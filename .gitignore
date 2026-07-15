@@ -1,0 +1,19 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+
+# Screenshots de sonda (artefatos de teste, gerados por scripts/probe-*.mjs)
+probe-*.png
+
+# Temporários dos scripts de arte (ampliações, medições)
+scripts/_*.png
+
+# Cache de ferramenta (Impeccable)
+.impeccable/
+
+# Logs e OS
+*.log
+.DS_Store
+Thumbs.db
