@@ -35,12 +35,18 @@ import { WEAPONS } from '../systems/WeaponSystem';
 const V = { x: 272, y: 89, w: 150, h: 82 } as const;
 const PREVIEW_SCALE = 3;
 
-/** Os slots são CENTRADOS e o passo é fixo: com 3 naves ou com 4, a fileira fica no meio da tela. */
+/**
+ * Os slots são CENTRADOS. O passo ENCOLHE quando a fileira não cabe (a Doca oferece 7 naves —
+ * a passo fixo de 86, a 7ª nasceria fora da tela): com poucas naves fica o passo folgado de
+ * sempre; com muitas, divide-se a largura útil. A caixa acompanha o passo.
+ */
 const SLOT = { y: 142, w: 78, h: 18, step: 86 } as const;
 
 /** As barras da ficha. `max` é o teto da escala — é ele que dá sentido ao número. */
 const FICHA = [
-  { rotulo: 'DANO', y: 86, max: 3 },
+  // max 5, não 3: o OBUS (dano 5) é o novo teto — com o teto antigo a barra dele estouraria a
+  // escala e a ficha compararia errado (róster v2).
+  { rotulo: 'DANO', y: 86, max: 5 },
   { rotulo: 'CADÊNCIA', y: 100, max: 7 },
   { rotulo: 'ALCANCE', y: 114, max: 5 },
 ] as const;
@@ -137,13 +143,16 @@ export class ShipPanel {
     //
     // CENTRADOS a partir da contagem. Com a posição cravada (`62 + i * 88`, do painel de 3), a 4ª
     // nave nasceria em x=326 — meia caixa para fora da tela.
+    const step = Math.min(SLOT.step, Math.floor((GAME_WIDTH - 16) / this.naves.length));
+    const slotW = Math.min(SLOT.w, step - 6);
+
     this.naves.forEach((id, i) => {
       const nave = SHIPS[id];
-      const x = GAME_WIDTH / 2 + (i - (this.naves.length - 1) / 2) * SLOT.step;
+      const x = GAME_WIDTH / 2 + (i - (this.naves.length - 1) / 2) * step;
       const tex = s.textures.exists(nave.texture) ? nave.texture : 'ship';
 
       const caixa = s.add
-        .rectangle(x, SLOT.y, SLOT.w, SLOT.h, COLORS.bgDeep, 0.9)
+        .rectangle(x, SLOT.y, slotW, SLOT.h, COLORS.bgDeep, 0.9)
         .setStrokeStyle(1, COLORS.metalMid)
         .setDepth(100);
 
@@ -165,7 +174,7 @@ export class ShipPanel {
     for (const k of ['RIGHT', 'D', 'DOWN', 'S']) kb.on(`keydown-${k}`, () => this.mover(1));
 
     // Atalho direto: quem já sabe o que quer não deveria ter que navegar.
-    const nums = ['ONE', 'TWO', 'THREE', 'FOUR'];
+    const nums = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT'];
     this.naves.forEach((_, i) => {
       kb.on(`keydown-${nums[i]}`, () => {
         if (!this.vivo || this.confirmando) return;

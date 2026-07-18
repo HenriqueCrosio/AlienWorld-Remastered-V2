@@ -76,6 +76,13 @@ export class BossCapitania implements StageBoss {
   private readonly bar: Phaser.GameObjects.Rectangle;
   /** UM emissor, reaproveitado. Criar um por tiro vaza memória (já custou caro duas vezes). */
   private readonly muzzleFx: Phaser.GameObjects.Particles.ParticleEmitter;
+  /**
+   * Os efeitos do TRAÇANTE — na família MAGENTA, a cor dela (o muzzleFx laranja fica para o
+   * que é explosão: hangar, flak, estouro). Dois emissores por CHEFÃO, criados no construtor
+   * e reaproveitados por todos os tiros — nunca um por disparo (armadilha nº 5).
+   */
+  private readonly tracerFlash: Phaser.GameObjects.Particles.ParticleEmitter;
+  private readonly tracerTrail: Phaser.GameObjects.Particles.ParticleEmitter;
 
   private static readonly BASE_Y = GAME_HEIGHT / 2 - 6;
   private static readonly STATION_X = GAME_WIDTH - 62;
@@ -134,6 +141,32 @@ export class BossCapitania implements StageBoss {
         emitting: false,
       })
       .setDepth(50);
+
+    // FLASH DE BOCA magenta: o clarão no cano no frame do disparo. O rosa claro é o mesmo do
+    // flash de dano do jogador (0xff7aa8) — a família de cor já existe no jogo.
+    this.tracerFlash = scene.add
+      .particles(0, 0, 'spark', {
+        lifespan: 150,
+        speed: { min: 30, max: 110 },
+        scale: { start: 2, end: 0 },
+        tint: [0xff7aa8, COLORS.enemyBright],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(50);
+
+    // TRILHA curta do traçante: fagulhas que morrem rápido atrás do tiro. É ela que separa
+    // "um risco magenta" de "uma bala TRAÇANTE" — o rastro é a metade do nome.
+    this.tracerTrail = scene.add
+      .particles(0, 0, 'spark', {
+        lifespan: 140,
+        speed: { min: 0, max: 14 },
+        scale: { start: 1.3, end: 0 },
+        tint: [COLORS.enemyBright, 0xff7aa8],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(40);
 
     this.barBg = scene.add.rectangle(GAME_WIDTH / 2, 16, 160, 4, COLORS.enemyDark).setDepth(100);
     this.bar = scene.add
@@ -208,6 +241,7 @@ export class BossCapitania implements StageBoss {
 
     this.t += dt;
     this.tickFlak(dt);
+    this.tickTrails();
 
     // Deriva vertical LENTA e larga: ela é pesada. Um navio capital que balança rápido parece
     // um drone grande. A velocidade PERSEGUE a altura desejada em vez de ser a derivada dela —
@@ -283,8 +317,9 @@ export class BossCapitania implements StageBoss {
 
         const m = this.muzzleOf(battery);
         const t = count === 1 ? 0 : i / (count - 1) - 0.5;
+        // O flash de boca agora sai de dentro do tracer(), magenta — não mais o laranja
+        // do muzzleFx, que ficou reservado para o que É explosão (hangar, flak).
         this.tracer(m.x, m.y, base + Phaser.Math.DegToRad(t * spread));
-        this.muzzleFx.explode(4, m.x, m.y);
       });
     }
 
@@ -307,14 +342,28 @@ export class BossCapitania implements StageBoss {
     // O pool é compartilhado: um slot que já tocou o `comet-burn` continuaria em chamas.
     b.anims.stop();
 
-    b.setTexture('bolt2').setScale(1.5).setTint(COLORS.enemyBright);
+    // ALONGADO no eixo do voo e com blend aditivo: é o que faz um risco de 13px ler como
+    // energia, não como um palito rosa. A escala anisotrópica estica só o comprimento.
+    b.setTexture('bolt2').setScale(2.4, 1.3).setTint(COLORS.enemyBright);
+    b.setBlendMode(Phaser.BlendModes.ADD);
     b.setFlipX(false);
     b.setRotation(angle);
+
+    // O visual cresceu, a HITBOX NÃO (balanceamento fechado): o corpo compensa a escala nova
+    // para manter o MESMO tamanho em mundo do traçante antigo (13×9 × 1.5 ≈ 19.5×13.5).
+    // O EnemySystem.release() devolve o corpo padrão ao reciclar o slot.
+    b.body!.setSize(19.5 / 2.4, 13.5 / 1.3);
+
     b.setData('ox', x);
     b.setData('oy', y);
     b.setData('flak', false);
+    // Marca para a trilha de partículas do update(). O release() do pool a apaga.
+    b.setData('tracer', true);
 
     b.setVelocity(Math.cos(angle) * 145, Math.sin(angle) * 145);
+
+    // Flash de boca NO DISPARO, na cor dela.
+    this.tracerFlash.explode(5, x, y);
   }
 
   /**
@@ -342,12 +391,26 @@ export class BossCapitania implements StageBoss {
    * mata — a cápsula em si é só o aviso viajando.
    */
   private flakVolley(target: Phaser.Physics.Arcade.Sprite): void {
+    // TRÊS cápsulas, mas em DOIS tempos (pedido do Henrique, 2026-07-18): DUAS agora, e a
+    // TERCEIRA 3s depois. Três estouros no mesmo instante liam como uma parede única; a
+    // retardatária reabre a pergunta do flak ("onde você VAI estar") quando o jogador acha que
+    // a barragem já acabou — sem acrescentar dano, só ritmo.
+    this.lancarCapsulas(target, 2);
+    this.scene.time.delayedCall(3000, () => {
+      // Chefão morto não atira do túmulo (a mesma regra do die(): granada póstuma mata o
+      // jogador na tela de vitória). E se a luta reiniciou (treino), o sprite já morreu junto.
+      if (this.dead || !this.sprite.active) return;
+      this.lancarCapsulas(target, 1);
+    });
+  }
+
+  private lancarCapsulas(target: Phaser.Physics.Arcade.Sprite, quantas: number): void {
     const m = this.muzzleOf(BossCapitania.BATTERIES[0]);
 
-    // TRÊS cápsulas, não quatro. Cada uma agora nega uma ÁREA (o estouro tem raio), e três áreas
-    // sorteadas cobrem mais tela do que quatro linhas paralelas — sem virar uma parede sólida,
-    // que seria injusto num ataque que o jogador não pode abater.
-    for (let i = 0; i < 3; i++) {
+    // Cada cápsula nega uma ÁREA (o estouro tem raio): áreas sorteadas cobrem mais tela do que
+    // linhas paralelas — sem virar uma parede sólida, que seria injusto num ataque que o
+    // jogador não pode abater.
+    for (let i = 0; i < quantas; i++) {
       const shell = this.bullets.get(m.x, m.y) as Phaser.Physics.Arcade.Sprite | null;
       if (!shell) return;
 
@@ -399,6 +462,19 @@ export class BossCapitania implements StageBoss {
     }
 
     this.muzzleFx.explode(8, m.x, m.y);
+  }
+
+  /**
+   * A TRILHA dos traçantes: uma fagulha por tiro ativo, por frame, no MESMO emissor.
+   *
+   * O emissor é um só (criado no construtor — armadilha nº 5); o que percorre os tiros é só
+   * um `emitParticleAt`. A vida curta da partícula (140ms) é o comprimento do rastro.
+   */
+  private tickTrails(): void {
+    for (const obj of this.bullets.getChildren()) {
+      const b = obj as Phaser.Physics.Arcade.Sprite;
+      if (b.active && b.getData('tracer') === true) this.tracerTrail.emitParticleAt(b.x, b.y);
+    }
   }
 
   /**
@@ -469,6 +545,9 @@ export class BossCapitania implements StageBoss {
       s.anims.stop();
 
       s.setTexture('bolt2').setScale(0.9).setTint(COLORS.hotBright);
+      // Blend ADITIVO, como os estilhaços da mina sensora: fagulha quente, não palito amarelo.
+      // O EnemySystem.release() devolve o blend NORMAL ao reciclar o slot.
+      s.setBlendMode(Phaser.BlendModes.ADD);
       s.setRotation(angle);
       s.setData('ox', x);
       s.setData('oy', y);
@@ -486,10 +565,8 @@ export class BossCapitania implements StageBoss {
     const angle = Phaser.Math.Angle.Between(m.x, m.y, target.x, target.y);
 
     // Rajada de 3 levemente abertas: uma bala mirada só se esquiva andando de lado; três abrem
-    // a pergunta "para que lado".
+    // a pergunta "para que lado". O flash de boca (magenta) sai de dentro do tracer().
     for (const d of [-7, 0, 7]) this.tracer(m.x, m.y, angle + Phaser.Math.DegToRad(d));
-
-    this.muzzleFx.explode(6, m.x, m.y);
   }
 
   private muzzleOf(b: Battery): { x: number; y: number } {
@@ -532,5 +609,7 @@ export class BossCapitania implements StageBoss {
     this.bar.destroy();
     this.barBg.destroy();
     this.muzzleFx.destroy();
+    this.tracerFlash.destroy();
+    this.tracerTrail.destroy();
   }
 }

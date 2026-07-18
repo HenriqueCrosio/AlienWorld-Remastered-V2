@@ -20,11 +20,76 @@ export interface ShipDef {
   weapon: string;
   /** Textura. Cai na `ship` padrão enquanto a arte do PixelLab não entrar. */
   texture: string;
+  /** Animação de propulsão da nave (róster v2: cada nave tem a sua, 9 quadros). */
+  anim?: string;
   /** Uma linha, no menu. Diz o TRADE-OFF, não o adjetivo. CURTA: a coluna tem ~150px. */
   tagline: string;
 }
 
 export const SHIPS: Record<string, ShipDef> = {
+  // ─── O RÓSTER v2 (2026-07-17, direção do Henrique). ───
+  //
+  // O JATO é a nave "terrestre" — a Fase 1 inteira é jogada nele, ANTES de qualquer escolha.
+  // A Aurora libera mais 3; a Doca soma a branca, a alien-preta e o Arauto; a nave de 4 canhões
+  // fica reservada para a fase final (ROSTER_FINAL, abaixo).
+  jato: {
+    id: 'jato',
+    name: 'JATO DE ATAQUE',
+    weapon: 'tracer',
+    texture: 'shipJato',
+    anim: 'ship-jato-thrust',
+    tagline: 'dupla · abraça o casco',
+  },
+  verde: {
+    id: 'verde',
+    name: 'BOMBARDEIRA',
+    weapon: 'obus',
+    texture: 'shipVerde',
+    anim: 'ship-verde-thrust',
+    tagline: 'pesada · exige liderar o alvo',
+  },
+  creme: {
+    id: 'creme',
+    name: 'CORSÁRIA',
+    weapon: 'agulha',
+    texture: 'shipCreme',
+    anim: 'ship-creme-thrust',
+    tagline: 'rápida · rala no casco',
+  },
+  cinza: {
+    id: 'cinza',
+    name: 'FANTASMA',
+    weapon: 'salva',
+    texture: 'shipCinza',
+    anim: 'ship-cinza-thrust',
+    tagline: 'rajada · a pausa expõe',
+  },
+  branca: {
+    id: 'branca',
+    name: 'PERFURADORA',
+    weapon: 'perfurante',
+    texture: 'shipBranca',
+    anim: 'ship-branca-thrust',
+    tagline: 'atravessa · fraca no um-a-um',
+  },
+  canhoes: {
+    id: 'canhoes',
+    name: 'BATERIA',
+    weapon: 'bateria',
+    texture: 'shipCanhoes',
+    anim: 'ship-canhoes-thrust',
+    tagline: '4 canos · abre com a distância',
+  },
+  alien2: {
+    id: 'alien2',
+    name: 'ESPECTRO',
+    weapon: 'lamina',
+    texture: 'shipAlien2',
+    anim: 'ship-alien2-thrust',
+    tagline: 'onda larga · perdoa a mira',
+  },
+
+  // ─── LEGADO (fora dos rósters desde o v2; defs mantidos para nada quebrar). ───
   interceptor: {
     id: 'interceptor',
     name: 'INTERCEPTOR',
@@ -69,8 +134,8 @@ export const SHIPS: Record<string, ShipDef> = {
   },
 };
 
-/** A nave da Fase 1: ela acontece ANTES da escolha, então é sempre esta. */
-export const DEFAULT_SHIP = 'interceptor';
+/** A nave da Fase 1: ela acontece ANTES da escolha, então é sempre esta. O jato "terrestre". */
+export const DEFAULT_SHIP = 'jato';
 
 /**
  * QUAIS NAVES CADA INTERLUDE OFERECE.
@@ -84,5 +149,11 @@ export const DEFAULT_SHIP = 'interceptor';
  * É por isso que o róster é DADO da cena, e não a lista inteira de `SHIPS`: a escolha cresce com
  * a campanha.
  */
-export const ROSTER_AURORA = ['interceptor', 'lanca', 'dispersor'];
-export const ROSTER_DOCA = ['interceptor', 'lanca', 'dispersor', 'alien'];
+export const ROSTER_AURORA = ['jato', 'verde', 'creme', 'cinza'];
+export const ROSTER_DOCA = ['jato', 'verde', 'creme', 'cinza', 'branca', 'alien2', 'alien'];
+/**
+ * A nave de 4 canhões entra QUANDO A FASE FINAL EXISTIR — não ligue este róster a cena nenhuma
+ * antes disso (a mesma regra do STAGES[3]: oferecer o que não existe despeja o jogador no lugar
+ * errado sem aviso).
+ */
+export const ROSTER_FINAL = [...ROSTER_DOCA, 'canhoes'];

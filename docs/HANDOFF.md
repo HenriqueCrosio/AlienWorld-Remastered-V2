@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-07-15)
+# HANDOFF — estado do projeto (2026-07-18)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -14,7 +14,54 @@ que dá início à fase 3"). **O PRÓXIMO PASSO É A FASE 3** — ver "A FASE 3 
 ordem já decidida: (1) a NEBULOSA primeiro, (2) regerar a ARANHA de lado, (3) os ATAQUES da
 serpente, (4) montar `STAGES[3]` e ligar a `Interlude2Scene` nela.
 
-### 🆕 O que mudou nesta sessão (2026-07-15)
+### 🆕 Sessão 2026-07-17/18 — RÓSTER v2, 7 ARMAS, EFEITOS e PASSE VISUAL
+
+A maior sessão do projeto. Tudo validado por sonda e aprovado em partes pelo Henrique ao longo
+do caminho; commit único no fim.
+
+- **RÓSTER v2 (src/ships.ts).** SETE naves novas, todas de PERFIL (arte PixelLab instalada +
+  animação de propulsão cada): o **JATO** (X-wing 40px, 38×22 em jogo) é a nave INICIAL da
+  campanha (`DEFAULT_SHIP`); a Aurora libera **verde/creme/cinza** (`ROSTER_AURORA`, 4 com o
+  jato); a Doca soma **branca/alien2/Arauto** (`ROSTER_DOCA`, 7); a **canhoes** (4 canos) está
+  em `ROSTER_FINAL` e SÓ entra quando a fase final existir. As 3 naves antigas viraram legado
+  (defs mantidos, fora dos rósters). A **cinza (FANTASMA)** usa a arte ORIGINAL da 1ª nave
+  (anim de 7 quadros — o `FRAMES` dela é 7, não 9). O ShipPanel ganhou fileira ADAPTATIVA
+  (passo encolhe p/ caber 7 slots) e a barra de DANO subiu o teto para 5 (o obus).
+- **7 ARMAS-BASE novas (WeaponSystem).** tracer (DUPLO CADENCIADO do jato: 2 canos paralelos,
+  munição TRAÇANTE vermelha/laranja `tracerRound` 8×1 desenhada no Boot — spec do Henrique),
+  obus (dano 5 lento), agulha (6/s fina), salva (rajada 3×dano 2 + pausa 0.8s — dano 2 porque
+  a 1 a média caía p/ 3.1 dps), perfurante (ATRAVESSA inimigos, 1 hit por inimigo por
+  projétil, morre em rocha), bateria (4 canos ±2°), lamina (onda TEAL alta). Extensões
+  opcionais no `WeaponDef`: `muzzles`/`burst`/`pierce`/`bulletScaleY`/`tint` +
+  `stretchX`/`glow`/`muzzleFlash` (peso visual, hitbox compensada). Hitbox de bala tem PISO de
+  3px (o traçante de 1px de arte atravessava sem tocar). **`scripts/probe-armas.mjs`** mede
+  as 7 em jogo (13 asserts) — ela já pegou a si mesma coletando pickup no meio da medição.
+- **EFEITOS.** Cometa da Torre girado no vetor de voo (arte aponta +40°; corpo virou CÍRCULO
+  r=4.5 na bola, não na cauda); traçante da Capitânia com ADD+trilha+flash; **torres de solo
+  atiram MÍSSEIS** (chave `missile`, arte PixelLab 30×11 a escala 0.8, hitbox e velocidade
+  FECHADAS compensadas); tiro de drone com glow; estilhaços de mina/flak com ADD; **Enxame com
+  trail teal** (a curva finalmente é visível); Lança esticada 1.8× (dano 3 aparece); obus pulsa.
+- **FLAK EM DOIS TEMPOS** (pedido do Henrique): a salva da fúria lança **2 cápsulas + a 3ª
+  após 3s** (`lancarCapsulas`), com guarda contra chefão morto. `probe-flak.mjs` conta no
+  lugar certo agora.
+- **CUTSCENES.** A nave que CHEGA em cada cutscene é a REAL (o jato na Aurora; a escolhida na
+  Doca). O `deckRim` da Aurora cobre SÓ o vão opaco do convés (arte x=19..102 — media 384px e
+  flutuava sobre a lua: a "linha estranha"). A doca ganhou PLATAFORMA de rocha na base da cena
+  + feather do topo esquerdo (passe 4 do `feather-doca.mjs`).
+- **PARALLAX / passe visual.** Primeiro plano de `0x05070f` → `0x121a2e` (era mancha preta);
+  camadas aceitam `tints[]` por sprite (nebulosa azul/violeta/petróleo; cinturão com
+  ferrugem); **tráfego distante** da colônia na F1 (silhuetas de batedor, faixa alta, fator
+  0.08); `setForegroundDimmed()` apaga o primeiro plano nas lutas de chefão (fica nas fases —
+  é dificuldade; nos chefões tapava a leitura). Camadas novas de fundo: **skyline da colônia**
+  (F1) e **casco morto** (F2) + **cometa raro** (ver ART/Parallax).
+- **SONDAS.** `probe-interlude.mjs` estava APODRECIDA (lia campos extintos e nunca confirmava
+  a escolha — não media nada) → modernizada com asserts reais. `probe-doca` escolhe o Arauto na
+  tecla **7**. Fase 1 abre com TRAÇANTE no HUD.
+- **PixelLab:** lições novas **16 e 17** no `assets/raw/prompts.json` — a vista lateral
+  FUNCIONA com `view: sidescroller`, e a REFERÊNCIA dita câmera E tamanho (a maior style_image
+  define o tamanho da saída; p/ 32px a referência tem que ter 32px).
+
+### O que mudou na sessão anterior (2026-07-15)
 
 Correção de um mal-entendido da sessão anterior + acabamento da cutscene da Doca:
 
@@ -56,7 +103,9 @@ razão não é estética, é física (a aranha ANDA, e precisa de chão).
 de vitória. Se ela chamar a `GameScene` com `stage: 3` antes da hora, a rede de segurança
 `STAGES[x] ?? STAGES[1]` despeja o jogador na **Fase 1** — sem aviso, depois de ele ter vencido a 2.
 
-**Saldo PixelLab: ~$5.43.**
+**Saldo PixelLab: ~$1.61** (2026-07-18 — as gerações da assinatura ACABARAM: tudo agora sai do
+crédito, inclusive animações. Orce a Fase 3 antes de gerar: nebulosa + ataques da serpente +
+regerar a aranha cabem, mas sem desperdício).
 
 ---
 
@@ -80,7 +129,9 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 | 5 | Menu inicial com a moldura nova | ⬜ |
 | 6 | Animações dos sprites da Fase 2 | ✅ |
 | 6b | **2ª cutscene** (Doca Kepler-9) + **nave ALIENÍGENA** | ✅ jogável (`[O]` no menu) |
-| 7 | **Fase 3 — O Casco** | 🔶 **em projeto — ver abaixo** |
+| 6c | **RÓSTER v2** (7 naves de perfil + 7 armas-base) | ✅ (2026-07-18) |
+| 6d | **Efeitos de projétil + passe visual** das Fases 1-2 | ✅ (2026-07-18) |
+| 7 | **Fase 3 — O Casco** | 🔶 **em projeto — ver abaixo — É O PRÓXIMO PASSO** |
 | 8 | **Fase 4 — O Interior** (o flap VOLTA) | ⬜ |
 | 9 | Score acumulado entre fases | ⬜ |
 | 10 | Modo Sobrevivência (Legacy) | ⬜ |
@@ -262,6 +313,7 @@ jeito rápido de chegar ao chefão, **a cutscene ficava inalcançável**. Vencer
 
 ```bash
 npm run probe                    # Fase 1: joga, devolve estado + screenshot
+node scripts/probe-armas.mjs     # as 7 ARMAS-BASE do róster v2: cadência real + assinatura de cada uma
 node scripts/probe-stage2.mjs    # Fase 2: cinturão, inimigos novos, Capitânia
 node scripts/probe-capitania.mjs # o chefão da Fase 2 nas DUAS fases (salva rolante / flak)
 node scripts/probe-interlude.mjs # a cutscene: placar → pouso → escolha → implosão → Fase 2
@@ -433,8 +485,9 @@ casco enquanto você desvia: a mão fica livre.
 Ela persegue **inimigo e chefão, nunca rocha** (`GameScene.homingTargets`) — um teleguiado que se
 joga no primeiro asteroide da frente seria uma arma que se sabota sozinha.
 
-**O róster cresce com a campanha** (`src/ships.ts`): a Aurora oferece 3 naves, a Doca oferece 4. O
-Arauto não existe no hangar humano porque ele não teria de onde ter vindo.
+**O róster cresce com a campanha** (`src/ships.ts`): a Fase 1 é sempre o JATO, a Aurora oferece
+4 naves, a Doca oferece 7 (róster v2). O Arauto não existe no hangar humano porque ele não teria
+de onde ter vindo.
 
 ## A FASE 3 — O CASCO (projeto fechado, ainda não construída)
 
@@ -494,14 +547,21 @@ inimigo.
 
 ### A escolha de nave — a nave É a arma
 
-Três naves, e **a única coisa que muda é a arma BASE** (`src/ships.ts`). Sem atributo de casco, de
-vida ou de velocidade: num run'n'gun a arma é a personagem, e um eixo só já é uma escolha.
+**⚠️ RÓSTER v2 (2026-07-18):** a tabela abaixo é a do róster ATUAL — as 3 naves antigas
+(Interceptor/Lança/Dispersor) viraram LEGADO (defs mantidos em `SHIPS`, fora dos rósters). A
+única coisa que muda entre naves continua sendo a arma BASE (`src/ships.ts`): sem atributo de
+casco, vida ou velocidade — num run'n'gun a arma é a personagem, e um eixo só já é uma escolha.
 
 | Nave | Arma base | O trade-off |
 |---|---|---|
-| INTERCEPTOR | `pulse` | tiro reto, alcance total — o equilíbrio |
-| LANÇA | `lance` | dano 3, cadência baixa — não perdoa erro |
-| DISPERSOR | `spread` | leque de 3, **ALCANCE CURTO** — obriga a chegar perto |
+| JATO DE ATAQUE (inicial) | `tracer` | traçante duplo: DPS 8 no casco, 4 no alvo pequeno |
+| BOMBARDEIRA (verde) | `obus` | dano 5 lento — derrete o que não desvia, erra o que anda |
+| CORSÁRIA (creme) | `agulha` | 6/s quase-instantânea — nunca chega tarde, rala no casco |
+| FANTASMA (cinza) | `salva` | rajada 3×2 + pausa 0.8s — dano adiantado, a pausa expõe |
+| PERFURADORA (branca) | `perfurante` | atravessa a fila inteira — fraca no um-a-um |
+| BATERIA (canhoes, fase final) | `bateria` | 4 canos que abrem com a distância |
+| ESPECTRO (alien2) | `lamina` | onda teal ALTA — perdoa a mira, DPS baixo |
+| ARAUTO (alien) | `enxame` | teleguiado de curva lenta (inalterado) |
 
 ⚠️ **São SIDEGRADES, não upgrades.** Se uma nave for simplesmente melhor, a escolha vira a resposta
 certa e o menu é inútil. O `range: 110` do Dispersor **não é sabor, é a trava de balanceamento**:
@@ -760,7 +820,8 @@ Navegadores bloqueiam áudio até a primeira interação; o Phaser destrava sozi
 ## PixelLab
 
 - MCP configurado no escopo deste projeto em `~/.claude.json` (a chave **não** está no repositório).
-- **Saldo: ~$5.43** (2026-07-14, fim da sessão). `create_1_direction_object` custa ~$0.09 e devolve
+- **Saldo: ~$1.61** (2026-07-18, fim da sessão — assinatura esgotada, tudo em crédito agora).
+  `create_1_direction_object` custa ~$0.09 e devolve
   **64 candidatos** num sprite de 32px (16 em 64px, **4 em 128px**). `create_ui_asset` custa ~$0.11.
 - **`animate_object` (modo `v3`) é BARATO** — ~1 geração (~$0.005) por animação. As 7 animações da
   Fase 2 custaram junto menos que **um** sprite. Não economize em animação: economize em lote.

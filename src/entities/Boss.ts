@@ -58,6 +58,19 @@ export class Boss implements StageBoss {
   private static readonly MUZZLE_X = -31;
   private static readonly MUZZLE_Y = -39;
 
+  /**
+   * Para onde a arte do cometa APONTA, medida no PNG — não chutada (lição 13).
+   *
+   * O quadro (18×17) tem a bola sólida no canto inferior-direito (centro ≈ 11.7, 10.7) e a
+   * cauda subindo para o superior-esquerdo: o vetor cauda→bola é ≈ +40° nos 8 quadros
+   * (37°–44°, medido por centroide de cor). O código antigo assumia 0° ("aponta para a
+   * direita") e a chama saía desalinhada do voo em TODOS os tiros — era este o desvio.
+   */
+  private static readonly COMET_ART_ANGLE = Phaser.Math.DegToRad(40);
+
+  /** Raio da bola SÓLIDA do cometa (px do quadro), medido no PNG. A cauda não fere. */
+  private static readonly COMET_CORE_RADIUS = 4.5;
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly bullets: Phaser.Physics.Arcade.Group,
@@ -208,9 +221,23 @@ export class Boss implements StageBoss {
 
     b.setScale(1.1);
     b.setFlipX(false);
-    // A arte aponta para a DIREITA. Girar pelo ângulo do tiro já a alinha com o movimento —
-    // espelhar POR CIMA disso inverteria duas vezes e o rastro sairia na frente da bola.
-    b.setRotation(angle);
+    // A arte NÃO aponta para a direita: o "para frente" dela é +40° (COMET_ART_ANGLE, medido
+    // no PNG). Subtraí-lo alinha a bola com o vetor de velocidade e a chama fica ATRÁS do
+    // movimento. Espelhar por cima disso inverteria duas vezes — flip fica sempre false.
+    b.setRotation(angle - Boss.COMET_ART_ANGLE);
+
+    // O corpo cobre só a BOLA, não a cauda de fogo. Um corpo Arcade NÃO gira com o sprite,
+    // então o círculo é centrado no CENTRO do quadro (9, 8.5): girando, a bola orbita a ~3px
+    // dele e o círculo a acompanha em qualquer direção. Antes o corpo era o retângulo 13×9
+    // herdado do `bolt2` do pool, ancorado no canto superior-esquerdo — exatamente a CAUDA.
+    // O EnemySystem.release() devolve o corpo padrão ao reciclar o slot.
+    const body = b.body as Phaser.Physics.Arcade.Body;
+    body.setCircle(
+      Boss.COMET_CORE_RADIUS,
+      b.width / 2 - Boss.COMET_CORE_RADIUS,
+      b.height / 2 - Boss.COMET_CORE_RADIUS,
+    );
+
     b.setData('ox', m.x);
     b.setData('oy', m.y);
 

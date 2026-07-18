@@ -53,5 +53,16 @@ for (let y = 0; y < H; y++) {
   for (let d = 0; d < FADE; d++) escala(x0 + d, y, rampa(d));
 }
 
+// 4. TOPO ESQUERDO (x<72): o arco de rocha da esquerda também é CORTADO pelo quadro em y=0 e
+//    parava numa linha reta (apontado pelo Henrique na cutscene). Rampa só as colunas cujo
+//    conteúdo encosta no topo (y0<=1) — as estruturas do miolo começam mais abaixo e não são
+//    tocadas.
+for (let x = 0; x < 72; x++) {
+  let y0 = -1;
+  for (let y = 0; y < H; y++) if (A(x, y) > 20) { y0 = y; break; }
+  if (y0 < 0 || y0 > 1) continue; // só onde o quadro CORTOU a rocha
+  for (let d = 0; d < FADE; d++) escala(x, y0 + d, rampa(d));
+}
+
 await sharp(data, { raw: { width: W, height: H, channels: 4 } }).png().toFile(arq);
 console.log(`doca.png: bordas esfumadas (${tocados}px suavizados, rampa ${FADE}px)`);

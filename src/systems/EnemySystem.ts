@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
 
 export type EnemyKind = 'drone' | 'batedor' | 'canhoneira' | 'kamikaze' | 'cargueiro';
@@ -82,6 +82,14 @@ export class EnemySystem {
   readonly enemies: Phaser.Physics.Arcade.Group;
   readonly enemyBullets: Phaser.Physics.Arcade.Group;
 
+  /**
+   * Flash de boca dos atiradores COMUNS (canhoneira/drone) — a versão menor do tratamento da
+   * Capitânia. UM emissor para o SISTEMA inteiro, criado aqui (armadilha nº 5: nunca um por
+   * tiro), na família magenta do inimigo. SEM trail, de propósito: o rastro é assinatura de
+   * chefão, e um tiro comum que arrasta cauda rouba essa leitura.
+   */
+  private readonly muzzleFlash: Phaser.GameObjects.Particles.ParticleEmitter;
+
   constructor(private readonly scene: Phaser.Scene) {
     this.enemies = scene.physics.add.group({ allowGravity: false });
     this.enemyBullets = scene.physics.add.group({
@@ -89,6 +97,19 @@ export class EnemySystem {
       maxSize: 64,
       allowGravity: false,
     });
+
+    // O rosa claro é o mesmo do flash de dano do jogador (0xff7aa8) — a família de cor já
+    // existe no jogo (é a mesma dupla do tracerFlash da Capitânia, só que mais contida).
+    this.muzzleFlash = scene.add
+      .particles(0, 0, 'spark', {
+        lifespan: 130,
+        speed: { min: 20, max: 80 },
+        scale: { start: 1.4, end: 0 },
+        tint: [0xff7aa8, COLORS.enemyBright],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(40);
   }
 
   /** `x` só é passado quando um inimigo PARE outro (o cargueiro cospe drones de dentro de si). */
@@ -266,6 +287,10 @@ export class EnemySystem {
     // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
     // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
     b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
+    // Leve GLOW aditivo: energia, não palito rosa chapado. Só o blend — sem trail e sem
+    // escala anisotrópica, que são o figurino do traçante da Capitânia. O release() abaixo
+    // devolve o blend NORMAL ao reciclar o slot.
+    b.setBlendMode(Phaser.BlendModes.ADD);
     // Origem: usada para a carência contra o relevo (ver GameScene).
     b.setData('ox', e.x);
     b.setData('oy', e.y);
@@ -273,6 +298,10 @@ export class EnemySystem {
     const angle = Phaser.Math.Angle.Between(e.x, e.y, target.x, target.y);
     b.setVelocity(Math.cos(angle) * 110, Math.sin(angle) * 110);
     b.setRotation(angle);
+
+    // Pequeno clarão na BOCA, na cor do dono: o disparo vira um evento legível — o telégrafo
+    // piscou, e AQUI está a prova de que o tiro saiu (e de onde).
+    this.muzzleFlash.explode(3, e.x, e.y);
   }
 
   /**
@@ -298,7 +327,23 @@ export class EnemySystem {
     // E o GIRO: a cápsula de flak da Capitânia roda no ar (setAngularVelocity). Sem zerar aqui,
     // o próximo projétil a herdar este slot sai do cano RODOPIANDO — um traçante que gira não
     // aponta para onde vai, e apontar para onde vai é a única informação que ele carrega.
-    (b.body as Phaser.Physics.Arcade.Body).setAngularVelocity(0);
+    const body = b.body as Phaser.Physics.Arcade.Body;
+    body.setAngularVelocity(0);
+
+    // E o CORPO: o cometa da Torre usa um círculo (só a bola fere, não a cauda), o míssil da
+    // torre de solo e o traçante da Capitânia usam retângulos próprios. Devolve o retângulo
+    // padrão do pool (o quadro do `bolt2`, como o slot nasce) — senão um tiro de drone herda a
+    // hitbox de quem usou o slot antes.
+    const frame = this.scene.textures.getFrame('bolt2');
+    body.setSize(frame.realWidth, frame.realHeight, false);
+    body.setOffset(0, 0);
+
+    // E o RESTO do figurino: o blend aditivo do traçante e as marcas de trilha. Sem apagar,
+    // um tiro comum sairia brilhando — e os emissores de trilha (Capitânia/Terrain) seguiriam
+    // um slot reciclado.
+    b.setBlendMode(Phaser.BlendModes.NORMAL);
+    b.setData('tracer', false);
+    b.setData('missile', false);
   }
 
   private cullBullets(): void {

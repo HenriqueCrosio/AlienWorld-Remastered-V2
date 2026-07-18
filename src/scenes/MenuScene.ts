@@ -85,7 +85,7 @@ export class MenuScene extends Phaser.Scene {
         this.scene.start('Interlude2', {
           score: 9140,
           handling: 'diegetico',
-          ship: 'dispersor',
+          ship: 'cinza',
           stage: 3,
         }),
       );

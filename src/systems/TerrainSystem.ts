@@ -51,11 +51,29 @@ const PROPS: Record<PropKind, PropDef> = {
 export class TerrainSystem {
   readonly props: Phaser.Physics.Arcade.Group;
 
+  /**
+   * A fumaça de exaustão dos mísseis das torres. UM emissor para o sistema inteiro, criado no
+   * construtor e reaproveitado por todos os mísseis — nunca um por tiro (armadilha nº 5).
+   * Serve também de sopro de lançamento (explode na boca do cano).
+   */
+  private readonly smokeFx: Phaser.GameObjects.Particles.ParticleEmitter;
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly enemyBullets: Phaser.Physics.Arcade.Group,
   ) {
     this.props = scene.physics.add.group({ allowGravity: false, immovable: true });
+
+    // Fumaça que NASCE pequena e clara e MORRE grande e sumida — é o que o olho conhece de
+    // exaustão. Uma pitada de brasa (hot) no meio dos cinzas vende o motor queimando.
+    this.smokeFx = scene.add.particles(0, 0, 'spark', {
+      lifespan: { min: 240, max: 420 },
+      speed: { min: 3, max: 14 },
+      scale: { start: 1.1, end: 2.4 },
+      alpha: { start: 0.5, end: 0 },
+      tint: [0xcfd6dd, 0x8b939c, 0xff8c1a],
+      emitting: false,
+    });
   }
 
   spawn(kind: PropKind): void {
@@ -120,6 +138,26 @@ export class TerrainSystem {
       if (PROPS[p.getData('kind') as PropKind].shoots) this.updateTurret(p, dt, target);
       if (p.x < -40) p.destroy();
     }
+
+    this.tickMissileTrails();
+  }
+
+  /**
+   * A fumaça sai da CAUDA de cada míssil vivo, uma partícula por frame — recuada 8px pelo
+   * ângulo do sprite, senão o rastro nasce em cima do nariz e o míssil voa "dentro" dele.
+   * Um emissor só para todos (ver construtor); a marca `missile` é apagada pelo
+   * EnemySystem.release() quando o slot volta ao pool.
+   */
+  private tickMissileTrails(): void {
+    for (const obj of this.enemyBullets.getChildren()) {
+      const b = obj as Phaser.Physics.Arcade.Sprite;
+      if (!b.active || b.getData('missile') !== true) continue;
+
+      this.smokeFx.emitParticleAt(
+        b.x - Math.cos(b.rotation) * 8,
+        b.y - Math.sin(b.rotation) * 8,
+      );
+    }
   }
 
   /**
@@ -175,13 +213,33 @@ export class TerrainSystem {
 
     b.setActive(true).setVisible(true);
     b.body!.enable = true;
-    b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
+
+    // MÍSSIL — mas só na LEITURA. Os números de balanceamento são os MESMOS do traçante que
+    // ele substitui (fechados pelo Henrique): mesma velocidade (100), mesma mira reta no
+    // jogador (NÃO teleguiado), mesma cadência (TURRET_RATE) e o mesmo dano por contato (o
+    // pool e o overlap são os mesmos). O que mudou: sprite alongado girado na direção do voo
+    // ('missile' — placeholder do BootScene; a arte do PixelLab entra com esta chave) e a
+    // fumaça de exaustão emitida no update().
+    // Escala 0.8: o Henrique achou o foguete GRANDE demais saindo de uma torre pequena — a arte
+    // nova (30×11) a 0.8 vira ~24×9 na tela, proporcional à boca que o lança.
+    b.setTexture('missile').setScale(0.8).clearTint();
+    b.setData('missile', true);
+
+    // A HITBOX também é a de antes, em px de MUNDO: 10×7. O setSize é em px LOCAIS e o corpo
+    // escala junto com o sprite — com a escala visual 0.8, compensa-se dividindo por ela.
+    // O release() do pool desfaz isto ao reciclar o slot.
+    b.body!.setSize(10 / 0.8, 7 / 0.8);
+
     b.setData('ox', muzzleX);
     b.setData('oy', muzzleY);
 
     const angle = Phaser.Math.Angle.Between(muzzleX, muzzleY, target.x, target.y);
     b.setVelocity(Math.cos(angle) * 100, Math.sin(angle) * 100);
     b.setRotation(angle);
+
+    // Sopro de lançamento na boca do cano — o arco estético ficou de fora de propósito:
+    // curvar a trajetória mudaria o tempo-até-o-jogador, e esse número está fechado.
+    this.smokeFx.explode(6, muzzleX, muzzleY);
 
     this.scene.cameras.main.shake(30, 0.001);
   }

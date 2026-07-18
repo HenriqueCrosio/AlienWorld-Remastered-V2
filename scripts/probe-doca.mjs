@@ -58,8 +58,8 @@ const roster = await page.evaluate(() => {
 console.log('róster   ', JSON.stringify(roster));
 console.log(roster?.includes('alien') ? '✔ o ARAUTO está na doca' : '✘ a nave alienígena NÃO apareceu');
 
-// Escolhe a alienígena (tecla 4) e confirma.
-await page.keyboard.press('4');
+// Escolhe a alienígena (tecla 7 — o róster v2 tem 7 naves e o Arauto é a última) e confirma.
+await page.keyboard.press('7');
 await page.waitForTimeout(400);
 await page.screenshot({ path: 'probe-doca-painel.png' });
 await page.keyboard.press('Enter');

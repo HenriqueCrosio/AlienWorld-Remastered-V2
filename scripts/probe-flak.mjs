@@ -40,11 +40,20 @@ await page.evaluate(() => {
   const volleyOrig = b.flakVolley.bind(b);
   b.flakVolley = (t) => {
     c.volleys++;
-    const antes = b.flak.length;
     volleyOrig(t);
-    c.nasceram += b.flak.length - antes;
-    // O pool é compartilhado e tem teto (64). Se ele estiver cheio, a salva sai VAZIA.
-    if (b.flak.length - antes < 3) c.poolCheio++;
+  };
+
+  // A salva agora é em DOIS TEMPOS (2 cápsulas + 1 retardatária 3s depois, via delayedCall):
+  // contar nascimentos só dentro do flakVolley perderia a terceira. `lancarCapsulas` é o único
+  // lugar onde cápsula nasce — é ali que se conta.
+  const lancarOrig = b.lancarCapsulas.bind(b);
+  b.lancarCapsulas = (t, quantas) => {
+    const antes = b.flak.length;
+    lancarOrig(t, quantas);
+    const nasceu = b.flak.length - antes;
+    c.nasceram += nasceu;
+    // O pool é compartilhado e tem teto (64). Se ele estiver cheio, o lançamento sai INCOMPLETO.
+    if (nasceu < quantas) c.poolCheio++;
   };
 
   const detOrig = b.detonate.bind(b);

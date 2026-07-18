@@ -1,359 +1,361 @@
 {
-  "_nota": "Registro de toda geração no PixelLab. Ver docs/ASSETS.md.",
-  "_custo_real": "create_1_direction_object = 20 gerações = ~$0.09 por lote. O lote traz vários candidatos: 32px→64, 48/64px→16, 128px→4. create_sidescroller_tileset = 1 geração (~$0.005).",
-  "_licao_1": "O JOGO NÃO USA PERFIL LATERAL — E NÃO PRECISA. Ver lição 8. A instrução antiga (ancorar STRICT SIDE VIEW PROFILE em maiúsculas) perseguia uma vista que nunca conseguimos e da qual não precisamos.",
-  "_licao_2": "Todos os sprites são gerados apontando para a DIREITA. Os inimigos são espelhados em jogo (setFlipX). Metade das chamadas economizada, e o estilo fica consistente.",
-  "_saldo": "9.61 -> ~5.4 (2026-07-14 sessao 3: nave alien + doca x2 ~0.29)",
-  "geracoes": [
-    {
-      "asset": "nave do jogador (v1)",
-      "id": "465ff670-49d4-4e24-b147-d9f12eb001b7",
-      "size": 32,
-      "resultado": "DESCARTADO — saiu em vista de cima. Sprites bons, ângulo errado.",
-      "salvo_em": "assets/raw/nave-v1-topdown/",
-      "prompt": "sleek arrowhead space fighter, delta wings swept back, twin rear thrusters with glowing cyan exhaust, angular armored plating in dark steel blue, battle-worn hull, single cockpit canopy, retro 90s arcade starfighter, dark sci-fi, facing right"
-    },
-    {
-      "asset": "nave do jogador (v2 — perfil) → public/sprites/ship.png",
-      "id": "b1a14eec-dbd8-480a-848d-b5ce8c5a3cf9",
-      "size": 32,
-      "escolhido": "frame_1",
-      "resultado": "APROVADO (provisório). Só os 3 primeiros candidatos saíram em perfil real.",
-      "prompt": "STRICT SIDE VIEW PROFILE of a spaceship, seen exactly from the side, horizontal orientation, nose pointing RIGHT, engine exhaust on the LEFT. The full length of the hull is visible from nose to tail. Sleek arrowhead starfighter, swept delta wing seen edge-on, bubble cockpit canopy on top of the hull, twin rear thrusters with glowing cyan exhaust flame trailing left, dark steel blue armored plating, battle-worn, retro 90s arcade horizontal shoot-em-up player ship, dark sci-fi"
-    },
-    {
-      "asset": "drone inimigo → public/sprites/enemy-drone.png",
-      "id": "39f38fde-3ffb-4c12-9e26-9b9be38b4229",
-      "size": 32,
-      "escolhido": "frame_0",
-      "nota": "Serve TAMBÉM de batedor, com tint rosa e escala menor. 1 sprite, 2 inimigos.",
-      "prompt": "STRICT SIDE VIEW PROFILE, horizontal orientation, nose pointing RIGHT. Small hostile alien drone fighter, insectoid angular hull, single glowing magenta core eye, thin swept fins, dark chitin plating with magenta veins, battle-worn, retro arcade horizontal shoot-em-up enemy, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "canhoneira → public/sprites/enemy-gunship.png",
-      "id": "5c1108f0-8dcb-41ed-8037-ca879c734eca",
-      "size": 48,
-      "escolhido": "frame_0",
-      "prompt": "STRICT SIDE VIEW PROFILE, horizontal orientation, nose pointing RIGHT. Heavy armored alien gunship, bulky armored hull, forward cannon barrel, thick plating in dark steel and magenta, glowing red cockpit slit, exhaust vents at rear, menacing, retro arcade horizontal shoot-em-up enemy, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "torre de solo → public/sprites/turret.png",
-      "id": "cc465561-f765-49c7-a20c-470e4a913693",
-      "size": 32,
-      "escolhido": "frame_0",
-      "prompt": "SIDE VIEW, ground-mounted anti-air defense turret sitting on a flat base, angled cannon barrel pointing up and to the LEFT, armored bunker housing, glowing red targeting lens, riveted dark metal plating, weathered, sci-fi colony defense, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "construção da colônia → public/sprites/building.png",
-      "id": "732e03b9-2379-4713-bf0b-d0424443fcd6",
-      "size": 64,
-      "escolhido": "frame_0",
-      "nota": "PENDÊNCIA: ficou escuro demais em jogo, lê como caixa preta. Regerar com mais contraste / janelas mais acesas.",
-      "prompt": "SIDE VIEW, abandoned space colony building on a moon surface, tall narrow modular habitat tower, antenna dish on top, small lit orange windows, dark riveted metal panels, weathered and damaged, standing upright on flat ground, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "pico de rocha → public/sprites/spire.png",
-      "id": "c6b7cc0d-0455-4183-92db-a7687fe08664",
-      "size": 64,
-      "escolhido": "frame_0",
-      "prompt": "SIDE VIEW, tall jagged rock spire rising straight up from the ground, narrow pointed pinnacle of dark alien stone, cracked and craggy silhouette, sharp peak at top, wide base at bottom, cold blue-grey rock with dark shadowed side, moon surface, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "montanhas distantes (parallax) → public/sprites/mtn-far.png",
-      "id": "84c722e6-5b68-4d86-848f-002cc8ff8111",
-      "size": 128,
-      "escolhido": "frame_1",
-      "prompt": "SIDE VIEW SILHOUETTE of a distant alien mountain range on the horizon, jagged peaks, very dark desaturated blue-grey, low contrast, flat silhouette with no interior detail, background layer for parallax scrolling, wide and low, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "montanhas médias (parallax) → public/sprites/mtn-mid.png",
-      "id": "f0054451-7f46-4889-8738-005a842c86af",
-      "size": 128,
-      "escolhido": "frame_0",
-      "prompt": "SIDE VIEW of mid-distance alien rocky hills and mesas, craggy rock formations of varying heights, muted dark slate blue with subtle highlights on the edges, moderate detail, midground layer for parallax scrolling, wide and low, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "CHEFÃO da Fase 1 → public/sprites/boss.png",
-      "id": "a2a65b1b-67e7-41a2-97af-70d34d082d53",
-      "size": 128,
-      "escolhido": "frame_0",
-      "prompt": "SIDE VIEW of a colossal ground-based anti-orbital defense tower, boss enemy, massive armored fortress cannon mounted on a wide reinforced base, huge forward gun barrel pointing LEFT, glowing red targeting eye, thick riveted armor plating, warning stripes in orange, industrial and menacing, retro arcade boss, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "solo (tileset) → public/sprites/ground-tile.png",
-      "id": "020d824e-3005-414b-8e4c-e4872a0e7470",
-      "tool": "create_sidescroller_tileset",
-      "custo": "1 geração",
-      "nota": "Grade 4x4 de tiles 16x16. O tile 6 é o único 100% opaco (miolo) — é ele que vira a faixa de solo 16x48. O tile de superfície tem motivo de blocos que, numa faixa de 10px, lê como rolo de filme. Saiu roxo: corrigido com tint 0x8fb2e0 em jogo.",
-      "prompt": "lower: dark cracked alien moon bedrock, cold blue-grey stone, deep shadows | transition: fine grey lunar dust and scattered small rocks"
-    },
-    {
-      "asset": "nebulosa (parallax) -> nebula.png / nebula-2.png",
-      "id": "1d850820-fd71-44a2-8550-471e400b5fd0",
-      "size": 128,
-      "escolhido": "frame_2 e frame_0",
-      "prompt": "deep space nebula cloud, soft billowing gas clouds, dark violet and deep blue with faint cyan highlights, very low contrast, wispy and diffuse, no hard edges, background element for a dark space scene, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "planeta anelado (parallax) -> planet.png",
-      "id": "47799422-4bc8-4cf3-a254-cf851fed3a3e",
-      "size": 128,
-      "escolhido": "frame_0",
-      "prompt": "huge distant alien gas giant planet seen from space, banded clouds, dark desaturated purple and steel blue, thin ring system, dim rim light on one edge, low contrast, ominous, background element, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "emblema do menu -> emblem.png",
-      "id": "c1e5c5db-ac5e-446b-9d39-a93b8a592252",
-      "size": 64,
-      "escolhido": "frame_0",
-      "prompt": "circular military insignia emblem for a space fleet, a sleek starfighter silhouette in front of a ringed planet, surrounded by a battered metal ring with rivets, dark steel with glowing cyan accents, weathered and scratched, retro arcade game logo emblem, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "projéteis de energia -> bolt.png / bolt-2 / bolt-3",
-      "id": "a9a3a7d7-8948-47a1-aa48-c0fc21c4de9e",
-      "size": 32,
-      "escolhido": "frames 0, 2, 4 — UM lote, três armas",
-      "nota": "Veio com xadrez desenhado dentro; limpo com decheck.mjs. Reduzido para escala de jogo (11-13px).",
-      "prompt": "glowing energy plasma bolt projectile flying to the RIGHT, horizontal elongated bullet of light, bright hot core with soft outer glow, sharp leading tip and trailing streak, sci-fi laser round, vivid saturated color, dark sci-fi shoot-em-up, transparent background"
-    },
-    {
-      "asset": "clarão de disparo -> flash.png",
-      "id": "ac060330-ff2c-47b3-af5f-61dfd9b0665d",
-      "size": 32,
-      "escolhido": "frame_0",
-      "prompt": "muzzle flash burst, a short violent star-shaped flash of fire and light expanding outward, bright yellow-white core fading to orange, sharp radiating spikes, no smoke, retro arcade weapon flash, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "cápsulas de arma -> capsule.png / capsule-2.png",
-      "id": "c122c9f4-f81d-4001-bb96-14e0c5895973",
-      "size": 32,
-      "escolhido": "frames 0 e 2",
-      "prompt": "floating weapon powerup capsule, a small armored canister with a glowing energy core and a bold weapon icon emblem on the front panel, chunky metal frame with hazard stripes, bright glowing rim light, arcade pickup item, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "base da colônia -> base.png (+ animação de luzes)",
-      "id": "e6c5856c-49b3-4470-94da-d7e2b21544bb",
-      "anim_id": "fafeddf2-3527-4031-87bf-16a1013643f7",
-      "size": 128,
-      "nota": "Borda direita 100% opaca — removida, e VOLTA a cada instalação dos quadros da animação.",
-      "prompt": "SIDE VIEW of an abandoned space colony base complex on a moon, several connected modular buildings of different heights, a large geodesic dome, antenna masts, walkways between modules, small lit orange windows, dark riveted metal, weathered and damaged, standing on flat ground, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "silo de combustível -> silo.png",
-      "id": "0f244065-b8d1-4430-8589-21956f35217f",
-      "size": 64,
-      "nota": "Borda direita opaca — removida (era o risco lateral).",
-      "prompt": "SIDE VIEW of industrial sci-fi ground structures on a moon colony: a tall cylindrical fuel silo tank with pipes and warning stripes, standing upright on flat ground, dark riveted metal, rust and wear, hazard markings, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "torre de radar -> radar.png (+ animação de varredura)",
-      "id": "587fe277-3abd-4272-ba90-be470c523e01",
-      "anim_id": "decbaee8-c93e-4981-a34e-a8a3f8838508",
-      "size": 64,
-      "prompt": "SIDE VIEW of a tall sci-fi radar and communications tower on a moon colony, lattice mast with a large dish antenna at the top, red warning light, guy wires, dark riveted metal, weathered, standing upright on flat ground, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "destroço de nave -> wreck.png",
-      "id": "0865dd6a-bf5d-4a21-8e79-5e831e860025",
-      "size": 64,
-      "prompt": "SIDE VIEW of a crashed wrecked spaceship half buried in moon rock, broken hull plating, snapped wing, scorch marks, thin smoke, abandoned and dead, dark steel and rust, lying on flat ground, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "COMETA do chefão (animado) -> comet-anim-0..6",
-      "id": "80b02af3-42d4-450b-9aaf-b8c5864790ea",
-      "anim_id": "5c8d532b-b3f2-4bca-8b3f-c6f8604278f2",
-      "size": 32,
-      "escolhido": "frame_1",
-      "nota": "Bola de fogo com rastro, como a referência do Henrique. Girada pelo ângulo do tiro (sem flip).",
-      "prompt": "flaming comet projectile flying to the RIGHT, a compact ball of fire with a long swirling flame trail streaming behind it to the left, bright yellow-white hot core, orange and red flames, glowing embers, sharp pixel art fire, retro arcade heavy cannon shell, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "ESTILHAÇO da shotgun (animado) -> blast-anim-0..6",
-      "id": "b97755b0-1f08-447f-bb6b-45d9afa67e3b",
-      "anim_id": "1a1cb47c-16cd-4e34-b24a-27bb92b196f7",
-      "size": 32,
-      "escolhido": "frame_2",
-      "prompt": "explosive shotgun blast pellet flying to the RIGHT, a jagged burst of red and yellow fire, chunky violent spark with radiating shards, hot white center, aggressive and messy, retro arcade explosive round, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "asteroide do cinturão (Fase 2) -> asteroid.png / -2 / -3",
-      "id": "bc23a525-0822-45af-bb8b-254e60e73412",
-      "size": 32,
-      "resultado": "3 de 64 candidatos. É o cinturão INTEIRO: obstáculo + as duas camadas de parallax.",
-      "escolha": "frames 0, 4, 11 — silhuetas distintas (o cinturão não pode ser a mesma pedra repetida)",
-      "prompt": "jagged floating space asteroid rock drifting in the void, irregular craggy silhouette, deep craters and fractured facets, cold blue-grey alien stone, one lit edge and a dark shadowed side, chunky and solid, retro arcade shoot-em-up obstacle, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "mina (Fase 2) -> mina.png / mina-2.png",
-      "id": "b914dd83-888e-44d2-bfc0-fbd0b51592bf",
-      "size": 32,
-      "resultado": "A 1a tentativa FALHOU no gerador; refeita com prompt mais concreto (mina naval, não abstrata).",
-      "escolha": "frames 9 e 11 — núcleo aceso bem visível: a mina precisa GRITAR perigo de longe (GDD pilar 3)",
-      "prompt": "spiked naval sea mine floating in space, dark round metal shell covered in sharp horn spikes, glowing red core light, hazard stripes, rusted iron, menacing explosive hazard, retro arcade game sprite, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "naves jogáveis (escolha na interlude) -> ship-2.png (LANÇA) / ship-3.png (DISPERSOR)",
-      "id": "6d561cf5-628e-4430-85b4-0d4a33767617",
-      "size": 32,
-      "resultado": "ATENÇÃO: metade dos candidatos (os índices PARES) saiu em vista de cima outra vez — a lição 1 bateu de novo. Os ÍMPARES vieram em perfil.",
-      "escolha": "frame 7 (nariz dourado pontiagudo -> LANÇA) e 15 (atarracada, canhões sob o casco -> DISPERSOR). A silhueta tem que anunciar COMO a nave atira.",
-      "prompt": "STRICT SIDE VIEW PROFILE of a spaceship, seen exactly from the side, horizontal orientation, nose pointing RIGHT, engine exhaust on the LEFT. The full length of the hull is visible from nose to tail. Player starfighter, distinct aggressive hull silhouette, cockpit canopy on top, rear thrusters with glowing cyan exhaust flame trailing left, dark steel blue armored plating, battle-worn, retro 90s arcade horizontal shoot-em-up player ship, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "CHEFÃO da Fase 2 (Canhoneira-Capitânia) -> capitania.png",
-      "id": "c1207020-b9d5-4b4b-8dd9-1aee2f285c29",
-      "size": 128,
-      "resultado": "4 candidatos. O [2] veio com o canhão para a DIREITA (lado errado) e o [1] virou uma coisa orgânica, não uma canhoneira.",
-      "escolha": "frame 0 — proa à esquerda, baterias ao longo do flanco, luzes magenta. Silhueta de NAVIO DE GUERRA, que é o que a luta precisa anunciar.",
-      "prompt": "STRICT SIDE VIEW PROFILE of a colossal alien capital warship (...) BOW pointing LEFT and engine nozzles on the RIGHT (...) gun batteries along its flank pointing LEFT, command bridge superstructure, glowing magenta lights, retro arcade horizontal shoot-em-up BOSS, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "AURORA, a capitânia aliada da cutscene -> carrier.png",
-      "id": "7cbddf82-9d2f-410a-b0d8-5a011511d41d",
-      "size": 128,
-      "resultado": "Veio com DUAS naves empilhadas no mesmo quadro (ver lição 6). Instalada com --banda alta.",
-      "escolha": "frame 0, banda alta. Azul-aço com luzes cianas = ALIADA (o inimigo é cinza+magenta). Na cena ela é o CHÃO, não um sprite: escala x3.2 = a largura exata da tela.",
-      "prompt": "STRICT SIDE VIEW PROFILE of a huge friendly human carrier capital ship (...) BOW pointing LEFT (...) open HANGAR BAY DOOR on the bow with a lit interior, command tower, rows of lit warm orange windows, dark steel blue plating with cyan running lights, allied fleet flagship, retro 90s arcade, dark sci-fi, transparent background"
-    },
-    {
-      "asset": "EXPERIMENTO: por que a vista lateral falha (3 lotes descartados)",
-      "id": "970d32a9 / f737e3ef / e20bc196",
-      "size": 32,
-      "resultado": "Ver lição 8. Os dois primeiros lotes foram DESCARTADOS (dismiss_review): 100% vista de cima.",
-      "prompt": "(a) fighter spaceship viewed from the side | (b) side view fighter spaceship, nose pointing right, dark blue steel, glowing cyan engine | (c) o mesmo (b) + style_images: public/sprites/ship.png"
-    },
-    {
-      "asset": "naves jogáveis v2 (as que ficaram) -> ship-2.png (LANÇA) / ship-3.png (DISPERSOR)",
-      "id": "e20bc196-53db-4afd-b1d0-84ffb2a0b3c6",
-      "size": 32,
-      "resultado": "Geradas com style_images = ship.png. Família COERENTE com a nave do jogador: mesma linguagem, mesmo motor aceso à esquerda, mesma orientação. As v1 (frames 7 e 15 do lote 6d561cf5) eram perfis de verdade e por isso DESTOAVAM — pareciam canhoneiras, não caças.",
-      "escolha": "frame 21 (nariz longo e pontudo, listra vermelha -> LANÇA) e 23 (delta largo e aberto -> DISPERSOR). A SILHUETA TEM QUE ANUNCIAR A ARMA.",
-      "prompt": "fighter spaceship seen from the side, nose to the right  [+ style_images: ship.png]"
-    },
-    {
-      "asset": "moldura do menu de naves -> public/sprites/ui-frame.png",
-      "id": "bd550498-c942-4944-801b-639143aeacf5",
-      "size": "384x216",
-      "resultado": "3a tentativa. Miolo TRANSPARENTE (centro alpha 0, só 15% de cobertura opaca) = é moldura, não painel. Ver lição 10.",
-      "prompt": "EMPTY dark sci-fi HUD frame border (...) Just the outer FRAME and its border — the entire inside is EMPTY and HOLLOW. Absolutely NO text, NO letters, NO icons, NO buttons, NO inner slots (...) riveted dark steel border, thin glowing cyan edge line, corner bolts, orange hazard stripe"
-    },
-    {
-      "asset": "KAMIKAZE -> enemy-kamikaze.png (+ anim kamikaze-fly)",
-      "id": "e7c9e278-972c-4cc4-bc33-9283577c9a63",
-      "promovido": "9d24cb83-12a0-4e98-b406-647dd2613647",
-      "size": 28,
-      "escolhido": "frame 19",
-      "nota": "style_images = enemy-drone.png (familia coerente). Candidatos VERDES e MARRONS descartados: fora da paleta. O 19 e metal escuro com ESPETO na proa — a arma dele desenhada no casco.",
-      "prompt": "hostile ramming interceptor drone, nose pointing right, sharp forward ramming spike, glowing orange-hot engine burning at the left, hunched aggressive silhouette, dark riveted metal [+ style_images: enemy-drone.png]"
-    },
-    {
-      "asset": "BATEDOR -> enemy-scout.png (+ anim scout-fly)",
-      "id": "f6c705cd-62c9-4cb0-94e3-c2c079073a3d",
-      "promovido": "462ccb26-043e-44f7-bd1c-5166ca044313",
-      "size": 28,
-      "escolhido": "frame 21",
-      "nota": "O lote inteiro saiu coerente (asas em flecha, olho magenta). O 21 tem o clarao do motor visivel — e o clarao vende o movimento.",
-      "prompt": "fast light scout fighter, nose pointing right, slim swept-back wings, single glowing magenta sensor eye, small engine flare at the left [+ style_images: enemy-drone.png]"
-    },
-    {
-      "asset": "CARGUEIRO -> enemy-carrier.png / -2 (+ anim carrier-fly)",
-      "id": "540e8292-fcb8-4e9f-8df4-7a96802cf4df",
-      "promovido": "119e87a7-9bb7-46a4-92ca-c847711df8e0",
-      "size": 64,
-      "escolhido": "frames 5 (base) e 9 (variante)",
-      "nota": "SEM style_images, NATIVO a 64px de proposito: ele era a canhoneira esticada a 1.9x, e escala fracionaria em pixel art BORRA a grade. Nativo, ele vai a 1.1x. O hangar aceso na BARRIGA e de onde os drones saem (EnemySystem.updateCarrier).",
-      "prompt": "bulky alien drone carrier ship, long armored hull, nose pointing right, big open launch bay hatch on the underside spilling magenta light, four engine nozzles glowing at the left, slow and fat silhouette"
-    },
-    {
-      "asset": "DESTROCO SOLTO -> destroco.png / -2 / -3",
-      "id": "2a02d78b-889c-414f-b0a9-a07aac6abd84",
-      "size": 64,
-      "escolhido": "frames 3, 5, 6",
-      "nota": "A QUEIXA DO HENRIQUE: o destroco do cinturao usava a wreck.png da FASE 1 — uma nave CAIDA, desenhada assentada no chao da lua. No vacuo ela boiava com uma BASE RETA embaixo, como se houvesse um chao invisivel. O prompt ataca isso de frente (ripped tear at both ends, NO GROUND, NO BASE). Candidatos marrons/alaranjados descartados: leem como ROCHA, nao como metal.",
-      "prompt": "torn-off section of a destroyed warship hull adrift in deep space, ripped jagged tear at both ends, snapped structural beams, scorched plating, dead and unlit, NO GROUND, NO BASE, floating freely in the void"
-    },
-    {
-      "asset": "PLANETA PARTIDO (parallax Fase 2) -> planet-broken.png",
-      "id": "745f7d3b-4c53-4060-ba2d-57e3ffd39a4b",
-      "size": 128,
-      "escolhido": "frame 1",
-      "nota": "O fundo do vacuo era o MESMO da Fase 1 (nebulosa + planeta anelado INTACTO). Este responde DE ONDE VEIO o cinturao: o mundo se partiu, e a poeira dele e o cemiterio em que voce voa. O 1 e o que mais mostra o pedaco ARRANCADO.",
-      "prompt": "huge shattered planet broken into pieces, the world split open with a glowing molten crack, giant fragments drifting apart, thick chaotic debris ring, very low contrast, background parallax element"
-    },
-    {
-      "asset": "FAIXA DO CINTURAO (parallax Fase 2) -> belt.png / belt-2.png",
-      "id": "07d2db45-d33f-4eb9-a217-622847f3fbc7",
-      "size": 128,
-      "escolhido": "frames 1 e 3",
-      "nota": "ATENCAO: os frames 0 e 2 foram REJEITADOS por terem BORDA VERTICAL RETA (o gerador cortou o cascalho num quadrado). Numa camada de sprites espalhados, borda reta vira o RISCO VERTICAL contra o ceu — a mesma armadilha das montanhas (ver Parallax.ts). Os 1 e 3 tem borda irregular e se sobrepoem sem costura. A camada usa faixa:[70,150] e NAO gira: uma faixa rodada em angulo aleatorio deixa de ser um cinturao.",
-      "prompt": "a dense horizontal river of asteroids stretching sideways, a packed clump of rocks of many sizes drifting together in a band, cluttered rubble field, distant background parallax layer, horizontally elongated"
-    },
-    {
-      "asset": "CAPSULA DE FLAK -> flak-shell.png (+ anim flak-arm)",
-      "id": "c4a7bcb8-1fac-4fa8-8af1-929b3d8f81ab",
-      "promovido": "6ac82f02-089d-4a52-aec1-95cd04d137be",
-      "size": 32,
-      "escolhido": "frame 17",
-      "nota": "O flak da Capitania agora ARREMESSA esta capsula num ponto SORTEADO da tela, e o ESTOURO e que cospe os estilhacos. O 17 e aco cinza com listras de perigo amarelas — le como explosivo a 12px, que e o tamanho real dele em jogo.",
-      "prompt": "a fat cylindrical flak shell canister projectile tumbling through space, rounded warhead nose and fins at the tail, blinking red fuse light, hazard stripes, heavy and blunt"
-    },
-    {
-      "asset": "MINA SENSORA -> sensor-mine.png / -2 (+ anim sensor-idle)",
-      "id": "7a2066aa-238b-4f01-91bc-f6e73ca8246d",
-      "promovido": "74cbd4ea-21da-4b76-a58c-5e3c0426ee8c",
-      "size": 32,
-      "escolhido": "frames 21 e 25",
-      "lote_descartado": "6ef6e529-6588-451c-b05d-f43cab6463a4 (olho CIANO — ver licao 12)",
-      "nota": "A feature nova da Fase 2. Pod redondo com antenas e um OLHO magenta de escaneamento — a antena e o giro lento a separam da mina comum num relance.",
-      "prompt": "a floating proximity sensor mine, round dark metal pod bristling with thin antenna probes, one big glowing MAGENTA-RED scanner eye lens, red and yellow hazard stripes, shrapnel plates"
-    },
-    {
-      "asset": "LEVIATA (parallax, o destino da campanha) -> leviathan.png",
-      "id": "8bc3874d-33a8-4afc-9fa0-e2c5779ff03e",
-      "size": 128,
-      "nota": "O Leviata era um POLIGONO desenhado em runtime (BootScene.makeLeviathan) e, contra o fundo novo do cinturao, aparecia como uma LAJE CINZA de bordas retas no meio do ceu — a coisa mais feia da tela. Achado com uma sonda A/B (esconde o sprite, tira o print, compara), NAO a olho nu. Ele e o casco da Fase 3: merecia arte de verdade.",
-      "prompt": "a colossal alien dreadnought capital ship seen far away in deep space, immense armored hull bristling with towers and spines, bow pointing left, dim red running lights, mostly a dark silhouette, very low contrast, distant background parallax element"
-    },
-    {
-      "asset": "NAVE ALIENIGENA (o ARAUTO) -> ship-4.png",
-      "id": "22d2aaa4-0578-4dfb-b044-0e4590212ea7",
-      "size": 32,
-      "escolhido": "frame 25",
-      "nota": "SEM style_images de proposito: as outras 3 naves usam a ship.png como referencia e formam uma FAMILIA. Esta nao pode pertencer a ela — ela e a unica coisa do roster que NAO e humana, e a cor (verde organico contra o cinza-azul) grita isso antes da silhueta. Descartados os candidatos-agulha: finos demais para ler a 30px.",
-      "prompt": "alien organic starfighter, nose pointing right, chitin carapace hull, glowing green bio-luminescent veins, organic engine glow at the left, asymmetric and unsettling, clearly not human-built"
-    },
-    {
-      "asset": "DOCA KEPLER-9 (2a cutscene) -> doca.png",
-      "id": "2de00dd3-0eff-4e75-9ab5-eed3e25e14bb",
-      "size": "160x160",
-      "escolhido": "quadro unico (completed)",
-      "lote_descartado": "d3f448af-10d2-487c-9284-5aeb1cdb5a14 frame 1 — o agente tinha instalado ESTE por engano; o Henrique havia escolhido o 2de00dd3 (o outpost LARGO e denso). Trocado nesta sessao (2026-07-15).",
-      "nota": "⚠️ ESTA E A IMAGEM QUE O HENRIQUE ESCOLHEU. Outpost de mineracao muito mais rico e DENSO (preenche o quadro quase todo), vista 3/4. Gerada a partir da referencia dele (style_images).",
-      "medido": "PAD_ROW=90 (a pista nao 'salta para o vazio' como a arte antiga — esta EMBUTIDA no centro-direita; achei pela COR: as marcacoes de pouso sao VERMELHAS, y=90..96 x=94..144). Ferramenta: node scripts/find-pad.mjs doca 80.",
-      "pos_processo": "⚠️ node scripts/feather-doca.mjs — OBRIGATORIO depois do install-sprite. A arte e densa: a rocha vai ate as bordas do quadro (esq/dir) e tem um TOPO plano no lençol de rocha a direita. Numa CUTSCENE a doca fica parada contra o vazio e cada corte reto lia como 'caixa de PNG'. O feather esfuma SO a rocha nas bordas (nunca as estruturas nem a pista). Se reinstalar a doca, RODE o feather de novo.",
-      "prompt": "side view of a huge industrial mining outpost built into a giant dark asteroid, modules embedded in cracked rock on the left, wide FLAT metal landing platforms jutting out to the right with red markings and landing lights, thick heavy cables anchoring nearby rocks [+ style_images: a foto do Henrique]"
-    },
-    {
-      "asset": "PLANETA EXPLODINDO (fundo da 2a cutscene) -> planet-shattered.png",
-      "id": "33a331de-b88a-4cd6-8ccd-c6a308c20173",
-      "size": "128x128 -> recortado 119x91",
-      "escolhido": "quadro unico (completed)",
-      "nota": "Mundo partido com o nucleo em LAVA sangrando para fora. Escolhido pelo Henrique como o grande fundo dramatico da Doca — a causa do cinturao, vista de perto. Entra na cutscene com setFlipX (o nucleo quente virado PARA a cena) e tint escuro (0x9aa6c8), depth -85. So a Interlude2Scene o usa.",
-      "prompt": "huge shattered planet broken into pieces seen from space, molten lava core exposed and glowing orange, chunks of crust drifting apart, debris field"
-    }
-  ],
-  "_licao_3": "O gerador às vezes DESENHA o xadrez de transparência dentro do PNG (quadrados cinza opacos). scripts/decheck.mjs remove por cor.",
-  "_licao_4": "Colunas de borda 100% opacas voltam a cada instalação nova (os quadros vêm do gerador). Sempre checar coluna 0 e W-1.",
-  "_licao_5": "Animações do mesmo objeto precisam da MESMA caixa de recorte, senão o sprite SALTA ao trocar de animação. scripts/install-anim.mjs usa a caixa união.",
-  "_licao_6": "O gerador às vezes desenha DUAS artes empilhadas no MESMO quadro (a Aurora veio com dois navios separados por 10 linhas vazias). scripts/install-sprite.mjs --banda alta|baixa corta na faixa vazia do MEIO — a maior faixa do quadro é quase sempre a sobra do canvas embaixo, e cortar por ela decepa a nave.",
-  "_licao_7": "Offsets de arte (bocas de canhão, linha do convés) se MEDEM no PNG, nunca se chutam. O convés da Aurora é a linha 15 de 49 — é onde a largura do casco salta de 38px para 84px. Ancorada pelo centro, a linha do convés caía 30px abaixo da tela e a nave pousava no vazio.",
-  "_licao_8_POR_QUE_A_VISTA_LATERAL_FALHA": "O modelo NÃO está ignorando o prompt — ele está sendo sobrescrito pelo prior. EXPERIMENTO (2026-07-14, 3 lotes, ~/usr/bin/bash.27): (a) prompt longo em MAIÚSCULAS -> metade dos 64 candidatos em vista de cima; (b) prompt minimalista (fighter spaceship viewed from the side) -> 12/12 vista de cima; (c) prompt curto ANCORADO (side view, nose pointing right, dark blue steel, glowing cyan engine) -> obedeceu nariz-à-direita, cor e motor ciano, mas AINDA vista de cima: ele ROTACIONOU uma nave em planta para o nariz ficar à direita. As palavras chegam; a CÂMERA é que é sobrescrita. POR QUÊ: (1) o dado de treino de pixel art de nave é dominado por shmup VERTICAL (Raiden, 1942, Xevious) — top-down é o que sprite-de-nave SIGNIFICA para o modelo; (2) nave não tem cima canônico como pessoa/casa, e a vista mais desenhada é a planta; (3) o perfil é DEGENERADO: asa, barbatana e motores duplos — as features que provam que aquilo é uma nave — somem de perfil, então o modelo volta para a vista onde o objeto é legível; (4) simetria bilateral é um atrator barato, e perfil é assimétrico (nariz != cauda). CONCLUSÃO: adjetivo não vence prior. A alavanca certa é CONDICIONAR POR IMAGEM (style_images) usando um sprite de perfil que já deu certo (public/sprites/ship.png). Vale para qualquer asset cuja vista brigue com o prior.",
-  "_licao_8_A_VISTA_LATERAL_E_UMA_BRIGA_INUTIL": "DESCOBERTA (2026-07-14, 4 lotes, ~/usr/bin/bash.36). A ship.png do jogador — gerada com STRICT SIDE VIEW PROFILE e tratada a sessão inteira como \"o perfil que deu certo\" — NÃO É UM PERFIL. É uma nave VISTA DE CIMA, rodada para o nariz apontar à direita (asas simétricas para cima e para baixo). O prompt nunca foi obedecido, e ninguém notou porque a 30x16px ela lê perfeitamente num shmup horizontal. É a mesma convenção do Vic Viper (Gradius). O QUE O MODELO OBEDECE: nariz à direita, cor, motor aceso, silhueta. O QUE ELE NÃO OBEDECE: o eixo da CÂMERA. Provas: (a) prompt minimalista -> 12/12 top-down; (b) prompt curto ancorado -> acertou nariz/cor/motor e AINDA veio top-down (ele ROTACIONOU uma planta); (c) style_images com a ship.png -> copiou a referência fielmente... e a referência era top-down. POR QUE O PRIOR VENCE: (1) pixel art de nave vem de shmup VERTICAL (Raiden, 1942, Xevious) — top-down é o que \"sprite de nave\" significa; (2) nave não tem cima canônico como pessoa/casa; (3) o perfil é DEGENERADO — asas, barbatanas e motores duplos, as features que provam que aquilo é uma nave, somem de perfil, então o modelo volta para a vista onde o objeto é legível; (4) simetria bilateral é um atrator barato, perfil é assimétrico. CONCLUSÃO: PARE DE PEDIR PERFIL PARA NAVES. Peça a planform (que ele acerta 100%) e ancore só o que importa: nariz à direita, motor aceso à esquerda, silhueta legível. Para CONSISTÊNCIA de família (roster de naves), use style_images com a ship.png — ela transfere linguagem visual, orientação e motor de graça.",
-  "_licao_9": "style_images é a alavanca mais forte que existe, e por isso é PERIGOSA: ela copia a referência FIELMENTE, inclusive os defeitos dela. Escolha a referência olhando-a ampliada (scripts/sheet.mjs), não de memória.",
-  "_licao_10_UI": "create_ui_asset PINTA TEXTO NA ARTE. A 1a tentativa devolveu um menu de seleção completo e bonito — com VYPER-7 INTERCEPTOR, DRACO-9 BOMBER e botões CONTROLS/SETTINGS/QUIT embutidos no PNG. Isso NÃO é UI: não muda, não acompanha o conteúdo e briga com o texto desenhado por cima. A 2a tentativa (NO text) veio limpa, mas com DOIS slots pintados, e nós temos TRÊS naves — slot pintado é layout que não se alinha. O QUE FUNCIONA: pedir só a MOLDURA OCA (um único piece, miolo vazio), e desenhar as linhas em código. A moldura vira reutilizável para qualquer menu; o conteúdo continua sendo dado. Peça no tamanho EXATO da tela (384x216 = 16:9, dentro do limite de 688) — assim ela é desenhada 1:1 e não precisa ser reescalada (reescalar pixel art destrói a grade).",
-  "_licao_11": "NÃO gerar arte de jogo no Higgsfield. Ele produz imagem com ESTÉTICA de pixel art, não pixel art de verdade (bordas suavizadas, milhares de cores, sem grade). O jogo roda a 384x216 com pixelArt:true — reduzir uma imagem grande destrói a grade e ela denuncia que veio de outro lugar. Higgsfield serve para material FORA do canvas: capa, itch.io, trailer.",
-  "_licao_12_A_COR_TEM_DONO": "A PALETA TEM DONO, E O GERADOR NAO SABE DISSO. A primeira mina sensora foi pedida com \"glowing cyan scanner eye\" e voltou linda — com um OLHO CIANO enorme. Ciano e a cor do JOGADOR (docs/ASSETS.md: o cenario nunca usa os acentos do jogador). Um perigo pintado com a cor do aliado MENTE sobre o que ele e, e num shmup a cor e lida antes da forma. Regerada em magenta (~$0.095). E NAO da para consertar com setTint: o tint MULTIPLICA, entao uma lente ciana tingida de magenta vira PRETA. Sempre que pedir um objeto com luz, DIGA A COR — e confira contra a paleta antes de instalar.",
-  "_licao_13_ANIMACAO_TEM_AS_MESMAS_SUJEIRAS": "Os quadros de ANIMACAO vem do mesmo gerador que os estaticos e trazem os mesmos defeitos (xadrez desenhado, bordas opacas) — mas so o install-sprite.mjs limpava; o install-anim.mjs nao. E aqui e PIOR: uma borda opaca esta em TODOS os quadros, entao ela entra na CAIXA UNIAO e infla o recorte do sprite INTEIRO, dando uma margem morta que nenhuma inspecao de um quadro so explica. Agora o install-anim.mjs limpa CADA QUADRO ANTES de medir a caixa uniao — a ordem nao e negociavel. Na instalacao desta sessao ele achou 20px de xadrez so na mina.",
-  "_licao_14_O_LOTE_NAO_E_UM_SPRITE": "O sheet.mjs dimensionava TODAS as celulas pela caixa do PRIMEIRO candidato — mas cada candidato volta com um tamanho proprio (o gerador ja entrega recortado). Os maiores VAZAVAM para a celula vizinha, e a folha de contato passava a mentir justamente sobre a SILHUETA, que e a unica coisa que ela existe para mostrar. Corrigido: a celula e a caixa do MAIOR, e cada candidato entra CENTRADO nela.",
-  "_licao_15_A_FOTO_DO_HENRIQUE_FUNCIONA_COMO_REFERENCIA": "style_images NAO precisa ser pixel art. A doca foi gerada a partir de um RENDER 3D (foto de referencia do Henrique) e saiu melhor que qualquer prompt sozinho: o modelo copiou a PALETA e a LUZ (rocha escura, lampadas laranja, marcacoes vermelhas na pista) e desenhou pixel art de verdade em cima. E a referencia pode ser COMPRIMIDA a serio (JPEG, 160px de lado, 4KB) — ela transfere estilo, nao detalhe. Sempre que o Henrique mandar uma referencia visual, ELA ENTRA como style_images."
+ "_nota": "Registro de toda geração no PixelLab. Ver docs/ASSETS.md.",
+ "_custo_real": "create_1_direction_object = 20 gerações = ~$0.09 por lote. O lote traz vários candidatos: 32px→64, 48/64px→16, 128px→4. create_sidescroller_tileset = 1 geração (~$0.005).",
+ "_licao_1": "O JOGO NÃO USA PERFIL LATERAL — E NÃO PRECISA. Ver lição 8. A instrução antiga (ancorar STRICT SIDE VIEW PROFILE em maiúsculas) perseguia uma vista que nunca conseguimos e da qual não precisamos.",
+ "_licao_2": "Todos os sprites são gerados apontando para a DIREITA. Os inimigos são espelhados em jogo (setFlipX). Metade das chamadas economizada, e o estilo fica consistente.",
+ "_saldo": "9.61 -> ~5.4 (2026-07-14 sessao 3: nave alien + doca x2 ~0.29)",
+ "geracoes": [
+  {
+   "asset": "nave do jogador (v1)",
+   "id": "465ff670-49d4-4e24-b147-d9f12eb001b7",
+   "size": 32,
+   "resultado": "DESCARTADO — saiu em vista de cima. Sprites bons, ângulo errado.",
+   "salvo_em": "assets/raw/nave-v1-topdown/",
+   "prompt": "sleek arrowhead space fighter, delta wings swept back, twin rear thrusters with glowing cyan exhaust, angular armored plating in dark steel blue, battle-worn hull, single cockpit canopy, retro 90s arcade starfighter, dark sci-fi, facing right"
+  },
+  {
+   "asset": "nave do jogador (v2 — perfil) → public/sprites/ship.png",
+   "id": "b1a14eec-dbd8-480a-848d-b5ce8c5a3cf9",
+   "size": 32,
+   "escolhido": "frame_1",
+   "resultado": "APROVADO (provisório). Só os 3 primeiros candidatos saíram em perfil real.",
+   "prompt": "STRICT SIDE VIEW PROFILE of a spaceship, seen exactly from the side, horizontal orientation, nose pointing RIGHT, engine exhaust on the LEFT. The full length of the hull is visible from nose to tail. Sleek arrowhead starfighter, swept delta wing seen edge-on, bubble cockpit canopy on top of the hull, twin rear thrusters with glowing cyan exhaust flame trailing left, dark steel blue armored plating, battle-worn, retro 90s arcade horizontal shoot-em-up player ship, dark sci-fi"
+  },
+  {
+   "asset": "drone inimigo → public/sprites/enemy-drone.png",
+   "id": "39f38fde-3ffb-4c12-9e26-9b9be38b4229",
+   "size": 32,
+   "escolhido": "frame_0",
+   "nota": "Serve TAMBÉM de batedor, com tint rosa e escala menor. 1 sprite, 2 inimigos.",
+   "prompt": "STRICT SIDE VIEW PROFILE, horizontal orientation, nose pointing RIGHT. Small hostile alien drone fighter, insectoid angular hull, single glowing magenta core eye, thin swept fins, dark chitin plating with magenta veins, battle-worn, retro arcade horizontal shoot-em-up enemy, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "canhoneira → public/sprites/enemy-gunship.png",
+   "id": "5c1108f0-8dcb-41ed-8037-ca879c734eca",
+   "size": 48,
+   "escolhido": "frame_0",
+   "prompt": "STRICT SIDE VIEW PROFILE, horizontal orientation, nose pointing RIGHT. Heavy armored alien gunship, bulky armored hull, forward cannon barrel, thick plating in dark steel and magenta, glowing red cockpit slit, exhaust vents at rear, menacing, retro arcade horizontal shoot-em-up enemy, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "torre de solo → public/sprites/turret.png",
+   "id": "cc465561-f765-49c7-a20c-470e4a913693",
+   "size": 32,
+   "escolhido": "frame_0",
+   "prompt": "SIDE VIEW, ground-mounted anti-air defense turret sitting on a flat base, angled cannon barrel pointing up and to the LEFT, armored bunker housing, glowing red targeting lens, riveted dark metal plating, weathered, sci-fi colony defense, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "construção da colônia → public/sprites/building.png",
+   "id": "732e03b9-2379-4713-bf0b-d0424443fcd6",
+   "size": 64,
+   "escolhido": "frame_0",
+   "nota": "PENDÊNCIA: ficou escuro demais em jogo, lê como caixa preta. Regerar com mais contraste / janelas mais acesas.",
+   "prompt": "SIDE VIEW, abandoned space colony building on a moon surface, tall narrow modular habitat tower, antenna dish on top, small lit orange windows, dark riveted metal panels, weathered and damaged, standing upright on flat ground, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "pico de rocha → public/sprites/spire.png",
+   "id": "c6b7cc0d-0455-4183-92db-a7687fe08664",
+   "size": 64,
+   "escolhido": "frame_0",
+   "prompt": "SIDE VIEW, tall jagged rock spire rising straight up from the ground, narrow pointed pinnacle of dark alien stone, cracked and craggy silhouette, sharp peak at top, wide base at bottom, cold blue-grey rock with dark shadowed side, moon surface, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "montanhas distantes (parallax) → public/sprites/mtn-far.png",
+   "id": "84c722e6-5b68-4d86-848f-002cc8ff8111",
+   "size": 128,
+   "escolhido": "frame_1",
+   "prompt": "SIDE VIEW SILHOUETTE of a distant alien mountain range on the horizon, jagged peaks, very dark desaturated blue-grey, low contrast, flat silhouette with no interior detail, background layer for parallax scrolling, wide and low, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "montanhas médias (parallax) → public/sprites/mtn-mid.png",
+   "id": "f0054451-7f46-4889-8738-005a842c86af",
+   "size": 128,
+   "escolhido": "frame_0",
+   "prompt": "SIDE VIEW of mid-distance alien rocky hills and mesas, craggy rock formations of varying heights, muted dark slate blue with subtle highlights on the edges, moderate detail, midground layer for parallax scrolling, wide and low, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "CHEFÃO da Fase 1 → public/sprites/boss.png",
+   "id": "a2a65b1b-67e7-41a2-97af-70d34d082d53",
+   "size": 128,
+   "escolhido": "frame_0",
+   "prompt": "SIDE VIEW of a colossal ground-based anti-orbital defense tower, boss enemy, massive armored fortress cannon mounted on a wide reinforced base, huge forward gun barrel pointing LEFT, glowing red targeting eye, thick riveted armor plating, warning stripes in orange, industrial and menacing, retro arcade boss, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "solo (tileset) → public/sprites/ground-tile.png",
+   "id": "020d824e-3005-414b-8e4c-e4872a0e7470",
+   "tool": "create_sidescroller_tileset",
+   "custo": "1 geração",
+   "nota": "Grade 4x4 de tiles 16x16. O tile 6 é o único 100% opaco (miolo) — é ele que vira a faixa de solo 16x48. O tile de superfície tem motivo de blocos que, numa faixa de 10px, lê como rolo de filme. Saiu roxo: corrigido com tint 0x8fb2e0 em jogo.",
+   "prompt": "lower: dark cracked alien moon bedrock, cold blue-grey stone, deep shadows | transition: fine grey lunar dust and scattered small rocks"
+  },
+  {
+   "asset": "nebulosa (parallax) -> nebula.png / nebula-2.png",
+   "id": "1d850820-fd71-44a2-8550-471e400b5fd0",
+   "size": 128,
+   "escolhido": "frame_2 e frame_0",
+   "prompt": "deep space nebula cloud, soft billowing gas clouds, dark violet and deep blue with faint cyan highlights, very low contrast, wispy and diffuse, no hard edges, background element for a dark space scene, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "planeta anelado (parallax) -> planet.png",
+   "id": "47799422-4bc8-4cf3-a254-cf851fed3a3e",
+   "size": 128,
+   "escolhido": "frame_0",
+   "prompt": "huge distant alien gas giant planet seen from space, banded clouds, dark desaturated purple and steel blue, thin ring system, dim rim light on one edge, low contrast, ominous, background element, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "emblema do menu -> emblem.png",
+   "id": "c1e5c5db-ac5e-446b-9d39-a93b8a592252",
+   "size": 64,
+   "escolhido": "frame_0",
+   "prompt": "circular military insignia emblem for a space fleet, a sleek starfighter silhouette in front of a ringed planet, surrounded by a battered metal ring with rivets, dark steel with glowing cyan accents, weathered and scratched, retro arcade game logo emblem, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "projéteis de energia -> bolt.png / bolt-2 / bolt-3",
+   "id": "a9a3a7d7-8948-47a1-aa48-c0fc21c4de9e",
+   "size": 32,
+   "escolhido": "frames 0, 2, 4 — UM lote, três armas",
+   "nota": "Veio com xadrez desenhado dentro; limpo com decheck.mjs. Reduzido para escala de jogo (11-13px).",
+   "prompt": "glowing energy plasma bolt projectile flying to the RIGHT, horizontal elongated bullet of light, bright hot core with soft outer glow, sharp leading tip and trailing streak, sci-fi laser round, vivid saturated color, dark sci-fi shoot-em-up, transparent background"
+  },
+  {
+   "asset": "clarão de disparo -> flash.png",
+   "id": "ac060330-ff2c-47b3-af5f-61dfd9b0665d",
+   "size": 32,
+   "escolhido": "frame_0",
+   "prompt": "muzzle flash burst, a short violent star-shaped flash of fire and light expanding outward, bright yellow-white core fading to orange, sharp radiating spikes, no smoke, retro arcade weapon flash, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "cápsulas de arma -> capsule.png / capsule-2.png",
+   "id": "c122c9f4-f81d-4001-bb96-14e0c5895973",
+   "size": 32,
+   "escolhido": "frames 0 e 2",
+   "prompt": "floating weapon powerup capsule, a small armored canister with a glowing energy core and a bold weapon icon emblem on the front panel, chunky metal frame with hazard stripes, bright glowing rim light, arcade pickup item, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "base da colônia -> base.png (+ animação de luzes)",
+   "id": "e6c5856c-49b3-4470-94da-d7e2b21544bb",
+   "anim_id": "fafeddf2-3527-4031-87bf-16a1013643f7",
+   "size": 128,
+   "nota": "Borda direita 100% opaca — removida, e VOLTA a cada instalação dos quadros da animação.",
+   "prompt": "SIDE VIEW of an abandoned space colony base complex on a moon, several connected modular buildings of different heights, a large geodesic dome, antenna masts, walkways between modules, small lit orange windows, dark riveted metal, weathered and damaged, standing on flat ground, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "silo de combustível -> silo.png",
+   "id": "0f244065-b8d1-4430-8589-21956f35217f",
+   "size": 64,
+   "nota": "Borda direita opaca — removida (era o risco lateral).",
+   "prompt": "SIDE VIEW of industrial sci-fi ground structures on a moon colony: a tall cylindrical fuel silo tank with pipes and warning stripes, standing upright on flat ground, dark riveted metal, rust and wear, hazard markings, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "torre de radar -> radar.png (+ animação de varredura)",
+   "id": "587fe277-3abd-4272-ba90-be470c523e01",
+   "anim_id": "decbaee8-c93e-4981-a34e-a8a3f8838508",
+   "size": 64,
+   "prompt": "SIDE VIEW of a tall sci-fi radar and communications tower on a moon colony, lattice mast with a large dish antenna at the top, red warning light, guy wires, dark riveted metal, weathered, standing upright on flat ground, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "destroço de nave -> wreck.png",
+   "id": "0865dd6a-bf5d-4a21-8e79-5e831e860025",
+   "size": 64,
+   "prompt": "SIDE VIEW of a crashed wrecked spaceship half buried in moon rock, broken hull plating, snapped wing, scorch marks, thin smoke, abandoned and dead, dark steel and rust, lying on flat ground, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "COMETA do chefão (animado) -> comet-anim-0..6",
+   "id": "80b02af3-42d4-450b-9aaf-b8c5864790ea",
+   "anim_id": "5c8d532b-b3f2-4bca-8b3f-c6f8604278f2",
+   "size": 32,
+   "escolhido": "frame_1",
+   "nota": "Bola de fogo com rastro, como a referência do Henrique. Girada pelo ângulo do tiro (sem flip).",
+   "prompt": "flaming comet projectile flying to the RIGHT, a compact ball of fire with a long swirling flame trail streaming behind it to the left, bright yellow-white hot core, orange and red flames, glowing embers, sharp pixel art fire, retro arcade heavy cannon shell, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "ESTILHAÇO da shotgun (animado) -> blast-anim-0..6",
+   "id": "b97755b0-1f08-447f-bb6b-45d9afa67e3b",
+   "anim_id": "1a1cb47c-16cd-4e34-b24a-27bb92b196f7",
+   "size": 32,
+   "escolhido": "frame_2",
+   "prompt": "explosive shotgun blast pellet flying to the RIGHT, a jagged burst of red and yellow fire, chunky violent spark with radiating shards, hot white center, aggressive and messy, retro arcade explosive round, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "asteroide do cinturão (Fase 2) -> asteroid.png / -2 / -3",
+   "id": "bc23a525-0822-45af-bb8b-254e60e73412",
+   "size": 32,
+   "resultado": "3 de 64 candidatos. É o cinturão INTEIRO: obstáculo + as duas camadas de parallax.",
+   "escolha": "frames 0, 4, 11 — silhuetas distintas (o cinturão não pode ser a mesma pedra repetida)",
+   "prompt": "jagged floating space asteroid rock drifting in the void, irregular craggy silhouette, deep craters and fractured facets, cold blue-grey alien stone, one lit edge and a dark shadowed side, chunky and solid, retro arcade shoot-em-up obstacle, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "mina (Fase 2) -> mina.png / mina-2.png",
+   "id": "b914dd83-888e-44d2-bfc0-fbd0b51592bf",
+   "size": 32,
+   "resultado": "A 1a tentativa FALHOU no gerador; refeita com prompt mais concreto (mina naval, não abstrata).",
+   "escolha": "frames 9 e 11 — núcleo aceso bem visível: a mina precisa GRITAR perigo de longe (GDD pilar 3)",
+   "prompt": "spiked naval sea mine floating in space, dark round metal shell covered in sharp horn spikes, glowing red core light, hazard stripes, rusted iron, menacing explosive hazard, retro arcade game sprite, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "naves jogáveis (escolha na interlude) -> ship-2.png (LANÇA) / ship-3.png (DISPERSOR)",
+   "id": "6d561cf5-628e-4430-85b4-0d4a33767617",
+   "size": 32,
+   "resultado": "ATENÇÃO: metade dos candidatos (os índices PARES) saiu em vista de cima outra vez — a lição 1 bateu de novo. Os ÍMPARES vieram em perfil.",
+   "escolha": "frame 7 (nariz dourado pontiagudo -> LANÇA) e 15 (atarracada, canhões sob o casco -> DISPERSOR). A silhueta tem que anunciar COMO a nave atira.",
+   "prompt": "STRICT SIDE VIEW PROFILE of a spaceship, seen exactly from the side, horizontal orientation, nose pointing RIGHT, engine exhaust on the LEFT. The full length of the hull is visible from nose to tail. Player starfighter, distinct aggressive hull silhouette, cockpit canopy on top, rear thrusters with glowing cyan exhaust flame trailing left, dark steel blue armored plating, battle-worn, retro 90s arcade horizontal shoot-em-up player ship, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "CHEFÃO da Fase 2 (Canhoneira-Capitânia) -> capitania.png",
+   "id": "c1207020-b9d5-4b4b-8dd9-1aee2f285c29",
+   "size": 128,
+   "resultado": "4 candidatos. O [2] veio com o canhão para a DIREITA (lado errado) e o [1] virou uma coisa orgânica, não uma canhoneira.",
+   "escolha": "frame 0 — proa à esquerda, baterias ao longo do flanco, luzes magenta. Silhueta de NAVIO DE GUERRA, que é o que a luta precisa anunciar.",
+   "prompt": "STRICT SIDE VIEW PROFILE of a colossal alien capital warship (...) BOW pointing LEFT and engine nozzles on the RIGHT (...) gun batteries along its flank pointing LEFT, command bridge superstructure, glowing magenta lights, retro arcade horizontal shoot-em-up BOSS, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "AURORA, a capitânia aliada da cutscene -> carrier.png",
+   "id": "7cbddf82-9d2f-410a-b0d8-5a011511d41d",
+   "size": 128,
+   "resultado": "Veio com DUAS naves empilhadas no mesmo quadro (ver lição 6). Instalada com --banda alta.",
+   "escolha": "frame 0, banda alta. Azul-aço com luzes cianas = ALIADA (o inimigo é cinza+magenta). Na cena ela é o CHÃO, não um sprite: escala x3.2 = a largura exata da tela.",
+   "prompt": "STRICT SIDE VIEW PROFILE of a huge friendly human carrier capital ship (...) BOW pointing LEFT (...) open HANGAR BAY DOOR on the bow with a lit interior, command tower, rows of lit warm orange windows, dark steel blue plating with cyan running lights, allied fleet flagship, retro 90s arcade, dark sci-fi, transparent background"
+  },
+  {
+   "asset": "EXPERIMENTO: por que a vista lateral falha (3 lotes descartados)",
+   "id": "970d32a9 / f737e3ef / e20bc196",
+   "size": 32,
+   "resultado": "Ver lição 8. Os dois primeiros lotes foram DESCARTADOS (dismiss_review): 100% vista de cima.",
+   "prompt": "(a) fighter spaceship viewed from the side | (b) side view fighter spaceship, nose pointing right, dark blue steel, glowing cyan engine | (c) o mesmo (b) + style_images: public/sprites/ship.png"
+  },
+  {
+   "asset": "naves jogáveis v2 (as que ficaram) -> ship-2.png (LANÇA) / ship-3.png (DISPERSOR)",
+   "id": "e20bc196-53db-4afd-b1d0-84ffb2a0b3c6",
+   "size": 32,
+   "resultado": "Geradas com style_images = ship.png. Família COERENTE com a nave do jogador: mesma linguagem, mesmo motor aceso à esquerda, mesma orientação. As v1 (frames 7 e 15 do lote 6d561cf5) eram perfis de verdade e por isso DESTOAVAM — pareciam canhoneiras, não caças.",
+   "escolha": "frame 21 (nariz longo e pontudo, listra vermelha -> LANÇA) e 23 (delta largo e aberto -> DISPERSOR). A SILHUETA TEM QUE ANUNCIAR A ARMA.",
+   "prompt": "fighter spaceship seen from the side, nose to the right  [+ style_images: ship.png]"
+  },
+  {
+   "asset": "moldura do menu de naves -> public/sprites/ui-frame.png",
+   "id": "bd550498-c942-4944-801b-639143aeacf5",
+   "size": "384x216",
+   "resultado": "3a tentativa. Miolo TRANSPARENTE (centro alpha 0, só 15% de cobertura opaca) = é moldura, não painel. Ver lição 10.",
+   "prompt": "EMPTY dark sci-fi HUD frame border (...) Just the outer FRAME and its border — the entire inside is EMPTY and HOLLOW. Absolutely NO text, NO letters, NO icons, NO buttons, NO inner slots (...) riveted dark steel border, thin glowing cyan edge line, corner bolts, orange hazard stripe"
+  },
+  {
+   "asset": "KAMIKAZE -> enemy-kamikaze.png (+ anim kamikaze-fly)",
+   "id": "e7c9e278-972c-4cc4-bc33-9283577c9a63",
+   "promovido": "9d24cb83-12a0-4e98-b406-647dd2613647",
+   "size": 28,
+   "escolhido": "frame 19",
+   "nota": "style_images = enemy-drone.png (familia coerente). Candidatos VERDES e MARRONS descartados: fora da paleta. O 19 e metal escuro com ESPETO na proa — a arma dele desenhada no casco.",
+   "prompt": "hostile ramming interceptor drone, nose pointing right, sharp forward ramming spike, glowing orange-hot engine burning at the left, hunched aggressive silhouette, dark riveted metal [+ style_images: enemy-drone.png]"
+  },
+  {
+   "asset": "BATEDOR -> enemy-scout.png (+ anim scout-fly)",
+   "id": "f6c705cd-62c9-4cb0-94e3-c2c079073a3d",
+   "promovido": "462ccb26-043e-44f7-bd1c-5166ca044313",
+   "size": 28,
+   "escolhido": "frame 21",
+   "nota": "O lote inteiro saiu coerente (asas em flecha, olho magenta). O 21 tem o clarao do motor visivel — e o clarao vende o movimento.",
+   "prompt": "fast light scout fighter, nose pointing right, slim swept-back wings, single glowing magenta sensor eye, small engine flare at the left [+ style_images: enemy-drone.png]"
+  },
+  {
+   "asset": "CARGUEIRO -> enemy-carrier.png / -2 (+ anim carrier-fly)",
+   "id": "540e8292-fcb8-4e9f-8df4-7a96802cf4df",
+   "promovido": "119e87a7-9bb7-46a4-92ca-c847711df8e0",
+   "size": 64,
+   "escolhido": "frames 5 (base) e 9 (variante)",
+   "nota": "SEM style_images, NATIVO a 64px de proposito: ele era a canhoneira esticada a 1.9x, e escala fracionaria em pixel art BORRA a grade. Nativo, ele vai a 1.1x. O hangar aceso na BARRIGA e de onde os drones saem (EnemySystem.updateCarrier).",
+   "prompt": "bulky alien drone carrier ship, long armored hull, nose pointing right, big open launch bay hatch on the underside spilling magenta light, four engine nozzles glowing at the left, slow and fat silhouette"
+  },
+  {
+   "asset": "DESTROCO SOLTO -> destroco.png / -2 / -3",
+   "id": "2a02d78b-889c-414f-b0a9-a07aac6abd84",
+   "size": 64,
+   "escolhido": "frames 3, 5, 6",
+   "nota": "A QUEIXA DO HENRIQUE: o destroco do cinturao usava a wreck.png da FASE 1 — uma nave CAIDA, desenhada assentada no chao da lua. No vacuo ela boiava com uma BASE RETA embaixo, como se houvesse um chao invisivel. O prompt ataca isso de frente (ripped tear at both ends, NO GROUND, NO BASE). Candidatos marrons/alaranjados descartados: leem como ROCHA, nao como metal.",
+   "prompt": "torn-off section of a destroyed warship hull adrift in deep space, ripped jagged tear at both ends, snapped structural beams, scorched plating, dead and unlit, NO GROUND, NO BASE, floating freely in the void"
+  },
+  {
+   "asset": "PLANETA PARTIDO (parallax Fase 2) -> planet-broken.png",
+   "id": "745f7d3b-4c53-4060-ba2d-57e3ffd39a4b",
+   "size": 128,
+   "escolhido": "frame 1",
+   "nota": "O fundo do vacuo era o MESMO da Fase 1 (nebulosa + planeta anelado INTACTO). Este responde DE ONDE VEIO o cinturao: o mundo se partiu, e a poeira dele e o cemiterio em que voce voa. O 1 e o que mais mostra o pedaco ARRANCADO.",
+   "prompt": "huge shattered planet broken into pieces, the world split open with a glowing molten crack, giant fragments drifting apart, thick chaotic debris ring, very low contrast, background parallax element"
+  },
+  {
+   "asset": "FAIXA DO CINTURAO (parallax Fase 2) -> belt.png / belt-2.png",
+   "id": "07d2db45-d33f-4eb9-a217-622847f3fbc7",
+   "size": 128,
+   "escolhido": "frames 1 e 3",
+   "nota": "ATENCAO: os frames 0 e 2 foram REJEITADOS por terem BORDA VERTICAL RETA (o gerador cortou o cascalho num quadrado). Numa camada de sprites espalhados, borda reta vira o RISCO VERTICAL contra o ceu — a mesma armadilha das montanhas (ver Parallax.ts). Os 1 e 3 tem borda irregular e se sobrepoem sem costura. A camada usa faixa:[70,150] e NAO gira: uma faixa rodada em angulo aleatorio deixa de ser um cinturao.",
+   "prompt": "a dense horizontal river of asteroids stretching sideways, a packed clump of rocks of many sizes drifting together in a band, cluttered rubble field, distant background parallax layer, horizontally elongated"
+  },
+  {
+   "asset": "CAPSULA DE FLAK -> flak-shell.png (+ anim flak-arm)",
+   "id": "c4a7bcb8-1fac-4fa8-8af1-929b3d8f81ab",
+   "promovido": "6ac82f02-089d-4a52-aec1-95cd04d137be",
+   "size": 32,
+   "escolhido": "frame 17",
+   "nota": "O flak da Capitania agora ARREMESSA esta capsula num ponto SORTEADO da tela, e o ESTOURO e que cospe os estilhacos. O 17 e aco cinza com listras de perigo amarelas — le como explosivo a 12px, que e o tamanho real dele em jogo.",
+   "prompt": "a fat cylindrical flak shell canister projectile tumbling through space, rounded warhead nose and fins at the tail, blinking red fuse light, hazard stripes, heavy and blunt"
+  },
+  {
+   "asset": "MINA SENSORA -> sensor-mine.png / -2 (+ anim sensor-idle)",
+   "id": "7a2066aa-238b-4f01-91bc-f6e73ca8246d",
+   "promovido": "74cbd4ea-21da-4b76-a58c-5e3c0426ee8c",
+   "size": 32,
+   "escolhido": "frames 21 e 25",
+   "lote_descartado": "6ef6e529-6588-451c-b05d-f43cab6463a4 (olho CIANO — ver licao 12)",
+   "nota": "A feature nova da Fase 2. Pod redondo com antenas e um OLHO magenta de escaneamento — a antena e o giro lento a separam da mina comum num relance.",
+   "prompt": "a floating proximity sensor mine, round dark metal pod bristling with thin antenna probes, one big glowing MAGENTA-RED scanner eye lens, red and yellow hazard stripes, shrapnel plates"
+  },
+  {
+   "asset": "LEVIATA (parallax, o destino da campanha) -> leviathan.png",
+   "id": "8bc3874d-33a8-4afc-9fa0-e2c5779ff03e",
+   "size": 128,
+   "nota": "O Leviata era um POLIGONO desenhado em runtime (BootScene.makeLeviathan) e, contra o fundo novo do cinturao, aparecia como uma LAJE CINZA de bordas retas no meio do ceu — a coisa mais feia da tela. Achado com uma sonda A/B (esconde o sprite, tira o print, compara), NAO a olho nu. Ele e o casco da Fase 3: merecia arte de verdade.",
+   "prompt": "a colossal alien dreadnought capital ship seen far away in deep space, immense armored hull bristling with towers and spines, bow pointing left, dim red running lights, mostly a dark silhouette, very low contrast, distant background parallax element"
+  },
+  {
+   "asset": "NAVE ALIENIGENA (o ARAUTO) -> ship-4.png",
+   "id": "22d2aaa4-0578-4dfb-b044-0e4590212ea7",
+   "size": 32,
+   "escolhido": "frame 25",
+   "nota": "SEM style_images de proposito: as outras 3 naves usam a ship.png como referencia e formam uma FAMILIA. Esta nao pode pertencer a ela — ela e a unica coisa do roster que NAO e humana, e a cor (verde organico contra o cinza-azul) grita isso antes da silhueta. Descartados os candidatos-agulha: finos demais para ler a 30px.",
+   "prompt": "alien organic starfighter, nose pointing right, chitin carapace hull, glowing green bio-luminescent veins, organic engine glow at the left, asymmetric and unsettling, clearly not human-built"
+  },
+  {
+   "asset": "DOCA KEPLER-9 (2a cutscene) -> doca.png",
+   "id": "2de00dd3-0eff-4e75-9ab5-eed3e25e14bb",
+   "size": "160x160",
+   "escolhido": "quadro unico (completed)",
+   "lote_descartado": "d3f448af-10d2-487c-9284-5aeb1cdb5a14 frame 1 — o agente tinha instalado ESTE por engano; o Henrique havia escolhido o 2de00dd3 (o outpost LARGO e denso). Trocado nesta sessao (2026-07-15).",
+   "nota": "⚠️ ESTA E A IMAGEM QUE O HENRIQUE ESCOLHEU. Outpost de mineracao muito mais rico e DENSO (preenche o quadro quase todo), vista 3/4. Gerada a partir da referencia dele (style_images).",
+   "medido": "PAD_ROW=90 (a pista nao 'salta para o vazio' como a arte antiga — esta EMBUTIDA no centro-direita; achei pela COR: as marcacoes de pouso sao VERMELHAS, y=90..96 x=94..144). Ferramenta: node scripts/find-pad.mjs doca 80.",
+   "pos_processo": "⚠️ node scripts/feather-doca.mjs — OBRIGATORIO depois do install-sprite. A arte e densa: a rocha vai ate as bordas do quadro (esq/dir) e tem um TOPO plano no lençol de rocha a direita. Numa CUTSCENE a doca fica parada contra o vazio e cada corte reto lia como 'caixa de PNG'. O feather esfuma SO a rocha nas bordas (nunca as estruturas nem a pista). Se reinstalar a doca, RODE o feather de novo.",
+   "prompt": "side view of a huge industrial mining outpost built into a giant dark asteroid, modules embedded in cracked rock on the left, wide FLAT metal landing platforms jutting out to the right with red markings and landing lights, thick heavy cables anchoring nearby rocks [+ style_images: a foto do Henrique]"
+  },
+  {
+   "asset": "PLANETA EXPLODINDO (fundo da 2a cutscene) -> planet-shattered.png",
+   "id": "33a331de-b88a-4cd6-8ccd-c6a308c20173",
+   "size": "128x128 -> recortado 119x91",
+   "escolhido": "quadro unico (completed)",
+   "nota": "Mundo partido com o nucleo em LAVA sangrando para fora. Escolhido pelo Henrique como o grande fundo dramatico da Doca — a causa do cinturao, vista de perto. Entra na cutscene com setFlipX (o nucleo quente virado PARA a cena) e tint escuro (0x9aa6c8), depth -85. So a Interlude2Scene o usa.",
+   "prompt": "huge shattered planet broken into pieces seen from space, molten lava core exposed and glowing orange, chunks of crust drifting apart, debris field"
+  }
+ ],
+ "_licao_3": "O gerador às vezes DESENHA o xadrez de transparência dentro do PNG (quadrados cinza opacos). scripts/decheck.mjs remove por cor.",
+ "_licao_4": "Colunas de borda 100% opacas voltam a cada instalação nova (os quadros vêm do gerador). Sempre checar coluna 0 e W-1.",
+ "_licao_5": "Animações do mesmo objeto precisam da MESMA caixa de recorte, senão o sprite SALTA ao trocar de animação. scripts/install-anim.mjs usa a caixa união.",
+ "_licao_6": "O gerador às vezes desenha DUAS artes empilhadas no MESMO quadro (a Aurora veio com dois navios separados por 10 linhas vazias). scripts/install-sprite.mjs --banda alta|baixa corta na faixa vazia do MEIO — a maior faixa do quadro é quase sempre a sobra do canvas embaixo, e cortar por ela decepa a nave.",
+ "_licao_7": "Offsets de arte (bocas de canhão, linha do convés) se MEDEM no PNG, nunca se chutam. O convés da Aurora é a linha 15 de 49 — é onde a largura do casco salta de 38px para 84px. Ancorada pelo centro, a linha do convés caía 30px abaixo da tela e a nave pousava no vazio.",
+ "_licao_8_POR_QUE_A_VISTA_LATERAL_FALHA": "O modelo NÃO está ignorando o prompt — ele está sendo sobrescrito pelo prior. EXPERIMENTO (2026-07-14, 3 lotes, ~/usr/bin/bash.27): (a) prompt longo em MAIÚSCULAS -> metade dos 64 candidatos em vista de cima; (b) prompt minimalista (fighter spaceship viewed from the side) -> 12/12 vista de cima; (c) prompt curto ANCORADO (side view, nose pointing right, dark blue steel, glowing cyan engine) -> obedeceu nariz-à-direita, cor e motor ciano, mas AINDA vista de cima: ele ROTACIONOU uma nave em planta para o nariz ficar à direita. As palavras chegam; a CÂMERA é que é sobrescrita. POR QUÊ: (1) o dado de treino de pixel art de nave é dominado por shmup VERTICAL (Raiden, 1942, Xevious) — top-down é o que sprite-de-nave SIGNIFICA para o modelo; (2) nave não tem cima canônico como pessoa/casa, e a vista mais desenhada é a planta; (3) o perfil é DEGENERADO: asa, barbatana e motores duplos — as features que provam que aquilo é uma nave — somem de perfil, então o modelo volta para a vista onde o objeto é legível; (4) simetria bilateral é um atrator barato, e perfil é assimétrico (nariz != cauda). CONCLUSÃO: adjetivo não vence prior. A alavanca certa é CONDICIONAR POR IMAGEM (style_images) usando um sprite de perfil que já deu certo (public/sprites/ship.png). Vale para qualquer asset cuja vista brigue com o prior.",
+ "_licao_8_A_VISTA_LATERAL_E_UMA_BRIGA_INUTIL": "DESCOBERTA (2026-07-14, 4 lotes, ~/usr/bin/bash.36). A ship.png do jogador — gerada com STRICT SIDE VIEW PROFILE e tratada a sessão inteira como \"o perfil que deu certo\" — NÃO É UM PERFIL. É uma nave VISTA DE CIMA, rodada para o nariz apontar à direita (asas simétricas para cima e para baixo). O prompt nunca foi obedecido, e ninguém notou porque a 30x16px ela lê perfeitamente num shmup horizontal. É a mesma convenção do Vic Viper (Gradius). O QUE O MODELO OBEDECE: nariz à direita, cor, motor aceso, silhueta. O QUE ELE NÃO OBEDECE: o eixo da CÂMERA. Provas: (a) prompt minimalista -> 12/12 top-down; (b) prompt curto ancorado -> acertou nariz/cor/motor e AINDA veio top-down (ele ROTACIONOU uma planta); (c) style_images com a ship.png -> copiou a referência fielmente... e a referência era top-down. POR QUE O PRIOR VENCE: (1) pixel art de nave vem de shmup VERTICAL (Raiden, 1942, Xevious) — top-down é o que \"sprite de nave\" significa; (2) nave não tem cima canônico como pessoa/casa; (3) o perfil é DEGENERADO — asas, barbatanas e motores duplos, as features que provam que aquilo é uma nave, somem de perfil, então o modelo volta para a vista onde o objeto é legível; (4) simetria bilateral é um atrator barato, perfil é assimétrico. CONCLUSÃO: PARE DE PEDIR PERFIL PARA NAVES. Peça a planform (que ele acerta 100%) e ancore só o que importa: nariz à direita, motor aceso à esquerda, silhueta legível. Para CONSISTÊNCIA de família (roster de naves), use style_images com a ship.png — ela transfere linguagem visual, orientação e motor de graça.",
+ "_licao_9": "style_images é a alavanca mais forte que existe, e por isso é PERIGOSA: ela copia a referência FIELMENTE, inclusive os defeitos dela. Escolha a referência olhando-a ampliada (scripts/sheet.mjs), não de memória.",
+ "_licao_10_UI": "create_ui_asset PINTA TEXTO NA ARTE. A 1a tentativa devolveu um menu de seleção completo e bonito — com VYPER-7 INTERCEPTOR, DRACO-9 BOMBER e botões CONTROLS/SETTINGS/QUIT embutidos no PNG. Isso NÃO é UI: não muda, não acompanha o conteúdo e briga com o texto desenhado por cima. A 2a tentativa (NO text) veio limpa, mas com DOIS slots pintados, e nós temos TRÊS naves — slot pintado é layout que não se alinha. O QUE FUNCIONA: pedir só a MOLDURA OCA (um único piece, miolo vazio), e desenhar as linhas em código. A moldura vira reutilizável para qualquer menu; o conteúdo continua sendo dado. Peça no tamanho EXATO da tela (384x216 = 16:9, dentro do limite de 688) — assim ela é desenhada 1:1 e não precisa ser reescalada (reescalar pixel art destrói a grade).",
+ "_licao_11": "NÃO gerar arte de jogo no Higgsfield. Ele produz imagem com ESTÉTICA de pixel art, não pixel art de verdade (bordas suavizadas, milhares de cores, sem grade). O jogo roda a 384x216 com pixelArt:true — reduzir uma imagem grande destrói a grade e ela denuncia que veio de outro lugar. Higgsfield serve para material FORA do canvas: capa, itch.io, trailer.",
+ "_licao_12_A_COR_TEM_DONO": "A PALETA TEM DONO, E O GERADOR NAO SABE DISSO. A primeira mina sensora foi pedida com \"glowing cyan scanner eye\" e voltou linda — com um OLHO CIANO enorme. Ciano e a cor do JOGADOR (docs/ASSETS.md: o cenario nunca usa os acentos do jogador). Um perigo pintado com a cor do aliado MENTE sobre o que ele e, e num shmup a cor e lida antes da forma. Regerada em magenta (~$0.095). E NAO da para consertar com setTint: o tint MULTIPLICA, entao uma lente ciana tingida de magenta vira PRETA. Sempre que pedir um objeto com luz, DIGA A COR — e confira contra a paleta antes de instalar.",
+ "_licao_13_ANIMACAO_TEM_AS_MESMAS_SUJEIRAS": "Os quadros de ANIMACAO vem do mesmo gerador que os estaticos e trazem os mesmos defeitos (xadrez desenhado, bordas opacas) — mas so o install-sprite.mjs limpava; o install-anim.mjs nao. E aqui e PIOR: uma borda opaca esta em TODOS os quadros, entao ela entra na CAIXA UNIAO e infla o recorte do sprite INTEIRO, dando uma margem morta que nenhuma inspecao de um quadro so explica. Agora o install-anim.mjs limpa CADA QUADRO ANTES de medir a caixa uniao — a ordem nao e negociavel. Na instalacao desta sessao ele achou 20px de xadrez so na mina.",
+ "_licao_14_O_LOTE_NAO_E_UM_SPRITE": "O sheet.mjs dimensionava TODAS as celulas pela caixa do PRIMEIRO candidato — mas cada candidato volta com um tamanho proprio (o gerador ja entrega recortado). Os maiores VAZAVAM para a celula vizinha, e a folha de contato passava a mentir justamente sobre a SILHUETA, que e a unica coisa que ela existe para mostrar. Corrigido: a celula e a caixa do MAIOR, e cada candidato entra CENTRADO nela.",
+ "_licao_15_A_FOTO_DO_HENRIQUE_FUNCIONA_COMO_REFERENCIA": "style_images NAO precisa ser pixel art. A doca foi gerada a partir de um RENDER 3D (foto de referencia do Henrique) e saiu melhor que qualquer prompt sozinho: o modelo copiou a PALETA e a LUZ (rocha escura, lampadas laranja, marcacoes vermelhas na pista) e desenhou pixel art de verdade em cima. E a referencia pode ser COMPRIMIDA a serio (JPEG, 160px de lado, 4KB) — ela transfere estilo, nao detalhe. Sempre que o Henrique mandar uma referencia visual, ELA ENTRA como style_images.",
+ "_licao_16_A_VISTA_LATERAL_FUNCIONA_COM_VIEW_SIDESCROLLER": "A licao 8 dizia que perfil lateral era briga inutil — mas aquilo foi medido SEM o parametro view. Provado em 2026-07-17 (roster v2, 9 geracoes): com view=sidescroller no create_1_direction_object + prompt 'side view ... nose pointing right' o modelo obedece o perfil em ~100% dos 64 candidatos. E A REFERENCIA DITA A CAMERA: style_image de perfil -> sai perfil; style_image 3/4 (asa de tras aparecendo) -> sai 3/4 MESMO pedindo planform no prompt. Receita fechada para nave de perfil: view sidescroller + prompt de perfil + style_image 32px LATERAL (reduzida por lanczos da arte 256 do Henrique; borrada serve, estilo transfere paleta/silhueta). Sem referencia lateral boa, va SO de prompt (strict side profile view / exactly one wing visible) — qualidade sai ate mais limpa, so menos fiel ao design.",
+ "_licao_17_STYLE_IMAGE_DITA_O_TAMANHO": "style_images nao convive com size: a MAIOR imagem de estilo define o tamanho da saida. Para gerar 32px com referencia, a referencia TEM que ser 32px. E o tamanho define quantos candidatos vem no mesmo preco (<=42px -> 64 candidatos)."
 }

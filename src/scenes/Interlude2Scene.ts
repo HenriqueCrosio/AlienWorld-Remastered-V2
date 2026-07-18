@@ -57,6 +57,8 @@ export class Interlude2Scene extends Phaser.Scene {
   private banner!: Phaser.GameObjects.Text;
 
   private amarras: Amarra[] = [];
+  /** A cordilheira em que a doca está ENCRAVADA — ela entra, vive e morre junto com a doca. */
+  private plataforma: Phaser.GameObjects.Image[] = [];
   private panel: ShipPanel | null = null;
 
   private score = 0;
@@ -97,6 +99,9 @@ export class Interlude2Scene extends Phaser.Scene {
   // passam ATRÁS da estação, que é onde um detrito distante deveria passar mesmo.
   private static readonly DEPTH_ROCHA = 66;
   private static readonly DEPTH_CABO = 67;
+  /** A cordilheira fica ENTRE o foreground do parallax (60) e a doca (70): a doca se apoia nela. */
+  private static readonly DEPTH_PLAT_FUNDO = 68;
+  private static readonly DEPTH_PLAT_FRENTE = 69;
   private static readonly DEPTH_DOCA = 70;
   private static readonly DEPTH_RIM = 71;
   private static readonly DEPTH_NAVE = 80;
@@ -131,6 +136,7 @@ export class Interlude2Scene extends Phaser.Scene {
     this.done = false;
     this.panel = null;
     this.amarras = [];
+    this.plataforma = [];
     this.t = 0;
 
     resetVariantCache();
@@ -154,10 +160,16 @@ export class Interlude2Scene extends Phaser.Scene {
         .setTint(0x9aa6c8);
     }
 
+    this.construirPlataforma();
+
     this.doca = this.add
       .image(Interlude2Scene.DOCA_X, Interlude2Scene.docaY, 'doca')
       .setScale(Interlude2Scene.SCALE)
-      .setDepth(Interlude2Scene.DEPTH_DOCA);
+      .setDepth(Interlude2Scene.DEPTH_DOCA)
+      // Tint frio MUITO sutil: a arte da doca é bege/cinza-quente e a cena inteira é azul-profunda.
+      // 0xd9deee só encosta a arte na paleta (B quase intacto, R levemente contido) sem apagar as
+      // lâmpadas laranja da pista.
+      .setTint(0xd9deee);
 
     // A aresta de luz da PISTA — só no trecho em que ela existe. Uma linha atravessando a tela
     // inteira (como a da Aurora, que era um convés de 384px) mentiria: aqui a superfície começa
@@ -177,8 +189,13 @@ export class Interlude2Scene extends Phaser.Scene {
     this.cabos = this.add.graphics().setDepth(Interlude2Scene.DEPTH_CABO);
     this.amarrarRochas();
 
-    this.ship = this.add.sprite(-30, 70, 'ship').setDepth(Interlude2Scene.DEPTH_NAVE);
-    if (this.anims.exists('ship-thrust')) (this.ship as Phaser.GameObjects.Sprite).play('ship-thrust');
+    // A nave que chega é a ESCOLHIDA na Aurora (this.naveId) — a doca não pode desmentir a
+    // escolha que o jogador fez uma fase atrás.
+    const chegada = SHIPS[this.naveId];
+    const chegadaTex = this.textures.exists(chegada.texture) ? chegada.texture : 'ship';
+    this.ship = this.add.sprite(-30, 70, chegadaTex).setDepth(Interlude2Scene.DEPTH_NAVE);
+    const chegadaAnim = chegadaTex === chegada.texture ? (chegada.anim ?? 'ship-thrust') : 'ship-thrust';
+    if (this.anims.exists(chegadaAnim)) (this.ship as Phaser.GameObjects.Sprite).play(chegadaAnim);
 
     this.banner = pixelText(this, GAME_WIDTH / 2, 26, '', { size: 11, color: COLORS.hotBright })
       .setDepth(100)
@@ -189,6 +206,83 @@ export class Interlude2Scene extends Phaser.Scene {
     // ⚠️ SEM TECLA DE PULAR — a mesma lição que custou a 1ª cutscene inteira (docs/HANDOFF.md).
     // O jogador chega aqui com o dedo no ESPAÇO (é o gatilho da Fase 2), e uma tecla de pular
     // seria consumida no primeiro frame.
+  }
+
+  /**
+   * A CORDILHEIRA DA BASE — a primeira camada de cenário em que a doca está ENCRAVADA.
+   *
+   * Sem ela, a doca flutua: abaixo e à direita do sprite é vazio, e a base esfumada dele lê como
+   * ilha recortada. A cordilheira atravessa a base INTEIRA da tela (e sobra 150px à direita,
+   * porque tudo entra deslizando junto com a doca — ver roteiro()), com topo IRREGULAR: topo reto
+   * lê como régua, não como rocha.
+   *
+   * É SILHUETA, não protagonista: duas camadas de tint azul-escuro (mais escuras que as rochas
+   * amarradas, 0x8fa0c0), leitura mínima de forma. Nas laterais baixas ela sobe até y≈120 — o
+   * suficiente para emoldurar sem invadir o corredor de aproximação (a nave chega em y=70) nem a
+   * pista (y=150, x≈171..246, que fica no MIOLO da doca, acima dela em depth).
+   */
+  private construirPlataforma(): void {
+    // Mais escura que as rochas amarradas: fundo quase silhueta, frente com um passo de leitura.
+    const TINT_FUNDO = 0x3a465e;
+    const TINT_FRENTE = 0x4d5a78;
+    const F = Interlude2Scene.DEPTH_PLAT_FUNDO;
+    const P = Interlude2Scene.DEPTH_PLAT_FRENTE;
+
+    // [textura, x, y, escala, ângulo, flipX, depth, tint] — posições FINAIS (pós-deslize).
+    // Valores fixos, não aleatórios: a sonda fotografa a cena e o quadro tem que ser reproduzível.
+    const pecas: Array<[string, number, number, number, number, boolean, number, number]> = [
+      // ── A faixa contínua da base (x=-8..545: cobre a tela e o excedente do deslize) ──
+      ['asteroid', -8, 214, 3.2, 0, false, F, TINT_FUNDO],
+      ['asteroid2', 36, 220, 3.0, 14, true, F, TINT_FUNDO],
+      ['asteroid3', 78, 212, 3.4, -8, false, F, TINT_FUNDO],
+      ['asteroid', 122, 222, 3.0, 22, true, F, TINT_FUNDO],
+      ['asteroid2', 164, 215, 3.2, -15, false, F, TINT_FUNDO],
+      ['asteroid3', 208, 224, 3.4, 6, true, F, TINT_FUNDO],
+      ['asteroid', 252, 216, 3.0, -20, false, F, TINT_FUNDO],
+      ['asteroid2', 296, 221, 3.2, 11, true, F, TINT_FUNDO],
+      ['asteroid3', 338, 213, 3.4, -5, false, F, TINT_FUNDO],
+      ['asteroid', 382, 220, 3.0, 17, true, F, TINT_FUNDO],
+      ['asteroid2', 426, 214, 3.2, -12, false, F, TINT_FUNDO],
+      ['asteroid3', 470, 221, 3.0, 8, true, F, TINT_FUNDO],
+      ['asteroid', 514, 215, 3.2, -18, false, F, TINT_FUNDO],
+      ['asteroid2', 545, 222, 3.0, 4, true, F, TINT_FUNDO],
+      // ── As massas laterais: 1-2 rochas maiores subindo até y≈120 nas beiradas baixas ──
+      ['asteroid3', 26, 172, 4.2, 10, false, F, TINT_FUNDO],
+      ['asteroid', 64, 188, 2.8, -14, true, P, TINT_FRENTE],
+      ['asteroid2', 360, 174, 4.0, -7, true, F, TINT_FUNDO],
+      ['asteroid3', 330, 192, 2.6, 12, false, P, TINT_FRENTE],
+      ['asteroid', 400, 185, 3.0, -19, false, P, TINT_FRENTE],
+      // ── O perfil DENTADO: pedras menores quebrando a linha do topo em alturas irregulares ──
+      ['asteroid3', 18, 192, 2.0, 24, true, P, TINT_FRENTE],
+      ['asteroid', 58, 199, 1.6, -9, false, P, TINT_FRENTE],
+      ['asteroid2', 98, 188, 2.2, 16, false, P, TINT_FRENTE],
+      ['asteroid3', 146, 197, 1.7, -22, true, P, TINT_FRENTE],
+      ['asteroid', 190, 202, 1.5, 7, false, P, TINT_FRENTE],
+      ['asteroid2', 262, 194, 1.9, -13, true, P, TINT_FRENTE],
+      ['asteroid', 306, 200, 1.6, 19, false, P, TINT_FRENTE],
+      ['asteroid3', 352, 190, 2.1, -6, true, P, TINT_FRENTE],
+      ['asteroid2', 398, 198, 1.7, 10, false, P, TINT_FRENTE],
+      ['asteroid', 444, 192, 2.0, -16, true, P, TINT_FRENTE],
+      ['asteroid3', 492, 199, 1.6, 21, false, P, TINT_FRENTE],
+      ['asteroid2', 532, 193, 1.9, -11, true, P, TINT_FRENTE],
+      // ── Destroços meio enterrados: a doca minera, e o entulho dela vive na rocha ──
+      ['destroco', 120, 208, 1.4, 6, false, P, TINT_FUNDO],
+      ['destroco2', 250, 205, 1.6, -8, true, P, TINT_FUNDO],
+    ];
+
+    for (const [tex, x, y, escala, angulo, flip, depth, tint] of pecas) {
+      if (!this.textures.exists(tex)) continue;
+
+      this.plataforma.push(
+        this.add
+          .image(x, y, tex)
+          .setScale(escala)
+          .setAngle(angulo)
+          .setFlipX(flip)
+          .setDepth(depth)
+          .setTint(tint),
+      );
+    }
   }
 
   /**
@@ -330,6 +424,9 @@ export class Interlude2Scene extends Phaser.Scene {
     const entrada = 150;
     this.doca.x += entrada;
     this.padRim.x += entrada;
+    // A cordilheira entra JUNTO: se ela ficasse parada, a doca deslizaria sobre rocha imóvel e a
+    // emenda entre as duas denunciaria que são peças separadas.
+    for (const p of this.plataforma) p.x += entrada;
     for (const a of this.amarras) {
       a.baseX += entrada;
       a.ancoraX += entrada;
@@ -337,7 +434,7 @@ export class Interlude2Scene extends Phaser.Scene {
     }
 
     this.tweens.add({
-      targets: [this.doca, this.padRim],
+      targets: [this.doca, this.padRim, ...this.plataforma],
       x: `-=${entrada}`,
       duration: 5000,
       ease: 'Sine.easeOut',
@@ -569,6 +666,18 @@ export class Interlude2Scene extends Phaser.Scene {
         alpha: 0,
         duration: 1200,
         ease: 'Quad.easeIn',
+      });
+
+      // A cordilheira afunda ATRÁS dela, um instante depois: a doca arrasta o chão junto. Se a
+      // rocha ficasse, a doca sumiria e deixaria a plataforma órfã — a ilha recortada de novo,
+      // só que invertida.
+      this.tweens.add({
+        targets: this.plataforma,
+        y: '+=60',
+        alpha: 0,
+        duration: 1200,
+        ease: 'Quad.easeIn',
+        delay: 150,
       });
     });
 

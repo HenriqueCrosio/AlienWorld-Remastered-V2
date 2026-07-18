@@ -32,6 +32,19 @@ const FRAMES: Record<string, number> = {
   capitaniaAnim: 7,
   minaAnim: 7,
   flakAnim: 7,
+
+  // ─── O RÓSTER v2 (2026-07-17): 7 naves de perfil, cada uma com a sua propulsão. ───
+  // 9 quadros (v3 do PixelLab guarda o quadro de referência como frame 0 — e o PNG estático
+  // de cada nave É esse quadro 0, então estático e animação nunca saltam entre si).
+  shipJatoAnim: 9,
+  shipVerdeAnim: 9,
+  shipCremeAnim: 9,
+  // A Fantasma usa a arte ORIGINAL da 1ª nave (pedido do Henrique) — a animação daquela era tem
+  // 7 quadros, não 9.
+  shipCinzaAnim: 7,
+  shipBrancaAnim: 9,
+  shipCanhoesAnim: 9,
+  shipAlien2Anim: 9,
 };
 
 /**
@@ -77,6 +90,15 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
 
   // A cápsula de flak: a luz do pavio pisca enquanto ela voa.
   { key: 'flak-arm', prefix: 'flakAnim', frameRate: 10 },
+
+  // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
+  { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
+  { key: 'ship-verde-thrust', prefix: 'shipVerdeAnim', frameRate: 12 },
+  { key: 'ship-creme-thrust', prefix: 'shipCremeAnim', frameRate: 12 },
+  { key: 'ship-cinza-thrust', prefix: 'shipCinzaAnim', frameRate: 12 },
+  { key: 'ship-branca-thrust', prefix: 'shipBrancaAnim', frameRate: 12 },
+  { key: 'ship-canhoes-thrust', prefix: 'shipCanhoesAnim', frameRate: 12 },
+  { key: 'ship-alien2-thrust', prefix: 'shipAlien2Anim', frameRate: 12 },
 ];
 
 /** Registra os quadros de uma animação no mapa de ART. */
@@ -105,8 +127,33 @@ const ART: Record<string, string> = {
   // A 4ª nave: a ALIENÍGENA (o Arauto), encontrada na doca do cinturão. Casco orgânico verde —
   // ela é a única coisa do róster que NÃO é humana, e a cor grita isso antes da silhueta.
   ship4: 'sprites/ship-4.png',
+
+  // ─── O RÓSTER v2: as 7 naves de perfil (src/ships.ts). ───
+  shipJato: 'sprites/ship-jato.png',
+  shipVerde: 'sprites/ship-verde.png',
+  shipCreme: 'sprites/ship-creme.png',
+  shipCinza: 'sprites/ship-cinza.png',
+  shipBranca: 'sprites/ship-branca.png',
+  shipCanhoes: 'sprites/ship-canhoes.png',
+  shipAlien2: 'sprites/ship-alien2.png',
+  ...animFrames('shipJatoAnim', 'ship-jato-anim'),
+  ...animFrames('shipVerdeAnim', 'ship-verde-anim'),
+  ...animFrames('shipCremeAnim', 'ship-creme-anim'),
+  ...animFrames('shipCinzaAnim', 'ship-cinza-anim'),
+  ...animFrames('shipBrancaAnim', 'ship-branca-anim'),
+  ...animFrames('shipCanhoesAnim', 'ship-canhoes-anim'),
+  ...animFrames('shipAlien2Anim', 'ship-alien2-anim'),
+
   boss: 'sprites/boss.png',
   groundTile: 'sprites/ground-tile.png',
+
+  // ─── Camadas de FUNDO do passe visual (2026-07-18). Sem placeholder de propósito: fundo
+  // opcional — sem o PNG, o addLayer do Parallax pula a camada e nada quebra. ───
+  skyline: 'sprites/skyline.png',
+  skyline2: 'sprites/skyline-2.png',
+  derelict: 'sprites/derelict.png',
+  cometSky: 'sprites/comet-sky.png',
+  cometSky2: 'sprites/comet-sky-2.png',
 
   ...animFrames('bossAnim', 'boss-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),
@@ -157,6 +204,10 @@ const ART: Record<string, string> = {
   // Projéteis de fogo (chefão e shotgun), animados.
   comet: 'sprites/comet.png',
   blast: 'sprites/blast.png',
+  // O MÍSSIL das torres de solo (TerrainSystem). Placeholder de piloto: a arte do PixelLab
+  // entra depois COM ESTA MESMA CHAVE, só copiando o PNG para cá. Desenhado apontando para a
+  // DIREITA, como todo sprite do jogo — o voo o gira (setRotation).
+  missile: 'sprites/missile.png',
 
   // Cápsulas de arma (o "emblema" que fica flutuando).
   capsule: 'sprites/capsule.png',
@@ -304,6 +355,8 @@ export class BootScene extends Phaser.Scene {
       mina: () => this.makeMine(),
       capitania: () => this.makeCapitania(),
       carrier: () => this.makeCarrier(),
+      // O míssil da torre de solo — placeholder até a arte do PixelLab entrar com esta chave.
+      missile: () => this.makeMissile(),
 
       // ⚠️ O LEVIATÃ E A LUA ENTRARAM AQUI, e o Leviatã por pouco não custou a arte nova dele.
       //
@@ -326,6 +379,7 @@ export class BootScene extends Phaser.Scene {
     // Estes nunca são gerados no PixelLab: partículas e formas de 3 cores (docs/ASSETS.md).
     this.makeFlak();
     this.makeBullet();
+    this.makeTracerRound();
     this.makeSpark();
     this.makeEnemyBullet();
     this.makePickup();
@@ -574,6 +628,43 @@ export class BootScene extends Phaser.Scene {
   }
 
   /**
+   * MÍSSIL 16×6 — o tiro das torres de solo da Fase 1.
+   *
+   * ALONGADO de propósito: a leitura que o Henrique pediu é "míssil", e a 384×216 quem diz isso
+   * é a silhueta comprida com nariz e empenas, não a cor. Aponta para a DIREITA (convenção de
+   * todos os sprites); o TerrainSystem o gira para alinhar com o vetor de voo, e a fumaça de
+   * exaustão sai por trás. NÃO é teleguiado — o número de balanceamento é o mesmo do traçante
+   * que ele substitui (só a leitura mudou).
+   */
+  private makeMissile(): void {
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+
+    // Corpo tubular.
+    g.fillStyle(COLORS.metalMid, 1);
+    g.fillRect(3, 1, 10, 4);
+    g.fillStyle(COLORS.metalLight, 1);
+    g.fillRect(3, 1, 10, 1);
+
+    // Nariz — magenta: a cor de quem atira (o inimigo), lida antes da forma.
+    g.fillStyle(COLORS.enemyBright, 1);
+    g.fillTriangle(13, 0, 16, 3, 13, 6);
+
+    // Empenas na cauda.
+    g.fillStyle(COLORS.metalDark, 1);
+    g.fillTriangle(3, 1, 3, 0, 6, 1);
+    g.fillTriangle(3, 5, 3, 6, 6, 5);
+
+    // Bocal escuro + brasa do motor.
+    g.fillStyle(COLORS.enemyDark, 1);
+    g.fillRect(2, 2, 1, 2);
+    g.fillStyle(COLORS.hotBright, 1);
+    g.fillRect(0, 2, 2, 2);
+
+    g.generateTexture('missile', 16, 6);
+    g.destroy();
+  }
+
+  /**
    * GRANADA DE FLAK 8×8 — a barragem da Capitânia na fúria.
    *
    * REDONDA E GORDA, ao contrário de todo projétil do jogo (que é um traço fino). A forma é o
@@ -604,6 +695,24 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(COLORS.playerBright, 1);
     g.fillRect(4, 0, 1, 2);
     g.generateTexture('bullet', 5, 2);
+    g.destroy();
+  }
+
+  /**
+   * A MUNIÇÃO TRAÇANTE do jato (pedido do Henrique): um risco FINO vermelho/laranja, ponta
+   * quente. É a bala de canhão de um jato de combate, não um raio de energia — por isso ela
+   * NÃO é ciano: traçante real queima em laranja, e a cor separa "metralha comum" (a base que
+   * o jogador quer trocar) de "arma de energia" (as especiais que ele caça).
+   */
+  private makeTracerRound(): void {
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+    g.fillStyle(0xb2321e, 1); // a cauda vermelha, esfriando
+    g.fillRect(0, 0, 4, 1);
+    g.fillStyle(0xff7a2a, 1); // o corpo laranja
+    g.fillRect(3, 0, 3, 1);
+    g.fillStyle(0xffd9a0, 1); // a ponta quente
+    g.fillRect(6, 0, 2, 1);
+    g.generateTexture('tracerRound', 8, 1);
     g.destroy();
   }
 

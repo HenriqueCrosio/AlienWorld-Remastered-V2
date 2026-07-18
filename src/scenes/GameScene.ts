@@ -171,10 +171,12 @@ export class GameScene extends Phaser.Scene {
     const tex = this.textures.exists(nave.texture) ? nave.texture : 'ship';
     this.ship = this.physics.add.sprite(70, GAME_HEIGHT / 2, tex);
 
-    // A ANIMAÇÃO SÓ TOCA NA NAVE BASE. Nas outras ela trocaria a textura pelos quadros da base
-    // — a nave escolhida viraria o Interceptor no primeiro frame (é a mesma armadilha das
-    // variantes de arte: ver src/art.ts).
-    if (tex === 'ship' && this.anims.exists('ship-thrust')) this.ship.play('ship-thrust');
+    // A ANIMAÇÃO É DA NAVE (róster v2): cada uma declara a sua em `ShipDef.anim`. Tocar a
+    // animação de OUTRA nave substituiria a textura pelos quadros errados (a armadilha das
+    // variantes de arte: ver src/art.ts) — por isso só toca se a textura equipada é a da nave.
+    const anim = nave.anim ?? (tex === 'ship' ? 'ship-thrust' : undefined);
+    if (anim && tex === nave.texture && this.anims.exists(anim)) this.ship.play(anim);
+    else if (tex === 'ship' && this.anims.exists('ship-thrust')) this.ship.play('ship-thrust');
 
     // A NAVE É A ARMA. É aqui que a escolha da interlude vira jogo — e é `setBase`, não `equip`:
     // ao morrer, o jogador tem que voltar para a arma DELE, não para a Pulse.
@@ -440,6 +442,12 @@ export class GameScene extends Phaser.Scene {
     // A trilha vira ANTES de o chefão aparecer na tela: a música é o primeiro aviso.
     Music.play(this, 'boss', 1200);
 
+    // O PRIMEIRO PLANO SAI DE CENA no mesmo aviso. Durante a fase as silhuetas na frente da
+    // nave são dificuldade; durante o chefão elas tapam a leitura dos padrões. Não volta
+    // depois: matar o chefão encerra a fase (na superfície o breakAtmosphere já derruba o
+    // terreno; no vácuo vem a vitória) — e um restart de cena reconstrói o Parallax do zero.
+    this.parallax.setForegroundDimmed(true);
+
     // O chefão é uma propriedade da FASE. A cena só sabe que ele cumpre `StageBoss`.
     //
     // A Capitânia recebe o EnemySystem inteiro, não só o pool de projéteis: ela LANÇA os
@@ -701,7 +709,15 @@ export class GameScene extends Phaser.Scene {
   ): void {
     if (!bullet.active || !enemy.active) return;
 
-    this.weapons.release(bullet);
+    // PERFURANTE: o projétil segue vivo, mas cada inimigo paga só 1× por projétil — sem o Set,
+    // o overlap cobraria o mesmo inimigo todo frame e o dano 2 viraria dano infinito.
+    const hits = bullet.getData('hits') as Set<Phaser.GameObjects.GameObject> | null;
+    if (bullet.getData('pierce') === true && hits) {
+      if (hits.has(enemy)) return;
+      hits.add(enemy);
+    } else {
+      this.weapons.release(bullet);
+    }
     this.fx.hit(bullet.x, bullet.y);
 
     const hp = (enemy.getData('hp') as number) - (bullet.getData('damage') as number);

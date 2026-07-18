@@ -97,11 +97,17 @@ export class InterludeScene extends Phaser.Scene {
     this.parallax = new Parallax(this, 'espaco');
     this.fx = new Fx(this);
 
-    this.ship = this.add.image(-30, GAME_HEIGHT / 2, 'ship').setDepth(20);
-    if (this.anims.exists('ship-thrust')) {
+    // A nave que POUSA é a que o jogador acabou de voar — a Fase 1 é sempre a nave padrão
+    // (o jato, no róster v2). Desenhar outra aqui desmentiria o voo que ele acabou de fazer.
+    const chegada = SHIPS[this.naveId];
+    const chegadaTex = this.textures.exists(chegada.texture) ? chegada.texture : 'ship';
+    const chegadaAnim = chegada.anim ?? 'ship-thrust';
+
+    this.ship = this.add.image(-30, GAME_HEIGHT / 2, chegadaTex).setDepth(20);
+    if (chegadaTex === chegada.texture && this.anims.exists(chegadaAnim)) {
       // Um sprite estático não "voa". A animação do motor é o que diz que ela está sob potência.
-      const s = this.add.sprite(-30, GAME_HEIGHT / 2, 'ship').setDepth(20);
-      s.play('ship-thrust');
+      const s = this.add.sprite(-30, GAME_HEIGHT / 2, chegadaTex).setDepth(20);
+      s.play(chegadaAnim);
       this.ship.destroy();
       this.ship = s;
     }
@@ -122,8 +128,14 @@ export class InterludeScene extends Phaser.Scene {
     // ARESTA DE LUZ NO CONVÉS. É o mesmo truque do solo da Fase 1 (`groundRim` em Parallax):
     // sem ela, casco escuro contra espaço escuro viram uma massa só, e o olho não sabe onde a
     // superfície começa. Uma linha de 1px é o que transforma "um borrão" em "chão".
+    //
+    // ⚠️ Ela cobre SÓ o vão opaco do casco na linha do convés — MEDIDO no PNG (row 15: arte
+    // x=19..102). De tela a tela inteira (384px) ela sobrava ~115px flutuando sobre o vazio à
+    // esquerda da proa — a "linha estranha" que o Henrique viu na subida (2026-07-18).
+    const rimX0 = 19 * InterludeScene.SCALE;
+    const rimW = (102 - 19 + 1) * InterludeScene.SCALE;
     this.deckRim = this.add
-      .rectangle(0, InterludeScene.DECK_Y, GAME_WIDTH, 1, 0x7fd4e8)
+      .rectangle(rimX0, InterludeScene.DECK_Y, rimW, 1, 0x7fd4e8)
       .setOrigin(0, 0)
       .setDepth(11)
       .setAlpha(0.55);

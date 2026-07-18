@@ -274,6 +274,9 @@ export class DebrisSystem {
       s.anims.stop();
 
       s.setTexture('bolt2').setScale(0.9).setTint(COLORS.hotBright);
+      // Blend ADITIVO: é o que faz o estilhaço ler como FAGULHA QUENTE saindo de um estouro,
+      // não como palito amarelo. O EnemySystem.release() devolve o blend NORMAL ao reciclar.
+      s.setBlendMode(Phaser.BlendModes.ADD);
       s.setRotation(angle);
       // A CARÊNCIA de 16px contra o cenário mede a distância desde AQUI. Sem `ox`/`oy`, a conta
       // vira NaN e o estilhaço atravessa a rocha que devia tê-lo parado (docs/HANDOFF.md).
