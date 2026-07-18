@@ -36,6 +36,13 @@ const FRAMES: Record<string, number> = {
   // ─── O RÓSTER v2 (2026-07-17): 7 naves de perfil, cada uma com a sua propulsão. ───
   // 9 quadros (v3 do PixelLab guarda o quadro de referência como frame 0 — e o PNG estático
   // de cada nave É esse quadro 0, então estático e animação nunca saltam entre si).
+  // ─── FASE 3: a serpente em 4 formas (anatomia da luta) + a aranha andadora. ───
+  serpenteAnim: 9,
+  serpente2cAnim: 9,
+  serpente1cAnim: 9,
+  serpenteFusaoAnim: 9,
+  aranhaAnim: 9,
+
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
   shipCremeAnim: 9,
@@ -90,6 +97,13 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
 
   // A cápsula de flak: a luz do pavio pisca enquanto ela voa.
   { key: 'flak-arm', prefix: 'flakAnim', frameRate: 10 },
+
+  // ─── FASE 3. A serpente respira DEVAGAR (8) — massa; a fúria e a aranha a 10: agitação. ───
+  { key: 'serpente-idle', prefix: 'serpenteAnim', frameRate: 8 },
+  { key: 'serpente-2c-idle', prefix: 'serpente2cAnim', frameRate: 8 },
+  { key: 'serpente-1c-idle', prefix: 'serpente1cAnim', frameRate: 8 },
+  { key: 'serpente-fusao-fury', prefix: 'serpenteFusaoAnim', frameRate: 10 },
+  { key: 'aranha-walk', prefix: 'aranhaAnim', frameRate: 10 },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -154,6 +168,21 @@ const ART: Record<string, string> = {
   derelict: 'sprites/derelict.png',
   cometSky: 'sprites/comet-sky.png',
   cometSky2: 'sprites/comet-sky-2.png',
+
+  // ─── FASE 3 ───
+  nebula3: 'sprites/nebula3.png',
+  nebula32: 'sprites/nebula3-2.png',
+  nebula33: 'sprites/nebula3-3.png',
+  serpente: 'sprites/serpente.png',
+  serpente2c: 'sprites/serpente-2c.png',
+  serpente1c: 'sprites/serpente-1c.png',
+  serpenteFusao: 'sprites/serpente-fusao.png',
+  aranha: 'sprites/aranha.png',
+  ...animFrames('serpenteAnim', 'serpente-anim'),
+  ...animFrames('serpente2cAnim', 'serpente-2c-anim'),
+  ...animFrames('serpente1cAnim', 'serpente-1c-anim'),
+  ...animFrames('serpenteFusaoAnim', 'serpente-fusao-anim'),
+  ...animFrames('aranhaAnim', 'aranha-anim'),
 
   ...animFrames('bossAnim', 'boss-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),

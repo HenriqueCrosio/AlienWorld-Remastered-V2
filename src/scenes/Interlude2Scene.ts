@@ -701,7 +701,9 @@ export class Interlude2Scene extends Phaser.Scene {
    * é uma rede de segurança boa para um link velho, e seria um DESASTRE silencioso aqui: o jogador
    * terminaria a Fase 2, veria a cutscene inteira, e cairia na Fase 1 sem nenhuma explicação.
    *
-   * Enquanto a Fase 3 não estiver pronta, a campanha termina aqui — dizendo isso, em voz alta.
+   * A Fase 3 EXISTE (2026-07-18): a doca entrega o jogador à SERPENTE. A guarda de STAGES
+   * continua — se um dia a `proxima` apontar para uma fase que não existe (a 4, hoje), a
+   * campanha termina na vitória em vez de despejar o jogador na Fase 1 pela rede de segurança.
    */
   private avancar(): void {
     if (this.done) return;

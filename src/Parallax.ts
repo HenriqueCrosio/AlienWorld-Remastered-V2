@@ -3,8 +3,14 @@ import { GAME_HEIGHT, GAME_WIDTH } from './config';
 import { pickVariant } from './art';
 import { GROUND_Y } from './systems/TerrainSystem';
 
-/** Que lugar este parallax desenha. É a mesma decisão da física: tem chão ou não tem. */
-export type ParallaxMode = 'superficie' | 'espaco';
+/**
+ * Que lugar este parallax desenha. É a mesma decisão da física: tem chão ou não tem.
+ *
+ * `nebulosa` (Fase 3, Ato 1) é o `espaco` MERGULHADO numa nuvem: tudo do vácuo continua lá,
+ * mais três camadas densas de nebulosa — inclusive VÉUS na frente da nave. A fase SAI da
+ * nuvem no meio (ver `setNebulaDensity`), e o que sobra é o espaço de sempre.
+ */
+export type ParallaxMode = 'superficie' | 'espaco' | 'nebulosa';
 
 interface ScatterLayer {
   key: string;
@@ -44,6 +50,11 @@ interface ScatterLayer {
    * cinturão porque é uma BANDA, viraria pedra espalhada igual a todo o resto.
    */
   faixa?: [number, number];
+  /** Camada EXTRA da nebulosa (Fase 3): o alpha dela segue `nebulaDim` (1 dentro, 0 fora). */
+  nebulosaExtra?: boolean;
+  /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue o INVERSO de `nebulaDim` — sair da
+   * nuvem e revelar o casco são o MESMO fade, e é por isso que são a mesma variável. */
+  casco?: boolean;
   sprites: Phaser.GameObjects.Image[];
   nextX: number;
 }
@@ -81,6 +92,8 @@ export class Parallax {
    * dos padrões do chefão.
    */
   private foregroundDim = 1;
+  /** Densidade da nebulosa (Fase 3): 1 = dentro da nuvem. Ver `setNebulaDensity`. */
+  private nebulaDim = 1;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -110,7 +123,7 @@ export class Parallax {
     // causa do lugar: o cinturão é o que sobrou dele. Trocar este único sprite é o que impede o
     // fundo da Fase 2 de ser o fundo da Fase 1 outra vez (era essa a queixa: o vácuo tinha
     // exatamente o céu da lua de onde o jogador acabara de decolar).
-    const mundo = mode === 'espaco' && this.scene.textures.exists('planetBroken')
+    const mundo = mode !== 'superficie' && this.scene.textures.exists('planetBroken')
       ? 'planetBroken'
       : 'planet';
 
@@ -128,6 +141,9 @@ export class Parallax {
 
     if (mode === 'superficie') this.buildSurface();
     else this.buildSpace();
+    // A nebulosa é o ESPAÇO mergulhado numa nuvem: tudo do vácuo continua lá, mais as camadas
+    // densas — e o casco do Leviatã dormindo com alpha 0, esperando a saída da nuvem revelá-lo.
+    if (mode === 'nebulosa') this.buildNebula();
 
     this.moon = scene.add.image(300, 190, 'moon').setDepth(-95).setAlpha(0).setScale(1.6);
 
@@ -156,6 +172,12 @@ export class Parallax {
       this.moon.setPosition(58, 168).setScale(1.25).setAlpha(0.8);
       // O Leviatã, à FRENTE (à direita). Longe e pequeno — por enquanto.
       this.leviathan.setPosition(304, 72).setScale(0.5).setAlpha(0.45);
+    }
+    if (mode === 'nebulosa') {
+      // Fase 3: a lua ficou para trás de vez; o Leviatã já entra GRANDE — a Fase 2 terminou
+      // com ele a 1.15, e a Fase 3 não pode reapresentá-lo pequeno (mesma regra da Fase 2 não
+      // "esquecer" a lua). Ele cresce até virar o chão no Ato 2.
+      this.leviathan.setPosition(310, 66).setScale(1.15).setAlpha(0.5);
     }
   }
 
@@ -402,6 +424,82 @@ export class Parallax {
     });
   }
 
+  /**
+   * A NEBULOSA da Fase 3, POR CIMA do espaço: a nave está DENTRO da nuvem.
+   *
+   * Três camadas de nuvem (fundo denso, meio, e VÉUS na frente da nave) — todas
+   * `nebulosaExtra`, apagáveis pelo `setNebulaDensity` quando a fase sai da nuvem. E o CASCO
+   * do Leviatã: uma banda contínua de placas no rodapé, com alpha 0 até a saída da nuvem
+   * revelá-la (`casco`). Proporção da referência do Henrique (Metal Slug): o "chão" é uma
+   * faixa GENEROSA e detalhada, não um risco no rodapé.
+   */
+  private buildNebula(): void {
+    // O corpo da nuvem: grande, sobreposto (gap < largura), quase parado. É ele que diz
+    // "estamos DENTRO" — nuvem espaçada é nuvem vista de fora.
+    this.addLayer({
+      key: 'nebula3',
+      factor: 0.05,
+      baseY: 0,
+      depth: -96,
+      tint: 0xffffff,
+      // A arte já é dourado-sobre-azul; os tints só variam a temperatura entre nuvens.
+      tints: [0xffffff, 0xe8d8c0, 0xb8c4e8],
+      alpha: 0.85,
+      scale: [1.8, 3.0],
+      gap: [95, 160],
+      terreno: false,
+      flutua: true,
+      nebulosaExtra: true,
+    });
+
+    this.addLayer({
+      key: 'nebula3',
+      factor: 0.16,
+      baseY: 0,
+      depth: -89,
+      tint: 0xd8c8b0,
+      alpha: 0.65,
+      scale: [1.0, 1.8],
+      gap: [150, 280],
+      terreno: false,
+      flutua: true,
+      nebulosaExtra: true,
+    });
+
+    // Os VÉUS: nuvem passando NA FRENTE da nave. É a assinatura de "voar dentro" — e também o
+    // tema mecânico do Ato 1 (a visibilidade). `primeiroPlano` porque a luta de chefão não
+    // pode ser lida através de névoa (mas o chefão só chega DEPOIS da nuvem — dupla garantia).
+    this.addLayer({
+      key: 'nebula3',
+      factor: 1.3,
+      baseY: 0,
+      depth: 60,
+      tint: 0x9aa2c8,
+      alpha: 0.38,
+      scale: [1.8, 3.0],
+      gap: [240, 460],
+      terreno: false,
+      flutua: true,
+      primeiroPlano: true,
+      nebulosaExtra: true,
+    });
+
+    // O CASCO DO LEVIATÃ: banda contínua de placas mortas no rodapé (origem na base, como o
+    // terreno da F1), dormindo em alpha 0 — `casco` faz o alpha dela seguir 1−nebulaDim.
+    this.addLayer({
+      key: 'derelict',
+      factor: 1.0,
+      baseY: GAME_HEIGHT + 26,
+      depth: -75,
+      tint: 0x2f3a55,
+      alpha: 0.95,
+      scale: [1.1, 1.5],
+      gap: [78, 108],
+      terreno: true,
+      casco: true,
+    });
+  }
+
   private addLayer(cfg: Omit<ScatterLayer, 'sprites' | 'nextX'>): void {
     // Camada sem arte não entra. Sem isto, o Phaser desenha a textura "faltando" —
     // uma caixa verde gritante no meio do céu.
@@ -429,9 +527,9 @@ export class Parallax {
       .setOrigin(0.5, layer.flutua ? 0.5 : 1)
       .setDepth(layer.depth)
       .setTint(layer.tints ? Phaser.Math.RND.pick(layer.tints) : layer.tint)
-      // O primeiro plano nasce já no alpha do ESTADO ATUAL: durante a luta de chefão a camada
-      // está apagada, e um sprite reciclado que nascesse opaco desfaria o fade sozinho.
-      .setAlpha(layer.primeiroPlano ? layer.alpha * this.foregroundDim : layer.alpha)
+      // O sprite nasce já no alpha do ESTADO ATUAL (fade do chefão, densidade da nebulosa,
+      // casco revelado): um reciclado que nascesse opaco desfaria qualquer fade sozinho.
+      .setAlpha(this.alphaFor(layer))
       .setScale(Phaser.Math.FloatBetween(...layer.scale))
       // Espelhar metade das montanhas dobra a variedade sem custar geração.
       .setFlipX(Math.random() < 0.5);
@@ -509,11 +607,51 @@ export class Parallax {
 
       this.scene.tweens.add({
         targets: layer.sprites.slice(),
-        alpha: layer.alpha * this.foregroundDim,
+        alpha: this.alphaFor(layer),
         duration: durationMs,
         ease: 'Quad.easeOut',
       });
     }
+  }
+
+  /**
+   * O alpha REAL de um sprite da camada, com todos os fades de estado aplicados. É a fonte
+   * única: `emit()` (sprite novo nasce certo), `setForegroundDimmed` e `setNebulaDensity`
+   * calculam por aqui — dois fades escrevendo alpha por contas diferentes dessincronizam.
+   */
+  private alphaFor(layer: ScatterLayer): number {
+    let a = layer.alpha;
+    if (layer.primeiroPlano) a *= this.foregroundDim;
+    if (layer.nebulosaExtra) a *= this.nebulaDim;
+    if (layer.casco) a *= 1 - this.nebulaDim;
+    return a;
+  }
+
+  /**
+   * A DENSIDADE DA NEBULOSA (Fase 3): 1 = dentro da nuvem, 0 = céu limpo.
+   *
+   * É UM fade só para DUAS revelações: as camadas `nebulosaExtra` somem e a banda `casco`
+   * aparece — sair da nuvem e ver o casco do Leviatã embaixo são o mesmo momento (a virada
+   * do Ato 1 para o Ato 2). Counter em vez de tween por sprite: as camadas RECICLAM durante
+   * o fade, e um sprite novo tem que nascer no alpha do instante (ver `emit`).
+   */
+  setNebulaDensity(density: number, durationMs = 5000): void {
+    const alvo = Phaser.Math.Clamp(density, 0, 1);
+
+    this.scene.tweens.addCounter({
+      from: this.nebulaDim,
+      to: alvo,
+      duration: durationMs,
+      ease: 'Sine.easeInOut',
+      onUpdate: (tw) => {
+        this.nebulaDim = tw.getValue() ?? alvo;
+        for (const layer of this.layers) {
+          if (!layer.nebulosaExtra && !layer.casco) continue;
+          const a = this.alphaFor(layer);
+          for (const s of layer.sprites) s.setAlpha(a);
+        }
+      },
+    });
   }
 
   /** A atmosfera rompeu: o TERRENO fica para trás. A nebulosa e o planeta continuam. */

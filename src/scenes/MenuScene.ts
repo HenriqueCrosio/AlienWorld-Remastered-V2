@@ -64,13 +64,18 @@ export class MenuScene extends Phaser.Scene {
     // Só em dev. Balancear uma luta sem jogar a fase inteira antes, e — desde que a Fase 2
     // existe — ENTRAR nela sem ter que vencer a Fase 1 toda vez.
     if (import.meta.env.DEV) {
-      this.t(GAME_WIDTH / 2, 200, '[B] chefão 1   [C] capitânia   [V] fase 2', 7, COLORS.metalMid);
+      this.t(GAME_WIDTH / 2, 200, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, COLORS.metalMid);
       this.t(GAME_WIDTH / 2, 209, '[I] cutscene (pouso · escolha de nave)', 7, COLORS.metalMid);
 
       kb.on('keydown-B', () => this.scene.start('Game', { handling: 'diegetico', practice: true }));
       kb.on('keydown-V', () => this.scene.start('Game', { stage: 2, handling: 'diegetico' }));
       kb.on('keydown-C', () =>
         this.scene.start('Game', { stage: 2, handling: 'diegetico', practice: true }),
+      );
+      // Fase 3: [M] joga a fase inteira (nebulosa → casco → serpente); [N] treina a SERPENTE.
+      kb.on('keydown-M', () => this.scene.start('Game', { stage: 3, handling: 'diegetico' }));
+      kb.on('keydown-N', () =>
+        this.scene.start('Game', { stage: 3, handling: 'diegetico', practice: true }),
       );
 
       // CORTA-CAMINHO — remover quando o balanceamento fechar (docs/HANDOFF.md).

@@ -11,6 +11,14 @@ import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 export interface StageBoss {
   readonly sprite: Phaser.Physics.Arcade.Sprite;
   readonly isDead: boolean;
+  /**
+   * As HITBOXES vivas do chefão, quando ele tem mais de uma (a serpente da Fase 3: cabeças).
+   *
+   * Ausente = o chefão é o `sprite` (Torre, Capitânia — nada muda para eles). Presente, a
+   * GameScene liga um overlap POR alvo e o teleguiado do jogador mira NELES, não no corpo.
+   * A lista é VIVA: o chefão a atualiza quando uma parte morre — a cena a lê a cada uso.
+   */
+  readonly targets?: Phaser.Physics.Arcade.Sprite[];
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean;

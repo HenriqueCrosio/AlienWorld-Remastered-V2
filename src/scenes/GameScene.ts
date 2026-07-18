@@ -15,6 +15,7 @@ import { DebrisSystem, MINE_BLAST_RADIUS, type HazardKind } from '../systems/Deb
 import { StageDirector, STAGES, type StageDef, type Zone } from '../systems/StageDirector';
 import { Boss, type StageBoss } from '../entities/Boss';
 import { BossCapitania } from '../entities/BossCapitania';
+import { BossSerpente } from '../entities/BossSerpente';
 import { SHIPS, DEFAULT_SHIP } from '../ships';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
@@ -135,8 +136,12 @@ export class GameScene extends Phaser.Scene {
     resetVariantCache();
 
     this.starfield = new Starfield(this);
-    // O fundo é o LUGAR: com chão na atmosfera, sem chão nenhum no vácuo.
-    this.parallax = new Parallax(this, this.zone === 'atmosfera' ? 'superficie' : 'espaco');
+    // O fundo é o LUGAR: com chão na atmosfera, sem chão nenhum no vácuo. A fase pode
+    // SOBREPOR o modo (a Fase 3 é vácuo, mas abre DENTRO da nebulosa).
+    this.parallax = new Parallax(
+      this,
+      this.stage.parallax ?? (this.zone === 'atmosfera' ? 'superficie' : 'espaco'),
+    );
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
     this.weapons = new WeaponSystem(this);
@@ -371,7 +376,11 @@ export class GameScene extends Phaser.Scene {
       .getChildren()
       .filter((e) => (e as Phaser.Physics.Arcade.Sprite).active) as Phaser.Physics.Arcade.Sprite[];
 
-    if (this.boss && !this.boss.isDead) alvos.push(this.boss.sprite);
+    // Chefão multi-parte (a serpente): o teleguiado caça as CABEÇAS, não o corpo — mirar no
+    // casco que absorve tiro faria o Enxame se sabotar sozinho na única luta multi-alvo.
+    if (this.boss && !this.boss.isDead) {
+      alvos.push(...(this.boss.targets ?? [this.boss.sprite]));
+    }
 
     return alvos;
   }
@@ -393,6 +402,16 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'banner':
         this.showBanner(e.text, COLORS.hotBright);
+        break;
+      case 'nebula':
+        // Entrar é instantâneo (a fase JÁ ABRE dentro da nuvem — o construtor nasce denso);
+        // SAIR é um fade longo: é a virada de ato, e ela tem que ser vista acontecendo.
+        this.parallax.setNebulaDensity(e.density, e.density >= 1 ? 0 : 6000);
+        break;
+      case 'miniboss':
+        // A aranha do casco (Fase 3, Ato 2). Um inimigo do roteiro, não um StageBoss: a fase
+        // continua correndo por baixo dela — chefão de verdade só há um por fase.
+        this.enemies.spawn('aranha', 0);
         break;
       case 'boss':
         this.spawnBoss();
@@ -456,10 +475,17 @@ export class GameScene extends Phaser.Scene {
     // ela ter pouca vida — era a HMG entregar 18 tiros/s de graça (o nerf está no WeaponSystem).
     // Inflar a vida para consertar uma arma quebrada só faz a luta ficar LONGA para quem usa as
     // outras: quem está na Pulse já leva ~20s, e esses 20s não podem virar 30 por causa da HMG.
+    // A luta da serpente é a CÉU LIMPO: na fase real a nuvem já foi embora no Ato 2, mas o
+    // TREINO (skipTo) descarta o evento de saída sem executá-lo — sem esta garantia, o chefão
+    // do treino lutava DENTRO da nebulosa e o do jogo real não (duas lutas diferentes).
+    if (this.stage.parallax === 'nebulosa') this.parallax.setNebulaDensity(0, 800);
+
     this.boss =
-      this.stage.id === 2
-        ? new BossCapitania(this, this.enemies, 150)
-        : new Boss(this, this.enemies.enemyBullets, 150);
+      this.stage.id === 3
+        ? new BossSerpente(this, this.enemies)
+        : this.stage.id === 2
+          ? new BossCapitania(this, this.enemies, 150)
+          : new Boss(this, this.enemies.enemyBullets, 150);
 
     this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip());
 
@@ -468,11 +494,55 @@ export class GameScene extends Phaser.Scene {
     // Escrito ao contrário, `bulletHitBoss` recebia o próprio boss e o devolvia ao pool de
     // projéteis (inativo, invisível, corpo desligado) — o boss sumia e nunca se movia.
     // Com o sprite PRIMEIRO, a ordem é determinística: (boss, projétil).
-    this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
-      this.bulletHitBoss(b as Phaser.Physics.Arcade.Sprite),
-    );
+    if (this.boss.targets) {
+      // CHEFÃO MULTI-PARTE (a serpente): o dano entra pelas HITBOXES da lista, e o CORPO
+      // vira cobertura dele mesmo — absorve o tiro sem dano (invulnerável é telégrafo; o
+      // jogador vê a fagulha morrer no casco e aprende a mirar na cabeça que brilha).
+      for (const alvo of this.boss.targets) {
+        this.physics.add.overlap(alvo, this.weapons.bullets, (_a, b) =>
+          this.bulletHitBoss(b as Phaser.Physics.Arcade.Sprite),
+        );
+      }
+      this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
+        this.bulletAbsorvedByBoss(b as Phaser.Physics.Arcade.Sprite),
+      );
+    } else {
+      this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
+        this.bulletHitBoss(b as Phaser.Physics.Arcade.Sprite),
+      );
+    }
 
-    this.showBanner(this.stage.id === 2 ? 'CANHONEIRA-CAPITÂNIA' : 'TORRE DE DEFESA', COLORS.enemyBright);
+    this.showBanner(
+      this.stage.id === 3
+        ? 'SERPENTE DO CASCO'
+        : this.stage.id === 2
+          ? 'CANHONEIRA-CAPITÂNIA'
+          : 'TORRE DE DEFESA',
+      COLORS.enemyBright,
+    );
+  }
+
+  /**
+   * O CORPO do chefão multi-parte absorve o tiro: sem dano, só a fagulha. O perfurante também
+   * morre aqui — atravessar o chefão inteiro de graça faria da cabeça um alvo opcional.
+   */
+  private bulletAbsorvedByBoss(bullet: Phaser.Physics.Arcade.Sprite): void {
+    if (!this.weapons.bullets.contains(bullet)) return;
+    if (!bullet.active || !this.boss || this.boss.isDead) return;
+
+    // Se a bala está na ZONA da cabeça, deixa o overlap da cabeça cobrar o dano — os dois
+    // corpos se sobrepõem, e a ordem dos callbacks no mesmo frame não é garantida.
+    for (const alvo of this.boss.targets ?? []) {
+      if (
+        alvo.active &&
+        Phaser.Math.Distance.Between(bullet.x, bullet.y, alvo.x, alvo.y) < 22
+      ) {
+        return;
+      }
+    }
+
+    this.weapons.release(bullet);
+    this.fx.hit(bullet.x, bullet.y);
   }
 
   private bulletHitBoss(bullet: Phaser.Physics.Arcade.Sprite): void {

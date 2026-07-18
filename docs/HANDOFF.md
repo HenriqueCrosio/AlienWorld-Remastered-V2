@@ -9,10 +9,12 @@ Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` →
 **Jogável hoje, do começo ao fim:** Fase 1 → cutscene da Aurora → Fase 2 → **cutscene da Doca
 Kepler-9** → tela de vitória (a Fase 3 ainda não existe).
 
-**A Fase 2 e a cutscene da Doca estão FECHADAS** (o Henrique deu o "fechamos a fase 2 e a cutscene
-que dá início à fase 3"). **O PRÓXIMO PASSO É A FASE 3** — ver "A FASE 3 — O CASCO", mais abaixo. A
-ordem já decidida: (1) a NEBULOSA primeiro, (2) regerar a ARANHA de lado, (3) os ATAQUES da
-serpente, (4) montar `STAGES[3]` e ligar a `Interlude2Scene` nela.
+**A FASE 3 ESTÁ CONSTRUÍDA (2026-07-18)** — a campanha agora joga F1 → Aurora → F2 → Doca →
+**F3 (nebulosa → casco → SERPENTE em 4 formas → vitória)**, validada de ponta a ponta por
+`scripts/probe-stage3.mjs`. **O PRÓXIMO PASSO é o PLAYTEST HUMANO da F3** (balanceamento fino:
+densidade da nebulosa/véus, cadências da serpente, HP da aranha — nada disso foi jogado por
+humano ainda) e, depois dele, a **FASE 4 — O Interior** (o flap volta). Atalhos: `[M]` joga a
+F3 inteira, `[N]` treina a serpente.
 
 ### 🆕 Sessão 2026-07-17/18 — RÓSTER v2, 7 ARMAS, EFEITOS e PASSE VISUAL
 
@@ -137,7 +139,7 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 | 6b | **2ª cutscene** (Doca Kepler-9) + **nave ALIENÍGENA** | ✅ jogável (`[O]` no menu) |
 | 6c | **RÓSTER v2** (7 naves de perfil + 7 armas-base) | ✅ (2026-07-18) |
 | 6d | **Efeitos de projétil + passe visual** das Fases 1-2 | ✅ (2026-07-18) |
-| 7 | **Fase 3 — O Casco** | 🔶 **em projeto — ver abaixo — É O PRÓXIMO PASSO** |
+| 7 | **Fase 3 — O Casco** | ✅ **construída (2026-07-18) — pendente playtest humano** |
 | 8 | **Fase 4 — O Interior** (o flap VOLTA) | ⬜ |
 | 9 | Score acumulado entre fases | ⬜ |
 | 10 | Modo Sobrevivência (Legacy) | ⬜ |
@@ -300,7 +302,9 @@ Vender ESCALA é o mais difícil em pixel art, e estes dois sprites fazem isso s
 |---|---|---|
 | `B` | menu | treino do chefão da FASE 1 (pula os 68s de fase) |
 | `C` | menu | treino da **CANHONEIRA-CAPITÂNIA** |
+| `N` | menu | treino da **SERPENTE** (as 4 formas + fúria) |
 | `V` | menu | entra direto na **FASE 2** |
+| `M` | menu | entra direto na **FASE 3** (nebulosa → casco → serpente) |
 | `I` | menu | entra direto na **CUTSCENE 1** (Aurora: pouso + escolha de nave) |
 | `O` | menu | entra direto na **CUTSCENE 2** (Doca Kepler-9 + a nave ALIENÍGENA) |
 | `G` | jogo | pula da fase atual direto para o chefão dela |
@@ -321,6 +325,8 @@ jeito rápido de chegar ao chefão, **a cutscene ficava inalcançável**. Vencer
 npm run probe                    # Fase 1: joga, devolve estado + screenshot
 node scripts/probe-armas.mjs     # as 7 ARMAS-BASE do róster v2: cadência real + assinatura de cada uma
 node scripts/probe-stage2.mjs    # Fase 2: cinturão, inimigos novos, Capitânia
+node scripts/probe-stage3.mjs    # FASE 3 inteira: nebulosa → casco+aranha → as 4 FORMAS da serpente → vitória
+node scripts/find-cabecas.mjs    # os offsets das CABEÇAS da serpente, por COR (a fonte dos números do boss)
 node scripts/probe-capitania.mjs # o chefão da Fase 2 nas DUAS fases (salva rolante / flak)
 node scripts/probe-interlude.mjs # a cutscene: placar → pouso → escolha → implosão → Fase 2
 node scripts/probe-chain.mjs     # a CORRENTE: Fase 1 → atmosfera rompe → zero-G → Interlude
@@ -495,29 +501,47 @@ joga no primeiro asteroide da frente seria uma arma que se sabota sozinha.
 4 naves, a Doca oferece 7 (róster v2). O Arauto não existe no hangar humano porque ele não teria
 de onde ter vindo.
 
-## A FASE 3 — O CASCO (projeto fechado, ainda não construída)
+## A FASE 3 — O CASCO (✅ CONSTRUÍDA em 2026-07-18; pendente: playtest humano)
 
-⚠️ **`STAGES[3]` NÃO EXISTE.** A `Interlude2Scene` sabe disso e cai na tela de vitória. **Não
-deixe ela chamar a `GameScene` com `stage: 3`** antes de a fase existir: a rede de segurança
-`STAGES[x] ?? STAGES[1]` despejaria o jogador na **Fase 1**, sem aviso, depois de ele ter vencido
-a Fase 2.
+`STAGES[3]` existe: dois atos (`STAGE_3`), modo `nebulosa` no Parallax (com `setNebulaDensity`
+— sair da nuvem e revelar a banda do `casco` são o MESMO fade), a ARANHA como `EnemyKind`
+roteirizado (`miniboss`, 50 HP, estaciona no casco e cospe leques de 3), e a **BossSerpente**
+(`src/entities/BossSerpente.ts`): contrato `StageBoss.targets[]` (multi-parte), 4 fases de
+ANATOMIA (laranja/rajada → ciano/investida → verde/metrônomo → FUSÃO com os 3 verbos),
+50+50+50+60 de HP, corpo que ABSORVE tiro (só a cabeça que BRILHA fere), cotos fumegando
+('puff'), morte de cabeça em cadeia de explosões e CONVULSÃO pré-fusão (a referência Metal
+Slug do Henrique). Os offsets das cabeças são MEDIDOS por cor (`find-cabecas.mjs`).
+⚠️ No TREINO o `skipTo` pula o evento de saída da nebulosa — o `spawnBoss` re-garante o céu
+limpo (`setNebulaDensity(0)`); se mexer ali, confira as duas rotas.
 
-Decidido com o Henrique:
+O projeto original, decidido com o Henrique:
 
 1. **Impacto visual primeiro.** A fase abre DENTRO de uma nebulosa (sair do tom monótono das duas
    primeiras). Referências dele: nebulosa quente/dourada e azul-profunda, com a sensação de estar
    *voando dentro dela*.
 2. **Dois atos.** Ato 1 = a nebulosa. Na METADE do tempo, o **Leviatã começa a aparecer** → Ato 2.
-3. **Os dois chefões que o Henrique gerou no PixelLab, e por que cada um vai onde vai:**
-   - 🐍 **SERPENTE de 3 cabeças** (`b5943a3c`, 256px) = **CHEFÃO**. Ela FLUTUA (cabe no vácuo) e
-     **três cabeças = três alvos** — é a gramática multi-parte que o GDD já previa. As duas
-     animações que ele fez são, as duas, um **IDLE** (as cabeças oscilam, nenhuma avança): o idle
-     está ótimo, **os ataques ainda não existem**.
-   - 🕷️ **ARANHA mecânica** (`17c299d1` / `48b908bd`, 256px) = **MINI-BOSS do Ato 2**. Ela **ANDA**
-     — tem pernas, pisa, solta vapor —, e um andador precisa de **CHÃO**. No Ato 2 o **casco do
-     Leviatã é a superfície**, e aí as pernas dela ganham motivo. No Ato 1 (voo aberto) ela estaria
-     "andando no vazio". Ela veio **de frente** (não de lado) e com uma **moldura pintada no PNG**:
-     **precisa ser regerada de lado**, usando a atual como `style_images`.
+3. **Os chefões — DESIGN FECHADO com o Henrique (2026-07-18), arte JÁ GERADA:**
+   - 🐍 **SERPENTE de 3 cabeças** (`b5943a3c`, 256px) = **CHEFÃO**, e a luta é por **ANATOMIA**:
+     cada fase tem UMA cabeça vulnerável (as outras absorvem tiro sem dano — invulnerável é
+     telégrafo). Ordem fixa de morte, com TROCA DE ARTE a cada cabeça morta:
+     1. **LARANJA** (visor, direita) vulnerável — padrão: rajada mirada. Morre → estado
+        **`412c00a9`** (2 cabeças, coto faiscando).
+     2. **CIANO** (crânio, esquerda) — padrão: INVESTIDA telegrafada. Morre → **`46b50df5`**
+        (só a verde, dois cotos).
+     3. **VERDE** (centro) — leque em metrônomo acelerando. Morre → convulsão →
+     4. **FUSÃO** (`efdb21d0`, cabeça ÚNICA gigante com as feições das três, corpo mais grosso,
+        exibir ~1.15×): a FÚRIA — os três verbos em ciclo denso com silêncio curto. Pedido
+        literal do Henrique: "depois da terceira, surge um boss maior com uma cabeça só, que é a
+        junção das 3". HP sugerido pela auditoria: ~50/cabeça + ~60 na fusão (teto ~210).
+     As cabeças são ZONAS medidas no PNG sobre UM sprite (lição 13: medir, não chutar); exige o
+     contrato StageBoss multi-parte (targets[]), o risco ALTO que a auditoria apontou.
+     Idles prontos: base (2 anims 9f legadas), 2-cabeças e 1-cabeça (idle 8f cada), fusão (fury
+     8f). **Ataques por CÓDIGO** (movimento + projéteis) — economia deliberada de saldo.
+   - 🕷️ **ARANHA mecânica** = **MINI-BOSS do Ato 2**, REGERADA DE LADO (`e5a4f2fd`, 128px, domo
+     escuro, olho vermelho, vapor; reserva `35d99174`) com anim de ANDAR (8f). Ela anda no casco
+     do Leviatã (~50 HP, abertura do Ato 2, 8-10s de respiro depois dela).
+   - 🌌 **NEBULOSA**: 3 variantes instaladas (`nebula3`, `nebula3-2`, `nebula3-3` — núcleo
+     dourado em azul-profundo, a referência do Henrique).
 
 ## A INTERLUDE
 

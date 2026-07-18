@@ -77,8 +77,15 @@ console.log('explosão ', JSON.stringify(await estado()));
 await page.waitForTimeout(3200);
 const fim = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
-  return { cena: s?.scene.key };
+  return { cena: s?.scene.key, fase: s?.stage?.id ?? null };
 });
 console.log('fim      ', JSON.stringify(fim));
+// A Fase 3 EXISTE (2026-07-18): a doca agora ENTREGA nela — cair na vitória (ou pior, na
+// Fase 1 pela rede de segurança) viraria regressão silenciosa sem este assert.
+console.log(
+  fim.cena === 'Game' && fim.fase === 3
+    ? '✔ a doca entrega a FASE 3'
+    : `✘ esperava Game/fase 3; veio ${fim.cena}/${fim.fase}`,
+);
 
 await browser.close();

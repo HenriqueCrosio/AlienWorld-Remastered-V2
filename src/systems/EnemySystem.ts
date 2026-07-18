@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
 
-export type EnemyKind = 'drone' | 'batedor' | 'canhoneira' | 'kamikaze' | 'cargueiro';
+export type EnemyKind = 'drone' | 'batedor' | 'canhoneira' | 'kamikaze' | 'cargueiro' | 'aranha';
 
 interface EnemyDef {
   texture: string;
@@ -76,6 +76,12 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // era a canhoneira esticada a 1.9×, o que além de repetir a forma BORRAVA a grade de pixel
   // (escala fracionária em pixel art). Nativo a 60px, ele agora vai a 1.1× e a grade fica de pé.
   cargueiro: { texture: 'enemyCarrier', anim: 'carrier-fly', hp: 24, speed: 20, wave: 0, fireRate: 0, score: 300, scale: 1.1, tint: 0xb9a8d8, homing: 0, spawns: 'drone', spawnRate: 1.5 },
+
+  // A ARANHA — o MINI-BOSS do Ato 2 da Fase 3 (roteirizada: evento 'miniboss', uma por fase).
+  // Um ANDADOR: entra pisando no casco do Leviatã (o y dela é cravado na linha do casco pelo
+  // spawn), ESTACIONA no terço direito e cospe leques de 3 mirados. 50 HP (auditoria): grande
+  // o bastante para pesar, curta o bastante para não roubar o clímax da serpente.
+  aranha: { texture: 'aranha', anim: 'aranha-walk', hp: 50, speed: 30, wave: 0, fireRate: 2.6, score: 500, scale: 0.62, tint: 0xffffff, homing: 0, spawnRate: 0 },
 };
 
 export class EnemySystem {
@@ -115,6 +121,10 @@ export class EnemySystem {
   /** `x` só é passado quando um inimigo PARE outro (o cargueiro cospe drones de dentro de si). */
   spawn(kind: EnemyKind, y: number, x = GAME_WIDTH + 16): void {
     const def = DEFS[kind];
+
+    // A aranha ANDA — o y dela não é do roteiro, é da FÍSICA: os pés na linha do casco
+    // (a banda `casco` do Parallax tem o topo em ~190; o centro dela assenta em cima).
+    if (kind === 'aranha') y = 170;
 
     const texture = pickVariant(this.scene, def.texture);
     const e = this.enemies.create(x, y, texture) as Phaser.Physics.Arcade.Sprite;
@@ -181,6 +191,17 @@ export class EnemySystem {
       if (def.homing > 0) this.updateChaser(e, def, target);
       if (def.fireRate > 0) this.updateGunner(e, def, dt, target);
       if (def.spawns) this.updateCarrier(e, def, dt);
+
+      // A aranha ESTACIONA no terço direito: um mini-boss que atravessa e some seria uma
+      // canhoneira gorda. Parada no casco, ela nega o lado direito até ser morta — e a
+      // resposta é focá-la (prioridade de alvo, docs/GDD.md §6).
+      if (
+        e.getData('kind') === 'aranha' &&
+        e.x <= 306 &&
+        (e.body as Phaser.Physics.Arcade.Body).velocity.x < 0
+      ) {
+        e.setVelocityX(0);
+      }
 
       // O perseguidor passa RETO pelo jogador e volta — culpa da inércia, e é o que o torna
       // legível. Se ele fosse morto ao cruzar a borda esquerda, um kamikaze que errou sumiria
@@ -273,31 +294,41 @@ export class EnemySystem {
 
   private static readonly TELEGRAPH = 0.45;
 
-  /** Tiro MIRADO: pune quem fica parado, que é a função da canhoneira. */
+  /**
+   * Tiro MIRADO: pune quem fica parado, que é a função da canhoneira.
+   * A ARANHA cospe um LEQUE de 3 (±13°) — mini-boss cobra área, não linha.
+   */
   private fireAt(e: Phaser.Physics.Arcade.Sprite, target: Phaser.Physics.Arcade.Sprite): void {
-    const b = this.enemyBullets.get(e.x, e.y) as Phaser.Physics.Arcade.Sprite | null;
-    if (!b) {
-      if (import.meta.env.DEV) console.warn('[inimigos] pool cheio, tiro descartado');
-      return;
+    const centro = Phaser.Math.Angle.Between(e.x, e.y, target.x, target.y);
+    const angulos =
+      e.getData('kind') === 'aranha'
+        ? [centro - Phaser.Math.DegToRad(13), centro, centro + Phaser.Math.DegToRad(13)]
+        : [centro];
+
+    for (const angle of angulos) {
+      const b = this.enemyBullets.get(e.x, e.y) as Phaser.Physics.Arcade.Sprite | null;
+      if (!b) {
+        if (import.meta.env.DEV) console.warn('[inimigos] pool cheio, tiro descartado');
+        return;
+      }
+
+      b.setActive(true).setVisible(true);
+      b.body!.enable = true;
+
+      // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
+      // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
+      b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
+      // Leve GLOW aditivo: energia, não palito rosa chapado. Só o blend — sem trail e sem
+      // escala anisotrópica, que são o figurino do traçante da Capitânia. O release() abaixo
+      // devolve o blend NORMAL ao reciclar o slot.
+      b.setBlendMode(Phaser.BlendModes.ADD);
+      // Origem: usada para a carência contra o relevo (ver GameScene).
+      b.setData('ox', e.x);
+      b.setData('oy', e.y);
+
+      b.setVelocity(Math.cos(angle) * 110, Math.sin(angle) * 110);
+      b.setRotation(angle);
     }
-
-    b.setActive(true).setVisible(true);
-    b.body!.enable = true;
-
-    // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
-    // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
-    b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
-    // Leve GLOW aditivo: energia, não palito rosa chapado. Só o blend — sem trail e sem
-    // escala anisotrópica, que são o figurino do traçante da Capitânia. O release() abaixo
-    // devolve o blend NORMAL ao reciclar o slot.
-    b.setBlendMode(Phaser.BlendModes.ADD);
-    // Origem: usada para a carência contra o relevo (ver GameScene).
-    b.setData('ox', e.x);
-    b.setData('oy', e.y);
-
-    const angle = Phaser.Math.Angle.Between(e.x, e.y, target.x, target.y);
-    b.setVelocity(Math.cos(angle) * 110, Math.sin(angle) * 110);
-    b.setRotation(angle);
 
     // Pequeno clarão na BOCA, na cor do dono: o disparo vira um evento legível — o telégrafo
     // piscou, e AQUI está a prova de que o tiro saiu (e de onde).

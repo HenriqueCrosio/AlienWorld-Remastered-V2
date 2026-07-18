@@ -9,6 +9,14 @@ export type StageEvent =
   /** Destroços FLUTUANDO. O equivalente do relevo no vácuo (Fase 2). */
   | { t: number; type: 'hazard'; rate: number; mix: HazardKind[] }
   | { t: number; type: 'banner'; text: string }
+  /**
+   * Densidade da NEBULOSA (Fase 3): 1 = dentro da nuvem, 0 = fora. A transição para 0 é a
+   * virada do Ato 1 para o Ato 2 — a nuvem rareia e o CASCO do Leviatã aparece por baixo
+   * (as duas coisas são o mesmo fade, ver Parallax.setNebulaDensity).
+   */
+  | { t: number; type: 'nebula'; density: number }
+  /** O MINI-BOSS do Ato 2 (a aranha que anda no casco). Um por fase, roteirizado. */
+  | { t: number; type: 'miniboss' }
   | { t: number; type: 'boss' };
 
 /**
@@ -151,6 +159,79 @@ export const STAGE_2: StageEvent[] = [
   { t: 75, type: 'boss' },
 ];
 
+/**
+ * FASE 3 — O CASCO. Duração ~88s. DOIS ATOS (design fechado com o Henrique).
+ *
+ * ATO 1 (0–42s): DENTRO da nebulosa. O impacto visual que tira o jogo do tom monótono — e a
+ * visibilidade reduzida é o tema mecânico: os véus na frente escondem o que vem. O vocabulário
+ * é o da Fase 2 (o jogador já sabe ler tudo), com pressão maior e cachos de minas.
+ *
+ * ~42s: a nave SAI da nuvem (nebula → 0). O fade é a virada de ato: a nebulosa rareia e o que
+ * aparece por baixo é o CASCO do Leviatã — o destino da campanha virando CHÃO, o mesmo truque
+ * de escala da Aurora e da Doca.
+ *
+ * ATO 2 (48–88s): o vocabulário da FASE 1 transplantado — torres e radares sobre o casco
+ * (TerrainSystem no vácuo: o casco é a superfície). A ARANHA mini-boss abre o ato: um andador
+ * finalmente tem chão para andar. Depois dela, 9s de RESPIRO (auditoria: release depois do
+ * mini-boss, senão é ruído). O pico final mistura os dois mundos, e o silêncio anuncia a
+ * SERPENTE.
+ */
+export const STAGE_3: StageEvent[] = [
+  { t: 0.5, type: 'banner', text: 'NEBULOSA DE KEPLER · APROXIMAÇÃO FINAL' },
+  { t: 0.6, type: 'nebula', density: 1 },
+
+  // Dentro da nuvem: asteroides e drones — o básico da F2, mas com véus na frente.
+  { t: 2, type: 'hazard', rate: 1.3, mix: ['asteroid'] },
+  { t: 5, type: 'wave', kind: 'drone', count: 5, spacing: 0.35, y: 80 },
+  { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 130 },
+
+  // Minas em CACHOS na névoa: a visibilidade curta transforma uma peça conhecida em susto
+  // honesto — o telégrafo delas (acordar e piscar) continua lá, só se vê mais tarde.
+  { t: 13, type: 'banner', text: 'SENSORES NA NÉVOA' },
+  { t: 14, type: 'hazard', rate: 1.0, mix: ['sensor', 'sensor', 'asteroid', 'mina'] },
+  { t: 16, type: 'wave', kind: 'drone', count: 6, spacing: 0.28, y: 60 },
+  { t: 20, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 100 },
+  { t: 24, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 70 },
+
+  // Pico do Ato 1: cargueiro + kamikazes dentro da nuvem.
+  { t: 28, type: 'banner', text: 'CARGUEIRO NA NEBULOSA' },
+  { t: 29, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 90 },
+  { t: 32, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
+  { t: 35, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 120 },
+
+  // ─── A VIRADA: sair da nuvem. O casco aparece por baixo dela. ───
+  { t: 40, type: 'hazard', rate: 0, mix: [] },
+  { t: 42, type: 'nebula', density: 0 },
+  { t: 44, type: 'banner', text: 'O CASCO DO LEVIATÃ' },
+
+  // ATO 2: o casco é a superfície — torres e radares SOBRE ele (vocabulário da F1;
+  // no vácuo o verbo continua o da F2: tudo se abate).
+  { t: 46, type: 'terrain', rate: 1.6, mix: ['wreck', 'turret', 'wreck', 'radar'] },
+  { t: 48, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
+
+  // O MINI-BOSS: a aranha entra andando no casco. As pernas dela finalmente têm motivo.
+  { t: 52, type: 'banner', text: 'SENTINELA DO CASCO' },
+  { t: 53, type: 'miniboss' },
+
+  // RESPIRO pós-aranha (~9s sem spawns novos): a auditoria pediu, e o silêncio também é o
+  // contraste que faz o pico final pesar.
+  { t: 54, type: 'terrain', rate: 0, mix: [] },
+
+  { t: 63, type: 'terrain', rate: 1.4, mix: ['wreck', 'turret', 'wreck', 'silo'] },
+  { t: 64, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
+  { t: 67, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
+  { t: 70, type: 'banner', text: 'DEFESAS DO CASCO' },
+  { t: 71, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
+  { t: 73, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
+  { t: 76, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
+  { t: 78, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
+
+  // Silêncio → serpente. O mesmo telégrafo das duas fases.
+  { t: 82, type: 'terrain', rate: 0, mix: [] },
+  { t: 84, type: 'banner', text: 'ALERTA · SERPENTE DO CASCO' },
+  { t: 88, type: 'boss' },
+];
+
 /** Onde a nave está. A física do mundo, não uma preferência do jogador (docs/GDD.md §3). */
 export type Zone = 'atmosfera' | 'vacuo';
 
@@ -166,6 +247,11 @@ export interface StageDef {
   zone: Zone;
   /** Trilha da fase (a do chefão é sempre 'boss'). */
   music: string;
+  /**
+   * Modo do fundo, quando a zona não basta. A Fase 3 é `vacuo` (voo livre) mas abre DENTRO
+   * de uma nebulosa — o fundo é outro sem a física ser outra. Ausente = derivado da zona.
+   */
+  parallax?: 'superficie' | 'espaco' | 'nebulosa';
   /** Fase seguinte, ou null se é a última que existe hoje. */
   next: number | null;
   /**
@@ -205,13 +291,21 @@ export const STAGES: Record<number, StageDef> = {
     music: 'stage1',
     next: 3,
     // A DOCA KEPLER-9: pouso na estação de mineração, a nave ALIENÍGENA entra no róster, e a doca
-    // explode. É a ponte para a Fase 3.
-    //
-    // ⚠️ A Fase 3 ainda NÃO EXISTE em STAGES. A `Interlude2Scene` sabe disso e termina a campanha
-    // com a tela de vitória em vez de chamar uma fase fantasma — se ela chamasse, a `GameScene`
-    // cairia na rede de segurança `STAGES[x] ?? STAGES[1]` e despejaria o jogador na FASE 1, sem
-    // aviso nenhum, depois de ele ter vencido a 2.
+    // explode. É a ponte para a Fase 3 — que agora EXISTE (2026-07-18).
     interlude: 'Interlude2',
+  },
+  3: {
+    id: 3,
+    name: 'O CASCO',
+    script: STAGE_3,
+    // Vácuo (voo livre) — mas o FUNDO é a nebulosa: a física e o cenário são decisões
+    // separadas de propósito (ver `parallax` na StageDef).
+    zone: 'vacuo',
+    parallax: 'nebulosa',
+    music: 'stage1',
+    // A Fase 4 (O Interior) ainda não existe: vencer a serpente fecha a campanha na vitória.
+    next: null,
+    interlude: null,
   },
 };
 
