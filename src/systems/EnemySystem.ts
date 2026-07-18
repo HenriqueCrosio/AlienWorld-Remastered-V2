@@ -192,16 +192,7 @@ export class EnemySystem {
       if (def.fireRate > 0) this.updateGunner(e, def, dt, target);
       if (def.spawns) this.updateCarrier(e, def, dt);
 
-      // A aranha ESTACIONA no terço direito: um mini-boss que atravessa e some seria uma
-      // canhoneira gorda. Parada no casco, ela nega o lado direito até ser morta — e a
-      // resposta é focá-la (prioridade de alvo, docs/GDD.md §6).
-      if (
-        e.getData('kind') === 'aranha' &&
-        e.x <= 306 &&
-        (e.body as Phaser.Physics.Arcade.Body).velocity.x < 0
-      ) {
-        e.setVelocityX(0);
-      }
+      if (e.getData('kind') === 'aranha') this.updateAranha(e, dt, target);
 
       // O perseguidor passa RETO pelo jogador e volta — culpa da inércia, e é o que o torna
       // legível. Se ele fosse morto ao cruzar a borda esquerda, um kamikaze que errou sumiria
@@ -293,6 +284,84 @@ export class EnemySystem {
   }
 
   private static readonly TELEGRAPH = 0.45;
+
+  /** A linha do casco onde a aranha pisa (os pés dela; ver spawn). */
+  private static readonly ARANHA_Y = 170;
+
+  /**
+   * A ARANHA: anda, estaciona, atira — e PULA (pedido do Henrique: um combo que justifique o
+   * corpo dela). O ciclo: entra andando → estaciona no terço direito → leques de 3 (o gunner
+   * comum cuida disso) → a cada ~7s, TELEGRAFA (agacha piscando 0.5s), SALTA num arco na
+   * direção do jogador (anim 'aranha-jump') e ATERRISSA com um anel radial de 6 tiros + shake.
+   * O pulo é a resposta dela a quem acampa na esquerda achando que ela é um canhão fixo.
+   */
+  private updateAranha(
+    e: Phaser.Physics.Arcade.Sprite,
+    dt: number,
+    target: Phaser.Physics.Arcade.Sprite,
+  ): void {
+    const body = e.body as Phaser.Physics.Arcade.Body;
+    const estado = (e.getData('aranhaEstado') as string) ?? 'chao';
+
+    if (estado === 'chao') {
+      // Estaciona ao chegar no terço direito (um mini-boss que atravessa e some seria uma
+      // canhoneira gorda; parada, ela nega o lado direito — prioridade de alvo, GDD §6).
+      if (e.x <= 306 && body.velocity.x < 0) e.setVelocityX(0);
+
+      const cd = ((e.getData('puloCd') as number) ?? 6) - dt;
+      e.setData('puloCd', cd);
+      if (cd <= 0 && body.velocity.x === 0) {
+        e.setData('aranhaEstado', 'telegrafo');
+        e.setData('aranhaT', 0.5);
+      }
+      return;
+    }
+
+    if (estado === 'telegrafo') {
+      const t = (e.getData('aranhaT') as number) - dt;
+      e.setData('aranhaT', t);
+      e.setTint(Math.floor(t * 20) % 2 === 0 ? 0xffd0d0 : 0xff6060);
+      if (t <= 0) {
+        e.setTint(e.getData('tint') as number);
+        e.setData('aranhaEstado', 'ar');
+        // O salto MIRA o lado do jogador, mas com teto de alcance — pular para fora da tela
+        // (ou para cima do rodapé esquerdo, encurralando) não é ataque, é sumiço.
+        const alvoX = Phaser.Math.Clamp(target.x + 40, 150, 300);
+        const vx = (alvoX - e.x) / 1.1; // ~1.1s de voo
+        e.setVelocity(vx, -190);
+        body.setAccelerationY(360); // a "gravidade" do salto — só existe no ar
+        if (this.scene.anims.exists('aranha-jump')) e.play('aranha-jump');
+      }
+      return;
+    }
+
+    // No AR: cai de volta na linha do casco e ATERRISSA.
+    if (e.y >= EnemySystem.ARANHA_Y && body.velocity.y > 0) {
+      e.setY(EnemySystem.ARANHA_Y);
+      e.setVelocity(0, 0);
+      body.setAccelerationY(0);
+      e.setData('aranhaEstado', 'chao');
+      e.setData('puloCd', Phaser.Math.FloatBetween(6, 8));
+      if (this.scene.anims.exists('aranha-walk')) e.play('aranha-walk');
+
+      // O ANEL da aterrissagem: 6 tiros radiais. É o novo combo — o pulo não é fuga, é área.
+      for (let i = 0; i < 6; i++) {
+        const ang = (i / 6) * Math.PI * 2 + Math.PI / 12;
+        const b = this.enemyBullets.get(e.x, e.y - 6) as Phaser.Physics.Arcade.Sprite | null;
+        if (!b) break;
+        b.setActive(true).setVisible(true);
+        b.body!.enable = true;
+        b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
+        b.setBlendMode(Phaser.BlendModes.ADD);
+        b.setData('ox', e.x);
+        b.setData('oy', e.y);
+        b.setVelocity(Math.cos(ang) * 105, Math.sin(ang) * 105);
+        b.setRotation(ang);
+      }
+      this.muzzleFlash.explode(8, e.x, e.y + 16);
+      this.scene.cameras.main.shake(110, 0.005);
+    }
+  }
 
   /**
    * Tiro MIRADO: pune quem fica parado, que é a função da canhoneira.

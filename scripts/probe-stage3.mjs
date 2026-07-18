@@ -125,10 +125,42 @@ const estadoBoss = () =>
     };
   });
 
+/**
+ * ⚠️ O TESTE QUE FALTAVA (o bug da cabeça inalcançável passou pela 1ª sonda): dano por BALA
+ * REAL, não por boss.damage(). A nave alinha com a cabeça vulnerável, atira 1.6s, e o HP TEM
+ * que cair — se o corpo absorver tudo no caminho, a fase é invencível e a campanha trava.
+ */
+async function alcancavelPorBala(nome) {
+  const antes = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    return s.boss?.hpTotal ?? -1;
+  });
+  await page.keyboard.down('Space');
+  for (let i = 0; i < 16; i++) {
+    await page.evaluate(() => {
+      const s = window.__game.scene.getScenes(true)[0];
+      const alvo = s.boss?.targets?.[0];
+      if (alvo) {
+        s.ship.y = alvo.y;
+        s.ship.x = 70;
+        s.ship.body.setVelocity(0, 0);
+      }
+    });
+    await page.waitForTimeout(100);
+  }
+  await page.keyboard.up('Space');
+  const depois = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    return s.boss?.hpTotal ?? -1;
+  });
+  ok(antes - depois >= 3, `${nome}: a cabeça é ALCANÇÁVEL por bala (dano real ${antes - depois})`);
+}
+
 let bs = await estadoBoss();
 if (!bs.boss) await abort('a serpente não entrou no treino [N]');
 console.log('serpente ', JSON.stringify(bs));
 ok(bs.boss === 'base', `forma inicial: ${bs.boss} (3 cabeças)`);
+await alcancavelPorBala('fase A (ciano)');
 ok(bs.alvos === 1, `UM alvo vivo (a cabeça laranja)`);
 ok(bs.cabecaJunta, 'a hitbox da cabeça acompanha o offset medido');
 await page.screenshot({ path: 'probe-stage3-serpente.png' });
@@ -168,6 +200,9 @@ for (const forma of ordem) {
   bs = await estadoBoss();
   console.log(`fase     `, JSON.stringify(bs));
   ok(bs.boss === forma, `forma trocou para ${forma}`);
+  // A imunidade da transição precisa expirar antes do teste de bala.
+  await page.waitForTimeout(1800);
+  await alcancavelPorBala(`fase ${forma}`);
   if (forma === '2c') ok(bs.fumaca, 'o coto FUMEGA (emissor vivo)');
   if (forma === 'fusao') {
     ok(bs.alvos === 1, 'a FÚRIA tem um alvo único (a cabeça fundida)');

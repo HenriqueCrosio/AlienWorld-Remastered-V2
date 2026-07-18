@@ -9,14 +9,42 @@ Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` →
 **Jogável hoje, do começo ao fim:** Fase 1 → cutscene da Aurora → Fase 2 → **cutscene da Doca
 Kepler-9** → tela de vitória (a Fase 3 ainda não existe).
 
-**A FASE 3 ESTÁ CONSTRUÍDA (2026-07-18)** — a campanha agora joga F1 → Aurora → F2 → Doca →
-**F3 (nebulosa → casco → SERPENTE em 4 formas → vitória)**, validada de ponta a ponta por
-`scripts/probe-stage3.mjs`. **O PRÓXIMO PASSO é o PLAYTEST HUMANO da F3** (balanceamento fino:
-densidade da nebulosa/véus, cadências da serpente, HP da aranha — nada disso foi jogado por
-humano ainda) e, depois dele, a **FASE 4 — O Interior** (o flap volta). Atalhos: `[M]` joga a
-F3 inteira, `[N]` treina a serpente.
+**A FASE 3 ESTÁ CONSTRUÍDA E JÁ PASSOU PELO 1º PLAYTEST** (2026-07-18) — a campanha joga
+F1 → Aurora → F2 → Doca → **F3 (nebulosa → casco+aranha → SERPENTE em 4 formas → vitória)**.
+O Henrique jogou, apontou 3 problemas, e TODOS foram corrigidos na mesma sessão (ver o bloco
+da sessão, abaixo — o mais importante era ESTRUTURAL: a ordem das cabeças). **AO RETOMAR:
+o Henrique vai trazer o feedback do playtest PÓS-correções** — espere ajustes de balanceamento
+fino (densidade da nebulosa/véus: `alpha`/`gap` no `buildNebula`; cadências da serpente:
+`cdPrincipal` por fase em `BossSerpente.atacar`; pulo/HP da aranha: `updateAranha` e DEFS no
+EnemySystem). Cenário da F3 já foi APROVADO por ele ("bem montado"). Depois do fino: a
+**FASE 4 — O Interior** (o flap volta). Atalhos: `[M]` = F3 inteira, `[N]` = treino da serpente.
 
-### 🆕 Sessão 2026-07-17/18 — RÓSTER v2, 7 ARMAS, EFEITOS e PASSE VISUAL
+### 🆕 Sessão 2026-07-18 (parte 2) — FASE 3 + correções do 1º playtest dela
+
+- **A ORDEM DAS CABEÇAS É AZUL → VERDE → LARANJA, E ISSO É ESTRUTURAL.** No 1º playtest a
+  vulnerável era a laranja (fundo direito): o jogador chega pela ESQUERDA, o corpo ABSORVE
+  tiro, e a bala morria no casco antes de alcançá-la — chefão invencível, campanha travada.
+  Correção tripla: (1) estados REGERADOS na ordem nova (`serpente-2c` = sem a ciano,
+  `serpente-1c` = só a laranja erguida — os PNGs antigos foram substituídos, mesmas chaves);
+  (2) o corpo-absorvedor agora cobre SÓ AS ROSCAS (metade de baixo — `ajustarCorpo()`), com a
+  faixa das cabeças de corredor livre; (3) `probe-stage3` ganhou o teste que faltava:
+  **alcançabilidade por BALA REAL em cada fase** (a 1ª sonda dava dano via `boss.damage()` e
+  por isso não pegou o bug — armadilha 19 em versão nova: sonda que pula a balística não
+  testa a luta). Verbos por cor mantidos: ciano=investida, verde=leque, laranja=rajada.
+- **A serpente EMERGE do Leviatã** (pedido do playtest): mais central (STATION_X 252), mais
+  baixa (BASE_Y 124, ondulação 14), com a BRECHA — 3 placas `derelict` escuras na frente da
+  base dela (depth 35, viajam junto) escondendo a parte de baixo do corpo.
+- **A aranha PULA** (pedido do playtest): ciclo andar/atirar + a cada ~7s telegrafa (agacha
+  piscando), SALTA num arco mirado no lado do jogador (anim `aranha-jump`, mesma caixa do
+  walk — sem salto de sprite) e aterrissa com ANEL radial de 6 tiros + shake. O leque de 3 e
+  o anel são o combo dela.
+- F3 completa da sessão: modo `nebulosa` (3 camadas + véus, `setNebulaDensity` — sair da
+  nuvem e revelar a banda `casco` são o MESMO fade), `STAGE_3` em dois atos, aranha como
+  `EnemyKind` roteirizado (`miniboss`), contrato `StageBoss.targets[]`, `BossSerpente` com
+  4 fases de anatomia (50+50+50+60), cotos fumegando, cadeias de explosão, convulsão →
+  FUSÃO 15% maior. `[M]`/`[N]` no menu dev. `find-cabecas.mjs` mede as cabeças por COR.
+
+### Sessão 2026-07-17/18 (parte 1) — RÓSTER v2, 7 ARMAS, EFEITOS e PASSE VISUAL
 
 A maior sessão do projeto. Tudo validado por sonda e aprovado em partes pelo Henrique ao longo
 do caminho; commit único no fim.
@@ -111,9 +139,9 @@ razão não é estética, é física (a aranha ANDA, e precisa de chão).
 de vitória. Se ela chamar a `GameScene` com `stage: 3` antes da hora, a rede de segurança
 `STAGES[x] ?? STAGES[1]` despeja o jogador na **Fase 1** — sem aviso, depois de ele ter vencido a 2.
 
-**Saldo PixelLab: ~$1.61** (2026-07-18 — as gerações da assinatura ACABARAM: tudo agora sai do
-crédito, inclusive animações. Orce a Fase 3 antes de gerar: nebulosa + ataques da serpente +
-regerar a aranha cabem, mas sem desperdício).
+**Saldo PixelLab: ~$0.91** (2026-07-18, fim da sessão da F3 — as gerações da assinatura
+ACABARAM: tudo sai do crédito, inclusive animações a ~$0.09 cada. A arte da F3 está completa;
+o que resta de saldo é para AJUSTES do playtest e o começo da F4. Orce antes de gerar).
 
 ---
 
@@ -523,12 +551,13 @@ O projeto original, decidido com o Henrique:
 3. **Os chefões — DESIGN FECHADO com o Henrique (2026-07-18), arte JÁ GERADA:**
    - 🐍 **SERPENTE de 3 cabeças** (`b5943a3c`, 256px) = **CHEFÃO**, e a luta é por **ANATOMIA**:
      cada fase tem UMA cabeça vulnerável (as outras absorvem tiro sem dano — invulnerável é
-     telégrafo). Ordem fixa de morte, com TROCA DE ARTE a cada cabeça morta:
-     1. **LARANJA** (visor, direita) vulnerável — padrão: rajada mirada. Morre → estado
-        **`412c00a9`** (2 cabeças, coto faiscando).
-     2. **CIANO** (crânio, esquerda) — padrão: INVESTIDA telegrafada. Morre → **`46b50df5`**
-        (só a verde, dois cotos).
-     3. **VERDE** (centro) — leque em metrônomo acelerando. Morre → convulsão →
+     telégrafo). Ordem fixa ESQUERDA→DIREITA (estrutural — ver bloco da sessão), com TROCA DE
+     ARTE a cada cabeça morta:
+     1. **CIANO** (crânio, esquerda — a alcançável) — padrão: INVESTIDA telegrafada. Morre →
+        estado **`41adfd52`** (sem a ciano, coto faiscando).
+     2. **VERDE** (centro) — leque em metrônomo acelerando. Morre → **`260d8727`**
+        (só a laranja erguida, dois cotos).
+     3. **LARANJA** (visor, direita) — rajada mirada. Morre → convulsão →
      4. **FUSÃO** (`efdb21d0`, cabeça ÚNICA gigante com as feições das três, corpo mais grosso,
         exibir ~1.15×): a FÚRIA — os três verbos em ciclo denso com silêncio curto. Pedido
         literal do Henrique: "depois da terceira, surge um boss maior com uma cabeça só, que é a
@@ -850,7 +879,7 @@ Navegadores bloqueiam áudio até a primeira interação; o Phaser destrava sozi
 ## PixelLab
 
 - MCP configurado no escopo deste projeto em `~/.claude.json` (a chave **não** está no repositório).
-- **Saldo: ~$1.61** (2026-07-18, fim da sessão — assinatura esgotada, tudo em crédito agora).
+- **Saldo: ~$0.91** (2026-07-18, pós-Fase 3 — assinatura esgotada, tudo em crédito agora).
   `create_1_direction_object` custa ~$0.09 e devolve
   **64 candidatos** num sprite de 32px (16 em 64px, **4 em 128px**). `create_ui_asset` custa ~$0.11.
 - **`animate_object` (modo `v3`) é BARATO** — ~1 geração (~$0.005) por animação. As 7 animações da

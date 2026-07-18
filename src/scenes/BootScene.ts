@@ -42,6 +42,7 @@ const FRAMES: Record<string, number> = {
   serpente1cAnim: 9,
   serpenteFusaoAnim: 9,
   aranhaAnim: 9,
+  aranhaJumpAnim: 9,
 
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
@@ -104,6 +105,8 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'serpente-1c-idle', prefix: 'serpente1cAnim', frameRate: 8 },
   { key: 'serpente-fusao-fury', prefix: 'serpenteFusaoAnim', frameRate: 10 },
   { key: 'aranha-walk', prefix: 'aranhaAnim', frameRate: 10 },
+  // O PULO toca UMA vez por salto (o EnemySystem devolve o walk na aterrissagem).
+  { key: 'aranha-jump', prefix: 'aranhaJumpAnim', frameRate: 10, loop: false },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -183,6 +186,7 @@ const ART: Record<string, string> = {
   ...animFrames('serpente1cAnim', 'serpente-1c-anim'),
   ...animFrames('serpenteFusaoAnim', 'serpente-fusao-anim'),
   ...animFrames('aranhaAnim', 'aranha-anim'),
+  ...animFrames('aranhaJumpAnim', 'aranha-jump-anim'),
 
   ...animFrames('bossAnim', 'boss-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),

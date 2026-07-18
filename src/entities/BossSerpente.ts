@@ -27,10 +27,16 @@ interface FaseSerpente {
  * anatomia visível, que é a gramática Metal Slug que o Henrique pediu (o Iron Nokana queima e
  * se despedaça; a serpente perde cabeças e fumega pelos cotos).
  *
- *   A  3 cabeças   vulnerável: LARANJA   ela pergunta "saia da linha" (rajada mirada)
- *   B  2 cabeças   vulnerável: CIANO     ela pergunta "onde você vai estar" (INVESTIDA)
- *   C  1 cabeça    vulnerável: VERDE     ela pergunta "leia o metrônomo" (leque acelerando)
+ *   A  3 cabeças   vulnerável: CIANO     "onde você vai estar" (INVESTIDA telegrafada)
+ *   B  2 cabeças   vulnerável: VERDE     "leia o metrônomo" (leque acelerando)
+ *   C  1 cabeça    vulnerável: LARANJA   "saia da linha" (rajada mirada)
  *   F  FUSÃO       a cabeça única        as três perguntas em ciclo, com silêncio curto
+ *
+ * ⚠️ A ORDEM É ESQUERDA → DIREITA, E ISSO É ESTRUTURAL (playtest do Henrique, 2026-07-18): o
+ * jogador chega pela ESQUERDA e o corpo ABSORVE tiro — uma cabeça vulnerável no fundo direito
+ * do sprite (a laranja) ficava ATRÁS da massa do corpo, a bala morria no casco no caminho, e o
+ * chefão nunca perdia vida. A cabeça vulnerável tem que ser sempre a mais ALCANÇÁVEL: ciano
+ * (a da frente), depois a verde (o centro exposto pelo coto), por último a laranja.
  *
  * A FUSÃO é o beat do Henrique ao pé da letra: "depois da terceira, surge um boss maior com
  * uma cabeça só, que é a junção das 3". Ela entra numa CONVULSÃO com explosões em cadeia
@@ -67,6 +73,14 @@ export class BossSerpente implements StageBoss {
   /** Passo do ciclo da FÚRIA (leque → rajada → investida → silêncio). */
   private furiaPasso = 0;
 
+  /**
+   * A BRECHA: placas de casco rasgadas NA FRENTE da base da serpente (depth acima dela). São
+   * elas que vendem o "ela SURGE DE DENTRO do Leviatã" (pedido do Henrique): a parte de baixo
+   * do corpo some atrás do metal rompido em vez de flutuar sobre ele. Viajam COM ela (offsets
+   * fixos, sincronizados no update) — a brecha é dela, ela a carrega ao investir.
+   */
+  private readonly brecha: Phaser.GameObjects.Image[] = [];
+
   private readonly barBg: Phaser.GameObjects.Rectangle;
   private readonly bar: Phaser.GameObjects.Rectangle;
   /** UM de cada, criados aqui e reaproveitados a luta inteira (armadilha nº 5). */
@@ -74,9 +88,12 @@ export class BossSerpente implements StageBoss {
   private readonly smokeFx: Phaser.GameObjects.Particles.ParticleEmitter;
   private smokeCd = 0;
 
-  private static readonly STATION_X = GAME_WIDTH - 88;
-  private static readonly BASE_Y = 106;
-  private static readonly ONDULACAO = 22;
+  // Mais CENTRAL e mais BAIXA (pedido do Henrique): ela não flutua sobre o Leviatã — ela
+  // EMERGE dele. A base do corpo fica escondida atrás da BRECHA (ver construtor) e abaixo da
+  // linha do casco; a ondulação é curta para ler "ancorada", não "boiando".
+  private static readonly STATION_X = GAME_WIDTH - 132;
+  private static readonly BASE_Y = 124;
+  private static readonly ONDULACAO = 14;
 
   /**
    * AS FASES. Offsets MEDIDOS por cor no PNG instalado (scripts/find-cabecas.mjs — lição 13:
@@ -87,10 +104,14 @@ export class BossSerpente implements StageBoss {
    *   serpente-fusao.png crânio (-30.8,-68.0)
    * Os COTOS fumegam onde a cabeça morta ESTAVA — o mesmo offset, que virou cicatriz.
    */
+  // Offsets MEDIDOS nas artes da ORDEM NOVA (find-cabecas + medição solta da verde):
+  //   serpente.png     ciano (-63.1,-43.3)
+  //   serpente-2c.png  verde (-10.1,-55.4)  [sem a ciano; coto no lugar dela]
+  //   serpente-1c.png  laranja (46.4,-62.0) [erguida no alto direito, caminho livre à esquerda]
   private static readonly FASES: FaseSerpente[] = [
-    { arte: 'serpente', anim: 'serpente-idle', hp: 50, cabeca: { x: 62.7, y: -65.9 }, cotos: [], escala: 0.55 },
-    { arte: 'serpente2c', anim: 'serpente-2c-idle', hp: 50, cabeca: { x: -62.8, y: -43.5 }, cotos: [{ x: 62.7, y: -65.9 }], escala: 0.55 },
-    { arte: 'serpente1c', anim: 'serpente-1c-idle', hp: 50, cabeca: { x: -10.9, y: -47.5 }, cotos: [{ x: 62.7, y: -65.9 }, { x: -62.8, y: -43.5 }], escala: 0.55 },
+    { arte: 'serpente', anim: 'serpente-idle', hp: 50, cabeca: { x: -63.1, y: -43.3 }, cotos: [], escala: 0.55 },
+    { arte: 'serpente2c', anim: 'serpente-2c-idle', hp: 50, cabeca: { x: -10.1, y: -55.4 }, cotos: [{ x: -63.1, y: -43.3 }], escala: 0.55 },
+    { arte: 'serpente1c', anim: 'serpente-1c-idle', hp: 50, cabeca: { x: 46.4, y: -62.0 }, cotos: [{ x: -60, y: -25 }, { x: -10, y: -50 }], escala: 0.55 },
     // A fusão é MAIOR (0.63 vs 0.55 ≈ +15%): "um boss maior com uma cabeça só".
     { arte: 'serpenteFusao', anim: 'serpente-fusao-fury', hp: 60, cabeca: { x: -30.8, y: -68.0 }, cotos: [{ x: 30, y: 30 }, { x: -20, y: 60 }], escala: 0.63 },
   ];
@@ -110,9 +131,7 @@ export class BossSerpente implements StageBoss {
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     body.setAllowGravity(false);
-    // O corpo cobre a serpente para ABSORVER tiro (e ferir por contato). As cabeças têm as
-    // suas próprias hitboxes — este corpo nunca recebe dano.
-    body.setSize(this.sprite.width * 0.72, this.sprite.height * 0.78);
+    this.ajustarCorpo();
     body.setVelocityX(-46);
     this.sprite.setData('boss', this);
 
@@ -151,6 +170,27 @@ export class BossSerpente implements StageBoss {
       })
       .setDepth(32);
 
+    // A brecha (ver o campo): 'derelict' rasgado, escuro, cobrindo a base do corpo. Offsets em
+    // px de TELA relativos ao centro do sprite — cobrem o quadrante inferior sem tocar as
+    // cabeças. `setFlipX` alternado quebra a repetição da mesma placa.
+    if (scene.textures.exists('derelict')) {
+      const pecas: { dx: number; dy: number; s: number; flip: boolean }[] = [
+        { dx: -40, dy: 62, s: 1.05, flip: false },
+        { dx: 10, dy: 74, s: 1.25, flip: true },
+        { dx: 52, dy: 64, s: 0.95, flip: false },
+      ];
+      for (const p of pecas) {
+        this.brecha.push(
+          scene.add
+            .image(this.sprite.x + p.dx, this.sprite.y + p.dy, 'derelict')
+            .setScale(p.s)
+            .setFlipX(p.flip)
+            .setTint(0x27314a)
+            .setDepth(35),
+        );
+      }
+    }
+
     this.barBg = scene.add.rectangle(GAME_WIDTH / 2, 16, 160, 4, 0x531a30).setDepth(100);
     this.bar = scene.add
       .rectangle(GAME_WIDTH / 2 - 80, 16, 160, 4, 0xff3a78)
@@ -168,6 +208,22 @@ export class BossSerpente implements StageBoss {
 
   private get body(): Phaser.Physics.Arcade.Body {
     return this.sprite.body as Phaser.Physics.Arcade.Body;
+  }
+
+  /**
+   * O corpo-absorvedor cobre SÓ AS ROSCAS (a metade de baixo do sprite) — nunca a faixa alta
+   * onde as cabeças vivem. A 1ª versão cobria o sprite quase inteiro e ABSORVIA A BALA NO
+   * CAMINHO da cabeça vulnerável (a sonda de alcançabilidade pegou: dano real 0 nas fases B/C).
+   * Absorver é papel do casco enrolado; o pescoço é o corredor do acerto.
+   * Recalculado a cada troca de arte (as alturas variam entre estados).
+   */
+  private ajustarCorpo(): void {
+    const w = this.sprite.width * 0.62;
+    const h = this.sprite.height * 0.5;
+    this.body.setSize(w, h);
+    // Topo do corpo LOGO ABAIXO do centro do sprite: as cabeças (offsets -22..-37 do centro,
+    // em px de tela) ficam acima dele, com linha de tiro limpa.
+    this.body.setOffset((this.sprite.width - w) / 2, this.sprite.height * 0.46);
   }
 
   // ─── O laço ─────────────────────────────────────────────────────────────────
@@ -250,38 +306,27 @@ export class BossSerpente implements StageBoss {
 
     switch (this.faseIdx) {
       case 0:
-        // A LARANJA cobra posição: rajada mirada (o verbo da canhoneira/Capitânia).
+        // A CIANO abre a luta cobrando futuro: a INVESTIDA (o verbo do kamikaze, no corpo de
+        // um titã). É o padrão mais legível — a fase A ensina a luta, como a Torre ensinou o jogo.
         if (this.cdPrincipal <= 0) {
-          this.cdPrincipal = 2.2;
-          this.rajada(boca, target, 3, 170);
+          this.cdPrincipal = 3.5;
+          this.comecarInvestida();
         }
-        // As outras cabeças atiram esparso — pressão de fundo, nunca competindo com a rajada.
+        // As outras cabeças atiram esparso — pressão de fundo, nunca competindo com a investida.
         if (this.cdSecundario <= 0) {
-          this.cdSecundario = 1.9;
+          this.cdSecundario = 2.0;
           const desvio = Phaser.Math.FloatBetween(-0.35, 0.35);
           this.tiro(this.sprite.x - 20, this.sprite.y - 30, this.anguloPara(target) + desvio, 140);
         }
         break;
 
-      case 1:
-        // A CIANO cobra futuro: a INVESTIDA (o verbo do kamikaze, no corpo de um titã).
-        if (this.cdPrincipal <= 0) {
-          this.cdPrincipal = 3.5;
-          this.comecarInvestida();
-        }
-        if (this.cdSecundario <= 0) {
-          this.cdSecundario = 2.6;
-          this.leque(boca, target, 5, 44, 150);
-        }
-        break;
-
-      case 2: {
+      case 1: {
         // A VERDE é a TORRE outra vez: metrônomo de leques — acelerando conforme sangra.
         // O jogador conhece esse verbo desde a Fase 1; o que muda é o relógio apertar.
         const aperto = 1 - this.hpFase / this.fase.hp; // 0 → 1 conforme a cabeça morre
         if (this.cdPrincipal <= 0) {
-          this.cdPrincipal = Phaser.Math.Linear(1.7, 1.15, aperto);
-          this.leque(boca, target, 5, 52, 160);
+          this.cdPrincipal = Phaser.Math.Linear(1.8, 1.25, aperto);
+          this.leque(boca, target, 5, 48, 155);
         }
         if (this.cdSecundario <= 0) {
           this.cdSecundario = 5;
@@ -289,6 +334,20 @@ export class BossSerpente implements StageBoss {
         }
         break;
       }
+
+      case 2:
+        // A LARANJA fecha cobrando posição: rajada mirada (o verbo da canhoneira/Capitânia).
+        // Ela é a cabeça do FUNDO — o jogador vai ter que atravessar o fogo para alcançá-la,
+        // e é por isso que ela é a última: a esta altura ele já leu os outros dois padrões.
+        if (this.cdPrincipal <= 0) {
+          this.cdPrincipal = 2.1;
+          this.rajada(boca, target, 3, 175);
+        }
+        if (this.cdSecundario <= 0) {
+          this.cdSecundario = 3.4;
+          this.leque(boca, target, 4, 40, 150);
+        }
+        break;
 
       case 3:
         // A FÚRIA: os três verbos em CICLO, com silêncio curto entre eles. O silêncio de 0.8s
@@ -391,6 +450,16 @@ export class BossSerpente implements StageBoss {
     this.cabeca.setPosition(p.x, p.y);
     // O glow PULSA — um alvo estático parece decoração; um pulsando parece um ponto fraco.
     this.cabeca.setAlpha(0.2 + 0.14 * Math.sin(this.t * 6));
+
+    // A brecha viaja com ela (offsets do construtor, na mesma ordem).
+    const OFF = [
+      { dx: -40, dy: 62 },
+      { dx: 10, dy: 74 },
+      { dx: 52, dy: 64 },
+    ];
+    this.brecha.forEach((b, i) => {
+      b.setPosition(this.sprite.x + OFF[i].dx, this.sprite.y + OFF[i].dy);
+    });
   }
 
   /** Os cotos fumegam. O dano ACUMULA visualmente: cada fase carrega as cicatrizes da anterior. */
@@ -481,7 +550,7 @@ export class BossSerpente implements StageBoss {
       this.sprite.setTexture(f.arte);
       this.sprite.setScale(f.escala);
       if (this.scene.anims.exists(f.anim)) this.sprite.play(f.anim);
-      this.body.setSize(this.sprite.width * 0.72, this.sprite.height * 0.78);
+      this.ajustarCorpo();
 
       this.muzzleFx.explode(24, this.sprite.x, this.sprite.y);
       this.scene.cameras.main.shake(paraFusao ? 300 : 160, paraFusao ? 0.012 : 0.007);
@@ -507,6 +576,7 @@ export class BossSerpente implements StageBoss {
   destroy(): void {
     this.sprite.destroy();
     if (this.cabeca.active) this.cabeca.destroy();
+    for (const b of this.brecha) b.destroy();
     this.bar.destroy();
     this.barBg.destroy();
     this.muzzleFx.destroy();
