@@ -66,10 +66,12 @@ export class TerrainSystem {
 
     // Fumaça que NASCE pequena e clara e MORRE grande e sumida — é o que o olho conhece de
     // exaustão. Uma pitada de brasa (hot) no meio dos cinzas vende o motor queimando.
-    this.smokeFx = scene.add.particles(0, 0, 'spark', {
+    // 'puff' (sopro redondo), NUNCA 'spark': o quadrado 2×2 escalado com blend normal aparecia
+    // como CAIXAS soltas na boca do cano a cada disparo (bug visual apontado pelo Henrique).
+    this.smokeFx = scene.add.particles(0, 0, 'puff', {
       lifespan: { min: 240, max: 420 },
       speed: { min: 3, max: 14 },
-      scale: { start: 1.1, end: 2.4 },
+      scale: { start: 0.5, end: 1.3 },
       alpha: { start: 0.5, end: 0 },
       tint: [0xcfd6dd, 0x8b939c, 0xff8c1a],
       emitting: false,

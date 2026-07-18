@@ -250,8 +250,11 @@ export class Parallax {
       .tileSprite(0, GROUND_Y, GAME_WIDTH, 48, 'groundTile')
       .setOrigin(0, 0)
       .setDepth(-80)
-      // O tileset saiu roxo; o tint puxa de volta para o azul-acinzentado da paleta.
-      .setTint(0x8fb2e0);
+      // O tile novo (2026-07-18) é ROCHA rachada, já na paleta — o tile antigo era o "trilho"
+      // de rebites roxo que precisava de correção (e de tint). O PNG é [arte | arte espelhada]
+      // (128px): espelhar garante emenda invisível nos DOIS lados sem depender do gerador.
+      // SEM tint: só 10px do chão aparecem (GROUND_Y = 216-10) — escurecer mataria a textura.
+      .setTint(0xffffff);
 
     // Aresta de luz no topo do solo. Sem ela, chão e montanhas viram uma massa escura só —
     // é o contraste que diz ao olho onde o terreno começa.
@@ -260,6 +263,23 @@ export class Parallax {
       .setOrigin(0, 0)
       .setDepth(-79)
       .setAlpha(0.7);
+
+    // O ENTULHO do chão (pedido do Henrique, 2026-07-18): pedras avulsas ASSENTADAS na linha do
+    // solo, correndo na MESMA velocidade dele (factor 1.0 = o groundOffset). É o que quebra o
+    // "trilho": um chão em que nada muda por 75s lê como esteira; meia dúzia de calhaus
+    // diferentes por tela lê como TERRENO. São decoração pura — nada colide, e o tint na
+    // família do solo os cola nele (não competem com o `spire` jogável, que é claro e alto).
+    this.addLayer({
+      key: 'asteroid',
+      factor: 1.0,
+      baseY: GROUND_Y + 7,
+      depth: -78,
+      tint: 0x5a6e94,
+      alpha: 1,
+      scale: [0.22, 0.45],
+      gap: [60, 140],
+      terreno: true,
+    });
 
     // PRIMEIRO PLANO: rochas em silhueta quase preta, MAIS RÁPIDAS que o mundo, passando NA
     // FRENTE da nave (depth 60). É o que mais vende profundidade — sem nada à frente, o

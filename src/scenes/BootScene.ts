@@ -380,6 +380,7 @@ export class BootScene extends Phaser.Scene {
     this.makeFlak();
     this.makeBullet();
     this.makeTracerRound();
+    this.makePuff();
     this.makeSpark();
     this.makeEnemyBullet();
     this.makePickup();
@@ -713,6 +714,26 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffd9a0, 1); // a ponta quente
     g.fillRect(6, 0, 2, 1);
     g.generateTexture('tracerRound', 8, 1);
+    g.destroy();
+  }
+
+  /**
+   * PARTÍCULA DE FUMAÇA: um sopro REDONDO 7×7 com borda irregular. A `spark` (quadrado 2×2)
+   * serve para clarão ADITIVO — escalada com blend normal, como fumaça, ela aparecia como
+   * QUADRADOS soltos na boca das torres lança-mísseis (bug apontado pelo Henrique).
+   */
+  private makePuff(): void {
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+    g.fillStyle(0xffffff, 1);
+    g.fillRect(2, 1, 3, 1);
+    g.fillRect(1, 2, 5, 3);
+    g.fillRect(2, 5, 3, 1);
+    g.fillStyle(0xffffff, 0.55); // cantos meio-transparentes: quebra o contorno de caixa
+    g.fillRect(1, 1, 1, 1);
+    g.fillRect(5, 1, 1, 1);
+    g.fillRect(1, 5, 1, 1);
+    g.fillRect(5, 5, 1, 1);
+    g.generateTexture('puff', 7, 7);
     g.destroy();
   }
 

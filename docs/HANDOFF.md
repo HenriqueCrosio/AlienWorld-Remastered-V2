@@ -54,6 +54,12 @@ do caminho; commit único no fim.
   0.08); `setForegroundDimmed()` apaga o primeiro plano nas lutas de chefão (fica nas fases —
   é dificuldade; nos chefões tapava a leitura). Camadas novas de fundo: **skyline da colônia**
   (F1) e **casco morto** (F2) + **cometa raro** (ver ART/Parallax).
+- **CHÃO DA F1** (pedido final da sessão): o "trilho" de rebites virou **rocha rachada** —
+  `ground-tile.png` novo é `[arte | arte espelhada]` (128×48, emenda invisível por espelho;
+  só ~10px aparecem: GROUND_Y = 216−10, então a banda escolhida da arte é a de rachaduras
+  densas e o tile vai SEM tint). Camada de **entulho** no solo (asteroid pequeno, factor 1.0,
+  tint do chão) quebra a repetição. E a fumaça dos mísseis das torres trocou `spark` (quadrado
+  2×2 — aparecia como CAIXAS na boca do cano) pela partícula **`puff`** redonda do Boot.
 - **SONDAS.** `probe-interlude.mjs` estava APODRECIDA (lia campos extintos e nunca confirmava
   a escolha — não media nada) → modernizada com asserts reais. `probe-doca` escolhe o Arauto na
   tecla **7**. Fase 1 abre com TRAÇANTE no HUD.
