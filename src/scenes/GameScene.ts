@@ -75,6 +75,10 @@ export class GameScene extends Phaser.Scene {
 
   private hud!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
+  /** A faixa escura discreta atrás do banner de ato. */
+  private bannerFaixa!: Phaser.GameObjects.Rectangle;
+  /** A faixa de progresso da fase: o preenchimento (o trilho é estático, criado no create). */
+  private progressFill!: Phaser.GameObjects.Rectangle;
   /** Calor e giro da HMG. Só aparecem quando a arma equipada tem cano giratório. */
   private heatBg!: Phaser.GameObjects.Rectangle;
   private heatBar!: Phaser.GameObjects.Rectangle;
@@ -273,12 +277,33 @@ export class GameScene extends Phaser.Scene {
       align: 'left',
     }).setDepth(100);
 
+    // A faixa atrás do banner: o aviso de ato cai no MEIO da tela, sobre a luta — a
+    // legibilidade não pode depender do que estiver explodindo atrás dele.
+    this.bannerFaixa = this.add
+      .rectangle(0, 64, GAME_WIDTH, 24, COLORS.bgDeep, 0.4)
+      .setOrigin(0, 0)
+      .setDepth(99)
+      .setAlpha(0);
+
     this.banner = pixelText(this, GAME_WIDTH / 2, 76, '', {
       size: 13,
       color: COLORS.hotBright,
     })
       .setDepth(100)
       .setAlpha(0);
+
+    // A FAIXA DE PROGRESSO da fase: 1px de altura no rodapé da faixa do HUD. Uma
+    // informação só — o quanto falta para o chefão. Esguia de propósito: é leitura de
+    // relance, não ornamento; quando a luta começa ela completa e pulsa em vermelho.
+    // O trilho é estático (alpha baixo, quase some na faixa): vive na display list, sem campo.
+    this.add
+      .rectangle(4, 12, GAME_WIDTH - 8, 1, COLORS.metalMid, 0.25)
+      .setOrigin(0, 0)
+      .setDepth(100);
+    this.progressFill = this.add
+      .rectangle(4, 12, 1, 1, COLORS.player, 0.55)
+      .setOrigin(0, 0)
+      .setDepth(101);
 
     // ─── O MEDIDOR DA MINI-GUN ───
     //
@@ -1073,19 +1098,35 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showBanner(text: string, color: number): void {
+    // Um banner NOVO interrompe o anterior sem piscar: mata os tweens em voo antes.
+    this.tweens.killTweensOf([this.banner, this.bannerFaixa]);
+
     this.banner
       .setText(text)
       .setColor(Phaser.Display.Color.IntegerToColor(color).rgba)
-      .setAlpha(1)
+      .setY(82)
+      .setAlpha(0)
       .setScale(1);
+    this.bannerFaixa.setAlpha(0);
 
+    // A ENTRADA: fade + slide curto (6px em 220ms). O aviso chega com intenção, não com
+    // um estalo — e some devagar, tempo de ler (~1.5s de palco).
+    this.tweens.add({
+      targets: this.banner,
+      y: 76,
+      alpha: 1,
+      duration: 220,
+      ease: 'Cubic.easeOut',
+    });
+    this.tweens.add({ targets: this.bannerFaixa, alpha: 0.4, duration: 220 });
     this.tweens.add({
       targets: this.banner,
       alpha: 0,
-      scale: 1.12,
-      duration: 1800,
+      duration: 450,
+      delay: 1500,
       ease: 'Cubic.easeIn',
     });
+    this.tweens.add({ targets: this.bannerFaixa, alpha: 0, duration: 450, delay: 1500 });
   }
 
   private updateHud(): void {
@@ -1103,6 +1144,37 @@ export class GameScene extends Phaser.Scene {
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 
     this.updateHeatGauge();
+    this.updateProgressBar();
+  }
+
+  /**
+   * A faixa de progresso da fase. UMA informação: a chegada do chefão.
+   *
+   * O andamento da fase não era desenhado em lugar nenhum — ele existia só no parallax
+   * (a aproximação da lua) e no relógio do diretor. Aqui ele vira 1px de ciano crescendo
+   * no rodapé da faixa do HUD: leitura de relance, sem ornamento. Quando o chefão entra,
+   * a barra completa e pulsa em VERMELHO — "é agora" é a única mensagem que merece
+   * atenção no topo da tela.
+   *
+   * O pulso é por `time.now`, não por tween: o hitstop pausa tweens, e a barra é a única
+   * coisa que DEVE continuar viva durante o freeze da morte.
+   */
+  private updateProgressBar(): void {
+    const cheio = GAME_WIDTH - 8;
+
+    if (this.boss && !this.boss.isDead) {
+      this.progressFill.width = cheio;
+      this.progressFill.fillColor = COLORS.enemyBright;
+      this.progressFill.alpha = 0.45 + 0.3 * Math.sin(this.time.now * 0.008);
+      return;
+    }
+
+    const progresso = Phaser.Math.Clamp(this.elapsed / this.director.bossTime, 0, 1);
+    // Largura zero desenharia a barra INTEIRA (a origem some com o corpo vazio) — o piso
+    // é 1px, o mesmo truque da barra de calor.
+    this.progressFill.width = Math.max(1, cheio * progresso);
+    this.progressFill.fillColor = COLORS.player;
+    this.progressFill.alpha = 0.55;
   }
 
   /** As barras de calor e giro da mini-gun. Escondidas para qualquer arma sem cano giratório. */
