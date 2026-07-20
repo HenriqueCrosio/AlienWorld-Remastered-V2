@@ -353,6 +353,13 @@ const ART: Record<string, string> = {
   // do céu. O parallax o desenha com TINT escuro — o que está longe é escuro (ver Parallax.ts).
   leviathan: 'sprites/leviathan.png',
 
+  // O LEVIATÃ MORRENDO e PARTIDO EM DOIS — os dois estados dele na CUTSCENE FINAL
+  // (Interlude4Scene): primeiro o casco rachado com fissuras de lava e explosões na espinha;
+  // depois o corpo rasgado no meio, com o interior incandescente exposto. Mesma paleta,
+  // nariz à direita (115×47 e 115×48, PixelLab). Sem placeholder: só a cena final os usa.
+  leviathanDying: 'sprites/leviathan-dying.png',
+  leviathanSplit: 'sprites/leviathan-split.png',
+
   mtnFar: 'sprites/mtn-far.png',
   mtnFar2: 'sprites/mtn-far-2.png',
   mtnFar3: 'sprites/mtn-far-3.png',

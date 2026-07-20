@@ -87,6 +87,12 @@ export class GameOverScene extends Phaser.Scene {
 
     if (isRecord) this.text(GAME_WIDTH / 2, 146, '★ NOVO RECORDE ★', 8, COLORS.hotBright);
 
+    // O CRÉDITO: só na vitória da FASE 4 (o fim da campanha), discreto na parte baixa.
+    // Nas telas de derrota e nas vitórias parciais ele não aparece — crédito é de fim de jogo.
+    if (victory && stage === 4) {
+      this.text(GAME_WIDTH / 2, 202, 'UM JOGO DE HENRIQUE CROSIO', 7, COLORS.metalMid);
+    }
+
     this.text(
       GAME_WIDTH / 2,
       180,

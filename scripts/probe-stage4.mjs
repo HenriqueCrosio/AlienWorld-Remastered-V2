@@ -3,8 +3,8 @@
 // O que só se vê rodando: se o fundo é o modo `interior` (parede de hangar + bandas de teto e
 // chão), se os corredores nascem em PARES com o vão prometido pelo roteiro (alturas
 // independentes somariam parede impassável), se o TETO MATA de verdade (a nave levada até uma
-// coluna pendurada perde vida — grupo certo não prova overlap vivo), e se o fim do corredor
-// fecha na VITÓRIA da fase 4 ("o Leviatã caiu") — o andaime até o NÚCLEO nascer.
+// coluna pendurada perde vida — grupo certo não prova overlap vivo), e se a vitória da fase 4
+// entrega a CUTSCENE FINAL (Interlude4) e ela fecha a campanha na tela de vitória.
 import { chromium } from 'playwright';
 
 let falhas = 0;
@@ -232,12 +232,29 @@ for (let i = 0; i < 60; i++) {
 }
 
 await page.waitForTimeout(4500);
-const fim = await page.evaluate(() => {
+const meio = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return { cena: s?.scene.key };
 });
+console.log('meio     ', JSON.stringify(meio));
+// A CUTSCENE FINAL entra entre o NÚCLEO e o GameOver (2026-07-20): vencer a Fase 4 agora
+// entrega a Interlude4 — a vitória amarga — e é ELA quem fecha a campanha.
+ok(meio.cena === 'Interlude4', `matar o NÚCLEO entrega a CUTSCENE FINAL (cena=${meio.cena})`);
+await page.screenshot({ path: 'probe-stage4-cutscene-final.png' });
+
+// Atravessa a interlude SEM tecla de pular (de propósito — docs/HANDOFF.md): espera a
+// timeline real (~42s) até ela entregar o GameOver.
+let fim = { cena: null };
+for (let i = 0; i < 55; i++) {
+  await page.waitForTimeout(1000);
+  fim = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    return { cena: s?.scene.key };
+  });
+  if (fim.cena === 'GameOver') break;
+}
 console.log('fim      ', JSON.stringify(fim));
-ok(fim.cena === 'GameOver', `matar o NÚCLEO fecha a campanha (cena=${fim.cena})`);
+ok(fim.cena === 'GameOver', `a cutscene final fecha a campanha na tela de vitória (cena=${fim.cena})`);
 
 console.log(falhas === 0 ? '\n✔ FASE 4 DE PONTA A PONTA (com o NÚCLEO)' : `\n✘ ${falhas} asserts falharam`);
 await browser.close();

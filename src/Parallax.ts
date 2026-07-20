@@ -713,6 +713,14 @@ export class Parallax {
     this.leviathan.setVisible(v);
   }
 
+  /**
+   * A CUTSCENE FINAL cresce a lua de Kepler POR CONTA PRÓPRIA (o retorno é o beat 4 dela) —
+   * a lua fixa do modo `espaco` duplicaria o astro no céu. O espelho do setLeviathanVisible.
+   */
+  setMoonVisible(v: boolean): void {
+    this.moon.setVisible(v);
+  }
+
   setForegroundDimmed(dimmed: boolean, durationMs = 1500): void {
     this.foregroundDim = dimmed ? 0 : 1;
 

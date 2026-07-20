@@ -702,11 +702,32 @@ export class GameScene extends Phaser.Scene {
 
     const { next, interlude } = this.stage;
 
+    // ⚠️ A INTERLUDE ENTRA SEMPRE QUE EXISTE — mesmo com `next: null`. Antes o teste era
+    // `next !== null`, e a FASE 4 (a final, sem fase seguinte) caía direto na tela de
+    // vitória: a CUTSCENE FINAL era inalcançável. Só se vai direto para o GameOver quando
+    // a fase NÃO declara interlude.
+    if (interlude) {
+      this.scene.start(interlude, {
+        // A fase SEGUINTE (null na final — a Interlude4 sabe que não há próxima) e a
+        // COMPLETADA (é com ela que a interlude final monta o GameOver).
+        stage: next,
+        stageDone: this.stage.id,
+        handling: this.handling,
+        // O total corrido viaja como `score`: a próxima fase soma o dela por cima (scoreBase).
+        score: this.totalScore(),
+        ship: this.shipId,
+        // A interlude final entrega o GameOver — ela precisa do checkpoint e do treino
+        // para montar o MESMO payload que esta cena montaria.
+        practice: this.practice,
+        baseScore: this.scoreBase,
+      });
+      return;
+    }
+
     if (next !== null) {
-      // O total corrido viaja como `score`: a próxima fase soma o dela por cima (scoreBase).
       // A nave viaja junto. Sem isto a escolha morre na troca de cena e a Fase 3 devolveria o
       // jogador ao Interceptor — a interlude é quem SOBRESCREVE `ship`, ao ser escolhida.
-      this.scene.start(interlude ?? 'Game', {
+      this.scene.start('Game', {
         stage: next,
         handling: this.handling,
         score: this.totalScore(),

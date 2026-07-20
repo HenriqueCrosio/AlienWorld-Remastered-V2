@@ -394,9 +394,12 @@ export const STAGES: Record<number, StageDef> = {
     zone: 'vacuo',
     parallax: 'interior',
     music: 'stage1',
-    // A FASE FINAL: não há próxima. Vencer o NÚCLEO fecha a campanha ("o Leviatã caiu").
+    // A FASE FINAL: não há próxima. Mas Vencer o NÚCLEO não cai direto na tela de fim:
+    // entrega a CUTSCENE FINAL (O AFASTAMENTO — vitória amarga, 2026-07-20). É a
+    // GameScene.victory quem honra a interlude mesmo com `next: null` — sem isso a
+    // última cena da campanha seria inalcançável.
     next: null,
-    interlude: null,
+    interlude: 'Interlude4',
   },
 };
 
