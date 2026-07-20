@@ -9,12 +9,12 @@ Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` →
 ### 🏁 A CAMPANHA INTEIRA EXISTE E ENCADEIA SOZINHA (2026-07-19/20)
 
 ```
-F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → CORAÇÃO → "o Leviatã caiu"
+F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → CORAÇÃO → O AFASTAMENTO → vitória
 ```
 
-Não há mais buraco no arco: as 4 fases, as 3 cutscenes e o chefão final estão de pé, e a
-`probe-stage4` fecha a corrente de ponta a ponta. **O que falta não é construir — é FECHAR
-NÚMEROS e polir.**
+Não há mais buraco no arco: as 4 fases, as 4 cutscenes e o chefão final estão de pé, e a
+`probe-stage4` fecha a corrente de ponta a ponta (atravessando a cutscene final até o
+GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online e deploy.**
 
 **AO RETOMAR, na ordem:**
 
@@ -23,16 +23,32 @@ NÚMEROS e polir.**
    - vãos dos corredores: **110 → 96 → 76 (o aperto) → 84** (evento `corredor` no `STAGE_4`)
    - o guardião: `INVESTIDA_CADA` (6s), `TELEGRAFO_DUR` (0.55s), HP 90
    - o coração: `ABERTO_DUR` / `FECHADO_DUR` / `CADENCIA` por fase, HP 180
-2. ~~A CUTSCENE FINAL~~ — ✅ **IMPLEMENTADA** (2026-07-20, ver a seção dela mais abaixo).
-   O que falta nela é o mesmo da F4: **o Henrique assistir** e dizer se o tom (vitória AMARGA)
-   e os ~42s estão certos. Atalho `[F]` no menu ensaia a cena direto.
-3. **Polimento**: cabos desenhados ancorando as duas formas do chefão a chão/teto (receita da
-   catenária da doca — hoje os cotos da arte terminam no ar); acabamento da cutscene 3.
-4. Depois: score acumulado, deploy (roadmap 9/11). ~~menu novo~~ — ✅ FEITO (2026-07-20
-   parte 4, ver a seção abaixo).
+2. **AS CALIBRAGENS DO PASSE VISUAL esperam o mesmo olho** (partes 3/4 abaixo): hitstop de
+   150ms na morte de chefão, fps das explosões (18/13/12), brilho do halo dos tiros
+   (`lifespan/scale/alpha` do `halo` no `WeaponSystem` — 3 números), fades e pulsos do menu.
+   E a CUTSCENE FINAL: atalho `[F]` no menu ensaia direto — conferir o tom (vitória AMARGA)
+   e os ~42s.
+3. **PLACAR ONLINE (Supabase)** — a próxima frente. **BLOQUEADA: falta o Henrique passar a
+   URL do projeto + a anon/public key** (Settings → API no painel do Supabase). Plano: tabela
+   `scores` (name, score, handling, stage, ship, victory, created_at) + RLS (insert anônimo,
+   select público); submit via fetch REST na GameOverScene (sem SDK); tela de ranking (top
+   por condução + melhores runs).
+4. **DEPLOY (Vercel)** — depois do placar: `npm run build` é estático (vite → `dist/`).
+   ⚠️ O CORS do Supabase precisa do DOMÍNIO FINAL — configurar depois do primeiro deploy.
+5. **Polimento menor**: cabos desenhados ancorando as duas formas do chefão a chão/teto
+   (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
+   fica para depois dessas frentes.
 
-**Saldo PixelLab: $0.40.** Praticamente tudo o que falta é CÓDIGO — orce qualquer arte nova
-com o Henrique antes de gerar.
+**Estado do repositório (2026-07-20, fim de sessão):** `main` @ `78cd19f`, tudo com push em
+`origin` (github.com/HenriqueCrosio/AlienWorld-Remastered-V2). Merges do dia: `c22c7eb`
+(balanceamento), `4615b36` (cutscene final), `78cd19f` (passe visual). Typecheck limpo;
+12 sondas, todas verdes.
+
+**Saldo PixelLab: 1271 GERAÇÕES + $0.398 de crédito** (2026-07-20). Descoberta da sessão:
+no Tier 2, **animação v3 e key art pixflux custam 1 GERAÇÃO cada** (não USD) — animar é
+barato. Pipeline novo: `scripts/gerar.mjs` (cria objeto; schema StyleReferenceImage) +
+`scripts/anim-sheet.mjs` (animação → sheet sem jitter). A API teve uma instabilidade de
+~4h hoje (500 em tudo; sem-auth continuava 401 — diagnóstico: problema DELES, não da chave).
 
 **Atalhos de dev:** `[M]`=F3, `[N]`=serpente, `[P]`=cutscene 3, `[L]`=F4, `[K]`=chefão final,
 `[F]`=cutscene final.
@@ -1194,6 +1210,19 @@ escolha dele justamente quando ela mais importa. A escolha **viaja junto** na tr
     0.88). Asserta o PISO do pulso (≥ 0.8), e se o pulso for por seno em `time.now`,
     ESPERA entre duas amostras (duas leituras coladas leem a mesma fase e o "pulsa"
     passa falso-negativo).
+
+### Ambiente Windows desta máquina (pago em 2026-07-20)
+
+37. **`pkill` NÃO EXISTE neste Git Bash — e o `ps` mostra o PID MSYS, não o WINPID.** O
+    padrão antigo das sondas (`...; pkill -f "vite"`) falhava em silêncio e DEIXAVA O DEV
+    SERVER VIVO. O que funciona: `ps -W` (a 4ª coluna é o WINPID) e
+    `taskkill //PID <winpid> //T //F` (o `//T` derruba a árvore: npm → node vite → esbuild).
+    Antes de matar, confirmar que o processo é SEU (`cat /proc/<pid_msys>/cmdline`): o
+    Kimi Work sobe o PRÓPRIO `npm run dev` de preview neste workspace — matar o dele
+    quebra o preview do Henrique. E dois detalhes de sempre: node/npm só entram com
+    `export PATH="/c/Program Files/nodejs:$PATH"`; o `/tmp` do Git Bash NÃO é o `/tmp` do
+    Python Windows (o managed python lê `/tmp` como `C:\tmp` — para trocar arquivo entre
+    os dois, usar o workspace ou `%TEMP%`).
 ---
 
 ## Convenções do código
@@ -1274,23 +1303,42 @@ Navegadores bloqueiam áudio até a primeira interação; o Phaser destrava sozi
 
 ## PixelLab
 
-- MCP configurado no escopo deste projeto em `~/.claude.json` (a chave **não** está no repositório).
-- **Saldo: ~$0.91** (2026-07-18, pós-Fase 3 — assinatura esgotada, tudo em crédito agora).
-  `create_1_direction_object` custa ~$0.09 e devolve
-  **64 candidatos** num sprite de 32px (16 em 64px, **4 em 128px**). `create_ui_asset` custa ~$0.11.
-- **`animate_object` (modo `v3`) é BARATO** — ~1 geração (~$0.005) por animação. As 7 animações da
-  Fase 2 custaram junto menos que **um** sprite. Não economize em animação: economize em lote.
-- **Todo prompt e cada escolha estão em `assets/raw/prompts.json`** — leia as `_licao_*` antes de
-  gerar qualquer coisa.
-- **Instalar sprite estático:**
-  `node scripts/install-sprite.mjs <object-id> <frame|-> <nome> [--flip] [--banda alta|baixa]`
-  Faz o recorte, remove o xadrez e as colunas de borda opacas. Use `-` como frame para um objeto já
-  promovido (`select_object_frames`), que guarda o quadro em `unknown.png`.
-- **Instalar animação:** `node scripts/install-anim.mjs <nome> <url-base> <n> [png-estático]`
-  Limpa **cada quadro** e só então mede a **caixa união** (a ordem importa — ver armadilha 23). A
-  URL-base sai do `get_object`: `.../animations/<anim-id>/unknown`.
-- **Julgue os candidatos AMPLIADOS:** `node scripts/sheet.mjs <id> <saida.png> <índices...>`.
-  A 32px a silhueta é um borrão — foi assim que uma leva inteira quase entrou em vista de cima.
-- **⚠️ Objeto em `review` não anima.** `animate_object` exige um objeto `completed`: promova o
-  quadro escolhido com `select_object_frames` primeiro (foi por isso que a Capitânia passou a
-  campanha inteira sem animação — ela tinha ficado em review).
+- **Neste repositório (V2) a integração é REST v2 pura** — `https://api.pixellab.ai/v2`, Bearer
+  token em `.env.pixellab` (NA RAIZ do workspace, gitignored — `PIXELLAB_SECRET=...`). O spec
+  OpenAPI baixado fica em `scripts/_openapi.json` (gitignored). A nota antiga de MCP
+  (`~/.claude.json`) era do repositório legado.
+- **Saldo: 1271 gerações + $0.398 de crédito** (2026-07-20, plano Tier 2 ativo). No plano,
+  TUDO cobra em gerações, não em USD: objeto = 1, **animação v3 = 1**, key art pixflux = 1.
+  `select-frames` e `states` não cobraram nada nas chamadas medidas. **Não economize em
+  animação: economize em lote.**
+- **Pipeline REST deste repo:**
+  1. **Gerar objeto:** `node scripts/gerar.mjs "<desc>" <size> <view> [ref.png ...]` — imprime
+     o OBJECT_ID e salva a resposta em `scripts/_gen-resp.json` (job não se perde em timeout).
+     ⚠️ `style_images` é uma lista de OBJETOS `{type:'base64', base64:'data:...', format:'png'}`,
+     e **não pode vir junto de `size`** (a maior ref define o tamanho de saída — lição 17).
+  2. **Julgar AMPLIADO:** `node scripts/sheet.mjs <id> <saida.png> <índices...>` — a 32px a
+     silhueta é um borrão.
+  3. **Promover (review → completed):** REST
+     `POST /v2/objects/{id}/select-frames` com `{"indices":[i],"common_tag":"nome"}` — devolve
+     `created_object_ids` (objeto NOVO). **Objeto em `review` não anima** (armadilha antiga).
+  4. **Sprite estático:** `node scripts/install-sprite.mjs <object-id> <frame|-> <nome> [--flip]`
+     (recorte + xadrez + bordas; `-` lê `unknown.png` do objeto promovido).
+  5. **Estado/variante de um objeto:** `POST /v2/objects/{id}/states`
+     (`{"edit_description":"..."}`) — foi assim que nasceu o `leviathan-split` a partir do
+     `leviathan-dying`, mesma paleta.
+  6. **Animar (v3, 1 geração):** `POST /v2/objects/{id}/animations`
+     (`{"mode":"v3","animation_description":"...","frame_count":N,"keep_first_frame":true}` —
+     N par de 4 a 16; NUNCA passar `directions` em objeto de 1 direção, dá 400).
+     Poll do `background_job_id` em `GET /v2/background-jobs/{id}` até `completed`.
+  7. **Sheet da animação:** `node scripts/anim-sheet.mjs <object-id> <animation-id> <nome>` —
+     baixa os quadros e monta `public/sprites/<nome>-sheet.png` SEM recorte por quadro (âncora
+     estável = jitter zero) + `scripts/_anim-<nome>-review.png` ampliada para julgar.
+  8. **Key art / imagem com fundo:** `POST /v2/create-image-pixflux` (síncrono, até 400×400 —
+     384×216 é a resolução nativa do jogo). O modelo às vezes assina um canto (artefato
+     "FPLk" na key art do menu — conferir os cantos e apagar com remendo de vizinhança).
+- **A API cai de verdade às vezes:** em 2026-07-20 ficou ~4h respondendo 500 em TODOS os
+  endpoints autenticados (sem-auth seguia 401). Diagnóstico: sem-auth 401 + com-auth 500 =
+  problema DELES (ou chave rotacionada), não do client. Esperar e retentar antes de mexer
+  em qualquer coisa.
+- **Todo prompt e cada escolha estão em `assets/raw/prompts.json`** — leia as `_licao_*` antes
+  de gerar qualquer coisa.
