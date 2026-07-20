@@ -311,6 +311,23 @@ export class WeaponSystem {
   private readonly muzzle: Phaser.GameObjects.Particles.ParticleEmitter;
 
   /**
+   * O HALO dos projéteis do jogador — UM emissor por FAMÍLIA DE COR, nunca um por tiro
+   * (armadilha nº 5). O bolt de 11×6px em escala 1 se perdia no ruído da luta: o jogador
+   * precisa distinguir de RELANCE os próprios tiros (ciano/quente, brilho aditivo) dos
+   * inimigos (magenta — a cor de perigo tem dono, armadilha 24).
+   *
+   * A partícula nasce NA posição do projétil com vida de 50ms: a 300px/s isso é um halo
+   * de ~15px que acompanha o tiro, NÃO uma cauda — e como os projéteis vizinhos da HMG
+   * nascem a ~19px um do outro, os halos nunca se fundem num feixe contínuo (a barra
+   * única leria como laser — a mesma armadilha da estela dos meteoros, nº 31).
+   *
+   * Duas cores porque o TRAÇANTE é laranja por decisão de design (munição de canhão, não
+   * raio de energia — makeTracerRound): um halo ciano nele mentiria sobre o que ele é.
+   */
+  private readonly glowCyan: Phaser.GameObjects.Particles.ParticleEmitter;
+  private readonly glowWarm: Phaser.GameObjects.Particles.ParticleEmitter;
+
+  /**
    * O rastro do ENXAME — UM emissor para todos os teleguiados (armadilha nº 5: nunca um por
    * tiro). A CURVA é a identidade da arma inteira (HomingDef) e era invisível: o projétil
    * corrigia o rumo e ninguém via a correção. O rastro curto é o que a desenha no ar.
@@ -349,6 +366,21 @@ export class WeaponSystem {
         emitting: false,
       })
       .setDepth(19);
+
+    const halo = {
+      lifespan: 40,
+      speed: 0,
+      scale: { start: 1.4, end: 0.3 },
+      alpha: { start: 0.28, end: 0 },
+      blendMode: 'ADD' as const,
+      emitting: false,
+    };
+    this.glowCyan = scene.add
+      .particles(0, 0, 'spark', { ...halo, tint: [0x3ee0f0, 0xb5f7ff] })
+      .setDepth(18);
+    this.glowWarm = scene.add
+      .particles(0, 0, 'spark', { ...halo, tint: [0xff7a2a, 0xffd9a0] })
+      .setDepth(18);
   }
 
   get current(): WeaponDef {
@@ -641,6 +673,11 @@ export class WeaponSystem {
       b.setBlendMode(this.weapon.glow ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL);
       b.setAlpha(1);
       b.setData('glow', this.weapon.glow === true);
+      // O halo aditivo (tickFx): por FAMÍLIA de cor — o traçante e o fogo da shotgun são
+      // quentes por design; o resto é ciano, a cor do jogador. Teleguiado não ganha halo:
+      // o rastro teal dele já desenha a curva, e brilho sobre brilho vira mancha.
+      const quente = this.weapon.bullet === 'tracerRound' || this.weapon.bullet === 'blast';
+      b.setData('glowKind', this.weapon.homing ? null : quente ? 'warm' : 'cyan');
       // Hitbox derivada da arte, e generosa: bala fina com corpo justo erra o que devia acertar.
       // O PISO de 3px existe pelo traçante (8×1): a 90% da arte, o corpo dele teria ~1px de
       // altura e atravessaria inimigo sem tocar — visualmente acertando.
@@ -713,6 +750,11 @@ export class WeaponSystem {
         );
       }
 
+      // O halo de legibilidade: uma partícula por projétil por frame, NA posição dele.
+      const haloKind = b.getData('glowKind') as 'cyan' | 'warm' | null;
+      if (haloKind === 'cyan') this.glowCyan.emitParticleAt(b.x, b.y);
+      else if (haloKind === 'warm') this.glowWarm.emitParticleAt(b.x, b.y);
+
       // O PULSO do obus: SÓ alpha — nunca escala, que arrastaria a hitbox de mundo junto.
       // A fase vem da origem do tiro (`ox`), senão dois obuses no ar pulsariam em uníssono.
       if (b.getData('glow') === true) {
@@ -733,6 +775,8 @@ export class WeaponSystem {
     b.setBlendMode(Phaser.BlendModes.NORMAL);
     b.setAlpha(1);
     b.setData('glow', false);
+    // E o halo: um slot que foi ciano não pode continuar soltando brilho como bala reciclada.
+    b.setData('glowKind', null);
   }
 
   private cull(): void {

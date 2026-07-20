@@ -28,13 +28,54 @@ NÚMEROS e polir.**
    e os ~42s estão certos. Atalho `[F]` no menu ensaia a cena direto.
 3. **Polimento**: cabos desenhados ancorando as duas formas do chefão a chão/teto (receita da
    catenária da doca — hoje os cotos da arte terminam no ar); acabamento da cutscene 3.
-4. Depois: score acumulado, menu novo, deploy (roadmap 9/5/11).
+4. Depois: score acumulado, deploy (roadmap 9/11). ~~menu novo~~ — ✅ FEITO (2026-07-20
+   parte 4, ver a seção abaixo).
 
 **Saldo PixelLab: $0.40.** Praticamente tudo o que falta é CÓDIGO — orce qualquer arte nova
 com o Henrique antes de gerar.
 
 **Atalhos de dev:** `[M]`=F3, `[N]`=serpente, `[P]`=cutscene 3, `[L]`=F4, `[K]`=chefão final,
 `[F]`=cutscene final.
+
+### 🆕 Sessão 2026-07-20 (parte 4) — MENU COM A KEY ART + HUD + PROJÉTEIS LEGÍVEIS
+
+A leva do "passe visual" da interface: a primeira impressão (menu), a leitura em combate
+(HUD) e a dos próprios tiros.
+
+- **O MENU agora é a KEY ART** (`menu-keyart.png`, 384×216 = a resolução exata do jogo —
+  o Leviatã-baleia sobre a lua morta com a nave de rastro azul; já estava commitada,
+  carregada no BootScene como `menuKeyart` com a guarda de sempre: sem o PNG, o menu cai
+  no layout antigo de parallax + véu, INTACTO como `layoutFallback()`). A arte já conta a
+  história, então nada a cobre: ela ACORDA com um fade-in de 1s; o título (20px, gelo
+  `playerGlow`) pousa no céu livre entre a nave e o horizonte com fade atrasado + pulso
+  sutil; o CTA `ENTER · COMEÇAR` (NOVO atalho — ENTER/ESPAÇO = diegética, o recomendado)
+  é o que pulsa de verdade; as 3 conduções viraram UMA LINHA cada no terço de baixo,
+  sobre uma faixa escura de alpha 0.45 (a régua: legibilidade sem assassinar a arte); 12
+  estrelas CINTILAM em pontos fixos escolhidos a dedo no céu livre (a arte é um quadro
+  parado — o "vivo" vem de fora dela); os hints de DEV subiram para o topo. A escolha de
+  condução, os atalhos e TODOS os corta-caminhos de dev continuam os mesmos.
+- **HUD: a faixa de progresso da fase AGORA EXISTE.** O andamento até o chefão só existia
+  no relógio do diretor e na aproximação do parallax — não era desenhado em lugar nenhum
+  (o diagnóstico falava de "faixa de losangos de progresso"; os losangos do HUD são as
+  VIDAS, e ficaram como estão). Ela é 1px no rodapé da faixa escura do topo: trilho
+  estático quase invisível + preenchimento ciano crescendo com `elapsed/bossTime`; quando
+  o chefão entra, completa e pulsa em VERMELHO (`enemyBright`, seno por `time.now` —
+  tween pausaria no hitstop, e a barra é a única coisa que deve continuar viva no
+  freeze). Os **banners de ato** ganharam entrada com fade+slide curto (6px em 220ms) e
+  uma faixa escura discreta atrás (o aviso cai no meio da luta — a legibilidade não pode
+  depender do que explode atrás).
+- **Os projéteis do jogador ganharam HALO aditivo** (dois emissores ÚNICOS no
+  `WeaponSystem`, ciano e quente — nunca um por tiro): o bolt de 11×6px se perdia no
+  ruído. O traçante e o fogo da shotgun são QUENTES por design (munição de canhão, não
+  raio — `makeTracerRound`); o resto é ciano, a cor do jogador; teleguiado não ganha (o
+  rastro teal já desenha a curva). Calibragem MEDIDA em A/B de screenshot (armadilha 35):
+  vida 40ms, escala 1.4, alpha 0.28 — a 1ª versão (50ms/2.2/0.4) fundiu a rajada da HMG
+  num feixe contínuo. Tiros inimigos INTOCADOS: a separação ciano/laranja × magenta fica
+  ainda mais clara de relance.
+- **Sonda `probe-menu.mjs` reescrita com asserts** (era só um print): key art na cena em
+  384×216 com o fade terminado, título visível (assert no PISO do pulso — armadilha 36),
+  CTA, as 3 conduções no terço de baixo, as estrelas de cintilação. Regressão inteira
+  verde de novo + typecheck limpo.
 
 ### 🆕 Sessão 2026-07-20 (parte 3) — O PASSE VISUAL DAS EXPLOSÕES (sheets animadas + hitstop)
 
@@ -585,7 +626,7 @@ node scripts/find-cabecas.mjs    # os offsets das CABEÇAS da serpente, por COR 
 node scripts/probe-capitania.mjs # o chefão da Fase 2 nas DUAS fases (salva rolante / flak)
 node scripts/probe-interlude.mjs # a cutscene: placar → pouso → escolha → implosão → Fase 2
 node scripts/probe-chain.mjs     # a CORRENTE: Fase 1 → atmosfera rompe → zero-G → Interlude
-node scripts/probe-menu.mjs      # screenshot do menu
+node scripts/probe-menu.mjs      # o MENU sobre a key art: arte presente? título visível? CTA + as 3 conduções?
 node scripts/probe-hmg.mjs       # a MINI-GUN: giro, calor e o exploit do tamborilar
 node scripts/probe-mina.mjs      # a MINA SENSORA: passar perto dói / atirar nela é seguro
 node scripts/probe-flak.mjs      # o FLAK na luta REAL: nasceu / estourou / foi absorvido?
@@ -1138,6 +1179,21 @@ escolha dele justamente quando ela mais importa. A escolha **viaja junto** na tr
     `physics.world.pause()` + `tweens.pauseAll()` + `anims.pauseAll()`, e o UPDATE devolve no
     primeiro frame enquanto `time < hitstopAte` — o `time` do update não é pausado por nada
     disso, então ele mesmo destrava. Sem `delayedCall` no caminho do descongelar.
+
+### Interface — menu, HUD e projéteis (passe visual 2026-07-20, parte 4)
+
+35. **Halo de projétil por partícula: a calibragem se mede contra a RAJADA MAIS DENSA, não
+    contra o tiro solto.** A 1 emissão/frame por projétil, as partículas formam uma cadeia
+    contínua a cada `velocidade/60` px (~6px na HMG) — com alpha 0.4 e vida 50ms elas se
+    sobrepõem em blend ADD e a rajada inteira lê como FEIXE/laser (a armadilha 31 de novo,
+    agora em tiro). A calibragem que fecha: vida 40ms, escala 1.4, alpha 0.28 — e o A/B
+    obrigatório é o screenshot da HMG em cadência cheia, não da Pulse (7 tiros/s perdoa
+    qualquer exagero; 18/s não perdoa nada).
+36. **Sonda não asserta alpha de objeto que PULSA.** Um tween yoyo faz o alpha oscilar —
+    medir `=== 1` pega um instante aleatório do ciclo e falha à toa (o título do menu em
+    0.88). Asserta o PISO do pulso (≥ 0.8), e se o pulso for por seno em `time.now`,
+    ESPERA entre duas amostras (duas leituras coladas leem a mesma fase e o "pulsa"
+    passa falso-negativo).
 ---
 
 ## Convenções do código
