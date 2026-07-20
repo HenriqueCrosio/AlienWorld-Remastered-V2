@@ -339,6 +339,11 @@ const ART: Record<string, string> = {
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',
 
+  // A KEY ART DO MENU (PixelLab, 384×216 = a resolução EXATA do jogo): o Leviatã-baleia
+  // sobre a lua morta, a nave solitária de rastro azul — a história do jogo num quadro só.
+  // Sem placeholder: se não existir, o menu cai no fundo antigo (parallax + véu).
+  menuKeyart: 'sprites/menu-keyart.png',
+
   // Moldura de HUD (PixelLab `create_ui_asset`, 384×216 = a tela inteira, miolo TRANSPARENTE).
   // Sem placeholder: se não existir, o menu de naves simplesmente aparece sem moldura.
   uiFrame: 'sprites/ui-frame.png',

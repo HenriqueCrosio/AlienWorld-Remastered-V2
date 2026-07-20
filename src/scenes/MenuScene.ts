@@ -7,9 +7,24 @@ import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import type { HandlingMode } from './GameScene';
 
+/**
+ * A TELA-TÍTULO.
+ *
+ * Dois fundos possíveis, decididos pela arte em disco:
+ *
+ * **KEY ART** (`menu-keyart.png`, 384×216 = a resolução exata do jogo): o Leviatã-baleia
+ * sobre a lua morta com a nave solitária de rastro azul. A arte JÁ conta a história do jogo,
+ * então o menu não a cobre com painéis: o título pousa no céu livre entre a nave e o
+ * horizonte, e as opções ficam no terço de baixo (o terreno escuro) sobre uma faixa
+ * translúcida DISCRETA — a legibilidade não pode depender da arte atrás, mas a faixa não
+ * pode assassiná-la (alpha 0.45, a mesma régua do véu antigo).
+ *
+ * **FALLBACK** (sem a arte): o parallax da fase rolando devagar atrás de um véu escuro —
+ * o layout original. O jogo nunca abre numa tela preta por causa de um PNG faltando.
+ */
 export class MenuScene extends Phaser.Scene {
-  private starfield!: Starfield;
-  private parallax!: Parallax;
+  private starfield: Starfield | null = null;
+  private parallax: Parallax | null = null;
 
   constructor() {
     super('Menu');
@@ -18,6 +33,122 @@ export class MenuScene extends Phaser.Scene {
   create(): void {
     resetVariantCache();
 
+    const keyart = this.textures.exists('menuKeyart')
+      ? this.add.image(0, 0, 'menuKeyart').setOrigin(0, 0).setDepth(0)
+      : null;
+
+    if (keyart) this.layoutKeyart(keyart);
+    else this.layoutFallback();
+
+    // A MESMA faixa da fase. Ao entrar no jogo, `Music.play` vê que já está tocando e não
+    // reinicia — a música atravessa a transição de cena sem corte.
+    Music.play(this, 'stage1');
+
+    this.bindKeys();
+  }
+
+  // ─── O layout sobre a KEY ART ───────────────────────────────────────────────
+
+  private layoutKeyart(art: Phaser.GameObjects.Image): void {
+    // A arte ACORDA: fade-in de ~1s na abertura. É o único movimento dela — ela é um
+    // quadro, e quadro bom não se remexe.
+    art.setAlpha(0);
+    this.tweens.add({ targets: art, alpha: 1, duration: 1000, ease: 'Cubic.easeOut' });
+
+    this.twinkleStars();
+
+    // A faixa das opções: o terreno lá embaixo já é escuro, então um véu FINO basta.
+    this.add
+      .rectangle(0, 148, GAME_WIDTH, GAME_HEIGHT - 148, COLORS.bgDeep, 0.45)
+      .setOrigin(0, 0)
+      .setDepth(5);
+
+    // O título mora no céu livre entre a nave e o horizonte — o único terreno vazio da
+    // arte. Gelo brilhante (playerGlow) com contorno pesado: legível sobre qualquer estrela.
+    const titulo = this.t(GAME_WIDTH / 2, 122, 'ALIEN WORLD', 20, COLORS.playerGlow);
+    const sub = this.t(GAME_WIDTH / 2, 139, 'R E M A S T E R E D', 8, COLORS.player);
+
+    // Entrada atrasada: a arte respira primeiro, o nome chega depois. E um brilho
+    // SUTIL pulsando — sinal de "vivo" sem custar um quadro de animação.
+    for (const [alvo, delay] of [[titulo, 300], [sub, 450]] as const) {
+      alvo.setAlpha(0);
+      this.tweens.add({ targets: alvo, alpha: 1, duration: 600, delay, ease: 'Cubic.easeOut' });
+    }
+    this.tweens.add({
+      targets: titulo,
+      alpha: 0.82,
+      duration: 2600,
+      delay: 1500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+
+    // O CTA é o que pulsa de verdade: é ele quem ensina o que fazer.
+    const cta = this.t(GAME_WIDTH / 2, 157, 'ENTER · COMEÇAR', 8, COLORS.playerGlow);
+    cta.setAlpha(0);
+    this.tweens.add({ targets: cta, alpha: 1, duration: 400, delay: 800 });
+    this.tweens.add({
+      targets: cta,
+      alpha: 0.4,
+      duration: 1100,
+      delay: 1200,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+
+    // As conduções, UMA LINHA cada: três linhas cabem no terço de baixo sem apertar, e a
+    // cor da opção carrega o título e a descrição juntos (em 8px, um texto por linha lê
+    // melhor que título+sub empilhados).
+    this.t(GAME_WIDTH / 2, 170, '— CONDUÇÃO —', 7, COLORS.metalLight);
+    this.t(GAME_WIDTH / 2, 182, '[1]  DIEGÉTICA · a gravidade decide · recomendado', 8, COLORS.playerBright);
+    this.t(GAME_WIDTH / 2, 194, '[2]  LEGACY · flap sempre · score ×1.25', 8, COLORS.hot);
+    this.t(GAME_WIDTH / 2, 206, '[3]  LIVRE · voo livre sempre · acessível', 8, COLORS.player);
+
+    // Os hints de DEV sobem para o topo: o miolo da tela agora é da arte. É texto de
+    // desenvolvedor — discreto por definição.
+    if (import.meta.env.DEV) {
+      this.t(GAME_WIDTH / 2, 8, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, COLORS.metalMid);
+      this.t(GAME_WIDTH / 2, 16, '[I][O][P][F] cutscenes  [L] f4  [K] núcleo', 7, COLORS.metalMid);
+    }
+  }
+
+  /**
+   * Estrelas que CINTILAM sobre o céu da key art. A arte já vem estrelada, mas é um
+   * quadro parado — uma dúzia de pontos piscando em fases aleatórias devolve o "vivo"
+   * sem animar nada da pintura (o Leviatã e a lua não se mexem, e não devem).
+   *
+   * Posições escolhidas A DEDO no céu livre: fora do corpo do Leviatã (x<245, y<115),
+   * fora da lua (x 300-370, y 30-85) e fora da nave (x 125-165, y 95-125).
+   */
+  private twinkleStars(): void {
+    const PONTOS: [number, number][] = [
+      [18, 30], [58, 12], [95, 55], [115, 20], [255, 18], [280, 48],
+      [310, 14], [370, 22], [375, 105], [250, 100], [70, 85], [30, 110],
+    ];
+
+    for (const [x, y] of PONTOS) {
+      const estrela = this.add
+        .rectangle(x, y, 1, 1, Math.random() < 0.5 ? COLORS.starBright : COLORS.starMid)
+        .setDepth(1)
+        .setAlpha(0.15);
+
+      this.tweens.add({
+        targets: estrela,
+        alpha: Phaser.Math.FloatBetween(0.6, 1),
+        duration: Phaser.Math.Between(900, 2300),
+        delay: Phaser.Math.Between(0, 2000),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
+  // ─── O fallback: o menu original, sem a arte ────────────────────────────────
+
+  private layoutFallback(): void {
     // O mesmo parallax da fase, rolando devagar atrás do menu: a tela de título vira uma
     // janela para o jogo, em vez de um fundo preto com texto por cima.
     this.starfield = new Starfield(this);
@@ -52,11 +183,21 @@ export class MenuScene extends Phaser.Scene {
     this.option(150, '[2]  LEGACY', 'flap sempre · score ×1.25', COLORS.hot);
     this.option(178, '[3]  LIVRE', 'voo livre sempre · acessível', COLORS.player);
 
-    // A MESMA faixa da fase. Ao entrar no jogo, `Music.play` vê que já está tocando e não
-    // reinicia — a música atravessa a transição de cena sem corte.
-    Music.play(this, 'stage1');
+    if (import.meta.env.DEV) {
+      this.t(GAME_WIDTH / 2, 200, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, COLORS.metalMid);
+      this.t(GAME_WIDTH / 2, 209, '[I][O][P][F] cutscenes  [L] f4  [K] núcleo', 7, COLORS.metalMid);
+    }
+  }
 
+  // ─── Teclas ─────────────────────────────────────────────────────────────────
+
+  private bindKeys(): void {
     const kb = this.input.keyboard!;
+
+    // O CTA da tela: ENTER (ou ESPAÇO) começa na condução RECOMENDADA. As teclas 1-3
+    // continuam sendo o caminho explícito para quem quer escolher.
+    kb.on('keydown-ENTER', () => this.start('diegetico'));
+    kb.on('keydown-SPACE', () => this.start('diegetico'));
     kb.on('keydown-ONE', () => this.start('diegetico'));
     kb.on('keydown-TWO', () => this.start('flap'));
     kb.on('keydown-THREE', () => this.start('free'));
@@ -64,9 +205,6 @@ export class MenuScene extends Phaser.Scene {
     // Só em dev. Balancear uma luta sem jogar a fase inteira antes, e — desde que a Fase 2
     // existe — ENTRAR nela sem ter que vencer a Fase 1 toda vez.
     if (import.meta.env.DEV) {
-      this.t(GAME_WIDTH / 2, 200, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, COLORS.metalMid);
-      this.t(GAME_WIDTH / 2, 209, '[I][O][P][F] cutscenes  [L] f4  [K] núcleo', 7, COLORS.metalMid);
-
       kb.on('keydown-B', () => this.scene.start('Game', { handling: 'diegetico', practice: true }));
       kb.on('keydown-V', () => this.scene.start('Game', { stage: 2, handling: 'diegetico' }));
       kb.on('keydown-C', () =>
@@ -131,6 +269,8 @@ export class MenuScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
+    if (!this.starfield || !this.parallax) return;
+
     const dt = delta / 1000;
     this.starfield.update(dt);
     // Metade da velocidade do jogo: o menu respira, não corre.
@@ -138,7 +278,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   /**
-   * Uma opção: título forte + descrição legível.
+   * Uma opção do fallback: título forte + descrição legível.
    * A descrição usa `metalLight`, não `metalMid`: em 8px, o cinza-médio da paleta não tem
    * contraste suficiente contra o fundo — contorno não salva cor apagada.
    */
@@ -147,8 +287,8 @@ export class MenuScene extends Phaser.Scene {
     this.t(GAME_WIDTH / 2, y + 13, sub, 8, COLORS.metalLight);
   }
 
-  private t(x: number, y: number, value: string, size: number, color: number): void {
-    pixelText(this, x, y, value, { size, color }).setDepth(10);
+  private t(x: number, y: number, value: string, size: number, color: number): Phaser.GameObjects.Text {
+    return pixelText(this, x, y, value, { size, color }).setDepth(10);
   }
 
   private start(handling: HandlingMode): void {
