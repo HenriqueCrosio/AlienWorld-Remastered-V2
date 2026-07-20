@@ -17,3 +17,8 @@ scripts/_*.png
 *.log
 .DS_Store
 Thumbs.db
+
+# Segredos locais (NUNCA commitar)
+.env.pixellab
+.env.local
+.env*.local
