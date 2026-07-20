@@ -100,7 +100,10 @@ export class EnemySystem {
     this.enemies = scene.physics.add.group({ allowGravity: false });
     this.enemyBullets = scene.physics.add.group({
       defaultKey: 'bolt2',
-      maxSize: 64,
+      // 128, não 64: a fúria do NÚCLEO (leque de 5 + mirado a cada 1.1s + paredes + 2 drones)
+      // somada aos estilhaços de uma mina sensora acordada estourava o teto — e o tiro
+      // descartado em silêncio é uma luta mais fácil do que a desenhada.
+      maxSize: 128,
       allowGravity: false,
     });
 

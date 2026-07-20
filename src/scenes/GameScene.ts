@@ -96,7 +96,13 @@ export class GameScene extends Phaser.Scene {
   /** No treino o relógio começa adiantado; o score não deve herdar esse tempo. */
   private clockOffset = 0;
   private score = 0;
+  /** Total JÁ FECHADO das fases anteriores — a campanha pontua em cadeia, não fase a fase. */
+  private scoreBase = 0;
   private lives = 3;
+  /** Bombas da vida atual (GDD §5: 3 por vida). `K` detona: limpa tiros e fere tudo na tela. */
+  private bombs = 3;
+  /** Tomou dano nesta fase? O bônus de no-hit é pago na vitória (GDD §8). */
+  private tookDamage = false;
   private invulnerableUntil = 0;
   private over = false;
 
@@ -109,6 +115,8 @@ export class GameScene extends Phaser.Scene {
     handling?: HandlingMode;
     practice?: boolean;
     ship?: string;
+    /** Total acumulado das fases anteriores (a campanha soma; a fase começa do checkpoint). */
+    score?: number;
   }): void {
     // Fase desconhecida cai na 1: um link velho ou um `scene.start` errado não pode
     // derrubar o jogo numa tela preta.
@@ -135,7 +143,10 @@ export class GameScene extends Phaser.Scene {
     this.elapsed = 0;
     this.clockOffset = 0;
     this.score = 0;
+    this.scoreBase = data.score ?? 0;
     this.lives = 3;
+    this.bombs = 3;
+    this.tookDamage = false;
     this.invulnerableUntil = 0;
     this.over = false;
 
@@ -347,6 +358,10 @@ export class GameScene extends Phaser.Scene {
 
     this.ship.setAngle(Phaser.Math.Clamp(body.velocity.y * 0.06, -25, 25));
     this.ship.setVisible(time > this.invulnerableUntil || Math.floor(time / 60) % 2 === 0);
+
+    // A BOMBA é da cena, não da arma: funciona nas duas conduções (no flap o K está livre,
+    // já que o gatilho é automático) e independe da arma equipada.
+    if (input.bombPressed) this.useBomb();
 
     // O CHÃO MACHUCA. Sem isto, a estratégia ótima no flap é raspar no solo — o que
     // anula o obstáculo e o próprio sentido da condução.
@@ -678,11 +693,17 @@ export class GameScene extends Phaser.Scene {
     if (this.over) return;
     this.over = true;
 
+    // O BÔNUS DE NO-HIT (GDD §8): cruzar a fase sem tomar um arranhão vale tanto quanto
+    // meio chefão. É a recompensa do jogador disciplinado — e o que dá profundidade ao placar.
+    if (!this.tookDamage) {
+      this.score += 1000;
+      this.showBanner('SEM DANO · +1000', COLORS.playerBright);
+    }
+
     const { next, interlude } = this.stage;
 
     if (next !== null) {
-      // O score ainda NÃO é acumulado entre fases — cada fase pontua a sua. Quando a campanha
-      // tiver as 4, isto vira um total corrido (docs/GDD.md §8).
+      // O total corrido viaja como `score`: a próxima fase soma o dela por cima (scoreBase).
       // A nave viaja junto. Sem isto a escolha morre na troca de cena e a Fase 3 devolveria o
       // jogador ao Interceptor — a interlude é quem SOBRESCREVE `ship`, ao ser escolhida.
       this.scene.start(interlude ?? 'Game', {
@@ -702,6 +723,8 @@ export class GameScene extends Phaser.Scene {
       // A fase COMPLETADA — a tela de vitória escreve o título com ela ("FASE 1 COMPLETA" era
       // texto fixo da era de fase única, e mentia em todo fim de campanha desde então).
       stage: this.stage.id,
+      ship: this.shipId,
+      baseScore: this.scoreBase,
     });
   }
 
@@ -872,11 +895,64 @@ export class GameScene extends Phaser.Scene {
     this.pickups.destroy(p);
   }
 
+  /**
+   * A BOMBA (K) — 3 por vida (GDD §5).
+   *
+   * É a válvula de escape para quando a tela fecha: limpa TODO tiro inimigo em voo, fere tudo
+   * que vive na tela e dá 1s de i-frames. O dano (12) mata o miúdo e fere o sério sem virar
+   * botão de vencer — um cargueiro (24) sobrevive, um chefão mal sente. Ela cobra pelo
+   * estoque: acabou, acabou até perder a vida.
+   */
+  private useBomb(): void {
+    if (this.over || this.bombs <= 0) return;
+    this.bombs--;
+
+    this.cameras.main.flash(220, 255, 232, 180);
+    this.cameras.main.shake(280, 0.008);
+    this.invulnerableUntil = Math.max(this.invulnerableUntil, this.time.now + 1000);
+    this.fx.explode(this.ship.x + 14, this.ship.y, 1.8);
+
+    // Todo tiro inimigo vira fagulha — a bomba é, antes de tudo, a resposta para a parede
+    // de balas que não dá mais para desviar. Snapshot do array: o pool muda no meio do loop.
+    for (const b of [
+      ...this.enemies.enemyBullets.getChildren(),
+    ] as Phaser.Physics.Arcade.Sprite[]) {
+      if (!b.active) continue;
+      this.fx.hit(b.x, b.y);
+      this.enemies.release(b);
+    }
+
+    for (const e of [
+      ...this.enemies.enemies.getChildren(),
+    ] as Phaser.Physics.Arcade.Sprite[]) {
+      if (!e.active) continue;
+      const hp = (e.getData('hp') as number) - 12;
+      e.setData('hp', hp);
+
+      if (hp <= 0) {
+        this.fx.explode(e.x, e.y, e.scale);
+        this.score += e.getData('score') as number;
+        this.pickups.maybeDrop(e.x, e.y, 0.18);
+        e.destroy();
+      } else {
+        e.setTint(0xffb0b0);
+        this.time.delayedCall(60, () => {
+          if (e.active) e.setTint(e.getData('tint') as number);
+        });
+      }
+    }
+
+    if (this.boss && !this.boss.isDead && this.boss.damage(12)) this.killBoss();
+  }
+
   private damageShip(): void {
     if (this.over || this.time.now < this.invulnerableUntil) return;
 
     this.lives--;
     this.invulnerableUntil = this.time.now + 1400;
+    this.tookDamage = true;
+    // 3 por vida (GDD §5): a vida nova vem com o estoque de bombas cheio.
+    this.bombs = 3;
 
     // Perde a ESPECIAL ao tomar dano — o modelo Metal Slug (docs/GDD.md §5). Volta para a arma
     // da NAVE, não para a Pulse: devolver o jogador à arma de outra nave apagaria a escolha dele.
@@ -902,6 +978,11 @@ export class GameScene extends Phaser.Scene {
         handling: this.handling,
         practice: this.practice,
         victory: false,
+        // O RETRY é da fase, não da campanha (GDD §8): a tela de fim precisa saber de onde
+        // o jogador caiu, com qual nave, e qual era o placar na ENTRADA da fase (checkpoint).
+        stage: this.stage.id,
+        ship: this.shipId,
+        baseScore: this.scoreBase,
       }),
     );
   }
@@ -910,7 +991,11 @@ export class GameScene extends Phaser.Scene {
 
   private totalScore(): number {
     const clock = this.elapsed - this.clockOffset;
-    return Math.floor((this.score + clock * 10) * this.controller.scoreMultiplier);
+    // A FASE pontua a sua (com o multiplicador da condução aplicado uma vez); a CAMPANHA é a
+    // soma das fases — o multiplicador não pode incidir de novo sobre o que já foi multiplicado.
+    return (
+      this.scoreBase + Math.floor((this.score + clock * 10) * this.controller.scoreMultiplier)
+    );
   }
 
   private showBanner(text: string, color: number): void {
@@ -939,7 +1024,7 @@ export class GameScene extends Phaser.Scene {
     const nome = this.weapons.overheated ? 'TRAVADA' : w.name;
 
     this.hud.setText(
-      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}   ${this.totalScore()}`,
+      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}   B×${this.bombs}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

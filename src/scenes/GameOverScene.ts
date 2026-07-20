@@ -23,11 +23,24 @@ export class GameOverScene extends Phaser.Scene {
     handling: HandlingMode;
     victory?: boolean;
     practice?: boolean;
-    /** A fase COMPLETADA (só na vitória). Sem ela o título era fixo — "FASE 1 COMPLETA" — e
-     *  mentia em todo fim de campanha desde que a Fase 2 nasceu. */
+    /** A fase COMPLETADA (na vitória) ou ONDE o jogador caiu (na derrota). Sem ela o título
+     *  era fixo — "FASE 1 COMPLETA" — e mentia em todo fim de campanha desde que a Fase 2 nasceu. */
     stage?: number;
+    /** A nave da run — o retry da fase devolve a MESMA nave, não o jato padrão. */
+    ship?: string;
+    /** O placar na ENTRADA da fase (checkpoint). O retry recomeça DAQUI, não do zero:
+     *  morrer reinicia a fase, não a campanha (GDD §8). */
+    baseScore?: number;
   }): void {
-    const { score, handling, victory = false, practice = false, stage = 1 } = data;
+    const {
+      score,
+      handling,
+      victory = false,
+      practice = false,
+      stage = 1,
+      ship,
+      baseScore = 0,
+    } = data;
 
     // Recorde por modificador — herdeiro do PlayerPrefs do v2.
     // O TREINO não grava recorde: ele pula 68s de fase, o score não é comparável.
@@ -54,6 +67,7 @@ export class GameOverScene extends Phaser.Scene {
       this.text(GAME_WIDTH / 2, 56, gancho[stage] ?? 'fim da campanha', 7, COLORS.player);
     } else {
       this.text(GAME_WIDTH / 2, 44, 'NAVE PERDIDA', 14, COLORS.enemyBright);
+      this.text(GAME_WIDTH / 2, 60, `a fase ${stage} continua esperando`, 7, COLORS.metalMid);
     }
 
     this.text(GAME_WIDTH / 2, 84, `SCORE  ${score}`, 10, COLORS.metalLight);
@@ -76,14 +90,22 @@ export class GameOverScene extends Phaser.Scene {
     this.text(
       GAME_WIDTH / 2,
       180,
-      practice ? 'ESPAÇO repete o CHEFÃO · ESC menu' : 'ESPAÇO reinicia · ESC menu',
+      practice
+        ? 'ESPAÇO repete o CHEFÃO · ESC menu'
+        : victory
+          ? 'ESPAÇO joga de novo · ESC menu'
+          : `ESPAÇO tenta a FASE ${stage} de novo · ESC menu`,
       6,
       COLORS.metalMid,
     );
 
     const kb = this.input.keyboard!;
-    // No treino, ESPAÇO volta direto para a luta — sem os 68s de fase.
-    kb.once('keydown-SPACE', () => this.scene.start('Game', { handling, practice }));
+    // No treino, ESPAÇO volta direto para a luta — sem a fase antes dela. Fora do treino,
+    // o retry é da FASE em que o jogador caiu (com a mesma nave e o placar do checkpoint):
+    // morrer reinicia a fase, não a campanha (GDD §8).
+    kb.once('keydown-SPACE', () =>
+      this.scene.start('Game', { stage, handling, practice, ship, score: baseScore }),
+    );
     kb.once('keydown-ESC', () => this.scene.start('Menu'));
   }
 

@@ -216,7 +216,7 @@ export const WEAPONS: Record<string, WeaponDef> = {
   // A régua é a pulse (7 dps, reta, infinita). Cada uma é forte num eixo e fraca no oposto —
   // sidegrades, nunca upgrades. Auditoria de balanceamento no scratchpad da sessão.
   //
-  //  tracer      8 dps no casco grande, 4 no alvo pequeno (só 1 dos 2 raios conecta)
+  //  tracer      7 dps no casco grande, 3.5 no alvo pequeno (só 1 dos 2 raios conecta)
   //  obus        5 dps que chegam de uma vez — pune tudo que fica parado, erra tudo que anda
   //  agulha      6 dps quase-instantâneos — nunca chega tarde no batedor, rala no casco
   //  salva       6.2 dps médios ADIANTADOS na janela (6 de dano em 0.16s, depois 0.8s exposta)

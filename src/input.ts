@@ -23,6 +23,7 @@ export class InputReader {
       rightArrow: kb.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
       space: kb.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
       fire: kb.addKey(Phaser.Input.Keyboard.KeyCodes.J),
+      bomb: kb.addKey(Phaser.Input.Keyboard.KeyCodes.K),
     };
     this.pointer = scene.input.activePointer;
   }
@@ -46,6 +47,8 @@ export class InputReader {
       flapPressed,
       // No Livre o Espaço não impulsiona, então serve de gatilho.
       firing: k.fire.isDown || k.space.isDown || this.pointer.isDown,
+      // A bomba é BORDA (JustDown): segurar o K não pode gastar o estoque inteiro.
+      bombPressed: Phaser.Input.Keyboard.JustDown(k.bomb),
     };
   }
 }
