@@ -36,6 +36,49 @@ com o Henrique antes de gerar.
 **Atalhos de dev:** `[M]`=F3, `[N]`=serpente, `[P]`=cutscene 3, `[L]`=F4, `[K]`=chefão final,
 `[F]`=cutscene final.
 
+### 🆕 Sessão 2026-07-20 (parte 3) — O PASSE VISUAL DAS EXPLOSÕES (sheets animadas + hitstop)
+
+O veredito do Henrique sobre a cutscene final ("interessante no conceito, fraca no visual e
+design") virou uma leva inteira de efeitos. As 3 sheets do PixelLab (`explosion-sheet` 13f 64²,
+`explosion-big-sheet` 13f 128², `leviathan-dying-sheet` 9f 116² — **1 geração cada**, ~$0.015 no
+total, aprovadas antes do código) entraram como SPRITESHEET no BootScene (mapa `SHEETS`, com a
+guarda de sempre: sem o PNG, a textura não existe e o jogo cai nas partículas — arte entra
+asset por asset).
+
+- **`Fx` reescrito**: as animações `explosion` (18fps), `explosion-big` (13fps — massa grande
+  explode devagar) e `implosion-big` (os MESMOS quadros ao contrário: fumaça→chama→núcleo =
+  matéria SUGADA) são registradas uma vez. `explode()` = sheet + as fagulhas de sempre (a sheet
+  dá o CORPO, a partícula dá a energia — sozinhas, nenhuma das duas bastava) + shake, e ganhou
+  um 4º parâmetro `depth` (armadilha 30). Sprites one-shot com `once('animationcomplete',
+  destroy)` — sem pool. `explodeBig()` (shake longo + flash), `implodeBig()`, `sheetExplosion()`
+  (sem shake: os impactos da chuva de meteoros caem em SILÊNCIO).
+- **HITSTOP na morte de chefão (150ms) — a técnica:** pausa-se o MUNDO (`physics.world.pause()`
+  + `tweens.pauseAll()` + `anims.pauseAll()`) e **NUNCA o relógio da cena**. `hitstopAte` é um
+  instante do `time` do update (que nada pausa): enquanto ele não passa, o update devolve no
+  1º frame (freeze-frame); quando passa, o próprio update rearma tudo. Nenhum `delayedCall`
+  participa do descongelar — é a armadilha clássica do hitstop (congelar o timer que
+  descongela) evitada por construção. Os `delayedCall` da cadeia de explosões seguem correndo,
+  e a 1ª explosão estoura DENTRO do quadro pregado: cinematográfico, não bug. Morte de chefão
+  = hitstop + cadeia de 8 + `explodeBig` final antes do destroy. **A BOMBA (K)** ganhou a
+  `explosion-big` ×1.7 no centro da tela.
+- **Cutscene 1**: o final da Aurora agora é IMPLOSÃO VISUAL — duas `implosion-big` no casco
+  (era um `explode(4)` de partícula) + grandes na cadeia do convés. **Cutscene 2**: a cadeia da
+  doca tem `explode-big` a cada 3 estouros e o estouro final é a sheet grande — TUDO com depth
+  na frente da doca (ver armadilha 30: estourava ATRÁS da estação).
+- **Cutscene 4 (a prioridade)**: o beat 3 trocou o sprite ESTÁTICO pela animação
+  `leviathan-dying` em pingpong (dura o beat sem congelar; o estático virou fallback), com a
+  cópia aditiva laranja AGORA ANIMADA JUNTO; a cadeia na espinha é de explosões da sheet (com
+  grandes a cada 5), depth corrigido; a partição ganhou o rasgo em `explosion-big` + 8
+  fragmentos; as estelas dos meteoros foram afuniladas em duas camadas (armadilha 31) e os
+  impactos ganham a sheet pequena SEM shake; a lua subiu para depth 61 (armadilha 32). **Os
+  beats, a fiação e os ~42s NÃO mudaram** — o trabalho foi visual. `probe-interlude4` cobre a
+  animação viva (textura da sheet + `isPlaying` + o quadro AVANÇANDO entre duas amostras).
+- **Sonda nova `probe-fx.mjs`**: mata um inimigo pela via REAL (alinha a nave e segura o J)
+  e prova que a morte dispara um sprite da sheet, que ele toca e que se destrói ao completar.
+- Regressão: stage2, stage3, stage4, chain, interlude, doca, interlude4, bomba, fx — todas
+  verdes; `npm run typecheck` limpo. Revisão visual quadro a quadro de TODOS os beats (a régua
+  era "cara de AAA pixel art").
+
 ### 🆕 Sessão 2026-07-20 (parte 2) — A CUTSCENE FINAL (O AFASTAMENTO) construída
 
 A última peça narrativa do jogo existe: `src/scenes/Interlude4Scene.ts`, ~42s medidos,
@@ -49,7 +92,9 @@ A última peça narrativa do jogo existe: `src/scenes/Interlude4Scene.ts`, ~42s 
   `victory && stage === 4`.
 - **Os 6 beats** (tempos em ms): DE DENTRO (nave fugindo para a ESQUERDA, entulho do
   `selarBoca` em posições fixas) → RUPTURA 8200 (corte no clarão) → AFASTAMENTO
-  (`leviathanDying` + brilho ADD pulsante + fissuras + explosões em cadeia na espinha) →
+  (o Leviatã MORRENDO — desde a parte 3 é a ANIMAÇÃO `leviathan-dying` 9f em pingpong, com a
+  cópia ADD pulsante animada junto + explosões da SHEET em cadeia na espinha; o estático
+  `leviathanDying` virou fallback) →
   PARTIÇÃO 16200 (`leviathanSplit` em container de **2 crops**, metades separam com rotação
   oposta enquanto o conjunto encolhe para (92,56) escala 1.2 — o `setApproach()` invertido) →
   RETORNO 19400 (a lua cresce para escala 2.1 em (316,106), tint 0x9aa4c4 + brilho ADD
@@ -548,7 +593,8 @@ node scripts/probe-fundo.mjs     # o que EXATAMENTE está desenhado no fundo, e 
 node scripts/probe-doca.mjs      # a 2ª cutscene: pousa NA PISTA? o Arauto está no róster?
 node scripts/probe-interlude3.mjs # a 3ª cutscene: derrapa NO CONVÉS? róster de 8? entrega a F4?
 node scripts/probe-stage4.mjs    # FASE 4: modo interior? pares com vão garantido? o TETO mata? (+ atravessa a cutscene final)
-node scripts/probe-interlude4.mjs # a CUTSCENE FINAL: os 6 beats batem? dura ~42s? entrega o GameOver com crédito?
+node scripts/probe-interlude4.mjs # a CUTSCENE FINAL: os 6 beats batem? dura ~42s? a animação do Leviatã está VIVA?
+node scripts/probe-fx.mjs        # as EXPLOSÕES ANIMADAS: matar um inimigo dispara a sheet? ela toca e se destrói?
 node scripts/vazar-janelas.mjs     # vaza as janelas do hangar (rode DEPOIS de reinstalar a arte)
 node scripts/find-pad.mjs doca 80  # acha a PISTA na doca pela COR (marcações vermelhas)
 node scripts/feather-doca.mjs      # esfuma as bordas cortadas da doca (rode DEPOIS do install)
@@ -1063,6 +1109,35 @@ escolha dele justamente quando ela mais importa. A escolha **viaja junto** na tr
     Bônus da revisão visual: a lua **placeholder** (círculo gerado) fica feia acima de ~2.2
     de escala, e um sprite ADD cobrindo o disco inteiro **clareia** em vez de aquecer — o
     brilho quente (0xff8c1a) tem que ficar só no contorno/metade iluminada.
+
+### Efeitos e explosões (passe visual 2026-07-20, parte 3)
+
+30. **⚠️ OS EMISSORES DO Fx VIVEM NO DEPTH 50 — e as CUTSCENES desenham acima disso.** A
+    doca (70), o entulho da Interlude4 (72) e o Leviatã morrendo (66) são todos mais altos:
+    as explosões de partícula estouravam ATRÁS do objeto que deviam estar destruindo, e era
+    metade do "visual fraco" dos set-pieces (a outra metade era não ter sheet). `fx.explode/
+    explodeBig/implodeBig` ganharam o parâmetro `depth` — numa cena com cenário acima de 50,
+    PASSAR SEMPRE. Sonda nenhuma pega: a explosão EXISTE, só está escondida. Olho, nos
+    screenshots.
+31. **Estela de meteoro em barra uniforme lê como LASER.** Um sprite único esticado
+    (`spark` 22×3, alpha alto) virou um bastão laranja flutuando. Trilha boa AFUNILA: rastro
+    longo fosco (alpha ~0.45, cor escura) + núcleo curto quente colado na rocha (alpha ~0.9).
+    O mesmo vale para qualquer "trilha" feita de um sprite retangular.
+32. **Protagonista de cutscene não divide depth com o primeiro plano do parallax.** A lua da
+    Interlude4 nasceu em 58, ABAIXO do foreground do parallax (60) — e uma pedra à deriva
+    cruzou o disco bem no quadro-final ("a nave contra a lua"). Quando um astro vira
+    protagonista (escala 2.1, beats inteiros olhando para ele), ele sobe acima do 60.
+33. **Sheet de canvas QUADRADO tem âncora DIFERENTE do sprite recortado da mesma arte.** O
+    `leviathanDying` estático é 115×47 recortado: o centro do sprite É o centro do bicho. A
+    `leviathan-dying-sheet` é 116×116 com o bicho centralizado SOBRANDO canvas: o centro
+    visual dele no quadro é ~(57.5, 61.5) — medido pelo bbox do alfa, média de vários quadros
+    (a criatura se move entre eles). Trocar um pelo outro sem compensar desloca o corpo ~9px.
+    `Interlude4Scene.leviatanPos` faz a conta; medir de novo se a sheet trocar.
+34. **HITSTOP: pause o MUNDO, nunca o RELÓGIO.** Quem congela o `time` congela junto o timer
+    que descongela (a armadilha clássica). A técnica do jogo: `hitstopAte = time.now + ms` +
+    `physics.world.pause()` + `tweens.pauseAll()` + `anims.pauseAll()`, e o UPDATE devolve no
+    primeiro frame enquanto `time < hitstopAte` — o `time` do update não é pausado por nada
+    disso, então ele mesmo destrava. Sem `delayedCall` no caminho do descongelar.
 ---
 
 ## Convenções do código

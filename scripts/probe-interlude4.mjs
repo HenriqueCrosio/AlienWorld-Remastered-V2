@@ -42,7 +42,16 @@ const estado = () =>
       entulho: s.entulho.length,
       cenario: s.cenario.length,
       leviatan: s.leviatan
-        ? { tipo: s.leviatan.type, tex: s.leviatan.texture?.key ?? null, escala: +s.leviatan.scaleX.toFixed(2) }
+        ? {
+            tipo: s.leviatan.type,
+            tex: s.leviatan.texture?.key ?? null,
+            escala: +s.leviatan.scaleX.toFixed(2),
+            // O beat 3 agora é ANIMADO (a sheet em pingpong): a sonda prova que a animação
+            // está TOCANDO — textura da sheet + anim corrente + o quadro avançando.
+            anim: s.leviatan.anims?.currentAnim?.key ?? null,
+            tocando: s.leviatan.anims?.isPlaying ?? null,
+            quadro: s.leviatan.anims?.currentFrame?.index ?? null,
+          }
         : null,
       partido: s.partido,
       metades: s.metadeEsq ? { esq: Math.round(s.metadeEsq.x), dir: Math.round(s.metadeDir.x) } : null,
@@ -81,13 +90,29 @@ const fora = await estado();
 console.log('fora     ', JSON.stringify(fora));
 ok(fora.beat === 3, `a ruptura aconteceu (beat=${fora.beat})`);
 ok(fora.cenario === 0 && fora.entulho === 0, 'o corte limpou o interior (cenário e entulho destruídos)');
+// O beat 3 trocou o sprite ESTÁTICO (`leviathanDying`) pela SHEET ANIMADA — e a sonda cobra
+// as duas coisas: a textura certa E a animação viva (uma sheet parada seria o adesivo de antes).
 ok(
-  fora.leviatan?.tex === 'leviathanDying',
-  `o Leviatã MORRENDO está na tela (tex=${fora.leviatan?.tex})`,
+  fora.leviatan?.tex === 'leviathanDyingSheet',
+  `o Leviatã MORRENDO é a sheet animada (tex=${fora.leviatan?.tex})`,
+);
+ok(
+  fora.leviatan?.anim === 'leviathan-dying' && fora.leviatan?.tocando === true,
+  `a animação está TOCANDO (anim=${fora.leviatan?.anim}, tocando=${fora.leviatan?.tocando})`,
 );
 ok(fora.nave?.flipX === false, 'lá fora a nave aponta para casa (sem flipX)');
 
-await page.waitForTimeout(2800); // ~t=12s
+// O quadro tem que AVANÇAR: amostra 1s depois, a animação (8fps, pingpong de 2s) está
+// obrigatoriamente em outro quadro — um pingpong congelado falharia aqui.
+await page.waitForTimeout(1000); // ~t=10.2s
+const fora2 = await estado();
+console.log('fora+1s  ', JSON.stringify(fora2));
+ok(
+  fora2.leviatan?.quadro !== null && fora2.leviatan?.quadro !== fora.leviatan?.quadro,
+  `o quadro da animação AVANÇA (${fora.leviatan?.quadro} → ${fora2.leviatan?.quadro})`,
+);
+
+await page.waitForTimeout(1800); // ~t=12s
 await page.screenshot({ path: 'probe-interlude4-beat3.png' });
 
 // ─── A PARTIÇÃO: o bicho rasga em dois, e o conjunto ENCOLHE (setApproach invertido) ───

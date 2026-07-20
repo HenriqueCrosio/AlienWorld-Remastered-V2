@@ -353,6 +353,8 @@ export class InterludeScene extends Phaser.Scene {
     // A CADEIA VARRE O CASCO DA DIREITA PARA A ESQUERDA, ao longo da linha do convés — e ela
     // chega ATÉ a nave. É a direção que cria a urgência: o jogador vê a destruição vindo na
     // direção dele antes de decolar. Uma explosão aleatória no meio da tela seria só barulho.
+    // A cada 4 estouros, um GRANDE (a sheet de 128px): a cadeia racha o casco, os grandes
+    // são os compartimentos indo pelos ares.
     const N = 14;
 
     for (let i = 0; i < N; i++) {
@@ -360,11 +362,10 @@ export class InterludeScene extends Phaser.Scene {
         if (this.done) return;
 
         const t = i / (N - 1);
-        this.fx.explode(
-          Phaser.Math.Linear(GAME_WIDTH + 10, 40, t) + Phaser.Math.Between(-14, 14),
-          InterludeScene.DECK_Y + Phaser.Math.Between(-10, 26),
-          1.5,
-        );
+        const x = Phaser.Math.Linear(GAME_WIDTH + 10, 40, t) + Phaser.Math.Between(-14, 14);
+        const y = InterludeScene.DECK_Y + Phaser.Math.Between(-10, 26);
+        if (i % 4 === 3) this.fx.explodeBig(x, y - 14, 0.8, 26);
+        else this.fx.explode(x, y, 1.5, 26);
       });
     }
 
@@ -380,13 +381,19 @@ export class InterludeScene extends Phaser.Scene {
       this.tweens.add({ targets: this.ship, y: 60, duration: 1600, ease: 'Cubic.easeOut' });
     });
 
-    // O casco AFUNDA e apaga: a Aurora sai de cena por baixo, por onde entrou.
+    // O FINAL É IMPLOSÃO, não explosão — é a palavra da cena ("a Aurora IMPLODE"), e agora ela
+    // é VISUAL: a `explosion-big` invertida suga a luz para dentro do casco. A sheet lê como
+    // matéria sendo engolida: fumaça → chama → núcleo branco → nada. Duas, em pontos do casco:
+    // uma nave de 384px não implode num ponto só.
     this.time.delayedCall(2700, () => {
       if (this.done) return;
 
-      this.cameras.main.flash(800, 255, 210, 120);
-      this.fx.explode(GAME_WIDTH / 2, InterludeScene.DECK_Y, 4);
+      this.cameras.main.flash(500, 255, 210, 120);
+      this.fx.implodeBig(GAME_WIDTH / 2 - 60, InterludeScene.DECK_Y - 34, 1.5, 26);
+      this.fx.implodeBig(GAME_WIDTH / 2 + 70, InterludeScene.DECK_Y - 26, 1.2, 26);
 
+      // O casco AFUNDA e apaga no rastro da implosão: a Aurora sai de cena por baixo, por onde
+      // entrou — puxada para dentro e para baixo, não varrida para o lado.
       this.tweens.add({
         targets: [this.carrier, this.deckRim],
         y: '+=70',
