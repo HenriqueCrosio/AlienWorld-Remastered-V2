@@ -118,6 +118,28 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'ship-alien2-thrust', prefix: 'shipAlien2Anim', frameRate: 12 },
 ];
 
+/**
+ * SPRITESHEETS (quadros lado a lado num PNG só) — o formato novo do passe visual (2026-07-20).
+ *
+ * Diferente das anims legadas (um PNG por quadro), aqui o tamanho do quadro é FIXO e declarado
+ * — as três sheets foram geradas no PixelLab já em grade: explosão 13×64², explosão grande
+ * 13×128², Leviatã morrendo 9×116². Sem o arquivo, a textura simplesmente não existe e o Fx
+ * cai nas partículas de sempre (arte entra asset por asset — a guarda é o `textures.exists`
+ * no registro das animações, não um placeholder desenhado: explosão procedural JÁ existe, são
+ * as fagulhas).
+ */
+const SHEETS: Record<string, { path: string; w: number; h: number }> = {
+  // A explosão-MESTRA do jogo: núcleo branco-quente → chamas → fumaça escura → some.
+  explosionSheet: { path: 'sprites/explosion-sheet.png', w: 64, h: 64 },
+  // A detonação apocalíptica (bosses, bombas, set-pieces). INVERTIDA vira IMPLOSÃO (Fx).
+  explosionBigSheet: { path: 'sprites/explosion-big-sheet.png', w: 128, h: 128 },
+  // O Leviatã com fissuras pulsando e explosões na espinha (cutscene final, beat 3).
+  // ⚠️ CANVAS QUADRADO 116×116 com a criatura CENTRALIZADA — a âncora é outra em relação ao
+  // sprite estático `leviathanDying` (115×47 recortado). O centro visual do bicho no quadro é
+  // ~(57.5, 61.5), medido no PNG — a Interlude4 posiciona por ele (Interlude4Scene.LEV_*).
+  leviathanDyingSheet: { path: 'sprites/leviathan-dying-sheet.png', w: 116, h: 116 },
+};
+
 /** Registra os quadros de uma animação no mapa de ART. */
 function animFrames(prefix: string, file: string): Record<string, string> {
   return Object.fromEntries(
@@ -388,6 +410,10 @@ export class BootScene extends Phaser.Scene {
     });
 
     for (const [key, path] of Object.entries(ART)) this.load.image(key, path);
+
+    for (const [key, sheet] of Object.entries(SHEETS)) {
+      this.load.spritesheet(key, sheet.path, { frameWidth: sheet.w, frameHeight: sheet.h });
+    }
 
     this.load.audio('stage1', 'audio/stage1.mp3');
     this.load.audio('boss', 'audio/boss.mp3');
