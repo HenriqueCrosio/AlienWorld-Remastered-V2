@@ -75,6 +75,10 @@ export class GameScene extends Phaser.Scene {
 
   private hud!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
+  /** A faixa escura discreta atrás do banner de ato. */
+  private bannerFaixa!: Phaser.GameObjects.Rectangle;
+  /** A faixa de progresso da fase: o preenchimento (o trilho é estático, criado no create). */
+  private progressFill!: Phaser.GameObjects.Rectangle;
   /** Calor e giro da HMG. Só aparecem quando a arma equipada tem cano giratório. */
   private heatBg!: Phaser.GameObjects.Rectangle;
   private heatBar!: Phaser.GameObjects.Rectangle;
@@ -105,6 +109,23 @@ export class GameScene extends Phaser.Scene {
   private tookDamage = false;
   private invulnerableUntil = 0;
   private over = false;
+
+  /**
+   * HITSTOP — o freeze-frame da morte de chefão (o "peso" do impacto).
+   *
+   * Técnica: pausamos o MUNDO (física, tweens, anims) mas NUNCA o relógio da cena — é a
+   * armadilha clássica do hitstop: quem congela o `time` congela junto o timer que descongela.
+   * Aqui `hitstopAte` é um instante do PRÓPRIO relógio do jogo (o `time` do update, que nada
+   * pausa): enquanto ele não chega, o update devolve no primeiro frame e o mundo fica pregado;
+   * quando passa, o próprio update rearma tudo. Nenhum `delayedCall` participa do descongelar,
+   * então não há timer que possa ser congelado por engano.
+   *
+   * 0 = sem hitstop. Duração medida na revisão visual: 150ms — longo o bastante para registrar,
+   * curto o bastante para não ler como engasgo (a sonda mede: probe-stage2/3/4 atravessam a
+   * morte do chefão sem ajuste).
+   */
+  private hitstopAte = 0;
+  private static readonly HITSTOP_BOSS_MS = 150;
 
   constructor() {
     super('Game');
@@ -148,6 +169,7 @@ export class GameScene extends Phaser.Scene {
     this.bombs = 3;
     this.tookDamage = false;
     this.invulnerableUntil = 0;
+    this.hitstopAte = 0;
     this.over = false;
 
     // As texturas mudam entre execuções (arte entra asset por asset): o cache de variantes
@@ -255,12 +277,33 @@ export class GameScene extends Phaser.Scene {
       align: 'left',
     }).setDepth(100);
 
+    // A faixa atrás do banner: o aviso de ato cai no MEIO da tela, sobre a luta — a
+    // legibilidade não pode depender do que estiver explodindo atrás dele.
+    this.bannerFaixa = this.add
+      .rectangle(0, 64, GAME_WIDTH, 24, COLORS.bgDeep, 0.4)
+      .setOrigin(0, 0)
+      .setDepth(99)
+      .setAlpha(0);
+
     this.banner = pixelText(this, GAME_WIDTH / 2, 76, '', {
       size: 13,
       color: COLORS.hotBright,
     })
       .setDepth(100)
       .setAlpha(0);
+
+    // A FAIXA DE PROGRESSO da fase: 1px de altura no rodapé da faixa do HUD. Uma
+    // informação só — o quanto falta para o chefão. Esguia de propósito: é leitura de
+    // relance, não ornamento; quando a luta começa ela completa e pulsa em vermelho.
+    // O trilho é estático (alpha baixo, quase some na faixa): vive na display list, sem campo.
+    this.add
+      .rectangle(4, 12, GAME_WIDTH - 8, 1, COLORS.metalMid, 0.25)
+      .setOrigin(0, 0)
+      .setDepth(100);
+    this.progressFill = this.add
+      .rectangle(4, 12, 1, 1, COLORS.player, 0.55)
+      .setOrigin(0, 0)
+      .setDepth(101);
 
     // ─── O MEDIDOR DA MINI-GUN ───
     //
@@ -322,6 +365,17 @@ export class GameScene extends Phaser.Scene {
 
   override update(time: number, delta: number): void {
     if (this.over) return;
+
+    // HITSTOP: o mundo está pregado (física/tweens/anims pausados no hitstop()). O relógio
+    // NÃO está — `time` continua correndo, e é ele quem destrava. Enquanto não passa, nada
+    // anda (freeze-frame); passou, o mundo rearma e o jogo segue no mesmo frame.
+    if (this.hitstopAte > 0) {
+      if (time < this.hitstopAte) return;
+      this.hitstopAte = 0;
+      this.physics.world.resume();
+      this.tweens.resumeAll();
+      this.anims.resumeAll();
+    }
 
     const dt = delta / 1000;
     this.elapsed += dt;
@@ -625,9 +679,28 @@ export class GameScene extends Phaser.Scene {
     if (this.boss.damage(bullet.getData('damage') as number)) this.killBoss();
   }
 
+  /**
+   * O freeze-frame: pausa física, tweens e anims — NUNCA o relógio. O descongelar mora no
+   * update (ver `hitstopAte`), que é o único lugar garantido de continuar rodando.
+   *
+   * ⚠️ Os `delayedCall` da cena (a cadeia de explosões, a vitória) NÃO pausam — de propósito:
+   * 150ms de relógio correndo durante o freeze é o que deixa a primeira explosão da cadeia
+   * estourar DENTRO do quadro pregado, e o efeito é cinematográfico, não bug.
+   */
+  private hitstop(ms: number): void {
+    this.hitstopAte = Math.max(this.hitstopAte, this.time.now + ms);
+    this.physics.world.pause();
+    this.tweens.pauseAll();
+    this.anims.pauseAll();
+  }
+
   private killBoss(): void {
     const boss = this.boss!;
     this.score += 2000;
+
+    // O PESO do impacto: o mundo congela por um instante no momento da morte — antes da
+    // cadeia. Sem hitstop, matar o chefão é só mais uma explosão; com ele, é A explosão.
+    this.hitstop(GameScene.HITSTOP_BOSS_MS);
 
     // Explosão em cadeia: um boss não morre num estouro só.
     for (let i = 0; i < 8; i++) {
@@ -641,6 +714,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.time.delayedCall(1200, () => {
+      // O estouro FINAL é o da sheet grande: a cadeia racha o casco, esta o apaga.
+      this.fx.explodeBig(boss.sprite.x, boss.sprite.y, 1.2);
       boss.destroy();
       this.boss = null;
 
@@ -932,6 +1007,9 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.shake(280, 0.008);
     this.invulnerableUntil = Math.max(this.invulnerableUntil, this.time.now + 1000);
     this.fx.explode(this.ship.x + 14, this.ship.y, 1.8);
+    // A detonação CENTRAL: a bomba é um evento de tela inteira, e a explosão grande no meio
+    // dela é o que vende isso (o efeito existente — flash/shake/limpeza — continua por cima).
+    this.fx.explodeBig(GAME_WIDTH / 2, GAME_HEIGHT / 2, 1.7);
 
     // Todo tiro inimigo vira fagulha — a bomba é, antes de tudo, a resposta para a parede
     // de balas que não dá mais para desviar. Snapshot do array: o pool muda no meio do loop.
@@ -1020,19 +1098,35 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showBanner(text: string, color: number): void {
+    // Um banner NOVO interrompe o anterior sem piscar: mata os tweens em voo antes.
+    this.tweens.killTweensOf([this.banner, this.bannerFaixa]);
+
     this.banner
       .setText(text)
       .setColor(Phaser.Display.Color.IntegerToColor(color).rgba)
-      .setAlpha(1)
+      .setY(82)
+      .setAlpha(0)
       .setScale(1);
+    this.bannerFaixa.setAlpha(0);
 
+    // A ENTRADA: fade + slide curto (6px em 220ms). O aviso chega com intenção, não com
+    // um estalo — e some devagar, tempo de ler (~1.5s de palco).
+    this.tweens.add({
+      targets: this.banner,
+      y: 76,
+      alpha: 1,
+      duration: 220,
+      ease: 'Cubic.easeOut',
+    });
+    this.tweens.add({ targets: this.bannerFaixa, alpha: 0.4, duration: 220 });
     this.tweens.add({
       targets: this.banner,
       alpha: 0,
-      scale: 1.12,
-      duration: 1800,
+      duration: 450,
+      delay: 1500,
       ease: 'Cubic.easeIn',
     });
+    this.tweens.add({ targets: this.bannerFaixa, alpha: 0, duration: 450, delay: 1500 });
   }
 
   private updateHud(): void {
@@ -1050,6 +1144,37 @@ export class GameScene extends Phaser.Scene {
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 
     this.updateHeatGauge();
+    this.updateProgressBar();
+  }
+
+  /**
+   * A faixa de progresso da fase. UMA informação: a chegada do chefão.
+   *
+   * O andamento da fase não era desenhado em lugar nenhum — ele existia só no parallax
+   * (a aproximação da lua) e no relógio do diretor. Aqui ele vira 1px de ciano crescendo
+   * no rodapé da faixa do HUD: leitura de relance, sem ornamento. Quando o chefão entra,
+   * a barra completa e pulsa em VERMELHO — "é agora" é a única mensagem que merece
+   * atenção no topo da tela.
+   *
+   * O pulso é por `time.now`, não por tween: o hitstop pausa tweens, e a barra é a única
+   * coisa que DEVE continuar viva durante o freeze da morte.
+   */
+  private updateProgressBar(): void {
+    const cheio = GAME_WIDTH - 8;
+
+    if (this.boss && !this.boss.isDead) {
+      this.progressFill.width = cheio;
+      this.progressFill.fillColor = COLORS.enemyBright;
+      this.progressFill.alpha = 0.45 + 0.3 * Math.sin(this.time.now * 0.008);
+      return;
+    }
+
+    const progresso = Phaser.Math.Clamp(this.elapsed / this.director.bossTime, 0, 1);
+    // Largura zero desenharia a barra INTEIRA (a origem some com o corpo vazio) — o piso
+    // é 1px, o mesmo truque da barra de calor.
+    this.progressFill.width = Math.max(1, cheio * progresso);
+    this.progressFill.fillColor = COLORS.player;
+    this.progressFill.alpha = 0.55;
   }
 
   /** As barras de calor e giro da mini-gun. Escondidas para qualquer arma sem cano giratório. */

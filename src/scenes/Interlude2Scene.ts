@@ -616,18 +616,22 @@ export class Interlude2Scene extends Phaser.Scene {
       this.tweens.add({ targets: this.ship, y: 44, duration: 1700, ease: 'Cubic.easeOut' });
     });
 
-    // A cadeia sobe pela estrutura, da pista para a rocha.
+    // A cadeia sobe pela estrutura, da pista para a rocha — agora com CORPO: a cadeia comum
+    // racha a estrutura, e a cada 3 estouros um GRANDE (a sheet de 128px) arranca um bloco
+    // inteiro. ⚠️ DEPTH NA FRENTE DA DOCA (73 > 70): os emissores do Fx vivem no depth 50, e
+    // sem o parâmetro as explosões nasciam ATRÁS da estação que deviam estar destruindo — era
+    // metade do motivo de o set-piece ler fraco.
     const N = 12;
     for (let i = 0; i < N; i++) {
       this.time.delayedCall(900 + i * 130, () => {
         if (this.done) return;
 
         const t = i / (N - 1);
-        this.fx.explode(
-          Phaser.Math.Linear(GAME_WIDTH - 40, 60, t) + Phaser.Math.Between(-16, 16),
-          Phaser.Math.Linear(Interlude2Scene.PAD_Y, 90, t) + Phaser.Math.Between(-12, 12),
-          1.5,
-        );
+        const x = Phaser.Math.Linear(GAME_WIDTH - 40, 60, t) + Phaser.Math.Between(-16, 16);
+        const y =
+          Phaser.Math.Linear(Interlude2Scene.PAD_Y, 90, t) + Phaser.Math.Between(-12, 12);
+        if (i % 3 === 2) this.fx.explodeBig(x, y - 10, 0.9, Interlude2Scene.DEPTH_DOCA + 3);
+        else this.fx.explode(x, y, 1.6, Interlude2Scene.DEPTH_DOCA + 3);
       });
     }
 
@@ -636,7 +640,7 @@ export class Interlude2Scene extends Phaser.Scene {
       if (this.done) return;
 
       this.amarras.forEach((a, i) => {
-        this.fx.explode(a.ancoraX, a.ancoraY, 1.2);
+        this.fx.explode(a.ancoraX, a.ancoraY, 1.2, Interlude2Scene.DEPTH_DOCA + 3);
 
         this.tweens.add({
           targets: a.rocha,
@@ -658,7 +662,14 @@ export class Interlude2Scene extends Phaser.Scene {
       if (this.done) return;
 
       this.cameras.main.flash(800, 255, 170, 90);
-      this.fx.explode(Interlude2Scene.DOCA_X + 40, Interlude2Scene.PAD_Y - 20, 4);
+      // O estouro FINAL, na barriga da estação: a detonação de 128px em escala grande — é ela
+      // que apaga a doca, não mais um clarão genérico de partícula.
+      this.fx.explodeBig(
+        Interlude2Scene.DOCA_X + 40,
+        Interlude2Scene.PAD_Y - 20,
+        1.6,
+        Interlude2Scene.DEPTH_DOCA + 3,
+      );
 
       this.tweens.add({
         targets: [this.doca, this.padRim],

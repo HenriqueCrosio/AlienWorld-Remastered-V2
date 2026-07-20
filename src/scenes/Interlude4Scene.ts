@@ -109,10 +109,36 @@ export class Interlude4Scene extends Phaser.Scene {
   private static readonly DEPTH_PISO = 64;
   private static readonly DEPTH_HANGAR = 70;
   private static readonly DEPTH_ENTULHO = 72;
-  private static readonly DEPTH_LUA = 58;
+  // A lua fica NA FRENTE do primeiro plano do parallax (60): com escala 2.1 ela é protagonista
+  // dos beats 4-6, e uma pedra à deriva cruzando o disco cobria o quadro-final (revisão visual).
+  private static readonly DEPTH_LUA = 61;
   private static readonly DEPTH_LEVIATAN = 66;
   private static readonly DEPTH_METEORO = 78;
   private static readonly DEPTH_NAVE = 80;
+
+  // ─── A geometria do Leviatã MORRENDO (beat 3) — a âncora do canvas quadrado ───
+  //
+  // O CENTRO VISUAL da criatura fica em (186, 90): o mesmo lugar do sprite estático da era
+  // anterior (`leviathanDying`, 115×47 recortado — o bicho preenche o quadro, o centro do
+  // sprite É o centro do bicho). A sheet nova (`leviathanDyingSheet`) tem canvas QUADRADO
+  // 116×116 com a criatura CENTRALIZADA dentro: o centro visual dela no quadro é ~(57.5, 61.5)
+  // — MEDIDO no PNG (bbox do alfa, média dos quadros), não chutado. Sem compensar, o bicho
+  // nasceria ~9px abaixo do lugar. `leviatanPos` devolve onde o CENTRO DO SPRITE tem que ficar
+  // para o BICHO cair em (LEVI_X, LEVI_Y).
+  private static readonly LEVI_X = 186;
+  private static readonly LEVI_Y = 90;
+  private static readonly LEVI_SCALE = 2.55;
+  private static readonly LEVI_FRAME = 116;
+  private static readonly LEVI_VIS_X = 57.5;
+  private static readonly LEVI_VIS_Y = 61.5;
+
+  private static get leviatanPos(): { x: number; y: number } {
+    const meio = Interlude4Scene.LEVI_FRAME / 2;
+    return {
+      x: Interlude4Scene.LEVI_X + (meio - Interlude4Scene.LEVI_VIS_X) * Interlude4Scene.LEVI_SCALE,
+      y: Interlude4Scene.LEVI_Y + (meio - Interlude4Scene.LEVI_VIS_Y) * Interlude4Scene.LEVI_SCALE,
+    };
+  }
 
   private static get hangarY(): number {
     const meio = Interlude4Scene.ART_H / 2;
@@ -316,12 +342,17 @@ export class Interlude4Scene extends Phaser.Scene {
    * cena), pilha de baixo para cima, tint de silhueta: é parede morrendo, não pedra de cenário.
    */
   private desabamento(): void {
-    // A cadeia de explosões corre o lado direito — de onde ela veio, tudo estoura.
+    // A cadeia de explosões corre o lado direito — de onde ela veio, tudo estoura. A cada 4
+    // estouros, um GRANDE: o interior não racha uniforme, ele cede aos blocos. ⚠️ Depth NA
+    // FRENTE do entulho (72): os emissores do Fx nascem no 50, atrás da parede desabando.
     const N = 12;
     for (let i = 0; i < N; i++) {
       this.time.delayedCall(3000 + i * 420, () => {
         if (this.done || this.beat !== 1) return;
-        this.fx.explode(Phaser.Math.Between(220, 376), Phaser.Math.Between(30, 180), 1.2);
+        const x = Phaser.Math.Between(220, 376);
+        const y = Phaser.Math.Between(30, 180);
+        if (i % 4 === 3) this.fx.explodeBig(x, y, 0.9, Interlude4Scene.DEPTH_ENTULHO + 2);
+        else this.fx.explode(x, y, 1.2, Interlude4Scene.DEPTH_ENTULHO + 2);
       });
     }
 
@@ -380,7 +411,9 @@ export class Interlude4Scene extends Phaser.Scene {
 
     this.cameras.main.flash(650, 255, 190, 110);
     this.cameras.main.shake(700, 0.02);
-    this.fx.explode(360, 100, 3);
+    // O rompimento do casco é a MAIOR detonação da cena: a sheet grande no ponto de saída,
+    // na frente de tudo — romper uma casca é ganhar o céu, e tem que DOER na tela.
+    this.fx.explodeBig(360, 100, 1.5, Interlude4Scene.DEPTH_NAVE + 2);
 
     this.time.delayedCall(280, () => {
       if (this.done) return;
@@ -405,27 +438,58 @@ export class Interlude4Scene extends Phaser.Scene {
   /**
    * BEAT 3 — O AFASTAMENTO: o Leviatã MORRENDO, grande na tela.
    *
-   * Ele sempre foi uma silhueta distante; agora está perto e morrendo. A luz das rachaduras
-   * pulsa POR CÓDIGO (uma cópia aditiva laranja respirando por cima + fagulhas nascendo ao
-   * longo do casco), e as explosões correm a espinha em cadeia — a mesma gramática da morte
-   * de todo chefão do jogo, aplicada ao corpo inteiro dele.
+   * Ele sempre foi uma silhueta distante; agora está perto e morrendo. A ESTRELA é a ANIMAÇÃO
+   * (`leviathan-dying`, 9 quadros da sheet em pingpong: fissuras pulsando e explosões na
+   * espinha) — o sprite ESTÁTICO da era anterior vira fallback. Por cima, os efeitos de código
+   * que SOMAM: a cópia aditiva respirando (agora animada junto, não congelada sobre arte viva),
+   * as fagulhas nascendo do casco, e a cadeia de explosões de VERDADE correndo a espinha — a
+   * mesma gramática da morte de todo chefão do jogo, aplicada ao corpo inteiro dele.
    */
   private afastamento(): void {
     if (this.done) return;
 
     this.aviso('O LEVIATÃ ESTÁ MORRENDO', COLORS.hot);
 
-    if (this.textures.exists('leviathanDying')) {
+    const pos = Interlude4Scene.leviatanPos;
+
+    if (this.anims.exists('leviathan-dying')) {
+      const lev = this.add
+        .sprite(pos.x, pos.y, 'leviathanDyingSheet', 0)
+        .setScale(Interlude4Scene.LEVI_SCALE)
+        .setDepth(Interlude4Scene.DEPTH_LEVIATAN);
+      lev.play('leviathan-dying');
+      this.leviatan = lev;
+
+      // A RACHADURA PULSANDO: uma cópia ADITIVA laranja da MESMA animação, respirando. Na era
+      // estática o glow era um segundo sprite parado por cima do primeiro; agora ele acompanha
+      // os quadros — o fogo interno acende e apaga NO RITMO das fissuras da arte.
+      const brilho = this.add
+        .sprite(pos.x, pos.y, 'leviathanDyingSheet', 0)
+        .setScale(Interlude4Scene.LEVI_SCALE)
+        .setTint(0xff7a2a)
+        .setAlpha(0.08)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(Interlude4Scene.DEPTH_LEVIATAN + 1);
+      brilho.play('leviathan-dying');
+      this.brilhoLeviatan = brilho;
+      this.tweens.add({
+        targets: this.brilhoLeviatan,
+        alpha: 0.3,
+        duration: 700,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    } else if (this.textures.exists('leviathanDying')) {
+      // Fallback da era anterior (arte entra asset por asset): o estático + o glow estático.
       this.leviatan = this.add
-        .image(186, 90, 'leviathanDying')
-        .setScale(2.55)
+        .image(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'leviathanDying')
+        .setScale(Interlude4Scene.LEVI_SCALE)
         .setDepth(Interlude4Scene.DEPTH_LEVIATAN);
 
-      // A RACHADURA PULSANDO: uma cópia ADITIVA laranja por cima da arte, respirando. Aditivo
-      // soma luz — é o fogo interno acendendo e apagando, não um tint piscando a silhueta.
       this.brilhoLeviatan = this.add
-        .image(186, 90, 'leviathanDying')
-        .setScale(2.55)
+        .image(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'leviathanDying')
+        .setScale(Interlude4Scene.LEVI_SCALE)
         .setTint(0xff7a2a)
         .setAlpha(0.1)
         .setBlendMode(Phaser.BlendModes.ADD)
@@ -438,34 +502,38 @@ export class Interlude4Scene extends Phaser.Scene {
         repeat: -1,
         ease: 'Sine.easeInOut',
       });
-
-      // Fagulhas nascendo ao longo do casco: as fissuras soltando fogo.
-      this.fissuras = this.add
-        .particles(186, 90, 'spark', {
-          emitZone: {
-            type: 'random',
-            source: new Phaser.Geom.Rectangle(-135, -28, 270, 56),
-          } as Phaser.Types.GameObjects.Particles.ParticleEmitterConfig['emitZone'],
-          lifespan: { min: 260, max: 620 },
-          speed: { min: 8, max: 34 },
-          scale: { start: 1.2, end: 0 },
-          tint: [COLORS.hotBright, COLORS.hot],
-          blendMode: 'ADD',
-          frequency: 70,
-        })
-        .setDepth(Interlude4Scene.DEPTH_LEVIATAN + 2);
     }
 
-    // A cadeia na espinha: um estouro a cada ~0.4s, varrendo o corpo.
+    // Fagulhas nascendo ao longo do casco: as fissuras soltando fogo. A faixa acompanha o corpo
+    // inteiro do bicho na tela (na escala 2.55 ele ocupa ~x=39..333, y=30..150).
+    this.fissuras = this.add
+      .particles(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'spark', {
+        emitZone: {
+          type: 'random',
+          source: new Phaser.Geom.Rectangle(-140, -55, 280, 105),
+        } as Phaser.Types.GameObjects.Particles.ParticleEmitterConfig['emitZone'],
+        lifespan: { min: 260, max: 620 },
+        speed: { min: 8, max: 34 },
+        scale: { start: 1.2, end: 0 },
+        tint: [COLORS.hotBright, COLORS.hot],
+        blendMode: 'ADD',
+        frequency: 70,
+      })
+      .setDepth(Interlude4Scene.DEPTH_LEVIATAN + 2);
+
+    // A CADEIA NA ESPINHA: explosões da SHEET (não mais fagulha solta), varrendo o corpo de
+    // ré a proa. A espinha do bicho na tela é a faixa ALTA do corpo (y≈34..84); a cada 5
+    // estouros, um GRANDE racha uma vértebra inteira. ⚠️ Depth NA FRENTE do Leviatã: os
+    // emissores do Fx nascem no depth 50 — sem o parâmetro a cadeia estourava ATRÁS do corpo
+    // que devia estar destruindo (era metade do "visual fraco" deste beat).
     const N = 17;
     for (let i = 0; i < N; i++) {
       this.time.delayedCall(400 + i * 430, () => {
         if (this.done || this.partido) return;
-        this.fx.explode(
-          186 + Phaser.Math.Between(-125, 125),
-          90 + Phaser.Math.Between(-26, 8),
-          1.1,
-        );
+        const x = Interlude4Scene.LEVI_X + Phaser.Math.Between(-125, 125);
+        const y = Interlude4Scene.LEVI_Y + Phaser.Math.Between(-56, -6);
+        if (i % 5 === 4) this.fx.explodeBig(x, y, 0.85, Interlude4Scene.DEPTH_LEVIATAN + 3);
+        else this.fx.explode(x, y, 1.1, Interlude4Scene.DEPTH_LEVIATAN + 3);
       });
     }
 
@@ -491,6 +559,14 @@ export class Interlude4Scene extends Phaser.Scene {
 
     this.cameras.main.flash(320, 255, 150, 70);
     this.cameras.main.shake(450, 0.012);
+    // O RASGO: a detonação grande no miolo, do ponto onde o corpo parte — o clarão cobre a
+    // troca da arte (o bicho inteiro vira as duas metades) e vende a violência do corte.
+    this.fx.explodeBig(
+      Interlude4Scene.LEVI_X,
+      Interlude4Scene.LEVI_Y,
+      1.1,
+      Interlude4Scene.DEPTH_LEVIATAN + 3,
+    );
 
     this.brilhoLeviatan?.destroy();
     this.brilhoLeviatan = null;
@@ -507,8 +583,8 @@ export class Interlude4Scene extends Phaser.Scene {
     // as duas pelo CENTRO do frame: os cortes se encontram na emenda, e o corpo se
     // reconstitui centrado no container (a esquerda cobre −57.5..+0.5, a direita +0.5..+57.5).
     const container = this.add
-      .container(186, 90)
-      .setScale(2.55)
+      .container(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y)
+      .setScale(Interlude4Scene.LEVI_SCALE)
       .setDepth(Interlude4Scene.DEPTH_LEVIATAN);
     this.metadeEsq = this.add.image(0, 0, 'leviathanSplit').setCrop(0, 0, 58, 48);
     this.metadeDir = this.add.image(0, 0, 'leviathanSplit').setCrop(58, 0, 57, 48);
@@ -530,18 +606,26 @@ export class Interlude4Scene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
-    // Os destroços entre as metades: cinco fragmentos saindo do miolo incandescente.
-    for (let i = 0; i < 5; i++) {
+    // Os destroços entre as metades: fragmentos saindo do miolo incandescente — rocha E
+    // fagulha (o burst do Fx por trás do rasgo), para o corte não ler como dois sprites
+    // deslizando no vazio.
+    this.fx.explode(
+      Interlude4Scene.LEVI_X,
+      Interlude4Scene.LEVI_Y,
+      1.6,
+      Interlude4Scene.DEPTH_LEVIATAN + 2,
+    );
+    for (let i = 0; i < 8; i++) {
       if (!this.textures.exists('asteroid')) break;
       const frag = this.add
-        .image(186, 90, 'asteroid')
-        .setScale(0.7)
+        .image(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'asteroid')
+        .setScale(Phaser.Math.FloatBetween(0.45, 0.85))
         .setTint(0xff9a3c)
         .setDepth(Interlude4Scene.DEPTH_LEVIATAN + 1);
       this.tweens.add({
         targets: frag,
-        x: 186 + Phaser.Math.Between(-90, 90),
-        y: 90 + Phaser.Math.Between(-50, 50),
+        x: Interlude4Scene.LEVI_X + Phaser.Math.Between(-110, 110),
+        y: Interlude4Scene.LEVI_Y + Phaser.Math.Between(-60, 60),
         angle: Phaser.Math.Between(-180, 180),
         alpha: 0.6,
         duration: 3800,
@@ -683,17 +767,26 @@ export class Interlude4Scene extends Phaser.Scene {
     const angulo = Math.atan2(ty - y0, tx - x0);
     const corpo = this.add.container(x0, y0).setRotation(angulo).setDepth(Interlude4Scene.DEPTH_METEORO);
 
-    const trilha = this.add
-      .sprite(-9, 0, 'spark')
-      .setScale(16, 3)
-      .setTint(0xff8c1a)
-      .setAlpha(0.75)
+    // A ESTELA, EM DUAS CAMADAS: um rastro longo e FOSCO + um núcleo curto e QUENTE colado na
+    // rocha. Uma barra única uniforme lia como LASER (revisão visual do beat 5 — trilha boa
+    // afunila: brilhante na cabeça, apagando na cauda).
+    const rastro = this.add
+      .sprite(-10, 0, 'spark')
+      .setScale(20, 2)
+      .setTint(0xd95f10)
+      .setAlpha(0.45)
+      .setBlendMode(Phaser.BlendModes.ADD);
+    const nucleo = this.add
+      .sprite(-4, 0, 'spark')
+      .setScale(8, 2)
+      .setTint(0xffc36b)
+      .setAlpha(0.9)
       .setBlendMode(Phaser.BlendModes.ADD);
     const rocha = this.add
       .sprite(0, 0, Phaser.Math.RND.pick(texs))
       .setScale(0.55)
       .setTint(0xffa54d);
-    corpo.add([trilha, rocha]);
+    corpo.add([rastro, nucleo, rocha]);
 
     this.tweens.add({ targets: rocha, angle: 360, duration: 900, repeat: 3 });
     this.meteoros++;
@@ -709,6 +802,9 @@ export class Interlude4Scene extends Phaser.Scene {
         corpo.destroy(true);
         if (this.done) return;
         this.impactoFx.explode(6, tx, ty);
+        // O estouro na atmosfera é da SHEET, pequeno e SEM SHAKE (sheetExplosion, não explode):
+        // a chuva cai em silêncio — o silêncio é o preço.
+        this.fx.sheetExplosion(tx, ty, 0.5, Interlude4Scene.DEPTH_LUA + 2);
         this.impactos++;
       },
     });
