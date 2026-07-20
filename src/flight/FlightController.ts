@@ -11,6 +11,8 @@ export interface InputState {
   flapPressed: boolean;
   /** Gatilho segurado. Ignorado por conduções com autoFire. */
   firing: boolean;
+  /** BOMBA (K): true apenas no frame em que a tecla desceu. A cena decide se gasta. */
+  bombPressed: boolean;
 }
 
 /**

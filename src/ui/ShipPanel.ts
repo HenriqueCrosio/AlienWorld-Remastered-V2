@@ -44,9 +44,10 @@ const SLOT = { y: 142, w: 78, h: 18, step: 86 } as const;
 
 /** As barras da ficha. `max` é o teto da escala — é ele que dá sentido ao número. */
 const FICHA = [
-  // max 5, não 3: o OBUS (dano 5) é o novo teto — com o teto antigo a barra dele estouraria a
-  // escala e a ficha compararia errado (róster v2).
-  { rotulo: 'DANO', y: 86, max: 5 },
+  // O DANO é o do CICLO COMPLETO do gatilho (pellets × rajada): a SALVA cospe 3×2=6 e a BATERIA
+  // 4×1=4 — ler só o `damage` do projétil fazia a rajada parecer fraca e a bateria parecer uma
+  // pulse, e a ficha mentia justamente nas armas compostas. Teto 6 = a salva.
+  { rotulo: 'DANO', y: 86, max: 6 },
   { rotulo: 'CADÊNCIA', y: 100, max: 7 },
   { rotulo: 'ALCANCE', y: 114, max: 5 },
 ] as const;
@@ -223,7 +224,11 @@ export class ShipPanel {
     // O ALCANCE do teleguiado é lido como TOTAL (5): ele não tem alcance curto, ele tem MIRA
     // ruim contra o que é rápido — e isso a ficha não tem como dizer em barra. Quem diz é a
     // tagline ("erra o que é rápido"), e é por isso que a tagline diz o TRADE-OFF, não o adjetivo.
-    const valores = [arma.damage, arma.rate, arma.range === null ? 5 : 2];
+    // O DANO é o do CICLO: `damage` é por PROJÉTIL, e as armas compostas cospem vários —
+    // o traçante é duplo (2), a salva é uma rajada de 3 (6), a bateria tem 4 canos (4).
+    // `pellets` e `burst` estão na WeaponDef exatamente para isto: a ficha lê a FONTE.
+    const danoCiclo = arma.damage * arma.pellets * (arma.burst?.count ?? 1);
+    const valores = [danoCiclo, arma.rate, arma.range === null ? 5 : 2];
 
     FICHA.forEach((f, i) => {
       const n = Phaser.Math.Clamp(Math.round((valores[i] / f.max) * 5), 1, 5);

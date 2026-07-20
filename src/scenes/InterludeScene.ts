@@ -414,6 +414,6 @@ export class InterludeScene extends Phaser.Scene {
     if (this.done) return;
     this.done = true;
 
-    this.scene.start('Game', { stage: 2, handling: this.handling, ship: this.naveId });
+    this.scene.start('Game', { stage: 2, handling: this.handling, ship: this.naveId, score: this.score });
   }
 }
