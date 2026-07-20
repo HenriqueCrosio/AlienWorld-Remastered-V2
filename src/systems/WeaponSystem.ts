@@ -165,10 +165,16 @@ export const WEAPONS: Record<string, WeaponDef> = {
   //
   // Ela NUNCA erra um alvo grande e lento. Ela QUASE SEMPRE erra um alvo pequeno e rápido.
   //
-  // A curva de 150°/s é a peça de balanceamento inteira (ver HomingDef): o projétil sai devagar
+  // A curva de 80°/s é a peça de balanceamento inteira (ver HomingDef): o projétil sai devagar
   // (170px/s — mais lento que qualquer outro do jogo) e corrige o rumo aos poucos. Um cargueiro,
   // uma mina ou o casco de um chefão não têm como fugir disso. Um batedor cruzando a tela a 95px/s
   // em senóide, sim — o projétil vira atrás dele e chega tarde.
+  //
+  // O NÚMERO É MEDIDO (scripts/probe-enxame-taxa.mjs, A/B na Fase 2): a 150°/s a curva não
+  // discriminava NADA (43% de acerto em batedor, 45% no cargueiro — a arma acertava o miúdo
+  // tanto quanto o casco, e o eixo do sidegrade não existia em jogo). A 100°/s a separação era
+  // fraca (37% × 41%). A 80°/s ela aparece: 19% × 51% — o batedor escapa 4 de 5 vezes, o
+  // cargueiro apanha da maioria (o resto morre em cobertura e nos drones que ele cospe).
   //
   // Ela persegue INIMIGO e CHEFÃO, nunca rocha: um projétil que se joga no primeiro asteroide da
   // frente seria uma arma que se sabota sozinha (e o cinturão está cheio deles).
@@ -178,7 +184,7 @@ export const WEAPONS: Record<string, WeaponDef> = {
   // isso é uma troca de verdade, e não um upgrade.
   enxame: {
     id: 'enxame', name: 'ENXAME', bullet: 'bolt2', bulletScale: 1, rate: 4, speed: 170, damage: 1, pellets: 1, spread: 6, ammo: null, range: null,
-    homing: { turn: 150, range: 150 },
+    homing: { turn: 80, range: 150 },
   },
 
   // A MINI-GUN. Ela MATAVA o chefão da Fase 1 sozinha (playtest do Henrique): 18 tiros por
