@@ -23,9 +23,9 @@ NÚMEROS e polir.**
    - vãos dos corredores: **110 → 96 → 76 (o aperto) → 84** (evento `corredor` no `STAGE_4`)
    - o guardião: `INVESTIDA_CADA` (6s), `TELEGRAFO_DUR` (0.55s), HP 90
    - o coração: `ABERTO_DUR` / `FECHADO_DUR` / `CADENCIA` por fase, HP 180
-2. **A CUTSCENE FINAL** (a 4ª) — **PROPOSTA escrita, decisões PENDENTES com o Henrique**:
-   ver a seção **"A CUTSCENE FINAL — O AFASTAMENTO"** mais abaixo. É a última peça narrativa
-   do jogo, e hoje matar o coração cai direto na tela de vitória.
+2. ~~A CUTSCENE FINAL~~ — ✅ **IMPLEMENTADA** (2026-07-20, ver a seção dela mais abaixo).
+   O que falta nela é o mesmo da F4: **o Henrique assistir** e dizer se o tom (vitória AMARGA)
+   e os ~42s estão certos. Atalho `[F]` no menu ensaia a cena direto.
 3. **Polimento**: cabos desenhados ancorando as duas formas do chefão a chão/teto (receita da
    catenária da doca — hoje os cotos da arte terminam no ar); acabamento da cutscene 3.
 4. Depois: score acumulado, menu novo, deploy (roadmap 9/5/11).
@@ -33,7 +33,39 @@ NÚMEROS e polir.**
 **Saldo PixelLab: $0.40.** Praticamente tudo o que falta é CÓDIGO — orce qualquer arte nova
 com o Henrique antes de gerar.
 
-**Atalhos de dev:** `[M]`=F3, `[N]`=serpente, `[P]`=cutscene 3, `[L]`=F4, `[K]`=chefão final.
+**Atalhos de dev:** `[M]`=F3, `[N]`=serpente, `[P]`=cutscene 3, `[L]`=F4, `[K]`=chefão final,
+`[F]`=cutscene final.
+
+### 🆕 Sessão 2026-07-20 (parte 2) — A CUTSCENE FINAL (O AFASTAMENTO) construída
+
+A última peça narrativa do jogo existe: `src/scenes/Interlude4Scene.ts`, ~42s medidos,
+**sem painel, sem escolha, sem tecla de pular** — o jogador assiste ao que causou.
+
+- **Decisões fechadas** (as 3 pendentes da proposta): (1) **vitória AMARGA** — a chuva de
+  meteoros cai sobre a colônia morta e **a música CALA** na chuva (`Music.stop`); (2) **arte
+  nova já existia** — `leviathan-dying.png` e `leviathan-split.png` foram geradas no PixelLab
+  no início da sessão (commits anteriores), sem gasto novo; (3) **crédito mínimo**: a cena
+  desemboca no GameOver normal, que ganha o rodapé `UM JOGO DE HENRIQUE CROSIO` **só** quando
+  `victory && stage === 4`.
+- **Os 6 beats** (tempos em ms): DE DENTRO (nave fugindo para a ESQUERDA, entulho do
+  `selarBoca` em posições fixas) → RUPTURA 8200 (corte no clarão) → AFASTAMENTO
+  (`leviathanDying` + brilho ADD pulsante + fissuras + explosões em cadeia na espinha) →
+  PARTIÇÃO 16200 (`leviathanSplit` em container de **2 crops**, metades separam com rotação
+  oposta enquanto o conjunto encolhe para (92,56) escala 1.2 — o `setApproach()` invertido) →
+  RETORNO 19400 (a lua cresce para escala 2.1 em (316,106), tint 0x9aa4c4 + brilho ADD
+  0xff8c1a; banner `KEPLER · A COLÔNIA MORTA`) → CHUVA 23400 (4 meteoros a cada 700ms, depois
+  38 a cada 210ms, container rocha+trilha ADD, impactos **sem shake**) → BEAT 6 35800 (a nave
+  que ELE escolheu, pequena, contra a lua) → fadeOut 41800 → GameOver.
+- **Fiação**: `STAGES[4].interlude = 'Interlude4'`; `GameScene.victory()` testa `interlude`
+  **PRIMEIRO** (mesmo com `next` null); BootScene carrega as duas texturas; Parallax ganhou
+  `setMoonVisible()` (espelho do `setLeviathanVisible`).
+- **Sonda**: `node scripts/probe-interlude4.mjs` — 20 asserts verde (usa `[F]`, tira um
+  screenshot por beat, mede a duração). A `probe-stage4` agora **atravessa** a cutscene depois
+  de matar o NÚCLEO (poll de 55s até o GameOver, sem tecla de pular).
+- **Lições visuais pagas nesta cena** (detalhe nas armadilhas 28/29): `setCrop` não reancora
+  a origem; o modo `nebulosa` do Parallax acende a banda `casco` com qualquer densidade < 1
+  (por isso a cena roda em modo `espaco` com lua e leviatã escondidos); a lua placeholder fica
+  feia acima de ~2.2 de escala; aditivo sobre o disco inteiro clareia em vez de aquecer.
 
 ### 🆕 Sessão 2026-07-19/20 — F3 APROVADA, CUTSCENE 3 e a FASE 4 INTEIRA (a campanha fechou)
 
@@ -296,7 +328,7 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 | 7 | **Fase 3 — O Casco** | ✅ jogável e **APROVADA pelo Henrique** (2026-07-19) |
 | 7b | **3ª cutscene** (queda no hangar do Leviatã) | ✅ jogável (`[P]` no menu, 2026-07-19) |
 | 8 | **Fase 4 — O Interior** (voo LIVRE + corredores; é a fase FINAL) | ✅ **construída COM o NÚCLEO (2026-07-19) — pendente playtest humano** |
-| 8b | **4ª cutscene** (a FINAL — o afastamento) | 🔶 **proposta escrita; decisões pendentes** |
+| 8b | **4ª cutscene** (a FINAL — o afastamento) | ✅ **implementada** (2026-07-20, `[F]` no menu) — pendente o Henrique assistir |
 | 9 | Score acumulado entre fases | ⬜ |
 | 10 | Modo Sobrevivência (Legacy) | ⬜ |
 | 11 | Deploy (itch.io, build estático) | ⬜ |
@@ -441,7 +473,8 @@ matar a Serpente
                   ESCOLHA DE NAVE (8 — ROSTER_FINAL, entra a BATERIA)
                   a ENTRADA colapsa e é MURADA por entulho → FASE 4
 
-matar o CORAÇÃO → ⛔ CUTSCENE 4 (a final) ainda NÃO EXISTE — desenhada, ver a seção dela
+matar o CORAÇÃO → placar da fase
+              → CUTSCENE 4 — O AFASTAMENTO (✅, ver a seção dela) → vitória
 ```
 
 **Cada cutscene queima a ponte por onde o jogador veio.** A Aurora implode e vira o cinturão da
@@ -483,6 +516,7 @@ Vender ESCALA é o mais difícil em pixel art, e estes dois sprites fazem isso s
 | `P` | menu | entra direto na **CUTSCENE 3** (queda no hangar do Leviatã + róster COMPLETO) |
 | `L` | menu | entra direto na **FASE 4** (corredores chão+teto → o NÚCLEO) |
 | `K` | menu | treino do chefão final (**GUARDIÃO → CORAÇÃO**, as duas formas) |
+| `F` | menu | entra direto na **CUTSCENE FINAL** (O AFASTAMENTO, ~42s → crédito) |
 | `G` | jogo | pula da fase atual direto para o chefão dela |
 | `1` `2` `3` | jogo | equipa Pulse / HMG / Shotgun |
 | `4` | jogo | equipa o **ENXAME** (a arma alienígena) — é a que mais precisa de playtest |
@@ -513,7 +547,8 @@ node scripts/probe-flak.mjs      # o FLAK na luta REAL: nasceu / estourou / foi 
 node scripts/probe-fundo.mjs     # o que EXATAMENTE está desenhado no fundo, e onde
 node scripts/probe-doca.mjs      # a 2ª cutscene: pousa NA PISTA? o Arauto está no róster?
 node scripts/probe-interlude3.mjs # a 3ª cutscene: derrapa NO CONVÉS? róster de 8? entrega a F4?
-node scripts/probe-stage4.mjs    # FASE 4: modo interior? pares com vão garantido? o TETO mata?
+node scripts/probe-stage4.mjs    # FASE 4: modo interior? pares com vão garantido? o TETO mata? (+ atravessa a cutscene final)
+node scripts/probe-interlude4.mjs # a CUTSCENE FINAL: os 6 beats batem? dura ~42s? entrega o GameOver com crédito?
 node scripts/vazar-janelas.mjs     # vaza as janelas do hangar (rode DEPOIS de reinstalar a arte)
 node scripts/find-pad.mjs doca 80  # acha a PISTA na doca pela COR (marcações vermelhas)
 node scripts/feather-doca.mjs      # esfuma as bordas cortadas da doca (rode DEPOIS do install)
@@ -723,10 +758,12 @@ O projeto original, decidido com o Henrique:
    - 🌌 **NEBULOSA**: 3 variantes instaladas (`nebula3`, `nebula3-2`, `nebula3-3` — núcleo
      dourado em azul-profundo, a referência do Henrique).
 
-## A CUTSCENE FINAL — O AFASTAMENTO (🔶 proposta, 2026-07-20)
+## A CUTSCENE FINAL — O AFASTAMENTO (✅ IMPLEMENTADA em 2026-07-20)
 
-⛔ **NÃO EXISTE AINDA.** Hoje, matar o CORAÇÃO cai direto na tela de vitória
-(`FASE 4 COMPLETA · o Leviatã caiu`). Esta seção é a proposta desenhada para ela.
+Existe e está verde: `src/scenes/Interlude4Scene.ts`, sonda `probe-interlude4.mjs` (20
+asserts), atalho `[F]` no menu. Matar o CORAÇÃO → placar → **a cena (~42s)** → GameOver com
+o crédito `UM JOGO DE HENRIQUE CROSIO`. Abaixo ficam a proposta original (a gramática que
+ela segue) e, ao final, **as decisões fechadas** — não reabrir sem o Henrique.
 
 ### O padrão das três primeiras — e por que a final tem que QUEBRÁ-LO
 
@@ -772,16 +809,18 @@ foi matar o chefão final. Cobrar mais uma prova DEPOIS do clímax rouba a vitó
 certo depois do esforço máximo é **assistir ao que você causou**. O jogo já tem o precedente:
 a zero-G da F1 é recompensa, não desafio.
 
-### Decisões PENDENTES com o Henrique
+### Decisões FECHADAS (2026-07-20 — não reabrir sem o Henrique)
 
-1. **O tom do fim.** Vitória limpa (a lua cresce, a nave volta para casa) ou vitória AMARGA
-   (os fragmentos do Leviatã entram na atmosfera da lua como chuva de meteoros — você matou
-   o bicho, mas o cadáver dele cai sobre a colônia que já estava morta)?
-2. **A arte.** A proposta inteira reusa o que existe (`leviathan`, `moon`, `derelict`,
-   partículas). Vale gerar UM sprite novo — o Leviatã PARTIDO/rachado — ou o efeito de
-   rachadura por código (linhas de luz + explosões) resolve? Saldo: **$0.40**.
-3. **Créditos.** A cena termina na tela de vitória atual, ou vira uma tela de créditos
-   própria (roadmap 5/9 encostam nisso)?
+1. **O tom do fim: vitória AMARGA.** Os fragmentos do Leviatã entram na atmosfera da lua como
+   chuva de meteoros sobre a colônia que já estava morta — e **a música CALA** na chuva
+   (`Music.stop` no beat 5). Você matou o bicho; o cadáver dele cai sobre Kepler.
+2. **A arte: duas texturas novas do PixelLab** (`leviathan-dying`, `leviathan-split`), geradas
+   na mesma sessão. A PARTIÇÃO é um container com **2 crops** da textura partida — as metades
+   separam com rotação oposta enquanto o conjunto encolhe. O resto reusa o que existia
+   (`moon`, `derelict`, partículas).
+3. **Créditos: mínimo e diegético.** A cena desemboca na tela de vitória atual, que ganha o
+   rodapé `UM JOGO DE HENRIQUE CROSIO` **só** quando `victory && stage === 4`. Tela de
+   créditos própria fica para o roadmap 5/9, se um dia existir.
 
 ## A INTERLUDE
 
@@ -1009,6 +1048,21 @@ escolha dele justamente quando ela mais importa. A escolha **viaja junto** na tr
     rocha escura, as lâmpadas laranja, as marcações vermelhas na pista) e desenhou pixel art de
     verdade em cima. E a referência pode ser **comprimida a sério** (JPEG, 160px de lado, 4KB) —
     ela transfere **estilo, não detalhe**. **Sempre que ele mandar uma referência, use-a.**
+
+### Cutscene final
+
+28. **`setCrop` MASCARA, mas NÃO reancora a origem.** Na PARTIÇÃO, os dois crops da textura
+    `leviathanSplit` nasceram com a origem na borda do crop — e cada metade apareceu deslocada
+    **±58px para fora** do lugar. A metade esquerda mostrava o pedaço certo **no lugar errado**.
+    Correção: `setOrigin(0.5)` nas duas metades e posicionar pelo **centro do conjunto**, não
+    pela borda do crop.
+29. **O modo `nebulosa` do Parallax acende a banda `casco` com QUALQUER densidade < 1.** A
+    cutscene final começou em modo `nebulosa` com densidade caindo — e o rodapé da tela
+    ganhou o chão de casco da Fase 3 no meio do espaço. A cena roda em modo `espaco` com
+    `setLeviathanVisible(false)` + `setMoonVisible(false)`, e desenha lua/leviatã próprios.
+    Bônus da revisão visual: a lua **placeholder** (círculo gerado) fica feia acima de ~2.2
+    de escala, e um sprite ADD cobrindo o disco inteiro **clareia** em vez de aquecer — o
+    brilho quente (0xff8c1a) tem que ficar só no contorno/metade iluminada.
 ---
 
 ## Convenções do código
