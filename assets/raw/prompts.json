@@ -334,6 +334,34 @@
    "prompt": "side view of a huge industrial mining outpost built into a giant dark asteroid, modules embedded in cracked rock on the left, wide FLAT metal landing platforms jutting out to the right with red markings and landing lights, thick heavy cables anchoring nearby rocks [+ style_images: a foto do Henrique]"
   },
   {
+   "asset": "HANGAR do Leviata (3a cutscene) -> hangar.png",
+   "id": "db328462-d16f-4e55-a927-27b508f05482 (lote 1) / 83313074-3ead-4558-b907-7a22812bda18 (lote 2, janelas vazadas)",
+   "size": "160x160",
+   "escolhido": "lote 1 frame 1 (preservado como objeto f3043c44) — ESCOLHA DO HENRIQUE: 'gostei mais da arte do primeiro'",
+   "reserva": "lote 2 frame 2 preservado como objeto 95b8b334 (janelas ja vazadas de origem, mas arte inferior)",
+   "custo": "2 lotes x 25 geracoes = ~$0.24 (saldo 0.91 -> 0.67)",
+   "nota": "Referencia do Henrique (interior industrial dark sci-fi, luz laranja) como style_images (licao 15, recorte 160px jpeg 4.9KB via scripts/prep-ref-hangar.mjs). O lote 2 pediu janelas VAZADAS (licao 10, EMPTY/HOLLOW) e obedeceu — mas o Henrique preferiu a ARTE do lote 1, que veio com o espaco pintado atras do vidro.",
+   "pos_processo": "⚠️ node scripts/vazar-janelas.mjs — vaza as janelas do lote 1 por COR (familia teal + estrelas) na faixa MEDIDA y=38..92 x>=38, com despeckle de ilhas ≤25px que nao tocam a borda da faixa (as molduras atravessam a faixa, entao sobrevivem). O parallax REAL do jogo aparece atraves das janelas (pedido do Henrique: 'as janelas precisam ser sem fundo'). O conves ja veio parcialmente transparente de origem — a cena desenha o chao por tras. RODE DE NOVO se reinstalar o hangar.",
+   "prompt": "side view interior of a colossal alien warship hangar bay, dark riveted metal walls with thick industrial pipes and heavy machinery, huge tall windows in the back wall showing deep space, wrecked broken human starfighter carcasses, wide FLAT metal landing deck floor with red hazard markings and landing lights, dim orange industrial lamps, ominous red alien lights [+ style_images: recorte da referencia do Henrique]"
+  },
+  {
+   "asset": "O GUARDIAO (1a forma do chefao final) -> guardiao.png",
+   "id": "03ef8c07-7aaf-4279-b925-395dfc977d81",
+   "size": "256x256 -> instalado 256x227",
+   "custo": "gerado PELO HENRIQUE na interface web (saldo dele)",
+   "nota": "CRIACAO DO HENRIQUE: a besta blindada ENROLADA em volta da massa viva — ele proposs a luta em DUAS formas ('primeiro encontro da luta, depois surge o coracao e as camadas'). E a estrutura da serpente aplicada ao final.",
+   "medido": "⚠️ A MASSA VERMELHA (alvo) e MEDIDA: x=106..197 y=105..186, centroide ~155,145 (find-pad guardiao 0). BossNucleo.G_CORE_OFF = +27,+31 do centro. A casca/bico ficam a ESQUERDA na MESMA altura — o corpo-absorvedor cobre SO O DOMO superior (corredor livre de bala ate a massa). Trocar a arte OBRIGA a remedir."
+  },
+  {
+   "asset": "O NUCLEO (chefao FINAL, Fase 4) -> nucleo.png",
+   "id": "ee602ec5 (lote 64px, 16 cand.) -> a3b5488c (lote 128px, style_image do frame 2 ampliado 2x) -> cf5b3e43 (ESCOLHA DO HENRIQUE, promovida por ele na interface web = frame 0 do lote 128)",
+   "size": "128x128 -> instalado 122x122",
+   "custo": "2 lotes x 20 geracoes = ~$0.20 (o lote de 64 foi ERRO MEU: esqueci o size; virou prova de composicao e o frame 2 dele foi a referencia do lote bom)",
+   "reservas": "af723e92/f79218d2 (64px frames 2 e 7), 2416bd5f (128px frame 3, o maquina-carne)",
+   "medido": "⚠️ A FERIDA (zona vulneravel) e MEDIDA: x=52..91 y=56..87 no PNG (node scripts/find-pad.mjs nucleo 0). Os vermelhos de y<52 sao LUZES da blindagem, nao alvo. BossNucleo.CORE_OFF_X/Y = +10,+10 do centro. Trocar a arte OBRIGA a remedir.",
+   "prompt": "side view of a colossal alien bio-mechanical HEART, final boss: armored organ suspended by thick organic cables and pipes, overlapping dark olive-brown chitin armor PLATES like a shell, large TORN OPEN gap revealing a bright GLOWING RED-ORANGE molten core like an open wound [+ style_images: frame 2 do lote 64 ampliado 2x nearest]"
+  },
+  {
    "asset": "PLANETA EXPLODINDO (fundo da 2a cutscene) -> planet-shattered.png",
    "id": "33a331de-b88a-4cd6-8ccd-c6a308c20173",
    "size": "128x128 -> recortado 119x91",

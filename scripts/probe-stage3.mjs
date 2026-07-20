@@ -231,7 +231,10 @@ const final = await page.evaluate(() => {
   return { cena: s.scene.key, victory: s.victory ?? s.data?.victory ?? null };
 });
 console.log('fim      ', JSON.stringify(final));
-ok(final.cena === 'GameOver', `matar a fusão entrega o fim de campanha (cena=${final.cena})`);
+// Desde 2026-07-19 a Fase 3 ENTREGA A 3ª CUTSCENE (o hangar do Leviatã) — não mais a tela de
+// fim. A cutscene é quem fecha na vitória enquanto a Fase 4 não existir (probe-interlude3.mjs
+// cobre esse trecho).
+ok(final.cena === 'Interlude3', `matar a fusão entrega o HANGAR (cena=${final.cena})`);
 
 console.log(falhas === 0 ? '\n✔ FASE 3 DE PONTA A PONTA' : `\n✘ ${falhas} asserts falharam`);
 await browser.close();

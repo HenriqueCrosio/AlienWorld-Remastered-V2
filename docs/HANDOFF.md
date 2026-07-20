@@ -1,25 +1,148 @@
-# HANDOFF — estado do projeto (2026-07-18)
+# HANDOFF — estado do projeto (2026-07-20)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
 ---
 
-## ⏭️ ONDE PARAMOS — e o que fazer primeiro amanhã
+## ⏭️ ONDE PARAMOS
 
-**Jogável hoje, do começo ao fim:** Fase 1 → cutscene da Aurora → Fase 2 → **cutscene da Doca
-Kepler-9** → tela de vitória (a Fase 3 ainda não existe).
+### 🏁 A CAMPANHA INTEIRA EXISTE E ENCADEIA SOZINHA (2026-07-19/20)
 
-**A FASE 3 ESTÁ CONSTRUÍDA E JÁ PASSOU PELO 1º PLAYTEST** (2026-07-18) — a campanha joga
-F1 → Aurora → F2 → Doca → **F3 (nebulosa → casco+aranha → SERPENTE em 4 formas → vitória)**.
-O Henrique jogou, apontou 3 problemas, e TODOS foram corrigidos na mesma sessão (ver o bloco
-da sessão, abaixo — o mais importante era ESTRUTURAL: a ordem das cabeças). **AO RETOMAR:
-o Henrique vai trazer o feedback do playtest PÓS-correções** — espere ajustes de balanceamento
-fino (densidade da nebulosa/véus: `alpha`/`gap` no `buildNebula`; cadências da serpente:
-`cdPrincipal` por fase em `BossSerpente.atacar`; pulo/HP da aranha: `updateAranha` e DEFS no
-EnemySystem). Cenário da F3 já foi APROVADO por ele ("bem montado"). Depois do fino: a
-**FASE 4 — O Interior** (o flap volta). Atalhos: `[M]` = F3 inteira, `[N]` = treino da serpente.
+```
+F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → CORAÇÃO → "o Leviatã caiu"
+```
 
-### 🆕 Sessão 2026-07-18 (parte 2) — FASE 3 + correções do 1º playtest dela
+Não há mais buraco no arco: as 4 fases, as 3 cutscenes e o chefão final estão de pé, e a
+`probe-stage4` fecha a corrente de ponta a ponta. **O que falta não é construir — é FECHAR
+NÚMEROS e polir.**
+
+**AO RETOMAR, na ordem:**
+
+1. **O PLAYTEST DO HENRIQUE NA FASE 4** — é o único passo que não dá para fazer sem ele.
+   Tudo abaixo é chute calibrado, e nenhum foi tocado por dedo humano ainda:
+   - vãos dos corredores: **110 → 96 → 76 (o aperto) → 84** (evento `corredor` no `STAGE_4`)
+   - o guardião: `INVESTIDA_CADA` (6s), `TELEGRAFO_DUR` (0.55s), HP 90
+   - o coração: `ABERTO_DUR` / `FECHADO_DUR` / `CADENCIA` por fase, HP 180
+2. **A CUTSCENE FINAL** (a 4ª) — **PROPOSTA escrita, decisões PENDENTES com o Henrique**:
+   ver a seção **"A CUTSCENE FINAL — O AFASTAMENTO"** mais abaixo. É a última peça narrativa
+   do jogo, e hoje matar o coração cai direto na tela de vitória.
+3. **Polimento**: cabos desenhados ancorando as duas formas do chefão a chão/teto (receita da
+   catenária da doca — hoje os cotos da arte terminam no ar); acabamento da cutscene 3.
+4. Depois: score acumulado, menu novo, deploy (roadmap 9/5/11).
+
+**Saldo PixelLab: $0.40.** Praticamente tudo o que falta é CÓDIGO — orce qualquer arte nova
+com o Henrique antes de gerar.
+
+**Atalhos de dev:** `[M]`=F3, `[N]`=serpente, `[P]`=cutscene 3, `[L]`=F4, `[K]`=chefão final.
+
+### 🆕 Sessão 2026-07-19/20 — F3 APROVADA, CUTSCENE 3 e a FASE 4 INTEIRA (a campanha fechou)
+
+**O Henrique jogou a F3 pós-correções e APROVOU**: "gostei da fase com a aranha, o pulo
+agregou; a serpente ficou muito boa, as fases ficaram divertidas". Balanceamento da F3
+FECHADO até motivo novo. Em seguida planejamos juntos a transição F3→F4. **Decisões dele:**
+
+1. **CUTSCENE 3 (`Interlude3`)**: a nave do jogador sai DANIFICADA da luta com a serpente e
+   **cai num hangar DENTRO do Leviatã** (é engolida — a "ponte queimada" desta vez é a saída:
+   a única direção é para dentro). Pouso SUJO: derrapa no convés com fagulhas, não o pouso
+   limpo das outras. **O dano é por CÓDIGO, não arte gerada** (fumaça/fagulhas/thrust falhando/
+   wobble — funciona para as 8 naves; arte por nave estouraria o saldo). Painel de escolha no
+   hangar; **narrativa: o hangar guarda carcaças da frota engolida** (a Frota Morta da F2 —
+   você salva uma nave irmã).
+2. **A F4 É A FASE FINAL** → o hangar usa **`ROSTER_FINAL`** (entra a BATERIA de 4 canos;
+   ShipPanel precisa aceitar 8 slots). Chefão = o desfecho (coração/núcleo do Leviatã — design
+   ainda aberto).
+3. **A F4 NÃO tem flap** (decisão do Henrique, REVERTE o "flap volta" antigo). A regra
+   diegética fica INTACTA: o interior do Leviatã é **zero-G** (`zone: 'vacuo'`), voo livre.
+   O eixo de dificuldade é **PRECISÃO DE VOO**: corredores apertados com chão E TETO
+   (referência dele: corredores industriais tipo Metroid). Verbos da campanha: F1 desviar →
+   F2 abater → F3 anatomia → **F4 precisão**. Engenharia: `TerrainSystem` só ancora no chão
+   (`GROUND_Y`) — precisa de âncora de TETO (extensão, não sistema novo). Visual: modo
+   **`interior`** no Parallax (parede industrial + JANELÕES mostrando o espaço/nebulosa,
+   tubulações, vigas — referência dark sci-fi industrial do Henrique).
+4. **Ordem de ataque**: arte do hangar (a peça que trava a cena; ORÇAR antes — saldo $0.91) →
+   `Interlude3Scene` + `probe-interlude3.mjs` + atalho dev `[P]` → só ligar `next: 4` quando
+   `STAGES[4]` existir (armadilha da rede `STAGES[x] ?? STAGES[1]`) → Parallax `interior` →
+   teto no TerrainSystem → `STAGE_4` → chefão final.
+
+**✅ EXECUTADO NA MESMA SESSÃO — a cutscene 3 está PRONTA:**
+
+- **Arte**: 2 lotes de 160px (~$0.24). O Henrique escolheu a ARTE do lote 1 e pediu as janelas
+  SEM FUNDO → `scripts/vazar-janelas.mjs` vaza por COR (teal+estrelas, faixa medida y=38..92)
+  com despeckle de ilhas; reservas guardadas no PixelLab (`f3043c44` lote 1, `95b8b334` lote 2).
+- **`Interlude3Scene`**: convés MEDIDO (DECK_ROW=138, faixa vermelha de largura total;
+  `find-pad.mjs hangar 80` — y=96..113 são luminárias da PAREDE, não pista). Nave entra
+  CAMBALEANDO (senoide y/ângulo no update + `anims.timeScale` sorteado a cada 240ms + fumaça
+  `puff` sem ADD), CAI (Quad.easeIn — cair ≠ pousar), QUICA uma vez e DERRAPA com fagulhas até
+  x=240 (entre as carcaças da arte). Fumaça APAGA na troca de nave (a nova está inteira, e a
+  sonda cobra isso). Colapso = só a metade ESQUERDA explode (a boca): o lugar sobrevive, a
+  ENTRADA morre — 1ª cutscene em que a ponte queimada é a saída.
+- **Fundo**: parallax `nebulosa` com `setNebulaDensity(0.45)` (borda da nuvem da F3 — `espaco`
+  mostrava a Lua/cinturão da F2, o fundo mentindo) e **`setLeviathanVisible(false)`** (método
+  novo no Parallax): dentro do Leviatã, a silhueta distante dele pelas janelas seria mentira.
+- **ShipPanel**: NADA mudou — já era adaptativo (passo=largura/contagem, teclas até EIGHT);
+  com 8 naves o passo fica 46px. Verificado pela sonda.
+- **Fiação**: `STAGES[3] = { next: 4, interlude: 'Interlude3' }`; a guarda da cena fecha na
+  VITÓRIA enquanto `STAGES[4]` não existir. `probe-stage3` atualizada: matar a fusão agora
+  entrega o HANGAR (não mais o GameOver) — e passou de ponta a ponta.
+- **REVISÃO VISUAL QUADRO A QUADRO** (pedido do Henrique: "você mesmo visualize"): a sonda
+  passava e a cena tinha defeitos que SÓ imagem mostra — (1) touchdown/parada DENTRO do monte
+  de carcaças (nave sumia no metal cinza) → toca em x=144 (sob o portão), para no vão x=258;
+  (2) fumaça tímida → alpha/escala maiores; (3) colapso SEM CICATRIZ (a cena ficava idêntica
+  depois) → `selarBoca()`: entulho escuro cai e MURA a metade esquerda, de baixo p/ cima, na
+  FRENTE das janelas (DEPTH_ENTULHO 72 > arte 70); (4) **BUG LATENTE**: a tela de vitória
+  tinha "FASE 1 COMPLETA" FIXO da era de fase única → GameOver agora recebe `stage` (+ gancho
+  por fase: "engolido · O INTERIOR aguarda") e TODOS os remetentes passam (GameScene,
+  Interlude2, Interlude3). Lição: sonda que passa não prova que a cena está BOA; beat visual
+  se revisa com OLHO.
+**✅ A FASE 4 FOI CONSTRUÍDA NA MESMA SESSÃO (corredores; chefão em ANDAIME):**
+
+- **`STAGES[4]` existe** (O INTERIOR, `zone: 'vacuo'`, fase FINAL, `next: null`) e a campanha
+  encadeia INTEIRA: F1→I→F2→I2→F3→I3→**F4**→vitória ("FASE 4 · o Leviatã caiu" já no gancho).
+- **Parallax modo `interior`**: a PAREDE de fundo é a arte do hangar repetida (mesma família
+  da cutscene — as janelas vazadas mostram a nebulosa de graça), bandas contínuas de `derelict`
+  no chão E NO TETO (flag `teto` nova no ScatterLayer: origem no topo + flipY), vigas
+  horizontais no primeiro plano (com `faixa` — giradas viravam BORRÃO preto, revisão visual).
+- **TETO no TerrainSystem**: `TETO_Y` + `spawn(kind, { anchor: 'teto', alturaPx, tint })`.
+  Guarda dura: prop de teto NÃO atira (a boca do cano é medida para a torre de pé). Tint de
+  interior nas colunas (0x6b7894 — a rocha branco-gelo da lua gritava dentro do bicho).
+- **Evento `corredor`** (rate + gap): pares chão+teto ATÔMICOS com vão garantido, altura do
+  vão sorteada com margem de 24px das bordas — alturas independentes somariam parede
+  impassável, e impassável não é difícil, é roubado. Arco do roteiro (~86s): vão 110
+  (aprender o teto) → 96+sensores → kamikazes no duto → respiro → **O APERTO (76px)** +
+  cargueiro → pico 84px → silêncio → NÚCLEO.
+- **✅ O CHEFÃO FINAL EXISTE EM DUAS FORMAS (`src/entities/BossNucleo.ts`).** O Henrique
+  CRIOU a 1ª forma na interface do PixelLab (`03ef8c07` → `guardiao.png`) e propôs a
+  estrutura: **GUARDIÃO → CORAÇÃO** ("primeiro encontro da luta, depois surge o coração e as
+  camadas") — a estrutura da serpente aplicada ao fim.
+  1. **GUARDIÃO** (HP 90, móvel): a besta enrolada em volta da massa viva. PARADO = a barriga
+     vermelha é alvo (e brilha); ao INVESTIR (telegrafado a cada 6s, mirado no passado — dá
+     para reagir) o corpo FECHA inteiro e a bala morre no casco. Mover = sístole dito de outro
+     jeito: as duas formas falam o mesmo idioma.
+  2. **CORAÇÃO** (HP 180): a casca morre em convulsão (o beat pré-fusão da serpente), estoura,
+     e o coração SURGE fechado. Sístole (parede + glóbulos `bolt3` laranja + anticorpos) e
+     diástole (a ferida BRILHA e ele fica quieto — a janela é a recompensa). Fases 66%/33%;
+     PAREDES de corredor na luta da fase 2 em diante (gap 92→84). UMA barra para as duas
+     formas (270 total): a luta é uma só e a barra é a promessa do tamanho dela.
+  Geometria MEDIDA nos dois PNGs (`find-pad`): massa x=106..197 y=105..186 (G_CORE_OFF
+  +27,+31); ferida x=52..91 y=56..87 (C_CORE_OFF +10,+10). Corpo-absorvedor = SÓ o domo
+  superior nas duas formas (a armadilha da cabeça laranja, não paga três vezes).
+  `probe-stage4`: **18 asserts**, com BALA REAL nas três situações (guardião parado fere /
+  coração fechado segura / aberto fere), a TROCA de forma com arte junto, paredes em luta e
+  vitória. **Polimento pendente: cabos desenhados ancorando as formas a chão/teto (catenária
+  da doca); cotos da arte terminam no ar.** `probe-stage4.mjs`: 9 asserts (modo interior, pares com vão EXATO de 110px, o teto
+  MATA por overlap real, andaime fecha na vitória). `probe-interlude3` atualizada: o hangar
+  agora ENTREGA a F4 (não mais a vitória).
+
+- **O INTERIOR PREENCHE A TELA INTEIRA** (feedback do Henrique: "metade da tela não tem nada").
+  A "boca aberta para o espaço" na metade esquerda lia como fim do desenho. Correção: a arte
+  ENTRA DUAS VEZES — `[espelhada | arte]`, o truque do chão da F1 (emenda de espelho é
+  invisível) — e o anel da arte vira um PORTÃO DUPLO central, o ponto focal da cena. A faixa
+  do convés, o teto e as lâmpadas continuam sozinhos (a viga e a linha de pista desenhadas à
+  mão foram REMOVIDAS). O placar ganhou FAIXA ESCURA própria (não existe mais canto de céu
+  limpo — mesma regra do ShipPanel: legibilidade não depende da arte atrás). A entrada fica
+  implícita fora da tela à esquerda — e é aquela metade que o entulho mura no colapso.
+
+### Sessão 2026-07-18 (parte 2) — FASE 3 + correções do 1º playtest dela
 
 - **A ORDEM DAS CABEÇAS É AZUL → VERDE → LARANJA, E ISSO É ESTRUTURAL.** No 1º playtest a
   vulnerável era a laranja (fundo direito): o jogador chega pela ESQUERDA, o corpo ABSORVE
@@ -135,13 +258,16 @@ Tudo isso está detalhado em **"A FASE 3 — O CASCO"**, mais abaixo. **Leia aqu
 gerar qualquer arte** — ela explica por que a serpente é o chefão e a aranha é o mini-boss, e a
 razão não é estética, é física (a aranha ANDA, e precisa de chão).
 
-⚠️ **`STAGES[3]` NÃO EXISTE.** Enquanto não existir, a `Interlude2Scene` termina a campanha na tela
-de vitória. Se ela chamar a `GameScene` com `stage: 3` antes da hora, a rede de segurança
-`STAGES[x] ?? STAGES[1]` despeja o jogador na **Fase 1** — sem aviso, depois de ele ter vencido a 2.
+⚠️ **A REDE `STAGES[x] ?? STAGES[1]` CONTINUA ARMADA** (histórico: este aviso existia porque a
+Fase 3 não existia). Hoje as 4 fases existem, mas a regra permanece para quem for criar a 5ª:
+uma cutscene que chame a `GameScene` com uma fase inexistente despeja o jogador na **Fase 1**,
+sem aviso, depois de ele ter vencido a anterior. **Por isso toda interlude checa `STAGES[proxima]`
+antes** e cai na tela de vitória se a fase não existir (ver `avancar()` nas três).
 
-**Saldo PixelLab: ~$0.91** (2026-07-18, fim da sessão da F3 — as gerações da assinatura
-ACABARAM: tudo sai do crédito, inclusive animações a ~$0.09 cada. A arte da F3 está completa;
-o que resta de saldo é para AJUSTES do playtest e o começo da F4. Orce antes de gerar).
+**Saldo PixelLab: ~$0.67** (2026-07-19, após os 2 lotes do hangar da cutscene 3 a ~$0.12
+cada — as gerações da assinatura ACABARAM: tudo sai do crédito. O que resta é para o
+TILESET/props do interior da F4 e o chefão final. Orce antes de gerar; dano de nave e
+efeitos saem por CÓDIGO, não por arte).
 
 ---
 
@@ -167,8 +293,10 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 | 6b | **2ª cutscene** (Doca Kepler-9) + **nave ALIENÍGENA** | ✅ jogável (`[O]` no menu) |
 | 6c | **RÓSTER v2** (7 naves de perfil + 7 armas-base) | ✅ (2026-07-18) |
 | 6d | **Efeitos de projétil + passe visual** das Fases 1-2 | ✅ (2026-07-18) |
-| 7 | **Fase 3 — O Casco** | ✅ **construída (2026-07-18) — pendente playtest humano** |
-| 8 | **Fase 4 — O Interior** (o flap VOLTA) | ⬜ |
+| 7 | **Fase 3 — O Casco** | ✅ jogável e **APROVADA pelo Henrique** (2026-07-19) |
+| 7b | **3ª cutscene** (queda no hangar do Leviatã) | ✅ jogável (`[P]` no menu, 2026-07-19) |
+| 8 | **Fase 4 — O Interior** (voo LIVRE + corredores; é a fase FINAL) | ✅ **construída COM o NÚCLEO (2026-07-19) — pendente playtest humano** |
+| 8b | **4ª cutscene** (a FINAL — o afastamento) | 🔶 **proposta escrita; decisões pendentes** |
 | 9 | Score acumulado entre fases | ⬜ |
 | 10 | Modo Sobrevivência (Legacy) | ⬜ |
 | 11 | Deploy (itch.io, build estático) | ⬜ |
@@ -271,7 +399,7 @@ seriam decoráveis.
 
 ---
 
-## Estado atual: FASES 1 e 2 + as DUAS cutscenes, encadeadas
+## Estado atual: AS 4 FASES + as 3 cutscenes, encadeadas
 
 **Fase 1 — A DECOLAGEM** (~75s). Rasante na lua → colônia → torres de solo → fogo cruzado →
 **TORRE DE DEFESA** → atmosfera rompe → zero-G.
@@ -279,6 +407,12 @@ seriam decoráveis.
 **Fase 2 — FROTA MORTA** (~78s). O vácuo: cinturão de asteroides e os destroços da sua própria
 frota. Voo **LIVRE** do começo ao fim — o jogador herda a zero-G que acabou de ganhar.
 Asteroides → destroços → **minas sensoras** → kamikazes → cargueiro → enxame → **CANHONEIRA-CAPITÂNIA**.
+
+**Fase 3 — O CASCO** (~88s). Dois atos: dentro da NEBULOSA → sair dela revela o casco do
+Leviatã como chão → aranha (mini-boss) → **SERPENTE** em 4 formas.
+
+**Fase 4 — O INTERIOR** (~86s). Dentro do bicho, zero-G, **corredores com chão E TETO**:
+o verbo é PRECISÃO. → **GUARDIÃO → CORAÇÃO** (o chefão final em duas formas).
 
 A campanha **encadeia sozinha**, sem passar pela tela de fim:
 
@@ -296,14 +430,25 @@ matar a Capitânia
               → CUTSCENE 2 — a DOCA KEPLER-9 (mineração encravada na rocha):
                   a doca entra grande, cabos segurando asteroides
                   a nave POUSA NA PISTA
-                  ESCOLHA DE NAVE (4 — entra o ARAUTO, a nave ALIENÍGENA)
-                  a doca EXPLODE, os cabos arrebentam → FASE 3 ⛔ (ainda não existe)
+                  ESCOLHA DE NAVE (7 — entra o ARAUTO, a nave ALIENÍGENA)
+                  a doca EXPLODE, os cabos arrebentam → FASE 3
+
+matar a Serpente
+              → placar da fase
+              → CUTSCENE 3 — o HANGAR DO LEVIATÃ (a nave sai DANIFICADA da luta):
+                  entra cambaleando, fumegando, o motor tossindo
+                  CAI e DERRAPA no convés, entre as carcaças da frota engolida
+                  ESCOLHA DE NAVE (8 — ROSTER_FINAL, entra a BATERIA)
+                  a ENTRADA colapsa e é MURADA por entulho → FASE 4
+
+matar o CORAÇÃO → ⛔ CUTSCENE 4 (a final) ainda NÃO EXISTE — desenhada, ver a seção dela
 ```
 
 **Cada cutscene queima a ponte por onde o jogador veio.** A Aurora implode e vira o cinturão da
 Fase 2 (a Frota Morta é o cadáver da sua própria frota). A Doca cai depois que você tira dela a
 única coisa que importava — a nave alienígena. É o mesmo verbo, com causas diferentes: a Aurora
-cai por dano de batalha; a Doca cai porque você já pegou o que foi buscar.
+cai por dano de batalha; a Doca cai porque você já pegou o que foi buscar. **A 3ª inverte o
+verbo:** o hangar não cai — ele se FECHA, e a ponte queimada é a SAÍDA.
 
 **O fundo conta a história** (GDD §7): na Fase 2 a Lua de Kepler **encolhe** (1.25 → 0.45) e o
 Leviatã **cresce** (0.5 → 1.15). É `Parallax.setApproach()`, alimentado com `elapsed / bossTime`.
@@ -335,6 +480,9 @@ Vender ESCALA é o mais difícil em pixel art, e estes dois sprites fazem isso s
 | `M` | menu | entra direto na **FASE 3** (nebulosa → casco → serpente) |
 | `I` | menu | entra direto na **CUTSCENE 1** (Aurora: pouso + escolha de nave) |
 | `O` | menu | entra direto na **CUTSCENE 2** (Doca Kepler-9 + a nave ALIENÍGENA) |
+| `P` | menu | entra direto na **CUTSCENE 3** (queda no hangar do Leviatã + róster COMPLETO) |
+| `L` | menu | entra direto na **FASE 4** (corredores chão+teto → o NÚCLEO) |
+| `K` | menu | treino do chefão final (**GUARDIÃO → CORAÇÃO**, as duas formas) |
 | `G` | jogo | pula da fase atual direto para o chefão dela |
 | `1` `2` `3` | jogo | equipa Pulse / HMG / Shotgun |
 | `4` | jogo | equipa o **ENXAME** (a arma alienígena) — é a que mais precisa de playtest |
@@ -364,6 +512,9 @@ node scripts/probe-mina.mjs      # a MINA SENSORA: passar perto dói / atirar ne
 node scripts/probe-flak.mjs      # o FLAK na luta REAL: nasceu / estourou / foi absorvido?
 node scripts/probe-fundo.mjs     # o que EXATAMENTE está desenhado no fundo, e onde
 node scripts/probe-doca.mjs      # a 2ª cutscene: pousa NA PISTA? o Arauto está no róster?
+node scripts/probe-interlude3.mjs # a 3ª cutscene: derrapa NO CONVÉS? róster de 8? entrega a F4?
+node scripts/probe-stage4.mjs    # FASE 4: modo interior? pares com vão garantido? o TETO mata?
+node scripts/vazar-janelas.mjs     # vaza as janelas do hangar (rode DEPOIS de reinstalar a arte)
 node scripts/find-pad.mjs doca 80  # acha a PISTA na doca pela COR (marcações vermelhas)
 node scripts/feather-doca.mjs      # esfuma as bordas cortadas da doca (rode DEPOIS do install)
 node scripts/sheet.mjs <id> <saida.png> <índices...>   # amplia candidatos do PixelLab
@@ -571,6 +722,66 @@ O projeto original, decidido com o Henrique:
      do Leviatã (~50 HP, abertura do Ato 2, 8-10s de respiro depois dela).
    - 🌌 **NEBULOSA**: 3 variantes instaladas (`nebula3`, `nebula3-2`, `nebula3-3` — núcleo
      dourado em azul-profundo, a referência do Henrique).
+
+## A CUTSCENE FINAL — O AFASTAMENTO (🔶 proposta, 2026-07-20)
+
+⛔ **NÃO EXISTE AINDA.** Hoje, matar o CORAÇÃO cai direto na tela de vitória
+(`FASE 4 COMPLETA · o Leviatã caiu`). Esta seção é a proposta desenhada para ela.
+
+### O padrão das três primeiras — e por que a final tem que QUEBRÁ-LO
+
+As três cutscenes existentes têm a mesma gramática: **chegar → ESCOLHER a nave → o lugar
+morre**. A escolha é o coração delas, e ela existe por um motivo estrutural: *havia uma
+próxima fase para armar*.
+
+**A final não pode ter escolha de nave, e isso não é uma falta — é o ponto.** Não há mais o
+que armar. Repetir o painel ali seria a cena mentindo sobre haver futuro. O beat que ocupa o
+lugar da escolha é outro: **a nave que ele escolheu, sozinha, contra o que sobrou.**
+
+### O arco inteiro foi uma APROXIMAÇÃO. A final é a primeira vez que a câmera RECUA.
+
+Superfície da lua → espaço → casco → interior: a campanha foi um mergulho, e a escala contou
+isso sozinha (`Parallax.setApproach()`: a Lua ENCOLHE, o Leviatã CRESCE). A cutscene final é
+esse número **rodando ao contrário** — e é o fecho mais barato e mais forte que existe, porque
+os dois sprites já estão no jogo há três fases.
+
+```
+matar o CORAÇÃO → placar da fase
+              → CUTSCENE 4 — O AFASTAMENTO:
+                  1. DE DENTRO: o interior cede. Cadeia de explosões, o corredor
+                     desabando atrás (reusa o entulho do `selarBoca` da cutscene 3),
+                     a nave FUGINDO para a esquerda — a única cena do jogo em que
+                     ela voa para TRÁS. Sair é desfazer o caminho.
+                  2. A RUPTURA: o casco rompe. É o beat da "atmosfera rompe" da F1
+                     citado de novo — a mesma promessa: romper uma casca é ganhar o céu.
+                  3. O AFASTAMENTO: o Leviatã INTEIRO na tela (`leviathan.png`, que
+                     sempre foi silhueta distante, agora perto e MORRENDO): rachaduras
+                     de luz laranja correndo pelo casco, explosões em cadeia, e ele
+                     PARTE. Enquanto isso ele ENCOLHE — setApproach() invertido.
+                  4. O RETORNO: a LUA DE KEPLER cresce à frente. É de onde o jogador
+                     decolou no primeiro segundo do jogo. O círculo fecha.
+                  5. A ÚLTIMA IMAGEM: a nave que ELE escolheu, pequena, contra a lua.
+                     Sem painel, sem escolha. → tela de vitória / créditos
+```
+
+### Por que ISSO, e não uma fuga jogável
+
+O impulso óbvio é fazer a fuga ser gameplay (o corredor desabando, timer correndo). **Não:**
+a campanha inteira já cobrou reflexo do jogador por ~5 minutos, e a última coisa que ele fez
+foi matar o chefão final. Cobrar mais uma prova DEPOIS do clímax rouba a vitória — o beat
+certo depois do esforço máximo é **assistir ao que você causou**. O jogo já tem o precedente:
+a zero-G da F1 é recompensa, não desafio.
+
+### Decisões PENDENTES com o Henrique
+
+1. **O tom do fim.** Vitória limpa (a lua cresce, a nave volta para casa) ou vitória AMARGA
+   (os fragmentos do Leviatã entram na atmosfera da lua como chuva de meteoros — você matou
+   o bicho, mas o cadáver dele cai sobre a colônia que já estava morta)?
+2. **A arte.** A proposta inteira reusa o que existe (`leviathan`, `moon`, `derelict`,
+   partículas). Vale gerar UM sprite novo — o Leviatã PARTIDO/rachado — ou o efeito de
+   rachadura por código (linhas de luz + explosões) resolve? Saldo: **$0.40**.
+3. **Créditos.** A cena termina na tela de vitória atual, ou vira uma tela de créditos
+   própria (roadmap 5/9 encostam nisso)?
 
 ## A INTERLUDE
 

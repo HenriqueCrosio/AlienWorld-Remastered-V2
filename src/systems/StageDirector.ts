@@ -17,6 +17,13 @@ export type StageEvent =
   | { t: number; type: 'nebula'; density: number }
   /** O MINI-BOSS do Ato 2 (a aranha que anda no casco). Um por fase, roteirizado. */
   | { t: number; type: 'miniboss' }
+  /**
+   * CORREDOR de precisão (Fase 4): pares chão+TETO com VÃO GARANTIDO de `gap` px, em altura
+   * sorteada. É o cano do flappy virando terreno — o DNA do v2 — mas SEM flap: no voo livre o
+   * desafio é posição, não ritmo. O par é atômico de propósito: duas alturas independentes
+   * podem somar uma parede impassável, e corredor impassável não é difícil, é roubado.
+   */
+  | { t: number; type: 'corredor'; rate: number; gap: number }
   | { t: number; type: 'boss' };
 
 /**
@@ -232,6 +239,76 @@ export const STAGE_3: StageEvent[] = [
   { t: 88, type: 'boss' },
 ];
 
+/**
+ * FASE 4 — O INTERIOR. Duração ~86s. A FASE FINAL (decisão do Henrique, 2026-07-19).
+ *
+ * Dentro do Leviatã. Zero-G (o bicho não tem gravidade artificial — a regra diegética fica
+ * intacta: vácuo → voo livre, SEM flap), e o eixo de dificuldade é o que nenhuma fase cobrou
+ * ainda: PRECISÃO DE VOO. A campanha fechou o ciclo dos verbos: F1 desviar (chão) → F2 abater
+ * (aberto) → F3 anatomia → F4 desviar DOS DOIS LADOS (chão E teto — a primeira fase fechada
+ * por cima). Referência do Henrique: corredores industriais tipo Metroid.
+ *
+ * O arco: entrar (corredores largos, aprender que o teto EXISTE) → o interior reage (defesas
+ * + minas em corredores médios) → o APERTO (corredores estreitos + kamikazes: posição sob
+ * pressão) → silêncio → o NÚCLEO (chefão final — design pendente com o Henrique).
+ *
+ * Sem asteroide aqui: pedra não faz sentido dentro do bicho. O entulho do interior é
+ * `destroco` (o que ele engoliu) e as minas são as defesas DELE.
+ */
+export const STAGE_4: StageEvent[] = [
+  { t: 0.5, type: 'banner', text: 'O INTERIOR · SEM VOLTA' },
+
+  // Corredores LARGOS primeiro (vão 110px): o jogador precisa descobrir que o teto mata
+  // ANTES de o vão apertar. Aprender a regra nova no aperto é sonegação, não dificuldade.
+  { t: 1, type: 'corredor', rate: 2.2, gap: 110 },
+  { t: 5, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 90 },
+  { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.38, y: 120 },
+
+  // O interior REAGE: minas sensoras nos vãos (a defesa imune do bicho) + pressão aérea.
+  { t: 14, type: 'banner', text: 'ANTICORPOS · SENSORES ATIVOS' },
+  { t: 15, type: 'corredor', rate: 2.4, gap: 96 },
+  { t: 15.5, type: 'hazard', rate: 2.2, mix: ['sensor', 'destroco'] },
+  { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
+  { t: 21, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 140 },
+
+  // Kamikazes num espaço FECHADO: o perseguidor conhecido, mas agora recuar tem parede.
+  { t: 26, type: 'banner', text: 'INTERCEPTADORES NO DUTO' },
+  { t: 27, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.75, y: 100 },
+  { t: 30, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 80 },
+  { t: 33, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.65, y: 130 },
+
+  // Respiro estrutural: corredor solto, sem onda — o jogador reaprende a voar antes do aperto.
+  { t: 37, type: 'corredor', rate: 2.6, gap: 104 },
+  { t: 38, type: 'hazard', rate: 0, mix: [] },
+
+  // ─── O APERTO: o coração da fase. Vão 76px (a nave tem ~22 de hitbox: passa com folga
+  // CURTA), minas nos vãos, cargueiro cuspindo drones no corredor. Posição sob pressão. ───
+  { t: 42, type: 'banner', text: 'O DUTO APERTA' },
+  { t: 43, type: 'corredor', rate: 1.9, gap: 76 },
+  { t: 44, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
+  { t: 46, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 100 },
+  { t: 50, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
+  { t: 51, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 100 },
+  { t: 54, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 90 },
+  { t: 58, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 110 },
+
+  // PICO FINAL: o corredor continua estreito e TUDO vem junto — mas menos volume que o pico
+  // da F2/F3: aqui o terreno já cobra metade da atenção, e pressão dupla total é ilegível.
+  { t: 63, type: 'banner', text: 'REJEIÇÃO TOTAL' },
+  { t: 63.5, type: 'corredor', rate: 1.7, gap: 84 },
+  { t: 64, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
+  { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
+  { t: 69, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
+  { t: 72, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
+  { t: 75, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
+
+  // Silêncio → o NÚCLEO. O mesmo telégrafo de todas as fases.
+  { t: 79, type: 'corredor', rate: 0, gap: 0 },
+  { t: 79.5, type: 'hazard', rate: 0, mix: [] },
+  { t: 82, type: 'banner', text: 'ALERTA · O NÚCLEO' },
+  { t: 86, type: 'boss' },
+];
+
 /** Onde a nave está. A física do mundo, não uma preferência do jogador (docs/GDD.md §3). */
 export type Zone = 'atmosfera' | 'vacuo';
 
@@ -251,7 +328,7 @@ export interface StageDef {
    * Modo do fundo, quando a zona não basta. A Fase 3 é `vacuo` (voo livre) mas abre DENTRO
    * de uma nebulosa — o fundo é outro sem a física ser outra. Ausente = derivado da zona.
    */
-  parallax?: 'superficie' | 'espaco' | 'nebulosa';
+  parallax?: 'superficie' | 'espaco' | 'nebulosa' | 'interior';
   /** Fase seguinte, ou null se é a última que existe hoje. */
   next: number | null;
   /**
@@ -303,7 +380,21 @@ export const STAGES: Record<number, StageDef> = {
     zone: 'vacuo',
     parallax: 'nebulosa',
     music: 'stage1',
-    // A Fase 4 (O Interior) ainda não existe: vencer a serpente fecha a campanha na vitória.
+    // Vencer a serpente entrega o HANGAR DO LEVIATÃ (3ª cutscene): a nave sai danificada e é
+    // engolida — e a cutscene entrega a Fase 4, que agora EXISTE (2026-07-19).
+    next: 4,
+    interlude: 'Interlude3',
+  },
+  4: {
+    id: 4,
+    name: 'O INTERIOR',
+    script: STAGE_4,
+    // Zero-G dentro do bicho (regra diegética intacta: vácuo → livre, SEM flap — decisão do
+    // Henrique que REVERTEU o plano antigo de o flap voltar aqui).
+    zone: 'vacuo',
+    parallax: 'interior',
+    music: 'stage1',
+    // A FASE FINAL: não há próxima. Vencer o NÚCLEO fecha a campanha ("o Leviatã caiu").
     next: null,
     interlude: null,
   },

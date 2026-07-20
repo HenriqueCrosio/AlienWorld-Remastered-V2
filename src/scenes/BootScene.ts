@@ -295,6 +295,25 @@ const ART: Record<string, string> = {
   // nave pousar no vazio, 30px abaixo da tela. Ferramenta: node scripts/find-pad.mjs doca 80.
   doca: 'sprites/doca.png',
 
+  // O HANGAR DO LEVIATÃ: o interior onde a nave danificada cai na 3ª cutscene (160×160, escolha
+  // do Henrique — lote 1 do prompts.json). ⚠️ As JANELAS são VAZADAS (scripts/vazar-janelas.mjs,
+  // rodar de novo a cada reinstalação): o starfield/parallax da cena aparece ATRAVÉS delas. A
+  // linha do convés é MEDIDA (Interlude3Scene.DECK_ROW = 138, a faixa vermelha de largura total;
+  // ferramenta: node scripts/find-pad.mjs hangar 80). Trocar a arte OBRIGA a remedir.
+  hangar: 'sprites/hangar.png',
+
+  // O NÚCLEO: o coração blindado do Leviatã, chefão FINAL (Fase 4). Escolha do Henrique
+  // (cf5b3e43, 128px → 122×122 instalado). ⚠️ A FERIDA (a zona vulnerável) é MEDIDA no PNG:
+  // x=52..91 y=56..87 (node scripts/find-pad.mjs nucleo 0 — os vermelhos de y<52 são luzes da
+  // blindagem, não alvo). Trocar a arte OBRIGA a remedir (BossNucleo.CORE_OFF_*).
+  nucleo: 'sprites/nucleo.png',
+
+  // O GUARDIÃO: a 1ª forma do chefão final — a besta blindada ENROLADA em volta da massa
+  // viva (arte CRIADA PELO HENRIQUE na interface do PixelLab, 03ef8c07, 256px → 256×227).
+  // ⚠️ A massa vermelha (alvo) é MEDIDA: x=106..197 y=105..186 (find-pad guardiao 0).
+  // Trocar a arte OBRIGA a remedir (BossNucleo.G_CORE_OFF_*).
+  guardiao: 'sprites/guardiao.png',
+
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',
 

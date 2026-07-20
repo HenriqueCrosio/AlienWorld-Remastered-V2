@@ -10,7 +10,7 @@ import { GROUND_Y } from './systems/TerrainSystem';
  * mais três camadas densas de nebulosa — inclusive VÉUS na frente da nave. A fase SAI da
  * nuvem no meio (ver `setNebulaDensity`), e o que sobra é o espaço de sempre.
  */
-export type ParallaxMode = 'superficie' | 'espaco' | 'nebulosa';
+export type ParallaxMode = 'superficie' | 'espaco' | 'nebulosa' | 'interior';
 
 interface ScatterLayer {
   key: string;
@@ -50,6 +50,12 @@ interface ScatterLayer {
    * cinturão porque é uma BANDA, viraria pedra espalhada igual a todo o resto.
    */
   faixa?: [number, number];
+  /**
+   * Ancorada no TETO (Fase 4, o interior): origem no TOPO, o sprite cresce para BAIXO e vai de
+   * cabeça para baixo (flipY). O espelho exato de `terreno` — o interior tem teto, e um teto
+   * feito de sprites "de pé" pendurados leria como chão colado no alto da tela.
+   */
+  teto?: boolean;
   /** Camada EXTRA da nebulosa (Fase 3): o alpha dela segue `nebulaDim` (1 dentro, 0 fora). */
   nebulosaExtra?: boolean;
   /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue o INVERSO de `nebulaDim` — sair da
@@ -140,6 +146,7 @@ export class Parallax {
     });
 
     if (mode === 'superficie') this.buildSurface();
+    else if (mode === 'interior') this.buildInterior();
     else this.buildSpace();
     // A nebulosa é o ESPAÇO mergulhado numa nuvem: tudo do vácuo continua lá, mais as camadas
     // densas — e o casco do Leviatã dormindo com alpha 0, esperando a saída da nuvem revelá-lo.
@@ -179,6 +186,102 @@ export class Parallax {
       // "esquecer" a lua). Ele cresce até virar o chão no Ato 2.
       this.leviathan.setPosition(310, 66).setScale(1.15).setAlpha(0.5);
     }
+  }
+
+  /**
+   * O INTERIOR do Leviatã (Fase 4) — o hangar da 3ª cutscene virando MUNDO.
+   *
+   * A parede de fundo é a PRÓPRIA arte do hangar repetida (mesma família visual da cutscene:
+   * o jogador acabou de POUSAR nesse lugar — o corredor tem que parecer o mesmo navio). As
+   * janelas dela são VAZADAS (scripts/vazar-janelas.mjs), então a nebulosa e o planeta
+   * partido aparecem ATRAVÉS delas de graça — a referência do Henrique: interior industrial
+   * com janelões mostrando o espaço.
+   *
+   * Chão e TETO são bandas contínuas de placas (`derelict`) — a mesma receita do casco do
+   * Ato 2 da F3 (continuidade: o chão da F4 é o MESMO material do casco que o jogador
+   * sobrevoou), agora espelhada no alto: o interior é a primeira fase FECHADA POR CIMA, e o
+   * fundo anuncia o verbo dela (precisão) antes de o primeiro corredor apertar.
+   */
+  private buildInterior(): void {
+    // A nebulosa pelas janelas: só fragmentos dela são visíveis (pelos buracos vazados), então
+    // ela pode ser esparsa — está ali para dar COR ao vazio, não para ser protagonista.
+    this.addLayer({
+      key: 'nebula3',
+      factor: 0.03,
+      baseY: 0,
+      depth: -96,
+      tint: 0xffffff,
+      tints: [0xb8c4e8, 0x8fa0c8, 0xe8d8c0],
+      alpha: 0.5,
+      scale: [1.6, 2.4],
+      gap: [180, 300],
+      terreno: false,
+      flutua: true,
+    });
+
+    // A PAREDE: hangar atrás de hangar, quase contínuo (gap < largura da arte). Tint frio e
+    // escuro — é fundo, e fundo distante é ESCURO (a mesma perspectiva aérea das montanhas).
+    this.addLayer({
+      key: 'hangar',
+      factor: 0.06,
+      baseY: 208,
+      depth: -90,
+      tint: 0x707a98,
+      tints: [0x707a98, 0x64708c, 0x7a82a0],
+      alpha: 0.95,
+      scale: [1.15, 1.3],
+      gap: [150, 180],
+      terreno: false,
+    });
+
+    // O CHÃO: a banda de placas do casco (receita da F3), sempre visível.
+    this.addLayer({
+      key: 'derelict',
+      factor: 1.0,
+      baseY: GAME_HEIGHT + 26,
+      depth: -75,
+      tint: 0x2f3a55,
+      alpha: 0.95,
+      scale: [1.1, 1.5],
+      gap: [78, 108],
+      terreno: false,
+    });
+
+    // O TETO: a mesma banda, espelhada no alto (flag `teto`). Um tom mais escuro que o chão —
+    // a luz das fases vem sempre de baixo/frente, e um teto tão claro quanto o chão achataria
+    // o túnel.
+    this.addLayer({
+      key: 'derelict',
+      factor: 1.0,
+      baseY: -26,
+      depth: -75,
+      tint: 0x27304a,
+      alpha: 0.95,
+      scale: [1.1, 1.5],
+      gap: [78, 108],
+      terreno: false,
+      teto: true,
+    });
+
+    // VIGAS SOLTAS no primeiro plano: as silhuetas que passam na frente da nave (dificuldade
+    // de leitura na fase; o chefão as apaga via setForegroundDimmed, como nas outras).
+    // Com FAIXA e escala contida: a placa girada em ângulo aleatório a escala 2.1 lia como um
+    // BORRÃO preto tapando um canto da tela, não como viga (revisão visual). A faixa a mantém
+    // horizontal — viga passa deitada — e o tom sobe um degrau para ela ter silhueta, não buraco.
+    this.addLayer({
+      key: 'derelict',
+      factor: 1.3,
+      baseY: 0,
+      depth: 60,
+      tint: 0x1a2440,
+      alpha: 1,
+      scale: [1.0, 1.4],
+      gap: [380, 560],
+      terreno: false,
+      flutua: true,
+      faixa: [30, 186],
+      primeiroPlano: true,
+    });
   }
 
   /** A lua da Fase 1: montanhas, solo, e picos pretos passando na frente da nave. */
@@ -524,7 +627,9 @@ export class Parallax {
     const img = this.scene.add
       // Sorteia entre as variantes da camada: montanhas repetidas denunciam o truque.
       .image(layer.nextX, y, pickVariant(this.scene, layer.key))
-      .setOrigin(0.5, layer.flutua ? 0.5 : 1)
+      // Teto: origem no TOPO e de cabeça para baixo — o espelho do terreno (ver ScatterLayer).
+      .setOrigin(0.5, layer.teto ? 0 : layer.flutua ? 0.5 : 1)
+      .setFlipY(layer.teto ?? false)
       .setDepth(layer.depth)
       .setTint(layer.tints ? Phaser.Math.RND.pick(layer.tints) : layer.tint)
       // O sprite nasce já no alpha do ESTADO ATUAL (fade do chefão, densidade da nebulosa,
@@ -599,6 +704,15 @@ export class Parallax {
    * Só mexe em ALPHA: a camada continua rolando e reciclando por baixo — e é `foregroundDim`
    * quem garante que sprites novos nasçam já no estado certo (ver `emit`).
    */
+  /**
+   * A 3ª cutscene acontece DENTRO do Leviatã: a silhueta distante dele não pode aparecer pelas
+   * janelas do hangar — ver o monstro "ao longe" estando dentro dele é o fundo mentindo.
+   * (A lua já não aparece: fora do modo `espaco` ela fica em alpha 0.)
+   */
+  setLeviathanVisible(v: boolean): void {
+    this.leviathan.setVisible(v);
+  }
+
   setForegroundDimmed(dimmed: boolean, durationMs = 1500): void {
     this.foregroundDim = dimmed ? 0 : 1;
 

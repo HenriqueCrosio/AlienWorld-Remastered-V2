@@ -5,6 +5,12 @@ import { pickVariant } from '../art';
 /** Linha do solo. Tudo aqui é ANCORADO nela — nada flutua. */
 export const GROUND_Y = GAME_HEIGHT - 10;
 
+/**
+ * Linha do TETO (Fase 4, o interior). O espelho de GROUND_Y: o interior do Leviatã é a
+ * primeira fase FECHADA POR CIMA, e um obstáculo pode nascer pendurado nela.
+ */
+export const TETO_Y = 10;
+
 export type PropKind = 'spire' | 'building' | 'turret' | 'base' | 'silo' | 'radar' | 'wreck';
 
 interface PropDef {
@@ -78,17 +84,37 @@ export class TerrainSystem {
     });
   }
 
-  spawn(kind: PropKind): void {
+  /**
+   * `anchor: 'teto'` pendura o prop na linha do teto, de cabeça para baixo (Fase 4 — o
+   * interior é fechado por cima). ⚠️ Só props que NÃO atiram: a boca do cano da torre é
+   * calculada para ela estar de pé (`updateTurret`/`fireAt` medem para CIMA).
+   *
+   * `alturaPx` crava a altura visível do prop (em px de tela) — é o que permite ao roteiro
+   * montar um CORREDOR com vão garantido: duas alturas sorteadas de forma independente podem
+   * somar uma parede impassável.
+   *
+   * `tint` veste o prop para o LUGAR (F4: a rocha branco-gelo da lua dentro do Leviatã escuro
+   * gritava fora da paleta). ⚠️ Vale só para prop INDESTRUTÍVEL: o flash de dano dá clearTint
+   * e devolveria a cor crua.
+   */
+  spawn(
+    kind: PropKind,
+    opts?: { anchor?: 'chao' | 'teto'; alturaPx?: number; tint?: number },
+  ): void {
+    const teto = opts?.anchor === 'teto';
+
     // Sorteia entre as variantes: um relevo com um pico só é um padrão, não uma paisagem.
     const texture = pickVariant(this.scene, kind);
     const p = this.props.create(
       GAME_WIDTH + 30,
-      GROUND_Y,
+      teto ? TETO_Y : GROUND_Y,
       texture,
     ) as Phaser.Physics.Arcade.Sprite;
 
-    // Origem na BASE: o prop cresce a partir do chão, seja qual for a altura.
-    p.setOrigin(0.5, 1);
+    // Origem na BASE: o prop cresce a partir do chão — ou, no teto, a partir dele para baixo
+    // (origem no topo + flipY: uma estalactite é um pico de cabeça para baixo).
+    p.setOrigin(0.5, teto ? 0 : 1);
+    p.setFlipY(teto);
     p.setData('kind', kind);
 
     const def = PROPS[kind];
@@ -106,6 +132,10 @@ export class TerrainSystem {
     // Só a rocha varia de altura: é ela que define o corredor, e é a altura variável que dá
     // ritmo ao flap. Construção esticada parece construção derretida.
     if (kind === 'spire') p.setScale(1, Phaser.Math.FloatBetween(0.55, 1.25));
+
+    // Altura CRAVADA pelo roteiro (corredores da F4): sobrepõe o sorteio acima.
+    if (opts?.alturaPx !== undefined) p.setScale(1, opts.alturaPx / p.height);
+    if (opts?.tint !== undefined) p.setTint(opts.tint);
 
     if (def.shoots) {
       // Primeiro tiro demora: a torre não pode disparar no instante em que entra na tela.
@@ -137,7 +167,10 @@ export class TerrainSystem {
       const p = obj as Phaser.Physics.Arcade.Sprite;
       if (!p.active) continue;
 
-      if (PROPS[p.getData('kind') as PropKind].shoots) this.updateTurret(p, dt, target);
+      // `!p.flipY`: prop de TETO não atira — a boca do cano é medida para a torre DE PÉ
+      // (fireAt mira para cima). Guarda dura: um roteiro que pendurar uma torre por engano
+      // ganha uma torre muda, não um tiro nascendo do lugar errado.
+      if (PROPS[p.getData('kind') as PropKind].shoots && !p.flipY) this.updateTurret(p, dt, target);
       if (p.x < -40) p.destroy();
     }
 

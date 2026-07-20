@@ -94,6 +94,24 @@ export class MenuScene extends Phaser.Scene {
           stage: 3,
         }),
       );
+
+      // Fase 4: [L] entra direto no INTERIOR (corredores chão+teto); [K] treina o NÚCLEO.
+      kb.on('keydown-L', () =>
+        this.scene.start('Game', { stage: 4, handling: 'diegetico', ship: 'alien' }),
+      );
+      kb.on('keydown-K', () =>
+        this.scene.start('Game', { stage: 4, handling: 'diegetico', practice: true }),
+      );
+
+      // A 3ª cutscene: o HANGAR DO LEVIATÃ (queda da nave danificada + róster completo + colapso).
+      kb.on('keydown-P', () =>
+        this.scene.start('Interlude3', {
+          score: 15200,
+          handling: 'diegetico',
+          ship: 'alien',
+          stage: 4,
+        }),
+      );
     }
   }
 

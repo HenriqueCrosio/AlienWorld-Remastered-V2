@@ -10,12 +10,13 @@ import { Fx } from '../systems/Fx';
 import { WeaponSystem } from '../systems/WeaponSystem';
 import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
 import { PickupSystem } from '../systems/PickupSystem';
-import { TerrainSystem, GROUND_Y, type PropKind } from '../systems/TerrainSystem';
+import { TerrainSystem, GROUND_Y, TETO_Y, type PropKind } from '../systems/TerrainSystem';
 import { DebrisSystem, MINE_BLAST_RADIUS, type HazardKind } from '../systems/DebrisSystem';
 import { StageDirector, STAGES, type StageDef, type Zone } from '../systems/StageDirector';
 import { Boss, type StageBoss } from '../entities/Boss';
 import { BossCapitania } from '../entities/BossCapitania';
 import { BossSerpente } from '../entities/BossSerpente';
+import { BossNucleo } from '../entities/BossNucleo';
 import { SHIPS, DEFAULT_SHIP } from '../ships';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
@@ -87,6 +88,10 @@ export class GameScene extends Phaser.Scene {
   private hazardRate = 0;
   private hazardMix: HazardKind[] = [];
   private hazardTimer = 0;
+  /** Corredores da F4: pares chão+teto com vão garantido (evento `corredor`). */
+  private corredorRate = 0;
+  private corredorGap = 0;
+  private corredorTimer = 0;
   private elapsed = 0;
   /** No treino o relógio começa adiantado; o score não deve herdar esse tempo. */
   private clockOffset = 0;
@@ -124,6 +129,9 @@ export class GameScene extends Phaser.Scene {
     this.hazardRate = 0;
     this.hazardMix = [];
     this.hazardTimer = 0;
+    this.corredorRate = 0;
+    this.corredorGap = 0;
+    this.corredorTimer = 0;
     this.elapsed = 0;
     this.clockOffset = 0;
     this.score = 0;
@@ -286,6 +294,7 @@ export class GameScene extends Phaser.Scene {
         this.director.skipTo(this.elapsed);
         this.propRate = 0;
         this.hazardRate = 0;
+        this.corredorRate = 0;
       });
 
       // Troca de arma. No treino você chega só com a PULSE (não passou pelos pickups),
@@ -349,6 +358,7 @@ export class GameScene extends Phaser.Scene {
 
     this.spawnWaves(dt);
     this.spawnProps(dt);
+    this.spawnCorredores(dt);
     this.spawnHazards(dt);
     this.terrain.update(dt, this.ship);
     // A mina sensora precisa saber ONDE o jogador está: é a proximidade dele que a acorda.
@@ -400,6 +410,10 @@ export class GameScene extends Phaser.Scene {
         this.hazardRate = e.rate;
         this.hazardMix = e.mix;
         break;
+      case 'corredor':
+        this.corredorRate = e.rate;
+        this.corredorGap = e.gap;
+        break;
       case 'banner':
         this.showBanner(e.text, COLORS.hotBright);
         break;
@@ -442,6 +456,39 @@ export class GameScene extends Phaser.Scene {
     this.terrain.spawn(Phaser.Utils.Array.GetRandom(this.propMix));
   }
 
+  /**
+   * Os CORREDORES da Fase 4: um par chão+TETO por batida, com VÃO GARANTIDO.
+   *
+   * A altura do vão é sorteada e as duas colunas são derivadas DELA — nunca sorteadas
+   * separadas: alturas independentes somam parede impassável, e corredor impassável não é
+   * difícil, é roubado. O vão nunca encosta nas bordas (margem de 24px): um vão colado no
+   * teto obrigaria a raspar a borda da tela, onde o jogador não vê o que vem.
+   */
+  private spawnCorredores(dt: number): void {
+    if (this.corredorRate <= 0) return;
+
+    this.corredorTimer -= dt;
+    if (this.corredorTimer > 0) return;
+    this.corredorTimer = this.corredorRate;
+
+    const margem = 24;
+    const meio = this.corredorGap / 2;
+    const vaoY = Phaser.Math.Between(TETO_Y + margem + meio, GROUND_Y - margem - meio);
+
+    // Coluna que não alcança 14px não lê como obstáculo — vira ruído no rodapé; pula-se.
+    // Tint de interior: a mesma rocha da F1, vestida de crescimento escuro do casco — a
+    // rocha branco-gelo da lua dentro do bicho gritava fora da paleta (revisão visual).
+    const TINT_INTERIOR = 0x6b7894;
+    const alturaChao = GROUND_Y - (vaoY + meio);
+    const alturaTeto = vaoY - meio - TETO_Y;
+    if (alturaChao >= 14) {
+      this.terrain.spawn('spire', { alturaPx: alturaChao, tint: TINT_INTERIOR });
+    }
+    if (alturaTeto >= 14) {
+      this.terrain.spawn('spire', { anchor: 'teto', alturaPx: alturaTeto, tint: TINT_INTERIOR });
+    }
+  }
+
   /** O mesmo relógio dos props, para os destroços do vácuo. */
   private spawnHazards(dt: number): void {
     if (this.hazardRate <= 0 || this.hazardMix.length === 0) return;
@@ -458,6 +505,8 @@ export class GameScene extends Phaser.Scene {
   private spawnBoss(): void {
     this.propRate = 0;
     this.hazardRate = 0;
+    this.corredorRate = 0;
+
     // A trilha vira ANTES de o chefão aparecer na tela: a música é o primeiro aviso.
     Music.play(this, 'boss', 1200);
 
@@ -481,11 +530,13 @@ export class GameScene extends Phaser.Scene {
     if (this.stage.parallax === 'nebulosa') this.parallax.setNebulaDensity(0, 800);
 
     this.boss =
-      this.stage.id === 3
-        ? new BossSerpente(this, this.enemies)
-        : this.stage.id === 2
-          ? new BossCapitania(this, this.enemies, 150)
-          : new Boss(this, this.enemies.enemyBullets, 150);
+      this.stage.id === 4
+        ? new BossNucleo(this, this.enemies, this.terrain)
+        : this.stage.id === 3
+          ? new BossSerpente(this, this.enemies)
+          : this.stage.id === 2
+            ? new BossCapitania(this, this.enemies, 150)
+            : new Boss(this, this.enemies.enemyBullets, 150);
 
     this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip());
 
@@ -513,7 +564,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.showBanner(
-      this.stage.id === 3
+      this.stage.id === 4
+        ? 'O NÚCLEO DO LEVIATÃ'
+        : this.stage.id === 3
         ? 'SERPENTE DO CASCO'
         : this.stage.id === 2
           ? 'CANHONEIRA-CAPITÂNIA'
@@ -646,6 +699,9 @@ export class GameScene extends Phaser.Scene {
       handling: this.handling,
       practice: this.practice,
       victory: true,
+      // A fase COMPLETADA — a tela de vitória escreve o título com ela ("FASE 1 COMPLETA" era
+      // texto fixo da era de fase única, e mentia em todo fim de campanha desde então).
+      stage: this.stage.id,
     });
   }
 

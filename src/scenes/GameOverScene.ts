@@ -23,8 +23,11 @@ export class GameOverScene extends Phaser.Scene {
     handling: HandlingMode;
     victory?: boolean;
     practice?: boolean;
+    /** A fase COMPLETADA (só na vitória). Sem ela o título era fixo — "FASE 1 COMPLETA" — e
+     *  mentia em todo fim de campanha desde que a Fase 2 nasceu. */
+    stage?: number;
   }): void {
-    const { score, handling, victory = false, practice = false } = data;
+    const { score, handling, victory = false, practice = false, stage = 1 } = data;
 
     // Recorde por modificador — herdeiro do PlayerPrefs do v2.
     // O TREINO não grava recorde: ele pula 68s de fase, o score não é comparável.
@@ -39,8 +42,16 @@ export class GameOverScene extends Phaser.Scene {
     const medal = MEDALS.find((m) => score >= m.min);
 
     if (victory) {
-      this.text(GAME_WIDTH / 2, 38, 'FASE 1 COMPLETA', 13, COLORS.playerBright);
-      this.text(GAME_WIDTH / 2, 56, 'rumo ao Leviatã', 7, COLORS.player);
+      // O subtítulo é o GANCHO para o que vem depois — por fase, porque a campanha é uma
+      // aproximação e cada fim aponta para um lugar diferente dela.
+      const gancho: Record<number, string> = {
+        1: 'rumo ao Leviatã',
+        2: 'o casco à vista',
+        3: 'engolido · O INTERIOR aguarda',
+        4: 'o Leviatã caiu',
+      };
+      this.text(GAME_WIDTH / 2, 38, `FASE ${stage} COMPLETA`, 13, COLORS.playerBright);
+      this.text(GAME_WIDTH / 2, 56, gancho[stage] ?? 'fim da campanha', 7, COLORS.player);
     } else {
       this.text(GAME_WIDTH / 2, 44, 'NAVE PERDIDA', 14, COLORS.enemyBright);
     }

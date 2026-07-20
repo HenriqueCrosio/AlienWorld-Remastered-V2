@@ -714,6 +714,8 @@ export class Interlude2Scene extends Phaser.Scene {
         score: this.score,
         handling: this.handling,
         victory: true,
+        // A fase COMPLETADA — sem ela a tela de vitória cai no título padrão ("FASE 1").
+        stage: this.proxima - 1,
       });
       return;
     }
