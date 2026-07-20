@@ -65,7 +65,7 @@ export class MenuScene extends Phaser.Scene {
     // existe — ENTRAR nela sem ter que vencer a Fase 1 toda vez.
     if (import.meta.env.DEV) {
       this.t(GAME_WIDTH / 2, 200, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, COLORS.metalMid);
-      this.t(GAME_WIDTH / 2, 209, '[I] cutscene (pouso · escolha de nave)', 7, COLORS.metalMid);
+      this.t(GAME_WIDTH / 2, 209, '[I][O][P][F] cutscenes  [L] f4  [K] núcleo', 7, COLORS.metalMid);
 
       kb.on('keydown-B', () => this.scene.start('Game', { handling: 'diegetico', practice: true }));
       kb.on('keydown-V', () => this.scene.start('Game', { stage: 2, handling: 'diegetico' }));
@@ -110,6 +110,21 @@ export class MenuScene extends Phaser.Scene {
           handling: 'diegetico',
           ship: 'alien',
           stage: 4,
+        }),
+      );
+
+      // A CUTSCENE FINAL (O AFASTAMENTO): [F] de "final" — a última tecla livre mnemônica
+      // (usadas: B C N V M I O P L K G 1-4). O payload é o de uma campanha completa plausível:
+      // o Arauto escolhido no hangar, score acumulado das 4 fases, a Fase 4 recém-vencida.
+      kb.on('keydown-F', () =>
+        this.scene.start('Interlude4', {
+          score: 21000,
+          handling: 'diegetico',
+          ship: 'alien',
+          stage: null,
+          stageDone: 4,
+          practice: false,
+          baseScore: 15200,
         }),
       );
     }
