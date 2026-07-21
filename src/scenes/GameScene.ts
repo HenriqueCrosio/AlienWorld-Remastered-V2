@@ -109,6 +109,8 @@ export class GameScene extends Phaser.Scene {
   private tookDamage = false;
   private invulnerableUntil = 0;
   private over = false;
+  /** Fumaça da nave avariada (última vida). Criada apagada; o relógio de 240ms a liga. */
+  private fumaca!: Phaser.GameObjects.Particles.ParticleEmitter;
 
   /**
    * HITSTOP — o freeze-frame da morte de chefão (o "peso" do impacto).
@@ -223,6 +225,43 @@ export class GameScene extends Phaser.Scene {
     const anim = nave.anim ?? (tex === 'ship' ? 'ship-thrust' : undefined);
     if (anim && tex === nave.texture && this.anims.exists(anim)) this.ship.play(anim);
     else if (tex === 'ship' && this.anims.exists('ship-thrust')) this.ship.play('ship-thrust');
+
+    // A NAVE AVARIADA (última vida) — dano por CÓDIGO, a técnica da Interlude3: fumaça
+    // escura seguindo o casco + o motor TOSSINDO (timeScale da propulsão sorteado a cada
+    // batida, às vezes cuspindo fagulha). Sprite de "nave quebrada" seria um asset por nave
+    // do róster; isto vende o dano para todas de graça. Sem wobble em y/ângulo: aqui a nave
+    // está sob o COMANDO do jogador, e tremer o sprite brigaria com a mão dele.
+    this.fumaca = this.add
+      .particles(0, 0, 'puff', {
+        lifespan: { min: 400, max: 800 },
+        speedX: { min: -34, max: -14 },
+        speedY: { min: -18, max: -4 },
+        scale: { start: 0.8, end: 2.2 },
+        alpha: { start: 0.7, end: 0 },
+        tint: [0x4a5266, 0x333a4d],
+        emitting: false,
+      })
+      .setDepth(-1);
+    this.fumaca.startFollow(this.ship, -10, -3);
+
+    this.time.addEvent({
+      delay: 240,
+      loop: true,
+      callback: () => {
+        const avariada = !this.over && this.lives === 1 && this.ship.active;
+        this.fumaca.emitting = avariada;
+        if (!avariada) {
+          this.ship.anims.timeScale = 1;
+          return;
+        }
+        // O motor FALHA: cada batida sorteia um ritmo — e às vezes ele cospe.
+        this.ship.anims.timeScale = Phaser.Math.FloatBetween(0.35, 1.6);
+        if (Math.random() < 0.3) {
+          this.fx.hit(this.ship.x - 11, this.ship.y - 1);
+          this.fumaca.explode(3, this.ship.x - 10, this.ship.y - 3);
+        }
+      },
+    });
 
     // A NAVE É A ARMA. É aqui que a escolha da interlude vira jogo — e é `setBase`, não `equip`:
     // ao morrer, o jogador tem que voltar para a arma DELE, não para a Pulse.
@@ -545,16 +584,36 @@ export class GameScene extends Phaser.Scene {
     const vaoY = Phaser.Math.Between(TETO_Y + margem + meio, GROUND_Y - margem - meio);
 
     // Coluna que não alcança 14px não lê como obstáculo — vira ruído no rodapé; pula-se.
-    // Tint de interior: a mesma rocha da F1, vestida de crescimento escuro do casco — a
-    // rocha branco-gelo da lua dentro do bicho gritava fora da paleta (revisão visual).
+    //
+    // O interior é um bicho VIVO: as colunas são costela biônica, pedaço de órgão e
+    // maquinário pesado — NÃO rocha. A rocha tingida (0x6b7894) era a superfície da lua
+    // mentindo dentro dele; fica como fallback para quando a arte orgânica não existe.
+    const organico = this.textures.exists('costela');
     const TINT_INTERIOR = 0x6b7894;
+    const sorteiaKind = (): PropKind => {
+      if (!organico) return 'spire';
+      const r = Math.random();
+      return r < 0.62 ? 'costela' : r < 0.82 ? 'orgao' : 'maquinario';
+    };
+    // O FUNIL: cada coluna inclina alguns graus na direção do scroll — a caixa torácica do
+    // bicho fechando à frente, não um cano retangular. O teto (flipY) leva o sinal
+    // espelhado. Pequeno de propósito: o Arcade não gira a hitbox junto (ver spawn).
+    const funil = (): number => Phaser.Math.Between(6, 13);
+
     const alturaChao = GROUND_Y - (vaoY + meio);
     const alturaTeto = vaoY - meio - TETO_Y;
     if (alturaChao >= 14) {
-      this.terrain.spawn('spire', { alturaPx: alturaChao, tint: TINT_INTERIOR });
+      this.terrain.spawn(sorteiaKind(), {
+        alturaPx: alturaChao,
+        ...(organico ? { angle: -funil() } : { tint: TINT_INTERIOR }),
+      });
     }
     if (alturaTeto >= 14) {
-      this.terrain.spawn('spire', { anchor: 'teto', alturaPx: alturaTeto, tint: TINT_INTERIOR });
+      this.terrain.spawn(sorteiaKind(), {
+        anchor: 'teto',
+        alturaPx: alturaTeto,
+        ...(organico ? { angle: funil() } : { tint: TINT_INTERIOR }),
+      });
     }
   }
 

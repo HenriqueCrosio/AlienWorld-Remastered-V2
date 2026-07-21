@@ -30,6 +30,9 @@ const FRAMES: Record<string, number> = {
   carrierAnim: 7,
   sensorAnim: 7,
   capitaniaAnim: 7,
+  // A SALVA das baterias (2026-07-21): 8 quadros + o de referência. Mesma caixa união do idle
+  // (scripts/_recrop-capitania.mjs) — caixas diferentes fariam o sprite saltar na troca.
+  capitaniaFireAnim: 9,
   minaAnim: 7,
   flakAnim: 7,
 
@@ -53,6 +56,8 @@ const FRAMES: Record<string, number> = {
   shipBrancaAnim: 9,
   shipCanhoesAnim: 9,
   shipAlien2Anim: 9,
+  // O ARAUTO também ganhou propulsão (2026-07-21): era a única nave jogável sem motor animado.
+  shipArautoAnim: 9,
 };
 
 /**
@@ -89,6 +94,8 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'scout-fly', prefix: 'scoutAnim', frameRate: 12 },
   { key: 'carrier-fly', prefix: 'carrierAnim', frameRate: 6 },
   { key: 'capitania-idle', prefix: 'capitaniaAnim', frameRate: 8 },
+  // O clarão da salva: toca no disparo e volta para o idle ao terminar (BossCapitania.playFire).
+  { key: 'capitania-fire', prefix: 'capitaniaFireAnim', frameRate: 14, loop: false },
 
   // As minas PISCAM devagar (5): é o pulso de uma coisa parada e paciente. Rápido demais, elas
   // competiriam com o telégrafo de perigo — que é justamente uma piscada RÁPIDA (o pavio). O
@@ -116,15 +123,16 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'ship-branca-thrust', prefix: 'shipBrancaAnim', frameRate: 12 },
   { key: 'ship-canhoes-thrust', prefix: 'shipCanhoesAnim', frameRate: 12 },
   { key: 'ship-alien2-thrust', prefix: 'shipAlien2Anim', frameRate: 12 },
+  { key: 'ship-arauto-thrust', prefix: 'shipArautoAnim', frameRate: 12 },
 ];
 
 /**
  * SPRITESHEETS (quadros lado a lado num PNG só) — o formato novo do passe visual (2026-07-20).
  *
  * Diferente das anims legadas (um PNG por quadro), aqui o tamanho do quadro é FIXO e declarado
- * — as três sheets foram geradas no PixelLab já em grade: explosão 13×64², explosão grande
- * 13×128², Leviatã morrendo 9×116². Sem o arquivo, a textura simplesmente não existe e o Fx
- * cai nas partículas de sempre (arte entra asset por asset — a guarda é o `textures.exists`
+ * — as sheets foram geradas no PixelLab já em grade: explosão 13×64², explosão grande
+ * 13×128², Leviatã-baleia morrendo 10×144². Sem o arquivo, a textura simplesmente não existe e o
+ * Fx cai nas partículas de sempre (arte entra asset por asset — a guarda é o `textures.exists`
  * no registro das animações, não um placeholder desenhado: explosão procedural JÁ existe, são
  * as fagulhas).
  */
@@ -133,11 +141,22 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   explosionSheet: { path: 'sprites/explosion-sheet.png', w: 64, h: 64 },
   // A detonação apocalíptica (bosses, bombas, set-pieces). INVERTIDA vira IMPLOSÃO (Fx).
   explosionBigSheet: { path: 'sprites/explosion-big-sheet.png', w: 128, h: 128 },
-  // O Leviatã com fissuras pulsando e explosões na espinha (cutscene final, beat 3).
-  // ⚠️ CANVAS QUADRADO 116×116 com a criatura CENTRALIZADA — a âncora é outra em relação ao
-  // sprite estático `leviathanDying` (115×47 recortado). O centro visual do bicho no quadro é
-  // ~(57.5, 61.5), medido no PNG — a Interlude4 posiciona por ele (Interlude4Scene.LEV_*).
-  leviathanDyingSheet: { path: 'sprites/leviathan-dying-sheet.png', w: 116, h: 116 },
+  // A explosão PEQUENA (9f 32²): drones, batedores, kamikazes, minas. Antes TUDO usava a
+  // mestra de 64px — o estouro de um drone de 24px cobria o dobro do cadáver e lia como
+  // capital. Explosão tem TAMANHO DE CASO agora (ver Fx.explode): pequena/média/grande.
+  explosionSmallSheet: { path: 'sprites/explosion-small-sheet.png', w: 32, h: 32 },
+  // O GUARDIÃO respirando (9f 256² — a massa vermelha pulsa como coração) e o NÚCLEO
+  // batendo (9f 128² — a ferida acende e apaga). CANVAS QUADRADO com a criatura centralizada:
+  // a âncora é OUTRA em relação aos estáticos recortados (guardiao.png 256×227, nucleo.png
+  // 122×122) — o BossNucleo compensa (a mesma armadilha da sheet do Leviatã, nº 33).
+  guardiaoIdleSheet: { path: 'sprites/guardiao-idle-sheet.png', w: 256, h: 256 },
+  nucleoBeatSheet: { path: 'sprites/nucleo-beat-sheet.png', w: 128, h: 128 },
+  // O Leviatã-BALEIA (o mesmo do menu) com fissuras pulsando e explosões na espinha (cutscene
+  // final, beat 3). ⚠️ CANVAS QUADRADO 144×144 com a criatura CENTRALIZADA — a âncora é outra
+  // em relação ao sprite estático `leviathanWhaleDying` (140×87 recortado). O centro visual do
+  // bicho no quadro é MEDIDO no PNG (bbox do alfa, média dos quadros) — a Interlude4 posiciona
+  // por ele (Interlude4Scene.LEVI_VIS_*).
+  leviathanWhaleDyingSheet: { path: 'sprites/leviathan-whale-dying-sheet.png', w: 144, h: 144 },
 };
 
 /** Registra os quadros de uma animação no mapa de ART. */
@@ -182,6 +201,7 @@ const ART: Record<string, string> = {
   ...animFrames('shipBrancaAnim', 'ship-branca-anim'),
   ...animFrames('shipCanhoesAnim', 'ship-canhoes-anim'),
   ...animFrames('shipAlien2Anim', 'ship-alien2-anim'),
+  ...animFrames('shipArautoAnim', 'ship-arauto-anim'),
 
   boss: 'sprites/boss.png',
   groundTile: 'sprites/ground-tile.png',
@@ -227,6 +247,7 @@ const ART: Record<string, string> = {
   ...animFrames('carrierAnim', 'carrier-anim'),
   ...animFrames('sensorAnim', 'sensor-anim'),
   ...animFrames('capitaniaAnim', 'capitania-anim'),
+  ...animFrames('capitaniaFireAnim', 'capitania-fire-anim'),
   ...animFrames('minaAnim', 'mina-anim'),
   ...animFrames('flakAnim', 'flak-anim'),
 
@@ -336,6 +357,15 @@ const ART: Record<string, string> = {
   // Trocar a arte OBRIGA a remedir (BossNucleo.G_CORE_OFF_*).
   guardiao: 'sprites/guardiao.png',
 
+  // ─── O INTERIOR ORGÂNICO DA FASE 4 (2026-07-21) ───
+  // Os corredores do Leviatã eram picos e rochas de superfície tingidos — pedra lunar dentro
+  // de um bicho VIVO, o lugar mentindo sobre o que é. O interior dele é costela biônica,
+  // pedaço de órgão e maquinário pesado (a referência do Henrique: giger industrial).
+  // Sem placeholder: sem o PNG, o corredor cai nas colunas de rocha de sempre.
+  costela: 'sprites/costela.png',
+  orgao: 'sprites/orgao.png',
+  maquinario: 'sprites/maquinario.png',
+
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',
 
@@ -380,12 +410,14 @@ const ART: Record<string, string> = {
   // do céu. O parallax o desenha com TINT escuro — o que está longe é escuro (ver Parallax.ts).
   leviathan: 'sprites/leviathan.png',
 
-  // O LEVIATÃ MORRENDO e PARTIDO EM DOIS — os dois estados dele na CUTSCENE FINAL
-  // (Interlude4Scene): primeiro o casco rachado com fissuras de lava e explosões na espinha;
-  // depois o corpo rasgado no meio, com o interior incandescente exposto. Mesma paleta,
-  // nariz à direita (115×47 e 115×48, PixelLab). Sem placeholder: só a cena final os usa.
-  leviathanDying: 'sprites/leviathan-dying.png',
-  leviathanSplit: 'sprites/leviathan-split.png',
+  // O LEVIATÃ-BALEIA MORRENDO e PARTIDO EM DOIS — os dois estados dele na CUTSCENE FINAL
+  // (Interlude4Scene). É A MESMA BALEIA DA KEY ART DO MENU (gerada com ela como style_images):
+  // primeiro o casco rachado com fissuras de lava e explosões na espinha; depois o corpo
+  // rasgado no meio, com o interior incandescente exposto. Paleta Deep Void + laranja #ff8c1a,
+  // nariz à direita (140×87 e 140×75, PixelLab). Sem placeholder: só a cena final os usa.
+  leviathanWhale: 'sprites/leviathan-whale.png',
+  leviathanWhaleDying: 'sprites/leviathan-whale-dying.png',
+  leviathanWhaleSplit: 'sprites/leviathan-whale-split.png',
 
   mtnFar: 'sprites/mtn-far.png',
   mtnFar2: 'sprites/mtn-far-2.png',
@@ -470,6 +502,7 @@ export class BootScene extends Phaser.Scene {
     this.makeFlak();
     this.makeBullet();
     this.makeTracerRound();
+    this.makeShots();
     this.makePuff();
     this.makeSpark();
     this.makeEnemyBullet();
@@ -805,6 +838,160 @@ export class BootScene extends Phaser.Scene {
     g.fillRect(6, 0, 2, 1);
     g.generateTexture('tracerRound', 8, 1);
     g.destroy();
+  }
+
+  /**
+   * OS PROJÉTEIS DO JOGADOR — desenhados em CÓDIGO, um desenho por arma (2026-07-21).
+   *
+   * Decisão do Henrique: tiro do jogador NÃO é sprite de arquivo. O sprite gerado (PixelLab)
+   * chegava GRANDE demais para uma bala de 11×6, e o upscale esmagava o desenho. O tiro tem
+   * que ler como LASER — núcleo branco-quente, corpo saturado, halo baixo em volta — e isso
+   * se desenha em três passadas de fillRect, não se pinta.
+   *
+   * ⚠️ AS DIMENSÕES SÃO AS DOS PNGs QUE SUBSTITUEM (bolt 11×6, bolt2 13×9, bolt3 12×5): a
+   * hitbox do projétil deriva do tamanho da textura (WeaponSystem.shoot), e o balanceamento
+   * está fechado — mudar o quadro muda a hitbox. A LÂMINA é a exceção consciente: o desenho
+   * já nasce ALTO (11×19, o tamanho de mundo que o stretch 3.2 entregava) e o `bulletScaleY`
+   * dela foi aposentado — hitbox de mundo igual, arte sem esticão borrado.
+   */
+  private makeShots(): void {
+    const tex = (key: string, w: number, h: number, draw: (g: Phaser.GameObjects.Graphics) => void): void => {
+      const g = this.make.graphics({ x: 0, y: 0 }, false);
+      draw(g);
+      g.generateTexture(key, w, h);
+      g.destroy();
+    };
+
+    // PULSE 11×6 — a régua. Cápsula ciano de núcleo branco: o laser na forma mais limpa.
+    tex('shotPulse', 11, 6, (g) => {
+      g.fillStyle(0x3ee0f0, 0.2);
+      g.fillRect(0, 1, 11, 4);
+      g.fillStyle(0x3ee0f0, 1);
+      g.fillRect(1, 2, 10, 2);
+      g.fillStyle(0xb5f7ff, 1);
+      g.fillRect(3, 2, 8, 1);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(7, 2, 4, 1);
+    });
+
+    // LANÇA 12×5 (estica 2.16× em voo) — a pesada de precisão: dourada, ponta de flecha.
+    tex('shotLance', 12, 5, (g) => {
+      g.fillStyle(0xffd966, 0.25);
+      g.fillRect(0, 1, 12, 3);
+      g.fillStyle(0xd9a43a, 1); // a cauda esfriando
+      g.fillRect(0, 2, 4, 1);
+      g.fillStyle(0xffe9a8, 1);
+      g.fillRect(4, 2, 5, 1);
+      g.fillStyle(0xffffff, 1);
+      g.fillTriangle(8, 0, 12, 2, 8, 4);
+      g.fillRect(8, 2, 2, 1);
+    });
+
+    // DISPERSOR 13×9 — a pelota do leque: losango laranja, quente como o traçante.
+    tex('shotSpread', 13, 9, (g) => {
+      g.fillStyle(0xff9a3c, 0.25);
+      g.fillCircle(6, 4, 4);
+      g.fillStyle(0xff9a3c, 1);
+      g.fillPoints([{ x: 6, y: 1 }, { x: 10, y: 4 }, { x: 6, y: 7 }, { x: 2, y: 4 }], true);
+      g.fillStyle(0xffe9c8, 1);
+      g.fillRect(5, 3, 2, 2);
+    });
+
+    // ENXAME 13×9 — a vagem ALIEN: teal, orgânica, quase um ovo. O rastro teal do
+    // homingTrail desenha a curva; o corpo é só o bicho vivo que voa.
+    tex('shotEnxame', 13, 9, (g) => {
+      g.fillStyle(0x5ef2d8, 0.22);
+      g.fillCircle(7, 4, 4);
+      g.fillStyle(0x2fbfae, 1);
+      g.fillEllipse(7, 4, 9, 6);
+      g.fillStyle(0x5ef2d8, 1);
+      g.fillEllipse(8, 4, 5, 3);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(8, 3, 2, 2);
+    });
+
+    // HMG 12×5 — a cápsula de chumbo da mini-gun. A rajada é DENSA (18/s): o desenho é
+    // deliberadamente discreto, senão o fluxo vira uma barra contínua (armadilha nº 35).
+    tex('shotHmg', 12, 5, (g) => {
+      g.fillStyle(0xffe9a8, 0.3);
+      g.fillRect(0, 1, 12, 3);
+      g.fillStyle(0xffd966, 1);
+      g.fillRect(1, 2, 11, 1);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(7, 2, 5, 1);
+    });
+
+    // OBUS 12×5 (escala 1.7) — o pesado lento: uma esfera CARREGADA, quente por dentro.
+    tex('shotObus', 12, 5, (g) => {
+      g.fillStyle(0xff7a2a, 0.35);
+      g.fillEllipse(6, 2, 12, 5);
+      g.fillStyle(0xff9a3c, 1);
+      g.fillEllipse(6, 2, 9, 4);
+      g.fillStyle(0xffe9c8, 1);
+      g.fillEllipse(7, 2, 5, 2);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(6, 2, 3, 1);
+    });
+
+    // AGULHA 11×6 — o tiro quase-instantâneo: um fio de 1px azul-gelo. A silhueta É a
+    // promessa da arma (nunca chega tarde): a bala mais fina do jogo.
+    tex('shotAgulha', 11, 6, (g) => {
+      g.fillStyle(0x9fd8ff, 0.3);
+      g.fillRect(0, 2, 11, 3);
+      g.fillStyle(0x9fd8ff, 1);
+      g.fillRect(0, 2, 9, 1);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(4, 2, 7, 1);
+    });
+
+    // SALVA 11×6 — a rajada de 3: dois chevrons ciano em disparada, um empurrando o outro.
+    tex('shotSalva', 11, 6, (g) => {
+      g.fillStyle(0x3ee0f0, 0.2);
+      g.fillRect(0, 1, 11, 4);
+      g.fillStyle(0x3ee0f0, 1);
+      g.fillTriangle(1, 1, 5, 3, 1, 5);
+      g.fillStyle(0xb5f7ff, 1);
+      g.fillTriangle(5, 1, 9, 3, 5, 5);
+      g.fillStyle(0xffffff, 1);
+      g.fillTriangle(7, 2, 10, 3, 7, 4);
+    });
+
+    // PERFURANTE 12×5 — o dardo que atravessa carne: flecha de ponta branca, rastro ciano.
+    tex('shotPerfurante', 12, 5, (g) => {
+      g.fillStyle(0xb5f7ff, 0.25);
+      g.fillRect(0, 1, 12, 3);
+      g.fillStyle(0x3ee0f0, 1);
+      g.fillRect(0, 2, 8, 1);
+      g.fillTriangle(0, 1, 3, 2, 0, 3);
+      g.fillStyle(0xffffff, 1);
+      g.fillTriangle(7, 0, 12, 2, 7, 4);
+    });
+
+    // BATERIA 11×6 — o feixe dos 4 canos: barra ciano dupla, núcleo branco curto.
+    tex('shotBateria', 11, 6, (g) => {
+      g.fillStyle(0x3ee0f0, 0.22);
+      g.fillRect(0, 1, 11, 4);
+      g.fillStyle(0x3ee0f0, 1);
+      g.fillRect(1, 2, 10, 1);
+      g.fillStyle(0x3ee0f0, 0.8);
+      g.fillRect(2, 3, 8, 1);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(6, 2, 5, 1);
+    });
+
+    // LÂMINA 11×19 — tecnologia ALIEN na mão do jogador: uma lâmina teal na VERTICAL, já
+    // desenhada na altura de mundo (o stretch 3.2 de um bolt horizontal virava borrão).
+    // Teal, nunca magenta: a cor tem dono (armadilha 24).
+    tex('shotLamina', 11, 19, (g) => {
+      g.fillStyle(0x5ef2d8, 0.2);
+      g.fillEllipse(5, 9, 11, 19);
+      g.fillStyle(0x2fbfae, 1);
+      g.fillPoints([{ x: 5, y: 0 }, { x: 9, y: 9 }, { x: 5, y: 18 }, { x: 1, y: 9 }], true);
+      g.fillStyle(0x5ef2d8, 1);
+      g.fillPoints([{ x: 5, y: 2 }, { x: 8, y: 9 }, { x: 5, y: 16 }, { x: 2, y: 9 }], true);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(5, 4, 1, 11);
+    });
   }
 
   /**

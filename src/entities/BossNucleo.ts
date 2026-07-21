@@ -95,6 +95,33 @@ export class BossNucleo implements StageBoss {
     this.sprite.setScale(BossNucleo.G_ESCALA);
     this.sprite.setData('boss', this);
 
+    // AS FORMAS VIVAS (sheets do PixelLab, 2026-07-21): o guardião RESPIRA (a massa vermelha
+    // pulsa como um coração — mover = sístole, e agora até parado ele é órgão vivo) e o
+    // coração BATE (a ferida acende e apaga no ritmo da janela). Sem a sheet, o estático de
+    // sempre segura a luta (arte entra asset por asset). Yoyo: o pulso vai E VOLTA sem corte.
+    // A âncora não precisa de compensação: o centro visual das sheets foi MEDIDO (bbox do
+    // alfa, média dos quadros) e cai a <3px do centro da arte estática nas duas formas.
+    const anims = scene.anims;
+    if (scene.textures.exists('guardiaoIdleSheet') && !anims.exists('guardiao-idle')) {
+      anims.create({
+        key: 'guardiao-idle',
+        frames: anims.generateFrameNumbers('guardiaoIdleSheet', { start: 0, end: 8 }),
+        frameRate: 6,
+        repeat: -1,
+        yoyo: true,
+      });
+    }
+    if (scene.textures.exists('nucleoBeatSheet') && !anims.exists('nucleo-beat')) {
+      anims.create({
+        key: 'nucleo-beat',
+        frames: anims.generateFrameNumbers('nucleoBeatSheet', { start: 0, end: 8 }),
+        frameRate: 7,
+        repeat: -1,
+        yoyo: true,
+      });
+    }
+    if (anims.exists('guardiao-idle')) this.sprite.play('guardiao-idle');
+
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     body.setAllowGravity(false);
     this.corpoDomo();
@@ -148,14 +175,21 @@ export class BossNucleo implements StageBoss {
 
   /** Corpo = só o DOMO superior: a faixa do alvo fica de corredor livre para a bala. */
   private corpoDomo(): void {
-    this.body.setSize(this.sprite.width * 0.78, this.sprite.height * 0.42);
-    this.body.setOffset(this.sprite.width * 0.11, this.sprite.height * 0.06);
+    // Dimensões CONSTANTES (as das artes estáticas, 256×227 / 122×122): com a sheet animada
+    // tocando, `sprite.width/height` é o QUADRO da sheet (256² / 128²) e o corpo cresceria.
+    if (this.forma === 'guardiao') {
+      this.body.setSize(256 * 0.78, 227 * 0.42);
+      this.body.setOffset(256 * 0.11, 227 * 0.06);
+    } else {
+      this.body.setSize(122 * 0.78, 122 * 0.42);
+      this.body.setOffset(122 * 0.11, 122 * 0.06);
+    }
   }
 
   /** Corpo INTEIRO: a investida é toda perigo — e fecha o alvo (bala morre no casco). */
   private corpoInteiro(): void {
-    this.body.setSize(this.sprite.width * 0.82, this.sprite.height * 0.8);
-    this.body.setOffset(this.sprite.width * 0.09, this.sprite.height * 0.08);
+    this.body.setSize(256 * 0.82, 227 * 0.8);
+    this.body.setOffset(256 * 0.09, 227 * 0.08);
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
@@ -279,7 +313,12 @@ export class BossNucleo implements StageBoss {
 
       this.forma = 'coracao';
       this.sprite.clearTint();
-      this.sprite.setTexture('nucleo');
+      // A troca de arte: para a animação do guardião ANTES de mexer na textura (armadilha 26:
+      // a animação sobrescreve a textura no quadro seguinte). Com a sheet do coração, é ela
+      // quem entra — o batimento É o telégrafo da forma nova.
+      this.sprite.anims.stop();
+      if (this.scene.anims.exists('nucleo-beat')) this.sprite.play('nucleo-beat');
+      else this.sprite.setTexture('nucleo');
       this.sprite.setScale(BossNucleo.C_ESCALA);
       this.sprite.setPosition(BossNucleo.C_STATION_X, BossNucleo.C_BASE_Y);
       this.corpoDomo();
@@ -367,12 +406,25 @@ export class BossNucleo implements StageBoss {
     const meio = gap / 2;
     const vaoY = Phaser.Math.Between(TETO_Y + margem + meio, GROUND_Y - margem - meio);
 
+    // Dentro do Núcleo a parede é CARNE E METAL, não rocha: costela biônica com o mesmo
+    // funil dos corredores da fase (a rocha tingida fica de fallback, ver GameScene).
+    const organico = this.scene.textures.exists('costela');
     const TINT = 0x6b7894;
+    const funil = (): number => Phaser.Math.Between(5, 11);
     const alturaChao = GROUND_Y - (vaoY + meio);
     const alturaTeto = vaoY - meio - TETO_Y;
-    if (alturaChao >= 14) this.terrain.spawn('spire', { alturaPx: alturaChao, tint: TINT });
+    if (alturaChao >= 14) {
+      this.terrain.spawn(organico ? 'costela' : 'spire', {
+        alturaPx: alturaChao,
+        ...(organico ? { angle: -funil() } : { tint: TINT }),
+      });
+    }
     if (alturaTeto >= 14) {
-      this.terrain.spawn('spire', { anchor: 'teto', alturaPx: alturaTeto, tint: TINT });
+      this.terrain.spawn(organico ? 'costela' : 'spire', {
+        anchor: 'teto',
+        alturaPx: alturaTeto,
+        ...(organico ? { angle: funil() } : { tint: TINT }),
+      });
     }
   }
 

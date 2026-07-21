@@ -282,6 +282,79 @@ export class Parallax {
       faixa: [30, 186],
       primeiroPlano: true,
     });
+
+    // ─── A ANATOMIA DO BICHO (2026-07-21) ───
+    //
+    // O hangar repetido dizia "estação espacial", não "dentro de um bicho VIVO". As camadas
+    // orgânicas são o que fecha a leitura: COSTELAS biônicas arcando do chão e do teto em duas
+    // distâncias (a longínqua escura e lenta, a próxima no plano do chão), órgãos à deriva no
+    // meio-fundo e maquinário pesado pendurado no teto. Os tints são ESCUROS de propósito:
+    // perspectiva aérea — e é o que separa cenário dos obstáculos jogáveis (as costelas do
+    // corredor, que nascem SEM tint, claras).
+    this.addLayer({
+      key: 'costela',
+      factor: 0.45,
+      baseY: GAME_HEIGHT + 30,
+      depth: -85,
+      tint: 0x2e2838,
+      alpha: 1,
+      scale: [0.3, 0.48],
+      gap: [130, 210],
+      terreno: false,
+    });
+    // O teto tem a caixa torácica dele: o espelho escuro, um degrau mais lento e esparso.
+    this.addLayer({
+      key: 'costela',
+      factor: 0.4,
+      baseY: -30,
+      depth: -85,
+      tint: 0x282234,
+      alpha: 1,
+      scale: [0.3, 0.46],
+      gap: [150, 250],
+      terreno: false,
+      teto: true,
+    });
+    // As costelas PRÓXIMAS: quase no plano do chão, um tom acima — são elas que fazem o
+    // corredor ler como a garganta do bicho fechando à frente.
+    this.addLayer({
+      key: 'costela',
+      factor: 0.9,
+      baseY: GAME_HEIGHT + 34,
+      depth: -74,
+      tint: 0x4a3e48,
+      alpha: 1,
+      scale: [0.42, 0.6],
+      gap: [180, 300],
+      terreno: false,
+    });
+    // ÓRGÃOS à deriva no meio-fundo: massas vivas presas entre as costelas, longe e lentas.
+    this.addLayer({
+      key: 'orgao',
+      factor: 0.3,
+      baseY: 0,
+      depth: -88,
+      tint: 0x5a4048,
+      alpha: 0.9,
+      scale: [0.5, 0.9],
+      gap: [220, 420],
+      terreno: false,
+      flutua: true,
+      faixa: [50, 170],
+    });
+    // MAQUINÁRIO PESADO pendurado no teto: o bicho é biomecânico — carne E máquina.
+    this.addLayer({
+      key: 'maquinario',
+      factor: 0.65,
+      baseY: -18,
+      depth: -80,
+      tint: 0x3a4258,
+      alpha: 0.95,
+      scale: [0.6, 1.0],
+      gap: [260, 480],
+      terreno: false,
+      teto: true,
+    });
   }
 
   /** A lua da Fase 1: montanhas, solo, e picos pretos passando na frente da nave. */

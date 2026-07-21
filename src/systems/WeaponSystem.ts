@@ -142,7 +142,7 @@ export interface WeaponDef {
 export const WEAPONS: Record<string, WeaponDef> = {
   // Cada arma tem um projétil VISUALMENTE distinto: num shmup, o jogador precisa saber o que
   // está atirando sem olhar o HUD.
-  pulse: { id: 'pulse', name: 'PULSE', bullet: 'bolt', bulletScale: 1, rate: 7, speed: 300, damage: 1, pellets: 1, spread: 0, ammo: null, range: null },
+  pulse: { id: 'pulse', name: 'PULSE', bullet: 'shotPulse', bulletScale: 1, rate: 7, speed: 300, damage: 1, pellets: 1, spread: 0, ammo: null, range: null },
 
   // ── Armas BASE das naves (docs/GDD.md §5: infinitas e fracas). ──
   //
@@ -158,8 +158,8 @@ export const WEAPONS: Record<string, WeaponDef> = {
   // alcance curto transforma isso numa ESCOLHA (chegar perto é arriscado), não num botão.
   // `stretchX`/`muzzleFlash` são peso VISUAL (dano 3 tem que aparecer na silhueta e no coice);
   // os números de gameplay são os mesmos, e a hitbox de mundo é compensada no shoot().
-  lance: { id: 'lance', name: 'LANÇA', bullet: 'bolt3', bulletScale: 1.2, rate: 3, speed: 430, damage: 3, pellets: 1, spread: 0, ammo: null, range: null, stretchX: 1.8, muzzleFlash: 6 },
-  spread: { id: 'spread', name: 'DISPERSOR', bullet: 'bolt2', bulletScale: 0.9, rate: 3, speed: 250, damage: 1, pellets: 3, spread: 22, ammo: null, range: 110 },
+  lance: { id: 'lance', name: 'LANÇA', bullet: 'shotLance', bulletScale: 1.2, rate: 3, speed: 430, damage: 3, pellets: 1, spread: 0, ammo: null, range: null, stretchX: 1.8, muzzleFlash: 6 },
+  spread: { id: 'spread', name: 'DISPERSOR', bullet: 'shotSpread', bulletScale: 0.9, rate: 3, speed: 250, damage: 1, pellets: 3, spread: 22, ammo: null, range: 110 },
 
   // ── ENXAME: a arma base da nave ALIENÍGENA (escolhida na 2ª interlude). ──
   //
@@ -183,7 +183,7 @@ export const WEAPONS: Record<string, WeaponDef> = {
   // SEM OLHAR — a mão fica livre para desviar. Num campo minado com kamikazes em cima de você,
   // isso é uma troca de verdade, e não um upgrade.
   enxame: {
-    id: 'enxame', name: 'ENXAME', bullet: 'bolt2', bulletScale: 1, rate: 4, speed: 170, damage: 1, pellets: 1, spread: 6, ammo: null, range: null,
+    id: 'enxame', name: 'ENXAME', bullet: 'shotEnxame', bulletScale: 1, rate: 4, speed: 170, damage: 1, pellets: 1, spread: 6, ammo: null, range: null,
     homing: { turn: 80, range: 150 },
   },
 
@@ -199,7 +199,7 @@ export const WEAPONS: Record<string, WeaponDef> = {
   // No FLAP o gatilho é automático (a mão está na altitude): a HMG entra girando sozinha e
   // esquenta sozinha. Ali ela é uma arma que se GASTA, e é assim que tem que ser.
   hmg: {
-    id: 'hmg', name: 'HMG', bullet: 'bolt3', bulletScale: 0.85, rate: 18, speed: 340, damage: 1, pellets: 1, spread: 5, ammo: 200, range: null,
+    id: 'hmg', name: 'HMG', bullet: 'shotHmg', bulletScale: 0.85, rate: 18, speed: 340, damage: 1, pellets: 1, spread: 5, ammo: 200, range: null,
     // ~3s de fogo cheio até travar; 1.6s travada; e o calor leva ~6.5s para sair inteiro.
     //
     // ⚠️ O `cool` É A TRAVA DO EXPLOIT, E O NÚMERO FOI MEDIDO, NÃO CHUTADO.
@@ -240,38 +240,40 @@ export const WEAPONS: Record<string, WeaponDef> = {
     muzzles: [{ dy: -2, angle: 0 }, { dy: 2, angle: 0 }],
   },
   obus: {
-    id: 'obus', name: 'OBUS', bullet: 'bolt3', bulletScale: 1.7, rate: 1, speed: 150,
+    id: 'obus', name: 'OBUS', bullet: 'shotObus', bulletScale: 1.7, rate: 1, speed: 150,
     damage: 5, pellets: 1, spread: 0, ammo: null, range: null,
     // O glow é só figurino (blend ADD + pulso de ALPHA — nunca de escala, que arrastaria a
     // hitbox de mundo junto): 5 de dano viajando a 150px/s tem que parecer carregado.
     glow: true, muzzleFlash: 4,
   },
   agulha: {
-    id: 'agulha', name: 'AGULHA', bullet: 'bolt', bulletScale: 0.7, rate: 6, speed: 500,
+    id: 'agulha', name: 'AGULHA', bullet: 'shotAgulha', bulletScale: 0.7, rate: 6, speed: 500,
     damage: 1, pellets: 1, spread: 0, ammo: null, range: null,
   },
   // Dano 2, não 1: com dano 1 a média do ciclo (3 tiros + 0.8s de pausa) caía a 3.1 dps — abaixo
   // de qualquer régua. A 2, a janela cospe 6 de dano em 0.16s e o ciclo fecha em ~6.2 dps.
   salva: {
-    id: 'salva', name: 'SALVA', bullet: 'bolt', bulletScale: 1, rate: 1.25, speed: 340,
+    id: 'salva', name: 'SALVA', bullet: 'shotSalva', bulletScale: 1, rate: 1.25, speed: 340,
     damage: 2, pellets: 1, spread: 0, ammo: null, range: null,
     burst: { count: 3, interval: 0.08 },
   },
   perfurante: {
-    id: 'perfurante', name: 'PERFURANTE', bullet: 'bolt3', bulletScale: 1.1, rate: 2.5, speed: 300,
+    id: 'perfurante', name: 'PERFURANTE', bullet: 'shotPerfurante', bulletScale: 1.1, rate: 2.5, speed: 300,
     damage: 2, pellets: 1, spread: 0, ammo: null, range: null,
     pierce: true,
   },
   bateria: {
-    id: 'bateria', name: 'BATERIA', bullet: 'bolt', bulletScale: 0.85, rate: 2, speed: 320,
+    id: 'bateria', name: 'BATERIA', bullet: 'shotBateria', bulletScale: 0.85, rate: 2, speed: 320,
     damage: 1, pellets: 4, spread: 0, ammo: null, range: null,
     muzzles: [{ dy: -5, angle: -2 }, { dy: -2, angle: -0.7 }, { dy: 2, angle: 0.7 }, { dy: 5, angle: 2 }],
   },
   // Teal, não ciano puro nem magenta: é tecnologia ALIEN na mão do jogador — parente da cor do
-  // Arauto, longe da cor do inimigo (armadilha 24: a cor tem dono).
+  // Arauto, longe da cor do inimigo (armadilha 24: a cor tem dono). O teal agora é ASSADO na
+  // textura desenhada em código (`shotLamina`, 11×19 — já na altura de mundo que o antigo
+  // stretchY 3.2 entregava; hitbox igual, sem esticão borrado nem tint por cima).
   lamina: {
-    id: 'lamina', name: 'LÂMINA', bullet: 'bolt', bulletScale: 1, bulletScaleY: 3.2, rate: 2,
-    speed: 260, damage: 2, pellets: 1, spread: 0, ammo: null, range: null, tint: 0x5ef2d8,
+    id: 'lamina', name: 'LÂMINA', bullet: 'shotLamina', bulletScale: 1, rate: 2,
+    speed: 260, damage: 2, pellets: 1, spread: 0, ammo: null, range: null,
   },
 };
 
@@ -673,10 +675,13 @@ export class WeaponSystem {
       b.setBlendMode(this.weapon.glow ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL);
       b.setAlpha(1);
       b.setData('glow', this.weapon.glow === true);
-      // O halo aditivo (tickFx): por FAMÍLIA de cor — o traçante e o fogo da shotgun são
+      // O halo aditivo (tickFx): por FAMÍLIA de cor — o traçante, o fogo da shotgun e os tiros
+      // desenhados em tons quentes (lança dourada, pelota laranja, cápsula da HMG, obus) são
       // quentes por design; o resto é ciano, a cor do jogador. Teleguiado não ganha halo:
       // o rastro teal dele já desenha a curva, e brilho sobre brilho vira mancha.
-      const quente = this.weapon.bullet === 'tracerRound' || this.weapon.bullet === 'blast';
+      const quente = ['tracerRound', 'blast', 'shotLance', 'shotSpread', 'shotHmg', 'shotObus'].includes(
+        this.weapon.bullet,
+      );
       b.setData('glowKind', this.weapon.homing ? null : quente ? 'warm' : 'cyan');
       // Hitbox derivada da arte, e generosa: bala fina com corpo justo erra o que devia acertar.
       // O PISO de 3px existe pelo traçante (8×1): a 90% da arte, o corpo dele teria ~1px de

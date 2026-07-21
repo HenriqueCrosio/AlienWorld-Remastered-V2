@@ -211,7 +211,8 @@ export class BossCapitania implements StageBoss {
         { at: 0.0, run: () => this.launch(2) },
         // A ONDA: proa → ventral → ponte, 0.3s entre elas. Rolando pelo casco, ela varre um
         // lado por vez — então SEMPRE existe um lado seguro, se você chegar nele a tempo.
-        { at: 0.8, run: () => this.burst(b0, 3, 26) },
+        // O clarão da salva toca UMA vez por onda (no primeiro disparo) e cobre a sequência.
+        { at: 0.8, run: () => { this.playFire(); this.burst(b0, 3, 26); } },
         { at: 1.1, run: () => this.burst(b1, 3, 26) },
         { at: 1.4, run: () => this.burst(b2, 3, 26) },
       ];
@@ -219,7 +220,7 @@ export class BossCapitania implements StageBoss {
 
     return [
       { at: 0.0, run: () => this.launch(3) },
-      { at: 0.5, run: () => this.burst(b0, 4, 34) },
+      { at: 0.5, run: () => { this.playFire(); this.burst(b0, 4, 34); } },
       { at: 0.7, run: () => this.burst(b1, 4, 34) },
       { at: 0.9, run: () => this.burst(b2, 4, 34) },
       // O flak entra DEPOIS da onda, não junto: dois padrões no mesmo instante não se leem.
@@ -299,6 +300,20 @@ export class BossCapitania implements StageBoss {
         this.enemies.spawn('kamikaze', hy + Phaser.Math.Between(-10, 10), hx);
       });
     }
+  }
+
+  /**
+   * O CLARÃO DA SALVA (2026-07-21): as baterias acendem em magenta e o casco treme com o
+   * recuo — a animação `capitania-fire` toca no primeiro disparo da onda e, ao terminar,
+   * devolve o navio à respiração do idle. Sem a arte, simplesmente não toca (o idle segue).
+   */
+  private playFire(): void {
+    if (!this.scene.anims.exists('capitania-fire')) return;
+
+    this.sprite.play('capitania-fire');
+    this.sprite.once('animationcomplete-capitania-fire', () => {
+      if (!this.dead && this.scene.anims.exists('capitania-idle')) this.sprite.play('capitania-idle');
+    });
   }
 
   /**

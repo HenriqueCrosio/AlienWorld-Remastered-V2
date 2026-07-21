@@ -120,12 +120,26 @@ const boss0 = await page.evaluate(() => {
     hpG: s.boss.hpGuardiao,
     alvos: s.boss.targets?.length ?? 0,
     tex: s.boss.sprite.texture.key,
+    anim: s.boss.sprite.anims?.currentAnim?.key ?? null,
+    tocando: s.boss.sprite.anims?.isPlaying ?? null,
+    quadro: s.boss.sprite.anims?.currentFrame?.index ?? null,
   };
 });
 console.log('boss     ', JSON.stringify(boss0));
 ok(boss0.forma === 'guardiao', `a luta abre com o GUARDIÃO (forma=${boss0.forma})`);
 ok(boss0.alvos === 1, `a massa é o único alvo (targets=${boss0.alvos})`);
+// O guardião RESPIRA (a sheet animada, 2026-07-21): a sonda cobra a animação viva, não só a
+// textura — o chefe final estático de antes era a "animação que existia só na teoria".
+ok(
+  boss0.anim === 'guardiao-idle' && boss0.tocando === true,
+  `o guardião RESPIRA (anim=${boss0.anim}, tocando=${boss0.tocando})`,
+);
 await page.screenshot({ path: 'probe-stage4-guardiao.png' });
+await page.waitForTimeout(1100);
+const boss0b = await page.evaluate(
+  () => window.__game.scene.getScenes(true)[0].boss.sprite.anims?.currentFrame?.index ?? null,
+);
+ok(boss0b !== boss0.quadro, `o quadro da respiração AVANÇA (${boss0.quadro} → ${boss0b})`);
 
 const atirar = async (ms) => {
   await page.evaluate(() => {
@@ -157,11 +171,25 @@ await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.damage(999
 await page.waitForTimeout(2200);
 const troca = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
-  return { forma: s.boss.forma, tex: s.boss.sprite.texture.key, aberto: s.boss.aberto };
+  return {
+    forma: s.boss.forma,
+    tex: s.boss.sprite.texture.key,
+    aberto: s.boss.aberto,
+    anim: s.boss.sprite.anims?.currentAnim?.key ?? null,
+    tocando: s.boss.sprite.anims?.isPlaying ?? null,
+  };
 });
 console.log('troca    ', JSON.stringify(troca));
 ok(troca.forma === 'coracao', `a casca morta revela o CORAÇÃO (forma=${troca.forma})`);
-ok(troca.tex === 'nucleo', `a arte trocou junto (tex=${troca.tex})`);
+// A arte trocou junto: a SHEET do batimento (ou o estático de fallback, se a sheet faltar).
+ok(
+  troca.tex === 'nucleoBeatSheet' || troca.tex === 'nucleo',
+  `a arte trocou junto (tex=${troca.tex})`,
+);
+ok(
+  troca.anim === 'nucleo-beat' && troca.tocando === true,
+  `o coração BATE (anim=${troca.anim}, tocando=${troca.tocando})`,
+);
 await page.screenshot({ path: 'probe-stage4-nucleo.png' });
 
 const esperarEstado = async (aberto) => {

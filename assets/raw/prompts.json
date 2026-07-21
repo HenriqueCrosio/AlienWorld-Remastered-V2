@@ -368,6 +368,62 @@
    "escolhido": "quadro unico (completed)",
    "nota": "Mundo partido com o nucleo em LAVA sangrando para fora. Escolhido pelo Henrique como o grande fundo dramatico da Doca — a causa do cinturao, vista de perto. Entra na cutscene com setFlipX (o nucleo quente virado PARA a cena) e tint escuro (0x9aa6c8), depth -85. So a Interlude2Scene o usa.",
    "prompt": "huge shattered planet broken into pieces seen from space, molten lava core exposed and glowing orange, chunks of crust drifting apart, debris field"
+  },
+  {
+   "asset": "EXPLOSAO PEQUENA (drones, tiros, impactos) -> explosion-small-sheet.png",
+   "id": "7cac0a4e (objeto) -> 732fdc01-3ebc-4664-b010-1657d6c0d179 (frame 1 promovido) -> anim 1e3026f4",
+   "size": "9 quadros 32x32 em grade (sheet)",
+   "nota": "A explosao UNICA do jogo era desproporcional: drone de 15px morria numa bola de fogo de 64. Agora o Fx.explode tem 3 tiers por tamanho (pequena 32 / media 64 / grande 128). Objeto criado com style_image da sheet de explosao media (referencia da propria casa).",
+   "prompt": "small pixel art explosion for tiny enemies, quick flash of orange-yellow fire with dark smoke puff, compact burst that fits a 32px frame"
+  },
+  {
+   "asset": "ARAUTO — propulsao (ultima nave jogavel sem motor animado) -> ship-arauto-anim-0..8.png",
+   "id": "22d2aaa4 (objeto, arte DO HENRIQUE na interface web) -> 9d945856-aef3-4005-9f69-c92104085f55 (frame 25 promovido) -> anim 9c417957",
+   "size": "9 quadros 31x15",
+   "nota": "Motor verde pulsando. Instalado via install-anim.mjs (assinatura: <nome> <url-base> <n>, diferente dos outros scripts). ATENCAO: os PNGs tem que se chamar ship-arauto-anim-N.png — o padrao animFrames do BootScene e '<file>-<i>.png'; nomear errado vira 'Failed to process file' no console.",
+   "prompt": "animate the green engine thruster of the alien herald ship, pulsing glow"
+  },
+  {
+   "asset": "COSTELA BIONICA (interior da Fase 4) -> costela.png",
+   "id": "b7a8a004",
+   "size": "256x237",
+   "nota": "Costela giger biomecanica. Virou (a) o obstaculo dos corredores da F4 (colunas chao/teto com angle de funil, substituindo a rocha tingida) e (b) 3 camadas de Parallax do interior (longe escura / teto / proxima). Um candidato TEAL foi descartado: teal e a cor do jogador (armadilha 24).",
+   "prompt": "colossal biomechanical rib bone, Giger style bionic arch: pale bone fused with dark cables and metal pistons, side view"
+  },
+  {
+   "asset": "ORGAO (interior da Fase 4) -> orgao.png",
+   "id": "e754b9b9",
+   "size": "121x118",
+   "nota": "Massa organica vermelha brilhante. Obstaculo de corredor (mix com costela) + camada flutuante do Parallax (tint escuro 0x5a4048, orgaos a deriva no meio-fundo).",
+   "prompt": "grotesque alien organ chunk fused with machine parts, glowing red-orange flesh wrapped in dark biomechanical tubes"
+  },
+  {
+   "asset": "MAQUINARIO PESADO (interior da Fase 4) -> maquinario.png",
+   "id": "89edcdd0",
+   "size": "112x121",
+   "nota": "Engrenagem industrial pesada. Obstaculo de corredor + camada pendurada no teto do Parallax (tint 0x3a4258). O interior do Leviata e carne E maquina.",
+   "prompt": "heavy industrial machinery block with big gear and pistons, grimy dark metal fused with organic growth, side view"
+  },
+  {
+   "asset": "ANIMACOES do GUARDIAO e do NUCLEO (chefe final) -> guardiao-idle-sheet.png / nucleo-beat-sheet.png",
+   "id": "guardiao: anim e7b7599f (objeto 03ef8c07, arte DO HENRIQUE); nucleo: anim bbe36ccd (objeto cf5b3e43)",
+   "size": "guardiao 9f 256x256 (idle respirando, 6fps yoyo); nucleo 9f 128x128 (ferida pulsando, 7fps yoyo)",
+   "nota": "BossNucleo toca guardiao-idle na 1a forma e nucleo-beat no coracao (anims.stop antes da troca — armadilha 26). corpoDomo/corpoInteiro usam dimensoes CONSTANTES (256x227 / 122x122), senao a sheet infla a hitbox.",
+   "prompt": "subtle idle breathing animation (guardiao) / the torn wound glows and pulses like a heartbeat (nucleo)"
+  },
+  {
+   "asset": "LEVIATA INTACTO (estado anterior do leviathan-dying) -> scripts/_leviathan-intact.png",
+   "id": "94df8790 (mesmo estado de f397793a-0e59-49e2-9853-848b674b3fd7, o dying aprovado pelo Henrique)",
+   "size": "128px",
+   "nota": "Gerado para unificar o Leviata do menu com o da cutscene final. A sessao paralela resolveu a unificacao com leviathan-whale (BootScene/Interlude4 reescritos por ela) — o intacto ficou em scripts/ como reserva, NAO instalado.",
+   "prompt": "colossal space leviathan whale, intact and alive, side view [mesma seed/estado do dying]"
+  },
+  {
+   "asset": "CAPITANIA — salva das baterias (anim de fogo) -> capitania-fire-anim-0..8.png",
+   "id": "c1207020-b9d5-4b4b-8dd9-1aee2f285c29 (objeto em REVIEW) -> select-frames indice 1 -> 5c2161ef-e49f-4287-955b-d561575f01f7 (completed, MESMA arte do capitania.png) -> anim 619eaf8e-058c-4620-8b0a-5af1aa7cd4a3 (grupo 1fe8d5d2)",
+   "size": "9 quadros 127x71 (caixa UNIAO com o idle — scripts/_recrop-capitania.mjs regravou idle+fogo+estatico na mesma caixa, licao 5)",
+   "nota": "O objeto original estava em review e NAO aceitava /animations (400 'not ready'): a promocao e POST /objects/{id}/select-frames {indices:[1]}. frame_count do v3 tem que ser PAR (4-16) — 9 da 400, 8 vira 9 com o keep_first_frame. BossCapitania.playFire toca 'capitania-fire' no primeiro burst da onda e volta para 'capitania-idle' no animationcomplete.",
+   "prompt": "the alien warship's flank gun batteries fire a heavy volley: bright magenta muzzle flashes bloom along the cannons, barrels recoil with the blast, running lights flare, then the ship settles back"
   }
  ],
  "_licao_3": "O gerador às vezes DESENHA o xadrez de transparência dentro do PNG (quadrados cinza opacos). scripts/decheck.mjs remove por cor.",

@@ -604,6 +604,60 @@ Vender ESCALA é o mais difícil em pixel art, e estes dois sprites fazem isso s
 
 ---
 
+## O PASSE VISUAL (2026-07-21) — explosões por caso, tiros em código, interior ORGÂNICO
+
+Pedido do Henrique, quatro frentes. Tudo verificado por sonda + revisão de screenshot.
+
+**Explosões POR CASO.** Uma explosão única servia para tudo e era desproporcional (drone de
+15px morria numa bola de fogo de 64). Agora há 3 sheets e o `Fx.explode()` escolhe por
+tamanho: `explosionSmallSheet` 32² (≤1.25), a média 64² (≤2.0), a grande 128² (>2.0), com
+fallback para a anterior se a sheet não existir.
+
+**Tiros são CÓDIGO, não sprite** (decisão do Henrique: sprite de tiro chega grande demais).
+`BootScene.makeShots()` desenha um projétil por arma (`shotPulse`, `shotLance`, `shotSpread`,
+`shotEnxame`, `shotHmg`, `shotObus`, `shotAgulha`, `shotSalva`, `shotPerfurante`, `shotBateria`,
+`shotLamina`) — núcleo branco-quente + corpo saturado + halo baixo, o jeito laser.
+⚠️ **As dimensões são as dos PNGs antigos** (bolt 11×6, bolt2 13×9, bolt3 12×5): a hitbox
+deriva da textura e o balanceamento está fechado. A LÂMINA é a exceção consciente: nasce
+alta (11×19, o mundo que o stretchY 3.2 entregava) e o `bulletScaleY` foi aposentado.
+`tracerRound` e `blast` (a shotgun ardendo) já eram código/animação e ficaram. Mísseis e
+detonadores seguem sprite — é permitido e o da torre já é. Halos quentes por família:
+lança/dispersor/HMG/obus entraram no `glowWarm`.
+Revisão visual: `node scripts/probe-shots.mjs` (foto por arma).
+
+**Nave avariada por código.** Na última vida a nave fumega e o motor TOSSE (a técnica da
+Interlude3: `puff` escuro seguindo o casco + `anims.timeScale` sorteado a cada 240ms, com
+cusparada de fagulha). Sem wobble em y/ângulo: na GameScene a nave está sob o comando do
+jogador, e tremer o sprite briga com a mão dele. Verificado em `probe-avaria.png`.
+
+**A Fase 4 é ORGÂNICA de verdade.** O Henrique pediu túneis estreitos de interior vivo —
+costelas, órgãos, maquinário — e o que havia era pico de rocha tingido. Três peças novas
+(ids em `assets/raw/prompts.json`):
+
+- `costela.png` (256×237), `orgao.png` (121×118), `maquinario.png` (112×121) — PixelLab.
+- **Corredores** (`GameScene.spawnCorredores` + `BossNucleo.parede`): as colunas agora são
+  o mix orgânico (62% costela) com **angle de funil** (±6–13° na direção do scroll — a caixa
+  torácica fechando à frente). Sem a arte, cai no spire tingido de sempre (fallback).
+  ⚠️ Prop orgânico escala UNIFORME no `alturaPx` (o esticão só-Y do spire deformaria); o
+  Arcade não gira hitbox — funil pequeno de propósito.
+- **Parallax interior**: 5 camadas novas (costela longe/chão, costela teto, costela próxima,
+  órgãos à deriva, maquinário pendurado) — tints ESCUROS (perspectiva aérea) para o cenário
+  nunca se confundir com as colunas jogáveis, que nascem claras.
+- O estreitamento real continua no roteiro (gap 110 → 76 no APERTO) — agora ele SE VÊ.
+
+**Bosses animados.** Guardião RESPIRA (`guardiao-idle`, 6fps yoyo) e o coração BATE
+(`nucleo-beat`, 7fps yoyo) — anims PixelLab sobre as artes aprovadas. `corpoDomo`/
+`corpoInteiro` usam dimensões CONSTANTES (a sheet inflaria a hitbox). O Arauto ganhou a
+propulsão que faltava (`ship-arauto-thrust`). A Capitânia ganhou a SALVA das baterias
+(`capitania-fire`, 9f não-loop, toca no primeiro burst da onda e volta para o idle) — e a
+instalação vale como receita: objeto em review NÃO aceita `/animations` (promova antes com
+`POST /objects/{id}/select-frames`), `frame_count` do v3 é PAR, e as duas anims + o estático
+foram re-recortados pela MESMA caixa união (`scripts/_recrop-capitania.mjs`, lição 5).
+⚠️ **O padrão de nome é `<file>-<i>.png`** (`ship-arauto-anim-0.png`): instalar como
+`ship-arauto-0.png` vira `Failed to process file` no console e a anim morre em silêncio.
+
+---
+
 ## Atalhos de DEV (só em `import.meta.env.DEV`)
 
 | Tecla | Onde | O quê |

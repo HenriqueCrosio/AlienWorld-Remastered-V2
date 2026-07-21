@@ -11,7 +11,19 @@ export const GROUND_Y = GAME_HEIGHT - 10;
  */
 export const TETO_Y = 10;
 
-export type PropKind = 'spire' | 'building' | 'turret' | 'base' | 'silo' | 'radar' | 'wreck';
+export type PropKind =
+  | 'spire'
+  | 'building'
+  | 'turret'
+  | 'base'
+  | 'silo'
+  | 'radar'
+  | 'wreck'
+  // O interior ORGÂNICO do Leviatã (Fase 4): costela biônica, pedaço de órgão, maquinário
+  // pesado. Terreno indestrutível como a rocha — existe para ser desviado.
+  | 'costela'
+  | 'orgao'
+  | 'maquinario';
 
 interface PropDef {
   /** Vida. Infinity = indestrutível (rocha: existe para ser desviada). */
@@ -41,6 +53,9 @@ const PROPS: Record<PropKind, PropDef> = {
   silo: { hp: 6, score: 90, shoots: false },
   radar: { hp: 4, score: 120, shoots: false, anim: 'radar-scan' },
   wreck: { hp: Infinity, score: 0, shoots: false },
+  costela: { hp: Infinity, score: 0, shoots: false },
+  orgao: { hp: Infinity, score: 0, shoots: false },
+  maquinario: { hp: Infinity, score: 0, shoots: false },
 };
 
 /**
@@ -96,10 +111,14 @@ export class TerrainSystem {
    * `tint` veste o prop para o LUGAR (F4: a rocha branco-gelo da lua dentro do Leviatã escuro
    * gritava fora da paleta). ⚠️ Vale só para prop INDESTRUTÍVEL: o flash de dano dá clearTint
    * e devolveria a cor crua.
+   *
+   * `angle` inclina o prop em torno da ÂNCORA (base no chão, topo no teto) — é o que faz as
+   * costelas da F4 fecharem em funil na direção do scroll. O corpo físico NÃO gira junto
+   * (Arcade é axis-aligned): manter pequeno (≤ ~14°), senão a hitbox mente feio.
    */
   spawn(
     kind: PropKind,
-    opts?: { anchor?: 'chao' | 'teto'; alturaPx?: number; tint?: number },
+    opts?: { anchor?: 'chao' | 'teto'; alturaPx?: number; tint?: number; angle?: number },
   ): void {
     const teto = opts?.anchor === 'teto';
 
@@ -134,8 +153,15 @@ export class TerrainSystem {
     if (kind === 'spire') p.setScale(1, Phaser.Math.FloatBetween(0.55, 1.25));
 
     // Altura CRAVADA pelo roteiro (corredores da F4): sobrepõe o sorteio acima.
-    if (opts?.alturaPx !== undefined) p.setScale(1, opts.alturaPx / p.height);
+    // A rocha estica só na vertical (é o que varia o relevo dela); os props ORGÂNICOS escalam
+    // UNIFORME — uma costela de 256×237 esticada só em Y viraria uma parede de 256px de
+    // largura deformada.
+    if (opts?.alturaPx !== undefined) {
+      if (kind === 'spire') p.setScale(1, opts.alturaPx / p.height);
+      else p.setScale(opts.alturaPx / p.height);
+    }
     if (opts?.tint !== undefined) p.setTint(opts.tint);
+    if (opts?.angle !== undefined) p.setAngle(opts.angle);
 
     if (def.shoots) {
       // Primeiro tiro demora: a torre não pode disparar no instante em que entra na tela.

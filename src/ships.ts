@@ -130,6 +130,7 @@ export const SHIPS: Record<string, ShipDef> = {
     name: 'ARAUTO',
     weapon: 'enxame',
     texture: 'ship4',
+    anim: 'ship-arauto-thrust',
     tagline: 'caça sozinho · erra o que é rápido',
   },
 };

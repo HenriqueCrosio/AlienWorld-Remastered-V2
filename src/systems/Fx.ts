@@ -49,20 +49,32 @@ export class Fx {
    * As animações das sheets (carregadas no BootScene). Registradas UMA vez — o Fx é criado
    * por cena, e `anims.create` com chave repetida gritaria; a guarda `anims.exists` resolve.
    *
-   * - `explosion` (13f @18fps ≈ 720ms): a explosão-MESTRA. Rápida o bastante para ler como
-   *   ESTOURO, lenta o bastante para a fumaça escura aparecer — a saída em fumaça é o que a
-   *   separa de um clarão de partícula.
+   * - `explosion` (13f @18fps ≈ 720ms): a explosão-MESTRA, média. Rápida o bastante para ler
+   *   como ESTOURO, lenta o bastante para a fumaça escura aparecer — a saída em fumaça é o que
+   *   a separa de um clarão de partícula.
+   * - `explosion-small` (9f @20fps ≈ 450ms): o estouro seco dos inimigos pequenos (32²).
+   *   Bicho pequeno morre rápido — a mestra a 0.6× lia como capital (o estouro engolia o
+   *   cadáver de 24px).
    * - `explosion-big` (13f @13fps ≈ 1s): a detonação de set-piece. Mais lenta: massa grande
    *   explode devagar (é o que vende a ESCALA — uma explosão de 128px a 18fps lê como pequena
    *   ampliada).
    * - `implosion-big`: os MESMOS quadros ao contrário. Fumaça → chama → núcleo branco: matéria
    *   sendo SUGADA para dentro. É a morte da Aurora (Interlude 1).
-   * - `leviathan-dying` (9f, pingpong): fissuras pulsando na espinha — toca o beat INTEIRO da
+   * - `leviathan-dying` (11f, pingpong): fissuras pulsando na espinha — toca o beat INTEIRO da
    *   cutscene final sem congelar no último quadro (o yoyo é o que impede o "adesivo parado").
    */
   private registerAnims(): void {
     const anims = this.scene.anims;
     const tex = this.scene.textures;
+
+    if (tex.exists('explosionSmallSheet') && !anims.exists('explosion-small')) {
+      anims.create({
+        key: 'explosion-small',
+        frames: anims.generateFrameNumbers('explosionSmallSheet', { start: 0, end: 8 }),
+        frameRate: 20,
+        repeat: 0,
+      });
+    }
 
     if (tex.exists('explosionSheet') && !anims.exists('explosion')) {
       anims.create({
@@ -92,10 +104,10 @@ export class Fx {
       }
     }
 
-    if (tex.exists('leviathanDyingSheet') && !anims.exists('leviathan-dying')) {
+    if (tex.exists('leviathanWhaleDyingSheet') && !anims.exists('leviathan-dying')) {
       anims.create({
         key: 'leviathan-dying',
-        frames: anims.generateFrameNumbers('leviathanDyingSheet', { start: 0, end: 8 }),
+        frames: anims.generateFrameNumbers('leviathanWhaleDyingSheet', { start: 0, end: 10 }),
         frameRate: 8,
         repeat: -1,
         yoyo: true,
@@ -127,14 +139,32 @@ export class Fx {
   /**
    * A explosão de combate: sheet + fagulhas + shake.
    *
-   * `size` é o parâmetro histórico (1 = inimigo comum, 1.5 = prop/torre, 2+ = mina/capital).
-   * A escala da sheet sai dele (0.6×): inimigo comum ≈ 0.6 (38px de bola de fogo — cobre o
-   * cadáver sem tapar a tela), capital ≈ 1.2. `depth` expõe a frente de cena das cutscenes.
+   * `size` é o parâmetro histórico (1 = inimigo comum, 1.5 = prop/torre, 2+ = mina/capital) —
+   * e agora ele escolhe A SHEET, não só a escala. Antes tudo saía da mestra de 64px: o drone
+   * de 24px morria numa bola de fogo de 38px (o estouro engolia o cadáver e lia como capital),
+   * e o cargueiro de 122px morria no mesmo foguinho ampliado. Explosão tem TAMANHO DE CASO:
+   *
+   *   size ≤ 1.25  → `explosion-small` (32², 20fps) — drones, batedores, kamikazes.
+   *                  Estouro curto e seco: bicho pequeno morre rápido.
+   *   size ≤ 2.0   → `explosion` (64²) — torres, canhoneiras, o jogador levando dano.
+   *   size > 2.0   → `explosion-big` (128²) — cargueiro, capitais, a morte do jogador.
+   *
+   * `depth` expõe a frente de cena das cutscenes.
    */
   explode(x: number, y: number, size = 1, depth = 50): Phaser.GameObjects.Sprite | null {
     this.burst.explode(Math.floor(10 * size), x, y);
     this.scene.cameras.main.shake(90 * size, 0.004 * size);
-    return this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth);
+    if (size <= 1.25) {
+      return this.sheetSprite('explosion-small', 'explosionSmallSheet', x, y, 1.1 * size, depth)
+        ?? this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth);
+    }
+    if (size <= 2.0) {
+      return this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth);
+    }
+    return (
+      this.sheetSprite('explosion-big', 'explosionBigSheet', x, y, 0.5 * size, depth) ??
+      this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth)
+    );
   }
 
   /**

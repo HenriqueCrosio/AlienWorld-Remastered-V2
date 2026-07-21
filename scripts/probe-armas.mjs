@@ -165,7 +165,9 @@ const ok = (cond, msg) => {
 // ─── lamina ───
 {
   const m = await medir('lamina');
-  ok(m.vivos.some((b) => b.sy > 2 && b.corpoH >= 10), `lamina: projétil alto (corpo ≥10px de mundo)`);
+  // A altura agora é ASSADA na textura (shotLamina 11×19, escala 1) — o contrato é a hitbox de
+  // mundo ≥10px, não o stretch que a entregava antes.
+  ok(m.vivos.some((b) => b.corpoH >= 10), `lamina: projétil alto (corpo ≥10px de mundo)`);
   const rate = m.count / 2.5;
   ok(rate > 1.6 && rate < 2.4, `lamina: cadência ${rate.toFixed(1)}/s (~2)`);
 }

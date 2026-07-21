@@ -50,7 +50,7 @@ export class Interlude4Scene extends Phaser.Scene {
   private entulho: Phaser.GameObjects.Image[] = [];
   /** O cenário do beat 1 (piso + as duas cópias do hangar) — destruído no corte da ruptura. */
   private cenario: Phaser.GameObjects.GameObject[] = [];
-  /** O Leviatã: Image ('leviathanDying') no beat 3; Container com as duas metades após a partição. */
+  /** O Leviatã: Sprite ('leviathanWhaleDyingSheet') no beat 3; Container com as duas metades após a partição. */
   private leviatan: Phaser.GameObjects.Image | Phaser.GameObjects.Container | null = null;
   private brilhoLeviatan: Phaser.GameObjects.Image | null = null;
   private metadeEsq: Phaser.GameObjects.Image | null = null;
@@ -118,19 +118,20 @@ export class Interlude4Scene extends Phaser.Scene {
 
   // ─── A geometria do Leviatã MORRENDO (beat 3) — a âncora do canvas quadrado ───
   //
-  // O CENTRO VISUAL da criatura fica em (186, 90): o mesmo lugar do sprite estático da era
-  // anterior (`leviathanDying`, 115×47 recortado — o bicho preenche o quadro, o centro do
-  // sprite É o centro do bicho). A sheet nova (`leviathanDyingSheet`) tem canvas QUADRADO
-  // 116×116 com a criatura CENTRALIZADA dentro: o centro visual dela no quadro é ~(57.5, 61.5)
-  // — MEDIDO no PNG (bbox do alfa, média dos quadros), não chutado. Sem compensar, o bicho
-  // nasceria ~9px abaixo do lugar. `leviatanPos` devolve onde o CENTRO DO SPRITE tem que ficar
-  // para o BICHO cair em (LEVI_X, LEVI_Y).
+  // O bicho é A MESMA BALEIA DA KEY ART DO MENU (regenerada com ela como style_images — um
+  // Leviatã só em todo o jogo). O CENTRO VISUAL da criatura fica em (186, 90) na tela. A sheet
+  // (`leviathanWhaleDyingSheet`) tem canvas QUADRADO 144×144 com a criatura CENTRALIZADA dentro:
+  // o centro visual dela no quadro é ~(69.5, 65.7) — MEDIDO no PNG (bbox do alfa, média dos 11
+  // quadros — a criatura convulsiona entre eles), não chutado. `leviatanPos` devolve onde o
+  // CENTRO DO SPRITE tem que ficar para o BICHO cair em (LEVI_X, LEVI_Y).
   private static readonly LEVI_X = 186;
   private static readonly LEVI_Y = 90;
-  private static readonly LEVI_SCALE = 2.55;
-  private static readonly LEVI_FRAME = 116;
-  private static readonly LEVI_VIS_X = 57.5;
-  private static readonly LEVI_VIS_Y = 61.5;
+  // A baleia da key art é mais CHEIA que a criatura antiga (140×87 contra 115×47): na escala
+  // 1.8 ela ocupa ~252×157 na tela — protagonista do beat sem engolir o quadro inteiro.
+  private static readonly LEVI_SCALE = 1.8;
+  private static readonly LEVI_FRAME = 144;
+  private static readonly LEVI_VIS_X = 69.5;
+  private static readonly LEVI_VIS_Y = 65.7;
 
   private static get leviatanPos(): { x: number; y: number } {
     const meio = Interlude4Scene.LEVI_FRAME / 2;
@@ -438,12 +439,13 @@ export class Interlude4Scene extends Phaser.Scene {
   /**
    * BEAT 3 — O AFASTAMENTO: o Leviatã MORRENDO, grande na tela.
    *
-   * Ele sempre foi uma silhueta distante; agora está perto e morrendo. A ESTRELA é a ANIMAÇÃO
-   * (`leviathan-dying`, 9 quadros da sheet em pingpong: fissuras pulsando e explosões na
-   * espinha) — o sprite ESTÁTICO da era anterior vira fallback. Por cima, os efeitos de código
-   * que SOMAM: a cópia aditiva respirando (agora animada junto, não congelada sobre arte viva),
-   * as fagulhas nascendo do casco, e a cadeia de explosões de VERDADE correndo a espinha — a
-   * mesma gramática da morte de todo chefão do jogo, aplicada ao corpo inteiro dele.
+   * Ele sempre foi uma silhueta distante; agora está perto e morrendo — e é A MESMA BALEIA DA
+   * KEY ART DO MENU (um Leviatã só no jogo inteiro). A ESTRELA é a ANIMAÇÃO (`leviathan-dying`,
+   * 11 quadros da sheet em pingpong: fissuras pulsando e explosões na espinha) — o sprite
+   * ESTÁTICO vira fallback. Por cima, os efeitos de código que SOMAM: a cópia aditiva respirando
+   * (animada junto, não congelada sobre arte viva), as fagulhas nascendo do casco, e a cadeia de
+   * explosões de VERDADE correndo a espinha — a mesma gramática da morte de todo chefão do
+   * jogo, aplicada ao corpo inteiro dele.
    */
   private afastamento(): void {
     if (this.done) return;
@@ -454,7 +456,7 @@ export class Interlude4Scene extends Phaser.Scene {
 
     if (this.anims.exists('leviathan-dying')) {
       const lev = this.add
-        .sprite(pos.x, pos.y, 'leviathanDyingSheet', 0)
+        .sprite(pos.x, pos.y, 'leviathanWhaleDyingSheet', 0)
         .setScale(Interlude4Scene.LEVI_SCALE)
         .setDepth(Interlude4Scene.DEPTH_LEVIATAN);
       lev.play('leviathan-dying');
@@ -464,7 +466,7 @@ export class Interlude4Scene extends Phaser.Scene {
       // estática o glow era um segundo sprite parado por cima do primeiro; agora ele acompanha
       // os quadros — o fogo interno acende e apaga NO RITMO das fissuras da arte.
       const brilho = this.add
-        .sprite(pos.x, pos.y, 'leviathanDyingSheet', 0)
+        .sprite(pos.x, pos.y, 'leviathanWhaleDyingSheet', 0)
         .setScale(Interlude4Scene.LEVI_SCALE)
         .setTint(0xff7a2a)
         .setAlpha(0.08)
@@ -480,15 +482,15 @@ export class Interlude4Scene extends Phaser.Scene {
         repeat: -1,
         ease: 'Sine.easeInOut',
       });
-    } else if (this.textures.exists('leviathanDying')) {
-      // Fallback da era anterior (arte entra asset por asset): o estático + o glow estático.
+    } else if (this.textures.exists('leviathanWhaleDying')) {
+      // Fallback (arte entra asset por asset): o estático + o glow estático.
       this.leviatan = this.add
-        .image(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'leviathanDying')
+        .image(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'leviathanWhaleDying')
         .setScale(Interlude4Scene.LEVI_SCALE)
         .setDepth(Interlude4Scene.DEPTH_LEVIATAN);
 
       this.brilhoLeviatan = this.add
-        .image(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'leviathanDying')
+        .image(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'leviathanWhaleDying')
         .setScale(Interlude4Scene.LEVI_SCALE)
         .setTint(0xff7a2a)
         .setAlpha(0.1)
@@ -505,12 +507,12 @@ export class Interlude4Scene extends Phaser.Scene {
     }
 
     // Fagulhas nascendo ao longo do casco: as fissuras soltando fogo. A faixa acompanha o corpo
-    // inteiro do bicho na tela (na escala 2.55 ele ocupa ~x=39..333, y=30..150).
+    // inteiro do bicho na tela (na escala 1.8 ele ocupa ~x=60..312, y=12..168).
     this.fissuras = this.add
       .particles(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y, 'spark', {
         emitZone: {
           type: 'random',
-          source: new Phaser.Geom.Rectangle(-140, -55, 280, 105),
+          source: new Phaser.Geom.Rectangle(-120, -66, 240, 128),
         } as Phaser.Types.GameObjects.Particles.ParticleEmitterConfig['emitZone'],
         lifespan: { min: 260, max: 620 },
         speed: { min: 8, max: 34 },
@@ -522,7 +524,7 @@ export class Interlude4Scene extends Phaser.Scene {
       .setDepth(Interlude4Scene.DEPTH_LEVIATAN + 2);
 
     // A CADEIA NA ESPINHA: explosões da SHEET (não mais fagulha solta), varrendo o corpo de
-    // ré a proa. A espinha do bicho na tela é a faixa ALTA do corpo (y≈34..84); a cada 5
+    // ré a proa. A espinha do bicho na tela é a faixa ALTA do corpo (y≈14..68); a cada 5
     // estouros, um GRANDE racha uma vértebra inteira. ⚠️ Depth NA FRENTE do Leviatã: os
     // emissores do Fx nascem no depth 50 — sem o parâmetro a cadeia estourava ATRÁS do corpo
     // que devia estar destruindo (era metade do "visual fraco" deste beat).
@@ -530,8 +532,8 @@ export class Interlude4Scene extends Phaser.Scene {
     for (let i = 0; i < N; i++) {
       this.time.delayedCall(400 + i * 430, () => {
         if (this.done || this.partido) return;
-        const x = Interlude4Scene.LEVI_X + Phaser.Math.Between(-125, 125);
-        const y = Interlude4Scene.LEVI_Y + Phaser.Math.Between(-56, -6);
+        const x = Interlude4Scene.LEVI_X + Phaser.Math.Between(-110, 110);
+        const y = Interlude4Scene.LEVI_Y + Phaser.Math.Between(-74, -22);
         if (i % 5 === 4) this.fx.explodeBig(x, y, 0.85, Interlude4Scene.DEPTH_LEVIATAN + 3);
         else this.fx.explode(x, y, 1.1, Interlude4Scene.DEPTH_LEVIATAN + 3);
       });
@@ -548,10 +550,10 @@ export class Interlude4Scene extends Phaser.Scene {
   /**
    * A PARTIÇÃO — o bicho rasga em dois.
    *
-   * A arte troca para `leviathanSplit` e as metades viram DOIS recortes do mesmo sprite (crop
-   * esquerdo/direito) dentro de um container: elas se afastam com rotação lenta OPOSTA enquanto
-   * o conjunto ENCOLHE e recua — o `setApproach` invertido: a campanha inteira o fez crescer;
-   * ele morre ficando pequeno.
+   * A arte troca para `leviathanWhaleSplit` e as metades viram DOIS recortes do mesmo sprite
+   * (crop esquerdo/direito) dentro de um container: elas se afastam com rotação lenta OPOSTA
+   * enquanto o conjunto ENCOLHE e recua — o `setApproach` invertido: a campanha inteira o fez
+   * crescer; ele morre ficando pequeno.
    */
   private particao(): void {
     if (this.done || this.partido) return;
@@ -574,20 +576,20 @@ export class Interlude4Scene extends Phaser.Scene {
     this.fissuras = null;
     this.leviatan?.destroy();
 
-    if (!this.textures.exists('leviathanSplit')) return;
+    if (!this.textures.exists('leviathanWhaleSplit')) return;
 
     // ⚠️ O setCrop MASCARA, NÃO REANCORA (armadilha nova, paga na revisão visual): o Phaser
     // corta a região visível mas mantém a origem relativa ao FRAME INTEIRO. Com origem na
-    // borda, cada metade nascia deslocada 58px para FORA — a "partição" acontecia com as
+    // borda, cada metade nascia deslocada ~70px para FORA — a "partição" acontecia com as
     // metades já arremessadas, e a da cabeça ia parar em cima da lua. A correção é ancorar
     // as duas pelo CENTRO do frame: os cortes se encontram na emenda, e o corpo se
-    // reconstitui centrado no container (a esquerda cobre −57.5..+0.5, a direita +0.5..+57.5).
+    // reconstitui centrado no container (a esquerda cobre −70..0, a direita 0..+70).
     const container = this.add
       .container(Interlude4Scene.LEVI_X, Interlude4Scene.LEVI_Y)
       .setScale(Interlude4Scene.LEVI_SCALE)
       .setDepth(Interlude4Scene.DEPTH_LEVIATAN);
-    this.metadeEsq = this.add.image(0, 0, 'leviathanSplit').setCrop(0, 0, 58, 48);
-    this.metadeDir = this.add.image(0, 0, 'leviathanSplit').setCrop(58, 0, 57, 48);
+    this.metadeEsq = this.add.image(0, 0, 'leviathanWhaleSplit').setCrop(0, 0, 70, 75);
+    this.metadeDir = this.add.image(0, 0, 'leviathanWhaleSplit').setCrop(70, 0, 70, 75);
     container.add([this.metadeEsq, this.metadeDir]);
     this.leviatan = container;
 

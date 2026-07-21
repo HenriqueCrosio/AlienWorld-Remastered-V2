@@ -1,0 +1,19 @@
+{
+  "usage": null,
+  "animation_group_id": "1fe8d5d2-8efb-4be9-92cf-0a7081b4e235",
+  "mode": "v3",
+  "frame_count": 8,
+  "display_name": null,
+  "description": "the alien warship's flank gun batteries fire a heavy volley: bright magenta muzzle flashes bloom along the cannons, barrels recoil with the blast, running lights flare, then the ship settles back",
+  "object_id": "5c2161ef-e49f-4287-955b-d561575f01f7",
+  "submissions": [
+    {
+      "direction": "unknown",
+      "status": "queued",
+      "background_job_id": "1f10b76a-0784-486f-b3ae-b131cbe17628",
+      "animation_id": "619eaf8e-058c-4620-8b0a-5af1aa7cd4a3"
+    }
+  ],
+  "enhanced_prompt": null,
+  "enhance_usage": null
+}
