@@ -455,6 +455,22 @@ export class Parallax {
       terreno: true,
     });
 
+    // HAZE ENTRE AS MONTANHAS: a névoa que separa a cordilheira distante da próxima — é ela que
+    // faz as duas lerem como PLANOS distintos, não uma massa só (o degrau de profundidade do ref).
+    this.addLayer({
+      key: 'nebula',
+      factor: 0.22,
+      baseY: 0,
+      depth: -90,
+      tint: 0x222c44,
+      alpha: 0.22,
+      scale: [1.4, 2.2],
+      gap: [170, 300],
+      terreno: false,
+      flutua: true,
+      faixa: [GROUND_Y - 46, GROUND_Y - 2],
+    });
+
     this.addLayer({
       key: 'mtnMid',
       factor: 0.35,
@@ -464,6 +480,21 @@ export class Parallax {
       alpha: 1,
       scale: [0.6, 0.95],
       gap: [45, 75],
+      terreno: true,
+    });
+
+    // 3ª FAIXA DE MONTANHA: mais próxima e rápida que a mtnMid, um degrau de tint acima. É ela que
+    // PREENCHE o vão vazio do meio-de-cena (o "MAIS COMPLEXIDADE"). Reusa a arte mtnMid — sem custo
+    // de geração. Contida na escala para não invadir o campo de jogo; fica atrás do chão (−86).
+    this.addLayer({
+      key: 'mtnMid',
+      factor: 0.6,
+      baseY: GROUND_Y + 4,
+      depth: -86,
+      tint: 0x435679,
+      alpha: 1,
+      scale: [0.55, 0.9],
+      gap: [50, 82],
       terreno: true,
     });
 
