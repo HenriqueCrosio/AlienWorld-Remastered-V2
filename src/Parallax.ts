@@ -554,6 +554,23 @@ export class Parallax {
       terreno: true,
     });
 
+    // NÉVOA RASTEIRA: fog frio e sutil cruzando a linha do chão (o fog de solo do Metal Slug). Dá
+    // "ar" ao terreno. Depth −84: à frente das montanhas, atrás do chão e dos obstáculos; dim
+    // para dar atmosfera sem esconder o jogo.
+    this.addLayer({
+      key: 'nebula',
+      factor: 0.75,
+      baseY: 0,
+      depth: -84,
+      tint: 0x1c2740,
+      alpha: 0.16,
+      scale: [1.2, 2.0],
+      gap: [140, 240],
+      terreno: true,
+      flutua: true,
+      faixa: [GROUND_Y - 20, GROUND_Y + 8],
+    });
+
     // PRIMEIRO PLANO: rochas em silhueta quase preta, MAIS RÁPIDAS que o mundo, passando NA
     // FRENTE da nave (depth 60). É o que mais vende profundidade — sem nada à frente, o
     // cenário é chapado por mais camadas que tenha atrás.
