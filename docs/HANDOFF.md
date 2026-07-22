@@ -4,6 +4,34 @@ Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` →
 
 ---
 
+## 🎬 PASSE VISUAL — FATIA 0: MENU "O DESPERTAR" (2026-07-22)
+
+A primeira fatia do passe visual da campanha (spec/plano em `docs/superpowers/`). O menu deixou
+de ser um quadro parado (a key art com a baleia ERRADA pintada dentro) e virou um **DIORAMA vivo
+com cinemática de abertura**:
+
+- **Leviatã canônico eleito.** O menu antigo e a cutscene final usavam DUAS baleias erradas (o
+  agente trocou os assets no PixelLab). O verdadeiro é o objeto biomecânico com a lava das
+  costelas: PixelLab `f397793a-0e59-49e2-9853-848b674b3fd7`. Gerei a animação **VIVO/idle** dele
+  (anim group `9b548573`) → `public/sprites/leviathan-alive-sheet.png` (9 frames 116×116) →
+  anim `leviathan-alive` (registrada na `MenuScene`). ⚠️ **As baleias erradas ainda estão DENTRO
+  do jogo/cutscene (Fase 3/4) — corrigir nas fatias 7/8.**
+- **Fundo COMPOSTO em camadas** (não uma placa pintada): o PixelLab só gera cena 384×216
+  EMOLDURADA (`create_ui_asset` = painel com bezel), e o higgsfield exige plano pago. Então o
+  fundo é montado com a arte do jogo — estrelas, nebulosa, **lua morta nova** (`menu-moon.png`,
+  PixelLab object `77acaa1d`) e duas bandas de montanha em profundidade. Parallax real, estilo
+  coeso.
+- **Cinemática "O DESPERTAR"**: um véu preto revela o diorama, o Leviatã desliza entrando, o
+  título BATE, a UI surge; aos ~3.3s assenta e liga os pulsos. **Qualquer tecla pula.**
+  `prefers-reduced-motion` vai direto ao repouso, sem partículas.
+- **Atmosfera**: brasas aditivas subindo à volta do Leviatã, névoa baixa, a nave cruzando ao longe.
+- **Sondas**: `probe-menu.mjs` (reescrita: diorama + Leviatã + reduced-motion) e
+  `probe-menu-intro.mjs` (nova: a abertura roda e a tecla pula). `npm run build` OK.
+- Branch `feat/menu-despertar`. **Calibragem visual e a escolha final da arte esperam o olho do
+  Henrique** (a lua/escala do Leviatã/tons são chutes calibrados por sonda A/B, não por dedo humano).
+
+---
+
 ## ⏭️ ONDE PARAMOS
 
 ### 🏁 A CAMPANHA INTEIRA EXISTE E ENCADEIA SOZINHA (2026-07-19/20)
