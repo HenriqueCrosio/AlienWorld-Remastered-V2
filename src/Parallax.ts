@@ -410,6 +410,25 @@ export class Parallax {
       terreno: true,
     });
 
+    // LUZES FRIAS DA COLÔNIA: pontos de luz pontilhando o horizonte industrial (o "vale com luz"
+    // do ref, mas alienígena — ciano frio, não janela amarela). Aditivas (glow), na velocidade do
+    // skyline. Faixa NA ALTURA das torres do skyline (não rente ao chão); densas. Depth −92.9:
+    // logo à frente do skyline (−93) — um cume à frente ainda OCLUI a luz distante (perspectiva).
+    this.addLayer({
+      key: 'colonyLight',
+      factor: 0.1,
+      baseY: 0,
+      depth: -92.9,
+      tint: 0xffffff,
+      alpha: 1,
+      scale: [0.8, 1.7],
+      gap: [20, 50],
+      terreno: true,
+      flutua: true,
+      faixa: [GROUND_Y - 68, GROUND_Y - 18],
+      glow: true,
+    });
+
     // O CÉU COM EVENTO: um cometa raríssimo cruzando o alto. Raro DE PROPÓSITO — ponto de
     // interesse é o que quebra a monotonia; dois na mesma tela viram papel de parede animado.
     this.addLayer({

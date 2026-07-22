@@ -524,6 +524,7 @@ export class BootScene extends Phaser.Scene {
     this.makeShots();
     this.makePuff();
     this.makeSpark();
+    this.makeColonyLight();
     this.makeEnemyBullet();
     this.makePickup();
     this.registerAnims();
@@ -1039,6 +1040,21 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xffffff, 1);
     g.fillRect(0, 0, 2, 2);
     g.generateTexture('spark', 2, 2);
+    g.destroy();
+  }
+
+  /**
+   * Ponto de luz FRIA da colônia (passe visual F1): núcleo claro + halo ciano-frio, 4×4. Usada
+   * ADITIVA (ScatterLayer.glow) — vira brilho no horizonte, não um quadrado. Nunca é arte do
+   * PixelLab: é forma de 3 cores, como spark/puff.
+   */
+  private makeColonyLight(): void {
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+    g.fillStyle(0x8fc4ff, 0.4);
+    g.fillCircle(2, 2, 2);
+    g.fillStyle(0xe6f4ff, 1);
+    g.fillCircle(2, 2, 1);
+    g.generateTexture('colonyLight', 4, 4);
     g.destroy();
   }
 
