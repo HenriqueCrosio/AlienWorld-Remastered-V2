@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { Starfield } from '../Starfield';
-import { Parallax } from '../Parallax';
 import { resetVariantCache, pickVariant } from '../art';
 import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
@@ -15,13 +14,12 @@ import type { HandlingMode } from './GameScene';
  * assenta num loop de repouso. Qualquer tecla pula a abertura; `prefers-reduced-motion` vai
  * direto ao repouso.
  *
- * Cada asset é OPCIONAL e passa pela guarda `textures.exists`: sem a placa `menuBg`, o fundo cai
- * no parallax da fase (o layout antigo); sem a sheet do Leviatã vivo, o menu simplesmente não
- * mostra a criatura. O jogo nunca abre em tela preta.
+ * O fundo é um DIORAMA composto em CAMADAS com a arte do próprio jogo (estrelas, nebulosa, a lua
+ * morta e bandas de montanha) — nada de placa pintada. Cada sprite passa pela guarda
+ * `textures.exists`, e o starfield é procedural: o jogo nunca abre numa tela preta.
  */
 export class MenuScene extends Phaser.Scene {
-  // Públicos: a sonda lê estes campos.
-  parallax: Parallax | null = null;
+  // Público: a sonda lê `settled`.
   settled = false;
 
   private starfield: Starfield | null = null;
@@ -207,8 +205,6 @@ export class MenuScene extends Phaser.Scene {
   /** Fixa tudo no estado de repouso, sem animar. É o destino da abertura e do reduced-motion. */
   private settle(): void {
     for (const { obj, alpha } of this.uiTargets) obj.setAlpha(alpha);
-    const plate = this.children.getByName('menuBgPlate') as Phaser.GameObjects.Image | null;
-    plate?.setAlpha(1);
     this.leviatan?.setAlpha(1);
     this.settled = true;
   }
@@ -228,7 +224,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   /**
-   * Estrelas que CINTILAM sobre a placa. Posições a dedo no céu livre (a mesma lógica do menu
+   * Estrelas que CINTILAM sobre o diorama. Posições a dedo no céu livre (a mesma lógica do menu
    * antigo). Sem custo de animação de pintura — só uma dúzia de pontos piscando.
    */
   private twinkleStars(): void {
@@ -339,11 +335,8 @@ export class MenuScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
-    const dt = delta / 1000;
-    // As estrelas derivam sozinhas (o diorama composto não usa Parallax); o parallax só roda no
-    // caminho legado, se algum dia voltar a existir.
-    this.starfield?.update(dt);
-    this.parallax?.update(dt, SCROLL_SPEED * 0.5);
+    // O diorama é estático; só o starfield deriva, dando a vida sutil do fundo.
+    this.starfield?.update(delta / 1000);
   }
 
   private t(x: number, y: number, value: string, size: number, color: number): Phaser.GameObjects.Text {
