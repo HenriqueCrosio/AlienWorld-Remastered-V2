@@ -157,6 +157,11 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // bicho no quadro é MEDIDO no PNG (bbox do alfa, média dos quadros) — a Interlude4 posiciona
   // por ele (Interlude4Scene.LEVI_VIS_*).
   leviathanWhaleDyingSheet: { path: 'sprites/leviathan-whale-dying-sheet.png', w: 144, h: 144 },
+
+  // O LEVIATÃ VIVO (menu "O DESPERTAR"): o objeto canônico biomecânico com a lava das costelas
+  // pulsando num ritmo cardíaco e o corpo ondulando. É a cara do jogo. Célula quadrada 116×116
+  // (o tamanho impresso por anim-sheet.mjs); 9 quadros lado a lado.
+  leviathanAliveSheet: { path: 'sprites/leviathan-alive-sheet.png', w: 116, h: 116 },
 };
 
 /** Registra os quadros de uma animação no mapa de ART. */

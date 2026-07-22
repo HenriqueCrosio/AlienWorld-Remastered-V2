@@ -45,6 +45,13 @@ const estado = await page.evaluate(() => {
     subtitulo: texto('REMASTERED'),
     cta: texto('ENTER'),
     opcoes: [texto('[1]'), texto('[2]'), texto('[3]')].map((t) => t ?? null),
+    leviatan: (() => {
+      const s2 = window.__game.scene.getScene('Menu');
+      const lev = s2.children.list.find(
+        (c) => c.type === 'Sprite' && c.texture?.key === 'leviathanAliveSheet',
+      );
+      return lev ? { anim: lev.anims?.currentAnim?.key ?? null, alpha: +lev.alpha.toFixed(2) } : null;
+    })(),
   };
 });
 
@@ -59,6 +66,9 @@ ok(!!estado.subtitulo, 'o subtítulo REMASTERED existe');
 ok(!!estado.cta, 'o CTA "ENTER · COMEÇAR" existe');
 ok(estado.opcoes.every((o) => o !== null), 'as TRÊS conduções estão no menu ([1] [2] [3])');
 ok(estado.opcoes.every((o) => o && o.y > 148), `as opções estão no terço de baixo (y: ${estado.opcoes.map((o) => o?.y)})`);
+ok(!!estado.leviatan, 'o Leviatã VIVO está na cena');
+ok(estado.leviatan?.anim === 'leviathan-alive', `o Leviatã está tocando o idle (${estado.leviatan?.anim})`);
+ok(estado.leviatan?.alpha >= 0.9, `o Leviatã está visível (alpha ${estado.leviatan?.alpha})`);
 
 console.log('screenshot: probe-menu.png');
 console.log(falhas === 0 ? '\n✔ MENU DE PONTA A PONTA' : `\n✘ ${falhas} FALHAS`);

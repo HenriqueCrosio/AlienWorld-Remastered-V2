@@ -37,6 +37,7 @@ export class MenuScene extends Phaser.Scene {
 
   create(): void {
     resetVariantCache();
+    this.registerLeviathanAlive();
     this.settled = false;
     this.introTweens = [];
     this.uiTargets = [];
@@ -79,9 +80,32 @@ export class MenuScene extends Phaser.Scene {
       .setDepth(5);
   }
 
-  /** O Leviatã VIVO. Preenchido na Task 3; sem a sheet, não há criatura. */
+  /**
+   * O Leviatã VIVO: a estrela do diorama. Sprite animado (`leviathan-alive`) pairando no céu,
+   * a lava pulsando. Sem a sheet, o método é um no-op — o menu roda sem a criatura.
+   */
   private buildLeviathan(): void {
-    // (Task 3)
+    if (!this.anims.exists('leviathan-alive')) return;
+
+    // Posto no céu livre, acima do horizonte, à esquerda da lua. Escala calibrada para ele ler
+    // IMPONENTE sem cobrir o título (que mora em y≈122).
+    this.leviatan = this.add
+      .sprite(150, 78, 'leviathanAliveSheet', 0)
+      .setDepth(10)
+      .setScale(1.6);
+    this.leviatan.play('leviathan-alive');
+
+    // Um bob vertical lentíssimo — "pairando", não voando. Desligado no reduced-motion.
+    if (!this.reducedMotion) {
+      this.tweens.add({
+        targets: this.leviatan,
+        y: '+=4',
+        duration: 3200,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
   }
 
   /** Brasas, névoa e a passagem da nave. Preenchido na Task 5. */
@@ -170,6 +194,22 @@ export class MenuScene extends Phaser.Scene {
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
+  /**
+   * Registra a animação do Leviatã vivo UMA vez (a cena recria a cada entrada; `anims.exists`
+   * evita o grito de chave repetida). Yoyo: a respiração da lava tem que ser um loop sem salto.
+   */
+  private registerLeviathanAlive(): void {
+    if (this.textures.exists('leviathanAliveSheet') && !this.anims.exists('leviathan-alive')) {
+      this.anims.create({
+        key: 'leviathan-alive',
+        frames: this.anims.generateFrameNumbers('leviathanAliveSheet', { start: 0, end: 8 }),
+        frameRate: 6,
+        repeat: -1,
+        yoyo: true,
       });
     }
   }
