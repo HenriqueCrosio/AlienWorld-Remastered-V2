@@ -162,6 +162,15 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // pulsando num ritmo cardíaco e o corpo ondulando. É a cara do jogo. Célula quadrada 116×116
   // (o tamanho impresso por anim-sheet.mjs); 9 quadros lado a lado.
   leviathanAliveSheet: { path: 'sprites/leviathan-alive-sheet.png', w: 116, h: 116 },
+
+  // O LEVIATÃ que NADA pelo menu "O DESPERTAR": a baleia BLINDADA com as costelas expostas
+  // (objeto `e9f7e0dc`), animada num ciclo de ondulação. Atravessa o céu UMA vez e some atrás da
+  // lua. Célula quadrada 116×116 (o tamanho impresso por anim-sheet.mjs); 17 quadros lado a lado.
+  leviathanSwimSheet: { path: 'sprites/leviathan-swim-sheet.png', w: 116, h: 116 },
+
+  // O EMBLEMA do jogo que SURGE quando o Leviatã some atrás da lua (menu). Brasão circular que
+  // faísca em loop. Célula 64×64; 9 quadros lado a lado.
+  menuLogoSheet: { path: 'sprites/menu-logo-sheet.png', w: 64, h: 64 },
 };
 
 /** Registra os quadros de uma animação no mapa de ART. */
