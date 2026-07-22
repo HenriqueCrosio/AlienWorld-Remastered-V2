@@ -205,22 +205,99 @@ export class MenuScene extends Phaser.Scene {
   /** Fixa tudo no estado de repouso, sem animar. É o destino da abertura e do reduced-motion. */
   private settle(): void {
     for (const { obj, alpha } of this.uiTargets) obj.setAlpha(alpha);
+    // O título pode ter parado no meio do "baque" (escala > 1) se a abertura foi pulada.
+    (this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined)?.setScale(1);
     this.leviatan?.setAlpha(1);
     this.settled = true;
   }
 
-  /** A abertura. A coreografia entra na Task 4; por ora, assenta imediatamente. */
+  /**
+   * A ABERTURA — "O DESPERTAR". O diorama já está montado; um VÉU PRETO por cima o REVELA
+   * (fade-out ~1s), o Leviatã desliza entrando, o título BATE e a UI surge. Cada tween entra em
+   * `introTweens` para o skip poder matá-los; o fecho chama `settle()` + os pulsos de repouso.
+   */
   private playIntro(): void {
-    // (Task 4 preenche a linha do tempo; ao fim dela, chamar this.settle())
-    this.settle();
+    // O véu que esconde o diorama montado e some para revelá-lo. Depth 15: acima do fundo e do
+    // Leviatã (≤10), abaixo da UI (20) — o texto surge por conta própria, não sob o véu.
+    const veu = this.add
+      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.bgDeep, 1)
+      .setOrigin(0, 0)
+      .setDepth(15)
+      .setName('introVeu');
+    this.introTweens.push(
+      this.tweens.add({
+        targets: veu,
+        alpha: 0,
+        duration: 1000,
+        ease: 'Cubic.easeOut',
+        onComplete: () => veu.destroy(),
+      }),
+    );
+
+    // O Leviatã desliza entrando e pousa (o bob contínuo já roda por baixo).
+    if (this.leviatan) {
+      const alvoX = this.leviatan.x;
+      this.leviatan.setAlpha(0).setX(alvoX - 40);
+      this.introTweens.push(
+        this.tweens.add({ targets: this.leviatan, alpha: 1, duration: 900, delay: 900, ease: 'Cubic.easeOut' }),
+      );
+      this.introTweens.push(
+        this.tweens.add({ targets: this.leviatan, x: alvoX, duration: 1500, delay: 900, ease: 'Cubic.easeOut' }),
+      );
+    }
+
+    // O título BATE (surge com leve overshoot de escala) e o resto da UI surge atrás.
+    const titulo = this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined;
+    if (titulo) {
+      titulo.setScale(1.14);
+      this.introTweens.push(
+        this.tweens.add({ targets: titulo, alpha: 1, duration: 500, delay: 2100, ease: 'Cubic.easeOut' }),
+      );
+      this.introTweens.push(
+        this.tweens.add({ targets: titulo, scale: 1, duration: 600, delay: 2100, ease: 'Back.easeOut' }),
+      );
+    }
+    for (let i = 1; i < this.uiTargets.length; i++) {
+      const { obj, alpha } = this.uiTargets[i];
+      this.introTweens.push(
+        this.tweens.add({ targets: obj, alpha, duration: 500, delay: 2500 + i * 40, ease: 'Cubic.easeOut' }),
+      );
+    }
+
+    // Fecho: aos ~3.3s o estado montado é oficial (e liga os pulsos de repouso).
+    this.time.delayedCall(3300, () => {
+      if (!this.settled) {
+        this.settle();
+        this.startRestPulses();
+      }
+    });
   }
 
-  /** Pula a abertura: mata os tweens em curso e vai ao repouso. */
+  /** Os pulsos do estado de repouso: o brilho vivo do título e o pisca-pisca do CTA. */
+  private startRestPulses(): void {
+    if (this.reducedMotion) return;
+    const titulo = this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined;
+    const cta = this.uiTargets[2]?.obj as Phaser.GameObjects.Text | undefined;
+    if (titulo) {
+      this.tweens.add({
+        targets: titulo, alpha: 0.82, duration: 2600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+    }
+    if (cta) {
+      this.tweens.add({
+        targets: cta, alpha: 0.4, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
+  /** Pula a abertura: mata os tweens em curso, tira o véu e vai ao repouso (com os pulsos). */
   private skipIntro(): void {
     if (this.settled) return;
     for (const tw of this.introTweens) tw.remove();
     this.introTweens = [];
+    this.children.getByName('introVeu')?.destroy();
     this.settle();
+    this.startRestPulses();
   }
 
   /**
