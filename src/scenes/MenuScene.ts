@@ -22,6 +22,13 @@ export class MenuScene extends Phaser.Scene {
   // Público: a sonda lê `settled`.
   settled = false;
 
+  // Posição e escala de REPOUSO do Leviatã. `settle()` precisa do X para reancorar a criatura
+  // quando a abertura é PULADA no meio do deslize de entrada — sem isto ela fica presa fora do
+  // lugar (até 40px à esquerda).
+  private static readonly LEVI_X = 150;
+  private static readonly LEVI_Y = 78;
+  private static readonly LEVI_SCALE = 1.6;
+
   private starfield: Starfield | null = null;
   private leviatan: Phaser.GameObjects.Sprite | null = null;
   private reducedMotion = false;
@@ -69,6 +76,8 @@ export class MenuScene extends Phaser.Scene {
    */
   private buildBackground(): void {
     this.starfield = new Starfield(this);
+    // No reduced-motion o campo é DESENHADO uma vez (estático) — `update()` não o deriva.
+    if (this.reducedMotion) this.starfield.update(0);
 
     // Nebulosa: manchas grandes e dim no céu, dando cor ao vazio (violeta e petróleo, os tons
     // da nebulosa do jogo — nada que brigue com o ciano do jogador).
@@ -147,10 +156,12 @@ export class MenuScene extends Phaser.Scene {
     // Posto no céu livre, acima do horizonte, à esquerda da lua. Escala calibrada para ele ler
     // IMPONENTE sem cobrir o título (que mora em y≈122).
     this.leviatan = this.add
-      .sprite(150, 78, 'leviathanAliveSheet', 0)
+      .sprite(MenuScene.LEVI_X, MenuScene.LEVI_Y, 'leviathanAliveSheet', 0)
       .setDepth(10)
-      .setScale(1.6);
-    this.leviatan.play('leviathan-alive');
+      .setScale(MenuScene.LEVI_SCALE);
+    // No reduced-motion o Leviatã fica no quadro 0 (a lava não pulsa): a anima é a MAIOR motion
+    // da cena, e movimento reduzido tem que amansá-la também, não só as partículas.
+    if (!this.reducedMotion) this.leviatan.play('leviathan-alive');
 
     // Um bob vertical lentíssimo — "pairando", não voando. Desligado no reduced-motion.
     if (!this.reducedMotion) {
@@ -244,8 +255,6 @@ export class MenuScene extends Phaser.Scene {
       obj.setAlpha(0);
       this.uiTargets.push({ obj, alpha: 1 });
     }
-    // O título repousa um degrau abaixo do branco puro (o pulso da Task 4 vai de 0.82↔1).
-    this.uiTargets[0].alpha = 1;
 
     if (import.meta.env.DEV) {
       const d1 = this.t(GAME_WIDTH / 2, 8, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, COLORS.metalMid);
@@ -264,7 +273,9 @@ export class MenuScene extends Phaser.Scene {
     for (const { obj, alpha } of this.uiTargets) obj.setAlpha(alpha);
     // O título pode ter parado no meio do "baque" (escala > 1) se a abertura foi pulada.
     (this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined)?.setScale(1);
+    // Idem o Leviatã, que pode ter parado no meio do deslize de entrada — reancora no X de repouso.
     this.leviatan?.setAlpha(1);
+    this.leviatan?.setX(MenuScene.LEVI_X);
     this.settled = true;
   }
 
@@ -469,7 +480,9 @@ export class MenuScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
-    // O diorama é estático; só o starfield deriva, dando a vida sutil do fundo.
+    // O diorama é estático; só o starfield deriva, dando a vida sutil do fundo. No reduced-motion
+    // ele já foi desenhado estático em `buildBackground` — nada se move aqui.
+    if (this.reducedMotion) return;
     this.starfield?.update(delta / 1000);
   }
 
