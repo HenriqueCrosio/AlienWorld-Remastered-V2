@@ -467,77 +467,10 @@ export class Parallax {
       faixa: [14, 48],
     });
 
-    // HAZE DO HORIZONTE: névoa fria e dim atrás das montanhas — cada cume dissolve nela e a
-    // camada de trás lê como mais LONGE (perspectiva aérea por névoa, o truque do Metal Slug).
-    // Faixa junto ao horizonte; tom frio; alpha baixo. Deriva devagar com o parallax.
-    this.addLayer({
-      key: 'nebula',
-      factor: 0.09,
-      baseY: 0,
-      depth: -95,
-      tint: 0x1a2338,
-      alpha: 0.28,
-      scale: [1.6, 2.6],
-      gap: [150, 260],
-      terreno: false,
-      flutua: true,
-      faixa: [GROUND_Y - 54, GROUND_Y - 6],
-    });
-
-    this.addLayer({
-      key: 'mtnFar',
-      factor: 0.12,
-      baseY: GROUND_Y - 4,
-      depth: -92,
-      tint: 0x1a2440,
-      alpha: 1,
-      scale: [0.7, 1.1],
-      gap: [38, 62],
-      terreno: true,
-    });
-
-    // HAZE ENTRE AS MONTANHAS: a névoa que separa a cordilheira distante da próxima — é ela que
-    // faz as duas lerem como PLANOS distintos, não uma massa só (o degrau de profundidade do ref).
-    this.addLayer({
-      key: 'nebula',
-      factor: 0.22,
-      baseY: 0,
-      depth: -90,
-      tint: 0x222c44,
-      alpha: 0.22,
-      scale: [1.4, 2.2],
-      gap: [170, 300],
-      terreno: false,
-      flutua: true,
-      faixa: [GROUND_Y - 46, GROUND_Y - 2],
-    });
-
-    this.addLayer({
-      key: 'mtnMid',
-      factor: 0.35,
-      baseY: GROUND_Y + 2,
-      depth: -88,
-      tint: 0x33456e,
-      alpha: 1,
-      scale: [0.6, 0.95],
-      gap: [45, 75],
-      terreno: true,
-    });
-
-    // 3ª FAIXA DE MONTANHA: mais próxima e rápida que a mtnMid, um degrau de tint acima. É ela que
-    // PREENCHE o vão vazio do meio-de-cena (o "MAIS COMPLEXIDADE"). Reusa a arte mtnMid — sem custo
-    // de geração. Contida na escala para não invadir o campo de jogo; fica atrás do chão (−86).
-    this.addLayer({
-      key: 'mtnMid',
-      factor: 0.6,
-      baseY: GROUND_Y + 4,
-      depth: -86,
-      tint: 0x435679,
-      alpha: 1,
-      scale: [0.55, 0.9],
-      gap: [50, 82],
-      terreno: true,
-    });
+    // As MONTANHAS DE ROCHA pixel (mtnFar/mtnMid/mtnNear) e a haze entre elas foram REMOVIDAS: o
+    // FUNDO PINTADO já entrega as montanhas distantes, e elas nasciam na LINHA DO SOLO mas rolavam
+    // em parallax lento (10–50 px/s) contra o chão/props (que correm a 84) — o "deslizamento" do
+    // solo. Sem elas, o solo não desliza mais e a cena não duplica montanha pixel sobre a pintada.
 
     // Alto o bastante para sangrar para fora da tela: uma faixa fina de solo denuncia
     // que o mundo acaba ali embaixo.
