@@ -186,6 +186,33 @@ export class TerrainSystem {
 
     // Depois do reset, porque ele zera a velocidade.
     p.setVelocityX(-SCROLL_SPEED);
+
+    // RAIZ do pico (passe visual F1): base de entulho + sombra de contato + respiro de névoa, para
+    // ele NASCER do terreno em vez de colado. Decoração pura — sem física; segue o x do prop no
+    // `update` e morre com ele. Depth relativo ao próprio pico: sombra atrás, entulho e névoa à
+    // frente da base (escondem a borda dura onde o cristal encosta no chão). O corpo do pico
+    // continua claro/legível acima — é obstáculo.
+    if (kind === 'spire' && !teto) {
+      const d = p.depth;
+      const sombra = this.scene.add
+        .ellipse(p.x, GROUND_Y + 1, 30, 8, 0x05070f, 0.5)
+        .setDepth(d - 0.1);
+      const entulho = this.scene.add
+        .image(p.x, GROUND_Y, pickVariant(this.scene, 'asteroid'))
+        .setOrigin(0.5, 1)
+        .setDepth(d + 0.1)
+        .setScale(0.55)
+        .setTint(0x3c4a68);
+      const nevoa = this.scene.add
+        .image(p.x, GROUND_Y - 1, 'nebula')
+        .setOrigin(0.5, 1)
+        .setDepth(d + 0.2)
+        .setScale(0.9)
+        .setTint(0x24304c)
+        .setAlpha(0.3)
+        .setBlendMode(Phaser.BlendModes.SCREEN);
+      p.setData('raiz', [sombra, entulho, nevoa]);
+    }
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
@@ -197,7 +224,15 @@ export class TerrainSystem {
       // (fireAt mira para cima). Guarda dura: um roteiro que pendurar uma torre por engano
       // ganha uma torre muda, não um tiro nascendo do lugar errado.
       if (PROPS[p.getData('kind') as PropKind].shoots && !p.flipY) this.updateTurret(p, dt, target);
-      if (p.x < -40) p.destroy();
+
+      // A RAIZ do pico (base/sombra/névoa) segue o x do prop e morre junto com ele.
+      const raiz = p.getData('raiz') as Array<Phaser.GameObjects.Ellipse | Phaser.GameObjects.Image> | undefined;
+      if (raiz) for (const r of raiz) r.x = p.x;
+
+      if (p.x < -40) {
+        if (raiz) for (const r of raiz) r.destroy();
+        p.destroy();
+      }
     }
 
     this.tickMissileTrails();
