@@ -379,6 +379,11 @@ const ART: Record<string, string> = {
   // Sem placeholder: se não existir, o menu cai no fundo antigo (parallax + véu).
   menuKeyart: 'sprites/menu-keyart.png',
 
+  // A LUA MORTA do diorama do menu (passe visual "O DESPERTAR"): esfera detalhada de crateras,
+  // sombra à esquerda, borda ciano — o foco do céu. Sem placeholder: sem ela, o MenuScene cai na
+  // lua procedural do Boot (`moon`).
+  menuMoon: 'sprites/menu-moon.png',
+
   // Moldura de HUD (PixelLab `create_ui_asset`, 384×216 = a tela inteira, miolo TRANSPARENTE).
   // Sem placeholder: se não existir, o menu de naves simplesmente aparece sem moldura.
   uiFrame: 'sprites/ui-frame.png',

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
-import { resetVariantCache } from '../art';
+import { resetVariantCache, pickVariant } from '../art';
 import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import type { HandlingMode } from './GameScene';
@@ -62,22 +62,81 @@ export class MenuScene extends Phaser.Scene {
 
   // ─── Camadas ────────────────────────────────────────────────────────────────
 
-  /** O fundo: a placa nova sem criatura, OU o parallax da fase como fallback. */
+  /**
+   * O fundo do menu: um DIORAMA composto em CAMADAS com a própria arte do jogo — estrelas à
+   * deriva, nebulosa, a lua morta e duas bandas de montanha em profundidade (perspectiva aérea:
+   * o que está longe é mais escuro). Sem placa pintada: as camadas casam com o estilo do resto
+   * do jogo e dão profundidade de verdade. Cada sprite passa pela guarda `textures.exists`; o
+   * starfield é procedural e sempre existe — o menu nunca abre numa tela preta.
+   */
   private buildBackground(): void {
-    if (this.textures.exists('menuBg')) {
-      this.add.image(0, 0, 'menuBg').setOrigin(0, 0).setDepth(0).setName('menuBgPlate');
-      // Estrelas de cintilação sobre a placa (a placa é um quadro parado; elas devolvem o vivo).
-      this.twinkleStars();
-      return;
-    }
-
-    // FALLBACK: o parallax da fase rolando atrás de um véu escuro — nunca uma tela preta.
     this.starfield = new Starfield(this);
-    this.parallax = new Parallax(this);
+
+    // Nebulosa: manchas grandes e dim no céu, dando cor ao vazio (violeta e petróleo, os tons
+    // da nebulosa do jogo — nada que brigue com o ciano do jogador).
+    this.addBg('nebula', 306, 44, 1.8, 0x5e4a8c, 0.5, 0);
+    this.addBg('nebula2', 64, 30, 2.0, 0x3d6a80, 0.42, 0);
+    this.addBg('nebula', 176, 22, 1.5, 0x4a5a8c, 0.3, 0);
+
+    // A LUA MORTA: o foco do céu, no alto à direita — deixa o céu à esquerda livre para o
+    // Leviatã. `menuMoon` (arte dedicada) quando existir; senão a lua procedural do Boot.
+    const moonKey = this.textures.exists('menuMoon') ? 'menuMoon' : 'moon';
     this.add
-      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.bgDeep, 0.55)
+      .image(322, 48, moonKey)
+      .setName('menuMoon')
+      .setDepth(2)
+      // Recuada de leve (escala menor, alpha < 1, tint frio): ela é o cenário, o Leviatã é o
+      // herói. Uma lua branca-clara demais rouba o olho da criatura.
+      .setScale(moonKey === 'menuMoon' ? 0.72 : 1.05)
+      .setAlpha(moonKey === 'menuMoon' ? 0.88 : 1)
+      .setTint(moonKey === 'menuMoon' ? 0xaab6d4 : 0xffffff);
+
+    // O HORIZONTE em duas bandas de montanha. A profundidade é o TINT: a distante é quase o
+    // fundo, a média um degrau mais clara (a mesma perspectiva aérea da Fase 1).
+    this.scatterRidge('mtnFar', 156, 0x1a2440, 3, [0.8, 1.15], [42, 74]);
+    this.scatterRidge('mtnMid', 176, 0x33456e, 4, [0.7, 1.0], [58, 92]);
+
+    // O TERRENO ESCURO do terço de baixo: a cama onde o texto pousa. Sem ele, os 3 modos de
+    // condução competem com a montanha e perdem. Faixa da paleta, translúcida.
+    this.add
+      .rectangle(0, 150, GAME_WIDTH, GAME_HEIGHT - 150, COLORS.bgDeep, 0.55)
       .setOrigin(0, 0)
-      .setDepth(5);
+      .setDepth(6);
+
+    this.twinkleStars();
+  }
+
+  /** Uma mancha de fundo (nebulosa), com guarda de textura. */
+  private addBg(key: string, x: number, y: number, scale: number, tint: number, alpha: number, depth: number): void {
+    if (!this.textures.exists(key)) return;
+    this.add.image(x, y, key).setDepth(depth).setScale(scale).setTint(tint).setAlpha(alpha);
+  }
+
+  /**
+   * Uma banda de montanha espalhada na horizontal (origem na base, sobre a linha `baseY`).
+   * Sprites repetidos com escala/espelho variados e as variantes da arte — um horizonte sem
+   * costura. O tint dá a distância. Com guarda: sem a arte, a banda simplesmente não entra.
+   */
+  private scatterRidge(
+    key: string,
+    baseY: number,
+    tint: number,
+    depth: number,
+    scale: [number, number],
+    gap: [number, number],
+  ): void {
+    if (!this.textures.exists(key)) return;
+    let x = -12;
+    while (x < GAME_WIDTH + 24) {
+      this.add
+        .image(x, baseY, pickVariant(this, key))
+        .setOrigin(0.5, 1)
+        .setDepth(depth)
+        .setTint(tint)
+        .setScale(Phaser.Math.FloatBetween(...scale))
+        .setFlipX(Math.random() < 0.5);
+      x += Phaser.Math.Between(...gap);
+    }
   }
 
   /**
@@ -280,10 +339,11 @@ export class MenuScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
-    if (!this.starfield || !this.parallax) return;
     const dt = delta / 1000;
-    this.starfield.update(dt);
-    this.parallax.update(dt, SCROLL_SPEED * 0.5);
+    // As estrelas derivam sozinhas (o diorama composto não usa Parallax); o parallax só roda no
+    // caminho legado, se algum dia voltar a existir.
+    this.starfield?.update(dt);
+    this.parallax?.update(dt, SCROLL_SPEED * 0.5);
   }
 
   private t(x: number, y: number, value: string, size: number, color: number): Phaser.GameObjects.Text {

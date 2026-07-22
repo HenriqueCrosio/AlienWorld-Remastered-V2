@@ -1,9 +1,10 @@
 // Sonda do MENU "O DESPERTAR": o diorama vivo montado (estado de REPOUSO).
 //
-// O que ela prova: o fundo está na cena (placa `menuBg` OU o fallback de parallax), o TÍTULO
-// existe e é grande (≥20px) e visível (alpha ≥0.8), o subtítulo, o CTA e as TRÊS conduções
-// estão lá no terço de baixo, e o menu chegou ao estado montado (settled) — nada preso no meio
-// de um fade. Fotografa parada: a primeira impressão se mede em repouso.
+// O que ela prova: o fundo é o DIORAMA composto em camadas (a lua `menuMoon` + as bandas de
+// montanha), o Leviatã VIVO está tocando o idle, o TÍTULO existe e é grande (≥20px) e visível
+// (alpha ≥0.8), o subtítulo, o CTA e as TRÊS conduções estão no terço de baixo, e o menu chegou
+// ao estado montado (settled) — nada preso no meio de um fade. Fotografa parada: a primeira
+// impressão se mede em repouso.
 import { chromium } from 'playwright';
 
 let falhas = 0;
@@ -27,8 +28,11 @@ const estado = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Menu');
   const filhos = s.children.list;
 
-  const fundoPlaca = filhos.find((c) => c.type === 'Image' && c.texture?.key === 'menuBg');
-  const temFallback = !!s.parallax; // o campo público do fallback
+  // O DIORAMA: a lua (nomeada) e as bandas de montanha (texturas mtn*).
+  const lua = filhos.find((c) => c.type === 'Image' && c.name === 'menuMoon');
+  const montanhas = filhos.filter(
+    (c) => c.type === 'Image' && /^mtn/i.test(c.texture?.key ?? ''),
+  ).length;
 
   const textos = filhos.filter((c) => c.type === 'Text').map((c) => ({
     valor: c.text,
@@ -40,7 +44,8 @@ const estado = await page.evaluate(() => {
 
   return {
     settled: s.settled,
-    fundo: fundoPlaca ? 'placa' : temFallback ? 'fallback' : null,
+    lua: lua ? { tex: lua.texture?.key, depth: lua.depth } : null,
+    montanhas,
     titulo: texto('ALIENWORLD'),
     subtitulo: texto('REMASTERED'),
     cta: texto('ENTER'),
@@ -58,7 +63,8 @@ const estado = await page.evaluate(() => {
 console.log(JSON.stringify(estado, null, 1));
 
 ok(estado.settled === true, 'o menu chegou ao estado montado (settled)');
-ok(estado.fundo !== null, `há um fundo na cena (${estado.fundo})`);
+ok(!!estado.lua, `a lua do diorama está na cena (${estado.lua?.tex})`);
+ok(estado.montanhas >= 4, `as bandas de montanha do diorama estão na cena (${estado.montanhas} ≥ 4)`);
 ok(!!estado.titulo, 'o título ALIEN WORLD existe');
 ok(estado.titulo && estado.titulo.alpha >= 0.8, `o título está VISÍVEL (alpha ${estado.titulo?.alpha})`);
 ok(estado.titulo && estado.titulo.tamanho >= 20, `o título tem tratamento de TÍTULO (${estado.titulo?.tamanho}px ≥ 20)`);
