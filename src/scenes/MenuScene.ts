@@ -165,9 +165,66 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  /** Brasas, névoa e a passagem da nave. Preenchido na Task 5. */
+  /**
+   * A atmosfera do diorama: brasas subindo (o Leviatã sangra luz), uma névoa baixa no horizonte,
+   * e a nave-jogador cruzando ao longe de vez em quando. Puro engine — nada de PixelLab. No
+   * reduced-motion, NADA disto entra: a cena fica um quadro parado e legível.
+   */
   private buildAtmosphere(): void {
-    // (Task 5)
+    if (this.reducedMotion) return;
+
+    // Brasas/esporos: fagulhas quentes subindo devagar da faixa baixa, aditivas (viram brilho).
+    // Brilham ao nascer e SOMEM ao subir (alpha 0.7→0) — brasa que esfria enquanto flutua.
+    this.add
+      .particles(0, 0, 'spark', {
+        x: { min: 0, max: GAME_WIDTH },
+        y: { min: 150, max: GAME_HEIGHT },
+        lifespan: 4200,
+        speedY: { min: -14, max: -5 },
+        speedX: { min: -4, max: 4 },
+        scale: { min: 0.5, max: 1.4 },
+        alpha: { start: 0.7, end: 0 },
+        tint: [COLORS.hot, COLORS.hotBright, COLORS.player],
+        frequency: 320,
+        blendMode: 'ADD',
+      })
+      .setDepth(12);
+
+    // Névoa baixa: uma faixa translúcida bem sutil no horizonte, respirando de leve.
+    const nevoa = this.add
+      .rectangle(0, 138, GAME_WIDTH, 24, COLORS.bgFar, 0.1)
+      .setOrigin(0, 0)
+      .setDepth(7);
+    this.tweens.add({
+      targets: nevoa, alpha: 0.2, duration: 4000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+    });
+
+    // A nave: primeira passagem depois da abertura, e daí em loop espaçado.
+    this.time.delayedCall(4500, () => this.shipPass());
+  }
+
+  /**
+   * Uma travessia da nave-jogador: entra pela esquerda, cruza o céu ao LONGE (pequena, atrás do
+   * Leviatã, com o rastro azul) e sai pela direita. Reagenda a próxima em intervalo amplo —
+   * evento pontual, não tráfego.
+   */
+  private shipPass(): void {
+    if (!this.scene.isActive()) return;
+
+    const y = Phaser.Math.Between(52, 72);
+    // A `ship` estática (com o rastro azul já desenhado) basta ao longe. Depth 3: atrás do
+    // Leviatã (10), à frente das montanhas — uma silhueta minúscula cruzando o céu.
+    const nave = this.add.image(-16, y, 'ship').setDepth(3).setScale(0.5).setAlpha(0.8);
+
+    this.tweens.add({
+      targets: nave,
+      x: GAME_WIDTH + 16,
+      duration: Phaser.Math.Between(8000, 11000),
+      ease: 'Linear',
+      onComplete: () => nave.destroy(),
+    });
+
+    this.time.delayedCall(Phaser.Math.Between(12000, 20000), () => this.shipPass());
   }
 
   /**

@@ -76,6 +76,20 @@ ok(!!estado.leviatan, 'o Leviatã VIVO está na cena');
 ok(estado.leviatan?.anim === 'leviathan-alive', `o Leviatã está tocando o idle (${estado.leviatan?.anim})`);
 ok(estado.leviatan?.alpha >= 0.9, `o Leviatã está visível (alpha ${estado.leviatan?.alpha})`);
 
+// ─── Reduced-motion: a cena tem que montar DIRETO e SEM partículas ───
+const page2 = await browser.newPage();
+await page2.emulateMedia({ reducedMotion: 'reduce' });
+await page2.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page2.waitForTimeout(800); // sem cinemática, monta quase na hora
+const rm = await page2.evaluate(() => {
+  const s = window.__game.scene.getScene('Menu');
+  const particulas = s.children.list.filter((c) => c.type === 'ParticleEmitter').length;
+  return { settled: s.settled, particulas };
+});
+ok(rm.settled === true, `reduced-motion monta DIRETO (settled=${rm.settled})`);
+ok(rm.particulas === 0, `reduced-motion NÃO cria partículas (${rm.particulas})`);
+await page2.close();
+
 console.log('screenshot: probe-menu.png');
 console.log(falhas === 0 ? '\n✔ MENU DE PONTA A PONTA' : `\n✘ ${falhas} FALHAS`);
 await browser.close();
