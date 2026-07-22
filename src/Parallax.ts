@@ -37,6 +37,8 @@ interface ScatterLayer {
   terreno: boolean;
   /** Espalha na altura toda em vez de crescer do chão. É o que faz uma pedra FLUTUAR. */
   flutua?: boolean;
+  /** Sprite ADITIVO (luzes da colônia, brilho de névoa): vira BRILHO em vez de mancha opaca. */
+  glow?: boolean;
   /**
    * PRIMEIRO PLANO: passa NA FRENTE da nave (depth 60). É a única camada que a luta de chefão
    * apaga — ver `setForegroundDimmed`: durante a fase ela é dificuldade, durante o chefão ela
@@ -359,6 +361,12 @@ export class Parallax {
 
   /** A lua da Fase 1: montanhas, solo, e picos pretos passando na frente da nave. */
   private buildSurface(): void {
+    // GRADIENTE DE CÉU: topo mais preto → horizonte um tom acima. Dá VOLUME ao céu (era preto
+    // chapado). Estático (é o céu), depth −99 (atrás de tudo). Frio e escuro — a Fase 1 segue dark.
+    const ceu = this.scene.add.graphics().setDepth(-99);
+    ceu.fillGradientStyle(0x05070f, 0x05070f, 0x141c30, 0x141c30, 1);
+    ceu.fillRect(0, 0, GAME_WIDTH, GROUND_Y);
+
     // TRÁFEGO DISTANTE DA COLÔNIA (passe visual 2026-07-18): silhuetas minúsculas cruzando o
     // vão de céu vazio no meio da tela. A colônia embaixo está VIVA (janelas acesas, radar
     // varrendo) — um céu absolutamente deserto desmentia isso. Eles são CENÁRIO: escuros como
@@ -416,6 +424,23 @@ export class Parallax {
       terreno: false,
       flutua: true,
       faixa: [14, 48],
+    });
+
+    // HAZE DO HORIZONTE: névoa fria e dim atrás das montanhas — cada cume dissolve nela e a
+    // camada de trás lê como mais LONGE (perspectiva aérea por névoa, o truque do Metal Slug).
+    // Faixa junto ao horizonte; tom frio; alpha baixo. Deriva devagar com o parallax.
+    this.addLayer({
+      key: 'nebula',
+      factor: 0.09,
+      baseY: 0,
+      depth: -95,
+      tint: 0x1a2338,
+      alpha: 0.28,
+      scale: [1.6, 2.6],
+      gap: [150, 260],
+      terreno: false,
+      flutua: true,
+      faixa: [GROUND_Y - 54, GROUND_Y - 6],
     });
 
     this.addLayer({
@@ -711,6 +736,9 @@ export class Parallax {
       .setScale(Phaser.Math.FloatBetween(...layer.scale))
       // Espelhar metade das montanhas dobra a variedade sem custar geração.
       .setFlipX(Math.random() < 0.5);
+
+    // Aditivo (glow): a luz da colônia e o brilho de névoa viram BRILHO, não mancha opaca.
+    if (layer.glow) img.setBlendMode(Phaser.BlendModes.ADD);
 
     // Uma pedra à deriva com o mesmo prumo de todas as outras é um adesivo, não uma pedra.
     //
