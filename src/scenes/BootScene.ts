@@ -445,6 +445,10 @@ const ART: Record<string, string> = {
   mtnMid: 'sprites/mtn-mid.png',
   mtnMid2: 'sprites/mtn-mid-2.png',
   mtnMid3: 'sprites/mtn-mid-3.png',
+
+  // FUNDO PINTADO da Fase 1 (estilo Metal Slug): a colônia alienígena escarpada, arte do Henrique.
+  // Camada mais distante do parallax de superfície; substitui o céu pixelado por trás do foreground.
+  paintBgF1: 'sprites/paint-bg-f1.png',
 };
 
 /**

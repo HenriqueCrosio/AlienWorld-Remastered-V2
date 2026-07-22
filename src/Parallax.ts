@@ -89,6 +89,14 @@ export class Parallax {
   // ainda seria atualizado todo frame para não ser visto.
   private ground: Phaser.GameObjects.TileSprite | null = null;
   private groundRim: Phaser.GameObjects.Rectangle | null = null;
+  /** FUNDO PINTADO (Fase 1): duas cópias da arte da colônia que rolam devagar e se alternam. */
+  private paintedBg: Phaser.GameObjects.Image[] = [];
+  /**
+   * FAIXA DE SOLO DA FRENTE (Fase 1): a MESMA arte do chão, um degrau à frente e ACIMA da linha
+   * do solo, escondendo o pé "colado" dos props (silos/torres/picos) atrás dela. Não é sprite
+   * novo — é o groundTile de novo, mais escuro e mais próximo.
+   */
+  private groundFront: Phaser.GameObjects.TileSprite | null = null;
   private readonly leviathan: Phaser.GameObjects.Image;
   private readonly moon: Phaser.GameObjects.Image;
   private groundOffset = 0;
@@ -367,6 +375,20 @@ export class Parallax {
     ceu.fillGradientStyle(0x05070f, 0x05070f, 0x141c30, 0x141c30, 1);
     ceu.fillRect(0, 0, GAME_WIDTH, GROUND_Y);
 
+    // FUNDO PINTADO (Metal Slug): a arte da colônia alienígena (do Henrique) como a camada MAIS
+    // DISTANTE, preenchendo o céu azul-escuro vazio ATRÁS das cidades/montanhas pixel (depth −94:
+    // atrás do skyline −93 e das montanhas, à frente do céu procedural). Duas cópias de reserva,
+    // mas o scroll é tão lento (ver `update`, fator 0.04) que a 1ª cópia cobre a fase inteira e a
+    // paisagem NUNCA repete. Y negativo posiciona os picos/colônia no céu.
+    if (this.scene.textures.exists('paintBgF1')) {
+      const w = (this.scene.textures.get('paintBgF1').getSourceImage() as { width: number }).width;
+      for (let i = 0; i < 2; i++) {
+        this.paintedBg.push(
+          this.scene.add.image(i * w, -80, 'paintBgF1').setOrigin(0, 0).setDepth(-94),
+        );
+      }
+    }
+
     // TRÁFEGO DISTANTE DA COLÔNIA (passe visual 2026-07-18): silhuetas minúsculas cruzando o
     // vão de céu vazio no meio da tela. A colônia embaixo está VIVA (janelas acesas, radar
     // varrendo) — um céu absolutamente deserto desmentia isso. Eles são CENÁRIO: escuros como
@@ -536,6 +558,18 @@ export class Parallax {
       .setOrigin(0, 0)
       .setDepth(-79)
       .setAlpha(0.7);
+
+    // FAIXA DE SOLO DA FRENTE: a MESMA arte do chão, começando um pouco ACIMA da linha do solo
+    // (GROUND_Y−5) e um tom mais escura (o solo mais PERTO, em leve sombra). Ela cobre o pé dos
+    // props (silos/torres/picos), escondendo a borda reta onde ficavam "colados". Depth −0.2: à
+    // FRENTE dos props (que passam a −0.5, ver TerrainSystem.spawn), mas ATRÁS da nave/inimigos
+    // (depth 0) — a nave NUNCA some atrás da faixa. Rola junto com o mundo (mesmo `groundOffset`),
+    // senão os props deslizariam sobre o chão.
+    this.groundFront = this.scene.add
+      .tileSprite(0, GROUND_Y - 5, GAME_WIDTH, 48, 'groundTile')
+      .setOrigin(0, 0)
+      .setDepth(-0.2)
+      .setTint(0x6878a0);
 
     // O ENTULHO do chão (pedido do Henrique, 2026-07-18): pedras avulsas ASSENTADAS na linha do
     // solo, correndo na MESMA velocidade dele (factor 1.0 = o groundOffset). É o que quebra o
@@ -819,6 +853,18 @@ export class Parallax {
   }
 
   update(dt: number, worldSpeed: number): void {
+    // FUNDO PINTADO: a camada mais distante rola LENTÍSSIMA (fator 0.04) — na fase de ~75s deriva
+    // ~250px, menos que a folga de 384px da imagem, então a paisagem não repete. O wrap é só
+    // insurance para uma fase longa demais.
+    if (this.paintedBg.length) {
+      const w = this.paintedBg[0].width;
+      const dx = worldSpeed * 0.04 * dt;
+      for (const bg of this.paintedBg) {
+        bg.x -= dx;
+        if (bg.x <= -w) bg.x += 2 * w;
+      }
+    }
+
     for (const layer of this.layers) {
       const dx = worldSpeed * layer.factor * dt;
       layer.nextX -= dx;
@@ -840,6 +886,8 @@ export class Parallax {
       // Math.round: tilePosition fracionário faz a arte tremular.
       this.ground.tilePositionX = Math.round(this.groundOffset);
     }
+    // A faixa da frente rola JUNTO com o chão/mundo — senão os props deslizariam sobre ela.
+    if (this.groundFront) this.groundFront.tilePositionX = Math.round(this.groundOffset);
   }
 
   /**
