@@ -22,23 +22,34 @@ Isso é o suficiente — este doc tem todo o contexto, o pipeline e os prompts.
   commitada aqui).
 - **Spec:** `docs/superpowers/specs/2026-07-22-fase1-inimigos-chefao-design.md` (commit `1408127`)
 - **Plano:** `docs/superpowers/plans/2026-07-22-fase1-inimigos-chefao.md` (commit `602230b`)
-- **FEITO:** Tasks 0, 1 (drone), 2 (batedor), 3 (canhoneira), 4 (torre de solo), 6 (salva de
-  mísseis), 7 (telégrafo + fúria). Regressão da Task 8 verde.
-- **EM ABERTO: só a Task 5 (arte do chefão).** O Henrique está gerando o candidato dele no
-  PixelLab e vai mandar a ref. Um lote automático ficou **em review** como plano B:
-  `f8a87745-dd7d-4cd6-812f-13d623796ce3` (4 candidatos, torres colossais roxas com canhão para a
-  esquerda e olho magenta — o `[2]`, de canhão duplo e sem laje no pé, é o melhor para um chefão
-  que FLUTUA). Descartar com `dismiss_review` se a arte do Henrique entrar no lugar.
+- **A LEVA 2 ESTÁ COMPLETA.** Tasks 0–8 fechadas: drone, batedor, canhoneira, torre de solo,
+  arte do chefão, salva de mísseis, telégrafo + fúria, e a regressão.
+- O chefão é a **fortaleza do Henrique** (`49a4f934-6aa9-4d85-aaec-9334890a5816`, 197×190). Um
+  lote automático ficou sem uso em review: `f8a87745-dd7d-4cd6-812f-13d623796ce3` — descartar com
+  `dismiss_review` quando quiser.
 
-### O que falta na Task 5, em ordem
+### O que ficou de dívida (nenhuma bloqueia a fatia)
 
-1. Instalar a arte (2 animações: `bossAnim` 9 quadros / `bossFireAnim` 7 — ver `FRAMES` no BootScene).
-2. **RECALIBRAR `src/entities/Boss.ts` medindo no PNG novo** (`find-pad.mjs`), não chutando:
-   `BASE_Y`, `STATION_X`, `MUZZLE_X/Y` (hoje `-31/-39`, medidos para os 97×125 atuais) e a hitbox.
-   A boca importa para o leque, para a salva de mísseis E para o telégrafo — os três leem
-   `this.muzzle`.
-3. Verificar com `node scripts/probe-chefao-misseis.mjs` (sonda nova: prova que a salva não é
-   teleguiada e fotografa o telégrafo).
+- **Batedor**: não virou o DARDO magro do spec. Ele se separa do drone por tamanho e limpeza de
+  casco, não por silhueta. Regerar exigiria resolver o dilema vista-vs-forma (ver a lição abaixo).
+- **Animação de despertar do chefão**: a de 13 quadros do Henrique (`ce2a3b84-…`, a cidadela
+  rachando e decolando) é um belo beat de ENTRADA e está sem uso — hoje o chefão só entra
+  deslizando. Ligá-la seria código novo na entrada do `Boss.ts`.
+
+## ⚠️ A SEGUNDA LIÇÃO: o v3 não faz IDLE SUTIL
+
+Duas tentativas de animar a fortaleza "pairando" voltaram estroboscópio — a estrutura inteira
+lavando de branco e o **olho magenta apagando**. Medido: luminância média oscilando entre 36 e 88
+contra 45 do quadro base, e a contagem de pixels magenta caindo a zero em vários quadros. Não
+havia subconjunto aproveitável nos dois lotes.
+
+O v3 dramatiza: quanto mais sutil o pedido, mais ele parece compensar. Pedir "do not flash, do
+not change color" não adiantou.
+
+**A saída:** `scripts/pulsar-brilho.mjs` sintetiza o loop a partir de UM quadro bom, modulando
+cada pixel pela própria "magentice" (R−G). Pedra cinza (R≈G) fica byte a byte intacta; só o olho
+e as veias respiram. E o que a arte não tem — os propulsores — virou **emissor de partículas** no
+`Boss.ts`, que é como o resto do jogo faz fogo. Vale para qualquer sprite grande daqui em diante.
 
 ## ⚠️ A LIÇÃO DO PIPELINE DE ARTE (custou 5 lotes)
 
@@ -158,3 +169,5 @@ animação v3 ~1–2 ger. Conta: user `f7282f36-b779-4f64-832a-4693ca4cc628` (a 
 - `scripts/probe-chefao-misseis.mjs` — prova que a salva NÃO é teleguiada comparando os ângulos
   com a nave em dois lugares opostos, e fotografa o telégrafo.
 - `scripts/probe-torre-solo.mjs` — torre atirando de perto: espelhamento e boca do cano.
+- `scripts/probe-chefao-arte.mjs` — o chefão PARADO, que é quando se julga arte. Falha se ele
+  transbordar a tela ou invadir o HUD (hoje: 148×143, caixa x 229..377, y 57..199).
