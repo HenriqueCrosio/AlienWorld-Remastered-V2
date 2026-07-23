@@ -47,6 +47,13 @@ export class Boss implements StageBoss {
   private readonly muzzleFx: Phaser.GameObjects.Particles.ParticleEmitter;
   /** Faíscas de CARGA dos tubos de míssil — sugam para dentro, o oposto do clarão de disparo. */
   private readonly chargeFx: Phaser.GameObjects.Particles.ParticleEmitter;
+  /** O fogo dos propulsores sob a cidadela — o que sustenta a fortaleza no ar. */
+  private readonly thrusterFx: Phaser.GameObjects.Particles.ParticleEmitter;
+
+  /** Largura da esteira de fogo, um pouco menor que a base (148px) para nascer DENTRO dela. */
+  private static readonly THRUSTER_SPAN = 116;
+  /** Distância do centro do sprite até a boca dos propulsores (meia-altura 71, menos a saia). */
+  private static readonly THRUSTER_Y = 62;
 
   /** Contagem para a próxima salva de mísseis, independente do leque. Semeada no construtor. */
   private missileCooldown: number;
@@ -65,24 +72,51 @@ export class Boss implements StageBoss {
   private ragedShown = false;
 
   /**
-   * Altura de repouso e posição de combate.
-   * Calibradas para o sprite REAL (97×125): com as constantes do placeholder (64×80) ele
-   * transbordava a tela pela direita e pelo rodapé.
+   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 197×190 numa tela de
+   * 384×216, ou seja 88% da altura. A 0.75 ela vira 148×143 — 14% mais alta que a torre
+   * antiga (97×125), que é o salto de presença que a fatia pedia, mas ainda sobrando céu
+   * acima e espaço de voo à esquerda.
+   *
+   * Reduzir o PNG no disco seria pior: reamostrar pixel art em 0.75 apaga a grade. Escalar no
+   * render deixa o Phaser amostrar por vizinho-mais-próximo, e a arte sobrevive.
    */
-  private static readonly BASE_Y = GAME_HEIGHT - 74;
-  private static readonly STATION_X = GAME_WIDTH - 56;
+  private static readonly SCALE = 0.75;
+
+  /**
+   * Altura de repouso e posição de combate — TODAS derivadas do sprite real, não herdadas.
+   *
+   * Com meia-altura de 71px (190×0.75/2), `BASE_Y = 128` põe o pé da cidadela em y≈199, logo
+   * acima da linha de solo (`GROUND_Y = 206`): ela paira rente ao chão, que é o que os
+   * propulsores da animação prometem. Meia-largura de 74px com `STATION_X = 304` deixa 6px de
+   * margem à direita — o mesmo aperto da torre antiga.
+   */
+  private static readonly BASE_Y = GAME_HEIGHT - 88;
+  private static readonly STATION_X = GAME_WIDTH - 80;
   private static readonly ENTRY_SPEED = 45;
 
   /**
-   * Boca do canhão, em px a partir do CENTRO do sprite (97×125).
-   * Medido no próprio PNG (primeiro pixel opaco da metade superior), não chutado —
-   * antes os tiros nasciam no meio da torre, longe do cano.
+   * Amplitude do bailado vertical.
    *
-   * Recalcular se o enquadramento mudar: as duas animações (flutuar/disparar) compartilham
-   * uma caixa única, e o clarão do disparo a alargou para a esquerda — o centro se deslocou.
+   * Eram 26px, calibrados para uma torre de 125px de altura. Numa fortaleza de 143px o mesmo
+   * número deixa de ser "pairando" e vira TERREMOTO: a estrutura inteira sobe e desce um sexto
+   * da própria altura. 8px é o que se lê como sustentação por propulsor — a massa aparece na
+   * lentidão, não no percurso.
    */
-  private static readonly MUZZLE_X = -31;
-  private static readonly MUZZLE_Y = -39;
+  private static readonly BOB = 8;
+
+  /**
+   * Boca do canhão, em px a partir do CENTRO do sprite JÁ ESCALADO.
+   * Medida no PNG instalado (primeiro pixel opaco do terço superior — o cano de gatling aponta
+   * para a esquerda, em x=15, linhas 15..23 de um quadro 197×190 de centro 98.5,95), e então
+   * multiplicada por SCALE. Não chutada: os −31/−39 antigos eram de outra arte e nasceriam
+   * dentro da carapaça.
+   *
+   * Recalcular se o enquadramento mudar. As duas animações compartilham uma caixa única
+   * (`scripts/install-anim-par.mjs` existe só para garantir isso): o clarão do disparo alarga
+   * a caixa para a esquerda, e recortá-las em separado deslocaria o centro entre elas.
+   */
+  private static readonly MUZZLE_X = -63;
+  private static readonly MUZZLE_Y = -57;
 
   /**
    * Para onde a arte do cometa APONTA, medida no PNG — não chutada (lição 13).
@@ -132,11 +166,17 @@ export class Boss implements StageBoss {
 
     this.sprite = scene.physics.add.sprite(GAME_WIDTH + 50, Boss.BASE_Y, 'boss');
 
+    // Só a ARTE real é grande demais para a tela. O placeholder procedural do BootScene
+    // (`makeBoss`, 64×80) já nasce no tamanho certo — encolhê-lo o tornaria ilegível no
+    // exato cenário em que ele existe, o de a arte não ter carregado.
+    if (scene.textures.get('boss').source[0].width > 100) this.sprite.setScale(Boss.SCALE);
+
     // Propulsores acesos e casco flutuando. Se a animação não existir, fica o sprite parado.
     if (scene.anims.exists('boss-hover')) this.sprite.play('boss-hover');
 
     this.body.setAllowGravity(false);
-    // Derivada da textura: o boss real (128px) entra sem recalibrar a hitbox.
+    // Derivada da textura, e o corpo Arcade escala junto com o sprite: a hitbox acompanha o
+    // SCALE sem uma segunda conta aqui.
     this.body.setSize(this.sprite.width * 0.7, this.sprite.height * 0.8);
     this.sprite.setData('boss', this);
 
@@ -176,6 +216,35 @@ export class Boss implements StageBoss {
       })
       .setDepth(50);
 
+    // PROPULSORES. A arte não os traz: a fortaleza foi desenhada pousada, e as duas tentativas
+    // de animar o "hover" no PixelLab devolveram estroboscópio (a estrutura inteira lavava de
+    // branco e o olho magenta chegava a APAGAR — medido: luminância média oscilando entre 36 e
+    // 88 contra 45 do quadro base). Então o fogo vem de partículas, que é como o resto do jogo
+    // faz fogo — e assim ele se move de verdade, em vez de ciclar 9 quadros.
+    //
+    // Depth −1: atrás do casco. As chamas escapam POR BAIXO da base e o que entraria por dentro
+    // da pedra fica escondido, que é exatamente o recorte certo.
+    this.thrusterFx = scene.add
+      .particles(0, 0, 'spark', {
+        lifespan: 320,
+        speedY: { min: 55, max: 140 },
+        speedX: { min: -14, max: 14 },
+        scale: { start: 2.4, end: 0 },
+        tint: [COLORS.enemyBright, 0xff6bd6, COLORS.hot],
+        blendMode: 'ADD',
+        // ~140 partículas/s numa esteira de 116px: menos que isto e o fogo vira poeira solta,
+        // que lê como avaria e não como propulsão.
+        frequency: 21,
+        quantity: 3,
+        emitZone: {
+          type: 'random',
+          source: new Phaser.Geom.Rectangle(-Boss.THRUSTER_SPAN / 2, 0, Boss.THRUSTER_SPAN, 4),
+          // O mesmo cast do Interlude4Scene: a união EmitZoneData do Phaser não aceita o
+          // literal inferido de um objeto solto.
+        } as Phaser.Types.GameObjects.Particles.ParticleEmitterConfig['emitZone'],
+      })
+      .setDepth(-1);
+
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, 16, 160, 4, COLORS.enemyDark)
       .setDepth(100);
@@ -201,6 +270,10 @@ export class Boss implements StageBoss {
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
     if (this.dead) return;
 
+    // ANTES do `return` da entrada: a fortaleza entra deslizando, e uma entrada com os
+    // propulsores apagados denunciaria que ela está sendo empurrada, não voando.
+    this.thrusterFx.setPosition(this.sprite.x, this.sprite.y + Boss.THRUSTER_Y);
+
     // Chegou à posição de combate: freia e a luta começa.
     if (this.entering) {
       if (this.sprite.x > Boss.STATION_X) return;
@@ -216,7 +289,7 @@ export class Boss implements StageBoss {
     // A velocidade PERSEGUE a altura desejada em vez de ser a derivada dela. Integrar a
     // derivada acumularia erro e o boss iria derivando para fora da altura de repouso ao
     // longo da luta. Perseguir o alvo não deriva.
-    const targetY = Boss.BASE_Y + Math.sin(this.t * 0.8) * 26;
+    const targetY = Boss.BASE_Y + Math.sin(this.t * 0.8) * Boss.BOB;
     this.body.setVelocityY((targetY - this.sprite.y) * 6);
 
     // Timer PRÓPRIO, fora do `cooldown` do leque: os dois padrões precisam se sobrepor em
@@ -425,6 +498,9 @@ export class Boss implements StageBoss {
 
     this.dead = true;
     this.body.setVelocity(0, 0);
+    // Os propulsores morrem com ela: uma fortaleza destruída que segue com o fogo aceso
+    // continuaria dizendo "estou voando" enquanto explode.
+    this.thrusterFx.stop();
     return true;
   }
 
@@ -480,5 +556,6 @@ export class Boss implements StageBoss {
     this.barBg.destroy();
     this.muzzleFx.destroy();
     this.chargeFx.destroy();
+    this.thrusterFx.destroy();
   }
 }
