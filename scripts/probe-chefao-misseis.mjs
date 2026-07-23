@@ -72,6 +72,29 @@ async function colherSalva(rotulo) {
 
 await ancorar(40, 40);
 
+// Espera o chefão existir e assumir a posição (ele entra deslizando; é imune enquanto entra).
+for (let i = 0; i < 200; i++) {
+  await page.waitForTimeout(100);
+  const pronto = await page.evaluate(() => {
+    const b = window.__game.scene.getScene('Game').boss;
+    return b && !b.entering;
+  });
+  if (pronto) break;
+}
+
+// Os mísseis SÓ existem na fase aérea. Força o chefão abaixo de 50% e espera a decolagem
+// terminar antes de medir a salva.
+await page.evaluate(() => {
+  const b = window.__game.scene.getScene('Game').boss;
+  const alvo = Math.ceil(b.maxHp / 2);
+  while (b.hp > alvo) b.damage(5);
+});
+for (let i = 0; i < 120; i++) {
+  await page.waitForTimeout(100);
+  const noAr = await page.evaluate(() => window.__game.scene.getScene('Game').boss.airborne === true);
+  if (noAr) break;
+}
+
 // O TELÉGRAFO: fotografa a torre no meio da carga (missileCharge > 0), antes de a salva sair.
 // Privado em TS, acessível em runtime — é o único jeito de pegar o instante certo.
 for (let i = 0; i < 300; i++) {

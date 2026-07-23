@@ -9,8 +9,14 @@ import { COLORS, GAME_WIDTH } from '../config';
  * animação nova, atualize o número aqui.
  */
 const FRAMES: Record<string, number> = {
-  bossAnim: 9,
+  // A luta da Torre tem DUAS formas de arte (solo -> ar) + a decolagem que liga uma à outra.
+  // `boss-idle` é o pulso do olho na forma pousada (sintetizado, não gerado — ver
+  // scripts/pulsar-brilho.mjs); as demais vêm do PixelLab.
+  bossIdleAnim: 8,
   bossFireAnim: 7,
+  bossAirAnim: 9,
+  bossAirFireAnim: 7,
+  bossTakeoffAnim: 13,
   shipAnim: 7,
   droneAnim: 7,
   gunshipAnim: 7,
@@ -68,9 +74,14 @@ const FRAMES: Record<string, number> = {
  * Rocha e prédio NÃO têm animação de propósito — pedra não se mexe, e animar por animar polui.
  */
 const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[] = [
-  { key: 'boss-hover', prefix: 'bossAnim', frameRate: 10 },
-  // Toca UMA vez, a cada disparo, e devolve o controle ao 'boss-hover'.
+  // FORMA POUSADA (fase 1): olho pulsando + o disparo do canhão.
+  { key: 'boss-idle', prefix: 'bossIdleAnim', frameRate: 10 },
   { key: 'boss-fire', prefix: 'bossFireAnim', frameRate: 14, loop: false },
+  // A DECOLAGEM: toca UMA vez na virada de fúria, a cidadela racha e acende os propulsores.
+  { key: 'boss-takeoff', prefix: 'bossTakeoffAnim', frameRate: 10, loop: false },
+  // FORMA NO AR (fase 2): propulsores tremulando + o disparo.
+  { key: 'boss-air-hover', prefix: 'bossAirAnim', frameRate: 10 },
+  { key: 'boss-air-fire', prefix: 'bossAirFireAnim', frameRate: 14, loop: false },
   { key: 'ship-thrust', prefix: 'shipAnim', frameRate: 12 },
   { key: 'drone-fly', prefix: 'droneAnim', frameRate: 12 },
   { key: 'gunship-fly', prefix: 'gunshipAnim', frameRate: 8 },
@@ -218,6 +229,7 @@ const ART: Record<string, string> = {
   ...animFrames('shipArautoAnim', 'ship-arauto-anim'),
 
   boss: 'sprites/boss.png',
+  bossAir: 'sprites/boss-air.png',
   groundTile: 'sprites/ground-tile.png',
 
   // ─── Camadas de FUNDO do passe visual (2026-07-18). Sem placeholder de propósito: fundo
@@ -244,8 +256,11 @@ const ART: Record<string, string> = {
   ...animFrames('aranhaAnim', 'aranha-anim'),
   ...animFrames('aranhaJumpAnim', 'aranha-jump-anim'),
 
-  ...animFrames('bossAnim', 'boss-anim'),
+  ...animFrames('bossIdleAnim', 'boss-idle-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),
+  ...animFrames('bossAirAnim', 'boss-air-anim'),
+  ...animFrames('bossAirFireAnim', 'boss-air-fire-anim'),
+  ...animFrames('bossTakeoffAnim', 'boss-takeoff-anim'),
   ...animFrames('shipAnim', 'ship-anim'),
   ...animFrames('droneAnim', 'drone-anim'),
   ...animFrames('gunshipAnim', 'gunship-anim'),

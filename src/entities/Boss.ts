@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, GAME_WIDTH } from '../config';
 
 /**
  * O que a GameScene precisa saber de um chefão — e nada mais.
@@ -28,8 +28,17 @@ export interface StageBoss {
 /**
  * Torre de Defesa da Colônia — chefão da Fase 1.
  *
- * Duas fases: leque lento → leque rápido + rajada mirada. Simples de propósito:
- * é o primeiro boss do jogo e existe para ENSINAR a ler um padrão, não para punir.
+ * A luta espelha o arco da FASE (GDD §7, "A Decolagem"): o espaço fecha e depois abre.
+ *
+ *   FASE 1 — POUSADA (>50% vida): a cidadela está no chão. Só o leque lento de 5. É a fase de
+ *            ENSINAR a ler um padrão, sem punir.
+ *   DECOLAGEM (na virada de 50%): ela racha os pilares, acende os propulsores e SOBE. Imune
+ *            durante a transição, como a Serpente e o Núcleo (BossNucleo.trocarParaCoracao).
+ *   FASE 2 — NO AR (≤50%): pairando, leque rápido de 7 + rajada mirada + a salva de mísseis.
+ *
+ * Os mísseis só existem na fase aérea — são a ESCALADA da fúria, não um perigo desde o início.
+ * E a salva TOMA O COMPASSO do leque (partitura, como a Capitânia): quando ela carrega, o leque
+ * cala. Somados, os dois padrões entupiam a tela; alternados, cada um tem seu tempo de leitura.
  */
 export class Boss implements StageBoss {
   readonly sprite: Phaser.Physics.Arcade.Sprite;
@@ -40,6 +49,12 @@ export class Boss implements StageBoss {
   private t = 0;
   private entering = true;
   private dead = false;
+  /** Já decolou? `false` = fase pousada; `true` = fase aérea. A DECOLAGEM fica no meio. */
+  private airborne = false;
+  /** Imune e sem atacar enquanto a animação de decolagem toca. */
+  private takingOff = false;
+  /** > 0 = o leque está CALADO (a salva de mísseis tomou o compasso). */
+  private fanMute = 0;
 
   private readonly barBg: Phaser.GameObjects.Rectangle;
   private readonly bar: Phaser.GameObjects.Rectangle;
@@ -47,13 +62,6 @@ export class Boss implements StageBoss {
   private readonly muzzleFx: Phaser.GameObjects.Particles.ParticleEmitter;
   /** Faíscas de CARGA dos tubos de míssil — sugam para dentro, o oposto do clarão de disparo. */
   private readonly chargeFx: Phaser.GameObjects.Particles.ParticleEmitter;
-  /** O fogo dos propulsores sob a cidadela — o que sustenta a fortaleza no ar. */
-  private readonly thrusterFx: Phaser.GameObjects.Particles.ParticleEmitter;
-
-  /** Largura da esteira de fogo, um pouco menor que a base (148px) para nascer DENTRO dela. */
-  private static readonly THRUSTER_SPAN = 116;
-  /** Distância do centro do sprite até a boca dos propulsores (meia-altura 71, menos a saia). */
-  private static readonly THRUSTER_Y = 62;
 
   /** Contagem para a próxima salva de mísseis, independente do leque. Semeada no construtor. */
   private missileCooldown: number;
@@ -68,14 +76,11 @@ export class Boss implements StageBoss {
    * voltaria à cor da primeira e o jogador perderia o único sinal de que o padrão mudou.
    */
   private baseTint = 0xffffff;
-  /** O beat de virada da fúria toca UMA vez. */
-  private ragedShown = false;
 
   /**
-   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 197×190 numa tela de
-   * 384×216, ou seja 88% da altura. A 0.75 ela vira 148×143 — 14% mais alta que a torre
-   * antiga (97×125), que é o salto de presença que a fatia pedia, mas ainda sobrando céu
-   * acima e espaço de voo à esquerda.
+   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 200×198 numa tela de
+   * 384×216. A 0.75 ela vira 150×148 — 19% mais alta que a torre antiga (97×125), o salto de
+   * presença que a fatia pedia, ainda sobrando céu acima e espaço de voo à esquerda.
    *
    * Reduzir o PNG no disco seria pior: reamostrar pixel art em 0.75 apaga a grade. Escalar no
    * render deixa o Phaser amostrar por vizinho-mais-próximo, e a arte sobrevive.
@@ -83,40 +88,42 @@ export class Boss implements StageBoss {
   private static readonly SCALE = 0.75;
 
   /**
-   * Altura de repouso e posição de combate — TODAS derivadas do sprite real, não herdadas.
-   *
-   * Com meia-altura de 71px (190×0.75/2), `BASE_Y = 128` põe o pé da cidadela em y≈199, logo
-   * acima da linha de solo (`GROUND_Y = 206`): ela paira rente ao chão, que é o que os
-   * propulsores da animação prometem. Meia-largura de 74px com `STATION_X = 304` deixa 6px de
-   * margem à direita — o mesmo aperto da torre antiga.
+   * As DUAS alturas de repouso. A base do conteúdo (pedra pousada / ponta das chamas) está a
+   * 74px do centro escalado — logo:
+   *   POUSADA: centro em 132 crava a base em ~206, a linha do solo (`GROUND_Y`). Plantada.
+   *   NO AR:   centro em 106 sobe a fortaleza 26px, e a esteira de fogo passa a flutuar sobre o
+   *            chão com um vão visível — o que a decolagem promete.
    */
-  private static readonly BASE_Y = GAME_HEIGHT - 88;
-  private static readonly STATION_X = GAME_WIDTH - 80;
+  private static readonly BASE_Y_GROUND = 132;
+  private static readonly BASE_Y_AIR = 106;
+  /** Meia-largura da fortaleza (72px do centro escalado): `STATION_X = 306` deixa ~6px à direita. */
+  private static readonly STATION_X = 306;
   private static readonly ENTRY_SPEED = 45;
 
+  /** Duração da subida na decolagem, casada com os 13 quadros da animação a 10fps (~1.3s). */
+  private static readonly TAKEOFF_MS = 1300;
+
   /**
-   * Amplitude do bailado vertical.
+   * Amplitude do bailado vertical — só na fase AÉREA (pousada não bobeia).
    *
-   * Eram 26px, calibrados para uma torre de 125px de altura. Numa fortaleza de 143px o mesmo
-   * número deixa de ser "pairando" e vira TERREMOTO: a estrutura inteira sobe e desce um sexto
-   * da própria altura. 8px é o que se lê como sustentação por propulsor — a massa aparece na
-   * lentidão, não no percurso.
+   * Eram 26px numa torre de 125px. Numa fortaleza de 148px o mesmo número vira TERREMOTO: sobe
+   * e desce um sexto da própria altura. 8px lê como sustentação por propulsor — a massa aparece
+   * na lentidão, não no percurso.
    */
   private static readonly BOB = 8;
 
   /**
-   * Boca do canhão, em px a partir do CENTRO do sprite JÁ ESCALADO.
-   * Medida no PNG instalado (primeiro pixel opaco do terço superior — o cano de gatling aponta
-   * para a esquerda, em x=15, linhas 15..23 de um quadro 197×190 de centro 98.5,95), e então
-   * multiplicada por SCALE. Não chutada: os −31/−39 antigos eram de outra arte e nasceriam
-   * dentro da carapaça.
+   * Boca do canhão, em px a partir do CENTRO do sprite JÁ ESCALADO — e IGUAL nas duas artes: o
+   * `create_object_state` só trocou a base (pedra → propulsores), o cano de gatling ficou no
+   * mesmo lugar. Medida nos dois PNGs instalados (x=15, linhas 15..23 num quadro 200×198 de
+   * centro 100,99) e multiplicada por SCALE — as duas deram −64,−54, então uma constante serve.
    *
-   * Recalcular se o enquadramento mudar. As duas animações compartilham uma caixa única
-   * (`scripts/install-anim-par.mjs` existe só para garantir isso): o clarão do disparo alarga
-   * a caixa para a esquerda, e recortá-las em separado deslocaria o centro entre elas.
+   * Toda a arte da luta compartilha UMA caixa de recorte (`scripts/install-boss-fight.mjs`): as
+   * trocas de textura (pousada ↔ decolagem ↔ ar) não podem deslocar a fortaleza, e o clarão do
+   * disparo + as chamas alargam a caixa — recortar cada forma em separado moveria o centro.
    */
-  private static readonly MUZZLE_X = -63;
-  private static readonly MUZZLE_Y = -57;
+  private static readonly MUZZLE_X = -64;
+  private static readonly MUZZLE_Y = -54;
 
   /**
    * Para onde a arte do cometa APONTA, medida no PNG — não chutada (lição 13).
@@ -143,8 +150,7 @@ export class Boss implements StageBoss {
   private static readonly MISSILE_COUNT = 4;
   /** Lento de propósito: é o que dá tempo de ler o leque inteiro antes que ele chegue. */
   private static readonly MISSILE_SPEED = 70;
-  private static readonly MISSILE_RATE = 6.5;
-  /** Na fúria a salva vem mais junto — mas o telégrafo NÃO encolhe. */
+  /** Intervalo entre salvas na fase aérea (a única que tem mísseis). */
   private static readonly MISSILE_RATE_ENRAGED = 4.5;
   /**
    * Aviso antes da salva. Míssil sem telégrafo é injusto mesmo não sendo teleguiado: o
@@ -152,6 +158,14 @@ export class Boss implements StageBoss {
    * Mesmo princípio da torre de solo (`TerrainSystem.TELEGRAPH`).
    */
   private static readonly MISSILE_TELEGRAPH = 0.65;
+  /**
+   * Quanto o leque fica CALADO depois que a salva de mísseis termina de carregar. Somado ao
+   * telégrafo (0.65), o leque some por ~1.85s em torno da salva: os mísseis a SUBSTITUEM em vez
+   * de somarem, e a luta ganha o silêncio que a Torre não tinha (era o único chefão-metrônomo,
+   * `docs/MAPA_TECNICO_BALANCEAMENTO.md`). Sem isto, cometa + míssil na mesma janela tornavam a
+   * fase aérea intransponível.
+   */
+  private static readonly FAN_MUTE_AFTER = 1.2;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -161,18 +175,19 @@ export class Boss implements StageBoss {
     this.hp = hp;
     this.maxHp = hp;
     // No corpo do construtor, não no campo: um inicializador de campo não enxerga um `static`
-    // declarado abaixo dele (TS2729).
-    this.missileCooldown = Boss.MISSILE_RATE;
+    // declarado abaixo dele (TS2729). Só conta de verdade depois da decolagem.
+    this.missileCooldown = Boss.MISSILE_RATE_ENRAGED;
 
-    this.sprite = scene.physics.add.sprite(GAME_WIDTH + 50, Boss.BASE_Y, 'boss');
+    this.sprite = scene.physics.add.sprite(GAME_WIDTH + 50, Boss.BASE_Y_GROUND, 'boss');
 
     // Só a ARTE real é grande demais para a tela. O placeholder procedural do BootScene
     // (`makeBoss`, 64×80) já nasce no tamanho certo — encolhê-lo o tornaria ilegível no
     // exato cenário em que ele existe, o de a arte não ter carregado.
     if (scene.textures.get('boss').source[0].width > 100) this.sprite.setScale(Boss.SCALE);
 
-    // Propulsores acesos e casco flutuando. Se a animação não existir, fica o sprite parado.
-    if (scene.anims.exists('boss-hover')) this.sprite.play('boss-hover');
+    // Entra POUSADA: o olho pulsa, mas os propulsores estão apagados (é a arte de solo). Se a
+    // animação não existir, fica o sprite parado.
+    if (scene.anims.exists('boss-idle')) this.sprite.play('boss-idle');
 
     this.body.setAllowGravity(false);
     // Derivada da textura, e o corpo Arcade escala junto com o sprite: a hitbox acompanha o
@@ -216,35 +231,6 @@ export class Boss implements StageBoss {
       })
       .setDepth(50);
 
-    // PROPULSORES. A arte não os traz: a fortaleza foi desenhada pousada, e as duas tentativas
-    // de animar o "hover" no PixelLab devolveram estroboscópio (a estrutura inteira lavava de
-    // branco e o olho magenta chegava a APAGAR — medido: luminância média oscilando entre 36 e
-    // 88 contra 45 do quadro base). Então o fogo vem de partículas, que é como o resto do jogo
-    // faz fogo — e assim ele se move de verdade, em vez de ciclar 9 quadros.
-    //
-    // Depth −1: atrás do casco. As chamas escapam POR BAIXO da base e o que entraria por dentro
-    // da pedra fica escondido, que é exatamente o recorte certo.
-    this.thrusterFx = scene.add
-      .particles(0, 0, 'spark', {
-        lifespan: 320,
-        speedY: { min: 55, max: 140 },
-        speedX: { min: -14, max: 14 },
-        scale: { start: 2.4, end: 0 },
-        tint: [COLORS.enemyBright, 0xff6bd6, COLORS.hot],
-        blendMode: 'ADD',
-        // ~140 partículas/s numa esteira de 116px: menos que isto e o fogo vira poeira solta,
-        // que lê como avaria e não como propulsão.
-        frequency: 21,
-        quantity: 3,
-        emitZone: {
-          type: 'random',
-          source: new Phaser.Geom.Rectangle(-Boss.THRUSTER_SPAN / 2, 0, Boss.THRUSTER_SPAN, 4),
-          // O mesmo cast do Interlude4Scene: a união EmitZoneData do Phaser não aceita o
-          // literal inferido de um objeto solto.
-        } as Phaser.Types.GameObjects.Particles.ParticleEmitterConfig['emitZone'],
-      })
-      .setDepth(-1);
-
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, 16, 160, 4, COLORS.enemyDark)
       .setDepth(100);
@@ -258,21 +244,12 @@ export class Boss implements StageBoss {
     return this.dead;
   }
 
-  /** Fase 2 começa com metade da vida: o padrão acelera e ele passa a mirar. */
-  private get enraged(): boolean {
-    return this.hp <= this.maxHp / 2;
-  }
-
   private get body(): Phaser.Physics.Arcade.Body {
     return this.sprite.body as Phaser.Physics.Arcade.Body;
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
     if (this.dead) return;
-
-    // ANTES do `return` da entrada: a fortaleza entra deslizando, e uma entrada com os
-    // propulsores apagados denunciaria que ela está sendo empurrada, não voando.
-    this.thrusterFx.setPosition(this.sprite.x, this.sprite.y + Boss.THRUSTER_Y);
 
     // Chegou à posição de combate: freia e a luta começa.
     if (this.entering) {
@@ -282,29 +259,39 @@ export class Boss implements StageBoss {
       this.entering = false;
     }
 
+    // DECOLANDO: imune e sem atacar. A subida é um tween em `sprite.y` (ver startTakeoff);
+    // o corpo é ressincronizado ao fim. Nada de leque, nada de míssil no meio da transição.
+    if (this.takingOff) return;
+
     this.t += dt;
 
-    // Sobe e desce devagar: um alvo parado não é uma luta.
-    //
-    // A velocidade PERSEGUE a altura desejada em vez de ser a derivada dela. Integrar a
-    // derivada acumularia erro e o boss iria derivando para fora da altura de repouso ao
-    // longo da luta. Perseguir o alvo não deriva.
-    const targetY = Boss.BASE_Y + Math.sin(this.t * 0.8) * Boss.BOB;
-    this.body.setVelocityY((targetY - this.sprite.y) * 6);
+    if (this.airborne) {
+      // Só a fase AÉREA bobeia. A velocidade PERSEGUE a altura desejada em vez de ser a
+      // derivada dela — integrar a derivada acumularia erro e o boss derivaria da altura de
+      // repouso ao longo da luta.
+      const targetY = Boss.BASE_Y_AIR + Math.sin(this.t * 0.8) * Boss.BOB;
+      this.body.setVelocityY((targetY - this.sprite.y) * 6);
 
-    // Timer PRÓPRIO, fora do `cooldown` do leque: os dois padrões precisam se sobrepor em
-    // ritmos diferentes. Amarrá-los ao mesmo relógio faria a salva cair sempre no mesmo
-    // compasso do leque, e o jogador decoraria um padrão só em vez de dois.
-    this.tickMissiles(dt);
+      // A salva pode CALAR o leque (fanMute). Roda antes do leque para o mute do frame valer já.
+      this.tickMissiles(dt);
+    }
+
+    if (this.fanMute > 0) {
+      this.fanMute -= dt;
+      // O leque não conta o cooldown enquanto calado: quando o silêncio acaba, ele recomeça do
+      // zero, sem despejar uma leva represada de uma vez.
+      this.cooldown = this.airborne ? 1.1 : 1.9;
+      return;
+    }
 
     this.cooldown -= dt;
     if (this.cooldown > 0) return;
 
-    this.cooldown = this.enraged ? 1.1 : 1.9;
+    this.cooldown = this.airborne ? 1.1 : 1.9;
 
     this.playFire();
-    this.fan(this.enraged ? 7 : 5);
-    if (this.enraged) this.aimed(target);
+    this.fan(this.airborne ? 7 : 5);
+    if (this.airborne) this.aimed(target);
 
     // Clarão na boca do cano, além do recuo do sprite.
     const m = this.muzzle;
@@ -340,8 +327,12 @@ export class Boss implements StageBoss {
     this.missileCooldown -= dt;
     if (this.missileCooldown > 0) return;
 
-    this.missileCooldown = this.enraged ? Boss.MISSILE_RATE_ENRAGED : Boss.MISSILE_RATE;
+    this.missileCooldown = Boss.MISSILE_RATE_ENRAGED;
     this.missileCharge = Boss.MISSILE_TELEGRAPH;
+    // A salva TOMA o compasso: cala o leque pelo telégrafo inteiro + o rescaldo. É aqui, no
+    // início da carga, que o silêncio começa — o jogador vê o telégrafo já sabendo que o leque
+    // parou, e lê a salva sem cometas no meio.
+    this.fanMute = Boss.MISSILE_TELEGRAPH + Boss.FAN_MUTE_AFTER;
   }
 
   /**
@@ -411,13 +402,15 @@ export class Boss implements StageBoss {
     this.shoot(angle, 130);
   }
 
-  /** Recuo do cano + clarão na boca. Ao terminar, volta a flutuar. */
+  /** Recuo do cano + clarão na boca. Ao terminar, volta ao idle DA FASE (pousado ou no ar). */
   private playFire(): void {
-    if (!this.scene.anims.exists('boss-fire')) return;
+    const fire = this.airborne ? 'boss-air-fire' : 'boss-fire';
+    const idle = this.airborne ? 'boss-air-hover' : 'boss-idle';
+    if (!this.scene.anims.exists(fire)) return;
 
-    this.sprite.play('boss-fire');
-    this.sprite.once('animationcomplete-boss-fire', () => {
-      if (!this.dead && this.scene.anims.exists('boss-hover')) this.sprite.play('boss-hover');
+    this.sprite.play(fire);
+    this.sprite.once(`animationcomplete-${fire}`, () => {
+      if (!this.dead && !this.takingOff && this.scene.anims.exists(idle)) this.sprite.play(idle);
     });
   }
 
@@ -475,9 +468,10 @@ export class Boss implements StageBoss {
 
   /** @returns true se este dano matou o boss. */
   damage(amount: number): boolean {
-    // Invulnerável enquanto desliza para dentro da tela. Sem isto dá para matá-lo
-    // ANTES DE ELE APARECER, atirando no vazio à direita (constatado no playtest).
-    if (this.dead || this.entering) return false;
+    // Invulnerável enquanto desliza para dentro da tela E durante a decolagem (o mesmo escudo
+    // da troca de forma do Núcleo). Sem o primeiro, dá para matá-lo antes de ele aparecer,
+    // atirando no vazio à direita (constatado no playtest).
+    if (this.dead || this.entering || this.takingOff) return false;
 
     this.hp = Math.max(0, this.hp - amount);
     this.bar.width = 160 * (this.hp / this.maxHp);
@@ -485,69 +479,83 @@ export class Boss implements StageBoss {
     // setTint, e NÃO setTintFill.
     //
     // `setTintFill` pinta o sprite inteiro de branco sólido — some com a arte. Num inimigo
-    // pequeno isso é um piscar; num chefão de 97×125 apanhando 7 tiros por segundo (o flap
+    // pequeno isso é um piscar; num chefão de 150px apanhando 7 tiros por segundo (o flap
     // atira sozinho), ele passa a maior parte do tempo como um borrão branco.
     // `setTint` multiplica a cor: avermelha sem apagar o desenho.
     this.sprite.setTint(0xffa0a0);
     // Volta ao tint de REPOUSO, não a "sem tint": depois da fúria o repouso é o casco quente.
-    this.scene.time.delayedCall(60, () => !this.dead && this.sprite.setTint(this.baseTint));
+    this.scene.time.delayedCall(60, () => !this.dead && !this.takingOff && this.sprite.setTint(this.baseTint));
 
-    if (this.enraged && !this.ragedShown) this.showRage();
+    // Cruzou 50% ainda pousada → DECOLA. Uma vez só (airborne trava a reentrada).
+    if (!this.airborne && this.hp <= this.maxHp / 2) this.startTakeoff();
 
     if (this.hp > 0) return false;
 
     this.dead = true;
     this.body.setVelocity(0, 0);
-    // Os propulsores morrem com ela: uma fortaleza destruída que segue com o fogo aceso
-    // continuaria dizendo "estou voando" enquanto explode.
-    this.thrusterFx.stop();
     return true;
   }
 
   /**
-   * O BEAT da virada de fúria — uma vez só.
+   * A DECOLAGEM — a virada de fúria, uma vez só.
    *
-   * Antes a segunda fase entrava em silêncio: o leque passava de 5 para 7 e a cadência caía
-   * de 1.9s para 1.1s, e nada na tela dizia por quê. Um chefão que endurece sem avisar parece
-   * inconsistente, não mais difícil. Aqui a torre SOBREAQUECE, e o casco fica quente para o
-   * resto da luta (`baseTint`) — o aviso não é só o instante, é o estado.
+   * É o beat central da luta e o eco da fase ("A Decolagem", GDD §7): a cidadela racha os
+   * pilares, acende os propulsores e SOBE. Enquanto isso ela é IMUNE e não ataca (mesmo escudo
+   * da troca de forma do Núcleo), senão o jogador atravessaria a transição no dano.
+   *
+   * A animação (`boss-takeoff`) faz a base quebrar; o CÓDIGO faz a subida, com um tween em
+   * `sprite.y` do repouso pousado ao aéreo. Um tween em `y` não moveria o CORPO Arcade (ele
+   * sobrescreve a posição todo frame — o bug documentado na entrada), mas durante a decolagem o
+   * `update` retorna cedo e o corpo está parado; ao fim, `body.reset` ressincroniza tudo.
    */
-  private showRage(): void {
-    this.ragedShown = true;
-    this.baseTint = 0xff9a6a;
+  private startTakeoff(): void {
+    this.takingOff = true;
+    this.baseTint = 0xff9a6a; // o casco fica quente para o resto da luta (o aviso é o estado)
+    this.body.setVelocity(0, 0);
+
+    if (this.scene.anims.exists('boss-takeoff')) {
+      this.sprite.anims.stop();
+      this.sprite.play('boss-takeoff');
+    }
 
     const m = this.muzzle;
     this.muzzleFx.explode(24, m.x, m.y);
     this.chargeFx.explode(20, this.sprite.x, this.sprite.y);
-    this.scene.cameras.main.shake(320, 0.008);
+    this.scene.cameras.main.shake(Boss.TAKEOFF_MS, 0.006);
+    this.scene.cameras.main.flash(400, 232, 60, 140);
 
-    // Estouro branco-quente e queda para o casco sobreaquecido. O `damage` que dispara esta
-    // virada já agendou um `setTint(baseTint)` para daqui a 60ms — este tween começa DEPOIS
-    // dele, senão o flash de dano cortaria o marco no meio.
-    this.scene.time.delayedCall(70, () => {
-      if (this.dead) return;
-      this.sprite.setTint(0xffffff);
-      this.scene.tweens.addCounter({
-        from: 0,
-        to: 1,
-        duration: 520,
-        onUpdate: (tw) => {
-          if (this.dead) return;
-          const k = tw.getValue() ?? 0;
-          this.sprite.setTint(
-            Phaser.Display.Color.ObjectToColor(
-              Phaser.Display.Color.Interpolate.ColorWithColor(
-                Phaser.Display.Color.ValueToColor(0xffffff),
-                Phaser.Display.Color.ValueToColor(this.baseTint),
-                100,
-                k * 100,
-              ),
-            ).color,
-          );
-        },
-        onComplete: () => !this.dead && this.sprite.setTint(this.baseTint),
-      });
+    this.scene.tweens.add({
+      targets: this.sprite,
+      y: Boss.BASE_Y_AIR,
+      duration: Boss.TAKEOFF_MS,
+      ease: 'Sine.easeInOut',
+      onComplete: () => this.finishTakeoff(),
     });
+  }
+
+  /** Fim da decolagem: assume a arte AÉREA, ressincroniza o corpo e volta a lutar. */
+  private finishTakeoff(): void {
+    if (this.dead) return;
+    this.airborne = true;
+    this.takingOff = false;
+
+    // Troca para a arte com propulsores. Parar a animação ANTES do setTexture (armadilha do
+    // Núcleo: a animação sobrescreve a textura no quadro seguinte).
+    this.sprite.anims.stop();
+    if (this.scene.anims.exists('boss-air-hover')) this.sprite.play('boss-air-hover');
+    else this.sprite.setTexture('bossAir');
+    this.sprite.setTint(this.baseTint);
+
+    // O tween moveu o sprite; o corpo estava parado no y de solo. Ressincroniza na altura aérea.
+    this.body.reset(this.sprite.x, Boss.BASE_Y_AIR);
+    this.body.setAllowGravity(false);
+    this.body.setSize(this.sprite.width * 0.7, this.sprite.height * 0.8);
+
+    // Recomeça os dois relógios do zero: a fase aérea não deve despejar leque + salva no frame
+    // em que assume o controle.
+    this.cooldown = 1.1;
+    this.missileCooldown = Boss.MISSILE_RATE_ENRAGED;
+    this.t = 0;
   }
 
   destroy(): void {
@@ -556,6 +564,5 @@ export class Boss implements StageBoss {
     this.barBg.destroy();
     this.muzzleFx.destroy();
     this.chargeFx.destroy();
-    this.thrusterFx.destroy();
   }
 }
