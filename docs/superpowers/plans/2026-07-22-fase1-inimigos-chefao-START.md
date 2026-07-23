@@ -45,6 +45,21 @@ Espelha o arco da fase ("A Decolagem", GDD §7): fecha → abre.
 Toda a arte da luta é recortada por UMA caixa única (`scripts/install-boss-fight.mjs`), senão a
 fortaleza salta na troca de textura. Sonda: `scripts/probe-chefao-fases.mjs`.
 
+### Depth do cenário na luta (dois consertos, 2026-07-23)
+
+- **Base do chefão enraizada:** o sprite ia no depth 0, À FRENTE da faixa de solo da frente
+  (`groundFront`, −0.2) que enraíza os props — a base ficava "colada". Fix: `setDepth(-0.3)` (atrás
+  da faixa, como os props em −0.5). As balas (18–40) e efeitos (50) seguem à frente; na fase aérea
+  ele flutua acima da faixa, então não é ocultado lá.
+- **Cidades do skyline plantadas:** a base reta dos prédios ficava 6px ACIMA do solo (`baseY
+  GROUND_Y−6`) e flutuava — invisível na fase (os picos na frente tapavam), mas exposta na luta,
+  que LIMPA o primeiro plano. Fix: `baseY GROUND_Y+2` (a base afunda atrás do chão −80 e da faixa
+  −0.2). Sonda de fundo: `scripts/_probe-boss-fundo.mjs` (censo das camadas + crop da base).
+- **Arena limpa é INTENCIONAL** (decisão do Henrique): `spawnBoss` faz `propRate=0` +
+  `setForegroundDimmed(true)` — os picos de gelo (props `spire`) e o primeiro plano somem de
+  propósito, para o jogador ler os padrões. Não é bug. Se um dia a cena parecer vazia demais, dá
+  para reforçar SÓ o fundo distante sem reativar obstáculos.
+
 ### O que ficou de dívida (nenhuma bloqueia a fatia)
 
 - **Batedor**: não virou o DARDO magro do spec. Ele se separa do drone por tamanho e limpeza de
