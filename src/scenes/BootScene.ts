@@ -268,7 +268,9 @@ const ART: Record<string, string> = {
   // O RÓSTER. Cada inimigo tem a SUA silhueta — o batedor, o kamikaze e o cargueiro deixaram de
   // ser o drone e a canhoneira recolorados (ver src/systems/EnemySystem.ts).
   enemyDrone: 'sprites/enemy-drone.png',
-  enemyDrone2: 'sprites/enemy-drone-2.png',
+  // SEM `enemyDrone2`: a variante 2 é a arte VELHA do drone. Com ela registrada, `pickVariant`
+  // sorteava entre o pod novo e o inseto antigo, e o enxame virava duas facções na mesma tela.
+  // A variante volta quando houver um segundo candidato do lote NOVO.
   enemyGunship: 'sprites/enemy-gunship.png',
   enemyScout: 'sprites/enemy-scout.png',
   enemyKamikaze: 'sprites/enemy-kamikaze.png',
