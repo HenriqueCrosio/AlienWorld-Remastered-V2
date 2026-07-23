@@ -420,10 +420,15 @@ export class Parallax {
     // O HORIZONTE DA COLÔNIA: skyline industrial ATRÁS das montanhas distantes (mais escura
     // que elas — o que está longe é escuro, perspectiva aérea). Em bolsões espaçados: a colônia
     // é assentamento em cordão, não megacidade contínua.
+    // baseY um pouco ABAIXO da linha do solo (não acima): a base reta dos prédios fica ENTERRADA
+    // atrás do chão (−80) e da faixa da frente (−0.2), que a ocultam. Com `GROUND_Y − 6` o pé
+    // ficava 6px ACIMA do solo, e a borda reta flutuava — invisível na fase (os picos na frente a
+    // tapavam), mas exposta na luta de chefão, que limpa o primeiro plano. O skyline agora nasce
+    // do horizonte em vez de pairar sobre ele.
     this.addLayer({
       key: 'skyline',
       factor: 0.1,
-      baseY: GROUND_Y - 6,
+      baseY: GROUND_Y + 2,
       depth: -93,
       tint: 0x151e38,
       alpha: 1,
