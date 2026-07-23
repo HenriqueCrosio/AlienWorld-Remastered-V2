@@ -134,6 +134,11 @@ export class TerrainSystem {
     // (origem no topo + flipY: uma estalactite é um pico de cabeça para baixo).
     p.setOrigin(0.5, teto ? 0 : 1);
     p.setFlipY(teto);
+    // A arte da torre nasce com o cano para cima-DIREITA (convenção do projeto: todo sprite
+    // aponta para a direita, o espelhamento é feito em jogo — ver BootScene). Mas ela só atira
+    // quando o jogador já passou, ou seja, para a ESQUERDA. Sem espelhar, o cano aponta para o
+    // lado oposto ao do tiro.
+    if (PROPS[kind].shoots) p.setFlipX(true);
     p.setData('kind', kind);
     // Depth −0.5: os props ficam ATRÁS da nave/inimigos (depth 0) e da FAIXA DE SOLO DA FRENTE
     // do parallax da F1 (−0.2), que esconde o pé "colado" deles. Só ordem de render — nenhum
@@ -269,9 +274,16 @@ export class TerrainSystem {
   private static readonly TELEGRAPH = 0.4;
 
   private fireAt(p: Phaser.Physics.Arcade.Sprite, target: Phaser.Physics.Arcade.Sprite): void {
-    // Boca do cano, FORA do corpo da torre — senão o tiro colide com ela mesma.
-    const muzzleX = p.x - 14;
-    const muzzleY = p.y - p.displayHeight + 4;
+    // Boca do cano, MEDIDA na arte (32×30) e não chutada: a ponta do cano ocupa x 23..26 num
+    // sprite de centro 16, ou seja +9 do centro — e o `setFlipX` do spawn a joga para −9. Em
+    // altura ela encosta no topo do quadro (y 0..2), e a origem do prop é a BASE, então o topo
+    // é `p.y − displayHeight`.
+    //
+    // Ela cai DENTRO do corpo da torre (que vai de −9.6 a +9.6), ao contrário da arte antiga.
+    // Quem protege o tiro agora é a CARÊNCIA de 16px do `enemyBulletHitCover` — a mesma que já
+    // impedia uma torre encostada numa rocha de destruir o próprio disparo ao nascer.
+    const muzzleX = p.x - 9;
+    const muzzleY = p.y - p.displayHeight + 2;
 
     const b = this.enemyBullets.get(muzzleX, muzzleY) as Phaser.Physics.Arcade.Sprite | null;
     if (!b) return;
