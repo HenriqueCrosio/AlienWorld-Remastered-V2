@@ -16,15 +16,44 @@ Isso é o suficiente — este doc tem todo o contexto, o pipeline e os prompts.
 
 ---
 
-## Estado atual
+## Estado atual (2026-07-23)
 
 - **Branch:** `feat/fase1-cenario` (a leva 2 seguiu nela; a leva 1/cenário já está completa e
-  commitada aqui). Pode continuar nela ou criar `feat/fase1-inimigos` a partir dela.
+  commitada aqui).
 - **Spec:** `docs/superpowers/specs/2026-07-22-fase1-inimigos-chefao-design.md` (commit `1408127`)
-- **Plano:** `docs/superpowers/plans/2026-07-22-fase1-inimigos-chefao.md` (commit `602233b`)
-- **Feito:** leva 1 (cenário) completa. Leva 2: spec + plano commitados; Task 0 (pipeline) resolvido.
-- **Em aberto:** Task 1 (drone) — objeto GERADO e **em review** (ver abaixo), ainda não escolhido/
-  instalado. Tasks 2–8 não iniciadas.
+- **Plano:** `docs/superpowers/plans/2026-07-22-fase1-inimigos-chefao.md` (commit `602230b`)
+- **FEITO:** Tasks 0, 1 (drone), 2 (batedor), 3 (canhoneira), 4 (torre de solo), 6 (salva de
+  mísseis), 7 (telégrafo + fúria). Regressão da Task 8 verde.
+- **EM ABERTO: só a Task 5 (arte do chefão).** O Henrique está gerando o candidato dele no
+  PixelLab e vai mandar a ref. Um lote automático ficou **em review** como plano B:
+  `f8a87745-dd7d-4cd6-812f-13d623796ce3` (4 candidatos, torres colossais roxas com canhão para a
+  esquerda e olho magenta — o `[2]`, de canhão duplo e sem laje no pé, é o melhor para um chefão
+  que FLUTUA). Descartar com `dismiss_review` se a arte do Henrique entrar no lugar.
+
+### O que falta na Task 5, em ordem
+
+1. Instalar a arte (2 animações: `bossAnim` 9 quadros / `bossFireAnim` 7 — ver `FRAMES` no BootScene).
+2. **RECALIBRAR `src/entities/Boss.ts` medindo no PNG novo** (`find-pad.mjs`), não chutando:
+   `BASE_Y`, `STATION_X`, `MUZZLE_X/Y` (hoje `-31/-39`, medidos para os 97×125 atuais) e a hitbox.
+   A boca importa para o leque, para a salva de mísseis E para o telégrafo — os três leem
+   `this.muzzle`.
+3. Verificar com `node scripts/probe-chefao-misseis.mjs` (sonda nova: prova que a salva não é
+   teleguiada e fotografa o telégrafo).
+
+## ⚠️ A LIÇÃO DO PIPELINE DE ARTE (custou 5 lotes)
+
+**A `style_images` manda mais que a descrição.** Três regras, todas verificadas:
+
+1. **Ref = o sprite ATUAL do próprio inimigo → máquina de cópia.** 64 candidatos do drone saíram
+   como releituras do drone antigo; idem batedor e canhoneira. A descrição foi ignorada.
+2. **Sem ref nenhuma → a forma se solta, mas a VISTA se perde.** Sai de cima/de frente, inútil num
+   side-scroller. O parâmetro `sidescroller` sozinho não segura — quem carrega a vista é a ref.
+3. **O que funciona: ref de OUTRO asset, em vista lateral, já no tamanho alvo.** Ela carrega vista
+   e paleta sem impor a silhueta. Quanto mais DISTANTE a ref do que se pede, mais a forma se
+   solta (a torre de solo escapou porque a ref era cinza-mecânica e o pedido era roxo-biomec).
+
+E: **`size` mínimo da API é 32**; com `style_images` o `size` é ignorado e a MAIOR ref define o
+tamanho de saída.
 
 ## Objetivo da leva (resumo do spec)
 
@@ -117,5 +146,15 @@ Isso é o suficiente — este doc tem todo o contexto, o pipeline e os prompts.
 
 ## Saldo PixelLab
 
-**838 gerações** (2026-07-22). Objeto novo ~20–40 ger; animação v3 ~1–2 ger. Folgado para os ~5 assets.
-Conta: user `f7282f36-b779-4f64-832a-4693ca4cc628` (a mesma do MCP e do `.env.pixellab`).
+**~690 gerações** (2026-07-23; eram 838 e a caça à silhueta consumiu ~150). Objeto novo ~20–40 ger;
+animação v3 ~1–2 ger. Conta: user `f7282f36-b779-4f64-832a-4693ca4cc628` (a mesma do MCP e do
+`.env.pixellab`).
+
+## Sondas desta leva (todas verdes em 2026-07-23)
+
+- `scripts/probe-roster-f1.mjs` — os 4 inimigos parados na mesma tela. É a única forma de julgar
+  "dá para distinguir num relance", e ela imprime as hitboxes para provar que não mudaram
+  (drone 16×14, batedor 14×12, canhoneira 27×14 — idênticas às de antes da fatia).
+- `scripts/probe-chefao-misseis.mjs` — prova que a salva NÃO é teleguiada comparando os ângulos
+  com a nave em dois lugares opostos, e fotografa o telégrafo.
+- `scripts/probe-torre-solo.mjs` — torre atirando de perto: espelhamento e boca do cano.
