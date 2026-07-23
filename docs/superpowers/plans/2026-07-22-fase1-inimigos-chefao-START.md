@@ -23,33 +23,48 @@ Isso é o suficiente — este doc tem todo o contexto, o pipeline e os prompts.
 - **Spec:** `docs/superpowers/specs/2026-07-22-fase1-inimigos-chefao-design.md` (commit `1408127`)
 - **Plano:** `docs/superpowers/plans/2026-07-22-fase1-inimigos-chefao.md` (commit `602230b`)
 - **A LEVA 2 ESTÁ COMPLETA.** Tasks 0–8 fechadas: drone, batedor, canhoneira, torre de solo,
-  arte do chefão, salva de mísseis, telégrafo + fúria, e a regressão.
-- O chefão é a **fortaleza do Henrique** (`49a4f934-6aa9-4d85-aaec-9334890a5816`, 197×190). Um
-  lote automático ficou sem uso em review: `f8a87745-dd7d-4cd6-812f-13d623796ce3` — descartar com
-  `dismiss_review` quando quiser.
+  arte do chefão, salva de mísseis, telégrafo + fúria, e a regressão. Mais a REESCRITA da luta do
+  chefão em duas fases (abaixo).
+- O chefão é a **fortaleza do Henrique** (`49a4f934-…`, arte pousada) + o **estado com propulsores**
+  (`2d499c7d-…`, `create_object_state`, arte aérea). Lote automático sem uso:
+  `f8a87745-…` — descartar com `dismiss_review`.
+
+## A LUTA DO CHEFÃO — duas fases (reescrita 2026-07-23)
+
+Espelha o arco da fase ("A Decolagem", GDD §7): fecha → abre.
+
+- **POUSADA (>50%):** cidadela no chão (`boss.png`, base de pedra), só o leque de 5 a cada 1.9s,
+  **sem mísseis**. `BASE_Y_GROUND = 132` crava a base no solo (206).
+- **DECOLAGEM (na virada de 50%):** toca `boss-takeoff` (os 13 quadros do Henrique), IMUNE, e o
+  código SOBE o sprite (tween de y=132→106) enquanto a base racha. Mesmo escudo da troca de forma
+  do Núcleo.
+- **AÉREA (≤50%):** `boss-air.png` (com propulsores), paira (`BOB=8`), leque de 7 + mirado +
+  salva de mísseis. A salva **toma o compasso** do leque (`fanMute`): quando carrega, o leque
+  cala pelo telégrafo + 1.2s. Antes os dois somavam e entupiam a tela.
+
+Toda a arte da luta é recortada por UMA caixa única (`scripts/install-boss-fight.mjs`), senão a
+fortaleza salta na troca de textura. Sonda: `scripts/probe-chefao-fases.mjs`.
 
 ### O que ficou de dívida (nenhuma bloqueia a fatia)
 
 - **Batedor**: não virou o DARDO magro do spec. Ele se separa do drone por tamanho e limpeza de
   casco, não por silhueta. Regerar exigiria resolver o dilema vista-vs-forma (ver a lição abaixo).
-- **Animação de despertar do chefão**: a de 13 quadros do Henrique (`ce2a3b84-…`, a cidadela
-  rachando e decolando) é um belo beat de ENTRADA e está sem uso — hoje o chefão só entra
-  deslizando. Ligá-la seria código novo na entrada do `Boss.ts`.
 
-## ⚠️ A SEGUNDA LIÇÃO: o v3 não faz IDLE SUTIL
+## ⚠️ A SEGUNDA LIÇÃO: animar CHAMA que não existe no quadro base
 
-Duas tentativas de animar a fortaleza "pairando" voltaram estroboscópio — a estrutura inteira
-lavando de branco e o **olho magenta apagando**. Medido: luminância média oscilando entre 36 e 88
-contra 45 do quadro base, e a contagem de pixels magenta caindo a zero em vários quadros. Não
-havia subconjunto aproveitável nos dois lotes.
+Duas tentativas de gerar o "hover" da fortaleza voltaram estroboscópio — a estrutura inteira
+lavando de branco e o **olho magenta apagando** (luminância média oscilando 36–88 contra 45 do
+quadro base; pixels magenta caindo a zero). A causa: **eu pedia ao v3 para animar propulsores que
+não estavam desenhados**. Sem a chama no quadro, ele não tem o que tremular e compensa mexendo no
+que existe — o casco.
 
-O v3 dramatiza: quanto mais sutil o pedido, mais ele parece compensar. Pedir "do not flash, do
-not change color" não adiantou.
+**A saída certa:** `create_object_state` para criar a fortaleza JÁ COM os propulsores e o fogo
+desenhados, e só então animar esse estado — aí a chama tem o que tremular. (Um caminho errado que
+cheguei a codar e reverter: fazer os propulsores por PARTÍCULAS no `Boss.ts`. Funcionava, mas
+propulsor é direção de arte — não era decisão minha para tomar no meio da execução.)
 
-**A saída:** `scripts/pulsar-brilho.mjs` sintetiza o loop a partir de UM quadro bom, modulando
-cada pixel pela própria "magentice" (R−G). Pedra cinza (R≈G) fica byte a byte intacta; só o olho
-e as veias respiram. E o que a arte não tem — os propulsores — virou **emissor de partículas** no
-`Boss.ts`, que é como o resto do jogo faz fogo. Vale para qualquer sprite grande daqui em diante.
+`scripts/pulsar-brilho.mjs` continua útil para o pulso do OLHO na fase pousada (modula cada pixel
+pela "magentice" R−G; pedra cinza fica intacta) — ali não há chama a animar, só o olho a respirar.
 
 ## ⚠️ A LIÇÃO DO PIPELINE DE ARTE (custou 5 lotes)
 
@@ -170,4 +185,6 @@ animação v3 ~1–2 ger. Conta: user `f7282f36-b779-4f64-832a-4693ca4cc628` (a 
   com a nave em dois lugares opostos, e fotografa o telégrafo.
 - `scripts/probe-torre-solo.mjs` — torre atirando de perto: espelhamento e boca do cano.
 - `scripts/probe-chefao-arte.mjs` — o chefão PARADO, que é quando se julga arte. Falha se ele
-  transbordar a tela ou invadir o HUD (hoje: 148×143, caixa x 229..377, y 57..199).
+  transbordar a tela ou invadir o HUD (hoje: 150×149, base no solo em y=206).
+- `scripts/probe-chefao-fases.mjs` — a luta inteira: pousada sem mísseis → decolagem imune subindo
+  → troca de arte → a salva calando o leque na fase aérea.
