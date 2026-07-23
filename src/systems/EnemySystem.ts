@@ -58,7 +58,11 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // separa ele do drone antes de a cor ser lida.
   batedor: { texture: 'enemyScout', anim: 'scout-fly', hp: 2, speed: 95, wave: 28, fireRate: 0, score: 40, scale: 0.85, tint: 0xffc8dc, homing: 0, spawnRate: 0 },
 
-  canhoneira: { texture: 'enemyGunship', anim: 'gunship-fly', hp: 6, speed: 40, wave: 0, fireRate: 1.6, score: 100, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0 },
+  // O tint puxa o casco para o ROXO da facção. A arte nova da canhoneira veio vermelho-tijolo,
+  // e contra o azul-escuro da F1 ela saltava como a única peça quente da tela — o jogador lia
+  // "coisa importante" numa nave que é tropa comum. Multiplicar por um lilás rebaixa o
+  // vermelho e levanta o azul sem apagar o desenho (é o mesmo recurso do cargueiro).
+  canhoneira: { texture: 'enemyGunship', anim: 'gunship-fly', hp: 6, speed: 40, wave: 0, fireRate: 1.6, score: 100, scale: 1, tint: 0xbfa8f0, homing: 0, spawnRate: 0 },
 
   // KAMIKAZE: entra devagar e ACELERA em cima de você. Frágil de propósito — a resposta
   // certa é atirar nele, não fugir, e 2 de vida garante que a arma base dê conta.
