@@ -185,6 +185,13 @@ export class Boss implements StageBoss {
     // exato cenário em que ele existe, o de a arte não ter carregado.
     if (scene.textures.get('boss').source[0].width > 100) this.sprite.setScale(Boss.SCALE);
 
+    // ATRÁS da faixa de solo da frente (`groundFront`, depth −0.2), como os props (−0.5): é ela
+    // que ENRAÍZA o pé da fortaleza no terreno na fase pousada. Sem isto, a base desenha por
+    // cima da faixa e fica com a borda reta "colada" no chão — o mesmo defeito que a faixa
+    // resolveu para silos e torres. As balas (18–40) e os efeitos (50) seguem à frente do boss,
+    // e na fase aérea ele flutua acima da faixa, então a −0.3 não o oculta ali.
+    this.sprite.setDepth(-0.3);
+
     // Entra POUSADA: o olho pulsa, mas os propulsores estão apagados (é a arte de solo). Se a
     // animação não existir, fica o sprite parado.
     if (scene.anims.exists('boss-idle')) this.sprite.play('boss-idle');
