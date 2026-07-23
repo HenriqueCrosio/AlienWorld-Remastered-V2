@@ -45,6 +45,24 @@ export class Boss implements StageBoss {
   private readonly bar: Phaser.GameObjects.Rectangle;
   /** UM emissor, reaproveitado. Criar um por tiro vaza memória. */
   private readonly muzzleFx: Phaser.GameObjects.Particles.ParticleEmitter;
+  /** Faíscas de CARGA dos tubos de míssil — sugam para dentro, o oposto do clarão de disparo. */
+  private readonly chargeFx: Phaser.GameObjects.Particles.ParticleEmitter;
+
+  /** Contagem para a próxima salva de mísseis, independente do leque. Semeada no construtor. */
+  private missileCooldown: number;
+  /** > 0 enquanto os tubos CARREGAM (o telégrafo). Ao zerar, a salva sai. */
+  private missileCharge = 0;
+
+  /**
+   * Tint de REPOUSO, e não `clearTint()` espalhado pelo código.
+   *
+   * A fúria esquenta o casco de forma PERMANENTE (ver `damage`): se o flash branco de dano
+   * terminasse em `clearTint()`, cada tiro levado apagaria a marca da segunda fase — a torre
+   * voltaria à cor da primeira e o jogador perderia o único sinal de que o padrão mudou.
+   */
+  private baseTint = 0xffffff;
+  /** O beat de virada da fúria toca UMA vez. */
+  private ragedShown = false;
 
   /**
    * Altura de repouso e posição de combate.
@@ -79,6 +97,28 @@ export class Boss implements StageBoss {
   /** Raio da bola SÓLIDA do cometa (px do quadro), medido no PNG. A cauda não fere. */
   private static readonly COMET_CORE_RADIUS = 4.5;
 
+  /**
+   * SALVA DE MÍSSEIS — o segundo padrão da luta, de leitura OPOSTA à do leque.
+   *
+   * O leque é rápido e mirado: exige reação. A salva é lenta, larga e em ângulos FIXOS —
+   * ela não persegue ninguém. Teleguiar mísseis num chefão que o jogador enfrenta preso ao
+   * flap seria punição, não desafio: com a mobilidade limitada, um projétil que corrige o
+   * curso não tem esquiva, só dano garantido. Sendo fixa, a salva vira um problema de
+   * POSIÇÃO — o jogador lê as brechas do leque e se planta numa delas.
+   */
+  private static readonly MISSILE_COUNT = 4;
+  /** Lento de propósito: é o que dá tempo de ler o leque inteiro antes que ele chegue. */
+  private static readonly MISSILE_SPEED = 70;
+  private static readonly MISSILE_RATE = 6.5;
+  /** Na fúria a salva vem mais junto — mas o telégrafo NÃO encolhe. */
+  private static readonly MISSILE_RATE_ENRAGED = 4.5;
+  /**
+   * Aviso antes da salva. Míssil sem telégrafo é injusto mesmo não sendo teleguiado: o
+   * jogador precisa do tempo de se REPOSICIONAR, que é a única defesa que a salva admite.
+   * Mesmo princípio da torre de solo (`TerrainSystem.TELEGRAPH`).
+   */
+  private static readonly MISSILE_TELEGRAPH = 0.65;
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly bullets: Phaser.Physics.Arcade.Group,
@@ -86,6 +126,9 @@ export class Boss implements StageBoss {
   ) {
     this.hp = hp;
     this.maxHp = hp;
+    // No corpo do construtor, não no campo: um inicializador de campo não enxerga um `static`
+    // declarado abaixo dele (TS2729).
+    this.missileCooldown = Boss.MISSILE_RATE;
 
     this.sprite = scene.physics.add.sprite(GAME_WIDTH + 50, Boss.BASE_Y, 'boss');
 
@@ -113,6 +156,21 @@ export class Boss implements StageBoss {
         angle: { min: 150, max: 210 },
         scale: { start: 2, end: 0 },
         tint: [COLORS.hotBright, COLORS.hot],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(50);
+
+    // CARGA: faíscas convergindo PARA a boca (speed negativo = vindo de fora para dentro),
+    // magenta da facção. Ler diferente do clarão de disparo é o ponto — uma é promessa,
+    // a outra é consequência.
+    this.chargeFx = scene.add
+      .particles(0, 0, 'spark', {
+        lifespan: 220,
+        speed: { min: -70, max: -30 },
+        angle: { min: 150, max: 210 },
+        scale: { start: 0, end: 1.8 },
+        tint: [COLORS.enemyBright, 0xff6bd6],
         blendMode: 'ADD',
         emitting: false,
       })
@@ -161,6 +219,11 @@ export class Boss implements StageBoss {
     const targetY = Boss.BASE_Y + Math.sin(this.t * 0.8) * 26;
     this.body.setVelocityY((targetY - this.sprite.y) * 6);
 
+    // Timer PRÓPRIO, fora do `cooldown` do leque: os dois padrões precisam se sobrepor em
+    // ritmos diferentes. Amarrá-los ao mesmo relógio faria a salva cair sempre no mesmo
+    // compasso do leque, e o jogador decoraria um padrão só em vez de dois.
+    this.tickMissiles(dt);
+
     this.cooldown -= dt;
     if (this.cooldown > 0) return;
 
@@ -174,6 +237,91 @@ export class Boss implements StageBoss {
     const m = this.muzzle;
     this.muzzleFx.explode(6, m.x, m.y);
     this.scene.cameras.main.shake(60, 0.003);
+  }
+
+  /**
+   * O relógio da salva: CARREGA (telegrafado), depois DISPARA.
+   *
+   * O tint pulsante é reaplicado a cada frame de propósito — o flash branco de dano
+   * (`damage`) agenda um `setTint(baseTint)` 60ms depois e apagaria o aviso no meio da
+   * carga. Reescrevendo todo frame, o telégrafo sobrevive a levar tiro.
+   */
+  private tickMissiles(dt: number): void {
+    if (this.missileCharge > 0) {
+      this.missileCharge -= dt;
+
+      // setTint, NÃO setTintFill: `tintFill` apagaria a arte e a torre viraria um bloco
+      // sólido — o mesmo motivo documentado no flash de dano.
+      this.sprite.setTint(Math.floor(this.missileCharge * 24) % 2 === 0 ? 0xffb0f0 : 0xff40c0);
+
+      const m = this.muzzle;
+      this.chargeFx.emitParticleAt(m.x, m.y);
+
+      if (this.missileCharge <= 0) {
+        this.sprite.setTint(this.baseTint);
+        this.launchMissiles();
+      }
+      return;
+    }
+
+    this.missileCooldown -= dt;
+    if (this.missileCooldown > 0) return;
+
+    this.missileCooldown = this.enraged ? Boss.MISSILE_RATE_ENRAGED : Boss.MISSILE_RATE;
+    this.missileCharge = Boss.MISSILE_TELEGRAPH;
+  }
+
+  /**
+   * Leque LARGO e LENTO de mísseis em ângulos FIXOS — não mira o jogador (ver MISSILE_COUNT).
+   *
+   * O arco (140°–220°, com o eixo y crescendo para BAIXO) varre de baixo-à-esquerda até
+   * cima-à-esquerda, mais aberto que o leque de fogo (150°–210°): as brechas entre os mísseis
+   * são a esquiva, e elas precisam caber a nave.
+   */
+  private launchMissiles(): void {
+    const m = this.muzzle;
+    const n = Boss.MISSILE_COUNT;
+
+    for (let i = 0; i < n; i++) {
+      const angle = Phaser.Math.DegToRad(140 + (i / (n - 1)) * 80);
+
+      const b = this.bullets.get(m.x, m.y) as Phaser.Physics.Arcade.Sprite | null;
+      if (!b) continue;
+
+      b.setActive(true).setVisible(true);
+      b.body!.enable = true;
+
+      // O slot pode vir de um cometa (que TOCA 'comet-burn'). O release() do pool já para a
+      // animação, mas setTexture sem parar seria sobrescrito no frame seguinte pelo quadro
+      // da animação — parar aqui torna a troca de figurino independente de quem veio antes.
+      b.anims.stop();
+      b.setTexture('missile').setScale(0.9).clearTint();
+      b.setBlendMode(Phaser.BlendModes.NORMAL);
+
+      // A marca que o TerrainSystem.tickMissileTrails procura. Ele varre `enemyBullets`, que
+      // é EXATAMENTE este grupo (GameScene passa o mesmo a ambos), e roda todo frame antes do
+      // boss — o rastro de exaustão sai de graça, sem emissor próprio aqui.
+      b.setData('missile', true);
+
+      // A arte do míssil aponta para a DIREITA, então o ângulo de voo é o giro direto
+      // (diferente do cometa, cuja arte aponta a +40° — ver COMET_ART_ANGLE).
+      b.setRotation(angle);
+
+      // Hitbox em px de MUNDO (~16×7), compensando a escala visual: o corpo Arcade escala
+      // junto com o sprite. Mesma conta da torre de solo (TerrainSystem.fireAt).
+      b.body!.setSize(16 / 0.9, 7 / 0.9);
+
+      // A CARÊNCIA de 16px do `enemyBulletHitCover` (GameScene) lê estes dois. Sem eles a
+      // conta dá NaN, a comparação falha, e o míssil é absorvido pelo primeiro cenário que
+      // encostar na boca — some no frame em que nasce.
+      b.setData('ox', m.x);
+      b.setData('oy', m.y);
+
+      b.setVelocity(Math.cos(angle) * Boss.MISSILE_SPEED, Math.sin(angle) * Boss.MISSILE_SPEED);
+    }
+
+    this.muzzleFx.explode(10, m.x, m.y);
+    this.scene.cameras.main.shake(90, 0.004);
   }
 
   /** Leque: cobre o espaço e obriga o jogador a se posicionar, não a reagir. */
@@ -268,7 +416,10 @@ export class Boss implements StageBoss {
     // atira sozinho), ele passa a maior parte do tempo como um borrão branco.
     // `setTint` multiplica a cor: avermelha sem apagar o desenho.
     this.sprite.setTint(0xffa0a0);
-    this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
+    // Volta ao tint de REPOUSO, não a "sem tint": depois da fúria o repouso é o casco quente.
+    this.scene.time.delayedCall(60, () => !this.dead && this.sprite.setTint(this.baseTint));
+
+    if (this.enraged && !this.ragedShown) this.showRage();
 
     if (this.hp > 0) return false;
 
@@ -277,10 +428,57 @@ export class Boss implements StageBoss {
     return true;
   }
 
+  /**
+   * O BEAT da virada de fúria — uma vez só.
+   *
+   * Antes a segunda fase entrava em silêncio: o leque passava de 5 para 7 e a cadência caía
+   * de 1.9s para 1.1s, e nada na tela dizia por quê. Um chefão que endurece sem avisar parece
+   * inconsistente, não mais difícil. Aqui a torre SOBREAQUECE, e o casco fica quente para o
+   * resto da luta (`baseTint`) — o aviso não é só o instante, é o estado.
+   */
+  private showRage(): void {
+    this.ragedShown = true;
+    this.baseTint = 0xff9a6a;
+
+    const m = this.muzzle;
+    this.muzzleFx.explode(24, m.x, m.y);
+    this.chargeFx.explode(20, this.sprite.x, this.sprite.y);
+    this.scene.cameras.main.shake(320, 0.008);
+
+    // Estouro branco-quente e queda para o casco sobreaquecido. O `damage` que dispara esta
+    // virada já agendou um `setTint(baseTint)` para daqui a 60ms — este tween começa DEPOIS
+    // dele, senão o flash de dano cortaria o marco no meio.
+    this.scene.time.delayedCall(70, () => {
+      if (this.dead) return;
+      this.sprite.setTint(0xffffff);
+      this.scene.tweens.addCounter({
+        from: 0,
+        to: 1,
+        duration: 520,
+        onUpdate: (tw) => {
+          if (this.dead) return;
+          const k = tw.getValue() ?? 0;
+          this.sprite.setTint(
+            Phaser.Display.Color.ObjectToColor(
+              Phaser.Display.Color.Interpolate.ColorWithColor(
+                Phaser.Display.Color.ValueToColor(0xffffff),
+                Phaser.Display.Color.ValueToColor(this.baseTint),
+                100,
+                k * 100,
+              ),
+            ).color,
+          );
+        },
+        onComplete: () => !this.dead && this.sprite.setTint(this.baseTint),
+      });
+    });
+  }
+
   destroy(): void {
     this.sprite.destroy();
     this.bar.destroy();
     this.barBg.destroy();
     this.muzzleFx.destroy();
+    this.chargeFx.destroy();
   }
 }
