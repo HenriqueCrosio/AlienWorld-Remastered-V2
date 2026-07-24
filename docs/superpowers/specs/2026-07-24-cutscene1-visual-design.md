@@ -29,9 +29,11 @@ Estado atual (screenshots `probe-cut-*.png`):
 
 - Original: `assets/raw/paint-bg-cut1-original.png` (1694×928, fornecido pelo Henrique).
 - Tratamento IGUAL ao da Fase 1 (`paint-bg-f1.png`, commit `b98cce3`): **reduzir para a
-  resolução interna** (alvo 768×432 = 2 telas de 384×216; crop leve de proporção 1.825→1.778
-  antes do downscale). 1 px da arte = 1 px do jogo; o upscale nearest da engine dá o acabamento
-  pixel. Sem quantização manual.
+  resolução interna** (crop leve de proporção 1.825→1.778 antes do downscale). 1 px da arte =
+  1 px do jogo; o upscale nearest da engine dá o acabamento pixel. Sem quantização manual.
+  **Alvo 480×270** (não 2 telas): a tela mostra a composição INTEIRA (lua embaixo à esquerda,
+  galáxia em cima) com folga de 96px horizontais para a deriva (~40px usados na cena de <40s);
+  em 768×432 só a metade de cima da pintura apareceria e a lua ficaria fora da tela.
 - Na `InterludeScene`, a pintura **substitui** o `new Parallax(this, 'espaco')`: entra como
   camada mais distante, com o **starfield mantido por cima** (as estrelas em movimento carregam
   a sensação de deriva). Deriva da pintura lentíssima (fator ~0.04, como na F1) — a cena dura
