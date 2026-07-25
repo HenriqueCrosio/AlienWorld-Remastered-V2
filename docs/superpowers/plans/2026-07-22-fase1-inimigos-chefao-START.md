@@ -60,10 +60,17 @@ fortaleza salta na troca de textura. Sonda: `scripts/probe-chefao-fases.mjs`.
   propósito, para o jogador ler os padrões. Não é bug. Se um dia a cena parecer vazia demais, dá
   para reforçar SÓ o fundo distante sem reativar obstáculos.
 
-### O que ficou de dívida (nenhuma bloqueia a fatia)
+### O que ficou de dívida (nenhuma bloqueia a fatia; revisão visual 2026-07-24)
 
 - **Batedor**: não virou o DARDO magro do spec. Ele se separa do drone por tamanho e limpeza de
   casco, não por silhueta. Regerar exigiria resolver o dilema vista-vs-forma (ver a lição abaixo).
+  Na revisão a olho, com drone+batedor voando juntos, quase não se distinguem à distância.
+- **Chamas dos propulsores (fase aérea)**: as 4 colunas laranja são muito retangulares/chapadas
+  perto do detalhe do casco — parecem pilares sólidos, não fogo. Afunilar para baixo ou dar um
+  flicker de 2–3 tons. (É arte do estado `boss-air`/takeoff no PixelLab, não código.)
+- **Flash da decolagem**: a sonda fotografou a tela INTEIRA lavada de magenta no início da
+  decolagem. Se for só 1–2 frames, ok; se durar mais, baixar o alpha do flash para não cegar o
+  jogador na virada da luta. Conferir a duração em `Boss.ts` (escudo da troca de fase).
 
 ## ⚠️ A SEGUNDA LIÇÃO: animar CHAMA que não existe no quadro base
 
