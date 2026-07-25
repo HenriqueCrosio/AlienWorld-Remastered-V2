@@ -64,6 +64,9 @@ const FRAMES: Record<string, number> = {
   shipAlien2Anim: 9,
   // O ARAUTO também ganhou propulsão (2026-07-21): era a única nave jogável sem motor animado.
   shipArautoAnim: 9,
+
+  // A AURORA da cutscene 1 (2026-07-25): luzes piscando + chamas azuis dos propulsores.
+  carrierBigAnim: 11,
 };
 
 /**
@@ -135,6 +138,9 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'ship-canhoes-thrust', prefix: 'shipCanhoesAnim', frameRate: 12 },
   { key: 'ship-alien2-thrust', prefix: 'shipAlien2Anim', frameRate: 12 },
   { key: 'ship-arauto-thrust', prefix: 'shipArautoAnim', frameRate: 12 },
+
+  // A AURORA respira a 8, como a Capitânia: navio ancorado, luzes e propulsores em marcha lenta.
+  { key: 'carrier-big-idle', prefix: 'carrierBigAnim', frameRate: 8 },
 ];
 
 /**
@@ -470,6 +476,12 @@ const ART: Record<string, string> = {
   // FUNDO PINTADO da cutscene 1 (espaço aberto: a lua que ficou + a borda do cinturão à direita,
   // arte do Henrique). Camada mais distante da InterludeScene; o parallax 'espaco' é o fallback.
   paintBgCut1: 'sprites/paint-bg-cut1.png',
+
+  // A AURORA nítida (cutscene 1): ~192px exibida ×2 inteira. O `carrier` antigo é o fallback.
+  // O estático É o quadro 0 da animação (mesma caixa união — install-anim.mjs), então
+  // estático e animação nunca saltam entre si.
+  carrierBig: 'sprites/carrier-big.png',
+  ...animFrames('carrierBigAnim', 'carrier-big-anim'),
 };
 
 /**

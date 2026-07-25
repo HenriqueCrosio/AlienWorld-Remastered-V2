@@ -61,24 +61,18 @@ export class InterludeScene extends Phaser.Scene {
   private static readonly DECK_Y = 168;
 
   /**
-   * Onde o CONVÉS está DENTRO da arte (`carrier.png`, 120×49).
+   * Geometria do casco POR TEXTURA — números MEDIDOS no PNG (scripts/medir-conves.mjs).
    *
-   * MEDIDO, não chutado — é a linha em que a largura do casco salta de 38px para 84px: acima
-   * dela são as torres e o mastro, abaixo é o casco. Ancorar o sprite pelo centro deixava a
-   * linha do convés 30px ABAIXO da tela, e só a ponta do mastro aparecia: a nave pousava no
-   * vazio. (Mesma lição das bocas de canhão do chefão — offsets de arte se medem no PNG.)
-   *
-   * Recalcular se a arte for trocada.
+   * A linha do convés é onde a largura opaca SALTA (torres → casco): medir, nunca chutar —
+   * ancorar pelo centro já deixou a linha do convés 30px ABAIXO da tela, e só a ponta do
+   * mastro aparecia. (Mesma lição das bocas de canhão do chefão — offsets se medem no PNG.)
+   * `rimX0..rimX1` é o vão opaco dessa linha, a extensão da aresta de luz (deckRim).
    */
-  private static readonly ART_H = 49;
-  private static readonly DECK_ROW = 15;
-  /** ×3.2 sobre 120px de arte = 384px = a largura EXATA da tela. O casco é o horizonte. */
-  private static readonly SCALE = 3.2;
+  private cfg!: { tex: string; artH: number; deckRow: number; scale: number; rimX0: number; rimX1: number };
 
   /** Y do centro do sprite que põe a linha do convés exatamente em DECK_Y. */
-  private static get carrierY(): number {
-    const meio = InterludeScene.ART_H / 2;
-    return InterludeScene.DECK_Y + (meio - InterludeScene.DECK_ROW) * InterludeScene.SCALE;
+  private get carrierY(): number {
+    return InterludeScene.DECK_Y + (this.cfg.artH / 2 - this.cfg.deckRow) * this.cfg.scale;
   }
 
   constructor() {
@@ -134,20 +128,36 @@ export class InterludeScene extends Phaser.Scene {
     //
     // É a escala que faz o pouso significar alguma coisa, e é o mesmo truque que a campanha
     // inteira usa: o Leviatã cresce até virar o chão da Fase 3 (docs/GDD.md §7).
+    //
+    // A Aurora nova (×2 INTEIRA — nítida) ou a antiga (×3.2 — o fallback borrado de hoje).
+    this.cfg = this.textures.exists('carrierBig')
+      ? { tex: 'carrierBig', artH: 85, deckRow: 44, scale: 2, rimX0: 11, rimX1: 177 }
+      : { tex: 'carrier', artH: 49, deckRow: 15, scale: 3.2, rimX0: 19, rimX1: 102 };
     this.carrier = this.add
-      .image(GAME_WIDTH / 2, InterludeScene.carrierY, 'carrier')
-      .setScale(InterludeScene.SCALE)
+      .image(GAME_WIDTH / 2, this.carrierY, this.cfg.tex)
+      .setScale(this.cfg.scale)
       .setDepth(10);
+    if (this.cfg.tex === 'carrierBig' && this.anims.exists('carrier-big-idle')) {
+      // A Aurora RESPIRA (luzes piscando, chamas azuis nos propulsores): um casco parado que
+      // pisca lê como nave viva, não como cenário. O estático é o quadro 0 — nada salta.
+      const s = this.add
+        .sprite(GAME_WIDTH / 2, this.carrierY, this.cfg.tex)
+        .setScale(this.cfg.scale)
+        .setDepth(10);
+      s.play('carrier-big-idle');
+      this.carrier.destroy();
+      this.carrier = s;
+    }
 
     // ARESTA DE LUZ NO CONVÉS. É o mesmo truque do solo da Fase 1 (`groundRim` em Parallax):
     // sem ela, casco escuro contra espaço escuro viram uma massa só, e o olho não sabe onde a
     // superfície começa. Uma linha de 1px é o que transforma "um borrão" em "chão".
     //
-    // ⚠️ Ela cobre SÓ o vão opaco do casco na linha do convés — MEDIDO no PNG (row 15: arte
-    // x=19..102). De tela a tela inteira (384px) ela sobrava ~115px flutuando sobre o vazio à
-    // esquerda da proa — a "linha estranha" que o Henrique viu na subida (2026-07-18).
-    const rimX0 = 19 * InterludeScene.SCALE;
-    const rimW = (102 - 19 + 1) * InterludeScene.SCALE;
+    // ⚠️ Ela cobre SÓ o vão opaco do casco na linha do convés — MEDIDO no PNG (o vão em
+    // `cfg.rimX0..rimX1`). De tela a tela inteira (384px) ela sobrava ~115px flutuando sobre o
+    // vazio à esquerda da proa — a "linha estranha" que o Henrique viu na subida (2026-07-18).
+    const rimX0 = this.cfg.rimX0 * this.cfg.scale;
+    const rimW = (this.cfg.rimX1 - this.cfg.rimX0 + 1) * this.cfg.scale;
     this.deckRim = this.add
       .rectangle(rimX0, InterludeScene.DECK_Y, rimW, 1, 0x7fd4e8)
       .setOrigin(0, 0)
@@ -217,7 +227,7 @@ export class InterludeScene extends Phaser.Scene {
 
     this.tweens.add({
       targets: this.carrier,
-      y: InterludeScene.carrierY,
+      y: this.carrierY,
       duration: 5200,
       ease: 'Sine.easeOut',
       delay: 2400,
