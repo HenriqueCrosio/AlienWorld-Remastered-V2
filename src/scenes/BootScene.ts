@@ -466,6 +466,10 @@ const ART: Record<string, string> = {
   // FUNDO PINTADO da Fase 1 (estilo Metal Slug): a colônia alienígena escarpada, arte do Henrique.
   // Camada mais distante do parallax de superfície; substitui o céu pixelado por trás do foreground.
   paintBgF1: 'sprites/paint-bg-f1.png',
+
+  // FUNDO PINTADO da cutscene 1 (espaço aberto: a lua que ficou + a borda do cinturão à direita,
+  // arte do Henrique). Camada mais distante da InterludeScene; o parallax 'espaco' é o fallback.
+  paintBgCut1: 'sprites/paint-bg-cut1.png',
 };
 
 /**

@@ -36,7 +36,10 @@ import type { HandlingMode } from './GameScene';
  */
 export class InterludeScene extends Phaser.Scene {
   private starfield!: Starfield;
-  private parallax!: Parallax;
+  /** O céu: a pintura do Henrique (lua + borda do cinturão). Null = sem PNG, caiu no parallax. */
+  private paintedBg: Phaser.GameObjects.Image | null = null;
+  /** Fallback do céu (o parallax pixel da Fase 2) — só existe quando a pintura NÃO existe. */
+  private parallax: Parallax | null = null;
   private fx!: Fx;
 
   private ship!: Phaser.GameObjects.Image;
@@ -92,9 +95,20 @@ export class InterludeScene extends Phaser.Scene {
     resetVariantCache();
 
     this.starfield = new Starfield(this);
-    // O MESMO fundo da Fase 2: a nave já está no vácuo. Trocar de céu entre a cena e a fase
-    // denunciaria o corte — a interlude tem que parecer o mesmo voo, e não um vídeo.
-    this.parallax = new Parallax(this, 'espaco');
+    // O CÉU DA TRAVESSIA: a pintura do espaço aberto (arte do Henrique). A lua embaixo à
+    // esquerda é o mundo que a nave acabou de deixar; o cinturão adensando à direita é para
+    // onde ela decola — o corte para a Fase 2 vira VIAGEM, não troca de céu.
+    //
+    // Depth −110: ATRÁS do starfield (−100) — as estrelas em movimento por cima da pintura
+    // parada são o que dá a sensação de deriva. Y centrado (270 de arte para 216 de tela).
+    this.paintedBg = null;
+    this.parallax = null;
+    if (this.textures.exists('paintBgCut1')) {
+      this.paintedBg = this.add.image(0, -27, 'paintBgCut1').setOrigin(0, 0).setDepth(-110);
+    } else {
+      // Sem o PNG: o céu antigo (o mesmo parallax da Fase 2) — comportamento de hoje.
+      this.parallax = new Parallax(this, 'espaco');
+    }
     this.fx = new Fx(this);
 
     // A nave que POUSA é a que o jogador acabou de voar — a Fase 1 é sempre a nave padrão
@@ -166,7 +180,10 @@ export class InterludeScene extends Phaser.Scene {
     const dt = delta / 1000;
     this.starfield.update(dt);
     // Devagar: a nave está em aproximação, não em fuga. O fundo dita o ritmo da cena.
-    this.parallax.update(dt, 26);
+    this.parallax?.update(dt, 26);
+    // A pintura deriva no MESMO fator da camada pintada da F1 (0.04 sobre a velocidade da
+    // cena): ~1px/s. Na cena de <40s anda ~40px — a folga é 96px (480−384), nunca acaba.
+    if (this.paintedBg) this.paintedBg.x -= 26 * 0.04 * dt;
   }
 
   // ─── O roteiro, em tempos ───────────────────────────────────────────────────
