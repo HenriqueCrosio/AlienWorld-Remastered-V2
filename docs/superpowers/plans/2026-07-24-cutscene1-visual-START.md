@@ -1,7 +1,7 @@
 # START — Fatia 2: CUTSCENE 1 (fundo pintado + Aurora nítida)
 
-**Documento de retomada.** Criado 2026-07-24 com spec e plano prontos e commitados; a execução
-ainda NÃO começou (nenhum código/asset tocado).
+**✅ FATIA FECHADA (2026-08-05).** Tasks 0–3 completas, aprovada a olho pelo Henrique, push
+feito em `origin/main`. Ver "Fechamento" no fim do documento.
 
 ---
 
@@ -63,3 +63,39 @@ Na próxima sessão, diga algo como:
 
 Batedor sem silhueta de dardo · chamas dos propulsores do chefão retangulares · conferir a
 duração do flash magenta da decolagem. Podem virar itens de uma passada de polish futura.
+
+---
+
+## Fechamento (2026-08-05)
+
+Tasks 0–2 (fundo pintado + Aurora nítida×2 com animação de luzes/propulsores) e Task 3
+(regressão + push) executadas **direto em `main`** (não em `feat/cutscene1-visual` como o plano
+previa — o resultado bate com o pedido do Henrique, "push no fechamento da fatia", só o caminho
+documentado foi outro). `npm run build` + `probe-interlude.mjs` + `probe-stage1-visual.mjs`
+verdes antes de cada fechamento.
+
+Depois da 1ª aprovação a olho, o Henrique pediu 3 ajustes finos, todos na mesma sessão:
+
+1. **Orientação:** a Aurora veio do PixelLab com a proa apontando a OESTE — contra o rumo da
+   campanha (a frota decola a LESTE na implosão, ver `implosao()`). `setFlipX(true)` no
+   sprite; a aresta de luz do convés (medida no PNG original) precisou da mesma matemática
+   espelhada (`artW − 1 − x`), senão descolava do casco depois do flip.
+2. **Oscilação do idle:** o "respirar" (luzes+propulsores) trouxe um bob vertical de até ~2px
+   **cravado nos quadros da animação** do PixelLab — não é parâmetro de código. Script novo
+   `scripts/amortecer-bob.mjs`: mede o centro de massa vertical de cada quadro contra o quadro
+   0 e desloca o conteúdo por pixel inteiro na direção da baseline, mantendo 35% da amplitude
+   (pedido: diminuir, não zerar). Os quadros originais do PixelLab continuam intactos em
+   `assets/raw/anim-carrier-big-anim/` — dá pra recalibrar o `keep` sem regerar arte.
+3. **Deriva do fundo:** fator `0.04 → 0.015` (quase 3× mais devagar — pedido: "ainda mais
+   lentamente").
+
+E um bug achado na revisão visual (print anotado pelo Henrique com setas): a aresta de luz do
+convés flutuava sobre uma tira preta. **Lição nova:** a 1ª linha opaca de uma arte pixel nem
+sempre é o brilho — pode ser o CONTORNO do desenho. Medido pixel a pixel
+(`carrier-big.png`, x=140..170 y=44..48): a linha 44 é contorno (rgb≈1,5,1), a linha 45 é o
+destaque real (rgb≈149,166,179). `cfg.rimYNudge` desce até a linha certa (medida nos dois PNGs,
+novo e fallback antigo). De quebra, o retângulo sólido de 1px virou um `Graphics` com degradê
+de 3 faixas — sem aresta dura, funde no casco em vez de flutuar sobre ele.
+
+**Estado do repositório:** `main` == `origin/main`, tudo pushado. Sem dívida nova conhecida
+desta fatia.
