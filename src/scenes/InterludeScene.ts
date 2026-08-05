@@ -68,7 +68,15 @@ export class InterludeScene extends Phaser.Scene {
    * mastro aparecia. (Mesma lição das bocas de canhão do chefão — offsets se medem no PNG.)
    * `rimX0..rimX1` é o vão opaco dessa linha, a extensão da aresta de luz (deckRim).
    */
-  private cfg!: { tex: string; artH: number; deckRow: number; scale: number; rimX0: number; rimX1: number };
+  private cfg!: {
+    tex: string;
+    artW: number;
+    artH: number;
+    deckRow: number;
+    scale: number;
+    rimX0: number;
+    rimX1: number;
+  };
 
   /** Y do centro do sprite que põe a linha do convés exatamente em DECK_Y. */
   private get carrierY(): number {
@@ -131,10 +139,16 @@ export class InterludeScene extends Phaser.Scene {
     //
     // A Aurora nova (×2 INTEIRA — nítida) ou a antiga (×3.2 — o fallback borrado de hoje).
     this.cfg = this.textures.exists('carrierBig')
-      ? { tex: 'carrierBig', artH: 85, deckRow: 44, scale: 2, rimX0: 11, rimX1: 177 }
-      : { tex: 'carrier', artH: 49, deckRow: 15, scale: 3.2, rimX0: 19, rimX1: 102 };
+      ? { tex: 'carrierBig', artW: 191, artH: 85, deckRow: 44, scale: 2, rimX0: 11, rimX1: 177 }
+      : { tex: 'carrier', artW: 120, artH: 49, deckRow: 15, scale: 3.2, rimX0: 19, rimX1: 102 };
+    // A arte veio com a proa apontando para OESTE (esquerda); a frota decola para LESTE (a Fase
+    // 2 corre para a direita — ver `implosao()`), então a Aurora é espelhada para casar a proa
+    // com o rumo da campanha. `setFlipX` espelha em torno do centro do sprite: a posição em tela
+    // não muda, só o conteúdo — por isso a aresta de luz do convés (medida no PNG ORIGINAL, sem
+    // espelhar) precisa da mesma matemática abaixo, não pode reusar `rimX0` puro.
     this.carrier = this.add
       .image(GAME_WIDTH / 2, this.carrierY, this.cfg.tex)
+      .setFlipX(true)
       .setScale(this.cfg.scale)
       .setDepth(10);
     if (this.cfg.tex === 'carrierBig' && this.anims.exists('carrier-big-idle')) {
@@ -142,6 +156,7 @@ export class InterludeScene extends Phaser.Scene {
       // pisca lê como nave viva, não como cenário. O estático é o quadro 0 — nada salta.
       const s = this.add
         .sprite(GAME_WIDTH / 2, this.carrierY, this.cfg.tex)
+        .setFlipX(true)
         .setScale(this.cfg.scale)
         .setDepth(10);
       s.play('carrier-big-idle');
@@ -156,7 +171,10 @@ export class InterludeScene extends Phaser.Scene {
     // ⚠️ Ela cobre SÓ o vão opaco do casco na linha do convés — MEDIDO no PNG (o vão em
     // `cfg.rimX0..rimX1`). De tela a tela inteira (384px) ela sobrava ~115px flutuando sobre o
     // vazio à esquerda da proa — a "linha estranha" que o Henrique viu na subida (2026-07-18).
-    const rimX0 = this.cfg.rimX0 * this.cfg.scale;
+    //
+    // O carrier está ESPELHADO (`setFlipX`) — o vão medido também espelha: o pixel que estava a
+    // `rimX0` da esquerda passa a estar a `rimX0` da DIREITA. `artW − 1 − rimX1` é o novo x0.
+    const rimX0 = (this.cfg.artW - 1 - this.cfg.rimX1) * this.cfg.scale;
     const rimW = (this.cfg.rimX1 - this.cfg.rimX0 + 1) * this.cfg.scale;
     this.deckRim = this.add
       .rectangle(rimX0, InterludeScene.DECK_Y, rimW, 1, 0x7fd4e8)
@@ -191,9 +209,10 @@ export class InterludeScene extends Phaser.Scene {
     this.starfield.update(dt);
     // Devagar: a nave está em aproximação, não em fuga. O fundo dita o ritmo da cena.
     this.parallax?.update(dt, 26);
-    // A pintura deriva no MESMO fator da camada pintada da F1 (0.04 sobre a velocidade da
-    // cena): ~1px/s. Na cena de <40s anda ~40px — a folga é 96px (480−384), nunca acaba.
-    if (this.paintedBg) this.paintedBg.x -= 26 * 0.04 * dt;
+    // A pintura deriva bem mais devagar que a F1 (pedido do Henrique: 0.04 corria demais para um
+    // fundo que devia ler como DISTANTE) — ~0.4px/s. Na cena de <40s anda ~16px — a folga é
+    // 96px (480−384), nunca acaba.
+    if (this.paintedBg) this.paintedBg.x -= 26 * 0.015 * dt;
   }
 
   // ─── O roteiro, em tempos ───────────────────────────────────────────────────
