@@ -45,7 +45,7 @@ export class InterludeScene extends Phaser.Scene {
   private ship!: Phaser.GameObjects.Image;
   private carrier!: Phaser.GameObjects.Image;
   /** A aresta de luz do convés — é ela que diz ao olho onde a superfície começa. */
-  private deckRim!: Phaser.GameObjects.Rectangle;
+  private deckRim!: Phaser.GameObjects.Graphics;
   private banner!: Phaser.GameObjects.Text;
 
   private score = 0;
@@ -76,12 +76,23 @@ export class InterludeScene extends Phaser.Scene {
     scale: number;
     rimX0: number;
     rimX1: number;
+    /**
+     * Quantas linhas de arte (não escaladas) descer a aresta de luz a partir de `deckRow`. A
+     * 1ª linha opaca do casco é o CONTORNO PRETO do desenho, não o brilho — medido pixel a
+     * pixel (`x=140..170,y=44..48` no carrier-big.png): linha 44 é contorno (rgb~1,5,1), a
+     * linha 45 É o destaque real (rgb~149,166,179). Sem o nudge a luz "flutua" sobre uma tira
+     * preta em vez de reforçar o brilho que a arte já desenhou.
+     */
+    rimYNudge: number;
   };
 
   /** Y do centro do sprite que põe a linha do convés exatamente em DECK_Y. */
   private get carrierY(): number {
     return InterludeScene.DECK_Y + (this.cfg.artH / 2 - this.cfg.deckRow) * this.cfg.scale;
   }
+
+  /** Y de repouso do `deckRim` (DECK_Y + o nudge que foge do contorno preto — ver `cfg`). */
+  private deckRimRestY = 0;
 
   constructor() {
     super('Interlude');
@@ -139,8 +150,8 @@ export class InterludeScene extends Phaser.Scene {
     //
     // A Aurora nova (×2 INTEIRA — nítida) ou a antiga (×3.2 — o fallback borrado de hoje).
     this.cfg = this.textures.exists('carrierBig')
-      ? { tex: 'carrierBig', artW: 191, artH: 85, deckRow: 44, scale: 2, rimX0: 11, rimX1: 177 }
-      : { tex: 'carrier', artW: 120, artH: 49, deckRow: 15, scale: 3.2, rimX0: 19, rimX1: 102 };
+      ? { tex: 'carrierBig', artW: 191, artH: 85, deckRow: 44, scale: 2, rimX0: 11, rimX1: 177, rimYNudge: 1 }
+      : { tex: 'carrier', artW: 120, artH: 49, deckRow: 15, scale: 3.2, rimX0: 19, rimX1: 102, rimYNudge: 2 };
     // A arte veio com a proa apontando para OESTE (esquerda); a frota decola para LESTE (a Fase
     // 2 corre para a direita — ver `implosao()`), então a Aurora é espelhada para casar a proa
     // com o rumo da campanha. `setFlipX` espelha em torno do centro do sprite: a posição em tela
@@ -166,7 +177,7 @@ export class InterludeScene extends Phaser.Scene {
 
     // ARESTA DE LUZ NO CONVÉS. É o mesmo truque do solo da Fase 1 (`groundRim` em Parallax):
     // sem ela, casco escuro contra espaço escuro viram uma massa só, e o olho não sabe onde a
-    // superfície começa. Uma linha de 1px é o que transforma "um borrão" em "chão".
+    // superfície começa. Um brilho suave é o que transforma "um borrão" em "chão".
     //
     // ⚠️ Ela cobre SÓ o vão opaco do casco na linha do convés — MEDIDO no PNG (o vão em
     // `cfg.rimX0..rimX1`). De tela a tela inteira (384px) ela sobrava ~115px flutuando sobre o
@@ -176,11 +187,21 @@ export class InterludeScene extends Phaser.Scene {
     // `rimX0` da esquerda passa a estar a `rimX0` da DIREITA. `artW − 1 − rimX1` é o novo x0.
     const rimX0 = (this.cfg.artW - 1 - this.cfg.rimX1) * this.cfg.scale;
     const rimW = (this.cfg.rimX1 - this.cfg.rimX0 + 1) * this.cfg.scale;
-    this.deckRim = this.add
-      .rectangle(rimX0, InterludeScene.DECK_Y, rimW, 1, 0x7fd4e8)
-      .setOrigin(0, 0)
-      .setDepth(11)
-      .setAlpha(0.55);
+    // ⚠️ FLUTUAVA sobre uma tira preta (achado revisando a olho, 2026-07-25): a 1ª linha opaca
+    // da arte é o CONTORNO do casco, não o brilho — `rimYNudge` desce até a linha de destaque
+    // real (medido pixel a pixel, ver o comentário no `cfg`). E era um retângulo de 1px SÓLIDO;
+    // virou um degradê de 3 linhas (fraca/forte/fraca) — sem aresta dura, funde no casco em vez
+    // de flutuar sobre ele. `setPosition`/`.alpha` do Graphics continuam controláveis pelos
+    // mesmos tweens de entrada/saída que já existiam (subida do casco, fade da implosão).
+    this.deckRimRestY = InterludeScene.DECK_Y + this.cfg.rimYNudge * this.cfg.scale;
+    this.deckRim = this.add.graphics().setDepth(11);
+    this.deckRim.fillStyle(0x7fd4e8, 0.18);
+    this.deckRim.fillRect(rimX0, -1, rimW, 1);
+    this.deckRim.fillStyle(0x7fd4e8, 0.5);
+    this.deckRim.fillRect(rimX0, 0, rimW, 1);
+    this.deckRim.fillStyle(0x7fd4e8, 0.18);
+    this.deckRim.fillRect(rimX0, 1, rimW, 1);
+    this.deckRim.setPosition(0, this.deckRimRestY);
 
     this.banner = pixelText(this, GAME_WIDTH / 2, 26, '', { size: 11, color: COLORS.hotBright })
       .setDepth(100)
@@ -254,8 +275,8 @@ export class InterludeScene extends Phaser.Scene {
 
     this.tweens.add({
       targets: this.deckRim,
-      y: InterludeScene.DECK_Y,
-      alpha: 0.55,
+      y: this.deckRimRestY,
+      alpha: 1,
       duration: 5200,
       ease: 'Sine.easeOut',
       delay: 2400,
