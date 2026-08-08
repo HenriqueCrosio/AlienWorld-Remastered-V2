@@ -590,6 +590,27 @@ export class Parallax {
    * PLANETA PARTIDO ao fundo, que responde de onde veio tudo isso. O fundo passa a ter uma causa.
    */
   private buildSpace(): void {
+    // FUNDO PINTADO (arte do Henrique): a colônia de mineração do cinturão, como a camada MAIS
+    // DISTANTE de todas — atrás até da nebulosa procedural (−98). Ela ENTRA, não SUBSTITUI: ao
+    // contrário da cutscene 1 (onde a pintura trocou o `Parallax('espaco')` inteiro), aqui a
+    // lua-encolhendo/Leviatã-crescendo é mecânica de narrativa ativa que não pode desaparecer —
+    // a pintura só preenche o vazio atrás dela. Mesmo mecanismo genérico do `paintBgF1`
+    // (`this.paintedBg[]`, tiling e scroll automáticos em `update()`, fator 0.04): zero código
+    // novo lá, só popular o array aqui. Y negativo centraliza a faixa da colônia (o miolo da
+    // pintura, com as luzes e guindastes) na janela de 216px — a arte tem o dobro da altura.
+    //
+    // `buildSpace()` também é chamado pelo modo 'nebulosa' (Fase 3: o vácuo continua lá, mais a
+    // nuvem por cima) — mas a pintura é da COLÔNIA do cinturão, cenário só da Fase 2. Sem o
+    // guard de `mode`, ela vazaria para dentro da nuvem da Fase 3.
+    if (this.mode === 'espaco' && this.scene.textures.exists('paintBgF2')) {
+      const w = (this.scene.textures.get('paintBgF2').getSourceImage() as { width: number }).width;
+      for (let i = 0; i < 2; i++) {
+        this.paintedBg.push(
+          this.scene.add.image(i * w, -108, 'paintBgF2').setOrigin(0, 0).setDepth(-99),
+        );
+      }
+    }
+
     // A FAIXA DO CINTURÃO. Bem atrás, quase parada, e é a camada que dá o NOME do lugar: uma
     // banda espessa de escombros correndo na horizontal. Fica na altura do meio e é ESTREITA na
     // vertical — um cinturão visto de dentro é uma linha, não uma nuvem: é essa leitura de

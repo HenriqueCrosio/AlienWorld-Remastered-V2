@@ -477,6 +477,11 @@ const ART: Record<string, string> = {
   // arte do Henrique). Camada mais distante da InterludeScene; o parallax 'espaco' é o fallback.
   paintBgCut1: 'sprites/paint-bg-cut1.png',
 
+  // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
+  // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
+  // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).
+  paintBgF2: 'sprites/paint-bg-f2.png',
+
   // A AURORA nítida (cutscene 1): ~192px exibida ×2 inteira. O `carrier` antigo é o fallback.
   // O estático É o quadro 0 da animação (mesma caixa união — install-anim.mjs), então
   // estático e animação nunca saltam entre si.
