@@ -88,6 +88,18 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   aranha: { texture: 'aranha', anim: 'aranha-walk', hp: 50, speed: 30, wave: 0, fireRate: 2.6, score: 500, scale: 0.62, tint: 0xffffff, homing: 0, spawnRate: 0 },
 };
 
+/**
+ * PELE POR FASE: canhoneira e batedor trocam de arte entre a Fase 1 (biomec roxo, sempre) e a
+ * Fase 2 (facção do cinturão) — mesmo `EnemyKind`/comportamento, só a textura. Fonte única de
+ * verdade para o comportamento (opção A do spec 2026-08-05): sem o PNG do cinturão, `spawn()`
+ * cai de volta em `def.texture`/`def.anim` — a Fase 1 e uma Fase 2 sem arte nova continuam
+ * IDÊNTICAS a hoje.
+ */
+const STAGE_2_SKIN: Partial<Record<EnemyKind, { texture: string; anim: string }>> = {
+  batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly' },
+  canhoneira: { texture: 'enemyGunshipCinturao', anim: 'gunship-cinturao-fly' },
+};
+
 export class EnemySystem {
   readonly enemies: Phaser.Physics.Arcade.Group;
   readonly enemyBullets: Phaser.Physics.Arcade.Group;
@@ -100,7 +112,11 @@ export class EnemySystem {
    */
   private readonly muzzleFlash: Phaser.GameObjects.Particles.ParticleEmitter;
 
-  constructor(private readonly scene: Phaser.Scene) {
+  constructor(
+    private readonly scene: Phaser.Scene,
+    /** A FASE atual (`GameScene.stage.id`) — só usada para a pele por fase (ver `STAGE_2_SKIN`). */
+    private readonly stageId: number,
+  ) {
     this.enemies = scene.physics.add.group({ allowGravity: false });
     this.enemyBullets = scene.physics.add.group({
       defaultKey: 'bolt2',
@@ -133,13 +149,20 @@ export class EnemySystem {
     // (a banda `casco` do Parallax tem o topo em ~190; o centro dela assenta em cima).
     if (kind === 'aranha') y = 170;
 
-    const texture = pickVariant(this.scene, def.texture);
+    // A PELE POR FASE (canhoneira/batedor): na Fase 2, tenta a textura do cinturão primeiro;
+    // sem o PNG (guarda de textura), cai na arte biomec de sempre — ver STAGE_2_SKIN.
+    const skin = this.stageId === 2 ? STAGE_2_SKIN[kind] : undefined;
+    const hasSkin = skin !== undefined && this.scene.textures.exists(skin.texture);
+    const baseTexture = hasSkin ? skin!.texture : def.texture;
+    const baseAnim = hasSkin ? skin!.anim : def.anim;
+
+    const texture = pickVariant(this.scene, baseTexture);
     const e = this.enemies.create(x, y, texture) as Phaser.Physics.Arcade.Sprite;
 
     // A animação só existe para a variante BASE. Tocá-la numa variante trocaria a textura
     // pelos quadros da base — e a variedade que acabamos de ganhar iria embora.
-    if (texture === def.texture && def.anim && this.scene.anims.exists(def.anim)) {
-      e.play(def.anim);
+    if (texture === baseTexture && baseAnim && this.scene.anims.exists(baseAnim)) {
+      e.play(baseAnim);
     }
 
     e.setVelocityX(-def.speed);

@@ -188,7 +188,7 @@ export class GameScene extends Phaser.Scene {
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
     this.weapons = new WeaponSystem(this);
-    this.enemies = new EnemySystem(this);
+    this.enemies = new EnemySystem(this, this.stage.id);
     this.pickups = new PickupSystem(this);
 
     // Os DOIS sistemas de obstáculo existem sempre; o roteiro da fase decide qual é alimentado
