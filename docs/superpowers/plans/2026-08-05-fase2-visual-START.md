@@ -1,7 +1,8 @@
 # START — Fatia 3: FASE 2 ("Frota Morta")
 
-**Documento de retomada.** Criado 2026-08-05 com o spec pronto, aprovado e commitado; o plano de
-implementação ainda NÃO foi escrito (nenhum código/asset tocado nesta fatia).
+**Documento de retomada.** Atualizado 2026-08-08: spec aprovado, plano ESCRITO, e o fundo pintado
+(Task 0 do plano) já implementado e commitado. Faltam as Tasks 1–6 (infra de troca de pele por
+fase + os 4 inimigos redesenhados + regressão final).
 
 ---
 
@@ -10,18 +11,24 @@ implementação ainda NÃO foi escrito (nenhum código/asset tocado nesta fatia)
 Na próxima sessão, diga:
 
 > **"Leia `docs/superpowers/plans/2026-08-05-fase2-visual-START.md` e continue a Fatia 3 (Fase 2)
-> a partir da escrita do plano de implementação."**
+> a partir da Task 1 do plano."**
 
 Isso é o suficiente — este doc tem todo o contexto.
 
 ---
 
-## Estado atual (2026-08-05)
+## Estado atual (2026-08-08)
 
 - **Fatias 0, 1 e 2 FECHADAS**, `main` == `origin/main`, tudo pushado.
 - **Spec pronto e aprovado:** `docs/superpowers/specs/2026-08-05-fase2-visual-design.md`.
-- **Plano:** ainda não escrito. Próximo passo é invocar `superpowers:writing-plans` a partir do
-  spec, seguindo o fluxo de sempre (brainstorm→spec→**plano**→impl).
+- **Plano escrito:** `docs/superpowers/plans/2026-08-05-fase2-visual.md` (Tasks 0–6).
+- **Branch:** `feat/fase2-visual` (a partir de `main`).
+- **Task 0 (fundo pintado) FEITA** — `public/sprites/paint-bg-f2.png`, camada nova em
+  `Parallax.buildSpace()` (depth −99, guarda de `mode==='espaco'` + textura). Commits
+  `72e840b` (fundo) e `04cb7ba` (o próprio plano).
+- **Próximo passo:** Task 1 do plano — a tabela `STAGE_2_SKIN` + `stageId` no `EnemySystem`
+  (infra pura, sem arte nova ainda), depois Tasks 2–5 (batedor/canhoneira/kamikaze/cargueiro,
+  cada um com geração PixelLab + aprovação do Henrique) e Task 6 (regressão + merge).
 
 ## Decisões já fechadas no spec (não redescobrir)
 
