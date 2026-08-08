@@ -599,17 +599,22 @@ export class Parallax {
     // DISTANTE de todas — atrás até da nebulosa procedural (−98). Ela ENTRA, não SUBSTITUI: ao
     // contrário da cutscene 1 (onde a pintura trocou o `Parallax('espaco')` inteiro), aqui a
     // lua-encolhendo/Leviatã-crescendo é mecânica de narrativa ativa que não pode desaparecer —
-    // a pintura só preenche o vazio atrás dela. Mesmo mecanismo genérico do `paintBgF1`
-    // (`this.paintedBg[]`, tiling e scroll automáticos em `update()`), com UMA diferença: cada
-    // entrada carrega o próprio fator de scroll em `data('bgFactor')` (0.04 se ausente — o que
-    // o F1 continua usando). A pintura original tem PEDRAS GRANDES em primeiro plano (o quadro
-    // do Henrique foi composto para ser visto inteiro, não recortado); herdar o fator do F1 fazia
-    // essas pedras, que já leem como PRÓXIMAS pela própria pintura, se mexerem rápido — a soma
-    // dava "colado no vidro". 0.018 (quase a metade) deixa a camada mais distante lida como tal.
+    // a pintura só preenche o vazio atrás dela.
     //
-    // Y negativo escolhe a FAIXA da pintura que fica na janela de 216px (ela tem o dobro da
-    // altura): −64 mostra o alto — galáxia + o TOPO da colônia (guindastes, torres) — e evita a
-    // banda de pedras GRANDES do rodapé da pintura, que é o que lia como "perto demais".
+    // ⚠️ DIMENSÃO 480×270 (não 2 telas largo como o `paintBgF1`) — mesma receita do
+    // `paintBgCut1` da cutscene 1, e por um motivo específico deste quadro: o `paintBgF1` é um
+    // céu de montanhas com MUITO vazio (a maior parte fica atrás do skyline/montanhas
+    // procedurais, que TAPAM o resto — ver `buildSurface`). O `paintBgF2` é uma cena FECHADA
+    // (guindastes, prédios, rochas até a borda) sem nada na frente que a esconda — a instalação
+    // original entrou em 768×432 (2 telas, câmera "por dentro" do quadro) e qualquer recorte de
+    // 216px dela mostrava só um PEDAÇO da cena, com as rochas de primeiro plano da PRÓPRIA
+    // pintura preenchendo a tela = lia como perto/ampliada. Em 480×270 (só 25% maior que os
+    // 384×216 do jogo) o quadro INTEIRO cabe na janela — é a mesma pintura, só exibida como o
+    // Henrique a compôs, não recortada no meio.
+    //
+    // Cada entrada de `paintedBg[]` carrega o próprio fator de scroll em `data('bgFactor')`
+    // (0.04 se ausente — o que o `paintBgF1` continua usando); 0.018 aqui porque mesmo a cena
+    // inteira, ela ainda tem elementos de primeiro plano na própria composição.
     //
     // `buildSpace()` também é chamado pelo modo 'nebulosa' (Fase 3: o vácuo continua lá, mais a
     // nuvem por cima) — mas a pintura é da COLÔNIA do cinturão, cenário só da Fase 2. Sem o
@@ -619,7 +624,9 @@ export class Parallax {
       for (let i = 0; i < 2; i++) {
         this.paintedBg.push(
           this.scene.add
-            .image(i * w, -64, 'paintBgF2')
+            // −27 = (270−216)/2: centraliza verticalmente a pintura na janela do jogo — mesma
+            // conta que o `paintBgCut1` da cutscene 1 já usa pra essa mesma dimensão.
+            .image(i * w, -27, 'paintBgF2')
             .setOrigin(0, 0)
             .setDepth(-99)
             .setData('bgFactor', 0.018),
