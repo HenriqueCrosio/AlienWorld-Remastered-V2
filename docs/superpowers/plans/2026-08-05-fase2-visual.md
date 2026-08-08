@@ -93,7 +93,7 @@ Baixar `public/sprites/capitania.png` como `style_images` de referência para o 
 Tasks 2–5 passam esse arquivo em `scripts/gerar.mjs "<descrição>" <size> side capitania.png`).
 Confirmar o saldo PixelLab (`get_balance`) e orçar os 4 assets + animações.
 
-- [ ] **Step 2: Tabela de pele por fase, em `EnemySystem.ts`**
+- [x] **Step 2: Tabela de pele por fase, em `EnemySystem.ts`**
 
 Adicionar logo abaixo de `DEFS`:
 
@@ -111,7 +111,7 @@ const STAGE_2_SKIN: Partial<Record<EnemyKind, { texture: string; anim: string }>
 };
 ```
 
-- [ ] **Step 3: `EnemySystem` passa a saber a fase atual**
+- [x] **Step 3: `EnemySystem` passa a saber a fase atual**
 
 ```ts
 export class EnemySystem {
@@ -129,7 +129,7 @@ export class EnemySystem {
 
 (o resto do construtor não muda.)
 
-- [ ] **Step 4: `spawn()` resolve a pele antes de criar o sprite**
+- [x] **Step 4: `spawn()` resolve a pele antes de criar o sprite**
 
 Trocar o início de `spawn()` — de:
 
@@ -181,7 +181,7 @@ para:
 (o resto de `spawn()` — `setVelocityX`, `setScale(def.scale)`, `setTint(def.tint)`, hitbox, etc.
 — não muda: continua lendo de `def`, que é a mesma `EnemyDef` nas duas fases.)
 
-- [ ] **Step 5: `GameScene` passa a fase ao construir o `EnemySystem`**
+- [x] **Step 5: `GameScene` passa a fase ao construir o `EnemySystem`**
 
 Em `src/scenes/GameScene.ts:191`, trocar:
 
@@ -195,13 +195,13 @@ por:
     this.enemies = new EnemySystem(this, this.stage.id);
 ```
 
-- [ ] **Step 6: Verificar** — `npm run build` PASS (typecheck pega qualquer assinatura
+- [x] **Step 6: Verificar** — `npm run build` PASS (typecheck pega qualquer assinatura
       desalinhada). Rodar `node scripts/probe-stage2.mjs` e `node scripts/probe-chain.mjs`: sem
       nenhum PNG novo instalado ainda, o comportamento tem que estar BYTE a byte igual ao de
       antes (batedor/canhoneira continuam com a arte biomec de sempre nas duas fases) — é a
       regressão que prova que a guarda funciona antes de qualquer arte nova entrar.
 
-- [ ] **Step 7: Commit** — `feat(fase2): infra de troca de pele por fase (canhoneira/batedor)`.
+- [x] **Step 7: Commit** — `feat(fase2): infra de troca de pele por fase (canhoneira/batedor)`.
 
 ---
 
