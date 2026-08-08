@@ -94,9 +94,15 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
  * verdade para o comportamento (opção A do spec 2026-08-05): sem o PNG do cinturão, `spawn()`
  * cai de volta em `def.texture`/`def.anim` — a Fase 1 e uma Fase 2 sem arte nova continuam
  * IDÊNTICAS a hoje.
+ *
+ * `scale`, quando presente, SUBSTITUI `def.scale` só pra essa pele — o plano original previa
+ * gerar a arte nova na MESMA caixa nativa da antiga (pra um `scale` só bastar), mas o batedor do
+ * cinturão veio um dardo de verdade (115×34, bem mais alongado que os 27×26 de sempre); forçar a
+ * mesma caixa esmagaria o desenho. O `scale` próprio recalibra o TAMANHO em tela pra ficar
+ * parecido com o da Fase 1 (hitbox deriva do tamanho exibido, ver `spawn`) sem mexer em `DEFS`.
  */
-const STAGE_2_SKIN: Partial<Record<EnemyKind, { texture: string; anim: string }>> = {
-  batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly' },
+const STAGE_2_SKIN: Partial<Record<EnemyKind, { texture: string; anim: string; scale?: number }>> = {
+  batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly', scale: 0.28 },
   canhoneira: { texture: 'enemyGunshipCinturao', anim: 'gunship-cinturao-fly' },
 };
 
@@ -155,6 +161,10 @@ export class EnemySystem {
     const hasSkin = skin !== undefined && this.scene.textures.exists(skin.texture);
     const baseTexture = hasSkin ? skin!.texture : def.texture;
     const baseAnim = hasSkin ? skin!.anim : def.anim;
+    // A pele pode trazer a própria escala (ver STAGE_2_SKIN) — a arte do cinturão nem sempre
+    // nasce na mesma caixa nativa da biomec, e forçar o `def.scale` de sempre distorceria o
+    // tamanho em tela.
+    const scale = hasSkin && skin!.scale !== undefined ? skin!.scale : def.scale;
 
     const texture = pickVariant(this.scene, baseTexture);
     const e = this.enemies.create(x, y, texture) as Phaser.Physics.Arcade.Sprite;
@@ -166,7 +176,7 @@ export class EnemySystem {
     }
 
     e.setVelocityX(-def.speed);
-    e.setScale(def.scale);
+    e.setScale(scale);
     e.setTint(def.tint);
 
     // Todos os sprites são gerados apontando para a DIREITA. O inimigo vem na sua direção,

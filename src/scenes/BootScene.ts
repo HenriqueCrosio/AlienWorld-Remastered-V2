@@ -42,6 +42,10 @@ const FRAMES: Record<string, number> = {
   minaAnim: 7,
   flakAnim: 7,
 
+  // A FACÇÃO DO CINTURÃO (passe visual 2026-08-08): canhoneira e batedor trocam de pele por
+  // FASE (ver EnemySystem.STAGE_2_SKIN) — estas são as chaves de animação da pele nova.
+  scoutCinturaoAnim: 7,
+
   // ─── O RÓSTER v2 (2026-07-17): 7 naves de perfil, cada uma com a sua propulsão. ───
   // 9 quadros (v3 do PixelLab guarda o quadro de referência como frame 0 — e o PNG estático
   // de cada nave É esse quadro 0, então estático e animação nunca saltam entre si).
@@ -106,6 +110,9 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // como um navio ancorado.
   { key: 'kamikaze-fly', prefix: 'kamikazeAnim', frameRate: 14 },
   { key: 'scout-fly', prefix: 'scoutAnim', frameRate: 12 },
+  // A pele do cinturão (Fase 2) do batedor: MESMA cadência do 'scout-fly' — é o mesmo
+  // comportamento, só a pele muda (ver EnemySystem.STAGE_2_SKIN).
+  { key: 'scout-cinturao-fly', prefix: 'scoutCinturaoAnim', frameRate: 12 },
   { key: 'carrier-fly', prefix: 'carrierAnim', frameRate: 6 },
   { key: 'capitania-idle', prefix: 'capitaniaAnim', frameRate: 8 },
   // O clarão da salva: toca no disparo e volta para o idle ao terminar (BossCapitania.playFire).
@@ -297,6 +304,12 @@ const ART: Record<string, string> = {
   enemyKamikaze: 'sprites/enemy-kamikaze.png',
   enemyCarrier: 'sprites/enemy-carrier.png',
   enemyCarrier2: 'sprites/enemy-carrier-2.png',
+
+  // A FACÇÃO DO CINTURÃO (Fase 2, passe visual 2026-08-08): canhoneira/batedor trocam de pele
+  // por fase (STAGE_2_SKIN no EnemySystem) — sem este PNG, a Fase 2 cai de volta na arte biomec
+  // de sempre (guarda de textura).
+  enemyScoutCinturao: 'sprites/enemy-scout-cinturao.png',
+  ...animFrames('scoutCinturaoAnim', 'scout-cinturao-anim'),
 
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
