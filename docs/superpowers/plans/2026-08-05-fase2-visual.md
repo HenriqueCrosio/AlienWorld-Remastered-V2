@@ -33,6 +33,12 @@ pelo pipeline de sempre do PixelLab, com a Capitânia como `style_images` de ref
   `EnemyDef`. Como os dois aparecem em AMBAS as fases com o MESMO `scale`, a arte nova do
   cinturão tem que nascer na MESMA dimensão nativa da arte biomec atual (batedor 27×26, canhoneira
   45×26) — senão o mesmo `scale` desenha tamanhos diferentes entre as duas aparições.
+  **Atualizado após a Task 2:** na prática o PixelLab nem sempre entrega essa dimensão exata (o
+  batedor saiu 115×36, um dardo bem mais alongado) — recortar à força pra caber em 27×26
+  esmagaria o desenho. `STAGE_2_SKIN` agora aceita um `scale?: number` OPCIONAL por pele,
+  usado no lugar de `DEFS.scale` só naquele spawn — `DEFS.scale` continua intocado (a Fase 1 não
+  muda). Calibrar esse número por revisão visual (largura em tela parecida com a da Fase 1), não
+  por conta de cabeça.
 - **Guarda de textura** em toda arte nova (`textures.exists`); sem o PNG, a Fase 2 (e a Fase 1,
   no caso de batedor/canhoneira) continuam exatamente como hoje.
 - **Arte aprovada asset por asset pelo Henrique antes de entrar no jogo.** Autoria dos commits:
@@ -213,18 +219,13 @@ por:
 **Interfaces:** Produces a textura `enemyScoutCinturao` + anim `scout-cinturao-fly`, lidas pela
 `STAGE_2_SKIN` da Task 1.
 
-- [ ] **Step 1: Gerar no PixelLab** — `node scripts/gerar.mjs "sleek dart-shaped scout starship, cold blue-grey hull, glowing warm magenta cockpit window, sharp arrow-like silhouette, side view facing right" 27 side public/sprites/capitania.png` (dimensão nativa igual à `enemy-scout.png` de hoje, 27×26 — ver Global Constraints). Animação de voo curta (propulsão) com `scripts/animar.mjs`.
-- [ ] **Step 2: Julgar candidatos ampliados** (`scripts/sheet.mjs`) e mostrar ao Henrique — só segue com aprovação explícita.
-- [ ] **Step 3: Instalar** — `node scripts/install-sprite.mjs <object-id> <frame> enemy-scout-cinturao` (estático) e `node scripts/install-anim.mjs scout-cinturao-anim <url-base-da-anim> <n-quadros> enemy-scout-cinturao` (quadros de voo), em `public/sprites/`.
-- [ ] **Step 4: Registrar em `BootScene.ts`**:
-  - `FRAMES`: `scoutCinturaoAnim: <n>,` (contagem real dos quadros instalados).
-  - `ANIMS`: `{ key: 'scout-cinturao-fly', prefix: 'scoutCinturaoAnim', frameRate: 12 },` (mesmo `frameRate` do `scout-fly` — cadência é comportamento, não pele).
-  - `ART`: `enemyScoutCinturao: 'sprites/enemy-scout-cinturao.png',` + `...animFrames('scoutCinturaoAnim', 'scout-cinturao-anim'),`.
-- [ ] **Step 5: Medir a dimensão nativa** do PNG instalado (`sharp` ou `identify`); se divergir de 27×26, RECORTAR para bater (não ajustar `DEFS.batedor.scale` — ele é compartilhado com a Fase 1).
-- [ ] **Step 6: Verificar** — `npm run build` PASS; `node scripts/probe-stage2.mjs`
-      (screenshot `probe-stage2-cinturao.png`): o batedor na Fase 2 lê como dardo magro,
-      cinza-azulado com destaque magenta, MESMO tamanho/cadência de sempre; `node scripts/probe-chain.mjs`: o batedor na Fase 1 continua roxo biomec (a Fase 1 não tem `enemyScoutCinturao` visível — ela nem chega a testá-lo, mas confirma que nada quebrou).
-- [ ] **Step 7: Commit** — `feat(fase2): arte nova do batedor (facao do cinturao)`.
+- [x] **Step 1: Gerar no PixelLab** — `node scripts/gerar.mjs "sleek dart-shaped scout starship, cold blue-grey hull, glowing warm magenta cockpit window, sharp arrow-like silhouette, side view facing right" 27 sidescroller public/sprites/capitania.png` (⚠️ `view` é `'sidescroller'`/`'top-down'`, não `'side'` — a API rejeita `'side'` com 422). Lote de 4 candidatos; animação via `mcp__pixellab__animate_object` (frame_count=6 gera 6+1 referência = 7 quadros, batendo com o padrão `xAnim: 7` do resto do jogo).
+- [x] **Step 2: Julgar candidatos ampliados** (`scripts/sheet.mjs`) e mostrar ao Henrique — aprovado o candidato #0 (dardo magro, cinza-azulado, faixa magenta); descartados #1 (mais "caixa", menos afilado), #2 (canhão visível no topo — lia como canhoneira, não batedor) e #3 (antena + paleta verde-água, fora da paleta pedida).
+- [x] **Step 3: Instalar** — promovido via `mcp__pixellab__select_object_frames` (o lote fica em status `review`; promover cria um objeto `completed` próprio), depois `install-sprite.mjs`/`install-anim.mjs` como sempre.
+- [x] **Step 4: Registrado em `BootScene.ts`** (`FRAMES.scoutCinturaoAnim: 7`, `ANIMS` com `frameRate: 12` igual ao `scout-fly`, `ART.enemyScoutCinturao` + `animFrames`).
+- [x] **Step 5: Dimensão nativa divergiu bastante** (115×36, não 27×26 — a arte veio um dardo de verdade, bem mais alongado). Recortar pra 27×26 teria esmagado o desenho; em vez disso, `STAGE_2_SKIN.batedor` ganhou um campo `scale?: number` (0.28) que `spawn()` usa NO LUGAR de `DEFS.batedor.scale` só para essa pele — `DEFS.batedor.scale` (compartilhado com a Fase 1) não mudou. **Desvio do texto original deste step, registrado aqui.**
+- [x] **Step 6: Verificar** — `npm run build` PASS; sonda dedicada (`scripts/_probe-batedor-cinturao.mjs`) confirmou os 4 batedores da primeira onda (F2, t≈9s) como dardos distintos e bem separados — a 1ª tentativa (antes de ligar o `scale` da pele em `spawn()`, bug pego na revisão visual) mostrava eles GRUDADOS numa massa só; corrigido e reverificado. `probe-chain.mjs`: Fase 1 sem erros de página (a arte biomec do batedor continua a mesma).
+- [x] **Step 7: Commit** — `feat(fase2): arte nova do batedor (facao do cinturao)` em `6f41110`.
 
 ---
 
