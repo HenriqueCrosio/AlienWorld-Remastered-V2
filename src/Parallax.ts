@@ -191,7 +191,14 @@ export class Parallax {
     // Fase 2 não pode "esquecer" o Leviatã e reapresentá-lo. Ele é o destino — está sempre à vista.
     if (mode === 'espaco') {
       // A lua que você DEIXOU: atrás (à esquerda) e grande — ainda perto, no começo da fase.
-      this.moon.setPosition(58, 168).setScale(1.25).setAlpha(0.8);
+      //
+      // DESLIGADA por decisão do Henrique (2026-08-08): a arte é a placeholder procedural
+      // (`makeMoon`), e mesmo trocada pela `moonBelt` (ver commit anterior) ela competia com o
+      // fundo pintado novo. `setApproach()` continua calculando posição/escala normalmente — só
+      // o alpha fica de fora — então religar é só descomentar a linha abaixo quando houver arte
+      // (ou uma composição) que combine com a pintura.
+      this.moon.setPosition(58, 168).setScale(1.25);
+      // this.moon.setAlpha(0.8);
       // O Leviatã, à FRENTE (à direita). Longe e pequeno — por enquanto.
       this.leviathan.setPosition(304, 72).setScale(0.5).setAlpha(0.45);
     }
