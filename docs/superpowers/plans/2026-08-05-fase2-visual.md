@@ -41,6 +41,16 @@ pelo pipeline de sempre do PixelLab, com a Capitânia como `style_images` de ref
   por conta de cabeça.
 - **Guarda de textura** em toda arte nova (`textures.exists`); sem o PNG, a Fase 2 (e a Fase 1,
   no caso de batedor/canhoneira) continuam exatamente como hoje.
+- **⚠️ ORIENTAÇÃO, não só silhueta/cor/escala — checar SEMPRE em jogo, não só no lote de
+  candidatos.** Lição da Task 2: o batedor saiu do PixelLab com o nariz pra ESQUERDA (o prompt
+  pediu "facing right", o modelo não obedeceu) — como o jogo espelha todo sprite pra esquerda em
+  runtime (`setFlipX`, convenção: arte SEMPRE gerada apontando pra DIREITA), a nave entrou
+  voando de costas, e isso só aparece OLHANDO O INIMIGO SE MOVENDO na sonda, não no contact
+  sheet estático. Depois de instalar QUALQUER sprite de inimigo/nave, rodar a sonda e olhar o
+  sentido do nariz contra o sentido do movimento antes de dar como pronto. Se vier invertido:
+  `install-sprite.mjs ... --flip` pro estático, e espelhar os quadros da animação em BLOCO
+  (junto com o estático, mesma transformação) pra não perder a caixa de recorte unificada que
+  `install-anim.mjs` monta entre eles.
 - **Arte aprovada asset por asset pelo Henrique antes de entrar no jogo.** Autoria dos commits:
   só Henrique (sem `Co-Authored-By`).
 - Verificação por sonda/screenshot + `npm run build` (typecheck + vite) — não há testes
