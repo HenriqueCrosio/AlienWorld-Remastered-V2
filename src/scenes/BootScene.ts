@@ -416,6 +416,12 @@ const ART: Record<string, string> = {
   // lua procedural do Boot (`moon`).
   menuMoon: 'sprites/menu-moon.png',
 
+  // A MESMA lua, recortada em 96×96 (a caixa da placeholder procedural) para servir de "a lua
+  // que você deixou" no `Parallax` da Fase 2 (`setApproach()`) — o disco vinha com um cinturão de
+  // destroços em volta, que sobra de graça para o tema do cinturão. Sem ela, o `Parallax` cai na
+  // lua procedural (`moon`), que ficava com "cara de placeholder" ao lado do fundo pintado.
+  moonBelt: 'sprites/moon-belt.png',
+
   // Moldura de HUD (PixelLab `create_ui_asset`, 384×216 = a tela inteira, miolo TRANSPARENTE).
   // Sem placeholder: se não existir, o menu de naves simplesmente aparece sem moldura.
   uiFrame: 'sprites/ui-frame.png',

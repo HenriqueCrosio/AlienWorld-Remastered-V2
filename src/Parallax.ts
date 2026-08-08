@@ -162,7 +162,12 @@ export class Parallax {
     // densas — e o casco do Leviatã dormindo com alpha 0, esperando a saída da nuvem revelá-lo.
     if (mode === 'nebulosa') this.buildNebula();
 
-    this.moon = scene.add.image(300, 190, 'moon').setDepth(-95).setAlpha(0).setScale(1.6);
+    // A lua REAL (`moonBelt`, recorte do `menuMoon` do menu — mesmo disco, e o cinturão de
+    // destroços que ele já carregava serve de graça à história da Fase 2). Mesma caixa 96×96 da
+    // placeholder procedural (`moon`, o fallback), então os números do `setApproach()` abaixo
+    // (escala/posição — fechados, esta fatia não mexe neles) continuam valendo sem ajuste.
+    const moonKey = scene.textures.exists('moonBelt') ? 'moonBelt' : 'moon';
+    this.moon = scene.add.image(300, 190, moonKey).setDepth(-95).setAlpha(0).setScale(1.6);
 
     // O LEVIATÃ É UMA SILHUETA DISTANTE — e o TINT é o que faz dele uma.
     //
@@ -595,9 +600,16 @@ export class Parallax {
     // contrário da cutscene 1 (onde a pintura trocou o `Parallax('espaco')` inteiro), aqui a
     // lua-encolhendo/Leviatã-crescendo é mecânica de narrativa ativa que não pode desaparecer —
     // a pintura só preenche o vazio atrás dela. Mesmo mecanismo genérico do `paintBgF1`
-    // (`this.paintedBg[]`, tiling e scroll automáticos em `update()`, fator 0.04): zero código
-    // novo lá, só popular o array aqui. Y negativo centraliza a faixa da colônia (o miolo da
-    // pintura, com as luzes e guindastes) na janela de 216px — a arte tem o dobro da altura.
+    // (`this.paintedBg[]`, tiling e scroll automáticos em `update()`), com UMA diferença: cada
+    // entrada carrega o próprio fator de scroll em `data('bgFactor')` (0.04 se ausente — o que
+    // o F1 continua usando). A pintura original tem PEDRAS GRANDES em primeiro plano (o quadro
+    // do Henrique foi composto para ser visto inteiro, não recortado); herdar o fator do F1 fazia
+    // essas pedras, que já leem como PRÓXIMAS pela própria pintura, se mexerem rápido — a soma
+    // dava "colado no vidro". 0.018 (quase a metade) deixa a camada mais distante lida como tal.
+    //
+    // Y negativo escolhe a FAIXA da pintura que fica na janela de 216px (ela tem o dobro da
+    // altura): −64 mostra o alto — galáxia + o TOPO da colônia (guindastes, torres) — e evita a
+    // banda de pedras GRANDES do rodapé da pintura, que é o que lia como "perto demais".
     //
     // `buildSpace()` também é chamado pelo modo 'nebulosa' (Fase 3: o vácuo continua lá, mais a
     // nuvem por cima) — mas a pintura é da COLÔNIA do cinturão, cenário só da Fase 2. Sem o
@@ -606,7 +618,11 @@ export class Parallax {
       const w = (this.scene.textures.get('paintBgF2').getSourceImage() as { width: number }).width;
       for (let i = 0; i < 2; i++) {
         this.paintedBg.push(
-          this.scene.add.image(i * w, -108, 'paintBgF2').setOrigin(0, 0).setDepth(-99),
+          this.scene.add
+            .image(i * w, -64, 'paintBgF2')
+            .setOrigin(0, 0)
+            .setDepth(-99)
+            .setData('bgFactor', 0.018),
         );
       }
     }
@@ -812,15 +828,18 @@ export class Parallax {
   }
 
   update(dt: number, worldSpeed: number): void {
-    // FUNDO PINTADO: a camada mais distante rola LENTÍSSIMA (fator 0.04) — na fase de ~75s deriva
-    // ~250px, menos que a folga de 384px da imagem, então a paisagem não repete. O wrap é só
-    // insurance para uma fase longa demais.
+    // FUNDO PINTADO: a camada mais distante rola LENTÍSSIMA — fator 0.04 por padrão (o F1, na
+    // fase de ~75s, deriva ~250px, menos que a folga de 384px da imagem, então a paisagem não
+    // repete). CADA cópia carrega o próprio fator em `data('bgFactor')` — o F2 usa um valor menor
+    // (ver `buildSpace`): a pintura dele tem pedras grandes em primeiro plano que já leem como
+    // PRÓXIMAS, e herdar o fator do F1 as fazia deslizar rápido demais. O wrap é só insurance
+    // para uma fase longa demais.
     if (this.paintedBg.length) {
-      const w = this.paintedBg[0].width;
-      const dx = worldSpeed * 0.04 * dt;
       for (const bg of this.paintedBg) {
+        const factor = (bg.getData('bgFactor') as number | undefined) ?? 0.04;
+        const dx = worldSpeed * factor * dt;
         bg.x -= dx;
-        if (bg.x <= -w) bg.x += 2 * w;
+        if (bg.x <= -bg.width) bg.x += 2 * bg.width;
       }
     }
 
