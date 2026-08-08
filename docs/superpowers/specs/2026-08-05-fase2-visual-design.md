@@ -133,3 +133,9 @@ com outra paleta. Vista lateral, mesmo pipeline de sempre (`gerar.mjs` + candida
 4. O fundo pintado entra como camada nova sem apagar a lua-encolhendo/Leviatã-crescendo — a
    aproximação da campanha continua contada pelo mesmo mecanismo.
 5. Nada quebra sem os PNGs; comportamento e balanceamento inalterados; `probe-stage2` verde.
+
+> **Nota (2026-08-08):** o critério 4 mudou em playtest — a lua ficou VISUALMENTE desligada
+> (competia com o fundo pintado, mesmo com a arte real `moonBelt`; decisão do Henrique). O
+> MECANISMO continua de pé (`setApproach()` calcula posição/escala normalmente, só o alpha fica
+> em 0) — religar é trivial quando houver arte/composição que combine com a pintura. O Leviatã
+> que cresce continua entrando normalmente.
