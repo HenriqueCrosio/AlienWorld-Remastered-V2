@@ -97,6 +97,25 @@ export class Parallax {
    * novo — é o groundTile de novo, mais escuro e mais próximo.
    */
   private groundFront: Phaser.GameObjects.TileSprite | null = null;
+  /**
+   * A SAÍDA DA ATMOSFERA (Fase 1, ver `breakAtmosphere`). Tudo nasce em alpha 0 e só existe
+   * durante os ~6.5s de zero-G: antes disso a Fase 1 está inteira na tela, depois disso a
+   * cutscene assume.
+   */
+  private zeroGBg: Phaser.GameObjects.Image | null = null;
+  /** As camadas de bruma, do fundo para a frente. `fator` é a velocidade relativa do arrasto. */
+  private fog: {
+    ts: Phaser.GameObjects.TileSprite;
+    fator: number;
+    pico: number;
+    /** O y de repouso, e o quanto a banda desce ao se dissolver (ver `playAtmosphereExit`). */
+    y: number;
+    queda: number;
+  }[] = [];
+  /** Os fachos que atravessam a bruma. `deriva` é o quanto cada um anda por segundo. */
+  private rays: { img: Phaser.GameObjects.Image; deriva: number; pico: number }[] = [];
+  /** Ligado por `breakAtmosphere`: é o que faz o `update` gastar quadro com a bruma/fachos. */
+  private exiting = false;
   private readonly leviathan: Phaser.GameObjects.Image;
   private readonly moon: Phaser.GameObjects.Image;
   private groundOffset = 0;
@@ -581,6 +600,114 @@ export class Parallax {
       terreno: true,
       primeiroPlano: true,
     });
+
+    this.buildAtmosphereExit();
+  }
+
+  /**
+   * A SAÍDA DA ATMOSFERA — a pintura, a bruma e os fachos dos ~6.5s de zero-G.
+   *
+   * Tudo nasce em ALPHA 0 e fica assim a fase inteira: quem acende é `breakAtmosphere()`. Montar
+   * na construção (e não na hora) é de propósito — criar TileSprite e imagem no instante em que a
+   * Torre morre é engasgo garantido no quadro que o jogador mais olha.
+   *
+   * ─── POR QUE A PROFUNDIDADE DA PINTURA É −95.5 ───
+   *
+   * Ela é OPACA, então tudo o que estiver atrás dela some de graça: o gradiente de céu (−99), a
+   * nebulosa de fundo (−98) e o tráfego da colônia (−96). Só sobra apagar à mão o que está NA
+   * FRENTE dela e não é terreno: o fundo pintado da Fase 1 (−94) e a faixa de solo (−0.2). A lua
+   * (−95) e o Leviatã (−94) continuam por cima, que é onde eles têm que estar — o
+   * `breakAtmosphere` de sempre os acende.
+   */
+  private buildAtmosphereExit(): void {
+    if (!this.scene.textures.exists('paintBgZeroG')) return;
+
+    this.zeroGBg = this.scene.add
+      // −27 = (270−216)/2, a mesma conta do `paintBgF2`/`paintBgCut1`: a pintura é maior que a
+      // janela do jogo, e a folga fica repartida em cima e embaixo.
+      .image(0, -27, 'paintBgZeroG')
+      .setOrigin(0, 0)
+      .setDepth(-95.5)
+      .setAlpha(0);
+
+    // ─── A BRUMA, em cinco camadas ───
+    //
+    // Cinco e não uma porque o que vende VOLUME é a diferença de VELOCIDADE entre elas: uma névoa
+    // só, por mais densa que seja, lê como filtro por cima da tela. O `fator` é o arrasto de cada
+    // uma, e a da frente corre 12× a do fundo — é essa disparidade que diz "estou atravessando
+    // alguma coisa" em vez de "tem uma cor por cima da tela".
+    //
+    // As cinco moram na METADE DE BAIXO: é de lá que a nave está saindo. Bruma no topo diria que
+    // ela está entrando em alguma coisa.
+    //
+    // Duas ficam ATRÁS dos fachos (−95.4, −94.5) e três NA FRENTE (−92, −20, 55). Os fachos no
+    // meio do sanduíche é o que faz eles atravessarem a névoa em vez de pousarem sobre ela.
+    //
+    // `queda` é o quanto a banda DESCE ao se dissolver — ver `playAtmosphereExit`. É o que
+    // transforma "a névoa sumiu" em "a nave subiu acima dela".
+    const bandas: {
+      y: number;
+      h: number;
+      tint: number;
+      pico: number;
+      fator: number;
+      depth: number;
+      queda: number;
+    }[] = [
+      // Teto de nuvem, quase parado, lá no fundo.
+      { y: 66, h: 116, tint: 0x2b2545, pico: 0.85, fator: 0.08, depth: -95.4, queda: 44 },
+      { y: 94, h: 116, tint: 0x342c52, pico: 0.72, fator: 0.2, depth: -94.5, queda: 60 },
+      { y: 118, h: 116, tint: 0x39325a, pico: 0.64, fator: 0.36, depth: -92, queda: 78 },
+      { y: 138, h: 124, tint: 0x241f3e, pico: 0.5, fator: 0.6, depth: -20, queda: 98 },
+      // A da FRENTE, passando por cima da nave (depth 55, como o primeiro plano de rochas). É a
+      // camada que mais custa e mais entrega: sem nada na frente, a bruma é cenário; com ela, a
+      // nave está DENTRO da bruma. A mais fraca das cinco de propósito — ela cobre o jogador, e
+      // uma névoa que esconde a própria nave vira estorvo, não volume.
+      { y: 156, h: 130, tint: 0x1b1832, pico: 0.38, fator: 0.95, depth: 55, queda: 124 },
+    ];
+
+    for (const b of bandas) {
+      const ts = this.scene.add
+        .tileSprite(0, b.y, GAME_WIDTH, b.h, 'fogBand')
+        .setOrigin(0, 0)
+        .setDepth(b.depth)
+        .setTint(b.tint)
+        .setAlpha(0);
+      // A banda é 256×64 e a faixa é mais alta: esticar na vertical dá nuvem LONGA em vez de
+      // fileira de bolinhas repetidas. As escalas horizontais diferem de camada para camada
+      // (1.0 no fundo → 0.62 na frente) porque bolinha do mesmo tamanho em cinco profundidades
+      // denuncia que é a MESMA textura cinco vezes — o que está perto tem que ter grão maior.
+      ts.setTileScale(1 - this.fog.length * 0.095, b.h / 64);
+      this.fog.push({ ts, fator: b.fator, pico: b.pico, y: b.y, queda: b.queda });
+    }
+
+    // ─── OS FACHOS ───
+    //
+    // Depth −93.5: entre a bruma funda (−95.4) e a média (−92). Não é enfeite de ordenação — é
+    // literalmente o pedido: os raios PASSAM PELA névoa, com bruma atrás e bruma na frente.
+    //
+    // A cor sai do arco de atmosfera da própria pintura (âmbar frio, não amarelo de sol), e o
+    // ângulo é o dele: sobem da esquerda-baixa para a direita-alta. Blend ADD com pico baixo —
+    // a lição da decolagem do chefão foi que clarão que lava a tela apaga o que o jogador
+    // precisava ver, e aqui o que ele precisa ver é a pintura.
+    const fachos: { x: number; y: number; escala: number; pico: number; deriva: number }[] = [
+      { x: 40, y: 150, escala: 1.5, pico: 0.2, deriva: 5 },
+      { x: 150, y: 108, escala: 2.1, pico: 0.14, deriva: 8 },
+      { x: 250, y: 168, escala: 1.7, pico: 0.18, deriva: 6 },
+      { x: 320, y: 126, escala: 1.3, pico: 0.11, deriva: 10 },
+    ];
+
+    for (const f of fachos) {
+      const img = this.scene.add
+        .image(f.x, f.y, 'godRay')
+        .setDepth(-93.5)
+        .setTint(0xffcf9a)
+        .setAlpha(0)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setAngle(-24)
+        .setScale(f.escala, 1);
+      this.rays.push({ img, deriva: f.deriva, pico: f.pico });
+    }
   }
 
   /**
@@ -880,6 +1007,42 @@ export class Parallax {
     }
     // A faixa da frente rola JUNTO com o chão/mundo — senão os props deslizariam sobre ela.
     if (this.groundFront) this.groundFront.tilePositionX = Math.round(this.groundOffset);
+
+    if (this.exiting) this.updateAtmosphereExit(dt, worldSpeed);
+  }
+
+  /**
+   * O MOVIMENTO da bruma e dos fachos. Sem ele os dois são filtro de cor por cima da tela: o que
+   * transforma névoa em AR é a diferença de velocidade entre as camadas.
+   *
+   * A bruma também escorre para BAIXO — a nave está subindo, então o que ela atravessa desce. É
+   * a única coisa na cena que diz "para cima" (o resto do jogo rola na horizontal), e é de graça.
+   */
+  private updateAtmosphereExit(dt: number, worldSpeed: number): void {
+    for (const f of this.fog) {
+      if (f.ts.alpha <= 0) continue;
+      // SÓ NA HORIZONTAL — e isto não é esquecimento.
+      //
+      // A queda das bordas da névoa vive DENTRO da textura (ver `makeFogBand`), e o TileSprite é
+      // montado com uma repetição por faixa: a parte transparente da textura coincide com a borda
+      // do retângulo, e é isso que faz a faixa não ter aresta. Arrastar `tilePositionY` desloca
+      // essa coincidência — em poucos segundos o miolo OPACO da textura chega à borda do
+      // retângulo, que corta seco, e aparecem linhas horizontais retas atravessando a pintura.
+      //
+      // O movimento vertical não se perde: quem o entrega é a QUEDA das faixas na dissolução
+      // (`playAtmosphereExit`), que move o sprite inteiro e leva as bordas macias junto.
+      f.ts.tilePositionX += worldSpeed * f.fator * dt;
+    }
+
+    for (const r of this.rays) {
+      if (r.img.alpha <= 0) continue;
+      r.img.x += r.deriva * dt;
+      // Some pela direita, volta pela esquerda: um facho que some e não volta deixa a bruma
+      // apagando sozinha no fim, que é o oposto do que a cena está contando.
+      if (r.img.x - r.img.displayWidth / 2 > GAME_WIDTH) {
+        r.img.x = -r.img.displayWidth / 2;
+      }
+    }
   }
 
   /**
@@ -1003,10 +1166,109 @@ export class Parallax {
     });
 
     // Para de emitir terreno novo. O espaço segue povoando o fundo.
-    for (const l of terreno) l.gap = [1e9, 1e9];
+    //
+    // `gap` sozinho não bastava: o `while (nextX < GAME_WIDTH + 120)` do `update` ainda solta UM
+    // sprite antes de o nextX saltar para o infinito, e esse último nascia com o alpha cheio da
+    // camada — uma luz de colônia opaca ficava acesa no vácuo depois de todo o resto ter apagado.
+    // Zerar o alpha da CAMADA faz o `alphaFor()` (a fonte única) apagar também o retardatário.
+    for (const l of terreno) {
+      l.gap = [1e9, 1e9];
+      l.alpha = 0;
+    }
 
-    this.scene.tweens.add({ targets: this.moon, alpha: 1, duration: 2000, delay: 600 });
+    // A LUA só entra quando NÃO há pintura.
+    //
+    // Ela existia para dar alguma coisa ao céu vazio que a atmosfera revelava. Com a pintura da
+    // saída, o céu já vem cheio — e aí ela cobra dois preços. O de leitura: o disco é claro e
+    // chapado, e contra uma pintura escura ele lê como adesivo, não como astro (é a mesma razão
+    // pela qual o Leviatã leva tint). E o de história: o corpo que a nave está deixando já está
+    // desenhado, ocupando a tela inteira embaixo — a lua o desenha DE NOVO, do lado, menor.
+    //
+    // Sem o PNG da pintura, nada disso se aplica e o comportamento é o de sempre.
+    if (!this.zeroGBg) {
+      this.scene.tweens.add({ targets: this.moon, alpha: 1, duration: 2000, delay: 600 });
+    }
     // O Leviatã entra devagar. Ele é o destino — não deve ser um susto, deve ser um peso.
     this.scene.tweens.add({ targets: this.leviathan, alpha: 0.55, duration: 3500, delay: 1400 });
+
+    this.playAtmosphereExit();
+  }
+
+  /**
+   * A COREOGRAFIA da saída: a bruma sobe, a Fase 1 sai DENTRO dela, e ela afina no espaço.
+   *
+   * A ordem é o truque, e é o mesmo da decolagem do chefão: **a troca acontece escondida.** A
+   * bruma vai de 0 ao pico em 0.9s; a Fase 1 só começa a sumir aos 0.5s, quando já há o que a
+   * cubra. Trocar a céu aberto seria um dissolve de duas paisagens sobrepostas — e duas
+   * paisagens sobrepostas não são nenhuma paisagem.
+   *
+   * Depois a bruma AFINA até zero: o que fica para trás é a atmosfera, e é a saída dela que a
+   * cena está contando. Terminar dentro da névoa contaria o contrário.
+   *
+   * Tudo cabe em ~5.8s, dentro dos 6.5s de zero-G (`GameScene.breakAtmosphere`) — a cutscene não
+   * pode entrar em cima de um fade pela metade.
+   */
+  private playAtmosphereExit(): void {
+    if (!this.zeroGBg) return;
+    this.exiting = true;
+
+    const t = this.scene.tweens;
+
+    // 1. A BRUMA FECHA — e é ela que dá cobertura para o resto.
+    //
+    // Ela entra ESCALONADA, de trás para a frente (90ms por camada): as cinco chegando juntas
+    // leem como uma cortina só acendendo: entrando em fila, leem como a nave ENTRANDO nelas.
+    for (let i = 0; i < this.fog.length; i++) {
+      const f = this.fog[i];
+      t.add({ targets: f.ts, alpha: f.pico, delay: i * 90, duration: 950, ease: 'Quad.easeOut' });
+    }
+    for (const r of this.rays) {
+      t.add({ targets: r.img, alpha: r.pico, delay: 200, duration: 1100, ease: 'Quad.easeOut' });
+    }
+
+    // 2. A BRUMA ABRE — e esta é a batida que o Henrique pediu: LIBERDADE.
+    //
+    // Apagar não bastava. Uma névoa que só perde opacidade some POR CIMA da nave, e o que fica
+    // é "o efeito acabou". Aqui cada camada DESCE enquanto se dissolve (`queda`), e as de baixo
+    // descem mais — a bruma sai pelo rodapé em vez de evaporar. Quem se move em relação a ela é
+    // a NAVE, e é isso que faz a saída ser dela e não do efeito.
+    //
+    // `Cubic.easeIn` na queda: começa devagar e desgarra. Um afastamento linear parece elevador.
+    for (let i = 0; i < this.fog.length; i++) {
+      const f = this.fog[i];
+      t.add({
+        targets: f.ts,
+        alpha: 0,
+        y: f.y + f.queda,
+        delay: 2500,
+        duration: 3300,
+        ease: 'Cubic.easeIn',
+      });
+    }
+
+    // Os fachos ABREM junto: ao perder a névoa que os corporificava, eles se espalham e somem.
+    // É o mesmo gesto da bruma dito na luz — sem isso, eles apagariam ainda apertados, e um
+    // facho estreito que some lê como lâmpada desligando.
+    for (const r of this.rays) {
+      t.add({
+        targets: r.img,
+        alpha: 0,
+        scaleX: r.img.scaleX * 1.7,
+        delay: 2500,
+        duration: 2900,
+        ease: 'Cubic.easeIn',
+      });
+    }
+
+    // 3. A TROCA, dentro do pico da bruma. O que sai é só o que está NA FRENTE da pintura nova e
+    //    não é terreno (o resto o depth −95.5 resolve — ver `buildAtmosphereExit`).
+    const saindo: Phaser.GameObjects.GameObject[] = [
+      ...this.paintedBg,
+      ...(this.groundFront ? [this.groundFront] : []),
+    ];
+    if (saindo.length) {
+      t.add({ targets: saindo, alpha: 0, delay: 500, duration: 1500, ease: 'Sine.easeInOut' });
+    }
+    t.add({ targets: this.zeroGBg, alpha: 1, delay: 500, duration: 1500, ease: 'Sine.easeInOut' });
   }
 }

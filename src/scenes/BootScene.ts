@@ -515,6 +515,15 @@ const ART: Record<string, string> = {
   // Camada mais distante do parallax de superfície; substitui o céu pixelado por trás do foreground.
   paintBgF1: 'sprites/paint-bg-f1.png',
 
+  // FUNDO PINTADO da SAÍDA DA ATMOSFERA (arte do Henrique): a órbita baixa vista de cima do
+  // planeta, com o arco de atmosfera ainda aceso embaixo. Entra só nos ~6.5s de zero-G entre a
+  // Torre morrer e a cutscene 1 (ver `Parallax.breakAtmosphere`) — sem este PNG, a passagem
+  // continua exatamente como era, contra o cenário da Fase 1.
+  //
+  // Ele é o ANTECESSOR do `paintBgCut1`, não um substituto: aqui o planeta ainda está embaixo;
+  // lá ele já sumiu e sobrou a lua. É o afastamento, contado em duas pinturas.
+  paintBgZeroG: 'sprites/paint-bg-zerog.png',
+
   // FUNDO PINTADO da cutscene 1 (espaço aberto: a lua que ficou + a borda do cinturão à direita,
   // arte do Henrique). Camada mais distante da InterludeScene; o parallax 'espaco' é o fallback.
   paintBgCut1: 'sprites/paint-bg-cut1.png',
@@ -611,6 +620,8 @@ export class BootScene extends Phaser.Scene {
     this.makeColonyLight();
     this.makeEnemyBullet();
     this.makePickup();
+    this.makeFogBand();
+    this.makeGodRay();
     this.registerAnims();
 
     this.scene.start('Menu');
@@ -1139,6 +1150,121 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xe6f4ff, 1);
     g.fillCircle(2, 2, 1);
     g.generateTexture('colonyLight', 4, 4);
+    g.destroy();
+  }
+
+  /**
+   * BANDA DE NÉVOA 256×64, EMENDÁVEL na horizontal — a camada de bruma da saída da atmosfera
+   * (`Parallax.breakAtmosphere`). Branca: a cor vem do `tint` de cada camada, como spark/puff.
+   *
+   * Emendável não é detalhe: ela é usada em TileSprite, e um borrão que não fecha nas bordas
+   * desenha uma costura vertical rolando pela tela — que é exatamente o defeito que a névoa
+   * deveria estar escondendo. Por isso todo círculo que encosta numa borda é desenhado DE NOVO
+   * do outro lado.
+   *
+   * A opacidade cai com a distância da linha do meio: sem isso a banda tem topo e base retos, e
+   * uma névoa com aresta lê como faixa de cor, não como ar.
+   */
+  private makeFogBand(): void {
+    const W = 256;
+    const H = 64;
+
+    // CANVAS, e não `Graphics` — as duas razões são visíveis em tela:
+    //
+    //  1. `fillCircle` desenha um disco de aresta DURA. Cem discos duros em alpha baixo somam um
+    //     degradê liso, que é filtro de cor, não névoa. O gradiente radial do canvas dá borrão de
+    //     verdade, e é dele que vem o corpo.
+    //  2. `Graphics` não sabe APAGAR. A queda das bordas precisa ser um recorte por cima do
+    //     desenho pronto (`destination-out`); calculá-la por borrão não funciona — um borrão de
+    //     raio 40 numa faixa de 64 cobre a altura inteira em alpha uniforme e devolve a faixa uma
+    //     ARESTA RETA no topo e na base. Foi exatamente o que apareceu na primeira versão: as
+    //     cinco camadas com emendas horizontais atravessando a pintura.
+    const tex = this.textures.createCanvas('fogBand', W, H);
+    if (!tex) return;
+    const ctx = tex.getContext();
+
+    // LCG: a textura tem que sair IGUAL toda vez. Uma névoa sorteada com Math.random muda a cada
+    // recarga, e aí nenhuma revisão visual vale para a próxima.
+    let semente = 0x5eed;
+    const rnd = () => ((semente = (semente * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+
+    const borrao = (x: number, y: number, r: number, a: number): void => {
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, `rgba(255,255,255,${a})`);
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    };
+
+    // DUAS PASSADAS, e é isso que dá VOLUME em vez de véu: massas grandes que se acumulam onde se
+    // sobrepõem (a nuvem) e borrões pequenos por cima (o grão que prova que ela tem textura).
+    // Os alphas são ALTOS para gradiente radial: o borrão só entrega o valor de pico no centro
+    // exato e cai a zero na borda, então a média que ele deposita é uma fração do número aqui.
+    // Os 0.12/0.09 da primeira tentativa (herdados dos discos duros do `Graphics`) devolveram
+    // uma bruma transparente demais — foi preciso mais que o dobro para a mesma densidade.
+    const passadas = [
+      { n: 34, rMin: 16, rMax: 38, alpha: 0.26 }, // as massas
+      { n: 55, rMin: 5, rMax: 14, alpha: 0.18 }, // o grão
+    ];
+
+    for (const p of passadas) {
+      for (let i = 0; i < p.n; i++) {
+        const x = rnd() * W;
+        const y = H / 2 + (rnd() - 0.5) * H * 0.9;
+        const r = p.rMin + rnd() * (p.rMax - p.rMin);
+        borrao(x, y, r, p.alpha);
+        // As cópias que fecham a emenda horizontal (ela roda em TileSprite).
+        if (x - r < 0) borrao(x + W, y, r, p.alpha);
+        if (x + r > W) borrao(x - W, y, r, p.alpha);
+      }
+    }
+
+    // A QUEDA DAS BORDAS, recortada por cima: sem ela a faixa tem topo e base retos, e névoa com
+    // aresta lê como faixa de cor. Só na vertical — na horizontal ela precisa fechar, não sumir.
+    const recorte = ctx.createLinearGradient(0, 0, 0, H);
+    recorte.addColorStop(0, 'rgba(0,0,0,1)');
+    recorte.addColorStop(0.22, 'rgba(0,0,0,0)');
+    recorte.addColorStop(0.78, 'rgba(0,0,0,0)');
+    recorte.addColorStop(1, 'rgba(0,0,0,1)');
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = recorte;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+
+    tex.refresh();
+  }
+
+  /**
+   * RAIO 192×24: um facho de luz de bordas suaves, que ganha o ângulo e a cor no uso
+   * (`Parallax`). É o único elemento CLARO da saída da atmosfera — a luz vem do arco aceso do
+   * planeta, e o resto da cena é casco escuro e bruma.
+   *
+   * Some nas DUAS pontas de propósito: um facho com fim reto vira um retângulo deitado. E o pico
+   * fica em 0.55, não em 1 — ele é somado (blend ADD) por cima da névoa, e um facho a pino
+   * estoura a tela, que é justamente o que não se quer aqui.
+   */
+  private makeGodRay(): void {
+    const W = 192;
+    const H = 24;
+    const PASSO = 6;
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+
+    for (let y = 0; y < H; y++) {
+      // Queda transversal ao facho, ao quadrado: o miolo concentra e a borda dissolve.
+      const t = 1 - Math.abs(y - (H - 1) / 2) / ((H - 1) / 2);
+      const transversal = t * t;
+      if (transversal <= 0) continue;
+
+      for (let x = 0; x < W; x += PASSO) {
+        // Queda ao LONGO do facho: entra e sai suave (meio seno nas duas pontas).
+        const u = (x + PASSO / 2) / W;
+        const longitudinal = Math.sin(Math.PI * u);
+        g.fillStyle(0xffffff, 0.55 * transversal * longitudinal);
+        g.fillRect(x, y, PASSO, 1);
+      }
+    }
+
+    g.generateTexture('godRay', W, H);
     g.destroy();
   }
 
