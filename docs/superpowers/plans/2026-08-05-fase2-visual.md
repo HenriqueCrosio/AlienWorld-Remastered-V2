@@ -121,6 +121,13 @@ cabeçalho do `gerar.mjs`). Para gerar em 45px é preciso uma referência DE 45p
 `scripts/_ref-batedor-45.png`, um recorte 1:1 da proa do batedor, feito para isso. O mínimo que
 a API aceita em `size` é 32.
 
+⚠️ Esse arquivo é GITIGNORADO (`scripts/_*.png`), então numa máquina limpa ele não existe.
+Refazer é uma linha:
+
+```
+node -e "require('sharp')('public/sprites/enemy-scout-cinturao.png').extract({left:70,top:5,width:45,height:26}).toFile('scripts/_ref-batedor-45.png')"
+```
+
 - [x] **Step 2: Tabela de pele por fase, em `EnemySystem.ts`**
 
 Adicionar logo abaixo de `DEFS`:
