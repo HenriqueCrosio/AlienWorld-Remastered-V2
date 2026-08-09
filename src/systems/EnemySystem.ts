@@ -121,7 +121,7 @@ const STAGE_2_SKIN: Partial<
       anim: string;
       scale?: number;
       tint?: number;
-      bullet?: { texture: string; scale: number };
+      bullet?: { texture: string; scale: number; anim?: string };
     }
   >
 > = {
@@ -137,10 +137,14 @@ const STAGE_2_SKIN: Partial<
     anim: 'gunship-cinturao-fly',
     scale: 0.72,
     tint: 0xffffff,
-    // 0.5 põe a bola em ~15×14, contra os 10×7 do traço que ela substitui. Maior de propósito:
-    // o que se ganha aqui é LEITURA, e ela é o motivo do troco. Sem tint — a arte já nasce
-    // magenta, que é a cor que o jogo ensina como "tiro que me mata" (ver `fireAt`).
-    bullet: { texture: 'bulletOrb', scale: 0.5 },
+    // A bola em ~14px de diâmetro em tela, contra os 10×7 do traço que ela substitui. Maior de
+    // propósito: o que se ganha aqui é LEITURA, e ela é o motivo do troco. Sem tint — a arte já
+    // nasce magenta, que é a cor que o jogo ensina como "tiro que me mata" (ver `fireAt`).
+    //
+    // 0.8 e não o 0.5 de antes porque a ARTE mudou (2026-08-09), não o desejo: a bola nova tem
+    // corpo de 18px contra os 29 da anterior, então o mesmo 0.5 a entregaria com METADE do
+    // tamanho calibrado. O número muda para o tamanho em tela ficar o mesmo.
+    bullet: { texture: 'bulletOrb', scale: 0.8, anim: 'bullet-orb-pulse' },
   },
 };
 
@@ -480,9 +484,21 @@ export class EnemySystem {
         // escura que a separa do fundo — a borda é metade do motivo de ela ser visível.
         b.setTexture(municao.texture).setScale(municao.scale).clearTint();
         b.setBlendMode(Phaser.BlendModes.NORMAL);
+        // E ela PULSA. Mesma guarda do resto: sem a animação registrada, fica o estático (que é
+        // o quadro 0 — mesma caixa união, então não salta ao começar). `release()` já para a
+        // animação ao reciclar o slot, senão o próximo tiro a herdar a vaga sairia pulsando.
+        if (municao.anim && this.scene.anims.exists(municao.anim)) b.play(municao.anim);
         // A hitbox do slot é a do `bolt2` até alguém trocá-la (o pool é compartilhado, ver
-        // `release`). Uma bola redonda com a caixa de um traço acerta pelo canto vazio.
-        b.body!.setSize(b.width * 0.7, b.height * 0.7);
+        // `release`). Uma bola redonda com a caixa de um traço acerta pelo canto vazio — então
+        // aqui ela é um CÍRCULO, como o cometa da Torre (mesma razão, ver `release`).
+        //
+        // Os números saem de MEDIÇÃO, não de gosto: a bola ocupa 18×18 de um canvas 20×24 (o
+        // resto é a fagulha do quadro 3, que não fere), e o centro dela cai em (10, 12). Raio
+        // 6.25 dá 10px de diâmetro em tela na escala 0.8 — que é exatamente a caixa que a arte
+        // ANTERIOR tinha (10.2×9.8) e que o balanceamento da Fase 2 já foi jogado em cima.
+        // Manter o `0.7` do canvas aqui teria inflado a caixa vertical em 37% de graça: o canvas
+        // novo é mais alto, e a fagulha teria virado hitbox.
+        (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
       } else {
         // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
         // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.

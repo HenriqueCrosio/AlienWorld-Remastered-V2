@@ -47,6 +47,11 @@ const FRAMES: Record<string, number> = {
   // FASE (ver EnemySystem.STAGE_2_SKIN) — estas são as chaves de animação da pele nova.
   scoutCinturaoAnim: 11,
   gunshipCinturaoAnim: 7,
+  // A BOLA de energia da canhoneira do cinturão, agora ANIMADA (2026-08-09): ela pulsa e solta
+  // fagulha no ar em vez de ser um adesivo. Os quadros nasceram com DERIVA (o desenho escorregava
+  // 5.6px para a esquerda ao longo do ciclo, o que num projétil soma à velocidade e vira
+  // solavanco) — corrigida no disco por `scripts/centrar-anim.mjs`, não em runtime.
+  bulletOrbAnim: 7,
 
   // ─── O RÓSTER v2 (2026-07-17): 7 naves de perfil, cada uma com a sua propulsão. ───
   // 9 quadros (v3 do PixelLab guarda o quadro de referência como frame 0 — e o PNG estático
@@ -121,6 +126,10 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // A pele do cinturão da canhoneira: MESMA cadência do 'gunship-fly' (8) — é o mesmo
   // comportamento pesado, só a pele muda.
   { key: 'gunship-cinturao-fly', prefix: 'gunshipCinturaoAnim', frameRate: 8 },
+  // A BOLA de energia dela: 14, a mesma cadência do 'comet-burn'/'blast-burn'. Projétil é a
+  // única coisa no jogo que pulsa RÁPIDO — energia lenta parece plástico, e um tiro que parece
+  // plástico não lê como perigo.
+  { key: 'bullet-orb-pulse', prefix: 'bulletOrbAnim', frameRate: 14 },
   { key: 'carrier-fly', prefix: 'carrierAnim', frameRate: 6 },
   { key: 'capitania-idle', prefix: 'capitaniaAnim', frameRate: 8 },
   // O clarão da salva: toca no disparo e volta para o idle ao terminar (BossCapitania.playFire).
@@ -323,6 +332,7 @@ const ART: Record<string, string> = {
   // A BOLA de energia que a canhoneira do cinturão cospe (ver STAGE_2_SKIN.canhoneira.bullet):
   // o traço `bolt2` sumia no fundo escuro da Fase 2. Sem este PNG, o tiro cai no traço de sempre.
   bulletOrb: 'sprites/bullet-orb.png',
+  ...animFrames('bulletOrbAnim', 'bullet-orb-anim'),
 
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
