@@ -35,7 +35,8 @@ pelo pipeline de sempre do PixelLab, com a Capitânia como `style_images` de ref
   45×26) — senão o mesmo `scale` desenha tamanhos diferentes entre as duas aparições.
   **Atualizado após a Task 2:** na prática o PixelLab nem sempre entrega essa dimensão exata (o
   batedor saiu 115×36, um dardo bem mais alongado) — recortar à força pra caber em 27×26
-  esmagaria o desenho. `STAGE_2_SKIN` agora aceita um `scale?: number` OPCIONAL por pele,
+  esmagaria o desenho. (A arte de 2026-08-09 que a substituiu tem 115×37 — o mesmo caso.)
+  `STAGE_2_SKIN` agora aceita um `scale?: number` OPCIONAL por pele,
   usado no lugar de `DEFS.scale` só naquele spawn — `DEFS.scale` continua intocado (a Fase 1 não
   muda). Calibrar esse número por revisão visual (largura em tela parecida com a da Fase 1), não
   por conta de cabeça.
@@ -51,6 +52,11 @@ pelo pipeline de sempre do PixelLab, com a Capitânia como `style_images` de ref
   `install-sprite.mjs ... --flip` pro estático, e espelhar os quadros da animação em BLOCO
   (junto com o estático, mesma transformação) pra não perder a caixa de recorte unificada que
   `install-anim.mjs` monta entre eles.
+  **Atualizado em 2026-08-09:** aconteceu de novo, nas DUAS artes novas de nave (o batedor
+  remodelado e a Aurora). Já não é acidente — trate como o padrão: o PixelLab ignora "facing
+  right". Existe agora `scripts/espelhar.mjs` pra espelhar o bloco inteiro em disco de uma vez;
+  espelhar em disco é melhor que `setFlipX` sempre que houver offset medido no PNG (bocas de
+  canhão, aresta do convés), porque o flip de runtime não acompanha esses números.
 - **Arte aprovada asset por asset pelo Henrique antes de entrar no jogo.** Autoria dos commits:
   só Henrique (sem `Co-Authored-By`).
 - Verificação por sonda/screenshot + `npm run build` (typecheck + vite) — não há testes
@@ -236,6 +242,51 @@ por:
 - [x] **Step 5: Dimensão nativa divergiu bastante** (115×36, não 27×26 — a arte veio um dardo de verdade, bem mais alongado). Recortar pra 27×26 teria esmagado o desenho; em vez disso, `STAGE_2_SKIN.batedor` ganhou um campo `scale?: number` (0.28) que `spawn()` usa NO LUGAR de `DEFS.batedor.scale` só para essa pele — `DEFS.batedor.scale` (compartilhado com a Fase 1) não mudou. **Desvio do texto original deste step, registrado aqui.**
 - [x] **Step 6: Verificar** — `npm run build` PASS; sonda dedicada (`scripts/_probe-batedor-cinturao.mjs`) confirmou os 4 batedores da primeira onda (F2, t≈9s) como dardos distintos e bem separados — a 1ª tentativa (antes de ligar o `scale` da pele em `spawn()`, bug pego na revisão visual) mostrava eles GRUDADOS numa massa só; corrigido e reverificado. `probe-chain.mjs`: Fase 1 sem erros de página (a arte biomec do batedor continua a mesma).
 - [x] **Step 7: Commit** — `feat(fase2): arte nova do batedor (facao do cinturao)` em `6f41110`.
+- [x] **Step 8 (2026-08-09): REFEITO.** O Henrique remodelou o batedor no PixelLab
+      (`ca7ce209-f4bb-4d20-97ca-e26a950028b3`) e a arte de ontem foi substituída — ver a
+      "Correção de rumo" abaixo. Dardo de casco escuro com cabine vermelha, 11 quadros (eram 7),
+      dimensão nativa 115×37 contra 115×36: o `scale` 0.28 da pele não mudou. Espelhado em disco
+      de novo (a arte nasceu apontando para a esquerda pela SEGUNDA vez — ver o constraint de
+      orientação). Commit `23b9cc3`.
+
+---
+
+### Correção de rumo (2026-08-09): a linha dark sci-fi
+
+**Não é uma task do plano** — é o Henrique parando o passe visual para dizer que ele tinha se
+afastado do que ele construiu antes: casco escuro, contraste baixo, luz só onde há energia. O
+que entrou, na ordem em que ele pediu, com a arte já criada por ele no PixelLab:
+
+1. **Chefão da Fase 1 — torre remodelada** (`5bba5ffc…` pousada, `48724795…` aérea). Commit
+   `b6d256e`. Três coisas para lembrar:
+   - As duas animações vieram com quadros PODRES: no grupo do ar o quadro 2 é um borrão cinza e
+     o 4/8 têm um clarão branco SOLTO ao lado do casco. Um quadro solto não é só feio — ele entra
+     na caixa UNIÃO do `install-boss-fight.mjs` e infla o recorte de todo mundo. O script passou a
+     declarar QUAIS índices entram, e em que ordem tocam.
+   - Os dois IDLES são sintetizados do estático (`pulsar-brilho.mjs`), não gerados. Já era assim
+     no idle de solo; agora vale para o hover aéreo também.
+   - A torre nova NÃO tem animação de decolagem. Ver a task seguinte.
+2. **Explosões na decolagem** (pedido no meio do trabalho). Sem a animação de decolagem, a troca
+   de forma seria um corte seco. A cadeia de estouros de `Boss.blowUpBase()` sobe pela base ao
+   longo de ~1s e a arte troca DEBAIXO do maior deles (`SWAP_AT`, no meio da subida) — o truque
+   de corte mais velho que existe. **Armadilha aprendida:** `Fx.explodeBig` e o
+   `cameras.main.flash(400)` da decolagem antiga lavavam a TELA INTEIRA justamente no quadro que
+   o jogador precisa ver. Viraram `Fx.explode(2.6)` (mesma sheet de 128px, sem flash) e um flash
+   de 160ms.
+3. **Aurora da cutscene 1** (`03f52489…`). Commit `a3747bd`. Remedida: 189×83, convés na row 43,
+   vão [12..178]. E a proa aponta para LESTE — a arte nasceu virada a oeste e é espelhada EM
+   DISCO na instalação (`scripts/espelhar.mjs`, novo), o que tirou o `setFlipX` de runtime.
+4. **Batedor do cinturão** (`ca7ce209…`) — ver Task 2 Step 8.
+
+**Fatias reabertas:** 1 e 2 do passe visual (Fase 1 e Cutscene 1) já estavam mergeadas no `main`.
+Os três primeiros itens acima mexem nelas a partir da branch `feat/fase2-visual` — na hora do
+merge, é UM merge só, não um por fatia.
+
+**Constraint novo, para todo asset daqui para frente:** casco escuro e dessaturado, luz só onde
+há energia (olho, propulsor, boca de canhão). E `setTint` em cima de arte escura REPINTA em vez
+de insinuar — o `baseTint` da fase aérea do chefão (`0xff9a6a`) virava o aço em cobre
+enferrujado e foi para `0xffd0bc`. Se uma cor de estado precisa aparecer, ela tem que caber na
+paleta da arte, não passar por cima dela.
 
 ---
 
