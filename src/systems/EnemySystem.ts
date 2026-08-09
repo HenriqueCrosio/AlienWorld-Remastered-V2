@@ -100,10 +100,29 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
  * cinturão veio um dardo de verdade (115×34, bem mais alongado que os 27×26 de sempre); forçar a
  * mesma caixa esmagaria o desenho. O `scale` próprio recalibra o TAMANHO em tela pra ficar
  * parecido com o da Fase 1 (hitbox deriva do tamanho exibido, ver `spawn`) sem mexer em `DEFS`.
+ *
+ * `tint` idem, e pelo mesmo motivo que o chefão da Fase 1 precisou baixar o dele: os tints do
+ * `DEFS` foram escolhidos para a arte BIOMEC, que é clara e lavada, e eles COLOREM em vez de
+ * insinuar. Aplicados sobre a arte do cinturão — quase preta de propósito — o lilás da canhoneira
+ * (0xbfa8f0) puxava o casco inteiro para cinza-malva e apagava a linha dark sci-fi. Branco aqui
+ * significa "mostre a arte como ela foi pintada", não "sem tint".
  */
-const STAGE_2_SKIN: Partial<Record<EnemyKind, { texture: string; anim: string; scale?: number }>> = {
-  batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly', scale: 0.28 },
-  canhoneira: { texture: 'enemyGunshipCinturao', anim: 'gunship-cinturao-fly' },
+const STAGE_2_SKIN: Partial<
+  Record<EnemyKind, { texture: string; anim: string; scale?: number; tint?: number }>
+> = {
+  batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly', scale: 0.28, tint: 0xffffff },
+  // 0.72 encolhe a arte (115×36, a caixa união do voo) até os 26px de ALTURA da canhoneira
+  // biomec, não até os 45 de largura. A escolha é de balanceamento, não de enquadramento: o
+  // jogador atira na HORIZONTAL, então quem decide "quão difícil é acertar" é o perfil VERTICAL
+  // — a hitbox sai de `e.height * 0.55`. Encaixando pela largura a nave ficaria com 13px de
+  // altura e metade da hitbox vertical de hoje, virando bem mais tanque sem ninguém ter pedido.
+  // O preço desta escolha é o comprimento: 83px em tela contra 45 da Fase 1.
+  canhoneira: {
+    texture: 'enemyGunshipCinturao',
+    anim: 'gunship-cinturao-fly',
+    scale: 0.72,
+    tint: 0xffffff,
+  },
 };
 
 export class EnemySystem {
@@ -165,6 +184,9 @@ export class EnemySystem {
     // nasce na mesma caixa nativa da biomec, e forçar o `def.scale` de sempre distorceria o
     // tamanho em tela.
     const scale = hasSkin && skin!.scale !== undefined ? skin!.scale : def.scale;
+    // E o próprio tint: os do `DEFS` foram escolhidos para a arte biomec (clara) e COLOREM a arte
+    // do cinturão (quase preta) em vez de insinuar — ver STAGE_2_SKIN.
+    const tint = hasSkin && skin!.tint !== undefined ? skin!.tint : def.tint;
 
     const texture = pickVariant(this.scene, baseTexture);
     const e = this.enemies.create(x, y, texture) as Phaser.Physics.Arcade.Sprite;
@@ -177,7 +199,7 @@ export class EnemySystem {
 
     e.setVelocityX(-def.speed);
     e.setScale(scale);
-    e.setTint(def.tint);
+    e.setTint(tint);
 
     // Todos os sprites são gerados apontando para a DIREITA. O inimigo vem na sua direção,
     // então normalmente é só espelhar.
@@ -201,7 +223,9 @@ export class EnemySystem {
     e.setData('hp', def.hp);
     e.setData('score', def.score);
     // Guardado para restaurar depois do flash branco de dano.
-    e.setData('tint', def.tint);
+    // O tint DA PELE, não o do DEFS: é este valor que o flash branco de dano restaura ao
+    // terminar (ver `damage`), e restaurar o do DEFS repintaria a arte do cinturão no 1º tiro.
+    e.setData('tint', tint);
     e.setData('baseY', y);
     e.setData('t', Phaser.Math.FloatBetween(0, Math.PI * 2));
     // Espera antes do PRIMEIRO tiro: uma canhoneira não dispara no frame em que aparece.
