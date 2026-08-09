@@ -46,7 +46,7 @@ const FRAMES: Record<string, number> = {
 
   // A FACÇÃO DO CINTURÃO (passe visual 2026-08-08): canhoneira e batedor trocam de pele por
   // FASE (ver EnemySystem.STAGE_2_SKIN) — estas são as chaves de animação da pele nova.
-  scoutCinturaoAnim: 7,
+  scoutCinturaoAnim: 11,
 
   // ─── O RÓSTER v2 (2026-07-17): 7 naves de perfil, cada uma com a sua propulsão. ───
   // 9 quadros (v3 do PixelLab guarda o quadro de referência como frame 0 — e o PNG estático
