@@ -288,6 +288,40 @@ de insinuar — o `baseTint` da fase aérea do chefão (`0xff9a6a`) virava o aç
 enferrujado e foi para `0xffd0bc`. Se uma cor de estado precisa aparecer, ela tem que caber na
 paleta da arte, não passar por cima dela.
 
+### 2ª volta (mesmo dia): o balanceamento que a arte nova cobrou
+
+O Henrique jogou e a luta do chefão da Fase 1 estava punindo sem querer. Commits `1078701` e
+`0049eef`.
+
+- **O leque não deixava espaço.** Virou número com `scripts/_probe-leque.mjs` (mede o vão
+  vertical entre cometas na COLUNA do jogador, que é onde importa — na boca do canhão todos
+  saem do mesmo pixel): a fase pousada abria 41–44px, folgado para uma nave de ~14px; a AÉREA
+  abria 31px **e caía para 15px** onde o tiro mirado cruzava o leque. Corrigido em duas partes,
+  e a segunda importa mais: 7 → 5 tiros, e o tiro mirado saiu de dentro do leque (`AIMED_DELAY`,
+  400ms depois). Somados eram uma parede; separados no tempo, o leque continua sendo um problema
+  de POSIÇÃO e o mirado um de REAÇÃO. Remedido: 41–46px nas duas fases.
+- **Os mísseis ganharam propósito próprio.** A salva de 4 em ângulos fixos era o mesmo leque com
+  outra arte. Agora sai UM de cada vez, mirado na posição do jogador no instante do disparo e
+  reto (corrigir o curso tiraria a única esquiva que o flap permite). `scripts/_probe-missil.mjs`
+  confirma a mira em três alturas diferentes.
+- **A decolagem ganhou animação.** O que destravou o PixelLab foi PROIBIR item por item no
+  prompt: *"no muzzle flash, no white sparks, no white lightning, no bright flares outside the
+  silhouette"*. Vale para qualquer asset daqui pra frente — descrever o que se quer não basta,
+  tem que listar o que não se quer. O Henrique recortou à mão os 7 quadros que prestam
+  (`assets/raw/anim_transi_boss_1`): só a base explodindo, porque depois disso o gerador desenha
+  uma torre que não é a dos grandes propulsores. `install-boss-fight.mjs` passou a aceitar grupo
+  vindo do DISCO por causa disso.
+- **O hover regerado foi RECUSADO por ele** — preferiu o original, onde a minigun aparece
+  atirando durante o voo e os bocais brilham em vez de cuspir chama. Lição: mostrar as duas e
+  deixar ele escolher, não presumir que "mais efeito" é melhor.
+- **A aresta do convés da Aurora precisou de mais desfoque.** O degradê de 3 linhas com pico 0.5
+  tinha sido calibrado contra a arte ANTIGA, cuja linha de destaque era clara — ali o ciano
+  REFORÇAVA um brilho que a arte já tinha. Na arte nova essa linha é bem mais escura e o mesmo
+  ciano passou a DESENHAR. Virou 6 linhas com pico 0.30, caindo para baixo.
+- **Armadilha de sonda:** `probe-chain.mjs` escreve `boss.hp = 2` no CAMPO, o que não chama
+  `damage()` — então é o golpe seguinte que dispara a decolagem e os 1.3s de imunidade. Com 3s
+  de orçamento a cadeia falhava por sorte, não por bug. Subiu para 7s.
+
 ---
 
 ### Task 3: Canhoneira do cinturão (casco pesado, canhão magenta saliente)
