@@ -664,7 +664,7 @@ export class GameScene extends Phaser.Scene {
           ? new BossSerpente(this, this.enemies)
           : this.stage.id === 2
             ? new BossCapitania(this, this.enemies, 150)
-            : new Boss(this, this.enemies.enemyBullets, 150);
+            : new Boss(this, this.enemies.enemyBullets, this.fx, 150);
 
     this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip());
 

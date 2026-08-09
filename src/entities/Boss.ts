@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
+import type { Fx } from '../systems/Fx';
 
 /**
  * O que a GameScene precisa saber de um chefão — e nada mais.
@@ -32,8 +33,9 @@ export interface StageBoss {
  *
  *   FASE 1 — POUSADA (>50% vida): a cidadela está no chão. Só o leque lento de 5. É a fase de
  *            ENSINAR a ler um padrão, sem punir.
- *   DECOLAGEM (na virada de 50%): ela racha os pilares, acende os propulsores e SOBE. Imune
- *            durante a transição, como a Serpente e o Núcleo (BossNucleo.trocarParaCoracao).
+ *   DECOLAGEM (na virada de 50%): a cidadela EXPLODE em cadeia, se arranca do chão e SOBE nos
+ *            propulsores. Imune durante a transição, como a Serpente e o Núcleo
+ *            (BossNucleo.trocarParaCoracao).
  *   FASE 2 — NO AR (≤50%): pairando, leque rápido de 7 + rajada mirada + a salva de mísseis.
  *
  * Os mísseis só existem na fase aérea — são a ESCALADA da fúria, não um perigo desde o início.
@@ -78,8 +80,8 @@ export class Boss implements StageBoss {
   private baseTint = 0xffffff;
 
   /**
-   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 200×198 numa tela de
-   * 384×216. A 0.75 ela vira 150×148 — 19% mais alta que a torre antiga (97×125), o salto de
+   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 197×189 numa tela de
+   * 384×216. A 0.75 ela vira 148×142 — bem mais alta que a torre antiga (97×125), o salto de
    * presença que a fatia pedia, ainda sobrando céu acima e espaço de voo à esquerda.
    *
    * Reduzir o PNG no disco seria pior: reamostrar pixel art em 0.75 apaga a grade. Escalar no
@@ -88,20 +90,29 @@ export class Boss implements StageBoss {
   private static readonly SCALE = 0.75;
 
   /**
-   * As DUAS alturas de repouso. A base do conteúdo (pedra pousada / ponta das chamas) está a
-   * 74px do centro escalado — logo:
-   *   POUSADA: centro em 132 crava a base em ~206, a linha do solo (`GROUND_Y`). Plantada.
-   *   NO AR:   centro em 106 sobe a fortaleza 26px, e a esteira de fogo passa a flutuar sobre o
-   *            chão com um vão visível — o que a decolagem promete.
+   * As DUAS alturas de repouso, MEDIDAS nos PNGs (`scripts/_medir-boss.mjs`) — a base do
+   * conteúdo está a 70px do centro escalado na forma pousada e a 67px na aérea (as duas artes
+   * têm silhuetas diferentes embaixo: pedra × bocais de propulsor), então NÃO dá para usar um
+   * número só:
+   *   POUSADA: centro em 136 crava a base em ~206, a linha do solo (`GROUND_Y`). Plantada.
+   *   NO AR:   centro em 113 põe a ponta das chamas em ~180 — 26px de vão sobre o chão, o
+   *            mesmo vão de antes: é ele que a decolagem promete.
    */
-  private static readonly BASE_Y_GROUND = 132;
-  private static readonly BASE_Y_AIR = 106;
-  /** Meia-largura da fortaleza (72px do centro escalado): `STATION_X = 306` deixa ~6px à direita. */
+  private static readonly BASE_Y_GROUND = 136;
+  private static readonly BASE_Y_AIR = 113;
+  /** Meia-largura da fortaleza (73px do centro escalado): `STATION_X = 306` deixa ~5px à direita. */
   private static readonly STATION_X = 306;
   private static readonly ENTRY_SPEED = 45;
 
-  /** Duração da subida na decolagem, casada com os 13 quadros da animação a 10fps (~1.3s). */
+  /** Duração da subida na decolagem. Tempo de a cadeia de estouros tocar inteira e ser LIDA. */
   private static readonly TAKEOFF_MS = 1300;
+
+  /**
+   * Quando a arte troca de pousada para aérea, dentro da subida. No MEIO, e não no fim: é ali
+   * que o estouro grande cobre o corte, e é ali que a fortaleza está a meio caminho do chão —
+   * trocar no fim faria a pedra viajar a subida inteira e sumir já parada, o que denuncia o corte.
+   */
+  private static readonly SWAP_AT = Boss.TAKEOFF_MS * 0.55;
 
   /**
    * Amplitude do bailado vertical — só na fase AÉREA (pousada não bobeia).
@@ -115,15 +126,16 @@ export class Boss implements StageBoss {
   /**
    * Boca do canhão, em px a partir do CENTRO do sprite JÁ ESCALADO — e IGUAL nas duas artes: o
    * `create_object_state` só trocou a base (pedra → propulsores), o cano de gatling ficou no
-   * mesmo lugar. Medida nos dois PNGs instalados (x=15, linhas 15..23 num quadro 200×198 de
-   * centro 100,99) e multiplicada por SCALE — as duas deram −64,−54, então uma constante serve.
+   * mesmo lugar. Remedida nos dois PNGs da torre remodelada (`scripts/_medir-boss.mjs`): a ponta
+   * do cano começa em x=15, linhas 7..27, num quadro 197×189 de centro (98.5, 94.5) — logo
+   * (−83.5, −77.5) em px de arte, ×SCALE. As duas formas deram o mesmo, então uma constante serve.
    *
-   * Toda a arte da luta compartilha UMA caixa de recorte (`scripts/install-boss-fight.mjs`): as
-   * trocas de textura (pousada ↔ decolagem ↔ ar) não podem deslocar a fortaleza, e o clarão do
-   * disparo + as chamas alargam a caixa — recortar cada forma em separado moveria o centro.
+   * Toda a arte da luta compartilha UMA caixa de recorte (`scripts/install-boss-fight.mjs`): a
+   * troca de textura (pousada ↔ ar) não pode deslocar a fortaleza, e o clarão do disparo + as
+   * chamas alargam a caixa — recortar cada forma em separado moveria o centro.
    */
-  private static readonly MUZZLE_X = -64;
-  private static readonly MUZZLE_Y = -54;
+  private static readonly MUZZLE_X = -63;
+  private static readonly MUZZLE_Y = -58;
 
   /**
    * Para onde a arte do cometa APONTA, medida no PNG — não chutada (lição 13).
@@ -170,6 +182,8 @@ export class Boss implements StageBoss {
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly bullets: Phaser.Physics.Arcade.Group,
+    /** As explosões da cena — a DECOLAGEM é contada por elas (ver `startTakeoff`). */
+    private readonly fx: Fx,
     hp = 90,
   ) {
     this.hp = hp;
@@ -506,30 +520,42 @@ export class Boss implements StageBoss {
   /**
    * A DECOLAGEM — a virada de fúria, uma vez só.
    *
-   * É o beat central da luta e o eco da fase ("A Decolagem", GDD §7): a cidadela racha os
-   * pilares, acende os propulsores e SOBE. Enquanto isso ela é IMUNE e não ataca (mesmo escudo
-   * da troca de forma do Núcleo), senão o jogador atravessaria a transição no dano.
+   * É o beat central da luta e o eco da fase ("A Decolagem", GDD §7): a cidadela se ARRANCA do
+   * chão e sobe nos propulsores. Enquanto isso ela é IMUNE e não ataca (mesmo escudo da troca de
+   * forma do Núcleo), senão o jogador atravessaria a transição no dano.
    *
-   * A animação (`boss-takeoff`) faz a base quebrar; o CÓDIGO faz a subida, com um tween em
-   * `sprite.y` do repouso pousado ao aéreo. Um tween em `y` não moveria o CORPO Arcade (ele
-   * sobrescreve a posição todo frame — o bug documentado na entrada), mas durante a decolagem o
-   * `update` retorna cedo e o corpo está parado; ao fim, `body.reset` ressincroniza tudo.
+   * ─── AS EXPLOSÕES SÃO O ARGUMENTO (2026-08-09, pedido do Henrique) ───
+   *
+   * A torre remodelada não tem animação de decolagem — as duas formas são artes SOLTAS, e sem
+   * nada entre elas a troca de textura seria um corte seco: a cidadela de pedra virando um casco
+   * de foguetes num quadro, sem motivo. A CADEIA DE ESTOUROS é o motivo. Ela quebra a base ao
+   * longo de ~1s, e a troca de arte acontece DEBAIXO do maior estouro (`SWAP_AT`), que é o
+   * truque de corte mais velho que existe: o olho não vê o que trocou porque estava vendo fogo.
+   *
+   * O CÓDIGO faz a subida, com um tween em `sprite.y` do repouso pousado ao aéreo. Um tween em
+   * `y` não moveria o CORPO Arcade (ele sobrescreve a posição todo frame — o bug documentado na
+   * entrada), mas durante a decolagem o `update` retorna cedo e o corpo está parado; ao fim,
+   * `body.reset` ressincroniza tudo.
    */
   private startTakeoff(): void {
     this.takingOff = true;
-    this.baseTint = 0xff9a6a; // o casco fica quente para o resto da luta (o aviso é o estado)
+    // O casco fica QUENTE para o resto da luta (o aviso é o estado). Mas só um viés — não uma
+    // repintura: com a torre remodelada (2026-08-09), 0xff9a6a virava o aço quase preto em cobre
+    // enferrujado e apagava a linha dark sci-fi da arte. O que anuncia a fase aérea é a FORMA
+    // (a cidadela de pedra vira bocais de propulsor), não a cor; ao tint sobra insinuar o calor.
+    this.baseTint = 0xffd0bc;
     this.body.setVelocity(0, 0);
-
-    if (this.scene.anims.exists('boss-takeoff')) {
-      this.sprite.anims.stop();
-      this.sprite.play('boss-takeoff');
-    }
 
     const m = this.muzzle;
     this.muzzleFx.explode(24, m.x, m.y);
     this.chargeFx.explode(20, this.sprite.x, this.sprite.y);
     this.scene.cameras.main.shake(Boss.TAKEOFF_MS, 0.006);
-    this.scene.cameras.main.flash(400, 232, 60, 140);
+    // 160ms, não 400: o clarão é o SOCO de abertura da virada. Esticado, ele lava a tela inteira
+    // durante um terço da decolagem — e a decolagem agora tem uma cadeia de estouros para ser
+    // VISTA. Um flash que cobre o que ele deveria anunciar trabalha contra si mesmo.
+    this.scene.cameras.main.flash(160, 232, 60, 140);
+
+    this.blowUpBase();
 
     this.scene.tweens.add({
       targets: this.sprite,
@@ -540,18 +566,77 @@ export class Boss implements StageBoss {
     });
   }
 
-  /** Fim da decolagem: assume a arte AÉREA, ressincroniza o corpo e volta a lutar. */
+  /**
+   * A CADEIA que arranca a fortaleza do chão.
+   *
+   * Os estouros andam DE BAIXO PARA CIMA e de fora para dentro: começam nos pilares (a base, que
+   * é o que precisa ceder para ela subir) e terminam no corpo. Cada um é sorteado dentro da
+   * silhueta — a lista é de OFFSETS relativos ao centro do sprite, lida no instante do disparo,
+   * porque o sprite está SUBINDO enquanto a cadeia toca (um x/y fixo deixaria o fogo para trás).
+   *
+   * O estouro do meio (`SWAP_AT`) é `explodeBig` e é o que cobre a troca de arte.
+   */
+  private blowUpBase(): void {
+    // Offsets (dx, dy) a partir do CENTRO do sprite escalado. dy +70 é a base do conteúdo
+    // (ver BASE_Y_GROUND); os últimos sobem para o casco.
+    const pontos: [number, number, number][] = [
+      // dx, dy, tamanho (Fx.explode: ≤1.25 pequeno, ≤2 médio, >2 grande)
+      [-38, 66, 1.8],
+      [34, 70, 2.0],
+      [-8, 60, 1.6],
+      [46, 44, 1.8],
+      [-46, 30, 2.0],
+      [12, 10, 1.6],
+      [-20, -18, 1.8],
+    ];
+
+    const passo = Boss.TAKEOFF_MS / (pontos.length + 1);
+
+    pontos.forEach(([dx, dy, tam], i) => {
+      this.scene.time.delayedCall(Math.round(i * passo), () => {
+        if (this.dead || !this.sprite.active) return;
+        this.fx.explode(this.sprite.x + dx, this.sprite.y + dy, tam);
+      });
+    });
+
+    // O ESTOURO GRANDE, no meio da subida: é ele que esconde o corte entre as duas artes.
+    //
+    // `explode(2.6)` e NÃO `explodeBig`: os dois usam a mesma sheet de 128px, mas o explodeBig
+    // acende um flash de TELA INTEIRA junto. Aqui isso seria autossabotagem — o clarão apaga a
+    // fortaleza no exato quadro em que ela troca de forma, que é o quadro que o jogador precisa
+    // ver. A bola de fogo local cobre o corte; a tela continua legível ao redor dela.
+    this.scene.time.delayedCall(Boss.SWAP_AT, () => {
+      if (this.dead || !this.sprite.active) return;
+      this.fx.explode(this.sprite.x, this.sprite.y + 30, 2.6);
+      this.swapToAirArt();
+    });
+  }
+
+  /**
+   * Troca para a arte com propulsores. Parar a animação ANTES do setTexture (armadilha do
+   * Núcleo: a animação sobrescreve a textura no quadro seguinte).
+   *
+   * Chamada de dentro da cadeia de explosões (debaixo do estouro grande) e, por garantia, de
+   * novo no fim da decolagem — `airborne` já estar de pé faria a segunda chamada reiniciar a
+   * animação de hover no meio, então ela é idempotente pelo próprio `anims.getName()`.
+   */
+  private swapToAirArt(): void {
+    if (this.sprite.texture.key === 'bossAir' || this.sprite.anims.getName() === 'boss-air-hover') {
+      return;
+    }
+    this.sprite.anims.stop();
+    if (this.scene.anims.exists('boss-air-hover')) this.sprite.play('boss-air-hover');
+    else this.sprite.setTexture('bossAir');
+    this.sprite.setTint(this.baseTint);
+  }
+
+  /** Fim da decolagem: ressincroniza o corpo e volta a lutar. */
   private finishTakeoff(): void {
     if (this.dead) return;
     this.airborne = true;
     this.takingOff = false;
 
-    // Troca para a arte com propulsores. Parar a animação ANTES do setTexture (armadilha do
-    // Núcleo: a animação sobrescreve a textura no quadro seguinte).
-    this.sprite.anims.stop();
-    if (this.scene.anims.exists('boss-air-hover')) this.sprite.play('boss-air-hover');
-    else this.sprite.setTexture('bossAir');
-    this.sprite.setTint(this.baseTint);
+    this.swapToAirArt();
 
     // O tween moveu o sprite; o corpo estava parado no y de solo. Ressincroniza na altura aérea.
     this.body.reset(this.sprite.x, Boss.BASE_Y_AIR);

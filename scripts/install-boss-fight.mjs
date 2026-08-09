@@ -1,34 +1,57 @@
 // Instala TODA a arte da luta do chefão da Fase 1 com UMA caixa de recorte compartilhada.
 //
-// A luta troca de arte no meio (solo -> decolagem -> ar), e as trocas têm que ser INVISÍVEIS:
-// a fortaleza não pode saltar de lugar quando o sprite muda de textura. Isso só se garante
-// recortando TODOS os quadros — os dois estáticos, o fogo de solo, o hover e o fogo aéreos, e a
-// decolagem — pela MESMA caixa (a união de todos). Cada PNG sai do mesmo tamanho, com a
-// fortaleza no mesmo pixel; o clarão do disparo e as chamas dos propulsores viram só margem
-// que sobra nos outros quadros.
+// A luta troca de arte no meio (solo -> ar), e a troca tem que ser INVISÍVEL: a fortaleza não
+// pode saltar de lugar quando o sprite muda de textura. Isso só se garante recortando TODOS os
+// quadros — os dois estáticos e os dois grupos de disparo — pela MESMA caixa (a união de todos).
+// Cada PNG sai do mesmo tamanho, com a fortaleza no mesmo pixel; o clarão do disparo e as chamas
+// dos propulsores viram só margem que sobra nos outros quadros.
 //
 // É o mesmo princípio do install-anim-par.mjs, estendido para N grupos + 2 estáticos.
 //
 // A limpeza (xadrez + bordas 100% opacas) é a de sempre, e vem ANTES da caixa.
+//
+// ─── SELEÇÃO DE QUADROS (2026-08-09) ───
+//
+// Cada grupo declara QUAIS índices entram, não "todos até dar 404". A torre remodelada veio com
+// animações de 9 quadros que o gerador não entregou limpas: no grupo do ar, o quadro 2 é um
+// borrão cinza (a arte se perdeu) e os quadros 4 e 8 têm um clarão branco SOLTO no ar à direita
+// do casco — e um quadro solto assim não é só feio, ele entra na caixa UNIÃO e infla o recorte
+// de todo mundo. Os índices abaixo são os quadros aprovados a olho, na ORDEM em que devem tocar
+// (clarão grande -> pequeno), não a ordem em que o gerador os cuspiu.
+//
+// O IDLE das duas formas NÃO vem daqui: é sintetizado do estático por scripts/pulsar-brilho.mjs
+// (ver o cabeçalho dele — o v3 do PixelLab estroboscopa em idle de sprite grande).
 //
 // uso: node scripts/install-boss-fight.mjs
 import sharp from 'sharp';
 import fs from 'fs';
 
 const U = 'f7282f36-b779-4f64-832a-4693ca4cc628';
-const O_SOLO = '49a4f934-6aa9-4d85-aaec-9334890a5816'; // arte pousada (base de pedra)
-const O_AR = '2d499c7d-e5c5-4d66-9612-15381f050126'; // estado com propulsores
+// A TORRE REMODELADA (passe visual 2026-08-09, escolha do Henrique): a linha dark sci-fi que a
+// arte anterior tinha perdido. Duas formas, um objeto cada.
+const O_SOLO = '5bba5ffc-778a-4c25-b4df-47fd623b9923'; // pousada, sobre a cidadela de pedra
+const O_AR = '48724795-10f8-4653-832d-d1bea410b33e'; // quebrada, sobre os três propulsores
 
 const raiz = (obj) => `https://backblaze.pixellab.ai/file/pixellab-characters/objects/${U}/${obj}`;
 const anim = (obj, grp) => `${raiz(obj)}/animations/${grp}/unknown`;
 const estatico = (obj) => `${raiz(obj)}/rotations/unknown.png`;
 
-// Cada item vira arquivos public/sprites/<nome>-<i>.png. `estatico` recebe também um PNG solto.
+// Cada item vira arquivos public/sprites/<nome>-<i>.png, numerados 0..n-1 na ordem de `quadros`.
 const grupos = [
-  { nome: 'boss-fire-anim', base: anim(O_SOLO, '894d1f08-f198-4545-8e48-273b8c345e06') },
-  { nome: 'boss-air-anim', base: anim(O_AR, '950a9859-1f90-45ab-9358-7ce1a0be15b3') },
-  { nome: 'boss-air-fire-anim', base: anim(O_AR, '55cc09a4-13bf-46e3-a177-0885ed65c851') },
-  { nome: 'boss-takeoff-anim', base: anim(O_SOLO, 'e30a7e1b-b946-4e78-9bea-76c464d876c0') },
+  {
+    nome: 'boss-fire-anim',
+    base: anim(O_SOLO, 'ce2e52b4-260b-4ee1-a0be-d205c886d020'),
+    // 0..3 são a torre em repouso (olho apagado) — no disparo elas atrasariam o clarão em ~0.3s
+    // contra as balas, que saem no mesmo frame em que o Boss.update manda tocar.
+    quadros: [4, 5, 6, 7, 8],
+  },
+  {
+    nome: 'boss-air-fire-anim',
+    base: anim(O_AR, 'b0af9567-7173-45e0-a797-4564bd94253a'),
+    // O grupo do ar é "pairar + atirar" num só. Aqui ficam SÓ os quadros de disparo, do clarão
+    // maior ao menor; o 2 (borrão) e o 4/8 (clarão solto) ficam de fora.
+    quadros: [1, 6, 7, 3],
+  },
 ];
 const estaticos = [
   { nome: 'boss', url: estatico(O_SOLO) }, // fase 1, pousada
@@ -83,18 +106,16 @@ async function baixarLimpo(url) {
   return { data: limpar(data, info.width, info.height), W: info.width, H: info.height };
 }
 
-// 1) Baixa e limpa tudo. Grupos: fetch sequencial até 404 (não confio na contagem de cabeça).
+// 1) Baixa e limpa tudo.
 const todos = []; // { destino: 'nome-i' | 'nome', frame }
 for (const g of grupos) {
   fs.mkdirSync(`assets/raw/anim-${g.nome}`, { recursive: true });
-  for (let i = 0; ; i++) {
-    const q = await baixarLimpo(`${g.base}/${i}.png`);
-    if (!q) {
-      g.n = i;
-      break;
-    }
+  for (let i = 0; i < g.quadros.length; i++) {
+    const q = await baixarLimpo(`${g.base}/${g.quadros[i]}.png`);
+    if (!q) throw new Error(`${g.nome}: quadro ${g.quadros[i]} não baixou`);
     todos.push({ destino: `${g.nome}-${i}`, frame: q });
   }
+  g.n = g.quadros.length;
 }
 for (const e of estaticos) {
   const q = await baixarLimpo(e.url);
@@ -135,5 +156,10 @@ console.log(
     (xadrezTotal ? ` · xadrez: ${xadrezTotal}px` : '') +
     (bordasTotal ? ` · bordas: ${bordasTotal}` : ''),
 );
-for (const g of grupos) console.log(`  ${g.nome}: ${g.n} quadros`);
+for (const g of grupos) console.log(`  ${g.nome}: ${g.n} quadros (do lote: ${g.quadros.join(',')})`);
 for (const e of estaticos) console.log(`  ${e.nome}.png (estático)`);
+console.log(
+  '\nfalta o IDLE das duas formas (sintetizado, não gerado):\n' +
+    '  node scripts/pulsar-brilho.mjs public/sprites/boss.png public/sprites/boss-idle-anim 8\n' +
+    '  node scripts/pulsar-brilho.mjs public/sprites/boss-air.png public/sprites/boss-air-anim 8',
+);

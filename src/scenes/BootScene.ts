@@ -9,14 +9,16 @@ import { COLORS, GAME_WIDTH } from '../config';
  * animação nova, atualize o número aqui.
  */
 const FRAMES: Record<string, number> = {
-  // A luta da Torre tem DUAS formas de arte (solo -> ar) + a decolagem que liga uma à outra.
-  // `boss-idle` é o pulso do olho na forma pousada (sintetizado, não gerado — ver
-  // scripts/pulsar-brilho.mjs); as demais vêm do PixelLab.
+  // A luta da Torre tem DUAS formas de arte (solo -> ar). Os dois IDLES são sintetizados do
+  // próprio estático (o pulso do olho e das chamas — scripts/pulsar-brilho.mjs); só os dois
+  // DISPAROS vêm do PixelLab, e por SELEÇÃO de quadros (ver scripts/install-boss-fight.mjs).
+  //
+  // Não há `bossTakeoffAnim`: a torre remodelada (2026-08-09) não tem animação de decolagem, e a
+  // virada de fúria passou a ser contada por EXPLOSÕES encadeadas sobre a subida (Boss.startTakeoff).
   bossIdleAnim: 8,
-  bossFireAnim: 7,
-  bossAirAnim: 9,
-  bossAirFireAnim: 7,
-  bossTakeoffAnim: 13,
+  bossFireAnim: 5,
+  bossAirAnim: 8,
+  bossAirFireAnim: 4,
   shipAnim: 7,
   droneAnim: 7,
   gunshipAnim: 7,
@@ -84,8 +86,6 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // FORMA POUSADA (fase 1): olho pulsando + o disparo do canhão.
   { key: 'boss-idle', prefix: 'bossIdleAnim', frameRate: 10 },
   { key: 'boss-fire', prefix: 'bossFireAnim', frameRate: 14, loop: false },
-  // A DECOLAGEM: toca UMA vez na virada de fúria, a cidadela racha e acende os propulsores.
-  { key: 'boss-takeoff', prefix: 'bossTakeoffAnim', frameRate: 10, loop: false },
   // FORMA NO AR (fase 2): propulsores tremulando + o disparo.
   { key: 'boss-air-hover', prefix: 'bossAirAnim', frameRate: 10 },
   { key: 'boss-air-fire', prefix: 'bossAirFireAnim', frameRate: 14, loop: false },
@@ -273,7 +273,6 @@ const ART: Record<string, string> = {
   ...animFrames('bossFireAnim', 'boss-fire-anim'),
   ...animFrames('bossAirAnim', 'boss-air-anim'),
   ...animFrames('bossAirFireAnim', 'boss-air-fire-anim'),
-  ...animFrames('bossTakeoffAnim', 'boss-takeoff-anim'),
   ...animFrames('shipAnim', 'ship-anim'),
   ...animFrames('droneAnim', 'drone-anim'),
   ...animFrames('gunshipAnim', 'gunship-anim'),
