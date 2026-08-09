@@ -60,7 +60,10 @@ async function amostrar(rotulo, segundos) {
     await page.waitForTimeout(100);
     const f = await faixa();
     // Só interessa a leva CHEIA — leques pela metade (já saindo da faixa) mentem para melhor.
-    if (f.ys.length >= 4) melhores.push(f.ys);
+    // 3, não 4: com o leque em 4 tiros os vãos ficaram largos o bastante para o primeiro cometa
+    // já ter saído da faixa quando o último entra, e exigir os 4 juntos fazia a sonda não achar
+    // amostra nenhuma na fase aérea (onde o míssil ainda cala o leque de vez em quando).
+    if (f.ys.length >= 3) melhores.push(f.ys);
   }
   if (!melhores.length) {
     console.log(`${rotulo}: nenhuma leva cheia na faixa`);

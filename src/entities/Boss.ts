@@ -176,9 +176,17 @@ export class Boss implements StageBoss {
    *      não no mesmo frame. Somados, os dois padrões viravam uma parede; separados no TEMPO,
    *      cada um tem a sua janela de leitura — o leque é um problema de POSIÇÃO, o mirado é um
    *      problema de REAÇÃO, e o jogador só resolve os dois se puder resolvê-los um de cada vez.
+   *
+   * ─── E DEPOIS DE 5 PARA 4, NAS DUAS FASES (2026-08-09, jogando) ───
+   *
+   * Com 5 os vãos já cabiam a nave (41–46px), mas caber não é o mesmo que ser TRANQUILO: o
+   * Henrique pediu um leque mais calmo porque a fase de fúria já entrega a punição da luta —
+   * ela tem o compasso mais rápido, o tiro mirado e o míssil. O leque não precisa competir com
+   * isso; ele é a batida de fundo. Com 4, o arco de 60° abre de 15° para 20° entre tiros, e o
+   * vão passa de ~43px para ~57px — de "dá para passar" para "escolha por onde".
    */
-  private static readonly FAN_GROUND = 5;
-  private static readonly FAN_AIR = 5;
+  private static readonly FAN_GROUND = 4;
+  private static readonly FAN_AIR = 4;
   /** Atraso do tiro mirado depois do leque. É o que impede os dois de virarem uma parede só. */
   private static readonly AIMED_DELAY = 400;
 
