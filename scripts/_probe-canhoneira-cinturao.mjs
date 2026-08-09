@@ -67,6 +67,24 @@ for (let i = 0; i < 120; i++) {
     console.log(`t=${e.t}s  CANHONEIRA ${c.tex} ${c.w}x${c.h} em (${c.x},${c.y}) vx=${c.vx} flip=${c.flip}`);
     console.log(`  resto na tela: ${e.inimigos.filter((x) => x.kind !== 'canhoneira').map((x) => `${x.kind} ${x.w}x${x.h}`).join(', ') || '(nenhum)'}`);
     await page.screenshot({ path: 'probe-canhoneira-cinturao.png' });
+
+    // E o TIRO: ela atira a cada 1.6s (DEFS.fireRate). O que se confere aqui é que a bola da
+    // pele saiu mesmo — o `bolt2` de sempre no lugar dela significa que a guarda de textura
+    // caiu, não que o desenho está errado.
+    for (let k = 0; k < 60; k++) {
+      await page.waitForTimeout(200);
+      const tiros = await page.evaluate(() =>
+        window.__s.enemies.enemyBullets
+          .getChildren()
+          .filter((b) => b.active)
+          .map((b) => `${b.texture.key} ${Math.round(b.displayWidth)}x${Math.round(b.displayHeight)}`),
+      );
+      if (tiros.length) {
+        console.log(`  tiros no ar: ${[...new Set(tiros)].join(', ')}`);
+        await page.screenshot({ path: 'probe-canhoneira-tiro.png' });
+        break;
+      }
+    }
     break;
   }
   // Empurra o relógio da fase para não esperar o minuto inteiro até a onda dela.

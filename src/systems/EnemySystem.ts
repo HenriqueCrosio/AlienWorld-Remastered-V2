@@ -101,6 +101,12 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
  * mesma caixa esmagaria o desenho. O `scale` próprio recalibra o TAMANHO em tela pra ficar
  * parecido com o da Fase 1 (hitbox deriva do tamanho exibido, ver `spawn`) sem mexer em `DEFS`.
  *
+ * `bullet` troca o PROJÉTIL junto com a pele, e não junto com o inimigo: a canhoneira da Fase 1
+ * continua cuspindo o traço de sempre. Existe porque o traço (`bolt2`, 13×9 tingido de rosa)
+ * SOME no fundo do cinturão — fundo pintado escuro, destroços, nebulosa —, e um tiro que não se
+ * vê não é dificuldade, é injustiça. A bola é redonda e tem núcleo branco justamente para não
+ * depender da cor para ser vista.
+ *
  * `tint` idem, e pelo mesmo motivo que o chefão da Fase 1 precisou baixar o dele: os tints do
  * `DEFS` foram escolhidos para a arte BIOMEC, que é clara e lavada, e eles COLOREM em vez de
  * insinuar. Aplicados sobre a arte do cinturão — quase preta de propósito — o lilás da canhoneira
@@ -108,7 +114,16 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
  * significa "mostre a arte como ela foi pintada", não "sem tint".
  */
 const STAGE_2_SKIN: Partial<
-  Record<EnemyKind, { texture: string; anim: string; scale?: number; tint?: number }>
+  Record<
+    EnemyKind,
+    {
+      texture: string;
+      anim: string;
+      scale?: number;
+      tint?: number;
+      bullet?: { texture: string; scale: number };
+    }
+  >
 > = {
   batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly', scale: 0.28, tint: 0xffffff },
   // 0.72 encolhe a arte (115×36, a caixa união do voo) até os 26px de ALTURA da canhoneira
@@ -122,6 +137,10 @@ const STAGE_2_SKIN: Partial<
     anim: 'gunship-cinturao-fly',
     scale: 0.72,
     tint: 0xffffff,
+    // 0.5 põe a bola em ~15×14, contra os 10×7 do traço que ela substitui. Maior de propósito:
+    // o que se ganha aqui é LEITURA, e ela é o motivo do troco. Sem tint — a arte já nasce
+    // magenta, que é a cor que o jogo ensina como "tiro que me mata" (ver `fireAt`).
+    bullet: { texture: 'bulletOrb', scale: 0.5 },
   },
 };
 
@@ -433,6 +452,13 @@ export class EnemySystem {
    */
   private fireAt(e: Phaser.Physics.Arcade.Sprite, target: Phaser.Physics.Arcade.Sprite): void {
     const centro = Phaser.Math.Angle.Between(e.x, e.y, target.x, target.y);
+
+    // A MUNIÇÃO da pele por fase (ver STAGE_2_SKIN). Mesma guarda de textura do resto: sem o
+    // PNG, cai no traço de sempre e nada quebra. Só a Fase 2 tem pele — a aranha da Fase 3, que
+    // também passa por aqui, nunca entra nesta condição.
+    const skin = this.stageId === 2 ? STAGE_2_SKIN[e.getData('kind') as EnemyKind] : undefined;
+    const municao =
+      skin?.bullet && this.scene.textures.exists(skin.bullet.texture) ? skin.bullet : undefined;
     const angulos =
       e.getData('kind') === 'aranha'
         ? [centro - Phaser.Math.DegToRad(13), centro, centro + Phaser.Math.DegToRad(13)]
@@ -448,13 +474,24 @@ export class EnemySystem {
       b.setActive(true).setVisible(true);
       b.body!.enable = true;
 
-      // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
-      // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
-      b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
-      // Leve GLOW aditivo: energia, não palito rosa chapado. Só o blend — sem trail e sem
-      // escala anisotrópica, que são o figurino do traçante da Capitânia. O release() abaixo
-      // devolve o blend NORMAL ao reciclar o slot.
-      b.setBlendMode(Phaser.BlendModes.ADD);
+      if (municao) {
+        // A BOLA da pele do cinturão (Fase 2). Sem tint e sem blend aditivo: a arte já vem
+        // magenta com núcleo branco, e somar luz por cima só estoura o núcleo e come a borda
+        // escura que a separa do fundo — a borda é metade do motivo de ela ser visível.
+        b.setTexture(municao.texture).setScale(municao.scale).clearTint();
+        b.setBlendMode(Phaser.BlendModes.NORMAL);
+        // A hitbox do slot é a do `bolt2` até alguém trocá-la (o pool é compartilhado, ver
+        // `release`). Uma bola redonda com a caixa de um traço acerta pelo canto vazio.
+        b.body!.setSize(b.width * 0.7, b.height * 0.7);
+      } else {
+        // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
+        // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
+        b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
+        // Leve GLOW aditivo: energia, não palito rosa chapado. Só o blend — sem trail e sem
+        // escala anisotrópica, que são o figurino do traçante da Capitânia. O release() abaixo
+        // devolve o blend NORMAL ao reciclar o slot.
+        b.setBlendMode(Phaser.BlendModes.ADD);
+      }
       // Origem: usada para a carência contra o relevo (ver GameScene).
       b.setData('ox', e.x);
       b.setData('oy', e.y);

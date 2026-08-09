@@ -320,6 +320,9 @@ const ART: Record<string, string> = {
   ...animFrames('scoutCinturaoAnim', 'scout-cinturao-anim'),
   enemyGunshipCinturao: 'sprites/enemy-gunship-cinturao.png',
   ...animFrames('gunshipCinturaoAnim', 'gunship-cinturao-anim'),
+  // A BOLA de energia que a canhoneira do cinturão cospe (ver STAGE_2_SKIN.canhoneira.bullet):
+  // o traço `bolt2` sumia no fundo escuro da Fase 2. Sem este PNG, o tiro cai no traço de sempre.
+  bulletOrb: 'sprites/bullet-orb.png',
 
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
