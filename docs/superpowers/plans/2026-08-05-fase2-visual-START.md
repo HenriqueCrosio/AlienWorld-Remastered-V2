@@ -1,8 +1,8 @@
 # START — Fatia 3: FASE 2 ("Frota Morta")
 
-**Documento de retomada.** Atualizado 2026-08-08: spec aprovado, plano ESCRITO, e o fundo pintado
-(Task 0 do plano) já implementado e commitado. Faltam as Tasks 1–6 (infra de troca de pele por
-fase + os 4 inimigos redesenhados + regressão final).
+**Documento de retomada.** Atualizado **2026-08-09 (fim da sessão)**: Tasks 0–3 fechadas, a
+Capitânia entrou fora do escopo, a correção de rumo dark sci-fi reabriu as fatias 1 e 2, e a
+canhoneira ganhou bola animada. **Faltam as Tasks 4, 5 e 6** (kamikaze, cargueiro, regressão+merge).
 
 ---
 
@@ -10,55 +10,77 @@ fase + os 4 inimigos redesenhados + regressão final).
 
 Na próxima sessão, diga:
 
-> **"Leia `docs/superpowers/plans/2026-08-05-fase2-visual-START.md` e continue a Fatia 3 (Fase 2)
-> a partir da Task 1 do plano."**
+> **"Leia `docs/superpowers/plans/2026-08-05-fase2-visual-START.md` e continue a Fatia 3 na branch
+> `feat/fase2-visual`. Comece decidindo comigo a pergunta em aberto do kamikaze (Task 4 do plano),
+> depois siga para as Tasks 4, 5 e 6."**
 
-Isso é o suficiente — este doc tem todo o contexto.
+Isso é o suficiente — este doc e o plano têm todo o contexto.
 
 ---
 
-## Estado atual (2026-08-08)
+## Estado atual (2026-08-09)
 
-- **Fatias 0, 1 e 2 FECHADAS**, `main` == `origin/main`, tudo pushado.
-- **Spec pronto e aprovado:** `docs/superpowers/specs/2026-08-05-fase2-visual-design.md`.
-- **Plano escrito:** `docs/superpowers/plans/2026-08-05-fase2-visual.md` (Tasks 0–6).
-- **Branch:** `feat/fase2-visual` (a partir de `main`).
-- **Task 0 (fundo pintado) FEITA** — `public/sprites/paint-bg-f2.png`, camada nova em
-  `Parallax.buildSpace()` (depth −99, guarda de `mode==='espaco'` + textura). Commits
-  `72e840b` (fundo) e `04cb7ba` (o próprio plano).
-- **Próximo passo:** Task 1 do plano — a tabela `STAGE_2_SKIN` + `stageId` no `EnemySystem`
-  (infra pura, sem arte nova ainda), depois Tasks 2–5 (batedor/canhoneira/kamikaze/cargueiro,
-  cada um com geração PixelLab + aprovação do Henrique) e Task 6 (regressão + merge).
+- **Branch:** `feat/fase2-visual`, à frente de `main`. **Nada mergeado ainda.**
+- **Plano:** `docs/superpowers/plans/2026-08-05-fase2-visual.md` — leia a **"Correção de rumo"** e
+  as **2ª, 3ª e 4ª voltas**, que é onde mora o que foi aprendido (elas valem mais que os Steps).
+- **Verificação:** `npm run build` limpo; `probe-chain` fecha a corrente; `probe-stage2` sem erro
+  de página.
 
-## Decisões já fechadas no spec (não redescobrir)
+### Feito
 
-- **A Canhoneira-Capitânia NÃO ENTRA nesta fatia — já tem arte real** (`capitania.png` +
-  `capitania-idle`/`capitania-fire`, instalada há semanas). `BootScene.makeCapitania()` é só o
-  guard-fallback procedural padrão, não a arte em uso — não confundir os dois de novo.
-- **Facção nova do cinturão**, ancorada na paleta da própria Capitânia (cinza-azulado frio +
-  acentos magenta/vermelho quentes) — ela vira a `style_images` de referência (nunca o sprite
-  antigo de cada inimigo).
-- **Redesenhar batedor, canhoneira, kamikaze e cargueiro.** O **drone continua roxo biomec** da
-  Fase 1 (reaproveitado de propósito — variedade: duas facções na mesma fase).
-- ⚠️ **Canhoneira e batedor trocam de TEXTURA por fase** (mesmo `EnemyKind`/comportamento: roxo
-  biomec na Fase 1, facção do cinturão na Fase 2) — **opção (A)** do spec: chave de textura
-  condicionada à `stage` atual no spawn, **não duplicar o `EnemyKind`** (duplicaria manutenção de
-  comportamento também).
-- **Fundo:** `assets/raw/paint-bg-f2-original.png` (1672×941, já quase na proporção do jogo) ENTRA
-  como camada NOVA em `buildSpace()` — **NÃO substitui** `Parallax('espaco')` como a cutscene 1
-  fez. Motivo: `espaco` carrega a lua que ENCOLHE e o Leviatã que CRESCE (a mecânica de
-  aproximação da campanha, GDD §7) — substituir apagaria isso. Reusa o mecanismo genérico
-  `this.paintedBg[]` que `paintBgF1` já usa (tiling + scroll automáticos em `update()`, zero
-  código novo lá). Depth proposto: **−99** (atrás da nebulosa procedural em −98, na frente de
-  nada — não precisa ficar atrás do Starfield como a cutscene, que substituía o céu inteiro).
-  Canvas largo (~2 telas), como `paintBgF1` (fase de duração parecida, ~78s) — não como a
-  cutscene curta.
-- **Ordem de execução escolhida com o Henrique:** fundo pintado primeiro, depois os 4 inimigos.
-- **Fora de escopo:** mina sensora, destroços, `setApproach()`/escala da lua-Leviatã — todos já
-  prontos/fechados, esta fatia não mexe.
+| | |
+|---|---|
+| **Task 0** | Fundo pintado do cinturão (`paint-bg-f2.png`) |
+| **Task 1** | Infra de pele por fase (`STAGE_2_SKIN` + `stageId` no `EnemySystem`) |
+| **Task 2** | Batedor do cinturão — **refeito** em 09/08 (arte escura, 11 quadros) |
+| **Task 3** | Canhoneira do cinturão + bola de energia |
+| **Task 3b** | **Capitânia** (chefão da F2) — entrou fora do escopo, a pedido |
+| **Correção de rumo** | Chefão da F1 remodelado, explosões na decolagem, Aurora da cutscene 1 |
+| **2ª volta** | Balanceamento que a arte nova cobrou (leque, mísseis, decolagem animada) |
+| **4ª volta** | Bola da canhoneira animada e sem deriva; **saída da atmosfera** com pintura própria |
 
-## Próximo passo
+### Falta
 
-Invocar `superpowers:writing-plans` com
-`docs/superpowers/specs/2026-08-05-fase2-visual-design.md` pra gerar o plano de implementação
-(Tasks numeradas, como as fatias anteriores) e então executar.
+- **Task 4 — kamikaze.** ⚠️ **Tem uma decisão em aberto, escrita por extenso no plano** (bloco
+  destacado logo abaixo do título da Task 4): o kamikaze aparece nas TRÊS fases e na luta da
+  Capitânia, e o `tint` quente dele repinta arte escura. Resolver com o Henrique antes de gerar.
+- **Task 5 — cargueiro.** Mesmo caso do kamikaze; decidir junto ou logo depois, mas
+  conscientemente.
+- **Task 6 — regressão final + merge.** ⚠️ As fatias 1 e 2 foram REABERTAS pela correção de rumo,
+  então o merge é **UM só**, não um por fatia.
+
+---
+
+## Regras que não se redescobrem (custaram sessão)
+
+- **Arte dark sci-fi:** casco escuro e dessaturado, luz só onde há energia. E `setTint` sobre arte
+  escura **REPINTA** em vez de insinuar — cor de estado tem que caber na paleta da arte.
+- **O PixelLab ignora "facing right".** Trate como padrão, não acidente. `scripts/espelhar.mjs`
+  espelha o bloco inteiro em disco (melhor que `setFlipX` sempre que houver offset medido no PNG).
+- **O PixelLab anima sem âncora**, e o desenho escorrega ao longo do ciclo.
+  `scripts/centrar-anim.mjs` (novo) tira a deriva do bloco em disco.
+- **Descrever o que se quer não basta: liste o que NÃO se quer** no prompt ("no muzzle flash, no
+  white sparks, no white lightning, no bright flares outside the silhouette"). Foi isso que
+  destravou todas as animações.
+- **`size` é IGNORADO quando se passa `style_images`** — a MAIOR referência define o tamanho de
+  saída. Para gerar em 45px é preciso uma referência DE 45px (`scripts/_ref-batedor-45.png`, que é
+  **gitignorado**; refazer com a linha registrada na Task 1 Step 1 do plano).
+- **A âncora de facção é o batedor** (`public/sprites/enemy-scout-cinturao.png`), não mais a
+  Capitânia.
+- **Idle sintetizado ganha de idle gerado** — duas vezes no mesmo dia (`pulsar-brilho.mjs`).
+- **Pintura de fundo é 480×270** (posicionada com `y = −27`), como `paintBgF2`/`paintBgCut1`.
+- **Sempre olhe o inimigo SE MOVENDO na sonda**, não só o contact sheet: orientação, tamanho em
+  tela e hitbox só aparecem em jogo.
+- **Mostre as duas opções e deixe o Henrique escolher** — não presuma que "mais efeito" é melhor
+  (o hover regerado do chefão foi recusado em favor do original).
+- **Autoria dos commits: só o Henrique**, sem `Co-Authored-By`.
+
+## Sondas úteis desta fatia
+
+`probe-chain.mjs` · `probe-stage2.mjs` · `_probe-zerog.mjs` (a saída da atmosfera, 6 marcos) ·
+`_diag-zerog.mjs` (mede alpha a alpha em vez de julgar por screenshot) · `_probe-orb.mjs` ·
+`_probe-canhoneira-cinturao.mjs` · `_probe-batedor-cinturao.mjs`
+
+⚠️ **`_probe-zerog`/`_diag-zerog`:** para matar a Torre, `damage()` **não mata** — ele devolve
+`true` e quem conduz a morte é `GameScene.killBoss` (como em `onBulletHitBoss`). Escrever `hp = 2`
+no campo também não conta como golpe.

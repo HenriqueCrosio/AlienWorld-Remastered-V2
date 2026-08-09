@@ -411,10 +411,86 @@ sintetizado, salva gerada.
 
 ---
 
+### 4ª volta (2026-08-09, fim do dia): o projétil e a saída da atmosfera
+
+Duas coisas que o Henrique pediu ANTES de começar o kamikaze. Commits `8edbaac` e `6911896`.
+
+- **A bola da canhoneira foi refeita e ANIMADA** (arte dele, objeto `99abc5f2`). Os 7 quadros
+  nasceram com **deriva**: o desenho escorregava 5.6px para a esquerda e 2.9px para cima ao longo
+  do ciclo. Num projétil isso soma à velocidade e vira solavanco a cada volta.
+  - Corrigido EM DISCO por `scripts/centrar-anim.mjs` (**novo, e reutilizável** — a deriva é um
+    defeito recorrente do PixelLab, como a orientação espelhada). Ele realinha o bloco por um
+    ponto comum e recorta todos pela mesma caixa união. A âncora é a **bbox do CORPO** (linhas/
+    colunas com menos de 4px opacos não contam): a bbox crua seria puxada pela fagulha de um
+    quadro só, e o centroide pelo núcleo quente, que se move de propósito dentro da bola.
+    Deriva residual: 0.5px, o arredondamento para inteiro.
+  - **Dois números mudaram junto com a arte, para o jogo NÃO mudar.** `scale` 0.5 → 0.8 (a bola
+    nova tem corpo de 18px contra os 29 da anterior); e a hitbox virou **círculo** de raio 6.25 no
+    centro medido (10,12), como a do cometa da Torre — manter o `0.7` do canvas teria inflado a
+    caixa vertical em 37%, porque o canvas novo é mais alto e a fagulha teria virado hitbox.
+  - **Armadilha de sonda:** ao tocar a animação, `texture.key` deixa de ser `bulletOrb` e vira a
+    chave do QUADRO (`bulletOrbAnim3`) — cada quadro é uma textura própria (`animFrames`). Filtrar
+    por igualdade não acha o tiro.
+  - De quebra: a bola anterior tinha **3 componentes soltas** no PNG (a esfera + dois cacos de 32
+    e 30px flutuando no canvas). A nova está limpa.
+
+- **A saída da atmosfera ganhou cenário próprio** (`public/sprites/paint-bg-zerog.png`, arte dele).
+  Os ~6.5s de zero-G entre a Torre morrer e a cutscene 1 rodavam contra o cenário da Fase 1.
+  Medido, não suposto: o terreno procedural apaga sim, mas `paintBgF1`, `groundFront` e o gradiente
+  de céu ficavam inteiros.
+  - **Coreografia:** a bruma fecha (0.95s) → a troca acontece DENTRO dela (delay 500ms) → a bruma
+    ABRE, cada faixa DESCENDO enquanto se dissolve. O passo 2 é o mesmo truque de corte da
+    decolagem do chefão; o passo 3 foi pedido depois de o Henrique jogar ("liberdade ao sair") —
+    apagar só não bastava, porque névoa que perde opacidade some POR CIMA da nave e lê como
+    "o efeito acabou".
+  - **Depth −95.5 resolve quase tudo de graça:** a pintura é opaca, então céu (−99), nebulosa
+    (−98) e tráfego (−96) somem cobertos. Só o que está NA FRENTE dela precisa de fade à mão.
+  - **A convenção real de tamanho de pintura é 480×270** (com `y = −27` centralizando em 384×216),
+    como `paintBgF2`/`paintBgCut1` — não os 768×432 que o texto da Task 0 deste plano afirma.
+  - **A lua procedural não entra mais quando há pintura**: clara e chapada, ela lia como adesivo
+    sobre arte escura — e o corpo que a nave deixa já está desenhado ocupando a tela.
+  - **`fogBand` é textura de CANVAS, não `Graphics`:** `fillCircle` dá disco de aresta dura (cem
+    discos somam um degradê liso = filtro de cor, não névoa), e `Graphics` **não sabe apagar** — a
+    queda das bordas tem que ser recorte (`destination-out`) por cima do desenho pronto. Calculá-la
+    por borrão não funciona: raio 40 numa faixa de 64 cobre a altura inteira em alpha uniforme e
+    devolve arestas retas.
+  - **A névoa arrasta só na HORIZONTAL.** `tilePositionY` desloca a coincidência entre a parte
+    transparente da textura e a borda do TileSprite; o miolo opaco chega na borda, que corta seco,
+    e aparecem linhas retas atravessando a pintura.
+  - **Retardatário de camada:** `gap = [1e9,1e9]` não basta — o `while (nextX < …)` ainda solta UM
+    sprite, e ele nascia com o alpha cheio da camada. Zerar `layer.alpha` faz o `alphaFor()`
+    (a fonte única) apagar também o retardatário.
+
+---
+
 ### Task 4: Kamikaze do cinturão (espeto na proa, facção nova)
 
 **Files:** Create `public/sprites/enemy-kamikaze.png` (substitui a atual, MESMA chave — o
 kamikaze não troca por fase); Modify `src/scenes/BootScene.ts` só se a contagem de quadros mudar.
+
+> ⚠️ **DECISÃO EM ABERTO — resolver com o Henrique ANTES de gerar (2026-08-09).** O levantamento
+> já está feito; falta só a escolha dele.
+>
+> O kamikaze aparece em **todas as três fases** (`StageDirector`: F1 em t=35/40/50/58/65, F2 em
+> t=20/32/67/76, F3 em t=27/33/54/64/75) **e dentro da luta da Capitânia** (`BossCapitania` larga
+> 2 por ciclo, 3 na fúria, teto de 5). Uma arte na chave `enemyKamikaze` muda os quatro lugares.
+>
+> E há o `tint`: `DEFS.kamikaze.tint = 0xffb066` (laranja quente, já ABRANDADO uma vez de
+> `0xff8c1a` porque o laranja chapado apagava o espeto). Pela lição da correção de rumo — `setTint`
+> sobre arte escura REPINTA — um casco carvão sai laranja chapado. Numa troca global o tint teria
+> de ir para ~branco, e aí **o kamikaze da Fase 1 deixa de ser a peça quente que é hoje**.
+>
+> As opções levantadas:
+> 1. **Pele só da Fase 2** (entra na `STAGE_2_SKIN`, que já aceita `texture`/`anim`/`scale`/
+>    `tint`/`bullet`): uma linha na tabela + chaves novas no `BootScene`. F1/F3/Capitânia
+>    intocadas, e o `scale?` por pele salva qualquer dimensão nativa divergente — a arte não
+>    precisa sair em 26×24.
+> 2. **Troca global**, como o texto original desta task diz: exige arte perto de 26×24 (senão
+>    `DEFS.kamikaze.scale` muda e o balanceamento junto) e o tint indo para ~branco.
+> 3. Troca global mantendo o tint quente — assumindo que a arte carvão vai ler alaranjada.
+>
+> O **cargueiro (Task 5) está no mesmo caso** (60×39, `scale` 1.1, tint `0xb9a8d8`, presente nas
+> três fases) — vale decidir junto ou logo depois, mas conscientemente.
 
 - [ ] **Step 1: Gerar** — na linha dark sci-fi e ancorado no BATEDOR (ver Task 1 Step 1), não na Capitânia: `node scripts/gerar.mjs "small interceptor with a sharp forward spike on the nose, very dark charcoal armour, almost black, low contrast, dim deep red glowing accents, no bright colours, dark sci-fi, side view" 32 sidescroller scripts/_ref-batedor-45.png`. **Proibir os clarões item por item no prompt** — "no muzzle flash, no white sparks, no white lightning, no bright flares outside the silhouette" — é o que destravou todas as animações desta sessão. ⚠️ O kamikaze **não troca por fase**: ele substitui a arte na MESMA chave, então não há `STAGE_2_SKIN.scale` para salvar uma dimensão nativa divergente. Ou a arte sai perto de 26×24, ou o `DEFS.kamikaze.scale` muda — e aí a Fase 1 muda junto. Animação de voo (`frameRate` 14 já fixado).
 - [ ] **Step 2: Julgar + aprovação do Henrique.**
