@@ -109,11 +109,17 @@ pelo pipeline de sempre do PixelLab, com a Capitânia como `style_images` de ref
   sempre. As Tasks 2 e 3 (batedor/canhoneira) só precisam colocar os PNGs nas chaves certas —
   nenhum código novo.
 
-- [ ] **Step 1: Fixar a referência de facção**
+- [x] **Step 1: Fixar a referência de facção** — ⚠️ **A ÂNCORA MUDOU (2026-08-09).**
 
-Baixar `public/sprites/capitania.png` como `style_images` de referência para o PixelLab (as
-Tasks 2–5 passam esse arquivo em `scripts/gerar.mjs "<descrição>" <size> side capitania.png`).
-Confirmar o saldo PixelLab (`get_balance`) e orçar os 4 assets + animações.
+Era `public/sprites/capitania.png`. Depois da correção de rumo, quem define a paleta real da
+facção em tela é o **batedor do cinturão** (`public/sprites/enemy-scout-cinturao.png`) — foi
+contra ele que a canhoneira teve de casar, não contra a Capitânia.
+
+E há uma armadilha de TAMANHO que custou uma leva inteira: **`size` é IGNORADO quando se passa
+`style_images`** — a MAIOR referência define o tamanho de saída (lição 17, já escrita no
+cabeçalho do `gerar.mjs`). Para gerar em 45px é preciso uma referência DE 45px: existe
+`scripts/_ref-batedor-45.png`, um recorte 1:1 da proa do batedor, feito para isso. O mínimo que
+a API aceita em `size` é 32.
 
 - [x] **Step 2: Tabela de pele por fase, em `EnemySystem.ts`**
 
@@ -227,7 +233,7 @@ por:
 
 ---
 
-### Task 2: Batedor do cinturão (dardo magro, cinza-azulado + magenta)
+### Task 2: Batedor do cinturão — ✅ FEITO (refeito em 2026-08-09)
 
 **Files:** Create `public/sprites/enemy-scout-cinturao.png` (+ quadros de animação); Modify
 `src/scenes/BootScene.ts` (`FRAMES`, `ANIMS`, `ART`).
@@ -321,23 +327,80 @@ O Henrique jogou e a luta do chefão da Fase 1 estava punindo sem querer. Commit
 - **Armadilha de sonda:** `probe-chain.mjs` escreve `boss.hp = 2` no CAMPO, o que não chama
   `damage()` — então é o golpe seguinte que dispara a decolagem e os 1.3s de imunidade. Com 3s
   de orçamento a cadeia falhava por sorte, não por bug. Subiu para 7s.
+- **E depois o leque foi de 5 para 4** (`f7ef889`), nas duas fases: com 5 os vãos já cabiam a
+  nave, mas caber não é ser tranquilo — a fase de fúria já entrega a punição da luta, e o leque
+  é a batida de fundo. O arco de 60° abre de 15° para 20° entre tiros: 55–62px de vão.
+
+### 3ª volta: a Capitânia e a canhoneira
+
+Commits `0b49aa7`, `760977e`, `8eb3522`.
+
+- **A Capitânia (chefão da Fase 2) entrou fora do escopo original**, a pedido do Henrique — o
+  plano a listava como "arte já pronta". A nova é uma EDIÇÃO da anterior: mesmo layout, mesma
+  proa, mesma orientação (aponta para a ESQUERDA, vem na sua direção), só muito mais escura e
+  com os canhões desenhados. Por isso é a primeira que não passou por `espelhar.mjs`.
+- **Nome ambíguo, resolvido aqui:** `canhoneira` é o inimigo comum (45×26, ondas na F1 e na F2);
+  a **Capitânia** é o chefão da F2 (124×65). O placeholder procedural dela se chama
+  `CANHONEIRA-CAPITÂNIA` no `BootScene`, e foi daí que veio a confusão numa sessão inteira.
+- **Baterias remedidas pela própria salva** (`scripts/_medir-capitania.mjs`): cada quadro da
+  animação acende UM clarão numa boca, então o clarão é a régua. Média global não servia — o
+  disparo alaranja o casco inteiro de leve e puxava o centroide para o meio da nave, dando
+  sempre a mesma posição. Virou centroide da VIZINHANÇA do pico.
+- **O idle da Capitânia foi gerado e RECUSADO**: o v3 inventou um painel azul que virava magenta
+  e depois vermelho. Voltou a ser sintetizado do estático (`pulsar-brilho.mjs`) — é a segunda
+  vez no mesmo dia que o idle gerado perde para o sintetizado.
+- **`size` é IGNORADO quando se passa `style_images`** — a maior referência define o tamanho de
+  saída, e isso já estava escrito no cabeçalho do `gerar.mjs` (lição 17). Custou uma leva
+  inteira da canhoneira gerada em 115px quando o pedido era 45. A saída foi recortar uma
+  referência 1:1 de 45×26 do próprio batedor.
+- **A canhoneira ficou em `scale` 0.72 (83×26)**, encaixando pela ALTURA e não pela largura. É
+  decisão de balanceamento: o jogador atira na horizontal, então o perfil VERTICAL é quem decide
+  "quão difícil é acertar" (a hitbox sai de `e.height * 0.55`). Pela largura ela ficaria com
+  13px de altura e metade da hitbox de hoje — mais tanque sem ninguém ter pedido.
+- **`STAGE_2_SKIN` ganhou `tint` e `bullet`**, pela mesma razão que ganhou `scale`: o que foi
+  calibrado para a arte biomec (clara) não serve para a do cinturão (quase preta). O lilás
+  `0xbfa8f0` repintava a nave; o traço `bolt2` sumia no fundo. Agora a pele carrega a própria
+  cor e a própria munição — uma bola de energia de ~15×14 —, e a Fase 1 continua intocada.
+- **Fogo foi descartado para o projétil**, por gosto do Henrique e por leitura: fogo é a
+  assinatura do chefão da Fase 1 (o cometa da Torre), e repetir a linguagem numa tropa comum
+  diluiria a hierarquia.
 
 ---
 
-### Task 3: Canhoneira do cinturão (casco pesado, canhão magenta saliente)
+### Task 3: Canhoneira do cinturão — ✅ FEITA
 
-**Files:** Create `public/sprites/enemy-gunship-cinturao.png` (+ quadros); Modify
-`src/scenes/BootScene.ts`.
+**Files:** Created `public/sprites/enemy-gunship-cinturao.png` + 7 quadros de voo +
+`public/sprites/bullet-orb.png`; Modified `src/scenes/BootScene.ts`, `src/systems/EnemySystem.ts`.
 
-**Interfaces:** Produces a textura `enemyGunshipCinturao` + anim `gunship-cinturao-fly`.
+- [x] **Step 1: Gerar** — duas levas descartadas antes da boa: a primeira (`469f8fb7`, cinza-azulada
+      com magenta) morreu na correção de rumo dark sci-fi; a segunda saiu em 115px porque `size` é
+      IGNORADO junto de `style_images`. A terceira usou uma referência 1:1 de 45×26 recortada do
+      próprio batedor. **A arte escolhida pelo Henrique acabou vindo da leva de 115px**
+      (`2dd7ce65`), pelo canhão mais legível.
+- [x] **Step 2: Julgar + aprovação do Henrique** — contact sheets em `scripts/_sheet-canhoneira-*.png`,
+      incluindo um comparando as três escalas possíveis em tamanho REAL de tela.
+- [x] **Step 3: Instalar** — `install-sprite.mjs` + `install-anim.mjs`. **Não precisou de flip**: é o
+      primeiro sprite da série que já nasceu apontando para a direita.
+- [x] **Step 4: Registrado em `BootScene.ts`** (`FRAMES.gunshipCinturaoAnim: 7`, `gunship-cinturao-fly`
+      a 8fps, `ART` + `animFrames`, e a chave `bulletOrb`).
+- [x] **Step 5: DESVIO da dimensão nativa** — a arte veio 115×36, não 45×26. Em vez de recortar
+      (esmagaria o desenho), `STAGE_2_SKIN.canhoneira.scale = 0.72` encaixa pela ALTURA: 83×26 em
+      tela. Ver a 3ª volta acima para o porquê de ser a altura e não a largura. `DEFS.canhoneira.scale`
+      não foi tocado — a Fase 1 continua idêntica.
+- [x] **Step 6: Verificar** — build limpo; `scripts/_probe-canhoneira-cinturao.mjs` (nova) confirma
+      83×26 tocando `gunship-cinturao-fly`, nariz na direção do voo, e a bola no ar; `probe-stage2.mjs`
+      sem erro de página.
+- [x] **Step 7: Commits** — `760977e` (arte + voo + tint por pele) e `8eb3522` (bola de energia).
 
-- [ ] **Step 1: Gerar** — `node scripts/gerar.mjs "heavy blocky gunship, thick cold blue-grey hull plating, one large gun cannon jutting forward glowing warm magenta muzzle, side view facing right" 45 side public/sprites/capitania.png` (dimensão nativa 45×26, igual à `enemy-gunship.png` atual). Animação de voo/propulsão.
-- [ ] **Step 2: Julgar + aprovação do Henrique.**
-- [ ] **Step 3: Instalar** (`install-sprite.mjs` + `install-anim.mjs`, mesmo padrão da Task 2) como `enemy-gunship-cinturao*`.
-- [ ] **Step 4: Registrar em `BootScene.ts`** — `FRAMES.gunshipCinturaoAnim`, `ANIMS` (`{ key: 'gunship-cinturao-fly', prefix: 'gunshipCinturaoAnim', frameRate: 8 }` — mesmo `frameRate` do `gunship-fly`), `ART` (`enemyGunshipCinturao` + `animFrames('gunshipCinturaoAnim', 'gunship-cinturao-anim')`).
-- [ ] **Step 5: Medir dimensão nativa**; recortar para bater com 45×26 se divergir (não tocar `DEFS.canhoneira.scale`).
-- [ ] **Step 6: Verificar** — build PASS; `probe-stage2.mjs`: a canhoneira na Fase 2 lê PESADA, casco frio com o canhão em destaque magenta, para-e-mira igual a sempre (telégrafo antes do tiro inalterado); `probe-chain.mjs`: a canhoneira na Fase 1 continua a arte biomec de sempre.
-- [ ] **Step 7: Commit** — `feat(fase2): arte nova da canhoneira (facao do cinturao)`.
+**Fora do texto original, e o Henrique pediu no meio:** o `tint` e o `bullet` por pele. Ver a 3ª volta.
+
+---
+
+### Task 3b: Capitânia — chefão da Fase 2 — ✅ FEITA (fora do escopo original)
+
+O plano listava a Capitânia como fora de escopo ("arte já pronta"). O Henrique pediu a troca no meio
+da fatia. Commit `0b49aa7`; detalhes na 3ª volta acima. Arte 124×65, baterias remedidas, idle
+sintetizado, salva gerada.
 
 ---
 
@@ -346,7 +409,7 @@ O Henrique jogou e a luta do chefão da Fase 1 estava punindo sem querer. Commit
 **Files:** Create `public/sprites/enemy-kamikaze.png` (substitui a atual, MESMA chave — o
 kamikaze não troca por fase); Modify `src/scenes/BootScene.ts` só se a contagem de quadros mudar.
 
-- [ ] **Step 1: Gerar** — `node scripts/gerar.mjs "small interceptor with a sharp forward spike on the nose, cold blue-grey hull, warm orange-red glowing accents, side view facing right" 26 side public/sprites/capitania.png` (dimensão nativa 26×24, igual à atual). Animação de voo (o kamikaze vibra rápido — `frameRate` 14 já fixado em `ANIMS`, não muda).
+- [ ] **Step 1: Gerar** — na linha dark sci-fi e ancorado no BATEDOR (ver Task 1 Step 1), não na Capitânia: `node scripts/gerar.mjs "small interceptor with a sharp forward spike on the nose, very dark charcoal armour, almost black, low contrast, dim deep red glowing accents, no bright colours, dark sci-fi, side view" 32 sidescroller scripts/_ref-batedor-45.png`. **Proibir os clarões item por item no prompt** — "no muzzle flash, no white sparks, no white lightning, no bright flares outside the silhouette" — é o que destravou todas as animações desta sessão. ⚠️ O kamikaze **não troca por fase**: ele substitui a arte na MESMA chave, então não há `STAGE_2_SKIN.scale` para salvar uma dimensão nativa divergente. Ou a arte sai perto de 26×24, ou o `DEFS.kamikaze.scale` muda — e aí a Fase 1 muda junto. Animação de voo (`frameRate` 14 já fixado).
 - [ ] **Step 2: Julgar + aprovação do Henrique.**
 - [ ] **Step 3: Instalar NA MESMA CHAVE** — `install-sprite.mjs <object-id> <frame> enemy-kamikaze` e `install-anim.mjs kamikaze-anim <url-base> <n> enemy-kamikaze` (sobrescrevendo `public/sprites/enemy-kamikaze*.png` — sem mudança nenhuma em `BootScene.ART`/`EnemySystem`, já apontam para essa chave).
 - [ ] **Step 4: Se a contagem de quadros divergir de 7**, atualizar `FRAMES.kamikazeAnim` em `BootScene.ts`.
@@ -361,7 +424,7 @@ kamikaze não troca por fase); Modify `src/scenes/BootScene.ts` só se a contage
 **Files:** Create `public/sprites/enemy-carrier.png` (substitui a atual, MESMA chave — o
 cargueiro não troca por fase); Modify `src/scenes/BootScene.ts` só se a contagem de quadros mudar.
 
-- [ ] **Step 1: Gerar** — `node scripts/gerar.mjs "slow bulky freighter with an open hangar bay glowing warm magenta on the belly, cold blue-grey hull, side view facing right" 60 side public/sprites/capitania.png` (dimensão nativa 60×39, igual à atual — o hangar aceso na barriga é onde os drones nascem, ver `EnemySystem.updateCarrier`). Animação lenta (`frameRate` 6, já fixado).
+- [ ] **Step 1: Gerar** — mesma linha e mesmas armadilhas do kamikaze: `node scripts/gerar.mjs "slow bulky freighter with an open hangar bay on the belly, very dark charcoal hull, almost black, low contrast, dim deep red glow inside the bay, no bright colours, dark sci-fi, side view" 60 sidescroller scripts/_ref-batedor-45.png` (dimensão nativa 60×39, igual à atual — o hangar aceso na barriga é onde os drones nascem, ver `EnemySystem.updateCarrier`; e ele TAMBÉM não troca por fase). Animação lenta (`frameRate` 6, já fixado).
 - [ ] **Step 2: Julgar + aprovação do Henrique.**
 - [ ] **Step 3: Instalar NA MESMA CHAVE** — `install-sprite.mjs <object-id> <frame> enemy-carrier` e `install-anim.mjs carrier-anim <url-base> <n> enemy-carrier`.
 - [ ] **Step 4: Se a contagem de quadros divergir de 7**, atualizar `FRAMES.carrierAnim`.
