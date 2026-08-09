@@ -202,18 +202,37 @@ export class InterludeScene extends Phaser.Scene {
     const rimW = (this.cfg.rimX1 - this.cfg.rimX0 + 1) * this.cfg.scale;
     // ⚠️ FLUTUAVA sobre uma tira preta (achado revisando a olho, 2026-07-25): a 1ª linha opaca
     // da arte é o CONTORNO do casco, não o brilho — `rimYNudge` desce até a linha de destaque
-    // real (medido pixel a pixel, ver o comentário no `cfg`). E era um retângulo de 1px SÓLIDO;
-    // virou um degradê de 3 linhas (fraca/forte/fraca) — sem aresta dura, funde no casco em vez
-    // de flutuar sobre ele. `setPosition`/`.alpha` do Graphics continuam controláveis pelos
-    // mesmos tweens de entrada/saída que já existiam (subida do casco, fade da implosão).
+    // real (medido pixel a pixel, ver o comentário no `cfg`).
+    //
+    // ─── E O DESFOQUE PRECISOU CRESCER COM A ARTE NOVA (2026-08-09) ───
+    //
+    // O degradê era de 3 linhas com pico 0.5, calibrado contra a Aurora ANTIGA, cuja linha de
+    // destaque era clara (rgb ~149,166,179): ali a aresta só REFORÇAVA um brilho que a arte já
+    // desenhava. A Aurora remodelada tem a mesma linha bem mais escura (rgb ~79..94), e o mesmo
+    // ciano por cima parou de reforçar e passou a DESENHAR — voltou a ler como risco sólido, que
+    // é exatamente o defeito que o degradê existia para resolver.
+    //
+    // A saída é a mesma de sempre, só mais longa e mais fraca: 6 linhas, pico 0.30, e a queda
+    // PARA BAIXO (uma linha acima, quatro abaixo). Assimétrica de propósito — acima da linha do
+    // convés é ESPAÇO, e brilho no vazio flutua; abaixo é chapa, e ali ele lê como luz caindo na
+    // superfície. `setPosition`/`.alpha` do Graphics continuam controláveis pelos mesmos tweens
+    // de entrada/saída que já existiam (subida do casco, fade da implosão).
+    const DEGRADE: [number, number][] = [
+      // deslocamento em y (linhas de tela), alpha
+      [-1, 0.08],
+      [0, 0.3],
+      [1, 0.22],
+      [2, 0.14],
+      [3, 0.08],
+      [4, 0.04],
+    ];
+
     this.deckRimRestY = InterludeScene.DECK_Y + this.cfg.rimYNudge * this.cfg.scale;
     this.deckRim = this.add.graphics().setDepth(11);
-    this.deckRim.fillStyle(0x7fd4e8, 0.18);
-    this.deckRim.fillRect(rimX0, -1, rimW, 1);
-    this.deckRim.fillStyle(0x7fd4e8, 0.5);
-    this.deckRim.fillRect(rimX0, 0, rimW, 1);
-    this.deckRim.fillStyle(0x7fd4e8, 0.18);
-    this.deckRim.fillRect(rimX0, 1, rimW, 1);
+    for (const [dy, alpha] of DEGRADE) {
+      this.deckRim.fillStyle(0x7fd4e8, alpha);
+      this.deckRim.fillRect(rimX0, dy, rimW, 1);
+    }
     this.deckRim.setPosition(0, this.deckRimRestY);
 
     this.banner = pixelText(this, GAME_WIDTH / 2, 26, '', { size: 11, color: COLORS.hotBright })

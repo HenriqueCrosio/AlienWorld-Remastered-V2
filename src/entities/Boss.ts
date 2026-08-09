@@ -80,8 +80,8 @@ export class Boss implements StageBoss {
   private baseTint = 0xffffff;
 
   /**
-   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 200×198 numa tela de
-   * 384×216. A 0.75 ela vira 150×148 — bem mais alta que a torre antiga (97×125), o salto de
+   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 197×193 numa tela de
+   * 384×216. A 0.75 ela vira 148×145 — bem mais alta que a torre antiga (97×125), o salto de
    * presença que a fatia pedia, ainda sobrando céu acima e espaço de voo à esquerda.
    *
    * Reduzir o PNG no disco seria pior: reamostrar pixel art em 0.75 apaga a grade. Escalar no
@@ -91,32 +91,34 @@ export class Boss implements StageBoss {
 
   /**
    * As DUAS alturas de repouso, MEDIDAS nos PNGs (`scripts/_medir-boss.mjs`) — a base do
-   * conteúdo está a 73.5px do centro escalado na forma pousada e a 70.5px na aérea (as duas
+   * conteúdo está a 71.6px do centro escalado na forma pousada e a 68.6px na aérea (as duas
    * artes têm silhuetas diferentes embaixo: pedra × bocais de propulsor), então NÃO dá para usar
    * um número só:
-   *   POUSADA: centro em 132 crava a base em ~206, a linha do solo (`GROUND_Y`). Plantada.
-   *   NO AR:   centro em 110 põe a ponta das chamas em ~180 — 26px de vão sobre o chão: é ele
+   *   POUSADA: centro em 134 crava a base em ~206, a linha do solo (`GROUND_Y`). Plantada.
+   *   NO AR:   centro em 111 põe a ponta das chamas em ~180 — 26px de vão sobre o chão: é ele
    *            que a decolagem promete.
    */
-  private static readonly BASE_Y_GROUND = 132;
-  private static readonly BASE_Y_AIR = 110;
-  /** Meia-largura da fortaleza (72px do centro escalado): `STATION_X = 306` deixa ~6px à direita. */
+  private static readonly BASE_Y_GROUND = 134;
+  private static readonly BASE_Y_AIR = 111;
+  /** Meia-largura da fortaleza (73px do centro escalado): `STATION_X = 306` deixa ~5px à direita. */
   private static readonly STATION_X = 306;
   private static readonly ENTRY_SPEED = 45;
 
-  /** Duração da subida, casada com os 12 quadros de `boss-takeoff` a 10fps (1.2s). */
+  /** Duração da subida. Cabe a decolagem inteira (875ms) + o resto do voo já na forma aérea. */
   private static readonly TAKEOFF_MS = 1300;
 
   /**
    * Quando a arte troca de pousada para aérea, dentro da subida.
    *
-   * No FIM (88%), e não no meio: com a animação de decolagem de volta (2026-08-09), é ELA que
-   * conta a transformação inteira — a base pega fogo, racha, os pedaços voam e a torre sobe nas
-   * chamas. Cortar no meio jogaria fora justamente o que se pagou para ter. A troca acontece no
-   * último respiro, debaixo do estouro grande, e o que ela troca já não é "pedra → foguetes"
-   * (a animação já fez isso), é a silhueta pousada pela silhueta QUEBRADA da fase aérea.
+   * Exatamente no FIM da animação de decolagem: 7 quadros a 8fps = 875ms, e 875/1300 ≈ 0.67.
+   *
+   * A animação mostra SÓ a base explodindo, e isso é escolha do Henrique, não corte por falta:
+   * a decolagem gerada continua depois disso com a torre se soltando, mas a torre que ela
+   * desenha ali não é a dos grandes propulsores — deixá-la correr mostraria uma terceira forma
+   * que não existe no jogo. Então a base explode, e é DAÍ que sai a forma aérea, debaixo do
+   * estouro grande. Os 425ms restantes da subida já são a fortaleza nova voando.
    */
-  private static readonly SWAP_AT = Boss.TAKEOFF_MS * 0.88;
+  private static readonly SWAP_AT = Boss.TAKEOFF_MS * 0.67;
 
   /**
    * Amplitude do bailado vertical — só na fase AÉREA (pousada não bobeia).
@@ -131,8 +133,8 @@ export class Boss implements StageBoss {
    * Boca do canhão, em px a partir do CENTRO do sprite JÁ ESCALADO — e IGUAL nas duas artes: o
    * `create_object_state` só trocou a base (pedra → propulsores), o cano de gatling ficou no
    * mesmo lugar. Remedida nos dois PNGs da torre remodelada (`scripts/_medir-boss.mjs`): a ponta
-   * do cano começa em x=15, linhas 23..31, num quadro 200×198 de centro (100, 99) — logo
-   * (−85, −72) em px de arte, ×SCALE. As duas formas deram o mesmo, então uma constante serve.
+   * do cano começa em x=15, linhas 18..26, num quadro 197×193 de centro (98.5, 96.5) — logo
+   * (−83.5, −74.5) em px de arte, ×SCALE. As duas formas deram o mesmo, então uma constante serve.
    *
    * Toda a arte da luta compartilha UMA caixa de recorte (`scripts/install-boss-fight.mjs`): as
    * trocas de textura (pousada ↔ decolagem ↔ ar) não podem deslocar a fortaleza, e o clarão do
@@ -140,8 +142,8 @@ export class Boss implements StageBoss {
    * moveria o centro. É por isso que MUDAR A LISTA DE QUADROS do install OBRIGA a remedir estes
    * números: a caixa é a união de todos eles.
    */
-  private static readonly MUZZLE_X = -64;
-  private static readonly MUZZLE_Y = -54;
+  private static readonly MUZZLE_X = -63;
+  private static readonly MUZZLE_Y = -56;
 
   /**
    * Para onde a arte do cometa APONTA, medida no PNG — não chutada (lição 13).
@@ -575,10 +577,10 @@ export class Boss implements StageBoss {
    *
    * ─── QUEM CONTA O QUÊ (2026-08-09) ───
    *
-   * A ANIMAÇÃO (`boss-takeoff`, 12 quadros) conta a transformação: a base pega fogo, racha, os
-   * pedaços voam e a torre se levanta sobre as chamas. As EXPLOSÕES (pedido do Henrique) são a
-   * força que a arranca — elas estouram FORA da silhueta, onde a animação não alcança, e é a
-   * maior delas que cobre a troca para a silhueta quebrada da fase aérea (`SWAP_AT`). Uma sem a
+   * A ANIMAÇÃO (`boss-takeoff`, 7 quadros) conta a BASE EXPLODINDO — o fogo que corre pela
+   * junta da cidadela e a arrebenta. As EXPLOSÕES (pedido do Henrique) são a força que arranca a
+   * fortaleza: elas estouram FORA da silhueta, onde a animação não pinta, e é a maior delas que
+   * cobre a troca para a forma aérea, no instante em que a animação acaba (`SWAP_AT`). Uma sem a
    * outra já foi testada e faltava: só a animação não sacode a cena; só as explosões deixavam a
    * pedra intacta subindo no ar.
    *

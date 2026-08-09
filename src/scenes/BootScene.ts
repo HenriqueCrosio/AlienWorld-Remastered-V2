@@ -17,7 +17,7 @@ const FRAMES: Record<string, number> = {
   bossFireAnim: 5,
   bossAirAnim: 6,
   bossAirFireAnim: 4,
-  bossTakeoffAnim: 12,
+  bossTakeoffAnim: 7,
   shipAnim: 7,
   droneAnim: 7,
   gunshipAnim: 7,
@@ -86,9 +86,10 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // FORMA POUSADA (fase 1): olho pulsando + o disparo do canhão.
   { key: 'boss-idle', prefix: 'bossIdleAnim', frameRate: 10 },
   { key: 'boss-fire', prefix: 'bossFireAnim', frameRate: 14, loop: false },
-  // A DECOLAGEM: toca UMA vez na virada de fúria — a base pega fogo, racha, e a torre sobe nas
-  // chamas. 12 quadros a 10fps = 1.2s, casado com o TAKEOFF_MS (1.3s) da subida no Boss.
-  { key: 'boss-takeoff', prefix: 'bossTakeoffAnim', frameRate: 10, loop: false },
+  // A DECOLAGEM: toca UMA vez na virada de fúria — o fogo corre pela junta da cidadela e a
+  // arrebenta. 7 quadros a 8fps = 875ms, e é esse número que o `Boss.SWAP_AT` persegue: a forma
+  // aérea entra no quadro seguinte ao último desta, debaixo do estouro grande.
+  { key: 'boss-takeoff', prefix: 'bossTakeoffAnim', frameRate: 8, loop: false },
   // FORMA NO AR (fase 2): propulsores queimando + o disparo.
   { key: 'boss-air-hover', prefix: 'bossAirAnim', frameRate: 10 },
   { key: 'boss-air-fire', prefix: 'bossAirFireAnim', frameRate: 14, loop: false },

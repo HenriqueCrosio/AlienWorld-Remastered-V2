@@ -77,11 +77,13 @@ const grupos = [
   },
   {
     nome: 'boss-takeoff-anim',
-    base: anim(O_SOLO, '436deaf9-e4cd-4f94-ab36-903da1a8abfd'),
-    // 0..11. O quadro 12 fecha com as chamas LAVADAS (viram cinza-rosa pálido) — como a
-    // animação não dá loop e é cortada pela troca de arte antes do fim, ele só faria falta
-    // se aparecesse, e ele aparece mal.
-    quadros: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    // DO DISCO, não do PixelLab: o Henrique recortou à mão a parte da decolagem gerada que
+    // presta e deixou em `assets/raw/anim_transi_boss_1`. São só os 7 primeiros quadros — a
+    // base pegando fogo e explodindo — e o corte é deliberado: a partir do 8º a torre se
+    // desprende e sobe, mas a torre que o gerador desenhou ali NÃO é a dos grandes propulsores
+    // (a forma aérea de verdade). Deixar a animação seguir mostraria uma terceira torre que não
+    // existe no jogo. Ela mostra a base explodir; quem entra em cena depois é `boss-air`.
+    arquivos: Array.from({ length: 7 }, (_, i) => `assets/raw/anim_transi_boss_1/frame_00${i}.png`),
   },
 ];
 const estaticos = [
@@ -127,29 +129,31 @@ function limpar(data, W, H) {
   return data;
 }
 
-async function baixarLimpo(url) {
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  const { data, info } = await sharp(Buffer.from(await res.arrayBuffer()))
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+/** Um quadro pronto para a caixa: já limpo, ainda no tamanho do gerador. */
+async function carregarLimpo(origem) {
+  const bruto =
+    typeof origem === 'string' && origem.startsWith('http')
+      ? await fetch(origem).then((r) => (r.ok ? r.arrayBuffer().then(Buffer.from) : null))
+      : fs.readFileSync(origem);
+  if (!bruto) return null;
+  const { data, info } = await sharp(bruto).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   return { data: limpar(data, info.width, info.height), W: info.width, H: info.height };
 }
 
-// 1) Baixa e limpa tudo.
+// 1) Carrega e limpa tudo. Um grupo vem da API (`base` + `quadros`) OU do disco (`arquivos`).
 const todos = []; // { destino: 'nome-i' | 'nome', frame }
 for (const g of grupos) {
-  fs.mkdirSync(`assets/raw/anim-${g.nome}`, { recursive: true });
-  for (let i = 0; i < g.quadros.length; i++) {
-    const q = await baixarLimpo(`${g.base}/${g.quadros[i]}.png`);
-    if (!q) throw new Error(`${g.nome}: quadro ${g.quadros[i]} não baixou`);
+  const origens = g.arquivos ?? g.quadros.map((q) => `${g.base}/${q}.png`);
+  for (let i = 0; i < origens.length; i++) {
+    const q = await carregarLimpo(origens[i]);
+    if (!q) throw new Error(`${g.nome}: quadro ${origens[i]} não carregou`);
     todos.push({ destino: `${g.nome}-${i}`, frame: q });
   }
-  g.n = g.quadros.length;
+  g.n = origens.length;
+  g.fonte = g.arquivos ? 'disco' : `lote ${g.quadros.join(',')}`;
 }
 for (const e of estaticos) {
-  const q = await baixarLimpo(e.url);
+  const q = await carregarLimpo(e.url);
   if (!q) throw new Error(`estático ${e.nome}: falhou`);
   todos.push({ destino: e.nome, frame: q });
 }
@@ -187,7 +191,7 @@ console.log(
     (xadrezTotal ? ` · xadrez: ${xadrezTotal}px` : '') +
     (bordasTotal ? ` · bordas: ${bordasTotal}` : ''),
 );
-for (const g of grupos) console.log(`  ${g.nome}: ${g.n} quadros (do lote: ${g.quadros.join(',')})`);
+for (const g of grupos) console.log(`  ${g.nome}: ${g.n} quadros (${g.fonte})`);
 for (const e of estaticos) console.log(`  ${e.nome}.png (estático)`);
 console.log(
   '\nfalta o IDLE DE SOLO (sintetizado, não gerado):\n' +
