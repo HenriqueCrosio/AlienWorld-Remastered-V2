@@ -71,8 +71,9 @@ const FRAMES: Record<string, number> = {
   // O ARAUTO também ganhou propulsão (2026-07-21): era a única nave jogável sem motor animado.
   shipArautoAnim: 9,
 
-  // A AURORA da cutscene 1 (2026-07-25): luzes piscando + chamas azuis dos propulsores.
-  carrierBigAnim: 11,
+  // A AURORA da cutscene 1. Remodelada em 2026-08-09 (casco escuro, luzes vermelhas piscando e
+  // os propulsores roxos pulsando atrás) — a arte anterior tinha saído da linha dark sci-fi.
+  carrierBigAnim: 9,
 };
 
 /**
