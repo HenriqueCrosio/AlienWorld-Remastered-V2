@@ -80,8 +80,8 @@ export class Boss implements StageBoss {
   private baseTint = 0xffffff;
 
   /**
-   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 197×189 numa tela de
-   * 384×216. A 0.75 ela vira 148×142 — bem mais alta que a torre antiga (97×125), o salto de
+   * A FORTALEZA é grande demais para entrar por inteiro: o PNG tem 200×198 numa tela de
+   * 384×216. A 0.75 ela vira 150×148 — bem mais alta que a torre antiga (97×125), o salto de
    * presença que a fatia pedia, ainda sobrando céu acima e espaço de voo à esquerda.
    *
    * Reduzir o PNG no disco seria pior: reamostrar pixel art em 0.75 apaga a grade. Escalar no
@@ -91,28 +91,32 @@ export class Boss implements StageBoss {
 
   /**
    * As DUAS alturas de repouso, MEDIDAS nos PNGs (`scripts/_medir-boss.mjs`) — a base do
-   * conteúdo está a 70px do centro escalado na forma pousada e a 67px na aérea (as duas artes
-   * têm silhuetas diferentes embaixo: pedra × bocais de propulsor), então NÃO dá para usar um
-   * número só:
-   *   POUSADA: centro em 136 crava a base em ~206, a linha do solo (`GROUND_Y`). Plantada.
-   *   NO AR:   centro em 113 põe a ponta das chamas em ~180 — 26px de vão sobre o chão, o
-   *            mesmo vão de antes: é ele que a decolagem promete.
+   * conteúdo está a 73.5px do centro escalado na forma pousada e a 70.5px na aérea (as duas
+   * artes têm silhuetas diferentes embaixo: pedra × bocais de propulsor), então NÃO dá para usar
+   * um número só:
+   *   POUSADA: centro em 132 crava a base em ~206, a linha do solo (`GROUND_Y`). Plantada.
+   *   NO AR:   centro em 110 põe a ponta das chamas em ~180 — 26px de vão sobre o chão: é ele
+   *            que a decolagem promete.
    */
-  private static readonly BASE_Y_GROUND = 136;
-  private static readonly BASE_Y_AIR = 113;
-  /** Meia-largura da fortaleza (73px do centro escalado): `STATION_X = 306` deixa ~5px à direita. */
+  private static readonly BASE_Y_GROUND = 132;
+  private static readonly BASE_Y_AIR = 110;
+  /** Meia-largura da fortaleza (72px do centro escalado): `STATION_X = 306` deixa ~6px à direita. */
   private static readonly STATION_X = 306;
   private static readonly ENTRY_SPEED = 45;
 
-  /** Duração da subida na decolagem. Tempo de a cadeia de estouros tocar inteira e ser LIDA. */
+  /** Duração da subida, casada com os 12 quadros de `boss-takeoff` a 10fps (1.2s). */
   private static readonly TAKEOFF_MS = 1300;
 
   /**
-   * Quando a arte troca de pousada para aérea, dentro da subida. No MEIO, e não no fim: é ali
-   * que o estouro grande cobre o corte, e é ali que a fortaleza está a meio caminho do chão —
-   * trocar no fim faria a pedra viajar a subida inteira e sumir já parada, o que denuncia o corte.
+   * Quando a arte troca de pousada para aérea, dentro da subida.
+   *
+   * No FIM (88%), e não no meio: com a animação de decolagem de volta (2026-08-09), é ELA que
+   * conta a transformação inteira — a base pega fogo, racha, os pedaços voam e a torre sobe nas
+   * chamas. Cortar no meio jogaria fora justamente o que se pagou para ter. A troca acontece no
+   * último respiro, debaixo do estouro grande, e o que ela troca já não é "pedra → foguetes"
+   * (a animação já fez isso), é a silhueta pousada pela silhueta QUEBRADA da fase aérea.
    */
-  private static readonly SWAP_AT = Boss.TAKEOFF_MS * 0.55;
+  private static readonly SWAP_AT = Boss.TAKEOFF_MS * 0.88;
 
   /**
    * Amplitude do bailado vertical — só na fase AÉREA (pousada não bobeia).
@@ -127,15 +131,17 @@ export class Boss implements StageBoss {
    * Boca do canhão, em px a partir do CENTRO do sprite JÁ ESCALADO — e IGUAL nas duas artes: o
    * `create_object_state` só trocou a base (pedra → propulsores), o cano de gatling ficou no
    * mesmo lugar. Remedida nos dois PNGs da torre remodelada (`scripts/_medir-boss.mjs`): a ponta
-   * do cano começa em x=15, linhas 7..27, num quadro 197×189 de centro (98.5, 94.5) — logo
-   * (−83.5, −77.5) em px de arte, ×SCALE. As duas formas deram o mesmo, então uma constante serve.
+   * do cano começa em x=15, linhas 23..31, num quadro 200×198 de centro (100, 99) — logo
+   * (−85, −72) em px de arte, ×SCALE. As duas formas deram o mesmo, então uma constante serve.
    *
-   * Toda a arte da luta compartilha UMA caixa de recorte (`scripts/install-boss-fight.mjs`): a
-   * troca de textura (pousada ↔ ar) não pode deslocar a fortaleza, e o clarão do disparo + as
-   * chamas alargam a caixa — recortar cada forma em separado moveria o centro.
+   * Toda a arte da luta compartilha UMA caixa de recorte (`scripts/install-boss-fight.mjs`): as
+   * trocas de textura (pousada ↔ decolagem ↔ ar) não podem deslocar a fortaleza, e o clarão do
+   * disparo + os estilhaços da decolagem alargam a caixa — recortar cada forma em separado
+   * moveria o centro. É por isso que MUDAR A LISTA DE QUADROS do install OBRIGA a remedir estes
+   * números: a caixa é a união de todos eles.
    */
-  private static readonly MUZZLE_X = -63;
-  private static readonly MUZZLE_Y = -58;
+  private static readonly MUZZLE_X = -64;
+  private static readonly MUZZLE_Y = -54;
 
   /**
    * Para onde a arte do cometa APONTA, medida no PNG — não chutada (lição 13).
@@ -151,33 +157,60 @@ export class Boss implements StageBoss {
   private static readonly COMET_CORE_RADIUS = 4.5;
 
   /**
-   * SALVA DE MÍSSEIS — o segundo padrão da luta, de leitura OPOSTA à do leque.
+   * O LEQUE, em números — e eles foram MEDIDOS, não estimados (`scripts/_probe-leque.mjs`
+   * fotografa os cometas cruzando a coluna do jogador e imprime os vãos verticais).
    *
-   * O leque é rápido e mirado: exige reação. A salva é lenta, larga e em ângulos FIXOS —
-   * ela não persegue ninguém. Teleguiar mísseis num chefão que o jogador enfrenta preso ao
-   * flap seria punição, não desafio: com a mobilidade limitada, um projétil que corrige o
-   * curso não tem esquiva, só dano garantido. Sendo fixa, a salva vira um problema de
-   * POSIÇÃO — o jogador lê as brechas do leque e se planta numa delas.
+   * ─── POR QUE O NÚMERO DE TIROS ENCOLHEU (2026-08-09) ───
+   *
+   * A queixa do Henrique foi que o leque não deixava espaço, e com o flap isso vira punição.
+   * A sonda deu razão a ele, e apontou o culpado exato: a fase POUSADA (5 tiros) abria vãos de
+   * 41–44px, folgados para uma nave de ~14px; a fase AÉREA (7 tiros) abria 31px — e caía para
+   * **15px** onde o tiro MIRADO cruzava o leque. 15px para uma nave de 14px não é uma esquiva
+   * difícil, é uma esquiva que não existe: o flap sobe em degraus, não em milímetros.
+   *
+   * A correção tem duas partes, e a segunda importa mais que a primeira:
+   *   1. A fase aérea desce de 7 para 5 tiros — o mesmo vão da fase pousada, que já estava bom.
+   *   2. O tiro MIRADO sai de dentro do leque: ele passa a ser disparado `AIMED_DELAY` depois,
+   *      não no mesmo frame. Somados, os dois padrões viravam uma parede; separados no TEMPO,
+   *      cada um tem a sua janela de leitura — o leque é um problema de POSIÇÃO, o mirado é um
+   *      problema de REAÇÃO, e o jogador só resolve os dois se puder resolvê-los um de cada vez.
    */
-  private static readonly MISSILE_COUNT = 4;
-  /** Lento de propósito: é o que dá tempo de ler o leque inteiro antes que ele chegue. */
-  private static readonly MISSILE_SPEED = 70;
-  /** Intervalo entre salvas na fase aérea (a única que tem mísseis). */
-  private static readonly MISSILE_RATE_ENRAGED = 4.5;
+  private static readonly FAN_GROUND = 5;
+  private static readonly FAN_AIR = 5;
+  /** Atraso do tiro mirado depois do leque. É o que impede os dois de virarem uma parede só. */
+  private static readonly AIMED_DELAY = 400;
+
   /**
-   * Aviso antes da salva. Míssil sem telégrafo é injusto mesmo não sendo teleguiado: o
-   * jogador precisa do tempo de se REPOSICIONAR, que é a única defesa que a salva admite.
+   * MÍSSEIS — o segundo padrão da luta, de leitura OPOSTA à do leque.
+   *
+   * ─── DE SALVA DE 4 PARA UM DE CADA VEZ (2026-08-09, pedido do Henrique) ───
+   *
+   * A salva antiga eram 4 mísseis em ângulos FIXOS: um leque lento. Ou seja, o mesmo problema
+   * que o leque de cometas já apresentava, com outra arte — e a fase aérea passava a repetir a
+   * pergunta em vez de fazer uma nova. Um míssil SOZINHO e MIRADO faz a pergunta que faltava.
+   *
+   * Ele mira a posição do jogador NO INSTANTE DO DISPARO e segue reto — não corrige o curso.
+   * A diferença importa: um projétil que persegue de verdade não tem esquiva quando a
+   * mobilidade é de flap, só dano garantido. Mirado no lançamento, a defesa existe e é clara —
+   * **saia de onde você estava**. E é isso que o telégrafo compra tempo para fazer.
+   */
+  /** Lento de propósito: é o que dá tempo de SAIR do lugar depois de ver para onde ele aponta. */
+  private static readonly MISSILE_SPEED = 70;
+  /** Intervalo entre mísseis na fase aérea (a única que os tem). Era 4.5 para uma salva de 4. */
+  private static readonly MISSILE_RATE_ENRAGED = 2.6;
+  /**
+   * Aviso antes do disparo. Míssil sem telégrafo é injusto mesmo não sendo teleguiado: o
+   * jogador precisa do tempo de se REPOSICIONAR, que é a única defesa que ele admite.
    * Mesmo princípio da torre de solo (`TerrainSystem.TELEGRAPH`).
    */
   private static readonly MISSILE_TELEGRAPH = 0.65;
   /**
-   * Quanto o leque fica CALADO depois que a salva de mísseis termina de carregar. Somado ao
-   * telégrafo (0.65), o leque some por ~1.85s em torno da salva: os mísseis a SUBSTITUEM em vez
-   * de somarem, e a luta ganha o silêncio que a Torre não tinha (era o único chefão-metrônomo,
-   * `docs/MAPA_TECNICO_BALANCEAMENTO.md`). Sem isto, cometa + míssil na mesma janela tornavam a
-   * fase aérea intransponível.
+   * Quanto o leque fica CALADO depois que o míssil termina de carregar. Era 1.2 (silêncio total
+   * de ~1.85s) quando o míssil vinha em salva de 4 a cada 4.5s. Agora que ele vem sozinho a
+   * cada 2.6s, aquele silêncio comeria a maior parte da luta — 0.35 mantém o princípio (o
+   * míssil SUBSTITUI o leque em vez de somar a ele) sem transformar a fase aérea em pausa.
    */
-  private static readonly FAN_MUTE_AFTER = 1.2;
+  private static readonly FAN_MUTE_AFTER = 0.35;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -293,31 +326,51 @@ export class Boss implements StageBoss {
       const targetY = Boss.BASE_Y_AIR + Math.sin(this.t * 0.8) * Boss.BOB;
       this.body.setVelocityY((targetY - this.sprite.y) * 6);
 
-      // A salva pode CALAR o leque (fanMute). Roda antes do leque para o mute do frame valer já.
-      this.tickMissiles(dt);
+      // O míssil pode CALAR o leque (fanMute). Roda antes do leque para o mute do frame valer já.
+      this.tickMissiles(dt, target);
     }
 
     if (this.fanMute > 0) {
       this.fanMute -= dt;
       // O leque não conta o cooldown enquanto calado: quando o silêncio acaba, ele recomeça do
       // zero, sem despejar uma leva represada de uma vez.
-      this.cooldown = this.airborne ? 1.1 : 1.9;
+      this.cooldown = this.fanRate;
       return;
     }
 
     this.cooldown -= dt;
     if (this.cooldown > 0) return;
 
-    this.cooldown = this.airborne ? 1.1 : 1.9;
+    this.cooldown = this.fanRate;
 
     this.playFire();
-    this.fan(this.airborne ? 7 : 5);
-    if (this.airborne) this.aimed(target);
+    this.fan(this.airborne ? Boss.FAN_AIR : Boss.FAN_GROUND);
+
+    // O MIRADO vem DEPOIS, não junto (ver AIMED_DELAY): disparado no mesmo frame, ele cruzava o
+    // leque e fechava o vão para 15px. `target` é lido de novo no callback — mirar na posição
+    // de 400ms atrás transformaria o atraso num tiro que erra de propósito.
+    if (this.airborne) {
+      this.scene.time.delayedCall(Boss.AIMED_DELAY, () => {
+        if (this.dead || this.takingOff || !this.sprite.active || !target.active) return;
+        this.aimed(target);
+        const a = this.muzzle;
+        this.muzzleFx.explode(4, a.x, a.y);
+      });
+    }
 
     // Clarão na boca do cano, além do recuo do sprite.
     const m = this.muzzle;
     this.muzzleFx.explode(6, m.x, m.y);
     this.scene.cameras.main.shake(60, 0.003);
+  }
+
+  /**
+   * Compasso do leque. A fase aérea era 1.1s com 7 tiros; com 5 tiros ela pode respirar um
+   * pouco mais sem perder a pressão — o que aperta a fase aérea agora é o míssil mirado, não a
+   * quantidade de cometa na tela.
+   */
+  private get fanRate(): number {
+    return this.airborne ? 1.35 : 1.9;
   }
 
   /**
@@ -327,7 +380,7 @@ export class Boss implements StageBoss {
    * (`damage`) agenda um `setTint(baseTint)` 60ms depois e apagaria o aviso no meio da
    * carga. Reescrevendo todo frame, o telégrafo sobrevive a levar tiro.
    */
-  private tickMissiles(dt: number): void {
+  private tickMissiles(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
     if (this.missileCharge > 0) {
       this.missileCharge -= dt;
 
@@ -340,7 +393,7 @@ export class Boss implements StageBoss {
 
       if (this.missileCharge <= 0) {
         this.sprite.setTint(this.baseTint);
-        this.launchMissiles();
+        this.launchMissile(target);
       }
       return;
     }
@@ -350,29 +403,25 @@ export class Boss implements StageBoss {
 
     this.missileCooldown = Boss.MISSILE_RATE_ENRAGED;
     this.missileCharge = Boss.MISSILE_TELEGRAPH;
-    // A salva TOMA o compasso: cala o leque pelo telégrafo inteiro + o rescaldo. É aqui, no
+    // O míssil TOMA o compasso: cala o leque pelo telégrafo inteiro + o rescaldo. É aqui, no
     // início da carga, que o silêncio começa — o jogador vê o telégrafo já sabendo que o leque
-    // parou, e lê a salva sem cometas no meio.
+    // parou, e lê o míssil sem cometas no meio.
     this.fanMute = Boss.MISSILE_TELEGRAPH + Boss.FAN_MUTE_AFTER;
   }
 
   /**
-   * Leque LARGO e LENTO de mísseis em ângulos FIXOS — não mira o jogador (ver MISSILE_COUNT).
+   * UM míssil, mirado em ONDE O JOGADOR ESTÁ neste instante — e depois reto, sem correção.
    *
-   * O arco (140°–220°, com o eixo y crescendo para BAIXO) varre de baixo-à-esquerda até
-   * cima-à-esquerda, mais aberto que o leque de fogo (150°–210°): as brechas entre os mísseis
-   * são a esquiva, e elas precisam caber a nave.
+   * A esquiva é SAIR DO LUGAR, e é por isso que ele é lento (MISSILE_SPEED) e telegrafado: as
+   * duas coisas existem para dar tempo de fazer exatamente isso. Corrigir o curso no meio do
+   * voo tiraria a única defesa que a mobilidade de flap permite — ver o bloco de MISSILE_SPEED.
    */
-  private launchMissiles(): void {
+  private launchMissile(target: Phaser.Physics.Arcade.Sprite): void {
     const m = this.muzzle;
-    const n = Boss.MISSILE_COUNT;
+    const angle = Phaser.Math.Angle.Between(m.x, m.y, target.x, target.y);
 
-    for (let i = 0; i < n; i++) {
-      const angle = Phaser.Math.DegToRad(140 + (i / (n - 1)) * 80);
-
-      const b = this.bullets.get(m.x, m.y) as Phaser.Physics.Arcade.Sprite | null;
-      if (!b) continue;
-
+    const b = this.bullets.get(m.x, m.y) as Phaser.Physics.Arcade.Sprite | null;
+    if (b) {
       b.setActive(true).setVisible(true);
       b.body!.enable = true;
 
@@ -524,13 +573,14 @@ export class Boss implements StageBoss {
    * chão e sobe nos propulsores. Enquanto isso ela é IMUNE e não ataca (mesmo escudo da troca de
    * forma do Núcleo), senão o jogador atravessaria a transição no dano.
    *
-   * ─── AS EXPLOSÕES SÃO O ARGUMENTO (2026-08-09, pedido do Henrique) ───
+   * ─── QUEM CONTA O QUÊ (2026-08-09) ───
    *
-   * A torre remodelada não tem animação de decolagem — as duas formas são artes SOLTAS, e sem
-   * nada entre elas a troca de textura seria um corte seco: a cidadela de pedra virando um casco
-   * de foguetes num quadro, sem motivo. A CADEIA DE ESTOUROS é o motivo. Ela quebra a base ao
-   * longo de ~1s, e a troca de arte acontece DEBAIXO do maior estouro (`SWAP_AT`), que é o
-   * truque de corte mais velho que existe: o olho não vê o que trocou porque estava vendo fogo.
+   * A ANIMAÇÃO (`boss-takeoff`, 12 quadros) conta a transformação: a base pega fogo, racha, os
+   * pedaços voam e a torre se levanta sobre as chamas. As EXPLOSÕES (pedido do Henrique) são a
+   * força que a arranca — elas estouram FORA da silhueta, onde a animação não alcança, e é a
+   * maior delas que cobre a troca para a silhueta quebrada da fase aérea (`SWAP_AT`). Uma sem a
+   * outra já foi testada e faltava: só a animação não sacode a cena; só as explosões deixavam a
+   * pedra intacta subindo no ar.
    *
    * O CÓDIGO faz a subida, com um tween em `sprite.y` do repouso pousado ao aéreo. Um tween em
    * `y` não moveria o CORPO Arcade (ele sobrescreve a posição todo frame — o bug documentado na
@@ -545,6 +595,11 @@ export class Boss implements StageBoss {
     // (a cidadela de pedra vira bocais de propulsor), não a cor; ao tint sobra insinuar o calor.
     this.baseTint = 0xffd0bc;
     this.body.setVelocity(0, 0);
+
+    if (this.scene.anims.exists('boss-takeoff')) {
+      this.sprite.anims.stop();
+      this.sprite.play('boss-takeoff');
+    }
 
     const m = this.muzzle;
     this.muzzleFx.explode(24, m.x, m.y);
@@ -569,25 +624,24 @@ export class Boss implements StageBoss {
   /**
    * A CADEIA que arranca a fortaleza do chão.
    *
-   * Os estouros andam DE BAIXO PARA CIMA e de fora para dentro: começam nos pilares (a base, que
-   * é o que precisa ceder para ela subir) e terminam no corpo. Cada um é sorteado dentro da
-   * silhueta — a lista é de OFFSETS relativos ao centro do sprite, lida no instante do disparo,
-   * porque o sprite está SUBINDO enquanto a cadeia toca (um x/y fixo deixaria o fogo para trás).
+   * Os estouros andam DE BAIXO PARA CIMA: começam nos pilares (a base, que é o que precisa
+   * ceder para ela subir) e sobem pelo corpo. A lista é de OFFSETS relativos ao centro do
+   * sprite, lida no instante do disparo, porque o sprite está SUBINDO enquanto a cadeia toca
+   * (um x/y fixo deixaria o fogo para trás).
    *
-   * O estouro do meio (`SWAP_AT`) é `explodeBig` e é o que cobre a troca de arte.
+   * São QUATRO, não sete: com a animação de decolagem de volta, o fogo de dentro da silhueta já
+   * é dela. Sete estouros por cima viravam uma cortina — o jogador via fumaça, não a fortaleza
+   * se partindo. Estes quatro ficam nas BORDAS, onde a animação não pinta.
    */
   private blowUpBase(): void {
-    // Offsets (dx, dy) a partir do CENTRO do sprite escalado. dy +70 é a base do conteúdo
-    // (ver BASE_Y_GROUND); os últimos sobem para o casco.
+    // Offsets (dx, dy) a partir do CENTRO do sprite escalado. dy +73 é a base do conteúdo
+    // (ver BASE_Y_GROUND); os últimos sobem pela lateral.
     const pontos: [number, number, number][] = [
       // dx, dy, tamanho (Fx.explode: ≤1.25 pequeno, ≤2 médio, >2 grande)
-      [-38, 66, 1.8],
-      [34, 70, 2.0],
-      [-8, 60, 1.6],
-      [46, 44, 1.8],
-      [-46, 30, 2.0],
-      [12, 10, 1.6],
-      [-20, -18, 1.8],
+      [-52, 68, 1.8],
+      [52, 72, 2.0],
+      [-58, 26, 1.8],
+      [56, 34, 1.6],
     ];
 
     const passo = Boss.TAKEOFF_MS / (pontos.length + 1);

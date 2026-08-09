@@ -1,8 +1,8 @@
 // Instala TODA a arte da luta do chefão da Fase 1 com UMA caixa de recorte compartilhada.
 //
-// A luta troca de arte no meio (solo -> ar), e a troca tem que ser INVISÍVEL: a fortaleza não
-// pode saltar de lugar quando o sprite muda de textura. Isso só se garante recortando TODOS os
-// quadros — os dois estáticos e os dois grupos de disparo — pela MESMA caixa (a união de todos).
+// A luta troca de arte no meio (solo -> decolagem -> ar), e a troca tem que ser INVISÍVEL: a
+// fortaleza não pode saltar de lugar quando o sprite muda de textura. Isso só se garante
+// recortando TODOS os quadros — os dois estáticos e os quatro grupos — pela MESMA caixa (a união).
 // Cada PNG sai do mesmo tamanho, com a fortaleza no mesmo pixel; o clarão do disparo e as chamas
 // dos propulsores viram só margem que sobra nos outros quadros.
 //
@@ -12,15 +12,25 @@
 //
 // ─── SELEÇÃO DE QUADROS (2026-08-09) ───
 //
-// Cada grupo declara QUAIS índices entram, não "todos até dar 404". A torre remodelada veio com
-// animações de 9 quadros que o gerador não entregou limpas: no grupo do ar, o quadro 2 é um
-// borrão cinza (a arte se perdeu) e os quadros 4 e 8 têm um clarão branco SOLTO no ar à direita
-// do casco — e um quadro solto assim não é só feio, ele entra na caixa UNIÃO e infla o recorte
-// de todo mundo. Os índices abaixo são os quadros aprovados a olho, na ORDEM em que devem tocar
-// (clarão grande -> pequeno), não a ordem em que o gerador os cuspiu.
+// Cada grupo declara QUAIS índices entram, não "todos até dar 404". As animações que vieram COM
+// a torre remodelada não estavam limpas: no grupo de disparo aéreo, o quadro 2 é um borrão cinza
+// (a arte se perdeu) e os quadros 4 e 8 têm um clarão branco SOLTO no ar à direita do casco — e
+// um quadro solto assim não é só feio, ele entra na caixa UNIÃO e infla o recorte de todo mundo.
+// Os índices são os quadros aprovados a olho, na ORDEM em que devem tocar (clarão grande ->
+// pequeno), não a ordem em que o gerador os cuspiu.
 //
-// O IDLE das duas formas NÃO vem daqui: é sintetizado do estático por scripts/pulsar-brilho.mjs
-// (ver o cabeçalho dele — o v3 do PixelLab estroboscopa em idle de sprite grande).
+// ─── A DECOLAGEM FOI REGERADA (2026-08-09, 2ª volta) ───
+//
+// O Henrique não conseguiu tirar do PixelLab uma animação de voo/decolagem sem os tais "brilhos
+// estranhos". O que resolveu foi PROIBIR explicitamente no prompt, item por item: "no muzzle
+// flash, no white sparks, no white lightning, no bright flares outside the silhouette". Saiu uma
+// decolagem de 13 quadros em que a base pega fogo, racha, os pedaços voam e a torre sobe nas
+// chamas — o último fica pálido (as chamas lavam) e fica de fora.
+//
+// O hover regerado no mesmo embalo foi DESCARTADO por ele: ver a nota no grupo `boss-air-anim`.
+//
+// Só o IDLE de solo continua sintetizado do estático por scripts/pulsar-brilho.mjs — a torre
+// pousada não tem o que mexer além do olho, e o v3 estroboscopa nesse caso (ver o cabeçalho dele).
 //
 // uso: node scripts/install-boss-fight.mjs
 import sharp from 'sharp';
@@ -48,9 +58,30 @@ const grupos = [
   {
     nome: 'boss-air-fire-anim',
     base: anim(O_AR, 'b0af9567-7173-45e0-a797-4564bd94253a'),
-    // O grupo do ar é "pairar + atirar" num só. Aqui ficam SÓ os quadros de disparo, do clarão
-    // maior ao menor; o 2 (borrão) e o 4/8 (clarão solto) ficam de fora.
+    // O grupo do ar ORIGINAL é "pairar + atirar" num só. Aqui ficam SÓ os quadros de disparo, do
+    // clarão maior ao menor; o 2 (borrão) e o 4/8 (clarão solto) ficam de fora.
     quadros: [1, 6, 7, 3],
+  },
+  {
+    nome: 'boss-air-anim',
+    // O HOVER sai do MESMO grupo original, e isso foi ESCOLHA do Henrique depois de ver as duas
+    // lado a lado: a versão regerada acende fogo de verdade nos bocais, mas ele preferiu esta —
+    // aqui a minigun aparece ATIRANDO durante o voo, e os bocais brilham/pulsam em vez de
+    // cuspir chama, o que ele achou um efeito melhor. (A regerada continua no PixelLab, no
+    // grupo 2867ac17, caso ele mude de ideia.)
+    //
+    // Ordem: calmo → fogo → fogo → calmo → fogo → fogo. Os quadros 2 (borrão), 4 e 8 (clarão
+    // branco solto) ficam de fora — são exatamente os "brilhos estranhos" que ele não quer.
+    base: anim(O_AR, 'b0af9567-7173-45e0-a797-4564bd94253a'),
+    quadros: [0, 1, 3, 5, 6, 7],
+  },
+  {
+    nome: 'boss-takeoff-anim',
+    base: anim(O_SOLO, '436deaf9-e4cd-4f94-ab36-903da1a8abfd'),
+    // 0..11. O quadro 12 fecha com as chamas LAVADAS (viram cinza-rosa pálido) — como a
+    // animação não dá loop e é cortada pela troca de arte antes do fim, ele só faria falta
+    // se aparecesse, e ele aparece mal.
+    quadros: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
   },
 ];
 const estaticos = [
@@ -159,7 +190,8 @@ console.log(
 for (const g of grupos) console.log(`  ${g.nome}: ${g.n} quadros (do lote: ${g.quadros.join(',')})`);
 for (const e of estaticos) console.log(`  ${e.nome}.png (estático)`);
 console.log(
-  '\nfalta o IDLE das duas formas (sintetizado, não gerado):\n' +
+  '\nfalta o IDLE DE SOLO (sintetizado, não gerado):\n' +
     '  node scripts/pulsar-brilho.mjs public/sprites/boss.png public/sprites/boss-idle-anim 8\n' +
-    '  node scripts/pulsar-brilho.mjs public/sprites/boss-air.png public/sprites/boss-air-anim 8',
+    'e remedir os offsets, que a caixa nova mexeu:\n' +
+    '  node scripts/_medir-boss.mjs',
 );

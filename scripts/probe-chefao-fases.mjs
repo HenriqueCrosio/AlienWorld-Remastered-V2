@@ -3,10 +3,10 @@
 // Aplica dano por código (não dá para depender da mira da sonda) até cruzar 50%, e fotografa:
 //  1. pousada atirando o leque (sem mísseis),
 //  2. o instante da decolagem (imune, subindo),
-//  3. a fase aérea com a salva de mísseis calando o leque.
+//  3. a fase aérea com o míssil mirado calando o leque.
 //
 // Também mede o que a fatia exige: que a fase pousada NÃO solte míssil, e que na fase aérea o
-// leque fique CALADO enquanto a salva carrega.
+// leque fique CALADO enquanto o míssil carrega.
 //
 // uso: node scripts/probe-chefao-fases.mjs   (com `npm run dev` no ar)
 import { chromium } from 'playwright';
@@ -118,10 +118,11 @@ for (let i = 0; i < 140; i++) {
   const e = await estado();
   if (e.missileCharge > 0) {
     viuSalva = true;
-    // Durante a carga da salva, o fanMute tem que estar ativo (leque calado).
+    // Durante a carga do míssil, o fanMute tem que estar ativo (leque calado).
     if (e.fanMute <= 0) violacao = true;
   }
-  if (e.misseis >= 4) {
+  // 1, não 4: os mísseis passaram a sair UM DE CADA VEZ, mirados (ver Boss.launchMissile).
+  if (e.misseis >= 1) {
     await page.screenshot({ path: 'scripts/_chefao-fase-aerea.png' });
   }
   if (e.cometas > 0) viuCometa = true;
@@ -132,7 +133,7 @@ console.log(`fase pousada sem mísseis: ${missilNaPousada === 0 ? 'PASS' : 'FALH
 console.log(`decolagem imune vista:    ${viuDecolagem ? 'PASS' : 'FALHA'}`);
 console.log(`subiu na decolagem:       ${posAr.y < posPousada.y ? 'PASS' : 'FALHA'} (${posPousada.y} -> ${posAr.y})`);
 console.log(`trocou para arte aérea:   ${posAr.tex === 'bossAir' || posAr.tex.startsWith('bossAir') ? 'PASS' : 'FALHA'} (${posAr.tex})`);
-console.log(`salva cala o leque:       ${viuSalva && !violacao ? 'PASS' : viuSalva ? 'FALHA (leque disparou durante a carga)' : 'sem salva no intervalo'}`);
+console.log(`missil cala o leque:      ${viuSalva && !violacao ? 'PASS' : viuSalva ? 'FALHA (leque disparou durante a carga)' : 'sem missil no intervalo'}`);
 console.log(`leque ativo na fase aérea:${viuCometa ? ' PASS' : ' sem cometa no intervalo'}`);
 console.log('screenshots: _chefao-fase-pousada / -decolagem / -aerea .png');
 
