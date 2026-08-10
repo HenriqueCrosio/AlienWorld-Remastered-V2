@@ -468,37 +468,55 @@ Duas coisas que o Henrique pediu ANTES de começar o kamikaze. Commits `8edbaac`
 **Files:** Create `public/sprites/enemy-kamikaze.png` (substitui a atual, MESMA chave — o
 kamikaze não troca por fase); Modify `src/scenes/BootScene.ts` só se a contagem de quadros mudar.
 
-> ⚠️ **DECISÃO EM ABERTO — resolver com o Henrique ANTES de gerar (2026-08-09).** O levantamento
-> já está feito; falta só a escolha dele.
+> ✅ **DECIDIDO E FEITO (2026-08-10): troca GLOBAL, na mesma chave, com `tint` branco.**
 >
-> O kamikaze aparece em **todas as três fases** (`StageDirector`: F1 em t=35/40/50/58/65, F2 em
-> t=20/32/67/76, F3 em t=27/33/54/64/75) **e dentro da luta da Capitânia** (`BossCapitania` larga
-> 2 por ciclo, 3 na fúria, teto de 5). Uma arte na chave `enemyKamikaze` muda os quatro lugares.
+> ⚠️ **O levantamento que estava aqui ESTAVA ERRADO, e a correção é a parte que importa.** Ele
+> afirmava que o kamikaze aparece "em todas as três fases", listando F1 em t=35/40/50/58/65. Esses
+> `t` são do **`STAGE_2`**. O texto rotulou os roteiros com um deslocamento de um: o que ele
+> chamava de F1/F2/F3 é `STAGE_2`/`STAGE_3`/`STAGE_4`.
 >
-> E há o `tint`: `DEFS.kamikaze.tint = 0xffb066` (laranja quente, já ABRANDADO uma vez de
-> `0xff8c1a` porque o laranja chapado apagava o espeto). Pela lição da correção de rumo — `setTint`
-> sobre arte escura REPINTA — um casco carvão sai laranja chapado. Numa troca global o tint teria
-> de ir para ~branco, e aí **o kamikaze da Fase 1 deixa de ser a peça quente que é hoje**.
+> Contagem real, direto do `StageDirector`:
 >
-> As opções levantadas:
-> 1. **Pele só da Fase 2** (entra na `STAGE_2_SKIN`, que já aceita `texture`/`anim`/`scale`/
->    `tint`/`bullet`): uma linha na tabela + chaves novas no `BootScene`. F1/F3/Capitânia
->    intocadas, e o `scale?` por pele salva qualquer dimensão nativa divergente — a arte não
->    precisa sair em 26×24.
-> 2. **Troca global**, como o texto original desta task diz: exige arte perto de 26×24 (senão
->    `DEFS.kamikaze.scale` muda e o balanceamento junto) e o tint indo para ~branco.
-> 3. Troca global mantendo o tint quente — assumindo que a arte carvão vai ler alaranjada.
+> | | kamikaze | cargueiro |
+> |---|---|---|
+> | `STAGE_1` | **0 ondas** | **0 ondas** |
+> | `STAGE_2` | 5 | 1 |
+> | `STAGE_3` | 4 | 1 |
+> | `STAGE_4` | 5 | 1 |
 >
-> O **cargueiro (Task 5) está no mesmo caso** (60×39, `scale` 1.1, tint `0xb9a8d8`, presente nas
-> três fases) — vale decidir junto ou logo depois, mas conscientemente.
+> **Não existe kamikaze nem cargueiro na Fase 1.** Isso anula o argumento central da pergunta —
+> "numa troca global o kamikaze da Fase 1 deixa de ser a peça quente que é hoje". Não havia peça
+> na Fase 1 para perder. (A frase sobre "a única peça quente contra o azul-escuro da F1" é do
+> comentário da **canhoneira** em `DEFS`, e foi aplicada ao bicho errado.)
+>
+> Sem esse custo, a troca global ficou a escolha óbvia, e pelo motivo do Henrique: o kamikaze é o
+> MESMO bicho onde quer que apareça, e trocá-lo só na Fase 2 o transformaria em figurino em vez de
+> procedência — ele sai do hangar da Capitânia (`BossCapitania.launch`, 2 por ciclo, 3 na fúria,
+> teto de 5), que é a chefona da própria Fase 2.
+>
+> **`tint` foi para `0xffffff`.** A arte nova é CLARA, e a lição da correção de rumo vale nos dois
+> sentidos: tint quente sobre arte clara também PINTA em vez de insinuar — o `0xffb066` apagaria o
+> azul do casco e os olhos verdes. O calor agora está pintado na arte (a crista laranja).
+>
+> **`DEFS.kamikaze.scale` mudou (1 → 0.85), e isso NÃO é mudança de balanceamento.** O medo
+> registrado aqui ("o scale muda e o balanceamento junto") confundia *escala* com *tamanho em
+> tela*. A hitbox sai do tamanho EXIBIDO (`e.body.setSize(e.width * 0.6, e.height * 0.55)`, com o
+> Arcade multiplicando pela escala do sprite), então segurar o tamanho em tela mantém a hitbox
+> intacta seja qual for a caixa nativa. Medido em jogo: **15.8×13.1 contra 15.6×13.2** de antes.
+>
+> O **cargueiro (Task 5) está no mesmo caso** (60×39, `scale` 1.1, tint `0xb9a8d8`) — mesma
+> correção de fases, mesma conclusão disponível.
 
-- [ ] **Step 1: Gerar** — na linha dark sci-fi e ancorado no BATEDOR (ver Task 1 Step 1), não na Capitânia: `node scripts/gerar.mjs "small interceptor with a sharp forward spike on the nose, very dark charcoal armour, almost black, low contrast, dim deep red glowing accents, no bright colours, dark sci-fi, side view" 32 sidescroller scripts/_ref-batedor-45.png`. **Proibir os clarões item por item no prompt** — "no muzzle flash, no white sparks, no white lightning, no bright flares outside the silhouette" — é o que destravou todas as animações desta sessão. ⚠️ O kamikaze **não troca por fase**: ele substitui a arte na MESMA chave, então não há `STAGE_2_SKIN.scale` para salvar uma dimensão nativa divergente. Ou a arte sai perto de 26×24, ou o `DEFS.kamikaze.scale` muda — e aí a Fase 1 muda junto. Animação de voo (`frameRate` 14 já fixado).
-- [ ] **Step 2: Julgar + aprovação do Henrique.**
-- [ ] **Step 3: Instalar NA MESMA CHAVE** — `install-sprite.mjs <object-id> <frame> enemy-kamikaze` e `install-anim.mjs kamikaze-anim <url-base> <n> enemy-kamikaze` (sobrescrevendo `public/sprites/enemy-kamikaze*.png` — sem mudança nenhuma em `BootScene.ART`/`EnemySystem`, já apontam para essa chave).
-- [ ] **Step 4: Se a contagem de quadros divergir de 7**, atualizar `FRAMES.kamikazeAnim` em `BootScene.ts`.
-- [ ] **Step 5: Medir dimensão nativa**; recortar para bater com 26×24 se divergir (não tocar `DEFS.kamikaze.scale`).
-- [ ] **Step 6: Verificar** — build PASS; `probe-stage2.mjs`: o kamikaze lê como espeto quente vindo em cima do jogador, casado com a paleta da Capitânia, mesmo tamanho/velocidade/homing de hoje.
-- [ ] **Step 7: Commit** — `feat(fase2): arte nova do kamikaze (facao do cinturao)`.
+- [x] **Step 1: Gerar** — feito, e **descartado**. Cinco levas no PixelLab (3 ancoradas em `_ref-batedor-45.png`, 2 numa referência nova de 50×34 feita para caçar a proporção). Duas lições que valem para o cargueiro:
+  - **A referência define o TAMANHO DA TELA de saída, não a proporção da nave.** A caça à proporção falhou: com uma referência de 1.47 o gerador devolveu conteúdo em 1.74–1.88, igual à leva ancorada em 1.73. A proporção é do que o modelo desenha, não do que se pede — "stubby, blunt, short body" no prompt devolveu 1.78 mesmo assim.
+  - **Forçar compacidade no texto quebra a silhueta.** A leva que insistiu (`E`) virou cápsulas ovais viradas para a ESQUERDA — leem como granada, não como interceptador.
+- [x] **Step 2: Julgar** — folhas ampliadas + comparação no TAMANHO DE JOGO. ⚠️ **Comparar pela TELA do PNG mente**: o kamikaze antigo era 26×24 de tela para 25×17 de arte, e os candidatos preenchiam a deles. A comparação honesta normaliza pela ALTURA DE CONTEÚDO (`scripts/_kami-real.mjs`), medida alfa a alfa — `sharp.trim()` devolve a tela inteira nestes PNGs e não serve.
+- [x] **Step 3: Instalar NA MESMA CHAVE** — a arte que entrou foi **feita à mão pelo Henrique** (objeto `31b0ea5f`), não gerada aqui: peixe biomecânico azul, olhos verdes, crista laranja dorsal, focinho longo. Conteúdo 30×19, aspecto **1.58** — mais perto do original (1.47) que qualquer candidato do gerador. `install-anim.mjs kamikaze-anim <url> 9 enemy-kamikaze`, depois `centrar-anim.mjs` (havia até 2px de deriva vertical no ciclo).
+- [x] **Step 4: `FRAMES.kamikazeAnim` 7 → 9** em `BootScene.ts`.
+- [x] **Step 5: Moldura, não recorte.** ⚠️ **A hitbox sai da TELA do quadro, não da arte dentro dela.** A arte veio recortada justa (30×20) e instalada assim entregaria hitbox 29% menor na vertical — o mesmo kamikaze, bem mais difícil de acertar, sem ninguém pedir. `scripts/_kami-moldura.mjs` devolve a tela a 31×28; com `scale` 0.85 o tamanho em tela E a hitbox batem com os de antes.
+- [x] **Step 6: Verificar** — build PASS. `scripts/_probe-kami.mjs` (novo) spawna kamikazes à mão em vez de depender de a corrida do piloto automático chegar viva na onda — a `probe-stage2` morreu antes da onda em duas de três execuções. Medido nas fases 2, 3 e 4: hitbox **15.8×13.1** (antes 15.6×13.2), `flipY` ativo nas três.
+- [x] **Step 6b: BUG ANTIGO ENCONTRADO E CORRIGIDO — o perseguidor voava de ponta-cabeça.** `updateChaser` aponta o nariz GIRANDO o sprite (`setRotation`), e indo para a esquerda a rotação passa de 90° e inverte a nave. Como a esquerda é a direção do jogador, esse era o estado NORMAL dele. A arte anterior era um bloco simétrico e escondia o defeito há tempos; a nova tem crista dorsal e barriga, e denunciou. `setFlipY(Math.abs(rumo) > Math.PI / 2)` resolve sem mexer no rumo que o nariz aponta. Só o kamikaze tem `homing > 0`, então nada mais foi afetado.
+- [x] **Step 7: Commit.**
 
 ---
 

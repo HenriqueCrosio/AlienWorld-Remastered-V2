@@ -38,16 +38,16 @@ Isso é o suficiente — este doc e o plano têm todo o contexto.
 | **Correção de rumo** | Chefão da F1 remodelado, explosões na decolagem, Aurora da cutscene 1 |
 | **2ª volta** | Balanceamento que a arte nova cobrou (leque, mísseis, decolagem animada) |
 | **4ª volta** | Bola da canhoneira animada e sem deriva; **saída da atmosfera** com pintura própria |
+| **Task 4** | **Kamikaze** — arte feita à mão pelo Henrique, troca GLOBAL, `tint` branco, `scale` 0.85; hitbox conferida em jogo |
 
 ### Falta
 
-- **Task 4 — kamikaze.** ⚠️ **Tem uma decisão em aberto, escrita por extenso no plano** (bloco
-  destacado logo abaixo do título da Task 4): o kamikaze aparece nas TRÊS fases e na luta da
-  Capitânia, e o `tint` quente dele repinta arte escura. Resolver com o Henrique antes de gerar.
-- **Task 5 — cargueiro.** Mesmo caso do kamikaze; decidir junto ou logo depois, mas
-  conscientemente.
+- **Task 5 — cargueiro.** A decisão que travava o kamikaze **já foi resolvida e vale igual aqui**:
+  troca GLOBAL, mesma chave, `tint` branco (ver o bloco ✅ na Task 4 do plano). Não há decisão
+  nova a tomar — só gerar/receber a arte, instalar e medir.
 - **Task 6 — regressão final + merge.** ⚠️ As fatias 1 e 2 foram REABERTAS pela correção de rumo,
-  então o merge é **UM só**, não um por fatia.
+  então o merge é **UM só**, não um por fatia. E a troca do kamikaze foi GLOBAL: a regressão
+  precisa cobrir as fases 2, 3 e 4, não só a 2 (`probe-chain` ainda NÃO foi rodado depois dela).
 
 ---
 
@@ -67,6 +67,23 @@ Isso é o suficiente — este doc e o plano têm todo o contexto.
   **gitignorado**; refazer com a linha registrada na Task 1 Step 1 do plano).
 - **A âncora de facção é o batedor** (`public/sprites/enemy-scout-cinturao.png`), não mais a
   Capitânia.
+- **A FASE 1 NÃO TEM KAMIKAZE NEM CARGUEIRO.** Os dois vivem em `STAGE_2`/`STAGE_3`/`STAGE_4`. O
+  texto original da Task 4 dizia o contrário — ele rotulou os roteiros com um deslocamento de um,
+  e uma decisão de arte inteira foi construída em cima disso. **Conte no `StageDirector` antes de
+  afirmar em que fase um inimigo aparece.**
+- **A hitbox sai da TELA do quadro, não da arte desenhada dentro dela**
+  (`e.body.setSize(e.width * 0.6, e.height * 0.55)`, e o Arcade multiplica pela escala do sprite).
+  Duas consequências: mexer no `scale` NÃO é mexer no balanceamento se o tamanho em tela for
+  segurado; e instalar arte recortada justa no lugar de arte com moldura ENCOLHE a hitbox em
+  silêncio (ver `scripts/_kami-moldura.mjs`).
+- **A referência define o TAMANHO DA TELA de saída, não a PROPORÇÃO da nave.** Referência 1.47
+  devolveu conteúdo 1.74–1.88. Proporção não sai do prompt nem da referência — se ela importa,
+  desenhe à mão.
+- **Comparar candidatos pela tela do PNG mente** — o que se compara é a caixa de CONTEÚDO, medida
+  alfa a alfa (`sharp.trim()` devolve a tela inteira nestes PNGs).
+- **O perseguidor voava de ponta-cabeça** desde sempre: `updateChaser` gira o sprite, e ir para a
+  esquerda passa de 90°. Corrigido com `setFlipY`. Arte simétrica esconde esse tipo de defeito —
+  **arte com dorso e barriga é o que denuncia.**
 - **Idle sintetizado ganha de idle gerado** — duas vezes no mesmo dia (`pulsar-brilho.mjs`).
 - **Pintura de fundo é 480×270** (posicionada com `y = −27`), como `paintBgF2`/`paintBgCut1`.
 - **Sempre olhe o inimigo SE MOVENDO na sonda**, não só o contact sheet: orientação, tamanho em

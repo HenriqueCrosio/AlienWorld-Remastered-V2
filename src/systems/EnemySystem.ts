@@ -71,7 +71,20 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // aquilo vem para bater antes de ele ter começado a acelerar. O tint quente foi ABRANDADO
   // (0xff8c1a → 0xffb066) porque a arte agora carrega a leitura — o laranja chapado apagava o
   // espeto, que é justamente a parte que informa.
-  kamikaze: { texture: 'enemyKamikaze', anim: 'kamikaze-fly', hp: 2, speed: 45, wave: 0, fireRate: 0, score: 60, scale: 1, tint: 0xffb066, homing: 150, spawnRate: 0 },
+  //
+  // ARTE NOVA (2026-08-10), e ela vale nas TRÊS fases e dentro da luta da Capitânia — troca
+  // global, na mesma chave. A escolha é de LEITURA: o kamikaze é o mesmo bicho em todo lugar, e
+  // trocá-lo só na Fase 2 o transformaria em figurino em vez de procedência (a Capitânia é o
+  // hangar dele, ver BossCapitania).
+  //
+  // O TINT foi de 0xffb066 para BRANCO porque o calor agora está PINTADO na arte (a crista
+  // laranja), não multiplicado por cima. O laranja quente sobre uma arte CLARA não insinua: ele
+  // pinta — apagaria o azul do casco e os olhos verdes, que é o que a peça tem de leitura.
+  //
+  // A ESCALA 0.85 sobre a tela 31x28 devolve EXATAMENTE o tamanho e a hitbox de antes
+  // (25.5x17 em tela, hitbox 15.8x13.1 contra 15.6x13.2) — ver scripts/_kami-moldura.mjs. O
+  // número não é estético, é o que mantém o balanceamento intocado.
+  kamikaze: { texture: 'enemyKamikaze', anim: 'kamikaze-fly', hp: 2, speed: 45, wave: 0, fireRate: 0, score: 60, scale: 0.85, tint: 0xffffff, homing: 150, spawnRate: 0 },
 
   // CARGUEIRO: lento, gordo e cheio de vida. Não atira — o perigo dele é o que ele CUSPE.
   // Ignorá-lo enche a tela de drones; é a definição de prioridade de alvo (docs/GDD.md §6).
@@ -310,7 +323,22 @@ export class EnemySystem {
 
     // O nariz aponta para onde ele VOA (não para o alvo): é o vetor de velocidade que o
     // jogador precisa ler para saber se ainda dá tempo de sair da frente.
-    e.setRotation(Math.atan2(body.velocity.y, body.velocity.x));
+    const rumo = Math.atan2(body.velocity.y, body.velocity.x);
+    e.setRotation(rumo);
+
+    // E VOANDO PARA A ESQUERDA ELE FICA DE PÉ. O sprite é desenhado apontando para a direita;
+    // girá-lo além de 90° o entrega de ponta-cabeça — dorso embaixo, barriga em cima. Como ele
+    // passa a maior parte do voo indo para a esquerda (é a direção do jogador), esse era o
+    // estado NORMAL dele, não a exceção.
+    //
+    // O defeito é antigo e estava escondido: a arte anterior era um bloco mecânico simétrico,
+    // que invertido continua parecendo o mesmo bloco. A arte de 2026-08-10 tem crista dorsal e
+    // barriga, e denunciou.
+    //
+    // `setFlipY` sobre o sprite JÁ GIRADO espelha no eixo local: composto com a rotação de ~180°
+    // ele desfaz a inversão vertical e mantém o rumo. Não é o mesmo que trocar a rotação — o
+    // nariz continua apontando para onde a velocidade aponta, que é a informação que o jogador lê.
+    e.setFlipY(Math.abs(rumo) > Math.PI / 2);
   }
 
   /** CARGUEIRO: cospe drones enquanto estiver na tela. Fora dela, seria um spawn invisível. */

@@ -32,7 +32,9 @@ const FRAMES: Record<string, number> = {
   // Até aqui o cinturão inteiro era ESTÁTICO: a Capitânia pairava como um adesivo, a mina não
   // piscava, e os inimigos novos não tinham motor aceso. Num jogo em que tudo o mais respira,
   // o que não se mexe lê como cenário — e cenário não mata ninguém, então o olho o descarta.
-  kamikazeAnim: 7,
+  // 9, e não os 7 do resto: a arte nova do kamikaze (feita à mão, 2026-08-10) veio com o ciclo
+  // mais longo — a cauda chicoteia num vaivém que 7 quadros cortariam no meio.
+  kamikazeAnim: 9,
   scoutAnim: 7,
   carrierAnim: 7,
   sensorAnim: 7,
