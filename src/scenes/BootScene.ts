@@ -36,7 +36,9 @@ const FRAMES: Record<string, number> = {
   // mais longo — a cauda chicoteia num vaivém que 7 quadros cortariam no meio.
   kamikazeAnim: 9,
   scoutAnim: 7,
-  carrierAnim: 7,
+  // 13: a arte nova do cargueiro (2026-08-10) cicla a baia de lançamento por vermelho → oliva →
+  // amarelo, e o ciclo inteiro precisa dos 13 quadros para fechar sem salto de cor.
+  carrierAnim: 13,
   sensorAnim: 7,
   capitaniaAnim: 7,
   // A SALVA das baterias (2026-07-21): 8 quadros + o de referência. Mesma caixa união do idle
@@ -322,7 +324,10 @@ const ART: Record<string, string> = {
   enemyScout: 'sprites/enemy-scout.png',
   enemyKamikaze: 'sprites/enemy-kamikaze.png',
   enemyCarrier: 'sprites/enemy-carrier.png',
-  enemyCarrier2: 'sprites/enemy-carrier-2.png',
+  // SEM `enemyCarrier2`, pela mesma razão que o drone não tem a dele: a variante 2 é a arte VELHA
+  // do cargueiro (julho). Com ela registrada, `pickVariant` sortearia metade dos cargueiros com o
+  // sprite antigo lilás — e sem animação, porque a animação só toca na variante BASE.
+  // A variante volta quando houver um segundo candidato da arte NOVA.
 
   // A FACÇÃO DO CINTURÃO (Fase 2, passe visual 2026-08-08): canhoneira/batedor trocam de pele
   // por fase (STAGE_2_SKIN no EnemySystem) — sem este PNG, a Fase 2 cai de volta na arte biomec

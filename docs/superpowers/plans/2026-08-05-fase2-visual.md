@@ -525,14 +525,16 @@ kamikaze não troca por fase); Modify `src/scenes/BootScene.ts` só se a contage
 **Files:** Create `public/sprites/enemy-carrier.png` (substitui a atual, MESMA chave — o
 cargueiro não troca por fase); Modify `src/scenes/BootScene.ts` só se a contagem de quadros mudar.
 
-- [ ] **Step 1: Gerar** — mesma linha e mesmas armadilhas do kamikaze: `node scripts/gerar.mjs "slow bulky freighter with an open hangar bay on the belly, very dark charcoal hull, almost black, low contrast, dim deep red glow inside the bay, no bright colours, dark sci-fi, side view" 60 sidescroller scripts/_ref-batedor-45.png` (dimensão nativa 60×39, igual à atual — o hangar aceso na barriga é onde os drones nascem, ver `EnemySystem.updateCarrier`; e ele TAMBÉM não troca por fase). Animação lenta (`frameRate` 6, já fixado).
-- [ ] **Step 2: Julgar + aprovação do Henrique.**
-- [ ] **Step 3: Instalar NA MESMA CHAVE** — `install-sprite.mjs <object-id> <frame> enemy-carrier` e `install-anim.mjs carrier-anim <url-base> <n> enemy-carrier`.
-- [ ] **Step 4: Se a contagem de quadros divergir de 7**, atualizar `FRAMES.carrierAnim`.
-- [ ] **Step 5: RE-MEDIR onde a barriga/hangar fica no PNG novo** — `updateCarrier` cospe o drone em `e.y + Phaser.Math.Between(4, 14)`, relativo ao centro do sprite; confirmar visualmente que o drone ainda nasce de dentro do hangar aceso, não do meio do casco.
-- [ ] **Step 6: Medir dimensão nativa**; recortar para bater com 60×39 se divergir (não tocar `DEFS.cargueiro.scale`).
-- [ ] **Step 7: Verificar** — build PASS; `probe-stage2.mjs` (`probe-stage2-cargueiro.png`): o cargueiro lê pesado/lento, hangar aceso na barriga cuspindo drones, casado com a facção nova.
-- [ ] **Step 8: Commit** — `feat(fase2): arte nova do cargueiro (facao do cinturao)`.
+- [x] **Step 1–2: Arte feita à mão pelo Henrique** (objeto `dc179f2d`), como o kamikaze — não gerada. Casco longo e quase preto, crista dorsal espinhosa, e uma baia de lançamento ocupando o flanco inferior inteiro. **Ela obedece a regra dark sci-fi melhor do que qualquer coisa que o gerador devolveu:** luz só onde há energia, e a baia é a única coisa acesa.
+- [x] **Step 3: Instalar NA MESMA CHAVE** — `install-anim.mjs carrier-anim <url> 13 enemy-carrier`. **Deriva praticamente zero** (caixa fixa em (2,13) nos 13 quadros), ao contrário do kamikaze.
+- [x] **Step 4: `FRAMES.carrierAnim` 7 → 13.**
+- [x] **Step 4b: ARMADILHA — `enemyCarrier2` tinha de sair do `BootScene`.** Ela aponta para a arte VELHA (julho), e o `pickVariant` sorteia entre base e variante: metade dos cargueiros nasceria com o sprite antigo, e SEM animação (a animação só toca na variante base). É a mesma armadilha que o drone já documenta. **Todo redesenho na mesma chave tem de checar se existe uma `<chave>2` registrada.**
+- [x] **Step 5: A BAIA FOI MEDIDA, não olhada.** Localizada por SATURAÇÃO — o casco e as espinhas dorsais são neutros, só a baia tem cor (medir por luminância falha: as espinhas são claras). Ela acende em **+5.5 a +10.5** do centro, e o `updateCarrier` cuspia em **+4 a +14** — os últimos 3px caíam ABAIXO dela, e um em cada quatro ou cinco drones brotava debaixo do casco. Corrigido para `Between(5, 11)`; medido em jogo, os drones passaram de +7/+13 para **+6/+11**.
+- [x] **Step 6: Moldura, não recorte** — `_moldurar.mjs 60 39` devolve a tela do sprite antigo. Consequência boa: **`DEFS.cargueiro.scale` NÃO precisou mudar** (segue 1.1), e a hitbox saiu **39.6×23.6**, idêntica. A arte nova é 6px mais baixa (29px contra 35), o que é propriedade do desenho.
+- [x] **Step 6b: `tint` 0xb9a8d8 → branco**, mesma razão do kamikaze: o lilás foi escolhido para arte clara e, sobre casco quase preto, levanta o cinza e apaga a baia.
+- [x] **Step 6c: O VERDE DA BAIA É CANON**, decisão consciente do Henrique. A baia cicla vermelho → oliva → amarelo, e o verde é cor nova num jogo que ensina magenta como "isto te mata". Serve *por* não ser a cor de perigo: o hangar é uma boca, não uma arma. Não "corrigir" para magenta.
+- [x] **Step 7: Verificar** — build PASS; `probe-stage2.mjs` sem erro de página, Capitânia intacta; `scripts/_probe-cargueiro.mjs` (novo) mede a faixa da baia e onde os drones de fato apareceram.
+- [x] **Step 8: Commit.**
 
 ---
 

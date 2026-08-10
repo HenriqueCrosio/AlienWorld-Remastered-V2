@@ -1,8 +1,9 @@
 # START — Fatia 3: FASE 2 ("Frota Morta")
 
-**Documento de retomada.** Atualizado **2026-08-09 (fim da sessão)**: Tasks 0–3 fechadas, a
-Capitânia entrou fora do escopo, a correção de rumo dark sci-fi reabriu as fatias 1 e 2, e a
-canhoneira ganhou bola animada. **Faltam as Tasks 4, 5 e 6** (kamikaze, cargueiro, regressão+merge).
+**Documento de retomada.** Atualizado **2026-08-10 (fim da sessão)**: **Tasks 0–5 fechadas.** O
+kamikaze e o cargueiro ganharam arte NOVA — feita à mão pelo Henrique, não gerada — em troca
+GLOBAL, e um bug antigo de rotação do perseguidor foi corrigido no caminho. **Falta só a Task 6**
+(regressão final + merge).
 
 ---
 
@@ -10,21 +11,36 @@ canhoneira ganhou bola animada. **Faltam as Tasks 4, 5 e 6** (kamikaze, cargueir
 
 Na próxima sessão, diga:
 
-> **"Leia `docs/superpowers/plans/2026-08-05-fase2-visual-START.md` e continue a Fatia 3 na branch
-> `feat/fase2-visual`. Comece decidindo comigo a pergunta em aberto do kamikaze (Task 4 do plano),
-> depois siga para as Tasks 4, 5 e 6."**
+> **"Leia `docs/superpowers/plans/2026-08-05-fase2-visual-START.md` e execute a Task 6 (a última)
+> na branch `feat/fase2-visual`: regressão nas fases 2, 3 e 4, róster lado a lado dos quatro
+> redesenhados, e o merge ÚNICO da branch."**
 
 Isso é o suficiente — este doc e o plano têm todo o contexto.
 
 ---
 
-## Estado atual (2026-08-09)
+## Estado atual (2026-08-10)
 
 - **Branch:** `feat/fase2-visual`, à frente de `main`. **Nada mergeado ainda.**
-- **Plano:** `docs/superpowers/plans/2026-08-05-fase2-visual.md` — leia a **"Correção de rumo"** e
-  as **2ª, 3ª e 4ª voltas**, que é onde mora o que foi aprendido (elas valem mais que os Steps).
+- **Plano:** `docs/superpowers/plans/2026-08-05-fase2-visual.md` — leia a **"Correção de rumo"**, as
+  **2ª/3ª/4ª voltas** e o **bloco ✅ da Task 4**, que é onde mora o que foi aprendido (valem mais
+  que os Steps).
 - **Verificação:** `npm run build` limpo; `probe-chain` fecha a corrente; `probe-stage2` sem erro
-  de página.
+  de página; hitboxes conferidas EM JOGO (kamikaze 15.8×13.1, cargueiro 39.6×23.6 — as duas
+  iguais às de antes da troca).
+
+### O que a Task 6 tem de fazer
+
+1. `npm run build` limpo.
+2. `probe-chain.mjs` — a cadeia Fase 1 → chefão → zero-G → Fase 2 continua fechando, e a
+   canhoneira/batedor da FASE 1 continuam com a arte biomec roxa.
+3. **Regressão nas fases 2, 3 E 4.** ⚠️ As trocas do kamikaze e do cargueiro foram GLOBAIS —
+   `_probe-kami.mjs <saida> <2|3|4>` cobre o kamikaze; o cargueiro precisa do mesmo tratamento.
+4. **Róster lado a lado** dos quatro redesenhados + o drone roxo biomec ao lado (mesmo princípio
+   do `probe-roster-f1.mjs` da Fatia 1): "dá para distinguir num relance?" — é o critério de
+   sucesso nº 3 do spec.
+5. **Merge ÚNICO** via `superpowers:finishing-a-development-branch`. Não um por fatia: as fatias 1
+   e 2 foram reabertas pela correção de rumo.
 
 ### Feito
 
@@ -39,12 +55,10 @@ Isso é o suficiente — este doc e o plano têm todo o contexto.
 | **2ª volta** | Balanceamento que a arte nova cobrou (leque, mísseis, decolagem animada) |
 | **4ª volta** | Bola da canhoneira animada e sem deriva; **saída da atmosfera** com pintura própria |
 | **Task 4** | **Kamikaze** — arte feita à mão pelo Henrique, troca GLOBAL, `tint` branco, `scale` 0.85; hitbox conferida em jogo |
+| **Task 5** | **Cargueiro** — idem, 13 quadros, `scale` intocado; baia MEDIDA e o `updateCarrier` acertado para cuspir de dentro dela |
 
 ### Falta
 
-- **Task 5 — cargueiro.** A decisão que travava o kamikaze **já foi resolvida e vale igual aqui**:
-  troca GLOBAL, mesma chave, `tint` branco (ver o bloco ✅ na Task 4 do plano). Não há decisão
-  nova a tomar — só gerar/receber a arte, instalar e medir.
 - **Task 6 — regressão final + merge.** ⚠️ As fatias 1 e 2 foram REABERTAS pela correção de rumo,
   então o merge é **UM só**, não um por fatia. E a troca do kamikaze foi GLOBAL: a regressão
   precisa cobrir as fases 2, 3 e 4, não só a 2 (`probe-chain` ainda NÃO foi rodado depois dela).
@@ -76,6 +90,13 @@ Isso é o suficiente — este doc e o plano têm todo o contexto.
   Duas consequências: mexer no `scale` NÃO é mexer no balanceamento se o tamanho em tela for
   segurado; e instalar arte recortada justa no lugar de arte com moldura ENCOLHE a hitbox em
   silêncio (ver `scripts/_kami-moldura.mjs`).
+- **Redesenho na mesma chave: cheque se existe uma `<chave>2` registrada no `BootScene`.** Ela é
+  a arte VELHA, e o `pickVariant` sorteia entre base e variante — metade dos inimigos nasceria com
+  o sprite antigo, e sem animação (ela só toca na variante BASE). Pegou o cargueiro
+  (`enemyCarrier2`); o drone já tinha sido pego antes.
+- **Onde a arte ACENDE se mede por SATURAÇÃO, não por luminância.** A baia do cargueiro é
+  colorida; o casco e as espinhas dorsais são claros mas NEUTROS, e um limiar de brilho devolve
+  as espinhas junto. Vale para qualquer "achar a parte acesa do sprite".
 - **A referência define o TAMANHO DA TELA de saída, não a PROPORÇÃO da nave.** Referência 1.47
   devolveu conteúdo 1.74–1.88. Proporção não sai do prompt nem da referência — se ela importa,
   desenhe à mão.

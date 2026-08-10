@@ -82,7 +82,7 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // pinta — apagaria o azul do casco e os olhos verdes, que é o que a peça tem de leitura.
   //
   // A ESCALA 0.85 sobre a tela 31x28 devolve EXATAMENTE o tamanho e a hitbox de antes
-  // (25.5x17 em tela, hitbox 15.8x13.1 contra 15.6x13.2) — ver scripts/_kami-moldura.mjs. O
+  // (25.5x17 em tela, hitbox 15.8x13.1 contra 15.6x13.2) — ver scripts/_moldurar.mjs. O
   // número não é estético, é o que mantém o balanceamento intocado.
   kamikaze: { texture: 'enemyKamikaze', anim: 'kamikaze-fly', hp: 2, speed: 45, wave: 0, fireRate: 0, score: 60, scale: 0.85, tint: 0xffffff, homing: 150, spawnRate: 0 },
 
@@ -92,7 +92,24 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // Sprite PRÓPRIO, e com o hangar aberto na barriga — de onde os drones saem de verdade. Antes
   // era a canhoneira esticada a 1.9×, o que além de repetir a forma BORRAVA a grade de pixel
   // (escala fracionária em pixel art). Nativo a 60px, ele agora vai a 1.1× e a grade fica de pé.
-  cargueiro: { texture: 'enemyCarrier', anim: 'carrier-fly', hp: 24, speed: 20, wave: 0, fireRate: 0, score: 300, scale: 1.1, tint: 0xb9a8d8, homing: 0, spawns: 'drone', spawnRate: 1.5 },
+  //
+  // ARTE NOVA (2026-08-10), troca GLOBAL como a do kamikaze — e pela mesma razão: ele aparece em
+  // STAGE_2/3/4 (nunca na Fase 1), sempre como o mesmo bicho.
+  //
+  // O TINT foi de 0xb9a8d8 para BRANCO. O lilás foi escolhido para a arte antiga, clara e lavada;
+  // sobre um casco quase preto ele levanta o cinza e apaga a única coisa acesa do desenho, que é
+  // a baia. Branco aqui significa "mostre a arte como ela foi pintada".
+  //
+  // O VERDE DA BAIA É DELIBERADO (decisão do Henrique, 2026-08-10). A baia cicla vermelho →
+  // oliva → amarelo, e o oliva/verde é cor NOVA no vocabulário do jogo — que ensina magenta como
+  // "isto te mata". É justamente por não ser a cor de perigo que ela serve: o hangar não é uma
+  // arma, é uma boca. Não trocar por magenta "para ficar coerente" — a incoerência é o ponto.
+  //
+  // A ESCALA NÃO MUDOU, e isso não é sorte: a arte nova foi remoldurada para a MESMA tela 60x39
+  // da antiga (`scripts/_moldurar.mjs`), então o comprimento em tela e a hitbox (39.6x23.6)
+  // seguem idênticos. O desenho é mais BAIXO que o anterior (29px de arte contra 35), o que é
+  // propriedade da arte, não do enquadramento.
+  cargueiro: { texture: 'enemyCarrier', anim: 'carrier-fly', hp: 24, speed: 20, wave: 0, fireRate: 0, score: 300, scale: 1.1, tint: 0xffffff, homing: 0, spawns: 'drone', spawnRate: 1.5 },
 
   // A ARANHA — o MINI-BOSS do Ato 2 da Fase 3 (roteirizada: evento 'miniboss', uma por fase).
   // Um ANDADOR: entra pisando no casco do Leviatã (o y dela é cravado na linha do casco pelo
@@ -356,7 +373,15 @@ export class EnemySystem {
     // Nasce NO HANGAR — a boca acesa na BARRIGA do cargueiro, que agora existe na arte. Antes o
     // drone saía do meio do casco (±8px do centro), e parecia atravessar o metal; sair por baixo,
     // de onde a luz vaza, é a diferença entre um inimigo LARGADO e um inimigo teletransportado.
-    this.spawn(def.spawns!, e.y + Phaser.Math.Between(4, 14), e.x - 6);
+    //
+    // A FAIXA É MEDIDA NA ARTE, não escolhida a olho: com a arte de 2026-08-10 a baia acesa fica
+    // em +5.5 a +10.5 do centro (localizada por SATURAÇÃO — o casco e as espinhas dorsais são
+    // neutros, só a baia tem cor). O intervalo anterior, +4 a +14, passava 3px ABAIXO dela, e
+    // um em cada quatro ou cinco drones brotava debaixo do casco em vez de dentro do hangar.
+    //
+    // ⚠️ Este número vale para ESTA arte. Trocar o sprite do cargueiro obriga a re-medir a baia
+    // (`scripts/_probe-cargueiro.mjs` mede a faixa e onde os drones de fato apareceram).
+    this.spawn(def.spawns!, e.y + Phaser.Math.Between(5, 11), e.x - 6);
   }
 
   /**
