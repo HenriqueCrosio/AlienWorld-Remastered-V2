@@ -10,13 +10,14 @@ import { COLORS, GAME_WIDTH } from '../config';
  */
 const FRAMES: Record<string, number> = {
   // A luta da Torre tem DUAS formas de arte (solo -> ar) + a decolagem que liga uma à outra.
-  // `boss-idle` é o pulso do olho na forma pousada (sintetizado, não gerado — ver
-  // scripts/pulsar-brilho.mjs); as demais vêm do PixelLab.
+  // Tudo vem do PixelLab por SELEÇÃO de quadros (ver scripts/install-boss-fight.mjs) — menos o
+  // `boss-idle`, que é o pulso do olho na forma pousada, sintetizado do estático
+  // (scripts/pulsar-brilho.mjs) porque o v3 estroboscopa em idle de sprite grande e parado.
   bossIdleAnim: 8,
-  bossFireAnim: 7,
-  bossAirAnim: 9,
-  bossAirFireAnim: 7,
-  bossTakeoffAnim: 13,
+  bossFireAnim: 5,
+  bossAirAnim: 6,
+  bossAirFireAnim: 4,
+  bossTakeoffAnim: 7,
   shipAnim: 7,
   droneAnim: 7,
   gunshipAnim: 7,
@@ -31,9 +32,13 @@ const FRAMES: Record<string, number> = {
   // Até aqui o cinturão inteiro era ESTÁTICO: a Capitânia pairava como um adesivo, a mina não
   // piscava, e os inimigos novos não tinham motor aceso. Num jogo em que tudo o mais respira,
   // o que não se mexe lê como cenário — e cenário não mata ninguém, então o olho o descarta.
-  kamikazeAnim: 7,
+  // 9, e não os 7 do resto: a arte nova do kamikaze (feita à mão, 2026-08-10) veio com o ciclo
+  // mais longo — a cauda chicoteia num vaivém que 7 quadros cortariam no meio.
+  kamikazeAnim: 9,
   scoutAnim: 7,
-  carrierAnim: 7,
+  // 13: a arte nova do cargueiro (2026-08-10) cicla a baia de lançamento por vermelho → oliva →
+  // amarelo, e o ciclo inteiro precisa dos 13 quadros para fechar sem salto de cor.
+  carrierAnim: 13,
   sensorAnim: 7,
   capitaniaAnim: 7,
   // A SALVA das baterias (2026-07-21): 8 quadros + o de referência. Mesma caixa união do idle
@@ -41,6 +46,16 @@ const FRAMES: Record<string, number> = {
   capitaniaFireAnim: 9,
   minaAnim: 7,
   flakAnim: 7,
+
+  // A FACÇÃO DO CINTURÃO (passe visual 2026-08-08): canhoneira e batedor trocam de pele por
+  // FASE (ver EnemySystem.STAGE_2_SKIN) — estas são as chaves de animação da pele nova.
+  scoutCinturaoAnim: 11,
+  gunshipCinturaoAnim: 7,
+  // A BOLA de energia da canhoneira do cinturão, agora ANIMADA (2026-08-09): ela pulsa e solta
+  // fagulha no ar em vez de ser um adesivo. Os quadros nasceram com DERIVA (o desenho escorregava
+  // 5.6px para a esquerda ao longo do ciclo, o que num projétil soma à velocidade e vira
+  // solavanco) — corrigida no disco por `scripts/centrar-anim.mjs`, não em runtime.
+  bulletOrbAnim: 7,
 
   // ─── O RÓSTER v2 (2026-07-17): 7 naves de perfil, cada uma com a sua propulsão. ───
   // 9 quadros (v3 do PixelLab guarda o quadro de referência como frame 0 — e o PNG estático
@@ -65,8 +80,9 @@ const FRAMES: Record<string, number> = {
   // O ARAUTO também ganhou propulsão (2026-07-21): era a única nave jogável sem motor animado.
   shipArautoAnim: 9,
 
-  // A AURORA da cutscene 1 (2026-07-25): luzes piscando + chamas azuis dos propulsores.
-  carrierBigAnim: 11,
+  // A AURORA da cutscene 1. Remodelada em 2026-08-09 (casco escuro, luzes vermelhas piscando e
+  // os propulsores roxos pulsando atrás) — a arte anterior tinha saído da linha dark sci-fi.
+  carrierBigAnim: 9,
 };
 
 /**
@@ -80,9 +96,11 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // FORMA POUSADA (fase 1): olho pulsando + o disparo do canhão.
   { key: 'boss-idle', prefix: 'bossIdleAnim', frameRate: 10 },
   { key: 'boss-fire', prefix: 'bossFireAnim', frameRate: 14, loop: false },
-  // A DECOLAGEM: toca UMA vez na virada de fúria, a cidadela racha e acende os propulsores.
-  { key: 'boss-takeoff', prefix: 'bossTakeoffAnim', frameRate: 10, loop: false },
-  // FORMA NO AR (fase 2): propulsores tremulando + o disparo.
+  // A DECOLAGEM: toca UMA vez na virada de fúria — o fogo corre pela junta da cidadela e a
+  // arrebenta. 7 quadros a 8fps = 875ms, e é esse número que o `Boss.SWAP_AT` persegue: a forma
+  // aérea entra no quadro seguinte ao último desta, debaixo do estouro grande.
+  { key: 'boss-takeoff', prefix: 'bossTakeoffAnim', frameRate: 8, loop: false },
+  // FORMA NO AR (fase 2): propulsores queimando + o disparo.
   { key: 'boss-air-hover', prefix: 'bossAirAnim', frameRate: 10 },
   { key: 'boss-air-fire', prefix: 'bossAirFireAnim', frameRate: 14, loop: false },
   { key: 'ship-thrust', prefix: 'shipAnim', frameRate: 12 },
@@ -106,6 +124,16 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // como um navio ancorado.
   { key: 'kamikaze-fly', prefix: 'kamikazeAnim', frameRate: 14 },
   { key: 'scout-fly', prefix: 'scoutAnim', frameRate: 12 },
+  // A pele do cinturão (Fase 2) do batedor: MESMA cadência do 'scout-fly' — é o mesmo
+  // comportamento, só a pele muda (ver EnemySystem.STAGE_2_SKIN).
+  { key: 'scout-cinturao-fly', prefix: 'scoutCinturaoAnim', frameRate: 12 },
+  // A pele do cinturão da canhoneira: MESMA cadência do 'gunship-fly' (8) — é o mesmo
+  // comportamento pesado, só a pele muda.
+  { key: 'gunship-cinturao-fly', prefix: 'gunshipCinturaoAnim', frameRate: 8 },
+  // A BOLA de energia dela: 14, a mesma cadência do 'comet-burn'/'blast-burn'. Projétil é a
+  // única coisa no jogo que pulsa RÁPIDO — energia lenta parece plástico, e um tiro que parece
+  // plástico não lê como perigo.
+  { key: 'bullet-orb-pulse', prefix: 'bulletOrbAnim', frameRate: 14 },
   { key: 'carrier-fly', prefix: 'carrierAnim', frameRate: 6 },
   { key: 'capitania-idle', prefix: 'capitaniaAnim', frameRate: 8 },
   // O clarão da salva: toca no disparo e volta para o idle ao terminar (BossCapitania.playFire).
@@ -296,7 +324,22 @@ const ART: Record<string, string> = {
   enemyScout: 'sprites/enemy-scout.png',
   enemyKamikaze: 'sprites/enemy-kamikaze.png',
   enemyCarrier: 'sprites/enemy-carrier.png',
-  enemyCarrier2: 'sprites/enemy-carrier-2.png',
+  // SEM `enemyCarrier2`, pela mesma razão que o drone não tem a dele: a variante 2 é a arte VELHA
+  // do cargueiro (julho). Com ela registrada, `pickVariant` sortearia metade dos cargueiros com o
+  // sprite antigo lilás — e sem animação, porque a animação só toca na variante BASE.
+  // A variante volta quando houver um segundo candidato da arte NOVA.
+
+  // A FACÇÃO DO CINTURÃO (Fase 2, passe visual 2026-08-08): canhoneira/batedor trocam de pele
+  // por fase (STAGE_2_SKIN no EnemySystem) — sem este PNG, a Fase 2 cai de volta na arte biomec
+  // de sempre (guarda de textura).
+  enemyScoutCinturao: 'sprites/enemy-scout-cinturao.png',
+  ...animFrames('scoutCinturaoAnim', 'scout-cinturao-anim'),
+  enemyGunshipCinturao: 'sprites/enemy-gunship-cinturao.png',
+  ...animFrames('gunshipCinturaoAnim', 'gunship-cinturao-anim'),
+  // A BOLA de energia que a canhoneira do cinturão cospe (ver STAGE_2_SKIN.canhoneira.bullet):
+  // o traço `bolt2` sumia no fundo escuro da Fase 2. Sem este PNG, o tiro cai no traço de sempre.
+  bulletOrb: 'sprites/bullet-orb.png',
+  ...animFrames('bulletOrbAnim', 'bullet-orb-anim'),
 
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
@@ -416,6 +459,12 @@ const ART: Record<string, string> = {
   // lua procedural do Boot (`moon`).
   menuMoon: 'sprites/menu-moon.png',
 
+  // A MESMA lua, recortada em 96×96 (a caixa da placeholder procedural) para servir de "a lua
+  // que você deixou" no `Parallax` da Fase 2 (`setApproach()`) — o disco vinha com um cinturão de
+  // destroços em volta, que sobra de graça para o tema do cinturão. Sem ela, o `Parallax` cai na
+  // lua procedural (`moon`), que ficava com "cara de placeholder" ao lado do fundo pintado.
+  moonBelt: 'sprites/moon-belt.png',
+
   // Moldura de HUD (PixelLab `create_ui_asset`, 384×216 = a tela inteira, miolo TRANSPARENTE).
   // Sem placeholder: se não existir, o menu de naves simplesmente aparece sem moldura.
   uiFrame: 'sprites/ui-frame.png',
@@ -473,9 +522,23 @@ const ART: Record<string, string> = {
   // Camada mais distante do parallax de superfície; substitui o céu pixelado por trás do foreground.
   paintBgF1: 'sprites/paint-bg-f1.png',
 
+  // FUNDO PINTADO da SAÍDA DA ATMOSFERA (arte do Henrique): a órbita baixa vista de cima do
+  // planeta, com o arco de atmosfera ainda aceso embaixo. Entra só nos ~6.5s de zero-G entre a
+  // Torre morrer e a cutscene 1 (ver `Parallax.breakAtmosphere`) — sem este PNG, a passagem
+  // continua exatamente como era, contra o cenário da Fase 1.
+  //
+  // Ele é o ANTECESSOR do `paintBgCut1`, não um substituto: aqui o planeta ainda está embaixo;
+  // lá ele já sumiu e sobrou a lua. É o afastamento, contado em duas pinturas.
+  paintBgZeroG: 'sprites/paint-bg-zerog.png',
+
   // FUNDO PINTADO da cutscene 1 (espaço aberto: a lua que ficou + a borda do cinturão à direita,
   // arte do Henrique). Camada mais distante da InterludeScene; o parallax 'espaco' é o fallback.
   paintBgCut1: 'sprites/paint-bg-cut1.png',
+
+  // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
+  // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
+  // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).
+  paintBgF2: 'sprites/paint-bg-f2.png',
 
   // A AURORA nítida (cutscene 1): ~192px exibida ×2 inteira. O `carrier` antigo é o fallback.
   // O estático É o quadro 0 da animação (mesma caixa união — install-anim.mjs), então
@@ -564,6 +627,8 @@ export class BootScene extends Phaser.Scene {
     this.makeColonyLight();
     this.makeEnemyBullet();
     this.makePickup();
+    this.makeFogBand();
+    this.makeGodRay();
     this.registerAnims();
 
     this.scene.start('Menu');
@@ -1092,6 +1157,121 @@ export class BootScene extends Phaser.Scene {
     g.fillStyle(0xe6f4ff, 1);
     g.fillCircle(2, 2, 1);
     g.generateTexture('colonyLight', 4, 4);
+    g.destroy();
+  }
+
+  /**
+   * BANDA DE NÉVOA 256×64, EMENDÁVEL na horizontal — a camada de bruma da saída da atmosfera
+   * (`Parallax.breakAtmosphere`). Branca: a cor vem do `tint` de cada camada, como spark/puff.
+   *
+   * Emendável não é detalhe: ela é usada em TileSprite, e um borrão que não fecha nas bordas
+   * desenha uma costura vertical rolando pela tela — que é exatamente o defeito que a névoa
+   * deveria estar escondendo. Por isso todo círculo que encosta numa borda é desenhado DE NOVO
+   * do outro lado.
+   *
+   * A opacidade cai com a distância da linha do meio: sem isso a banda tem topo e base retos, e
+   * uma névoa com aresta lê como faixa de cor, não como ar.
+   */
+  private makeFogBand(): void {
+    const W = 256;
+    const H = 64;
+
+    // CANVAS, e não `Graphics` — as duas razões são visíveis em tela:
+    //
+    //  1. `fillCircle` desenha um disco de aresta DURA. Cem discos duros em alpha baixo somam um
+    //     degradê liso, que é filtro de cor, não névoa. O gradiente radial do canvas dá borrão de
+    //     verdade, e é dele que vem o corpo.
+    //  2. `Graphics` não sabe APAGAR. A queda das bordas precisa ser um recorte por cima do
+    //     desenho pronto (`destination-out`); calculá-la por borrão não funciona — um borrão de
+    //     raio 40 numa faixa de 64 cobre a altura inteira em alpha uniforme e devolve a faixa uma
+    //     ARESTA RETA no topo e na base. Foi exatamente o que apareceu na primeira versão: as
+    //     cinco camadas com emendas horizontais atravessando a pintura.
+    const tex = this.textures.createCanvas('fogBand', W, H);
+    if (!tex) return;
+    const ctx = tex.getContext();
+
+    // LCG: a textura tem que sair IGUAL toda vez. Uma névoa sorteada com Math.random muda a cada
+    // recarga, e aí nenhuma revisão visual vale para a próxima.
+    let semente = 0x5eed;
+    const rnd = () => ((semente = (semente * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+
+    const borrao = (x: number, y: number, r: number, a: number): void => {
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, `rgba(255,255,255,${a})`);
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    };
+
+    // DUAS PASSADAS, e é isso que dá VOLUME em vez de véu: massas grandes que se acumulam onde se
+    // sobrepõem (a nuvem) e borrões pequenos por cima (o grão que prova que ela tem textura).
+    // Os alphas são ALTOS para gradiente radial: o borrão só entrega o valor de pico no centro
+    // exato e cai a zero na borda, então a média que ele deposita é uma fração do número aqui.
+    // Os 0.12/0.09 da primeira tentativa (herdados dos discos duros do `Graphics`) devolveram
+    // uma bruma transparente demais — foi preciso mais que o dobro para a mesma densidade.
+    const passadas = [
+      { n: 34, rMin: 16, rMax: 38, alpha: 0.26 }, // as massas
+      { n: 55, rMin: 5, rMax: 14, alpha: 0.18 }, // o grão
+    ];
+
+    for (const p of passadas) {
+      for (let i = 0; i < p.n; i++) {
+        const x = rnd() * W;
+        const y = H / 2 + (rnd() - 0.5) * H * 0.9;
+        const r = p.rMin + rnd() * (p.rMax - p.rMin);
+        borrao(x, y, r, p.alpha);
+        // As cópias que fecham a emenda horizontal (ela roda em TileSprite).
+        if (x - r < 0) borrao(x + W, y, r, p.alpha);
+        if (x + r > W) borrao(x - W, y, r, p.alpha);
+      }
+    }
+
+    // A QUEDA DAS BORDAS, recortada por cima: sem ela a faixa tem topo e base retos, e névoa com
+    // aresta lê como faixa de cor. Só na vertical — na horizontal ela precisa fechar, não sumir.
+    const recorte = ctx.createLinearGradient(0, 0, 0, H);
+    recorte.addColorStop(0, 'rgba(0,0,0,1)');
+    recorte.addColorStop(0.22, 'rgba(0,0,0,0)');
+    recorte.addColorStop(0.78, 'rgba(0,0,0,0)');
+    recorte.addColorStop(1, 'rgba(0,0,0,1)');
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = recorte;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+
+    tex.refresh();
+  }
+
+  /**
+   * RAIO 192×24: um facho de luz de bordas suaves, que ganha o ângulo e a cor no uso
+   * (`Parallax`). É o único elemento CLARO da saída da atmosfera — a luz vem do arco aceso do
+   * planeta, e o resto da cena é casco escuro e bruma.
+   *
+   * Some nas DUAS pontas de propósito: um facho com fim reto vira um retângulo deitado. E o pico
+   * fica em 0.55, não em 1 — ele é somado (blend ADD) por cima da névoa, e um facho a pino
+   * estoura a tela, que é justamente o que não se quer aqui.
+   */
+  private makeGodRay(): void {
+    const W = 192;
+    const H = 24;
+    const PASSO = 6;
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+
+    for (let y = 0; y < H; y++) {
+      // Queda transversal ao facho, ao quadrado: o miolo concentra e a borda dissolve.
+      const t = 1 - Math.abs(y - (H - 1) / 2) / ((H - 1) / 2);
+      const transversal = t * t;
+      if (transversal <= 0) continue;
+
+      for (let x = 0; x < W; x += PASSO) {
+        // Queda ao LONGO do facho: entra e sai suave (meio seno nas duas pontas).
+        const u = (x + PASSO / 2) / W;
+        const longitudinal = Math.sin(Math.PI * u);
+        g.fillStyle(0xffffff, 0.55 * transversal * longitudinal);
+        g.fillRect(x, y, PASSO, 1);
+      }
+    }
+
+    g.generateTexture('godRay', W, H);
     g.destroy();
   }
 

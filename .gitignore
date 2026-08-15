@@ -7,8 +7,9 @@ dist/
 # Screenshots de sonda (artefatos de teste, gerados por scripts/probe-*.mjs)
 probe-*.png
 
-# Temporários dos scripts de arte (ampliações, medições)
+# Temporários dos scripts de arte (ampliações, medições, capturas em movimento)
 scripts/_*.png
+scripts/_*.gif
 
 # Cache de ferramenta (Impeccable)
 .impeccable/

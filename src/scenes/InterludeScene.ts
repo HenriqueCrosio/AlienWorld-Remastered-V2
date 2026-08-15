@@ -84,6 +84,8 @@ export class InterludeScene extends Phaser.Scene {
      * preta em vez de reforçar o brilho que a arte já desenhou.
      */
     rimYNudge: number;
+    /** A arte desta textura aponta para OESTE em disco e precisa de `setFlipX` para virar leste. */
+    flip: boolean;
   };
 
   /** Y do centro do sprite que põe a linha do convés exatamente em DECK_Y. */
@@ -150,24 +152,28 @@ export class InterludeScene extends Phaser.Scene {
     //
     // A Aurora nova (×2 INTEIRA — nítida) ou a antiga (×3.2 — o fallback borrado de hoje).
     this.cfg = this.textures.exists('carrierBig')
-      ? { tex: 'carrierBig', artW: 191, artH: 85, deckRow: 44, scale: 2, rimX0: 11, rimX1: 177, rimYNudge: 1 }
-      : { tex: 'carrier', artW: 120, artH: 49, deckRow: 15, scale: 3.2, rimX0: 19, rimX1: 102, rimYNudge: 2 };
-    // A arte veio com a proa apontando para OESTE (esquerda); a frota decola para LESTE (a Fase
-    // 2 corre para a direita — ver `implosao()`), então a Aurora é espelhada para casar a proa
-    // com o rumo da campanha. `setFlipX` espelha em torno do centro do sprite: a posição em tela
-    // não muda, só o conteúdo — por isso a aresta de luz do convés (medida no PNG ORIGINAL, sem
-    // espelhar) precisa da mesma matemática abaixo, não pode reusar `rimX0` puro.
+      ? { tex: 'carrierBig', artW: 189, artH: 83, deckRow: 43, scale: 2, rimX0: 12, rimX1: 178, rimYNudge: 1, flip: false }
+      : { tex: 'carrier', artW: 120, artH: 49, deckRow: 15, scale: 3.2, rimX0: 19, rimX1: 102, rimYNudge: 2, flip: true };
+    // A PROA APONTA PARA LESTE, e isso é requisito, não detalhe: a frota decola para a direita
+    // (a Fase 2 corre para lá — ver `implosao()`), e uma capitânia de proa virada para trás nega
+    // o rumo da campanha inteira.
+    //
+    // A Aurora nova já sai do disco virada para lá (`scripts/espelhar.mjs`, rodado na instalação
+    // junto com os 9 quadros, em BLOCO — a caixa união tem que sobreviver ao espelho). O
+    // fallback antigo continua apontando para OESTE em disco e precisa do `setFlipX` de sempre;
+    // por isso o `flip` mora no `cfg`, com os outros números medidos daquela arte.
     this.carrier = this.add
       .image(GAME_WIDTH / 2, this.carrierY, this.cfg.tex)
-      .setFlipX(true)
+      .setFlipX(this.cfg.flip)
       .setScale(this.cfg.scale)
       .setDepth(10);
     if (this.cfg.tex === 'carrierBig' && this.anims.exists('carrier-big-idle')) {
-      // A Aurora RESPIRA (luzes piscando, chamas azuis nos propulsores): um casco parado que
-      // pisca lê como nave viva, não como cenário. O estático é o quadro 0 — nada salta.
+      // A Aurora RESPIRA (luzes vermelhas piscando no casco, propulsores pulsando na popa): um
+      // casco parado que pisca lê como nave viva, não como cenário. O estático é o quadro 0 —
+      // nada salta.
       const s = this.add
         .sprite(GAME_WIDTH / 2, this.carrierY, this.cfg.tex)
-        .setFlipX(true)
+        .setFlipX(this.cfg.flip)
         .setScale(this.cfg.scale)
         .setDepth(10);
       s.play('carrier-big-idle');
@@ -183,24 +189,50 @@ export class InterludeScene extends Phaser.Scene {
     // `cfg.rimX0..rimX1`). De tela a tela inteira (384px) ela sobrava ~115px flutuando sobre o
     // vazio à esquerda da proa — a "linha estranha" que o Henrique viu na subida (2026-07-18).
     //
-    // O carrier está ESPELHADO (`setFlipX`) — o vão medido também espelha: o pixel que estava a
-    // `rimX0` da esquerda passa a estar a `rimX0` da DIREITA. `artW − 1 − rimX1` é o novo x0.
-    const rimX0 = (this.cfg.artW - 1 - this.cfg.rimX1) * this.cfg.scale;
+    // O vão é medido no PNG; a aresta é desenhada em coordenadas de TELA. A conversão é a borda
+    // esquerda do casco (ele está centrado em GAME_WIDTH/2) mais o offset medido, escalado.
+    //
+    // E se a textura estiver ESPELHADA em runtime (`cfg.flip`), o vão espelha junto: o pixel que
+    // estava a `rimX0` da esquerda passa a estar a `rimX0` da DIREITA — `artW − 1 − rimX1` é o
+    // novo x0. Sem isso a aresta sobrava ~115px flutuando sobre o vazio à esquerda da proa (a
+    // "linha estranha" que o Henrique viu na subida, 2026-07-18).
+    const bordaEsq = GAME_WIDTH / 2 - (this.cfg.artW * this.cfg.scale) / 2;
+    const offX = this.cfg.flip ? this.cfg.artW - 1 - this.cfg.rimX1 : this.cfg.rimX0;
+    const rimX0 = bordaEsq + offX * this.cfg.scale;
     const rimW = (this.cfg.rimX1 - this.cfg.rimX0 + 1) * this.cfg.scale;
     // ⚠️ FLUTUAVA sobre uma tira preta (achado revisando a olho, 2026-07-25): a 1ª linha opaca
     // da arte é o CONTORNO do casco, não o brilho — `rimYNudge` desce até a linha de destaque
-    // real (medido pixel a pixel, ver o comentário no `cfg`). E era um retângulo de 1px SÓLIDO;
-    // virou um degradê de 3 linhas (fraca/forte/fraca) — sem aresta dura, funde no casco em vez
-    // de flutuar sobre ele. `setPosition`/`.alpha` do Graphics continuam controláveis pelos
-    // mesmos tweens de entrada/saída que já existiam (subida do casco, fade da implosão).
+    // real (medido pixel a pixel, ver o comentário no `cfg`).
+    //
+    // ─── E O DESFOQUE PRECISOU CRESCER COM A ARTE NOVA (2026-08-09) ───
+    //
+    // O degradê era de 3 linhas com pico 0.5, calibrado contra a Aurora ANTIGA, cuja linha de
+    // destaque era clara (rgb ~149,166,179): ali a aresta só REFORÇAVA um brilho que a arte já
+    // desenhava. A Aurora remodelada tem a mesma linha bem mais escura (rgb ~79..94), e o mesmo
+    // ciano por cima parou de reforçar e passou a DESENHAR — voltou a ler como risco sólido, que
+    // é exatamente o defeito que o degradê existia para resolver.
+    //
+    // A saída é a mesma de sempre, só mais longa e mais fraca: 6 linhas, pico 0.30, e a queda
+    // PARA BAIXO (uma linha acima, quatro abaixo). Assimétrica de propósito — acima da linha do
+    // convés é ESPAÇO, e brilho no vazio flutua; abaixo é chapa, e ali ele lê como luz caindo na
+    // superfície. `setPosition`/`.alpha` do Graphics continuam controláveis pelos mesmos tweens
+    // de entrada/saída que já existiam (subida do casco, fade da implosão).
+    const DEGRADE: [number, number][] = [
+      // deslocamento em y (linhas de tela), alpha
+      [-1, 0.08],
+      [0, 0.3],
+      [1, 0.22],
+      [2, 0.14],
+      [3, 0.08],
+      [4, 0.04],
+    ];
+
     this.deckRimRestY = InterludeScene.DECK_Y + this.cfg.rimYNudge * this.cfg.scale;
     this.deckRim = this.add.graphics().setDepth(11);
-    this.deckRim.fillStyle(0x7fd4e8, 0.18);
-    this.deckRim.fillRect(rimX0, -1, rimW, 1);
-    this.deckRim.fillStyle(0x7fd4e8, 0.5);
-    this.deckRim.fillRect(rimX0, 0, rimW, 1);
-    this.deckRim.fillStyle(0x7fd4e8, 0.18);
-    this.deckRim.fillRect(rimX0, 1, rimW, 1);
+    for (const [dy, alpha] of DEGRADE) {
+      this.deckRim.fillStyle(0x7fd4e8, alpha);
+      this.deckRim.fillRect(rimX0, dy, rimW, 1);
+    }
     this.deckRim.setPosition(0, this.deckRimRestY);
 
     this.banner = pixelText(this, GAME_WIDTH / 2, 26, '', { size: 11, color: COLORS.hotBright })

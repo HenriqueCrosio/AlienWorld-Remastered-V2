@@ -188,7 +188,7 @@ export class GameScene extends Phaser.Scene {
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
     this.weapons = new WeaponSystem(this);
-    this.enemies = new EnemySystem(this);
+    this.enemies = new EnemySystem(this, this.stage.id);
     this.pickups = new PickupSystem(this);
 
     // Os DOIS sistemas de obstáculo existem sempre; o roteiro da fase decide qual é alimentado
@@ -664,7 +664,7 @@ export class GameScene extends Phaser.Scene {
           ? new BossSerpente(this, this.enemies)
           : this.stage.id === 2
             ? new BossCapitania(this, this.enemies, 150)
-            : new Boss(this, this.enemies.enemyBullets, 150);
+            : new Boss(this, this.enemies.enemyBullets, this.fx, 150);
 
     this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip());
 

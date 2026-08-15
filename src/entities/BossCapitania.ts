@@ -92,19 +92,35 @@ export class BossCapitania implements StageBoss {
   private static readonly MAX_KAMIKAZES = 5;
 
   /**
-   * As três baterias, a partir do CENTRO do sprite (112×64).
+   * As três baterias, a partir do CENTRO do sprite (124×65).
    *
    * Espalhadas pelo CASCO de propósito: é a distância entre elas que transforma três rajadas
    * pequenas numa ONDA rolando. Juntas no mesmo ponto, seriam um leque só — a Torre outra vez.
+   *
+   * ⚠️ MEDIDAS NA ARTE, não estimadas (`scripts/_medir-capitania.mjs`). A régua é a própria
+   * animação de salva: cada quadro dela acende UM clarão na boca de UMA bateria, então o clarão
+   * É a medida — diferença por pixel contra o estático, centroide da VIZINHANÇA do pico. (Média
+   * global não serve: o disparo alaranja o casco inteiro de leve, e esse brilho espalhado puxava
+   * o centroide para o meio da nave, dando sempre a mesma posição.)
+   *
+   * Remedidas em 2026-08-09 com a Capitânia remodelada. Os ângulos NÃO mudaram: eles são o
+   * desenho da luta, não da arte.
    */
   private static readonly BATTERIES: Battery[] = [
-    { x: -46, y: -2, angle: 180 }, // proa — aponta reto em você
-    { x: -22, y: 14, angle: 200 }, // ventral — corta o caminho de baixo
-    { x: 2, y: -24, angle: 160 }, // ponte — corta o de cima
+    { x: -30, y: -3, angle: 180 }, // canhão do casco — aponta reto em você
+    { x: -58, y: 18, angle: 200 }, // barbeta baixa na proa — corta o caminho de baixo
+    { x: -30, y: -25, angle: 160 }, // torre alta — corta o de cima
   ];
 
-  /** Hangar: de onde os interceptadores saem. Atrás da proa, na barriga do casco. */
-  private static readonly HANGAR = { x: -30, y: 20 };
+  /**
+   * Hangar: de onde os interceptadores saem. Atrás da proa, na barriga do casco.
+   *
+   * Este NÃO foi remedido pelo clarão (o hangar não dispara, então não há o que medir). A arte
+   * remodelada é uma EDIÇÃO da anterior — mesmo layout, mesma proa, só mais escura —, então o
+   * offset foi reescalado proporcionalmente da caixa antiga (127×71) para a nova (124×65), o que
+   * mantém os drones nascendo do mesmo ponto do desenho.
+   */
+  private static readonly HANGAR = { x: -29, y: 18 };
 
   constructor(
     private readonly scene: Phaser.Scene,

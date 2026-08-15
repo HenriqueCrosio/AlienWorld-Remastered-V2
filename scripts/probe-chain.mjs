@@ -50,11 +50,18 @@ await voar(5000);
 console.log('no chefão ', JSON.stringify(await estado()));
 
 // Deixa a Torre quase morta e o tiro automático do flap termina o serviço.
+//
+// ⚠️ 7s, não 3s. Escrever `hp = 2` é escrever no CAMPO, não chamar `damage()` — então o golpe
+// seguinte é que cruza os 50% e dispara a DECOLAGEM, e a Torre passa 1.3s imune subindo antes de
+// poder morrer. Somando isso a uma sonda que não sabe jogar (ela voa baixo e o tiro horizontal
+// passa por baixo do chefão aéreo por vários segundos), 3s dependiam de sorte: a cadeia às vezes
+// chegava ao fim com a Torre viva e o relatório inteiro saía errado por causa do orçamento, não
+// do jogo.
 await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   if (s?.boss) s.boss.hp = 2;
 });
-await voar(3000);
+await voar(7000);
 console.log('morta     ', JSON.stringify(await estado()));
 
 // Rompe a atmosfera: a física muda EM PLENO VOO e a zero-G é a recompensa.

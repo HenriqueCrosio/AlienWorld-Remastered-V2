@@ -71,7 +71,20 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // aquilo vem para bater antes de ele ter começado a acelerar. O tint quente foi ABRANDADO
   // (0xff8c1a → 0xffb066) porque a arte agora carrega a leitura — o laranja chapado apagava o
   // espeto, que é justamente a parte que informa.
-  kamikaze: { texture: 'enemyKamikaze', anim: 'kamikaze-fly', hp: 2, speed: 45, wave: 0, fireRate: 0, score: 60, scale: 1, tint: 0xffb066, homing: 150, spawnRate: 0 },
+  //
+  // ARTE NOVA (2026-08-10), e ela vale nas TRÊS fases e dentro da luta da Capitânia — troca
+  // global, na mesma chave. A escolha é de LEITURA: o kamikaze é o mesmo bicho em todo lugar, e
+  // trocá-lo só na Fase 2 o transformaria em figurino em vez de procedência (a Capitânia é o
+  // hangar dele, ver BossCapitania).
+  //
+  // O TINT foi de 0xffb066 para BRANCO porque o calor agora está PINTADO na arte (a crista
+  // laranja), não multiplicado por cima. O laranja quente sobre uma arte CLARA não insinua: ele
+  // pinta — apagaria o azul do casco e os olhos verdes, que é o que a peça tem de leitura.
+  //
+  // A ESCALA 0.85 sobre a tela 31x28 devolve EXATAMENTE o tamanho e a hitbox de antes
+  // (25.5x17 em tela, hitbox 15.8x13.1 contra 15.6x13.2) — ver scripts/_moldurar.mjs. O
+  // número não é estético, é o que mantém o balanceamento intocado.
+  kamikaze: { texture: 'enemyKamikaze', anim: 'kamikaze-fly', hp: 2, speed: 45, wave: 0, fireRate: 0, score: 60, scale: 0.85, tint: 0xffffff, homing: 150, spawnRate: 0 },
 
   // CARGUEIRO: lento, gordo e cheio de vida. Não atira — o perigo dele é o que ele CUSPE.
   // Ignorá-lo enche a tela de drones; é a definição de prioridade de alvo (docs/GDD.md §6).
@@ -79,13 +92,90 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // Sprite PRÓPRIO, e com o hangar aberto na barriga — de onde os drones saem de verdade. Antes
   // era a canhoneira esticada a 1.9×, o que além de repetir a forma BORRAVA a grade de pixel
   // (escala fracionária em pixel art). Nativo a 60px, ele agora vai a 1.1× e a grade fica de pé.
-  cargueiro: { texture: 'enemyCarrier', anim: 'carrier-fly', hp: 24, speed: 20, wave: 0, fireRate: 0, score: 300, scale: 1.1, tint: 0xb9a8d8, homing: 0, spawns: 'drone', spawnRate: 1.5 },
+  //
+  // ARTE NOVA (2026-08-10), troca GLOBAL como a do kamikaze — e pela mesma razão: ele aparece em
+  // STAGE_2/3/4 (nunca na Fase 1), sempre como o mesmo bicho.
+  //
+  // O TINT foi de 0xb9a8d8 para BRANCO. O lilás foi escolhido para a arte antiga, clara e lavada;
+  // sobre um casco quase preto ele levanta o cinza e apaga a única coisa acesa do desenho, que é
+  // a baia. Branco aqui significa "mostre a arte como ela foi pintada".
+  //
+  // O VERDE DA BAIA É DELIBERADO (decisão do Henrique, 2026-08-10). A baia cicla vermelho →
+  // oliva → amarelo, e o oliva/verde é cor NOVA no vocabulário do jogo — que ensina magenta como
+  // "isto te mata". É justamente por não ser a cor de perigo que ela serve: o hangar não é uma
+  // arma, é uma boca. Não trocar por magenta "para ficar coerente" — a incoerência é o ponto.
+  //
+  // A ESCALA NÃO MUDOU, e isso não é sorte: a arte nova foi remoldurada para a MESMA tela 60x39
+  // da antiga (`scripts/_moldurar.mjs`), então o comprimento em tela e a hitbox (39.6x23.6)
+  // seguem idênticos. O desenho é mais BAIXO que o anterior (29px de arte contra 35), o que é
+  // propriedade da arte, não do enquadramento.
+  cargueiro: { texture: 'enemyCarrier', anim: 'carrier-fly', hp: 24, speed: 20, wave: 0, fireRate: 0, score: 300, scale: 1.1, tint: 0xffffff, homing: 0, spawns: 'drone', spawnRate: 1.5 },
 
   // A ARANHA — o MINI-BOSS do Ato 2 da Fase 3 (roteirizada: evento 'miniboss', uma por fase).
   // Um ANDADOR: entra pisando no casco do Leviatã (o y dela é cravado na linha do casco pelo
   // spawn), ESTACIONA no terço direito e cospe leques de 3 mirados. 50 HP (auditoria): grande
   // o bastante para pesar, curta o bastante para não roubar o clímax da serpente.
   aranha: { texture: 'aranha', anim: 'aranha-walk', hp: 50, speed: 30, wave: 0, fireRate: 2.6, score: 500, scale: 0.62, tint: 0xffffff, homing: 0, spawnRate: 0 },
+};
+
+/**
+ * PELE POR FASE: canhoneira e batedor trocam de arte entre a Fase 1 (biomec roxo, sempre) e a
+ * Fase 2 (facção do cinturão) — mesmo `EnemyKind`/comportamento, só a textura. Fonte única de
+ * verdade para o comportamento (opção A do spec 2026-08-05): sem o PNG do cinturão, `spawn()`
+ * cai de volta em `def.texture`/`def.anim` — a Fase 1 e uma Fase 2 sem arte nova continuam
+ * IDÊNTICAS a hoje.
+ *
+ * `scale`, quando presente, SUBSTITUI `def.scale` só pra essa pele — o plano original previa
+ * gerar a arte nova na MESMA caixa nativa da antiga (pra um `scale` só bastar), mas o batedor do
+ * cinturão veio um dardo de verdade (115×34, bem mais alongado que os 27×26 de sempre); forçar a
+ * mesma caixa esmagaria o desenho. O `scale` próprio recalibra o TAMANHO em tela pra ficar
+ * parecido com o da Fase 1 (hitbox deriva do tamanho exibido, ver `spawn`) sem mexer em `DEFS`.
+ *
+ * `bullet` troca o PROJÉTIL junto com a pele, e não junto com o inimigo: a canhoneira da Fase 1
+ * continua cuspindo o traço de sempre. Existe porque o traço (`bolt2`, 13×9 tingido de rosa)
+ * SOME no fundo do cinturão — fundo pintado escuro, destroços, nebulosa —, e um tiro que não se
+ * vê não é dificuldade, é injustiça. A bola é redonda e tem núcleo branco justamente para não
+ * depender da cor para ser vista.
+ *
+ * `tint` idem, e pelo mesmo motivo que o chefão da Fase 1 precisou baixar o dele: os tints do
+ * `DEFS` foram escolhidos para a arte BIOMEC, que é clara e lavada, e eles COLOREM em vez de
+ * insinuar. Aplicados sobre a arte do cinturão — quase preta de propósito — o lilás da canhoneira
+ * (0xbfa8f0) puxava o casco inteiro para cinza-malva e apagava a linha dark sci-fi. Branco aqui
+ * significa "mostre a arte como ela foi pintada", não "sem tint".
+ */
+const STAGE_2_SKIN: Partial<
+  Record<
+    EnemyKind,
+    {
+      texture: string;
+      anim: string;
+      scale?: number;
+      tint?: number;
+      bullet?: { texture: string; scale: number; anim?: string };
+    }
+  >
+> = {
+  batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly', scale: 0.28, tint: 0xffffff },
+  // 0.72 encolhe a arte (115×36, a caixa união do voo) até os 26px de ALTURA da canhoneira
+  // biomec, não até os 45 de largura. A escolha é de balanceamento, não de enquadramento: o
+  // jogador atira na HORIZONTAL, então quem decide "quão difícil é acertar" é o perfil VERTICAL
+  // — a hitbox sai de `e.height * 0.55`. Encaixando pela largura a nave ficaria com 13px de
+  // altura e metade da hitbox vertical de hoje, virando bem mais tanque sem ninguém ter pedido.
+  // O preço desta escolha é o comprimento: 83px em tela contra 45 da Fase 1.
+  canhoneira: {
+    texture: 'enemyGunshipCinturao',
+    anim: 'gunship-cinturao-fly',
+    scale: 0.72,
+    tint: 0xffffff,
+    // A bola em ~14px de diâmetro em tela, contra os 10×7 do traço que ela substitui. Maior de
+    // propósito: o que se ganha aqui é LEITURA, e ela é o motivo do troco. Sem tint — a arte já
+    // nasce magenta, que é a cor que o jogo ensina como "tiro que me mata" (ver `fireAt`).
+    //
+    // 0.8 e não o 0.5 de antes porque a ARTE mudou (2026-08-09), não o desejo: a bola nova tem
+    // corpo de 18px contra os 29 da anterior, então o mesmo 0.5 a entregaria com METADE do
+    // tamanho calibrado. O número muda para o tamanho em tela ficar o mesmo.
+    bullet: { texture: 'bulletOrb', scale: 0.8, anim: 'bullet-orb-pulse' },
+  },
 };
 
 export class EnemySystem {
@@ -100,7 +190,11 @@ export class EnemySystem {
    */
   private readonly muzzleFlash: Phaser.GameObjects.Particles.ParticleEmitter;
 
-  constructor(private readonly scene: Phaser.Scene) {
+  constructor(
+    private readonly scene: Phaser.Scene,
+    /** A FASE atual (`GameScene.stage.id`) — só usada para a pele por fase (ver `STAGE_2_SKIN`). */
+    private readonly stageId: number,
+  ) {
     this.enemies = scene.physics.add.group({ allowGravity: false });
     this.enemyBullets = scene.physics.add.group({
       defaultKey: 'bolt2',
@@ -133,18 +227,32 @@ export class EnemySystem {
     // (a banda `casco` do Parallax tem o topo em ~190; o centro dela assenta em cima).
     if (kind === 'aranha') y = 170;
 
-    const texture = pickVariant(this.scene, def.texture);
+    // A PELE POR FASE (canhoneira/batedor): na Fase 2, tenta a textura do cinturão primeiro;
+    // sem o PNG (guarda de textura), cai na arte biomec de sempre — ver STAGE_2_SKIN.
+    const skin = this.stageId === 2 ? STAGE_2_SKIN[kind] : undefined;
+    const hasSkin = skin !== undefined && this.scene.textures.exists(skin.texture);
+    const baseTexture = hasSkin ? skin!.texture : def.texture;
+    const baseAnim = hasSkin ? skin!.anim : def.anim;
+    // A pele pode trazer a própria escala (ver STAGE_2_SKIN) — a arte do cinturão nem sempre
+    // nasce na mesma caixa nativa da biomec, e forçar o `def.scale` de sempre distorceria o
+    // tamanho em tela.
+    const scale = hasSkin && skin!.scale !== undefined ? skin!.scale : def.scale;
+    // E o próprio tint: os do `DEFS` foram escolhidos para a arte biomec (clara) e COLOREM a arte
+    // do cinturão (quase preta) em vez de insinuar — ver STAGE_2_SKIN.
+    const tint = hasSkin && skin!.tint !== undefined ? skin!.tint : def.tint;
+
+    const texture = pickVariant(this.scene, baseTexture);
     const e = this.enemies.create(x, y, texture) as Phaser.Physics.Arcade.Sprite;
 
     // A animação só existe para a variante BASE. Tocá-la numa variante trocaria a textura
     // pelos quadros da base — e a variedade que acabamos de ganhar iria embora.
-    if (texture === def.texture && def.anim && this.scene.anims.exists(def.anim)) {
-      e.play(def.anim);
+    if (texture === baseTexture && baseAnim && this.scene.anims.exists(baseAnim)) {
+      e.play(baseAnim);
     }
 
     e.setVelocityX(-def.speed);
-    e.setScale(def.scale);
-    e.setTint(def.tint);
+    e.setScale(scale);
+    e.setTint(tint);
 
     // Todos os sprites são gerados apontando para a DIREITA. O inimigo vem na sua direção,
     // então normalmente é só espelhar.
@@ -168,7 +276,9 @@ export class EnemySystem {
     e.setData('hp', def.hp);
     e.setData('score', def.score);
     // Guardado para restaurar depois do flash branco de dano.
-    e.setData('tint', def.tint);
+    // O tint DA PELE, não o do DEFS: é este valor que o flash branco de dano restaura ao
+    // terminar (ver `damage`), e restaurar o do DEFS repintaria a arte do cinturão no 1º tiro.
+    e.setData('tint', tint);
     e.setData('baseY', y);
     e.setData('t', Phaser.Math.FloatBetween(0, Math.PI * 2));
     // Espera antes do PRIMEIRO tiro: uma canhoneira não dispara no frame em que aparece.
@@ -230,7 +340,22 @@ export class EnemySystem {
 
     // O nariz aponta para onde ele VOA (não para o alvo): é o vetor de velocidade que o
     // jogador precisa ler para saber se ainda dá tempo de sair da frente.
-    e.setRotation(Math.atan2(body.velocity.y, body.velocity.x));
+    const rumo = Math.atan2(body.velocity.y, body.velocity.x);
+    e.setRotation(rumo);
+
+    // E VOANDO PARA A ESQUERDA ELE FICA DE PÉ. O sprite é desenhado apontando para a direita;
+    // girá-lo além de 90° o entrega de ponta-cabeça — dorso embaixo, barriga em cima. Como ele
+    // passa a maior parte do voo indo para a esquerda (é a direção do jogador), esse era o
+    // estado NORMAL dele, não a exceção.
+    //
+    // O defeito é antigo e estava escondido: a arte anterior era um bloco mecânico simétrico,
+    // que invertido continua parecendo o mesmo bloco. A arte de 2026-08-10 tem crista dorsal e
+    // barriga, e denunciou.
+    //
+    // `setFlipY` sobre o sprite JÁ GIRADO espelha no eixo local: composto com a rotação de ~180°
+    // ele desfaz a inversão vertical e mantém o rumo. Não é o mesmo que trocar a rotação — o
+    // nariz continua apontando para onde a velocidade aponta, que é a informação que o jogador lê.
+    e.setFlipY(Math.abs(rumo) > Math.PI / 2);
   }
 
   /** CARGUEIRO: cospe drones enquanto estiver na tela. Fora dela, seria um spawn invisível. */
@@ -248,7 +373,15 @@ export class EnemySystem {
     // Nasce NO HANGAR — a boca acesa na BARRIGA do cargueiro, que agora existe na arte. Antes o
     // drone saía do meio do casco (±8px do centro), e parecia atravessar o metal; sair por baixo,
     // de onde a luz vaza, é a diferença entre um inimigo LARGADO e um inimigo teletransportado.
-    this.spawn(def.spawns!, e.y + Phaser.Math.Between(4, 14), e.x - 6);
+    //
+    // A FAIXA É MEDIDA NA ARTE, não escolhida a olho: com a arte de 2026-08-10 a baia acesa fica
+    // em +5.5 a +10.5 do centro (localizada por SATURAÇÃO — o casco e as espinhas dorsais são
+    // neutros, só a baia tem cor). O intervalo anterior, +4 a +14, passava 3px ABAIXO dela, e
+    // um em cada quatro ou cinco drones brotava debaixo do casco em vez de dentro do hangar.
+    //
+    // ⚠️ Este número vale para ESTA arte. Trocar o sprite do cargueiro obriga a re-medir a baia
+    // (`scripts/_probe-cargueiro.mjs` mede a faixa e onde os drones de fato apareceram).
+    this.spawn(def.spawns!, e.y + Phaser.Math.Between(5, 11), e.x - 6);
   }
 
   /**
@@ -376,6 +509,13 @@ export class EnemySystem {
    */
   private fireAt(e: Phaser.Physics.Arcade.Sprite, target: Phaser.Physics.Arcade.Sprite): void {
     const centro = Phaser.Math.Angle.Between(e.x, e.y, target.x, target.y);
+
+    // A MUNIÇÃO da pele por fase (ver STAGE_2_SKIN). Mesma guarda de textura do resto: sem o
+    // PNG, cai no traço de sempre e nada quebra. Só a Fase 2 tem pele — a aranha da Fase 3, que
+    // também passa por aqui, nunca entra nesta condição.
+    const skin = this.stageId === 2 ? STAGE_2_SKIN[e.getData('kind') as EnemyKind] : undefined;
+    const municao =
+      skin?.bullet && this.scene.textures.exists(skin.bullet.texture) ? skin.bullet : undefined;
     const angulos =
       e.getData('kind') === 'aranha'
         ? [centro - Phaser.Math.DegToRad(13), centro, centro + Phaser.Math.DegToRad(13)]
@@ -391,13 +531,36 @@ export class EnemySystem {
       b.setActive(true).setVisible(true);
       b.body!.enable = true;
 
-      // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
-      // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
-      b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
-      // Leve GLOW aditivo: energia, não palito rosa chapado. Só o blend — sem trail e sem
-      // escala anisotrópica, que são o figurino do traçante da Capitânia. O release() abaixo
-      // devolve o blend NORMAL ao reciclar o slot.
-      b.setBlendMode(Phaser.BlendModes.ADD);
+      if (municao) {
+        // A BOLA da pele do cinturão (Fase 2). Sem tint e sem blend aditivo: a arte já vem
+        // magenta com núcleo branco, e somar luz por cima só estoura o núcleo e come a borda
+        // escura que a separa do fundo — a borda é metade do motivo de ela ser visível.
+        b.setTexture(municao.texture).setScale(municao.scale).clearTint();
+        b.setBlendMode(Phaser.BlendModes.NORMAL);
+        // E ela PULSA. Mesma guarda do resto: sem a animação registrada, fica o estático (que é
+        // o quadro 0 — mesma caixa união, então não salta ao começar). `release()` já para a
+        // animação ao reciclar o slot, senão o próximo tiro a herdar a vaga sairia pulsando.
+        if (municao.anim && this.scene.anims.exists(municao.anim)) b.play(municao.anim);
+        // A hitbox do slot é a do `bolt2` até alguém trocá-la (o pool é compartilhado, ver
+        // `release`). Uma bola redonda com a caixa de um traço acerta pelo canto vazio — então
+        // aqui ela é um CÍRCULO, como o cometa da Torre (mesma razão, ver `release`).
+        //
+        // Os números saem de MEDIÇÃO, não de gosto: a bola ocupa 18×18 de um canvas 20×24 (o
+        // resto é a fagulha do quadro 3, que não fere), e o centro dela cai em (10, 12). Raio
+        // 6.25 dá 10px de diâmetro em tela na escala 0.8 — que é exatamente a caixa que a arte
+        // ANTERIOR tinha (10.2×9.8) e que o balanceamento da Fase 2 já foi jogado em cima.
+        // Manter o `0.7` do canvas aqui teria inflado a caixa vertical em 37% de graça: o canvas
+        // novo é mais alto, e a fagulha teria virado hitbox.
+        (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
+      } else {
+        // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
+        // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
+        b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
+        // Leve GLOW aditivo: energia, não palito rosa chapado. Só o blend — sem trail e sem
+        // escala anisotrópica, que são o figurino do traçante da Capitânia. O release() abaixo
+        // devolve o blend NORMAL ao reciclar o slot.
+        b.setBlendMode(Phaser.BlendModes.ADD);
+      }
       // Origem: usada para a carência contra o relevo (ver GameScene).
       b.setData('ox', e.x);
       b.setData('oy', e.y);
