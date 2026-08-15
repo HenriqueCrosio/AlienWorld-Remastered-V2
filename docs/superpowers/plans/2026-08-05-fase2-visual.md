@@ -540,21 +540,28 @@ cargueiro não troca por fase); Modify `src/scenes/BootScene.ts` só se a contag
 
 ### Task 6: Regressão + revisão final
 
-- [ ] **Step 1: `npm run build`** limpo (typecheck + vite).
-- [ ] **Step 2: `node scripts/probe-stage2.mjs`** — verde, sem erro de página/console; os quatro
-      screenshots (`cinturao`, `kamikaze`, `cargueiro`, `capitania`) mostram a facção nova coesa
-      e a Capitânia intocada.
-- [ ] **Step 3: `node scripts/probe-chain.mjs`** — a cadeia Fase 1 → chefão → zero-G → Fase 2
-      continua fechando; a canhoneira/batedor da FASE 1 continuam com a arte biomec roxa (a pele
-      do cinturão só aparece na Fase 2).
-- [ ] **Step 4: Revisão a olho — roster lado a lado.** Um screenshot com os 4 redesenhados
-      (mesmo princípio do `probe-roster-f1.mjs` da Fatia 1: "dá para distinguir num relance") +
-      o drone roxo biomec ao lado — confirma o critério de sucesso #3 do spec (duas facções na
-      mesma fase, legível).
-- [ ] **Step 5: Hitbox/balanceamento** — conferir visualmente que nenhum dos quatro cresceu/
-      encolheu em jogo (comparar com os screenshots do Task 0/commits anteriores).
-- [ ] **Step 6: Merge** — seguir `superpowers:finishing-a-development-branch` a partir da branch
-      `feat/fase2-visual` (mesmo fluxo das fatias 1 e 2).
+**✅ TASK 6 FECHADA (2026-08-15).** Mergeada em `138acf7`.
+
+- [x] **Step 1: `npm run build`** limpo (typecheck + vite). O aviso de chunk >500 kB é
+      pré-existente, não desta fatia.
+- [x] **Step 2: `node scripts/probe-stage2.mjs`** — sem erro de página/console, Capitânia
+      intocada. ⚠️ **Ressalva:** a corrida morre em t≈37s, ANTES das ondas de kamikaze e
+      cargueiro — os screenshots desses dois não valem como julgamento. Cobertos pelo Step 4.
+- [x] **Step 3: `node scripts/probe-chain.mjs`** — a cadeia Fase 1 → chefão → zero-G → Interlude
+      continua fechando; a Fase 1 segue 100% biomec roxa (nenhuma arte do cinturão vazou).
+- [x] **Step 4: Róster lado a lado — `scripts/_probe-roster-fases.mjs` (novo).** Cobre as fases
+      1, 2, 3 E 4, porque as trocas do kamikaze e do cargueiro foram GLOBAIS. Confirma o critério
+      de sucesso #3 do spec e mais: a pele de fase se desliga corretamente na 3 e na 4, e os dois
+      redesenhados saem idênticos nas três (mesma animação, mesmo tamanho em tela, mesma hitbox).
+      Orientação do perseguidor conferida por fase com `_probe-kami.mjs` — `flipY` ativo a ~180°.
+- [x] **Step 5: Hitbox/balanceamento** — kamikaze `15.8×13.1` e cargueiro `39.6×23.6`, iguais às
+      registradas antes das trocas e idênticas nas fases 2/3/4. Nada cresceu nem encolheu.
+- [x] **Step 6: Merge** — `--no-ff` em `main` (`138acf7`), push em `origin/main`, branch local
+      apagada. Merge ÚNICO, não um por fatia: a correção de rumo reabriu as fatias 1 e 2.
+
+**Ficou aberto de propósito** (ver "Fechamento" no START): a baia do cargueiro camufla na Fase 4,
+onde o cenário é feito de órgãos vermelhos; e o batedor do cinturão é a silhueta mais frágil do
+róster. As duas foram vistas e medidas, não resolvidas — decisão de arte pendente.
 
 ---
 
