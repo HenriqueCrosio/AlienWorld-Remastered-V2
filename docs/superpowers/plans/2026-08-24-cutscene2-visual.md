@@ -395,7 +395,7 @@ devolvido:
         const d = acha('docaCinturao');
         return d ? { x: Math.round(d.x), y: Math.round(d.y), s: d.scaleX } : null;
       })(),
-      cordilheira: s.plataforma ? s.plataforma.length : -1,
+      cordilheira: s.plataforma === undefined ? 'removida' : s.plataforma.length,
 ```
 
 E depois dos asserts existentes:
@@ -403,7 +403,7 @@ E depois dos asserts existentes:
 ```js
 ok(e.doca !== null, 'a DOCA NOVA está na cena');
 ok(e.doca !== null && Number.isInteger(e.doca.s), 'a doca está em escala INTEIRA');
-ok(e.cordilheira === 0, 'a cordilheira foi APOSENTADA (a doca flutua)');
+ok(e.cordilheira === 'removida', 'o chão falso foi APAGADO (a doca flutua)');
 ```
 
 - [ ] **Passo 6: Rodar a sonda e ver que ela REPROVA**
@@ -457,24 +457,56 @@ Se na revisão do Passo 11 a doca ainda ler como **colagem** sobre a pintura (o 
 ×2.2 ter puxado o azul dela para além do azul do céu), o remédio é um tint **escuro e frio** —
 comece em `0xb8c2d8` e desça. Nunca um tint claro.
 
-- [ ] **Passo 8: Aposentar a cordilheira**
+- [ ] **Passo 8: Apagar o CHÃO FALSO — remoção completa**
 
-Em `src/scenes/Interlude2Scene.ts`, substituir o CORPO inteiro de `construirPlataforma()` (mantendo
-o método, para os spreads `...this.plataforma` continuarem válidos) por:
+O que o código chama de "cordilheira" são **33 sprites de asteroide** (`asteroid`/`asteroid2`/
+`asteroid3` + 2 `destroco`) ampliados de 1.4× a 4.2×, tingidos de azul-escuro e enfileirados no
+rodapé e nas laterais (`y = 172..224`, `x = −8..545`). Não são montanhas e não são as rochas
+amarradas pelos cabos — é **um chão falso**, e o comentário do próprio código diz para quê:
+*"sem ela, a doca flutua"*.
+
+A doca agora **flutua de propósito**, então a função dessas peças está invertida. E a pintura do
+cinturão já desenha rocha de verdade em toda a tela: conferido em jogo, sem elas a cena não abre
+buraco nenhum.
+
+**Remoção completa — apagar os OITO pontos de uso.** Decisão do Henrique (2026-08-24): não deixar
+lápide; o porquê fica registrado no comentário de cabeçalho da classe.
+
+1. O campo `private plataforma: Phaser.GameObjects.Image[] = [];` (~linha 61) e o comentário dele.
+2. As constantes `DEPTH_PLAT_FUNDO` e `DEPTH_PLAT_FRENTE` (~linhas 103-104).
+   ⚠️ **Isto não é opcional.** `tsconfig.json` tem `noUnusedLocals: true` e `npm run build` roda
+   `tsc --noEmit`: constante privada sem leitor **reprova o build**.
+3. `this.plataforma = [];` em `create()` (~linha 139).
+4. A chamada `this.construirPlataforma();` em `create()` (~linha 163).
+5. O método `construirPlataforma()` inteiro, com o array `pecas` e o doc-comment (~linhas 214-290).
+6. `for (const p of this.plataforma) p.x += entrada;` em `roteiro()` (~linha 429), com o comentário
+   de duas linhas acima dele.
+7. `...this.plataforma` da lista de `targets` do tween de deslize (~linha 437) — que passa a ser
+   `targets: [this.doca, this.padRim]`.
+8. O tween inteiro `targets: this.plataforma, y: '+=60', alpha: 0` no fim da partida (~linhas
+   684-692), com o comentário de três linhas acima dele. O tween da doca logo acima dele
+   (`targets: [this.doca, this.padRim]`) **fica** — é ele que afunda a doca no fim.
+
+E acrescentar ao doc-comment de cabeçalho da classe `Interlude2Scene`, junto das outras decisões
+da cena:
 
 ```ts
-  /**
-   * APOSENTADA na Fatia 4. A cordilheira existia para a doca não flutuar — ela era "a rocha em que
-   * a doca está ENCRAVADA". Mas a doca agora É uma plataforma SUSPENSA, presa pelos cabos, e é
-   * isso que a pintura do cinturão desenha: naquele lugar as plataformas pendem de guindastes, não
-   * se fincam em chão. A pintura também já entrega toda a rocha de fundo que a cena precisa.
-   *
-   * O método fica (vazio) de propósito: `this.plataforma` continua sendo um array válido, e os
-   * spreads `...this.plataforma` no deslize e na destruição seguem funcionando como no-ops.
-   */
-  private construirPlataforma(): void {
-    // Sem peças: a doca flutua.
-  }
+ * ─── NÃO HÁ CHÃO AQUI (Fatia 4) ───
+ *
+ * Até a Fatia 4 a cena montava 33 asteroides ampliados no rodapé para a doca não parecer que
+ * flutuava. Ela flutua — é uma plataforma SUSPENSA, presa pelos cabos, e é assim que a pintura
+ * do cinturão desenha aquele lugar: as estações pendem de guindastes, não se fincam em chão.
+ * O chão falso foi apagado; a rocha que aparece atrás da doca é a da pintura.
+```
+
+Ajustar também o assert da sonda do Passo 5, já que o campo deixa de existir:
+
+```js
+      cordilheira: s.plataforma === undefined ? 'removida' : s.plataforma.length,
+```
+
+```js
+ok(e.cordilheira === 'removida', 'o chão falso foi APAGADO (a doca flutua)');
 ```
 
 - [ ] **Passo 9: Rodar a sonda e ver que ela PASSA**
