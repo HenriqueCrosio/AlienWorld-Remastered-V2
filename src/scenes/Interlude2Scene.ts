@@ -85,6 +85,16 @@ export class Interlude2Scene extends Phaser.Scene {
   private static readonly PAD_X0 = 37;   // ← do Passo 3
   private static readonly PAD_X1 = 213;  // ← do Passo 3
 
+  // ─── A RISCA DA PISTA — encurtada e amaciada (passe de correção pós-Passo-3-b) ───
+  // ⚠️ PAD_X0/PAD_X1 marcam a BORDA DO RECORTE (usados pelo pouso em `pouso()`) — a arte tem 6px
+  // de pena alfa em cada lado, então uma risca visual que vai até PAD_X1 vaza pro pixel já
+  // transparente. A risca fica LONGE dessa borda (margem abaixo) e curta, plantada no trecho
+  // onde a nave de fato assenta — não a largura inteira da pista.
+  /** Margem mínima (coords de arte) entre a risca e a borda com pena alfa (6px + folga). */
+  private static readonly RIM_MARGIN = 8;
+  /** Meia-largura da risca (coords de arte), centrada no ponto de pouso. */
+  private static readonly RIM_HALF_WIDTH = 40;
+
   /**
    * ×1: escala INTEIRA. A doca antiga era ×1.5 — fracionária, e ela BORRA a grade de pixel, que é
    * a única coisa que faz o jogo parecer feito de pixels (o mesmo defeito que tirou o cargueiro
@@ -175,17 +185,28 @@ export class Interlude2Scene extends Phaser.Scene {
       .setScale(Interlude2Scene.SCALE)
       .setDepth(Interlude2Scene.DEPTH_DOCA);
 
-    // A aresta de luz da PISTA — só no trecho em que ela existe. Uma linha atravessando a tela
-    // inteira (como a da Aurora, que era um convés de 384px) mentiria: aqui a superfície começa
-    // em x=PAD_X0 e o resto é rocha.
-    const x0 = Interlude2Scene.artToScreenX(Interlude2Scene.PAD_X0);
-    const x1 = Interlude2Scene.artToScreenX(Interlude2Scene.PAD_X1);
+    // A aresta de luz da PISTA — uma MARCAÇÃO no convés, não uma barra. Curta (centrada no ponto
+    // em que a nave realmente pousa) e por dentro da pena alfa das bordas do recorte — a versão
+    // antiga ia até PAD_X1, que É o último pixel do recorte, dentro da pena de 6px.
+    const padCentroAx = (Interlude2Scene.PAD_X0 + Interlude2Scene.PAD_X1) / 2; // = onde a nave assenta
+    const rimAx0 = Math.max(
+      Interlude2Scene.PAD_X0 + Interlude2Scene.RIM_MARGIN,
+      padCentroAx - Interlude2Scene.RIM_HALF_WIDTH,
+    );
+    const rimAx1 = Math.min(
+      Interlude2Scene.PAD_X1 - Interlude2Scene.RIM_MARGIN,
+      padCentroAx + Interlude2Scene.RIM_HALF_WIDTH,
+    );
+    const x0 = Interlude2Scene.artToScreenX(rimAx0);
+    const x1 = Interlude2Scene.artToScreenX(rimAx1);
 
     this.padRim = this.add
       .rectangle(x0, Interlude2Scene.PAD_Y, x1 - x0, 1, 0xff7a4a)
       .setOrigin(0, 0)
       .setDepth(Interlude2Scene.DEPTH_RIM)
-      .setAlpha(0.6);
+      // Mais fraca: era o elemento mais saturado da tela. Agora lê como marcação no convés
+      // escuro, não como a fonte de luz da cena.
+      .setAlpha(0.35);
 
     // OS CABOS. Desenhados em código, e não como sprite, porque eles precisam LIGAR duas coisas:
     // uma ponta na doca, a outra numa rocha que balança. Um sprite de cabo ficaria parado
@@ -227,14 +248,23 @@ export class Interlude2Scene extends Phaser.Scene {
    * direita e acima da pista, que é a única região grande sem nada em cima).
    */
   private amarrarRochas(): void {
-    // ⚠️ Re-ancorado para a arte NOVA (160×160, densa). As âncoras saem dos guindastes/mastros no
-    // alto do outpost (coords da ARTE, x~45-65 y~22-40); as rochas ficam no céu aberto à direita,
-    // ONDE não há doca (ela preenche até x~270 na tela). Medir de novo se a arte trocar.
+    // ⚠️ Re-ancorado para a doca NOVA (214×63, uma laje larga e fina — passe de correção). As
+    // âncoras antigas eram calibradas pra doca ANTERIOR (160×160 a ×1.5, quase quadrada): um
+    // cluster perto do centro fazia sentido lá. Na laje larga de hoje, o mesmo cluster vira 18px
+    // de largura amontoados no terço esquerdo, todos ABAIXO da linha da pista (y=150) — três
+    // cabos que parecem puxar de lado, do meio do nada, em vez de segurar a plataforma por cima.
+    //
+    // Correção: as âncoras se ESPALHAM pelos três terços da laje (x da arte, derivado de ART_W —
+    // "medir, nunca chutar" vale tanto pra não chutar em screen-space quanto em art-space) e
+    // sentam perto da BORDA DE CIMA da plataforma (topo = y=134 na tela; ay baixo, perto de 0,
+    // fica logo abaixo dele) — assim o cabo puxa pra CIMA, que é fisicamente o que sustenta algo
+    // pendurado, e não pra lado a partir da barriga do convés.
     const pontos = [
-      // âncora (coords da ARTE) → rocha (coords da TELA, no vazio à direita/alto)
-      { ax: 58, ay: 24, rx: 300, ry: 34, escala: 1.4 },
-      { ax: 64, ay: 34, rx: 352, ry: 104, escala: 1.0 },
-      { ax: 46, ay: 30, rx: 298, ry: 96, escala: 0.85 },
+      // âncora (coords da ARTE, terço esquerdo/centro/direito, rente ao topo) → rocha (coords da
+      // TELA, no vazio à direita/alto — as rochas NÃO mudam de lugar, só de onde o cabo nasce).
+      { ax: Interlude2Scene.ART_W * (1 / 6), ay: 6, rx: 300, ry: 34, escala: 1.4 },
+      { ax: Interlude2Scene.ART_W * (1 / 2), ay: 6, rx: 352, ry: 104, escala: 1.0 },
+      { ax: Interlude2Scene.ART_W * (5 / 6), ay: 6, rx: 298, ry: 96, escala: 0.85 },
     ];
 
     for (const p of pontos) {
