@@ -418,6 +418,12 @@ const ART: Record<string, string> = {
   // nave pousar no vazio, 30px abaixo da tela. Ferramenta: node scripts/find-pad.mjs doca 80.
   doca: 'sprites/doca.png',
 
+  // A DOCA DO CINTURÃO — recortada da arte nova (PixelLab 906bb897), corrigida no tom e
+  // esfumada nas bordas por `scripts/_cut2-doca.mjs`.
+  // ⚠️ NUNCA renomear para `doca2`: o pickVariant trataria isso como VARIANTE e sortearia entre
+  // a arte nova e a velha a cada spawn. Foi o que pegou o cargueiro na Fatia 3.
+  docaCinturao: 'sprites/doca-cinturao.png',
+
   // O HANGAR DO LEVIATÃ: o interior onde a nave danificada cai na 3ª cutscene (160×160, escolha
   // do Henrique — lote 1 do prompts.json). ⚠️ As JANELAS são VAZADAS (scripts/vazar-janelas.mjs,
   // rodar de novo a cada reinstalação): o starfield/parallax da cena aparece ATRAVÉS delas. A

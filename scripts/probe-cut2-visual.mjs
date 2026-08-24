@@ -24,6 +24,11 @@ const estado = () =>
       cena: s.scene.key,
       ceu: ceu ? { x: Math.round(ceu.x), y: Math.round(ceu.y), d: ceu.depth } : null,
       temParallaxPixel: !!s.parallax,
+      doca: (() => {
+        const d = acha('docaCinturao');
+        return d ? { x: Math.round(d.x), y: Math.round(d.y), s: d.scaleX } : null;
+      })(),
+      cordilheira: s.plataforma === undefined ? 'removida' : s.plataforma.length,
     };
   });
 
@@ -39,6 +44,9 @@ ok(e.cena === 'Interlude2', 'está na Interlude2');
 ok(e.ceu !== null, 'a PINTURA do cinturão está na cena');
 ok(e.ceu !== null && e.ceu.d === -110, 'a pintura está no depth -110 (atrás do starfield)');
 ok(e.temParallaxPixel === false, 'o parallax pixel foi APOSENTADO (a pintura o substituiu)');
+ok(e.doca !== null, 'a DOCA NOVA está na cena');
+ok(e.doca !== null && Number.isInteger(e.doca.s), 'a doca está em escala INTEIRA');
+ok(e.cordilheira === 'removida', 'o chão falso foi APAGADO (a doca flutua)');
 
 await page.screenshot({ path: 'probe-cut2-aproximacao.png' });
 
