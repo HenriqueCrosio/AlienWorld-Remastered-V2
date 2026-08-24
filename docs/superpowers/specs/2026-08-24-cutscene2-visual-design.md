@@ -67,7 +67,8 @@ no código: ela **desliza** na aproximação (a sonda mede `x = 300 → 175 → 
   Sem quantização manual.
 - Chave nova `paintBgCut2` no `BootScene`. Substitui o `new Parallax(this, 'espaco')`, entrando
   como camada mais distante, com o **starfield MANTIDO por cima** — são as estrelas em movimento
-  que carregam a deriva. Deriva da pintura lentíssima (fator ~0.04, como nas outras).
+  que carregam a deriva. Deriva da pintura lentíssima: `paintedBg.x -= 20 * 0.015 * dt`
+  (conferido na Cutscene 1, que usa `26 * 0.015` — 26 é a velocidade do parallax dela; aqui é 20).
 - **Guarda:** sem o PNG, a cena mantém o parallax `espaco` de hoje (fallback = comportamento atual).
 
 ### 3. A doca — recortada da arte nova
