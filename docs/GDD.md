@@ -35,7 +35,7 @@ atira, coleta armas e mata o que estiver no caminho.
 |---|---|---|
 | **Atmosfera** (superfície da lua) | Há gravidade → a nave cai | **FLAP** — você impulsiona para não cair |
 | **Vácuo** (espaço aberto) | Não há gravidade → a nave flutua | **LIVRE** — voo em 8 direções |
-| **Interior do Leviatã** | Gravidade **artificial** | **FLAP** — ele volta |
+| **Interior do Leviatã** | Zero-G (é o vácuo do bicho) | **LIVRE** — shmup até o fim |
 
 O jogador não escolhe o flap: **a gravidade o impõe.**
 
@@ -46,12 +46,26 @@ FASE 1  atmosfera ──[rompe a atmosfera EM PLENO VOO]──▶ vácuo
         FLAP                                            LIVRE
 FASE 2  vácuo · LIVRE
 FASE 3  vácuo · LIVRE
-FASE 4  dentro do Leviatã · gravidade artificial · FLAP  ← o flap VOLTA, no clímax
+FASE 4  dentro do Leviatã · zero-G · LIVRE
 ```
 
-O jogo **ensina** o flap no berço dele (a superfície, que é o Alien World v2), **tira** o flap do
-jogador por duas fases inteiras, e o **devolve no clímax** — nos corredores apertados, quando ele
-já desaprendeu. Isso é estrutura, e ela sai de graça da física.
+O flap é a **ABERTURA**, e só ela. Ele existe para que quem jogou o *Alien World v2* reconheça o
+jogo nos primeiros 30 segundos — é a homenagem ao original, no ambiente onde ela nasceu. Depois
+que a atmosfera rompe, o jogo **é um shmup até o fim**.
+
+### ⚠️ O flap NÃO volta na Fase 4 (decisão do Henrique, 2026-08-24 — não reabrir)
+
+O plano original era devolver o flap no clímax, nos corredores apertados, quando o jogador já o
+tivesse desaprendido. Bonito no papel; **injogável na mão.** O Henrique jogou a Fase 4 e a
+constatação foi direta: nos corredores o flap não dá — e o flap já é **punitivo demais em boa
+parte do jogo** para ainda pagar o aperto da fase final.
+
+O que se perde é uma simetria de documento. O que se ganha é a fase final ser jogável, e o flap
+ficar sendo exatamente o que ele é bom sendo: o **sabor do jogo antigo na abertura**.
+
+⚠️ O **Legacy** (flap em tudo, ×1.25) **continua existindo** — e na Fase 4 ele é reconhecidamente
+quase injogável. Isso é um custo ACEITO de um modificador hardcore opcional, não um bug a
+consertar. Ninguém cai nele sem escolher.
 
 O momento em que a atmosfera rompe e **os controles se transformam na sua mão, em pleno voo**, é o
 momento-assinatura do jogo.
@@ -102,9 +116,9 @@ Voo em 8 direções, sem gravidade. Controle direto, estilo shmup clássico.
 - Input: `WASD` / setas / analógico — movimento. `J` / `Espaço` — atirar. `K` — arma especial / bomba.
 - É a condução "padrão", onde o level design é calibrado.
 
-> **Implicação técnica:** todo level design precisa ser jogável nas duas conduções. Regra prática:
-> nenhum corredor exige precisão vertical maior que o arco de um flap. Corredores apertados
-> (fase 2) precisam de passagem verificada com o flap antes de fechar.
+> **Implicação técnica:** o level design é calibrado no **LIVRE**, que é a condução da campanha
+> da Fase 2 em diante. Só a **Fase 1** precisa passar no flap — e ela é o berço dele, então passa
+> por construção. O Legacy voa por cima dessa régua por conta e risco do jogador.
 
 ---
 
@@ -247,11 +261,15 @@ no ambiente onde ela nasceu, antes de exigir dela num run'n'gun.
 - **Custo:** lua + Leviatã = **2 assets gerados**, reaproveitados em escalas diferentes. É o maior
   elemento de coesão do jogo e custa duas gerações.
 
-### ⚠️ Restrição de level design (inegociável)
+### ⚠️ Restrição de level design
 
-O espaço fecha, mas **nenhum corredor pode ser mais estreito que o arco de um flap**. A Fase 4 é
-onde a condução Flap mais sofre — todo corredor dela precisa ser jogado no Flap antes de ser
-aprovado. Se não passa no Flap, o corredor está errado, não a condução.
+**REVISTA em 2026-08-24.** A regra antiga era "nenhum corredor mais estreito que o arco de um
+flap", e ela existia porque o flap voltava na Fase 4. **Ele não volta mais** (ver §3). A régua
+agora é o **voo LIVRE**, e os corredores da Fase 4 podem apertar até onde o shmup aguentar.
+
+O que **continua valendo**: a **Fase 1** é jogada no flap e todo obstáculo dela precisa passar no
+arco de um flap antes de ser aprovado. Ali a regra é a mesma de sempre — se não passa no flap, o
+obstáculo está errado, não a condução.
 
 ---
 

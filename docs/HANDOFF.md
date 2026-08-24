@@ -44,26 +44,45 @@ Não há mais buraco no arco: as 4 fases, as 4 cutscenes e o chefão final estã
 `probe-stage4` fecha a corrente de ponta a ponta (atravessando a cutscene final até o
 GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online e deploy.**
 
-**AO RETOMAR, na ordem:**
+> ⚠️ **ESTE BLOCO FOI REORDENADO EM 2026-08-24.** A versão anterior mandava playtestar a Fase 4
+> PRIMEIRO. Não é mais assim — ver a ordem fechada logo abaixo.
 
-1. **O PLAYTEST DO HENRIQUE NA FASE 4** — é o único passo que não dá para fazer sem ele.
-   Tudo abaixo é chute calibrado, e nenhum foi tocado por dedo humano ainda:
+**A ORDEM FECHADA (2026-08-24):** a ÚNICA frente aberta é o **passe visual por fatias**. Tudo o
+que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele — playtestar e
+balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
+
+1. **PASSE VISUAL INTEIRO** — fatias 4–8. A próxima é a **Fatia 4 (Cutscene 2: a doca no
+   cinturão e a explosão)**, que ainda não tem spec nem plano: começa pelo BRAINSTORMING.
+   Mapa e estado em `docs/superpowers/plans/2026-08-05-fase2-visual-START.md`.
+2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
+   (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
+   fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
+3. **BALANCEAMENTO**: colisões, explosões, e então **armas e naves**. É onde o **ENXAME** (a arma
+   do Arauto, nunca jogada por humano) finalmente é revisto.
+4. **PLAYTEST HUMANO DE TODAS AS FASES**, só então.
+
+⚠️ **A Fase 4 JÁ FOI JOGADA** pelo Henrique (2026-08-24): veredicto *"bem jogável"*. Ela **não**
+está pendente por esquecimento. Os números abaixo seguem sendo chute calibrado até o playtest
+final do passo 4 — não os mexa antes disso:
    - vãos dos corredores: **110 → 96 → 76 (o aperto) → 84** (evento `corredor` no `STAGE_4`)
    - o guardião: `INVESTIDA_CADA` (6s), `TELEGRAFO_DUR` (0.55s), HP 90
    - o coração: `ABERTO_DUR` / `FECHADO_DUR` / `CADENCIA` por fase, HP 180
-2. **AS CALIBRAGENS DO PASSE VISUAL esperam o mesmo olho** (partes 3/4 abaixo): hitstop de
-   150ms na morte de chefão, fps das explosões (18/13/12), brilho do halo dos tiros
-   (`lifespan/scale/alpha` do `halo` no `WeaponSystem` — 3 números), fades e pulsos do menu.
-   E a CUTSCENE FINAL: atalho `[F]` no menu ensaia direto — conferir o tom (vitória AMARGA)
-   e os ~42s.
-3. **PLACAR ONLINE (Supabase)** — a próxima frente. **BLOQUEADA: falta o Henrique passar a
+
+⚠️ **A Fatia 7 (Fase 4) mexe em GEOMETRIA, não só em pintura.** As colunas dos corredores são
+props COM hitbox. Instalar arte recortada mais justa no lugar da atual ENCOLHE o vão sem nada no
+roteiro mudar — é a armadilha do cargueiro (Task 5 da Fatia 3) aplicada a level design. **Medir
+os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
+
+**As frentes abaixo seguem abertas, mas DEPOIS do que está acima:**
+
+5. **PLACAR ONLINE (Supabase)** — a próxima frente. **BLOQUEADA: falta o Henrique passar a
    URL do projeto + a anon/public key** (Settings → API no painel do Supabase). Plano: tabela
    `scores` (name, score, handling, stage, ship, victory, created_at) + RLS (insert anônimo,
    select público); submit via fetch REST na GameOverScene (sem SDK); tela de ranking (top
    por condução + melhores runs).
-4. **DEPLOY (Vercel)** — depois do placar: `npm run build` é estático (vite → `dist/`).
+6. **DEPLOY (Vercel)** — depois do placar: `npm run build` é estático (vite → `dist/`).
    ⚠️ O CORS do Supabase precisa do DOMÍNIO FINAL — configurar depois do primeiro deploy.
-5. **Polimento menor**: cabos desenhados ancorando as duas formas do chefão a chão/teto
+7. **Polimento menor**: cabos desenhados ancorando as duas formas do chefão a chão/teto
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
@@ -622,6 +641,13 @@ Vender ESCALA é o mais difícil em pixel art, e estes dois sprites fazem isso s
 1. **A condução é DIEGÉTICA.** Não é opção de menu, é física do lugar: atmosfera tem gravidade →
    **FLAP**; vácuo não tem → **LIVRE**. O jogador não escolhe o flap, a gravidade o impõe.
    O menu pergunta *quem decide*: `diegetico` (padrão), `flap` (Legacy, ×1.25) ou `free`.
+   ⚠️ **O FLAP É SÓ A ABERTURA** (decisão do Henrique, 2026-08-24). Ele existe na Fase 1 como a
+   homenagem ao *Alien World v2*; da Fase 2 em diante o jogo **é um shmup até o fim**, e o flap
+   **NÃO volta na Fase 4** — nos corredores ele é injogável, e é punitivo demais em boa parte do
+   jogo. `STAGES[4].zone` já é `'vacuo'`, então **o código sempre esteve certo**; era o GDD que
+   ainda prometia o retorno do flap (corrigido em `docs/GDD.md` §3 e §7).
+   O **Legacy** continua de pé e na Fase 4 é quase injogável: custo ACEITO de um modificador
+   hardcore opcional, não bug.
 2. **A campanha é uma aproximação:** superfície da lua → espaço → casco do Leviatã → interior dele.
 3. **A zero-G é a RECOMPENSA por matar o chefão**, não um evento no meio da fase.
    ⚠️ **A cutscene NÃO a atropela:** o jogador voa na zero-G com o controle na mão, e só DEPOIS a
