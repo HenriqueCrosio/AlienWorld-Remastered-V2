@@ -535,6 +535,10 @@ const ART: Record<string, string> = {
   // arte do Henrique). Camada mais distante da InterludeScene; o parallax 'espaco' é o fallback.
   paintBgCut1: 'sprites/paint-bg-cut1.png',
 
+  // O céu da CUTSCENE 2 — a doca no cinturão. Mesmo tratamento do paintBgCut1: 480×270, 1px de
+  // arte = 1px de jogo, posicionada em y=-27. A pintura é do Henrique.
+  paintBgCut2: 'sprites/paint-bg-cut2.png',
+
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
   // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).

@@ -46,7 +46,10 @@ interface Amarra {
  */
 export class Interlude2Scene extends Phaser.Scene {
   private starfield!: Starfield;
-  private parallax!: Parallax;
+  /** O céu: a pintura do Henrique (o cinturão visto de dentro). Null = sem PNG, caiu no parallax. */
+  private paintedBg: Phaser.GameObjects.Image | null = null;
+  /** Fallback do céu (o parallax pixel da Fase 2) — só existe quando a pintura NÃO existe. */
+  private parallax: Parallax | null = null;
   private fx!: Fx;
 
   private ship!: Phaser.GameObjects.Image;
@@ -142,8 +145,16 @@ export class Interlude2Scene extends Phaser.Scene {
     resetVariantCache();
 
     this.starfield = new Starfield(this);
-    // O MESMO céu da Fase 2: a cutscene é a continuação do voo, não um vídeo à parte.
-    this.parallax = new Parallax(this, 'espaco');
+    // O CÉU é a pintura do Henrique. Depth −110: ATRÁS do starfield (−100), porque são as
+    // estrelas em movimento que carregam a deriva — a pintura sozinha seria um quadro parado.
+    this.paintedBg = null;
+    this.parallax = null;
+    if (this.textures.exists('paintBgCut2')) {
+      this.paintedBg = this.add.image(0, -27, 'paintBgCut2').setOrigin(0, 0).setDepth(-110);
+    } else {
+      // Sem o PNG: o céu antigo (o mesmo parallax da Fase 2) — comportamento de hoje.
+      this.parallax = new Parallax(this, 'espaco');
+    }
     this.fx = new Fx(this);
 
     // O PLANETA EXPLODINDO — o grande fundo da cena. É a CAUSA do cinturão, vista de perto: o
@@ -340,7 +351,9 @@ export class Interlude2Scene extends Phaser.Scene {
 
     this.starfield.update(dt);
     // Devagar: a nave está em aproximação, não em fuga.
-    this.parallax.update(dt, 20);
+    this.parallax?.update(dt, 20);
+    // Deriva lentíssima: a cena dura <40s e a pintura tem 96px de folga horizontal.
+    if (this.paintedBg) this.paintedBg.x -= 20 * 0.015 * dt;
 
     // As rochas BALANÇAM na ponta do cabo — e é o balanço que prova que o cabo está sob tensão.
     // Pedra parada pendurada num fio é um adesivo.
