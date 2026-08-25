@@ -552,6 +552,10 @@ const ART: Record<string, string> = {
   // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).
   paintBgF2: 'sprites/paint-bg-f2.png',
 
+  // O céu do ATO 1 da FASE 3 — a nebulosa de Kepler, pintada pelo Henrique. Mesma receita do
+  // paintBgF2: 480×270, posicionada em y=-27. Ela SEGUE o nebulaDim (some quando a nuvem abre).
+  paintBgF3: 'sprites/paint-bg-f3.png',
+
   // A AURORA nítida (cutscene 1): ~192px exibida ×2 inteira. O `carrier` antigo é o fallback.
   // O estático É o quadro 0 da animação (mesma caixa união — install-anim.mjs), então
   // estático e animação nunca saltam entre si.

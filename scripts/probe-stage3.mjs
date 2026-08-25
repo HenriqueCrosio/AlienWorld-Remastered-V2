@@ -69,7 +69,10 @@ const estadoFase = () =>
 let f = await estadoFase();
 console.log('ato 1    ', JSON.stringify(f));
 ok(f.fase === 3, `fase 3 rodando (id=${f.fase})`);
-ok(f.camadasNebulosa >= 3 && f.spritesNebulosa > 0, `nebulosa ATIVA (${f.camadasNebulosa} camadas, ${f.spritesNebulosa} nuvens)`);
+// Eram 3 camadas `nebula3` antes da pintura do Henrique (Fatia 5, Tarefa 1): a mais profunda
+// virou a PLACA `paintBgF3` (fora de `layers[]`, não conta aqui). 2 é o número certo agora —
+// ver `probe-f3-visual.mjs`, que asserta o mesmo.
+ok(f.camadasNebulosa >= 2 && f.spritesNebulosa > 0, `nebulosa ATIVA (${f.camadasNebulosa} camadas, ${f.spritesNebulosa} nuvens)`);
 ok(f.nebulaDim >= 0.95, `dentro da nuvem (nebulaDim=${f.nebulaDim})`);
 ok(f.casco === 1 && f.alphaCasco < 0.05, `casco ainda escondido (alpha=${f.alphaCasco.toFixed(2)})`);
 await page.screenshot({ path: 'probe-stage3-nebulosa.png' });

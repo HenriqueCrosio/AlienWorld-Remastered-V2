@@ -129,6 +129,12 @@ export class Parallax {
   private foregroundDim = 1;
   /** Densidade da nebulosa (Fase 3): 1 = dentro da nuvem. Ver `setNebulaDensity`. */
   private nebulaDim = 1;
+  /**
+   * A pintura do céu da FASE 3. Ela NÃO é uma `ScatterLayer` — é uma placa fixa, como o
+   * `paintBgF2` — então o alpha dela não passa por `alphaFor`. Quem a apaga é o
+   * `setNebulaDensity`, à mão. Ver o comentário lá.
+   */
+  private nebulaPainting: Phaser.GameObjects.Image[] = [];
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -852,23 +858,52 @@ export class Parallax {
    * faixa GENEROSA e detalhada, não um risco no rodapé.
    */
   private buildNebula(): void {
+    // A PINTURA DO HENRIQUE é o corpo da nuvem. Ela SUBSTITUI a camada procedural mais profunda
+    // (a de baixo, `factor 0.05`) — as outras duas continuam, e é isso que mantém o movimento:
+    // uma placa parada atrás + nuvem procedural derivando por cima lê como "voar dentro"; a placa
+    // sozinha leria como papel de parede.
+    //
+    // ⚠️ Ela é uma PLACA, não uma ScatterLayer: o alpha dela não passa por `alphaFor`, e por isso
+    // o `setNebulaDensity` a apaga à mão. Sem isso ela ficaria de pé depois de t=42 e o ATO 2
+    // teria nebulosa no céu — a fase inteira perderia a virada.
+    //
+    // −27 = (270−216)/2: centraliza a pintura de 480×270 na janela de 384×216. Duas cópias
+    // lado a lado, como o `paintBgF2`, para a rolagem nunca mostrar buraco.
+    const temPintura = this.scene.textures.exists('paintBgF3');
+    if (temPintura) {
+      const w = (this.scene.textures.get('paintBgF3').getSourceImage() as { width: number }).width;
+      for (let i = 0; i < 2; i++) {
+        this.nebulaPainting.push(
+          this.scene.add
+            .image(i * w, -27, 'paintBgF3')
+            .setOrigin(0, 0)
+            .setDepth(-97)
+            .setData('bgFactor', 0.02),
+        );
+      }
+      this.paintedBg.push(...this.nebulaPainting);
+    }
+
     // O corpo da nuvem: grande, sobreposto (gap < largura), quase parado. É ele que diz
     // "estamos DENTRO" — nuvem espaçada é nuvem vista de fora.
-    this.addLayer({
-      key: 'nebula3',
-      factor: 0.05,
-      baseY: 0,
-      depth: -96,
-      tint: 0xffffff,
-      // A arte já é dourado-sobre-azul; os tints só variam a temperatura entre nuvens.
-      tints: [0xffffff, 0xe8d8c0, 0xb8c4e8],
-      alpha: 0.85,
-      scale: [1.8, 3.0],
-      gap: [95, 160],
-      terreno: false,
-      flutua: true,
-      nebulosaExtra: true,
-    });
+    // ⚠️ SÓ ENTRA SEM A PINTURA. Com ela, esta é a camada substituída (fallback = o visual antigo).
+    if (!temPintura) {
+      this.addLayer({
+        key: 'nebula3',
+        factor: 0.05,
+        baseY: 0,
+        depth: -96,
+        tint: 0xffffff,
+        // A arte já é dourado-sobre-azul; os tints só variam a temperatura entre nuvens.
+        tints: [0xffffff, 0xe8d8c0, 0xb8c4e8],
+        alpha: 0.85,
+        scale: [1.8, 3.0],
+        gap: [95, 160],
+        terreno: false,
+        flutua: true,
+        nebulosaExtra: true,
+      });
+    }
 
     this.addLayer({
       key: 'nebula3',
@@ -893,7 +928,10 @@ export class Parallax {
       baseY: 0,
       depth: 60,
       tint: 0x9aa2c8,
-      alpha: 0.38,
+      // ⚠️ ALPHA MEDIDO EM A/B COM INIMIGO ESCURO NA TELA (Fatia 5), não escolhido no olho. O
+      // critério é o inimigo LER através do véu — numa fase que põe minas em cachos na névoa, não
+      // ver a mina não é problema estético, é morte. Era 0.38 e escondia demais.
+      alpha: 0.24,
       scale: [1.8, 3.0],
       gap: [240, 460],
       terreno: false,
@@ -1143,6 +1181,8 @@ export class Parallax {
           const a = this.alphaFor(layer);
           for (const s of layer.sprites) s.setAlpha(a);
         }
+        // A pintura não é ScatterLayer, então ela não passa por `alphaFor` — some aqui, à mão.
+        for (const img of this.nebulaPainting) img.setAlpha(this.nebulaDim);
       },
     });
   }
