@@ -66,6 +66,9 @@ export class Interlude2Scene extends Phaser.Scene {
   private cabos!: Phaser.GameObjects.Graphics;
   private banner!: Phaser.GameObjects.Text;
 
+  /** O ACHADO: o caça alienígena encalhado na doca. Null = sem a arte dele. */
+  private arauto: Phaser.GameObjects.Image | null = null;
+
   private amarras: Amarra[] = [];
   private panel: ShipPanel | null = null;
 
@@ -214,6 +217,7 @@ export class Interlude2Scene extends Phaser.Scene {
     // enquanto a rocha se move, e a amarra viraria uma decoração solta no meio do vazio.
     this.cabos = this.add.graphics().setDepth(Interlude2Scene.DEPTH_CABO);
     this.amarrarRochas();
+    this.encalharArauto();
 
     // A nave que chega é a ESCOLHIDA na Aurora (this.naveId) — a doca não pode desmentir a
     // escolha que o jogador fez uma fase atrás.
@@ -323,6 +327,54 @@ export class Interlude2Scene extends Phaser.Scene {
    * marcado no PNG. O halo grande e o facho (a "volumetria") só nascem nas poucas luzes mais
    * fortes, nunca em todas — senão a doca inteira vira um brilho só.
    */
+  /**
+   * O ACHADO — o caça alienígena encalhado, VISÍVEL antes da escolha.
+   *
+   * ⚠️ ISTO NÃO É DECORAÇÃO. É a premissa da cena. A 1ª interlude é uma PERDA (a sua frota
+   * implode); esta é um ACHADO, e o que se acha é tecnologia do inimigo. É por isso que o ARAUTO
+   * só pode ser escolhido AQUI e em lugar nenhum antes — "ele não existe no hangar humano porque
+   * não teria de onde ter vindo" (`src/ships.ts`).
+   *
+   * Até a Fatia 4 esse achado existia só no comentário do arquivo e como um slot no painel: o
+   * jogador escolhia uma nave alienígena num menu sem NUNCA ter visto de onde ela veio. Agora ele
+   * pousa um nível abaixo dela e olha para cima.
+   *
+   * ─── ONDE, E POR QUE MEDIDO ───
+   *
+   * Na plataforma do MEIO (escolha do Henrique): um nível acima da pista, então ele não disputa
+   * laje com a nave do jogador e o jogador precisa REPARAR nele em vez de esbarrar nele.
+   *
+   * O ponto sai de medição no PNG, não do olho: na linha da laje do meio (arte y=135) a superfície
+   * clara vai de x≈136 a x≈228, e acima de x≈152 o céu está aberto. `ARAUTO_AX = 190` cai no meio
+   * desse trecho livre, com folga para os 31px de casco. `artToScreenX` converte; a superfície
+   * fica em `135 − 25 = 110` na tela, e o casco assenta meia altura acima dela.
+   *
+   * ⚠️ ENCALHADO, não estacionado: inclinado sobre a laje e escurecido. Uma nave alinhada e limpa
+   * lê como frota, e não há frota aqui — há um destroço que a doca estava minerando.
+   *
+   * ⚠️ É um `Image`, NUNCA um `Sprite`, e isso é de propósito: um `Image` não tem como tocar
+   * animação nem por engano. Nave morta não pulsa motor.
+   */
+  private encalharArauto(): void {
+    const alien = SHIPS['alien'];
+    if (!alien || !this.textures.exists(alien.texture)) return;
+
+    /** X do casco em coords da ARTE — medido no trecho livre da laje do meio (136..228). */
+    const ARAUTO_AX = 190;
+    /** Linha da laje do meio, em coords da ARTE (a pista é a de BAIXO, em PAD_ROW=175). */
+    const LAJE_MEIO_AY = 135;
+
+    const x = Interlude2Scene.artToScreenX(ARAUTO_AX);
+    const superficie =
+      Interlude2Scene.docaY + (LAJE_MEIO_AY - Interlude2Scene.ART_H / 2) * Interlude2Scene.SCALE;
+
+    this.arauto = this.add
+      .image(x, superficie - 6, alien.texture)
+      .setDepth(Interlude2Scene.DEPTH_DOCA + 0.5)
+      .setAngle(-8)
+      .setTint(0x7f88a8);
+  }
+
   private criarLuzes(): void {
     // GUARDA: sem a textura, a cena não quebra — só fica sem o efeito (a mesma regra de guarda
     // que `chegadaTex`/`docaTex` já seguem nesta cena).
@@ -651,6 +703,15 @@ export class Interlude2Scene extends Phaser.Scene {
     this.panel = null;
 
     this.trocarNave(id);
+
+    // ⚠️ SE ELE LEVOU O ARAUTO, O ARAUTO NÃO ESTÁ MAIS NA LAJE. A cena passaria a mentir: o
+    // jogador decolaria pilotando a nave alienígena com uma cópia dela ainda pousada atrás. É o
+    // mesmo tipo de mentira que a animação já causou uma vez aqui (a nave escolhida não era a que
+    // decolava, ver `trocarNave`) — só que em cenário.
+    if (id === 'alien' && this.arauto) {
+      this.arauto.destroy();
+      this.arauto = null;
+    }
 
     const nave = SHIPS[id];
     this.aviso(`${nave.name} · ARMADA`, COLORS.hotBright);
