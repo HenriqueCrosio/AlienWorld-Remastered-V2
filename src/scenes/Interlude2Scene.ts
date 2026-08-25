@@ -131,9 +131,11 @@ export class Interlude2Scene extends Phaser.Scene {
    * A 2ª arte (c166782d) não é um cutout independente do céu — é um cais entalhado num paredão de
    * asteroide, pensado para nascer na margem da tela, não flutuando no meio dela. Com origem no
    * centro e `SCALE = 1`, colar a borda ESQUERDA do sprite em x=0 é `DOCA_X − ART_W/2 = 0`, ou
-   * seja `DOCA_X = ART_W/2`. Metade da arte (o lado esquerdo) fica fora da tela — é por isso que
-   * `_cut2-doca2.mjs` esfuma o topo, a base e a DIREITA, mas nunca a esquerda: esfumar um lado que
-   * ninguém vê comeria arte que de fato aparece.
+   * seja `DOCA_X = ART_W/2`. Metade da arte (o lado esquerdo) fica fora da tela.
+   *
+   * ⚠️ A arte NÃO leva feather em borda nenhuma (`_cut2-doca2.mjs`, bloco 3). Feather é remédio
+   * para CORTE — servia à arte anterior, que era um recorte retangular. Esta já vem com cutout e
+   * silhueta próprios, e a rampa de alpha só comia as pontas das antenas e dos conveses.
    */
   private static readonly DOCA_X = Interlude2Scene.ART_W / 2;
 
