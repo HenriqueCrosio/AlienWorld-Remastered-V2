@@ -66,8 +66,11 @@ export class Interlude2Scene extends Phaser.Scene {
   private cabos!: Phaser.GameObjects.Graphics;
   private banner!: Phaser.GameObjects.Text;
 
-  /** O ACHADO: o caça alienígena encalhado na doca. Null = sem a arte dele. */
-  private arauto: Phaser.GameObjects.Image | null = null;
+  /**
+   * O ACHADO: a nave que esta cutscene desbloqueia, pousada na doca à vista.
+   * Null = sem a arte dela, ou o jogador já a levou. Ver `encalharNaveDaVaga()`.
+   */
+  private naveDaVaga: Phaser.GameObjects.Image | null = null;
 
   private amarras: Amarra[] = [];
   private panel: ShipPanel | null = null;
@@ -125,6 +128,18 @@ export class Interlude2Scene extends Phaser.Scene {
   // ponto de luz, nunca na frente dele.
   private static readonly DEPTH_LUZ_HALO = Interlude2Scene.DEPTH_DOCA + 0.3;
   private static readonly DEPTH_LUZ = Interlude2Scene.DEPTH_DOCA + 1;
+
+  // ─── A VAGA: qual nave fica pousada à vista, e onde ───
+  //
+  // ⚠️ TROCAR A NAVE DESTA CUTSCENE É EDITAR **UMA LINHA** — `NAVE_DA_VAGA`. O róster ainda vai
+  // ser rebalanceado e enxugado (passe de balanceamento), e o Henrique pediu explicitamente que o
+  // ponto ficasse pronto para a troca, para não virar retrabalho. Ver `encalharNaveDaVaga()`.
+  /** O id em `SHIPS` da nave que ESTA cutscene desbloqueia. Trocar aqui, e só aqui. */
+  private static readonly NAVE_DA_VAGA = 'alien';
+  /** X do casco na VAGA, em coords da ARTE — medido no trecho livre da laje do meio (136..228). */
+  private static readonly VAGA_AX = 190;
+  /** Linha da laje do MEIO, em coords da ARTE (a pista é a de BAIXO, em PAD_ROW). */
+  private static readonly VAGA_AY = 135;
 
   /** A altura da pista NA TELA. Baixa: a doca é grande e sangra para fora por baixo. */
   private static readonly PAD_Y = 150;
@@ -217,7 +232,7 @@ export class Interlude2Scene extends Phaser.Scene {
     // enquanto a rocha se move, e a amarra viraria uma decoração solta no meio do vazio.
     this.cabos = this.add.graphics().setDepth(Interlude2Scene.DEPTH_CABO);
     this.amarrarRochas();
-    this.encalharArauto();
+    this.encalharNaveDaVaga();
 
     // A nave que chega é a ESCOLHIDA na Aurora (this.naveId) — a doca não pode desmentir a
     // escolha que o jogador fez uma fase atrás.
@@ -328,7 +343,9 @@ export class Interlude2Scene extends Phaser.Scene {
    * fortes, nunca em todas — senão a doca inteira vira um brilho só.
    */
   /**
-   * O ACHADO — o caça alienígena encalhado, VISÍVEL antes da escolha.
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   *  A VAGA — o lugar onde a nave que ESTA cutscene desbloqueia fica pousada, à vista.
+   * ════════════════════════════════════════════════════════════════════════════════════════
    *
    * ⚠️ ISTO NÃO É DECORAÇÃO. É a premissa da cena. A 1ª interlude é uma PERDA (a sua frota
    * implode); esta é um ACHADO, e o que se acha é tecnologia do inimigo. É por isso que o ARAUTO
@@ -336,40 +353,50 @@ export class Interlude2Scene extends Phaser.Scene {
    * não teria de onde ter vindo" (`src/ships.ts`).
    *
    * Até a Fatia 4 esse achado existia só no comentário do arquivo e como um slot no painel: o
-   * jogador escolhia uma nave alienígena num menu sem NUNCA ter visto de onde ela veio. Agora ele
-   * pousa um nível abaixo dela e olha para cima.
+   * jogador escolhia uma nave alienígena num menu sem NUNCA ter visto de onde ela veio.
+   *
+   * ─── ⚠️ ESTE É UM PADRÃO PARA AS OUTRAS CUTSCENES, NÃO UM CASO ESPECIAL ───
+   *
+   * Pedido do Henrique (2026-08-25): **toda cutscene deveria mostrar, pousada em algum canto, a
+   * nave que ela desbloqueia.** Faz sentido narrativo (a nave vem de algum lugar) e resolve de
+   * graça o mesmo buraco que esta cena tinha.
+   *
+   * O róster ainda vai ser MEXIDO — o passe de balanceamento vai rebalancear e "enxugar" as naves.
+   * Por isso a vaga foi deixada **parametrizada**: quando aquele passe chegar, trocar qual nave
+   * aparece aqui é editar `NAVE_DA_VAGA` e mais nada. A posição, a inclinação, o tint, a guarda de
+   * textura e o sumiço-ao-escolher continuam valendo para qualquer nave.
+   *
+   * Para copiar isto numa outra interlude, o que viaja junto é: (1) a constante da nave, (2) uma
+   * posição MEDIDA na arte daquela cena, (3) o `Image` (nunca `Sprite`), e (4) o sumiço em
+   * `escolher()`. Nada disso depende de ser o Arauto.
    *
    * ─── ONDE, E POR QUE MEDIDO ───
    *
-   * Na plataforma do MEIO (escolha do Henrique): um nível acima da pista, então ele não disputa
-   * laje com a nave do jogador e o jogador precisa REPARAR nele em vez de esbarrar nele.
+   * Na plataforma do MEIO (escolha do Henrique): um nível acima da pista, então ela não disputa
+   * laje com a nave do jogador e o jogador precisa REPARAR nela em vez de esbarrar nela.
    *
    * O ponto sai de medição no PNG, não do olho: na linha da laje do meio (arte y=135) a superfície
-   * clara vai de x≈136 a x≈228, e acima de x≈152 o céu está aberto. `ARAUTO_AX = 190` cai no meio
+   * clara vai de x≈136 a x≈228, e acima de x≈152 o céu está aberto. `VAGA_AX = 190` cai no meio
    * desse trecho livre, com folga para os 31px de casco. `artToScreenX` converte; a superfície
    * fica em `135 − 25 = 110` na tela, e o casco assenta meia altura acima dela.
    *
-   * ⚠️ ENCALHADO, não estacionado: inclinado sobre a laje e escurecido. Uma nave alinhada e limpa
+   * ⚠️ ENCALHADA, não estacionada: inclinada sobre a laje e escurecida. Uma nave alinhada e limpa
    * lê como frota, e não há frota aqui — há um destroço que a doca estava minerando.
    *
    * ⚠️ É um `Image`, NUNCA um `Sprite`, e isso é de propósito: um `Image` não tem como tocar
    * animação nem por engano. Nave morta não pulsa motor.
    */
-  private encalharArauto(): void {
-    const alien = SHIPS['alien'];
-    if (!alien || !this.textures.exists(alien.texture)) return;
+  private encalharNaveDaVaga(): void {
+    const nave = SHIPS[Interlude2Scene.NAVE_DA_VAGA];
+    if (!nave || !this.textures.exists(nave.texture)) return;
 
-    /** X do casco em coords da ARTE — medido no trecho livre da laje do meio (136..228). */
-    const ARAUTO_AX = 190;
-    /** Linha da laje do meio, em coords da ARTE (a pista é a de BAIXO, em PAD_ROW=175). */
-    const LAJE_MEIO_AY = 135;
-
-    const x = Interlude2Scene.artToScreenX(ARAUTO_AX);
+    const x = Interlude2Scene.artToScreenX(Interlude2Scene.VAGA_AX);
     const superficie =
-      Interlude2Scene.docaY + (LAJE_MEIO_AY - Interlude2Scene.ART_H / 2) * Interlude2Scene.SCALE;
+      Interlude2Scene.docaY +
+      (Interlude2Scene.VAGA_AY - Interlude2Scene.ART_H / 2) * Interlude2Scene.SCALE;
 
-    this.arauto = this.add
-      .image(x, superficie - 6, alien.texture)
+    this.naveDaVaga = this.add
+      .image(x, superficie - 6, nave.texture)
       .setDepth(Interlude2Scene.DEPTH_DOCA + 0.5)
       .setAngle(-8)
       .setTint(0x7f88a8);
@@ -708,9 +735,9 @@ export class Interlude2Scene extends Phaser.Scene {
     // jogador decolaria pilotando a nave alienígena com uma cópia dela ainda pousada atrás. É o
     // mesmo tipo de mentira que a animação já causou uma vez aqui (a nave escolhida não era a que
     // decolava, ver `trocarNave`) — só que em cenário.
-    if (id === 'alien' && this.arauto) {
-      this.arauto.destroy();
-      this.arauto = null;
+    if (id === Interlude2Scene.NAVE_DA_VAGA && this.naveDaVaga) {
+      this.naveDaVaga.destroy();
+      this.naveDaVaga = null;
     }
 
     const nave = SHIPS[id];
