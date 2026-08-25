@@ -119,12 +119,19 @@ export class Interlude2Scene extends Phaser.Scene {
   /** A altura da pista NA TELA. Baixa: a doca é grande e sangra para fora por baixo. */
   private static readonly PAD_Y = 150;
   /**
-   * X do centro do sprite. Com SCALE 1, põe o centro da pista (~x=139 na arte, novo ART_W=256)
-   * em x=168 na tela — o mesmo ponto de pouso de sempre, só re-derivado para a arte maior:
-   * padCentroAx = (PAD_X0+PAD_X1)/2 = (51+227)/2 = 139
-   * DOCA_X = 168 − (padCentroAx − ART_W/2) = 168 − (139−128) = 168 − 11 = 157
+   * X do centro do sprite: a arte fica CENTRADA na tela (pedido do Henrique, 2026-08-25).
+   *
+   * ⚠️ A versão anterior travava a PISTA em x=168 (o ponto de pouso histórico) e deixava a ARTE
+   * cair onde caísse — e ela caía 35px à esquerda do centro, porque a pista não fica no meio do
+   * desenho (centro da pista = (51+227)/2 = 139, contra 128 do centro da arte). Com a arte
+   * inteira na tela, essa assimetria fica visível: a doca parecia encostada num canto.
+   *
+   * Agora manda a arte, e a pista vai junto — ela passa a assentar em
+   * `192 + (139 − 128) = 203`. **Nada precisa ser reajustado à mão:** o ponto de pouso é DERIVADO
+   * da pista em `pouso()` (`(artToScreenX(PAD_X0) + artToScreenX(PAD_X1)) / 2`), nunca escrito
+   * como número. Foi o que permitiu esta troca custar uma constante.
    */
-  private static readonly DOCA_X = 157;
+  private static readonly DOCA_X = GAME_WIDTH / 2;
 
   /** Y do centro do sprite que põe a linha da pista exatamente em PAD_Y. */
   private static get docaY(): number {
