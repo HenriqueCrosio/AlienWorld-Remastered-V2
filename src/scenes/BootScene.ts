@@ -418,6 +418,14 @@ const ART: Record<string, string> = {
   // nave pousar no vazio, 30px abaixo da tela. Ferramenta: node scripts/find-pad.mjs doca 80.
   doca: 'sprites/doca.png',
 
+  // A DOCA DO CINTURÃO — a 2ª arte (PixelLab c166782d), corrigida no tom (ganho ×1.5) por
+  // `scripts/_cut2-doca2.mjs`. SEM feather nas bordas: a arte já vem com cutout e silhueta
+  // próprios (decisão do Henrique, "tire todo o esmaecer da imagem") — feather era remédio da
+  // 1ª arte (906bb897), um recorte retangular que já foi substituído.
+  // ⚠️ NUNCA renomear para `doca2`: o pickVariant trataria isso como VARIANTE e sortearia entre
+  // a arte nova e a velha a cada spawn. Foi o que pegou o cargueiro na Fatia 3.
+  docaCinturao: 'sprites/doca-cinturao.png',
+
   // O HANGAR DO LEVIATÃ: o interior onde a nave danificada cai na 3ª cutscene (160×160, escolha
   // do Henrique — lote 1 do prompts.json). ⚠️ As JANELAS são VAZADAS (scripts/vazar-janelas.mjs,
   // rodar de novo a cada reinstalação): o starfield/parallax da cena aparece ATRAVÉS delas. A
@@ -534,6 +542,10 @@ const ART: Record<string, string> = {
   // FUNDO PINTADO da cutscene 1 (espaço aberto: a lua que ficou + a borda do cinturão à direita,
   // arte do Henrique). Camada mais distante da InterludeScene; o parallax 'espaco' é o fallback.
   paintBgCut1: 'sprites/paint-bg-cut1.png',
+
+  // O céu da CUTSCENE 2 — a doca no cinturão. Mesmo tratamento do paintBgCut1: 480×270, 1px de
+  // arte = 1px de jogo, posicionada em y=-27. A pintura é do Henrique.
+  paintBgCut2: 'sprites/paint-bg-cut2.png',
 
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a

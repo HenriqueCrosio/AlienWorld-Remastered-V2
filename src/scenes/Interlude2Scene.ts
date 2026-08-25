@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH } from '../config';
+import { COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
@@ -10,6 +10,10 @@ import { SHIPS, DEFAULT_SHIP, ROSTER_DOCA } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
 import { STAGES } from '../systems/StageDirector';
 import type { HandlingMode } from './GameScene';
+// AS LUZES DA DOCA — medidas em `scripts/_cut2-luzes.mjs` (por SATURAÇÃO, não luminância: metal
+// e rocha desta pintura leem claros mas neutros; matiz quente + saturação é o que isola uma
+// lâmpada de um parafuso batendo luz). Coordenadas em espaço de ARTE — `criarLuzes()` converte.
+import docaLuzes from '../data/doca-luzes.json';
 
 /** Uma rocha ancorada: o sprite + o ponto da doca em que o cabo dela prende. */
 interface Amarra {
@@ -43,22 +47,35 @@ interface Amarra {
  *
  * ⚠️ A linha da pista é MEDIDA no PNG (`PAD_ROW`), nunca chutada — chutar a linha do convés da
  * Aurora já fez a nave pousar 30px abaixo da tela, no vazio (docs/HANDOFF.md, lição 13).
+ *
+ * ─── NÃO HÁ CHÃO AQUI (Fatia 4) ───
+ *
+ * Até a Fatia 4 a cena montava 33 asteroides ampliados no rodapé para a doca não parecer que
+ * flutuava. Ela flutua — é uma plataforma SUSPENSA, presa pelos cabos, e é assim que a pintura
+ * do cinturão desenha aquele lugar: as estações pendem de guindastes, não se fincam em chão.
+ * O chão falso foi apagado; a rocha que aparece atrás da doca é a da pintura.
  */
 export class Interlude2Scene extends Phaser.Scene {
   private starfield!: Starfield;
-  private parallax!: Parallax;
+  /** Fallback do céu (o parallax pixel da Fase 2) — só existe quando a pintura NÃO existe. */
+  private parallax: Parallax | null = null;
   private fx!: Fx;
 
   private ship!: Phaser.GameObjects.Image;
   private doca!: Phaser.GameObjects.Image;
-  /** A aresta de luz da pista: sem ela, metal escuro contra espaço escuro viram uma massa só. */
-  private padRim!: Phaser.GameObjects.Rectangle;
   private cabos!: Phaser.GameObjects.Graphics;
   private banner!: Phaser.GameObjects.Text;
 
+  /**
+   * O ACHADO: a nave que esta cutscene desbloqueia, pousada na doca à vista.
+   * Null = sem a arte dela, ou o jogador já a levou. Ver `encalharNaveDaVaga()`.
+   */
+  private naveDaVaga: Phaser.GameObjects.Image | null = null;
+
   private amarras: Amarra[] = [];
-  /** A cordilheira em que a doca está ENCRAVADA — ela entra, vive e morre junto com a doca. */
-  private plataforma: Phaser.GameObjects.Image[] = [];
+  /** Todo objeto que `criarLuzes()` cria (núcleos, halos e fachos) — para que `destruicao()`
+   * consiga afundá-los e apagá-los junto com a doca (ver o field-fix no fim de `criarLuzes()`). */
+  private luzes: Phaser.GameObjects.Image[] = [];
   private panel: ShipPanel | null = null;
 
   private score = 0;
@@ -68,25 +85,23 @@ export class Interlude2Scene extends Phaser.Scene {
   private done = false;
   private t = 0;
 
-  // ─── A GEOMETRIA DA DOCA — medida em `doca.png` (160×160), a arte que o Henrique ESCOLHEU ───
-  //
-  // Esta arte é DENSA (preenche o quadro quase todo) e a pista não "salta para o vazio" como na
-  // versão antiga — ela está EMBUTIDA no centro-direita, e a única forma de achá-la é pela COR: as
-  // marcações de pouso são VERMELHAS. `node scripts/find-pad.mjs doca 80` encontra os pixels
-  // vermelhos da pista em y=90..96, x=94..144. PAD_ROW é o topo dessa superfície.
-  private static readonly ART_W = 160;
-  private static readonly ART_H = 160;
-  private static readonly PAD_ROW = 90;
-  /** Onde a pista marcada começa e termina DENTRO da arte. É o trecho em que dá para pousar. */
-  private static readonly PAD_X0 = 94;
-  private static readonly PAD_X1 = 144;
+  // ─── A GEOMETRIA DA DOCA — medida por `scripts/_cut2-doca2.mjs` na arte INTEIRA (a 2ª arte,
+  // c166782d-84e8-4dca-9017-ebdbd26ef0bf: um cais em balanço no paredão de um asteroide, 256×256,
+  // com TRÊS plataformas — a MAIS BAIXA e MAIOR é a pista, ver task-2-report.md) ───
+  // ⚠️ Estes números saem da MEDIÇÃO, nunca do olho. Chutar a linha do convés da Aurora já fez a
+  // nave pousar 30px abaixo da tela, no vazio. Se a arte mudar, rode o script de novo.
+  private static readonly ART_W = 256;   // ← de `_cut2-doca2.mjs`
+  private static readonly ART_H = 256;   // ← de `_cut2-doca2.mjs`
+  private static readonly PAD_ROW = 175; // ← de `_cut2-doca2.mjs`
+  private static readonly PAD_X0 = 26;   // ← de `_cut2-doca2.mjs`
+  private static readonly PAD_X1 = 217;  // ← de `_cut2-doca2.mjs`
 
   /**
-   * ×1.5: a doca entra GRANDE (240px numa tela de 384 — domina e sangra para fora por cima e por
-   * baixo), mas deixa céu à esquerda para a nave se aproximar e à direita para as rochas amarradas.
-   * ×2 tapava a tela inteira e não sobrava vazio para a aproximação ler.
+   * ×1: escala INTEIRA. A doca antiga era ×1.5 — fracionária, e ela BORRA a grade de pixel, que é
+   * a única coisa que faz o jogo parecer feito de pixels (o mesmo defeito que tirou o cargueiro
+   * de 1.9× na Fatia 3). Se o tamanho em tela não fechar, o que muda é o RECORTE, não a escala.
    */
-  private static readonly SCALE = 1.5;
+  private static readonly SCALE = 1;
 
   // ─── AS PROFUNDIDADES, E POR QUE ELAS SÃO ALTAS ───
   //
@@ -97,19 +112,55 @@ export class Interlude2Scene extends Phaser.Scene {
   //
   // A doca inteira sobe para CIMA dele. As pedras à deriva continuam existindo — só que agora
   // passam ATRÁS da estação, que é onde um detrito distante deveria passar mesmo.
+  // ⚠️ O CABO PASSA POR TRÁS DE TUDO QUE ELE LIGA (Henrique, 2026-08-25). Ele era 67, ACIMA das
+  // rochas (66) — e a linha branca cruzava por cima da pedra, como se estivesse pintada nela em
+  // vez de amarrada nela. Um cabo que some atrás do que ele prende lê como PRESO; um que passa
+  // por cima lê como risco.
+  //
+  // Por isso ele é o MENOR dos três: abaixo da rocha (66) e abaixo da doca (70). Perto do convés
+  // ele desaparece atrás da plataforma e reaparece no vazio à direita — que é exatamente o
+  // caminho de um cabo que nasce sob a laje.
+  private static readonly DEPTH_CABO = 65;
   private static readonly DEPTH_ROCHA = 66;
-  private static readonly DEPTH_CABO = 67;
-  /** A cordilheira fica ENTRE o foreground do parallax (60) e a doca (70): a doca se apoia nela. */
-  private static readonly DEPTH_PLAT_FUNDO = 68;
-  private static readonly DEPTH_PLAT_FRENTE = 69;
   private static readonly DEPTH_DOCA = 70;
-  private static readonly DEPTH_RIM = 71;
   private static readonly DEPTH_NAVE = 80;
+
+  // ⚠️ AS LUZES FICAM NA FRENTE DA DOCA (>70) — senão a arte por cima delas apaga o próprio
+  // brilho que elas existem para acrescentar. O HALO/FACHO nasce um degrau ATRÁS do núcleo
+  // pontual (70.3 < 71): ele é a "névoa" ao redor da lâmpada, e a névoa fica atrás do próprio
+  // ponto de luz, nunca na frente dele.
+  private static readonly DEPTH_LUZ_HALO = Interlude2Scene.DEPTH_DOCA + 0.3;
+  private static readonly DEPTH_LUZ = Interlude2Scene.DEPTH_DOCA + 1;
+
+  // ─── A VAGA: qual nave fica pousada à vista, e onde ───
+  //
+  // ⚠️ TROCAR A NAVE DESTA CUTSCENE É EDITAR **UMA LINHA** — `NAVE_DA_VAGA`. O róster ainda vai
+  // ser rebalanceado e enxugado (passe de balanceamento), e o Henrique pediu explicitamente que o
+  // ponto ficasse pronto para a troca, para não virar retrabalho. Ver `encalharNaveDaVaga()`.
+  /** O id em `SHIPS` da nave que ESTA cutscene desbloqueia. Trocar aqui, e só aqui. */
+  private static readonly NAVE_DA_VAGA = 'alien';
+  /** X do casco na VAGA, em coords da ARTE — medido no trecho livre da laje do meio (136..228). */
+  private static readonly VAGA_AX = 190;
+  /** Linha da laje do MEIO, em coords da ARTE (a pista é a de BAIXO, em PAD_ROW). */
+  private static readonly VAGA_AY = 135;
 
   /** A altura da pista NA TELA. Baixa: a doca é grande e sangra para fora por baixo. */
   private static readonly PAD_Y = 150;
-  /** X do centro do sprite. Com SCALE 1.5, põe a pista (centro da arte ~119) em ~x=208 na tela. */
-  private static readonly DOCA_X = 150;
+  /**
+   * X do centro do sprite: a arte fica COLADA NA BORDA ESQUERDA DA TELA.
+   *
+   * A 2ª arte (c166782d) não é um cutout independente do céu — é um cais entalhado num paredão de
+   * asteroide, pensado para nascer na margem da tela, não flutuando no meio dela. Com origem no
+   * centro e `SCALE = 1`, colar a borda ESQUERDA do sprite em x=0 é `DOCA_X − ART_W/2 = 0`, ou
+   * seja `DOCA_X = ART_W/2`. Nada da arte fica fora da tela: com ART_W = 256 num jogo de 384px de
+   * largura, o sprite ocupa o TERÇO ESQUERDO até os DOIS TERÇOS (x 0..256) — o terço direito é o
+   * céu aberto onde as rochas amarradas ficam (ver `amarrarRochas()`).
+   *
+   * ⚠️ A arte NÃO leva feather em borda nenhuma (`_cut2-doca2.mjs`, bloco 3). Feather é remédio
+   * para CORTE — servia à arte anterior, que era um recorte retangular. Esta já vem com cutout e
+   * silhueta próprios, e a rampa de alpha só comia as pontas das antenas e dos conveses.
+   */
+  private static readonly DOCA_X = Interlude2Scene.ART_W / 2;
 
   /** Y do centro do sprite que põe a linha da pista exatamente em PAD_Y. */
   private static get docaY(): number {
@@ -120,6 +171,11 @@ export class Interlude2Scene extends Phaser.Scene {
   /** Converte um X da arte para o X da tela. */
   private static artToScreenX(ax: number): number {
     return Interlude2Scene.DOCA_X + (ax - Interlude2Scene.ART_W / 2) * Interlude2Scene.SCALE;
+  }
+
+  /** Converte um Y da arte para o Y da tela (mesma conta de `docaY`, para um Y qualquer da arte). */
+  private static artToScreenY(ay: number): number {
+    return Interlude2Scene.docaY + (ay - Interlude2Scene.ART_H / 2) * Interlude2Scene.SCALE;
   }
 
   constructor() {
@@ -136,58 +192,54 @@ export class Interlude2Scene extends Phaser.Scene {
     this.done = false;
     this.panel = null;
     this.amarras = [];
-    this.plataforma = [];
+    this.luzes = [];
+    this.naveDaVaga = null;
     this.t = 0;
 
     resetVariantCache();
 
     this.starfield = new Starfield(this);
-    // O MESMO céu da Fase 2: a cutscene é a continuação do voo, não um vídeo à parte.
-    this.parallax = new Parallax(this, 'espaco');
+    // O CÉU é a pintura do Henrique. Depth −110: ATRÁS do starfield (−100), porque são as
+    // estrelas em movimento que carregam a deriva — a pintura sozinha seria um quadro parado.
+    // Ela é ESTÁTICA (não guardamos referência em `this`: nada mais precisa mexer nela depois de
+    // criada — quem chega é a nave, não o céu, ver `roteiro()`).
+    this.parallax = null;
+    if (this.textures.exists('paintBgCut2')) {
+      this.add.image(0, -27, 'paintBgCut2').setOrigin(0, 0).setDepth(-110);
+    } else {
+      // Sem o PNG: o céu antigo (o mesmo parallax da Fase 2) — comportamento de hoje.
+      this.parallax = new Parallax(this, 'espaco');
+    }
     this.fx = new Fx(this);
 
-    // O PLANETA EXPLODINDO — o grande fundo da cena. É a CAUSA do cinturão, vista de perto: o
-    // mundo partido cujo núcleo ainda sangra lava, e cuja poeira é a rocha em que a doca minera.
-    // Fica no céu ABERTO à direita (a doca preenche o centro), com o núcleo virado PARA a cena
-    // (setFlipX) — o brilho quente aponta para dentro, e amarra com a "sobrecarga" do fim.
-    // Depth entre as camadas de fundo do parallax e a doca: longe, mas uma presença, não um detalhe.
-    if (this.textures.exists('planetShattered')) {
-      this.add
-        .image(324, 58, 'planetShattered')
-        .setDepth(-85)
-        .setScale(1.15)
-        .setFlipX(true)
-        .setTint(0x9aa6c8);
-    }
+    // O PLANETA PARTIDO FOI RETIRADO DAQUI (decisão do Henrique): a pintura do céu já tem uma
+    // lua, e a arte nova da doca também tem a dela — com o `planetShattered` a cena mostrava TRÊS
+    // luas no mesmo quadro. A textura continua registrada em `BootScene` para quem mais usar; só
+    // esta cena parou de desenhá-la.
 
-    this.construirPlataforma();
-
+    // Guarda: sem a arte nova, cai na doca antiga (comportamento de hoje).
+    const docaTex = this.textures.exists('docaCinturao') ? 'docaCinturao' : 'doca';
     this.doca = this.add
-      .image(Interlude2Scene.DOCA_X, Interlude2Scene.docaY, 'doca')
+      .image(Interlude2Scene.DOCA_X, Interlude2Scene.docaY, docaTex)
       .setScale(Interlude2Scene.SCALE)
-      .setDepth(Interlude2Scene.DEPTH_DOCA)
-      // Tint frio MUITO sutil: a arte da doca é bege/cinza-quente e a cena inteira é azul-profunda.
-      // 0xd9deee só encosta a arte na paleta (B quase intacto, R levemente contido) sem apagar as
-      // lâmpadas laranja da pista.
-      .setTint(0xd9deee);
+      .setDepth(Interlude2Scene.DEPTH_DOCA);
 
-    // A aresta de luz da PISTA — só no trecho em que ela existe. Uma linha atravessando a tela
-    // inteira (como a da Aurora, que era um convés de 384px) mentiria: aqui a superfície começa
-    // em x=PAD_X0 e o resto é rocha.
-    const x0 = Interlude2Scene.artToScreenX(Interlude2Scene.PAD_X0);
-    const x1 = Interlude2Scene.artToScreenX(Interlude2Scene.PAD_X1);
+    // A RISCA DA PISTA DESENHADA EM CÓDIGO FOI REMOVIDA (2ª arte, c166782d): a arte nova já traz
+    // suas próprias marcações pintadas no convés (chevrons vermelhos e luzes de borda) — uma
+    // segunda marcação por cima seria a MESMA duplicação que a troca de arte existe para corrigir
+    // ("usar duas imagens sobrepostas e parecidas causa estranheza", diagnóstico do Henrique).
 
-    this.padRim = this.add
-      .rectangle(x0, Interlude2Scene.PAD_Y, x1 - x0, 1, 0xff7a4a)
-      .setOrigin(0, 0)
-      .setDepth(Interlude2Scene.DEPTH_RIM)
-      .setAlpha(0.6);
+    // AS LUZES PISCAM — a cena é estática, e depois da composição aprovada isto é o que sobra
+    // para manter o quadro vivo ("faça as luzes piscarem, trazer um pouco de volumetria",
+    // Henrique). Ver `criarLuzes()`.
+    this.criarLuzes();
 
     // OS CABOS. Desenhados em código, e não como sprite, porque eles precisam LIGAR duas coisas:
     // uma ponta na doca, a outra numa rocha que balança. Um sprite de cabo ficaria parado
     // enquanto a rocha se move, e a amarra viraria uma decoração solta no meio do vazio.
     this.cabos = this.add.graphics().setDepth(Interlude2Scene.DEPTH_CABO);
     this.amarrarRochas();
+    this.encalharNaveDaVaga();
 
     // A nave que chega é a ESCOLHIDA na Aurora (this.naveId) — a doca não pode desmentir a
     // escolha que o jogador fez uma fase atrás.
@@ -209,81 +261,18 @@ export class Interlude2Scene extends Phaser.Scene {
   }
 
   /**
-   * A CORDILHEIRA DA BASE — a primeira camada de cenário em que a doca está ENCRAVADA.
+   * Quanto acima da linha da pista (PAD_ROW) as âncoras dos cabos sentam, em px de arte — igual
+   * em px de tela, já que SCALE é 1.
    *
-   * Sem ela, a doca flutua: abaixo e à direita do sprite é vazio, e a base esfumada dele lê como
-   * ilha recortada. A cordilheira atravessa a base INTEIRA da tela (e sobra 150px à direita,
-   * porque tudo entra deslizando junto com a doca — ver roteiro()), com topo IRREGULAR: topo reto
-   * lê como régua, não como rocha.
+   * ⚠️ É **ZERO**, e isso não é preguiça: a âncora tem que cair EXATAMENTE na superfície da laje.
+   * Com 12 (a versão anterior) ela subia para o VÃO ABERTO entre a plataforma de baixo e a do
+   * meio, e o cabo nascia no ar — o Henrique circulou justamente essa ponta solta, em (185, 138).
    *
-   * É SILHUETA, não protagonista: duas camadas de tint azul-escuro (mais escuras que as rochas
-   * amarradas, 0x8fa0c0), leitura mínima de forma. Nas laterais baixas ela sobe até y≈120 — o
-   * suficiente para emoldurar sem invadir o corredor de aproximação (a nave chega em y=70) nem a
-   * pista (y=150, x≈171..246, que fica no MIOLO da doca, acima dela em depth).
+   * "Um pouco acima do convés" parece mais natural no papel e é errado na tela: acima do convés
+   * não há convés. Numa arte com plataformas em balanço, o único ponto garantidamente sólido na
+   * vertical é a própria linha medida.
    */
-  private construirPlataforma(): void {
-    // Mais escura que as rochas amarradas: fundo quase silhueta, frente com um passo de leitura.
-    const TINT_FUNDO = 0x3a465e;
-    const TINT_FRENTE = 0x4d5a78;
-    const F = Interlude2Scene.DEPTH_PLAT_FUNDO;
-    const P = Interlude2Scene.DEPTH_PLAT_FRENTE;
-
-    // [textura, x, y, escala, ângulo, flipX, depth, tint] — posições FINAIS (pós-deslize).
-    // Valores fixos, não aleatórios: a sonda fotografa a cena e o quadro tem que ser reproduzível.
-    const pecas: Array<[string, number, number, number, number, boolean, number, number]> = [
-      // ── A faixa contínua da base (x=-8..545: cobre a tela e o excedente do deslize) ──
-      ['asteroid', -8, 214, 3.2, 0, false, F, TINT_FUNDO],
-      ['asteroid2', 36, 220, 3.0, 14, true, F, TINT_FUNDO],
-      ['asteroid3', 78, 212, 3.4, -8, false, F, TINT_FUNDO],
-      ['asteroid', 122, 222, 3.0, 22, true, F, TINT_FUNDO],
-      ['asteroid2', 164, 215, 3.2, -15, false, F, TINT_FUNDO],
-      ['asteroid3', 208, 224, 3.4, 6, true, F, TINT_FUNDO],
-      ['asteroid', 252, 216, 3.0, -20, false, F, TINT_FUNDO],
-      ['asteroid2', 296, 221, 3.2, 11, true, F, TINT_FUNDO],
-      ['asteroid3', 338, 213, 3.4, -5, false, F, TINT_FUNDO],
-      ['asteroid', 382, 220, 3.0, 17, true, F, TINT_FUNDO],
-      ['asteroid2', 426, 214, 3.2, -12, false, F, TINT_FUNDO],
-      ['asteroid3', 470, 221, 3.0, 8, true, F, TINT_FUNDO],
-      ['asteroid', 514, 215, 3.2, -18, false, F, TINT_FUNDO],
-      ['asteroid2', 545, 222, 3.0, 4, true, F, TINT_FUNDO],
-      // ── As massas laterais: 1-2 rochas maiores subindo até y≈120 nas beiradas baixas ──
-      ['asteroid3', 26, 172, 4.2, 10, false, F, TINT_FUNDO],
-      ['asteroid', 64, 188, 2.8, -14, true, P, TINT_FRENTE],
-      ['asteroid2', 360, 174, 4.0, -7, true, F, TINT_FUNDO],
-      ['asteroid3', 330, 192, 2.6, 12, false, P, TINT_FRENTE],
-      ['asteroid', 400, 185, 3.0, -19, false, P, TINT_FRENTE],
-      // ── O perfil DENTADO: pedras menores quebrando a linha do topo em alturas irregulares ──
-      ['asteroid3', 18, 192, 2.0, 24, true, P, TINT_FRENTE],
-      ['asteroid', 58, 199, 1.6, -9, false, P, TINT_FRENTE],
-      ['asteroid2', 98, 188, 2.2, 16, false, P, TINT_FRENTE],
-      ['asteroid3', 146, 197, 1.7, -22, true, P, TINT_FRENTE],
-      ['asteroid', 190, 202, 1.5, 7, false, P, TINT_FRENTE],
-      ['asteroid2', 262, 194, 1.9, -13, true, P, TINT_FRENTE],
-      ['asteroid', 306, 200, 1.6, 19, false, P, TINT_FRENTE],
-      ['asteroid3', 352, 190, 2.1, -6, true, P, TINT_FRENTE],
-      ['asteroid2', 398, 198, 1.7, 10, false, P, TINT_FRENTE],
-      ['asteroid', 444, 192, 2.0, -16, true, P, TINT_FRENTE],
-      ['asteroid3', 492, 199, 1.6, 21, false, P, TINT_FRENTE],
-      ['asteroid2', 532, 193, 1.9, -11, true, P, TINT_FRENTE],
-      // ── Destroços meio enterrados: a doca minera, e o entulho dela vive na rocha ──
-      ['destroco', 120, 208, 1.4, 6, false, P, TINT_FUNDO],
-      ['destroco2', 250, 205, 1.6, -8, true, P, TINT_FUNDO],
-    ];
-
-    for (const [tex, x, y, escala, angulo, flip, depth, tint] of pecas) {
-      if (!this.textures.exists(tex)) continue;
-
-      this.plataforma.push(
-        this.add
-          .image(x, y, tex)
-          .setScale(escala)
-          .setAngle(angulo)
-          .setFlipX(flip)
-          .setDepth(depth)
-          .setTint(tint),
-      );
-    }
-  }
+  private static readonly ANCHOR_LIFT = 0;
 
   /**
    * AS ROCHAS AMARRADAS — "grandes cabos saem para segurar os asteroides em volta".
@@ -300,14 +289,26 @@ export class Interlude2Scene extends Phaser.Scene {
    * direita e acima da pista, que é a única região grande sem nada em cima).
    */
   private amarrarRochas(): void {
-    // ⚠️ Re-ancorado para a arte NOVA (160×160, densa). As âncoras saem dos guindastes/mastros no
-    // alto do outpost (coords da ARTE, x~45-65 y~22-40); as rochas ficam no céu aberto à direita,
-    // ONDE não há doca (ela preenche até x~270 na tela). Medir de novo se a arte trocar.
+    // ⚠️ Re-ancorado para a 2ª arte (256×256, c166782d). As âncoras seguem duas regras medidas,
+    // nunca chutadas:
+    //
+    //  1. ESPALHAR: ax vem dos TERÇOS DO VÃO DA PISTA (PAD_X0..PAD_X1), não de ART_W — a laje é
+    //     só uma faixa dentro da arte inteira agora, então espalhar pelos terços da arte toda
+    //     poria âncoras fora da estrutura da doca. Espalhar pelo vão da pista mantém as três
+    //     "sobre" a plataforma, e não em qualquer ponto do céu ao redor.
+    //  2. SUBIR: ay = PAD_ROW − ANCHOR_LIFT, sempre relativo à linha da pista MEDIDA — nunca um
+    //     número solto — para que o cabo puxe pra CIMA (fisicamente o que sustenta algo
+    //     pendurado) a partir de um ponto logo acima do convés, não do topo da imagem.
+    const vaoPista = Interlude2Scene.PAD_X1 - Interlude2Scene.PAD_X0;
+    const ax = (frac: number) => Interlude2Scene.PAD_X0 + vaoPista * frac;
+    const ay = Interlude2Scene.PAD_ROW - Interlude2Scene.ANCHOR_LIFT;
     const pontos = [
-      // âncora (coords da ARTE) → rocha (coords da TELA, no vazio à direita/alto)
-      { ax: 58, ay: 24, rx: 300, ry: 34, escala: 1.4 },
-      { ax: 64, ay: 34, rx: 352, ry: 104, escala: 1.0 },
-      { ax: 46, ay: 30, rx: 298, ry: 96, escala: 0.85 },
+      // âncora (coords da ARTE, terço esquerdo/centro/direito do vão da pista, rente à laje) →
+      // rocha (coords da TELA, no vazio à direita/alto — as rochas NÃO mudam de lugar, só de
+      // onde o cabo nasce).
+      { ax: ax(1 / 6), ay, rx: 300, ry: 34, escala: 1.4 },
+      { ax: ax(1 / 2), ay, rx: 352, ry: 104, escala: 1.0 },
+      { ax: ax(5 / 6), ay, rx: 298, ry: 96, escala: 0.85 },
     ];
 
     for (const p of pontos) {
@@ -334,13 +335,203 @@ export class Interlude2Scene extends Phaser.Scene {
     }
   }
 
+  /**
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   *  A VAGA — o lugar onde a nave que ESTA cutscene desbloqueia fica pousada, à vista.
+   * ════════════════════════════════════════════════════════════════════════════════════════
+   *
+   * ⚠️ ISTO NÃO É DECORAÇÃO. É a premissa da cena. A 1ª interlude é uma PERDA (a sua frota
+   * implode); esta é um ACHADO, e o que se acha é tecnologia do inimigo. É por isso que o ARAUTO
+   * só pode ser escolhido AQUI e em lugar nenhum antes — "ele não existe no hangar humano porque
+   * não teria de onde ter vindo" (`src/ships.ts`).
+   *
+   * Até a Fatia 4 esse achado existia só no comentário do arquivo e como um slot no painel: o
+   * jogador escolhia uma nave alienígena num menu sem NUNCA ter visto de onde ela veio.
+   *
+   * ─── ⚠️ ESTE É UM PADRÃO PARA AS OUTRAS CUTSCENES, NÃO UM CASO ESPECIAL ───
+   *
+   * Pedido do Henrique (2026-08-25): **toda cutscene deveria mostrar, pousada em algum canto, a
+   * nave que ela desbloqueia.** Faz sentido narrativo (a nave vem de algum lugar) e resolve de
+   * graça o mesmo buraco que esta cena tinha.
+   *
+   * O róster ainda vai ser MEXIDO — o passe de balanceamento vai rebalancear e "enxugar" as naves.
+   * Por isso a vaga foi deixada **parametrizada**: quando aquele passe chegar, trocar qual nave
+   * aparece aqui é editar `NAVE_DA_VAGA` e mais nada. A posição, a inclinação, o tint, a guarda de
+   * textura e o sumiço-ao-escolher continuam valendo para qualquer nave.
+   *
+   * Para copiar isto numa outra interlude, o que viaja junto é: (1) a constante da nave, (2) uma
+   * posição MEDIDA na arte daquela cena, (3) o `Image` (nunca `Sprite`), e (4) o sumiço em
+   * `escolher()`. Nada disso depende de ser o Arauto.
+   *
+   * ─── ONDE, E POR QUE MEDIDO ───
+   *
+   * Na plataforma do MEIO (escolha do Henrique): um nível acima da pista, então ela não disputa
+   * laje com a nave do jogador e o jogador precisa REPARAR nela em vez de esbarrar nela.
+   *
+   * O ponto sai de medição no PNG, não do olho: na linha da laje do meio (arte y=135) a superfície
+   * clara vai de x≈136 a x≈228, e acima de x≈152 o céu está aberto. `VAGA_AX = 190` cai no meio
+   * desse trecho livre, com folga para os 31px de casco. `artToScreenX` converte; a superfície
+   * fica em `135 − 25 = 110` na tela, e o casco assenta EXATAMENTE meia altura de si mesmo acima
+   * dela (`getSourceImage().height / 2`, não um número fixo — senão trocar `NAVE_DA_VAGA` por um
+   * casco mais alto afunda o sprite na laje, e o comentário logo acima promete que a troca é
+   * "editar `NAVE_DA_VAGA` e mais nada").
+   *
+   * ⚠️ ENCALHADA, não estacionada: inclinada sobre a laje e escurecida. Uma nave alinhada e limpa
+   * lê como frota, e não há frota aqui — há um destroço que a doca estava minerando.
+   *
+   * ⚠️ É um `Image`, NUNCA um `Sprite`, e isso é de propósito: um `Image` não tem como tocar
+   * animação nem por engano. Nave morta não pulsa motor.
+   */
+  private encalharNaveDaVaga(): void {
+    const nave = SHIPS[Interlude2Scene.NAVE_DA_VAGA];
+    if (!nave || !this.textures.exists(nave.texture)) return;
+
+    const x = Interlude2Scene.artToScreenX(Interlude2Scene.VAGA_AX);
+    const superficie =
+      Interlude2Scene.docaY +
+      (Interlude2Scene.VAGA_AY - Interlude2Scene.ART_H / 2) * Interlude2Scene.SCALE;
+
+    const altura = this.textures.get(nave.texture).getSourceImage().height;
+
+    this.naveDaVaga = this.add
+      // ⚠️ DEPTH `DEPTH_LUZ + 0.1`, na FRENTE das luzes (71): ela é um destroço em PRIMEIRO
+      // PLANO, pousado SOBRE o convés — tem que ocluir a lâmpada que estiver atrás dela, não o
+      // contrário (achado nesta revisão: a 70.5 antiga desenhava atrás de 2 núcleos medidos).
+      .image(x, superficie - altura / 2, nave.texture)
+      .setDepth(Interlude2Scene.DEPTH_LUZ + 0.1)
+      .setAngle(-8)
+      .setTint(0x7f88a8);
+  }
+
+  /**
+   * AS LUZES QUE JÁ ESTÃO PINTADAS — não pintamos luz nova, achamos a que a arte já tem (janelas
+   * âmbar/laranja nas torres, luzes vermelhas e âmbar na borda das plataformas — medidas por
+   * SATURAÇÃO em `scripts/_cut2-luzes.mjs`, ver o doc-comment de lá) e a fazemos RESPIRAR.
+   *
+   * ⚠️ FASES DIFERENTES POR LUZ. Um pulso em uníssono lê como a TELA INTEIRA piscando — o que
+   * este quadro pede é uma estação viva, com cada lâmpada no seu próprio relógio. Por isso
+   * duração, atraso e faixa de alfa são sorteados por ponto, não um único tween compartilhado.
+   *
+   * ⚠️ RESTRIÇÃO É O PEDIDO. A pintura anterior foi rejeitada duas vezes por virar a coisa mais
+   * clara da tela — a regra da casa é luz só onde há energia, e aqui "onde há energia" já está
+   * marcado no PNG. O halo grande e o facho (a "volumetria") só nascem nas poucas luzes mais
+   * fortes, nunca em todas — senão a doca inteira vira um brilho só.
+   */
+  private criarLuzes(): void {
+    // GUARDA: sem a textura, a cena não quebra — só fica sem o efeito (a mesma regra de guarda
+    // que `chegadaTex`/`docaTex` já seguem nesta cena).
+    if (!this.textures.exists('colonyLight')) return;
+
+    const pontos = docaLuzes.pontos;
+    if (pontos.length === 0) return;
+
+    // AS MAIS FORTES: pelo `score` (saturação × valor) que `_cut2-luzes.mjs` já mede e grava por
+    // ponto — não pela ordem em que a varredura raster encontrou os pixels. `doca-luzes.json`
+    // só tem 3 cores distintas, então ranquear pela COR (como esta cena fazia antes) sempre dava
+    // o mesmo empate de 3 valores — funcionava só porque o script já emitia os pontos ordenados
+    // por score; ranquear no campo `score` explícito tira essa dependência de acidente de ordem.
+    const porScore = [...pontos].sort((a, b) => b.score - a.score);
+
+    // O FACHO — e, desde esta revisão, também o HALO — só valem a pena numa luz que sobra
+    // QUADRO. A arte tem lâmpadas rentes à borda (o 1º ponto medido, x=245 y=22, mapeia para
+    // screenY=−3: fora da tela), e um halo ali vira uma mancha âmbar de 24-36px pairando sobre a
+    // borda sem nenhuma lâmpada visível por baixo. Filtra por margem ANTES de escolher tanto as
+    // "fortes" (halo) quanto as "mais fortes" (facho) — as duas vêm do mesmo conjunto visível.
+    const MARGEM = 14;
+    const visiveis = porScore.filter((p) => {
+      const sy = Interlude2Scene.artToScreenY(p.y);
+      const sx = Interlude2Scene.artToScreenX(p.x);
+      return sy > MARGEM && sy < GAME_HEIGHT - MARGEM && sx > MARGEM && sx < GAME_WIDTH - MARGEM;
+    });
+    const fortes = new Set(visiveis.slice(0, Math.min(5, visiveis.length)));
+    const maisFortes = new Set(visiveis.slice(0, Math.min(2, visiveis.length)));
+
+    const temGodRay = this.textures.exists('godRay');
+
+    for (const p of pontos) {
+      // O mapeamento de arte→tela é o mesmo de `artToScreenX`/`Y`: com DOCA_X = ART_W/2 e
+      // SCALE = 1, screenX = artX e screenY = artY − 25.
+      const sx = Interlude2Scene.artToScreenX(p.x);
+      const sy = Interlude2Scene.artToScreenY(p.y);
+      const tint = p.familia === 'red' ? 0xff4433 : 0xffb066;
+
+      // A VOLUMETRIA, primeiro (para nascer ATRÁS do núcleo pontual): um halo bem maior e bem
+      // mais fraco, só nas luzes mais fortes — o núcleo é a lâmpada, o halo é o AR ao redor dela.
+      if (fortes.has(p)) {
+        const halo = this.add
+          .image(sx, sy, 'colonyLight')
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setTint(tint)
+          .setDepth(Interlude2Scene.DEPTH_LUZ_HALO)
+          .setScale(Phaser.Math.FloatBetween(6, 9));
+
+        this.luzes.push(halo);
+
+        const haloBase = Phaser.Math.FloatBetween(0.1, 0.16);
+        const haloPiso = haloBase * 0.4;
+        halo.setAlpha(haloPiso);
+
+        this.tweens.add({
+          targets: halo,
+          alpha: { from: haloPiso, to: haloBase },
+          duration: Phaser.Math.Between(1800, 3200),
+          delay: Phaser.Math.Between(0, 2000),
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+
+        // Um facho raríssimo saindo da lâmpada mais forte — só 1 ou 2 no quadro inteiro, sutil,
+        // baixo alfa, a mesma receita do `Parallax.ts` (ADD, tint âmbar frio, ângulo, escala
+        // esticada) — cena escura, luz só onde há energia.
+        if (temGodRay && maisFortes.has(p)) {
+          const facho = this.add
+            .image(sx, sy, 'godRay')
+            .setBlendMode(Phaser.BlendModes.ADD)
+            .setTint(0xffcf9a)
+            .setAlpha(Phaser.Math.FloatBetween(0.05, 0.09))
+            .setAngle(Phaser.Math.Between(-70, -110))
+            .setScale(Phaser.Math.FloatBetween(0.22, 0.32), Phaser.Math.FloatBetween(0.5, 0.7))
+            .setDepth(Interlude2Scene.DEPTH_LUZ_HALO);
+          this.luzes.push(facho);
+        }
+      }
+
+      // O NÚCLEO: a lâmpada em si, piscando. Todo ponto medido recebe um.
+      const nucleo = this.add
+        .image(sx, sy, 'colonyLight')
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setTint(tint)
+        .setDepth(Interlude2Scene.DEPTH_LUZ)
+        .setScale(Phaser.Math.FloatBetween(0.8, 1.4));
+      this.luzes.push(nucleo);
+
+      const alphaMin = Phaser.Math.FloatBetween(0.15, 0.35);
+      const alphaMax = Phaser.Math.FloatBetween(0.55, 0.85);
+      nucleo.setAlpha(alphaMin);
+
+      this.tweens.add({
+        targets: nucleo,
+        alpha: { from: alphaMin, to: alphaMax },
+        duration: Phaser.Math.Between(700, 2200),
+        delay: Phaser.Math.Between(0, 1800),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
   override update(_time: number, delta: number): void {
     const dt = delta / 1000;
     this.t += dt;
 
     this.starfield.update(dt);
-    // Devagar: a nave está em aproximação, não em fuga.
-    this.parallax.update(dt, 20);
+    // Devagar: a nave está em aproximação, não em fuga. (Só roda de fato sem a pintura — é o
+    // fallback do parallax pixel; com a pintura carregada é um no-op, porque `this.parallax`
+    // fica null.)
+    this.parallax?.update(dt, 20);
+    // A PINTURA NÃO ANDA — a cena é estática, só a nave chega (ver comentário em `roteiro()`).
 
     // As rochas BALANÇAM na ponta do cabo — e é o balanço que prova que o cabo está sob tensão.
     // Pedra parada pendurada num fio é um adesivo.
@@ -358,10 +549,10 @@ export class Interlude2Scene extends Phaser.Scene {
   /**
    * UM CABO DE ARRASTO — grosso, com barriga, e com um fio de luz em cima.
    *
-   * ⚠️ **NÃO é um sprite, e não pode ser.** Um cabo liga DUAS coisas que se mexem (a doca desliza
-   * para dentro da tela; a rocha balança na ponta), e um PNG esticado entre elas seria uma barra
-   * rígida — ou pior, um adesivo parado enquanto as pontas andam. O que vende o cabo é ele
-   * ACOMPANHAR, e só o desenho por frame faz isso.
+   * ⚠️ **NÃO é um sprite, e não pode ser.** Um cabo liga a doca (parada) a uma rocha que BALANÇA
+   * na ponta, e um PNG esticado entre elas seria uma barra rígida — ou pior, um adesivo parado
+   * enquanto a rocha anda. O que vende o cabo é ele ACOMPANHAR o balanço, e só o desenho por
+   * frame faz isso.
    *
    * Três coisas o fazem parecer um cabo de mineração e não um fio:
    *  1. **BARRIGA** (catenária). Uma reta perfeita entre dois pontos lê como viga, não como cabo.
@@ -420,45 +611,14 @@ export class Interlude2Scene extends Phaser.Scene {
       this.cameras.main.flash(160, 255, 212, 71);
     });
 
-    // A doca ENTRA: ela desliza da direita, grande. O jogador não chega nela — ela chega nele.
-    const entrada = 150;
-    this.doca.x += entrada;
-    this.padRim.x += entrada;
-    // A cordilheira entra JUNTO: se ela ficasse parada, a doca deslizaria sobre rocha imóvel e a
-    // emenda entre as duas denunciaria que são peças separadas.
-    for (const p of this.plataforma) p.x += entrada;
-    for (const a of this.amarras) {
-      a.baseX += entrada;
-      a.ancoraX += entrada;
-      a.rocha.x += entrada;
-    }
-
-    this.tweens.add({
-      targets: [this.doca, this.padRim, ...this.plataforma],
-      x: `-=${entrada}`,
-      duration: 5000,
-      ease: 'Sine.easeOut',
-      delay: 2400,
-    });
-
-    // As amarras viajam JUNTO — as âncoras são números, não objetos, então elas não seguem o
-    // tween sozinhas. Sem isto, os cabos ficariam pendurados a 150px da doca.
-    this.tweens.addCounter({
-      from: entrada,
-      to: 0,
-      duration: 5000,
-      ease: 'Sine.easeOut',
-      delay: 2400,
-      onUpdate: (tw) => {
-        const d = (tw.getValue() ?? 0) - (this.desloc ?? entrada);
-        this.desloc = tw.getValue() ?? 0;
-
-        for (const a of this.amarras) {
-          a.ancoraX += d;
-          a.baseX += d;
-        }
-      },
-    });
+    // A CENA É ESTÁTICA — quem chega é a NAVE, não a doca. A doca (e as âncoras/rochas que
+    // dependem dela) usada a deslizar da direita a cada início de cena; o Henrique cortou isso:
+    // "a imagem precisa estar estatica e a nave que chega". Os números de posição logo acima
+    // (DOCA_X, amarrarRochas) já são as posições FINAIS (pós-deslize) — a doca só
+    // PRECISAVA nascer nelas, o deslize inteiro era um passo redundante que a câmera não pede
+    // mais. Removido o offset de entrada, o tween que desfazia o offset, e o addCounter que
+    // arrastava as âncoras (números, não objetos) atrás do tween — os três só existiam para
+    // sustentar um movimento que não deve mais acontecer.
 
     this.tweens.add({
       targets: this.ship,
@@ -470,9 +630,6 @@ export class Interlude2Scene extends Phaser.Scene {
 
     this.time.delayedCall(6200, () => this.pouso());
   }
-
-  /** Quanto do deslocamento de entrada as amarras já consumiram (ver o tween acima). */
-  private desloc?: number;
 
   private placar(): void {
     const t = (y: number, v: string, size: number, color: number) =>
@@ -586,6 +743,15 @@ export class Interlude2Scene extends Phaser.Scene {
 
     this.trocarNave(id);
 
+    // ⚠️ SE ELE LEVOU O ARAUTO, O ARAUTO NÃO ESTÁ MAIS NA LAJE. A cena passaria a mentir: o
+    // jogador decolaria pilotando a nave alienígena com uma cópia dela ainda pousada atrás. É o
+    // mesmo tipo de mentira que a animação já causou uma vez aqui (a nave escolhida não era a que
+    // decolava, ver `trocarNave`) — só que em cenário.
+    if (id === Interlude2Scene.NAVE_DA_VAGA && this.naveDaVaga) {
+      this.naveDaVaga.destroy();
+      this.naveDaVaga = null;
+    }
+
     const nave = SHIPS[id];
     this.aviso(`${nave.name} · ARMADA`, COLORS.hotBright);
     this.cameras.main.flash(200, 62, 224, 240);
@@ -626,14 +792,46 @@ export class Interlude2Scene extends Phaser.Scene {
       this.time.delayedCall(900 + i * 130, () => {
         if (this.done) return;
 
+        // ⚠️ A CADEIA CAMINHA DENTRO DA DOCA, e os limites saem da GEOMETRIA MEDIDA — não de
+        // números fixos. Os antigos (x de 344 até 60) eram casados com a doca velha, que era
+        // larga e centrada; a doca de hoje está COLADA À ESQUERDA e ocupa x 0..256, então o
+        // começo da cadeia estourava a ~88px FORA dela, em céu vazio.
+        //
+        // O caminho é o mesmo de sempre: sobe da PISTA para a ROCHA. Só que agora a ponta de
+        // baixo é a borda direita da laje medida, e a de cima é o paredão, à esquerda e acima.
         const t = i / (N - 1);
-        const x = Phaser.Math.Linear(GAME_WIDTH - 40, 60, t) + Phaser.Math.Between(-16, 16);
+        const x =
+          Phaser.Math.Linear(
+            Interlude2Scene.artToScreenX(Interlude2Scene.PAD_X1),
+            Interlude2Scene.artToScreenX(20),
+            t,
+          ) + Phaser.Math.Between(-12, 12);
         const y =
-          Phaser.Math.Linear(Interlude2Scene.PAD_Y, 90, t) + Phaser.Math.Between(-12, 12);
+          Phaser.Math.Linear(Interlude2Scene.PAD_Y, Interlude2Scene.artToScreenY(95), t) +
+          Phaser.Math.Between(-10, 10);
         if (i % 3 === 2) this.fx.explodeBig(x, y - 10, 0.9, Interlude2Scene.DEPTH_DOCA + 3);
         else this.fx.explode(x, y, 1.6, Interlude2Scene.DEPTH_DOCA + 3);
       });
     }
+
+    // A NAVE QUE ELE NÃO LEVOU MORRE COM A DOCA.
+    //
+    // ⚠️ Se o jogador escolheu outra nave, a da vaga continua pousada — e a doca inteira explode
+    // em volta dela. O Henrique viu isso em jogo: no fim da destruição ela ficava BOIANDO, intacta,
+    // no lugar onde a estação tinha acabado de deixar de existir.
+    //
+    // Ela ganha o próprio estouro no meio da cadeia (e o tween de afundar da doca já a leva junto,
+    // ver o fim deste método). Se ele LEVOU a nave, `naveDaVaga` já é null desde `escolher()` e
+    // aqui não há nada para matar — que é exatamente o certo: ela saiu voando com ele.
+    this.time.delayedCall(1750, () => {
+      if (this.done || !this.naveDaVaga) return;
+      this.fx.explodeBig(
+        this.naveDaVaga.x,
+        this.naveDaVaga.y,
+        0.8,
+        Interlude2Scene.DEPTH_DOCA + 3,
+      );
+    });
 
     // OS CABOS ARREBENTAM: as rochas se soltam e derivam para fora.
     this.time.delayedCall(2300, () => {
@@ -663,32 +861,27 @@ export class Interlude2Scene extends Phaser.Scene {
 
       this.cameras.main.flash(800, 255, 170, 90);
       // O estouro FINAL, na barriga da estação: a detonação de 128px em escala grande — é ela
-      // que apaga a doca, não mais um clarão genérico de partícula.
+      // que apaga a doca, não mais um clarão genérico de partícula. Em espaço de arte (x=168,
+      // y=155) em vez de tela — a mesma posição de sempre, só que autodocumentada em vez de dois
+      // números de tela sem relação óbvia com DOCA_X/PAD_Y.
       this.fx.explodeBig(
-        Interlude2Scene.DOCA_X + 40,
-        Interlude2Scene.PAD_Y - 20,
+        Interlude2Scene.artToScreenX(168),
+        Interlude2Scene.artToScreenY(155),
         1.6,
         Interlude2Scene.DEPTH_DOCA + 3,
       );
 
+      // A DOCA AFUNDA E APAGA — e as LUZES vão junto (`this.luzes`, ver `criarLuzes()`): sem
+      // elas no `targets`, a estrutura sumia mas as ~31 lâmpadas continuavam piscando, pregadas
+      // no vazio, até a cena trocar (achado nesta revisão).
       this.tweens.add({
-        targets: [this.doca, this.padRim],
+        targets: this.naveDaVaga
+          ? [this.doca, this.naveDaVaga, ...this.luzes]
+          : [this.doca, ...this.luzes],
         y: '+=60',
         alpha: 0,
         duration: 1200,
         ease: 'Quad.easeIn',
-      });
-
-      // A cordilheira afunda ATRÁS dela, um instante depois: a doca arrasta o chão junto. Se a
-      // rocha ficasse, a doca sumiria e deixaria a plataforma órfã — a ilha recortada de novo,
-      // só que invertida.
-      this.tweens.add({
-        targets: this.plataforma,
-        y: '+=60',
-        alpha: 0,
-        duration: 1200,
-        ease: 'Quad.easeIn',
-        delay: 150,
       });
     });
 
