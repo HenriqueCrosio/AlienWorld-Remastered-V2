@@ -74,22 +74,23 @@ export class Interlude2Scene extends Phaser.Scene {
   private done = false;
   private t = 0;
 
-  // ─── A GEOMETRIA DA DOCA — medida por `scripts/_cut2-doca.mjs` na arte nova (906bb897) ───
+  // ─── A GEOMETRIA DA DOCA — medida por `scripts/_cut2-doca.mjs` na arte INTEIRA (não mais uma
+  // tira recortada — a doca agora é o PNG PixelLab completo, 256×190; ver task-2-report.md) ───
   // ⚠️ Estes números saem da MEDIÇÃO, nunca do olho. Chutar a linha do convés da Aurora já fez a
-  // nave pousar 30px abaixo da tela, no vazio. Se o recorte mudar, rode o script de novo.
-  private static readonly ART_W = 214;   // ← do Passo 3
-  private static readonly ART_H = 63;    // ← do Passo 3
-  private static readonly PAD_ROW = 16;  // ← do Passo 3
-  private static readonly PAD_X0 = 37;   // ← do Passo 3
-  private static readonly PAD_X1 = 213;  // ← do Passo 3
+  // nave pousar 30px abaixo da tela, no vazio. Se a arte mudar, rode o script de novo.
+  private static readonly ART_W = 256;   // ← de `_cut2-doca.mjs`
+  private static readonly ART_H = 190;   // ← de `_cut2-doca.mjs`
+  private static readonly PAD_ROW = 143; // ← de `_cut2-doca.mjs`
+  private static readonly PAD_X0 = 51;   // ← de `_cut2-doca.mjs`
+  private static readonly PAD_X1 = 227;  // ← de `_cut2-doca.mjs`
 
   // ─── A RISCA DA PISTA — encurtada e amaciada (passe de correção pós-Passo-3-b) ───
-  // ⚠️ PAD_X0/PAD_X1 marcam a BORDA DO RECORTE (usados pelo pouso em `pouso()`) — a arte tem 6px
+  // ⚠️ PAD_X0/PAD_X1 marcam a BORDA DA LAJE (usados pelo pouso em `pouso()`) — a arte tem 10px
   // de pena alfa em cada lado, então uma risca visual que vai até PAD_X1 vaza pro pixel já
   // transparente. A risca fica LONGE dessa borda (margem abaixo) e curta, plantada no trecho
   // onde a nave de fato assenta — não a largura inteira da pista.
-  /** Margem mínima (coords de arte) entre a risca e a borda com pena alfa (6px + folga). */
-  private static readonly RIM_MARGIN = 8;
+  /** Margem mínima (coords de arte) entre a risca e a borda com pena alfa (10px + folga). */
+  private static readonly RIM_MARGIN = 12;
   /** Meia-largura da risca (coords de arte), centrada no ponto de pouso. */
   private static readonly RIM_HALF_WIDTH = 40;
 
@@ -117,8 +118,13 @@ export class Interlude2Scene extends Phaser.Scene {
 
   /** A altura da pista NA TELA. Baixa: a doca é grande e sangra para fora por baixo. */
   private static readonly PAD_Y = 150;
-  /** X do centro do sprite. Com SCALE 1, põe o centro da pista (~x=125 na arte) em ~x=168 na tela. */
-  private static readonly DOCA_X = 150;
+  /**
+   * X do centro do sprite. Com SCALE 1, põe o centro da pista (~x=139 na arte, novo ART_W=256)
+   * em x=168 na tela — o mesmo ponto de pouso de sempre, só re-derivado para a arte maior:
+   * padCentroAx = (PAD_X0+PAD_X1)/2 = (51+227)/2 = 139
+   * DOCA_X = 168 − (padCentroAx − ART_W/2) = 168 − (139−128) = 168 − 11 = 157
+   */
+  private static readonly DOCA_X = 157;
 
   /** Y do centro do sprite que põe a linha da pista exatamente em PAD_Y. */
   private static get docaY(): number {
@@ -163,19 +169,10 @@ export class Interlude2Scene extends Phaser.Scene {
     }
     this.fx = new Fx(this);
 
-    // O PLANETA EXPLODINDO — o grande fundo da cena. É a CAUSA do cinturão, vista de perto: o
-    // mundo partido cujo núcleo ainda sangra lava, e cuja poeira é a rocha em que a doca minera.
-    // Fica no céu ABERTO à direita (a doca preenche o centro), com o núcleo virado PARA a cena
-    // (setFlipX) — o brilho quente aponta para dentro, e amarra com a "sobrecarga" do fim.
-    // Depth entre as camadas de fundo do parallax e a doca: longe, mas uma presença, não um detalhe.
-    if (this.textures.exists('planetShattered')) {
-      this.add
-        .image(324, 58, 'planetShattered')
-        .setDepth(-85)
-        .setScale(1.15)
-        .setFlipX(true)
-        .setTint(0x9aa6c8);
-    }
+    // O PLANETA PARTIDO FOI RETIRADO DAQUI (decisão do Henrique): a pintura do céu já tem uma
+    // lua, e a arte nova da doca também tem a dela — com o `planetShattered` a cena mostrava TRÊS
+    // luas no mesmo quadro. A textura continua registrada em `BootScene` para quem mais usar; só
+    // esta cena parou de desenhá-la.
 
     // Guarda: sem a arte nova, cai na doca antiga (comportamento de hoje).
     const docaTex = this.textures.exists('docaCinturao') ? 'docaCinturao' : 'doca';
@@ -246,24 +243,36 @@ export class Interlude2Scene extends Phaser.Scene {
    * Por isso a âncora sai da ARTE (é uma peça da doca) e a rocha vai para a TELA (o vazio à
    * direita e acima da pista, que é a única região grande sem nada em cima).
    */
+  /**
+   * Quanto acima da linha da pista (PAD_ROW) as âncoras dos cabos sentam, em px de arte — igual
+   * em px de tela, já que SCALE é 1. "Just above the deck", não no topo do sprite: com a doca
+   * agora sendo a arte INTEIRA (256×190, não mais a tira 214×63), `ay=6` — que era ~10px acima da
+   * antiga PAD_ROW=16 — ficaria perto do TOPO da imagem, longe da laje, se não re-ancorado aqui.
+   */
+  private static readonly ANCHOR_LIFT = 12;
+
   private amarrarRochas(): void {
-    // ⚠️ Re-ancorado para a doca NOVA (214×63, uma laje larga e fina — passe de correção). As
-    // âncoras antigas eram calibradas pra doca ANTERIOR (160×160 a ×1.5, quase quadrada): um
-    // cluster perto do centro fazia sentido lá. Na laje larga de hoje, o mesmo cluster vira 18px
-    // de largura amontoados no terço esquerdo, todos ABAIXO da linha da pista (y=150) — três
-    // cabos que parecem puxar de lado, do meio do nada, em vez de segurar a plataforma por cima.
+    // ⚠️ Re-ancorado para a doca INTEIRA (256×190 — a arte PixelLab completa, não mais a tira
+    // 214×63 do passe de correção anterior). As âncoras seguem duas regras medidas, nunca
+    // chutadas:
     //
-    // Correção: as âncoras se ESPALHAM pelos três terços da laje (x da arte, derivado de ART_W —
-    // "medir, nunca chutar" vale tanto pra não chutar em screen-space quanto em art-space) e
-    // sentam perto da BORDA DE CIMA da plataforma (topo = y=134 na tela; ay baixo, perto de 0,
-    // fica logo abaixo dele) — assim o cabo puxa pra CIMA, que é fisicamente o que sustenta algo
-    // pendurado, e não pra lado a partir da barriga do convés.
+    //  1. ESPALHAR: ax vem dos TERÇOS DO VÃO DA PISTA (PAD_X0..PAD_X1), não de ART_W — a laje é
+    //     só uma faixa dentro da arte inteira agora, então espalhar pelos terços da arte toda
+    //     poria âncoras fora da estrutura da doca. Espalhar pelo vão da pista mantém as três
+    //     "sobre" a plataforma, e não em qualquer ponto do céu ao redor.
+    //  2. SUBIR: ay = PAD_ROW − ANCHOR_LIFT, sempre relativo à linha da pista MEDIDA — nunca um
+    //     número solto — para que o cabo puxe pra CIMA (fisicamente o que sustenta algo
+    //     pendurado) a partir de um ponto logo acima do convés, não do topo da imagem.
+    const vaoPista = Interlude2Scene.PAD_X1 - Interlude2Scene.PAD_X0;
+    const ax = (frac: number) => Interlude2Scene.PAD_X0 + vaoPista * frac;
+    const ay = Interlude2Scene.PAD_ROW - Interlude2Scene.ANCHOR_LIFT;
     const pontos = [
-      // âncora (coords da ARTE, terço esquerdo/centro/direito, rente ao topo) → rocha (coords da
-      // TELA, no vazio à direita/alto — as rochas NÃO mudam de lugar, só de onde o cabo nasce).
-      { ax: Interlude2Scene.ART_W * (1 / 6), ay: 6, rx: 300, ry: 34, escala: 1.4 },
-      { ax: Interlude2Scene.ART_W * (1 / 2), ay: 6, rx: 352, ry: 104, escala: 1.0 },
-      { ax: Interlude2Scene.ART_W * (5 / 6), ay: 6, rx: 298, ry: 96, escala: 0.85 },
+      // âncora (coords da ARTE, terço esquerdo/centro/direito do vão da pista, rente à laje) →
+      // rocha (coords da TELA, no vazio à direita/alto — as rochas NÃO mudam de lugar, só de
+      // onde o cabo nasce).
+      { ax: ax(1 / 6), ay, rx: 300, ry: 34, escala: 1.4 },
+      { ax: ax(1 / 2), ay, rx: 352, ry: 104, escala: 1.0 },
+      { ax: ax(5 / 6), ay, rx: 298, ry: 96, escala: 0.85 },
     ];
 
     for (const p of pontos) {

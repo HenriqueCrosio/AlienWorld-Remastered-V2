@@ -28,6 +28,7 @@ const estado = () =>
         const d = acha('docaCinturao');
         return d ? { x: Math.round(d.x), y: Math.round(d.y), s: d.scaleX } : null;
       })(),
+      luaPartida: acha('planetShattered') !== null,
       cordilheira: s.plataforma === undefined ? 'removida' : s.plataforma.length,
       amarras: s.amarras.map((a) => ({ x: Math.round(a.ancoraX), y: Math.round(a.ancoraY) })),
     };
@@ -48,15 +49,16 @@ ok(e.temParallaxPixel === false, 'o parallax pixel foi APOSENTADO (a pintura o s
 ok(e.doca !== null, 'a DOCA NOVA está na cena');
 ok(e.doca !== null && Number.isInteger(e.doca.s), 'a doca está em escala INTEIRA');
 ok(e.cordilheira === 'removida', 'o chão falso foi APAGADO (a doca flutua)');
+ok(e.luaPartida === false, 'a lua partida (planetShattered) NÃO está na cena — três luas viraram duas');
 
 // AS ÂNCORAS DOS CABOS: as três não podem se amontoar num só ponto — isso é o defeito medido no
-// passe de correção (18px de 214 de largura de doca, um cluster no terço esquerdo). O vão entre a
-// mais à esquerda e a mais à direita tem que ser uma fração real da largura da doca (214px), não
-// um punhado de pixels. 100px é bem menos que os ~143px que a geometria atual entrega, mas é bem
-// mais que os 18px do defeito — se alguém reintroduzir o cluster, isto acusa.
+// passe de correção original (18px de largura de doca, um cluster no terço esquerdo). O vão entre
+// a mais à esquerda e a mais à direita tem que ser uma fração real da largura da doca (256px hoje,
+// arte inteira), não um punhado de pixels. 100px é bem menos que os ~118px que a geometria atual
+// entrega, mas é bem mais que os 18px do defeito — se alguém reintroduzir o cluster, isto acusa.
 const xsAncora = e.amarras.map((a) => a.x);
 const vaoAncoras = Math.max(...xsAncora) - Math.min(...xsAncora);
-ok(vaoAncoras >= 100, `as âncoras dos cabos se espalham pela doca (vão=${vaoAncoras}px de 214px)`);
+ok(vaoAncoras >= 100, `as âncoras dos cabos se espalham pela doca (vão=${vaoAncoras}px de 256px)`);
 
 await page.screenshot({ path: 'probe-cut2-aproximacao.png' });
 
