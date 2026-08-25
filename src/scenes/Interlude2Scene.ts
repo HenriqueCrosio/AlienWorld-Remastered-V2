@@ -53,8 +53,6 @@ interface Amarra {
  */
 export class Interlude2Scene extends Phaser.Scene {
   private starfield!: Starfield;
-  /** O céu: a pintura do Henrique (o cinturão visto de dentro). Null = sem PNG, caiu no parallax. */
-  private paintedBg: Phaser.GameObjects.Image | null = null;
   /** Fallback do céu (o parallax pixel da Fase 2) — só existe quando a pintura NÃO existe. */
   private parallax: Parallax | null = null;
   private fx!: Fx;
@@ -154,10 +152,11 @@ export class Interlude2Scene extends Phaser.Scene {
     this.starfield = new Starfield(this);
     // O CÉU é a pintura do Henrique. Depth −110: ATRÁS do starfield (−100), porque são as
     // estrelas em movimento que carregam a deriva — a pintura sozinha seria um quadro parado.
-    this.paintedBg = null;
+    // Ela é ESTÁTICA (não guardamos referência em `this`: nada mais precisa mexer nela depois de
+    // criada — quem chega é a nave, não o céu, ver `roteiro()`).
     this.parallax = null;
     if (this.textures.exists('paintBgCut2')) {
-      this.paintedBg = this.add.image(0, -27, 'paintBgCut2').setOrigin(0, 0).setDepth(-110);
+      this.add.image(0, -27, 'paintBgCut2').setOrigin(0, 0).setDepth(-110);
     } else {
       // Sem o PNG: o céu antigo (o mesmo parallax da Fase 2) — comportamento de hoje.
       this.parallax = new Parallax(this, 'espaco');
@@ -296,10 +295,11 @@ export class Interlude2Scene extends Phaser.Scene {
     this.t += dt;
 
     this.starfield.update(dt);
-    // Devagar: a nave está em aproximação, não em fuga.
+    // Devagar: a nave está em aproximação, não em fuga. (Só roda de fato sem a pintura — é o
+    // fallback do parallax pixel; com a pintura carregada é um no-op, porque `this.parallax`
+    // fica null.)
     this.parallax?.update(dt, 20);
-    // Deriva lentíssima: a cena dura <40s e a pintura tem 96px de folga horizontal.
-    if (this.paintedBg) this.paintedBg.x -= 20 * 0.015 * dt;
+    // A PINTURA NÃO ANDA — a cena é estática, só a nave chega (ver comentário em `roteiro()`).
 
     // As rochas BALANÇAM na ponta do cabo — e é o balanço que prova que o cabo está sob tensão.
     // Pedra parada pendurada num fio é um adesivo.
@@ -317,10 +317,10 @@ export class Interlude2Scene extends Phaser.Scene {
   /**
    * UM CABO DE ARRASTO — grosso, com barriga, e com um fio de luz em cima.
    *
-   * ⚠️ **NÃO é um sprite, e não pode ser.** Um cabo liga DUAS coisas que se mexem (a doca desliza
-   * para dentro da tela; a rocha balança na ponta), e um PNG esticado entre elas seria uma barra
-   * rígida — ou pior, um adesivo parado enquanto as pontas andam. O que vende o cabo é ele
-   * ACOMPANHAR, e só o desenho por frame faz isso.
+   * ⚠️ **NÃO é um sprite, e não pode ser.** Um cabo liga a doca (parada) a uma rocha que BALANÇA
+   * na ponta, e um PNG esticado entre elas seria uma barra rígida — ou pior, um adesivo parado
+   * enquanto a rocha anda. O que vende o cabo é ele ACOMPANHAR o balanço, e só o desenho por
+   * frame faz isso.
    *
    * Três coisas o fazem parecer um cabo de mineração e não um fio:
    *  1. **BARRIGA** (catenária). Uma reta perfeita entre dois pontos lê como viga, não como cabo.
@@ -379,42 +379,14 @@ export class Interlude2Scene extends Phaser.Scene {
       this.cameras.main.flash(160, 255, 212, 71);
     });
 
-    // A doca ENTRA: ela desliza da direita, grande. O jogador não chega nela — ela chega nele.
-    const entrada = 150;
-    this.doca.x += entrada;
-    this.padRim.x += entrada;
-    for (const a of this.amarras) {
-      a.baseX += entrada;
-      a.ancoraX += entrada;
-      a.rocha.x += entrada;
-    }
-
-    this.tweens.add({
-      targets: [this.doca, this.padRim],
-      x: `-=${entrada}`,
-      duration: 5000,
-      ease: 'Sine.easeOut',
-      delay: 2400,
-    });
-
-    // As amarras viajam JUNTO — as âncoras são números, não objetos, então elas não seguem o
-    // tween sozinhas. Sem isto, os cabos ficariam pendurados a 150px da doca.
-    this.tweens.addCounter({
-      from: entrada,
-      to: 0,
-      duration: 5000,
-      ease: 'Sine.easeOut',
-      delay: 2400,
-      onUpdate: (tw) => {
-        const d = (tw.getValue() ?? 0) - (this.desloc ?? entrada);
-        this.desloc = tw.getValue() ?? 0;
-
-        for (const a of this.amarras) {
-          a.ancoraX += d;
-          a.baseX += d;
-        }
-      },
-    });
+    // A CENA É ESTÁTICA — quem chega é a NAVE, não a doca. A doca (e as âncoras/rochas que
+    // dependem dela) usada a deslizar da direita a cada início de cena; o Henrique cortou isso:
+    // "a imagem precisa estar estatica e a nave que chega". Os números de posição logo acima
+    // (DOCA_X, padRim, amarrarRochas) já são as posições FINAIS (pós-deslize) — a doca só
+    // PRECISAVA nascer nelas, o deslize inteiro era um passo redundante que a câmera não pede
+    // mais. Removido o offset de entrada, o tween que desfazia o offset, e o addCounter que
+    // arrastava as âncoras (números, não objetos) atrás do tween — os três só existiam para
+    // sustentar um movimento que não deve mais acontecer.
 
     this.tweens.add({
       targets: this.ship,
@@ -426,9 +398,6 @@ export class Interlude2Scene extends Phaser.Scene {
 
     this.time.delayedCall(6200, () => this.pouso());
   }
-
-  /** Quanto do deslocamento de entrada as amarras já consumiram (ver o tween acima). */
-  private desloc?: number;
 
   private placar(): void {
     const t = (y: number, v: string, size: number, color: number) =>

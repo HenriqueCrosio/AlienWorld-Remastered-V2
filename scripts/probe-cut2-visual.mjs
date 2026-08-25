@@ -60,6 +60,24 @@ ok(vaoAncoras >= 100, `as âncoras dos cabos se espalham pela doca (vão=${vaoAn
 
 await page.screenshot({ path: 'probe-cut2-aproximacao.png' });
 
+// A CENA É ESTÁTICA — "a imagem precisa estar estatica e a nave que chega" (Henrique). A doca
+// costumava deslizar da direita e a pintura costumava derivar; as duas coisas foram cortadas.
+// Sonda amostra a doca e a pintura duas vezes, a alguns segundos de distância, e reprova se
+// QUALQUER uma das duas tiver andado um pixel — o assert é sobre estado real (x amostrado),
+// não sobre print.
+await page.waitForTimeout(2500);
+const e2 = await estado();
+console.log('estado+2.5s', JSON.stringify(e2));
+
+ok(
+  e.doca !== null && e2.doca !== null && e2.doca.x === e.doca.x,
+  `a doca NÃO se move (x=${e.doca?.x} em t0, x=${e2.doca?.x} em t0+2.5s)`,
+);
+ok(
+  e.ceu !== null && e2.ceu !== null && e2.ceu.x === e.ceu.x,
+  `a pintura NÃO se move (x=${e.ceu?.x} em t0, x=${e2.ceu?.x} em t0+2.5s)`,
+);
+
 await browser.close();
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nTUDO VERDE');
 process.exit(falhas ? 1 : 0);
