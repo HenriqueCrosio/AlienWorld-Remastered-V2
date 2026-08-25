@@ -780,14 +780,45 @@ export class Interlude2Scene extends Phaser.Scene {
       this.time.delayedCall(900 + i * 130, () => {
         if (this.done) return;
 
+        // ⚠️ A CADEIA CAMINHA DENTRO DA DOCA, e os limites saem da GEOMETRIA MEDIDA — não de
+        // números fixos. Os antigos (x de 344 até 60) eram casados com a doca velha, que era
+        // larga e centrada; a doca de hoje está COLADA À ESQUERDA e ocupa x 0..256, então o
+        // começo da cadeia estourava a ~88px FORA dela, em céu vazio.
+        //
+        // O caminho é o mesmo de sempre: sobe da PISTA para a ROCHA. Só que agora a ponta de
+        // baixo é a borda direita da laje medida, e a de cima é o paredão, à esquerda e acima.
         const t = i / (N - 1);
-        const x = Phaser.Math.Linear(GAME_WIDTH - 40, 60, t) + Phaser.Math.Between(-16, 16);
+        const x =
+          Phaser.Math.Linear(
+            Interlude2Scene.artToScreenX(Interlude2Scene.PAD_X1),
+            Interlude2Scene.artToScreenX(20),
+            t,
+          ) + Phaser.Math.Between(-12, 12);
         const y =
-          Phaser.Math.Linear(Interlude2Scene.PAD_Y, 90, t) + Phaser.Math.Between(-12, 12);
+          Phaser.Math.Linear(Interlude2Scene.PAD_Y, 70, t) + Phaser.Math.Between(-10, 10);
         if (i % 3 === 2) this.fx.explodeBig(x, y - 10, 0.9, Interlude2Scene.DEPTH_DOCA + 3);
         else this.fx.explode(x, y, 1.6, Interlude2Scene.DEPTH_DOCA + 3);
       });
     }
+
+    // A NAVE QUE ELE NÃO LEVOU MORRE COM A DOCA.
+    //
+    // ⚠️ Se o jogador escolheu outra nave, a da vaga continua pousada — e a doca inteira explode
+    // em volta dela. O Henrique viu isso em jogo: no fim da destruição ela ficava BOIANDO, intacta,
+    // no lugar onde a estação tinha acabado de deixar de existir.
+    //
+    // Ela ganha o próprio estouro no meio da cadeia (e o tween de afundar da doca já a leva junto,
+    // ver o fim deste método). Se ele LEVOU a nave, `naveDaVaga` já é null desde `escolher()` e
+    // aqui não há nada para matar — que é exatamente o certo: ela saiu voando com ele.
+    this.time.delayedCall(1750, () => {
+      if (this.done || !this.naveDaVaga) return;
+      this.fx.explodeBig(
+        this.naveDaVaga.x,
+        this.naveDaVaga.y,
+        0.8,
+        Interlude2Scene.DEPTH_DOCA + 3,
+      );
+    });
 
     // OS CABOS ARREBENTAM: as rochas se soltam e derivam para fora.
     this.time.delayedCall(2300, () => {
@@ -826,7 +857,7 @@ export class Interlude2Scene extends Phaser.Scene {
       );
 
       this.tweens.add({
-        targets: this.doca,
+        targets: this.naveDaVaga ? [this.doca, this.naveDaVaga] : this.doca,
         y: '+=60',
         alpha: 0,
         duration: 1200,
