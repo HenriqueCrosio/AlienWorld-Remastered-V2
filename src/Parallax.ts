@@ -851,8 +851,11 @@ export class Parallax {
   /**
    * A NEBULOSA da Fase 3, POR CIMA do espaço: a nave está DENTRO da nuvem.
    *
-   * Três camadas de nuvem (fundo denso, meio, e VÉUS na frente da nave) — todas
-   * `nebulosaExtra`, apagáveis pelo `setNebulaDensity` quando a fase sai da nuvem. E o CASCO
+   * ⚠️ ATUALIZADO NA FATIA 5. Eram três camadas de nuvem, todas `nebulosaExtra`. Hoje, COM a
+   * pintura (`paintBgF3`), o corpo denso do fundo deixou de ser uma `ScatterLayer`: ele é uma
+   * PLACA, e por isso o alpha dele não passa por `alphaFor` — quem o apaga é o
+   * `setNebulaDensity`, à mão. Restam duas camadas procedurais (meio e VÉUS), essas sim
+   * `nebulosaExtra`. Sem a pintura, as três voltam (é o fallback). E o CASCO
    * do Leviatã: uma banda contínua de placas no rodapé, com alpha 0 até a saída da nuvem
    * revelá-la (`casco`). Proporção da referência do Henrique (Metal Slug): o "chão" é uma
    * faixa GENEROSA e detalhada, não um risco no rodapé.
@@ -877,7 +880,17 @@ export class Parallax {
           this.scene.add
             .image(i * w, -27, 'paintBgF3')
             .setOrigin(0, 0)
-            .setDepth(-97)
+            // ⚠️ −96, NÃO −97. A camada `mundo` (o planeta) vive em −97, e −97 aqui daria um EMPATE
+            // de profundidade: renderizaria certo só por acidente de ordem de inserção, e qualquer
+            // reordenação futura das chamadas viraria a pintura para trás do planeta sem nenhuma
+            // sonda pegar. −96 é o número honesto — é a camada que esta pintura SUBSTITUI, e ela
+            // fica na frente do planeta, que é o que está mais longe.
+            //
+            // ⚠️ E A PINTURA É 100% OPACA (medido: 0 pixels não-opacos em 129.600). Ela ESCONDE
+            // tudo que estiver atrás dela — inclusive o planeta. Isso é ACEITO e tem um efeito
+            // colateral bom: quando a nuvem abre em t=42 e a pintura some, o planeta reaparece
+            // JUNTO com o casco. A virada revela duas coisas, não uma.
+            .setDepth(-96)
             .setData('bgFactor', 0.02),
         );
       }
