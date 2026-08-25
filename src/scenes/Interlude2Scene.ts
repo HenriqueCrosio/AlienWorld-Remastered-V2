@@ -99,8 +99,16 @@ export class Interlude2Scene extends Phaser.Scene {
   //
   // A doca inteira sobe para CIMA dele. As pedras à deriva continuam existindo — só que agora
   // passam ATRÁS da estação, que é onde um detrito distante deveria passar mesmo.
+  // ⚠️ O CABO PASSA POR TRÁS DE TUDO QUE ELE LIGA (Henrique, 2026-08-25). Ele era 67, ACIMA das
+  // rochas (66) — e a linha branca cruzava por cima da pedra, como se estivesse pintada nela em
+  // vez de amarrada nela. Um cabo que some atrás do que ele prende lê como PRESO; um que passa
+  // por cima lê como risco.
+  //
+  // Por isso ele é o MENOR dos três: abaixo da rocha (66) e abaixo da doca (70). Perto do convés
+  // ele desaparece atrás da plataforma e reaparece no vazio à direita — que é exatamente o
+  // caminho de um cabo que nasce sob a laje.
+  private static readonly DEPTH_CABO = 65;
   private static readonly DEPTH_ROCHA = 66;
-  private static readonly DEPTH_CABO = 67;
   private static readonly DEPTH_DOCA = 70;
   private static readonly DEPTH_NAVE = 80;
 
@@ -219,11 +227,17 @@ export class Interlude2Scene extends Phaser.Scene {
    */
   /**
    * Quanto acima da linha da pista (PAD_ROW) as âncoras dos cabos sentam, em px de arte — igual
-   * em px de tela, já que SCALE é 1. "Just above the deck", não no topo do sprite: a pista fica
-   * bem abaixo do meio da arte (PAD_ROW=175 de 256), então um `ay` solto poderia cair longe da
-   * laje se não re-ancorado relativo a PAD_ROW aqui.
+   * em px de tela, já que SCALE é 1.
+   *
+   * ⚠️ É **ZERO**, e isso não é preguiça: a âncora tem que cair EXATAMENTE na superfície da laje.
+   * Com 12 (a versão anterior) ela subia para o VÃO ABERTO entre a plataforma de baixo e a do
+   * meio, e o cabo nascia no ar — o Henrique circulou justamente essa ponta solta, em (185, 138).
+   *
+   * "Um pouco acima do convés" parece mais natural no papel e é errado na tela: acima do convés
+   * não há convés. Numa arte com plataformas em balanço, o único ponto garantidamente sólido na
+   * vertical é a própria linha medida.
    */
-  private static readonly ANCHOR_LIFT = 12;
+  private static readonly ANCHOR_LIFT = 0;
 
   private amarrarRochas(): void {
     // ⚠️ Re-ancorado para a 2ª arte (256×256, c166782d). As âncoras seguem duas regras medidas,

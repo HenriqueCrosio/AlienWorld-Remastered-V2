@@ -13,10 +13,11 @@
 // escuro demais para ler como alvo; ×2.0 estoura as plataformas para quase-branco, e a doca vira a
 // coisa mais clara da tela — o MESMO defeito que matou a arte anterior. Não mude este número.
 //
-// ⚠️ A ARTE ENCOSTA NA BORDA ESQUERDA DA TELA (Interlude2Scene: DOCA_X = ART_W/2). O lado esquerdo
-// do sprite fica fora da tela — por isso NÃO esfumamos a borda esquerda: esfumá-la comeria arte
-// que de fato aparece. As outras três (topo, base, direita) continuam retas por definição de PNG,
-// então levam feather.
+// ⚠️ A ARTE ENCOSTA NA BORDA ESQUERDA DA TELA (Interlude2Scene: DOCA_X = ART_W/2), então metade
+// dela fica fora de vista.
+//
+// ⚠️ NENHUMA borda leva feather (ver bloco 3). Feather é remédio para CORTE — esta arte já vem
+// recortada, com silhueta e transparência próprias.
 //
 // ⚠️ Das três plataformas (y≈92..110, y≈127..144, y≈169..183), o Henrique escolheu a MAIS BAIXA e
 // MAIOR — y≈169..183 — como pista de pouso. A regra genérica "linha com mais pixels de tom médio"
@@ -29,7 +30,7 @@ import sharp from 'sharp';
 const GANHO = Number(process.argv[2] ?? 1.5);
 const SRC = 'scripts/_cut2/doca2-base.png';
 const OUT = 'public/sprites/doca-cinturao.png';
-const FADE = 20; // largura da rampa de alpha, em px — topo, base e direita (NÃO a esquerda)
+// (sem FADE: ver o bloco 3 — arte com cutout proprio nao leva feather)
 
 // 1. Corrigir o tom com ganho linear sobre a arte inteira (256×256).
 const corrigida = await sharp(SRC).linear(GANHO, 0).png().toBuffer();
@@ -54,25 +55,17 @@ console.log(`LAJE medida: y=${melhor.y} (${melhor.n} px claros) x ${melhor.x0}..
 
 const PAD_ROW = melhor.y;
 
-// 3. FEATHER no TOPO, na BASE e na DIREITA. A ESQUERDA fica reta — a doca está colada na borda
-// esquerda da tela (fora de vista), esfumá-la comeria arte visível.
-const idx = (x, y) => (y * info.width + x) * 4 + 3;
-for (let x = 0; x < info.width; x++) {
-  for (let k = 0; k < FADE; k++) {
-    const f = (k + 1) / (FADE + 1);
-    const top = idx(x, k);
-    data[top] = Math.round(data[top] * f);
-    const bot = idx(x, info.height - 1 - k);
-    data[bot] = Math.round(data[bot] * f);
-  }
-}
-for (let y = 0; y < info.height; y++) {
-  for (let k = 0; k < FADE; k++) {
-    const f = (k + 1) / (FADE + 1);
-    const right = idx(info.width - 1 - k, y);
-    data[right] = Math.round(data[right] * f);
-  }
-}
+// 3. SEM FEATHER NENHUM — decisão do Henrique em 2026-08-25: "tire todo o esmaecer da imagem".
+//
+// ⚠️ O feather existia para a arte ANTERIOR (906bb897), que era um RECORTE retangular arrancado
+// do meio de uma cena maior: ali a borda reta denunciava o corte, e esfumar era o remédio.
+// Esta arte é outra coisa — um cutout de verdade, com transparência em volta da estrutura
+// (55% opaca) e silhueta própria. Ela não tem borda reta para esconder, e a rampa de alpha só
+// fazia uma coisa: COMER as pontas dos cabos, das antenas e dos conveses que chegam perto das
+// beiradas — exatamente o detalhe que dá vida à silhueta.
+//
+// A regra que sai daqui: feather é remédio para CORTE, não acabamento padrão. Arte que já vem
+// recortada não leva.
 
 await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
   .png()
