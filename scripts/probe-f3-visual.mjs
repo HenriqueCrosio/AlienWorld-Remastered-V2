@@ -87,6 +87,36 @@ ok(
 );
 await page.screenshot({ path: 'scripts/_f3/probe-anuncio.png' });
 
+// O ATO 2: a nuvem abriu e o casco é a superfície.
+while ((await estado()).t < 47) {
+  await page.waitForTimeout(1500);
+  await respirar();
+}
+const ato2 = await estado();
+const casco2 = ato2.camadas.filter((c) => c.casco);
+console.log('t=' + ato2.t, JSON.stringify(casco2));
+
+ok(
+  casco2.some((c) => c.key === 'cascoLeviata'),
+  'a BASE do casco usa a arte nova (cascoLeviata)',
+);
+ok(
+  casco2.some((c) => c.key === 'cascoDetalhe'),
+  'a PONTUAÇÃO do casco existe (cascoDetalhe)',
+);
+ok(
+  !casco2.some((c) => c.key === 'derelict'),
+  'o destroço genérico saiu da camada do casco',
+);
+// A base é a MAIORIA: mais sprites que a pontuação, por construção do gap.
+const base = casco2.find((c) => c.key === 'cascoLeviata');
+const det = casco2.find((c) => c.key === 'cascoDetalhe');
+ok(
+  base && det && base.n > det.n,
+  `os trechos lisos são a MAIORIA da faixa (base ${base?.n} > pontuação ${det?.n})`,
+);
+await page.screenshot({ path: 'scripts/_f3/probe-ato2.png' });
+
 await browser.close();
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nTUDO VERDE');
 process.exit(falhas ? 1 : 0);

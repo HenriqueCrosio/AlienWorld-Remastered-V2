@@ -953,17 +953,53 @@ export class Parallax {
       nebulosaExtra: true,
     });
 
-    // O CASCO DO LEVIATÃ: banda contínua de placas mortas no rodapé (origem na base, como o
-    // terreno da F1), dormindo em alpha 0 — `casco` faz o alpha dela seguir 1−nebulaDim.
+    // ─── O CASCO DO LEVIATÃ (Fatia 5) ───
+    //
+    // Até aqui o casco era uma fileira de `derelict` — o destroço GENÉRICO da Fase 2 — tingido de
+    // azul. A fase se chama "O CASCO", e a promessa do GDD é que o Leviatã VIROU O CHÃO; uma tira
+    // de sucata reaproveitada não cumpre isso.
+    //
+    // A arte nova é biomecânica de propósito: ela ANUNCIA o interior. A Fase 4 é costela, órgão e
+    // maquinário, e entre as duas a nave é engolida por uma cutscene. Se o casco fosse placa lisa
+    // de metal, a Fase 4 chegaria como surpresa desconexa; assim ela chega como confirmação.
+    //
+    // ⚠️ DUAS CAMADAS, E A PROPORÇÃO SAI DO `gap`. Os trechos LISOS são a base contínua e a
+    // MAIORIA; o maquinário é pontuação. Um casco em que cada metro tem uma engrenagem lê como
+    // brinquedo — são os trechos vazios que fazem o maquinário significar alguma coisa (a mesma
+    // lógica do SILÊNCIO no ciclo da Capitânia). O `pickVariant` sorteia UNIFORME, então a
+    // proporção não pode vir dele: vem daqui.
+    //
+    // ⚠️ ESCALA 1, INTEIRA. As artes são 72×72 e 72 de 216 é exatamente um terço da tela — a
+    // proporção que o GDD pede ("corredor amplo, TETO ABERTO"): a faixa cresce só para cima a
+    // partir do rodapé, e o céu fica livre.
+    //
+    // ⚠️ SEM TINT. Luminância média medida entre 0,142 e 0,176 — a família já nasce escura. Um
+    // tint aqui seria a terceira vez nesta campanha que se escurece arte que já estava escura.
+    //
+    // `gap` MENOR que a largura (72) na base: sobrepostos, a emenda vertical some. É a regra das
+    // montanhas do parallax, e é por isso que isto NÃO é um TileSprite.
     this.addLayer({
-      key: 'derelict',
+      key: 'cascoLeviata',
       factor: 1.0,
-      baseY: GAME_HEIGHT + 26,
+      baseY: GAME_HEIGHT + 6,
       depth: -75,
-      tint: 0x2f3a55,
-      alpha: 0.95,
-      scale: [1.1, 1.5],
-      gap: [78, 108],
+      tint: 0xffffff,
+      alpha: 1,
+      scale: [1, 1],
+      gap: [56, 68],
+      terreno: true,
+      casco: true,
+    });
+
+    this.addLayer({
+      key: 'cascoDetalhe',
+      factor: 1.0,
+      baseY: GAME_HEIGHT + 6,
+      depth: -74,
+      tint: 0xffffff,
+      alpha: 1,
+      scale: [1, 1],
+      gap: [200, 340],
       terreno: true,
       casco: true,
     });

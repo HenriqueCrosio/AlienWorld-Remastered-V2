@@ -74,7 +74,9 @@ ok(f.fase === 3, `fase 3 rodando (id=${f.fase})`);
 // ver `probe-f3-visual.mjs`, que asserta o mesmo.
 ok(f.camadasNebulosa >= 2 && f.spritesNebulosa > 0, `nebulosa ATIVA (${f.camadasNebulosa} camadas, ${f.spritesNebulosa} nuvens)`);
 ok(f.nebulaDim >= 0.95, `dentro da nuvem (nebulaDim=${f.nebulaDim})`);
-ok(f.casco === 1 && f.alphaCasco < 0.05, `casco ainda escondido (alpha=${f.alphaCasco.toFixed(2)})`);
+// Fatia 5, Tarefa 3: o casco virou DUAS camadas (base lisa + pontuação de maquinário) — ver
+// `buildNebula()` em Parallax.ts e o comentário "POR QUE DUAS CAMADAS" no brief da tarefa.
+ok(f.casco === 2 && f.alphaCasco < 0.05, `casco ainda escondido (alpha=${f.alphaCasco.toFixed(2)})`);
 await page.screenshot({ path: 'probe-stage3-nebulosa.png' });
 
 // Espera a VIRADA (evento aos 42s + fade de 6s) e a aranha (53s). Blindagem renovada no meio.

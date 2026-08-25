@@ -290,6 +290,21 @@ const ART: Record<string, string> = {
   ...animFrames('aranhaAnim', 'aranha-anim'),
   ...animFrames('aranhaJumpAnim', 'aranha-jump-anim'),
 
+  // O CASCO DO LEVIATÃ (Fase 3, Ato 2) — 7 artes do PixelLab (Henrique, 2026-08-25), 72×72.
+  // Fontes em `assets/raw/casco-leviata-{1..7}.png`.
+  //
+  // DUAS famílias de propósito: `cascoLeviata` são os trechos LISOS (a base contínua da faixa) e
+  // `cascoDetalhe` são os trechos com maquinário/veios/escamas (a pontuação). O `pickVariant`
+  // sorteia UNIFORME dentro de cada família — a proporção entre elas sai do `gap` das duas
+  // camadas no Parallax, não de peso. Ver `buildNebula()`.
+  cascoLeviata: 'sprites/casco-leviata.png',
+  cascoLeviata2: 'sprites/casco-leviata2.png',
+  cascoDetalhe: 'sprites/casco-detalhe.png',
+  cascoDetalhe2: 'sprites/casco-detalhe2.png',
+  cascoDetalhe3: 'sprites/casco-detalhe3.png',
+  cascoDetalhe4: 'sprites/casco-detalhe4.png',
+  cascoDetalhe5: 'sprites/casco-detalhe5.png',
+
   ...animFrames('bossIdleAnim', 'boss-idle-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),
   ...animFrames('bossAirAnim', 'boss-air-anim'),
