@@ -1,3 +1,9 @@
+// ⚠️ PIPELINE REJEITADO — mantido só como REGISTRO HISTÓRICO da 1ª arte da doca (906bb897),
+// rejeitada duas vezes por virar a coisa mais clara da tela. NUNCA rode isto apontando para o
+// sprite que o jogo carrega — `OUT` aqui é um arquivo de descarte (`scripts/_cut2/`), de
+// propósito, para que uma execução acidental não sobrescreva a arte aprovada
+// (`scripts/_cut2-doca2.mjs`, que é o pipeline vivo).
+//
 // A DOCA DO CINTURÃO — corrige o tom da arte nova, usa a arte INTEIRA (sem recorte de tira),
 // MEDE a linha da pista e esfuma as QUATRO bordas.
 //
@@ -15,7 +21,7 @@ import sharp from 'sharp';
 
 const GANHO = Number(process.argv[2] ?? 2.2);
 const SRC = 'scripts/_cut2/novo-base.png';
-const OUT = 'public/sprites/doca-cinturao.png';
+const OUT = 'scripts/_cut2/doca-rejeitada.png';
 const FADE = 10; // largura da rampa de alpha, em px, nas QUATRO bordas
 
 // 1. Corrigir o tom sobre o conteúdo opaco inteiro (y 36..226 → 256x190).
@@ -26,17 +32,17 @@ const corrigida = await sharp(SRC)
   .toBuffer();
 
 // 2. MEDIR a laje: a linha com mais pixels de tom médio é o convés.
-const { data: d0, info: i0 } = await sharp(corrigida)
+const { data, info } = await sharp(corrigida)
   .ensureAlpha()
   .raw()
   .toBuffer({ resolveWithObject: true });
 const lum = (b, i) => (b[i] * 0.299 + b[i + 1] * 0.587 + b[i + 2] * 0.114) / 255;
 let melhor = { y: -1, n: -1, x0: 0, x1: 0 };
-for (let y = 0; y < i0.height; y++) {
-  let n = 0, x0 = i0.width, x1 = 0;
-  for (let x = 0; x < i0.width; x++) {
-    const i = (y * i0.width + x) * 4;
-    if (d0[i + 3] > 8 && lum(d0, i) > 0.17) { n++; if (x < x0) x0 = x; if (x > x1) x1 = x; }
+for (let y = 0; y < info.height; y++) {
+  let n = 0, x0 = info.width, x1 = 0;
+  for (let x = 0; x < info.width; x++) {
+    const i = (y * info.width + x) * 4;
+    if (data[i + 3] > 8 && lum(data, i) > 0.17) { n++; if (x < x0) x0 = x; if (x > x1) x1 = x; }
   }
   if (n > melhor.n) melhor = { y, n, x0, x1 };
 }
@@ -44,7 +50,6 @@ console.log(`LAJE medida: y=${melhor.y} (${melhor.n} px claros) x ${melhor.x0}..
 
 // 3. A arte INTEIRA é o sprite agora — sem recorte de faixa. PAD_ROW é medido direto na arte
 // corrigida (não há mais TOP/LEFT de recorte a subtrair).
-const { data, info } = { data: d0, info: i0 };
 const PAD_ROW = melhor.y;
 
 // 4. FEATHER nas QUATRO bordas (a reta de cima é a que mais denunciava o corte na tira antiga —
