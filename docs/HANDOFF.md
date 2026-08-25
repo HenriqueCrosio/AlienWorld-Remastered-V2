@@ -757,6 +757,45 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
+## A FATIA 5 (2026-08-25) — a Fase 3, EM ANDAMENTO
+
+🟡 **Tasks 1–3 feitas, Task 4 pendente. Branch `feat/fase3-visual` de pé, NÃO mergeada.**
+Estado, o que testar e o que falta: `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`.
+
+**⚠️ A/B VISUAL SEM CONGELAR A CENA NÃO É A/B.** Três tiros a 400ms de intervalo com o jogo
+andando são três MOMENTOS, não três versões do mesmo quadro — e um deles pegou um flash de dano
+que tingiu a tela inteira. Congele (`scene.pause()`) e limpe (`cameras.main.resetFX()`) antes de
+cada tiro. ⚠️ Depois do `pause()` a cena SAI do `getScenes(true)`: busque por chave
+(`getScene('Game')`), senão o script quebra na segunda iteração.
+
+**⚠️ EMPATE DE PROFUNDIDADE RENDERIZA CERTO POR ACIDENTE.** A pintura da Fase 3 entrou no mesmo
+depth da camada do planeta; funcionava só por ordem de inserção, e qualquer reordenação futura a
+viraria para trás sem nenhuma sonda pegar. Profundidade nova precisa ser DISTINTA e comentada.
+
+**⚠️ PINTURA DE FUNDO É 100% OPACA e esconde tudo atrás dela** (medido: 0 pixels não-opacos em
+129.600). Na Fase 3 isso esconde o planeta no Ato 1 — aceito, e com efeito bom: quando a nuvem
+abre, o planeta reaparece JUNTO com o casco, e a virada revela duas coisas.
+
+**Pintura QUASE 16:9 não leva alargamento.** A da Fase 3 (1625×968) perde 5,6% num recorte
+central. O `alargar-16x9.mjs` existe para pinturas QUADRADAS (a da Cutscene 2 perdia 44%) e as
+laterais que ele inventa são mancha, não arte.
+
+**O `pickVariant` sorteia UNIFORME.** Quando a proporção entre variantes importa, ela vem da
+GEOMETRIA, não dele: duas camadas, uma com `gap` menor que a largura (contínua) e outra com `gap`
+grande (pontuação). Foi assim que o casco ficou com os trechos LISOS sendo maioria — e isso é
+contraintuitivo: um casco em que cada metro tem uma engrenagem lê como brinquedo. São os trechos
+vazios que fazem o maquinário significar alguma coisa (mesma lógica do SILÊNCIO da Capitânia).
+
+**O PixelLab desenha SUJEITOS, não superfícies.** Pedir "textura emendável" faz ele desenhar um
+objeto e repeti-lo. As artes de casco que funcionaram têm a frase *"Seamless horizontally
+repeating"* no COMEÇO do prompt, onde ele pesa mais.
+
+**⚠️ Sonda existente que encosta na mudança se CONFERE, não se afrouxa.** Duas vezes nesta fatia
+um subagente ajustou a `probe-stage3`. As duas foram legítimas (os números contavam a arquitetura
+antiga) — mas só se sabe isso conferindo, e uma delas ficou mais ESTRITA, não menos.
+
+---
+
 ## Atalhos de DEV (só em `import.meta.env.DEV`)
 
 | Tecla | Onde | O quê |
