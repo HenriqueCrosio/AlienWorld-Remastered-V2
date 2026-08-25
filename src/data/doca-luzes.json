@@ -1,0 +1,192 @@
+{
+  "artW": 256,
+  "artH": 256,
+  "pontos": [
+    {
+      "x": 245,
+      "y": 22,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 19,
+      "y": 73,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 194,
+      "y": 92,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 36,
+      "y": 104,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 137,
+      "y": 121,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 132,
+      "y": 130,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 146,
+      "y": 141,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 47,
+      "y": 146,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 65,
+      "y": 167,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 97,
+      "y": 167,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 202,
+      "y": 169,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 117,
+      "y": 182,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 206,
+      "y": 183,
+      "familia": "amber",
+      "cor": "#dc8249"
+    },
+    {
+      "x": 184,
+      "y": 102,
+      "familia": "red",
+      "cor": "#a3151e"
+    },
+    {
+      "x": 49,
+      "y": 123,
+      "familia": "red",
+      "cor": "#a3151e"
+    },
+    {
+      "x": 241,
+      "y": 127,
+      "familia": "red",
+      "cor": "#a3151e"
+    },
+    {
+      "x": 188,
+      "y": 141,
+      "familia": "red",
+      "cor": "#a3151e"
+    },
+    {
+      "x": 224,
+      "y": 141,
+      "familia": "red",
+      "cor": "#a3151e"
+    },
+    {
+      "x": 223,
+      "y": 169,
+      "familia": "red",
+      "cor": "#a3151e"
+    },
+    {
+      "x": 183,
+      "y": 184,
+      "familia": "red",
+      "cor": "#a3151e"
+    },
+    {
+      "x": 144,
+      "y": 122,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 205,
+      "y": 127,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 32,
+      "y": 143,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 61,
+      "y": 165,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 149,
+      "y": 166,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 81,
+      "y": 167,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 60,
+      "y": 169,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 68,
+      "y": 176,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 16,
+      "y": 180,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 88,
+      "y": 185,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    },
+    {
+      "x": 54,
+      "y": 188,
+      "familia": "amber",
+      "cor": "#9f5a28"
+    }
+  ]
+}

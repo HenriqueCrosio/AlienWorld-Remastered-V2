@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH } from '../config';
+import { COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
@@ -10,6 +10,10 @@ import { SHIPS, DEFAULT_SHIP, ROSTER_DOCA } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
 import { STAGES } from '../systems/StageDirector';
 import type { HandlingMode } from './GameScene';
+// AS LUZES DA DOCA — medidas em `scripts/_cut2-luzes.mjs` (por SATURAÇÃO, não luminância: metal
+// e rocha desta pintura leem claros mas neutros; matiz quente + saturação é o que isola uma
+// lâmpada de um parafuso batendo luz). Coordenadas em espaço de ARTE — `criarLuzes()` converte.
+import docaLuzes from '../data/doca-luzes.json';
 
 /** Uma rocha ancorada: o sprite + o ponto da doca em que o cabo dela prende. */
 interface Amarra {
@@ -112,6 +116,13 @@ export class Interlude2Scene extends Phaser.Scene {
   private static readonly DEPTH_DOCA = 70;
   private static readonly DEPTH_NAVE = 80;
 
+  // ⚠️ AS LUZES FICAM NA FRENTE DA DOCA (>70) — senão a arte por cima delas apaga o próprio
+  // brilho que elas existem para acrescentar. O HALO/FACHO nasce um degrau ATRÁS do núcleo
+  // pontual (70.3 < 71): ele é a "névoa" ao redor da lâmpada, e a névoa fica atrás do próprio
+  // ponto de luz, nunca na frente dele.
+  private static readonly DEPTH_LUZ_HALO = Interlude2Scene.DEPTH_DOCA + 0.3;
+  private static readonly DEPTH_LUZ = Interlude2Scene.DEPTH_DOCA + 1;
+
   /** A altura da pista NA TELA. Baixa: a doca é grande e sangra para fora por baixo. */
   private static readonly PAD_Y = 150;
   /**
@@ -135,6 +146,11 @@ export class Interlude2Scene extends Phaser.Scene {
   /** Converte um X da arte para o X da tela. */
   private static artToScreenX(ax: number): number {
     return Interlude2Scene.DOCA_X + (ax - Interlude2Scene.ART_W / 2) * Interlude2Scene.SCALE;
+  }
+
+  /** Converte um Y da arte para o Y da tela (mesma conta de `docaY`, para um Y qualquer da arte). */
+  private static artToScreenY(ay: number): number {
+    return Interlude2Scene.docaY + (ay - Interlude2Scene.ART_H / 2) * Interlude2Scene.SCALE;
   }
 
   constructor() {
@@ -185,6 +201,11 @@ export class Interlude2Scene extends Phaser.Scene {
     // suas próprias marcações pintadas no convés (chevrons vermelhos e luzes de borda) — uma
     // segunda marcação por cima seria a MESMA duplicação que a troca de arte existe para corrigir
     // ("usar duas imagens sobrepostas e parecidas causa estranheza", diagnóstico do Henrique).
+
+    // AS LUZES PISCAM — a cena é estática, e depois da composição aprovada isto é o que sobra
+    // para manter o quadro vivo ("faça as luzes piscarem, trazer um pouco de volumetria",
+    // Henrique). Ver `criarLuzes()`.
+    this.criarLuzes();
 
     // OS CABOS. Desenhados em código, e não como sprite, porque eles precisam LIGAR duas coisas:
     // uma ponta na doca, a outra numa rocha que balança. Um sprite de cabo ficaria parado
@@ -284,6 +305,128 @@ export class Interlude2Scene extends Phaser.Scene {
         baseY: rocha.y,
       });
     }
+  }
+
+  /**
+   * AS LUZES QUE JÁ ESTÃO PINTADAS — não pintamos luz nova, achamos a que a arte já tem (janelas
+   * âmbar/laranja nas torres, luzes vermelhas e âmbar na borda das plataformas — medidas por
+   * SATURAÇÃO em `scripts/_cut2-luzes.mjs`, ver o doc-comment de lá) e a fazemos RESPIRAR.
+   *
+   * ⚠️ FASES DIFERENTES POR LUZ. Um pulso em uníssono lê como a TELA INTEIRA piscando — o que
+   * este quadro pede é uma estação viva, com cada lâmpada no seu próprio relógio. Por isso
+   * duração, atraso e faixa de alfa são sorteados por ponto, não um único tween compartilhado.
+   *
+   * ⚠️ RESTRIÇÃO É O PEDIDO. A pintura anterior foi rejeitada duas vezes por virar a coisa mais
+   * clara da tela — a regra da casa é luz só onde há energia, e aqui "onde há energia" já está
+   * marcado no PNG. O halo grande e o facho (a "volumetria") só nascem nas poucas luzes mais
+   * fortes, nunca em todas — senão a doca inteira vira um brilho só.
+   */
+  private criarLuzes(): void {
+    // GUARDA: sem a textura, a cena não quebra — só fica sem o efeito (a mesma regra de guarda
+    // que `chegadaTex`/`docaTex` já seguem nesta cena).
+    if (!this.textures.exists('colonyLight')) return;
+
+    const pontos = docaLuzes.pontos;
+    if (pontos.length === 0) return;
+
+    // AS MAIS FORTES: pelo brilho da própria amostra (não por ordem de medição). São elas que
+    // recebem o halo grande-e-fraco; um facho de `godRay` vai só nas 2 primeiras — a volumetria
+    // é um tempero, não o prato.
+    const porBrilho = [...pontos].sort(
+      (a, b) => Interlude2Scene.luminanciaHex(b.cor) - Interlude2Scene.luminanciaHex(a.cor),
+    );
+    const fortes = new Set(porBrilho.slice(0, Math.min(5, pontos.length)));
+
+    // O FACHO só vale a pena numa luz que sobra QUADRO — a arte tem lâmpadas rentes à borda de
+    // cima (uma baliza de antena, por exemplo), e um facho ali nasce quase todo fora da tela.
+    // Filtra por margem antes de pegar as 2 mais fortes, sem mudar quem recebe o halo.
+    const MARGEM = 14;
+    const visiveis = porBrilho.filter((p) => {
+      const sy = Interlude2Scene.artToScreenY(p.y);
+      const sx = Interlude2Scene.artToScreenX(p.x);
+      return sy > MARGEM && sy < GAME_HEIGHT - MARGEM && sx > MARGEM && sx < GAME_WIDTH - MARGEM;
+    });
+    const maisFortes = new Set(visiveis.slice(0, Math.min(2, visiveis.length)));
+
+    const temGodRay = this.textures.exists('godRay');
+
+    for (const p of pontos) {
+      // O mapeamento de arte→tela é o mesmo de `artToScreenX`/`Y`: com DOCA_X = ART_W/2 e
+      // SCALE = 1, screenX = artX e screenY = artY − 25.
+      const sx = Interlude2Scene.artToScreenX(p.x);
+      const sy = Interlude2Scene.artToScreenY(p.y);
+      const tint = p.familia === 'red' ? 0xff4433 : 0xffb066;
+
+      // A VOLUMETRIA, primeiro (para nascer ATRÁS do núcleo pontual): um halo bem maior e bem
+      // mais fraco, só nas luzes mais fortes — o núcleo é a lâmpada, o halo é o AR ao redor dela.
+      if (fortes.has(p)) {
+        const halo = this.add
+          .image(sx, sy, 'colonyLight')
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setTint(tint)
+          .setDepth(Interlude2Scene.DEPTH_LUZ_HALO)
+          .setScale(Phaser.Math.FloatBetween(6, 9));
+
+        const haloBase = Phaser.Math.FloatBetween(0.1, 0.16);
+        const haloPiso = haloBase * 0.4;
+        halo.setAlpha(haloPiso);
+
+        this.tweens.add({
+          targets: halo,
+          alpha: { from: haloPiso, to: haloBase },
+          duration: Phaser.Math.Between(1800, 3200),
+          delay: Phaser.Math.Between(0, 2000),
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+
+        // Um facho raríssimo saindo da lâmpada mais forte — só 1 ou 2 no quadro inteiro, sutil,
+        // baixo alfa, a mesma receita do `Parallax.ts` (ADD, tint âmbar frio, ângulo, escala
+        // esticada) — cena escura, luz só onde há energia.
+        if (temGodRay && maisFortes.has(p)) {
+          this.add
+            .image(sx, sy, 'godRay')
+            .setBlendMode(Phaser.BlendModes.ADD)
+            .setTint(0xffcf9a)
+            .setAlpha(Phaser.Math.FloatBetween(0.05, 0.09))
+            .setAngle(Phaser.Math.Between(-70, -110))
+            .setScale(Phaser.Math.FloatBetween(0.22, 0.32), Phaser.Math.FloatBetween(0.5, 0.7))
+            .setDepth(Interlude2Scene.DEPTH_LUZ_HALO);
+        }
+      }
+
+      // O NÚCLEO: a lâmpada em si, piscando. Todo ponto medido recebe um.
+      const nucleo = this.add
+        .image(sx, sy, 'colonyLight')
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setTint(tint)
+        .setDepth(Interlude2Scene.DEPTH_LUZ)
+        .setScale(Phaser.Math.FloatBetween(0.8, 1.4));
+
+      const alphaMin = Phaser.Math.FloatBetween(0.15, 0.35);
+      const alphaMax = Phaser.Math.FloatBetween(0.55, 0.85);
+      nucleo.setAlpha(alphaMin);
+
+      this.tweens.add({
+        targets: nucleo,
+        alpha: { from: alphaMin, to: alphaMax },
+        duration: Phaser.Math.Between(700, 2200),
+        delay: Phaser.Math.Between(0, 1800),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+  }
+
+  /** Luminância aproximada (0–255) de um "#rrggbb" — usada só para ranquear as luzes mais fortes. */
+  private static luminanciaHex(hex: string): number {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) & 0xff;
+    const g = (n >> 8) & 0xff;
+    const b = n & 0xff;
+    return r * 0.299 + g * 0.587 + b * 0.114;
   }
 
   override update(_time: number, delta: number): void {

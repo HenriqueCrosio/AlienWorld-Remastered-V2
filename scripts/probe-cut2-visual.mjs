@@ -62,6 +62,35 @@ ok(vaoAncoras >= 100, `as âncoras dos cabos se espalham pela doca (vão=${vaoAn
 
 await page.screenshot({ path: 'probe-cut2-aproximacao.png' });
 
+// ─── AS LUZES DA DOCA (Fatia visual: "faça as luzes piscarem, trazer volumetria") ───
+//
+// `criarLuzes()` põe um `colonyLight` aditivo por ponto medido, no depth DEPTH_LUZ (71, um
+// degrau acima da doca em 70). A contagem tem que bater com o que `scripts/_cut2-luzes.mjs`
+// mediu (~31 hoje) — nem 0 (guarda falhou / textura sumiu) nem centenas (limiar frouxo demais).
+const lightAlphas = () =>
+  page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    return s.children.list
+      .filter((o) => o.texture && o.texture.key === 'colonyLight' && o.depth === 71)
+      .map((o) => Number(o.alpha.toFixed(4)));
+  });
+
+const alphasA = await lightAlphas();
+console.log('luzes', alphasA.length, JSON.stringify(alphasA.slice(0, 6)));
+ok(alphasA.length >= 10 && alphasA.length <= 40, `contagem de luzes plausível (${alphasA.length})`);
+
+// ASSERTA ESTADO REAL, NÃO PRINT: amostra o alfa de TODA luz duas vezes, com tempo de sobra pro
+// pulso mais lento (o tween mais longo dura até 2200ms + 1800ms de atraso) virar de fase.
+await page.waitForTimeout(4200);
+const alphasB = await lightAlphas();
+console.log('luzes+4.2s', JSON.stringify(alphasB.slice(0, 6)));
+
+const mudou = alphasA.some((a, i) => Math.abs(a - (alphasB[i] ?? a)) > 0.02);
+ok(
+  alphasA.length > 0 && mudou,
+  'ao menos uma luz mudou de alfa entre as duas amostras (está piscando, não só desenhada)',
+);
+
 // A CENA É ESTÁTICA — "a imagem precisa estar estatica e a nave que chega" (Henrique). A doca
 // costumava deslizar da direita e a pintura costumava derivar; as duas coisas foram cortadas.
 // Sonda amostra a doca e a pintura duas vezes, a alguns segundos de distância, e reprova se
