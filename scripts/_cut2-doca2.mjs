@@ -13,8 +13,9 @@
 // escuro demais para ler como alvo; ×2.0 estoura as plataformas para quase-branco, e a doca vira a
 // coisa mais clara da tela — o MESMO defeito que matou a arte anterior. Não mude este número.
 //
-// ⚠️ A ARTE ENCOSTA NA BORDA ESQUERDA DA TELA (Interlude2Scene: DOCA_X = ART_W/2), então metade
-// dela fica fora de vista.
+// ⚠️ A ARTE ENCOSTA NA BORDA ESQUERDA DA TELA (Interlude2Scene: DOCA_X = ART_W/2). Nada dela fica
+// fora de vista: com ART_W = 256 num jogo de 384px de largura, ela ocupa o terço esquerdo até os
+// dois terços da tela (x 0..256) — o terço direito é o céu aberto onde as rochas amarradas ficam.
 //
 // ⚠️ NENHUMA borda leva feather (ver bloco 3). Feather é remédio para CORTE — esta arte já vem
 // recortada, com silhueta e transparência próprias.
@@ -28,7 +29,7 @@
 import sharp from 'sharp';
 
 const GANHO = Number(process.argv[2] ?? 1.5);
-const SRC = 'scripts/_cut2/doca2-base.png';
+const SRC = 'assets/raw/doca-cinturao-original.png';
 const OUT = 'public/sprites/doca-cinturao.png';
 // (sem FADE: ver o bloco 3 — arte com cutout proprio nao leva feather)
 

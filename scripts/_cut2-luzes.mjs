@@ -86,12 +86,15 @@ for (const c of candidatos) {
 }
 
 // 4. Emite coordenadas de arte inteiras + a família de matiz (a cena tinge por família) + a cor
-// amostrada (útil pra depurar/ajustar o tint na cena sem reabrir o PNG).
+// amostrada (útil pra depurar/ajustar o tint na cena sem reabrir o PNG) + o `score` (saturação ×
+// valor) já calculado no passo 1 — é o `score` que `Interlude2Scene.criarLuzes()` usa para
+// ranquear "as mais fortes", em vez de reconstruir uma ordem a partir de só 3 cores distintas.
 const pontos = aceitos.map((c) => ({
   x: Math.round(c.x),
   y: Math.round(c.y),
   familia: c.familia,
   cor: `#${[c.r, c.g, c.b].map((n) => n.toString(16).padStart(2, '0')).join('')}`,
+  score: Math.round(c.score * 1000) / 1000,
 }));
 
 writeFileSync(OUT, JSON.stringify({ artW: width, artH: height, pontos }, null, 2));

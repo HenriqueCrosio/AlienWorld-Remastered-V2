@@ -73,6 +73,9 @@ export class Interlude2Scene extends Phaser.Scene {
   private naveDaVaga: Phaser.GameObjects.Image | null = null;
 
   private amarras: Amarra[] = [];
+  /** Todo objeto que `criarLuzes()` cria (núcleos, halos e fachos) — para que `destruicao()`
+   * consiga afundá-los e apagá-los junto com a doca (ver o field-fix no fim de `criarLuzes()`). */
+  private luzes: Phaser.GameObjects.Image[] = [];
   private panel: ShipPanel | null = null;
 
   private score = 0;
@@ -149,7 +152,9 @@ export class Interlude2Scene extends Phaser.Scene {
    * A 2ª arte (c166782d) não é um cutout independente do céu — é um cais entalhado num paredão de
    * asteroide, pensado para nascer na margem da tela, não flutuando no meio dela. Com origem no
    * centro e `SCALE = 1`, colar a borda ESQUERDA do sprite em x=0 é `DOCA_X − ART_W/2 = 0`, ou
-   * seja `DOCA_X = ART_W/2`. Metade da arte (o lado esquerdo) fica fora da tela.
+   * seja `DOCA_X = ART_W/2`. Nada da arte fica fora da tela: com ART_W = 256 num jogo de 384px de
+   * largura, o sprite ocupa o TERÇO ESQUERDO até os DOIS TERÇOS (x 0..256) — o terço direito é o
+   * céu aberto onde as rochas amarradas ficam (ver `amarrarRochas()`).
    *
    * ⚠️ A arte NÃO leva feather em borda nenhuma (`_cut2-doca2.mjs`, bloco 3). Feather é remédio
    * para CORTE — servia à arte anterior, que era um recorte retangular. Esta já vem com cutout e
@@ -187,6 +192,8 @@ export class Interlude2Scene extends Phaser.Scene {
     this.done = false;
     this.panel = null;
     this.amarras = [];
+    this.luzes = [];
+    this.naveDaVaga = null;
     this.t = 0;
 
     resetVariantCache();
@@ -254,20 +261,6 @@ export class Interlude2Scene extends Phaser.Scene {
   }
 
   /**
-   * AS ROCHAS AMARRADAS — "grandes cabos saem para segurar os asteroides em volta".
-   *
-   * Elas são a razão de a doca existir: isto é uma MINA. Os cabos dizem, sem uma linha de texto,
-   * que aquela gente estava ARRASTANDO pedra — e que parou.
-   *
-   * ⚠️ AS ROCHAS FICAM NO CÉU ABERTO, não coladas na estrutura. A 1ª versão ancorava e soltava as
-   * rochas em coordenadas tiradas da arte, e elas nasceram enterradas dentro do desenho da rocha
-   * (invisíveis) ou fora da tela — só UM dos três cabos aparecia. O cabo só conta a história se as
-   * DUAS pontas dele forem visíveis: uma na máquina, a outra na pedra, com vácuo no meio.
-   *
-   * Por isso a âncora sai da ARTE (é uma peça da doca) e a rocha vai para a TELA (o vazio à
-   * direita e acima da pista, que é a única região grande sem nada em cima).
-   */
-  /**
    * Quanto acima da linha da pista (PAD_ROW) as âncoras dos cabos sentam, em px de arte — igual
    * em px de tela, já que SCALE é 1.
    *
@@ -281,6 +274,20 @@ export class Interlude2Scene extends Phaser.Scene {
    */
   private static readonly ANCHOR_LIFT = 0;
 
+  /**
+   * AS ROCHAS AMARRADAS — "grandes cabos saem para segurar os asteroides em volta".
+   *
+   * Elas são a razão de a doca existir: isto é uma MINA. Os cabos dizem, sem uma linha de texto,
+   * que aquela gente estava ARRASTANDO pedra — e que parou.
+   *
+   * ⚠️ AS ROCHAS FICAM NO CÉU ABERTO, não coladas na estrutura. A 1ª versão ancorava e soltava as
+   * rochas em coordenadas tiradas da arte, e elas nasceram enterradas dentro do desenho da rocha
+   * (invisíveis) ou fora da tela — só UM dos três cabos aparecia. O cabo só conta a história se as
+   * DUAS pontas dele forem visíveis: uma na máquina, a outra na pedra, com vácuo no meio.
+   *
+   * Por isso a âncora sai da ARTE (é uma peça da doca) e a rocha vai para a TELA (o vazio à
+   * direita e acima da pista, que é a única região grande sem nada em cima).
+   */
   private amarrarRochas(): void {
     // ⚠️ Re-ancorado para a 2ª arte (256×256, c166782d). As âncoras seguem duas regras medidas,
     // nunca chutadas:
@@ -329,20 +336,6 @@ export class Interlude2Scene extends Phaser.Scene {
   }
 
   /**
-   * AS LUZES QUE JÁ ESTÃO PINTADAS — não pintamos luz nova, achamos a que a arte já tem (janelas
-   * âmbar/laranja nas torres, luzes vermelhas e âmbar na borda das plataformas — medidas por
-   * SATURAÇÃO em `scripts/_cut2-luzes.mjs`, ver o doc-comment de lá) e a fazemos RESPIRAR.
-   *
-   * ⚠️ FASES DIFERENTES POR LUZ. Um pulso em uníssono lê como a TELA INTEIRA piscando — o que
-   * este quadro pede é uma estação viva, com cada lâmpada no seu próprio relógio. Por isso
-   * duração, atraso e faixa de alfa são sorteados por ponto, não um único tween compartilhado.
-   *
-   * ⚠️ RESTRIÇÃO É O PEDIDO. A pintura anterior foi rejeitada duas vezes por virar a coisa mais
-   * clara da tela — a regra da casa é luz só onde há energia, e aqui "onde há energia" já está
-   * marcado no PNG. O halo grande e o facho (a "volumetria") só nascem nas poucas luzes mais
-   * fortes, nunca em todas — senão a doca inteira vira um brilho só.
-   */
-  /**
    * ════════════════════════════════════════════════════════════════════════════════════════
    *  A VAGA — o lugar onde a nave que ESTA cutscene desbloqueia fica pousada, à vista.
    * ════════════════════════════════════════════════════════════════════════════════════════
@@ -378,7 +371,10 @@ export class Interlude2Scene extends Phaser.Scene {
    * O ponto sai de medição no PNG, não do olho: na linha da laje do meio (arte y=135) a superfície
    * clara vai de x≈136 a x≈228, e acima de x≈152 o céu está aberto. `VAGA_AX = 190` cai no meio
    * desse trecho livre, com folga para os 31px de casco. `artToScreenX` converte; a superfície
-   * fica em `135 − 25 = 110` na tela, e o casco assenta meia altura acima dela.
+   * fica em `135 − 25 = 110` na tela, e o casco assenta EXATAMENTE meia altura de si mesmo acima
+   * dela (`getSourceImage().height / 2`, não um número fixo — senão trocar `NAVE_DA_VAGA` por um
+   * casco mais alto afunda o sprite na laje, e o comentário logo acima promete que a troca é
+   * "editar `NAVE_DA_VAGA` e mais nada").
    *
    * ⚠️ ENCALHADA, não estacionada: inclinada sobre a laje e escurecida. Uma nave alinhada e limpa
    * lê como frota, e não há frota aqui — há um destroço que a doca estava minerando.
@@ -395,13 +391,32 @@ export class Interlude2Scene extends Phaser.Scene {
       Interlude2Scene.docaY +
       (Interlude2Scene.VAGA_AY - Interlude2Scene.ART_H / 2) * Interlude2Scene.SCALE;
 
+    const altura = this.textures.get(nave.texture).getSourceImage().height;
+
     this.naveDaVaga = this.add
-      .image(x, superficie - 6, nave.texture)
-      .setDepth(Interlude2Scene.DEPTH_DOCA + 0.5)
+      // ⚠️ DEPTH `DEPTH_LUZ + 0.1`, na FRENTE das luzes (71): ela é um destroço em PRIMEIRO
+      // PLANO, pousado SOBRE o convés — tem que ocluir a lâmpada que estiver atrás dela, não o
+      // contrário (achado nesta revisão: a 70.5 antiga desenhava atrás de 2 núcleos medidos).
+      .image(x, superficie - altura / 2, nave.texture)
+      .setDepth(Interlude2Scene.DEPTH_LUZ + 0.1)
       .setAngle(-8)
       .setTint(0x7f88a8);
   }
 
+  /**
+   * AS LUZES QUE JÁ ESTÃO PINTADAS — não pintamos luz nova, achamos a que a arte já tem (janelas
+   * âmbar/laranja nas torres, luzes vermelhas e âmbar na borda das plataformas — medidas por
+   * SATURAÇÃO em `scripts/_cut2-luzes.mjs`, ver o doc-comment de lá) e a fazemos RESPIRAR.
+   *
+   * ⚠️ FASES DIFERENTES POR LUZ. Um pulso em uníssono lê como a TELA INTEIRA piscando — o que
+   * este quadro pede é uma estação viva, com cada lâmpada no seu próprio relógio. Por isso
+   * duração, atraso e faixa de alfa são sorteados por ponto, não um único tween compartilhado.
+   *
+   * ⚠️ RESTRIÇÃO É O PEDIDO. A pintura anterior foi rejeitada duas vezes por virar a coisa mais
+   * clara da tela — a regra da casa é luz só onde há energia, e aqui "onde há energia" já está
+   * marcado no PNG. O halo grande e o facho (a "volumetria") só nascem nas poucas luzes mais
+   * fortes, nunca em todas — senão a doca inteira vira um brilho só.
+   */
   private criarLuzes(): void {
     // GUARDA: sem a textura, a cena não quebra — só fica sem o efeito (a mesma regra de guarda
     // que `chegadaTex`/`docaTex` já seguem nesta cena).
@@ -410,23 +425,25 @@ export class Interlude2Scene extends Phaser.Scene {
     const pontos = docaLuzes.pontos;
     if (pontos.length === 0) return;
 
-    // AS MAIS FORTES: pelo brilho da própria amostra (não por ordem de medição). São elas que
-    // recebem o halo grande-e-fraco; um facho de `godRay` vai só nas 2 primeiras — a volumetria
-    // é um tempero, não o prato.
-    const porBrilho = [...pontos].sort(
-      (a, b) => Interlude2Scene.luminanciaHex(b.cor) - Interlude2Scene.luminanciaHex(a.cor),
-    );
-    const fortes = new Set(porBrilho.slice(0, Math.min(5, pontos.length)));
+    // AS MAIS FORTES: pelo `score` (saturação × valor) que `_cut2-luzes.mjs` já mede e grava por
+    // ponto — não pela ordem em que a varredura raster encontrou os pixels. `doca-luzes.json`
+    // só tem 3 cores distintas, então ranquear pela COR (como esta cena fazia antes) sempre dava
+    // o mesmo empate de 3 valores — funcionava só porque o script já emitia os pontos ordenados
+    // por score; ranquear no campo `score` explícito tira essa dependência de acidente de ordem.
+    const porScore = [...pontos].sort((a, b) => b.score - a.score);
 
-    // O FACHO só vale a pena numa luz que sobra QUADRO — a arte tem lâmpadas rentes à borda de
-    // cima (uma baliza de antena, por exemplo), e um facho ali nasce quase todo fora da tela.
-    // Filtra por margem antes de pegar as 2 mais fortes, sem mudar quem recebe o halo.
+    // O FACHO — e, desde esta revisão, também o HALO — só valem a pena numa luz que sobra
+    // QUADRO. A arte tem lâmpadas rentes à borda (o 1º ponto medido, x=245 y=22, mapeia para
+    // screenY=−3: fora da tela), e um halo ali vira uma mancha âmbar de 24-36px pairando sobre a
+    // borda sem nenhuma lâmpada visível por baixo. Filtra por margem ANTES de escolher tanto as
+    // "fortes" (halo) quanto as "mais fortes" (facho) — as duas vêm do mesmo conjunto visível.
     const MARGEM = 14;
-    const visiveis = porBrilho.filter((p) => {
+    const visiveis = porScore.filter((p) => {
       const sy = Interlude2Scene.artToScreenY(p.y);
       const sx = Interlude2Scene.artToScreenX(p.x);
       return sy > MARGEM && sy < GAME_HEIGHT - MARGEM && sx > MARGEM && sx < GAME_WIDTH - MARGEM;
     });
+    const fortes = new Set(visiveis.slice(0, Math.min(5, visiveis.length)));
     const maisFortes = new Set(visiveis.slice(0, Math.min(2, visiveis.length)));
 
     const temGodRay = this.textures.exists('godRay');
@@ -448,6 +465,8 @@ export class Interlude2Scene extends Phaser.Scene {
           .setDepth(Interlude2Scene.DEPTH_LUZ_HALO)
           .setScale(Phaser.Math.FloatBetween(6, 9));
 
+        this.luzes.push(halo);
+
         const haloBase = Phaser.Math.FloatBetween(0.1, 0.16);
         const haloPiso = haloBase * 0.4;
         halo.setAlpha(haloPiso);
@@ -466,7 +485,7 @@ export class Interlude2Scene extends Phaser.Scene {
         // baixo alfa, a mesma receita do `Parallax.ts` (ADD, tint âmbar frio, ângulo, escala
         // esticada) — cena escura, luz só onde há energia.
         if (temGodRay && maisFortes.has(p)) {
-          this.add
+          const facho = this.add
             .image(sx, sy, 'godRay')
             .setBlendMode(Phaser.BlendModes.ADD)
             .setTint(0xffcf9a)
@@ -474,6 +493,7 @@ export class Interlude2Scene extends Phaser.Scene {
             .setAngle(Phaser.Math.Between(-70, -110))
             .setScale(Phaser.Math.FloatBetween(0.22, 0.32), Phaser.Math.FloatBetween(0.5, 0.7))
             .setDepth(Interlude2Scene.DEPTH_LUZ_HALO);
+          this.luzes.push(facho);
         }
       }
 
@@ -484,6 +504,7 @@ export class Interlude2Scene extends Phaser.Scene {
         .setTint(tint)
         .setDepth(Interlude2Scene.DEPTH_LUZ)
         .setScale(Phaser.Math.FloatBetween(0.8, 1.4));
+      this.luzes.push(nucleo);
 
       const alphaMin = Phaser.Math.FloatBetween(0.15, 0.35);
       const alphaMax = Phaser.Math.FloatBetween(0.55, 0.85);
@@ -499,15 +520,6 @@ export class Interlude2Scene extends Phaser.Scene {
         ease: 'Sine.easeInOut',
       });
     }
-  }
-
-  /** Luminância aproximada (0–255) de um "#rrggbb" — usada só para ranquear as luzes mais fortes. */
-  private static luminanciaHex(hex: string): number {
-    const n = parseInt(hex.slice(1), 16);
-    const r = (n >> 16) & 0xff;
-    const g = (n >> 8) & 0xff;
-    const b = n & 0xff;
-    return r * 0.299 + g * 0.587 + b * 0.114;
   }
 
   override update(_time: number, delta: number): void {
@@ -795,7 +807,8 @@ export class Interlude2Scene extends Phaser.Scene {
             t,
           ) + Phaser.Math.Between(-12, 12);
         const y =
-          Phaser.Math.Linear(Interlude2Scene.PAD_Y, 70, t) + Phaser.Math.Between(-10, 10);
+          Phaser.Math.Linear(Interlude2Scene.PAD_Y, Interlude2Scene.artToScreenY(95), t) +
+          Phaser.Math.Between(-10, 10);
         if (i % 3 === 2) this.fx.explodeBig(x, y - 10, 0.9, Interlude2Scene.DEPTH_DOCA + 3);
         else this.fx.explode(x, y, 1.6, Interlude2Scene.DEPTH_DOCA + 3);
       });
@@ -848,16 +861,23 @@ export class Interlude2Scene extends Phaser.Scene {
 
       this.cameras.main.flash(800, 255, 170, 90);
       // O estouro FINAL, na barriga da estação: a detonação de 128px em escala grande — é ela
-      // que apaga a doca, não mais um clarão genérico de partícula.
+      // que apaga a doca, não mais um clarão genérico de partícula. Em espaço de arte (x=168,
+      // y=155) em vez de tela — a mesma posição de sempre, só que autodocumentada em vez de dois
+      // números de tela sem relação óbvia com DOCA_X/PAD_Y.
       this.fx.explodeBig(
-        Interlude2Scene.DOCA_X + 40,
-        Interlude2Scene.PAD_Y - 20,
+        Interlude2Scene.artToScreenX(168),
+        Interlude2Scene.artToScreenY(155),
         1.6,
         Interlude2Scene.DEPTH_DOCA + 3,
       );
 
+      // A DOCA AFUNDA E APAGA — e as LUZES vão junto (`this.luzes`, ver `criarLuzes()`): sem
+      // elas no `targets`, a estrutura sumia mas as ~31 lâmpadas continuavam piscando, pregadas
+      // no vazio, até a cena trocar (achado nesta revisão).
       this.tweens.add({
-        targets: this.naveDaVaga ? [this.doca, this.naveDaVaga] : this.doca,
+        targets: this.naveDaVaga
+          ? [this.doca, this.naveDaVaga, ...this.luzes]
+          : [this.doca, ...this.luzes],
         y: '+=60',
         alpha: 0,
         duration: 1200,

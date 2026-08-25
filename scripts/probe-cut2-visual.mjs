@@ -54,8 +54,9 @@ ok(e.luaPartida === false, 'a lua partida (planetShattered) NÃO está na cena �
 // AS ÂNCORAS DOS CABOS: as três não podem se amontoar num só ponto — isso é o defeito medido no
 // passe de correção original (18px de largura de doca, um cluster no terço esquerdo). O vão entre
 // a mais à esquerda e a mais à direita tem que ser uma fração real da largura da doca (256px hoje,
-// arte inteira), não um punhado de pixels. 100px é bem menos que os ~118px que a geometria atual
-// entrega, mas é bem mais que os 18px do defeito — se alguém reintroduzir o cluster, isto acusa.
+// arte inteira), não um punhado de pixels. 100px é bem menos que os ~127px que a geometria atual
+// entrega ((PAD_X1 − PAD_X0) × 2/3 = 191 × 2/3), mas é bem mais que os 18px do defeito — se
+// alguém reintroduzir o cluster, isto acusa.
 const xsAncora = e.amarras.map((a) => a.x);
 const vaoAncoras = Math.max(...xsAncora) - Math.min(...xsAncora);
 ok(vaoAncoras >= 100, `as âncoras dos cabos se espalham pela doca (vão=${vaoAncoras}px de 256px)`);
@@ -108,6 +109,69 @@ ok(
   e.ceu !== null && e2.ceu !== null && e2.ceu.x === e.ceu.x,
   `a pintura NÃO se move (x=${e.ceu?.x} em t0, x=${e2.ceu?.x} em t0+2.5s)`,
 );
+
+// ─── ACHADO 1 DA REVISÃO: AS LUZES TÊM QUE SUMIR JUNTO COM A DOCA ───
+//
+// `destruicao()` afunda e apaga `this.doca` (e a nave da vaga) num tween de alpha — mas até esta
+// correção não guardava referência aos ~31 objetos de `criarLuzes()`, então a doca sumia e as
+// ~31 lâmpadas continuavam piscando a alfa cheia, penduradas no vazio. Nenhuma sonda existente
+// chegava a rodar a destruição inteira; esta é a primeira a provar que `this.luzes` (agora nos
+// `targets` do tween de afundamento) segura essa correção.
+//
+// Pelo relógio da cena, o pouso já devia ter terminado: `roteiro()` chama `pouso()` em t=6200,
+// e as tweens de pouso levam mais 2200ms até chamar `escolha()` — bem menos que os ~9.2s já
+// esperados acima.
+const painelAberto = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return s.panel !== null;
+});
+ok(painelAberto, 'o painel de escolha está aberto (pouso concluído)');
+
+if (painelAberto) {
+  // Escolhe o ARAUTO (7º e último de ROSTER_DOCA) — dispara escolher() → destruicao().
+  await page.keyboard.press('7');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Enter'); // seleciona
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Enter'); // confirma → escolher(), que agenda destruicao() em +1400ms
+
+  // Dentro de `destruicao()`: o tween de afundamento nasce em +3000ms e dura 1200ms (termina em
+  // +4200ms); `avancar()` troca de cena em +4400ms. Amostra em +4180ms — o mais tarde possível
+  // sem cruzar a troca de cena, com o tween a ~98% do caminho (alpha já bem perto de 0 se a
+  // correção segurar; ainda em ~1 se ela não segurar, porque as luzes não fazem parte do tween).
+  await page.waitForTimeout(1400 + 4180);
+
+  const fimDestruicao = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    if (!s || s.scene.key !== 'Interlude2') return null;
+    return {
+      docaAlpha: s.doca ? Number(s.doca.alpha.toFixed(3)) : null,
+      nLuzes: Array.isArray(s.luzes) ? s.luzes.length : -1,
+      luzAlphas: Array.isArray(s.luzes)
+        ? s.luzes.slice(0, 8).map((o) => Number(o.alpha.toFixed(3)))
+        : [],
+    };
+  });
+  console.log('destruição', JSON.stringify(fimDestruicao));
+
+  ok(
+    fimDestruicao !== null && fimDestruicao.nLuzes > 0,
+    `o array de luzes ainda tem objetos para checar (${fimDestruicao?.nLuzes})`,
+  );
+  ok(
+    fimDestruicao !== null && fimDestruicao.docaAlpha !== null && fimDestruicao.docaAlpha < 0.2,
+    `a doca sumiu perto do fim da destruição (alpha=${fimDestruicao?.docaAlpha})`,
+  );
+  ok(
+    fimDestruicao !== null &&
+      fimDestruicao.luzAlphas.length > 0 &&
+      fimDestruicao.luzAlphas.every((a) => a < 0.2),
+    `as LUZES sumiram JUNTO com a doca, não ficaram piscando no vazio (alphas=${JSON.stringify(fimDestruicao?.luzAlphas)})`,
+  );
+} else {
+  falhas++;
+  console.log('✘ painel de escolha não abriu a tempo — não foi possível testar a destruição/luzes');
+}
 
 await browser.close();
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nTUDO VERDE');

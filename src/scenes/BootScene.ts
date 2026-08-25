@@ -418,8 +418,10 @@ const ART: Record<string, string> = {
   // nave pousar no vazio, 30px abaixo da tela. Ferramenta: node scripts/find-pad.mjs doca 80.
   doca: 'sprites/doca.png',
 
-  // A DOCA DO CINTURÃO — recortada da arte nova (PixelLab 906bb897), corrigida no tom e
-  // esfumada nas bordas por `scripts/_cut2-doca.mjs`.
+  // A DOCA DO CINTURÃO — a 2ª arte (PixelLab c166782d), corrigida no tom (ganho ×1.5) por
+  // `scripts/_cut2-doca2.mjs`. SEM feather nas bordas: a arte já vem com cutout e silhueta
+  // próprios (decisão do Henrique, "tire todo o esmaecer da imagem") — feather era remédio da
+  // 1ª arte (906bb897), um recorte retangular que já foi substituído.
   // ⚠️ NUNCA renomear para `doca2`: o pickVariant trataria isso como VARIANTE e sortearia entre
   // a arte nova e a velha a cada spawn. Foi o que pegou o cargueiro na Fatia 3.
   docaCinturao: 'sprites/doca-cinturao.png',
