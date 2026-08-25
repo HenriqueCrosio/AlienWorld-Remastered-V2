@@ -712,6 +712,51 @@ foram re-recortados pela MESMA caixa união (`scripts/_recrop-capitania.mjs`, li
 
 ---
 
+## A FATIA 4 (2026-08-25) — a Cutscene 2, e as lições que ela comprou
+
+Detalhe completo em `docs/superpowers/plans/2026-08-25-cutscene2-visual-START.md`.
+⚠️ O spec e o plano dela (`2026-08-24-*`) são ARQUEOLOGIA — a direção mudou seis vezes durante a
+execução e eles descrevem uma cena que não existe. Estão marcados como tal.
+
+**⚠️ NÃO GERE A ARTE DO CENÁRIO A PARTIR DA PRÓPRIA PINTURA DE FUNDO.** A 1ª doca foi gerada no
+PixelLab usando a pintura do céu como referência, e o resultado foi uma cópia competente da mesma
+composição. **Uma cópia da coisa que já está ATRÁS não funciona como camada da FRENTE** — o
+diagnóstico do Henrique foi "usar duas imagens sobrepostas e parecidas causa estranheza". Custou
+três rodadas tratando sintoma (esfumar, corrigir tom, esconder a lua, centralizar) antes de alguém
+perceber que o defeito era de conceito. A saída foi arte GENUINAMENTE diferente: uma DOCA contra um
+CÉU, não uma imagem contra a cópia dela.
+
+**Feather é remédio para CORTE, não acabamento padrão.** Ele serve quando a arte é um recorte
+retangular arrancado do meio de uma cena maior — ali a borda reta denuncia. Arte que já vem com
+cutout e silhueta próprios NÃO leva: a rampa de alpha só come as pontas de antenas, cabos e
+conveses, que é o detalhe que dá vida à silhueta.
+
+**DERIVAR PAGA DIVIDENDO, e coordenada de tela escrita à mão é dívida com juros.** O ponto de pouso
+da Cutscene 2 sempre saiu da pista medida, nunca de um número. Por isso mover a doca para o centro,
+e depois colá-la à esquerda, moveu o pouso junto — cada troca custou UMA constante. No mesmo
+arquivo, a cadeia de explosões TINHA números chumbados (`x` de 344 a 60) e, com a doca nova,
+passou a detonar 88px fora dela, em céu vazio. **As sondas não pegam isso.**
+
+**Objeto criado em `create()` tem que MORRER com o que ele decora.** As 31 luzes da doca não
+guardavam referência: a estação afundava e sumia, e as lâmpadas seguiam piscando no vazio. A sonda
+não pegou porque ela não avançava até a destruição.
+
+**Pintura QUADRADA numa tela 16:9 só tem três saídas:** cortar, deixar barra vazia, ou alargar.
+`scripts/alargar-16x9.mjs` faz a terceira, e diz na própria cabeça que **não é outpainting** — é
+espelho borrado, e as laterais são mancha, não arte. O caminho bom é a pintura já nascer 16:9.
+⚠️ O outpaint pago do Higgsfield está fora: plano free, 1,9 créditos, custa 2.
+
+**O PADRÃO DA VAGA — vale para TODAS as cutscenes.** Toda cutscene deve mostrar, pousada em algum
+canto, **a nave que ela desbloqueia** (pedido do Henrique). Faz sentido narrativo e fecha de graça
+o buraco que a Cutscene 2 tinha: o jogador escolhia uma nave alienígena num menu sem nunca ter
+visto de onde ela veio. Como o róster ainda vai ser rebalanceado e enxugado, a vaga da Cutscene 2
+ficou PARAMETRIZADA (`NAVE_DA_VAGA` / `VAGA_AX` / `VAGA_AY`) — **trocar a nave é editar uma linha.**
+O que viaja para outra interlude: a constante da nave, uma posição MEDIDA na arte daquela cena, um
+`Image` (nunca `Sprite`, para não tocar animação por engano), o sumiço em `escolher()` quando o
+jogador leva a nave, e a morte junto com o cenário quando ele não leva.
+
+---
+
 ## Atalhos de DEV (só em `import.meta.env.DEV`)
 
 | Tecla | Onde | O quê |

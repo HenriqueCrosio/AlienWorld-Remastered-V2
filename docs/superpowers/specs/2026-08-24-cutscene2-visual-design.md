@@ -1,3 +1,18 @@
+> # ⚠️ ESTE DOCUMENTO É ARQUEOLOGIA — NÃO O SIGA
+>
+> Ele foi escrito **antes** de o Henrique ver a cena montada. A partir daí a direção mudou seis
+> vezes, e o que está aqui descreve uma cutscene que **não existe**.
+>
+> **A verdade é o código**, e o resumo fiel está em
+> `docs/superpowers/plans/2026-08-25-cutscene2-visual-START.md`.
+>
+> O que este documento promete e é FALSO hoje: recorte central da pintura (ela foi ALARGADA para
+> 16:9), deriva do céu (a cena é ESTÁTICA), deslize da doca (removido), a arte `906bb897` (foi
+> REJEITADA, a viva é `c166782d`), ganho ×2.2 (é ×1.5), feather (NENHUM), o Arauto na pista (está
+> na plataforma do MEIO), o `padRim` (removido).
+>
+> Mantido como registro de como a fatia começou.
+
 # Fatia 4 — Cutscene 2 (Interlude2Scene): passe visual — Design
 
 **Data:** 2026-08-24 · **Fatia:** 4 de 8 (mapa em `2026-07-21-menu-visual-design.md`)
