@@ -198,6 +198,20 @@ export const STAGE_3: StageEvent[] = [
   { t: 14, type: 'hazard', rate: 1.0, mix: ['sensor', 'sensor', 'asteroid', 'mina'] },
   { t: 16, type: 'wave', kind: 'drone', count: 6, spacing: 0.28, y: 60 },
   { t: 20, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 100 },
+
+  // ⚠️ O LEVIATÃ COMEÇA A APARECER NA METADE DO ATO 1 (Fatia 5). O `HANDOFF` sempre pediu isso —
+  // "na metade do tempo, o Leviatã começa a aparecer" — e o código nunca fez: o casco ficava em
+  // alpha 0 até a virada em t=42 e SALTAVA para visível.
+  //
+  // `density 0.75` faz duas coisas de uma vez, e as duas são desejadas: afina a nuvem em 25% e
+  // sobe o casco a 0.25 (o alpha dele é `1 − nebulaDim`). A nuvem abrindo é o que MOTIVA o casco
+  // aparecer — melhor do que ele surgir através de uma nuvem inalterada.
+  //
+  // ⚠️ É UMA INSINUAÇÃO, NÃO UMA REVELAÇÃO. Se der para LER a estrutura do casco antes dos 42s, a
+  // virada perde o efeito e este número está alto demais. O critério é "sentir que há algo por
+  // baixo", não "ver o casco".
+  { t: 21, type: 'nebula', density: 0.75 },
+
   { t: 24, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 70 },
 
   // Pico do Ato 1: cargueiro + kamikazes dentro da nuvem.

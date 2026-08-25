@@ -67,6 +67,26 @@ ok(nebulas.some((c) => c.primeiroPlano), 'os VÉUS (primeiroPlano) continuam exi
 
 await page.screenshot({ path: 'scripts/_f3/probe-ato1.png' });
 
+// O CASCO SE ANUNCIA: em t≈25s ele já existe e já tem alpha, mas BAIXO.
+while ((await estado()).t < 25) {
+  await page.waitForTimeout(1500);
+  await respirar();
+}
+const meio = await estado();
+const cascoMeio = meio.camadas.filter((c) => c.casco);
+console.log('t=' + meio.t, 'nebulaDim=' + meio.nebulaDim, JSON.stringify(cascoMeio));
+
+ok(cascoMeio.length > 0, 'a camada do casco existe');
+ok(
+  cascoMeio.some((c) => c.alpha !== null && c.alpha > 0.05),
+  'o casco JÁ SE VÊ na metade do Ato 1 (alpha > 0.05)',
+);
+ok(
+  cascoMeio.every((c) => c.alpha === null || c.alpha < 0.5),
+  'mas ele é só uma INSINUAÇÃO (alpha < 0.5) — a virada em t=42 ainda tem o que revelar',
+);
+await page.screenshot({ path: 'scripts/_f3/probe-anuncio.png' });
+
 await browser.close();
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nTUDO VERDE');
 process.exit(falhas ? 1 : 0);
