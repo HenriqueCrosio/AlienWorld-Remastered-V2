@@ -59,8 +59,6 @@ export class Interlude2Scene extends Phaser.Scene {
 
   private ship!: Phaser.GameObjects.Image;
   private doca!: Phaser.GameObjects.Image;
-  /** A aresta de luz da pista: sem ela, metal escuro contra espaço escuro viram uma massa só. */
-  private padRim!: Phaser.GameObjects.Rectangle;
   private cabos!: Phaser.GameObjects.Graphics;
   private banner!: Phaser.GameObjects.Text;
 
@@ -74,25 +72,16 @@ export class Interlude2Scene extends Phaser.Scene {
   private done = false;
   private t = 0;
 
-  // ─── A GEOMETRIA DA DOCA — medida por `scripts/_cut2-doca.mjs` na arte INTEIRA (não mais uma
-  // tira recortada — a doca agora é o PNG PixelLab completo, 256×190; ver task-2-report.md) ───
+  // ─── A GEOMETRIA DA DOCA — medida por `scripts/_cut2-doca2.mjs` na arte INTEIRA (a 2ª arte,
+  // c166782d-84e8-4dca-9017-ebdbd26ef0bf: um cais em balanço no paredão de um asteroide, 256×256,
+  // com TRÊS plataformas — a MAIS BAIXA e MAIOR é a pista, ver task-2-report.md) ───
   // ⚠️ Estes números saem da MEDIÇÃO, nunca do olho. Chutar a linha do convés da Aurora já fez a
   // nave pousar 30px abaixo da tela, no vazio. Se a arte mudar, rode o script de novo.
-  private static readonly ART_W = 256;   // ← de `_cut2-doca.mjs`
-  private static readonly ART_H = 190;   // ← de `_cut2-doca.mjs`
-  private static readonly PAD_ROW = 143; // ← de `_cut2-doca.mjs`
-  private static readonly PAD_X0 = 51;   // ← de `_cut2-doca.mjs`
-  private static readonly PAD_X1 = 227;  // ← de `_cut2-doca.mjs`
-
-  // ─── A RISCA DA PISTA — encurtada e amaciada (passe de correção pós-Passo-3-b) ───
-  // ⚠️ PAD_X0/PAD_X1 marcam a BORDA DA LAJE (usados pelo pouso em `pouso()`) — a arte tem 10px
-  // de pena alfa em cada lado, então uma risca visual que vai até PAD_X1 vaza pro pixel já
-  // transparente. A risca fica LONGE dessa borda (margem abaixo) e curta, plantada no trecho
-  // onde a nave de fato assenta — não a largura inteira da pista.
-  /** Margem mínima (coords de arte) entre a risca e a borda com pena alfa (10px + folga). */
-  private static readonly RIM_MARGIN = 12;
-  /** Meia-largura da risca (coords de arte), centrada no ponto de pouso. */
-  private static readonly RIM_HALF_WIDTH = 40;
+  private static readonly ART_W = 256;   // ← de `_cut2-doca2.mjs`
+  private static readonly ART_H = 256;   // ← de `_cut2-doca2.mjs`
+  private static readonly PAD_ROW = 175; // ← de `_cut2-doca2.mjs`
+  private static readonly PAD_X0 = 26;   // ← de `_cut2-doca2.mjs`
+  private static readonly PAD_X1 = 217;  // ← de `_cut2-doca2.mjs`
 
   /**
    * ×1: escala INTEIRA. A doca antiga era ×1.5 — fracionária, e ela BORRA a grade de pixel, que é
@@ -113,25 +102,21 @@ export class Interlude2Scene extends Phaser.Scene {
   private static readonly DEPTH_ROCHA = 66;
   private static readonly DEPTH_CABO = 67;
   private static readonly DEPTH_DOCA = 70;
-  private static readonly DEPTH_RIM = 71;
   private static readonly DEPTH_NAVE = 80;
 
   /** A altura da pista NA TELA. Baixa: a doca é grande e sangra para fora por baixo. */
   private static readonly PAD_Y = 150;
   /**
-   * X do centro do sprite: a arte fica CENTRADA na tela (pedido do Henrique, 2026-08-25).
+   * X do centro do sprite: a arte fica COLADA NA BORDA ESQUERDA DA TELA.
    *
-   * ⚠️ A versão anterior travava a PISTA em x=168 (o ponto de pouso histórico) e deixava a ARTE
-   * cair onde caísse — e ela caía 35px à esquerda do centro, porque a pista não fica no meio do
-   * desenho (centro da pista = (51+227)/2 = 139, contra 128 do centro da arte). Com a arte
-   * inteira na tela, essa assimetria fica visível: a doca parecia encostada num canto.
-   *
-   * Agora manda a arte, e a pista vai junto — ela passa a assentar em
-   * `192 + (139 − 128) = 203`. **Nada precisa ser reajustado à mão:** o ponto de pouso é DERIVADO
-   * da pista em `pouso()` (`(artToScreenX(PAD_X0) + artToScreenX(PAD_X1)) / 2`), nunca escrito
-   * como número. Foi o que permitiu esta troca custar uma constante.
+   * A 2ª arte (c166782d) não é um cutout independente do céu — é um cais entalhado num paredão de
+   * asteroide, pensado para nascer na margem da tela, não flutuando no meio dela. Com origem no
+   * centro e `SCALE = 1`, colar a borda ESQUERDA do sprite em x=0 é `DOCA_X − ART_W/2 = 0`, ou
+   * seja `DOCA_X = ART_W/2`. Metade da arte (o lado esquerdo) fica fora da tela — é por isso que
+   * `_cut2-doca2.mjs` esfuma o topo, a base e a DIREITA, mas nunca a esquerda: esfumar um lado que
+   * ninguém vê comeria arte que de fato aparece.
    */
-  private static readonly DOCA_X = GAME_WIDTH / 2;
+  private static readonly DOCA_X = Interlude2Scene.ART_W / 2;
 
   /** Y do centro do sprite que põe a linha da pista exatamente em PAD_Y. */
   private static get docaY(): number {
@@ -188,28 +173,10 @@ export class Interlude2Scene extends Phaser.Scene {
       .setScale(Interlude2Scene.SCALE)
       .setDepth(Interlude2Scene.DEPTH_DOCA);
 
-    // A aresta de luz da PISTA — uma MARCAÇÃO no convés, não uma barra. Curta (centrada no ponto
-    // em que a nave realmente pousa) e por dentro da pena alfa das bordas do recorte — a versão
-    // antiga ia até PAD_X1, que É o último pixel do recorte, dentro da pena de 6px.
-    const padCentroAx = (Interlude2Scene.PAD_X0 + Interlude2Scene.PAD_X1) / 2; // = onde a nave assenta
-    const rimAx0 = Math.max(
-      Interlude2Scene.PAD_X0 + Interlude2Scene.RIM_MARGIN,
-      padCentroAx - Interlude2Scene.RIM_HALF_WIDTH,
-    );
-    const rimAx1 = Math.min(
-      Interlude2Scene.PAD_X1 - Interlude2Scene.RIM_MARGIN,
-      padCentroAx + Interlude2Scene.RIM_HALF_WIDTH,
-    );
-    const x0 = Interlude2Scene.artToScreenX(rimAx0);
-    const x1 = Interlude2Scene.artToScreenX(rimAx1);
-
-    this.padRim = this.add
-      .rectangle(x0, Interlude2Scene.PAD_Y, x1 - x0, 1, 0xff7a4a)
-      .setOrigin(0, 0)
-      .setDepth(Interlude2Scene.DEPTH_RIM)
-      // Mais fraca: era o elemento mais saturado da tela. Agora lê como marcação no convés
-      // escuro, não como a fonte de luz da cena.
-      .setAlpha(0.35);
+    // A RISCA DA PISTA DESENHADA EM CÓDIGO FOI REMOVIDA (2ª arte, c166782d): a arte nova já traz
+    // suas próprias marcações pintadas no convés (chevrons vermelhos e luzes de borda) — uma
+    // segunda marcação por cima seria a MESMA duplicação que a troca de arte existe para corrigir
+    // ("usar duas imagens sobrepostas e parecidas causa estranheza", diagnóstico do Henrique).
 
     // OS CABOS. Desenhados em código, e não como sprite, porque eles precisam LIGAR duas coisas:
     // uma ponta na doca, a outra numa rocha que balança. Um sprite de cabo ficaria parado
@@ -252,16 +219,15 @@ export class Interlude2Scene extends Phaser.Scene {
    */
   /**
    * Quanto acima da linha da pista (PAD_ROW) as âncoras dos cabos sentam, em px de arte — igual
-   * em px de tela, já que SCALE é 1. "Just above the deck", não no topo do sprite: com a doca
-   * agora sendo a arte INTEIRA (256×190, não mais a tira 214×63), `ay=6` — que era ~10px acima da
-   * antiga PAD_ROW=16 — ficaria perto do TOPO da imagem, longe da laje, se não re-ancorado aqui.
+   * em px de tela, já que SCALE é 1. "Just above the deck", não no topo do sprite: a pista fica
+   * bem abaixo do meio da arte (PAD_ROW=175 de 256), então um `ay` solto poderia cair longe da
+   * laje se não re-ancorado relativo a PAD_ROW aqui.
    */
   private static readonly ANCHOR_LIFT = 12;
 
   private amarrarRochas(): void {
-    // ⚠️ Re-ancorado para a doca INTEIRA (256×190 — a arte PixelLab completa, não mais a tira
-    // 214×63 do passe de correção anterior). As âncoras seguem duas regras medidas, nunca
-    // chutadas:
+    // ⚠️ Re-ancorado para a 2ª arte (256×256, c166782d). As âncoras seguem duas regras medidas,
+    // nunca chutadas:
     //
     //  1. ESPALHAR: ax vem dos TERÇOS DO VÃO DA PISTA (PAD_X0..PAD_X1), não de ART_W — a laje é
     //     só uma faixa dentro da arte inteira agora, então espalhar pelos terços da arte toda
@@ -398,7 +364,7 @@ export class Interlude2Scene extends Phaser.Scene {
     // A CENA É ESTÁTICA — quem chega é a NAVE, não a doca. A doca (e as âncoras/rochas que
     // dependem dela) usada a deslizar da direita a cada início de cena; o Henrique cortou isso:
     // "a imagem precisa estar estatica e a nave que chega". Os números de posição logo acima
-    // (DOCA_X, padRim, amarrarRochas) já são as posições FINAIS (pós-deslize) — a doca só
+    // (DOCA_X, amarrarRochas) já são as posições FINAIS (pós-deslize) — a doca só
     // PRECISAVA nascer nelas, o deslize inteiro era um passo redundante que a câmera não pede
     // mais. Removido o offset de entrada, o tween que desfazia o offset, e o addCounter que
     // arrastava as âncoras (números, não objetos) atrás do tween — os três só existiam para
@@ -613,7 +579,7 @@ export class Interlude2Scene extends Phaser.Scene {
       );
 
       this.tweens.add({
-        targets: [this.doca, this.padRim],
+        targets: this.doca,
         y: '+=60',
         alpha: 0,
         duration: 1200,
