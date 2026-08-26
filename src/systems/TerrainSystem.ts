@@ -71,6 +71,40 @@ const PROPS: Record<PropKind, PropDef> = {
 };
 
 /**
+ * AS BOCAS de cada prop que atira — offsets MEDIDOS na arte, nunca chutados. `x` conta a partir
+ * do CENTRO do sprite e `y` a partir do TOPO do quadro. O `setFlipX` do `spawn` espelha o prop
+ * (ele atira para a esquerda), e o `fireAt` troca o sinal do `x` por causa disso.
+ *
+ * A `turret` da Fase 1 tem UMA: a ponta do cano ocupa x 23..26 num sprite 32×30 de centro 16 —
+ * +9 — e encosta no topo do quadro (y 0..2). São os mesmos números de sempre, agora numa tabela
+ * em vez de dois literais soltos no meio do `fireAt`.
+ *
+ * O `lancaMisseis` da Fase 3 tem QUATRO, medidas por saturação no PNG (as bocas são os únicos
+ * pontos âmbar fortes da arte): duas em cima (y≈5) e duas embaixo (y≈15). Ele REVEZA entre elas
+ * a cada disparo, então o jogador vê os quatro tubos trabalharem.
+ *
+ * ⚠️ OS NÚMEROS SÃO DA `lanca-misseis.png`, e a camada sorteia entre DUAS variantes. Medidas as
+ * duas: a `lanca-misseis2` bate em três das quatro dentro de 1px (7,6 / 17,5 / 22,3), e na
+ * quarta o tubo dela fica alguns px fora da conta. Aceito — é um prop de fundo de 59px e o tiro
+ * continua saindo da metade certa da peça. Uma tabela por VARIANTE resolveria, e não paga:
+ * `BOCAS` é indexada por `PropKind`, e a textura só se sabe depois do `pickVariant`.
+ *
+ * ⚠️ REVEZAR NÃO É SALVA. Continua UM míssil por disparo, na mesma cadência (`TURRET_RATE`) e
+ * com o mesmo dano — a troca de arte não podia mexer no peso da fase. Uma salva de quatro é
+ * possível e foi cogitada, mas quadruplicaria o volume de tiro do Ato 2, e esse número está
+ * fechado até o playtest.
+ */
+const BOCAS: Partial<Record<PropKind, ReadonlyArray<readonly [number, number]>>> = {
+  turret: [[9, 2]],
+  lancaMisseis: [
+    [7, 5],
+    [18, 5],
+    [12, 15],
+    [23, 15],
+  ],
+};
+
+/**
  * Obstáculos da superfície.
  *
  * Asteroides flutuando sobre um planeta não fazem sentido (constatado no playtest).
@@ -286,16 +320,20 @@ export class TerrainSystem {
   private static readonly TELEGRAPH = 0.4;
 
   private fireAt(p: Phaser.Physics.Arcade.Sprite, target: Phaser.Physics.Arcade.Sprite): void {
-    // Boca do cano, MEDIDA na arte (32×30) e não chutada: a ponta do cano ocupa x 23..26 num
-    // sprite de centro 16, ou seja +9 do centro — e o `setFlipX` do spawn a joga para −9. Em
-    // altura ela encosta no topo do quadro (y 0..2), e a origem do prop é a BASE, então o topo
-    // é `p.y − displayHeight`.
-    //
-    // Ela cai DENTRO do corpo da torre (que vai de −9.6 a +9.6), ao contrário da arte antiga.
-    // Quem protege o tiro agora é a CARÊNCIA de 16px do `enemyBulletHitCover` — a mesma que já
-    // impedia uma torre encostada numa rocha de destruir o próprio disparo ao nascer.
-    const muzzleX = p.x - 9;
-    const muzzleY = p.y - p.displayHeight + 2;
+    // A BOCA DE ONDE O TIRO SAI, por prop. Ver `BOCAS`: são offsets MEDIDOS na arte, e o
+    // lança-mísseis reveza entre as quatro dele a cada disparo.
+    const kind = p.getData('kind') as PropKind;
+    const bocas = BOCAS[kind] ?? BOCAS.turret!;
+    const i = ((p.getData('boca') as number | undefined) ?? 0) % bocas.length;
+    p.setData('boca', i + 1);
+    const [bx, by] = bocas[i];
+
+    // O `setFlipX` do spawn espelha o prop (ele atira para a ESQUERDA, ver `spawn`), então o
+    // offset medido na arte não-espelhada entra aqui com o sinal trocado. A origem do prop é a
+    // BASE, então o topo do quadro é `p.y − displayHeight`. Multiplicar pela escala mantém a
+    // conta certa se algum dia um roteiro cravar `alturaPx` num prop que atira.
+    const muzzleX = p.x - bx * p.scaleX;
+    const muzzleY = p.y - p.displayHeight + by * p.scaleY;
 
     const b = this.enemyBullets.get(muzzleX, muzzleY) as Phaser.Physics.Arcade.Sprite | null;
     if (!b) return;

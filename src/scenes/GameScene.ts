@@ -557,10 +557,16 @@ export class GameScene extends Phaser.Scene {
    * ⚠️ CENÁRIO, NÃO INIMIGO. Sem corpo físico, sem hitbox, sem dano, fora de todo grupo de
    * colisão. Nenhuma onda, nenhum spawn e nenhum número de balanceamento muda por causa dele.
    *
-   * ⚠️ `depth −70`: na FRENTE da faixa do casco (−75/−74) e ATRÁS do jogo (0), então ele nunca
-   * cobre a nave nem um tiro. Os VÉUS da nebulosa vivem em `depth 60` e passam POR CIMA dele —
-   * é de propósito: aos 40,5s a nave ainda está dentro da nuvem, e o rabo tem que chegar
-   * EMBAÇADO, como um vulto que a névoa entrega aos poucos.
+   * ⚠️ ELE NÃO ATRAVESSA A TELA — ELE CHEGA E SE SEGURA NA DIREITA. Foi assim que o Henrique
+   * desenhou: o CORPO do bicho sangra para fora da borda direita, e o que fica dentro do quadro
+   * é a NADADEIRA, batendo para cima e para baixo. Uma travessia da direita para a esquerda
+   * (a primeira versão) lia como mais um destroço passando; o que faz este momento pesar é ele
+   * PARAR ali, grande demais para caber, batendo enquanto o jogador se aproxima.
+   *
+   * ⚠️ `depth −76`: ATRÁS da faixa do casco (−75/−74) e à frente da nuvem do meio (−89). Isso
+   * paga a saída: no fim ele AFUNDA, e afundar por trás do casco é a transição inteira dita em
+   * movimento — o rabo passa por baixo, e o que sobra no lugar dele é o chão. Os VÉUS (depth
+   * 60) passam por cima o tempo todo, então ele chega embaçado, entregue pela névoa.
    *
    * ⚠️ ELE CHEGA ANTES DA NUVEM ABRIR (t=40,5 contra t=42). A ordem é a coisa toda: primeiro o
    * jogador vê O QUE alcançou, e só depois o casco se revela como o corpo daquilo.
@@ -570,49 +576,86 @@ export class GameScene extends Phaser.Scene {
     // asset do projeto (ausente = a cena continua, ver BootScene).
     if (!this.textures.exists('raboLeviata')) return;
 
-    // ESCALA 1,7: a arte é 115×105 e a tela tem 216 de altura. A 1,7 a nadadeira ocupa ~178px
-    // — quatro quintos da tela. Menor que isso ela vira um peixe passando; a leitura pretendida
-    // é "a coisa é grande demais para caber no quadro".
+    // ⚠️ ESCALA 2,4 — COLOSSAL, MAS AINDA VISÍVEL POR INTEIRO. A arte é 107×73 e vira 257×175.
+    //
+    // Em 1,7 ele lia como "um bicho grande passando", e a leitura pedida é que a coisa não cabe
+    // no quadro. Mas 3,0 passou do ponto e virou o defeito oposto: a nadadeira sozinha ficava
+    // com 219px de altura numa tela de 216, e a batida a varria para fora em cima e embaixo —
+    // sobrava a lombada atravessando o quadro, e o rabo, que é a coisa toda, nunca aparecia
+    // inteiro. 2,4 é o maior tamanho em que o ARCO INTEIRO da batida ainda cabe na tela.
+    //
+    // ⚠️ A ORIGEM VAI PARA A DIREITA (0,92 / 0,5) — E ELA É O PIVÔ DA BATIDA. Numa baleia o
+    // rabo gira em torno do pedúnculo, lá onde ele encontra o corpo; a nadadeira é a ponta do
+    // braço, não o eixo. Com a origem no centro, qualquer rotação faria a peça inteira rodar
+    // em volta de si mesma — que foi exatamente o defeito da animação gerada (ela virou HÉLICE).
+    //
+    // Com origem em 0,92 o sprite ocupa de `x − 236` a `x + 21`. Em x=368 isso é 132..389: o
+    // corpo sangra para fora da borda direita e a nadadeira varre o miolo da tela.
+    //
+    // ⚠️ `depth −70` NA CHEGADA, `−76` NO MERGULHO (ver o tween 3). Na frente da faixa do casco
+    // enquanto ele é o assunto; atrás dela na hora de afundar, que é o que faz o mergulho ler
+    // como "passou por baixo de nós" em vez de "escorregou na frente do chão".
     const rabo = this.add
-      .sprite(GAME_WIDTH + 130, 112, 'raboLeviata')
+      .sprite(GAME_WIDTH + 200, 104, 'raboLeviata')
+      .setOrigin(0.92, 0.5)
       .setDepth(-70)
-      .setScale(1.7)
+      .setScale(2.4)
       .setAlpha(0);
 
-    if (this.anims.exists('rabo-batida')) rabo.play('rabo-batida');
+    // 1. A CHEGADA (2,5s): entra pela direita e DESACELERA até parar. O `easeOut` é o que
+    //    transforma "um sprite entrou" em "alguma coisa alcançou a gente".
+    this.tweens.add({ targets: rabo, x: 368, duration: 2500, ease: 'Sine.easeOut' });
+    this.tweens.add({ targets: rabo, alpha: 1, duration: 1100, ease: 'Sine.easeOut' });
 
-    // A TRAVESSIA: ~9,5s para cruzar a tela inteira, da direita para a esquerda. É lento de
-    // propósito — velocidade de scroll faria dele mais um destroço passando, e a fase inteira
-    // já é feita de coisas passando rápido. O que separa este momento dos outros é a demora.
-    this.tweens.add({
+    // 2. A BATIDA, EM CÓDIGO E NÃO EM QUADROS.
+    //
+    //    ⚠️ A animação do PixelLab foi DESCARTADA. O v3 leu "bater para cima e para baixo" como
+    //    "girar": os quadros 4 a 8 rodavam a nadadeira em torno do próprio eixo e o bicho virava
+    //    uma hélice. Rotação em torno do pedúnculo é o movimento certo, é uma linha de tween, e
+    //    não tem como sair errado — então é onde ele mora.
+    //
+    //    ⚠️ A BATIDA É ASSIMÉTRICA, e isso é a diferença entre "peixe de aquário" e "propulsão".
+    //    Sobe DEVAGAR (1,5s, easeInOut: o braço carregando) e desce COM TUDO (0,55s, easeIn: a
+    //    remada). Um yoyo simples daria as duas metades com a mesma pressa, e o peso sumiria.
+    //
+    //    ±8°: com a ponta a 236px do pivô, isso varre ~66px na vertical. Foi o maior ângulo em
+    //    que a nadadeira inteira continua dentro da tela nos DOIS extremos do arco — é ela que
+    //    limita, não o corpo, porque ela é a ponta do braço mais longo.
+    rabo.setAngle(-8);
+    const batida = this.tweens.chain({
       targets: rabo,
-      x: -190,
-      duration: 9500,
-      ease: 'Linear',
-      onComplete: () => rabo.destroy(),
+      loop: -1,
+      tweens: [
+        { angle: 8, duration: 1500, ease: 'Sine.easeInOut' },
+        { angle: -8, duration: 550, ease: 'Sine.easeIn' },
+        { angle: -8, duration: 250 },
+      ],
     });
 
-    // A NÉVOA O ENTREGA E O LEVA: aparece em 900ms, e some nos últimos 900ms. Um vulto que
-    // materializa e desmaterializa dentro da nuvem, em vez de um sprite que pisca na borda.
-    this.tweens.add({ targets: rabo, alpha: 1, duration: 900, ease: 'Sine.easeOut' });
+    // 3. O MERGULHO (3,5s, a partir dos 7s): ele AFUNDA — sai pelo rodapé, por trás da faixa do
+    //    casco. É a transição dita sem banner nenhum: o rabo passa por baixo, e o que fica no
+    //    lugar dele é o chão. Some no caminho, para não brigar com o casco já revelado.
+    this.tweens.add({
+      targets: rabo,
+      y: 300,
+      x: 268,
+      delay: 7000,
+      duration: 3500,
+      ease: 'Sine.easeIn',
+      // A batida para no mergulho: um rabo que continua remando enquanto afunda lê como peça
+      // solta caindo. Ele desce porque DEU a remada, não apesar dela.
+      onStart: () => {
+        batida.stop();
+        rabo.setDepth(-76);
+      },
+      onComplete: () => rabo.destroy(),
+    });
     this.tweens.add({
       targets: rabo,
       alpha: 0,
       delay: 8600,
-      duration: 900,
+      duration: 1900,
       ease: 'Sine.easeIn',
-    });
-
-    // A DERIVA VERTICAL: ele sobe e desce ~14px enquanto atravessa. A batida da nadadeira é da
-    // animação; isto é o CORPO respondendo a ela — sem o deslocamento, a nadadeira bate e o
-    // bicho fica parado no ar, que é a leitura de um adesivo animado.
-    this.tweens.add({
-      targets: rabo,
-      y: 126,
-      duration: 2400,
-      ease: 'Sine.easeInOut',
-      yoyo: true,
-      repeat: -1,
     });
   }
 

@@ -757,10 +757,82 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 5 (2026-08-25) — a Fase 3, EM ANDAMENTO
+## A FATIA 5 (2026-08-26) — a Fase 3, EM ANDAMENTO
 
-🟡 **Tasks 1–3 feitas, Task 4 pendente. Branch `feat/fase3-visual` de pé, NÃO mergeada.**
+🟡 **Branch `feat/fase3-visual` de pé, NÃO mergeada. `main` segue em `ee4e2a0`.**
 Estado, o que testar e o que falta: `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`.
+
+**A SESSÃO DE 26/08** entrou depois do primeiro teste do Henrique e mexeu em cinco frentes: o
+piso e as emendas do casco, a colônia da Fase 1 que saiu de cima dele, o RABO do Leviatã como
+transição, o míssil e as quatro bocas do lança-mísseis, e **a pintura de fundo em resolução
+real**. Nada foi jogado ainda — o teste humano é a próxima sessão.
+
+### ⚠️ A PINTURA DE FUNDO ESTAVA AMPLIADA — DESDE A FASE 1
+
+O erro que o Henrique reclamou três vezes, finalmente com número. A receita repetida em toda a
+campanha era reduzir a pintura para **480×270** e pôr em `y=−27`. A tela é **384×216**. Numa
+janela de 384×216, uma placa de 480×270 mostra 80% de cada eixo — ou seja **64% da pintura, com
+zoom de 1,25×**. A arte chegava AMPLIADA e cortada pelas beiradas.
+
+O `scripts/paint-bg.mjs` sempre fez a coisa certa: o cabeçalho dele diz *"1 px da arte = 1 px do
+jogo"*. **Ele vinha sendo CHAMADO com os números errados.** Em 384×216 aparece a largura
+INTEIRA e 94,4% da altura, um pixel da pintura por pixel de tela.
+
+⚠️ **A `paintBgF2` e a `paintBgZeroG` continuam 480×270 em `y=−27`** — o mesmo defeito, em fases
+já mergeadas. Não foram tocadas nesta sessão (a Fatia 4 está fechada e revisada); corrigir é uma
+linha de comando por pintura, e a decisão é do Henrique. A `probe-f3-visual` agora tem um assert
+que impede a receita errada de voltar na Fase 3.
+
+### ⚠️ O v3 DO PIXELLAB LÊ "BATER PARA CIMA E PARA BAIXO" COMO "GIRAR"
+
+A animação do rabo voltou com os quadros 4 a 8 rodando a nadadeira em torno do próprio eixo — o
+bicho virava uma HÉLICE. Foi descartada inteira. A batida vive em **código**, como rotação em
+torno do pedúnculo (`tweens.chain`, ±8°), que é o movimento real de uma baleia e não tem como dar
+a volta. **Movimento que se descreve numa frase de geometria não precisa de quadros gerados.**
+
+E a batida é **assimétrica** de propósito: sobe devagar (1,5s, `easeInOut`) e desce com tudo
+(0,55s, `easeIn`). Um `yoyo` simples dá as duas metades com a mesma pressa e o peso some.
+
+### ⚠️ COLOSSAL TEM UM TETO: O QUE NÃO CABE NÃO SE VÊ
+
+O rabo foi a escala 3,0 a pedido ("precisa ser colossal") e ficou PIOR: a nadadeira sozinha
+media 219px numa tela de 216, e a batida a varria para fora em cima e embaixo. Sobrava a lombada
+atravessando o quadro, e o rabo — que é a coisa toda — nunca aparecia inteiro. **2,4 é o maior
+tamanho em que o ARCO INTEIRO da batida ainda cabe.** Quem limita é a ponta do braço mais longo,
+não o corpo.
+
+### ⚠️ A ARMADILHA DA FATIA 4 SE REPETIU, E FOI PAGA DE NOVO
+
+O primeiro lote do lança-mísseis pedia *"missile launcher mounted on a WHALE HULL"* com a baleia
+de referência. As 16 candidatas voltaram sendo **A BALEIA com um canhão nas costas**. Arte gerada
+a partir da coisa em que ela se apoia volta como cópia dessa coisa — é a mesma lição da doca, em
+escala menor e 20 gerações mais barata. O lote que funcionou não menciona baleia em lugar nenhum
+e usa o prefixo de estilo da casa, sem referência.
+
+### ⚠️ PROP SEM FAIXA DA FRENTE PARECE COLADO — A FASE 1 JÁ SABIA DISSO
+
+O respiradouro parecia *"um asset colado no outro, sem base"*. A causa não era a arte: um prop
+ancorado na linha do solo termina numa BORDA RETA, e a Fase 1 esconde isso desde sempre com o
+`groundFront` em `depth −0.2` (à frente dos props em −0.5, atrás da nave em 0). **A Fase 3 nunca
+ganhou o equivalente** — a faixa do casco vive em −75/−74, longe demais para cobrir pé de
+ninguém. O `scripts/casco-frente.mjs` corta o tile que faltava.
+
+### ⚠️ ASSERT QUE AMOSTRA UMA LINHA SÓ NÃO MEDE O QUE DIZ MEDIR
+
+O assert do rodapé sorteava duas linhas e reprovou por um motivo falso: uma delas caiu numa
+JUNTA DE PLACA do tile, arte legítima e escura de propósito. Virou média das 6 últimas linhas —
+sobrevive a uma junta e ainda despenca num vazio de verdade.
+
+O irmão dele, o das emendas verticais, tinha o defeito gêmeo: contava toda coluna escura e
+acusava 11, que eram as SILHUETAS dos respiradouros. A diferença entre um risco e um prop é a
+LARGURA — um risco é 1px com vizinhos claros dos dois lados; um prop é uma mancha de dezenas de
+colunas. **Quando um assert visual reprova, confira se ele está medindo a coisa antes de mexer
+na coisa.**
+
+### ⚠️ TRÊS SONDAS CONCORRENTES CONTRA UM DEV SERVER DÃO FLAKE
+
+A `probe-stage3` quebrou uma vez em `matarCabeca` com três browsers headless disputando o mesmo
+Vite. Passou sozinha, sem nenhuma mudança. **Sonda de tempo real se roda uma por vez.**
 
 **⚠️ A/B VISUAL SEM CONGELAR A CENA NÃO É A/B.** Três tiros a 400ms de intervalo com o jogo
 andando são três MOMENTOS, não três versões do mesmo quadro — e um deles pegou um flash de dano

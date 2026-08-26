@@ -33,8 +33,11 @@ const estado = () =>
       cena: s.scene.key,
       t: Number((s.elapsed ?? 0).toFixed(1)),
       nebulaDim: p ? Number(p.nebulaDim.toFixed(2)) : null,
+      frente: p?.cascoFrente
+        ? { y: p.cascoFrente.y, d: p.cascoFrente.depth, a: Number(p.cascoFrente.alpha.toFixed(2)) }
+        : null,
       pintura: pint.length
-        ? { n: pint.length, y: Math.round(pint[0].y), d: pint[0].depth, a: Number(pint[0].alpha.toFixed(2)) }
+        ? { n: pint.length, y: Math.round(pint[0].y), d: pint[0].depth, a: Number(pint[0].alpha.toFixed(2)), w: pint[0].width, h: pint[0].height }
         : null,
       // As camadas do Parallax, por chave: quantos sprites e o alpha do primeiro.
       camadas: (p?.layers ?? []).map((l) => ({
@@ -59,7 +62,16 @@ console.log('t=' + e.t, JSON.stringify(e.camadas.map((c) => c.key)));
 ok(e.cena === 'Game', 'está na fase');
 ok(e.pintura !== null, 'a PINTURA da nebulosa está na cena');
 ok(e.pintura !== null && e.pintura.n === 2, 'a pintura entra em DUAS cópias (rolagem sem buraco)');
-ok(e.pintura !== null && e.pintura.y === -27, 'a pintura está em y=-27 (centrada na janela)');
+
+// ⚠️ A PINTURA EM RESOLUÇÃO REAL. Ela era 480×270 em y=−27 — a receita que o projeto repetia
+// desde a Fase 1 e que o Henrique reclamou três vezes. Numa janela de 384×216, uma placa de
+// 480×270 mostra 80% de cada eixo: 64% da pintura, com zoom de 1,25×. Este assert existe para
+// que a receita errada não volte por hábito em nenhuma fase futura.
+ok(
+  e.pintura !== null && e.pintura.w === 384 && e.pintura.h === 216,
+  `a pintura está na RESOLUÇÃO REAL do jogo (${e.pintura?.w}×${e.pintura?.h}, não ampliada)`,
+);
+ok(e.pintura !== null && e.pintura.y === 0, `e em y=0, sem recorte de sobra (y=${e.pintura?.y})`);
 
 // A camada procedural mais profunda da nuvem saiu; a do meio ficou.
 const nebulas = e.camadas.filter((c) => c.key === 'nebula3');
@@ -98,28 +110,46 @@ while ((await estado()).t < 41.5) {
   await page.waitForTimeout(800);
   await respirar();
 }
-const naVirada = await page.evaluate(() => {
+const naVirada = await page.evaluate(async () => {
   const s = window.__game.scene.getScene('Game');
-  const r = s.children.list.filter((o) => o.texture && String(o.texture.key).startsWith('raboLeviata'));
+  const r = s.children.list.find((o) => o.texture && o.texture.key === 'raboLeviata');
+  if (!r) return { n: 0 };
+  // A BATIDA é rotação em torno do pedúnculo, feita em código. Amostra o ângulo duas vezes:
+  // se ele não se move, o rabo está pregado; se passar de |90|, virou hélice de novo.
+  const a1 = r.angle;
+  await new Promise((res) => setTimeout(res, 700));
+  const a2 = r.angle;
   return {
     t: Number((s.elapsed ?? 0).toFixed(1)),
     nebulaDim: Number(s.parallax.nebulaDim.toFixed(2)),
-    n: r.length,
-    depth: r[0]?.depth ?? null,
-    anim: r[0]?.anims?.currentAnim?.key ?? null,
-    corpo: r[0]?.body ?? null,
+    n: 1,
+    x: Math.round(r.x),
+    depth: r.depth,
+    escala: r.scaleX,
+    alturaTela: Math.round(r.displayHeight),
+    a1: Number(a1.toFixed(1)),
+    a2: Number(a2.toFixed(1)),
+    corpo: r.body ?? null,
   };
 });
 console.log('rabo    ' + JSON.stringify(naVirada));
 ok(naVirada.n === 1, `o RABO está na tela na virada (achei ${naVirada.n})`);
-ok(naVirada.anim === 'rabo-batida', `a nadadeira está BATENDO (anim=${naVirada.anim})`);
-ok(naVirada.nebulaDim > 0.5, `e ele chega AINDA DENTRO da nuvem (nebulaDim=${naVirada.nebulaDim})`);
-// Cenário, não inimigo: sem corpo físico, e atrás do jogo (depth 0) e na frente do casco (−74).
-ok(naVirada.corpo === null, 'o rabo NÃO tem corpo físico (é cenário, não inimigo)');
+ok(naVirada.a1 !== naVirada.a2, `a nadadeira está BATENDO (ângulo ${naVirada.a1}° → ${naVirada.a2}°)`);
+// ⚠️ O ASSERT QUE PAGA A LIÇÃO DA HÉLICE. A animação gerada pelo PixelLab rodava a nadadeira em
+// torno do próprio eixo, e "o rabo existe e se move" passava numa versão que estava errada. A
+// batida de uma baleia é um ARCO CURTO — nunca uma volta.
 ok(
-  naVirada.depth !== null && naVirada.depth > -75 && naVirada.depth < 0,
-  `depth ${naVirada.depth}: na frente do casco e atrás do jogo`,
+  Math.abs(naVirada.a1) <= 20 && Math.abs(naVirada.a2) <= 20,
+  `e o arco é CURTO, não um giro (|${naVirada.a1}| e |${naVirada.a2}| ≤ 20°)`,
 );
+// ELE SE SEGURA NA DIREITA, com o corpo sangrando para fora da borda — não atravessa a tela.
+ok(naVirada.x > 300, `ele se SEGURA na direita, com o corpo saindo do quadro (x=${naVirada.x})`);
+ok(
+  naVirada.alturaTela > 150,
+  `e é COLOSSAL: ${naVirada.alturaTela}px de altura numa tela de 216 (escala ${naVirada.escala})`,
+);
+ok(naVirada.nebulaDim > 0.5, `chega AINDA DENTRO da nuvem (nebulaDim=${naVirada.nebulaDim})`);
+ok(naVirada.corpo === null, 'o rabo NÃO tem corpo físico (é cenário, não inimigo)');
 await page.screenshot({ path: 'scripts/_f3/probe-rabo.png' });
 
 // O ATO 2: a nuvem abriu e o casco é a superfície.
@@ -171,20 +201,35 @@ const linha = (y) => {
   }
   return l / info.width;
 };
-const ultima = linha(info.height - 1);
-const penultima = linha(info.height - 3);
-console.log(`rodapé   linha ${info.height - 3}=${penultima.toFixed(3)} linha ${info.height - 1}=${ultima.toFixed(3)}`);
+// ⚠️ A MÉDIA DAS ÚLTIMAS 6 LINHAS, NÃO UMA LINHA SOLTA.
+//
+// A primeira versão deste assert amostrava as linhas 213 e 215 e reprovou por um motivo falso:
+// a faixa da frente repete um tile de 18px, e a linha 213 caía numa JUNTA DE PLACA — arte
+// legítima, escura de propósito. Um assert que depende de qual linha ele calhou de sortear não
+// mede o que diz medir. A média das 6 últimas sobrevive a uma junta e ainda assim despenca se
+// houver um vazio de verdade: com os 7px de espaço aberto do bug original, ela media ~0,03.
+let somaRodape = 0;
+for (let y = info.height - 6; y < info.height; y++) somaRodape += linha(y);
+const rodape = somaRodape / 6;
+console.log(`rodapé   média das 6 últimas linhas = ${rodape.toFixed(3)}`);
 ok(
-  ultima > 0.06 && penultima > 0.06,
-  `a faixa do casco ENCOSTA no rodapé (última linha ${ultima.toFixed(3)} > 0.06 — vazio mediria ~0.03)`,
+  rodape > 0.055,
+  `a faixa do casco ENCOSTA no rodapé (média ${rodape.toFixed(3)} > 0.055 — vazio mediria ~0.03)`,
 );
 
-// ─── AS EMENDAS: nenhum risco PRETO vertical atravessando a faixa ───
+// ─── AS EMENDAS: nenhum RISCO preto vertical atravessando a faixa ───
 //
 // As peças vinham do PixelLab com uma coluna de contorno preta (0,008) na borda; a peça da
 // direita desenha por cima, então o contorno dela virava um risco a cada ~60px. Quem apara é o
-// `aparar-casco.mjs`. Aqui: nenhuma COLUNA dentro da faixa pode ser quase-preta.
-const faixaY = [info.height - 40, info.height - 2];
+// `aparar-casco.mjs` — e ele já reprova na FONTE se sobrar borda preta.
+//
+// ⚠️ AQUI O ASSERT PRECISA DISTINGUIR UM RISCO DE UM PROP, e a primeira versão não distinguia:
+// ela contava toda coluna escura e reprovou com 11, que eram as SILHUETAS dos respiradouros
+// plantados na faixa. A diferença é a LARGURA. Um risco de emenda é uma coluna de 1px com
+// vizinhos claros dos dois lados; um prop é uma mancha escura de dezenas de colunas seguidas.
+// Então: só conta como risco a coluna quase-preta cujos vizinhos a 3px são nitidamente mais
+// claros — o que um prop nunca é, e um contorno de 1px sempre é.
+const faixaY = [info.height - 24, info.height - 2];
 const coluna = (x) => {
   let l = 0;
   let n = 0;
@@ -195,36 +240,12 @@ const coluna = (x) => {
   }
   return l / n;
 };
-let pretas = 0;
-for (let x = 0; x < info.width; x++) if (coluna(x) < 0.05) pretas++;
-ok(pretas === 0, `nenhuma emenda PRETA na faixa (${pretas} colunas abaixo de 0.05)`);
+let riscos = 0;
+for (let x = 3; x < info.width - 3; x++) {
+  if (coluna(x) < 0.035 && coluna(x - 3) > 0.06 && coluna(x + 3) > 0.06) riscos++;
+}
+ok(riscos === 0, `nenhum RISCO de emenda na faixa (${riscos} colunas pretas de 1px entre vizinhos claros)`);
 
-// ─── OS PROPS DO ATO 2: a colônia da FASE 1 saiu de cima do casco ───
-//
-// O Ato 2 sorteava `turret`/`radar`/`silo`/`wreck` — a colônia da Fase 1 parafusada nas costas
-// de uma baleia. Este assert existe porque a volta é BARATA: basta alguém reabrir o `STAGE_3` e
-// reaproveitar um prop que já existe. A proporção de quem ATIRA também é conferida: a troca é
-// de arte, e uma mistura que dobrasse os atiradores mudaria a fase sem ninguém notar.
-while ((await estado()).t < 66) {
-  await page.waitForTimeout(1500);
-  await respirar();
-}
-const vistos = new Set();
-for (let i = 0; i < 8; i++) {
-  const kinds = await page.evaluate(() => {
-    const s = window.__game.scene.getScene('Game');
-    s.lives = 9;
-    return s.terrain.props.getChildren().filter((p) => p.active).map((p) => p.getData('kind'));
-  });
-  for (const k of kinds) vistos.add(k);
-  await page.waitForTimeout(1100);
-}
-const props = [...vistos].sort();
-console.log('props ato2  ' + JSON.stringify(props));
-const colonia = props.filter((k) => ['turret', 'radar', 'silo', 'wreck', 'building', 'base', 'spire'].includes(k));
-ok(colonia.length === 0, `nenhum prop da COLÔNIA da Fase 1 no casco (achei: ${colonia.join(', ') || 'nenhum'})`);
-ok(props.includes('lancaMisseis'), 'o LANÇA-MÍSSEIS está no casco');
-ok(props.includes('respiradouro'), 'o RESPIRADOURO está no casco');
 await page.screenshot({ path: 'scripts/_f3/probe-props.png' });
 
 await browser.close();

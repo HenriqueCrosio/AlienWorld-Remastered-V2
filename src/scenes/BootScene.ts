@@ -67,9 +67,6 @@ const FRAMES: Record<string, number> = {
   serpenteFusaoAnim: 9,
   aranhaAnim: 9,
   aranhaJumpAnim: 9,
-  // O RABO do Leviatã, batendo a nadadeira. Atravessa a tela UMA vez, na virada do Ato 1 para
-  // o Ato 2 — ver `GameScene.raboDoLeviata()`.
-  raboLeviataAnim: 9,
 
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
@@ -159,9 +156,6 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'aranha-walk', prefix: 'aranhaAnim', frameRate: 10 },
   // O PULO toca UMA vez por salto (o EnemySystem devolve o walk na aterrissagem).
   { key: 'aranha-jump', prefix: 'aranhaJumpAnim', frameRate: 10, loop: false },
-  // A BATIDA DO RABO a 6 — mais lenta que a serpente (8), que já é "massa". Uma nadadeira do
-  // tamanho da tela batendo a 10 lê como peixe de aquário; o peso está na demora.
-  { key: 'rabo-batida', prefix: 'raboLeviataAnim', frameRate: 6 },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -320,16 +314,25 @@ const ART: Record<string, string> = {
   // BALEIA com um canhão nas costas — a mesma armadilha da doca da Fatia 4 (arte gerada a
   // partir da coisa em que ela se apoia volta como cópia dessa coisa). A que funcionou não
   // menciona baleia em lugar nenhum e usa o prefixo de estilo da casa, sem referência.
+  // A tira que esconde o PÉ dos props no casco — o `groundFront` da Fase 3. Gerada por
+  // `scripts/casco-frente.mjs` a partir da peça lisa da base. Ver `buildNebula()`.
+  cascoFrente: 'sprites/casco-frente.png',
+
   lancaMisseis: 'sprites/lanca-misseis.png',
   lancaMisseis2: 'sprites/lanca-misseis2.png',
   respiradouro: 'sprites/respiradouro.png',
   respiradouro2: 'sprites/respiradouro2.png',
   respiradouro3: 'sprites/respiradouro3.png',
 
-  // O RABO do Leviatã: a nadadeira traseira que atravessa a tela na virada do Ato 1 para o
-  // Ato 2. Estático + 9 quadros da batida. Ver `GameScene.raboDoLeviata()`.
+  // O RABO do Leviatã: a nadadeira traseira, em perfil lateral, que chega na virada do Ato 1
+  // para o Ato 2 e se segura na direita batendo.
+  //
+  // ⚠️ SÓ O ESTÁTICO, E DE PROPÓSITO. A animação do PixelLab foi gerada e DESCARTADA: o v3 leu
+  // "bater para cima e para baixo" como "girar", e os quadros 4 a 8 rodavam a nadadeira em
+  // torno do próprio eixo — o bicho virava uma hélice. A batida vive em código, como rotação em
+  // torno do pedúnculo (ver `GameScene.raboDoLeviata()`), que é o movimento real de uma baleia
+  // e não tem como dar a volta.
   raboLeviata: 'sprites/rabo-leviata.png',
-  ...animFrames('raboLeviataAnim', 'rabo-leviata-anim'),
 
   ...animFrames('bossIdleAnim', 'boss-idle-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),

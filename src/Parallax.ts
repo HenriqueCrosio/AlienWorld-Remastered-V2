@@ -135,6 +135,12 @@ export class Parallax {
    * `setNebulaDensity`, à mão. Ver o comentário lá.
    */
   private nebulaPainting: Phaser.GameObjects.Image[] = [];
+  /**
+   * A FAIXA DE CASCO DA FRENTE (Fase 3, Ato 2): o equivalente do `groundFront` da Fase 1. Ela
+   * existe por um motivo só — esconder o PÉ dos props, que sem ela terminam numa borda reta e
+   * parecem colados no casco em vez de plantados nele. Ver `buildNebula()`.
+   */
+  private cascoFrente: Phaser.GameObjects.TileSprite | null = null;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -870,15 +876,27 @@ export class Parallax {
     // o `setNebulaDensity` a apaga à mão. Sem isso ela ficaria de pé depois de t=42 e o ATO 2
     // teria nebulosa no céu — a fase inteira perderia a virada.
     //
-    // −27 = (270−216)/2: centraliza a pintura de 480×270 na janela de 384×216. Duas cópias
-    // lado a lado, como o `paintBgF2`, para a rolagem nunca mostrar buraco.
+    // ⚠️ A PINTURA É 384×216 — A RESOLUÇÃO REAL DO JOGO — E FICA EM y=0.
+    //
+    // Ela era 480×270 em y=−27, que é a receita que o projeto vinha repetindo desde a Fase 1.
+    // A receita está ERRADA e o Henrique reclamou dela três vezes. A conta: numa janela de
+    // 384×216, uma placa de 480×270 mostra 384 de 480 na largura e 216 de 270 na altura — 80%
+    // de cada eixo, ou seja **64% da pintura, com zoom de 1,25×**. A pintura do Henrique
+    // chegava à tela AMPLIADA e cortada pelas beiradas, que é exatamente o oposto de "1 px da
+    // arte = 1 px do jogo" (a frase está no cabeçalho do `paint-bg.mjs`, que fazia a coisa
+    // certa e vinha sendo CHAMADO com os números errados).
+    //
+    // Em 384×216 aparece a LARGURA INTEIRA e 94,4% da altura (o recorte central de 1625×914
+    // sobre 1625×968 — 5,6%, medido), com um pixel da pintura por pixel de tela.
+    //
+    // Duas cópias lado a lado, como o `paintBgF2`, para a rolagem nunca mostrar buraco.
     const temPintura = this.scene.textures.exists('paintBgF3');
     if (temPintura) {
       const w = (this.scene.textures.get('paintBgF3').getSourceImage() as { width: number }).width;
       for (let i = 0; i < 2; i++) {
         this.nebulaPainting.push(
           this.scene.add
-            .image(i * w, -27, 'paintBgF3')
+            .image(i * w, 0, 'paintBgF3')
             .setOrigin(0, 0)
             // ⚠️ −96, NÃO −97. A camada `mundo` (o planeta) vive em −97, e −97 aqui daria um EMPATE
             // de profundidade: renderizaria certo só por acidente de ordem de inserção, e qualquer
@@ -1017,6 +1035,36 @@ export class Parallax {
       terreno: true,
       casco: true,
     });
+
+    // ─── A FAIXA DE CASCO DA FRENTE ───
+    //
+    // Um prop ancorado na linha do solo termina numa BORDA RETA, e sem nada na frente dele essa
+    // borda fica à mostra: o respiradouro parecia "um asset colado no outro", sem base. É o
+    // mesmo defeito que a Fase 1 já resolvia — e a Fase 3 nunca ganhou o remédio, porque a
+    // faixa do casco vive lá atrás em `depth −75/−74` e não há nada entre o pé do prop e o olho.
+    //
+    // ⚠️ `depth −0.2`, o MESMO número do `groundFront` da Fase 1, e pelo mesmo motivo: à FRENTE
+    // dos props (que nascem em −0.5, ver `TerrainSystem.spawn`) e ATRÁS da nave e dos inimigos
+    // (depth 0). A nave nunca some atrás dela.
+    //
+    // ⚠️ `y = GROUND_Y − 4`: a tira começa 4px ACIMA da linha em que os props se ancoram, então
+    // ela cobre o pé deles. Mais alta que isso e ela engoliria a silhueta; mais baixa e a borda
+    // reta reapareceria.
+    //
+    // ⚠️ TINT ESCURO (0x9aa4b8, multiplicativo), nunca claro: é o casco MAIS PERTO, em leve
+    // sombra — a mesma leitura do `groundFront`, e a mesma regra de sempre nesta campanha.
+    //
+    // Ela segue o alpha do CASCO (1 − nebulaDim): durante o Ato 1 não existe chão nenhum para
+    // ter pé, e uma tira opaca no rodapé estragaria a nuvem. Quem a acende é o
+    // `setNebulaDensity`, à mão — como a pintura, ela não é uma `ScatterLayer`.
+    if (this.scene.textures.exists('cascoFrente')) {
+      this.cascoFrente = this.scene.add
+        .tileSprite(0, GROUND_Y - 4, GAME_WIDTH, 20, 'cascoFrente')
+        .setOrigin(0, 0)
+        .setDepth(-0.2)
+        .setTint(0x9aa4b8)
+        .setAlpha(0);
+    }
   }
 
   private addLayer(cfg: Omit<ScatterLayer, 'sprites' | 'nextX'>): void {
@@ -1108,6 +1156,13 @@ export class Parallax {
     }
     // A faixa da frente rola JUNTO com o chão/mundo — senão os props deslizariam sobre ela.
     if (this.groundFront) this.groundFront.tilePositionX = Math.round(this.groundOffset);
+
+    // A faixa de casco da frente (Fase 3) tem o mesmo dever, mas o `groundOffset` acima só
+    // avança quando existe `ground` — e na nebulosa não existe chão. Ela conta o dela.
+    if (this.cascoFrente) {
+      this.groundOffset += worldSpeed * dt;
+      this.cascoFrente.tilePositionX = Math.round(this.groundOffset);
+    }
 
     if (this.exiting) this.updateAtmosphereExit(dt, worldSpeed);
   }
@@ -1246,6 +1301,8 @@ export class Parallax {
         }
         // A pintura não é ScatterLayer, então ela não passa por `alphaFor` — some aqui, à mão.
         for (const img of this.nebulaPainting) img.setAlpha(this.nebulaDim);
+        // A faixa da frente também não é: ela ACENDE junto com o casco (1 − nebulaDim).
+        this.cascoFrente?.setAlpha(1 - this.nebulaDim);
       },
     });
   }
