@@ -535,10 +535,85 @@ export class GameScene extends Phaser.Scene {
         // continua correndo por baixo dela — chefão de verdade só há um por fase.
         this.enemies.spawn('aranha', 0);
         break;
+      case 'rabo':
+        this.raboDoLeviata();
+        break;
       case 'boss':
         this.spawnBoss();
         break;
     }
+  }
+
+  /**
+   * O RABO DO LEVIATÃ — a transição do Ato 1 para o Ato 2 da Fase 3.
+   *
+   * A nadadeira traseira entra pela DIREITA, bate com tudo o seu nado espacial e sai pela
+   * esquerda. Antes disto a virada era um fade: a nuvem rareava e o casco aparecia. Funcionava
+   * como efeito e não dizia nada — o jogador via um chão novo, não o fim de uma perseguição.
+   * O rabo diz a frase inteira sem banner nenhum: **eu alcancei o bicho, e estou atrás dele.**
+   * O casco que vira chão logo depois deixa de ser cenário e passa a ser a MESMA criatura,
+   * vista de perto demais.
+   *
+   * ⚠️ CENÁRIO, NÃO INIMIGO. Sem corpo físico, sem hitbox, sem dano, fora de todo grupo de
+   * colisão. Nenhuma onda, nenhum spawn e nenhum número de balanceamento muda por causa dele.
+   *
+   * ⚠️ `depth −70`: na FRENTE da faixa do casco (−75/−74) e ATRÁS do jogo (0), então ele nunca
+   * cobre a nave nem um tiro. Os VÉUS da nebulosa vivem em `depth 60` e passam POR CIMA dele —
+   * é de propósito: aos 40,5s a nave ainda está dentro da nuvem, e o rabo tem que chegar
+   * EMBAÇADO, como um vulto que a névoa entrega aos poucos.
+   *
+   * ⚠️ ELE CHEGA ANTES DA NUVEM ABRIR (t=40,5 contra t=42). A ordem é a coisa toda: primeiro o
+   * jogador vê O QUE alcançou, e só depois o casco se revela como o corpo daquilo.
+   */
+  private raboDoLeviata(): void {
+    // Sem a arte, a fase segue sem a transição em vez de quebrar — o mesmo contrato de todo
+    // asset do projeto (ausente = a cena continua, ver BootScene).
+    if (!this.textures.exists('raboLeviata')) return;
+
+    // ESCALA 1,7: a arte é 115×105 e a tela tem 216 de altura. A 1,7 a nadadeira ocupa ~178px
+    // — quatro quintos da tela. Menor que isso ela vira um peixe passando; a leitura pretendida
+    // é "a coisa é grande demais para caber no quadro".
+    const rabo = this.add
+      .sprite(GAME_WIDTH + 130, 112, 'raboLeviata')
+      .setDepth(-70)
+      .setScale(1.7)
+      .setAlpha(0);
+
+    if (this.anims.exists('rabo-batida')) rabo.play('rabo-batida');
+
+    // A TRAVESSIA: ~9,5s para cruzar a tela inteira, da direita para a esquerda. É lento de
+    // propósito — velocidade de scroll faria dele mais um destroço passando, e a fase inteira
+    // já é feita de coisas passando rápido. O que separa este momento dos outros é a demora.
+    this.tweens.add({
+      targets: rabo,
+      x: -190,
+      duration: 9500,
+      ease: 'Linear',
+      onComplete: () => rabo.destroy(),
+    });
+
+    // A NÉVOA O ENTREGA E O LEVA: aparece em 900ms, e some nos últimos 900ms. Um vulto que
+    // materializa e desmaterializa dentro da nuvem, em vez de um sprite que pisca na borda.
+    this.tweens.add({ targets: rabo, alpha: 1, duration: 900, ease: 'Sine.easeOut' });
+    this.tweens.add({
+      targets: rabo,
+      alpha: 0,
+      delay: 8600,
+      duration: 900,
+      ease: 'Sine.easeIn',
+    });
+
+    // A DERIVA VERTICAL: ele sobe e desce ~14px enquanto atravessa. A batida da nadadeira é da
+    // animação; isto é o CORPO respondendo a ela — sem o deslocamento, a nadadeira bate e o
+    // bicho fica parado no ar, que é a leitura de um adesivo animado.
+    this.tweens.add({
+      targets: rabo,
+      y: 126,
+      duration: 2400,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+    });
   }
 
   private spawnWaves(dt: number): void {

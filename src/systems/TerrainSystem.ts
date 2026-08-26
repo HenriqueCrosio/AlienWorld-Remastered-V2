@@ -19,6 +19,12 @@ export type PropKind =
   | 'silo'
   | 'radar'
   | 'wreck'
+  // O CASCO do Leviatã (Fase 3, Ato 2). O Ato 2 sorteava `turret`/`radar`/`silo` — a colônia
+  // da FASE 1 transplantada para as costas de uma baleia. Funcionava como bloco de jogo e
+  // mentia como ficção: o casco vivo do Leviatã não tem reservatório de colônia em cima.
+  // Estes dois são a defesa DELE, geradas com o Leviatã armored como referência de estilo.
+  | 'lancaMisseis'
+  | 'respiradouro'
   // O interior ORGÂNICO do Leviatã (Fase 4): costela biônica, pedaço de órgão, maquinário
   // pesado. Terreno indestrutível como a rocha — existe para ser desviado.
   | 'costela'
@@ -53,6 +59,12 @@ const PROPS: Record<PropKind, PropDef> = {
   silo: { hp: 6, score: 90, shoots: false },
   radar: { hp: 4, score: 120, shoots: false, anim: 'radar-scan' },
   wreck: { hp: Infinity, score: 0, shoots: false },
+  // ⚠️ OS NÚMEROS SÃO OS DA TORRE E DO SILO, DE PROPÓSITO. Esta é uma troca de ARTE, não de
+  // balanceamento: o `lancaMisseis` herda `hp 5 / score 150 / shoots` da `turret` e o
+  // `respiradouro` herda `hp 6 / score 90` do `silo`. O Ato 2 continua pesando exatamente o
+  // mesmo, e o playtest que ainda não aconteceu vai medir a fase que já existia.
+  lancaMisseis: { hp: 5, score: 150, shoots: true },
+  respiradouro: { hp: 6, score: 90, shoots: false },
   costela: { hp: Infinity, score: 0, shoots: false },
   orgao: { hp: Infinity, score: 0, shoots: false },
   maquinario: { hp: Infinity, score: 0, shoots: false },

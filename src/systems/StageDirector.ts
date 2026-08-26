@@ -18,6 +18,16 @@ export type StageEvent =
   /** O MINI-BOSS do Ato 2 (a aranha que anda no casco). Um por fase, roteirizado. */
   | { t: number; type: 'miniboss' }
   /**
+   * O RABO DO LEVIATÃ atravessando a tela (Fase 3): a nadadeira traseira entra pela DIREITA,
+   * bate uma vez com tudo — o nado espacial dele — e sai pela esquerda. É a TRANSIÇÃO do Ato 1
+   * para o Ato 2, e ela conta uma coisa que nenhum banner contava: a perseguição acabou, o
+   * jogador ALCANÇOU o Leviatã por trás. O casco que vira chão logo depois é a mesma criatura,
+   * vista de perto demais.
+   *
+   * ⚠️ SEM HITBOX. É cenário roteirizado, não inimigo — nada de onda, dano ou colisão muda.
+   */
+  | { t: number; type: 'rabo' }
+  /**
    * CORREDOR de precisão (Fase 4): pares chão+TETO com VÃO GARANTIDO de `gap` px, em altura
    * sorteada. É o cano do flappy virando terreno — o DNA do v2 — mas SEM flap: no voo livre o
    * desafio é posição, não ritmo. O par é atômico de propósito: duas alturas independentes
@@ -220,14 +230,28 @@ export const STAGE_3: StageEvent[] = [
   { t: 32, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 35, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 120 },
 
-  // ─── A VIRADA: sair da nuvem. O casco aparece por baixo dela. ───
+  // ─── A VIRADA: O RABO. ───
+  //
+  // A nuvem para de cuspir asteroide em t=40 e o quadro esvazia — e é no vazio que o RABO
+  // entra pela direita, ainda ATRÁS dos véus, e bate a nadadeira uma vez com tudo. A ordem
+  // importa: primeiro o jogador vê O QUE alcançou, e só DEPOIS a nuvem abre e revela em cima
+  // do que ele está voando. Invertido (nuvem primeiro, rabo depois) o casco chegaria como
+  // cenário anônimo e o rabo viraria decoração atrasada.
   { t: 40, type: 'hazard', rate: 0, mix: [] },
+  { t: 40.5, type: 'rabo' },
   { t: 42, type: 'nebula', density: 0 },
   { t: 44, type: 'banner', text: 'O CASCO DO LEVIATÃ' },
 
-  // ATO 2: o casco é a superfície — torres e radares SOBRE ele (vocabulário da F1;
-  // no vácuo o verbo continua o da F2: tudo se abate).
-  { t: 46, type: 'terrain', rate: 1.6, mix: ['wreck', 'turret', 'wreck', 'radar'] },
+  // ATO 2: o casco é a superfície — e o que há EM CIMA dele é a defesa do próprio Leviatã.
+  //
+  // ⚠️ Aqui vivia a colônia da FASE 1 transplantada: `wreck`, `turret`, `radar`, `silo`. Como
+  // bloco de jogo funcionava; como ficção mentia — o casco vivo de uma baleia biomecânica não
+  // tem reservatório de colônia nem antena de rádio parafusada em cima. As duas peças novas
+  // (`lancaMisseis`, `respiradouro`) foram geradas com o Leviatã armored como referência.
+  //
+  // ⚠️ A PROPORÇÃO DE QUEM ATIRA É A MESMA: 1 em 4, como era com a `turret`. Isto é troca de
+  // ARTE — o Ato 2 continua pesando o que pesava.
+  { t: 46, type: 'terrain', rate: 1.6, mix: ['respiradouro', 'lancaMisseis', 'respiradouro', 'respiradouro'] },
   { t: 48, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
 
   // O MINI-BOSS: a aranha entra andando no casco. As pernas dela finalmente têm motivo.
@@ -238,7 +262,7 @@ export const STAGE_3: StageEvent[] = [
   // contraste que faz o pico final pesar.
   { t: 54, type: 'terrain', rate: 0, mix: [] },
 
-  { t: 63, type: 'terrain', rate: 1.4, mix: ['wreck', 'turret', 'wreck', 'silo'] },
+  { t: 63, type: 'terrain', rate: 1.4, mix: ['respiradouro', 'lancaMisseis', 'respiradouro', 'respiradouro'] },
   { t: 64, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
   { t: 67, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
   { t: 70, type: 'banner', text: 'DEFESAS DO CASCO' },

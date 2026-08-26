@@ -67,6 +67,9 @@ const FRAMES: Record<string, number> = {
   serpenteFusaoAnim: 9,
   aranhaAnim: 9,
   aranhaJumpAnim: 9,
+  // O RABO do Leviatã, batendo a nadadeira. Atravessa a tela UMA vez, na virada do Ato 1 para
+  // o Ato 2 — ver `GameScene.raboDoLeviata()`.
+  raboLeviataAnim: 9,
 
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
@@ -156,6 +159,9 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'aranha-walk', prefix: 'aranhaAnim', frameRate: 10 },
   // O PULO toca UMA vez por salto (o EnemySystem devolve o walk na aterrissagem).
   { key: 'aranha-jump', prefix: 'aranhaJumpAnim', frameRate: 10, loop: false },
+  // A BATIDA DO RABO a 6 — mais lenta que a serpente (8), que já é "massa". Uma nadadeira do
+  // tamanho da tela batendo a 10 lê como peixe de aquário; o peso está na demora.
+  { key: 'rabo-batida', prefix: 'raboLeviataAnim', frameRate: 6 },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -304,6 +310,26 @@ const ART: Record<string, string> = {
   cascoDetalhe3: 'sprites/casco-detalhe3.png',
   cascoDetalhe4: 'sprites/casco-detalhe4.png',
   cascoDetalhe5: 'sprites/casco-detalhe5.png',
+
+  // O QUE VIVE EM CIMA DO CASCO (Fase 3, Ato 2). O Ato 2 sorteava `turret`/`radar`/`silo` — a
+  // colônia da FASE 1 reaproveitada. Estas duas são a defesa do PRÓPRIO Leviatã, geradas com o
+  // Leviatã armored como referência de estilo (`assets/raw/ref-leviata-armored.png`).
+  //
+  // ⚠️ O `lancaMisseis` foi gerado NA SEGUNDA TENTATIVA. A primeira pedia "missile launcher
+  // mounted on a WHALE HULL" com a baleia de referência, e as 16 candidatas voltaram sendo A
+  // BALEIA com um canhão nas costas — a mesma armadilha da doca da Fatia 4 (arte gerada a
+  // partir da coisa em que ela se apoia volta como cópia dessa coisa). A que funcionou não
+  // menciona baleia em lugar nenhum e usa o prefixo de estilo da casa, sem referência.
+  lancaMisseis: 'sprites/lanca-misseis.png',
+  lancaMisseis2: 'sprites/lanca-misseis2.png',
+  respiradouro: 'sprites/respiradouro.png',
+  respiradouro2: 'sprites/respiradouro2.png',
+  respiradouro3: 'sprites/respiradouro3.png',
+
+  // O RABO do Leviatã: a nadadeira traseira que atravessa a tela na virada do Ato 1 para o
+  // Ato 2. Estático + 9 quadros da batida. Ver `GameScene.raboDoLeviata()`.
+  raboLeviata: 'sprites/rabo-leviata.png',
+  ...animFrames('raboLeviataAnim', 'rabo-leviata-anim'),
 
   ...animFrames('bossIdleAnim', 'boss-idle-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),
