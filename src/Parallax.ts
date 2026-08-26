@@ -969,24 +969,38 @@ export class Parallax {
     // lógica do SILÊNCIO no ciclo da Capitânia). O `pickVariant` sorteia UNIFORME, então a
     // proporção não pode vir dele: vem daqui.
     //
-    // ⚠️ ESCALA 1, INTEIRA. As artes são 72×72 e 72 de 216 é exatamente um terço da tela — a
-    // proporção que o GDD pede ("corredor amplo, TETO ABERTO"): a faixa cresce só para cima a
-    // partir do rodapé, e o céu fica livre.
+    // ⚠️ ESCALA 1, INTEIRA — e o QUADRO NÃO É A FAIXA. As peças são 72×72 (70 depois do aparo,
+    // ver abaixo), mas o desenho OPACO delas ocupa só as linhas 6..58 do quadro: a faixa que se
+    // vê tem 53px, um quarto da tela, não um terço. O resto do quadro é padding transparente, e
+    // é ele que a linha de baixo tem que compensar.
+    //
+    // ⚠️ `baseY = GAME_HEIGHT + 13`, NÃO `+ 6`. Com origem na base, o `baseY` ancora a BORDA DO
+    // QUADRO, não o desenho — e o quadro tem 13px de transparência embaixo (a última linha
+    // opaca da base é a 58 de 71). Em `+6` a faixa parava na linha 208 da tela e sobrava uma
+    // tira de 7px de espaço aberto atravessando o rodapé inteiro: dava para ver estrela e
+    // asteroide passando POR BAIXO do chão (medido: luminância 0,107 no casco contra 0,028 na
+    // tira). `+13` põe a última linha opaca em 215, encostada na borda. O `derelict` antigo
+    // usava `+26` e por isso nunca teve o problema — a âncora mudou com a arte e o padding não
+    // foi recontado.
     //
     // ⚠️ SEM TINT. Luminância média medida entre 0,142 e 0,176 — a família já nasce escura. Um
     // tint aqui seria a terceira vez nesta campanha que se escurece arte que já estava escura.
     //
-    // `gap` MENOR que a largura (72) na base: sobrepostos, a emenda vertical some. É a regra das
-    // montanhas do parallax, e é por isso que isto NÃO é um TileSprite.
+    // ⚠️ `gap` MENOR que a largura (70) na base: sobrepostos, como as montanhas do parallax — e
+    // é por isso que isto NÃO é um TileSprite. Mas A SOBREPOSIÇÃO SOZINHA NÃO APAGAVA A EMENDA:
+    // o PixelLab devolveu as peças com uma coluna de contorno PRETA na borda (0,008 contra 0,14
+    // do miolo), e como a peça da direita desenha por cima, o contorno da borda ESQUERDA dela
+    // ficava visível — um risco preto a cada ~60px. Quem resolve isso é o `aparar-casco.mjs`,
+    // que corta 1px de cada lado das sete peças; as larguras aqui já contam com os 70px.
     this.addLayer({
       key: 'cascoLeviata',
       factor: 1.0,
-      baseY: GAME_HEIGHT + 6,
+      baseY: GAME_HEIGHT + 14,
       depth: -75,
       tint: 0xffffff,
       alpha: 1,
       scale: [1, 1],
-      gap: [56, 68],
+      gap: [54, 64],
       terreno: true,
       casco: true,
     });
@@ -994,7 +1008,7 @@ export class Parallax {
     this.addLayer({
       key: 'cascoDetalhe',
       factor: 1.0,
-      baseY: GAME_HEIGHT + 6,
+      baseY: GAME_HEIGHT + 14,
       depth: -74,
       tint: 0xffffff,
       alpha: 1,
