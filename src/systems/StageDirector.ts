@@ -263,9 +263,20 @@ export const STAGE_3: StageEvent[] = [
   // tem reservatório de colônia nem antena de rádio parafusada em cima. As duas peças novas
   // (`lancaMisseis`, `respiradouro`) foram geradas com o Leviatã armored como referência.
   //
-  // ⚠️ A PROPORÇÃO DE QUEM ATIRA É A MESMA: 1 em 4, como era com a `turret`. Isto é troca de
-  // ARTE — o Ato 2 continua pesando o que pesava.
-  { t: 46, type: 'terrain', rate: 1.6, mix: ['respiradouro', 'lancaMisseis', 'respiradouro', 'respiradouro'] },
+  // ⚠️ A PROPORÇÃO DE QUEM ATIRA CONTINUA A MESMA — E É POR ISSO QUE OS DOIS NÚMEROS MUDARAM
+  // JUNTOS (2026-08-27). A cadência caiu pela metade (1,6s → 3,0s) e a mistura dobrou a favor do
+  // lança (1:3 → 1:1). Os dois se cancelam exatamente na conta de quem atira:
+  //
+  //   antes   27s de janela / 1,6s × 0,25 = 4,22 lança-mísseis
+  //   depois  25s de janela / 3,0s × 0,50 = 4,17 lança-mísseis
+  //
+  // A janela encolheu porque os props começam em t=48, quando o casco fica SÓLIDO, e não mais em
+  // t=46: prop opaco sobre casco meio transparente é o defeito que a virada nova conserta. O 3,0
+  // (em vez do 3,2 da spec) é o que compensa esses 2 segundos.
+  //
+  // O respiradouro cai de ~12,7 para ~3 — e quem garante o ESPAÇAMENTO é a carência no
+  // `GameScene.spawnProps`, não esta mistura. Sorteio uniforme pode dar dois seguidos.
+  { t: 48, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
   { t: 48, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
 
   // O MINI-BOSS: a aranha entra andando no casco. As pernas dela finalmente têm motivo.
@@ -276,7 +287,7 @@ export const STAGE_3: StageEvent[] = [
   // contraste que faz o pico final pesar.
   { t: 54, type: 'terrain', rate: 0, mix: [] },
 
-  { t: 63, type: 'terrain', rate: 1.4, mix: ['respiradouro', 'lancaMisseis', 'respiradouro', 'respiradouro'] },
+  { t: 63, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
   { t: 64, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
   { t: 67, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
   { t: 70, type: 'banner', text: 'DEFESAS DO CASCO' },

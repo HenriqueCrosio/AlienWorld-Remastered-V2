@@ -57,6 +57,19 @@ await page.keyboard.press('m');
 await page.waitForTimeout(4000);
 await respirar();
 
+// O GANCHO DOS PROPS: registra cada NASCIMENTO com o instante. Montado agora, antes de o Ato 2
+// existir, porque props reciclam — contar sprites vivos mede quantos couberam na tela, não
+// quantos nasceram. Lido lá embaixo, no bloco dos respiradouros.
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  window.__nasc = [];
+  const orig = s.terrain.spawn.bind(s.terrain);
+  s.terrain.spawn = (kind) => {
+    window.__nasc.push({ kind, t: Number((s.elapsed ?? 0).toFixed(2)) });
+    return orig(kind);
+  };
+});
+
 const e = await estado();
 console.log('t=' + e.t, JSON.stringify(e.camadas.map((c) => c.key)));
 
@@ -310,6 +323,50 @@ for (let x = 3; x < info.width - 3; x++) {
   if (coluna(x) < 0.035 && coluna(x - 3) > 0.06 && coluna(x + 3) > 0.06) riscos++;
 }
 ok(riscos === 0, `nenhum RISCO de emenda na faixa (${riscos} colunas pretas de 1px entre vizinhos claros)`);
+
+// ─── OS RESPIRADOUROS SÃO RAROS, E O ESPAÇAMENTO NÃO DEPENDE DE SORTE ───
+//
+// ⚠️ ISTO CONTA AO LONGO DO TEMPO, NÃO NUMA AMOSTRA. É a lição do assert do rodapé, paga nesta
+// mesma fatia: um assert que olha um instante só mede o instante, não a regra. Aqui a regra é
+// "nenhum par a menos de 5s", e ela só existe no tempo.
+//
+// O trinco é uma CARÊNCIA no spawn, não uma proporção no sorteio: `GetRandom` é uniforme e pode
+// dar dois seguidos por acaso. É a mesma lição do `pickVariant` — proporção que importa vem da
+// geometria, nunca do dado.
+// A janela de props do Ato 2 fecha em t=82 (o silêncio que telegrafa a serpente). Esperar até lá
+// é o que torna a contagem uma contagem, e não uma amostra.
+while ((await estado()).t < 82) {
+  await page.waitForTimeout(1500);
+  await respirar();
+}
+
+// ⚠️ ELE ENVELOPA `terrain.spawn` EM VEZ DE CONTAR SPRITES NA TELA. Os props RECICLAM e saem
+// pela esquerda; contar o que está vivo num instante mede quantos couberam na tela, não quantos
+// nasceram. O envelope mede a CHAMADA, que é o evento que a regra governa. (O gancho é montado
+// lá em cima, logo depois de a fase abrir.)
+const nasc = await page.evaluate(() => window.__nasc);
+const respiradouros = nasc.filter((n) => n.kind === 'respiradouro').map((n) => n.t);
+const lancas = nasc.filter((n) => n.kind === 'lancaMisseis');
+const pares = respiradouros.slice(1).map((t, i) => Number((t - respiradouros[i]).toFixed(2)));
+console.log('respiradouros nasceram em ' + JSON.stringify(respiradouros));
+console.log('intervalos ' + JSON.stringify(pares));
+console.log('lanca-misseis: ' + lancas.length);
+ok(
+  respiradouros.length > 0 && respiradouros.length <= 6,
+  `POUCOS respiradouros no Ato 2 (${respiradouros.length} — eram ~13 antes da carência)`,
+);
+ok(
+  pares.every((d) => d >= 5),
+  `e BEM ESPAÇADOS: nenhum par a menos de 5s (o menor foi ${pares.length ? Math.min(...pares) : 'n/a'}s)`,
+);
+// ⚠️ O ASSERT QUE PROTEGE O BALANCEAMENTO. O corte no respiradouro foi desenhado para NÃO mexer
+// no volume de tiro do Ato 2 (a cadência caiu pela metade e a mistura dobrou a favor do lança,
+// e os dois se cancelam). Se alguém "melhorar" a mistura depois, é aqui que reprova.
+ok(
+  lancas.length >= 3 && lancas.length <= 6,
+  `e os ATIRADORES não mudaram: ${lancas.length} lança-mísseis (a conta antiga dava ~4,2)`,
+);
+
 
 await page.screenshot({ path: 'scripts/_f3/probe-props.png' });
 
