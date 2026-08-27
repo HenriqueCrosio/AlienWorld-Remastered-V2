@@ -200,6 +200,21 @@ export const STAGE_3: StageEvent[] = [
   // Dentro da nuvem: asteroides e drones — o básico da F2, mas com véus na frente.
   { t: 2, type: 'hazard', rate: 1.3, mix: ['asteroid'] },
   { t: 5, type: 'wave', kind: 'drone', count: 5, spacing: 0.35, y: 80 },
+  // ─── A ÁGUA-VIVA: a vida da nebulosa, e o único ritmo lento do Ato 1 ───
+  //
+  // ⚠️ ELAS CAEM EM CIMA DAS ONDAS RÁPIDAS DE PROPÓSITO. Lento e rápido no mesmo quadro é o
+  // contraste que justifica ela existir; sozinha numa janela vazia ela vira só um asteroide
+  // bonito que brilha.
+  //
+  // ⚠️ O ÚLTIMO SPAWN TEM QUE LIMPAR A TELA ANTES DE t=38, e a margem é APERTADA. Ela nasce em
+  // `x = GAME_WIDTH + 16` (400), não em 384 — são 400px a 28px/s, ou seja **14,3s** de travessia,
+  // e não os 13,7 que a largura da tela sugere. A primeira versão pôs a segunda onda em t=19: o
+  // último nascia em 23,2 e ainda estava vivo em t=38. A sonda pegou.
+  //
+  // O quadro precisa estar VAZIO quando o rabo entra — o vazio é o que faz a chegada dele pesar,
+  // e é para isso que o `hazard rate 0` existe em t=37,5. Com a onda em t=16, o último nasce em
+  // 20,2 e limpa em t≈34,5. NÃO empurrar estas ondas para depois de t=23.
+  { t: 8, type: 'wave', kind: 'aguaViva', count: 3, spacing: 1.6, y: 100 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 130 },
 
   // Minas em CACHOS na névoa: a visibilidade curta transforma uma peça conhecida em susto
@@ -207,6 +222,7 @@ export const STAGE_3: StageEvent[] = [
   { t: 13, type: 'banner', text: 'SENSORES NA NÉVOA' },
   { t: 14, type: 'hazard', rate: 1.0, mix: ['sensor', 'sensor', 'asteroid', 'mina'] },
   { t: 16, type: 'wave', kind: 'drone', count: 6, spacing: 0.28, y: 60 },
+  { t: 16, type: 'wave', kind: 'aguaViva', count: 4, spacing: 1.4, y: 75 },
   { t: 20, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 100 },
 
   // ⚠️ O LEVIATÃ COMEÇA A APARECER NA METADE DO ATO 1 (Fatia 5). O `HANDOFF` sempre pediu isso —

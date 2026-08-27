@@ -67,6 +67,7 @@ const FRAMES: Record<string, number> = {
   serpenteFusaoAnim: 9,
   aranhaAnim: 9,
   aranhaJumpAnim: 9,
+  aguaVivaAnim: 9,
 
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
@@ -156,6 +157,9 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'aranha-walk', prefix: 'aranhaAnim', frameRate: 10 },
   // O PULO toca UMA vez por salto (o EnemySystem devolve o walk na aterrissagem).
   { key: 'aranha-jump', prefix: 'aranhaJumpAnim', frameRate: 10, loop: false },
+  // A ÁGUA-VIVA do Ato 1 da Fase 3: o sino contrai e os tentáculos arrastam. 6fps de propósito —
+  // ela é a única coisa LENTA da nebulosa, e pulsar rápido a transformaria em mais uma nave.
+  { key: 'aguaviva-drift', prefix: 'aguaVivaAnim', frameRate: 6 },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -283,12 +287,14 @@ const ART: Record<string, string> = {
   serpente1c: 'sprites/serpente-1c.png',
   serpenteFusao: 'sprites/serpente-fusao.png',
   aranha: 'sprites/aranha.png',
+  aguaViva: 'sprites/agua-viva.png',
   ...animFrames('serpenteAnim', 'serpente-anim'),
   ...animFrames('serpente2cAnim', 'serpente-2c-anim'),
   ...animFrames('serpente1cAnim', 'serpente-1c-anim'),
   ...animFrames('serpenteFusaoAnim', 'serpente-fusao-anim'),
   ...animFrames('aranhaAnim', 'aranha-anim'),
   ...animFrames('aranhaJumpAnim', 'aranha-jump-anim'),
+  ...animFrames('aguaVivaAnim', 'agua-viva-anim'),
 
   // O CASCO DO LEVIATÃ (Fase 3, Ato 2) — 7 artes do PixelLab (Henrique, 2026-08-25), 72×72.
   // Fontes em `assets/raw/casco-leviata-{1..7}.png`.

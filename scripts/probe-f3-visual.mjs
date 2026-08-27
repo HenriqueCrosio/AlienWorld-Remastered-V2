@@ -94,6 +94,22 @@ ok(nebulas.some((c) => c.primeiroPlano), 'os VÉUS (primeiroPlano) continuam exi
 
 await page.screenshot({ path: 'scripts/_f3/probe-ato1.png' });
 
+// ─── A ÁGUA-VIVA: existe, deriva, e some antes do rabo ───
+while ((await estado()).t < 22) {
+  await page.waitForTimeout(800);
+  await respirar();
+}
+const vivas = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const l = s.enemies.enemies.getChildren().filter((o) => o.active && o.getData('kind') === 'aguaViva');
+  return { n: l.length, vx: l[0] ? Math.round(l[0].body.velocity.x) : null, anim: l[0]?.anims?.currentAnim?.key ?? null };
+});
+console.log('agua-viva ' + JSON.stringify(vivas));
+ok(vivas.n > 0, `a ÁGUA-VIVA está no Ato 1 (achei ${vivas.n})`);
+ok(vivas.vx !== null && vivas.vx > -40, `e ela DERIVA, não voa (vx=${vivas.vx}, o drone faz -70)`);
+ok(vivas.anim === 'aguaviva-drift', `e o sino está PULSANDO (anim=${vivas.anim})`);
+await page.screenshot({ path: 'scripts/_f3/probe-agua-viva.png' });
+
 // ⚠️ O CASCO NÃO SE ANUNCIA MAIS, E A INVERSÃO É DELIBERADA (2026-08-27).
 //
 // Até aqui este assert exigia o contrário: `alpha > 0.05` em t≈25, a "insinuação" que o
@@ -130,6 +146,19 @@ await page.screenshot({ path: 'scripts/_f3/probe-anuncio.png' });
 // desenho todo: primeiro o jogador vê O QUE alcançou, e só depois o casco se revela como o
 // corpo daquilo. Um assert que só perguntasse "o rabo existe" passaria com ele entrando DEPOIS
 // da virada, que é a versão sem sentido — por isso este mede o nebulaDim junto.
+// ⚠️ O QUADRO TEM QUE ESTAR VAZIO QUANDO O RABO CHEGA. A água-viva demora ~13,7s para atravessar
+// — é o inimigo mais lento do jogo, e o único capaz de sobrar para dentro da virada. O vazio é o
+// que faz a chegada do rabo pesar; se alguém empurrar as ondas dela para a frente, reprova aqui.
+while ((await estado()).t < 38) {
+  await page.waitForTimeout(500);
+  await respirar();
+}
+const naEntrada = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  return s.enemies.enemies.getChildren().filter((o) => o.active && o.getData('kind') === 'aguaViva').length;
+});
+ok(naEntrada === 0, `a água-viva LIMPOU a tela antes do rabo entrar (achei ${naEntrada} em t=38)`);
+
 while ((await estado()).t < 39.5) {
   await page.waitForTimeout(800);
   await respirar();

@@ -2,7 +2,14 @@ import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
 
-export type EnemyKind = 'drone' | 'batedor' | 'canhoneira' | 'kamikaze' | 'cargueiro' | 'aranha';
+export type EnemyKind =
+  | 'drone'
+  | 'batedor'
+  | 'canhoneira'
+  | 'kamikaze'
+  | 'cargueiro'
+  | 'aranha'
+  | 'aguaViva';
 
 interface EnemyDef {
   texture: string;
@@ -116,6 +123,27 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // spawn), ESTACIONA no terço direito e cospe leques de 3 mirados. 50 HP (auditoria): grande
   // o bastante para pesar, curta o bastante para não roubar o clímax da serpente.
   aranha: { texture: 'aranha', anim: 'aranha-walk', hp: 50, speed: 30, wave: 0, fireRate: 2.6, score: 500, scale: 0.62, tint: 0xffffff, homing: 0, spawnRate: 0 },
+
+  // A ÁGUA-VIVA (Fase 3, Ato 1). A única coisa LENTA da nebulosa.
+  //
+  // O Ato 1 era todo rápido — drone 70, batedor 95, kamikaze 45 com perseguição, mais asteroide,
+  // mina e sensor. Não havia nada que FICASSE no quadro. Ela é isso: deriva a 28, atravessa em
+  // ~14,3s (400px a partir de `GAME_WIDTH + 16`, não 384), e o azul aceso dela é a única coisa que
+  // a névoa densa deixa ver de longe.
+  //
+  // ⚠️ NÃO ATIRA E NÃO PERSEGUE. Ela ATRAPALHA — é obstáculo vivo, não alvo. Isso é deliberado:
+  // um projétil novo entraria no volume de tiro do Ato 1, e esse número está congelado até o
+  // playtest.
+  //
+  // ⚠️ `hp 10` É O NÚMERO MAIS FRÁGIL DESTA PEÇA. A escala do jogo é 2 para drone/batedor/
+  // kamikaze e 6 para a canhoneira; dez é 5× um drone, e é para ela não morrer de raspão. Se no
+  // playtest ela virar pedágio em vez de estorvo, é este número que desce — não a velocidade,
+  // que é a razão de ela existir.
+  //
+  // A arte é 25×42 (alta e estreita: o sino mais os tentáculos), então 0.6 devolve 15×25 em
+  // tela, ao lado dos 26×24 do kamikaze. Tint BRANCO: ela já nasce acesa, e multiplicar cor por
+  // cima apagaria justamente o brilho.
+  aguaViva: { texture: 'aguaViva', anim: 'aguaviva-drift', hp: 10, speed: 28, wave: 34, fireRate: 0, score: 120, scale: 0.6, tint: 0xffffff, homing: 0, spawnRate: 0 },
 };
 
 /**
@@ -286,6 +314,40 @@ export class EnemySystem {
     e.setData('charging', 0);
     // Espera antes de cuspir o primeiro drone: um cargueiro não pare no frame em que entra.
     e.setData('spawnCd', def.spawnRate > 0 ? def.spawnRate : 0);
+
+    // ⚠️ O PULSO ELÉTRICO É CÓDIGO, E ISSO NÃO É PREGUIÇA — É A LIÇÃO DA HÉLICE.
+    //
+    // "Acende e apaga" cabe numa frase de geometria, e nesta mesma fatia o v3 do PixelLab leu
+    // "bater para cima e para baixo" como GIRAR: a animação do rabo do Leviatã voltou com a
+    // nadadeira rodando em torno do próprio eixo e foi descartada inteira. Pedir "pulsa com
+    // eletricidade" aos quadros devolveria uma hélice azul. Aos quadros foi o que código não faz
+    // (o sino deformando, os tentáculos arrastando); o brilho fica aqui.
+    //
+    // ⚠️ GLOW E NÃO TINT. O tint é do flash branco de dano, que restaura o valor guardado em
+    // `setData('tint')` — um pulso escrevendo tint todo frame comeria o flash, e o jogador
+    // deixaria de ver que acertou.
+    //
+    // `preFX` é nulo no renderer Canvas. A guarda mantém o contrato de sempre: sem o recurso, a
+    // cena continua — só sem brilho.
+    // ⚠️ BRILHO PARA DENTRO (`innerStrength`), NUNCA PARA FORA. O `outerStrength` desenha o halo
+    // ALÉM da silhueta — e a quad do sprite é a arte recortada justa (25×42, o `install-anim`
+    // corta pela caixa união). O halo vaza para fora da quad e é ceifado nela: o que aparece na
+    // tela é um RETÂNGULO azul aceso em volta do bicho, não um brilho. Foi assim na primeira
+    // versão, e quem entregou foi a captura ampliada — no tamanho do jogo passava por "brilho".
+    //
+    // O brilho interno vive dentro do alfa da forma, então não tem como virar caixa. E é a
+    // leitura certa de todo modo: a criatura ACENDE, não a moldura dela.
+    if (kind === 'aguaViva' && e.preFX) {
+      const glow = e.preFX.addGlow(0x35b6ea, 0, 0, false, 0.1, 10);
+      this.scene.tweens.add({
+        targets: glow,
+        innerStrength: 2.2,
+        duration: 900,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
