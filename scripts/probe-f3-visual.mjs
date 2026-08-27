@@ -33,6 +33,7 @@ const estado = () =>
       cena: s.scene.key,
       t: Number((s.elapsed ?? 0).toFixed(1)),
       nebulaDim: p ? Number(p.nebulaDim.toFixed(2)) : null,
+      cascoReveal: p ? Number(p.cascoReveal.toFixed(2)) : null,
       frente: p?.cascoFrente
         ? { y: p.cascoFrente.y, d: p.cascoFrente.depth, a: Number(p.cascoFrente.alpha.toFixed(2)) }
         : null,
@@ -80,23 +81,33 @@ ok(nebulas.some((c) => c.primeiroPlano), 'os VÉUS (primeiroPlano) continuam exi
 
 await page.screenshot({ path: 'scripts/_f3/probe-ato1.png' });
 
-// O CASCO SE ANUNCIA: em t≈25s ele já existe e já tem alpha, mas BAIXO.
+// ⚠️ O CASCO NÃO SE ANUNCIA MAIS, E A INVERSÃO É DELIBERADA (2026-08-27).
+//
+// Até aqui este assert exigia o contrário: `alpha > 0.05` em t≈25, a "insinuação" que o
+// HANDOFF pedia desde sempre ("na metade do tempo, o Leviatã começa a aparecer"). Ela foi
+// implementada na sessão de 26/08, foi JOGADA, e foi reprovada pelo Henrique — o que se via
+// era uma estrutura meio apagada pairando 20s antes de ter motivo.
+//
+// O TESTE JOGADO VENCE O DOCUMENTO. O casco agora nasce quando o RABO afunda, e não antes.
 while ((await estado()).t < 25) {
   await page.waitForTimeout(1500);
   await respirar();
 }
 const meio = await estado();
 const cascoMeio = meio.camadas.filter((c) => c.casco);
-console.log('t=' + meio.t, 'nebulaDim=' + meio.nebulaDim, JSON.stringify(cascoMeio));
+console.log('t=' + meio.t, 'nebulaDim=' + meio.nebulaDim, 'cascoReveal=' + meio.cascoReveal, JSON.stringify(cascoMeio));
 
 ok(cascoMeio.length > 0, 'a camada do casco existe');
 ok(
-  cascoMeio.some((c) => c.alpha !== null && c.alpha > 0.05),
-  'o casco JÁ SE VÊ na metade do Ato 1 (alpha > 0.05)',
+  cascoMeio.every((c) => c.alpha === null || c.alpha === 0),
+  'e está INVISÍVEL na metade do Ato 1 — o casco só nasce quando o rabo afunda',
 );
+ok(meio.cascoReveal === 0, `cascoReveal=0 em t=${meio.t} (era 1 − nebulaDim = 0.25)`);
+// ⚠️ E A NUVEM CONTINUA AFINANDO. É o par que prova o DESACOPLAMENTO: se este assert
+// reprovar junto com os de cima, alguém consertou o casco desligando o t=21 inteiro.
 ok(
-  cascoMeio.every((c) => c.alpha === null || c.alpha < 0.5),
-  'mas ele é só uma INSINUAÇÃO (alpha < 0.5) — a virada em t=42 ainda tem o que revelar',
+  meio.nebulaDim > 0.6 && meio.nebulaDim < 0.9,
+  `mas a NUVEM afinou mesmo assim (nebulaDim=${meio.nebulaDim}) — os dois estão separados`,
 );
 await page.screenshot({ path: 'scripts/_f3/probe-anuncio.png' });
 

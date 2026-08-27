@@ -60,8 +60,8 @@ interface ScatterLayer {
   teto?: boolean;
   /** Camada EXTRA da nebulosa (Fase 3): o alpha dela segue `nebulaDim` (1 dentro, 0 fora). */
   nebulosaExtra?: boolean;
-  /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue o INVERSO de `nebulaDim` — sair da
-   * nuvem e revelar o casco são o MESMO fade, e é por isso que são a mesma variável. */
+  /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue `cascoReveal`, que é dirigido pelo
+   * MERGULHO DO RABO — não pela nuvem. Ver `revealCasco` para o porquê da separação. */
   casco?: boolean;
   sprites: Phaser.GameObjects.Image[];
   nextX: number;
@@ -129,6 +129,19 @@ export class Parallax {
   private foregroundDim = 1;
   /** Densidade da nebulosa (Fase 3): 1 = dentro da nuvem. Ver `setNebulaDensity`. */
   private nebulaDim = 1;
+  /**
+   * A REVELAÇÃO DO CASCO (Fase 3): 0 = não existe, 1 = é o chão.
+   *
+   * ⚠️ SEPARADO DE `nebulaDim` DE PROPÓSITO (2026-08-27, o primeiro teste jogado). Até aqui o
+   * alpha do casco era `1 − nebulaDim` — afinar a nuvem OBRIGAVA o casco a aparecer, e não
+   * havia como ter um sem o outro. O roteiro se apoiava nisso em t=21 para "insinuar" o
+   * Leviatã, e o que o Henrique viu jogando foi "aquele gradiente de transparência estranho":
+   * uma estrutura meio apagada pairando 20s antes de ter motivo.
+   *
+   * Agora a nuvem afina sozinha, e o casco só nasce quando o RABO o chama — no fim do
+   * mergulho, do toco da cauda para a esquerda (ver `GameScene.raboDoLeviata`).
+   */
+  private cascoReveal = 0;
   /**
    * A pintura do céu da FASE 3. Ela NÃO é uma `ScatterLayer` — é uma placa fixa, como o
    * `paintBgF2` — então o alpha dela não passa por `alphaFor`. Quem a apaga é o
@@ -1272,17 +1285,20 @@ export class Parallax {
     let a = layer.alpha;
     if (layer.primeiroPlano) a *= this.foregroundDim;
     if (layer.nebulosaExtra) a *= this.nebulaDim;
-    if (layer.casco) a *= 1 - this.nebulaDim;
+    if (layer.casco) a *= this.cascoReveal;
     return a;
   }
 
   /**
    * A DENSIDADE DA NEBULOSA (Fase 3): 1 = dentro da nuvem, 0 = céu limpo.
    *
-   * É UM fade só para DUAS revelações: as camadas `nebulosaExtra` somem e a banda `casco`
-   * aparece — sair da nuvem e ver o casco do Leviatã embaixo são o mesmo momento (a virada
-   * do Ato 1 para o Ato 2). Counter em vez de tween por sprite: as camadas RECICLAM durante
-   * o fade, e um sprite novo tem que nascer no alpha do instante (ver `emit`).
+   * ⚠️ ELE NÃO MEXE MAIS NO CASCO (2026-08-27). Até aqui era "um fade só para duas
+   * revelações" — a nuvem sumindo e o casco nascendo eram a MESMA variável, e por isso
+   * afinar a nuvem em t=21 arrastava o casco junto. Agora o casco tem o `cascoReveal` dele,
+   * e quem o chama é o mergulho do rabo. Ver `revealCasco`.
+   *
+   * Counter em vez de tween por sprite: as camadas RECICLAM durante o fade, e um sprite novo
+   * tem que nascer no alpha do instante (ver `emit`).
    */
   setNebulaDensity(density: number, durationMs = 5000): void {
     const alvo = Phaser.Math.Clamp(density, 0, 1);
@@ -1295,14 +1311,43 @@ export class Parallax {
       onUpdate: (tw) => {
         this.nebulaDim = tw.getValue() ?? alvo;
         for (const layer of this.layers) {
-          if (!layer.nebulosaExtra && !layer.casco) continue;
+          if (!layer.nebulosaExtra) continue;
           const a = this.alphaFor(layer);
           for (const s of layer.sprites) s.setAlpha(a);
         }
         // A pintura não é ScatterLayer, então ela não passa por `alphaFor` — some aqui, à mão.
         for (const img of this.nebulaPainting) img.setAlpha(this.nebulaDim);
-        // A faixa da frente também não é: ela ACENDE junto com o casco (1 − nebulaDim).
-        this.cascoFrente?.setAlpha(1 - this.nebulaDim);
+      },
+    });
+  }
+
+  /**
+   * O CASCO NASCE (Fase 3, a virada do Ato 1 para o Ato 2).
+   *
+   * ⚠️ QUEM CHAMA É O MERGULHO DO RABO (`GameScene.raboDoLeviata`), NÃO O ROTEIRO. O casco tem
+   * que começar no instante exato em que a nadadeira limpa o rodapé — e esse instante é uma
+   * etapa de tween, não uma linha do `STAGE_3`. Amarrá-lo ao relógio do roteiro faria os dois
+   * derivarem na primeira vez que alguém mexesse na duração da descida, e a costura viraria
+   * corte outra vez.
+   */
+  revealCasco(alvo: number, durationMs = 1500): void {
+    const destino = Phaser.Math.Clamp(alvo, 0, 1);
+
+    this.scene.tweens.addCounter({
+      from: this.cascoReveal,
+      to: destino,
+      duration: durationMs,
+      ease: 'Sine.easeInOut',
+      onUpdate: (tw) => {
+        this.cascoReveal = tw.getValue() ?? destino;
+        for (const layer of this.layers) {
+          if (!layer.casco) continue;
+          const a = this.alphaFor(layer);
+          for (const s of layer.sprites) s.setAlpha(a);
+        }
+        // A faixa da frente não é ScatterLayer — não passa por `alphaFor`. Acende aqui, à mão,
+        // e junto com o casco: ela é o casco MAIS PERTO (ver a construção dela).
+        this.cascoFrente?.setAlpha(this.cascoReveal);
       },
     });
   }
