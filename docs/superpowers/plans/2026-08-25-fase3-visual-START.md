@@ -3,23 +3,23 @@
 **🟡 FATIA EM ANDAMENTO.** Branch `feat/fase3-visual`, **não mergeada**. `main` continua em
 `ee4e2a0` (a Fatia 4).
 
-A sessão de **26/08** entrou depois do primeiro teste do Henrique e atendeu ao que ele pediu ali.
-**Nada disso foi jogado ainda** — ele vai testar na próxima sessão, e é dela que saem os ajustes.
+O Henrique **jogou a fase em 27/08** e deu veredicto por parte. A sessão de 27/08 entregou os
+quatro ajustes que ele pediu. **Nada disso foi jogado ainda.**
 
 ---
 
 ## 🔑 COMO RETOMAR (frase de arranque)
 
 > **"Leia `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`. A Fatia 5 está em andamento
-> na branch `feat/fase3-visual`. A sessão passada entregou cinco mudanças que EU AINDA NÃO
-> TESTEI: a pintura de fundo em resolução real, o rabo do Leviatã na virada, a faixa que planta
-> os props, o lança-mísseis com míssil novo e 4 bocas, e os consertos do piso do casco. Sobe o
-> `npm run dev`, eu entro com `[M]`, e só depois do meu veredicto seguimos para a Task 4."**
+> na branch `feat/fase3-visual`. A sessão passada entregou quatro mudanças que EU AINDA NÃO
+> TESTEI: o rabo colossal saindo do quadro, o toco da cauda virando a costura do casco, os
+> respiradouros raros, e a água-viva elétrica no Ato 1. Sobe o `npm run dev`, eu entro com `[M]`,
+> e só depois do meu veredicto seguimos para o fechamento."**
 
-⚠️ **NÃO comece pela Task 4.** Ela é o fechamento (regressão final, revisão ampla, documentos,
-merge), e fechar antes do teste humano é fechar sobre arte que ainda pode mudar.
+⚠️ **NÃO comece pelo fechamento** (revisão ampla, documentos, merge). Fechar antes do teste humano
+é fechar sobre arte que ainda pode mudar — foi por isso que esta fatia abriu duas vezes.
 
-⚠️ **NÃO re-despache as Tasks 1–3.** Estão commitadas. Ledger em `.superpowers/sdd/progress.md`.
+⚠️ **NÃO re-despache as Tasks 1–3 antigas.** Estão commitadas. Ledger em `.superpowers/sdd/progress.md`.
 
 ---
 
@@ -29,109 +29,108 @@ merge), e fechar antes do teste humano é fechar sobre arte que ainda pode mudar
 
 | t | O quê |
 |---|---|
-| 0–21s | Ato 1 dentro da nuvem — **a pintura agora em resolução real** |
-| 21s | O casco se anuncia: a nuvem afina 25% e a estrutura aparece por baixo |
-| **40,5s** | **O RABO** entra pela direita e se segura, batendo a nadadeira |
-| 42s | A nuvem abre — o casco assume (e o planeta reaparece junto) |
-| ~47,5s | O rabo **afunda** por trás do casco: a transição dita em movimento |
-| 46s+ | Ato 2 — lança-mísseis e respiradouros sobre o casco |
+| 0–37s | Ato 1 dentro da nuvem — **a água-viva entra em t=8 e t=16** |
+| 21s | A nuvem afina 25%… **e o casco NÃO aparece** (era aqui o gradiente estranho) |
+| 37,5s | Os hazards param — o quadro esvazia |
+| **38s** | **O RABO** entra pela direita, colossal, sangrando do quadro |
+| 42s | A nuvem abre: planeta e estrelas voltam. **O casco continua invisível** |
+| **46,5s** | A nadadeira sai pelo rodapé. **Só o TOCO fica — e o casco nasce dele** |
+| 48s | O casco está sólido; o toco afunda por trás dele |
+| 48,5s | Banner `O CASCO DO LEVIATÃ` |
 | 53s / 88s | A aranha / a serpente |
 
 ---
 
-## As CINCO mudanças que esperam o seu olho
+## As QUATRO mudanças que esperam o seu olho
 
-### 1. A pintura de fundo, em resolução real ⭐ (a reclamação de três sessões)
+### 1. O rabo colossal ⭐
 
-Ela era **480×270 em `y=−27`** numa tela de **384×216** — mostrava 80% de cada eixo, ou seja
-**64% da pintura com zoom de 1,25×**. Agora é 384×216 em `y=0`: largura inteira, 94,4% da altura,
-um pixel da arte por pixel de tela.
+Escala **2,4 → 3,4**: 364×248 numa tela de 384×216, sangrando ~20px em cima e ~12px embaixo. A
+regra antiga (*"o arco inteiro tem que caber"*) morreu com o seu teste.
 
-⚠️ **A `paintBgF2` (Cutscene 2) e a `paintBgZeroG` (rompimento da atmosfera) continuam erradas** —
-mesmo defeito, em fases já mergeadas e revisadas. Não foram tocadas. O conserto é uma linha por
-pintura (`node scripts/paint-bg.mjs <origem> <destino> 384 216`, mais o `y` no `Parallax`), e a
-decisão é sua.
+- **Está opressivo?** A nadadeira agora alcança x≈33 — atravessa a tela inteira por trás de você,
+  e o fundo do quadro vira todo rabo por ~7s. **3,0 é o degrau abaixo**, e a coreografia não muda
+  com ele: é trocar um número.
+- **A batida mudou de peso?** Não deveria: o arco caiu de ±8° para ±6° justamente porque a
+  alavanca cresceu de 236 para 335px. A varredura foi de ~66px para ~70px.
 
-### 2. O rabo do Leviatã
+### 2. O toco vira a costura
 
-Chega pela direita, **se segura** com o corpo saindo do quadro, bate a nadadeira, e afunda por
-trás do casco. Escala **2,4** (175px de altura numa tela de 216).
+O mergulho virou **rotação em torno do pedúnculo** (−38°): a nadadeira desce 206px e sai pelo
+rodapé, o toco fica na quina, o casco nasce dali, e só depois o toco afunda por baixo do chão novo.
 
-- **Ele está colossal o bastante?** Tentei 3,0 e ficou pior: a nadadeira sozinha media 219px e a
-  batida a varria para fora da tela em cima e embaixo — via-se a lombada, nunca o rabo inteiro.
-  2,4 é o maior tamanho em que o arco inteiro cabe. Para ir além, o arco tem que encolher.
-- **A batida está com peso?** Ela é assimétrica: sobe em 1,5s, desce em 0,55s. Se estiver lenta
-  demais ou rápida demais, são dois números em `raboDoLeviata()`.
+- **A emenda ficou fluida?** É a pergunta central desta rodada. Se ainda ler como corte, os botões
+  são a pausa do toco (800ms) e a duração da revelação (1500ms), em `raboDoLeviata()`.
+- **O gradiente sumiu mesmo?** Em t=21 e t=44 o casco tem que estar em alpha **0**.
 
-### 3. A faixa que planta os props
+### 3. Os respiradouros raros
 
-O respiradouro parecia colado. A causa não era a arte — era a falta da **faixa da frente**, que a
-Fase 1 tem desde sempre e a Fase 3 não tinha. Agora existe, em `depth −0.2`.
+De ~13 na fase para **~3**, com espaçamento mínimo de 6,4s.
 
-- **O pé dos props sumiu direito?** Se ainda parecer colado, a tira sobe (`GROUND_Y − 4` → −8).
-- **O tom dela está certo?** Ela é o casco MAIS PERTO, em leve sombra (tint `0x9aa4b8`). Se
-  brigar com a faixa de trás, escurece — **nunca clareia**.
+- ⚠️ **~3 pode ser POUCO DEMAIS** — é o número que eu mais desconfio. O botão é
+  `RESPIRADOURO_CARENCIA` no `GameScene`: 5s → ~3; **3s → ~4**; 8s → ~2.
+- **Mexer na CARÊNCIA, nunca na mistura.** A mistura é o que segura o volume de tiro do Ato 2.
+- O número de lança-mísseis não mudou (medido: 4 antes, 3–6 depois, mesma variância de sempre).
 
-### 4. O lança-mísseis e o míssil
+### 4. A água-viva elétrica
 
-Você criou dois projéteis; escolhi o **`d77055b6`** e descartei o `e77eebe8`. O motivo, medido no
-tamanho real do jogo: o descartado vira uma lasca de 20×18 quase vazia, lê como lança arremessada
-e a chama some. O escolhido tem corpo compacto e chama forte em 21×11.
+Do objeto que você criou. Deriva a 28px/s (o drone faz 70), não atira, não persegue, `hp 10`.
+Duas ondas: 3 em t=8 e 4 em t=16.
 
-⚠️ Os dois vinham **inclinados**, e o código faz `setRotation(angle)` — a arte tem que ser
-horizontal apontando para a direita, senão o míssil voa com o nariz torto o tempo todo. Foi
-endireitado em 11,5° com nearest (ampliando 4x e voltando, para não derreter a aresta).
-
-**As 4 bocas revezam**: um míssil por disparo, saindo de um tubo diferente a cada vez, ciclo
-fechado (verificado). **Não é salva.** Uma salva de quatro quadruplicaria o volume de tiro do
-Ato 2, e esse número está fechado até o playtest — se você quiser a salva, é uma decisão de
-balanceamento, não de arte.
-
-### 5. Os consertos do piso e das emendas
-
-O piso do casco não encostava no rodapé (sobrava uma tira de 7px onde se via estrela passando por
-baixo do chão) e as peças tinham contorno preto na borda, que virava risco vertical a cada ~60px.
-Os dois estão corrigidos e travados por assert.
+- ⚠️ **`hp 10` é o número mais frágil.** É 5× um drone. A intenção é "obstáculo que atrapalha", não
+  "alvo que você deleta". Se virar pedágio, é o `hp` que desce — **não a velocidade**, que é a
+  razão de ela existir.
+- **7 na tela ao mesmo tempo é demais?** As duas ondas se sobrepõem de propósito (lento e rápido
+  no mesmo quadro), mas o número é ajustável.
+- O pulso elétrico é código; os quadros só fazem o sino contrair e os tentáculos arrastarem.
 
 ---
 
 ## Regras que não se redescobrem (custaram sessão)
 
-### O erro da pintura, e por que ele durou tanto
+### As duas regras que o TESTE JOGADO derrubou
 
-⚠️ **O `paint-bg.mjs` sempre fez a coisa certa** — o cabeçalho dele diz *"1 px da arte = 1 px do
-jogo"*. Ele vinha sendo **CHAMADO com os números errados** (480×270 em vez de 384×216), em fase
-após fase. Um script correto invocado errado é mais difícil de achar do que um script errado:
-ninguém suspeita da ferramenta que documenta o próprio contrato.
+⚠️ **A "insinuação" do casco em t=21 foi REVERTIDA.** O `HANDOFF` pedia desde a Fatia 0 (*"na
+metade do tempo o Leviatã começa a aparecer"*), a sessão de 26/08 implementou, e o Henrique
+reprovou jogando. **Ela não foi esquecida: foi construída, vista e rejeitada.** Não reimplemente.
+
+⚠️ **"Colossal tem teto" também morreu.** Sair do quadro deixou de ser defeito e virou o objetivo.
+
+### O que as sondas ensinaram, e continua valendo
+
+⚠️ **ASSERT DE MOVIMENTO QUE NÃO OLHA A DIREÇÃO NÃO MEDE MOVIMENTO.** O mergulho saiu com o sinal
+invertido (`+38` em vez de `−38`) e a nadadeira atravessava o TOPO do quadro. O assert
+`angulo > 20` passou verde: media o tamanho do giro, não o lado. **Quem reprovou foi a captura de
+tela.** Toda sonda visual desta fatia tira foto por isso.
+
+⚠️ **ASSERT QUE AMOSTRA UMA LINHA SÓ NÃO MEDE O QUE DIZ MEDIR** (a lição do rodapé e das emendas).
+E o gêmeo dela: **contar sprites vivos não conta nascimentos** — props reciclam, então a sonda dos
+respiradouros envelopa `terrain.spawn` em vez de olhar a tela.
+
+⚠️ **SONDA EXISTENTE QUE ENCOSTA NA MUDANÇA SE CONFERE, NÃO SE AFROUXA.** Nesta rodada dois
+asserts mudaram de critério (o do casco e o do "colossal") e um mudou de HORA (o do Ato 2
+amostrava em t=47, no meio da revelação, e reprovava um casco correto mas inacabado). Nenhum
+afrouxou.
+
+⚠️ **SONDA DE TEMPO REAL SE RODA UMA POR VEZ.** Três browsers headless no mesmo Vite quebram a
+`probe-stage3`.
 
 ### Arte gerada
 
-⚠️ **O v3 do PixelLab lê "bater para cima e para baixo" como "GIRAR".** A animação do rabo voltou
-com a nadadeira rodando em torno do próprio eixo — uma hélice. Descartada inteira. **Movimento que
-se descreve numa frase de geometria não precisa de quadros gerados**: a batida virou uma rotação
-em torno do pedúnculo, em código, e não tem como dar a volta.
+⚠️ **MOVIMENTO QUE CABE NUMA FRASE DE GEOMETRIA NÃO VAI PARA OS QUADROS GERADOS.** O v3 leu *"bater
+para cima e para baixo"* como **girar** e devolveu o rabo como hélice. Na água-viva a divisão foi
+feita a tempo: quadros para o sino deformando, código para o pulso — e ela voltou certa de
+primeira.
 
-⚠️ **NÃO GERE ARTE A PARTIR DA COISA EM QUE ELA SE APOIA.** A lição da doca (Fatia 4) se repetiu:
-pedi um lança-mísseis *"mounted on a whale hull"* com a baleia de referência, e as 16 candidatas
-voltaram sendo a baleia com um canhão nas costas. Custou 20 gerações e uma rodada.
+⚠️ **GLOW INTERNO, NUNCA EXTERNO, em sprite recortado justo.** O halo externo vaza da quad e é
+ceifado nela: vira um retângulo aceso em volta do bicho.
 
-⚠️ **PARA TRAVAR O ÂNGULO, RECORTE O ÂNGULO DA PRÓPRIA REF.** O primeiro rabo saiu numa vista de
-cima porque o prompt dizia "wide horizontal fin". O que resolveu não foi adjetivo: foi recortar a
-CAUDA da baleia de referência (`assets/raw/ref-rabo-lateral.png`) e mandar ela como style image.
+⚠️ **MEDIR NO TAMANHO REAL DO JOGO.** O míssil descartado (`e77eebe8`) só se entregou assim.
 
-**Colossal tem teto.** O que não cabe na tela não se vê: em escala 3,0 sobrava a lombada
-atravessando o quadro e o rabo nunca aparecia inteiro. Quem limita é a ponta do braço mais longo.
+⚠️ **NÃO GERE ARTE A PARTIR DA COISA EM QUE ELA SE APOIA** (a lição da doca, repetida no
+lança-mísseis: 16 candidatas voltaram sendo a baleia com um canhão nas costas).
 
-### Sondas
-
-⚠️ **ASSERT QUE AMOSTRA UMA LINHA SÓ NÃO MEDE O QUE DIZ MEDIR.** O do rodapé reprovou porque uma
-das duas linhas caiu numa junta de placa — arte legítima. Virou média de 6 linhas. O das emendas
-tinha o defeito gêmeo: contava toda coluna escura e acusava 11, que eram as silhuetas dos
-respiradouros. A diferença entre um risco e um prop é a **largura**. **Quando um assert visual
-reprova, confira se ele mede a coisa antes de mexer na coisa.**
-
-⚠️ **SONDA DE TEMPO REAL SE RODA UMA POR VEZ.** A `probe-stage3` quebrou com três browsers
-headless disputando o mesmo Vite, e passou sozinha sem nenhuma mudança.
+⚠️ **PARA TRAVAR O ÂNGULO, RECORTE O ÂNGULO DA PRÓPRIA REF.**
 
 ### As regras das sessões anteriores, ainda válidas
 
@@ -139,36 +138,39 @@ headless disputando o mesmo Vite, e passou sozinha sem nenhuma mudança.
   depois do pause busque a cena por chave, `getScene('Game')`).
 - ⚠️ **Empate de profundidade renderiza certo por acidente.** Toda profundidade nova precisa ser
   distinta e comentada.
-- **Pintura de fundo é 100% opaca** e esconde o planeta no Ato 1 — aceito, e com efeito bom: em
-  t=42 a pintura some e o planeta reaparece junto com o casco.
-- **O `pickVariant` sorteia UNIFORME.** Proporção que importa vem da GEOMETRIA (o `gap`), não dele.
-- ⚠️ **Sonda existente que encosta na mudança se CONFERE, não se afrouxa.**
+- **O `pickVariant` sorteia UNIFORME.** Proporção que importa vem da GEOMETRIA, não dele — e
+  ESPAÇAMENTO, muito menos.
+- ⚠️ **O `paint-bg.mjs` sempre esteve certo; ele vinha sendo CHAMADO errado.** Um script correto
+  invocado errado é mais difícil de achar do que um script errado.
 
 ---
 
 ## Sondas
 
-`probe-f3-visual.mjs` — **26 asserts**, tudo verde. Cobre a pintura em resolução real, o casco se
-anunciando, o rabo (existe, bate, arco curto e não giro, se segura na direita, é colossal, não tem
-corpo físico), o rodapé, as emendas, os props do Ato 2 e a faixa da frente.
+`probe-f3-visual.mjs` — **36 asserts**, tudo verde. Cobre a pintura em resolução real, a água-viva
+(existe, deriva, pulsa, limpa a tela antes do rabo), o casco INVISÍVEL no Ato 1 com a nuvem
+afinando mesmo assim, o rabo (bate, arco curto, se segura na direita, colossal, sangra do quadro,
+sem corpo físico), o TOCO (gira para baixo, depth −76, o casco nascendo dele), o casco inteiro no
+Ato 2, o rodapé, as emendas, e os respiradouros (poucos, espaçados, sem mexer nos atiradores).
 
 `probe-stage3.mjs` — **o portão**: a fase de ponta a ponta, as 4 formas da serpente, o hangar.
 
-Regressão da sessão: `tsc` limpo · `npm run build` limpo · `probe-f3-visual` 26/26 ·
+Regressão da sessão de 27/08: `tsc` limpo · `npm run build` limpo · `probe-f3-visual` 36/36 ·
 `probe-stage3` verde · `probe-chain` verde · `probe-cut2-visual` verde · `probe-doca` verde.
 
 ---
 
-## O que falta (a Task 4)
+## O que falta
 
 1. **Os ajustes que saírem do teste do Henrique** — é por isso que a fatia está aberta.
 2. **A luz quente entre segmentos do casco — CONDICIONAL.** Só se ele disser que falta luz. **Se
    pedir, PARE e escreva uma tarefa própria**: é medir sete artes, escolher limiares e calibrar.
    Referência: `Interlude2Scene.criarLuzes()` (`88b80c4`) + `scripts/_cut2-luzes.mjs`.
 3. **A decisão sobre a `paintBgF2` / `paintBgZeroG`** (o mesmo erro de resolução, em fases
-   mergeadas).
-4. **A revisão ampla da branch** — a Task 3 nunca foi revisada, e a sessão de 26/08 não passou
-   por revisão nenhuma.
+   mergeadas e revisadas). Uma linha por pintura: `node scripts/paint-bg.mjs <origem> <destino>
+   384 216`, mais o `y` no `Parallax`.
+4. ⚠️ **A REVISÃO AMPLA DA BRANCH** — a Task 3 nunca foi revisada, nem a sessão de 26/08, nem a de
+   27/08. **Tem que acontecer antes do merge.**
 5. **Os documentos e o merge** (`--no-ff`, mensagem por arquivo).
 
 **A próxima fatia depois desta é a 6 — Cutscene 3 (o hangar do Leviatã).**

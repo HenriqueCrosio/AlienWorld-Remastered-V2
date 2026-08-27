@@ -757,10 +757,88 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 5 (2026-08-26) — a Fase 3, EM ANDAMENTO
+## A FATIA 5 — a Fase 3, EM ANDAMENTO
 
 🟡 **Branch `feat/fase3-visual` de pé, NÃO mergeada. `main` segue em `ee4e2a0`.**
 Estado, o que testar e o que falta: `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`.
+
+### O PRIMEIRO TESTE JOGADO (2026-08-27) — o que ele aprovou, mudou e REVERTEU
+
+O Henrique jogou a fase pela primeira vez. **Aprovados jogando, e agora fora de escopo:** a
+pintura e a névoa do Ato 1 (*"bem imersivo, o cenário ficou muito bem montado"*), o lança-mísseis
+e os projéteis, a faixa que planta os props, o piso e as emendas do casco, e a batida assimétrica
+do rabo. Spec: `docs/superpowers/specs/2026-08-27-fase3-ajustes-teste-design.md`.
+
+#### ⚠️ A INSINUAÇÃO DO CASCO EM t=21 FOI REVERTIDA — NÃO A REIMPLEMENTE
+
+**Este documento pedia**, desde a Fatia 0, *"na metade do tempo, o Leviatã começa a aparecer"*. A
+sessão de 26/08 finalmente implementou (`nebula density 0.75` em t=21, que subia o casco a alpha
+0,25). **O Henrique jogou e reprovou**: *"o casco está com aquele gradiente de transparência
+estranho antes mesmo da cauda aparecer"*.
+
+**O teste jogado vence o documento.** O casco agora fica em alpha 0 até o rabo afundar. Se você
+está lendo este arquivo e achando que a insinuação foi esquecida, **ela não foi: foi construída,
+vista e rejeitada.**
+
+A causa técnica era um acoplamento: o alpha do casco era `1 − nebulaDim`, então afinar a nuvem
+OBRIGAVA o casco a aparecer. Agora existe `Parallax.cascoReveal`, separado, e quem o chama é o
+mergulho do rabo — não o roteiro.
+
+#### ⚠️ "COLOSSAL TEM TETO" TAMBÉM MORREU, E PELO MESMO MOTIVO
+
+A sessão de 26/08 escreveu que 2,4 era o teto do rabo *"porque o arco inteiro da batida tem que
+caber na tela"*. A regra existia porque **sair do quadro era tratado como defeito**. O Henrique
+pediu o contrário: *"precisa ser maior, talvez fazer com que ele saia do frame da tela"*. Escala
+**3,4** (364×248 numa tela de 384×216), sangrando ~20px em cima e ~12px embaixo.
+
+O arco caiu de ±8° para **±6°** — e isso PRESERVA a batida em vez de enfraquecê-la: a alavanca
+foi de 236 para 335px, então ±8° varreria 93px (contra os ~66 aprovados) e ±6° varre ~70.
+
+#### O TOCO DA CAUDA: o mergulho é ROTAÇÃO, não translação
+
+O pedido foi *"sai por baixo, deixando apenas o toco da cauda... quando a cauda abaixa, o casco se
+inicia"*. Girar **−38°** em torno do pedúnculo (origem 0.92) manda a nadadeira 206px para baixo e
+para fora do rodapé, enquanto o toco, que está EM CIMA do pivô, fica. O casco nasce dali.
+
+⚠️ **DESCER EM LINHA RETA NÃO SERVIRIA**, e só a medição mostrou por quê: a arte é uma **cunha
+contínua** (nadadeira alta em x≈27..40, cintura em x=45, corpo engrossando até a direita — ver
+`scripts/_medir-rabo.mjs`). Não existe coluna onde a nadadeira "acabe", então uma translação
+deixaria à mostra a borda de cima do desenho inteiro.
+
+⚠️ **O SINAL DO GIRO CUSTOU UMA RODADA.** Com y para baixo, ângulo POSITIVO joga um ponto à
+esquerda do pivô para CIMA. `+38` mandava a nadadeira atravessar o topo do quadro — e o assert
+`angulo > 20` **passava verde**, porque media o tamanho do giro e não o lado. Quem reprovou foi a
+captura de tela. **Assert de movimento que não olha a direção não mede movimento.**
+
+#### OS RESPIRADOUROS: cortar sem mexer em quem atira
+
+`rate` é INTERVALO em segundos, não taxa. A cadência caiu pela metade (1,6 → 3,0s) e a mistura
+dobrou a favor do lança (1:3 → 1:1): os dois **se cancelam** na conta de atiradores. Medido, 4
+lança-mísseis antes e 3–6 depois (a variância é a mesma de antes, e sempre existiu). Respiradouros
+caíram de ~13 para ~3.
+
+⚠️ **O ESPAÇAMENTO VEM DE UMA CARÊNCIA, NÃO DO SORTEIO** — `GetRandom` é uniforme e pode dar dois
+seguidos. É a mesma lição do `pickVariant`. A vaga bloqueada **MORRE em vez de virar
+lança-mísseis**: substituir dobraria os atiradores. O botão de ajuste é a carência
+(`RESPIRADOURO_CARENCIA`), nunca a mistura.
+
+#### A ÁGUA-VIVA: onde a arte gerada acaba e o código começa
+
+Inimigo novo do Ato 1 (`aguaViva`), a partir de um objeto que o Henrique criou. É a **única coisa
+lenta** da nebulosa — o ato inteiro era rápido, e nada ficava no quadro.
+
+⚠️ **A DIVISÃO DE TRABALHO É A LIÇÃO DA HÉLICE, APLICADA A TEMPO.** Aos quadros gerados foi só o
+que código não faz (o sino deformando, os tentáculos arrastando); o pulso elétrico é um tween.
+Pedir *"pulsa com eletricidade"* ao v3 devolveria uma hélice azul, como o rabo. Desta vez a
+animação voltou certa de primeira.
+
+⚠️ **GLOW INTERNO, NUNCA EXTERNO.** O `outerStrength` desenha além da silhueta, a quad do sprite é
+a arte recortada justa, e o vazamento é ceifado nela: o que aparece é um **retângulo azul** em
+volta do bicho. No tamanho do jogo passava por brilho; quem entregou foi a captura ampliada.
+
+⚠️ **ELA NASCE EM `GAME_WIDTH + 16`, NÃO EM `GAME_WIDTH`.** A 28px/s são 400px, ou **14,3s** de
+travessia — não os 13,7 que a largura da tela sugere. A primeira colocação das ondas errou por
+esses 0,6s e deixou uma viva na tela quando o rabo entrava.
 
 **A SESSÃO DE 26/08** entrou depois do primeiro teste do Henrique e mexeu em cinco frentes: o
 piso e as emendas do casco, a colônia da Fase 1 que saiu de cima dele, o RABO do Leviatã como
