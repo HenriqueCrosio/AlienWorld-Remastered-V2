@@ -576,13 +576,17 @@ export class GameScene extends Phaser.Scene {
     // asset do projeto (ausente = a cena continua, ver BootScene).
     if (!this.textures.exists('raboLeviata')) return;
 
-    // ⚠️ ESCALA 2,4 — COLOSSAL, MAS AINDA VISÍVEL POR INTEIRO. A arte é 107×73 e vira 257×175.
+    // ⚠️ ESCALA 3,4 — COLOSSAL PORQUE NÃO CABE. A arte é 107×73 e vira 364×248 numa tela de
+    // 384×216: ela sangra ~20px pelo topo e ~12px pelo rodapé.
     //
-    // Em 1,7 ele lia como "um bicho grande passando", e a leitura pedida é que a coisa não cabe
-    // no quadro. Mas 3,0 passou do ponto e virou o defeito oposto: a nadadeira sozinha ficava
-    // com 219px de altura numa tela de 216, e a batida a varria para fora em cima e embaixo —
-    // sobrava a lombada atravessando o quadro, e o rabo, que é a coisa toda, nunca aparecia
-    // inteiro. 2,4 é o maior tamanho em que o ARCO INTEIRO da batida ainda cabe na tela.
+    // ⚠️ A REGRA ANTERIOR ERA A OPOSTA, E FOI DERRUBADA JOGANDO (2026-08-27). A sessão de 26/08
+    // travou em 2,4 com a justificativa "é o maior tamanho em que o ARCO INTEIRO da batida ainda
+    // cabe na tela" — e a regra existia porque sair do quadro era tratado como defeito. O
+    // Henrique jogou e pediu o contrário: "precisa ser maior, talvez fazer com que ele saia do
+    // frame da tela, para dar a impressão de colossal". Sem o teto, a escala sobe.
+    //
+    // 3,0 é o degrau abaixo, se um dia 3,4 ficar opressivo — a coreografia não muda com ele.
+    // A régua é `scripts/_medir-rabo.mjs`.
     //
     // ⚠️ A ORIGEM VAI PARA A DIREITA (0,92 / 0,5) — E ELA É O PIVÔ DA BATIDA. Numa baleia o
     // rabo gira em torno do pedúnculo, lá onde ele encontra o corpo; a nadadeira é a ponta do
@@ -599,7 +603,7 @@ export class GameScene extends Phaser.Scene {
       .sprite(GAME_WIDTH + 200, 104, 'raboLeviata')
       .setOrigin(0.92, 0.5)
       .setDepth(-70)
-      .setScale(2.4)
+      .setScale(3.4)
       .setAlpha(0);
 
     // 1. A CHEGADA (2,5s): entra pela direita e DESACELERA até parar. O `easeOut` é o que
@@ -618,17 +622,19 @@ export class GameScene extends Phaser.Scene {
     //    Sobe DEVAGAR (1,5s, easeInOut: o braço carregando) e desce COM TUDO (0,55s, easeIn: a
     //    remada). Um yoyo simples daria as duas metades com a mesma pressa, e o peso sumiria.
     //
-    //    ±8°: com a ponta a 236px do pivô, isso varre ~66px na vertical. Foi o maior ângulo em
-    //    que a nadadeira inteira continua dentro da tela nos DOIS extremos do arco — é ela que
-    //    limita, não o corpo, porque ela é a ponta do braço mais longo.
-    rabo.setAngle(-8);
+    //    ⚠️ ±6°, E O ÂNGULO CAIU PARA O MOVIMENTO NÃO MUDAR. Com a escala em 3,4 a ponta da
+    //    nadadeira passou a ficar a ~335px do pedúnculo, contra 236 antes — a mesma alavanca
+    //    ficou mais longa. ±8° agora varreria 93px e a batida viraria outra coisa; ±6° varre
+    //    ~70px, que é praticamente a varredura que o Henrique aprovou (~66px). Reduzir o ângulo
+    //    aqui é o que PRESERVA a remada, não o que a enfraquece.
+    rabo.setAngle(-6);
     const batida = this.tweens.chain({
       targets: rabo,
       loop: -1,
       tweens: [
-        { angle: 8, duration: 1500, ease: 'Sine.easeInOut' },
-        { angle: -8, duration: 550, ease: 'Sine.easeIn' },
-        { angle: -8, duration: 250 },
+        { angle: 6, duration: 1500, ease: 'Sine.easeInOut' },
+        { angle: -6, duration: 550, ease: 'Sine.easeIn' },
+        { angle: -6, duration: 250 },
       ],
     });
 

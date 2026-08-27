@@ -138,6 +138,8 @@ const naVirada = await page.evaluate(async () => {
     depth: r.depth,
     escala: r.scaleX,
     alturaTela: Math.round(r.displayHeight),
+    topo: Math.round(r.y - r.displayHeight / 2),
+    base: Math.round(r.y + r.displayHeight / 2),
     a1: Number(a1.toFixed(1)),
     a2: Number(a2.toFixed(1)),
     corpo: r.body ?? null,
@@ -155,9 +157,22 @@ ok(
 );
 // ELE SE SEGURA NA DIREITA, com o corpo sangrando para fora da borda — não atravessa a tela.
 ok(naVirada.x > 300, `ele se SEGURA na direita, com o corpo saindo do quadro (x=${naVirada.x})`);
+// ⚠️ O CRITÉRIO DE "COLOSSAL" MUDOU, E MUDOU PARA MAIS EXIGENTE (2026-08-27).
+//
+// A versão anterior pedia `alturaTela > 150` e o comentário do código dizia que 2,4 era o teto
+// "porque o arco inteiro tem que caber na tela". O Henrique jogou e derrubou a regra: ele QUER
+// que o rabo saia do frame — é assim que a coisa lê como grande demais para o quadro.
+//
+// Então o assert deixa de medir "cabe" e passa a medir "NÃO cabe". Não é afrouxar: é a mesma
+// pergunta com a resposta invertida, e ela reprova tanto o pequeno demais quanto o que voltou
+// a caber por acidente.
 ok(
-  naVirada.alturaTela > 150,
+  naVirada.alturaTela > 240,
   `e é COLOSSAL: ${naVirada.alturaTela}px de altura numa tela de 216 (escala ${naVirada.escala})`,
+);
+ok(
+  naVirada.topo < 0 && naVirada.base > 216,
+  `SANGRANDO do quadro em cima E embaixo (y ${naVirada.topo}..${naVirada.base}, tela 0..216)`,
 );
 ok(naVirada.nebulaDim > 0.5, `chega AINDA DENTRO da nuvem (nebulaDim=${naVirada.nebulaDim})`);
 ok(naVirada.corpo === null, 'o rabo NÃO tem corpo físico (é cenário, não inimigo)');
