@@ -840,6 +840,65 @@ volta do bicho. No tamanho do jogo passava por brilho; quem entregou foi a captu
 travessia — não os 13,7 que a largura da tela sugere. A primeira colocação das ondas errou por
 esses 0,6s e deixou uma viva na tela quando o rabo entrava.
 
+### O SEGUNDO TESTE JOGADO (2026-08-27) — a cor, e o que a medição desmentiu
+
+O Henrique jogou de novo. **A água-viva agradou como visual e foi reprovada como MOVIMENTO**
+(*"elas sobem e descem verticalmente... quero que elas subam ou desçam e SAIAM da tela também,
+como se estivessem de passagem"*): agora ela atravessa na vertical, entrando por baixo subindo ou
+de ponta-cabeça por cima descendo.
+
+#### ⚠️ O CASCO ERA A ÚNICA PEÇA QUENTE DA FASE — E A MEDIÇÃO É QUE MOSTROU
+
+A reclamação foi *"o rabo fica quebrado... e depois já entra o casco que está de outra cor"*, o
+que soa como duas peças que precisam se acertar entre si. **A medição contou outra história:**
+
+| | realce da placa | R−B |
+|---|---|---|
+| modelo original (`assets/raw/ref-leviata-armored.png`) | `#24323b` | −23 |
+| rabo | `#24323b` | −23 |
+| respiradouro | `#24323b` | −23 |
+| lança-mísseis | `#3c445c` | −32 |
+| **casco** | `#423f38` | **+10** ← o único |
+
+O rabo e os props já estavam **na cor canônica exata**. O casco destoava do rabo, dos props E do
+modelo original ao mesmo tempo. **A pergunta deixou de ser "qual dos dois cede" e virou "há uma
+peça fora do canon".** Tint `0x84c0ff`, calculado e não escolhido a olho — para levar `#423f38` a
+`#24323b` é preciso (0.52, 0.75, 1.0) por canal, e como **tint multiplicativo só escurece**,
+normaliza-se pelo canal maior. Entrega `#222f38`: o canônico a menos de 3 por canal.
+
+⚠️ **MEÇA A PALETA ANTES DE DISCUTIR COR.** Relato de cor é impressão; a paleta é número, e o
+número reenquadrou o problema inteiro. A hipótese que caiu de brinde: o respiradouro era uma peça
+FRIA pousada num chão QUENTE — nunca pertenceu ao material, e isso pode ser parte do "falta algo"
+que o Henrique sentiu neles.
+
+⚠️ **AS COSTURAS DO CASCO FICAM ESCURAS, por decisão dele** — *"deixe a costura acesa para o rabo,
+é uma licença de design"*. O casco é blindagem morta; a junta do rabo é articulação viva. É a
+regra de sempre: luz só onde há energia.
+
+#### ⚠️ O CULLING DO RÓSTER SÓ OLHA A BORDA ESQUERDA
+
+Nada no jogo saía por cima ou por baixo até a água-viva atravessar. Quem cruza na vertical precisa
+do culling próprio — senão sai da tela e continua vivo para sempre, contado por toda sonda e todo
+overlap.
+
+E o par disso: **um eixo é física, o outro é escrito à mão, e eles não podem se misturar.** A
+senóide escreve posição, e escrever posição todo frame apaga a velocidade daquele eixo. No róster
+é física no x e senóide no y; na travessia vertical é o espelho exato.
+
+#### ⚠️ ASSERT DE MOVIMENTO QUE NÃO OLHA A DIREÇÃO NÃO MEDE MOVIMENTO — DE NOVO
+
+Depois do mergulho invertido, a segunda ocorrência na mesma fatia: a água-viva era medida por
+`vx > -40`, que é verdadeiro **até num bicho parado**. Ele passava verde em qualquer coisa que não
+voasse para a esquerda. Agora mede o EIXO e o sentido casando com o `flipY`.
+
+#### O que ficou ABERTO nesta rodada
+
+1. 🔴 **O alinhamento do toco com o casco.** O Henrique desenhou linhas vermelhas numa segunda
+   imagem que **não chegou** na sessão. A cor casou; a FORMA não (o rabo termina numa aresta
+   diagonal, o casco é faixa horizontal). **Pedir a imagem — não chutar geometria.**
+2. 🔴 **Os respiradouros ("falta algo").** Sem resposta, e vale rejogar com o casco já frio antes
+   de propor qualquer coisa.
+
 **A SESSÃO DE 26/08** entrou depois do primeiro teste do Henrique e mexeu em cinco frentes: o
 piso e as emendas do casco, a colônia da Fase 1 que saiu de cima dele, o RABO do Leviatã como
 transição, o míssil e as quatro bocas do lança-mísseis, e **a pintura de fundo em resolução
