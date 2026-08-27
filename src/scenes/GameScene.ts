@@ -638,30 +638,64 @@ export class GameScene extends Phaser.Scene {
       ],
     });
 
-    // 3. O MERGULHO (3,5s, a partir dos 7s): ele AFUNDA — sai pelo rodapé, por trás da faixa do
-    //    casco. É a transição dita sem banner nenhum: o rabo passa por baixo, e o que fica no
-    //    lugar dele é o chão. Some no caminho, para não brigar com o casco já revelado.
+    // 3. O MERGULHO, EM DUAS ETAPAS — e é a PRIMEIRA que faz a transição.
+    //
+    // ⚠️ A DESCIDA É UMA ROTAÇÃO, NÃO UMA TRANSLAÇÃO, E É ISSO QUE DEIXA O TOCO. O pivô é o
+    // pedúnculo (origem 0.92), lá na borda direita. Girar para −38° manda a NADADEIRA — que
+    // está a ~335px do pivô — 206px para baixo, para fora do rodapé, enquanto o TOCO, que está
+    // EM CIMA do pivô, praticamente não sai do lugar.
+    //
+    // ⚠️ E DESCER EM LINHA RETA NÃO SERVIRIA, o que não é óbvio até a arte ser medida. O perfil
+    // dela é uma CUNHA CONTÍNUA — nadadeira alta em x≈27..40, cintura em x=45, corpo
+    // engrossando até a direita (`scripts/_medir-rabo.mjs`). Não há uma coluna onde a nadadeira
+    // "acaba": uma translação deixaria à mostra a borda de cima do desenho INTEIRO, nadadeira
+    // junto, e não sobraria toco nenhum. Só a rotação separa a ponta longa da raiz.
+    //
+    // ⚠️ O SINAL É NEGATIVO, E ELE JÁ ENGANOU UMA VEZ. Com y para baixo, ângulo POSITIVO gira
+    // horário e joga um ponto à ESQUERDA do pivô para CIMA — é o mesmo sinal que a batida aqui
+    // em cima usa para "sobe devagar". `+38` mandava a nadadeira atravessar o topo do quadro, e
+    // o assert `angulo > 20` da sonda passava assim mesmo, porque media o tamanho do giro e não
+    // o lado. Quem reprovou foi a FOTO. Assert de movimento que não olha a direção não mede
+    // movimento.
+    //
+    // É o pedido do Henrique ao pé da letra: "sai por baixo, deixando apenas o toco da cauda...
+    // quando a cauda abaixa para a parte de baixo da tela, o casco se inicia".
+    //
+    // E é a MESMA remada da batida, terminada. Ele afunda porque DEU a remada, não apesar dela.
+    //
+    // O `y` desce junto (104 → 200) só para plantar o toco na quina de baixo, que é de onde o
+    // chão novo vai crescer.
     this.tweens.add({
       targets: rabo,
-      y: 300,
-      x: 268,
+      angle: -38,
+      y: 200,
       delay: 7000,
-      duration: 3500,
+      duration: 1500,
       ease: 'Sine.easeIn',
-      // A batida para no mergulho: um rabo que continua remando enquanto afunda lê como peça
-      // solta caindo. Ele desce porque DEU a remada, não apesar dela.
       onStart: () => {
+        // A batida para: um rabo que continua remando enquanto afunda lê como peça solta caindo.
         batida.stop();
+        // ATRÁS da faixa do casco (−75/−74), para o toco afundar POR BAIXO do chão novo em vez
+        // de escorregar na frente dele.
         rabo.setDepth(-76);
       },
-      onComplete: () => rabo.destroy(),
+      // ⚠️ O CASCO NASCE AQUI, E NÃO NO ROTEIRO. Este é o instante em que a nadadeira limpou o
+      // rodapé — o único instante em que o casco pode começar sem que a emenda vire corte. Uma
+      // linha no `STAGE_3` derivaria deste tween na primeira vez que alguém mexesse na duração.
+      onComplete: () => this.parallax.revealCasco(1, 1500),
     });
+
+    // 4. O TOCO AFUNDA (1,7s a partir dos 9,3s), por trás do casco que já está se formando. Ele
+    //    segura 800ms parado depois da remada: é o tempo de o jogador ler que o chão novo
+    //    COMEÇA ali. Sem essa pausa a costura passa rápido demais para ser vista.
     this.tweens.add({
       targets: rabo,
+      y: 330,
       alpha: 0,
-      delay: 8600,
-      duration: 1900,
+      delay: 9300,
+      duration: 1700,
       ease: 'Sine.easeIn',
+      onComplete: () => rabo.destroy(),
     });
   }
 

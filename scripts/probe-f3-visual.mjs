@@ -113,11 +113,11 @@ await page.screenshot({ path: 'scripts/_f3/probe-anuncio.png' });
 
 // ─── A TRANSIÇÃO: o RABO do Leviatã atravessa a tela ───
 //
-// Ele entra em t=40,5 — ANTES da nuvem abrir em t=42 — e leva ~9,5s para cruzar. A ordem é o
+// Ele entra em t=38 — ANTES da nuvem abrir em t=42 — e leva ~11s até sumir. A ordem é o
 // desenho todo: primeiro o jogador vê O QUE alcançou, e só depois o casco se revela como o
 // corpo daquilo. Um assert que só perguntasse "o rabo existe" passaria com ele entrando DEPOIS
 // da virada, que é a versão sem sentido — por isso este mede o nebulaDim junto.
-while ((await estado()).t < 41.5) {
+while ((await estado()).t < 39.5) {
   await page.waitForTimeout(800);
   await respirar();
 }
@@ -178,8 +178,46 @@ ok(naVirada.nebulaDim > 0.5, `chega AINDA DENTRO da nuvem (nebulaDim=${naVirada.
 ok(naVirada.corpo === null, 'o rabo NÃO tem corpo físico (é cenário, não inimigo)');
 await page.screenshot({ path: 'scripts/_f3/probe-rabo.png' });
 
-// O ATO 2: a nuvem abriu e o casco é a superfície.
+// ─── O TOCO: a nadadeira sai pelo rodapé e o casco NASCE dali ───
+//
+// ⚠️ ESTE É O ASSERT DA COSTURA, e ele existe porque a versão anterior fazia um CORTE. O
+// mergulho é uma ROTAÇÃO em torno do pedúnculo: a nadadeira desce 206px e sai da tela, e o
+// toco — que está no pivô — praticamente não sai do lugar. Depois dele, e só depois, o casco
+// começa. Se este assert reprovar com o casco já em 1, alguém religou o casco ao relógio do
+// roteiro e a costura virou corte de novo.
 while ((await estado()).t < 47) {
+  await page.waitForTimeout(400);
+  await respirar();
+}
+const noToco = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const r = s.children.list.find((o) => o.texture && o.texture.key === 'raboLeviata');
+  return {
+    t: Number((s.elapsed ?? 0).toFixed(1)),
+    cascoReveal: Number(s.parallax.cascoReveal.toFixed(2)),
+    n: r ? 1 : 0,
+    angulo: r ? Number(r.angle.toFixed(1)) : null,
+    y: r ? Math.round(r.y) : null,
+    depth: r ? r.depth : null,
+  };
+});
+console.log('toco    ' + JSON.stringify(noToco));
+ok(noToco.n === 1, `o TOCO ainda está em cena em t=${noToco.t}`);
+// ⚠️ O SINAL FAZ PARTE DO ASSERT. A primeira versão pedia `angulo > 20` — só o TAMANHO do giro —
+// e passou verde numa implementação que mandava a nadadeira para CIMA, atravessando o topo do
+// quadro. Quem reprovou foi a captura de tela. Com y para baixo, ângulo NEGATIVO é o que desce.
+ok(noToco.angulo !== null && noToco.angulo < -20, `e ele GIROU para BAIXO (${noToco.angulo}°) — a nadadeira saiu pelo rodapé`);
+ok(noToco.depth === -76, `atrás da faixa do casco (depth ${noToco.depth}) — ele afunda POR BAIXO do chão novo`);
+ok(noToco.cascoReveal > 0, `e o casco JÁ COMEÇOU a nascer dele (cascoReveal=${noToco.cascoReveal})`);
+await page.screenshot({ path: 'scripts/_f3/probe-toco.png' });
+
+// O ATO 2: o rabo afundou e o casco é a superfície.
+//
+// ⚠️ A ESPERA É t<50, E O NÚMERO IMPORTA. Ela era t<47, o que bastava quando o casco já estava
+// de pé desde t=21. Agora ele NASCE do mergulho e só fecha em t=48 — amostrar em 47 pegava a
+// revelação no meio (cascoReveal=0,38) e reprovava um casco que estava correto, só inacabado.
+// O assert media a coisa certa na hora errada; quem mudou foi a hora.
+while ((await estado()).t < 50) {
   await page.waitForTimeout(1500);
   await respirar();
 }
@@ -187,6 +225,7 @@ const ato2 = await estado();
 const casco2 = ato2.camadas.filter((c) => c.casco);
 console.log('t=' + ato2.t, JSON.stringify(casco2));
 
+ok(ato2.cascoReveal === 1, `o casco está INTEIRO no Ato 2 (cascoReveal=${ato2.cascoReveal})`);
 ok(
   casco2.some((c) => c.key === 'cascoLeviata'),
   'a BASE do casco usa a arte nova (cascoLeviata)',

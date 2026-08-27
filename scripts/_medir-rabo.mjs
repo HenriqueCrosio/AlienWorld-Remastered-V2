@@ -67,8 +67,12 @@ for (const escala of [2.4, 3.0, 3.4, 3.8]) {
   );
 }
 
-// O MERGULHO é uma ROTAÇÃO em torno do pedúnculo (ver GameScene.raboDoLeviata): girar
-// positivo manda a nadadeira para baixo e deixa o TOCO praticamente no lugar.
+// O MERGULHO é uma ROTAÇÃO em torno do pedúnculo (ver GameScene.raboDoLeviata): ela manda a
+// nadadeira para baixo e deixa o TOCO praticamente no lugar.
+//
+// ⚠️ O ÂNGULO É NEGATIVO NO CÓDIGO. Com y para baixo, girar POSITIVO leva um ponto à esquerda do
+// pivô para CIMA (é o sinal que a batida usa para "sobe devagar"). A tabela abaixo mostra o
+// tamanho do giro; o sinal dele no `raboDoLeviata` é −.
 console.log('');
 const braco34 = ORIGIN_X * width * 3.4;
 const meiaAltura = (height * 3.4) / 2;

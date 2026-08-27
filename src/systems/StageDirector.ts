@@ -237,10 +237,24 @@ export const STAGE_3: StageEvent[] = [
   // importa: primeiro o jogador vê O QUE alcançou, e só DEPOIS a nuvem abre e revela em cima
   // do que ele está voando. Invertido (nuvem primeiro, rabo depois) o casco chegaria como
   // cenário anônimo e o rabo viraria decoração atrasada.
-  { t: 40, type: 'hazard', rate: 0, mix: [] },
-  { t: 40.5, type: 'rabo' },
+  // ⚠️ O RABO ANDOU PARA TRÁS: 40,5 → 38 (2026-08-27). A coreografia nova — a remada final que
+  // manda a nadadeira para fora do rodapé, o toco segurando, e o casco nascendo dele — precisa
+  // de ~2,5s a mais de pista. Puxar o rabo é mais barato do que empurrar o Ato 2 inteiro.
+  //
+  // O `hazard rate 0` andou junto (40 → 37,5) porque ele NÃO é do Ato 2: é a preparação do
+  // rabo. Esvaziar o quadro é o que faz a chegada pesar, e tem que acontecer antes dela.
+  //
+  // ⚠️ O BANNER ANDOU PARA A FRENTE: 44 → 48,5. Ele anunciava um casco que só existe em t=48 —
+  // legenda antes da imagem. Agora ele chega quando há o que ver.
+  //
+  // ⚠️ A "INSINUAÇÃO" DE t=21 NÃO REVELA MAIS O CASCO, e isso é deliberado. O `density 0.75`
+  // continua lá afinando a nuvem, mas o casco não está mais amarrado a ele (ver
+  // `Parallax.cascoReveal`). O HANDOFF pedia a insinuação desde sempre; ela foi implementada em
+  // 26/08, foi JOGADA, e o Henrique reprovou. O teste jogado vence o documento.
+  { t: 37.5, type: 'hazard', rate: 0, mix: [] },
+  { t: 38, type: 'rabo' },
   { t: 42, type: 'nebula', density: 0 },
-  { t: 44, type: 'banner', text: 'O CASCO DO LEVIATÃ' },
+  { t: 48.5, type: 'banner', text: 'O CASCO DO LEVIATÃ' },
 
   // ATO 2: o casco é a superfície — e o que há EM CIMA dele é a defesa do próprio Leviatã.
   //
