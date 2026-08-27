@@ -1023,12 +1023,33 @@ export class Parallax {
     // do miolo), e como a peça da direita desenha por cima, o contorno da borda ESQUERDA dela
     // ficava visível — um risco preto a cada ~60px. Quem resolve isso é o `aparar-casco.mjs`,
     // que corta 1px de cada lado das sete peças; as larguras aqui já contam com os 70px.
+    // ⚠️ O TINT FRIO É O QUE FAZ O CASCO SER O MESMO BICHO DO RABO (2026-08-27).
+    //
+    // A arte do casco voltou do gerador MARROM-OLIVA (realce #423f38, R−B = +10). Todo o resto da
+    // Fase 3 é FRIO, e não por acaso — é a paleta do Leviatã canônico:
+    //
+    //   modelo original (`assets/raw/ref-leviata-armored.png`)  #24323b   R−B = −23
+    //   rabo-leviata                                            #24323b   R−B = −23
+    //   respiradouro                                            #24323b   R−B = −23
+    //   lanca-misseis                                           #3c445c   R−B = −32
+    //   casco                                                   #423f38   R−B = +10   ← o único
+    //
+    // Jogado, isso é a reclamação do Henrique: o rabo acaba e "já entra o casco que está de outra
+    // cor, ficando estranho". Não eram duas peças mal alinhadas — eram dois MATERIAIS.
+    //
+    // O tint sai da conta, não do olho: para levar #423f38 a #24323b é preciso (0.52, 0.75, 1.0)
+    // por canal. Tint multiplicativo só escurece, então normaliza-se pelo canal maior (o azul) e
+    // sobra 0x84c0ff, que entrega #222f38 — o canônico a menos de 3 por canal.
+    //
+    // ⚠️ AS COSTURAS FICAM ESCURAS, E ISSO É DECISÃO DO HENRIQUE, não limitação. O casco é
+    // blindagem MORTA: a luz quente das juntas é licença de design do RABO, onde há articulação
+    // viva. É a regra de sempre — luz só onde há energia.
     this.addLayer({
       key: 'cascoLeviata',
       factor: 1.0,
       baseY: GAME_HEIGHT + 14,
       depth: -75,
-      tint: 0xffffff,
+      tint: 0x84c0ff,
       alpha: 1,
       scale: [1, 1],
       gap: [54, 64],
@@ -1041,7 +1062,9 @@ export class Parallax {
       factor: 1.0,
       baseY: GAME_HEIGHT + 14,
       depth: -74,
-      tint: 0xffffff,
+      // O MESMO tint frio da base — as duas camadas são a mesma chapa, e um tint só numa delas
+      // devolveria a briga de material dentro do próprio casco.
+      tint: 0x84c0ff,
       alpha: 1,
       scale: [1, 1],
       gap: [200, 340],
@@ -1064,8 +1087,13 @@ export class Parallax {
     // ela cobre o pé deles. Mais alta que isso e ela engoliria a silhueta; mais baixa e a borda
     // reta reapareceria.
     //
-    // ⚠️ TINT ESCURO (0x9aa4b8, multiplicativo), nunca claro: é o casco MAIS PERTO, em leve
-    // sombra — a mesma leitura do `groundFront`, e a mesma regra de sempre nesta campanha.
+    // ⚠️ TINT ESCURO, nunca claro: é o casco MAIS PERTO, em leve sombra — a mesma leitura do
+    // `groundFront`, e a mesma regra de sempre nesta campanha.
+    //
+    // ⚠️ 0x9aa4b8 → 0x6390bf (2026-08-27). O cinza antigo foi escolhido quando a chapa era
+    // marrom-oliva, e sobre ela dava um cinza NEUTRO (#282928) — que agora briga com a base já
+    // esfriada. O novo é o MESMO frio da base (0x84c0ff) a 75% de brilho: mesma cor, um degrau
+    // mais escura. Sombra é a mesma tinta com menos luz, não outra tinta.
     //
     // Ela segue o alpha do CASCO (1 − nebulaDim): durante o Ato 1 não existe chão nenhum para
     // ter pé, e uma tira opaca no rodapé estragaria a nuvem. Quem a acende é o
@@ -1075,7 +1103,7 @@ export class Parallax {
         .tileSprite(0, GROUND_Y - 4, GAME_WIDTH, 20, 'cascoFrente')
         .setOrigin(0, 0)
         .setDepth(-0.2)
-        .setTint(0x9aa4b8)
+        .setTint(0x6390bf)
         .setAlpha(0);
     }
   }

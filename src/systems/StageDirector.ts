@@ -214,6 +214,8 @@ export const STAGE_3: StageEvent[] = [
   // O quadro precisa estar VAZIO quando o rabo entra — o vazio é o que faz a chegada dele pesar,
   // e é para isso que o `hazard rate 0` existe em t=37,5. Com a onda em t=16, o último nasce em
   // 20,2 e limpa em t≈34,5. NÃO empurrar estas ondas para depois de t=23.
+  // ⚠️ O `y` AQUI É IGNORADO: a travessia vertical nasce NA borda (ver `EnemySystem.spawn`). O
+  // roteiro escolhe QUANDO ela cruza, não a que altura — altura de quem atravessa é a borda.
   { t: 8, type: 'wave', kind: 'aguaViva', count: 3, spacing: 1.6, y: 100 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 130 },
 

@@ -102,12 +102,32 @@ while ((await estado()).t < 22) {
 const vivas = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   const l = s.enemies.enemies.getChildren().filter((o) => o.active && o.getData('kind') === 'aguaViva');
-  return { n: l.length, vx: l[0] ? Math.round(l[0].body.velocity.x) : null, anim: l[0]?.anims?.currentAnim?.key ?? null };
+  return {
+    n: l.length,
+    vys: l.map((o) => Math.round(o.body.velocity.y)),
+    flips: l.map((o) => o.flipY),
+    sobe: l.map((o) => o.getData('sobe')),
+    anim: l[0]?.anims?.currentAnim?.key ?? null,
+  };
 });
 console.log('agua-viva ' + JSON.stringify(vivas));
 ok(vivas.n > 0, `a ÁGUA-VIVA está no Ato 1 (achei ${vivas.n})`);
-ok(vivas.vx !== null && vivas.vx > -40, `e ela DERIVA, não voa (vx=${vivas.vx}, o drone faz -70)`);
 ok(vivas.anim === 'aguaviva-drift', `e o sino está PULSANDO (anim=${vivas.anim})`);
+
+// ⚠️ ELA ESTÁ DE PASSAGEM, E O ASSERT MEDE O EIXO. A primeira versão derivava da direita para a
+// esquerda em senóide, e o Henrique reprovou o movimento: ele quer que ela ATRAVESSE, entrando
+// por uma borda horizontal e saindo pela oposta. O assert antigo media `vx > -40`, que continua
+// verdadeiro num bicho parado — não separava "deriva" de "atravessa".
+ok(
+  vivas.vys.length > 0 && vivas.vys.every((v) => Math.abs(v) > 20),
+  `e ela ATRAVESSA na vertical, não fica bobeando (vy=${JSON.stringify(vivas.vys)})`,
+);
+// ⚠️ E O SENTIDO TEM QUE CASAR COM O FLIP. Quem desce entra DE PONTA-CABEÇA (pedido literal);
+// quem sobe entra de pé. Um assert que só olhasse "existe flip" passaria com todas viradas.
+ok(
+  vivas.sobe.every((s, i) => vivas.flips[i] === !s),
+  `e quem DESCE vem de ponta-cabeça (sobe=${JSON.stringify(vivas.sobe)}, flipY=${JSON.stringify(vivas.flips)})`,
+);
 await page.screenshot({ path: 'scripts/_f3/probe-agua-viva.png' });
 
 // ⚠️ O CASCO NÃO SE ANUNCIA MAIS, E A INVERSÃO É DELIBERADA (2026-08-27).

@@ -32,6 +32,14 @@ interface EnemyDef {
   /** Cospe este inimigo a cada `spawnRate` segundos. O cargueiro é uma fábrica com casco. */
   spawns?: EnemyKind;
   spawnRate: number;
+  /**
+   * TRAVESSIA VERTICAL: em vez de atravessar da direita para a esquerda, o bicho entra por uma
+   * borda horizontal e sai pela oposta — está DE PASSAGEM, cruzando a rota do jogador.
+   *
+   * Quando ligada, `speed` passa a ser a velocidade VERTICAL e `wave` a gingada HORIZONTAL (o
+   * contrário do padrão). Ver `spawn` e o culling em `update`.
+   */
+  travessia?: 'vertical';
 }
 
 /**
@@ -143,7 +151,16 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // A arte é 25×42 (alta e estreita: o sino mais os tentáculos), então 0.6 devolve 15×25 em
   // tela, ao lado dos 26×24 do kamikaze. Tint BRANCO: ela já nasce acesa, e multiplicar cor por
   // cima apagaria justamente o brilho.
-  aguaViva: { texture: 'aguaViva', anim: 'aguaviva-drift', hp: 10, speed: 28, wave: 34, fireRate: 0, score: 120, scale: 0.6, tint: 0xffffff, homing: 0, spawnRate: 0 },
+  // ⚠️ ELA ESTÁ DE PASSAGEM, E ISSO É O CONSERTO DO PRIMEIRO TESTE (2026-08-27). A primeira
+  // versão derivava da direita para a esquerda subindo e descendo em senóide, e o Henrique
+  // reprovou o MOVIMENTO ("elas sobem e descem verticalmente... quero que elas subam ou desçam e
+  // SAIAM da tela também, como se estivessem de passagem"). Agora ela cruza a rota do jogador:
+  // entra por baixo e sobe, ou entra de ponta-cabeça por cima e desce. Some pela borda oposta.
+  //
+  // Com `travessia: 'vertical'` os dois números TROCAM DE EIXO: `speed` é a subida/descida e
+  // `wave` é a gingada lateral. 264px de travessia a 34px/s = ~7,8s no quadro — tempo de sobra
+  // para atirar ou desviar, que é o que a mudança comprou.
+  aguaViva: { texture: 'aguaViva', anim: 'aguaviva-drift', hp: 10, speed: 34, wave: 26, fireRate: 0, score: 120, scale: 0.6, tint: 0xffffff, homing: 0, spawnRate: 0, travessia: 'vertical' },
 };
 
 /**
@@ -255,6 +272,20 @@ export class EnemySystem {
     // (a banda `casco` do Parallax tem o topo em ~190; o centro dela assenta em cima).
     if (kind === 'aranha') y = 170;
 
+    // ⚠️ A TRAVESSIA VERTICAL IGNORA O `y` DO ROTEIRO, e tem que ignorar: aqui o roteiro não
+    // escolhe ALTURA, escolhe QUANDO. Quem entra por uma borda horizontal nasce NA borda.
+    //
+    // O sorteio de sentido é meio a meio, e o que desce entra DE PONTA-CABEÇA — pedido literal do
+    // Henrique. Uma água-viva mergulhando com o sino para baixo é a mesma criatura noutro rumo;
+    // sem o `flipY` ela pareceria um segundo bicho com a mesma arte.
+    const sobe = DEFS[kind].travessia === 'vertical' ? Math.random() < 0.5 : false;
+    if (DEFS[kind].travessia === 'vertical') {
+      y = sobe ? GAME_HEIGHT + 24 : -24;
+      // Nasce à DIREITA do meio da tela: com a deriva lateral ela ainda cruza boa parte do
+      // quadro antes de sair, em vez de raspar a borda e sumir.
+      x = Phaser.Math.Between(Math.round(GAME_WIDTH * 0.45), GAME_WIDTH + 40);
+    }
+
     // A PELE POR FASE (canhoneira/batedor): na Fase 2, tenta a textura do cinturão primeiro;
     // sem o PNG (guarda de textura), cai na arte biomec de sempre — ver STAGE_2_SKIN.
     const skin = this.stageId === 2 ? STAGE_2_SKIN[kind] : undefined;
@@ -278,7 +309,18 @@ export class EnemySystem {
       e.play(baseAnim);
     }
 
-    e.setVelocityX(-def.speed);
+    if (def.travessia === 'vertical') {
+      // ⚠️ SÓ A VERTICAL É FÍSICA. A horizontal (deriva + gingada) é escrita à mão no `update`,
+      // porque a gingada ESCREVE `x` — e escrever x todo frame apagaria uma velocityX. É o
+      // espelho exato do que o resto do róster faz: lá a física é a horizontal e a senóide
+      // escreve `y`. Os dois eixos trocaram de papel, e a regra é a mesma.
+      e.setVelocityY(sobe ? -def.speed : def.speed);
+      e.setFlipY(!sobe);
+      e.setData('sobe', sobe);
+      e.setData('baseX', x);
+    } else {
+      e.setVelocityX(-def.speed);
+    }
     e.setScale(scale);
     e.setTint(tint);
 
@@ -361,7 +403,16 @@ export class EnemySystem {
 
       const def = DEFS[e.getData('kind') as EnemyKind];
 
-      if (def.wave > 0) {
+      if (def.travessia === 'vertical') {
+        // OS EIXOS TROCADOS: a física cuida da subida/descida, e aqui se escreve o X — a deriva
+        // lateral do mundo mais a gingada da criatura. `baseX` guarda a deriva sozinha, para a
+        // senóide não se acumular sobre si mesma a cada frame.
+        const t = (e.getData('t') as number) + dt * 2;
+        e.setData('t', t);
+        const baseX = (e.getData('baseX') as number) - 16 * dt;
+        e.setData('baseX', baseX);
+        e.x = baseX + Math.sin(t) * def.wave;
+      } else if (def.wave > 0) {
         const t = (e.getData('t') as number) + dt * 3;
         e.setData('t', t);
         e.y = (e.getData('baseY') as number) + Math.sin(t) * def.wave;
@@ -378,6 +429,11 @@ export class EnemySystem {
       // no meio da curva de volta. Ele só morre bem longe da tela.
       const limite = def.homing > 0 ? -120 : -24;
       if (e.x < limite) e.destroy();
+
+      // ⚠️ QUEM ATRAVESSA NA VERTICAL PRECISA DE CULLING VERTICAL. O culling do róster só olha a
+      // borda ESQUERDA — nada mais sai por cima ou por baixo. Sem isto a água-viva sairia da tela
+      // e continuaria viva descendo para sempre, contada por toda sonda e por todo overlap.
+      if (def.travessia === 'vertical' && (e.y < -48 || e.y > GAME_HEIGHT + 48)) e.destroy();
     }
 
     this.cullBullets();
