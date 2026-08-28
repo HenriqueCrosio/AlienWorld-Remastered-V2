@@ -142,6 +142,15 @@ export class Parallax {
    * mergulho, do toco da cauda para a esquerda (ver `GameScene.raboDoLeviata`).
    */
   private cascoReveal = 0;
+
+  /**
+   * QUANTOS PIXELS DE LEVIATÃ JÁ PASSARAM. Começa a contar no `revealCasco` e é a régua de
+   * `familiaDoCasco`: o casco não é uma textura sorteada, é um PERCURSO sobre um corpo.
+   */
+  private cascoDist = 0;
+
+  /** Ligado pelo `revealCasco`: antes dele não há casco nenhum para percorrer. */
+  private cascoAndando = false;
   /**
    * A pintura do céu da FASE 3. Ela NÃO é uma `ScatterLayer` — é uma placa fixa, como o
    * `paintBgF2` — então o alpha dela não passa por `alphaFor`. Quem a apaga é o
@@ -1021,53 +1030,50 @@ export class Parallax {
     // é por isso que isto NÃO é um TileSprite. Mas A SOBREPOSIÇÃO SOZINHA NÃO APAGAVA A EMENDA:
     // o PixelLab devolveu as peças com uma coluna de contorno PRETA na borda (0,008 contra 0,14
     // do miolo), e como a peça da direita desenha por cima, o contorno da borda ESQUERDA dela
-    // ficava visível — um risco preto a cada ~60px. Quem resolve isso é o `aparar-casco.mjs`,
+    // ficava visível — um risco preto a cada ~60px. Quem resolve isso é o `instalar-casco.mjs`,
     // que corta 1px de cada lado das sete peças; as larguras aqui já contam com os 70px.
-    // ⚠️ O TINT FRIO É O QUE FAZ O CASCO SER O MESMO BICHO DO RABO (2026-08-27).
+    // ⚠️ SEM TINT, E ISSO É A CORREÇÃO DE 28/08 — não um esquecimento.
     //
-    // A arte do casco voltou do gerador MARROM-OLIVA (realce #423f38, R−B = +10). Todo o resto da
-    // Fase 3 é FRIO, e não por acaso — é a paleta do Leviatã canônico:
+    // A geração de 25/08 voltou MARROM-OLIVA e a fase inteira teve de ser tingida de frio para
+    // disfarçar (`tint 0x84c0ff`, calculado para levar #423f38 a #24323b). O Henrique jogou de
+    // novo e a cor CONTINUAVA destoando: um tint multiplicativo só escurece, então o casco
+    // chegava ao canon perdendo ~28% de luminância no caminho — frio E apagado, ao lado de um
+    // rabo frio e vivo. Ele gerou os tiles novos, e eles nascem na cor certa (régua:
+    // `scripts/_medir-paleta.mjs`, a cor MODAL do material e não os 8% mais claros, que aqui
+    // mediriam o osso):
     //
-    //   modelo original (`assets/raw/ref-leviata-armored.png`)  #24323b   R−B = −23
-    //   rabo-leviata                                            #24323b   R−B = −23
-    //   respiradouro                                            #24323b   R−B = −23
-    //   lanca-misseis                                           #3c445c   R−B = −32
-    //   casco                                                   #423f38   R−B = +10   ← o único
+    //   ref-leviata-armored   #0c121a / #1f2932   R−B −14 / −19
+    //   rabo-leviata          #19222a (39%)       R−B −17
+    //   casco ANTIGO          #32312b (44%)       R−B  +7   ← o intruso
+    //   casco NOVO            #19222a / #2e3b44   R−B −17 / −22
     //
-    // Jogado, isso é a reclamação do Henrique: o rabo acaba e "já entra o casco que está de outra
-    // cor, ficando estranho". Não eram duas peças mal alinhadas — eram dois MATERIAIS.
+    // Tingir arte que já está no canon seria escurecê-la de graça.
     //
-    // O tint sai da conta, não do olho: para levar #423f38 a #24323b é preciso (0.52, 0.75, 1.0)
-    // por canal. Tint multiplicativo só escurece, então normaliza-se pelo canal maior (o azul) e
-    // sobra 0x84c0ff, que entrega #222f38 — o canônico a menos de 3 por canal.
+    // ⚠️ UMA CAMADA, NÃO DUAS. As sete peças velhas se dividiam em "lisas" (base densa) e
+    // "detalhe" (pontuação esparsa), e a proporção entre as duas saía do `gap`. As novas são
+    // seis faixas COMPLETAS de 114×66 — sobrepor duas camadas de arte opaca de altura cheia só
+    // faria a de cima cobrir a de baixo em pedaços sorteados. A variedade agora vem de QUAL
+    // peça entra, e isso passou a ser uma decisão de LUGAR (ver `familiaDoCasco`).
     //
-    // ⚠️ AS COSTURAS FICAM ESCURAS, E ISSO É DECISÃO DO HENRIQUE, não limitação. O casco é
-    // blindagem MORTA: a luz quente das juntas é licença de design do RABO, onde há articulação
-    // viva. É a regra de sempre — luz só onde há energia.
+    // ⚠️ `baseY = GAME_HEIGHT`, sem margem — e agora ele é honesto. As peças velhas tinham 13px
+    // de padding transparente embaixo do desenho, e o `+14` era isso sendo compensado às cegas
+    // (a versão `+6` deixou 7px de espaço aberto atravessando o rodapé, com estrela passando por
+    // baixo do chão). O `instalar-casco.mjs` recorta as peças novas NA FAIXA: o quadro é o
+    // desenho, sem padding nenhum. Com origem na base, a faixa ocupa y=150..215 — encostada na
+    // borda de baixo, e com a crista em 150 contra os 165 de antes.
+    //
+    // ⚠️ `gap` MENOR QUE A LARGURA (114), como sempre: as peças se sobrepõem, e é por isso que
+    // isto não é um TileSprite. O aparo de 1px de `instalar-casco.mjs` é o que impede a coluna
+    // de contorno preta de quem desenha por cima de virar risco a cada tile.
     this.addLayer({
-      key: 'cascoLeviata',
+      key: 'cascoPlaca',
       factor: 1.0,
-      baseY: GAME_HEIGHT + 14,
+      baseY: GAME_HEIGHT,
       depth: -75,
-      tint: 0x84c0ff,
+      tint: 0xffffff,
       alpha: 1,
       scale: [1, 1],
-      gap: [54, 64],
-      terreno: true,
-      casco: true,
-    });
-
-    this.addLayer({
-      key: 'cascoDetalhe',
-      factor: 1.0,
-      baseY: GAME_HEIGHT + 14,
-      depth: -74,
-      // O MESMO tint frio da base — as duas camadas são a mesma chapa, e um tint só numa delas
-      // devolveria a briga de material dentro do próprio casco.
-      tint: 0x84c0ff,
-      alpha: 1,
-      scale: [1, 1],
-      gap: [200, 340],
+      gap: [96, 108],
       terreno: true,
       casco: true,
     });
@@ -1083,27 +1089,36 @@ export class Parallax {
     // dos props (que nascem em −0.5, ver `TerrainSystem.spawn`) e ATRÁS da nave e dos inimigos
     // (depth 0). A nave nunca some atrás dela.
     //
-    // ⚠️ `y = GROUND_Y − 4`: a tira começa 4px ACIMA da linha em que os props se ancoram, então
-    // ela cobre o pé deles. Mais alta que isso e ela engoliria a silhueta; mais baixa e a borda
-    // reta reapareceria.
+    // ⚠️ `y = GROUND_Y − 8`, 18px de altura: a tira ocupa y=198..215 — encostada na borda de
+    // baixo, sem aresta inferior à mostra. Antes eram `−4` e 20px, herdados da arte de 72² com
+    // outro padding; com a faixa nova (66px, ancorada em `GAME_HEIGHT`) esses números deixariam
+    // 6px da tira fora da tela sem motivo.
+    //
+    // ⚠️ A ARTE dela vem das linhas 44..61 do tile, não das 48..65 que corresponderiam a esta
+    // altura. As 48..65 caem em cima dos SULCOS entre as placas hexagonais — colunas de 1px
+    // quase pretas que, num tile repetido a cada 228px, viram um risco atravessando o chão da
+    // fase (a sonda pegou, e o `casco-frente.mjs` agora reprova na fonte).
+    //
+    // Ela ainda cobre o pé dos props (que se ancoram em `GROUND_Y` = 206) com 8px de folga
+    // acima da linha; mais alta que isso e ela começaria a engolir a silhueta deles.
     //
     // ⚠️ TINT ESCURO, nunca claro: é o casco MAIS PERTO, em leve sombra — a mesma leitura do
     // `groundFront`, e a mesma regra de sempre nesta campanha.
     //
-    // ⚠️ 0x9aa4b8 → 0x6390bf (2026-08-27). O cinza antigo foi escolhido quando a chapa era
-    // marrom-oliva, e sobre ela dava um cinza NEUTRO (#282928) — que agora briga com a base já
-    // esfriada. O novo é o MESMO frio da base (0x84c0ff) a 75% de brilho: mesma cor, um degrau
-    // mais escura. Sombra é a mesma tinta com menos luz, não outra tinta.
+    // ⚠️ 0x6390bf → 0xb0b0b0 (2026-08-28), pela mesma regra e pelo motivo oposto. O tint frio
+    // existia para acompanhar a base, que estava sendo esfriada à força; a arte nova já é fria
+    // de nascença, e repetir o frio aqui esfriaria DUAS vezes. O que sobra é o que a tira sempre
+    // quis ser: um multiplicador NEUTRO a 69% — a mesma tinta com menos luz, e nada mais.
     //
     // Ela segue o alpha do CASCO (1 − nebulaDim): durante o Ato 1 não existe chão nenhum para
     // ter pé, e uma tira opaca no rodapé estragaria a nuvem. Quem a acende é o
     // `setNebulaDensity`, à mão — como a pintura, ela não é uma `ScatterLayer`.
     if (this.scene.textures.exists('cascoFrente')) {
       this.cascoFrente = this.scene.add
-        .tileSprite(0, GROUND_Y - 4, GAME_WIDTH, 20, 'cascoFrente')
+        .tileSprite(0, GROUND_Y - 8, GAME_WIDTH, 18, 'cascoFrente')
         .setOrigin(0, 0)
         .setDepth(-0.2)
-        .setTint(0x6390bf)
+        .setTint(0xb0b0b0)
         .setAlpha(0);
     }
   }
@@ -1120,6 +1135,54 @@ export class Parallax {
     while (layer.nextX < GAME_WIDTH + 120) this.emit(layer);
   }
 
+  /**
+   * QUE PARTE DO LEVIATÃ ESTÁ PASSANDO AGORA — e este é o pedido do Henrique (2026-08-28):
+   * *"use a composição do casco com sabedoria, utilize uma métrica... no meio da composição você
+   * pode colocar tiles que têm a costela, para 'parecer' que o jogador está +- no meio do
+   * leviatã."*
+   *
+   * ⚠️ O `pickVariant` SORTEIA UNIFORME, então isto não pode sair dele — é a mesma lição que o
+   * `gap` das camadas velhas já tinha aprendido. Aqui a escolha é de LUGAR: a mesma peça nunca
+   * poderia aparecer na cauda e na proa, porque cauda e proa não são o mesmo pedaço de bicho.
+   *
+   * A régua é a DISTÂNCIA percorrida, não o relógio: o roteiro pode mudar de hora, a nave não
+   * muda de velocidade. `CORPO` é o comprimento nominal do trecho roteirizado — o casco nasce
+   * em t≈46,5 (o mergulho do rabo) e a serpente chega em t=88, o que a `SCROLL_SPEED` de 84px/s
+   * põe em ~3500px. Depois disso a conta satura: a luta de chefão dura o que o jogador levar, e
+   * ela acontece na PROA — perto da cabeça, que é para onde a Fase 4 leva.
+   *
+   *   0–28%    CAUDA    blindagem lisa e couro escamado. O toco do rabo acabou de afundar aqui.
+   *   28–68%   MEIO     a CAIXA TORÁCICA. O trecho mais longo, e é ele que diz onde o jogador está.
+   *   68%+     PROA     dutos e conduítes: a víscera técnica engrossando na direção da cabeça.
+   *
+   * As listas têm repetição de propósito: é assim que se dá PESO a uma escolha uniforme sem
+   * inventar um sorteio com pesos. E nenhuma zona é de uma família só — um trecho inteiro de
+   * costela seria um padrão, e padrão lê como papel de parede (a mesma razão dos trechos LISOS
+   * da versão anterior).
+   */
+  private familiaDoCasco(): string {
+    const CORPO = 3500;
+    const p = Phaser.Math.Clamp(this.cascoDist / CORPO, 0, 1);
+
+    const zona =
+      p < 0.28
+        ? ['cascoPlaca', 'cascoPlaca', 'cascoPlaca', 'cascoEscama', 'cascoEscama']
+        : p < 0.68
+          ? ['cascoCostela', 'cascoCostela', 'cascoCostela', 'cascoEscama', 'cascoEscama', 'cascoPlaca']
+          : ['cascoDuto', 'cascoDuto', 'cascoDuto', 'cascoPlaca', 'cascoPlaca', 'cascoCostela'];
+
+    // `pickVariant` ainda entra: `cascoCostela` tem a variante com maquinário e `cascoDuto` tem
+    // a com a chapa arranhada. A zona escolhe a FAMÍLIA; o sorteio escolhe a peça dentro dela.
+    //
+    // ⚠️ `GetRandom` (que usa `Math.random`) E NÃO `Phaser.Math.RND`. Os dois são geradores
+    // DIFERENTES, e o `RND` é o que `Phaser.Math.Between` consome — ou seja, o mesmo fluxo do
+    // espaçamento das ondas e do sorteio de altura dos inimigos. Uma decisão de ARTE DE FUNDO
+    // não pode adiantar o dado do jogo: puxar um número aqui deslocaria tudo o que vem depois,
+    // e a sonda passaria a medir uma fase levemente diferente a cada mudança de cenário. O
+    // `pickVariant` já usa `Math.random` pelo mesmo motivo.
+    return pickVariant(this.scene, Phaser.Utils.Array.GetRandom(zona));
+  }
+
   private emit(layer: ScatterLayer): void {
     // No vácuo o sprite nasce em qualquer altura e é ancorado pelo CENTRO — ele flutua, não
     // cresce do chão. Na superfície é o contrário: origem na base, sobre a linha do solo.
@@ -1131,7 +1194,8 @@ export class Parallax {
 
     const img = this.scene.add
       // Sorteia entre as variantes da camada: montanhas repetidas denunciam o truque.
-      .image(layer.nextX, y, pickVariant(this.scene, layer.key))
+      // O CASCO é a exceção — lá a peça não é sorteada, é o lugar do corpo que decide.
+      .image(layer.nextX, y, layer.casco ? this.familiaDoCasco() : pickVariant(this.scene, layer.key))
       // Teto: origem no TOPO e de cabeça para baixo — o espelho do terreno (ver ScatterLayer).
       .setOrigin(0.5, layer.teto ? 0 : layer.flutua ? 0.5 : 1)
       .setFlipY(layer.teto ?? false)
@@ -1204,6 +1268,11 @@ export class Parallax {
       this.groundOffset += worldSpeed * dt;
       this.cascoFrente.tilePositionX = Math.round(this.groundOffset);
     }
+
+    // A RÉGUA DO PERCURSO sobre o Leviatã (ver `familiaDoCasco`). Conta só DEPOIS do
+    // `revealCasco`: durante o Ato 1 a faixa existe com alpha 0 e não há bicho nenhum sob a
+    // nave — contar ali faria a nave nascer no meio das costelas quando o casco acendesse.
+    if (this.cascoAndando) this.cascoDist += worldSpeed * dt;
 
     if (this.exiting) this.updateAtmosphereExit(dt, worldSpeed);
   }
@@ -1360,6 +1429,11 @@ export class Parallax {
    */
   revealCasco(alvo: number, durationMs = 1500): void {
     const destino = Phaser.Math.Clamp(alvo, 0, 1);
+
+    // O percurso sobre o bicho começa AQUI, no instante em que o casco nasce — é o zero de
+    // `familiaDoCasco`, e é o mesmo instante em que o toco do rabo afunda. A cauda do Leviatã
+    // é onde o jogador entra.
+    if (destino > 0) this.cascoAndando = true;
 
     this.scene.tweens.addCounter({
       from: this.cascoReveal,

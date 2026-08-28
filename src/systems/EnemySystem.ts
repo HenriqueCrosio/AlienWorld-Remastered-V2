@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Fx } from './Fx';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
 
@@ -239,6 +240,8 @@ export class EnemySystem {
     private readonly scene: Phaser.Scene,
     /** A FASE atual (`GameScene.stage.id`) — só usada para a pele por fase (ver `STAGE_2_SKIN`). */
     private readonly stageId: number,
+    /** Só para o ESTALO da água-viva (ver `update`). O resto dos efeitos é da GameScene. */
+    private readonly fx: Fx,
   ) {
     this.enemies = scene.physics.add.group({ allowGravity: false });
     this.enemyBullets = scene.physics.add.group({
@@ -379,6 +382,15 @@ export class EnemySystem {
     //
     // O brilho interno vive dentro do alfa da forma, então não tem como virar caixa. E é a
     // leitura certa de todo modo: a criatura ACENDE, não a moldura dela.
+    // ⚠️ O ESTALO É SEPARADO DO GLOW, E NÃO É DUPLICAÇÃO. O glow é ESTADO — a criatura está
+    // carregada, e isso se vê o tempo todo. O estalo é EVENTO — ela DESCARREGA, e é isso que o
+    // Henrique pediu depois do 3º teste ("algo que pareça que ela dá choque"). Um bicho que só
+    // brilha lê como lâmpada; o que ensina o jogador a não encostar é o arco.
+    //
+    // O primeiro sai cedo (0,3–1,1s): a criatura tem ~7,8s de tela, e um estalo que só aparece
+    // depois de metade da travessia chega tarde para mudar a decisão de quem vai passar por ela.
+    if (kind === 'aguaViva') e.setData('estalo', Phaser.Math.FloatBetween(0.3, 1.1));
+
     if (kind === 'aguaViva' && e.preFX) {
       const glow = e.preFX.addGlow(0x35b6ea, 0, 0, false, 0.1, 10);
       this.scene.tweens.add({
@@ -412,6 +424,20 @@ export class EnemySystem {
         const baseX = (e.getData('baseX') as number) - 16 * dt;
         e.setData('baseX', baseX);
         e.x = baseX + Math.sin(t) * def.wave;
+
+        // O ESTALO: um arco atravessando o sino, de tempos em tempos. Ver `Fx.estalo`.
+        //
+        // ⚠️ INTERVALO SORTEADO A CADA DISPARO, não fixo. Um período constante lê como
+        // pisca-pisca (o defeito que o pulso do glow já evita sendo lento); irregular lê como
+        // descarga. E o raio do arco sai do `displayWidth` REAL, não de um número: a criatura
+        // entra em duas escalas de sprite e um raio fixo estouraria a silhueta da menor.
+        const estalo = (e.getData('estalo') as number) - dt;
+        if (estalo <= 0) {
+          this.fx.estalo(e.x, e.y, e.displayWidth * 0.42);
+          e.setData('estalo', Phaser.Math.FloatBetween(1.1, 2.3));
+        } else {
+          e.setData('estalo', estalo);
+        }
       } else if (def.wave > 0) {
         const t = (e.getData('t') as number) + dt * 3;
         e.setData('t', t);

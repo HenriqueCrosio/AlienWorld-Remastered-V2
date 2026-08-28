@@ -74,9 +74,12 @@ ok(f.fase === 3, `fase 3 rodando (id=${f.fase})`);
 // ver `probe-f3-visual.mjs`, que asserta o mesmo.
 ok(f.camadasNebulosa >= 2 && f.spritesNebulosa > 0, `nebulosa ATIVA (${f.camadasNebulosa} camadas, ${f.spritesNebulosa} nuvens)`);
 ok(f.nebulaDim >= 0.95, `dentro da nuvem (nebulaDim=${f.nebulaDim})`);
-// Fatia 5, Tarefa 3: o casco virou DUAS camadas (base lisa + pontuação de maquinário) — ver
-// `buildNebula()` em Parallax.ts e o comentário "POR QUE DUAS CAMADAS" no brief da tarefa.
-ok(f.casco === 2 && f.alphaCasco < 0.05, `casco ainda escondido (alpha=${f.alphaCasco.toFixed(2)})`);
+// ⚠️ UMA CAMADA, não duas (2026-08-28). A arte de 25/08 se dividia em "base lisa" + "pontuação
+// de maquinário", e a proporção entre as duas saía do `gap` de cada uma. Os tiles novos são seis
+// faixas COMPLETAS de 114×66: sobrepor duas camadas de arte opaca de altura cheia só faria a de
+// cima cobrir a de baixo em pedaços sorteados. A variedade virou uma decisão de LUGAR —
+// `Parallax.familiaDoCasco`, cobrada em `probe-f3-visual`.
+ok(f.casco === 1 && f.alphaCasco < 0.05, `casco ainda escondido (${f.casco} camada, alpha=${f.alphaCasco.toFixed(2)})`);
 await page.screenshot({ path: 'probe-stage3-nebulosa.png' });
 
 // Espera a VIRADA (evento aos 42s + fade de 6s) e a aranha (53s). Blindagem renovada no meio.

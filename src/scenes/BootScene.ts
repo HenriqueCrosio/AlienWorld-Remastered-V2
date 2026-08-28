@@ -296,20 +296,29 @@ const ART: Record<string, string> = {
   ...animFrames('aranhaJumpAnim', 'aranha-jump-anim'),
   ...animFrames('aguaVivaAnim', 'agua-viva-anim'),
 
-  // O CASCO DO LEVIATÃ (Fase 3, Ato 2) — 7 artes do PixelLab (Henrique, 2026-08-25), 72×72.
-  // Fontes em `assets/raw/casco-leviata-{1..7}.png`.
+  // O CASCO DO LEVIATÃ (Fase 3, Ato 2) — 6 artes do PixelLab (Henrique, 2026-08-28), 116²,
+  // recortadas para 114×66 por `scripts/instalar-casco.mjs`. Fontes em `assets/raw/casco-*.png`.
   //
-  // DUAS famílias de propósito: `cascoLeviata` são os trechos LISOS (a base contínua da faixa) e
-  // `cascoDetalhe` são os trechos com maquinário/veios/escamas (a pontuação). O `pickVariant`
-  // sorteia UNIFORME dentro de cada família — a proporção entre elas sai do `gap` das duas
-  // camadas no Parallax, não de peso. Ver `buildNebula()`.
-  cascoLeviata: 'sprites/casco-leviata.png',
-  cascoLeviata2: 'sprites/casco-leviata2.png',
-  cascoDetalhe: 'sprites/casco-detalhe.png',
-  cascoDetalhe2: 'sprites/casco-detalhe2.png',
-  cascoDetalhe3: 'sprites/casco-detalhe3.png',
-  cascoDetalhe4: 'sprites/casco-detalhe4.png',
-  cascoDetalhe5: 'sprites/casco-detalhe5.png',
+  // ⚠️ ESTAS SUBSTITUEM AS SETE PEÇAS DE 72² DE 25/08, e o motivo é COR. Aquelas voltaram do
+  // gerador marrom-oliva (#32312b, R−B +7) contra um rabo e um modelo original frios (#19222a,
+  // R−B −17) — o Henrique jogou duas vezes e reclamou nas duas de que "o casco está de outra
+  // cor". A rodada anterior tapou o buraco com `tint 0x84c0ff`; estas nascem no canon e o tint
+  // sumiu junto. A régua é `scripts/_medir-paleta.mjs`.
+  //
+  // QUATRO famílias, e elas não são decoração: são a ANATOMIA em ordem. O Parallax escolhe entre
+  // elas pela DISTÂNCIA já percorrida sobre o bicho, não por sorteio — blindagem na cauda,
+  // COSTELA no meio, maquinário perto da cabeça. Ver `buildNebula()` / `familiaDoCasco()`.
+  //
+  //   cascoPlaca     blindagem hexagonal lisa — a chapa, o trecho "só casco"
+  //   cascoEscama    couro escamado com costelas assomando — a pele da cauda
+  //   cascoCostela   a caixa torácica: osso grande atravessando a faixa (+ variante com maquinário)
+  //   cascoDuto      dutos, conduítes e o nó azul aceso — a víscera técnica da proa
+  cascoPlaca: 'sprites/casco-placa.png',
+  cascoEscama: 'sprites/casco-escama.png',
+  cascoCostela: 'sprites/casco-costela.png',
+  cascoCostela2: 'sprites/casco-costela2.png',
+  cascoDuto: 'sprites/casco-duto.png',
+  cascoDuto2: 'sprites/casco-duto2.png',
 
   // O QUE VIVE EM CIMA DO CASCO (Fase 3, Ato 2). O Ato 2 sorteava `turret`/`radar`/`silo` — a
   // colônia da FASE 1 reaproveitada. Estas duas são a defesa do PRÓPRIO Leviatã, geradas com o

@@ -8,50 +8,53 @@
 // pouco acima da linha do solo, num tom mais escuro, em `depth −0.2` — à frente dos props
 // (−0.5) e atrás da nave (0). O pé some atrás dela e o prop passa a estar PLANTADO.
 //
-// A Fase 3 nunca ganhou o equivalente: a faixa do casco vive em `depth −75/−74`, muito atrás dos
+// A Fase 3 nunca ganhou o equivalente: a faixa do casco vive em `depth −75`, muito atrás dos
 // props, então não havia nada entre o pé deles e o olho. Este script corta o tile que faltava.
 //
 // ⚠️ O TILE É [arte | arte ESPELHADA], como o `groundTile`. Espelhar garante emenda invisível
 // nos dois lados sem depender de a arte ser emendável — e a arte do casco NÃO é (foi o que
-// custou o `aparar-casco.mjs`).
+// custou o aparo de 1px em `instalar-casco.mjs`).
 //
-// ⚠️ Lê de `assets/raw/` e escreve em `public/sprites/`: rodar duas vezes dá o mesmo resultado.
+// ⚠️ LÊ DE `public/sprites/casco-placa.png` — a peça JÁ INSTALADA, não o raw. É a peça lisa
+// (blindagem sem costela nem duto): a tira da frente é sombra do material, não um segundo
+// assunto competindo com o que passa atrás dela. Rode o `instalar-casco.mjs` primeiro.
+//
+// ⚠️ AS LINHAS 44..61, E ELAS FORAM ESCOLHIDAS POR MEDIÇÃO, NÃO PELA ALTURA.
+//
+// O recorte "natural" seria 48..65 — as linhas que, com a faixa ancorada em `baseY = 216`,
+// caem exatamente onde a tira vai ser desenhada (y=198..215), material do mesmo lugar do casco.
+// Ele foi tentado e REPROVOU na sonda: a blindagem hexagonal tem SULCOS entre as placas, e
+// nessa altura quatro deles são colunas de 1px quase pretas (0,010–0,021). Numa tira que repete
+// a cada 228px isso vira um risco preto atravessando o chão da fase inteira — exatamente o
+// defeito que o aparo das bordas existe para evitar, agora vindo do miolo do desenho.
+//
+// 44..61 é a janela de 18 linhas MAIS BAIXA da peça sem nenhuma coluna dessas (varridas todas,
+// de 2 em 2: 48 → 4 riscos, 46 → 1, 44 → 0). O desalinho de 4px contra a faixa de trás não se
+// vê — a tira está na frente, em sombra, e é o mesmo material. O risco preto se veria.
 import sharp from 'sharp';
 
-const ORIGEM = 'assets/raw/casco-leviata-5.png'; // a peça LISA da base (ver BootScene)
+const ORIGEM = 'public/sprites/casco-placa.png';
 const DESTINO = 'public/sprites/casco-frente.png';
 
-// As linhas 40..57 do quadro: a metade de baixo do desenho opaco, onde estão as placas grandes.
-// Acima disso a arte tem a silhueta irregular do topo da faixa, que numa tira repetida viraria
-// um serrilhado.
-//
-// ⚠️ A LINHA 58 FICA DE FORA, E ESSE É O PONTO. Ela é a linha de CONTORNO da arte (luminância
-// 0,009 contra 0,12 do miolo) — o mesmo defeito que o `aparar-casco.mjs` corrige nas laterais,
-// aqui na horizontal. Incluída, ela viraria um risco preto atravessando a tela a cada repetição
-// do tile. Medido: com ela dentro, a última linha do rodapé caía para 0,005.
-const TOPO = 40;
-const BASE = 57;
+const TOPO = 44;
+const BASE = 61;
+const LARGURA = 114;
 
 const meta = await sharp(ORIGEM).metadata();
-if (meta.width !== 72 || meta.height !== 72) {
-  throw new Error(`${ORIGEM}: esperava 72x72, achei ${meta.width}x${meta.height}`);
+if (meta.width !== LARGURA || meta.height !== 66) {
+  throw new Error(`${ORIGEM}: esperava ${LARGURA}x66, achei ${meta.width}x${meta.height} — rode o instalar-casco.mjs`);
 }
 
-// Apara 1px de cada lado, a mesma conta do `aparar-casco.mjs` — a coluna de contorno preta da
-// borda viraria um risco vertical a cada repetição do tile.
-const tira = await sharp(ORIGEM)
-  .extract({ left: 1, top: TOPO, width: 70, height: BASE - TOPO + 1 })
-  .toBuffer();
-
+const altura = BASE - TOPO + 1;
+const tira = await sharp(ORIGEM).extract({ left: 0, top: TOPO, width: LARGURA, height: altura }).toBuffer();
 const espelhada = await sharp(tira).flop().toBuffer();
-const alturaTira = BASE - TOPO + 1;
 
 await sharp({
-  create: { width: 140, height: alturaTira, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+  create: { width: LARGURA * 2, height: altura, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
 })
   .composite([
     { input: tira, left: 0, top: 0 },
-    { input: espelhada, left: 70, top: 0 },
+    { input: espelhada, left: LARGURA, top: 0 },
   ])
   .png()
   .toFile(DESTINO);
@@ -78,3 +81,16 @@ console.log(
 
 if (opacos < total) throw new Error('a tira tem pixel transparente — ela não esconderia o pé dos props');
 if (coluna(0) < 0.05 || coluna(info.width - 1) < 0.05) throw new Error('borda preta no tile');
+
+// ⚠️ E OS SULCOS DO MIOLO, que é o motivo de TOPO/BASE serem 44/61 e não 48/65 (ver acima).
+// Uma coluna quase preta entre vizinhas claras, num tile que repete, é um risco atravessando o
+// chão. O critério é o mesmo da sonda `probe-f3-visual`: escura de verdade E com vizinhas
+// nitidamente claras — o que uma sombra larga de desenho nunca é.
+const riscos = [];
+for (let x = 1; x < info.width - 1; x++) {
+  if (coluna(x) < 0.05 && coluna(x - 1) > 0.08 && coluna(x + 1) > 0.08) riscos.push(x);
+}
+if (riscos.length) {
+  throw new Error(`sulco quase preto de 1px em x=${riscos.join(',')} — vira risco repetido no chão`);
+}
+console.log('sem sulcos de 1px no miolo: a tira pode repetir sem virar risco.');

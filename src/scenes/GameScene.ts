@@ -204,7 +204,7 @@ export class GameScene extends Phaser.Scene {
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
     this.weapons = new WeaponSystem(this);
-    this.enemies = new EnemySystem(this, this.stage.id);
+    this.enemies = new EnemySystem(this, this.stage.id, this.fx);
     this.pickups = new PickupSystem(this);
 
     // Os DOIS sistemas de obstáculo existem sempre; o roteiro da fase decide qual é alimentado
@@ -616,7 +616,7 @@ export class GameScene extends Phaser.Scene {
     // enquanto ele é o assunto; atrás dela na hora de afundar, que é o que faz o mergulho ler
     // como "passou por baixo de nós" em vez de "escorregou na frente do chão".
     const rabo = this.add
-      .sprite(GAME_WIDTH + 200, 104, 'raboLeviata')
+      .sprite(GAME_WIDTH + 200, 158, 'raboLeviata')
       .setOrigin(0.92, 0.5)
       .setDepth(-70)
       .setScale(3.4)
@@ -624,7 +624,7 @@ export class GameScene extends Phaser.Scene {
 
     // 1. A CHEGADA (2,5s): entra pela direita e DESACELERA até parar. O `easeOut` é o que
     //    transforma "um sprite entrou" em "alguma coisa alcançou a gente".
-    this.tweens.add({ targets: rabo, x: 368, duration: 2500, ease: 'Sine.easeOut' });
+    this.tweens.add({ targets: rabo, x: 374, duration: 2500, ease: 'Sine.easeOut' });
     this.tweens.add({ targets: rabo, alpha: 1, duration: 1100, ease: 'Sine.easeOut' });
 
     // 2. A BATIDA, EM CÓDIGO E NÃO EM QUADROS.
@@ -684,7 +684,7 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({
       targets: rabo,
       angle: -38,
-      y: 200,
+      y: 190,
       delay: 7000,
       duration: 1500,
       ease: 'Sine.easeIn',
@@ -701,14 +701,24 @@ export class GameScene extends Phaser.Scene {
       onComplete: () => this.parallax.revealCasco(1, 1500),
     });
 
-    // 4. O TOCO AFUNDA (1,7s a partir dos 9,3s), por trás do casco que já está se formando. Ele
-    //    segura 800ms parado depois da remada: é o tempo de o jogador ler que o chão novo
-    //    COMEÇA ali. Sem essa pausa a costura passa rápido demais para ser vista.
+    // 4. O TOCO AFUNDA (1,7s a partir dos 10,8s), por trás do casco já FORMADO.
+    //
+    // ⚠️ ERA 9,3s, E ISSO ERA CEDO DEMAIS — é a segunda metade da reclamação do Henrique no 3º
+    // teste: *"o rabo cai do nada... e só depois vem o piso que é o casco."* A conta explica o
+    // relato. A remada termina em 8,5s e é ela que chama o `revealCasco(1, 1500)`, então o chão
+    // só fica SÓLIDO em 10,0s. Começar a afundar em 9,3s fazia o toco ir embora com o casco
+    // ainda em ~50% de alpha: o jogador via o rabo sumir, um vão, e o chão chegar depois — três
+    // eventos em fila, quando a cena inteira existe para eles serem UM.
+    //
+    // 10,8s põe a ordem no lugar: a remada acaba (8,5s) → o toco SEGURA enquanto o chão cresce
+    // atrás dele (8,5→10,0s) → o chão está inteiro e o toco ainda está lá (10,0→10,8s, quase um
+    // segundo de sobreposição, que é o instante em que a emenda se lê) → só então ele afunda por
+    // baixo. O toco não é substituído pelo casco; ele ENTREGA o casco e sai.
     this.tweens.add({
       targets: rabo,
       y: 330,
       alpha: 0,
-      delay: 9300,
+      delay: 10800,
       duration: 1700,
       ease: 'Sine.easeIn',
       onComplete: () => rabo.destroy(),
@@ -1232,10 +1242,28 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.fx.explode(enemy.x, enemy.y, enemy.scale);
-    this.score += enemy.getData('score') as number;
-    this.pickups.maybeDrop(enemy.x, enemy.y, 0.18);
-    enemy.destroy();
+    this.matarInimigo(enemy);
+  }
+
+  /**
+   * A MORTE DE UM INIMIGO — o estouro, o placar, o drop. UM lugar só.
+   *
+   * ⚠️ ELA EXISTE PORQUE O ESTOURO DEIXOU DE SER UM SÓ. A água-viva morre em CHOQUE, não em
+   * fogo (`Fx.choque`), e havia dois caminhos de morte no arquivo — a bala e a BOMBA — cada um
+   * com a sua cópia das quatro linhas. Deixar assim significaria que matá-la com a bomba a faria
+   * pegar fogo, e ninguém descobriria isso a não ser jogando com a bomba na hora certa.
+   *
+   * O `aguaViva` é o único caso hoje; a forma da função é o que impede o próximo de nascer torto.
+   */
+  private matarInimigo(e: Phaser.Physics.Arcade.Sprite): void {
+    if (e.getData('kind') === 'aguaViva') {
+      this.fx.choque(e.x, e.y, e.scale);
+    } else {
+      this.fx.explode(e.x, e.y, e.scale);
+    }
+    this.score += e.getData('score') as number;
+    this.pickups.maybeDrop(e.x, e.y, 0.18);
+    e.destroy();
   }
 
   private collectPickup(p: Phaser.Physics.Arcade.Sprite): void {
@@ -1284,10 +1312,7 @@ export class GameScene extends Phaser.Scene {
       e.setData('hp', hp);
 
       if (hp <= 0) {
-        this.fx.explode(e.x, e.y, e.scale);
-        this.score += e.getData('score') as number;
-        this.pickups.maybeDrop(e.x, e.y, 0.18);
-        e.destroy();
+        this.matarInimigo(e);
       } else {
         e.setTint(0xffb0b0);
         this.time.delayedCall(60, () => {

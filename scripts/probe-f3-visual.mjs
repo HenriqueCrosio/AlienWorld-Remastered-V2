@@ -41,13 +41,21 @@ const estado = () =>
         ? { n: pint.length, y: Math.round(pint[0].y), d: pint[0].depth, a: Number(pint[0].alpha.toFixed(2)), w: pint[0].width, h: pint[0].height }
         : null,
       // As camadas do Parallax, por chave: quantos sprites e o alpha do primeiro.
+      //
+      // ⚠️ `texturas` EXISTE PORQUE `key` DEIXOU DE BASTAR. A faixa do casco é UMA camada só
+      // desde 28/08, e a peça de cada sprite é escolhida pela DISTÂNCIA já percorrida sobre o
+      // bicho (`Parallax.familiaDoCasco`). Contar a camada diria sempre "cascoPlaca" e o assert
+      // da composição mediria o nome do config, não o que está na tela.
       camadas: (p?.layers ?? []).map((l) => ({
         key: l.key,
         n: l.sprites.length,
         alpha: l.sprites[0] ? Number(l.sprites[0].alpha.toFixed(3)) : null,
         primeiroPlano: !!l.primeiroPlano,
         casco: !!l.casco,
+        texturas: l.casco ? [...new Set(l.sprites.map((sp) => sp.texture.key))].sort() : undefined,
+        baseY: l.baseY,
       })),
+      cascoDist: p ? Math.round(p.cascoDist) : null,
     };
   });
 
@@ -129,6 +137,64 @@ ok(
   `e quem DESCE vem de ponta-cabeça (sobe=${JSON.stringify(vivas.sobe)}, flipY=${JSON.stringify(vivas.flips)})`,
 );
 await page.screenshot({ path: 'scripts/_f3/probe-agua-viva.png' });
+
+// ─── O CHOQUE: ela ESTALA viva e DESCARREGA ao morrer ───
+//
+// Pedido do Henrique no 3º teste: *"só preciso do efeito de choque que não vi ainda... ao morrer
+// o efeito de explosão de choque."*
+//
+// ⚠️ O ASSERT DA MORTE ENVELOPA `Fx.choque` E `Fx.explode` E COBRA OS DOIS. Perguntar só "o
+// choque foi chamado?" passaria numa implementação que chamasse os DOIS — a criatura morreria em
+// eletricidade E em fogo, e no tamanho do jogo a bola de fogo esconderia os arcos. O que se está
+// medindo é que a morte dela NÃO É de fogo.
+//
+// ⚠️ E ELE MATA PELA MESMA PORTA QUE O JOGO (`hitEnemy`, via hp), não chamando `destroy`. Havia
+// DOIS caminhos de morte no arquivo (a bala e a BOMBA) com a cópia das mesmas quatro linhas;
+// medir o caminho da bala é o que garante que quem passou a decidir o efeito foi o `matarInimigo`
+// de verdade, e não um `if` colado num deles.
+const morte = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  // Os contadores vivem no `window` para o bloco do ESTALO poder lê-los mais tarde.
+  window.__fx = { choque: 0, explode: 0, estalo: 0 };
+  for (const nome of ['choque', 'explode', 'estalo']) {
+    const orig = s.fx[nome].bind(s.fx);
+    s.fx[nome] = (...a) => { window.__fx[nome]++; return orig(...a); };
+  }
+
+  const av = s.enemies.enemies.getChildren().find((o) => o.active && o.getData('kind') === 'aguaViva');
+  if (!av) return { ...window.__fx, achou: false };
+  const temTimer = typeof av.getData('estalo') === 'number';
+
+  // Uma bala do jogador com dano suficiente, entregue pela porta de sempre. O `release` do
+  // pool é desligado durante a chamada: a bala é falsa e devolvê-la ao pool faria o
+  // `WeaponSystem` mexer no corpo físico de um objeto que não tem nenhum. O que se está medindo
+  // é o caminho da MORTE, não o do projétil.
+  const b = { x: av.x, y: av.y, active: true, getData: (k) => (k === 'damage' ? 99 : undefined) };
+  const rel = s.weapons.release.bind(s.weapons);
+  s.weapons.release = () => {};
+  try {
+    s.bulletHitEnemy(b, av);
+  } finally {
+    s.weapons.release = rel;
+  }
+  return { ...window.__fx, achou: true, temTimer, vivo: av.active };
+});
+console.log('morte da água-viva ' + JSON.stringify(morte));
+ok(morte.achou, 'havia uma água-viva para matar');
+ok(morte.temTimer, 'ela carrega o cronômetro do ESTALO (o arco de quem está viva)');
+ok(morte.vivo === false, 'ela morreu com o dano');
+ok(morte.choque === 1, `e morreu em CHOQUE (Fx.choque chamado ${morte.choque}×)`);
+ok(morte.explode === 0, `e NÃO em fogo (Fx.explode chamado ${morte.explode}×)`);
+
+// O ESTALO acontece SOZINHO, sem ninguém pedir: 1,1–2,3s entre arcos. 5s de espera cobre
+// qualquer sorteio com folga — e contar a CHAMADA é o único jeito de medir um efeito de 90ms
+// sem depender de fotografá-lo no instante certo (a lição do assert do rodapé, que amostrava um
+// instante e media o instante).
+await page.waitForTimeout(5000);
+await respirar();
+const nEstalos = await page.evaluate(() => window.__fx.estalo);
+console.log('estalos em 5s: ' + nEstalos);
+ok(nEstalos >= 2, `o ESTALO dispara sozinho enquanto ela vive (${nEstalos} em 5s)`);
 
 // ⚠️ O CASCO NÃO SE ANUNCIA MAIS, E A INVERSÃO É DELIBERADA (2026-08-27).
 //
@@ -232,9 +298,19 @@ ok(
   naVirada.alturaTela > 240,
   `e é COLOSSAL: ${naVirada.alturaTela}px de altura numa tela de 216 (escala ${naVirada.escala})`,
 );
+// ⚠️ SANGRA PELO RODAPÉ, E NÃO MAIS PELO TOPO (2026-08-28). Este assert pedia os DOIS, o que
+// era a leitura certa enquanto o rabo estava centrado na tela. O Henrique jogou de novo e mandou
+// o contrário, com desenho: *"o rabo precisa ficar mais encostado na quina inferior direita da
+// tela, para que ao abaixar o rabo no movimento de nado para baixo, o toco fique alinhado com o
+// chão."* Um rabo centrado deixava uma faixa de vazio de ~50px entre a barriga dele e a borda de
+// baixo — e era nesse vazio que o chão aparecia DEPOIS, que é a costura que ele reclamou.
+//
+// NÃO É AFROUXAR: o teste ficou mais exigente. Antes bastava sangrar 20px de cada lado; agora o
+// topo tem que estar DENTRO do quadro (a peça está deitada na quina, não centrada) e o rodapé
+// tem que sangrar 40px ou mais. Um rabo centrado reprova aqui, e um rabo que encolheu também.
 ok(
-  naVirada.topo < 0 && naVirada.base > 216,
-  `SANGRANDO do quadro em cima E embaixo (y ${naVirada.topo}..${naVirada.base}, tela 0..216)`,
+  naVirada.topo > 0 && naVirada.base > 216 + 40,
+  `DEITADO NA QUINA DE BAIXO: topo dentro do quadro (${naVirada.topo}) e ${naVirada.base - 216}px sangrando pelo rodapé`,
 );
 ok(naVirada.nebulaDim > 0.5, `chega AINDA DENTRO da nuvem (nebulaDim=${naVirada.nebulaDim})`);
 ok(naVirada.corpo === null, 'o rabo NÃO tem corpo físico (é cenário, não inimigo)');
@@ -288,25 +364,32 @@ const casco2 = ato2.camadas.filter((c) => c.casco);
 console.log('t=' + ato2.t, JSON.stringify(casco2));
 
 ok(ato2.cascoReveal === 1, `o casco está INTEIRO no Ato 2 (cascoReveal=${ato2.cascoReveal})`);
+ok(casco2.length === 1, `a faixa do casco é UMA camada só (achei ${casco2.length})`);
+
+const texCauda = casco2[0]?.texturas ?? [];
 ok(
-  casco2.some((c) => c.key === 'cascoLeviata'),
-  'a BASE do casco usa a arte nova (cascoLeviata)',
+  texCauda.length > 0 && texCauda.every((k) => k.startsWith('casco')),
+  `a faixa usa a arte nova do casco (${texCauda.join(', ')})`,
 );
 ok(
-  casco2.some((c) => c.key === 'cascoDetalhe'),
-  'a PONTUAÇÃO do casco existe (cascoDetalhe)',
-);
-ok(
-  !casco2.some((c) => c.key === 'derelict'),
+  !texCauda.includes('derelict'),
   'o destroço genérico saiu da camada do casco',
 );
-// A base é a MAIORIA: mais sprites que a pontuação, por construção do gap.
-const base = casco2.find((c) => c.key === 'cascoLeviata');
-const det = casco2.find((c) => c.key === 'cascoDetalhe');
+// ⚠️ A COMPOSIÇÃO É POSICIONAL, E ESTE É O ASSERT QUE COBRA ISSO. O pedido do Henrique foi uma
+// MÉTRICA: costela no MEIO do bicho, para o jogador saber onde está. Na entrada — a cauda, onde
+// o toco acabou de afundar — não pode haver costela nem duto na tela.
 ok(
-  base && det && base.n > det.n,
-  `os trechos lisos são a MAIORIA da faixa (base ${base?.n} > pontuação ${det?.n})`,
+  ato2.cascoDist !== null && ato2.cascoDist < 900,
+  `na entrada do Ato 2 o percurso sobre o bicho ainda é curto (${ato2.cascoDist}px)`,
 );
+ok(
+  !texCauda.some((k) => k.startsWith('cascoCostela') || k.startsWith('cascoDuto')),
+  `a CAUDA é blindagem e couro, sem costela nem duto (${texCauda.join(', ')})`,
+);
+// ⚠️ E O QUADRO NÃO É A FAIXA — a armadilha que custou 7px de rodapé aberto na versão anterior.
+// As peças novas são recortadas NA faixa (`instalar-casco.mjs`), sem padding: `baseY` pode ser
+// `GAME_HEIGHT` cravado. Se alguém voltar a somar margem aqui, o chão descola da borda.
+ok(casco2[0]?.baseY === 216, `a faixa ancora na borda de baixo sem margem (baseY=${casco2[0]?.baseY})`);
 await page.screenshot({ path: 'scripts/_f3/probe-ato2.png' });
 
 // ─── O RODAPÉ: a faixa do casco ENCOSTA na borda de baixo? ───
@@ -348,7 +431,7 @@ ok(
 //
 // As peças vinham do PixelLab com uma coluna de contorno preta (0,008) na borda; a peça da
 // direita desenha por cima, então o contorno dela virava um risco a cada ~60px. Quem apara é o
-// `aparar-casco.mjs` — e ele já reprova na FONTE se sobrar borda preta.
+// `instalar-casco.mjs` — e ele já reprova na FONTE se sobrar borda preta.
 //
 // ⚠️ AQUI O ASSERT PRECISA DISTINGUIR UM RISCO DE UM PROP, e a primeira versão não distinguia:
 // ela contava toda coluna escura e reprovou com 11, que eram as SILHUETAS dos respiradouros
@@ -373,6 +456,31 @@ for (let x = 3; x < info.width - 3; x++) {
 }
 ok(riscos === 0, `nenhum RISCO de emenda na faixa (${riscos} colunas pretas de 1px entre vizinhos claros)`);
 
+// ─── A MÉTRICA DO CASCO: onde no bicho o jogador está ───
+//
+// O pedido do Henrique (28/08): *"o cenário do casco tem X blocos, então no meio da composição
+// você pode colocar tiles que têm a costela, para 'parecer' que o jogador está +- no meio do
+// leviatã."* A cauda já foi conferida lá em cima; aqui se cobra o MEIO e a PROA.
+//
+// ⚠️ ISTO NÃO É UM ASSERT DE TEXTURA, É UM ASSERT DE PERCURSO. Ele passa se, e só se, a mesma
+// faixa mostrar coisas DIFERENTES em lugares diferentes do corpo — que é a coisa toda. Um
+// sorteio uniforme (o `pickVariant` cru) reprovaria aqui: ele poria costela na cauda.
+while ((await estado()).t < 68) {
+  await page.waitForTimeout(1500);
+  await respirar();
+}
+const meioCorpo = await estado();
+const texMeio = meioCorpo.camadas.find((c) => c.casco)?.texturas ?? [];
+console.log(`meio     t=${meioCorpo.t} dist=${meioCorpo.cascoDist}px ${JSON.stringify(texMeio)}`);
+ok(
+  texMeio.some((k) => k.startsWith('cascoCostela')),
+  `no MEIO do bicho a CAIXA TORÁCICA está na tela (${texMeio.join(', ')})`,
+);
+ok(
+  !texMeio.some((k) => k.startsWith('cascoDuto')),
+  'e o maquinário da proa ainda não chegou',
+);
+
 // ─── OS RESPIRADOUROS SÃO RAROS, E O ESPAÇAMENTO NÃO DEPENDE DE SORTE ───
 //
 // ⚠️ ISTO CONTA AO LONGO DO TEMPO, NÃO NUMA AMOSTRA. É a lição do assert do rodapé, paga nesta
@@ -393,6 +501,14 @@ while ((await estado()).t < 82) {
 // pela esquerda; contar o que está vivo num instante mede quantos couberam na tela, não quantos
 // nasceram. O envelope mede a CHAMADA, que é o evento que a regra governa. (O gancho é montado
 // lá em cima, logo depois de a fase abrir.)
+const proa = await estado();
+const texProa = proa.camadas.find((c) => c.casco)?.texturas ?? [];
+console.log(`proa     t=${proa.t} dist=${proa.cascoDist}px ${JSON.stringify(texProa)}`);
+ok(
+  texProa.some((k) => k.startsWith('cascoDuto')),
+  `perto da CABEÇA a faixa vira maquinário (${texProa.join(', ')})`,
+);
+
 const nasc = await page.evaluate(() => window.__nasc);
 const respiradouros = nasc.filter((n) => n.kind === 'respiradouro').map((n) => n.t);
 const lancas = nasc.filter((n) => n.kind === 'lancaMisseis');
