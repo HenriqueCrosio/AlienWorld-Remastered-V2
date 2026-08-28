@@ -896,8 +896,139 @@ voasse para a esquerda. Agora mede o EIXO e o sentido casando com o `flipY`.
 1. 🔴 **O alinhamento do toco com o casco.** O Henrique desenhou linhas vermelhas numa segunda
    imagem que **não chegou** na sessão. A cor casou; a FORMA não (o rabo termina numa aresta
    diagonal, o casco é faixa horizontal). **Pedir a imagem — não chutar geometria.**
+   → A imagem chegou em 28/08. Ver o TERCEIRO TESTE, abaixo.
 2. 🔴 **Os respiradouros ("falta algo").** Sem resposta, e vale rejogar com o casco já frio antes
-   de propor qualquer coisa.
+   de propor qualquer coisa. → **Continua sem resposta depois do 3º teste.**
+
+### O TERCEIRO TESTE JOGADO (2026-08-28) — a arte nova do casco, e o rabo que ainda não passa
+
+O Henrique jogou a rodada anterior e trouxe **seis tiles novos de casco gerados por ele**, a
+imagem com as linhas vermelhas que faltava, e o pedido do choque da água-viva. Commit `69da3e8`.
+
+#### ⚠️ O TINT DO CASCO SAIU — E A RÉGUA DE PALETA ESTAVA MEDINDO A COISA ERRADA
+
+A rodada de 27/08 tingiu o casco de `0x84c0ff` para levá-lo ao canon. O Henrique jogou e **a cor
+continuava destoando**. O motivo é a segunda metade de uma frase que já estava escrita aqui:
+*tint multiplicativo só escurece*. Levar `#423f38` a `#24323b` custava ~28% de luminância — o
+casco chegava ao canon **frio E apagado**, ao lado de um rabo frio e vivo. Cor certa, matéria
+morta.
+
+⚠️ **E A RÉGUA ANTIGA NÃO SERVE MAIS PARA ESTA FAMÍLIA.** A tabela do 2º teste mede "realce = a
+média dos 8% mais claros". Funcionava enquanto as peças eram chapa lisa. Os tiles novos têm OSSO
+quase branco e COBRE saturado: os 8% mais claros passam a medir o osso (`#b8b19b`, R−B +29) e
+diriam "quente" de um material azul-frio. **A cor de um material é a cor que ele REPETE.** A régua
+nova é `scripts/_medir-paleta.mjs`: a cor MODAL dos pixels opacos, descartando o quase-preto do
+contorno e o quase-branco do realce.
+
+| | cor modal do material | R−B |
+|---|---|---|
+| `ref-leviata-armored` | `#0c121a` / `#1f2932` | −14 / −19 |
+| rabo | `#19222a` (39% dos pixels) | −17 |
+| casco **antigo** | `#32312b` (44%) | **+7** ← o intruso |
+| casco **novo** (os seis) | `#19222a` / `#2e3b44` | −17 / −22 |
+
+Os tiles novos nascem no canon. **O tint sumiu inteiro** — tingir arte já correta é escurecê-la de
+graça — e a faixa da frente foi junto (`0x6390bf` → `0xb0b0b0`, multiplicador neutro a 69%).
+
+#### O CASCO DEIXOU DE SER SORTEIO E VIROU PERCURSO
+
+Pedido literal: *"use a composição do casco com sabedoria, utilize uma métrica, exemplo: o cenário
+do casco tem X blocos, então no meio da composição você pode colocar tiles que têm a costela, para
+'parecer' que o jogador está +- no meio do leviatã."*
+
+`Parallax.familiaDoCasco()` escolhe a peça pela **distância já percorrida sobre o bicho**
+(`cascoDist`, que zera no mergulho do rabo), não por sorteio: blindagem e couro na cauda, **caixa
+torácica** no meio, dutos perto da cabeça. Contra a linha do tempo: a aranha (t=53) cai na cauda,
+o miolo da fase (t=63–78) nas costelas, a serpente (t=88) na proa.
+
+⚠️ **UMA CAMADA, NÃO DUAS.** As sete peças velhas se dividiam em "lisas" e "detalhe" e a proporção
+saía do `gap`. As novas são seis faixas COMPLETAS de 114×66 — sobrepor duas camadas opacas de
+altura cheia só faz a de cima cobrir a de baixo em pedaços sorteados.
+
+⚠️ **A FAIXA CRESCEU DE 53 PARA 66px** (crista de y=165 → y=150). Em 53 linhas as costelas saíam
+decapitadas. Os props têm 57–62px e ainda coroam acima dela, que é o que mantém a silhueta deles
+legível. **Não foi pedido — é uma decisão da sessão, e ela ainda não foi aprovada jogando.**
+
+⚠️ **O QUADRO AGORA É A FAIXA.** As peças velhas tinham 13px de padding transparente embaixo, e o
+`baseY` vinha compensando isso às cegas (a versão `+6` deixou 7px de rodapé aberto). O
+`instalar-casco.mjs` recorta na faixa: `baseY = GAME_HEIGHT`, cravado, e a sonda cobra o número.
+
+⚠️ **ARTE DE FUNDO NÃO PODE ADIANTAR O DADO DO JOGO.** A primeira versão de `familiaDoCasco` usava
+`Phaser.Math.RND`, que é o MESMO fluxo que `Phaser.Math.Between` consome no espaçamento das ondas
+e na altura dos inimigos. Uma decisão de cenário deslocava o sorteio da fase inteira. `pickVariant`
+sempre usou `Math.random` por isso; agora esta também.
+
+⚠️ **SULCO DE 1px NO MIOLO É TÃO RUIM QUANTO CONTORNO NA BORDA.** A tira da frente (`casco-frente`)
+saía das linhas 48..65 da placa — a altura "natural", a que corresponde ao lugar dela na tela. Elas
+caem em cima dos sulcos entre as placas hexagonais: quatro colunas quase pretas num tile que
+repete a cada 228px, ou seja um risco atravessando o chão da fase. 44..61 é a janela mais baixa
+sem nenhuma, e o script agora **reprova na fonte**. A sonda tinha pegado; o script é quem impede.
+
+#### O RABO: a imagem chegou, e o mergulho ainda não é o movimento certo
+
+A instrução foi *"o rabo precisa ficar mais encostado na quina inferior direita da tela, para que
+ao abaixar o rabo no movimento de nado para baixo, o toco fique alinhado com o chão."* Ele estava
+**CENTRADO**: sobrava ~50px de vazio entre a barriga dele e a borda de baixo, e era nesse vazio que
+o chão aparecia depois. Agora ele deita (y 104 → 158, x 368 → 374), com o topo dentro do quadro e
+66px sangrando pelo rodapé; o mergulho para em y=190 e o afundamento saiu de 9,3s para 10,8s.
+
+⚠️ **MEDIR O QUE ESTÁ NA TELA POR DIFERENÇA, NÃO A OLHO.** A quina inferior direita da Fase 3 tem
+`derelict` pálido do parallax passando o tempo todo, e numa captura ele é **indistinguível do
+toco**. Esta sessão quase calibrou a pose em cima de um destroço. `scripts/_f3/ver-toco.mjs`
+congela a cena, fotografa com e sem o rabo e pinta a diferença: em y=200 o toco assomava 22
+colunas quase invisíveis; em y=190 são 79 (x 301..379, até y=109).
+
+⚠️ **A ORDEM DOS TWEENS EXPLICAVA METADE DO RELATO.** *"O rabo cai do nada e só depois vem o
+piso"*: a remada acaba em 8,5s e é ela que chama `revealCasco(1, 1500)`, então o chão só fica
+sólido em 10,0s — e o toco começava a afundar em 9,3s. Ele ia embora com o casco em ~50% de alpha,
+e o jogador via três eventos em fila.
+
+#### A ÁGUA-VIVA: o choque
+
+*"Gostei do mini caos que elas trazem... só preciso do efeito de choque que não vi ainda, algo que
+pareça que ela dá choque, ao morrer o efeito de explosão de choque."* Duas coisas, e a distinção
+importa: **luz é estado, arco é EVENTO**. O glow pulsando já dizia "está carregada"; o que ensina o
+jogador a não encostar é o arco.
+
+- `Fx.estalo` — um raio atravessando o sino a cada 1,1–2,3s, 90ms de vida.
+- `Fx.choque` — a morte: 7 raios, um anel de frente de choque, e fagulha **FRIA**.
+
+⚠️ **A MORTE DELA NÃO USA A SHEET DE EXPLOSÃO.** As sheets do jogo são FOGO — núcleo branco-quente,
+chama, fumaça. Água-viva no vácuo **descarrega**, não pega fogo. Usar a mestra apagaria a única
+criatura da campanha que mata por contato elétrico.
+
+⚠️ **HAVIA DOIS CAMINHOS DE MORTE DE INIMIGO, COM A MESMA CÓPIA DAS QUATRO LINHAS** — a bala e a
+BOMBA. Deixar assim faria a água-viva **pegar fogo quando morresse de bomba**, e ninguém
+descobriria a não ser jogando com a bomba na hora certa. Viraram `GameScene.matarInimigo()`.
+
+⚠️ **DUAS CALIBRAGENS SAÍRAM DA CAPTURA AMPLIADA, NÃO DO OLHO** — e é a terceira vez nesta fatia
+que o zoom desmente o tamanho do jogo (a primeira foi o glow-retângulo, a segunda o míssil). O arco
+saía quase RETO (desvio de ~3px numa criatura de 15px: lia como arranhão, não como raio) e a
+descarga era do tamanho da criatura, sumindo junto com ela. Caos 0,45 → 0,85 do raio, 4 → 5
+segmentos, e o alcance ganhou um PISO (`16 + 22 × escala`) em vez de ser proporcional puro.
+
+#### ⚠️ ASSERT QUE MEDE UM EFEITO DE 90ms SE MEDE POR CHAMADA, NÃO POR FOTO
+
+É a lição do rodapé outra vez, num caso novo. O estalo é contado envelopando `Fx.estalo` e
+esperando 5s; e a morte cobra `choque == 1` **E** `explode == 0` — perguntar só "o choque foi
+chamado?" passaria numa implementação que chamasse os DOIS, e no tamanho do jogo a bola de fogo
+esconderia os arcos.
+
+#### ⚠️ ASSERT QUE ENCOSTA NA MUDANÇA PODE FICAR MAIS EXIGENTE, NÃO SÓ MUDAR DE CRITÉRIO
+
+O assert do sangramento do rabo pedia *"sangra em cima E embaixo"*, o que era certo com o rabo
+centrado. Ele **inverteu de lado**: agora exige topo DENTRO do quadro e 40px+ pelo rodapé. Um rabo
+centrado reprova, e um rabo que encolheu também. Trocar o critério é legítimo quando o critério
+mudou; o teste é se a versão nova reprova mais coisas do que a antiga.
+
+#### O que ficou ABERTO depois do 3º teste
+
+1. 🔴 **O RABO AINDA SE DESPRENDE.** Ver o START — é o ponto bloqueado da próxima sessão, e ele
+   derruba a coreografia do toco inteira.
+2. 🔴 **Os respiradouros ("falta algo")** — a pergunta segue sem resposta, agora com o casco já
+   trocado por inteiro. Vale rejogar antes de propor qualquer coisa.
+3. ⚠️ **A faixa de 66px** (a crista subiu 15px) foi decisão da sessão, não pedido — precisa de
+   veredicto jogado.
 
 **A SESSÃO DE 26/08** entrou depois do primeiro teste do Henrique e mexeu em cinco frentes: o
 piso e as emendas do casco, a colônia da Fase 1 que saiu de cima dele, o RABO do Leviatã como
