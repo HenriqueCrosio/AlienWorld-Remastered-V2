@@ -45,7 +45,52 @@ interface PropDef {
    * fazem uma ruína parecer uma ruína, e não um cenário de papelão.
    */
   anim?: string;
+  /**
+   * PROP DE CASCO (Fase 3, Ato 2): ele é plantado NA SUPERFÍCIE do Leviatã, e não na linha de
+   * solo. Ver `PLANTIO` e `plantarNoCasco`.
+   */
+  casco?: boolean;
 }
+
+/**
+ * O PLANTIO DOS PROPS DE CASCO — a resposta ao "eles ainda estão com sensação de colados"
+ * (Henrique, 2026-08-29, o 4º teste jogado; foi a quarta vez que os respiradouros voltaram, e a
+ * primeira em que a palavra foi ÚTIL: não é falta de vida, é falta de ASSENTAMENTO).
+ *
+ * ⚠️ O DEFEITO, MEDIDO. Todo prop nascia com o pé em `GROUND_Y` (206), a aresta MAIS PRÓXIMA da
+ * faixa do casco. A faixa vai de y=150 (a crista) a y=216, e um respiradouro tem 62px:
+ *
+ *     faixa do casco   y 150 ──────────────────── 216
+ *     respiradouro     y 144 ─────────── 206
+ *
+ * São 56px dos 62 achatados contra a face do casco — 90% de sobreposição, com 6px espiando
+ * acima da crista. Nenhum prop QUEBRAVA a linha do horizonte, e todos ficavam no mesmo `y`, em
+ * fila. Isso não é um relevo: é uma tira de adesivos. As quatro hipóteses das rodadas
+ * anteriores (falta sopro / falta luz / falta reagir / falta variar de tamanho) erravam o alvo
+ * porque nenhuma delas era sobre onde a peça ENCOSTA.
+ *
+ * ⚠️ E POR QUE NÃO BAIXAR A CRISTA. Era a outra saída (`ALTURA` 66 → 51 em `instalar-casco.mjs`,
+ * crista de volta a y=165), e ela devolveria 6% de área de jogo — mas em 53 linhas as COSTELAS
+ * saem decapitadas, que é exatamente por que a crista subiu em 28/08. O plantio resolve sem
+ * pagar a arte.
+ *
+ * ⚠️ O TETO É 199 PORQUE O PROP MAIS BAIXO MANDA, E ISSO CUSTOU UMA REPROVAÇÃO DA SONDA. A
+ * primeira versão usou 204, calculado sobre o respiradouro (62px). Mas o `lancaMisseis` tem
+ * 59px, e plantado em 204 ele coroa 5px — PIOR que os 6 do defeito original. O alcance de um
+ * plantio se mede pela peça mais BAIXA que vai usá-lo, nunca pela mais alta:
+ *
+ *     lancaMisseis (59px) em 199  →  topo 140, coroa 10px   ← o pior caso, e ele passa
+ *     respiradouro (62px) em 186  →  topo 124, coroa 26px   ← o melhor
+ *
+ * ⚠️ E O PISO DE 186 NÃO SOBE MAIS QUE ISSO. Ele deixa 30px de casco visível ABAIXO do prop, e
+ * é isso que faz a peça ler como "apoiada numa superfície". Plantar perto da crista (150) a
+ * penduraria na linha do horizonte, que é outro defeito.
+ *
+ * ⚠️ SEM VARIAR A ESCALA, e isso é deliberado. Perspectiva pediria que o plantado mais fundo
+ * fosse menor, mas escala não-inteira em pixel art de 62px borra a peça — e a faixa é rasa
+ * demais (13px de alcance) para o ganho pagar o preço.
+ */
+const PLANTIO = { fundo: 186, frente: 199, saltoMin: 5 } as const;
 
 /**
  * A colônia da Fase 1. Rocha, construções, silos, antenas, destroços — e as torres que atiram.
@@ -63,8 +108,8 @@ const PROPS: Record<PropKind, PropDef> = {
   // balanceamento: o `lancaMisseis` herda `hp 5 / score 150 / shoots` da `turret` e o
   // `respiradouro` herda `hp 6 / score 90` do `silo`. O Ato 2 continua pesando exatamente o
   // mesmo, e o playtest que ainda não aconteceu vai medir a fase que já existia.
-  lancaMisseis: { hp: 5, score: 150, shoots: true },
-  respiradouro: { hp: 6, score: 90, shoots: false },
+  lancaMisseis: { hp: 5, score: 150, shoots: true, casco: true },
+  respiradouro: { hp: 6, score: 90, shoots: false, casco: true },
   costela: { hp: Infinity, score: 0, shoots: false },
   orgao: { hp: Infinity, score: 0, shoots: false },
   maquinario: { hp: Infinity, score: 0, shoots: false },
@@ -168,11 +213,21 @@ export class TerrainSystem {
   ): void {
     const teto = opts?.anchor === 'teto';
 
+    // ⚠️ O PÉ DO PROP DE CASCO É SORTEADO DENTRO DA FAIXA, e é isso que tira a "sensação de
+    // colado". Ver `PLANTIO`. Prop de teto e prop de chão da F1/F4 continuam onde sempre
+    // estiveram — este sorteio existe porque a Fase 3 tem uma SUPERFÍCIE de 66px de fundo, e
+    // nenhuma outra fase tem.
+    //
+    // ⚠️ `Math.random`, NUNCA `Phaser.Math`. O `Phaser.Math.RND` é o mesmo fluxo que o
+    // espaçamento das ondas consome, e arte de fundo não pode adiantar o dado do jogo.
+    const naCasca = !teto && PROPS[kind].casco;
+    const pe = naCasca ? this.sortearPlantio() : GROUND_Y;
+
     // Sorteia entre as variantes: um relevo com um pico só é um padrão, não uma paisagem.
     const texture = pickVariant(this.scene, kind);
     const p = this.props.create(
       GAME_WIDTH + 30,
-      teto ? TETO_Y : GROUND_Y,
+      teto ? TETO_Y : pe,
       texture,
     ) as Phaser.Physics.Arcade.Sprite;
 
@@ -189,7 +244,14 @@ export class TerrainSystem {
     // Depth −0.5: os props ficam ATRÁS da nave/inimigos (depth 0) e da FAIXA DE SOLO DA FRENTE
     // do parallax da F1 (−0.2), que esconde o pé "colado" deles. Só ordem de render — nenhum
     // overlap/colisão depende disto.
-    p.setDepth(-0.5);
+    //
+    // ⚠️ E OS DE CASCO SE ORDENAM ENTRE SI PELO PLANTIO. Assim que o pé passou a variar, dois
+    // props podem se sobrepor na horizontal — e sem isto qual fica na frente seria decidido pela
+    // ordem de criação, ou seja, por acaso. Quem está plantado mais à FRENTE (pé maior) desenha
+    // por cima: `−0.5` na aresta de frente, `−0.536` no fundo. Toda a faixa continua entre a
+    // tira do casco (−0.2, à frente) e a faixa de fundo (−74/−75, atrás), então nada mais no
+    // quadro muda de ordem.
+    p.setDepth(naCasca ? -0.5 - (PLANTIO.frente - pe) * 0.002 : -0.5);
 
     const def = PROPS[kind];
 
@@ -241,6 +303,100 @@ export class TerrainSystem {
 
     // Depois do reset, porque ele zera a velocidade.
     p.setVelocityX(-SCROLL_SPEED);
+
+    if (naCasca) this.plantarNoCasco(p);
+  }
+
+  /** O último pé sorteado, para o plantio seguinte não repetir a altura. Ver `sortearPlantio`. */
+  private ultimoPlantio = 0;
+
+  /**
+   * SORTEIA O PÉ DO PROP DE CASCO, RECUSANDO ALTURA REPETIDA.
+   *
+   * ⚠️ UNIFORME PURO NÃO BASTA, E A SONDA MOSTROU ISSO NA PRIMEIRA EXECUÇÃO: oito props saíram
+   * entre 191 e 199 (um sorteio de 0,4% de chance, conferido — o alcance está certo), e nessa
+   * rodada a fila voltaria. O olho não compara um prop com a média da faixa; compara com o
+   * VIZINHO. Dois seguidos a 1px de diferença leem como a mesma linha, que é o defeito inteiro.
+   *
+   * ⚠️ É A MESMA IDEIA DA `RESPIRADOURO_CARENCIA` do `GameScene`, e pelo mesmo motivo: sorteio
+   * uniforme pode dar dois iguais em seguida, e quem garante o espaçamento é a recusa, nunca a
+   * distribuição. Aqui a recusa é em pixels de altura em vez de segundos.
+   *
+   * ⚠️ E ELA SORTEIA DENTRO DO QUE SOBRA, EM VEZ DE TENTAR DE NOVO ATÉ DAR CERTO. A primeira
+   * versão era um laço de até 8 tentativas com teto — e um laço de recusa com teto às vezes
+   * ESTOURA, o que devolveria um plantio repetido em ~3% das vezes e faria a sonda piscar. Um
+   * assert que reprova de vez em quando é pior que não ter assert. Aqui as alturas permitidas
+   * são duas faixas fechadas (abaixo e acima da última), e o sorteio é uniforme sobre a soma
+   * delas: o salto mínimo passa a ser uma garantia de construção, não uma probabilidade.
+   *
+   * As duas faixas nunca ficam ambas vazias: o alcance é 13px e `2 × saltoMin` é 10, então
+   * sobram no mínimo 4 alturas mesmo com a última bem no meio.
+   *
+   * O `saltoMin` de 5px é o que se enxerga numa tela de 384 de largura sem estreitar demais o
+   * que resta para sortear.
+   *
+   * ⚠️ `Math.random`, NUNCA `Phaser.Math`. O `Phaser.Math.RND` é o mesmo fluxo que o espaçamento
+   * das ondas consome, e arte de fundo não pode adiantar o dado do jogo.
+   */
+  private sortearPlantio(): number {
+    const { fundo, frente, saltoMin } = PLANTIO;
+
+    // O primeiro prop da fase não tem vizinho anterior: sorteia livre no alcance inteiro.
+    if (this.ultimoPlantio === 0) {
+      this.ultimoPlantio = Math.round(fundo + Math.random() * (frente - fundo));
+      return this.ultimoPlantio;
+    }
+
+    const abaixo = Math.max(0, this.ultimoPlantio - saltoMin - fundo + 1);
+    const acima = Math.max(0, frente - (this.ultimoPlantio + saltoMin) + 1);
+    const n = Math.floor(Math.random() * (abaixo + acima));
+    this.ultimoPlantio =
+      n < abaixo ? fundo + n : this.ultimoPlantio + saltoMin + (n - abaixo);
+    return this.ultimoPlantio;
+  }
+
+  /**
+   * A SOMBRA DE CONTATO do prop de casco — a outra metade da resposta ao "colado".
+   *
+   * ⚠️ ELA SÓ EXISTE PORQUE O PLANTIO TIROU O PÉ DE BAIXO DA TIRA. A `cascoFrente` do
+   * `Parallax` (y=198..215, depth −0,2) foi posta ali justamente para esconder a base reta dos
+   * props — e enquanto todo prop nascia em `GROUND_Y` (206) ela dava conta. Com o pé podendo
+   * subir até 186, a base fica À MOSTRA na maioria dos sorteios, e uma aresta reta pousada no
+   * nada é a definição de adesivo. A sombra é o que substitui a tira nesse trecho: ela não
+   * esconde a base, ela ANCORA a base.
+   *
+   * ⚠️ UMA ELIPSE, NÃO UM SPRITE, e nunca um `glow`. É escurecimento puro sobre um casco que já
+   * é escuro — a mesma regra do `groundFront` e do tint da tira: o que está mais perto do olho
+   * entra em sombra, jamais em luz. Um halo aceso aqui viraria um anel brilhante em volta do
+   * pé, que é o defeito que esta fatia já pagou no rabo.
+   *
+   * ⚠️ `depth` LOGO ATRÁS DO PRÓPRIO PROP (−0,001), e não um número fixo. Fixo, a sombra de um
+   * prop plantado no fundo passaria na FRENTE de um prop plantado à frente. Amarrada ao dono,
+   * ela viaja na profundidade junto com ele.
+   *
+   * ⚠️ O `once('destroy')` COBRE OS DOIS CAMINHOS DE MORTE. O prop morre pelo culling
+   * (`x < −40`) e morre pelo tiro do jogador, em arquivos diferentes. Pendurar a limpeza no
+   * evento do dono, e não no culling, é o que impede uma sombra órfã de ficar deslizando sozinha
+   * pela fase — é a mesma lição dos dois caminhos de morte da água-viva, num caso novo.
+   */
+  private plantarNoCasco(p: Phaser.Physics.Arcade.Sprite): void {
+    // ⚠️ ELA TEM QUE TRANSBORDAR A BASE — 1,35 da largura, e centrada 1px ABAIXO do pé. A
+    // primeira versão foi 0,9 da largura centrada em `y − 1`, e ficou INVISÍVEL: mais estreita
+    // que o prop e acima da linha do pé, a elipse inteira desenhava atrás do dono e não sobrava
+    // um pixel dela na tela. Uma sombra que não escapa da silhueta não é sombra, é enchimento.
+    // Quem entrega o contato é justamente o que vaza para os lados.
+    //
+    // 7px de altura é o que some na perspectiva rasa da faixa; mais que isso e ela lê como
+    // buraco em vez de apoio.
+    const sombra = this.scene.add
+      .ellipse(p.x, p.y + 1, Math.round(p.displayWidth * 1.35), 7, 0x000000, 0.5)
+      .setDepth(p.depth - 0.001)
+      // O nome é o que torna o vazamento MEDÍVEL: a sonda conta sombras contra props vivos, e
+      // uma sombra órfã deslizando sozinha pela fase reprova em vez de passar despercebida.
+      .setName('sombraCasco');
+
+    p.setData('sombra', sombra);
+    p.once('destroy', () => sombra.destroy());
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
@@ -252,6 +408,13 @@ export class TerrainSystem {
       // (fireAt mira para cima). Guarda dura: um roteiro que pendurar uma torre por engano
       // ganha uma torre muda, não um tiro nascendo do lugar errado.
       if (PROPS[p.getData('kind') as PropKind].shoots && !p.flipY) this.updateTurret(p, dt, target);
+
+      // A sombra não tem corpo físico: quem a move é o dono. Sincronizar aqui (e não dar
+      // velocidade a ela) é o que garante que as duas nunca derivem uma da outra — a mesma
+      // razão de o rabo não misturar eixo escrito à mão com eixo de física.
+      const sombra = p.getData('sombra') as Phaser.GameObjects.Ellipse | undefined;
+      if (sombra) sombra.x = p.x;
+
       if (p.x < -40) p.destroy();
     }
 

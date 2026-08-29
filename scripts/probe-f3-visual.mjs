@@ -72,9 +72,25 @@ await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   window.__nasc = [];
   const orig = s.terrain.spawn.bind(s.terrain);
-  s.terrain.spawn = (kind) => {
-    window.__nasc.push({ kind, t: Number((s.elapsed ?? 0).toFixed(2)) });
-    return orig(kind);
+  s.terrain.spawn = (kind, opts) => {
+    // ⚠️ O `opts` PASSA ADIANTE. O gancho antigo chamava `orig(kind)` e engolia o segundo
+    // argumento — na Fase 3 ninguém passa `opts`, então nada quebrava, mas uma sonda que altera
+    // a chamada que está medindo mede outra coisa.
+    const r = orig(kind, opts);
+    // O PLANTIO se lê AQUI, no nascimento, e não depois: props reciclam e morrem, e uma
+    // varredura tardia só acha quem sobreviveu até a foto.
+    const p = s.terrain.props.getChildren().at(-1);
+    const som = p ? p.getData('sombra') : null;
+    window.__nasc.push({
+      kind,
+      t: Number((s.elapsed ?? 0).toFixed(2)),
+      pe: p ? Math.round(p.y) : null,
+      coroa: p ? 150 - Math.round(p.y - p.displayHeight) : null,
+      depth: p ? Number(p.depth.toFixed(3)) : null,
+      propW: p ? Math.round(p.displayWidth) : null,
+      somW: som ? Math.round(som.width) : null,
+    });
+    return r;
   };
 });
 
@@ -518,6 +534,14 @@ let riscos = 0;
 for (let x = 3; x < info.width - 3; x++) {
   if (coluna(x) < 0.035 && coluna(x - 3) > 0.06 && coluna(x + 3) > 0.06) riscos++;
 }
+// ⚠️ ESTE ASSERT É RUIDOSO — O TERCEIRO DA SONDA, e ele não estava na lista até 2026-08-29.
+// Reprova com `riscos = 1` em torno de uma execução em quatro. MEDIDO no código de `HEAD`, sem
+// o plantio dos props, justamente porque o plantio pôs sombras dentro da janela que ele amostra
+// (y = altura−24 .. altura−2) e a primeira suspeita foi essa. NÃO era: o ruído já existia.
+//
+// A causa é a mesma dos outros dois: ele fotografa UM instante de uma fase que rola, e o que cai
+// sob a janela muda a cada execução. RODE DE NOVO ANTES DE CONCLUIR — e nunca afrouxe o 0.035
+// para calar: o dia em que um risco de emenda voltar de verdade, é este número que o pega.
 ok(riscos === 0, `nenhum RISCO de emenda na faixa (${riscos} colunas pretas de 1px entre vizinhos claros)`);
 
 // ─── A MÉTRICA DO CASCO: onde no bicho o jogador está ───
@@ -594,6 +618,83 @@ ok(
 ok(
   lancas.length >= 3 && lancas.length <= 6,
   `e os ATIRADORES não mudaram: ${lancas.length} lança-mísseis (a conta antiga dava ~4,2)`,
+);
+
+// ─── O PLANTIO: os props de casco NÃO SÃO UMA FILA ───
+//
+// ⚠️ ESTE BLOCO É A RESPOSTA AO "COLADOS" (Henrique, 4º teste jogado). Todo prop nascia com o
+// pé em GROUND_Y=206, contra uma faixa de casco que vai de y=150 a 216: 90% de sobreposição e
+// 6px coroando, todos no mesmo `y`. Uma tira de adesivos. Agora o pé é sorteado dentro da faixa
+// (ver `TerrainSystem.PLANTIO`) e cada um quebra a linha da crista numa altura diferente.
+const casco = nasc.filter((n) => n.kind === 'respiradouro' || n.kind === 'lancaMisseis');
+const pes = casco.map((n) => n.pe);
+console.log('plantio ' + JSON.stringify(casco.map((n) => ({ k: n.kind[0], pe: n.pe, coroa: n.coroa, d: n.depth }))));
+ok(casco.length >= 3, `há props de casco para medir (${casco.length})`);
+// ⚠️ O ASSERT DA FILA. `every(dentro da faixa)` sozinho passaria numa versão que plantasse
+// TODOS em 195 — o defeito original com outro número. O que se está medindo é a VARIAÇÃO.
+ok(new Set(pes).size > 1, `e eles NÃO estão todos no mesmo y (${new Set(pes).size} plantios distintos em ${pes.length})`);
+ok(
+  pes.every((y) => y >= 186 && y <= 199),
+  `e todo pé cai DENTRO da faixa do casco, nunca na crista nem abaixo dela (${JSON.stringify(pes)})`,
+);
+// ⚠️ COROAR É O PONTO, E O PIOR CASO É O PROP MAIS BAIXO. 6px era o número do defeito. O
+// `lancaMisseis` tem 59px e é ele quem define o teto do PLANTIO: em 199 ele coroa 10px, e o
+// respiradouro (62px) no fundo da faixa coroa 26. Este assert JÁ REPROVOU uma vez — o teto
+// nasceu 204, calculado sobre o prop mais ALTO, e o lança coroava 5px, pior que o defeito.
+ok(
+  casco.every((n) => n.coroa >= 10),
+  `e todo prop QUEBRA a linha da crista (coroa mínima ${Math.min(...casco.map((n) => n.coroa))}px, o defeito eram 6)`,
+);
+// ⚠️ A PROFUNDIDADE ACOMPANHA O PLANTIO, senão quem fica na frente é decidido pela ordem de
+// criação — empate de profundidade renderiza certo por acidente.
+const ordenado = [...casco].sort((a, b) => a.pe - b.pe);
+ok(
+  ordenado.every((n, i) => i === 0 || n.depth >= ordenado[i - 1].depth),
+  'e quem está plantado mais à FRENTE desenha por cima (depth cresce com o pé)',
+);
+// ⚠️ A SOMBRA TEM QUE TRANSBORDAR O PROP, E ESTE ASSERT EXISTE PORQUE A PRIMEIRA VERSÃO NÃO
+// TRANSBORDAVA. Ela nasceu com 0,9 da largura e centrada ACIMA da linha do pé: desenhava inteira
+// atrás do dono e não sobrava um pixel dela na tela. "A sombra existe" passaria verde nessa
+// versão invisível; o que se mede é que ela ESCAPA da silhueta.
+// ⚠️ E VIZINHOS NÃO REPETEM ALTURA. O olho compara um prop com o SEGUINTE, não com a média da
+// faixa — e o sorteio uniforme puro entregou, na primeira execução desta sonda, oito props entre
+// 191 e 199. Quem garante o espaçamento é `TerrainSystem.sortearPlantio`, nunca a distribuição.
+//
+// ⚠️ ESTE ASSERT NÃO PISCA, e isso foi comprado de propósito. A primeira versão do sorteio era
+// um laço de até 8 tentativas, que estoura em ~3% das vezes; agora o salto é garantia de
+// construção (o sorteio é uniforme sobre as faixas que SOBRAM). 400 mil sorteios: menor salto
+// 5, sempre. Se alguém voltar ao laço com teto, este assert começa a piscar — e a resposta é
+// consertar o sorteio, nunca afrouxar o piso.
+const saltos = pes.slice(1).map((y, i) => Math.abs(y - pes[i]));
+ok(
+  saltos.every((d) => d >= 5),
+  `e nenhum vizinho repete a altura do anterior (menor salto ${saltos.length ? Math.min(...saltos) : 'n/a'}px, piso 5)`,
+);
+ok(
+  casco.every((n) => n.somW !== null && n.somW > n.propW),
+  `e cada um tem SOMBRA DE CONTATO mais larga que ele (${JSON.stringify(casco.map((n) => n.somW + '>' + n.propW))})`,
+);
+
+// ⚠️ E NENHUMA SOMBRA ÓRFÃ. A sombra não é filha do prop: é um objeto solto que ALGUÉM tem de
+// matar. O prop morre por dois caminhos — o culling em `x < −40` e o tiro do jogador, em
+// arquivos diferentes — e a limpeza está pendurada no `once('destroy')` do dono justamente para
+// cobrir os dois. Uma sombra vazada não quebra nada e não aparece jogando: ela só desliza pela
+// fase para sempre. É a lição dos dois caminhos de morte da água-viva, num caso novo.
+//
+// A contagem é EXATA, e não "<=": sobra significa vazamento, e falta significa que alguma
+// sombra morreu antes do dono e há um prop de casco sem base.
+const vazamento = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const vivos = s.terrain.props.getChildren().filter(
+    (o) => o.active && (o.getData('kind') === 'respiradouro' || o.getData('kind') === 'lancaMisseis'),
+  ).length;
+  const sombras = s.children.list.filter((o) => o.name === 'sombraCasco').length;
+  return { vivos, sombras };
+});
+console.log('sombras ' + JSON.stringify(vazamento));
+ok(
+  vazamento.sombras === vazamento.vivos,
+  `uma sombra por prop de casco vivo, nem mais nem menos (${vazamento.sombras} sombras / ${vazamento.vivos} props)`,
 );
 
 
