@@ -697,6 +697,7 @@ export class BootScene extends Phaser.Scene {
     this.makeBullet();
     this.makeTracerRound();
     this.makeShots();
+    this.makeShotsChefes();
     this.makePuff();
     this.makeSpark();
     this.makeColonyLight();
@@ -1051,6 +1052,103 @@ export class BootScene extends Phaser.Scene {
    * já nasce ALTO (11×19, o tamanho de mundo que o stretch 3.2 entregava) e o `bulletScaleY`
    * dela foi aposentado — hitbox de mundo igual, arte sem esticão borrado.
    */
+  /**
+   * OS PROJÉTEIS DOS DOIS CHEFES DA FASE 3 — desenhados em código, pela MESMA razão que os do
+   * jogador (ver `makeShots` logo abaixo): projétil de 13px não se gera, se desenha.
+   *
+   * ⚠️ POR QUE ELES EXISTEM. Até 2026-08-29 a aranha e a serpente cuspiam a mesma coisa: o
+   * `bolt2` — que é o TRAÇO DA NAVE DO JOGADOR — tingido de `0xff3a78`. Mesmo asset, mesma cor,
+   * escalas 0,8 e 0,9. O Henrique, jogando: *"É um tiro magenta igual, sem característica
+   * nenhuma."* Ele tinha razão de um jeito literal: forma era a única coisa que ninguém nunca
+   * tinha mexido nesses dois tiros.
+   *
+   * ⚠️ E A COR SAIU DO CONTRATO DO MAGENTA, POR DECISÃO DELE. O jogo ensinava `magenta = isto te
+   * mata` (é o que a bola da Fase 2 preserva de propósito, ver `STAGE_2_SKIN`), e eu perguntei
+   * antes de romper. Ele escolheu romper: cada chefe passa a atirar na cor DELE. Se um dia
+   * alguém achar que "faltou coerência", não foi esquecimento — foi escolhido, com o preço na
+   * mesa.
+   *
+   * ⚠️ O CIANO ESTÁ FORA, E ESSE FOI O ACHADO QUE SALVOU UMA RODADA. O acento medido da serpente
+   * é `#48e8f0`, que é praticamente o `playerBright` (`#3ee0f0`) da nave: um tiro ciano leria
+   * como tiro do próprio jogador. O verde `#60f088`/`#70d890` é o OUTRO acento dela (a cabeça do
+   * meio, a que pinga veneno), e é o que não colide com ninguém.
+   *
+   * ⚠️ AS CAIXAS SÃO AS DE ANTES, E ISSO NÃO É DETALHE. A hitbox do slot vem do quadro do
+   * `bolt2` (13×9, ver `EnemySystem.release`). A munição da aranha nasce nesse mesmo 13×9, então
+   * o balanceamento não se mexe nem um pixel. A gota da serpente é MAIOR na tela (16×12) porque
+   * é o ponto dela, e por isso ela — e só ela — precisa cravar o corpo à mão no `tiro()`.
+   *
+   * ⚠️ OS DOIS APONTAM PARA A DIREITA. Quem os gira é o `setRotation(angle)` de quem atira; um
+   * desenho simétrico perderia a informação de para onde o tiro vai, que é a única coisa que um
+   * projétil carrega.
+   */
+  private makeShotsChefes(): void {
+    const tex = (key: string, w: number, h: number, draw: (g: Phaser.GameObjects.Graphics) => void): void => {
+      const g = this.make.graphics({ x: 0, y: 0 }, false);
+      draw(g);
+      g.generateTexture(key, w, h);
+      g.destroy();
+    };
+
+    // A ARANHA — MATÉRIA. Ela é uma máquina de aço com um cano soltando fumaça em cima, e o
+    // acento dela e do casco inteiro é COBRE (`#e0a878`, `#f8e898`, medidos). Então o tiro dela
+    // é munição: casco frio atrás, corpo de cobre, ogiva quente na frente. Curto e duro — ela
+    // cospe leque de 3 e anel de 6, e muitos projéteis pequenos precisam ler por SILHUETA.
+    tex('shotAranha', 13, 9, (g) => {
+      g.fillStyle(0xc07840, 0.22);
+      g.fillRect(0, 3, 13, 3);
+      // ⚠️ O CONTORNO QUASE PRETO É FUNCIONAL, NÃO ESTILO. Ela voa sobre um casco que tem
+      // costuras de COBRE — a mesma família da munição. Sem a borda escura o corpo do projétil
+      // se dissolve nas costuras e sobra só o bico.
+      g.fillStyle(0x120c08, 1);
+      g.fillRect(1, 2, 11, 5);
+      g.fillStyle(0x6b4630, 1); // a cauda: casco que já esfriou
+      g.fillRect(2, 3, 4, 3);
+      g.fillStyle(0xc98a52, 1); // o corpo de cobre
+      g.fillRect(6, 3, 4, 3);
+      g.fillStyle(0xf8e898, 1); // a ogiva quente
+      g.fillTriangle(9, 1, 13, 4, 9, 7);
+      g.fillStyle(0xffffff, 1); // o bico
+      g.fillRect(10, 4, 2, 1);
+    });
+
+    // A SERPENTE — ENERGIA CUSPIDA. Uma gota com cauda, não um traço: ela sai de uma BOCA, não
+    // de um cano. O corpo é o verde medido da cabeça do meio, com núcleo quase branco para não
+    // depender da cor para ser vista (é a lição da bola da Fase 2) e uma borda escura que a
+    // separa do casco quase preto por cima do qual ela voa.
+    // ⚠️ ELA NÃO PODE DEPENDER DO VERDE PARA SER VISTA, E A PRIMEIRA VERSÃO DEPENDIA. Capturada
+    // em voo, a gota sumia — porque o corpo da própria serpente é verde e ciano, e um projétil
+    // verde desaparece dentro do dono no exato instante em que o jogador precisa lê-lo para
+    // desviar. É o defeito que a bola da Fase 2 já tinha resolvido, e a solução é a mesma dela:
+    // contraste de LUMINÂNCIA, não de cor. Borda quase preta e núcleo quase branco, grandes o
+    // bastante para sobreviverem a 0,9 de escala.
+    // ⚠️ 13×9 — O MESMO QUADRO DO `bolt2`, E ISSO É UMA DECISÃO DE SEGURANÇA, NÃO DE ESTILO.
+    // A primeira versão nasceu 16×12 (uma gota maior na tela) e cravava o corpo à mão com
+    // `body.setSize(13, 9)`. Medindo, a caixa saiu 10×7 em vez de 12×8: o `Body` do Arcade
+    // guarda a escala do frame ANTERIOR, e o slot vinha de um tiro da aranha (escala 0,8), então
+    // `13 × 0,8 = 10,4`. A hitbox passava a depender de QUEM tinha usado o slot antes — um bug
+    // que ninguém acharia jogando e que nenhum assert de "o tiro existe" pegaria.
+    //
+    // Nascendo no quadro do `bolt2`, o corpo que o `release` devolve já é o certo, não há
+    // `setSize` nenhum, e a caixa fica PROVADAMENTE igual à de antes desta mudança — que é o
+    // único jeito de trocar a arte de um chefe já balanceado sem reabrir o balanceamento.
+    tex('shotVeneno', 13, 9, (g) => {
+      g.fillStyle(0x60f088, 0.18);
+      g.fillCircle(8, 4, 4);
+      g.fillStyle(0x07120c, 1); // a borda: o que a separa do próprio bicho
+      g.fillEllipse(8, 4, 10, 9);
+      g.fillStyle(0x2f7a52, 1);
+      g.fillEllipse(8, 4, 8, 7);
+      g.fillStyle(0x60f088, 1);
+      g.fillEllipse(8, 4, 6, 5);
+      // A CAUDA: o rastro do cuspe, afinando para trás. É o que separa "gota lançada" de "bola".
+      g.fillStyle(0x50b080, 0.8);
+      g.fillTriangle(5, 2, 5, 6, 0, 4);
+      g.fillStyle(0xe8fff0, 1); // o núcleo: quase branco, e é ele que carrega a leitura
+      g.fillEllipse(9, 4, 4, 4);
+    });
+  }
+
   private makeShots(): void {
     const tex = (key: string, w: number, h: number, draw: (g: Phaser.GameObjects.Graphics) => void): void => {
       const g = this.make.graphics({ x: 0, y: 0 }, false);

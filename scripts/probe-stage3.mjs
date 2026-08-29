@@ -172,6 +172,46 @@ await alcancavelPorBala('fase A (ciano)');
 ok(bs.alvos === 1, `UM alvo vivo (a cabeça laranja)`);
 ok(bs.cabecaJunta, 'a hitbox da cabeça acompanha o offset medido');
 await page.screenshot({ path: 'probe-stage3-serpente.png' });
+// ─── O CUSPE DA SERPENTE: ela e a aranha não atiram mais a MESMA coisa ───
+//
+// ⚠️ ATÉ 2026-08-29 OS DOIS CHEFES DA FASE CUSPIAM UM ÚNICO OBJETO: `bolt2` — o traço da nave
+// do jogador — tingido do mesmo `0xff3a78`, em escalas 0,8 e 0,9. *"É um tiro magenta igual, sem
+// característica nenhuma."* Este assert existe para que nunca mais sejam o mesmo.
+//
+// ⚠️ O CIANO ESTÁ PROIBIDO, E ESSE FOI O ACHADO QUE SALVOU UMA RODADA. O acento medido da
+// serpente é `#48e8f0`, que é praticamente o `playerBright` da nave (`#3ee0f0`) — vestir o tiro
+// dela de ciano faria o jogador ler o próprio tiro voltando contra ele. O verde `#60f088` é o
+// OUTRO acento dela (a cabeça do meio, a que pinga veneno).
+const cuspe = await page.evaluate(async () => {
+  const s = window.__game.scene.getScenes(true)[0];
+  for (let i = 0; i < 1200; i++) {
+    const b = s.enemies.enemyBullets.getChildren().find((o) => o.active && o.texture.key === 'shotVeneno');
+    if (b) {
+      const bolt2 = s.textures.getFrame('bolt2');
+      return {
+        tex: b.texture.key,
+        tint: b.tintTopLeft.toString(16),
+        quadro: [b.texture.getSourceImage().width, b.texture.getSourceImage().height],
+        bolt2: [bolt2.realWidth, bolt2.realHeight],
+      };
+    }
+    if (s.player) s.lives = 9;
+    await new Promise((res) => requestAnimationFrame(res));
+  }
+  return null;
+});
+console.log('cuspe    ' + JSON.stringify(cuspe));
+ok(cuspe !== null, 'a SERPENTE cospe a munição dela, não o traço da nave do jogador');
+ok(cuspe?.tint === 'ffffff', `sem tint por cima da arte (tint=${cuspe?.tint})`);
+// ⚠️ MESMO QUADRO DO `bolt2`: é dele que o `release` do pool reconstrói o corpo. Uma versão
+// 16×12 desta arte cravava a caixa à mão e ela saía 10×7 em vez de 12×8, porque o `Body` do
+// Arcade aplica a escala do frame ANTERIOR — a hitbox passava a depender de quem usou o slot
+// antes. Nascendo no quadro do `bolt2`, não há conta de escala nenhuma para errar.
+ok(
+  cuspe !== null && cuspe.quadro[0] === cuspe.bolt2[0] && cuspe.quadro[1] === cuspe.bolt2[1],
+  `e nasce no MESMO quadro do bolt2 (${cuspe?.quadro?.join('×')}), então a hitbox dela não se mexeu`,
+);
+
 
 /** Bate no chefão até a FORMA trocar (ou aborta): o dano entra por boss.damage, como as sondas
  *  da Capitânia — o que se testa aqui é a ANATOMIA das fases, não a pontaria. */

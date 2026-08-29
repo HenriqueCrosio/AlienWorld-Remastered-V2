@@ -281,8 +281,12 @@ export class TerrainSystem {
     if (opts?.angle !== undefined) p.setAngle(opts.angle);
 
     if (def.shoots) {
-      // Primeiro tiro demora: a torre não pode disparar no instante em que entra na tela.
-      p.setData('cooldown', Phaser.Math.FloatBetween(1.6, 2.8));
+      // ⚠️ ERA `1.6 a 2.8`, E ESSE NÚMERO ERA O DEFEITO. Ver o bloco grande em `updateTurret`:
+      // o relógio agora só corre DENTRO da janela de tiro, então este sorteio não disputa mais
+      // com a posição do jogador — ele existe só para os canhões não dispararem em uníssono.
+      // A faixa curta é o que garante que todo canhão consiga o primeiro tiro mesmo quando a
+      // janela é estreita (0,88s com o jogador colado em x=300).
+      p.setData('cooldown', Phaser.Math.FloatBetween(...TerrainSystem.PRIMEIRO_TIRO));
       p.setData('charging', 0);
     }
 
@@ -467,11 +471,35 @@ export class TerrainSystem {
       return;
     }
 
-    const cd = (p.getData('cooldown') as number) - dt;
-
     // Só mira quando está na tela E o jogador ainda está à sua frente: uma torre que
     // já passou não deve atirar pelas costas.
-    if (cd <= 0 && p.x < GAME_WIDTH - 10 && p.x > target.x) {
+    const naJanela = p.x < GAME_WIDTH - 10 && p.x > target.x;
+
+    // ⚠️ O RELÓGIO SÓ ANDA DENTRO DA JANELA, E ISSO É O CONSERTO DE UM DEFEITO RELATADO JOGANDO
+    // (Henrique, 2026-08-29: *"alguns canhões não estão atirando"*).
+    //
+    // A causa, medida com `scripts/_f3/diag-canhao.mjs`: a janela de tiro é
+    // `(374 − x_do_jogador) / SCROLL_SPEED`, ou seja, ela ENCOLHE conforme o jogador avança. O
+    // cooldown inicial era sorteado em 1,6–2,8s e corria desde o nascimento, então o canhão
+    // gastava a janela inteira esperando ficar pronto:
+    //
+    //     jogador em x=70   janela 3,62s   4 de 4 atiravam
+    //     jogador em x=160  janela 2,55s   7 de 7
+    //     jogador em x=240  janela 1,60s   2 de 4     ← e os dois que falharam eram
+    //     jogador em x=300  janela 0,88s   0 de 7        os de `cdInicial` mais alto
+    //
+    // Quanto mais para a frente se jogava, menos o Ato 2 revidava — o oposto do que a fase quer.
+    // Com o relógio parado fora da janela, o sorteio deixa de disputar com a posição: o canhão
+    // chega pronto e o primeiro tiro sai `PRIMEIRO_TIRO` depois de ele PODER atirar. Do segundo
+    // em diante continua a cadência de sempre.
+    //
+    // ⚠️ O PREÇO ESTÁ ESCOLHIDO, NÃO ESCONDIDO: quem fica atrás passa a levar ~2 tiros por canhão
+    // em vez de 1, porque agora sobra janela para a segunda recarga. A ameaça deixa de depender
+    // de onde o jogador voa, que era o defeito.
+    if (!naJanela) return;
+
+    const cd = (p.getData('cooldown') as number) - dt;
+    if (cd <= 0) {
       p.setData('cooldown', TerrainSystem.TURRET_RATE);
       p.setData('charging', TerrainSystem.TELEGRAPH);
     } else {
@@ -481,6 +509,12 @@ export class TerrainSystem {
 
   private static readonly TURRET_RATE = 2.4;
   private static readonly TELEGRAPH = 0.4;
+
+  /**
+   * A espera do PRIMEIRO tiro, contada de dentro da janela (ver `updateTurret`). Curta porque a
+   * janela pode ser de 0,88s; sorteada porque canhões que disparam em uníssono viram uma salva.
+   */
+  private static readonly PRIMEIRO_TIRO: readonly [number, number] = [0.35, 0.75];
 
   private fireAt(p: Phaser.Physics.Arcade.Sprite, target: Phaser.Physics.Arcade.Sprite): void {
     // A BOCA DE ONDE O TIRO SAI, por prop. Ver `BOCAS`: são offsets MEDIDOS na arte, e o

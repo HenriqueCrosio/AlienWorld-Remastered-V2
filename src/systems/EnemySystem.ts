@@ -635,8 +635,11 @@ export class EnemySystem {
         if (!b) break;
         b.setActive(true).setVisible(true);
         b.body!.enable = true;
-        b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
-        b.setBlendMode(Phaser.BlendModes.ADD);
+        // A MESMA munição de cobre do leque dela (ver `municaoAranha`). O anel de aterrissagem é
+        // o segundo caminho de tiro da aranha, e os dois têm que cuspir a MESMA coisa — foi um
+        // par de caminhos com a mesma cópia de linhas que já fez a água-viva morrer em fogo por
+        // uma porta e em choque pela outra.
+        EnemySystem.municaoAranha(b);
         b.setData('ox', e.x);
         b.setData('oy', e.y);
         b.setVelocity(Math.cos(ang) * 105, Math.sin(ang) * 105);
@@ -645,6 +648,27 @@ export class EnemySystem {
       this.muzzleFlash.explode(8, e.x, e.y + 16);
       this.scene.cameras.main.shake(110, 0.005);
     }
+  }
+
+  /**
+   * A MUNIÇÃO DA ARANHA DO CASCO — um lugar só, porque ela atira por DOIS caminhos.
+   *
+   * O leque de 3 (`fireAt`) e o anel de 6 da aterrissagem (`updateAranha`) são código separado,
+   * e duas cópias das mesmas quatro linhas foi exatamente como a água-viva chegou a morrer em
+   * fogo por uma porta e em choque pela outra. Aqui é um método estático para que trocar o tiro
+   * dela seja impossível de fazer pela metade.
+   *
+   * ⚠️ `shotAranha` NASCE EM 13×9, o mesmo quadro do `bolt2` que ela usava — então a hitbox do
+   * slot (que o `release` devolve a partir do quadro do `bolt2`) continua exata e o
+   * balanceamento não se move. Ver `BootScene.makeShotsChefes`.
+   *
+   * ⚠️ `clearTint()` E BLEND NORMAL. A arte já nasce na cor certa; tingir por cima só a
+   * escureceria, e o aditivo estouraria a ogiva branca e comeria a borda escura que a separa do
+   * casco — que é metade do motivo de ela ser visível (a lição da bola da Fase 2).
+   */
+  private static municaoAranha(b: Phaser.Physics.Arcade.Sprite): void {
+    b.setTexture('shotAranha').setScale(0.8).clearTint();
+    b.setBlendMode(Phaser.BlendModes.NORMAL);
   }
 
   /**
@@ -696,6 +720,9 @@ export class EnemySystem {
         // Manter o `0.7` do canvas aqui teria inflado a caixa vertical em 37% de graça: o canvas
         // novo é mais alto, e a fagulha teria virado hitbox.
         (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
+      } else if (e.getData('kind') === 'aranha') {
+        // A ARANHA TEM MUNIÇÃO PRÓPRIA (2026-08-29). Ver `municaoAranha` e `makeShotsChefes`.
+        EnemySystem.municaoAranha(b);
       } else {
         // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
         // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.

@@ -680,6 +680,54 @@ ok(
   `e os ATIRADORES não mudaram: ${lancas.length} lança-mísseis (a conta antiga dava ~4,2)`,
 );
 
+// ─── A MUNIÇÃO DA ARANHA: ela não cospe mais o tiro da NAVE DO JOGADOR ───
+//
+// ⚠️ ATÉ 2026-08-29 A ARANHA E A SERPENTE ATIRAVAM O MESMO OBJETO: `bolt2` — que é o traço do
+// próprio jogador — tingido de `0xff3a78`. *"É um tiro magenta igual, sem característica
+// nenhuma."* O assert cobra as três coisas que estavam erradas de uma vez: que NÃO é mais o
+// `bolt2`, que NÃO tem tint (a arte já nasce na cor), e que a CAIXA não se mexeu — trocar arte
+// de inimigo balanceado sem reabrir o balanceamento só é seguro assim.
+const municao = await page.evaluate(async () => {
+  const s = window.__game.scene.getScene('Game');
+  for (let i = 0; i < 900; i++) {
+    const b = s.enemies.enemyBullets.getChildren().find(
+      (o) => o.active && o.texture.key !== 'bolt2' && o.getData('missile') !== true,
+    );
+    const bolt2 = s.textures.getFrame('bolt2');
+    if (b) {
+      return {
+        tex: b.texture.key,
+        tint: b.tintTopLeft.toString(16),
+        blend: b.blendMode,
+        w: Math.round(b.displayWidth),
+        h: Math.round(b.displayHeight),
+        quadro: [b.texture.getSourceImage().width, b.texture.getSourceImage().height],
+        bolt2: [bolt2.realWidth, bolt2.realHeight],
+      };
+    }
+    await new Promise((res) => requestAnimationFrame(res));
+  }
+  return null;
+});
+console.log('municao ' + JSON.stringify(municao));
+ok(municao !== null, 'a ARANHA atirou durante o mini-boss');
+ok(
+  municao?.tex === 'shotAranha',
+  `e a munição é a DELA, não o traço da nave do jogador (${municao?.tex}, era 'bolt2')`,
+);
+// ⚠️ SEM TINT. A arte nasce na cor de cobre medida no casco; tingir por cima só a escureceria.
+// `ffffff` é o valor de "sem tint" — qualquer outra coisa aqui significa que alguém repintou.
+ok(municao?.tint === 'ffffff', `sem tint por cima da arte (tint=${municao?.tint})`);
+// ⚠️ E A CAIXA É A DE ANTES. O quadro tem que ser o MESMO do `bolt2` que ela substituiu — é
+// dele que o `release` do pool reconstrói o corpo. Um quadro maior aqui daria hitbox de graça, e
+// pior: uma hitbox que depende de quem usou o slot antes (o `Body` do Arcade aplica a escala do
+// frame anterior). Foi medido acontecendo com uma versão 16×12 desta arte.
+ok(
+  municao !== null && municao.quadro[0] === municao.bolt2[0] && municao.quadro[1] === municao.bolt2[1],
+  `e nasce no MESMO quadro do bolt2 (${municao?.quadro?.join('×')} contra ${municao?.bolt2?.join('×')}), então a hitbox não se mexeu`,
+);
+await page.screenshot({ path: 'scripts/_f3/probe-municao.png' });
+
 // ─── O PLANTIO: os props de casco NÃO SÃO UMA FILA ───
 //
 // ⚠️ ESTE BLOCO É A RESPOSTA AO "COLADOS" (Henrique, 4º teste jogado). Todo prop nascia com o
