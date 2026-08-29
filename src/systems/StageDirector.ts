@@ -262,8 +262,12 @@ export const STAGE_3: StageEvent[] = [
   // O `hazard rate 0` andou junto (40 → 37,5) porque ele NÃO é do Ato 2: é a preparação do
   // rabo. Esvaziar o quadro é o que faz a chegada pesar, e tem que acontecer antes dela.
   //
-  // ⚠️ O BANNER ANDOU PARA A FRENTE: 44 → 48,5. Ele anunciava um casco que só existe em t=48 —
-  // legenda antes da imagem. Agora ele chega quando há o que ver.
+  // ⚠️ O BANNER SAIU DAQUI (2026-08-29). Ele já tinha andado de 44 para 48,5 porque anunciava um
+  // casco que só existia em t=48 — legenda antes da imagem. Agora ele nem mora mais no relógio:
+  // quem o dispara é `GameScene.escurecerParaOCasco`, no instante em que a tela fica preta, que
+  // é onde o Henrique pediu que o nome aparecesse. Horário fixo para um evento que é o fim de um
+  // tween é a mesma armadilha que o casco já tinha: os dois derivam na primeira mudança de
+  // duração. Se você procurar 'O CASCO DO LEVIATÃ' e não achar aqui, é por isso.
   //
   // ⚠️ A "INSINUAÇÃO" DE t=21 NÃO REVELA MAIS O CASCO, e isso é deliberado. O `density 0.75`
   // continua lá afinando a nuvem, mas o casco não está mais amarrado a ele (ver
@@ -272,7 +276,6 @@ export const STAGE_3: StageEvent[] = [
   { t: 37.5, type: 'hazard', rate: 0, mix: [] },
   { t: 38, type: 'rabo' },
   { t: 42, type: 'nebula', density: 0 },
-  { t: 48.5, type: 'banner', text: 'O CASCO DO LEVIATÃ' },
 
   // ATO 2: o casco é a superfície — e o que há EM CIMA dele é a defesa do próprio Leviatã.
   //

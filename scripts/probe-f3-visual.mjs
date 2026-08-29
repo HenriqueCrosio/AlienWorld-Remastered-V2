@@ -347,9 +347,9 @@ await page.screenshot({ path: 'scripts/_f3/probe-rabo.png' });
 // (o mergulho não translada), o `alpha` cairia a 0, o `angulo` iria a −38, e o rabo ainda
 // estaria em cena depois do reveal. É o critério de "o assert novo reprova MAIS do que o velho".
 
-// A amostra do MEIO da travessia (t≈44,8; ela corre de 44,0 a 46,2). O passo é curto de
-// propósito: passar de 46,2 pegaria o sprite já destruído e o teste mediria a coisa errada.
-while ((await estado()).t < 44.8) {
+// A amostra do MEIO da saída (t≈46,5; ela corre de 45,8 a 47,6). O passo é curto de propósito:
+// passar de 47,6 pegaria o sprite já destruído e o teste mediria a coisa errada.
+while ((await estado()).t < 46.5) {
   await page.waitForTimeout(200);
   await respirar();
 }
@@ -369,6 +369,7 @@ const naTravessia = await page.evaluate(async () => {
     n: 1,
     x1: Math.round(x1),
     x2: d ? Math.round(d.x) : null,
+    y: d ? Math.round(d.y) : null,
     alpha1: Number(alpha1.toFixed(2)),
     alpha2: d ? Number(d.alpha.toFixed(2)) : null,
     angulo: d ? Number(d.angle.toFixed(1)) : null,
@@ -376,12 +377,18 @@ const naTravessia = await page.evaluate(async () => {
   };
 });
 console.log('travessia ' + JSON.stringify(naTravessia));
-ok(naTravessia.n === 1, `o rabo está ATRAVESSANDO em t=${naTravessia.t}`);
-// ⚠️ O SINAL FAZ PARTE DO ASSERT — a mesma lição do `+38`, aplicada ao outro eixo. `x2 < x1` é
-// direção; `Math.abs(x2 - x1) > 0` seria só movimento, e passaria num rabo indo para a direita.
+ok(naTravessia.n === 1, `o rabo está SAINDO em t=${naTravessia.t}`);
+// ⚠️⚠️ O ASSERT MAIS CARO DESTA FATIA: ELE VAI PARA A DIREITA, E O SINAL É A COISA TODA.
+//
+// O corpo do Leviãtã está fora do quadro à DIREITA (origem 0.92), e num sidescroller "estar
+// atrás dele" é lateral: `player =)----> Leviãtã`. Uma saída para a esquerda é o rabo se
+// afastando do próprio corpo e vindo na direção do jogador — e foi assim que a 4ª tentativa
+// foi reprovada: *"como se o rabo tivesse se partido"*. A versão anterior desta sonda cobrava
+// `x2 < x1` e ficava VERDE em cima desse defeito, porque media a direção que eu tinha escolhido
+// em vez da direção que o desenho exige. Um assert só protege a decisão que ele codifica.
 ok(
-  naTravessia.x2 !== null && naTravessia.x2 < naTravessia.x1,
-  `e ele vai para a ESQUERDA (x ${naTravessia.x1} → ${naTravessia.x2})`,
+  naTravessia.x2 !== null && naTravessia.x2 > naTravessia.x1,
+  `e ele é PUXADO PARA A DIREITA, atrás do corpo dele (x ${naTravessia.x1} → ${naTravessia.x2})`,
 );
 // ⚠️ O ASSERT DO `alpha` É O CORAÇÃO DA RECLAMAÇÃO. Sair de opacidade lê como "desapareceu"; ele
 // tem que sair por GEOMETRIA, cruzando a borda. Um `alpha: 0` na saída reprova exatamente aqui.
@@ -395,38 +402,91 @@ ok(
   naTravessia.angulo !== null && Math.abs(naTravessia.angulo) <= 8,
   `e o CORPO não roda — só a ponta bate (${naTravessia.angulo}°, teto 8°)`,
 );
-ok(naTravessia.depth === -70, `depth −70 sem troca durante a travessia (${naTravessia.depth})`);
+ok(naTravessia.depth === -70, `depth −70 sem troca durante a saída (${naTravessia.depth})`);
+// ⚠️ A SAÍDA É UMA LINHA SÓ: O `x`. Cada eixo extra que entrou nas tentativas anteriores foi
+// lido como o corpo se deformando ou se soltando — a 4ª descia 38px enquanto andava. O `y` tem
+// que ser o MESMO do hold, não "parecido".
+ok(
+  naTravessia.y === 158,
+  `e a pose não muda: mesmo y do hold, sem descer nada (y=${naTravessia.y})`,
+);
 ok(
   naTravessia.cascoReveal === 0,
   `e o casco AINDA NÃO nasceu enquanto ele passa (cascoReveal=${naTravessia.cascoReveal})`,
 );
 await page.screenshot({ path: 'scripts/_f3/probe-travessia.png' });
 
-// A amostra DEPOIS: ele saiu, e o casco está nascendo do lugar que ele deixou.
+// ─── O ESCURECIMENTO: ele saiu, a tela ficou preta, e o casco veio PRONTO de trás dela ───
 //
-// Em t=47 a conta é: destroy em 46,2 → 300ms de quadro vazio → reveal de 46,5 a 48,0. Então
-// aqui o rabo tem que ter SUMIDO e o casco tem que estar no meio do caminho.
-while ((await estado()).t < 47) {
-  await page.waitForTimeout(300);
+// ⚠️ NÃO HÁ MAIS "REVELAÇÃO" DO CASCO PARA MEDIR, e isso é a mudança inteira. Por quatro
+// rodadas o chão subiu num fade de 1500ms na frente do jogador, e cada uma delas gastou uma
+// sessão discutindo em que instante o fade podia começar sem virar corte. O Henrique trocou o
+// problema por um escurecimento: atrás do preto não existe "meio transparente". Então o assert
+// deixa de perguntar "o casco está no meio do caminho?" e passa a cobrar que ele esteja
+// INTEIRO já na primeira amostra depois do escuro.
+//
+// A conta: destroy em 47,6 → preto cheio em 47,95 → casco em 1 e nome na tela → preto segura
+// até 48,37 → clareia até 48,72.
+while ((await estado()).t < 48.2) {
+  await page.waitForTimeout(150);
   await respirar();
 }
-const depoisDele = await page.evaluate(() => {
+const noEscuro = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   const r = s.children.list.find((o) => o.texture && o.texture.key === 'raboLeviata');
+  const preto = s.children.list.find((o) => o.name === 'pretoDoCasco');
   return {
     t: Number((s.elapsed ?? 0).toFixed(1)),
     cascoReveal: Number(s.parallax.cascoReveal.toFixed(2)),
-    n: r ? 1 : 0,
+    rabo: r ? 1 : 0,
+    preto: preto ? Number(preto.alpha.toFixed(2)) : null,
+    pretoDepth: preto ? preto.depth : null,
+    banner: s.banner ? s.banner.text : null,
+    bannerAlpha: s.banner ? Number(s.banner.alpha.toFixed(2)) : null,
+    bannerDepth: s.banner ? s.banner.depth : null,
   };
 });
-console.log('saiu    ' + JSON.stringify(depoisDele));
+console.log('escuro  ' + JSON.stringify(noEscuro));
 // ⚠️ NADA FICA. "O toco fica e o casco nasce dele" foi construído, jogado e REPROVADO. Se algum
-// dia este assert reprovar com n=1, alguém reimplementou o toco.
-ok(depoisDele.n === 0, `o rabo SAIU DA TELA e não deixou toco nenhum em t=${depoisDele.t}`);
+// dia este assert reprovar com rabo=1, alguém reimplementou o toco — ou a saída ficou lenta
+// demais e o bicho está sendo apagado pelo preto em vez de sair andando, que é o defeito de
+// novo, só que escondido.
+ok(noEscuro.rabo === 0, `o rabo JÁ SAIU antes de a tela escurecer (t=${noEscuro.t})`);
+ok(noEscuro.preto === 1, `a tela está PRETA (alpha=${noEscuro.preto})`);
+// ⚠️ O CASCO VEM PRONTO. Qualquer valor entre 0 e 1 aqui significa que alguém devolveu o fade
+// e o jogador vai ver o chão se materializando — que é exatamente o que o escurecimento existe
+// para esconder.
+ok(noEscuro.cascoReveal === 1, `e o casco veio INTEIRO de trás do preto (cascoReveal=${noEscuro.cascoReveal})`);
+// ⚠️ O NOME SE LÊ SOBRE O PRETO, e é por isso que o preto é depth 90 e não 200. O pedido foi
+// que a tela escurecesse *o suficiente para aparecer o nome*: um preto por cima do banner
+// apagaria justamente a coisa que ele veio mostrar.
 ok(
-  depoisDele.cascoReveal > 0 && depoisDele.cascoReveal < 1,
-  `e o casco está nascendo DEPOIS dele, no lugar que ele deixou (cascoReveal=${depoisDele.cascoReveal})`,
+  noEscuro.banner === 'O CASCO DO LEVIATÃ' && noEscuro.bannerAlpha > 0.5,
+  `e o NOME está na tela durante o escuro ("${noEscuro.banner}", alpha ${noEscuro.bannerAlpha})`,
 );
+ok(
+  noEscuro.pretoDepth < noEscuro.bannerDepth,
+  `com o preto ATRÁS do nome (preto ${noEscuro.pretoDepth} < banner ${noEscuro.bannerDepth})`,
+);
+await page.screenshot({ path: 'scripts/_f3/probe-escuro.png' });
+
+// E A TELA VOLTA. Um escurecimento que não clareia é uma fase preta, e o retângulo tem de ser
+// DESTRUÍDO: deixado em alpha 0 ele fica de pé para sempre em cima do Ato 2 inteiro.
+while ((await estado()).t < 49.4) {
+  await page.waitForTimeout(200);
+  await respirar();
+}
+const clareou = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  return {
+    t: Number((s.elapsed ?? 0).toFixed(1)),
+    preto: s.children.list.filter((o) => o.name === 'pretoDoCasco').length,
+    cascoReveal: Number(s.parallax.cascoReveal.toFixed(2)),
+  };
+});
+console.log('clareou ' + JSON.stringify(clareou));
+ok(clareou.preto === 0, `a tela CLAREOU e o preto foi destruído, não só zerado (t=${clareou.t})`);
+ok(clareou.cascoReveal === 1, `e o casco continua inteiro (${clareou.cascoReveal})`);
 await page.screenshot({ path: 'scripts/_f3/probe-saiu.png' });
 
 // O ATO 2: o rabo afundou e o casco é a superfície.

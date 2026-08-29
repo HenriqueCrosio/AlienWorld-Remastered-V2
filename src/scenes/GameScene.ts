@@ -563,8 +563,8 @@ export class GameScene extends Phaser.Scene {
   /**
    * O RABO DO LEVIATÃ — a transição do Ato 1 para o Ato 2 da Fase 3.
    *
-   * A nadadeira traseira entra pela DIREITA, se segura na quina batendo, e depois SAI pela
-   * esquerda. Antes disto a virada era um fade: a nuvem rareava e o casco aparecia. Funcionava
+   * A nadadeira traseira entra pela DIREITA, se segura na quina batendo, e depois é PUXADA de
+   * volta para a direita. Antes disto a virada era um fade: a nuvem rareava e o casco aparecia. Funcionava
    * como efeito e não dizia nada — o jogador via um chão novo, não o fim de uma perseguição.
    * O rabo diz a frase inteira sem banner nenhum: **eu alcancei o bicho, e estou atrás dele.**
    * O casco que vira chão logo depois deixa de ser cenário e passa a ser a MESMA criatura,
@@ -573,34 +573,38 @@ export class GameScene extends Phaser.Scene {
    * ⚠️ CENÁRIO, NÃO INIMIGO. Sem corpo físico, sem hitbox, sem dano, fora de todo grupo de
    * colisão. Nenhuma onda, nenhum spawn e nenhum número de balanceamento muda por causa dele.
    *
-   * ⚠️ UM VERBO SÓ PARA O PLANO INTEIRO: **PASSAR.** Esta é a lição do 4º teste jogado
-   * (2026-08-29), e ela derrubou a coreografia anterior por inteiro. A versão de 28/08 tinha
-   * DOIS verbos: chegava VIAJANDO (`x` em easeOut) e ia embora GIRANDO −38°, descendo em `y` e
-   * apagando o `alpha` no lugar. Um corpo rígido que rotaciona em torno de um ponto, escorrega
-   * para baixo e some de opacidade onde estava é a descrição física de uma PEÇA QUE SE SOLTOU,
-   * e foi exatamente isso que o Henrique relatou três vezes seguidas:
+   * ⚠️ ELE SAI PELA DIREITA, E ESSA DIREÇÃO CUSTOU CINCO TENTATIVAS. A regra que faltava, dita
+   * pelo Henrique em 2026-08-29 e óbvia depois de dita:
    *
-   *   *"O rabo continua com efeito de desprender no final da animação... o rabo precisa ficar
-   *   fixo no canto inferior direito da tela, e somente o final da cauda que mexe... fazer com
-   *   que a cauda saia da tela no final, como se o nado do leviatã tivesse apenas passado na
-   *   frente do jogador."*
+   *   *"Se o jogo é um sidescroller, o estar atrás do Leviatã é estar atrás dele lateralmente:
+   *   player =)----> Leviatã. A nadadeira aparece e é puxada para a direita, como se o Leviatã
+   *   estivesse nadando na mesma direção da nave do player."*
    *
-   * Nenhum ajuste de `y`, de `delay` ou de ângulo consertaria isso: o VOCABULÁRIO estava errado,
-   * não os números. Agora entra nadando, segura, e sai nadando — a saída é o espelho exato da
-   * chegada (`easeIn` contra `easeOut`).
+   * O CORPO do bicho está fora do quadro à DIREITA — com origem 0.92 o pedúnculo encosta na
+   * borda direita e o resto dele continua para lá. Então qualquer saída para a ESQUERDA é o rabo
+   * se afastando do próprio corpo, indo na direção do jogador, e não existe leitura disso que
+   * não seja "ele se partiu e está sendo arrastado". Foi o 4º defeito relatado, e ele era pior
+   * que o 3º: o anterior se soltava parado na quina, este se soltava atravessando a tela.
    *
-   * ⚠️ ELE SAI POR GEOMETRIA, NUNCA POR TRANSPARÊNCIA. O `alpha` fica em 1 até o `destroy`.
-   * Sumir de opacidade é a leitura mais pura de "desapareceu" em vez de "foi embora", e era
-   * metade da reclamação.
+   * ⚠️ AS QUATRO VERSÕES REPROVADAS, para nenhuma delas voltar por parecer uma boa ideia:
+   *   1. o rabo centrado, girando ±8° — pequeno demais, "precisa sair do frame"
+   *   2. o MERGULHO: gira −38°, desce e apaga no lugar — "efeito de desprender"
+   *   3. o mergulho de novo, com o toco ficando e o casco nascendo dele — mesma reclamação
+   *   4. a TRAVESSIA para a esquerda, saindo pela borda oposta — "como se tivesse se partido"
+   *
+   * ⚠️ A SAÍDA É UMA LINHA SÓ: O `x`. Sem `y`, sem `angle`, sem `alpha`. Cada eixo extra que eu
+   * acrescentei nas tentativas anteriores foi lido como o corpo se deformando ou se soltando.
+   * A única coisa que se mexe além do `x` é a batida da ponta — que é literalmente o pedido:
+   * *"somente o final da cauda que mexe"*.
    *
    * ⚠️ E O TOCO NÃO EXISTE MAIS. "O toco fica e o casco nasce dele" veio do pedido do 1º teste,
-   * sobreviveu a duas rodadas e foi REPROVADO na terceira. O 3º pedido é o oposto: nada fica,
-   * o bicho passa. Não reimplemente — já foi construído, visto e rejeitado.
+   * sobreviveu a duas rodadas e foi REPROVADO na terceira. Nada fica. Não reimplemente — já foi
+   * construído, visto e rejeitado.
    *
-   * ⚠️ `depth −70` O TEMPO TODO, sem troca. A versão anterior caía para −76 no mergulho para
-   * afundar POR TRÁS da faixa do casco (−75/−74); agora não há casco nenhum em cena quando ele
-   * passa (ver o tween 3), então não há nada para passar por trás. Os VÉUS (depth 60) passam
-   * por cima o tempo todo, então ele chega embaçado, entregue pela névoa.
+   * ⚠️ `depth −70` O TEMPO TODO, sem troca. A versão do mergulho caía para −76 para afundar POR
+   * TRÁS da faixa do casco (−75/−74); agora não há casco nenhum em cena enquanto ele está aqui
+   * (quem o traz é `escurecerParaOCasco`), então não há nada para passar por trás. Os VÉUS
+   * (depth 60) passam por cima o tempo todo, então ele chega embaçado, entregue pela névoa.
    *
    * ⚠️ ELE CHEGA ANTES DA NUVEM ABRIR (t=40,5 contra t=42). A ordem é a coisa toda: primeiro o
    * jogador vê O QUE alcançou, e só depois o casco se revela como o corpo daquilo.
@@ -697,41 +701,90 @@ export class GameScene extends Phaser.Scene {
     // oposto exato: a remada é o que CAUSA a viagem. Parar de bater e continuar se movendo é
     // que leria como peça sendo arrastada. Ela só para no `destroy`.
     //
-    // ⚠️ E NÃO HÁ `alpha` NENHUM NESTE TWEEN. Ver o cabeçalho.
+    // ⚠️ E NÃO HÁ `alpha` NENHUM NESTE TWEEN, NEM `y`, NEM `angle`. A saída é UMA linha: o `x`.
     //
-    // ⚠️ O `delay` É 6000 E NÃO 7000, E ISSO PROTEGE O `STAGE_3`. A conta corre para trás a
-    // partir de uma âncora que não pode se mexer: em `t=48` entram os props (`terrain`) e em
-    // `t=48,5` o banner, e os props só podem cair sobre um casco JÁ SÓLIDO — prop opaco sobre
-    // casco meio transparente é um defeito já consertado nesta fatia. Então:
+    // ⚠️ O `delay` É 7800. A conta corre para trás a partir de `t=48`, onde entram os props
+    // (`terrain`) — e prop opaco sobre casco meio transparente é um defeito já consertado nesta
+    // fatia, então o casco tem que estar SÓLIDO antes disso:
     //
-    //   casco sólido em t=48,0  ←  reveal começa em 46,5 (1500ms)
-    //   reveal em 46,5          ←  destroy em 46,2 (+300ms de quadro vazio)
-    //   destroy em 46,2         ←  saída começa em 44,0 (2200ms)  →  delay 6000 sobre o t=38
+    //   props em t=48,0     ←  casco sólido em 48,01 (o escurecimento entrega ele pronto)
+    //   tela preta em 47,95 ←  fade de 350ms começando no destroy
+    //   destroy em 47,6     ←  saída começa em 45,8 (1800ms)  →  delay 7800 sobre o t=38
     //
-    // O preço é o hold cair de 4,5s para 3,5s; ele ainda segura 2s depois da nuvem abrir em
-    // t=42. Em troca, o `StageDirector` não muda uma linha.
+    // O hold subiu de 3,5s para 5,3s: ele segura mais tempo grande demais para caber, que é o
+    // que o momento sempre pediu.
     this.tweens.add({
       targets: rabo,
-      x: -40,
-      y: 196,
-      delay: 6000,
-      duration: 2200,
+      x: 740,
+      delay: 7800,
+      duration: 1800,
       ease: 'Sine.easeIn',
       onComplete: () => {
         batida.stop();
         rabo.destroy();
+        this.escurecerParaOCasco();
+      },
+    });
+  }
 
-        // ⚠️ O CASCO NASCE AQUI, E NÃO NO ROTEIRO — a mesma razão de sempre, num gancho novo.
-        // Antes quem o chamava era o fim do mergulho (o instante em que a nadadeira limpava o
-        // rodapé). Agora é o instante em que o bicho SAIU. Uma linha no `STAGE_3` derivaria
-        // deste tween na primeira vez que alguém mexesse na duração da travessia.
-        //
-        // ⚠️ OS 300ms DE QUADRO VAZIO SÃO A ESCOLHA DO HENRIQUE (opção "c", 2026-08-29), não um
-        // atraso técnico: *"ele passou, e o que estava atrás dele era o corpo"*. Ele atravessa,
-        // o quadro fica vazio uma respiração, e só então o chão sobe. As opções descartadas
-        // foram (a) o casco já estar lá quando ele passa — mata a revelação — e (b) o casco
-        // nascer durante a travessia.
-        this.time.delayedCall(300, () => this.parallax.revealCasco(1, 1500));
+  /**
+   * O ESCURECIMENTO QUE ENTREGA O CASCO — a virada do Ato 1 para o Ato 2, pedida assim, ao pé
+   * da letra (Henrique, 2026-08-29, depois de quatro tentativas de coreografia):
+   *
+   *   *"Ao sair, faça com que a tela escureça por milissegundos, suficientes para aparecer o
+   *   nome 'Casco do leviatã' e os tiles do casco aparecerem."*
+   *
+   * ⚠️ ISTO SUBSTITUIU A "REVELAÇÃO" DO CASCO, E ELA NÃO VOLTA. Por quatro rodadas o casco
+   * subiu em fade de 1500ms na frente do jogador, e cada versão disso gastou uma sessão
+   * discutindo o instante exato em que o fade podia começar sem virar corte. O escurecimento
+   * dissolve o problema inteiro: atrás do preto não existe "meio transparente", então o casco
+   * nasce PRONTO (`revealCasco(1, 60)`) e não há emenda nenhuma para acertar.
+   *
+   * ⚠️ `depth 90`, E O NÚMERO É ESCOLHIDO, NÃO HERDADO. Acima de tudo que é jogo (nave, props e
+   * inimigos vivem em 0 e abaixo) e ABAIXO do banner e do HUD (99/100). É isso que faz o nome
+   * do ato se ler SOBRE o preto — que é o pedido — em vez de ser apagado junto com a cena.
+   *
+   * ⚠️ E O BANNER SAIU DO `STAGE_3`. Ele era `{ t: 48.5, type: 'banner' }`, um horário fixo que
+   * hoje derivaria do fim de um tween. É a mesma regra que já valia para o casco: o que pertence
+   * a um instante VISUAL não pode morar no relógio do roteiro, senão os dois derivam na primeira
+   * vez que alguém mexer numa duração.
+   *
+   * ⚠️ A ONDA DE DRONES DO `t=48` NASCE COM A TELA AINDA ESCURA, e isso foi conferido em vez de
+   * assumido: eles entram em x=414 e a tela clareia em 48,7, quando ainda estão além da metade
+   * direita. Se alguém adiantar essa onda, é aqui que o jogador começa a levar tiro no escuro.
+   */
+  private escurecerParaOCasco(): void {
+    const preto = this.add
+      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000)
+      .setOrigin(0, 0)
+      .setDepth(90)
+      .setAlpha(0)
+      // O nome é o que a sonda tem para agarrar: um retângulo preto sem nome é indistinguível
+      // de qualquer outro retângulo da cena.
+      .setName('pretoDoCasco');
+
+    this.tweens.add({
+      targets: preto,
+      alpha: 1,
+      duration: 350,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        // No escuro TOTAL: o chão nasce inteiro e o nome entra. Os 60ms não são um fade — são o
+        // mínimo que o `addCounter` precisa para rodar o `onUpdate` que acende as camadas.
+        this.parallax.revealCasco(1, 60);
+        this.showBanner('O CASCO DO LEVIATÃ', COLORS.hotBright);
+
+        // 420ms de preto cheio: tempo de o nome se firmar antes de a imagem voltar. É o número
+        // para mexer se a virada ficar apressada ou arrastada — os outros três são conta.
+        this.time.delayedCall(420, () => {
+          this.tweens.add({
+            targets: preto,
+            alpha: 0,
+            duration: 350,
+            ease: 'Sine.easeOut',
+            onComplete: () => preto.destroy(),
+          });
+        });
       },
     });
   }
