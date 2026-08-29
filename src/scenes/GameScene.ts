@@ -563,7 +563,7 @@ export class GameScene extends Phaser.Scene {
   /**
    * O RABO DO LEVIATÃ — a transição do Ato 1 para o Ato 2 da Fase 3.
    *
-   * A nadadeira traseira entra pela DIREITA, bate com tudo o seu nado espacial e sai pela
+   * A nadadeira traseira entra pela DIREITA, se segura na quina batendo, e depois SAI pela
    * esquerda. Antes disto a virada era um fade: a nuvem rareava e o casco aparecia. Funcionava
    * como efeito e não dizia nada — o jogador via um chão novo, não o fim de uma perseguição.
    * O rabo diz a frase inteira sem banner nenhum: **eu alcancei o bicho, e estou atrás dele.**
@@ -573,16 +573,34 @@ export class GameScene extends Phaser.Scene {
    * ⚠️ CENÁRIO, NÃO INIMIGO. Sem corpo físico, sem hitbox, sem dano, fora de todo grupo de
    * colisão. Nenhuma onda, nenhum spawn e nenhum número de balanceamento muda por causa dele.
    *
-   * ⚠️ ELE NÃO ATRAVESSA A TELA — ELE CHEGA E SE SEGURA NA DIREITA. Foi assim que o Henrique
-   * desenhou: o CORPO do bicho sangra para fora da borda direita, e o que fica dentro do quadro
-   * é a NADADEIRA, batendo para cima e para baixo. Uma travessia da direita para a esquerda
-   * (a primeira versão) lia como mais um destroço passando; o que faz este momento pesar é ele
-   * PARAR ali, grande demais para caber, batendo enquanto o jogador se aproxima.
+   * ⚠️ UM VERBO SÓ PARA O PLANO INTEIRO: **PASSAR.** Esta é a lição do 4º teste jogado
+   * (2026-08-29), e ela derrubou a coreografia anterior por inteiro. A versão de 28/08 tinha
+   * DOIS verbos: chegava VIAJANDO (`x` em easeOut) e ia embora GIRANDO −38°, descendo em `y` e
+   * apagando o `alpha` no lugar. Um corpo rígido que rotaciona em torno de um ponto, escorrega
+   * para baixo e some de opacidade onde estava é a descrição física de uma PEÇA QUE SE SOLTOU,
+   * e foi exatamente isso que o Henrique relatou três vezes seguidas:
    *
-   * ⚠️ `depth −76`: ATRÁS da faixa do casco (−75/−74) e à frente da nuvem do meio (−89). Isso
-   * paga a saída: no fim ele AFUNDA, e afundar por trás do casco é a transição inteira dita em
-   * movimento — o rabo passa por baixo, e o que sobra no lugar dele é o chão. Os VÉUS (depth
-   * 60) passam por cima o tempo todo, então ele chega embaçado, entregue pela névoa.
+   *   *"O rabo continua com efeito de desprender no final da animação... o rabo precisa ficar
+   *   fixo no canto inferior direito da tela, e somente o final da cauda que mexe... fazer com
+   *   que a cauda saia da tela no final, como se o nado do leviatã tivesse apenas passado na
+   *   frente do jogador."*
+   *
+   * Nenhum ajuste de `y`, de `delay` ou de ângulo consertaria isso: o VOCABULÁRIO estava errado,
+   * não os números. Agora entra nadando, segura, e sai nadando — a saída é o espelho exato da
+   * chegada (`easeIn` contra `easeOut`).
+   *
+   * ⚠️ ELE SAI POR GEOMETRIA, NUNCA POR TRANSPARÊNCIA. O `alpha` fica em 1 até o `destroy`.
+   * Sumir de opacidade é a leitura mais pura de "desapareceu" em vez de "foi embora", e era
+   * metade da reclamação.
+   *
+   * ⚠️ E O TOCO NÃO EXISTE MAIS. "O toco fica e o casco nasce dele" veio do pedido do 1º teste,
+   * sobreviveu a duas rodadas e foi REPROVADO na terceira. O 3º pedido é o oposto: nada fica,
+   * o bicho passa. Não reimplemente — já foi construído, visto e rejeitado.
+   *
+   * ⚠️ `depth −70` O TEMPO TODO, sem troca. A versão anterior caía para −76 no mergulho para
+   * afundar POR TRÁS da faixa do casco (−75/−74); agora não há casco nenhum em cena quando ele
+   * passa (ver o tween 3), então não há nada para passar por trás. Os VÉUS (depth 60) passam
+   * por cima o tempo todo, então ele chega embaçado, entregue pela névoa.
    *
    * ⚠️ ELE CHEGA ANTES DA NUVEM ABRIR (t=40,5 contra t=42). A ordem é a coisa toda: primeiro o
    * jogador vê O QUE alcançou, e só depois o casco se revela como o corpo daquilo.
@@ -609,12 +627,12 @@ export class GameScene extends Phaser.Scene {
     // braço, não o eixo. Com a origem no centro, qualquer rotação faria a peça inteira rodar
     // em volta de si mesma — que foi exatamente o defeito da animação gerada (ela virou HÉLICE).
     //
-    // Com origem em 0,92 o sprite ocupa de `x − 236` a `x + 21`. Em x=368 isso é 132..389: o
-    // corpo sangra para fora da borda direita e a nadadeira varre o miolo da tela.
+    // Com origem em 0,92 e escala 3,4 o sprite ocupa de `x − 341` a `x + 23`. Em x=374 isso é
+    // 33..397 (`scripts/_medir-rabo.mjs`): o corpo sangra para fora da borda direita e a
+    // nadadeira varre o miolo da tela. Esse `x + 23` é a conta da SAÍDA — ver o tween 3.
     //
-    // ⚠️ `depth −70` NA CHEGADA, `−76` NO MERGULHO (ver o tween 3). Na frente da faixa do casco
-    // enquanto ele é o assunto; atrás dela na hora de afundar, que é o que faz o mergulho ler
-    // como "passou por baixo de nós" em vez de "escorregou na frente do chão".
+    // ⚠️ `depth −70` DO INÍCIO AO FIM, sem troca. Ver o cabeçalho: o casco não existe enquanto
+    // ele está em cena, então não há profundidade nenhuma para negociar.
     const rabo = this.add
       .sprite(GAME_WIDTH + 200, 158, 'raboLeviata')
       .setOrigin(0.92, 0.5)
@@ -654,74 +672,67 @@ export class GameScene extends Phaser.Scene {
       ],
     });
 
-    // 3. O MERGULHO, EM DUAS ETAPAS — e é a PRIMEIRA que faz a transição.
+    // 3. A SAÍDA — ELE ATRAVESSA E VAI EMBORA. É o plano inteiro num verbo só.
     //
-    // ⚠️ A DESCIDA É UMA ROTAÇÃO, NÃO UMA TRANSLAÇÃO, E É ISSO QUE DEIXA O TOCO. O pivô é o
-    // pedúnculo (origem 0.92), lá na borda direita. Girar para −38° manda a NADADEIRA — que
-    // está a ~335px do pivô — 206px para baixo, para fora do rodapé, enquanto o TOCO, que está
-    // EM CIMA do pivô, praticamente não sai do lugar.
+    // ⚠️ QUEM O TIRA DO QUADRO É ANDAR, NÃO AFUNDAR — e isso é o seguro contra recair no
+    // mergulho. São 414px de viagem horizontal (374 → −40) contra 38px de descida (158 → 196):
+    // razão de 11 para 1. Mesmo depois de descer os 38px o topo do sprite ainda estaria em
+    // y=72, DENTRO da tela — ou seja, a descida sozinha nunca o removeria. Ela é tempero de
+    // nado, jamais o mecanismo. Se um dia alguém quiser mais peso na descida, o teto é o
+    // ponto em que ela deixaria de ser subordinada: acima de ~80px o gesto vira mergulho de
+    // novo e a reclamação volta.
     //
-    // ⚠️ E DESCER EM LINHA RETA NÃO SERVIRIA, o que não é óbvio até a arte ser medida. O perfil
-    // dela é uma CUNHA CONTÍNUA — nadadeira alta em x≈27..40, cintura em x=45, corpo
-    // engrossando até a direita (`scripts/_medir-rabo.mjs`). Não há uma coluna onde a nadadeira
-    // "acaba": uma translação deixaria à mostra a borda de cima do desenho INTEIRO, nadadeira
-    // junto, e não sobraria toco nenhum. Só a rotação separa a ponta longa da raiz.
+    // ⚠️ O `−40` É MEDIDO, NÃO CHUTADO. Com origem 0.92 e escala 3,4 o sprite vai até `x + 23`
+    // (`_medir-rabo.mjs`: x 33..397 quando x=374), então ele limpa a borda esquerda em x=−23.
+    // O −40 dá 17px de folga. ⚠️ Se a ESCALA mudar, este número muda junto: é `−(0,08 × 107 ×
+    // escala) − 17`.
     //
-    // ⚠️ O SINAL É NEGATIVO, E ELE JÁ ENGANOU UMA VEZ. Com y para baixo, ângulo POSITIVO gira
-    // horário e joga um ponto à ESQUERDA do pivô para CIMA — é o mesmo sinal que a batida aqui
-    // em cima usa para "sobe devagar". `+38` mandava a nadadeira atravessar o topo do quadro, e
-    // o assert `angulo > 20` da sonda passava assim mesmo, porque media o tamanho do giro e não
-    // o lado. Quem reprovou foi a FOTO. Assert de movimento que não olha a direção não mede
-    // movimento.
+    // ⚠️ `Sine.easeIn` É O ESPELHO DA CHEGADA. Ela era `easeOut` — desacelera até parar. A saída
+    // ACELERA: arranca devagar e se afasta. Entrou nadando, sai nadando. Um `easeOut` aqui daria
+    // um rabo que sai de ré perdendo força, e um `Linear` daria uma carta sendo puxada.
     //
-    // É o pedido do Henrique ao pé da letra: "sai por baixo, deixando apenas o toco da cauda...
-    // quando a cauda abaixa para a parte de baixo da tela, o casco se inicia".
+    // ⚠️ A BATIDA CONTINUA, E ISSO É UMA INVERSÃO DELIBERADA DA VERSÃO ANTERIOR. Ela chamava
+    // `batida.stop()` aqui com a justificativa "um rabo que continua remando enquanto AFUNDA lê
+    // como peça solta caindo" — o que estava certo para um mergulho. Para uma travessia é o
+    // oposto exato: a remada é o que CAUSA a viagem. Parar de bater e continuar se movendo é
+    // que leria como peça sendo arrastada. Ela só para no `destroy`.
     //
-    // E é a MESMA remada da batida, terminada. Ele afunda porque DEU a remada, não apesar dela.
+    // ⚠️ E NÃO HÁ `alpha` NENHUM NESTE TWEEN. Ver o cabeçalho.
     //
-    // O `y` desce junto (104 → 200) só para plantar o toco na quina de baixo, que é de onde o
-    // chão novo vai crescer.
+    // ⚠️ O `delay` É 6000 E NÃO 7000, E ISSO PROTEGE O `STAGE_3`. A conta corre para trás a
+    // partir de uma âncora que não pode se mexer: em `t=48` entram os props (`terrain`) e em
+    // `t=48,5` o banner, e os props só podem cair sobre um casco JÁ SÓLIDO — prop opaco sobre
+    // casco meio transparente é um defeito já consertado nesta fatia. Então:
+    //
+    //   casco sólido em t=48,0  ←  reveal começa em 46,5 (1500ms)
+    //   reveal em 46,5          ←  destroy em 46,2 (+300ms de quadro vazio)
+    //   destroy em 46,2         ←  saída começa em 44,0 (2200ms)  →  delay 6000 sobre o t=38
+    //
+    // O preço é o hold cair de 4,5s para 3,5s; ele ainda segura 2s depois da nuvem abrir em
+    // t=42. Em troca, o `StageDirector` não muda uma linha.
     this.tweens.add({
       targets: rabo,
-      angle: -38,
-      y: 190,
-      delay: 7000,
-      duration: 1500,
+      x: -40,
+      y: 196,
+      delay: 6000,
+      duration: 2200,
       ease: 'Sine.easeIn',
-      onStart: () => {
-        // A batida para: um rabo que continua remando enquanto afunda lê como peça solta caindo.
+      onComplete: () => {
         batida.stop();
-        // ATRÁS da faixa do casco (−75/−74), para o toco afundar POR BAIXO do chão novo em vez
-        // de escorregar na frente dele.
-        rabo.setDepth(-76);
-      },
-      // ⚠️ O CASCO NASCE AQUI, E NÃO NO ROTEIRO. Este é o instante em que a nadadeira limpou o
-      // rodapé — o único instante em que o casco pode começar sem que a emenda vire corte. Uma
-      // linha no `STAGE_3` derivaria deste tween na primeira vez que alguém mexesse na duração.
-      onComplete: () => this.parallax.revealCasco(1, 1500),
-    });
+        rabo.destroy();
 
-    // 4. O TOCO AFUNDA (1,7s a partir dos 10,8s), por trás do casco já FORMADO.
-    //
-    // ⚠️ ERA 9,3s, E ISSO ERA CEDO DEMAIS — é a segunda metade da reclamação do Henrique no 3º
-    // teste: *"o rabo cai do nada... e só depois vem o piso que é o casco."* A conta explica o
-    // relato. A remada termina em 8,5s e é ela que chama o `revealCasco(1, 1500)`, então o chão
-    // só fica SÓLIDO em 10,0s. Começar a afundar em 9,3s fazia o toco ir embora com o casco
-    // ainda em ~50% de alpha: o jogador via o rabo sumir, um vão, e o chão chegar depois — três
-    // eventos em fila, quando a cena inteira existe para eles serem UM.
-    //
-    // 10,8s põe a ordem no lugar: a remada acaba (8,5s) → o toco SEGURA enquanto o chão cresce
-    // atrás dele (8,5→10,0s) → o chão está inteiro e o toco ainda está lá (10,0→10,8s, quase um
-    // segundo de sobreposição, que é o instante em que a emenda se lê) → só então ele afunda por
-    // baixo. O toco não é substituído pelo casco; ele ENTREGA o casco e sai.
-    this.tweens.add({
-      targets: rabo,
-      y: 330,
-      alpha: 0,
-      delay: 10800,
-      duration: 1700,
-      ease: 'Sine.easeIn',
-      onComplete: () => rabo.destroy(),
+        // ⚠️ O CASCO NASCE AQUI, E NÃO NO ROTEIRO — a mesma razão de sempre, num gancho novo.
+        // Antes quem o chamava era o fim do mergulho (o instante em que a nadadeira limpava o
+        // rodapé). Agora é o instante em que o bicho SAIU. Uma linha no `STAGE_3` derivaria
+        // deste tween na primeira vez que alguém mexesse na duração da travessia.
+        //
+        // ⚠️ OS 300ms DE QUADRO VAZIO SÃO A ESCOLHA DO HENRIQUE (opção "c", 2026-08-29), não um
+        // atraso técnico: *"ele passou, e o que estava atrás dele era o corpo"*. Ele atravessa,
+        // o quadro fica vazio uma respiração, e só então o chão sobe. As opções descartadas
+        // foram (a) o casco já estar lá quando ele passa — mata a revelação — e (b) o casco
+        // nascer durante a travessia.
+        this.time.delayedCall(300, () => this.parallax.revealCasco(1, 1500));
+      },
     });
   }
 

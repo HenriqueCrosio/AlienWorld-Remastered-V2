@@ -215,7 +215,7 @@ console.log('t=' + meio.t, 'nebulaDim=' + meio.nebulaDim, 'cascoReveal=' + meio.
 ok(cascoMeio.length > 0, 'a camada do casco existe');
 ok(
   cascoMeio.every((c) => c.alpha === null || c.alpha === 0),
-  'e está INVISÍVEL na metade do Ato 1 — o casco só nasce quando o rabo afunda',
+  'e está INVISÍVEL na metade do Ato 1 — o casco só nasce quando o rabo SAI',
 );
 ok(meio.cascoReveal === 0, `cascoReveal=0 em t=${meio.t} (era 1 − nebulaDim = 0.25)`);
 // ⚠️ E A NUVEM CONTINUA AFINANDO. É o par que prova o DESACOPLAMENTO: se este assert
@@ -283,7 +283,9 @@ ok(
   Math.abs(naVirada.a1) <= 20 && Math.abs(naVirada.a2) <= 20,
   `e o arco é CURTO, não um giro (|${naVirada.a1}| e |${naVirada.a2}| ≤ 20°)`,
 );
-// ELE SE SEGURA NA DIREITA, com o corpo sangrando para fora da borda — não atravessa a tela.
+// ELE SE SEGURA NA DIREITA, com o corpo sangrando para fora da borda. ⚠️ ISTO É O *HOLD*, e ele
+// continua valendo depois da travessia nova (2026-08-29): o rabo chega, PARA na quina, e só
+// muito depois sai pela esquerda. Amostrar aqui em t=39,5 é amostrar a chegada, não a saída.
 ok(naVirada.x > 300, `ele se SEGURA na direita, com o corpo saindo do quadro (x=${naVirada.x})`);
 // ⚠️ O CRITÉRIO DE "COLOSSAL" MUDOU, E MUDOU PARA MAIS EXIGENTE (2026-08-27).
 //
@@ -316,43 +318,105 @@ ok(naVirada.nebulaDim > 0.5, `chega AINDA DENTRO da nuvem (nebulaDim=${naVirada.
 ok(naVirada.corpo === null, 'o rabo NÃO tem corpo físico (é cenário, não inimigo)');
 await page.screenshot({ path: 'scripts/_f3/probe-rabo.png' });
 
-// ─── O TOCO: a nadadeira sai pelo rodapé e o casco NASCE dali ───
+// ─── A TRAVESSIA: ele ATRAVESSA e SAI, e o casco nasce do quadro vazio ───
 //
-// ⚠️ ESTE É O ASSERT DA COSTURA, e ele existe porque a versão anterior fazia um CORTE. O
-// mergulho é uma ROTAÇÃO em torno do pedúnculo: a nadadeira desce 206px e sai da tela, e o
-// toco — que está no pivô — praticamente não sai do lugar. Depois dele, e só depois, o casco
-// começa. Se este assert reprovar com o casco já em 1, alguém religou o casco ao relógio do
-// roteiro e a costura virou corte de novo.
-while ((await estado()).t < 47) {
-  await page.waitForTimeout(400);
+// ⚠️ ESTE BLOCO SUBSTITUIU O DO TOCO (2026-08-29), E ELE NÃO AFROUXOU: INVERTEU. Os asserts
+// antigos cobravam um mergulho (`angulo < -20`, `depth === -76`, o toco ainda em cena em t=47,
+// o casco nascendo dele). O Henrique jogou três vezes e reprovou o mergulho: um corpo rígido que
+// gira, desce e apaga no lugar lê como PEÇA QUE SE SOLTOU. A coreografia nova é uma travessia —
+// e o teste agora cobra principalmente O QUE NÃO PODE ACONTECER, que é a lição que esta fatia já
+// pagou duas vezes (o `+38` invertido e a água-viva medida por `vx > -40`).
+//
+// Rodando a versão ANTIGA, este bloco reprova em quatro pontos: o `x` subiria em vez de descer
+// (o mergulho não translada), o `alpha` cairia a 0, o `angulo` iria a −38, e o rabo ainda
+// estaria em cena depois do reveal. É o critério de "o assert novo reprova MAIS do que o velho".
+
+// A amostra do MEIO da travessia (t≈44,8; ela corre de 44,0 a 46,2). O passo é curto de
+// propósito: passar de 46,2 pegaria o sprite já destruído e o teste mediria a coisa errada.
+while ((await estado()).t < 44.8) {
+  await page.waitForTimeout(200);
   await respirar();
 }
-const noToco = await page.evaluate(() => {
+const naTravessia = await page.evaluate(async () => {
+  const s = window.__game.scene.getScene('Game');
+  const acha = () => s.children.list.find((o) => o.texture && o.texture.key === 'raboLeviata');
+  const r = acha();
+  if (!r) return { n: 0 };
+  // DUAS amostras de x, porque DIREÇÃO não se mede numa foto só.
+  const x1 = r.x;
+  const alpha1 = r.alpha;
+  await new Promise((res) => setTimeout(res, 700));
+  const d = acha();
+  return {
+    t: Number((s.elapsed ?? 0).toFixed(1)),
+    cascoReveal: Number(s.parallax.cascoReveal.toFixed(2)),
+    n: 1,
+    x1: Math.round(x1),
+    x2: d ? Math.round(d.x) : null,
+    alpha1: Number(alpha1.toFixed(2)),
+    alpha2: d ? Number(d.alpha.toFixed(2)) : null,
+    angulo: d ? Number(d.angle.toFixed(1)) : null,
+    depth: d ? d.depth : null,
+  };
+});
+console.log('travessia ' + JSON.stringify(naTravessia));
+ok(naTravessia.n === 1, `o rabo está ATRAVESSANDO em t=${naTravessia.t}`);
+// ⚠️ O SINAL FAZ PARTE DO ASSERT — a mesma lição do `+38`, aplicada ao outro eixo. `x2 < x1` é
+// direção; `Math.abs(x2 - x1) > 0` seria só movimento, e passaria num rabo indo para a direita.
+ok(
+  naTravessia.x2 !== null && naTravessia.x2 < naTravessia.x1,
+  `e ele vai para a ESQUERDA (x ${naTravessia.x1} → ${naTravessia.x2})`,
+);
+// ⚠️ O ASSERT DO `alpha` É O CORAÇÃO DA RECLAMAÇÃO. Sair de opacidade lê como "desapareceu"; ele
+// tem que sair por GEOMETRIA, cruzando a borda. Um `alpha: 0` na saída reprova exatamente aqui.
+ok(
+  naTravessia.alpha1 === 1 && naTravessia.alpha2 === 1,
+  `SEM FADE: o alpha fica em 1 durante a saída inteira (${naTravessia.alpha1} → ${naTravessia.alpha2})`,
+);
+// ⚠️ E O CORPO NÃO RODA. Só a ponta bate (±6°); a folga de 8° é a margem da batida, não licença.
+// O mergulho velho ia a −38° e reprovaria.
+ok(
+  naTravessia.angulo !== null && Math.abs(naTravessia.angulo) <= 8,
+  `e o CORPO não roda — só a ponta bate (${naTravessia.angulo}°, teto 8°)`,
+);
+ok(naTravessia.depth === -70, `depth −70 sem troca durante a travessia (${naTravessia.depth})`);
+ok(
+  naTravessia.cascoReveal === 0,
+  `e o casco AINDA NÃO nasceu enquanto ele passa (cascoReveal=${naTravessia.cascoReveal})`,
+);
+await page.screenshot({ path: 'scripts/_f3/probe-travessia.png' });
+
+// A amostra DEPOIS: ele saiu, e o casco está nascendo do lugar que ele deixou.
+//
+// Em t=47 a conta é: destroy em 46,2 → 300ms de quadro vazio → reveal de 46,5 a 48,0. Então
+// aqui o rabo tem que ter SUMIDO e o casco tem que estar no meio do caminho.
+while ((await estado()).t < 47) {
+  await page.waitForTimeout(300);
+  await respirar();
+}
+const depoisDele = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   const r = s.children.list.find((o) => o.texture && o.texture.key === 'raboLeviata');
   return {
     t: Number((s.elapsed ?? 0).toFixed(1)),
     cascoReveal: Number(s.parallax.cascoReveal.toFixed(2)),
     n: r ? 1 : 0,
-    angulo: r ? Number(r.angle.toFixed(1)) : null,
-    y: r ? Math.round(r.y) : null,
-    depth: r ? r.depth : null,
   };
 });
-console.log('toco    ' + JSON.stringify(noToco));
-ok(noToco.n === 1, `o TOCO ainda está em cena em t=${noToco.t}`);
-// ⚠️ O SINAL FAZ PARTE DO ASSERT. A primeira versão pedia `angulo > 20` — só o TAMANHO do giro —
-// e passou verde numa implementação que mandava a nadadeira para CIMA, atravessando o topo do
-// quadro. Quem reprovou foi a captura de tela. Com y para baixo, ângulo NEGATIVO é o que desce.
-ok(noToco.angulo !== null && noToco.angulo < -20, `e ele GIROU para BAIXO (${noToco.angulo}°) — a nadadeira saiu pelo rodapé`);
-ok(noToco.depth === -76, `atrás da faixa do casco (depth ${noToco.depth}) — ele afunda POR BAIXO do chão novo`);
-ok(noToco.cascoReveal > 0, `e o casco JÁ COMEÇOU a nascer dele (cascoReveal=${noToco.cascoReveal})`);
-await page.screenshot({ path: 'scripts/_f3/probe-toco.png' });
+console.log('saiu    ' + JSON.stringify(depoisDele));
+// ⚠️ NADA FICA. "O toco fica e o casco nasce dele" foi construído, jogado e REPROVADO. Se algum
+// dia este assert reprovar com n=1, alguém reimplementou o toco.
+ok(depoisDele.n === 0, `o rabo SAIU DA TELA e não deixou toco nenhum em t=${depoisDele.t}`);
+ok(
+  depoisDele.cascoReveal > 0 && depoisDele.cascoReveal < 1,
+  `e o casco está nascendo DEPOIS dele, no lugar que ele deixou (cascoReveal=${depoisDele.cascoReveal})`,
+);
+await page.screenshot({ path: 'scripts/_f3/probe-saiu.png' });
 
 // O ATO 2: o rabo afundou e o casco é a superfície.
 //
 // ⚠️ A ESPERA É t<50, E O NÚMERO IMPORTA. Ela era t<47, o que bastava quando o casco já estava
-// de pé desde t=21. Agora ele NASCE do mergulho e só fecha em t=48 — amostrar em 47 pegava a
+// de pé desde t=21. Agora ele NASCE da SAÍDA do rabo e só fecha em t=48 — amostrar em 47 pegava a
 // revelação no meio (cascoReveal=0,38) e reprovava um casco que estava correto, só inacabado.
 // O assert media a coisa certa na hora errada; quem mudou foi a hora.
 while ((await estado()).t < 50) {

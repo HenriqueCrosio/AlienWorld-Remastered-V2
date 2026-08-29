@@ -60,8 +60,8 @@ interface ScatterLayer {
   teto?: boolean;
   /** Camada EXTRA da nebulosa (Fase 3): o alpha dela segue `nebulaDim` (1 dentro, 0 fora). */
   nebulosaExtra?: boolean;
-  /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue `cascoReveal`, que é dirigido pelo
-   * MERGULHO DO RABO — não pela nuvem. Ver `revealCasco` para o porquê da separação. */
+  /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue `cascoReveal`, que é dirigido pela
+   * SAÍDA DO RABO — não pela nuvem. Ver `revealCasco` para o porquê da separação. */
   casco?: boolean;
   sprites: Phaser.GameObjects.Image[];
   nextX: number;
@@ -138,8 +138,8 @@ export class Parallax {
    * Leviatã, e o que o Henrique viu jogando foi "aquele gradiente de transparência estranho":
    * uma estrutura meio apagada pairando 20s antes de ter motivo.
    *
-   * Agora a nuvem afina sozinha, e o casco só nasce quando o RABO o chama — no fim do
-   * mergulho, do toco da cauda para a esquerda (ver `GameScene.raboDoLeviata`).
+   * Agora a nuvem afina sozinha, e o casco só nasce quando o RABO o chama — 300ms depois que
+   * ele atravessa e sai pela esquerda (ver `GameScene.raboDoLeviata`).
    */
   private cascoReveal = 0;
 
@@ -1421,18 +1421,24 @@ export class Parallax {
   /**
    * O CASCO NASCE (Fase 3, a virada do Ato 1 para o Ato 2).
    *
-   * ⚠️ QUEM CHAMA É O MERGULHO DO RABO (`GameScene.raboDoLeviata`), NÃO O ROTEIRO. O casco tem
-   * que começar no instante exato em que a nadadeira limpa o rodapé — e esse instante é uma
-   * etapa de tween, não uma linha do `STAGE_3`. Amarrá-lo ao relógio do roteiro faria os dois
-   * derivarem na primeira vez que alguém mexesse na duração da descida, e a costura viraria
+   * ⚠️ QUEM CHAMA É A SAÍDA DO RABO (`GameScene.raboDoLeviata`), NÃO O ROTEIRO. O casco tem que
+   * começar 300ms depois que o bicho ATRAVESSOU e saiu do quadro — e esse instante é o fim de
+   * um tween, não uma linha do `STAGE_3`. Amarrá-lo ao relógio do roteiro faria os dois
+   * derivarem na primeira vez que alguém mexesse na duração da travessia, e a costura viraria
    * corte outra vez.
+   *
+   * ⚠️ O GANCHO MUDOU DE DONO EM 2026-08-29, e o tween que o chamava não existe mais. Até 28/08
+   * quem chamava era o fim do MERGULHO (o instante em que a nadadeira limpava o rodapé). O
+   * Henrique reprovou o mergulho jogando — ele lia como peça se desprendendo — e escolheu, entre
+   * três opções, que o casco nascesse DEPOIS da travessia, com um quadro vazio no meio: *"ele
+   * passou, e o que estava atrás dele era o corpo."*
    */
   revealCasco(alvo: number, durationMs = 1500): void {
     const destino = Phaser.Math.Clamp(alvo, 0, 1);
 
     // O percurso sobre o bicho começa AQUI, no instante em que o casco nasce — é o zero de
-    // `familiaDoCasco`, e é o mesmo instante em que o toco do rabo afunda. A cauda do Leviatã
-    // é onde o jogador entra.
+    // `familiaDoCasco`, e é o instante logo depois que o rabo saiu do quadro. A cauda do
+    // Leviatã é onde o jogador entra.
     if (destino > 0) this.cascoAndando = true;
 
     this.scene.tweens.addCounter({
