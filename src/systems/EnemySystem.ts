@@ -785,6 +785,10 @@ export class EnemySystem {
     b.setBlendMode(Phaser.BlendModes.NORMAL);
     b.setData('tracer', false);
     b.setData('missile', false);
+    // E o ATIRADOR: sem apagar, o slot reciclado continuaria imune ao prop que disparou o tiro
+    // ANTERIOR — um projétil que atravessa uma torre por herança de vaga. Ver
+    // `TerrainSystem.fireAt` e `GameScene.enemyBulletHitCover`.
+    b.setData('atirador', null);
   }
 
   private cullBullets(): void {

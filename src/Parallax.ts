@@ -537,10 +537,70 @@ export class Parallax {
       faixa: [14, 48],
     });
 
-    // As MONTANHAS DE ROCHA pixel (mtnFar/mtnMid/mtnNear) e a haze entre elas foram REMOVIDAS: o
-    // FUNDO PINTADO já entrega as montanhas distantes, e elas nasciam na LINHA DO SOLO mas rolavam
-    // em parallax lento (10–50 px/s) contra o chão/props (que correm a 84) — o "deslizamento" do
-    // solo. Sem elas, o solo não desliza mais e a cena não duplica montanha pixel sobre a pintada.
+    // ─── A CADEIA DO MEIO-DE-CENA ───
+    //
+    // ⚠️ ELAS FORAM REMOVIDAS EM `cbf40fe` E VOLTARAM EM 2026-08-30, PELA METADE E DE PROPÓSITO.
+    // A remoção levou CINCO camadas de uma vez (haze longe, `mtnFar`, haze meio, e duas faixas de
+    // `mtnMid`) com uma justificativa só: elas eram a fonte do "deslizamento" do solo. O Henrique
+    // jogou a Fase 1 de novo e cobrou a cadeia do meio de volta — e olhando as cinco definições
+    // lado a lado, só UMA podia causar o deslize:
+    //
+    //     mtnFar    baseY GROUND_Y − 4   base VISÍVEL acima do chão, correndo a 0,12 contra 1,0
+    //     mtnMid    baseY GROUND_Y + 2   base ENTERRADA
+    //     mtnMid    baseY GROUND_Y + 4   base ENTERRADA
+    //
+    // Deslize é uma aresta COMPARTILHADA entre duas camadas de velocidade diferente. As duas
+    // `mtnMid` nunca tiveram essa aresta: a base delas nasce abaixo da linha do solo, que é o
+    // mesmo truque que mantém o `skyline` (GROUND_Y + 2) funcionando desde sempre. Elas foram
+    // levadas junto sem serem a causa.
+    //
+    // ⚠️ A `mtnFar` E A HAZE DISTANTE CONTINUAM FORA, e isso é a outra metade da justificativa
+    // original, que segue valendo: o FUNDO PINTADO já entrega a cordilheira distante, e a
+    // `mtnFar` desenhava montanha pixel POR CIMA de montanha pintada.
+    //
+    // HAZE ENTRE AS MONTANHAS: a névoa que separa uma cordilheira da próxima — é ela que faz as
+    // duas lerem como PLANOS distintos, e não uma massa só. Ela flutua (`faixa`), não encosta no
+    // chão, então nunca teve parte no deslize.
+    this.addLayer({
+      key: 'nebula',
+      factor: 0.22,
+      baseY: 0,
+      depth: -90,
+      tint: 0x222c44,
+      alpha: 0.22,
+      scale: [1.4, 2.2],
+      gap: [170, 300],
+      terreno: false,
+      flutua: true,
+      faixa: [GROUND_Y - 46, GROUND_Y - 2],
+    });
+
+    this.addLayer({
+      key: 'mtnMid',
+      factor: 0.35,
+      baseY: GROUND_Y + 2,
+      depth: -88,
+      tint: 0x33456e,
+      alpha: 1,
+      scale: [0.6, 0.95],
+      gap: [45, 75],
+      terreno: true,
+    });
+
+    // A 2ª FAIXA: mais próxima e mais rápida que a de cima, um degrau de tint acima. É ela que
+    // PREENCHE o vão do meio-de-cena — o buraco que o Henrique viu entre o fundo pintado e o
+    // skyline. Reusa a arte da `mtnMid` (sem custo de geração) e fica atrás do chão (−86).
+    this.addLayer({
+      key: 'mtnMid',
+      factor: 0.6,
+      baseY: GROUND_Y + 4,
+      depth: -86,
+      tint: 0x435679,
+      alpha: 1,
+      scale: [0.55, 0.9],
+      gap: [50, 82],
+      terreno: true,
+    });
 
     // Alto o bastante para sangrar para fora da tela: uma faixa fina de solo denuncia
     // que o mundo acaba ali embaixo.

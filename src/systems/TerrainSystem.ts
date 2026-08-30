@@ -281,12 +281,22 @@ export class TerrainSystem {
     if (opts?.angle !== undefined) p.setAngle(opts.angle);
 
     if (def.shoots) {
-      // ⚠️ ERA `1.6 a 2.8`, E ESSE NÚMERO ERA O DEFEITO. Ver o bloco grande em `updateTurret`:
-      // o relógio agora só corre DENTRO da janela de tiro, então este sorteio não disputa mais
-      // com a posição do jogador — ele existe só para os canhões não dispararem em uníssono.
-      // A faixa curta é o que garante que todo canhão consiga o primeiro tiro mesmo quando a
-      // janela é estreita (0,88s com o jogador colado em x=300).
-      p.setData('cooldown', Phaser.Math.FloatBetween(...TerrainSystem.PRIMEIRO_TIRO));
+      // ⚠️ DOIS RELÓGIOS, UM POR FASE, E ISSO NÃO É INCONSISTÊNCIA — É UMA FRONTEIRA.
+      //
+      // O prop do CASCO usa a faixa curta: o relógio dele só corre dentro da janela de tiro (ver
+      // `updateTurret`), então este sorteio existe só para os canhões não dispararem em uníssono,
+      // e a faixa curta garante o primeiro tiro mesmo com a janela em 0,88s.
+      //
+      // A `turret` da FASE 1 fica no `1.6 a 2.8` de sempre. O mesmo defeito existe lá — canhão
+      // que nunca atira se o jogador voa à frente — mas a Fase 1 está mergeada e aprovada
+      // jogando, e mudar o peso dela de carona num conserto da Fase 3 é exatamente o tipo de
+      // efeito colateral que ninguém descobre até jogar. Fica para a fatia da Fase 1.
+      p.setData(
+        'cooldown',
+        def.casco
+          ? Phaser.Math.FloatBetween(...TerrainSystem.PRIMEIRO_TIRO)
+          : Phaser.Math.FloatBetween(1.6, 2.8),
+      );
       p.setData('charging', 0);
     }
 
@@ -496,10 +506,20 @@ export class TerrainSystem {
     // ⚠️ O PREÇO ESTÁ ESCOLHIDO, NÃO ESCONDIDO: quem fica atrás passa a levar ~2 tiros por canhão
     // em vez de 1, porque agora sobra janela para a segunda recarga. A ameaça deixa de depender
     // de onde o jogador voa, que era o defeito.
-    if (!naJanela) return;
+    //
+    // ⚠️⚠️ E O CONSERTO VALE SÓ PARA OS PROPS DO CASCO (FASE 3), POR DECISÃO DO HENRIQUE.
+    // Este arquivo é COMPARTILHADO: a `turret` da Fase 1 passa por aqui também, e a primeira
+    // versão do conserto mudou o peso dela sem ninguém pedir — numa fase já mergeada, revisada e
+    // aprovada jogando. O defeito É o mesmo lá, e continua lá: está anotado para a fatia da
+    // Fase 1, onde ele pode ser consertado e TESTADO junto.
+    //
+    // A regra geral desta campanha, custe o que custar: conserto em código compartilhado não
+    // atravessa a fronteira de uma fase fechada sem alguém rejogar aquela fase.
+    const doCasco = PROPS[p.getData('kind') as PropKind].casco === true;
+    if (doCasco && !naJanela) return;
 
     const cd = (p.getData('cooldown') as number) - dt;
-    if (cd <= 0) {
+    if (cd <= 0 && naJanela) {
       p.setData('cooldown', TerrainSystem.TURRET_RATE);
       p.setData('charging', TerrainSystem.TELEGRAPH);
     } else {
@@ -546,8 +566,37 @@ export class TerrainSystem {
     // fumaça de exaustão emitida no update().
     // Escala 0.8: o Henrique achou o foguete GRANDE demais saindo de uma torre pequena — a arte
     // nova (30×11) a 0.8 vira ~24×9 na tela, proporcional à boca que o lança.
-    b.setTexture('missile').setScale(0.8).clearTint();
-    b.setData('missile', true);
+    //
+    // ⚠️ E O FOGUETE É SÓ DO LANÇA-MÍSSEIS, DESDE 2026-08-30. Este método é compartilhado por
+    // todo prop que atira, e vestia `missile` em TODOS — então a torre de colônia da Fase 1
+    // cuspia o mesmo foguete do canhão do casco do Leviatã. O Henrique topou com isso jogando a
+    // Fase 1: *"os misseis das torres da fase 1 viraram o mesmo missel do canhão do casco"*.
+    // É a terceira vez nesta fatia que duas coisas diferentes dividiam um projétil só.
+    //
+    // ⚠️ A `missile: true` VAI JUNTO COM A ARTE, e é por isso que ela mora aqui e não numa linha
+    // solta: ela liga a FUMAÇA DE EXAUSTÃO do `tickMissileTrails`. Um traçante de canhão que
+    // deixasse rastro de foguete seria o mesmo erro com outra cara.
+    //
+    // ⚠️ A CAIXA NÃO DEPENDE DA ARTE. O `setSize` logo abaixo crava 10×7 em px de MUNDO para os
+    // dois, então a Fase 1 troca de textura sem que um número de balanceamento se mexa — que era
+    // a condição para encostar numa fase já mergeada.
+    const foguete = kind === 'lancaMisseis';
+    b.setTexture(foguete ? 'missile' : 'shotTorre').setScale(0.8).clearTint();
+    b.setBlendMode(Phaser.BlendModes.NORMAL);
+    b.setData('missile', foguete);
+
+    // ⚠️ QUEM ATIROU, para o próprio cano não comer o tiro. Ver `GameScene.enemyBulletHitCover`.
+    //
+    // O projétil nasce DENTRO da hitbox do canhão que o dispara: a boca fica a 7–23px do centro
+    // da peça e o corpo dela tem 35px de largura. A carência de 16px que existia para isso não
+    // basta quando o tiro sai em diagonal — ele anda os 16px e ainda está dentro do próprio dono.
+    // Medido (`scripts/_f3/diag-missil.mjs`): 2 de cada 4 mísseis morriam com 16–17px andados,
+    // absorvidos pelo MESMO prop que os disparou. É o *"o canhão está soltando o míssil e
+    // explodindo antes de tudo"* do teste jogado de 2026-08-30.
+    //
+    // A carência continua valendo para o resto do cenário; o que se corrige aqui é só o caso em
+    // que atirador e cobertura são a mesma peça, que nunca deveria absorver nada.
+    b.setData('atirador', p);
 
     // A HITBOX também é a de antes, em px de MUNDO: 10×7. O setSize é em px LOCAIS e o corpo
     // escala junto com o sprite — com a escala visual 0.8, compensa-se dividindo por ela.

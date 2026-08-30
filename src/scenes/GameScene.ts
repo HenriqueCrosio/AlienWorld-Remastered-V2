@@ -1264,6 +1264,15 @@ export class GameScene extends Phaser.Scene {
   ): void {
     if (!bullet.active || !cover.active) return;
 
+    // ⚠️ O CANO NUNCA COME O PRÓPRIO TIRO, E ISSO NÃO É UM CASO DA CARÊNCIA — É OUTRO PROBLEMA.
+    // A carência abaixo protege o projétil dos VIZINHOS por 16px; ela não dá conta do dono,
+    // porque o tiro nasce dentro dele: a boca fica a 7–23px do centro de uma peça de 35px de
+    // largura, e um tiro em diagonal ainda está lá dentro depois de andar 16px. Medido em
+    // 2026-08-30, 2 de cada 4 mísseis morriam assim — *"o canhão está soltando o míssil e
+    // explodindo antes de tudo"*. Aumentar a carência "resolveria" fazendo o projétil atravessar
+    // rochas vizinhas de graça; o que estava errado é o dono absorver, e é só isso que muda.
+    if (bullet.getData('atirador') === cover) return;
+
     // CARÊNCIA: o projétil só é absorvido depois de andar 16px.
     //
     // Sem isto, uma torre encostada numa rocha vizinha tem o tiro destruído no MESMO frame em

@@ -1112,6 +1112,41 @@ export class BootScene extends Phaser.Scene {
       g.fillRect(10, 4, 2, 1);
     });
 
+    // A TORRE DA COLÔNIA (FASE 1) — UM TRAÇANTE, NÃO UM FOGUETE.
+    //
+    // ⚠️ ELA DISPARAVA A TEXTURA `missile`, A MESMA DO LANÇA-MÍSSEIS DO CASCO, e isso é anterior
+    // a esta fatia (commit `0b23c55`, já na `main`): o `TerrainSystem.fireAt` é compartilhado por
+    // todo prop que atira e vestia foguete em todos. O Henrique topou com isso jogando a Fase 1
+    // em 2026-08-30 — *"os misseis das torres da fase 1 viraram o mesmo missel do canhão do
+    // casco"*. É a mesma queixa dos dois chefes, num terceiro par.
+    //
+    // A separação é de FICÇÃO antes de ser de arte: um lança-mísseis do Leviatã dispara
+    // ordenança; uma torre fixa de colônia dispara munição de canhão. Foguete tem corpo, aleta e
+    // fumaça de exaustão — nada disso pertence a uma peça de artilharia parada num rochedo.
+    //
+    // ⚠️ A COR É A FRIA DA COLÔNIA, e é o que a separa do cobre do casco a 384px de largura. A
+    // Fase 1 é azul-aço: o traçante sai gelo-quente no núcleo e azul no corpo, com a mesma borda
+    // escura das outras duas munições — pelo mesmo motivo de sempre, que é não depender da cor
+    // para ser visto.
+    //
+    // ⚠️ E A CAIXA NÃO MUDA: o `fireAt` crava 10×7 em px de MUNDO para todo prop que atira,
+    // independentemente do quadro da arte. Trocar a textura aqui não encosta no balanceamento
+    // da Fase 1 — que é a condição para mexer numa fase mergeada.
+    tex('shotTorre', 13, 9, (g) => {
+      g.fillStyle(0x6ab0e0, 0.22);
+      g.fillRect(0, 3, 13, 3);
+      g.fillStyle(0x0a1018, 1); // a borda escura
+      g.fillRect(2, 2, 10, 5);
+      g.fillStyle(0x2f6a9e, 1); // a cauda, esfriando
+      g.fillRect(3, 3, 4, 3);
+      g.fillStyle(0x6ab0e0, 1); // o corpo
+      g.fillRect(7, 3, 3, 3);
+      g.fillStyle(0xd8f0ff, 1); // a cabeça quente
+      g.fillRect(10, 3, 2, 3);
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(11, 4, 1, 1);
+    });
+
     // A SERPENTE — ENERGIA CUSPIDA. Uma gota com cauda, não um traço: ela sai de uma BOCA, não
     // de um cano. O corpo é o verde medido da cabeça do meio, com núcleo quase branco para não
     // depender da cor para ser vista (é a lição da bola da Fase 2) e uma borda escura que a
