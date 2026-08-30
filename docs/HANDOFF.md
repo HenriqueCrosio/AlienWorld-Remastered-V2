@@ -1035,6 +1035,154 @@ piso e as emendas do casco, a colônia da Fase 1 que saiu de cima dele, o RABO d
 transição, o míssil e as quatro bocas do lança-mísseis, e **a pintura de fundo em resolução
 real**. Nada foi jogado ainda — o teste humano é a próxima sessão.
 
+### O 4º E O 5º TESTES JOGADOS (2026-08-29 e 30) — o rabo em CINCO tentativas, e a lição de processo que elas compraram
+
+**A Fatia 5 fechou o conteúdo.** Cinco rodadas de teste jogado, e a mais cara delas foi um único
+plano de 10 segundos.
+
+#### O RABO: as cinco tentativas, e por que quatro falharam
+
+| # | o que foi feito | o veredicto do Henrique |
+|---|---|---|
+| 1 | rabo centrado, girando ±8° | *"precisa ser maior, que ele saia do frame"* |
+| 2 | o MERGULHO: gira −38°, desce em `y`, apaga o `alpha` | *"efeito de desprender"* |
+| 3 | o mergulho de novo, com o TOCO ficando e o casco nascendo dele | mesma reclamação |
+| 4 | a TRAVESSIA para a ESQUERDA, saindo pela borda oposta | *"como se o rabo tivesse se partido"* |
+| 5 | **puxado para a DIREITA + a tela escurece** | ✅ *"agora ficou interessante"* |
+
+⚠️ **A REGRA QUE FALTAVA, E QUE EU NUNCA PERGUNTEI EM QUATRO RODADAS.** Palavras dele:
+
+> *"Se o jogo é um sidescroller, o estar atrás do Leviatã é estar atrás dele lateralmente:
+> `player =)----> Leviatã`. A nadadeira aparece e é puxada para a direita, como se o Leviatã
+> estivesse nadando na mesma direção da nave do player."*
+
+O CORPO do bicho está fora do quadro à DIREITA (origem 0.92). Qualquer saída para a esquerda é o
+rabo se afastando do próprio corpo, indo na direção do jogador — não existe leitura disso que não
+seja "ele se partiu". **E eu tinha essa geometria certa no código e escolhi a opção que a
+contradiz**, porque inventei uma narrativa que ele nunca disse ("a gente ultrapassa ele") e depois
+escrevi o menu de opções em cima dela, com a esquerda já marcada como recomendada. Ele escolheu
+dentro de um menu errado.
+
+⚠️ **A SAÍDA É UMA LINHA SÓ: O `x`.** Sem `y`, sem `angle`, sem `alpha`. Cada eixo extra que
+entrou nas tentativas anteriores foi lido como o corpo se deformando ou se soltando — a 4ª ainda
+descia 38px enquanto andava. A única coisa que se mexe além do `x` é a batida da ponta, que é
+literalmente o pedido: *"somente o final da cauda que mexe"*.
+
+#### O ESCURECIMENTO MATOU UM PROBLEMA INTEIRO, e essa é a lição mais barata da fatia
+
+Pedido dele: *"Ao sair, faça com que a tela escureça por milissegundos, suficientes para aparecer
+o nome 'Casco do leviatã' e os tiles do casco aparecerem."*
+
+Por **quatro rodadas** o casco subiu num fade de 1500ms na frente do jogador, e cada uma delas
+gastou uma sessão discutindo em que instante exato o fade podia começar sem virar corte. O
+escurecimento dissolve a pergunta: **atrás do preto não existe "meio transparente"**. O casco
+nasce PRONTO (`revealCasco(1, 60)`) e não há emenda nenhuma para acertar.
+
+⚠️ `depth 90` no retângulo preto: acima de todo o jogo, **abaixo** do banner e do HUD (99/100). Um
+preto por cima do banner apagaria justamente o que ele veio mostrar. E o banner SAIU do `STAGE_3`
+(era `t: 48.5` fixo): quem o dispara é o instante em que a tela fica preta.
+
+#### O QUE MAIS ENTROU, e o veredicto de cada um
+
+- **Os props do casco deixaram de ser uma fila de adesivos.** *"Ainda estão com sensação de
+  colados"* — a 4ª vez que os respiradouros voltavam, e a 1ª em que a palavra foi útil: não era
+  falta de vida, era falta de **assentamento**. Medido: todo prop nascia com o pé em `GROUND_Y`
+  (206) contra uma faixa de casco de 150 a 216 — **90% de sobreposição, 6px coroando, todos no
+  mesmo `y`**. Agora o pé é sorteado em 186..199 com salto mínimo garantido entre vizinhos, a
+  profundidade acompanha o plantio, e uma sombra de contato ancora a base. ✅ **"estão ok"**.
+- **Cada chefe passou a atirar a coisa dele.** *"É um tiro magenta igual, sem característica
+  nenhuma"* — a aranha e a serpente cuspiam o `bolt2` (o traço da NAVE DO JOGADOR) tingido do
+  mesmo `0xff3a78`. Aranha → munição de cobre; serpente → gota de veneno. ✅ **"estão bons"**.
+- **A faixa de casco de 66px** ✅ *"está boa, para esse estágio da fase ficou perfeito"*.
+- **O casco novo, a métrica das zonas e o choque da água-viva** ✅ aprovados.
+
+### ⚠️ AS LIÇÕES QUE ESTAS DUAS RODADAS COMPRARAM
+
+⚠️ **UM ASSERT SÓ PROTEGE A DECISÃO QUE ELE CODIFICA — E PODE FICAR VERDE EM CIMA DO DEFEITO.** O
+assert da direção do rabo cobrava `x2 < x1`. Ele estava **verde** na versão que o Henrique
+reprovou, porque media a direção que EU tinha escolhido em vez da que o desenho exige. Sonda não
+descobre premissa errada; ela só defende a premissa que você escreveu nela.
+
+⚠️ **CAPTURA PARADA NÃO JULGA MOVIMENTO, E APRESENTÁ-LA COMO CONFIRMAÇÃO É PIOR QUE NÃO TER.**
+Uma tira de 11 quadros e uma tabela de `x` confirmam que o construído bate com o pretendido —
+inútil exatamente quando o pretendido está errado. Foi apresentado como prova quatro vezes.
+
+⚠️ **A ORDEM É: ANALISAR → DISCUTIR → PERGUNTAR → EXECUTAR.** Diretriz explícita do Henrique
+depois da 4ª tentativa. O padrão que falhou: converter a frase dele em geometria cedo demais e
+passar a defender a geometria. Desenhar a cena **em palavras** e esperar confirmação antes de
+escrever a primeira linha foi o que fez a 5ª tentativa acertar — a frase de duas linhas dele sobre
+o sidescroller valeu mais que três horas de trabalho.
+
+⚠️ **CONSERTO EM CÓDIGO COMPARTILHADO NÃO ATRAVESSA A FRONTEIRA DE UMA FASE FECHADA.** O conserto
+do cooldown dos canhões mora no `TerrainSystem`, e mudou o peso da torre da **Fase 1** — mergeada,
+revisada e aprovada jogando — sem ninguém pedir. Foi desfeito e escopado por `PROPS[kind].casco`.
+O mesmo defeito continua na Fase 1 e está **anotado no código** para a fatia dela, onde pode ser
+consertado e TESTADO junto.
+
+⚠️ **A JANELA DE TIRO DE UM CANHÃO DEPENDE DE ONDE O JOGADOR VOA, E ISSO NÃO ERA ÓBVIO.**
+*"Alguns canhões não estão atirando."* A janela é `(374 − x_do_jogador) / SCROLL_SPEED`, então ela
+ENCOLHE conforme o jogador avança — mas o cooldown inicial era sorteado em 1,6–2,8s e corria desde
+o nascimento, gastando a janela inteira. Medido em quatro posições:
+
+```
+x=70   janela 3,62s   4/4        x=240  janela 1,60s   2/4
+x=160  janela 2,55s   7/7        x=300  janela 0,88s   0/7
+```
+
+**Rodar a fase com a sonda parada em x=70 passa verde no código defeituoso** — foi assim que o bug
+sobreviveu até um teste jogado. O `probe-canhao.mjs` novo PRENDE a nave em quatro posições.
+
+⚠️ **O CANO COMIA O PRÓPRIO TIRO.** *"O canhão está soltando o míssil e explodindo antes de
+tudo."* O projétil nasce DENTRO da hitbox de quem o dispara (a boca fica a 7–23px do centro de uma
+peça de 35px). A carência de 16px do `enemyBulletHitCover` existia para isso, mas não dá conta
+quando o tiro sai em diagonal: 2 de cada 4 mísseis morriam com 16–17px andados, comidos pelo MESMO
+prop. **Aumentar a carência "resolveria" fazendo o projétil atravessar rochas vizinhas de graça** —
+o que estava errado é o dono absorver, e só isso mudou.
+
+⚠️ **O `Body` DO ARCADE APLICA A ESCALA DO FRAME ANTERIOR.** Uma versão da gota de veneno nasceu
+16×12 e cravava a caixa com `setSize(13, 9)`: media **10×7** em vez de 12×8, porque o slot vinha de
+um tiro da aranha (escala 0,8). **A hitbox passava a depender de quem tinha usado o slot antes.**
+A cura é não ter conta de escala: projétil novo nasce no MESMO quadro do `bolt2` que ele
+substitui, e o corpo que o `release` devolve já é o certo.
+
+⚠️ **DUAS COISAS DIFERENTES DIVIDINDO UM PROJÉTIL SÓ ACONTECEU TRÊS VEZES NESTA FATIA.** Aranha e
+serpente; e a torre da Fase 1 com o lança-mísseis do casco (esta anterior à branch, commit
+`0b23c55`). `TerrainSystem.fireAt` é compartilhado por todo prop que atira e vestia `missile` em
+todos. A separação é de FICÇÃO antes de ser de arte: um lança-mísseis dispara ordenança, uma torre
+de colônia dispara munição de canhão.
+
+⚠️ **UM PROJÉTIL NÃO PODE DEPENDER DA COR PARA SER VISTO — E O DONO É O PIOR FUNDO POSSÍVEL.** A
+gota de veneno nasceu só verde e SUMIA dentro da própria serpente, que é verde e ciano. É o
+defeito que a bola da Fase 2 já documentava (*"um tiro que não se vê não é dificuldade, é
+injustiça"*), e a solução é a mesma: contraste de **luminância** — borda quase preta, núcleo quase
+branco.
+
+⚠️ **O CIANO ESTÁ PROIBIDO PARA TIRO INIMIGO.** O acento medido da serpente é `#48e8f0`, que é
+praticamente o `playerBright` (`#3ee0f0`) da nave. Um tiro ciano leria como o próprio tiro do
+jogador voltando contra ele. Foi pego ANTES de custar uma rodada, medindo a paleta.
+
+⚠️ **REMOÇÃO EM BLOCO LEVA INOCENTE JUNTO.** O `cbf40fe` removeu CINCO camadas da Fase 1 com uma
+justificativa só ("fonte do deslize do solo"), e o Henrique cobrou a cadeia do meio de volta um mês
+depois, jogando por acaso. Olhando as cinco definições lado a lado, só UMA podia causar deslize:
+
+```
+mtnFar   baseY GROUND_Y − 4   base VISÍVEL, correndo a 0,12 contra um chão a 1,0
+mtnMid   baseY GROUND_Y + 2   base ENTERRADA
+mtnMid   baseY GROUND_Y + 4   base ENTERRADA
+```
+
+**Deslize é uma aresta COMPARTILHADA entre duas camadas de velocidade diferente.** As duas `mtnMid`
+nunca tiveram essa aresta — é o mesmo truque que mantém o `skyline` (GROUND_Y + 2) funcionando
+desde sempre. Voltaram; a `mtnFar` continua fora, porque o fundo pintado já entrega a cordilheira
+distante.
+
+⚠️ **A CONTA QUE DESMENTIU O COMENTÁRIO: 480×270 NÃO CABE EM 384×216.** As pinturas da Fase 2 e do
+Zero-G eram placas de 480×270 em `y = −27`, e o comentário do código defendia isso como
+enquadramento ("só 25% maior, o quadro INTEIRO cabe na janela"). 384/480 e 216/270 dão **80% de
+cada eixo** — a janela mostrava 64% da pintura, recortada nas quatro bordas, com zoom de 1,25×.
+As duas foram para 384×216 em `y = 0`. O parágrafo antigo não foi apagado: ficou marcado como o
+raciocínio anterior, com a metade certa separada da metade que era a armadilha.
+
 ### ⚠️ A PINTURA DE FUNDO ESTAVA AMPLIADA — DESDE A FASE 1
 
 O erro que o Henrique reclamou três vezes, finalmente com número. A receita repetida em toda a

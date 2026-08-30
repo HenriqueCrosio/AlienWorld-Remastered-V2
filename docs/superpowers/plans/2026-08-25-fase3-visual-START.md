@@ -1,305 +1,195 @@
 # START — Fatia 5: FASE 3 ("O CASCO")
 
-**🟡 FATIA EM ANDAMENTO.** Branch `feat/fase3-visual` @ `69da3e8`, **não mergeada**. `main`
-continua em `ee4e2a0` (a Fatia 4).
+**🟢 O CONTEÚDO DA FATIA ESTÁ FECHADO E APROVADO JOGANDO.** Branch `feat/fase3-visual`,
+**não mergeada**. `main` continua em `ee4e2a0` (a Fatia 4).
 
-O Henrique jogou a fase **três vezes** — 27/08 (duas) e 28/08. A terceira rodada de ajustes está
-entregue e **já foi jogada**: ela deixou **um veredicto claro sobre o rabo**, que é por onde a
-próxima sessão começa.
+O Henrique jogou a fase **cinco vezes** (27, 28, 29 e 30/08). Na última rodada ele aprovou tudo
+que estava aberto. O que sobrou não é arte da Fase 3: é **uma animação nova da serpente final**,
+**um veredicto pendente da Fase 1**, e o **fechamento da branch**.
 
 ---
 
 ## 🔑 COMO RETOMAR (frase de arranque)
 
-> **"Leia `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`. A Fatia 5 está em andamento
-> na branch `feat/fase3-visual`. Já joguei a última rodada e o veredicto está no topo do
-> documento: o rabo ainda se desprende no fim, e o que eu quero é que ele ATRAVESSE — fixo na
-> quina inferior direita, só a ponta da cauda mexendo, e no fim ele SAI da tela, como se o nado
-> do Leviatã tivesse só passado na minha frente. Isso derruba a coreografia do toco: não tente
-> salvá-la. Comece por me perguntar o que a saída deixa no lugar dela, porque hoje é o toco que
-> chama o nascimento do casco. Sobe o `npm run dev`, eu entro com `[M]`."**
+> **"Leia `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`. A Fatia 5 está com o
+> conteúdo aprovado na branch `feat/fase3-visual`. Duas coisas antes do merge. A primeira: a
+> serpente da FUSÃO (a gigante que vem depois da de 3 cabeças) tem arte nova no PixelLab
+> — objeto `eab6dbf3-3c51-403d-a70e-c167458a83b7` — e eu quero mais uma animação nela. Me
+> pergunte QUAL antes de gerar, e me diga se a arte nova entra no lugar da fusão azul que está
+> no jogo hoje. A segunda: eu ainda não joguei a Fase 1 depois de você devolver a cadeia de
+> montanhas do meio — preciso te dar esse veredicto. Depois disso é a revisão ampla da branch e
+> o merge. Sobe o `npm run dev`."**
 
-⚠️ **NÃO comece pelo fechamento** (revisão ampla, documentos, merge). Fechar antes do teste humano
-é fechar sobre arte que ainda muda — esta fatia já reabriu três vezes por isso.
+⚠️ **A ORDEM É: ANALISAR → DISCUTIR → PERGUNTAR → EXECUTAR.** É diretriz explícita dele, dada
+depois de a coreografia do rabo falhar quatro vezes. **Desenhe a cena em palavras e espere a
+confirmação antes de escrever a primeira linha.** Não converta a frase dele em geometria cedo:
+foi assim que quatro rodadas se perderam.
 
-⚠️ **NÃO re-despache as tarefas antigas.** Estão commitadas (21 commits desde `ee4e2a0`).
+⚠️ **NÃO re-despache as tarefas antigas.** Estão commitadas (28 commits desde `ee4e2a0`).
 
 ---
 
-## 🔴 O VEREDICTO DO 3º TESTE — leia antes de propor qualquer coisa
+## 🔴 O QUE FALTA — nesta ordem
 
-### 1. O RABO SE DESPRENDE. Ele tem que ATRAVESSAR.
+### 1. A ANIMAÇÃO NOVA DA SERPENTE DA FUSÃO — pergunte antes de gerar
 
-Palavras dele, 28/08:
+Ele mandou o objeto do PixelLab: **`eab6dbf3-3c51-403d-a70e-c167458a83b7`**
+(*"colossal armored alien serpent"*, 1 direção, 256×256, grupo `b7188518-…`).
 
-> *"O rabo continua com efeito de desprender no final da animação, quando muda para o casco. O
-> rabo precisa ficar fixo no canto inferior direito da tela, e somente o final da cauda que mexe.
-> Para ficar mais fácil, o que precisa ser feito é fazer com que a cauda saia da tela no final da
-> animação, como se o nado do leviatã tivesse apenas passado na frente do jogador."*
+**O que já foi apurado nesta sessão** (não re-descubra):
 
-**Três coisas nessa frase, e a terceira derruba a segunda rodada inteira de ajustes:**
+- É a **forma da FUSÃO** — o `serpenteFusao` do jogo, a última das quatro formas
+  (base 3 cabeças → 2c → 1c → **fusão**). Confirmado comparando a silhueta com
+  `public/sprites/serpente-fusao.png`: mesma criatura, mesma pose enrolada, cabeça de crânio.
+- **A arte do objeto é MAIS ESCURA e mais blindada que a que está no jogo** (a do jogo é
+  azul/ciano). ⚠️ **Pergunte se a arte nova entra no lugar da atual** — ele disse *"a serpente
+  gigante tem nova arte e animação"*, e não ficou claro se isso já foi instalado ou se é o que
+  ele quer instalar.
+- O objeto já tem **duas** animações, e as duas são **o mesmo gesto**: virar/inclinar a cabeça
+  para oeste (9 quadros cada). Então a animação nova precisa ser outra coisa.
+- **A hipótese mais forte, e é para PERGUNTAR, não escolher:** o ciclo de fúria da fusão
+  (`BossSerpente`, `case 3`) tem quatro passos — `leque` de 7 → `rajada` de 4 →
+  **`comecarInvestida`** → silêncio. A **investida é um bote**, e hoje ela avança tocando o
+  mesmo loop parado (`serpente-fusao-fury`). É o único verbo da luta sem gesto próprio.
+- Alternativas a pôr na mesa: a MORTE (o colapso final), o DANO (o recuo ao levar tiro).
 
-1. **FIXO na quina inferior direita.** A pose de 28/08 (`y=158`, `x=374`, deitado, sangrando 66px
-   pelo rodapé) foi na direção certa e **não é o que ele está reclamando** — não a desfaça sem
-   motivo. O que ele quer é que o corpo não se MOVA de lá.
-2. **Só a ponta da cauda mexe.** A batida (±6° em torno do pedúnculo) já é isso. O que quebra a
-   leitura é o resto do movimento, não ela.
-3. **No fim ele SAI DA TELA.** É a substituição do mergulho, não um ajuste dele.
+⚠️ **`animate_object` com `mode: 'v3'`** (o padrão) — o `pro` custa 20–40 gerações por direção e
+o v3 costuma sair melhor. Objeto de 1 direção: **não passe `directions`**.
 
-⚠️ **O MERGULHO É O QUE LÊ COMO DESPRENDER, E ISSO ERA PREVISÍVEL EM RETROSPECTO.** A coreografia
-atual é: gira −38° em torno do pedúnculo → o corpo inteiro roda e desce → segura → afunda em `y`
-até 330 com `alpha` indo a 0. Um corpo rígido que gira e depois **desce e apaga** no lugar é
-exatamente a descrição de uma peça que se soltou. Nenhuma quantidade de ajuste em `y` ou no atraso
-conserta isso: **o vocabulário do movimento está errado**, não os números dele.
+⚠️ **MOVIMENTO QUE CABE NUMA FRASE DE GEOMETRIA NÃO VAI PARA OS QUADROS GERADOS.** O v3 já leu
+*"bater para cima e para baixo"* como **girar** e devolveu o rabo como hélice, nesta mesma fatia.
+Se o gesto for descritível como uma rotação em torno de um ponto, ele vive melhor em tween.
 
-⚠️ **NÃO TENTE SALVAR O TOCO.** "O toco fica e o casco nasce dele" é uma ideia bonita que veio do
-pedido do 1º teste (*"sai por baixo, deixando apenas o toco da cauda"*) e que **três testes depois
-não passou**. O 3º pedido é o oposto: nada fica. O bicho passa.
+⚠️ **O `install-anim.mjs` grava `<nome>-{i}.png`**; a convenção do `BootScene` é
+`<coisa>-anim-{i}`. E as animações da serpente estão registradas em `BootScene` como
+`serpenteFusaoAnim` (9 quadros, `frameRate` 10).
 
-### ⚠️ E ISSO ABRE UM BURACO QUE PRECISA DA DECISÃO DELE — PERGUNTE ANTES DE CODAR
+### 2. O VEREDICTO DA FASE 1 — ele ainda não jogou
 
-**Hoje é o mergulho do rabo que chama o nascimento do casco** (`GameScene.raboDoLeviata` →
-`onComplete: () => this.parallax.revealCasco(1, 1500)`), e isso é deliberado: o casco tem que
-começar no instante exato em que a nadadeira limpa o rodapé, e esse instante é uma etapa de tween,
-não uma linha do `STAGE_3` (amarrá-lo ao relógio faz os dois derivarem — está comentado no código).
+A **cadeia de montanhas do meio voltou** (commit `048f8a6`), depois de ele topar com a falta dela
+jogando por acaso. Voltou **pela metade e de propósito**: as duas `mtnMid` (enterradas em
+`GROUND_Y + 2` e `+ 4`) mais a haze entre elas; a `mtnFar` continua fora, porque a base dela
+nascia VISÍVEL em `GROUND_Y − 4` e era a única que podia causar o deslize do solo.
 
-Se o rabo **sai da tela**, esse gancho tem que ir para outro lugar, e as opções não são
-equivalentes:
+⚠️ **PERGUNTE SE A ALTURA FICOU CERTA.** Os `scale` são os originais, mas ele nunca as viu junto
+com o fundo pintado atual — elas ocupam o terço de baixo e podem estar mais dominantes do que ele
+lembra. Se estiverem, o botão é o `scale` das duas camadas em `Parallax.buildSurface()`.
 
-- **(a) O casco já está lá quando o rabo passa** — o rabo atravessa POR CIMA de um chão que já
-  existe. É o que "só passou na minha frente" mais literalmente sugere, e é o mais simples. Mas
-  mata a revelação: o casco deixa de ser a virada e vira cenário que apareceu sozinho.
-- **(b) O casco nasce enquanto o rabo passa** — o `revealCasco` engatado na saída dele, não no
-  fim. A virada sobrevive e o rabo continua sendo quem a causa.
-- **(c) O casco nasce depois que ele sai** — o quadro fica vazio um instante e o chão sobe. É a
-  leitura mais limpa de "ele passou, e o que estava atrás dele era o corpo".
+Também não comentado: a **munição própria da torre da Fase 1** (`shotTorre`, um traçante frio),
+que substituiu o foguete que ela dividia com o lança-mísseis do casco.
 
-**PERGUNTE QUAL.** Não escolha por ele: a Fase 3 se chama "O CASCO" e essa é a cena que dá nome à
-fase. Vale também perguntar **por qual borda ele sai** — pela esquerda (continua a rota do jogador,
-"ultrapassamos") ou por baixo (mergulha e some, mais perto do nado de baleia).
+### 3. A REVISÃO AMPLA DA BRANCH — nunca aconteceu, em nenhuma das cinco rodadas
 
-### 2. Os respiradouros: "falta algo" — TRÊS testes sem resposta
+**Tem que vir antes do merge.** É a última coisa antes do fechamento.
 
-> *"Os respiradouros preciso ver o que vamos fazer, acho que eles são legais, mas ainda acho que
-> falta algo neles."*
+### 4. O MERGE (`--no-ff`, mensagem por arquivo) e os documentos.
 
-A hipótese da 2ª rodada (*eles eram peça fria num casco quente*) **caducou**: o casco não é mais
-aquele — a arte inteira foi trocada em 28/08 e agora nasce no canon. Então a pergunta volta ao
-zero, e é melhor assim.
+---
 
-⚠️ **PEÇA PARA ELE REJOGAR E DIZER SE O "FALTA ALGO" MUDOU DE TAMANHO** antes de propor sopro, luz
-ou reação. As hipóteses seguem na mesa, se ele quiser escolher: (a) falta **respirarem** — um sopro
-de vapor em pulso; (b) falta **luz** dentro; (c) falta **reagir** ao jogador; (d) falta
-**variedade de tamanho**.
+## ✅ O QUE ESTÁ APROVADO — não reabra
 
-### 3. A faixa de casco de 66px — decisão da sessão, sem veredicto
+| | veredicto dele |
+|---|---|
+| O rabo que é puxado para a direita + o escurecimento | *"agora ficou interessante"* / *"dá a entender que o jogador chegou no casco, isso é o importante"* |
+| Os respiradouros, depois do plantio em profundidade | *"estão ok"* |
+| Os projéteis novos da aranha e da serpente | *"estão bons"* |
+| A faixa de casco de 66px | *"está boa, para esse estágio da fase ficou perfeito"* |
+| O casco novo, a métrica das zonas, o choque da água-viva | aprovados no 4º teste |
+| As pinturas da Fase 2 e do Zero-G em 384×216 | pedido dele, entregue |
 
-A crista subiu de y=165 para **y=150** quando a arte nova entrou (os tiles são 116² e em 53 linhas
-as costelas saíam decapitadas). **Ele não pediu isso.** Os props têm 57–62px e ainda coroam acima
-da faixa, mas são 6% de tela a menos. Se ele reclamar de aperto, o botão é a altura do recorte em
-`scripts/instalar-casco.mjs` (`ALTURA = 66`) — e mexer nela obriga a re-rodar
-`node scripts/instalar-casco.mjs && node scripts/casco-frente.mjs`.
+---
+
+## ⛔ O QUE JÁ FOI CONSTRUÍDO, VISTO E REJEITADO — não reimplemente
+
+- ⚠️ **A "insinuação" do casco em t=21.** Pedida pelo HANDOFF desde a Fatia 0, implementada,
+  jogada e reprovada.
+- ⚠️ **O MERGULHO do rabo** (gira −38°, desce, apaga o alpha). Duas versões, duas reprovações:
+  *"efeito de desprender"*.
+- ⚠️ **O TOCO que fica e o casco que nasce dele.** Sobreviveu a duas rodadas, morreu na terceira.
+- ⚠️ **A TRAVESSIA para a ESQUERDA.** *"Como se o rabo tivesse se partido."* O corpo do bicho
+  está fora do quadro à DIREITA — sair pela esquerda é o rabo se afastando do próprio corpo.
+- ⚠️ **O FADE de 1500ms do casco.** Substituído pelo escurecimento, que dissolve o problema
+  inteiro: atrás do preto não existe "meio transparente".
+- ⚠️ **"Colossal tem teto".** Sair do quadro deixou de ser defeito e virou o objetivo.
+
+---
+
+## A CENA DA VIRADA, como ela é hoje (t=38 → 49)
+
+```
+38,0 → 40,5   a nadadeira entra pela direita e DESACELERA até parar (easeOut)
+40,5 → 45,8   HOLD na quina inferior direita. Só a ponta bate (±6° no pedúnculo)
+45,8 → 47,6   SAÍDA: x 374 → 740, easeIn. Uma linha só — sem y, sem angle, sem alpha
+47,6 → 47,95  a tela ESCURECE (retângulo preto, depth 90 — abaixo do banner/HUD)
+47,95         no escuro: revealCasco(1, 60) + banner "O CASCO DO LEVIATÃ"
+48,0          os props entram sobre um casco JÁ SÓLIDO (âncora do STAGE_3, não mexer)
+48,37 → 48,72 a tela CLAREIA e o chão já está lá
+```
+
+Os dois únicos números ajustáveis: **1800ms** da saída e **420ms** de preto cheio. O resto é conta
+para trás a partir do `t=48` dos props.
 
 ---
 
 ## O que testar, e como
 
-`npm run dev` (porta 5173). No menu: **`M`** entra direto na Fase 3, `N` é o treino da serpente.
+`npm run dev` (porta 5173). No menu: **`M`** Fase 3 · **`N`** treino da serpente · **`V`** Fase 2 ·
+**`B`** treino da Fase 1.
 
 | t | O quê |
 |---|---|
-| 0–37s | Ato 1 dentro da nuvem — as águas-vivas atravessam em t=8 e t=16, **agora com CHOQUE** |
-| 21s | A nuvem afina 25%… e o casco **não** aparece |
-| 37,5s | Os hazards param — o quadro esvazia |
-| **38s** | **O RABO** entra pela direita, agora **deitado na quina inferior direita** |
-| 42s | A nuvem abre; o casco continua invisível |
-| **46,5s** | 🔴 **O MERGULHO — é ele que lê como "desprender". É o que vai mudar.** |
-| 48s | O casco sólido: **arte nova, sem tint** |
-| 48,5s | Banner `O CASCO DO LEVIATÃ` |
-| 53s | A aranha — **zona da CAUDA**: blindagem e couro |
-| 63–78s | **zona do MEIO: a caixa torácica.** É aqui que a métrica do casco se vê |
-| 84s+ | **zona da PROA**: dutos e maquinário |
-| 88s | A serpente |
-
----
-
-## O que a rodada de 28/08 entregou (commit `69da3e8`)
-
-### 1. O casco: arte nova, tint fora, e composição por PERCURSO
-
-Os seis tiles que ele gerou nascem na cor do rabo — o `tint 0x84c0ff` saiu inteiro. A régua nova é
-`scripts/_medir-paleta.mjs` (a cor **modal** do material; a antiga media os 8% mais claros, que
-nesta família é o OSSO):
-
-| | cor modal | R−B |
-|---|---|---|
-| `ref-leviata-armored` | `#0c121a` / `#1f2932` | −14 / −19 |
-| rabo | `#19222a` (39%) | −17 |
-| casco **antigo** | `#32312b` (44%) | **+7** ← o intruso |
-| casco **novo** | `#19222a` / `#2e3b44` | −17 / −22 |
-
-E a **métrica que ele pediu**: `Parallax.familiaDoCasco()` escolhe a peça pela distância percorrida
-sobre o bicho, não por sorteio — cauda → costela → duto. **Ainda não foi comentada por ele.**
-
-### 2. O rabo: deitado na quina (aprovado por implicação), mergulho (REPROVADO)
-
-A pose deitada resolveu o vazio de ~50px que havia entre a barriga dele e a borda de baixo. **Ele
-não reclamou dela** — reclamou do que vem depois.
-
-### 3. A água-viva: o choque
-
-`Fx.estalo` (o arco de quem está viva, a cada 1,1–2,3s) e `Fx.choque` (a morte: 7 raios + anel +
-fagulha fria, **sem a sheet de fogo**). **Não comentado no 3º teste** — vale perguntar.
-
----
-
-## Regras que não se redescobrem (custaram sessão)
-
-### O que os TRÊS testes jogados derrubaram
-
-⚠️ **A "insinuação" do casco em t=21 foi REVERTIDA.** O `HANDOFF` pedia desde a Fatia 0, a sessão
-de 26/08 implementou, e o Henrique reprovou jogando. **Não foi esquecida: foi construída, vista e
-rejeitada.** Não reimplemente.
-
-⚠️ **"Colossal tem teto" também morreu.** Sair do quadro deixou de ser defeito e virou o objetivo.
-
-⚠️ **"O toco fica e o casco nasce dele" morreu no 3º teste.** Ver o topo deste documento.
-
-### Medição
-
-⚠️ **MEÇA A PALETA ANTES DE DISCUTIR COR** — e **confira o que a régua está medindo**. A régua dos
-"8% mais claros" funcionou por duas rodadas e mentiu na terceira, quando a arte ganhou osso branco
-e cobre. A cor de um material é a cor que ele REPETE.
-
-⚠️ **TINT MULTIPLICATIVO SÓ ESCURECE**, e o preço aparece jogando: o casco tingido chegou ao canon
-perdendo ~28% de luminância — cor certa, matéria morta. Arte na cor errada se REGERA; não se tinge.
-
-⚠️ **MEDIR NO TAMANHO REAL DO JOGO.** O míssil descartado (`e77eebe8`) só se entregou assim.
-
-⚠️ **O QUE ESTÁ NA TELA SE MEDE POR DIFERENÇA, NÃO A OLHO.** A quina inferior direita tem
-`derelict` pálido do parallax passando o tempo todo, indistinguível do toco numa captura — esta
-sessão quase calibrou a pose em cima de um destroço. `scripts/_f3/ver-toco.mjs` congela a cena,
-fotografa com e sem o rabo, e pinta a diferença.
-
-### Sondas
-
-⚠️ **ASSERT DE MOVIMENTO QUE NÃO OLHA A DIREÇÃO NÃO MEDE MOVIMENTO.** Duas vezes nesta fatia: o
-mergulho com o sinal invertido (`+38`) que `angulo > 20` aprovou, e a água-viva medida por
-`vx > -40`, verdadeiro até num bicho parado. **Quem reprovou o primeiro foi a captura de tela.**
-
-⚠️ **EFEITO DE 90ms SE MEDE POR CHAMADA, NÃO POR FOTO.** O estalo da água-viva é contado
-envelopando `Fx.estalo`. É a lição do rodapé, num caso novo.
-
-⚠️ **ASSERT DE EFEITO COBRA O QUE NÃO ACONTECEU TAMBÉM.** A morte da água-viva exige
-`choque == 1` **E** `explode == 0` — só a primeira metade passaria numa implementação que chamasse
-os dois, e a bola de fogo esconderia os arcos.
-
-⚠️ **ASSERT QUE ENCOSTA NA MUDANÇA SE CONFERE, NÃO SE AFROUXA — e pode ficar mais EXIGENTE.** O do
-sangramento do rabo inverteu de lado (topo DENTRO do quadro, 40px+ pelo rodapé): um rabo centrado
-agora reprova, e um encolhido também. O teste é se a versão nova reprova MAIS do que a antiga.
-
-⚠️ **SONDA DE TEMPO REAL SE RODA UMA POR VEZ.** Três browsers headless no mesmo Vite quebram a
-`probe-stage3`.
-
-⚠️ **SONDA QUE PODE TRAVAR EM SILÊNCIO NÃO É SONDA.** A primeira `ver-emenda.mjs` dormia
-`(alvo − t) × 700ms`, o que assume tempo real — o headless não roda em tempo real, e o laço ficou
-mudo por minutos. Polling de intervalo FIXO e teto de iterações.
-
-### Código
-
-⚠️ **O CULLING DO RÓSTER SÓ OLHA A BORDA ESQUERDA.** Quem atravessa na vertical precisa do culling
-próprio. ⚠️ **Isto vai voltar quando o rabo sair pela borda** — se ele sair por baixo ou pela
-esquerda, confira quem o destrói.
-
-⚠️ **UM EIXO É FÍSICA, O OUTRO É ESCRITO À MÃO — E ELES NÃO PODEM SE MISTURAR.** A senóide escreve
-posição, e escrever posição todo frame apaga a velocidade daquele eixo.
-
-⚠️ **ARTE DE FUNDO NÃO PODE ADIANTAR O DADO DO JOGO.** `Phaser.Math.RND` é o mesmo fluxo que
-`Phaser.Math.Between` consome no espaçamento das ondas. Cenário sorteia com `Math.random`.
-
-⚠️ **DOIS CAMINHOS DE MORTE COM A MESMA CÓPIA DAS QUATRO LINHAS.** A bala e a BOMBA. Um efeito de
-morte novo só num deles faria a água-viva pegar fogo quando morresse de bomba — e ninguém
-descobriria a não ser jogando com a bomba na hora certa. Agora é `GameScene.matarInimigo()`.
-
-### Arte gerada
-
-⚠️ **MOVIMENTO QUE CABE NUMA FRASE DE GEOMETRIA NÃO VAI PARA OS QUADROS GERADOS.** O v3 leu *"bater
-para cima e para baixo"* como **girar** e devolveu o rabo como hélice. Os raios do choque são
-desenhados em código pelo mesmo motivo.
-
-⚠️ **GLOW INTERNO, NUNCA EXTERNO, em sprite recortado justo.** O halo externo vaza da quad e é
-ceifado nela: vira um retângulo aceso em volta do bicho.
-
-⚠️ **A CAPTURA AMPLIADA DESMENTE O TAMANHO DO JOGO — TRÊS VEZES NESTA FATIA.** O glow-retângulo, o
-míssil, e agora o arco do choque (que saía quase reto: ~3px de desvio numa criatura de 15px).
-
-⚠️ **SULCO DE 1px NO MIOLO É TÃO RUIM QUANTO CONTORNO NA BORDA.** Num tile que repete, vira risco
-atravessando o chão. O `casco-frente.mjs` agora reprova na fonte.
-
-⚠️ **O `install-anim.mjs` grava `<nome>-{i}.png`.** A convenção do `BootScene` é `<coisa>-anim-{i}`.
-
-⚠️ **NÃO GERE ARTE A PARTIR DA COISA EM QUE ELA SE APOIA** (a doca, repetida no lança-mísseis).
-
-⚠️ **PARA TRAVAR O ÂNGULO, RECORTE O ÂNGULO DA PRÓPRIA REF.**
-
-### As regras das sessões anteriores, ainda válidas
-
-- ⚠️ **A/B visual sem congelar a cena não é A/B** (`scene.pause()`; e depois do pause busque a cena
-  por chave, `getScene('Game')` — `getScenes(true)` volta vazio com tudo pausado).
-- ⚠️ **Empate de profundidade renderiza certo por acidente.** Toda profundidade nova precisa ser
-  distinta e comentada.
-- **O `pickVariant` sorteia UNIFORME.** Proporção que importa vem da GEOMETRIA, não dele — e no
-  casco, agora, do LUGAR (`familiaDoCasco`).
-- ⚠️ **O `paint-bg.mjs` sempre esteve certo; ele vinha sendo CHAMADO errado.**
+| 0–37s | Ato 1 dentro da nuvem — águas-vivas em t=8 e t=16, com CHOQUE |
+| 38–49s | **A VIRADA** (tabela acima) |
+| 53s | A aranha — zona da CAUDA. **Munição de cobre** |
+| 63–78s | zona do MEIO: a caixa torácica |
+| 84s+ | zona da PROA: dutos e maquinário |
+| 88s | A serpente — base → 2c → 1c → **fusão**. **Gota de veneno** |
 
 ---
 
 ## Sondas e réguas
 
-`probe-f3-visual.mjs` — **44 asserts**, tudo verde. Cobre a pintura em resolução real, a água-viva
-(existe, pulsa, atravessa na vertical, quem desce vem de ponta-cabeça, limpa a tela antes do rabo,
-**estala viva e morre em CHOQUE e não em fogo**), o casco INVISÍVEL no Ato 1 com a nuvem afinando
-mesmo assim, o rabo (bate, arco curto, se segura na direita, colossal, **deitado na quina**, sem
-corpo físico), o TOCO (gira para BAIXO, depth −76, o casco nascendo dele), **a composição
-POSICIONAL do casco em três pontos** (sem costela na cauda, costela no meio, duto na proa), o
-rodapé, as emendas, e os respiradouros.
-
-`probe-stage3.mjs` — **o portão**: a fase de ponta a ponta, as 4 formas da serpente, o hangar.
+- `probe-f3-visual.mjs` — a fatia inteira. Cobre a água-viva, o casco invisível no Ato 1, o rabo
+  (bate, arco curto, deitado na quina, **puxado para a DIREITA**, pose congelada, sem fade), o
+  **escurecimento** (preto cheio, casco em 1 atrás dele, nome legível sobre o preto, retângulo
+  DESTRUÍDO no fim), o **plantio** dos props, e a **munição da aranha**.
+- `probe-stage3.mjs` — **o portão**: a fase de ponta a ponta, as 4 formas da serpente, o hangar,
+  e o **cuspe da serpente**.
+- `_f3/probe-canhao.mjs` — **prende a nave em 4 posições** e cobra que todo lança-mísseis atire e
+  que nenhum míssil seja comido pelo próprio canhão.
+- `probe-chain.mjs` · `probe-stage1-visual.mjs` · `probe-stage2.mjs` — as outras fases.
 
 **Réguas e olhos** (`scripts/`):
 - `_medir-paleta.mjs` — a cor MODAL de uma arte. **Use antes de discutir cor.**
-- `_medir-rabo.mjs` — perfil da arte por coluna, escala × tela, e quanto cada ângulo derruba a
-  nadadeira. ⚠️ O ângulo do mergulho é NEGATIVO no código; a tabela mostra só o tamanho do giro.
-- `instalar-casco.mjs` — recorta os seis tiles (114×66) e reprova borda preta e furo na faixa.
-- `casco-frente.mjs` — a tira que esconde o pé dos props; reprova sulco de 1px.
-- `_f3/ver-toco.mjs` — **a silhueta do rabo isolada por diferença.** Indispensável para a próxima
-  rodada: é o único jeito de saber o que na quina é rabo e o que é destroço do fundo.
-- `_f3/ver-emenda.mjs [de] [até] [passo]` — a transição quadro a quadro + zoom da quina.
-- `_f3/ver-choque.mjs` — o estalo e a descarga, congelados e ampliados a 8×.
-- `_f3/diag-emenda.mjs [t]` — que peças de casco estão na tela num instante, e colunas escuras.
+- `_medir-rabo.mjs` · `instalar-casco.mjs` · `casco-frente.mjs` · `paint-bg.mjs`
+- `_f3/ver-emenda.mjs [de] [até] [passo]` — a transição quadro a quadro.
+- `_f3/ver-plantio.mjs` — A/B dos três plantios de prop, cena congelada.
+- `_f3/ver-tiros.mjs` — os projéteis dos chefes em voo, ampliados.
+- `_f3/ver-toco.mjs` · `_f3/ver-choque.mjs` · `_f3/diag-emenda.mjs`
+- `_f3/diag-canhao.mjs` · `_f3/diag-missil.mjs` — a janela de tiro e a vida de cada míssil.
 
-Regressão da sessão de 28/08: `tsc` limpo · `npm run build` limpo · `probe-f3-visual` 44/44 ·
-`probe-stage3` verde · `probe-chain` verde · `probe-cut2-visual` verde · `probe-doca` verde.
+⚠️ **TRÊS ASSERTS SÃO BARULHENTOS. RODE DE NOVO ANTES DE CONCLUIR — E NUNCA AFROUXE.**
+- **O rodapé** (0,065–0,50 entre execuções, limiar 0,055).
+- **A contagem de lança-mísseis** (varia de 2 a 6; esperado ~4,2).
+- **O risco de emenda na faixa** — reprova ~1 em 4. Medido no código de `HEAD` sem o plantio: o
+  ruído já existia, não veio das sombras novas.
 
-⚠️ **DOIS ASSERTS SÃO BARULHENTOS. RODE DE NOVO ANTES DE CONCLUIR — E NUNCA AFROUXE.**
-- **O rodapé** (0,065–0,50 entre execuções, limiar 0,055): amostra pixel num instante da fase.
-- **A contagem de lança-mísseis** (1 a 5 entre execuções, esperado ~4,2): `GetRandom` é uniforme
-  sobre ~8 slots. Reprovou uma vez em 28/08 e passou na re-execução seguinte com 4.
+⚠️ **SONDA DE TEMPO REAL SE RODA UMA POR VEZ.** Três browsers headless no mesmo Vite quebram.
 
 ---
 
-## O que falta
+## Regras que não se redescobrem
 
-1. 🔴 **O RABO QUE ATRAVESSA** — e a decisão dele sobre o que passa a chamar o nascimento do casco.
-   **Pergunte antes de codar.** É o item 1 do topo deste documento.
-2. 🔴 **OS RESPIRADOUROS** — três testes sem resposta. Peça o veredicto com o casco novo na tela.
-3. ⚠️ **A faixa de 66px** — decisão da sessão, sem veredicto jogado.
-4. **Os outros ajustes que saírem do teste.**
-5. **A decisão sobre a `paintBgF2` / `paintBgZeroG`** (o mesmo erro de resolução, em fases
-   mergeadas e revisadas). Uma linha por pintura: `node scripts/paint-bg.mjs <origem> <destino>
-   384 216`, mais o `y` no `Parallax`.
-6. ⚠️ **A REVISÃO AMPLA DA BRANCH** — a Task 3 nunca foi revisada, nem a sessão de 26/08, nem
-   nenhuma das três rodadas de teste. **Tem que acontecer antes do merge.**
-7. **Os documentos e o merge** (`--no-ff`, mensagem por arquivo).
+Todas as lições desta fatia estão em `docs/HANDOFF.md`, na seção **"O 4º E O 5º TESTES JOGADOS"**.
+As quatro que mais custaram:
+
+1. **Um assert só protege a decisão que ele codifica** — e pode ficar VERDE em cima do defeito.
+2. **Captura parada não julga movimento**, e apresentá-la como confirmação é pior que não ter.
+3. **Conserto em código compartilhado não atravessa a fronteira de uma fase fechada** sem alguém
+   rejogar aquela fase.
+4. **Remoção em bloco leva inocente junto** — cinco camadas removidas por uma justificativa que
+   só valia para uma delas.
+
+---
 
 **A próxima fatia depois desta é a 6 — Cutscene 3 (o hangar do Leviatã).**
