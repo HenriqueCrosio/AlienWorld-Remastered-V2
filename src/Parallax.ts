@@ -717,9 +717,18 @@ export class Parallax {
     if (!this.scene.textures.exists('paintBgZeroG')) return;
 
     this.zeroGBg = this.scene.add
-      // −27 = (270−216)/2, a mesma conta do `paintBgF2`/`paintBgCut1`: a pintura é maior que a
-      // janela do jogo, e a folga fica repartida em cima e embaixo.
-      .image(0, -27, 'paintBgZeroG')
+      // ⚠️ `y = 0`, E A PINTURA AGORA É 384×216 (2026-08-30). Ela era 480×270 pendurada em
+      // `y = −27`, com a folga repartida em cima e embaixo — e isso não era enquadramento, era
+      // um ERRO DE RESOLUÇÃO: numa janela de 384×216, uma placa de 480×270 mostra 80% de cada
+      // eixo, ou seja **64% da pintura**, com zoom de 1,25×. A Fase 3 já tinha sido corrigida
+      // assim; esta e a da Fase 2 ficaram para trás e o Henrique pediu o mesmo padrão.
+      //
+      // ⚠️ ESTA FOI REDUZIDA A PARTIR DOS 480×270, NÃO DO ORIGINAL. A F2 tem
+      // `assets/raw/paint-bg-f2-original.png` (1672×941) e foi refeita de lá; do Zero-G não há
+      // original guardado, então o 480×270 virou a fonte (`assets/raw/paint-bg-zerog-480.png`).
+      // É um passo de redução a mais do que o ideal. Se o original aparecer, refazer com
+      // `node scripts/paint-bg.mjs <original> public/sprites/paint-bg-zerog.png 384 216`.
+      .image(0, 0, 'paintBgZeroG')
       .setOrigin(0, 0)
       .setDepth(-95.5)
       .setAlpha(0);
@@ -829,6 +838,13 @@ export class Parallax {
     // lua-encolhendo/Leviatã-crescendo é mecânica de narrativa ativa que não pode desaparecer —
     // a pintura só preenche o vazio atrás dela.
     //
+    // ⚠️ DIMENSÃO 384×216 DESDE 2026-08-30 — o parágrafo abaixo é o raciocínio ANTIGO, mantido
+    // porque a metade dele continua certa e a outra metade é a armadilha. Certa: uma pintura
+    // larga demais recortada em 216px mostra só um PEDAÇO da cena e lê como ampliada. Errada: a
+    // conclusão de que 480×270 resolvia isso, "só 25% maior que os 384×216". Não resolvia —
+    // resolvia MENOS: 384/480 e 216/270 dão 80% de cada eixo, então a janela mostrava 64% da
+    // pintura, recortada nas quatro bordas, com zoom de 1,25×. O quadro inteiro nunca coube.
+    //
     // ⚠️ DIMENSÃO 480×270 (não 2 telas largo como o `paintBgF1`) — mesma receita do
     // `paintBgCut1` da cutscene 1, e por um motivo específico deste quadro: o `paintBgF1` é um
     // céu de montanhas com MUITO vazio (a maior parte fica atrás do skyline/montanhas
@@ -852,9 +868,16 @@ export class Parallax {
       for (let i = 0; i < 2; i++) {
         this.paintedBg.push(
           this.scene.add
-            // −27 = (270−216)/2: centraliza verticalmente a pintura na janela do jogo — mesma
-            // conta que o `paintBgCut1` da cutscene 1 já usa pra essa mesma dimensão.
-            .image(i * w, -27, 'paintBgF2')
+            // ⚠️ `y = 0`, E A PINTURA AGORA É 384×216 (2026-08-30). Ela era 480×270 pendurada em
+            // `y = −27` para centralizar a folga. O bloco acima defende os 480×270 como
+            // enquadramento — e a defesa está errada na conta: numa janela de 384×216 uma placa
+            // de 480×270 mostra 80% de CADA eixo, ou seja 64% da pintura, com zoom de 1,25×. O
+            // quadro inteiro NÃO cabia; ele era recortado nas quatro bordas.
+            //
+            // 1 px de arte = 1 px de jogo, e o upscale nearest da engine dá o acabamento pixel.
+            // É a mesma correção que a Fase 3 recebeu, refeita a partir do ORIGINAL
+            // (`assets/raw/paint-bg-f2-original.png`, 1672×941) e não do 480×270.
+            .image(i * w, 0, 'paintBgF2')
             .setOrigin(0, 0)
             .setDepth(-99)
             .setData('bgFactor', 0.018),
