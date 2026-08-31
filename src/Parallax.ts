@@ -717,18 +717,25 @@ export class Parallax {
     if (!this.scene.textures.exists('paintBgZeroG')) return;
 
     this.zeroGBg = this.scene.add
-      // ⚠️ `y = 0`, E A PINTURA AGORA É 384×216 (2026-08-30). Ela era 480×270 pendurada em
-      // `y = −27`, com a folga repartida em cima e embaixo — e isso não era enquadramento, era
-      // um ERRO DE RESOLUÇÃO: numa janela de 384×216, uma placa de 480×270 mostra 80% de cada
-      // eixo, ou seja **64% da pintura**, com zoom de 1,25×. A Fase 3 já tinha sido corrigida
-      // assim; esta e a da Fase 2 ficaram para trás e o Henrique pediu o mesmo padrão.
+      // ⚠️ 480×270 EM `y = −27`, E ISSO É UMA REVERSÃO PEDIDA, NÃO UM ESQUECIMENTO. Em
+      // 2026-08-30 esta pintura foi reduzida para 384×216 em `y = 0` junto com a da Fase 2, pela
+      // conta da resolução: numa janela de 384×216 uma placa de 480×270 mostra 80% de cada eixo,
+      // ou seja 64% da pintura, recortada nas quatro bordas, com zoom de 1,25×. A conta continua
+      // certa — e o Henrique reprovou o resultado assim mesmo, no mesmo dia: *"o fundo da zero G
+      // pode ser como estava antes, reverta ele para eu verificar de novo"*.
       //
-      // ⚠️ ESTA FOI REDUZIDA A PARTIR DOS 480×270, NÃO DO ORIGINAL. A F2 tem
-      // `assets/raw/paint-bg-f2-original.png` (1672×941) e foi refeita de lá; do Zero-G não há
-      // original guardado, então o 480×270 virou a fonte (`assets/raw/paint-bg-zerog-480.png`).
-      // É um passo de redução a mais do que o ideal. Se o original aparecer, refazer com
+      // ⚠️ E ISSO NÃO CONTRADIZ A FASE 2, QUE FICOU EM 384×216. A diferença entre as duas não é
+      // de conta, é de ORIGEM: a da F2 foi refeita do original de 1672×941, então reduzir devolve
+      // a cena inteira com detalhe de sobra. Do Zero-G não há original guardado — a redução saiu
+      // do próprio 480×270 (`assets/raw/paint-bg-zerog-480.png`), um passo de reamostragem a mais
+      // em cima de uma arte que já era pequena. O recorte custava enquadramento; a redução
+      // custava DETALHE, e neste quadro o detalhe era o que segurava a cena.
+      //
+      // −27 = (270−216)/2: a folga fica repartida em cima e embaixo.
+      //
+      // Se o original de alta resolução aparecer, é ele que resolve os dois lados de uma vez:
       // `node scripts/paint-bg.mjs <original> public/sprites/paint-bg-zerog.png 384 216`.
-      .image(0, 0, 'paintBgZeroG')
+      .image(0, -27, 'paintBgZeroG')
       .setOrigin(0, 0)
       .setDepth(-95.5)
       .setAlpha(0);
