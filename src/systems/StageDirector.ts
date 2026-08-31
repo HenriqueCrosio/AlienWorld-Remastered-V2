@@ -18,6 +18,16 @@ export type StageEvent =
   /** O MINI-BOSS do Ato 2 (a aranha que anda no casco). Um por fase, roteirizado. */
   | { t: number; type: 'miniboss' }
   /**
+   * O RABO DO LEVIATÃ atravessando a tela (Fase 3): a nadadeira traseira entra pela DIREITA,
+   * bate uma vez com tudo — o nado espacial dele — e sai pela esquerda. É a TRANSIÇÃO do Ato 1
+   * para o Ato 2, e ela conta uma coisa que nenhum banner contava: a perseguição acabou, o
+   * jogador ALCANÇOU o Leviatã por trás. O casco que vira chão logo depois é a mesma criatura,
+   * vista de perto demais.
+   *
+   * ⚠️ SEM HITBOX. É cenário roteirizado, não inimigo — nada de onda, dano ou colisão muda.
+   */
+  | { t: number; type: 'rabo' }
+  /**
    * CORREDOR de precisão (Fase 4): pares chão+TETO com VÃO GARANTIDO de `gap` px, em altura
    * sorteada. É o cano do flappy virando terreno — o DNA do v2 — mas SEM flap: no voo livre o
    * desafio é posição, não ritmo. O par é atômico de propósito: duas alturas independentes
@@ -190,6 +200,23 @@ export const STAGE_3: StageEvent[] = [
   // Dentro da nuvem: asteroides e drones — o básico da F2, mas com véus na frente.
   { t: 2, type: 'hazard', rate: 1.3, mix: ['asteroid'] },
   { t: 5, type: 'wave', kind: 'drone', count: 5, spacing: 0.35, y: 80 },
+  // ─── A ÁGUA-VIVA: a vida da nebulosa, e o único ritmo lento do Ato 1 ───
+  //
+  // ⚠️ ELAS CAEM EM CIMA DAS ONDAS RÁPIDAS DE PROPÓSITO. Lento e rápido no mesmo quadro é o
+  // contraste que justifica ela existir; sozinha numa janela vazia ela vira só um asteroide
+  // bonito que brilha.
+  //
+  // ⚠️ O ÚLTIMO SPAWN TEM QUE LIMPAR A TELA ANTES DE t=38, e a margem é APERTADA. Ela nasce em
+  // `x = GAME_WIDTH + 16` (400), não em 384 — são 400px a 28px/s, ou seja **14,3s** de travessia,
+  // e não os 13,7 que a largura da tela sugere. A primeira versão pôs a segunda onda em t=19: o
+  // último nascia em 23,2 e ainda estava vivo em t=38. A sonda pegou.
+  //
+  // O quadro precisa estar VAZIO quando o rabo entra — o vazio é o que faz a chegada dele pesar,
+  // e é para isso que o `hazard rate 0` existe em t=37,5. Com a onda em t=16, o último nasce em
+  // 20,2 e limpa em t≈34,5. NÃO empurrar estas ondas para depois de t=23.
+  // ⚠️ O `y` AQUI É IGNORADO: a travessia vertical nasce NA borda (ver `EnemySystem.spawn`). O
+  // roteiro escolhe QUANDO ela cruza, não a que altura — altura de quem atravessa é a borda.
+  { t: 8, type: 'wave', kind: 'aguaViva', count: 3, spacing: 1.6, y: 100 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 130 },
 
   // Minas em CACHOS na névoa: a visibilidade curta transforma uma peça conhecida em susto
@@ -197,7 +224,22 @@ export const STAGE_3: StageEvent[] = [
   { t: 13, type: 'banner', text: 'SENSORES NA NÉVOA' },
   { t: 14, type: 'hazard', rate: 1.0, mix: ['sensor', 'sensor', 'asteroid', 'mina'] },
   { t: 16, type: 'wave', kind: 'drone', count: 6, spacing: 0.28, y: 60 },
+  { t: 16, type: 'wave', kind: 'aguaViva', count: 4, spacing: 1.4, y: 75 },
   { t: 20, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 100 },
+
+  // ⚠️ O LEVIATÃ COMEÇA A APARECER NA METADE DO ATO 1 (Fatia 5). O `HANDOFF` sempre pediu isso —
+  // "na metade do tempo, o Leviatã começa a aparecer" — e o código nunca fez: o casco ficava em
+  // alpha 0 até a virada em t=42 e SALTAVA para visível.
+  //
+  // `density 0.75` faz duas coisas de uma vez, e as duas são desejadas: afina a nuvem em 25% e
+  // sobe o casco a 0.25 (o alpha dele é `1 − nebulaDim`). A nuvem abrindo é o que MOTIVA o casco
+  // aparecer — melhor do que ele surgir através de uma nuvem inalterada.
+  //
+  // ⚠️ É UMA INSINUAÇÃO, NÃO UMA REVELAÇÃO. Se der para LER a estrutura do casco antes dos 42s, a
+  // virada perde o efeito e este número está alto demais. O critério é "sentir que há algo por
+  // baixo", não "ver o casco".
+  { t: 21, type: 'nebula', density: 0.75 },
+
   { t: 24, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 70 },
 
   // Pico do Ato 1: cargueiro + kamikazes dentro da nuvem.
@@ -206,14 +248,56 @@ export const STAGE_3: StageEvent[] = [
   { t: 32, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 35, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 120 },
 
-  // ─── A VIRADA: sair da nuvem. O casco aparece por baixo dela. ───
-  { t: 40, type: 'hazard', rate: 0, mix: [] },
+  // ─── A VIRADA: O RABO. ───
+  //
+  // A nuvem para de cuspir asteroide em t=40 e o quadro esvazia — e é no vazio que o RABO
+  // entra pela direita, ainda ATRÁS dos véus, e bate a nadadeira uma vez com tudo. A ordem
+  // importa: primeiro o jogador vê O QUE alcançou, e só DEPOIS a nuvem abre e revela em cima
+  // do que ele está voando. Invertido (nuvem primeiro, rabo depois) o casco chegaria como
+  // cenário anônimo e o rabo viraria decoração atrasada.
+  // ⚠️ O RABO ANDOU PARA TRÁS: 40,5 → 38 (2026-08-27). A coreografia nova — a remada final que
+  // manda a nadadeira para fora do rodapé, o toco segurando, e o casco nascendo dele — precisa
+  // de ~2,5s a mais de pista. Puxar o rabo é mais barato do que empurrar o Ato 2 inteiro.
+  //
+  // O `hazard rate 0` andou junto (40 → 37,5) porque ele NÃO é do Ato 2: é a preparação do
+  // rabo. Esvaziar o quadro é o que faz a chegada pesar, e tem que acontecer antes dela.
+  //
+  // ⚠️ O BANNER SAIU DAQUI (2026-08-29). Ele já tinha andado de 44 para 48,5 porque anunciava um
+  // casco que só existia em t=48 — legenda antes da imagem. Agora ele nem mora mais no relógio:
+  // quem o dispara é `GameScene.escurecerParaOCasco`, no instante em que a tela fica preta, que
+  // é onde o Henrique pediu que o nome aparecesse. Horário fixo para um evento que é o fim de um
+  // tween é a mesma armadilha que o casco já tinha: os dois derivam na primeira mudança de
+  // duração. Se você procurar 'O CASCO DO LEVIATÃ' e não achar aqui, é por isso.
+  //
+  // ⚠️ A "INSINUAÇÃO" DE t=21 NÃO REVELA MAIS O CASCO, e isso é deliberado. O `density 0.75`
+  // continua lá afinando a nuvem, mas o casco não está mais amarrado a ele (ver
+  // `Parallax.cascoReveal`). O HANDOFF pedia a insinuação desde sempre; ela foi implementada em
+  // 26/08, foi JOGADA, e o Henrique reprovou. O teste jogado vence o documento.
+  { t: 37.5, type: 'hazard', rate: 0, mix: [] },
+  { t: 38, type: 'rabo' },
   { t: 42, type: 'nebula', density: 0 },
-  { t: 44, type: 'banner', text: 'O CASCO DO LEVIATÃ' },
 
-  // ATO 2: o casco é a superfície — torres e radares SOBRE ele (vocabulário da F1;
-  // no vácuo o verbo continua o da F2: tudo se abate).
-  { t: 46, type: 'terrain', rate: 1.6, mix: ['wreck', 'turret', 'wreck', 'radar'] },
+  // ATO 2: o casco é a superfície — e o que há EM CIMA dele é a defesa do próprio Leviatã.
+  //
+  // ⚠️ Aqui vivia a colônia da FASE 1 transplantada: `wreck`, `turret`, `radar`, `silo`. Como
+  // bloco de jogo funcionava; como ficção mentia — o casco vivo de uma baleia biomecânica não
+  // tem reservatório de colônia nem antena de rádio parafusada em cima. As duas peças novas
+  // (`lancaMisseis`, `respiradouro`) foram geradas com o Leviatã armored como referência.
+  //
+  // ⚠️ A PROPORÇÃO DE QUEM ATIRA CONTINUA A MESMA — E É POR ISSO QUE OS DOIS NÚMEROS MUDARAM
+  // JUNTOS (2026-08-27). A cadência caiu pela metade (1,6s → 3,0s) e a mistura dobrou a favor do
+  // lança (1:3 → 1:1). Os dois se cancelam exatamente na conta de quem atira:
+  //
+  //   antes   27s de janela / 1,6s × 0,25 = 4,22 lança-mísseis
+  //   depois  25s de janela / 3,0s × 0,50 = 4,17 lança-mísseis
+  //
+  // A janela encolheu porque os props começam em t=48, quando o casco fica SÓLIDO, e não mais em
+  // t=46: prop opaco sobre casco meio transparente é o defeito que a virada nova conserta. O 3,0
+  // (em vez do 3,2 da spec) é o que compensa esses 2 segundos.
+  //
+  // O respiradouro cai de ~12,7 para ~3 — e quem garante o ESPAÇAMENTO é a carência no
+  // `GameScene.spawnProps`, não esta mistura. Sorteio uniforme pode dar dois seguidos.
+  { t: 48, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
   { t: 48, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
 
   // O MINI-BOSS: a aranha entra andando no casco. As pernas dela finalmente têm motivo.
@@ -224,7 +308,7 @@ export const STAGE_3: StageEvent[] = [
   // contraste que faz o pico final pesar.
   { t: 54, type: 'terrain', rate: 0, mix: [] },
 
-  { t: 63, type: 'terrain', rate: 1.4, mix: ['wreck', 'turret', 'wreck', 'silo'] },
+  { t: 63, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
   { t: 64, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
   { t: 67, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
   { t: 70, type: 'banner', text: 'DEFESAS DO CASCO' },

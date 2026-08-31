@@ -25,6 +25,16 @@ import { FreeController } from '../flight/FreeController';
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
 
+/**
+ * A CARÊNCIA DO RESPIRADOURO (Fase 3), em segundos.
+ *
+ * ⚠️ ESTE É O BOTÃO, E A MISTURA NÃO É. Cortar respiradouro mexendo na mistura mexeria também
+ * na proporção de quem ATIRA (o lança-mísseis divide o mesmo sorteio), e o volume de tiro do
+ * Ato 2 está congelado até o playtest por decisão do Henrique. Quem regula quantos espiráculos
+ * se vê é este número: 5 → ~3 na fase; 3 → ~4; 8 → ~2.
+ */
+const RESPIRADOURO_CARENCIA = 5;
+
 interface PendingWave {
   kind: EnemyKind;
   left: number;
@@ -88,6 +98,8 @@ export class GameScene extends Phaser.Scene {
   private propRate = 0;
   private propMix: PropKind[] = [];
   private propTimer = 0;
+  /** Segundos desde o último RESPIRADOURO que NASCEU. Ver `RESPIRADOURO_CARENCIA`. */
+  private respiradouroTimer = RESPIRADOURO_CARENCIA;
   /** O mesmo par para os destroços flutuantes do vácuo (ver DebrisSystem). */
   private hazardRate = 0;
   private hazardMix: HazardKind[] = [];
@@ -157,6 +169,10 @@ export class GameScene extends Phaser.Scene {
     this.propRate = 0;
     this.propMix = [];
     this.propTimer = 0;
+    // ⚠️ COMEÇA PRONTO, não em zero: a fase tem que poder cuspir o primeiro espiráculo assim que
+    // o Ato 2 abrir. Em zero, o primeiro slot nasceria bloqueado e o ato abriria com um buraco
+    // que ninguém pediu.
+    this.respiradouroTimer = RESPIRADOURO_CARENCIA;
     this.hazardRate = 0;
     this.hazardMix = [];
     this.hazardTimer = 0;
@@ -188,7 +204,7 @@ export class GameScene extends Phaser.Scene {
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
     this.weapons = new WeaponSystem(this);
-    this.enemies = new EnemySystem(this, this.stage.id);
+    this.enemies = new EnemySystem(this, this.stage.id, this.fx);
     this.pickups = new PickupSystem(this);
 
     // Os DOIS sistemas de obstáculo existem sempre; o roteiro da fase decide qual é alimentado
@@ -535,10 +551,242 @@ export class GameScene extends Phaser.Scene {
         // continua correndo por baixo dela — chefão de verdade só há um por fase.
         this.enemies.spawn('aranha', 0);
         break;
+      case 'rabo':
+        this.raboDoLeviata();
+        break;
       case 'boss':
         this.spawnBoss();
         break;
     }
+  }
+
+  /**
+   * O RABO DO LEVIATÃ — a transição do Ato 1 para o Ato 2 da Fase 3.
+   *
+   * A nadadeira traseira entra pela DIREITA, se segura na quina batendo, e depois é PUXADA de
+   * volta para a direita. Antes disto a virada era um fade: a nuvem rareava e o casco aparecia. Funcionava
+   * como efeito e não dizia nada — o jogador via um chão novo, não o fim de uma perseguição.
+   * O rabo diz a frase inteira sem banner nenhum: **eu alcancei o bicho, e estou atrás dele.**
+   * O casco que vira chão logo depois deixa de ser cenário e passa a ser a MESMA criatura,
+   * vista de perto demais.
+   *
+   * ⚠️ CENÁRIO, NÃO INIMIGO. Sem corpo físico, sem hitbox, sem dano, fora de todo grupo de
+   * colisão. Nenhuma onda, nenhum spawn e nenhum número de balanceamento muda por causa dele.
+   *
+   * ⚠️ ELE SAI PELA DIREITA, E ESSA DIREÇÃO CUSTOU CINCO TENTATIVAS. A regra que faltava, dita
+   * pelo Henrique em 2026-08-29 e óbvia depois de dita:
+   *
+   *   *"Se o jogo é um sidescroller, o estar atrás do Leviatã é estar atrás dele lateralmente:
+   *   player =)----> Leviatã. A nadadeira aparece e é puxada para a direita, como se o Leviatã
+   *   estivesse nadando na mesma direção da nave do player."*
+   *
+   * O CORPO do bicho está fora do quadro à DIREITA — com origem 0.92 o pedúnculo encosta na
+   * borda direita e o resto dele continua para lá. Então qualquer saída para a ESQUERDA é o rabo
+   * se afastando do próprio corpo, indo na direção do jogador, e não existe leitura disso que
+   * não seja "ele se partiu e está sendo arrastado". Foi o 4º defeito relatado, e ele era pior
+   * que o 3º: o anterior se soltava parado na quina, este se soltava atravessando a tela.
+   *
+   * ⚠️ AS QUATRO VERSÕES REPROVADAS, para nenhuma delas voltar por parecer uma boa ideia:
+   *   1. o rabo centrado, girando ±8° — pequeno demais, "precisa sair do frame"
+   *   2. o MERGULHO: gira −38°, desce e apaga no lugar — "efeito de desprender"
+   *   3. o mergulho de novo, com o toco ficando e o casco nascendo dele — mesma reclamação
+   *   4. a TRAVESSIA para a esquerda, saindo pela borda oposta — "como se tivesse se partido"
+   *
+   * ⚠️ A SAÍDA É UMA LINHA SÓ: O `x`. Sem `y`, sem `angle`, sem `alpha`. Cada eixo extra que eu
+   * acrescentei nas tentativas anteriores foi lido como o corpo se deformando ou se soltando.
+   * A única coisa que se mexe além do `x` é a batida da ponta — que é literalmente o pedido:
+   * *"somente o final da cauda que mexe"*.
+   *
+   * ⚠️ E O TOCO NÃO EXISTE MAIS. "O toco fica e o casco nasce dele" veio do pedido do 1º teste,
+   * sobreviveu a duas rodadas e foi REPROVADO na terceira. Nada fica. Não reimplemente — já foi
+   * construído, visto e rejeitado.
+   *
+   * ⚠️ `depth −70` O TEMPO TODO, sem troca. A versão do mergulho caía para −76 para afundar POR
+   * TRÁS da faixa do casco (−75/−74); agora não há casco nenhum em cena enquanto ele está aqui
+   * (quem o traz é `escurecerParaOCasco`), então não há nada para passar por trás. Os VÉUS
+   * (depth 60) passam por cima o tempo todo, então ele chega embaçado, entregue pela névoa.
+   *
+   * ⚠️ ELE CHEGA ANTES DA NUVEM ABRIR (t=40,5 contra t=42). A ordem é a coisa toda: primeiro o
+   * jogador vê O QUE alcançou, e só depois o casco se revela como o corpo daquilo.
+   */
+  private raboDoLeviata(): void {
+    // Sem a arte, a fase segue sem a transição em vez de quebrar — o mesmo contrato de todo
+    // asset do projeto (ausente = a cena continua, ver BootScene).
+    if (!this.textures.exists('raboLeviata')) return;
+
+    // ⚠️ ESCALA 3,4 — COLOSSAL PORQUE NÃO CABE. A arte é 107×73 e vira 364×248 numa tela de
+    // 384×216: ela sangra ~20px pelo topo e ~12px pelo rodapé.
+    //
+    // ⚠️ A REGRA ANTERIOR ERA A OPOSTA, E FOI DERRUBADA JOGANDO (2026-08-27). A sessão de 26/08
+    // travou em 2,4 com a justificativa "é o maior tamanho em que o ARCO INTEIRO da batida ainda
+    // cabe na tela" — e a regra existia porque sair do quadro era tratado como defeito. O
+    // Henrique jogou e pediu o contrário: "precisa ser maior, talvez fazer com que ele saia do
+    // frame da tela, para dar a impressão de colossal". Sem o teto, a escala sobe.
+    //
+    // 3,0 é o degrau abaixo, se um dia 3,4 ficar opressivo — a coreografia não muda com ele.
+    // A régua é `scripts/_medir-rabo.mjs`.
+    //
+    // ⚠️ A ORIGEM VAI PARA A DIREITA (0,92 / 0,5) — E ELA É O PIVÔ DA BATIDA. Numa baleia o
+    // rabo gira em torno do pedúnculo, lá onde ele encontra o corpo; a nadadeira é a ponta do
+    // braço, não o eixo. Com a origem no centro, qualquer rotação faria a peça inteira rodar
+    // em volta de si mesma — que foi exatamente o defeito da animação gerada (ela virou HÉLICE).
+    //
+    // Com origem em 0,92 e escala 3,4 o sprite ocupa de `x − 341` a `x + 23`. Em x=374 isso é
+    // 33..397 (`scripts/_medir-rabo.mjs`): o corpo sangra para fora da borda direita e a
+    // nadadeira varre o miolo da tela. Esse `x + 23` é a conta da SAÍDA — ver o tween 3.
+    //
+    // ⚠️ `depth −70` DO INÍCIO AO FIM, sem troca. Ver o cabeçalho: o casco não existe enquanto
+    // ele está em cena, então não há profundidade nenhuma para negociar.
+    const rabo = this.add
+      .sprite(GAME_WIDTH + 200, 158, 'raboLeviata')
+      .setOrigin(0.92, 0.5)
+      .setDepth(-70)
+      .setScale(3.4)
+      .setAlpha(0);
+
+    // 1. A CHEGADA (2,5s): entra pela direita e DESACELERA até parar. O `easeOut` é o que
+    //    transforma "um sprite entrou" em "alguma coisa alcançou a gente".
+    this.tweens.add({ targets: rabo, x: 374, duration: 2500, ease: 'Sine.easeOut' });
+    this.tweens.add({ targets: rabo, alpha: 1, duration: 1100, ease: 'Sine.easeOut' });
+
+    // 2. A BATIDA, EM CÓDIGO E NÃO EM QUADROS.
+    //
+    //    ⚠️ A animação do PixelLab foi DESCARTADA. O v3 leu "bater para cima e para baixo" como
+    //    "girar": os quadros 4 a 8 rodavam a nadadeira em torno do próprio eixo e o bicho virava
+    //    uma hélice. Rotação em torno do pedúnculo é o movimento certo, é uma linha de tween, e
+    //    não tem como sair errado — então é onde ele mora.
+    //
+    //    ⚠️ A BATIDA É ASSIMÉTRICA, e isso é a diferença entre "peixe de aquário" e "propulsão".
+    //    Sobe DEVAGAR (1,5s, easeInOut: o braço carregando) e desce COM TUDO (0,55s, easeIn: a
+    //    remada). Um yoyo simples daria as duas metades com a mesma pressa, e o peso sumiria.
+    //
+    //    ⚠️ ±6°, E O ÂNGULO CAIU PARA O MOVIMENTO NÃO MUDAR. Com a escala em 3,4 a ponta da
+    //    nadadeira passou a ficar a ~335px do pedúnculo, contra 236 antes — a mesma alavanca
+    //    ficou mais longa. ±8° agora varreria 93px e a batida viraria outra coisa; ±6° varre
+    //    ~70px, que é praticamente a varredura que o Henrique aprovou (~66px). Reduzir o ângulo
+    //    aqui é o que PRESERVA a remada, não o que a enfraquece.
+    rabo.setAngle(-6);
+    const batida = this.tweens.chain({
+      targets: rabo,
+      loop: -1,
+      tweens: [
+        { angle: 6, duration: 1500, ease: 'Sine.easeInOut' },
+        { angle: -6, duration: 550, ease: 'Sine.easeIn' },
+        { angle: -6, duration: 250 },
+      ],
+    });
+
+    // 3. A SAÍDA — ELE ATRAVESSA E VAI EMBORA. É o plano inteiro num verbo só.
+    //
+    // ⚠️ QUEM O TIRA DO QUADRO É ANDAR, NÃO AFUNDAR — e isso é o seguro contra recair no
+    // mergulho. São 414px de viagem horizontal (374 → −40) contra 38px de descida (158 → 196):
+    // razão de 11 para 1. Mesmo depois de descer os 38px o topo do sprite ainda estaria em
+    // y=72, DENTRO da tela — ou seja, a descida sozinha nunca o removeria. Ela é tempero de
+    // nado, jamais o mecanismo. Se um dia alguém quiser mais peso na descida, o teto é o
+    // ponto em que ela deixaria de ser subordinada: acima de ~80px o gesto vira mergulho de
+    // novo e a reclamação volta.
+    //
+    // ⚠️ O `−40` É MEDIDO, NÃO CHUTADO. Com origem 0.92 e escala 3,4 o sprite vai até `x + 23`
+    // (`_medir-rabo.mjs`: x 33..397 quando x=374), então ele limpa a borda esquerda em x=−23.
+    // O −40 dá 17px de folga. ⚠️ Se a ESCALA mudar, este número muda junto: é `−(0,08 × 107 ×
+    // escala) − 17`.
+    //
+    // ⚠️ `Sine.easeIn` É O ESPELHO DA CHEGADA. Ela era `easeOut` — desacelera até parar. A saída
+    // ACELERA: arranca devagar e se afasta. Entrou nadando, sai nadando. Um `easeOut` aqui daria
+    // um rabo que sai de ré perdendo força, e um `Linear` daria uma carta sendo puxada.
+    //
+    // ⚠️ A BATIDA CONTINUA, E ISSO É UMA INVERSÃO DELIBERADA DA VERSÃO ANTERIOR. Ela chamava
+    // `batida.stop()` aqui com a justificativa "um rabo que continua remando enquanto AFUNDA lê
+    // como peça solta caindo" — o que estava certo para um mergulho. Para uma travessia é o
+    // oposto exato: a remada é o que CAUSA a viagem. Parar de bater e continuar se movendo é
+    // que leria como peça sendo arrastada. Ela só para no `destroy`.
+    //
+    // ⚠️ E NÃO HÁ `alpha` NENHUM NESTE TWEEN, NEM `y`, NEM `angle`. A saída é UMA linha: o `x`.
+    //
+    // ⚠️ O `delay` É 7800. A conta corre para trás a partir de `t=48`, onde entram os props
+    // (`terrain`) — e prop opaco sobre casco meio transparente é um defeito já consertado nesta
+    // fatia, então o casco tem que estar SÓLIDO antes disso:
+    //
+    //   props em t=48,0     ←  casco sólido em 48,01 (o escurecimento entrega ele pronto)
+    //   tela preta em 47,95 ←  fade de 350ms começando no destroy
+    //   destroy em 47,6     ←  saída começa em 45,8 (1800ms)  →  delay 7800 sobre o t=38
+    //
+    // O hold subiu de 3,5s para 5,3s: ele segura mais tempo grande demais para caber, que é o
+    // que o momento sempre pediu.
+    this.tweens.add({
+      targets: rabo,
+      x: 740,
+      delay: 7800,
+      duration: 1800,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        batida.stop();
+        rabo.destroy();
+        this.escurecerParaOCasco();
+      },
+    });
+  }
+
+  /**
+   * O ESCURECIMENTO QUE ENTREGA O CASCO — a virada do Ato 1 para o Ato 2, pedida assim, ao pé
+   * da letra (Henrique, 2026-08-29, depois de quatro tentativas de coreografia):
+   *
+   *   *"Ao sair, faça com que a tela escureça por milissegundos, suficientes para aparecer o
+   *   nome 'Casco do leviatã' e os tiles do casco aparecerem."*
+   *
+   * ⚠️ ISTO SUBSTITUIU A "REVELAÇÃO" DO CASCO, E ELA NÃO VOLTA. Por quatro rodadas o casco
+   * subiu em fade de 1500ms na frente do jogador, e cada versão disso gastou uma sessão
+   * discutindo o instante exato em que o fade podia começar sem virar corte. O escurecimento
+   * dissolve o problema inteiro: atrás do preto não existe "meio transparente", então o casco
+   * nasce PRONTO (`revealCasco(1, 60)`) e não há emenda nenhuma para acertar.
+   *
+   * ⚠️ `depth 90`, E O NÚMERO É ESCOLHIDO, NÃO HERDADO. Acima de tudo que é jogo (nave, props e
+   * inimigos vivem em 0 e abaixo) e ABAIXO do banner e do HUD (99/100). É isso que faz o nome
+   * do ato se ler SOBRE o preto — que é o pedido — em vez de ser apagado junto com a cena.
+   *
+   * ⚠️ E O BANNER SAIU DO `STAGE_3`. Ele era `{ t: 48.5, type: 'banner' }`, um horário fixo que
+   * hoje derivaria do fim de um tween. É a mesma regra que já valia para o casco: o que pertence
+   * a um instante VISUAL não pode morar no relógio do roteiro, senão os dois derivam na primeira
+   * vez que alguém mexer numa duração.
+   *
+   * ⚠️ A ONDA DE DRONES DO `t=48` NASCE COM A TELA AINDA ESCURA, e isso foi conferido em vez de
+   * assumido: eles entram em x=414 e a tela clareia em 48,7, quando ainda estão além da metade
+   * direita. Se alguém adiantar essa onda, é aqui que o jogador começa a levar tiro no escuro.
+   */
+  private escurecerParaOCasco(): void {
+    const preto = this.add
+      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000)
+      .setOrigin(0, 0)
+      .setDepth(90)
+      .setAlpha(0)
+      // O nome é o que a sonda tem para agarrar: um retângulo preto sem nome é indistinguível
+      // de qualquer outro retângulo da cena.
+      .setName('pretoDoCasco');
+
+    this.tweens.add({
+      targets: preto,
+      alpha: 1,
+      duration: 350,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        // No escuro TOTAL: o chão nasce inteiro e o nome entra. Os 60ms não são um fade — são o
+        // mínimo que o `addCounter` precisa para rodar o `onUpdate` que acende as camadas.
+        this.parallax.revealCasco(1, 60);
+        this.showBanner('O CASCO DO LEVIATÃ', COLORS.hotBright);
+
+        // 420ms de preto cheio: tempo de o nome se firmar antes de a imagem voltar. É o número
+        // para mexer se a virada ficar apressada ou arrastada — os outros três são conta.
+        this.time.delayedCall(420, () => {
+          this.tweens.add({
+            targets: preto,
+            alpha: 0,
+            duration: 350,
+            ease: 'Sine.easeOut',
+            onComplete: () => preto.destroy(),
+          });
+        });
+      },
+    });
   }
 
   private spawnWaves(dt: number): void {
@@ -555,13 +803,35 @@ export class GameScene extends Phaser.Scene {
   }
 
   private spawnProps(dt: number): void {
+    // ⚠️ O RELÓGIO DA CARÊNCIA CORRE SEMPRE, inclusive nas janelas em que `propRate` é 0. Aquilo
+    // é casco liso passando na tela, e casco liso É espaçamento — não contá-lo faria o primeiro
+    // prop depois do respiro da aranha nascer bloqueado sem motivo.
+    this.respiradouroTimer += dt;
+
     if (this.propRate <= 0 || this.propMix.length === 0) return;
 
     this.propTimer -= dt;
     if (this.propTimer > 0) return;
 
     this.propTimer = this.propRate;
-    this.terrain.spawn(Phaser.Utils.Array.GetRandom(this.propMix));
+
+    const escolhido = Phaser.Utils.Array.GetRandom(this.propMix);
+
+    // ⚠️ A CARÊNCIA DO RESPIRADOURO, E POR QUE A VAGA MORRE EM VEZ DE SER SUBSTITUÍDA.
+    //
+    // Uma baleia tem UM espiráculo. Doze deles ao longo do Ato 2 (o que a mistura antiga dava)
+    // lia como tileset, não como anatomia — o Henrique jogou e pediu "bemmm espaçados, aparecer
+    // poucas vezes".
+    //
+    // Substituir por lança-mísseis manteria a densidade e DOBRARIA os atiradores. O slot morre,
+    // e é justamente isso que preserva o volume de tiro: o lança continua sorteando os 50% dele
+    // sobre o mesmo número de slots. Casco liso é o que "bem espaçado" significa.
+    if (escolhido === 'respiradouro') {
+      if (this.respiradouroTimer < RESPIRADOURO_CARENCIA) return;
+      this.respiradouroTimer = 0;
+    }
+
+    this.terrain.spawn(escolhido);
   }
 
   /**
@@ -994,6 +1264,15 @@ export class GameScene extends Phaser.Scene {
   ): void {
     if (!bullet.active || !cover.active) return;
 
+    // ⚠️ O CANO NUNCA COME O PRÓPRIO TIRO, E ISSO NÃO É UM CASO DA CARÊNCIA — É OUTRO PROBLEMA.
+    // A carência abaixo protege o projétil dos VIZINHOS por 16px; ela não dá conta do dono,
+    // porque o tiro nasce dentro dele: a boca fica a 7–23px do centro de uma peça de 35px de
+    // largura, e um tiro em diagonal ainda está lá dentro depois de andar 16px. Medido em
+    // 2026-08-30, 2 de cada 4 mísseis morriam assim — *"o canhão está soltando o míssil e
+    // explodindo antes de tudo"*. Aumentar a carência "resolveria" fazendo o projétil atravessar
+    // rochas vizinhas de graça; o que estava errado é o dono absorver, e é só isso que muda.
+    if (bullet.getData('atirador') === cover) return;
+
     // CARÊNCIA: o projétil só é absorvido depois de andar 16px.
     //
     // Sem isto, uma torre encostada numa rocha vizinha tem o tiro destruído no MESMO frame em
@@ -1036,10 +1315,28 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.fx.explode(enemy.x, enemy.y, enemy.scale);
-    this.score += enemy.getData('score') as number;
-    this.pickups.maybeDrop(enemy.x, enemy.y, 0.18);
-    enemy.destroy();
+    this.matarInimigo(enemy);
+  }
+
+  /**
+   * A MORTE DE UM INIMIGO — o estouro, o placar, o drop. UM lugar só.
+   *
+   * ⚠️ ELA EXISTE PORQUE O ESTOURO DEIXOU DE SER UM SÓ. A água-viva morre em CHOQUE, não em
+   * fogo (`Fx.choque`), e havia dois caminhos de morte no arquivo — a bala e a BOMBA — cada um
+   * com a sua cópia das quatro linhas. Deixar assim significaria que matá-la com a bomba a faria
+   * pegar fogo, e ninguém descobriria isso a não ser jogando com a bomba na hora certa.
+   *
+   * O `aguaViva` é o único caso hoje; a forma da função é o que impede o próximo de nascer torto.
+   */
+  private matarInimigo(e: Phaser.Physics.Arcade.Sprite): void {
+    if (e.getData('kind') === 'aguaViva') {
+      this.fx.choque(e.x, e.y, e.scale);
+    } else {
+      this.fx.explode(e.x, e.y, e.scale);
+    }
+    this.score += e.getData('score') as number;
+    this.pickups.maybeDrop(e.x, e.y, 0.18);
+    e.destroy();
   }
 
   private collectPickup(p: Phaser.Physics.Arcade.Sprite): void {
@@ -1088,10 +1385,7 @@ export class GameScene extends Phaser.Scene {
       e.setData('hp', hp);
 
       if (hp <= 0) {
-        this.fx.explode(e.x, e.y, e.scale);
-        this.score += e.getData('score') as number;
-        this.pickups.maybeDrop(e.x, e.y, 0.18);
-        e.destroy();
+        this.matarInimigo(e);
       } else {
         e.setTint(0xffb0b0);
         this.time.delayedCall(60, () => {

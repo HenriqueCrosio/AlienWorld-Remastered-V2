@@ -391,8 +391,25 @@ export class BossSerpente implements StageBoss {
     b.setActive(true).setVisible(true);
     b.body!.enable = true;
     b.anims.stop();
-    b.setTexture('bolt2').setScale(0.9).setTint(0xff3a78);
-    b.setBlendMode(Phaser.BlendModes.ADD);
+    // A GOTA DE VENENO (2026-08-29). Ela cuspia o `bolt2` — o traço da nave do jogador — tingido
+    // do mesmo `0xff3a78` da aranha: dois chefes, um asset, uma cor. *"É um tiro magenta igual,
+    // sem característica nenhuma."*
+    //
+    // ⚠️ O VERDE É MEDIDO NA ARTE DELA, e é o acento da cabeça DO MEIO — a que pinga veneno
+    // (`#60f088` / `#70d890`). O outro acento dela é ciano `#48e8f0`, que está fora: é
+    // praticamente o `playerBright` (`#3ee0f0`) da nave, e um tiro ciano leria como tiro do
+    // próprio jogador. Ver `BootScene.makeShotsChefes`.
+    //
+    // ⚠️ SEM TINT E SEM BLEND ADITIVO. A arte já nasce na cor; o aditivo estouraria o núcleo e
+    // comeria a borda escura que separa a gota do casco quase preto por baixo dela.
+    b.setTexture('shotVeneno').setScale(0.9).clearTint();
+    b.setBlendMode(Phaser.BlendModes.NORMAL);
+    // ⚠️ E NÃO HÁ `setSize` AQUI, DE PROPÓSITO. A gota nasce no MESMO quadro 13×9 do `bolt2` que
+    // ela substitui, então o corpo que o `release` devolve já é exatamente o de antes. Uma
+    // versão anterior usou um quadro maior e cravava a caixa à mão — e a caixa saía errada,
+    // porque o `Body` do Arcade aplica a escala do frame anterior (o slot vinha da aranha, a
+    // 0,8). Ver `BootScene.makeShotsChefes`. Trocar arte de chefe balanceado sem reabrir o
+    // balanceamento só é seguro assim.
     b.setData('ox', x);
     b.setData('oy', y);
     b.setData('flak', false);

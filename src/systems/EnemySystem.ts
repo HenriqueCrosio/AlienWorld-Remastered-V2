@@ -1,8 +1,16 @@
 import Phaser from 'phaser';
+import { Fx } from './Fx';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
 
-export type EnemyKind = 'drone' | 'batedor' | 'canhoneira' | 'kamikaze' | 'cargueiro' | 'aranha';
+export type EnemyKind =
+  | 'drone'
+  | 'batedor'
+  | 'canhoneira'
+  | 'kamikaze'
+  | 'cargueiro'
+  | 'aranha'
+  | 'aguaViva';
 
 interface EnemyDef {
   texture: string;
@@ -25,6 +33,14 @@ interface EnemyDef {
   /** Cospe este inimigo a cada `spawnRate` segundos. O cargueiro é uma fábrica com casco. */
   spawns?: EnemyKind;
   spawnRate: number;
+  /**
+   * TRAVESSIA VERTICAL: em vez de atravessar da direita para a esquerda, o bicho entra por uma
+   * borda horizontal e sai pela oposta — está DE PASSAGEM, cruzando a rota do jogador.
+   *
+   * Quando ligada, `speed` passa a ser a velocidade VERTICAL e `wave` a gingada HORIZONTAL (o
+   * contrário do padrão). Ver `spawn` e o culling em `update`.
+   */
+  travessia?: 'vertical';
 }
 
 /**
@@ -116,6 +132,36 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // spawn), ESTACIONA no terço direito e cospe leques de 3 mirados. 50 HP (auditoria): grande
   // o bastante para pesar, curta o bastante para não roubar o clímax da serpente.
   aranha: { texture: 'aranha', anim: 'aranha-walk', hp: 50, speed: 30, wave: 0, fireRate: 2.6, score: 500, scale: 0.62, tint: 0xffffff, homing: 0, spawnRate: 0 },
+
+  // A ÁGUA-VIVA (Fase 3, Ato 1). A única coisa LENTA da nebulosa.
+  //
+  // O Ato 1 era todo rápido — drone 70, batedor 95, kamikaze 45 com perseguição, mais asteroide,
+  // mina e sensor. Não havia nada que FICASSE no quadro. Ela é isso: deriva a 28, atravessa em
+  // ~14,3s (400px a partir de `GAME_WIDTH + 16`, não 384), e o azul aceso dela é a única coisa que
+  // a névoa densa deixa ver de longe.
+  //
+  // ⚠️ NÃO ATIRA E NÃO PERSEGUE. Ela ATRAPALHA — é obstáculo vivo, não alvo. Isso é deliberado:
+  // um projétil novo entraria no volume de tiro do Ato 1, e esse número está congelado até o
+  // playtest.
+  //
+  // ⚠️ `hp 10` É O NÚMERO MAIS FRÁGIL DESTA PEÇA. A escala do jogo é 2 para drone/batedor/
+  // kamikaze e 6 para a canhoneira; dez é 5× um drone, e é para ela não morrer de raspão. Se no
+  // playtest ela virar pedágio em vez de estorvo, é este número que desce — não a velocidade,
+  // que é a razão de ela existir.
+  //
+  // A arte é 25×42 (alta e estreita: o sino mais os tentáculos), então 0.6 devolve 15×25 em
+  // tela, ao lado dos 26×24 do kamikaze. Tint BRANCO: ela já nasce acesa, e multiplicar cor por
+  // cima apagaria justamente o brilho.
+  // ⚠️ ELA ESTÁ DE PASSAGEM, E ISSO É O CONSERTO DO PRIMEIRO TESTE (2026-08-27). A primeira
+  // versão derivava da direita para a esquerda subindo e descendo em senóide, e o Henrique
+  // reprovou o MOVIMENTO ("elas sobem e descem verticalmente... quero que elas subam ou desçam e
+  // SAIAM da tela também, como se estivessem de passagem"). Agora ela cruza a rota do jogador:
+  // entra por baixo e sobe, ou entra de ponta-cabeça por cima e desce. Some pela borda oposta.
+  //
+  // Com `travessia: 'vertical'` os dois números TROCAM DE EIXO: `speed` é a subida/descida e
+  // `wave` é a gingada lateral. 264px de travessia a 34px/s = ~7,8s no quadro — tempo de sobra
+  // para atirar ou desviar, que é o que a mudança comprou.
+  aguaViva: { texture: 'aguaViva', anim: 'aguaviva-drift', hp: 10, speed: 34, wave: 26, fireRate: 0, score: 120, scale: 0.6, tint: 0xffffff, homing: 0, spawnRate: 0, travessia: 'vertical' },
 };
 
 /**
@@ -194,6 +240,8 @@ export class EnemySystem {
     private readonly scene: Phaser.Scene,
     /** A FASE atual (`GameScene.stage.id`) — só usada para a pele por fase (ver `STAGE_2_SKIN`). */
     private readonly stageId: number,
+    /** Só para o ESTALO da água-viva (ver `update`). O resto dos efeitos é da GameScene. */
+    private readonly fx: Fx,
   ) {
     this.enemies = scene.physics.add.group({ allowGravity: false });
     this.enemyBullets = scene.physics.add.group({
@@ -227,6 +275,20 @@ export class EnemySystem {
     // (a banda `casco` do Parallax tem o topo em ~190; o centro dela assenta em cima).
     if (kind === 'aranha') y = 170;
 
+    // ⚠️ A TRAVESSIA VERTICAL IGNORA O `y` DO ROTEIRO, e tem que ignorar: aqui o roteiro não
+    // escolhe ALTURA, escolhe QUANDO. Quem entra por uma borda horizontal nasce NA borda.
+    //
+    // O sorteio de sentido é meio a meio, e o que desce entra DE PONTA-CABEÇA — pedido literal do
+    // Henrique. Uma água-viva mergulhando com o sino para baixo é a mesma criatura noutro rumo;
+    // sem o `flipY` ela pareceria um segundo bicho com a mesma arte.
+    const sobe = DEFS[kind].travessia === 'vertical' ? Math.random() < 0.5 : false;
+    if (DEFS[kind].travessia === 'vertical') {
+      y = sobe ? GAME_HEIGHT + 24 : -24;
+      // Nasce à DIREITA do meio da tela: com a deriva lateral ela ainda cruza boa parte do
+      // quadro antes de sair, em vez de raspar a borda e sumir.
+      x = Phaser.Math.Between(Math.round(GAME_WIDTH * 0.45), GAME_WIDTH + 40);
+    }
+
     // A PELE POR FASE (canhoneira/batedor): na Fase 2, tenta a textura do cinturão primeiro;
     // sem o PNG (guarda de textura), cai na arte biomec de sempre — ver STAGE_2_SKIN.
     const skin = this.stageId === 2 ? STAGE_2_SKIN[kind] : undefined;
@@ -250,7 +312,18 @@ export class EnemySystem {
       e.play(baseAnim);
     }
 
-    e.setVelocityX(-def.speed);
+    if (def.travessia === 'vertical') {
+      // ⚠️ SÓ A VERTICAL É FÍSICA. A horizontal (deriva + gingada) é escrita à mão no `update`,
+      // porque a gingada ESCREVE `x` — e escrever x todo frame apagaria uma velocityX. É o
+      // espelho exato do que o resto do róster faz: lá a física é a horizontal e a senóide
+      // escreve `y`. Os dois eixos trocaram de papel, e a regra é a mesma.
+      e.setVelocityY(sobe ? -def.speed : def.speed);
+      e.setFlipY(!sobe);
+      e.setData('sobe', sobe);
+      e.setData('baseX', x);
+    } else {
+      e.setVelocityX(-def.speed);
+    }
     e.setScale(scale);
     e.setTint(tint);
 
@@ -286,6 +359,62 @@ export class EnemySystem {
     e.setData('charging', 0);
     // Espera antes de cuspir o primeiro drone: um cargueiro não pare no frame em que entra.
     e.setData('spawnCd', def.spawnRate > 0 ? def.spawnRate : 0);
+
+    // ⚠️ O PULSO ELÉTRICO É CÓDIGO, E ISSO NÃO É PREGUIÇA — É A LIÇÃO DA HÉLICE.
+    //
+    // "Acende e apaga" cabe numa frase de geometria, e nesta mesma fatia o v3 do PixelLab leu
+    // "bater para cima e para baixo" como GIRAR: a animação do rabo do Leviatã voltou com a
+    // nadadeira rodando em torno do próprio eixo e foi descartada inteira. Pedir "pulsa com
+    // eletricidade" aos quadros devolveria uma hélice azul. Aos quadros foi o que código não faz
+    // (o sino deformando, os tentáculos arrastando); o brilho fica aqui.
+    //
+    // ⚠️ GLOW E NÃO TINT. O tint é do flash branco de dano, que restaura o valor guardado em
+    // `setData('tint')` — um pulso escrevendo tint todo frame comeria o flash, e o jogador
+    // deixaria de ver que acertou.
+    //
+    // `preFX` é nulo no renderer Canvas. A guarda mantém o contrato de sempre: sem o recurso, a
+    // cena continua — só sem brilho.
+    // ⚠️ BRILHO PARA DENTRO (`innerStrength`), NUNCA PARA FORA. O `outerStrength` desenha o halo
+    // ALÉM da silhueta — e a quad do sprite é a arte recortada justa (25×42, o `install-anim`
+    // corta pela caixa união). O halo vaza para fora da quad e é ceifado nela: o que aparece na
+    // tela é um RETÂNGULO azul aceso em volta do bicho, não um brilho. Foi assim na primeira
+    // versão, e quem entregou foi a captura ampliada — no tamanho do jogo passava por "brilho".
+    //
+    // O brilho interno vive dentro do alfa da forma, então não tem como virar caixa. E é a
+    // leitura certa de todo modo: a criatura ACENDE, não a moldura dela.
+    // ⚠️ O ESTALO É SEPARADO DO GLOW, E NÃO É DUPLICAÇÃO. O glow é ESTADO — a criatura está
+    // carregada, e isso se vê o tempo todo. O estalo é EVENTO — ela DESCARREGA, e é isso que o
+    // Henrique pediu depois do 3º teste ("algo que pareça que ela dá choque"). Um bicho que só
+    // brilha lê como lâmpada; o que ensina o jogador a não encostar é o arco.
+    //
+    // O primeiro sai cedo (0,3–1,1s): a criatura tem ~7,8s de tela, e um estalo que só aparece
+    // depois de metade da travessia chega tarde para mudar a decisão de quem vai passar por ela.
+    if (kind === 'aguaViva') e.setData('estalo', Phaser.Math.FloatBetween(0.3, 1.1));
+
+    if (kind === 'aguaViva' && e.preFX) {
+      const glow = e.preFX.addGlow(0x35b6ea, 0, 0, false, 0.1, 10);
+      const pulso = this.scene.tweens.add({
+        targets: glow,
+        innerStrength: 2.2,
+        duration: 900,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      // ⚠️ O PULSO MORRE COM O BICHO, E ISSO NÃO É ZELO — É UM VAZAMENTO MEDIDO. O alvo do tween
+      // é o CONTROLADOR do glow, não o sprite: o Phaser leva o `preFX` junto no `destroy()` do
+      // dono, mas nada avisa o `TweenManager`, e um `repeat: -1` sem dono continua tocando até a
+      // cena fechar. Medido em `_f3/probe-tween-agua-viva.mjs`: as duas ondas soltam 7 bichos, e
+      // em t=34,6 — nenhuma água-viva viva em tela — havia exatamente 7 tweens ainda tocando
+      // contra a linha de base 0.
+      //
+      // ⚠️ E O GANCHO É O `destroy` DO DONO, NUNCA O CULLING, porque são DOIS caminhos de morte
+      // em arquivos diferentes: o tiro do jogador (`GameScene.matarInimigo`) e a saída por cima
+      // ou por baixo (`update`). É a mesma razão de a sombra do prop de casco pendurar a limpeza
+      // aqui — quem sabe que morreu é o morto.
+      e.once('destroy', () => pulso.remove());
+    }
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
@@ -299,7 +428,30 @@ export class EnemySystem {
 
       const def = DEFS[e.getData('kind') as EnemyKind];
 
-      if (def.wave > 0) {
+      if (def.travessia === 'vertical') {
+        // OS EIXOS TROCADOS: a física cuida da subida/descida, e aqui se escreve o X — a deriva
+        // lateral do mundo mais a gingada da criatura. `baseX` guarda a deriva sozinha, para a
+        // senóide não se acumular sobre si mesma a cada frame.
+        const t = (e.getData('t') as number) + dt * 2;
+        e.setData('t', t);
+        const baseX = (e.getData('baseX') as number) - 16 * dt;
+        e.setData('baseX', baseX);
+        e.x = baseX + Math.sin(t) * def.wave;
+
+        // O ESTALO: um arco atravessando o sino, de tempos em tempos. Ver `Fx.estalo`.
+        //
+        // ⚠️ INTERVALO SORTEADO A CADA DISPARO, não fixo. Um período constante lê como
+        // pisca-pisca (o defeito que o pulso do glow já evita sendo lento); irregular lê como
+        // descarga. E o raio do arco sai do `displayWidth` REAL, não de um número: a criatura
+        // entra em duas escalas de sprite e um raio fixo estouraria a silhueta da menor.
+        const estalo = (e.getData('estalo') as number) - dt;
+        if (estalo <= 0) {
+          this.fx.estalo(e.x, e.y, e.displayWidth * 0.42);
+          e.setData('estalo', Phaser.Math.FloatBetween(1.1, 2.3));
+        } else {
+          e.setData('estalo', estalo);
+        }
+      } else if (def.wave > 0) {
         const t = (e.getData('t') as number) + dt * 3;
         e.setData('t', t);
         e.y = (e.getData('baseY') as number) + Math.sin(t) * def.wave;
@@ -316,6 +468,11 @@ export class EnemySystem {
       // no meio da curva de volta. Ele só morre bem longe da tela.
       const limite = def.homing > 0 ? -120 : -24;
       if (e.x < limite) e.destroy();
+
+      // ⚠️ QUEM ATRAVESSA NA VERTICAL PRECISA DE CULLING VERTICAL. O culling do róster só olha a
+      // borda ESQUERDA — nada mais sai por cima ou por baixo. Sem isto a água-viva sairia da tela
+      // e continuaria viva descendo para sempre, contada por toda sonda e por todo overlap.
+      if (def.travessia === 'vertical' && (e.y < -48 || e.y > GAME_HEIGHT + 48)) e.destroy();
     }
 
     this.cullBullets();
@@ -491,8 +648,11 @@ export class EnemySystem {
         if (!b) break;
         b.setActive(true).setVisible(true);
         b.body!.enable = true;
-        b.setTexture('bolt2').setScale(0.8).setTint(0xff3a78);
-        b.setBlendMode(Phaser.BlendModes.ADD);
+        // A MESMA munição de cobre do leque dela (ver `municaoAranha`). O anel de aterrissagem é
+        // o segundo caminho de tiro da aranha, e os dois têm que cuspir a MESMA coisa — foi um
+        // par de caminhos com a mesma cópia de linhas que já fez a água-viva morrer em fogo por
+        // uma porta e em choque pela outra.
+        EnemySystem.municaoAranha(b);
         b.setData('ox', e.x);
         b.setData('oy', e.y);
         b.setVelocity(Math.cos(ang) * 105, Math.sin(ang) * 105);
@@ -501,6 +661,27 @@ export class EnemySystem {
       this.muzzleFlash.explode(8, e.x, e.y + 16);
       this.scene.cameras.main.shake(110, 0.005);
     }
+  }
+
+  /**
+   * A MUNIÇÃO DA ARANHA DO CASCO — um lugar só, porque ela atira por DOIS caminhos.
+   *
+   * O leque de 3 (`fireAt`) e o anel de 6 da aterrissagem (`updateAranha`) são código separado,
+   * e duas cópias das mesmas quatro linhas foi exatamente como a água-viva chegou a morrer em
+   * fogo por uma porta e em choque pela outra. Aqui é um método estático para que trocar o tiro
+   * dela seja impossível de fazer pela metade.
+   *
+   * ⚠️ `shotAranha` NASCE EM 13×9, o mesmo quadro do `bolt2` que ela usava — então a hitbox do
+   * slot (que o `release` devolve a partir do quadro do `bolt2`) continua exata e o
+   * balanceamento não se move. Ver `BootScene.makeShotsChefes`.
+   *
+   * ⚠️ `clearTint()` E BLEND NORMAL. A arte já nasce na cor certa; tingir por cima só a
+   * escureceria, e o aditivo estouraria a ogiva branca e comeria a borda escura que a separa do
+   * casco — que é metade do motivo de ela ser visível (a lição da bola da Fase 2).
+   */
+  private static municaoAranha(b: Phaser.Physics.Arcade.Sprite): void {
+    b.setTexture('shotAranha').setScale(0.8).clearTint();
+    b.setBlendMode(Phaser.BlendModes.NORMAL);
   }
 
   /**
@@ -552,6 +733,9 @@ export class EnemySystem {
         // Manter o `0.7` do canvas aqui teria inflado a caixa vertical em 37% de graça: o canvas
         // novo é mais alto, e a fagulha teria virado hitbox.
         (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
+      } else if (e.getData('kind') === 'aranha') {
+        // A ARANHA TEM MUNIÇÃO PRÓPRIA (2026-08-29). Ver `municaoAranha` e `makeShotsChefes`.
+        EnemySystem.municaoAranha(b);
       } else {
         // Mesmo sprite do jogador, tingido de MAGENTA. A cor é o que separa "meu tiro" de
         // "tiro que me mata" — a forma não precisa mudar, e assim não custa geração nenhuma.
@@ -614,6 +798,10 @@ export class EnemySystem {
     b.setBlendMode(Phaser.BlendModes.NORMAL);
     b.setData('tracer', false);
     b.setData('missile', false);
+    // E o ATIRADOR: sem apagar, o slot reciclado continuaria imune ao prop que disparou o tiro
+    // ANTERIOR — um projétil que atravessa uma torre por herança de vaga. Ver
+    // `TerrainSystem.fireAt` e `GameScene.enemyBulletHitCover`.
+    b.setData('atirador', null);
   }
 
   private cullBullets(): void {

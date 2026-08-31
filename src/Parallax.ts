@@ -60,8 +60,8 @@ interface ScatterLayer {
   teto?: boolean;
   /** Camada EXTRA da nebulosa (Fase 3): o alpha dela segue `nebulaDim` (1 dentro, 0 fora). */
   nebulosaExtra?: boolean;
-  /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue o INVERSO de `nebulaDim` — sair da
-   * nuvem e revelar o casco são o MESMO fade, e é por isso que são a mesma variável. */
+  /** O CASCO do Leviatã (Fase 3, Ato 2): o alpha segue `cascoReveal`, que é dirigido pela
+   * SAÍDA DO RABO — não pela nuvem. Ver `revealCasco` para o porquê da separação. */
   casco?: boolean;
   sprites: Phaser.GameObjects.Image[];
   nextX: number;
@@ -129,6 +129,40 @@ export class Parallax {
   private foregroundDim = 1;
   /** Densidade da nebulosa (Fase 3): 1 = dentro da nuvem. Ver `setNebulaDensity`. */
   private nebulaDim = 1;
+  /**
+   * A REVELAÇÃO DO CASCO (Fase 3): 0 = não existe, 1 = é o chão.
+   *
+   * ⚠️ SEPARADO DE `nebulaDim` DE PROPÓSITO (2026-08-27, o primeiro teste jogado). Até aqui o
+   * alpha do casco era `1 − nebulaDim` — afinar a nuvem OBRIGAVA o casco a aparecer, e não
+   * havia como ter um sem o outro. O roteiro se apoiava nisso em t=21 para "insinuar" o
+   * Leviatã, e o que o Henrique viu jogando foi "aquele gradiente de transparência estranho":
+   * uma estrutura meio apagada pairando 20s antes de ter motivo.
+   *
+   * Agora a nuvem afina sozinha, e o casco só nasce quando o RABO o chama — 300ms depois que
+   * ele atravessa e sai pela esquerda (ver `GameScene.raboDoLeviata`).
+   */
+  private cascoReveal = 0;
+
+  /**
+   * QUANTOS PIXELS DE LEVIATÃ JÁ PASSARAM. Começa a contar no `revealCasco` e é a régua de
+   * `familiaDoCasco`: o casco não é uma textura sorteada, é um PERCURSO sobre um corpo.
+   */
+  private cascoDist = 0;
+
+  /** Ligado pelo `revealCasco`: antes dele não há casco nenhum para percorrer. */
+  private cascoAndando = false;
+  /**
+   * A pintura do céu da FASE 3. Ela NÃO é uma `ScatterLayer` — é uma placa fixa, como o
+   * `paintBgF2` — então o alpha dela não passa por `alphaFor`. Quem a apaga é o
+   * `setNebulaDensity`, à mão. Ver o comentário lá.
+   */
+  private nebulaPainting: Phaser.GameObjects.Image[] = [];
+  /**
+   * A FAIXA DE CASCO DA FRENTE (Fase 3, Ato 2): o equivalente do `groundFront` da Fase 1. Ela
+   * existe por um motivo só — esconder o PÉ dos props, que sem ela terminam numa borda reta e
+   * parecem colados no casco em vez de plantados nele. Ver `buildNebula()`.
+   */
+  private cascoFrente: Phaser.GameObjects.TileSprite | null = null;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -503,10 +537,70 @@ export class Parallax {
       faixa: [14, 48],
     });
 
-    // As MONTANHAS DE ROCHA pixel (mtnFar/mtnMid/mtnNear) e a haze entre elas foram REMOVIDAS: o
-    // FUNDO PINTADO já entrega as montanhas distantes, e elas nasciam na LINHA DO SOLO mas rolavam
-    // em parallax lento (10–50 px/s) contra o chão/props (que correm a 84) — o "deslizamento" do
-    // solo. Sem elas, o solo não desliza mais e a cena não duplica montanha pixel sobre a pintada.
+    // ─── A CADEIA DO MEIO-DE-CENA ───
+    //
+    // ⚠️ ELAS FORAM REMOVIDAS EM `cbf40fe` E VOLTARAM EM 2026-08-30, PELA METADE E DE PROPÓSITO.
+    // A remoção levou CINCO camadas de uma vez (haze longe, `mtnFar`, haze meio, e duas faixas de
+    // `mtnMid`) com uma justificativa só: elas eram a fonte do "deslizamento" do solo. O Henrique
+    // jogou a Fase 1 de novo e cobrou a cadeia do meio de volta — e olhando as cinco definições
+    // lado a lado, só UMA podia causar o deslize:
+    //
+    //     mtnFar    baseY GROUND_Y − 4   base VISÍVEL acima do chão, correndo a 0,12 contra 1,0
+    //     mtnMid    baseY GROUND_Y + 2   base ENTERRADA
+    //     mtnMid    baseY GROUND_Y + 4   base ENTERRADA
+    //
+    // Deslize é uma aresta COMPARTILHADA entre duas camadas de velocidade diferente. As duas
+    // `mtnMid` nunca tiveram essa aresta: a base delas nasce abaixo da linha do solo, que é o
+    // mesmo truque que mantém o `skyline` (GROUND_Y + 2) funcionando desde sempre. Elas foram
+    // levadas junto sem serem a causa.
+    //
+    // ⚠️ A `mtnFar` E A HAZE DISTANTE CONTINUAM FORA, e isso é a outra metade da justificativa
+    // original, que segue valendo: o FUNDO PINTADO já entrega a cordilheira distante, e a
+    // `mtnFar` desenhava montanha pixel POR CIMA de montanha pintada.
+    //
+    // HAZE ENTRE AS MONTANHAS: a névoa que separa uma cordilheira da próxima — é ela que faz as
+    // duas lerem como PLANOS distintos, e não uma massa só. Ela flutua (`faixa`), não encosta no
+    // chão, então nunca teve parte no deslize.
+    this.addLayer({
+      key: 'nebula',
+      factor: 0.22,
+      baseY: 0,
+      depth: -90,
+      tint: 0x222c44,
+      alpha: 0.22,
+      scale: [1.4, 2.2],
+      gap: [170, 300],
+      terreno: false,
+      flutua: true,
+      faixa: [GROUND_Y - 46, GROUND_Y - 2],
+    });
+
+    this.addLayer({
+      key: 'mtnMid',
+      factor: 0.35,
+      baseY: GROUND_Y + 2,
+      depth: -88,
+      tint: 0x33456e,
+      alpha: 1,
+      scale: [0.6, 0.95],
+      gap: [45, 75],
+      terreno: true,
+    });
+
+    // A 2ª FAIXA: mais próxima e mais rápida que a de cima, um degrau de tint acima. É ela que
+    // PREENCHE o vão do meio-de-cena — o buraco que o Henrique viu entre o fundo pintado e o
+    // skyline. Reusa a arte da `mtnMid` (sem custo de geração) e fica atrás do chão (−86).
+    this.addLayer({
+      key: 'mtnMid',
+      factor: 0.6,
+      baseY: GROUND_Y + 4,
+      depth: -86,
+      tint: 0x435679,
+      alpha: 1,
+      scale: [0.55, 0.9],
+      gap: [50, 82],
+      terreno: true,
+    });
 
     // Alto o bastante para sangrar para fora da tela: uma faixa fina de solo denuncia
     // que o mundo acaba ali embaixo.
@@ -623,9 +717,18 @@ export class Parallax {
     if (!this.scene.textures.exists('paintBgZeroG')) return;
 
     this.zeroGBg = this.scene.add
-      // −27 = (270−216)/2, a mesma conta do `paintBgF2`/`paintBgCut1`: a pintura é maior que a
-      // janela do jogo, e a folga fica repartida em cima e embaixo.
-      .image(0, -27, 'paintBgZeroG')
+      // ⚠️ `y = 0`, E A PINTURA AGORA É 384×216 (2026-08-30). Ela era 480×270 pendurada em
+      // `y = −27`, com a folga repartida em cima e embaixo — e isso não era enquadramento, era
+      // um ERRO DE RESOLUÇÃO: numa janela de 384×216, uma placa de 480×270 mostra 80% de cada
+      // eixo, ou seja **64% da pintura**, com zoom de 1,25×. A Fase 3 já tinha sido corrigida
+      // assim; esta e a da Fase 2 ficaram para trás e o Henrique pediu o mesmo padrão.
+      //
+      // ⚠️ ESTA FOI REDUZIDA A PARTIR DOS 480×270, NÃO DO ORIGINAL. A F2 tem
+      // `assets/raw/paint-bg-f2-original.png` (1672×941) e foi refeita de lá; do Zero-G não há
+      // original guardado, então o 480×270 virou a fonte (`assets/raw/paint-bg-zerog-480.png`).
+      // É um passo de redução a mais do que o ideal. Se o original aparecer, refazer com
+      // `node scripts/paint-bg.mjs <original> public/sprites/paint-bg-zerog.png 384 216`.
+      .image(0, 0, 'paintBgZeroG')
       .setOrigin(0, 0)
       .setDepth(-95.5)
       .setAlpha(0);
@@ -735,6 +838,13 @@ export class Parallax {
     // lua-encolhendo/Leviatã-crescendo é mecânica de narrativa ativa que não pode desaparecer —
     // a pintura só preenche o vazio atrás dela.
     //
+    // ⚠️ DIMENSÃO 384×216 DESDE 2026-08-30 — o parágrafo abaixo é o raciocínio ANTIGO, mantido
+    // porque a metade dele continua certa e a outra metade é a armadilha. Certa: uma pintura
+    // larga demais recortada em 216px mostra só um PEDAÇO da cena e lê como ampliada. Errada: a
+    // conclusão de que 480×270 resolvia isso, "só 25% maior que os 384×216". Não resolvia —
+    // resolvia MENOS: 384/480 e 216/270 dão 80% de cada eixo, então a janela mostrava 64% da
+    // pintura, recortada nas quatro bordas, com zoom de 1,25×. O quadro inteiro nunca coube.
+    //
     // ⚠️ DIMENSÃO 480×270 (não 2 telas largo como o `paintBgF1`) — mesma receita do
     // `paintBgCut1` da cutscene 1, e por um motivo específico deste quadro: o `paintBgF1` é um
     // céu de montanhas com MUITO vazio (a maior parte fica atrás do skyline/montanhas
@@ -758,9 +868,16 @@ export class Parallax {
       for (let i = 0; i < 2; i++) {
         this.paintedBg.push(
           this.scene.add
-            // −27 = (270−216)/2: centraliza verticalmente a pintura na janela do jogo — mesma
-            // conta que o `paintBgCut1` da cutscene 1 já usa pra essa mesma dimensão.
-            .image(i * w, -27, 'paintBgF2')
+            // ⚠️ `y = 0`, E A PINTURA AGORA É 384×216 (2026-08-30). Ela era 480×270 pendurada em
+            // `y = −27` para centralizar a folga. O bloco acima defende os 480×270 como
+            // enquadramento — e a defesa está errada na conta: numa janela de 384×216 uma placa
+            // de 480×270 mostra 80% de CADA eixo, ou seja 64% da pintura, com zoom de 1,25×. O
+            // quadro inteiro NÃO cabia; ele era recortado nas quatro bordas.
+            //
+            // 1 px de arte = 1 px de jogo, e o upscale nearest da engine dá o acabamento pixel.
+            // É a mesma correção que a Fase 3 recebeu, refeita a partir do ORIGINAL
+            // (`assets/raw/paint-bg-f2-original.png`, 1672×941) e não do 480×270.
+            .image(i * w, 0, 'paintBgF2')
             .setOrigin(0, 0)
             .setDepth(-99)
             .setData('bgFactor', 0.018),
@@ -845,30 +962,84 @@ export class Parallax {
   /**
    * A NEBULOSA da Fase 3, POR CIMA do espaço: a nave está DENTRO da nuvem.
    *
-   * Três camadas de nuvem (fundo denso, meio, e VÉUS na frente da nave) — todas
-   * `nebulosaExtra`, apagáveis pelo `setNebulaDensity` quando a fase sai da nuvem. E o CASCO
+   * ⚠️ ATUALIZADO NA FATIA 5. Eram três camadas de nuvem, todas `nebulosaExtra`. Hoje, COM a
+   * pintura (`paintBgF3`), o corpo denso do fundo deixou de ser uma `ScatterLayer`: ele é uma
+   * PLACA, e por isso o alpha dele não passa por `alphaFor` — quem o apaga é o
+   * `setNebulaDensity`, à mão. Restam duas camadas procedurais (meio e VÉUS), essas sim
+   * `nebulosaExtra`. Sem a pintura, as três voltam (é o fallback). E o CASCO
    * do Leviatã: uma banda contínua de placas no rodapé, com alpha 0 até a saída da nuvem
    * revelá-la (`casco`). Proporção da referência do Henrique (Metal Slug): o "chão" é uma
    * faixa GENEROSA e detalhada, não um risco no rodapé.
    */
   private buildNebula(): void {
+    // A PINTURA DO HENRIQUE é o corpo da nuvem. Ela SUBSTITUI a camada procedural mais profunda
+    // (a de baixo, `factor 0.05`) — as outras duas continuam, e é isso que mantém o movimento:
+    // uma placa parada atrás + nuvem procedural derivando por cima lê como "voar dentro"; a placa
+    // sozinha leria como papel de parede.
+    //
+    // ⚠️ Ela é uma PLACA, não uma ScatterLayer: o alpha dela não passa por `alphaFor`, e por isso
+    // o `setNebulaDensity` a apaga à mão. Sem isso ela ficaria de pé depois de t=42 e o ATO 2
+    // teria nebulosa no céu — a fase inteira perderia a virada.
+    //
+    // ⚠️ A PINTURA É 384×216 — A RESOLUÇÃO REAL DO JOGO — E FICA EM y=0.
+    //
+    // Ela era 480×270 em y=−27, que é a receita que o projeto vinha repetindo desde a Fase 1.
+    // A receita está ERRADA e o Henrique reclamou dela três vezes. A conta: numa janela de
+    // 384×216, uma placa de 480×270 mostra 384 de 480 na largura e 216 de 270 na altura — 80%
+    // de cada eixo, ou seja **64% da pintura, com zoom de 1,25×**. A pintura do Henrique
+    // chegava à tela AMPLIADA e cortada pelas beiradas, que é exatamente o oposto de "1 px da
+    // arte = 1 px do jogo" (a frase está no cabeçalho do `paint-bg.mjs`, que fazia a coisa
+    // certa e vinha sendo CHAMADO com os números errados).
+    //
+    // Em 384×216 aparece a LARGURA INTEIRA e 94,4% da altura (o recorte central de 1625×914
+    // sobre 1625×968 — 5,6%, medido), com um pixel da pintura por pixel de tela.
+    //
+    // Duas cópias lado a lado, como o `paintBgF2`, para a rolagem nunca mostrar buraco.
+    const temPintura = this.scene.textures.exists('paintBgF3');
+    if (temPintura) {
+      const w = (this.scene.textures.get('paintBgF3').getSourceImage() as { width: number }).width;
+      for (let i = 0; i < 2; i++) {
+        this.nebulaPainting.push(
+          this.scene.add
+            .image(i * w, 0, 'paintBgF3')
+            .setOrigin(0, 0)
+            // ⚠️ −96, NÃO −97. A camada `mundo` (o planeta) vive em −97, e −97 aqui daria um EMPATE
+            // de profundidade: renderizaria certo só por acidente de ordem de inserção, e qualquer
+            // reordenação futura das chamadas viraria a pintura para trás do planeta sem nenhuma
+            // sonda pegar. −96 é o número honesto — é a camada que esta pintura SUBSTITUI, e ela
+            // fica na frente do planeta, que é o que está mais longe.
+            //
+            // ⚠️ E A PINTURA É 100% OPACA (medido: 0 pixels não-opacos em 129.600). Ela ESCONDE
+            // tudo que estiver atrás dela — inclusive o planeta. Isso é ACEITO e tem um efeito
+            // colateral bom: quando a nuvem abre em t=42 e a pintura some, o planeta reaparece
+            // JUNTO com o casco. A virada revela duas coisas, não uma.
+            .setDepth(-96)
+            .setData('bgFactor', 0.02),
+        );
+      }
+      this.paintedBg.push(...this.nebulaPainting);
+    }
+
     // O corpo da nuvem: grande, sobreposto (gap < largura), quase parado. É ele que diz
     // "estamos DENTRO" — nuvem espaçada é nuvem vista de fora.
-    this.addLayer({
-      key: 'nebula3',
-      factor: 0.05,
-      baseY: 0,
-      depth: -96,
-      tint: 0xffffff,
-      // A arte já é dourado-sobre-azul; os tints só variam a temperatura entre nuvens.
-      tints: [0xffffff, 0xe8d8c0, 0xb8c4e8],
-      alpha: 0.85,
-      scale: [1.8, 3.0],
-      gap: [95, 160],
-      terreno: false,
-      flutua: true,
-      nebulosaExtra: true,
-    });
+    // ⚠️ SÓ ENTRA SEM A PINTURA. Com ela, esta é a camada substituída (fallback = o visual antigo).
+    if (!temPintura) {
+      this.addLayer({
+        key: 'nebula3',
+        factor: 0.05,
+        baseY: 0,
+        depth: -96,
+        tint: 0xffffff,
+        // A arte já é dourado-sobre-azul; os tints só variam a temperatura entre nuvens.
+        tints: [0xffffff, 0xe8d8c0, 0xb8c4e8],
+        alpha: 0.85,
+        scale: [1.8, 3.0],
+        gap: [95, 160],
+        terreno: false,
+        flutua: true,
+        nebulosaExtra: true,
+      });
+    }
 
     this.addLayer({
       key: 'nebula3',
@@ -893,7 +1064,10 @@ export class Parallax {
       baseY: 0,
       depth: 60,
       tint: 0x9aa2c8,
-      alpha: 0.38,
+      // ⚠️ ALPHA MEDIDO EM A/B COM INIMIGO ESCURO NA TELA (Fatia 5), não escolhido no olho. O
+      // critério é o inimigo LER através do véu — numa fase que põe minas em cachos na névoa, não
+      // ver a mina não é problema estético, é morte. Era 0.38 e escondia demais.
+      alpha: 0.24,
       scale: [1.8, 3.0],
       gap: [240, 460],
       terreno: false,
@@ -902,20 +1076,134 @@ export class Parallax {
       nebulosaExtra: true,
     });
 
-    // O CASCO DO LEVIATÃ: banda contínua de placas mortas no rodapé (origem na base, como o
-    // terreno da F1), dormindo em alpha 0 — `casco` faz o alpha dela seguir 1−nebulaDim.
+    // ─── O CASCO DO LEVIATÃ (Fatia 5) ───
+    //
+    // Até aqui o casco era uma fileira de `derelict` — o destroço GENÉRICO da Fase 2 — tingido de
+    // azul. A fase se chama "O CASCO", e a promessa do GDD é que o Leviatã VIROU O CHÃO; uma tira
+    // de sucata reaproveitada não cumpre isso.
+    //
+    // A arte nova é biomecânica de propósito: ela ANUNCIA o interior. A Fase 4 é costela, órgão e
+    // maquinário, e entre as duas a nave é engolida por uma cutscene. Se o casco fosse placa lisa
+    // de metal, a Fase 4 chegaria como surpresa desconexa; assim ela chega como confirmação.
+    //
+    // ⚠️ DUAS CAMADAS, E A PROPORÇÃO SAI DO `gap`. Os trechos LISOS são a base contínua e a
+    // MAIORIA; o maquinário é pontuação. Um casco em que cada metro tem uma engrenagem lê como
+    // brinquedo — são os trechos vazios que fazem o maquinário significar alguma coisa (a mesma
+    // lógica do SILÊNCIO no ciclo da Capitânia). O `pickVariant` sorteia UNIFORME, então a
+    // proporção não pode vir dele: vem daqui.
+    //
+    // ⚠️ ESCALA 1, INTEIRA — e o QUADRO NÃO É A FAIXA. As peças são 72×72 (70 depois do aparo,
+    // ver abaixo), mas o desenho OPACO delas ocupa só as linhas 6..58 do quadro: a faixa que se
+    // vê tem 53px, um quarto da tela, não um terço. O resto do quadro é padding transparente, e
+    // é ele que a linha de baixo tem que compensar.
+    //
+    // ⚠️ `baseY = GAME_HEIGHT + 13`, NÃO `+ 6`. Com origem na base, o `baseY` ancora a BORDA DO
+    // QUADRO, não o desenho — e o quadro tem 13px de transparência embaixo (a última linha
+    // opaca da base é a 58 de 71). Em `+6` a faixa parava na linha 208 da tela e sobrava uma
+    // tira de 7px de espaço aberto atravessando o rodapé inteiro: dava para ver estrela e
+    // asteroide passando POR BAIXO do chão (medido: luminância 0,107 no casco contra 0,028 na
+    // tira). `+13` põe a última linha opaca em 215, encostada na borda. O `derelict` antigo
+    // usava `+26` e por isso nunca teve o problema — a âncora mudou com a arte e o padding não
+    // foi recontado.
+    //
+    // ⚠️ SEM TINT. Luminância média medida entre 0,142 e 0,176 — a família já nasce escura. Um
+    // tint aqui seria a terceira vez nesta campanha que se escurece arte que já estava escura.
+    //
+    // ⚠️ `gap` MENOR que a largura (70) na base: sobrepostos, como as montanhas do parallax — e
+    // é por isso que isto NÃO é um TileSprite. Mas A SOBREPOSIÇÃO SOZINHA NÃO APAGAVA A EMENDA:
+    // o PixelLab devolveu as peças com uma coluna de contorno PRETA na borda (0,008 contra 0,14
+    // do miolo), e como a peça da direita desenha por cima, o contorno da borda ESQUERDA dela
+    // ficava visível — um risco preto a cada ~60px. Quem resolve isso é o `instalar-casco.mjs`,
+    // que corta 1px de cada lado das sete peças; as larguras aqui já contam com os 70px.
+    // ⚠️ SEM TINT, E ISSO É A CORREÇÃO DE 28/08 — não um esquecimento.
+    //
+    // A geração de 25/08 voltou MARROM-OLIVA e a fase inteira teve de ser tingida de frio para
+    // disfarçar (`tint 0x84c0ff`, calculado para levar #423f38 a #24323b). O Henrique jogou de
+    // novo e a cor CONTINUAVA destoando: um tint multiplicativo só escurece, então o casco
+    // chegava ao canon perdendo ~28% de luminância no caminho — frio E apagado, ao lado de um
+    // rabo frio e vivo. Ele gerou os tiles novos, e eles nascem na cor certa (régua:
+    // `scripts/_medir-paleta.mjs`, a cor MODAL do material e não os 8% mais claros, que aqui
+    // mediriam o osso):
+    //
+    //   ref-leviata-armored   #0c121a / #1f2932   R−B −14 / −19
+    //   rabo-leviata          #19222a (39%)       R−B −17
+    //   casco ANTIGO          #32312b (44%)       R−B  +7   ← o intruso
+    //   casco NOVO            #19222a / #2e3b44   R−B −17 / −22
+    //
+    // Tingir arte que já está no canon seria escurecê-la de graça.
+    //
+    // ⚠️ UMA CAMADA, NÃO DUAS. As sete peças velhas se dividiam em "lisas" (base densa) e
+    // "detalhe" (pontuação esparsa), e a proporção entre as duas saía do `gap`. As novas são
+    // seis faixas COMPLETAS de 114×66 — sobrepor duas camadas de arte opaca de altura cheia só
+    // faria a de cima cobrir a de baixo em pedaços sorteados. A variedade agora vem de QUAL
+    // peça entra, e isso passou a ser uma decisão de LUGAR (ver `familiaDoCasco`).
+    //
+    // ⚠️ `baseY = GAME_HEIGHT`, sem margem — e agora ele é honesto. As peças velhas tinham 13px
+    // de padding transparente embaixo do desenho, e o `+14` era isso sendo compensado às cegas
+    // (a versão `+6` deixou 7px de espaço aberto atravessando o rodapé, com estrela passando por
+    // baixo do chão). O `instalar-casco.mjs` recorta as peças novas NA FAIXA: o quadro é o
+    // desenho, sem padding nenhum. Com origem na base, a faixa ocupa y=150..215 — encostada na
+    // borda de baixo, e com a crista em 150 contra os 165 de antes.
+    //
+    // ⚠️ `gap` MENOR QUE A LARGURA (114), como sempre: as peças se sobrepõem, e é por isso que
+    // isto não é um TileSprite. O aparo de 1px de `instalar-casco.mjs` é o que impede a coluna
+    // de contorno preta de quem desenha por cima de virar risco a cada tile.
     this.addLayer({
-      key: 'derelict',
+      key: 'cascoPlaca',
       factor: 1.0,
-      baseY: GAME_HEIGHT + 26,
+      baseY: GAME_HEIGHT,
       depth: -75,
-      tint: 0x2f3a55,
-      alpha: 0.95,
-      scale: [1.1, 1.5],
-      gap: [78, 108],
+      tint: 0xffffff,
+      alpha: 1,
+      scale: [1, 1],
+      gap: [96, 108],
       terreno: true,
       casco: true,
     });
+
+    // ─── A FAIXA DE CASCO DA FRENTE ───
+    //
+    // Um prop ancorado na linha do solo termina numa BORDA RETA, e sem nada na frente dele essa
+    // borda fica à mostra: o respiradouro parecia "um asset colado no outro", sem base. É o
+    // mesmo defeito que a Fase 1 já resolvia — e a Fase 3 nunca ganhou o remédio, porque a
+    // faixa do casco vive lá atrás em `depth −75/−74` e não há nada entre o pé do prop e o olho.
+    //
+    // ⚠️ `depth −0.2`, o MESMO número do `groundFront` da Fase 1, e pelo mesmo motivo: à FRENTE
+    // dos props (que nascem em −0.5, ver `TerrainSystem.spawn`) e ATRÁS da nave e dos inimigos
+    // (depth 0). A nave nunca some atrás dela.
+    //
+    // ⚠️ `y = GROUND_Y − 8`, 18px de altura: a tira ocupa y=198..215 — encostada na borda de
+    // baixo, sem aresta inferior à mostra. Antes eram `−4` e 20px, herdados da arte de 72² com
+    // outro padding; com a faixa nova (66px, ancorada em `GAME_HEIGHT`) esses números deixariam
+    // 6px da tira fora da tela sem motivo.
+    //
+    // ⚠️ A ARTE dela vem das linhas 44..61 do tile, não das 48..65 que corresponderiam a esta
+    // altura. As 48..65 caem em cima dos SULCOS entre as placas hexagonais — colunas de 1px
+    // quase pretas que, num tile repetido a cada 228px, viram um risco atravessando o chão da
+    // fase (a sonda pegou, e o `casco-frente.mjs` agora reprova na fonte).
+    //
+    // Ela ainda cobre o pé dos props (que se ancoram em `GROUND_Y` = 206) com 8px de folga
+    // acima da linha; mais alta que isso e ela começaria a engolir a silhueta deles.
+    //
+    // ⚠️ TINT ESCURO, nunca claro: é o casco MAIS PERTO, em leve sombra — a mesma leitura do
+    // `groundFront`, e a mesma regra de sempre nesta campanha.
+    //
+    // ⚠️ 0x6390bf → 0xb0b0b0 (2026-08-28), pela mesma regra e pelo motivo oposto. O tint frio
+    // existia para acompanhar a base, que estava sendo esfriada à força; a arte nova já é fria
+    // de nascença, e repetir o frio aqui esfriaria DUAS vezes. O que sobra é o que a tira sempre
+    // quis ser: um multiplicador NEUTRO a 69% — a mesma tinta com menos luz, e nada mais.
+    //
+    // Ela segue o alpha do CASCO (1 − nebulaDim): durante o Ato 1 não existe chão nenhum para
+    // ter pé, e uma tira opaca no rodapé estragaria a nuvem. Quem a acende é o
+    // `setNebulaDensity`, à mão — como a pintura, ela não é uma `ScatterLayer`.
+    if (this.scene.textures.exists('cascoFrente')) {
+      this.cascoFrente = this.scene.add
+        .tileSprite(0, GROUND_Y - 8, GAME_WIDTH, 18, 'cascoFrente')
+        .setOrigin(0, 0)
+        .setDepth(-0.2)
+        .setTint(0xb0b0b0)
+        .setAlpha(0);
+    }
   }
 
   private addLayer(cfg: Omit<ScatterLayer, 'sprites' | 'nextX'>): void {
@@ -930,6 +1218,54 @@ export class Parallax {
     while (layer.nextX < GAME_WIDTH + 120) this.emit(layer);
   }
 
+  /**
+   * QUE PARTE DO LEVIATÃ ESTÁ PASSANDO AGORA — e este é o pedido do Henrique (2026-08-28):
+   * *"use a composição do casco com sabedoria, utilize uma métrica... no meio da composição você
+   * pode colocar tiles que têm a costela, para 'parecer' que o jogador está +- no meio do
+   * leviatã."*
+   *
+   * ⚠️ O `pickVariant` SORTEIA UNIFORME, então isto não pode sair dele — é a mesma lição que o
+   * `gap` das camadas velhas já tinha aprendido. Aqui a escolha é de LUGAR: a mesma peça nunca
+   * poderia aparecer na cauda e na proa, porque cauda e proa não são o mesmo pedaço de bicho.
+   *
+   * A régua é a DISTÂNCIA percorrida, não o relógio: o roteiro pode mudar de hora, a nave não
+   * muda de velocidade. `CORPO` é o comprimento nominal do trecho roteirizado — o casco nasce
+   * em t≈46,5 (o mergulho do rabo) e a serpente chega em t=88, o que a `SCROLL_SPEED` de 84px/s
+   * põe em ~3500px. Depois disso a conta satura: a luta de chefão dura o que o jogador levar, e
+   * ela acontece na PROA — perto da cabeça, que é para onde a Fase 4 leva.
+   *
+   *   0–28%    CAUDA    blindagem lisa e couro escamado. O toco do rabo acabou de afundar aqui.
+   *   28–68%   MEIO     a CAIXA TORÁCICA. O trecho mais longo, e é ele que diz onde o jogador está.
+   *   68%+     PROA     dutos e conduítes: a víscera técnica engrossando na direção da cabeça.
+   *
+   * As listas têm repetição de propósito: é assim que se dá PESO a uma escolha uniforme sem
+   * inventar um sorteio com pesos. E nenhuma zona é de uma família só — um trecho inteiro de
+   * costela seria um padrão, e padrão lê como papel de parede (a mesma razão dos trechos LISOS
+   * da versão anterior).
+   */
+  private familiaDoCasco(): string {
+    const CORPO = 3500;
+    const p = Phaser.Math.Clamp(this.cascoDist / CORPO, 0, 1);
+
+    const zona =
+      p < 0.28
+        ? ['cascoPlaca', 'cascoPlaca', 'cascoPlaca', 'cascoEscama', 'cascoEscama']
+        : p < 0.68
+          ? ['cascoCostela', 'cascoCostela', 'cascoCostela', 'cascoEscama', 'cascoEscama', 'cascoPlaca']
+          : ['cascoDuto', 'cascoDuto', 'cascoDuto', 'cascoPlaca', 'cascoPlaca', 'cascoCostela'];
+
+    // `pickVariant` ainda entra: `cascoCostela` tem a variante com maquinário e `cascoDuto` tem
+    // a com a chapa arranhada. A zona escolhe a FAMÍLIA; o sorteio escolhe a peça dentro dela.
+    //
+    // ⚠️ `GetRandom` (que usa `Math.random`) E NÃO `Phaser.Math.RND`. Os dois são geradores
+    // DIFERENTES, e o `RND` é o que `Phaser.Math.Between` consome — ou seja, o mesmo fluxo do
+    // espaçamento das ondas e do sorteio de altura dos inimigos. Uma decisão de ARTE DE FUNDO
+    // não pode adiantar o dado do jogo: puxar um número aqui deslocaria tudo o que vem depois,
+    // e a sonda passaria a medir uma fase levemente diferente a cada mudança de cenário. O
+    // `pickVariant` já usa `Math.random` pelo mesmo motivo.
+    return pickVariant(this.scene, Phaser.Utils.Array.GetRandom(zona));
+  }
+
   private emit(layer: ScatterLayer): void {
     // No vácuo o sprite nasce em qualquer altura e é ancorado pelo CENTRO — ele flutua, não
     // cresce do chão. Na superfície é o contrário: origem na base, sobre a linha do solo.
@@ -941,7 +1277,8 @@ export class Parallax {
 
     const img = this.scene.add
       // Sorteia entre as variantes da camada: montanhas repetidas denunciam o truque.
-      .image(layer.nextX, y, pickVariant(this.scene, layer.key))
+      // O CASCO é a exceção — lá a peça não é sorteada, é o lugar do corpo que decide.
+      .image(layer.nextX, y, layer.casco ? this.familiaDoCasco() : pickVariant(this.scene, layer.key))
       // Teto: origem no TOPO e de cabeça para baixo — o espelho do terreno (ver ScatterLayer).
       .setOrigin(0.5, layer.teto ? 0 : layer.flutua ? 0.5 : 1)
       .setFlipY(layer.teto ?? false)
@@ -1007,6 +1344,18 @@ export class Parallax {
     }
     // A faixa da frente rola JUNTO com o chão/mundo — senão os props deslizariam sobre ela.
     if (this.groundFront) this.groundFront.tilePositionX = Math.round(this.groundOffset);
+
+    // A faixa de casco da frente (Fase 3) tem o mesmo dever, mas o `groundOffset` acima só
+    // avança quando existe `ground` — e na nebulosa não existe chão. Ela conta o dela.
+    if (this.cascoFrente) {
+      this.groundOffset += worldSpeed * dt;
+      this.cascoFrente.tilePositionX = Math.round(this.groundOffset);
+    }
+
+    // A RÉGUA DO PERCURSO sobre o Leviatã (ver `familiaDoCasco`). Conta só DEPOIS do
+    // `revealCasco`: durante o Ato 1 a faixa existe com alpha 0 e não há bicho nenhum sob a
+    // nave — contar ali faria a nave nascer no meio das costelas quando o casco acendesse.
+    if (this.cascoAndando) this.cascoDist += worldSpeed * dt;
 
     if (this.exiting) this.updateAtmosphereExit(dt, worldSpeed);
   }
@@ -1116,17 +1465,20 @@ export class Parallax {
     let a = layer.alpha;
     if (layer.primeiroPlano) a *= this.foregroundDim;
     if (layer.nebulosaExtra) a *= this.nebulaDim;
-    if (layer.casco) a *= 1 - this.nebulaDim;
+    if (layer.casco) a *= this.cascoReveal;
     return a;
   }
 
   /**
    * A DENSIDADE DA NEBULOSA (Fase 3): 1 = dentro da nuvem, 0 = céu limpo.
    *
-   * É UM fade só para DUAS revelações: as camadas `nebulosaExtra` somem e a banda `casco`
-   * aparece — sair da nuvem e ver o casco do Leviatã embaixo são o mesmo momento (a virada
-   * do Ato 1 para o Ato 2). Counter em vez de tween por sprite: as camadas RECICLAM durante
-   * o fade, e um sprite novo tem que nascer no alpha do instante (ver `emit`).
+   * ⚠️ ELE NÃO MEXE MAIS NO CASCO (2026-08-27). Até aqui era "um fade só para duas
+   * revelações" — a nuvem sumindo e o casco nascendo eram a MESMA variável, e por isso
+   * afinar a nuvem em t=21 arrastava o casco junto. Agora o casco tem o `cascoReveal` dele,
+   * e quem o chama é o mergulho do rabo. Ver `revealCasco`.
+   *
+   * Counter em vez de tween por sprite: as camadas RECICLAM durante o fade, e um sprite novo
+   * tem que nascer no alpha do instante (ver `emit`).
    */
   setNebulaDensity(density: number, durationMs = 5000): void {
     const alvo = Phaser.Math.Clamp(density, 0, 1);
@@ -1139,10 +1491,54 @@ export class Parallax {
       onUpdate: (tw) => {
         this.nebulaDim = tw.getValue() ?? alvo;
         for (const layer of this.layers) {
-          if (!layer.nebulosaExtra && !layer.casco) continue;
+          if (!layer.nebulosaExtra) continue;
           const a = this.alphaFor(layer);
           for (const s of layer.sprites) s.setAlpha(a);
         }
+        // A pintura não é ScatterLayer, então ela não passa por `alphaFor` — some aqui, à mão.
+        for (const img of this.nebulaPainting) img.setAlpha(this.nebulaDim);
+      },
+    });
+  }
+
+  /**
+   * O CASCO NASCE (Fase 3, a virada do Ato 1 para o Ato 2).
+   *
+   * ⚠️ QUEM CHAMA É A SAÍDA DO RABO (`GameScene.raboDoLeviata`), NÃO O ROTEIRO. O casco tem que
+   * começar 300ms depois que o bicho ATRAVESSOU e saiu do quadro — e esse instante é o fim de
+   * um tween, não uma linha do `STAGE_3`. Amarrá-lo ao relógio do roteiro faria os dois
+   * derivarem na primeira vez que alguém mexesse na duração da travessia, e a costura viraria
+   * corte outra vez.
+   *
+   * ⚠️ O GANCHO MUDOU DE DONO EM 2026-08-29, e o tween que o chamava não existe mais. Até 28/08
+   * quem chamava era o fim do MERGULHO (o instante em que a nadadeira limpava o rodapé). O
+   * Henrique reprovou o mergulho jogando — ele lia como peça se desprendendo — e escolheu, entre
+   * três opções, que o casco nascesse DEPOIS da travessia, com um quadro vazio no meio: *"ele
+   * passou, e o que estava atrás dele era o corpo."*
+   */
+  revealCasco(alvo: number, durationMs = 1500): void {
+    const destino = Phaser.Math.Clamp(alvo, 0, 1);
+
+    // O percurso sobre o bicho começa AQUI, no instante em que o casco nasce — é o zero de
+    // `familiaDoCasco`, e é o instante logo depois que o rabo saiu do quadro. A cauda do
+    // Leviatã é onde o jogador entra.
+    if (destino > 0) this.cascoAndando = true;
+
+    this.scene.tweens.addCounter({
+      from: this.cascoReveal,
+      to: destino,
+      duration: durationMs,
+      ease: 'Sine.easeInOut',
+      onUpdate: (tw) => {
+        this.cascoReveal = tw.getValue() ?? destino;
+        for (const layer of this.layers) {
+          if (!layer.casco) continue;
+          const a = this.alphaFor(layer);
+          for (const s of layer.sprites) s.setAlpha(a);
+        }
+        // A faixa da frente não é ScatterLayer — não passa por `alphaFor`. Acende aqui, à mão,
+        // e junto com o casco: ela é o casco MAIS PERTO (ver a construção dela).
+        this.cascoFrente?.setAlpha(this.cascoReveal);
       },
     });
   }
