@@ -206,6 +206,12 @@ export class Boss implements StageBoss {
    */
   /** Lento de propósito: é o que dá tempo de SAIR do lugar depois de ver para onde ele aponta. */
   private static readonly MISSILE_SPEED = 70;
+  /**
+   * A escala VISUAL da arte do míssil — e o divisor da hitbox, que é por isso que ela é uma
+   * constante e não dois literais soltos. O número sai da altura do CORPO da arte (12 linhas de
+   * `missil-colonia.png`) contra os 7px de mundo da caixa: 7/12 ≈ 0,6. Ver `launchMissile`.
+   */
+  private static readonly MISSILE_ART_SCALE = 0.6;
   /** Intervalo entre mísseis na fase aérea (a única que os tem). Era 4.5 para uma salva de 4. */
   private static readonly MISSILE_RATE_ENRAGED = 2.6;
   /**
@@ -439,7 +445,26 @@ export class Boss implements StageBoss {
       // animação, mas setTexture sem parar seria sobrescrito no frame seguinte pelo quadro
       // da animação — parar aqui torna a troca de figurino independente de quem veio antes.
       b.anims.stop();
-      b.setTexture('missile').setScale(0.9).clearTint();
+      // ⚠️ `missilColonia`, E NÃO `missile` — a arte da CIDADELA, não a do Leviatã. Até
+      // 2026-08-31 esta linha vestia `missile`, que é o foguete do lança-mísseis do casco da
+      // Fase 3: a colônia da Fase 1 disparava ordenança do bicho que ela nem conhece. Quem
+      // achou foi o Henrique, jogando — *"a segunda fase do boss da Fase 1 está atirando o
+      // mesmo míssel que o canhão do casco"*. Ver `BootScene` para os dois eixos que separam
+      // as duas artes (valor do corpo e temperatura da chama).
+      //
+      // ⚠️ A ESCALA CAIU DE 0,9 PARA 0,6, E O NÚMERO É MEDIDO, NÃO ESTÉTICO. A regra que a arte
+      // antiga cumpria sem ninguém ter escrito: o CORPO do míssil tem a altura da hitbox, e as
+      // empenas e a chama são de graça. Medido linha a linha nas duas artes:
+      //
+      //     missile.png         25×12   corpo  7 linhas × 0,9  =  6,3px   ≈ hitbox 7  ✔
+      //     missil-colonia.png  30×20   corpo 12 linhas × 0,9  = 10,8px   contra 7    ✘
+      //     missil-colonia.png  30×20   corpo 12 linhas × 0,6  =  7,2px   ≈ hitbox 7  ✔
+      //
+      // A 0,9 o desenho ficaria 54% mais alto que a caixa que ele representa — e um projétil
+      // que parece maior do que é ensina o jogador a desviar do lugar errado. A 0,6 a peça
+      // inteira mede 18×12 contra os 22,5×10,8 da anterior: mesma presença na tela, e a
+      // silhueta passa a dizer a verdade sobre a hitbox melhor do que a arte antiga dizia.
+      b.setTexture('missilColonia').setScale(Boss.MISSILE_ART_SCALE).clearTint();
       b.setBlendMode(Phaser.BlendModes.NORMAL);
 
       // A marca que o TerrainSystem.tickMissileTrails procura. Ele varre `enemyBullets`, que
@@ -453,7 +478,13 @@ export class Boss implements StageBoss {
 
       // Hitbox em px de MUNDO (~16×7), compensando a escala visual: o corpo Arcade escala
       // junto com o sprite. Mesma conta da torre de solo (TerrainSystem.fireAt).
-      b.body!.setSize(16 / 0.9, 7 / 0.9);
+      //
+      // ⚠️ O DIVISOR É A ESCALA, ENTÃO ELE ACOMPANHA A ARTE E O NÚMERO DE MUNDO NÃO SE MEXE.
+      // Cravado em 0.9 ele viraria uma mentira no dia em que a escala mudou — que é hoje: com
+      // a arte nova a 0,6, um `16 / 0.9` daria 10,7px de mundo em vez de 16, e a troca de
+      // figurino teria mudado o peso do chefão de uma fase FECHADA sem ninguém pedir. É
+      // exatamente o efeito colateral que o cooldown dos canhões já custou nesta campanha.
+      b.body!.setSize(16 / Boss.MISSILE_ART_SCALE, 7 / Boss.MISSILE_ART_SCALE);
 
       // A CARÊNCIA de 16px do `enemyBulletHitCover` (GameScene) lê estes dois. Sem eles a
       // conta dá NaN, a comparação falha, e o míssil é absorvido pelo primeiro cenário que

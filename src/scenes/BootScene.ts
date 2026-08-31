@@ -424,6 +424,22 @@ const ART: Record<string, string> = {
   // DIREITA, como todo sprite do jogo — o voo o gira (setRotation).
   missile: 'sprites/missile.png',
 
+  // ⚠️ O MÍSSIL DA COLÔNIA — a ordenança do CHEFÃO DA FASE 1 na fase aérea, e ele existe porque
+  // o `missile` acima estava vestindo os dois. O Henrique topou com isso jogando: *"a segunda
+  // fase do boss da Fase 1 está atirando o mesmo míssel que o canhão do casco"*. É a QUARTA vez
+  // nesta campanha que duas coisas diferentes dividiam um projétil só, e a terceira em que quem
+  // achou foi ele, jogando.
+  //
+  // A separação é de FICÇÃO antes de ser de arte, a mesma regra da munição da torre: um
+  // lança-mísseis do Leviatã dispara ordenança do bicho — o `missile` é OSSO, corpo claro e
+  // chama laranja. A cidadela da colônia dispara ordenança industrial — corpo gunmetal escuro e
+  // chama FRIA, a mesma família do `shotTorre` que a torre de solo dela acabou de ganhar.
+  //
+  // As duas se separam em DOIS eixos ao mesmo tempo, e isso foi escolhido: valor do corpo
+  // (claro contra escuro) e temperatura da chama (laranja contra azul). Um eixo só se perde
+  // quando o projétil está a 27px voando.
+  missilColonia: 'sprites/missil-colonia.png',
+
   // Cápsulas de arma (o "emblema" que fica flutuando).
   capsule: 'sprites/capsule.png',
   capsule2: 'sprites/capsule-2.png',
