@@ -248,7 +248,7 @@ export class TerrainSystem {
     // ⚠️ E OS DE CASCO SE ORDENAM ENTRE SI PELO PLANTIO. Assim que o pé passou a variar, dois
     // props podem se sobrepor na horizontal — e sem isto qual fica na frente seria decidido pela
     // ordem de criação, ou seja, por acaso. Quem está plantado mais à FRENTE (pé maior) desenha
-    // por cima: `−0.5` na aresta de frente, `−0.536` no fundo. Toda a faixa continua entre a
+    // por cima: `−0.5` na aresta de frente, `−0.526` no fundo (13px × 0,002). Toda a faixa fica entre a
     // tira do casco (−0.2, à frente) e a faixa de fundo (−74/−75, atrás), então nada mais no
     // quadro muda de ordem.
     p.setDepth(naCasca ? -0.5 - (PLANTIO.frente - pe) * 0.002 : -0.5);

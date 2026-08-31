@@ -393,7 +393,7 @@ export class EnemySystem {
 
     if (kind === 'aguaViva' && e.preFX) {
       const glow = e.preFX.addGlow(0x35b6ea, 0, 0, false, 0.1, 10);
-      this.scene.tweens.add({
+      const pulso = this.scene.tweens.add({
         targets: glow,
         innerStrength: 2.2,
         duration: 900,
@@ -401,6 +401,19 @@ export class EnemySystem {
         repeat: -1,
         ease: 'Sine.easeInOut',
       });
+
+      // ⚠️ O PULSO MORRE COM O BICHO, E ISSO NÃO É ZELO — É UM VAZAMENTO MEDIDO. O alvo do tween
+      // é o CONTROLADOR do glow, não o sprite: o Phaser leva o `preFX` junto no `destroy()` do
+      // dono, mas nada avisa o `TweenManager`, e um `repeat: -1` sem dono continua tocando até a
+      // cena fechar. Medido em `_f3/probe-tween-agua-viva.mjs`: as duas ondas soltam 7 bichos, e
+      // em t=34,6 — nenhuma água-viva viva em tela — havia exatamente 7 tweens ainda tocando
+      // contra a linha de base 0.
+      //
+      // ⚠️ E O GANCHO É O `destroy` DO DONO, NUNCA O CULLING, porque são DOIS caminhos de morte
+      // em arquivos diferentes: o tiro do jogador (`GameScene.matarInimigo`) e a saída por cima
+      // ou por baixo (`update`). É a mesma razão de a sombra do prop de casco pendurar a limpeza
+      // aqui — quem sabe que morreu é o morto.
+      e.once('destroy', () => pulso.remove());
     }
   }
 
