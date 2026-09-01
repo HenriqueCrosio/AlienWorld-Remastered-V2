@@ -1,31 +1,44 @@
-# START — Fatia 5: FASE 3 ("O CASCO")
+# START — Fatia 5: FASE 3 ("O CASCO") — ✅ FECHADA
 
-**🟢 O CONTEÚDO DA FATIA ESTÁ FECHADO E APROVADO JOGANDO.** Branch `feat/fase3-visual`,
-**não mergeada**. `main` continua em `ee4e2a0` (a Fatia 4).
+**🟢 A FATIA ESTÁ MERGEADA EM `main` (`a28dd07`, `--no-ff`), COM PUSH.** Fechada em 2026-08-31.
 
-O Henrique jogou a fase **cinco vezes** (27, 28, 29 e 30/08). Na última rodada ele aprovou tudo
-que estava aberto. O que sobrou não é arte da Fase 3: é **uma animação nova da serpente final**,
-**um veredicto pendente da Fase 1**, e o **fechamento da branch**.
+O Henrique jogou a fase **cinco vezes** (27, 28, 29 e 30/08) e julgou os 5 pontos que tinham
+entrado sem ele ver (31/08). A revisão ampla aconteceu e achou dois defeitos, os dois
+consertados antes do merge. **O histórico completo, os veredictos e as lições estão em
+`docs/HANDOFF.md`, na seção "A FATIA 5 — a Fase 3, FECHADA E MERGEADA".**
 
 ---
 
-## 🔑 COMO RETOMAR (frase de arranque)
+## 🔴 A ÚNICA COISA QUE SOBROU DESTA FATIA
 
-> **"Leia `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`. A Fatia 5 está com o
-> conteúdo aprovado na branch `feat/fase3-visual`. Duas coisas antes do merge. A primeira: a
-> serpente da FUSÃO (a gigante que vem depois da de 3 cabeças) tem arte nova no PixelLab
-> — objeto `eab6dbf3-3c51-403d-a70e-c167458a83b7` — e eu quero mais uma animação nela. Me
-> pergunte QUAL antes de gerar, e me diga se a arte nova entra no lugar da fusão azul que está
-> no jogo hoje. A segunda: eu ainda não joguei a Fase 1 depois de você devolver a cadeia de
-> montanhas do meio — preciso te dar esse veredicto. Depois disso é a revisão ampla da branch e
-> o merge. Sobe o `npm run dev`."**
+**A ANIMAÇÃO NOVA DA SERPENTE DA FUSÃO.** Ele pediu, e ficou para depois do merge. Tudo o que já
+foi apurado está na seção 1 abaixo — **não re-descubra**. E a regra continua valendo:
+**PERGUNTE QUAL ANIMAÇÃO antes de gerar**, e pergunte se a arte nova entra no lugar da fusão azul
+que está no jogo hoje.
+
+**Depois disso, a próxima fatia é a 6 — Cutscene 3 (a queda no hangar do Leviatã).** Ela não tem
+spec nem plano: **começa pelo BRAINSTORMING.**
+
+---
+
+## 📌 A frase de arranque da próxima sessão
+
+> **"A Fatia 5 fechou e está mergeada. Sobrou a animação nova da serpente da FUSÃO — objeto
+> PixelLab `eab6dbf3-3c51-403d-a70e-c167458a83b7`. Leia
+> `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`, me pergunte QUAL animação antes de
+> gerar, e me diga se a arte nova entra no lugar da fusão azul que está no jogo hoje. Depois
+> disso a gente abre a Fatia 6 (Cutscene 3) pelo brainstorming. Sobe o `npm run dev`."**
+
+---
+
+## 🔑 AS REGRAS DE PROCESSO DESTA FATIA (continuam valendo)
 
 ⚠️ **A ORDEM É: ANALISAR → DISCUTIR → PERGUNTAR → EXECUTAR.** É diretriz explícita dele, dada
 depois de a coreografia do rabo falhar quatro vezes. **Desenhe a cena em palavras e espere a
 confirmação antes de escrever a primeira linha.** Não converta a frase dele em geometria cedo:
 foi assim que quatro rodadas se perderam.
 
-⚠️ **NÃO re-despache as tarefas antigas.** Estão commitadas (28 commits desde `ee4e2a0`).
+⚠️ **NÃO re-despache as tarefas antigas.** A fatia inteira está mergeada em `main` (`a28dd07`).
 
 ---
 
@@ -64,25 +77,22 @@ Se o gesto for descritível como uma rotação em torno de um ponto, ele vive me
 `<coisa>-anim-{i}`. E as animações da serpente estão registradas em `BootScene` como
 `serpenteFusaoAnim` (9 quadros, `frameRate` 10).
 
-### 2. O VEREDICTO DA FASE 1 — ele ainda não jogou
+### 2, 3 e 4 — ✅ FECHADAS EM 2026-08-31
 
-A **cadeia de montanhas do meio voltou** (commit `048f8a6`), depois de ele topar com a falta dela
-jogando por acaso. Voltou **pela metade e de propósito**: as duas `mtnMid` (enterradas em
-`GROUND_Y + 2` e `+ 4`) mais a haze entre elas; a `mtnFar` continua fora, porque a base dela
-nascia VISÍVEL em `GROUND_Y − 4` e era a única que podia causar o deslize do solo.
+- **O veredicto da Fase 1** veio: *"a cadeia de montanhas ficou boa"*, e ele ofereceu melhorar a
+  arte — o que foi feito (três cristas novas geradas como conjunto, `66898a2`). A altura que ele
+  aprovou foi preservada: o que aparece na tela é a **caixa opaca × escala**, e a média das três
+  foi de 84,0px para 83,3px. A munição própria da torre também foi julgada: *"está simples, mas
+  está melhor que compartilhar a mesma da torre do casco"*.
+- **A revisão ampla** aconteceu: zero Critical, dois achados consertados antes do merge
+  (`8d95fd2`) — o tween órfão do glow da água-viva e um comentário que errava a conta do depth.
+- **O merge** está feito (`a28dd07`, `--no-ff`) e com push.
 
-⚠️ **PERGUNTE SE A ALTURA FICOU CERTA.** Os `scale` são os originais, mas ele nunca as viu junto
-com o fundo pintado atual — elas ocupam o terço de baixo e podem estar mais dominantes do que ele
-lembra. Se estiverem, o botão é o `scale` das duas camadas em `Parallax.buildSurface()`.
+⚠️ **E ELE ACHOU UM DEFEITO NOVO JOGANDO:** a fase aérea do chefão da Fase 1 atirava o **mesmo
+míssil do canhão do casco**. Consertado em `66898a2` (arte própria, `missilColonia`) — foi a
+QUARTA vez na campanha que duas coisas diferentes dividiam um projétil só.
 
-Também não comentado: a **munição própria da torre da Fase 1** (`shotTorre`, um traçante frio),
-que substituiu o foguete que ela dividia com o lança-mísseis do casco.
-
-### 3. A REVISÃO AMPLA DA BRANCH — nunca aconteceu, em nenhuma das cinco rodadas
-
-**Tem que vir antes do merge.** É a última coisa antes do fechamento.
-
-### 4. O MERGE (`--no-ff`, mensagem por arquivo) e os documentos.
+Tudo isso está detalhado em `docs/HANDOFF.md`, seção "O FECHAMENTO (2026-08-31)".
 
 ---
 
@@ -95,7 +105,8 @@ que substituiu o foguete que ela dividia com o lança-mísseis do casco.
 | Os projéteis novos da aranha e da serpente | *"estão bons"* |
 | A faixa de casco de 66px | *"está boa, para esse estágio da fase ficou perfeito"* |
 | O casco novo, a métrica das zonas, o choque da água-viva | aprovados no 4º teste |
-| As pinturas da Fase 2 e do Zero-G em 384×216 | pedido dele, entregue |
+| A pintura da **Fase 2** em 384×216 | ✅ mantida |
+| A pintura do **Zero-G** em 384×216 | 🔴 **REPROVADA e REVERTIDA** para 480×270 em `y=−27` (`bc19bf9`) — a conta da resolução estava certa, mas sem original de alta resolução a redução custava DETALHE |
 
 ---
 
@@ -149,6 +160,12 @@ para trás a partir do `t=48` dos props.
 
 ## Sondas e réguas
 
+- `_f3/probe-tween-agua-viva.mjs` — **NOVA (31/08)**: conta os tweens tocando contra as
+  águas-vivas VIVAS. É a guarda do tween órfão do glow — sem ela o vazamento volta calado.
+- `_f1/probe-missil-colonia.mjs` — **NOVA (31/08)**: o chefão da Fase 1 atira a arte DELE, e a
+  caixa continua 16×7 em px de MUNDO apesar de a escala da arte ter caído de 0,9 para 0,6.
+  ⚠️ `body.width` do Arcade JÁ vem em px de mundo — não multiplique pela escala (a 1ª versão
+  desta sonda fez isso e reprovou código certo).
 - `probe-f3-visual.mjs` — a fatia inteira. Cobre a água-viva, o casco invisível no Ato 1, o rabo
   (bate, arco curto, deitado na quina, **puxado para a DIREITA**, pose congelada, sem fade), o
   **escurecimento** (preto cheio, casco em 1 atrás dele, nome legível sobre o preto, retângulo
@@ -162,6 +179,10 @@ para trás a partir do `t=48` dos props.
 **Réguas e olhos** (`scripts/`):
 - `_medir-paleta.mjs` — a cor MODAL de uma arte. **Use antes de discutir cor.**
 - `_medir-rabo.mjs` · `instalar-casco.mjs` · `casco-frente.mjs` · `paint-bg.mjs`
+- `instalar-cordilheira.mjs` — **NOVO**: instala as três cristas da F1 recortando pela caixa
+  OPACA, e imprime a altura nova contra a antiga (é ela que diz se o `scale` precisa mexer).
+- `_folha-contato.mjs <object-id> <n> <zoom> <saída>` — **NOVO**: monta a grade ampliada de um
+  pacote de review do PixelLab. Escolher candidato na miniatura é adivinhar.
 - `_f3/ver-emenda.mjs [de] [até] [passo]` — a transição quadro a quadro.
 - `_f3/ver-plantio.mjs` — A/B dos três plantios de prop, cena congelada.
 - `_f3/ver-tiros.mjs` — os projéteis dos chefes em voo, ampliados.

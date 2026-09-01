@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-07-20)
+# HANDOFF — estado do projeto (2026-09-01)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -51,9 +51,11 @@ GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online
 que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele — playtestar e
 balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
 
-1. **PASSE VISUAL INTEIRO** — fatias 4–8. A próxima é a **Fatia 4 (Cutscene 2: a doca no
-   cinturão e a explosão)**, que ainda não tem spec nem plano: começa pelo BRAINSTORMING.
-   Mapa e estado em `docs/superpowers/plans/2026-08-05-fase2-visual-START.md`.
+1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
+   (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A próxima é a **Fatia 6
+   (Cutscene 3: a queda no hangar do Leviatã)**, que ainda não tem spec nem plano: **começa pelo
+   BRAINSTORMING**. ⚠️ Antes dela sobrou UM item da Fatia 5: a **animação nova da serpente da
+   fusão** — ver "O QUE FICOU ABERTO DA FATIA 5".
 2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
    (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
    fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
@@ -86,10 +88,16 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
-**Estado do repositório (2026-07-20, fim de sessão):** `main` @ `78cd19f`, tudo com push em
-`origin` (github.com/HenriqueCrosio/AlienWorld-Remastered-V2). Merges do dia: `c22c7eb`
-(balanceamento), `4615b36` (cutscene final), `78cd19f` (passe visual). Typecheck limpo;
-12 sondas, todas verdes.
+**Estado do repositório (2026-09-01, fim de sessão):** `main` com a **Fatia 5 mergeada**
+(`a28dd07`, `--no-ff`) mais o fechamento dela, tudo com push em `origin`
+(github.com/HenriqueCrosio/AlienWorld-Remastered-V2 — ⚠️ o remoto `legacy` é o repositório
+ANTIGO, não empurre nada para lá). Typecheck e build limpos; sondas verdes, incluindo as duas
+novas desta sessão (`_f3/probe-tween-agua-viva.mjs` e `_f1/probe-missil-colonia.mjs`).
+
+⚠️ **UM ASSERT BARULHENTO CONHECIDO, NÃO O AFROUXE:** o risco de emenda na faixa do casco
+(`probe-f3-visual`) reprova ~1 em 4 execuções. O ruído já existia antes das sombras novas —
+medido no código de `HEAD` sem o plantio. **Rode de novo antes de concluir.** Os outros dois do
+mesmo tipo são o rodapé do casco e a contagem de lança-mísseis (varia de 2 a 6).
 
 **Saldo PixelLab: 1271 GERAÇÕES + $0.398 de crédito** (2026-07-20). Descoberta da sessão:
 no Tier 2, **animação v3 e key art pixflux custam 1 GERAÇÃO cada** (não USD) — animar é
@@ -463,6 +471,29 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 
 ## ROADMAP
 
+### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-01)
+
+O conteúdo do jogo está todo de pé (tabela abaixo). O que corre agora é o passe visual, fatia a
+fatia, cada uma com spec → plano → implementação → **teste jogado pelo Henrique** → merge.
+
+| Fatia | O quê | Estado |
+|---|---|---|
+| 0 | Menu "O Despertar" | ✅ mergeada |
+| 1 | Fase 1 — cenário | ✅ mergeada |
+| 2 | Fase 1 — inimigos e chefão | ✅ mergeada |
+| 3 | Cutscene 1 | ✅ mergeada |
+| 4 | Cutscene 2 — a doca do cinturão | ✅ mergeada (`ee4e2a0`) |
+| 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
+| — | *sobra da 5: a animação da serpente da fusão* | 🟡 **pendente — PERGUNTAR antes de gerar** |
+| 6 | **Cutscene 3 — a queda no hangar** | ⬜ **A PRÓXIMA. Sem spec: começa pelo brainstorming** |
+| 7 | Fase 4 — o interior | ⬜ ⚠️ mexe em GEOMETRIA, não só em pintura (ver aviso acima) |
+| 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
+
+Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**
+(armas e naves, o ENXAME) → **playtest humano de todas as fases** → placar (Supabase) → deploy.
+
+### O CONTEÚDO DO JOGO
+
 | # | O quê | Estado |
 |---|---|---|
 | 1 | **Fase 1 — A Decolagem** | ✅ jogável, arte e música finais |
@@ -757,10 +788,143 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 5 — a Fase 3, EM ANDAMENTO
+## A FATIA 5 — a Fase 3, FECHADA E MERGEADA (2026-08-31)
 
-🟡 **Branch `feat/fase3-visual` de pé, NÃO mergeada. `main` segue em `ee4e2a0`.**
-Estado, o que testar e o que falta: `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`.
+🟢 **Mergeada em `main` (`a28dd07`, `--no-ff`), com push.** A branch `feat/fase3-visual` levou
+29 commits e cinco rodadas de teste jogado. O histórico da fatia — os cinco testes, o rabo em
+cinco tentativas, as lições — está nas seções abaixo, e o mapa de retomada em
+`docs/superpowers/plans/2026-08-25-fase3-visual-START.md`.
+
+### O FECHAMENTO (2026-08-31) — a revisão ampla, os 5 veredictos, e a arte da Fase 1
+
+**A REVISÃO AMPLA, que nunca tinha acontecido em nenhuma das cinco rodadas.** Zero Critical. Dois
+achados, os dois consertados antes do merge (`8d95fd2`):
+
+⚠️ **UM TWEEN INFINITO SOBREVIVIA AO DONO, E NENHUMA SONDA PEGAVA.** O brilho da água-viva é um
+`preFX.addGlow` animado por um tween `repeat: -1`, e o alvo do tween é o CONTROLADOR do glow, não
+o sprite. O Phaser leva o `preFX` junto no `destroy()` do dono, mas **nada avisa o
+`TweenManager`**. Medido com a sonda nova (`_f3/probe-tween-agua-viva.mjs`), que conta tweens
+tocando contra águas-vivas VIVAS:
+
+```
+t=29,6s   0 vivas    9 tweens tocando
+t=34,6s   0 vivas    7 tweens tocando   ← as duas ondas soltam 3+4 = 7
+```
+
+Sete bichos, sete tweens órfãos por partida, contra uma linha de base de 0. O gancho do conserto
+é o `destroy` do DONO e nunca o culling, porque são dois caminhos de morte em arquivos
+diferentes — a mesma solução que a sombra do prop de casco já usava.
+
+⚠️ **E UM COMENTÁRIO QUE MENTIA A CONTA**: o `spawn` documentava a faixa de depth do plantio como
+`−0.5` a `−0.536`; a conta é `13px × 0,002` = `−0.526`, e a sonda já media `−0.506..−0.524` sem
+ninguém ter comparado. Comentário que erra número envelhece pior que código errado.
+
+**OS 5 PONTOS QUE ENTRARAM SEM ELE VER — todos julgados (2026-08-31):**
+
+| | veredicto dele | o que ficou |
+|---|---|---|
+| A cadeia de montanhas do meio, de volta na F1 | ✅ *"ficou boa"* + ofereceu melhorar a arte | arte nova gerada, ver abaixo |
+| A munição própria da torre da F1 | ✅ *"simples, mas melhor que compartilhar"* | mantida |
+| O míssil que explodia na boca do cano | ✅ *"até onde joguei não explodiu"* | resolvido |
+| Os canhões que não atiravam | ✅ *"não consegui perceber bem, mas melhorou"* | resolvido |
+| As pinturas da F2 e do Zero-G em 384×216 | 🔴 **o Zero-G reprovado** | revertido (`bc19bf9`) |
+
+⚠️ **A REVERSÃO DO ZERO-G, E POR QUE ELA NÃO CONTRADIZ A FASE 2.** A conta da resolução estava
+certa (uma placa 480×270 numa janela 384×216 mostra 64% da pintura, recortada nas quatro bordas)
+e ele reprovou o resultado assim mesmo: *"o fundo da zero G pode ser como estava antes, reverta
+ele para eu verificar de novo"*. **A diferença entre as duas não é de conta, é de ORIGEM.** A da
+F2 foi refeita do original de 1672×941 — reduzir devolve a cena inteira com detalhe de sobra. Do
+Zero-G não há original guardado, então a redução saiu do próprio 480×270: um passo de
+reamostragem a mais em cima de arte que já era pequena. **O recorte custava enquadramento; a
+redução custava DETALHE**, e naquele quadro (o limbo do planeta, a faixa de atmosfera) era o
+detalhe que segurava a cena. A F2 fica em 384×216; o Zero-G volta para 480×270 em `y=−27`.
+
+**A ARTE DA FASE 1 QUE OS VEREDICTOS PEDIRAM** (`66898a2`), as duas escolhas dele:
+
+⚠️ **A CADEIA DO MEIO, AS TRÊS CRISTAS COMO CONJUNTO.** Ele aprovou a cadeia jogando e ofereceu
+melhorar a arte. O único defeito apontável com o dedo era a variante 2: ela não é uma cordilheira,
+é um BLOCO cortado reto na borda. Medida a altura da coluna nas bordas, em % da altura do pico:
+
+```
+mtn-mid-2 (antiga)   esquerda 84%   direita 96%   ← cortada quase inteira
+picos     (nova)     esquerda 42%   direita 26%
+maciço    (nova)     esquerda 13%   direita 11%
+agulhas   (nova)     esquerda 25%   direita 25%
+```
+
+Uma crista que chega à borda em 96% da altura do pico emenda com a vizinha numa **parede
+vertical**. As três novas são conjunto e isso também se mede: luminância média 33 / 34 / 35.
+
+⚠️ **A ALTURA APROVADA NÃO PODE MUDAR DE CARONA, E O QUE A DEFINE É A CAIXA OPACA.** O que aparece
+na tela é a caixa OPACA × a escala da camada, nunca o quadro do PNG. A média das três vai de
+84,0px para 83,3px (−0,8%), então o `scale` do `buildSurface` ficou como estava. E a arte antiga
+tinha folga ZERO embaixo, então recortar pela caixa opaca não move nada — a camada ancora em
+`setOrigin(0.5, 1)`.
+
+⚠️ **O MÍSSIL DA CIDADELA — A QUARTA VEZ QUE DUAS COISAS DIVIDIAM UM PROJÉTIL.** *"A segunda fase
+do boss da Fase 1 está atirando o mesmo míssel que o canhão do casco."* O `Boss.launchMissile`
+vestia `missile`, o foguete do lança-mísseis do casco da Fase 3. **A terceira vez em que quem
+achou foi ele, jogando.** A separação é de FICÇÃO antes de ser de arte: o Leviatã dispara
+ordenança do bicho (corpo OSSO, chama laranja), a colônia dispara ordenança industrial (corpo
+gunmetal, chama FRIA — a família do `shotTorre`). **Dois eixos ao mesmo tempo** (valor do corpo e
+temperatura da chama), porque um eixo só se perde quando o projétil está a 27px voando.
+
+⚠️ **O CORPO DO PROJÉTIL TEM A ALTURA DA HITBOX — a regra que a arte antiga cumpria sem ninguém
+ter escrito.** Medido linha a linha:
+
+```
+missile.png         25×12   corpo  7 linhas × 0,9 =  6,3px  ≈ hitbox 7   ✔
+missil-colonia.png  30×20   corpo 12 linhas × 0,9 = 10,8px  contra 7     ✘
+missil-colonia.png  30×20   corpo 12 linhas × 0,6 =  7,2px  ≈ hitbox 7   ✔
+```
+
+Daí a escala 0,6. **E o divisor da hitbox virou a constante da escala**: cravado em `0.9` ele
+daria 10,7px de mundo em vez de 16 no dia em que a escala mudasse — e a troca de figurino teria
+mexido no peso de uma fase FECHADA sem ninguém pedir.
+
+### ⚠️ AS LIÇÕES DO FECHAMENTO
+
+⚠️ **ASSERT QUE ERRA A UNIDADE ACUSA INOCENTE.** A primeira versão do
+`_f1/probe-missil-colonia.mjs` multiplicava `body.width` pela escala do sprite — mas **o Arcade já
+entrega esse número em px de MUNDO**. Ela mediu 17,6 e cobrou 16, reprovando código certo. É o
+irmão gêmeo do assert verde em cima do defeito (o da direção do rabo): os dois medem a coisa
+errada com confiança total. Conferir a UNIDADE antes de acreditar na reprovação.
+
+⚠️ **UM QUADRO SÓ NÃO JULGA UM SORTEIO.** Olhando UMA captura da cadeia nova eu escrevi que ela
+tinha virado "campo de agulhas" e quase a descartei. Aquele quadro tinha sorteado várias agulhas
+juntas — no A/B honesto (duas alturas da fase, antiga contra nova) a cadeia nova lê melhor e o
+platô de topo chato sumiu. É a irmã da regra "captura parada não julga movimento": **captura
+única não julga variante sorteada.**
+
+⚠️ **O GERADOR DEVOLVE O PRÓPRIO DEFEITO QUE VOCÊ FOI CONSERTAR.** Das quatro cristas da primeira
+leva, uma subia até a borda direita e era cortada reta — exatamente a peça que eu tinha ido
+substituir. Descartada, e o maciço regerado com a restrição escrita por extenso ("as colunas das
+duas bordas têm que ficar VAZIAS"). Prompt que descreve o que se quer não basta; **tem que proibir
+o defeito pelo nome.**
+
+⚠️ **MEDIR A COR ANTES DE ARGUMENTAR COM ELA, DE NOVO.** Eu ia escolher o míssil `[16]` "porque
+tem uma faixa azul no corpo" — a medição mostrou que os três finalistas têm a MESMA cor dominante
+(`#4f595b`) e que o azul é a **chama**, presente em todos os 64. A escolha passou a ser por
+contraste contra o céu real da fase (dois candidatos mediam 3,7× e 3,8× e sumiam no fundo; o
+escolhido mede 4,9×), pela regra que a Fase 2 já tinha escrito: *um tiro que não se vê não é
+dificuldade, é injustiça*.
+
+### O QUE FICOU ABERTO DA FATIA 5
+
+- **A animação nova da serpente da FUSÃO** — objeto PixelLab `eab6dbf3-3c51-403d-a70e-c167458a83b7`.
+  Ele pediu, e ficou para depois do merge. **PERGUNTAR QUAL antes de gerar**, e perguntar se a
+  arte nova (mais escura e mais blindada) entra no lugar da fusão azul que está no jogo hoje. As
+  duas animações que o objeto já tem são o MESMO gesto (virar a cabeça para oeste), então a nova
+  tem que ser outra coisa. Hipótese a pôr na mesa, não a escolher: a **investida** do ciclo de
+  fúria é o único verbo da luta sem gesto próprio.
+- **Os dois projéteis da Capitânia (Fase 2)**, achados na auditoria e NÃO tocados por serem de
+  fase fechada. `BossCapitania.ts:578` usa `bolt2` × 0,9 tingido de laranja — **mesma forma e
+  quase a mesma escala do tiro comum**, só muda o tint, que é o padrão que o Henrique já reprovou
+  duas vezes (*"um tiro magenta igual, sem característica nenhuma"*). `BossCapitania.ts:378` usa
+  `bolt2` esticado 2,4×1,3, mais defensável porque a silhueta difere. **Para a fatia da Fase 2.**
+- **`paint-bg-f1.png` ainda é 768×394** — a última pintura fora da resolução do jogo. Fase
+  fechada; para a fatia dela.
+- **Os pontos finos** (calibragem) ficam para a **revisão final**, por decisão dele.
 
 ### O PRIMEIRO TESTE JOGADO (2026-08-27) — o que ele aprovou, mudou e REVERTEU
 
