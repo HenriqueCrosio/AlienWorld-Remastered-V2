@@ -71,9 +71,30 @@ public/sprites/paint-bg-cut3.png           ← 384×216, gerado por scripts/pain
 
 **A pintura já resolve três coisas de graça:**
 
-- **As janelas já vêm vazadas** (cinco aberturas: duas pequenas à esquerda, o óvalo central grande,
-  duas pequenas à direita). O `scripts/vazar-janelas.mjs` fica **obsoleto para esta cena** — ele
-  continua existindo para o `hangar.png` da Fase 4.
+- **As cinco janelas já vêm MARCADAS** (duas à esquerda, o óvalo central, duas à direita).
+
+  ⚠️ **MAS MARCADAS NÃO É VAZADAS, E ISSO SE MEDIU.** O PNG chegou com **3 canais, sem alpha**: o
+  xadrez das janelas está PINTADO como pixels cinza opacos. É exatamente a armadilha que os
+  instaladores do projeto já documentam (lições 16–17: *"o gerador DESENHA o xadrez de
+  transparência dentro do PNG"*) — desta vez vinda da exportação, não do gerador.
+
+  **O key é limpo, com uma ressalva medida:**
+
+  | região | luminância | saturação | bate como "cinza de xadrez" |
+  |---|---|---|---|
+  | janelas | 73 | 0,8 | **100%** |
+  | convés | 44 | 13,2 | 0% |
+  | faixa de perigo | 24 | 22,5 | 0% |
+  | banda de baixo | 5 | 1,5 | 0% |
+  | parede / vísceras | 25 | 5,0 | ⚠️ **20,5%** |
+
+  O convés e a faixa estão a salvo — a saturação deles denuncia. Mas **20% da parede cai na mesma
+  faixa neutra**, então um key global por cor abriria buracos nas vísceras.
+
+  ⚠️ **A SOLUÇÃO É PREENCHIMENTO A PARTIR DE SEMENTES, NÃO LIMIAR MAIS APERTADO.** Uma semente
+  dentro de cada uma das cinco janelas, alastrando só por pixels que casam: pixel de parede que
+  por acaso casa não está CONECTADO a janela nenhuma e não vaza. Apertar o limiar até a parede
+  sobreviver quebraria a borda das janelas — e borda de janela é onde a nadadeira vai aparecer.
 - **O convés já está pintado**, com a faixa de perigo amarela e preta.
 - **A repetição morre**: é um quadro largo e assimétrico, não um azulejo.
 
