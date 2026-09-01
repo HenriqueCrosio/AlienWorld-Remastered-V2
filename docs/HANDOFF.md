@@ -54,8 +54,8 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
    (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A próxima é a **Fatia 6
    (Cutscene 3: a queda no hangar do Leviatã)**, que ainda não tem spec nem plano: **começa pelo
-   BRAINSTORMING**. ⚠️ Antes dela sobrou UM item da Fatia 5: a **animação nova da serpente da
-   fusão** — ver "O QUE FICOU ABERTO DA FATIA 5".
+   BRAINSTORMING**. A Fatia 5 não deixou nada em aberto — a fusão da serpente, que era o
+   último item, fechou em `4848820`.
 2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
    (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
    fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
@@ -484,7 +484,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 3 | Cutscene 1 | ✅ mergeada |
 | 4 | Cutscene 2 — a doca do cinturão | ✅ mergeada (`ee4e2a0`) |
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
-| — | *sobra da 5: a animação da serpente da fusão* | 🟡 **pendente — PERGUNTAR antes de gerar** |
+| — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ⬜ **A PRÓXIMA. Sem spec: começa pelo brainstorming** |
 | 7 | Fase 4 — o interior | ⬜ ⚠️ mexe em GEOMETRIA, não só em pintura (ver aviso acima) |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
@@ -909,14 +909,55 @@ contraste contra o céu real da fase (dois candidatos mediam 3,7× e 3,8× e sum
 escolhido mede 4,9×), pela regra que a Fase 2 já tinha escrito: *um tiro que não se vê não é
 dificuldade, é injustiça*.
 
+### A FUSÃO DA SERPENTE — o último item da Fatia 5, fechado (2026-09-01, `4848820`)
+
+Spec em `docs/superpowers/specs/2026-09-01-fusao-serpente-design.md`. Pedido dele, com liberdade
+total: *"quero que a transição da fusão seja repensada, algo mais explosivo misturado com bio
+mecânico"*. Aprovado por ele vendo a cena: *"ficou muito bom"*.
+
+⚠️ **"OESTE" É "PARA A NAVE" — E ESTE DOCUMENTO REGISTRAVA O CONTRÁRIO.** A anotação anterior
+dizia que as duas animações do objeto eram *"o MESMO gesto (virar a cabeça para oeste), então a
+nova tem que ser outra coisa"*. Num sidescroller o jogador está à **esquerda**: uma cabeça virada
+para oeste está **encarando o jogador**. A anotação mediu o gesto sem perguntar para onde ele
+apontava, e por isso descartou a animação certa. Quem viu foi o Henrique. **Antes de anotar um
+gesto como inútil, pergunte para onde ele aponta.**
+
+- **A arte nova SUBSTITUIU a fusão azul.** A antiga era CLARA e encarava a CÂMERA; a nova é
+  escura, blindada e virada para a nave, com a mandíbula ABERTA nos 9 quadros.
+- **A BOCA virou um offset próprio** (`FaseSerpente.boca`, ausente = cai na `cabeca`). Até aqui
+  `posCabeca()` era alvo E origem dos tiros; nesta arte os dois pontos ficam **29px afastados**.
+  Mexe em ORIGEM, nunca em peso — o ciclo de fúria é o mesmo.
+- **A cena:** silêncio → as três cicatrizes acendem na cor de cada cabeça morta → os fios
+  convergem para o núcleo com arcos elétricos e a espiral apertando → implosão e escuro →
+  **180ms de preto cheio, onde a troca acontece** → detonação BRANCA (rosa é a cor de dano).
+- **Só o NÚCLEO virou arte gerada.** Anel que cresce, fio que percorre caminho e implosão são
+  geometria, e geometria não vai bem para quadros gerados (o v3 leu "bater para cima e para
+  baixo" como GIRAR). Textura é o que código não faz.
+
+⚠️ **DUAS COISAS ESCREVENDO A MESMA PROPRIEDADE É UM DEFEITO, E O TWEEN GANHA.** O tween que
+aperta a espiral e o `setScale` da troca mexem os dois na escala do sprite, e o tween termina
+DEPOIS: ele repunha 0,506 por cima dos 0,63 e o "boss maior" nascia **menor** que a forma
+anterior. Guardar o tween e matá-lo na troca é o primo do `anims.stop()` antes do `setTexture`
+(armadilha 26) — **quem anima uma propriedade solta o volante antes de outro assumir.**
+
+⚠️ **UM VÉU SEM HOLD NÃO ESCONDE NADA.** A 1ª versão levava o véu a alpha 1,0 e começava a
+clarear no MESMO frame: a troca virava um piscar em vez de acontecer atrás do escuro. Os 180ms de
+preto cheio são a mesma receita dos 420ms do casco — que já estava escrita e não foi lida.
+
+⚠️ **O SEGUNDO ASSERT DA SESSÃO A REPROVAR CÓDIGO CERTO POR UNIDADE.** `sprite.texture.key` num
+sprite ANIMADO devolve o **quadro** (`serpenteFusaoAnim1`), nunca a chave da arte. O primeiro foi
+o `body.width` do míssil (que já vem em px de mundo). **Dois na mesma sessão — antes de acreditar
+numa reprovação, confira a UNIDADE do que o assert leu.**
+
+⚠️ **O MEDIDOR DA CASA NÃO SERVIA PARA ESTA ARTE, E ISSO SÓ APARECEU MEDINDO.** A
+`find-cabecas.mjs` procura ciano/verde/laranja; a fusão nova só tem laranja (18px de visor), e o
+laranja das costuras do CORPO contamina o centroide. Os offsets saíram de medir o osso e a
+cavidade **dentro da região do crânio** — e o primeiro ponto de boca que eu cravei caiu **fora da
+silhueta**, o que só apareceu porque o marcador foi desenhado na arte antes de o número entrar no
+código. **Medir, marcar, olhar — nessa ordem.**
+
 ### O QUE FICOU ABERTO DA FATIA 5
 
-- **A animação nova da serpente da FUSÃO** — objeto PixelLab `eab6dbf3-3c51-403d-a70e-c167458a83b7`.
-  Ele pediu, e ficou para depois do merge. **PERGUNTAR QUAL antes de gerar**, e perguntar se a
-  arte nova (mais escura e mais blindada) entra no lugar da fusão azul que está no jogo hoje. As
-  duas animações que o objeto já tem são o MESMO gesto (virar a cabeça para oeste), então a nova
-  tem que ser outra coisa. Hipótese a pôr na mesa, não a escolher: a **investida** do ciclo de
-  fúria é o único verbo da luta sem gesto próprio.
 - **Os dois projéteis da Capitânia (Fase 2)**, achados na auditoria e NÃO tocados por serem de
   fase fechada. `BossCapitania.ts:578` usa `bolt2` × 0,9 tingido de laranja — **mesma forma e
   quase a mesma escala do tiro comum**, só muda o tint, que é o padrão que o Henrique já reprovou

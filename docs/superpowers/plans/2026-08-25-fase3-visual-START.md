@@ -1,4 +1,4 @@
-# START — Fatia 5: FASE 3 ("O CASCO") — ✅ FECHADA
+# START — Fatia 5: FASE 3 ("O CASCO") — ✅ FECHADA, SEM PENDÊNCIAS
 
 **🟢 A FATIA ESTÁ MERGEADA EM `main` (`a28dd07`, `--no-ff`), COM PUSH.** Fechada em 2026-08-31.
 
@@ -9,25 +9,26 @@ consertados antes do merge. **O histórico completo, os veredictos e as lições
 
 ---
 
-## 🔴 A ÚNICA COISA QUE SOBROU DESTA FATIA
+## ✅ A FATIA 5 ESTÁ 100% FECHADA
 
-**A ANIMAÇÃO NOVA DA SERPENTE DA FUSÃO.** Ele pediu, e ficou para depois do merge. Tudo o que já
-foi apurado está na seção 1 abaixo — **não re-descubra**. E a regra continua valendo:
-**PERGUNTE QUAL ANIMAÇÃO antes de gerar**, e pergunte se a arte nova entra no lugar da fusão azul
-que está no jogo hoje.
+Nada em aberto. O último item — **a fusão da serpente** — fechou em 2026-09-01 (`4848820`) e foi
+aprovado por ele vendo a cena: *"ficou muito bom"*. Spec em
+`docs/superpowers/specs/2026-09-01-fusao-serpente-design.md`; as lições estão em `docs/HANDOFF.md`,
+seção "A FUSÃO DA SERPENTE".
 
-**Depois disso, a próxima fatia é a 6 — Cutscene 3 (a queda no hangar do Leviatã).** Ela não tem
-spec nem plano: **começa pelo BRAINSTORMING.**
+⚠️ **A seção "O QUE FALTA" abaixo está OBSOLETA e ficou como histórico** — o item 1 dela dizia
+que as duas animações do objeto eram "o mesmo gesto inútil, virar a cabeça para oeste".
+**Oeste é para a NAVE**: num sidescroller o jogador está à esquerda, e era a animação certa o
+tempo todo.
 
 ---
 
-## 📌 A frase de arranque da próxima sessão
+## ➡️ A PRÓXIMA COISA É A FATIA 6 — Cutscene 3 (a queda no hangar do Leviatã)
 
-> **"A Fatia 5 fechou e está mergeada. Sobrou a animação nova da serpente da FUSÃO — objeto
-> PixelLab `eab6dbf3-3c51-403d-a70e-c167458a83b7`. Leia
-> `docs/superpowers/plans/2026-08-25-fase3-visual-START.md`, me pergunte QUAL animação antes de
-> gerar, e me diga se a arte nova entra no lugar da fusão azul que está no jogo hoje. Depois
-> disso a gente abre a Fatia 6 (Cutscene 3) pelo brainstorming. Sobe o `npm run dev`."**
+Ela **não tem spec nem plano**: começa pelo BRAINSTORMING.
+
+> **Frase de arranque:** *"Vamos abrir a Fatia 6 do passe visual — a Cutscene 3, a queda no
+> hangar do Leviatã. Começa pelo brainstorming. Sobe o `npm run dev`."*
 
 ---
 
