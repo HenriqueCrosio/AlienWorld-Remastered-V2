@@ -54,8 +54,10 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
    (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A próxima é a **Fatia 6
    (Cutscene 3: a queda no hangar do Leviatã)**, que ainda não tem spec nem plano: **começa pelo
-   BRAINSTORMING**. A Fatia 5 não deixou nada em aberto — a fusão da serpente, que era o
-   último item, fechou em `4848820`.
+   BRAINSTORMING** — que já aconteceu. A Fatia 5 não deixou nada em aberto (a fusão da serpente,
+   o último item, fechou em `4848820`), e a **Fatia 6 já tem spec e plano aprovados, com zero
+   linha de código escrita**. Retome por
+   `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`.
 2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
    (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
    fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
@@ -485,7 +487,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 4 | Cutscene 2 — a doca do cinturão | ✅ mergeada (`ee4e2a0`) |
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
-| 6 | **Cutscene 3 — a queda no hangar** | ⬜ **A PRÓXIMA. Sem spec: começa pelo brainstorming** |
+| 6 | **Cutscene 3 — a queda no hangar** | 🟡 **spec e plano PRONTOS, código zero** — ver o START dela |
 | 7 | Fase 4 — o interior | ⬜ ⚠️ mexe em GEOMETRIA, não só em pintura (ver aviso acima) |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
@@ -785,6 +787,38 @@ ficou PARAMETRIZADA (`NAVE_DA_VAGA` / `VAGA_AX` / `VAGA_AY`) — **trocar a nave
 O que viaja para outra interlude: a constante da nave, uma posição MEDIDA na arte daquela cena, um
 `Image` (nunca `Sprite`, para não tocar animação por engano), o sumiço em `escolher()` quando o
 jogador leva a nave, e a morte junto com o cenário quando ele não leva.
+
+---
+
+## A FATIA 6 — a Cutscene 3, PLANEJADA E NÃO INICIADA (2026-09-01)
+
+🟡 **Spec e plano aprovados, ZERO código.** Sem branch — a fatia não começou.
+**Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`.**
+
+- Spec: `docs/superpowers/specs/2026-09-01-cutscene3-visual-design.md`
+- Plano: `docs/superpowers/plans/2026-09-01-cutscene3-visual.md` (5 tarefas)
+
+**O diagnóstico, capturado e não suposto** (`_cut3/ver-cena.mjs`): a parede da cutscene é o
+`hangar.png` de 160px desenhado duas vezes, e a repetição se vê — o mesmo arco/janela/pilar quatro
+vezes na tela. Não há segundo plano. E as **carcaças da frota engolida**, que o doc promete desde
+julho, são três borrões cinzas.
+
+**A pintura do Henrique já está versionada** (`assets/raw/paint-bg-cut3-original.png`, 1672×940):
+visceral e biomecânica, *"para passar esse ar de interior, sendo que a fase 4 já é no interior do
+Leviatã"*. Três peças do PixelLab entram por cima: a **nadadeira peitoral** (ideia dele — ela
+atravessa as janelas mostrando o Leviatã remando no nado espacial), as **carcaças** e o **portão**.
+
+⚠️ **A FRONTEIRA DESTA FATIA:** o `hangar.png` **não se toca** — ele é a parede de fundo da FASE 4,
+que é a Fatia 7. A pintura entra como asset NOVO.
+
+⚠️ **A PINTURA CHEGOU COM AS JANELAS MARCADAS, MAS NÃO VAZADAS** (3 canais, sem alpha; o xadrez
+pintado como pixels opacos). O key foi medido: janelas em lum 73 / sat 0,8, convés e faixa a 0% —
+mas **20,5% da parede cai na mesma faixa neutra**, então o vazamento é por SEMENTES, nunca por
+limiar global.
+
+⚠️ **A DIREÇÃO DA NADADEIRA (direita → esquerda) FOI DERIVADA E CONFIRMADA**, nunca assumida — a
+Fase 3 cravou que o corpo fica fora do quadro à direita e que ele nada no mesmo sentido da nave.
+Assumir direção sem perguntar reprovou quatro versões do rabo.
 
 ---
 
