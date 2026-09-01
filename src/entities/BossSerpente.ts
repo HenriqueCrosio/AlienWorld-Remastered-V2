@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH } from '../config';
+import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
+import type { Fx } from '../systems/Fx';
 import type { StageBoss } from './Boss';
 
 /**
@@ -14,6 +15,17 @@ interface FaseSerpente {
   hp: number;
   /** Offset da cabeça VULNERÁVEL, do centro da arte. MEDIDO por cor (scripts/find-cabecas.mjs). */
   cabeca: { x: number; y: number };
+  /**
+   * De onde os PROJÉTEIS saem. Ausente = a própria `cabeca`, que era o comportamento de todas
+   * as fases até 2026-09-01.
+   *
+   * ⚠️ ELE EXISTE PORQUE ALVO E BOCA DEIXARAM DE SER O MESMO PONTO NA FUSÃO. A arte nova dela
+   * tem o crânio virado para a nave com a MANDÍBULA ABERTA — e a boca aberta fica ~45px abaixo
+   * do centro do crânio. Cuspir do centro do crânio faria o veneno nascer na testa dela.
+   * Pedido do Henrique: *"assim conseguimos fazer com que os projéteis e skills saiam de um
+   * lugar próprio, a boca"*.
+   */
+  boca?: { x: number; y: number };
   /** Onde os COTOS fumegam nesta fase (as cabeças que já morreram). */
   cotos: { x: number; y: number }[];
   escala: number;
@@ -56,6 +68,8 @@ export class BossSerpente implements StageBoss {
   private hpTotal: number;
   private readonly maxHpTotal: number;
   private faseIdx = 0;
+  /** Durante a cena da FUSÃO: a ondulação para e o corpo cede. Ver `mover` e `fusao`. */
+  private colapso = false;
   private t = 0;
   private entering = true;
   private dead = false;
@@ -113,12 +127,26 @@ export class BossSerpente implements StageBoss {
     { arte: 'serpente2c', anim: 'serpente-2c-idle', hp: 50, cabeca: { x: -10.1, y: -55.4 }, cotos: [{ x: -63.1, y: -43.3 }], escala: 0.55 },
     { arte: 'serpente1c', anim: 'serpente-1c-idle', hp: 50, cabeca: { x: 46.4, y: -62.0 }, cotos: [{ x: -60, y: -25 }, { x: -10, y: -50 }], escala: 0.55 },
     // A fusão é MAIOR (0.63 vs 0.55 ≈ +15%): "um boss maior com uma cabeça só".
-    { arte: 'serpenteFusao', anim: 'serpente-fusao-fury', hp: 60, cabeca: { x: -30.8, y: -68.0 }, cotos: [{ x: 30, y: 30 }, { x: -20, y: 60 }], escala: 0.63 },
+    //
+    // ⚠️ OS DOIS OFFSETS SÃO DA ARTE NOVA (2026-09-01) E FORAM MEDIDOS, NÃO HERDADOS. A arte
+    // anterior era a fusão AZUL que encarava a CÂMERA; a nova é escura, blindada e com o crânio
+    // virado para OESTE — que num sidescroller é onde o jogador está. Os valores antigos
+    // (cabeça -30.8,-68.0) eram daquela arte e apontavam para o lugar errado desta.
+    //
+    //   cabeca  centroide do OSSO do crânio   -52.0,-75.6   (cai na testa, acima do visor)
+    //   boca    a goela, na frente da arcada  -58.0,-30.0   (o tiro sai por entre as presas)
+    //
+    // A `find-cabecas.mjs` sozinha não resolve esta arte: ela procura ciano/verde/laranja, e a
+    // fusão nova só tem laranja (o visor, 18px) — e o laranja das costuras do CORPO contamina o
+    // centroide se a busca não for restrita ao crânio. Os dois números acima saíram de medir o
+    // osso e a cavidade dentro da região do crânio, e foram CONFERIDOS marcando-os na arte.
+    { arte: 'serpenteFusao', anim: 'serpente-fusao-fury', hp: 60, cabeca: { x: -52.0, y: -75.6 }, boca: { x: -58.0, y: -30.0 }, cotos: [{ x: 30, y: 30 }, { x: -20, y: 60 }], escala: 0.63 },
   ];
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly enemies: EnemySystem,
+    private readonly fx: Fx,
   ) {
     const fases = BossSerpente.FASES;
     this.hpFase = fases[0].hp;
@@ -255,6 +283,15 @@ export class BossSerpente implements StageBoss {
    * puxado de volta ao posto; dentro dela, a máquina de estados manda.
    */
   private mover(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
+    // ⚠️ DURANTE O COLAPSO DA FUSÃO A ONDULAÇÃO PARA, e isso é o primeiro beat da cena: um
+    // corpo que continua respirando enquanto se desfaz não lê como colapso. Ela CEDE alguns px
+    // em vez de travar no lugar — parar seco leria como bug de animação.
+    if (this.colapso) {
+      this.body.setVelocityY((BossSerpente.BASE_Y + 6 - this.sprite.y) * 2);
+      this.body.setVelocityX((BossSerpente.STATION_X - this.sprite.x) * 3);
+      return;
+    }
+
     const alvoY =
       BossSerpente.BASE_Y + Math.sin(this.t * 1.25) * BossSerpente.ONDULACAO;
     this.body.setVelocityY((alvoY - this.sprite.y) * 4);
@@ -302,7 +339,10 @@ export class BossSerpente implements StageBoss {
     this.cdPrincipal -= dt;
     this.cdSecundario -= dt;
 
-    const boca = this.posCabeca();
+    // ⚠️ A BOCA, NÃO A CABEÇA (2026-09-01). Nas três primeiras formas as duas são o mesmo
+    // ponto; na FUSÃO a boca aberta fica ~45px abaixo do crânio, e cuspir da cabeça faria o
+    // veneno nascer na testa dela. Ver `posBoca`.
+    const boca = this.posBoca();
 
     switch (this.faseIdx) {
       case 0:
@@ -443,7 +483,9 @@ export class BossSerpente implements StageBoss {
     for (let i = 0; i < n; i++) {
       this.scene.time.delayedCall(i * 120, () => {
         if (this.dead || !this.sprite.active) return;
-        const boca = this.posCabeca();
+        // A BOCA, não a cabeça — ver `posBoca`. E ela é lida A CADA tiro da rajada, de
+        // propósito: a serpente se move durante os 120ms entre um e outro.
+        const boca = this.posBoca();
         const ang = Phaser.Math.Angle.Between(boca.x, boca.y, target.x, target.y);
         this.tiro(boca.x, boca.y, ang, speed);
         this.muzzleFx.explode(3, boca.x, boca.y);
@@ -459,6 +501,19 @@ export class BossSerpente implements StageBoss {
     return {
       x: this.sprite.x + f.cabeca.x * f.escala,
       y: this.sprite.y + f.cabeca.y * f.escala,
+    };
+  }
+
+  /**
+   * DE ONDE O TIRO SAI. Cai de volta na `cabeca` quando a fase não declara `boca` — as três
+   * primeiras formas não declaram, e para elas nada muda.
+   */
+  private posBoca(): { x: number; y: number } {
+    const f = this.fase;
+    const b = f.boca ?? f.cabeca;
+    return {
+      x: this.sprite.x + b.x * f.escala,
+      y: this.sprite.y + b.y * f.escala,
     };
   }
 
@@ -529,10 +584,15 @@ export class BossSerpente implements StageBoss {
    * percorrendo o CORPO inteiro — o colapso que precede o "boss maior" surgir.
    */
   private transicao(): void {
-    const paraFusao = this.faseIdx === BossSerpente.FASES.length - 2;
+    // A ULTIMA transicao nao e uma morte de cabeca -- e a FUSAO, e ela tem cena propria.
+    if (this.faseIdx === BossSerpente.FASES.length - 2) {
+      this.fusao();
+      return;
+    }
+
     const cabecaMorta = this.posCabeca();
-    const duracao = paraFusao ? 1500 : 550;
-    const estouros = paraFusao ? 10 : 5;
+    const duracao = 550;
+    const estouros = 5;
 
     this.imune = duracao / 1000 + 0.2;
     this.investida = 'nao';
@@ -541,14 +601,10 @@ export class BossSerpente implements StageBoss {
     for (let i = 0; i < estouros; i++) {
       this.scene.time.delayedCall(i * (duracao / estouros), () => {
         if (!this.sprite.active) return;
-        // Na convulsão os estouros percorrem o CORPO; na morte de cabeça, ficam nela.
-        const raio = paraFusao ? 70 : 26;
-        const cx = paraFusao ? this.sprite.x : cabecaMorta.x;
-        const cy = paraFusao ? this.sprite.y : cabecaMorta.y;
         this.muzzleFx.explode(
           10,
-          cx + Phaser.Math.Between(-raio, raio),
-          cy + Phaser.Math.Between(-raio, raio),
+          cabecaMorta.x + Phaser.Math.Between(-26, 26),
+          cabecaMorta.y + Phaser.Math.Between(-26, 26),
         );
         this.scene.cameras.main.shake(70, 0.004);
       });
@@ -556,22 +612,247 @@ export class BossSerpente implements StageBoss {
 
     this.scene.time.delayedCall(duracao, () => {
       if (!this.sprite.active || this.dead) return;
-
-      this.faseIdx++;
-      const f = this.fase;
-      this.hpFase = f.hp;
-
-      // PARAR A ANIMAÇÃO ANTES DA TEXTURA (armadilha nº 26): sem o stop, o Phaser repõe o
-      // quadro da animação velha por cima e a cabeça morta "ressuscita" na tela.
-      this.sprite.anims.stop();
-      this.sprite.setTexture(f.arte);
-      this.sprite.setScale(f.escala);
-      if (this.scene.anims.exists(f.anim)) this.sprite.play(f.anim);
-      this.ajustarCorpo();
-
+      this.vestirFase(this.faseIdx + 1);
       this.muzzleFx.explode(24, this.sprite.x, this.sprite.y);
-      this.scene.cameras.main.shake(paraFusao ? 300 : 160, paraFusao ? 0.012 : 0.007);
-      this.scene.cameras.main.flash(paraFusao ? 300 : 140, 255, 120, 160);
+      this.scene.cameras.main.shake(160, 0.007);
+      this.scene.cameras.main.flash(140, 255, 120, 160);
+    });
+  }
+
+  /** Troca a arte, a escala, a animacao e a hitbox para a fase `i`. */
+  private vestirFase(i: number): void {
+    this.faseIdx = i;
+    const f = this.fase;
+    this.hpFase = f.hp;
+
+    // PARAR A ANIMACAO ANTES DA TEXTURA (armadilha 26): sem o stop, o Phaser repoe o quadro da
+    // animacao velha por cima e a cabeca morta "ressuscita" na tela.
+    this.sprite.anims.stop();
+    this.sprite.setTexture(f.arte);
+    this.sprite.setScale(f.escala);
+    if (this.scene.anims.exists(f.anim)) this.sprite.play(f.anim);
+    this.ajustarCorpo();
+  }
+
+  /** As cores das TRES cabecas, na ordem em que elas morrem. Ver `fusao`. */
+  private static readonly CORES_CABECAS = [0x48e8f0, 0x60f088, 0xff9040] as const;
+
+  /** Os tempos da cena da fusao, em ms. Ver `fusao`. */
+  private static readonly FUSAO = {
+    silencio: 250,
+    convergencia: 900,
+    implosao: 250,
+    /**
+     * O PRETO CHEIO, e ele existe porque a primeira versao NAO o tinha. Medido pela sonda: o veu
+     * chegava a alpha 1,0 e comecava a clarear no MESMO frame, entao a troca acontecia num
+     * piscar em vez de atras do escuro. E a mesma licao que o casco pagou na virada do Ato 1, e
+     * la ela ja estava escrita: sao os 420ms de preto cheio que fazem a troca ser invisivel.
+     */
+    escuroCheio: 180,
+    detonacao: 350,
+    hold: 400,
+  } as const;
+
+  /**
+   * A FUSAO -- a cena que substituiu a "convulsao" (2026-09-01, pedido do Henrique: *"quero que
+   * a transicao da fusao seja repensada, algo mais explosivo misturado com bio mecanico"*).
+   *
+   * OK O QUE ESTAVA ERRADO NA VERSAO ANTERIOR. Ela era 1500ms de dez estouros ALEATORIOS num
+   * raio de 70px em volta do centro, troca de textura, e `flash(300, 255, 120, 160)` -- ROSA,
+   * que e literalmente a cor de DANO deste jogo. Uma coisa que pisca de rosa e explode em
+   * pontos sorteados le como "esta levando dano", nao como "tres estao virando uma".
+   *
+   * O MATERIAL DA FUSAO JA ESTAVA NA LUTA E NINGUEM TINHA USADO: as tres cabecas tem COR
+   * (ciano, verde, laranja) e os `cotos` guardam ONDE cada uma morreu. A fusao fica literal se a
+   * materia das tres voltar para dentro -- sem inventar vocabulario novo, e cobrando de volta
+   * uma informacao que o jogador passou a luta inteira aprendendo.
+   *
+   * A cena, em cinco beats:
+   *
+   *   0ms     O corpo PARA (ver `colapso` em `mover`) e cede. Nenhum estouro. O silencio e o
+   *           que faz o barulho seguinte existir -- e ele ja e o 4o passo do ciclo de furia,
+   *           entao e vocabulario que a luta ja tem.
+   *   250ms   As tres CICATRIZES acendem, cada uma na cor da cabeca que morreu ali.
+   *   600ms   A CONVERGENCIA: os tres fios rastejam ate o nucleo, que cresce conforme eles
+   *           chegam. Arcos eletricos saltam pelo corpo. A escala APERTA (a espiral fechando).
+   *   1500ms  A IMPLOSAO: tudo colapsa no nucleo e a tela ESCURECE.
+   *   1750ms  A DETONACAO: BRANCO, nao rosa -- rosa e dano, branco e nascimento. Atras do
+   *           branco a arte troca, e ela surge ja encarando a nave, de boca aberta.
+   *
+   * ATRAS DO ESCURO NAO EXISTE ESTADO "MEIO TRANSFORMADO", e e por isso que nenhum quadro
+   * intermediario de metamorfose precisou ser gerado. E a mesma licao que matou o fade de
+   * 1500ms do casco nesta mesma fatia -- e ali ela custou quatro rodadas para ser aprendida.
+   *
+   * OS PROJETEIS EM VOO SAO LIMPOS NO COLAPSO. Um leque disparado meio segundo antes
+   * continuaria voando durante a cena inteira e mataria o jogador enquanto ele assiste, sem
+   * nada na tela explicando de onde veio. E a mesma regra que a `die()` ja aplica.
+   */
+  private fusao(): void {
+    const F = BossSerpente.FUSAO;
+    const total = F.silencio + F.convergencia + F.implosao + F.escuroCheio + F.detonacao;
+
+    this.imune = (total + F.hold) / 1000;
+    this.investida = 'nao';
+    this.colapso = true;
+    this.sprite.clearTint();
+
+    for (const obj of [...this.enemies.enemyBullets.getChildren()]) {
+      const b = obj as Phaser.Physics.Arcade.Sprite;
+      if (b.active) this.enemies.release(b);
+    }
+
+    // As TRES origens: os dois cotos desta fase (onde a ciano e a verde morreram) e a cabeca que
+    // acabou de cair. Em px de MUNDO, congelados agora -- o corpo ainda cede alguns px.
+    const f = this.fase;
+    const origens = [...f.cotos, f.cabeca].map((o, i) => ({
+      x: this.sprite.x + o.x * f.escala,
+      y: this.sprite.y + o.y * f.escala,
+      cor: BossSerpente.CORES_CABECAS[i] ?? 0xffffff,
+    }));
+    const nucleoX = this.sprite.x;
+    const nucleoY = this.sprite.y;
+
+    this.scene.time.delayedCall(F.silencio, () => {
+      if (!this.sprite.active || this.dead) return;
+
+      const nucleo = this.scene.add
+        .image(nucleoX, nucleoY, 'fusaoNucleo')
+        .setDepth(31)
+        .setScale(0)
+        .setAlpha(0)
+        // O nome e o que a sonda tem para agarrar -- e para cobrar que ele foi DESTRUIDO.
+        .setName('nucleoDaFusao');
+
+      for (const o of origens) {
+        const fio = this.scene.add
+          .image(o.x, o.y, 'spark')
+          .setTint(o.cor)
+          .setDepth(31)
+          .setScale(0)
+          .setAlpha(0)
+          .setName('fioDaFusao');
+
+        // Acende NO LUGAR (200ms), espera, e so entao viaja. Acender e viajar ao mesmo tempo
+        // esconderia de onde ele saiu, que e a unica coisa que este beat tem para dizer.
+        this.scene.tweens.add({
+          targets: fio,
+          scale: 2.2,
+          alpha: 1,
+          duration: 200,
+          ease: 'Quad.easeOut',
+        });
+        this.scene.tweens.add({
+          targets: fio,
+          x: nucleoX,
+          y: nucleoY,
+          delay: 350,
+          duration: F.convergencia - 100,
+          ease: 'Quad.easeIn',
+          onComplete: () => fio.destroy(),
+        });
+      }
+
+      this.scene.tweens.add({
+        targets: nucleo,
+        scale: 1.1,
+        alpha: 1,
+        delay: 350,
+        duration: F.convergencia - 100,
+        ease: 'Quad.easeIn',
+      });
+
+      // A espiral FECHANDO. Escala, nunca posicao: a serpente e ancorada pela fisica, e mexer no
+      // y dela aqui brigaria com o `mover` (armadilha 2).
+      //
+      // OK ELE PRECISA SER GUARDADO E MORTO NA TROCA. Este tween e o `setScale` do `vestirFase`
+      // escrevem A MESMA PROPRIEDADE, e o tween termina DEPOIS: sem o `remove()` ele repoe 0,506
+      // por cima dos 0,63 da fusao e o "boss maior" nasce MENOR que a forma anterior. Medido pela
+      // sonda -- a escala final ficava em 0,506. E o primo do `anims.stop()` antes do
+      // `setTexture` (armadilha 26): quem anima uma propriedade tem que soltar o volante antes de
+      // outro alguem assumir.
+      const aperto = this.scene.tweens.add({
+        targets: this.sprite,
+        scale: f.escala * 0.92,
+        delay: 350,
+        duration: F.convergencia - 100,
+        ease: 'Sine.easeIn',
+      });
+
+      // Os arcos. Sete ao longo da convergencia, cada um entre duas voltas sorteadas do corpo --
+      // e o `Fx.estalo` que a agua-viva estreou, num caso novo.
+      for (let i = 0; i < 7; i++) {
+        this.scene.time.delayedCall(350 + i * ((F.convergencia - 100) / 7), () => {
+          if (!this.sprite.active || this.dead) return;
+          this.fx.estalo(
+            this.sprite.x + Phaser.Math.Between(-60, 60),
+            this.sprite.y + Phaser.Math.Between(-50, 50),
+            Phaser.Math.Between(16, 30),
+          );
+        });
+      }
+
+      this.scene.time.delayedCall(F.convergencia, () => {
+        if (!this.sprite.active || this.dead) return;
+
+        this.fx.implodeBig(nucleoX, nucleoY, 1.4, 32);
+        this.scene.tweens.add({
+          targets: nucleo,
+          scale: 0.2,
+          duration: F.implosao,
+          ease: 'Quad.easeIn',
+          onComplete: () => nucleo.destroy(),
+        });
+
+        // `depth 90`: acima de todo o jogo e ABAIXO do HUD (99/100) -- o mesmo numero, pela
+        // mesma razao, do escurecimento que entrega o casco na virada do Ato 1.
+        const veu = this.scene.add
+          .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000)
+          .setOrigin(0, 0)
+          .setDepth(90)
+          .setAlpha(0)
+          .setName('veuDaFusao');
+        this.scene.tweens.add({
+          targets: veu,
+          alpha: 1,
+          duration: F.implosao,
+          ease: 'Sine.easeIn',
+        });
+
+        this.scene.time.delayedCall(F.implosao, () => {
+          if (!this.sprite.active || this.dead) {
+            veu.destroy();
+            return;
+          }
+
+          // NO PRETO CHEIO: a troca acontece aqui, onde ninguem a ve. O `remove()` do aperto vem
+          // ANTES do `vestirFase` -- ver o comentario dele.
+          aperto.remove();
+          this.colapso = false;
+          this.vestirFase(this.faseIdx + 1);
+
+          // E so DEPOIS do escuro cheio a detonacao acontece.
+          this.scene.time.delayedCall(F.escuroCheio, () => {
+            if (!this.sprite.active || this.dead) {
+              veu.destroy();
+              return;
+            }
+
+            veu.setFillStyle(0xffffff);
+            this.fx.choque(nucleoX, nucleoY, 2.2);
+            this.scene.cameras.main.shake(360, 0.014);
+
+            this.scene.tweens.add({
+              targets: veu,
+              alpha: 0,
+              duration: F.detonacao,
+              ease: 'Sine.easeOut',
+              // DESTRUIR, nunca deixar em alpha 0: um retangulo de tela cheia esquecido em cima
+              // do jogo e a armadilha que o preto do casco ja documentou.
+              onComplete: () => veu.destroy(),
+            });
+          });
+        });
+      });
     });
   }
 

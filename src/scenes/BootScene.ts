@@ -286,6 +286,17 @@ const ART: Record<string, string> = {
   serpente2c: 'sprites/serpente-2c.png',
   serpente1c: 'sprites/serpente-1c.png',
   serpenteFusao: 'sprites/serpente-fusao.png',
+
+  // ⚠️ O NÚCLEO DA FUSÃO — a única peça de ARTE da cena da fusão; o resto dela é tween.
+  // A divisão segue a lição que esta fatia pagou: o v3 do PixelLab leu "bater para cima e para
+  // baixo" como GIRAR. Anel que cresce, fio que percorre um caminho e implosão são
+  // transformação geométrica e vivem melhor em código; textura é o que código não faz.
+  //
+  // ⚠️ E ELE É DE UMA COR SÓ, DE PROPÓSITO. A primeira versão da spec pedia as TRÊS cores
+  // (ciano/verde/laranja) vazando dele. Errado por dois motivos: três cores em 52px viram lama,
+  // e narrativamente o núcleo é justamente onde as três viram UMA. As três cores vivem nos FIOS
+  // que chegam nele; ele é o resultado.
+  fusaoNucleo: 'sprites/fusao-nucleo.png',
   aranha: 'sprites/aranha.png',
   aguaViva: 'sprites/agua-viva.png',
   ...animFrames('serpenteAnim', 'serpente-anim'),
