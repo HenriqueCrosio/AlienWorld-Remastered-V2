@@ -62,12 +62,17 @@ const parada = await estado();
 console.log('parada   ', JSON.stringify(parada));
 await page.screenshot({ path: 'probe-i3-painel.png' });
 
-// Derrapou até o meio do convés? (o convés está em y=150; a nave assenta 7px acima; para em x=240)
-const noConves = parada.nave && Math.abs(parada.nave.y - (150 - 7)) < 4;
+// Derrapou até o convés? A nave assenta 7px acima da linha dele e para em x=258.
+//
+// ⚠️ O 150 DAQUI ERA DO AZULEJO. Na Fatia 6 a parede virou a PINTURA do Henrique e o convés foi
+// re-medido: a faixa de perigo dela está em y=171..173, então DECK_Y=171 e a nave assenta em 164.
+// A sonda foi CORRIGIDA para o número novo, não afrouxada — a tolerância continua sendo 4px.
+const DECK_Y = 171;
+const noConves = parada.nave && Math.abs(parada.nave.y - (DECK_Y - 7)) < 4;
 console.log(
   noConves
     ? '✔ derrapou NO CONVÉS'
-    : `✘ parou FORA do convés (y=${parada.nave?.y}, esperado ~143)`,
+    : `✘ parou FORA do convés (y=${parada.nave?.y}, esperado ~${DECK_Y - 7})`,
 );
 // x=258: o VÃO LIVRE entre os dois montes de carcaça (parar colado no monte esquerdo escondia
 // a nave no meio do metal cinza — revisão visual 2026-07-19).
