@@ -487,7 +487,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 4 | Cutscene 2 — a doca do cinturão | ✅ mergeada (`ee4e2a0`) |
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
-| 6 | **Cutscene 3 — a queda no hangar** | 🟡 **spec e plano PRONTOS, código zero** — ver o START dela |
+| 6 | **Cutscene 3 — a queda no hangar** | 🟠 **as 5 tarefas IMPLEMENTADAS** em `feat/cutscene3-visual` (`06dbe68`), sonda verde — **falta o teste jogado** |
 | 7 | Fase 4 — o interior | ⬜ ⚠️ mexe em GEOMETRIA, não só em pintura (ver aviso acima) |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
