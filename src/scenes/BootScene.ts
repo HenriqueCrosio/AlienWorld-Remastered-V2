@@ -633,6 +633,15 @@ const ART: Record<string, string> = {
   // arte = 1px de jogo, posicionada em y=-27. A pintura é do Henrique.
   paintBgCut2: 'sprites/paint-bg-cut2.png',
 
+  // ⚠️ A PINTURA DO HANGAR DA CUTSCENE 3 — asset NOVO, e ela NÃO substitui o `hangar.png`.
+  // Aquele arquivo é também a parede de fundo da FASE 4 (`Parallax` modo `interior`): trocá-lo
+  // faria a Fatia 6 mudar a Fase 4 sem ninguém pedir, e a Fase 4 é a Fatia 7. A mesma lei que o
+  // cooldown dos canhões já custou nesta campanha.
+  //
+  // As cinco janelas são vazadas por `scripts/instalar-cut3.mjs` (preenchimento a partir de
+  // sementes, nunca limiar global — 20,5% da parede cai na mesma faixa neutra do xadrez).
+  paintBgCut3: 'sprites/paint-bg-cut3.png',
+
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
   // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).
