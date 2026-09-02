@@ -103,6 +103,60 @@ ok(carc.xs.every((x) => Math.abs(x - 258) > 40), `nenhuma carcaca no vao de para
 // faixa das janelas apagaria a NADADEIRA, que so existe na tela pelo que as janelas deixam ver.
 ok(carc.topos.every((t) => t > 132), `nenhuma carcaca invade a faixa das janelas (topos ${carc.topos.join(',')} > 132)`);
 
+// ─── O PORTÃO: a saída morre, e a cicatriz FICA ───
+//
+// ⚠️ O COLAPSO NÃO ACONTECE SOZINHO. Ele só dispara depois de o jogador ESCOLHER uma nave no
+// painel — uma sonda que apenas espera nunca vê o portão, e o assert ficaria falhando para
+// sempre por um motivo que não é o defeito. A sonda tem de JOGAR a cena.
+//
+// ⚠️ E A ESPERA É PELO ESTADO, NÃO PELO RELÓGIO. O painel abre por volta de t≈10,5s, mas isso
+// depende da derrapagem; espera cega em sonda é a receita de falha intermitente.
+let painel = false;
+for (let i = 0; i < 60 && !painel; i++) {
+  painel = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    return s.panel ? 'aberto' : false;
+  });
+  if (!painel) await page.waitForTimeout(400);
+}
+ok(!!painel, 'o painel de naves abriu (a sonda precisa dele para chegar ao colapso)');
+
+await page.keyboard.press('8');
+await page.waitForTimeout(400);
+await page.keyboard.press('Enter');
+await page.waitForTimeout(300);
+await page.keyboard.press('Enter');
+
+let port = null;
+for (let i = 0; i < 40 && !port; i++) {
+  port = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const p = s.children.list.filter((o) => o.name === 'portaoCut3')[0];
+    return p ? { x: Math.round(p.x), alpha: +p.alpha.toFixed(2), depth: p.depth,
+                 topo: Math.round(p.y - p.displayHeight), depthParede: 70 } : null;
+  });
+  if (!port) await page.waitForTimeout(300);
+}
+// ⚠️ ELE NASCE EM alpha=0 E ENTRA POR TWEEN de 260ms. Ler o alpha no instante em que o objeto
+// aparece pega o portão NO MEIO DO FADE (0,32 numa execução) e reprova uma cena correta — o
+// assert julga o estado FINAL, então a sonda espera o tween fechar.
+if (port) {
+  await page.waitForTimeout(500);
+  port = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const p = s.children.list.filter((o) => o.name === 'portaoCut3')[0];
+    return p ? { x: Math.round(p.x), alpha: +p.alpha.toFixed(2), depth: p.depth,
+                 topo: Math.round(p.y - p.displayHeight), depthParede: 70 } : null;
+  });
+}
+console.log('portao  ', JSON.stringify(port));
+ok(!!port, 'o portao selou a saida');
+if (port) {
+  ok(port.x < 160, `e ele fecha a metade ESQUERDA, que e a boca (x=${port.x})`);
+  ok(port.alpha === 1, 'ele esta solido, nao meio transparente');
+  ok(port.depth > port.depthParede, `ele fica NA FRENTE da pintura (${port.depth} > ${port.depthParede}) — e a vista para fora que ele apaga`);
+}
+
 console.log('');
 console.log(falhas ? `${falhas} FALHA(S)` : '✔ A FATIA 6 ESTA DE PE');
 await browser.close();

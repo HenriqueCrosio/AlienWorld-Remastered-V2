@@ -584,6 +584,19 @@ export class Interlude3Scene extends Phaser.Scene {
    * Posições FIXAS, não sorteadas: a sonda fotografa a cena, e o quadro tem que ser reproduzível.
    */
   private selarBoca(): void {
+    // ⚠️ O PORTÃO ENTRA PRIMEIRO E O ENTULHO CAI EM VOLTA. A ordem importa: uma comporta que
+    // aparece depois do entulho leria como "surgiu do nada"; aparecendo antes, o entulho vira o
+    // que ela ARRANCOU ao fechar.
+    if (this.textures.exists('portaoHangar')) {
+      const portao = this.add
+        .image(80, Interlude3Scene.DECK_Y, 'portaoHangar')
+        .setOrigin(0.5, 1)
+        .setDepth(Interlude3Scene.DEPTH_ENTULHO)
+        .setAlpha(0)
+        .setName('portaoCut3');
+      this.tweens.add({ targets: portao, alpha: 1, duration: 260, ease: 'Quad.easeIn' });
+    }
+
     // [textura, x, yFinal, escala, ângulo] — 3 fiadas, da base ao topo da abertura.
     const pecas: Array<[string, number, number, number, number]> = [
       ['asteroid', 22, 142, 2.6, 12],

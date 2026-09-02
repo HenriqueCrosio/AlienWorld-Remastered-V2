@@ -658,6 +658,11 @@ const ART: Record<string, string> = {
   carcaca2: 'sprites/carcaca-2.png',
   carcaca3: 'sprites/carcaca-3.png',
 
+  // ⚠️ O PORTÃO que sela a saída (cutscene 3). Esta é a 1ª cutscene da campanha em que a ponte
+  // queimada é a SAÍDA — a Aurora e a Doca destruíam o lugar DE ONDE o jogador vinha; aqui ele é
+  // ENGOLIDO. O beat merecia uma FORMA fechando, não um monte de entulho genérico.
+  portaoHangar: 'sprites/portao-hangar.png',
+
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
   // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).
