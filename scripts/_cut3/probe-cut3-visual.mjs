@@ -78,6 +78,31 @@ if (a) {
   }
 }
 
+// ─── AS CARCAÇAS: plantadas, não enfileiradas, e fora do vão onde a nave para ───
+const carc = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const cs = s.children.list.filter((o) => o.name === 'carcacaCut3');
+  const so = s.children.list.filter((o) => o.name === 'sombraCarcaca');
+  return {
+    n: cs.length,
+    sombras: so.length,
+    pes: cs.map((o) => Math.round(o.y)),
+    xs: cs.map((o) => Math.round(o.x)),
+    depths: cs.map((o) => +o.depth.toFixed(3)),
+    topos: cs.map((o) => Math.round(o.y - o.displayHeight)),
+  };
+});
+console.log('carcacas', JSON.stringify(carc));
+ok(carc.n >= 3, `ha carcacas no conves (${carc.n})`);
+ok(carc.sombras === carc.n, `uma sombra por carcaca (${carc.sombras}/${carc.n})`);
+ok(new Set(carc.pes).size > 1, `elas NAO estao todas no mesmo y (${carc.pes.join(',')})`);
+// ⚠️ A nave derrapa e PARA em x≈258, um vão escolhido a dedo na revisão de 2026-07-19 para ela
+// não sumir dentro do metal cinza. Plantar uma carcaça ali refaria aquele defeito.
+ok(carc.xs.every((x) => Math.abs(x - 258) > 40), `nenhuma carcaca no vao de parada da nave (${carc.xs.join(',')})`);
+// ⚠️ E NENHUMA PODE SUBIR ATE AS JANELAS (o alpha da pintura acaba em y=132). Elas taparem a
+// faixa das janelas apagaria a NADADEIRA, que so existe na tela pelo que as janelas deixam ver.
+ok(carc.topos.every((t) => t > 132), `nenhuma carcaca invade a faixa das janelas (topos ${carc.topos.join(',')} > 132)`);
+
 console.log('');
 console.log(falhas ? `${falhas} FALHA(S)` : '✔ A FATIA 6 ESTA DE PE');
 await browser.close();

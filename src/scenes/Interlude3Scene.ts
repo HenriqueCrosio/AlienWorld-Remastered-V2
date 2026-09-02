@@ -119,6 +119,7 @@ export class Interlude3Scene extends Phaser.Scene {
 
     this.construirHangar();
     this.nadadeira();
+    this.plantarCarcacas();
 
     // A nave chega DANIFICADA. A fumaça segue o casco; as fagulhas só ligam na derrapagem.
     const chegada = SHIPS[this.naveId];
@@ -233,6 +234,81 @@ export class Interlude3Scene extends Phaser.Scene {
       // casco e a sombra órfã do prop já documentaram.
       onComplete: () => nad.destroy(),
     });
+  }
+
+  /**
+   * O PLANTIO DAS CARCAÇAS — a régua é a que a Fase 3 pagou (`TerrainSystem.PLANTIO`).
+   *
+   * ⚠️ PÉ SORTEADO COM SALTO MÍNIMO GARANTIDO POR CONSTRUÇÃO, nunca por probabilidade. Sorteio
+   * uniforme puro dá dois vizinhos a 1px de diferença e a fila volta — o olho não compara uma
+   * peça com a média da faixa, compara com a VIZINHA. A Fase 3 mediu isso: oito props saíram
+   * entre 191 e 199 numa execução.
+   *
+   * ⚠️ E ELAS SÃO CENÁRIO: sem corpo físico, sem colisão. A nave derrapa e para em x≈258, um vão
+   * escolhido a dedo na revisão de 2026-07-19 justamente para ela não parar dentro do monte de
+   * metal e sumir. Plantar uma carcaça ali refaria aquele defeito — daí o `VAO_DA_NAVE`.
+   *
+   * ⚠️ O TAMANHO É DERIVADO DO TETO DAS JANELAS, e está ASSADO NO ARQUIVO — o plano não previa
+   * nenhum dos dois. O gerador entrega 128px num jogo de 216px de altura: em tamanho nativo, uma
+   * carcaça sozinha cobriria a parede e taparia as janelas — justamente por onde a NADADEIRA
+   * precisa aparecer, que é o efeito que sustenta a cena. A conta: as janelas terminam em y=132
+   * (medido no alpha da pintura) e o plantio mais ao fundo põe o pé em DECK_Y−10 = 161, então
+   * sobram 29px. A mais alta do lote tinha 77px, e 29/77 = 0,376 — daí o fator 0,36, que deixa
+   * folga. Elas ficam com 41×25, 47×24 e 39×28, contra os 30×22 da nave do jogador: maiores que
+   * ela, como naves de guerra engolidas devem ser, sem comer o quadro.
+   *
+   * ⚠️ E A REDUÇÃO É DO ARQUIVO, NÃO `setScale()`. A lei do projeto é 1px de arte = 1px de jogo;
+   * um setScale(0,36) deixaria 128px de arte sendo espremidos a cada quadro, e a grade de pixel
+   * do sprite pararia de casar com a da tela. `scripts/reduzir-sprite.mjs` assa o tamanho e
+   * relimiariza o alpha (a franja do lanczos vira contorno fantasma sobre fundo escuro).
+   * ⚠️ Reinstalar do PixelLab REFAZ o arquivo em 128px — reduzir de novo depois.
+   */
+  private static readonly CARCACAS = { fundo: -10, frente: 4, saltoMin: 4 } as const;
+  private static readonly VAO_DA_NAVE = { x: 258, raio: 40 } as const;
+
+  private plantarCarcacas(): void {
+    const artes = ['carcaca1', 'carcaca2', 'carcaca3'].filter((k) => this.textures.exists(k));
+    if (!artes.length) return;
+
+    const { fundo, frente, saltoMin } = Interlude3Scene.CARCACAS;
+    const xs = [64, 150, 330].filter(
+      (x) => Math.abs(x - Interlude3Scene.VAO_DA_NAVE.x) > Interlude3Scene.VAO_DA_NAVE.raio,
+    );
+
+    let ultimo = 0;
+    for (let i = 0; i < xs.length; i++) {
+      // O salto mínimo é garantia de construção: sorteia dentro do que SOBRA, em vez de tentar de
+      // novo até dar certo — laço de recusa com teto às vezes estoura e devolve altura repetida.
+      let pe: number;
+      if (ultimo === 0) {
+        pe = Math.round(fundo + Math.random() * (frente - fundo));
+      } else {
+        const abaixo = Math.max(0, ultimo - saltoMin - fundo + 1);
+        const acima = Math.max(0, frente - (ultimo + saltoMin) + 1);
+        const n = Math.floor(Math.random() * (abaixo + acima));
+        pe = n < abaixo ? fundo + n : ultimo + saltoMin + (n - abaixo);
+      }
+      ultimo = pe;
+
+      const y = Interlude3Scene.DECK_Y + pe;
+      const c = this.add
+        .image(xs[i], y, artes[i % artes.length])
+        .setOrigin(0.5, 1)
+        // Quem está plantado mais à FRENTE (pé maior) desenha por cima. Sem isto, a ordem seria
+        // decidida pela ordem de criação, ou seja, por acaso.
+        .setDepth(Interlude3Scene.DEPTH_HANGAR + 1 + (pe - fundo) * 0.01)
+        .setName('carcacaCut3');
+
+      // A SOMBRA DE CONTATO: escurecimento puro, nunca glow — a regra do projeto é que o que está
+      // perto do olho entra em sombra, jamais em luz. Ela tem que TRANSBORDAR a base (1,35 da
+      // largura) e ficar 1px ABAIXO do pé: mais estreita que a peça, ela desenha inteira atrás do
+      // dono e não sobra um pixel na tela. Foi assim na 1ª versão do prop de casco.
+      const sombra = this.add
+        .ellipse(c.x, y + 1, Math.round(c.displayWidth * 1.35), 6, 0x000000, 0.5)
+        .setDepth(c.depth - 0.001)
+        .setName('sombraCarcaca');
+      c.once('destroy', () => sombra.destroy());
+    }
   }
 
   private construirHangar(): void {

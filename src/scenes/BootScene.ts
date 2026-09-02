@@ -650,6 +650,14 @@ const ART: Record<string, string> = {
   // baixo" como GIRAR e devolveu o rabo do Leviatã como hélice, nesta mesma campanha.
   nadadeira: 'sprites/nadadeira.png',
 
+  // ⚠️ AS CARCAÇAS DA FROTA ENGOLIDA (cutscene 3). O HANDOFF promete desde julho que "o hangar
+  // guarda carcaças da frota engolida — a Frota Morta da F2, vista por dentro", e que o painel de
+  // naves existe porque "você não compra uma nave, você SALVA uma nave irmã do cemitério". Até
+  // 2026-09-01 isso só existia em comentário: no convés havia três borrões cinzas genéricos.
+  carcaca1: 'sprites/carcaca-1.png',
+  carcaca2: 'sprites/carcaca-2.png',
+  carcaca3: 'sprites/carcaca-3.png',
+
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
   // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).
