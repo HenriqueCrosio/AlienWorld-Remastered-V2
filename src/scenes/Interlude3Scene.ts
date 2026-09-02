@@ -75,6 +75,13 @@ export class Interlude3Scene extends Phaser.Scene {
   // ela repousa em DECK_Y−7 e quica em DECK_Y−13.
   private static readonly DECK_Y = 171;
 
+  /**
+   * O CENTRO DA FAIXA DAS JANELAS, medido no alpha da pintura instalada: os pixels vazados vão de
+   * y=44 a y=132, 89px de altura. É a altura por onde a nadadeira passa — ela só existe na tela
+   * pelo que as janelas deixam ver, então a régua dela é a das janelas, não o olho.
+   */
+  private static readonly JANELAS_Y = 88;
+
   // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
   // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
   // metade esquerda, na frente das janelas); a nave (80) passa na frente de tudo.
@@ -111,6 +118,7 @@ export class Interlude3Scene extends Phaser.Scene {
     this.fx = new Fx(this);
 
     this.construirHangar();
+    this.nadadeira();
 
     // A nave chega DANIFICADA. A fumaça segue o casco; as fagulhas só ligam na derrapagem.
     const chegada = SHIPS[this.naveId];
@@ -188,6 +196,45 @@ export class Interlude3Scene extends Phaser.Scene {
    * O piso desenhado por trás também saiu: a pintura entrega o convés, a faixa de perigo e a
    * banda escura de baixo dela mesma.
    */
+  /**
+   * A NADADEIRA PEITORAL — uma remada só, atravessando a faixa das janelas.
+   *
+   * ⚠️ ELA VIVE ATRÁS DA PINTURA, e é isso que faz a cena funcionar sem máscara nenhuma. Como as
+   * cinco janelas são as ÚNICAS aberturas da pintura, a nadadeira só aparece por elas — o quadro
+   * da janela a recorta sozinho, e esse recorte é exatamente o que vende que ela está do lado de
+   * fora do casco.
+   *
+   * ⚠️ DIREITA → ESQUERDA, e a direção foi DERIVADA E CONFIRMADA, nunca assumida. A Fase 3 já
+   * cravou que o corpo do Leviatã fica fora do quadro à direita e que ele nada no mesmo sentido
+   * da nave; num bicho que nada para a direita, a remada de FORÇA varre para trás. Assumir esta
+   * direção sem perguntar foi o que reprovou quatro versões do rabo.
+   *
+   * ⚠️ E É UMA LINHA SÓ: O `x`. Sem `y`, sem `angle`, sem `alpha`. Cada eixo extra que entrou nas
+   * tentativas do rabo foi lido como o corpo se deformando ou se soltando.
+   *
+   * O `y` é o CENTRO MEDIDO da faixa das janelas (elas ocupam y=44..132 na pintura instalada),
+   * não um número escolhido no olho.
+   */
+  private nadadeira(): void {
+    if (!this.textures.exists('nadadeira')) return;
+
+    const nad = this.add
+      .image(GAME_WIDTH + 140, Interlude3Scene.JANELAS_Y, 'nadadeira')
+      .setDepth(Interlude3Scene.DEPTH_HANGAR - 1)
+      .setName('nadadeiraCut3');
+
+    this.tweens.add({
+      targets: nad,
+      x: -140,
+      delay: 1200,
+      duration: 6000,
+      ease: 'Sine.easeInOut',
+      // DESTRUIR, nunca deixar parada fora da tela: objeto esquecido é a armadilha que o preto do
+      // casco e a sombra órfã do prop já documentaram.
+      onComplete: () => nad.destroy(),
+    });
+  }
+
   private construirHangar(): void {
     this.add
       .image(0, 0, 'paintBgCut3')

@@ -642,6 +642,14 @@ const ART: Record<string, string> = {
   // sementes, nunca limiar global — 20,5% da parede cai na mesma faixa neutra do xadrez).
   paintBgCut3: 'sprites/paint-bg-cut3.png',
 
+  // ⚠️ A NADADEIRA PEITORAL do Leviatã (cutscene 3), ideia do Henrique: ela atravessa a faixa das
+  // janelas mostrando que o bicho bate as nadadeiras nadando — e diz, sem banner, que você está
+  // DENTRO de uma coisa viva em movimento.
+  //
+  // ⚠️ SÓ A TEXTURA É GERADA. A remada é tween: o v3 do PixelLab leu "bater para cima e para
+  // baixo" como GIRAR e devolveu o rabo do Leviatã como hélice, nesta mesma campanha.
+  nadadeira: 'sprites/nadadeira.png',
+
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
   // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).

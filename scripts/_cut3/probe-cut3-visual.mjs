@@ -43,6 +43,41 @@ if (c.parede) {
 }
 ok(c.usamHangar === 0, `nenhuma imagem da cena usa mais o 'hangar' da Fase 4 (${c.usamHangar})`);
 
+// ─── A NADADEIRA: uma remada só, da DIREITA para a ESQUERDA, e só o `x` se mexe ───
+//
+// ⚠️ O ASSERT COBRA A DIREÇÃO QUE O DESENHO EXIGE, NÃO A QUE O CÓDIGO ESCOLHEU. O assert do rabo
+// cobrava `x2 < x1` e ficou VERDE em cima da versão que o Henrique reprovou, porque media a
+// escolha de quem o escreveu. Aqui a direita→esquerda foi derivada da Fase 3 (o corpo do Leviatã
+// está fora do quadro à direita, ele nada para a direita, a remada de força varre para trás) e
+// CONFIRMADA por ele antes de uma linha ser escrita.
+const nad = () =>
+  page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const n = s.children.list.filter((o) => o.name === 'nadadeiraCut3')[0];
+    const p = s.children.list.filter((o) => o.name === 'paredeCut3')[0];
+    return n
+      ? { x: Math.round(n.x), y: Math.round(n.y), ang: Math.round(n.angle),
+          alpha: +n.alpha.toFixed(2), depth: n.depth, depthParede: p ? p.depth : null }
+      : null;
+  });
+
+let a = null;
+for (let i = 0; i < 60 && !a; i++) { a = await nad(); if (!a) await page.waitForTimeout(200); }
+ok(!!a, 'a nadadeira entra em cena');
+if (a) {
+  await page.waitForTimeout(1500);
+  const b = await nad();
+  console.log('nadadeira', JSON.stringify(a), '->', JSON.stringify(b));
+  ok(!!b, 'ela ainda esta na tela 1,5s depois (a remada e lenta)');
+  if (b) {
+    ok(b.x < a.x, `ela varre da DIREITA para a ESQUERDA (${a.x} -> ${b.x})`);
+    ok(b.y === a.y, `sem eixo Y — a saida e uma linha so (${a.y} -> ${b.y})`);
+    ok(b.ang === a.ang, `sem giro (${a.ang}deg)`);
+    ok(b.alpha === a.alpha && b.alpha === 1, `sem fade: alpha fica em 1 (${a.alpha} -> ${b.alpha})`);
+    ok(b.depth < b.depthParede, `ela fica ATRAS da pintura (${b.depth} < ${b.depthParede}), entao so aparece pelas janelas`);
+  }
+}
+
 console.log('');
 console.log(falhas ? `${falhas} FALHA(S)` : '✔ A FATIA 6 ESTA DE PE');
 await browser.close();
