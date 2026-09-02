@@ -245,6 +245,28 @@ PixelLab  →  revisão manual (Aseprite: quantizar paleta, limpar bordas, ajust
 Manter os PNGs originais gerados em `assets/raw/` (fora do bundle) e os atlas em `assets/dist/`.
 Nunca editar o atlas na mão — reempacotar.
 
+## ⚠️ O TAMANHO DO SPRITE MORA NO ARQUIVO, NÃO NO `setScale()` (2026-09-02)
+
+O gerador entrega 128px num jogo de 216px de altura. Quando a peça precisa aparecer bem menor, a
+saída **não** é `setScale()` na cena: 128px de arte espremidos a cada quadro fazem a grade de pixel
+do sprite parar de casar com a da tela, e isso contraria a regra 3 daqui (*1 pixel = 1 pixel*) e a
+lei que o `paint-bg.mjs` já aplicava às pinturas.
+
+`scripts/reduzir-sprite.mjs <arquivo.png> <altura>` assa o tamanho no arquivo e **relimiariza o
+alpha**: a franja de alpha parcial que o lanczos cria na borda vira contorno fantasma sobre fundo
+escuro, então ela volta a ser 0 ou 255. O sprite resultante desenha em escala 1.
+
+⚠️ **A altura se DERIVA, não se escolhe.** Na cutscene 3 ela saiu do teto medido das janelas: elas
+acabam em y=132 e o pé mais ao fundo fica em 161, logo sobram 29px — e a peça mais alta do lote
+tinha 77px, dando o fator 0,36.
+
+⚠️ **Reinstalar do PixelLab REFAZ o arquivo em 128px.** Reduzir de novo depois, sempre.
+
+⚠️ **O que essa redução custa, e é honesto dizer:** o lanczos mistura tons no MIOLO da peça, então
+o arquivo reduzido pode carregar cores fora da paleta travada. A silhueta continua dura (o alpha é
+relimiarizado) e o resultado é pixel-perfeito na resolução em que é desenhado, mas quem for
+quantizar a paleta depois tem de fazê-lo **no arquivo reduzido**, não no de 128px.
+
 ## Ordem de produção
 
 1. **M1-M3 rodam com placeholder** (retângulos coloridos). O jogo tem que estar divertido *antes* da arte.

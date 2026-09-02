@@ -52,12 +52,11 @@ que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele �
 balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
 
 1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
-   (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A próxima é a **Fatia 6
-   (Cutscene 3: a queda no hangar do Leviatã)**, que ainda não tem spec nem plano: **começa pelo
-   BRAINSTORMING** — que já aconteceu. A Fatia 5 não deixou nada em aberto (a fusão da serpente,
-   o último item, fechou em `4848820`), e a **Fatia 6 já tem spec e plano aprovados, com zero
-   linha de código escrita**. Retome por
-   `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`.
+   (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no
+   hangar do Leviatã) está IMPLEMENTADA** na branch `feat/cutscene3-visual` (`06dbe68`), com as
+   cinco tarefas feitas, sonda verde e **sem merge**: o que falta é o **TESTE JOGADO** pelo
+   Henrique. Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`, que virou o
+   mapa do teste — ele carrega a lista de verificação e os quatro pontos que esperam veredicto.
 2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
    (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
    fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
@@ -90,16 +89,20 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
-**Estado do repositório (2026-09-01, fim de sessão):** `main` com a **Fatia 5 mergeada**
-(`a28dd07`, `--no-ff`) mais o fechamento dela, tudo com push em `origin`
+**Estado do repositório (2026-09-02, fim de sessão):** `main` segue em `392eedf`, com a
+**Fatia 5 mergeada** (`a28dd07`, `--no-ff`) e push em `origin`
 (github.com/HenriqueCrosio/AlienWorld-Remastered-V2 — ⚠️ o remoto `legacy` é o repositório
-ANTIGO, não empurre nada para lá). Typecheck e build limpos; sondas verdes, incluindo as duas
-novas desta sessão (`_f3/probe-tween-agua-viva.mjs` e `_f1/probe-missil-colonia.mjs`).
+ANTIGO, não empurre nada para lá). A **Fatia 6 está na branch `feat/cutscene3-visual`**, 7
+commits, **não mergeada e ainda não empurrada**. Typecheck e build limpos; sondas verdes
+(`_cut3/probe-cut3-visual` com 16 asserts, `probe-interlude3`, `probe-stage3`, `probe-stage4`,
+`probe-stage2`, `probe-stage1-visual`).
 
 ⚠️ **UM ASSERT BARULHENTO CONHECIDO, NÃO O AFROUXE:** o risco de emenda na faixa do casco
 (`probe-f3-visual`) reprova ~1 em 4 execuções. O ruído já existia antes das sombras novas —
 medido no código de `HEAD` sem o plantio. **Rode de novo antes de concluir.** Os outros dois do
-mesmo tipo são o rodapé do casco e a contagem de lança-mísseis (varia de 2 a 6).
+mesmo tipo são o rodapé do casco e a contagem de lança-mísseis (varia de 2 a 6 — e em
+2026-09-02 deu **8**, então a faixa real é mais larga do que este doc registrava; três execuções
+seguidas deram 8, 4 e 3). **Rode de novo antes de concluir; não afrouxe o assert.**
 
 **Saldo PixelLab: 1271 GERAÇÕES + $0.398 de crédito** (2026-07-20). Descoberta da sessão:
 no Tier 2, **animação v3 e key art pixflux custam 1 GERAÇÃO cada** (não USD) — animar é
@@ -790,35 +793,93 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 6 — a Cutscene 3, PLANEJADA E NÃO INICIADA (2026-09-01)
+## A FATIA 6 — a Cutscene 3, IMPLEMENTADA E AGUARDANDO TESTE JOGADO (2026-09-02)
 
-🟡 **Spec e plano aprovados, ZERO código.** Sem branch — a fatia não começou.
-**Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`.**
+🟠 **As cinco tarefas estão feitas; a fatia NÃO fechou.** Branch `feat/cutscene3-visual`, 7
+commits, ponta em `06dbe68`. Sem merge e sem push. **`main` segue em `392eedf`.**
+**Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**, que deixou de ser o
+mapa de quem implementa e virou o mapa de quem TESTA.
 
 - Spec: `docs/superpowers/specs/2026-09-01-cutscene3-visual-design.md`
 - Plano: `docs/superpowers/plans/2026-09-01-cutscene3-visual.md` (5 tarefas)
 
-**O diagnóstico, capturado e não suposto** (`_cut3/ver-cena.mjs`): a parede da cutscene é o
-`hangar.png` de 160px desenhado duas vezes, e a repetição se vê — o mesmo arco/janela/pilar quatro
-vezes na tela. Não há segundo plano. E as **carcaças da frota engolida**, que o doc promete desde
-julho, são três borrões cinzas.
+**O que entrou:** a pintura do Henrique no lugar do azulejo repetido (`3f2cd3a`), o convés
+re-medido (`2fe0d8c`), a nadadeira peitoral atravessando as janelas (`f616bc1`), as três carcaças
+da frota engolida (`ad0496d`) e o portão que sela a boca (`06dbe68`). 15 arquivos, +501/−70, e 60
+gerações do PixelLab em três lotes.
 
-**A pintura do Henrique já está versionada** (`assets/raw/paint-bg-cut3-original.png`, 1672×940):
-visceral e biomecânica, *"para passar esse ar de interior, sendo que a fase 4 já é no interior do
-Leviatã"*. Três peças do PixelLab entram por cima: a **nadadeira peitoral** (ideia dele — ela
-atravessa as janelas mostrando o Leviatã remando no nado espacial), as **carcaças** e o **portão**.
+⚠️ **A FRONTEIRA FOI RESPEITADA, e conferida por quatro caminhos a cada rodada:** o `hangar.png`
+continua **160×160**, com `git status` limpo, `usamHangar: 0` na sonda da fatia e `probe-stage4`
+verde de ponta a ponta. Ele é a parede de fundo da FASE 4, que é a Fatia 7; a pintura entrou como
+asset NOVO (`paintBgCut3`).
 
-⚠️ **A FRONTEIRA DESTA FATIA:** o `hangar.png` **não se toca** — ele é a parede de fundo da FASE 4,
-que é a Fatia 7. A pintura entra como asset NOVO.
+### O CONVÉS FOI RE-MEDIDO, E O NÚMERO ANTIGO ERA DE OUTRA ARTE
 
-⚠️ **A PINTURA CHEGOU COM AS JANELAS MARCADAS, MAS NÃO VAZADAS** (3 canais, sem alpha; o xadrez
-pintado como pixels opacos). O key foi medido: janelas em lum 73 / sat 0,8, convés e faixa a 0% —
-mas **20,5% da parede cai na mesma faixa neutra**, então o vazamento é por SEMENTES, nunca por
-limiar global.
+`DECK_ROW = 138` e `DECK_Y = 150` descreviam o azulejo de 160px. Na pintura, a faixa de perigo
+amarela e preta está em **y = 171..173** (152/152/161px quentes na largura, contra 12 e 5 nas
+vizinhas): **`DECK_Y = 171`**, e a nave passou a assentar em 164. `ART_W`, `ART_H`, `SCALE`,
+`HANGAR_X`, `WALL_ROW`, `DECK_ROW`, o getter `hangarY` e o `DEPTH_PISO` saíram todos — quem os
+usava foi apontado pelo **typecheck**, não pela memória.
 
-⚠️ **A DIREÇÃO DA NADADEIRA (direita → esquerda) FOI DERIVADA E CONFIRMADA**, nunca assumida — a
-Fase 3 cravou que o corpo fica fora do quadro à direita e que ele nada no mesmo sentido da nave.
-Assumir direção sem perguntar reprovou quatro versões do rabo.
+⚠️ **E a `probe-interlude3` acusou na hora**, porque cobrava `y≈143`. Foi **corrigida para o número
+medido, não afrouxada** (`23c804b`): a tolerância continua sendo 4px. Sonda existente que encosta
+na mudança se confere; afrouxar o limite para o verde voltar é o que transforma sonda em enfeite.
+
+### A LIÇÃO NOVA DESTA SESSÃO — o tamanho do sprite mora no ARQUIVO, não no `setScale()`
+
+O PixelLab entrega 128px num jogo de 216px de altura. As carcaças em tamanho nativo **tapavam as
+janelas** — justamente por onde a nadadeira precisa aparecer, que é o efeito que sustenta a cena.
+O plano não previa escala nenhuma.
+
+O tamanho saiu de medição: as janelas acabam em **y=132** (medido no alpha da pintura) e o plantio
+mais ao fundo põe o pé em 161, então sobram **29px**; a carcaça mais alta tinha 77px, e 29/77 =
+0,376 — daí o fator **0,36**.
+
+⚠️ **Mas `setScale(0,36)` seria a resposta errada**, e essa é a lição: 128px de arte espremidos a
+cada quadro fazem a grade de pixel do sprite parar de casar com a da tela, contra a lei de **1px de
+arte = 1px de jogo** que o `paint-bg.mjs` já documentava para as pinturas. Nasceu o
+`scripts/reduzir-sprite.mjs`, que assa o tamanho no arquivo e **relimiariza o alpha** — a franja
+que o lanczos cria na borda vira contorno fantasma sobre fundo escuro. A cena voltou a desenhar em
+escala 1. ⚠️ **Reinstalar do PixelLab refaz o arquivo em 128px: reduzir de novo depois.**
+
+### DUAS ARMADILHAS DE SONDA QUE ESTA CENA COBROU
+
+**1. O colapso não acontece sozinho.** Ele só dispara depois de o jogador ESCOLHER uma nave no
+painel. Uma sonda que apenas espera nunca vê o portão, e o assert ficaria vermelho para sempre por
+um motivo que não é o defeito — a sonda tem de **jogar** a cena. E a espera passou a ser pelo
+**estado** (o painel aberto), não pelo relógio: espera cega é a receita de falha intermitente.
+
+**2. O portão nasce em alpha 0 e entra por tween de 260ms.** Lido no instante em que o objeto
+aparece, ele foi flagrado **no meio do fade** (0,32 numa execução) e reprovou uma cena correta. O
+assert julga o estado FINAL, então a sonda espera o tween fechar antes de medir.
+
+### O PLANO ERROU SETE PONTOS, E TODOS FORAM RESOLVIDOS MEDINDO
+
+Além dos quatro acima: o limiar de amarelo que ele sugeria **não achava a faixa de perigo** (a
+pintura é mais escura do que ele supunha — o limiar passou a ser derivado do pixel mais quente da
+própria arte), e o retângulo de amostra `PAREDE` acusava 15,3% de vazamento porque **ele próprio
+invadia a janela 2** (trocado por 5 patches de parede real, todos 0,0%, mais um teste forte: zero
+pixel transparente fora das cinco janelas medidas).
+
+⚠️ **A lição por trás das duas é a mesma:** número que vem escrito no plano também é número
+herdado. Ele vale tanto quanto o do código antigo — **confira medindo antes de usar**.
+
+### O QUE ESPERA O VEREDICTO DO HENRIQUE
+
+Quatro pontos, todos de correção barata (três são uma linha ou um tint medido; só o primeiro pede
+um lote novo do PixelLab):
+
+1. **A carcaça do meio não lê como nave** — o "cargueiro partido ao meio" vira dois blocos cinza no
+   tamanho de tela. As outras duas leem bem.
+2. **A terceira carcaça está fora da família de luminância** — 31 / 29 / **41**, contra o critério
+   da família apertada das cristas da Fase 1 (33/34/35).
+3. **`DECK_Y = 171` põe a nave no lábio da frente do convés** — é o topo da faixa, como o plano
+   mandava e como a marcação na arte confirmou, mas o plano do piso continua atrás dela.
+4. **As costuras laranja do portão brilham forte** num quadro escuro.
+
+E duas coisas para o olho dele que sonda nenhuma julga: a cena ficou **bem mais escura** que o
+azulejo (a nave e o banner carregam quase toda a luz agora), e o **entulho cai por cima do portão**
+e cobre boa parte da forma no fim — você vê a comporta fechar e depois ela vira pedra.
 
 ---
 
