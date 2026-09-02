@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, GAME_WIDTH } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
@@ -34,10 +34,11 @@ import type { HandlingMode } from './GameScene';
  *
  * ─── AS JANELAS SÃO VAZADAS, E ISSO É O TRUQUE DA CENA ───
  *
- * `hangar.png` passou pelo `scripts/vazar-janelas.mjs`: os janelões não têm nada pintado atrás.
- * O starfield e o parallax REAIS do jogo vivem em depth baixo e aparecem ATRAVÉS delas — o
- * espaço lá fora se mexe de verdade. O convés da arte também é parcialmente transparente: o chão
- * é um retângulo desenhado POR TRÁS (DEPTH_PISO), o que dá controle total da cor dele.
+ * A pintura passou pelo `scripts/instalar-cut3.mjs`: as cinco janelas foram VAZADAS por
+ * preenchimento a partir de sementes (nunca limiar global — 20,5% da parede cai na mesma faixa
+ * neutra do xadrez), e não têm nada pintado atrás. O starfield e o parallax REAIS do jogo vivem
+ * em depth baixo e aparecem ATRAVÉS delas — o espaço lá fora se mexe de verdade. O convés já vem
+ * PINTADO e opaco, então o retângulo de piso que existia por trás não é mais necessário.
  */
 export class Interlude3Scene extends Phaser.Scene {
   private starfield!: Starfield;
@@ -62,43 +63,24 @@ export class Interlude3Scene extends Phaser.Scene {
   /** 'entrando' = voo cambaleante (o update anima); depois disso os tweens assumem. */
   private fase: 'entrando' | 'chao' = 'entrando';
 
-  // ─── A GEOMETRIA DO HANGAR — medida em `hangar.png` (160×160, a arte que o Henrique escolheu) ─
+  // ─── A GEOMETRIA DO HANGAR — medida na PINTURA (384×216), não mais no `hangar.png` ───
   //
-  // A linha do convés é a FAIXA VERMELHA CONTÍNUA da arte: `node scripts/find-pad.mjs hangar 80`
-  // acha vermelho de largura total em y=138..141 (os vermelhos de y=96..113 são as luminárias da
-  // PAREDE; y=149+ são as lâmpadas do avental inferior). DECK_ROW é o topo dessa faixa.
-  // WALL_ROW é onde a parede encontra o convés (base das luminárias) — o piso desenhado começa aí.
-  private static readonly ART_W = 160;
-  private static readonly ART_H = 160;
-  private static readonly DECK_ROW = 138;
-  private static readonly WALL_ROW = 97;
+  // ⚠️ OS NÚMEROS ANTIGOS ERAM DA OUTRA ARTE. `ART_W/ART_H` (160), `SCALE` (1,5), `HANGAR_X`
+  // (264), `WALL_ROW` (97) e `DECK_ROW` (138) descreviam o azulejo de 160px desenhado duas vezes.
+  // A pintura é 1:1 com a tela, então só sobra a linha do convés.
+  //
+  // `DECK_Y` é o TOPO DA FAIXA DE PERIGO amarela e preta, medida por cor na pintura instalada
+  // (y=171..173 acusam 152/152/161px quentes na largura; as linhas vizinhas caem para 12 e 5) e
+  // conferida marcando a linha na arte (scripts/_cut3/conves-medido.png). É onde a nave encosta:
+  // ela repousa em DECK_Y−7 e quica em DECK_Y−13.
+  private static readonly DECK_Y = 171;
 
-  /** ×1.5, como a doca: a arte domina a metade direita e sangra por cima e por baixo. */
-  private static readonly SCALE = 1.5;
-
-  /**
-   * O centro da arte fica à DIREITA (x=264: a arte cobre 144..384, sem fresta na borda). A metade
-   * esquerda da tela é a BOCA do hangar — aberta para o espaço, é por ela que a nave entra caindo
-   * e é ELA que colapsa no fim. A composição é a história: entrada escancarada, depois nenhuma.
-   */
-  private static readonly HANGAR_X = 264;
-
-  /** A altura do convés NA TELA (a mesma régua da doca: PAD_Y=150). */
-  private static readonly DECK_Y = 150;
-
-  // O piso fica ABAIXO da arte (70) para os detalhes dela (carcaças, faixa de risco, lâmpadas)
-  // desenharem por cima; o ENTULHO do colapso fica ACIMA da arte (ele mura a metade esquerda —
-  // na frente das janelas espelhadas); a nave (80) passa na frente de tudo.
-  private static readonly DEPTH_PISO = 64;
+  // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
+  // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
+  // metade esquerda, na frente das janelas); a nave (80) passa na frente de tudo.
   private static readonly DEPTH_HANGAR = 70;
   private static readonly DEPTH_ENTULHO = 72;
   private static readonly DEPTH_NAVE = 80;
-
-  /** Y do centro do sprite que põe DECK_ROW exatamente em DECK_Y. */
-  private static get hangarY(): number {
-    const meio = Interlude3Scene.ART_H / 2;
-    return Interlude3Scene.DECK_Y + (meio - Interlude3Scene.DECK_ROW) * Interlude3Scene.SCALE;
-  }
 
   constructor() {
     super('Interlude3');
@@ -193,44 +175,26 @@ export class Interlude3Scene extends Phaser.Scene {
   }
 
   /**
-   * O CENÁRIO — a arte DUAS vezes: `[espelhada | arte]`, o truque do chão da Fase 1.
+   * O CENÁRIO — UMA pintura, não mais o azulejo repetido.
    *
-   * A arte tem 240px na tela e a tela tem 384: sozinha, ela deixava METADE da tela vazia — e a
-   * "boca aberta para o espaço" lia como fim do desenho, não como abertura (feedback do
-   * Henrique, 2026-07-19). A cópia ESPELHADA cobre a esquerda com emenda invisível (espelho não
-   * tem costura), os janelões continuam, e o anel da arte vira um PORTÃO DUPLO no centro. A
-   * entrada por onde a nave veio fica implícita fora da tela, à esquerda — e é aquela metade
-   * que o entulho do colapso mura no fim.
+   * A parede era `hangar.png` (160×160) desenhado duas vezes a 1,5×, `[espelhada | arte]`. O
+   * truque resolvia a tela vazia, mas a repetição se via: o mesmo arco, a mesma janela e o mesmo
+   * pilar quatro vezes. A pintura do Henrique é um quadro largo e ASSIMÉTRICO de 384×216 — 1px de
+   * arte = 1px de jogo, sem emenda para esconder.
    *
-   * O piso é desenhado POR TRÁS das duas cópias (o convés da arte é transparente de origem).
+   * ⚠️ E O `hangar.png` CONTINUA EXISTINDO, intocado: ele é a parede de fundo da FASE 4
+   * (`Parallax` modo `interior`), que é a Fatia 7. Esta cena só deixou de usá-lo.
+   *
+   * O piso desenhado por trás também saiu: a pintura entrega o convés, a faixa de perigo e a
+   * banda escura de baixo dela mesma.
    */
   private construirHangar(): void {
-    // O piso: da base da parede (WALL_ROW) até fora da tela. Azul-profundo, mais escuro que o
-    // primeiro plano das fases — é interior, e a luz aqui é das lâmpadas, não do espaço.
-    const pisoY = Interlude3Scene.DECK_Y +
-      (Interlude3Scene.WALL_ROW - Interlude3Scene.DECK_ROW) * Interlude3Scene.SCALE;
     this.add
-      .rectangle(0, pisoY, GAME_WIDTH, GAME_HEIGHT - pisoY, 0x0d1322)
+      .image(0, 0, 'paintBgCut3')
       .setOrigin(0, 0)
-      .setDepth(Interlude3Scene.DEPTH_PISO);
-
-    // A cópia espelhada: o centro dela encosta a borda direita DELA na borda esquerda da arte
-    // principal (x = HANGAR_X − ART_W·SCALE). Espelhada, a faixa do convés e o teto CONTINUAM
-    // sem código extra — a viga e a linha de pista desenhadas à mão saíram daqui.
-    this.add
-      .image(
-        Interlude3Scene.HANGAR_X - Interlude3Scene.ART_W * Interlude3Scene.SCALE,
-        Interlude3Scene.hangarY,
-        'hangar',
-      )
-      .setScale(Interlude3Scene.SCALE)
-      .setFlipX(true)
-      .setDepth(Interlude3Scene.DEPTH_HANGAR);
-
-    this.add
-      .image(Interlude3Scene.HANGAR_X, Interlude3Scene.hangarY, 'hangar')
-      .setScale(Interlude3Scene.SCALE)
-      .setDepth(Interlude3Scene.DEPTH_HANGAR);
+      .setDepth(Interlude3Scene.DEPTH_HANGAR)
+      // O nome é o que a sonda tem para agarrar.
+      .setName('paredeCut3');
   }
 
   override update(_time: number, delta: number): void {
