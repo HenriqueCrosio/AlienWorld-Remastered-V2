@@ -1,189 +1,193 @@
-# START — Fatia 6: CUTSCENE 3 ("O HANGAR DO LEVIATÃ")
+# START — Fatia 6: CUTSCENE 3, 2ª VOLTA ("A GARGANTA")
 
-**🟠 AS 5 TAREFAS ESTÃO IMPLEMENTADAS. FALTA O TESTE JOGADO.** Branch `feat/cutscene3-visual`,
-7 commits, ponta em `06dbe68` (+ `a57aa7f` de docs). **Não mergeada e não empurrada** — `main`
+**🟠 A 1ª VOLTA FOI JOGADA E JULGADA. A 2ª ESTÁ ESPECIFICADA E NÃO COMEÇOU.** Branch
+`feat/cutscene3-visual`, 8 commits, ponta em `0bd2353`. **Não mergeada e não empurrada** — `main`
 segue em `392eedf`.
 
-> ⚠️ **ESTE DOCUMENTO MUDOU DE MÃO EM 2026-09-02.** Ele era o mapa de quem ia IMPLEMENTAR a
-> fatia. Agora é o mapa de quem vai TESTÁ-LA. A implementação está feita e as sondas estão
-> verdes — o que falta não é código, é o olho do Henrique.
+> ⚠️ **ESTE DOCUMENTO MUDOU DE MÃO PELA SEGUNDA VEZ, EM 2026-09-03.** Ele nasceu mapa de quem ia
+> IMPLEMENTAR a fatia; em 02/09 virou mapa de quem ia TESTÁ-LA; agora, com o veredicto na mão,
+> volta a ser mapa de quem IMPLEMENTA — só que a 2ª volta, não a 1ª.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`. A Fatia 6 (Cutscene 3, o
-> hangar do Leviatã) está IMPLEMENTADA na branch `feat/cutscene3-visual`, com sonda verde e sem
-> merge. Sobe o `npm run dev` e me guia pelo teste jogado: eu abro com `P`, jogo a cena inteira
-> incluindo escolher a nave, e te dou o veredicto. Tenha em mãos os quatro pontos que esperam
-> julgamento e a lista de verificação — eles estão neste documento."**
+> **"Leia `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`. A Fatia 6 foi testada em
+> 2026-09-03: três blocos passaram, dois foram reprovados, e a 2ª volta já tem spec fechado em
+> `docs/superpowers/specs/2026-09-03-cutscene3-garganta-design.md`. Escreve o plano de
+> implementação e executa: a garganta, os destroços biomecânicos, a nadadeira com pivô, e as
+> luzes por código. As medições todas já estão no spec — não remeça nada, e não decida nada no
+> olho."**
 
 ---
 
-## O QUE MUDOU NA CENA
+## O VEREDICTO — o que passou e o que caiu
 
-A cutscene já existia e funcionava desde julho. **Esta fatia não construiu a cena — deu a ela um
-LUGAR.**
-
-| Task | commit | o que entrou |
-|---|---|---|
-| 1 | `3f2cd3a` | a pintura vazada por sementes, 384×216, cinco janelas em alpha 0 |
-| 2 | `2fe0d8c` | a parede virou a pintura; convés **re-medido** (`DECK_Y` 150 → **171**) |
-| — | `23c804b` | a sonda antiga corrigida para o convés novo |
-| 3 | `f616bc1` | a nadadeira peitoral, uma remada da direita para a esquerda |
-| 4 | `ad0496d` | as três carcaças da frota engolida + `scripts/reduzir-sprite.mjs` |
-| 5 | `06dbe68` | o portão que sela a boca antes do entulho |
-
-15 arquivos, +501/−70. **60 gerações do PixelLab** (3 lotes de 20); saldo em **3.314**.
-
----
-
-## COMO TESTAR
-
-```bash
-npm run dev          # porta 5173
-```
-
-No menu: **`P`** entra direto na Cutscene 3.
-
-⚠️ **JOGUE ATÉ O FIM, INCLUINDO ESCOLHER A NAVE.** O colapso — e portanto o portão — **só dispara
-depois da escolha**. Uma passada que só assiste não vê metade da fatia.
-
-Outros atalhos: `M` Fase 3 · `N` treino da serpente · `L` Fase 4 · `V` Fase 2 · `B` treino F1.
-
----
-
-## ✅ A LISTA DE VERIFICAÇÃO
-
-### 1. A cena inteira
-- [ ] A repetição sumiu? (era o mesmo arco/janela/pilar quatro vezes na tela)
-- [ ] Não ficou **escura demais**? A pintura é bem mais escura que o azulejo, e agora a nave e o
-      banner carregam quase toda a luz do quadro
-- [ ] A nave **toca e para** no convés — nem flutuando, nem enterrada
-
-### 2. A nadadeira — o beat da fatia
-- [ ] Aparece **recortada pelas janelas**, nunca por cima da parede
-- [ ] A travessia leva 6s. Lenta demais? Rápida demais?
-- [ ] Ela é bem mais **clara** que a pintura: aparece bem contra a nebulosa, mas é a segunda coisa
-      mais clara da tela. Passou do ponto?
-- [ ] A direção (direita → esquerda) casa com o que você imaginou?
-
-### 3. As carcaças
-- [ ] Leem como **naves**, ou como entulho?
-- [ ] Tamanho: 41×25, 47×24, 39×28, contra 30×22 da sua nave. Pequenas demais para "naves de
-      guerra engolidas"?
-- [ ] A nave continua **legível onde ela para** (x≈258) — foi o defeito que a revisão de
-      2026-07-19 consertou nesta mesma cena
-
-### 4. O portão
-- [ ] Lê como uma **forma fechando**, e não como um portal?
-- [ ] O entulho cai **por cima** dele e cobre boa parte da forma no fim. Você vê a comporta fechar
-      e depois ela vira pedra. É isso que você queria, ou o portão devia continuar visível?
-
-### 5. A fronteira
-- [ ] Jogue a **Fase 4** (`L`): a parede dela tem que estar idêntica
-
----
-
-## ⚖️ OS QUATRO PONTOS QUE ESPERAM O SEU VEREDICTO
-
-**1. A carcaça do meio não lê como nave.** É o "cargueiro partido ao meio" e, no tamanho de tela,
-vira dois blocos cinza. As outras duas leem bem. Trocar custa mais um lote (~20 gerações, ~8min).
-
-**2. A terceira carcaça está fora da família de luminância.** 31 / 29 / **41** — o critério era a
-família apertada das cristas da Fase 1 (33/34/35). Ela é a mais legível das três, o que pode ser
-bom ou pode ser ela puxando o olho. Corrigível por tint medido, sem tocar na arte.
-
-**3. `DECK_Y = 171` põe a nave no lábio da frente do convés.** É o topo da faixa de perigo, como o
-plano mandava, e foi medido e conferido marcando na arte. Mas o plano do piso continua atrás dela
-— se você preferir a nave mais "dentro" do convés, o número desce e é uma linha só.
-
-**4. As costuras laranja do portão brilham forte.** A luminância média dele (27) está na família de
-tudo, mas as costuras são pontos quentes num quadro escuro.
-
----
-
-## AS IMAGENS PARA OLHAR, NESTA ORDEM
-
-| arquivo | o quê |
+| bloco | veredicto |
 |---|---|
-| `scripts/_cut3/cena-hoje.png` | a tira de 16 quadros da cena inteira |
-| `scripts/_cut3/det-nadadeira.png` | a remada recortada pelas janelas, 3× |
-| `scripts/_cut3/det-conves.png` | as três carcaças e a nave no convés, 3× |
-| `scripts/_cut3/colapso.png` | os 6 quadros do portão fechando, 2× |
-| `scripts/_cut3/_marca-janelas.png` | a pintura vazada sobre magenta (magenta = buraco) |
-| `scripts/_cut3/conves-zoom.png` | a linha de `DECK_Y` medida sobre a faixa de perigo, 6× |
+| 1 · A cena inteira | ✅ *"O cenário está ótimo, o mais escuro passa a sensação exata de dark sci-fi."* |
+| 2 · A nadadeira | ❌ **"Ficou péssima."** |
+| 3 · As carcaças | ✅ *"Bem criado e combinou com o conjunto."* |
+| 4 · O portão | ❌ **Descartado.** *"Totalmente sem nexo, sem contexto."* |
 
-⚠️ Esses PNGs de trabalho **não estão versionados** (o `_cut3/` é bancada). Regerá-los é barato:
-`ver-cena.mjs`, `_ver-detalhe.mjs`, `_ver-colapso.mjs`.
-
----
-
-## O QUE O PLANO ERROU — e como ficou resolvido
-
-Sete pontos. Nenhum foi contornado no olho; todos foram medidos.
-
-| # | o que | como ficou |
-|---|---|---|
-| 1 | o limiar de amarelo da Task 2 **não achava a faixa de perigo** — a pintura é mais escura do que ele supunha | o limiar passou a ser DERIVADO do pixel mais quente da própria arte |
-| 2 | o retângulo de amostra `PAREDE` acusava 15,3% de vazamento — **ele próprio invadia a janela 2** | 5 patches de parede real (0,0%) + teste forte: zero transparência fora das 5 janelas |
-| 3 | o plano **não previa escala** para as carcaças — 128px nativos tapavam as janelas, matando a nadadeira | escala derivada do teto medido (29px de folga ÷ 77px = 0,376 → **0,36**) |
-| 4 | e previa `setScale()`, contra a lei de **1px de arte = 1px de jogo** | `scripts/reduzir-sprite.mjs` assa o tamanho no arquivo e relimiariza a franja do lanczos |
-| 5 | o assert do portão nunca ficaria verde: o colapso **só dispara depois da escolha da nave** | a sonda passou a JOGAR a cena, esperando o **estado** (painel aberto), não o relógio |
-| 6 | e ela lia o alpha no meio do fade de 260ms (pegou 0,32) | espera o tween fechar antes de julgar |
-| 7 | a `probe-interlude3` cobrava `y≈143`, o convés do azulejo | **corrigida para 164 = 171−7**, tolerância de 4px intacta — corrigida, não afrouxada |
+**Os quatro pontos que esperavam julgamento ficam TODOS como estão.** Os blocos 1 e 3 passaram
+inteiros; o portão, dono do 4º ponto, saiu da cena. **Não reabra `DECK_Y`, nem a carcaça do meio,
+nem a luminância da 3ª carcaça.**
 
 ---
 
-## O QUE ESTÁ VERDE
+## O QUE FAZER, NA ORDEM
 
-`_cut3/probe-cut3-visual.mjs` (16 asserts) · `probe-interlude3` · `probe-stage3` · `probe-stage4` ·
-`probe-stage2` · `probe-stage1-visual` · `npm run typecheck` · `npm run build`
+O spec tem os detalhes e todos os números. Isto aqui é só a ordem e os pontos de tropeço.
 
-⚠️ **Sondas de tempo real: UMA POR VEZ** — três browsers headless no mesmo Vite quebram.
+### 1. A criatura — regerar em 191px e assar a paleta
 
-⚠️ **`probe-f3-visual` reprovou uma vez e passou nas duas seguintes.** O assert dos atiradores é o
-ruído JÁ DOCUMENTADO neste HANDOFF (contagem de lança-mísseis por sorteio). Nesta sessão ele deu
-**8, 4 e 3** — o 8 estica a faixa que o doc registrava como 2 a 6. **Não afrouxe: rode de novo.**
+Objeto PixelLab **`15f111fd-62c2-4689-9a33-93c931b5b796`**, face **`south`**.
 
----
+- A face recortada tem **131×131**. O enquadramento aprovado pede **191**. ⚠️ **Não use
+  `setScale()` nem redimensione com filtro** — é o erro nº 4 da 1ª volta. O caminho **verificado**:
+  `create_1_direction_object` com a face `south` subida para 191×191 como **`style_images`** —
+  quando há imagem de estilo, é ela que determina o tamanho da saída, e o modelo **redesenha**
+  naquela resolução em vez de esticar.
+- Depois: **`node scripts/_cut3/_paleta-familia.mjs <entrada> <saida>`**. Ele já está aferido nessa
+  peça: **31,8/207 → 30,6/132**.
 
-## ⚠️ A FRONTEIRA — conferida por quatro caminhos, e ela continua valendo
+### 2. As duas animações da criatura
 
-O `public/sprites/hangar.png` **não foi tocado** e não pode ser: ele é a parede de fundo da
-**Fase 4** (`Parallax` modo `interior`), que é a **Fatia 7**. A pintura entrou como asset NOVO
-(`paintBgCut3`).
+`animate_object` modo **v3**, direção **`south`**: `garganta-idle` (respirando, roda a cena
+inteira) e `garganta-morte` (no beat final).
 
-Provas em cada rodada: `hangar.png` ainda **160×160** · `git status` limpo nele ·
-`usamHangar: 0` na sonda da fatia · `probe-stage4` verde de ponta a ponta.
+⚠️ **A armadilha do recorte:** os quadros voltam no canvas cheio. Recortar quadro a quadro faz a
+animação **tremer**. Corte todos pela **MESMA caixa**, derivada da união dos alphas.
 
----
-
-## AS DECISÕES JÁ TOMADAS — não reabra
+### 3. A cena — geometria, beat final, cadeia invertida
 
 | | |
 |---|---|
-| A arte de fundo | **pintura do Henrique**, versionada em `cdaefde` |
-| O lugar | *"visceral e biomecânica, para passar esse ar de interior"* |
-| As janelas | mostram o **exterior** (a nebulosa) |
-| A nadadeira | **uma remada só, atravessando**, da **DIREITA para a ESQUERDA** |
-| As peças do PixelLab | as carcaças **e** o portão **e** a nadadeira |
-| A boca da fusão | fora de escopo — a Fatia 5 fechou |
+| textura | `gargantaCut3`, **191×191 nativo** |
+| centro x | **330** (cobre x 235..426 — oclui as janelas #4 e #5 por inteiro) |
+| topo y | **8** · base y **199** |
+| depth | acima da pintura (70), abaixo da nave (80) |
 
-⚠️ **A DIREÇÃO DA NADADEIRA FOI DERIVADA E CONFIRMADA, não assumida.** A Fase 3 cravou que o corpo
-do Leviatã fica fora do quadro à direita e que ele *"nada no mesmo sentido da nave"*; num bicho que
-nada para a direita, a **remada de força varre para trás**. Assumir uma direção sem perguntar foi o
-que reprovou **quatro** versões do rabo.
+⚠️ **Ela existe desde o primeiro quadro.** Respira durante a queda, a derrapagem e o painel de
+escolha. **Não pode "surgir"** — foi essa a queixa exata contra o portão.
+
+O beat final, cinco tempos: a nave sobe e encara → **atira** (+600ms) → **impacto**, a criatura
+morre e a cadeia nasce NELA (+1000ms) → a cadeia corre **de x≈330 para x≈8** (+1200ms) → a nave
+**entra na boca encolhendo** (escala → 0,15, alpha → 0) e some (+2000ms).
+
+⚠️ **O míssil NÃO pode ser o `bolt2` tingido.** É o padrão que o Henrique já reprovou duas vezes
+(*"um tiro magenta igual, sem característica nenhuma"*) — o mesmo defeito anotado em
+`BossCapitania.ts:578`. Projétil próprio, forma própria.
+
+### 4. Os destroços biomecânicos
+
+4 peças novas (`create_1_direction_object`, `size` 64 → **16 candidatas numa chamada só**,
+`item_descriptions` dá descrição por peça), passadas pelo **mesmo `_paleta-familia.mjs`**.
+
+⚠️ **As 9 posições fixas NÃO mudam** — foram medidas, e a sonda fotografa a cena. O que inverte é
+a **ordem de queda**: cada peça entra logo depois do estouro que passa por ela, direita → esquerda.
+
+### 5. A nadadeira — arte com referência, movimento com pivô
+
+⚠️ **A referência é o `leviathan-swim-sheet` QUADRO 0** — o Leviatã do key art do Menu, que já tem
+a peitoral desenhada **lisa, escura, ardósia, sem membrana e sem dedos**. A instrução literal do
+Henrique: *"baseada no corpo do leviatã usado, cor escura e nadadeira lisa"*. Gerar Leviatã sem
+passar esse quadro como estilo é repetir o erro de 02/09.
+
+⚠️ **O movimento errado era SEPARADO do erro de arte, e é código.** Ela atravessava a tela como um
+asteroide. Nadadeira presa num corpo **pivota**: origem no encaixe do ombro, pivô **fora do quadro,
+embaixo e à direita**, arco de ~7s de ida e ~9s de volta, com pausa no extremo, **em ciclo longo**.
+Continua **atrás da pintura** (depth < 70) — só existe pelo que as janelas deixam ver, e as que
+sobram são a **#1, a #2 e a central #3**.
+
+### 6. As luzes e as faíscas — 100% código
+
+⚠️ **AS LUZES JÁ ESTÃO PINTADAS NA ARTE.** Rode **`node scripts/_cut3/_medir-lampadas.mjs`**: ele
+devolve as **17 posições, tamanhos e cores próprias**, e imprime o array pronto para colar no
+`Interlude3Scene`. As 17 somam **186 pixels** — é toda a energia elétrica do quadro.
+
+14 respiram (senoide, alpha ~0,15–0,55), 3 falham (mau contato, apagão curto), e **no colapso todas
+viram alarme** em uníssono com tint puxado para o `enemy`.
+
+⚠️ **Fase e semente são DERIVADAS do índice, nunca sorteadas.** A sonda compara quadros; qualquer
+aleatório por quadro a quebra. Vale igual para os 3 emissores de faísca.
+
+### 7. Limpeza
+
+Saem `public/sprites/portao-hangar.png`, a entrada `portaoHangar` no `BootScene`, e o bloco do
+portão em `Interlude3Scene.selarBoca()`. `nadadeira.png` é **substituído**.
 
 ---
 
-## DEPOIS DO SEU VEREDICTO
+## A SONDA
 
-- **Se aprovar:** `superpowers:finishing-a-development-branch` → merge `--no-ff` em `main` + push
-  em `origin` (⚠️ **nunca** no remoto `legacy`, que é o repositório ANTIGO), e o roadmap anda para
-  a **Fatia 7**.
-- **Se reprovar algum ponto:** os quatro pontos acima são todos de correção barata — três são de
-  uma linha ou de um tint medido, e só a troca da carcaça do meio pede um lote novo do PixelLab.
+`scripts/_cut3/probe-cut3-visual.mjs` (hoje 16 asserts, um deles do portão):
+
+- **cai** o assert do portão;
+- **entram**: a criatura presente **desde o primeiro quadro** na caixa medida; a família de
+  luminância dela (média ~30, **pico ≤ 132**); a cadeia começando **à direita**; a nave sumindo
+  **dentro da boca**; os 4 destroços novos nas 9 posições.
+
+`probe-interlude3` **não muda** — `DECK_Y` 171 / 164 continua valendo.
+
+⚠️ **Sondas de tempo real: UMA POR VEZ.** Três browsers headless no mesmo Vite quebram.
+
+⚠️ **`probe-f3-visual` tem ruído documentado** (contagem de lança-mísseis por sorteio). A faixa
+real medida até hoje é **2 a 8**. **Não afrouxe: rode de novo.**
+
+---
+
+## ⚠️ A FRONTEIRA — continua valendo, e agora vale para a Fatia 7
+
+`public/sprites/hangar.png` é a parede de fundo da **Fase 4** (`Parallax` modo `interior`), que é a
+**Fatia 7**. **Não pode ser tocado.** Provas a cada rodada: 160×160 · `git status` limpo nele ·
+`usamHangar: 0` na sonda da fatia · `probe-stage4` verde.
+
+---
+
+## 💡 A LIÇÃO QUE O PORTÃO COMPROU — leia antes de pôr QUALQUER asset novo sobre a pintura
+
+O portão falhou por **duas** coisas somadas, e as duas são gerais:
+
+1. **Sem moldura** — colado sobre parede pintada. Um asset novo precisa **de um buraco que o
+   emoldure**, ou de estar declaradamente **NA FRENTE da parede, ocluindo-a**. A garganta escapa
+   pelo segundo caminho: ela não finge ser parede, ela é um corpo dentro do hangar.
+2. **Sem causa** — o entulho caía porque um banner dizia que estava caindo. A garganta conserta
+   isso de graça: você atira nela, ela explode, e a explosão dela derruba o teto. O banner
+   `A ENTRADA ESTÁ COLAPSANDO` vira **legenda do que você viu**, não a causa.
+
+---
+
+## O ORÇAMENTO DO PIXELLAB
+
+Em 2026-09-03 o saldo estava em **3.314 de 5.000**, com virada de ciclo em **2026-09-04**. As
+sobras **não acumulam**, mas o ciclo **reabastece para 5.000** — então, implementando hoje ou
+depois, **orçamento não é restrição**: o teto estimado da 2ª volta inteira é **~160 gerações**.
+
+| item | chamada | ~gerações |
+|---|---|---|
+| criatura regerada em 191px | `create_1_direction_object` + estilo | 20–40 |
+| idle da criatura | `animate_object` v3, 1 direção | ~20 |
+| morte da criatura | `animate_object` v3, 1 direção | ~20 |
+| nadadeira (4 candidatas) | `create_1_direction_object` + estilo | 20–40 |
+| 4 destroços (16 candidatas de uma vez) | `create_1_direction_object` size 64 | 20–40 |
+
+A folga é o ponto: ela compra as refeitas dos lotes que saírem fora do modelo.
+
+---
+
+## A BANCADA
+
+⚠️ Os PNGs de conferência em `scripts/_cut3/` **não são versionados** — são bancada. Os scripts,
+sim:
+
+| script | o que faz |
+|---|---|
+| `_medir-lampadas.mjs` | acha as 17 lâmpadas pintadas e imprime o array pronto |
+| `_paleta-familia.mjs` | assa a correção de paleta **no arquivo** e reporta média/pico |
+| `ver-cena.mjs` · `_ver-detalhe.mjs` · `_ver-colapso.mjs` | regeram as tiras de conferência |
+| `reduzir-sprite.mjs` | assa o TAMANHO no arquivo (a lei 1px de arte = 1px de jogo) |
 
 ---
 
@@ -191,29 +195,17 @@ que reprovou **quatro** versões do rabo.
 
 ```
 0–5  ✅ fechadas e mergeadas
-6    🟠 Cutscene 3 — IMPLEMENTADA, aguardando teste jogado   ← VOCÊ ESTÁ AQUI
+6    🟠 Cutscene 3 — 1ª volta testada, 2ª volta ESPECIFICADA e não iniciada   ← VOCÊ ESTÁ AQUI
 7    ⬜ Fase 4 — o interior (⚠️ mexe em GEOMETRIA, não só em pintura)
 8    ⬜ Cutscene final + as duas baleias erradas que ainda estão na F3/F4
 ```
 
-Depois das fatias, na ordem já fechada: **calibragem** → **balanceamento** (armas e naves, o
-ENXAME que nunca foi jogado por humano) → **playtest humano de todas as fases** → placar
-(Supabase) → deploy.
-
----
-
-## O QUE SEGUE ANOTADO PARA AS FATIAS DONAS
-
-- **Os dois projéteis da Capitânia (Fase 2)** — `BossCapitania.ts:578` usa `bolt2` × 0,9 tingido de
-  laranja, mesma forma e quase a mesma escala do tiro comum. O padrão que o Henrique já reprovou
-  duas vezes (*"um tiro magenta igual, sem característica nenhuma"*).
-- **`paint-bg-f1.png` ainda é 768×394** — a última pintura fora da resolução do jogo.
-- **As duas baleias erradas** ainda dentro da F3/F4 — isso é literalmente a Fatia 8.
+Depois das fatias, na ordem já fechada: **calibragem** → **balanceamento** → **playtest humano de
+todas as fases** → placar (Supabase) → deploy.
 
 ---
 
 ## O REPOSITÓRIO
 
 `origin` = **github.com/HenriqueCrosio/AlienWorld-Remastered-V2**.
-⚠️ O remoto **`legacy`** aponta para o repositório ANTIGO — **nunca empurre para ele**. Use
-`git push origin feat/cutscene3-visual` (a branch ainda não subiu).
+⚠️ O remoto **`legacy`** aponta para o repositório ANTIGO — **nunca empurre para ele**.

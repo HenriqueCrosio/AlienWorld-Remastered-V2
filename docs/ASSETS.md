@@ -267,6 +267,29 @@ o arquivo reduzido pode carregar cores fora da paleta travada. A silhueta contin
 relimiarizado) e o resultado é pixel-perfeito na resolução em que é desenhado, mas quem for
 quantizar a paleta depois tem de fazê-lo **no arquivo reduzido**, não no de 128px.
 
+## ⚠️ A COR DO SPRITE TAMBÉM MORA NO ARQUIVO, NÃO NO `setTint()` (2026-09-03)
+
+A mesma lei da seção acima, um passo adiante. Quando uma peça do gerador chega fora da paleta do
+lugar, a saída **não** é `setTint()` na cena: o tint multiplica a textura inteira por **uma cor
+só** — ele não sabe separar o casco do miolo, e some com a única luz que a peça tem direito de ter.
+
+`scripts/_cut3/_paleta-familia.mjs <entrada.png> <saida.png>` assa a correção no arquivo em três
+operações, cada uma com um motivo:
+
+1. o **casco** fora de paleta gira de matiz para a família do cenário;
+2. o **miolo** de energia **mantém** o matiz, porque ele é o que a peça tem de luz legítima;
+3. **compressão de realce** acima de L=90 — é isso que tira o grito **sem escurecer o corpo**.
+
+⚠️ **O alvo se MEDE no cenário, não se escolhe.** A pintura da cutscene 3 tem luminância média
+**13,1**, e **só 31 pixels da tela inteira** passam de 110 — 0,05%. Esse é o teto prático do
+quadro. A criatura chegou com **média 31,8 e pico 207**; corrigida ficou em **30,6 / 132**. Repare
+que a **média mal se moveu**: o defeito quase nunca é o brilho geral da peça, é o **pico**.
+
+⚠️ **Matiz não é decoração, é semântica.** A criatura chegou com casco **teal** — que é
+`player 0x17a6bd`, a cor do JOGADOR. Um inimigo vestido da cor do jogador mente para quem olha. Já
+o miolo **rosa** ficou: é `enemyBright 0xe8306b`, paleta de inimigo, e está certo. **Antes de
+mexer numa cor, veja de quem ela é em `src/config.ts`.**
+
 ## Ordem de produção
 
 1. **M1-M3 rodam com placeholder** (retângulos coloridos). O jogo tem que estar divertido *antes* da arte.

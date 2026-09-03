@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-01)
+# HANDOFF — estado do projeto (2026-09-03)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -490,7 +490,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 4 | Cutscene 2 — a doca do cinturão | ✅ mergeada (`ee4e2a0`) |
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
-| 6 | **Cutscene 3 — a queda no hangar** | 🟠 **as 5 tarefas IMPLEMENTADAS** em `feat/cutscene3-visual` (`06dbe68`), sonda verde — **falta o teste jogado** |
+| 6 | **Cutscene 3 — a queda no hangar** | 🟠 **TESTADA em 2026-09-03: 3 blocos aprovados, 2 reprovados.** 2ª volta especificada, **falta implementar** |
 | 7 | Fase 4 — o interior | ⬜ ⚠️ mexe em GEOMETRIA, não só em pintura (ver aviso acima) |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
@@ -793,15 +793,16 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 6 — a Cutscene 3, IMPLEMENTADA E AGUARDANDO TESTE JOGADO (2026-09-02)
+## A FATIA 6 — a Cutscene 3, TESTADA E EM 2ª VOLTA (2026-09-03)
 
-🟠 **As cinco tarefas estão feitas; a fatia NÃO fechou.** Branch `feat/cutscene3-visual`, 7
-commits, ponta em `06dbe68`. Sem merge e sem push. **`main` segue em `392eedf`.**
-**Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**, que deixou de ser o
-mapa de quem implementa e virou o mapa de quem TESTA.
+🟠 **A 1ª volta foi jogada e julgada; a 2ª está especificada e NÃO começou.** Branch
+`feat/cutscene3-visual`, 8 commits, ponta em `0bd2353`. Sem merge e sem push. **`main` segue em
+`392eedf`.** **Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**, que
+mudou de mão outra vez: era o mapa de quem TESTA, virou o mapa de quem IMPLEMENTA a 2ª volta.
 
-- Spec: `docs/superpowers/specs/2026-09-01-cutscene3-visual-design.md`
-- Plano: `docs/superpowers/plans/2026-09-01-cutscene3-visual.md` (5 tarefas)
+- Spec da 1ª volta: `docs/superpowers/specs/2026-09-01-cutscene3-visual-design.md`
+- Plano da 1ª volta: `docs/superpowers/plans/2026-09-01-cutscene3-visual.md` (5 tarefas)
+- **Spec da 2ª volta: `docs/superpowers/specs/2026-09-03-cutscene3-garganta-design.md`**
 
 **O que entrou:** a pintura do Henrique no lugar do azulejo repetido (`3f2cd3a`), o convés
 re-medido (`2fe0d8c`), a nadadeira peitoral atravessando as janelas (`f616bc1`), as três carcaças
@@ -864,22 +865,79 @@ pixel transparente fora das cinco janelas medidas).
 ⚠️ **A lição por trás das duas é a mesma:** número que vem escrito no plano também é número
 herdado. Ele vale tanto quanto o do código antigo — **confira medindo antes de usar**.
 
-### O QUE ESPERA O VEREDICTO DO HENRIQUE
+### O VEREDICTO CHEGOU (teste jogado, 2026-09-03)
 
-Quatro pontos, todos de correção barata (três são uma linha ou um tint medido; só o primeiro pede
-um lote novo do PixelLab):
+O Henrique jogou a cena inteira, incluindo a escolha da nave. **Três blocos passaram, dois foram
+reprovados.**
 
-1. **A carcaça do meio não lê como nave** — o "cargueiro partido ao meio" vira dois blocos cinza no
-   tamanho de tela. As outras duas leem bem.
-2. **A terceira carcaça está fora da família de luminância** — 31 / 29 / **41**, contra o critério
-   da família apertada das cristas da Fase 1 (33/34/35).
-3. **`DECK_Y = 171` põe a nave no lábio da frente do convés** — é o topo da faixa, como o plano
-   mandava e como a marcação na arte confirmou, mas o plano do piso continua atrás dela.
-4. **As costuras laranja do portão brilham forte** num quadro escuro.
+| bloco | veredicto |
+|---|---|
+| 1 · A cena inteira | ✅ *"O cenário está ótimo, o mais escuro passa a sensação exata de dark sci-fi."* |
+| 2 · A nadadeira | ❌ **"Ficou péssima."** Arte errada **e** movimento errado |
+| 3 · As carcaças | ✅ *"Bem criado e combinou com o conjunto"* |
+| 4 · O portão | ❌ **Descartado.** *"Totalmente sem nexo, sem contexto"* |
 
-E duas coisas para o olho dele que sonda nenhuma julga: a cena ficou **bem mais escura** que o
-azulejo (a nave e o banner carregam quase toda a luz agora), e o **entulho cai por cima do portão**
-e cobre boa parte da forma no fim — você vê a comporta fechar e depois ela vira pedra.
+Os **quatro pontos que esperavam julgamento ficam todos como estão** — os blocos 1 e 3 passaram
+inteiros, e o portão, dono do 4º ponto, saiu da cena.
+
+#### A NADADEIRA FALHOU POR DUAS CAUSAS SEPARADAS, e só uma era de arte
+
+**A arte foi gerada SEM REFERÊNCIA.** Lado a lado com o `rabo-leviata.png` (canônico, aprovado
+depois de quatro reprovações), ela não compartilha **um único traço**: o rabo é placa escura
+segmentada com costura de energia laranja; o que entrou é **asa de morcego**, com membrana e dedos
+ósseos. Não é o mesmo bicho.
+
+**O movimento estava errado por conta própria, e isso é código.** Ela **atravessava a tela** como
+um asteroide. Nadadeira presa num corpo **não viaja — ela PIVOTA** em torno de um ombro. Daí a
+leitura exata do Henrique: *"passou desgarrada, apenas passando como se fosse um objeto perdido no
+espaço"*.
+
+⚠️ **A referência certa já existe na árvore e é canônica:** o **`leviathan-swim-sheet` quadro 0**
+— o Leviatã do key art do Menu — já traz a peitoral desenhada **lisa, escura, ardósia, sem
+membrana e sem dedos**. Gerar arte de Leviatã sem passar esse quadro como referência é repetir o
+erro.
+
+#### O PORTÃO FALHOU POR SEM MOLDURA E SEM CAUSA
+
+*"Apenas surge um asset sem relação nenhuma com a arte, direção do jogo, e as pedras caem sobre
+ele."* Duas falhas somadas: **sem moldura**, colado sobre parede pintada; e **sem causa**, porque
+o entulho caía só porque um banner dizia que estava caindo.
+
+⚠️ **A lição, e ela vale para a Fatia 7:** um asset novo sobre a pintura precisa de **moldura**
+(um buraco que o emoldure, ou estar declaradamente NA FRENTE da parede ocluindo-a) **e de causa
+visível na tela**. Sem as duas, ele lê como colagem por mais bem gerado que seja.
+
+### A 2ª VOLTA — o que foi especificado em 2026-09-03
+
+Spec completo em **`docs/superpowers/specs/2026-09-03-cutscene3-garganta-design.md`**. Em resumo:
+
+- **Entra A GARGANTA** — o objeto PixelLab `15f111fd` (a boca com miolo em espiral) como criatura
+  viva ocupando o terço direito, **altura inteira, dentro do hangar e na frente da parede**. A
+  nave escolhida atira nela, ela explode, e a nave **entra na boca e some** — a Fase 4, que é o
+  interior, começa exatamente onde ela sumiu.
+- **A cadeia de explosões inverte**: nasce na criatura e corre **direita → esquerda**. O entulho
+  deixa de ser causa e vira **consequência do que você viu acontecer**.
+- **Os destroços viram biomecânicos** (4 peças novas), nas **mesmas 9 posições medidas** — só a
+  ordem de queda inverte, acompanhando a onda.
+- **A nadadeira volta**, com a referência canônica e com **pivô no lugar de travessia**.
+- **As 17 lâmpadas pintadas passam a respirar** (14), a falhar (3) e a virar alarme no colapso —
+  100% código, zero arte.
+- **Sai** `portao-hangar.png`, a entrada `portaoHangar` do loader e o bloco do portão em
+  `selarBoca()`.
+
+⚠️ **AS LUZES DO HANGAR JÁ ESTÃO PINTADAS NA ARTE.** São **17 aglomerados, 186 pixels no total**
+— toda a energia elétrica do quadro. Fazer piscar não é arte nova: é medir por cor e pôr brilho
+aditivo em cima das posições medidas, cada um tingido com a cor própria daquela lâmpada.
+
+⚠️ **A CRIATURA PRECISA DE CORREÇÃO DE PALETA, e ela é assada no ARQUIVO.** Como veio, tem casco
+**teal** — que é a cor do JOGADOR (`player 0x17a6bd`) — e **pico de luminância 207**, num quadro
+cuja média é **13,1** e onde **só 31 pixels passam de 110**. Corrigida (teal → ferrugem, realces
+comprimidos), fica em **média 30,6 / pico 132**: a média mal se move, sai só o grito. O miolo rosa
+**fica** — é `enemyBright`, paleta de inimigo.
+
+⚠️ **O MÍSSIL DO BEAT FINAL NÃO PODE SER O `bolt2` TINGIDO.** É o padrão que o Henrique já
+reprovou duas vezes (*"um tiro magenta igual, sem característica nenhuma"*), o mesmo defeito
+anotado em `BossCapitania.ts:578`.
 
 ---
 
