@@ -85,23 +85,33 @@ export class Interlude3Scene extends Phaser.Scene {
   private static readonly JANELAS_Y = 88;
 
   /**
-   * A GARGANTA — a geometria saiu do DESENHO do Henrique, medida nos traços vermelhos.
+   * A GARGANTA — a criatura que substituiu o portão.
    *
-   * A forma fechada que ele desenhou tem a borda esquerda constante em x≈350-355, de y≈8 a
-   * y≈199, saindo pela borda direita: uma coluna de ALTURA INTEIRA colada na direita. As quatro
-   * setas apontam y≈34, 88, 141 e 180 — teto, janela, convés e chão: ele está apontando a faixa
-   * inteira, de cima a baixo.
+   * ⚠️ A ARTE É A DO HENRIQUE, o objeto PixelLab `15f111fd`, face `south` — a boca frontal com o
+   * miolo em espiral. Ele já existia, com 8 direções, e a decisão dele em 2026-09-04 foi usar
+   * AQUELE arquivo, não um redesenho: a peça entra em TAMANHO NATIVO, sem um pixel de estica.
    *
-   * Com centro em 330 e 191 de largura, ela cobre x=235..426 e OCLUI POR INTEIRO as janelas #4
-   * (288..321) e #5 (336..376). Isso é o certo: ela não está embutida na parede, ela está DENTRO
-   * do hangar, NA FRENTE dela. Objeto ocluindo parede é render, não colagem — e é por aí que ela
+   * ⚠️ E FOI ISSO QUE FIXOU O ENQUADRAMENTO, não o contrário. O spec pedia "altura inteira"
+   * (y 8..199, 191px), mas o desenho dele tem 137px depois do recorte pela caixa única das duas
+   * animações. Esticar 1,46× para chegar aos 191 quebraria a grade de pixel — é o erro nº 4 da 1ª
+   * volta. Então o enquadramento cedeu, e o que ficou é o que a arte real permite: ela PISA NO
+   * CONVÉS. `base` é a linha do convés; o topo é consequência da altura do arquivo.
+   *
+   * Com centro em 330 e 136 de largura, ela cobre x≈262..398: OCLUI a janela #5 (336..376) por
+   * inteiro e a #4 (288..321) quase toda. Ela não está embutida na parede, ela está DENTRO do
+   * hangar, NA FRENTE dela — objeto ocluindo parede é render, não colagem, e é por aí que ela
    * escapa do defeito que matou o portão.
    *
    * `mira` é onde a nave RECUA para atirar, e `miraY` a altura da boca. ⚠️ O recuo não é enfeite:
-   * a nave para em x=258, DENTRO da caixa da criatura, e um tiro de 56px disparado de cima do
-   * alvo não se lê como tiro. Recuando para 150, o torpedo cruza 180px de tela.
+   * a nave para em x=258, encostada na criatura, e um tiro de 72px disparado de cima do alvo não
+   * se lê como tiro. Recuando para 150, o torpedo cruza 180px de tela.
    */
-  private static readonly GARGANTA = { x: 330, topo: 8, miraY: 103, mira: 150 } as const;
+  private static readonly GARGANTA = {
+    x: 330,
+    base: Interlude3Scene.DECK_Y,
+    miraY: 103,
+    mira: 150,
+  } as const;
 
   // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
   // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
@@ -347,16 +357,17 @@ export class Interlude3Scene extends Phaser.Scene {
    * queixa exata contra o portão foi "apenas surge um asset sem relação nenhuma com a arte".
    * Um corpo que já estava lá quando você caiu não surge: você é que chegou.
    *
-   * ⚠️ ANCORADA PELO TOPO, não pelo centro. O topo (y=8) é o número que veio do desenho; a base é
-   * consequência da altura real da arte instalada. Ancorar pelo centro faria o enquadramento
-   * inteiro escorregar a cada reinstalação da peça.
+   * ⚠️ ANCORADA PELO PÉ, não pelo centro nem pelo topo. A linha do convés (`DECK_Y`) é um número
+   * MEDIDO na pintura; a altura da criatura é o que o arquivo tiver. Ancorar pelo topo faria ela
+   * flutuar acima ou afundar no convés a cada reinstalação da peça — o pé é o único ponto que a
+   * cena conhece de verdade. É a mesma âncora das carcaças, e pelo mesmo motivo.
    */
   private plantarGarganta(): void {
     if (!this.textures.exists('gargantaCut3')) return;
 
     this.garganta = this.add
-      .sprite(Interlude3Scene.GARGANTA.x, Interlude3Scene.GARGANTA.topo, 'gargantaCut3')
-      .setOrigin(0.5, 0)
+      .sprite(Interlude3Scene.GARGANTA.x, Interlude3Scene.GARGANTA.base, 'gargantaCut3')
+      .setOrigin(0.5, 1)
       .setDepth(Interlude3Scene.DEPTH_GARGANTA)
       .setName('gargantaCut3');
 

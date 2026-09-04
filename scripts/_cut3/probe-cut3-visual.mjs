@@ -1,5 +1,5 @@
-// A FATIA 6 na tela. Cobre a pintura, a fronteira com a Fase 4, a nadadeira, as carcaças e o
-// portão. Roda UMA POR VEZ (três browsers no mesmo Vite quebram).
+// A FATIA 6 na tela. Cobre a pintura, a fronteira com a Fase 4, a GARGANTA, a nadadeira, as
+// carcaças, o beat final e o entulho. Roda UMA POR VEZ (três browsers no mesmo Vite quebram).
 import { chromium } from 'playwright';
 
 const browser = await chromium.launch({
@@ -54,7 +54,9 @@ const garg = await page.evaluate(() => {
   const g = s.children.list.filter((o) => o.name === 'gargantaCut3')[0];
   const p = s.children.list.filter((o) => o.name === 'paredeCut3')[0];
   return g
-    ? { tex: g.texture.key, x: Math.round(g.x), topo: Math.round(g.y),
+    ? { tex: g.texture.key, x: Math.round(g.x), pe: Math.round(g.y),
+        topo: Math.round(g.y - g.displayHeight),
+        esq: Math.round(g.x - g.displayWidth / 2), dir: Math.round(g.x + g.displayWidth / 2),
         w: g.width, h: g.height, sx: g.scaleX, sy: g.scaleY,
         depth: g.depth, depthParede: p ? p.depth : null,
         anim: g.anims && g.anims.currentAnim ? g.anims.currentAnim.key : null,
@@ -68,11 +70,17 @@ if (garg) {
   // primeiro quadro, então o Phaser devolve `gargantaIdleAnim<n>`. O que este assert prova é que
   // a arte desenhada é da família da garganta — não um asteroide, não um portão.
   ok(/^garganta/.test(garg.tex), `ela usa a arte propria (${garg.tex})`);
-  ok(garg.x === 330, `centrada em x=330, cobrindo as janelas #4 e #5 (x=${garg.x})`);
-  ok(garg.topo === 8, `ancorada pelo TOPO em y=8 (y=${garg.topo})`);
-  // ⚠️ 1px de arte = 1px de jogo. Escala != 1 aqui e a peça inteira sai da grade.
+  ok(garg.x === 330, `centrada em x=330 (x=${garg.x})`);
+  // ⚠️ ANCORADA PELO PÉ na linha do convés. DECK_Y=171 é MEDIDO na pintura; a altura da criatura é
+  // o que o arquivo tiver. Cobrar o topo seria cobrar a altura do PNG, não a posição da peça.
+  ok(garg.pe === 171, `pisando no conves, ancorada pelo PE em DECK_Y=171 (y=${garg.pe})`);
+  // ⚠️ 1px de arte = 1px de jogo. Escala != 1 aqui e a peça inteira sai da grade — e é ESTE assert
+  // que impede alguém de "resolver" o enquadramento com um setScale.
   ok(garg.sx === 1 && garg.sy === 1, `desenhada em tamanho NATIVO (escala ${garg.sx}x${garg.sy})`);
-  ok(garg.w >= 170 && garg.h >= 170, `no enquadramento aprovado, altura inteira (${garg.w}x${garg.h})`);
+  // Ela tem que OCLUIR a janela #5 (336..376) — é isso que a põe DENTRO do hangar, na frente da
+  // parede, em vez de colada nela.
+  ok(garg.esq < 336 && garg.dir > 376, `oclui a janela #5 por inteiro (cobre x ${garg.esq}..${garg.dir})`);
+  ok(garg.topo < 132, `e sobe ate a faixa das janelas (topo y=${garg.topo} < 132)`);
   ok(garg.depth > garg.depthParede, `ela e um CORPO na frente da parede (${garg.depth} > ${garg.depthParede})`);
   ok(garg.depth < 80, `e atras da nave (${garg.depth} < 80)`);
   ok(garg.anim === 'garganta-idle' && garg.tocando, `ela RESPIRA desde o comeco (${garg.anim}, tocando=${garg.tocando})`);
@@ -140,11 +148,11 @@ ok(carc.xs.every((x) => Math.abs(x - 258) > 40), `nenhuma carcaca no vao de para
 // faixa das janelas apagaria a NADADEIRA, que so existe na tela pelo que as janelas deixam ver.
 ok(carc.topos.every((t) => t > 132), `nenhuma carcaca invade a faixa das janelas (topos ${carc.topos.join(',')} > 132)`);
 
-// ─── O PORTÃO: a saída morre, e a cicatriz FICA ───
+// ─── A SONDA TEM DE JOGAR A CENA ───
 //
 // ⚠️ O COLAPSO NÃO ACONTECE SOZINHO. Ele só dispara depois de o jogador ESCOLHER uma nave no
-// painel — uma sonda que apenas espera nunca vê o portão, e o assert ficaria falhando para
-// sempre por um motivo que não é o defeito. A sonda tem de JOGAR a cena.
+// painel — uma sonda que apenas espera nunca chega ao beat final, e os asserts ficariam falhando
+// para sempre por um motivo que não é o defeito.
 //
 // ⚠️ E A ESPERA É PELO ESTADO, NÃO PELO RELÓGIO. O painel abre por volta de t≈10,5s, mas isso
 // depende da derrapagem; espera cega em sonda é a receita de falha intermitente.
@@ -164,34 +172,73 @@ await page.keyboard.press('Enter');
 await page.waitForTimeout(300);
 await page.keyboard.press('Enter');
 
-let port = null;
-for (let i = 0; i < 40 && !port; i++) {
-  port = await page.evaluate(() => {
+// ─── O BEAT FINAL: o tiro, a morte, a cadeia invertida e a nave engolida ───
+//
+// ⚠️ A CORRENTE CAUSAL É O QUE ESTÁ SENDO PROVADO AQUI. O portão falhou por não ter causa: o
+// entulho caía porque um banner dizia que estava caindo. Agora o jogador ATIRA, a criatura
+// EXPLODE, e é a explosão dela que derruba o teto. Cada assert abaixo é um elo dessa corrente.
+
+// 1. O TORPEDO. ⚠️ Ele NÃO pode ser o `bolt2` tingido — é o padrão que o Henrique já reprovou
+// duas vezes ("um tiro magenta igual, sem característica nenhuma"), o mesmo defeito anotado em
+// BossCapitania.ts:578. O assert cobra a TEXTURA PRÓPRIA, que é o que estava faltando.
+let torp = null;
+for (let i = 0; i < 60 && !torp; i++) {
+  torp = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
-    const p = s.children.list.filter((o) => o.name === 'portaoCut3')[0];
-    return p ? { x: Math.round(p.x), alpha: +p.alpha.toFixed(2), depth: p.depth,
-                 topo: Math.round(p.y - p.displayHeight), depthParede: 70 } : null;
+    const t = s.children.list.filter((o) => o.name === 'torpedoCut3')[0];
+    return t ? { tex: t.texture.key, x: Math.round(t.x) } : null;
   });
-  if (!port) await page.waitForTimeout(300);
+  if (!torp) await page.waitForTimeout(100);
 }
-// ⚠️ ELE NASCE EM alpha=0 E ENTRA POR TWEEN de 260ms. Ler o alpha no instante em que o objeto
-// aparece pega o portão NO MEIO DO FADE (0,32 numa execução) e reprova uma cena correta — o
-// assert julga o estado FINAL, então a sonda espera o tween fechar.
-if (port) {
-  await page.waitForTimeout(500);
-  port = await page.evaluate(() => {
+console.log('torpedo ', JSON.stringify(torp));
+ok(!!torp, 'a nave DISPARA no beat final');
+if (torp) ok(torp.tex === 'torpedoCut3', `e o projetil tem forma PROPRIA, nao e o bolt2 tingido (${torp.tex})`);
+
+// 2. A MORTE. A criatura reage ao tiro — é ela a causa do colapso.
+let morte = null;
+for (let i = 0; i < 40 && !morte; i++) {
+  morte = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
-    const p = s.children.list.filter((o) => o.name === 'portaoCut3')[0];
-    return p ? { x: Math.round(p.x), alpha: +p.alpha.toFixed(2), depth: p.depth,
-                 topo: Math.round(p.y - p.displayHeight), depthParede: 70 } : null;
+    const g = s.children.list.filter((o) => o.name === 'gargantaCut3')[0];
+    return g && g.anims && g.anims.currentAnim && g.anims.currentAnim.key === 'garganta-morte'
+      ? { anim: g.anims.currentAnim.key }
+      : null;
   });
+  if (!morte) await page.waitForTimeout(120);
 }
-console.log('portao  ', JSON.stringify(port));
-ok(!!port, 'o portao selou a saida');
-if (port) {
-  ok(port.x < 160, `e ele fecha a metade ESQUERDA, que e a boca (x=${port.x})`);
-  ok(port.alpha === 1, 'ele esta solido, nao meio transparente');
-  ok(port.depth > port.depthParede, `ele fica NA FRENTE da pintura (${port.depth} > ${port.depthParede}) — e a vista para fora que ele apaga`);
+ok(!!morte, 'a garganta entra em garganta-morte quando o torpedo acerta');
+
+// 3. A CADEIA NASCE NELA E CORRE PARA A ESQUERDA. ⚠️ A 1ª volta sorteava o x de cada estouro
+// (`Phaser.Math.Between(8, 130)`) — uma cena que não se reproduz não se fotografa. Agora os 10 x
+// são DERIVADOS do índice, e a sonda lê a lista inteira.
+const cad = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return s.cadeiaX && s.cadeiaX.length ? s.cadeiaX : null;
+});
+console.log('cadeia  ', JSON.stringify(cad));
+ok(Array.isArray(cad) && cad.length === 10, `a cadeia tem 10 estouros (${cad ? cad.length : 'nenhum'})`);
+if (Array.isArray(cad) && cad.length === 10) {
+  ok(cad[0] > 300, `ela NASCE na garganta, a direita (x=${cad[0]})`);
+  ok(cad[cad.length - 1] < 20, `e morre na boca por onde a nave entrou, a esquerda (x=${cad[cad.length - 1]})`);
+  ok(cad.every((x, i) => i === 0 || x < cad[i - 1]), `e corre sempre para a ESQUERDA (${cad.join(',')})`);
+}
+
+// 4. A NAVE SOME DENTRO DA BOCA. ⚠️ Ela não escapa pela borda — ela vai MAIS PARA DENTRO, que é a
+// história desta cutscene, e a Fase 4 começa exatamente onde ela sumiu.
+await page.waitForTimeout(2400);
+const fim = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return s.ship
+    ? { x: Math.round(s.ship.x), y: Math.round(s.ship.y),
+        escala: +s.ship.scaleX.toFixed(2), alpha: +s.ship.alpha.toFixed(2) }
+    : null;
+});
+console.log('nave-fim', JSON.stringify(fim));
+ok(!!fim, 'a nave ainda existe no fim do beat');
+if (fim) {
+  ok(Math.abs(fim.x - 330) < 12, `ela some DENTRO da boca (x=${fim.x}, boca em 330), nao pela borda da tela`);
+  ok(fim.escala <= 0.3, `encolhendo (escala ${fim.escala})`);
+  ok(fim.alpha <= 0.1, `e apagando (alpha ${fim.alpha})`);
 }
 
 console.log('');

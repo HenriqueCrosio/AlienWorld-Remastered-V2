@@ -47,8 +47,13 @@ export function estatistica(buf, ch) {
 
 /**
  * AS TRÊS OPERAÇÕES, e o motivo de cada uma:
- *   1. o casco TEAL (matiz 140°–215°) gira para a FERRUGEM do hangar (~18°).
+ *   1. o casco FRIO (matiz 140°–265°) gira para a FERRUGEM do hangar (~18°).
  *      Teal é `player 0x17a6bd` — a cor do JOGADOR. Um inimigo vestido da cor do jogador mente.
+ *      ⚠️ O TETO ERA 215 E ESTAVA ERRADO PARA ESTA PEÇA (medido em 2026-09-04). O histograma de
+ *      matiz da criatura não tem UM pixel abaixo de 200°: a faixa antiga pegava só 2.600px em
+ *      200–215 e deixava intactos os 4.300px de AZUL em 220–260 — que é o halo que sobrava em
+ *      volta dela na cena. O corte novo é o VÃO medido entre as duas massas: o azul acaba em
+ *      260°, a carne começa em 270°. 265 fica no meio, e não encosta no miolo.
  *   2. o miolo ROSA/MAGENTA (matiz ≥280° ou ≤15°) MANTÉM o matiz.
  *      Rosa é `enemyBright 0xe8306b` — paleta de inimigo. Está certo, e é a energia da peça.
  *   3. COMPRESSÃO DE REALCE acima de L=90: a curva achata em 0,36, teto vira ~132.
@@ -64,7 +69,7 @@ export function corrigirPaleta(buf, ch) {
 
     let [h, s, l] = rgb2hsl(saida[i], saida[i + 1], saida[i + 2]);
 
-    if (h >= 140 && h <= 215) {
+    if (h >= 140 && h <= 265) {
       h = 18 + (h - 140) * 0.10;
       s *= 0.55;
       l *= 0.80;

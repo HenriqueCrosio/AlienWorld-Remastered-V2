@@ -16,15 +16,19 @@
 // o group id (que a API usa) e, dentro da própria URL dos quadros, OUTRO id. É este último que
 // entra aqui. Passar o group id devolve 404 em todos os quadros.
 //
-//   node scripts/_cut3/_instalar-garganta.mjs <object-id> <anim-idle-url> <anim-morte-url> [n-quadros]
+// ⚠️ A DIREÇÃO É PARÂMETRO. O objeto do Henrique (15f111fd) tem 8 direções e a cutscene usa só
+// a `south` — a boca frontal. Um objeto de 1 direção usa `unknown`, que é o padrão.
+//
+//   node scripts/_cut3/_instalar-garganta.mjs <object-id> <anim-idle-url> <anim-morte-url> [n] [direcao]
 import sharp from 'sharp';
 import fs from 'node:fs';
 import { paraFamilia, estatistica } from './_paleta.mjs';
 
-const [OBJ, GRP_IDLE, GRP_MORTE, N_RAW] = process.argv.slice(2);
+const [OBJ, GRP_IDLE, GRP_MORTE, N_RAW, DIR_RAW] = process.argv.slice(2);
+const DIR = DIR_RAW ?? 'unknown';
 const N = Number(N_RAW ?? 9);
 if (!OBJ || !GRP_IDLE || !GRP_MORTE) {
-  console.error('uso: node scripts/_cut3/_instalar-garganta.mjs <object-id> <grupo-idle> <grupo-morte> [n]');
+  console.error('uso: node scripts/_cut3/_instalar-garganta.mjs <object-id> <anim-idle> <anim-morte> [n] [direcao]');
   process.exit(1);
 }
 
@@ -62,12 +66,12 @@ async function baixarLimpo(url, guardarComo) {
 }
 
 const pecas = [];
-pecas.push({ saida: 'garganta', quadro: await baixarLimpo(`${raiz}/rotations/unknown.png`, 'estatico.png') });
+pecas.push({ saida: 'garganta', quadro: await baixarLimpo(`${raiz}/rotations/${DIR}.png`, 'estatico.png') });
 for (const [grp, nome] of [[GRP_IDLE, 'garganta-idle-anim'], [GRP_MORTE, 'garganta-morte-anim']]) {
   for (let i = 0; i < N; i++) {
     pecas.push({
       saida: `${nome}-${i}`,
-      quadro: await baixarLimpo(`${raiz}/animations/${grp}/unknown/${i}.png`, `${nome}-${i}.png`),
+      quadro: await baixarLimpo(`${raiz}/animations/${grp}/${DIR}/${i}.png`, `${nome}-${i}.png`),
     });
   }
 }
