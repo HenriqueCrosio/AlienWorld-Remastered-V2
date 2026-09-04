@@ -794,6 +794,7 @@ export class BootScene extends Phaser.Scene {
     this.makeTracerRound();
     this.makeShots();
     this.makeShotsChefes();
+    this.makeTorpedo();
     this.makePuff();
     this.makeSpark();
     this.makeColonyLight();
@@ -1418,6 +1419,41 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff, 1);
       g.fillRect(5, 4, 1, 11);
     });
+  }
+
+  /**
+   * O TORPEDO DA CUTSCENE 3 — a única arma que o jogador dispara numa interlude.
+   *
+   * ⚠️ ELE NÃO É O `bolt2` TINGIDO, E ESSA É A RAZÃO DE ELE EXISTIR. Esse padrão — mesmo asset,
+   * cor trocada — já foi reprovado duas vezes nesta campanha ("um tiro magenta igual, sem
+   * característica nenhuma"), e é o defeito anotado em BossCapitania.ts:578. Um tiro carrega uma
+   * informação só, e essa informação é a SILHUETA.
+   *
+   * ⚠️ E ELE É CIANO, NÃO MAGENTA, DE PROPÓSITO. O jogo ensina `magenta = isto te mata`; este é o
+   * único tiro da campanha que sai DA nave do jogador numa cutscene, então ele veste a paleta
+   * dele (`player`/`playerGlow`). O rastro laranja atrás é o motor, não a munição.
+   *
+   * 15×7, apontando para a DIREITA — a garganta está à direita da nave.
+   */
+  private makeTorpedo(): void {
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+
+    // O rastro: o motor ardendo atrás, que é o que separa "torpedo" de "traço".
+    g.fillStyle(COLORS.hot, 1);
+    g.fillRect(0, 3, 3, 1);
+    // O casco, e as duas aletas que dão a silhueta de corpo lançado.
+    g.fillStyle(COLORS.metalDark, 1);
+    g.fillRect(2, 2, 9, 3);
+    g.fillRect(2, 1, 3, 1);
+    g.fillRect(2, 5, 3, 1);
+    // A ogiva.
+    g.fillStyle(COLORS.player, 1);
+    g.fillRect(11, 2, 2, 3);
+    g.fillStyle(COLORS.playerGlow, 1);
+    g.fillRect(13, 3, 2, 1);
+
+    g.generateTexture('torpedoCut3', 15, 7);
+    g.destroy();
   }
 
   /**

@@ -61,6 +61,10 @@ export class Interlude3Scene extends Phaser.Scene {
   private naveId: string = DEFAULT_SHIP;
   private proxima = 4;
   private done = false;
+  /** Ligado no impacto: daí em diante as 17 lâmpadas viram alarme (ver `pulsarLampadas`). */
+  alarme = false;
+  /** Os x dos 10 estouros da cadeia, na ordem — a sonda lê esta lista. */
+  cadeiaX: number[] = [];
   private t = 0;
   /** 'entrando' = voo cambaleante (o update anima); depois disso os tweens assumem. */
   private fase: 'entrando' | 'chao' = 'entrando';
@@ -113,6 +117,19 @@ export class Interlude3Scene extends Phaser.Scene {
     mira: 150,
   } as const;
 
+  /**
+   * A CADEIA — 10 estouros correndo da GARGANTA até a boca por onde a nave entrou.
+   *
+   * ⚠️ ELA INVERTEU DE SENTIDO, E O SENTIDO É A CAUSA. Na 1ª volta a cadeia corria só na metade
+   * esquerda, com x e y SORTEADOS, e nascia de um banner. Agora ela nasce NA CRIATURA que o
+   * jogador acabou de estourar e corre dali até a entrada: a onda tem origem, e a origem é o tiro
+   * dele.
+   *
+   * ⚠️ E TUDO AQUI É DERIVADO DO ÍNDICE. O sorteio saiu porque a sonda fotografa a cena — e
+   * porque uma onda com jitter aleatório não lê como onda, lê como pipoca.
+   */
+  private static readonly CADEIA = { n: 10, x0: 330, x1: 8, t0: 200, passo: 140 } as const;
+
   // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
   // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
   // metade esquerda, na frente das janelas); a nave (80) passa na frente de tudo.
@@ -135,6 +152,8 @@ export class Interlude3Scene extends Phaser.Scene {
     this.proxima = data.stage ?? 4;
     this.done = false;
     this.panel = null;
+    this.alarme = false;
+    this.cadeiaX = [];
     this.t = 0;
     this.fase = 'entrando';
 
@@ -588,56 +607,139 @@ export class Interlude3Scene extends Phaser.Scene {
   }
 
   /**
-   * O COLAPSO — a ponte queimada desta vez é a SAÍDA.
+   * O COLAPSO — em cinco tempos, e agora com CAUSA.
    *
-   * A boca por onde a nave entrou desaba (a cadeia de explosões corre a metade ESQUERDA da
-   * tela), e a nave decola para a DIREITA — para dentro. A Aurora caiu por dano; a Doca caiu
-   * porque você tirou dela o que importava; o hangar não cai: ele se FECHA. É a primeira
-   * cutscene em que o lugar sobrevive — e é exatamente por isso que não há volta.
+   * A 1ª volta foi reprovada aqui: o entulho caía porque o banner dizia que estava caindo, e um
+   * portão aparecia do nada para as pedras baterem em cima. A corrente agora fecha sozinha:
+   *
+   *   0      a nave sobe do convés, RECUA e encara a garganta
+   *   +600   dispara — torpedo próprio, atravessando 180px de tela até a boca
+   *   +1000  impacto: ela entra em `garganta-morte`, clarão, shake, e a cadeia nasce NELA
+   *   +1200  a cadeia corre de x≈330 para x≈8 — 10 estouros, direita → esquerda
+   *   +2000  a nave voa para DENTRO da boca, encolhendo, e some no miolo
+   *
+   * ⚠️ O BANNER VIROU LEGENDA. Ele não abre mais o beat: chega no impacto, nomeando o que o
+   * jogador acabou de ver. Era a causa; virou a descrição da causa.
+   *
+   * ⚠️ E A SAÍDA FICA LITERAL. A nave não escapa pela borda — ela vai MAIS PARA DENTRO, que é a
+   * história desta cutscene, e a Fase 4 (o interior) começa exatamente onde ela sumiu. A versão
+   * anterior a mandava para `GAME_WIDTH + 40`: ela saía de cena por uma borda, que é o oposto de
+   * ser engolida.
    */
   private colapso(): void {
     if (this.done) return;
 
-    this.aviso('A ENTRADA ESTÁ COLAPSANDO', COLORS.enemyBright);
     Music.play(this, 'boss', 600);
 
-    this.time.delayedCall(600, () => {
-      if (this.done) return;
-
-      // Para a DIREITA e para cima: é para lá que a Fase 4 corre — para DENTRO do Leviatã.
-      this.tweens.add({ targets: this.ship, x: GAME_WIDTH + 40, duration: 1700, ease: 'Sine.easeIn' });
-      this.tweens.add({ targets: this.ship, y: 48, duration: 1700, ease: 'Cubic.easeOut' });
+    // A nave sobe e RECUA. O recuo não é enfeite: ela parou em x=258, encostada na criatura, e um
+    // tiro de 72px disparado de cima do alvo não se lê como tiro.
+    this.tweens.add({
+      targets: this.ship,
+      x: Interlude3Scene.GARGANTA.mira,
+      y: Interlude3Scene.GARGANTA.miraY,
+      angle: 0,
+      duration: 520,
+      ease: 'Sine.easeOut',
     });
 
-    // A cadeia desce pela boca: do teto da abertura até o convés, só na metade esquerda — a
-    // metade direita (o hangar em si) fica de pé. O lugar não morre; a entrada morre.
-    const N = 10;
-    for (let i = 0; i < N; i++) {
-      this.time.delayedCall(900 + i * 140, () => {
-        if (this.done) return;
+    this.time.delayedCall(600, () => this.disparar());
+    this.time.delayedCall(1000, () => this.impacto());
 
-        const t = i / (N - 1);
-        this.fx.explode(
-          Phaser.Math.Between(8, 130),
-          Phaser.Math.Linear(20, Interlude3Scene.DECK_Y, t) + Phaser.Math.Between(-10, 10),
-          1.4,
-        );
-      });
-    }
-
-    // ⚠️ O COLAPSO TEM QUE DEIXAR CICATRIZ. Na 1ª versão a cadeia estourava, o clarão passava —
-    // e a boca ficava IDÊNTICA: "a entrada colapsou" era só uma frase (revisão visual, 2026-07-19).
-    // Agora o ENTULHO cai e FICA: pedaços de rocha escura empilham de baixo para cima até murar
-    // a abertura, e a nebulosa que se via lá fora some atrás deles. A cena termina com a parede
-    // que a Fase 4 pressupõe: não há volta.
-    this.selarBoca();
-
-    this.time.delayedCall(2700, () => {
+    // O clarão final e a entrega, depois de a última peça de entulho assentar (ver `selarBoca`).
+    this.time.delayedCall(4800, () => {
       if (this.done) return;
       this.cameras.main.flash(700, 255, 150, 80);
     });
+    this.time.delayedCall(5600, () => this.avancar());
+  }
 
-    this.time.delayedCall(4200, () => this.avancar());
+  /** O tiro. Sai da boca do canhão da nave e cruza a tela até o miolo da criatura. */
+  private disparar(): void {
+    if (this.done || !this.textures.exists('torpedoCut3')) return;
+
+    const g = Interlude3Scene.GARGANTA;
+    const t = this.add
+      .image(this.ship.x + 16, this.ship.y, 'torpedoCut3')
+      .setDepth(Interlude3Scene.DEPTH_NAVE + 1)
+      .setName('torpedoCut3');
+
+    this.fx.hit(t.x, t.y);
+    this.cameras.main.shake(90, 0.002);
+
+    this.tweens.add({
+      targets: t,
+      x: g.x,
+      y: g.miraY,
+      duration: 400,
+      ease: 'Quad.easeIn',
+      // DESTRUIR, nunca deixar parado: objeto esquecido fora da tela é armadilha documentada.
+      onComplete: () => t.destroy(),
+    });
+  }
+
+  /** O impacto — e é daqui que TUDO o mais desce. */
+  private impacto(): void {
+    if (this.done) return;
+
+    const g = Interlude3Scene.GARGANTA;
+
+    if (this.garganta && this.anims.exists('garganta-morte')) this.garganta.play('garganta-morte');
+
+    this.fx.explodeBig(g.x, g.miraY, 1.1, Interlude3Scene.DEPTH_GARGANTA + 1);
+    this.cameras.main.flash(220, 255, 150, 80);
+    this.cameras.main.shake(320, 0.008);
+
+    // A legenda, não a causa.
+    this.aviso('A ENTRADA ESTÁ COLAPSANDO', COLORS.enemyBright);
+
+    this.alarme = true;
+    this.cadeia();
+    this.selarBoca();
+    this.time.delayedCall(1000, () => this.engolida());
+  }
+
+  /** A onda: 10 estouros descendo da boca da criatura até o convés, direita → esquerda. */
+  private cadeia(): void {
+    const { n, x0, x1, t0, passo } = Interlude3Scene.CADEIA;
+
+    this.cadeiaX = [];
+    for (let i = 0; i < n; i++) {
+      const k = i / (n - 1);
+      const x = Math.round(Phaser.Math.Linear(x0, x1, k));
+      const y = Math.round(Phaser.Math.Linear(24, Interlude3Scene.DECK_Y - 10, k));
+      this.cadeiaX.push(x);
+
+      this.time.delayedCall(t0 + i * passo, () => {
+        if (this.done) return;
+        this.fx.explode(x, y, 1.4);
+      });
+    }
+  }
+
+  /**
+   * A NAVE ENGOLIDA. Ela voa para dentro da boca ENCOLHENDO e some no miolo.
+   *
+   * ⚠️ A escala aqui é MOVIMENTO, não tamanho de arte — ela termina em alpha 0. A lei "1px de
+   * arte = 1px de jogo" vale para o que fica desenhado na tela, e no fim deste tween não fica
+   * nada.
+   */
+  private engolida(): void {
+    if (this.done) return;
+
+    const g = Interlude3Scene.GARGANTA;
+    this.fumaca.emitting = false;
+    this.fagulhas.emitting = false;
+
+    this.tweens.add({
+      targets: this.ship,
+      x: g.x,
+      y: g.miraY,
+      scale: 0.15,
+      alpha: 0,
+      angle: 0,
+      duration: 1400,
+      ease: 'Quad.easeIn',
+    });
   }
 
   /**
@@ -647,18 +749,12 @@ export class Interlude3Scene extends Phaser.Scene {
    * Posições FIXAS, não sorteadas: a sonda fotografa a cena, e o quadro tem que ser reproduzível.
    */
   private selarBoca(): void {
-    // ⚠️ O PORTÃO ENTRA PRIMEIRO E O ENTULHO CAI EM VOLTA. A ordem importa: uma comporta que
-    // aparece depois do entulho leria como "surgiu do nada"; aparecendo antes, o entulho vira o
-    // que ela ARRANCOU ao fechar.
-    if (this.textures.exists('portaoHangar')) {
-      const portao = this.add
-        .image(80, Interlude3Scene.DECK_Y, 'portaoHangar')
-        .setOrigin(0.5, 1)
-        .setDepth(Interlude3Scene.DEPTH_ENTULHO)
-        .setAlpha(0)
-        .setName('portaoCut3');
-      this.tweens.add({ targets: portao, alpha: 1, duration: 260, ease: 'Quad.easeIn' });
-    }
+    // ⚠️ O PORTÃO SAIU DAQUI EM 2026-09-04, e não por gosto: o Henrique jogou a cena e o reprovou
+    // inteiro — "totalmente sem nexo, sem contexto. Apenas surge um asset sem relação nenhuma com
+    // a arte, direção do jogo, e as pedras caem sobre ele". Ele falhava por DUAS coisas somadas:
+    // sem MOLDURA (colado sobre parede pintada) e sem CAUSA (caía porque um banner dizia). Quem
+    // resolve as duas agora é a GARGANTA — ela é um corpo ocluindo a parede, e é a explosão dela
+    // que derruba o teto.
 
     // [textura, x, yFinal, escala, ângulo] — 3 fiadas, da base ao topo da abertura.
     const pecas: Array<[string, number, number, number, number]> = [
@@ -676,7 +772,10 @@ export class Interlude3Scene extends Phaser.Scene {
     pecas.forEach(([tex, x, yFinal, escala, angulo], i) => {
       if (!this.textures.exists(tex)) return;
 
-      this.time.delayedCall(1000 + i * 240, () => {
+      // ⚠️ A PILHA COMEÇA SÓ DEPOIS DE A CADEIA PASSAR (ela acaba em t≈1460 daqui). Entulho
+      // caindo ANTES da onda seria a mesma mentira de antes com outra roupa: a pedra chegando
+      // primeiro que a explosão que a arrancou.
+      this.time.delayedCall(1700 + i * 190, () => {
         if (this.done) return;
 
         const peca = this.add
