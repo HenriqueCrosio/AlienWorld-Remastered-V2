@@ -69,6 +69,11 @@ const FRAMES: Record<string, number> = {
   aranhaJumpAnim: 9,
   aguaVivaAnim: 9,
 
+  // A GARGANTA da Cutscene 3: 9 quadros por animação (o v3 do PixelLab guarda o quadro de
+  // referência como frame 0, então frame_count=8 grava 9 em disco).
+  gargantaIdleAnim: 9,
+  gargantaMorteAnim: 9,
+
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
   shipCremeAnim: 9,
@@ -160,6 +165,14 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // A ÁGUA-VIVA do Ato 1 da Fase 3: o sino contrai e os tentáculos arrastam. 6fps de propósito —
   // ela é a única coisa LENTA da nebulosa, e pulsar rápido a transformaria em mais uma nave.
   { key: 'aguaviva-drift', prefix: 'aguaVivaAnim', frameRate: 6 },
+
+  // ─── A GARGANTA (cutscene 3) ───
+  // Ela respira a 6, a mesma cadência da água-viva: é a coisa LENTA do quadro. Pulsar rápido
+  // faria dela mais um inimigo, e ela não é inimigo — ela é o LUGAR, e está ali desde o primeiro
+  // quadro da cena.
+  { key: 'garganta-idle', prefix: 'gargantaIdleAnim', frameRate: 6 },
+  // A MORTE toca UMA vez, e mais rápido: é o único instante em que ela reage a alguma coisa.
+  { key: 'garganta-morte', prefix: 'gargantaMorteAnim', frameRate: 12, loop: false },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -658,10 +671,36 @@ const ART: Record<string, string> = {
   carcaca2: 'sprites/carcaca-2.png',
   carcaca3: 'sprites/carcaca-3.png',
 
-  // ⚠️ O PORTÃO que sela a saída (cutscene 3). Esta é a 1ª cutscene da campanha em que a ponte
-  // queimada é a SAÍDA — a Aurora e a Doca destruíam o lugar DE ONDE o jogador vinha; aqui ele é
-  // ENGOLIDO. O beat merecia uma FORMA fechando, não um monte de entulho genérico.
-  portaoHangar: 'sprites/portao-hangar.png',
+  // ⚠️ OS DESTROÇOS BIOMECÂNICOS que muram a saída (cutscene 3, 2ª volta). Eles substituem
+  // `asteroid`/`asteroid2`/`asteroid3` com `setTint(0x39415c)` — três pedras genéricas de 24px
+  // esticadas 2,5× e pintadas de azul. Na descrição do Henrique: restos de fuselagem com traços
+  // biomecânicos, ossos envoltos de tecnologia e carne, que é o padrão que a arte do jogo já tem.
+  //
+  // ⚠️ O TAMANHO E A COR ESTÃO ASSADOS NOS ARQUIVOS (scripts/_cut3/_instalar-destrocos.mjs): a
+  // cena desenha em escala 1 e sem tint nenhum.
+  //
+  // ⚠️ E A CHAVE É `entulho`, NÃO `destroco`. O jogo JÁ TEM `destroco`/`destroco2`/`destroco3`
+  // (linha ~498): o casco rasgado à deriva que as Fases 2 e 3 cospem como perigo
+  // (`DebrisSystem.HAZARDS`). Usar aquele nome aqui sobrescreveu a arte deles em disco antes de o
+  // typecheck acusar a chave duplicada. Nome de asset novo se confere ANTES de escrever no disco.
+  entulho1: 'sprites/entulho-1.png',
+  entulho2: 'sprites/entulho-2.png',
+  entulho3: 'sprites/entulho-3.png',
+  entulho4: 'sprites/entulho-4.png',
+
+  // ⚠️ A GARGANTA — a criatura que substituiu o portão (2ª volta da Fatia 6, 2026-09-04).
+  //
+  // O portão foi reprovado no teste jogado por DUAS coisas somadas: sem MOLDURA (colado sobre
+  // parede pintada) e sem CAUSA (o entulho caía porque um banner dizia que estava caindo). A
+  // garganta escapa das duas: ela não finge ser parede, ela é um CORPO dentro do hangar, na
+  // frente da parede, ocluindo as janelas #4 e #5 — e é a explosão dela que derruba o teto, então
+  // o banner vira legenda do que o jogador viu, não a causa.
+  //
+  // ⚠️ ELA EXISTE DESDE O PRIMEIRO QUADRO. Respira durante a queda, a derrapagem e o painel de
+  // escolha. Surgir foi exatamente a queixa contra o portão.
+  gargantaCut3: 'sprites/garganta.png',
+  ...animFrames('gargantaIdleAnim', 'garganta-idle-anim'),
+  ...animFrames('gargantaMorteAnim', 'garganta-morte-anim'),
 
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a

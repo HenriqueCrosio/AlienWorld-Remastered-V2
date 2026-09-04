@@ -87,3 +87,71 @@ export function corrigirPaleta(buf, ch) {
 
   return saida;
 }
+
+/**
+ * PARA A FAMÍLIA — `corrigirPaleta` mais um ajuste de MÉDIA, medido.
+ *
+ * ⚠️ POR QUE ISTO PRECISOU EXISTIR (2026-09-04). `corrigirPaleta` foi aferida numa peça que já
+ * chegava com média 31,8: ela gira o matiz e ACHATA O PICO, mas quase não mexe na média — é o que
+ * está escrito lá em cima, "a média mal se move". O spec da 2ª volta assumiu que toda arte nova
+ * chegaria por volta de 32 e mandou passar tudo pela mesma correção. Medido: os destroços vieram
+ * com média 50 a 69 e a criatura com 37. Contra uma pintura de média 13,1, isso não é família —
+ * é um borrão claro colado na cena, e foi exatamente assim que a 1ª geração da garganta apareceu.
+ *
+ * O ajuste é uma CURVA DE POTÊNCIA sobre a luminância (L' = 255·(L/255)^γ), com o γ resolvido por
+ * bisseção até a média cair no alvo. Potência, e não ganho multiplicativo: ganho puro empurra a
+ * peça inteira para o preto e mata o contraste interno; a potência escurece os meios-tons e deixa
+ * a faixa escura quase parada, que é onde a silhueta mora.
+ *
+ * O canal de cor é reescalado pelo MESMO fator (L'/L), então matiz e saturação não se mexem — só
+ * a intensidade. O achatamento do realce roda DEPOIS, para o teto valer sobre o resultado final.
+ */
+export function paraFamilia(buf, ch, mediaAlvo = 30) {
+  const base = corrigirPaleta(buf, ch);
+  const m0 = estatistica(base, ch).media;
+  if (!(m0 > mediaAlvo)) return base; // já está na família (ou mais escura) — não clarear nada
+
+  const mediaCom = (gama) => {
+    let soma = 0, n = 0;
+    for (let i = 0; i < base.length; i += ch) {
+      if (base[i + 3] < 200) continue;
+      const L = lum(base[i], base[i + 1], base[i + 2]);
+      soma += L > 0 ? 255 * (L / 255) ** gama : 0;
+      n++;
+    }
+    return n ? soma / n : 0;
+  };
+
+  let lo = 1, hi = 6;
+  for (let k = 0; k < 40; k++) {
+    const mid = (lo + hi) / 2;
+    if (mediaCom(mid) > mediaAlvo) lo = mid; else hi = mid;
+  }
+  const gama = (lo + hi) / 2;
+
+  const saida = Buffer.from(base);
+  for (let i = 0; i < saida.length; i += ch) {
+    if (saida[i + 3] < 8) continue;
+    const L = lum(saida[i], saida[i + 1], saida[i + 2]);
+    if (L <= 0) continue;
+    const k = (255 * (L / 255) ** gama) / L;
+    saida[i] = Math.min(255, Math.round(saida[i] * k));
+    saida[i + 1] = Math.min(255, Math.round(saida[i + 1] * k));
+    saida[i + 2] = Math.min(255, Math.round(saida[i + 2] * k));
+  }
+
+  // O TETO VALE SOBRE O RESULTADO: a mesma compressão acima de L=90 da lei original, agora
+  // aplicada depois do escurecimento.
+  for (let i = 0; i < saida.length; i += ch) {
+    if (saida[i + 3] < 8) continue;
+    const L = lum(saida[i], saida[i + 1], saida[i + 2]);
+    if (L <= 90) continue;
+    const k = (90 + (L - 90) * 0.36) / L;
+    saida[i] = Math.round(saida[i] * k);
+    saida[i + 1] = Math.round(saida[i + 1] * k);
+    saida[i + 2] = Math.round(saida[i + 2] * k);
+  }
+
+  saida.gama = gama;
+  return saida;
+}
