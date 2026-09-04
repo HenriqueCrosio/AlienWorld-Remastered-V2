@@ -290,6 +290,56 @@ que a **média mal se moveu**: o defeito quase nunca é o brilho geral da peça,
 o miolo **rosa** ficou: é `enemyBright 0xe8306b`, paleta de inimigo, e está certo. **Antes de
 mexer numa cor, veja de quem ela é em `src/config.ts`.**
 
+## ⚠️ QUATRO LIÇÕES DA 2ª VOLTA DA CUTSCENE 3 (2026-09-04)
+
+Todas as quatro custaram trabalho refeito na mesma sessão. As três primeiras são irmãs da lição de
+02/09 acima: elas falham porque uma decisão foi tomada olhando UM caso e generalizada sem medir.
+
+### 1. A caixa do recorte é UMA por PEÇA, não uma por LOTE
+
+`install-anim.mjs` calcula a caixa união **de um lote**. Uma peça com DUAS animações — a garganta
+tem idle e morte — rodada duas vezes por ele ganha **duas caixas diferentes**, e o sprite SALTA no
+instante da troca. Na Cutscene 3 a troca acontece no impacto do torpedo: o único quadro da cena em
+que ninguém pode piscar.
+
+`scripts/_cut3/_instalar-garganta.mjs` existe por isso: ele baixa o estático e os dois lotes, limpa
+tudo, e calcula UMA caixa sobre o conjunto inteiro. **Peça com mais de uma animação precisa de um
+instalador que veja todas de uma vez.**
+
+### 2. Pico baixo NÃO é o mesmo que estar na família — quem manda é a MÉDIA
+
+A correção de 03/09 foi aferida numa peça que já chegava com **média 31,8**: ela gira o matiz e
+achata o pico, e por isso está escrito ali em cima que "a média mal se move". Isso virou uma
+suposição de que toda arte nova chegaria por volta de 32. **Medido em 04/09: os destroços vieram
+com média 50 a 69 e a primeira garganta com 37.** Contra uma pintura de média 13,1, eles ficaram
+com pico obediente (≤132) e mesmo assim **borrões claros colados na cena**.
+
+`paraFamilia()` em `scripts/_cut3/_paleta.mjs` fecha o buraco: resolve por bisseção o γ de uma
+curva de potência (L' = 255·(L/255)^γ) até a média cair no alvo, e só então aplica o teto.
+Potência, não ganho multiplicativo — ganho puro mata o contraste interno da peça.
+
+**A peça entra na família pela MÉDIA. O pico só evita que ela grite.**
+
+### 3. A faixa de matiz se MEDE na peça, não se assume
+
+A regra "casco teal = matiz 140°–215°" nasceu correta e virou lei. Em 04/09 o histograma de matiz
+da garganta mostrou que ela **não tem um único pixel abaixo de 200°**: a faixa pegava 2.600px e
+deixava intactos **4.300px de azul em 220–260** — o halo ciano que sobrava em volta dela na cena.
+Ciano é a cor do jogador, então o defeito era semântico, não só feio.
+
+O corte novo (265°) é o **vão medido** entre as duas massas: o azul acaba em 260, a carne começa em
+270. **Antes de aplicar uma faixa de matiz, rode o histograma da peça.**
+
+### 4. Nome de asset novo se confere ANTES de escrever no disco
+
+O plano batizou as peças de entulho de `destroco1..4`. O jogo **já tinha** `destroco`/`destroco2`/
+`destroco3` — o casco rasgado à deriva que as Fases 2 e 3 cospem como perigo (`DebrisSystem`). O
+instalador gravou `destroco-2.png` e `destroco-3.png` por cima da arte deles, e só o `tsc` acusou,
+pela chave duplicada no `ART` — depois de o disco já estar sobrescrito. Restaurado com
+`git checkout` e renomeado para `entulho1..4`.
+
+**`grep` no `ART` antes de escolher o nome. O typecheck avisa tarde demais.**
+
 ## Ordem de produção
 
 1. **M1-M3 rodam com placeholder** (retângulos coloridos). O jogo tem que estar divertido *antes* da arte.

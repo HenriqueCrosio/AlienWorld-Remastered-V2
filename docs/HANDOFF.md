@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-03)
+# HANDOFF — estado do projeto (2026-09-04)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -53,10 +53,11 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 
 1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
    (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no
-   hangar do Leviatã) está IMPLEMENTADA** na branch `feat/cutscene3-visual` (`06dbe68`), com as
-   cinco tarefas feitas, sonda verde e **sem merge**: o que falta é o **TESTE JOGADO** pelo
-   Henrique. Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`, que virou o
-   mapa do teste — ele carrega a lista de verificação e os quatro pontos que esperam veredicto.
+   hangar do Leviatã) teve a 1ª volta jogada e reprovada em dois blocos, e a 2ª volta está
+   IMPLEMENTADA** na branch `feat/cutscene3-visual` (`ac2c04a`), com as nove tarefas feitas, todas
+   as sondas verdes e **sem merge**: o que falta é o **TESTE JOGADO** da 2ª volta. Retome por
+   `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`, que carrega a lista de
+   verificação bloco a bloco e o risco aberto (a nave parada encostada na criatura).
 2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
    (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
    fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
@@ -793,12 +794,52 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 6 — a Cutscene 3, TESTADA E EM 2ª VOLTA (2026-09-03)
+## A FATIA 6 — a Cutscene 3, 2ª VOLTA IMPLEMENTADA (2026-09-04)
 
-🟠 **A 1ª volta foi jogada e julgada; a 2ª está especificada e NÃO começou.** Branch
-`feat/cutscene3-visual`, 8 commits, ponta em `0bd2353`. Sem merge e sem push. **`main` segue em
-`392eedf`.** **Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**, que
-mudou de mão outra vez: era o mapa de quem TESTA, virou o mapa de quem IMPLEMENTA a 2ª volta.
+🟠 **A 2ª volta está IMPLEMENTADA e aguarda teste jogado.** Branch `feat/cutscene3-visual`, 19
+commits, ponta em `ac2c04a`. Sem merge e sem push. **`main` segue em `392eedf`.** **Retome por
+`docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**, que mudou de mão pela terceira
+vez: agora é o mapa de quem TESTA a 2ª volta.
+
+### O QUE A 2ª VOLTA ENTREGOU (plano: `docs/superpowers/plans/2026-09-04-cutscene3-garganta.md`)
+
+| bloco | o que ficou |
+|---|---|
+| A garganta | a arte do Henrique (`15f111fd`, face `south`), **136×137 nativos**, pé no convés em `DECK_Y`, cobrindo x 262..398. Idle + morte, **19 arquivos na mesma caixa**. Média 29,7 / pico 105. |
+| O beat final | a nave recua para x=150, dispara um **torpedo próprio** (`torpedoCut3`, 15×7 desenhado em código), a criatura morre, a cadeia corre 330→8 e a nave **some dentro da boca** (escala 0,15, alpha 0). |
+| O entulho | 4 peças biomecânicas novas (`entulho1..4`, 53 a 67px), tamanho e cor **assados no arquivo**, escala 1 e zero `setTint`. Todas em média 30,0 / pico 91–97. |
+| A nadadeira | refeita com o `leviathan-swim-sheet` quadro 0 como estilo (90×81, média 29,7) **e** o movimento trocado de travessia por **pivô**. |
+| As luzes | as 17 lâmpadas pintadas ganharam brilho aditivo na cor própria de cada uma; 14 respiram, 3 falham, e no colapso todas viram alarme. 3 emissores de faísca nas junções medidas. |
+| O portão | **saiu** — do disco, do `BootScene` e da cena. |
+| A 3ª carcaça | **saiu**, por decisão do Henrique: a garganta cobre x 262..398 e ela ficava 100% atrás. O assert baixou de `>= 3` para `>= 2`. |
+
+**Sondas, todas verdes:** `probe-cut3-visual` (52 asserts), `probe-interlude3` (`DECK_Y` 171 / 164
+intacto), `probe-stage4`, `probe-f3-visual`, `probe-menu`. `npm run build` limpo.
+
+⚠️ **O RISCO ABERTO PARA O TESTE JOGADO:** a nave passa ~10s parada em **x=258**, encostada na
+borda esquerda da criatura (que começa em 262), durante todo o painel de escolha. Casco escuro
+sobre corpo escuro pode dissolver a silhueta. **É para ser julgado, não consertado por conta
+própria.**
+
+### ⚠️ A CORREÇÃO DE RUMO QUE CUSTOU 40 GERAÇÕES — leia antes de gerar arte "melhor"
+
+O spec da 2ª volta mandava **regerar** a criatura em 191px, porque o enquadramento aprovado pedia
+altura inteira e a arte do Henrique tem 131px de conteúdo — esticar quebraria a grade de pixel. Eu
+segui o spec e gerei duas versões novas (40 gerações), sem perguntar.
+
+O Henrique cortou no meio: *"eu disse para usar o `15f111fd` exatamente porque ele já estava feito
+(...) era para animar o que eu já fiz"*. Ele tinha razão, e a saída era simples — **o enquadramento
+é que devia ceder para a arte, não o contrário**. A criatura entrou em 136×137 nativos, pisando no
+convés, e o número 191 do spec morreu.
+
+**A lição:** quando o spec manda REGERAR arte que o Henrique já fez, isso é uma decisão dele, não
+uma consequência técnica. Pergunte antes de gastar. O custo aqui foi baixo (40 de 5.000), mas a
+regra vale para o caso em que não for.
+
+⚠️ **E a morte perdeu dois quadros por defeito do gerador:** os índices 7 e 8 vieram com uma cruz
+marrom no meio da boca, e como a anim não repete ela CONGELAVA nesse quadro — a cruz ficava na tela
+do impacto até o fim da cena. Cortados no disco (`gargantaMorteAnim: 7`). A caixa foi calculada com
+os 19 quadros originais, então apagar arquivos não desalinha nada.
 
 - Spec da 1ª volta: `docs/superpowers/specs/2026-09-01-cutscene3-visual-design.md`
 - Plano da 1ª volta: `docs/superpowers/plans/2026-09-01-cutscene3-visual.md` (5 tarefas)
