@@ -1,7 +1,8 @@
 # START — Fatia 6: CUTSCENE 3, TESTE JOGADO DA 2ª VOLTA
 
-**🟠 A 2ª VOLTA ESTÁ IMPLEMENTADA E NÃO FOI JOGADA.** Branch `feat/cutscene3-visual`, 21 commits,
-ponta em `f1aa2e4`. **Não mergeada e não empurrada** — `main` segue em `392eedf`.
+**🟠 A 2ª VOLTA ESTÁ IMPLEMENTADA E NÃO FOI JOGADA.** Branch `feat/cutscene3-visual`.
+**O último commit de CÓDIGO é `ac2c04a`**;
+o que veio depois é documentação. **Não mergeada e não empurrada** — `main` segue em `392eedf`.
 
 > ⚠️ **ESTE DOCUMENTO MUDOU DE MÃO PELA TERCEIRA VEZ, EM 2026-09-04.** Ele nasceu mapa de quem ia
 > IMPLEMENTAR a fatia; em 02/09 virou mapa de quem ia TESTÁ-LA; em 03/09 voltou a ser mapa de quem
@@ -173,7 +174,7 @@ as peças da cutscene se chamam `entulho1..4`.
 ## O ORÇAMENTO DO PIXELLAB
 
 Em 2026-09-04 o ciclo virou e reabasteceu para **5.000**, com a próxima virada em **2026-10-04**.
-A 2ª volta gastou **~140** (40 delas em duas gerações descartadas da criatura, antes de o Henrique
+A 2ª volta gastou **107** (40 delas em duas gerações descartadas da criatura, antes de o Henrique
 mandar usar a arte que ele já tinha). Orçamento não é restrição.
 
 ---

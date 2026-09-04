@@ -54,7 +54,7 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
    (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no
    hangar do Leviatã) teve a 1ª volta jogada e reprovada em dois blocos, e a 2ª volta está
-   IMPLEMENTADA** na branch `feat/cutscene3-visual` (`f1aa2e4`), com as nove tarefas feitas, todas
+   IMPLEMENTADA** na branch `feat/cutscene3-visual` (último commit de código: `ac2c04a`), com as nove tarefas feitas, todas
    as sondas verdes e **sem merge**: o que falta é o **TESTE JOGADO** da 2ª volta. Retome por
    `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`, que carrega a lista de
    verificação bloco a bloco e o risco aberto (a nave parada encostada na criatura).
@@ -796,8 +796,9 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ## A FATIA 6 — a Cutscene 3, 2ª VOLTA IMPLEMENTADA (2026-09-04)
 
-🟠 **A 2ª volta está IMPLEMENTADA e aguarda teste jogado.** Branch `feat/cutscene3-visual`, 21
-commits, ponta em `f1aa2e4`. Sem merge e sem push. **`main` segue em `392eedf`.** **Retome por
+🟠 **A 2ª volta está IMPLEMENTADA e aguarda teste jogado.** Branch `feat/cutscene3-visual`. **O
+último commit de CÓDIGO é `ac2c04a`**; o que veio depois é documentação. Sem merge e sem push, e
+**`main` segue em `392eedf`.** **Retome por
 `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**, que mudou de mão pela terceira
 vez: agora é o mapa de quem TESTA a 2ª volta.
 
