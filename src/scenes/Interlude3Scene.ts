@@ -130,6 +130,30 @@ export class Interlude3Scene extends Phaser.Scene {
    */
   private static readonly CADEIA = { n: 10, x0: 330, x1: 8, t0: 200, passo: 140 } as const;
 
+  /**
+   * O ENTULHO QUE MURA A BOCA — `[x, yFinal, textura, ângulo]`.
+   *
+   * ⚠️ AS 9 POSIÇÕES SÃO AS MEDIDAS DA 1ª VOLTA e NÃO mudam: elas foram escolhidas para empilhar
+   * uma parede que fecha a abertura, e a sonda fotografa a cena — posição sorteada não se
+   * reproduz.
+   *
+   * ⚠️ O QUE INVERTEU FOI A ORDEM, e as DUAS leis convivem. As FIADAS continuam de baixo para
+   * cima (pilha que começa pelo topo é chuva, não desabamento — 2026-07-19). Dentro de cada
+   * fiada, as peças agora entram da DIREITA para a ESQUERDA, acompanhando a cadeia que acabou de
+   * passar por elas. Antes era esquerda → direita, contra a onda.
+   *
+   * ⚠️ SEM `setScale` E SEM `setTint`. Eram `asteroid`/`asteroid2`/`asteroid3` — pedras genéricas
+   * de 24px esticadas 2,2 a 2,8× e multiplicadas por um azul só. Agora o tamanho (53 a 67px, os
+   * mesmos que aquelas escalas davam na tela) e a cor estão ASSADOS no arquivo, e a cena desenha
+   * em escala 1.
+   */
+  private static readonly ENTULHO: ReadonlyArray<readonly [number, number, string, number]> = [
+    [112, 141, 'entulho3', 32], [66, 146, 'entulho2', -20], [22, 142, 'entulho1', 12],
+    [132, 100, 'entulho4', -28], [90, 108, 'entulho1', 24], [40, 104, 'entulho2', -8],
+    [108, 62, 'entulho3', -14], [58, 66, 'entulho4', 16],
+    [78, 30, 'entulho2', 8],
+  ];
+
   // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
   // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
   // metade esquerda, na frente das janelas); a nave (80) passa na frente de tudo.
@@ -743,10 +767,13 @@ export class Interlude3Scene extends Phaser.Scene {
   }
 
   /**
-   * O entulho que mura a boca. Pedaços caem de FORA da tela e empilham DE BAIXO PARA CIMA
-   * (pilha que começa pelo topo é chuva, não desabamento), cada um com um impacto curto ao
-   * assentar. Tint de silhueta escura — é parede nascendo, não pedra de cenário.
-   * Posições FIXAS, não sorteadas: a sonda fotografa a cena, e o quadro tem que ser reproduzível.
+   * O entulho que mura a boca. As peças caem de FORA da tela e assentam nas 9 posições medidas,
+   * cada uma com um impacto curto ao encostar. São restos da frota engolida — casco com osso
+   * dentro —, não pedra de cenário: a mesma leitura das carcaças do convés, agora de pé contra a
+   * saída.
+   *
+   * ⚠️ Posições FIXAS, não sorteadas: a sonda fotografa a cena, e o quadro tem que ser
+   * reproduzível. Ver `ENTULHO` para as duas leis de ordem que convivem aqui.
    */
   private selarBoca(): void {
     // ⚠️ O PORTÃO SAIU DAQUI EM 2026-09-04, e não por gosto: o Henrique jogou a cena e o reprovou
@@ -756,20 +783,7 @@ export class Interlude3Scene extends Phaser.Scene {
     // resolve as duas agora é a GARGANTA — ela é um corpo ocluindo a parede, e é a explosão dela
     // que derruba o teto.
 
-    // [textura, x, yFinal, escala, ângulo] — 3 fiadas, da base ao topo da abertura.
-    const pecas: Array<[string, number, number, number, number]> = [
-      ['asteroid', 22, 142, 2.6, 12],
-      ['asteroid2', 66, 146, 2.8, -20],
-      ['asteroid3', 112, 141, 2.5, 32],
-      ['asteroid2', 40, 104, 2.4, -8],
-      ['asteroid', 90, 108, 2.7, 24],
-      ['asteroid3', 132, 100, 2.2, -28],
-      ['asteroid', 58, 66, 2.5, 16],
-      ['asteroid2', 108, 62, 2.4, -14],
-      ['asteroid3', 78, 30, 2.6, 8],
-    ];
-
-    pecas.forEach(([tex, x, yFinal, escala, angulo], i) => {
+    Interlude3Scene.ENTULHO.forEach(([x, yFinal, tex, angulo], i) => {
       if (!this.textures.exists(tex)) return;
 
       // ⚠️ A PILHA COMEÇA SÓ DEPOIS DE A CADEIA PASSAR (ela acaba em t≈1460 daqui). Entulho
@@ -780,12 +794,11 @@ export class Interlude3Scene extends Phaser.Scene {
 
         const peca = this.add
           .image(x, -40, tex)
-          .setScale(escala)
           .setAngle(angulo)
-          .setTint(0x39415c)
-          // ACIMA da arte: o entulho mura a metade esquerda NA FRENTE das janelas espelhadas —
-          // é a vista para fora que ele existe para apagar.
-          .setDepth(Interlude3Scene.DEPTH_ENTULHO);
+          // ACIMA da pintura: o entulho mura a metade esquerda NA FRENTE das janelas #1 e #2 — é
+          // a vista para fora que ele existe para apagar, e é a parede que a Fase 4 pressupõe.
+          .setDepth(Interlude3Scene.DEPTH_ENTULHO)
+          .setName('entulhoCut3');
 
         this.tweens.add({
           targets: peca,

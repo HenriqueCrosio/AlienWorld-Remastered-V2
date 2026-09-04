@@ -241,6 +241,32 @@ if (fim) {
   ok(fim.alpha <= 0.1, `e apagando (alpha ${fim.alpha})`);
 }
 
+// ─── OS DESTROÇOS: peças da frota, não pedras genéricas, nas 9 posições MEDIDAS ───
+//
+// ⚠️ AS 9 POSIÇÕES NÃO MUDAM. Elas foram medidas na 1ª volta e a sonda fotografa a cena: posição
+// sorteada quebra a reprodutibilidade. O que inverteu foi a ORDEM DE QUEDA.
+// ⚠️ E ELES NÃO PODEM MAIS SER `asteroid` TINGIDO. A cor mora no ARQUIVO (ver _paleta.mjs) —
+// `setTint` multiplicaria a peça inteira por uma cor só e apagaria a única luz que ela tem.
+await page.waitForTimeout(1800);
+const ent = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const es = s.children.list.filter((o) => o.name === 'entulhoCut3');
+  return {
+    n: es.length,
+    texs: [...new Set(es.map((o) => o.texture.key))].sort(),
+    tingidos: es.filter((o) => o.isTinted).length,
+    escalas: [...new Set(es.map((o) => +o.scaleX.toFixed(2)))],
+    xs: es.map((o) => Math.round(o.x)),
+  };
+});
+console.log('entulho ', JSON.stringify(ent));
+ok(ent.n === 9, `as 9 pecas de entulho cairam (${ent.n})`);
+ok(ent.texs.length === 4 && ent.texs.every((t) => t.startsWith('entulho')),
+   `as 4 pecas biomecanicas novas entraram, nenhum asteroide (${ent.texs.join(',')})`);
+ok(ent.tingidos === 0, `nenhuma peca depende de setTint — a cor esta no arquivo (${ent.tingidos} tingidas)`);
+ok(ent.escalas.length === 1 && ent.escalas[0] === 1, `desenhadas em tamanho NATIVO (escalas ${ent.escalas.join(',')})`);
+ok(ent.xs.every((x) => x < 140), `e todas muram a metade ESQUERDA, que e a boca (${ent.xs.join(',')})`);
+
 console.log('');
 console.log(falhas ? `${falhas} FALHA(S)` : '✔ A FATIA 6 ESTA DE PE');
 await browser.close();
