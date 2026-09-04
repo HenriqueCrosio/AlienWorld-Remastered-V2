@@ -1,7 +1,7 @@
 # START — Fatia 6: CUTSCENE 3, TESTE JOGADO DA 2ª VOLTA
 
-**🟠 A 2ª VOLTA ESTÁ IMPLEMENTADA E NÃO FOI JOGADA.** Branch `feat/cutscene3-visual`, 19 commits,
-ponta em `ac2c04a`. **Não mergeada e não empurrada** — `main` segue em `392eedf`.
+**🟠 A 2ª VOLTA ESTÁ IMPLEMENTADA E NÃO FOI JOGADA.** Branch `feat/cutscene3-visual`, 21 commits,
+ponta em `f1aa2e4`. **Não mergeada e não empurrada** — `main` segue em `392eedf`.
 
 > ⚠️ **ESTE DOCUMENTO MUDOU DE MÃO PELA TERCEIRA VEZ, EM 2026-09-04.** Ele nasceu mapa de quem ia
 > IMPLEMENTAR a fatia; em 02/09 virou mapa de quem ia TESTÁ-LA; em 03/09 voltou a ser mapa de quem
@@ -34,7 +34,7 @@ A cena dura ~16s até o painel de naves, e o beat final leva mais ~6s depois da 
 
 ---
 
-## O QUE JULGAR — cinco blocos, na ordem em que aparecem
+## O QUE JULGAR — seis blocos, na ordem em que aparecem
 
 ### 1. A GARGANTA, desde o primeiro quadro
 
@@ -129,7 +129,7 @@ aditivo em cima, cada uma na **cor medida dela**.
 
 ## SE ALGUM BLOCO FOR REPROVADO
 
-**Não conserte antes de o Henrique julgar todos os cinco.** A 1ª volta ensinou que dois blocos
+**Não conserte antes de o Henrique julgar todos os seis.** A 1ª volta ensinou que dois blocos
 podem cair juntos por motivos diferentes (a nadadeira caiu por arte E por movimento, separadamente),
 e consertar o primeiro antes de ouvir o resto refaz trabalho.
 
