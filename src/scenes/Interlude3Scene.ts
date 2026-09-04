@@ -46,6 +46,8 @@ export class Interlude3Scene extends Phaser.Scene {
   private fx!: Fx;
 
   private ship!: Phaser.GameObjects.Sprite;
+  /** A criatura que substituiu o portão. Existe desde `create()`; morre no beat final. */
+  private garganta?: Phaser.GameObjects.Sprite;
   private banner!: Phaser.GameObjects.Text;
   private panel: ShipPanel | null = null;
 
@@ -82,11 +84,33 @@ export class Interlude3Scene extends Phaser.Scene {
    */
   private static readonly JANELAS_Y = 88;
 
+  /**
+   * A GARGANTA — a geometria saiu do DESENHO do Henrique, medida nos traços vermelhos.
+   *
+   * A forma fechada que ele desenhou tem a borda esquerda constante em x≈350-355, de y≈8 a
+   * y≈199, saindo pela borda direita: uma coluna de ALTURA INTEIRA colada na direita. As quatro
+   * setas apontam y≈34, 88, 141 e 180 — teto, janela, convés e chão: ele está apontando a faixa
+   * inteira, de cima a baixo.
+   *
+   * Com centro em 330 e 191 de largura, ela cobre x=235..426 e OCLUI POR INTEIRO as janelas #4
+   * (288..321) e #5 (336..376). Isso é o certo: ela não está embutida na parede, ela está DENTRO
+   * do hangar, NA FRENTE dela. Objeto ocluindo parede é render, não colagem — e é por aí que ela
+   * escapa do defeito que matou o portão.
+   *
+   * `mira` é onde a nave RECUA para atirar, e `miraY` a altura da boca. ⚠️ O recuo não é enfeite:
+   * a nave para em x=258, DENTRO da caixa da criatura, e um tiro de 56px disparado de cima do
+   * alvo não se lê como tiro. Recuando para 150, o torpedo cruza 180px de tela.
+   */
+  private static readonly GARGANTA = { x: 330, topo: 8, miraY: 103, mira: 150 } as const;
+
   // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
   // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
   // metade esquerda, na frente das janelas); a nave (80) passa na frente de tudo.
   private static readonly DEPTH_HANGAR = 70;
   private static readonly DEPTH_ENTULHO = 72;
+  // A GARGANTA fica ACIMA da pintura e do entulho, e ABAIXO da nave: ela é um corpo dentro do
+  // hangar, e a nave passa na frente dele.
+  private static readonly DEPTH_GARGANTA = 75;
   private static readonly DEPTH_NAVE = 80;
 
   constructor() {
@@ -120,6 +144,7 @@ export class Interlude3Scene extends Phaser.Scene {
     this.construirHangar();
     this.nadadeira();
     this.plantarCarcacas();
+    this.plantarGarganta();
 
     // A nave chega DANIFICADA. A fumaça segue o casco; as fagulhas só ligam na derrapagem.
     const chegada = SHIPS[this.naveId];
@@ -271,7 +296,11 @@ export class Interlude3Scene extends Phaser.Scene {
     if (!artes.length) return;
 
     const { fundo, frente, saltoMin } = Interlude3Scene.CARCACAS;
-    const xs = [64, 150, 330].filter(
+    // ⚠️ ERAM TRÊS, E A TERCEIRA (x=330) CAIU EM 2026-09-04. A garganta cobre x=235..426: a peça
+    // ficava 100% atrás dela, invisível — arte aprovada no teste jogado sendo desenhada para
+    // ninguém. Medido em `scripts/_cut3/_mock-garganta.png`; decidido pelo Henrique com as três
+    // saídas na mesa (mover a carcaça, mover a nave, ou cortar). O convés livre acaba em x≈235.
+    const xs = [64, 150].filter(
       (x) => Math.abs(x - Interlude3Scene.VAO_DA_NAVE.x) > Interlude3Scene.VAO_DA_NAVE.raio,
     );
 
@@ -309,6 +338,29 @@ export class Interlude3Scene extends Phaser.Scene {
         .setName('sombraCarcaca');
       c.once('destroy', () => sombra.destroy());
     }
+  }
+
+  /**
+   * A GARGANTA, plantada no primeiro quadro.
+   *
+   * ⚠️ ELA NÃO SURGE. Respira durante a queda, a derrapagem e o painel de escolha inteiro — a
+   * queixa exata contra o portão foi "apenas surge um asset sem relação nenhuma com a arte".
+   * Um corpo que já estava lá quando você caiu não surge: você é que chegou.
+   *
+   * ⚠️ ANCORADA PELO TOPO, não pelo centro. O topo (y=8) é o número que veio do desenho; a base é
+   * consequência da altura real da arte instalada. Ancorar pelo centro faria o enquadramento
+   * inteiro escorregar a cada reinstalação da peça.
+   */
+  private plantarGarganta(): void {
+    if (!this.textures.exists('gargantaCut3')) return;
+
+    this.garganta = this.add
+      .sprite(Interlude3Scene.GARGANTA.x, Interlude3Scene.GARGANTA.topo, 'gargantaCut3')
+      .setOrigin(0.5, 0)
+      .setDepth(Interlude3Scene.DEPTH_GARGANTA)
+      .setName('gargantaCut3');
+
+    if (this.anims.exists('garganta-idle')) this.garganta.play('garganta-idle');
   }
 
   private construirHangar(): void {

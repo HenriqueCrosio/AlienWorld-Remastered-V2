@@ -43,6 +43,41 @@ if (c.parede) {
 }
 ok(c.usamHangar === 0, `nenhuma imagem da cena usa mais o 'hangar' da Fase 4 (${c.usamHangar})`);
 
+// ─── A GARGANTA: ela EXISTE DESDE O PRIMEIRO QUADRO, e é um corpo na frente da parede ───
+//
+// ⚠️ O ASSERT DE "DESDE O PRIMEIRO QUADRO" É O CORAÇÃO DESTE BLOCO. O portão foi reprovado por
+// SURGIR ("apenas surge um asset sem relação nenhuma com a arte"). A leitura acontece 1,5s depois
+// do start da cena — antes da queda, antes da derrapagem, antes do painel. Se ela só nascesse no
+// colapso, este assert seria o que pegaria.
+const garg = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const g = s.children.list.filter((o) => o.name === 'gargantaCut3')[0];
+  const p = s.children.list.filter((o) => o.name === 'paredeCut3')[0];
+  return g
+    ? { tex: g.texture.key, x: Math.round(g.x), topo: Math.round(g.y),
+        w: g.width, h: g.height, sx: g.scaleX, sy: g.scaleY,
+        depth: g.depth, depthParede: p ? p.depth : null,
+        anim: g.anims && g.anims.currentAnim ? g.anims.currentAnim.key : null,
+        tocando: !!(g.anims && g.anims.isPlaying) }
+    : null;
+});
+console.log('garganta', JSON.stringify(garg));
+ok(!!garg, 'a garganta esta em cena DESDE o comeco (nao surge no colapso, como o portao surgia)');
+if (garg) {
+  // ⚠️ A TEXTURA LIDA É A DO QUADRO CORRENTE, não a chave estática: ela está TOCANDO desde o
+  // primeiro quadro, então o Phaser devolve `gargantaIdleAnim<n>`. O que este assert prova é que
+  // a arte desenhada é da família da garganta — não um asteroide, não um portão.
+  ok(/^garganta/.test(garg.tex), `ela usa a arte propria (${garg.tex})`);
+  ok(garg.x === 330, `centrada em x=330, cobrindo as janelas #4 e #5 (x=${garg.x})`);
+  ok(garg.topo === 8, `ancorada pelo TOPO em y=8 (y=${garg.topo})`);
+  // ⚠️ 1px de arte = 1px de jogo. Escala != 1 aqui e a peça inteira sai da grade.
+  ok(garg.sx === 1 && garg.sy === 1, `desenhada em tamanho NATIVO (escala ${garg.sx}x${garg.sy})`);
+  ok(garg.w >= 170 && garg.h >= 170, `no enquadramento aprovado, altura inteira (${garg.w}x${garg.h})`);
+  ok(garg.depth > garg.depthParede, `ela e um CORPO na frente da parede (${garg.depth} > ${garg.depthParede})`);
+  ok(garg.depth < 80, `e atras da nave (${garg.depth} < 80)`);
+  ok(garg.anim === 'garganta-idle' && garg.tocando, `ela RESPIRA desde o comeco (${garg.anim}, tocando=${garg.tocando})`);
+}
+
 // ─── A NADADEIRA: uma remada só, da DIREITA para a ESQUERDA, e só o `x` se mexe ───
 //
 // ⚠️ O ASSERT COBRA A DIREÇÃO QUE O DESENHO EXIGE, NÃO A QUE O CÓDIGO ESCOLHEU. O assert do rabo
@@ -93,7 +128,9 @@ const carc = await page.evaluate(() => {
   };
 });
 console.log('carcacas', JSON.stringify(carc));
-ok(carc.n >= 3, `ha carcacas no conves (${carc.n})`);
+// ⚠️ DUAS, NÃO TRÊS, DESDE 2026-09-04. A terceira ficava atrás da garganta — ver o comentário em
+// Interlude3Scene.plantarCarcacas().
+ok(carc.n >= 2, `ha carcacas no conves (${carc.n})`);
 ok(carc.sombras === carc.n, `uma sombra por carcaca (${carc.sombras}/${carc.n})`);
 ok(new Set(carc.pes).size > 1, `elas NAO estao todas no mesmo y (${carc.pes.join(',')})`);
 // ⚠️ A nave derrapa e PARA em x≈258, um vão escolhido a dedo na revisão de 2026-07-19 para ela
