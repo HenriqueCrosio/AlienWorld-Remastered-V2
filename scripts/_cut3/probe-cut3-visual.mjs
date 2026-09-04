@@ -86,38 +86,48 @@ if (garg) {
   ok(garg.anim === 'garganta-idle' && garg.tocando, `ela RESPIRA desde o comeco (${garg.anim}, tocando=${garg.tocando})`);
 }
 
-// ─── A NADADEIRA: uma remada só, da DIREITA para a ESQUERDA, e só o `x` se mexe ───
+// ─── A NADADEIRA: ela PIVOTA, não atravessa ───
 //
-// ⚠️ O ASSERT COBRA A DIREÇÃO QUE O DESENHO EXIGE, NÃO A QUE O CÓDIGO ESCOLHEU. O assert do rabo
-// cobrava `x2 < x1` e ficou VERDE em cima da versão que o Henrique reprovou, porque media a
-// escolha de quem o escreveu. Aqui a direita→esquerda foi derivada da Fase 3 (o corpo do Leviatã
-// está fora do quadro à direita, ele nada para a direita, a remada de força varre para trás) e
-// CONFIRMADA por ele antes de uma linha ser escrita.
+// ⚠️ O ASSERT ANTIGO COBRAVA `x2 < x1` — a travessia — E FICAVA VERDE EM CIMA DO DEFEITO. Ele
+// media a escolha de quem o escreveu, não o que o desenho exige. O Henrique jogou e leu a peça
+// como "objeto perdido no espaço", justamente porque ela viajava: nadadeira presa num corpo não
+// viaja, ela pivota em torno de um ombro. Agora o assert cobra o PIVÔ, e cobra que o `x` e o `y`
+// LOCAIS da peça não se mexam — quem se mexe é o ângulo do braço.
 const nad = () =>
   page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
-    const n = s.children.list.filter((o) => o.name === 'nadadeiraCut3')[0];
+    const c = s.children.list.filter((o) => o.name === 'nadadeiraPivo')[0];
     const p = s.children.list.filter((o) => o.name === 'paredeCut3')[0];
-    return n
-      ? { x: Math.round(n.x), y: Math.round(n.y), ang: Math.round(n.angle),
-          alpha: +n.alpha.toFixed(2), depth: n.depth, depthParede: p ? p.depth : null }
-      : null;
+    if (!c) return null;
+    const peca = c.list.filter((o) => o.name === 'nadadeiraCut3')[0];
+    const m = peca ? peca.getWorldTransformMatrix() : null;
+    return {
+      ang: +c.angle.toFixed(2),
+      depth: c.depth,
+      depthParede: p ? p.depth : null,
+      localX: peca ? Math.round(peca.x) : null,
+      localY: peca ? Math.round(peca.y) : null,
+      mundoX: m ? Math.round(m.tx) : null,
+      mundoY: m ? Math.round(m.ty) : null,
+    };
   });
 
 let a = null;
-for (let i = 0; i < 60 && !a; i++) { a = await nad(); if (!a) await page.waitForTimeout(200); }
-ok(!!a, 'a nadadeira entra em cena');
+for (let i = 0; i < 40 && !a; i++) { a = await nad(); if (!a) await page.waitForTimeout(200); }
+ok(!!a, 'a nadadeira esta em cena, pendurada num braco que pivota');
 if (a) {
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
   const b = await nad();
   console.log('nadadeira', JSON.stringify(a), '->', JSON.stringify(b));
-  ok(!!b, 'ela ainda esta na tela 1,5s depois (a remada e lenta)');
+  ok(!!b, 'ela continua na tela 2,5s depois — a remada e LENTA e o ciclo e longo');
   if (b) {
-    ok(b.x < a.x, `ela varre da DIREITA para a ESQUERDA (${a.x} -> ${b.x})`);
-    ok(b.y === a.y, `sem eixo Y — a saida e uma linha so (${a.y} -> ${b.y})`);
-    ok(b.ang === a.ang, `sem giro (${a.ang}deg)`);
-    ok(b.alpha === a.alpha && b.alpha === 1, `sem fade: alpha fica em 1 (${a.alpha} -> ${b.alpha})`);
-    ok(b.depth < b.depthParede, `ela fica ATRAS da pintura (${b.depth} < ${b.depthParede}), entao so aparece pelas janelas`);
+    ok(b.ang !== a.ang, `o que se move e o ANGULO do braco (${a.ang}deg -> ${b.ang}deg)`);
+    ok(b.localX === a.localX && b.localY === a.localY,
+       `e a peca nao viaja: x,y locais fixos (${a.localX},${a.localY} -> ${b.localX},${b.localY})`);
+    ok(b.mundoY !== a.mundoY, `no mundo ela varre a faixa das janelas (y ${a.mundoY} -> ${b.mundoY})`);
+    ok(b.mundoY > 20 && b.mundoY < 175, `dentro da faixa util do quadro (y=${b.mundoY})`);
+    ok(b.depth < b.depthParede,
+       `e continua ATRAS da pintura (${b.depth} < ${b.depthParede}) — so existe pelo que as janelas deixam ver`);
   }
 }
 

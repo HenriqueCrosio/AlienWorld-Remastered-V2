@@ -82,11 +82,16 @@ export class Interlude3Scene extends Phaser.Scene {
   private static readonly DECK_Y = 171;
 
   /**
-   * O CENTRO DA FAIXA DAS JANELAS, medido no alpha da pintura instalada: os pixels vazados vão de
-   * y=44 a y=132, 89px de altura. É a altura por onde a nadadeira passa — ela só existe na tela
-   * pelo que as janelas deixam ver, então a régua dela é a das janelas, não o olho.
+   * A FAIXA DAS JANELAS, medida no alpha da pintura instalada: os pixels vazados vão de y=44 a
+   * y=132, 89px de altura. É a altura por onde a nadadeira passa — ela só existe na tela pelo que
+   * as janelas deixam ver, então a régua dela é a das janelas, não o olho.
+   *
+   * ⚠️ Era só o CENTRO (`JANELAS_Y = 88`), porque a nadadeira antiga atravessava numa linha reta
+   * e só precisava de uma altura. Com o pivô (2026-09-04) ela VARRE a faixa, e o que importa
+   * passaram a ser as bordas — que são as mesmas medições, agora nomeadas. As junções de faísca
+   * também penduram nelas.
    */
-  private static readonly JANELAS_Y = 88;
+  private static readonly JANELAS = { topo: 44, centro: 88, base: 132 } as const;
 
   /**
    * A GARGANTA — a criatura que substituiu o portão.
@@ -129,6 +134,47 @@ export class Interlude3Scene extends Phaser.Scene {
    * porque uma onda com jitter aleatório não lê como onda, lê como pipoca.
    */
   private static readonly CADEIA = { n: 10, x0: 330, x1: 8, t0: 200, passo: 140 } as const;
+
+  /**
+   * O BRAÇO DA NADADEIRA. O pivô é o OMBRO do Leviatã, e ele fica FORA DO QUADRO, embaixo e à
+   * direita — que é onde a Fase 3 já cravou que o corpo dele está (ele nada para a direita, com o
+   * casco fora da tela desse lado).
+   *
+   * ⚠️ OS DOIS EXTREMOS DO ARCO NÃO SÃO ESCOLHIDOS, SÃO RESOLVIDOS. `anguloPara()` acha o ângulo
+   * em que o centro da peça encosta numa altura pedida, e as alturas pedidas são as BORDAS
+   * MEDIDAS da faixa das janelas (`JANELAS`) com uma folga de 8px para fora — a remada tem que
+   * começar abaixo do que a janela mostra e terminar acima, senão o extremo do arco fica visível
+   * e a peça parece bater num teto invisível.
+   */
+  private static readonly NADADEIRA = {
+    pivoX: 440, pivoY: 260,
+    bracoX: -320, bracoY: -120,
+    folga: 8,
+  } as const;
+
+  /**
+   * O ângulo do braço em que o CENTRO da peça encosta em `yAlvo`.
+   *
+   * Girar o braço por θ leva o centro para `pivoY + (bracoX·sen θ + bracoY·cos θ)`. A função é
+   * monótona no trecho que interessa (0° a 40°), então bisseção resolve — e resolver é o ponto:
+   * mudar o pivô ou o braço reajusta o arco sozinho, em vez de deixar dois números velhos.
+   */
+  private static anguloPara(yAlvo: number): number {
+    const { pivoX: _px, pivoY, bracoX, bracoY } = Interlude3Scene.NADADEIRA;
+    const yEm = (g: number) => {
+      const r = Phaser.Math.DegToRad(g);
+      return pivoY + (bracoX * Math.sin(r) + bracoY * Math.cos(r));
+    };
+
+    let lo = 0;
+    let hi = 40;
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      if (yEm(mid) > yAlvo) lo = mid;
+      else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
 
   /**
    * O ENTULHO QUE MURA A BOCA — `[x, yFinal, textura, ângulo]`.
@@ -276,41 +322,52 @@ export class Interlude3Scene extends Phaser.Scene {
    * banda escura de baixo dela mesma.
    */
   /**
-   * A NADADEIRA PEITORAL — uma remada só, atravessando a faixa das janelas.
+   * A NADADEIRA PEITORAL — e o conserto de 2026-09-04 foi de CÓDIGO, não só de arte.
    *
-   * ⚠️ ELA VIVE ATRÁS DA PINTURA, e é isso que faz a cena funcionar sem máscara nenhuma. Como as
-   * cinco janelas são as ÚNICAS aberturas da pintura, a nadadeira só aparece por elas — o quadro
-   * da janela a recorta sozinho, e esse recorte é exatamente o que vende que ela está do lado de
-   * fora do casco.
+   * ⚠️ ELA VIVE ATRÁS DA PINTURA, e é isso que faz a cena funcionar sem máscara nenhuma. As
+   * janelas são as ÚNICAS aberturas da pintura, então ela só aparece por elas — o quadro da
+   * janela a recorta sozinho, e esse recorte é o que vende que ela está do lado de fora do casco.
+   * Com a garganta ocluindo a #5 e quase toda a #4, as que sobram são a #1, a #2 e a central #3.
    *
-   * ⚠️ DIREITA → ESQUERDA, e a direção foi DERIVADA E CONFIRMADA, nunca assumida. A Fase 3 já
-   * cravou que o corpo do Leviatã fica fora do quadro à direita e que ele nada no mesmo sentido
-   * da nave; num bicho que nada para a direita, a remada de FORÇA varre para trás. Assumir esta
-   * direção sem perguntar foi o que reprovou quatro versões do rabo.
+   * ⚠️ A 1ª VOLTA FOI REPROVADA POR DUAS COISAS SEPARADAS, e esta é a segunda. A arte estava
+   * errada (asa de morcego, gerada sem referência), mas o MOVIMENTO estava errado sozinho: ela
+   * ATRAVESSAVA a tela num tween de `x`, da direita para a esquerda, e o Henrique leu exatamente
+   * o que isso é — "um objeto perdido no espaço".
    *
-   * ⚠️ E É UMA LINHA SÓ: O `x`. Sem `y`, sem `angle`, sem `alpha`. Cada eixo extra que entrou nas
-   * tentativas do rabo foi lido como o corpo se deformando ou se soltando.
+   * ⚠️ NADADEIRA PRESA NUM CORPO NÃO VIAJA: ELA PIVOTA. O container mora no ombro, a peça mora na
+   * ponta do braço, e o que se anima é UM ângulo. A lei antiga desta cena ("é uma linha só: o
+   * `x`") continua valendo — ela só estava aplicada ao eixo errado. O eixo certo é o ângulo.
    *
-   * O `y` é o CENTRO MEDIDO da faixa das janelas (elas ocupam y=44..132 na pintura instalada),
-   * não um número escolhido no olho.
+   * A REMADA: 7s de ida, 9s de VOLTA — a volta é mais lenta porque a ida é a braçada de força —,
+   * com pausa nos extremos, em ciclo longo e infinito. Ela é vida de fundo, não um evento que
+   * passa uma vez e se perde. A versão anterior se DESTRUÍA no fim da travessia: a partir de
+   * t≈7,2s a cena não tinha mais nada vivo do lado de fora.
    */
   private nadadeira(): void {
     if (!this.textures.exists('nadadeira')) return;
 
-    const nad = this.add
-      .image(GAME_WIDTH + 140, Interlude3Scene.JANELAS_Y, 'nadadeira')
-      .setDepth(Interlude3Scene.DEPTH_HANGAR - 1)
-      .setName('nadadeiraCut3');
+    const n = Interlude3Scene.NADADEIRA;
+    const j = Interlude3Scene.JANELAS;
 
-    this.tweens.add({
-      targets: nad,
-      x: -140,
-      delay: 1200,
-      duration: 6000,
-      ease: 'Sine.easeInOut',
-      // DESTRUIR, nunca deixar parada fora da tela: objeto esquecido é a armadilha que o preto do
-      // casco e a sombra órfã do prop já documentaram.
-      onComplete: () => nad.destroy(),
+    // Os extremos da remada: 8px ABAIXO do pé da faixa e 8px ACIMA do topo dela. Ela entra e sai
+    // do que a janela mostra, em vez de parar dentro do quadro.
+    const embaixo = Interlude3Scene.anguloPara(j.base + n.folga);
+    const emCima = Interlude3Scene.anguloPara(j.topo - n.folga);
+
+    const peca = this.add.image(n.bracoX, n.bracoY, 'nadadeira').setName('nadadeiraCut3');
+    const braco = this.add
+      .container(n.pivoX, n.pivoY, [peca])
+      .setAngle(embaixo)
+      .setDepth(Interlude3Scene.DEPTH_HANGAR - 1)
+      .setName('nadadeiraPivo');
+
+    this.tweens.chain({
+      targets: braco,
+      loop: -1,
+      tweens: [
+        { angle: emCima, duration: 7000, ease: 'Sine.easeInOut', hold: 900 },
+        { angle: embaixo, duration: 9000, ease: 'Sine.easeInOut', hold: 700 },
+      ],
     });
   }
 
