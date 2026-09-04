@@ -72,7 +72,13 @@ const FRAMES: Record<string, number> = {
   // A GARGANTA da Cutscene 3: 9 quadros por animação (o v3 do PixelLab guarda o quadro de
   // referência como frame 0, então frame_count=8 grava 9 em disco).
   gargantaIdleAnim: 9,
-  gargantaMorteAnim: 9,
+  // ⚠️ A MORTE TEM 7, NÃO 9, E OS DOIS QUE SAÍRAM SAÍRAM POR DEFEITO DA ARTE. O gerador devolveu
+  // os dois últimos quadros com um artefato — uma cruz marrom clara no meio da boca, do nada. E
+  // como esta animação NÃO repete (`loop: false`), ela CONGELA no último quadro: a cruz ficaria na
+  // tela do impacto até o fim da cena. Cortados no disco, a morte termina onde ela devia terminar,
+  // no buraco preto. ⚠️ A caixa do recorte foi calculada com os 19 quadros ORIGINAIS, então
+  // apagar dois arquivos não desalinha nada — o sprite não salta.
+  gargantaMorteAnim: 7,
 
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
