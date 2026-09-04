@@ -48,6 +48,8 @@ export class Interlude3Scene extends Phaser.Scene {
   private ship!: Phaser.GameObjects.Sprite;
   /** A criatura que substituiu o portão. Existe desde `create()`; morre no beat final. */
   private garganta?: Phaser.GameObjects.Sprite;
+  /** Os 17 brilhos aditivos, um por lâmpada pintada na arte. */
+  private luzes: Phaser.GameObjects.Rectangle[] = [];
   private banner!: Phaser.GameObjects.Text;
   private panel: ShipPanel | null = null;
 
@@ -200,10 +202,51 @@ export class Interlude3Scene extends Phaser.Scene {
     [78, 30, 'entulho2', 8],
   ];
 
+  /**
+   * AS 17 LÂMPADAS QUE JÁ ESTÃO PINTADAS NA ARTE — `[x, y, w, h, cor própria]`.
+   *
+   * ⚠️ "FAZER AS LUZES PISCAREM" NÃO É ARTE NOVA NESTA CENA. Elas estão dentro do
+   * `paint-bg-cut3.png`, e o que falta é intensidade. Medidas por
+   * `node scripts/_cut3/_medir-lampadas.mjs` (2026-09-03, reconferido em 04/09): 17 aglomerados,
+   * **186 pixels no total** — é literalmente toda a energia elétrica do quadro. A pintura é
+   * espelhada, então elas saem em pares (L1↔L3, L2↔L4, L5↔L6, L7↔L12, L8↔L13, L9↔L10, L11↔L14).
+   *
+   * ⚠️ CADA UMA NA COR DELA. Um tint único para as 17 apagaria a variação que a pintura já tem.
+   */
+  private static readonly LAMPADAS: ReadonlyArray<readonly [number, number, number, number, number]> = [
+    [88, 145, 10, 2, 0x962e24], [45, 19, 9, 2, 0x7f4020], [297, 145, 8, 2, 0x953025],
+    [339, 19, 8, 2, 0x84431f], [30, 184, 7, 2, 0x994631], [354, 184, 7, 2, 0x9e4831],
+    [353, 147, 4, 4, 0x984232], [138, 185, 4, 4, 0x9c4736], [225, 37, 6, 3, 0x914221],
+    [159, 37, 5, 3, 0x93421c], [106, 47, 3, 4, 0x8a3a17], [31, 147, 3, 4, 0xaa5540],
+    [246, 185, 5, 2, 0xa7573e], [278, 47, 2, 4, 0x9d4d23], [239, 146, 3, 3, 0x99461e],
+    [145, 146, 2, 3, 0xa04c20], [298, 156, 5, 3, 0x651b18],
+  ];
+
+  /**
+   * AS TRÊS DE MAU CONTATO — escolha FIXA por índice, gravada aqui, nunca sorteada.
+   * A última delas (índice 16, `0x651b18`) é a mais escura das 17: ela já parece meio morta na
+   * pintura, e é a que menos custa apagar.
+   */
+  private static readonly LAMPADAS_FALHAS: readonly number[] = [6, 11, 16];
+
+  /**
+   * AS TRÊS JUNÇÕES QUE FAÍSCAM. Os x saem das PAREDES entre as janelas medidas, não do olho: a
+   * #2 acaba em 95 e a #3 começa em 134 → 115; a #3 acaba em 249 e a #4 começa em 288 → 268; o
+   * pilar entre a #1 e a #2 vai de 48 a 63 → 55. Os y são as bordas da faixa vazada (`JANELAS`).
+   */
+  private static readonly JUNCOES: ReadonlyArray<readonly [number, number]> = [
+    [115, Interlude3Scene.JANELAS.topo],
+    [268, Interlude3Scene.JANELAS.topo],
+    [55, Interlude3Scene.JANELAS.base],
+  ];
+
   // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
   // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
   // metade esquerda, na frente das janelas); a nave (80) passa na frente de tudo.
   private static readonly DEPTH_HANGAR = 70;
+  // O brilho das lâmpadas fica logo acima da pintura e ABAIXO da garganta: as que caem atrás
+  // dela somem sozinhas, sem uma linha de código pedindo.
+  private static readonly DEPTH_LUZ = 70.5;
   private static readonly DEPTH_ENTULHO = 72;
   // A GARGANTA fica ACIMA da pintura e do entulho, e ABAIXO da nave: ela é um corpo dentro do
   // hangar, e a nave passa na frente dele.
@@ -224,6 +267,7 @@ export class Interlude3Scene extends Phaser.Scene {
     this.panel = null;
     this.alarme = false;
     this.cadeiaX = [];
+    this.luzes = [];
     this.t = 0;
     this.fase = 'entrando';
 
@@ -244,6 +288,8 @@ export class Interlude3Scene extends Phaser.Scene {
     this.nadadeira();
     this.plantarCarcacas();
     this.plantarGarganta();
+    this.acenderLampadas();
+    this.faiscar();
 
     // A nave chega DANIFICADA. A fumaça segue o casco; as fagulhas só ligam na derrapagem.
     const chegada = SHIPS[this.naveId];
@@ -474,6 +520,88 @@ export class Interlude3Scene extends Phaser.Scene {
     if (this.anims.exists('garganta-idle')) this.garganta.play('garganta-idle');
   }
 
+  /**
+   * O BRILHO ADITIVO em cima de cada lâmpada pintada. O retângulo é 2px maior que a lâmpada em
+   * cada eixo: o vazamento de 1px em volta é o que faz ler como BULBO em vez de adesivo.
+   */
+  private acenderLampadas(): void {
+    this.luzes = Interlude3Scene.LAMPADAS.map(([x, y, w, h, cor]) =>
+      this.add
+        .rectangle(x, y, w + 2, h + 2, cor)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(Interlude3Scene.DEPTH_LUZ)
+        .setAlpha(0.35)
+        .setName('lampadaCut3'),
+    );
+  }
+
+  /**
+   * O PULSO — chamado do `update`, e PÚBLICO porque a sonda o chama duas vezes no mesmo tick para
+   * provar que ele é determinístico.
+   *
+   * ⚠️ FASE E SEMENTE SÃO DERIVADAS DO ÍNDICE, NUNCA SORTEADAS. A sonda compara quadros; um
+   * `Math.random()` aqui a quebraria, e a cena deixaria de se reproduzir entre execuções.
+   */
+  pulsarLampadas(): void {
+    for (let i = 0; i < this.luzes.length; i++) {
+      const luz = this.luzes[i];
+
+      if (this.alarme) {
+        // NO COLAPSO TODAS VIRAM ALARME: pulso rápido em uníssono, e a cor sai da lâmpada e vai
+        // para o `enemy`. O quadro inteiro passa a dizer a mesma coisa ao mesmo tempo.
+        luz.setFillStyle(COLORS.enemy);
+        luz.setAlpha(0.25 + Math.abs(Math.sin(this.t * 7)) * 0.6);
+        continue;
+      }
+
+      if (Interlude3Scene.LAMPADAS_FALHAS.includes(i)) {
+        // MAU CONTATO: duas senoides incomensuráveis se multiplicando. Irregular ao olho, e
+        // IDÊNTICA a cada execução — que é exatamente o que a sonda precisa.
+        const s = Math.sin(this.t * 11.3 + i * 2.7) * Math.sin(this.t * 4.1 + i);
+        luz.setAlpha(s > 0.15 ? 0.5 : s > -0.4 ? 0.08 : 0);
+        continue;
+      }
+
+      // AS 14 QUE RESPIRAM, entre alpha 0,15 e 0,55, cada uma na sua fase e no seu ritmo.
+      const fase = (i * Math.PI * 2) / Interlude3Scene.LAMPADAS.length;
+      const vel = 1.1 + (i % 5) * 0.13;
+      luz.setAlpha(0.35 + Math.sin(this.t * vel + fase) * 0.2);
+    }
+  }
+
+  /**
+   * AS FAÍSCAS das três junções da parede. Curtas, laranja, caindo — é metal cedendo, não fogo.
+   *
+   * ⚠️ INTERVALO E QUANTIDADE DERIVADOS DO ÍNDICE (2,2s / 2,9s / 3,6s e 3 / 4 / 5 partículas). O
+   * olho lê "de vez em quando, em pontos diferentes"; a sonda lê a MESMA cena toda vez.
+   */
+  private faiscar(): void {
+    Interlude3Scene.JUNCOES.forEach(([x, y], i) => {
+      const em = this.add
+        .particles(x, y, 'spark', {
+          lifespan: { min: 220, max: 520 },
+          speedX: { min: -12, max: 12 },
+          speedY: { min: 10, max: 46 },
+          gravityY: 90,
+          scale: { start: 1, end: 0 },
+          tint: [COLORS.hot, COLORS.hotBright],
+          blendMode: 'ADD',
+          emitting: false,
+        })
+        .setDepth(Interlude3Scene.DEPTH_LUZ)
+        .setName('faiscaCut3');
+
+      this.time.addEvent({
+        delay: 2200 + i * 700,
+        loop: true,
+        startAt: i * 400,
+        callback: () => {
+          if (!this.done) em.explode(3 + i, x, y);
+        },
+      });
+    });
+  }
+
   private construirHangar(): void {
     this.add
       .image(0, 0, 'paintBgCut3')
@@ -489,6 +617,7 @@ export class Interlude3Scene extends Phaser.Scene {
 
     this.starfield.update(dt);
     this.parallax.update(dt, 14);
+    this.pulsarLampadas();
 
     // O VOO CAMBALEANTE: enquanto a nave está no ar, y e ângulo oscilam por senoide — o tween só
     // leva o x. Cambalear por tween seria uma coreografia; por senoide é um sistema falhando.

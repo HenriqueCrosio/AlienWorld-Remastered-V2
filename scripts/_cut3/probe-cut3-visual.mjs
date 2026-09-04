@@ -131,6 +131,48 @@ if (a) {
   }
 }
 
+// ─── AS 17 LÂMPADAS: elas JÁ ESTÃO PINTADAS, e o que entra é intensidade ───
+//
+// ⚠️ "Fazer as luzes piscarem" não é arte nova nesta cena. As 17 estão dentro do
+// `paint-bg-cut3.png` (186 pixels no total, medidos por `_medir-lampadas.mjs`): o código só põe
+// brilho ADITIVO em cima delas, cada um na COR PRÓPRIA daquela lâmpada. Nada muda de cor.
+const luz1 = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const ls = s.children.list.filter((o) => o.name === 'lampadaCut3');
+  const p = s.children.list.filter((o) => o.name === 'paredeCut3')[0];
+  const g = s.children.list.filter((o) => o.name === 'gargantaCut3')[0];
+  return {
+    n: ls.length,
+    cores: [...new Set(ls.map((o) => o.fillColor))].length,
+    depth: ls.length ? ls[0].depth : null,
+    depthParede: p ? p.depth : null,
+    depthGarganta: g ? g.depth : null,
+    alphas: ls.map((o) => +o.alpha.toFixed(3)),
+    faiscas: s.children.list.filter((o) => o.name === 'faiscaCut3').length,
+  };
+});
+console.log('luzes   ', JSON.stringify({ ...luz1, alphas: `${luz1.alphas.length} valores` }));
+ok(luz1.n === 17, `as 17 lampadas pintadas ganharam brilho (${luz1.n})`);
+ok(luz1.cores >= 10, `cada uma na COR PROPRIA dela, nao numa cor so (${luz1.cores} cores distintas)`);
+ok(luz1.depth > luz1.depthParede, `o brilho fica acima da pintura (${luz1.depth} > ${luz1.depthParede})`);
+ok(luz1.depth < luz1.depthGarganta,
+   `e ABAIXO da garganta (${luz1.depth} < ${luz1.depthGarganta}) — as que caem atras dela somem sozinhas`);
+ok(new Set(luz1.alphas).size > 6, `elas respiram fora de fase umas das outras (${new Set(luz1.alphas).size} alphas distintos)`);
+ok(luz1.faiscas === 3, `os 3 emissores de faisca estao nas juncoes (${luz1.faiscas})`);
+
+// ⚠️ O DETERMINISMO, PROVADO. Fase e semente são derivadas do índice; um `Math.random()` por
+// quadro faria a sonda comparar duas cenas diferentes. Chamando `pulsarLampadas()` de novo no
+// MESMO tick (o `this.t` não avançou), a lista de alphas tem que sair idêntica.
+const det = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const ler = () => s.children.list.filter((o) => o.name === 'lampadaCut3').map((o) => +o.alpha.toFixed(6));
+  const a = ler();
+  s.pulsarLampadas();
+  const b = ler();
+  return { igual: a.length === b.length && a.every((v, i) => v === b[i]) };
+});
+ok(det.igual, 'o pulso e DERIVADO do tempo, nunca sorteado (duas leituras no mesmo tick batem)');
+
 // ─── AS CARCAÇAS: plantadas, não enfileiradas, e fora do vão onde a nave para ───
 const carc = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
