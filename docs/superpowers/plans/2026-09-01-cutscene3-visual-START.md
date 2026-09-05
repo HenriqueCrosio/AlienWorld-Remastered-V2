@@ -1,12 +1,31 @@
 # START — Fatia 6: CUTSCENE 3, TESTE JOGADO DA 2ª VOLTA
 
 **🟠 A 2ª VOLTA FOI JOGADA UMA VEZ (2026-09-05), TRÊS COISAS CAÍRAM E FORAM CONSERTADAS. FALTA
-JOGAR DE NOVO.** Branch `feat/cutscene3-visual`. **O último commit de CÓDIGO é `94a3660`**; o que
+JOGAR DE NOVO.** Branch `feat/cutscene3-visual`. **O último commit de CÓDIGO é `c89c4b7`**; o que
 veio depois é documentação. **Não mergeada e não empurrada** — `main` segue em `392eedf`.
 
 > ⚠️ **ESTE DOCUMENTO MUDOU DE MÃO PELA TERCEIRA VEZ, EM 2026-09-04.** Ele nasceu mapa de quem ia
 > IMPLEMENTAR a fatia; em 02/09 virou mapa de quem ia TESTÁ-LA; em 03/09 voltou a ser mapa de quem
 > implementa (a 2ª volta); e agora, com a 2ª volta de pé, volta a ser **mapa de quem TESTA**.
+
+## ⚠️ AS REGRAS DA CENA — não reabra sem perguntar a ele
+
+Números que ele cravou jogando. Cada um consertou um defeito que a sonda não pegava.
+
+| regra | o número | por quê |
+|---|---|---|
+| **A cor da criatura é a DELE, crua** | média 31,8 / pico 207 | *"quero a cor que foi criada, a original, sem tint"*. O pipeline pode limpar e recortar; mudar cor de arte que ele fez, **pergunte**. |
+| **A nave pousa em x=200** | `VAO_DA_NAVE.x` | pousando em 258 ela ficava encostada na criatura e precisava recuar para atirar — *"a nave voa para trás um pouco antes de atirar"*. |
+| **A decolagem é VERTICAL** | o tween de subida não leva `x` | consequência da regra acima: com o pouso certo, ela só precisa subir. |
+| **A nave entra na boca em TAMANHO CHEIO** | `ENGOLIDA.engole` = 260ms de 1.400ms | *"ela precisa entrar na boca da criatura com o MESMO TAMANHO e somente ficar pequena nos milissegundos finais"*. Escala e posição no mesmo tween fazem ela ler como se AFASTANDO, não sendo engolida. |
+| **A morte precisa ser VISTA** | 7 quadros a 5fps = 1.040ms | a 12fps eram 480ms debaixo da própria explosão, e ele reportou a animação como quebrada. |
+
+⚠️ **Um assert de "aconteceu" não prova "foi visto".** Três dos cinco defeitos acima passaram por
+sondas verdes. Para beat curto, meça a duração na tela e conte quem desenha por cima —
+`scripts/_cut3/_diag-morte.mjs` faz isso.
+
+⚠️ **E se a cor parecer errada no navegador dele, é CACHE.** O Vite serve `public/` sem hash no
+nome. `Ctrl+Shift+R`, ou `node scripts/_cut3/_ver-agora.mjs` para um quadro de browser limpo.
 
 ## O QUE MUDOU DEPOIS DO 1º TESTE JOGADO (2026-09-05)
 
@@ -61,13 +80,14 @@ derrapagem e o painel de escolha.
   (y 8..199, 191px). Sua arte tem 137px, e esticar quebraria a grade de pixel — então o
   enquadramento cedeu para a arte. Ela ficou menor do que a opção C que você aprovou. **Serve?**
 
-### 2. ⚠️ O RISCO ABERTO — a nave parada em cima dela
+### 2. O POUSO E A DECOLAGEM
 
-A nave derrapa e para em **x=258**. A criatura começa em **x=262**. Durante os ~10 segundos do
-painel de escolha, a nave fica encostada na borda esquerda dela, e as duas são escuras.
+A nave derrapa e para em **x=200** — 50px da carcaça mais próxima e 47px da criatura. No beat
+final ela sobe **reto**, sem recuar.
 
-**A silhueta da nave some?** Esta foi uma decisão sua em 04/09 (a alternativa era puxar o convés
-inteiro para a esquerda), tomada com o mock na mesa e o risco anotado. É o momento de julgar.
+- A decolagem lê como natural agora, ou ainda tem alguma coisa estranha no arranque?
+- ⚠️ **O risco de 04/09 morreu junto:** ela não fica mais encostada na criatura durante o painel de
+  escolha. A silhueta dela se separa do fundo?
 
 ### 3. O BEAT FINAL — a corrente causal
 
@@ -75,11 +95,11 @@ Escolha uma nave e assista. A ordem é:
 
 | t | o que tem que acontecer |
 |---|---|
-| 0 | a nave sobe do convés e **recua** para x=150, encarando a garganta |
+| 0 | a nave sobe do convés **RETO** (ela já pousou em x=200), encarando a garganta |
 | +600ms | **dispara** um torpedo CIANO com aletas — não o traço magenta de sempre |
 | +1000ms | **impacto**: a boca dá um flare magenta e apaga até virar buraco preto, em **1,04s** — a explosão estoura na BORDA dela, não em cima |
 | +1200ms | a cadeia corre **de x=330 para x=8** — 10 estouros, direita → esquerda |
-| +2000ms | a nave voa **para dentro da boca**, encolhendo, e some no miolo |
+| +2000ms | a nave voa **para dentro da boca em tamanho cheio** e só encolhe nos 260ms finais |
 | +2700ms | o entulho cai e mura a esquerda |
 
 - O banner `A ENTRADA ESTÁ COLAPSANDO` agora chega **no impacto**, não antes. Ele lê como legenda
@@ -112,7 +132,7 @@ aditivo em cima, cada uma na **cor medida dela**.
 
 | prova | estado |
 |---|---|
-| `probe-cut3-visual` | ✔ 45 asserts, tudo verde |
+| `probe-cut3-visual` | ✔ 48 asserts, tudo verde |
 | `probe-interlude3` | ✔ `DECK_Y` 171 / nave em 164 — intacto |
 | `probe-stage4` | ✔ a fronteira com a Fase 4 de pé |
 | `probe-f3-visual` | ✔ (tem ruído documentado: se falhar por contagem de lança-mísseis, rode de novo) |

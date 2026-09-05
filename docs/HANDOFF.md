@@ -814,7 +814,7 @@ vez: agora é o mapa de quem TESTA a 2ª volta.
 | O portão | **saiu** — do disco, do `BootScene` e da cena. |
 | A 3ª carcaça | **saiu**, por decisão do Henrique: a garganta cobre x 262..398 e ela ficava 100% atrás. O assert baixou de `>= 3` para `>= 2`. |
 
-**Sondas, todas verdes:** `probe-cut3-visual` (45 asserts), `probe-interlude3` (`DECK_Y` 171 / 164
+**Sondas, todas verdes:** `probe-cut3-visual` (48 asserts), `probe-interlude3` (`DECK_Y` 171 / 164
 intacto), `probe-stage4`, `probe-f3-visual`, `probe-menu`. `npm run build` limpo.
 
 ⚠️ **O RISCO ABERTO PARA O TESTE JOGADO:** a nave passa ~10s parada em **x=258**, encostada na
