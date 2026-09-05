@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH } from '../config';
+import { COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
@@ -101,18 +101,20 @@ export class Interlude3Scene extends Phaser.Scene {
    * usar AQUELE arquivo, não um redesenho: a peça entra em TAMANHO NATIVO, sem um pixel de estica.
    *
    * ⚠️ E A FACE MUDOU DE `south` PARA `east` EM 2026-09-05, quando ele fez as animações dele. De
-   * frente a criatura tinha 136×137 e encarava a câmera; de PERFIL tem **78×138** e encara a
-   * ESQUERDA — que é de onde a nave vem. A cena ganhou com isso: ela deixa de olhar para fora da
-   * tela e passa a olhar para o jogador chegando. ⚠️ As animações vêm apontando para a DIREITA e
-   * são espelhadas EM DISCO pelo `--flip` do instalador, nunca com `setFlipX` na cena.
+   * frente a criatura encarava a câmera; de PERFIL ela encara a ESQUERDA — que é de onde a nave
+   * vem. A cena ganhou com isso: ela deixa de olhar para fora da tela e passa a olhar para o
+   * jogador chegando. ⚠️ As animações vêm apontando para a DIREITA e são espelhadas EM DISCO pelo
+   * `--flip` do instalador, nunca com `setFlipX` na cena.
    *
-   * ⚠️ E FOI A ARTE QUE FIXOU O ENQUADRAMENTO, não o contrário. O spec pedia "altura inteira"
-   * (y 8..199, 191px); esticar para chegar lá quebraria a grade de pixel — é o erro nº 4 da 1ª
-   * volta. Então o enquadramento cedeu: ela PISA NO CONVÉS. `base` é a linha do convés, e o topo
-   * é consequência da altura do arquivo.
+   * ⚠️ E A PEÇA É AMPLIADA NO ARQUIVO, de 78×138 para **122×216** (`--altura 216` no instalador).
+   * Isso CEDE a lei "1px de arte = 1px de jogo", e foi escolha dele com o custo na mesa: o fator
+   * 1,565 não é inteiro, então a grade fica irregular (uns pixels 1×1, outros 2×1). Ele viu em
+   * zoom 6× e escolheu assim — o pedido era *"que ela ocupe todo o lado da tela da direita (...)
+   * dá a sensação que a nave precisa atravessar aquela estrutura"*, e a arte dele não tinha altura
+   * para isso. ⚠️ Mas continua ASSADO no arquivo: a cena desenha em escala 1.
    *
-   * Com centro em 359 e 78 de largura, ela cobre x=320..398 — ou seja, sai 14px pela borda direita
-   * e OCLUI a janela #5 (336..376) por inteiro. Ela não está embutida na parede, ela está DENTRO do
+   * Com centro em 337 e 122 de largura, ela cobre x=276..398 — ou seja, sai 14px pela borda direita
+   * e OCLUI as janelas #4 e #5 por inteiro. Ela não está embutida na parede, ela está DENTRO do
    * hangar, NA FRENTE dela — objeto ocluindo parede é render, não colagem, e é por aí que ela
    * escapa do defeito que matou o portão.
    *
@@ -125,13 +127,14 @@ export class Interlude3Scene extends Phaser.Scene {
   /**
    * O centro da PEÇA em x. ⚠️ É DERIVADO DA BORDA DA TELA, não escolhido: o Henrique pediu em
    * 2026-09-05 que *"a traseira dela fique encostada na tela lateral direita, ligeiramente
-   * cortada (a nave vai passar pela boca, não quero sobras atrás)"*. Com 78px de largura e
-   * `CORTE` px saindo pela direita, o centro cai em `GAME_WIDTH − 78/2 + CORTE`.
+   * cortada (a nave vai passar pela boca, não quero sobras atrás)"*. Com `LARG` px de largura e
+   * `CORTE` px saindo pela direita, o centro cai em `GAME_WIDTH − LARG/2 + CORTE`.
    *
    * O 14 foi escolhido olhando três opções (8, 14 e 20) na cena: com 8 ela ainda tem parede atrás,
-   * com 20 começa a perder corpo. **Mudou a arte? Recalcule a partir da largura nova, não do 359.**
+   * com 20 começa a perder corpo. **Mudou a arte? Só mexa em `LARG`/`ALT` — o resto se recalcula.**
    */
-  private static readonly GARGANTA_LARG = 78;
+  private static readonly GARGANTA_LARG = 122;
+  private static readonly GARGANTA_ALT = 216;
   private static readonly GARGANTA_CORTE = 14;
   private static readonly GARGANTA_X =
     GAME_WIDTH - Interlude3Scene.GARGANTA_LARG / 2 + Interlude3Scene.GARGANTA_CORTE;
@@ -139,14 +142,24 @@ export class Interlude3Scene extends Phaser.Scene {
   private static readonly GARGANTA = {
     /** O centro da PEÇA — só posiciona o sprite. */
     x: Interlude3Scene.GARGANTA_X,
-    base: Interlude3Scene.DECK_Y,
+    /**
+     * ⚠️ O PÉ DELA É O FUNDO DA TELA, NÃO O CONVÉS, desde 2026-09-05. Ele pediu que ela ocupasse
+     * *"todo o lado da tela da direita"*, e a peça foi ampliada no arquivo para 122×216 — a altura
+     * inteira do quadro. Ancorada em `GAME_HEIGHT`, ela vai do topo ao fundo e passa POR CIMA da
+     * faixa de perigo e da estrutura de baixo do convés.
+     *
+     * Isso é deliberado e ele viu o custo antes de escolher: ela deixa de "pisar" no convés e vira
+     * uma parede — que é exatamente a leitura pedida, *"a sensação de que a nave precisa
+     * atravessar aquela estrutura para continuar no interior do Leviatã"*.
+     */
+    base: GAME_HEIGHT,
     /**
      * ⚠️ A BOCA NÃO É O CENTRO DA PEÇA, e passou a não ser em 2026-09-05, quando as animações
      * `east` do Henrique entraram. De frente (a face `south`) os dois coincidiam e um número só
      * bastava; de PERFIL a criatura tem 78px de largura e a goela fica descentrada.
      *
-     * Medido no miolo magenta da peça instalada (os 81px saturados e claros — a única luz que ela
-     * tem): centroide local (25, 67) numa peça 78×138. Daí os deslocamentos abaixo, relativos ao
+     * Medido no miolo magenta da peça instalada (os 205px saturados e claros — a única luz que ela
+     * tem): centroide local (41, 106) numa peça 122×216. Daí os deslocamentos abaixo, relativos ao
      * CENTRO e ao PÉ — que é o que faz a boca acompanhar sozinha quando a peça se move.
      *
      * ⚠️ NÃO CRAVE `bocaX` COMO NÚMERO. Ele já foi 326 e virou 345 quando a criatura encostou na
@@ -155,8 +168,8 @@ export class Interlude3Scene extends Phaser.Scene {
      *
      * É para AQUI que o torpedo vai, que a cadeia nasce e que a nave é engolida.
      */
-    bocaX: Interlude3Scene.GARGANTA_X - Interlude3Scene.GARGANTA_LARG / 2 + 25,
-    bocaY: Interlude3Scene.DECK_Y - 138 + 67,
+    bocaX: Interlude3Scene.GARGANTA_X - Interlude3Scene.GARGANTA_LARG / 2 + 41,
+    bocaY: GAME_HEIGHT - Interlude3Scene.GARGANTA_ALT + 106,
   } as const;
 
   /**

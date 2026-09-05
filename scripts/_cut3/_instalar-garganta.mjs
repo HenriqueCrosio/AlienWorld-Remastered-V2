@@ -42,7 +42,28 @@ import { estatistica } from './_paleta.mjs';
 
 const args = process.argv.slice(2);
 const FLIP = args.includes('--flip');
-const [OBJ, GRP_IDLE, GRP_MORTE, N_RAW, DIR_RAW] = args.filter((a) => a !== '--flip');
+
+/**
+ * `--altura N` reamostra TODOS os quadros para N pixels de altura, DEPOIS do recorte pela caixa
+ * única. Existe por decisão do Henrique em 2026-09-05: ele quis a criatura ocupando *"todo o lado
+ * da tela da direita (...) assim dá a sensação que a nave precisa atravessar aquela estrutura"*, e
+ * a arte dele tem 138px de altura contra os 216 da tela.
+ *
+ * ⚠️ ISTO CEDE A LEI "1px de arte = 1px de jogo", E FOI ESCOLHA DELE COM O CUSTO NA MESA. O fator
+ * 1,565 não é inteiro: com `nearest`, alguns pixels duplicam e outros não, e a grade fica
+ * irregular (uns 1×1, outros 2×1). Ele viu isso em zoom 6× — `scripts/_cut3/_grade-zoom.png` — e
+ * escolheu mesmo assim, porque a peça está sempre em movimento e o ganho de leitura compensa.
+ *
+ * ⚠️ MAS CONTINUA SENDO ASSADO NO ARQUIVO, NUNCA `setScale`. A cena desenha em escala 1. Um
+ * `setScale(1.565)` reamostraria a cada quadro e ainda mentiria para tudo que mede a peça.
+ *
+ * ⚠️ E É `nearest`, NUNCA `lanczos`: interpolação em pixel art vira borrão, não suavidade.
+ */
+const ALTURA = args.includes('--altura') ? Number(args[args.indexOf('--altura') + 1]) : null;
+
+const [OBJ, GRP_IDLE, GRP_MORTE, N_RAW, DIR_RAW] = args.filter(
+  (a, i) => a !== '--flip' && a !== '--altura' && args[i - 1] !== '--altura',
+);
 const DIR = DIR_RAW ?? 'unknown';
 const N = Number(N_RAW ?? 9);
 if (!OBJ || !GRP_IDLE || !GRP_MORTE) {
@@ -154,11 +175,19 @@ for (const { saida, quadro: { data, W, H } } of pecas) {
     continue;
   }
 
-  await sharp(recortado.data, { raw: { width: box.width, height: box.height, channels: 4 } })
-    .png().toFile(`public/sprites/${saida}.png`);
+  // ⚠️ A AMPLIAÇÃO VEM DEPOIS DA CAIXA ÚNICA, e a proporção é a MESMA para os 23 arquivos: é isso
+  // que garante que eles continuem alinhados entre si depois de esticados.
+  let img = sharp(recortado.data, { raw: { width: box.width, height: box.height, channels: 4 } });
+  if (ALTURA) {
+    img = img.resize(Math.round((box.width * ALTURA) / box.height), ALTURA, { kernel: 'nearest' });
+  }
+  await img.png().toFile(`public/sprites/${saida}.png`);
 }
 
-console.log(`garganta: ${pecas.length} arquivos, TODOS na caixa ${box.width}x${box.height} (de ${box.left},${box.top})`);
+const saidaW = ALTURA ? Math.round((box.width * ALTURA) / box.height) : box.width;
+const saidaH = ALTURA ?? box.height;
+console.log(`garganta: ${pecas.length} arquivos, caixa unica ${box.width}x${box.height} (de ${box.left},${box.top})`);
+if (ALTURA) console.log(`  AMPLIADOS no arquivo para ${saidaW}x${saidaH}  (fator ${(ALTURA / box.height).toFixed(3)}${Number.isInteger(ALTURA / box.height) ? ", inteiro" : ", fracionario: a grade fica irregular"})`);
 console.log(`  estático, CRU: média ${stat.media.toFixed(1)}  pico ${stat.pico.toFixed(0)}`);
 console.log('  (a pintura do hangar tem média 13,1 e teto prático ~110 — a peça entra crua POR DECISÃO)');
 if (descartados.length) {
