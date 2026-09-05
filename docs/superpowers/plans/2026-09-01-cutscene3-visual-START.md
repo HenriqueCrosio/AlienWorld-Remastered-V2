@@ -14,11 +14,11 @@ Números que ele cravou jogando. Cada um consertou um defeito que a sonda não p
 
 | regra | o número | por quê |
 |---|---|---|
-| **A cor da criatura é a DELE, crua** | média 31,8 / pico 207 | *"quero a cor que foi criada, a original, sem tint"*. O pipeline pode limpar e recortar; mudar cor de arte que ele fez, **pergunte**. |
+| **A cor da criatura é a DELE, crua** | média 34,1 / pico 207 | *"quero a cor que foi criada, a original, sem tint"*. O pipeline pode limpar e recortar; mudar cor de arte que ele fez, **pergunte**. |
 | **A nave pousa em x=200** | `VAO_DA_NAVE.x` | pousando em 258 ela ficava encostada na criatura e precisava recuar para atirar — *"a nave voa para trás um pouco antes de atirar"*. |
 | **A decolagem é VERTICAL** | o tween de subida não leva `x` | consequência da regra acima: com o pouso certo, ela só precisa subir. |
 | **A nave entra na boca em TAMANHO CHEIO** | `ENGOLIDA.engole` = 260ms de 1.400ms | *"ela precisa entrar na boca da criatura com o MESMO TAMANHO e somente ficar pequena nos milissegundos finais"*. Escala e posição no mesmo tween fazem ela ler como se AFASTANDO, não sendo engolida. |
-| **A morte precisa ser VISTA** | 7 quadros a 5fps = 1.040ms | a 12fps eram 480ms debaixo da própria explosão, e ele reportou a animação como quebrada. |
+| **A morte precisa ser VISTA** | 11 quadros a 5fps = 2,2s | a 12fps eram 480ms debaixo da própria explosão, e ele reportou a animação como quebrada. |
 
 ⚠️ **Um assert de "aconteceu" não prova "foi visto".** Três dos cinco defeitos acima passaram por
 sondas verdes. Para beat curto, meça a duração na tela e conte quem desenha por cima —
@@ -32,8 +32,14 @@ nome. `Ctrl+Shift+R`, ou `node scripts/_cut3/_ver-agora.mjs` para um quadro de b
 | o que ele disse | o que foi feito |
 |---|---|
 | *"Retire completamente a nadadeira (...) não faz diferença no final das contas"* | **Saiu inteira** — textura, chave, método, constantes do pivô e assert. O bloco de teste dela saiu daqui junto. |
-| *"Por que o modelo que eu criei está estranho e sem cor?"* | A lei de cor girava **52% dos pixels** dele de azul para lodo, com um motivo que não se sustentava (o ciano do jogador é 188°, o casco dela é 220–260°). A peça entra **CRUA** agora: média 31,8 / pico 207. |
-| *"A animação de idle funciona. O da morte, não"* | Ela funcionava — em **480ms**, escondida debaixo da própria explosão. Agora são **1.040ms**, com a explosão no ponto de impacto. |
+| *"Por que o modelo que eu criei está estranho e sem cor?"* | A lei de cor girava **52% dos pixels** dele de azul para lodo, com um motivo que não se sustentava (o ciano do jogador é 188°, o casco dela é 220–260°). A peça entra **CRUA**: média 34,1 / pico 207. |
+| *"A animação de idle funciona. O da morte, não"* | Ela funcionava — em **480ms**, escondida debaixo da própria explosão. Agora com a explosão no ponto de impacto e a 5fps. |
+| *"Quero testar minhas criações"* (as duas animações `east`) | **Instaladas**, 11 quadros cada, espelhadas em disco. A criatura passou de frontal (136×137) para **perfil (78×138)**, encarando a esquerda — de onde a nave vem. Zero geração gasta. |
+
+⚠️ **E A BOCA DEIXOU DE SER O CENTRO DA PEÇA.** De frente os dois coincidiam; de perfil a goela
+fica descentrada. Medida no miolo magenta da peça instalada: **(326, 100)**, enquanto o corpo está
+em x=340. É para a BOCA que o torpedo vai, que a cadeia nasce e que a nave é engolida — mirar no
+centro mandaria os três para 14px ao lado do buraco.
 
 ---
 
@@ -66,9 +72,9 @@ A cena dura ~16s até o painel de naves, e o beat final leva mais ~6s depois da 
 
 ### 1. A GARGANTA, desde o primeiro quadro
 
-A criatura na direita é **a arte que você fez** (objeto PixelLab `15f111fd`, face `south`), em
-**136×137 nativos**, sem um pixel de estica. Ela pisa no convés (`DECK_Y` = 171), cobre x 262..398,
-oclui a janela #5 inteira e quase toda a #4, e **respira desde o quadro zero** — durante a queda, a
+A criatura na direita é **a arte que você fez** (objeto PixelLab `15f111fd`, face `east` ESPELHADA), em
+**78×138 nativos**, sem um pixel de estica. Ela pisa no convés (`DECK_Y` = 171), cobre x 301..379,
+oclui a janela #5 inteira, encara a ESQUERDA — de onde a nave vem — e **respira desde o quadro zero** — durante a queda, a
 derrapagem e o painel de escolha.
 
 - Ela lê como um CORPO dentro do hangar, ou ainda parece colada na parede?

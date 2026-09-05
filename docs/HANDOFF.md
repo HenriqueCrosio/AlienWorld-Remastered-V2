@@ -822,7 +822,7 @@ borda esquerda da criatura (que começa em 262), durante todo o painel de escolh
 sobre corpo escuro pode dissolver a silhueta. **É para ser julgado, não consertado por conta
 própria.**
 
-### O 1º TESTE JOGADO DA 2ª VOLTA (2026-09-05) — três coisas caíram
+### O 1º TESTE JOGADO DA 2ª VOLTA (2026-09-05) — o que ele mandou mudar
 
 O Henrique jogou a cena e reportou três coisas. Nenhuma delas era o que a sonda media.
 
@@ -844,7 +844,14 @@ a faixa de 215 para 265 para matar um "halo azul" que era a cor da peça. Decis�
 cor que foi criada, a original, sem tint"* — a garganta entra **crua**, média 31,8 / pico 207.
 A lição inteira está em `docs/ASSETS.md`.
 
-**3. A morte não estava quebrada, estava escondida.** *"A animação de idle está funcionando na
+**3. As animações EAST dele entraram.** *"Quero testar minhas criações"* — ele fez duas animações
+novas no objeto `15f111fd`, face `east`, 11 quadros cada. Instaladas e **espelhadas em disco**
+(`--flip` no instalador, antes da limpeza e da caixa união; nunca `setFlipX` na cena). A criatura
+passou de frontal (136×137) para **perfil (78×138)** e encara a ESQUERDA, de onde a nave vem. ⚠️ E
+a BOCA deixou de ser o centro da peça: medida no miolo magenta, ela cai em **(326, 100)** com o
+corpo em x=340 — o torpedo, a cadeia e a nave engolida miram nela, não no centro. Zero geração.
+
+**4. A morte não estava quebrada, estava escondida.** *"A animação de idle está funcionando na
 criatura. O da morte, não."* `scripts/_cut3/_diag-morte.mjs` pegou os 7 quadros passando — em
 **480ms**, a 12fps, debaixo de um `explodeBig` de ~141px centrado na criatura de 136×137. Conserto:
 frameRate 12 → 5 (**1.040ms** medidos), explosão movida para o ponto de impacto com escala 0,7,
