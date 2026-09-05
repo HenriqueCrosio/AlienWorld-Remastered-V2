@@ -10,7 +10,20 @@
 // opacas. Uma borda opaca é opaca em TODOS os quadros, então entraria na união e inflaria o
 // recorte do sprite inteiro.
 //
-// ⚠️ E A PALETA É ASSADA AQUI, no mesmo passe (ver `paraFamilia` em _paleta.mjs).
+// ⚠️ E A PALETA NÃO É TOCADA — DECISÃO DO HENRIQUE, 2026-09-05: "quero a cor que foi criada, a
+// original, sem tint".
+//
+// Este instalador CORRIGIA a cor, seguindo a lei do spec de 03/09 (`paraFamilia` em _paleta.mjs):
+// o casco frio girava para a ferrugem do hangar, a saturação caía a 55% e o realce era comprimido.
+// Medido depois que ele jogou: **52% dos pixels da peça tinham o matiz girado**, de azul-petróleo
+// para lodo, e o pico caía de 207 para 105 — metade do brilho e outra cor.
+//
+// ⚠️ E O MOTIVO ESCRITO NA LEI NÃO SE SUSTENTAVA NESTA PEÇA. Ela dizia "teal é `player 0x17a6bd`,
+// a cor do JOGADOR". Conferido no `COLORS`: o ciano do jogador é matiz **188°**, e o casco desta
+// criatura está em **220–260°** — azul-índigo, não ciano. A faixa vinha de outra peça e foi
+// aplicada nesta sem medir; em 04/09 eu ainda a alarguei de 215 para 265, o que dobrou o estrago.
+//
+// A peça entra CRUA: só a limpeza (xadrez e bordas opacas) e o recorte pela caixa única.
 //
 // ⚠️ O ID DA ANIMAÇÃO NA URL NÃO É O `animation_group_id`. O `get_object` devolve os dois:
 // o group id (que a API usa) e, dentro da própria URL dos quadros, OUTRO id. É este último que
@@ -22,7 +35,7 @@
 //   node scripts/_cut3/_instalar-garganta.mjs <object-id> <anim-idle-url> <anim-morte-url> [n] [direcao]
 import sharp from 'sharp';
 import fs from 'node:fs';
-import { paraFamilia, estatistica } from './_paleta.mjs';
+import { estatistica } from './_paleta.mjs';
 
 const [OBJ, GRP_IDLE, GRP_MORTE, N_RAW, DIR_RAW] = process.argv.slice(2);
 const DIR = DIR_RAW ?? 'unknown';
@@ -65,6 +78,20 @@ async function baixarLimpo(url, guardarComo) {
   return { data, W, H };
 }
 
+/**
+ * ⚠️ OS DOIS ÚLTIMOS QUADROS DA MORTE SÃO LIXO DO GERADOR, e isto é código porque já voltaram uma
+ * vez. Os índices 7 e 8 vieram com um artefato — uma cruz marrom clara no meio da boca, do nada — e
+ * como a animação NÃO repete (`loop: false`), ela CONGELA no último quadro: a cruz ficava na tela
+ * do impacto até o fim da cena.
+ *
+ * Eu os apaguei à mão em 04/09 e a reinstalação de 05/09 os trouxe de volta, porque nada aqui
+ * sabia deles. **Descarte que mora fora do instalador não é descarte, é lembrete.**
+ *
+ * ⚠️ A CAIXA CONTINUA SENDO A DOS 19 QUADROS ORIGINAIS: eles entram no cálculo da união e só depois
+ * são jogados fora, então apagar não desalinha nada e o sprite não salta.
+ */
+const MORTE_UTEIS = 7;
+
 const pecas = [];
 pecas.push({ saida: 'garganta', quadro: await baixarLimpo(`${raiz}/rotations/${DIR}.png`, 'estatico.png') });
 for (const [grp, nome] of [[GRP_IDLE, 'garganta-idle-anim'], [GRP_MORTE, 'garganta-morte-anim']]) {
@@ -90,22 +117,27 @@ for (const { quadro: { data, W, H } } of pecas) {
 if (maxX < 0) throw new Error('todos os quadros ficaram vazios depois da limpeza');
 const box = { left: minX, top: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
 
-let antes = null, depois = null, gama = 1;
+let stat = null;
+const descartados = [];
 for (const { saida, quadro: { data, W, H } } of pecas) {
   const recortado = await sharp(data, { raw: { width: W, height: H, channels: 4 } })
     .extract(box).raw().toBuffer({ resolveWithObject: true });
-  const corrigido = paraFamilia(recortado.data, 4);
-  if (saida === 'garganta') {
-    antes = estatistica(recortado.data, 4);
-    depois = estatistica(corrigido, 4);
-    gama = corrigido.gama ?? 1;
+  if (saida === 'garganta') stat = estatistica(recortado.data, 4);
+
+  // O descarte acontece DEPOIS da caixa união, nunca antes (ver MORTE_UTEIS).
+  const m = saida.match(/^garganta-morte-anim-(\d+)$/);
+  if (m && Number(m[1]) >= MORTE_UTEIS) {
+    descartados.push(saida);
+    continue;
   }
-  await sharp(corrigido, { raw: { width: box.width, height: box.height, channels: 4 } })
+
+  await sharp(recortado.data, { raw: { width: box.width, height: box.height, channels: 4 } })
     .png().toFile(`public/sprites/${saida}.png`);
 }
 
 console.log(`garganta: ${pecas.length} arquivos, TODOS na caixa ${box.width}x${box.height} (de ${box.left},${box.top})`);
-console.log(`  estático  antes: média ${antes.media.toFixed(1)}  pico ${antes.pico.toFixed(0)}`);
-console.log(`  estático depois: média ${depois.media.toFixed(1)}  pico ${depois.pico.toFixed(0)}  (gama ${gama.toFixed(2)})`);
-if (depois.pico > 140) console.log('  ⚠️  o pico ainda passa de 140 — a peça vai gritar no quadro escuro.');
-if (box.height < 170) console.log(`  ⚠️  a criatura saiu com ${box.height}px de altura, abaixo dos 191 do enquadramento.`);
+console.log(`  estático, CRU: média ${stat.media.toFixed(1)}  pico ${stat.pico.toFixed(0)}`);
+console.log('  (a pintura do hangar tem média 13,1 e teto prático ~110 — a peça entra crua POR DECISÃO)');
+if (descartados.length) {
+  console.log(`  descartados por artefato do gerador: ${descartados.join(', ')}`);
+}
