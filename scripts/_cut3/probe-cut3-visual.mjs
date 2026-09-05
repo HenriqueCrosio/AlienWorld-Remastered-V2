@@ -70,7 +70,11 @@ if (garg) {
   // primeiro quadro, então o Phaser devolve `gargantaIdleAnim<n>`. O que este assert prova é que
   // a arte desenhada é da família da garganta — não um asteroide, não um portão.
   ok(/^garganta/.test(garg.tex), `ela usa a arte propria (${garg.tex})`);
-  ok(garg.x === 340, `centrada em x=340 (x=${garg.x})`);
+  // ⚠️ A TRASEIRA ENCOSTA E É CORTADA pela borda direita — pedido do Henrique, 05/09: 'não quero
+  // sobras atrás' da boca por onde a nave passa. O centro é DERIVADO (384 − 78/2 + 14 = 359), então
+  // o assert cobra o EFEITO (a peça passa da borda), não o número.
+  ok(garg.dir > 384, `a traseira sai pela borda direita (vai ate x=${garg.dir}, a tela acaba em 384)`);
+  ok(garg.dir - 384 < 25, `mas so LIGEIRAMENTE cortada (${garg.dir - 384}px fora da tela)`);
   // ⚠️ ANCORADA PELO PÉ na linha do convés. DECK_Y=171 é MEDIDO na pintura; a altura da criatura é
   // o que o arquivo tiver. Cobrar o topo seria cobrar a altura do PNG, não a posição da peça.
   ok(garg.pe === 171, `pisando no conves, ancorada pelo PE em DECK_Y=171 (y=${garg.pe})`);
@@ -248,11 +252,11 @@ for (let i = 0; i < 80 && !meio; i++) {
   meio = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
     // o meio da viagem: já saiu do ponto de tiro (200) e ainda não chegou na boca (330)
-    return s.ship && s.ship.x > 245 && s.ship.x < 305
+    return s.ship && s.ship.x > 240 && s.ship.x < 310
       ? { x: Math.round(s.ship.x), escala: +s.ship.scaleX.toFixed(2), alpha: +s.ship.alpha.toFixed(2) }
       : null;
   });
-  if (!meio) await page.waitForTimeout(40);
+  if (!meio) await page.waitForTimeout(30);
 }
 console.log('nave-meio', JSON.stringify(meio));
 ok(!!meio, 'a nave e vista a caminho da boca');
@@ -279,8 +283,22 @@ for (let i = 0; i < 80 && !fim; i++) {
 }
 console.log('nave-fim', JSON.stringify(fim));
 ok(!!fim, 'a nave ainda existe no fim do beat');
+
+// ⚠️ E ELA PASSOU COM A BOCA AINDA ABERTA — pedido do Henrique, 05/09: "quero que a nave passe
+// antes da criatura fechar a boca". A abertura da goela mede 84px de altura nos quadros 1-3 da
+// morte e despenca para 28px no quadro 8: é ali que ela fecha. A leitura acima acontece no
+// instante em que a nave apaga, e este assert diz em que quadro da morte isso caiu.
 if (fim) {
-  ok(Math.abs(fim.x - 326) < 12, `ela some DENTRO da BOCA (x=${fim.x}, boca em 326), nao pela borda da tela`);
+  const q = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const g = s.children.list.filter((o) => o.name === 'gargantaCut3')[0];
+    return g && g.anims && g.anims.currentFrame ? g.anims.currentFrame.index : null;
+  });
+  console.log('quadro-da-morte-quando-a-nave-some', q);
+  ok(q !== null && q < 9, `ela passou com a boca ABERTA (quadro ${q} da morte; a boca fecha no 8, indice 9)`);
+}
+if (fim) {
+  ok(Math.abs(fim.x - 345) < 12, `ela some DENTRO da BOCA (x=${fim.x}, boca em 345), nao pela borda da tela`);
   ok(fim.escala <= 0.3, `encolhendo (escala ${fim.escala})`);
   ok(fim.alpha <= 0.1, `e apagando (alpha ${fim.alpha})`);
 }

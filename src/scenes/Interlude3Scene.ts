@@ -111,9 +111,10 @@ export class Interlude3Scene extends Phaser.Scene {
    * volta. Então o enquadramento cedeu: ela PISA NO CONVÉS. `base` é a linha do convés, e o topo
    * é consequência da altura do arquivo.
    *
-   * Com centro em 340 e 78 de largura, ela cobre x=301..379 e OCLUI a janela #5 (336..376) por
-   * inteiro. Ela não está embutida na parede, ela está DENTRO do hangar, NA FRENTE dela — objeto
-   * ocluindo parede é render, não colagem, e é por aí que ela escapa do defeito que matou o portão.
+   * Com centro em 359 e 78 de largura, ela cobre x=320..398 — ou seja, sai 14px pela borda direita
+   * e OCLUI a janela #5 (336..376) por inteiro. Ela não está embutida na parede, ela está DENTRO do
+   * hangar, NA FRENTE dela — objeto ocluindo parede é render, não colagem, e é por aí que ela
+   * escapa do defeito que matou o portão.
    *
    * ⚠️ EXISTIA UM `mira` (o x para onde a nave RECUAVA antes de atirar) e ele SAIU em 2026-09-05.
    * Ele só era necessário porque a nave parava em x=258, encostada na criatura, e um tiro disparado
@@ -121,9 +122,23 @@ export class Interlude3Scene extends Phaser.Scene {
    * jogou e viu a nave *"voar para trás um pouco antes de atirar"*. O conserto certo foi mover o
    * POUSO para 200 (ver `VAO_DA_NAVE`) — aí a distância já existe e a decolagem é reta.
    */
+  /**
+   * O centro da PEÇA em x. ⚠️ É DERIVADO DA BORDA DA TELA, não escolhido: o Henrique pediu em
+   * 2026-09-05 que *"a traseira dela fique encostada na tela lateral direita, ligeiramente
+   * cortada (a nave vai passar pela boca, não quero sobras atrás)"*. Com 78px de largura e
+   * `CORTE` px saindo pela direita, o centro cai em `GAME_WIDTH − 78/2 + CORTE`.
+   *
+   * O 14 foi escolhido olhando três opções (8, 14 e 20) na cena: com 8 ela ainda tem parede atrás,
+   * com 20 começa a perder corpo. **Mudou a arte? Recalcule a partir da largura nova, não do 359.**
+   */
+  private static readonly GARGANTA_LARG = 78;
+  private static readonly GARGANTA_CORTE = 14;
+  private static readonly GARGANTA_X =
+    GAME_WIDTH - Interlude3Scene.GARGANTA_LARG / 2 + Interlude3Scene.GARGANTA_CORTE;
+
   private static readonly GARGANTA = {
     /** O centro da PEÇA — só posiciona o sprite. */
-    x: 340,
+    x: Interlude3Scene.GARGANTA_X,
     base: Interlude3Scene.DECK_Y,
     /**
      * ⚠️ A BOCA NÃO É O CENTRO DA PEÇA, e passou a não ser em 2026-09-05, quando as animações
@@ -131,15 +146,32 @@ export class Interlude3Scene extends Phaser.Scene {
      * bastava; de PERFIL a criatura tem 78px de largura e a goela fica descentrada.
      *
      * Medido no miolo magenta da peça instalada (os 81px saturados e claros — a única luz que ela
-     * tem): centroide local (25, 67) numa peça 78×138. Com o pé em `DECK_Y` e o centro em `x`,
-     * isso põe a boca em (326, 100).
+     * tem): centroide local (25, 67) numa peça 78×138. Daí os deslocamentos abaixo, relativos ao
+     * CENTRO e ao PÉ — que é o que faz a boca acompanhar sozinha quando a peça se move.
      *
-     * É para AQUI que o torpedo vai, que a cadeia nasce e que a nave é engolida. Mirar no centro
-     * da peça mandaria os três para 14px ao lado da goela — dentro do corpo, mas fora do buraco.
+     * ⚠️ NÃO CRAVE `bocaX` COMO NÚMERO. Ele já foi 326 e virou 345 quando a criatura encostou na
+     * borda; um literal aqui dessincroniza no primeiro ajuste de posição, e o sintoma seria o
+     * torpedo acertando 14px ao lado do buraco — dentro do corpo, e portanto quase invisível.
+     *
+     * É para AQUI que o torpedo vai, que a cadeia nasce e que a nave é engolida.
      */
-    bocaX: 326,
-    bocaY: 100,
+    bocaX: Interlude3Scene.GARGANTA_X - Interlude3Scene.GARGANTA_LARG / 2 + 25,
+    bocaY: Interlude3Scene.DECK_Y - 138 + 67,
   } as const;
+
+  /**
+   * A ANIMAÇÃO DE MORTE, medida quadro a quadro em `public/sprites/garganta-morte-anim-*.png`.
+   *
+   * ⚠️ `fechaNoQuadro` NÃO É ESTIMATIVA. A abertura da boca (a caixa dos pixels claros e saturados
+   * do interior) mede 84px de altura nos quadros 1–3 e despenca para **28px no quadro 8**, ficando
+   * assim até o fim. É ali que ela fecha, e é esse número que manda no beat da nave.
+   */
+  private static readonly MORTE = { fps: 5, quadros: 11, fechaNoQuadro: 8 } as const;
+
+  /** Quando, em ms depois do impacto, a boca fecha. */
+  private static get bocaFechaEm(): number {
+    return (Interlude3Scene.MORTE.fechaNoQuadro / Interlude3Scene.MORTE.fps) * 1000;
+  }
 
   /**
    * A CADEIA — 10 estouros correndo da GARGANTA até a boca por onde a nave entrou.
@@ -853,7 +885,7 @@ export class Interlude3Scene extends Phaser.Scene {
     this.alarme = true;
     this.cadeia();
     this.selarBoca();
-    this.time.delayedCall(1000, () => this.engolida());
+    this.time.delayedCall(Interlude3Scene.engolidaAtraso, () => this.engolida());
   }
 
   /** A onda: 10 estouros descendo da boca da criatura até o convés, direita → esquerda. */
@@ -892,7 +924,26 @@ export class Interlude3Scene extends Phaser.Scene {
    *
    * ⚠️ Se alguém voltar a juntar os dois, o defeito volta inteiro. A escala é o ÚLTIMO gesto.
    */
-  private static readonly ENGOLIDA = { viagem: 1400, engole: 260, escalaFinal: 0.15 } as const;
+  /**
+   * ⚠️ E ELA TEM QUE PASSAR ANTES DE A BOCA FECHAR — pedido do Henrique, 2026-09-05: *"quero que a
+   * nave passe antes da criatura fechar a boca"*.
+   *
+   * Ele estava certo e a conta prova: a boca fecha em **1.600ms** depois do impacto (11 quadros a
+   * 5fps, fechando no 8º — ver `MORTE`), e a nave chegava em 1.000 + 1.400 = **2.400ms**. Ela
+   * entrava 800ms depois de a goela ter se cerrado, ou seja, atravessava dentes fechados.
+   *
+   * ⚠️ O ATRASO É DERIVADO, NÃO ESCOLHIDO. `atraso = bocaFechaEm − margem − viagem`. Mudou o fps
+   * da morte, o número de quadros, ou o quadro em que ela fecha? O beat se reajusta sozinho. Um
+   * literal aqui voltaria a descolar na próxima vez que a animação mudasse — e ela já mudou duas
+   * vezes nesta fatia.
+   */
+  private static readonly ENGOLIDA = { viagem: 900, engole: 220, escalaFinal: 0.15, margem: 300 } as const;
+
+  /** Quando, depois do impacto, a nave começa a viagem para dentro da boca. */
+  private static get engolidaAtraso(): number {
+    const { viagem, margem } = Interlude3Scene.ENGOLIDA;
+    return Math.max(0, Math.round(Interlude3Scene.bocaFechaEm - margem - viagem));
+  }
 
   private engolida(): void {
     if (this.done) return;
