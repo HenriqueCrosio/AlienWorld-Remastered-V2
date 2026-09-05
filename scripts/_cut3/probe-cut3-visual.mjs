@@ -1,4 +1,4 @@
-// A FATIA 6 na tela. Cobre a pintura, a fronteira com a Fase 4, a GARGANTA, a nadadeira, as
+// A FATIA 6 na tela. Cobre a pintura, a fronteira com a Fase 4, a GARGANTA, as
 // carcaças, o beat final e o entulho. Roda UMA POR VEZ (três browsers no mesmo Vite quebram).
 import { chromium } from 'playwright';
 
@@ -86,50 +86,10 @@ if (garg) {
   ok(garg.anim === 'garganta-idle' && garg.tocando, `ela RESPIRA desde o comeco (${garg.anim}, tocando=${garg.tocando})`);
 }
 
-// ─── A NADADEIRA: ela PIVOTA, não atravessa ───
-//
-// ⚠️ O ASSERT ANTIGO COBRAVA `x2 < x1` — a travessia — E FICAVA VERDE EM CIMA DO DEFEITO. Ele
-// media a escolha de quem o escreveu, não o que o desenho exige. O Henrique jogou e leu a peça
-// como "objeto perdido no espaço", justamente porque ela viajava: nadadeira presa num corpo não
-// viaja, ela pivota em torno de um ombro. Agora o assert cobra o PIVÔ, e cobra que o `x` e o `y`
-// LOCAIS da peça não se mexam — quem se mexe é o ângulo do braço.
-const nad = () =>
-  page.evaluate(() => {
-    const s = window.__game.scene.getScenes(true)[0];
-    const c = s.children.list.filter((o) => o.name === 'nadadeiraPivo')[0];
-    const p = s.children.list.filter((o) => o.name === 'paredeCut3')[0];
-    if (!c) return null;
-    const peca = c.list.filter((o) => o.name === 'nadadeiraCut3')[0];
-    const m = peca ? peca.getWorldTransformMatrix() : null;
-    return {
-      ang: +c.angle.toFixed(2),
-      depth: c.depth,
-      depthParede: p ? p.depth : null,
-      localX: peca ? Math.round(peca.x) : null,
-      localY: peca ? Math.round(peca.y) : null,
-      mundoX: m ? Math.round(m.tx) : null,
-      mundoY: m ? Math.round(m.ty) : null,
-    };
-  });
-
-let a = null;
-for (let i = 0; i < 40 && !a; i++) { a = await nad(); if (!a) await page.waitForTimeout(200); }
-ok(!!a, 'a nadadeira esta em cena, pendurada num braco que pivota');
-if (a) {
-  await page.waitForTimeout(2500);
-  const b = await nad();
-  console.log('nadadeira', JSON.stringify(a), '->', JSON.stringify(b));
-  ok(!!b, 'ela continua na tela 2,5s depois — a remada e LENTA e o ciclo e longo');
-  if (b) {
-    ok(b.ang !== a.ang, `o que se move e o ANGULO do braco (${a.ang}deg -> ${b.ang}deg)`);
-    ok(b.localX === a.localX && b.localY === a.localY,
-       `e a peca nao viaja: x,y locais fixos (${a.localX},${a.localY} -> ${b.localX},${b.localY})`);
-    ok(b.mundoY !== a.mundoY, `no mundo ela varre a faixa das janelas (y ${a.mundoY} -> ${b.mundoY})`);
-    ok(b.mundoY > 20 && b.mundoY < 175, `dentro da faixa util do quadro (y=${b.mundoY})`);
-    ok(b.depth < b.depthParede,
-       `e continua ATRAS da pintura (${b.depth} < ${b.depthParede}) — so existe pelo que as janelas deixam ver`);
-  }
-}
+// ⚠️ A NADADEIRA SAIU DA CENA EM 2026-09-05, e o bloco de assert dela saiu junto. Ela passou por
+// três versões (arte original, arte refeita com o leviathan-swim-sheet, movimento por pivô) e as
+// três foram reprovadas pelo Henrique jogando. O veredicto foi de ESCOPO: uma peça que só aparece
+// por um buraco de 116x89 durante 4s não paga três idas ao gerador.
 
 // ─── AS 17 LÂMPADAS: elas JÁ ESTÃO PINTADAS, e o que entra é intensidade ───
 //

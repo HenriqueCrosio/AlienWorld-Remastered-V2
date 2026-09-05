@@ -177,8 +177,16 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // faria dela mais um inimigo, e ela não é inimigo — ela é o LUGAR, e está ali desde o primeiro
   // quadro da cena.
   { key: 'garganta-idle', prefix: 'gargantaIdleAnim', frameRate: 6 },
-  // A MORTE toca UMA vez, e mais rápido: é o único instante em que ela reage a alguma coisa.
-  { key: 'garganta-morte', prefix: 'gargantaMorteAnim', frameRate: 12, loop: false },
+  // A MORTE toca UMA vez, a 5 — e o número foi MEDIDO, não escolhido.
+  //
+  // ⚠️ ELA ESTAVA A 12 E O HENRIQUE NÃO CONSEGUIA VÊ-LA. Ele jogou e relatou "o idle funciona, o
+  // da morte não". A animação rodava: `scripts/_cut3/_diag-morte.mjs` amostrou a cena a cada 80ms
+  // e pegou os 7 quadros passando — em **480ms**, debaixo de um `explodeBig` que cobria a criatura
+  // inteira, de um flash de tela e de um shake. Não era um defeito de animação, era um defeito de
+  // TEMPO: meio segundo escondido não existe para quem está jogando.
+  //
+  // 7 quadros a 5fps = 1,4s. Ela morre devagar, que é o beat: a boca dá um flare e apaga.
+  { key: 'garganta-morte', prefix: 'gargantaMorteAnim', frameRate: 5, loop: false },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -661,13 +669,18 @@ const ART: Record<string, string> = {
   // sementes, nunca limiar global — 20,5% da parede cai na mesma faixa neutra do xadrez).
   paintBgCut3: 'sprites/paint-bg-cut3.png',
 
-  // ⚠️ A NADADEIRA PEITORAL do Leviatã (cutscene 3), ideia do Henrique: ela atravessa a faixa das
-  // janelas mostrando que o bicho bate as nadadeiras nadando — e diz, sem banner, que você está
-  // DENTRO de uma coisa viva em movimento.
+  // ⚠️ A NADADEIRA PEITORAL SAIU DA ÁRVORE EM 2026-09-05, e sai daqui como aviso.
   //
-  // ⚠️ SÓ A TEXTURA É GERADA. A remada é tween: o v3 do PixelLab leu "bater para cima e para
-  // baixo" como GIRAR e devolveu o rabo do Leviatã como hélice, nesta mesma campanha.
-  nadadeira: 'sprites/nadadeira.png',
+  // Ela era ideia do Henrique e passou por TRÊS versões: a original, a refeita com o
+  // `leviathan-swim-sheet` como referência de estilo, e o movimento trocado de travessia por pivô.
+  // As três foram reprovadas por ele jogando. O veredicto final foi de ESCOPO, não de qualidade:
+  // *"não quero ficar dias resolvendo algo desse porte. Isso não faz diferença no final das
+  // contas."*
+  //
+  // ⚠️ SE ALGUÉM PENSAR EM RESSUSCITAR: o custo real não é a arte, é o número de rodadas de
+  // julgamento. Uma peça que só aparece por um buraco de 116×89 durante 4 segundos não paga três
+  // idas ao gerador. Antes de repor qualquer coisa "do lado de fora das janelas", pergunte a ele
+  // se vale a rodada.
 
   // ⚠️ AS CARCAÇAS DA FROTA ENGOLIDA (cutscene 3). O HANDOFF promete desde julho que "o hangar
   // guarda carcaças da frota engolida — a Frota Morta da F2, vista por dentro", e que o painel de
