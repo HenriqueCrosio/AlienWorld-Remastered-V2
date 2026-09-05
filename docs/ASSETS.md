@@ -340,6 +340,59 @@ pela chave duplicada no `ART` — depois de o disco já estar sobrescrito. Resta
 
 **`grep` no `ART` antes de escolher o nome. O typecheck avisa tarde demais.**
 
+## ⚠️ A LEI DE COR TEM DONO, E O DONO É QUEM DESENHOU (2026-09-05)
+
+Esta é a lição mais cara desta campanha, porque ela **desfaz** parte do que está escrito logo
+acima. Leia as duas juntas.
+
+### A faixa de matiz se confere contra o `COLORS`, não contra a memória
+
+A regra "o casco **teal** (140°–215°) gira para a ferrugem" nasceu com um motivo bom: *teal é
+`player 0x17a6bd`, a cor do JOGADOR, e um inimigo vestido da cor do jogador mente.* O motivo
+continua valendo. **A faixa não.**
+
+Medido em 05/09: o ciano do jogador é **matiz 188°**. O casco da criatura da Cutscene 3 está em
+**220–260°** — azul-índigo, que não é a cor de ninguém no jogo. A faixa 140–215 nasceu de outra
+peça e foi aplicada nesta sem medir; em 04/09 eu ainda a alarguei para 265° para matar um "halo
+azul" que era simplesmente **a cor da peça**.
+
+O resultado: **52% dos pixels do desenho do Henrique com o matiz girado**, saturação −23%, pico de
+207 para 105. Metade do brilho e outra cor. Ele jogou e perguntou *"por que o modelo que eu criei
+no PixelLab está estranho e sem cor no cenário?"* — e a resposta era essa.
+
+```bash
+# ANTES de aplicar qualquer faixa de matiz, rode o histograma da peça E compare com o COLORS:
+#   player 0x17a6bd → 188°   ·   enemy 0xa11347 → 337°   ·   hot 0xff8c1a → 31°
+```
+
+### E arte que o Henrique fez não se corrige sem perguntar
+
+A correção de paleta existe para peça **gerada**, que ninguém escolheu a dedo. Quando a peça é um
+objeto que **ele** desenhou e aprovou no PixelLab, mudar a cor dela é uma decisão de direção de
+arte, não um passo de pipeline. A garganta entra **crua** — só limpeza e recorte — por decisão
+dele: *"quero a cor que foi criada, a original, sem tint"*, com média 31,8 e pico 207 contra uma
+pintura de 13,1.
+
+**A regra:** o pipeline pode LIMPAR (xadrez, bordas opacas) e RECORTAR sem perguntar. Mudar
+tamanho ou cor de arte que ele fez, **pergunte**.
+
+## ⚠️ ANIMAÇÃO QUE NÃO SE VÊ É ANIMAÇÃO QUEBRADA (2026-09-05)
+
+O Henrique jogou e relatou: *"a animação de idle está funcionando na criatura. O da morte, não."*
+A sonda dizia o contrário — ela cobrava `currentAnim.key === 'garganta-morte'` e ficava verde.
+
+`scripts/_cut3/_diag-morte.mjs` amostrou a cena a cada 80ms e mostrou os **7 quadros passando**: a
+animação rodava. Em **480ms**, a 12fps, debaixo de um `explodeBig` de ~141px centrado numa criatura
+de 136×137 e desenhado ACIMA dela, com flash de tela e shake por cima.
+
+Não era defeito de animação, era defeito de **tempo e de oclusão**. Conserto: frameRate 12 → 5
+(1.040ms medidos), a explosão movida para o ponto de impacto com escala 0,7, e o flash de 220 →
+140ms.
+
+⚠️ **Um assert de "a animação ENTROU" não prova que ela é VISTA.** Para beat curto, meça a duração
+na tela e conte quem desenha por cima — é o que o `_diag-morte.mjs` faz, e ele fica na bancada
+para a próxima.
+
 ## Ordem de produção
 
 1. **M1-M3 rodam com placeholder** (retângulos coloridos). O jogo tem que estar divertido *antes* da arte.

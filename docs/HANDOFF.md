@@ -814,13 +814,42 @@ vez: agora é o mapa de quem TESTA a 2ª volta.
 | O portão | **saiu** — do disco, do `BootScene` e da cena. |
 | A 3ª carcaça | **saiu**, por decisão do Henrique: a garganta cobre x 262..398 e ela ficava 100% atrás. O assert baixou de `>= 3` para `>= 2`. |
 
-**Sondas, todas verdes:** `probe-cut3-visual` (52 asserts), `probe-interlude3` (`DECK_Y` 171 / 164
+**Sondas, todas verdes:** `probe-cut3-visual` (45 asserts), `probe-interlude3` (`DECK_Y` 171 / 164
 intacto), `probe-stage4`, `probe-f3-visual`, `probe-menu`. `npm run build` limpo.
 
 ⚠️ **O RISCO ABERTO PARA O TESTE JOGADO:** a nave passa ~10s parada em **x=258**, encostada na
 borda esquerda da criatura (que começa em 262), durante todo o painel de escolha. Casco escuro
 sobre corpo escuro pode dissolver a silhueta. **É para ser julgado, não consertado por conta
 própria.**
+
+### O 1º TESTE JOGADO DA 2ª VOLTA (2026-09-05) — três coisas caíram
+
+O Henrique jogou a cena e reportou três coisas. Nenhuma delas era o que a sonda media.
+
+**1. A nadadeira saiu da árvore.** *"Retire completamente a nadadeira, de novo ficou horrível e não
+quero ficar dias resolvendo algo desse porte. Isso não faz diferença no final das contas."* Ela
+passou por TRÊS versões (arte original, arte refeita com o `leviathan-swim-sheet` como estilo, e o
+movimento trocado de travessia por pivô) e as três foram reprovadas jogando. **O veredicto foi de
+ESCOPO, não de qualidade** — uma peça que só aparece por um buraco de 116×89 durante 4 segundos não
+paga três rodadas de julgamento. Saíram a textura, a chave no `BootScene`, o método, as constantes
+do pivô e o bloco de assert. ⚠️ Ficou um comentário no lugar da chave: **antes de repor qualquer
+coisa "do lado de fora das janelas", pergunte a ele se vale a rodada.**
+
+**2. A cor da criatura era minha, não dele.** *"Por que o modelo que eu criei no PixelLab está
+estranho e sem cor no cenário?"* Medido: **52% dos pixels com o matiz girado** de azul-petróleo
+para lodo, saturação −23%, pico de 207 para 105. A lei de cor do spec de 03/09 fazia isso, e o
+motivo escrito nela — *"teal é `player 0x17a6bd`, a cor do jogador"* — **não se sustentava nesta
+peça**: o ciano do jogador é matiz 188° e o casco dela está em 220–260°. Pior, em 04/09 eu alarguei
+a faixa de 215 para 265 para matar um "halo azul" que era a cor da peça. Decisão dele: *"quero a
+cor que foi criada, a original, sem tint"* — a garganta entra **crua**, média 31,8 / pico 207.
+A lição inteira está em `docs/ASSETS.md`.
+
+**3. A morte não estava quebrada, estava escondida.** *"A animação de idle está funcionando na
+criatura. O da morte, não."* `scripts/_cut3/_diag-morte.mjs` pegou os 7 quadros passando — em
+**480ms**, a 12fps, debaixo de um `explodeBig` de ~141px centrado na criatura de 136×137. Conserto:
+frameRate 12 → 5 (**1.040ms** medidos), explosão movida para o ponto de impacto com escala 0,7,
+flash de 220 → 140ms. ⚠️ **Um assert de "a animação ENTROU" não prova que ela é VISTA** — a sonda
+estava verde o tempo todo.
 
 ### ⚠️ A CORREÇÃO DE RUMO QUE CUSTOU 40 GERAÇÕES — leia antes de gerar arte "melhor"
 
