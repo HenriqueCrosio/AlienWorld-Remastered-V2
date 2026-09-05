@@ -70,7 +70,7 @@ if (garg) {
   // primeiro quadro, então o Phaser devolve `gargantaIdleAnim<n>`. O que este assert prova é que
   // a arte desenhada é da família da garganta — não um asteroide, não um portão.
   ok(/^garganta/.test(garg.tex), `ela usa a arte propria (${garg.tex})`);
-  ok(garg.x === 330, `centrada em x=330 (x=${garg.x})`);
+  ok(garg.x === 340, `centrada em x=340 (x=${garg.x})`);
   // ⚠️ ANCORADA PELO PÉ na linha do convés. DECK_Y=171 é MEDIDO na pintura; a altura da criatura é
   // o que o arquivo tiver. Cobrar o topo seria cobrar a altura do PNG, não a posição da peça.
   ok(garg.pe === 171, `pisando no conves, ancorada pelo PE em DECK_Y=171 (y=${garg.pe})`);
@@ -230,7 +230,7 @@ const cad = await page.evaluate(() => {
 console.log('cadeia  ', JSON.stringify(cad));
 ok(Array.isArray(cad) && cad.length === 10, `a cadeia tem 10 estouros (${cad ? cad.length : 'nenhum'})`);
 if (Array.isArray(cad) && cad.length === 10) {
-  ok(cad[0] > 300, `ela NASCE na garganta, a direita (x=${cad[0]})`);
+  ok(cad[0] > 300, `ela NASCE na BOCA da garganta, a direita (x=${cad[0]})`);
   ok(cad[cad.length - 1] < 20, `e morre na boca por onde a nave entrou, a esquerda (x=${cad[cad.length - 1]})`);
   ok(cad.every((x, i) => i === 0 || x < cad[i - 1]), `e corre sempre para a ESQUERDA (${cad.join(',')})`);
 }
@@ -280,7 +280,7 @@ for (let i = 0; i < 80 && !fim; i++) {
 console.log('nave-fim', JSON.stringify(fim));
 ok(!!fim, 'a nave ainda existe no fim do beat');
 if (fim) {
-  ok(Math.abs(fim.x - 330) < 12, `ela some DENTRO da boca (x=${fim.x}, boca em 330), nao pela borda da tela`);
+  ok(Math.abs(fim.x - 326) < 12, `ela some DENTRO da BOCA (x=${fim.x}, boca em 326), nao pela borda da tela`);
   ok(fim.escala <= 0.3, `encolhendo (escala ${fim.escala})`);
   ok(fim.alpha <= 0.1, `e apagando (alpha ${fim.alpha})`);
 }

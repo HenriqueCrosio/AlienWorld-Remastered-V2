@@ -97,22 +97,23 @@ export class Interlude3Scene extends Phaser.Scene {
   /**
    * A GARGANTA — a criatura que substituiu o portão.
    *
-   * ⚠️ A ARTE É A DO HENRIQUE, o objeto PixelLab `15f111fd`, face `south` — a boca frontal com o
-   * miolo em espiral. Ele já existia, com 8 direções, e a decisão dele em 2026-09-04 foi usar
-   * AQUELE arquivo, não um redesenho: a peça entra em TAMANHO NATIVO, sem um pixel de estica.
+   * ⚠️ A ARTE É A DO HENRIQUE, o objeto PixelLab `15f111fd`, e a decisão dele em 2026-09-04 foi
+   * usar AQUELE arquivo, não um redesenho: a peça entra em TAMANHO NATIVO, sem um pixel de estica.
    *
-   * ⚠️ E FOI ISSO QUE FIXOU O ENQUADRAMENTO, não o contrário. O spec pedia "altura inteira"
-   * (y 8..199, 191px), mas o desenho dele tem 137px depois do recorte pela caixa única das duas
-   * animações. Esticar 1,46× para chegar aos 191 quebraria a grade de pixel — é o erro nº 4 da 1ª
-   * volta. Então o enquadramento cedeu, e o que ficou é o que a arte real permite: ela PISA NO
-   * CONVÉS. `base` é a linha do convés; o topo é consequência da altura do arquivo.
+   * ⚠️ E A FACE MUDOU DE `south` PARA `east` EM 2026-09-05, quando ele fez as animações dele. De
+   * frente a criatura tinha 136×137 e encarava a câmera; de PERFIL tem **78×138** e encara a
+   * ESQUERDA — que é de onde a nave vem. A cena ganhou com isso: ela deixa de olhar para fora da
+   * tela e passa a olhar para o jogador chegando. ⚠️ As animações vêm apontando para a DIREITA e
+   * são espelhadas EM DISCO pelo `--flip` do instalador, nunca com `setFlipX` na cena.
    *
-   * Com centro em 330 e 136 de largura, ela cobre x≈262..398: OCLUI a janela #5 (336..376) por
-   * inteiro e a #4 (288..321) quase toda. Ela não está embutida na parede, ela está DENTRO do
-   * hangar, NA FRENTE dela — objeto ocluindo parede é render, não colagem, e é por aí que ela
-   * escapa do defeito que matou o portão.
+   * ⚠️ E FOI A ARTE QUE FIXOU O ENQUADRAMENTO, não o contrário. O spec pedia "altura inteira"
+   * (y 8..199, 191px); esticar para chegar lá quebraria a grade de pixel — é o erro nº 4 da 1ª
+   * volta. Então o enquadramento cedeu: ela PISA NO CONVÉS. `base` é a linha do convés, e o topo
+   * é consequência da altura do arquivo.
    *
-   * `miraY` é a altura da boca: a nave sobe até ela para atirar, e é para lá que ela é engolida.
+   * Com centro em 340 e 78 de largura, ela cobre x=301..379 e OCLUI a janela #5 (336..376) por
+   * inteiro. Ela não está embutida na parede, ela está DENTRO do hangar, NA FRENTE dela — objeto
+   * ocluindo parede é render, não colagem, e é por aí que ela escapa do defeito que matou o portão.
    *
    * ⚠️ EXISTIA UM `mira` (o x para onde a nave RECUAVA antes de atirar) e ele SAIU em 2026-09-05.
    * Ele só era necessário porque a nave parava em x=258, encostada na criatura, e um tiro disparado
@@ -121,9 +122,23 @@ export class Interlude3Scene extends Phaser.Scene {
    * POUSO para 200 (ver `VAO_DA_NAVE`) — aí a distância já existe e a decolagem é reta.
    */
   private static readonly GARGANTA = {
-    x: 330,
+    /** O centro da PEÇA — só posiciona o sprite. */
+    x: 340,
     base: Interlude3Scene.DECK_Y,
-    miraY: 103,
+    /**
+     * ⚠️ A BOCA NÃO É O CENTRO DA PEÇA, e passou a não ser em 2026-09-05, quando as animações
+     * `east` do Henrique entraram. De frente (a face `south`) os dois coincidiam e um número só
+     * bastava; de PERFIL a criatura tem 78px de largura e a goela fica descentrada.
+     *
+     * Medido no miolo magenta da peça instalada (os 81px saturados e claros — a única luz que ela
+     * tem): centroide local (25, 67) numa peça 78×138. Com o pé em `DECK_Y` e o centro em `x`,
+     * isso põe a boca em (326, 100).
+     *
+     * É para AQUI que o torpedo vai, que a cadeia nasce e que a nave é engolida. Mirar no centro
+     * da peça mandaria os três para 14px ao lado da goela — dentro do corpo, mas fora do buraco.
+     */
+    bocaX: 326,
+    bocaY: 100,
   } as const;
 
   /**
@@ -137,7 +152,7 @@ export class Interlude3Scene extends Phaser.Scene {
    * ⚠️ E TUDO AQUI É DERIVADO DO ÍNDICE. O sorteio saiu porque a sonda fotografa a cena — e
    * porque uma onda com jitter aleatório não lê como onda, lê como pipoca.
    */
-  private static readonly CADEIA = { n: 10, x0: 330, x1: 8, t0: 200, passo: 140 } as const;
+  private static readonly CADEIA = { n: 10, x0: Interlude3Scene.GARGANTA.bocaX, x1: 8, t0: 200, passo: 140 } as const;
 
   /**
    * O ENTULHO QUE MURA A BOCA — `[x, yFinal, textura, ângulo]`.
@@ -771,7 +786,7 @@ export class Interlude3Scene extends Phaser.Scene {
     // `VAO_DA_NAVE`), não a decolagem — agora ela já pousa longe o bastante e só precisa subir.
     this.tweens.add({
       targets: this.ship,
-      y: Interlude3Scene.GARGANTA.miraY,
+      y: Interlude3Scene.GARGANTA.bocaY,
       angle: 0,
       duration: 520,
       ease: 'Sine.easeOut',
@@ -803,8 +818,8 @@ export class Interlude3Scene extends Phaser.Scene {
 
     this.tweens.add({
       targets: t,
-      x: g.x,
-      y: g.miraY,
+      x: g.bocaX,
+      y: g.bocaY,
       duration: 400,
       ease: 'Quad.easeIn',
       // DESTRUIR, nunca deixar parado: objeto esquecido fora da tela é armadilha documentada.
@@ -827,8 +842,8 @@ export class Interlude3Scene extends Phaser.Scene {
     //
     // Agora ela estoura no PONTO DE IMPACTO (a borda esquerda, por onde o torpedo entrou), menor,
     // e o clarão da câmera encurta. O que o jogador olha durante a morte é a criatura, não o fogo.
-    const impactoX = Math.round(g.x - (this.garganta ? this.garganta.displayWidth / 2 : 68) + 24);
-    this.fx.explodeBig(impactoX, g.miraY, 0.7, Interlude3Scene.DEPTH_GARGANTA + 1);
+    const impactoX = Math.round(g.bocaX - 18);
+    this.fx.explodeBig(impactoX, g.bocaY, 0.7, Interlude3Scene.DEPTH_GARGANTA + 1);
     this.cameras.main.flash(140, 255, 150, 80);
     this.cameras.main.shake(320, 0.008);
 
@@ -891,8 +906,8 @@ export class Interlude3Scene extends Phaser.Scene {
     // 1. A VIAGEM — tamanho cheio o caminho todo.
     this.tweens.add({
       targets: this.ship,
-      x: g.x,
-      y: g.miraY,
+      x: g.bocaX,
+      y: g.bocaY,
       angle: 0,
       duration: viagem,
       ease: 'Quad.easeIn',

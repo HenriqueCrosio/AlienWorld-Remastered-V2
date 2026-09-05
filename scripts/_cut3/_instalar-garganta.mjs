@@ -32,12 +32,17 @@
 // ⚠️ A DIREÇÃO É PARÂMETRO. O objeto do Henrique (15f111fd) tem 8 direções e a cutscene usa só
 // a `south` — a boca frontal. Um objeto de 1 direção usa `unknown`, que é o padrão.
 //
-//   node scripts/_cut3/_instalar-garganta.mjs <object-id> <anim-idle-url> <anim-morte-url> [n] [direcao]
+//   node scripts/_cut3/_instalar-garganta.mjs <object-id> <anim-idle-url> <anim-morte-url> [n] [direcao] [--flip]
+//
+// `--flip` espelha TUDO na horizontal, antes da limpeza e da caixa. É o que traz uma face `east`
+// para a direção que a cena usa.
 import sharp from 'sharp';
 import fs from 'node:fs';
 import { estatistica } from './_paleta.mjs';
 
-const [OBJ, GRP_IDLE, GRP_MORTE, N_RAW, DIR_RAW] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const FLIP = args.includes('--flip');
+const [OBJ, GRP_IDLE, GRP_MORTE, N_RAW, DIR_RAW] = args.filter((a) => a !== '--flip');
 const DIR = DIR_RAW ?? 'unknown';
 const N = Number(N_RAW ?? 9);
 if (!OBJ || !GRP_IDLE || !GRP_MORTE) {
@@ -57,7 +62,17 @@ async function baixarLimpo(url, guardarComo) {
   const bruto = Buffer.from(await res.arrayBuffer());
   fs.writeFileSync(`${tmp}/${guardarComo}`, bruto);
 
-  const { data, info } = await sharp(bruto).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  // ⚠️ O ESPELHAMENTO ACONTECE AQUI, ANTES DA LIMPEZA E DA CAIXA. As animações que o Henrique
+  // fez estão na face `east` — a criatura olha para a DIREITA. Na cena ela vive na direita e a
+  // nave chega pela esquerda, então ela precisa olhar para a esquerda.
+  //
+  // ⚠️ E ESPELHAR EM DISCO, NUNCA COM `setFlipX` NA CENA. É a mesma lei que `install-sprite.mjs`
+  // já paga (o chefão que vinha apontando para o lado errado): o flip em jogo não acompanha nada
+  // que seja medido a partir do centro — e aqui a peça é ancorada pelo pé e pelo x=330. Espelhando
+  // ANTES da caixa união, os 23 quadros saem alinhados entre si por construção.
+  const fonte = FLIP ? await sharp(bruto).flop().png().toBuffer() : bruto;
+
+  const { data, info } = await sharp(fonte).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: W, height: H } = info;
   const A = (x, y) => data[(y * W + x) * 4 + 3];
 
@@ -87,10 +102,18 @@ async function baixarLimpo(url, guardarComo) {
  * Eu os apaguei à mão em 04/09 e a reinstalação de 05/09 os trouxe de volta, porque nada aqui
  * sabia deles. **Descarte que mora fora do instalador não é descarte, é lembrete.**
  *
- * ⚠️ A CAIXA CONTINUA SENDO A DOS 19 QUADROS ORIGINAIS: eles entram no cálculo da união e só depois
- * são jogados fora, então apagar não desalinha nada e o sprite não salta.
+ * ⚠️ O CORTE É POR LOTE, não uma lei da peça: os 9 quadros SOUTH tinham lixo nos dois últimos, e
+ * um lote novo pode não ter. Por isso o padrão é NÃO CORTAR NADA (todos os N), e o corte entra por
+ * ambiente:
+ *
+ *     MORTE_UTEIS=7 node scripts/_cut3/_instalar-garganta.mjs ...
+ *
+ * ⚠️ Antes de cortar, OLHE os quadros — cortar de memória é o que trouxe o lixo de volta.
+ *
+ * ⚠️ A CAIXA CONTINUA SENDO A DE TODOS OS QUADROS BAIXADOS: os descartados entram no cálculo da
+ * união e só depois são jogados fora, então cortar não desalinha nada e o sprite não salta.
  */
-const MORTE_UTEIS = 7;
+const MORTE_UTEIS = Number(process.env.MORTE_UTEIS ?? N);
 
 const pecas = [];
 pecas.push({ saida: 'garganta', quadro: await baixarLimpo(`${raiz}/rotations/${DIR}.png`, 'estatico.png') });
