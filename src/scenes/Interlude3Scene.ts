@@ -112,15 +112,18 @@ export class Interlude3Scene extends Phaser.Scene {
    * hangar, NA FRENTE dela — objeto ocluindo parede é render, não colagem, e é por aí que ela
    * escapa do defeito que matou o portão.
    *
-   * `mira` é onde a nave RECUA para atirar, e `miraY` a altura da boca. ⚠️ O recuo não é enfeite:
-   * a nave para em x=258, encostada na criatura, e um tiro de 72px disparado de cima do alvo não
-   * se lê como tiro. Recuando para 150, o torpedo cruza 180px de tela.
+   * `miraY` é a altura da boca: a nave sobe até ela para atirar, e é para lá que ela é engolida.
+   *
+   * ⚠️ EXISTIA UM `mira` (o x para onde a nave RECUAVA antes de atirar) e ele SAIU em 2026-09-05.
+   * Ele só era necessário porque a nave parava em x=258, encostada na criatura, e um tiro disparado
+   * de cima do alvo não se lê como tiro. O recuo consertava o sintoma e criava outro: o Henrique
+   * jogou e viu a nave *"voar para trás um pouco antes de atirar"*. O conserto certo foi mover o
+   * POUSO para 200 (ver `VAO_DA_NAVE`) — aí a distância já existe e a decolagem é reta.
    */
   private static readonly GARGANTA = {
     x: 330,
     base: Interlude3Scene.DECK_Y,
     miraY: 103,
-    mira: 150,
   } as const;
 
   /**
@@ -352,7 +355,20 @@ export class Interlude3Scene extends Phaser.Scene {
    * ⚠️ Reinstalar do PixelLab REFAZ o arquivo em 128px — reduzir de novo depois.
    */
   private static readonly CARCACAS = { fundo: -10, frente: 4, saltoMin: 4 } as const;
-  private static readonly VAO_DA_NAVE = { x: 258, raio: 40 } as const;
+  /**
+   * ⚠️ ELA PARAVA EM 258 E FOI PUXADA PARA 200 EM 2026-09-05, por pedido do Henrique jogando:
+   * *"quero que a nave pouse um pouco antes (...) se ela pousa antes, a decolagem pode ficar mais
+   * vertical e natural"*.
+   *
+   * O 258 vinha de 2026-07-19 e era o vão entre os dois montes de entulho — uma decisão sobre o
+   * ENTULHO, tomada antes de a garganta existir. Com a criatura ocupando x≥262, parar em 258
+   * obrigava a nave a RECUAR antes de atirar, e o recuo lia como ela voando de ré. Parando em 200
+   * ela sobe RETO: o `colapso()` não mexe mais no `x`.
+   *
+   * As folgas continuam boas: 50px da carcaça mais próxima (x=150, o mínimo é 40) e 47px da borda
+   * da criatura. E o `raio` é o mesmo — é ele que mantém as carcaças fora do vão.
+   */
+  private static readonly VAO_DA_NAVE = { x: 200, raio: 40 } as const;
 
   private plantarCarcacas(): void {
     const artes = ['carcaca1', 'carcaca2', 'carcaca3'].filter((k) => this.textures.exists(k));
@@ -644,13 +660,13 @@ export class Interlude3Scene extends Phaser.Scene {
       },
     });
 
-    // O deslize: passa NA FRENTE do monte esquerdo (depth 80 > 70 — de raspão, vendendo o
-    // caos) e para no VÃO LIVRE entre os dois montes (tela ≈ 226..286; carcaças medidas na
-    // arte: x≈5..55 e x≈95..145). Parar em 240 deixava a nave COLADA na borda do monte e as
-    // duas silhuetas cinza viravam uma massa só — o beat "REARMADA" existe para MOSTRAR a nave.
+    // O deslize: passa NA FRENTE do monte esquerdo (depth 80 > 70 — de raspão, vendendo o caos) e
+    // para no VÃO LIVRE, que é `VAO_DA_NAVE.x`. ⚠️ O destino é a CONSTANTE, não um literal: eles
+    // eram dois números iguais escritos em lugares diferentes, e mover um sem o outro poria a nave
+    // parada em cima de uma carcaça sem nada acusar.
     this.tweens.add({
       targets: this.ship,
-      x: 258,
+      x: Interlude3Scene.VAO_DA_NAVE.x,
       duration: 2100,
       ease: 'Cubic.easeOut',
       onComplete: () => {
@@ -748,11 +764,13 @@ export class Interlude3Scene extends Phaser.Scene {
 
     Music.play(this, 'boss', 600);
 
-    // A nave sobe e RECUA. O recuo não é enfeite: ela parou em x=258, encostada na criatura, e um
-    // tiro de 72px disparado de cima do alvo não se lê como tiro.
+    // ⚠️ A DECOLAGEM É VERTICAL, E O `x` NÃO ENTRA NESTE TWEEN. Ela subia E recuava ao mesmo
+    // tempo, porque parava em x=258 — encostada na criatura — e precisava de distância para o tiro
+    // ler. O Henrique jogou e viu o que isso é: *"a nave voa para trás um pouco antes de atirar"*.
+    // Nave decolando de um convés sobe; ela não dá ré. O conserto foi mover o POUSO (ver
+    // `VAO_DA_NAVE`), não a decolagem — agora ela já pousa longe o bastante e só precisa subir.
     this.tweens.add({
       targets: this.ship,
-      x: Interlude3Scene.GARGANTA.mira,
       y: Interlude3Scene.GARGANTA.miraY,
       angle: 0,
       duration: 520,
@@ -842,27 +860,51 @@ export class Interlude3Scene extends Phaser.Scene {
   }
 
   /**
-   * A NAVE ENGOLIDA. Ela voa para dentro da boca ENCOLHENDO e some no miolo.
+   * A NAVE ENGOLIDA. Ela voa para dentro da boca em TAMANHO CHEIO e só encolhe no fim.
    *
-   * ⚠️ A escala aqui é MOVIMENTO, não tamanho de arte — ela termina em alpha 0. A lei "1px de
-   * arte = 1px de jogo" vale para o que fica desenhado na tela, e no fim deste tween não fica
-   * nada.
+   * ⚠️ REGRA DA CENA (Henrique, 2026-09-05): *"a nave está ficando pequena cedo demais, ela
+   * precisa entrar na boca da criatura com o MESMO TAMANHO e somente ficar pequena nos
+   * milissegundos finais mesmo."*
+   *
+   * A versão anterior tinha UM tween só, levando posição, escala e alpha juntos por 1.400ms. Com
+   * escala e posição no mesmo intervalo, ela encolhia durante a VIAGEM inteira: chegava na boca já
+   * minúscula, e o que se lia era uma nave se afastando, não sendo engolida. São coisas
+   * diferentes, e a diferença é exatamente QUANDO a escala cai.
+   *
+   * Agora são DOIS tweens sobre o mesmo alvo:
+   *   · a VIAGEM leva só `x`, `y` e `angle` — a nave cruza a tela inteira em tamanho 1;
+   *   · o ENGOLIMENTO leva `scale` e `alpha`, e só começa em `VIAGEM − ENGOLE` do fim.
+   *
+   * ⚠️ Se alguém voltar a juntar os dois, o defeito volta inteiro. A escala é o ÚLTIMO gesto.
    */
+  private static readonly ENGOLIDA = { viagem: 1400, engole: 260, escalaFinal: 0.15 } as const;
+
   private engolida(): void {
     if (this.done) return;
 
     const g = Interlude3Scene.GARGANTA;
+    const { viagem, engole, escalaFinal } = Interlude3Scene.ENGOLIDA;
+
     this.fumaca.emitting = false;
     this.fagulhas.emitting = false;
 
+    // 1. A VIAGEM — tamanho cheio o caminho todo.
     this.tweens.add({
       targets: this.ship,
       x: g.x,
       y: g.miraY,
-      scale: 0.15,
-      alpha: 0,
       angle: 0,
-      duration: 1400,
+      duration: viagem,
+      ease: 'Quad.easeIn',
+    });
+
+    // 2. O ENGOLIMENTO — os últimos `engole` ms, e só eles.
+    this.tweens.add({
+      targets: this.ship,
+      scale: escalaFinal,
+      alpha: 0,
+      delay: viagem - engole,
+      duration: engole,
       ease: 'Quad.easeIn',
     });
   }

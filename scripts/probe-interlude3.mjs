@@ -62,7 +62,7 @@ const parada = await estado();
 console.log('parada   ', JSON.stringify(parada));
 await page.screenshot({ path: 'probe-i3-painel.png' });
 
-// Derrapou até o convés? A nave assenta 7px acima da linha dele e para em x=258.
+// Derrapou até o convés? A nave assenta 7px acima da linha dele e para em x=200.
 //
 // ⚠️ O 150 DAQUI ERA DO AZULEJO. Na Fatia 6 a parede virou a PINTURA do Henrique e o convés foi
 // re-medido: a faixa de perigo dela está em y=171..173, então DECK_Y=171 e a nave assenta em 164.
@@ -74,10 +74,15 @@ console.log(
     ? '✔ derrapou NO CONVÉS'
     : `✘ parou FORA do convés (y=${parada.nave?.y}, esperado ~${DECK_Y - 7})`,
 );
-// x=258: o VÃO LIVRE entre os dois montes de carcaça (parar colado no monte esquerdo escondia
+// x=200: o VÃO LIVRE do convés. ⚠️ ERA 258 ATÉ 2026-09-05, e o número mudou por PEDIDO do
+// Henrique, jogando: parando em 258 ela ficava encostada na garganta (que começa em x=262) e
+// precisava RECUAR antes de atirar — ele viu a nave 'voar para trás'. Pousando em 200 a decolagem
+// é vertical. ⚠️ O assert foi CORRIGIDO para o número novo, não afrouxado: a tolerância continua
+// 6px. Sonda que encosta na mudança se confere; alargar o limite para o verde voltar é o que
+// transforma sonda em enfeite. (parar colado no monte esquerdo escondia
 // a nave no meio do metal cinza — revisão visual 2026-07-19).
-const noMeio = parada.nave && Math.abs(parada.nave.x - 258) < 6;
-console.log(noMeio ? '✔ parou no vão entre as carcaças (x~258)' : `✘ parou em x=${parada.nave?.x}, esperado ~258`);
+const noMeio = parada.nave && Math.abs(parada.nave.x - 200) < 6;
+console.log(noMeio ? '✔ parou no vão entre as carcaças (x~200)' : `✘ parou em x=${parada.nave?.x}, esperado ~200`);
 console.log(parada.painel === 'aberto' ? '✔ painel aberto' : '✘ o painel NÃO abriu');
 
 // ─── O painel: as 8 naves — a BATERIA entra AQUI e só aqui ───

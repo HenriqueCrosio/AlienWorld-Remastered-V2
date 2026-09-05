@@ -237,14 +237,46 @@ if (Array.isArray(cad) && cad.length === 10) {
 
 // 4. A NAVE SOME DENTRO DA BOCA. ⚠️ Ela não escapa pela borda — ela vai MAIS PARA DENTRO, que é a
 // história desta cutscene, e a Fase 4 começa exatamente onde ela sumiu.
-await page.waitForTimeout(2400);
-const fim = await page.evaluate(() => {
-  const s = window.__game.scene.getScenes(true)[0];
-  return s.ship
-    ? { x: Math.round(s.ship.x), y: Math.round(s.ship.y),
-        escala: +s.ship.scaleX.toFixed(2), alpha: +s.ship.alpha.toFixed(2) }
-    : null;
-});
+//
+// ⚠️ E ELA VIAJA EM TAMANHO CHEIO — REGRA DA CENA (Henrique, 05/09): "ela precisa entrar na boca da
+// criatura com o MESMO TAMANHO e somente ficar pequena nos milissegundos finais". A versão antiga
+// levava posição, escala e alpha no MESMO tween de 1.400ms, e ela encolhia a viagem inteira: o que
+// se lia era uma nave se AFASTANDO, não sendo engolida. Este assert amostra o MEIO do caminho —
+// se alguém juntar os dois tweens de novo, ele cai.
+let meio = null;
+for (let i = 0; i < 80 && !meio; i++) {
+  meio = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    // o meio da viagem: já saiu do ponto de tiro (200) e ainda não chegou na boca (330)
+    return s.ship && s.ship.x > 245 && s.ship.x < 305
+      ? { x: Math.round(s.ship.x), escala: +s.ship.scaleX.toFixed(2), alpha: +s.ship.alpha.toFixed(2) }
+      : null;
+  });
+  if (!meio) await page.waitForTimeout(40);
+}
+console.log('nave-meio', JSON.stringify(meio));
+ok(!!meio, 'a nave e vista a caminho da boca');
+if (meio) {
+  ok(meio.escala === 1, `no MEIO do caminho ela ainda esta em tamanho CHEIO (x=${meio.x}, escala ${meio.escala})`);
+  ok(meio.alpha === 1, `e ainda opaca (alpha ${meio.alpha})`);
+}
+
+// ⚠️ A ESPERA É PELO ESTADO, NÃO PELO RELÓGIO — e isto custou uma execução em 05/09. O bloco do
+// entulho esperava 1.800ms cegos depois de 2.400ms cegos; quando os asserts do meio da viagem
+// entraram e gastaram mais relógio, a soma passou dos 5.600ms do `avancar()`, a cena virou a Fase
+// 4 e o entulho leu ZERO. Não era defeito da cena, era a sonda chegando atrasada.
+let fim = null;
+for (let i = 0; i < 80 && !fim; i++) {
+  fim = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    if (s.scene.key !== 'Interlude3' || !s.ship) return null;
+    return s.ship.alpha <= 0.1
+      ? { x: Math.round(s.ship.x), y: Math.round(s.ship.y),
+          escala: +s.ship.scaleX.toFixed(2), alpha: +s.ship.alpha.toFixed(2) }
+      : null;
+  });
+  if (!fim) await page.waitForTimeout(60);
+}
 console.log('nave-fim', JSON.stringify(fim));
 ok(!!fim, 'a nave ainda existe no fim do beat');
 if (fim) {
@@ -259,18 +291,27 @@ if (fim) {
 // sorteada quebra a reprodutibilidade. O que inverteu foi a ORDEM DE QUEDA.
 // ⚠️ E ELES NÃO PODEM MAIS SER `asteroid` TINGIDO. A cor mora no ARQUIVO (ver _paleta.mjs) —
 // `setTint` multiplicaria a peça inteira por uma cor só e apagaria a única luz que ela tem.
-await page.waitForTimeout(1800);
-const ent = await page.evaluate(() => {
-  const s = window.__game.scene.getScenes(true)[0];
-  const es = s.children.list.filter((o) => o.name === 'entulhoCut3');
-  return {
-    n: es.length,
-    texs: [...new Set(es.map((o) => o.texture.key))].sort(),
-    tingidos: es.filter((o) => o.isTinted).length,
-    escalas: [...new Set(es.map((o) => +o.scaleX.toFixed(2)))],
-    xs: es.map((o) => Math.round(o.x)),
-  };
-});
+// ⚠️ Espera pelas 9 PEÇAS, não por um relógio (ver o comentário do bloco da nave).
+const lerEnt = () =>
+  page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    if (s.scene.key !== 'Interlude3') return { n: -1, texs: [], tingidos: 0, escalas: [], xs: [] };
+    const es = s.children.list.filter((o) => o.name === 'entulhoCut3');
+    return {
+      n: es.length,
+      texs: [...new Set(es.map((o) => o.texture.key))].sort(),
+      tingidos: es.filter((o) => o.isTinted).length,
+      escalas: [...new Set(es.map((o) => +o.scaleX.toFixed(2)))],
+      xs: es.map((o) => Math.round(o.x)),
+    };
+  });
+
+let ent = await lerEnt();
+for (let i = 0; i < 80 && ent.n !== 9; i++) {
+  await page.waitForTimeout(60);
+  ent = await lerEnt();
+}
+if (ent.n === -1) console.log('[AVISO] a cena ja avancou para a Fase 4 antes de o entulho ser lido');
 console.log('entulho ', JSON.stringify(ent));
 ok(ent.n === 9, `as 9 pecas de entulho cairam (${ent.n})`);
 ok(ent.texs.length === 4 && ent.texs.every((t) => t.startsWith('entulho')),
