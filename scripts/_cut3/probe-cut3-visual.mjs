@@ -56,7 +56,7 @@ const garg = await page.evaluate(() => {
   return g
     ? { tex: g.texture.key, x: Math.round(g.x), pe: Math.round(g.y),
         topo: Math.round(g.y - g.displayHeight),
-        esq: Math.round(g.x - g.displayWidth / 2), dir: Math.round(g.x + g.displayWidth / 2),
+        esq: Math.round(g.x - g.displayWidth), dir: Math.round(g.x),
         w: g.width, h: g.height, sx: g.scaleX, sy: g.scaleY,
         depth: g.depth, depthParede: p ? p.depth : null,
         anim: g.anims && g.anims.currentAnim ? g.anims.currentAnim.key : null,
@@ -75,17 +75,16 @@ if (garg) {
   // o assert cobra o EFEITO (a peça passa da borda), não o número.
   ok(garg.dir > 384, `a traseira sai pela borda direita (vai ate x=${garg.dir}, a tela acaba em 384)`);
   ok(garg.dir - 384 < 25, `mas so LIGEIRAMENTE cortada (${garg.dir - 384}px fora da tela)`);
-  // ⚠️ O PE DELA E O FUNDO DA TELA desde 05/09: ela foi ampliada para 122x216 e ocupa a coluna
-  // direita inteira, passando por cima da faixa de perigo. Era DECK_Y=171 quando ela pisava no
-  // conves.
-  ok(garg.pe === 216, `ancorada pelo PE no fundo da tela (y=${garg.pe})`);
-  ok(garg.topo <= 0, `e vai ate o topo do quadro (topo y=${garg.topo})`);
+  // ⚠️ ELA VOLTOU A PISAR NO CONVES. Chegou a ir ate o fundo da tela (122x216) num teste, e o
+  // Henrique preferiu a versao menor: 97x171, do topo da tela ao conves, com menos esticao.
+  ok(garg.pe === 171, `ancorada pelo PE na linha do conves, DECK_Y=171 (y=${garg.pe})`);
+  ok(garg.topo <= 0, `e sobe ate o topo do quadro (topo y=${garg.topo})`);
   // ⚠️ 1px de arte = 1px de jogo. Escala != 1 aqui e a peça inteira sai da grade — e é ESTE assert
   // que impede alguém de "resolver" o enquadramento com um setScale.
   ok(garg.sx === 1 && garg.sy === 1, `desenhada em tamanho NATIVO (escala ${garg.sx}x${garg.sy})`);
-  // Ela tem que OCLUIR as janelas #4 (288..321) e #5 (336..376) — é isso que a põe DENTRO do
-  // hangar, na frente da parede, em vez de colada nela.
-  ok(garg.esq < 288 && garg.dir > 376, `oclui as janelas #4 e #5 por inteiro (cobre x ${garg.esq}..${garg.dir})`);
+  // Ela tem que OCLUIR a janela #5 (336..376) — é isso que a põe DENTRO do hangar, na frente da
+  // parede, em vez de colada nela.
+  ok(garg.esq < 336 && garg.dir > 376, `oclui a janela #5 por inteiro (cobre x ${garg.esq}..${garg.dir})`);
   ok(garg.depth > garg.depthParede, `ela e um CORPO na frente da parede (${garg.depth} > ${garg.depthParede})`);
   ok(garg.depth < 80, `e atras da nave (${garg.depth} < 80)`);
   ok(garg.anim === 'garganta-idle' && garg.tocando, `ela RESPIRA desde o comeco (${garg.anim}, tocando=${garg.tocando})`);
@@ -299,7 +298,7 @@ if (fim) {
   ok(q !== null && q < 9, `ela passou com a boca ABERTA (quadro ${q} da morte; a boca fecha no 8, indice 9)`);
 }
 if (fim) {
-  ok(Math.abs(fim.x - 317) < 12, `ela some DENTRO da BOCA (x=${fim.x}, boca em 317), nao pela borda da tela`);
+  ok(Math.abs(fim.x - 333) < 12, `ela some DENTRO da BOCA (x=${fim.x}, boca em 333), nao pela borda da tela`);
   ok(fim.escala <= 0.3, `encolhendo (escala ${fim.escala})`);
   ok(fim.alpha <= 0.1, `e apagando (alpha ${fim.alpha})`);
 }
