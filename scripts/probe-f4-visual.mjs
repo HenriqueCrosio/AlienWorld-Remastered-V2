@@ -63,6 +63,43 @@ ok(
   interior.escalas.length === 1 && interior.escalas[0] === 1,
   `a pintura é desenhada em escala 1 (${JSON.stringify(interior.escalas)})`,
 );
+// ─── A TROCA DE CENÁRIO: o roteiro manda, o Parallax obedece ───
+//
+// ⚠️ Espera por ESTADO (o relógio da fase), nunca por relógio de parede: um assert novo que
+// gaste tempo faria a espera cega derivar. Foi assim que os quatro primeiros quadros desta
+// fatia saíram todos já no chefão, em 06/09.
+const pinturaEm = async (ate) => {
+  for (let i = 0; i < 700; i++) {
+    const e = await page.evaluate(() => {
+      const s = window.__game.scene.getScenes(true)[0];
+      if (!s || s.scene.key !== 'Game') return null;
+      s.lives = 99; // a sonda não sabe jogar: testa-se o CENÁRIO, não quem segura o teclado
+      s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+      return { t: Math.round((s.elapsed ?? 0) * 10) / 10, tex: s.parallax?.pinturaAtual ?? null };
+    });
+    if (!e) return null;
+    if (e.t >= ate) return e;
+    await page.waitForTimeout(200);
+  }
+  return null;
+};
+
+const c1 = await pinturaEm(5);
+console.log('cenario 1', JSON.stringify(c1));
+ok(c1?.tex === 'paintBgF4a', `t=5s: a câmara 1 é o hangar engolido (${c1?.tex})`);
+
+const c2 = await pinturaEm(45);
+console.log('cenario 2', JSON.stringify(c2));
+ok(c2?.tex === 'paintBgF4b', `t=45s: TROCOU para a caixa torácica (${c2?.tex})`);
+
+const c3 = await pinturaEm(70);
+console.log('cenario 3', JSON.stringify(c3));
+ok(c3?.tex === 'paintBgF4c', `t=70s: TROCOU para o duto (${c3?.tex})`);
+
+const c4 = await pinturaEm(84);
+console.log('cenario 4', JSON.stringify(c4));
+ok(c4?.tex === 'paintBgF4d', `t=84s: TROCOU para a câmara do núcleo (${c4?.tex})`);
+
 console.log(falhas === 0 ? '\n✔ A FATIA 7 (BLOCO A) ESTÁ DE PÉ' : `\n✘ ${falhas} FALHA(S)`);
 await browser.close();
 process.exit(falhas === 0 ? 0 : 1);

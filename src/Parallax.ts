@@ -1495,6 +1495,52 @@ export class Parallax {
    * Counter em vez de tween por sprite: as camadas RECICLAM durante o fade, e um sprite novo
    * tem que nascer no alpha do instante (ver `emit`).
    */
+  /**
+   * TROCA a pintura do interior (Fase 4). Quem manda é o ROTEIRO (evento `cenario` no
+   * `STAGE_4`), não um relógio interno — a forma da fase mora toda num lugar só.
+   *
+   * ⚠️ O fade MERGULHA NO ESCURO e volta, em vez de dissolver uma pintura na outra. As quatro
+   * são opacas e detalhadas: um crossfade direto vira sopa no meio do caminho, com duas
+   * anatomias diferentes somadas em alpha 0,5. O escuro lê como passar por um estreitamento —
+   * que é exatamente o que a ficção diz que está acontecendo.
+   *
+   * ⚠️ E A TEXTURA TROCA NO MEIO DO MERGULHO, com a tela já escura. Trocar no começo mostraria
+   * o corte.
+   *
+   * ⚠️ A duração é PONTO DE PARTIDA, não número fechado — é o tipo de coisa que só o olho do
+   * Henrique jogando decide (a Fatia 6 provou isso três vezes).
+   */
+  setPintura(key: string, durationMs = 600): void {
+    if (!this.pinturaF4.length || !this.scene.textures.exists(key)) return;
+    if (this.pinturaAtual === key) return;
+
+    const meio = durationMs / 2;
+    this.scene.tweens.addCounter({
+      from: 1,
+      to: 0,
+      duration: meio,
+      ease: 'Sine.easeIn',
+      onUpdate: (tw) => {
+        const a = tw.getValue() ?? 0;
+        for (const img of this.pinturaF4) img.setAlpha(a);
+      },
+      onComplete: () => {
+        for (const img of this.pinturaF4) img.setTexture(key);
+        this.pinturaAtual = key;
+        this.scene.tweens.addCounter({
+          from: 0,
+          to: 1,
+          duration: meio,
+          ease: 'Sine.easeOut',
+          onUpdate: (tw) => {
+            const a = tw.getValue() ?? 1;
+            for (const img of this.pinturaF4) img.setAlpha(a);
+          },
+        });
+      },
+    });
+  }
+
   setNebulaDensity(density: number, durationMs = 5000): void {
     const alvo = Phaser.Math.Clamp(density, 0, 1);
 

@@ -554,6 +554,11 @@ export class GameScene extends Phaser.Scene {
       case 'rabo':
         this.raboDoLeviata();
         break;
+      case 'cenario':
+        // A jornada anatômica da Fase 4: cada câmara tem a pintura dela, e quem manda na
+        // troca é o roteiro. O mergulho no escuro vive no `setPintura` — daqui só sai a chave.
+        this.parallax.setPintura(e.key);
+        break;
       case 'boss':
         this.spawnBoss();
         break;

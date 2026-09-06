@@ -34,6 +34,15 @@ export type StageEvent =
    * podem somar uma parede impassável, e corredor impassável não é difícil, é roubado.
    */
   | { t: number; type: 'corredor'; rate: number; gap: number }
+  /**
+   * TROCA O CENÁRIO PINTADO (Fase 4). A fase é uma jornada anatômica — o hangar engolido, a
+   * caixa torácica, o duto e a câmara do núcleo — e cada câmara tem a pintura dela.
+   *
+   * ⚠️ É O ROTEIRO QUE MANDA, não o `Parallax`: a forma da fase mora toda num lugar só. Um
+   * relógio interno no fundo derivaria do roteiro na primeira vez que alguém mexesse nos
+   * tempos, e a troca cairia no meio de uma onda em vez de no respiro.
+   */
+  | { t: number; type: 'cenario'; key: string }
   | { t: number; type: 'boss' };
 
 /**
@@ -365,6 +374,11 @@ export const STAGE_4: StageEvent[] = [
   { t: 37, type: 'corredor', rate: 2.6, gap: 104 },
   { t: 38, type: 'hazard', rate: 0, mix: [] },
 
+  // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
+  // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
+  // mesmo lugar. Cai no RESPIRO (sem onda no ar), não no meio de uma.
+  { t: 40, type: 'cenario', key: 'paintBgF4b' },
+
   // ─── O APERTO: o coração da fase. Vão 76px (a nave tem ~22 de hitbox: passa com folga
   // CURTA), minas nos vãos, cargueiro cuspindo drones no corredor. Posição sob pressão. ───
   { t: 42, type: 'banner', text: 'O DUTO APERTA' },
@@ -382,6 +396,9 @@ export const STAGE_4: StageEvent[] = [
   { t: 63.5, type: 'corredor', rate: 1.7, gap: 84 },
   { t: 64, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
+  // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
+  // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
+  { t: 68, type: 'cenario', key: 'paintBgF4c' },
   { t: 69, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
   { t: 72, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
   { t: 75, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
@@ -389,6 +406,9 @@ export const STAGE_4: StageEvent[] = [
   // Silêncio → o NÚCLEO. O mesmo telégrafo de todas as fases.
   { t: 79, type: 'corredor', rate: 0, gap: 0 },
   { t: 79.5, type: 'hazard', rate: 0, mix: [] },
+  // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
+  // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
+  { t: 82, type: 'cenario', key: 'paintBgF4d' },
   { t: 82, type: 'banner', text: 'ALERTA · O NÚCLEO' },
   { t: 86, type: 'boss' },
 ];
