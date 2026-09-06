@@ -546,6 +546,21 @@ const ART: Record<string, string> = {
   // ferramenta: node scripts/find-pad.mjs hangar 80). Trocar a arte OBRIGA a remedir.
   hangar: 'sprites/hangar.png',
 
+  // ─── OS QUATRO FUNDOS DA FASE 4 (Fatia 7, arte do Henrique) ───
+  // A jornada anatômica: o hangar engolido → a caixa torácica → o duto → a câmara do núcleo.
+  // Quem troca de um para o outro é o ROTEIRO (evento `cenario` no STAGE_4), não o Parallax.
+  //
+  // ⚠️ 384×216 = a resolução EXATA do jogo, ASSADA no arquivo
+  // (`scripts/instalar-fundos-f4.mjs`), e desenhados em escala 1. É a grade de pixel casando com
+  // a da tela que dá a PROFUNDIDADE — pintura esticada em runtime achata o fundo. Reduzir pode;
+  // AMPLIAR, nunca: se ficar pequena para o enquadramento, gere de novo maior.
+  //
+  // Sem placeholder: sem eles, o `interior` cai nas camadas procedurais de sempre.
+  paintBgF4a: 'sprites/paint-bg-f4-a.png',
+  paintBgF4b: 'sprites/paint-bg-f4-b.png',
+  paintBgF4c: 'sprites/paint-bg-f4-c.png',
+  paintBgF4d: 'sprites/paint-bg-f4-d.png',
+
   // O NÚCLEO: o coração blindado do Leviatã, chefão FINAL (Fase 4). Escolha do Henrique
   // (cf5b3e43, 128px → 122×122 instalado). ⚠️ A FERIDA (a zona vulnerável) é MEDIDA no PNG:
   // x=52..91 y=56..87 (node scripts/find-pad.mjs nucleo 0 — os vermelhos de y<52 são luzes da
