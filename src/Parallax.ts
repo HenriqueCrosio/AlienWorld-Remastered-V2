@@ -157,6 +157,12 @@ export class Parallax {
    * `setNebulaDensity`, à mão. Ver o comentário lá.
    */
   private nebulaPainting: Phaser.GameObjects.Image[] = [];
+
+  /** As duas cópias da pintura do interior (Fase 4). `setPintura` troca a textura delas. */
+  private pinturaF4: Phaser.GameObjects.Image[] = [];
+
+  /** A chave da pintura do interior que está na tela. A sonda da fatia cobra este valor. */
+  pinturaAtual: string | null = null;
   /**
    * A FAIXA DE CASCO DA FRENTE (Fase 3, Ato 2): o equivalente do `groundFront` da Fase 1. Ela
    * existe por um motivo só — esconder o PÉ dos props, que sem ela terminam numa borda reta e
@@ -278,36 +284,38 @@ export class Parallax {
    * fundo anuncia o verbo dela (precisão) antes de o primeiro corredor apertar.
    */
   private buildInterior(): void {
-    // A nebulosa pelas janelas: só fragmentos dela são visíveis (pelos buracos vazados), então
-    // ela pode ser esparsa — está ali para dar COR ao vazio, não para ser protagonista.
-    this.addLayer({
-      key: 'nebula3',
-      factor: 0.03,
-      baseY: 0,
-      depth: -96,
-      tint: 0xffffff,
-      tints: [0xb8c4e8, 0x8fa0c8, 0xe8d8c0],
-      alpha: 0.5,
-      scale: [1.6, 2.4],
-      gap: [180, 300],
-      terreno: false,
-      flutua: true,
-    });
-
-    // A PAREDE: hangar atrás de hangar, quase contínuo (gap < largura da arte). Tint frio e
-    // escuro — é fundo, e fundo distante é ESCURO (a mesma perspectiva aérea das montanhas).
-    this.addLayer({
-      key: 'hangar',
-      factor: 0.06,
-      baseY: 208,
-      depth: -90,
-      tint: 0x707a98,
-      tints: [0x707a98, 0x64708c, 0x7a82a0],
-      alpha: 0.95,
-      scale: [1.15, 1.3],
-      gap: [150, 180],
-      terreno: false,
-    });
+    // ─── A PINTURA DO INTERIOR (Fatia 7) ───
+    //
+    // A parede era o `hangar.png` repetido, COM JANELAS MOSTRANDO O ESPAÇO — o jogador acabava
+    // de ser engolido por uma garganta e a primeira coisa que via era uma parede de hangar com
+    // vista para a nebulosa. O lugar mentia sobre o que é.
+    //
+    // Agora é a pintura do Henrique, e ela TROCA ao longo da fase (ver `setPintura`): o hangar
+    // engolido → a caixa torácica → o duto → a câmara do núcleo. Quem manda na troca é o
+    // ROTEIRO (evento `cenario` no `STAGE_4`), não este arquivo.
+    //
+    // ⚠️ A `nebula3` saiu junto, e não por gosto: ela existia para aparecer PELAS JANELAS do
+    // hangar. Com uma pintura opaca na frente, ela era sprite gasto atrás de parede.
+    //
+    // ⚠️ ESCALA 1, SEMPRE. A pintura está assada em 384×216 (a resolução do jogo). É a grade de
+    // pixel casando com a da tela que dá a PROFUNDIDADE — esticar aqui achata o fundo.
+    //
+    // Duas cópias lado a lado, como o `paintBgF2`/`paintBgF3`, para a rolagem nunca mostrar
+    // buraco. Depth −96: atrás de tudo que é do interior, à frente do planeta (−97).
+    if (this.scene.textures.exists('paintBgF4a')) {
+      const w = (this.scene.textures.get('paintBgF4a').getSourceImage() as { width: number }).width;
+      for (let i = 0; i < 2; i++) {
+        this.pinturaF4.push(
+          this.scene.add
+            .image(i * w, 0, 'paintBgF4a')
+            .setOrigin(0, 0)
+            .setDepth(-96)
+            .setData('bgFactor', 0.02),
+        );
+      }
+      this.paintedBg.push(...this.pinturaF4);
+      this.pinturaAtual = 'paintBgF4a';
+    }
 
     // O CHÃO: a banda de placas do casco (receita da F3), sempre visível.
     this.addLayer({
