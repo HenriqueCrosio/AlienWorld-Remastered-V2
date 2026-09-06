@@ -1,0 +1,2 @@
+OBJECT_ID=3767577e-0582-4800-85bd-35b2929843d6
+próximo passo: node scripts/sheet.mjs 3767577e-0582-4800-85bd-35b2929843d6 scripts/_sheet-<nome>.png <índices...>

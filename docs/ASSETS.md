@@ -245,6 +245,154 @@ PixelLab  →  revisão manual (Aseprite: quantizar paleta, limpar bordas, ajust
 Manter os PNGs originais gerados em `assets/raw/` (fora do bundle) e os atlas em `assets/dist/`.
 Nunca editar o atlas na mão — reempacotar.
 
+## ⚠️ O TAMANHO DO SPRITE MORA NO ARQUIVO, NÃO NO `setScale()` (2026-09-02)
+
+O gerador entrega 128px num jogo de 216px de altura. Quando a peça precisa aparecer bem menor, a
+saída **não** é `setScale()` na cena: 128px de arte espremidos a cada quadro fazem a grade de pixel
+do sprite parar de casar com a da tela, e isso contraria a regra 3 daqui (*1 pixel = 1 pixel*) e a
+lei que o `paint-bg.mjs` já aplicava às pinturas.
+
+`scripts/reduzir-sprite.mjs <arquivo.png> <altura>` assa o tamanho no arquivo e **relimiariza o
+alpha**: a franja de alpha parcial que o lanczos cria na borda vira contorno fantasma sobre fundo
+escuro, então ela volta a ser 0 ou 255. O sprite resultante desenha em escala 1.
+
+⚠️ **A altura se DERIVA, não se escolhe.** Na cutscene 3 ela saiu do teto medido das janelas: elas
+acabam em y=132 e o pé mais ao fundo fica em 161, logo sobram 29px — e a peça mais alta do lote
+tinha 77px, dando o fator 0,36.
+
+⚠️ **Reinstalar do PixelLab REFAZ o arquivo em 128px.** Reduzir de novo depois, sempre.
+
+⚠️ **O que essa redução custa, e é honesto dizer:** o lanczos mistura tons no MIOLO da peça, então
+o arquivo reduzido pode carregar cores fora da paleta travada. A silhueta continua dura (o alpha é
+relimiarizado) e o resultado é pixel-perfeito na resolução em que é desenhado, mas quem for
+quantizar a paleta depois tem de fazê-lo **no arquivo reduzido**, não no de 128px.
+
+## ⚠️ A COR DO SPRITE TAMBÉM MORA NO ARQUIVO, NÃO NO `setTint()` (2026-09-03)
+
+A mesma lei da seção acima, um passo adiante. Quando uma peça do gerador chega fora da paleta do
+lugar, a saída **não** é `setTint()` na cena: o tint multiplica a textura inteira por **uma cor
+só** — ele não sabe separar o casco do miolo, e some com a única luz que a peça tem direito de ter.
+
+`scripts/_cut3/_paleta-familia.mjs <entrada.png> <saida.png>` assa a correção no arquivo em três
+operações, cada uma com um motivo:
+
+1. o **casco** fora de paleta gira de matiz para a família do cenário;
+2. o **miolo** de energia **mantém** o matiz, porque ele é o que a peça tem de luz legítima;
+3. **compressão de realce** acima de L=90 — é isso que tira o grito **sem escurecer o corpo**.
+
+⚠️ **O alvo se MEDE no cenário, não se escolhe.** A pintura da cutscene 3 tem luminância média
+**13,1**, e **só 31 pixels da tela inteira** passam de 110 — 0,05%. Esse é o teto prático do
+quadro. A criatura chegou com **média 31,8 e pico 207**; corrigida ficou em **30,6 / 132**. Repare
+que a **média mal se moveu**: o defeito quase nunca é o brilho geral da peça, é o **pico**.
+
+⚠️ **Matiz não é decoração, é semântica.** A criatura chegou com casco **teal** — que é
+`player 0x17a6bd`, a cor do JOGADOR. Um inimigo vestido da cor do jogador mente para quem olha. Já
+o miolo **rosa** ficou: é `enemyBright 0xe8306b`, paleta de inimigo, e está certo. **Antes de
+mexer numa cor, veja de quem ela é em `src/config.ts`.**
+
+## ⚠️ QUATRO LIÇÕES DA 2ª VOLTA DA CUTSCENE 3 (2026-09-04)
+
+Todas as quatro custaram trabalho refeito na mesma sessão. As três primeiras são irmãs da lição de
+02/09 acima: elas falham porque uma decisão foi tomada olhando UM caso e generalizada sem medir.
+
+### 1. A caixa do recorte é UMA por PEÇA, não uma por LOTE
+
+`install-anim.mjs` calcula a caixa união **de um lote**. Uma peça com DUAS animações — a garganta
+tem idle e morte — rodada duas vezes por ele ganha **duas caixas diferentes**, e o sprite SALTA no
+instante da troca. Na Cutscene 3 a troca acontece no impacto do torpedo: o único quadro da cena em
+que ninguém pode piscar.
+
+`scripts/_cut3/_instalar-garganta.mjs` existe por isso: ele baixa o estático e os dois lotes, limpa
+tudo, e calcula UMA caixa sobre o conjunto inteiro. **Peça com mais de uma animação precisa de um
+instalador que veja todas de uma vez.**
+
+### 2. Pico baixo NÃO é o mesmo que estar na família — quem manda é a MÉDIA
+
+A correção de 03/09 foi aferida numa peça que já chegava com **média 31,8**: ela gira o matiz e
+achata o pico, e por isso está escrito ali em cima que "a média mal se move". Isso virou uma
+suposição de que toda arte nova chegaria por volta de 32. **Medido em 04/09: os destroços vieram
+com média 50 a 69 e a primeira garganta com 37.** Contra uma pintura de média 13,1, eles ficaram
+com pico obediente (≤132) e mesmo assim **borrões claros colados na cena**.
+
+`paraFamilia()` em `scripts/_cut3/_paleta.mjs` fecha o buraco: resolve por bisseção o γ de uma
+curva de potência (L' = 255·(L/255)^γ) até a média cair no alvo, e só então aplica o teto.
+Potência, não ganho multiplicativo — ganho puro mata o contraste interno da peça.
+
+**A peça entra na família pela MÉDIA. O pico só evita que ela grite.**
+
+### 3. A faixa de matiz se MEDE na peça, não se assume
+
+A regra "casco teal = matiz 140°–215°" nasceu correta e virou lei. Em 04/09 o histograma de matiz
+da garganta mostrou que ela **não tem um único pixel abaixo de 200°**: a faixa pegava 2.600px e
+deixava intactos **4.300px de azul em 220–260** — o halo ciano que sobrava em volta dela na cena.
+Ciano é a cor do jogador, então o defeito era semântico, não só feio.
+
+O corte novo (265°) é o **vão medido** entre as duas massas: o azul acaba em 260, a carne começa em
+270. **Antes de aplicar uma faixa de matiz, rode o histograma da peça.**
+
+### 4. Nome de asset novo se confere ANTES de escrever no disco
+
+O plano batizou as peças de entulho de `destroco1..4`. O jogo **já tinha** `destroco`/`destroco2`/
+`destroco3` — o casco rasgado à deriva que as Fases 2 e 3 cospem como perigo (`DebrisSystem`). O
+instalador gravou `destroco-2.png` e `destroco-3.png` por cima da arte deles, e só o `tsc` acusou,
+pela chave duplicada no `ART` — depois de o disco já estar sobrescrito. Restaurado com
+`git checkout` e renomeado para `entulho1..4`.
+
+**`grep` no `ART` antes de escolher o nome. O typecheck avisa tarde demais.**
+
+## ⚠️ A LEI DE COR TEM DONO, E O DONO É QUEM DESENHOU (2026-09-05)
+
+Esta é a lição mais cara desta campanha, porque ela **desfaz** parte do que está escrito logo
+acima. Leia as duas juntas.
+
+### A faixa de matiz se confere contra o `COLORS`, não contra a memória
+
+A regra "o casco **teal** (140°–215°) gira para a ferrugem" nasceu com um motivo bom: *teal é
+`player 0x17a6bd`, a cor do JOGADOR, e um inimigo vestido da cor do jogador mente.* O motivo
+continua valendo. **A faixa não.**
+
+Medido em 05/09: o ciano do jogador é **matiz 188°**. O casco da criatura da Cutscene 3 está em
+**220–260°** — azul-índigo, que não é a cor de ninguém no jogo. A faixa 140–215 nasceu de outra
+peça e foi aplicada nesta sem medir; em 04/09 eu ainda a alarguei para 265° para matar um "halo
+azul" que era simplesmente **a cor da peça**.
+
+O resultado: **52% dos pixels do desenho do Henrique com o matiz girado**, saturação −23%, pico de
+207 para 105. Metade do brilho e outra cor. Ele jogou e perguntou *"por que o modelo que eu criei
+no PixelLab está estranho e sem cor no cenário?"* — e a resposta era essa.
+
+```bash
+# ANTES de aplicar qualquer faixa de matiz, rode o histograma da peça E compare com o COLORS:
+#   player 0x17a6bd → 188°   ·   enemy 0xa11347 → 337°   ·   hot 0xff8c1a → 31°
+```
+
+### E arte que o Henrique fez não se corrige sem perguntar
+
+A correção de paleta existe para peça **gerada**, que ninguém escolheu a dedo. Quando a peça é um
+objeto que **ele** desenhou e aprovou no PixelLab, mudar a cor dela é uma decisão de direção de
+arte, não um passo de pipeline. A garganta entra **crua** — só limpeza e recorte — por decisão
+dele: *"quero a cor que foi criada, a original, sem tint"*, com média 31,8 e pico 207 contra uma
+pintura de 13,1.
+
+**A regra:** o pipeline pode LIMPAR (xadrez, bordas opacas) e RECORTAR sem perguntar. Mudar
+tamanho ou cor de arte que ele fez, **pergunte**.
+
+## ⚠️ ANIMAÇÃO QUE NÃO SE VÊ É ANIMAÇÃO QUEBRADA (2026-09-05)
+
+O Henrique jogou e relatou: *"a animação de idle está funcionando na criatura. O da morte, não."*
+A sonda dizia o contrário — ela cobrava `currentAnim.key === 'garganta-morte'` e ficava verde.
+
+`scripts/_cut3/_diag-morte.mjs` amostrou a cena a cada 80ms e mostrou os **7 quadros passando**: a
+animação rodava. Em **480ms**, a 12fps, debaixo de um `explodeBig` de ~141px centrado numa criatura
+de 136×137 e desenhado ACIMA dela, com flash de tela e shake por cima.
+
+Não era defeito de animação, era defeito de **tempo e de oclusão**. Conserto: frameRate 12 → 5
+(1.040ms medidos), a explosão movida para o ponto de impacto com escala 0,7, e o flash de 220 →
+140ms.
+
+⚠️ **Um assert de "a animação ENTROU" não prova que ela é VISTA.** Para beat curto, meça a duração
+na tela e conte quem desenha por cima — é o que o `_diag-morte.mjs` faz, e ele fica na bancada
+para a próxima.
+
 ## Ordem de produção
 
 1. **M1-M3 rodam com placeholder** (retângulos coloridos). O jogo tem que estar divertido *antes* da arte.

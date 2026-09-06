@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-01)
+# HANDOFF — estado do projeto (2026-09-04)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -51,13 +51,14 @@ GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online
 que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele — playtestar e
 balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
 
-1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
-   (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A próxima é a **Fatia 6
-   (Cutscene 3: a queda no hangar do Leviatã)**, que ainda não tem spec nem plano: **começa pelo
-   BRAINSTORMING** — que já aconteceu. A Fatia 5 não deixou nada em aberto (a fusão da serpente,
-   o último item, fechou em `4848820`), e a **Fatia 6 já tem spec e plano aprovados, com zero
-   linha de código escrita**. Retome por
-   `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`.
+1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 6 estão FECHADAS** (a 4 = Cutscene 2 em
+   `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no hangar do Leviatã)
+   foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
+   levou duas voltas: a 1ª caiu em dois blocos (a nadadeira e o portão) e a 2ª passou por cinco
+   rodadas de ajuste com ele jogando. A branch `feat/cutscene3-visual` está empurrada para
+   `origin`. **A PRÓXIMA FRENTE É A FATIA 7 (Fase 4, o interior)** — e ela é diferente das
+   anteriores: ⚠️ **mexe em GEOMETRIA, não só em pintura**, e é a primeira que pode tocar o
+   `hangar.png` que seis fatias protegeram.
 2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
    (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
    fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
@@ -90,16 +91,20 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
-**Estado do repositório (2026-09-01, fim de sessão):** `main` com a **Fatia 5 mergeada**
-(`a28dd07`, `--no-ff`) mais o fechamento dela, tudo com push em `origin`
+**Estado do repositório (2026-09-05, fim de sessão):** `main` segue em `392eedf`, com a
+**Fatia 5 mergeada** (`a28dd07`, `--no-ff`). O remoto é `origin`
 (github.com/HenriqueCrosio/AlienWorld-Remastered-V2 — ⚠️ o remoto `legacy` é o repositório
-ANTIGO, não empurre nada para lá). Typecheck e build limpos; sondas verdes, incluindo as duas
-novas desta sessão (`_f3/probe-tween-agua-viva.mjs` e `_f1/probe-missil-colonia.mjs`).
+ANTIGO, **não empurre nada para lá**). A **Fatia 6 está na branch `feat/cutscene3-visual`**,
+**aprovada no teste jogado e EMPURRADA para `origin`**. Typecheck e build limpos; sondas verdes
+(`_cut3/probe-cut3-visual` com 50 asserts, `probe-interlude3`, `probe-stage4`, `probe-f3-visual`,
+`probe-menu`).
 
 ⚠️ **UM ASSERT BARULHENTO CONHECIDO, NÃO O AFROUXE:** o risco de emenda na faixa do casco
 (`probe-f3-visual`) reprova ~1 em 4 execuções. O ruído já existia antes das sombras novas —
 medido no código de `HEAD` sem o plantio. **Rode de novo antes de concluir.** Os outros dois do
-mesmo tipo são o rodapé do casco e a contagem de lança-mísseis (varia de 2 a 6).
+mesmo tipo são o rodapé do casco e a contagem de lança-mísseis (varia de 2 a 6 — e em
+2026-09-02 deu **8**, então a faixa real é mais larga do que este doc registrava; três execuções
+seguidas deram 8, 4 e 3). **Rode de novo antes de concluir; não afrouxe o assert.**
 
 **Saldo PixelLab: 1271 GERAÇÕES + $0.398 de crédito** (2026-07-20). Descoberta da sessão:
 no Tier 2, **animação v3 e key art pixflux custam 1 GERAÇÃO cada** (não USD) — animar é
@@ -487,7 +492,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 4 | Cutscene 2 — a doca do cinturão | ✅ mergeada (`ee4e2a0`) |
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
-| 6 | **Cutscene 3 — a queda no hangar** | 🟡 **spec e plano PRONTOS, código zero** — ver o START dela |
+| 6 | **Cutscene 3 — a queda no hangar** | 🟠 **TESTADA em 2026-09-03: 3 blocos aprovados, 2 reprovados.** 2ª volta especificada, **falta implementar** |
 | 7 | Fase 4 — o interior | ⬜ ⚠️ mexe em GEOMETRIA, não só em pintura (ver aviso acima) |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
@@ -790,35 +795,254 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 6 — a Cutscene 3, PLANEJADA E NÃO INICIADA (2026-09-01)
+## A FATIA 6 — a Cutscene 3, ✅ APROVADA NO TESTE JOGADO (2026-09-05)
 
-🟡 **Spec e plano aprovados, ZERO código.** Sem branch — a fatia não começou.
-**Retome por `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`.**
+✅ **O Henrique jogou e fechou: *"Agora sim. Podemos fechar essa etapa."*** Branch
+`feat/cutscene3-visual`, empurrada para `origin`. **Retome por
+`docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**.
 
-- Spec: `docs/superpowers/specs/2026-09-01-cutscene3-visual-design.md`
-- Plano: `docs/superpowers/plans/2026-09-01-cutscene3-visual.md` (5 tarefas)
+### O QUE A FATIA ENTREGOU, no estado final
 
-**O diagnóstico, capturado e não suposto** (`_cut3/ver-cena.mjs`): a parede da cutscene é o
-`hangar.png` de 160px desenhado duas vezes, e a repetição se vê — o mesmo arco/janela/pilar quatro
-vezes na tela. Não há segundo plano. E as **carcaças da frota engolida**, que o doc promete desde
-julho, são três borrões cinzas.
+| bloco | o que ficou |
+|---|---|
+| A garganta | a arte do Henrique (`15f111fd`), face **`east` espelhada em disco**, com as **animações que ELE fez** (11 quadros cada). Ampliada no arquivo para **97×171**, do topo da tela ao convés, traseira cortada 14px pela borda direita. **Cor CRUA** — média 34,1 / pico 207. |
+| O beat final | a nave pousa em x=200, sobe **reto**, dispara um **torpedo próprio** (`torpedoCut3`, 15×7 em código), a criatura morre em 1,04s, a cadeia corre 333→8 e a nave entra na boca **em tamanho cheio**, encolhendo só nos 220ms finais — e passa **com a boca ainda aberta**. |
+| O entulho | 4 peças biomecânicas (`entulho1..4`, 53 a 67px), tamanho e cor **assados no arquivo**, escala 1 e zero `setTint`. Média 30,0 / pico 91–97. |
+| As luzes | as 17 lâmpadas pintadas ganharam brilho aditivo na cor própria de cada uma; 14 respiram, 3 falham, e no colapso todas viram alarme. 3 emissores de faísca nas junções medidas. |
+| O portão | **saiu** — do disco, do `BootScene` e da cena. |
+| A nadadeira | **saiu**, depois de três versões reprovadas. Veredicto de ESCOPO, não de qualidade. |
+| A 3ª carcaça | **saiu**: ficava 100% atrás da criatura. O assert baixou de `>= 3` para `>= 2`. |
 
-**A pintura do Henrique já está versionada** (`assets/raw/paint-bg-cut3-original.png`, 1672×940):
-visceral e biomecânica, *"para passar esse ar de interior, sendo que a fase 4 já é no interior do
-Leviatã"*. Três peças do PixelLab entram por cima: a **nadadeira peitoral** (ideia dele — ela
-atravessa as janelas mostrando o Leviatã remando no nado espacial), as **carcaças** e o **portão**.
+**Sondas, todas verdes:** `probe-cut3-visual` (50 asserts), `probe-interlude3`, `probe-stage4`,
+`probe-f3-visual`, `probe-menu`. `npm run build` limpo. **A fronteira intacta:** `hangar.png`
+160×160 sem uma alteração, e os `destroco` das Fases 2/3 idem.
 
-⚠️ **A FRONTEIRA DESTA FATIA:** o `hangar.png` **não se toca** — ele é a parede de fundo da FASE 4,
-que é a Fatia 7. A pintura entra como asset NOVO.
+**PixelLab:** ~107 gerações de 5.000 no ciclo (que vira em 2026-10-04). As animações finais são
+dele e custaram **zero**.
 
-⚠️ **A PINTURA CHEGOU COM AS JANELAS MARCADAS, MAS NÃO VAZADAS** (3 canais, sem alpha; o xadrez
-pintado como pixels opacos). O key foi medido: janelas em lum 73 / sat 0,8, convés e faixa a 0% —
-mas **20,5% da parede cai na mesma faixa neutra**, então o vazamento é por SEMENTES, nunca por
-limiar global.
+### O 1º TESTE JOGADO DA 2ª VOLTA (2026-09-05) — o que ele mandou mudar
 
-⚠️ **A DIREÇÃO DA NADADEIRA (direita → esquerda) FOI DERIVADA E CONFIRMADA**, nunca assumida — a
-Fase 3 cravou que o corpo fica fora do quadro à direita e que ele nada no mesmo sentido da nave.
-Assumir direção sem perguntar reprovou quatro versões do rabo.
+O Henrique jogou a cena e reportou três coisas. Nenhuma delas era o que a sonda media.
+
+**1. A nadadeira saiu da árvore.** *"Retire completamente a nadadeira, de novo ficou horrível e não
+quero ficar dias resolvendo algo desse porte. Isso não faz diferença no final das contas."* Ela
+passou por TRÊS versões (arte original, arte refeita com o `leviathan-swim-sheet` como estilo, e o
+movimento trocado de travessia por pivô) e as três foram reprovadas jogando. **O veredicto foi de
+ESCOPO, não de qualidade** — uma peça que só aparece por um buraco de 116×89 durante 4 segundos não
+paga três rodadas de julgamento. Saíram a textura, a chave no `BootScene`, o método, as constantes
+do pivô e o bloco de assert. ⚠️ Ficou um comentário no lugar da chave: **antes de repor qualquer
+coisa "do lado de fora das janelas", pergunte a ele se vale a rodada.**
+
+**2. A cor da criatura era minha, não dele.** *"Por que o modelo que eu criei no PixelLab está
+estranho e sem cor no cenário?"* Medido: **52% dos pixels com o matiz girado** de azul-petróleo
+para lodo, saturação −23%, pico de 207 para 105. A lei de cor do spec de 03/09 fazia isso, e o
+motivo escrito nela — *"teal é `player 0x17a6bd`, a cor do jogador"* — **não se sustentava nesta
+peça**: o ciano do jogador é matiz 188° e o casco dela está em 220–260°. Pior, em 04/09 eu alarguei
+a faixa de 215 para 265 para matar um "halo azul" que era a cor da peça. Decisão dele: *"quero a
+cor que foi criada, a original, sem tint"* — a garganta entra **crua**, média 31,8 / pico 207.
+A lição inteira está em `docs/ASSETS.md`.
+
+**3. As animações EAST dele entraram.** *"Quero testar minhas criações"* — ele fez duas animações
+novas no objeto `15f111fd`, face `east`, 11 quadros cada. Instaladas e **espelhadas em disco**
+(`--flip` no instalador, antes da limpeza e da caixa união; nunca `setFlipX` na cena). A criatura
+passou de frontal (136×137) para **perfil (78×138)** e encara a ESQUERDA, de onde a nave vem. ⚠️ E
+a BOCA deixou de ser o centro da peça: medida no miolo magenta, ela cai em **(326, 100)** com o
+corpo em x=340 — o torpedo, a cadeia e a nave engolida miram nela, não no centro. Zero geração.
+
+**4. A morte não estava quebrada, estava escondida.** *"A animação de idle está funcionando na
+criatura. O da morte, não."* `scripts/_cut3/_diag-morte.mjs` pegou os 7 quadros passando — em
+**480ms**, a 12fps, debaixo de um `explodeBig` de ~141px centrado na criatura de 136×137. Conserto:
+frameRate 12 → 5 (**1.040ms** medidos), explosão movida para o ponto de impacto com escala 0,7,
+flash de 220 → 140ms. ⚠️ **Um assert de "a animação ENTROU" não prova que ela é VISTA** — a sonda
+estava verde o tempo todo.
+
+**5. A coreografia da nave, em três pedidos.** *"Quero que a nave pouse um pouco antes (...) a nave
+voa para trás um pouco antes de atirar"* — ela parava em x=258 (número de julho, do tempo em que o
+vão era entre os montes de entulho) e por isso precisava RECUAR para o tiro ler. Pousando em **200**
+a decolagem é **vertical** e o recuo sumiu. *"A nave está ficando pequena cedo demais"* — posição,
+escala e alpha estavam num tween só, então ela encolhia a viagem inteira e lia como se AFASTANDO.
+Viraram **dois** tweens: a viagem em tamanho 1, o encolhimento nos 220ms finais. E *"quero que a
+nave passe antes da criatura fechar a boca"* — medindo a abertura quadro a quadro, a goela fecha no
+**8º de 11** (84px de altura caem para 28px), o que a 5fps é 1.600ms; a nave chegava em 2.400ms e
+atravessava dentes cerrados. O atraso virou **derivado**: `bocaFechaEm − margem − viagem`.
+
+**6. O tamanho, em duas rodadas.** *"Consegue expandir a criatura para que ela ocupe todo o lado da
+tela da direita? Assim dá a sensação que a nave precisa atravessar aquela estrutura."* A arte tem
+138px contra os 216 da tela, então isso exige AMPLIAR — e ampliar cobra. Mostrei as quatro opções
+na cena e a grade em zoom 6×; ele escolheu a coluna cheia (122×216), testou, e voltou para a
+**97×171**: *"o que melhor vai combinar sem perder muita resolução é a letra C"*.
+
+⚠️ **É A PRIMEIRA VEZ QUE A LEI "1px de arte = 1px de jogo" CEDE NESTA CAMPANHA**, e foi decisão
+dele com o custo na mesa: o fator 1,239 não é inteiro, então a grade fica irregular. As
+alternativas eram 2× inteiro (grade uniforme, pixels o dobro dos da pintura) ou regerar no PixelLab
+(pixel-perfeito, ~80 gerações, e ele PERDERIA as animações que fez). **Mas continua assado no
+arquivo** (`--altura` no instalador): a cena desenha em escala 1, e o assert que impede `setScale`
+segue de pé.
+
+⚠️ **E A ÂNCORA FOI PARA O CANTO INFERIOR DIREITO**, por causa do `roundPixels: true`. A peça ficou
+com largura ÍMPAR (97): ancorada pelo centro, o x precisaria ser `X,5` para as bordas caírem em
+pixels inteiros, e o arredondamento deixaria uma coluna de artefato na borda. Ancorada pela
+traseira, o x **é** a borda direita (398) — sempre inteiro. **Largura ímpar + `roundPixels` = âncora
+no canto, nunca no centro.**
+
+### ⚠️ A CORREÇÃO DE RUMO QUE CUSTOU 40 GERAÇÕES — leia antes de gerar arte "melhor"
+
+O spec da 2ª volta mandava **regerar** a criatura em 191px, porque o enquadramento aprovado pedia
+altura inteira e a arte do Henrique tem 131px de conteúdo — esticar quebraria a grade de pixel. Eu
+segui o spec e gerei duas versões novas (40 gerações), sem perguntar.
+
+O Henrique cortou no meio: *"eu disse para usar o `15f111fd` exatamente porque ele já estava feito
+(...) era para animar o que eu já fiz"*. Ele tinha razão, e a saída era simples — **o enquadramento
+é que devia ceder para a arte, não o contrário**. A criatura entrou em 136×137 nativos, pisando no
+convés, e o número 191 do spec morreu.
+
+**A lição:** quando o spec manda REGERAR arte que o Henrique já fez, isso é uma decisão dele, não
+uma consequência técnica. Pergunte antes de gastar. O custo aqui foi baixo (40 de 5.000), mas a
+regra vale para o caso em que não for.
+
+⚠️ **E a morte perdeu dois quadros por defeito do gerador:** os índices 7 e 8 vieram com uma cruz
+marrom no meio da boca, e como a anim não repete ela CONGELAVA nesse quadro — a cruz ficava na tela
+do impacto até o fim da cena. Cortados no disco (`gargantaMorteAnim: 7`). A caixa foi calculada com
+os 19 quadros originais, então apagar arquivos não desalinha nada.
+
+- Spec da 1ª volta: `docs/superpowers/specs/2026-09-01-cutscene3-visual-design.md`
+- Plano da 1ª volta: `docs/superpowers/plans/2026-09-01-cutscene3-visual.md` (5 tarefas)
+- **Spec da 2ª volta: `docs/superpowers/specs/2026-09-03-cutscene3-garganta-design.md`**
+
+**O que entrou:** a pintura do Henrique no lugar do azulejo repetido (`3f2cd3a`), o convés
+re-medido (`2fe0d8c`), a nadadeira peitoral atravessando as janelas (`f616bc1`), as três carcaças
+da frota engolida (`ad0496d`) e o portão que sela a boca (`06dbe68`). 15 arquivos, +501/−70, e 60
+gerações do PixelLab em três lotes.
+
+⚠️ **A FRONTEIRA FOI RESPEITADA, e conferida por quatro caminhos a cada rodada:** o `hangar.png`
+continua **160×160**, com `git status` limpo, `usamHangar: 0` na sonda da fatia e `probe-stage4`
+verde de ponta a ponta. Ele é a parede de fundo da FASE 4, que é a Fatia 7; a pintura entrou como
+asset NOVO (`paintBgCut3`).
+
+### O CONVÉS FOI RE-MEDIDO, E O NÚMERO ANTIGO ERA DE OUTRA ARTE
+
+`DECK_ROW = 138` e `DECK_Y = 150` descreviam o azulejo de 160px. Na pintura, a faixa de perigo
+amarela e preta está em **y = 171..173** (152/152/161px quentes na largura, contra 12 e 5 nas
+vizinhas): **`DECK_Y = 171`**, e a nave passou a assentar em 164. `ART_W`, `ART_H`, `SCALE`,
+`HANGAR_X`, `WALL_ROW`, `DECK_ROW`, o getter `hangarY` e o `DEPTH_PISO` saíram todos — quem os
+usava foi apontado pelo **typecheck**, não pela memória.
+
+⚠️ **E a `probe-interlude3` acusou na hora**, porque cobrava `y≈143`. Foi **corrigida para o número
+medido, não afrouxada** (`23c804b`): a tolerância continua sendo 4px. Sonda existente que encosta
+na mudança se confere; afrouxar o limite para o verde voltar é o que transforma sonda em enfeite.
+
+### A LIÇÃO NOVA DESTA SESSÃO — o tamanho do sprite mora no ARQUIVO, não no `setScale()`
+
+O PixelLab entrega 128px num jogo de 216px de altura. As carcaças em tamanho nativo **tapavam as
+janelas** — justamente por onde a nadadeira precisa aparecer, que é o efeito que sustenta a cena.
+O plano não previa escala nenhuma.
+
+O tamanho saiu de medição: as janelas acabam em **y=132** (medido no alpha da pintura) e o plantio
+mais ao fundo põe o pé em 161, então sobram **29px**; a carcaça mais alta tinha 77px, e 29/77 =
+0,376 — daí o fator **0,36**.
+
+⚠️ **Mas `setScale(0,36)` seria a resposta errada**, e essa é a lição: 128px de arte espremidos a
+cada quadro fazem a grade de pixel do sprite parar de casar com a da tela, contra a lei de **1px de
+arte = 1px de jogo** que o `paint-bg.mjs` já documentava para as pinturas. Nasceu o
+`scripts/reduzir-sprite.mjs`, que assa o tamanho no arquivo e **relimiariza o alpha** — a franja
+que o lanczos cria na borda vira contorno fantasma sobre fundo escuro. A cena voltou a desenhar em
+escala 1. ⚠️ **Reinstalar do PixelLab refaz o arquivo em 128px: reduzir de novo depois.**
+
+### DUAS ARMADILHAS DE SONDA QUE ESTA CENA COBROU
+
+**1. O colapso não acontece sozinho.** Ele só dispara depois de o jogador ESCOLHER uma nave no
+painel. Uma sonda que apenas espera nunca vê o portão, e o assert ficaria vermelho para sempre por
+um motivo que não é o defeito — a sonda tem de **jogar** a cena. E a espera passou a ser pelo
+**estado** (o painel aberto), não pelo relógio: espera cega é a receita de falha intermitente.
+
+**2. O portão nasce em alpha 0 e entra por tween de 260ms.** Lido no instante em que o objeto
+aparece, ele foi flagrado **no meio do fade** (0,32 numa execução) e reprovou uma cena correta. O
+assert julga o estado FINAL, então a sonda espera o tween fechar antes de medir.
+
+### O PLANO ERROU SETE PONTOS, E TODOS FORAM RESOLVIDOS MEDINDO
+
+Além dos quatro acima: o limiar de amarelo que ele sugeria **não achava a faixa de perigo** (a
+pintura é mais escura do que ele supunha — o limiar passou a ser derivado do pixel mais quente da
+própria arte), e o retângulo de amostra `PAREDE` acusava 15,3% de vazamento porque **ele próprio
+invadia a janela 2** (trocado por 5 patches de parede real, todos 0,0%, mais um teste forte: zero
+pixel transparente fora das cinco janelas medidas).
+
+⚠️ **A lição por trás das duas é a mesma:** número que vem escrito no plano também é número
+herdado. Ele vale tanto quanto o do código antigo — **confira medindo antes de usar**.
+
+### O VEREDICTO CHEGOU (teste jogado, 2026-09-03)
+
+O Henrique jogou a cena inteira, incluindo a escolha da nave. **Três blocos passaram, dois foram
+reprovados.**
+
+| bloco | veredicto |
+|---|---|
+| 1 · A cena inteira | ✅ *"O cenário está ótimo, o mais escuro passa a sensação exata de dark sci-fi."* |
+| 2 · A nadadeira | ❌ **"Ficou péssima."** Arte errada **e** movimento errado |
+| 3 · As carcaças | ✅ *"Bem criado e combinou com o conjunto"* |
+| 4 · O portão | ❌ **Descartado.** *"Totalmente sem nexo, sem contexto"* |
+
+Os **quatro pontos que esperavam julgamento ficam todos como estão** — os blocos 1 e 3 passaram
+inteiros, e o portão, dono do 4º ponto, saiu da cena.
+
+#### A NADADEIRA FALHOU POR DUAS CAUSAS SEPARADAS, e só uma era de arte
+
+**A arte foi gerada SEM REFERÊNCIA.** Lado a lado com o `rabo-leviata.png` (canônico, aprovado
+depois de quatro reprovações), ela não compartilha **um único traço**: o rabo é placa escura
+segmentada com costura de energia laranja; o que entrou é **asa de morcego**, com membrana e dedos
+ósseos. Não é o mesmo bicho.
+
+**O movimento estava errado por conta própria, e isso é código.** Ela **atravessava a tela** como
+um asteroide. Nadadeira presa num corpo **não viaja — ela PIVOTA** em torno de um ombro. Daí a
+leitura exata do Henrique: *"passou desgarrada, apenas passando como se fosse um objeto perdido no
+espaço"*.
+
+⚠️ **A referência certa já existe na árvore e é canônica:** o **`leviathan-swim-sheet` quadro 0**
+— o Leviatã do key art do Menu — já traz a peitoral desenhada **lisa, escura, ardósia, sem
+membrana e sem dedos**. Gerar arte de Leviatã sem passar esse quadro como referência é repetir o
+erro.
+
+#### O PORTÃO FALHOU POR SEM MOLDURA E SEM CAUSA
+
+*"Apenas surge um asset sem relação nenhuma com a arte, direção do jogo, e as pedras caem sobre
+ele."* Duas falhas somadas: **sem moldura**, colado sobre parede pintada; e **sem causa**, porque
+o entulho caía só porque um banner dizia que estava caindo.
+
+⚠️ **A lição, e ela vale para a Fatia 7:** um asset novo sobre a pintura precisa de **moldura**
+(um buraco que o emoldure, ou estar declaradamente NA FRENTE da parede ocluindo-a) **e de causa
+visível na tela**. Sem as duas, ele lê como colagem por mais bem gerado que seja.
+
+### A 2ª VOLTA — o que foi especificado em 2026-09-03
+
+Spec completo em **`docs/superpowers/specs/2026-09-03-cutscene3-garganta-design.md`**. Em resumo:
+
+- **Entra A GARGANTA** — o objeto PixelLab `15f111fd` (a boca com miolo em espiral) como criatura
+  viva ocupando o terço direito, **altura inteira, dentro do hangar e na frente da parede**. A
+  nave escolhida atira nela, ela explode, e a nave **entra na boca e some** — a Fase 4, que é o
+  interior, começa exatamente onde ela sumiu.
+- **A cadeia de explosões inverte**: nasce na criatura e corre **direita → esquerda**. O entulho
+  deixa de ser causa e vira **consequência do que você viu acontecer**.
+- **Os destroços viram biomecânicos** (4 peças novas), nas **mesmas 9 posições medidas** — só a
+  ordem de queda inverte, acompanhando a onda.
+- **A nadadeira volta**, com a referência canônica e com **pivô no lugar de travessia**.
+- **As 17 lâmpadas pintadas passam a respirar** (14), a falhar (3) e a virar alarme no colapso —
+  100% código, zero arte.
+- **Sai** `portao-hangar.png`, a entrada `portaoHangar` do loader e o bloco do portão em
+  `selarBoca()`.
+
+⚠️ **AS LUZES DO HANGAR JÁ ESTÃO PINTADAS NA ARTE.** São **17 aglomerados, 186 pixels no total**
+— toda a energia elétrica do quadro. Fazer piscar não é arte nova: é medir por cor e pôr brilho
+aditivo em cima das posições medidas, cada um tingido com a cor própria daquela lâmpada.
+
+⚠️ **A CRIATURA PRECISA DE CORREÇÃO DE PALETA, e ela é assada no ARQUIVO.** Como veio, tem casco
+**teal** — que é a cor do JOGADOR (`player 0x17a6bd`) — e **pico de luminância 207**, num quadro
+cuja média é **13,1** e onde **só 31 pixels passam de 110**. Corrigida (teal → ferrugem, realces
+comprimidos), fica em **média 30,6 / pico 132**: a média mal se move, sai só o grito. O miolo rosa
+**fica** — é `enemyBright`, paleta de inimigo.
+
+⚠️ **O MÍSSIL DO BEAT FINAL NÃO PODE SER O `bolt2` TINGIDO.** É o padrão que o Henrique já
+reprovou duas vezes (*"um tiro magenta igual, sem característica nenhuma"*), o mesmo defeito
+anotado em `BossCapitania.ts:578`.
 
 ---
 

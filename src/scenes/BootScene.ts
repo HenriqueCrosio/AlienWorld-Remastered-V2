@@ -69,6 +69,17 @@ const FRAMES: Record<string, number> = {
   aranhaJumpAnim: 9,
   aguaVivaAnim: 9,
 
+  // A GARGANTA da Cutscene 3: 9 quadros por animação (o v3 do PixelLab guarda o quadro de
+  // referência como frame 0, então frame_count=8 grava 9 em disco).
+  gargantaIdleAnim: 11,
+  // ⚠️ A MORTE TEM 7, NÃO 9, E OS DOIS QUE SAÍRAM SAÍRAM POR DEFEITO DA ARTE. O gerador devolveu
+  // os dois últimos quadros com um artefato — uma cruz marrom clara no meio da boca, do nada. E
+  // como esta animação NÃO repete (`loop: false`), ela CONGELA no último quadro: a cruz ficaria na
+  // tela do impacto até o fim da cena. Cortados no disco, a morte termina onde ela devia terminar,
+  // no buraco preto. ⚠️ A caixa do recorte foi calculada com os 19 quadros ORIGINAIS, então
+  // apagar dois arquivos não desalinha nada — o sprite não salta.
+  gargantaMorteAnim: 11,
+
   shipJatoAnim: 9,
   shipVerdeAnim: 9,
   shipCremeAnim: 9,
@@ -160,6 +171,22 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // A ÁGUA-VIVA do Ato 1 da Fase 3: o sino contrai e os tentáculos arrastam. 6fps de propósito —
   // ela é a única coisa LENTA da nebulosa, e pulsar rápido a transformaria em mais uma nave.
   { key: 'aguaviva-drift', prefix: 'aguaVivaAnim', frameRate: 6 },
+
+  // ─── A GARGANTA (cutscene 3) ───
+  // Ela respira a 6, a mesma cadência da água-viva: é a coisa LENTA do quadro. Pulsar rápido
+  // faria dela mais um inimigo, e ela não é inimigo — ela é o LUGAR, e está ali desde o primeiro
+  // quadro da cena.
+  { key: 'garganta-idle', prefix: 'gargantaIdleAnim', frameRate: 6 },
+  // A MORTE toca UMA vez, a 5 — e o número foi MEDIDO, não escolhido.
+  //
+  // ⚠️ ELA ESTAVA A 12 E O HENRIQUE NÃO CONSEGUIA VÊ-LA. Ele jogou e relatou "o idle funciona, o
+  // da morte não". A animação rodava: `scripts/_cut3/_diag-morte.mjs` amostrou a cena a cada 80ms
+  // e pegou os 7 quadros passando — em **480ms**, debaixo de um `explodeBig` que cobria a criatura
+  // inteira, de um flash de tela e de um shake. Não era um defeito de animação, era um defeito de
+  // TEMPO: meio segundo escondido não existe para quem está jogando.
+  //
+  // 7 quadros a 5fps = 1,4s. Ela morre devagar, que é o beat: a boca dá um flare e apaga.
+  { key: 'garganta-morte', prefix: 'gargantaMorteAnim', frameRate: 5, loop: false },
 
   // ─── As propulsões do róster v2. O mesmo 12 da nave base: o motor é o mesmo verbo. ───
   { key: 'ship-jato-thrust', prefix: 'shipJatoAnim', frameRate: 12 },
@@ -633,6 +660,67 @@ const ART: Record<string, string> = {
   // arte = 1px de jogo, posicionada em y=-27. A pintura é do Henrique.
   paintBgCut2: 'sprites/paint-bg-cut2.png',
 
+  // ⚠️ A PINTURA DO HANGAR DA CUTSCENE 3 — asset NOVO, e ela NÃO substitui o `hangar.png`.
+  // Aquele arquivo é também a parede de fundo da FASE 4 (`Parallax` modo `interior`): trocá-lo
+  // faria a Fatia 6 mudar a Fase 4 sem ninguém pedir, e a Fase 4 é a Fatia 7. A mesma lei que o
+  // cooldown dos canhões já custou nesta campanha.
+  //
+  // As cinco janelas são vazadas por `scripts/instalar-cut3.mjs` (preenchimento a partir de
+  // sementes, nunca limiar global — 20,5% da parede cai na mesma faixa neutra do xadrez).
+  paintBgCut3: 'sprites/paint-bg-cut3.png',
+
+  // ⚠️ A NADADEIRA PEITORAL SAIU DA ÁRVORE EM 2026-09-05, e sai daqui como aviso.
+  //
+  // Ela era ideia do Henrique e passou por TRÊS versões: a original, a refeita com o
+  // `leviathan-swim-sheet` como referência de estilo, e o movimento trocado de travessia por pivô.
+  // As três foram reprovadas por ele jogando. O veredicto final foi de ESCOPO, não de qualidade:
+  // *"não quero ficar dias resolvendo algo desse porte. Isso não faz diferença no final das
+  // contas."*
+  //
+  // ⚠️ SE ALGUÉM PENSAR EM RESSUSCITAR: o custo real não é a arte, é o número de rodadas de
+  // julgamento. Uma peça que só aparece por um buraco de 116×89 durante 4 segundos não paga três
+  // idas ao gerador. Antes de repor qualquer coisa "do lado de fora das janelas", pergunte a ele
+  // se vale a rodada.
+
+  // ⚠️ AS CARCAÇAS DA FROTA ENGOLIDA (cutscene 3). O HANDOFF promete desde julho que "o hangar
+  // guarda carcaças da frota engolida — a Frota Morta da F2, vista por dentro", e que o painel de
+  // naves existe porque "você não compra uma nave, você SALVA uma nave irmã do cemitério". Até
+  // 2026-09-01 isso só existia em comentário: no convés havia três borrões cinzas genéricos.
+  carcaca1: 'sprites/carcaca-1.png',
+  carcaca2: 'sprites/carcaca-2.png',
+  carcaca3: 'sprites/carcaca-3.png',
+
+  // ⚠️ OS DESTROÇOS BIOMECÂNICOS que muram a saída (cutscene 3, 2ª volta). Eles substituem
+  // `asteroid`/`asteroid2`/`asteroid3` com `setTint(0x39415c)` — três pedras genéricas de 24px
+  // esticadas 2,5× e pintadas de azul. Na descrição do Henrique: restos de fuselagem com traços
+  // biomecânicos, ossos envoltos de tecnologia e carne, que é o padrão que a arte do jogo já tem.
+  //
+  // ⚠️ O TAMANHO E A COR ESTÃO ASSADOS NOS ARQUIVOS (scripts/_cut3/_instalar-destrocos.mjs): a
+  // cena desenha em escala 1 e sem tint nenhum.
+  //
+  // ⚠️ E A CHAVE É `entulho`, NÃO `destroco`. O jogo JÁ TEM `destroco`/`destroco2`/`destroco3`
+  // (linha ~498): o casco rasgado à deriva que as Fases 2 e 3 cospem como perigo
+  // (`DebrisSystem.HAZARDS`). Usar aquele nome aqui sobrescreveu a arte deles em disco antes de o
+  // typecheck acusar a chave duplicada. Nome de asset novo se confere ANTES de escrever no disco.
+  entulho1: 'sprites/entulho-1.png',
+  entulho2: 'sprites/entulho-2.png',
+  entulho3: 'sprites/entulho-3.png',
+  entulho4: 'sprites/entulho-4.png',
+
+  // ⚠️ A GARGANTA — a criatura que substituiu o portão (2ª volta da Fatia 6, 2026-09-04).
+  //
+  // O portão foi reprovado no teste jogado por DUAS coisas somadas: sem MOLDURA (colado sobre
+  // parede pintada) e sem CAUSA (o entulho caía porque um banner dizia que estava caindo). A
+  // garganta escapa das duas: ela não finge ser parede, ela é um CORPO dentro do hangar, na
+  // frente da parede, ocluindo as janelas #4 e #5 — e é a explosão dela que derruba o teto, então
+  // o banner vira legenda do que o jogador viu, não a causa.
+  //
+  // ⚠️ ELA EXISTE DESDE O PRIMEIRO QUADRO. Respira durante a queda, a derrapagem e o painel de
+  // escolha. Surgir foi exatamente a queixa contra o portão.
+  gargantaCut3: 'sprites/garganta.png',
+  ...animFrames('gargantaIdleAnim', 'garganta-idle-anim'),
+  ...animFrames('gargantaMorteAnim', 'garganta-morte-anim'),
+
   // FUNDO PINTADO da Fase 2 (a colônia de mineração do cinturão, arte do Henrique): camada NOVA
   // no `buildSpace()`, atrás até da nebulosa procedural — NÃO substitui `Parallax('espaco')` (a
   // lua que encolhe e o Leviatã que cresce continuam vindo da nebulosa/planeta existentes).
@@ -725,6 +813,7 @@ export class BootScene extends Phaser.Scene {
     this.makeTracerRound();
     this.makeShots();
     this.makeShotsChefes();
+    this.makeTorpedo();
     this.makePuff();
     this.makeSpark();
     this.makeColonyLight();
@@ -1349,6 +1438,41 @@ export class BootScene extends Phaser.Scene {
       g.fillStyle(0xffffff, 1);
       g.fillRect(5, 4, 1, 11);
     });
+  }
+
+  /**
+   * O TORPEDO DA CUTSCENE 3 — a única arma que o jogador dispara numa interlude.
+   *
+   * ⚠️ ELE NÃO É O `bolt2` TINGIDO, E ESSA É A RAZÃO DE ELE EXISTIR. Esse padrão — mesmo asset,
+   * cor trocada — já foi reprovado duas vezes nesta campanha ("um tiro magenta igual, sem
+   * característica nenhuma"), e é o defeito anotado em BossCapitania.ts:578. Um tiro carrega uma
+   * informação só, e essa informação é a SILHUETA.
+   *
+   * ⚠️ E ELE É CIANO, NÃO MAGENTA, DE PROPÓSITO. O jogo ensina `magenta = isto te mata`; este é o
+   * único tiro da campanha que sai DA nave do jogador numa cutscene, então ele veste a paleta
+   * dele (`player`/`playerGlow`). O rastro laranja atrás é o motor, não a munição.
+   *
+   * 15×7, apontando para a DIREITA — a garganta está à direita da nave.
+   */
+  private makeTorpedo(): void {
+    const g = this.make.graphics({ x: 0, y: 0 }, false);
+
+    // O rastro: o motor ardendo atrás, que é o que separa "torpedo" de "traço".
+    g.fillStyle(COLORS.hot, 1);
+    g.fillRect(0, 3, 3, 1);
+    // O casco, e as duas aletas que dão a silhueta de corpo lançado.
+    g.fillStyle(COLORS.metalDark, 1);
+    g.fillRect(2, 2, 9, 3);
+    g.fillRect(2, 1, 3, 1);
+    g.fillRect(2, 5, 3, 1);
+    // A ogiva.
+    g.fillStyle(COLORS.player, 1);
+    g.fillRect(11, 2, 2, 3);
+    g.fillStyle(COLORS.playerGlow, 1);
+    g.fillRect(13, 3, 2, 1);
+
+    g.generateTexture('torpedoCut3', 15, 7);
+    g.destroy();
   }
 
   /**

@@ -23,3 +23,17 @@ Thumbs.db
 .env.pixellab
 .env.local
 .env*.local
+
+# BANCADA: os PNGs de conferência das fatias do passe visual. Os SCRIPTS são versionados; as
+# imagens que eles geram, não — elas são de olhar uma vez e jogar fora, e somam megabytes.
+# ⚠️ Isto existe porque em 2026-09-05 um `git add scripts/` engoliu ~15 MB de tiras de conferência
+# de três fatias antigas de uma vez. Regra que só mora no documento não impede o acidente.
+scripts/_cut2/*.png
+scripts/_cut3/*.png
+scripts/_f1/*.png
+scripts/_f3/*.png
+scripts/_f3/av/
+scripts/_f3/novos/*.png
+
+# Config local do Claude Code (a de projeto, settings.json, VAI versionada)
+.claude/settings.local.json

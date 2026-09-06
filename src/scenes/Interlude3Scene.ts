@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, GAME_WIDTH } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
@@ -34,10 +34,11 @@ import type { HandlingMode } from './GameScene';
  *
  * ─── AS JANELAS SÃO VAZADAS, E ISSO É O TRUQUE DA CENA ───
  *
- * `hangar.png` passou pelo `scripts/vazar-janelas.mjs`: os janelões não têm nada pintado atrás.
- * O starfield e o parallax REAIS do jogo vivem em depth baixo e aparecem ATRAVÉS delas — o
- * espaço lá fora se mexe de verdade. O convés da arte também é parcialmente transparente: o chão
- * é um retângulo desenhado POR TRÁS (DEPTH_PISO), o que dá controle total da cor dele.
+ * A pintura passou pelo `scripts/instalar-cut3.mjs`: as cinco janelas foram VAZADAS por
+ * preenchimento a partir de sementes (nunca limiar global — 20,5% da parede cai na mesma faixa
+ * neutra do xadrez), e não têm nada pintado atrás. O starfield e o parallax REAIS do jogo vivem
+ * em depth baixo e aparecem ATRAVÉS delas — o espaço lá fora se mexe de verdade. O convés já vem
+ * PINTADO e opaco, então o retângulo de piso que existia por trás não é mais necessário.
  */
 export class Interlude3Scene extends Phaser.Scene {
   private starfield!: Starfield;
@@ -45,6 +46,10 @@ export class Interlude3Scene extends Phaser.Scene {
   private fx!: Fx;
 
   private ship!: Phaser.GameObjects.Sprite;
+  /** A criatura que substituiu o portão. Existe desde `create()`; morre no beat final. */
+  private garganta?: Phaser.GameObjects.Sprite;
+  /** Os 17 brilhos aditivos, um por lâmpada pintada na arte. */
+  private luzes: Phaser.GameObjects.Rectangle[] = [];
   private banner!: Phaser.GameObjects.Text;
   private panel: ShipPanel | null = null;
 
@@ -58,47 +63,233 @@ export class Interlude3Scene extends Phaser.Scene {
   private naveId: string = DEFAULT_SHIP;
   private proxima = 4;
   private done = false;
+  /** Ligado no impacto: daí em diante as 17 lâmpadas viram alarme (ver `pulsarLampadas`). */
+  alarme = false;
+  /** Os x dos 10 estouros da cadeia, na ordem — a sonda lê esta lista. */
+  cadeiaX: number[] = [];
   private t = 0;
   /** 'entrando' = voo cambaleante (o update anima); depois disso os tweens assumem. */
   private fase: 'entrando' | 'chao' = 'entrando';
 
-  // ─── A GEOMETRIA DO HANGAR — medida em `hangar.png` (160×160, a arte que o Henrique escolheu) ─
+  // ─── A GEOMETRIA DO HANGAR — medida na PINTURA (384×216), não mais no `hangar.png` ───
   //
-  // A linha do convés é a FAIXA VERMELHA CONTÍNUA da arte: `node scripts/find-pad.mjs hangar 80`
-  // acha vermelho de largura total em y=138..141 (os vermelhos de y=96..113 são as luminárias da
-  // PAREDE; y=149+ são as lâmpadas do avental inferior). DECK_ROW é o topo dessa faixa.
-  // WALL_ROW é onde a parede encontra o convés (base das luminárias) — o piso desenhado começa aí.
-  private static readonly ART_W = 160;
-  private static readonly ART_H = 160;
-  private static readonly DECK_ROW = 138;
-  private static readonly WALL_ROW = 97;
-
-  /** ×1.5, como a doca: a arte domina a metade direita e sangra por cima e por baixo. */
-  private static readonly SCALE = 1.5;
+  // ⚠️ OS NÚMEROS ANTIGOS ERAM DA OUTRA ARTE. `ART_W/ART_H` (160), `SCALE` (1,5), `HANGAR_X`
+  // (264), `WALL_ROW` (97) e `DECK_ROW` (138) descreviam o azulejo de 160px desenhado duas vezes.
+  // A pintura é 1:1 com a tela, então só sobra a linha do convés.
+  //
+  // `DECK_Y` é o TOPO DA FAIXA DE PERIGO amarela e preta, medida por cor na pintura instalada
+  // (y=171..173 acusam 152/152/161px quentes na largura; as linhas vizinhas caem para 12 e 5) e
+  // conferida marcando a linha na arte (scripts/_cut3/conves-medido.png). É onde a nave encosta:
+  // ela repousa em DECK_Y−7 e quica em DECK_Y−13.
+  private static readonly DECK_Y = 171;
 
   /**
-   * O centro da arte fica à DIREITA (x=264: a arte cobre 144..384, sem fresta na borda). A metade
-   * esquerda da tela é a BOCA do hangar — aberta para o espaço, é por ela que a nave entra caindo
-   * e é ELA que colapsa no fim. A composição é a história: entrada escancarada, depois nenhuma.
+   * A FAIXA DAS JANELAS, medida no alpha da pintura instalada: os pixels vazados vão de y=44 a
+   * y=132, 89px de altura. É por onde o espaço lá fora aparece, e é nela que as junções de faísca
+   * se penduram.
+   *
+   * ⚠️ ELA EXISTIA PARA A NADADEIRA, QUE FOI REMOVIDA EM 2026-09-05 (ver o comentário de classe).
+   * A medição fica porque é ela que define a faixa vazada da pintura — quem quiser pôr qualquer
+   * coisa "do lado de fora" precisa dela, e medi-la de novo custaria a mesma sessão duas vezes.
    */
-  private static readonly HANGAR_X = 264;
+  private static readonly JANELAS = { topo: 44, centro: 88, base: 132 } as const;
 
-  /** A altura do convés NA TELA (a mesma régua da doca: PAD_Y=150). */
-  private static readonly DECK_Y = 150;
+  /**
+   * A GARGANTA — a criatura que substituiu o portão.
+   *
+   * ⚠️ A ARTE É A DO HENRIQUE, o objeto PixelLab `15f111fd`, e a decisão dele em 2026-09-04 foi
+   * usar AQUELE arquivo, não um redesenho: a peça entra em TAMANHO NATIVO, sem um pixel de estica.
+   *
+   * ⚠️ E A FACE MUDOU DE `south` PARA `east` EM 2026-09-05, quando ele fez as animações dele. De
+   * frente a criatura encarava a câmera; de PERFIL ela encara a ESQUERDA — que é de onde a nave
+   * vem. A cena ganhou com isso: ela deixa de olhar para fora da tela e passa a olhar para o
+   * jogador chegando. ⚠️ As animações vêm apontando para a DIREITA e são espelhadas EM DISCO pelo
+   * `--flip` do instalador, nunca com `setFlipX` na cena.
+   *
+   * ⚠️ E A PEÇA É AMPLIADA NO ARQUIVO, de 78×138 para **97×171** (`--altura 171` no instalador).
+   * Isso CEDE a lei "1px de arte = 1px de jogo", e foi escolha dele com o custo na mesa: o fator
+   * 1,239 não é inteiro, então a grade fica irregular (uns pixels 1×1, outros 2×1). Ele viu isso em
+   * zoom 6× (`scripts/_cut3/_grade-zoom.png`) e escolheu assim, para ela *"ocupar todo o lado da
+   * tela da direita (...) dá a sensação que a nave precisa atravessar aquela estrutura"*.
+   *
+   * ⚠️ E A ALTURA É 171, NÃO 216. Ele testou primeiro a coluna cheia (122×216, do topo ao fundo) e
+   * voltou para esta: *"o que melhor vai combinar sem perder muita resolução é a letra C"*. Com 171
+   * ela vai do topo da tela até o convés e continua PISANDO nele, em vez de cobrir a faixa de
+   * perigo e a estrutura de baixo — e o esticão é menor, 1,239 contra 1,565.
+   *
+   * ⚠️ Mas continua ASSADO no arquivo: a cena desenha em escala 1.
+   *
+   * Com a traseira em 398 e 97 de largura, ela cobre x=301..398 — sai 14px pela borda direita e
+   * OCLUI a janela #5 (336..376) por inteiro. Ela não está embutida na parede, ela está DENTRO do
+   * hangar, NA FRENTE dela — objeto ocluindo parede é render, não colagem, e é por aí que ela
+   * escapa do defeito que matou o portão.
+   *
+   * ⚠️ EXISTIA UM `mira` (o x para onde a nave RECUAVA antes de atirar) e ele SAIU em 2026-09-05.
+   * Ele só era necessário porque a nave parava em x=258, encostada na criatura, e um tiro disparado
+   * de cima do alvo não se lê como tiro. O recuo consertava o sintoma e criava outro: o Henrique
+   * jogou e viu a nave *"voar para trás um pouco antes de atirar"*. O conserto certo foi mover o
+   * POUSO para 200 (ver `VAO_DA_NAVE`) — aí a distância já existe e a decolagem é reta.
+   */
+  /**
+   * O TAMANHO E O CORTE. `LARG`/`ALT` são as dimensões do arquivo já ampliado, e `CORTE` é quanto
+   * ela sai pela borda direita — o Henrique pediu *"a traseira encostada na tela lateral direita,
+   * ligeiramente cortada (a nave vai passar pela boca, não quero sobras atrás)"*.
+   *
+   * O 14 foi escolhido olhando três opções (8, 14 e 20) na cena: com 8 ela ainda tem parede atrás,
+   * com 20 começa a perder corpo. **Mudou a arte? Só mexa em `LARG`/`ALT` — o resto se recalcula.**
+   */
+  private static readonly GARGANTA_LARG = 97;
+  private static readonly GARGANTA_ALT = 171;
+  private static readonly GARGANTA_CORTE = 14;
 
-  // O piso fica ABAIXO da arte (70) para os detalhes dela (carcaças, faixa de risco, lâmpadas)
-  // desenharem por cima; o ENTULHO do colapso fica ACIMA da arte (ele mura a metade esquerda —
-  // na frente das janelas espelhadas); a nave (80) passa na frente de tudo.
-  private static readonly DEPTH_PISO = 64;
-  private static readonly DEPTH_HANGAR = 70;
-  private static readonly DEPTH_ENTULHO = 72;
-  private static readonly DEPTH_NAVE = 80;
+  /**
+   * ⚠️ ELA É ANCORADA PELA TRASEIRA, NÃO PELO CENTRO — e isso é exigência do `roundPixels: true`
+   * do jogo, não estilo.
+   *
+   * A peça tem largura ÍMPAR (97). Com origem no centro, o x precisaria ser `X,5` para as bordas
+   * caírem em pixels inteiros; o `roundPixels` arredondaria isso e a peça escorregaria meio pixel,
+   * o que num sprite pixel-perfeito aparece como uma coluna de artefato na borda.
+   *
+   * Ancorando pela traseira o x É a borda direita — sempre inteiro — e o conceito fica igual ao
+   * que o Henrique pediu: *"a traseira encostada na tela lateral direita, ligeiramente cortada"*.
+   * Aqui isso é literal: `x = GAME_WIDTH + CORTE`.
+   */
+  private static readonly GARGANTA_X = GAME_WIDTH + Interlude3Scene.GARGANTA_CORTE;
 
-  /** Y do centro do sprite que põe DECK_ROW exatamente em DECK_Y. */
-  private static get hangarY(): number {
-    const meio = Interlude3Scene.ART_H / 2;
-    return Interlude3Scene.DECK_Y + (meio - Interlude3Scene.DECK_ROW) * Interlude3Scene.SCALE;
+  private static readonly GARGANTA = {
+    /** A TRASEIRA da peça (a borda direita) — só posiciona o sprite. Ver GARGANTA_X. */
+    x: Interlude3Scene.GARGANTA_X,
+    /**
+     * ⚠️ O PÉ DELA É O FUNDO DA TELA, NÃO O CONVÉS, desde 2026-09-05. Ele pediu que ela ocupasse
+     * *"todo o lado da tela da direita"*, e a peça foi ampliada no arquivo para 122×216 — a altura
+     * inteira do quadro. Ancorada em `GAME_HEIGHT`, ela vai do topo ao fundo e passa POR CIMA da
+     * faixa de perigo e da estrutura de baixo do convés.
+     *
+     * Isso é deliberado e ele viu o custo antes de escolher: ela deixa de "pisar" no convés e vira
+     * uma parede — que é exatamente a leitura pedida, *"a sensação de que a nave precisa
+     * atravessar aquela estrutura para continuar no interior do Leviatã"*.
+     */
+    base: Interlude3Scene.DECK_Y,
+    /**
+     * ⚠️ A BOCA NÃO É O CENTRO DA PEÇA, e passou a não ser em 2026-09-05, quando as animações
+     * `east` do Henrique entraram. De frente (a face `south`) os dois coincidiam e um número só
+     * bastava; de PERFIL a criatura tem 78px de largura e a goela fica descentrada.
+     *
+     * Medido no miolo magenta da peça instalada (os 120px saturados e claros — a única luz que ela
+     * tem): centroide local (32, 83) numa peça 97×171. Daí os deslocamentos abaixo, relativos à
+     * TRASEIRA e ao PÉ — que é o que faz a boca acompanhar sozinha quando a peça se move.
+     *
+     * ⚠️ NÃO CRAVE `bocaX` COMO NÚMERO. Ele já foi 326 e virou 345 quando a criatura encostou na
+     * borda; um literal aqui dessincroniza no primeiro ajuste de posição, e o sintoma seria o
+     * torpedo acertando 14px ao lado do buraco — dentro do corpo, e portanto quase invisível.
+     *
+     * É para AQUI que o torpedo vai, que a cadeia nasce e que a nave é engolida.
+     */
+    bocaX: Interlude3Scene.GARGANTA_X - Interlude3Scene.GARGANTA_LARG + 32,
+    bocaY: Interlude3Scene.DECK_Y - Interlude3Scene.GARGANTA_ALT + 83,
+  } as const;
+
+  /**
+   * A ANIMAÇÃO DE MORTE, medida quadro a quadro em `public/sprites/garganta-morte-anim-*.png`.
+   *
+   * ⚠️ `fechaNoQuadro` NÃO É ESTIMATIVA. A abertura da boca (a caixa dos pixels claros e saturados
+   * do interior) mede 84px de altura nos quadros 1–3 e despenca para **28px no quadro 8**, ficando
+   * assim até o fim. É ali que ela fecha, e é esse número que manda no beat da nave.
+   */
+  private static readonly MORTE = { fps: 5, quadros: 11, fechaNoQuadro: 8 } as const;
+
+  /** Quando, em ms depois do impacto, a boca fecha. */
+  private static get bocaFechaEm(): number {
+    return (Interlude3Scene.MORTE.fechaNoQuadro / Interlude3Scene.MORTE.fps) * 1000;
   }
+
+  /**
+   * A CADEIA — 10 estouros correndo da GARGANTA até a boca por onde a nave entrou.
+   *
+   * ⚠️ ELA INVERTEU DE SENTIDO, E O SENTIDO É A CAUSA. Na 1ª volta a cadeia corria só na metade
+   * esquerda, com x e y SORTEADOS, e nascia de um banner. Agora ela nasce NA CRIATURA que o
+   * jogador acabou de estourar e corre dali até a entrada: a onda tem origem, e a origem é o tiro
+   * dele.
+   *
+   * ⚠️ E TUDO AQUI É DERIVADO DO ÍNDICE. O sorteio saiu porque a sonda fotografa a cena — e
+   * porque uma onda com jitter aleatório não lê como onda, lê como pipoca.
+   */
+  private static readonly CADEIA = { n: 10, x0: Interlude3Scene.GARGANTA.bocaX, x1: 8, t0: 200, passo: 140 } as const;
+
+  /**
+   * O ENTULHO QUE MURA A BOCA — `[x, yFinal, textura, ângulo]`.
+   *
+   * ⚠️ AS 9 POSIÇÕES SÃO AS MEDIDAS DA 1ª VOLTA e NÃO mudam: elas foram escolhidas para empilhar
+   * uma parede que fecha a abertura, e a sonda fotografa a cena — posição sorteada não se
+   * reproduz.
+   *
+   * ⚠️ O QUE INVERTEU FOI A ORDEM, e as DUAS leis convivem. As FIADAS continuam de baixo para
+   * cima (pilha que começa pelo topo é chuva, não desabamento — 2026-07-19). Dentro de cada
+   * fiada, as peças agora entram da DIREITA para a ESQUERDA, acompanhando a cadeia que acabou de
+   * passar por elas. Antes era esquerda → direita, contra a onda.
+   *
+   * ⚠️ SEM `setScale` E SEM `setTint`. Eram `asteroid`/`asteroid2`/`asteroid3` — pedras genéricas
+   * de 24px esticadas 2,2 a 2,8× e multiplicadas por um azul só. Agora o tamanho (53 a 67px, os
+   * mesmos que aquelas escalas davam na tela) e a cor estão ASSADOS no arquivo, e a cena desenha
+   * em escala 1.
+   */
+  private static readonly ENTULHO: ReadonlyArray<readonly [number, number, string, number]> = [
+    [112, 141, 'entulho3', 32], [66, 146, 'entulho2', -20], [22, 142, 'entulho1', 12],
+    [132, 100, 'entulho4', -28], [90, 108, 'entulho1', 24], [40, 104, 'entulho2', -8],
+    [108, 62, 'entulho3', -14], [58, 66, 'entulho4', 16],
+    [78, 30, 'entulho2', 8],
+  ];
+
+  /**
+   * AS 17 LÂMPADAS QUE JÁ ESTÃO PINTADAS NA ARTE — `[x, y, w, h, cor própria]`.
+   *
+   * ⚠️ "FAZER AS LUZES PISCAREM" NÃO É ARTE NOVA NESTA CENA. Elas estão dentro do
+   * `paint-bg-cut3.png`, e o que falta é intensidade. Medidas por
+   * `node scripts/_cut3/_medir-lampadas.mjs` (2026-09-03, reconferido em 04/09): 17 aglomerados,
+   * **186 pixels no total** — é literalmente toda a energia elétrica do quadro. A pintura é
+   * espelhada, então elas saem em pares (L1↔L3, L2↔L4, L5↔L6, L7↔L12, L8↔L13, L9↔L10, L11↔L14).
+   *
+   * ⚠️ CADA UMA NA COR DELA. Um tint único para as 17 apagaria a variação que a pintura já tem.
+   */
+  private static readonly LAMPADAS: ReadonlyArray<readonly [number, number, number, number, number]> = [
+    [88, 145, 10, 2, 0x962e24], [45, 19, 9, 2, 0x7f4020], [297, 145, 8, 2, 0x953025],
+    [339, 19, 8, 2, 0x84431f], [30, 184, 7, 2, 0x994631], [354, 184, 7, 2, 0x9e4831],
+    [353, 147, 4, 4, 0x984232], [138, 185, 4, 4, 0x9c4736], [225, 37, 6, 3, 0x914221],
+    [159, 37, 5, 3, 0x93421c], [106, 47, 3, 4, 0x8a3a17], [31, 147, 3, 4, 0xaa5540],
+    [246, 185, 5, 2, 0xa7573e], [278, 47, 2, 4, 0x9d4d23], [239, 146, 3, 3, 0x99461e],
+    [145, 146, 2, 3, 0xa04c20], [298, 156, 5, 3, 0x651b18],
+  ];
+
+  /**
+   * AS TRÊS DE MAU CONTATO — escolha FIXA por índice, gravada aqui, nunca sorteada.
+   * A última delas (índice 16, `0x651b18`) é a mais escura das 17: ela já parece meio morta na
+   * pintura, e é a que menos custa apagar.
+   */
+  private static readonly LAMPADAS_FALHAS: readonly number[] = [6, 11, 16];
+
+  /**
+   * AS TRÊS JUNÇÕES QUE FAÍSCAM. Os x saem das PAREDES entre as janelas medidas, não do olho: a
+   * #2 acaba em 95 e a #3 começa em 134 → 115; a #3 acaba em 249 e a #4 começa em 288 → 268; o
+   * pilar entre a #1 e a #2 vai de 48 a 63 → 55. Os y são as bordas da faixa vazada (`JANELAS`).
+   */
+  private static readonly JUNCOES: ReadonlyArray<readonly [number, number]> = [
+    [115, Interlude3Scene.JANELAS.topo],
+    [268, Interlude3Scene.JANELAS.topo],
+    [55, Interlude3Scene.JANELAS.base],
+  ];
+
+  // A pintura (70) traz o próprio convés, então o retângulo de piso que ficava atrás dela
+  // (DEPTH_PISO 64) saiu junto com o azulejo. O ENTULHO do colapso fica ACIMA dela (ele mura a
+  // metade esquerda, na frente das janelas); a nave (80) passa na frente de tudo.
+  private static readonly DEPTH_HANGAR = 70;
+  // O brilho das lâmpadas fica logo acima da pintura e ABAIXO da garganta: as que caem atrás
+  // dela somem sozinhas, sem uma linha de código pedindo.
+  private static readonly DEPTH_LUZ = 70.5;
+  private static readonly DEPTH_ENTULHO = 72;
+  // A GARGANTA fica ACIMA da pintura e do entulho, e ABAIXO da nave: ela é um corpo dentro do
+  // hangar, e a nave passa na frente dele.
+  private static readonly DEPTH_GARGANTA = 75;
+  private static readonly DEPTH_NAVE = 80;
 
   constructor() {
     super('Interlude3');
@@ -112,6 +303,9 @@ export class Interlude3Scene extends Phaser.Scene {
     this.proxima = data.stage ?? 4;
     this.done = false;
     this.panel = null;
+    this.alarme = false;
+    this.cadeiaX = [];
+    this.luzes = [];
     this.t = 0;
     this.fase = 'entrando';
 
@@ -129,6 +323,10 @@ export class Interlude3Scene extends Phaser.Scene {
     this.fx = new Fx(this);
 
     this.construirHangar();
+    this.plantarCarcacas();
+    this.plantarGarganta();
+    this.acenderLampadas();
+    this.faiscar();
 
     // A nave chega DANIFICADA. A fumaça segue o casco; as fagulhas só ligam na derrapagem.
     const chegada = SHIPS[this.naveId];
@@ -193,44 +391,227 @@ export class Interlude3Scene extends Phaser.Scene {
   }
 
   /**
-   * O CENÁRIO — a arte DUAS vezes: `[espelhada | arte]`, o truque do chão da Fase 1.
+   * O CENÁRIO — UMA pintura, não mais o azulejo repetido.
    *
-   * A arte tem 240px na tela e a tela tem 384: sozinha, ela deixava METADE da tela vazia — e a
-   * "boca aberta para o espaço" lia como fim do desenho, não como abertura (feedback do
-   * Henrique, 2026-07-19). A cópia ESPELHADA cobre a esquerda com emenda invisível (espelho não
-   * tem costura), os janelões continuam, e o anel da arte vira um PORTÃO DUPLO no centro. A
-   * entrada por onde a nave veio fica implícita fora da tela, à esquerda — e é aquela metade
-   * que o entulho do colapso mura no fim.
+   * A parede era `hangar.png` (160×160) desenhado duas vezes a 1,5×, `[espelhada | arte]`. O
+   * truque resolvia a tela vazia, mas a repetição se via: o mesmo arco, a mesma janela e o mesmo
+   * pilar quatro vezes. A pintura do Henrique é um quadro largo e ASSIMÉTRICO de 384×216 — 1px de
+   * arte = 1px de jogo, sem emenda para esconder.
    *
-   * O piso é desenhado POR TRÁS das duas cópias (o convés da arte é transparente de origem).
+   * ⚠️ E O `hangar.png` CONTINUA EXISTINDO, intocado: ele é a parede de fundo da FASE 4
+   * (`Parallax` modo `interior`), que é a Fatia 7. Esta cena só deixou de usá-lo.
+   *
+   * O piso desenhado por trás também saiu: a pintura entrega o convés, a faixa de perigo e a
+   * banda escura de baixo dela mesma.
    */
+  /**
+   * O PLANTIO DAS CARCAÇAS — a régua é a que a Fase 3 pagou (`TerrainSystem.PLANTIO`).
+   *
+   * ⚠️ PÉ SORTEADO COM SALTO MÍNIMO GARANTIDO POR CONSTRUÇÃO, nunca por probabilidade. Sorteio
+   * uniforme puro dá dois vizinhos a 1px de diferença e a fila volta — o olho não compara uma
+   * peça com a média da faixa, compara com a VIZINHA. A Fase 3 mediu isso: oito props saíram
+   * entre 191 e 199 numa execução.
+   *
+   * ⚠️ E ELAS SÃO CENÁRIO: sem corpo físico, sem colisão. A nave derrapa e para em x≈258, um vão
+   * escolhido a dedo na revisão de 2026-07-19 justamente para ela não parar dentro do monte de
+   * metal e sumir. Plantar uma carcaça ali refaria aquele defeito — daí o `VAO_DA_NAVE`.
+   *
+   * ⚠️ O TAMANHO É DERIVADO DO TETO DAS JANELAS, e está ASSADO NO ARQUIVO — o plano não previa
+   * nenhum dos dois. O gerador entrega 128px num jogo de 216px de altura: em tamanho nativo, uma
+   * carcaça sozinha cobriria a parede e taparia as janelas — justamente por onde a NADADEIRA
+   * precisa aparecer, que é o efeito que sustenta a cena. A conta: as janelas terminam em y=132
+   * (medido no alpha da pintura) e o plantio mais ao fundo põe o pé em DECK_Y−10 = 161, então
+   * sobram 29px. A mais alta do lote tinha 77px, e 29/77 = 0,376 — daí o fator 0,36, que deixa
+   * folga. Elas ficam com 41×25, 47×24 e 39×28, contra os 30×22 da nave do jogador: maiores que
+   * ela, como naves de guerra engolidas devem ser, sem comer o quadro.
+   *
+   * ⚠️ E A REDUÇÃO É DO ARQUIVO, NÃO `setScale()`. A lei do projeto é 1px de arte = 1px de jogo;
+   * um setScale(0,36) deixaria 128px de arte sendo espremidos a cada quadro, e a grade de pixel
+   * do sprite pararia de casar com a da tela. `scripts/reduzir-sprite.mjs` assa o tamanho e
+   * relimiariza o alpha (a franja do lanczos vira contorno fantasma sobre fundo escuro).
+   * ⚠️ Reinstalar do PixelLab REFAZ o arquivo em 128px — reduzir de novo depois.
+   */
+  private static readonly CARCACAS = { fundo: -10, frente: 4, saltoMin: 4 } as const;
+  /**
+   * ⚠️ ELA PARAVA EM 258 E FOI PUXADA PARA 200 EM 2026-09-05, por pedido do Henrique jogando:
+   * *"quero que a nave pouse um pouco antes (...) se ela pousa antes, a decolagem pode ficar mais
+   * vertical e natural"*.
+   *
+   * O 258 vinha de 2026-07-19 e era o vão entre os dois montes de entulho — uma decisão sobre o
+   * ENTULHO, tomada antes de a garganta existir. Com a criatura ocupando x≥262, parar em 258
+   * obrigava a nave a RECUAR antes de atirar, e o recuo lia como ela voando de ré. Parando em 200
+   * ela sobe RETO: o `colapso()` não mexe mais no `x`.
+   *
+   * As folgas continuam boas: 50px da carcaça mais próxima (x=150, o mínimo é 40) e 47px da borda
+   * da criatura. E o `raio` é o mesmo — é ele que mantém as carcaças fora do vão.
+   */
+  private static readonly VAO_DA_NAVE = { x: 200, raio: 40 } as const;
+
+  private plantarCarcacas(): void {
+    const artes = ['carcaca1', 'carcaca2', 'carcaca3'].filter((k) => this.textures.exists(k));
+    if (!artes.length) return;
+
+    const { fundo, frente, saltoMin } = Interlude3Scene.CARCACAS;
+    // ⚠️ ERAM TRÊS, E A TERCEIRA (x=330) CAIU EM 2026-09-04. A garganta cobre x=235..426: a peça
+    // ficava 100% atrás dela, invisível — arte aprovada no teste jogado sendo desenhada para
+    // ninguém. Medido em `scripts/_cut3/_mock-garganta.png`; decidido pelo Henrique com as três
+    // saídas na mesa (mover a carcaça, mover a nave, ou cortar). O convés livre acaba em x≈235.
+    const xs = [64, 150].filter(
+      (x) => Math.abs(x - Interlude3Scene.VAO_DA_NAVE.x) > Interlude3Scene.VAO_DA_NAVE.raio,
+    );
+
+    let ultimo = 0;
+    for (let i = 0; i < xs.length; i++) {
+      // O salto mínimo é garantia de construção: sorteia dentro do que SOBRA, em vez de tentar de
+      // novo até dar certo — laço de recusa com teto às vezes estoura e devolve altura repetida.
+      let pe: number;
+      if (ultimo === 0) {
+        pe = Math.round(fundo + Math.random() * (frente - fundo));
+      } else {
+        const abaixo = Math.max(0, ultimo - saltoMin - fundo + 1);
+        const acima = Math.max(0, frente - (ultimo + saltoMin) + 1);
+        const n = Math.floor(Math.random() * (abaixo + acima));
+        pe = n < abaixo ? fundo + n : ultimo + saltoMin + (n - abaixo);
+      }
+      ultimo = pe;
+
+      const y = Interlude3Scene.DECK_Y + pe;
+      const c = this.add
+        .image(xs[i], y, artes[i % artes.length])
+        .setOrigin(0.5, 1)
+        // Quem está plantado mais à FRENTE (pé maior) desenha por cima. Sem isto, a ordem seria
+        // decidida pela ordem de criação, ou seja, por acaso.
+        .setDepth(Interlude3Scene.DEPTH_HANGAR + 1 + (pe - fundo) * 0.01)
+        .setName('carcacaCut3');
+
+      // A SOMBRA DE CONTATO: escurecimento puro, nunca glow — a regra do projeto é que o que está
+      // perto do olho entra em sombra, jamais em luz. Ela tem que TRANSBORDAR a base (1,35 da
+      // largura) e ficar 1px ABAIXO do pé: mais estreita que a peça, ela desenha inteira atrás do
+      // dono e não sobra um pixel na tela. Foi assim na 1ª versão do prop de casco.
+      const sombra = this.add
+        .ellipse(c.x, y + 1, Math.round(c.displayWidth * 1.35), 6, 0x000000, 0.5)
+        .setDepth(c.depth - 0.001)
+        .setName('sombraCarcaca');
+      c.once('destroy', () => sombra.destroy());
+    }
+  }
+
+  /**
+   * A GARGANTA, plantada no primeiro quadro.
+   *
+   * ⚠️ ELA NÃO SURGE. Respira durante a queda, a derrapagem e o painel de escolha inteiro — a
+   * queixa exata contra o portão foi "apenas surge um asset sem relação nenhuma com a arte".
+   * Um corpo que já estava lá quando você caiu não surge: você é que chegou.
+   *
+   * ⚠️ ANCORADA PELO PÉ, não pelo centro nem pelo topo. A linha do convés (`DECK_Y`) é um número
+   * MEDIDO na pintura; a altura da criatura é o que o arquivo tiver. Ancorar pelo topo faria ela
+   * flutuar acima ou afundar no convés a cada reinstalação da peça — o pé é o único ponto que a
+   * cena conhece de verdade. É a mesma âncora das carcaças, e pelo mesmo motivo.
+   */
+  private plantarGarganta(): void {
+    if (!this.textures.exists('gargantaCut3')) return;
+
+    this.garganta = this.add
+      .sprite(Interlude3Scene.GARGANTA.x, Interlude3Scene.GARGANTA.base, 'gargantaCut3')
+      // ⚠️ ÂNCORA NO CANTO INFERIOR DIREITO — a TRASEIRA e o PÉ, os dois pontos que a cena conhece
+      // de verdade. Ver `GARGANTA_X`: com largura ímpar (97) e `roundPixels: true`, ancorar pelo
+      // centro cairia em meio pixel e deixaria uma coluna de artefato na borda.
+      .setOrigin(1, 1)
+      .setDepth(Interlude3Scene.DEPTH_GARGANTA)
+      .setName('gargantaCut3');
+
+    if (this.anims.exists('garganta-idle')) this.garganta.play('garganta-idle');
+  }
+
+  /**
+   * O BRILHO ADITIVO em cima de cada lâmpada pintada. O retângulo é 2px maior que a lâmpada em
+   * cada eixo: o vazamento de 1px em volta é o que faz ler como BULBO em vez de adesivo.
+   */
+  private acenderLampadas(): void {
+    this.luzes = Interlude3Scene.LAMPADAS.map(([x, y, w, h, cor]) =>
+      this.add
+        .rectangle(x, y, w + 2, h + 2, cor)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(Interlude3Scene.DEPTH_LUZ)
+        .setAlpha(0.35)
+        .setName('lampadaCut3'),
+    );
+  }
+
+  /**
+   * O PULSO — chamado do `update`, e PÚBLICO porque a sonda o chama duas vezes no mesmo tick para
+   * provar que ele é determinístico.
+   *
+   * ⚠️ FASE E SEMENTE SÃO DERIVADAS DO ÍNDICE, NUNCA SORTEADAS. A sonda compara quadros; um
+   * `Math.random()` aqui a quebraria, e a cena deixaria de se reproduzir entre execuções.
+   */
+  pulsarLampadas(): void {
+    for (let i = 0; i < this.luzes.length; i++) {
+      const luz = this.luzes[i];
+
+      if (this.alarme) {
+        // NO COLAPSO TODAS VIRAM ALARME: pulso rápido em uníssono, e a cor sai da lâmpada e vai
+        // para o `enemy`. O quadro inteiro passa a dizer a mesma coisa ao mesmo tempo.
+        luz.setFillStyle(COLORS.enemy);
+        luz.setAlpha(0.25 + Math.abs(Math.sin(this.t * 7)) * 0.6);
+        continue;
+      }
+
+      if (Interlude3Scene.LAMPADAS_FALHAS.includes(i)) {
+        // MAU CONTATO: duas senoides incomensuráveis se multiplicando. Irregular ao olho, e
+        // IDÊNTICA a cada execução — que é exatamente o que a sonda precisa.
+        const s = Math.sin(this.t * 11.3 + i * 2.7) * Math.sin(this.t * 4.1 + i);
+        luz.setAlpha(s > 0.15 ? 0.5 : s > -0.4 ? 0.08 : 0);
+        continue;
+      }
+
+      // AS 14 QUE RESPIRAM, entre alpha 0,15 e 0,55, cada uma na sua fase e no seu ritmo.
+      const fase = (i * Math.PI * 2) / Interlude3Scene.LAMPADAS.length;
+      const vel = 1.1 + (i % 5) * 0.13;
+      luz.setAlpha(0.35 + Math.sin(this.t * vel + fase) * 0.2);
+    }
+  }
+
+  /**
+   * AS FAÍSCAS das três junções da parede. Curtas, laranja, caindo — é metal cedendo, não fogo.
+   *
+   * ⚠️ INTERVALO E QUANTIDADE DERIVADOS DO ÍNDICE (2,2s / 2,9s / 3,6s e 3 / 4 / 5 partículas). O
+   * olho lê "de vez em quando, em pontos diferentes"; a sonda lê a MESMA cena toda vez.
+   */
+  private faiscar(): void {
+    Interlude3Scene.JUNCOES.forEach(([x, y], i) => {
+      const em = this.add
+        .particles(x, y, 'spark', {
+          lifespan: { min: 220, max: 520 },
+          speedX: { min: -12, max: 12 },
+          speedY: { min: 10, max: 46 },
+          gravityY: 90,
+          scale: { start: 1, end: 0 },
+          tint: [COLORS.hot, COLORS.hotBright],
+          blendMode: 'ADD',
+          emitting: false,
+        })
+        .setDepth(Interlude3Scene.DEPTH_LUZ)
+        .setName('faiscaCut3');
+
+      this.time.addEvent({
+        delay: 2200 + i * 700,
+        loop: true,
+        startAt: i * 400,
+        callback: () => {
+          if (!this.done) em.explode(3 + i, x, y);
+        },
+      });
+    });
+  }
+
   private construirHangar(): void {
-    // O piso: da base da parede (WALL_ROW) até fora da tela. Azul-profundo, mais escuro que o
-    // primeiro plano das fases — é interior, e a luz aqui é das lâmpadas, não do espaço.
-    const pisoY = Interlude3Scene.DECK_Y +
-      (Interlude3Scene.WALL_ROW - Interlude3Scene.DECK_ROW) * Interlude3Scene.SCALE;
     this.add
-      .rectangle(0, pisoY, GAME_WIDTH, GAME_HEIGHT - pisoY, 0x0d1322)
+      .image(0, 0, 'paintBgCut3')
       .setOrigin(0, 0)
-      .setDepth(Interlude3Scene.DEPTH_PISO);
-
-    // A cópia espelhada: o centro dela encosta a borda direita DELA na borda esquerda da arte
-    // principal (x = HANGAR_X − ART_W·SCALE). Espelhada, a faixa do convés e o teto CONTINUAM
-    // sem código extra — a viga e a linha de pista desenhadas à mão saíram daqui.
-    this.add
-      .image(
-        Interlude3Scene.HANGAR_X - Interlude3Scene.ART_W * Interlude3Scene.SCALE,
-        Interlude3Scene.hangarY,
-        'hangar',
-      )
-      .setScale(Interlude3Scene.SCALE)
-      .setFlipX(true)
-      .setDepth(Interlude3Scene.DEPTH_HANGAR);
-
-    this.add
-      .image(Interlude3Scene.HANGAR_X, Interlude3Scene.hangarY, 'hangar')
-      .setScale(Interlude3Scene.SCALE)
-      .setDepth(Interlude3Scene.DEPTH_HANGAR);
+      .setDepth(Interlude3Scene.DEPTH_HANGAR)
+      // O nome é o que a sonda tem para agarrar.
+      .setName('paredeCut3');
   }
 
   override update(_time: number, delta: number): void {
@@ -239,6 +620,7 @@ export class Interlude3Scene extends Phaser.Scene {
 
     this.starfield.update(dt);
     this.parallax.update(dt, 14);
+    this.pulsarLampadas();
 
     // O VOO CAMBALEANTE: enquanto a nave está no ar, y e ângulo oscilam por senoide — o tween só
     // leva o x. Cambalear por tween seria uma coreografia; por senoide é um sistema falhando.
@@ -358,13 +740,13 @@ export class Interlude3Scene extends Phaser.Scene {
       },
     });
 
-    // O deslize: passa NA FRENTE do monte esquerdo (depth 80 > 70 — de raspão, vendendo o
-    // caos) e para no VÃO LIVRE entre os dois montes (tela ≈ 226..286; carcaças medidas na
-    // arte: x≈5..55 e x≈95..145). Parar em 240 deixava a nave COLADA na borda do monte e as
-    // duas silhuetas cinza viravam uma massa só — o beat "REARMADA" existe para MOSTRAR a nave.
+    // O deslize: passa NA FRENTE do monte esquerdo (depth 80 > 70 — de raspão, vendendo o caos) e
+    // para no VÃO LIVRE, que é `VAO_DA_NAVE.x`. ⚠️ O destino é a CONSTANTE, não um literal: eles
+    // eram dois números iguais escritos em lugares diferentes, e mover um sem o outro poria a nave
+    // parada em cima de uma carcaça sem nada acusar.
     this.tweens.add({
       targets: this.ship,
-      x: 258,
+      x: Interlude3Scene.VAO_DA_NAVE.x,
       duration: 2100,
       ease: 'Cubic.easeOut',
       onComplete: () => {
@@ -438,92 +820,227 @@ export class Interlude3Scene extends Phaser.Scene {
   }
 
   /**
-   * O COLAPSO — a ponte queimada desta vez é a SAÍDA.
+   * O COLAPSO — em cinco tempos, e agora com CAUSA.
    *
-   * A boca por onde a nave entrou desaba (a cadeia de explosões corre a metade ESQUERDA da
-   * tela), e a nave decola para a DIREITA — para dentro. A Aurora caiu por dano; a Doca caiu
-   * porque você tirou dela o que importava; o hangar não cai: ele se FECHA. É a primeira
-   * cutscene em que o lugar sobrevive — e é exatamente por isso que não há volta.
+   * A 1ª volta foi reprovada aqui: o entulho caía porque o banner dizia que estava caindo, e um
+   * portão aparecia do nada para as pedras baterem em cima. A corrente agora fecha sozinha:
+   *
+   *   0      a nave sobe do convés, RECUA e encara a garganta
+   *   +600   dispara — torpedo próprio, atravessando 180px de tela até a boca
+   *   +1000  impacto: ela entra em `garganta-morte`, clarão, shake, e a cadeia nasce NELA
+   *   +1200  a cadeia corre de x≈330 para x≈8 — 10 estouros, direita → esquerda
+   *   +2000  a nave voa para DENTRO da boca, encolhendo, e some no miolo
+   *
+   * ⚠️ O BANNER VIROU LEGENDA. Ele não abre mais o beat: chega no impacto, nomeando o que o
+   * jogador acabou de ver. Era a causa; virou a descrição da causa.
+   *
+   * ⚠️ E A SAÍDA FICA LITERAL. A nave não escapa pela borda — ela vai MAIS PARA DENTRO, que é a
+   * história desta cutscene, e a Fase 4 (o interior) começa exatamente onde ela sumiu. A versão
+   * anterior a mandava para `GAME_WIDTH + 40`: ela saía de cena por uma borda, que é o oposto de
+   * ser engolida.
    */
   private colapso(): void {
     if (this.done) return;
 
-    this.aviso('A ENTRADA ESTÁ COLAPSANDO', COLORS.enemyBright);
     Music.play(this, 'boss', 600);
 
-    this.time.delayedCall(600, () => {
-      if (this.done) return;
-
-      // Para a DIREITA e para cima: é para lá que a Fase 4 corre — para DENTRO do Leviatã.
-      this.tweens.add({ targets: this.ship, x: GAME_WIDTH + 40, duration: 1700, ease: 'Sine.easeIn' });
-      this.tweens.add({ targets: this.ship, y: 48, duration: 1700, ease: 'Cubic.easeOut' });
+    // ⚠️ A DECOLAGEM É VERTICAL, E O `x` NÃO ENTRA NESTE TWEEN. Ela subia E recuava ao mesmo
+    // tempo, porque parava em x=258 — encostada na criatura — e precisava de distância para o tiro
+    // ler. O Henrique jogou e viu o que isso é: *"a nave voa para trás um pouco antes de atirar"*.
+    // Nave decolando de um convés sobe; ela não dá ré. O conserto foi mover o POUSO (ver
+    // `VAO_DA_NAVE`), não a decolagem — agora ela já pousa longe o bastante e só precisa subir.
+    this.tweens.add({
+      targets: this.ship,
+      y: Interlude3Scene.GARGANTA.bocaY,
+      angle: 0,
+      duration: 520,
+      ease: 'Sine.easeOut',
     });
 
-    // A cadeia desce pela boca: do teto da abertura até o convés, só na metade esquerda — a
-    // metade direita (o hangar em si) fica de pé. O lugar não morre; a entrada morre.
-    const N = 10;
-    for (let i = 0; i < N; i++) {
-      this.time.delayedCall(900 + i * 140, () => {
-        if (this.done) return;
+    this.time.delayedCall(600, () => this.disparar());
+    this.time.delayedCall(1000, () => this.impacto());
 
-        const t = i / (N - 1);
-        this.fx.explode(
-          Phaser.Math.Between(8, 130),
-          Phaser.Math.Linear(20, Interlude3Scene.DECK_Y, t) + Phaser.Math.Between(-10, 10),
-          1.4,
-        );
-      });
-    }
-
-    // ⚠️ O COLAPSO TEM QUE DEIXAR CICATRIZ. Na 1ª versão a cadeia estourava, o clarão passava —
-    // e a boca ficava IDÊNTICA: "a entrada colapsou" era só uma frase (revisão visual, 2026-07-19).
-    // Agora o ENTULHO cai e FICA: pedaços de rocha escura empilham de baixo para cima até murar
-    // a abertura, e a nebulosa que se via lá fora some atrás deles. A cena termina com a parede
-    // que a Fase 4 pressupõe: não há volta.
-    this.selarBoca();
-
-    this.time.delayedCall(2700, () => {
+    // O clarão final e a entrega, depois de a última peça de entulho assentar (ver `selarBoca`).
+    this.time.delayedCall(4800, () => {
       if (this.done) return;
       this.cameras.main.flash(700, 255, 150, 80);
     });
+    this.time.delayedCall(5600, () => this.avancar());
+  }
 
-    this.time.delayedCall(4200, () => this.avancar());
+  /** O tiro. Sai da boca do canhão da nave e cruza a tela até o miolo da criatura. */
+  private disparar(): void {
+    if (this.done || !this.textures.exists('torpedoCut3')) return;
+
+    const g = Interlude3Scene.GARGANTA;
+    const t = this.add
+      .image(this.ship.x + 16, this.ship.y, 'torpedoCut3')
+      .setDepth(Interlude3Scene.DEPTH_NAVE + 1)
+      .setName('torpedoCut3');
+
+    this.fx.hit(t.x, t.y);
+    this.cameras.main.shake(90, 0.002);
+
+    this.tweens.add({
+      targets: t,
+      x: g.bocaX,
+      y: g.bocaY,
+      duration: 400,
+      ease: 'Quad.easeIn',
+      // DESTRUIR, nunca deixar parado: objeto esquecido fora da tela é armadilha documentada.
+      onComplete: () => t.destroy(),
+    });
+  }
+
+  /** O impacto — e é daqui que TUDO o mais desce. */
+  private impacto(): void {
+    if (this.done) return;
+
+    const g = Interlude3Scene.GARGANTA;
+
+    if (this.garganta && this.anims.exists('garganta-morte')) this.garganta.play('garganta-morte');
+
+    // ⚠️ A EXPLOSÃO SAI DE CIMA DELA, E ISSO CUSTOU UM TESTE JOGADO. Ela estava em `(g.x, g.miraY)`
+    // — o CENTRO da criatura — com escala 1,1: um estouro de ~141px em cima de um corpo de 136×137,
+    // desenhado ACIMA dela. A morte inteira acontecia por baixo, e o Henrique reportou que "a
+    // animação de morte não funciona". Ela funcionava; ninguém conseguia vê-la.
+    //
+    // Agora ela estoura no PONTO DE IMPACTO (a borda esquerda, por onde o torpedo entrou), menor,
+    // e o clarão da câmera encurta. O que o jogador olha durante a morte é a criatura, não o fogo.
+    const impactoX = Math.round(g.bocaX - 18);
+    this.fx.explodeBig(impactoX, g.bocaY, 0.7, Interlude3Scene.DEPTH_GARGANTA + 1);
+    this.cameras.main.flash(140, 255, 150, 80);
+    this.cameras.main.shake(320, 0.008);
+
+    // A legenda, não a causa.
+    this.aviso('A ENTRADA ESTÁ COLAPSANDO', COLORS.enemyBright);
+
+    this.alarme = true;
+    this.cadeia();
+    this.selarBoca();
+    this.time.delayedCall(Interlude3Scene.engolidaAtraso, () => this.engolida());
+  }
+
+  /** A onda: 10 estouros descendo da boca da criatura até o convés, direita → esquerda. */
+  private cadeia(): void {
+    const { n, x0, x1, t0, passo } = Interlude3Scene.CADEIA;
+
+    this.cadeiaX = [];
+    for (let i = 0; i < n; i++) {
+      const k = i / (n - 1);
+      const x = Math.round(Phaser.Math.Linear(x0, x1, k));
+      const y = Math.round(Phaser.Math.Linear(24, Interlude3Scene.DECK_Y - 10, k));
+      this.cadeiaX.push(x);
+
+      this.time.delayedCall(t0 + i * passo, () => {
+        if (this.done) return;
+        this.fx.explode(x, y, 1.4);
+      });
+    }
   }
 
   /**
-   * O entulho que mura a boca. Pedaços caem de FORA da tela e empilham DE BAIXO PARA CIMA
-   * (pilha que começa pelo topo é chuva, não desabamento), cada um com um impacto curto ao
-   * assentar. Tint de silhueta escura — é parede nascendo, não pedra de cenário.
-   * Posições FIXAS, não sorteadas: a sonda fotografa a cena, e o quadro tem que ser reproduzível.
+   * A NAVE ENGOLIDA. Ela voa para dentro da boca em TAMANHO CHEIO e só encolhe no fim.
+   *
+   * ⚠️ REGRA DA CENA (Henrique, 2026-09-05): *"a nave está ficando pequena cedo demais, ela
+   * precisa entrar na boca da criatura com o MESMO TAMANHO e somente ficar pequena nos
+   * milissegundos finais mesmo."*
+   *
+   * A versão anterior tinha UM tween só, levando posição, escala e alpha juntos por 1.400ms. Com
+   * escala e posição no mesmo intervalo, ela encolhia durante a VIAGEM inteira: chegava na boca já
+   * minúscula, e o que se lia era uma nave se afastando, não sendo engolida. São coisas
+   * diferentes, e a diferença é exatamente QUANDO a escala cai.
+   *
+   * Agora são DOIS tweens sobre o mesmo alvo:
+   *   · a VIAGEM leva só `x`, `y` e `angle` — a nave cruza a tela inteira em tamanho 1;
+   *   · o ENGOLIMENTO leva `scale` e `alpha`, e só começa em `VIAGEM − ENGOLE` do fim.
+   *
+   * ⚠️ Se alguém voltar a juntar os dois, o defeito volta inteiro. A escala é o ÚLTIMO gesto.
+   */
+  /**
+   * ⚠️ E ELA TEM QUE PASSAR ANTES DE A BOCA FECHAR — pedido do Henrique, 2026-09-05: *"quero que a
+   * nave passe antes da criatura fechar a boca"*.
+   *
+   * Ele estava certo e a conta prova: a boca fecha em **1.600ms** depois do impacto (11 quadros a
+   * 5fps, fechando no 8º — ver `MORTE`), e a nave chegava em 1.000 + 1.400 = **2.400ms**. Ela
+   * entrava 800ms depois de a goela ter se cerrado, ou seja, atravessava dentes fechados.
+   *
+   * ⚠️ O ATRASO É DERIVADO, NÃO ESCOLHIDO. `atraso = bocaFechaEm − margem − viagem`. Mudou o fps
+   * da morte, o número de quadros, ou o quadro em que ela fecha? O beat se reajusta sozinho. Um
+   * literal aqui voltaria a descolar na próxima vez que a animação mudasse — e ela já mudou duas
+   * vezes nesta fatia.
+   */
+  private static readonly ENGOLIDA = { viagem: 900, engole: 220, escalaFinal: 0.15, margem: 300 } as const;
+
+  /** Quando, depois do impacto, a nave começa a viagem para dentro da boca. */
+  private static get engolidaAtraso(): number {
+    const { viagem, margem } = Interlude3Scene.ENGOLIDA;
+    return Math.max(0, Math.round(Interlude3Scene.bocaFechaEm - margem - viagem));
+  }
+
+  private engolida(): void {
+    if (this.done) return;
+
+    const g = Interlude3Scene.GARGANTA;
+    const { viagem, engole, escalaFinal } = Interlude3Scene.ENGOLIDA;
+
+    this.fumaca.emitting = false;
+    this.fagulhas.emitting = false;
+
+    // 1. A VIAGEM — tamanho cheio o caminho todo.
+    this.tweens.add({
+      targets: this.ship,
+      x: g.bocaX,
+      y: g.bocaY,
+      angle: 0,
+      duration: viagem,
+      ease: 'Quad.easeIn',
+    });
+
+    // 2. O ENGOLIMENTO — os últimos `engole` ms, e só eles.
+    this.tweens.add({
+      targets: this.ship,
+      scale: escalaFinal,
+      alpha: 0,
+      delay: viagem - engole,
+      duration: engole,
+      ease: 'Quad.easeIn',
+    });
+  }
+
+  /**
+   * O entulho que mura a boca. As peças caem de FORA da tela e assentam nas 9 posições medidas,
+   * cada uma com um impacto curto ao encostar. São restos da frota engolida — casco com osso
+   * dentro —, não pedra de cenário: a mesma leitura das carcaças do convés, agora de pé contra a
+   * saída.
+   *
+   * ⚠️ Posições FIXAS, não sorteadas: a sonda fotografa a cena, e o quadro tem que ser
+   * reproduzível. Ver `ENTULHO` para as duas leis de ordem que convivem aqui.
    */
   private selarBoca(): void {
-    // [textura, x, yFinal, escala, ângulo] — 3 fiadas, da base ao topo da abertura.
-    const pecas: Array<[string, number, number, number, number]> = [
-      ['asteroid', 22, 142, 2.6, 12],
-      ['asteroid2', 66, 146, 2.8, -20],
-      ['asteroid3', 112, 141, 2.5, 32],
-      ['asteroid2', 40, 104, 2.4, -8],
-      ['asteroid', 90, 108, 2.7, 24],
-      ['asteroid3', 132, 100, 2.2, -28],
-      ['asteroid', 58, 66, 2.5, 16],
-      ['asteroid2', 108, 62, 2.4, -14],
-      ['asteroid3', 78, 30, 2.6, 8],
-    ];
+    // ⚠️ O PORTÃO SAIU DAQUI EM 2026-09-04, e não por gosto: o Henrique jogou a cena e o reprovou
+    // inteiro — "totalmente sem nexo, sem contexto. Apenas surge um asset sem relação nenhuma com
+    // a arte, direção do jogo, e as pedras caem sobre ele". Ele falhava por DUAS coisas somadas:
+    // sem MOLDURA (colado sobre parede pintada) e sem CAUSA (caía porque um banner dizia). Quem
+    // resolve as duas agora é a GARGANTA — ela é um corpo ocluindo a parede, e é a explosão dela
+    // que derruba o teto.
 
-    pecas.forEach(([tex, x, yFinal, escala, angulo], i) => {
+    Interlude3Scene.ENTULHO.forEach(([x, yFinal, tex, angulo], i) => {
       if (!this.textures.exists(tex)) return;
 
-      this.time.delayedCall(1000 + i * 240, () => {
+      // ⚠️ A PILHA COMEÇA SÓ DEPOIS DE A CADEIA PASSAR (ela acaba em t≈1460 daqui). Entulho
+      // caindo ANTES da onda seria a mesma mentira de antes com outra roupa: a pedra chegando
+      // primeiro que a explosão que a arrancou.
+      this.time.delayedCall(1700 + i * 190, () => {
         if (this.done) return;
 
         const peca = this.add
           .image(x, -40, tex)
-          .setScale(escala)
           .setAngle(angulo)
-          .setTint(0x39415c)
-          // ACIMA da arte: o entulho mura a metade esquerda NA FRENTE das janelas espelhadas —
-          // é a vista para fora que ele existe para apagar.
-          .setDepth(Interlude3Scene.DEPTH_ENTULHO);
+          // ACIMA da pintura: o entulho mura a metade esquerda NA FRENTE das janelas #1 e #2 — é
+          // a vista para fora que ele existe para apagar, e é a parede que a Fase 4 pressupõe.
+          .setDepth(Interlude3Scene.DEPTH_ENTULHO)
+          .setName('entulhoCut3');
 
         this.tweens.add({
           targets: peca,
