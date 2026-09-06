@@ -37,3 +37,4 @@ scripts/_f3/novos/*.png
 
 # Config local do Claude Code (a de projeto, settings.json, VAI versionada)
 .claude/settings.local.json
+scripts/_f4/*.png
