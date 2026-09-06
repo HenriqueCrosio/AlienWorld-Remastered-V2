@@ -1,0 +1,2 @@
+OBJECT_ID=f8a87745-dd7d-4cd6-812f-13d623796ce3
+próximo passo: node scripts/sheet.mjs f8a87745-dd7d-4cd6-812f-13d623796ce3 scripts/_sheet-<nome>.png <índices...>
