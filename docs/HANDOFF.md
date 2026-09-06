@@ -51,13 +51,14 @@ GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online
 que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele — playtestar e
 balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
 
-1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 5 estão FECHADAS e mergeadas**
-   (a 4 = Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no
-   hangar do Leviatã) teve a 1ª volta jogada e reprovada em dois blocos, e a 2ª volta está
-   IMPLEMENTADA** na branch `feat/cutscene3-visual` (último commit de código: `ac2c04a`), com as nove tarefas feitas, todas
-   as sondas verdes e **sem merge**: o que falta é o **TESTE JOGADO** da 2ª volta. Retome por
-   `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`, que carrega a lista de
-   verificação bloco a bloco e o risco aberto (a nave parada encostada na criatura).
+1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 6 estão FECHADAS** (a 4 = Cutscene 2 em
+   `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no hangar do Leviatã)
+   foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
+   levou duas voltas: a 1ª caiu em dois blocos (a nadadeira e o portão) e a 2ª passou por cinco
+   rodadas de ajuste com ele jogando. A branch `feat/cutscene3-visual` está empurrada para
+   `origin`. **A PRÓXIMA FRENTE É A FATIA 7 (Fase 4, o interior)** — e ela é diferente das
+   anteriores: ⚠️ **mexe em GEOMETRIA, não só em pintura**, e é a primeira que pode tocar o
+   `hangar.png` que seis fatias protegeram.
 2. **CALIBRAGEM do passe visual**: hitstop de 150ms na morte de chefão, fps das explosões
    (18/13/12), brilho do halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`),
    fades e pulsos do menu. E a CUTSCENE FINAL (`[F]` no menu) — o tom (vitória AMARGA) e os ~42s.
@@ -90,13 +91,13 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
-**Estado do repositório (2026-09-02, fim de sessão):** `main` segue em `392eedf`, com a
-**Fatia 5 mergeada** (`a28dd07`, `--no-ff`) e push em `origin`
+**Estado do repositório (2026-09-05, fim de sessão):** `main` segue em `392eedf`, com a
+**Fatia 5 mergeada** (`a28dd07`, `--no-ff`). O remoto é `origin`
 (github.com/HenriqueCrosio/AlienWorld-Remastered-V2 — ⚠️ o remoto `legacy` é o repositório
-ANTIGO, não empurre nada para lá). A **Fatia 6 está na branch `feat/cutscene3-visual`**, 7
-commits, **não mergeada e ainda não empurrada**. Typecheck e build limpos; sondas verdes
-(`_cut3/probe-cut3-visual` com 16 asserts, `probe-interlude3`, `probe-stage3`, `probe-stage4`,
-`probe-stage2`, `probe-stage1-visual`).
+ANTIGO, **não empurre nada para lá**). A **Fatia 6 está na branch `feat/cutscene3-visual`**,
+**aprovada no teste jogado e EMPURRADA para `origin`**. Typecheck e build limpos; sondas verdes
+(`_cut3/probe-cut3-visual` com 50 asserts, `probe-interlude3`, `probe-stage4`, `probe-f3-visual`,
+`probe-menu`).
 
 ⚠️ **UM ASSERT BARULHENTO CONHECIDO, NÃO O AFROUXE:** o risco de emenda na faixa do casco
 (`probe-f3-visual`) reprova ~1 em 4 execuções. O ruído já existia antes das sombras novas —
@@ -794,33 +795,30 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ---
 
-## A FATIA 6 — a Cutscene 3, 2ª VOLTA IMPLEMENTADA (2026-09-04)
+## A FATIA 6 — a Cutscene 3, ✅ APROVADA NO TESTE JOGADO (2026-09-05)
 
-🟠 **A 2ª volta está IMPLEMENTADA e aguarda teste jogado.** Branch `feat/cutscene3-visual`. **O
-último commit de CÓDIGO é `ac2c04a`**; o que veio depois é documentação. Sem merge e sem push, e
-**`main` segue em `392eedf`.** **Retome por
-`docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**, que mudou de mão pela terceira
-vez: agora é o mapa de quem TESTA a 2ª volta.
+✅ **O Henrique jogou e fechou: *"Agora sim. Podemos fechar essa etapa."*** Branch
+`feat/cutscene3-visual`, empurrada para `origin`. **Retome por
+`docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**.
 
-### O QUE A 2ª VOLTA ENTREGOU (plano: `docs/superpowers/plans/2026-09-04-cutscene3-garganta.md`)
+### O QUE A FATIA ENTREGOU, no estado final
 
 | bloco | o que ficou |
 |---|---|
-| A garganta | a arte do Henrique (`15f111fd`, face `south`), **136×137 nativos**, pé no convés em `DECK_Y`, cobrindo x 262..398. Idle + morte, **19 arquivos na mesma caixa**. Média 29,7 / pico 105. |
-| O beat final | a nave recua para x=150, dispara um **torpedo próprio** (`torpedoCut3`, 15×7 desenhado em código), a criatura morre, a cadeia corre 330→8 e a nave **some dentro da boca** (escala 0,15, alpha 0). |
-| O entulho | 4 peças biomecânicas novas (`entulho1..4`, 53 a 67px), tamanho e cor **assados no arquivo**, escala 1 e zero `setTint`. Todas em média 30,0 / pico 91–97. |
-| A nadadeira | refeita com o `leviathan-swim-sheet` quadro 0 como estilo (90×81, média 29,7) **e** o movimento trocado de travessia por **pivô**. |
+| A garganta | a arte do Henrique (`15f111fd`), face **`east` espelhada em disco**, com as **animações que ELE fez** (11 quadros cada). Ampliada no arquivo para **97×171**, do topo da tela ao convés, traseira cortada 14px pela borda direita. **Cor CRUA** — média 34,1 / pico 207. |
+| O beat final | a nave pousa em x=200, sobe **reto**, dispara um **torpedo próprio** (`torpedoCut3`, 15×7 em código), a criatura morre em 1,04s, a cadeia corre 333→8 e a nave entra na boca **em tamanho cheio**, encolhendo só nos 220ms finais — e passa **com a boca ainda aberta**. |
+| O entulho | 4 peças biomecânicas (`entulho1..4`, 53 a 67px), tamanho e cor **assados no arquivo**, escala 1 e zero `setTint`. Média 30,0 / pico 91–97. |
 | As luzes | as 17 lâmpadas pintadas ganharam brilho aditivo na cor própria de cada uma; 14 respiram, 3 falham, e no colapso todas viram alarme. 3 emissores de faísca nas junções medidas. |
 | O portão | **saiu** — do disco, do `BootScene` e da cena. |
-| A 3ª carcaça | **saiu**, por decisão do Henrique: a garganta cobre x 262..398 e ela ficava 100% atrás. O assert baixou de `>= 3` para `>= 2`. |
+| A nadadeira | **saiu**, depois de três versões reprovadas. Veredicto de ESCOPO, não de qualidade. |
+| A 3ª carcaça | **saiu**: ficava 100% atrás da criatura. O assert baixou de `>= 3` para `>= 2`. |
 
-**Sondas, todas verdes:** `probe-cut3-visual` (48 asserts), `probe-interlude3` (`DECK_Y` 171 / 164
-intacto), `probe-stage4`, `probe-f3-visual`, `probe-menu`. `npm run build` limpo.
+**Sondas, todas verdes:** `probe-cut3-visual` (50 asserts), `probe-interlude3`, `probe-stage4`,
+`probe-f3-visual`, `probe-menu`. `npm run build` limpo. **A fronteira intacta:** `hangar.png`
+160×160 sem uma alteração, e os `destroco` das Fases 2/3 idem.
 
-⚠️ **O RISCO ABERTO PARA O TESTE JOGADO:** a nave passa ~10s parada em **x=258**, encostada na
-borda esquerda da criatura (que começa em 262), durante todo o painel de escolha. Casco escuro
-sobre corpo escuro pode dissolver a silhueta. **É para ser julgado, não consertado por conta
-própria.**
+**PixelLab:** ~107 gerações de 5.000 no ciclo (que vira em 2026-10-04). As animações finais são
+dele e custaram **zero**.
 
 ### O 1º TESTE JOGADO DA 2ª VOLTA (2026-09-05) — o que ele mandou mudar
 
@@ -857,6 +855,35 @@ criatura. O da morte, não."* `scripts/_cut3/_diag-morte.mjs` pegou os 7 quadros
 frameRate 12 → 5 (**1.040ms** medidos), explosão movida para o ponto de impacto com escala 0,7,
 flash de 220 → 140ms. ⚠️ **Um assert de "a animação ENTROU" não prova que ela é VISTA** — a sonda
 estava verde o tempo todo.
+
+**5. A coreografia da nave, em três pedidos.** *"Quero que a nave pouse um pouco antes (...) a nave
+voa para trás um pouco antes de atirar"* — ela parava em x=258 (número de julho, do tempo em que o
+vão era entre os montes de entulho) e por isso precisava RECUAR para o tiro ler. Pousando em **200**
+a decolagem é **vertical** e o recuo sumiu. *"A nave está ficando pequena cedo demais"* — posição,
+escala e alpha estavam num tween só, então ela encolhia a viagem inteira e lia como se AFASTANDO.
+Viraram **dois** tweens: a viagem em tamanho 1, o encolhimento nos 220ms finais. E *"quero que a
+nave passe antes da criatura fechar a boca"* — medindo a abertura quadro a quadro, a goela fecha no
+**8º de 11** (84px de altura caem para 28px), o que a 5fps é 1.600ms; a nave chegava em 2.400ms e
+atravessava dentes cerrados. O atraso virou **derivado**: `bocaFechaEm − margem − viagem`.
+
+**6. O tamanho, em duas rodadas.** *"Consegue expandir a criatura para que ela ocupe todo o lado da
+tela da direita? Assim dá a sensação que a nave precisa atravessar aquela estrutura."* A arte tem
+138px contra os 216 da tela, então isso exige AMPLIAR — e ampliar cobra. Mostrei as quatro opções
+na cena e a grade em zoom 6×; ele escolheu a coluna cheia (122×216), testou, e voltou para a
+**97×171**: *"o que melhor vai combinar sem perder muita resolução é a letra C"*.
+
+⚠️ **É A PRIMEIRA VEZ QUE A LEI "1px de arte = 1px de jogo" CEDE NESTA CAMPANHA**, e foi decisão
+dele com o custo na mesa: o fator 1,239 não é inteiro, então a grade fica irregular. As
+alternativas eram 2× inteiro (grade uniforme, pixels o dobro dos da pintura) ou regerar no PixelLab
+(pixel-perfeito, ~80 gerações, e ele PERDERIA as animações que fez). **Mas continua assado no
+arquivo** (`--altura` no instalador): a cena desenha em escala 1, e o assert que impede `setScale`
+segue de pé.
+
+⚠️ **E A ÂNCORA FOI PARA O CANTO INFERIOR DIREITO**, por causa do `roundPixels: true`. A peça ficou
+com largura ÍMPAR (97): ancorada pelo centro, o x precisaria ser `X,5` para as bordas caírem em
+pixels inteiros, e o arredondamento deixaria uma coluna de artefato na borda. Ancorada pela
+traseira, o x **é** a borda direita (398) — sempre inteiro. **Largura ímpar + `roundPixels` = âncora
+no canto, nunca no centro.**
 
 ### ⚠️ A CORREÇÃO DE RUMO QUE CUSTOU 40 GERAÇÕES — leia antes de gerar arte "melhor"
 
