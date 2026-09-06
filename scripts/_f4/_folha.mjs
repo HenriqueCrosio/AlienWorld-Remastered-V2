@@ -3,10 +3,10 @@ import sharp from 'sharp';
 
 const W = 768, H = 432, PAD = 8, ROT = 26;
 const tiros = [
-  ['_a-largos.png', 'A  t=6s  CORREDORES LARGOS (vao 110)'],
-  ['_b-anticorpos.png', 'B  t=19s  ANTICORPOS (vao 96 + minas)'],
-  ['_c-aperto.png', 'C  t=47s  O APERTO (vao 76)'],
-  ['_d-pico.png', 'D  t=68s  REJEICAO TOTAL (vao 84)'],
+  ['_novo-a-largos.png', 'A  t=6s   CAMARA 1 - o hangar engolido'],
+  ['_novo-b-anticorpos.png', 'B  t=19s  CAMARA 1 - anticorpos'],
+  ['_novo-c-aperto.png', 'C  t=47s  CAMARA 2 - a caixa toracica (trocou em t=40)'],
+  ['_novo-d-pico.png', 'D  t=68s  o DUTO entra (trocou em t=68)'],
 ];
 
 const svgRotulo = (txt) =>
@@ -33,5 +33,5 @@ for (let i = 0; i < linhas.length; i += 2) {
 await sharp({ create: { width: W, height: alturaTotal, channels: 3, background: '#0b0f1a' } })
   .composite(comp)
   .png()
-  .toFile('scripts/_f4/_folha-base.png');
-console.log('scripts/_f4/_folha-base.png pronto');
+  .toFile('scripts/_f4/_folha-depois.png');
+console.log('scripts/_f4/_folha-depois.png pronto');

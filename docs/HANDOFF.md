@@ -51,9 +51,19 @@ GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online
 que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele — playtestar e
 balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
 
-1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 6 estão FECHADAS** (a 4 = Cutscene 2 em
-   `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no hangar do Leviatã)
-   foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
+1. **PASSE VISUAL INTEIRO** — fatias 7–8. **As fatias 0 a 6 estão FECHADAS E MERGEADAS** (a 4 =
+   Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`; a 6 = Cutscene 3 em `f29c46d`).
+
+   🟠 **A FATIA 7 (Fase 4, o interior) ESTÁ EM ANDAMENTO na branch `feat/fase4-visual`, com o
+   BLOCO A implementado e aguardando o TESTE JOGADO.** Retome por
+   `docs/superpowers/plans/2026-09-06-fatia7-bloco-a-START.md`. Ela saiu partida em três blocos,
+   e ele joga entre eles: **A** = o lugar (os 4 fundos pintados dele, a troca entre câmaras, o
+   hangar fora — risco de hitbox ZERO), **B** = o chefão (a arte nova do guardião, a posição no
+   alto-direita, e um brainstorm próprio da 2ª forma), **C** = o duto (paredes contínuas + 3
+   portas destrutíveis — aqui mora a hitbox). Spec:
+   `docs/superpowers/specs/2026-09-06-fatia7-fase4-design.md`.
+
+   O histórico da Fatia 6: ela **foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
    levou duas voltas: a 1ª caiu em dois blocos (a nadadeira e o portão) e a 2ª passou por cinco
    rodadas de ajuste com ele jogando. A branch `feat/cutscene3-visual` está empurrada para
    `origin`. **A PRÓXIMA FRENTE É A FATIA 7 (Fase 4, o interior)** — e ela é diferente das
@@ -91,8 +101,9 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
-**Estado do repositório (2026-09-06):** `main` está em **`f29c46d`**, com a **Fatia 6 mergeada
-`--no-ff`** e empurrada — a branch `feat/cutscene3-visual` também está em `origin` e pode ser
+**Estado do repositório (2026-09-06, fim de sessão):** `main` está em **`f417c0e`**, com a
+**Fatia 6 mergeada `--no-ff`** e empurrada; a **Fatia 7 corre em `feat/fase4-visual`**, com o
+Bloco A implementado e empurrado, aguardando o teste jogado — a branch `feat/cutscene3-visual` também está em `origin` e pode ser
 apagada quando ele quiser. O remoto é `origin`
 (github.com/HenriqueCrosio/AlienWorld-Remastered-V2 — ⚠️ o remoto `legacy` é o repositório
 ANTIGO, **não empurre nada para lá**). Verificado ANTES do merge, não de memória: `npm run build`

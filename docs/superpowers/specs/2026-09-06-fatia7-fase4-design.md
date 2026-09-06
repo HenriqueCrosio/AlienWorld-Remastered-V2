@@ -99,7 +99,28 @@ A fronteira sobrevive por deixar de ser necessária, não por ser defendida.
 
 ---
 
-## 4. BLOCO A — O LUGAR
+## 4. OS TRÊS BLOCOS, E ELE JOGA ENTRE ELES
+
+A fatia é grande demais para um mergulho só — a Fatia 6 levou duas voltas com escopo menor. Ela
+sai partida em três, **na ordem de execução**, e cada um termina jogável:
+
+```
+BLOCO A — O LUGAR        os 4 fundos, a troca, o hangar sai, as colunas
+     ↓                   risco de hitbox: ZERO
+  ▶ ELE JOGA
+     ↓
+BLOCO B — O CHEFÃO       a arte nova do guardião, a posição no alto-direita,
+     ↓                   e o BRAINSTORM da 2ª forma (com a arena já na tela)
+  ▶ ELE JOGA
+     ↓
+BLOCO C — O DUTO         paredes contínuas + as 3 portas
+     ↓                   risco de hitbox: aqui
+  ▶ ELE JOGA → a fatia fecha
+```
+
+---
+
+## 5. BLOCO A — O LUGAR
 
 **Risco de hitbox: ZERO.** A fase joga exatamente como hoje, com outra cara. **Ele joga o A antes
 de uma linha do B ser escrita.**
@@ -117,7 +138,7 @@ outros. O `STAGE_4` continua sendo a fonte única da forma da fase.
 estreitamento. ⚠️ **A duração exata é para ser julgada JOGANDO, não cravada aqui** — é o tipo de
 número que a Fatia 6 provou que só o olho dele fecha.
 
-No Bloco A os quatro se distribuem pelas batidas que o roteiro já tem. No Bloco B a entrada do
+No Bloco A os quatro se distribuem pelas batidas que o roteiro já tem. No Bloco C a entrada do
 `bg3` se realinha para coincidir com o duto.
 
 ### A2. O hangar sai do interior
@@ -153,11 +174,93 @@ sonda verde e só caíram quando ele rodou a cena.
 
 ---
 
-## 5. BLOCO B — O DUTO
+## 6. BLOCO B — O CHEFÃO FINAL
+
+**Ele só começa depois de ele JOGAR o Bloco A** — a câmara do núcleo precisa estar real na tela
+antes de a gente desenhar o chefão que vive nela. Desenhar o chefão longe da arena é o erro que
+custou as duas voltas da Fatia 6.
+
+### B1. A 1ª forma — o guardião ganha a arte nova dele
+
+Arte dele, no PixelLab: objeto `9436240c-c69c-49a6-a75f-5eb8e57850d6`, **256×256**, casco blindado
+com a massa viva exposta e tendões. Substitui o `guardiao.png` atual (256×227). Vêm com ela duas
+animações de 9 quadros: uma **idle** (a massa esquenta até um branco-amarelo e volta a apagar — um
+batimento de verdade, aprovada) e uma explosão nova, gerada nesta sessão.
+
+⚠️ **A arte nova é 256×256 contra 256×227 — a massa vermelha MUDA DE LUGAR.** `G_CORE_OFF_X` e
+`G_CORE_OFF_Y` (hoje +27/+31) **têm que ser remedidos** com `find-pad`, e o `G_MUZZLE_X/Y` junto.
+É a lei que o próprio `BootScene` escreve sobre esta arte: *"trocar a arte OBRIGA a remedir"*.
+
+⚠️ **E um achado na idle, para ele julgar jogando:** nos quadros 6–8 o miolo apaga quase por
+completo. Esse miolo **é o alvo** — a massa vermelha é a hitbox que leva dano. Um alvo que some
+metade do ciclo é o tipo de coisa que só incomoda com o controle na mão.
+
+**A explosão que foi reprovada, e por quê** — vale registrar para não repetir o prompt: a primeira
+(`The creature explodes`) falhou porque **a silhueta nunca muda**. O casco é idêntico nos 9
+quadros; o que "explode" são espículas de luz saindo do miolo por dentro de uma carcaça intacta, e
+ela **termina inteira**, quase igual ao quadro escuro da idle. Morte que acaba com o cadáver
+intacto lê como "desligou", não como "morreu". O prompt novo nomeia a **quebra da silhueta**
+(pedaços saindo do corpo, o casco progressivamente rasgado, o fim como carcaça oca com destroços).
+
+### B2. A posição — o chefão nasce no alto-direita
+
+**A ficção, decidida por ele:** o coração pintado da `bg4` **é o núcleo**; o chefão é a
+**extensão** dele.
+
+Hoje ele estaciona em `G_STATION_X = 298`, `G_BASE_Y = 104` — já está no quarto direito, e o que
+muda é a altura. O guardião é 179×159 na tela; centrado no alto ele fica **cortado pela borda de
+cima**, que é como um braço vindo de fora do quadro deve ler. A massa vermelha continua
+alcançável.
+
+⚠️ **O Y exato se decide com ele vendo na cena**, com as opções lado a lado — foi assim que o
+tamanho da garganta fechou na Fatia 6, e foi o único método que não custou rodada.
+
+**Sem ligação explícita entre o coração pintado e o chefão** — decisão dele. Sem cabo, sem pulso
+sincronizado, sem estado morto da pintura. A `bg4` entra como cenário.
+
+> Ressalva registrada uma vez, e ele decidiu com ela na mesa: é o terreno onde o portão da
+> cutscene 3 caiu (*"asset sem causa visível lê como colagem"*). O que diminui o risco aqui é que
+> o coração pintado **não é um asset colado sobre a pintura — ele É a pintura**.
+
+### B3. A 2ª forma — ela vai ser REPENSADA, e o brainstorm é próprio
+
+Pedido dele: *"a segunda fase do boss precisa ser repensada, para ter algo mais impactante para o
+final do jogo"*.
+
+**Este bloco tem um brainstorm agendado, e isso é decisão, não buraco no spec.** O gatilho é ele
+jogar o Bloco A. O que está fechado aqui é o **diagnóstico**, medido na tela hoje:
+
+| | forma 1 (guardião) | forma 2 (coração) |
+|---|---|---|
+| na tela | 179×159 | 146×146 |
+| área | 100% | **75%** |
+
+1. **O clímax da campanha ENCOLHE 25%.**
+2. **É a mesma família de silhueta** — massa arredondada no quarto direito com um miolo vermelho.
+   O jogador acabou de matar exatamente isso.
+3. **A paleta verde-oliva lê como "outro inimigo"**, não como "o coração de dentro do que você
+   rachou" — e não conversa com o coração pintado da `bg4`, que é vermelho profundo.
+4. **O verbo não muda.** Nas duas formas é *espere a janela, atire no ponto vermelho à direita*. A
+   2ª fase de um chefão final devia cobrar outra coisa, não a mesma coisa com outro sprite.
+
+Linha de base capturada em `scripts/_f4/shot-boss2.mjs` (as três telas: forma 1, forma 2 fechada,
+forma 2 aberta).
+
+⚠️ **Armadilha da sonda, encontrada ao capturar:** `forma === 'guardiao'` já é verdade enquanto
+ele ainda VOA para dentro da tela, e `damage()` nesse estado é ignorado em silêncio. Espere por
+`!boss.entering`, nunca pela forma.
+
+### Critério de aceite do Bloco B
+
+Ele joga a luta. **A 2ª forma parece o fim do jogo?**
+
+---
+
+## 7. BLOCO C — O DUTO
 
 **Aqui mora a hitbox.**
 
-### B1. As paredes contínuas
+### C1. As paredes contínuas
 
 | t | o que acontece | vão |
 |---|---|---|
@@ -178,7 +281,7 @@ separada para cima e para baixo, porque alturas independentes somam parede impas
 
 Banda jogável: `TETO_Y = 10` a `GROUND_Y = 206`.
 
-### B2. As portas
+### C2. As portas
 
 **Comporta biomecânica com núcleo aceso.** Anteparo escuro encravado na carne, nervuras, e um
 ponto ACESO no meio. O núcleo aceso resolve duas coisas de uma vez: diz "sou destrutível" e diz
@@ -208,49 +311,33 @@ invulnerabilidade. Quem não abre a porta é empurrado contra a borda esquerda e
 cada 1,4s até morrer — e a porta seguinte chega 4s depois. **"Atirar ou morrer" é literal.** Está
 escrito aqui para ele julgar jogando, não para descobrir jogando.
 
-### B3. O chefão no alto-direita
-
-**A ficção, decidida por ele:** o coração pintado da `bg4` **é o núcleo**; o chefão é a
-**extensão** dele.
-
-O chefão passa a nascer no **canto superior direito**. Hoje ele estaciona em `G_STATION_X = 298`,
-`G_BASE_Y = 104` — já está no quarto direito, e o que muda é a altura. O guardião é 179×159 na
-tela; centrado no alto ele fica **cortado pela borda de cima**, que é como um braço vindo de fora
-do quadro deve ler. A massa vermelha (o alvo, offset +27/+31) continua alcançável.
-
-⚠️ **O Y exato se decide com ele vendo na cena**, com as opções lado a lado — foi assim que o
-tamanho da garganta fechou na Fatia 6, e foi o único método que não custou rodada.
-
-**Sem ligação explícita entre o coração pintado e o chefão** — decisão dele. Sem cabo, sem pulso
-sincronizado, sem estado morto da pintura. A `bg4` entra como cenário.
-
-> Ressalva registrada uma vez, e ele decidiu com ela na mesa: é o terreno onde o portão da
-> cutscene 3 caiu (*"asset sem causa visível lê como colagem"*). O que diminui o risco aqui é que
-> o coração pintado **não é um asset colado sobre a pintura — ele É a pintura**.
-
-### Critério de aceite do Bloco B
+### Critério de aceite do Bloco C
 
 Ele joga o duto. As perguntas: **a porta diz "atire em mim" antes de você bater nela?** e **o vão
 de 60 é apertado ou é roubo?**
 
 ---
 
-## 6. OS ASSETS NOVOS
+## 8. OS ASSETS NOVOS
 
 Os fundos são dele e já estão entregues. Do PixelLab saem quatro peças:
 
-| asset | o que é | bloco |
-|---|---|---|
-| `colunaA`, `colunaB` | as colunas das câmaras, desenhadas COMO coluna | A |
-| `dutoParede` | o segmento de parede do duto, encaixável (o teto sai por `flipY`) | B |
-| `porta` | a comporta biomecânica com núcleo aceso + o estado destruído | B |
+| asset | o que é | de quem | bloco |
+|---|---|---|---|
+| `paintBgF4a..d` | os quatro fundos, reduzidos para 384×216 | **dele**, entregues | A |
+| `colunaA`, `colunaB` | as colunas das câmaras, desenhadas COMO coluna | PixelLab | A |
+| `guardiao` (nova) + idle | o casco blindado com a massa exposta, 256×256, 9 quadros | **dele**, entregue | B |
+| `guardiao-morte` | a explosão que QUEBRA a silhueta (a 1ª foi reprovada) | PixelLab | B |
+| a 2ª forma | **a definir no brainstorm do Bloco B** | a decidir | B |
+| `dutoParede` | o segmento de parede do duto, encaixável (o teto sai por `flipY`) | PixelLab | C |
+| `porta` | a comporta biomecânica com núcleo aceso + o estado destruído | PixelLab | C |
 
 Orçamento PixelLab em 2026-09-06: ~4.890 de 5.000, ciclo virando em 2026-10-04. **O gargalo não é
 orçamento — são as rodadas de julgamento.**
 
 ---
 
-## 7. ⚠️ AS TRAVAS DE GEOMETRIA
+## 9. ⚠️ AS TRAVAS DE GEOMETRIA
 
 É onde esta fatia pode quebrar o jogo, e o aviso é do próprio START: instalar arte recortada mais
 justa no lugar da atual **encolhe o vão sem uma linha do roteiro mudar**.
@@ -265,7 +352,7 @@ justa no lugar da atual **encolhe o vão sem uma linha do roteiro mudar**.
 
 ---
 
-## 8. DECISÕES MARCADAS, PARA NÃO VIRAREM CONSERTO DE CARONA
+## 10. DECISÕES MARCADAS, PARA NÃO VIRAREM CONSERTO DE CARONA
 
 ⚠️ **O chefão é desenhado com `setScale`.** `G_ESCALA = 0.7` (guardião, 256×227 → 179×159) e
 `C_ESCALA = 1.2` (coração, 122×122 → 146×146). Arte espremida **e ampliada** em runtime —
@@ -277,7 +364,7 @@ como limpeza silenciosa.
 
 ---
 
-## 9. COMO SE VERIFICA
+## 11. COMO SE VERIFICA
 
 - `probe-stage4` — a fase de ponta a ponta, o teto matando, a cutscene final. **Linha de base.**
 - Uma sonda nova da fatia: os quatro fundos entram na ordem certa, o `hangar` NÃO aparece no modo
@@ -290,7 +377,7 @@ como limpeza silenciosa.
 
 ---
 
-## 10. O QUE FICOU DE FORA, DE PROPÓSITO
+## 12. O QUE FICOU DE FORA, DE PROPÓSITO
 
 - **As duas baleias erradas** que ainda estão na F3 e na cutscene final — vão para a Fatia 8.
 - **A cutscene final** — Fatia 8.
