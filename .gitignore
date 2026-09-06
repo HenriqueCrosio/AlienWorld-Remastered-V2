@@ -33,3 +33,7 @@ scripts/_cut3/*.png
 scripts/_f1/*.png
 scripts/_f3/*.png
 scripts/_f3/av/
+scripts/_f3/novos/*.png
+
+# Config local do Claude Code (a de projeto, settings.json, VAI versionada)
+.claude/settings.local.json
