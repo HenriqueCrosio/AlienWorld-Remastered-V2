@@ -1,6 +1,7 @@
 # START — FATIA 7: A FASE 4, O INTERIOR
 
-**⬜ NÃO COMEÇOU.** A Fatia 6 fechou em 2026-09-05 e esta é a próxima frente do passe visual.
+**⬜ NÃO COMEÇOU.** A Fatia 6 fechou em 2026-09-05, foi mergeada em `main` (`f29c46d`) em
+2026-09-06, e esta é a próxima frente do passe visual.
 
 ---
 
@@ -93,7 +94,7 @@ Orçamento não é restrição — o gargalo são as rodadas de julgamento, não
 ## ONDE ISSO CAI NO ROADMAP
 
 ```
-0–6  ✅ fechadas   (a 6 aprovada no teste jogado em 2026-09-05)
+0–6  ✅ fechadas   (a 6 aprovada jogando e mergeada em main: f29c46d)
 7    ⬜ Fase 4 — o interior (⚠️ mexe em GEOMETRIA, e pode tocar o hangar.png)  ← VOCÊ ESTÁ AQUI
 8    ⬜ Cutscene final + as duas baleias erradas que ainda estão na F3/F4
 ```

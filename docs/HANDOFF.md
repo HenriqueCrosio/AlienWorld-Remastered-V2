@@ -91,13 +91,17 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
-**Estado do repositório (2026-09-05, fim de sessão):** `main` segue em `392eedf`, com a
-**Fatia 5 mergeada** (`a28dd07`, `--no-ff`). O remoto é `origin`
+**Estado do repositório (2026-09-06):** `main` está em **`f29c46d`**, com a **Fatia 6 mergeada
+`--no-ff`** e empurrada — a branch `feat/cutscene3-visual` também está em `origin` e pode ser
+apagada quando ele quiser. O remoto é `origin`
 (github.com/HenriqueCrosio/AlienWorld-Remastered-V2 — ⚠️ o remoto `legacy` é o repositório
-ANTIGO, **não empurre nada para lá**). A **Fatia 6 está na branch `feat/cutscene3-visual`**,
-**aprovada no teste jogado e EMPURRADA para `origin`**. Typecheck e build limpos; sondas verdes
-(`_cut3/probe-cut3-visual` com 50 asserts, `probe-interlude3`, `probe-stage4`, `probe-f3-visual`,
-`probe-menu`).
+ANTIGO, **não empurre nada para lá**). Verificado ANTES do merge, não de memória: `npm run build`
+limpo, `_cut3/probe-cut3-visual` (50 asserts), `probe-interlude3` e `probe-stage4` verdes.
+
+⚠️ **A SESSÃO DE 05/09 CAIU NO MEIO DO FECHAMENTO** (cmd fechado à força). Os commits de código
+estavam salvos, mas os docs e o push não — foram refeitos em 06/09. Ficou uma lição de higiene: o
+HANDOFF chegou a AFIRMAR "empurrada para `origin`" antes do push existir. **Documento escrito na
+frente do fato vira mentira se a sessão cair.**
 
 ⚠️ **UM ASSERT BARULHENTO CONHECIDO, NÃO O AFROUXE:** o risco de emenda na faixa do casco
 (`probe-f3-visual`) reprova ~1 em 4 execuções. O ruído já existia antes das sombras novas —
@@ -797,8 +801,8 @@ jogador leva a nave, e a morte junto com o cenário quando ele não leva.
 
 ## A FATIA 6 — a Cutscene 3, ✅ APROVADA NO TESTE JOGADO (2026-09-05)
 
-✅ **O Henrique jogou e fechou: *"Agora sim. Podemos fechar essa etapa."*** Branch
-`feat/cutscene3-visual`, empurrada para `origin`. **Retome por
+✅ **O Henrique jogou e fechou: *"Agora sim. Podemos fechar essa etapa."*** **Mergeada em
+`main` (`f29c46d`, `--no-ff`) e empurrada em 2026-09-06.** **Retome por
 `docs/superpowers/plans/2026-09-01-cutscene3-visual-START.md`**.
 
 ### O QUE A FATIA ENTREGOU, no estado final
