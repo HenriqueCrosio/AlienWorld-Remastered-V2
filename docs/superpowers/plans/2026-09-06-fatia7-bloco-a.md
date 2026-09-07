@@ -498,33 +498,132 @@ coluna nova e instalar sem ele ver é exatamente o que custou 40 gerações na F
 - Modify (depois da aprovação dele): `src/scenes/BootScene.ts`, `src/scenes/GameScene.ts`
   (`sorteiaKind`)
 
-- [ ] **Passo 1: medir a linha de base ANTES de trocar qualquer arte**
+- [x] **Passo 1: medir a linha de base ANTES de trocar qualquer arte** — FEITO 07/09/2026
 
-Rodar: `node scripts/probe-stage4.mjs` e guardar a saída de `corredores`. É o número contra o
-qual a troca vai ser conferida.
+```
+corredores {"chao":3,"teto":3,"vaos":[110,110,110]}
+```
 
-- [ ] **Passo 2: gerar as colunas no PixelLab**
+⚠️ **`[110,110,110]` é A LINHA DE BASE.** Depois de instalar coluna nova, `probe-stage4` tem de
+devolver exatamente estes três números. Se mudarem, a arte nova é mais justa que a velha e está
+comendo o vão — o erro é da ARTE, não do roteiro.
 
-Duas peças, `colunaA` (costela) e `colunaB` (duto orgânico), desenhadas COMO coluna: **base
-cortada reta, ponta definida**, silhueta que diz onde a coluna termina e onde o vão começa. Passar
-como referência de estilo o `paint-bg-f4-a.png` já instalado.
+- [x] **Passo 2: gerar as colunas no PixelLab** — FEITO 07/09/2026, **10 gerações**
 
-- [ ] **Passo 3: montar a folha de contato e mandar para ele**
+Duas rodadas, e a segunda existe por causa do que a primeira ensinou:
 
-As candidatas em cima do fundo `paintBgF4a`, em zoom 2×, com o vão de 76px marcado — a pergunta
-que ele responde é **"dá para achar o vão de relance?"**.
+**Rodada 1 (1–6), com `color_image_base64` = um recorte da `paint-bg-f4-a.png`.** A FORMA saiu
+certa de primeira — coluna alta e estreita, base cortada reta, ponta definida. Mas forçar a
+paleta da PINTURA na coluna deu uma coluna DA COR DA PINTURA: no quadro elas quase somem.
+⚠️ **Lição: paleta forçada do fundo é camuflagem.** O prop precisa da FAMÍLIA de cor do fundo,
+não do VALOR dele.
 
-- [ ] **Passo 4: PARAR e esperar o julgamento dele**
+**Rodada 2 (7–10), sem paleta forçada, atrás de valor.** Legíveis.
 
-⚠️ Nada é instalado antes da resposta.
+- [x] **Passo 3: montar a folha de contato e mandar para ele** — FEITO 07/09/2026
 
-- [ ] **Passo 5 (só depois do OK): instalar e RE-MEDIR os vãos**
+`scripts/_f4/_folha-colunas.mjs` → `_folha-colunas-forma.png` e `_folha-colunas-contraste.png`.
+Ambas abrem com a faixa **HOJE** (a arte atual) como controle. Vão de 76px (o aperto do t=42),
+funil 9°, zoom 2×, geometria copiada de `spawnCorredores` + `TerrainSystem.spawn`.
 
-Rodar `node scripts/probe-stage4.mjs` de novo e comparar com o Passo 1.
+### ⚠️ O QUE A MEDIDA MOSTRA E O OLHO NÃO — a 110px de altura
+
+| candidata | textura | DESENHO | hitbox | folga na base |
+|---|---|---|---|---|
+| **hoje** `costela` | 119px | 119px | 71px | 0,0 |
+| **hoje** `orgao` | 113px | 113px | 68px | 0,0 |
+| 1 costela | 48px | 44px | 29px | 3,9 |
+| 2 costela+tocha | 48px | **13px** | 29px | 6,9 |
+| 3 duto | 48px | **18px** | 29px | 2,1 |
+| 4 duto+anel | 48px | 28px | 29px | 3,0 |
+| 5 pistao | 48px | 31px | 29px | 4,3 |
+| 6 lamina | 48px | 44px | 29px | 1,7 |
+| 7 tocha | 48px | **6px** | 29px | **0,0** |
+| 8 osso | 48px | 30px | 29px | 6,9 |
+| 9 ciano | 48px | **48px** | 29px | **0,0** |
+| 10 aco | 48px | 28px | 29px | 5,2 |
+
+**1. A HITBOX SAI DA TEXTURA, NÃO DO DESENHO** (`TerrainSystem.ts:307`, `body.setSize(p.width * 0.6, ...)`).
+Onde o desenho é mais estreito que 29px, o jogador MORRE NO VAZIO. A 7 desenha 6px e mata em 29:
+23px de colisão invisível. As únicas honestas são a **6**, a **1** e a **9**.
+
+**2. FOLGA NA BASE = COLUNA FLUTUANDO.** A origem é a base da TEXTURA, então px transparente
+embaixo vira ar entre a coluna e o chão. Só a **7** e a **9** encostam.
+⚠️ Isto é defeito TÉCNICO do recorte, não gosto: depois da escolha dele, aparar e recentrar a
+textura na largura do desenho conserta os dois de uma vez.
+
+**3. A FASE FICA MAIS FÁCIL NA HORIZONTAL, E ISSO É DECISÃO DELE.** A hitbox cai de **71px para
+29px** — menos da metade. O vão VERTICAL não muda (a coluna é cravada em `alturaPx`), então a
+`probe-stage4` vai continuar devolvendo `[110,110,110]` e **a linha de base do Passo 1 NÃO pega
+esta mudança**. A sonda cobre o vão, não a espessura.
+
+- [x] **Passo 4: PARAR e esperar o julgamento dele** — RESPONDIDO 07/09/2026
+
+> *"Eu ainda acho que não ficou bom, mas podemos tentar o N 6 bem grandes em conjunto com o que
+> já temos hoje em dia. Mas isso vai ficar para as primeiras partes da fase, quando o duto ficar
+> estreito, vai ser outros assets criados."*
+
+**Nenhuma das dez foi aprovada como está.** O que ele autorizou é mais estreito que a task
+pedia, e a diferença importa:
+
+| | |
+|---|---|
+| **NÃO é** | trocar `costela`/`orgao`/`maquinario` pela arte nova |
+| **É** | a **6 (lamina)**, **bem grande**, entrando no sorteio **JUNTO** com os três de hoje |
+
+⚠️ **E SÓ NA PARTE LARGA DA FASE.** Ele cravou uma fronteira nova que o plano não tinha: **o
+duto estreito ganha assets PRÓPRIOS, criados depois** — ou seja, no **Bloco C**, onde as paredes
+contínuas e as 3 portas entram. A coluna larga e a coluna do aperto deixam de ser o mesmo
+problema.
+
+⚠️ Consequência direta para o `sorteiaKind` (`GameScene.ts:869`): o sorteio passa a ter de
+saber EM QUE TRECHO da fase está. Hoje ele só sorteia entre três nomes, sem noção de tempo.
+
+⚠️ **"BEM GRANDE" SÓ TEM UM EIXO LIVRE.** A altura é cravada pelo roteiro (`alturaPx`) e a
+escala é UNIFORME (`TerrainSystem.ts:278`), então a única forma de a lamina ter a presença dos
+assets de hoje (102–119px de largura a 110 de altura) é a TEXTURA nascer mais larga. A 6 atual
+dá 48px — um palito ao lado dos de hoje.
+
+- [ ] **Passo 5: gerar a LAMINA LARGA — a única arte que ele autorizou**
+
+⚠️ **Não é uma coluna nova: é a 6 outra vez, larga.** A silhueta da `_col-6-lamina.png` já passou
+no teste técnico (desenho 44px contra hitbox 29px — das três honestas, a de melhor leitura). O que
+falta nela é PRESENÇA.
+
+Alvo: textura com **~110–128px de largura** para, escalada a 110 de altura, ficar no páreo com os
+102–119px dos assets de hoje. Prompt sem `color_image_base64` (a rodada 1 provou que paleta
+forçada do fundo é camuflagem) — família de cor do fundo, valor próprio.
+
+⚠️ **Aparar e recentrar a textura na largura do DESENHO antes de qualquer coisa.** Isso conserta
+de uma vez os dois defeitos técnicos que a tabela acima mediu: a hitbox que sai da textura e a
+folga na base que faz a coluna flutuar.
+
+- [ ] **Passo 6: a folha nova — a lamina larga AO LADO dos três de hoje**
+
+⚠️ **A pergunta mudou.** Não é mais "qual das dez?": é **"a lamina grande convive com
+`costela`/`orgao`/`maquinario` na mesma tela?"** — que é o que ele autorizou. Então a folha tem
+de mostrar o sorteio MISTURADO, não a lamina sozinha numa faixa.
+
+Reaproveitar `scripts/_f4/_folha-colunas.mjs` (a geometria dele já é a do jogo). Faixa de
+controle HOJE em cima, faixa MISTA embaixo.
+
+- [ ] **Passo 7: PARAR e esperar o julgamento dele**
+
+⚠️ Nada é instalado antes da resposta. Vale a mesma lei da Fatia 6.
+
+- [ ] **Passo 8 (só depois do OK): instalar e RE-MEDIR os vãos**
+
+Instalar é mais do que registrar o asset no `BootScene`: o `sorteiaKind` (`GameScene.ts:869`)
+passa a ter de **saber em que trecho da fase está**, porque a lamina só entra na parte LARGA. O
+duto estreito fica para o Bloco C, com assets próprios — fronteira cravada por ele em 07/09.
+
+Rodar `node scripts/probe-stage4.mjs` de novo e comparar com o Passo 1 (`[110,110,110]`).
 ⚠️ **Instalar arte mais justa encolhe o vão sem uma linha do roteiro mudar.** Se o número mudou,
 a arte está errada — não o roteiro.
+⚠️ E lembre: a sonda **NÃO** pega a queda de hitbox de 71px para 29px. Essa muda a dificuldade na
+horizontal e só o controle na mão julga.
 
-- [ ] **Passo 6: commit**
+- [ ] **Passo 9: commit**
 
 ```bash
 git add public/sprites/coluna-*.png src/scenes/BootScene.ts src/scenes/GameScene.ts
@@ -533,14 +632,18 @@ git commit -m "feat(fatia7): as colunas do interior passam a ser desenhadas como
 
 ---
 
-## Critério de aceite do Bloco A
+## Critério de aceite do Bloco A — ✅ RESPONDIDO 07/09/2026, com o controle na mão
 
-O Henrique joga a Fase 4 inteira e responde:
+> *"Os 3 fundos trocados deram uma boa dimensão de profundidade e atmosfera para a fase, a
+> transição ainda está seca e repentina, mas isso vamos organizar no decorrer das fatias."*
 
-1. **Parece estar dentro do bicho?**
-2. **Dá para achar o vão de relance?**
-3. **A troca entre câmaras se sente como passar por um estreitamento, ou como um corte?**
-   (o `durationMs` de 600 é ponto de partida, não número fechado)
+1. **Parece estar dentro do bicho?** ✅ **SIM** — a queixa que abriu a fatia está respondida pelo
+   FUNDO.
+2. **Dá para achar o vão de relance?** — não julgada; ele já sabia que as colunas não mudaram. É a
+   Task 4, ainda aberta.
+3. **Estreitamento ou corte?** ⚠️ **Corte.** Os 600ms do `Parallax.setPintura` não passaram —
+   **mas ele decidiu adiar**, e a transição volta junto com o Bloco C, onde uma passagem
+   ATRAVESSADA pode aposentar o fade. **Não mexa no `durationMs` sem ele pedir.**
 
 Nada de screenshot: a Fatia 6 teve três defeitos que passaram por sonda verde e só caíram quando
 ele rodou a cena.

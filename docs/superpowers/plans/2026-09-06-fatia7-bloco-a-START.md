@@ -1,35 +1,117 @@
-# START — FATIA 7 · BLOCO A: O TESTE JOGADO
+# START — FATIA 7 · BLOCO A: ONDE A PRÓXIMA SESSÃO PEGA
 
-**🟠 IMPLEMENTADO, AGUARDANDO O TESTE JOGADO DO HENRIQUE.** Branch `feat/fase4-visual`.
+**🟢 O BLOCO A PASSOU NO TESTE JOGADO (07/09/2026).**
+**🟠 A TASK 4 (as colunas) está no meio — ele já julgou as dez e autorizou UMA coisa só.**
+Branch `feat/fase4-visual`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-06-fatia7-bloco-a-START.md`. O Bloco A da Fatia 7 está
-> implementado e eu vou jogar a Fase 4 agora para dar o veredicto. Não mexa em nada antes do meu
-> feedback."**
+> **"Leia `docs/superpowers/plans/2026-09-06-fatia7-bloco-a-START.md`. O Bloco A já passou no
+> teste jogado e as dez colunas já foram julgadas. Retome a Task 4 no Passo 5: a lamina larga."**
 
 ---
 
-## O QUE ELE VAI JULGAR — três perguntas, nesta ordem
+## ⏭️ A PRÓXIMA AÇÃO, EM UMA FRASE
 
-Rode `npm run dev` e aperte **`L`** no jogo (atalho de DEV: cai direto na Fase 4).
+**Gerar a candidata 6 (lamina) DE NOVO, com a textura nascendo larga (~110–128px), e montar uma
+folha em que ela apareça MISTURADA com `costela`/`orgao`/`maquinario` na mesma tela.**
 
-1. **Parece estar dentro do bicho?** Era a queixa que abriu a fatia — *"não parece estar dentro de
-   uma baleia"*.
-2. **Dá para achar o vão de relance?** ⚠️ **Provavelmente não, ainda** — leia "o que EU já vi"
-   abaixo antes de julgar isso como defeito novo.
-3. **A troca entre câmaras se sente como passar por um estreitamento, ou como um corte?** O
-   mergulho no escuro está em **600ms** (`Parallax.setPintura`), e esse número é ponto de partida,
-   não decisão fechada.
-
-**As trocas acontecem em `t=40` (a caixa torácica), `t=68` (o duto) e `t=82` (a câmara do
-núcleo).** A fase inteira dura 86s.
+É o **Passo 5** de `docs/superpowers/plans/2026-09-06-fatia7-bloco-a.md`. Nada é instalado antes
+de ele ver a folha (Passo 7).
 
 ---
 
-## O QUE ENTROU (3 commits)
+## ✅ O VEREDICTO DO BLOCO A — 07/09/2026, com o controle na mão
+
+> *"Os 3 fundos trocados deram uma boa dimensão de profundidade e atmosfera para a fase, a
+> transição ainda está seca e repentina, mas isso vamos organizar no decorrer das fatias."*
+
+| pergunta | resposta |
+|---|---|
+| **1. Parece estar dentro do bicho?** | ✅ **SIM.** A queixa que abriu a fatia está respondida pelo FUNDO. |
+| **2. Dá para achar o vão de relance?** | — não julgada; ele já sabia que as colunas não mudaram. É a **Task 4**. |
+| **3. Estreitamento ou corte?** | ⚠️ **Corte.** "seca e repentina" — **ADIADA POR DECISÃO DELE**, não esquecida. |
+
+⚠️ **NÃO mexa no `durationMs` de 600ms do `Parallax.setPintura` sem ele pedir.** A transição volta
+junto com o **Bloco C**, onde uma passagem que o jogador ATRAVESSA pode aposentar o fade. Afinar o
+número agora é afinar algo que o Bloco C pode jogar fora.
+
+---
+
+## 🎨 A TASK 4 ATÉ AQUI — 10 colunas geradas, ZERO instaladas
+
+Duas rodadas no PixelLab, duas folhas de contato (`scripts/_f4/_folha-colunas-forma.png` e
+`_folha-colunas-contraste.png`, ambas abrindo com a faixa **HOJE** como controle).
+
+### O veredicto dele, na íntegra
+
+> *"Eu ainda acho que não ficou bom, mas podemos tentar o N 6 bem grandes em conjunto com o que já
+> temos hoje em dia. Mas isso vai ficar para as primeiras partes da fase, quando o duto ficar
+> estreito, vai ser outros assets criados."*
+
+| | |
+|---|---|
+| **NÃO é** | trocar `costela`/`orgao`/`maquinario` pela arte nova |
+| **É** | a **6 (lamina)**, **bem grande**, entrando no sorteio **JUNTO** com os três de hoje |
+| **E SÓ** | na parte **LARGA** da fase — o duto estreito ganha assets PRÓPRIOS, no **Bloco C** |
+
+⚠️ **Essa última linha é fronteira nova, cravada por ele — o plano não tinha.** A coluna larga e a
+coluna do aperto deixaram de ser o mesmo problema.
+
+⚠️ **Consequência para o `sorteiaKind` (`GameScene.ts:869`):** ele passa a ter de saber **em que
+trecho da fase está**. Hoje sorteia entre três nomes, sem noção de tempo.
+
+⚠️ **"BEM GRANDE" SÓ TEM UM EIXO LIVRE.** A altura é cravada pelo roteiro (`alturaPx`) e a escala
+é UNIFORME (`TerrainSystem.ts:278`) — a única forma de a lamina ter a presença dos assets de hoje
+(102–119px de largura a 110 de altura) é a **TEXTURA NASCER MAIS LARGA**. A 6 atual dá 48px: um
+palito ao lado dos de hoje.
+
+---
+
+## ⚠️ AS MEDIDAS QUE VALEM MAIS QUE AS DEZ ARTES
+
+A tabela completa das 10 candidatas está no plano. O que ela ensinou:
+
+**1. A HITBOX SAI DA LARGURA DA TEXTURA, NÃO DO DESENHO** — `TerrainSystem.ts:307`,
+`body.setSize(p.width * 0.6, ...)`. Onde o desenho é mais estreito que a textura, **o jogador
+morre no vazio**: a candidata 7 desenha 6px e mata em 29 — 23px de colisão invisível. Das dez, só
+a **6**, a **1** e a **9** são honestas.
+
+**2. PIXEL TRANSPARENTE NA BASE = COLUNA FLUTUANDO.** A origem é a base da TEXTURA, então padding
+embaixo vira ar entre a coluna e o chão. Só a 7 e a 9 encostam.
+
+⚠️ Os dois são defeito **técnico de recorte**, não gosto: **aparar e recentrar a textura na
+largura do desenho conserta os dois de uma vez** — faça isso na lamina larga antes de qualquer
+outra coisa.
+
+**3. A FASE FICA MAIS FÁCIL NA HORIZONTAL — e isso é decisão dele.** A hitbox cai de **71px para
+29px**. O vão VERTICAL não muda, então a `probe-stage4` continua devolvendo `[110,110,110]` e **a
+sonda NÃO pega esta mudança**. A sonda cobre o vão, não a espessura.
+
+**4. PALETA FORÇADA DO FUNDO É CAMUFLAGEM.** A rodada 1 passou `color_image_base64` com um recorte
+da `paint-bg-f4-a.png`: a FORMA saiu certa de primeira, mas a coluna ficou DA COR DA PINTURA e
+some no quadro. O prop precisa da **família** de cor do fundo, não do **valor** dele. A rodada 2
+largou a paleta forçada e ganhou legibilidade.
+
+---
+
+## 📌 A LINHA DE BASE — não perca este número
+
+```
+corredores {"chao":3,"teto":3,"vaos":[110,110,110]}
+```
+
+`node scripts/probe-stage4.mjs`, medido ANTES de qualquer troca de arte. Depois de instalar coluna
+nova a sonda tem de devolver **exatamente** isto. Se mudar, a arte nova é mais justa que a velha e
+está comendo o vão — **o erro é da ARTE, não do roteiro**.
+
+---
+
+## 🗂️ O QUE ESTÁ NO DISCO
+
+**Commitado** — os 3 commits do Bloco A:
 
 | commit | o que |
 |---|---|
@@ -40,35 +122,34 @@ núcleo).** A fase inteira dura 86s.
 **Verificado, não presumido:** `probe-f4-visual` (16 asserts) verde, `probe-stage4` de ponta a
 ponta verde, `probe-interlude3` verde, `npm run build` limpo.
 
-⚠️ **A fronteira intacta:** o `hangar.png` continua **160×160 byte por byte** (`git status` limpo
-nele) e a cutscene final segue usando o mesmo arquivo. A sonda cobra `usamHangar = 0` no interior.
+**Da Task 4** — em `scripts/_f4/`, tudo com `_` na frente (material de trabalho, não entra no
+jogo): `_col-1..10-*.png` (as dez candidatas), `_folha-colunas.mjs` (o gerador das folhas — a
+geometria dele é COPIADA de `spawnCorredores` + `TerrainSystem.spawn`, não inventada),
+`_folha-colunas-forma.png`, `_folha-colunas-contraste.png`, `_paleta-f4a.png` e `_paleta.b64`.
 
-⚠️ **Risco de hitbox: ZERO.** Nenhum número de `corredor`, `hazard` ou `wave` foi tocado. Se a
-`probe-stage4` cair, o erro é de render, não de geometria.
+⚠️ **`scripts/_f4/*.png` é IGNORADO pelo git** (`.gitignore:40`). As dez candidatas e as duas
+folhas existem **só neste disco** — um `git clean` as apaga e não há de onde restaurar. Os
+`.mjs`/`.b64` estão versionados; os PNG, não.
 
----
+⚠️ **A fronteira intacta:** o `hangar.png` continua **160×160 byte por byte** e a cutscene final
+segue usando o mesmo arquivo. A sonda cobra `usamHangar = 0` no interior.
 
-## ⚠️ O QUE EU JÁ VI NOS QUADROS, PARA ELE NÃO GASTAR RODADA DESCOBRINDO
-
-**As colunas continuam borrões.** O fundo mudou, mas as colunas do corredor ainda são
-`costela`/`orgao`/`maquinario` — assets de CENÁRIO esticados até a altura sorteada e girados
-alguns graus. Contra a pintura nova elas até destacam mais, mas **onde a coluna termina e onde o
-vão começa continua difícil de ler de relance**.
-
-Isso é a **Task 4 do plano** (`docs/superpowers/plans/2026-09-06-fatia7-bloco-a.md`), que está
-deliberadamente **parada esperando o julgamento dele** — a task termina numa folha de contato, não
-num merge. Gerar coluna nova e instalar sem ele ver é o que custou 40 gerações na Fatia 6.
+⚠️ **Risco de hitbox no que já entrou: ZERO.** Nenhum número de `corredor`, `hazard` ou `wave` foi
+tocado. Se a `probe-stage4` cair, o erro é de render, não de geometria.
 
 ---
 
 ## O QUE VEM DEPOIS, NA ORDEM
 
 ```
-BLOCO A — O LUGAR          ✅ implementado    ◄ ELE JOGA AGORA
-  └ Task 4 (as colunas)    ⬜ espera o OK dele na folha de contato
+BLOCO A — O LUGAR          ✅ APROVADO no teste jogado (07/09)
+  └ Task 4 (as colunas)    🟠 EM CURSO — Passo 5: a lamina larga  ◄ PEGUE AQUI
+  └ a transição (600ms)    ⏸ ADIADA por ele — volta junto com o Bloco C
 BLOCO B — O CHEFÃO         ⬜ a arte nova do guardião + a posição no alto-direita
   └ e o BRAINSTORM da 2ª forma, com a arena já na tela
 BLOCO C — O DUTO           ⬜ paredes contínuas + as 3 portas (aqui mora a hitbox)
+  └ os assets do APERTO     ⬜ fronteira nova dele: o duto estreito tem arte PRÓPRIA
+  └ e a TRANSIÇÃO adiada    ⬜ a passagem atravessada pode aposentar o fade
 ```
 
 **Spec da fatia inteira:** `docs/superpowers/specs/2026-09-06-fatia7-fase4-design.md`.
@@ -86,7 +167,7 @@ BLOCO C — O DUTO           ⬜ paredes contínuas + as 3 portas (aqui mora a h
   ⚠️ **Mas nos quadros 6–8 ele apaga quase por completo, e esse miolo É O ALVO.** Alvo que some
   metade do ciclo é coisa de julgar com o controle na mão.
 - A **morte**: a primeira (dele) falhou porque a silhueta nunca muda — o casco fica intacto e o
-  que "explode" é luz por dentro. A segunda (gerada nesta sessão, prompt nomeando a quebra)
+  que "explode" é luz por dentro. A segunda (gerada em 06/09, prompt nomeando a quebra)
   **melhorou o fim** — vira carcaça oca com destroços — **mas o grosso da silhueta continua
   inteiro**. Duas tentativas convergiram no mesmo limite do gerador.
   **A saída proposta, para ele decidir:** compor a morte no motor — a animação nova rodando com
@@ -98,23 +179,27 @@ BLOCO C — O DUTO           ⬜ paredes contínuas + as 3 portas (aqui mora a h
 
 ---
 
-## AS LEIS QUE ESTA SESSÃO CONFIRMOU OU DESCOBRIU
+## AS LEIS QUE ESTA FATIA CONFIRMOU OU DESCOBRIU
 
 | lei | onde doeu |
 |---|---|
 | ⚠️ **Fundo pintado: assado em 384×216, escala 1. REDUZIR pode, AUMENTAR nunca** — é a grade de pixel casando com a da tela que dá a PROFUNDIDADE | ele cravou em 06/09; o instalador RECUSA ampliar |
+| ⚠️ **A hitbox de um prop de cenário sai da LARGURA DA TEXTURA, não do desenho** | as 10 colunas, 07/09 — 23px de morte invisível na pior delas |
+| ⚠️ **Paleta forçada do fundo camufla o prop** — passe a FAMÍLIA de cor, não o VALOR | a rodada 1 das colunas, 07/09 |
 | **A sonda espera por ESTADO, e o nome do estado se CONFERE** | `s.stageTime` não existe; a espera "por estado" virou relógio cego e os 4 primeiros quadros saíram todos já no chefão. O campo é `s.elapsed` |
 | **`boss.forma` já é verdade enquanto o chefão VOA para dentro da tela** — `damage()` nesse estado é ignorado em silêncio. Espere por `!boss.entering` | ao capturar a 2ª forma, 06/09 |
 | **Documento escrito na frente do fato vira mentira se a sessão cair** | o HANDOFF afirmava "empurrada para origin" antes do push existir |
 | **Arte que o Henrique fez não se corrige sem perguntar** | segue valendo |
+| **Gerar arte e instalar sem ele ver custou 40 gerações na Fatia 6** | a Task 4 termina numa FOLHA, não num merge |
 
 ---
 
 ## O REPOSITÓRIO
 
-Branch **`feat/fase4-visual`**, empurrada. `main` está em `f417c0e` com a **Fatia 6 mergeada**.
+Branch **`feat/fase4-visual`**. `main` está em `f417c0e` com a **Fatia 6 mergeada**.
 `origin` = github.com/HenriqueCrosio/AlienWorld-Remastered-V2.
 ⚠️ O remoto **`legacy`** é o repositório ANTIGO — **nunca empurre para ele**.
 ⚠️ **Commits são de autoria SÓ do Henrique** — sem `Co-Authored-By`, sem "Generated with".
 
-**PixelLab:** 4.852 de 5.000 no ciclo que vira em 2026-10-04. Esta sessão gastou ~2 gerações.
+**PixelLab:** ~4.842 de 5.000 no ciclo que vira em 2026-10-04 (eram 4.852 e a Task 4 gastou 10).
+Confira o saldo no arranque antes de gastar.
