@@ -1,25 +1,36 @@
 # START — FATIA 7 · BLOCO A: ONDE A PRÓXIMA SESSÃO PEGA
 
 **🟢 O BLOCO A PASSOU NO TESTE JOGADO (07/09/2026).**
-**🟠 A TASK 4 (as colunas) está no meio — ele já julgou as dez e autorizou UMA coisa só.**
+**🔴 A TASK 4 (as colunas) está PARADA NO PASSO 7, esperando o julgamento dele.**
 Branch `feat/fase4-visual`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-06-fatia7-bloco-a-START.md`. O Bloco A já passou no
-> teste jogado e as dez colunas já foram julgadas. Retome a Task 4 no Passo 5: a lamina larga."**
+> **"Leia `docs/superpowers/plans/2026-09-06-fatia7-bloco-a-START.md`. A lamina larga já foi
+> gerada e a folha já está montada. A Task 4 está parada no Passo 7 esperando meu julgamento
+> de `scripts/_f4/_folha-lamina.png`."**
 
 ---
 
 ## ⏭️ A PRÓXIMA AÇÃO, EM UMA FRASE
 
-**Gerar a candidata 6 (lamina) DE NOVO, com a textura nascendo larga (~110–128px), e montar uma
-folha em que ela apareça MISTURADA com `costela`/`orgao`/`maquinario` na mesma tela.**
+**Nenhuma — a bola está com ele.** Abrir `scripts/_f4/_folha-lamina.png` e responder:
+**o feixe de osso (`_lam-K-feixe`) convive com `costela`/`orgao`/`maquinario`, ou continua não
+sendo bom?**
 
-É o **Passo 5** de `docs/superpowers/plans/2026-09-06-fatia7-bloco-a.md`. Nada é instalado antes
-de ele ver a folha (Passo 7).
+Com a resposta, o **Passo 8** instala (`BootScene` + o `sorteiaKind` de `GameScene.ts:869`
+passando a saber em que trecho da fase está) e re-mede os vãos. Sem ela, nada é instalado.
+
+### O que a sessão de 08/09 fez — 12 gerações, ZERO instaladas
+
+| | |
+|---|---|
+| **`_lam-K-feixe.png`** | a candidata que sobrou: feixe de lâminas de OSSO, coroa larga, brasa entre as lâminas. 70px de largura contra os 44px da 6 original (**+59%**), **honesta na ponta** e da família quente dos três de hoje |
+| `_lam-E-vela.png` | a alternativa grande (107px) e AZUL — está na folha só para ele ver o que a cor errada faz mesmo com o tamanho certo |
+| `_medir-colunas.mjs` | a régua de honestidade, versionada: mede na altura real do jogo, depois do aparo, com os três de hoje sempre impressos como referência |
+| `_folha-lamina.mjs` | a folha MISTA, no vão da parte LARGA (110/96), não no aperto de 76 |
 
 ---
 
@@ -67,6 +78,25 @@ trecho da fase está**. Hoje sorteia entre três nomes, sem noção de tempo.
 é UNIFORME (`TerrainSystem.ts:278`) — a única forma de a lamina ter a presença dos assets de hoje
 (102–119px de largura a 110 de altura) é a **TEXTURA NASCER MAIS LARGA**. A 6 atual dá 48px: um
 palito ao lado dos de hoje.
+
+---
+
+## 🔴 A LEI QUE O 08/09 DESCOBRIU — E QUE CUSTOU 3 GERAÇÕES PARA APARECER
+
+**"BEM GRANDE" TEM DE SER LARGO NA PONTA, NÃO NA BASE.**
+
+A primeira tentativa de alargar a lamina acertou os 110px pedidos engordando a BASE — e piorou o
+jogo. A hitbox é um retângulo de **altura cheia** com 60% da largura da textura, e é na altura da
+**ponta** que o jogador passa. Resultado: 103px de textura, hitbox de 62px, e 10px de desenho lá
+em cima — **46px de morte invisível**, o dobro da candidata 7 que o Passo 4 já tinha reprovado.
+
+⚠️ **O alvo não é "110px de largura". É "a largura na faixa do topo alcança a hitbox"**, como nos
+três props de hoje. Quem mede isso agora é `node scripts/_f4/_medir-colunas.mjs <arte.png>`.
+
+**E a segunda:** com "dark sci-fi / alien hull" no prompt, o gerador puxa para o **azul-frio**, e
+azul no quadro da F4 é corpo estranho — tudo que é vivo ali é osso, brasa e latão. O prompt tem de
+dizer `bone white / rust orange / ember / NO blue`. É o aviso da paleta forçada visto do outro
+lado: **forçar a paleta do fundo camufla; ignorar a família de cor expulsa.**
 
 ---
 
@@ -143,7 +173,7 @@ tocado. Se a `probe-stage4` cair, o erro é de render, não de geometria.
 
 ```
 BLOCO A — O LUGAR          ✅ APROVADO no teste jogado (07/09)
-  └ Task 4 (as colunas)    🟠 EM CURSO — Passo 5: a lamina larga  ◄ PEGUE AQUI
+  └ Task 4 (as colunas)    🔴 PARADA no Passo 7 — a folha `_folha-lamina.png` espera ele  ◄ AQUI
   └ a transição (600ms)    ⏸ ADIADA por ele — volta junto com o Bloco C
 BLOCO B — O CHEFÃO         ⬜ a arte nova do guardião + a posição no alto-direita
   └ e o BRAINSTORM da 2ª forma, com a arena já na tela
@@ -201,5 +231,5 @@ Branch **`feat/fase4-visual`**. `main` está em `f417c0e` com a **Fatia 6 mergea
 ⚠️ O remoto **`legacy`** é o repositório ANTIGO — **nunca empurre para ele**.
 ⚠️ **Commits são de autoria SÓ do Henrique** — sem `Co-Authored-By`, sem "Generated with".
 
-**PixelLab:** ~4.842 de 5.000 no ciclo que vira em 2026-10-04 (eram 4.852 e a Task 4 gastou 10).
-Confira o saldo no arranque antes de gastar.
+**PixelLab:** ~4.782 de 5.000 no ciclo que vira em 2026-10-04 (a Task 4 gastou 10 em 07/09 e
+mais 12 em 08/09). Confira o saldo no arranque antes de gastar.

@@ -584,7 +584,7 @@ escala é UNIFORME (`TerrainSystem.ts:278`), então a única forma de a lamina t
 assets de hoje (102–119px de largura a 110 de altura) é a TEXTURA nascer mais larga. A 6 atual
 dá 48px — um palito ao lado dos de hoje.
 
-- [ ] **Passo 5: gerar a LAMINA LARGA — a única arte que ele autorizou**
+- [x] **Passo 5: gerar a LAMINA LARGA — a única arte que ele autorizou** — FEITO 08/09/2026, **12 gerações**
 
 ⚠️ **Não é uma coluna nova: é a 6 outra vez, larga.** A silhueta da `_col-6-lamina.png` já passou
 no teste técnico (desenho 44px contra hitbox 29px — das três honestas, a de melhor leitura). O que
@@ -598,18 +598,73 @@ forçada do fundo é camuflagem) — família de cor do fundo, valor próprio.
 de uma vez os dois defeitos técnicos que a tabela acima mediu: a hitbox que sai da textura e a
 folga na base que faz a coluna flutuar.
 
-- [ ] **Passo 6: a folha nova — a lamina larga AO LADO dos três de hoje**
+### ⚠️ A LEI NOVA: "BEM GRANDE" TEM DE SER LARGO **NA PONTA**, NÃO NA BASE
 
-⚠️ **A pergunta mudou.** Não é mais "qual das dez?": é **"a lamina grande convive com
-`costela`/`orgao`/`maquinario` na mesma tela?"** — que é o que ele autorizou. Então a folha tem
-de mostrar o sorteio MISTURADO, não a lamina sozinha numa faixa.
+A primeira rodada (A/B/C) acertou o alvo de 110px de largura e **piorou o jogo**. A medida:
 
-Reaproveitar `scripts/_f4/_folha-colunas.mjs` (a geometria dele já é a do jogo). Faixa de
-controle HOJE em cima, faixa MISTA embaixo.
+| candidata | texW | hitbox | 10% | 20% | 30% | 50% | 80% | base | veredicto |
+|---|---|---|---|---|---|---|---|---|---|
+| **hoje** costela | 119 | 71 | 102 | 110 | 119 | 116 | 119 | 44 | referência |
+| **hoje** orgao | 113 | 68 | 110 | 105 | 106 | 106 | 101 | 42 | referência |
+| **hoje** maquinario | 102 | 61 | 50 | 81 | 98 | 100 | 93 | 51 | referência (11px na ponta) |
+| `_col-6-lamina` | 44 | 26 | 3 | 6 | 7 | 9 | 14 | 44 | ⚠️ mata 20px no vazio |
+| A larga | 103 | 62 | 10 | 16 | 15 | 25 | 33 | 102 | ⚠️ **mata 46px no vazio** |
+| B trio | 94 | 56 | 11 | 15 | 49 | 49 | 61 | 50 | ⚠️ mata 41px no vazio |
+| D cutelo | 48 | 29 | 17 | 27 | 35 | 36 | 7 | 8 | deitado, e flutua |
+| E vela | 107 | 64 | 38 | 42 | 46 | 53 | 94 | 107 | ⚠️ mata 22px, e é AZUL |
+| H monolito | 98 | 59 | 45 | 64 | 66 | 67 | 71 | 98 | honesta, mas é ROCHA |
+| I osso | 98 | 59 | 19 | 26 | 31 | 41 | 75 | 83 | ⚠️ mata 33px no vazio |
+| J laje | 53 | 32 | 41 | 53 | 53 | 53 | 53 | 18 | honesta, mas é um TIJOLO |
+| **K feixe** | **70** | **42** | **41** | **55** | **57** | **57** | **58** | **70** | ✅ **honesta (0px)** |
 
-- [ ] **Passo 7: PARAR e esperar o julgamento dele**
+⚠️ **Alargar a BASE alarga a textura, a hitbox vai junto — e a ponta continua fina.** A hitbox é
+um retângulo de ALTURA CHEIA (`body.setSize(p.width * 0.6, p.height)`), e é na altura da PONTA que
+o jogador passa. A candidata A ficou com os 103px de largura pedidos e passou a **matar em 62px
+onde desenha 10**: 46px de morte invisível — o dobro da candidata 7, que o Passo 4 já tinha
+reprovado por 23px. **O alvo certo não é "110px de largura": é "a largura na faixa do topo
+alcança a hitbox", como nos três de hoje.**
+
+A régua que mede isso virou script: **`scripts/_f4/_medir-colunas.mjs`** (versionado). Ela mede na
+altura real do jogo, DEPOIS do aparo, e sempre imprime os três de hoje como referência.
+
+### ⚠️ A SEGUNDA LEI: A FAMÍLIA DE COR É QUENTE, E O GERADOR PUXA PARA O FRIO
+
+Com "dark sci-fi / alien hull" no prompt, as seis primeiras candidatas nasceram **azul-frias**.
+Na folha elas viram corpo estranho: no quadro da F4 tudo que é vivo é OSSO, BRASA e LATÃO. Uma
+rodada explicitando `bone white / rust orange / ember / NO blue` resolveu — é o mesmo aviso da
+rodada 1 visto do outro lado: **paleta forçada do fundo camufla, mas ignorar a família de cor
+expulsa.**
+
+**A candidata que sobrou: `_lam-K-feixe.png`** — feixe de lâminas de osso, coroa larga em cima,
+brasa entre as lâminas. 70px de largura contra os 44px da 6 original (**+59% de presença**),
+honesta na ponta (0px de morte invisível) e da família quente dos três de hoje. Não chega aos
+102–119px dos de hoje, e isso é uma escolha: os 70px são o quanto ela cresce **sem** voltar a
+mentir na hitbox.
+
+- [x] **Passo 6: a folha nova — a lamina larga AO LADO dos três de hoje** — FEITO 08/09/2026
+
+`scripts/_f4/_folha-lamina.mjs` → `scripts/_f4/_folha-lamina.png`, cinco faixas:
+
+1. **HOJE** (controle) — `costela`/`orgao`/`maquinario`, gap 110
+2. **MISTO** com `_lam-K-feixe`, gap 110 (o trecho de t=1)
+3. **MISTO** com `_lam-K-feixe`, gap 96 (o trecho de t=15)
+4. **MISTO** com `_lam-E-vela`, gap 110 — a alternativa GRANDE e FRIA, para ele ver o que a
+   família de cor errada faz mesmo com o tamanho certo
+5. **MISTO** com `_lam-E-vela`, gap 96
+
+⚠️ **O vão é o da parte LARGA (110/96), não o aperto de 76** da folha anterior: o aperto ganha
+assets próprios no Bloco C, fronteira cravada por ele em 07/09.
+
+- [ ] **Passo 7: PARAR e esperar o julgamento dele** ◄ **É AQUI QUE ESTAMOS**
 
 ⚠️ Nada é instalado antes da resposta. Vale a mesma lei da Fatia 6.
+
+**A pergunta, em uma linha:** na folha `_folha-lamina.png`, o feixe de osso convive com
+`costela`/`orgao`/`maquinario` — ou continua não sendo bom?
+
+Se a resposta for "ainda não", a saída conhecida é **subir a largura da K** e pagar o preço:
+cada pixel de largura além do desenho da ponta vira morte invisível. A régua
+(`_medir-colunas.mjs`) diz exatamente quanto.
 
 - [ ] **Passo 8 (só depois do OK): instalar e RE-MEDIR os vãos**
 
