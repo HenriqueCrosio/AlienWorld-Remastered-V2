@@ -1,3 +1,23 @@
+# ⛔ ESTE DOCUMENTO FOI SUPERADO EM 08/09/2026
+
+**A porta de entrada agora é
+[`2026-09-08-fatia7-moldura-START.md`](2026-09-08-fatia7-moldura-START.md).**
+
+A **Task 4 (as colunas novas) morreu.** Ela foi substituída pela MOLDURA — a faixa contínua de
+chão e teto, decidida com ele em 08/09 e especificada em
+`docs/superpowers/specs/2026-09-08-fatia7-moldura-fase4-design.md`.
+
+**O que ainda vale aqui, e só isto:**
+
+- ✅ o registro do Bloco A aprovado no teste jogado (os 4 fundos, a saída do `hangar`, o evento
+  `cenario`) — a parte de cima deste documento;
+- ✅ a seção **"O QUE JÁ ESTÁ NA MÃO PARA O BLOCO B"** — o guardião novo continua de pé, intacto;
+- ✅ a linha de base `[110,110,110]`.
+
+**O que NÃO vale mais:** tudo que fala em escolher, gerar ou instalar coluna sorteada.
+
+---
+
 # START — FATIA 7 · BLOCO A: ONDE A PRÓXIMA SESSÃO PEGA
 
 **🟢 O BLOCO A PASSOU NO TESTE JOGADO (07/09/2026).**

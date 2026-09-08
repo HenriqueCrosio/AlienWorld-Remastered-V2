@@ -1,3 +1,20 @@
+# ⛔ A TASK 4 DESTE PLANO FOI CANCELADA EM 08/09/2026
+
+As Tasks 1 a 3 estão **feitas e aprovadas no teste jogado** — o registro delas continua válido.
+
+A **Task 4 (as colunas novas) morreu no Passo 7**, e não por falta de arte: 22 candidatas em dois
+dias provaram que o defeito era a ESTRUTURA que segurava a coluna, não a coluna. Ela foi
+substituída pela MOLDURA.
+
+**Spec nova:** `docs/superpowers/specs/2026-09-08-fatia7-moldura-fase4-design.md`
+**Porta de entrada:** `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`
+
+⚠️ O que a Task 4 deixou de herança e continua valendo: a régua `scripts/_f4/_medir-colunas.mjs`
+e a lei de que a hitbox sai da LARGURA DA TEXTURA, não do desenho. A mesa de topo chato da moldura
+existe por causa dessa medida.
+
+---
+
 # FATIA 7 · BLOCO A — O LUGAR · Plano de implementação
 
 > **Para quem executa:** SUB-SKILL OBRIGATÓRIA — `superpowers:executing-plans` ou
