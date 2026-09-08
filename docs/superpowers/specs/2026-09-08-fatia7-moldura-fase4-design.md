@@ -241,9 +241,16 @@ os véus da nebulosa), então o `f4Veu` não pede infraestrutura nova.
 
 ## 8. AS LEIS DE ARTE DESTA FASE
 
-1. ⚠️ **Mais contraste que a pintura, não menos.** Plano mais perto tem mais contraste e mais
-   saturação. Foi o erro das duas primeiras versões do mock: a faixa escurecida lia como buraco
-   preto. Só na terceira, clareada e contrastada, passou a ler como parede.
+1. ⚠️ **Mais contraste que a pintura — o que NÃO é o mesmo que mais clara.** Esta lei já nasceu
+   mal escrita aqui e cobrou o preço no mesmo dia: as quatro primeiras faixas saíram de **1,55× a
+   4,06× mais claras** que as próprias pinturas, e parede 4× mais clara que o lugar onde ela está
+   não lê como plano da frente — lê como adesivo branco. A redação certa, em número:
+   - a **média** da faixa fica pouco acima da média da pintura — alvo **1,3×**, não mais;
+   - o **contraste interno** sobe (fator ~1,4): a diferença mora DENTRO da peça.
+   - **O brilho é local, não geral.** Quem confere é `scripts/_f4/_valor-faixa.mjs`.
+
+   (O erro simétrico também já aconteceu: as duas primeiras versões do mock escureceram a faixa e
+   ela virou buraco preto. O alvo é uma faixa estreita, e por isso ele é um número.)
 2. ⚠️ **Nada, nunca, no meio.** A banda onde o jogador voa fica vazia. O espaço negativo é o que
    faz o resto ser legível — e é o que permite gastar todo o detalhe na borda sem matar ninguém.
 3. ⚠️ **Luz é PONTUAL, não contorno.** A primeira versão do mock desenhou um contorno aceso na
@@ -268,7 +275,14 @@ os véus da nebulosa), então o `f4Veu` não pede infraestrutura nova.
 
 **Sobrevive:**
 
-- **`scripts/_f4/_medir-colunas.mjs`** — a régua de honestidade. Passa a medir mesas.
+- **`scripts/_f4/_medir-colunas.mjs`** — a régua de honestidade da MESA (hitbox contra desenho).
+- **`scripts/_f4/_medir-faixas.mjs`** — a régua da FAIXA: se ela sangra nas três bordas, se o topo
+  é reto e o quanto a emenda vai aparecer. ⚠️ Foi ela que provou que
+  `create_1_direction_object` é a ferramenta ERRADA para uma parede: das 64 candidatas geradas em
+  08/09, **nenhuma** encostava nas três bordas — a ferramenta existe para recortar um objeto do
+  fundo, e parede precisa do oposto. A faixa é **imagem cheia** (`no_background: false`), e aí
+  topo reto e bordas sangrando saem por construção.
+- **`scripts/_f4/_valor-faixa.mjs`** — o acerto de valor contra a pintura da câmara.
 - **`scripts/_f4/_folha-lamina.mjs` e `_mock-moldura.mjs`** — o ferramental de folha de contato.
 - **Tudo do Bloco A já aprovado**: os quatro fundos, a saída do `hangar`, o evento `cenario`.
 
