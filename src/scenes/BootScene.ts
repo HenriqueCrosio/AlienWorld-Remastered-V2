@@ -594,7 +594,18 @@ const ART: Record<string, string> = {
   f4Faixa: 'sprites/f4-faixa-prov.png',
   // A MESA: 96×112, TOPO CHATO. A hitbox sai da largura da TEXTURA, então topo chato é o que a
   // torna honesta por construção (`scripts/_f4/_medir-colunas.mjs`).
-  f4Mesa: 'sprites/f4-mesa-prov.png',
+  //
+  // ⚠️ A CHAVE TEM DE SE CHAMAR `mesa`, NÃO `f4Mesa`. `TerrainSystem.spawn` resolve a textura por
+  // `pickVariant(scene, kind)` (src/art.ts) — o nome do `PropKind` É a chave da arte, sem
+  // tradução no meio. Uma chave fora dessa convenção não gera erro nenhum: o `pickVariant` procura
+  // 'mesa', não acha, e o Phaser devolve a textura de erro (`__MISSING`) — que tem 32×32, então
+  // `body.setSize(width * 0.6, height)` também sai errado, e o obstáculo perde a hitbox junto com
+  // a arte. Foi exatamente o que aconteceu: a Task 5 criou o kind `mesa`, a Task 3 registrou a
+  // arte como `f4Mesa`, e as quatro sondas passaram porque nenhuma olhava a TEXTURA carregada
+  // (ver os asserts novos em `scripts/probe-f4-moldura.mjs`). Quando a arte de verdade entrar
+  // (M2–M5), as variantes são `mesa2`, `mesa3`… — o `pickVariant` sorteia entre elas sem mudar
+  // nenhuma linha de código, DE GRAÇA, porque a convenção foi respeitada desde o nome.
+  mesa: 'sprites/f4-mesa-prov.png',
 
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',

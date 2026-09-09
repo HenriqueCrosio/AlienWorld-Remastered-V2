@@ -202,6 +202,8 @@ const mesas = await page.evaluate(() => {
     kinds: [...new Set(ps.map((p) => p.getData('kind')))],
     escalas: [...new Set(ps.flatMap((p) => [p.scaleX, p.scaleY]))],
     vaos,
+    texturas: [...new Set(ps.map((p) => p.texture.key))],
+    dims: [...new Set(ps.map((p) => `${p.displayWidth}x${p.displayHeight}`))],
   };
 });
 console.log('mesa     ', JSON.stringify(mesas));
@@ -216,6 +218,24 @@ ok(
 ok(
   mesas.vaos.length >= 2 && mesas.vaos.every((v) => v === mesas.gap),
   `o vão medido é o do roteiro, EXATO (gap=${mesas.gap}, medidos=[${mesas.vaos}])`,
+);
+// ⚠️ ESTES DOIS ASSERTS SÃO O REMENDO DO BURACO DA TASK 5. A chave da arte da mesa (`f4Mesa`) e o
+// nome do `PropKind` (`mesa`) nasceram desalinhados: `pickVariant(scene, kind)` procurava `mesa`,
+// não achava, e o Phaser devolvia a textura de erro do motor (`__MISSING`, 32×32). O obstáculo
+// ficou INVISÍVEL e com a hitbox errada, e as QUATRO sondas existentes passaram assim mesmo — os
+// asserts acima checam `kind` (o dado que o jogo ATRIBUI ao prop, não o que ele CARREGOU), a
+// escala e o vão do par, e o vão sai do MESMO número que posiciona a peça (`bordaVao`), então ele
+// não tem como flagrar textura errada por construção. Só olhar a textura de verdade pega isto.
+ok(
+  mesas.texturas.length === 1 && mesas.texturas[0] === 'mesa',
+  `nenhum prop do corredor usa a textura de erro — todos carregam 'mesa' (${JSON.stringify(mesas.texturas)})`,
+);
+// A mesa entra em escala 1 e não é escalada — o `bordaVao` crava a POSIÇÃO, nunca o TAMANHO. Se a
+// arte real for 96×112 e a tela mostrar outra coisa, é a textura de erro (32×32) ou uma variante
+// com dimensão diferente entrando sem que ninguém tenha medido.
+ok(
+  mesas.dims.length === 1 && mesas.dims[0] === '96x112',
+  `as dimensões batem com a arte — 96×112, sem esticar nem encolher (${JSON.stringify(mesas.dims)})`,
 );
 
 // ─── A ESPESSURA SOBE AO LONGO DA FASE ───

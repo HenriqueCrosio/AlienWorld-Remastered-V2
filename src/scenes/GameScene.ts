@@ -881,7 +881,7 @@ export class GameScene extends Phaser.Scene {
     // é UM — a mesa — e o que troca entre as câmaras é a TEXTURA dela (etapas M2–M5), não o nome.
     // Sem a arte, cai na `costela`: mais larga e mais feia, mas a fase roda (arte entra asset por
     // asset, e a guarda é sempre `textures.exists`).
-    const kind: PropKind = this.textures.exists('f4Mesa') ? 'mesa' : 'costela';
+    const kind: PropKind = this.textures.exists('mesa') ? 'mesa' : 'costela';
 
     // ⚠️ MORREU AQUI TAMBÉM O FUNIL (o `angle` por coluna). Ele existia para as costelas fecharem
     // em funil; uma mesa inclinada tem o topo em DIAGONAL, e topo em diagonal é exatamente a
