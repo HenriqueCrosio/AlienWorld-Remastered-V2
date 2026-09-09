@@ -52,6 +52,13 @@ Valem para **todas** as tarefas. Os números vêm da spec, verbatim.
 - **Git:** branch `feat/fase4-visual`. ⚠️ Commits de autoria **SÓ do Henrique** — sem
   `Co-Authored-By`, sem "Generated with". `origin` = `AlienWorld-Remastered-V2`; ⚠️ **nunca**
   empurre para o remoto `legacy`.
+- ⚠️ **A CHAVE DA ARTE DE UM PROP É O NOME DO `PropKind`.** `TerrainSystem.spawn` resolve a
+  textura com `pickVariant(scene, kind)` (`src/art.ts`), então um prop chamado `mesa` exige uma
+  entrada `mesa` no `ART`. Fora dessa convenção a peça nasce com a textura de ERRO do Phaser e a
+  hitbox sai das dimensões DELA (32×32) — o obstáculo some do jogo. **E nenhuma das quatro sondas
+  pega isso sozinha**: a linha de base `[110,110,110]` é calculada a partir do mesmo número que
+  posiciona a peça, então ela não pode detectar textura errada. Por isso a sonda cobra a chave e as
+  dimensões explicitamente.
 - ⚠️ **`scripts/_f4/*.png` é IGNORADO pelo git** (`.gitignore`). `public/sprites/*.png` **não é** —
   é lá que a arte provisória tem de morar para sobreviver a um `git clean`.
 - **Build limpo:** `npm run build` (roda `tsc --noEmit` antes do Vite) tem de passar ao fim de
@@ -69,7 +76,7 @@ Valem para **todas** as tarefas. Os números vêm da spec, verbatim.
 | **Modificar** `src/scenes/GameScene.ts` | Constrói e atualiza a `Moldura`; `spawnCorredores` deixa de sortear e passa a perguntar; o evento `moldura` entra no `switch`. |
 | **Modificar** `src/systems/TerrainSystem.ts` | `PropKind` ganha `mesa`; `spawn` ganha a opção `bordaVao` (crava a borda, não escala). |
 | **Modificar** `src/systems/StageDirector.ts` | O tipo de evento `moldura` e as sete linhas dele no `STAGE_4`. |
-| **Modificar** `src/scenes/BootScene.ts` | Registra `f4Faixa` e `f4Mesa` no `ART`. |
+| **Modificar** `src/scenes/BootScene.ts` | Registra `f4Faixa` e `mesa` no `ART`. ⚠️ A chave da mesa TEM de se chamar `mesa` — ver a lei de nomenclatura nas Global Constraints. |
 | **Criar** `public/sprites/f4-faixa-prov.png`, `public/sprites/f4-mesa-prov.png` | A arte provisória, versionada (é asset, não bancada). |
 
 ---
@@ -110,7 +117,7 @@ pela sonda é o `gap` do roteiro **exato**, sem arredondamento.
 
 **Interfaces:**
 - Consome: `public/sprites/paint-bg-f4-a.png` (a pintura da câmara A, 384×216).
-- Produz: os dois PNG acima. As tarefas 3 e 5 os carregam pelas chaves `f4Faixa` e `f4Mesa`.
+- Produz: os dois PNG acima. As tarefas 3 e 5 os carregam pelas chaves `f4Faixa` e `mesa`.
 
 ⚠️ **Isto é arte FEIA DE PROPÓSITO.** O M1 existe para responder se a GEOMETRIA funciona antes de
 gastar 14 peças em cima dela. Não melhore a arte aqui; não gere nada no PixelLab.
@@ -957,7 +964,15 @@ Em `src/scenes/BootScene.ts`, no bloco da Fase 4, logo **depois** da linha
   f4Faixa: 'sprites/f4-faixa-prov.png',
   // A MESA: 96×112, TOPO CHATO. A hitbox sai da largura da TEXTURA, então topo chato é o que a
   // torna honesta por construção (`scripts/_f4/_medir-colunas.mjs`).
-  f4Mesa: 'sprites/f4-mesa-prov.png',
+  //
+  // ⚠️ A CHAVE SE CHAMA `mesa` PORQUE O `PropKind` SE CHAMA `mesa`, e isso não é estilo: o
+  // `TerrainSystem.spawn` resolve a textura com `pickVariant(scene, kind)`, então o nome do kind É
+  // a chave da arte (é assim que `costela`, `orgao` e `maquinario` funcionam). Registrada fora
+  // dessa convenção, a peça nasce com a textura de ERRO do Phaser — invisível — e, pior, a hitbox
+  // passa a sair das dimensões dela (32×32) em vez das da mesa (96×112): o obstáculo deixa de
+  // existir. Aconteceu (chave `f4Mesa`), e as QUATRO sondas passaram por cima.
+  // De brinde, a convenção devolve as variantes: `mesa2`, `mesa3`… entram sem tocar em código.
+  mesa: 'sprites/f4-mesa-prov.png',
 ```
 
 - [ ] **Passo 4: rodar a sonda e confirmar que ela PASSA**
@@ -1204,7 +1219,7 @@ git commit -m "feat(fase4): a espessura da faixa por trecho — as paredes vao f
   `scripts/_f4/_medir-colunas.mjs`
 
 **Interfaces:**
-- Consome: `Moldura.vaoEm(x)` (Task 2), a textura `f4Mesa` (Tasks 1 e 3).
+- Consome: `Moldura.vaoEm(x)` (Task 2), a textura `mesa` (Tasks 1 e 3).
 - Produz: o `PropKind` `'mesa'` e a opção `spawn(kind, { bordaVao })`. As etapas M2–M5 vão trocar
   só a **textura** — a geometria fica pronta aqui.
 
@@ -1382,7 +1397,7 @@ Em `src/scenes/GameScene.ts`, substitua **todo o corpo** de `spawnCorredores` a 
     // é UM — a mesa — e o que troca entre as câmaras é a TEXTURA dela (etapas M2–M5), não o nome.
     // Sem a arte, cai na `costela`: mais larga e mais feia, mas a fase roda (arte entra asset por
     // asset, e a guarda é sempre `textures.exists`).
-    const kind: PropKind = this.textures.exists('f4Mesa') ? 'mesa' : 'costela';
+    const kind: PropKind = this.textures.exists('mesa') ? 'mesa' : 'costela';
 
     // ⚠️ MORREU AQUI TAMBÉM O FUNIL (o `angle` por coluna). Ele existia para as costelas fecharem
     // em funil; uma mesa inclinada tem o topo em DIAGONAL, e topo em diagonal é exatamente a
