@@ -157,10 +157,17 @@ export class Moldura {
     // sozinho e fosse reposicionado ao sair da tela acumularia erro de ponto flutuante e sairia
     // da grade; fora da grade, a trava dos 8px deixa de ser exata. Aqui `x = i*128 − (xMundo %
     // 128)` por construção, todo frame.
-    const off = this.xMundo % Moldura.LARGURA;
+    //
+    // ⚠️ O ÍNDICE DA PLACA VEM DO LAÇO, NUNCA DO `x` ARREDONDADO. O `x` é arredondado para a
+    // grade de pixel da tela (nada de sprite em meio pixel), e esse arredondamento pode empurrar
+    // `floor((xMundo + x) / 128)` uma placa para trás — o segmento passaria a desenhar a altura
+    // da placa vizinha toda vez que `off` cruzasse um meio pixel. O segmento `i` É a placa
+    // `base + i`, por construção.
+    const base = Math.floor(this.xMundo / Moldura.LARGURA);
+    const off = this.xMundo - base * Moldura.LARGURA;
     for (let i = 0; i < Moldura.SEGMENTOS; i++) {
+      const p = this.placaDe(base + i);
       const x = Math.round(i * Moldura.LARGURA - off);
-      const p = this.placaEm(x);
       this.chao[i].setPosition(x, p.superficieChao);
       this.teto[i].setPosition(x, p.superficieTeto);
     }
@@ -181,16 +188,33 @@ export class Moldura {
     return this.placaEm(xTela).superficieTeto;
   }
 
-  private placaEm(xTela: number): Placa {
-    const n = Math.floor((this.xMundo + xTela) / Moldura.LARGURA);
+  /**
+   * A placa de índice `n`, gerando as que faltam e podando as que já saíram da tela.
+   *
+   * ⚠️ A PODA MEDE A TELA, NUNCA A PERGUNTA — e esta distinção custou um crash garantido no
+   * frame 1. A primeira versão podava `k < n - 3` com o `n` de QUEM PERGUNTOU. Mas quem pergunta
+   * mais à frente é o `spawnCorredores` (`vaoEm(414)`, três a quatro placas à direita do último
+   * segmento desenhado), e a poda dele apagava a placa que o segmento da ESQUERDA ia pedir no
+   * frame seguinte: `placas.get(n)` devolvia `undefined` e o `!` mentia para o TypeScript.
+   * O piso agora sai do `xMundo` — a borda esquerda da tela, que é a mesma para todos os que
+   * perguntam.
+   */
+  private placaDe(n: number): Placa {
+    // A geração é sempre para a FRENTE: o mundo só rola num sentido, e cada placa deriva da
+    // anterior (ver `gerar`), então gerar em ordem é o que mantém a curva contínua.
     while (this.ultima < n) {
       this.ultima++;
       this.placas.set(this.ultima, this.gerar(this.ultima));
     }
-    // Poda: a tela cabe em 4 placas; guardar 3 atrás é folga de sobra para o `x` negativo do
-    // segmento da esquerda. Sem poda, o Map cresce a fase inteira.
-    for (const k of this.placas.keys()) if (k < n - 3) this.placas.delete(k);
+
+    const piso = Math.floor(this.xMundo / Moldura.LARGURA) - 1;
+    for (const k of this.placas.keys()) if (k < piso) this.placas.delete(k);
+
     return this.placas.get(n)!;
+  }
+
+  private placaEm(xTela: number): Placa {
+    return this.placaDe(Math.floor((this.xMundo + xTela) / Moldura.LARGURA));
   }
 
   private gerar(n: number): Placa {
@@ -237,6 +261,11 @@ export class Moldura {
     if (this.gap > 0) {
       superficieChao = Math.max(superficieChao, vaoY + meio + Moldura.FOLGA);
       superficieTeto = Math.min(superficieTeto, vaoY - meio - Moldura.FOLGA);
+      // ⚠️ `meio` pode ser fracionário (`gap` ímpar), e a trava acima herdaria essa fração. O
+      // arredondamento entra DEPOIS do clamp, no mesmo sentido seguro de sempre — chão para
+      // BAIXO, teto para CIMA — para nunca comer os 8px de folga que a trava acabou de garantir.
+      superficieChao = Math.ceil(superficieChao);
+      superficieTeto = Math.floor(superficieTeto);
     }
 
     return { vaoY, repetida, superficieChao, superficieTeto };
