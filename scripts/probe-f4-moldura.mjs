@@ -103,7 +103,14 @@ ok(
 ok(serie.length >= 6, `a curva ANDOU ao longo da fase (${serie.length} degraus distintos)`);
 ok(maior <= PASSO_MAX + 1, `o degrau nunca salta mais que ${PASSO_MAX}px (maior=${maior})`);
 
-// ─── A FAIXA: ela existe, é DECORAÇÃO, e está em escala 1 ───
+// ─── A FAIXA: ela existe, é DECORAÇÃO, está em escala 1, e é a TEXTURA/DIMENSÃO certas ───
+//
+// ⚠️ A LIÇÃO DA TASK 5 (ver os dois asserts da MESA logo abaixo) vale IGUAL para a faixa: são as
+// 14 peças do M2–M5 que vão trocar exatamente esta arte. `texturas` cobra que nenhum segmento
+// caiu na textura de erro do motor (`__MISSING`/`__DEFAULT`); `dims` cobra 128×64 exatos — a
+// LARGURA é o que faz `cobre` fechar sem buraco entre segmentos, e a ALTURA é de quem
+// `Moldura.ESPESSURA_MAX = 54` depende (a peça tem 64px e é ancorada pela superfície, sem crop
+// nem escala — ver o comentário do construtor).
 const faixa = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   const pega = (nome) => s.children.list.filter((o) => o.name === nome);
@@ -115,10 +122,29 @@ const faixa = await page.evaluate(() => {
     teto: teto.length,
     comCorpo: todos.filter((o) => o.body).length,
     escalas: [...new Set(todos.flatMap((o) => [o.scaleX, o.scaleY]))],
+    // ⚠️ `o.displayWidth`, NUNCA o literal 128. Uma peça de faixa com largura errada
+    // posicionaria os segmentos a 128px mesmo assim (é o `LARGURA` da GRADE do mundo, não da
+    // arte) e deixaria buracos entre eles — um `cobre` medido com o literal passaria do mesmo
+    // jeito, cego para exatamente o defeito que existe para pegar.
     cobre: chao.length
       ? Math.min(...chao.map((o) => o.x)) <= 0 &&
-        Math.max(...chao.map((o) => o.x)) + 128 >= 384
+        Math.max(...chao.map((o) => o.x + o.displayWidth)) >= 384
       : false,
+    texturas: [...new Set(todos.map((o) => o.texture.key))],
+    dims: [...new Set(todos.map((o) => `${o.displayWidth}x${o.displayHeight}`))],
+    // ⚠️ I3 — O QUE ESTÁ DESENHADO CONTRA O QUE A PLACA DIZ, não dois lados da mesma fonte
+    // interna. Os outros asserts desta sonda só leem `moldura.placaEm`/`vaoEm`/`espessura` —
+    // dados INTERNOS — e nunca comparam com a posição de tela do sprite. O Critical da Task 2
+    // (o segmento desenhando a altura da placa VIZINHA, por causa do `x` arredondado)
+    // continuaria invisível aqui: a trava mede a placa, a placa estaria certa, só o desenho
+    // estaria errado — a mesma classe do incidente da mesa invisível: os números fecham, a
+    // coisa não está na tela.
+    //
+    // ⚠️ AMOSTRA NO MEIO DO SEGMENTO (`x + 64`), NUNCA NA BORDA. O `x` do sprite é arredondado
+    // para a grade de pixel; amostrar na borda reintroduz a mesma ambiguidade de placa que
+    // causou o Critical. Tolerância 0: os dois têm de bater exatamente.
+    desviosChao: chao.map((o) => o.y - s.moldura.superficieChaoEm(o.x + 64)),
+    desviosTeto: teto.map((o) => o.y - s.moldura.superficieTetoEm(o.x + 64)),
   };
 });
 console.log('faixa    ', JSON.stringify(faixa));
@@ -132,6 +158,22 @@ ok(
   `a faixa é desenhada em escala 1 (${JSON.stringify(faixa.escalas)})`,
 );
 ok(faixa.cobre, 'os 4 segmentos cobrem a largura da tela sem buraco');
+ok(
+  faixa.texturas.length === 1 && faixa.texturas[0] === 'f4Faixa',
+  `nenhum segmento da faixa usa a textura de erro — todos carregam 'f4Faixa' (${JSON.stringify(faixa.texturas)})`,
+);
+ok(
+  faixa.dims.length === 1 && faixa.dims[0] === '128x64',
+  `as dimensões da faixa batem com a arte — 128×64, sem esticar nem encolher (${JSON.stringify(faixa.dims)})`,
+);
+ok(
+  faixa.desviosChao.every((d) => d === 0),
+  `o chão da faixa está EXATAMENTE onde a placa manda (desvios=${JSON.stringify(faixa.desviosChao)})`,
+);
+ok(
+  faixa.desviosTeto.every((d) => d === 0),
+  `o teto da faixa está EXATAMENTE onde a placa manda (desvios=${JSON.stringify(faixa.desviosTeto)})`,
+);
 
 // ─── A TRAVA DOS 8px: a superfície nunca entra no corredor ───
 //
