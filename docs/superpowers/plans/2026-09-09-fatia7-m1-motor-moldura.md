@@ -375,20 +375,50 @@ await blindar();
 // ⚠️ Amostra o vão na BOCA DE CENA (x = 414, onde o corredor nasce) e guarda só as MUDANÇAS. É a
 // medida direta do defeito diagnosticado em `GameScene.ts:859`: hoje cada par sorteia um `vaoY`
 // novo no alcance inteiro (saltos de até 38px); a curva anda no máximo `PASSO_MAX`.
+// ⚠️ Espera por ESTADO (o relógio do JOGO), nunca por relógio de parede — e este laço foi a
+// exceção que faltava. A primeira versão contava 120 iterações de `waitForTimeout(200)` (~24s de
+// PAREDE) achando que cobria a fase. Não cobre: o Chromium headless com swiftshader engasga, o
+// Phaser limita o `delta`, e o relógio do JOGO andava só ~15s nesse tempo — ~10 placas (a placa
+// muda a cada 1,52s). Simulado 20.000× por cenário: 10 placas reprovam `serie.length >= 6` em
+// 41,9% das vezes — bate com o "1 em 3" medido em produção. 19 placas (~29s de jogo) derrubam
+// isso para ~0,5%. O limiar 6 estava certo; a unidade da espera é que estava errada.
 const PASSO_MAX = 14;
+const ALVO_ELAPSED = 32; // ~29s de jogo a partir do t≈3 em que a sonda começa aqui → ~19 placas.
+const TETO_ITERACOES = 400; // rede de segurança: nunca deixa a sonda pendurar se algo travar.
 const serie = [];
-for (let i = 0; i < 120; i++) {
+let elapsedAlcancado = 0;
+let iteracoesUsadas = 0;
+let janelaAlcancada = false;
+for (; iteracoesUsadas < TETO_ITERACOES; iteracoesUsadas++) {
   await blindar();
-  const v = await page.evaluate(() => {
+  const leitura = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
-    return s && s.moldura ? Math.round(s.moldura.vaoEm(414)) : null;
+    if (!s || !s.moldura) return null;
+    return { v: Math.round(s.moldura.vaoEm(414)), t: s.elapsed ?? 0 };
   });
-  if (v !== null && v !== serie[serie.length - 1]) serie.push(v);
+  if (leitura !== null) {
+    elapsedAlcancado = leitura.t;
+    if (leitura.v !== serie[serie.length - 1]) serie.push(leitura.v);
+    if (leitura.t >= ALVO_ELAPSED) {
+      janelaAlcancada = true;
+      iteracoesUsadas++;
+      break;
+    }
+  }
   await page.waitForTimeout(200);
 }
 const saltos = serie.slice(1).map((v, i) => Math.abs(v - serie[i]));
 const maior = saltos.length ? Math.max(...saltos) : 0;
-console.log('curva    ', JSON.stringify({ degraus: serie.length, serie, maior }));
+console.log(
+  'curva    ',
+  JSON.stringify({ degraus: serie.length, serie, maior, elapsed: elapsedAlcancado }),
+);
+// ⚠️ Este assert existe para os dois de baixo não passarem por OMISSÃO: sem ele, uma janela que
+// nunca foi alcançada devolveria poucos degraus e a sonda culparia a curva em vez do relógio.
+ok(
+  janelaAlcancada,
+  `a janela do relógio do JOGO foi alcançada (elapsed=${elapsedAlcancado}, alvo=${ALVO_ELAPSED}, ${iteracoesUsadas}/${TETO_ITERACOES} iterações)`,
+);
 ok(serie.length >= 6, `a curva ANDOU ao longo da fase (${serie.length} degraus distintos)`);
 ok(maior <= PASSO_MAX + 1, `o degrau nunca salta mais que ${PASSO_MAX}px (maior=${maior})`);
 
@@ -429,6 +459,18 @@ interface Placa {
   superficieChao: number;
   /** A linha de baixo da faixa do teto, em y de tela. Já com a trava aplicada. */
   superficieTeto: number;
+  /**
+   * O `gap` sob o qual esta placa nasceu.
+   *
+   * ⚠️ ELE EXISTE PARA A TRAVA DOS 8px SER MEDÍVEL, e já foi removido uma vez por parecer peso
+   * morto — o que deixou a sonda sem como aferir a própria invariante que ela cobra. A trava é
+   * aplicada com o `gap` VIGENTE NA HORA em que a placa nasce; quando o roteiro alarga o corredor
+   * (t=37: 96→104, e t=63,5: 76→84, ambos +8px), as placas ainda na tela pertencem ao regime
+   * antigo. Medi-las contra o `gap` corrente devolve 4px onde a trava garantiu 8 — e é a MEDIDA
+   * que está errada, não a parede: a superfície continua fora do corredor, com menos folga, até as
+   * placas velhas saírem da tela.
+   */
+  gap: number;
 }
 
 /**
@@ -680,7 +722,14 @@ export class Moldura {
       superficieTeto = Math.min(superficieTeto, vaoY - meio - Moldura.FOLGA);
     }
 
-    return { vaoY, repetida, superficieChao, superficieTeto };
+    // ⚠️ E O `gap` VAI JUNTO. A trava acima foi aplicada com ESTE `gap`, e é por isso que a placa
+    // precisa carregá-lo: sem ele a sonda não tem como aferir a invariante contra o regime certo.
+    //
+    // ⚠️ LIMITE LATENTE, para quem for calibrar os vãos: um ALARGAMENTO de `gap` maior que
+    // `2 × FOLGA` (16px) faria as placas ainda na tela — nascidas sob o vão antigo — invadirem o
+    // corredor de verdade por alguns segundos, até saírem de cena. Hoje o maior alargamento do
+    // roteiro é +8 (96→104 e 76→84), então sobra folga. Um salto maior que isso pede repensar.
+    return { vaoY, repetida, superficieChao, superficieTeto, gap: this.gap };
   }
 }
 ```
@@ -846,17 +895,25 @@ for (let i = 0; i < 60; i++) {
   const f = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
     if (!s || !s.moldura || s.corredorRate <= 0) return null;
-    const meio = s.corredorGap / 2;
+    // ⚠️ CADA PLACA É MEDIDA CONTRA O `gap` DELA, nunca contra o corrente. A trava foi aplicada
+    // com o `gap` vigente quando a placa nasceu, e quando o roteiro ALARGA o corredor as placas
+    // ainda na tela pertencem ao regime antigo — medi-las contra o `gap` novo devolve 4px onde a
+    // trava garantiu 8, e reprova uma parede que está certa. (Foi assim que este assert reprovou
+    // em 2 de 3 execuções na Task 4, e o erro era da medida.)
+    // A `Moldura` só devolve fatos crus; quem faz a aritmética é a sonda — um teste que pergunta
+    // ao código "você está correto?" não testa nada.
     let min = Infinity;
     for (let x = 0; x <= 384; x += 10) {
-      const v = s.moldura.vaoEm(x);
+      const p = s.moldura.placaEm(x);
+      if (p.gap <= 0) continue; // sem corredor nesta placa, não há o que proteger
+      const meio = p.gap / 2;
       min = Math.min(
         min,
-        s.moldura.superficieChaoEm(x) - (v + meio),
-        v - meio - s.moldura.superficieTetoEm(x),
+        p.superficieChao - (p.vaoY + meio),
+        p.vaoY - meio - p.superficieTeto,
       );
     }
-    return min;
+    return min === Infinity ? null : min;
   });
   if (f !== null) { pior = Math.min(pior, f); amostras++; }
   await page.waitForTimeout(250);
