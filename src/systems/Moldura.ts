@@ -14,6 +14,18 @@ interface Placa {
   superficieChao: number;
   /** A linha de baixo da faixa do teto, em y de tela. Já com a trava aplicada. */
   superficieTeto: number;
+  /**
+   * O `gap` sob o qual esta placa nasceu.
+   *
+   * ⚠️ ELE EXISTE PARA A TRAVA DOS 8px SER MEDÍVEL, e já foi removido uma vez por parecer peso
+   * morto — o que deixou a sonda sem como aferir a própria invariante que ela cobra. A trava é
+   * aplicada com o `gap` VIGENTE NA HORA em que a placa nasce; quando o roteiro alarga o corredor
+   * (t=37: 96→104, e t=63,5: 76→84, ambos +8px), as placas ainda na tela pertencem ao regime
+   * antigo. Medi-las contra o `gap` corrente devolve 4px onde a trava garantiu 8 — e é a MEDIDA
+   * que está errada, não a parede: a superfície continua fora do corredor, com menos folga, até
+   * as placas velhas saírem da tela.
+   */
+  gap: number;
 }
 
 /**
@@ -270,6 +282,13 @@ export class Moldura {
     // ⚠️ A TRAVA DOS 8px. Só existe quando há corredor: em `gap 0` (o silêncio antes do chefão) não
     // há vão para proteger, e travar contra um vão que não existe apagaria a parede justamente
     // onde ela é o cenário inteiro.
+    //
+    // ⚠️ LIMITE LATENTE: a trava é aplicada com o `gap` VIGENTE NA HORA em que a placa nasce, e
+    // placas velhas ficam na tela por até `SEGMENTOS × LARGURA` px depois que o roteiro alarga o
+    // corredor. Um alargamento maior que `2 × FOLGA` (16px) faria essas placas velhas invadirem de
+    // fato o vão novo por alguns segundos — hoje o maior alargamento do roteiro é +8 (t=37:
+    // 96→104; t=63,5: 76→84), então há folga, mas quem mexer nos vãos do roteiro precisa saber
+    // disso.
     if (this.gap > 0) {
       superficieChao = Math.max(superficieChao, vaoY + meio + Moldura.FOLGA);
       superficieTeto = Math.min(superficieTeto, vaoY - meio - Moldura.FOLGA);
@@ -280,6 +299,6 @@ export class Moldura {
       superficieTeto = Math.floor(superficieTeto);
     }
 
-    return { vaoY, repetida, superficieChao, superficieTeto };
+    return { vaoY, repetida, superficieChao, superficieTeto, gap: this.gap };
   }
 }
