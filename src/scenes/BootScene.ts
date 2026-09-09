@@ -582,6 +582,20 @@ const ART: Record<string, string> = {
   orgao: 'sprites/orgao.png',
   maquinario: 'sprites/maquinario.png',
 
+  // ─── A MOLDURA DA FASE 4 (Fatia 7 · M1) ───
+  //
+  // ⚠️ ARTE PROVISÓRIA, E FEIA DE PROPÓSITO (`scripts/_f4/_assar-provisoria.mjs`). O M1 existe para
+  // descobrir se a mudança de GEOMETRIA funciona ANTES de gastar as 14 peças de arte em cima dela.
+  // A arte de verdade entra nas etapas M2–M5, uma câmara por vez.
+  //
+  // ⚠️ A FAIXA É 128×64 E ENTRA EM ESCALA 1, ancorada pela SUPERFÍCIE — o que sobra dela sai da
+  // tela. É por isso que `Moldura.ESPESSURA_MAX` é 54 e não 64.
+  // Sem placeholder: sem o PNG, a `Moldura` não constrói sprite nenhum e a fase roda como antes.
+  f4Faixa: 'sprites/f4-faixa-prov.png',
+  // A MESA: 96×112, TOPO CHATO. A hitbox sai da largura da TEXTURA, então topo chato é o que a
+  // torna honesta por construção (`scripts/_f4/_medir-colunas.mjs`).
+  f4Mesa: 'sprites/f4-mesa-prov.png',
+
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',
 

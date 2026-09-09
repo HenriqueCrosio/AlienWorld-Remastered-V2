@@ -56,6 +56,64 @@ console.log('curva    ', JSON.stringify({ degraus: serie.length, serie, maior })
 ok(serie.length >= 6, `a curva ANDOU ao longo da fase (${serie.length} degraus distintos)`);
 ok(maior <= PASSO_MAX + 1, `o degrau nunca salta mais que ${PASSO_MAX}px (maior=${maior})`);
 
+// ─── A FAIXA: ela existe, é DECORAÇÃO, e está em escala 1 ───
+const faixa = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const pega = (nome) => s.children.list.filter((o) => o.name === nome);
+  const chao = pega('faixaChao');
+  const teto = pega('faixaTeto');
+  const todos = [...chao, ...teto];
+  return {
+    chao: chao.length,
+    teto: teto.length,
+    comCorpo: todos.filter((o) => o.body).length,
+    escalas: [...new Set(todos.flatMap((o) => [o.scaleX, o.scaleY]))],
+    cobre: chao.length
+      ? Math.min(...chao.map((o) => o.x)) <= 0 &&
+        Math.max(...chao.map((o) => o.x)) + 128 >= 384
+      : false,
+  };
+});
+console.log('faixa    ', JSON.stringify(faixa));
+ok(faixa.chao === 4, `a faixa do CHÃO tem os 4 segmentos (${faixa.chao})`);
+ok(faixa.teto === 4, `a faixa do TETO tem os 4 segmentos (${faixa.teto})`);
+// ⚠️ O assert mais importante desta sonda: a faixa é DECORAÇÃO. Um corpo físico aqui seria a
+// física nova que a spec proibiu, e ele apareceria como morte invisível no meio do vão.
+ok(faixa.comCorpo === 0, `a faixa NÃO tem corpo físico — é decoração (${faixa.comCorpo} com corpo)`);
+ok(
+  faixa.escalas.length === 1 && faixa.escalas[0] === 1,
+  `a faixa é desenhada em escala 1 (${JSON.stringify(faixa.escalas)})`,
+);
+ok(faixa.cobre, 'os 4 segmentos cobrem a largura da tela sem buraco');
+
+// ─── A TRAVA DOS 8px: a superfície nunca entra no corredor ───
+//
+// ⚠️ Mede a tela inteira, coluna a coluna, e durante um trecho longo — a trava só MORDE quando a
+// espessura cresce, então uma amostra curta passaria sem testar nada.
+let pior = Infinity;
+for (let i = 0; i < 60; i++) {
+  await blindar();
+  const f = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    if (!s || !s.moldura || s.corredorRate <= 0) return null;
+    const meio = s.corredorGap / 2;
+    let min = Infinity;
+    for (let x = 0; x <= 384; x += 10) {
+      const v = s.moldura.vaoEm(x);
+      min = Math.min(
+        min,
+        s.moldura.superficieChaoEm(x) - (v + meio),
+        v - meio - s.moldura.superficieTetoEm(x),
+      );
+    }
+    return min;
+  });
+  if (f !== null) pior = Math.min(pior, f);
+  await page.waitForTimeout(250);
+}
+console.log('trava    ', JSON.stringify({ folgaMinima: pior }));
+ok(pior >= 8, `a superfície da faixa nunca entra no corredor (folga mínima ${pior}px, mínimo 8)`);
+
 console.log(falhas === 0 ? '\n✔ A MOLDURA ESTÁ DE PÉ' : `\n✘ ${falhas} asserts falharam`);
 await browser.close();
 process.exit(falhas === 0 ? 0 : 1);
