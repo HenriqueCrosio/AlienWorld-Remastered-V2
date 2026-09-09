@@ -13,7 +13,13 @@ import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
 import { PickupSystem } from '../systems/PickupSystem';
 import { TerrainSystem, GROUND_Y, type PropKind } from '../systems/TerrainSystem';
 import { DebrisSystem, MINE_BLAST_RADIUS, type HazardKind } from '../systems/DebrisSystem';
-import { StageDirector, STAGES, type StageDef, type Zone } from '../systems/StageDirector';
+import {
+  StageDirector,
+  STAGES,
+  type StageDef,
+  type StageEvent,
+  type Zone,
+} from '../systems/StageDirector';
 import { Boss, type StageBoss } from '../entities/Boss';
 import { BossCapitania } from '../entities/BossCapitania';
 import { BossSerpente } from '../entities/BossSerpente';
@@ -229,11 +235,14 @@ export class GameScene extends Phaser.Scene {
     this.director = new StageDirector(this.stage.script);
 
     // TREINO: salta o relógio para 1s antes do chefão. Tudo o que viria antes é
-    // descartado sem executar, então a fase começa no silêncio que o anuncia.
+    // descartado sem executar, então a fase começa no silêncio que o anuncia — MAS o estado que
+    // esses eventos descartados teriam deixado (corredor/moldura) precisa ser aplicado à mão, ou
+    // o chefão do treino luta contra uma parede que não existe. Ver `aplicaCorredorEMoldura`.
     if (this.practice) {
       this.elapsed = this.director.bossTime - 1;
       this.clockOffset = this.elapsed;
       this.director.skipTo(this.elapsed);
+      this.aplicaCorredorEMoldura(this.elapsed);
     }
 
     const nave = SHIPS[this.shipId];
@@ -531,6 +540,40 @@ export class GameScene extends Phaser.Scene {
   }
 
   // ─── Roteiro ────────────────────────────────────────────────────────────────
+
+  /**
+   * O TREINO (`practice: true`) salta o relógio direto para perto do chefão com
+   * `StageDirector.skipTo`, que DESCARTA os eventos anteriores sem executá-los. Para a maioria
+   * dos tipos de evento isso é o comportamento certo (não faz sentido tocar onda ou banner de
+   * uma fase que o jogador nunca viu) — mas `corredor` e `moldura` não dão instrução para tocar
+   * agora, eles CRAVAM ESTADO que persiste (`corredorRate`/`corredorGap`/`moldura.espessura`), e
+   * esse estado some junto com o resto do que foi descartado.
+   *
+   * ⚠️ SEM ISTO, O CHEFÃO DO TREINO É LUTADO COM `espessura = 0` E `gap = 0`, enquanto o do jogo
+   * real chega com o que o roteiro deixou no ar (STAGE_4: `moldura` em t=68 e t=79 chegam a
+   * 54px; `corredor` em t=79 fecha o gap a 0) — duas lutas diferentes. É a MESMA classe de bug
+   * que o `spawnBoss` já pagou e documentou para a nebulosa (`setNebulaDensity`): o treino
+   * precisa do estado que o roteiro teria deixado, não do estado de largada.
+   *
+   * Varre o roteiro pelos ÚLTIMOS eventos `corredor`/`moldura` anteriores a `t` e os aplica —
+   * NUNCA hardcoda os números, porque a próxima calibragem do roteiro desincronizaria as duas
+   * lutas de novo sem que nada aqui denunciasse.
+   */
+  private aplicaCorredorEMoldura(t: number): void {
+    let corredor: Extract<StageEvent, { type: 'corredor' }> | undefined;
+    let moldura: Extract<StageEvent, { type: 'moldura' }> | undefined;
+    for (const e of this.stage.script) {
+      if (e.t >= t) break;
+      if (e.type === 'corredor') corredor = e;
+      else if (e.type === 'moldura') moldura = e;
+    }
+    if (corredor) {
+      this.corredorRate = corredor.rate;
+      this.corredorGap = corredor.gap;
+      this.moldura.setGap(corredor.gap);
+    }
+    if (moldura) this.moldura.setEspessura(moldura.espessura);
+  }
 
   private runEvent(e: ReturnType<StageDirector['update']>[number]): void {
     switch (e.type) {
