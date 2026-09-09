@@ -176,6 +176,48 @@ ok(
   `a superfície da faixa nunca entra no corredor (${amostras} amostras, folga mínima ${pior}px, mínimo 8)`,
 );
 
+// ─── A MESA: escala 1, enterrada na faixa, topo na borda do vão ───
+//
+// ⚠️ `alturaPx` ESTICAVA a peça. Uma mesa de 112px espremida em 30 vira mingau, e ampliar é
+// proibido pela lei da resolução. A mesa nasce em escala 1 e é ENTERRADA: o que varia é quanto
+// dela sobra para fora, nunca o tamanho do desenho.
+const mesas = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const ps = s.terrain.props.getChildren().filter((p) => p.active);
+  const chao = ps.filter((p) => !p.flipY);
+  const teto = ps.filter((p) => p.flipY);
+
+  // ⚠️ MEDE O PAR, NUNCA O PROP CONTRA A CURVA. O prop anda pela FÍSICA (`setVelocityX`) e a curva
+  // anda pelo `xMundo`: as duas correm a 84px/s, mas um prop pousado em cima de uma fronteira de
+  // placa pode cair do outro lado por meio pixel de deriva, e o assert piscaria. O par é imune —
+  // as duas mesas nasceram do MESMO `vaoY`, e a distância entre elas é o `gap` do roteiro, exato.
+  const vaos = [];
+  for (const t of teto) {
+    const par = chao.find((c) => Math.abs(c.x - t.x) < 8);
+    if (par) vaos.push(Math.round(par.y - par.displayHeight - (t.y + t.displayHeight)));
+  }
+  return {
+    total: ps.length,
+    gap: s.corredorGap,
+    kinds: [...new Set(ps.map((p) => p.getData('kind')))],
+    escalas: [...new Set(ps.flatMap((p) => [p.scaleX, p.scaleY]))],
+    vaos,
+  };
+});
+console.log('mesa     ', JSON.stringify(mesas));
+ok(mesas.total > 0, `há corredor na tela para medir (${mesas.total} props)`);
+ok(mesas.kinds.length === 1 && mesas.kinds[0] === 'mesa', `o corredor é feito de MESA (${mesas.kinds})`);
+ok(
+  mesas.escalas.length === 1 && mesas.escalas[0] === 1,
+  `a mesa entra em escala 1, nunca esticada (${JSON.stringify(mesas.escalas)})`,
+);
+// ⚠️ EXATO, não uma janela. O `bordaVao` crava o topo em `vaoY ± gap/2` sem escalar nada, então o
+// vão medido é o número do roteiro sem arredondamento — é a prova de que a mesa não come o vão.
+ok(
+  mesas.vaos.length >= 2 && mesas.vaos.every((v) => v === mesas.gap),
+  `o vão medido é o do roteiro, EXATO (gap=${mesas.gap}, medidos=[${mesas.vaos}])`,
+);
+
 // ─── A ESPESSURA SOBE AO LONGO DA FASE ───
 //
 // ⚠️ Espera por ESTADO (o relógio da fase), nunca por relógio de parede: um assert novo que gaste

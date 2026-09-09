@@ -11,7 +11,7 @@ import { Moldura } from '../systems/Moldura';
 import { WeaponSystem } from '../systems/WeaponSystem';
 import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
 import { PickupSystem } from '../systems/PickupSystem';
-import { TerrainSystem, GROUND_Y, TETO_Y, type PropKind } from '../systems/TerrainSystem';
+import { TerrainSystem, GROUND_Y, type PropKind } from '../systems/TerrainSystem';
 import { DebrisSystem, MINE_BLAST_RADIUS, type HazardKind } from '../systems/DebrisSystem';
 import { StageDirector, STAGES, type StageDef, type Zone } from '../systems/StageDirector';
 import { Boss, type StageBoss } from '../entities/Boss';
@@ -874,42 +874,25 @@ export class GameScene extends Phaser.Scene {
     const meio = this.corredorGap / 2;
     // ⚠️ A LINHA QUE MATA O "SEM NEXO". O `vaoY` deixa de ser sorteado por batida e passa a sair da
     // CURVA — a altura do corredor deriva de x (a posição no mundo), então duas colunas seguidas
-    // têm relação. A margem das bordas mudou de casa: agora ela vive na `Moldura` (`MARGEM`), que
-    // é quem clampa o vão.
+    // têm relação. A margem das bordas vive na `Moldura` (`MARGEM`), que é quem clampa o vão.
     const vaoY = this.moldura.vaoEm(GAME_WIDTH + 30);
 
-    // Coluna que não alcança 14px não lê como obstáculo — vira ruído no rodapé; pula-se.
-    //
-    // O interior é um bicho VIVO: as colunas são costela biônica, pedaço de órgão e
-    // maquinário pesado — NÃO rocha. A rocha tingida (0x6b7894) era a superfície da lua
-    // mentindo dentro dele; fica como fallback para quando a arte orgânica não existe.
-    const organico = this.textures.exists('costela');
-    const TINT_INTERIOR = 0x6b7894;
-    const sorteiaKind = (): PropKind => {
-      if (!organico) return 'spire';
-      const r = Math.random();
-      return r < 0.62 ? 'costela' : r < 0.82 ? 'orgao' : 'maquinario';
-    };
-    // O FUNIL: cada coluna inclina alguns graus na direção do scroll — a caixa torácica do
-    // bicho fechando à frente, não um cano retangular. O teto (flipY) leva o sinal
-    // espelhado. Pequeno de propósito: o Arcade não gira a hitbox junto (ver spawn).
-    const funil = (): number => Phaser.Math.Between(6, 13);
+    // ⚠️ MORREU AQUI O `sorteiaKind`. Não há mais nomes soltos para sortear: o obstáculo desta fase
+    // é UM — a mesa — e o que troca entre as câmaras é a TEXTURA dela (etapas M2–M5), não o nome.
+    // Sem a arte, cai na `costela`: mais larga e mais feia, mas a fase roda (arte entra asset por
+    // asset, e a guarda é sempre `textures.exists`).
+    const kind: PropKind = this.textures.exists('f4Mesa') ? 'mesa' : 'costela';
 
-    const alturaChao = GROUND_Y - (vaoY + meio);
-    const alturaTeto = vaoY - meio - TETO_Y;
-    if (alturaChao >= 14) {
-      this.terrain.spawn(sorteiaKind(), {
-        alturaPx: alturaChao,
-        ...(organico ? { angle: -funil() } : { tint: TINT_INTERIOR }),
-      });
-    }
-    if (alturaTeto >= 14) {
-      this.terrain.spawn(sorteiaKind(), {
-        anchor: 'teto',
-        alturaPx: alturaTeto,
-        ...(organico ? { angle: funil() } : { tint: TINT_INTERIOR }),
-      });
-    }
+    // ⚠️ MORREU AQUI TAMBÉM O FUNIL (o `angle` por coluna). Ele existia para as costelas fecharem
+    // em funil; uma mesa inclinada tem o topo em DIAGONAL, e topo em diagonal é exatamente a
+    // silhueta que faz a hitbox mentir.
+    //
+    // ⚠️ E MORREU A REGRA DOS 14px. Ela pulava a coluna baixa demais para ler como obstáculo — mas
+    // agora há uma FAIXA desenhada atrás dela, e a trava dos 8px garante que a mesa sempre sobra
+    // pelo menos 8px para fora da parede. Pular uma delas quebraria o PAR, e par quebrado é vão não
+    // medido: é o que a `probe-stage4` cobra em `vaos:[110,110,110]`.
+    this.terrain.spawn(kind, { bordaVao: vaoY + meio });
+    this.terrain.spawn(kind, { anchor: 'teto', bordaVao: vaoY - meio });
   }
 
   /** O mesmo relógio dos props, para os destroços do vácuo. */

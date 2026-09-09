@@ -27,9 +27,24 @@ export type PropKind =
   | 'respiradouro'
   // O interior ORGÂNICO do Leviatã (Fase 4): costela biônica, pedaço de órgão, maquinário
   // pesado. Terreno indestrutível como a rocha — existe para ser desviado.
+  //
+  // ⚠️ DESDE A MOLDURA (09/09) ELES NÃO SÃO MAIS O CORREDOR. O `spawnCorredores` sorteava entre os
+  // três, e nomes soltos sorteados por batida eram metade da causa do "assets jogados na cena".
+  // Continuam registrados porque viram DECORAÇÃO PLANTADA NA FAIXA nas etapas M2–M5 — que é o que
+  // a faixa 4 do mock mostrou e ele aprovou.
   | 'costela'
   | 'orgao'
-  | 'maquinario';
+  | 'maquinario'
+  /**
+   * A MESA (Fase 4, a moldura): a saliência de TOPO CHATO que fecha o caminho — a parede
+   * avançando, não um prop pousado no vazio.
+   *
+   * ⚠️ TOPO CHATO NÃO É GOSTO. A hitbox sai da LARGURA DA TEXTURA (`body.setSize(p.width*0.6, ...)`)
+   * e é um retângulo de ALTURA CHEIA: uma silhueta de base larga e ponta fina mata numa faixa larga
+   * na altura da PONTA, que é por onde o jogador passa. A lâmina alargada de 08/09 matava 46px no
+   * vazio, e foi o que enterrou a Task 4. Mesa de topo chato passa por construção.
+   */
+  | 'mesa';
 
 interface PropDef {
   /** Vida. Infinity = indestrutível (rocha: existe para ser desviada). */
@@ -113,6 +128,8 @@ const PROPS: Record<PropKind, PropDef> = {
   costela: { hp: Infinity, score: 0, shoots: false },
   orgao: { hp: Infinity, score: 0, shoots: false },
   maquinario: { hp: Infinity, score: 0, shoots: false },
+  // Indestrutível como a rocha: a parede existe para ser desviada, não abatida.
+  mesa: { hp: Infinity, score: 0, shoots: false },
 };
 
 /**
@@ -209,7 +226,27 @@ export class TerrainSystem {
    */
   spawn(
     kind: PropKind,
-    opts?: { anchor?: 'chao' | 'teto'; alturaPx?: number; tint?: number; angle?: number },
+    opts?: {
+      anchor?: 'chao' | 'teto';
+      alturaPx?: number;
+      tint?: number;
+      angle?: number;
+      /**
+       * A borda que ENCARA O CORREDOR, em y de tela: o TOPO de um prop de chão, a BASE de um
+       * pendurado no teto.
+       *
+       * ⚠️ ELE CRAVA A BORDA E NÃO ESCALA A PEÇA — é o oposto do `alturaPx`, e é a diferença
+       * entre a mesa e a coluna velha. `alturaPx` estica: uma mesa de 112px espremida em 30
+       * vira mingau, e ampliar é proibido (a lei da resolução, 06/09). Com `bordaVao` a peça
+       * nasce em ESCALA 1 e é ENTERRADA na faixa — quem varia é o quanto dela sobra para fora,
+       * nunca o tamanho do desenho.
+       *
+       * ⚠️ E É ELE QUE PRESERVA A LINHA DE BASE. Com a borda cravada em `vaoY ± gap/2`, o vão
+       * medido pela `probe-stage4` é o `gap` do roteiro EXATO — sem o arredondamento de escala
+       * que o `alturaPx` introduzia.
+       */
+      bordaVao?: number;
+    },
   ): void {
     const teto = opts?.anchor === 'teto';
 
@@ -276,6 +313,15 @@ export class TerrainSystem {
     if (opts?.alturaPx !== undefined) {
       if (kind === 'spire') p.setScale(1, opts.alturaPx / p.height);
       else p.setScale(opts.alturaPx / p.height);
+    }
+    // ⚠️ DEPOIS do `alturaPx` e ANTES do `body.reset` lá embaixo — o corpo é sincronizado com a
+    // posição final, e sincronizá-lo antes faria o prop FLUTUAR (a armadilha do
+    // `updateFromGameObject`, documentada no `reset()`).
+    //
+    // A origem do prop de chão é a BASE (`p.y` é o pé), então cravar o TOPO é somar a altura;
+    // a do prop de teto é o TOPO (`p.y` é o alto do quadro), então cravar a BASE é subtrair.
+    if (opts?.bordaVao !== undefined) {
+      p.y = teto ? opts.bordaVao - p.height : opts.bordaVao + p.height;
     }
     if (opts?.tint !== undefined) p.setTint(opts.tint);
     if (opts?.angle !== undefined) p.setAngle(opts.angle);
