@@ -1,26 +1,30 @@
 # START — FATIA 7 · A MOLDURA: ONDE A PRÓXIMA SESSÃO PEGA
 
 **🟢 O DESIGN ESTÁ FECHADO E APROVADO POR ELE (08/09/2026).**
-**🔴 NENHUMA LINHA DE `src/` FOI ESCRITA. O próximo passo é o PLANO do M1.**
+**🟢 O M1 — O MOTOR — ESTÁ IMPLEMENTADO E VERIFICADO (09/09/2026).**
+**🔴 O M1 AINDA NÃO FOI JOGADO. É essa a próxima ação — ver "O QUE VEM DEPOIS, NA ORDEM".**
 Branch `feat/fase4-visual`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O design da moldura está
-> aprovado e a spec está escrita. Escreva o plano de implementação do M1 — o motor, com arte
-> provisória."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O M1 está implementado e
+> verificado; eu já joguei. Aqui está o meu veredicto sobre a curva contínua: <DIGA AQUI>.
+> Toque o M2 — a câmara A."**
+
+⚠️ **Se ele ainda NÃO jogou, a próxima ação não é código: é ele jogar.** Ver a seção
+"🔴 O M1 ESTÁ DE PÉ, MAS NÃO FOI JOGADO", mais abaixo.
 
 ---
 
 ## ⏭️ A PRÓXIMA AÇÃO, EM UMA FRASE
 
-**Invocar a skill `superpowers:writing-plans` e escrever o plano do M1** a partir de
-`docs/superpowers/specs/2026-09-08-fatia7-moldura-fase4-design.md`, seção 14.
+**ELE JOGA O M1.** O código está pronto e as sondas estão verdes, mas a pergunta que o M1 existe
+para responder — *a curva contínua estragou a dificuldade?* — só o controle na mão responde.
 
-⚠️ **Não gere arte nenhuma antes disso.** O M1 roda com a faixa procedural feia de propósito — é a
-única forma de descobrir se a mudança de GEOMETRIA funciona antes de gastar 14 peças em cima dela.
+⚠️ **Não gere arte nenhuma antes disso.** Se a geometria estiver errada, o M1 é barato de desfazer;
+depois do M3, com 8 peças de arte em cima dela, não é.
 
 ---
 
@@ -149,16 +153,66 @@ poluem a listagem. Se ele confirmar que não quer nenhuma das 64 candidatas,
 ## O QUE VEM DEPOIS, NA ORDEM
 
 ```
-M1 — O MOTOR              ⬜ ◄ PEGUE AQUI (plano ainda não escrito)
-  a faixa contínua, a curva do vão, a mesa, a trava dos 8px,
-  COM ARTE PROVISÓRIA (assada do _mock-moldura.mjs)
-  └ termina com ELE JOGANDO: a curva contínua estragou a dificuldade?
-M2 — A CÂMARA A           ⬜ as 4 peças da doca engolida
+M1 — O MOTOR              ✅ CÓDIGO PRONTO E VERIFICADO (09/09) · 🔴 FALTA O TESTE JOGADO DELE
+  a faixa contínua, a curva do vão, a mesa, a trava dos 8px — com arte provisória.
+  Plano: docs/superpowers/plans/2026-09-09-fatia7-m1-motor-moldura.md
+  └ A PERGUNTA QUE AINDA NÃO TEM RESPOSTA: a curva contínua estragou a dificuldade?
+M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI (depois que ele jogar) · as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
 M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
 M5 — A CÂMARA D           ⬜ a faixa da arena
 BLOCO B — O CHEFÃO        ⬜ INALTERADO pela moldura, e ainda de pé
 ```
+
+### 🔴 O M1 ESTÁ DE PÉ, MAS NÃO FOI JOGADO
+
+O código está completo e verificado (build limpo · `probe-f4-moldura` 19/19 · `probe-stage4` 22/22
+com `vaos:[110,110,110]` · `probe-f4-visual` 17/17 · a régua da mesa honesta). **Nada disso responde
+a pergunta do M1.** Ela é do controle na mão:
+
+> **A curva contínua estragou a dificuldade?** O vão parou de saltar, e saltar era parte do desafio.
+
+Para jogar: `npm run dev` → `http://localhost:5173/` → tecla **`L`** (vai direto para a Fase 4).
+Se ficou monótono, o knob é **um só**: `Moldura.PASSO_MAX` (hoje 14). Se ficou injusto, o mesmo
+número para baixo. As outras quatro coisas para olhar estão na Task 6 do plano do M1.
+
+⚠️ **A arte é provisória e feia de propósito**, com dois defeitos já conhecidos que **não são do
+motor**: a mesa lê mais CLARA que a parede (inverte a leitura de plano) e a faixa fica escura
+demais nos trechos grossos. Os dois são distribuição de valor da peça, e a arte do M2 resolve.
+**Julgue a geometria e o ritmo; a beleza não está em jogo aqui.**
+
+### ⚠️ AS DUAS LEIS QUE O M1 PAGOU CARO PARA APRENDER — valem para o M2–M5
+
+**1. Toda peça de arte precisa de assert de CHAVE DE TEXTURA e de DIMENSÃO.** Medir a posição não
+prova que a peça certa está na tela. A mesa nasceu com a textura de ERRO do Phaser (a chave foi
+registrada como `f4Mesa` enquanto o `PropKind` se chamava `mesa`), a hitbox virou 32×32 em vez de
+96×112 — o obstáculo praticamente deixou de existir — e **as quatro sondas passaram**. A linha de
+base `[110,110,110]` é cega para isso *por construção*: o vão é calculado a partir do mesmo número
+que posiciona a peça, então os termos se cancelam. ⚠️ **A chave da arte de um prop É o nome do
+`PropKind`** (`pickVariant(scene, kind)`), e é assim que `mesa2`/`mesa3` entram de graça no M2.
+
+**2. Toda mudança em código COMPARTILHADO exige olhar as fases que não são a sua.** A faixa da F4
+estava sendo desenhada nas Fases **1, 2 e 3** — uma tira opaca e acesa no rodapé de três fases já
+mergeadas e aprovadas jogando. É a mesma fronteira que o `TerrainSystem.updateTurret` já cravou
+como regra, atravessada na direção contrária. **Nenhuma sonda pegaria**: as quatro cobrem a F4.
+
+**E a regra que resume as duas: ABRA A IMAGEM.** Três dos cinco achados sérios desta etapa só
+apareceram porque alguém olhou uma captura, não porque um assert ficou vermelho.
+
+### 📌 EM ABERTO PARA O M2, decidir ANTES de gerar arte
+
+- **Como a arte troca por câmara.** O M1 entregou **um** `PropKind` só (`mesa`), e o plano diz que
+  M2–M5 trocam só a TEXTURA. Mas a spec de 08/09 nomeia as peças como `f4MesaA1/A2/B1/B2`. Com um
+  kind só, trocar por câmara exige decidir: `setTexture` no spawn conforme a câmara, ou kinds
+  separados? ⚠️ Seja qual for, ela esbarra na **lei 1** acima.
+- **O atalho de dev `G`** (pula pro chefão numa partida ao vivo) descarta os eventos entre o
+  instante atual e o `bossTime` — apertar `G` em t=10 luta com parede de 16px em vez de 54. O
+  modo treino já foi consertado; o `G` não. ⚠️ A `probe-stage4` **usa o `G`**, então a luta que
+  ela testa não é a luta final real.
+- **O relevo da faixa é CORTADO, não deslocado** (`Math.min` em `Moldura.gerar`). A partir de
+  espessura 44 ele começa a ser aparado, e em 54 (t≈68 até o fim) é exatamente **0**: a parede
+  vira régua reta justamente no clímax. Não é defeito — mas é a explicação se o duto parecer
+  "morto" no teste jogado.
 
 ⚠️ **O Bloco B não foi tocado** e continua com tudo o que estava pronto: a arte nova do guardião
 em `assets/raw/anim-guardiao-novo/`, a idle aprovada, a morte que precisa ser composta no motor, e
