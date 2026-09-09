@@ -1,0 +1,244 @@
+import Phaser from 'phaser';
+import { GROUND_Y, TETO_Y } from './TerrainSystem';
+
+/**
+ * Uma PLACA do mundo: o pedaço de 128px que a peça da faixa cobre. Vão, espessura e mesa derivam
+ * todos da MESMA placa — ver a nota da grade em `Moldura`.
+ */
+interface Placa {
+  /** O centro do vão nesta placa, em px de tela. Já ARREDONDADO: o vão medido tem de ser inteiro. */
+  vaoY: number;
+  /** Quantas placas seguidas saíram nesta MESMA altura (1..3). Ver `gerar`. */
+  repetida: number;
+  /** A linha de cima da faixa do chão, em y de tela. Já com a trava aplicada. */
+  superficieChao: number;
+  /** A linha de baixo da faixa do teto, em y de tela. Já com a trava aplicada. */
+  superficieTeto: number;
+}
+
+/**
+ * A MOLDURA DA FASE 4 — a faixa contínua e a curva do vão.
+ *
+ * ⚠️ ELA EXISTE PORQUE "SEM NEXO" ERA UM FATO DO CÓDIGO, NÃO UMA IMPRESSÃO. Até 08/09 cada par de
+ * colunas sorteava um `vaoY` NOVO no alcance inteiro (`GameScene.spawnCorredores`), então duas
+ * colunas seguidas não tinham relação nenhuma — e foi isso que o Henrique leu como *"assets
+ * jogados na cena"*. A altura do corredor agora deriva de x (a posição no mundo), não de um
+ * sorteio por batida.
+ *
+ * ⚠️ A SEPARAÇÃO MAIS IMPORTANTE DESTE ARQUIVO: a FAIXA é decoração pura, sem corpo físico; quem
+ * colide é a MESA, com o mesmo `gap` que o roteiro já manda. É por isso que a linha de base
+ * `corredores {"chao":3,"teto":3,"vaos":[110,110,110]}` da `probe-stage4` sobrevive e **nenhuma
+ * física nova entra** — que é onde bug de colisão mora.
+ *
+ * ⚠️ A GRADE DE 128px É O QUE FAZ A TRAVA SER EXATA. O mundo é dividido em placas da largura da
+ * peça da faixa, e vão, espessura e mesa derivam todos da MESMA placa. Sem a grade, a superfície
+ * variaria dentro de um segmento e a trava dos 8px viraria aproximação — e aproximação em cima do
+ * vão é exatamente o que come a linha de base.
+ */
+export class Moldura {
+  /** A largura de um segmento da faixa, e da grade do mundo. 128 ÷ 84 = 1,52s por placa. */
+  static readonly LARGURA = 128;
+
+  /**
+   * ⚠️ A TRAVA. A superfície da faixa nunca chega a menos de 8px da borda do vão. O desenho cede,
+   * o vão nunca — é um assert da sonda, não uma boa intenção.
+   */
+  static readonly FOLGA = 8;
+
+  /**
+   * O passo máximo de um degrau. ⚠️ É ESTE NÚMERO que substitui o sorteio: hoje o vão pula até
+   * 38px entre batidas; com 14 ele ANDA. Se o Henrique achar a fase monótona no teste jogado, é o
+   * primeiro número a subir.
+   */
+  static readonly PASSO_MAX = 14;
+
+  /**
+   * ⚠️ O TETO DA ESPESSURA, e ele é uma conta, não um gosto: a peça tem 64px de altura e é
+   * ancorada pela SUPERFÍCIE, sem crop e sem escala. Para ela ainda alcançar a borda da tela,
+   * `espessura + relevo` não pode passar de 54 (206 − 54 + 64 = 216 = a base da tela; 10 + 54 −
+   * 64 = 0 = o topo). Passar disso abriria uma fresta entre a faixa e a borda.
+   */
+  static readonly ESPESSURA_MAX = 54;
+
+  /** A margem das bordas da tela: um vão colado no teto obriga a raspar onde não se vê o que vem. */
+  private static readonly MARGEM = 24;
+
+  /**
+   * O capricho da espessura, placa a placa. É o que impede a faixa de ser uma régua reta — e é
+   * DECORAÇÃO, então sai do fluxo de acaso da ARTE (`Math.random`), nunca do fluxo do jogo.
+   */
+  private static readonly RELEVO = 10;
+
+  /** Quantos segmentos por lado. 4 × 128 = 512 ≥ 384 + 128 de folga de rolagem. */
+  private static readonly SEGMENTOS = 4;
+
+  /** px/s com que a espessura persegue o alvo. Calibragem: o teste jogado decide. */
+  private static readonly RAMPA = 8;
+
+  /** A distância que o mundo já rolou, em px. É o eixo de tudo. */
+  private xMundo = 0;
+
+  private readonly placas = new Map<number, Placa>();
+  /** O maior índice de placa já gerado. A geração é sempre para a FRENTE. */
+  private ultima = -1;
+
+  private gap = 0;
+  /** A espessura pedida pelo roteiro (evento `moldura`). Ver `setEspessura`. */
+  private alvo = 0;
+  /** A espessura em vigor — ela persegue o alvo (ver `avanca`), porque parede não salta. */
+  espessura = 0;
+
+  private readonly chao: Phaser.GameObjects.Image[] = [];
+  private readonly teto: Phaser.GameObjects.Image[] = [];
+
+  constructor(scene: Phaser.Scene) {
+    // ⚠️ SEM `physics.add`. A faixa é DECORAÇÃO: um corpo físico aqui seria a física nova que a
+    // spec proibiu, e ele apareceria como morte invisível no meio do vão. A sonda cobra a
+    // ausência dele.
+    //
+    // Sem a textura, a `Moldura` continua respondendo a curva (matemática pura) e não desenha
+    // nada — a mesma lei de todo o resto: arte entra asset por asset.
+    if (!scene.textures.exists('f4Faixa')) return;
+
+    for (let i = 0; i < Moldura.SEGMENTOS; i++) {
+      // Depth −0.6: atrás dos props (−0.5 — a mesa desenha por cima da faixa de onde ela nasce) e
+      // à frente de tudo que é fundo (a pintura em −96, as bandas de placas em −75).
+      //
+      // ⚠️ Origem no TOPO no chão e na BASE no teto: a peça é ancorada pela SUPERFÍCIE, e o que
+      // sobra dela sai da tela. É o que dispensa crop e escala — ver `ESPESSURA_MAX`.
+      //
+      // O NOME é o que torna a faixa medível: a sonda acha os segmentos por ele, como a
+      // `sombraCasco` da Fase 3.
+      this.chao.push(
+        scene.add.image(0, 0, 'f4Faixa').setOrigin(0, 0).setDepth(-0.6).setName('faixaChao'),
+      );
+      this.teto.push(
+        scene.add
+          .image(0, 0, 'f4Faixa')
+          .setOrigin(0, 1)
+          .setFlipY(true) // o teto é a mesma peça de cabeça para baixo
+          .setDepth(-0.6)
+          .setName('faixaTeto'),
+      );
+    }
+  }
+
+  /** O `gap` do roteiro. A placa que nascer daqui em diante é julgada por ele. */
+  setGap(gap: number): void {
+    this.gap = gap;
+  }
+
+  /**
+   * A espessura pedida pelo roteiro. O primeiro pedido CRAVA (a fase não pode abrir com a parede
+   * crescendo na cara do jogador); os seguintes são perseguidos devagar, porque a dramaturgia da
+   * fase é *as paredes vão fechando em você* — e uma parede que salta 12px num quadro não fecha,
+   * pisca.
+   */
+  setEspessura(px: number): void {
+    this.alvo = Phaser.Math.Clamp(px, 0, Moldura.ESPESSURA_MAX);
+    if (this.espessura === 0) this.espessura = this.alvo;
+  }
+
+  /**
+   * Roda o mundo. Chamada da `GameScene.update`, ANTES dos spawns — o corredor que nasce neste
+   * frame tem de ler a curva já avançada.
+   */
+  avanca(dt: number, speed: number): void {
+    this.xMundo += speed * dt;
+
+    // A espessura persegue o alvo a `RAMPA` px/s, sem passar dele.
+    const falta = this.alvo - this.espessura;
+    const passo = Moldura.RAMPA * dt;
+    this.espessura += Math.abs(falta) <= passo ? falta : Math.sign(falta) * passo;
+
+    if (!this.chao.length) return;
+
+    // ⚠️ A POSIÇÃO É CALCULADA, NUNCA ACUMULADA — e não há reciclagem. Um segmento que andasse
+    // sozinho e fosse reposicionado ao sair da tela acumularia erro de ponto flutuante e sairia
+    // da grade; fora da grade, a trava dos 8px deixa de ser exata. Aqui `x = i*128 − (xMundo %
+    // 128)` por construção, todo frame.
+    const off = this.xMundo % Moldura.LARGURA;
+    for (let i = 0; i < Moldura.SEGMENTOS; i++) {
+      const x = Math.round(i * Moldura.LARGURA - off);
+      const p = this.placaEm(x);
+      this.chao[i].setPosition(x, p.superficieChao);
+      this.teto[i].setPosition(x, p.superficieTeto);
+    }
+  }
+
+  /** O centro do corredor na coluna `xTela` da tela. */
+  vaoEm(xTela: number): number {
+    return this.placaEm(xTela).vaoY;
+  }
+
+  /** A linha de cima da faixa do chão em `xTela`. */
+  superficieChaoEm(xTela: number): number {
+    return this.placaEm(xTela).superficieChao;
+  }
+
+  /** A linha de baixo da faixa do teto em `xTela`. */
+  superficieTetoEm(xTela: number): number {
+    return this.placaEm(xTela).superficieTeto;
+  }
+
+  private placaEm(xTela: number): Placa {
+    const n = Math.floor((this.xMundo + xTela) / Moldura.LARGURA);
+    while (this.ultima < n) {
+      this.ultima++;
+      this.placas.set(this.ultima, this.gerar(this.ultima));
+    }
+    // Poda: a tela cabe em 4 placas; guardar 3 atrás é folga de sobra para o `x` negativo do
+    // segmento da esquerda. Sem poda, o Map cresce a fase inteira.
+    for (const k of this.placas.keys()) if (k < n - 3) this.placas.delete(k);
+    return this.placas.get(n)!;
+  }
+
+  private gerar(n: number): Placa {
+    const ant = this.placas.get(n - 1);
+    const meio = this.gap / 2;
+    const lo = TETO_Y + Moldura.MARGEM + meio;
+    const hi = GROUND_Y - Moldura.MARGEM - meio;
+
+    // ⚠️ SEGURA OU ANDA — e é daqui que saem as "placas de larguras diferentes" da spec com uma
+    // peça só de 128px: duas ou três placas na mesma altura LEEM como uma placa larga. Onda lisa
+    // lê como onda; placa lê como parede.
+    //
+    // ⚠️ `Phaser.Math` AQUI, e não `Math.random`. O vão é JOGO, e jogo sorteia do fluxo do jogo.
+    const segura = ant !== undefined && ant.repetida < 3 && Phaser.Math.FloatBetween(0, 1) < 0.45;
+
+    let vaoY: number;
+    let repetida: number;
+    if (segura && ant) {
+      // O `gap` pode ter mudado sob a placa: reclampa em vez de herdar cru.
+      vaoY = Phaser.Math.Clamp(ant.vaoY, lo, hi);
+      repetida = ant.repetida + 1;
+    } else {
+      const base = ant ? ant.vaoY : (lo + hi) / 2;
+      vaoY = Phaser.Math.Clamp(base + Phaser.Math.FloatBetween(-1, 1) * Moldura.PASSO_MAX, lo, hi);
+      repetida = 1;
+    }
+    // ⚠️ ARREDONDA. A mesa é ancorada em `vaoY ± gap/2`, e o vão medido pela `probe-stage4` tem de
+    // dar o inteiro do roteiro — 110, não 109,7.
+    vaoY = Math.round(vaoY);
+
+    // ⚠️ `Math.random` AQUI, e não `Phaser.Math`. O relevo é ARTE, e arte de fundo não pode
+    // adiantar o dado do jogo — é a mesma fronteira do plantio do casco da Fase 3.
+    const eChao = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Math.random() * Moldura.RELEVO);
+    const eTeto = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Math.random() * Moldura.RELEVO);
+
+    // ⚠️ ARREDONDA NA DIREÇÃO SEGURA: o chão para BAIXO (y maior), o teto para CIMA (y menor).
+    // Arredondar para o lado errado devolveria 7px de folga onde a trava prometeu 8.
+    let superficieChao = Math.ceil(GROUND_Y - eChao);
+    let superficieTeto = Math.floor(TETO_Y + eTeto);
+
+    // ⚠️ A TRAVA DOS 8px. Só existe quando há corredor: em `gap 0` (o silêncio antes do chefão) não
+    // há vão para proteger, e travar contra um vão que não existe apagaria a parede justamente
+    // onde ela é o cenário inteiro.
+    if (this.gap > 0) {
+      superficieChao = Math.max(superficieChao, vaoY + meio + Moldura.FOLGA);
+      superficieTeto = Math.min(superficieTeto, vaoY - meio - Moldura.FOLGA);
+    }
+
+    return { vaoY, repetida, superficieChao, superficieTeto };
+  }
+}

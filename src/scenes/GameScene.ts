@@ -7,6 +7,7 @@ import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import { InputReader } from '../input';
 import { Fx } from '../systems/Fx';
+import { Moldura } from '../systems/Moldura';
 import { WeaponSystem } from '../systems/WeaponSystem';
 import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
 import { PickupSystem } from '../systems/PickupSystem';
@@ -61,6 +62,8 @@ export class GameScene extends Phaser.Scene {
   private debris!: DebrisSystem;
   private starfield!: Starfield;
   private parallax!: Parallax;
+  /** A moldura da F4: a curva do vão e a faixa contínua. Ver `Moldura`. */
+  private moldura!: Moldura;
   private reader!: InputReader;
   private weapons!: WeaponSystem;
   private enemies!: EnemySystem;
@@ -211,6 +214,10 @@ export class GameScene extends Phaser.Scene {
     // (`terrain` na superfície, `hazard` no vácuo). Um grupo vazio não custa frame nenhum, e
     // assim a montagem das colisões não precisa saber em que fase está.
     this.terrain = new TerrainSystem(this, this.enemies.enemyBullets);
+    // A MOLDURA é construída sempre — a curva é matemática pura e não custa nada nas outras fases.
+    // Os SPRITES dela só nascem se a textura existir (o construtor devolve cedo sem ela), que é a
+    // mesma lei de todo o resto: arte entra asset por asset.
+    this.moldura = new Moldura(this);
     // A mina sensora estilhaça em TIROS INIMIGOS — daí o pool. Ela é a única coisa do cenário
     // que revida, e o estilhaço dela obedece às mesmas regras de qualquer tiro do inimigo
     // (acerta o jogador, morre na rocha).
@@ -441,6 +448,9 @@ export class GameScene extends Phaser.Scene {
     // cinturão inteiro pareceria pendurado. Só a Fase 1, que ROMPE a atmosfera no fim, freia.
     const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
+    // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
+    // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
+    this.moldura.avanca(dt, SCROLL_SPEED * frenagem);
 
     // A APROXIMAÇÃO: a lua encolhe, o Leviatã cresce. Medida até o chefão — depois dele a fase
     // acabou, e o fundo não deve continuar "andando" durante a luta.
@@ -537,6 +547,8 @@ export class GameScene extends Phaser.Scene {
       case 'corredor':
         this.corredorRate = e.rate;
         this.corredorGap = e.gap;
+        // A curva precisa do `gap` para clampar o vão dentro da margem e para a trava dos 8px.
+        this.moldura.setGap(e.gap);
         break;
       case 'banner':
         this.showBanner(e.text, COLORS.hotBright);
@@ -854,9 +866,12 @@ export class GameScene extends Phaser.Scene {
     if (this.corredorTimer > 0) return;
     this.corredorTimer = this.corredorRate;
 
-    const margem = 24;
     const meio = this.corredorGap / 2;
-    const vaoY = Phaser.Math.Between(TETO_Y + margem + meio, GROUND_Y - margem - meio);
+    // ⚠️ A LINHA QUE MATA O "SEM NEXO". O `vaoY` deixa de ser sorteado por batida e passa a sair da
+    // CURVA — a altura do corredor deriva de x (a posição no mundo), então duas colunas seguidas
+    // têm relação. A margem das bordas mudou de casa: agora ela vive na `Moldura` (`MARGEM`), que
+    // é quem clampa o vão.
+    const vaoY = this.moldura.vaoEm(GAME_WIDTH + 30);
 
     // Coluna que não alcança 14px não lê como obstáculo — vira ruído no rodapé; pula-se.
     //
