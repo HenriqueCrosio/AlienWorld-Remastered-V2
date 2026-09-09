@@ -173,6 +173,18 @@ export class Moldura {
     }
   }
 
+  /**
+   * ⚠️ O CONTRATO DAS TRÊS CONSULTAS ABAIXO, E ELE É O QUE SEGURA A PODA DE PÉ:
+   * **`xTela >= -128`.** Ou seja, pergunta-se sobre a tela e sobre o que está à direita dela,
+   * nunca sobre o passado. A `avanca` respeita isso pedindo a placa pelo ÍNDICE (`base + i`), e o
+   * `spawnCorredores` pede em `x = 414`, à direita da tela.
+   *
+   * O motivo é que o piso da poda é `base − 1` (ver `placaDe`): uma pergunta mais atrás que isso
+   * cai numa placa já apagada, e ela NÃO é regerada — regerar sortearia outro valor e a parede
+   * saltaria de altura. Foi exatamente uma suposição deste tipo, não escrita, que derrubou o jogo
+   * no frame 1 antes do conserto da poda. Está escrita agora.
+   */
+
   /** O centro do corredor na coluna `xTela` da tela. */
   vaoEm(xTela: number): number {
     return this.placaEm(xTela).vaoY;
