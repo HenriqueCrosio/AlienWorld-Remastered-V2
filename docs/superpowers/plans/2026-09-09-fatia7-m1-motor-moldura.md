@@ -1037,15 +1037,39 @@ const espessuraEm = async (ate) => {
   return null;
 };
 
-const e10 = await espessuraEm(10);
-const e40 = await espessuraEm(40);
-const e60 = await espessuraEm(60);
-const e70 = await espessuraEm(70);
-console.log('espessura', JSON.stringify([e10, e40, e60, e70]));
-ok(e10 && e10.e >= 15 && e10.e <= 17, `t=10s: a fase abre com a faixa fina (${e10 && e10.e}px, esperado 16)`);
-ok(e40 && e10 && e40.e > e10.e, `t=40s: as paredes ganharam corpo (${e10 && e10.e} → ${e40 && e40.e}px)`);
-ok(e60 && e40 && e60.e > e40.e, `t=60s: o aperto (${e40 && e40.e} → ${e60 && e60.e}px)`);
-ok(e70 && e60 && e70.e > e60.e, `t=70s: o duto — a faixa cheia (${e60 && e60.e} → ${e70 && e70.e}px)`);
+const e55 = await espessuraEm(55);
+const e66 = await espessuraEm(66);
+const e74 = await espessuraEm(74);
+console.log('espessura', JSON.stringify([e55, e66, e74]));
+ok(e55 && e55.e === 36, `t=55s: o aperto (${e55 && e55.e}px, esperado 36)`);
+ok(e66 && e55 && e66.e > e55.e, `t=66s: não é mais câmara (${e55 && e55.e} → ${e66 && e66.e}px)`);
+ok(e74 && e66 && e74.e > e66.e, `t=74s: o duto — a faixa cheia (${e66 && e66.e} → ${e74 && e74.e}px)`);
+```
+
+⚠️ **E a abertura fina (16px) NÃO cabe aqui — ela vai ANTES da curva e da trava.** Este bloco roda
+depois dos dois laços de amostragem, e a essa altura o relógio da fase já passa de t≈42s na
+primeira leitura: t=10 e t=40 ficam para trás **antes da primeira consulta** e colapsam na mesma
+amostra (medido: `{"t":42.1,"e":26}` duas vezes seguidas). O defeito não é da `Moldura` nem do
+roteiro — é dos instantes do assert não sobreviverem ao custo da própria sonda. Por isso os
+instantes daqui são 55/66/74 (que caem fundo nas janelas ainda alcançáveis: 43–63,5 → 36 ·
+63,5–68 → 48 · 68–79 → 54), e o "abre fina" vira um assert próprio, colado **logo depois do
+`blindar()` inicial**, no topo do arquivo:
+
+```js
+// ─── A ESPESSURA CRAVA NO PRIMEIRO VALOR (checada AQUI, antes da curva e da trava) ───
+//
+// ⚠️ `setEspessura` CRAVA o primeiro pedido em vez de subir em rampa — a fase não pode abrir com a
+// parede crescendo na cara do jogador. Provar isso exige medir ANTES dos dois laços de amostragem
+// consumirem o relógio; depois deles, o instante que se queria medir já passou e não tem volta.
+const cravaInicial = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return { t: Math.round((s.elapsed ?? 0) * 10) / 10, e: Math.round(s.moldura?.espessura ?? -1) };
+});
+console.log('espessuraInicial', JSON.stringify(cravaInicial));
+ok(
+  cravaInicial.e >= 15 && cravaInicial.e <= 17,
+  `a fase abre com a faixa fina, já cravada (${cravaInicial.e}px, esperado 16)`,
+);
 ```
 
 ⚠️ Este bloco atravessa a fase inteira (~70s) e tem de ser **o último** da sonda: ele consome o
