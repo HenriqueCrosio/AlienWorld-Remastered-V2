@@ -35,6 +35,20 @@ export type StageEvent =
    */
   | { t: number; type: 'corredor'; rate: number; gap: number }
   /**
+   * A ESPESSURA DA FAIXA da moldura (Fase 4), em px — do `GROUND_Y` para cima no chão e do
+   * `TETO_Y` para baixo no teto, as mesmas âncoras que o `TerrainSystem` já usa.
+   *
+   * ⚠️ É UM EVENTO SEPARADO DO `corredor`, DE PROPÓSITO. O `gap` manda na COLISÃO; a espessura
+   * manda no DESENHO — é a separação que protege a fase de virar um conserto de colisão. E, na
+   * prática: a batida do duto (t=68) não tem evento `corredor` nenhum.
+   *
+   * A fase inteira vira uma frase: **as paredes vão fechando em você.**
+   *
+   * ⚠️ Os números são CHUTE CALIBRADO até o playtest, com a mesma etiqueta dos vãos e dos HP das
+   * portas. O que não é chute é a CURVA: ela tem de subir monotonicamente.
+   */
+  | { t: number; type: 'moldura'; espessura: number }
+  /**
    * TROCA O CENÁRIO PINTADO (Fase 4). A fase é uma jornada anatômica — o hangar engolido, a
    * caixa torácica, o duto e a câmara do núcleo — e cada câmara tem a pintura dela.
    *
@@ -354,12 +368,17 @@ export const STAGE_4: StageEvent[] = [
   // Corredores LARGOS primeiro (vão 110px): o jogador precisa descobrir que o teto mata
   // ANTES de o vão apertar. Aprender a regra nova no aperto é sonegação, não dificuldade.
   { t: 1, type: 'corredor', rate: 2.2, gap: 110 },
+  // ⚠️ A ESPESSURA É A DRAMATURGIA DA FASE — e ela já estava escrita nos vãos desde a Fatia 7, só
+  // não estava visível. A moldura é o que faz o jogador ENXERGAR o que os números já faziam com
+  // ele. 16px: você entrou num lugar grande.
+  { t: 1, type: 'moldura', espessura: 16 },
   { t: 5, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 90 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.38, y: 120 },
 
   // O interior REAGE: minas sensoras nos vãos (a defesa imune do bicho) + pressão aérea.
   { t: 14, type: 'banner', text: 'ANTICORPOS · SENSORES ATIVOS' },
   { t: 15, type: 'corredor', rate: 2.4, gap: 96 },
+  { t: 15, type: 'moldura', espessura: 18 },        // ele começa a se estreitar
   { t: 15.5, type: 'hazard', rate: 2.2, mix: ['sensor', 'destroco'] },
   { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
   { t: 21, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 140 },
@@ -372,6 +391,7 @@ export const STAGE_4: StageEvent[] = [
 
   // Respiro estrutural: corredor solto, sem onda — o jogador reaprende a voar antes do aperto.
   { t: 37, type: 'corredor', rate: 2.6, gap: 104 },
+  { t: 37, type: 'moldura', espessura: 26 },        // as paredes ganharam corpo
   { t: 38, type: 'hazard', rate: 0, mix: [] },
 
   // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
@@ -383,6 +403,7 @@ export const STAGE_4: StageEvent[] = [
   // CURTA), minas nos vãos, cargueiro cuspindo drones no corredor. Posição sob pressão. ───
   { t: 42, type: 'banner', text: 'O DUTO APERTA' },
   { t: 43, type: 'corredor', rate: 1.9, gap: 76 },
+  { t: 43, type: 'moldura', espessura: 36 },        // o aperto
   { t: 44, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
   { t: 46, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 100 },
   { t: 50, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
@@ -394,17 +415,24 @@ export const STAGE_4: StageEvent[] = [
   // da F2/F3: aqui o terreno já cobra metade da atenção, e pressão dupla total é ilegível.
   { t: 63, type: 'banner', text: 'REJEIÇÃO TOTAL' },
   { t: 63.5, type: 'corredor', rate: 1.7, gap: 84 },
+  { t: 63.5, type: 'moldura', espessura: 48 },      // não é mais câmara
   { t: 64, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
   // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
   // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
   { t: 68, type: 'cenario', key: 'paintBgF4c' },
+  // O DUTO: a faixa CHEIA. 54 é o teto da peça de 64px ancorada pela superfície
+  // (`Moldura.ESPESSURA_MAX`), e a partir daqui a mesa vira parede — a trava dos 8px apara o
+  // resto sozinha enquanto o corredor existir.
+  { t: 68, type: 'moldura', espessura: 54 },
   { t: 69, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
   { t: 72, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
   { t: 75, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
 
   // Silêncio → o NÚCLEO. O mesmo telégrafo de todas as fases.
   { t: 79, type: 'corredor', rate: 0, gap: 0 },
+  // O silêncio antes do chefão: sem corredor, a trava desliga e a parede fica cheia de verdade.
+  { t: 79, type: 'moldura', espessura: 54 },
   { t: 79.5, type: 'hazard', rate: 0, mix: [] },
   // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
   // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.

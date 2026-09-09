@@ -550,6 +550,11 @@ export class GameScene extends Phaser.Scene {
         // A curva precisa do `gap` para clampar o vão dentro da margem e para a trava dos 8px.
         this.moldura.setGap(e.gap);
         break;
+      case 'moldura':
+        // A espessura da faixa (decoração). O `gap` do `corredor` continua mandando na colisão —
+        // esta linha não encosta em física nenhuma.
+        this.moldura.setEspessura(e.espessura);
+        break;
       case 'banner':
         this.showBanner(e.text, COLORS.hotBright);
         break;
