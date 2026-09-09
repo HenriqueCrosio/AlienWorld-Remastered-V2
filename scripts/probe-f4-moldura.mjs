@@ -91,6 +91,7 @@ ok(faixa.cobre, 'os 4 segmentos cobrem a largura da tela sem buraco');
 // ⚠️ Mede a tela inteira, coluna a coluna, e durante um trecho longo — a trava só MORDE quando a
 // espessura cresce, então uma amostra curta passaria sem testar nada.
 let pior = Infinity;
+let amostras = 0;
 for (let i = 0; i < 60; i++) {
   await blindar();
   const f = await page.evaluate(() => {
@@ -108,11 +109,21 @@ for (let i = 0; i < 60; i++) {
     }
     return min;
   });
-  if (f !== null) pior = Math.min(pior, f);
+  if (f !== null) {
+    pior = Math.min(pior, f);
+    amostras++;
+  }
   await page.waitForTimeout(250);
 }
-console.log('trava    ', JSON.stringify({ folgaMinima: pior }));
-ok(pior >= 8, `a superfície da faixa nunca entra no corredor (folga mínima ${pior}px, mínimo 8)`);
+console.log('trava    ', JSON.stringify({ folgaMinima: pior, amostras }));
+// ⚠️ O `amostras` NÃO É ENFEITE. Sem ele o assert passa quando NUNCA MEDIU: `pior` fica em
+// `Infinity` se toda iteração cair fora da janela de corredor, e `Infinity >= 8` é verdadeiro —
+// o guard-rail que protege o vão ficaria verde justamente no caso em que perdeu a capacidade de
+// testar. Um assert que não distingue "sempre teve folga" de "nunca olhou" não é um assert.
+ok(
+  amostras >= 10 && pior >= 8,
+  `a superfície da faixa nunca entra no corredor (${amostras} amostras, folga mínima ${pior}px, mínimo 8)`,
+);
 
 console.log(falhas === 0 ? '\n✔ A MOLDURA ESTÁ DE PÉ' : `\n✘ ${falhas} asserts falharam`);
 await browser.close();
