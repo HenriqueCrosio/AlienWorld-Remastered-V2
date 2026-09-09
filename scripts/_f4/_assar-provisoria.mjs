@@ -108,7 +108,9 @@ const clamp = (v) => Math.max(0, Math.min(255, v));
       let [r, g, b] = amostra(x + 210, y + 96);
       if (y < 1) { r = r * 1.5 + 12; g = g * 1.5 + 12; b = b * 1.5 + 12; }
       else if (y < 4) { r *= 0.55; g *= 0.55; b *= 0.55; }
-      // Duas nervuras verticais: dão leitura de chapa dobrada sem custar desenho.
+      // x % 31 acende em x=0,31,62,93 dentro de MESA_W=96: quatro colunas, não duas — as duas do
+      // meio leem como nervura, as das pontas leem como sombra de borda. Dão leitura de chapa
+      // dobrada sem custar desenho.
       if (x % 31 === 0 && y > 2) { r *= 0.6; g *= 0.6; b *= 0.6; }
 
       buf[i] = clamp(r);

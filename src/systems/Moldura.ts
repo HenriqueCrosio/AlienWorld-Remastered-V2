@@ -154,10 +154,14 @@ export class Moldura {
   }
 
   /**
-   * A espessura pedida pelo roteiro. O primeiro pedido CRAVA (a fase não pode abrir com a parede
-   * crescendo na cara do jogador); os seguintes são perseguidos devagar, porque a dramaturgia da
-   * fase é *as paredes vão fechando em você* — e uma parede que salta 12px num quadro não fecha,
-   * pisca.
+   * A espessura pedida pelo roteiro. Um pedido CRAVA quando `espessura` ainda está em 0 — hoje
+   * isso só acontece no primeiro pedido, então a fase não abre com a parede crescendo na cara do
+   * jogador; os seguintes são perseguidos devagar, porque a dramaturgia da fase é *as paredes vão
+   * fechando em você* — e uma parede que salta 12px num quadro não fecha, pisca.
+   *
+   * ⚠️ Um roteiro futuro que voltasse a pedir 0 no meio da fase cravaria de novo no próximo
+   * pedido (a condição é `espessura === 0`, não "é o primeiro"), e a parede saltaria em vez de
+   * perseguir. Hoje as duas leituras coincidem porque só o primeiro evento pede 0.
    */
   setEspessura(px: number): void {
     this.alvo = Phaser.Math.Clamp(px, 0, Moldura.ESPESSURA_MAX);
@@ -284,6 +288,13 @@ export class Moldura {
 
     // ⚠️ `Math.random` AQUI, e não `Phaser.Math`. O relevo é ARTE, e arte de fundo não pode
     // adiantar o dado do jogo — é a mesma fronteira do plantio do casco da Fase 3.
+    //
+    // ⚠️ O `Math.min` CORTA O RELEVO, NÃO O DESLOCA — comportamento, não defeito, documentado
+    // aqui porque só existe na cabeça de quem mediu. A partir de `espessura = 44` o relevo (até
+    // +10) começa a ser aparado pelo teto de 54; em `espessura = 54` (STAGE_4: de t≈68 até o fim
+    // da fase) ele é EXATAMENTE 0 — a parede vira uma régua perfeitamente reta bem no clímax,
+    // onde os degraus são a leitura. Se o duto parecer "morto" no teste jogado, é isto, não um
+    // bug: não mexer sem o Henrique julgar primeiro.
     const eChao = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Math.random() * Moldura.RELEVO);
     const eTeto = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Math.random() * Moldura.RELEVO);
 
