@@ -37,11 +37,11 @@ await blindar();
 // ─── A ESPESSURA CRAVA NO PRIMEIRO VALOR (checada AQUI, antes da curva e da trava) ───
 //
 // ⚠️ Por que este assert mora aqui e não junto com o resto dos asserts de espessura, no fim do
-// arquivo: os laços da CURVA (120×200ms ≈ 24s) e da TRAVA (60×250ms ≈ 15s) logo abaixo somam
-// ~40s de relógio DE JOGO antes da primeira leitura — medido: o bloco de espessura do fim do
-// arquivo já encontra a fase em t≈42s na primeira consulta, mesmo esperando por ESTADO. Checar
-// "abre fina" (t=1, 16px) só é possível ANTES desses dois laços rodarem — depois, o relógio já
-// passou do instante que se queria medir, e não tem como voltar.
+// arquivo: os laços da CURVA (que amostra até `s.elapsed >= 32`) e da TRAVA (60 leituras) logo
+// abaixo consomem o relógio DA FASE antes da primeira leitura de lá — medido: o bloco de
+// espessura do fim do arquivo já encontra a fase em t≈42s na primeira consulta, mesmo esperando
+// por ESTADO. Checar "abre fina" (t=1, 16px) só é possível ANTES desses dois laços rodarem —
+// depois, o relógio já passou do instante que se queria medir, e não tem como voltar.
 const cravaInicial = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return { t: Math.round((s.elapsed ?? 0) * 10) / 10, e: Math.round(s.moldura?.espessura ?? -1) };
