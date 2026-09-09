@@ -215,9 +215,10 @@ export class GameScene extends Phaser.Scene {
     // assim a montagem das colisões não precisa saber em que fase está.
     this.terrain = new TerrainSystem(this, this.enemies.enemyBullets);
     // A MOLDURA é construída sempre — a curva é matemática pura e não custa nada nas outras fases.
-    // Os SPRITES dela só nascem se a textura existir (o construtor devolve cedo sem ela), que é a
-    // mesma lei de todo o resto: arte entra asset por asset.
-    this.moldura = new Moldura(this);
+    // Os SPRITES dela só nascem na Fase 4 (segundo argumento): a `BootScene` carrega `f4Faixa`
+    // GLOBALMENTE, então `scene.textures.exists` sozinho não bastava como guarda — os 8 segmentos
+    // nasciam nas Fases 1, 2 e 3 também, e vazavam uma tira acesa no rodapé (a peça é opaca).
+    this.moldura = new Moldura(this, this.stage.id === 4);
     // A mina sensora estilhaça em TIROS INIMIGOS — daí o pool. Ela é a única coisa do cenário
     // que revida, e o estilhaço dela obedece às mesmas regras de qualquer tiro do inimigo
     // (acerta o jogador, morre na rocha).

@@ -103,14 +103,27 @@ export class Moldura {
   private readonly chao: Phaser.GameObjects.Image[] = [];
   private readonly teto: Phaser.GameObjects.Image[] = [];
 
-  constructor(scene: Phaser.Scene) {
+  /**
+   * @param desenha Só a Fase 4 recebe os SPRITES da faixa. A CURVA (`avanca`, `vaoEm`,
+   * `superficieChaoEm`/`superficieTetoEm`) roda sempre — é matemática pura, não custa nada, e é
+   * o que o comentário do `create()` promete.
+   *
+   * ⚠️ ISTO NÃO É CAUTELA, É CONSERTO DE UM BUG JÁ MEDIDO: a `BootScene` carrega `ART` (e
+   * `f4Faixa` com ele) GLOBALMENTE, então `scene.textures.exists('f4Faixa')` sozinho é verdadeiro
+   * em TODA fase — os 8 sprites da faixa nasciam nas Fases 1, 2 e 3 também. A peça é OPACA de
+   * ponta a ponta (não é uma silhueta com buraco no meio); o que aparecia na tela era só a quina
+   * acesa e a brasa, e isso lia como uma tira vermelha listrada colada no rodapé (e outra fina no
+   * topo) de três fases já fechadas e aprovadas jogando — pior caso medido na Fase 2 (vácuo, sem
+   * nada na frente para tapar). `desenha` é a guarda que faltava.
+   */
+  constructor(scene: Phaser.Scene, desenha: boolean) {
     // ⚠️ SEM `physics.add`. A faixa é DECORAÇÃO: um corpo físico aqui seria a física nova que a
     // spec proibiu, e ele apareceria como morte invisível no meio do vão. A sonda cobra a
     // ausência dele.
     //
-    // Sem a textura, a `Moldura` continua respondendo a curva (matemática pura) e não desenha
-    // nada — a mesma lei de todo o resto: arte entra asset por asset.
-    if (!scene.textures.exists('f4Faixa')) return;
+    // Sem a textura, ou fora da Fase 4, a `Moldura` continua respondendo a curva (matemática
+    // pura) e não desenha nada — a mesma lei de todo o resto: arte entra asset por asset.
+    if (!desenha || !scene.textures.exists('f4Faixa')) return;
 
     for (let i = 0; i < Moldura.SEGMENTOS; i++) {
       // Depth −0.6: atrás dos props (−0.5 — a mesa desenha por cima da faixa de onde ela nasce) e
