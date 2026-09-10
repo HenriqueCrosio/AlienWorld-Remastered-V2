@@ -2,7 +2,8 @@
 //
 // O que só se vê rodando: se a linha do vão virou CURVA (placas vizinhas se relacionam) em vez de
 // sorteio por batida, se a faixa existe e é DECORAÇÃO (sem corpo físico, escala 1), se a trava dos
-// 8px segura, e se a espessura sobe ao longo da fase.
+// 8px segura, se o PERFIL da espessura é o de 10/09 (margem fina → duto → reabertura), e se a
+// MORDIDA do duto cobra só onde a parede está desenhada, sem alcançar o vão.
 //
 // ⚠️ Exige `npm run dev` rodando. UMA sonda por vez: três browsers headless no mesmo Vite quebram.
 import { chromium } from 'playwright';
@@ -280,19 +281,18 @@ ok(
   `as dimensões batem com a arte — 96×112, sem esticar nem encolher (${JSON.stringify(mesas.dims)})`,
 );
 
-// ─── A ESPESSURA SOBE AO LONGO DA FASE ───
+// ─── O PERFIL DA ESPESSURA: margem fina → o duto fecha → o núcleo reabre ───
 //
 // ⚠️ Espera por ESTADO (o relógio da fase), nunca por relógio de parede: um assert novo que gaste
 // tempo faria a espera cega derivar. Foi assim que quatro quadros de conferência da Fatia 7
 // saíram todos já no chefão, em 06/09.
 //
-// ⚠️ DESVIO DELIBERADO dos instantes 10/40/60/70 do brief: a essa altura da sonda (depois da
-// curva e da trava) o relógio da fase já passa de t≈42s na primeira leitura — 10 e 40 ficam para
-// trás ANTES da primeira consulta, e os dois colapsam na mesma amostra (medido:
-// {"t":42.1,"e":26} duas vezes seguidas). O bug não é da `Moldura` nem do roteiro — é dos
-// instantes do assert não sobreviverem ao próprio custo da sonda. Ficam 55/66/74: caem fundo nas
-// janelas do STAGE_4 ainda alcançáveis daqui (43–63,5 → 36 · 63,5–68 → 48 · 68–79 → 54) e provam
-// a MESMA subida. A abertura fina (16px) já foi provada acima, antes da curva consumir o relógio.
+// ⚠️ NENHUM INSTANTE ANTES DE t≈42 É ALCANÇÁVEL DAQUI: a essa altura da sonda (depois da curva e
+// da trava) o relógio da fase já passa de 42s na primeira leitura, e um assert cravado antes disso
+// mediria uma amostra que já ficou para trás — dois instantes precoces colapsavam na MESMA leitura
+// (medido: {"t":42.1,...} duas vezes seguidas). O bug não era da `Moldura` nem do roteiro, era dos
+// instantes do assert não sobreviverem ao próprio custo da sonda. A abertura fina (16px em t=1) já
+// foi provada lá em cima, antes de a curva consumir o relógio.
 const espessuraEm = async (ate) => {
   for (let i = 0; i < 900; i++) {
     const e = await page.evaluate(() => {
@@ -309,13 +309,158 @@ const espessuraEm = async (ate) => {
   return null;
 };
 
-const e55 = await espessuraEm(55);
+// ⚠️ ESTES INSTANTES SÃO AMOSTRADOS DEPOIS DO FIM DE CADA RAMPA, NUNCA NO INSTANTE DO EVENTO. A
+// espessura persegue o alvo a `RAMPA` px/s (8), então em t=55 ela ainda é 16 e subindo: um assert
+// cravado ali mediria a rampa, não o alvo, e piscaria conforme a velocidade do headless. As
+// janelas usadas, com o fim da rampa entre parênteses:
+//   t=50 → 16 (a margem, estável desde t=1)   t=60 → 32 (rampa fecha em ~57)
+//   t=66 → 44 (fecha em ~65)                  t=74 → 54 (fecha em ~69,25)
+//   t=84 → 16 (a reabertura fecha em ~83,75)
+const e50 = await espessuraEm(50);
+const e60 = await espessuraEm(60);
 const e66 = await espessuraEm(66);
+console.log('espessura', JSON.stringify([e50, e60, e66]));
+// ⚠️ O ASSERT MAIS IMPORTANTE DOS CINCO, e é o que reprova a volta do desenho antigo: em t=50 a
+// fase já passou pelo vão mais estreito dela (76px, t=43) e a BORDA CONTINUA FINA. Até 10/09 aqui
+// havia 36px. O aperto do miolo é do VÃO; a parede só fecha no duto.
+ok(e50 && e50.e === 16, `t=50s: a borda ainda margeia, mesmo no aperto (${e50 && e50.e}px, esperado 16)`);
+ok(e60 && e60.e === 32, `t=60s: a parede ganha corpo (${e60 && e60.e}px, esperado 32)`);
+ok(e66 && e66.e === 44, `t=66s: não é mais câmara (${e66 && e66.e}px, esperado 44)`);
+
+// ─── A MORDIDA: a parede do duto cobra o encosto, e SÓ o duto ───
+//
+// ⚠️ Sonda a `morde` DIRETO, com caixas fabricadas — não espera a nave bater. A sonda voa blindada
+// (`invulnerableUntil` no máximo) justamente para poder medir a fase inteira; esperar uma colisão
+// real aqui seria trocar um assert determinístico por um sorteio.
+const caixas = () => page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  s.lives = 99;
+  s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+  const m = s.moldura;
+  const x = Math.round(s.ship.x);
+  const chao = m.superficieChaoEm(x);
+  const teto = m.superficieTetoEm(x);
+  const vao = m.vaoEm(x);
+  return {
+    t: Math.round((s.elapsed ?? 0) * 10) / 10,
+    letal: m.letal,
+    chao,
+    teto,
+    // ENTERRADA no chão: 10px abaixo da superfície, bem além da mordida de 3px.
+    dentroChao: m.morde(x - 10, x + 10, chao - 6, chao + 10),
+    // ENTERRADA no teto, o espelho da de cima.
+    dentroTeto: m.morde(x - 10, x + 10, teto - 10, teto + 6),
+    // NO MEIO DO VÃO: é aqui que o jogo acontece, e a parede não pode encostar nele NUNCA.
+    noVao: m.morde(x - 10, x + 10, vao - 8, vao + 8),
+    // O RASPÃO de 1px, que a mordida de 3px tem de perdoar.
+    raspao: m.morde(x - 10, x + 10, chao - 20, chao + 1),
+  };
+});
+
+const antes = await caixas();
+console.log('mordida  ', JSON.stringify(antes));
+ok(antes.letal === false, `t=${antes.t}s: antes do duto a parede NÃO é letal (letal=${antes.letal})`);
+ok(
+  antes.dentroChao === false && antes.dentroTeto === false,
+  `t=${antes.t}s: antes do duto a parede é atravessável — é cenário (chão=${antes.dentroChao}, teto=${antes.dentroTeto})`,
+);
+const fioAntes = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return s.children.list.filter((o) => (o.name === 'fioChao' || o.name === 'fioTeto') && o.visible).length;
+});
+// ⚠️ Parede acesa fora do duto seria pior que a mordida sem aviso: prometeria perigo onde não há,
+// e o jogador que aprendesse a desviar dela desaprenderia a regra no instante em que ela vale.
+ok(fioAntes === 0, `t=${antes.t}s: o fio está APAGADO fora do duto (${fioAntes} acesos)`);
+
 const e74 = await espessuraEm(74);
-console.log('espessura', JSON.stringify([e55, e66, e74]));
-ok(e55 && e55.e === 36, `t=55s: o aperto (${e55 && e55.e}px, esperado 36)`);
-ok(e66 && e55 && e66.e > e55.e, `t=66s: não é mais câmara (${e55 && e55.e} → ${e66 && e66.e}px)`);
-ok(e74 && e66 && e74.e > e66.e, `t=74s: o duto — a faixa cheia (${e66 && e66.e} → ${e74 && e74.e}px)`);
+const duto = await caixas();
+console.log('espessura', JSON.stringify(e74));
+console.log('mordida  ', JSON.stringify(duto));
+ok(e74 && e74.e === 54, `t=74s: o duto — a faixa cheia (${e74 && e74.e}px, esperado 54)`);
+ok(duto.letal === true, `t=${duto.t}s: no duto a parede é letal (letal=${duto.letal})`);
+ok(
+  duto.dentroChao === true && duto.dentroTeto === true,
+  `t=${duto.t}s: a parede do duto MORDE nos dois lados (chão=${duto.dentroChao}, teto=${duto.dentroTeto})`,
+);
+// ⚠️ O ASSERT QUE PROTEGE A FASE DE FICAR IMPOSSÍVEL. A trava dos 8px garante que a superfície
+// nunca entra no corredor; se este ficar vermelho, a parede letal invadiu o vão e a fase virou
+// roubo — e nenhum outro assert desta sonda pegaria isso, porque todos os outros medem a parede,
+// não o espaço jogável dentro dela.
+ok(duto.noVao === false, `t=${duto.t}s: a mordida NÃO alcança o meio do vão (noVao=${duto.noVao})`);
+// ⚠️ Sem este, `MORDIDA` poderia cair para 0 e a sonda continuaria verde: o assert `dentroChao`
+// passa com qualquer folga, porque ele enterra a caixa 10px. Este é o único que mede a folga.
+ok(duto.raspao === false, `t=${duto.t}s: o raspão de 1px é perdoado (a mordida é de 3px) (raspao=${duto.raspao})`);
+
+// ⚠️ O QUE MATA É O QUE DESENHA, e este assert é o motivo de a mordida não ser um corpo físico. A
+// superfície que a `morde` consulta tem de ser a MESMA que posiciona o sprite da faixa na tela —
+// se as duas divergirem, a parede mata onde não está desenhada, que é a definição de morte
+// invisível. É a lição do `679f7f3` (a mesa com a textura de erro) aplicada à parede.
+const desenho = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const m = s.moldura;
+  const segs = s.children.list.filter((o) => o.name === 'faixaChao');
+  const fora = [];
+  for (const seg of segs) {
+    // O centro do segmento: longe das fronteiras de placa, onde `placaEm` pode discordar em 1px.
+    const x = Math.round(seg.x + 64);
+    if (x < 0 || x > 384) continue;
+    const medido = m.superficieChaoEm(x);
+    if (medido !== seg.y) fora.push({ x, sprite: seg.y, medido });
+  }
+  // O FIO: a linha acesa na superfície. Só existe quando a parede morde, e tem de cair EXATAMENTE
+  // na linha que cobra — luz meio pixel fora da hitbox ensina a coisa errada.
+  const fios = s.children.list.filter((o) => o.name === 'fioChao' || o.name === 'fioTeto');
+  const acesos = fios.filter((f) => f.visible);
+  const desalinhados = acesos.filter((f) => {
+    const x = Math.round(f.x + 64);
+    if (x < 0 || x > 384) return false;
+    const alvo = f.name === 'fioChao' ? m.superficieChaoEm(x) : m.superficieTetoEm(x) - 2;
+    return f.y !== alvo;
+  }).length;
+  return {
+    segmentos: segs.length,
+    fora,
+    tint: segs.length ? segs[0].tintTopLeft : null,
+    fios: fios.length,
+    acesos: acesos.length,
+    desalinhados,
+  };
+});
+console.log('desenho  ', JSON.stringify(desenho));
+ok(desenho.segmentos > 0, `há segmentos de faixa na tela para conferir (${desenho.segmentos})`);
+ok(
+  desenho.fora.length === 0,
+  `a superfície que MORDE é a mesma que DESENHA (${desenho.fora.length} divergências: ${JSON.stringify(desenho.fora)})`,
+);
+// O TELÉGRAFO. Sem ele a mordida é sonegação — a mesma lei que faz a fase abrir com corredor largo
+// para o jogador descobrir que o teto mata antes de o vão apertar.
+//
+// ⚠️ O ASSERT QUE VALE É O DO FIO, NÃO O DO TINT. O tint foi a primeira tentativa e ele NÃO LÊ:
+// medido em t=74, o delta de luminância entre inerte e letal deu −1,5 (tint no Phaser é
+// multiplicativo, e a faixa é quase preta na banda que importa). O tint fica porque esquenta o que
+// tem luz; quem anuncia a parede é a linha acesa.
+ok(
+  desenho.tint === 0xff8a6a,
+  `a faixa esquenta ao morder (tint=0x${(desenho.tint ?? 0).toString(16)}, esperado 0xff8a6a)`,
+);
+ok(
+  desenho.acesos === desenho.fios && desenho.fios > 0,
+  `o FIO está ACESO nos dois lados enquanto a parede morde (${desenho.acesos}/${desenho.fios})`,
+);
+// ⚠️ A luz tem de cair na MESMA linha que cobra o encosto. Um fio deslocado ensinaria o jogador a
+// mirar numa borda que não é a que mata — pior que não ter telégrafo nenhum.
+ok(
+  desenho.desalinhados === 0,
+  `o fio cai EXATAMENTE na linha que morde (${desenho.desalinhados} desalinhados)`,
+);
+
+// ─── A REABERTURA: a parede recua no silêncio, e o chefão luta numa arena emoldurada ───
+const e84 = await espessuraEm(84);
+const arena = await caixas();
+console.log('espessura', JSON.stringify(e84));
+console.log('mordida  ', JSON.stringify(arena));
+ok(e84 && e84.e <= 20, `t=84s: a parede recuou antes do chefão (${e84 && e84.e}px, esperado ~16)`);
+ok(arena.letal === false, `t=${arena.t}s: a arena do núcleo não morde (letal=${arena.letal})`);
 
 console.log(falhas === 0 ? '\n✔ A MOLDURA ESTÁ DE PÉ' : `\n✘ ${falhas} asserts falharam`);
 await browser.close();
