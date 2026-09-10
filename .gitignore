@@ -38,3 +38,6 @@ scripts/_f3/novos/*.png
 # Config local do Claude Code (a de projeto, settings.json, VAI versionada)
 .claude/settings.local.json
 scripts/_f4/*.png
+# ...e as subpastas de candidatas (as 64 reprovadas de 08/09 moram em _faixas/). O padrao com `*`
+# nao desce um nivel, e um `git add -A` de 10/09 empurrou as 64 para o stage sem querer.
+scripts/_f4/**/*.png

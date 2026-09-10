@@ -1,30 +1,71 @@
 # START — FATIA 7 · A MOLDURA: ONDE A PRÓXIMA SESSÃO PEGA
 
 **🟢 O DESIGN ESTÁ FECHADO E APROVADO POR ELE (08/09/2026).**
-**🟢 O M1 — O MOTOR — ESTÁ IMPLEMENTADO E VERIFICADO (09/09/2026).**
-**🔴 O M1 AINDA NÃO FOI JOGADO. É essa a próxima ação — ver "O QUE VEM DEPOIS, NA ORDEM".**
+**🟢 O M1 — O MOTOR — ESTÁ IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
+**🟢 O AJUSTE DO TESTE JOGADO ESTÁ IMPLEMENTADO E VERIFICADO (10/09/2026).**
+**🔴 O AJUSTE AINDA NÃO FOI JOGADO. É essa a próxima ação.**
 Branch `feat/fase4-visual`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O M1 está implementado e
-> verificado; eu já joguei. Aqui está o meu veredicto sobre a curva contínua: <DIGA AQUI>.
-> Toque o M2 — a câmara A."**
-
-⚠️ **Se ele ainda NÃO jogou, a próxima ação não é código: é ele jogar.** Ver a seção
-"🔴 O M1 ESTÁ DE PÉ, MAS NÃO FOI JOGADO", mais abaixo.
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O ajuste de 10/09 (a borda de
+> margem, a parede que morde no duto, o cenário desempilhado) está de pé e eu já joguei. Meu
+> veredicto: <DIGA AQUI>. Toque o M2 — a câmara A."**
 
 ---
 
 ## ⏭️ A PRÓXIMA AÇÃO, EM UMA FRASE
 
-**ELE JOGA O M1.** O código está pronto e as sondas estão verdes, mas a pergunta que o M1 existe
-para responder — *a curva contínua estragou a dificuldade?* — só o controle na mão responde.
+**ELE JOGA O AJUSTE DE 10/09.** As três sondas estão verdes e a linha de base sobreviveu, mas as
+duas perguntas que este ajuste abre só o controle na mão responde:
 
-⚠️ **Não gere arte nenhuma antes disso.** Se a geometria estiver errada, o M1 é barato de desfazer;
+1. **A parede do duto está justa ou está roubando?** Ela agora MORDE (t=68→79), com 3px de perdão
+   no raspão e 1400ms de i-frames. O knob é `Moldura.MORDIDA`.
+2. **O fio aceso avisa a tempo?** Ele acende no mesmo instante em que a parede passa a cobrar. Se
+   ele avisa tarde demais, o conserto é o roteiro acender antes de morder — não mexer na mordida.
+
+⚠️ **Continua valendo: não gere arte nenhuma antes disso.** A geometria ainda é barata de desfazer;
 depois do M3, com 8 peças de arte em cima dela, não é.
+
+---
+
+## 🆕 O QUE MUDOU EM 10/09 — o ajuste do teste jogado
+
+Veredicto dele sobre o M1: *"as bordas ficaram boas"*, *"gostei da sua adição do hitbox na margem,
+ficou mais desafiador jogar"*. **A curva contínua NÃO estragou a dificuldade — `PASSO_MAX` fica em
+14.** O que ele pediu por cima disso:
+
+| pedido dele | o que foi feito |
+|---|---|
+| *"que elas sejam como bordas mesmo, margeando a fase"* | espessura **16 até t=55**, e o aperto do miolo passa a vir só do VÃO |
+| *"só ficando mais para dentro na fase do duto"* | 32 (t=55) → 44 (t=63,5) → **54 no duto** |
+| *"e abrindo no boss final"* | **16 em t=79**: a rampa de 8px/s abre em 4,75s e o chefão luta numa arena emoldurada |
+| *"o desafio extra de sair do duto com vida"* | a parede **MORDE** de t=68 a t=79 |
+| *"alguns se repetem em outros tamanhos"* | costela 3→2 camadas, escalas separadas, viga de primeiro plano a 1.6–1.9 |
+| *"coração pequeno jogado no ar"* | o `orgao` deixou de flutuar e foi **ancorado no chão**, escala 0.9–1.3 |
+
+**A spec:** `docs/superpowers/specs/2026-09-10-fatia7-moldura-borda-letal-design.md`.
+
+### ⚠️ AS DUAS LEIS QUE ESTE AJUSTE PAGOU PARA APRENDER
+
+**1. O ROTEIRO TEM DE ESTAR EM ORDEM CRESCENTE DE `t`.** `StageDirector.update` caminha com um
+cursor monotônico: um evento fora de ordem dispara no `t` do VIZINHO ANTERIOR, não no dele. O
+`{ t: 55, moldura 32 }` foi inserido depois de um `{ t: 58, wave }` e a parede só engrossava em
+t=58. ⚠️ **A sonda passou verde** — ela amostrava em t=60 e a rampa de 2s terminava justo a tempo.
+Quem pegou foi uma **captura de tela em t=58**. Agora há um guard no construtor do `StageDirector`
+que lança na carga da fase, e ele vale para as quatro fases.
+
+**2. `setTint` NÃO SERVE DE TELÉGRAFO NUMA FASE ESCURA.** Tint no Phaser é multiplicativo, e a
+faixa é quase preta na banda que importa: medido, o delta de luminância entre inerte e letal deu
+**−1,5**. Não era defeito da arte provisória — o rumo da fase é *luz só onde há energia*, então a
+arte final também será escura. A saída foi luz ADITIVA por cima: um fio de 2px na superfície,
+`0xffb478`, medido em **+16,2 de luminância e +37,1 no pico**. ⚠️ **Quem quiser anunciar qualquer
+coisa nesta fase: desenhe luz, não multiplique cor.**
+
+**E a regra que resume as duas, de novo: ABRA A IMAGEM.** As duas foram pegas por captura, nenhuma
+por assert.
 
 ---
 
@@ -153,18 +194,22 @@ poluem a listagem. Se ele confirmar que não quer nenhuma das 64 candidatas,
 ## O QUE VEM DEPOIS, NA ORDEM
 
 ```
-M1 — O MOTOR              ✅ CÓDIGO PRONTO E VERIFICADO (09/09) · 🔴 FALTA O TESTE JOGADO DELE
+M1 — O MOTOR              ✅ PRONTO, VERIFICADO E JOGADO (09–10/09)
   a faixa contínua, a curva do vão, a mesa, a trava dos 8px — com arte provisória.
   Plano: docs/superpowers/plans/2026-09-09-fatia7-m1-motor-moldura.md
-  └ A PERGUNTA QUE AINDA NÃO TEM RESPOSTA: a curva contínua estragou a dificuldade?
-M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI (depois que ele jogar) · as 4 peças da doca engolida
+  └ RESPONDIDA: a curva contínua NÃO estragou a dificuldade. PASSO_MAX fica em 14.
+M1.5 — O AJUSTE           ✅ PRONTO E VERIFICADO (10/09) · 🔴 FALTA O TESTE JOGADO DELE
+  a borda de margem, a parede que morde no duto, o fio aceso, o cenário desempilhado.
+  Spec: docs/superpowers/specs/2026-09-10-fatia7-moldura-borda-letal-design.md
+  └ AS PERGUNTAS ABERTAS: a mordida está justa? o fio avisa a tempo?
+M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI (depois que ele jogar o M1.5) · as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
 M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
 M5 — A CÂMARA D           ⬜ a faixa da arena
 BLOCO B — O CHEFÃO        ⬜ INALTERADO pela moldura, e ainda de pé
 ```
 
-### 🔴 O M1 ESTÁ DE PÉ, MAS NÃO FOI JOGADO
+### 🟢 O M1 FOI JOGADO E APROVADO (10/09) — esta seção fica como registro
 
 O código está completo e verificado (build limpo · `probe-f4-moldura` 19/19 · `probe-stage4` 22/22
 com `vaos:[110,110,110]` · `probe-f4-visual` 17/17 · a régua da mesa honesta). **Nada disso responde
