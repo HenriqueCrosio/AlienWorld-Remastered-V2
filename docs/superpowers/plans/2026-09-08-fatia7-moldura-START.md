@@ -1,30 +1,50 @@
 # START — FATIA 7 · A MOLDURA: ONDE A PRÓXIMA SESSÃO PEGA
 
 **🟢 O DESIGN ESTÁ FECHADO E APROVADO POR ELE (08/09/2026).**
-**🟢 O M1 — O MOTOR — ESTÁ IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
-**🟢 O AJUSTE DO TESTE JOGADO ESTÁ IMPLEMENTADO E VERIFICADO (10/09/2026).**
-**🔴 O AJUSTE AINDA NÃO FOI JOGADO. É essa a próxima ação.**
+**🟢 O M1 — O MOTOR — IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
+**🟢 O M1.5 — O DUTO E AS PORTAS — IMPLEMENTADO E VERIFICADO (10/09/2026).**
+**🔴 O M1.5 AINDA NÃO FOI JOGADO. É essa a próxima ação.**
 Branch `feat/fase4-visual`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O ajuste de 10/09 (a borda de
-> margem, a parede que morde no duto, o cenário desempilhado) está de pé e eu já joguei. Meu
-> veredicto: <DIGA AQUI>. Toque o M2 — a câmara A."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O M1.5 está de pé — o duto
+> com parede colada, as três portas e a fase de 113s — e eu já joguei. Meu veredicto: <DIGA AQUI>.
+> Toque o M2 — a câmara A."**
+
+---
+
+## 👀 O QUE VER PRIMEIRO NA PRÓXIMA SESSÃO, NESTA ORDEM
+
+1. **A fase agora tem 113 segundos** (era 86). O duto passou de 11s para 38s. Se ele achar a fase
+   longa demais, o corte é nas ondas entre as portas, **nunca nas portas** — elas são o motivo de o
+   duto existir.
+2. **A parede do duto COLA no corredor.** A banda aberta é exatamente `vão + 8 + 8` (medido: 100px
+   para vão 84). Antes eram 127px, com a parede do teto em 16,6px de média. Se ele disser que o
+   duto voltou a ficar largo, é este bloco que quebrou — a sonda tem assert para ele.
+3. **As três portas** (t=72, 82, 94 · HP 6, 8, 10 · vãos 84, 76, 68). Arte provisória, com núcleo
+   aceso. A pergunta é se o HP está calibrado: a PULSE entrega 7 de dano/s e a porta chega em ~3,5s.
+4. **O fundo do chefão NÃO está ampliado** — foi medido de três formas (§5 da spec do duto). O que
+   cresceu foi a abertura: 108px → 184px de pintura visível. Se ainda incomodar, o número é a
+   espessura do chefão (hoje 16), não a pintura.
+5. **O primeiro plano some ao entrar no duto.** A viga tinha 84px opacos contra um canal de 100px.
 
 ---
 
 ## ⏭️ A PRÓXIMA AÇÃO, EM UMA FRASE
 
-**ELE JOGA O AJUSTE DE 10/09.** As três sondas estão verdes e a linha de base sobreviveu, mas as
-duas perguntas que este ajuste abre só o controle na mão responde:
+**ELE JOGA O M1.5.** As três sondas estão verdes e a linha de base sobreviveu, mas quatro perguntas
+só o controle na mão responde:
 
-1. **A parede do duto está justa ou está roubando?** Ela agora MORDE (t=68→79), com 3px de perdão
-   no raspão e 1400ms de i-frames. O knob é `Moldura.MORDIDA`.
-2. **O fio aceso avisa a tempo?** Ele acende no mesmo instante em que a parede passa a cobrar. Se
-   ele avisa tarde demais, o conserto é o roteiro acender antes de morder — não mexer na mordida.
+1. **A parede do duto está justa ou está roubando?** Ela MORDE de t=68 a t=106, com 3px de perdão no
+   raspão e 1400ms de i-frames. O knob é `Moldura.MORDIDA`.
+2. **O HP das portas está certo?** 6, 8, 10. Se ele passar por todas sem esforço, sobe; se perder
+   vida em todas, desce. O knob é o `hp` de cada evento `porta` no `STAGE_4`.
+3. **38 segundos de duto é demais?** O knob é o espaçamento entre as portas.
+4. **O fio avisa a tempo?** Ele acende no mesmo instante em que a parede passa a cobrar. Se avisar
+   tarde demais, o conserto é o roteiro **acender antes de morder** — não mexer na mordida.
 
 ⚠️ **Continua valendo: não gere arte nenhuma antes disso.** A geometria ainda é barata de desfazer;
 depois do M3, com 8 peças de arte em cima dela, não é.
@@ -66,6 +86,19 @@ coisa nesta fase: desenhe luz, não multiplique cor.**
 
 **E a regra que resume as duas, de novo: ABRA A IMAGEM.** As duas foram pegas por captura, nenhuma
 por assert.
+
+### ⚠️ E AS DUAS DA 2ª RODADA (o duto)
+
+**3. A TRAVA DOS 8px NÃO ERA UM PISO DA PAREDE, ERA UM TETO DELA.** O `max`/`min` contra a
+espessura só sabe AFASTAR a superfície do corredor. Medido: o roteiro pedia 54 e a parede do teto
+saía com **16,6px de média**, com **127px de banda aberta para um corredor de 84**. Os 43px
+sobrando não eram nem corredor nem parede — e era isso, não a espessura ser pequena, que fazia o
+duto ler como "passagem estreita". ⚠️ **No duto quem manda na parede é o CORREDOR, não a espessura.**
+
+**4. UM DIFF ENTRE DOIS QUADROS DE UM JOGO QUE ROLA MEDE O TEMPO PASSANDO, NÃO O QUE SE PEDIU.** Ao
+investigar se as nebulosas apareciam, pausei `physics.world` e o diff deu **71%**. O parallax rola
+pelo `update` da CENA, não pela física: com `scene.pause()` o número é **0,00%**. Eu quase reportei
+um defeito que não existia. ⚠️ **Pausar a física não pausa o mundo.**
 
 ---
 
@@ -199,9 +232,11 @@ M1 — O MOTOR              ✅ PRONTO, VERIFICADO E JOGADO (09–10/09)
   Plano: docs/superpowers/plans/2026-09-09-fatia7-m1-motor-moldura.md
   └ RESPONDIDA: a curva contínua NÃO estragou a dificuldade. PASSO_MAX fica em 14.
 M1.5 — O AJUSTE           ✅ PRONTO E VERIFICADO (10/09) · 🔴 FALTA O TESTE JOGADO DELE
-  a borda de margem, a parede que morde no duto, o fio aceso, o cenário desempilhado.
-  Spec: docs/superpowers/specs/2026-09-10-fatia7-moldura-borda-letal-design.md
-  └ AS PERGUNTAS ABERTAS: a mordida está justa? o fio avisa a tempo?
+  1ª rodada: a borda de margem, a parede que morde, o fio aceso, o cenário desempilhado.
+  2ª rodada: a parede COLA no corredor, as 3 PORTAS, a fase vai a 113s.
+  Specs: .../2026-09-10-fatia7-moldura-borda-letal-design.md  (1ª, parcialmente superada)
+         .../2026-09-10-fatia7-duto-portas-design.md          (2ª, a que vale)
+  └ AS PERGUNTAS ABERTAS: a mordida está justa? o HP das portas? 38s de duto é demais?
 M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI (depois que ele jogar o M1.5) · as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
 M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
