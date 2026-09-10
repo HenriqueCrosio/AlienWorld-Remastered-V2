@@ -42,12 +42,22 @@ export type StageEvent =
    * manda no DESENHO — é a separação que protege a fase de virar um conserto de colisão. E, na
    * prática: a batida do duto (t=68) não tem evento `corredor` nenhum.
    *
-   * A fase inteira vira uma frase: **as paredes vão fechando em você.**
+   * A fase inteira vira uma frase: **a fase é emoldurada, o duto fecha, e o núcleo reabre.**
+   *
+   * ⚠️ A CURVA NÃO SOBE MAIS MONOTONICAMENTE, e isso foi uma decisão, não um descuido. Até o teste
+   * jogado de 10/09 ela subia em seis degraus do começo ao fim; o Henrique jogou e pediu borda de
+   * MARGEM na fase inteira, fechando só no duto e **abrindo no chefão** — *"isso dá o desafio
+   * extra de desviar e conseguir sair do duto com vida"*. Quem quiser voltar a exigir monotonia
+   * numa sonda vai reprovar o desenho aprovado.
+   *
+   * `letal` é a parede COBRANDO o encosto, e só o duto pede isso. ⚠️ Ela NÃO é deduzida da
+   * espessura: um roteiro futuro que pedisse 54px por outro motivo ganharia parede assassina sem
+   * ninguém ter escrito isso. Quem manda é esta linha. Ver `Moldura.morde`.
    *
    * ⚠️ Os números são CHUTE CALIBRADO até o playtest, com a mesma etiqueta dos vãos e dos HP das
-   * portas. O que não é chute é a CURVA: ela tem de subir monotonicamente.
+   * portas.
    */
-  | { t: number; type: 'moldura'; espessura: number }
+  | { t: number; type: 'moldura'; espessura: number; letal?: boolean }
   /**
    * TROCA O CENÁRIO PINTADO (Fase 4). A fase é uma jornada anatômica — o hangar engolido, a
    * caixa torácica, o duto e a câmara do núcleo — e cada câmara tem a pintura dela.
@@ -371,6 +381,10 @@ export const STAGE_4: StageEvent[] = [
   // ⚠️ A ESPESSURA É A DRAMATURGIA DA FASE — e ela já estava escrita nos vãos desde a Fatia 7, só
   // não estava visível. A moldura é o que faz o jogador ENXERGAR o que os números já faziam com
   // ele. 16px: você entrou num lugar grande.
+  //
+  // ⚠️ E 16px É ONDE ELA FICA ATÉ t=55. Depois do teste jogado de 10/09 a moldura é uma BORDA que
+  // margeia a fase, não uma parede que cresce a fase inteira: o aperto do miolo vem do VÃO (76px
+  // em t=43), e é o duto — e só ele — que fecha de verdade. Ver a spec de 10/09.
   { t: 1, type: 'moldura', espessura: 16 },
   { t: 5, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 90 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.38, y: 120 },
@@ -378,7 +392,7 @@ export const STAGE_4: StageEvent[] = [
   // O interior REAGE: minas sensoras nos vãos (a defesa imune do bicho) + pressão aérea.
   { t: 14, type: 'banner', text: 'ANTICORPOS · SENSORES ATIVOS' },
   { t: 15, type: 'corredor', rate: 2.4, gap: 96 },
-  { t: 15, type: 'moldura', espessura: 18 },        // ele começa a se estreitar
+  { t: 15, type: 'moldura', espessura: 16 },        // a borda margeia, e é só isso
   { t: 15.5, type: 'hazard', rate: 2.2, mix: ['sensor', 'destroco'] },
   { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
   { t: 21, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 140 },
@@ -391,7 +405,7 @@ export const STAGE_4: StageEvent[] = [
 
   // Respiro estrutural: corredor solto, sem onda — o jogador reaprende a voar antes do aperto.
   { t: 37, type: 'corredor', rate: 2.6, gap: 104 },
-  { t: 37, type: 'moldura', espessura: 26 },        // as paredes ganharam corpo
+  { t: 37, type: 'moldura', espessura: 16 },        // ainda margem: o respiro é largo de verdade
   { t: 38, type: 'hazard', rate: 0, mix: [] },
 
   // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
@@ -403,36 +417,55 @@ export const STAGE_4: StageEvent[] = [
   // CURTA), minas nos vãos, cargueiro cuspindo drones no corredor. Posição sob pressão. ───
   { t: 42, type: 'banner', text: 'O DUTO APERTA' },
   { t: 43, type: 'corredor', rate: 1.9, gap: 76 },
-  { t: 43, type: 'moldura', espessura: 36 },        // o aperto
+  // ⚠️ O APERTO NÃO É DA PAREDE, É DO VÃO. A borda continua em 16 aqui: quem cobra posição é o
+  // `corredor` de 76px acima, e empilhar parede grossa em cima do vão mais estreito da fase era
+  // justamente o que fazia a moldura deixar de ler como borda.
+  { t: 43, type: 'moldura', espessura: 16 },
   { t: 44, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
   { t: 46, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 100 },
   { t: 50, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
   { t: 51, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 100 },
   { t: 54, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 90 },
+  // A PAREDE COMEÇA A GANHAR CORPO — o primeiro degrau real da fase, e ele cai no meio do pico,
+  // sem evento `corredor` junto: o jogador sente o lugar apertar sem que o vão tenha mudado.
+  { t: 55, type: 'moldura', espessura: 32 },
   { t: 58, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 110 },
 
   // PICO FINAL: o corredor continua estreito e TUDO vem junto — mas menos volume que o pico
   // da F2/F3: aqui o terreno já cobra metade da atenção, e pressão dupla total é ilegível.
   { t: 63, type: 'banner', text: 'REJEIÇÃO TOTAL' },
   { t: 63.5, type: 'corredor', rate: 1.7, gap: 84 },
-  { t: 63.5, type: 'moldura', espessura: 48 },      // não é mais câmara
+  { t: 63.5, type: 'moldura', espessura: 44 },      // não é mais câmara
   { t: 64, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
   // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
   // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
   { t: 68, type: 'cenario', key: 'paintBgF4c' },
-  // O DUTO: a faixa CHEIA. 54 é o teto da peça de 64px ancorada pela superfície
-  // (`Moldura.ESPESSURA_MAX`), e a partir daqui a mesa vira parede — a trava dos 8px apara o
-  // resto sozinha enquanto o corredor existir.
-  { t: 68, type: 'moldura', espessura: 54 },
+  // O DUTO: a faixa CHEIA, E ELA PASSA A MORDER. 54 é o teto da peça de 64px ancorada pela
+  // superfície (`Moldura.ESPESSURA_MAX`), e a partir daqui a mesa vira parede — a trava dos 8px
+  // apara o resto sozinha enquanto o corredor existir.
+  //
+  // ⚠️ `letal` CAI JUNTO COM A TROCA DE PINTURA, e não é coincidência: a faixa muda de tint no
+  // mesmo instante (ver `Moldura.setLetal`), então a regra nova chega ANUNCIADA. Parede que foi
+  // cenário por 68s e de repente cobra é sonegação — a mesma lei que abre esta fase com corredor
+  // largo para o jogador descobrir que o teto mata.
+  //
+  // ⚠️ E a folga não some: medido neste regime (espessura 54, gap 84), sobram de 8px (pior caso,
+  // o mínimo que `Moldura.FOLGA` promete) a 34px entre a borda do vão e a parede que morde.
+  { t: 68, type: 'moldura', espessura: 54, letal: true },
   { t: 69, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
   { t: 72, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
   { t: 75, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
 
   // Silêncio → o NÚCLEO. O mesmo telégrafo de todas as fases.
   { t: 79, type: 'corredor', rate: 0, gap: 0 },
-  // O silêncio antes do chefão: sem corredor, a trava desliga e a parede fica cheia de verdade.
-  { t: 79, type: 'moldura', espessura: 54 },
+  // A PAREDE RECUA NO SILÊNCIO. `RAMPA` é 8px/s, então 54→16 leva 4,75s: a abertura termina em
+  // t≈83,75 e o chefão (t=86) luta numa arena EMOLDURADA, não dentro de um duto. O jogador VÊ a
+  // parede abrir enquanto sai — é a recompensa de ter saído do duto com vida.
+  //
+  // ⚠️ `letal: false` é explícito, e tem de ser: sem ele a parede continuaria cobrando durante os
+  // 4,75s em que ainda está grossa, e cobraria numa fase que já tirou o corredor do jogador.
+  { t: 79, type: 'moldura', espessura: 16, letal: false },
   { t: 79.5, type: 'hazard', rate: 0, mix: [] },
   // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
   // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
@@ -542,7 +575,32 @@ export const STAGES: Record<number, StageDef> = {
 export class StageDirector {
   private next = 0;
 
-  constructor(private readonly script: StageEvent[]) {}
+  /**
+   * ⚠️ O ROTEIRO TEM DE ESTAR EM ORDEM CRESCENTE DE `t`, E ISTO NÃO É ESTILO — É CORRETUDE. O
+   * `update` caminha com um CURSOR MONOTÔNICO (`next`), então um evento fora de ordem não dispara
+   * no instante que ele declara: dispara quando o cursor chega nele, ou seja, no `t` do vizinho
+   * anterior. Ele fica escrito no roteiro com um número e acontece com outro.
+   *
+   * ⚠️ ESTE GUARD NASCEU DE UM DEFEITO REAL, em 10/09: o evento `{ t: 55, moldura 32 }` foi
+   * inserido depois de um `{ t: 58, wave }`, e a parede só começava a engrossar em t=58. A sonda
+   * passou VERDE — ela amostrava em t=60, e a rampa de 2s terminava justo a tempo. Quem pegou foi
+   * uma CAPTURA de tela em t=58. Um assert de sonda não teria segurado isso; este segura, porque
+   * falha na carga da fase e não depende de instante amostrado.
+   *
+   * Lança em vez de ordenar sozinho: ordenar em silêncio faria o roteiro rodar diferente do que
+   * está escrito no arquivo, que é exatamente o defeito que se quer impedir.
+   */
+  constructor(private readonly script: StageEvent[]) {
+    for (let i = 1; i < script.length; i++) {
+      if (script[i].t < script[i - 1].t) {
+        throw new Error(
+          `Roteiro fora de ordem no índice ${i}: t=${script[i].t} (${script[i].type}) vem depois ` +
+            `de t=${script[i - 1].t} (${script[i - 1].type}). O cursor de \`update\` é monotônico: ` +
+            `este evento dispararia em t=${script[i - 1].t}, não em t=${script[i].t}.`,
+        );
+      }
+    }
+  }
 
   /**
    * Instante em que o chefão entra — o modo treino salta para cá.
