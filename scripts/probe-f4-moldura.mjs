@@ -343,7 +343,7 @@ const caixas = () => page.evaluate(() => {
   const vao = m.vaoEm(x);
   return {
     t: Math.round((s.elapsed ?? 0) * 10) / 10,
-    letal: m.letal,
+    duto: m.duto,
     chao,
     teto,
     // ENTERRADA no chão: 10px abaixo da superfície, bem além da mordida de 3px.
@@ -359,7 +359,7 @@ const caixas = () => page.evaluate(() => {
 
 const antes = await caixas();
 console.log('mordida  ', JSON.stringify(antes));
-ok(antes.letal === false, `t=${antes.t}s: antes do duto a parede NÃO é letal (letal=${antes.letal})`);
+ok(antes.duto === false, `t=${antes.t}s: antes do duto a parede NÃO é letal (duto=${antes.duto})`);
 ok(
   antes.dentroChao === false && antes.dentroTeto === false,
   `t=${antes.t}s: antes do duto a parede é atravessável — é cenário (chão=${antes.dentroChao}, teto=${antes.dentroTeto})`,
@@ -377,7 +377,7 @@ const duto = await caixas();
 console.log('espessura', JSON.stringify(e74));
 console.log('mordida  ', JSON.stringify(duto));
 ok(e74 && e74.e === 54, `t=74s: o duto — a faixa cheia (${e74 && e74.e}px, esperado 54)`);
-ok(duto.letal === true, `t=${duto.t}s: no duto a parede é letal (letal=${duto.letal})`);
+ok(duto.duto === true, `t=${duto.t}s: no duto a parede é letal (duto=${duto.duto})`);
 ok(
   duto.dentroChao === true && duto.dentroTeto === true,
   `t=${duto.t}s: a parede do duto MORDE nos dois lados (chão=${duto.dentroChao}, teto=${duto.dentroTeto})`,
@@ -454,13 +454,126 @@ ok(
   `o fio cai EXATAMENTE na linha que morde (${desenho.desalinhados} desalinhados)`,
 );
 
+// ─── A PAREDE COLA NO CORREDOR: é isto que faz o duto ser um DUTO ───
+//
+// ⚠️ ESTE BLOCO EXISTE POR UMA MEDIÇÃO, não por precaução. Em 09/09 a superfície do duto saía da
+// espessura com a trava como TETO (`max`/`min`), e o resultado medido foi: parede de teto com
+// **16,6px de média** onde o roteiro pedia 54, e **127px de banda aberta** para um corredor de 84.
+// Os 43px sobrando não eram nem corredor nem parede — e era exatamente isso que fazia o duto ler
+// como "passagem estreita" em vez de duto. Se estes asserts caírem, o defeito voltou.
+const colada = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+  const m = s.moldura;
+  const gap = s.corredorGap;
+  const bandas = [];
+  const folgas = [];
+  for (const x of [64, 192, 320]) {
+    const c = m.superficieChaoEm(x), t = m.superficieTetoEm(x), v = m.vaoEm(x);
+    bandas.push(c - t);
+    folgas.push(c - (v + gap / 2), (v - gap / 2) - t);
+  }
+  // A peça tem 64px; onde a parede passa disso, quem fecha até a borda é o ENCHIMENTO.
+  const ench = s.children.list.filter((o) => o.name === 'enchimentoChao' || o.name === 'enchimentoTeto');
+  const buracos = [];
+  for (const seg of s.children.list.filter((o) => o.name === 'faixaChao')) {
+    const x = Math.round(seg.x + 64);
+    if (x < 0 || x > 384) continue;
+    const fim = seg.y + 64;                     // onde a peça do chão termina
+    const e = ench.find((o) => o.name === 'enchimentoChao' && Math.abs(o.x - seg.x) < 1);
+    if (fim < 216 && (!e || !e.visible || e.y > fim || e.y + e.height < 216)) buracos.push({ x, fim });
+  }
+  return { gap, bandas, folgas, enchimentos: ench.length, acesos: ench.filter((o) => o.visible).length, buracos };
+});
+console.log('colada   ', JSON.stringify(colada));
+// A banda aberta é o vão MAIS as duas folgas da trava, e nada além disso. Antes: 127 para gap 84.
+const esperado = colada.gap + 2 * 8;
+ok(
+  colada.bandas.every((b) => b === esperado),
+  `a banda aberta do duto é o vão + as duas folgas, EXATO (${colada.bandas} contra ${esperado} = ${colada.gap}+8+8)`,
+);
+// ⚠️ E a folga continua sendo 8 dos dois lados — colar a parede APERTA contra o corredor, nunca
+// dentro dele. Se este cair, a parede letal invadiu o vão e a fase virou roubo.
+ok(
+  colada.folgas.every((f) => f === 8),
+  `a folga da trava continua exata dos dois lados (${colada.folgas})`,
+);
+// ⚠️ O ENCHIMENTO. A peça tem 64px e no duto a parede passa disso — sem ele apareceria uma tira de
+// FUNDO no rodapé e no topo, ou seja, um buraco no meio da parede que acabou de virar letal.
+ok(
+  colada.acesos === colada.enchimentos && colada.enchimentos > 0,
+  `o enchimento está aceso nos dois lados dentro do duto (${colada.acesos}/${colada.enchimentos})`,
+);
+ok(
+  colada.buracos.length === 0,
+  `a parede vai da superfície até a borda da tela, sem fresta (${colada.buracos.length} buracos: ${JSON.stringify(colada.buracos)})`,
+);
+
+// ─── AS PORTAS: o duto deixa de ser uma passagem estreita ───
+//
+// ⚠️ A PORTA TEM DE TAPAR O VÃO INTEIRO. Uma comporta desalinhada com o corredor deixa passagem
+// por cima ou por baixo, e porta que dá para contornar não é porta — o jogador aprenderia a
+// ignorar o núcleo aceso, que é a única coisa que a peça existe para ensinar.
+const porta = await (async () => {
+  for (let i = 0; i < 900; i++) {
+    const r = await page.evaluate(() => {
+      const s = window.__game.scene.getScenes(true)[0];
+      if (!s || s.scene.key !== 'Game') return null;
+      s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+      const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
+      if (!p) return { achou: false, t: Math.round((s.elapsed ?? 0) * 10) / 10 };
+      const m = s.moldura;
+      const x = Math.round(p.x);
+      const vao = m.vaoEm(Math.max(0, Math.min(383, x)));
+      const gap = s.corredorGap;
+      return {
+        achou: true,
+        t: Math.round((s.elapsed ?? 0) * 10) / 10,
+        hp: p.getData('hp'),
+        tex: p.texture.key,
+        dims: `${Math.round(p.displayWidth)}x${Math.round(p.displayHeight)}`,
+        escala: p.scaleX,
+        // as bordas da peça contra as bordas do corredor, na coluna dela
+        sobraCima: Math.round(vao - gap / 2 - (p.y - p.displayHeight / 2)),
+        sobraBaixo: Math.round(p.y + p.displayHeight / 2 - (vao + gap / 2)),
+      };
+    });
+    if (r && r.achou) return r;
+    await page.waitForTimeout(100);
+  }
+  return null;
+})();
+console.log('porta    ', JSON.stringify(porta));
+ok(porta !== null, 'a porta do duto nasce');
+if (porta) {
+  ok(porta.tex === 'porta', `a porta não usa a textura de erro — carrega 'porta' (${porta.tex})`);
+  ok(porta.escala === 1, `a porta entra em escala 1, nunca esticada (${porta.escala})`);
+  ok(porta.dims === '64x112', `as dimensões batem com a arte — 64×112 (${porta.dims})`);
+  ok(porta.hp === 6 || porta.hp === 8 || porta.hp === 10, `o HP vem do ROTEIRO, porta a porta (hp=${porta.hp})`);
+  // ⚠️ OS DOIS ASSERTS QUE IMPORTAM. A peça de 112px contra um vão de 84, 76 ou 68 tem de sobrar
+  // dos DOIS lados. Sobra negativa = fresta = porta contornável.
+  ok(
+    porta.sobraCima >= 0 && porta.sobraBaixo >= 0,
+    `a porta TAPA o vão inteiro, sem fresta (sobra ${porta.sobraCima}px em cima, ${porta.sobraBaixo}px embaixo)`,
+  );
+}
+
+// ⚠️ NO DUTO NÃO NASCE MESA. Desde que a parede colou no corredor, uma mesa nasceria como uma
+// protuberância de 8px invisível contra a parede — 8px de vão comido sem ninguém ver de onde.
+const mesaNoDuto = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+  return s.terrain.props.getChildren().filter((o) => o.active && o.getData('kind') === 'mesa').length;
+});
+ok(mesaNoDuto === 0, `no duto não nasce mesa — quem fecha o caminho são as portas (${mesaNoDuto} mesas)`);
+
 // ─── A REABERTURA: a parede recua no silêncio, e o chefão luta numa arena emoldurada ───
-const e84 = await espessuraEm(84);
+const e112 = await espessuraEm(112);
 const arena = await caixas();
-console.log('espessura', JSON.stringify(e84));
+console.log('espessura', JSON.stringify(e112));
 console.log('mordida  ', JSON.stringify(arena));
-ok(e84 && e84.e <= 20, `t=84s: a parede recuou antes do chefão (${e84 && e84.e}px, esperado ~16)`);
-ok(arena.letal === false, `t=${arena.t}s: a arena do núcleo não morde (letal=${arena.letal})`);
+ok(e112 && e112.e <= 20, `t=112s: a parede recuou antes do chefão (${e112 && e112.e}px, esperado ~16)`);
+ok(arena.duto === false, `t=${arena.t}s: a arena do núcleo não morde (duto=${arena.duto})`);
 
 console.log(falhas === 0 ? '\n✔ A MOLDURA ESTÁ DE PÉ' : `\n✘ ${falhas} asserts falharam`);
 await browser.close();

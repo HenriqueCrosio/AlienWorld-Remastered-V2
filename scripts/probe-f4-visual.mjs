@@ -96,9 +96,13 @@ const c3 = await pinturaEm(70);
 console.log('cenario 3', JSON.stringify(c3));
 ok(c3?.tex === 'paintBgF4c', `t=70s: TROCOU para o duto (${c3?.tex})`);
 
-const c4 = await pinturaEm(84);
+// ⚠️ t=110, e NÃO t=84. A câmara do núcleo entrava em t=82 até 10/09; com o duto crescendo de 11s
+// para 38s (as três portas), ela foi para t=109 e o chefão para t=113. Este assert falhou verde na
+// mudança e é bom que tenha falhado: um instante de sonda cravado à mão é um número que precisa
+// acompanhar o roteiro, e falhar é como ele avisa.
+const c4 = await pinturaEm(110);
 console.log('cenario 4', JSON.stringify(c4));
-ok(c4?.tex === 'paintBgF4d', `t=84s: TROCOU para a câmara do núcleo (${c4?.tex})`);
+ok(c4?.tex === 'paintBgF4d', `t=110s: TROCOU para a câmara do núcleo (${c4?.tex})`);
 
 console.log(falhas === 0 ? '\n✔ A FATIA 7 (BLOCO A) ESTÁ DE PÉ' : `\n✘ ${falhas} FALHA(S)`);
 await browser.close();
