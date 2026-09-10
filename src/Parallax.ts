@@ -358,7 +358,11 @@ export class Parallax {
       depth: 60,
       tint: 0x1a2440,
       alpha: 1,
-      scale: [1.0, 1.4],
+      // ⚠️ 1.6–1.9, E A FAIXA TEM DOIS TETOS. O piso subiu de 1.0 porque a viga nascia do MESMO
+      // tamanho das bandas de chão e teto (1.1–1.5) e lia como a terceira cópia da mesma placa em
+      // vez de como uma viga PERTO. O teto de 1.9 é a revisão visual anterior, que mediu a placa
+      // girada a 2.1 lendo como borrão preto tapando um canto da tela.
+      scale: [1.6, 1.9],
       gap: [380, 560],
       terreno: false,
       flutua: true,
@@ -374,18 +378,17 @@ export class Parallax {
     // meio-fundo e maquinário pesado pendurado no teto. Os tints são ESCUROS de propósito:
     // perspectiva aérea — e é o que separa cenário dos obstáculos jogáveis (as costelas do
     // corredor, que nascem SEM tint, claras).
-    this.addLayer({
-      key: 'costela',
-      factor: 0.45,
-      baseY: GAME_HEIGHT + 30,
-      depth: -85,
-      tint: 0x2e2838,
-      alpha: 1,
-      scale: [0.3, 0.48],
-      gap: [130, 210],
-      terreno: false,
-    });
-    // O teto tem a caixa torácica dele: o espelho escuro, um degrau mais lento e esparso.
+    // ⚠️ A COSTELA ERAM TRÊS CAMADAS, E VIROU DUAS (teste jogado de 10/09: *"alguns se repetem em
+    // outros tamanhos e ficou repetitivo"*). A que morreu era a do chão distante (fator 0.45,
+    // escala 0.3–0.48) — ela e a do teto nasciam praticamente do mesmo tamanho, e duas cópias da
+    // mesma arte no mesmo tamanho não leem como duas distâncias, leem como uma cópia.
+    //
+    // ⚠️ E AS DUAS QUE FICARAM TIVERAM AS ESCALAS SEPARADAS (0.28–0.38 contra 0.5–0.7, sem
+    // sobreposição). É a SOBREPOSIÇÃO das faixas de escala que fazia a peça ler como repetição:
+    // a mesma arte em tamanhos claramente diferentes lê como profundidade; em tamanhos parecidos,
+    // lê como a mesma peça colada duas vezes.
+    //
+    // O teto tem a caixa torácica dele: o espelho escuro, longe, lento e esparso.
     this.addLayer({
       key: 'costela',
       factor: 0.4,
@@ -393,7 +396,7 @@ export class Parallax {
       depth: -85,
       tint: 0x282234,
       alpha: 1,
-      scale: [0.3, 0.46],
+      scale: [0.28, 0.38],
       gap: [150, 250],
       terreno: false,
       teto: true,
@@ -407,23 +410,34 @@ export class Parallax {
       depth: -74,
       tint: 0x4a3e48,
       alpha: 1,
-      scale: [0.42, 0.6],
+      scale: [0.5, 0.7],
       gap: [180, 300],
       terreno: false,
     });
-    // ÓRGÃOS à deriva no meio-fundo: massas vivas presas entre as costelas, longe e lentas.
+    // ÓRGÃOS ANCORADOS NO CHÃO: massas vivas CRESCENDO do piso do bicho, grandes e raras.
+    //
+    // ⚠️ ESTA CAMADA FLUTUAVA, E ERA O DEFEITO QUE O HENRIQUE FOTOGRAFOU. Ela nascia com
+    // `flutua: true` numa faixa de 50 a 170 e escala 0.5–0.9 — um coração PEQUENO SOLTO NO MEIO DA
+    // TELA. Veredicto dele, com print: *"coração pequeno jogado no ar da fase"*, contra o
+    // maquinário pendurado no teto logo abaixo, que ele aprovou por *"trazer noção de grandeza"*.
+    //
+    // ⚠️ A LEI QUE SAI DAÍ, E ELA VALE PARA TODA PEÇA DE CENÁRIO DESTA FASE: **peça grande
+    // ANCORADA numa borda lê como grandeza; peça pequena SOLTA no meio da tela lê como asset
+    // jogado na cena.** É a mesma frase que abriu a Fatia 7 inteira em 08/09 — e as duas camadas
+    // são a MESMA arte (`orgao.png`, 121×118). O que mudava era âncora e tamanho, só isso.
+    //
+    // O chão fica com a carne e o teto com a máquina (`maquinario`, logo abaixo): cada borda ganha
+    // a sua peça-assinatura, as duas grandes, e nenhuma das duas flutua.
     this.addLayer({
       key: 'orgao',
       factor: 0.3,
-      baseY: 0,
+      baseY: GAME_HEIGHT + 20,
       depth: -88,
       tint: 0x5a4048,
       alpha: 0.9,
-      scale: [0.5, 0.9],
-      gap: [220, 420],
+      scale: [0.9, 1.3],
+      gap: [400, 700],
       terreno: false,
-      flutua: true,
-      faixa: [50, 170],
     });
     // MAQUINÁRIO PESADO pendurado no teto: o bicho é biomecânico — carne E máquina.
     this.addLayer({
