@@ -589,12 +589,12 @@ export class GameScene extends Phaser.Scene {
     }
     if (moldura) {
       this.moldura.setEspessura(moldura.espessura);
-      // ⚠️ `letal` TAMBÉM, e este `?? false` é o conserto de um buraco JÁ ABERTO uma vez. O commit
+      // ⚠️ `duto` TAMBÉM, e este `?? false` é o conserto de um buraco JÁ ABERTO uma vez. O commit
       // `bb1018c` existe porque este método aplicava o corredor e esquecia a moldura; um campo
       // novo no mesmo evento chega com o mesmo buraco esperando. Sem esta linha, o treino que
-      // começa dentro do duto luta contra uma parede que não morde — e o que começa DEPOIS do
-      // duto herda a mordida de um evento que já foi revogado.
-      this.moldura.setLetal(moldura.letal ?? false);
+      // começa dentro do duto luta contra uma parede fina que não morde — e o que começa DEPOIS
+      // do duto herda a parede colada de um evento que já foi revogado.
+      this.moldura.setDuto(moldura.duto ?? false);
     }
   }
 
@@ -621,11 +621,25 @@ export class GameScene extends Phaser.Scene {
         // A espessura da faixa (decoração). O `gap` do `corredor` continua mandando na colisão do
         // OBSTÁCULO — esta linha não encosta em física nenhuma.
         this.moldura.setEspessura(e.espessura);
-        // ⚠️ `?? false` E NÃO `if (e.letal !== undefined)`. Omitir o campo tem de DESLIGAR a
-        // mordida, não preservá-la: um evento de espessura sem `letal` é uma parede que não
-        // cobra, e é o que a fase inteira fora do duto pede. Preservar o estado faria a mordida
-        // vazar do duto para o resto da fase no dia em que alguém inserisse um evento no meio.
-        this.moldura.setLetal(e.letal ?? false);
+        // ⚠️ `?? false` E NÃO `if (e.duto !== undefined)`. Omitir o campo tem de DESLIGAR o duto,
+        // não preservá-lo: um evento de espessura sem `duto` é uma parede que não cobra, e é o
+        // que a fase inteira fora do duto pede. Preservar o estado faria a mordida vazar do duto
+        // para o resto da fase no dia em que alguém inserisse um evento no meio.
+        this.moldura.setDuto(e.duto ?? false);
+        // ⚠️ O PRIMEIRO PLANO SAI DE CENA AO ENTRAR NO DUTO, pela MESMA lei que já o tira no
+        // chefão: *"durante a fase as silhuetas na frente da nave são dificuldade; durante o
+        // chefão elas tapam a leitura dos padrões"*. O duto é o segundo lugar desta fase onde
+        // isso vale, e é medível: a viga tem 84px de altura OPACA e o canal do duto tem 100px —
+        // uma silhueta que cobre 84% da passagem, num trecho em que encostar na parede cobra uma
+        // vida. Dificuldade é não caber; não enxergar onde cabe é roubo.
+        //
+        // ⚠️ NÃO VOLTA DEPOIS, e é de propósito: o que vem depois do duto é o silêncio e o
+        // chefão, e o chefão apaga o primeiro plano de novo (`spawnBoss`). Reacender por 7
+        // segundos de silêncio seria pisca-pisca de estado, não dramaturgia.
+        if (e.duto) this.parallax.setForegroundDimmed(true);
+        break;
+      case 'porta':
+        this.spawnPorta(e.hp);
         break;
       case 'banner':
         this.showBanner(e.text, COLORS.hotBright);
@@ -939,6 +953,17 @@ export class GameScene extends Phaser.Scene {
   private spawnCorredores(dt: number): void {
     if (this.corredorRate <= 0) return;
 
+    // ⚠️ NO DUTO NÃO NASCE MESA, e a spec de 06/09 já dizia por quê: *"C é o duto (parede cheia,
+    // sem mesa — quem fecha o caminho são as portas)"*. Desde que a parede passou a COLAR no
+    // corredor (10/09), a mesa nasceria com o topo 8px acima da superfície — uma protuberância de
+    // 8px numa parede que já vai do corredor até a borda da tela. Ela não somaria obstáculo:
+    // somaria 8px de corredor comido, invisíveis contra a parede, e a fase perderia vão sem
+    // ninguém ver de onde.
+    //
+    // ⚠️ O `corredorRate` do roteiro CONTINUA VALENDO no duto, e não é desperdício: quem lê o
+    // `gap` é a curva (é ele que a parede colada persegue). O que esta linha corta é só o SPAWN.
+    if (this.moldura.duto) return;
+
     this.corredorTimer -= dt;
     if (this.corredorTimer > 0) return;
     this.corredorTimer = this.corredorRate;
@@ -965,6 +990,23 @@ export class GameScene extends Phaser.Scene {
     // medido: é o que a `probe-stage4` cobra em `vaos:[110,110,110]`.
     this.terrain.spawn(kind, { bordaVao: vaoY + meio });
     this.terrain.spawn(kind, { anchor: 'teto', bordaVao: vaoY - meio });
+  }
+
+  /**
+   * A PORTA do duto: a comporta que tapa o vão e só deixa passar quem a destrói.
+   *
+   * ⚠️ ELA NASCE NO CENTRO DO VÃO NA BOCA DE CENA, pela mesma curva que o corredor consulta e no
+   * mesmo x (`GAME_WIDTH + 30`, onde o `TerrainSystem` cria todo prop). Perguntar a curva em
+   * outro ponto faria a porta nascer numa altura que não é a do corredor onde ela vai chegar, e
+   * uma porta desalinhada deixa passagem por cima ou por baixo — porta que dá para contornar não
+   * é porta.
+   *
+   * ⚠️ SEM PAR. Ela é o único prop desta fase ancorado pelo CENTRO (ver o `PropKind` dela): a peça
+   * de 112px cobre sozinha o vão mais largo do duto (84), com folga nas duas pontas.
+   */
+  private spawnPorta(hp: number): void {
+    if (!this.textures.exists('porta')) return;
+    this.terrain.spawn('porta', { centroVao: this.moldura.vaoEm(GAME_WIDTH + 30), hp });
   }
 
   /** O mesmo relógio dos props, para os destroços do vácuo. */

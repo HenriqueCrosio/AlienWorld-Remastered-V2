@@ -57,7 +57,22 @@ export type StageEvent =
    * ⚠️ Os números são CHUTE CALIBRADO até o playtest, com a mesma etiqueta dos vãos e dos HP das
    * portas.
    */
-  | { t: number; type: 'moldura'; espessura: number; letal?: boolean }
+  | { t: number; type: 'moldura'; espessura: number; duto?: boolean }
+  /**
+   * UMA PORTA do duto (Fase 4): a comporta que TAPA O VÃO INTEIRO e só deixa passar quem a
+   * destrói. Ela é o que faz o duto ser um lugar em vez de uma passagem estreita — o veredicto
+   * do teste jogado de 10/09.
+   *
+   * ⚠️ É UM EVENTO PONTUAL, não uma taxa. `corredor` e `hazard` cravam um RITMO que persiste; a
+   * porta é um instante, como o `miniboss` e o `rabo`. Três portas roteirizadas uma a uma valem
+   * mais que um `rate`: elas têm HP crescente, e é essa progressão que dá começo, meio e fim ao
+   * duto.
+   *
+   * ⚠️ O `hp` VIVE AQUI, e não na tabela de props. Ele sobrepõe o `PropDef` porta a porta (6, 8,
+   * 10 — os números da spec de 06/09, chute calibrado até o playtest): a conta é que a porta
+   * chega em quem voa em ~3,5s e a PULSE, o pior caso, entrega 7 de dano/s.
+   */
+  | { t: number; type: 'porta'; hp: number }
   /**
    * TROCA O CENÁRIO PINTADO (Fase 4). A fase é uma jornada anatômica — o hangar engolido, a
    * caixa torácica, o duto e a câmara do núcleo — e cada câmara tem a pintura dela.
@@ -445,33 +460,55 @@ export const STAGE_4: StageEvent[] = [
   // superfície (`Moldura.ESPESSURA_MAX`), e a partir daqui a mesa vira parede — a trava dos 8px
   // apara o resto sozinha enquanto o corredor existir.
   //
-  // ⚠️ `letal` CAI JUNTO COM A TROCA DE PINTURA, e não é coincidência: a faixa muda de tint no
-  // mesmo instante (ver `Moldura.setLetal`), então a regra nova chega ANUNCIADA. Parede que foi
-  // cenário por 68s e de repente cobra é sonegação — a mesma lei que abre esta fase com corredor
-  // largo para o jogador descobrir que o teto mata.
+  // ⚠️ `duto` CAI JUNTO COM A TROCA DE PINTURA, e não é coincidência: a faixa acende no mesmo
+  // instante (ver `Moldura.setDuto`), então a regra nova chega ANUNCIADA. Parede que foi cenário
+  // por 68s e de repente cobra é sonegação — a mesma lei que abre esta fase com corredor largo
+  // para o jogador descobrir que o teto mata.
   //
-  // ⚠️ E a folga não some: medido neste regime (espessura 54, gap 84), sobram de 8px (pior caso,
-  // o mínimo que `Moldura.FOLGA` promete) a 34px entre a borda do vão e a parede que morde.
-  { t: 68, type: 'moldura', espessura: 54, letal: true },
+  // ⚠️ `duto: true` FAZ DUAS COISAS: a parede COLA no corredor (deixa de sair da espessura) e ela
+  // MORDE. A primeira é o conserto de 10/09 — sem ela o duto media 127px de banda aberta para um
+  // corredor de 84, e a parede do teto ficava em 16,6px de média onde esta linha pede 54.
+  { t: 68, type: 'moldura', espessura: 54, duto: true },
   { t: 69, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
-  { t: 72, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
-  { t: 75, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
+
+  // ─── AS TRÊS PORTAS. O duto deixa de ser uma passagem estreita e vira um LUGAR. ───
+  //
+  // ⚠️ ELAS SÃO O MOTIVO DE O DUTO TER 38s EM VEZ DE 11s. Uma porta chega em quem voa em ~3,5s;
+  // três portas coladas viravam uma fila, e o duto que o teste jogado pediu precisa de espaço
+  // entre elas para as ondas respirarem. A fase passa de 86s para 113s, autorizado em 10/09.
+  //
+  // ⚠️ O VÃO APERTA A CADA PORTA (84 → 76 → 68) e o HP SOBE (6 → 8 → 10). É a progressão que dá
+  // começo, meio e fim ao duto — e é ela, não a duração, que faz o trecho ter forma.
+  { t: 72, type: 'porta', hp: 6 },
+  { t: 74, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
+  { t: 78, type: 'corredor', rate: 1.7, gap: 76 },
+  { t: 82, type: 'porta', hp: 8 },
+  { t: 84, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
+  { t: 88, type: 'banner', text: 'ESFÍNCTER FINAL' },
+  { t: 89, type: 'corredor', rate: 1.7, gap: 68 },
+  { t: 94, type: 'porta', hp: 10 },
+
+  // O PICO: o duto no seu mais fechado, e tudo junto. Menos volume que o pico da F2/F3 — aqui a
+  // parede morde e cobra metade da atenção sozinha.
+  { t: 97, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 100 },
+  { t: 100, type: 'wave', kind: 'drone', count: 7, spacing: 0.2, y: 90 },
+  { t: 103, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.55, y: 120 },
 
   // Silêncio → o NÚCLEO. O mesmo telégrafo de todas as fases.
-  { t: 79, type: 'corredor', rate: 0, gap: 0 },
+  { t: 106, type: 'corredor', rate: 0, gap: 0 },
   // A PAREDE RECUA NO SILÊNCIO. `RAMPA` é 8px/s, então 54→16 leva 4,75s: a abertura termina em
-  // t≈83,75 e o chefão (t=86) luta numa arena EMOLDURADA, não dentro de um duto. O jogador VÊ a
+  // t≈110,75 e o chefão (t=113) luta numa arena EMOLDURADA, não dentro de um duto. O jogador VÊ a
   // parede abrir enquanto sai — é a recompensa de ter saído do duto com vida.
   //
-  // ⚠️ `letal: false` é explícito, e tem de ser: sem ele a parede continuaria cobrando durante os
-  // 4,75s em que ainda está grossa, e cobraria numa fase que já tirou o corredor do jogador.
-  { t: 79, type: 'moldura', espessura: 16, letal: false },
-  { t: 79.5, type: 'hazard', rate: 0, mix: [] },
+  // ⚠️ `duto: false` é explícito, e tem de ser: sem ele a parede continuaria colada e mordendo
+  // durante os 4,75s em que ainda está grossa, numa fase que já tirou o corredor do jogador.
+  { t: 106, type: 'moldura', espessura: 16, duto: false },
+  { t: 106.5, type: 'hazard', rate: 0, mix: [] },
   // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
   // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
-  { t: 82, type: 'cenario', key: 'paintBgF4d' },
-  { t: 82, type: 'banner', text: 'ALERTA · O NÚCLEO' },
-  { t: 86, type: 'boss' },
+  { t: 109, type: 'cenario', key: 'paintBgF4d' },
+  { t: 109, type: 'banner', text: 'ALERTA · O NÚCLEO' },
+  { t: 113, type: 'boss' },
 ];
 
 /** Onde a nave está. A física do mundo, não uma preferência do jogador (docs/GDD.md §3). */
