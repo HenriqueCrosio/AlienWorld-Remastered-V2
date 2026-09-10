@@ -1,8 +1,26 @@
 # SPEC — A MOLDURA VIRA BORDA: O PERFIL NOVO, A PAREDE QUE MORDE, E O CENÁRIO DESEMPILHADO
 
-**Data:** 2026-09-10 · **Branch:** `feat/fase4-visual` · **Fatia 7 · pós-M1**
+**Data:** 2026-09-10 (1ª rodada) · **Branch:** `feat/fase4-visual` · **Fatia 7 · pós-M1**
 
 Aprovado pelo Henrique em 10/09/2026, depois do teste jogado do M1.
+
+---
+
+## ⚠️ PARCIALMENTE SUPERADA NO MESMO DIA
+
+O teste jogado desta rodada gerou a **`2026-09-10-fatia7-duto-portas-design.md`**, que substitui
+três pontos daqui. Leia as duas: o que morreu está listado na seção 6 de lá.
+
+| daqui | o que aconteceu |
+|---|---|
+| `letal` como campo do roteiro | virou **`duto`**, que cola a parede no corredor E morde |
+| "a folga vai de 8 a 34px no duto" (§3.2) | agora é **sempre 8** — a parede cola |
+| o perfil `t=79 → 16` | foi para **t=106**; o duto cresceu de 11s para 38s |
+
+**O que continua valendo, item a item:** a borda de margem até t=55 (§2), a mordida ser uma MEDIÇÃO
+e não um corpo físico (§3.1 e §3.2, itens 1 e 3), os 3px de perdão (§3.3), o roteiro mandando
+explicitamente (§3.4), o fio como telégrafo (§3.5), a invariante da ordem do roteiro (§5.1) e o
+cenário desempilhado (§4).
 
 ---
 
