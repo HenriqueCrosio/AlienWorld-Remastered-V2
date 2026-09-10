@@ -140,18 +140,31 @@ export class Moldura {
   espessura = 0;
 
   /**
-   * A parede COBRA o encosto? Só o duto pede isso (`STAGE_4`, t=68 → t=79).
+   * ESTAMOS DENTRO DO DUTO? É UM ESTADO SÓ, com duas consequências, e ele vale de t=68 a t=106.
    *
-   * ⚠️ QUEM MANDA É O ROTEIRO, e nunca a espessura. Deduzir a letalidade de `espessura >= 54`
-   * seria mágica implícita: um roteiro futuro que pedisse a faixa cheia por motivo de ARTE
-   * ganharia parede assassina sem ninguém ter escrito isso. Ver `setLetal`.
+   * 1. **A parede COLA no corredor** — a superfície deixa de sair da espessura e passa a ser
+   *    `vaoY ± (gap/2 + FOLGA)`, exato. Ver `gerar`.
+   * 2. **A parede MORDE** — encostar cobra uma vida. Ver `morde`.
+   *
+   * ⚠️ UM CAMPO, NÃO DOIS, e isto é uma correção de 10/09. A primeira versão tinha `letal`
+   * sozinho, e a parede continuava saindo da espessura — o resultado medido foi uma parede de
+   * teto com **16,6px de média** onde o roteiro pedia 54, e uma banda aberta de **127px** para um
+   * corredor de 84. Os 43px sobrando não eram nem corredor nem parede, e é exatamente isso que
+   * fazia o duto não ler como duto. Estar no duto é UM estado dramatúrgico; separá-lo em dois
+   * booleanos permitiria a combinação inválida (parede colada que não morde) sem ganhar nada.
+   *
+   * ⚠️ QUEM MANDA É O ROTEIRO, e nunca a espessura. Deduzir isto de `espessura >= 54` seria
+   * mágica implícita: um roteiro futuro que pedisse a faixa cheia por motivo de ARTE ganharia
+   * parede assassina sem ninguém ter escrito isso. Ver `setDuto`.
    */
-  letal = false;
+  duto = false;
 
   private readonly chao: Phaser.GameObjects.Image[] = [];
   private readonly teto: Phaser.GameObjects.Image[] = [];
   /** Os fios acesos — um por segmento, por lado. Só existem quando a parede morde. Ver `FIO`. */
   private readonly fios: Phaser.GameObjects.Rectangle[] = [];
+  /** O enchimento atrás da peça, um por segmento por lado. Só existe no duto. Ver `enche`. */
+  private readonly enchimento: Phaser.GameObjects.Rectangle[] = [];
 
   /**
    * @param desenha Só a Fase 4 recebe os SPRITES da faixa. A CURVA (`avanca`, `vaoEm`,
@@ -174,6 +187,8 @@ export class Moldura {
     // Sem a textura, ou fora da Fase 4, a `Moldura` continua respondendo a curva (matemática
     // pura) e não desenha nada — a mesma lei de todo o resto: arte entra asset por asset.
     if (!desenha || !scene.textures.exists('f4Faixa')) return;
+
+    const fundo = Moldura.corDoFundo(scene);
 
     for (let i = 0; i < Moldura.SEGMENTOS; i++) {
       // Depth −0.6: atrás dos props (−0.5 — a mesa desenha por cima da faixa de onde ela nasce) e
@@ -213,7 +228,43 @@ export class Moldura {
             .setName(lado),
         );
       }
+
+      // O ENCHIMENTO. Ver `enche` para o porquê; a COR sai da própria arte, medida uma vez.
+      for (const lado of ['enchimentoChao', 'enchimentoTeto']) {
+        this.enchimento.push(
+          scene.add
+            .rectangle(0, 0, Moldura.LARGURA, 1, fundo)
+            .setOrigin(0, 0)
+            .setDepth(-0.62) // atrás da peça (−0,6), à frente das bandas de placas (−75)
+            .setVisible(false)
+            .setName(lado),
+        );
+      }
     }
+  }
+
+  /**
+   * A cor do enchimento, MEDIDA na borda da peça da faixa em vez de escolhida.
+   *
+   * ⚠️ UM LITERAL AQUI SERIA UMA COR INVENTADA QUE ENVELHECE MAL. A arte da faixa ainda é
+   * provisória e vai ser repintada quatro vezes (uma por câmara); uma constante escolhida hoje
+   * contra a peça vermelha de teste ficaria errada no dia em que a arte final entrar, e ninguém
+   * lembraria de voltar aqui. Medir a linha que ENCOSTA no enchimento faz a emenda desaparecer
+   * com qualquer arte — inclusive a que ainda não existe.
+   */
+  private static corDoFundo(scene: Phaser.Scene): number {
+    if (!scene.textures.exists('f4Faixa')) return 0x000000;
+    // A peça do chão é ancorada pelo TOPO e o que sobra sai da tela por baixo, então quem encosta
+    // no enchimento é a ÚLTIMA linha dela. Média de 16 colunas: um pixel só pega uma brasa.
+    let r = 0, g = 0, b = 0, n = 0;
+    const y = 63;
+    for (let i = 0; i < 16; i++) {
+      const px = scene.textures.getPixel(i * 8, y, 'f4Faixa');
+      if (!px) continue;
+      r += px.red; g += px.green; b += px.blue; n++;
+    }
+    if (!n) return 0x000000;
+    return (Math.round(r / n) << 16) | (Math.round(g / n) << 8) | Math.round(b / n);
   }
 
   /** O `gap` do roteiro. A placa que nascer daqui em diante é julgada por ele. */
@@ -248,13 +299,15 @@ export class Moldura {
    * O roteiro faz a troca cair junto com a pintura do duto (`paintBgF4c`) e com o banner que já
    * existe: três avisos no mesmo instante, e nenhum deles custa uma vida para ser lido.
    */
-  setLetal(letal: boolean): void {
-    this.letal = letal;
-    const tint = letal ? Moldura.TINT_LETAL : Moldura.TINT_INERTE;
+  setDuto(duto: boolean): void {
+    this.duto = duto;
+    const tint = duto ? Moldura.TINT_LETAL : Moldura.TINT_INERTE;
     for (const s of this.chao) s.setTint(tint);
     for (const s of this.teto) s.setTint(tint);
     // O FIO é o que de fato se vê. O tint só esquenta o que já tem luz. Ver `FIO`.
-    for (const f of this.fios) f.setVisible(letal);
+    for (const f of this.fios) f.setVisible(duto);
+    // O ENCHIMENTO só existe no duto, porque só lá a parede passa dos 64px da peça. Ver `enche`.
+    for (const e of this.enchimento) e.setVisible(duto);
   }
 
   /**
@@ -294,6 +347,7 @@ export class Moldura {
       // cobra o encosto: o jogador vê onde a parede morde, não uma aproximação dela.
       this.fios[i * 2].setPosition(x, p.superficieChao);
       this.fios[i * 2 + 1].setPosition(x, p.superficieTeto - Moldura.FIO_PX);
+      this.enche(i, x, p);
     }
   }
 
@@ -351,12 +405,42 @@ export class Moldura {
    * ela vive por volta de x=40..60 na tela.
    */
   morde(esquerda: number, direita: number, topo: number, base: number): boolean {
-    if (!this.letal) return false;
+    if (!this.duto) return false;
 
     const chao = Math.min(this.superficieChaoEm(esquerda), this.superficieChaoEm(direita));
     const teto = Math.max(this.superficieTetoEm(esquerda), this.superficieTetoEm(direita));
 
     return base - Moldura.MORDIDA >= chao || topo + Moldura.MORDIDA <= teto;
+  }
+
+  /**
+   * Estica o ENCHIMENTO do segmento `i` da borda da peça até a borda da tela.
+   *
+   * ⚠️ ELE EXISTE PORQUE A PEÇA TEM 64px E A PAREDE DO DUTO PASSA DISSO. Fora do duto a espessura
+   * é limitada a `ESPESSURA_MAX` (54) exatamente para a peça de 64px sempre alcançar a borda da
+   * tela sem deixar fresta. Dentro do duto a parede segue o corredor e pode chegar perto de 120px
+   * — a peça sozinha deixaria uma faixa de FUNDO aparecendo no rodapé e no topo, ou seja, um
+   * buraco no meio da parede que acabou de virar letal. O enchimento é o que fecha isso.
+   *
+   * ⚠️ É DECORAÇÃO, como a faixa. Ele não tem corpo físico e não entra na mordida: quem responde
+   * pelo que mata continua sendo `superficieChaoEm`/`superficieTetoEm`, e o enchimento nasce das
+   * MESMAS linhas — ele preenche daí para fora, nunca para dentro.
+   */
+  private enche(i: number, x: number, p: Placa): void {
+    const chao = this.enchimento[i * 2];
+    const teto = this.enchimento[i * 2 + 1];
+
+    // A peça do chão começa em `superficieChao` e vai até +64; o enchimento cobre dali até a base
+    // da tela. `max(1, ...)` porque um Rectangle de altura 0 ou negativa desenha invertido.
+    const inicioChao = p.superficieChao + 64;
+    chao.setPosition(x, inicioChao);
+    chao.setSize(Moldura.LARGURA, Math.max(1, GROUND_Y + 10 - inicioChao));
+
+    // O espelho: a peça do teto termina em `superficieTeto` e sobe 64; o enchimento cobre dali
+    // até o topo da tela.
+    const fimTeto = p.superficieTeto - 64;
+    teto.setPosition(x, 0);
+    teto.setSize(Moldura.LARGURA, Math.max(1, fimTeto));
   }
 
   /**
@@ -444,8 +528,23 @@ export class Moldura {
     // 96→104; t=63,5: 76→84), então há folga, mas quem mexer nos vãos do roteiro precisa saber
     // disso.
     if (this.gap > 0) {
-      superficieChao = Math.max(superficieChao, vaoY + meio + Moldura.FOLGA);
-      superficieTeto = Math.min(superficieTeto, vaoY - meio - Moldura.FOLGA);
+      // ⚠️ NO DUTO A PAREDE COLA NO CORREDOR — ela deixa de ser `max`/`min` contra a espessura e
+      // passa a ser a borda do vão mais a folga, EXATO. É a diferença entre uma borda grossa e um
+      // DUTO: sem isto sobra espaço aberto que não é nem corredor nem parede, e foi assim que o
+      // duto de 09/09 acabou com **127px de banda aberta para um corredor de 84** e uma parede de
+      // teto de **16,6px de média** onde o roteiro pedia 54. A trava não era um piso da parede,
+      // era um teto dela — e no duto é o corredor que tem de mandar, não a espessura.
+      //
+      // ⚠️ A FOLGA CONTINUA SENDO A MESMA, e é o que mantém a fase possível: a superfície fica a
+      // `FOLGA` px da borda do vão, nem mais perto. Trocar `max` por `=` APERTA a parede contra o
+      // corredor, nunca dentro dele — a invariante que a sonda cobra não muda de valor.
+      if (this.duto) {
+        superficieChao = vaoY + meio + Moldura.FOLGA;
+        superficieTeto = vaoY - meio - Moldura.FOLGA;
+      } else {
+        superficieChao = Math.max(superficieChao, vaoY + meio + Moldura.FOLGA);
+        superficieTeto = Math.min(superficieTeto, vaoY - meio - Moldura.FOLGA);
+      }
       // ⚠️ `meio` pode ser fracionário (`gap` ímpar), e a trava acima herdaria essa fração. O
       // arredondamento entra DEPOIS do clamp, no mesmo sentido seguro de sempre — chão para
       // BAIXO, teto para CIMA — para nunca comer os 8px de folga que a trava acabou de garantir.
