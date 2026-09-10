@@ -500,6 +500,21 @@ export class GameScene extends Phaser.Scene {
       this.damageShip();
     }
 
+    // A PAREDE DO DUTO MORDE (Fase 4, t=68→79). Mesma lei que o chão acima: raspar não pode ser a
+    // estratégia ótima. Aqui ela chega mais tarde e vai embora — é o clímax da fase, não a regra
+    // dela; o roteiro liga e desliga com `letal`.
+    //
+    // ⚠️ SEM `physics.add`. A `morde` é uma MEDIÇÃO contra as mesmas linhas que desenham a faixa —
+    // ver o cabeçalho dela para o porquê de não ser um corpo. Isto é o que mantém de pé a
+    // proibição de física nova da spec de 08/09, e é o que faz a linha de base
+    // `vaos:[110,110,110]` continuar valendo: a mesa e o vão não são tocados por nada disto.
+    //
+    // ⚠️ SEM EMPURRÃO, ao contrário do chão. O chão devolve a nave para cima (`setVelocityY`)
+    // porque lá o piso é o mundo inteiro; aqui há teto E chão a menos de 84px um do outro, e um
+    // empurrão cuspiria a nave direto na parede oposta — dois danos por um encosto. Quem separa
+    // os dois toques são os 1400ms de i-frames que o `damageShip` já dá.
+    if (this.moldura.morde(body.left, body.right, body.top, body.bottom)) this.damageShip();
+
     this.spawnWaves(dt);
     this.spawnProps(dt);
     this.spawnCorredores(dt);
@@ -572,7 +587,15 @@ export class GameScene extends Phaser.Scene {
       this.corredorGap = corredor.gap;
       this.moldura.setGap(corredor.gap);
     }
-    if (moldura) this.moldura.setEspessura(moldura.espessura);
+    if (moldura) {
+      this.moldura.setEspessura(moldura.espessura);
+      // ⚠️ `letal` TAMBÉM, e este `?? false` é o conserto de um buraco JÁ ABERTO uma vez. O commit
+      // `bb1018c` existe porque este método aplicava o corredor e esquecia a moldura; um campo
+      // novo no mesmo evento chega com o mesmo buraco esperando. Sem esta linha, o treino que
+      // começa dentro do duto luta contra uma parede que não morde — e o que começa DEPOIS do
+      // duto herda a mordida de um evento que já foi revogado.
+      this.moldura.setLetal(moldura.letal ?? false);
+    }
   }
 
   private runEvent(e: ReturnType<StageDirector['update']>[number]): void {
@@ -595,9 +618,14 @@ export class GameScene extends Phaser.Scene {
         this.moldura.setGap(e.gap);
         break;
       case 'moldura':
-        // A espessura da faixa (decoração). O `gap` do `corredor` continua mandando na colisão —
-        // esta linha não encosta em física nenhuma.
+        // A espessura da faixa (decoração). O `gap` do `corredor` continua mandando na colisão do
+        // OBSTÁCULO — esta linha não encosta em física nenhuma.
         this.moldura.setEspessura(e.espessura);
+        // ⚠️ `?? false` E NÃO `if (e.letal !== undefined)`. Omitir o campo tem de DESLIGAR a
+        // mordida, não preservá-la: um evento de espessura sem `letal` é uma parede que não
+        // cobra, e é o que a fase inteira fora do duto pede. Preservar o estado faria a mordida
+        // vazar do duto para o resto da fase no dia em que alguém inserisse um evento no meio.
+        this.moldura.setLetal(e.letal ?? false);
         break;
       case 'banner':
         this.showBanner(e.text, COLORS.hotBright);

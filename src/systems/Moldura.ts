@@ -87,6 +87,45 @@ export class Moldura {
   /** px/s com que a espessura persegue o alvo. Calibragem: o teste jogado decide. */
   private static readonly RAMPA = 8;
 
+  /**
+   * ⚠️ A MORDIDA. A parede letal só cobra depois que a nave entra `MORDIDA` px nela — e este
+   * número NÃO é generosidade solta, é a folga que um limite JÁ DOCUMENTADO exige.
+   *
+   * O `avanca` explica que `placaEm` pode discordar em UMA PLACA na fronteira dos 128px: o `x` do
+   * sprite é arredondado para a grade de pixel da tela, e `floor((xMundo + x) / 128)` pode cair
+   * uma placa atrás desse arredondamento. Sem folga, esse 1px de discordância poderia ser a
+   * diferença entre viver e morrer num degrau. Com 3px, ele é ESTRUTURALMENTE INCAPAZ de decidir
+   * uma vida — e de quebra a parede joga como shmup deve jogar, perdoando o encosto de raspão.
+   */
+  private static readonly MORDIDA = 3;
+
+  /** O tint da faixa quando ela é só cenário. `0xffffff` = a arte como ela é. */
+  private static readonly TINT_INERTE = 0xffffff;
+
+  /**
+   * O tint da faixa quando ela MORDE. Ele esquenta o que já tem luz — e é só isso. ⚠️ Quem carrega
+   * o telégrafo é o `FIO`, logo abaixo, e o comentário dele explica por quê.
+   */
+  private static readonly TINT_LETAL = 0xff8a6a;
+
+  /**
+   * A cor do FIO — a linha acesa na superfície da parede letal.
+   *
+   * ⚠️ O TELÉGRAFO É ESTE FIO, E NÃO O TINT, POR UMA MEDIÇÃO. A primeira versão apostava só no
+   * `setTint`, e ele NÃO LÊ: tint no Phaser é MULTIPLICATIVO, e a faixa é quase preta na banda que
+   * importa (medido em t=74: rgb 25,17,22). Multiplicar preto por qualquer cor devolve preto — o
+   * delta de luminância entre inerte e letal deu **−1,5**, ou seja, nada. E não é um defeito da
+   * arte provisória que a arte final conserte sozinha: o rumo desta fase é casco ESCURO com *luz
+   * só onde há energia*, então a parede final também será escura.
+   *
+   * A parede que morde está energizada. O idioma do jogo para isso é luz ADITIVA, desenhada por
+   * cima — não uma multiplicação que só pode escurecer.
+   */
+  private static readonly FIO = 0xffb478;
+
+  /** A espessura do fio, em px. Dois: um pixel some na grade de 384×216, três viram enfeite. */
+  private static readonly FIO_PX = 2;
+
   /** A distância que o mundo já rolou, em px. É o eixo de tudo. */
   private xMundo = 0;
 
@@ -100,8 +139,19 @@ export class Moldura {
   /** A espessura em vigor — ela persegue o alvo (ver `avanca`), porque parede não salta. */
   espessura = 0;
 
+  /**
+   * A parede COBRA o encosto? Só o duto pede isso (`STAGE_4`, t=68 → t=79).
+   *
+   * ⚠️ QUEM MANDA É O ROTEIRO, e nunca a espessura. Deduzir a letalidade de `espessura >= 54`
+   * seria mágica implícita: um roteiro futuro que pedisse a faixa cheia por motivo de ARTE
+   * ganharia parede assassina sem ninguém ter escrito isso. Ver `setLetal`.
+   */
+  letal = false;
+
   private readonly chao: Phaser.GameObjects.Image[] = [];
   private readonly teto: Phaser.GameObjects.Image[] = [];
+  /** Os fios acesos — um por segmento, por lado. Só existem quando a parede morde. Ver `FIO`. */
+  private readonly fios: Phaser.GameObjects.Rectangle[] = [];
 
   /**
    * @param desenha Só a Fase 4 recebe os SPRITES da faixa. A CURVA (`avanca`, `vaoEm`,
@@ -145,6 +195,24 @@ export class Moldura {
           .setDepth(-0.6)
           .setName('faixaTeto'),
       );
+
+      // OS FIOS: dois por segmento (chão e teto), invisíveis até a parede morder.
+      //
+      // ⚠️ Depth −0.55: à FRENTE da faixa (−0,6) e ATRÁS dos props (−0,5). O fio é a superfície da
+      // parede acesa, então a mesa que nasce dela tem de continuar passando por cima.
+      //
+      // ⚠️ Origem no CANTO, como a faixa: o fio é posicionado pela mesma linha de superfície que
+      // a faixa, e origem no meio faria a luz nascer meio pixel fora do desenho que ela acende.
+      for (const lado of ['fioChao', 'fioTeto']) {
+        this.fios.push(
+          scene.add
+            .rectangle(0, 0, Moldura.LARGURA, Moldura.FIO_PX, Moldura.FIO)
+            .setOrigin(0, 0)
+            .setDepth(-0.55)
+            .setVisible(false)
+            .setName(lado),
+        );
+      }
     }
   }
 
@@ -166,6 +234,27 @@ export class Moldura {
   setEspessura(px: number): void {
     this.alvo = Phaser.Math.Clamp(px, 0, Moldura.ESPESSURA_MAX);
     if (this.espessura === 0) this.espessura = this.alvo;
+  }
+
+  /**
+   * Liga/desliga a mordida — e ACENDE A FAIXA junto, no mesmo instante.
+   *
+   * ⚠️ O TINT NÃO É ENFEITE, É O TELÉGRAFO, e sem ele a mordida seria sonegação. A parede foi
+   * cenário atravessável por 68 segundos; passar a cobrar sem avisar é a mesma coisa que o
+   * `STAGE_4` já se proíbe de fazer na abertura, onde ele gasta 14 segundos de corredor largo só
+   * para o jogador descobrir que o teto mata ANTES de o vão apertar. *"Aprender a regra nova no
+   * aperto é sonegação, não dificuldade."*
+   *
+   * O roteiro faz a troca cair junto com a pintura do duto (`paintBgF4c`) e com o banner que já
+   * existe: três avisos no mesmo instante, e nenhum deles custa uma vida para ser lido.
+   */
+  setLetal(letal: boolean): void {
+    this.letal = letal;
+    const tint = letal ? Moldura.TINT_LETAL : Moldura.TINT_INERTE;
+    for (const s of this.chao) s.setTint(tint);
+    for (const s of this.teto) s.setTint(tint);
+    // O FIO é o que de fato se vê. O tint só esquenta o que já tem luz. Ver `FIO`.
+    for (const f of this.fios) f.setVisible(letal);
   }
 
   /**
@@ -199,6 +288,12 @@ export class Moldura {
       const x = Math.round(i * Moldura.LARGURA - off);
       this.chao[i].setPosition(x, p.superficieChao);
       this.teto[i].setPosition(x, p.superficieTeto);
+
+      // ⚠️ O FIO SAI DA MESMA PLACA QUE A FAIXA E QUE A MORDIDA — os três leem `superficieChao` /
+      // `superficieTeto` da placa `base + i`. É isso que faz a luz cair EXATAMENTE na linha que
+      // cobra o encosto: o jogador vê onde a parede morde, não uma aproximação dela.
+      this.fios[i * 2].setPosition(x, p.superficieChao);
+      this.fios[i * 2 + 1].setPosition(x, p.superficieTeto - Moldura.FIO_PX);
     }
   }
 
@@ -227,6 +322,41 @@ export class Moldura {
   /** A linha de baixo da faixa do teto em `xTela`. */
   superficieTetoEm(xTela: number): number {
     return this.placaEm(xTela).superficieTeto;
+  }
+
+  /**
+   * A PAREDE MORDEU esta caixa? Recebe a caixa da nave em px de tela.
+   *
+   * ⚠️ ISTO NÃO É UM CORPO FÍSICO, E ESSA É A DECISÃO INTEIRA. A spec de 08/09 proibiu física
+   * nova na Fase 4 e a proibição continua de pé: não há `physics.add` aqui, nem colisor, nem
+   * grupo. A mordida é uma MEDIÇÃO contra `superficieChaoEm`/`superficieTetoEm` — exatamente os
+   * números que a `avanca` usa para posicionar os 8 sprites da faixa.
+   *
+   * O que isso compra, e é o motivo de ser assim: **a parede não tem como matar onde não está
+   * desenhada**, porque a hitbox e o desenho são o MESMO dado. Um Arcade Body colado no vão é a
+   * outra saída, e é onde mora morte invisível — a `probe-stage4` mede o vão a partir do mesmo
+   * número que posiciona a mesa, então ela seria cega para a divergência por construção. Foi
+   * assim que a mesa sem textura passou por quatro sondas em 09/09.
+   *
+   * ⚠️ E A FASE NÃO FICA IMPOSSÍVEL, por uma invariante que JÁ EXISTIA: a trava dos 8px
+   * (`FOLGA`) garante que a superfície nunca entra no corredor. Medido no regime do duto
+   * (espessura 54, gap 84): sobram de 8px (o pior caso, que é o mínimo que a trava promete) a
+   * 34px entre a borda do vão e a parede que morde.
+   *
+   * ⚠️ AMOSTRA AS DUAS BORDAS, nunca o centro. A parede é uma escada de 128px e a nave tem ~22px:
+   * medir só pelo centro daria até 11px de placa errada ao cruzar um degrau. Toma a superfície
+   * mais PERIGOSA das duas colunas — o nariz encosta antes do corpo, e é assim que tem de ser.
+   *
+   * O contrato `xTela >= -128` das três consultas vale aqui também, e a nave o cumpre com folga:
+   * ela vive por volta de x=40..60 na tela.
+   */
+  morde(esquerda: number, direita: number, topo: number, base: number): boolean {
+    if (!this.letal) return false;
+
+    const chao = Math.min(this.superficieChaoEm(esquerda), this.superficieChaoEm(direita));
+    const teto = Math.max(this.superficieTetoEm(esquerda), this.superficieTetoEm(direita));
+
+    return base - Moldura.MORDIDA >= chao || topo + Moldura.MORDIDA <= teto;
   }
 
   /**
