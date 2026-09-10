@@ -44,7 +44,22 @@ export type PropKind =
    * na altura da PONTA, que é por onde o jogador passa. A lâmina alargada de 08/09 matava 46px no
    * vazio, e foi o que enterrou a Task 4. Mesa de topo chato passa por construção.
    */
-  | 'mesa';
+  | 'mesa'
+  /**
+   * A PORTA do duto (Fase 4, M1.5): a comporta biomecânica que TAPA O VÃO INTEIRO.
+   *
+   * ⚠️ ELA É O ÚNICO PROP DESTRUTÍVEL DESTA FASE, e é ela que faz o duto ser um lugar em vez de
+   * uma passagem estreita — o veredicto do teste jogado de 10/09 foi exatamente esse. O núcleo
+   * aceso da arte diz duas coisas de uma vez: *sou destrutível* e *mire aqui*.
+   *
+   * ⚠️ ANCORADA NO CENTRO DO VÃO, não no chão nem no teto. É o único prop assim, e tem de ser: um
+   * anteparo preso a uma das bordas deixaria passagem pela outra, e a porta que dá para
+   * contornar não é porta. Ver o `case 'porta'` do `spawn`.
+   *
+   * Falhar em destruí-la custa UMA vida e ela segue: os 1400ms de i-frames do `damageShip`
+   * impedem que a mesma porta cobre duas vezes, e a fase nunca trava.
+   */
+  | 'porta';
 
 interface PropDef {
   /** Vida. Infinity = indestrutível (rocha: existe para ser desviada). */
@@ -130,6 +145,10 @@ const PROPS: Record<PropKind, PropDef> = {
   maquinario: { hp: Infinity, score: 0, shoots: false },
   // Indestrutível como a rocha: a parede existe para ser desviada, não abatida.
   mesa: { hp: Infinity, score: 0, shoots: false },
+  // ⚠️ O `hp` AQUI É SÓ O PADRÃO — quem manda é o roteiro, porta a porta (6, 8, 10 na spec de
+  // 06/09), via `opts.hp`. As três portas do duto têm vidas diferentes de propósito: é a
+  // progressão delas que faz o duto ter começo, meio e fim.
+  porta: { hp: 8, score: 200, shoots: false },
 };
 
 /**
@@ -246,6 +265,13 @@ export class TerrainSystem {
        * que o `alturaPx` introduzia.
        */
       bordaVao?: number;
+      /**
+       * A vida DESTA instância, sobrepondo o `PropDef`. Só a porta usa: as três do duto têm HP
+       * diferentes (6, 8, 10) e a progressão delas é o roteiro, não a tabela de props.
+       */
+      hp?: number;
+      /** O CENTRO do vão, em y de tela. Só a porta usa — ver o `PropKind` dela. */
+      centroVao?: number;
     },
   ): void {
     const teto = opts?.anchor === 'teto';
@@ -299,7 +325,7 @@ export class TerrainSystem {
       // não é uma colônia, é um letreiro.
       p.anims.setProgress(Math.random());
     }
-    p.setData('hp', def.hp);
+    p.setData('hp', opts?.hp ?? def.hp);
     p.setData('score', def.score);
 
     // Só a rocha varia de altura: é ela que define o corredor, e é a altura variável que dá
@@ -322,6 +348,14 @@ export class TerrainSystem {
     // a do prop de teto é o TOPO (`p.y` é o alto do quadro), então cravar a BASE é subtrair.
     if (opts?.bordaVao !== undefined) {
       p.y = teto ? opts.bordaVao - p.height : opts.bordaVao + p.height;
+    }
+    // ⚠️ A PORTA É ANCORADA PELO CENTRO, e é o único prop assim. `setOrigin` acima deu a ela a
+    // base (0.5, 1) como a todo prop de chão; aqui a origem vira o meio e o `y` vira o centro do
+    // vão. Sem isto ela nasceria pendurada pelo pé numa altura que não é a do corredor, e o vão
+    // ficaria aberto por cima — porta que dá para contornar não é porta.
+    if (opts?.centroVao !== undefined) {
+      p.setOrigin(0.5, 0.5);
+      p.y = opts.centroVao;
     }
     if (opts?.tint !== undefined) p.setTint(opts.tint);
     if (opts?.angle !== undefined) p.setAngle(opts.angle);

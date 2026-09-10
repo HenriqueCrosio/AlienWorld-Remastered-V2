@@ -606,6 +606,10 @@ const ART: Record<string, string> = {
   // (M2–M5), as variantes são `mesa2`, `mesa3`… — o `pickVariant` sorteia entre elas sem mudar
   // nenhuma linha de código, DE GRAÇA, porque a convenção foi respeitada desde o nome.
   mesa: 'sprites/f4-mesa-prov.png',
+  // ⚠️ A CHAVE É O NOME DO `PropKind`, e é a lei que custou caro em 09/09: `pickVariant(scene,
+  // kind)` procura a textura pelo nome do kind, e registrá-la como `f4Porta` faria o Phaser
+  // devolver a textura de ERRO (32×32) com a hitbox junto — sem nenhuma sonda ficar vermelha.
+  porta: 'sprites/f4-porta-prov.png',
 
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',

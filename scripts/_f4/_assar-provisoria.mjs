@@ -14,6 +14,7 @@ import sharp from 'sharp';
 const FUNDO = 'public/sprites/paint-bg-f4-a.png';
 const FAIXA_W = 128, FAIXA_H = 64;
 const MESA_W = 96, MESA_H = 112;
+const PORTA_W = 64, PORTA_H = 112;
 const PLACA = 19;                      // a largura da nervura interna (do mock)
 const BRASA = [255, 122, 60];
 
@@ -122,4 +123,55 @@ const clamp = (v) => Math.max(0, Math.min(255, v));
   await sharp(buf, { raw: { width: MESA_W, height: MESA_H, channels: 4 } })
     .png().toFile('public/sprites/f4-mesa-prov.png');
   console.log('✔ public/sprites/f4-mesa-prov.png   96×112 (mesa provisória — topo CHATO)');
+}
+
+// ─── A PORTA: 64×112, anteparo escuro com NÚCLEO ACESO ─────────────────────────────────────
+//
+// ⚠️ O NÚCLEO ACESO NÃO É ENFEITE — é a peça inteira. Ele resolve duas coisas de uma vez que
+// nenhum texto de tutorial resolveria: diz *sou destrutível* (num duto onde TODA parede mata de
+// encostar, um obstáculo que se pode abater precisa se anunciar) e diz *mire aqui*. A spec de
+// 06/09 já pedia isso, e o teste jogado de 10/09 é o que trouxe a porta para dentro do duto.
+//
+// ⚠️ RETANGULAR E CHEIA, sem ombro em rampa. A porta é ancorada pelo CENTRO do vão e tem de tapar
+// o corredor inteiro; recuo nas bordas viraria fresta, e fresta em porta é buraco por onde se
+// passa sem atirar — que é exatamente o oposto do que ela existe para fazer.
+{
+  const buf = Buffer.alloc(PORTA_W * PORTA_H * 4);
+  const cx = PORTA_W / 2, cy = PORTA_H / 2;
+  for (let y = 0; y < PORTA_H; y++) {
+    for (let x = 0; x < PORTA_W; x++) {
+      const i = (y * PORTA_W + x) * 4;
+      // A chapa: a mesma textura-mãe, puxada para BAIXO no valor. A porta tem de ler como
+      // anteparo escuro para o núcleo ter contra o que brilhar.
+      let [r, g, b] = amostra(x + 60, y + 30);
+      r *= 0.62; g *= 0.62; b *= 0.62;
+
+      // As nervuras horizontais: quatro faixas, a leitura de "chapa reforçada".
+      if (y % 27 < 2) { r *= 1.35; g *= 1.3; b *= 1.25; }
+      // A moldura da borda: dois pixels escuros em volta, para a porta se destacar da parede.
+      if (x < 2 || x >= PORTA_W - 2 || y < 2 || y >= PORTA_H - 2) { r *= 0.45; g *= 0.45; b *= 0.45; }
+
+      // O NÚCLEO: um disco quente no meio, com halo. `d` em unidades de raio.
+      const d = Math.hypot((x - cx) / 13, (y - cy) / 13);
+      if (d < 1) {
+        const k = 1 - d * d;                    // sólido no centro, caindo para a borda
+        r = r * (1 - k) + BRASA[0] * k;
+        g = g * (1 - k) + BRASA[1] * k;
+        b = b * (1 - k) + BRASA[2] * k;
+      } else if (d < 1.6) {
+        const k = (1.6 - d) / 0.6 * 0.35;       // o halo, para o núcleo não ter borda dura
+        r = r * (1 - k) + BRASA[0] * k;
+        g = g * (1 - k) + BRASA[1] * k;
+        b = b * (1 - k) + BRASA[2] * k;
+      }
+
+      buf[i] = clamp(r);
+      buf[i + 1] = clamp(g);
+      buf[i + 2] = clamp(b);
+      buf[i + 3] = 255;                                   // OPACA: ela TAPA o vão
+    }
+  }
+  await sharp(buf, { raw: { width: PORTA_W, height: PORTA_H, channels: 4 } })
+    .png().toFile('public/sprites/f4-porta-prov.png');
+  console.log('✔ public/sprites/f4-porta-prov.png  64×112  (porta provisória — anteparo + núcleo aceso)');
 }
