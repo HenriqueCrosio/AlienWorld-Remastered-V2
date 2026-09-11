@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH } from '../config';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Moldura } from '../systems/Moldura';
 
@@ -25,9 +25,11 @@ type EstiloTiro = 'rajada' | 'leque';
  * Ele é o MOTIVO de a câmara mudar. O Henrique jogou o M1.5 e perguntou por que o fundo troca, e
  * a resposta estava num protótipo que ele mesmo tinha criado no PixelLab sem uso pensado.
  *
- *   AVISO    nada de A até B, em paredes OPOSTAS (sorteio por partida). Intocável. B marca de onde
- *            o ataque sai — *"a marcação do ataque é a posição B, independente de onde seja"*.
- *   X        1ª passagem: sai de B, cruza nadando e SAI DA TELA pela esquerda. Some. Bolhas sobem
+ *   AVISO    nada de A até B, em paredes OPOSTAS (sorteio por partida), passa por B e SAI DA TELA
+ *            pela borda. Intocável. B marca de onde o ataque vem — *"a marcação do ataque é a
+ *            posição B, independente de onde seja"*.
+ *   X        1ª passagem: entra de fora da tela pela direita, NA ALTURA DE B, cruza nadando e sai
+ *            pela esquerda. Some. Bolhas sobem
  *            da parede de A, e ele IRROMPE dela num x sorteado, cruza o corredor e MERGULHA na
  *            parede oposta. Em cada passagem, UMA cambalhota e o LEQUE de 3. Piso de vida 25.
  *   DUELO    pela direita, de frente, até morrer, flip após flip alternando ESTILO e VELOCIDADE:
@@ -49,8 +51,15 @@ export class Golfinho {
   private static readonly COLUNA_AB = 320;
   /** O centro do corpo, em px para DENTRO da faixa jogável a partir da superfície da parede. */
   private static readonly DENTRO = 4;
-  private static readonly AVISO_DUR = 2;
-  private static readonly ESPERA_DUR = 1.5;
+  /**
+   * O AVISO: de A, passando por B, até FORA DA TELA (2º teste jogado de 11/09: *"quando chegar em B
+   * sair da tela"*). Acelera — sai da parede devagar e dispara para a borda.
+   */
+  private static readonly AVISO_DUR = 2.4;
+  /** Quanto além da borda ele some: meio comprimento do corpo girado (21px) e folga. */
+  private static readonly AVISO_ALEM_BORDA = 40;
+  /** O tempo FORA DA TELA entre o aviso e a 1ª passagem do X. */
+  private static readonly ESPERA_DUR = 0.8;
   private static readonly VEL_X = 190;
 
   // ─── O NADO DE VERDADE (teste jogado de 11/09: *"ele parece estar flutuando ou à deriva"*) ───
@@ -309,17 +318,22 @@ export class Golfinho {
 
     switch (this._estado) {
       case 'aviso': {
-        const p = Phaser.Math.Easing.Sine.InOut(Math.min(1, this.t / Golfinho.AVISO_DUR));
-        this.sprite.y = Phaser.Math.Linear(this.yA, this.yB, p);
+        // Ele NÃO para em B: passa por ela e sai pela borda do lado de B. B segue marcando de que
+        // lado o ataque vem — é por lá que ele some, e é na altura dela que o X entra.
+        const fora =
+          this.sentido === 'sobe' ? -Golfinho.AVISO_ALEM_BORDA : GAME_HEIGHT + Golfinho.AVISO_ALEM_BORDA;
+        const p = Phaser.Math.Easing.Sine.In(Math.min(1, this.t / Golfinho.AVISO_DUR));
+        this.sprite.y = Phaser.Math.Linear(this.yA, fora, p);
         if (this.t >= Golfinho.AVISO_DUR) {
-          this.sprite.setAngle(0);
+          this.sprite.setVisible(false).setAngle(0);
           this.mudar('espera');
         }
         break;
       }
       case 'espera':
+        // Fora da tela. A 1ª passagem entra pela DIREITA, na altura de B.
         if (this.t >= Golfinho.ESPERA_DUR) {
-          this.iniciarPassagem('x1', Golfinho.COLUNA_AB, this.yB, Golfinho.SAIDA_X, this.yA);
+          this.iniciarPassagem('x1', Golfinho.ENTRADA_X, this.yB, Golfinho.SAIDA_X, this.yA);
         }
         break;
       case 'x1':

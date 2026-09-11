@@ -309,6 +309,16 @@ Ele jogou e aprovou o duelo — *"ficou legal, é algo diferente na fase"* — e
 - O leque do X continua a 110px/s e continua saindo na metade direita (a cambalhota da 1ª passagem
   começa em x=310; a da 2ª, a 20% do caminho de parede a parede, com o piso de x=280).
 
+### 9.1 O 2º teste jogado (11/09): o aviso também sai da tela
+
+*"O nado ficou bom"*, e um último pedido antes do push: *"ele vai nadar de A-B e quando chegar em B
+sair da tela"*.
+
+- A espera parada de 1,5s em B **morreu**. O aviso continua na mesma direção, passa por B e sai pela
+  borda (de cima ou de baixo, conforme o sorteio), acelerando — em ~2,4s.
+- Ele fica 0,8s fora da tela, e a 1ª passagem do X **entra de fora da tela, pela direita, na altura
+  de B**: B continua marcando de que lado o ataque vem.
+
 ---
 
 ## 10. FORA DESTA SPEC

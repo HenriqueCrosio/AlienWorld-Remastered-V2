@@ -22,8 +22,10 @@ Branch `feat/fase4-visual`.
 > ficou legal, é algo diferente na fase."* O X nadava como boia e não saía da tela; as rajadas eram
 > lentas. Agora: nado com onda e inclinação, volta de dentro da parede com bolhas de aviso, e o
 > duelo alternando rajada lenta → leque rápido → rajada rápida → leque lento (spec §9).
-> **🔴 O AJUSTE AINDA NÃO FOI JOGADO.** Knobs novos: `ONDA_AMPLITUDE` (9), `ONDA_HZ` (1,3),
-> `GIRO_FREIO` (0,35), `INTERVALO_MIN/MAX` (0,8–1,4), `EMERGIR_DUR` (0,5), `DUELO_SEQUENCIA`.
+> **🟢 O AJUSTE FOI JOGADO (11/09):** *"o nado ficou bom"*. Último pedido, aplicado antes do push: o
+> aviso passa por B e **sai da tela**, e o X entra de fora dela pela direita, na altura de B (spec
+> §9.1). Knobs: `ONDA_AMPLITUDE` (9), `ONDA_HZ` (1,3), `GIRO_FREIO` (0,35), `INTERVALO_MIN/MAX`
+> (0,8–1,4), `EMERGIR_DUR` (0,5), `DUELO_SEQUENCIA`, `AVISO_DUR` (2,4), `ESPERA_DUR` (0,8).
 >
 > Para jogar: `npm run dev` →
 > `http://localhost:5173/` → tecla **`L`** → ~40s de fase. O que olhar:

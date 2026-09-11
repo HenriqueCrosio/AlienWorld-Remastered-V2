@@ -136,36 +136,59 @@ ok(Math.abs(aviso.angulo) === 90, `a travessia vertical gira 90°, sem serrilhar
 await page.waitForTimeout(500);
 await page.screenshot({ path: 'probe-f4-golfinho-aviso.png' });
 
-// ─── A BALA ATRAVESSA O AVISO (na espera em B, parado) ───
-await esperar(() => window.__game.scene.getScenes(true)[0].golfinho?.estado === 'espera', 100);
-await page.evaluate(() => {
-  const s = window.__game.scene.getScenes(true)[0];
-  const g = s.golfinho;
-  s.ship.body.reset(g.sprite.x - 90, g.sprite.y);
-});
+// ─── A BALA ATRAVESSA O AVISO (em movimento: a nave segue a altura dele) ───
+//
+// ⚠️ Desde o 2º teste jogado (11/09) não existe mais a espera parada em B: ele passa por B e sai da
+// tela. A sonda atira com ele nadando, a nave acompanhando a altura dele a cada leitura.
+let atravessa = { hp: null, alem: 0 };
 await page.keyboard.down('Space');
-await page.waitForTimeout(900);
-const atravessa = await page.evaluate(() => {
-  const s = window.__game.scene.getScenes(true)[0];
-  const g = s.golfinho;
-  return {
-    estado: g.estado,
-    hp: g.hp,
-    alem: s.weapons.bullets.getChildren().filter((b) => b.active && b.x > g.sprite.x + 30).length,
-  };
-});
+for (let i = 0; i < 60; i++) {
+  const r = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const g = s.golfinho;
+    if (!g || g.estado !== 'aviso') return null;
+    s.ship.body.reset(g.sprite.x - 90, Math.max(20, Math.min(196, g.sprite.y)));
+    return {
+      hp: g.hp,
+      alem: s.weapons.bullets.getChildren().filter((b) => b.active && b.x > g.sprite.x + 30).length,
+    };
+  });
+  if (!r) break;
+  atravessa = { hp: r.hp, alem: Math.max(atravessa.alem, r.alem) };
+  await page.waitForTimeout(60);
+}
 await page.keyboard.up('Space');
 console.log('atravessa', JSON.stringify(atravessa));
 ok(atravessa.hp === 50, `a bala do jogador não fere o aviso (hp=${atravessa.hp})`);
 ok(atravessa.alem > 0, `a bala ATRAVESSA o golfinho no aviso (${atravessa.alem} balas além dele)`);
 
+// ─── CHEGOU EM B, SAIU DA TELA (2º teste jogado, 11/09) ───
+// *"ele vai nadar de A-B e quando chegar em B sair da tela"*.
+const saida = await esperar(() => {
+  const g = window.__game.scene.getScenes(true)[0].golfinho;
+  return g && g.estado === 'espera'
+    ? { visivel: g.sprite.visible, y: Math.round(g.sprite.y), corpo: g.sprite.body.enable }
+    : null;
+}, 100);
+console.log('saida    ', JSON.stringify(saida));
+ok(
+  saida !== null && saida.visivel === false && (saida.y < 0 || saida.y > 216) && saida.corpo === false,
+  `passando por B, ele SAI DA TELA pela borda (${JSON.stringify(saida)})`,
+);
+
 // ─── O X: fere, barra aparece, leque de 3 na metade direita, piso em 25 ───
 const x1 = await esperar(() => {
   const g = window.__game.scene.getScenes(true)[0].golfinho;
-  return g && g.estado === 'x1' ? { barra: g.bar.visible, corpo: g.sprite.body.enable, vulneravel: g.vulneravel } : null;
+  return g && g.estado === 'x1'
+    ? { barra: g.bar.visible, corpo: g.sprite.body.enable, vulneravel: g.vulneravel, deX: g.deX, deY: g.deY, yB: g.yB }
+    : null;
 }, 100);
 console.log('x1       ', JSON.stringify(x1));
 ok(x1 !== null && x1.barra && x1.corpo && x1.vulneravel, `no X a barra aparece e ele passa a ferir e apanhar (${JSON.stringify(x1)})`);
+ok(
+  x1 !== null && x1.deX > 384 && x1.deY === x1.yB,
+  `o X começa DE FORA DA TELA, pela direita, na altura de B (de x=${x1?.deX}, y=${x1?.deY}; B=${x1?.yB})`,
+);
 
 await page.evaluate(() => { window.__game.scene.getScenes(true)[0].golfinho._hp = 27; });
 let leque = null;
