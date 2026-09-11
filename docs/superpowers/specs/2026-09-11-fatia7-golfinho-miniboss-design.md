@@ -64,8 +64,10 @@ jogador ter a surpresa de estar na segunda run e se deparar com um ataque em lug
 - A travessia é VERTICAL, então o sprite gira **90°** — o único ângulo em que pixel art gira sem
   serrilhar. Dura 2,0s; depois ele segura 1,5s em B, virado para a esquerda.
 - A altura em cada parede sai da `Moldura` (`superficieTetoEm`/`superficieChaoEm`), com o centro do
-  corpo 14px para dentro da faixa jogável. A parede na câmara B tem 16px e o corpo tem ~30: metade
-  dele fica ao alcance, e **para acertá-lo o jogador tem de voar perto da parede.**
+  corpo **4px para dentro** da faixa jogável: colado na parede, girado, metade do comprimento dele
+  sobre a faixa. Como o aviso é intocável, a distância não cobra nada — ela é leitura.
+- ⚠️ **O primeiro plano sai de cena enquanto ele vive** e volta quando ele morre (achado na captura
+  da implementação: a viga cobria o aviso, o X e o duelo). É a lei do chefão e do duto.
 
 ### 1.2 O estágio 1 — o X
 

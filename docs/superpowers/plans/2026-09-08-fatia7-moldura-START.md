@@ -16,6 +16,20 @@ Branch `feat/fase4-visual`.
 > troca de t=40 não tinha motivo nenhum. A resposta é **o golfinho biomecânico** — um mini-chefão
 > com aviso, um X de ataque e um duelo em arena, que entra ANTES do M2.
 > **Spec:** `docs/superpowers/specs/2026-09-11-fatia7-golfinho-miniboss-design.md`.
+> **Plano:** `docs/superpowers/plans/2026-09-11-fatia7-golfinho.md` — implementado em 11/09.
+>
+> **🔴 O GOLFINHO AINDA NÃO FOI JOGADO. É essa a próxima ação.** Para jogar: `npm run dev` →
+> `http://localhost:5173/` → tecla **`L`** → ~40s de fase. O que olhar:
+> 1. **O aviso lê como aviso?** Ele nada de uma parede à outra na coluna x=320 e espera 1,5s em B.
+> 2. **O X é justo?** A cambalhota freia em x=280 e o leque sai de lá. Knobs: `Golfinho.VEL_X`
+>    (190), `X_CAMBALHOTA` (280), `LEQUE_ABERTURA` (13°), `VEL_LEQUE` (110).
+> 3. **O duelo dura quanto?** Knobs: `Golfinho.HP` (50) e `PISO` (25). Rajada: `VEL_RAJADA` (130).
+> 4. **A fase ficou longa?** O roteiro continua com 113s; o tempo real cresce o que o duelo durar.
+> 5. **O primeiro plano some na arena e volta depois** — se a volta incomodar, é um evento só.
+>
+> ⚠️ **As sondas que atravessam t=40–50 precisam matar o golfinho** (`s.matarGolfinho()`), senão
+> o relógio fica preso em 49,5. A `probe-f4-visual` e a `probe-f4-moldura` já fazem isso.
+>
 > As seções abaixo ficam como registro do M1/M1.5.
 
 ---
