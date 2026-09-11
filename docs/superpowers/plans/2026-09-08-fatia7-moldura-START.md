@@ -1,57 +1,108 @@
-# START — FATIA 7 · A MOLDURA: ONDE A PRÓXIMA SESSÃO PEGA
+# START — FATIA 7 · A FASE 4: ONDE A PRÓXIMA SESSÃO PEGA
 
-**🟢 O DESIGN ESTÁ FECHADO E APROVADO POR ELE (08/09/2026).**
+**🟢 A MOLDURA — DESIGN FECHADO E APROVADO (08/09/2026).**
 **🟢 O M1 — O MOTOR — IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
-**🟢 O M1.5 — O DUTO E AS PORTAS — IMPLEMENTADO, VERIFICADO E JOGADO (10–11/09/2026).**
-**🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — DESENHADO E APROVADO (11/09/2026).**
-Branch `feat/fase4-visual`.
-
-> ### 🆕 11/09 — o veredicto do M1.5 e a frente nova
->
-> **O M1.5 foi APROVADO jogando:** *"o duto com as portas ficou muito legal"* e *"a sequência de
-> moldura se fechando no duto e abrindo no boss ficou como pedi"*. A mordida, o HP das portas
-> (6/8/10), os 38s de duto e o fio **ficam como estão**.
->
-> **A pergunta dele que abriu a frente nova:** *"quero que tenha um porquê de mudar o fundo"*. A
-> troca de t=40 não tinha motivo nenhum. A resposta é **o golfinho biomecânico** — um mini-chefão
-> com aviso, um X de ataque e um duelo em arena, que entra ANTES do M2.
-> **Spec:** `docs/superpowers/specs/2026-09-11-fatia7-golfinho-miniboss-design.md`.
-> **Plano:** `docs/superpowers/plans/2026-09-11-fatia7-golfinho.md` — implementado em 11/09.
->
-> **🟠 O GOLFINHO FOI JOGADO (11/09) — o duelo aprovado, o X e as rajadas ajustados.** *"O duelo
-> ficou legal, é algo diferente na fase."* O X nadava como boia e não saía da tela; as rajadas eram
-> lentas. Agora: nado com onda e inclinação, volta de dentro da parede com bolhas de aviso, e o
-> duelo alternando rajada lenta → leque rápido → rajada rápida → leque lento (spec §9).
-> **🟢 O AJUSTE FOI JOGADO (11/09):** *"o nado ficou bom"*. Último pedido, aplicado antes do push: o
-> aviso passa por B e **sai da tela**, e o X entra de fora dela pela direita, na altura de B (spec
-> §9.1). Knobs: `ONDA_AMPLITUDE` (9), `ONDA_HZ` (1,3), `GIRO_FREIO` (0,35), `INTERVALO_MIN/MAX`
-> (0,8–1,4), `EMERGIR_DUR` (0,5), `DUELO_SEQUENCIA`, `AVISO_DUR` (2,4), `ESPERA_DUR` (0,8).
->
-> Para jogar: `npm run dev` →
-> `http://localhost:5173/` → tecla **`L`** → ~40s de fase. O que olhar:
-> 1. **O aviso lê como aviso?** Ele nada de uma parede à outra na coluna x=320 e espera 1,5s em B.
-> 2. **O X é justo?** A cambalhota freia em x=280 e o leque sai de lá. Knobs: `Golfinho.VEL_X`
->    (190), `X_CAMBALHOTA` (280), `LEQUE_ABERTURA` (13°), `VEL_LEQUE` (110).
-> 3. **O duelo dura quanto?** Knobs: `Golfinho.HP` (50) e `PISO` (25). Rajada: `VEL_RAJADA` (130).
-> 4. **A fase ficou longa?** O roteiro continua com 113s; o tempo real cresce o que o duelo durar.
-> 5. **O primeiro plano some na arena e volta depois** — se a volta incomodar, é um evento só.
->
-> ⚠️ **As sondas que atravessam t=40–50 precisam matar o golfinho** (`s.matarGolfinho()`), senão
-> o relógio fica preso em 49,5. A `probe-f4-visual` e a `probe-f4-moldura` já fazem isso.
->
-> As seções abaixo ficam como registro do M1/M1.5.
+**🟢 O M1.5 — O DUTO E AS PORTAS — JOGADO E APROVADO (11/09/2026).**
+**🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — IMPLEMENTADO, JOGADO DUAS VEZES E APROVADO (11/09/2026).**
+**🟠 O ÚLTIMO AJUSTE DO GOLFINHO (o aviso passa por B e sai da tela) FOI FEITO A PEDIDO DELE E AINDA NÃO FOI JOGADO.**
+Branch `feat/fase4-visual`, **em dia com o `origin`**.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O M1.5 está de pé — o duto
-> com parede colada, as três portas e a fase de 113s — e eu já joguei. Meu veredicto: <DIGA AQUI>.
-> Toque o M2 — a câmara A."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O golfinho da câmara B está
+> de pé — o aviso que sai da tela, o X nadando com a volta de dentro da parede, e o duelo alternando
+> rajada e leque — e eu já joguei o último ajuste. Meu veredicto: <DIGA AQUI>. Toque o M2 — a
+> câmara A — começando pela decisão do motivo dela."**
 
 ---
 
-## 👀 O QUE VER PRIMEIRO NA PRÓXIMA SESSÃO, NESTA ORDEM
+## 🆕 O QUE A SESSÃO DE 11/09 FEZ, EM ORDEM
+
+1. **O M1.5 foi APROVADO jogando:** *"o duto com as portas ficou muito legal"* e *"a sequência de
+   moldura se fechando no duto e abrindo no boss ficou como pedi"*. A mordida, o HP das portas
+   (6/8/10), os 38s de duto e o fio **ficam como estão**.
+2. **A pergunta dele que abriu a frente nova:** *"quero que tenha um porquê de mudar o fundo"*.
+   Medido: das três trocas de pintura, a de **t=40 não tinha motivo nenhum** (mesmos inimigos, mesmas
+   minas, e um banner anunciando o duto 26s antes). E **nenhum inimigo da F4 morava no Leviatã**.
+3. **A resposta foi o golfinho biomecânico** que ele já tinha criado no PixelLab
+   (`f37ab55c-be70-49da-8ed5-3bd5e168da31`) — um mini-chefão com arena própria. Brainstorm em quatro
+   partes, todas aprovadas por ele.
+   **Spec:** `docs/superpowers/specs/2026-09-11-fatia7-golfinho-miniboss-design.md` (§9 e §9.1 são
+   os dois ajustes jogados). **Plano:** `docs/superpowers/plans/2026-09-11-fatia7-golfinho.md`.
+4. **A arte saiu da PixMiniMax** (10 gerações): nado `39d99a12`, flip + tiro `279cc362` (*"ficou
+   perfeito"*), cambalhota v1 `3d081f67`. A v2 da cambalhota (`ff2a4a3b`, com um LASER) ficou de
+   reserva, fora do jogo. A bala desenhada nas animações foi APAGADA por
+   `scripts/_f4/_golfinho-sheets.mjs`; a bala do jogo é o tiro do flip, reduzido a 13×9.
+5. **1º teste jogado:** *"O duelo ficou legal, é algo diferente na fase."* Mas o X *"parece estar
+   flutuando ou à deriva"*, não saía da tela, e *"as rajadas são lentas e fáceis de desviar"*.
+   Ajustado (spec §9).
+6. **2º teste jogado:** *"o nado ficou bom"*. Último pedido antes do push: o aviso passa por B e sai
+   da tela (spec §9.1). **Esse ajuste não foi jogado.**
+
+---
+
+## 🐬 O GOLFINHO COMO ESTÁ NO JOGO
+
+Tudo em `src/entities/Golfinho.ts`. Evento no roteiro: `{ t: 40, type: 'miniboss', kind: 'golfinho', seguraEm: 49.5 }`.
+
+| momento | o que acontece | knobs |
+|---|---|---|
+| **aviso** | nada de A até B em paredes OPOSTAS (sorteio por partida), passa por B e sai pela borda. Intocável, sem colisão | `AVISO_DUR` 2,4 · `ESPERA_DUR` 0,8 (fora da tela) |
+| **X, 1ª passagem** | entra pela direita na altura de B, nada em ONDA com o corpo inclinado, cambalhota + leque de 3 sem parar, sai pela esquerda. Barra aparece; vida não desce de 25 | `VEL_X` 190 · `ONDA_AMPLITUDE` 9 · `ONDA_HZ` 1,3 · `GIRO_FREIO` 0,35 · `X_CAMBALHOTA` 310 |
+| **X, a volta** | some por um tempo sorteado; **bolhas sobem da parede de A**; ele irrompe num x sorteado, cruza o corredor com cambalhota + leque e mergulha na parede oposta | `INTERVALO_MIN/MAX` 0,8–1,4 · `EMERGIR_DUR` 0,5 · `EMERGE_X_MIN/MAX` 280–340 |
+| **duelo** | pela direita, de frente, até morrer: flip a flip, **rajada lenta → leque rápido → rajada rápida → leque lento** | `DUELO_SEQUENCIA` (115/200/210/105) · `HP` 50 · `PISO` 25 |
+| **a arena** | o relógio da fase não passa de t=49,5 enquanto ele vive; nada nasce; o primeiro plano sai de cena e volta quando ele morre | `seguraEm` no `STAGE_4` |
+| **a morte** | explosão grande, +500, sem hitstop; a fase segue com "A GARGANTA APERTA" em t=50 | `Golfinho.SCORE` |
+
+Para jogar: `npm run dev` → `http://localhost:5173/` → tecla **`L`** → ~40s de fase.
+
+---
+
+## 👀 O QUE VER NO PRÓXIMO TESTE JOGADO, NESTA ORDEM
+
+1. **O aviso saindo da tela** (o ajuste não jogado). Se sair rápido demais, é `AVISO_DUR`; se o X
+   demorar a entrar, é `ESPERA_DUR`.
+2. **As bolhas são PROVISÓRIAS** — partícula `puff` do jogo, e leem mais como fumaça clara do que como
+   bolha. Se incomodar, é arte pequena (uma sheet de bolha) ou partícula própria.
+3. **Na volta ele desce quase na vertical** (até ~70° de inclinação) porque cruza de parede a parede.
+   O knob é o `EMERGE_DESLOCA_X` (120) — maior abre a diagonal.
+4. **Golfinho escuro sobre decoração escura** (o maquinário do teto, na captura do X). É leitura de
+   arte, não de depth: a decoração está em −74 a −88 e ele em 0.
+5. **O tempo da fase**: o roteiro tem 113s; o real cresce o que o duelo durar.
+
+---
+
+## ⚠️ AS LEIS QUE A SESSÃO DE 11/09 PAGOU
+
+| lei | onde doeu |
+|---|---|
+| ⚠️ **ABRA A IMAGEM, de novo.** Dois defeitos do golfinho só apareceram em captura, com a sonda verde | a viga do primeiro plano passando na frente do leque e da rajada; e a 1ª versão das bolhas, que não aparecia |
+| ⚠️ **Pausa de arena é "não passa de", nunca "para quando o estado X começa"** | o X não tem duração exata; esperar o duelo deixaria o corredor de t=50 nascer dentro da arena |
+| ⚠️ **Toda sonda que atravessa t=40–50 tem de matar o golfinho** (`s.matarGolfinho()`) | a `probe-f4-visual` e a `probe-f4-moldura` ficariam presas em 49,5 |
+| ⚠️ **Um `rate: 0` congela o cronômetro do corredor no meio da contagem** | ao voltar em t=50, o primeiro par chega em t≈51,x; a sonda da mesa achou um par só em t=54 |
+| ⚠️ **Animação interrompida não dispara `animationcomplete`** — estado que depende dele tem de ser zerado à mão | o `girando` preso deixaria o duelo sem nenhum flip |
+| ⚠️ **Hitbox de sprite com quadro folgado é fixada à mão, com assert de dimensão** | o golfinho ocupa 42×30 de um quadro 80×80; a regra padrão mataria 38px de vazio |
+| **PixMiniMax: 2 gerações por clipe em 80×80; o loop não fecha sozinho; "muzzle flash" vira bala** | ver a memória `pixminimax-animacao` |
+
+---
+
+## ⏭️ A PRÓXIMA AÇÃO: O M2 — A CÂMARA A
+
+⚠️ **Não gere arte antes de responder a primeira pergunta.** É a mesma que ele fez para a câmara B, e
+a spec do golfinho a deixou em aberto de propósito (§10): **qual é o motivo da câmara A?** Hoje ela é
+a entrada que ensina a voar entre chão e teto — o que a torna um LUGAR, e não só um fundo?
+
+As outras três decisões que já estavam abertas para o M2 continuam valendo (seção "📌 EM ABERTO PARA O
+M2" abaixo): a **repetição da faixa**, **quem pinta as 4 faixas** (dele, sem aprovação), e **como a
+arte troca por câmara** (`setTexture` no spawn ou `PropKind` separados).
+
+**PixelLab:** **4.668** de 5.000 gerações, ciclo virando em 2026-10-04. ⚠️ Confira o saldo no arranque.
+
+---
+
+## 📚 REGISTRO DO M1.5 — O QUE SE PEDIA PARA OLHAR (jogado e aprovado em 11/09)
 
 1. **A fase agora tem 113 segundos** (era 86). O duto passou de 11s para 38s. Se ele achar a fase
    longa demais, o corte é nas ondas entre as portas, **nunca nas portas** — elas são o motivo de o
@@ -68,9 +119,9 @@ Branch `feat/fase4-visual`.
 
 ---
 
-## ⏭️ A PRÓXIMA AÇÃO, EM UMA FRASE
+## 📚 REGISTRO DO M1.5 — AS PERGUNTAS DO TESTE (respondidas em 11/09: tudo fica como está)
 
-**ELE JOGA O M1.5.** As três sondas estão verdes e a linha de base sobreviveu, mas quatro perguntas
+**O M1.5 FOI JOGADO E APROVADO.** Na época as três sondas estavam verdes e a linha de base sobreviveu, mas quatro perguntas
 só o controle na mão responde:
 
 1. **A parede do duto está justa ou está roubando?** Ela MORDE de t=68 a t=106, com 3px de perdão no
@@ -271,10 +322,11 @@ M1.5 — O AJUSTE           ✅ PRONTO, VERIFICADO E JOGADO (10–11/09) — apr
   2ª rodada: a parede COLA no corredor, as 3 PORTAS, a fase vai a 113s.
   Specs: .../2026-09-10-fatia7-moldura-borda-letal-design.md  (1ª, parcialmente superada)
          .../2026-09-10-fatia7-duto-portas-design.md          (2ª, a que vale)
-O GOLFINHO — CÂMARA B     🟠 ◄ PEGUE AQUI · spec aprovada (11/09), plano e implementação na sequência
-  aviso A→B, o X com cambalhota e leque, o duelo com flip e rajada, a fase segura em t=49,5.
-  Spec: .../2026-09-11-fatia7-golfinho-miniboss-design.md
-M2 — A CÂMARA A           ⬜ as 4 peças da doca engolida
+O GOLFINHO — CÂMARA B     ✅ IMPLEMENTADO, JOGADO DUAS VEZES E APROVADO (11/09)
+  aviso que sai da tela, o X nadando com a volta de dentro da parede, o duelo alternando rajada e
+  leque, a fase segura em t=49,5. 🟠 o último ajuste (o aviso saindo da tela) ainda não foi jogado.
+  Spec: .../2026-09-11-fatia7-golfinho-miniboss-design.md · Plano: .../2026-09-11-fatia7-golfinho.md
+M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI · primeiro o MOTIVO da câmara, depois as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
 M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
 M5 — A CÂMARA D           ⬜ a faixa da arena
@@ -370,13 +422,22 @@ mergeada. `origin` = github.com/HenriqueCrosio/AlienWorld-Remastered-V2.
 ⚠️ O remoto **`legacy`** é o repositório ANTIGO — **nunca empurre para ele**.
 ⚠️ **Commits são de autoria SÓ do Henrique** — sem `Co-Authored-By`, sem "Generated with".
 
-Os commits desta sessão:
+Os commits da sessão de 11/09 (o golfinho), todos empurrados:
 
 | commit | o que |
 |---|---|
-| `603f538` | (da sessão anterior) o julgamento das dez colunas |
-| `15794c0` | a spec da moldura + as réguas + o mock |
-| `f40c90a` | a lei do valor virando número + a régua da faixa |
+| `5ca12d0` | a spec do golfinho + o START apontando para ela |
+| `f1fc711` | a arte: três folhas sem a bala desenhada, e a bala 13×9 |
+| `9fe5080` | a entidade, o roteiro da câmara B e a arena segurando em t=49,5 |
+| `b29c82a` | o primeiro plano sai de cena na arena (pego na captura) |
+| `0d71780` | as sondas da moldura e do cenário atravessam a arena |
+| `dc76c80` | o plano e o que ver no teste jogado |
+| `c6be51b` | o 1º ajuste jogado: nado com onda, volta de dentro da parede, duelo alternando |
+| `2801c6c` | o 2º ajuste jogado: o aviso passa por B e sai da tela |
 
-**PixelLab:** **4.679** de 5.000, ciclo virando em 2026-10-04. Consumo do dia: 115 (99 nos 4
-objetos dele, 16 nas gerações minhas). ⚠️ Confira o saldo no arranque antes de gastar.
+As sondas da F4, verdes no fim da sessão: `probe-f4-golfinho` (a nova), `probe-f4-moldura`,
+`probe-f4-visual`, `probe-stage4` (com `vaos:[110,110,110]`) e `probe-stage3` (a aranha segue sendo o
+`miniboss` sem `kind`). ⚠️ UMA POR VEZ.
+
+**PixelLab:** **4.668** de 5.000, ciclo virando em 2026-10-04. Consumo de 11/09: 10 gerações, todas
+nas animações do golfinho. ⚠️ Confira o saldo no arranque antes de gastar.
