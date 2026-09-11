@@ -24,6 +24,7 @@ import { Boss, type StageBoss } from '../entities/Boss';
 import { BossCapitania } from '../entities/BossCapitania';
 import { BossSerpente } from '../entities/BossSerpente';
 import { BossNucleo } from '../entities/BossNucleo';
+import { Golfinho, type SentidoGolfinho } from '../entities/Golfinho';
 import { SHIPS, DEFAULT_SHIP } from '../ships';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
@@ -77,6 +78,11 @@ export class GameScene extends Phaser.Scene {
   private fx!: Fx;
   private director!: StageDirector;
   private boss: StageBoss | null = null;
+  /** O mini-chefão da câmara B da Fase 4 (spec 2026-09-11). `null` fora da arena dele. */
+  private golfinho: Golfinho | null = null;
+  /** O `t` que o relógio da fase não passa enquanto o golfinho viver (`seguraEm` do roteiro). */
+  private golfinhoSeguraEm = Infinity;
+  private golfinhoColliders: Phaser.Physics.Arcade.Collider[] = [];
   private stage!: StageDef;
   /** A nave escolhida na interlude. Ela DEFINE a arma base (src/ships.ts). */
   private shipId: string = DEFAULT_SHIP;
@@ -174,6 +180,9 @@ export class GameScene extends Phaser.Scene {
     // Fase 2 começa em voo livre sem que ninguém escolha nada.
     this.zone = this.stage.zone;
     this.boss = null;
+    this.golfinho = null;
+    this.golfinhoSeguraEm = Infinity;
+    this.golfinhoColliders = [];
     this.waves = [];
     this.propRate = 0;
     this.propMix = [];
@@ -416,6 +425,9 @@ export class GameScene extends Phaser.Scene {
       // Pula da fase direto para o chefão, sem reiniciar.
       kb.on('keydown-G', () => {
         if (this.boss || this.over) return;
+        // ⚠️ A ARENA NUNCA PRENDE A FASE: pular para o chefão encerra o golfinho primeiro, senão o
+        // teto do relógio seguraria o `elapsed` que a linha abaixo acabou de escrever.
+        this.encerrarGolfinho();
         this.elapsed = this.director.bossTime - 1;
         this.director.skipTo(this.elapsed);
         this.propRate = 0;
@@ -450,7 +462,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     const dt = delta / 1000;
-    this.elapsed += dt;
+    // A ARENA DO GOLFINHO: enquanto ele viver, o relógio da fase não passa do `seguraEm` do roteiro.
+    // O mundo continua rolando (fundo, parede, física, armas) — só o roteiro, a aproximação, a barra
+    // de progresso e os pontos por tempo esperam. `Math.max` porque o teto nunca faz o relógio VOLTAR.
+    this.elapsed = this.golfinho?.vivo
+      ? Math.min(this.elapsed + dt, Math.max(this.elapsed, this.golfinhoSeguraEm))
+      : this.elapsed + dt;
 
     this.starfield.update(dt);
     // No vácuo o fundo quase para: sem chão passando, uma nebulosa correndo denunciaria que a
@@ -525,6 +542,9 @@ export class GameScene extends Phaser.Scene {
     this.enemies.update(dt, this.ship);
     this.pickups.update();
     this.boss?.update(dt, this.ship);
+    this.golfinho?.update(dt, this.ship);
+    // Rede: se ele deixou de viver por um caminho que não passou por `matarGolfinho`, a arena solta.
+    if (this.golfinho && !this.golfinho.vivo) this.encerrarGolfinho();
     this.updateHud();
   }
 
@@ -550,6 +570,7 @@ export class GameScene extends Phaser.Scene {
     if (this.boss && !this.boss.isDead) {
       alvos.push(...(this.boss.targets ?? [this.boss.sprite]));
     }
+    if (this.golfinho?.vulneravel) alvos.push(this.golfinho.sprite);
 
     return alvos;
   }
@@ -650,9 +671,11 @@ export class GameScene extends Phaser.Scene {
         this.parallax.setNebulaDensity(e.density, e.density >= 1 ? 0 : 6000);
         break;
       case 'miniboss':
-        // A aranha do casco (Fase 3, Ato 2). Um inimigo do roteiro, não um StageBoss: a fase
-        // continua correndo por baixo dela — chefão de verdade só há um por fase.
-        this.enemies.spawn('aranha', 0);
+        // O mini-chefão da fase. Sem `kind`, a ARANHA do casco (Fase 3, Ato 2): um inimigo do
+        // roteiro, não um StageBoss — a fase continua correndo por baixo dela. O GOLFINHO (Fase 4)
+        // é outra coisa: ele traz a ARENA, e o relógio segura em `seguraEm` enquanto ele viver.
+        if (e.kind === 'golfinho') this.spawnGolfinho(undefined, e.seguraEm);
+        else this.enemies.spawn('aranha', 0);
         break;
       case 'rabo':
         this.raboDoLeviata();
@@ -1096,6 +1119,61 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * O GOLFINHO entra (evento `miniboss` de kind `golfinho`). O sorteio de A e B é daqui, não do
+   * roteiro: *"para o jogador ter a surpresa de estar na segunda run e se deparar com um ataque em
+   * lugar diferente"*. A sonda passa o `sentido` para testar os dois.
+   */
+  private spawnGolfinho(sentido?: SentidoGolfinho, seguraEm = Infinity): void {
+    // Arte entra asset por asset: sem a folha, a câmara segue sem ele — e sem arena presa.
+    if (!this.textures.exists('golfinhoNado')) return;
+    this.encerrarGolfinho();
+
+    const g = new Golfinho(this, this.enemies, this.moldura, sentido ?? (Math.random() < 0.5 ? 'sobe' : 'desce'));
+    this.golfinho = g;
+    this.golfinhoSeguraEm = seguraEm;
+
+    // ⚠️ SPRITE PRIMEIRO: `overlap(sprite, grupo)` entrega (sprite, projétil) — ver `spawnBoss`.
+    this.golfinhoColliders = [
+      this.physics.add.overlap(g.sprite, this.ship, () => {
+        if (g.vulneravel) this.damageShip();
+      }),
+      this.physics.add.overlap(g.sprite, this.weapons.bullets, (_g, b) =>
+        this.bulletHitGolfinho(b as Phaser.Physics.Arcade.Sprite),
+      ),
+    ];
+  }
+
+  private bulletHitGolfinho(bullet: Phaser.Physics.Arcade.Sprite): void {
+    if (!this.weapons.bullets.contains(bullet)) return;
+    const g = this.golfinho;
+    // No aviso ele é intocável: a bala ATRAVESSA (não é devolvida ao pool).
+    if (!bullet.active || !g || !g.vulneravel) return;
+
+    this.weapons.release(bullet);
+    // A fagulha sai mesmo no PISO: o jogador vê que acertou, e só a barra para.
+    this.fx.hit(bullet.x, bullet.y);
+    if (g.damage(bullet.getData('damage') as number)) this.matarGolfinho();
+  }
+
+  /** A morte: explosão grande, 500 pontos, SEM hitstop (a pausa dramática é dos chefões). */
+  private matarGolfinho(): void {
+    const g = this.golfinho;
+    if (!g) return;
+    this.fx.explodeBig(g.sprite.x, g.sprite.y, 0.8);
+    this.score += Golfinho.SCORE;
+    this.encerrarGolfinho();
+  }
+
+  /** Tira o golfinho de cena por QUALQUER caminho, e solta a arena junto. */
+  private encerrarGolfinho(): void {
+    for (const c of this.golfinhoColliders) c.destroy();
+    this.golfinhoColliders = [];
+    this.golfinho?.destroy();
+    this.golfinho = null;
+    this.golfinhoSeguraEm = Infinity;
+  }
+
+  /**
    * O CORPO do chefão multi-parte absorve o tiro: sem dano, só a fagulha. O perfurante também
    * morre aqui — atravessar o chefão inteiro de graça faria da cabeça um alvo opcional.
    */
@@ -1517,6 +1595,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     if (this.boss && !this.boss.isDead && this.boss.damage(12)) this.killBoss();
+    if (this.golfinho?.vulneravel && this.golfinho.damage(12)) this.matarGolfinho();
   }
 
   private damageShip(): void {

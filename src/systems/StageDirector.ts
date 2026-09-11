@@ -15,8 +15,18 @@ export type StageEvent =
    * (as duas coisas são o mesmo fade, ver Parallax.setNebulaDensity).
    */
   | { t: number; type: 'nebula'; density: number }
-  /** O MINI-BOSS do Ato 2 (a aranha que anda no casco). Um por fase, roteirizado. */
-  | { t: number; type: 'miniboss' }
+  /**
+   * O MINI-CHEFÃO de uma fase, roteirizado — um por fase.
+   *
+   * `kind` ausente é a ARANHA (Fase 3): o `STAGE_3` não muda uma linha. `golfinho` é o da câmara B
+   * da Fase 4 (spec 2026-09-11), e ele traz a ARENA: `seguraEm` é o `t` que o relógio da fase não
+   * passa enquanto ele viver.
+   *
+   * ⚠️ O TETO É DO ROTEIRO, NÃO DA ENTIDADE, e é "não passa de", não "para quando o duelo começa".
+   * O X do golfinho não tem duração exata — cada cambalhota o freia — e, se a pausa esperasse o
+   * estado de duelo, um X mais longo deixaria os eventos seguintes nascerem DENTRO da arena.
+   */
+  | { t: number; type: 'miniboss'; kind?: 'aranha' | 'golfinho'; seguraEm?: number }
   /**
    * O RABO DO LEVIATÃ atravessando a tela (Fase 3): a nadadeira traseira entra pela DIREITA,
    * bate uma vez com tudo — o nado espacial dele — e sai pela esquerda. É a TRANSIÇÃO do Ato 1
@@ -422,24 +432,39 @@ export const STAGE_4: StageEvent[] = [
   { t: 37, type: 'corredor', rate: 2.6, gap: 104 },
   { t: 37, type: 'moldura', espessura: 16 },        // ainda margem: o respiro é largo de verdade
   { t: 38, type: 'hazard', rate: 0, mix: [] },
+  // A ARENA ABRE. O corredor para de nascer 1,5s antes da câmara: as últimas mesas saem da tela em
+  // 384 ÷ 84 = 4,6s, ou seja, em t≈43,1 — antes de o X do golfinho começar (t≈43,5).
+  { t: 38.5, type: 'corredor', rate: 0, gap: 104 },
 
   // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
   // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
   // mesmo lugar. Cai no RESPIRO (sem onda no ar), não no meio de uma.
   { t: 40, type: 'cenario', key: 'paintBgF4b' },
+  // ─── O GOLFINHO: o motivo de a câmara mudar (spec 2026-09-11). ───
+  //
+  // O Henrique, depois de jogar o M1.5: *"quero que tenha um porquê de mudar o fundo"*. Antes daqui
+  // os inimigos, as minas e a mesa eram os mesmos dos dois lados da troca. Agora a pintura azul chega
+  // junto com o primeiro habitante do Leviatã: aviso A→B, o X, e o duelo em arena.
+  //
+  // ⚠️ `seguraEm: 49.5`: o relógio não passa daqui enquanto ele viver, e entre 41 e 50 o roteiro
+  // não tem NADA marcado — é isso que faz a arena ser só o jogador e o golfinho.
+  { t: 40, type: 'miniboss', kind: 'golfinho', seguraEm: 49.5 },
+  { t: 41, type: 'banner', text: 'AS PROFUNDEZAS' },
 
   // ─── O APERTO: o coração da fase. Vão 76px (a nave tem ~22 de hitbox: passa com folga
   // CURTA), minas nos vãos, cargueiro cuspindo drones no corredor. Posição sob pressão. ───
-  { t: 42, type: 'banner', text: 'O DUTO APERTA' },
-  { t: 43, type: 'corredor', rate: 1.9, gap: 76 },
+  //
+  // ⚠️ ENCOLHEU DE 20s PARA 13s (e a onda de batedores de t=46 saiu) para o golfinho caber sem
+  // empurrar o duto aprovado para fora de t=68.
+  { t: 50, type: 'banner', text: 'A GARGANTA APERTA' },
+  { t: 50, type: 'corredor', rate: 1.9, gap: 76 },
   // ⚠️ O APERTO NÃO É DA PAREDE, É DO VÃO. A borda continua em 16 aqui: quem cobra posição é o
   // `corredor` de 76px acima, e empilhar parede grossa em cima do vão mais estreito da fase era
   // justamente o que fazia a moldura deixar de ler como borda.
-  { t: 43, type: 'moldura', espessura: 16 },
-  { t: 44, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
-  { t: 46, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 100 },
-  { t: 50, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
-  { t: 51, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 100 },
+  { t: 50, type: 'moldura', espessura: 16 },
+  { t: 50.5, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
+  { t: 52, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
+  { t: 52.5, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 100 },
   { t: 54, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 90 },
   // A PAREDE COMEÇA A GANHAR CORPO — o primeiro degrau real da fase, e ele cai no meio do pico,
   // sem evento `corredor` junto: o jogador sente o lugar apertar sem que o vão tenha mudado.
