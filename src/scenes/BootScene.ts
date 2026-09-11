@@ -247,6 +247,15 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // O EMBLEMA do jogo que SURGE quando o Leviatã some atrás da lua (menu). Brasão circular que
   // faísca em loop. Célula 64×64; 9 quadros lado a lado.
   menuLogoSheet: { path: 'sprites/menu-logo-sheet.png', w: 64, h: 64 },
+
+  // O GOLFINHO BIOMECÂNICO — o mini-chefão da câmara B da Fase 4 (spec 2026-09-11). Animações
+  // PixMiniMax aprovadas pelo Henrique, 80×80 com o bicho virado para a ESQUERDA (o sentido dos
+  // inimigos). ⚠️ O QUADRO NÃO É O CORPO: o golfinho ocupa ~42×30 do quadro, e a hitbox é fixada à
+  // mão no `Golfinho`. ⚠️ A bala que as animações traziam desenhada foi APAGADA por
+  // `scripts/_f4/_golfinho-sheets.mjs` — rodar de novo a cada reinstalação.
+  golfinhoNado: { path: 'sprites/golfinho-nado.png', w: 80, h: 80 },
+  golfinhoFlip: { path: 'sprites/golfinho-flip.png', w: 80, h: 80 },
+  golfinhoCambalhota: { path: 'sprites/golfinho-cambalhota.png', w: 80, h: 80 },
 };
 
 /** Registra os quadros de uma animação no mapa de ART. */
@@ -560,6 +569,10 @@ const ART: Record<string, string> = {
   paintBgF4b: 'sprites/paint-bg-f4-b.png',
   paintBgF4c: 'sprites/paint-bg-f4-c.png',
   paintBgF4d: 'sprites/paint-bg-f4-d.png',
+
+  // A BALA DO GOLFINHO: o tiro vermelho que o Henrique aprovou na animação do flip, recortado,
+  // virado para a direita e reduzido a 13×9 — o quadro do `bolt2`, de onde a hitbox do pool vem.
+  shotGolfinho: 'sprites/shot-golfinho.png',
 
   // O NÚCLEO: o coração blindado do Leviatã, chefão FINAL (Fase 4). Escolha do Henrique
   // (cf5b3e43, 128px → 122×122 instalado). ⚠️ A FERIDA (a zona vulnerável) é MEDIDA no PNG:
