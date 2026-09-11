@@ -245,6 +245,7 @@ for (let i = 0; d0 && i < 300; i++) {
       props: s.terrain.props.countActive(),
       perigos: s.debris.hazards.countActive(),
       inimigos: s.enemies.enemies.countActive(),
+      fg: s.parallax.foregroundDim,
     };
   }, d0.now);
   if (!r) break;
@@ -262,6 +263,9 @@ ok(dFim?.props === 0 && dFim?.perigos === 0, `na arena não nasce mesa nem mina 
 ok(dFim && dFim.inimigos <= d0.inimigos, `nenhum inimigo novo entra na arena (${d0?.inimigos} → ${dFim?.inimigos})`);
 ok(rajada !== null && rajada.n === 3, `o flip cospe uma RAJADA de 3 (${JSON.stringify(rajada)})`);
 ok(yFora === 0, `a altura dele fica presa entre as paredes (${yFora} amostras fora)`);
+// ⚠️ PEGO NA CAPTURA DE 11/09, NÃO POR ASSERT: a viga do primeiro plano passava na frente do leque
+// e da rajada. Na arena ela sai de cena, pela mesma lei do chefão.
+ok(dFim?.fg === 0, `o primeiro plano está APAGADO na arena (foregroundDim=${dFim?.fg})`);
 
 // ─── PERDER UMA VIDA NO DUELO: ele continua ───
 const perda = await page.evaluate(() => {
@@ -299,11 +303,14 @@ ok(morto !== null, 'a bala real mata o golfinho');
 ok(morto && morto.score - score0 >= 500, `a morte paga 500 pontos (${score0} → ${morto?.score})`);
 const solto = await esperar(() => {
   const s = window.__game.scene.getScenes(true)[0];
-  return s.elapsed >= 50.4 ? { t: Math.round(s.elapsed * 10) / 10, gap: s.corredorGap, rate: s.corredorRate } : null;
+  return s.elapsed >= 50.4
+    ? { t: Math.round(s.elapsed * 10) / 10, gap: s.corredorGap, rate: s.corredorRate, fg: s.parallax.foregroundDim }
+    : null;
 }, 100);
 console.log('solto    ', JSON.stringify(solto));
 ok(solto !== null, 'morto o golfinho, a fase volta a andar');
 ok(solto?.gap === 76 && solto?.rate === 1.9, `o evento de t=50 disparou: o aperto voltou (${JSON.stringify(solto)})`);
+ok(solto?.fg === 1, `morto o golfinho, o primeiro plano VOLTA — a câmara é fase de novo (foregroundDim=${solto?.fg})`);
 await esperar(() => window.__game.scene.getScenes(true)[0].elapsed >= 53, 100);
 await page.screenshot({ path: 'probe-f4-golfinho-t50.png' });
 

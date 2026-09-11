@@ -426,8 +426,9 @@ export class GameScene extends Phaser.Scene {
       kb.on('keydown-G', () => {
         if (this.boss || this.over) return;
         // ⚠️ A ARENA NUNCA PRENDE A FASE: pular para o chefão encerra o golfinho primeiro, senão o
-        // teto do relógio seguraria o `elapsed` que a linha abaixo acabou de escrever.
-        this.encerrarGolfinho();
+        // teto do relógio seguraria o `elapsed` que a linha abaixo acabou de escrever. Sem reacender
+        // o primeiro plano: o chefão o apaga de novo em 1s.
+        this.encerrarGolfinho(false);
         this.elapsed = this.director.bossTime - 1;
         this.director.skipTo(this.elapsed);
         this.propRate = 0;
@@ -1126,11 +1127,17 @@ export class GameScene extends Phaser.Scene {
   private spawnGolfinho(sentido?: SentidoGolfinho, seguraEm = Infinity): void {
     // Arte entra asset por asset: sem a folha, a câmara segue sem ele — e sem arena presa.
     if (!this.textures.exists('golfinhoNado')) return;
-    this.encerrarGolfinho();
+    this.encerrarGolfinho(false);
 
     const g = new Golfinho(this, this.enemies, this.moldura, sentido ?? (Math.random() < 0.5 ? 'sobe' : 'desce'));
     this.golfinho = g;
     this.golfinhoSeguraEm = seguraEm;
+
+    // ⚠️ O PRIMEIRO PLANO SAI DE CENA NA ARENA, pela mesma lei do chefão e do duto: *"durante a fase
+    // as silhuetas na frente da nave são dificuldade; durante o chefão elas tapam a leitura dos
+    // padrões"*. Pego na captura de 11/09: a viga cobria o terço de cima no aviso e no X, e o canto
+    // de baixo no duelo — o leque e a rajada passando por trás de uma silhueta preta.
+    this.parallax.setForegroundDimmed(true, 800);
 
     // ⚠️ SPRITE PRIMEIRO: `overlap(sprite, grupo)` entrega (sprite, projétil) — ver `spawnBoss`.
     this.golfinhoColliders = [
@@ -1164,13 +1171,21 @@ export class GameScene extends Phaser.Scene {
     this.encerrarGolfinho();
   }
 
-  /** Tira o golfinho de cena por QUALQUER caminho, e solta a arena junto. */
-  private encerrarGolfinho(): void {
+  /**
+   * Tira o golfinho de cena por QUALQUER caminho, e solta a arena junto.
+   *
+   * `reacende` devolve o primeiro plano: morto o golfinho, a câmara B volta a ser FASE, e ali as
+   * silhuetas são dificuldade. É falso só quando quem chama vai apagá-lo de novo em seguida — trocar
+   * de golfinho, ou o `G` que pula para o chefão (reacender por 1s viraria pisca-pisca de estado).
+   */
+  private encerrarGolfinho(reacende = true): void {
+    const havia = this.golfinho !== null;
     for (const c of this.golfinhoColliders) c.destroy();
     this.golfinhoColliders = [];
     this.golfinho?.destroy();
     this.golfinho = null;
     this.golfinhoSeguraEm = Infinity;
+    if (havia && reacende) this.parallax.setForegroundDimmed(false);
   }
 
   /**
