@@ -2,9 +2,21 @@
 
 **🟢 O DESIGN ESTÁ FECHADO E APROVADO POR ELE (08/09/2026).**
 **🟢 O M1 — O MOTOR — IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
-**🟢 O M1.5 — O DUTO E AS PORTAS — IMPLEMENTADO E VERIFICADO (10/09/2026).**
-**🔴 O M1.5 AINDA NÃO FOI JOGADO. É essa a próxima ação.**
+**🟢 O M1.5 — O DUTO E AS PORTAS — IMPLEMENTADO, VERIFICADO E JOGADO (10–11/09/2026).**
+**🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — DESENHADO E APROVADO (11/09/2026).**
 Branch `feat/fase4-visual`.
+
+> ### 🆕 11/09 — o veredicto do M1.5 e a frente nova
+>
+> **O M1.5 foi APROVADO jogando:** *"o duto com as portas ficou muito legal"* e *"a sequência de
+> moldura se fechando no duto e abrindo no boss ficou como pedi"*. A mordida, o HP das portas
+> (6/8/10), os 38s de duto e o fio **ficam como estão**.
+>
+> **A pergunta dele que abriu a frente nova:** *"quero que tenha um porquê de mudar o fundo"*. A
+> troca de t=40 não tinha motivo nenhum. A resposta é **o golfinho biomecânico** — um mini-chefão
+> com aviso, um X de ataque e um duelo em arena, que entra ANTES do M2.
+> **Spec:** `docs/superpowers/specs/2026-09-11-fatia7-golfinho-miniboss-design.md`.
+> As seções abaixo ficam como registro do M1/M1.5.
 
 ---
 
@@ -231,13 +243,15 @@ M1 — O MOTOR              ✅ PRONTO, VERIFICADO E JOGADO (09–10/09)
   a faixa contínua, a curva do vão, a mesa, a trava dos 8px — com arte provisória.
   Plano: docs/superpowers/plans/2026-09-09-fatia7-m1-motor-moldura.md
   └ RESPONDIDA: a curva contínua NÃO estragou a dificuldade. PASSO_MAX fica em 14.
-M1.5 — O AJUSTE           ✅ PRONTO E VERIFICADO (10/09) · 🔴 FALTA O TESTE JOGADO DELE
+M1.5 — O AJUSTE           ✅ PRONTO, VERIFICADO E JOGADO (10–11/09) — aprovado como está
   1ª rodada: a borda de margem, a parede que morde, o fio aceso, o cenário desempilhado.
   2ª rodada: a parede COLA no corredor, as 3 PORTAS, a fase vai a 113s.
   Specs: .../2026-09-10-fatia7-moldura-borda-letal-design.md  (1ª, parcialmente superada)
          .../2026-09-10-fatia7-duto-portas-design.md          (2ª, a que vale)
-  └ AS PERGUNTAS ABERTAS: a mordida está justa? o HP das portas? 38s de duto é demais?
-M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI (depois que ele jogar o M1.5) · as 4 peças da doca engolida
+O GOLFINHO — CÂMARA B     🟠 ◄ PEGUE AQUI · spec aprovada (11/09), plano e implementação na sequência
+  aviso A→B, o X com cambalhota e leque, o duelo com flip e rajada, a fase segura em t=49,5.
+  Spec: .../2026-09-11-fatia7-golfinho-miniboss-design.md
+M2 — A CÂMARA A           ⬜ as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
 M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
 M5 — A CÂMARA D           ⬜ a faixa da arena
