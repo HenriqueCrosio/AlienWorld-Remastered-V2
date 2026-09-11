@@ -187,13 +187,22 @@ ok(
 // nasceram sob o vão antigo. Medi-las contra o `gap` corrente é medir a régua errada — dá 4px
 // onde a trava garantiu 8, e o defeito seria da medida, não da parede. A `Moldura` expõe os fatos
 // crus (cada placa carrega o `gap` sob o qual nasceu); quem faz a aritmética é a sonda.
+// ⚠️ ESPERA POR ESTADO E ATRAVESSA A ARENA. Até 11/09 eram 60 leituras fixas; com o corredor
+// parando em t=38,5 (a arena do golfinho) e voltando em t=50, leituras cegas cairiam quase todas
+// fora da janela de corredor. O laço segue até ter amostras dos DOIS lados da arena e para em
+// t≈54 — antes de a parede engrossar em t=55, que o assert de espessura logo abaixo lê como 16. E
+// é também em t≈54 que o corredor de 76 (rate 1,9s, desde t=50) já tem os dois pares que o bloco
+// da MESA precisa na tela.
 let pior = Infinity;
 let amostras = 0;
-for (let i = 0; i < 60; i++) {
+for (let i = 0; i < 600; i++) {
   await blindar();
   const f = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
-    if (!s || !s.moldura || s.corredorRate <= 0) return null;
+    if (!s || !s.moldura) return null;
+    if (s.golfinho) s.matarGolfinho(); // a arena segura o relógio; esta sonda mede a MOLDURA
+    const t = s.elapsed ?? 0;
+    if (s.corredorRate <= 0) return { t, min: null };
     let min = Infinity;
     for (let x = 0; x <= 384; x += 10) {
       const p = s.moldura.placaEm(x);
@@ -201,12 +210,13 @@ for (let i = 0; i < 60; i++) {
       const meio = p.gap / 2;
       min = Math.min(min, p.superficieChao - (p.vaoY + meio), (p.vaoY - meio) - p.superficieTeto);
     }
-    return min === Infinity ? null : min;
+    return { t, min: min === Infinity ? null : min };
   });
-  if (f !== null) {
-    pior = Math.min(pior, f);
+  if (f && f.min !== null) {
+    pior = Math.min(pior, f.min);
     amostras++;
   }
+  if (f && f.t >= 54 && amostras >= 10) break;
   await page.waitForTimeout(250);
 }
 console.log('trava    ', JSON.stringify({ folgaMinima: pior, amostras }));
@@ -224,7 +234,19 @@ ok(
 // ⚠️ `alturaPx` ESTICAVA a peça. Uma mesa de 112px espremida em 30 vira mingau, e ampliar é
 // proibido pela lei da resolução. A mesa nasce em escala 1 e é ENTERRADA: o que varia é quanto
 // dela sobra para fora, nunca o tamanho do desenho.
-const mesas = await page.evaluate(() => {
+// ⚠️ A ESPESSURA "DE t=50" É LIDA AQUI, ANTES DA MESA (11/09). A mesa agora espera por estado (logo
+// abaixo) e pode empurrar o relógio para perto de t=55, quando a parede começa a engrossar; lida
+// depois dela, a margem de 16 viraria rampa. A trava acabou de parar em t≈54, então esta leitura
+// cai direto na margem. (Lida direto, e não por `espessuraEm`: aquela função é declarada mais abaixo.)
+const e50 = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return { t: Math.round((s.elapsed ?? 0) * 10) / 10, e: Math.round(s.moldura?.espessura ?? -1) };
+});
+
+// ⚠️ A MESA ESPERA POR ESTADO: DOIS PARES NA TELA. Depois da arena do golfinho o corredor volta em
+// t=50, mas o cronômetro dele ficou congelado no meio da contagem quando parou em t=38,5 — o
+// primeiro par chega em t≈51,x, e em t≈54 pode haver um só. Um vão só não prova o "exato".
+const lerMesas = () => page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   const ps = s.terrain.props.getChildren().filter((p) => p.active);
   const chao = ps.filter((p) => !p.flipY);
@@ -249,6 +271,12 @@ const mesas = await page.evaluate(() => {
     dims: [...new Set(ps.map((p) => `${p.displayWidth}x${p.displayHeight}`))],
   };
 });
+let mesas = await lerMesas();
+for (let i = 0; i < 60 && mesas.vaos.length < 2; i++) {
+  await blindar();
+  await page.waitForTimeout(150);
+  mesas = await lerMesas();
+}
 console.log('mesa     ', JSON.stringify(mesas));
 ok(mesas.total > 0, `há corredor na tela para medir (${mesas.total} props)`);
 ok(mesas.kinds.length === 1 && mesas.kinds[0] === 'mesa', `o corredor é feito de MESA (${mesas.kinds})`);
@@ -300,6 +328,7 @@ const espessuraEm = async (ate) => {
       if (!s || s.scene.key !== 'Game') return null;
       s.lives = 99;
       s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+      if (s.golfinho) s.matarGolfinho(); // a arena segura o relógio; esta sonda mede a MOLDURA
       return { t: Math.round((s.elapsed ?? 0) * 10) / 10, e: Math.round(s.moldura?.espessura ?? -1) };
     });
     if (!e) return null;
@@ -313,10 +342,9 @@ const espessuraEm = async (ate) => {
 // espessura persegue o alvo a `RAMPA` px/s (8), então em t=55 ela ainda é 16 e subindo: um assert
 // cravado ali mediria a rampa, não o alvo, e piscaria conforme a velocidade do headless. As
 // janelas usadas, com o fim da rampa entre parênteses:
-//   t=50 → 16 (a margem, estável desde t=1)   t=60 → 32 (rampa fecha em ~57)
+//   t≈54 → 16 (a margem; a sonda chega aqui depois da trava, que para em 54)   t=60 → 32 (rampa fecha em ~57)
 //   t=66 → 44 (fecha em ~65)                  t=74 → 54 (fecha em ~69,25)
 //   t=84 → 16 (a reabertura fecha em ~83,75)
-const e50 = await espessuraEm(50);
 const e60 = await espessuraEm(60);
 const e66 = await espessuraEm(66);
 console.log('espessura', JSON.stringify([e50, e60, e66]));
@@ -520,6 +548,7 @@ const porta = await (async () => {
       const s = window.__game.scene.getScenes(true)[0];
       if (!s || s.scene.key !== 'Game') return null;
       s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+      if (s.golfinho) s.matarGolfinho(); // a arena segura o relógio; esta sonda mede a MOLDURA
       const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
       if (!p) return { achou: false, t: Math.round((s.elapsed ?? 0) * 10) / 10 };
       const m = s.moldura;

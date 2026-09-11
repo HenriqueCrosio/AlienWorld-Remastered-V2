@@ -75,6 +75,9 @@ const pinturaEm = async (ate) => {
       if (!s || s.scene.key !== 'Game') return null;
       s.lives = 99; // a sonda não sabe jogar: testa-se o CENÁRIO, não quem segura o teclado
       s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+      // ⚠️ A ARENA DO GOLFINHO (t=40–49,5) SEGURA O RELÓGIO enquanto ele vive, e esta sonda não
+      // sabe matá-lo. Ela testa o CENÁRIO; quem testa o golfinho é a probe-f4-golfinho.
+      if (s.golfinho) s.matarGolfinho();
       return { t: Math.round((s.elapsed ?? 0) * 10) / 10, tex: s.parallax?.pinturaAtual ?? null };
     });
     if (!e) return null;
