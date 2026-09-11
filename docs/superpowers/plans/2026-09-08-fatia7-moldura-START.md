@@ -18,7 +18,14 @@ Branch `feat/fase4-visual`.
 > **Spec:** `docs/superpowers/specs/2026-09-11-fatia7-golfinho-miniboss-design.md`.
 > **Plano:** `docs/superpowers/plans/2026-09-11-fatia7-golfinho.md` — implementado em 11/09.
 >
-> **🔴 O GOLFINHO AINDA NÃO FOI JOGADO. É essa a próxima ação.** Para jogar: `npm run dev` →
+> **🟠 O GOLFINHO FOI JOGADO (11/09) — o duelo aprovado, o X e as rajadas ajustados.** *"O duelo
+> ficou legal, é algo diferente na fase."* O X nadava como boia e não saía da tela; as rajadas eram
+> lentas. Agora: nado com onda e inclinação, volta de dentro da parede com bolhas de aviso, e o
+> duelo alternando rajada lenta → leque rápido → rajada rápida → leque lento (spec §9).
+> **🔴 O AJUSTE AINDA NÃO FOI JOGADO.** Knobs novos: `ONDA_AMPLITUDE` (9), `ONDA_HZ` (1,3),
+> `GIRO_FREIO` (0,35), `INTERVALO_MIN/MAX` (0,8–1,4), `EMERGIR_DUR` (0,5), `DUELO_SEQUENCIA`.
+>
+> Para jogar: `npm run dev` →
 > `http://localhost:5173/` → tecla **`L`** → ~40s de fase. O que olhar:
 > 1. **O aviso lê como aviso?** Ele nada de uma parede à outra na coluna x=320 e espera 1,5s em B.
 > 2. **O X é justo?** A cambalhota freia em x=280 e o leque sai de lá. Knobs: `Golfinho.VEL_X`

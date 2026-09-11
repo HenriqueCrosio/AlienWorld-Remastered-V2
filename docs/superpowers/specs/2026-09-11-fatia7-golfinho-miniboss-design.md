@@ -292,7 +292,26 @@ focinho** nos quadros de tiro.
 
 ---
 
-## 9. FORA DESTA SPEC
+## 9. O AJUSTE DO TESTE JOGADO (11/09, o mesmo dia)
+
+Ele jogou e aprovou o duelo — *"ficou legal, é algo diferente na fase"* — e pediu três coisas.
+
+| pedido dele | o que mudou |
+|---|---|
+| *"na fase de cruzar em X, eu quero o movimento full de nadar, ele parece estar flutuando ou à deriva"* | o caminho vira ONDA (9px, 1,3Hz) perpendicular ao rumo; o corpo INCLINA para o rumo com a onda (suavizado); a cauda passa de 10 para 14fps; e a cambalhota **não para mais** — só freia a 35% |
+| *"o X precisa cruzar e sair da visão da tela, voltar em outro ponto (causar susto)"* — e, na escolha, *"sempre de dentro da parede"* | a 1ª passagem sai pela esquerda; ele some por 0,8–1,4s (sorteado); **bolhas sobem da parede de A por 0,5s**; ele irrompe dali num x sorteado entre 280 e 340, cruza o corredor e MERGULHA na parede oposta |
+| *"as rajadas são lentas e fáceis de desviar, pode alternar em velocidade: rajadas lentas e leque rápido, rajadas rápidas e leque lento"* | o duelo alterna estilo E velocidade, flip a flip: **rajada 115 → leque 200 → rajada 210 → leque 105** |
+
+- ⚠️ **A rotação livre substitui a regra "só de 90 em 90" nas passagens.** A deriva era pior que o
+  serrilhado, e o kamikaze já gira livre no jogo. O aviso continua em ±90°.
+- ⚠️ **As bolhas são o telégrafo da volta**, e não enfeite: um bicho que fere surgindo do nada é
+  punir o que o jogador não teve como ver. Na volta, o corpo só fere com o alfa ≥ 0,5.
+- O leque do X continua a 110px/s e continua saindo na metade direita (a cambalhota da 1ª passagem
+  começa em x=310; a da 2ª, a 20% do caminho de parede a parede, com o piso de x=280).
+
+---
+
+## 10. FORA DESTA SPEC
 
 - **A câmara A continua sem motivo próprio.** Ela é a entrada que ensina a voar entre chão e teto; o
   que dá identidade a ela fica para outra conversa.

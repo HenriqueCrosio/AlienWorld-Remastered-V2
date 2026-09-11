@@ -172,26 +172,67 @@ let leque = null;
 let dimsBala = [];
 let hpX = null;
 let capturouX = false;
+let capturouVolta = false;
+// O AJUSTE DO TESTE JOGADO (11/09): *"ele parece estar flutuando"* e *"o X precisa sair da tela e
+// voltar em outro ponto"*. A sonda cobra o corpo inclinando, a saída, e a volta pela parede.
+let inclinacaoMax = 0;
+let saiuDaTela = false;
+let emergiu = null;
+let x2Visto = false;
 await page.keyboard.down('Space');
-for (let i = 0; i < 120; i++) {
+for (let i = 0; i < 200; i++) {
   await blindar();
   const r = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
     const g = s.golfinho;
     if (!g) return null;
-    if (g.sprite.x > 120) s.ship.body.reset(Math.max(24, g.sprite.x - 100), g.sprite.y);
+    if (g.sprite.visible && g.sprite.x > 120) s.ship.body.reset(Math.max(24, g.sprite.x - 100), g.sprite.y);
     const bs = s.enemies.enemyBullets.getChildren().filter((b) => b.active && b.texture.key === 'shotGolfinho');
     const grupos = {};
     for (const b of bs) {
       const k = `${Math.round(b.getData('ox'))},${Math.round(b.getData('oy'))}`;
       grupos[k] = (grupos[k] ?? 0) + 1;
     }
-    return { estado: g.estado, hp: g.hp, grupos, dims: [...new Set(bs.map((b) => `${b.displayWidth}x${b.displayHeight}`))] };
+    const x = g.sprite.x;
+    return {
+      estado: g.estado,
+      hp: g.hp,
+      grupos,
+      dims: [...new Set(bs.map((b) => `${b.displayWidth}x${b.displayHeight}`))],
+      angulo: g.sprite.angle,
+      girando: g.girando,
+      visivel: g.sprite.visible,
+      alfa: g.sprite.alpha,
+      x,
+      y: g.sprite.y,
+      corpo: g.sprite.body.enable,
+      bolhas: g.bolhas.emitting,
+      paredeA: g.sentido === 'sobe' ? s.moldura.superficieChaoEm(x) - 4 : s.moldura.superficieTetoEm(x) + 4,
+    };
   });
-  if (!r || (r.estado !== 'x1' && r.estado !== 'intervalo' && r.estado !== 'x2')) break;
+  if (!r || !['x1', 'intervalo', 'emergir', 'x2'].includes(r.estado)) break;
   hpX = r.hp;
   for (const [k, n] of Object.entries(r.grupos)) if (n >= 3 && !leque) leque = { k, n };
   if (r.dims.length) dimsBala = r.dims;
+  if ((r.estado === 'x1' || r.estado === 'x2') && r.visivel && !r.girando) {
+    inclinacaoMax = Math.max(inclinacaoMax, Math.abs(r.angulo));
+  }
+  if (r.estado === 'intervalo' && !r.visivel) saiuDaTela = true;
+  if (r.estado === 'emergir') {
+    if (!emergiu) {
+      emergiu = { x: r.x, y: r.y, paredeA: r.paredeA, bolhas: r.bolhas, visivel: r.visivel, corpo: r.corpo, amostras: 0 };
+    }
+    emergiu.amostras++;
+    // No MEIO do aviso, não no primeiro instante: com o emissor recém-ligado há bolha nenhuma no ar.
+    if (emergiu.amostras === 3) await page.screenshot({ path: 'probe-f4-golfinho-bolhas.png' });
+  }
+  if (r.estado === 'x2' && r.alfa > 0.5) {
+    x2Visto = true;
+    if (!capturouVolta) {
+      await page.screenshot({ path: 'probe-f4-golfinho-volta.png' });
+      capturouVolta = true;
+    }
+  }
   if (leque && !capturouX) {
     await page.screenshot({ path: 'probe-f4-golfinho-x.png' });
     capturouX = true;
@@ -199,7 +240,18 @@ for (let i = 0; i < 120; i++) {
   await page.waitForTimeout(80);
 }
 await page.keyboard.up('Space');
-console.log('X        ', JSON.stringify({ leque, dimsBala, hpX }));
+console.log('X        ', JSON.stringify({ leque, dimsBala, hpX, inclinacaoMax, saiuDaTela, emergiu, x2Visto }));
+ok(inclinacaoMax >= 8, `o corpo INCLINA com o rumo e a onda — nada, não flutua (inclinação máx ${inclinacaoMax.toFixed(1)}°)`);
+ok(saiuDaTela, 'a 1ª passagem cruza e SAI DA TELA');
+ok(
+  emergiu !== null && emergiu.x >= 280 && emergiu.x <= 340 && Math.abs(emergiu.y - emergiu.paredeA) <= 1,
+  `ele volta DE DENTRO DA PAREDE de A, num x sorteado entre 280 e 340 (${JSON.stringify(emergiu)})`,
+);
+ok(
+  emergiu !== null && emergiu.bolhas === true && emergiu.visivel === false && emergiu.corpo === false,
+  `antes de irromper, só as BOLHAS avisam — ele ainda é invisível e sem corpo (${JSON.stringify(emergiu)})`,
+);
+ok(x2Visto, 'a 2ª passagem irrompe da parede e aparece');
 ok(leque !== null && leque.n === 3, `a cambalhota cospe um LEQUE de 3 (${JSON.stringify(leque)})`);
 ok(leque !== null && Number(leque.k.split(',')[0]) > 192, `o leque sai na METADE DIREITA da tela (origem ${leque?.k})`);
 ok(dimsBala.length === 1 && dimsBala[0] === '13x9', `a bala em tela é 13×9 (${JSON.stringify(dimsBala)})`);
@@ -220,6 +272,7 @@ ok(d0 !== null, 'o golfinho chega ao DUELO');
 let dFim = null;
 let rajada = null;
 let yFora = 0;
+const combos = new Set();
 for (let i = 0; d0 && i < 300; i++) {
   await blindar();
   const r = await page.evaluate((now0) => {
@@ -233,7 +286,13 @@ for (let i = 0; d0 && i < 300; i++) {
       const k = `${Math.round(b.getData('ox'))},${Math.round(b.getData('oy'))}`;
       grupos[k] = (grupos[k] ?? 0) + 1;
     }
+    const tiros = bs.map((b) => ({
+      k: `${Math.round(b.getData('ox'))},${Math.round(b.getData('oy'))}`,
+      v: Math.round(b.body.speed),
+      a: Math.round((Math.atan2(b.body.velocity.y, b.body.velocity.x) * 180) / Math.PI),
+    }));
     return {
+      tiros,
       dt: s.time.now - now0,
       t: s.elapsed,
       estado: g.estado,
@@ -251,11 +310,26 @@ for (let i = 0; d0 && i < 300; i++) {
   if (!r) break;
   if (r.y < r.teto - 1 || r.y > r.chao + 1) yFora++;
   for (const [k, n] of Object.entries(r.grupos)) if (n >= 3 && !rajada) rajada = { k, n };
+  // O ESTILO E A VELOCIDADE DE CADA GRUPO DE 3: leque tem três ângulos (±13°); rajada, um só (a
+  // nave está parada, e cada tiro é mirado de novo nela). Rápido é ≥ 180px/s.
+  const porGrupo = {};
+  for (const tiro of r.tiros) (porGrupo[tiro.k] ??= []).push(tiro);
+  for (const lista of Object.values(porGrupo)) {
+    if (lista.length < 3) continue;
+    const estilo = new Set(lista.map((x) => x.a)).size >= 3 ? 'leque' : 'rajada';
+    const ritmo = lista[0].v >= 180 ? 'rapido' : 'lento';
+    combos.add(`${estilo}-${ritmo}`);
+  }
   dFim = r;
-  if (r.dt >= 4000 && rajada) break;
+  if (r.dt >= 4000 && rajada && combos.size >= 4) break;
   await page.waitForTimeout(100);
 }
-console.log('duelo    ', JSON.stringify({ dFim, rajada, yFora }));
+console.log('duelo    ', JSON.stringify({ dFim: { ...dFim, tiros: undefined }, rajada, yFora, combos: [...combos] }));
+// ⚠️ O PEDIDO DO TESTE JOGADO (11/09): *"rajadas lentas e leque rápido, rajadas rápidas e leque lento"*.
+ok(
+  ['rajada-lento', 'leque-rapido', 'rajada-rapido', 'leque-lento'].every((c) => combos.has(c)),
+  `o duelo ALTERNA estilo e velocidade — as quatro combinações apareceram (${[...combos]})`,
+);
 await page.screenshot({ path: 'probe-f4-golfinho-duelo.png' });
 ok(dFim?.t === 49.5, `a fase SEGURA em t=49,5 durante o duelo (t=${dFim?.t})`);
 ok(dFim && dFim.faixa !== d0.faixa, `mas o MUNDO continua rolando — a faixa andou (${d0?.faixa} → ${dFim?.faixa})`);

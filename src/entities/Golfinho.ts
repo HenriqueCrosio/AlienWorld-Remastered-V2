@@ -11,10 +11,13 @@ export type EstadoGolfinho =
   | 'espera'
   | 'x1'
   | 'intervalo'
+  | 'emergir'
   | 'x2'
   | 'entrada'
   | 'duelo'
   | 'morto';
+
+type EstiloTiro = 'rajada' | 'leque';
 
 /**
  * O GOLFINHO BIOMECÂNICO — o mini-chefão da câmara B da Fase 4 (spec 2026-09-11).
@@ -24,16 +27,17 @@ export type EstadoGolfinho =
  *
  *   AVISO    nada de A até B, em paredes OPOSTAS (sorteio por partida). Intocável. B marca de onde
  *            o ataque sai — *"a marcação do ataque é a posição B, independente de onde seja"*.
- *   X        duas diagonais, da direita para a esquerda: a 1ª sai de B, a 2ª de A. Em cada uma,
- *            UMA cambalhota e o LEQUE de 3. A barra aparece; a vida não desce de 25.
- *   DUELO    pela direita, de frente, até morrer: flip subindo + RAJADA de 3, flip descendo +
- *            rajada. Sem piso.
+ *   X        1ª passagem: sai de B, cruza nadando e SAI DA TELA pela esquerda. Some. Bolhas sobem
+ *            da parede de A, e ele IRROMPE dela num x sorteado, cruza o corredor e MERGULHA na
+ *            parede oposta. Em cada passagem, UMA cambalhota e o LEQUE de 3. Piso de vida 25.
+ *   DUELO    pela direita, de frente, até morrer, flip após flip alternando ESTILO e VELOCIDADE:
+ *            rajada lenta → leque rápido → rajada rápida → leque lento.
  *
  * ⚠️ QUEM SEGURA A FASE NÃO É ESTA CLASSE. O teto do relógio é do roteiro (`seguraEm`) e quem o
  * aplica é a `GameScene`; aqui só se diz se o bicho está vivo.
  *
- * ⚠️ POSIÇÃO ESCRITA À MÃO, SEM VELOCIDADE. As trajetórias são segmentos com paradas (a cambalhota
- * FREIA, o flip anda 36px e para), e integrar velocidade faria a parada depender do `dt` do quadro.
+ * ⚠️ POSIÇÃO ESCRITA À MÃO, SEM VELOCIDADE. As trajetórias são segmentos com onda e freio, e
+ * integrar velocidade faria a forma do caminho depender do `dt` do quadro.
  */
 export class Golfinho {
   static readonly HP = 50;
@@ -47,15 +51,53 @@ export class Golfinho {
   private static readonly DENTRO = 4;
   private static readonly AVISO_DUR = 2;
   private static readonly ESPERA_DUR = 1.5;
-  private static readonly INTERVALO_DUR = 0.4;
   private static readonly VEL_X = 190;
+
+  // ─── O NADO DE VERDADE (teste jogado de 11/09: *"ele parece estar flutuando ou à deriva"*) ───
+  //
+  // ⚠️ AS QUATRO CAUSAS DA DERIVA, e o conserto de cada uma: o caminho era uma RETA (vira onda); o
+  // corpo não inclinava (agora aponta para o rumo, onda incluída — o kamikaze já gira livre, e
+  // girar venceu o serrilhado); a cauda batia a 10fps (14); e ele PARAVA no ar durante a cambalhota
+  // (agora só freia). Parar no meio do nado era o que mais lia como boia.
+  /** A onda do nado, perpendicular ao rumo: golfinho furando a água. */
+  private static readonly ONDA_AMPLITUDE = 9;
+  private static readonly ONDA_HZ = 1.3;
+  /** Na cambalhota ele não para: nada a esta fração da velocidade. */
+  private static readonly GIRO_FREIO = 0.35;
+  /** Quão rápido o corpo alcança o ângulo do rumo (por segundo). Evita estalo de rotação. */
+  private static readonly SUAVE_GIRO = 10;
+
   /**
-   * ⚠️ A CAMBALHOTA É AQUI, E ELE FREIA NELA. A animação dura 1,4s e o tiro sai no fim; em
-   * movimento a 190px/s o leque sairia em x≈100, nas COSTAS de quem joga. Parado em 280, sai na
-   * metade direita da tela.
+   * ⚠️ A CAMBALHOTA DA 1ª PASSAGEM COMEÇA AQUI. A animação dura 1,4s e o tiro sai no fim; com o
+   * freio de 0,35 ele anda ~72px nesse tempo, e o leque sai em x≈238 — na metade direita.
    */
-  private static readonly X_CAMBALHOTA = 280;
+  private static readonly X_CAMBALHOTA = 310;
+  /** Na 2ª passagem, a cambalhota começa a esta fração do caminho de parede a parede. */
+  private static readonly X2_CAMBALHOTA_FRACAO = 0.2;
   private static readonly SAIDA_X = -40;
+
+  // ─── A VOLTA PELA PAREDE (decisão dele: *"sempre de dentro da parede"*) ───
+  /** O tempo fora da tela entre as passagens — SORTEADO: o susto também é de QUANDO. */
+  private static readonly INTERVALO_MIN = 0.8;
+  private static readonly INTERVALO_MAX = 1.4;
+  /**
+   * ⚠️ O AVISO DA VOLTA: bolhas na parede antes de ele irromper. Um bicho que fere e surge do nada
+   * é punir o que o jogador não teve como ver — e o GDD proíbe isso.
+   */
+  private static readonly EMERGIR_DUR = 0.5;
+  /** O x em que ele irrompe, sorteado. O piso de 280 mantém o leque na metade direita. */
+  private static readonly EMERGE_X_MIN = 280;
+  private static readonly EMERGE_X_MAX = 340;
+  /** Quanto ele anda para a esquerda cruzando de parede a parede. */
+  private static readonly EMERGE_DESLOCA_X = 120;
+  /**
+   * O fade de sair da parede e o de mergulhar na outra. ⚠️ 20, não 36: com 36 ele passava meio
+   * segundo translúcido sobre a decoração e lia como fantasma dentro da costela (captura de 11/09).
+   * Irromper é seco — é o susto.
+   */
+  private static readonly EMERGE_FADE_PX = 20;
+  private static readonly MERGULHO_FADE_PX = 30;
+
   private static readonly ENTRADA_X = GAME_WIDTH + 30;
   private static readonly DUELO_X = 300;
   private static readonly VEL_ENTRADA = 120;
@@ -68,8 +110,19 @@ export class Golfinho {
   private static readonly QUADRO_TIRO_FLIP = 11;
   private static readonly QUADRO_TIRO_CAMBALHOTA = 14;
   private static readonly LEQUE_ABERTURA = Phaser.Math.DegToRad(13);
-  private static readonly VEL_LEQUE = 110;
-  private static readonly VEL_RAJADA = 130;
+  /** O leque do X. */
+  private static readonly VEL_LEQUE_X = 110;
+  /**
+   * ⚠️ O DUELO ALTERNA ESTILO E VELOCIDADE (teste jogado de 11/09: *"as rajadas são lentas e fáceis
+   * de desviar, pode alternar em velocidade: rajadas lentas e leque rápido, rajadas rápidas e leque
+   * lento"*). Um flip por passo, em ciclo. A rajada única de 130 virou duas: 115 e 210.
+   */
+  private static readonly DUELO_SEQUENCIA: ReadonlyArray<{ estilo: EstiloTiro; vel: number }> = [
+    { estilo: 'rajada', vel: 115 },
+    { estilo: 'leque', vel: 200 },
+    { estilo: 'rajada', vel: 210 },
+    { estilo: 'leque', vel: 105 },
+  ];
   private static readonly RAJADA_TIROS = 3;
   private static readonly RAJADA_INTERVALO = 0.09;
   /** O focinho, a partir do centro do quadro 80×80 (medido: a bala nascia em (28, 41)). */
@@ -82,12 +135,27 @@ export class Golfinho {
   readonly yB: number;
   readonly bar: Phaser.GameObjects.Rectangle;
   private readonly barBg: Phaser.GameObjects.Rectangle;
+  /** As bolhas do aviso da volta e do mergulho. */
+  readonly bolhas: Phaser.GameObjects.Particles.ParticleEmitter;
 
   private _estado: EstadoGolfinho = 'aviso';
   private _hp = Golfinho.HP;
   private t = 0;
-  private vy = 0;
   private nave: Phaser.Physics.Arcade.Sprite | null = null;
+
+  // A passagem em curso: origem, direção unitária, comprimento, distância andada e fase da onda.
+  private deX = 0;
+  private deY = 0;
+  private ux = 0;
+  private uy = 0;
+  private comprimento = 0;
+  private andado = 0;
+  private fase = 0;
+  private intervaloDur = 0;
+  /** Onde a 2ª passagem irrompe (sorteado ao fim do intervalo). */
+  private emergeX = 0;
+  private emergeY = 0;
+
   private cambalhotaFeita = false;
   private girando = false;
   /** O tiro da animação em curso já saiu? Rede para quadro pulado num `dt` grande. */
@@ -97,8 +165,10 @@ export class Golfinho {
   private flipY0 = 0;
   private flipY1 = 0;
   private pausa = 0;
+  private passoDuelo = 0;
   private rajadaRestante = 0;
   private rajadaT = 0;
+  private rajadaVel = 0;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -108,10 +178,8 @@ export class Golfinho {
   ) {
     Golfinho.registrarAnims(scene);
 
-    const teto = moldura.superficieTetoEm(Golfinho.COLUNA_AB) + Golfinho.DENTRO;
-    const chao = moldura.superficieChaoEm(Golfinho.COLUNA_AB) - Golfinho.DENTRO;
-    this.yA = sentido === 'sobe' ? chao : teto;
-    this.yB = sentido === 'sobe' ? teto : chao;
+    this.yA = this.naParede('A', Golfinho.COLUNA_AB);
+    this.yB = this.naParede('B', Golfinho.COLUNA_AB);
 
     this.sprite = scene.physics.add.sprite(Golfinho.COLUNA_AB, this.yA, 'golfinhoNado');
     const body = this.body;
@@ -136,6 +204,29 @@ export class Golfinho {
       this.aoCompletar(anim.key),
     );
 
+    // ⚠️ BOLHAS FRIAS, SEM BLEND ADITIVO: bolha não é energia, e a regra da fase é luz só onde há
+    // energia. Elas são movimento na borda, onde a visão periférica pega.
+    //
+    // ⚠️ ELAS SOBEM DA PAREDE PARA DENTRO DO CORREDOR, e são grandes e claras de propósito. A 1ª
+    // versão (escala 0,55, cinza, espalhando em volta do ponto) não apareceu na captura de 11/09: um
+    // aviso que não se vê não avisa. A parede de A é o chão no sentido `sobe` — bolha sobe; no teto,
+    // desce.
+    const paraDentro = sentido === 'sobe' ? -1 : 1;
+    this.bolhas = scene.add
+      .particles(0, 0, 'puff', {
+        lifespan: { min: 420, max: 760 },
+        speedX: { min: -16, max: 16 },
+        speedY: { min: 28 * paraDentro, max: 70 * paraDentro },
+        scale: { start: 1.15, end: 0.2 },
+        alpha: { start: 0.9, end: 0 },
+        tint: [0xd2e0ea, 0xa8bccb],
+        frequency: 30,
+        quantity: 2,
+        emitting: false,
+      })
+      .setDepth(1)
+      .setName('bolhasGolfinho');
+
     // A barra tem a cara da do chefão, mais curta: a promessa de que esta luta é menor que a final.
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, 16, Golfinho.BARRA_W, 4, COLORS.enemyDark)
@@ -151,12 +242,12 @@ export class Golfinho {
   private static registrarAnims(scene: Phaser.Scene): void {
     const a = scene.anims;
     // Vai-e-volta: o nado da PixMiniMax não fecha o ciclo (salto 8→0 de 3,91 contra 2,8 entre
-    // vizinhos), e em loop direto daria um tranco.
+    // vizinhos), e em loop direto daria um tranco. 14fps: a 10 a cauda quase não batia.
     if (!a.exists('golfinho-nado')) {
       a.create({
         key: 'golfinho-nado',
         frames: a.generateFrameNumbers('golfinhoNado', { start: 0, end: 8 }),
-        frameRate: 10,
+        frameRate: 14,
         repeat: -1,
         yoyo: true,
       });
@@ -191,7 +282,7 @@ export class Golfinho {
     return this._estado !== 'morto' && this.sprite.active;
   }
 
-  /** Fere e apanha: do X em diante. O aviso, a espera em B e o intervalo fora da tela, não. */
+  /** Fere e apanha: do X em diante. O aviso, a espera em B e o tempo fora da tela, não. */
   get vulneravel(): boolean {
     return (
       this._estado === 'x1' || this._estado === 'x2' || this._estado === 'entrada' || this._estado === 'duelo'
@@ -200,6 +291,14 @@ export class Golfinho {
 
   private get body(): Phaser.Physics.Arcade.Body {
     return this.sprite.body as Phaser.Physics.Arcade.Body;
+  }
+
+  /** A altura do corpo colado na parede de A ou de B, na coluna `x`. */
+  private naParede(qual: 'A' | 'B', x: number): number {
+    const chao = (qual === 'A') === (this.sentido === 'sobe');
+    return chao
+      ? this.moldura.superficieChaoEm(x) - Golfinho.DENTRO
+      : this.moldura.superficieTetoEm(x) + Golfinho.DENTRO;
   }
 
   update(dt: number, nave: Phaser.Physics.Arcade.Sprite): void {
@@ -219,14 +318,23 @@ export class Golfinho {
         break;
       }
       case 'espera':
-        if (this.t >= Golfinho.ESPERA_DUR) this.iniciarDiagonal('x1');
+        if (this.t >= Golfinho.ESPERA_DUR) {
+          this.iniciarPassagem('x1', Golfinho.COLUNA_AB, this.yB, Golfinho.SAIDA_X, this.yA);
+        }
         break;
       case 'x1':
       case 'x2':
-        this.nadarDiagonal(dt);
+        this.nadar(dt);
         break;
       case 'intervalo':
-        if (this.t >= Golfinho.INTERVALO_DUR) this.iniciarDiagonal('x2');
+        if (this.t >= this.intervaloDur) this.prepararVolta();
+        break;
+      case 'emergir':
+        if (this.t >= Golfinho.EMERGIR_DUR) {
+          this.bolhas.emitting = false;
+          const paraX = this.emergeX - Golfinho.EMERGE_DESLOCA_X;
+          this.iniciarPassagem('x2', this.emergeX, this.emergeY, paraX, this.naParede('B', paraX));
+        }
         break;
       case 'entrada':
         this.sprite.x = Math.max(Golfinho.DUELO_X, this.sprite.x - Golfinho.VEL_ENTRADA * dt);
@@ -266,6 +374,7 @@ export class Golfinho {
     this.sprite.destroy();
     this.bar.destroy();
     this.barBg.destroy();
+    this.bolhas.destroy();
   }
 
   // ─── O X ─────────────────────────────────────────────────────────────────────
@@ -275,42 +384,101 @@ export class Golfinho {
     this.t = 0;
   }
 
-  /** A 1ª diagonal sai de B e termina na altura de A; a 2ª entra pela direita em A e termina em B. */
-  private iniciarDiagonal(qual: 'x1' | 'x2'): void {
-    const deX = qual === 'x1' ? Golfinho.COLUNA_AB : Golfinho.ENTRADA_X;
-    const deY = qual === 'x1' ? this.yB : this.yA;
-    const paraY = qual === 'x1' ? this.yA : this.yB;
+  private iniciarPassagem(qual: 'x1' | 'x2', deX: number, deY: number, paraX: number, paraY: number): void {
+    const dx = paraX - deX;
+    const dy = paraY - deY;
+    this.comprimento = Math.hypot(dx, dy);
+    this.ux = dx / this.comprimento;
+    this.uy = dy / this.comprimento;
+    this.deX = deX;
+    this.deY = deY;
+    this.andado = 0;
+    this.fase = 0;
 
-    this.sprite.setPosition(deX, deY).setAngle(0).setVisible(true);
-    this.vy = (paraY - deY) / ((deX - Golfinho.SAIDA_X) / Golfinho.VEL_X);
+    // A 2ª passagem nasce DENTRO da parede: invisível e sem corpo até sair dela (ver `nadar`).
+    this.sprite.setPosition(deX, deY).setVisible(true).setAlpha(qual === 'x2' ? 0 : 1);
+    this.sprite.setRotation(this.anguloDoRumo(1));
+    this.sprite.play('golfinho-nado', true);
     this.cambalhotaFeita = false;
-    this.body.enable = true;
+    // ⚠️ Uma cambalhota interrompida pelo fim da passagem não dispara `animationcomplete`: sem esta
+    // linha o `girando` ficaria preso, e a passagem seguinte nadaria inteira com o freio puxado.
+    this.girando = false;
+    this.body.enable = qual === 'x1';
     this.barBg.setVisible(true);
     this.bar.setVisible(true);
     this.mudar(qual);
   }
 
-  private nadarDiagonal(dt: number): void {
-    if (this.girando) return;
+  private nadar(dt: number): void {
+    const vel = this.girando ? Golfinho.VEL_X * Golfinho.GIRO_FREIO : Golfinho.VEL_X;
+    this.andado += vel * dt;
+    // A onda congela na cambalhota: quem desenha o movimento ali é a própria animação.
+    if (!this.girando) this.fase += dt * Math.PI * 2 * Golfinho.ONDA_HZ;
 
-    this.sprite.x -= Golfinho.VEL_X * dt;
-    this.sprite.y += this.vy * dt;
+    const onda = Golfinho.ONDA_AMPLITUDE * Math.sin(this.fase);
+    this.sprite.setPosition(
+      this.deX + this.ux * this.andado - this.uy * onda,
+      this.deY + this.uy * this.andado + this.ux * onda,
+    );
 
-    if (!this.cambalhotaFeita && this.sprite.x <= Golfinho.X_CAMBALHOTA) {
+    // O CORPO APONTA PARA O RUMO, com a onda — suavizado, para a entrada e a saída da cambalhota
+    // não estalarem. Na cambalhota ele se endireita: o giro é da animação.
+    const alvo = this.girando ? 0 : this.anguloDoRumo(Math.cos(this.fase));
+    const passo = Math.min(1, dt * Golfinho.SUAVE_GIRO);
+    this.sprite.setRotation(this.sprite.rotation + Phaser.Math.Angle.Wrap(alvo - this.sprite.rotation) * passo);
+
+    if (this._estado === 'x2') {
+      // Sai da parede aparecendo, mergulha na outra sumindo — e só fere enquanto está à vista.
+      const saindo = Math.min(1, this.andado / Golfinho.EMERGE_FADE_PX);
+      const mergulhando = Math.min(1, (this.comprimento - this.andado) / Golfinho.MERGULHO_FADE_PX);
+      const alfa = Phaser.Math.Clamp(Math.min(saindo, mergulhando), 0, 1);
+      this.sprite.setAlpha(alfa);
+      this.body.enable = alfa >= 0.5;
+    }
+
+    const hora =
+      this._estado === 'x1'
+        ? this.sprite.x <= Golfinho.X_CAMBALHOTA
+        : this.andado >= this.comprimento * Golfinho.X2_CAMBALHOTA_FRACAO;
+    if (!this.cambalhotaFeita && hora) {
       this.cambalhotaFeita = true;
       this.girar('golfinho-cambalhota');
-      return;
     }
 
-    if (this.sprite.x > Golfinho.SAIDA_X) return;
+    if (this.andado < this.comprimento) return;
 
+    this.body.enable = false;
+    this.sprite.setVisible(false);
     if (this._estado === 'x1') {
-      this.body.enable = false;
-      this.sprite.setVisible(false);
+      this.intervaloDur = Phaser.Math.FloatBetween(Golfinho.INTERVALO_MIN, Golfinho.INTERVALO_MAX);
       this.mudar('intervalo');
     } else {
+      // O MERGULHO: as bolhas de onde ele entrou na parede.
+      this.bolhas.explode(10, this.sprite.x, this.sprite.y);
       this.iniciarDuelo();
     }
+  }
+
+  /**
+   * O ângulo do corpo para o rumo da passagem somado à onda. O sprite nasce virado para a ESQUERDA,
+   * então rotação 0 é nariz em (−1, 0): o ângulo que leva o nariz ao vetor (vx, vy) é
+   * `atan2(−vy, −vx)`. As passagens sempre andam para a esquerda, e `vx` nunca troca de sinal.
+   */
+  private anguloDoRumo(cosFase: number): number {
+    const w = Golfinho.ONDA_AMPLITUDE * Math.PI * 2 * Golfinho.ONDA_HZ * cosFase;
+    const vx = this.ux * Golfinho.VEL_X - this.uy * w;
+    const vy = this.uy * Golfinho.VEL_X + this.ux * w;
+    return Math.atan2(-vy, -vx);
+  }
+
+  /** Fim do tempo fora da tela: sorteia onde ele irrompe, e as bolhas começam a subir dali. */
+  private prepararVolta(): void {
+    this.emergeX = Phaser.Math.Between(Golfinho.EMERGE_X_MIN, Golfinho.EMERGE_X_MAX);
+    this.emergeY = this.naParede('A', this.emergeX);
+    this.sprite.setPosition(this.emergeX, this.emergeY);
+    this.bolhas.setPosition(this.emergeX, this.emergeY);
+    this.bolhas.emitting = true;
+    this.mudar('emergir');
   }
 
   // ─── O DUELO ─────────────────────────────────────────────────────────────────
@@ -318,7 +486,11 @@ export class Golfinho {
   private iniciarDuelo(): void {
     const meio =
       (this.moldura.superficieTetoEm(Golfinho.DUELO_X) + this.moldura.superficieChaoEm(Golfinho.DUELO_X)) / 2;
-    this.sprite.setPosition(Golfinho.ENTRADA_X, meio).setVisible(true);
+    this.sprite.setPosition(Golfinho.ENTRADA_X, meio).setVisible(true).setAlpha(1).setRotation(0);
+    this.sprite.play('golfinho-nado', true);
+    // ⚠️ O mesmo buraco do `iniciarPassagem`: com o `girando` preso de uma cambalhota interrompida, o
+    // duelo nunca começaria um flip.
+    this.girando = false;
     this.body.enable = true;
     this.mudar('entrada');
   }
@@ -373,6 +545,7 @@ export class Golfinho {
     if (chave === 'golfinho-flip') {
       this.flipSobe = !this.flipSobe;
       this.pausa = Golfinho.PAUSA_FLIP;
+      this.passoDuelo = (this.passoDuelo + 1) % Golfinho.DUELO_SEQUENCIA.length;
     }
     this.sprite.play('golfinho-nado');
   }
@@ -380,21 +553,31 @@ export class Golfinho {
   private dispararDaAnimacao(chave: string): void {
     this.disparou = true;
     if (chave === 'golfinho-cambalhota') {
-      // O LEQUE: *ache o buraco*.
-      const centro = this.mira();
-      for (const d of [-1, 0, 1]) this.atirar(centro + d * Golfinho.LEQUE_ABERTURA, Golfinho.VEL_LEQUE);
+      this.leque(Golfinho.VEL_LEQUE_X);
+      return;
+    }
+    const passo = Golfinho.DUELO_SEQUENCIA[this.passoDuelo];
+    if (passo.estilo === 'leque') {
+      this.leque(passo.vel);
     } else {
       // A RAJADA: *saia da linha*. Três em fila, cada um mirado de novo.
       this.rajadaRestante = Golfinho.RAJADA_TIROS;
+      this.rajadaVel = passo.vel;
       this.rajadaT = 0;
     }
+  }
+
+  /** O LEQUE: *ache o buraco*. */
+  private leque(velocidade: number): void {
+    const centro = this.mira();
+    for (const d of [-1, 0, 1]) this.atirar(centro + d * Golfinho.LEQUE_ABERTURA, velocidade);
   }
 
   private tickRajada(dt: number): void {
     if (this.rajadaRestante <= 0) return;
     this.rajadaT -= dt;
     if (this.rajadaT > 0) return;
-    this.atirar(this.mira(), Golfinho.VEL_RAJADA);
+    this.atirar(this.mira(), this.rajadaVel);
     this.rajadaRestante--;
     this.rajadaT = Golfinho.RAJADA_INTERVALO;
   }
