@@ -514,21 +514,30 @@ export class Parallax {
 
     // ─── O QUE O BICHO ENGOLIU (12/09) — as peças que saíram das 64 candidaturas dele ───
     //
-    // ⚠️ A PASSARELA É O QUE FALTAVA PARA A CÂMARA A DIZER O QUE ELA É. A fase abre na "doca
+    // ⚠️ A PONTE É O QUE FALTAVA PARA A CÂMARA A DIZER O QUE ELA É. A fase abre na "doca
     // engolida", mas até aqui nada na tela dizia DOCA: costela, órgão e maquinário são todos do
     // bicho, então o lugar lia como víscera desde o primeiro segundo. Esta peça é a metade humana
-    // da frase — convés industrial com guarda-corpo e lâmpada âmbar, e as veias do Leviatã subindo
-    // por baixo para tomar conta dele.
+    // da frase — dois pilares de convés industrial com guarda-corpo e lâmpada âmbar, tomados pelas
+    // veias do Leviatã, e um vão suspenso entre eles.
     //
-    // ⚠️ ANCORADA NO CHÃO, e não flutuando, pela lei do `orgao`: peça grande ancorada numa borda
-    // lê como grandeza; peça pequena solta no meio lê como asset jogado. A base vai 6px abaixo da
-    // tela para a carne se fundir com a faixa em vez de terminar numa linha reta.
+    // ⚠️ ELA ERA UM PILAR SÓ, E ELE JOGOU E DIAGNOSTICOU: *"está pequeno e as mesas e bordas
+    // tampam ele... hoje nós temos o que seria o INÍCIO de uma ponte"*. Duas coisas mudaram por
+    // causa disso, e as duas estão nos números abaixo:
     //
-    // ⚠️ O CORTE LATERAL DO CORRIMÃO É DE PROPÓSITO. Ele é o defeito que reprovou a peça como
-    // FAIXA (sangramento irregular nas bordas); como prop, "a passarela continua no escuro" é
-    // exatamente o que ela deveria dizer.
+    // 1. **A PEÇA TRIPLICOU DE LARGURA** (71 → 178–198px), com o vão gerado coluna a coluna em
+    //    `_assar-ponte.mjs`. Pilar sozinho não lê como ponte, por maior que seja a escala.
+    //
+    // 2. **A ESCALA SUBIU DE 0.8–1.05 PARA 1.45–1.7, E O NÚMERO É UMA CONTA.** O convés mora nas
+    //    linhas 15–31 de uma peça de ~60 — de 28 a 44px acima da base. Com a base em
+    //    `GAME_HEIGHT + 6` = 222, o topo do convés cai em `222 − 44·escala`. A mesa mais alta da
+    //    abertura tem 46px e o topo dela fica em ~160, então a escala precisa passar de **1,41**
+    //    só para o convés começar a assomar acima do terreno. Abaixo disso a mesa tapa a ponte —
+    //    que é exatamente o que ele viu. Em 1,45 o guarda-corpo sai em y≈136, bem acima da mesa.
+    //
+    // ⚠️ O `gap` SUBIU JUNTO, e não é folclore: a peça chega a 337px em tela, e um `gap` menor que
+    // a largura faria duas pontes se sobreporem — uma emenda que nenhuma escala esconde.
     this.addLayer({
-      key: 'f4Passarela',
+      key: 'f4Ponte',
       factor: 0.55,
       baseY: GAME_HEIGHT + 6,
       depth: -78,
@@ -537,8 +546,8 @@ export class Parallax {
       // *luz só onde há energia*, apagar a luz é apagar o motivo de a peça existir.
       tint: 0x6d788f,
       alpha: 1,
-      scale: [0.8, 1.05],
-      gap: [300, 520],
+      scale: [1.45, 1.7],
+      gap: [520, 900],
       terreno: false,
     });
 

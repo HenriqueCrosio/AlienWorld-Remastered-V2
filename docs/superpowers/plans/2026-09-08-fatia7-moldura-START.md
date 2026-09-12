@@ -96,16 +96,48 @@ virtude.**
 
 | peça | de onde | o que é | camada |
 |---|---|---|---|
-| **`f4Passarela`** ×3 | A-01, A-05, A-13 | convés industrial com guarda-corpo e **lâmpada âmbar**, com as veias do bicho subindo por baixo | chão, depth −78, tint `0x6d788f`, escala 0.8–1.05, gap 300–520 |
+| **`f4Ponte`** ×3 | A-01, A-05, A-13 + vão procedural | dois pilares de convés industrial com guarda-corpo e **lâmpada âmbar**, tomados pelas veias, e um VÃO suspenso entre eles | chão, depth −78, tint `0x6d788f`, escala **1.45–1.7**, gap 520–900 |
 | **`f4Ganglio`** ×2 | B-05, B-12 | núcleos nervosos **ACESOS**, esfumados em elipse irregular | teto, depth −87, tint `0x9aa2b8`, escala 0.55–0.85, gap 420–760 |
 | **`f4Cano`** ×3 | objeto `bc28cdf2` (novo, 20 gerações) | o cano de despejo que ENCHE a câmara | desenhado pela `Agua`, não pelo Parallax — ver "🚰 OS CANOS" |
 
-**Onde elas aparecem, medido** (`_ver-pecas.mjs`, amostrando t=0 a t=36 — a câmara A inteira):
+### 🌉 A PONTE — a 3ª rodada de 12/09 (feita, NÃO jogada)
+
+A passarela entrou como UM pilar, ele jogou, e o diagnóstico foi dele: *"sobre o asset da ponte, eu
+achei, é que ele está pequeno e as mesas e bordas tampam ele. O que pensei: hoje nós temos o que
+seria o INÍCIO de uma ponte ou passarela, podemos criar uma continuação desse jeito: Ponte atual
+___(continuação)___ Ponte atual invertida... podemos criar de forma procedural mesmo para prolongar
+a ponte e termos algo mais rico no mid parallax."*
+
+⚠️ **ELE ESTAVA CERTO SOBRE A CAUSA, E A CAUSA NÃO ERA ESCALA.** A peça de 71px não era pequena por
+acidente — ela é a PONTA de uma ponte, e ponta sozinha não lê como ponte por maior que fique. Duas
+coisas mudaram:
+
+1. **A peça triplicou de largura**: 71 → **178–198px** (`_assar-ponte.mjs`), montada como
+   PILAR + VÃO + PILAR ESPELHADO. Espelhar e não repetir — dois pilares apontando para o
+   mesmo lado leem como a peça colada duas vezes.
+2. **A escala subiu de 0.8–1.05 para 1.45–1.7, e o número é uma CONTA:** o convés mora nas linhas
+   15–31 de uma peça de ~60, ou seja de 28 a 44px acima da base. Com a base em 222, o topo do
+   convés cai em `222 − 44·escala`; a mesa mais alta da abertura tem 46px e o topo dela fica em
+   ~160. **Abaixo de escala 1,41 a mesa tapa a ponte** — que é exatamente o que ele viu. Em 1,45 o
+   guarda-corpo sai em y≈136, bem acima do terreno.
+
+⚠️ **O VÃO É DESENHADO COLUNA A COLUNA, NÃO É UMA FATIA REPETIDA.** Repetir 18px de arte pintada
+denuncia a costura a cada 18px — a mesma doença de "papel de parede" da spec de 08/09. O vão nasce
+de duas colunas do próprio original: uma de VÃO esticada para preencher, e uma de MONTANTE
+carimbada a cada 18px. Sem emenda por construção, com a paleta e o sombreado verticais de graça.
+
+⚠️ **E A COLUNA DO VÃO É ESCOLHIDA, NÃO CRAVADA.** A 1ª versão fixou x=13 à mão e essa coluna
+atravessa a LÂMPADA ÂMBAR: o vão saiu com a lâmpada esticada de ponta a ponta, quebrada em três
+pedaços pelos montantes. Três lâmpadas em fila leem como padrão, e a lâmpada é o que deve marcar o
+PILAR. Agora o forno procura uma coluna com o convés cheio, o guarda-corpo vazio e **nenhum pixel
+quente**.
+
+**Onde as peças aparecem, medido** (`_ver-pecas.mjs`, amostrando t=0 a t=36 — a câmara A inteira):
 
 | peça | % do tempo na tela | quantas por vez |
 |---|---|---|
-| `f4Passarela` | **98%** | 1–2 |
-| `f4Ganglio` | **87%** | 0–1 |
+| `f4Ponte` | **84%** | 0–1 |
+| `f4Ganglio` | **88%** | 0–1 |
 
 ⚠️ **Elas estão na tela desde o primeiro segundo da fase**, não só perto do golfinho — o parallax
 pré-enche as camadas na montagem. A passarela é praticamente contínua; o gânglio pisca com folga,

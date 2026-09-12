@@ -603,12 +603,21 @@ const ART: Record<string, string> = {
   // exatamente o que a faixa não queria: RECORTAR um objeto do fundo. Como prop, o recorte é a
   // virtude. Ver `scripts/_f4/_assar-cand.mjs`.
   //
-  // A PASSARELA é a assinatura da câmara A — a doca engolida: convés industrial com guarda-corpo
-  // e lâmpada âmbar, com as veias do bicho subindo por baixo. Três variantes (a regra de
-  // nomenclatura do `pickVariant`: base, base2, base3).
-  f4Passarela: 'sprites/f4-passarela.png',
-  f4Passarela2: 'sprites/f4-passarela2.png',
-  f4Passarela3: 'sprites/f4-passarela3.png',
+  // A PONTE é a assinatura da câmara A — a doca engolida: dois pilares de convés industrial com
+  // guarda-corpo e lâmpada âmbar, tomados pelas veias do bicho, e um VÃO suspenso entre eles.
+  //
+  // ⚠️ ELA ERA SÓ UM PILAR ATÉ O TESTE JOGADO DE 12/09. Veredicto dele: *"sobre o asset da ponte,
+  // eu achei, é que ele está pequeno e as mesas e bordas tampam ele... hoje nós temos o que seria
+  // o INÍCIO de uma ponte"*. O diagnóstico é dele e está certo: a peça de 71px não era pequena por
+  // acidente — ela é a PONTA de uma ponte, e ponta sozinha não lê como ponte.
+  //
+  // ⚠️ O VÃO É PROCEDURAL (`scripts/_f4/_assar-ponte.mjs`), desenhado coluna a coluna a partir do
+  // próprio original — não é uma fatia repetida, que denunciaria a costura a cada 18px. As
+  // `f4-passarela*.png` continuam no disco porque são a ENTRADA desse forno, mas não são mais
+  // carregadas: quem entra em cena é a ponte inteira.
+  f4Ponte: 'sprites/f4-ponte.png',
+  f4Ponte2: 'sprites/f4-ponte2.png',
+  f4Ponte3: 'sprites/f4-ponte3.png',
   // O GÂNGLIO é um núcleo nervoso ACESO. ⚠️ A escolha anterior eram os anéis de cartilagem da
   // câmara B, e o mock contra a pintura os matou: a pintura da câmara B JÁ É uma caixa torácica,
   // então a peça repetia o que já estava lá. Estes dizem o que nenhuma das quatro pinturas diz —

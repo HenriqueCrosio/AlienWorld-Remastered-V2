@@ -15,7 +15,7 @@ await p.evaluate(() => {
   setInterval(() => { s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER; }, 150);
 });
 
-const CHAVES = ['f4Passarela', 'f4Ganglio', 'costela', 'orgao', 'maquinario', 'derelict'];
+const CHAVES = ['f4Ponte', 'f4Ganglio', 'costela', 'orgao', 'maquinario', 'derelict'];
 const visto = Object.fromEntries(CHAVES.map((k) => [k, 0]));
 const quadros = { total: 0 };
 let ultimo = -1;
