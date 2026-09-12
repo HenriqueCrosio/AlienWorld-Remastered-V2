@@ -361,18 +361,39 @@ material morto da Task 4 (`_col-1..10`, `_lam-A..K`).
 
 ---
 
-## 🧹 UMA LIMPEZA PENDENTE NO PIXELLAB
+## 🚫 A "LIMPEZA DO PIXELLAB" — NÃO EXISTE. NÃO PROPONHA DE NOVO.
 
-Os 4 objetos que ele gerou continuam em `review:awaiting-selection` — eles seguram slot e
-poluem a listagem. Se ele confirmar que não quer nenhuma das 64 candidatas,
-`dismiss_review(object_id=...)` em cada um:
+⚠️ **ESTA SEÇÃO ERA UMA PROPOSTA DE LIMPEZA E VIROU O CONTRÁRIO EM 12/09.** Ela dizia que 4
+objetos presos em `review:awaiting-selection` "seguram slot e poluem a listagem", e sugeria
+`dismiss_review` nos quatro. Estava errada em três coisas, e as três foram conferidas na API:
 
-| câmara | object_id |
+1. **NÃO SÃO 4 OBJETOS EM REVIEW. SÃO 167**, de 906 no total. O doc só rastreava os 4 porque foram
+   os únicos que uma sessão parou para julgar.
+2. **OS OUTROS 163 NÃO SÃO ENTULHO — SÃO A BIBLIOTECA DELE.** Palavras dele: *"eu tinha criado
+   vários assets novos para colocarmos na fase 4, como melhoria e enriquecimento de cenário... mas
+   isso vamos ver após fechar as pendências de arte e gameplay."* ⚠️ **A fila de review é onde ele
+   guarda o que ainda não instalou.** Um `dismiss_review` em massa apagaria trabalho dele, e é
+   IRREVERSÍVEL — `dismiss_review` descarta o objeto e apaga todas as candidatas.
+3. **DESCARTAR NÃO DEVOLVE GERAÇÃO NENHUMA.** As ~99 gastas nas 4 faixas foram embora em 08/09. O
+   ganho da "limpeza" era zero; o risco, o trabalho dele.
+
+**A decisão de 12/09: não se descarta nada, nem as 4 faixas.** Elas continuam reprovadas por
+estrutura (ver a lei da ferramenta errada), mas guardar não custa e descartar não rende. Ficam:
+
+| câmara | object_id (reprovadas por estrutura — GUARDADAS, não descartar) |
 |---|---|
 | A | `be88daa1-175e-4e5e-b794-557d762c6c7f` |
 | B | `0884adc1-2a87-42e6-947f-ecc476ddac9c` |
 | C | `b9771d81-d557-4679-825c-eb3cbb2fadf3` |
 | D | `0dcb4148-4bd4-4779-8d57-c0bca6fa723e` |
+
+### ⏳ E O QUE FICA NA FILA DE VERDADE: o enriquecimento de cenário da F4
+
+Ele tem assets novos já gerados para **enriquecer o cenário da Fase 4**, e disse QUANDO olhar para
+eles: *"após fechar as pendências de arte e gameplay"* — ou seja, **depois do M2–M5 e do Bloco B**,
+não antes. ⚠️ **Não puxe esse material para dentro do M2.** O M2 tem quatro peças definidas e três
+decisões abertas; misturar uma biblioteca de 163 candidaturas no meio disso é como a Fatia 7 já
+morreu uma vez (a Task 4, as colunas novas).
 
 ---
 
