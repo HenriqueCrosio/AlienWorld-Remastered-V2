@@ -107,6 +107,53 @@ const c4 = await pinturaEm(110);
 console.log('cenario 4', JSON.stringify(c4));
 ok(c4?.tex === 'paintBgF4d', `t=110s: TROCOU para a câmara do núcleo (${c4?.tex})`);
 
+// ─── A LEITURA DO MIOLO: o que a decoração NÃO pode tapar (teste jogado de 12/09) ───
+//
+// ⚠️ ESTES DOIS ASSERTS NASCERAM DE UM PRINT, não de uma falha vermelha — a lei da fatia, de novo.
+// O Henrique circulou o destroço de primeiro plano atravessando o meio da tela e apontou quatro
+// setas para os cabos do coração terminando no ar. As duas coisas são de POSIÇÃO, e posição é
+// exatamente o que um assert sabe cobrar depois que alguém olhou a imagem uma vez.
+//
+// ⚠️ AMOSTRA AO LONGO DO TEMPO, e não um quadro só: as duas camadas sorteiam altura A CADA
+// sprite, então um quadro que passe não prova nada sobre o próximo.
+const leitura = { frenteNoMiolo: [], orgaoNoAr: [], amostras: 0 };
+for (let i = 0; i < 24; i++) {
+  const q = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    if (!s || s.scene.key !== 'Game') return null;
+    const imgs = s.children.list.filter((o) => o.type === 'Image' && o.visible);
+    const caixa = (o) => ({
+      topo: Math.round(o.y - o.displayHeight * o.originY),
+      base: Math.round(o.y + o.displayHeight * (1 - o.originY)),
+    });
+    const naTela = (o) => o.x > -o.displayWidth && o.x < 384 + o.displayWidth;
+    return {
+      // o destroço de PRIMEIRO PLANO é o único `derelict` em depth 60
+      frente: imgs.filter((o) => o.texture?.key === 'derelict' && o.depth === 60 && naTela(o)).map(caixa),
+      orgao: imgs.filter((o) => o.texture?.key === 'orgao' && naTela(o)).map(caixa),
+    };
+  });
+  if (q) {
+    leitura.amostras++;
+    // O TERÇO CENTRAL (72–144) é onde o corredor vive. Nada de primeiro plano entra nele.
+    for (const b of q.frente) if (b.base > 72 && b.topo < 144) leitura.frenteNoMiolo.push(b);
+    // O topo do coração tem de estar ENTERRADO na faixa do teto (superfície em TETO_Y + 16 = 26
+    // na abertura da fase). Acima disso os cabos dele ficam no ar — foi o que ele fotografou.
+    for (const b of q.orgao) if (b.topo > 26) leitura.orgaoNoAr.push(b);
+  }
+  await page.waitForTimeout(250);
+}
+console.log('leitura  ', JSON.stringify(leitura));
+ok(leitura.amostras >= 12, `a amostragem rodou (${leitura.amostras} quadros)`);
+ok(
+  leitura.frenteNoMiolo.length === 0,
+  `o destroço de primeiro plano NUNCA entra no terço central (${leitura.frenteNoMiolo.length} invasões)`,
+);
+ok(
+  leitura.orgaoNoAr.length === 0,
+  `o coração sempre encosta o topo na faixa do teto (${leitura.orgaoNoAr.length} com cabo no ar)`,
+);
+
 console.log(falhas === 0 ? '\n✔ A FATIA 7 (BLOCO A) ESTÁ DE PÉ' : `\n✘ ${falhas} FALHA(S)`);
 await browser.close();
 process.exit(falhas === 0 ? 0 : 1);

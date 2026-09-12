@@ -67,9 +67,14 @@ console.log('corredores', JSON.stringify(corredores));
 ok(corredores.teto >= 2, `o TETO existe (${corredores.teto} colunas penduradas)`);
 ok(corredores.chao >= 2, `o chão existe (${corredores.chao} colunas)`);
 ok(corredores.vaos.length >= 2, `colunas nascem em PARES (${corredores.vaos.length} pares medidos)`);
-// t≈8s: o roteiro está no gap 110 (t=1). Margem de ±14 para arredondamento de escala/altura.
-const vaosOk = corredores.vaos.every((v) => v >= 96 && v <= 124);
-ok(vaosOk, `todo vão respeita o prometido (~110px): [${corredores.vaos}]`);
+// t≈8s: o roteiro está no gap 126 (t=1). Margem de ±14 para arredondamento de escala/altura.
+//
+// ⚠️ ERA 110, E A LINHA DE BASE MUDOU DE PROPÓSITO EM 12/09 — o Henrique, jogando: *"diminua o
+// tamanho das mesas no início da fase 4"*. Esta janela é a guarda de que a MESA não come o vão;
+// quando o ROTEIRO muda o vão, é a janela que acompanha. ⚠️ Se ela falhar sem ninguém ter mexido
+// no `STAGE_4`, aí sim o erro é da ARTE — ver a nota da linha de base no START da fatia.
+const vaosOk = corredores.vaos.every((v) => v >= 112 && v <= 140);
+ok(vaosOk, `todo vão respeita o prometido (~126px): [${corredores.vaos}]`);
 
 // ─── O teto MATA: leva a nave até uma coluna pendurada e mede a vida ───
 const dano = await page.evaluate(() => {

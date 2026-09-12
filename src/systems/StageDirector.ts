@@ -400,9 +400,24 @@ export const STAGE_3: StageEvent[] = [
 export const STAGE_4: StageEvent[] = [
   { t: 0.5, type: 'banner', text: 'O INTERIOR · SEM VOLTA' },
 
-  // Corredores LARGOS primeiro (vão 110px): o jogador precisa descobrir que o teto mata
-  // ANTES de o vão apertar. Aprender a regra nova no aperto é sonegação, não dificuldade.
-  { t: 1, type: 'corredor', rate: 2.2, gap: 110 },
+  // Corredores LARGOS primeiro: o jogador precisa descobrir que o teto mata ANTES de o vão
+  // apertar. Aprender a regra nova no aperto é sonegação, não dificuldade.
+  //
+  // ⚠️ OS TRÊS VÃOS ANTES DO GOLFINHO SUBIRAM +16 (110→126, 96→112, 104→120) no teste jogado de
+  // 12/09: *"diminua o tamanho das mesas no início da fase 4 — diminuir elas quer dizer aumentar
+  // o espaço de navegação da nave; deixe para as mesas crescerem a partir do golfinho"*. O vão é
+  // o ÚNICO knob da mesa: ela nasce da borda até a borda do vão, então +16 de vão é −16 de mesa
+  // somados chão e teto. A maior mesa isolada da abertura cai de 62px para 46px.
+  //
+  // ⚠️ O RITMO INTERNO FOI PRESERVADO — os três andaram juntos, então largo→aperta→respira
+  // continua sendo a forma da câmara A. E a queda para 76 em t=50 fica MAIOR de propósito: é o
+  // golfinho que passa a ser a fronteira entre o lugar largo e a garganta.
+  //
+  // ⚠️ O PREÇO ESTÁ NA ONDULAÇÃO, e é aritmética, não gosto: o centro do vão anda em
+  // [TETO_Y + MARGEM + meio, GROUND_Y − MARGEM − meio], uma faixa de "148 − gap" px. Em 110 o
+  // corredor tinha 38px de sobe-e-desce; em 126 tem 22. Se a abertura ficar RETA demais no teste
+  // jogado, o knob é a Moldura.MARGEM (24) para baixo, não o vão de volta para 110.
+  { t: 1, type: 'corredor', rate: 2.2, gap: 126 },
   // ⚠️ A ESPESSURA É A DRAMATURGIA DA FASE — e ela já estava escrita nos vãos desde a Fatia 7, só
   // não estava visível. A moldura é o que faz o jogador ENXERGAR o que os números já faziam com
   // ele. 16px: você entrou num lugar grande.
@@ -416,7 +431,7 @@ export const STAGE_4: StageEvent[] = [
 
   // O interior REAGE: minas sensoras nos vãos (a defesa imune do bicho) + pressão aérea.
   { t: 14, type: 'banner', text: 'ANTICORPOS · SENSORES ATIVOS' },
-  { t: 15, type: 'corredor', rate: 2.4, gap: 96 },
+  { t: 15, type: 'corredor', rate: 2.4, gap: 112 },
   { t: 15, type: 'moldura', espessura: 16 },        // a borda margeia, e é só isso
   { t: 15.5, type: 'hazard', rate: 2.2, mix: ['sensor', 'destroco'] },
   { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
@@ -429,12 +444,12 @@ export const STAGE_4: StageEvent[] = [
   { t: 33, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.65, y: 130 },
 
   // Respiro estrutural: corredor solto, sem onda — o jogador reaprende a voar antes do aperto.
-  { t: 37, type: 'corredor', rate: 2.6, gap: 104 },
+  { t: 37, type: 'corredor', rate: 2.6, gap: 120 },
   { t: 37, type: 'moldura', espessura: 16 },        // ainda margem: o respiro é largo de verdade
   { t: 38, type: 'hazard', rate: 0, mix: [] },
   // A ARENA ABRE. O corredor para de nascer 1,5s antes da câmara: as últimas mesas saem da tela em
   // 384 ÷ 84 = 4,6s, ou seja, em t≈43,1 — antes de o X do golfinho começar (t≈43,5).
-  { t: 38.5, type: 'corredor', rate: 0, gap: 104 },
+  { t: 38.5, type: 'corredor', rate: 0, gap: 120 },
 
   // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
   // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o

@@ -53,6 +53,19 @@ interface ScatterLayer {
    */
   faixa?: [number, number];
   /**
+   * BANDAS DE BORDA: como a `faixa`, mas são VÁRIAS e o sprite sorteia uma. Existe para uma peça
+   * poder morar COLADA numa borda sem poder nascer no meio da tela.
+   *
+   * ⚠️ ELA NASCEU DO TESTE JOGADO DE 12/09, com print: o destroço de primeiro plano tapando o
+   * miolo da Fase 4. *"alguns destroços estão atrapalhando muito a visão da fase"*, e a receita
+   * dele: *"os destroços podem ser movidos para perto da borda, mas não no meio da fase"*. Uma
+   * `faixa` só não resolve — ela é um intervalo CONTÍNUO, e "perto de cima OU perto de baixo" é
+   * exatamente o que um intervalo contínuo não sabe dizer sem passar pelo meio.
+   *
+   * Quando presente, ela GANHA da `faixa`.
+   */
+  faixas?: Array<[number, number]>;
+  /**
    * Ancorada no TETO (Fase 4, o interior): origem no TOPO, o sprite cresce para BAIXO e vai de
    * cabeça para baixo (flipY). O espelho exato de `terreno` — o interior tem teto, e um teto
    * feito de sprites "de pé" pendurados leria como chão colado no alto da tela.
@@ -366,7 +379,25 @@ export class Parallax {
       gap: [380, 560],
       terreno: false,
       flutua: true,
-      faixa: [30, 186],
+      // ⚠️ ELA MOROU EM `faixa: [30, 186]` E ERA O DEFEITO QUE O HENRIQUE CIRCULOU no print de
+      // 12/09: *"o marcado de número 1 é o destroço tomando quase 80% da tela"*. A conta explica
+      // o print — a peça tem 123×46 e a escala 1.6–1.9 a leva a 234×87; num campo de 384×216,
+      // centrada em y=108, ela é uma placa OPACA (depth 60, na frente da nave) atravessando o
+      // miolo exato de onde se joga.
+      //
+      // ⚠️ A RECEITA É DELE, E É DE POSIÇÃO, NÃO DE TAMANHO: *"os destroços podem ser movidos
+      // para perto da borda, mas não no meio da fase"*. Uma viga grande COLADA na borda continua
+      // sendo a silhueta de primeiro plano que a fase quer; a mesma viga no meio é um tapa-olho.
+      // (É a mesma lei do `orgao` logo abaixo, escrita para a outra ponta da tela.)
+      //
+      // ⚠️ OS NÚMEROS SAEM DE UMA INVARIANTE, não de gosto: com meia-altura máxima de 44px
+      // (46 × 1,9 ÷ 2), um centro em 28 põe a base em 72 e um centro em 188 põe o topo em 144 —
+      // ou seja, **o TERÇO CENTRAL (72–144) nunca é tocado**, que é onde o corredor vive. A
+      // sonda cobra exatamente isso.
+      faixas: [
+        [6, 28],
+        [188, 210],
+      ],
       primeiroPlano: true,
     });
 
@@ -428,14 +459,42 @@ export class Parallax {
     //
     // O chão fica com a carne e o teto com a máquina (`maquinario`, logo abaixo): cada borda ganha
     // a sua peça-assinatura, as duas grandes, e nenhuma das duas flutua.
+    // ⚠️ E A ESCALA SUBIU DE 0.9–1.3 PARA 1.85–2.15 NO TESTE JOGADO DE 12/09, pelo mesmo print.
+    // Ancorar no chão matou o coração FLUTUANDO, mas não os CABOS: eles fazem parte do desenho
+    // (`orgao.png` é o coração numa gaiola COM tubos saindo para todos os lados), e a 1.3 o topo
+    // da peça parava em y≈83 — no ar. Quatro setas dele marcaram exatamente esses tocos:
+    // *"o coração com os cabos flutuando no ar, fica feio e dá aspecto de não polido"*.
+    //
+    // ⚠️ A RECEITA, de novo dele: *"quando for utilizado o sprite dele grande, tentar deixar suas
+    // extremidades encostadas na parede de cima ou de baixo, para tapar aqueles cabos suspensos"*.
+    // Não se apaga o cabo — ENTERRA-SE a ponta dele. A faixa da moldura é desenhada em depth −0,6
+    // contra os −88 desta camada, então tudo o que passa da superfície some atrás dela.
+    //
+    // ⚠️ A BASE SUBIU DE `GAME_HEIGHT + 20` (236) PARA `GROUND_Y` (206), E ISSO É O QUE MANTÉM A
+    // PEÇA MAGRA. A peça cresce para cima, então o topo é `base − 118 × escala`: quanto mais
+    // fundo a base, MAIOR a escala necessária para o topo alcançar o teto — e escala é largura.
+    // Medido na captura: com base em 236 a cobertura exigia 1.85 e a peça saía com **263px de
+    // largura**, dois terços da tela, uma massa marrom no meio do campo de jogo. Com a base na
+    // linha do chão, a mesma cobertura sai em 1.62 e **196px**.
+    //
+    // ⚠️ AS DUAS PONTAS FICAM ENTERRADAS, e as duas contas são estas — na abertura da fase, com
+    // espessura 16: a superfície do teto está em `TETO_Y + 16` = 26 e a do chão em
+    // `GROUND_Y − 16` = 190. Em cima, `206 − 118 × 1,62 = 14,8` entra 11px na faixa; embaixo, a
+    // base em 206 fica 16px atrás dela. E só melhora conforme a espessura cresce (em 54 a
+    // superfície do teto desce para 64). ⚠️ **Baixar deste 1.62 devolve os cabos ao ar** — é um
+    // piso calculado, não uma preferência.
+    //
+    // ⚠️ O QUE ESTA CONTA NÃO RESOLVE: os tubos LATERAIS. A arte é radial — os tubos saem para
+    // todos os lados — e só some no lado quem for mais largo que a tela (escala ≥ 3,2, que é uma
+    // parede marrom, não uma peça). Cima e baixo é o que dá para enterrar, e é o que ele pediu.
     this.addLayer({
       key: 'orgao',
       factor: 0.3,
-      baseY: GAME_HEIGHT + 20,
+      baseY: GROUND_Y,
       depth: -88,
       tint: 0x5a4048,
       alpha: 0.9,
-      scale: [0.9, 1.3],
+      scale: [1.62, 1.85],
       gap: [400, 700],
       terreno: false,
     });
@@ -1300,9 +1359,12 @@ export class Parallax {
     // cresce do chão. Na superfície é o contrário: origem na base, sobre a linha do solo.
     // A `faixa`, quando existe, prende a camada a uma banda: é o que faz o cinturão ser um
     // cinturão, e não pedra espalhada.
-    const y = layer.flutua
-      ? Phaser.Math.Between(...(layer.faixa ?? [-10, GAME_HEIGHT + 10]))
-      : layer.baseY;
+    // As `faixas` (plural) sorteiam PRIMEIRO a banda, depois a altura dentro dela — é o que
+    // permite "colado em cima ou colado embaixo, nunca no meio".
+    const banda = layer.faixas
+      ? Phaser.Utils.Array.GetRandom(layer.faixas)
+      : (layer.faixa ?? [-10, GAME_HEIGHT + 10]);
+    const y = layer.flutua ? Phaser.Math.Between(...banda) : layer.baseY;
 
     const img = this.scene.add
       // Sorteia entre as variantes da camada: montanhas repetidas denunciam o truque.
@@ -1328,7 +1390,7 @@ export class Parallax {
     // A FAIXA é a exceção, e por isso ela é reconhecida aqui: ela só lê como cinturão porque é
     // HORIZONTAL. Rodada em ângulo aleatório como as pedras, viraria cascalho picado no céu — e
     // a banda, que é a coisa toda, some.
-    if (layer.flutua && !layer.faixa) img.setAngle(Phaser.Math.Between(0, 359));
+    if (layer.flutua && !layer.faixa && !layer.faixas) img.setAngle(Phaser.Math.Between(0, 359));
 
     layer.sprites.push(img);
     layer.nextX += Phaser.Math.Between(...layer.gap);

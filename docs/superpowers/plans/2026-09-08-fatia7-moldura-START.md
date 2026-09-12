@@ -3,22 +3,79 @@
 **🟢 A MOLDURA — DESIGN FECHADO E APROVADO (08/09/2026).**
 **🟢 O M1 — O MOTOR — IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
 **🟢 O M1.5 — O DUTO E AS PORTAS — JOGADO E APROVADO (11/09/2026).**
-**🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — IMPLEMENTADO, JOGADO DUAS VEZES E APROVADO (11/09/2026).**
-**🟠 O ÚLTIMO AJUSTE DO GOLFINHO (o aviso passa por B e sai da tela) FOI FEITO A PEDIDO DELE E AINDA NÃO FOI JOGADO.**
+**🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12/09/2026).**
+**🟢 A LEITURA DA ABERTURA — mesas menores, destroços nas bordas, o coração enterrado — JOGADA E APROVADA (12/09/2026).**
+**🟢 O MOTIVO DA CÂMARA A — RESPONDIDO POR ELE EM 12/09: ela NÃO tem motivo especial. Ver "⏭️".**
 Branch `feat/fase4-visual`, **em dia com o `origin`**.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O golfinho da câmara B está
-> de pé — o aviso que sai da tela, o X nadando com a volta de dentro da parede, e o duelo alternando
-> rajada e leque — e eu já joguei o último ajuste. Meu veredicto: <DIGA AQUI>. Toque o M2 — a
-> câmara A — começando pela decisão do motivo dela."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O golfinho está fechado e a
+> abertura da fase foi ajustada e aprovada. O motivo da câmara A já está respondido — ela é entrada
+> de shmup, sem motivo especial. Toque o M2 pelas TRÊS decisões que sobraram: a repetição da faixa,
+> quem pinta as 4 faixas, e como a arte troca por câmara."**
 
 ---
 
-## 🆕 O QUE A SESSÃO DE 11/09 FEZ, EM ORDEM
+## 🆕 O QUE A SESSÃO DE 12/09 FEZ
+
+**Tudo nesta seção foi JOGADO e APROVADO por ele:** *"Joguei e ficou bom assim."*
+
+1. **O GOLFINHO FECHOU.** O último ajuste (o aviso passando por B e saindo da tela) foi jogado:
+   *"em relação ao golfinho, ficou muito bom. ele sai da tela como pedi, as skills dele estão
+   ótimas."* ⚠️ **Ele não tem mais nada pendente** — os quatro itens de "o que ver no próximo teste"
+   da sessão anterior estão respondidos ou vencidos. As bolhas provisórias **ficam como estão**.
+2. **O MOTIVO DA CÂMARA A — RESPONDIDO, e a resposta é "não tem".** Palavras dele: *"A entrada é o
+   início da fase como todas as outras, nada de especial, apenas atirar, desviar e não morrer. A
+   interação do golfinho já traz essa novidade."* ⚠️ **Isto ENCERRA a §10 da spec do golfinho**, que
+   deixava a pergunta em aberto de propósito. A câmara A não ganha habitante nem evento próprio.
+3. **Três ajustes de LEITURA, todos pedidos com um print na mão.** Eles não mudam design nenhum —
+   mudam o que dá para enxergar enquanto se joga.
+
+### O que mudou no código
+
+| pedido dele | o que foi feito | onde |
+|---|---|---|
+| *"diminua o tamanho das mesas no início da fase 4 — diminuir elas quer dizer aumentar o espaço de navegação da nave; deixe para as mesas crescerem a partir do golfinho"* | os três vãos antes do golfinho subiram **+16** (110→**126**, 96→**112**, 104→**120**), com o ritmo interno intacto. A maior mesa isolada da abertura cai de **62px para 46px**. De t=50 em diante, nada mudou | `STAGE_4` |
+| *"alguns destroços estão atrapalhando muito a visão da fase"* + *"os destroços podem ser movidos para perto da borda, mas não no meio da fase"* | o destroço de primeiro plano saiu de `faixa: [30, 186]` para `faixas: [[6,28],[188,210]]` — duas bandas de borda, uma sorteada por sprite | `Parallax.buildInterior` |
+| *"o coração com os cabos flutuando no ar, fica feio e dá aspecto de não polido"* + *"tentar deixar suas extremidades encostadas na parede de cima ou de baixo, para tapar aqueles cabos suspensos"* | o `orgao` passou de `baseY 236 / escala 0.9–1.3` para `baseY GROUND_Y / escala 1.62–1.85`: topo enterrado 11px na faixa do teto, base 16px atrás da do chão | `Parallax.buildInterior` |
+
+**O campo novo no `ScatterLayer`: `faixas`** (plural). É uma LISTA de bandas, e o sprite sorteia
+uma. ⚠️ A `faixa` velha não servia porque ela é um intervalo **contínuo** — e "perto de cima OU
+perto de baixo" é exatamente o que um intervalo contínuo não sabe dizer sem passar pelo meio.
+
+### Os números que são invariante, não gosto
+
+- **O destroço de primeiro plano nunca toca o TERÇO CENTRAL (72–144).** Com meia-altura máxima de
+  44px (46 × 1,9 ÷ 2), um centro em 28 põe a base em 72 e um centro em 188 põe o topo em 144.
+- **O topo do coração fica sempre ENTERRADO** na faixa do teto (superfície em `TETO_Y + 16` = 26 na
+  abertura). Em 1,62: `206 − 118 × 1,62 = 14,8`, 11px dentro. **Baixar de 1.62 devolve os cabos ao ar.**
+- Os dois viraram assert na `probe-f4-visual`, amostrados em **24 quadros** — as duas camadas
+  sorteiam altura A CADA sprite, então um quadro que passe não prova nada sobre o próximo.
+
+### ⚠️ AS LEIS QUE ESTA SESSÃO PAGOU
+
+| lei | onde doeu |
+|---|---|
+| ⚠️ **O VÃO É O ÚNICO KNOB DA MESA** — ela nasce da borda até a borda do vão, então +16 de vão é −16 de mesa somados chão e teto | não existe "tamanho da mesa" para mexer: quem pediu mesa menor pediu vão maior |
+| ⚠️ **E O PREÇO DO VÃO MAIOR É A ONDULAÇÃO, e é aritmética:** o centro anda em `148 − gap` px | em 110 o corredor tinha 38px de sobe-e-desce; em 126 tem 22. Se a abertura ficar RETA demais, o knob é a `Moldura.MARGEM` (24) para baixo, **não** o vão de volta |
+| ⚠️ **ANCORAR MAIS FUNDO ENGORDA A PEÇA.** A peça cresce para cima, então o topo é `base − altura × escala`: quanto mais fundo a base, MAIOR a escala para alcançar o teto — e escala é largura | a 1ª tentativa do coração manteve a base em 236, exigiu escala 1,85 e saiu com **263px de largura**, dois terços da tela. Subir a base para `GROUND_Y` deu a mesma cobertura em 1,62 e **196px** |
+| ⚠️ **ENTERRA-SE A PONTA, NÃO SE APAGA O CABO.** A faixa da moldura é desenhada em depth −0,6 contra os −88 da decoração: tudo o que passa da superfície some atrás dela | os cabos fazem parte do `orgao.png` — não havia o que remover, só onde esconder |
+| ⚠️ **ASSERT VERDE NÃO JULGA COMPOSIÇÃO — DE NOVO.** O coração de 263px passava em TODAS as sondas, invariantes novas incluídas | quem pegou foi a captura. É a quarta vez que esta lei cobra nesta fatia |
+| **O que a conta NÃO resolve: os tubos LATERAIS do coração.** A arte é radial, e só sumiria de lado uma peça mais larga que a tela (escala ≥ 3,2 — uma parede, não uma peça) | cima e baixo é o que dava para enterrar, e é o que ele pediu |
+
+### A ferramenta nova
+
+`scripts/_f4/_ver-abertura.mjs` — captura t=7, t=20 e t=33 da abertura e imprime a caixa de cada
+peça (topo, base, largura). ⚠️ **Foi ela que pegou o coração de 263px**, numa versão que passava em
+todos os asserts. Uso: `npm run dev` noutro terminal, depois
+`node scripts/_f4/_ver-abertura.mjs scripts/_f4/_abertura.png`.
+
+---
+
+## 📚 REGISTRO — O QUE A SESSÃO DE 11/09 FEZ, EM ORDEM
 
 1. **O M1.5 foi APROVADO jogando:** *"o duto com as portas ficou muito legal"* e *"a sequência de
    moldura se fechando no duto e abrindo no boss ficou como pedi"*. A mordida, o HP das portas
@@ -60,17 +117,17 @@ Para jogar: `npm run dev` → `http://localhost:5173/` → tecla **`L`** → ~40
 
 ---
 
-## 👀 O QUE VER NO PRÓXIMO TESTE JOGADO, NESTA ORDEM
+## 📚 REGISTRO — O QUE SE PEDIA PARA OLHAR NO GOLFINHO (tudo respondido em 12/09)
 
-1. **O aviso saindo da tela** (o ajuste não jogado). Se sair rápido demais, é `AVISO_DUR`; se o X
-   demorar a entrar, é `ESPERA_DUR`.
-2. **As bolhas são PROVISÓRIAS** — partícula `puff` do jogo, e leem mais como fumaça clara do que como
-   bolha. Se incomodar, é arte pequena (uma sheet de bolha) ou partícula própria.
-3. **Na volta ele desce quase na vertical** (até ~70° de inclinação) porque cruza de parede a parede.
-   O knob é o `EMERGE_DESLOCA_X` (120) — maior abre a diagonal.
-4. **Golfinho escuro sobre decoração escura** (o maquinário do teto, na captura do X). É leitura de
-   arte, não de depth: a decoração está em −74 a −88 e ele em 0.
-5. **O tempo da fase**: o roteiro tem 113s; o real cresce o que o duelo durar.
+Ele jogou e fechou: *"ficou muito bom. ele sai da tela como pedi, as skills dele estão ótimas."*
+
+1. ~~O aviso saindo da tela~~ — **aprovado.** `AVISO_DUR` 2,4 e `ESPERA_DUR` 0,8 ficam.
+2. ~~As bolhas provisórias~~ — **ficam como estão.** Não incomodaram; a sheet de bolha própria
+   deixa de ser trabalho pendente.
+3. ~~A volta quase vertical~~ — **aprovada.** `EMERGE_DESLOCA_X` fica em 120.
+4. ~~Golfinho escuro sobre decoração escura~~ — **não foi levantado.** ⚠️ E a decoração mudou desde
+   então (o destroço foi para as bordas), o que só ajuda esta leitura.
+5. **O tempo da fase**: o roteiro tem 113s; o real cresce o que o duelo durar. Segue valendo.
 
 ---
 
@@ -90,13 +147,21 @@ Para jogar: `npm run dev` → `http://localhost:5173/` → tecla **`L`** → ~40
 
 ## ⏭️ A PRÓXIMA AÇÃO: O M2 — A CÂMARA A
 
-⚠️ **Não gere arte antes de responder a primeira pergunta.** É a mesma que ele fez para a câmara B, e
-a spec do golfinho a deixou em aberto de propósito (§10): **qual é o motivo da câmara A?** Hoje ela é
-a entrada que ensina a voar entre chão e teto — o que a torna um LUGAR, e não só um fundo?
+✅ **A PRIMEIRA PERGUNTA JÁ ESTÁ RESPONDIDA, e a resposta poupa trabalho.** Em 12/09, sobre o motivo
+da câmara A: *"A entrada é o início da fase como todas as outras, nada de especial, apenas atirar,
+desviar e não morrer. A interação do golfinho já traz essa novidade."*
 
-As outras três decisões que já estavam abertas para o M2 continuam valendo (seção "📌 EM ABERTO PARA O
-M2" abaixo): a **repetição da faixa**, **quem pinta as 4 faixas** (dele, sem aprovação), e **como a
-arte troca por câmara** (`setTexture` no spawn ou `PropKind` separados).
+⚠️ **NÃO PROPONHA HABITANTE, EVENTO NEM MECÂNICA PARA A CÂMARA A.** A pergunta do "porquê de mudar o
+fundo" valia para a troca do MEIO da fase (t=40), que não tinha motivo nenhum — não para a abertura,
+que é onde o jogador aprende a regra. Uma fase precisa de um lugar comum antes de ter um incomum.
+Isto ENCERRA a §10 da spec do golfinho. **O M2 é passe de ARTE, e só.**
+
+Restam as TRÊS decisões que já estavam abertas (seção "📌 EM ABERTO PARA O M2" abaixo), e é por elas
+que a sessão começa: a **repetição da faixa**, **quem pinta as 4 faixas** (dele, ainda sem aprovação),
+e **como a arte troca por câmara** (`setTexture` no spawn ou `PropKind` separados).
+
+⚠️ **E a geometria da câmara A mudou em 12/09** — os vãos da abertura são 126/112/120, não
+110/96/104. Quem for medir a peça de arte contra o corredor mede contra os números NOVOS.
 
 **PixelLab:** **4.668** de 5.000 gerações, ciclo virando em 2026-10-04. ⚠️ Confira o saldo no arranque.
 
@@ -322,11 +387,15 @@ M1.5 — O AJUSTE           ✅ PRONTO, VERIFICADO E JOGADO (10–11/09) — apr
   2ª rodada: a parede COLA no corredor, as 3 PORTAS, a fase vai a 113s.
   Specs: .../2026-09-10-fatia7-moldura-borda-letal-design.md  (1ª, parcialmente superada)
          .../2026-09-10-fatia7-duto-portas-design.md          (2ª, a que vale)
-O GOLFINHO — CÂMARA B     ✅ IMPLEMENTADO, JOGADO DUAS VEZES E APROVADO (11/09)
+O GOLFINHO — CÂMARA B     ✅ FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12/09)
   aviso que sai da tela, o X nadando com a volta de dentro da parede, o duelo alternando rajada e
-  leque, a fase segura em t=49,5. 🟠 o último ajuste (o aviso saindo da tela) ainda não foi jogado.
+  leque, a fase segura em t=49,5. Nada pendente.
   Spec: .../2026-09-11-fatia7-golfinho-miniboss-design.md · Plano: .../2026-09-11-fatia7-golfinho.md
-M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI · primeiro o MOTIVO da câmara, depois as 4 peças da doca engolida
+A LEITURA DA ABERTURA     ✅ JOGADA E APROVADA (12/09)
+  mesas menores (vãos 126/112/120), destroços nas bordas, o coração enterrando os próprios cabos.
+  Sem spec: três ajustes de leitura pedidos com print na mão. Ver "O QUE A SESSÃO DE 12/09 FEZ".
+M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI · o MOTIVO já está respondido (não tem) — é passe de ARTE:
+                             as 3 decisões abertas, depois as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
 M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
 M5 — A CÂMARA D           ⬜ a faixa da arena
@@ -403,11 +472,16 @@ o aviso de que `G_CORE_OFF_X/Y` e `G_MUZZLE_X/Y` **têm que ser remedidos** porq
 ## 📌 A LINHA DE BASE — não perca este número
 
 ```
-corredores {"chao":3,"teto":3,"vaos":[110,110,110]}
+corredores {"chao":3,"teto":3,"vaos":[126,126,126]}
 ```
 
-`node scripts/probe-stage4.mjs`. Depois do M1 tem de devolver **exatamente** isto. Se mudar, a
-mesa nova está comendo o vão — **o erro é da ARTE, não do roteiro**.
+`node scripts/probe-stage4.mjs`. Tem de devolver **exatamente** isto. Se mudar, a mesa nova está
+comendo o vão — **o erro é da ARTE, não do roteiro**.
+
+⚠️ **ERA `[110,110,110]` ATÉ 11/09, E MUDOU DE PROPÓSITO EM 12/09** — ele, jogando: *"diminua o
+tamanho das mesas no início da fase 4"*. A janela da sonda acompanhou (`[96,124]` → `[112,140]`).
+A regra não mudou: **quando o ROTEIRO muda o vão, a linha de base acompanha; quando ela quebra
+sozinha, a culpada é a arte.**
 
 ⚠️ **A sonda NÃO pega a mudança de dificuldade na horizontal nem a curva contínua.** Ela cobre o
 vão, não a espessura nem o ritmo. Isso só o controle na mão julga — e é por isso que o M1 termina
