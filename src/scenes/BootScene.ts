@@ -658,7 +658,25 @@ const ART: Record<string, string> = {
   // (ver os asserts novos em `scripts/probe-f4-moldura.mjs`). Quando a arte de verdade entrar
   // (M2–M5), as variantes são `mesa2`, `mesa3`… — o `pickVariant` sorteia entre elas sem mudar
   // nenhuma linha de código, DE GRAÇA, porque a convenção foi respeitada desde o nome.
-  mesa: 'sprites/f4-mesa-prov.png',
+  // ⚠️ A ARTE DE VERDADE ENTROU EM 12/09 (M2). A estrutura foi decidida com ele: **aço ENGOLIDO,
+  // não carne**. A mesa é a única coisa da fase que mata por ser TERRENO — todo o resto ou é fundo
+  // (tingido escuro, depth negativo) ou é inimigo (se move, atira), e por isso ela é a única peça
+  // da F4 que nasce SEM tint. Biomecânica seria feita da mesma matéria da faixa, das costelas e da
+  // parede de onde ela cresce: camuflagem. É a mesma língua da `f4Ponte` e do `f4Cano`, então a
+  // fase passa a ter uma frase só — *isto era uma doca, e o bicho está digerindo*.
+  //
+  // ⚠️ AS TRÊS ENTRAM COM O MESMO RODAPÉ HORIZONTAL (94px de largura em tela), e isso é
+  // deliberado: o prop nasce em escala 1, então a largura em tela é a da TEXTURA. As candidaturas
+  // vieram quase quadradas (101–112 para 110 de altura) e instalar assim engordaria o obstáculo em
+  // até 19% — o que estica o tempo que o jogador passa dentro do aperto. **O vão é dele**
+  // (126/112/120, calibrado jogando em 12/09); arte não mexe em dificuldade de lado. Ver
+  // `scripts/_f4/_assar-mesa.mjs`.
+  //
+  // ⚠️ `f4-mesa-prov.png` FICA NO DISCO de propósito. A regra de saída é dele: *"caso não fique
+  // bom, mantemos a que está agora"* — voltar atrás é trocar esta linha, não regerar nada.
+  mesa: 'sprites/f4-mesa.png',
+  mesa2: 'sprites/f4-mesa2.png',
+  mesa3: 'sprites/f4-mesa3.png',
   // ⚠️ A CHAVE É O NOME DO `PropKind`, e é a lei que custou caro em 09/09: `pickVariant(scene,
   // kind)` procura a textura pelo nome do kind, e registrá-la como `f4Porta` faria o Phaser
   // devolver a textura de ERRO (32×32) com a hitbox junto — sem nenhuma sonda ficar vermelha.

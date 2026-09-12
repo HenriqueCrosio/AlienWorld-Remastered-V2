@@ -687,10 +687,29 @@ apareceram porque alguém olhou uma captura, não porque um assert ficou vermelh
 
 ### 📌 EM ABERTO PARA O M2, decidir ANTES de gerar arte
 
-- **Como a arte troca por câmara.** O M1 entregou **um** `PropKind` só (`mesa`), e o plano diz que
-  M2–M5 trocam só a TEXTURA. Mas a spec de 08/09 nomeia as peças como `f4MesaA1/A2/B1/B2`. Com um
-  kind só, trocar por câmara exige decidir: `setTexture` no spawn conforme a câmara, ou kinds
-  separados? ⚠️ Seja qual for, ela esbarra na **lei 1** acima.
+- ✅ **A MESA — ESTRUTURA DECIDIDA E ARTE INSTALADA (12/09).** A pergunta dele foi *"podemos
+  decidir qual será sua estrutura: biomecânica? aço? outro tipo?"*, e a resposta foi **aço
+  ENGOLIDO** — silhueta industrial com a carne do bicho tomando conta, a mesma língua da `f4Ponte`
+  e do `f4Cano`. Três razões, e a primeira manda:
+  1. **Legibilidade.** A mesa é a única coisa da fase que mata por ser TERRENO — todo o resto é
+     fundo (tingido, depth negativo) ou inimigo (se move, atira). É a única peça da F4 que nasce
+     **sem tint**. Biomecânica seria a mesma matéria da faixa, das costelas e da parede de onde ela
+     cresce: camuflagem — o defeito que a provisória já tinha documentado.
+  2. **Topo chato é geometria, não estilo.** A hitbox é 60% da largura da TEXTURA em altura cheia,
+     então o desenho tem de alcançá-la lá em cima. Aço tem topo chato de graça; carne afunila, que
+     foi como a lâmina morreu em 08/09 (46px de morte invisível).
+  3. **Ficção já aprovada por ele**: a fase passa a ter uma frase só — *isto era uma doca, e o
+     bicho está digerindo*.
+
+  **Instaladas:** `mesa` / `mesa2` / `mesa3` (contêineres com hera leve, contêineres com as veias
+  trepando, anteparo rachado). Dois objetos novos no PixelLab, 40 gerações, 8 candidaturas, 3
+  escolhidas. ⚠️ **`f4-mesa-prov.png` fica no disco:** a regra de saída é dele — *"caso não fique
+  bom, mantemos a que está agora"* — e voltar atrás é trocar uma linha da `BootScene`.
+
+  ⚠️ **E A PERGUNTA DE "ARTE POR CÂMARA" NÃO PRECISOU SER RESPONDIDA.** Ela pressupunha que cada
+  câmara teria a SUA mesa; na prática as três variantes entram pelo `pickVariant` em toda a fase,
+  e a identidade de lugar é carregada pela FAIXA e pela pintura, que já são por câmara. Um
+  `PropKind` por câmara continua possível se o M3–M5 pedir, mas deixou de ser pré-requisito.
 - ✅ **O atalho de dev `G` — CONSERTADO em 12/09.** Ele agora chama `aplicaCorredorEMoldura`,
   como o modo treino já fazia desde 10/09. ⚠️ **E o defeito era pior do que estava escrito aqui:**
   a descrição dizia "luta com parede de 16px em vez de 54", mas o erro real era o oposto e mais

@@ -269,6 +269,8 @@ const lerMesas = () => page.evaluate(() => {
     vaos,
     texturas: [...new Set(ps.map((p) => p.texture.key))],
     dims: [...new Set(ps.map((p) => `${p.displayWidth}x${p.displayHeight}`))],
+    larguras: [...new Set(ps.map((p) => Math.round(p.displayWidth)))],
+    alturas: [...new Set(ps.map((p) => Math.round(p.displayHeight)))],
   };
 });
 let mesas = await lerMesas();
@@ -297,16 +299,33 @@ ok(
 // asserts acima checam `kind` (o dado que o jogo ATRIBUI ao prop, não o que ele CARREGOU), a
 // escala e o vão do par, e o vão sai do MESMO número que posiciona a peça (`bordaVao`), então ele
 // não tem como flagrar textura errada por construção. Só olhar a textura de verdade pega isto.
+// ⚠️ A FAMÍLIA, E NÃO UMA CHAVE SÓ. Até 12/09 este assert cobrava `texturas[0] === 'mesa'`, o que
+// era certo enquanto existia uma arte só. Com a arte de verdade entraram `mesa2` e `mesa3` (o
+// `pickVariant` sorteia entre elas de graça, pela convenção de nomes), e cravar uma chave passaria
+// a reprovar o funcionamento normal. O que ele tem de pegar continua sendo o mesmo: a textura de
+// ERRO do motor (`__MISSING`/`__DEFAULT`), que não casa com o padrão.
 ok(
-  mesas.texturas.length === 1 && mesas.texturas[0] === 'mesa',
-  `nenhum prop do corredor usa a textura de erro — todos carregam 'mesa' (${JSON.stringify(mesas.texturas)})`,
+  mesas.texturas.length > 0 && mesas.texturas.every((k) => /^mesa[0-9]*$/.test(k)),
+  `nenhum prop do corredor usa a textura de erro — todos são da família 'mesa' (${JSON.stringify(mesas.texturas)})`,
 );
-// A mesa entra em escala 1 e não é escalada — o `bordaVao` crava a POSIÇÃO, nunca o TAMANHO. Se a
-// arte real for 96×112 e a tela mostrar outra coisa, é a textura de erro (32×32) ou uma variante
-// com dimensão diferente entrando sem que ninguém tenha medido.
+
+// ⚠️ O ASSERT DE DIMENSÃO VIROU UM ASSERT DE RODAPÉ, e a troca é o ponto. Ele cravava `96x112`
+// porque havia uma arte só; três variantes têm três dimensões de PNG diferentes (94×110, 91×107,
+// 89×104) e isso é legítimo. O que NÃO é legítimo é a largura em TELA variar: o prop nasce em
+// escala 1, então a largura da textura É a pegada horizontal do obstáculo, e uma variante mais
+// gorda que a outra faria a dificuldade mudar conforme o sorteio. As três foram aparadas ao mesmo
+// aspecto por isso (scripts/_f4/_assar-mesa.mjs), e é isto que o assert protege.
 ok(
-  mesas.dims.length === 1 && mesas.dims[0] === '96x112',
-  `as dimensões batem com a arte — 96×112, sem esticar nem encolher (${JSON.stringify(mesas.dims)})`,
+  mesas.larguras.length >= 1 && mesas.larguras.every((w) => Math.abs(w - 94) <= 2),
+  `todas as variantes da mesa têm a MESMA pegada horizontal (~94px): ${JSON.stringify(mesas.larguras)}`,
+);
+// ⚠️ E ALTURA SUFICIENTE PARA ENTERRAR. A mesa é cravada pelo TOPO (`bordaVao`) e desce o resto da
+// própria altura; se a peça for baixa demais, o pé dela aparece no meio da tela em vez de sumir na
+// faixa. O pior caso é a borda do vão mais alta que o roteiro produz (~182 com gap 126), e dali à
+// base da tela são 34px. 32×32 (a textura de erro) reprova aqui também, por sorte e por desenho.
+ok(
+  mesas.alturas.every((h) => h >= 100),
+  `a mesa é alta o bastante para enterrar o pé (${JSON.stringify(mesas.alturas)}, mínimo 100)`,
 );
 
 // ─── O PERFIL DA ESPESSURA: margem fina → o duto fecha → o núcleo reabre ───
