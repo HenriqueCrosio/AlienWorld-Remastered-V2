@@ -25,6 +25,7 @@ import { BossCapitania } from '../entities/BossCapitania';
 import { BossSerpente } from '../entities/BossSerpente';
 import { BossNucleo } from '../entities/BossNucleo';
 import { Golfinho, type SentidoGolfinho } from '../entities/Golfinho';
+import { Agua } from '../systems/Agua';
 import { SHIPS, DEFAULT_SHIP } from '../ships';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
@@ -80,6 +81,8 @@ export class GameScene extends Phaser.Scene {
   private boss: StageBoss | null = null;
   /** O mini-chefão da câmara B da Fase 4 (spec 2026-09-11). `null` fora da arena dele. */
   private golfinho: Golfinho | null = null;
+  /** A água da arena do golfinho. Existe em toda fase; só a Fase 4 manda encher. */
+  private agua!: Agua;
   /** O `t` que o relógio da fase não passa enquanto o golfinho viver (`seguraEm` do roteiro). */
   private golfinhoSeguraEm = Infinity;
   private golfinhoColliders: Phaser.Physics.Arcade.Collider[] = [];
@@ -234,6 +237,10 @@ export class GameScene extends Phaser.Scene {
     // GLOBALMENTE, então `scene.textures.exists` sozinho não bastava como guarda — os 8 segmentos
     // nasciam nas Fases 1, 2 e 3 também, e vazavam uma tira acesa no rodapé (a peça é opaca).
     this.moldura = new Moldura(this, this.stage.id === 4);
+    // A ÁGUA é construída sempre e nasce SECA: ela só existe quando alguém chama `encher()`, e
+    // quem chama é o nascimento do golfinho. Um pool parado não custa frame — e construí-la só na
+    // Fase 4 espalharia um `if (stage === 4)` por três pontos do ciclo de vida.
+    this.agua = new Agua(this);
     // A mina sensora estilhaça em TIROS INIMIGOS — daí o pool. Ela é a única coisa do cenário
     // que revida, e o estilhaço dela obedece às mesmas regras de qualquer tiro do inimigo
     // (acerta o jogador, morre na rocha).
@@ -544,6 +551,10 @@ export class GameScene extends Phaser.Scene {
     this.pickups.update();
     this.boss?.update(dt, this.ship);
     this.golfinho?.update(dt, this.ship);
+    // ⚠️ A ÁGUA ANDA COM `dt` CRU, e não com o relógio da fase. A arena SEGURA o relógio em t=49,5
+    // (`golfinhoSeguraEm`), então amarrar o enchimento ao `elapsed` congelaria a água no meio do
+    // surto — com a tela opaca — pelo duelo inteiro.
+    this.agua.update(dt);
     // Rede: se ele deixou de viver por um caminho que não passou por `matarGolfinho`, a arena solta.
     if (this.golfinho && !this.golfinho.vivo) this.encerrarGolfinho();
     this.updateHud();
@@ -683,8 +694,9 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'cenario':
         // A jornada anatômica da Fase 4: cada câmara tem a pintura dela, e quem manda na
-        // troca é o roteiro. O mergulho no escuro vive no `setPintura` — daqui só sai a chave.
-        this.parallax.setPintura(e.key);
+        // troca é o roteiro. O mergulho no escuro vive no `setPintura` — daqui saem a chave e,
+        // quando o roteiro tem motivo para encurtar o mergulho, a duração dele.
+        this.parallax.setPintura(e.key, e.fadeMs);
         break;
       case 'boss':
         this.spawnBoss();
@@ -1139,6 +1151,11 @@ export class GameScene extends Phaser.Scene {
     // de baixo no duelo — o leque e a rajada passando por trás de uma silhueta preta.
     this.parallax.setForegroundDimmed(true, 800);
 
+    // ⚠️ A CÂMARA ALAGA, E É ISSO QUE ESCONDE A TROCA DE PINTURA. O `cenario` de t=40,95 cai dentro
+    // do surto desta água — ver o comentário da classe `Agua`, que carrega a conta dos dois
+    // números. Chamar aqui, e não no roteiro, é o que garante que não existe arena sem água.
+    this.agua.encher();
+
     // ⚠️ SPRITE PRIMEIRO: `overlap(sprite, grupo)` entrega (sprite, projétil) — ver `spawnBoss`.
     this.golfinhoColliders = [
       this.physics.add.overlap(g.sprite, this.ship, () => {
@@ -1186,6 +1203,14 @@ export class GameScene extends Phaser.Scene {
     this.golfinho = null;
     this.golfinhoSeguraEm = Infinity;
     if (havia && reacende) this.parallax.setForegroundDimmed(false);
+    // A água segue o mesmo caminho do primeiro plano: DRENA quando a câmara volta a ser fase, e
+    // some SEM animação quando quem chamou vai apagar tudo em seguida (o `G` para o chefão) —
+    // drenar por 0,8s no meio de um salto de cena é o mesmo pisca-pisca de estado que o
+    // `reacende` já evita.
+    if (havia) {
+      if (reacende) this.agua.esvaziar();
+      else this.agua.limpar();
+    }
   }
 
   /**

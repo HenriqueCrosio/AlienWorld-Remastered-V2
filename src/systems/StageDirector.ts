@@ -91,7 +91,15 @@ export type StageEvent =
    * relógio interno no fundo derivaria do roteiro na primeira vez que alguém mexesse nos
    * tempos, e a troca cairia no meio de uma onda em vez de no respiro.
    */
-  | { t: number; type: 'cenario'; key: string }
+  /**
+   * Troca a pintura da câmara (Fase 4).
+   *
+   * `fadeMs` encurta o mergulho no escuro do `setPintura` (600 por omissão). ⚠️ ELE EXISTE PARA A
+   * TROCA DE t=40,95, que acontece atrás da água: o mergulho é justamente o truque de ESCONDER o
+   * corte, e ele vira contraproducente quando já há um véu opaco por cima — a pintura nova
+   * reaparecendo por baixo da água que assenta lê como pisca. Sob água, o corte pode ser rápido.
+   */
+  | { t: number; type: 'cenario'; key: string; fadeMs?: number }
   | { t: number; type: 'boss' };
 
 /**
@@ -451,10 +459,6 @@ export const STAGE_4: StageEvent[] = [
   // 384 ÷ 84 = 4,6s, ou seja, em t≈43,1 — antes de o X do golfinho começar (t≈43,5).
   { t: 38.5, type: 'corredor', rate: 0, gap: 120 },
 
-  // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
-  // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
-  // mesmo lugar. Cai no RESPIRO (sem onda no ar), não no meio de uma.
-  { t: 40, type: 'cenario', key: 'paintBgF4b' },
   // ─── O GOLFINHO: o motivo de a câmara mudar (spec 2026-09-11). ───
   //
   // O Henrique, depois de jogar o M1.5: *"quero que tenha um porquê de mudar o fundo"*. Antes daqui
@@ -464,6 +468,26 @@ export const STAGE_4: StageEvent[] = [
   // ⚠️ `seguraEm: 49.5`: o relógio não passa daqui enquanto ele viver, e entre 41 e 50 o roteiro
   // não tem NADA marcado — é isso que faz a arena ser só o jogador e o golfinho.
   { t: 40, type: 'miniboss', kind: 'golfinho', seguraEm: 49.5 },
+
+  // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
+  // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
+  // mesmo lugar. Cai no RESPIRO (sem onda no ar), não no meio de uma.
+  //
+  // ⚠️ ERA t=40 E VIROU t=40,7 EM 12/09, E O NÚMERO É CASADO COM A `Agua`. Pedido dele: *"para
+  // casar com a transição da imagem de fundo, tenha um pequeno efeito para encher de água a tela e
+  // assim escondemos a transição das imagens de fundo"*. A troca sempre foi um CORTE SECO de uma
+  // pintura para outra; agora ela cai dentro do SURTO da água, quando o véu está em alpha 0,96 e a
+  // tela é uma cor só. A conta: o `miniboss` acima chama `encher()` em t=40, o pico completo
+  // chega em 0,78s (`ENCHE_DUR` 0,62 + `SURTO_DUR` 0,16) e se sustenta por mais 0,45s — então a
+  // janela vai de t=40,78 a t=41,23, e 40,95 cai no meio dela com ~0,2s de folga dos dois lados.
+  //
+  // ⚠️ ELE TEM DE VIR DEPOIS DO `miniboss` NO ARRAY, e não é estilo: o `StageDirector` caminha com
+  // um cursor monotônico, e evento fora de ordem dispara no `t` do VIZINHO ANTERIOR. Trocar a
+  // ordem destas duas linhas faria a pintura trocar em t=40, antes de existir água para escondê-la.
+  //
+  // ⚠️ MEXER NUM SEM O OUTRO DEVOLVE O CORTE SECO. A `probe-f4-agua` cobra exatamente isso: que no
+  // instante em que a pintura troca, a água esteja `cobrindo`.
+  { t: 40.95, type: 'cenario', key: 'paintBgF4b', fadeMs: 200 },
   { t: 41, type: 'banner', text: 'AS PROFUNDEZAS' },
 
   // ─── O APERTO: o coração da fase. Vão 76px (a nave tem ~22 de hitbox: passa com folga
