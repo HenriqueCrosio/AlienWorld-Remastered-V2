@@ -6,19 +6,108 @@
 **🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12/09/2026).**
 **🟢 A LEITURA DA ABERTURA — mesas menores, destroços nas bordas, o coração enterrado — JOGADA E APROVADA (12/09/2026).**
 **🟢 O MOTIVO DA CÂMARA A — RESPONDIDO POR ELE EM 12/09: ela NÃO tem motivo especial. Ver "⏭️".**
-**🟢 A ÁGUA, OS CANOS, AS PEÇAS E A PONTE — JOGADOS E APROVADOS (12/09, rodadas 2 e 3).**
-**✅ A FATIA 7 · BLOCO A ESTÁ FECHADA ATÉ O M2. Nada de 12/09 ficou pendente.**
+**🟢 A ÁGUA, OS CANOS, OS GÂNGLIOS E A MESA — JOGADOS E APROVADOS (12/09).**
+**🟠 AS PONTES FECHADAS POR TORRES (12/09, 4ª rodada) — FEITAS A PEDIDO DELE E AINDA NÃO JOGADAS.**
+**🟠 O M2 ESTÁ ABERTO E PARADO EM DUAS DECISÕES DE ARTE DELE — as bordas das câmaras A e B.**
 Branch `feat/fase4-visual`, **em dia com o `origin`**.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O Bloco A está fechado: a
-> abertura, o golfinho, a água com os canos, a ponte e os gânglios — tudo jogado e aprovado em
-> 12/09, e nada pendente. Toque o M2. O motivo da câmara A já está respondido (ela não tem), então
-> é passe de ARTE, e ele começa pelas TRÊS decisões abertas: a repetição da faixa, quem pinta as 4
-> faixas, e como a arte troca por câmara."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🎨.
+> Em 12/09 fechamos a água com os canos, a mesa de aço, os gânglios e as pontes com torres —
+> aprovei tudo, menos as torres, que ainda não joguei. As bordas do DUTO e do NÚCLEO estão
+> aprovadas; as da câmara A e da B têm duas candidatas cada, esperando minha escolha. Minha
+> escolha: câmara A = <A-0 | A-2 | as duas>, câmara B = <B-1 | B-3 | as duas>. Instale, me mostre
+> a captura, e siga o M2."**
+
+⚠️ **SE ELE NÃO DER A ESCOLHA NO ARRANQUE, NÃO ADIVINHE — mostre a folha de contato primeiro.** As
+duas folhas se remontam com `_folha-faixa2.mjs` (ver a seção 🎨), e a escolha é dele por regra: as
+faixas são as 4 peças que ele reservou para si na divisão de 08/09.
+
+---
+
+## 🎨 O M2 ESTÁ ABERTO E PARADO NUMA DECISÃO DE ARTE (12/09, 4ª rodada)
+
+**🟠 DUAS PERGUNTAS ESPERAM O OLHO DELE. Nada mais bloqueia o M2.**
+
+### ✅ O QUE ELE JÁ APROVOU DAS QUATRO BORDAS
+
+Vendo a folha de contato (`_folha-faixas.mjs`), veredicto dele: *"as do duto e do núcleo ficaram
+ótimas. As duas primeiras que preciso que troque."*
+
+| câmara | borda | estado |
+|---|---|---|
+| **C · o duto** | `scripts/_f4/_faixa-C-v.png` | ✅ **APROVADA** |
+| **D · o núcleo** | `scripts/_f4/_faixa-D-v.png` | ✅ **APROVADA** |
+| **A · a doca engolida** | a antiga é clara demais | 🟠 **duas candidatas novas, ele escolhe** |
+| **B · a garganta** | a antiga tem pontos laranja brigando com o azul | 🟠 **duas candidatas novas, ele escolhe** |
+
+### 🟠 A DECISÃO 1 — a borda da CÂMARA A
+
+Direção dele, apontando três candidaturas do lote C: fibra muscular vermelha densa com estilhaços
+de osso. ⚠️ **A ficção fecha:** a câmara A é a doca engolida, então o osso é o que sobrou do que o
+bicho comeu — e isso REFORÇA a decisão da mesa (parede orgânica, obstáculo de aço).
+
+| candidata | emenda | como lê |
+|---|---|---|
+| **`_faixa2/A-0-v.png`** | **10** (a melhor das quatro) | fibra vermelha limpa, com o topo aceso |
+| **`_faixa2/A-2-v.png`** | 12 | a mesma fibra **com os estilhaços de osso** visíveis |
+
+### 🟠 A DECISÃO 2 — a borda da CÂMARA B
+
+Direção dele: as três candidaturas pálidas e azuis do lote B.
+
+| candidata | emenda | como lê |
+|---|---|---|
+| **`_faixa2/B-1-v.png`** | 12 | arcos pálidos com nervuras — **recua**, como borda deve recuar |
+| **`_faixa2/B-3-v.png`** | **10** | arcos escuros com aro aceso e um nódulo vermelho em cada — mais dramática, mas o aro branco puxa o olho |
+
+⚠️ **AS DUAS DECISÕES ACEITAM "AS DUAS".** Se ele escolher duas por câmara, elas viram
+`f4Faixa`/`f4Faixa2` e **matam a repetição de graça** — que era a decisão aberta nº 1 do M2. As
+quatro atuais emendam entre 19 e 27; as novas, entre 10 e 12.
+
+### ⚠️ COMO AS CANDIDATAS FORAM FEITAS, E POR QUE AS 64 NÃO SERVIAM
+
+Ele apontou candidaturas dos lotes de 08/09 como referência. **Elas não podiam ser instaladas:** são
+objetos recortados, medido de novo com a régua — 0% de sangramento nas bordas e emenda **255** (o
+máximo). Então elas entraram como **referência visual** numa geração nova de IMAGEM CHEIA
+(`create_image_pro`, 128×64, `no_background: false`, 3 referências por chamada, 20 gerações cada).
+
+⚠️ **É a lei de 08/09 confirmada pela terceira vez: faixa é imagem cheia, objeto é prop.** O que
+mudou foi só o caminho — agora o gosto dele entra como referência em vez de virar instalação.
+
+### 🚨 OS ARQUIVOS DA DECISÃO NÃO ESTÃO VERSIONADOS
+
+⚠️ `scripts/_f4/*.png` é ignorado pelo git (`.gitignore:40`), e é onde as oito candidatas moram. Um
+`git clean` apaga. **A fonte de recuperação são os jobs do PixelLab**, e é por isso que os ids estão
+aqui:
+
+| lote | job id | download |
+|---|---|---|
+| câmara A (4 candidatas) | `2409a4ca-4a01-4b29-9188-67732aa80a2c` | `https://api.pixellab.ai/mcp/images/<job>/download?index=0..3` |
+| câmara B (4 candidatas) | `ccc85cf9-15eb-40a3-93a0-2ff2667ccc76` | idem |
+| as torres da ponte (16) | `34753985-afc0-4abf-8493-8f13b0f8766e` | objeto, em `review` |
+| a mesa · contêineres (4) | `f972d8e7-10f6-4704-b4c4-cacf3eef3e62` | objeto, em `review` |
+| a mesa · anteparos (4) | `eb9afbaf-9178-454a-ab04-8e0e6eb055c4` | objeto, em `review` |
+| o cano (16) | `bc28cdf2-8ee0-43cc-aef5-9dbf956330c5` | objeto, em `review` |
+
+### ⛏️ O QUE FALTA CONSTRUIR DEPOIS QUE ELE ESCOLHER
+
+⚠️ **A FAIXA AINDA NÃO SABE TROCAR POR CÂMARA.** A `Moldura` cria os 8 segmentos com a chave
+`f4Faixa` fixa, no construtor — não existe caminho para o evento `cenario` trocar a textura deles.
+Instalar as quatro bordas exige isso, e é a mesma pergunta que a MESA respondeu por outro caminho
+(lá as variantes entram pelo `pickVariant` e a identidade de lugar fica com a faixa e a pintura).
+
+Duas saídas, e a primeira é a barata:
+1. **`Moldura.setFaixa(key)`**, chamado pelo mesmo evento `cenario` que já troca a pintura — um
+   `setTexture` nos 8 segmentos. ⚠️ Com duas variantes por câmara, o sorteio por segmento continua
+   sendo do `pickVariant`, então `setFaixa` passa a BASE (`f4FaixaA`) e cada segmento sorteia.
+2. Um evento `faixa` próprio no roteiro, se as trocas de faixa e de pintura precisarem se separar.
+
+⚠️ **E a sonda vai junto:** a `probe-f4-moldura` já cobra `texturas[0] === 'f4Faixa'` e `dims`
+`128×64`. É o mesmo remendo que a mesa levou hoje — cobrar a FAMÍLIA, não uma chave.
 
 ---
 
@@ -337,7 +426,13 @@ Ele jogou e fechou: *"ficou muito bom. ele sai da tela como pedi, as skills dele
 
 ---
 
-## ⏭️ A PRÓXIMA AÇÃO: O M2 — A CÂMARA A
+## ⏭️ A PRÓXIMA AÇÃO — ver a seção 🎨 no topo
+
+⚠️ **ESTA SEÇÃO FICOU PARA TRÁS EM 12/09 e vale como registro do porquê, não como plano.** O M2
+andou: a MESA está instalada e aprovada, e as bordas estão em decisão. O que fazer a seguir está na
+seção **🎨 O M2 ESTÁ ABERTO E PARADO NUMA DECISÃO DE ARTE**, no topo do arquivo.
+
+## 📚 REGISTRO — COMO O M2 FOI ABERTO: A CÂMARA A
 
 ✅ **A PRIMEIRA PERGUNTA JÁ ESTÁ RESPONDIDA, e a resposta poupa trabalho.** Em 12/09, sobre o motivo
 da câmara A: *"A entrada é o início da fase como todas as outras, nada de especial, apenas atirar,
@@ -642,8 +737,13 @@ A ÁGUA + OS CANOS + AS PEÇAS + A PONTE   ✅ JOGADOS E APROVADOS (12/09, rodad
   f4Ponte ×3 (pilar + vão procedural + pilar espelhado), f4Ganglio ×2, f4Cano ×3.
   *"o cano e a batalha com o golfinho ficou muito mais divertida"*, *"podemos encerrar esses
   ajustes"*. Ver "🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS".
-M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI · o MOTIVO já está respondido (não tem) — é passe de ARTE:
-                             as 3 decisões abertas, depois as 4 peças da doca engolida
+A PONTE COM TORRES       🟠 FEITA, NÃO JOGADA (12/09, 4ª rodada)
+  [torre][pilar][vão][pilar espelhado][torre espelhada]. Conserta o "começam do nada e ficam com
+  aparência de cortadas" do print dele. Sondas verdes — falta o controle na mão.
+M2 — AS BORDAS            🟠 ◄ PEGUE AQUI · C e D APROVADAS; A e B com duas candidatas cada,
+                             esperando a escolha dele. Depois: `Moldura.setFaixa` (a faixa ainda
+                             não sabe trocar por câmara). Ver a seção 🎨 no topo.
+  └ A MESA, que era parte do M2, já está instalada e aprovada (aço engolido, 3 variantes).
 M3 — A CÂMARA B           ⬜ a garganta
 M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
 M5 — A CÂMARA D           ⬜ a faixa da arena
@@ -793,6 +893,18 @@ As sondas da F4, verdes no fim daquela sessão: `probe-f4-golfinho` (a nova), `p
 `probe-f4-visual`, `probe-stage4` (com `vaos:[110,110,110]` — hoje `[126,126,126]`) e `probe-stage3`
 (a aranha segue sendo o `miniboss` sem `kind`). ⚠️ UMA POR VEZ.
 
-**PixelLab:** **4.668** de 5.000, ciclo virando em 2026-10-04. Conferido no arranque de 12/09 — a
-sessão não gastou nenhuma geração (os três ajustes são de código, não de arte). ⚠️ Confira o saldo
-no arranque antes de gastar.
+**PixelLab:** o arranque de 12/09 conferiu **4.668** de 5.000, ciclo virando em 2026-10-04. A
+sessão gastou **125** ao longo do dia:
+
+| o quê | gerações |
+|---|---|
+| o cano de despejo (16 candidaturas) | 20 |
+| a mesa · contêineres (4) | 20 |
+| a mesa · anteparos (4) | 20 |
+| as torres da ponte (16) | 25 |
+| a borda da câmara B (4, imagem cheia com 3 referências) | 20 |
+| a borda da câmara A (4, idem) | 20 |
+
+⚠️ **A LIÇÃO DE CUSTO, medida de novo:** objeto de 48–80px devolve 16 candidaturas por 20–25
+gerações; `create_image_pro` a 128×64 devolve 4 por 20. Candidatura é barata; o caro é o tempo de
+julgar. ⚠️ Confira o saldo no arranque antes de gastar.
