@@ -6,24 +6,38 @@
 **🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12/09/2026).**
 **🟢 A LEITURA DA ABERTURA — mesas menores, destroços nas bordas, o coração enterrado — JOGADA E APROVADA (12/09/2026).**
 **🟢 O MOTIVO DA CÂMARA A — RESPONDIDO POR ELE EM 12/09: ela NÃO tem motivo especial. Ver "⏭️".**
-**🟠 A ÁGUA DA ARENA E AS 5 PEÇAS NOVAS (12/09, 2ª rodada) — FEITAS SOZINHO A PEDIDO DELE, E NÃO JOGADAS.**
+**🟢 A ÁGUA, OS CANOS, AS PEÇAS E A PONTE — JOGADOS E APROVADOS (12/09, rodadas 2 e 3).**
+**✅ A FATIA 7 · BLOCO A ESTÁ FECHADA ATÉ O M2. Nada de 12/09 ficou pendente.**
 Branch `feat/fase4-visual`, **em dia com o `origin`**.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. Enquanto eu estava fora você
-> alagou a arena do golfinho e instalou 5 peças tiradas das minhas 64 candidaturas. Eu joguei. Meu
-> veredicto: <DIGA AQUI>. Depois disso, o M2 — o motivo da câmara A já está respondido, então é
-> passe de ARTE: a repetição da faixa, quem pinta as 4 faixas, e como a arte troca por câmara."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O Bloco A está fechado: a
+> abertura, o golfinho, a água com os canos, a ponte e os gânglios — tudo jogado e aprovado em
+> 12/09, e nada pendente. Toque o M2. O motivo da câmara A já está respondido (ela não tem), então
+> é passe de ARTE, e ele começa pelas TRÊS decisões abertas: a repetição da faixa, quem pinta as 4
+> faixas, e como a arte troca por câmara."**
 
 ---
 
-## 🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS (12/09, 2ª rodada) — FEITO, NÃO JOGADO
+## 🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS (12/09, rodadas 2 e 3) — JOGADO E APROVADO
 
-**🟠 Ele pediu as duas coisas e saiu:** *"quero que faça sozinho, pois não estarei aqui para
-escolher respostas ou fazer o brainstorming com você"*. **Nada aqui foi jogado ainda.**
+**✅ TUDO NESTA SEÇÃO FOI JOGADO E APROVADO.** Ele pediu para ser feito sozinho (*"não estarei aqui
+para escolher respostas ou fazer o brainstorming com você"*), jogou em três rodadas e fechou:
+
+| rodada | veredicto dele |
+|---|---|
+| **água + 5 peças** | *"a água e o efeito da água ficaram ótimos"* — com dois ajustes pedidos, os das rodadas abaixo |
+| **enchimento adiantado + canos** | *"perfeito para a água, o cano e a batalha com o golfinho ficou muito mais divertida!"* |
+| **a ponte** | *"ficou bom, podemos encerrar esses ajustes"* |
+
+⚠️ **A ÁGUA MELHOROU O JOGO, NÃO SÓ A TELA** — e isso não estava no pedido. O que ele escreveu foi
+um efeito visual para esconder a troca de pintura; o que ele relatou depois de jogar foi que **o
+duelo ficou mais divertido**. A arena passou a ser um LUGAR (uma câmara alagada) em vez de um
+trecho de corredor onde um bicho aparece, e a leitura do lugar mudou como o combate se sente. Vale
+lembrar disso no M2–M5: cenário não é só o que se vê.
 
 ### 1 · A CÂMARA B ALAGA
 
@@ -170,18 +184,19 @@ dele** (ver a divisão das 14 peças), então não toquei.
 | ⚠️ **O TINT NÃO PODE APAGAR A LUZ DA PEÇA.** Tint de força de costela (0x4a3e48) mataria a lâmpada âmbar e a brasa do gânglio — que são o motivo de as duas existirem | as duas levam tint claro; quem as segura no fundo é o ALPHA e a raridade do `gap` |
 | ⚠️ **A MESMA CANDIDATURA É REPROVADA OU APROVADA CONFORME A PERGUNTA.** "Não sangra nas bordas" reprova uma faixa e **descreve** um prop | as 64 estavam paradas em review desde 08/09 por uma régua que não era a delas |
 
-### 👀 O QUE VER NO TESTE JOGADO
+### 📚 REGISTRO — O QUE SE PEDIA PARA OLHAR (tudo respondido em 12/09)
 
-1. **O surto tapa mesmo?** Se pintar de azul demais, é `ALPHA_PICO`; se a pintura velha vazar, é
-   `SURTO_SEGURA` para cima (e o `cenario` de 40,95 junto).
-2. **O submerso deixa jogar?** O véu está em 0,24. Se atrapalhar a leitura do leque e da rajada, é
-   `ALPHA_SUBMERSO` para baixo.
-3. **As bolhas e os feixes** — 22 e 3. É o que vende "submerso"; se ler como sujeira, os dois números.
-4. **A drenagem em 0,8s** casa com a volta da fase em t=50?
-5. **A lâmpada âmbar da passarela** pode ser confundida com pickup? Ela é de fundo (depth −78), mas
-   é a única coisa acesa nova ao alcance do olho.
-6. **O corte lateral do corrimão** — a passarela é cortada nas laterais. Lê como "continua no
-   escuro" ou lê como PNG cortado?
+Os seis itens foram jogados. Os dois que ele reprovou viraram as rodadas 2 e 3; os outros quatro
+**ficam como estão** e deixam de ser trabalho pendente.
+
+| item | veredicto |
+|---|---|
+| ~~O surto tapa?~~ | **a pergunta morreu com o surto.** Ele foi reprovado inteiro — *"muito repentino e forçado"* — e o enchimento passou a ser adiantado |
+| O submerso deixa jogar? | ✅ **sim.** `ALPHA_SUBMERSO` fica em 0,24 |
+| As bolhas e os feixes | ✅ **ficam.** 22 e 3, e não foram questionados |
+| A drenagem em 0,8s | ✅ **casa** com a volta da fase em t=50 |
+| A lâmpada âmbar lê como pickup? | ✅ **não.** Ela continua sendo a única luz da peça, e é o motivo de o tint ser claro |
+| ~~O corte lateral do corrimão~~ | **reprovado por outro motivo:** *"está pequeno e as mesas e bordas tampam ele"*. O corte deixou de existir quando a passarela virou PONTE — ele agora é o encontro de dois pilares com o vão, não um PNG cortado |
 
 ### AS FERRAMENTAS NOVAS
 
@@ -598,10 +613,11 @@ O GOLFINHO — CÂMARA B     ✅ FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12
 A LEITURA DA ABERTURA     ✅ JOGADA E APROVADA (12/09)
   mesas menores (vãos 126/112/120), destroços nas bordas, o coração enterrando os próprios cabos.
   Sem spec: três ajustes de leitura pedidos com print na mão. Ver "O QUE A SESSÃO DE 12/09 FEZ".
-A ÁGUA + AS 5 PEÇAS      🟠 FEITAS, NÃO JOGADAS (12/09, 2ª rodada)
-  a câmara B alaga e o alagamento esconde a troca de pintura; f4Passarela ×3 e f4Ganglio ×2,
-  tiradas das 64 candidaturas dele. Sondas verdes, build limpo — falta o controle na mão.
-  Ver "🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS".
+A ÁGUA + OS CANOS + AS PEÇAS + A PONTE   ✅ JOGADOS E APROVADOS (12/09, rodadas 2 e 3)
+  a câmara B alaga em t=36 com 3 canos despejando, e a troca de pintura cai atrás do escuro;
+  f4Ponte ×3 (pilar + vão procedural + pilar espelhado), f4Ganglio ×2, f4Cano ×3.
+  *"o cano e a batalha com o golfinho ficou muito mais divertida"*, *"podemos encerrar esses
+  ajustes"*. Ver "🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS".
 M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI · o MOTIVO já está respondido (não tem) — é passe de ARTE:
                              as 3 decisões abertas, depois as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
