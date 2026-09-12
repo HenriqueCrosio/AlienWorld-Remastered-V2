@@ -348,6 +348,7 @@ dos quatro fundos.
 | `_valor-faixa.mjs` | reaplica o acerto de valor de uma faixa contra a pintura da câmara |
 | `_folha-faixas.mjs` | as 4 faixas no enquadramento real, cru contra corrigido |
 | `_mock-moldura.mjs` | o mock procedural que ele aprovou — **e a fonte da arte provisória do M1** |
+| `_ver-abertura.mjs` | **da ABERTURA JOGANDO:** o que a decoração está tapando? Captura t=7/20/33 e imprime a caixa de cada peça. Foi ela que pegou o coração de 263px que passava em todos os asserts |
 | `_folha-lamina.mjs` | a folha mista (da Task 4 morta; a geometria dela ainda serve) |
 
 ⚠️ **`scripts/_f4/*.png` é IGNORADO pelo git** (`.gitignore:40`). Os PNG existem **só neste
@@ -496,6 +497,15 @@ mergeada. `origin` = github.com/HenriqueCrosio/AlienWorld-Remastered-V2.
 ⚠️ O remoto **`legacy`** é o repositório ANTIGO — **nunca empurre para ele**.
 ⚠️ **Commits são de autoria SÓ do Henrique** — sem `Co-Authored-By`, sem "Generated with".
 
+**A sessão de 12/09** fechou num commit só, `c4bbdc8` — *"a abertura abre: mesas menores,
+destroços na borda, o coração enterrado"*. Ele carrega os três ajustes, os dois asserts novos da
+`probe-f4-visual`, a janela nova da `probe-stage4` e a ferramenta `_ver-abertura.mjs`.
+
+As sondas no fim da sessão, **todas verdes, uma por vez**: `probe-f4-visual` (20/20, com os dois
+asserts de leitura), `probe-stage4` (com `vaos:[126,126,126]`), `probe-f4-moldura`,
+`probe-f4-golfinho`. ⚠️ E as das outras fases (`probe-stage1-visual`, `probe-stage2`,
+`probe-stage3`) porque `Parallax.emit` é código COMPARTILHADO — a lei 2 do M1.
+
 Os commits da sessão de 11/09 (o golfinho), todos empurrados:
 
 | commit | o que |
@@ -509,9 +519,10 @@ Os commits da sessão de 11/09 (o golfinho), todos empurrados:
 | `c6be51b` | o 1º ajuste jogado: nado com onda, volta de dentro da parede, duelo alternando |
 | `2801c6c` | o 2º ajuste jogado: o aviso passa por B e sai da tela |
 
-As sondas da F4, verdes no fim da sessão: `probe-f4-golfinho` (a nova), `probe-f4-moldura`,
-`probe-f4-visual`, `probe-stage4` (com `vaos:[110,110,110]`) e `probe-stage3` (a aranha segue sendo o
-`miniboss` sem `kind`). ⚠️ UMA POR VEZ.
+As sondas da F4, verdes no fim daquela sessão: `probe-f4-golfinho` (a nova), `probe-f4-moldura`,
+`probe-f4-visual`, `probe-stage4` (com `vaos:[110,110,110]` — hoje `[126,126,126]`) e `probe-stage3`
+(a aranha segue sendo o `miniboss` sem `kind`). ⚠️ UMA POR VEZ.
 
-**PixelLab:** **4.668** de 5.000, ciclo virando em 2026-10-04. Consumo de 11/09: 10 gerações, todas
-nas animações do golfinho. ⚠️ Confira o saldo no arranque antes de gastar.
+**PixelLab:** **4.668** de 5.000, ciclo virando em 2026-10-04. Conferido no arranque de 12/09 — a
+sessão não gastou nenhuma geração (os três ajustes são de código, não de arte). ⚠️ Confira o saldo
+no arranque antes de gastar.
