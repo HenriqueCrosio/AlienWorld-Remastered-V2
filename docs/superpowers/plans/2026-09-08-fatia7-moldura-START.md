@@ -667,10 +667,14 @@ apareceram porque alguém olhou uma captura, não porque um assert ficou vermelh
   M2–M5 trocam só a TEXTURA. Mas a spec de 08/09 nomeia as peças como `f4MesaA1/A2/B1/B2`. Com um
   kind só, trocar por câmara exige decidir: `setTexture` no spawn conforme a câmara, ou kinds
   separados? ⚠️ Seja qual for, ela esbarra na **lei 1** acima.
-- **O atalho de dev `G`** (pula pro chefão numa partida ao vivo) descarta os eventos entre o
-  instante atual e o `bossTime` — apertar `G` em t=10 luta com parede de 16px em vez de 54. O
-  modo treino já foi consertado; o `G` não. ⚠️ A `probe-stage4` **usa o `G`**, então a luta que
-  ela testa não é a luta final real.
+- ✅ **O atalho de dev `G` — CONSERTADO em 12/09.** Ele agora chama `aplicaCorredorEMoldura`,
+  como o modo treino já fazia desde 10/09. ⚠️ **E o defeito era pior do que estava escrito aqui:**
+  a descrição dizia "luta com parede de 16px em vez de 54", mas o erro real era o oposto e mais
+  grave — apertar `G` **dentro do duto** levava a parede do duto para dentro da arena, com
+  espessura 54 e `duto: true`. Ou seja, **o chefão final era lutado num corredor cujas paredes
+  matam.** ⚠️ E a `probe-stage4` nunca pegou isso por coincidência: ela aperta `G` por volta de
+  t≈10, onde a espessura já é 16 e `duto` já é false — exatamente o estado da arena. Sonda nova:
+  `probe-f4-atalho-g`, que salta de t=72 (dentro do duto) e cobra a arena real.
 - **O relevo da faixa é CORTADO, não deslocado** (`Math.min` em `Moldura.gerar`). A partir de
   espessura 44 ele começa a ser aparado, e em 54 (t≈68 até o fim) é exatamente **0**: a parede
   vira régua reta justamente no clímax. Não é defeito — mas é a explicação se o duto parecer

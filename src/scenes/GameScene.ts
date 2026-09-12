@@ -438,6 +438,17 @@ export class GameScene extends Phaser.Scene {
         this.encerrarGolfinho(false);
         this.elapsed = this.director.bossTime - 1;
         this.director.skipTo(this.elapsed);
+        // ⚠️ E O ESTADO QUE OS EVENTOS DESCARTADOS DEIXARIAM, À MÃO — a mesma linha que o modo
+        // treino já tinha e que o `G` não tinha. `skipTo` DESCARTA sem executar: sem isto, apertar
+        // `G` em t=10 chegava ao chefão com a parede que valia em t=10 (espessura 16) em vez dos
+        // 54 que o roteiro já teria mandado, e sem o `duto`.
+        //
+        // ⚠️ E NÃO ERA SÓ UM ATALHO DE DEV TORTO: a `probe-stage4` chega ao chefão apertando `G`,
+        // então até 12/09 a luta que ela media acontecia numa arena de parede fina — não na arena
+        // final real. Um atalho de desenvolvimento que uma sonda usa deixa de ser atalho.
+        this.aplicaCorredorEMoldura(this.elapsed);
+        // Depois do estado, e nesta ordem: daqui para a frente nada mais nasce, e o
+        // `aplicaCorredorEMoldura` acabou de reescrever o `corredorRate` com o do roteiro.
         this.propRate = 0;
         this.hazardRate = 0;
         this.corredorRate = 0;

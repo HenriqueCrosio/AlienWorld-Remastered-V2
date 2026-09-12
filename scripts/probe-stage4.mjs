@@ -102,6 +102,22 @@ if (dano === null) {
 // ─── O NÚCLEO: a batida sístole/diástole, por BALA REAL (armadilha 19) ───
 await page.keyboard.press('G');
 
+// ⚠️ O `G` TEM DE ENTREGAR A ARENA FINAL REAL, E ATÉ 12/09 NÃO ENTREGAVA. `StageDirector.skipTo`
+// DESCARTA os eventos pulados sem executar, e o `G` não reaplicava o estado que eles deixariam —
+// então esta sonda media o chefão contra a parede que valia no instante do salto (espessura 16),
+// não contra a arena de 16px que o roteiro monta em t=79 depois de abrir os 54 do duto. O modo
+// treino já fazia isso certo desde 10/09; o `G` ficou para trás, e como É ESTA SONDA que usa o
+// `G`, ninguém percebia. Agora o `G` chama `aplicaCorredorEMoldura` e este assert cobra o
+// resultado. ⚠️ Se ele falhar, a luta que o resto do arquivo mede não é a luta do jogo.
+const arena = await page.evaluate(async () => {
+  const s = window.__game.scene.getScenes(true)[0];
+  await new Promise((r) => setTimeout(r, 600));
+  return { t: Math.round(s.elapsed), espessura: Math.round(s.moldura.espessura ?? -1), duto: s.moldura.duto };
+});
+console.log('arena    ', JSON.stringify(arena));
+ok(arena.espessura >= 14 && arena.espessura <= 20, `o G entrega a ARENA do chefão (parede ~16px, veio ${arena.espessura})`);
+ok(arena.duto === false, `e fora do duto: a parede não morde na arena final (duto=${arena.duto})`);
+
 // Espera o coração estacionar. A sonda não sabe jogar: vidas e invulnerabilidade para cima —
 // testa-se o CHEFÃO, não a habilidade de quem segura o teclado.
 for (let i = 0; i < 40; i++) {
