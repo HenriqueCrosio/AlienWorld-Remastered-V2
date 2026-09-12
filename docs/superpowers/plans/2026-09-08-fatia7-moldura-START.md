@@ -486,7 +486,31 @@ um defeito que não existia. ⚠️ **Pausar a física não pausa o mundo.**
 
 ## 🔴 AS DUAS DECISÕES ABERTAS — ELE PRECISA RESPONDER
 
-### 1. A REPETIÇÃO DA FAIXA
+### ✅ RESPONDIDO EM 12/09 — O CRITÉRIO DE ESCOLHA DAS FAIXAS
+
+Duas coisas ficaram decididas, e as duas encolhem o M2:
+
+**1. Ele NÃO vai pintar as faixas à mão.** *"eu criei os assets no PixelLab e isso era o combinado
+de trocar quando desse"*. As 64 candidaturas SÃO a entrega dele. O trabalho de filtrar e instalar é
+meu, e a regra de saída é dele: *"precisamos filtrar as melhores e ver se fica bom, caso não fique,
+mantemos a que está agora"* — ou seja, **a provisória é um destino aceitável**, não um fracasso.
+
+**2. O critério de escolha não é qualidade abstrata, é IDENTIDADE DE CÂMARA.** Palavras dele:
+*"eu só preciso que cada segmento, irmãs ou diferentes, tenham a identidade visual daquela câmara
+(sempre combinando com o fundo)"*.
+
+⚠️ **ISSO MUDA A RÉGUA, e é a lei que vale para as 4 faixas e para as peças do M3–M5:** a pergunta
+deixa de ser *"esta candidatura é bonita?"* e passa a ser **"esta candidatura pertence a ESTA
+câmara?"** — medida contra a pintura dela, não contra as outras três nem contra o gosto. Duas
+variantes irmãs ou duas bem diferentes, tanto faz: o que não pode é uma peça da câmara B que
+caberia igualmente bem na C.
+
+⚠️ **E ISSO RESOLVE A REPETIÇÃO DE GRAÇA.** A seção abaixo dizia que duas variantes por câmara
+"dobram a arte dele" — não dobram mais: são 16 candidaturas por lote, e escolher DUAS custa o mesmo
+que escolher uma. A pergunta que restava (*uma variante neutra ou duas alternadas?*) morre: são
+duas, porque agora é grátis.
+
+### 1. A REPETIÇÃO DA FAIXA — (o texto abaixo é o registro de como a pergunta nasceu)
 
 384 ÷ 128 = **3 cópias idênticas na tela ao mesmo tempo**, e o olho pega. A `B` e a `C` são as
 piores (o motivo lê como papel de parede). No jogo a repetição vira temporal, mas o mesmo desenho
