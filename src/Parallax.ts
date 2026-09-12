@@ -511,6 +511,65 @@ export class Parallax {
       terreno: false,
       teto: true,
     });
+
+    // ─── O QUE O BICHO ENGOLIU (12/09) — as peças que saíram das 64 candidaturas dele ───
+    //
+    // ⚠️ A PASSARELA É O QUE FALTAVA PARA A CÂMARA A DIZER O QUE ELA É. A fase abre na "doca
+    // engolida", mas até aqui nada na tela dizia DOCA: costela, órgão e maquinário são todos do
+    // bicho, então o lugar lia como víscera desde o primeiro segundo. Esta peça é a metade humana
+    // da frase — convés industrial com guarda-corpo e lâmpada âmbar, e as veias do Leviatã subindo
+    // por baixo para tomar conta dele.
+    //
+    // ⚠️ ANCORADA NO CHÃO, e não flutuando, pela lei do `orgao`: peça grande ancorada numa borda
+    // lê como grandeza; peça pequena solta no meio lê como asset jogado. A base vai 6px abaixo da
+    // tela para a carne se fundir com a faixa em vez de terminar numa linha reta.
+    //
+    // ⚠️ O CORTE LATERAL DO CORRIMÃO É DE PROPÓSITO. Ele é o defeito que reprovou a peça como
+    // FAIXA (sangramento irregular nas bordas); como prop, "a passarela continua no escuro" é
+    // exatamente o que ela deveria dizer.
+    this.addLayer({
+      key: 'f4Passarela',
+      factor: 0.55,
+      baseY: GAME_HEIGHT + 6,
+      depth: -78,
+      // ⚠️ TINT CLARO PARA UM FUNDO, e é por causa da LÂMPADA. Um tint de força de costela
+      // (0x4a3e48) apagaria o âmbar, que é a única coisa acesa da peça — e numa fase cujo rumo é
+      // *luz só onde há energia*, apagar a luz é apagar o motivo de a peça existir.
+      tint: 0x6d788f,
+      alpha: 1,
+      scale: [0.8, 1.05],
+      gap: [300, 520],
+      terreno: false,
+    });
+
+    // OS GÂNGLIOS ACESOS: os núcleos nervosos do bicho, pendurados no teto e raros.
+    //
+    // ⚠️ ESTA CAMADA ERA OUTRA, E A CAPTURA A TROCOU. A primeira escolha foram os empilhamentos
+    // de anéis de cartilagem do mesmo lote, para dizer "caixa torácica" na câmara B — e o mock
+    // contra a pintura mostrou o óbvio: **a pintura da câmara B JÁ É uma caixa torácica**, com as
+    // costelas ocupando o meio do quadro. A peça repetia o que já estava lá e só somava massa
+    // escura no caminho.
+    //
+    // ⚠️ A LEI QUE SAI DAÍ, E ELA VALE PARA AS 10 PEÇAS DO M2–M5: **peça de cenário tem de dizer
+    // o que a PINTURA não diz.** O critério não é "combina com a câmara" — combinar demais é como
+    // se desenha papel de parede. Estes dizem: são o único ponto de luz PRÓPRIO do cenário, e é a
+    // fase inteira numa peça (*luz só onde há energia*).
+    //
+    // ⚠️ O TINT É QUASE NEUTRO DE PROPÓSITO. Um tint escuro de costela apagaria a brasa, que é o
+    // motivo de a peça existir — a mesma conta que a passarela faz pela lâmpada âmbar. Quem
+    // segura a peça no fundo aqui é o ALPHA e a raridade do gap, não a multiplicação de cor.
+    this.addLayer({
+      key: 'f4Ganglio',
+      factor: 0.4,
+      baseY: -14,
+      depth: -87,
+      tint: 0x9aa2b8,
+      alpha: 0.85,
+      scale: [0.55, 0.85],
+      gap: [420, 760],
+      terreno: false,
+      teto: true,
+    });
   }
 
   /** A lua da Fase 1: montanhas, solo, e picos pretos passando na frente da nave. */

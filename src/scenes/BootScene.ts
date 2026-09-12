@@ -595,6 +595,29 @@ const ART: Record<string, string> = {
   orgao: 'sprites/orgao.png',
   maquinario: 'sprites/maquinario.png',
 
+  // ─── AS PEÇAS QUE SAÍRAM DAS 64 CANDIDATURAS DELE (12/09) ───
+  //
+  // ⚠️ ELAS FORAM REPROVADAS COMO FAIXA E APROVADAS COMO PROP, e a diferença é a pergunta. Faixa
+  // precisa sangrar nas três bordas com topo reto — medido, nenhuma das 64 tem (o sangramento
+  // lateral varia de 0% a 100% da altura, sem regra). Mas `create_1_direction_object` faz bem
+  // exatamente o que a faixa não queria: RECORTAR um objeto do fundo. Como prop, o recorte é a
+  // virtude. Ver `scripts/_f4/_assar-cand.mjs`.
+  //
+  // A PASSARELA é a assinatura da câmara A — a doca engolida: convés industrial com guarda-corpo
+  // e lâmpada âmbar, com as veias do bicho subindo por baixo. Três variantes (a regra de
+  // nomenclatura do `pickVariant`: base, base2, base3).
+  f4Passarela: 'sprites/f4-passarela.png',
+  f4Passarela2: 'sprites/f4-passarela2.png',
+  f4Passarela3: 'sprites/f4-passarela3.png',
+  // O GÂNGLIO é um núcleo nervoso ACESO. ⚠️ A escolha anterior eram os anéis de cartilagem da
+  // câmara B, e o mock contra a pintura os matou: a pintura da câmara B JÁ É uma caixa torácica,
+  // então a peça repetia o que já estava lá. Estes dizem o que nenhuma das quatro pinturas diz —
+  // um ponto de luz PRÓPRIO, que é a fase inteira em uma peça (*luz só onde há energia*).
+  // ESFUMADOS numa elipse irregular: são textura de quadro cheio, e sem isso entrariam como
+  // quadrado colado ("sprite com BORDA RETA é veneno").
+  f4Ganglio: 'sprites/f4-ganglio.png',
+  f4Ganglio2: 'sprites/f4-ganglio2.png',
+
   // ─── A MOLDURA DA FASE 4 (Fatia 7 · M1) ───
   //
   // ⚠️ ARTE PROVISÓRIA, E FEIA DE PROPÓSITO (`scripts/_f4/_assar-provisoria.mjs`). O M1 existe para
