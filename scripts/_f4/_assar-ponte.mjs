@@ -54,14 +54,65 @@ function acharColunas(px, W) {
   return { vao: vaos[Math.floor(vaos.length / 2)], montante: montantes[Math.floor(montantes.length / 2)] };
 }
 
+/**
+ * ⚠️ AS TORRES DE AMARRAÇÃO — o conserto do print dele (12/09).
+ *
+ * Veredicto: *"as passarelas de metal ficaram realmente boas, só que algumas começam do nada e
+ * ficam com aparência de cortadas"*, com a ponta circulada em vermelho. A causa, ampliada: o
+ * corrimão do original atravessa o quadro e é FATIADO pelos 72px da peça; montando a ponte, os
+ * cortes internos somem (encontram o vão) mas os dois EXTERNOS ficam expostos — um convés
+ * terminando numa parede vertical, no ar.
+ *
+ * ⚠️ A PRIMEIRA TENTATIVA FOI ERODIR A PONTA e ela foi descartada por ele: *"você pode criar uma
+ * estrutura que feche a ponte no PixelLab... ou mais de uma para ter troca"*. Ele está certo —
+ * esfarelar disfarça o corte; uma TORRE o resolve. Ponte de verdade termina em encontro, não em
+ * desvanecimento.
+ *
+ * A montagem passou a ser: **[torre][pilar][vão][pilar espelhado][torre espelhada]**.
+ */
+const TORRES = ['p-05', 'p-11', 'p-13'];
+
+/**
+ * ⚠️ A TORRE É RECORTADA A 34px DE LARGURA, e o número sai de uma conta de TELA, não de gosto. A
+ * peça já tinha 198px e a escala tem PISO em 1,41 (abaixo disso a mesa tapa o convés — ver a
+ * camada no Parallax). Somar duas torres de 43px levaria a ponte a 284px, ou 400px em tela no piso
+ * da escala: mais larga que os 384 da tela, e as duas pontas nunca apareceriam juntas. Recortando
+ * a 34 e encurtando o vão para 2 montantes em todas, a peça fecha em 248px = 350px em tela.
+ *
+ * O recorte é pela face EXTERNA: é ela que fecha a ponte, e a interna encosta no convés.
+ */
+const TORRE_W = 34;
+/** O alvo de valor das torres: a banda da decoração da fase, a mesma da passarela e do cano. */
+const TORRE_ALVO = 16.4 * 2.2;
+
 /** Quantos montantes de vão entre os dois pilares, por variante. */
 const PONTES = [
-  { de: 'f4-passarela.png', para: 'f4-ponte.png', montantes: 2 },
-  { de: 'f4-passarela2.png', para: 'f4-ponte2.png', montantes: 3 },
-  { de: 'f4-passarela3.png', para: 'f4-ponte3.png', montantes: 3 },
+  { de: 'f4-passarela.png', para: 'f4-ponte.png', montantes: 2, torre: 'p-05' },
+  { de: 'f4-passarela2.png', para: 'f4-ponte2.png', montantes: 2, torre: 'p-11' },
+  { de: 'f4-passarela3.png', para: 'f4-ponte3.png', montantes: 2, torre: 'p-13' },
 ];
 
-for (const { de, para, montantes } of PONTES) {
+/** Apara, escurece ao alvo e recorta a torre pela face externa. Devolve os pixels crus. */
+async function prepararTorre(nome) {
+  const t = await sharp(`scripts/_f4/_ponta/${nome}.png`).trim({ threshold: 1 }).png().toBuffer();
+  const { data, info } = await sharp(t).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let soma = 0, n = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 8) continue;
+    soma += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]; n++;
+  }
+  const g = TORRE_ALVO / (soma / n);
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 8) continue;
+    // Contraste preservado em 1,25: a lâmpada âmbar é o motivo de a peça existir.
+    for (let c = 0; c < 3; c++) {
+      data[i + c] = Math.max(0, Math.min(255, TORRE_ALVO + (data[i + c] * g - TORRE_ALVO) * 1.25));
+    }
+  }
+  return { data, W: info.width, H: info.height };
+}
+
+for (const { de, para, montantes, torre } of PONTES) {
   const src = sharp(`public/sprites/${de}`).ensureAlpha();
   const { width: W, height: H } = await src.metadata();
   const { data } = await src.raw().toBuffer({ resolveWithObject: true });
@@ -108,9 +159,49 @@ for (const { de, para, montantes } of PONTES) {
     for (let x = 0; x < W; x++) por(total - 1 - x, y, px(x, y));
   }
 
-  await sharp(buf, { raw: { width: total, height: H, channels: 4 } }).png().toFile(`public/sprites/${para}`);
+  // ─── 4. AS TORRES, uma em cada ponta, ESPELHADAS entre si ───
+  //
+  // ⚠️ TUDO É ALINHADO PELA BASE, e isso não é arrumação: o convés mora a 28–44px do rodapé da
+  // peça, e a camada no Parallax ancora a ponte por `baseY` com a conta da escala presa nesse
+  // número (`222 − 44·escala`). Alinhar pelo topo faria a torre empurrar o convés para baixo e a
+  // mesa voltaria a tapá-lo — o defeito que a escala 1,45 tinha acabado de consertar.
+  const t = await prepararTorre(torre);
+  const larguraTorre = Math.min(TORRE_W, t.W);
+  const finalW = larguraTorre + total + larguraTorre;
+  const finalH = Math.max(H, t.H);
+  const saida = Buffer.alloc(finalW * finalH * 4, 0);
+  const porFinal = (x, y, r, g, b, a) => {
+    if (x < 0 || x >= finalW || y < 0 || y >= finalH) return;
+    const i = (y * finalW + x) * 4;
+    saida[i] = r; saida[i + 1] = g; saida[i + 2] = b; saida[i + 3] = a;
+  };
+
+  // a ponte, encostada no rodapé
+  const dyPonte = finalH - H;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < total; x++) {
+      const i = (y * total + x) * 4;
+      if (buf[i + 3] === 0) continue;
+      porFinal(larguraTorre + x, dyPonte + y, buf[i], buf[i + 1], buf[i + 2], buf[i + 3]);
+    }
+  }
+
+  // as torres, também no rodapé. A ESQUERDA leva as N primeiras colunas da peça (a
+  // face externa dela); a DIREITA é a mesma coisa espelhada, para as duas fecharem para fora.
+  const dyTorre = finalH - t.H;
+  for (let y = 0; y < t.H; y++) {
+    for (let x = 0; x < larguraTorre; x++) {
+      const i = (y * t.W + x) * 4;
+      if (t.data[i + 3] === 0) continue;
+      porFinal(x, dyTorre + y, t.data[i], t.data[i + 1], t.data[i + 2], t.data[i + 3]);
+      porFinal(finalW - 1 - x, dyTorre + y, t.data[i], t.data[i + 1], t.data[i + 2], t.data[i + 3]);
+    }
+  }
+
+  await sharp(saida, { raw: { width: finalW, height: finalH, channels: 4 } })
+    .png().toFile(`public/sprites/${para}`);
   console.log(
-    `✔ ${para}  ${total}x${H}  (pilar ${W} + vão ${vaoW} + pilar ${W}, ${montantes} montantes; ` +
-      `coluna de vão x=${X_VAO}, montante x=${X_MONT})`,
+    `✔ ${para}  ${finalW}x${finalH}  (torre ${larguraTorre} + pilar ${W} + vão ${vaoW} + pilar ${W} + ` +
+      `torre ${larguraTorre}; torre ${torre}, coluna de vão x=${X_VAO}, montante x=${X_MONT})`,
   );
 }

@@ -534,8 +534,20 @@ export class Parallax {
     //    só para o convés começar a assomar acima do terreno. Abaixo disso a mesa tapa a ponte —
     //    que é exatamente o que ele viu. Em 1,45 o guarda-corpo sai em y≈136, bem acima da mesa.
     //
-    // ⚠️ O `gap` SUBIU JUNTO, e não é folclore: a peça chega a 337px em tela, e um `gap` menor que
-    // a largura faria duas pontes se sobreporem — uma emenda que nenhuma escala esconde.
+    // ⚠️ E AS PONTAS GANHARAM TORRE na 2ª rodada de 12/09, por outro print dele: *"começam do nada
+    // e ficam com aparência de cortadas"*. O corrimão do original atravessa o quadro e é fatiado
+    // pelos 72px da peça; na ponte os cortes internos somem, mas os externos ficavam expostos. A
+    // primeira tentativa foi erodir a ponta e ele descartou — *"você pode criar uma estrutura que
+    // feche a ponte no PixelLab, ou mais de uma para ter troca"*. Ele está certo: esfarelar
+    // disfarça o corte, uma TORRE o resolve. A peça foi de 198 para **248px**.
+    //
+    // ⚠️ E POR ISSO O VÃO ENCURTOU DE 3 MONTANTES PARA 2. A escala tem PISO em 1,41 (abaixo disso a
+    // mesa tapa o convés), então a largura em tela é no mínimo `largura × 1,41`: com as torres e o
+    // vão antigo a ponte passaria de 400px numa tela de 384, e as duas pontas nunca apareceriam
+    // juntas — o conserto viraria invisível. Em 248px ela fecha em 350px no piso da escala.
+    //
+    // ⚠️ O `gap` TEM DE PASSAR DA LARGURA EM TELA, senão duas pontes se sobrepõem — uma emenda que
+    // nenhuma escala esconde.
     this.addLayer({
       key: 'f4Ponte',
       factor: 0.55,
@@ -546,8 +558,8 @@ export class Parallax {
       // *luz só onde há energia*, apagar a luz é apagar o motivo de a peça existir.
       tint: 0x6d788f,
       alpha: 1,
-      scale: [1.45, 1.7],
-      gap: [520, 900],
+      scale: [1.41, 1.55],
+      gap: [620, 1000],
       terreno: false,
     });
 
