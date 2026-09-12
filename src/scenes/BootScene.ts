@@ -617,6 +617,14 @@ const ART: Record<string, string> = {
   // quadrado colado ("sprite com BORDA RETA é veneno").
   f4Ganglio: 'sprites/f4-ganglio.png',
   f4Ganglio2: 'sprites/f4-ganglio2.png',
+  // O CANO DE DESPEJO da câmara B: a FONTE da água. ⚠️ Pedido dele depois de jogar o enchimento —
+  // *"se quiser implementar canos soltando a água, como um asset visual diferente. Assim fica mais
+  // plausível"*. Nível que sobe sozinho é exatamente o que um cenário não pode fazer; o Leviatã
+  // engoliu uma doca, e doca tem encanamento. Nasceram deitados e entram de pé (giro de 90°, que
+  // em pixel art é exato) — flange no teto, boca despejando para baixo. scripts/_f4/_assar-cano.mjs.
+  f4Cano: 'sprites/f4-cano.png',
+  f4Cano2: 'sprites/f4-cano2.png',
+  f4Cano3: 'sprites/f4-cano3.png',
 
   // ─── A MOLDURA DA FASE 4 (Fatia 7 · M1) ───
   //

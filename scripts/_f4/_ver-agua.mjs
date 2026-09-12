@@ -26,9 +26,11 @@ await page.evaluate(() => {
   s.lives = 99;
   s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
   setInterval(() => { s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER; }, 200);
-  s.elapsed = 39.6;
-  s.director.skipTo(39.6);
-  s.aplicaCorredorEMoldura(39.6);
+  // ⚠️ 34,5 E NÃO 39,6: o enchimento agora começa em t=36 (evento `agua` no roteiro), quatro
+  // segundos antes do golfinho. Saltar para depois disso pularia justamente o que se quer ver.
+  s.elapsed = 34.5;
+  s.director.skipTo(34.5);
+  s.aplicaCorredorEMoldura(34.5);
   s.hazardRate = 0;
   s.propRate = 0;
 });
@@ -47,7 +49,7 @@ const estado = () => page.evaluate(() => {
 // Amostra densa durante o enchimento: é lá que o casamento com o roteiro acontece.
 // ⚠️ Os instantes são ACUMULADOS desde o salto — a espera é o delta entre um e o anterior.
 let anterior = 0;
-for (const ms of [400, 700, 1000, 1250, 1500, 1900, 2700, 4500, 7500]) {
+for (const ms of [1600, 2200, 2800, 3400, 4000, 4400, 5000, 5800, 7500, 10500]) {
   await page.waitForTimeout(Math.max(16, ms - anterior));
   anterior = ms;
   const e = await estado();

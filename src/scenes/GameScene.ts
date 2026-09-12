@@ -554,7 +554,10 @@ export class GameScene extends Phaser.Scene {
     // ⚠️ A ÁGUA ANDA COM `dt` CRU, e não com o relógio da fase. A arena SEGURA o relógio em t=49,5
     // (`golfinhoSeguraEm`), então amarrar o enchimento ao `elapsed` congelaria a água no meio do
     // surto — com a tela opaca — pelo duelo inteiro.
-    this.agua.update(dt);
+    // ⚠️ A ÁGUA RECEBE O `worldSpeed`, e não é enfeite: os CANOS que a despejam são parede do
+    // Leviatã e têm de rolar com o corredor. Cano parado enquanto o mundo anda lê como marca
+    // d'água da interface, não como encanamento de uma doca engolida.
+    this.agua.update(dt, SCROLL_SPEED * frenagem);
     // Rede: se ele deixou de viver por um caminho que não passou por `matarGolfinho`, a arena solta.
     if (this.golfinho && !this.golfinho.vivo) this.encerrarGolfinho();
     this.updateHud();
@@ -691,6 +694,13 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'rabo':
         this.raboDoLeviata();
+        break;
+      case 'agua':
+        // ⚠️ QUEM ENCHE É O ROTEIRO, e não o nascimento do golfinho — foi assim até o teste jogado
+        // de 12/09, e os dois eventos disputavam os mesmos segundos. Ver o comentário do evento
+        // no `STAGE_4`. A DRENAGEM segue sendo da morte do bicho (`encerrarGolfinho`), porque ela
+        // tem de esperar o duelo, que dura o que o jogador levar.
+        this.agua.encher();
         break;
       case 'cenario':
         // A jornada anatômica da Fase 4: cada câmara tem a pintura dela, e quem manda na
@@ -1151,9 +1161,10 @@ export class GameScene extends Phaser.Scene {
     // de baixo no duelo — o leque e a rajada passando por trás de uma silhueta preta.
     this.parallax.setForegroundDimmed(true, 800);
 
-    // ⚠️ A CÂMARA ALAGA, E É ISSO QUE ESCONDE A TROCA DE PINTURA. O `cenario` de t=40,95 cai dentro
-    // do surto desta água — ver o comentário da classe `Agua`, que carrega a conta dos dois
-    // números. Chamar aqui, e não no roteiro, é o que garante que não existe arena sem água.
+    // ⚠️ REDE, E SÓ REDE. Quem enche a câmara é o evento `agua` de t=36 no roteiro — este
+    // `encher()` é reentrante e não faz nada quando a água já está lá. Ele existe para o caso de
+    // alguém chegar ao golfinho por um caminho que pulou o t=36: o modo treino, o `G`, ou uma
+    // sonda saltando com `skipTo`. Arena sem água seria um golfinho nadando no seco.
     this.agua.encher();
 
     // ⚠️ SPRITE PRIMEIRO: `overlap(sprite, grupo)` entrega (sprite, projétil) — ver `spawnBoss`.

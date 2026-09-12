@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from './../config';
+import { pickVariant } from '../art';
 
 /** Em que ponto do ciclo a câmara está. Ver o comentário da classe para o porquê de cada um. */
-type EstadoAgua = 'seco' | 'enchendo' | 'surto' | 'assentando' | 'submerso' | 'esvaziando';
+type EstadoAgua = 'seco' | 'enchendo' | 'assentando' | 'submerso' | 'esvaziando';
 
 /**
  * A ÁGUA DA ARENA DO GOLFINHO — a câmara B enche, e a tela cheia ESCONDE a troca de pintura.
@@ -32,20 +33,29 @@ type EstadoAgua = 'seco' | 'enchendo' | 'surto' | 'assentando' | 'submerso' | 'e
 export class Agua {
   // ─── OS TEMPOS (segundos) ───
 
-  /** De seco a cheio. Curto: é uma câmara enchendo de golpe, não uma maré. */
-  private static readonly ENCHE_DUR = 0.62;
-  /** A subida do véu até o pico opaco, depois de cheio. */
-  private static readonly SURTO_DUR = 0.16;
   /**
-   * Quanto tempo o pico se SUSTENTA. ⚠️ É A JANELA EM QUE O ROTEIRO PODE TROCAR A PINTURA, e ela
-   * foi medida, não escolhida: com 0,3 a captura pegou o `cenario` disparando com o véu ainda em
-   * alpha 0,83 — 17% da pintura velha atravessando o "pico". Com 0,45 a janela vai de 0,78s a
-   * 1,23s depois do `encher()`, e o evento de t=40,95 cai no meio dela com ~0,2s de folga dos
-   * dois lados.
+   * De seco a cheio.
+   *
+   * ⚠️ ERA 0,62 E VIROU 2,6 NO TESTE JOGADO DE 12/09, e a mudança não é de gosto — é de MONTAGEM.
+   * Veredicto dele: *"a água e o efeito da água ficaram ótimos. Mas achei o encher da tela muito
+   * repentino e forçado... do jeito que está agora o efeito de encher a tela de água casa/atrapalha
+   * com a chegada (aviso) do golfinho."* Dois eventos grandes disputando os mesmos 2 segundos.
+   *
+   * ⚠️ A RECEITA É DELE: *"enchendo até ficar completamente cheio na hora do golfinho, mesmo que
+   * comece a encher antes do encontro"*. O roteiro passou a mandar encher em **t=36**, quatro
+   * segundos antes do bicho — a câmara alaga, DEPOIS o habitante chega. A ordem dos dois deixa de
+   * ser simultânea e vira dramaturgia: o lugar muda, e só então algo mora nele.
    */
-  private static readonly SURTO_SEGURA = 0.45;
-  /** Do pico até o repouso submerso. Longo: é o olho se acostumando com a água. */
-  private static readonly ASSENTA_DUR = 0.55;
+  private static readonly ENCHE_DUR = 2.6;
+  /**
+   * A sobra do véu no instante em que a água topa, antes de assentar. ⚠️ SUBSTITUIU O `SURTO`, que
+   * era um pico OPACO de alpha 0,96 — uma tela azul chapada para tapar a troca de pintura. Com o
+   * enchimento adiantado ele deixou de ter função: quando a pintura troca, a água JÁ está cheia, e
+   * quem esconde o corte é o mergulho no escuro que o `setPintura` sempre soube fazer — que é a
+   * outra receita dele, *"tela preta por milissegundos e já aparecer cheia de água"*. O que sobra
+   * aqui é um repuxo de 10% do véu, que lê como a água se acomodando.
+   */
+  private static readonly ASSENTA_DUR = 0.9;
   /** A drenagem, quando o golfinho morre. */
   private static readonly ESVAZIA_DUR = 0.8;
 
@@ -57,10 +67,14 @@ export class Agua {
    * Quem carrega a leitura de "submerso" são os FEIXES e as BOLHAS, não a saturação do véu.
    */
   private static readonly COR = 0x14495e;
-  /** O véu enquanto a água sobe: dá para ver através, e é isso que faz ela ler como água. */
-  private static readonly ALPHA_SUBINDO = 0.46;
-  /** ⚠️ O pico. É ele que tapa a troca de pintura — abaixo de 0,9 a pintura velha vaza. */
-  private static readonly ALPHA_PICO = 0.96;
+  /**
+   * O véu enquanto a água sobe, e o repuxo do instante em que ela topa.
+   *
+   * ⚠️ ERA 0,46 E CAIU PARA 0,34: com o enchimento em 2,6s o véu fica visível quatro vezes mais
+   * tempo, e o que era um lampejo virou estado. Dá para ver através dele o caminho todo — que é o
+   * que faz a massa ler como ÁGUA e não como cortina.
+   */
+  private static readonly ALPHA_SUBINDO = 0.34;
   /** O repouso. Tem de deixar a nave, o golfinho e os tiros legíveis. */
   private static readonly ALPHA_SUBMERSO = 0.24;
 
@@ -71,6 +85,31 @@ export class Agua {
   private static readonly BOLHAS = 22;
   /** Quantos feixes de luz descendo do teto. */
   private static readonly FEIXES = 3;
+
+  // ─── OS CANOS (12/09, 2ª rodada) ───
+
+  /**
+   * Quantos canos despejando ao mesmo tempo.
+   *
+   * ⚠️ ELES EXISTEM PORQUE ÁGUA SEM FONTE NÃO CONVENCE. Pedido dele, depois de jogar o
+   * enchimento: *"se quiser implementar canos soltando a água, como um asset visual diferente.
+   * Assim fica mais plausível"*. Até aqui o nível subia sozinho, e "sozinho" é exatamente o que
+   * um cenário não pode fazer — o Leviatã engoliu uma doca, e doca tem encanamento.
+   */
+  private static readonly CANOS = 3;
+  /** Gotas no ar, somadas todas as bocas. Pool fixo: nada nasce durante o enchimento. */
+  private static readonly GOTAS = 30;
+  /** A cor do jato e da gota. Clara e fria — é a única coisa em movimento rápido na tela. */
+  private static readonly COR_JATO = 0x9fe4f5;
+  /**
+   * Onde o TOPO do cano fica, medido do topo da tela.
+   *
+   * ⚠️ 2, E NÃO 0: o flange tem de ficar enterrado na faixa do teto (que cobre y 0–26 na espessura
+   * 16 — o que o roteiro mantém de t=37 a t=50, a arena inteira), para o cano ler como saindo da
+   * parede em vez de colado por cima dela. Com a peça em ~43px de altura, a boca cai em y≈45:
+   * 19px abaixo da faixa, que é o quanto um cano de descarga deve se projetar.
+   */
+  private static readonly CANO_Y = 2;
 
   // ─── O ESTADO ───
 
@@ -92,6 +131,16 @@ export class Agua {
   private readonly bolhaDeriva: number[] = [];
   private readonly bolhaFase: number[] = [];
   private readonly bolhaVel: number[] = [];
+  private readonly canos: Phaser.GameObjects.Image[] = [];
+  private readonly jatos: Phaser.GameObjects.Rectangle[] = [];
+  private readonly respingos: Phaser.GameObjects.Rectangle[] = [];
+  private readonly gotas: Phaser.GameObjects.Rectangle[] = [];
+  /** O x de mundo de cada cano, em px de tela. Eles rolam; o sprite só segue este número. */
+  private readonly canoX: number[] = [];
+  private readonly gotaVy: number[] = [];
+  private readonly gotaDono: number[] = [];
+  /** 0 a 1: o quanto os canos estão despejando. Sobe ao abrir e cai ao fechar, sem corte seco. */
+  private forcaCano = 0;
 
   constructor(scene: Phaser.Scene) {
     // ⚠️ DEPTH 70–74: acima do primeiro plano (60), abaixo da HUD e das barras de chefão (99+).
@@ -146,11 +195,29 @@ export class Agua {
       this.bolhaVel.push(0);
       this.recolocarBolha(i, true);
     }
+
+    this.montarCanos(scene);
   }
 
-  /** A câmara está com água o bastante para esconder o que passa atrás? A sonda pergunta isto. */
-  get cobrindo(): boolean {
-    return this.nivel >= 0.999 && this.alpha >= 0.9;
+  /**
+   * A câmara já está CHEIA? A sonda pergunta isto em dois momentos, e os dois são invariantes que
+   * saíram do teste jogado de 12/09:
+   *
+   * 1. **quando a pintura troca** — se a água ainda estivesse subindo, o jogador veria a câmara
+   *    mudar de lugar E de nível ao mesmo tempo, que é a confusão que ele descreveu;
+   * 2. **quando o golfinho nasce** — *"enchendo até ficar completamente cheio na hora do
+   *    golfinho"*. O aviso dele tem de acontecer numa câmara parada.
+   *
+   * ⚠️ ELA SUBSTITUIU O `cobrindo`, que perguntava se o véu estava OPACO (alpha ≥ 0,9). Essa
+   * pergunta morreu junto com o `surto`: não é mais a água que esconde o corte da pintura.
+   */
+  get cheia(): boolean {
+    return this.nivel >= 0.999;
+  }
+
+  /** A água chegou ao repouso? É o que diz que a câmara parou de se mexer. */
+  get assentada(): boolean {
+    return this.estado === 'submerso';
   }
 
   /** Para a sonda e para quem for depurar: o estado e os dois números que o descrevem. */
@@ -165,11 +232,11 @@ export class Agua {
    * dois enchimentos nem ressetar uma água que já está cheia.
    */
   encher(): void {
-    if (this.estado === 'enchendo' || this.estado === 'surto') return;
-    // Já submerso: não recomeça do zero, só segura.
-    if (this.estado === 'submerso') return;
+    // Já enchendo, assentando ou cheia: não recomeça do zero nem empilha um segundo enchimento.
+    if (this.estado !== 'seco' && this.estado !== 'esvaziando') return;
     this.estado = 'enchendo';
     this.t = 0;
+    this.abrirCanos();
     this.veu.setVisible(true);
     this.superficie.setVisible(true);
     for (const b of this.bolhas) b.setVisible(true);
@@ -193,9 +260,11 @@ export class Agua {
     this.superficie.setVisible(false).setAlpha(0);
     for (const b of this.bolhas) b.setVisible(false);
     for (const f of this.feixes) f.setVisible(false);
+    this.forcaCano = 0;
+    this.fecharCanos();
   }
 
-  update(dt: number): void {
+  update(dt: number, worldSpeed = 0): void {
     if (this.estado === 'seco') return;
     this.tempoVivo += dt;
     this.t += dt;
@@ -203,21 +272,12 @@ export class Agua {
     switch (this.estado) {
       case 'enchendo': {
         const p = Math.min(1, this.t / Agua.ENCHE_DUR);
-        // Desacelera no fim: água que para de subir de repente lê como barra de carregamento.
-        this.nivel = Phaser.Math.Easing.Sine.Out(p);
-        this.alpha = Agua.ALPHA_SUBINDO * Math.min(1, p * 2.2);
+        // ⚠️ SINE.INOUT, E NÃO SINE.OUT. Com 0,62s a saída rápida era o efeito; com 2,6s ela lia
+        // como barra de carregamento — a água disparava e depois rastejava. O InOut faz a maré
+        // COMEÇAR devagar também, e é a entrada suave que tira o "repentino" que ele apontou.
+        this.nivel = Phaser.Math.Easing.Sine.InOut(p);
+        this.alpha = Agua.ALPHA_SUBINDO * Math.min(1, p * 3);
         if (p >= 1) {
-          this.estado = 'surto';
-          this.t = 0;
-        }
-        break;
-      }
-      case 'surto': {
-        this.nivel = 1;
-        const p = Math.min(1, this.t / Agua.SURTO_DUR);
-        this.alpha = Phaser.Math.Linear(Agua.ALPHA_SUBINDO, Agua.ALPHA_PICO, p);
-        // ⚠️ O pico SE SUSTENTA — é a janela em que o `cenario` do roteiro troca a pintura.
-        if (this.t >= Agua.SURTO_DUR + Agua.SURTO_SEGURA) {
           this.estado = 'assentando';
           this.t = 0;
         }
@@ -226,7 +286,9 @@ export class Agua {
       case 'assentando': {
         const p = Math.min(1, this.t / Agua.ASSENTA_DUR);
         this.nivel = 1;
-        this.alpha = Phaser.Math.Linear(Agua.ALPHA_PICO, Agua.ALPHA_SUBMERSO, Phaser.Math.Easing.Sine.InOut(p));
+        // O repuxo: o véu cede os 10% que tinha a mais enquanto subia. Nada de pico opaco aqui —
+        // ver o comentário do ASSENTA_DUR para o porquê de o `surto` ter morrido.
+        this.alpha = Phaser.Math.Linear(Agua.ALPHA_SUBINDO, Agua.ALPHA_SUBMERSO, Phaser.Math.Easing.Sine.InOut(p));
         if (p >= 1) {
           this.estado = 'submerso';
           this.t = 0;
@@ -252,6 +314,7 @@ export class Agua {
     }
 
     this.desenhar(dt);
+    this.correrCanos(dt, worldSpeed, GAME_HEIGHT - Math.round(this.nivel * GAME_HEIGHT));
   }
 
   /** Põe no ecrã o que o estado calculou. Nenhuma regra mora aqui — só geometria. */
@@ -306,10 +369,167 @@ export class Agua {
     this.bolhaFase[i] = Math.random() * Math.PI * 2;
   }
 
+  /**
+   * Monta os canos e o jato de cada um. Chamado uma vez, na construção.
+   *
+   * ⚠️ SEM A ARTE, A ÁGUA CONTINUA — arte entra asset por asset nesta fatia, e um enchimento que
+   * dependesse do PNG para funcionar seria uma regressão esperando a próxima geração falhar.
+   * Sem `f4Cano` não há cano nem jato; a maré sobe igual.
+   */
+  private montarCanos(scene: Phaser.Scene): void {
+    if (!scene.textures.exists('f4Cano')) return;
+
+    for (let i = 0; i < Agua.CANOS; i++) {
+      // ⚠️ ORIGEM NO TOPO E Y FIXO EM 12: a faixa do teto cobre y 0–26 na espessura 16, que é o
+      // que o roteiro mantém de t=37 a t=50 — a arena inteira. Com a peça ancorada em 12, o corpo
+      // do cano fica DENTRO da faixa (lê como saindo da parede) e só a boca aparece embaixo dela.
+      this.canos.push(
+        scene.add
+          .image(0, Agua.CANO_Y, pickVariant(scene, 'f4Cano'))
+          .setOrigin(0.5, 0)
+          // ⚠️ DEPTH −0,5, E NÃO 69 COMO O VÉU. O cano é MUNDO — parede do Leviatã, logo à frente
+          // da faixa da moldura (−0,6) e atrás de tudo o que se joga. É isso que faz a água, ao
+          // subir, PASSAR NA FRENTE dele: o véu está em 70, então o cano afunda conforme o nível
+          // sobe, em vez de boiar por cima da própria enchente.
+          .setDepth(-0.5)
+          .setAlpha(0)
+          .setVisible(false),
+      );
+      // O JATO: a coluna d'água entre a boca e a superfície. Ela é o corpo do despejo; as gotas
+      // são o detalhe por cima. ⚠️ ADITIVA, pela mesma lei do fio da moldura — numa fase escura
+      // só luz ADICIONADA aparece.
+      this.jatos.push(
+        scene.add
+          .rectangle(0, 0, 3, 0, Agua.COR_JATO)
+          .setOrigin(0.5, 0)
+          .setDepth(-0.5)
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setAlpha(0)
+          .setVisible(false),
+      );
+      // O RESPINGO: a marca no ponto em que o jato fura a superfície.
+      this.respingos.push(
+        scene.add
+          .rectangle(0, 0, 9, 2, Agua.COR_JATO)
+          .setDepth(73)
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setAlpha(0)
+          .setVisible(false),
+      );
+      this.canoX.push(0);
+    }
+
+    for (let i = 0; i < Agua.GOTAS; i++) {
+      this.gotas.push(
+        scene.add
+          .rectangle(0, 0, 1, 2, Agua.COR_JATO)
+          .setDepth(73)
+          .setAlpha(0)
+          .setVisible(false),
+      );
+      this.gotaVy.push(0);
+      this.gotaDono.push(0);
+    }
+  }
+
+  /** Espalha os canos pela largura da tela e acende o despejo. */
+  private abrirCanos(): void {
+    for (let i = 0; i < this.canos.length; i++) {
+      // Espalhados com folga e um empurrão sorteado: três canos em passo igual leem como grade.
+      this.canoX[i] = 40 + (i * GAME_WIDTH) / Agua.CANOS + Phaser.Math.Between(-18, 18);
+      this.canos[i].setVisible(true);
+      this.jatos[i].setVisible(true);
+      this.respingos[i].setVisible(true);
+    }
+    for (let i = 0; i < this.gotas.length; i++) {
+      this.gotaDono[i] = i % Math.max(1, this.canos.length);
+      this.recolocarGota(i, true);
+      this.gotas[i].setVisible(true);
+    }
+  }
+
+  /** Apaga canos, jatos e gotas — sem animação. */
+  private fecharCanos(): void {
+    for (const c of this.canos) c.setVisible(false).setAlpha(0);
+    for (const j of this.jatos) j.setVisible(false).setAlpha(0);
+    for (const r of this.respingos) r.setVisible(false).setAlpha(0);
+    for (const g of this.gotas) g.setVisible(false).setAlpha(0);
+  }
+
+  /** Devolve uma gota à boca do cano dono dela. */
+  private recolocarGota(i: number, inicial = false): void {
+    const dono = this.gotaDono[i];
+    const g = this.gotas[i];
+    g.x = this.canoX[dono] + Phaser.Math.Between(-2, 2);
+    const boca = Agua.CANO_Y + (this.canos[dono]?.displayHeight ?? 16);
+    // Na primeira montagem elas já nascem espalhadas na queda; depois, sempre na boca.
+    g.y = inicial ? Phaser.Math.Between(boca, GAME_HEIGHT) : boca + Phaser.Math.Between(0, 4);
+    this.gotaVy[i] = Phaser.Math.Between(90, 170);
+  }
+
+  /**
+   * O despejo, quadro a quadro.
+   *
+   * ⚠️ OS CANOS ROLAM COM O MUNDO. Eles são parede do Leviatã, não sobreposição de tela: um cano
+   * parado enquanto o corredor anda leria como marca d'água da interface. Quando um sai pela
+   * esquerda, ele volta pela direita enquanto ainda houver o que despejar.
+   */
+  private correrCanos(dt: number, worldSpeed: number, linha: number): void {
+    if (!this.canos.length) return;
+
+    // O despejo só existe enquanto a água SOBE. Assentada, os canos fecham e saem de cena.
+    const despejando = this.estado === 'enchendo';
+    const alvo = despejando ? 1 : 0;
+    this.forcaCano = Phaser.Math.Linear(this.forcaCano, alvo, Math.min(1, dt * 4));
+    if (!despejando && this.forcaCano < 0.02) {
+      this.fecharCanos();
+      return;
+    }
+
+    for (let i = 0; i < this.canos.length; i++) {
+      this.canoX[i] -= worldSpeed * dt;
+      if (this.canoX[i] < -40) this.canoX[i] = GAME_WIDTH + Phaser.Math.Between(10, 70);
+
+      const cano = this.canos[i];
+      cano.x = Math.round(this.canoX[i]);
+      cano.setAlpha(this.forcaCano);
+
+      const boca = Agua.CANO_Y + cano.displayHeight;
+      const queda = Math.max(0, linha - boca);
+      const jato = this.jatos[i];
+      jato.x = cano.x;
+      jato.y = boca;
+      jato.setSize(3, queda);
+      // O jato treme de largura: coluna de espessura cravada lê como barra de progresso.
+      jato.scaleX = 1 + Math.sin(this.tempoVivo * 9 + i * 2) * 0.25;
+      jato.setAlpha(this.forcaCano * 0.32);
+
+      const r = this.respingos[i];
+      r.x = cano.x;
+      r.y = linha + 1;
+      r.scaleX = 1 + Math.sin(this.tempoVivo * 13 + i) * 0.3;
+      r.setAlpha(queda > 4 ? this.forcaCano * (0.3 + Math.sin(this.tempoVivo * 17 + i * 3) * 0.12) : 0);
+    }
+
+    for (let i = 0; i < this.gotas.length; i++) {
+      const g = this.gotas[i];
+      this.gotaVy[i] += 260 * dt; // gravidade
+      g.y += this.gotaVy[i] * dt;
+      g.x -= worldSpeed * dt;
+      g.setAlpha(this.forcaCano * 0.7);
+      // Morre ao furar a superfície — ou ao ficar para trás do próprio cano.
+      if (g.y >= linha || g.x < -6) this.recolocarGota(i);
+    }
+  }
+
   destroy(): void {
     this.veu.destroy();
     this.superficie.destroy();
     for (const b of this.bolhas) b.destroy();
     for (const f of this.feixes) f.destroy();
+    for (const c of this.canos) c.destroy();
+    for (const j of this.jatos) j.destroy();
+    for (const r of this.respingos) r.destroy();
+    for (const g of this.gotas) g.destroy();
   }
 }

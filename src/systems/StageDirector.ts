@@ -92,14 +92,24 @@ export type StageEvent =
    * tempos, e a troca cairia no meio de uma onda em vez de no respiro.
    */
   /**
-   * Troca a pintura da câmara (Fase 4).
-   *
-   * `fadeMs` encurta o mergulho no escuro do `setPintura` (600 por omissão). ⚠️ ELE EXISTE PARA A
-   * TROCA DE t=40,95, que acontece atrás da água: o mergulho é justamente o truque de ESCONDER o
-   * corte, e ele vira contraproducente quando já há um véu opaco por cima — a pintura nova
-   * reaparecendo por baixo da água que assenta lê como pisca. Sob água, o corte pode ser rápido.
+   * Troca a pintura da câmara (Fase 4). `fadeMs` ajusta o mergulho no escuro do `setPintura`
+   * (600 por omissão).
    */
   | { t: number; type: 'cenario'; key: string; fadeMs?: number }
+  /**
+   * A ÁGUA DA CÂMARA B (Fase 4) — enche ou drena.
+   *
+   * ⚠️ ELE EXISTE PORQUE O ENCHIMENTO PRECISOU SAIR DE CIMA DO GOLFINHO. Até o teste jogado de
+   * 12/09 quem enchia era o nascimento do bicho, e os dois eventos disputavam os mesmos segundos:
+   * *"o efeito de encher a tela de água casa/atrapalha com a chegada (aviso) do golfinho"*. Com o
+   * enchimento no ROTEIRO, ele começa em t=36 e termina antes de o bicho existir — que é a receita
+   * dele: *"enchendo até ficar completamente cheio na hora do golfinho, mesmo que comece a encher
+   * antes do encontro"*.
+   *
+   * ⚠️ A DRENAGEM CONTINUA SENDO DA MORTE DO GOLFINHO, não do roteiro: ela tem de esperar o duelo,
+   * que dura o que o jogador levar.
+   */
+  | { t: number; type: 'agua'; acao: 'encher' }
   | { t: number; type: 'boss' };
 
 /**
@@ -451,6 +461,22 @@ export const STAGE_4: StageEvent[] = [
   { t: 30, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 80 },
   { t: 33, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.65, y: 130 },
 
+  // ─── A CÂMARA COMEÇA A ALAGAR, QUATRO SEGUNDOS ANTES DO BICHO ───
+  //
+  // ⚠️ t=36, E NÃO t=40 JUNTO COM O GOLFINHO. Veredicto do teste jogado de 12/09: *"a água e o
+  // efeito da água ficaram ótimos. Mas achei o encher da tela muito repentino e forçado... do
+  // jeito que está agora o efeito de encher a tela de água casa/atrapalha com a chegada (aviso)
+  // do golfinho."* Dois eventos grandes nos mesmos dois segundos, e um comia o outro.
+  //
+  // A conta: `Agua.ENCHE_DUR` 2,6 leva a água ao topo em t=38,6, e o repuxo de `ASSENTA_DUR` 0,9
+  // termina em t=39,5 — meio segundo antes de o golfinho nascer. **A câmara alaga, DEPOIS o
+  // habitante chega.** A ordem deixa de ser simultânea e vira dramaturgia.
+  //
+  // ⚠️ ELE CAI NO RESPIRO (t=37–38,5: corredor solto, hazard em 0, nenhuma onda no ar), e não é
+  // coincidência — é o único trecho da fase em que o jogador tem olho sobrando para reparar no
+  // cenário.
+  { t: 36, type: 'agua', acao: 'encher' },
+
   // Respiro estrutural: corredor solto, sem onda — o jogador reaprende a voar antes do aperto.
   { t: 37, type: 'corredor', rate: 2.6, gap: 120 },
   { t: 37, type: 'moldura', espessura: 16 },        // ainda margem: o respiro é largo de verdade
@@ -458,6 +484,23 @@ export const STAGE_4: StageEvent[] = [
   // A ARENA ABRE. O corredor para de nascer 1,5s antes da câmara: as últimas mesas saem da tela em
   // 384 ÷ 84 = 4,6s, ou seja, em t≈43,1 — antes de o X do golfinho começar (t≈43,5).
   { t: 38.5, type: 'corredor', rate: 0, gap: 120 },
+
+  // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
+  // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
+  // mesmo lugar.
+  //
+  // ⚠️ ELA ANDOU DUAS VEZES EM 12/09, E A SEGUNDA DESFEZ METADE DA PRIMEIRA. Foi de t=40 para
+  // t=40,95 para cair dentro do "surto" da água — um pico OPACO que existia só para tapar o corte.
+  // Com o enchimento adiantado para t=36, o surto perdeu a função e morreu: quando a pintura troca,
+  // **a água já está cheia há 0,2s**, e quem esconde o corte volta a ser o mergulho no escuro do
+  // `setPintura`, com os 600ms de sempre. É a outra receita dele, palavra por palavra: *"tela
+  // preta por milissegundos e já aparecer cheia de água, transição feita do fundo"*.
+  //
+  // ⚠️ E ELA TEM DE CAIR COM A ÁGUA CHEIA. `ENCHE_DUR` 2,6 a partir de t=36 topa em t=38,6; esta
+  // linha em t=38,8 cai 0,2s depois, e o mergulho termina em t=39,4 — meio segundo antes do bicho.
+  // **A `probe-f4-agua` cobra exatamente isso.** Antecipar esta linha sem antecipar o `agua`
+  // devolve o defeito que ele apontou: a câmara mudando de lugar e de nível ao mesmo tempo.
+  { t: 38.8, type: 'cenario', key: 'paintBgF4b' },
 
   // ─── O GOLFINHO: o motivo de a câmara mudar (spec 2026-09-11). ───
   //
@@ -473,21 +516,6 @@ export const STAGE_4: StageEvent[] = [
   // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
   // mesmo lugar. Cai no RESPIRO (sem onda no ar), não no meio de uma.
   //
-  // ⚠️ ERA t=40 E VIROU t=40,7 EM 12/09, E O NÚMERO É CASADO COM A `Agua`. Pedido dele: *"para
-  // casar com a transição da imagem de fundo, tenha um pequeno efeito para encher de água a tela e
-  // assim escondemos a transição das imagens de fundo"*. A troca sempre foi um CORTE SECO de uma
-  // pintura para outra; agora ela cai dentro do SURTO da água, quando o véu está em alpha 0,96 e a
-  // tela é uma cor só. A conta: o `miniboss` acima chama `encher()` em t=40, o pico completo
-  // chega em 0,78s (`ENCHE_DUR` 0,62 + `SURTO_DUR` 0,16) e se sustenta por mais 0,45s — então a
-  // janela vai de t=40,78 a t=41,23, e 40,95 cai no meio dela com ~0,2s de folga dos dois lados.
-  //
-  // ⚠️ ELE TEM DE VIR DEPOIS DO `miniboss` NO ARRAY, e não é estilo: o `StageDirector` caminha com
-  // um cursor monotônico, e evento fora de ordem dispara no `t` do VIZINHO ANTERIOR. Trocar a
-  // ordem destas duas linhas faria a pintura trocar em t=40, antes de existir água para escondê-la.
-  //
-  // ⚠️ MEXER NUM SEM O OUTRO DEVOLVE O CORTE SECO. A `probe-f4-agua` cobra exatamente isso: que no
-  // instante em que a pintura troca, a água esteja `cobrindo`.
-  { t: 40.95, type: 'cenario', key: 'paintBgF4b', fadeMs: 200 },
   { t: 41, type: 'banner', text: 'AS PROFUNDEZAS' },
 
   // ─── O APERTO: o coração da fase. Vão 76px (a nave tem ~22 de hitbox: passa com folga

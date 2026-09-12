@@ -36,20 +36,52 @@ físico, nenhuma colisão, nenhum efeito no voo:
 
 | estado | o que acontece | knob |
 |---|---|---|
-| **enchendo** | a água sobe do rodapé com a superfície acesa de 2px correndo à frente; véu translúcido | `ENCHE_DUR` 0,62 · `ALPHA_SUBINDO` 0,46 |
-| **surto** | cheia, o véu vai ao PICO e a tela vira uma cor só. ⚠️ **é a janela em que a pintura troca** | `SURTO_DUR` 0,16 · `ALPHA_PICO` 0,96 · `SURTO_SEGURA` 0,45 |
-| **assentando** | o véu desce ao repouso | `ASSENTA_DUR` 0,55 |
+| **enchendo** | a água sobe do rodapé com a superfície acesa de 2px correndo à frente; os CANOS despejam | `ENCHE_DUR` 2,6 · `ALPHA_SUBINDO` 0,34 · `CANOS` 3 · `GOTAS` 30 |
+| **assentando** | o véu cede o repuxo e os canos fecham | `ASSENTA_DUR` 0,9 |
 | **submerso** | véu leve com respiração, 3 feixes de luz aditivos derivando, 22 bolhas subindo com oscilação | `ALPHA_SUBMERSO` 0,24 · `BOLHAS` 22 · `FEIXES` 3 |
 | **esvaziando** | morto o golfinho, drena | `ESVAZIA_DUR` 0,8 |
 
 **Quem manda:** `spawnGolfinho` chama `encher()`; `encerrarGolfinho` chama `esvaziar()` — ou
 `limpar()` (sem animação) quando é o `G` pulando para o chefão, pela mesma lógica do `reacende`.
 
-⚠️ **O NÚMERO ESTÁ EM DOIS ARQUIVOS E ELES SÃO CASADOS.** O `miniboss` de t=40 enche; o `cenario`
-mudou de **t=40 para t=40,95** para cair no meio do surto. E a troca ganhou `fadeMs: 200` (era o
-padrão de 600) — o mergulho no escuro do `setPintura` existe justamente para esconder o corte, e
-ele vira contraproducente debaixo de um véu opaco: a pintura nova reaparecendo por baixo da água
-que assenta lê como pisca. **A `probe-f4-agua` cobra isso e é a razão de ela existir.**
+### ⚠️ E ELA FOI REFEITA NO MESMO DIA, DEPOIS DO TESTE JOGADO
+
+Veredicto dele sobre a 1ª versão: *"a água e o efeito da água ficaram ótimos. Mas achei o encher da
+tela muito repentino e forçado... do jeito que está agora o efeito de encher a tela de água
+casa/atrapalha com a chegada (aviso) do golfinho."* **Dois eventos grandes disputando os mesmos
+dois segundos, e um comia o outro.**
+
+A receita foi dele, e eu fiz as duas que ele ofereceu ao mesmo tempo:
+
+| o que ele disse | o que virou |
+|---|---|
+| *"enchendo até ficar completamente cheio na hora do golfinho, mesmo que comece a encher antes do encontro"* | o enchimento saiu do nascimento do golfinho e virou **evento de roteiro em t=36** — quatro segundos antes do bicho. `ENCHE_DUR` foi de 0,62 para **2,6**, e o easing de `Sine.Out` para `Sine.InOut` (com 2,6s a saída rápida lia como barra de carregamento) |
+| *"tela preta por milissegundos e já aparecer cheia de água, transição feita do fundo"* | o **`surto` morreu** — o pico opaco de alpha 0,96 existia só para tapar a troca de pintura. Com a água cheia antes, quem esconde o corte volta a ser o mergulho no escuro que o `setPintura` sempre soube fazer, com os 600ms de sempre |
+
+**A ordem agora é dramaturgia, não simultaneidade:** t=36 alaga → t=38,6 a água topa → t=38,8 a
+câmara troca atrás do escurecimento → t=39,5 assenta → **t=40 o bicho chega numa câmara parada**.
+
+⚠️ **É ISSO QUE A `probe-f4-agua` COBRA, e nenhum outro lugar cobra:** que a pintura troque com a
+água JÁ CHEIA, que o golfinho nasça com ela CHEIA E ASSENTADA, e que o pico do véu nunca passe de
+0,5 (se passar, o `surto` voltou por engano). Mexer no `agua` de t=36, no `cenario` de t=38,8 ou
+no `ENCHE_DUR` sem mexer nos outros quebra a ordem e fica vermelho ali.
+
+### 🚰 OS CANOS — a água ganhou FONTE
+
+Pedido dele, ainda na mesma rodada: *"se quiser implementar canos soltando a água, como um asset
+visual diferente. Assim fica mais plausível"* — e *"temos de sobra créditos no PixelLab para isso"*.
+
+Nível que sobe sozinho é exatamente o que um cenário não pode fazer. O Leviatã engoliu uma doca, e
+doca tem encanamento. **3 canos** despejam enquanto a água sobe, com jato, 30 gotas em queda com
+gravidade e um respingo no ponto em que o jato fura a superfície. Cheia a câmara, eles fecham.
+
+| detalhe | porquê |
+|---|---|
+| **objeto `bc28cdf2`, 16 candidaturas, 20 gerações** | 3 escolhidas (c-00, c-08, c-13), variantes do `pickVariant` |
+| ⚠️ **nasceram DEITADOS e entram DE PÉ** | o prompt pediu vista lateral de cano de parede e o gerador deu a boca para a DIREITA — certo para parede vertical, errado para uma fase que só tem teto e chão. Giro de 90°, que **em pixel art é exato** (não reamostra, só troca os eixos): flange em cima, boca embaixo |
+| ⚠️ **escurecidos no `_assar-cano.mjs`, ao contrário das peças de parallax** | cano não é camada de parallax — quem o desenha é a `Agua`, que não tem `tint` de camada. Alvo: 2,2× a pintura, a mesma banda da passarela |
+| ⚠️ **depth −0,5, e não 69 como o véu** | o cano é MUNDO, logo à frente da faixa da moldura (−0,6). É isso que faz a água **passar na frente dele** conforme sobe, em vez de ele boiar por cima da própria enchente |
+| **rolam com o mundo** (`worldSpeed` entra no `update`) | cano parado enquanto o corredor anda lê como marca d'água da interface |
 
 ### 2 · AS PEÇAS QUE SAÍRAM DAS 64 CANDIDATURAS DELE
 
@@ -66,6 +98,18 @@ virtude.**
 |---|---|---|---|
 | **`f4Passarela`** ×3 | A-01, A-05, A-13 | convés industrial com guarda-corpo e **lâmpada âmbar**, com as veias do bicho subindo por baixo | chão, depth −78, tint `0x6d788f`, escala 0.8–1.05, gap 300–520 |
 | **`f4Ganglio`** ×2 | B-05, B-12 | núcleos nervosos **ACESOS**, esfumados em elipse irregular | teto, depth −87, tint `0x9aa2b8`, escala 0.55–0.85, gap 420–760 |
+| **`f4Cano`** ×3 | objeto `bc28cdf2` (novo, 20 gerações) | o cano de despejo que ENCHE a câmara | desenhado pela `Agua`, não pelo Parallax — ver "🚰 OS CANOS" |
+
+**Onde elas aparecem, medido** (`_ver-pecas.mjs`, amostrando t=0 a t=36 — a câmara A inteira):
+
+| peça | % do tempo na tela | quantas por vez |
+|---|---|---|
+| `f4Passarela` | **98%** | 1–2 |
+| `f4Ganglio` | **87%** | 0–1 |
+
+⚠️ **Elas estão na tela desde o primeiro segundo da fase**, não só perto do golfinho — o parallax
+pré-enche as camadas na montagem. A passarela é praticamente contínua; o gânglio pisca com folga,
+que é o que se quer de um ponto de luz raro.
 
 **A passarela é o que faltava para a câmara A dizer o que ela é.** A fase abre na "doca engolida",
 mas até aqui nada na tela dizia DOCA — costela, órgão e maquinário são todos do bicho, então o
@@ -85,8 +129,10 @@ dele** (ver a divisão das 14 peças), então não toquei.
 
 | lei | onde doeu |
 |---|---|
-| ⚠️ **ENCHER DE BAIXO PARA CIMA NÃO TAPA NADA.** Enquanto a água sobe, a metade de cima da tela ainda mostra a pintura velha | por isso o `surto` existe, e por isso ele SE SUSTENTA: é a janela, não o instante |
-| ⚠️ **A JANELA FOI MEDIDA, NÃO ESCOLHIDA.** Com `SURTO_SEGURA` 0,3 a captura pegou o `cenario` disparando com o véu em **0,83** — 17% da pintura velha atravessando o "pico" | virou 0,45, e o evento foi para 40,95: ~0,2s de folga dos dois lados |
+| ⚠️ **DOIS EVENTOS GRANDES NÃO CABEM NOS MESMOS DOIS SEGUNDOS.** Cada um estava certo sozinho; juntos, um comia o outro | o enchimento e o aviso do golfinho. O conserto não foi enfraquecer nenhum dos dois — foi **afastá-los no tempo** |
+| ⚠️ **EASING É FUNÇÃO DA DURAÇÃO, não do gosto.** `Sine.Out` estava certo em 0,62s e errado em 2,6s: a água disparava e depois rastejava, lendo como barra de carregamento | virou `Sine.InOut`, e é a entrada suave que tira o "repentino" que ele apontou |
+| ⚠️ **RESOLVER O PROBLEMA CERTO APOSENTA CÓDIGO.** O `surto` era um pico opaco de 0,96 inventado para tapar a troca de pintura, com a janela medida a 0,45s | com o enchimento adiantado ele **perdeu a função e morreu inteiro**, e a troca voltou ao mergulho no escuro que o `setPintura` já fazia. A 1ª versão estava resolvendo um problema que a montagem não precisava ter |
+| ⚠️ **EFEITO SEM FONTE NÃO CONVENCE, por melhor que esteja.** Ele aprovou a água e no mesmo fôlego pediu os canos | *"assim fica mais plausível"*. O que faltava não era qualidade do efeito, era CAUSA |
 | ⚠️ **A ÁGUA ANDA COM `dt` CRU, NUNCA COM O RELÓGIO DA FASE.** A arena SEGURA o relógio em t=49,5 | amarrá-la ao `elapsed` congelaria a água no meio do surto — **com a tela opaca** — pelo duelo inteiro |
 | ⚠️ **PEÇA DE CENÁRIO TEM DE DIZER O QUE A PINTURA NÃO DIZ.** O critério não é "combina com a câmara" — combinar demais é como se desenha papel de parede | a 1ª escolha para a câmara B foram os anéis de cartilagem (B-06, B-14). O mock contra a pintura matou: **a pintura da câmara B JÁ É uma caixa torácica.** A peça repetia o que já estava lá e só somava massa escura |
 | ⚠️ **O TINT NÃO PODE APAGAR A LUZ DA PEÇA.** Tint de força de costela (0x4a3e48) mataria a lâmpada âmbar e a brasa do gânglio — que são o motivo de as duas existirem | as duas levam tint claro; quem as segura no fundo é o ALPHA e a raridade do `gap` |
