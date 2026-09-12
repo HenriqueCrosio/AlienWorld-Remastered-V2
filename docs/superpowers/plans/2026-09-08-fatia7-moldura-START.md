@@ -6,16 +6,115 @@
 **🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12/09/2026).**
 **🟢 A LEITURA DA ABERTURA — mesas menores, destroços nas bordas, o coração enterrado — JOGADA E APROVADA (12/09/2026).**
 **🟢 O MOTIVO DA CÂMARA A — RESPONDIDO POR ELE EM 12/09: ela NÃO tem motivo especial. Ver "⏭️".**
+**🟠 A ÁGUA DA ARENA E AS 5 PEÇAS NOVAS (12/09, 2ª rodada) — FEITAS SOZINHO A PEDIDO DELE, E NÃO JOGADAS.**
 Branch `feat/fase4-visual`, **em dia com o `origin`**.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. O golfinho está fechado e a
-> abertura da fase foi ajustada e aprovada. O motivo da câmara A já está respondido — ela é entrada
-> de shmup, sem motivo especial. Toque o M2 pelas TRÊS decisões que sobraram: a repetição da faixa,
-> quem pinta as 4 faixas, e como a arte troca por câmara."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`. Enquanto eu estava fora você
+> alagou a arena do golfinho e instalou 5 peças tiradas das minhas 64 candidaturas. Eu joguei. Meu
+> veredicto: <DIGA AQUI>. Depois disso, o M2 — o motivo da câmara A já está respondido, então é
+> passe de ARTE: a repetição da faixa, quem pinta as 4 faixas, e como a arte troca por câmara."**
+
+---
+
+## 🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS (12/09, 2ª rodada) — FEITO, NÃO JOGADO
+
+**🟠 Ele pediu as duas coisas e saiu:** *"quero que faça sozinho, pois não estarei aqui para
+escolher respostas ou fazer o brainstorming com você"*. **Nada aqui foi jogado ainda.**
+
+### 1 · A CÂMARA B ALAGA
+
+Pedido: *"na arena do golfinho, quero que coloque um filtro que pareça estarmos dentro da água...
+ao entrar na zona do golfinho, para casar com a transição da imagem de fundo, tenha um pequeno
+efeito para encher de água a tela e assim escondemos a transição das imagens de fundo"*.
+
+Tudo em `src/systems/Agua.ts`. Um ciclo de seis estados, e ele é decoração PURA — nenhum corpo
+físico, nenhuma colisão, nenhum efeito no voo:
+
+| estado | o que acontece | knob |
+|---|---|---|
+| **enchendo** | a água sobe do rodapé com a superfície acesa de 2px correndo à frente; véu translúcido | `ENCHE_DUR` 0,62 · `ALPHA_SUBINDO` 0,46 |
+| **surto** | cheia, o véu vai ao PICO e a tela vira uma cor só. ⚠️ **é a janela em que a pintura troca** | `SURTO_DUR` 0,16 · `ALPHA_PICO` 0,96 · `SURTO_SEGURA` 0,45 |
+| **assentando** | o véu desce ao repouso | `ASSENTA_DUR` 0,55 |
+| **submerso** | véu leve com respiração, 3 feixes de luz aditivos derivando, 22 bolhas subindo com oscilação | `ALPHA_SUBMERSO` 0,24 · `BOLHAS` 22 · `FEIXES` 3 |
+| **esvaziando** | morto o golfinho, drena | `ESVAZIA_DUR` 0,8 |
+
+**Quem manda:** `spawnGolfinho` chama `encher()`; `encerrarGolfinho` chama `esvaziar()` — ou
+`limpar()` (sem animação) quando é o `G` pulando para o chefão, pela mesma lógica do `reacende`.
+
+⚠️ **O NÚMERO ESTÁ EM DOIS ARQUIVOS E ELES SÃO CASADOS.** O `miniboss` de t=40 enche; o `cenario`
+mudou de **t=40 para t=40,95** para cair no meio do surto. E a troca ganhou `fadeMs: 200` (era o
+padrão de 600) — o mergulho no escuro do `setPintura` existe justamente para esconder o corte, e
+ele vira contraproducente debaixo de um véu opaco: a pintura nova reaparecendo por baixo da água
+que assenta lê como pisca. **A `probe-f4-agua` cobra isso e é a razão de ela existir.**
+
+### 2 · AS PEÇAS QUE SAÍRAM DAS 64 CANDIDATURAS DELE
+
+Pedido: *"veja quais assets daqueles 64 que criei podem funcionar na fase, melhorando o visual e
+imersão"*.
+
+⚠️ **ELAS FORAM REPROVADAS COMO FAIXA E APROVADAS COMO PROP — a pergunta mudou, e por isso a régua
+mudou.** Faixa precisa sangrar nas três bordas com topo reto; medido de novo, nenhuma das 64 tem (o
+sangramento lateral varia de 0% a 100% da altura, sem regra). Mas `create_1_direction_object` faz
+bem exatamente o que a faixa não queria: RECORTAR um objeto do fundo. **Como prop, o recorte é a
+virtude.**
+
+| peça | de onde | o que é | camada |
+|---|---|---|---|
+| **`f4Passarela`** ×3 | A-01, A-05, A-13 | convés industrial com guarda-corpo e **lâmpada âmbar**, com as veias do bicho subindo por baixo | chão, depth −78, tint `0x6d788f`, escala 0.8–1.05, gap 300–520 |
+| **`f4Ganglio`** ×2 | B-05, B-12 | núcleos nervosos **ACESOS**, esfumados em elipse irregular | teto, depth −87, tint `0x9aa2b8`, escala 0.55–0.85, gap 420–760 |
+
+**A passarela é o que faltava para a câmara A dizer o que ela é.** A fase abre na "doca engolida",
+mas até aqui nada na tela dizia DOCA — costela, órgão e maquinário são todos do bicho, então o
+lugar lia como víscera desde o primeiro segundo. Ela é a metade humana da frase.
+
+⚠️ **E O VALOR NÃO FOI CORRIGIDO, DE PROPÓSITO.** Medido contra a pintura (16,4): a decoração que
+já estava no jogo entra CRUA a 2,2×–4,6× e quem a empurra para o fundo é o TINT da camada (costela
+4,59× com `0x4a3e48`). As escolhidas caem na mesma banda (A-01 a 2,20×, B-05 a 4,16×), então elas
+obedecem ao sistema que já existe em vez de inventar um segundo.
+
+**O que NÃO entrou, e por quê:** os objetos **C** (carne muscular vermelha) e **D** (fibras de
+tendão, quase preto) são textura de QUADRO CHEIO sem silhueta nenhuma — 0,68 a 0,85 de
+preenchimento, sem borda. Eles são exatamente o que são: material de FAIXA. ⚠️ **E faixa é peça
+dele** (ver a divisão das 14 peças), então não toquei.
+
+### ⚠️ AS LEIS DESTA RODADA
+
+| lei | onde doeu |
+|---|---|
+| ⚠️ **ENCHER DE BAIXO PARA CIMA NÃO TAPA NADA.** Enquanto a água sobe, a metade de cima da tela ainda mostra a pintura velha | por isso o `surto` existe, e por isso ele SE SUSTENTA: é a janela, não o instante |
+| ⚠️ **A JANELA FOI MEDIDA, NÃO ESCOLHIDA.** Com `SURTO_SEGURA` 0,3 a captura pegou o `cenario` disparando com o véu em **0,83** — 17% da pintura velha atravessando o "pico" | virou 0,45, e o evento foi para 40,95: ~0,2s de folga dos dois lados |
+| ⚠️ **A ÁGUA ANDA COM `dt` CRU, NUNCA COM O RELÓGIO DA FASE.** A arena SEGURA o relógio em t=49,5 | amarrá-la ao `elapsed` congelaria a água no meio do surto — **com a tela opaca** — pelo duelo inteiro |
+| ⚠️ **PEÇA DE CENÁRIO TEM DE DIZER O QUE A PINTURA NÃO DIZ.** O critério não é "combina com a câmara" — combinar demais é como se desenha papel de parede | a 1ª escolha para a câmara B foram os anéis de cartilagem (B-06, B-14). O mock contra a pintura matou: **a pintura da câmara B JÁ É uma caixa torácica.** A peça repetia o que já estava lá e só somava massa escura |
+| ⚠️ **O TINT NÃO PODE APAGAR A LUZ DA PEÇA.** Tint de força de costela (0x4a3e48) mataria a lâmpada âmbar e a brasa do gânglio — que são o motivo de as duas existirem | as duas levam tint claro; quem as segura no fundo é o ALPHA e a raridade do `gap` |
+| ⚠️ **A MESMA CANDIDATURA É REPROVADA OU APROVADA CONFORME A PERGUNTA.** "Não sangra nas bordas" reprova uma faixa e **descreve** um prop | as 64 estavam paradas em review desde 08/09 por uma régua que não era a delas |
+
+### 👀 O QUE VER NO TESTE JOGADO
+
+1. **O surto tapa mesmo?** Se pintar de azul demais, é `ALPHA_PICO`; se a pintura velha vazar, é
+   `SURTO_SEGURA` para cima (e o `cenario` de 40,95 junto).
+2. **O submerso deixa jogar?** O véu está em 0,24. Se atrapalhar a leitura do leque e da rajada, é
+   `ALPHA_SUBMERSO` para baixo.
+3. **As bolhas e os feixes** — 22 e 3. É o que vende "submerso"; se ler como sujeira, os dois números.
+4. **A drenagem em 0,8s** casa com a volta da fase em t=50?
+5. **A lâmpada âmbar da passarela** pode ser confundida com pickup? Ela é de fundo (depth −78), mas
+   é a única coisa acesa nova ao alcance do olho.
+6. **O corte lateral do corrimão** — a passarela é cortada nas laterais. Lê como "continua no
+   escuro" ou lê como PNG cortado?
+
+### AS FERRAMENTAS NOVAS
+
+| script | o que responde |
+|---|---|
+| `_ver-agua.mjs` | o ciclo da água quadro a quadro, do enchimento à drenagem |
+| `_baixar-cand.mjs` | baixa as 16 candidaturas de cada um dos 4 objetos dele |
+| `_medir-cand.mjs` | **de uma candidatura:** tem silhueta? sangra? quão clara contra a pintura? |
+| `_folha-cand.mjs` | as 64 em 4×, **sobre a pintura da câmara** — candidatura bonita em fundo claro é armadilha |
+| `_assar-cand.mjs` | apara e esfuma as escolhidas em peças de jogo |
+| `_mock-pecas.mjs` | a peça no enquadramento real **com o tint da camada aplicado** — foi ele que matou o anel |
 
 ---
 
@@ -380,6 +479,11 @@ objetos presos em `review:awaiting-selection` "seguram slot e poluem a listagem"
 **A decisão de 12/09: não se descarta nada, nem as 4 faixas.** Elas continuam reprovadas por
 estrutura (ver a lei da ferramenta errada), mas guardar não custa e descartar não rende. Ficam:
 
+⚠️ **E NA 2ª RODADA DE 12/09 ELAS DEIXARAM DE SER PESO MORTO.** Cinco peças do jogo saíram desses
+mesmos quatro objetos — `f4Passarela` ×3 (do A) e `f4Ganglio` ×2 (do B). **A mesma candidatura é
+reprovada ou aprovada conforme a pergunta:** "não sangra nas bordas" reprova uma FAIXA e *descreve*
+um PROP. Mais um motivo para nunca descartar por arrumação.
+
 | câmara | object_id (reprovadas por estrutura — GUARDADAS, não descartar) |
 |---|---|
 | A | `be88daa1-175e-4e5e-b794-557d762c6c7f` |
@@ -416,6 +520,10 @@ O GOLFINHO — CÂMARA B     ✅ FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12
 A LEITURA DA ABERTURA     ✅ JOGADA E APROVADA (12/09)
   mesas menores (vãos 126/112/120), destroços nas bordas, o coração enterrando os próprios cabos.
   Sem spec: três ajustes de leitura pedidos com print na mão. Ver "O QUE A SESSÃO DE 12/09 FEZ".
+A ÁGUA + AS 5 PEÇAS      🟠 FEITAS, NÃO JOGADAS (12/09, 2ª rodada)
+  a câmara B alaga e o alagamento esconde a troca de pintura; f4Passarela ×3 e f4Ganglio ×2,
+  tiradas das 64 candidaturas dele. Sondas verdes, build limpo — falta o controle na mão.
+  Ver "🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS".
 M2 — A CÂMARA A           ⬜ ◄ PEGUE AQUI · o MOTIVO já está respondido (não tem) — é passe de ARTE:
                              as 3 decisões abertas, depois as 4 peças da doca engolida
 M3 — A CÂMARA B           ⬜ a garganta
