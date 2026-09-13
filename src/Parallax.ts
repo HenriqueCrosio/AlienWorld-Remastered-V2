@@ -1488,12 +1488,24 @@ export class Parallax {
     // disco, `anima` é nulo e a peça nasce estática como sempre.
     const anima = layer.anim && this.scene.textures.exists(layer.anim.sheet) ? layer.anim : null;
 
-    const img = anima
+    // ⚠️ O OBJETO NASCE NUMA EXPRESSÃO SÓ, E A CADEIA DE SETTERS VEM DEPOIS, SEM TERNÁRIO NO
+    // MEIO. A 1ª versão escrevia `anima ? add.sprite(...) : add.image(...).setOrigin()...` e a
+    // cadeia inteira grudava no ramo FALSO: a peça animada nascia sem depth (0 — na frente do
+    // jogo), sem escala (1 em vez de 1,62–1,85), sem tint e sem origem. Ele jogou e diagnosticou
+    // pela tela: *"os corações estão na primeira camada do parallax, aumente eles como fez com as
+    // imagens estáticas e coloque-os na mesma camada de antes"*. Não havia nada de errado com a
+    // arte — era precedência de operador.
+    const base = anima
       ? this.scene.add.sprite(layer.nextX, y, anima.sheet)
-      : this.scene.add
       // Sorteia entre as variantes da camada: montanhas repetidas denunciam o truque.
       // O CASCO é a exceção — lá a peça não é sorteada, é o lugar do corpo que decide.
-      .image(layer.nextX, y, layer.casco ? this.familiaDoCasco() : pickVariant(this.scene, layer.key))
+      : this.scene.add.image(
+          layer.nextX,
+          y,
+          layer.casco ? this.familiaDoCasco() : pickVariant(this.scene, layer.key),
+        );
+
+    const img = base
       // Teto: origem no TOPO e de cabeça para baixo — o espelho do terreno (ver ScatterLayer).
       .setOrigin(0.5, layer.teto ? 0 : layer.flutua ? 0.5 : 1)
       .setFlipY(layer.teto ?? false)

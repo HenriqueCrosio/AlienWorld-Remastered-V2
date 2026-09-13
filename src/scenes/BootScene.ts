@@ -657,11 +657,15 @@ const ART: Record<string, string> = {
   // tela. É por isso que `Moldura.ESPESSURA_MAX` é 54 e não 64. **Qualquer peça registrada aqui
   // TEM de ser 128×64**; a `probe-f4-moldura` cobra isso de cada uma, uma a uma.
   //
-  // ⚠️ A CONVENÇÃO DE NOME É A DO `pickVariant` (src/art.ts): `<base>`, `<base>2`, `<base>3`… A
-  // câmara A tem DUAS irmãs e cada segmento sorteia entre elas — é o que mata as 3 cópias
-  // idênticas na tela ao mesmo tempo (384 ÷ 128 = 3). As outras têm uma só, e o `pickVariant`
-  // devolve a própria base sem reclamar. Acrescentar uma irmã depois é copiar um PNG e escrever
-  // uma linha aqui — nenhum código muda.
+  // ⚠️ UMA ARTE POR CÂMARA, E ISSO É DECISÃO DELE, NÃO LIMITAÇÃO. A câmara A entrou com duas
+  // irmãs sorteadas (A-0 e A-2) para matar as 3 cópias idênticas na tela ao mesmo tempo
+  // (384 ÷ 128 = 3). Ele jogou e reprovou: *"quero a pintura que tem o músculo apenas e não o
+  // músculo com ossos… unifique as câmaras com sua única arte, não tenha duas"*. As duas irmãs
+  // não liam como variedade da mesma parede — liam como duas paredes emendadas, que é um defeito
+  // PIOR que a repetição que elas vieram resolver.
+  //
+  // A convenção do `pickVariant` (src/art.ts) continua de pé — `<base>`, `<base>2`, `<base>3`… —
+  // e é por isso que desfazer isto é copiar um PNG e escrever uma linha aqui, sem tocar em código.
   //
   // ⚠️ A CÂMARA C NÃO ESTÁ AQUI, E A ARTE DELA EXISTE E FOI APROVADA (`_faixa-C-v.png`). Ela é
   // 128×**80** — a "faixa grossa" do duto — e três coisas presumem 64: o `ESPESSURA_MAX` de 54, o
@@ -672,7 +676,6 @@ const ART: Record<string, string> = {
   // ⚠️ `f4-faixa-prov.png` FICA NO DISCO. A regra de saída é dele — *"caso não fique bom, mantemos
   // a que está agora"* — e voltar atrás é reapontar estas chaves para o provisório.
   f4FaixaA: 'sprites/f4-faixa-a.png',
-  f4FaixaA2: 'sprites/f4-faixa-a2.png',
   f4FaixaB: 'sprites/f4-faixa-b.png',
   f4FaixaD: 'sprites/f4-faixa-d.png',
   // A MESA: 96×112, TOPO CHATO. A hitbox sai da largura da TEXTURA, então topo chato é o que a

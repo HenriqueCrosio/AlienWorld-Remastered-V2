@@ -478,6 +478,20 @@ const desenho = await page.evaluate(() => {
     const alvo = f.name === 'fioChao' ? m.superficieChaoEm(x) : m.superficieTetoEm(x) - 2;
     return f.y !== alvo;
   }).length;
+  // O DEGRAU: o pedaço VERTICAL do fio, na emenda. Ele tem de ENCOSTAR nos dois fios horizontais
+  // que liga — um conector que não alcança devolve a costura que ele veio tapar, só mais fina.
+  const degraus = s.children.list.filter((o) => o.name === 'degrauChao' || o.name === 'degrauTeto');
+  const frestas = [];
+  for (const d of degraus.filter((o) => o.visible)) {
+    // Ele liga a placa do x dele com a de +2px à direita (a emenda fica nos últimos 2px).
+    const xEsq = Math.round(d.x) - 1, xDir = Math.round(d.x) + 3;
+    if (xEsq < 0 || xDir > 384) continue;
+    const chao = d.name === 'degrauChao';
+    const a = chao ? m.superficieChaoEm(xEsq) : m.superficieTetoEm(xEsq) - 2;
+    const b = chao ? m.superficieChaoEm(xDir) : m.superficieTetoEm(xDir) - 2;
+    const topo = Math.round(d.y), base = Math.round(d.y + d.height);
+    if (topo > Math.min(a, b) || base < Math.max(a, b) + 2) frestas.push({ x: Math.round(d.x), topo, base, a, b });
+  }
   return {
     segmentos: segs.length,
     fora,
@@ -485,6 +499,9 @@ const desenho = await page.evaluate(() => {
     fios: fios.length,
     acesos: acesos.length,
     desalinhados,
+    degraus: degraus.length,
+    degrausAcesos: degraus.filter((o) => o.visible).length,
+    frestas,
   };
 });
 console.log('desenho  ', JSON.stringify(desenho));
@@ -514,6 +531,15 @@ ok(
   desenho.desalinhados === 0,
   `o fio cai EXATAMENTE na linha que morde (${desenho.desalinhados} desalinhados)`,
 );
+// ⚠️ O DEGRAU, e ele existe por uma FOTO, não por uma teoria. Dois fios de 128px em alturas
+// diferentes com um vazio entre eles leem como dois pedaços mal colados: *"existe um degrau onde
+// as continuações dos assets se encaixam, causando um gap reto na colagem"*. O conector vertical
+// fecha o contorno — e como o fio é o telégrafo da parede que MATA, um vazio nele também era
+// borda letal sem aviso, bem na emenda onde o jogador raspa.
+ok(
+  desenho.frestas.length === 0,
+  `⭐ o degrau ENCOSTA nos dois fios que liga, sem fresta (${desenho.frestas.length}: ${JSON.stringify(desenho.frestas)})`,
+);
 
 // ─── A PAREDE COLA NO CORREDOR: é isto que faz o duto ser um DUTO ───
 //
@@ -534,17 +560,30 @@ const colada = await page.evaluate(() => {
     bandas.push(c - t);
     folgas.push(c - (v + gap / 2), (v - gap / 2) - t);
   }
-  // A peça tem 64px; onde a parede passa disso, quem fecha até a borda é o ENCHIMENTO.
-  const ench = s.children.list.filter((o) => o.name === 'enchimentoChao' || o.name === 'enchimentoTeto');
+  // A peça tem 64px; onde a parede passa disso, quem continua até a borda é a SAIA.
+  const saias = s.children.list.filter((o) => o.name === 'saiaChao' || o.name === 'saiaTeto');
   const buracos = [];
+  const desalinhadas = [];
   for (const seg of s.children.list.filter((o) => o.name === 'faixaChao')) {
     const x = Math.round(seg.x + 64);
     if (x < 0 || x > 384) continue;
     const fim = seg.y + 64;                     // onde a peça do chão termina
-    const e = ench.find((o) => o.name === 'enchimentoChao' && Math.abs(o.x - seg.x) < 1);
-    if (fim < 216 && (!e || !e.visible || e.y > fim || e.y + e.height < 216)) buracos.push({ x, fim });
+    const e = saias.find((o) => o.name === 'saiaChao' && Math.abs(o.x - seg.x) < 1);
+    if (fim < 216 && (!e || !e.visible || e.y > fim || e.y + e.displayHeight < 216)) buracos.push({ x, fim });
+    // ⚠️ A EMENDA TEM DE SER EXATA, e é um assert separado do buraco de propósito: uma saia 1px
+    // deslocada NÃO deixa fresta (ela é 64px, sobra de resto) e passaria batida no teste acima —
+    // mas desenha uma costura visível, que é o defeito que ela veio consertar.
+    if (e && Math.round(e.y) !== Math.round(fim)) desalinhadas.push({ x, saia: Math.round(e.y), peca: Math.round(fim) });
   }
-  return { gap, bandas, folgas, enchimentos: ench.length, acesos: ench.filter((o) => o.visible).length, buracos };
+  return {
+    gap, bandas, folgas, buracos, desalinhadas,
+    saias: saias.length,
+    acesas: saias.filter((o) => o.visible).length,
+    // A saia é ARTE CONTINUADA, não cor lisa: se ela cair na textura de erro, ou ficar numa
+    // câmara diferente da peça, o rodapé volta a ser um campo estranho no meio da parede.
+    texturas: [...new Set(saias.map((o) => o.texture.key))],
+    espelhos: [...new Set(saias.map((o) => `${o.name}:${o.flipY}`))].sort(),
+  };
 });
 console.log('colada   ', JSON.stringify(colada));
 // A banda aberta é o vão MAIS as duas folgas da trava, e nada além disso. Antes: 127 para gap 84.
@@ -559,11 +598,31 @@ ok(
   colada.folgas.every((f) => f === 8),
   `a folga da trava continua exata dos dois lados (${colada.folgas})`,
 );
-// ⚠️ O ENCHIMENTO. A peça tem 64px e no duto a parede passa disso — sem ele apareceria uma tira de
-// FUNDO no rodapé e no topo, ou seja, um buraco no meio da parede que acabou de virar letal.
+// ⚠️ A SAIA. A peça tem 64px e no duto a parede passa disso — sem ela apareceria uma tira de FUNDO
+// no rodapé e no topo, ou seja, um buraco no meio da parede que acabou de virar letal.
+//
+// ⚠️ E ELA ERA UM RETÂNGULO DE COR LISA ATÉ 13/09. A cor era medida da última linha da peça, então
+// a emenda fechava e todos estes asserts ficavam verdes — mas eram 19px de campo CHAPADO cruzando
+// o rodapé, e ele pegou jogando: *"uma parte cinza que não tem nada"*. É a lei desta fatia pela
+// quinta vez: **assert verde não julga composição.** Os três asserts abaixo cobram o que dá para
+// cobrar (acesa, emendada no pixel, e da mesma câmara); quem julga o resto é a captura.
 ok(
-  colada.acesos === colada.enchimentos && colada.enchimentos > 0,
-  `o enchimento está aceso nos dois lados dentro do duto (${colada.acesos}/${colada.enchimentos})`,
+  colada.acesas === colada.saias && colada.saias > 0,
+  `a saia está acesa nos dois lados dentro do duto (${colada.acesas}/${colada.saias})`,
+);
+ok(
+  colada.desalinhadas.length === 0,
+  `⭐ a saia emenda na peça no PIXEL, sem costura (${colada.desalinhadas.length} tortas: ${JSON.stringify(colada.desalinhadas)})`,
+);
+ok(
+  colada.texturas.length === 1 && /^f4Faixa[A-D]\d*$/.test(colada.texturas[0]),
+  `⭐ a saia é a ARTE da mesma câmara, não cor lisa nem textura de erro (${JSON.stringify(colada.texturas)})`,
+);
+// O espelho é o que faz a emenda sumir sem casar pixel nenhum: a saia do chão é virada, a do teto
+// não — o oposto exato da peça que cada uma continua.
+ok(
+  colada.espelhos.join() === 'saiaChao:true,saiaTeto:false',
+  `a saia é ESPELHADA em cada lado (${JSON.stringify(colada.espelhos)})`,
 );
 ok(
   colada.buracos.length === 0,

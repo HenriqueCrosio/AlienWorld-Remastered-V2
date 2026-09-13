@@ -87,7 +87,17 @@ export class Moldura {
 
   /**
    * O capricho da espessura, placa a placa. É o que impede a faixa de ser uma régua reta — e é
-   * DECORAÇÃO, então sai do fluxo de acaso da ARTE (`Math.random`), nunca do fluxo do jogo.
+   * DECORAÇÃO, então nunca sai do fluxo de acaso do JOGO.
+   *
+   * ⚠️ E ELE DEIXOU DE SER SORTEADO EM 13/09, POR UM DEFEITO QUE ELE FOTOGRAFOU: *"existe um
+   * degrau onde as continuações dos assets se encaixam, causando um gap reto na colagem"*. Com um
+   * `Math.random()` por placa, duas placas vizinhas podiam cair a 10px uma da outra — e como cada
+   * segmento é um retângulo CHATO de 128px, essa diferença vira um corte vertical na emenda. O
+   * relevo existe para a parede não ser régua; ele não precisava ser RUÍDO para isso.
+   *
+   * Agora é uma ONDA contínua da posição no mundo (ver `relevoEm`): a mesma amplitude de 10px ao
+   * longo da fase, mas a diferença entre placas VIZINHAS cai para ~2px, que é o tamanho do degrau
+   * que sobra. Onda também lê melhor que ruído: é parede orgânica, não serrilha.
    */
   private static readonly RELEVO = 10;
 
@@ -183,8 +193,16 @@ export class Moldura {
   private readonly teto: Phaser.GameObjects.Image[] = [];
   /** Os fios acesos — um por segmento, por lado. Só existem quando a parede morde. Ver `FIO`. */
   private readonly fios: Phaser.GameObjects.Rectangle[] = [];
-  /** O enchimento atrás da peça, um por segmento por lado. Só existe no duto. Ver `enche`. */
-  private readonly enchimento: Phaser.GameObjects.Rectangle[] = [];
+  /**
+   * A SAIA: a peça CONTINUADA EM ESPELHO onde ela não alcança. Uma por segmento por lado, só no
+   * duto. Ver `enche`.
+   *
+   * ⚠️ ELA ERA UM RETÂNGULO DE COR LISA, E ELE PEGOU ISSO JOGANDO: *"tem uma parte cinza que não
+   * tem nada"*, com o print circulado. A cor era medida da última linha da peça (havia até um
+   * `corDoFundo` para isso), então a emenda não aparecia — mas 19px de campo CHAPADO no rodapé,
+   * atravessando a tela inteira, leem como um buraco na arte, e nenhuma cor conserta isso.
+   */
+  private readonly saia: Phaser.GameObjects.Image[] = [];
 
   /**
    * @param desenha Só a Fase 4 recebe os SPRITES da faixa. A CURVA (`avanca`, `vaoEm`,
@@ -210,7 +228,6 @@ export class Moldura {
 
     this.scene = scene;
     this.base = Moldura.FAIXA_INICIAL;
-    const fundo = Moldura.corDoFundo(scene, this.base);
 
     for (let i = 0; i < Moldura.SEGMENTOS; i++) {
       // Depth −0.6: atrás dos props (−0.5 — a mesa desenha por cima da faixa de onde ela nasce) e
@@ -260,12 +277,38 @@ export class Moldura {
         );
       }
 
-      // O ENCHIMENTO. Ver `enche` para o porquê; a COR sai da própria arte, medida uma vez.
-      for (const lado of ['enchimentoChao', 'enchimentoTeto']) {
-        this.enchimento.push(
+      // O DEGRAU: o pedaço VERTICAL do fio, na emenda entre este segmento e o próximo.
+      //
+      // ⚠️ ELE EXISTE PORQUE O FIO HORIZONTAL DENUNCIAVA A EMENDA EM VEZ DE DESENHAR A PAREDE.
+      // Dois fios de 128px em alturas diferentes, com um vazio entre eles, é a leitura de dois
+      // pedaços mal colados — foi o que ele fotografou. Ligando as duas pontas, o mesmo degrau
+      // passa a ler como uma SALIÊNCIA da parede: o contorno aceso é contínuo, sobe e continua.
+      //
+      // ⚠️ E ELE NÃO É SÓ ENFEITE: o fio é o telégrafo da parede que mata. Um vazio nele é um
+      // pedaço de borda letal sem aviso, exatamente na emenda onde o jogador está raspando.
+      for (const lado of ['degrauChao', 'degrauTeto']) {
+        this.fios.push(
           scene.add
-            .rectangle(0, 0, Moldura.LARGURA, 1, fundo)
+            .rectangle(0, 0, Moldura.FIO_PX, 1, Moldura.FIO)
             .setOrigin(0, 0)
+            .setDepth(-0.55)
+            .setVisible(false)
+            .setName(lado),
+        );
+      }
+
+      // A SAIA. Ver `enche` para o porquê e para a conta do espelho.
+      //
+      // ⚠️ O `flipY` DE CADA LADO É O OPOSTO DO DA PEÇA QUE ELA CONTINUA, e é isso que faz a
+      // emenda sumir sem ninguém casar pixel nenhum: a peça do chão termina na linha 63 da arte,
+      // e a saia espelhada COMEÇA na linha 63. A do teto é o inverso exato, porque a peça de lá
+      // já nasce virada.
+      for (const lado of ['saiaChao', 'saiaTeto']) {
+        this.saia.push(
+          scene.add
+            .image(0, 0, pickVariant(scene, this.base))
+            .setOrigin(0, lado === 'saiaChao' ? 0 : 1)
+            .setFlipY(lado === 'saiaChao')
             .setDepth(-0.62) // atrás da peça (−0,6), à frente das bandas de placas (−75)
             .setVisible(false)
             .setName(lado),
@@ -274,29 +317,12 @@ export class Moldura {
     }
   }
 
-  /**
-   * A cor do enchimento, MEDIDA na borda da peça da faixa em vez de escolhida.
-   *
-   * ⚠️ UM LITERAL AQUI SERIA UMA COR INVENTADA QUE ENVELHECE MAL. A arte da faixa ainda é
-   * provisória e vai ser repintada quatro vezes (uma por câmara); uma constante escolhida hoje
-   * contra a peça vermelha de teste ficaria errada no dia em que a arte final entrar, e ninguém
-   * lembraria de voltar aqui. Medir a linha que ENCOSTA no enchimento faz a emenda desaparecer
-   * com qualquer arte — inclusive a que ainda não existe.
-   */
-  private static corDoFundo(scene: Phaser.Scene, key: string): number {
-    if (!scene.textures.exists(key)) return 0x000000;
-    // A peça do chão é ancorada pelo TOPO e o que sobra sai da tela por baixo, então quem encosta
-    // no enchimento é a ÚLTIMA linha dela. Média de 16 colunas: um pixel só pega uma brasa.
-    let r = 0, g = 0, b = 0, n = 0;
-    const y = 63;
-    for (let i = 0; i < 16; i++) {
-      const px = scene.textures.getPixel(i * 8, y, key);
-      if (!px) continue;
-      r += px.red; g += px.green; b += px.blue; n++;
-    }
-    if (!n) return 0x000000;
-    return (Math.round(r / n) << 16) | (Math.round(g / n) << 8) | Math.round(b / n);
-  }
+  // ⚠️ AQUI MORAVA O `corDoFundo`, e vale saber por quê. Ele MEDIA a última linha da peça para
+  // pintar o enchimento com ela, em vez de cravar um literal — engenharia correta para o problema
+  // errado. A emenda de fato sumia; o que não sumia era o campo CHAPADO de 19px atravessando o
+  // rodapé, e ele jogou e chamou de *"uma parte cinza que não tem nada"*. A lição fica: **cor
+  // certa não salva superfície vazia.** A saia resolve os dois de uma vez, porque continuar a
+  // ARTE torna a pergunta da cor sem sentido.
 
   /**
    * TROCA A BORDA DE CÂMARA. Quem chama é o evento `cenario` do roteiro, junto com a pintura: a
@@ -320,11 +346,10 @@ export class Moldura {
     for (const seg of this.chao) seg.setTexture(pickVariant(scene, base));
     for (const seg of this.teto) seg.setTexture(pickVariant(scene, base));
 
-    // ⚠️ E O ENCHIMENTO REMEDIDO JUNTO. A cor dele sai da última linha da PEÇA (ver `corDoFundo`),
-    // então trocar a arte sem remedir deixaria a emenda do duto pintada com a cor da câmara
-    // anterior — uma tira da cor errada no exato lugar que o enchimento existe para esconder.
-    const fundo = Moldura.corDoFundo(scene, base);
-    for (const r of this.enchimento) r.setFillStyle(fundo);
+    // ⚠️ E A SAIA TROCA JUNTO, OBRIGATORIAMENTE. Ela é a peça continuada em espelho: deixada para
+    // trás, o duto apareceria com a borda da câmara nova em cima e a da câmara anterior logo
+    // abaixo, emendadas — exatamente as "duas paredes coladas" que ele reprovou nas irmãs.
+    for (const s of this.saia) s.setTexture(pickVariant(scene, base));
   }
 
   /** O `gap` do roteiro. A placa que nascer daqui em diante é julgada por ele. */
@@ -364,10 +389,13 @@ export class Moldura {
     const tint = duto ? Moldura.TINT_LETAL : Moldura.TINT_INERTE;
     for (const s of this.chao) s.setTint(tint);
     for (const s of this.teto) s.setTint(tint);
+    // ⚠️ E A SAIA COM O MESMO TINT DA PEÇA. Ela é a mesma parede continuada; um tint diferente
+    // desenharia justamente a linha horizontal que ela existe para não ter.
+    for (const s of this.saia) s.setTint(tint);
     // O FIO é o que de fato se vê. O tint só esquenta o que já tem luz. Ver `FIO`.
     for (const f of this.fios) f.setVisible(duto);
-    // O ENCHIMENTO só existe no duto, porque só lá a parede passa dos 64px da peça. Ver `enche`.
-    for (const e of this.enchimento) e.setVisible(duto);
+    // A SAIA só existe no duto, porque só lá a parede passa dos 64px da peça. Ver `enche`.
+    for (const s of this.saia) s.setVisible(duto);
   }
 
   /**
@@ -405,8 +433,22 @@ export class Moldura {
       // ⚠️ O FIO SAI DA MESMA PLACA QUE A FAIXA E QUE A MORDIDA — os três leem `superficieChao` /
       // `superficieTeto` da placa `base + i`. É isso que faz a luz cair EXATAMENTE na linha que
       // cobra o encosto: o jogador vê onde a parede morde, não uma aproximação dela.
-      this.fios[i * 2].setPosition(x, p.superficieChao);
-      this.fios[i * 2 + 1].setPosition(x, p.superficieTeto - Moldura.FIO_PX);
+      this.fios[i * 4].setPosition(x, p.superficieChao);
+      this.fios[i * 4 + 1].setPosition(x, p.superficieTeto - Moldura.FIO_PX);
+
+      // O DEGRAU liga esta placa à SEGUINTE, na emenda. Pedir `base + i + 1` respeita o contrato
+      // da poda (só se pergunta sobre a tela e sobre o que está à direita dela) — a placa mais à
+      // frente aqui é `base + SEGMENTOS`, e o `spawnCorredores` já pergunta mais longe que isso.
+      const prox = this.placaDe(base + i + 1);
+      const xEmenda = x + Moldura.LARGURA - Moldura.FIO_PX;
+      this.ligaDegrau(this.fios[i * 4 + 2], xEmenda, p.superficieChao, prox.superficieChao);
+      this.ligaDegrau(
+        this.fios[i * 4 + 3],
+        xEmenda,
+        p.superficieTeto - Moldura.FIO_PX,
+        prox.superficieTeto - Moldura.FIO_PX,
+      );
+
       this.enche(i, x, p);
     }
   }
@@ -486,21 +528,43 @@ export class Moldura {
    * pelo que mata continua sendo `superficieChaoEm`/`superficieTetoEm`, e o enchimento nasce das
    * MESMAS linhas — ele preenche daí para fora, nunca para dentro.
    */
+  /**
+   * Estica o pedaço vertical do fio entre duas alturas de superfície vizinhas.
+   *
+   * ⚠️ `+ FIO_PX` NA ALTURA, e não é arredondamento: os dois fios horizontais que ele liga têm 2px
+   * de espessura, então um conector da altura EXATA da diferença deixaria uma falha de 2px numa
+   * das pontas — a costura de 2px no lugar da de 8. Ele encosta nos dois, com sobra.
+   *
+   * Degrau zero acontece o tempo todo (a curva SEGURA ou ANDA), e aí não há nada para ligar: o
+   * conector some em vez de virar um ponto aceso solto na emenda.
+   */
+  private ligaDegrau(fio: Phaser.GameObjects.Rectangle, x: number, a: number, b: number): void {
+    const alto = Math.abs(a - b);
+    if (alto < 1) {
+      fio.setVisible(false);
+      return;
+    }
+    fio.setVisible(this.duto);
+    fio.setPosition(x, Math.min(a, b));
+    fio.setSize(Moldura.FIO_PX, alto + Moldura.FIO_PX);
+  }
+
   private enche(i: number, x: number, p: Placa): void {
-    const chao = this.enchimento[i * 2];
-    const teto = this.enchimento[i * 2 + 1];
+    const chao = this.saia[i * 2];
+    const teto = this.saia[i * 2 + 1];
 
-    // A peça do chão começa em `superficieChao` e vai até +64; o enchimento cobre dali até a base
-    // da tela. `max(1, ...)` porque um Rectangle de altura 0 ou negativa desenha invertido.
-    const inicioChao = p.superficieChao + 64;
-    chao.setPosition(x, inicioChao);
-    chao.setSize(Moldura.LARGURA, Math.max(1, GROUND_Y + 10 - inicioChao));
-
-    // O espelho: a peça do teto termina em `superficieTeto` e sobe 64; o enchimento cobre dali
-    // até o topo da tela.
-    const fimTeto = p.superficieTeto - 64;
-    teto.setPosition(x, 0);
-    teto.setSize(Moldura.LARGURA, Math.max(1, fimTeto));
+    // ⚠️ A SAIA ENCOSTA, NÃO SE ESTICA — e é isto que a separa do retângulo que ela substituiu.
+    // Ela é ancorada exatamente na linha onde a peça acaba, com 64px próprios, e o que sobrar sai
+    // da tela. Sem `setSize`, sem escala, sem crop: a mesma lei da peça (`ESPESSURA_MAX`), pelo
+    // mesmo motivo — esticar arte de 64px para tapar um vão variável é o que dá aquele aspecto
+    // borrado que nenhuma sonda pega.
+    //
+    // A CONTA DE QUE 64 BASTA: no duto a superfície é `vaoY + meio + FOLGA`, e o `vaoY` mais alto
+    // possível é `TETO_Y + MARGEM + meio` = 66. Com `gap` 84 (o do duto), a superfície do chão não
+    // sobe além de 66 + 42 + 8 = 116; a peça vai até 180 e a tela acaba em 216, então o pior caso
+    // descoberto é 36px. A saia cobre 64.
+    chao.setPosition(x, p.superficieChao + 64);
+    teto.setPosition(x, p.superficieTeto - 64);
   }
 
   /**
@@ -530,6 +594,24 @@ export class Moldura {
 
   private placaEm(xTela: number): Placa {
     return this.placaDe(Math.floor((this.xMundo + xTela) / Moldura.LARGURA));
+  }
+
+  /**
+   * O relevo da placa `n`, em px de 0 a `RELEVO`. Contínuo, não sorteado — ver `RELEVO`.
+   *
+   * Duas senoides de períodos incomensuráveis (≈9 e ≈20 placas): juntas não repetem num trecho
+   * que caiba na tela, então a parede não denuncia um padrão, mas as duas são deriváveis e é
+   * disso que sai o degrau pequeno. A diferença máxima entre `n` e `n+1` é a soma das duas
+   * derivadas — `2·sen(0,35)·3 + 2·sen(0,155)·2` ≈ **2,7px**, contra os 10px do sorteio.
+   *
+   * `fase` separa chão e teto: com a mesma onda nos dois, a parede inteira engrossaria e
+   * afinaria junto, o que lê como a tela respirando em vez de como duas superfícies.
+   */
+  private static relevoEm(n: number, fase: number): number {
+    const a = Math.sin((n + fase) * 0.7);
+    const b = Math.sin((n + fase) * 0.31);
+    // De [−1,1] para [0, RELEVO], com a onda longa pesando menos que a curta.
+    return ((a * 0.6 + b * 0.4) + 1) * 0.5 * Moldura.RELEVO;
   }
 
   private gerar(n: number): Placa {
@@ -569,8 +651,8 @@ export class Moldura {
     // da fase) ele é EXATAMENTE 0 — a parede vira uma régua perfeitamente reta bem no clímax,
     // onde os degraus são a leitura. Se o duto parecer "morto" no teste jogado, é isto, não um
     // bug: não mexer sem o Henrique julgar primeiro.
-    const eChao = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Math.random() * Moldura.RELEVO);
-    const eTeto = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Math.random() * Moldura.RELEVO);
+    const eChao = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Moldura.relevoEm(n, 0));
+    const eTeto = Math.min(Moldura.ESPESSURA_MAX, this.espessura + Moldura.relevoEm(n, 37));
 
     // ⚠️ ARREDONDA NA DIREÇÃO SEGURA: o chão para BAIXO (y maior), o teto para CIMA (y menor).
     // Arredondar para o lado errado devolveria 7px de folga onde a trava prometeu 8.
