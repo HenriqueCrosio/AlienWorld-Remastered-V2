@@ -4,110 +4,212 @@
 **🟢 O M1 — O MOTOR — IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
 **🟢 O M1.5 — O DUTO E AS PORTAS — JOGADO E APROVADO (11/09/2026).**
 **🟢 O GOLFINHO — O MINI-CHEFÃO DA CÂMARA B — FECHADO, JOGADO TRÊS VEZES E APROVADO (11–12/09/2026).**
-**🟢 A LEITURA DA ABERTURA — mesas menores, destroços nas bordas, o coração enterrado — JOGADA E APROVADA (12/09/2026).**
-**🟢 O MOTIVO DA CÂMARA A — RESPONDIDO POR ELE EM 12/09: ela NÃO tem motivo especial. Ver "⏭️".**
-**🟢 A ÁGUA, OS CANOS, OS GÂNGLIOS E A MESA — JOGADOS E APROVADOS (12/09).**
-**🟠 AS PONTES FECHADAS POR TORRES (12/09, 4ª rodada) — FEITAS A PEDIDO DELE E AINDA NÃO JOGADAS.**
-**🟠 O M2 ESTÁ ABERTO E PARADO EM DUAS DECISÕES DE ARTE DELE — as bordas das câmaras A e B.**
-Branch `feat/fase4-visual`, **em dia com o `origin`**.
+**🟢 A LEITURA DA ABERTURA, A ÁGUA, OS CANOS, OS GÂNGLIOS E A MESA — JOGADOS E APROVADOS (12/09).**
+**🟢 AS PONTES COM TORRES DE AMARRAÇÃO — JOGADAS E APROVADAS (13/09):** *"ficaram boas e terminaram
+com o problema do início das passarelas flutuando."*
+**🟠 O M2 — AS BORDAS — INSTALADO E CORRIGIDO NUMA RODADA DE TESTE (13/09), AINDA NÃO REJOGADO.**
+**🟢 O CORAÇÃO E O MAQUINÁRIO RESPIRAM (13/09) — corrigidos depois do teste dele, não rejogados.**
+Branch `feat/fase4-visual` em `7bb2fd2`, **em dia com o `origin`**.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🎨.
-> Em 12/09 fechamos a água com os canos, a mesa de aço, os gânglios e as pontes com torres —
-> aprovei tudo, menos as torres, que ainda não joguei. As bordas do DUTO e do NÚCLEO estão
-> aprovadas; as da câmara A e da B têm duas candidatas cada, esperando minha escolha. Minha
-> escolha: câmara A = <A-0 | A-2 | as duas>, câmara B = <B-1 | B-3 | as duas>. Instale, me mostre
-> a captura, e siga o M2."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🎯.
+> Em 13/09 as bordas das câmaras entraram, o coração e o maquinário ganharam animação, e eu joguei
+> e mandei quatro consertos: uma arte só por câmara, os corações de volta na camada certa, a tira
+> cinza do rodapé fora, e a emenda com degrau. Você consertou os quatro e eu ainda NÃO rejoguei.
+> Meu veredicto agora: <o que achei jogando>. Siga daí."**
 
-⚠️ **SE ELE NÃO DER A ESCOLHA NO ARRANQUE, NÃO ADIVINHE — mostre a folha de contato primeiro.** As
-duas folhas se remontam com `_folha-faixa2.mjs` (ver a seção 🎨), e a escolha é dele por regra: as
-faixas são as 4 peças que ele reservou para si na divisão de 08/09.
+⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O VEREDICTO DELE, NÃO CODAR.** Tudo o que está 🟠 aqui
+está *feito e verificado por sonda*, e nada disso foi rejogado — a lei desta fatia, paga cinco
+vezes, é que **assert verde não julga composição**. A seção 🎯 lista o que perguntar, item por item.
+
+⚠️ **SE ELE CHEGAR SEM VEREDICTO**, suba o localhost (`npm run dev` → `L`) e remonte as capturas
+antes de qualquer outra coisa: `_ver-bordas.mjs` (as 4 câmaras), `_ver-respiro.mjs` (as duas peças
+respirando) e `_ver-abertura.mjs` (a leitura da abertura).
 
 ---
 
-## 🎨 O M2 ESTÁ ABERTO E PARADO NUMA DECISÃO DE ARTE (12/09, 4ª rodada)
+## 🎯 O QUE ESPERA O OLHO DELE — a lista da próxima sessão
 
-**🟠 DUAS PERGUNTAS ESPERAM O OLHO DELE. Nada mais bloqueia o M2.**
+**Nada aqui está quebrado. Tudo aqui está por julgar.** Sondas todas verdes; o que falta é o
+controle na mão.
 
-### ✅ O QUE ELE JÁ APROVOU DAS QUATRO BORDAS
-
-Vendo a folha de contato (`_folha-faixas.mjs`), veredicto dele: *"as do duto e do núcleo ficaram
-ótimas. As duas primeiras que preciso que troque."*
-
-| câmara | borda | estado |
+| # | o que | por que ainda não fechou |
 |---|---|---|
-| **C · o duto** | `scripts/_f4/_faixa-C-v.png` | ✅ **APROVADA** |
-| **D · o núcleo** | `scripts/_f4/_faixa-D-v.png` | ✅ **APROVADA** |
-| **A · a doca engolida** | a antiga é clara demais | 🟠 **duas candidatas novas, ele escolhe** |
-| **B · a garganta** | a antiga tem pontos laranja brigando com o azul | 🟠 **duas candidatas novas, ele escolhe** |
+| 1 | **A borda da câmara A** (`f4FaixaA`, a fibra sem osso) | é a mais escura das quatro. A pintura da doca tem média 16,4 e o tratamento prende a faixa em 1,3× disso — as candidatas caíram de 55,6 para 22,1. Se sumir contra o fundo, o knob é o alvo do `_valor-faixa.mjs` (1,3 → 1,5), reassar, zero geração |
+| 2 | **A borda da câmara B** (`f4FaixaB`) | ⚠️ **HÁ UMA FRASE DELE SEM RESPOSTA AQUI.** Ver a seção 🟠 logo abaixo — pode ser que ele queira trocar por `B-3` |
+| 3 | **A borda da câmara D** (`f4FaixaD`) | aprovada na folha de contato, nunca vista instalada. Ficou bem discreta na captura |
+| 4 | **O duto com a borda de B herdada** | a arte de C existe e está aprovada, mas é 128×80 e instalá-la é o M4. Pergunta dele a responder: dá para conviver até lá, ou corta C para 64 agora? |
+| 5 | **A emenda entre segmentos** | fora do duto virou degrau de ~1px (era até 10). DENTRO do duto continua 9–11px e **isso não sai** — ver a seção ⛏️. O que mudou lá foi a leitura, não a geometria |
+| 6 | **O coração e o maquinário respirando** | profundidade (sutil demais? forte demais?), ritmo (2,3s contra 3,2s), e se as peças na tela estão claramente fora de fase |
+| 7 | **O atalho `G`** | verificação de conserto, não gosto: apertar `G` tem de entregar o núcleo (pintura escura, borda D), nunca a doca vermelha |
 
-### 🟠 A DECISÃO 1 — a borda da CÂMARA A
+### 🟠 A FRASE DELE QUE FICOU SEM RESPOSTA
 
-Direção dele, apontando três candidaturas do lote C: fibra muscular vermelha densa com estilhaços
-de osso. ⚠️ **A ficção fecha:** a câmara A é a doca engolida, então o osso é o que sobrou do que o
-bicho comeu — e isso REFORÇA a decisão da mesa (parede orgânica, obstáculo de aço).
+> *"Na parte do golfinho quero que mantenha a mais escura também e tire a segunda variação."*
 
-| candidata | emenda | como lê |
+⚠️ **A CÂMARA B NUNCA TEVE DUAS VARIAÇÕES** — só `B-1` foi instalada, e a sonda confirma uma
+textura só na tela (`texturas: ["f4FaixaB"]`). Então a frase só fecha de duas maneiras, e **é dele
+a escolha, não adivinhe:**
+
+1. **Ele quer trocar B-1 por B-3**, a candidata mais ESCURA das duas que ele viu na folha (arcos
+   escuros com aro aceso e nódulo vermelho, emenda 10). É a leitura mais provável: ele pediu "mais
+   escuro" nas duas câmaras na mesma mensagem. Custo: reassar `B-3` com o `_valor-faixa.mjs` e
+   trocar uma linha do `ART`.
+2. **Ele viu os sprites bugados como se fossem uma segunda variação.** Naquela partida o coração e
+   o maquinário estavam em depth 0, sem tint e em escala 1 (ver o defeito 1 da seção 🆕) — arte
+   estranha colada por cima da câmara B. Se for isso, já está resolvido e não há nada a fazer.
+
+**Pergunte antes de mexer.** Os 8 PNGs candidatos continuam em `scripts/_f4/_faixa2/`.
+
+---
+
+## 🆕 O QUE A SESSÃO DE 13/09 FEZ
+
+### 1 · O M2 — AS BORDAS ENTRARAM
+
+**A escolha dele, na 1ª rodada:** câmara A as duas candidatas escurecidas (A-0 e A-2), câmara B a
+B-1, tratamento padrão nas três. A câmara D entrou junto, já estava aprovada.
+
+**E ele jogou e revisou:** *"preciso que mantenha só um tipo de pintura, quero a pintura que tem o
+músculo apenas e não o músculo com ossos… unifique as câmaras com sua única arte, não tenha duas."*
+
+⚠️ **A DECISÃO DAS DUAS IRMÃS MORREU NO TESTE JOGADO, E O MOTIVO VALE PARA O M3–M5.** Duas variantes
+por câmara eram a resposta à repetição (384 ÷ 128 = 3 cópias idênticas na tela). Elas mataram a
+repetição e criaram coisa pior: **não liam como variedade da mesma parede, liam como duas paredes
+emendadas.** A repetição é um defeito que o olho perdoa; a emenda não. A convenção do `pickVariant`
+continua de pé — desfazer isto é copiar um PNG e escrever uma linha no `ART`.
+
+| câmara | arte instalada | estado |
 |---|---|---|
-| **`_faixa2/A-0-v.png`** | **10** (a melhor das quatro) | fibra vermelha limpa, com o topo aceso |
-| **`_faixa2/A-2-v.png`** | 12 | a mesma fibra **com os estilhaços de osso** visíveis |
+| **A · a doca engolida** | `f4FaixaA` ← `_faixa2/A-0-v.png` | 🟠 instalada, por julgar |
+| **B · a garganta** | `f4FaixaB` ← `_faixa2/B-1-v.png` | 🟠 instalada, e ver a frase sem resposta acima |
+| **C · o duto** | — herda a borda de B | 🟠 arte aprovada, instalação é M4 |
+| **D · o núcleo** | `f4FaixaD` ← `_faixa-D-v.png` | 🟠 instalada, por julgar |
 
-### 🟠 A DECISÃO 2 — a borda da CÂMARA B
+### 2 · A `Moldura` APRENDEU A TROCAR DE FAIXA
 
-Direção dele: as três candidaturas pálidas e azuis do lote B.
+Ela criava os 8 segmentos com a chave cravada no construtor e não existia caminho para o evento
+`cenario` mexer neles. Agora:
 
-| candidata | emenda | como lê |
+- **`Moldura.setFaixa(base)`** troca a textura dos oito e a saia junto. Recebe a BASE, nunca a
+  chave final: cada segmento resorteia pelo `pickVariant`.
+- **A borda viaja no evento `cenario`**, junto com a pintura (`faixa?: string` no `StageEvent`), e
+  não num evento próprio. Borda e fundo são o mesmo lugar visto de dois ângulos; separá-los cria a
+  chance de discordarem — a garganta emoldurada pela doca.
+- **A câmara A não tem evento**, porque é onde a fase começa: `Moldura.FAIXA_INICIAL` já nasce com
+  ela. Quem escrever um `cenario` novo antes de t=38,8 tem de lembrar da borda junto.
+- **A guarda da chave inexistente** é o caminho da câmara C: o roteiro pede `f4FaixaC`, não acha, e
+  a borda anterior FICA. Sem ela os 8 segmentos cairiam na textura de erro (32×32).
+
+⚠️ **E ISSO ABRIU UM BURACO QUE JÁ EXISTIA.** O `aplicaCorredorEMoldura` repõe à mão o estado que o
+`skipTo` descarta, e a **PINTURA nunca esteve na lista**: apertar `G` levava a câmara A — a doca —
+para dentro da arena do chefão, que o roteiro pinta de câmara D em t=109. Mesma família do defeito
+que o `G` pagou em 12/09, um andar acima. As duas voltam na mesma linha agora, porque repor só a
+borda seria pior que não repor nenhuma.
+
+### 3 · O CORAÇÃO E O MAQUINÁRIO RESPIRAM
+
+Pedido dele: *"o coração gigante que faz parte do cenário precisa ganhar uma animação para ficar
+mais interessante"*. Os dois links que ele mandou **são** os sprites do jogo: `orgao.png` é o
+objeto `e754b9b9`, `maquinario.png` é o `89edcdd0`.
+
+| peça | ritmo | por quê |
 |---|---|---|
-| **`_faixa2/B-1-v.png`** | 12 | arcos pálidos com nervuras — **recua**, como borda deve recuar |
-| **`_faixa2/B-3-v.png`** | **10** | arcos escuros com aro aceso e um nódulo vermelho em cada — mais dramática, mas o aro branco puxa o olho |
+| **o coração** (chão, `f4-orgao-bate`) | 7 quadros/s + yoyo, ~2,3s | o mesmo `frameRate` do `nucleo-beat` do chefão: cenário e núcleo são o mesmo bicho |
+| **o maquinário** (teto, `f4-maquinario-brasa`) | 5 quadros/s + yoyo, ~3,2s | o chão é carne e o teto é máquina. No mesmo compasso o teto viraria víscera junto |
 
-⚠️ **AS DUAS DECISÕES ACEITAM "AS DUAS".** Se ele escolher duas por câmara, elas viram
-`f4Faixa`/`f4Faixa2` e **matam a repetição de graça** — que era a decisão aberta nº 1 do M2. As
-quatro atuais emendam entre 19 e 27; as novas, entre 10 e 12.
+⚠️ **O QUADRO INICIAL É SORTEADO POR SPRITE.** Três corações em uníssono leem como uma máquina, não
+como órgãos — a mesma lei do `pickVariant`.
 
-### ⚠️ COMO AS CANDIDATAS FORAM FEITAS, E POR QUE AS 64 NÃO SERVIAM
+⚠️ **A LEI NOVA, E ELA CUSTOU TRÊS RODADAS DE GERAÇÃO: O GERADOR NÃO OBEDECE LIMITE DE COR.** Duas
+rodadas pediram *"nunca branco, nunca pálido"* com todas as letras e as duas voltaram com o núcleo
+estourado — o modelo tem um viés forte de **pulsar = clarear**. O que virou foi **mudar o pedido**,
+não repetir: a 3ª rodada do coração pede uma animação que só ESCURECE (*"nothing ever gets brighter
+than frame one"*) e aí não há o que estourar. Saiu de primeira, com o p99 constante nos 9 quadros.
 
-Ele apontou candidaturas dos lotes de 08/09 como referência. **Elas não podiam ser instaladas:** são
-objetos recortados, medido de novo com a régua — 0% de sangramento nas bordas e emenda **255** (o
-máximo). Então elas entraram como **referência visual** numa geração nova de IMAGEM CHEIA
-(`create_image_pro`, 128×64, `no_background: false`, 3 referências por chamada, 20 gerações cada).
+⚠️ **E O QUE SOBRA SE IMPÕE NO DISCO** (`scripts/_f4/_assar-anim.mjs`), onde é determinístico. A
+âncora não é um número escolhido: é o SPRITE ESTÁTICO já aprovado jogando, e o quadro 0 das duas
+animações saiu idêntico a ele (média 42,5 nos dois). Três knobs, e os três nasceram de um defeito
+medido — o **joelho** (o teto do p99, com fator, porque no coração os pixels mais claros são o
+LATÃO da gaiola e não a carne), o **retint** (mede por MATIZ `b/r`, não por saturação: o estouro do
+gerador não vira cinza, vira creme, e creme tem saturação suficiente para escapar de um filtro de
+saturação) e a **força** (mistura cada quadro de volta no quadro 0; no coração 0,55).
 
-⚠️ **É a lei de 08/09 confirmada pela terceira vez: faixa é imagem cheia, objeto é prop.** O que
-mudou foi só o caminho — agora o gosto dele entra como referência em vez de virar instalação.
+### 4 · O TESTE JOGADO DELE, E OS QUATRO CONSERTOS
 
-### 🚨 OS ARQUIVOS DA DECISÃO NÃO ESTÃO VERSIONADOS
+**⚠️ O DEFEITO 1 ERA DE CÓDIGO, NÃO DE ARTE, e ele diagnosticou pela tela:** *"os corações estão na
+primeira camada do parallax, aumente eles como fez com as imagens estáticas e coloque-os na mesma
+camada de antes."*
 
-⚠️ `scripts/_f4/*.png` é ignorado pelo git (`.gitignore:40`), e é onde as oito candidatas moram. Um
-`git clean` apaga. **A fonte de recuperação são os jobs do PixelLab**, e é por isso que os ids estão
-aqui:
+O `Parallax.emit` escrevia `anima ? add.sprite(...) : add.image(...).setOrigin()…` e **a cadeia
+inteira de setters grudava no ramo FALSO**: a peça animada nascia sem depth (0 — na frente do
+jogo), sem escala (1 em vez de 1,62–1,85), sem tint e sem origem. Precedência de operador.
+Medido depois do conserto: coração em depth −88, escala 1,77, tint `0x5a4048`, 216px de largura.
 
-| lote | job id | download |
-|---|---|---|
-| câmara A (4 candidatas) | `2409a4ca-4a01-4b29-9188-67732aa80a2c` | `https://api.pixellab.ai/mcp/images/<job>/download?index=0..3` |
-| câmara B (4 candidatas) | `ccc85cf9-15eb-40a3-93a0-2ff2667ccc76` | idem |
-| as torres da ponte (16) | `34753985-afc0-4abf-8493-8f13b0f8766e` | objeto, em `review` |
-| a mesa · contêineres (4) | `f972d8e7-10f6-4704-b4c4-cacf3eef3e62` | objeto, em `review` |
-| a mesa · anteparos (4) | `eb9afbaf-9178-454a-ab04-8e0e6eb055c4` | objeto, em `review` |
-| o cano (16) | `bc28cdf2-8ee0-43cc-aef5-9dbf956330c5` | objeto, em `review` |
+⚠️ **É A LEI DA CAPTURA OUTRA VEZ, e desta vez contra MIM:** eu tinha *verificado* que as animações
+tocavam (as duas em quadros diferentes, sorteio funcionando) e não olhei ONDE elas estavam. A
+verificação certa, feita agora, compara os valores contra os do estático.
 
-### ⛏️ O QUE FALTA CONSTRUIR DEPOIS QUE ELE ESCOLHER
+**O DEFEITO 2 — a tira chapada no rodapé:** *"tem uma parte cinza que não tem nada"*, com o print
+circulado. Era o ENCHIMENTO. No duto a parede COLA no corredor e passa dos 54px do `ESPESSURA_MAX`
+(medido: 73px de espessura efetiva), a peça de 64px não alcança, e o resto era um retângulo de cor
+lisa de 19px atravessando a tela. Havia até um `corDoFundo` MEDINDO a última linha da peça para
+acertar essa cor — engenharia correta para o problema errado.
 
-⚠️ **A FAIXA AINDA NÃO SABE TROCAR POR CÂMARA.** A `Moldura` cria os 8 segmentos com a chave
-`f4Faixa` fixa, no construtor — não existe caminho para o evento `cenario` trocar a textura deles.
-Instalar as quatro bordas exige isso, e é a mesma pergunta que a MESA respondeu por outro caminho
-(lá as variantes entram pelo `pickVariant` e a identidade de lugar fica com a faixa e a pintura).
+⚠️ **A LEI QUE SAI DAÍ: COR CERTA NÃO SALVA SUPERFÍCIE VAZIA.** Agora é a **saia**: a própria peça
+continuada em ESPELHO a partir da linha onde ela acaba. Sem esticar, sem crop — 64px próprios, o
+que sobra sai da tela.
 
-Duas saídas, e a primeira é a barata:
-1. **`Moldura.setFaixa(key)`**, chamado pelo mesmo evento `cenario` que já troca a pintura — um
-   `setTexture` nos 8 segmentos. ⚠️ Com duas variantes por câmara, o sorteio por segmento continua
-   sendo do `pickVariant`, então `setFaixa` passa a BASE (`f4FaixaA`) e cada segmento sorteia.
-2. Um evento `faixa` próprio no roteiro, se as trocas de faixa e de pintura precisarem se separar.
+**O DEFEITO 3 — a emenda com degrau:** *"existe um degrau onde as continuações dos assets se
+encaixam, causando um gap reto na colagem"*. Ver a seção ⛏️ abaixo — são duas causas e só uma sai.
 
-⚠️ **E a sonda vai junto:** a `probe-f4-moldura` já cobra `texturas[0] === 'f4Faixa'` e `dims`
-`128×64`. É o mesmo remendo que a mesa levou hoje — cobrar a FAMÍLIA, não uma chave.
+**O DEFEITO 4 — as duas irmãs da câmara A.** Ver a seção 1.
+
+---
+
+## ⛏️ O DEGRAU DO DUTO — o que saiu e o que NÃO sai
+
+**FORA DO DUTO ERA RUÍDO GRATUITO, e saiu.** O relevo sorteava `Math.random() * 10` por placa, então
+vizinhas caíam a até 10px uma da outra — e como cada segmento é um retângulo CHATO de 128px, essa
+diferença vira um corte vertical na emenda. Agora é uma **onda contínua** da posição no mundo
+(`Moldura.relevoEm`): mesma amplitude de 10px ao longo da fase, degrau entre vizinhas de ~2,7px por
+construção. Medido na abertura: **`[1, 1, −1]`**, contra `[0, −7, 8]` antes.
+
+**DENTRO DO DUTO O DEGRAU É LOAD-BEARING E NÃO SAI.** Ali a parede é colada no corredor
+(`vaoY + meio + FOLGA`) e o corredor anda até `PASSO_MAX` = 14 por placa. Medido: `[11, 9, −4]`.
+
+⚠️ **E SUAVIZAR O DESENHO SEM SUAVIZAR O QUE MORDE É PROIBIDO** — daria parede invisível ou morte
+invisível, e a `probe-f4-moldura` cobra que os dois sejam a MESMA linha ("a superfície que MORDE é
+a mesma que DESENHA"). Suavizar os dois junto significa tornar `superficieChaoEm` contínua dentro
+da placa, o que reabre a trava dos 8px e a linha de base inteira. **Não faça isso sem ele pedir.**
+
+**O que dava para consertar era a LEITURA, e foi o que se fez.** O fio horizontal de 128px
+denunciava a emenda: duas linhas acesas em alturas diferentes, com um vazio entre elas, leem como
+dois pedaços mal colados. Agora um pedaço **vertical** liga as duas pontas (`Moldura.ligaDegrau`) e
+o mesmo degrau lê como saliência da parede. ⚠️ **E não é só enfeite:** o fio é o telégrafo da parede
+que MATA, então o vazio era borda letal sem aviso, bem na emenda onde o jogador raspa.
+
+⚠️ **SE ELE AINDA ACHAR O DUTO SERRILHADO**, as saídas em ordem de custo são: (1) baixar o
+`PASSO_MAX` só no trecho do duto — mexe em dificuldade já validada no M1; (2) meia-placa no
+DESENHO e na MORDIDA juntos — dobra os segmentos e reabre a trava; (3) aceitar. Nenhuma é barata.
+
+---
+
+## ⛏️ O QUE FALTA CONSTRUIR — a câmara C
+
+⚠️ **A ARTE DA CÂMARA C ESTÁ APROVADA E PARADA.** `scripts/_f4/_faixa-C-v.png`, veredicto dele em
+12/09: *"as do duto e do núcleo ficaram ótimas."* Ela é **128×80** — a "faixa grossa" do duto — e
+três coisas presumem 64:
+
+- `Moldura.ESPESSURA_MAX` = 54, calibrado para a peça de 64px sempre alcançar a borda;
+- a **saia**, que é ancorada em `superficie ± 64`;
+- o assert de dimensão da sonda (`128x64`).
+
+Instalar C é construir isso, e é o M4. **A decisão dele:** esperar o M4, ou cortar C para 64 agora
+e entregar hoje (jogando fora a faixa grossa)?
 
 ---
 
@@ -203,7 +305,7 @@ virtude.**
 | **`f4Ganglio`** ×2 | B-05, B-12 | núcleos nervosos **ACESOS**, esfumados em elipse irregular | teto, depth −87, tint `0x9aa2b8`, escala 0.55–0.85, gap 420–760 |
 | **`f4Cano`** ×3 | objeto `bc28cdf2` (novo, 20 gerações) | o cano de despejo que ENCHE a câmara | desenhado pela `Agua`, não pelo Parallax — ver "🚰 OS CANOS" |
 
-### 🌉 A PONTE — a 3ª rodada de 12/09 (feita, NÃO jogada)
+### 🌉 A PONTE — a 3ª rodada de 12/09 (✅ JOGADA E APROVADA em 13/09)
 
 A passarela entrou como UM pilar, ele jogou, e o diagnóstico foi dele: *"sobre o asset da ponte, eu
 achei, é que ele está pequeno e as mesas e bordas tampam ele. O que pensei: hoje nós temos o que
@@ -426,11 +528,11 @@ Ele jogou e fechou: *"ficou muito bom. ele sai da tela como pedi, as skills dele
 
 ---
 
-## ⏭️ A PRÓXIMA AÇÃO — ver a seção 🎨 no topo
+## ⏭️ A PRÓXIMA AÇÃO — ver a seção 🎯 no topo
 
 ⚠️ **ESTA SEÇÃO FICOU PARA TRÁS EM 12/09 e vale como registro do porquê, não como plano.** O M2
-andou: a MESA está instalada e aprovada, e as bordas estão em decisão. O que fazer a seguir está na
-seção **🎨 O M2 ESTÁ ABERTO E PARADO NUMA DECISÃO DE ARTE**, no topo do arquivo.
+andou duas vezes desde então: a MESA em 12/09 e as BORDAS em 13/09, as duas instaladas. O que fazer
+a seguir está na seção **🎯 O QUE ESPERA O OLHO DELE**, no topo do arquivo.
 
 ## 📚 REGISTRO — COMO O M2 FOI ABERTO: A CÂMARA A
 
@@ -579,7 +681,16 @@ um defeito que não existia. ⚠️ **Pausar a física não pausa o mundo.**
 
 ---
 
-## 🔴 AS DUAS DECISÕES ABERTAS — ELE PRECISA RESPONDER
+## ✅ AS DUAS DECISÕES DESTA SEÇÃO ESTÃO FECHADAS — fica como registro
+
+⚠️ **AS DUAS MORRERAM, E A PRIMEIRA MORREU JOGANDO.** *Quem pinta as faixas* fechou em 12/09 (são
+as candidaturas dele, e filtrar é meu). *A repetição da faixa* fechou em 13/09, e não do jeito que
+esta seção previa: as duas variantes por câmara foram instaladas, ele jogou e **reprovou** —
+*"unifique as câmaras com sua única arte, não tenha duas"*.
+
+⚠️ **A LEI QUE SAI DAÍ, e ela vale para o M3–M5:** as duas irmãs mataram a repetição e trouxeram
+coisa pior — não leram como variedade da mesma parede, leram como **duas paredes emendadas**. A
+repetição é um defeito que o olho perdoa; a emenda não. **Uma arte por câmara.**
 
 ### ✅ RESPONDIDO EM 12/09 — O CRITÉRIO DE ESCOLHA DAS FAIXAS
 
@@ -661,14 +772,39 @@ dos quatro fundos.
 | `_mock-moldura.mjs` | o mock procedural que ele aprovou — **e a fonte da arte provisória do M1** |
 | `_ver-abertura.mjs` | **da ABERTURA JOGANDO:** o que a decoração está tapando? Captura t=7/20/33 e imprime a caixa de cada peça. Foi ela que pegou o coração de 263px que passava em todos os asserts |
 | `_folha-lamina.mjs` | a folha mista (da Task 4 morta; a geometria dela ainda serve) |
+| **`_ver-bordas.mjs`** (13/09) | **as 4 CÂMARAS JOGANDO:** salta para t=7/45/74/111, imprime as texturas de faixa e a espessura de cada uma, e monta a folha. É o que responde a pergunta dele — *esta borda pertence a ESTA câmara?* |
+| **`_assar-anim.mjs`** (13/09) | **de uma ANIMAÇÃO de cenário:** prende o estouro do gerador contra o sprite estático aprovado e monta a folha de sprites. Três knobs: `pico` (a média), `teto` (o p99, com fator, porque nem sempre o pixel mais claro é a parte que acende) e `forca` (a amplitude inteira) |
+| **`_folha-anim.mjs`** (13/09) | **de uma ANIMAÇÃO, a régua:** quanto cada quadro mexeu contra o quadro 0, e quanto disso foi SILHUETA. ⚠️ Cuidado com a leitura dela — ver a lei da caixa delimitadora abaixo |
+| **`_ver-respiro.mjs`** (13/09) | **as peças RESPIRANDO no jogo:** congela o mundo e fotografa a MESMA peça em quatro momentos da batida. Sem congelar, a peça sai da tela entre um quadro e o outro e a folha compara peças diferentes |
+
+⚠️ **A LEI QUE A `_folha-anim.mjs` QUASE FEZ EU PAGAR ERRADO:** ela acusou 5–9% de "silhueta
+mexendo" no coração e eu quase descartei a animação por isso. A medição certa é a **CAIXA
+DELIMITADORA por quadro** — e ela não anda (0px no maquinário, 2px no coração). O que a primeira
+régua somava era a carne mudando de forma DENTRO da gaiola, que É a batida. Importa porque a peça é
+ancorada na borda: balançar denunciaria a âncora, mudar de forma por dentro não.
 
 ⚠️ **`scripts/_f4/*.png` é IGNORADO pelo git** (`.gitignore:40`). Os PNG existem **só neste
 disco** — um `git clean` apaga e não há de onde restaurar. Os `.mjs` estão versionados.
 
 **Os arquivos que importam no disco:**
-`_faixa-{A,B,C,D}.png` (cru) e **`_faixa-{A,B,C,D}-v.png` (valor corrigido — é daqui que vale
-pintar por cima)**. Mais `_folha-faixas.png`, `_mock-moldura.png`, `_folha-lamina.png` e o
-material morto da Task 4 (`_col-1..10`, `_lam-A..K`).
+`_faixa-{A,B,C,D}.png` (cru) e **`_faixa-{A,B,C,D}-v.png` (valor corrigido)**, mais os **8
+candidatos da decisão de 13/09 em `scripts/_f4/_faixa2/`** (`A-0..3`, `B-0..3`, com os `-v` dos
+finalistas). Mais `_folha-faixas.png`, `_mock-moldura.png`, `_folha-lamina.png` e o material morto
+da Task 4 (`_col-1..10`, `_lam-A..K`).
+
+⚠️ **A ARTE QUE ENTROU NO JOGO NÃO CORRE ESSE RISCO** — ela mora em `public/sprites/` e está
+versionada: `f4-faixa-{a,b,d}.png`, `orgao-anim.png`, `maquinario-anim.png`. E os quadros crus das
+duas animações estão em `assets/raw/anim-orgao/` e `assets/raw/anim-maquinario/`, também
+versionados, então reassar com outros knobs não custa geração nenhuma.
+
+**Os job ids do PixelLab, se os candidatos de `_f4/` sumirem:**
+
+| lote | job id |
+|---|---|
+| câmara A (4 candidatas) | `2409a4ca-4a01-4b29-9188-67732aa80a2c` |
+| câmara B (4 candidatas) | `ccc85cf9-15eb-40a3-93a0-2ff2667ccc76` |
+| animação do coração (a boa, "só escurece") | objeto `e754b9b9-8338-408c-b56e-ca24661036ae`, grupo `14dbafcb-83d1-4626-8701-2d36776dcb9b` |
+| animação do maquinário (a boa) | objeto `89edcdd0-9d7d-4ce8-8721-029e20fc3267`, grupo `7eeceed5-7c59-47e1-b869-7b44982ccd8a` |
 
 ---
 
@@ -737,15 +873,23 @@ A ÁGUA + OS CANOS + AS PEÇAS + A PONTE   ✅ JOGADOS E APROVADOS (12/09, rodad
   f4Ponte ×3 (pilar + vão procedural + pilar espelhado), f4Ganglio ×2, f4Cano ×3.
   *"o cano e a batalha com o golfinho ficou muito mais divertida"*, *"podemos encerrar esses
   ajustes"*. Ver "🌊 A ÁGUA DA ARENA E AS PEÇAS NOVAS".
-A PONTE COM TORRES       🟠 FEITA, NÃO JOGADA (12/09, 4ª rodada)
-  [torre][pilar][vão][pilar espelhado][torre espelhada]. Conserta o "começam do nada e ficam com
-  aparência de cortadas" do print dele. Sondas verdes — falta o controle na mão.
-M2 — AS BORDAS            🟠 ◄ PEGUE AQUI · C e D APROVADAS; A e B com duas candidatas cada,
-                             esperando a escolha dele. Depois: `Moldura.setFaixa` (a faixa ainda
-                             não sabe trocar por câmara). Ver a seção 🎨 no topo.
-  └ A MESA, que era parte do M2, já está instalada e aprovada (aço engolido, 3 variantes).
+A PONTE COM TORRES       ✅ JOGADA E APROVADA (13/09)
+  [torre][pilar][vão][pilar espelhado][torre espelhada]. *"ficaram boas e terminaram com o
+  problema do início das passarelas flutuando."* Nada pendente.
+M2 — AS BORDAS            🟠 ◄ PEGUE AQUI · INSTALADAS E CORRIGIDAS, NÃO REJOGADAS (13/09)
+  A, B e D entraram com UMA arte cada (ele reprovou as duas irmãs jogando). A `Moldura` ganhou
+  `setFaixa`, a borda viaja no evento `cenario`, e o `aplicaCorredorEMoldura` passou a repor a
+  pintura junto — buraco que já existia e levava a doca para a arena do chefão.
+  Depois do teste dele: a saia no lugar do enchimento chapado, o relevo contínuo, e o fio
+  vertical ligando o degrau. Ver a seção 🎯 no topo.
+  └ A MESA, que era parte do M2, está instalada e aprovada (aço engolido, 3 variantes).
+  └ ⚠️ A CÂMARA C NÃO ENTROU: a arte está aprovada mas é 128×80, e instalá-la é o M4.
+O CENÁRIO RESPIRA         🟠 FEITO E CORRIGIDO, NÃO REJOGADO (13/09)
+  o coração (chão, 7 q/s) e o maquinário (teto, 5 q/s), quadro inicial sorteado por peça.
+  Assados por `_assar-anim.mjs` contra o sprite estático aprovado.
 M3 — A CÂMARA B           ⬜ a garganta
-M4 — A CÂMARA C           ⬜ a faixa grossa, o esfíncter, e as 3 PORTAS (o resto do Bloco C)
+M4 — A CÂMARA C           ⬜ a faixa grossa (a arte JÁ EXISTE e está aprovada), o esfíncter, e as
+                             3 PORTAS (o resto do Bloco C)
 M5 — A CÂMARA D           ⬜ a faixa da arena
 BLOCO B — O CHEFÃO        ⬜ INALTERADO pela moldura, e ainda de pé
 ```
@@ -867,6 +1011,20 @@ mergeada. `origin` = github.com/HenriqueCrosio/AlienWorld-Remastered-V2.
 ⚠️ O remoto **`legacy`** é o repositório ANTIGO — **nunca empurre para ele**.
 ⚠️ **Commits são de autoria SÓ do Henrique** — sem `Co-Authored-By`, sem "Generated with".
 
+**A sessão de 13/09** fechou em três commits, todos empurrados:
+
+| commit | o que |
+|---|---|
+| `8e29f63` | as bordas das câmaras entram, e a moldura aprende a trocar de faixa (`setFaixa`, o `faixa` no evento `cenario`, a pintura reposta no `aplicaCorredorEMoldura`) |
+| `8fa81a3` | o coração e o maquinário respiram — as sheets, o `_assar-anim.mjs` e o `anim` na `ScatterLayer` |
+| `7bb2fd2` | o teste jogado dele: a camada dos corações, uma arte por câmara, a saia no lugar da tira chapada, o relevo contínuo e o fio do degrau |
+
+⚠️ **AS SONDAS DA SESSÃO DE 13/09, TODAS VERDES E UMA POR VEZ:** `probe-f4-moldura` (com cinco
+asserts novos — a FAMÍLIA da faixa em vez de uma chave cravada, os 8 segmentos da MESMA câmara, a
+saia emendada no PIXEL, a saia como ARTE e não cor lisa, e o degrau ENCOSTANDO nos dois fios),
+`probe-stage4` (`vaos:[126,126,126]`, exato), `probe-f4-visual`, `probe-f4-atalho-g`,
+`probe-f4-golfinho` e `probe-stage3`.
+
 **A sessão de 12/09** fechou num commit só, `c4bbdc8` — *"a abertura abre: mesas menores,
 destroços na borda, o coração enterrado"*. Ele carrega os três ajustes, os dois asserts novos da
 `probe-f4-visual`, a janela nova da `probe-stage4` e a ferramenta `_ver-abertura.mjs`.
@@ -908,3 +1066,13 @@ sessão gastou **125** ao longo do dia:
 ⚠️ **A LIÇÃO DE CUSTO, medida de novo:** objeto de 48–80px devolve 16 candidaturas por 20–25
 gerações; `create_image_pro` a 128×64 devolve 4 por 20. Candidatura é barata; o caro é o tempo de
 julgar. ⚠️ Confira o saldo no arranque antes de gastar.
+
+**PixelLab em 13/09: 4.533 de 5.000**, ciclo virando em 2026-10-04. A sessão de 13/09 gastou **10**
+— cinco chamadas de `animate_object`, 2 cada. As bordas não custaram nada: a arte já estava em
+disco desde 12/09.
+
+⚠️ **E A LIÇÃO DE CUSTO NOVA É DE PROMPT, NÃO DE PREÇO: repetir um pedido que o gerador ignorou é
+gastar geração para receber o mesmo número.** Duas rodadas pediram "nunca branco" com todas as
+letras e as duas voltaram estouradas. Quem virou o jogo foi a 3ª, que pediu OUTRA COISA — uma
+animação que só escurece. Se a segunda tentativa sair igual à primeira, **mude o pedido ou mude de
+ferramenta**; a terceira idêntica é dinheiro no lixo.
