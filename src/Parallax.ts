@@ -31,6 +31,15 @@ interface ScatterLayer {
   /** Distância entre um sprite e o próximo, em px. */
   gap: [number, number];
   /**
+   * A SHEET que faz esta camada RESPIRAR, se ela tiver uma. Sem a chave, ou sem o PNG em disco,
+   * a camada nasce `image` como sempre e o estático segura — arte entra asset por asset.
+   *
+   * ⚠️ O QUADRO INICIAL É SORTEADO POR SPRITE (`emit`), e é o detalhe que faz ou quebra a coisa:
+   * três corações batendo em uníssono na tela leem como uma máquina, não como órgãos. É a mesma
+   * lei do `pickVariant` — o que se repete igual denuncia o truque.
+   */
+  anim?: { sheet: string; key: string; frameRate: number };
+  /**
    * Cai para trás ao romper a atmosfera?
    * Terreno sim. Nebulosa e planeta NÃO — eles são o espaço, e o espaço continua lá.
    */
@@ -497,6 +506,10 @@ export class Parallax {
       scale: [1.62, 1.85],
       gap: [400, 700],
       terreno: false,
+      // ⚠️ 7 QUADROS/s COM YOYO = 16 quadros por volta, ou ~2,3s por batida — um coração EM
+      // REPOUSO. É o mesmo `frameRate` do `nucleo-beat` do chefão, e de propósito: o cenário e o
+      // núcleo são o mesmo bicho, e dois ritmos diferentes na mesma tela seriam dois bichos.
+      anim: { sheet: 'orgaoAnimSheet', key: 'f4-orgao-bate', frameRate: 7 },
     });
     // MAQUINÁRIO PESADO pendurado no teto: o bicho é biomecânico — carne E máquina.
     this.addLayer({
@@ -510,6 +523,11 @@ export class Parallax {
       gap: [260, 480],
       terreno: false,
       teto: true,
+      // ⚠️ 5 QUADROS/s — MAIS LENTO QUE O CORAÇÃO, e a diferença é a frase da fase. O chão é
+      // carne e o teto é máquina: se os dois respirassem no mesmo compasso, o teto viraria
+      // víscera junto e a metade industrial da fase sumiria. ~3,2s por ciclo é uma fornalha
+      // esfriando, não um órgão.
+      anim: { sheet: 'maquinarioAnimSheet', key: 'f4-maquinario-brasa', frameRate: 5 },
     });
 
     // ─── O QUE O BICHO ENGOLIU (12/09) — as peças que saíram das 64 candidaturas dele ───
@@ -1434,6 +1452,25 @@ export class Parallax {
     return pickVariant(this.scene, Phaser.Utils.Array.GetRandom(zona));
   }
 
+  /**
+   * Registra a animação de uma camada, uma vez por cena.
+   *
+   * ⚠️ `yoyo`, E É O QUE FECHA O LOOP. A sheet vem do gerador com 9 quadros que NÃO voltam ao
+   * primeiro — o último é o pico, e um `repeat: -1` seco daria um corte duro de pico para
+   * repouso a cada volta. Tocando 0→8→0 a batida fecha por construção, sem tocar na arte. É a
+   * mesma solução que o `nucleo-beat` do chefão já usa, pelo mesmo motivo.
+   */
+  private registraAnim(a: { sheet: string; key: string; frameRate: number }): void {
+    if (this.scene.anims.exists(a.key)) return;
+    this.scene.anims.create({
+      key: a.key,
+      frames: this.scene.anims.generateFrameNumbers(a.sheet, { start: 0, end: 8 }),
+      frameRate: a.frameRate,
+      repeat: -1,
+      yoyo: true,
+    });
+  }
+
   private emit(layer: ScatterLayer): void {
     // No vácuo o sprite nasce em qualquer altura e é ancorado pelo CENTRO — ele flutua, não
     // cresce do chão. Na superfície é o contrário: origem na base, sobre a linha do solo.
@@ -1446,7 +1483,14 @@ export class Parallax {
       : (layer.faixa ?? [-10, GAME_HEIGHT + 10]);
     const y = layer.flutua ? Phaser.Math.Between(...banda) : layer.baseY;
 
-    const img = this.scene.add
+    // A CAMADA QUE RESPIRA nasce `sprite` em vez de `image`; todo o resto é idêntico, porque
+    // `Sprite` ESTENDE `Image` e o array da camada continua servindo os dois. Sem a sheet em
+    // disco, `anima` é nulo e a peça nasce estática como sempre.
+    const anima = layer.anim && this.scene.textures.exists(layer.anim.sheet) ? layer.anim : null;
+
+    const img = anima
+      ? this.scene.add.sprite(layer.nextX, y, anima.sheet)
+      : this.scene.add
       // Sorteia entre as variantes da camada: montanhas repetidas denunciam o truque.
       // O CASCO é a exceção — lá a peça não é sorteada, é o lugar do corpo que decide.
       .image(layer.nextX, y, layer.casco ? this.familiaDoCasco() : pickVariant(this.scene, layer.key))
@@ -1471,6 +1515,17 @@ export class Parallax {
     // HORIZONTAL. Rodada em ângulo aleatório como as pedras, viraria cascalho picado no céu — e
     // a banda, que é a coisa toda, some.
     if (layer.flutua && !layer.faixa && !layer.faixas) img.setAngle(Phaser.Math.Between(0, 359));
+
+    // E A RESPIRAÇÃO COMEÇA NUM PONTO SORTEADO DA BATIDA. `play` reinicia do quadro 0, então sem
+    // o `startFrame` cada peça que entra pela direita nasceria em sístole junto com todas as
+    // outras — e a tela inteira pulsaria em uníssono, que é a leitura de máquina, não de órgão.
+    if (anima) {
+      this.registraAnim(anima);
+      (img as Phaser.GameObjects.Sprite).play({
+        key: anima.key,
+        startFrame: Phaser.Math.Between(0, 8),
+      });
+    }
 
     layer.sprites.push(img);
     layer.nextX += Phaser.Math.Between(...layer.gap);
