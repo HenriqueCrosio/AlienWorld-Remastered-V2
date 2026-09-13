@@ -227,6 +227,20 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // 122×122) — o BossNucleo compensa (a mesma armadilha da sheet do Leviatã, nº 33).
   guardiaoIdleSheet: { path: 'sprites/guardiao-idle-sheet.png', w: 256, h: 256 },
   nucleoBeatSheet: { path: 'sprites/nucleo-beat-sheet.png', w: 128, h: 128 },
+
+  // AS DUAS PEÇAS-ASSINATURA DO CENÁRIO DA F4, RESPIRANDO (13/09). O coração no chão e o
+  // maquinário no teto — as mesmas peças estáticas de sempre (`orgao`/`maquinario`), agora com o
+  // que acende passeando. 9 quadros de 122×122, assados por `scripts/_f4/_assar-anim.mjs`.
+  //
+  // ⚠️ O QUADRO 0 É O SPRITE ESTÁTICO, e isso não é coincidência: o assador ancora a animação
+  // inteira nele (média 42,5 nos dois). A peça respira EM VOLTA do que já foi aprovado jogando,
+  // em vez de trocar de aparência.
+  //
+  // ⚠️ E O ASSADOR EXISTE PORQUE O GERADOR NÃO OBEDECE LIMITE DE COR: duas rodadas pediram "nunca
+  // branco" com todas as letras e as duas voltaram com o núcleo estourado. O teto se impõe no
+  // disco, onde é determinístico. Ver o cabeçalho do script.
+  orgaoAnimSheet: { path: 'sprites/orgao-anim.png', w: 122, h: 122 },
+  maquinarioAnimSheet: { path: 'sprites/maquinario-anim.png', w: 122, h: 122 },
   // O Leviatã-BALEIA (o mesmo do menu) com fissuras pulsando e explosões na espinha (cutscene
   // final, beat 3). ⚠️ CANVAS QUADRADO 144×144 com a criatura CENTRALIZADA — a âncora é outra
   // em relação ao sprite estático `leviathanWhaleDying` (140×87 recortado). O centro visual do
@@ -637,14 +651,30 @@ const ART: Record<string, string> = {
 
   // ─── A MOLDURA DA FASE 4 (Fatia 7 · M1) ───
   //
-  // ⚠️ ARTE PROVISÓRIA, E FEIA DE PROPÓSITO (`scripts/_f4/_assar-provisoria.mjs`). O M1 existe para
-  // descobrir se a mudança de GEOMETRIA funciona ANTES de gastar as 14 peças de arte em cima dela.
-  // A arte de verdade entra nas etapas M2–M5, uma câmara por vez.
+  // AS BORDAS DAS CÂMARAS — a arte de verdade da moldura, instalada no M2 (13/09).
   //
   // ⚠️ A FAIXA É 128×64 E ENTRA EM ESCALA 1, ancorada pela SUPERFÍCIE — o que sobra dela sai da
-  // tela. É por isso que `Moldura.ESPESSURA_MAX` é 54 e não 64.
-  // Sem placeholder: sem o PNG, a `Moldura` não constrói sprite nenhum e a fase roda como antes.
-  f4Faixa: 'sprites/f4-faixa-prov.png',
+  // tela. É por isso que `Moldura.ESPESSURA_MAX` é 54 e não 64. **Qualquer peça registrada aqui
+  // TEM de ser 128×64**; a `probe-f4-moldura` cobra isso de cada uma, uma a uma.
+  //
+  // ⚠️ A CONVENÇÃO DE NOME É A DO `pickVariant` (src/art.ts): `<base>`, `<base>2`, `<base>3`… A
+  // câmara A tem DUAS irmãs e cada segmento sorteia entre elas — é o que mata as 3 cópias
+  // idênticas na tela ao mesmo tempo (384 ÷ 128 = 3). As outras têm uma só, e o `pickVariant`
+  // devolve a própria base sem reclamar. Acrescentar uma irmã depois é copiar um PNG e escrever
+  // uma linha aqui — nenhum código muda.
+  //
+  // ⚠️ A CÂMARA C NÃO ESTÁ AQUI, E A ARTE DELA EXISTE E FOI APROVADA (`_faixa-C-v.png`). Ela é
+  // 128×**80** — a "faixa grossa" do duto — e três coisas presumem 64: o `ESPESSURA_MAX` de 54, o
+  // `Moldura.corDoFundo` lendo a linha 63, e o assert de dimensão da sonda. Instalar C é construir
+  // isso, e é exatamente o que o M4 está escalado para fazer. Até lá o `setFaixa('f4FaixaC')` não
+  // acha a chave e MANTÉM a borda anterior — ver a guarda em `Moldura.setFaixa`.
+  //
+  // ⚠️ `f4-faixa-prov.png` FICA NO DISCO. A regra de saída é dele — *"caso não fique bom, mantemos
+  // a que está agora"* — e voltar atrás é reapontar estas chaves para o provisório.
+  f4FaixaA: 'sprites/f4-faixa-a.png',
+  f4FaixaA2: 'sprites/f4-faixa-a2.png',
+  f4FaixaB: 'sprites/f4-faixa-b.png',
+  f4FaixaD: 'sprites/f4-faixa-d.png',
   // A MESA: 96×112, TOPO CHATO. A hitbox sai da largura da TEXTURA, então topo chato é o que a
   // torna honesta por construção (`scripts/_f4/_medir-colunas.mjs`).
   //

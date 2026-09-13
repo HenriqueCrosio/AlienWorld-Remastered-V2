@@ -159,9 +159,23 @@ ok(
   `a faixa é desenhada em escala 1 (${JSON.stringify(faixa.escalas)})`,
 );
 ok(faixa.cobre, 'os 4 segmentos cobrem a largura da tela sem buraco');
+// ⚠️ A FAMÍLIA, NÃO UMA CHAVE CRAVADA — é o mesmo remendo que a mesa levou em 12/09. Até o M2 a
+// faixa era uma peça provisória só (`f4Faixa`) e este assert podia comparar com um literal. Agora
+// a câmara A tem DUAS irmãs sorteadas segmento a segmento (`f4FaixaA`/`f4FaixaA2`, ver
+// `Moldura.setFaixa`), então um literal reprovaria o sorteio que é justamente a decisão do M2.
+//
+// O que ainda tem de ser cobrado é o que o literal cobrava de verdade: que nenhum segmento caiu na
+// textura de erro do motor (`__MISSING`/`__DEFAULT`, 32×32) e que todos pertencem à MESMA câmara —
+// oito segmentos meio da doca, meio da garganta é o defeito que o `setFaixa` pode introduzir.
+const FAMILIA = /^f4Faixa([A-D])\d*$/;
+const camaras = [...new Set(faixa.texturas.map((k) => (FAMILIA.exec(k) ?? [])[1]))];
 ok(
-  faixa.texturas.length === 1 && faixa.texturas[0] === 'f4Faixa',
-  `nenhum segmento da faixa usa a textura de erro — todos carregam 'f4Faixa' (${JSON.stringify(faixa.texturas)})`,
+  faixa.texturas.length > 0 && faixa.texturas.every((k) => FAMILIA.test(k)),
+  `nenhum segmento da faixa usa a textura de erro — todos são da família f4Faixa* (${JSON.stringify(faixa.texturas)})`,
+);
+ok(
+  camaras.length === 1,
+  `⭐ os 8 segmentos são todos da MESMA câmara (${JSON.stringify(camaras)})`,
 );
 ok(
   faixa.dims.length === 1 && faixa.dims[0] === '128x64',

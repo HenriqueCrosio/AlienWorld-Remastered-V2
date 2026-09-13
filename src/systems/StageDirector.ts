@@ -94,8 +94,16 @@ export type StageEvent =
   /**
    * Troca a pintura da câmara (Fase 4). `fadeMs` ajusta o mergulho no escuro do `setPintura`
    * (600 por omissão).
+   *
+   * ⚠️ `faixa` É A BORDA DA MOLDURA, E ELA VIAJA NESTE EVENTO DE PROPÓSITO. A borda e a pintura
+   * são o MESMO lugar visto de dois ângulos, então separá-las num evento `faixa` próprio criaria
+   * a chance de as duas discordarem — a garganta emoldurada pela doca. Um evento, uma câmara.
+   * É a BASE (`f4FaixaA`), nunca a chave final: cada segmento sorteia a irmã dele.
+   *
+   * ⚠️ A CÂMARA A NÃO TEM EVENTO porque é onde a fase começa — `Moldura.FAIXA_INICIAL` já nasce
+   * com ela. Quem escrever um `cenario` novo antes de t=38,8 tem de lembrar da borda junto.
    */
-  | { t: number; type: 'cenario'; key: string; fadeMs?: number }
+  | { t: number; type: 'cenario'; key: string; fadeMs?: number; faixa?: string }
   /**
    * A ÁGUA DA CÂMARA B (Fase 4) — enche ou drena.
    *
@@ -500,7 +508,7 @@ export const STAGE_4: StageEvent[] = [
   // linha em t=38,8 cai 0,2s depois, e o mergulho termina em t=39,4 — meio segundo antes do bicho.
   // **A `probe-f4-agua` cobra exatamente isso.** Antecipar esta linha sem antecipar o `agua`
   // devolve o defeito que ele apontou: a câmara mudando de lugar e de nível ao mesmo tempo.
-  { t: 38.8, type: 'cenario', key: 'paintBgF4b' },
+  { t: 38.8, type: 'cenario', key: 'paintBgF4b', faixa: 'f4FaixaB' },
 
   // ─── O GOLFINHO: o motivo de a câmara mudar (spec 2026-09-11). ───
   //
@@ -547,7 +555,7 @@ export const STAGE_4: StageEvent[] = [
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
   // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
   // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
-  { t: 68, type: 'cenario', key: 'paintBgF4c' },
+  { t: 68, type: 'cenario', key: 'paintBgF4c', faixa: 'f4FaixaC' },
   // O DUTO: a faixa CHEIA, E ELA PASSA A MORDER. 54 é o teto da peça de 64px ancorada pela
   // superfície (`Moldura.ESPESSURA_MAX`), e a partir daqui a mesa vira parede — a trava dos 8px
   // apara o resto sozinha enquanto o corredor existir.
@@ -598,7 +606,7 @@ export const STAGE_4: StageEvent[] = [
   { t: 106.5, type: 'hazard', rate: 0, mix: [] },
   // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
   // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
-  { t: 109, type: 'cenario', key: 'paintBgF4d' },
+  { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD' },
   { t: 109, type: 'banner', text: 'ALERTA · O NÚCLEO' },
   { t: 113, type: 'boss' },
 ];

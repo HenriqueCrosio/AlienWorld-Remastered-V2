@@ -624,10 +624,28 @@ export class GameScene extends Phaser.Scene {
   private aplicaCorredorEMoldura(t: number): void {
     let corredor: Extract<StageEvent, { type: 'corredor' }> | undefined;
     let moldura: Extract<StageEvent, { type: 'moldura' }> | undefined;
+    let cenario: Extract<StageEvent, { type: 'cenario' }> | undefined;
     for (const e of this.stage.script) {
       if (e.t >= t) break;
       if (e.type === 'corredor') corredor = e;
       else if (e.type === 'moldura') moldura = e;
+      else if (e.type === 'cenario') cenario = e;
+    }
+    // ⚠️ O `cenario` ENTROU AQUI EM 13/09, E ELE JÁ FALTAVA ANTES DA BORDA EXISTIR. Este método
+    // repõe à mão o estado que os eventos descartados pelo `skipTo` teriam deixado, e a PINTURA
+    // nunca esteve na lista: apertar `G` levava a câmara A — a doca — para dentro da arena do
+    // chefão, que o roteiro pinta de câmara D em t=109. É a mesma família do defeito que o `G`
+    // pagou em 12/09, um andar acima.
+    //
+    // ⚠️ E REPOR SÓ A BORDA SERIA PIOR QUE NÃO REPOR NENHUMA: a garganta emoldurando a doca lê
+    // como defeito de arte, enquanto as duas erradas juntas ao menos leem como um lugar. Por isso
+    // as duas saem do mesmo evento e voltam na mesma linha.
+    //
+    // Sem `fadeMs`: o mergulho no escuro é dramaturgia de uma troca ao vivo. Aqui não se está
+    // TROCANDO de câmara, está-se chegando numa — o fade seria uma cortina sobre nada.
+    if (cenario) {
+      this.parallax.setPintura(cenario.key, 0);
+      if (cenario.faixa) this.moldura.setFaixa(cenario.faixa);
     }
     if (corredor) {
       this.corredorRate = corredor.rate;
@@ -718,6 +736,9 @@ export class GameScene extends Phaser.Scene {
         // troca é o roteiro. O mergulho no escuro vive no `setPintura` — daqui saem a chave e,
         // quando o roteiro tem motivo para encurtar o mergulho, a duração dele.
         this.parallax.setPintura(e.key, e.fadeMs);
+        // E A BORDA DA MOLDURA JUNTO, no mesmo evento: a câmara é o fundo E a moldura dele. O
+        // `setFaixa` recebe a BASE e cada segmento sorteia a irmã — ver `Moldura.setFaixa`.
+        if (e.faixa) this.moldura.setFaixa(e.faixa);
         break;
       case 'boss':
         this.spawnBoss();

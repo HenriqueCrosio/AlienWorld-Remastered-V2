@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { pickVariant } from '../art';
 import { GROUND_Y, TETO_Y } from './TerrainSystem';
 
 /**
@@ -50,6 +51,15 @@ interface Placa {
 export class Moldura {
   /** A largura de um segmento da faixa, e da grade do mundo. 128 ÷ 84 = 1,52s por placa. */
   static readonly LARGURA = 128;
+
+  /**
+   * A borda com que a moldura NASCE: a da câmara A, porque é onde a fase começa.
+   *
+   * ⚠️ ELA TAMBÉM É A GUARDA DE EXISTÊNCIA do construtor. A `BootScene` carrega `ART`
+   * GLOBALMENTE, então uma chave de faixa existe em TODA fase — sem a guarda, os 8 sprites
+   * nasciam nas Fases 1, 2 e 3 como uma tira vermelha colada no rodapé. Ver `desenha`.
+   */
+  static readonly FAIXA_INICIAL = 'f4FaixaA';
 
   /**
    * ⚠️ A TRAVA. A superfície da faixa nunca chega a menos de 8px da borda do vão. O desenho cede,
@@ -159,6 +169,16 @@ export class Moldura {
    */
   duto = false;
 
+  /**
+   * A cena, guardada só quando a moldura DESENHA. É o que o `setFaixa` precisa para sortear a
+   * variante e para remedir a cor do enchimento; fora da Fase 4 ela fica nula e o `setFaixa` é
+   * um no-op, como todo o resto do desenho.
+   */
+  private scene: Phaser.Scene | null = null;
+
+  /** A BASE da borda em vigor (`f4FaixaA`, `f4FaixaB`…). O sorteio das irmãs sai daqui. */
+  private base = Moldura.FAIXA_INICIAL;
+
   private readonly chao: Phaser.GameObjects.Image[] = [];
   private readonly teto: Phaser.GameObjects.Image[] = [];
   /** Os fios acesos — um por segmento, por lado. Só existem quando a parede morde. Ver `FIO`. */
@@ -186,9 +206,11 @@ export class Moldura {
     //
     // Sem a textura, ou fora da Fase 4, a `Moldura` continua respondendo a curva (matemática
     // pura) e não desenha nada — a mesma lei de todo o resto: arte entra asset por asset.
-    if (!desenha || !scene.textures.exists('f4Faixa')) return;
+    if (!desenha || !scene.textures.exists(Moldura.FAIXA_INICIAL)) return;
 
-    const fundo = Moldura.corDoFundo(scene);
+    this.scene = scene;
+    this.base = Moldura.FAIXA_INICIAL;
+    const fundo = Moldura.corDoFundo(scene, this.base);
 
     for (let i = 0; i < Moldura.SEGMENTOS; i++) {
       // Depth −0.6: atrás dos props (−0.5 — a mesa desenha por cima da faixa de onde ela nasce) e
@@ -199,12 +221,21 @@ export class Moldura {
       //
       // O NOME é o que torna a faixa medível: a sonda acha os segmentos por ele, como a
       // `sombraCasco` da Fase 3.
+      //
+      // ⚠️ `pickVariant` POR SEGMENTO, não uma textura para os oito. 384 ÷ 128 = 3 cópias na tela
+      // ao mesmo tempo, e o olho pega o desenho repetido — era a decisão aberta nº 1 do M2. Com
+      // duas irmãs na câmara A o sorteio quebra a fileira; com uma só, `pickVariant` devolve a
+      // base e nada muda. É o mesmo caminho da mesa.
       this.chao.push(
-        scene.add.image(0, 0, 'f4Faixa').setOrigin(0, 0).setDepth(-0.6).setName('faixaChao'),
+        scene.add
+          .image(0, 0, pickVariant(scene, this.base))
+          .setOrigin(0, 0)
+          .setDepth(-0.6)
+          .setName('faixaChao'),
       );
       this.teto.push(
         scene.add
-          .image(0, 0, 'f4Faixa')
+          .image(0, 0, pickVariant(scene, this.base))
           .setOrigin(0, 1)
           .setFlipY(true) // o teto é a mesma peça de cabeça para baixo
           .setDepth(-0.6)
@@ -252,19 +283,48 @@ export class Moldura {
    * lembraria de voltar aqui. Medir a linha que ENCOSTA no enchimento faz a emenda desaparecer
    * com qualquer arte — inclusive a que ainda não existe.
    */
-  private static corDoFundo(scene: Phaser.Scene): number {
-    if (!scene.textures.exists('f4Faixa')) return 0x000000;
+  private static corDoFundo(scene: Phaser.Scene, key: string): number {
+    if (!scene.textures.exists(key)) return 0x000000;
     // A peça do chão é ancorada pelo TOPO e o que sobra sai da tela por baixo, então quem encosta
     // no enchimento é a ÚLTIMA linha dela. Média de 16 colunas: um pixel só pega uma brasa.
     let r = 0, g = 0, b = 0, n = 0;
     const y = 63;
     for (let i = 0; i < 16; i++) {
-      const px = scene.textures.getPixel(i * 8, y, 'f4Faixa');
+      const px = scene.textures.getPixel(i * 8, y, key);
       if (!px) continue;
       r += px.red; g += px.green; b += px.blue; n++;
     }
     if (!n) return 0x000000;
     return (Math.round(r / n) << 16) | (Math.round(g / n) << 8) | Math.round(b / n);
+  }
+
+  /**
+   * TROCA A BORDA DE CÂMARA. Quem chama é o evento `cenario` do roteiro, junto com a pintura: a
+   * borda e o fundo são o MESMO lugar, e é por isso que não existe evento `faixa` próprio.
+   *
+   * ⚠️ RECEBE A BASE, NÃO A CHAVE FINAL (`f4FaixaA`, não `f4FaixaA2`). Cada segmento resorteia a
+   * irmã dele — se a troca cravasse uma textura só, as 3 cópias na tela voltariam a ser idênticas
+   * e a decisão de duas variantes por câmara não valeria nada.
+   *
+   * ⚠️ A GUARDA DA CHAVE INEXISTENTE NÃO É CAUTELA, É O CAMINHO DA CÂMARA C. A arte dela está
+   * aprovada mas é 128×80, e instalá-la é trabalho do M4 (ver a nota no `ART` da `BootScene`).
+   * Até lá o roteiro pede `f4FaixaC`, não acha, e a borda anterior FICA — o duto herda a borda da
+   * garganta em vez de cair na textura de erro do motor, que é 32×32 e apareceria como oito
+   * selos minúsculos alinhados no rodapé.
+   */
+  setFaixa(base: string): void {
+    const scene = this.scene;
+    if (!scene || !scene.textures.exists(base)) return;
+
+    this.base = base;
+    for (const seg of this.chao) seg.setTexture(pickVariant(scene, base));
+    for (const seg of this.teto) seg.setTexture(pickVariant(scene, base));
+
+    // ⚠️ E O ENCHIMENTO REMEDIDO JUNTO. A cor dele sai da última linha da PEÇA (ver `corDoFundo`),
+    // então trocar a arte sem remedir deixaria a emenda do duto pintada com a cor da câmara
+    // anterior — uma tira da cor errada no exato lugar que o enchimento existe para esconder.
+    const fundo = Moldura.corDoFundo(scene, base);
+    for (const r of this.enchimento) r.setFillStyle(fundo);
   }
 
   /** O `gap` do roteiro. A placa que nascer daqui em diante é julgada por ele. */
