@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { pickVariant } from '../art';
+import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { GROUND_Y, TETO_Y } from './TerrainSystem';
 
 /**
@@ -27,6 +28,44 @@ interface Placa {
    * as placas velhas saírem da tela.
    */
   gap: number;
+  /**
+   * A BORDA desta placa, sorteada UMA VEZ, quando ela nasce — uma chave para o chão e outra para o
+   * teto, cada uma com a irmã dela.
+   *
+   * ⚠️ A BORDA MORA NA PLACA, E NÃO NO SPRITE, PORQUE A TROCA DE CÂMARA TEM DE ROLAR COM O MUNDO.
+   * Até 14/09 o `setFaixa` reescrevia os oito sprites no mesmo quadro, e ele jogou e descreveu
+   * exatamente isso: *"parece acontecer um glitch… como as duas são muito diferentes visualmente,
+   * o jogador percebe a troca grosseira"*. Guardada aqui, a borda nova só vale para as placas
+   * geradas DEPOIS da troca — e placa nova só nasce à direita da tela (ver `placaDe`). A câmara
+   * seguinte ENTRA pela direita, como todo o resto da fase.
+   */
+  faixaChao: string;
+  faixaTeto: string;
+  /**
+   * O QUANTO a placa nasceu dentro do duto, de 0 a 1 — decide o tint dela, e só o tint.
+   *
+   * ⚠️ POR PLACA PELO MESMO MOTIVO DA BORDA, e foi ele que pegou (14/09): *"a borda do final do duto
+   * ficou muito estranha e sem acabamento… arrume essa transição repentina"*. Com o tint global, o
+   * `setDuto(false)` de t=106 descoloria no mesmo quadro a parede grossa e colada que ainda estava
+   * inteira na tela. Agora o fim do duto rola para fora com a cara do duto.
+   *
+   * ⚠️ E É UM NÚMERO, NÃO UM BOOLEANO: com tint cru por placa, a placa vermelha do duto encostava
+   * na azul da câmara com um corte de cor seco — uma costura nova no lugar da que se tirou. O tint
+   * anda `1 / LETAL_PLACAS` por placa gerada (ver `gerar`), e a parede esfria ao longo de três.
+   *
+   * ⚠️ E O FIO E A MORDIDA VIRARAM DA PLACA TAMBÉM (14/09, 2º teste jogado): *"um pouco antes [da
+   * câmara D] ainda tem o erro… a linha do duto não existe e o sprite da borda é diferente de todo
+   * o duto, quero que fique igual ao do duto"*. Com o fio global, a parede do duto que ainda estava
+   * na tela perdia a linha acesa no quadro em que o roteiro dizia "acabou". Agora a regra é uma só,
+   * placa a placa: **`letal > 0` desenha o fio E morde** — a parede nunca mata sem a linha acesa, e
+   * a linha nunca acende numa parede que não mata.
+   */
+  letal: number;
+  /**
+   * A PEÇA QUE TAPA A EMENDA entre duas câmaras, se esta placa for a primeira da câmara nova — a
+   * chave da arte (uma mesa), já sorteada. Ver `JUNTA_ESCALA`.
+   */
+  junta?: string;
 }
 
 /**
@@ -128,6 +167,12 @@ export class Moldura {
    */
   private static readonly TINT_LETAL = 0xff8a6a;
 
+  /** Em quantas placas o tint do duto acende ou apaga. Ver `Placa.letal`. */
+  private static readonly LETAL_PLACAS = 3;
+
+  /** O tint da última placa gerada, perseguindo o `duto` placa a placa. */
+  private letalAtual = 0;
+
   /**
    * A cor do FIO — a linha acesa na superfície da parede letal.
    *
@@ -145,6 +190,25 @@ export class Moldura {
 
   /** A espessura do fio, em px. Dois: um pixel some na grade de 384×216, três viram enfeite. */
   private static readonly FIO_PX = 2;
+
+  /**
+   * A JUNTA — o pilar na frente da costura entre as bordas de duas câmaras.
+   *
+   * ⚠️ A IDEIA É DELE (14/09), com o print circulado: *"por que não colocar um pilar menor na frente
+   * dessa costura, isso resolve o problema utilizando o cenário… truque barato e eficiente"*. A
+   * emenda entre duas artes muito diferentes não some por nenhuma conta de cor; uma peça sólida
+   * PLANTADA em cima dela transforma a costura em estrutura.
+   *
+   * ⚠️ É DECORAÇÃO, COMO A FAIXA — sem corpo, sem mordida. A arte é uma mesa (a do lugar para onde se
+   * está entrando), mas ela não é um obstáculo: sobe só `JUNTA_SOBRA` px acima da superfície, dentro
+   * dos 8px da trava, então nunca encosta no vão e nunca vira a parede que mata sem avisar.
+   *
+   * ⚠️ 0,8 DE ESCALA, E REDUZIR PODE: é o "pilar MENOR" do pedido, e a lei da resolução proíbe
+   * aumentar, não diminuir. 94 × 0,8 = 75px cobre a emenda com folga para os dois lados.
+   */
+  private static readonly JUNTA_ESCALA = 0.8;
+  /** Quanto o pilar da junta passa da superfície mais alta das duas placas. Menor que a `FOLGA`. */
+  private static readonly JUNTA_SOBRA = 5;
 
   /** A distância que o mundo já rolou, em px. É o eixo de tudo. */
   private xMundo = 0;
@@ -203,6 +267,22 @@ export class Moldura {
    * atravessando a tela inteira, leem como um buraco na arte, e nenhuma cor conserta isso.
    */
   private readonly saia: Phaser.GameObjects.Image[] = [];
+  /** O pilar da junta, um por lado. Invisível enquanto não há emenda na tela. Ver `JUNTA_ESCALA`. */
+  private juntaChao: Phaser.GameObjects.Image | null = null;
+  private juntaTeto: Phaser.GameObjects.Image | null = null;
+  /**
+   * A junta pedida por um `setFaixa` ao vivo que não achou placa fora da tela para carregá-la: a
+   * próxima placa GERADA é a primeira da câmara nova, e leva a junta.
+   */
+  private juntaPendente: string | null = null;
+
+  /**
+   * O ÍNDICE DA PRIMEIRA PLACA DA CÂMARA NOVA — a emenda viva entre duas bordas. `null` com
+   * `emendaPendente` = a troca já foi pedida e a placa ainda não nasceu; `null` sem pendência = não
+   * há emenda em curso. Quem lê é o `xDaEmenda`, e é por ele que a PINTURA entra junto com a borda.
+   */
+  private emendaIndice: number | null = null;
+  private emendaPendente = false;
 
   /**
    * @param desenha Só a Fase 4 recebe os SPRITES da faixa. A CURVA (`avanca`, `vaoEm`,
@@ -315,6 +395,26 @@ export class Moldura {
         );
       }
     }
+
+    // A JUNTA: dois pilares, um por lado. Depth −0,54: à frente da faixa (−0,6), da saia e do FIO
+    // (−0,55), atrás dos props (−0,5). ⚠️ Na frente do fio de propósito: com o duto durando até a
+    // emenda do núcleo, a linha acesa da última placa de B chega ao centro do pilar — por trás dele ela
+    // ENTRA na peça; por cima, atravessava metade do pilar como um risco solto (captura de 14/09).
+    this.juntaChao = scene.add
+      .image(0, 0, Moldura.FAIXA_INICIAL)
+      .setOrigin(0.5, 0)
+      .setScale(Moldura.JUNTA_ESCALA)
+      .setDepth(-0.54)
+      .setVisible(false)
+      .setName('juntaChao');
+    this.juntaTeto = scene.add
+      .image(0, 0, Moldura.FAIXA_INICIAL)
+      .setOrigin(0.5, 1)
+      .setFlipY(true)
+      .setScale(Moldura.JUNTA_ESCALA)
+      .setDepth(-0.54)
+      .setVisible(false)
+      .setName('juntaTeto');
   }
 
   // ⚠️ AQUI MORAVA O `corDoFundo`, e vale saber por quê. Ele MEDIA a última linha da peça para
@@ -328,9 +428,15 @@ export class Moldura {
    * TROCA A BORDA DE CÂMARA. Quem chama é o evento `cenario` do roteiro, junto com a pintura: a
    * borda e o fundo são o MESMO lugar, e é por isso que não existe evento `faixa` próprio.
    *
-   * ⚠️ RECEBE A BASE, NÃO A CHAVE FINAL (`f4FaixaA`, não `f4FaixaA2`). Cada segmento resorteia a
-   * irmã dele — se a troca cravasse uma textura só, as 3 cópias na tela voltariam a ser idênticas
-   * e a decisão de duas variantes por câmara não valeria nada.
+   * ⚠️ RECEBE A BASE, NÃO A CHAVE FINAL (`f4FaixaA`, não `f4FaixaA2`). Cada placa sorteia a irmã
+   * dela quando nasce — se a troca cravasse uma textura só, as 3 cópias na tela voltariam a ser
+   * idênticas.
+   *
+   * ⚠️ AO VIVO, A TROCA NÃO TOCA EM NADA QUE ESTÁ NA TELA — ver `Placa.faixaChao`. Ela só muda a
+   * base, e a câmara nova chega nas placas que nascem daqui em diante, pela direita. `imediato`
+   * é o caminho do SALTO (`aplicaCorredorEMoldura`: o `G`, o treino, as sondas): lá não se está
+   * atravessando uma passagem, está-se chegando numa câmara, e a borda velha rolando para fora
+   * seria a câmara errada na tela por cinco segundos.
    *
    * ⚠️ A GUARDA DA CHAVE INEXISTENTE NÃO É CAUTELA, É O CAMINHO DA CÂMARA C. A arte dela está
    * aprovada mas é 128×80, e instalá-la é trabalho do M4 (ver a nota no `ART` da `BootScene`).
@@ -338,18 +444,68 @@ export class Moldura {
    * garganta em vez de cair na textura de erro do motor, que é 32×32 e apareceria como oito
    * selos minúsculos alinhados no rodapé.
    */
-  setFaixa(base: string): void {
+  setFaixa(base: string, imediato = false, junta?: string): void {
     const scene = this.scene;
     if (!scene || !scene.textures.exists(base)) return;
+    if (base === this.base && !imediato) return;
 
     this.base = base;
-    for (const seg of this.chao) seg.setTexture(pickVariant(scene, base));
-    for (const seg of this.teto) seg.setTexture(pickVariant(scene, base));
 
-    // ⚠️ E A SAIA TROCA JUNTO, OBRIGATORIAMENTE. Ela é a peça continuada em espelho: deixada para
-    // trás, o duto apareceria com a borda da câmara nova em cima e a da câmara anterior logo
-    // abaixo, emendadas — exatamente as "duas paredes coladas" que ele reprovou nas irmãs.
-    for (const s of this.saia) s.setTexture(pickVariant(scene, base));
+    // A JUNTA vai na PRIMEIRA placa da câmara nova — a de menor índice entre as reescritas abaixo,
+    // ou, se nenhuma estava pronta fora da tela, a próxima que nascer. O salto não tem emenda.
+    const chaveJunta = !imediato && junta && scene.textures.exists(junta) ? pickVariant(scene, junta) : null;
+    let primeira: Placa | null = null;
+    let primeiraN: number | null = null;
+
+    // ⚠️ AO VIVO, AS PLACAS JÁ GERADAS MAS AINDA FORA DA TELA TAMBÉM TROCAM. O `spawnCorredores`
+    // pergunta a curva bem à direita da tela, então há sempre duas ou três placas prontas
+    // esperando — e sem esta linha a borda nova só aparecia **3,5s depois** da pintura (medido na
+    // captura de 14/09: pintura do núcleo em t=109, primeira placa D na tela em t=112,5, com o
+    // chefão entrando em 113). Quem ainda não entrou na tela pode trocar sem ninguém ver.
+    //
+    // O SALTO (`imediato`) reescreve todas; a `avanca` aplica no próximo quadro, peça e saia juntas
+    // (ver `pinta`).
+    //
+    // ⚠️ E A CONTA É SOBRE A BORDA ESQUERDA DO PILAR, NÃO DA PLACA: o pilar é centrado na emenda e
+    // meia largura dele vaza para a placa ANTERIOR. Uma placa que começa exatamente na borda da tela
+    // poria o pilar já meio visível no quadro em que ele nasce.
+    const meioPilar = chaveJunta ? (94 * Moldura.JUNTA_ESCALA) / 2 : 0;
+    const ordenadas = [...this.placas.entries()].sort((a, b) => a[0] - b[0]);
+    for (const [n, p] of ordenadas) {
+      if (!imediato && n * Moldura.LARGURA - this.xMundo - meioPilar < GAME_WIDTH) continue;
+      p.faixaChao = pickVariant(scene, base);
+      p.faixaTeto = pickVariant(scene, base);
+      p.junta = undefined;
+      // ⚠️ A CÂMARA NOVA NÃO HERDA A RAMPA DO TINT DA ANTERIOR: a placa da borda nova já nasce no
+      // estado final do duto. O degradê é para a MESMA borda esfriando; entre duas bordas quem tapa a
+      // costura é o pilar da junta, e uma borda D meio avermelhada seria outra costura.
+      p.letal = this.duto ? 1 : 0;
+      if (primeira === null) {
+        primeira = p;
+        primeiraN = n;
+      }
+    }
+    this.letalAtual = this.duto ? 1 : 0;
+    if (chaveJunta) {
+      if (primeira) primeira.junta = chaveJunta;
+      else this.juntaPendente = chaveJunta;
+    }
+    // A EMENDA VIVA — o salto não tem uma.
+    this.emendaIndice = imediato ? null : primeiraN;
+    this.emendaPendente = !imediato && primeiraN === null;
+  }
+
+  /**
+   * ONDE ESTÁ A EMENDA entre a borda anterior e a da câmara nova, em x de tela — a borda ESQUERDA da
+   * primeira placa nova, que é também o centro do pilar da junta.
+   *
+   * Pedida antes de a placa nascer, responde "à direita da tela"; sem emenda nenhuma (o salto, ou
+   * uma troca que nunca aconteceu), responde −Infinity, que quem espera a emenda lê como "já passou".
+   */
+  xDaEmenda(): number {
+    if (this.emendaPendente) return GAME_WIDTH + Moldura.LARGURA;
+    if (this.emendaIndice === null) return -Infinity;
+    return this.emendaIndice * Moldura.LARGURA - this.xMundo;
   }
 
   /** O `gap` do roteiro. A placa que nascer daqui em diante é julgada por ele. */
@@ -384,18 +540,32 @@ export class Moldura {
    * O roteiro faz a troca cair junto com a pintura do duto (`paintBgF4c`) e com o banner que já
    * existe: três avisos no mesmo instante, e nenhum deles custa uma vida para ser lido.
    */
-  setDuto(duto: boolean): void {
+  setDuto(duto: boolean, imediato = false): void {
     this.duto = duto;
-    const tint = duto ? Moldura.TINT_LETAL : Moldura.TINT_INERTE;
-    for (const s of this.chao) s.setTint(tint);
-    for (const s of this.teto) s.setTint(tint);
-    // ⚠️ E A SAIA COM O MESMO TINT DA PEÇA. Ela é a mesma parede continuada; um tint diferente
-    // desenharia justamente a linha horizontal que ela existe para não ter.
-    for (const s of this.saia) s.setTint(tint);
-    // O FIO é o que de fato se vê. O tint só esquenta o que já tem luz. Ver `FIO`.
-    for (const f of this.fios) f.setVisible(duto);
-    // A SAIA só existe no duto, porque só lá a parede passa dos 64px da peça. Ver `enche`.
-    for (const s of this.saia) s.setVisible(duto);
+    // O TINT É DA PLACA (ver `Placa.letal`): ao vivo muda só o que ainda não entrou na tela, e o
+    // `pinta` aplica quadro a quadro. O salto reescreve todas.
+    if (imediato) {
+      for (const p of this.placas.values()) p.letal = duto ? 1 : 0;
+      this.letalAtual = duto ? 1 : 0;
+    } else {
+      // ⚠️ AS PLACAS PRONTAS FORA DA TELA ENTRAM NO DEGRADÊ, EM ORDEM — cravá-las no valor final
+      // pulava a rampa inteira e devolvia o corte de cor seco na primeira placa fora da tela.
+      // O degradê parte da última placa que JÁ está na tela.
+      const ordenadas = [...this.placas.entries()].sort((a, b) => a[0] - b[0]);
+      let ultimaNaTela: number | null = null;
+      for (const [n, p] of ordenadas) {
+        if (n * Moldura.LARGURA - this.xMundo < GAME_WIDTH) {
+          ultimaNaTela = p.letal;
+          continue;
+        }
+        if (ultimaNaTela !== null) {
+          this.letalAtual = ultimaNaTela;
+          ultimaNaTela = null;
+        }
+        p.letal = this.avancaLetal();
+      }
+    }
+    // O FIO É DA PLACA, como o tint e a mordida — ver `Placa.letal`. A `avanca` acende quadro a quadro.
   }
 
   /**
@@ -429,28 +599,34 @@ export class Moldura {
       const x = Math.round(i * Moldura.LARGURA - off);
       this.chao[i].setPosition(x, p.superficieChao);
       this.teto[i].setPosition(x, p.superficieTeto);
+      this.pinta(i, p);
 
       // ⚠️ O FIO SAI DA MESMA PLACA QUE A FAIXA E QUE A MORDIDA — os três leem `superficieChao` /
       // `superficieTeto` da placa `base + i`. É isso que faz a luz cair EXATAMENTE na linha que
       // cobra o encosto: o jogador vê onde a parede morde, não uma aproximação dela.
-      this.fios[i * 4].setPosition(x, p.superficieChao);
-      this.fios[i * 4 + 1].setPosition(x, p.superficieTeto - Moldura.FIO_PX);
+      this.fios[i * 4].setPosition(x, p.superficieChao).setVisible(p.letal > 0);
+      this.fios[i * 4 + 1].setPosition(x, p.superficieTeto - Moldura.FIO_PX).setVisible(p.letal > 0);
 
       // O DEGRAU liga esta placa à SEGUINTE, na emenda. Pedir `base + i + 1` respeita o contrato
       // da poda (só se pergunta sobre a tela e sobre o que está à direita dela) — a placa mais à
       // frente aqui é `base + SEGMENTOS`, e o `spawnCorredores` já pergunta mais longe que isso.
       const prox = this.placaDe(base + i + 1);
       const xEmenda = x + Moldura.LARGURA - Moldura.FIO_PX;
-      this.ligaDegrau(this.fios[i * 4 + 2], xEmenda, p.superficieChao, prox.superficieChao);
+      // O degrau só liga dois fios que existem: as duas placas da emenda têm de estar acesas.
+      const acesoDegrau = p.letal > 0 && prox.letal > 0;
+      this.ligaDegrau(this.fios[i * 4 + 2], xEmenda, p.superficieChao, prox.superficieChao, acesoDegrau);
       this.ligaDegrau(
         this.fios[i * 4 + 3],
         xEmenda,
         p.superficieTeto - Moldura.FIO_PX,
         prox.superficieTeto - Moldura.FIO_PX,
+        acesoDegrau,
       );
 
       this.enche(i, x, p);
     }
+
+    this.posicionaJunta(base, off);
   }
 
   /**
@@ -507,10 +683,16 @@ export class Moldura {
    * ela vive por volta de x=40..60 na tela.
    */
   morde(esquerda: number, direita: number, topo: number, base: number): boolean {
-    if (!this.duto) return false;
-
-    const chao = Math.min(this.superficieChaoEm(esquerda), this.superficieChaoEm(direita));
-    const teto = Math.max(this.superficieTetoEm(esquerda), this.superficieTetoEm(direita));
+    // ⚠️ SÓ MORDE A COLUNA CUJA PLACA ESTÁ ACESA — a mesma pergunta que acende o fio dela (ver
+    // `Placa.letal`). Sem placa acesa sob a nave, não há parede que mate.
+    let chao = Infinity;
+    let teto = -Infinity;
+    for (const x of [esquerda, direita]) {
+      const p = this.placaEm(x);
+      if (p.letal <= 0) continue;
+      chao = Math.min(chao, p.superficieChao);
+      teto = Math.max(teto, p.superficieTeto);
+    }
 
     return base - Moldura.MORDIDA >= chao || topo + Moldura.MORDIDA <= teto;
   }
@@ -538,15 +720,94 @@ export class Moldura {
    * Degrau zero acontece o tempo todo (a curva SEGURA ou ANDA), e aí não há nada para ligar: o
    * conector some em vez de virar um ponto aceso solto na emenda.
    */
-  private ligaDegrau(fio: Phaser.GameObjects.Rectangle, x: number, a: number, b: number): void {
+  private ligaDegrau(
+    fio: Phaser.GameObjects.Rectangle,
+    x: number,
+    a: number,
+    b: number,
+    aceso: boolean,
+  ): void {
     const alto = Math.abs(a - b);
-    if (alto < 1) {
+    if (alto < 1 || !aceso) {
       fio.setVisible(false);
       return;
     }
-    fio.setVisible(this.duto);
+    fio.setVisible(true);
     fio.setPosition(x, Math.min(a, b));
     fio.setSize(Moldura.FIO_PX, alto + Moldura.FIO_PX);
+  }
+
+  /**
+   * Veste o segmento `i` com a borda da placa que ele está desenhando neste quadro.
+   *
+   * ⚠️ TODO QUADRO, E NÃO SÓ NA TROCA: o segmento `i` é sempre o `i`-ésimo da TELA, e a placa sob
+   * ele muda cada vez que o mundo rola 128px. A borda segue a placa, não o sprite — é isso que faz
+   * a emenda entre as duas câmaras ANDAR para a esquerda em vez de ficar parada na tela.
+   *
+   * ⚠️ E A SAIA VESTE A MESMA CHAVE DA PEÇA QUE ELA CONTINUA. Ela é a peça continuada em espelho:
+   * com a borda de outra câmara, o duto apareceria com a câmara nova em cima e a anterior logo
+   * abaixo, emendadas — exatamente as "duas paredes coladas" que ele reprovou nas irmãs.
+   */
+  private pinta(i: number, p: Placa): void {
+    if (this.chao[i].texture.key !== p.faixaChao) {
+      this.chao[i].setTexture(p.faixaChao);
+      this.saia[i * 2].setTexture(p.faixaChao);
+    }
+    if (this.teto[i].texture.key !== p.faixaTeto) {
+      this.teto[i].setTexture(p.faixaTeto);
+      this.saia[i * 2 + 1].setTexture(p.faixaTeto);
+    }
+    // ⚠️ E A SAIA COM O MESMO TINT DA PEÇA. Ela é a mesma parede continuada; um tint diferente
+    // desenharia justamente a linha horizontal que ela existe para não ter.
+    const tint = Moldura.tintDe(p.letal);
+    if (this.chao[i].tintTopLeft !== tint) {
+      this.chao[i].setTint(tint);
+      this.teto[i].setTint(tint);
+      this.saia[i * 2].setTint(tint);
+      this.saia[i * 2 + 1].setTint(tint);
+    }
+  }
+
+  /** O tint de uma placa `letal` (0..1): do branco (a arte crua) ao `TINT_LETAL`, canal a canal. */
+  private static tintDe(letal: number): number {
+    const c = Phaser.Display.Color.Interpolate.ColorWithColor(
+      Phaser.Display.Color.ValueToColor(Moldura.TINT_INERTE),
+      Phaser.Display.Color.ValueToColor(Moldura.TINT_LETAL),
+      100,
+      Math.round(letal * 100),
+    );
+    return Phaser.Display.Color.GetColor(c.r, c.g, c.b);
+  }
+
+  /**
+   * Planta o pilar da junta na emenda, se alguma das placas na tela (ou logo à direita dela) é a
+   * primeira de uma câmara nova. Ver `JUNTA_ESCALA`.
+   */
+  private posicionaJunta(base: number, off: number): void {
+    const chao = this.juntaChao;
+    const teto = this.juntaTeto;
+    if (!chao || !teto) return;
+
+    // Do segmento 0 até um além do último: a emenda da placa `base + SEGMENTOS` ainda está na borda
+    // direita da tela, e o pilar centrado nela já aparece pela metade.
+    for (let i = 0; i <= Moldura.SEGMENTOS; i++) {
+      const p = this.placaDe(base + i);
+      if (!p.junta) continue;
+      const ant = this.placaDe(base + i - 1);
+      const x = Math.round(i * Moldura.LARGURA - off);
+      // O pilar parte da superfície MAIS ALTA das duas placas: o degrau entre elas fica atrás dele.
+      chao
+        .setTexture(p.junta)
+        .setPosition(x, Math.min(p.superficieChao, ant.superficieChao) - Moldura.JUNTA_SOBRA)
+        .setVisible(true);
+      teto
+        .setTexture(p.junta)
+        .setPosition(x, Math.max(p.superficieTeto, ant.superficieTeto) + Moldura.JUNTA_SOBRA)
+        .setVisible(true);
+      return;
+    }
+    chao.setVisible(false);
+    teto.setVisible(false);
   }
 
   private enche(i: number, x: number, p: Placa): void {
@@ -565,6 +826,13 @@ export class Moldura {
     // descoberto é 36px. A saia cobre 64.
     chao.setPosition(x, p.superficieChao + 64);
     teto.setPosition(x, p.superficieTeto - 64);
+
+    // ⚠️ A SAIA APARECE ONDE A PEÇA NÃO ALCANÇA A BORDA DA TELA — e não "no duto". Até 14/09 ela
+    // seguia o `duto` global, e em t=106 sumia no mesmo quadro de toda a parede colada que ainda
+    // estava na tela: 30–40px de fundo aparecendo embaixo de cada placa do fim do duto. Foi o
+    // "sem acabamento" que ele apontou. A pergunta certa é de geometria, placa a placa.
+    chao.setVisible(p.superficieChao + 64 < GAME_HEIGHT);
+    teto.setVisible(p.superficieTeto - 64 > 0);
   }
 
   /**
@@ -612,6 +880,14 @@ export class Moldura {
     const b = Math.sin((n + fase) * 0.31);
     // De [−1,1] para [0, RELEVO], com a onda longa pesando menos que a curta.
     return ((a * 0.6 + b * 0.4) + 1) * 0.5 * Moldura.RELEVO;
+  }
+
+  /** Um passo do tint na direção do `duto` — ver `Placa.letal`. */
+  private avancaLetal(): number {
+    const alvo = this.duto ? 1 : 0;
+    const passo = 1 / Moldura.LETAL_PLACAS;
+    this.letalAtual += Math.max(-passo, Math.min(passo, alvo - this.letalAtual));
+    return Math.round(this.letalAtual * 1000) / 1000;
   }
 
   private gerar(n: number): Placa {
@@ -694,6 +970,23 @@ export class Moldura {
       superficieTeto = Math.floor(superficieTeto);
     }
 
-    return { vaoY, repetida, superficieChao, superficieTeto, gap: this.gap };
+    // A BORDA DA PLACA sai da base EM VIGOR AGORA, e nunca mais muda ao vivo — ver `Placa.faixaChao`.
+    // Fora da Fase 4 não há cena guardada e ninguém desenha: a base crua basta.
+    const scene = this.scene;
+    const faixaChao = scene ? pickVariant(scene, this.base) : this.base;
+    const faixaTeto = scene ? pickVariant(scene, this.base) : this.base;
+
+    // A junta pendente de um `setFaixa` que não achou placa fora da tela: esta é a primeira da câmara.
+    const junta = this.juntaPendente ?? undefined;
+    this.juntaPendente = null;
+    if (this.emendaPendente) {
+      this.emendaIndice = n;
+      this.emendaPendente = false;
+    }
+
+    return {
+      vaoY, repetida, superficieChao, superficieTeto, gap: this.gap, faixaChao, faixaTeto,
+      letal: this.avancaLetal(), junta,
+    };
   }
 }

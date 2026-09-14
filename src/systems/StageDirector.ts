@@ -102,8 +102,32 @@ export type StageEvent =
    *
    * ⚠️ A CÂMARA A NÃO TEM EVENTO porque é onde a fase começa — `Moldura.FAIXA_INICIAL` já nasce
    * com ela. Quem escrever um `cenario` novo antes de t=38,8 tem de lembrar da borda junto.
+   *
+   * ⚠️ `soFundo` É A CÂMARA DO CHEFÃO: a partir dela, a tela é SÓ a pintura e a borda — todas as
+   * camadas de peças de cenário apagam no mergulho no escuro. A regra é dele, de 14/09, e vale
+   * para toda luta de chefão: *"todas as fases de BOSS ficam apenas com o fundo e, no caso da
+   * fase 4, a borda"*. Ver `Parallax.limpaCenario`.
    */
-  | { t: number; type: 'cenario'; key: string; fadeMs?: number; faixa?: string }
+  | {
+      t: number;
+      type: 'cenario';
+      key: string;
+      fadeMs?: number;
+      faixa?: string;
+      soFundo?: boolean;
+      /**
+       * A PEÇA PLANTADA NA EMENDA entre a borda anterior e a desta câmara — o `PropKind` de uma mesa,
+       * cuja arte vira o pilar da junta (ver `Moldura.JUNTA_ESCALA`). A da câmara para onde se ENTRA:
+       * é ela que o jogador está chegando para ver.
+       */
+      junta?: string;
+      /**
+       * COMO A PINTURA ENTRA. Ausente: o mergulho no escuro do `setPintura`. `'emenda'`: a câmara nova
+       * se revela atrás do pilar da junta, andando com ele — ver `Parallax.setPinturaPelaEmenda`. Só
+       * faz sentido com `faixa` (é a troca de borda que cria a emenda).
+       */
+      entrada?: 'emenda';
+    }
   /**
    * A ÁGUA DA CÂMARA B (Fase 4) — enche ou drena.
    *
@@ -489,9 +513,16 @@ export const STAGE_4: StageEvent[] = [
   { t: 37, type: 'corredor', rate: 2.6, gap: 120 },
   { t: 37, type: 'moldura', espessura: 16 },        // ainda margem: o respiro é largo de verdade
   { t: 38, type: 'hazard', rate: 0, mix: [] },
-  // A ARENA ABRE. O corredor para de nascer 1,5s antes da câmara: as últimas mesas saem da tela em
-  // 384 ÷ 84 = 4,6s, ou seja, em t≈43,1 — antes de o X do golfinho começar (t≈43,5).
-  { t: 38.5, type: 'corredor', rate: 0, gap: 120 },
+  // ⚠️ A ARENA TEM MESA DESDE 14/09. Até ali o corredor parava aqui (`rate: 0`) para a arena ser só
+  // o jogador e o golfinho. O pedido dele trocou isso: *"quando o mapa encher de água, quero que
+  // utilize novas mesas… assim que o golfinho for morto, as mesas vão explodir e afundar"* — e mesa
+  // que explode na morte do golfinho tem de estar na tela durante o duelo.
+  //
+  // O corredor segue no ritmo e no vão do respiro (2,6s, 120px, o mais largo depois da abertura): a
+  // arena continua sendo a mais aberta da câmara. Quem troca a mesa de aço pela do mar é a MARÉ
+  // (`GameScene.mare`), não esta linha. ⚠️ Se o duelo ficar apertado demais jogando, o knob é o
+  // `rate` daqui para cima — ou voltar a 0, que devolve a arena vazia e tira as mesas do mar junto.
+  { t: 38.5, type: 'corredor', rate: 2.6, gap: 120 },
 
   // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
   // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
@@ -508,7 +539,7 @@ export const STAGE_4: StageEvent[] = [
   // linha em t=38,8 cai 0,2s depois, e o mergulho termina em t=39,4 — meio segundo antes do bicho.
   // **A `probe-f4-agua` cobra exatamente isso.** Antecipar esta linha sem antecipar o `agua`
   // devolve o defeito que ele apontou: a câmara mudando de lugar e de nível ao mesmo tempo.
-  { t: 38.8, type: 'cenario', key: 'paintBgF4b', faixa: 'f4FaixaB' },
+  { t: 38.8, type: 'cenario', key: 'paintBgF4b', faixa: 'f4FaixaB', junta: 'mesaMar' },
 
   // ─── O GOLFINHO: o motivo de a câmara mudar (spec 2026-09-11). ───
   //
@@ -602,11 +633,27 @@ export const STAGE_4: StageEvent[] = [
   //
   // ⚠️ `duto: false` é explícito, e tem de ser: sem ele a parede continuaria colada e mordendo
   // durante os 4,75s em que ainda está grossa, numa fase que já tirou o corredor do jogador.
-  { t: 106, type: 'moldura', espessura: 16, duto: false },
+  //
+  // ⚠️ `duto: true` ATÉ t=109, e não mais `false` aqui (14/09, 2º teste jogado). Com o duto acabando
+  // em 106, o trecho entre o fim do duto e a borda do núcleo virava uma parede sem linha acesa e sem
+  // o tint — *"a linha do duto não existe e o sprite da borda é diferente de todo o duto, quero que
+  // fique igual ao do duto"*. O duto agora dura até a câmara D ENTRAR: a parede recua (o `gap` já é
+  // 0, então nada cola nela) mas continua sendo o duto, com fio e mordida honestos placa a placa.
+  { t: 106, type: 'moldura', espessura: 16, duto: true },
   { t: 106.5, type: 'hazard', rate: 0, mix: [] },
   // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
   // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
-  { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD' },
+  //
+  // ⚠️ `soFundo`: a câmara do núcleo é a ARENA, e arena é só pintura e borda. O coração, o
+  // maquinário e as costelas que ainda estavam na tela apagam no mesmo mergulho da pintura — a sala
+  // chega vazia. Pedido dele no teste de 14/09: *"retire os maquinários do fundo do núcleo"*.
+  // O DUTO ACABA AQUI, UMA LINHA ANTES DA CÂMARA — e a ordem importa: o `setDuto(false)` corre
+  // antes do `setFaixa`, então a primeira placa D já nasce fria e todas as placas B que restam na
+  // tela seguem sendo duto até a emenda, onde o pilar da junta planta a fronteira.
+  { t: 109, type: 'moldura', espessura: 16, duto: false },
+  // ⚠️ `entrada: 'emenda'` (14/09, 3º teste jogado): o mergulho no escuro de 600ms foi reprovado aqui
+  // — *"a transição de fundos, de novo, está muito seca"*. O núcleo se revela atrás do pilar.
+  { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD', soFundo: true, junta: 'mesa', entrada: 'emenda' },
   { t: 109, type: 'banner', text: 'ALERTA · O NÚCLEO' },
   { t: 113, type: 'boss' },
 ];

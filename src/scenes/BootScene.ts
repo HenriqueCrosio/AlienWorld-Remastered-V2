@@ -239,8 +239,17 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // ⚠️ E O ASSADOR EXISTE PORQUE O GERADOR NÃO OBEDECE LIMITE DE COR: duas rodadas pediram "nunca
   // branco" com todas as letras e as duas voltaram com o núcleo estourado. O teto se impõe no
   // disco, onde é determinístico. Ver o cabeçalho do script.
-  orgaoAnimSheet: { path: 'sprites/orgao-anim.png', w: 122, h: 122 },
-  maquinarioAnimSheet: { path: 'sprites/maquinario-anim.png', w: 122, h: 122 },
+  //
+  // ⚠️ AS DUAS PEÇAS FORAM REGERADAS EM 14/09, VERTICAIS. A arte de 13/09 era radial — tubos para
+  // todos os lados — e os laterais ficavam no ar mesmo dissolvidos: *"os tubos dos maquinários
+  // ainda aparecem sim, podemos tentar gerar novos assets com tubos somente em cima e embaixo"*.
+  // Objetos PixelLab `7d5df865` (o coração em coluna, 9 quadros de 96×128) e `a4f7f9e0` (o
+  // maquinário, 6 quadros de 96×128: os quadros 6–8 do gerador estouravam a brasa num halo que a
+  // trava de brilho transformava em mancha bege). Os dois são COLUNAS, do chão ao teto — ver o
+  // `maquinario` no `Parallax`. Brutos em `assets/raw/anim-
+  // orgao-v` e `anim-maquinario-v`.
+  orgaoAnimSheet: { path: 'sprites/orgao-anim.png', w: 96, h: 128 },
+  maquinarioAnimSheet: { path: 'sprites/maquinario-anim.png', w: 96, h: 128 },
   // O Leviatã-BALEIA (o mesmo do menu) com fissuras pulsando e explosões na espinha (cutscene
   // final, beat 3). ⚠️ CANVAS QUADRADO 144×144 com a criatura CENTRALIZADA — a âncora é outra
   // em relação ao sprite estático `leviathanWhaleDying` (140×87 recortado). O centro visual do
@@ -710,6 +719,10 @@ const ART: Record<string, string> = {
   mesa: 'sprites/f4-mesa.png',
   mesa2: 'sprites/f4-mesa2.png',
   mesa3: 'sprites/f4-mesa3.png',
+  // A MESA DO MAR — a câmara alagada do golfinho (14/09). Um `PropKind` próprio, não `mesa4`: ver o
+  // `mesaMar` do `TerrainSystem`. Assadas por `scripts/_f4/_assar-mesa-mar.mjs`, 94px como as de aço.
+  mesaMar: 'sprites/f4-mesa-mar.png',
+  mesaMar2: 'sprites/f4-mesa-mar2.png',
   // ⚠️ A CHAVE É O NOME DO `PropKind`, e é a lei que custou caro em 09/09: `pickVariant(scene,
   // kind)` procura a textura pelo nome do kind, e registrá-la como `f4Porta` faria o Phaser
   // devolver a textura de ERRO (32×32) com a hitbox junto — sem nenhuma sonda ficar vermelha.

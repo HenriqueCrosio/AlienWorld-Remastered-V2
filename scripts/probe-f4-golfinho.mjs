@@ -325,6 +325,8 @@ for (let i = 0; d0 && i < 300; i++) {
       grupos,
       faixa: s.children.list.filter((o) => o.name === 'faixaChao').map((o) => Math.round(o.x)).join(','),
       props: s.terrain.props.countActive(),
+      // As KINDS dos props da arena — a maré de 14/09 põe mesa aqui, mas só a do mar.
+      kinds: [...new Set(s.terrain.props.getChildren().filter((p) => p.active).map((p) => p.getData('kind')))],
       perigos: s.debris.hazards.countActive(),
       inimigos: s.enemies.enemies.countActive(),
       fg: s.parallax.foregroundDim,
@@ -356,7 +358,15 @@ ok(
 await page.screenshot({ path: 'probe-f4-golfinho-duelo.png' });
 ok(dFim?.t === 49.5, `a fase SEGURA em t=49,5 durante o duelo (t=${dFim?.t})`);
 ok(dFim && dFim.faixa !== d0.faixa, `mas o MUNDO continua rolando — a faixa andou (${d0?.faixa} → ${dFim?.faixa})`);
-ok(dFim?.props === 0 && dFim?.perigos === 0, `na arena não nasce mesa nem mina (props=${dFim?.props}, perigos=${dFim?.perigos})`);
+// ⚠️ ESTE ASSERT MUDOU DE LEI EM 14/09, E NÃO AFROUXOU. Ele cobrava "na arena não nasce mesa", que
+// era a regra até o pedido dele: *"quando o mapa encher de água, quero que utilize novas mesas…
+// assim que o golfinho for morto, as mesas vão explodir e afundar"*. A arena agora TEM mesa — e o
+// que tem de ser cobrado é que é SÓ a do mar (uma mesa de aço aqui é a maré que não virou) e que a
+// mina continua fora.
+ok(
+  dFim?.props > 0 && dFim.kinds.every((k) => k === 'mesaMar') && dFim?.perigos === 0,
+  `na arena só nasce a MESA DO MAR, e nenhuma mina (kinds=${JSON.stringify(dFim?.kinds)}, perigos=${dFim?.perigos})`,
+);
 ok(dFim && dFim.inimigos <= d0.inimigos, `nenhum inimigo novo entra na arena (${d0?.inimigos} → ${dFim?.inimigos})`);
 ok(rajada !== null && rajada.n === 3, `o flip cospe uma RAJADA de 3 (${JSON.stringify(rajada)})`);
 ok(yFora === 0, `a altura dele fica presa entre as paredes (${yFora} amostras fora)`);

@@ -46,6 +46,18 @@ export type PropKind =
    */
   | 'mesa'
   /**
+   * A MESA DO MAR (Fase 4, a câmara alagada do golfinho): a mesma mesa, tomada pelo fundo do mar —
+   * contêineres com coral ciano, anteparo com anêmonas. Pedido dele em 14/09.
+   *
+   * ⚠️ UM KIND PRÓPRIO, E NÃO UMA VARIANTE `mesa4`. O `pickVariant` sorteia entre TODAS as irmãs de
+   * um nome, então uma `mesa4` do mar cairia na doca seca também. O que troca aqui é o LUGAR, e lugar
+   * é decisão do roteiro — ver `GameScene.mare`.
+   *
+   * ⚠️ E ELA TEM OS MESMOS 94px DE LARGURA (ver `_assar-mesa-mar.mjs`): a pegada horizontal é a
+   * dificuldade, e trocar a arte não troca a dificuldade de lado.
+   */
+  | 'mesaMar'
+  /**
    * A PORTA do duto (Fase 4, M1.5): a comporta biomecânica que TAPA O VÃO INTEIRO.
    *
    * ⚠️ ELA É O ÚNICO PROP DESTRUTÍVEL DESTA FASE, e é ela que faz o duto ser um lugar em vez de
@@ -145,6 +157,7 @@ const PROPS: Record<PropKind, PropDef> = {
   maquinario: { hp: Infinity, score: 0, shoots: false },
   // Indestrutível como a rocha: a parede existe para ser desviada, não abatida.
   mesa: { hp: Infinity, score: 0, shoots: false },
+  mesaMar: { hp: Infinity, score: 0, shoots: false },
   // ⚠️ O `hp` AQUI É SÓ O PADRÃO — quem manda é o roteiro, porta a porta (6, 8, 10 na spec de
   // 06/09), via `opts.hp`. As três portas do duto têm vidas diferentes de propósito: é a
   // progressão delas que faz o duto ter começo, meio e fim.
@@ -206,6 +219,12 @@ export class TerrainSystem {
    */
   private readonly smokeFx: Phaser.GameObjects.Particles.ParticleEmitter;
 
+  /**
+   * A POEIRA DO DESMORONAMENTO — as mesas de aço caindo para dentro da parede antes da maré (14/09).
+   * Cinza e escura, sem a brasa da exaustão: é entulho, não motor. Um emissor só, como o `smokeFx`.
+   */
+  private readonly poeiraFx: Phaser.GameObjects.Particles.ParticleEmitter;
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly enemyBullets: Phaser.Physics.Arcade.Group,
@@ -224,6 +243,19 @@ export class TerrainSystem {
       tint: [0xcfd6dd, 0x8b939c, 0xff8c1a],
       emitting: false,
     });
+
+    this.poeiraFx = scene.add
+      .particles(0, 0, 'puff', {
+        lifespan: { min: 500, max: 950 },
+        speedX: { min: -26, max: 26 },
+        speedY: { min: -18, max: 4 },
+        scale: { start: 0.55, end: 1.7 },
+        alpha: { start: 0.55, end: 0 },
+        tint: [0x9a9080, 0x756c60, 0x524b44],
+        emitting: false,
+      })
+      // À frente da faixa e das mesas: a poeira sobe da linha onde a peça entra na parede.
+      .setDepth(-0.45);
   }
 
   /**
@@ -491,6 +523,194 @@ export class TerrainSystem {
 
     p.setData('sombra', sombra);
     p.once('destroy', () => sombra.destroy());
+  }
+
+  // ─── A MARÉ DA CÂMARA DO GOLFINHO (14/09) ───────────────────────────────────
+  //
+  // As mesas da câmara B não aparecem e somem: elas ENTRAM e SAEM da parede. Três movimentos, e os
+  // três pelo mesmo caminho — a peça desliza para trás da borda da `Moldura` e o que passa da
+  // superfície some atrás dela.
+  //
+  // ⚠️ A MESA EM MOVIMENTO É INERTE, E ESSA É A REGRA QUE SEGURA O RESTO. Durante o deslize o
+  // desenho não está onde a hitbox estaria, então ela não mata, não para tiro e não cobre bala
+  // (`solido`, lido pelos três `overlap` da `GameScene`). Mesa que mata antes de chegar é morte
+  // invisível; mesa que ainda mata enquanto some é a mesma coisa ao contrário.
+  //
+  // ⚠️ `Math.random` EM TODO SORTEIO DAQUI, NUNCA `Phaser.Math`: é arte, e arte não adianta o dado do
+  // jogo — a mesma fronteira do `sortearPlantio`.
+  //
+  // ⚠️ E ELA SE APAGA ENQUANTO ENTRA NA PAREDE — a profundidade sozinha NÃO esconde. A borda da
+  // câmara B tem frestas semitransparentes entre os arcos, e a primeira captura (14/09) mostrou a
+  // mesa afundada atrás dela como uma mancha preta atravessando o rodapé, com a borda "faltando" por
+  // cima. O alpha vai junto com o deslize: some na parede em vez de ficar guardada nela.
+
+  /** Depth ATRÁS da faixa da `Moldura` (−0,6) e à frente do fundo. É o que faz a peça sumir na parede. */
+  private static readonly DEPTH_NA_PAREDE = -0.65;
+
+  /** A mesa conta como obstáculo agora? Falso enquanto ela entra ou sai da parede. */
+  static solido(p: Phaser.GameObjects.GameObject): boolean {
+    return p.getData('inerte') !== true;
+  }
+
+  /**
+   * Quanto a peça tem de andar para dentro da parede para sumir inteira atrás da borda. Positivo
+   * = para baixo (mesa de chão), negativo = para cima (mesa de teto).
+   *
+   * `superficie` é a da `Moldura` NA COLUNA da peça; os 12px de sobra cobrem o relevo da placa
+   * vizinha, que a peça atravessa enquanto rola.
+   */
+  private static mergulho(p: Phaser.Physics.Arcade.Sprite, superficie: number): number {
+    return p.flipY
+      ? superficie - 12 - (p.y + p.displayHeight)
+      : superficie + 12 - (p.y - p.displayHeight);
+  }
+
+  private tornaInerte(p: Phaser.Physics.Arcade.Sprite): void {
+    p.setData('inerte', true);
+    p.setDepth(TerrainSystem.DEPTH_NA_PAREDE);
+    // O tween morre com a peça: o culling (`x < −40`) pode destruí-la no meio do deslize.
+    p.once('destroy', () => this.scene.tweens.killTweensOf(p));
+  }
+
+  /**
+   * DESMORONA: toda mesa `kind` na tela treme, solta poeira e cai para dentro da parede. É o que abre
+   * a câmara para a água.
+   *
+   * ⚠️ ERA UM DESLIZE DE 700ms E ELE REPROVOU (14/09): *"a explosão das mesas antes de encher com
+   * água não acontece, elas somem apenas, poderia dar um efeito de desmoronar, pois a volta delas
+   * depois que a fase se esvazia ficou muito boa, os pilares subindo deram um ar dramático"*. A
+   * volta funcionava porque tinha TEMPO e PESO; a ida precisava do mesmo, ao contrário. Três
+   * tempos: o tranco (a peça estremece), a queda lenta que acelera, e a poeira subindo da linha da
+   * borda enquanto a peça passa por ela.
+   */
+  desmoronar(kind: PropKind, superficie: (xTela: number, teto: boolean) => number): void {
+    for (const p of this.mesasVivas(kind)) {
+      this.tornaInerte(p);
+      const sup = superficie(Math.max(0, p.x), p.flipY);
+      // Cada peça com o próprio atraso: desabando todas no mesmo quadro, leriam como UM efeito.
+      const atraso = Math.round(Math.random() * 320);
+
+      // 1 · O TRANCO — a peça estremece no lugar. `angle` e não `x`: o `x` é da física (a velocidade
+      // de rolagem), e um tween nele brigaria com ela.
+      this.scene.tweens.add({
+        targets: p,
+        angle: { from: -2.5, to: 2.5 },
+        duration: 55,
+        yoyo: true,
+        repeat: 3,
+        delay: atraso,
+        onStart: () => this.soltaPoeira(p, sup, 5),
+      });
+
+      // 2 · A QUEDA — devagar no começo, pesada no fim, apagando só na metade final.
+      this.scene.tweens.add({
+        targets: p,
+        y: p.y + TerrainSystem.mergulho(p, sup),
+        angle: (Math.random() * 2 - 1) * 6,
+        duration: 1300,
+        delay: atraso + 380,
+        ease: 'Cubic.easeIn',
+        onUpdate: (tw) => {
+          // 3 · A POEIRA acompanha a queda: um sopro a cada ~8% do caminho.
+          if (Math.random() < 0.28) this.soltaPoeira(p, sup, 2);
+          if (tw.progress > 0.5) p.setAlpha(1 - (tw.progress - 0.5) * 2);
+        },
+        onComplete: () => p.destroy(),
+      });
+    }
+  }
+
+  /** Um punhado de poeira na linha onde a peça `p` encontra a borda. */
+  private soltaPoeira(p: Phaser.Physics.Arcade.Sprite, superficie: number, n: number): void {
+    if (!p.active) return;
+    const meia = p.displayWidth * 0.45;
+    for (let i = 0; i < n; i++) {
+      this.poeiraFx.emitParticleAt(p.x + (Math.random() * 2 - 1) * meia, superficie);
+    }
+  }
+
+  /**
+   * EXPLODE E AFUNDA: toda mesa `kind` na tela leva a explosão e cai para dentro da parede. É a
+   * morte do golfinho chegando ao cenário — *"assim que o golfinho for morto, as mesas vão explodir
+   * e afundar"*.
+   *
+   * `explode` é quem desenha o estouro (o `Fx` mora na cena); cada peça pede um no meio da parte que
+   * está À MOSTRA, que é onde o olho está.
+   */
+  afundar(
+    kind: PropKind,
+    superficie: (xTela: number, teto: boolean) => number,
+    explode: (x: number, y: number) => void,
+  ): void {
+    for (const p of this.mesasVivas(kind)) {
+      const sup = superficie(Math.max(0, p.x), p.flipY);
+      const borda = p.flipY ? p.y + p.displayHeight : p.y - p.displayHeight;
+      explode(p.x, (borda + sup) / 2);
+      this.tornaInerte(p);
+      // Um tranco escuro em vez de flash claro: a fase é escura, e a explosão já é a luz.
+      p.setTint(0x6a7a88);
+      this.scene.tweens.add({
+        targets: p,
+        y: p.y + TerrainSystem.mergulho(p, sup),
+        angle: (Math.random() * 2 - 1) * 7,
+        alpha: 0,
+        duration: 1100,
+        // Um respiro antes de cair: a peça leva o golpe, e SÓ DEPOIS afunda.
+        delay: 60 + Math.round(Math.random() * 160),
+        ease: 'Cubic.easeIn',
+        onComplete: () => p.destroy(),
+      });
+    }
+  }
+
+  /**
+   * EMERGE: a peça que acabou de nascer começa ENTERRADA na parede e sobe até o lugar dela. Nasce
+   * fora da tela (`GAME_WIDTH + 30`), então o jogador a vê já subindo quando ela entra.
+   *
+   * ⚠️ A CONTA DE QUE ELA CHEGA A TEMPO: a 84px/s ela entra na tela em ~0,4s e o deslize de 0,9s
+   * termina com ela em x≈330 — a nave vive em x≈40–60. Nenhuma mesa emergindo alcança o jogador
+   * antes de virar sólida.
+   */
+  emergir(p: Phaser.Physics.Arcade.Sprite, superficie: (xTela: number, teto: boolean) => number): void {
+    const final = p.y;
+    this.tornaInerte(p);
+    p.y = final + TerrainSystem.mergulho(p, superficie(GAME_WIDTH, p.flipY));
+    p.setAlpha(0);
+    this.scene.tweens.add({
+      targets: p,
+      y: final,
+      alpha: 1,
+      duration: 900,
+      ease: 'Cubic.easeOut',
+      onComplete: () => {
+        p.setData('inerte', false);
+        p.setDepth(-0.5);
+      },
+    });
+  }
+
+  /** A última mesa que `spawn` criou — é por ela que a `GameScene` pede o `emergir`. */
+  get ultimo(): Phaser.Physics.Arcade.Sprite | null {
+    const filhos = this.props.getChildren();
+    return (filhos[filhos.length - 1] as Phaser.Physics.Arcade.Sprite | undefined) ?? null;
+  }
+
+  /** Remove sem animação — o salto de cena (`G`) não tem por que ver a maré virar. */
+  limpar(kind: PropKind): void {
+    for (const p of this.mesasVivas(kind)) p.destroy();
+  }
+
+  /**
+   * As peças `kind` vivas — INCLUSIVE as que ainda estão emergindo, com o deslize delas cortado.
+   * Uma mesa do mar a meio caminho quando o golfinho morre tem de explodir junto com as outras, e
+   * não terminar de subir sozinha numa câmara que já virou.
+   */
+  private mesasVivas(kind: PropKind): Phaser.Physics.Arcade.Sprite[] {
+    const vivas = (this.props.getChildren() as Phaser.Physics.Arcade.Sprite[]).filter(
+      (p) => p.active && p.getData('kind') === kind,
+    );
+    for (const p of vivas) this.scene.tweens.killTweensOf(p);
+    return vivas;
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {

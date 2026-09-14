@@ -495,7 +495,10 @@ const desenho = await page.evaluate(() => {
   return {
     segmentos: segs.length,
     fora,
-    tint: segs.length ? segs[0].tintTopLeft : null,
+    // ⚠️ A PLACA MAIS À DIREITA, NÃO A PRIMEIRA (14/09): o tint passou a ser da PLACA e acende em
+    // três placas a partir da direita (ver `Moldura.LETAL_PLACAS`), então a da esquerda ainda pode
+    // estar no meio da rampa. Quem cobra que a parede avisa no quadro certo é o assert do FIO.
+    tint: segs.length ? [...segs].sort((x, y) => y.x - x.x)[0].tintTopLeft : null,
     fios: fios.length,
     acesos: acesos.length,
     desalinhados,
@@ -575,8 +578,19 @@ const colada = await page.evaluate(() => {
     // mas desenha uma costura visível, que é o defeito que ela veio consertar.
     if (e && Math.round(e.y) !== Math.round(fim)) desalinhadas.push({ x, saia: Math.round(e.y), peca: Math.round(fim) });
   }
+  // ⚠️ A SAIA ACENDE ONDE A PEÇA NÃO ALCANÇA A BORDA DA TELA, e só ali (14/09). Ela seguia o `duto`
+  // global e sumia no quadro do t=106 com a parede colada ainda na tela — o "sem acabamento" dele.
+  // Aqui se cobra, dos DOIS lados, que cada saia está acesa exatamente quando a peça dela precisa.
+  const erradas = [];
+  for (const lado of ['Chao', 'Teto']) {
+    for (const seg of s.children.list.filter((o) => o.name === `faixa${lado}`)) {
+      const e = saias.find((o) => o.name === `saia${lado}` && Math.abs(o.x - seg.x) < 1);
+      const precisa = lado === 'Chao' ? seg.y + 64 < 216 : seg.y - 64 > 0;
+      if (!e || e.visible !== precisa) erradas.push({ lado, x: Math.round(seg.x), precisa, acesa: e?.visible });
+    }
+  }
   return {
-    gap, bandas, folgas, buracos, desalinhadas,
+    gap, bandas, folgas, buracos, desalinhadas, erradas,
     saias: saias.length,
     acesas: saias.filter((o) => o.visible).length,
     // A saia é ARTE CONTINUADA, não cor lisa: se ela cair na textura de erro, ou ficar numa
@@ -607,8 +621,10 @@ ok(
 // quinta vez: **assert verde não julga composição.** Os três asserts abaixo cobram o que dá para
 // cobrar (acesa, emendada no pixel, e da mesma câmara); quem julga o resto é a captura.
 ok(
-  colada.acesas === colada.saias && colada.saias > 0,
-  `a saia está acesa nos dois lados dentro do duto (${colada.acesas}/${colada.saias})`,
+  // ⚠️ SEM EXIGIR `acesas > 0`: quantas saias a tela precisa depende do sorteio do corredor (numa
+  // rodada de 14/09 foram 0 de 8, e nenhuma errada). O que se cobra é que nenhuma mente.
+  colada.saias > 0 && colada.erradas.length === 0,
+  `a saia acende exatamente onde a peça não alcança a borda, nos dois lados (${colada.acesas}/${colada.saias} acesas, erradas: ${JSON.stringify(colada.erradas)})`,
 );
 ok(
   colada.desalinhadas.length === 0,

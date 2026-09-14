@@ -126,6 +126,28 @@ export class GameScene extends Phaser.Scene {
   private corredorRate = 0;
   private corredorGap = 0;
   private corredorTimer = 0;
+  /**
+   * A MARÉ DA CÂMARA DO GOLFINHO (14/09) — que mesa o corredor planta, e como ela entra.
+   *
+   * O pedido dele, na ordem em que acontece: *"antes do mapa encher de água, quero que coloque um
+   * efeito nas mesas para retraírem; quando o mapa encher de água, quero que utilize novas mesas
+   * [fundo do mar]… assim que o golfinho for morto, as mesas vão explodir e afundar, voltando depois
+   * gradualmente as antigas"*.
+   *
+   *   `aco`        a fase normal: a mesa de aço, nascendo no lugar
+   *   `recolhendo` a água começou a subir: as de aço entraram na parede e NADA nasce até ela encher
+   *   `mar`        câmara cheia: a mesa do mar, emergindo da parede
+   *   `voltando`   o golfinho morreu: as do mar afundaram, e as de aço voltam emergindo aos poucos
+   *
+   * ⚠️ QUEM VIRA A MARÉ SÃO OS EVENTOS DA CÂMARA, NUNCA O RELÓGIO: o encher da água (`agua` no
+   * roteiro, e a rede do `spawnGolfinho`) e o fim do golfinho (`encerrarGolfinho`). O relógio fica
+   * preso em 49,5 enquanto o golfinho vive — um `t` aqui congelaria a maré junto.
+   */
+  private mare: 'aco' | 'recolhendo' | 'mar' | 'voltando' = 'aco';
+  /** Em `voltando`: segundos até a primeira mesa de aço voltar. */
+  private mareEspera = 0;
+  /** Em `voltando`: quantos PARES de aço ainda nascem emergindo, antes de a fase voltar ao normal. */
+  private mareParesEmergindo = 0;
   private elapsed = 0;
   /** No treino o relógio começa adiantado; o score não deve herdar esse tempo. */
   private clockOffset = 0;
@@ -200,6 +222,9 @@ export class GameScene extends Phaser.Scene {
     this.corredorRate = 0;
     this.corredorGap = 0;
     this.corredorTimer = 0;
+    this.mare = 'aco';
+    this.mareEspera = 0;
+    this.mareParesEmergindo = 0;
     this.elapsed = 0;
     this.clockOffset = 0;
     this.score = 0;
@@ -320,15 +345,23 @@ export class GameScene extends Phaser.Scene {
     // Derivada da textura — a arte real (32×32) entra sem recalibrar.
     this.ship.body!.setSize(this.ship.width * 0.55, this.ship.height * 0.42);
 
-    this.physics.add.overlap(this.ship, this.terrain.props, () => this.damageShip());
+    // ⚠️ O `TerrainSystem.solido` NOS TRÊS OVERLAPS DE PROP: a mesa que entra ou sai da parede (a
+    // maré da câmara do golfinho) não está onde a hitbox estaria — ela não mata, não para tiro e
+    // não cobre bala até chegar. Ver a nota da maré no `TerrainSystem`.
+    this.physics.add.overlap(this.ship, this.terrain.props, () => this.damageShip(), (_s, p) =>
+      TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
+    );
     this.physics.add.overlap(this.ship, this.debris.hazards, () => this.damageShip());
     this.physics.add.overlap(this.ship, this.enemies.enemies, () => this.damageShip());
     this.physics.add.overlap(this.ship, this.enemies.enemyBullets, (_s, b) => {
       this.enemies.release(b as Phaser.Physics.Arcade.Sprite);
       this.damageShip();
     });
-    this.physics.add.overlap(this.weapons.bullets, this.terrain.props, (b, p) =>
-      this.bulletHitProp(b as Phaser.Physics.Arcade.Sprite, p as Phaser.Physics.Arcade.Sprite),
+    this.physics.add.overlap(
+      this.weapons.bullets,
+      this.terrain.props,
+      (b, p) => this.bulletHitProp(b as Phaser.Physics.Arcade.Sprite, p as Phaser.Physics.Arcade.Sprite),
+      (_b, p) => TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
     );
     this.physics.add.overlap(this.weapons.bullets, this.debris.hazards, (b, h) =>
       this.bulletHitHazard(b as Phaser.Physics.Arcade.Sprite, h as Phaser.Physics.Arcade.Sprite),
@@ -340,8 +373,11 @@ export class GameScene extends Phaser.Scene {
     //
     // Vale igual no vácuo: lá o destroço é a ÚNICA cobertura que existe, já que não há chão
     // nem relevo atrás do qual se esconder.
-    this.physics.add.overlap(this.enemies.enemyBullets, this.terrain.props, (b, p) =>
-      this.enemyBulletHitCover(b as Phaser.Physics.Arcade.Sprite, p as Phaser.Physics.Arcade.Sprite),
+    this.physics.add.overlap(
+      this.enemies.enemyBullets,
+      this.terrain.props,
+      (b, p) => this.enemyBulletHitCover(b as Phaser.Physics.Arcade.Sprite, p as Phaser.Physics.Arcade.Sprite),
+      (_b, p) => TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
     );
     this.physics.add.overlap(this.enemies.enemyBullets, this.debris.hazards, (b, h) =>
       this.enemyBulletHitCover(b as Phaser.Physics.Arcade.Sprite, h as Phaser.Physics.Arcade.Sprite),
@@ -625,11 +661,20 @@ export class GameScene extends Phaser.Scene {
     let corredor: Extract<StageEvent, { type: 'corredor' }> | undefined;
     let moldura: Extract<StageEvent, { type: 'moldura' }> | undefined;
     let cenario: Extract<StageEvent, { type: 'cenario' }> | undefined;
+    // ⚠️ A BORDA É VARRIDA À PARTE DA PINTURA, e é o conserto de um salto que caía na câmara errada:
+    // o `cenario` do duto (t=68) pede `f4FaixaC`, que ainda não existe, e ao vivo a borda de B
+    // FICA. Pegar a borda do último `cenario` repunha a chave inexistente, o `setFaixa` a recusava,
+    // e o salto para dentro do duto mostrava a borda INICIAL — a doca. A borda certa é a da última
+    // câmara cuja arte existe, que é exatamente o que o jogo ao vivo deixou na tela.
+    let faixa: string | undefined;
     for (const e of this.stage.script) {
       if (e.t >= t) break;
       if (e.type === 'corredor') corredor = e;
       else if (e.type === 'moldura') moldura = e;
-      else if (e.type === 'cenario') cenario = e;
+      else if (e.type === 'cenario') {
+        cenario = e;
+        if (e.faixa && this.textures.exists(e.faixa)) faixa = e.faixa;
+      }
     }
     // ⚠️ O `cenario` ENTROU AQUI EM 13/09, E ELE JÁ FALTAVA ANTES DA BORDA EXISTIR. Este método
     // repõe à mão o estado que os eventos descartados pelo `skipTo` teriam deixado, e a PINTURA
@@ -643,9 +688,13 @@ export class GameScene extends Phaser.Scene {
     //
     // Sem `fadeMs`: o mergulho no escuro é dramaturgia de uma troca ao vivo. Aqui não se está
     // TROCANDO de câmara, está-se chegando numa — o fade seria uma cortina sobre nada.
+    // A MARÉ não sobrevive a um salto sem golfinho: chega-se numa câmara seca, com a mesa de aço.
+    if (!this.golfinho) this.saiDaMare(false);
     if (cenario) {
       this.parallax.setPintura(cenario.key, 0);
-      if (cenario.faixa) this.moldura.setFaixa(cenario.faixa);
+      // `imediato`: chega-se na câmara, não se atravessa a passagem — ver `Moldura.setFaixa`.
+      if (faixa) this.moldura.setFaixa(faixa, true);
+      if (cenario.soFundo) this.parallax.limpaCenario(0);
     }
     if (corredor) {
       this.corredorRate = corredor.rate;
@@ -659,7 +708,7 @@ export class GameScene extends Phaser.Scene {
       // novo no mesmo evento chega com o mesmo buraco esperando. Sem esta linha, o treino que
       // começa dentro do duto luta contra uma parede fina que não morde — e o que começa DEPOIS
       // do duto herda a parede colada de um evento que já foi revogado.
-      this.moldura.setDuto(moldura.duto ?? false);
+      this.moldura.setDuto(moldura.duto ?? false, true);
     }
   }
 
@@ -730,15 +779,29 @@ export class GameScene extends Phaser.Scene {
         // no `STAGE_4`. A DRENAGEM segue sendo da morte do bicho (`encerrarGolfinho`), porque ela
         // tem de esperar o duelo, que dura o que o jogador levar.
         this.agua.encher();
+        // E AS MESAS DE AÇO FOGEM DA MARÉ, no mesmo instante em que ela começa a subir.
+        this.entraNaMare();
         break;
       case 'cenario':
         // A jornada anatômica da Fase 4: cada câmara tem a pintura dela, e quem manda na
         // troca é o roteiro. O mergulho no escuro vive no `setPintura` — daqui saem a chave e,
         // quando o roteiro tem motivo para encurtar o mergulho, a duração dele.
-        this.parallax.setPintura(e.key, e.fadeMs);
         // E A BORDA DA MOLDURA JUNTO, no mesmo evento: a câmara é o fundo E a moldura dele. O
-        // `setFaixa` recebe a BASE e cada segmento sorteia a irmã — ver `Moldura.setFaixa`.
-        if (e.faixa) this.moldura.setFaixa(e.faixa);
+        // `setFaixa` recebe a BASE e cada placa sorteia a irmã — ver `Moldura.setFaixa`. Ao vivo
+        // ela ENTRA PELA DIREITA em vez de trocar no quadro.
+        // A JUNTA: o pilar que tapa a costura entre as duas bordas, pedido dele (14/09).
+        //
+        // ⚠️ A BORDA ANTES DA PINTURA: é o `setFaixa` que cria a emenda que a entrada pela emenda segue.
+        if (e.faixa) this.moldura.setFaixa(e.faixa, false, e.junta);
+        if (e.entrada === 'emenda' && e.faixa) {
+          this.parallax.setPinturaPelaEmenda(e.key, () => this.moldura.xDaEmenda());
+        } else {
+          this.parallax.setPintura(e.key, e.fadeMs);
+        }
+        // A ARENA: as peças de cenário apagam. No mergulho, na metade descendente dele (somem com a
+        // tela escurecendo); na entrada pela emenda não há escuro para esconder nada, então elas se
+        // dissolvem devagar, no tempo de a emenda chegar à tela.
+        if (e.soFundo) this.parallax.limpaCenario(e.entrada === 'emenda' ? 1400 : (e.fadeMs ?? 600) / 2);
         break;
       case 'boss':
         this.spawnBoss();
@@ -1042,6 +1105,15 @@ export class GameScene extends Phaser.Scene {
     // `gap` é a curva (é ele que a parede colada persegue). O que esta linha corta é só o SPAWN.
     if (this.moldura.duto) return;
 
+    // A MARÉ: nada nasce enquanto a água sobe, nem na pausa entre o golfinho morrer e o aço voltar.
+    // ⚠️ ANTES DO TIMER, de propósito: ele fica parado no zero, e o primeiro par da câmara cheia
+    // nasce no quadro em que ela enche — sem esperar uma batida inteira de corredor vazio.
+    if (this.mare === 'recolhendo') {
+      if (!this.agua.cheia) return;
+      this.mare = 'mar';
+    }
+    if (this.mare === 'voltando' && (this.mareEspera -= dt) > 0) return;
+
     this.corredorTimer -= dt;
     if (this.corredorTimer > 0) return;
     this.corredorTimer = this.corredorRate;
@@ -1056,7 +1128,16 @@ export class GameScene extends Phaser.Scene {
     // é UM — a mesa — e o que troca entre as câmaras é a TEXTURA dela (etapas M2–M5), não o nome.
     // Sem a arte, cai na `costela`: mais larga e mais feia, mas a fase roda (arte entra asset por
     // asset, e a guarda é sempre `textures.exists`).
-    const kind: PropKind = this.textures.exists('mesa') ? 'mesa' : 'costela';
+    //
+    // A câmara alagada é a exceção: ali nasce a MESA DO MAR, com a mesma guarda de arte.
+    const kind: PropKind =
+      this.mare === 'mar' && this.textures.exists('mesaMar')
+        ? 'mesaMar'
+        : this.textures.exists('mesa')
+          ? 'mesa'
+          : 'costela';
+    // Na câmara cheia TODA mesa emerge da parede; na volta do aço, só os primeiros pares.
+    const emerge = this.mare === 'mar' || this.mare === 'voltando';
 
     // ⚠️ MORREU AQUI TAMBÉM O FUNIL (o `angle` por coluna). Ele existia para as costelas fecharem
     // em funil; uma mesa inclinada tem o topo em DIAGONAL, e topo em diagonal é exatamente a
@@ -1067,7 +1148,53 @@ export class GameScene extends Phaser.Scene {
     // pelo menos 8px para fora da parede. Pular uma delas quebraria o PAR, e par quebrado é vão não
     // medido: é o que a `probe-stage4` cobra em `vaos:[110,110,110]`.
     this.terrain.spawn(kind, { bordaVao: vaoY + meio });
+    if (emerge) this.terrain.emergir(this.terrain.ultimo!, this.superficieDaMoldura);
     this.terrain.spawn(kind, { anchor: 'teto', bordaVao: vaoY - meio });
+    if (emerge) this.terrain.emergir(this.terrain.ultimo!, this.superficieDaMoldura);
+
+    // A VOLTA É GRADUAL: `MARE_PARES_EMERGINDO` pares de aço ainda sobem da parede, e aí a fase
+    // volta a plantar a mesa no lugar, como sempre.
+    if (this.mare === 'voltando' && --this.mareParesEmergindo <= 0) this.mare = 'aco';
+  }
+
+  /** A superfície da borda na coluna `xTela` — o que as mesas da maré precisam para sumir nela. */
+  private readonly superficieDaMoldura = (xTela: number, teto: boolean): number =>
+    teto ? this.moldura.superficieTetoEm(xTela) : this.moldura.superficieChaoEm(xTela);
+
+  /** Segundos entre o golfinho morrer e a primeira mesa de aço voltar: o tempo das do mar afundarem. */
+  private static readonly MARE_ESPERA = 1.4;
+  /** Quantos pares de aço voltam emergindo antes de a fase plantar a mesa no lugar de novo. */
+  private static readonly MARE_PARES_EMERGINDO = 3;
+
+  /**
+   * A MARÉ SOBE: as mesas de aço entram na parede, e o corredor para até a câmara encher. Quem chama
+   * é o encher da água — o evento `agua` do roteiro e a rede do `spawnGolfinho`.
+   *
+   * Reentrante, como o `Agua.encher`: a rede chama de novo com a câmara já alagada, e aí não há
+   * nada a recolher.
+   */
+  private entraNaMare(): void {
+    if (this.mare === 'recolhendo' || this.mare === 'mar') return;
+    this.terrain.desmoronar('mesa', this.superficieDaMoldura);
+    this.mare = 'recolhendo';
+  }
+
+  /**
+   * A MARÉ DESCE. `anima` é a morte do golfinho: as mesas do mar explodem e afundam, e o aço volta
+   * aos poucos. Sem `anima` é o salto de cena (o `G`, trocar de golfinho): tudo some no quadro e a
+   * fase segue como se a câmara nunca tivesse alagado.
+   */
+  private saiDaMare(anima: boolean): void {
+    if (this.mare === 'aco') return;
+    if (anima) {
+      this.terrain.afundar('mesaMar', this.superficieDaMoldura, (x, y) => this.fx.explode(x, y, 1.1, -0.4));
+      this.mare = 'voltando';
+      this.mareEspera = GameScene.MARE_ESPERA;
+      this.mareParesEmergindo = GameScene.MARE_PARES_EMERGINDO;
+    } else {
+      this.terrain.limpar('mesaMar');
+      this.mare = 'aco';
+    }
   }
 
   /**
@@ -1198,6 +1325,7 @@ export class GameScene extends Phaser.Scene {
     // alguém chegar ao golfinho por um caminho que pulou o t=36: o modo treino, o `G`, ou uma
     // sonda saltando com `skipTo`. Arena sem água seria um golfinho nadando no seco.
     this.agua.encher();
+    this.entraNaMare();
 
     // ⚠️ SPRITE PRIMEIRO: `overlap(sprite, grupo)` entrega (sprite, projétil) — ver `spawnBoss`.
     this.golfinhoColliders = [
@@ -1253,6 +1381,8 @@ export class GameScene extends Phaser.Scene {
     if (havia) {
       if (reacende) this.agua.esvaziar();
       else this.agua.limpar();
+      // As mesas do mar seguem a água: explodem e afundam quando ela drena, somem quando ela é limpa.
+      this.saiDaMare(reacende);
     }
   }
 

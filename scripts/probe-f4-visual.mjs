@@ -103,9 +103,14 @@ ok(c3?.tex === 'paintBgF4c', `t=70s: TROCOU para o duto (${c3?.tex})`);
 // para 38s (as três portas), ela foi para t=109 e o chefão para t=113. Este assert falhou verde na
 // mudança e é bom que tenha falhado: um instante de sonda cravado à mão é um número que precisa
 // acompanhar o roteiro, e falhar é como ele avisa.
-const c4 = await pinturaEm(110);
+//
+// ⚠️ E t=116, NÃO MAIS t=110 (14/09): a pintura do núcleo passou a entrar PELA EMENDA — ela se revela
+// atrás do pilar da junta enquanto ele atravessa a tela (`Parallax.setPinturaPelaEmenda`), e só vira
+// a `pinturaAtual` quando a borda macia inteira passou da esquerda, por volta de t≈114,5. Em t=110 a
+// emenda ainda nem entrou na tela, e o duto continua sendo o lugar certo à esquerda dela.
+const c4 = await pinturaEm(116);
 console.log('cenario 4', JSON.stringify(c4));
-ok(c4?.tex === 'paintBgF4d', `t=110s: TROCOU para a câmara do núcleo (${c4?.tex})`);
+ok(c4?.tex === 'paintBgF4d', `t=116s: TROCOU para a câmara do núcleo, pela emenda (${c4?.tex})`);
 
 // ─── A LEITURA DO MIOLO: o que a decoração NÃO pode tapar (teste jogado de 12/09) ───
 //

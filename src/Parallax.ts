@@ -149,6 +149,11 @@ export class Parallax {
    * dos padrões do chefão.
    */
   private foregroundDim = 1;
+  /**
+   * Multiplicador de alpha de TODAS as camadas de peças (1 = fase, 0 = arena do chefão). Ver
+   * `limpaCenario`. Guardado pelo mesmo motivo do `foregroundDim`: a camada recicla.
+   */
+  private cenarioDim = 1;
   /** Densidade da nebulosa (Fase 3): 1 = dentro da nuvem. Ver `setNebulaDensity`. */
   private nebulaDim = 1;
   /**
@@ -182,6 +187,21 @@ export class Parallax {
 
   /** As duas cópias da pintura do interior (Fase 4). `setPintura` troca a textura delas. */
   private pinturaF4: Phaser.GameObjects.Image[] = [];
+
+  /**
+   * A PINTURA NOVA ENTRANDO PELA EMENDA (ver `setPinturaPelaEmenda`): as cópias dela por cima das
+   * da pintura atual, recortadas por uma máscara de borda macia que anda com a emenda da `Moldura`.
+   */
+  private entrada: {
+    key: string;
+    copias: Phaser.GameObjects.Image[];
+    mascara: Phaser.GameObjects.Image;
+    bitmap: Phaser.Display.Masks.BitmapMask;
+    emendaX: () => number;
+  } | null = null;
+
+  /** A largura da borda macia da cortina, em px. Larga o bastante para não ler como corte reto. */
+  private static readonly ENTRADA_RAMPA = 112;
 
   /** A chave da pintura do interior que está na tela. A sonda da fatia cobra este valor. */
   pinturaAtual: string | null = null;
@@ -493,9 +513,16 @@ export class Parallax {
     // superfície do teto desce para 64). ⚠️ **Baixar deste 1.62 devolve os cabos ao ar** — é um
     // piso calculado, não uma preferência.
     //
-    // ⚠️ O QUE ESTA CONTA NÃO RESOLVE: os tubos LATERAIS. A arte é radial — os tubos saem para
-    // todos os lados — e só some no lado quem for mais largo que a tela (escala ≥ 3,2, que é uma
-    // parede marrom, não uma peça). Cima e baixo é o que dá para enterrar, e é o que ele pediu.
+    // ⚠️ O QUE ESTA CONTA NÃO RESOLVIA: os tubos LATERAIS. A arte era radial e só sumia no lado
+    // quem fosse mais largo que a tela. Em 14/09 a peça foi REGERADA como COLUNA — o coração numa
+    // cápsula, com os cabos só para cima e para baixo — e os laterais deixaram de existir.
+    //
+    // ⚠️ E A ESCALA É OUTRA CONTA, COM A MESMA LEI: a coluna tem 128px e as duas pontas são cabo
+    // cortado, então as DUAS têm de enterrar. A base em `GROUND_Y` (206) já está 16px atrás da
+    // faixa do chão; o topo é `206 − 128 × escala`, e para entrar na faixa do teto (superfície em 26
+    // na abertura) a escala precisa passar de **1,41**. Em 1,45 o topo cai em 20. ⚠️ **Baixar deste
+    // piso devolve o cabo de cima ao ar.** E ela emagreceu de brinde: a coluna tem ~43px de corpo,
+    // 62px em tela contra os 196 da peça radial.
     this.addLayer({
       key: 'orgao',
       factor: 0.3,
@@ -503,7 +530,7 @@ export class Parallax {
       depth: -88,
       tint: 0x5a4048,
       alpha: 0.9,
-      scale: [1.62, 1.85],
+      scale: [1.45, 1.6],
       gap: [400, 700],
       terreno: false,
       // ⚠️ 7 QUADROS/s COM YOYO = 16 quadros por volta, ou ~2,3s por batida — um coração EM
@@ -511,16 +538,26 @@ export class Parallax {
       // núcleo são o mesmo bicho, e dois ritmos diferentes na mesma tela seriam dois bichos.
       anim: { sheet: 'orgaoAnimSheet', key: 'f4-orgao-bate', frameRate: 7 },
     });
-    // MAQUINÁRIO PESADO pendurado no teto: o bicho é biomecânico — carne E máquina.
+    // MAQUINÁRIO PESADO: o bicho é biomecânico — carne E máquina.
+    //
+    // ⚠️ ELE ERA PENDURADO NO TETO, E VIROU COLUNA COMO O CORAÇÃO (14/09, 2º teste jogado). Ele
+    // disse *"ficaram melhores na vertical para pegar teto e chão, só que percebi que só aparece um
+    // deles"* — e a medição mostrou que o maquinário ESTAVA na tela (em 100% das amostras de 100s,
+    // contra 86% do coração), só que como uma peça de 93px em y=−18, meio escondida atrás da borda
+    // do teto. Não lia como a peça nova. Agora é a mesma conta do `orgao`: 128px, origem no teto em
+    // `TETO_Y` (10), pontas enterradas nas duas bordas a partir de escala 1,45.
+    //
+    // ⚠️ E O `gap` SUBIU (260–480 → 520–860): coluna de chão a teto a cada 5–9s viraria grade. Com
+    // ~55px/s ele passa a cada 9–16s, perto do ritmo do coração, e os dois se revezam.
     this.addLayer({
       key: 'maquinario',
       factor: 0.65,
-      baseY: -18,
+      baseY: 10,
       depth: -80,
       tint: 0x3a4258,
       alpha: 0.95,
-      scale: [0.6, 1.0],
-      gap: [260, 480],
+      scale: [1.45, 1.6],
+      gap: [520, 860],
       terreno: false,
       teto: true,
       // ⚠️ 5 QUADROS/s — MAIS LENTO QUE O CORAÇÃO, e a diferença é a frase da fase. O chão é
@@ -1464,7 +1501,8 @@ export class Parallax {
     if (this.scene.anims.exists(a.key)) return;
     this.scene.anims.create({
       key: a.key,
-      frames: this.scene.anims.generateFrameNumbers(a.sheet, { start: 0, end: 8 }),
+      // Todos os quadros da folha, quantos forem: o coração tem 9, o maquinário 6 (ver a `BootScene`).
+      frames: this.scene.anims.generateFrameNumbers(a.sheet),
       frameRate: a.frameRate,
       repeat: -1,
       yoyo: true,
@@ -1533,9 +1571,13 @@ export class Parallax {
     // outras — e a tela inteira pulsaria em uníssono, que é a leitura de máquina, não de órgão.
     if (anima) {
       this.registraAnim(anima);
+      // ⚠️ O SORTEIO VAI ATÉ O ÚLTIMO QUADRO DA ANIMAÇÃO, NUNCA ATÉ UM NÚMERO CRAVADO. Era `0..8`
+      // enquanto as duas folhas tinham 9 quadros; o maquinário de 14/09 tem 6, e um sorteio 6–8
+      // apontava para um quadro que não existe — a cena caía com "reading 'duration'", só às vezes.
+      const quadros = this.scene.anims.get(anima.key).frames.length;
       (img as Phaser.GameObjects.Sprite).play({
         key: anima.key,
-        startFrame: Phaser.Math.Between(0, 8),
+        startFrame: Phaser.Math.Between(0, quadros - 1),
       });
     }
 
@@ -1558,6 +1600,7 @@ export class Parallax {
         if (bg.x <= -bg.width) bg.x += 2 * bg.width;
       }
     }
+    this.avancaEntrada();
 
     for (const layer of this.layers) {
       const dx = worldSpeed * layer.factor * dt;
@@ -1695,12 +1738,53 @@ export class Parallax {
   }
 
   /**
+   * A ARENA DO CHEFÃO: apaga TODAS as camadas de peças e deixa na tela só a pintura (e, na Fase 4,
+   * a borda da `Moldura`, que não é camada deste arquivo). Quem chama é o roteiro — o `cenario`
+   * com `soFundo` — e o salto do `G`/treino, pelo mesmo evento.
+   *
+   * ⚠️ A REGRA É DELE (14/09), e ela nasceu no núcleo da Fase 4: *"retire os maquinários do fundo
+   * do núcleo. Todas as fases de BOSS ficam apenas com o fundo e, no caso da fase 4, a borda"*. O
+   * `setForegroundDimmed` já tirava o PRIMEIRO PLANO da luta; o que sobrava atrás — coração,
+   * maquinário, costelas, ponte — era cenário competindo com o chefão pelo olho.
+   *
+   * ⚠️ SÓ MEXE EM ALPHA, E A CAMADA CONTINUA EMITINDO — invisível. Não é preguiça: o `emit` gasta
+   * `Phaser.Math.Between`, que é o fluxo de dado do JOGO. Parar de emitir mudaria a sequência
+   * de sorteios da luta de chefão inteira, e a sonda passaria a medir um chefão diferente por
+   * causa de uma decisão de arte de fundo. Um sprite em alpha 0 nem chega ao renderizador.
+   *
+   * Não tem volta, e não precisa: depois do chefão a fase acaba, e um restart reconstrói o
+   * Parallax do zero (a mesma lei do `setForegroundDimmed`).
+   */
+  limpaCenario(durationMs = 300): void {
+    if (this.cenarioDim === 0) return;
+    this.cenarioDim = 0;
+
+    for (const layer of this.layers) {
+      if (layer.sprites.length === 0) continue;
+      const alvo = this.alphaFor(layer);
+      if (durationMs <= 0) {
+        for (const s of layer.sprites) {
+          this.scene.tweens.killTweensOf(s);
+          s.setAlpha(alvo);
+        }
+        continue;
+      }
+      this.scene.tweens.add({
+        targets: layer.sprites.slice(),
+        alpha: alvo,
+        duration: durationMs,
+        ease: 'Sine.easeIn',
+      });
+    }
+  }
+
+  /**
    * O alpha REAL de um sprite da camada, com todos os fades de estado aplicados. É a fonte
    * única: `emit()` (sprite novo nasce certo), `setForegroundDimmed` e `setNebulaDensity`
    * calculam por aqui — dois fades escrevendo alpha por contas diferentes dessincronizam.
    */
   private alphaFor(layer: ScatterLayer): number {
-    let a = layer.alpha;
+    let a = layer.alpha * this.cenarioDim;
     if (layer.primeiroPlano) a *= this.foregroundDim;
     if (layer.nebulosaExtra) a *= this.nebulaDim;
     if (layer.casco) a *= this.cascoReveal;
@@ -1734,6 +1818,9 @@ export class Parallax {
    * Henrique jogando decide (a Fatia 6 provou isso três vezes).
    */
   setPintura(key: string, durationMs = 600): void {
+    // Um salto no meio de uma entrada pela emenda termina a entrada antes: duas trocas por cima uma
+    // da outra deixariam a cortina recortando a pintura errada.
+    this.terminaEntrada();
     if (!this.pinturaF4.length || !this.scene.textures.exists(key)) return;
     if (this.pinturaAtual === key) return;
 
@@ -1762,6 +1849,78 @@ export class Parallax {
         });
       },
     });
+  }
+
+  /**
+   * TROCA A PINTURA PELA EMENDA — a câmara nova se revela ATRÁS do pilar da junta, acompanhando-o
+   * enquanto ele atravessa a tela.
+   *
+   * ⚠️ ELA EXISTE PORQUE O MERGULHO NO ESCURO FOI REPROVADO NA ENTRADA DO NÚCLEO (14/09, 3º teste
+   * jogado): *"a transição de fundos, de novo, está muito seca. Não está agradável"*. A borda já
+   * tinha aprendido a entrar pela direita com o mundo, e o pilar a tapar a costura; a pintura
+   * piscando no escuro de uma vez era a última coisa trocando "no quadro". Agora o lugar muda onde o
+   * jogador PASSA: à esquerda do pilar ainda é o duto, à direita já é o núcleo.
+   *
+   * ⚠️ NÃO É UM CROSSFADE, e a lei do `setPintura` continua de pé: as duas pinturas nunca se somam
+   * em alpha 0,5 no quadro inteiro — só na faixa de `ENTRADA_RAMPA` px da borda macia, que anda.
+   *
+   * `emendaX` é a borda esquerda da primeira placa nova, em x de tela (`Moldura.xDaEmenda`).
+   * Quando a borda macia inteira passou da esquerda da tela, a troca se completa e a cortina some.
+   */
+  setPinturaPelaEmenda(key: string, emendaX: () => number): void {
+    this.terminaEntrada();
+    if (!this.pinturaF4.length || !this.scene.textures.exists(key) || this.pinturaAtual === key) return;
+
+    const R = Parallax.ENTRADA_RAMPA;
+    const CHAVE = 'f4EntradaMascara';
+    if (!this.scene.textures.exists(CHAVE)) {
+      // A máscara: transparente → opaca ao longo de R px, e opaca daí até cobrir a tela inteira mais
+      // uma placa, que é de onde a emenda parte.
+      const w = R + GAME_WIDTH + 256;
+      const tex = this.scene.textures.createCanvas(CHAVE, w, GAME_HEIGHT)!;
+      const ctx = tex.getContext();
+      const g = ctx.createLinearGradient(0, 0, R, 0);
+      g.addColorStop(0, 'rgba(255,255,255,0)');
+      g.addColorStop(1, 'rgba(255,255,255,1)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, R, GAME_HEIGHT);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(R, 0, w - R, GAME_HEIGHT);
+      tex.refresh();
+    }
+
+    const mascara = this.scene.make.image({ x: GAME_WIDTH, y: 0, key: CHAVE }, false).setOrigin(0, 0);
+    const bitmap = mascara.createBitmapMask();
+    // Logo acima da pintura atual (−96) e abaixo de tudo o que é camada do interior (−88 em diante).
+    const copias = this.pinturaF4.map((img) =>
+      this.scene.add.image(img.x, img.y, key).setOrigin(0, 0).setDepth(-95.5).setMask(bitmap),
+    );
+    this.entrada = { key, copias, mascara, bitmap, emendaX };
+    this.avancaEntrada();
+  }
+
+  /** Um quadro da entrada: a cortina segue a emenda, as cópias seguem a deriva da pintura. */
+  private avancaEntrada(): void {
+    const e = this.entrada;
+    if (!e) return;
+    e.copias.forEach((c, i) => c.setX(this.pinturaF4[i].x));
+    const x = e.emendaX();
+    // A borda macia é CENTRADA na emenda: metade dela ainda mostra o lugar de onde se vem.
+    const esquerda = Math.min(GAME_WIDTH, x) - Parallax.ENTRADA_RAMPA / 2;
+    e.mascara.setX(Math.round(esquerda));
+    if (esquerda + Parallax.ENTRADA_RAMPA <= 0) this.terminaEntrada();
+  }
+
+  /** Completa a entrada em curso, se houver: a pintura nova vira a pintura, e a cortina some. */
+  private terminaEntrada(): void {
+    const e = this.entrada;
+    if (!e) return;
+    this.entrada = null;
+    for (const img of this.pinturaF4) img.setTexture(e.key).setAlpha(1);
+    this.pinturaAtual = e.key;
+    for (const c of e.copias) c.destroy();
+    e.bitmap.destroy();
+    e.mascara.destroy();
   }
 
   setNebulaDensity(density: number, durationMs = 5000): void {
