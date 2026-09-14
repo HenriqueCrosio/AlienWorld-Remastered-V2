@@ -7,62 +7,113 @@
 **🟢 A LEITURA DA ABERTURA, A ÁGUA, OS CANOS, OS GÂNGLIOS E A MESA — JOGADOS E APROVADOS (12/09).**
 **🟢 AS PONTES COM TORRES DE AMARRAÇÃO — JOGADAS E APROVADAS (13/09):** *"ficaram boas e terminaram
 com o problema do início das passarelas flutuando."*
-**🟠 O M2 — AS BORDAS — INSTALADO E CORRIGIDO NUMA RODADA DE TESTE (13/09), AINDA NÃO REJOGADO.**
-**🟢 O CORAÇÃO E O MAQUINÁRIO RESPIRAM (13/09) — corrigidos depois do teste dele, não rejogados.**
-Branch `feat/fase4-visual` em `7bb2fd2`, **em dia com o `origin`**.
+**🟢 O M2 — AS BORDAS — REJOGADO E APROVADO (14/09):** *"Câmara A está muito boa… agora está clean e
+uniforme. O duto ficou muito bem construído."* Câmara D: *"o metal escuro com luzes vermelhas trouxe
+uma boa combinação"*.
+**🟢 O CORAÇÃO E O MAQUINÁRIO RESPIRAM — APROVADOS (14/09):** *"Está muito bom a animação das peças."*
+**🟢 AS COLUNAS (coração e maquinário verticais), O PILAR NAS COSTURAS, O FIM DO DUTO E A MARÉ DO GOLFINHO — JOGADOS EM 14/09:**
+*"os maquinários casaram bem com a fase e estarem em diferentes layers deu uma profundidade maior"* ·
+*"o pilar na junta ficou bom"* · *"o restante ficou bom"*.
+**🟠 A ENTRADA DO NÚCLEO PELA EMENDA — FEITA NA ÚLTIMA RODADA DE 14/09, AINDA NÃO JOGADA.**
+**⏸️ DUAS DECISÕES GUARDADAS PARA A PRÓXIMA SESSÃO, a pedido dele** — ver ⏸️ (*"na próxima sessão eu
+testo e decidimos o que precisa"*).
+Branch `feat/fase4-visual`, commitada e empurrada no fim de 14/09.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🎯.
-> Em 13/09 as bordas das câmaras entraram, o coração e o maquinário ganharam animação, e eu joguei
-> e mandei quatro consertos: uma arte só por câmara, os corações de volta na camada certa, a tira
-> cinza do rodapé fora, e a emenda com degrau. Você consertou os quatro e eu ainda NÃO rejoguei.
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção ⏸️.
+> Em 14/09 fizemos quatro rodadas de teste jogado na Fase 4: as colunas do coração e do maquinário,
+> o pilar nas costuras das bordas, o fim do duto igual ao duto, a maré do golfinho com as mesas do
+> mar, e por último a pintura do núcleo entrando pela emenda. Ficaram guardadas duas coisas: julgar
+> essa entrada do núcleo jogando, e decidir o que fazer com a pintura do núcleo que parece ampliada.
 > Meu veredicto agora: <o que achei jogando>. Siga daí."**
 
-⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O VEREDICTO DELE, NÃO CODAR.** Tudo o que está 🟠 aqui
-está *feito e verificado por sonda*, e nada disso foi rejogado — a lei desta fatia, paga cinco
-vezes, é que **assert verde não julga composição**. A seção 🎯 lista o que perguntar, item por item.
-
-⚠️ **SE ELE CHEGAR SEM VEREDICTO**, suba o localhost (`npm run dev` → `L`) e remonte as capturas
-antes de qualquer outra coisa: `_ver-bordas.mjs` (as 4 câmaras), `_ver-respiro.mjs` (as duas peças
-respirando) e `_ver-abertura.mjs` (a leitura da abertura).
+⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O VEREDICTO DELE, NÃO CODAR.** Assert verde não julga
+composição. Sem veredicto: suba o localhost (`npm run dev` → `L`) e remonte `_ver-nucleo.mjs` (duto →
+núcleo, com a entrada pela emenda) e `_ver-mare.mjs` (a maré inteira).
 
 ---
 
-## 🎯 O QUE ESPERA O OLHO DELE — a lista da próxima sessão
+## ⏸️ AS DUAS DECISÕES GUARDADAS — pergunte antes de mexer
 
-**Nada aqui está quebrado. Tudo aqui está por julgar.** Sondas todas verdes; o que falta é o
-controle na mão.
+1. **A entrada do núcleo pela emenda** (4ª rodada). Ele reprovou o mergulho no escuro (*"de novo, está
+   muito seca"*); a resposta instalada é a cortina de borda macia seguindo o pilar. **Nunca foi jogada.**
+   Knobs: `Parallax.ENTRADA_RAMPA` (112px, a largura da borda macia) e a duração do `limpaCenario`
+   (1400ms) no `runEvent` do `cenario`. Reverter é tirar `entrada: 'emenda'` da linha de t=109.
+2. **A pintura do núcleo "ampliada".** **Medido: não está** (captura e arquivo batem na mesma escala;
+   384×216 em escala 1; é a de MAIS detalhe das quatro). O que lê como ampliado é o enquadramento da
+   arte. Caminhos oferecidos, **escolha dele** (fundo pintado é peça dele): **(a)** desampliar o
+   original — estender o quadro por outpaint e reduzir para 384×216, que a lei permite; **(b)** ele
+   gerar de novo com enquadramento mais aberto.
 
-| # | o que | por que ainda não fechou |
+E uma nota que ele mesmo deixou para depois: *"se precisarmos espaçar mais [as colunas] é um detalhe
+que no balanceamento geral podemos fazer depois"* — o knob é o `gap` das camadas `orgao` e `maquinario`.
+
+---
+
+## 🎯 O QUE MUDOU EM 14/09 — o registro, rodada a rodada
+
+| # | o que | o que foi feito | o knob se ele reprovar |
+|---|---|---|---|
+| 1 | **Os tubos laterais** do coração e do maquinário | 1ª rodada (dissolver as pontas) **reprovada**: *"os tubos ainda aparecem sim"*. 2ª rodada (14/09): as duas peças **regeradas verticais**, tubos só em cima e embaixo. O coração virou COLUNA do chão ao teto (escala 1,45–1,6, as duas pontas enterradas); na 3ª rodada o maquinário virou coluna também (ver a seção da 3ª rodada). **Aprovadas jogando.** Objetos `7d5df865` e `a4f7f9e0`, animados e assados contra o quadro estático. ⚠️ A 1ª tentativa de regerar (`8b39566b`, `ab212ce2`, com a peça radial de referência) copiou a forma com os tubos — as 8 seguem na fila | a escala do `orgao` no `Parallax` (⚠️ piso 1,41, abaixo disso o cabo de cima fica no ar); o maquinário usa só os quadros 0–5 (6–8 estouravam); o `gap` das duas camadas é o espaçamento |
+| 2 | **As costuras entre bordas** (*"por que não colocar um pilar menor na frente dessa costura"*) | a borda mora na PLACA e a câmara nova entra pela direita. **E a costura ganhou um PILAR** (a ideia dele): a primeira placa da câmara nova carrega uma `junta` — uma mesa a 0,8 de escala, decoração sem corpo, plantada na emenda em cima e embaixo. A→B usa a mesa do mar, B→D a de aço (campo `junta` no `cenario`) | `JUNTA_ESCALA` e `JUNTA_SOBRA` na `Moldura`; a arte é o `junta` do evento |
+| 2b | **O fim do duto** (*"estranha e sem acabamento… transição repentina"*) | duas causas, as duas saíram: (1) a SAIA sumia no quadro de t=106 com a parede colada ainda na tela — agora ela acende por GEOMETRIA, onde a peça não alcança a borda; (2) o tint do duto descoloria a parede inteira no mesmo quadro — agora ele é da placa e acende/apaga em degradê de 3 placas, entrando pela direita. Na 3ª rodada o fio e a mordida também viraram da placa, e o duto passou a durar até t=109 | `LETAL_PLACAS` na `Moldura` |
+| 3 | **O núcleo só com fundo e borda** (*"retire os maquinários do fundo do núcleo"*) | `soFundo` no `cenario` de t=109: TODAS as camadas de peças apagam (1400ms desde a entrada pela emenda da 4ª rodada; eram os 300ms do mergulho). Vale também no `G` e no treino | a duração em `GameScene.runEvent` (`fadeMs/2`). ⚠️ Ele disse *"todas as fases de BOSS"* — F1–F3 **não foram auditadas** contra isso |
+| 4 | **A maré da câmara do golfinho** | t=36: as mesas de aço **DESMORONAM** (2ª rodada, *"elas somem apenas, poderia dar um efeito de desmoronar"*): tranco, poeira na linha da borda, queda de 1,3s · câmara cheia: nasce a **mesa do mar** (`mesaMar`/`mesaMar2`), sempre emergindo da parede · morte do golfinho: as do mar **explodem e afundam** · 1,4s depois o aço volta, os 3 primeiros pares emergindo | `MARE_ESPERA` e `MARE_PARES_EMERGINDO` na `GameScene`; as durações no `TerrainSystem` (`desmoronar` 380+1300ms, `afundar` 1100ms, `emergir` 900ms). **Aprovada jogando** |
+| 5 | ⚠️ **A arena do golfinho agora TEM corredor** | o `corredor` de t=38,5 foi de `rate: 0` para `rate: 2.6, gap: 120` — sem isso não haveria mesa do mar para explodir na morte. **É uma mudança de dificuldade do duelo**, e só o controle na mão julga | o `rate` dessa linha para cima; `rate: 0` devolve a arena vazia (e tira as mesas do mar junto) |
+| 6 | **A arte das mesas do mar** | 2 objetos PixelLab com as mesas instaladas de referência: `5eff6d47…` (contêineres, escolhida a [1], coral ciano) e `84f4a25c…` (anteparo, escolhida a [0], anêmonas e costela). As outras 6 seguem na fila de review. 94px de largura, a mesma pegada das de aço | trocar a candidata em `ESCOLHIDAS` de `_assar-mesa-mar.mjs` e reassar — zero geração |
+
+### A pergunta que eu interpretei sem confirmar
+
+*"As novas mesas vão submergir"* foi lido como **elas emergem da parede já debaixo d'água** (sobem no
+lugar). Se ele quis outra coisa (elas afundando ao longo do duelo, por exemplo), é o `emergir` que muda.
+
+### ⚠️ AS LEIS NOVAS DE 14/09
+
+- **Arena de chefão é só fundo (+ borda na F4).** Ver `Parallax.limpaCenario` — só alpha; a camada
+  segue emitindo porque o `emit` gasta `Phaser.Math.Between`, o fluxo de dado do jogo.
+- **A borda mora na placa.** `Moldura.setFaixa` ao vivo só reescreve placas que ainda não entraram na
+  tela; `imediato` (o salto) reescreve todas.
+- **O salto para o duto mostrava a borda da doca** — `aplicaCorredorEMoldura` repunha a borda do último
+  `cenario` (`f4FaixaC`, que não existe). Agora varre a última borda cuja arte EXISTE.
+- **Esconder atrás da borda não esconde:** a borda B tem frestas semitransparentes. A mesa que entra na
+  parede apaga o alpha junto com o deslize.
+- **Mesa em movimento é inerte** (`TerrainSystem.solido`, nos três `overlap` de prop): não mata, não
+  para tiro, não cobre bala até chegar.
+- **O assert da arena do golfinho mudou de lei, não afrouxou:** era "não nasce mesa", agora é "só nasce
+  a mesa do mar, e nenhuma mina".
+
+**Sondas em 14/09, uma por vez:** `probe-f4-moldura` 56 ✔ · `probe-f4-atalho-g` 6 ✔ · `probe-stage4` 24 ✔
+(`vaos:[126,126,126]`) · `probe-f4-visual` 20 ✔ · `probe-f4-golfinho` 47 ✔ · `probe-f4-agua` 28 ✔.
+
+⚠️ **Dois asserts da `probe-f4-moldura` mudaram de lei na 2ª rodada, não afrouxaram:** a saia "acesa nas 8 dentro do duto" virou "acesa exatamente onde a peça não alcança a borda, nos dois lados"; o tint letal é cobrado na placa mais à DIREITA (a rampa acende de lá). ⚠️ **E o "degrau nunca salta mais que 14px" é INTERMITENTE, e o defeito é da sonda:** ela amostra a curva a cada 200ms e, com o swiftshader lento, duas placas passam entre leituras (medido 24 = dois degraus). Passou em 2 de 3 rodadas seguidas.
+
+### 🔁 A 3ª RODADA (14/09) — o 2º teste jogado dele
+
+*"gostei dos novos assets de maquinário, ficaram melhores na vertical"* · *"o pilar na junta ficou bom na entrada da câmara D"* · *"os pilares novos [mesa do mar] ficaram bons"*. Três consertos:
+
+| o que ele viu | o que era, MEDIDO | o que mudou |
 |---|---|---|
-| 1 | **A borda da câmara A** (`f4FaixaA`, a fibra sem osso) | é a mais escura das quatro. A pintura da doca tem média 16,4 e o tratamento prende a faixa em 1,3× disso — as candidatas caíram de 55,6 para 22,1. Se sumir contra o fundo, o knob é o alvo do `_valor-faixa.mjs` (1,3 → 1,5), reassar, zero geração |
-| 2 | **A borda da câmara B** (`f4FaixaB`) | ⚠️ **HÁ UMA FRASE DELE SEM RESPOSTA AQUI.** Ver a seção 🟠 logo abaixo — pode ser que ele queira trocar por `B-3` |
-| 3 | **A borda da câmara D** (`f4FaixaD`) | aprovada na folha de contato, nunca vista instalada. Ficou bem discreta na captura |
-| 4 | **O duto com a borda de B herdada** | a arte de C existe e está aprovada, mas é 128×80 e instalá-la é o M4. Pergunta dele a responder: dá para conviver até lá, ou corta C para 64 agora? |
-| 5 | **A emenda entre segmentos** | fora do duto virou degrau de ~1px (era até 10). DENTRO do duto continua 9–11px e **isso não sai** — ver a seção ⛏️. O que mudou lá foi a leitura, não a geometria |
-| 6 | **O coração e o maquinário respirando** | profundidade (sutil demais? forte demais?), ritmo (2,3s contra 3,2s), e se as peças na tela estão claramente fora de fase |
-| 7 | **O atalho `G`** | verificação de conserto, não gosto: apertar `G` tem de entregar o núcleo (pintura escura, borda D), nunca a doca vermelha |
+| *"só aparece um deles"* (o coração) | **ele estava certo no que importa, errado no número:** em 100s de fase, amostrando a cada 0,5s, o maquinário esteve na tela em 100% das amostras e o coração em 86%. Mas o maquinário entrava como uma peça de 93px em y=−18, meio escondida atrás da borda do teto — não lia como a peça nova | o maquinário virou COLUNA como o coração (folha de 96×128, origem no teto em y=10, escala 1,45–1,6) e o `gap` subiu para 520–860, para as duas colunas se revezarem em vez de virarem grade |
+| *"um pouco antes [da câmara D] a linha do duto não existe e o sprite da borda é diferente de todo o duto"* | o duto acabava em t=106 e a borda D só chegava em ~110: as placas de B entre as duas perdiam o fio e o tint | o **duto dura até t=109** (a linha `duto:false` desceu para uma linha ANTES do `cenario` do núcleo) e **fio e mordida viraram da PLACA**, como o tint: `letal > 0` desenha o fio E morde. A placa D nasce fria; a fronteira é o pilar. O pilar subiu para depth −0,54, na frente do fio |
+| o anteparo do mar *"fica cortado e não aparece a parte mais chamativa"* | a mesa é enterrada pela borda do vão: na tela só aparecem os ~50px de CIMA da textura, e no anteparo isso era laje lisa | `_assar-mesa-mar.mjs` corta 30 linhas do topo dele (94×82): a janela visível passa a ser as anêmonas e a costela |
 
-### 🟠 A FRASE DELE QUE FICOU SEM RESPOSTA
+### 🔁 A 4ª RODADA (14/09) — o 3º teste jogado dele
 
-> *"Na parte do golfinho quero que mantenha a mais escura também e tire a segunda variação."*
+*"os maquinários casaram bem com a fase e estarem em diferentes layers deu uma profundidade maior"* · a borda C→D *"resolvida"* · o espaçamento das colunas fica para o balanceamento geral.
 
-⚠️ **A CÂMARA B NUNCA TEVE DUAS VARIAÇÕES** — só `B-1` foi instalada, e a sonda confirma uma
-textura só na tela (`texturas: ["f4FaixaB"]`). Então a frase só fecha de duas maneiras, e **é dele
-a escolha, não adivinhe:**
+| o que ele viu | o que era | o que mudou / o que falta |
+|---|---|---|
+| *"a transição de fundos, de novo, está muito seca"* (duto → núcleo) | o `setPintura` mergulhava no escuro em 600ms, a última coisa da câmara que ainda trocava "no quadro" | **a pintura entra PELA EMENDA** (`entrada: 'emenda'` no `cenario` de t=109 → `Parallax.setPinturaPelaEmenda`): uma cortina com borda macia de 112px segue a `Moldura.xDaEmenda()`, então à esquerda do pilar ainda é o duto e à direita já é o núcleo. Completa em t≈114,5. As peças de cenário se dissolvem em 1,4s |
+| *"a imagem de fundo do núcleo está ampliada ou aumentada"* | **MEDIDO: não está.** A captura em t=118 reduzida a 384×216 bate com o `paint-bg-f4-d.png` na mesma escala; o arquivo é 384×216 em escala 1, do mesmo original de 1672×941 das outras três, e é o que tem MAIS detalhe (gradiente médio 5,47 contra 3,73–4,70). O que lê como ampliado é o ENQUADRAMENTO da arte: a massa do núcleo ocupa um terço do quadro e as bordas cortam o chão e o teto dela | ⚠️ **ABERTO, e é decisão dele** (fundo pintado é peça dele): (a) *desampliar* o original — estender o quadro por outpaint e reduzir para 384×216, que a lei permite; ou (b) ele gerar de novo com enquadramento mais aberto. Nada foi mexido |
 
-1. **Ele quer trocar B-1 por B-3**, a candidata mais ESCURA das duas que ele viu na folha (arcos
-   escuros com aro aceso e nódulo vermelho, emenda 10). É a leitura mais provável: ele pediu "mais
-   escuro" nas duas câmaras na mesma mensagem. Custo: reassar `B-3` com o `_valor-faixa.mjs` e
-   trocar uma linha do `ART`.
-2. **Ele viu os sprites bugados como se fossem uma segunda variação.** Naquela partida o coração e
-   o maquinário estavam em depth 0, sem tint e em escala 1 (ver o defeito 1 da seção 🆕) — arte
-   estranha colada por cima da câmara B. Se for isso, já está resolvido e não há nada a fazer.
+⚠️ **Mais dois asserts reescritos:** a `probe-f4-visual` cobra o núcleo em t=116 (não 110), porque a pintura agora se completa quando a emenda atravessa; a saia da `probe-f4-moldura` deixou de exigir "pelo menos uma acesa" — numa rodada o sorteio do corredor não precisou de nenhuma, e nenhuma estava errada.
 
-**Pergunte antes de mexer.** Os 8 PNGs candidatos continuam em `scripts/_f4/_faixa2/`.
+⚠️ **Bug pego na 2ª rodada:** o `emit` do `Parallax` sorteava o quadro inicial em `0..8` cravado; com a folha de 6 quadros do maquinário, a cena caía às vezes com *"reading 'duration'"*. Agora sorteia até o último quadro real.
+
+**PixelLab em 14/09:** 4.533 no arranque, **4.437** no fim — **96** gerações: mesas do mar 40, a tentativa radial das peças 40, as colunas (Pro Flash) 12, as duas animações 4.
 
 ---
 
