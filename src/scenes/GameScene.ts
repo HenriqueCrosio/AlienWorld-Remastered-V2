@@ -1256,7 +1256,7 @@ export class GameScene extends Phaser.Scene {
 
     this.boss =
       this.stage.id === 4
-        ? new BossNucleo(this, this.enemies, this.terrain)
+        ? new BossNucleo(this, this.enemies, this.terrain, this.fx)
         : this.stage.id === 3
           ? new BossSerpente(this, this.enemies, this.fx)
           : this.stage.id === 2

@@ -28,29 +28,108 @@ pode ser um marrom escuro"*. `Moldura.CONTORNO` (0x22160f, alpha 0,9, 2px), POR 
 fio toma o lugar. Só `f4FaixaB` (`CONTORNO_BASES`). Os retângulos trocam de nome com o traço
 (`contornoChao`…) para a sonda do fio não ler contorno como parede acesa. Captura: `_f4/_ver-contorno.mjs`.
 Sondas 15/09: `probe-f4-moldura` ✔ · `probe-f4-visual` ✔ · `probe-f4-golfinho` ✔.
-Branch `feat/fase4-visual`, commitada e empurrada no fim de 14/09.
+
+**🟢 BLOCO B · B1 — O GUARDIÃO NOVO — JOGADO E APROVADO (15/09):** *"o novo modelo ficou melhor que o
+outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeiro** — B1 ✅ → **B3 (a
+2ª forma, EM CURSO)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
+(M3, `f4Vivo`, `f4Veu`) seguem sem resposta — ver "🧭 O MAPA PARA FECHAR A FATIA 7".
+- **Arte:** a DELE (PixelLab `9436240c`), montada sem geração por `_f4/_instalar-guardiao.mjs` —
+  `guardiao.png`, `guardiao-idle-sheet.png`, `guardiao-morte-sheet.png` e `guardiao-destruido.png`,
+  todos no MESMO quadro de 256². Os crus seguem em `assets/raw/anim-guardiao-novo/`.
+- **Remedido** (`_f4/_medir-guardiao.mjs`): alvo `G_CORE_OFF` +27,+31 → **+24,+13**; o corpo do
+  alvo 54×48. ⚠️ O antigo +31 já estava errado DURANTE a respiração (estático 256×227 contra sheet
+  256² alinhada no topo: ~10px de tela abaixo do miolo). O bico `G_MUZZLE` −100,−20 → **−94,+44**:
+  o antigo era a olho e caía no vazio acima da cabeça; o leque agora sai do bico, ~45px mais baixo.
+- **A morte, composta no motor (escolha dele):** `guardiao-morte` (1000ms) + 6 `fx.explode` subindo
+  pelo casco + `guardiaoDestruido` com `explodeBig` no fim; o coração surge em 1500ms (era 1300) e a
+  carcaça some, como antes (*ele não quis adiantar o B3*). `BossNucleo` passou a receber o `Fx`.
+- ⚠️ **Não julgado explicitamente:** nos quadros 6–8 da respiração o miolo (o ALVO) quase apaga —
+  área acesa de ~1.560px cai para 120–307px. Ele aprovou o modelo sem apontar isso; se voltar, é
+  julgamento dele.
+- ⚠️ **Leitura enganosa pega nesta sessão:** `core.body.x/y` lido fora do passo da física sai meio
+  corpo para baixo/direita (o `body.reset` grava o canto sem offset). Na colisão está centrado —
+  medido no `worldstep`: `body.center` = `core.x/y`. A captura `_f4/_ver-guardiao.mjs` desenha pelo centro.
+- Sondas: `probe-stage4` ✔ (bala real fere a massa, troca, coração, cutscene final) · typecheck ✔.
+
+**🟠 BLOCO B · B3 — A 2ª FORMA: O CORAÇÃO MORRE, ENTRA "A FÚRIA" (15/09). 4 CANDIDATAS, NENHUMA
+ESCOLHIDA.** Ver ⏸️ logo abaixo.
+
+Branch `feat/fase4-visual`, tudo commitado e empurrado no fim de 15/09.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
 > **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção ⏸️.
-> Em 14/09 fizemos quatro rodadas de teste jogado na Fase 4: as colunas do coração e do maquinário,
-> o pilar nas costuras das bordas, o fim do duto igual ao duto, a maré do golfinho com as mesas do
-> mar, e por último a pintura do núcleo entrando pela emenda. Ficaram guardadas duas coisas: julgar
-> essa entrada do núcleo jogando, e decidir o que fazer com a pintura do núcleo que parece ampliada.
-> Meu veredicto agora: <o que achei jogando>. Siga daí."**
+> Em 15/09 fechamos as pendências da borda (a emenda C→D, a pintura do núcleo, o contorno da borda B),
+> instalamos e aprovamos o guardião novo com a morte composta no motor, e começamos o B3: a 2ª forma
+> deixa de ser o coração e vira uma criatura furiosa que sai de dentro do guardião. Geramos 4
+> candidatas no PixelLab (serpente, predador, boca, louva-a-deus) — a folha está em
+> `docs/superpowers/folhas/2026-09-15/furia-candidatas.png`. Minha escolha: <A/B/C/D, mistura ou nova
+> rodada, e o que ajustar>. Siga daí."**
 
-⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O VEREDICTO DELE, NÃO CODAR.** Assert verde não julga
-composição. Sem veredicto: suba o localhost (`npm run dev` → `L`) e remonte `_ver-nucleo.mjs` (duto →
-núcleo, com a entrada pela emenda) e `_ver-mare.mjs` (a maré inteira).
+⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER A ESCOLHA DELE, NÃO GERAR.** Se ele não trouxer a escolha,
+mande a folha (`SendUserFile`) e pergunte. Localhost: `npm run dev` → `L` → `G` vai direto ao chefão.
+
+---
+
+## ⏸️ ONDE PARAMOS — O B3, A 2ª FORMA DO CHEFÃO
+
+**O pedido dele (15/09), depois de jogar o guardião novo:** *"o gap visual é a segunda fase do boss que
+tem o coração, mas ficou muito sem noção um coração após a explosão do boss. Quero que crie no PixelLab
+uma evolução deste monstro que explode, algo que sai de dentro dele furioso e vil."* E sobre o coração:
+*"os outros feedbacks seriam sobre o coração e seu hitbox depois da fúria, mas já que vamos trocar o
+coração pela nova transformação, não preciso dizer"* — **o coração sai inteiro; não gaste rodada
+consertando o hitbox dele.**
+
+⚠️ **ELE DISPENSOU O BRAINSTORMING PARA A ARTE:** *"não precisa brainstorming, pode fazer direto"* ·
+*"crie e me mostre"*. Gere, monte a folha, mostre.
+
+### A rodada 1 — 4 conceitos, `create_object_pro_flash` 256×256, 9 gerações cada (36)
+
+Referência de estilo: o guardião (`9436240c`). Tudo guardado em **`assets/raw/furia-candidatas/`** (os 4
+PNG + `candidatas.json` com object_id e prompt de cada uma). Folha: **`docs/superpowers/folhas/2026-09-15/furia-candidatas.png`**
+(linha de cima crua em escala 1; linha de baixo sobre `paint-bg-f4-d` a 0,7 no lugar do guardião).
+Remontar: `node scripts/_f4/_folha-furia.mjs <saida.png> rotulo=object_id …`.
+
+| | object_id | conceito | leitura |
+|---|---|---|---|
+| **A · serpente** | `0cea374e-0514-48cf-a0f6-5c45946a9b77` | larva esfolada em S, costelas, mandíbula em 4 ganchos | silhueta mais diferente do guardião; os dentes brancos são o valor mais claro da folha |
+| **B · predador** | `76945935-56fe-43da-a498-7284a2823022` | besta sem pele, garras-lâmina, peito rasgado aceso, casca nos ombros | **a recomendada**: fúria, alvo natural no peito, carrega a casca, vertical contra a bola; ocupa a altura da arena |
+| **C · boca** | `355c6301-96cc-43e3-8b03-24dd6c76e8be` | tentáculos em volta de bocarra vertical, cacho de olhos | alvo mais óbvio (a garganta), mas silhueta REDONDA — o defeito medido no coração |
+| **D · louva** | `c0457daf-2a87-4420-bc31-45b4899e23ae` | louva-a-deus de carne, lâminas, asas rasgadas | a mais vil, e a mais vermelha/saturada — a que mais foge do dark sci-fi |
+
+⚠️ **Dois desvios do gerador:** (1) *"Side view, facing LEFT"* foi IGNORADO — B, C e D vieram de FRENTE
+(num shmup encarar o jogador funciona, mas o guardião é de perfil); (2) os restos de casca quase não
+vieram — só a B. Se ele pedir outra rodada, **mude o pedido em vez de repetir** (ver a memória
+`gerador-ignora-limite-de-cor`): referência de imagem da escolhida via `create_object_state`, ou
+descrever a pose pelo que a vista mostra (*"we see its left flank, head at the left edge"*).
+
+**PixelLab em 15/09:** 4.437 no arranque, **4.401** no fim — **36** gerações, só as 4 candidatas (o
+guardião entrou com os quadros que ele já tinha baixado). Ciclo vira em 2026-10-04.
+
+### O que vem depois da escolha, na ordem
+1. **Refinar a escolhida** (1–2 variações): orientação, casca presa, valor/saturação contra o guardião.
+2. **Medir antes de instalar**: `_f4/_medir-guardiao.mjs` serve de molde — onde está o miolo (o alvo),
+   onde fica a boca dos tiros, a caixa do alfa. ⚠️ A arte manda na hitbox; nada de offset a olho.
+3. **Animações**: idle (a fúria respirando/rosnando) e a morte final. Regras da memória
+   `pixminimax-animacao` e `gerador-ignora-limite-de-cor` (pulsar = clarear; ancorar no estático).
+4. **⚠️ O COMO ELA LUTA AINDA NÃO FOI DECIDIDO** — e o diagnóstico da spec continua de pé (seção B3
+   da `2026-09-06-fatia7-fase4-design.md`): a forma 2 de hoje *encolhe 25%*, *repete a silhueta* e
+   *cobra o mesmo verbo* ("espere a janela, atire no ponto vermelho à direita"). Trocar só o sprite
+   conserta os dois primeiros e deixa o terceiro. **Pergunte a ele** o verbo da fúria antes de mexer
+   no `updateCoracao` (ele dispensou brainstorming da ARTE, não necessariamente do comportamento).
+   Hoje a forma 2 inteira é o `forma === 'coracao'` do `BossNucleo` (HP 180, sístole/diástole, paredes
+   na fase ≥2) e a `probe-stage4` cobra esse ciclo (`aberto`, "FECHADO segura / ABERTO fere").
+5. **A troca**: a morte composta do guardião já termina no `guardiaoDestruido` com a carcaça sumindo
+   em 1500ms (`TROCA_MS`) — o gancho natural para a fúria EMERGIR dali.
 
 ---
 
 ## ✅ AS DUAS DECISÕES GUARDADAS — FECHADAS EM 15/09 (a emenda aprovada, a pintura fica)
 
 1. **A entrada do núcleo pela emenda** (4ª rodada). Ele reprovou o mergulho no escuro (*"de novo, está
-   muito seca"*); a resposta instalada é a cortina de borda macia seguindo o pilar. **Nunca foi jogada.**
+   muito seca"*); a resposta instalada é a cortina de borda macia seguindo o pilar. **Aprovada jogando em 15/09.**
    Knobs: `Parallax.ENTRADA_RAMPA` (112px, a largura da borda macia) e a duração do `limpaCenario`
    (1400ms) no `runEvent` do `cenario`. Reverter é tirar `entrada: 'emenda'` da linha de t=109.
 2. **A pintura do núcleo "ampliada".** **Medido: não está** (captura e arquivo batem na mesma escala;
@@ -938,7 +1017,7 @@ A ÁGUA + OS CANOS + AS PEÇAS + A PONTE   ✅ JOGADOS E APROVADOS (12/09, rodad
 A PONTE COM TORRES       ✅ JOGADA E APROVADA (13/09)
   [torre][pilar][vão][pilar espelhado][torre espelhada]. *"ficaram boas e terminaram com o
   problema do início das passarelas flutuando."* Nada pendente.
-M2 — AS BORDAS            🟠 ◄ PEGUE AQUI · INSTALADAS E CORRIGIDAS, NÃO REJOGADAS (13/09)
+M2 — AS BORDAS            ✅ REJOGADAS E APROVADAS (14/09) · o contorno da B aprovado em 15/09
   A, B e D entraram com UMA arte cada (ele reprovou as duas irmãs jogando). A `Moldura` ganhou
   `setFaixa`, a borda viaja no evento `cenario`, e o `aplicaCorredorEMoldura` passou a repor a
   pintura junto — buraco que já existia e levava a doca para a arena do chefão.
@@ -946,15 +1025,35 @@ M2 — AS BORDAS            🟠 ◄ PEGUE AQUI · INSTALADAS E CORRIGIDAS, NÃO
   vertical ligando o degrau. Ver a seção 🎯 no topo.
   └ A MESA, que era parte do M2, está instalada e aprovada (aço engolido, 3 variantes).
   └ ⚠️ A CÂMARA C NÃO ENTROU: a arte está aprovada mas é 128×80, e instalá-la é o M4.
-O CENÁRIO RESPIRA         🟠 FEITO E CORRIGIDO, NÃO REJOGADO (13/09)
+O CENÁRIO RESPIRA         ✅ APROVADO (14/09), e as colunas verticais junto
   o coração (chão, 7 q/s) e o maquinário (teto, 5 q/s), quadro inicial sorteado por peça.
   Assados por `_assar-anim.mjs` contra o sprite estático aprovado.
-M3 — A CÂMARA B           ⬜ a garganta
-M4 — A CÂMARA C           ⬜ a faixa grossa (a arte JÁ EXISTE e está aprovada), o esfíncter, e as
-                             3 PORTAS (o resto do Bloco C)
-M5 — A CÂMARA D           ⬜ a faixa da arena
-BLOCO B — O CHEFÃO        ⬜ INALTERADO pela moldura, e ainda de pé
+A EMENDA C→D + A PINTURA  ✅ APROVADAS (15/09) — a pintura do núcleo fica como está
+BLOCO B · B1 — GUARDIÃO   ✅ APROVADO (15/09) — arte nova dele + morte composta no motor
+BLOCO B · B3 — 2ª FORMA   🟠 ◄ PEGUE AQUI · 4 candidatas da "fúria", escolha dele pendente (ver ⏸️)
+BLOCO B · B2 — A POSIÇÃO  ⬜ o guardião no alto-direita, cortado pela borda de cima (Y escolhido por ele
+                             vendo as opções lado a lado na cena). Hoje os tentáculos batem no teto.
+M4 — A CÂMARA C           ⬜ as 3 PORTAS com arte final (hoje `f4-porta-prov.png`), a borda C grossa
+                             (128×80, arte dele aprovada; a `Moldura` foi feita para 64 de altura) e o
+                             esfíncter animado (`f4VivoC`)
+M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprovada)
 ```
+
+## 🧭 O MAPA PARA FECHAR A FATIA 7 (15/09)
+
+**🔴 Obrigatório, na ordem dele:** B3 (a 2ª forma) → B2 (a posição) → M4 (portas, borda C, esfíncter).
+
+**🟡 Cortar ou manter — PERGUNTADO EM 15/09, SEM RESPOSTA:**
+
+| peça da spec de 08/09 | o que já existe | a proposta |
+|---|---|---|
+| **M3** — `f4MesaB1/B2` (a garganta) | mesas de aço, mesas do mar, gânglios, canos, o golfinho | cortar — a câmara B já está cheia |
+| `f4VivoA/B` (lâmpada, glândula) | coração e maquinário respirando | cortar — o orçamento do "vivo" já foi gasto |
+| `f4Veu1/2` (primeiro plano orgânico) | nada | decisão dele |
+
+**🔵 Fechamento:** rejogar a dificuldade da arena do golfinho (`corredor` de t=38,5 com `rate 2.6`) ·
+atualizar o HANDOFF · merge `--no-ff` na `main`. **Fora da fatia:** auditar as arenas de chefão das F1–F3
+contra "só fundo" (→ Fatia 8 ou calibragem) · espaçar as colunas (→ balanceamento).
 
 ### 🟢 O M1 FOI JOGADO E APROVADO (10/09) — esta seção fica como registro
 

@@ -222,10 +222,16 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // capital. Explosão tem TAMANHO DE CASO agora (ver Fx.explode): pequena/média/grande.
   explosionSmallSheet: { path: 'sprites/explosion-small-sheet.png', w: 32, h: 32 },
   // O GUARDIÃO respirando (9f 256² — a massa vermelha pulsa como coração) e o NÚCLEO
-  // batendo (9f 128² — a ferida acende e apaga). CANVAS QUADRADO com a criatura centralizada:
-  // a âncora é OUTRA em relação aos estáticos recortados (guardiao.png 256×227, nucleo.png
-  // 122×122) — o BossNucleo compensa (a mesma armadilha da sheet do Leviatã, nº 33).
+  // batendo (9f 128² — a ferida acende e apaga). O núcleo tem CANVAS QUADRADO com a criatura
+  // centralizada, e a âncora é outra em relação ao estático recortado (nucleo.png 122×122).
+  //
+  // ⚠️ O GUARDIÃO NÃO TEM MAIS ESSA ARMADILHA (15/09, B1): a arte nova DELE (PixelLab 9436240c) sai
+  // com estático, respiração, morte e destruído no MESMO quadro de 256², montados sem recorte por
+  // `scripts/_f4/_instalar-guardiao.mjs`. Um offset vale para os quatro.
   guardiaoIdleSheet: { path: 'sprites/guardiao-idle-sheet.png', w: 256, h: 256 },
+  // A MORTE (9f, a que termina OCA). Toca na troca para a 2ª forma, com as explosões do motor por
+  // cima e o `guardiaoDestruido` no fim — a decisão dele de 15/09 (ver `BossNucleo.trocarParaCoracao`).
+  guardiaoMorteSheet: { path: 'sprites/guardiao-morte-sheet.png', w: 256, h: 256 },
   nucleoBeatSheet: { path: 'sprites/nucleo-beat-sheet.png', w: 128, h: 128 },
 
   // AS DUAS PEÇAS-ASSINATURA DO CENÁRIO DA F4, RESPIRANDO (13/09). O coração no chão e o
@@ -604,10 +610,13 @@ const ART: Record<string, string> = {
   nucleo: 'sprites/nucleo.png',
 
   // O GUARDIÃO: a 1ª forma do chefão final — a besta blindada ENROLADA em volta da massa
-  // viva (arte CRIADA PELO HENRIQUE na interface do PixelLab, 03ef8c07, 256px → 256×227).
-  // ⚠️ A massa vermelha (alvo) é MEDIDA: x=106..197 y=105..186 (find-pad guardiao 0).
-  // Trocar a arte OBRIGA a remedir (BossNucleo.G_CORE_OFF_*).
+  // viva. A ARTE NOVA DELE (15/09, B1 da Fatia 7): PixelLab 9436240c, 256×256, casco escuro com
+  // a massa exposta — substitui a 03ef8c07 (256×227, casco verde-oliva).
+  // ⚠️ A massa vermelha (alvo) é MEDIDA: x=115..192 y=109..176, centroide 152,141
+  // (`scripts/_f4/_medir-guardiao.mjs`). Trocar a arte OBRIGA a remedir (BossNucleo.G_CORE_OFF_*).
   guardiao: 'sprites/guardiao.png',
+  // O último quadro da morte — o casco partido em anel, o único em que a silhueta QUEBRA.
+  guardiaoDestruido: 'sprites/guardiao-destruido.png',
 
   // ─── O INTERIOR ORGÂNICO DA FASE 4 (2026-07-21) ───
   // Os corredores do Leviatã eram picos e rochas de superfície tingidos — pedra lunar dentro

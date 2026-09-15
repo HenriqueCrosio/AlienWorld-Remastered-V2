@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
 import type { StageBoss } from './Boss';
 import type { EnemySystem } from '../systems/EnemySystem';
+import type { Fx } from '../systems/Fx';
 import { TerrainSystem, GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
 
 /**
@@ -22,10 +23,10 @@ import { TerrainSystem, GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
  *
  * ─── GEOMETRIA MEDIDA, NUNCA CHUTADA (lição 13; find-pad nos dois PNGs) ───
  *
- *  - GUARDIÃO (256×227): massa vermelha em x=106..197, y=105..186 (centroide ≈155,145 →
- *    offset +27,+31 do centro). Casca/bico à ESQUERDA na MESMA altura da massa — por isso o
- *    corpo-absorvedor cobre SÓ O DOMO SUPERIOR (a bala cruza o rebordo da casca sem morrer e
- *    cobra na massa; o mesmo pacto visual da faixa das cabeças da serpente).
+ *  - GUARDIÃO (256×256, a arte nova de 15/09): massa vermelha em x=115..192, y=109..176
+ *    (centroide ≈152,141 → offset +24,+13 do centro). Casca/bico à ESQUERDA na MESMA altura da
+ *    massa — por isso o corpo-absorvedor cobre SÓ O DOMO SUPERIOR (a bala cruza o rebordo da
+ *    casca sem morrer e cobra na massa; o mesmo pacto visual da faixa das cabeças da serpente).
  *  - CORAÇÃO (122×122): ferida em x=52..91, y=56..87 (offset +10,+10 do centro).
  */
 export class BossNucleo implements StageBoss {
@@ -61,16 +62,32 @@ export class BossNucleo implements StageBoss {
   private readonly bar: Phaser.GameObjects.Rectangle;
   private readonly glow: Phaser.GameObjects.Particles.ParticleEmitter;
 
-  // ─── Guardião (256×227 a escala 0.7 ≈ 179×159) ───
+  // ─── Guardião (256×256 a escala 0.7 ≈ 179×179) ───
   private static readonly G_ESCALA = 0.7;
   private static readonly G_STATION_X = GAME_WIDTH - 86;
   private static readonly G_BASE_Y = 104;
-  /** Centro da massa vermelha, em px do PNG a partir do centro do sprite (medido). */
-  private static readonly G_CORE_OFF_X = 27;
-  private static readonly G_CORE_OFF_Y = 31;
-  /** Bico (a boca dos glóbulos): topo-esquerda da cabeça, medido a olho na arte. */
-  private static readonly G_MUZZLE_X = -100;
-  private static readonly G_MUZZLE_Y = -20;
+  /**
+   * Centro da massa vermelha, em px do PNG a partir do centro do sprite (medido,
+   * `scripts/_f4/_medir-guardiao.mjs`).
+   *
+   * ⚠️ E AGORA ELE VALE DURANTE A RESPIRAÇÃO TAMBÉM. A arte antiga tinha o estático em 256×227 e a
+   * sheet em 256² alinhada no topo: com a sheet tocando (o tempo todo), o centro do quadro descia
+   * 14,5px e o +31 medido no estático punha o alvo ~10px de tela ABAIXO do miolo desenhado. A arte
+   * nova sai toda no mesmo quadro.
+   */
+  private static readonly G_CORE_OFF_X = 24;
+  private static readonly G_CORE_OFF_Y = 13;
+  /**
+   * O bico (a boca dos glóbulos): a ponta do gancho da cabeça, em (34,172) do PNG.
+   *
+   * ⚠️ O ANTIGO (−100,−20) ERA "A OLHO" E CAÍA NO VAZIO: 64px acima da cabeça, fora do casco. O leque
+   * saía do ar. Este ponto é medido, e baixa a origem dos glóbulos ~45px na tela.
+   */
+  private static readonly G_MUZZLE_X = -94;
+  private static readonly G_MUZZLE_Y = 44;
+  /** A morte na troca: 9 quadros a 9 q/s, o destruído, e o coração surge. Ver `trocarParaCoracao`. */
+  private static readonly MORTE_MS = 1000;
+  private static readonly TROCA_MS = 1500;
   private static readonly INVESTIDA_CADA = 6;
   private static readonly TELEGRAFO_DUR = 0.55;
 
@@ -90,6 +107,7 @@ export class BossNucleo implements StageBoss {
     private readonly scene: Phaser.Scene,
     private readonly enemies: EnemySystem,
     private readonly terrain: TerrainSystem,
+    private readonly fx: Fx,
   ) {
     this.sprite = scene.physics.add.sprite(GAME_WIDTH + 120, BossNucleo.G_BASE_Y, 'guardiao');
     this.sprite.setScale(BossNucleo.G_ESCALA);
@@ -99,9 +117,17 @@ export class BossNucleo implements StageBoss {
     // pulsa como um coração — mover = sístole, e agora até parado ele é órgão vivo) e o
     // coração BATE (a ferida acende e apaga no ritmo da janela). Sem a sheet, o estático de
     // sempre segura a luta (arte entra asset por asset). Yoyo: o pulso vai E VOLTA sem corte.
-    // A âncora não precisa de compensação: o centro visual das sheets foi MEDIDO (bbox do
-    // alfa, média dos quadros) e cai a <3px do centro da arte estática nas duas formas.
+    // A âncora não precisa de compensação: a arte do guardião sai toda no mesmo quadro de 256²
+    // (ver `G_CORE_OFF_X`), e a do coração foi medida a <3px do centro do estático.
     const anims = scene.anims;
+    if (scene.textures.exists('guardiaoMorteSheet') && !anims.exists('guardiao-morte')) {
+      anims.create({
+        key: 'guardiao-morte',
+        frames: anims.generateFrameNumbers('guardiaoMorteSheet', { start: 0, end: 8 }),
+        frameRate: 9000 / BossNucleo.MORTE_MS,
+        repeat: 0,
+      });
+    }
     if (scene.textures.exists('guardiaoIdleSheet') && !anims.exists('guardiao-idle')) {
       anims.create({
         key: 'guardiao-idle',
@@ -131,7 +157,8 @@ export class BossNucleo implements StageBoss {
     this.core.setVisible(false);
     const coreBody = this.core.body as Phaser.Physics.Arcade.Body;
     coreBody.setAllowGravity(false);
-    coreBody.setSize(56, 44);
+    // A massa medida (78×68 no PNG) na escala 0,7.
+    coreBody.setSize(54, 48);
     this.targets = [this.core];
 
     this.glow = scene.add
@@ -175,11 +202,13 @@ export class BossNucleo implements StageBoss {
 
   /** Corpo = só o DOMO superior: a faixa do alvo fica de corredor livre para a bala. */
   private corpoDomo(): void {
-    // Dimensões CONSTANTES (as das artes estáticas, 256×227 / 122×122): com a sheet animada
-    // tocando, `sprite.width/height` é o QUADRO da sheet (256² / 128²) e o corpo cresceria.
+    // Dimensões CONSTANTES, em px do quadro: `sprite.width/height` muda com a textura (o coração
+    // tem estático de 122² e sheet de 128²), e o corpo cresceria junto.
     if (this.forma === 'guardiao') {
-      this.body.setSize(256 * 0.78, 227 * 0.42);
-      this.body.setOffset(256 * 0.11, 227 * 0.06);
+      // ⚠️ O DOMO ACABA ONDE A MASSA COMEÇA (y=109 no PNG): y=14..109, x=28..228. Mais baixo e ele
+      // comeria o topo do alvo — a bala morreria no casco em cima do miolo aceso.
+      this.body.setSize(200, 95);
+      this.body.setOffset(28, 14);
     } else {
       this.body.setSize(122 * 0.78, 122 * 0.42);
       this.body.setOffset(122 * 0.11, 122 * 0.06);
@@ -188,8 +217,9 @@ export class BossNucleo implements StageBoss {
 
   /** Corpo INTEIRO: a investida é toda perigo — e fecha o alvo (bala morre no casco). */
   private corpoInteiro(): void {
-    this.body.setSize(256 * 0.82, 227 * 0.8);
-    this.body.setOffset(256 * 0.09, 227 * 0.08);
+    // O casco inteiro do quadro de 256² (x=27..255, y=0..249), sem as pontas dos tentáculos.
+    this.body.setSize(210, 190);
+    this.body.setOffset(23, 18);
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
@@ -286,29 +316,49 @@ export class BossNucleo implements StageBoss {
   }
 
   /**
-   * A TROCA: a casca morre em convulsão, estoura — e o CORAÇÃO surge do estouro. O mesmo
-   * beat da serpente pré-fusão: a pausa dramática É o telégrafo da forma nova.
+   * A TROCA: a casca MORRE, estoura — e o CORAÇÃO surge do estouro. O mesmo beat da serpente
+   * pré-fusão: a pausa dramática É o telégrafo da forma nova.
+   *
+   * ⚠️ A MORTE É COMPOSTA NO MOTOR, e é decisão dele (15/09). Duas animações geradas convergiram no
+   * mesmo limite do gerador: o miolo explode, mas o grosso da silhueta fica inteiro — e morte que
+   * acaba com o cadáver intacto lê como "desligou". Então são três camadas:
+   *   1. a `guardiao-morte` (o miolo estourando até ficar oco), 0 → `MORTE_MS`;
+   *   2. as explosões do jogo subindo pela casca por cima dela, a mesma gramática de todo chefão;
+   *   3. o `guardiaoDestruido` no fim, o único quadro em que o casco PARTE — com a detonação grande.
+   * A carcaça some quando o coração surge, em `TROCA_MS`, como antes (ele escolheu não adiantar o B3).
    */
   private trocarParaCoracao(): void {
     this.trocando = true;
     this.body.setVelocity(0, 0);
     this.glow.emitting = false;
+    this.sprite.clearTint();
 
-    // Convulsão: flashes + explosões subindo pela casca.
-    for (let i = 0; i < 7; i++) {
-      this.scene.time.delayedCall(i * 170, () => {
+    // ⚠️ `anims.stop()` ANTES de tocar a morte: a respiração está em yoyo e sobrescreveria o quadro.
+    this.sprite.anims.stop();
+    if (this.scene.anims.exists('guardiao-morte')) this.sprite.play('guardiao-morte');
+
+    // As explosões do motor, espalhadas pelo CASCO (não pelo miolo, que a animação já estoura).
+    const e = BossNucleo.G_ESCALA;
+    for (let i = 0; i < 6; i++) {
+      this.scene.time.delayedCall(80 + i * 150, () => {
         if (this.dead) return;
-        this.sprite.setTint(i % 2 === 0 ? 0xff8080 : 0xffffff);
-        this.glow.explode(
-          6,
-          this.sprite.x + Phaser.Math.Between(-50, 50),
-          this.sprite.y + Phaser.Math.Between(-40, 40),
+        this.fx.explode(
+          this.sprite.x + Phaser.Math.Between(-90, 90) * e,
+          this.sprite.y + Phaser.Math.Between(-70, 80) * e,
+          1.6,
+          52,
         );
-        this.scene.cameras.main.shake(90, 0.004);
       });
     }
 
-    this.scene.time.delayedCall(1300, () => {
+    this.scene.time.delayedCall(BossNucleo.MORTE_MS, () => {
+      if (this.dead) return;
+      this.sprite.anims.stop();
+      if (this.scene.textures.exists('guardiaoDestruido')) this.sprite.setTexture('guardiaoDestruido');
+      this.fx.explodeBig(this.core.x, this.core.y, 1.1, 52);
+    });
+
+    this.scene.time.delayedCall(BossNucleo.TROCA_MS, () => {
       if (this.dead) return;
 
       this.forma = 'coracao';

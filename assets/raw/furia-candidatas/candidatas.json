@@ -1,0 +1,36 @@
+{
+  "o_que_e": "A 2ª forma do chefão final da Fase 4 (Bloco B · B3 da Fatia 7): o que sai de dentro do guardião quando ele explode — 'furioso e vil', pedido dele em 15/09, substituindo o coração. Rodada 1: quatro conceitos, nenhum escolhido ainda.",
+  "ferramenta": "create_object_pro_flash · 256x256 · n_directions 1 · view side · 9 gerações cada (36 no total)",
+  "referencia_de_estilo": "guardião novo, objeto 9436240c-c69c-49a6-a75f-5eb8e57850d6 (rotations/unknown.png)",
+  "folha": "docs/superpowers/folhas/2026-09-15/furia-candidatas.png (remontável com scripts/_f4/_folha-furia.mjs)",
+  "candidatas": [
+    {
+      "arquivo": "A-serpente.png",
+      "object_id": "0cea374e-0514-48cf-a0f6-5c45946a9b77",
+      "conceito": "larva esfolada em S, costelas de osso, mandíbula em quatro ganchos",
+      "prompt": "Side view, facing LEFT. The vile furious creature that just burst out of the armored guardian: a long flayed serpentine larva of raw dark crimson muscle and exposed bone ribs, coiled in an S-curve, its head lunging left with a huge jaw split open into four hooked mandibles full of needle teeth, dripping black ichor. Jagged fragments of the broken dark armored shell are still stuck to its back and spine. A burning red-orange living core visible through the ribs of its chest, the only strong light; small glowing red eyes. Dark desaturated sci-fi horror palette: near-black browns, dried blood reds, bone white only in teeth. Menacing, aggressive, predatory. Pixel art, clean outline."
+    },
+    {
+      "arquivo": "B-predador.png",
+      "object_id": "76945935-56fe-43da-a498-7284a2823022",
+      "conceito": "besta sem pele, garras-lâmina, peito rasgado com o miolo aceso, casca nos ombros — a recomendada",
+      "prompt": "Side view, facing LEFT. The vile furious creature that just clawed its way out of the armored guardian: a hunched skinless predator beast of wet dark red sinew and black bone, two long bladed clawed arms reaching forward to the left, spine arched with bone spikes, a narrow eyeless skull head with a gaping lower jaw and rows of teeth, many small glowing red eyes along the jaw. Its chest is torn open showing a pulsing glowing red-orange heart, the only strong light. Shards of the broken dark armored carapace still hang off its shoulders and back. Dark desaturated sci-fi horror palette: near-black, dried blood crimson, rust, dull bone. Enraged, lunging, predatory. Pixel art, clean outline."
+    },
+    {
+      "arquivo": "C-boca.png",
+      "object_id": "355c6301-96cc-43e3-8b03-24dd6c76e8be",
+      "conceito": "massa de tentáculos com bocarra vertical e cacho de olhos",
+      "prompt": "Side view, facing LEFT. The vile furious horror unleashed from inside the armored guardian: a mass of writhing dark flesh tentacles and hooked bone appendages lashing outward, surrounding a giant vertical maw facing left that splits the body open, lined with jagged teeth and a glowing red-orange throat deep inside, the only strong light. A cluster of burning red eyes above the maw. Broken plates of the dark armored shell are still embedded in the flesh like shrapnel. Dark desaturated sci-fi horror palette: near-black, deep crimson, rust brown, dull bone teeth. Grotesque, rabid, hateful. Pixel art, clean outline."
+    },
+    {
+      "arquivo": "D-louva.png",
+      "object_id": "c0457daf-2a87-4420-bc31-45b4899e23ae",
+      "conceito": "louva-a-deus de carne, lâminas, asas rasgadas, abdômen aceso",
+      "prompt": "Side view, facing LEFT. The vile furious creature that hatched from inside the armored guardian: an insectoid flayed horror, tall and angular like a giant mantis made of raw dark red flesh and black chitin, two huge scythe-blade forelimbs raised toward the left, torn membranous wings flared behind, a split head with opening mandibles and glowing red eyes. A glowing red-orange living core pulses in its abdomen, the only strong light. Cracked pieces of the dark armored shell still cling to its back like a broken eggshell. Dark desaturated sci-fi horror palette: near-black, dried blood crimson, rust, dull bone. Aggressive, vicious, ready to strike. Pixel art, clean outline."
+    }
+  ],
+  "desvios_do_gerador": [
+    "'Side view, facing LEFT' foi ignorado: B, C e D vieram DE FRENTE; só a A saiu meio de lado.",
+    "Os restos da casca quase não vieram — só a B carrega casca de verdade."
+  ]
+}
