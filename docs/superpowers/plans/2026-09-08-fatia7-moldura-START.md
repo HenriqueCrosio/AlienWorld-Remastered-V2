@@ -14,9 +14,20 @@ uma boa combinação"*.
 **🟢 AS COLUNAS (coração e maquinário verticais), O PILAR NAS COSTURAS, O FIM DO DUTO E A MARÉ DO GOLFINHO — JOGADOS EM 14/09:**
 *"os maquinários casaram bem com a fase e estarem em diferentes layers deu uma profundidade maior"* ·
 *"o pilar na junta ficou bom"* · *"o restante ficou bom"*.
-**🟠 A ENTRADA DO NÚCLEO PELA EMENDA — FEITA NA ÚLTIMA RODADA DE 14/09, AINDA NÃO JOGADA.**
-**⏸️ DUAS DECISÕES GUARDADAS PARA A PRÓXIMA SESSÃO, a pedido dele** — ver ⏸️ (*"na próxima sessão eu
-testo e decidimos o que precisa"*).
+**🟢 A ENTRADA DO NÚCLEO PELA EMENDA (fundo C → D) — JOGADA E APROVADA (15/09):** *"todas as questões
+melhoraram muito"* · *"a transição suave e em fade ainda é perceptível, mas não tem aquele impacto seco
+mais. Foi uma saída barata e eficaz"*.
+**🟢 A PINTURA DO NÚCLEO — FICA COMO ESTÁ (15/09):** *"a pintura está boa assim, deixe como está"*. Nem
+outpaint nem regeração.
+**🟢 O CONTORNO DA BORDA B — JOGADO E APROVADO (15/09):** *"o contorno está bom, melhorou o vazio que
+antes aparentava ter"*. ⚠️ **A e D NÃO levam contorno**, decisão dele: *"elas têm o metal que dá o
+acabamento de forma gratuita"*. O pedido: *"na borda logo após ou
+durante o golfinho… uma fina camada que contorne a borda, igual tem no duto, mas mais discreta e preta…
+pode ser um marrom escuro"*. `Moldura.CONTORNO` (0x22160f, alpha 0,9, 2px), POR FORA da superfície
+(a 1ª linha da arte B é a barra acesa das costelas), com degrau na quina da placa mais alta; no duto o
+fio toma o lugar. Só `f4FaixaB` (`CONTORNO_BASES`). Os retângulos trocam de nome com o traço
+(`contornoChao`…) para a sonda do fio não ler contorno como parede acesa. Captura: `_f4/_ver-contorno.mjs`.
+Sondas 15/09: `probe-f4-moldura` ✔ · `probe-f4-visual` ✔ · `probe-f4-golfinho` ✔.
 Branch `feat/fase4-visual`, commitada e empurrada no fim de 14/09.
 
 ---
@@ -36,7 +47,7 @@ núcleo, com a entrada pela emenda) e `_ver-mare.mjs` (a maré inteira).
 
 ---
 
-## ⏸️ AS DUAS DECISÕES GUARDADAS — pergunte antes de mexer
+## ✅ AS DUAS DECISÕES GUARDADAS — FECHADAS EM 15/09 (a emenda aprovada, a pintura fica)
 
 1. **A entrada do núcleo pela emenda** (4ª rodada). Ele reprovou o mergulho no escuro (*"de novo, está
    muito seca"*); a resposta instalada é a cortina de borda macia seguindo o pilar. **Nunca foi jogada.**

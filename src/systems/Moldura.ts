@@ -62,6 +62,11 @@ interface Placa {
    */
   letal: number;
   /**
+   * A borda desta placa leva CONTORNO? Sai da base em vigor quando ela nasce, como a borda. Ver
+   * `Moldura.CONTORNO`.
+   */
+  contorno: boolean;
+  /**
    * A PEÇA QUE TAPA A EMENDA entre duas câmaras, se esta placa for a primeira da câmara nova — a
    * chave da arte (uma mesa), já sorteada. Ver `JUNTA_ESCALA`.
    */
@@ -190,6 +195,25 @@ export class Moldura {
 
   /** A espessura do fio, em px. Dois: um pixel some na grade de 384×216, três viram enfeite. */
   private static readonly FIO_PX = 2;
+
+  /**
+   * O CONTORNO — o acabamento escuro da borda da câmara do golfinho, no traço do fio.
+   *
+   * ⚠️ O PEDIDO É DELE (15/09): *"uma fina camada que contorne a borda, igual tem no duto, mas mais
+   * discreta e preta, apenas para dar um acabamento… pode ser um marrom escuro"*. As costelas de B
+   * acabam numa barra clara colada no fundo azul, e sem linha a borda lê recortada.
+   *
+   * ⚠️ POR FORA DA ARTE, E NÃO POR CIMA COMO O FIO: a primeira linha da peça é opaca e é a barra
+   * acesa das costelas (lum 72–85, medido). Um traço escuro por cima apagaria justamente a luz dela;
+   * por fora, ele a CONTORNA. Os 2px saem dos 8 da `FOLGA`, e é decoração: não morde, não tem corpo.
+   *
+   * ⚠️ E A PLACA ACESA MANDA: no duto (que herda a borda B) o fio toma o lugar do contorno. Os dois
+   * na mesma placa seriam uma linha dupla, e o telégrafo da parede letal não divide a superfície.
+   */
+  private static readonly CONTORNO = 0x22160f;
+  private static readonly CONTORNO_ALPHA = 0.9;
+  /** As bordas que levam contorno. Hoje só a da câmara do golfinho — o pedido foi dela. */
+  private static readonly CONTORNO_BASES: ReadonlySet<string> = new Set(['f4FaixaB']);
 
   /**
    * A JUNTA — o pilar na frente da costura entre as bordas de duas câmaras.
@@ -475,6 +499,7 @@ export class Moldura {
       if (!imediato && n * Moldura.LARGURA - this.xMundo - meioPilar < GAME_WIDTH) continue;
       p.faixaChao = pickVariant(scene, base);
       p.faixaTeto = pickVariant(scene, base);
+      p.contorno = Moldura.CONTORNO_BASES.has(base);
       p.junta = undefined;
       // ⚠️ A CÂMARA NOVA NÃO HERDA A RAMPA DO TINT DA ANTERIOR: a placa da borda nova já nasce no
       // estado final do duto. O degradê é para a MESMA borda esfriando; entre duas bordas quem tapa a
@@ -604,24 +629,30 @@ export class Moldura {
       // ⚠️ O FIO SAI DA MESMA PLACA QUE A FAIXA E QUE A MORDIDA — os três leem `superficieChao` /
       // `superficieTeto` da placa `base + i`. É isso que faz a luz cair EXATAMENTE na linha que
       // cobra o encosto: o jogador vê onde a parede morde, não uma aproximação dela.
-      this.fios[i * 4].setPosition(x, p.superficieChao).setVisible(p.letal > 0);
-      this.fios[i * 4 + 1].setPosition(x, p.superficieTeto - Moldura.FIO_PX).setVisible(p.letal > 0);
+      //
+      // O CONTORNO usa os mesmos retângulos, POR FORA da superfície: o chão sobe `FIO_PX`, o teto desce.
+      const traco = Moldura.tracoDe(p);
+      const fora = traco === 'contorno' ? Moldura.FIO_PX : 0;
+      const yChao = (q: Placa) => q.superficieChao - fora;
+      const yTeto = (q: Placa) => q.superficieTeto - Moldura.FIO_PX + fora;
+      this.veste(this.fios[i * 4], traco, 'Chao').setPosition(x, yChao(p));
+      this.veste(this.fios[i * 4 + 1], traco, 'Teto').setPosition(x, yTeto(p));
 
       // O DEGRAU liga esta placa à SEGUINTE, na emenda. Pedir `base + i + 1` respeita o contrato
       // da poda (só se pergunta sobre a tela e sobre o que está à direita dela) — a placa mais à
       // frente aqui é `base + SEGMENTOS`, e o `spawnCorredores` já pergunta mais longe que isso.
       const prox = this.placaDe(base + i + 1);
       const xEmenda = x + Moldura.LARGURA - Moldura.FIO_PX;
-      // O degrau só liga dois fios que existem: as duas placas da emenda têm de estar acesas.
-      const acesoDegrau = p.letal > 0 && prox.letal > 0;
-      this.ligaDegrau(this.fios[i * 4 + 2], xEmenda, p.superficieChao, prox.superficieChao, acesoDegrau);
-      this.ligaDegrau(
-        this.fios[i * 4 + 3],
-        xEmenda,
-        p.superficieTeto - Moldura.FIO_PX,
-        prox.superficieTeto - Moldura.FIO_PX,
-        acesoDegrau,
-      );
+      // O degrau só liga dois traços que existem, e do MESMO tipo: fio com fio, contorno com contorno.
+      const ligaTraco = traco !== null && Moldura.tracoDe(prox) === traco;
+      this.veste(this.fios[i * 4 + 2], traco, 'DegrauChao');
+      this.veste(this.fios[i * 4 + 3], traco, 'DegrauTeto');
+      // ⚠️ O CONTORNO DO DEGRAU FICA DO LADO DE FORA DA PLACA MAIS ALTA — é a quina dela que está
+      // exposta. O fio fica sempre na placa da esquerda: ele é luz na superfície, não uma borda.
+      const xChao = fora && p.superficieChao < prox.superficieChao ? x + Moldura.LARGURA : xEmenda;
+      const xTeto = fora && p.superficieTeto > prox.superficieTeto ? x + Moldura.LARGURA : xEmenda;
+      this.ligaDegrau(this.fios[i * 4 + 2], xChao, yChao(p), yChao(prox), ligaTraco);
+      this.ligaDegrau(this.fios[i * 4 + 3], xTeto, yTeto(p), yTeto(prox), ligaTraco);
 
       this.enche(i, x, p);
     }
@@ -766,6 +797,36 @@ export class Moldura {
       this.saia[i * 2].setTint(tint);
       this.saia[i * 2 + 1].setTint(tint);
     }
+  }
+
+  /** Que traço a superfície da placa leva: o fio (ela morde), o contorno (a borda pede) ou nenhum. */
+  private static tracoDe(p: Placa): 'fio' | 'contorno' | null {
+    if (p.letal > 0) return 'fio';
+    return p.contorno ? 'contorno' : null;
+  }
+
+  /**
+   * Pinta o retângulo com o traço pedido, ou o esconde. Só troca a cor quando ela muda.
+   *
+   * ⚠️ O NOME SEGUE O TRAÇO (`fioChao` ↔ `contornoChao`, `degrauTeto` ↔ `contornoDegrauTeto`): a sonda
+   * acha o fio pelo nome e cobra que ele só acenda onde a parede morde. Um contorno chamado de fio
+   * seria uma parede "acesa" na câmara do golfinho, e a sonda estaria certa em reprovar.
+   */
+  private veste(
+    r: Phaser.GameObjects.Rectangle,
+    traco: 'fio' | 'contorno' | null,
+    papel: 'Chao' | 'Teto' | 'DegrauChao' | 'DegrauTeto',
+  ): Phaser.GameObjects.Rectangle {
+    if (traco === null) return r.setVisible(false);
+    const contorno = traco === 'contorno';
+    const nome = contorno
+      ? `contorno${papel}`
+      : papel.startsWith('Degrau') ? `degrau${papel.slice(6)}` : `fio${papel}`;
+    if (r.name !== nome) r.setName(nome);
+    const cor = contorno ? Moldura.CONTORNO : Moldura.FIO;
+    const alpha = contorno ? Moldura.CONTORNO_ALPHA : 1;
+    if (r.fillColor !== cor || r.fillAlpha !== alpha) r.setFillStyle(cor, alpha);
+    return r.setVisible(true);
   }
 
   /** O tint de uma placa `letal` (0..1): do branco (a arte crua) ao `TINT_LETAL`, canal a canal. */
@@ -986,7 +1047,7 @@ export class Moldura {
 
     return {
       vaoY, repetida, superficieChao, superficieTeto, gap: this.gap, faixaChao, faixaTeto,
-      letal: this.avancaLetal(), junta,
+      letal: this.avancaLetal(), contorno: Moldura.CONTORNO_BASES.has(this.base), junta,
     };
   }
 }
