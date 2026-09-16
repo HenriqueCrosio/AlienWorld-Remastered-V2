@@ -51,8 +51,8 @@ outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeir
   medido no `worldstep`: `body.center` = `core.x/y`. A captura `_f4/_ver-guardiao.mjs` desenha pelo centro.
 - Sondas: `probe-stage4` ✔ (bala real fere a massa, troca, coração, cutscene final) · typecheck ✔.
 
-**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). IMPLEMENTADO, VERIFICADO NA SONDA — FALTA ELE
-JOGAR.** Ver ⏸️ logo abaixo.
+**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). 1º TESTE JOGADO: A MECÂNICA APROVADA, AS ANIMAÇÕES
+REFEITAS (rodada 2) — FALTA ELE JOGAR DE NOVO.** Ver ⏸️ logo abaixo.
 
 Branch `feat/fase4-visual`, tudo commitado no fim de 16/09.
 
@@ -64,7 +64,9 @@ Branch `feat/fase4-visual`, tudo commitado no fim de 16/09.
 > Em 16/09 a 2ª forma do chefão virou O PREDADOR (a candidata B): explosão sangrenta com sangue na tela,
 > ele surge em 0,7 urrando, salta girando para 0,47, e luta em três fases — investida com slash e lava;
 > a ronda pelo chão e pelo teto com saída pela direita; e o breu, onde só o core dele revela o corpo.
-> A folha está em `docs/superpowers/folhas/2026-09-16/predador-em-jogo.png`. Joguei e: <o que achou>.
+> Depois do 1º teste (mecânica aprovada) as animações foram refeitas no PixMiniMax — pulo, slash, teto, morte — e
+> a lava ganhou cor de lava e brilho no breu. A folha é `docs/superpowers/folhas/2026-09-16/predador-em-jogo-r2.png`.
+> Joguei a rodada 2 e: <o que achou>.
 > Siga daí."**
 
 ⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O TESTE JOGADO DELE.** Localhost: `npm run dev` → `L` → `G`
@@ -73,7 +75,32 @@ vai direto ao chefão (mate o guardião para ver a troca). Ele disse *"corrigimo
 
 ---
 
-## ⏸️ ONDE PARAMOS — O PREDADOR, À ESPERA DO TESTE JOGADO
+## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 2, À ESPERA DO TESTE JOGADO
+
+### 🎮 O 1º TESTE JOGADO (16/09) e a rodada 2
+*"Eu gostei de como ficou a luta, a mecânica ficou interessante. Mas as animações deixaram a desejar."*
+
+| o que ele viu | o que mudou (rodada 2) |
+|---|---|
+| *"o pulo e a girada para WEST precisa ser ajustada para ficar mais natural"* (o jogo de tamanhos ficou bom) | clipe novo **PixMiniMax S→luta com quadro final fixo**: agacha, TORCE o corpo no ar, pousa de três quartos. O motor só sobe entre o impulso e o pouso (`PULO_QUADROS`, `PULO_IMPULSO` 0,36, `PULO_POUSO` 0,92, `PULO_ALTURA` 30) |
+| *"ele dá o dash, mas não vejo movimento da garra"* | **slash em três tempos**: clipe PixMiniMax partido no quadro 8 — a garra SOBE na carga, fica erguida no bote, DESCE em arco vermelho na chegada (`SLASH_PREP`, `SLASH_PREP_MS` 700, `SLASH_MS` 480). O rastro do motor (`rastroDoCorte`) ficou desligado: o clipe já traz o arco |
+| *"na parede ficou boa, mas muito deformado, quase irreconhecível"* | o teto é a **pose de LUTA ESPELHADA** (não mais a editada) + clipe PixMiniMax do arremesso a partir dela. Miolo remedido: −23,+2 |
+| *"a animação da morte não é nada, é quase um idle"* | clipe **PixMiniMax**: grita, cambaleia, DESABA e fica estendido — + o sangue do mesmo organismo (`sangue.ts`, agora compartilhado) + 5 estouros pelo corpo |
+| *"a lava tem que ter cor de lava"* | bola desenhada no motor (núcleo branco-amarelo → laranja → vermelho), **luz ADD tremulando** e **rastro de brasas** (`lancarLava`) |
+| *"a lava eu não consegui ver no escuro… lava é fogo, brilha"* | a lava, a luz e as brasas ficam ACIMA do breu |
+| *"a fase pode escurecer mais, ficando uma tensão no ar"* | `BREU_ALPHA` 0,96 → **1** (a pintura e a borda somem de vez); o halo da nave um pouco menor |
+| (visto na captura) a fumaça preta do estouro sobre a barriga dele | a fumaça passa para trás do predador quando ele surge |
+
+**A lição da ferramenta:** o **PixMiniMax** ganhou TODOS os confrontos contra o v3 nos gestos grandes (o v3 gira
+no lugar / quase não se mexe) e custa **2 gerações por clipe em 256²**. Candidatas lado a lado:
+`folhas/2026-09-16/r2-pulo.png`, `r2-slash-teto.png`, `r2-morte.png`. As perdedoras seguem em
+`assets/raw/furia-predador-anim2/` (`*-v3`, e `morte-v3b` com o quadro final `morte-fim.png`) — trocar é só
+apontar o `_instalar-predador.mjs` (`PULO=… MORTE=…` no ambiente) e reinstalar.
+
+**Ainda do v3 (ele não reclamou):** o urro, o idle e a lava do chão.
+**PixelLab rodada 2:** 49 gerações (4.301 → **4.252**).
+
+### A 1ª passada (antes do teste)
 
 **Spec:** `docs/superpowers/specs/2026-09-16-fatia7-b3-predador-design.md` (substitui a B3 da spec de
 06/09). **Plano:** `docs/superpowers/plans/2026-09-16-fatia7-b3-predador.md`. **Código:**
@@ -103,7 +130,7 @@ vai direto ao chefão (mate o guardião para ver a troca). Ele disse *"corrigimo
 - **Via REST a partir de PNG local:** `scripts/_f4/_pl.mjs edit|anim` (o MCP pede base64 inline, que trunca).
 - **A morte gerada quase não se mexe** (o mesmo limite da do guardião): a do predador é o clipe + a cadeia
   do `killBoss` por cima. Se ler como "desligou", compor como a do guardião.
-- **PixelLab 16/09:** **100** gerações — 4.401 no arranque, **4.301** no fim (8 rotações, 3 edições de estilo, 1 pose do teto, 7 clipes v3). Ciclo vira em 2026-10-04.
+- **PixelLab 16/09 (1ª passada):** **100** gerações — 4.401 no arranque, **4.301** no fim (8 rotações, 3 edições de estilo, 1 pose do teto, 7 clipes v3). Ciclo vira em 2026-10-04.
 
 ### O que olhar quando ele jogar (1ª passada — os knobs, todos no topo do `Predador`)
 | o que | knob |
@@ -119,15 +146,13 @@ vai direto ao chefão (mate o guardião para ver a troca). Ele disse *"corrigimo
 | a hitbox da casca (absorve + fere) | `corpoCasca` / `corpoInteiro` — ⚠️ a olho, NÃO medida; só o miolo foi medido |
 
 ### ⚠️ Pontos já vistos na captura, não decididos
-- Em +1600ms, a **fumaça escura do fim do `explodeBig`** cai sobre a barriga dele recém-surgido.
-- A **cabeça da pose do teto** ficou pouco legível (no clipe `teto-lava` ela aparece melhor).
 - A **emenda vertical da pintura** do núcleo passa pela arena (x≈270 na foto do aviso) — anterior a isto.
 - O coração saiu inteiro: `nucleo.png`/`nucleo-beat-sheet.png` seguem no disco, sem uso (apagar é dele).
 
 ### Sondas 16/09
 `probe-stage4` ✔ (a troca revela o predador, a arma trava e destrava, 0,7→0,47, a bala real fere o peito,
 o dano dobra na recuperação, a fase 3 liga o breu, matar entrega a cutscene final) · typecheck ✔ · build ✔.
-Captura: `node scripts/_f4/_ver-predador.mjs` → `docs/superpowers/folhas/2026-09-16/predador-em-jogo.png`.
+Captura: `node scripts/_f4/_ver-predador.mjs [saida]` → a rodada 2 está em `docs/superpowers/folhas/2026-09-16/predador-em-jogo-r2.png` (20 fotos: o pulo, os 3 tempos do slash, a lava, o teto, o breu com a lava, a morte).
 
 ---
 

@@ -64,24 +64,29 @@ const esperar = async (fn, arg, timeout = 20000) =>
 // A TROCA, quadro a quadro.
 await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.damage(999));
 let t0 = 0;
-for (const ms of [500, 1100, 1600, 2300, 2900, 3700]) {
+for (const ms of [1100, 1600, 2300, 2900, 3250, 3550, 3900]) {
   await page.waitForTimeout(ms - t0);
   t0 = ms;
-  await foto(`troca +${ms}ms`, ms > 3000);
+  await foto(`troca +${ms}ms`, ms > 3800);
 }
 
-// FASE 1.
-if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'carga', null)) {
-  await page.waitForTimeout(700);
-  await foto('fase 1 · carga (o core acelera)');
+// FASE 1: o slash em três tempos (a garra sobe na carga, segura no bote, desce na chegada) e a lava.
+if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'carga', null, 30000)) {
+  await page.waitForTimeout(650);
+  await foto('fase 1 · carga (a garra no alto)');
 }
-if (await esperar(() => ['bote', 'slash'].includes(window.__game.scene.getScenes(true)[0].boss.predador?.estado), null)) {
-  await foto('fase 1 · bote');
+if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'bote', null)) {
+  await page.waitForTimeout(60);
+  await foto('fase 1 · bote (garra erguida)');
+}
+if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'slash', null)) {
+  await page.waitForTimeout(170);
+  await foto('fase 1 · o golpe');
 }
 if (await esperar(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return s.boss.predador?.estado === 'recupera' && s.enemies.enemyBullets.getChildren().some((o) => o.active && o.getData('lava'));
-}, null, 30000)) {
+}, null, 40000)) {
   await page.waitForTimeout(250);
   await foto('fase 1 · lava no ar');
 }
@@ -93,9 +98,12 @@ await page.evaluate(() => {
   p.recuperando = false;
   s.boss.damage(Math.ceil(p.hp - 180 * 0.6));
 });
-if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'teto', null, 40000)) {
-  await page.waitForTimeout(300);
-  await foto('fase 2 · no teto');
+if (await esperar(() => {
+  const p = window.__game.scene.getScenes(true)[0].boss.predador;
+  return p?.estado === 'telegLava' && p.ancora.lado === 'teto';
+}, null, 60000)) {
+  await page.waitForTimeout(500);
+  await foto('fase 2 · arremesso do teto');
 }
 if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'aviso', null, 40000)) {
   await foto('fase 2 · aviso da reentrada');
@@ -115,6 +123,22 @@ if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.br
   if (await esperar(() => { const p = window.__game.scene.getScenes(true)[0].boss.predador; return p.pulso < 0.05 && ['chao', 'teto'].includes(p.estado); }, null)) await foto('breu · pulso baixo', false);
   if (await esperar(() => { const p = window.__game.scene.getScenes(true)[0].boss.predador; return p.pulso > 0.9 && ['chao', 'teto'].includes(p.estado); }, null)) await foto('breu · pulso alto', false);
   if (await esperar(() => { const p = window.__game.scene.getScenes(true)[0].boss.predador; return p.estado === 'carga' && p.pulso > 0.8; }, null, 30000)) await foto('breu · carga', false);
+  if (await esperar(() => window.__game.scene.getScenes(true)[0].enemies.enemyBullets.getChildren().some((o) => o.active && o.getData('lava')), null, 40000)) {
+    await page.waitForTimeout(350);
+    await foto('breu · a lava brilha', false);
+  }
+}
+
+// A MORTE.
+await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  if (s.boss && !s.boss.isDead && s.boss.damage(999)) s.killBoss();
+});
+let tm = 0;
+for (const ms of [250, 600, 1000]) {
+  await page.waitForTimeout(ms - tm);
+  tm = ms;
+  await foto(`morte +${ms}ms`, false);
 }
 await browser.close();
 

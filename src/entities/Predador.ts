@@ -3,6 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
 import { GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
+import { explosaoSangrenta, sangueNaTela } from './sangue';
 
 /**
  * O PREDADOR — a 2ª forma do chefão final da Fase 4 (B3 da Fatia 7, design dele de 16/09).
@@ -20,8 +21,8 @@ import { GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
  * nas colisões (os overlaps são presos aos objetos, não à forma), e delega `update`/`damage` para cá.
  *
  * ─── GEOMETRIA MEDIDA (`scripts/_f4/_medir-predador.mjs`, quadros de 256²) ───
- *  Miolo aceso, offset ao centro do quadro: S +6,−5 · luta −23,−3 · teto +4,−18.
- *  Pés da pose de luta em y=252 (+124 do centro). A pose do teto crava as garras em y=0 (−128).
+ *  Miolo aceso, offset ao centro do quadro: S +6,−5 · luta −23,−3 · teto −23,+2 (a luta ESPELHADA).
+ *  Pés da pose de luta em y=252 (+124 do centro); no teto, espelhados, em y=4 (−124).
  */
 export type EstadoPredador =
   | 'surgindo'
@@ -52,7 +53,7 @@ export class Predador {
   static readonly MIOLO: Record<Pose, { x: number; y: number }> = {
     S: { x: 6, y: -5 },
     luta: { x: -23, y: -3 },
-    teto: { x: 4, y: -18 },
+    teto: { x: -23, y: 2 },
   };
   static readonly ANCORAS: Ancora[] = [
     { x: 300, lado: 'chao' },
@@ -62,13 +63,38 @@ export class Predador {
   ];
 
   static readonly URRO_MS = 1200;
-  static readonly SALTO_SURGE_MS = 800;
+  /**
+   * O PULO DO SURGIMENTO (rodada 2, 16/09: *"o pulo e a girada para WEST precisa ser ajustada para ficar mais
+   * natural"*). O clipe agacha, impulsiona, torce e pousa; o motor SÓ SOBE entre o impulso e o pouso (frações
+   * da duração) — antes disso o bicho está carregando o salto no chão, e sair do chão ali mentia.
+   */
+  static readonly SALTO_SURGE_MS = 1000;
+  /**
+   * Os quadros do clipe do PixMiniMax (17): 0–9 é o agachar quase parado (encurtado para 4), 10–15 a TORÇÃO no
+   * ar, 16 o pouso já de três quartos. O impulso cai no quadro 10 (índice 4 de 11), o pouso no 16 (10 de 11).
+   */
+  static readonly PULO_QUADROS = [0, 4, 7, 9, 10, 11, 12, 13, 14, 15, 16];
+  static readonly PULO_IMPULSO = 0.36;
+  static readonly PULO_POUSO = 0.92;
+  /** 56 levava o topo dele para trás da barra do HUD no meio da torção (captura r2). */
+  static readonly PULO_ALTURA = 30;
   static readonly CARGA = [0, 1.5, 1.3, 1.6];
   static readonly CARGA_MIN = 0.9;
   static readonly BOTE_VEL = 330;
-  static readonly SLASH_MS = 200;
+  /**
+   * O SLASH EM TRÊS TEMPOS (rodada 2, 16/09: *"ele dá o dash, mas não vejo movimento da garra"*): o clipe é
+   * partido no quadro `SLASH_PREP` (a garra no alto). A PREPARAÇÃO toca na carga e SEGURA no bote — ele avança
+   * com a garra erguida —, e o GOLPE toca inteiro na chegada, com o rastro do corte desenhado no motor.
+   */
+  static readonly SLASH_PREP = 8;
+  static readonly SLASH_PREP_MS = 700;
+  static readonly SLASH_MS = 480;
+  /** O clipe do PixMiniMax já traz o arco vermelho do corte (quadros 9–11): o rastro do motor dobraria. */
+  static readonly RASTRO_MOTOR = false;
   static readonly RECUP_SLASH = 1.0;
   static readonly TELEG_LAVA = 0.5;
+  /** Pendurado, o arremesso sai no quadro ~12 de 16 do clipe do teto (1000ms). */
+  static readonly TELEG_LAVA_TETO = 0.72;
   static readonly RECUP_LAVA = 0.6;
   static readonly DANO_RECUP = 2;
   static readonly LAVA_G = 260;
@@ -79,9 +105,11 @@ export class Predador {
   static readonly FORA_MAX = 2.0;
   static readonly AVISO = 0.5;
   static readonly PAUSA: [number, number][] = [[0, 0], [1.2, 2.0], [0.9, 1.6], [1.0, 1.7]];
-  static readonly BREU_ALPHA = 0.96;
+  /** 0,96 deixava a pintura e a borda aparecendo (16/09: *"a fase pode escurecer mais"*). */
+  static readonly BREU_ALPHA = 1;
   static readonly BREU_ENTRA_MS = 600;
   static readonly PULSO_BREU = 2.4;
+  static readonly MORTE_MS = 1100;
 
   hp = Predador.HP;
   estado: EstadoPredador = 'surgindo';
@@ -101,7 +129,8 @@ export class Predador {
   private pulsoFase = 0;
   /** 0..1 — o brilho do core agora (a captura espera o pico e o vale). */
   pulso = 0;
-  private lavas: Phaser.Physics.Arcade.Sprite[] = [];
+  private lavas: { b: Phaser.Physics.Arcade.Sprite; luz: Phaser.GameObjects.Image; bola: boolean }[] = [];
+  private brasas!: Phaser.GameObjects.Particles.ParticleEmitter;
   private tween: Phaser.Tweens.Tween | null = null;
 
   private readonly luz: Phaser.GameObjects.Image;
@@ -120,6 +149,7 @@ export class Predador {
     private readonly aoMudarVida: () => void,
   ) {
     this.criarAnims();
+    this.criarLava();
     if (!scene.textures.exists('luzRadial')) {
       // Uma luz redonda de verdade: degradê radial que chega a ZERO antes da borda do quadro. ⚠️ A 1ª versão
       // (anéis de alpha somados) tinha alpha > 0 na borda — em ADD e ampliada, lia como RETÂNGULO (16/09).
@@ -172,24 +202,45 @@ export class Predador {
 
   private criarAnims(): void {
     const anims = this.scene.anims;
-    const clipe = (key: string, sheet: string, ms: number, repeat = 0, yoyo = false) => {
+    const clipe = (key: string, sheet: string, ms: number, repeat = 0, yoyo = false, escolha?: number[]) => {
       if (!this.scene.textures.exists(sheet) || anims.exists(key)) return;
-      const n = this.scene.textures.get(sheet).frameTotal - 1; // o `__BASE` conta
+      const total = this.scene.textures.get(sheet).frameTotal - 1; // o `__BASE` conta
+      const lista = escolha?.filter((q) => q < total);
+      const n = lista?.length ?? total;
       anims.create({
         key,
-        frames: anims.generateFrameNumbers(sheet, { start: 0, end: n - 1 }),
+        frames: lista ? anims.generateFrameNumbers(sheet, { frames: lista }) : anims.generateFrameNumbers(sheet, { start: 0, end: total - 1 }),
         frameRate: (n * 1000) / ms,
         repeat,
         yoyo,
       });
     };
     clipe('predador-urro', 'predadorUrroSheet', Predador.URRO_MS);
+    clipe('predador-pulo', 'predadorPuloSheet', Predador.SALTO_SURGE_MS, 0, false, Predador.PULO_QUADROS);
     clipe('predador-giro', 'predadorGiroSheet', Predador.SALTO_SURGE_MS);
     clipe('predador-idle', 'predadorIdleSheet', 1500, -1, true);
-    clipe('predador-slash', 'predadorSlashSheet', 650);
     clipe('predador-lava', 'predadorLavaSheet', 1000);
     clipe('predador-teto-lava', 'predadorTetoLavaSheet', 1000);
-    clipe('predador-morte', 'predadorMorteSheet', 1100);
+    clipe('predador-morte', 'predadorMorteSheet', Predador.MORTE_MS);
+
+    // O slash partido em dois clipes da MESMA folha.
+    const sheet = 'predadorSlashSheet';
+    if (this.scene.textures.exists(sheet) && !anims.exists('predador-slash-prep')) {
+      const n = this.scene.textures.get(sheet).frameTotal - 1;
+      const p = Math.min(Predador.SLASH_PREP, n - 2);
+      anims.create({
+        key: 'predador-slash-prep',
+        frames: anims.generateFrameNumbers(sheet, { start: 0, end: p }),
+        frameRate: ((p + 1) * 1000) / Predador.SLASH_PREP_MS,
+        repeat: 0,
+      });
+      anims.create({
+        key: 'predador-slash-golpe',
+        frames: anims.generateFrameNumbers(sheet, { start: p, end: n - 1 }),
+        frameRate: ((n - p) * 1000) / Predador.SLASH_MS,
+        repeat: 0,
+      });
+    }
   }
 
   /** Troca de pose: a textura estática (fallback) E o offset do miolo andam juntos. */
@@ -219,15 +270,16 @@ export class Predador {
 
   private yApoio(lado: 'chao' | 'teto'): number {
     const e = Predador.ESCALA_LUTA;
-    return lado === 'chao' ? Predador.CHAO_APOIO - 124 * e : Predador.TETO_APOIO + 128 * e;
+    return lado === 'chao' ? Predador.CHAO_APOIO - 124 * e : Predador.TETO_APOIO + 124 * e;
   }
 
   /** Corpo = a CASCA dos ombros (absorve a bala, fere por contato) — o pacto do domo do guardião. */
   private corpoCasca(): void {
     this.body.enable = true;
     if (this.pose === 'teto') {
-      this.body.setSize(80, 90);
-      this.body.setOffset(140, 90);
+      // A casca da luta (115,20 · 90×80) espelhada na vertical.
+      this.body.setSize(90, 80);
+      this.body.setOffset(115, 156);
     } else {
       this.body.setSize(90, 80);
       this.body.setOffset(115, 20);
@@ -270,7 +322,8 @@ export class Predador {
 
     this.scene.time.delayedCall(Predador.URRO_MS, () => {
       if (this.dead) return;
-      this.tocar('predador-giro', 'S', 'predadorLuta');
+      if (this.scene.anims.exists('predador-pulo')) this.tocar('predador-pulo', 'S', 'predadorLuta');
+      else this.tocar('predador-giro', 'S', 'predadorLuta');
       const x0 = this.sprite.x;
       const y0 = this.sprite.y;
       this.ancora = Predador.ANCORAS[0];
@@ -278,17 +331,28 @@ export class Predador {
       const y1 = this.yApoio('chao');
       const e0 = Predador.ESCALA_SURGE;
       const e1 = Predador.ESCALA_LUTA;
+      let impulsionou = false;
+      let pousou = false;
       this.tween = this.scene.tweens.addCounter({
         from: 0,
         to: 1,
         duration: Predador.SALTO_SURGE_MS,
-        ease: 'Sine.easeInOut',
         onUpdate: (tw) => {
           const k = tw.getValue() ?? 0;
-          // O miolo gira junto: a S olha de frente, a luta de três quartos.
-          this.pose = k < 0.5 ? 'S' : 'luta';
-          this.sprite.setScale(Phaser.Math.Linear(e0, e1, k));
-          this.sprite.setPosition(Phaser.Math.Linear(x0, x1, k), Phaser.Math.Linear(y0, y1, k) - Math.sin(Math.PI * k) * 42);
+          // O voo só existe entre o impulso e o pouso; fora dele o clipe agacha/amortece no chão.
+          const v = Phaser.Math.Clamp((k - Predador.PULO_IMPULSO) / (Predador.PULO_POUSO - Predador.PULO_IMPULSO), 0, 1);
+          if (v >= 1 && !pousou) {
+            pousou = true;
+            this.scene.cameras.main.shake(160, 0.008);
+          }
+          if (v > 0 && !impulsionou) {
+            impulsionou = true;
+            this.scene.cameras.main.shake(90, 0.004);
+          }
+          const suave = Phaser.Math.Easing.Sine.InOut(v);
+          this.pose = k < 0.55 ? 'S' : 'luta';
+          this.sprite.setScale(Phaser.Math.Linear(e0, e1, suave));
+          this.sprite.setPosition(Phaser.Math.Linear(x0, x1, suave), Phaser.Math.Linear(y0, y1, suave) - Math.sin(Math.PI * v) * Predador.PULO_ALTURA);
         },
         onComplete: () => {
           if (this.dead) return;
@@ -296,7 +360,6 @@ export class Predador {
           this.sprite.setScale(e1);
           this.sprite.setPosition(x1, y1);
           this.body.reset(x1, y1);
-          this.scene.cameras.main.shake(140, 0.006);
           this.idle();
           this.corpoCasca();
           this.coreBody.enable = true;
@@ -352,8 +415,7 @@ export class Predador {
         const chegou = this.sprite.x <= Math.max(56, this.alvoX + 44) || this.estadoT <= 0;
         if (chegou) {
           this.body.setVelocity(0, 0);
-          this.mudar('slash', Predador.SLASH_MS / 1000);
-          this.scene.cameras.main.shake(90, 0.006);
+          this.golpear();
         }
         break;
       }
@@ -428,12 +490,13 @@ export class Predador {
   private carregar(): void {
     const dur = Math.max(Predador.CARGA_MIN, Predador.CARGA[this.fase]);
     this.pulsoFase = 0;
+    // A garra sobe na carga e FICA no alto (o clipe de preparação segura o último quadro).
+    if (this.scene.anims.exists('predador-slash-prep')) this.tocar('predador-slash-prep', 'luta', 'predadorLuta');
     this.mudar('carga', dur);
   }
 
   private bote(): void {
     this.corpoInteiro();
-    this.tocar('predador-slash', 'luta', 'predadorLuta');
     const dx = Math.max(56, this.alvoX + 44) - this.sprite.x;
     const t = Math.max(0.12, Math.abs(dx) / Predador.BOTE_VEL);
     const alvoCentroY = Phaser.Math.Clamp(this.alvoY - Predador.MIOLO.luta.y * Predador.ESCALA_LUTA, 70, this.yApoio('chao'));
@@ -441,10 +504,47 @@ export class Predador {
     this.mudar('bote', t + 0.1);
   }
 
+  /** O GOLPE: a garra desce em arco (o clipe) e o CORTE rasga o ar na frente dele (o motor). */
+  private golpear(): void {
+    this.mudar('slash', Predador.SLASH_MS / 1000);
+    if (this.scene.anims.exists('predador-slash-golpe')) this.tocar('predador-slash-golpe', 'luta', 'predadorLuta');
+    this.scene.time.delayedCall(Predador.SLASH_MS * 0.35, () => {
+      if (this.dead) return;
+      if (Predador.RASTRO_MOTOR) this.rastroDoCorte();
+      this.scene.cameras.main.shake(110, 0.007);
+    });
+  }
+
+  /** Um crescente de 3 riscos, do alto-frente para baixo-frente, que acende e se apaga em ~220ms. */
+  private rastroDoCorte(): void {
+    const e = this.sprite.scaleX;
+    const cx = this.sprite.x - 58 * e;
+    const cy = this.sprite.y - 6 * e;
+    const g = this.scene.add.graphics().setDepth(42).setBlendMode(Phaser.BlendModes.ADD);
+    const riscos: [number, number, number][] = [
+      [74, 4, 0xfff2e0],
+      [66, 3, 0xff9a70],
+      [58, 2, 0xc0302a],
+    ];
+    for (const [raio, esp, cor] of riscos) {
+      g.lineStyle(esp * e * 2.2, cor, 1);
+      g.beginPath();
+      g.arc(cx + 30 * e, cy, raio * e, Phaser.Math.DegToRad(215), Phaser.Math.DegToRad(145), true);
+      g.strokePath();
+    }
+    this.scene.tweens.add({
+      targets: g,
+      alpha: 0,
+      duration: 220,
+      ease: 'Quad.easeIn',
+      onComplete: () => g.destroy(),
+    });
+  }
+
   private telegrafarLava(): void {
     if (this.ancora.lado === 'teto') this.tocar('predador-teto-lava', 'teto', 'predadorTeto');
     else this.tocar('predador-lava', 'luta', 'predadorLuta');
-    this.mudar('telegLava', Predador.TELEG_LAVA);
+    this.mudar('telegLava', this.ancora.lado === 'teto' ? Predador.TELEG_LAVA_TETO : Predador.TELEG_LAVA);
   }
 
   /** Bolas de lava em arco: tempo de voo fixo, velocidade resolvida para cair onde a nave está. */
@@ -454,36 +554,61 @@ export class Predador {
     const bocaX = this.sprite.x - 70 * e;
     const bocaY = this.ancora.lado === 'teto' ? this.sprite.y + 60 * e : this.sprite.y - 40 * e;
     for (let i = 0; i < n; i++) {
-      const b = this.enemies.enemyBullets.get(bocaX, bocaY) as Phaser.Physics.Arcade.Sprite | null;
-      if (!b) continue;
-      b.setActive(true).setVisible(true);
-      b.body!.enable = true;
-      if (this.scene.textures.exists('bolt3')) b.setTexture('bolt3');
-      b.setTint(0xff6a1a);
-      b.setScale(1.6);
-      b.setFlipX(false);
-      b.setData('ox', bocaX);
-      b.setData('oy', bocaY);
-      b.setData('lava', true);
       const T = Predador.LAVA_VOO * (0.85 + i * 0.18);
       const ax = target.x + (i - (n - 1) / 2) * 26;
       const ay = target.y;
       const vx = (ax - bocaX) / T;
       const vy = (ay - bocaY - 0.5 * Predador.LAVA_G * T * T) / T;
-      b.setVelocity(vx, vy);
-      b.setRotation(Math.atan2(vy, vx));
-      this.lavas.push(b);
+      this.lancarLava(bocaX, bocaY, vx, vy, true);
     }
+    this.brasas.explode(10, bocaX, bocaY);
     this.scene.cameras.main.shake(70, 0.004);
+  }
+
+  /**
+   * UMA GOTA DE LAVA — com cor de LAVA (pedido dele, 16/09: *"a lava tem que ter cor de lava"*) e que BRILHA
+   * no breu (*"lava é fogo, então brilha no escuro"*): a bola (núcleo branco-amarelo → laranja → vermelho),
+   * uma luz ADD que tremula por cima dela e um rastro de brasas. Tudo acima da camada do breu.
+   */
+  private lancarLava(x: number, y: number, vx: number, vy: number, bola: boolean): void {
+    const b = this.enemies.enemyBullets.get(x, y) as Phaser.Physics.Arcade.Sprite | null;
+    if (!b) return;
+    b.setActive(true).setVisible(true);
+    b.body!.enable = true;
+    b.setTexture(bola ? 'lavaBola' : 'lavaGota');
+    b.clearTint();
+    b.setScale(1);
+    b.setFlipX(false);
+    b.setDepth(41);
+    b.setData('ox', x);
+    b.setData('oy', y);
+    b.setData('lava', true);
+    b.setVelocity(vx, vy);
+    b.setRotation(Math.atan2(vy, vx));
+    const luz = this.scene.add
+      .image(x, y, 'luzRadial')
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setTint(0xff6a18)
+      .setScale(bola ? 0.62 : 0.34)
+      .setDepth(40);
+    this.lavas.push({ b, luz, bola });
   }
 
   /** A gravidade da lava é DAQUI, não do pool (o `enemyBullets` é compartilhado com a fase inteira). */
   private atualizarLavas(dt: number): void {
-    this.lavas = this.lavas.filter((b) => b.active && b.getData('lava') === true);
-    for (const b of this.lavas) {
+    this.lavas = this.lavas.filter((l) => {
+      if (l.b.active && l.b.getData('lava') === true) return true;
+      l.luz.destroy();
+      return false;
+    });
+    for (const l of this.lavas) {
+      const { b, luz, bola } = l;
       const body = b.body as Phaser.Physics.Arcade.Body;
-      body.velocity.y += Predador.LAVA_G * dt;
+      if (bola) body.velocity.y += Predador.LAVA_G * dt;
       b.setRotation(Math.atan2(body.velocity.y, body.velocity.x));
+      luz.setPosition(b.x, b.y).setAlpha(0.65 + Math.random() * 0.35);
+      if (Math.random() < (bola ? 0.8 : 0.35)) this.brasas.emitParticleAt(b.x, b.y);
+
       const bateuChao = b.y >= GROUND_Y - 4 && body.velocity.y > 0;
       const bateuTeto = b.y <= TETO_Y + 4 && body.velocity.y < 0;
       if (!bateuChao && !bateuTeto) continue;
@@ -491,28 +616,54 @@ export class Predador {
       const y = b.y;
       b.setData('lava', false);
       this.enemies.release(b);
-      this.fx.hit(x, y);
-      if (this.fase === 3) this.estilhacar(x, y, bateuChao ? -1 : 1);
+      this.brasas.explode(bola ? 14 : 4, x, y);
+      if (bola && this.fase === 3) this.estilhacar(x, y, bateuChao ? -1 : 1);
     }
   }
 
   private estilhacar(x: number, y: number, sentido: number): void {
     for (let i = 0; i < Predador.ESTILHACOS; i++) {
-      const b = this.enemies.enemyBullets.get(x, y) as Phaser.Physics.Arcade.Sprite | null;
-      if (!b) continue;
-      b.setActive(true).setVisible(true);
-      b.body!.enable = true;
-      if (this.scene.textures.exists('bolt3')) b.setTexture('bolt3');
-      b.setTint(0xffa040);
-      b.setScale(0.8);
-      b.setData('ox', x);
-      b.setData('oy', y);
       // Um leque aberto para LONGE da borda (para cima se bateu no chão, para baixo se no teto).
-      const ang = Phaser.Math.DegToRad(sentido < 0 ? -170 + (i / (Predador.ESTILHACOS - 1)) * 160 : 10 + (i / (Predador.ESTILHACOS - 1)) * 160);
+      const k = i / (Predador.ESTILHACOS - 1);
+      const ang = Phaser.Math.DegToRad(sentido < 0 ? -170 + k * 160 : 10 + k * 160);
       const v = Phaser.Math.Between(180, 220);
-      b.setVelocity(Math.cos(ang) * v, Math.sin(ang) * v);
-      b.setRotation(ang);
+      this.lancarLava(x, y - sentido * 6, Math.cos(ang) * v, Math.sin(ang) * v, false);
     }
+  }
+
+  /** As texturas da lava e as brasas — desenhadas no motor, zero geração. */
+  private criarLava(): void {
+    const bola = (key: string, lado: number) => {
+      if (this.scene.textures.exists(key)) return;
+      const tex = this.scene.textures.createCanvas(key, lado, lado);
+      if (!tex) return;
+      const ctx = tex.getContext();
+      const r = lado / 2;
+      const g = ctx.createRadialGradient(r - 1, r - 1, 0, r, r, r);
+      g.addColorStop(0, '#fff8d0');
+      g.addColorStop(0.28, '#ffd23a');
+      g.addColorStop(0.58, '#ff7a10');
+      g.addColorStop(0.85, '#c01e08');
+      g.addColorStop(1, 'rgba(90,8,2,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(r, r, r, 0, Math.PI * 2);
+      ctx.fill();
+      tex.refresh();
+    };
+    bola('lavaBola', 14);
+    bola('lavaGota', 8);
+    this.brasas = this.scene.add
+      .particles(0, 0, 'puff', {
+        lifespan: { min: 240, max: 480 },
+        speed: { min: 6, max: 34 },
+        scale: { start: 0.9, end: 0 },
+        alpha: { start: 1, end: 0 },
+        tint: [0xfff0a0, 0xffb030, 0xff6a10, 0xd02a08],
+        blendMode: Phaser.BlendModes.ADD,
+        emitting: false,
+      })
+      .setDepth(40);
   }
 
   private depoisDoAtaque(): void {
@@ -643,7 +794,7 @@ export class Predador {
     this.scene.tweens.add({ targets: this.breuCamada, alpha: Predador.BREU_ALPHA, duration: Predador.BREU_ENTRA_MS });
 
     // O halo da nave: JUSTO, só ela — não ilumina nada em volta.
-    this.halo = this.scene.add.image(0, 0, 'luzRadial').setBlendMode(Phaser.BlendModes.ADD).setTint(0x9ec4ff).setScale(0.55).setAlpha(0.55).setDepth(5.5);
+    this.halo = this.scene.add.image(0, 0, 'luzRadial').setBlendMode(Phaser.BlendModes.ADD).setTint(0x9ec4ff).setScale(0.5).setAlpha(0.42).setDepth(5.5);
 
     // O CORPO REVELADO pela luz do core: uma cópia escura e avermelhada, alpha preso ao pulso.
     this.revela = this.scene.add.image(0, 0, this.sprite.texture.key).setDepth(6.5).setTint(0x7a1c12).setAlpha(0);
@@ -711,7 +862,22 @@ export class Predador {
     this.coreBody.enable = false;
     this.tocar('predador-morte', 'luta', 'predadorLuta');
     this.luz.setAlpha(1).setScale(1.8);
-    this.scene.tweens.add({ targets: this.luz, alpha: 0, duration: 1100 });
+    this.scene.tweens.add({ targets: this.luz, alpha: 0, duration: Predador.MORTE_MS });
+    // A MORTE COMPOSTA (rodada 2, 16/09: *"a animação da morte não é nada, é quase um idle"*): o clipe + o
+    // sangue do mesmo organismo que estourou na troca + estouros pelo corpo enquanto ele cai.
+    const e = this.sprite.scaleX;
+    explosaoSangrenta(this.scene, this.core.x, this.core.y, 0.7);
+    sangueNaTela(this.scene, 5);
+    for (let i = 0; i < 5; i++) {
+      this.scene.time.delayedCall(120 + i * 170, () => {
+        this.fx.explode(
+          this.sprite.x + Phaser.Math.Between(-70, 70) * e,
+          this.sprite.y + Phaser.Math.Between(-90, 90) * e,
+          1.1,
+          52,
+        );
+      });
+    }
     this.sairDoBreu(800);
     return true;
   }
@@ -719,8 +885,12 @@ export class Predador {
   destroy(): void {
     this.tween?.stop();
     this.sairDoBreu(0);
-    for (const b of this.lavas) if (b.active) this.enemies.release(b);
+    for (const l of this.lavas) {
+      if (l.b.active) this.enemies.release(l.b);
+      l.luz.destroy();
+    }
     this.lavas = [];
+    this.brasas.destroy();
     this.luz.destroy();
   }
 }

@@ -2,7 +2,7 @@
 //
 //   predador-s.png              ← furia-predador-giro/corrigido/0   (a S, o surgimento)
 //   predador-luta.png           ← furia-predador-giro/corrigido/8   (três quartos p/ a esquerda: a pose da luta)
-//   predador-teto.png           ← furia-predador-teto/pose          (pendurado no teto)
+//   predador-teto.png           ← furia-predador-teto/base-espelhada (a luta espelhada, pendurado no teto)
 //   predador-<clipe>-sheet.png  ← os quadros de cada clipe, em linha (N × 256²)
 //
 // ⚠️ SÓ O GIRO leva a correção de brilho (`corrigido/`): ele clareava quadro a quadro SEM querer. No urro,
@@ -16,15 +16,18 @@ import sharp from 'sharp';
 const OUT = 'public/sprites';
 const Q = 256;
 const ANIM = 'assets/raw/furia-predador-anim';
+// A RODADA 2 (16/09, depois do 1º teste jogado): as escolhidas de cada clipe refeito. `-mini` = PixMiniMax.
+const ANIM2 = 'assets/raw/furia-predador-anim2';
 
 const CLIPES = {
   urro: `${ANIM}/urro`,
   giro: 'assets/raw/furia-predador-giro/corrigido',
+  pulo: process.env.PULO ?? `${ANIM2}/pulo-mini`,
   idle: `${ANIM}/idle`,
-  slash: `${ANIM}/slash`,
+  slash: `${ANIM2}/slash-mini`,
   lava: `${ANIM}/lava`,
-  'teto-lava': `${ANIM}/teto-lava`,
-  morte: `${ANIM}/morte`,
+  'teto-lava': `${ANIM2}/teto-mini`,
+  morte: process.env.MORTE ?? `${ANIM2}/morte-mini`,
 };
 
 const quadros = (dir) =>
@@ -35,7 +38,8 @@ const quadros = (dir) =>
 for (const [saida, src] of [
   ['predador-s.png', 'assets/raw/furia-predador-giro/corrigido/0.png'],
   ['predador-luta.png', 'assets/raw/furia-predador-giro/corrigido/8.png'],
-  ['predador-teto.png', 'assets/raw/furia-predador-teto/pose.png'],
+  // O teto é a pose de LUTA ESPELHADA: a pose editada (`teto/pose.png`) deformava o bicho (*"quase irreconhecível"*).
+  ['predador-teto.png', 'assets/raw/furia-predador-teto/base-espelhada.png'],
 ]) {
   await sharp(src).png().toFile(`${OUT}/${saida}`);
   console.log(`${OUT}/${saida}`);

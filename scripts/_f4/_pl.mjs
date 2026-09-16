@@ -4,7 +4,7 @@
 //
 //   node scripts/_f4/_pl.mjs edit <entrada.png> <saida.png> "<descrição>"
 //       edit-image-pro-flash, só texto, fundo transparente (~9 gerações em 256²)
-//   node scripts/_f4/_pl.mjs anim <primeiro.png> <dir-saida> <quadros> "<ação>" [ultimo.png]
+//   node scripts/_f4/_pl.mjs anim|mini <primeiro.png> <dir-saida> <quadros> "<ação>" [ultimo.png]
 //       animate-with-text-v3 (o motor que segurou o estilo da S no giro) — quadros 4..16, par
 import fs from 'node:fs';
 import path from 'node:path';
@@ -66,16 +66,27 @@ if (cmd === 'edit') {
   if (!achadas.length) throw new Error(`sem imagem no resultado: ${JSON.stringify(fim).slice(0, 800)}`);
   await gravar(achadas[0], saida);
   console.log(saida, `(${achadas.length} imagem)`, JSON.stringify(fim.usage ?? r.usage ?? {}));
-} else if (cmd === 'anim') {
+} else if (cmd === 'anim' || cmd === 'mini') {
   const [primeiro, dir, quadros, acao, ultimo] = args;
   fs.mkdirSync(dir, { recursive: true });
-  const r = await post('/animate-with-text-v3', {
-    first_frame: b64(primeiro),
-    ...(ultimo ? { last_frame: b64(ultimo) } : {}),
-    action: acao,
-    frame_count: Number(quadros),
-    no_background: true,
-  });
+  // `mini` = PixMiniMax: movimento mais SOLTO que o v3 (o v3 tende a "quase idle" em gesto grande — a
+  // morte de 16/09); quadros em múltiplos de 4 (4..40). `anim` = v3: segura melhor o traço do 1º quadro.
+  const r =
+    cmd === 'mini'
+      ? await post('/animate-pixminimax', {
+          first_frame: b64(primeiro),
+          ...(ultimo ? { last_frame: b64(ultimo) } : {}),
+          description: acao,
+          frame_count: Number(quadros),
+          no_background: true,
+        })
+      : await post('/animate-with-text-v3', {
+          first_frame: b64(primeiro),
+          ...(ultimo ? { last_frame: b64(ultimo) } : {}),
+          action: acao,
+          frame_count: Number(quadros),
+          no_background: true,
+        });
   fs.writeFileSync(path.join(dir, 'job.json'), JSON.stringify({ inicio: r, acao }, null, 2));
   const fim = await esperar(r.background_job_id);
   const achadas = imagens(fim);
@@ -84,6 +95,6 @@ if (cmd === 'edit') {
   fs.writeFileSync(path.join(dir, 'job.json'), JSON.stringify({ inicio: r, acao, quadros: achadas.length, usage: fim.usage }, null, 2));
   console.log(dir, `${achadas.length} quadros`, JSON.stringify(fim.usage ?? {}));
 } else {
-  console.error('uso: edit <entrada> <saida> "<desc>" | anim <primeiro> <dir> <quadros> "<ação>" [ultimo]');
+  console.error('uso: edit <entrada> <saida> "<desc>" | anim|mini <primeiro> <dir> <quadros> "<ação>" [ultimo]');
   process.exit(1);
 }

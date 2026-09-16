@@ -238,6 +238,7 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // `scripts/_f4/_instalar-predador.mjs`. Um offset por POSE vale para os clipes que partem dela.
   predadorUrroSheet: { path: 'sprites/predador-urro-sheet.png', w: 256, h: 256 },
   predadorGiroSheet: { path: 'sprites/predador-giro-sheet.png', w: 256, h: 256 },
+  predadorPuloSheet: { path: 'sprites/predador-pulo-sheet.png', w: 256, h: 256 },
   predadorIdleSheet: { path: 'sprites/predador-idle-sheet.png', w: 256, h: 256 },
   predadorSlashSheet: { path: 'sprites/predador-slash-sheet.png', w: 256, h: 256 },
   predadorLavaSheet: { path: 'sprites/predador-lava-sheet.png', w: 256, h: 256 },
@@ -628,7 +629,7 @@ const ART: Record<string, string> = {
   // O último quadro da morte — o casco partido em anel, o único em que a silhueta QUEBRA.
   guardiaoDestruido: 'sprites/guardiao-destruido.png',
   // O PREDADOR, as três POSES (16/09, B3). Miolo MEDIDO (`scripts/_f4/_medir-predador.mjs`), offset ao
-  // centro do quadro de 256²: S +6,−5 · luta −23,−3 · teto +4,−18 (ver `Predador.MIOLO`).
+  // centro do quadro de 256²: S +6,−5 · luta −23,−3 · teto −23,+2 (a luta espelhada) (ver `Predador.MIOLO`).
   predadorS: 'sprites/predador-s.png',
   predadorLuta: 'sprites/predador-luta.png',
   predadorTeto: 'sprites/predador-teto.png',
