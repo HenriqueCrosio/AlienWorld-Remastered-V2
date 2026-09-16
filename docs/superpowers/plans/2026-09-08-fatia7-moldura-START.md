@@ -31,7 +31,7 @@ Sondas 15/09: `probe-f4-moldura` ✔ · `probe-f4-visual` ✔ · `probe-f4-golfi
 
 **🟢 BLOCO B · B1 — O GUARDIÃO NOVO — JOGADO E APROVADO (15/09):** *"o novo modelo ficou melhor que o
 outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeiro** — B1 ✅ → **B3 (a
-2ª forma, EM CURSO)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
+2ª forma: o PREDADOR, implementado 16/09, à espera do teste jogado)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
 (M3, `f4Vivo`, `f4Veu`) seguem sem resposta — ver "🧭 O MAPA PARA FECHAR A FATIA 7".
 - **Arte:** a DELE (PixelLab `9436240c`), montada sem geração por `_f4/_instalar-guardiao.mjs` —
   `guardiao.png`, `guardiao-idle-sheet.png`, `guardiao-morte-sheet.png` e `guardiao-destruido.png`,
@@ -51,41 +51,89 @@ outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeir
   medido no `worldstep`: `body.center` = `core.x/y`. A captura `_f4/_ver-guardiao.mjs` desenha pelo centro.
 - Sondas: `probe-stage4` ✔ (bala real fere a massa, troca, coração, cutscene final) · typecheck ✔.
 
-**🟠 BLOCO B · B3 — A 2ª FORMA: O CORAÇÃO MORRE, ENTRA "A FÚRIA" (15/09). 4 CANDIDATAS, NENHUMA
-ESCOLHIDA.** Ver ⏸️ logo abaixo.
+**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). IMPLEMENTADO, VERIFICADO NA SONDA — FALTA ELE
+JOGAR.** Ver ⏸️ logo abaixo.
 
-Branch `feat/fase4-visual`, tudo commitado e empurrado no fim de 15/09.
+Branch `feat/fase4-visual`, tudo commitado no fim de 16/09.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
 > **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção ⏸️.
-> Em 15/09 fechamos as pendências da borda (a emenda C→D, a pintura do núcleo, o contorno da borda B),
-> instalamos e aprovamos o guardião novo com a morte composta no motor, e começamos o B3: a 2ª forma
-> deixa de ser o coração e vira uma criatura furiosa que sai de dentro do guardião. Geramos 4
-> candidatas no PixelLab (serpente, predador, boca, louva-a-deus) — a folha está em
-> `docs/superpowers/folhas/2026-09-15/furia-candidatas.png`. Minha escolha: <A/B/C/D, mistura ou nova
-> rodada, e o que ajustar>. Siga daí."**
+> Em 16/09 a 2ª forma do chefão virou O PREDADOR (a candidata B): explosão sangrenta com sangue na tela,
+> ele surge em 0,7 urrando, salta girando para 0,47, e luta em três fases — investida com slash e lava;
+> a ronda pelo chão e pelo teto com saída pela direita; e o breu, onde só o core dele revela o corpo.
+> A folha está em `docs/superpowers/folhas/2026-09-16/predador-em-jogo.png`. Joguei e: <o que achou>.
+> Siga daí."**
 
-⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER A ESCOLHA DELE, NÃO GERAR.** Se ele não trouxer a escolha,
-mande a folha (`SendUserFile`) e pergunte. Localhost: `npm run dev` → `L` → `G` vai direto ao chefão.
+⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O TESTE JOGADO DELE.** Localhost: `npm run dev` → `L` → `G`
+vai direto ao chefão (mate o guardião para ver a troca). Ele disse *"corrigimos depois"*: tudo abaixo é
+1ª passada, e os knobs estão listados.
 
 ---
 
-## ⏸️ ONDE PARAMOS — O B3, A 2ª FORMA DO CHEFÃO
+## ⏸️ ONDE PARAMOS — O PREDADOR, À ESPERA DO TESTE JOGADO
 
-**O pedido dele (15/09), depois de jogar o guardião novo:** *"o gap visual é a segunda fase do boss que
-tem o coração, mas ficou muito sem noção um coração após a explosão do boss. Quero que crie no PixelLab
-uma evolução deste monstro que explode, algo que sai de dentro dele furioso e vil."* E sobre o coração:
-*"os outros feedbacks seriam sobre o coração e seu hitbox depois da fúria, mas já que vamos trocar o
-coração pela nova transformação, não preciso dizer"* — **o coração sai inteiro; não gaste rodada
-consertando o hitbox dele.**
+**Spec:** `docs/superpowers/specs/2026-09-16-fatia7-b3-predador-design.md` (substitui a B3 da spec de
+06/09). **Plano:** `docs/superpowers/plans/2026-09-16-fatia7-b3-predador.md`. **Código:**
+`src/entities/Predador.ts` (a forma 2 inteira) e `BossNucleo.ts` (o guardião e a troca).
 
-⚠️ **ELE DISPENSOU O BRAINSTORMING PARA A ARTE:** *"não precisa brainstorming, pode fazer direto"* ·
-*"crie e me mostre"*. Gere, monte a folha, mostre.
+### As decisões dele, na ordem do brainstorm
+- **A candidata B (predador)**, e a luta que ELE desenhou: mobilidade + furtividade; investida+slash,
+  lava, e o stealth stage no breu.
+- **Paredes (c):** chão E teto E lateral — mas **a lateral caiu no mock** (não há parede à direita; a pose
+  girada vira bolo de garras). Virou **SAÍDA**: ele salta para fora e reentra noutro ponto, com aviso. O
+  teto ganhou **pose e animação próprias** (pedido dele).
+- **Ataques por vida (a):** fase 1 no chão · fase 2 a ronda · fase 3 o breu.
+- **O alvo (c), a mistura:** o peito sempre vulnerável; **dano dobra na recuperação**.
+- **O breu:** a nave visível com **halo justo que não ilumina nada**; **só o core revela o predador**.
+  A carga da investida é **o core pulsando devagar e acelerando** (ideia dele — *"assim dá tempo do
+  jogador esquivar"*).
+- **Lava:** arco com gravidade nas fases 1–2; **estoura em estilhaços na borda no breu**.
+- **Surgimento:** **arma travada** (a nave voa livre); **0,7 → 0,47 no pulo**; **explosão no motor
+  primeiro** + **sangue na tela** (*"fica imersivo e dá mais desvio para a transição"*).
 
-### A rodada 1 — 4 conceitos, `create_object_pro_flash` 256×256, 9 gerações cada (36)
+### A arte — o que aprendemos gerando
+- **As rotações de 8 direções ALISAM o estilo** (*"mais liso e mais cartunesco… menos horrendos"*). Edição
+  com a S de referência pegou a pose da referência (a SW virou frontal); edição por texto quase não mudou.
+  Medido: não é brilho médio, é CONTRASTE (faixas limpas vs. meios-tons barrentos).
+- **A saída: tirar a pose da própria S por ANIMAÇÃO.** O giro v3 herda o traço. Parou em três quartos —
+  e isso é melhor para a luta (o peito encara a nave). O giro clareava (lum 46→61): corrigido por gama.
+- **Via REST a partir de PNG local:** `scripts/_f4/_pl.mjs edit|anim` (o MCP pede base64 inline, que trunca).
+- **A morte gerada quase não se mexe** (o mesmo limite da do guardião): a do predador é o clipe + a cadeia
+  do `killBoss` por cima. Se ler como "desligou", compor como a do guardião.
+- **PixelLab 16/09:** ~111 gerações (8 rotações, 3 edições de estilo, 1 teto, 7 clipes v3). Saldo no arranque: 4.401.
+
+### O que olhar quando ele jogar (1ª passada — os knobs, todos no topo do `Predador`)
+| o que | knob |
+|---|---|
+| a duração do surgimento (urro 1,2s + salto 0,8s) e a escala | `URRO_MS`, `SALTO_SURGE_MS`, `ESCALA_*` |
+| a carga dá tempo de desviar? (às claras e no breu) | `CARGA` por fase, `CARGA_MIN`, `BOTE_VEL` |
+| a punição da recuperação | `RECUP_SLASH`, `RECUP_LAVA`, `DANO_RECUP` |
+| a lava (quantas, o arco, os estilhaços) | `LAVA_G`, `LAVA_VOO`, `ESTILHACOS` |
+| o ritmo entre ataques | `PAUSA` por fase |
+| a ronda e a saída | `ANCORAS`, `SALTO_MS`, `FORA_MIN/MAX`, `AVISO`, e as chances em `depoisDoAtaque` |
+| o breu (quão preto, o pulso) | `BREU_ALPHA`, `PULSO_BREU`, o alpha da cópia em `atualizarBreu` (0,62) |
+| a linha de apoio no chão e no teto | `CHAO_APOIO` (190), `TETO_APOIO` (30) — a olho na borda desenhada, conferir |
+| a hitbox da casca (absorve + fere) | `corpoCasca` / `corpoInteiro` — ⚠️ a olho, NÃO medida; só o miolo foi medido |
+
+### ⚠️ Pontos já vistos na captura, não decididos
+- Em +1600ms, a **fumaça escura do fim do `explodeBig`** cai sobre a barriga dele recém-surgido.
+- A **cabeça da pose do teto** ficou pouco legível (no clipe `teto-lava` ela aparece melhor).
+- A **emenda vertical da pintura** do núcleo passa pela arena (x≈270 na foto do aviso) — anterior a isto.
+- O coração saiu inteiro: `nucleo.png`/`nucleo-beat-sheet.png` seguem no disco, sem uso (apagar é dele).
+
+### Sondas 16/09
+`probe-stage4` ✔ (a troca revela o predador, a arma trava e destrava, 0,7→0,47, a bala real fere o peito,
+o dano dobra na recuperação, a fase 3 liga o breu, matar entrega a cutscene final) · typecheck ✔ · build ✔.
+Captura: `node scripts/_f4/_ver-predador.mjs` → `docs/superpowers/folhas/2026-09-16/predador-em-jogo.png`.
+
+---
+
+### 📜 Histórico: a rodada 1 da "fúria" (15/09) — de onde saiu a escolha
+
+#### A rodada 1 — 4 conceitos, `create_object_pro_flash` 256×256, 9 gerações cada (36)
 
 Referência de estilo: o guardião (`9436240c`). Tudo guardado em **`assets/raw/furia-candidatas/`** (os 4
 PNG + `candidatas.json` com object_id e prompt de cada uma). Folha: **`docs/superpowers/folhas/2026-09-15/furia-candidatas.png`**
@@ -108,21 +156,6 @@ descrever a pose pelo que a vista mostra (*"we see its left flank, head at the l
 **PixelLab em 15/09:** 4.437 no arranque, **4.401** no fim — **36** gerações, só as 4 candidatas (o
 guardião entrou com os quadros que ele já tinha baixado). Ciclo vira em 2026-10-04.
 
-### O que vem depois da escolha, na ordem
-1. **Refinar a escolhida** (1–2 variações): orientação, casca presa, valor/saturação contra o guardião.
-2. **Medir antes de instalar**: `_f4/_medir-guardiao.mjs` serve de molde — onde está o miolo (o alvo),
-   onde fica a boca dos tiros, a caixa do alfa. ⚠️ A arte manda na hitbox; nada de offset a olho.
-3. **Animações**: idle (a fúria respirando/rosnando) e a morte final. Regras da memória
-   `pixminimax-animacao` e `gerador-ignora-limite-de-cor` (pulsar = clarear; ancorar no estático).
-4. **⚠️ O COMO ELA LUTA AINDA NÃO FOI DECIDIDO** — e o diagnóstico da spec continua de pé (seção B3
-   da `2026-09-06-fatia7-fase4-design.md`): a forma 2 de hoje *encolhe 25%*, *repete a silhueta* e
-   *cobra o mesmo verbo* ("espere a janela, atire no ponto vermelho à direita"). Trocar só o sprite
-   conserta os dois primeiros e deixa o terceiro. **Pergunte a ele** o verbo da fúria antes de mexer
-   no `updateCoracao` (ele dispensou brainstorming da ARTE, não necessariamente do comportamento).
-   Hoje a forma 2 inteira é o `forma === 'coracao'` do `BossNucleo` (HP 180, sístole/diástole, paredes
-   na fase ≥2) e a `probe-stage4` cobra esse ciclo (`aberto`, "FECHADO segura / ABERTO fere").
-5. **A troca**: a morte composta do guardião já termina no `guardiaoDestruido` com a carcaça sumindo
-   em 1500ms (`TROCA_MS`) — o gancho natural para a fúria EMERGIR dali.
 
 ---
 
@@ -1030,7 +1063,7 @@ O CENÁRIO RESPIRA         ✅ APROVADO (14/09), e as colunas verticais junto
   Assados por `_assar-anim.mjs` contra o sprite estático aprovado.
 A EMENDA C→D + A PINTURA  ✅ APROVADAS (15/09) — a pintura do núcleo fica como está
 BLOCO B · B1 — GUARDIÃO   ✅ APROVADO (15/09) — arte nova dele + morte composta no motor
-BLOCO B · B3 — 2ª FORMA   🟠 ◄ PEGUE AQUI · 4 candidatas da "fúria", escolha dele pendente (ver ⏸️)
+BLOCO B · B3 — 2ª FORMA   🟠 ◄ PEGUE AQUI · O PREDADOR implementado (16/09) — falta o teste jogado dele (ver ⏸️)
 BLOCO B · B2 — A POSIÇÃO  ⬜ o guardião no alto-direita, cortado pela borda de cima (Y escolhido por ele
                              vendo as opções lado a lado na cena). Hoje os tentáculos batem no teto.
 M4 — A CÂMARA C           ⬜ as 3 PORTAS com arte final (hoje `f4-porta-prov.png`), a borda C grossa
@@ -1041,7 +1074,7 @@ M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprov
 
 ## 🧭 O MAPA PARA FECHAR A FATIA 7 (15/09)
 
-**🔴 Obrigatório, na ordem dele:** B3 (a 2ª forma) → B2 (a posição) → M4 (portas, borda C, esfíncter).
+**🔴 Obrigatório, na ordem dele:** B3 (a 2ª forma — o predador, jogar e ajustar) → B2 (a posição) → M4 (portas, borda C, esfíncter).
 
 **🟡 Cortar ou manter — PERGUNTADO EM 15/09, SEM RESPOSTA:**
 

@@ -363,9 +363,10 @@ export class BossNucleo implements StageBoss {
       .particles(x, y, 'puff', {
         lifespan: { min: 500, max: 900 },
         speed: { min: 10, max: 60 },
-        scale: { start: 3.5, end: 7 },
-        alpha: { start: 0.7, end: 0 },
-        tint: [0x3a0204, 0x5a0508],
+        scale: { start: 3, end: 6 },
+        // ⚠️ Escura demais (0x3a0204 a 0,7) ela lia como BURACOS PRETOS sobre a barriga dele (captura 16/09).
+        alpha: { start: 0.35, end: 0 },
+        tint: [0x8a1410, 0x6a0a0c],
         emitting: false,
       })
       .setDepth(52);

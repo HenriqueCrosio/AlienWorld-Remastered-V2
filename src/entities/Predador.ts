@@ -99,7 +99,8 @@ export class Predador {
   private ultimos: ('slash' | 'lava')[] = [];
   private fasePassada = 1;
   private pulsoFase = 0;
-  private pulso = 0;
+  /** 0..1 — o brilho do core agora (a captura espera o pico e o vale). */
+  pulso = 0;
   private lavas: Phaser.Physics.Arcade.Sprite[] = [];
   private tween: Phaser.Tweens.Tween | null = null;
 
@@ -120,14 +121,20 @@ export class Predador {
   ) {
     this.criarAnims();
     if (!scene.textures.exists('luzRadial')) {
-      // Uma luz redonda de verdade (o `puff` é 7×7 e lê como bolinha): anéis de alpha decrescente.
-      const g = scene.add.graphics();
-      for (let r = 32; r > 0; r -= 2) {
-        g.fillStyle(0xffffff, 0.05 + 0.9 * Math.pow(1 - r / 32, 2.2) * 0.12);
-        g.fillCircle(32, 32, r);
+      // Uma luz redonda de verdade: degradê radial que chega a ZERO antes da borda do quadro. ⚠️ A 1ª versão
+      // (anéis de alpha somados) tinha alpha > 0 na borda — em ADD e ampliada, lia como RETÂNGULO (16/09).
+      const tex = scene.textures.createCanvas('luzRadial', 64, 64);
+      if (tex) {
+        const ctx = tex.getContext();
+        const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 31);
+        grad.addColorStop(0, 'rgba(255,255,255,1)');
+        grad.addColorStop(0.25, 'rgba(255,255,255,0.55)');
+        grad.addColorStop(0.6, 'rgba(255,255,255,0.15)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 64, 64);
+        tex.refresh();
       }
-      g.generateTexture('luzRadial', 64, 64);
-      g.destroy();
     }
 
     // A LUZ DO CORE: existe sempre (às claras é o brilho do peito; na carga é o telégrafo; no breu é
@@ -602,8 +609,9 @@ export class Predador {
       base = this.breu ? 0.1 : 0.3;
       forte = 1;
     } else if (this.estado === 'aviso') {
-      periodo = 0.25;
-      base = 0.4;
+      // O aviso da reentrada precisa GRITAR: ele vem de fora da tela, e o jogador não o via.
+      periodo = 0.2;
+      base = 0.7;
       forte = 1;
     } else if (this.recuperando) {
       // O convite: exposto, o peito brilha mais.
@@ -617,7 +625,7 @@ export class Predador {
     const visivel = this.estado !== 'fora' && this.estado !== 'morto';
     this.luz.setVisible(visivel || this.estado === 'aviso');
     this.luz.setAlpha(alpha);
-    this.luz.setScale((this.breu ? 1.1 : 0.9) + 0.35 * this.pulso);
+    this.luz.setScale((this.estado === 'aviso' ? 1.6 : this.breu ? 1.1 : 0.9) + 0.35 * this.pulso);
   }
 
   private entrarNoBreu(): void {

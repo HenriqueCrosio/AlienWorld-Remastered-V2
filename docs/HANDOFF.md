@@ -56,16 +56,19 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 
    🟠 **A FATIA 7 (Fase 4, o interior) ESTÁ EM ANDAMENTO na branch `feat/fase4-visual`.** Retome
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
-   com a frase de arranque. **Estado em 2026-09-15:** jogados e aprovados — o Bloco A (os 4 fundos
+   com a frase de arranque. **Estado em 2026-09-16:** jogados e aprovados — o Bloco A (os 4 fundos
    dele), a MOLDURA (M1, M1.5: o duto, as 3 portas), o GOLFINHO (mini-chefão da câmara B), o M2 (as
    bordas A/B/D, o cenário respirando, as colunas, o pilar nas costuras, a maré), a entrada do núcleo
    pela emenda, o contorno da borda B e o **B1 — o guardião novo** com a morte composta no motor.
-   **Em curso: o B3** — a 2ª forma deixa de ser o coração e vira "a fúria" que sai de dentro do
-   guardião; 4 candidatas geradas, a escolha é dele. **Na fila, obrigatório:** B2 (a posição do
+   **Em curso: o B3** — a 2ª forma deixou de ser o coração e virou **o predador** que sai de dentro do
+   guardião (`src/entities/Predador.ts`): surgimento sangrento, investida+slash, lava, a ronda pelo
+   chão e teto, e o breu. Implementado e verificado na sonda em 16/09; **falta o teste jogado dele**.
+   **Na fila, obrigatório:** B2 (a posição do
    chefão) e M4 (portas com arte final, borda C, esfíncter). O mapa inteiro está na seção "🧭 O MAPA
    PARA FECHAR A FATIA 7" do START. Specs, em ordem:
    `2026-09-06-fatia7-fase4-design.md` (a fatia), `2026-09-08-fatia7-moldura-fase4-design.md`,
-   `2026-09-10-fatia7-duto-portas-design.md` e `2026-09-11-fatia7-golfinho-miniboss-design.md`.
+   `2026-09-10-fatia7-duto-portas-design.md`, `2026-09-11-fatia7-golfinho-miniboss-design.md` e
+   `2026-09-16-fatia7-b3-predador-design.md`.
 
    O histórico da Fatia 6: ela **foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
    levou duas voltas: a 1ª caiu em dois blocos (a nadadeira e o portão) e a 2ª passou por cinco
@@ -497,7 +500,7 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 
 ## ROADMAP
 
-### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-15)
+### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-16)
 
 O conteúdo do jogo está todo de pé (tabela abaixo). O que corre agora é o passe visual, fatia a
 fatia, cada uma com spec → plano → implementação → **teste jogado pelo Henrique** → merge.
@@ -512,7 +515,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
-| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas e guardião novo aprovados; falta B3 (2ª forma), B2 (posição), M4 (portas/borda C/esfíncter). Ver o START |
+| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas e guardião novo aprovados; B3 (o predador) implementado, falta jogar; falta B2 (posição), M4 (portas/borda C/esfíncter). Ver o START |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**
