@@ -20,6 +20,12 @@ export interface StageBoss {
    * A lista é VIVA: o chefão a atualiza quando uma parte morre — a cena a lê a cada uso.
    */
   readonly targets?: Phaser.Physics.Arcade.Sprite[];
+  /**
+   * A ARMA DO JOGADOR TRAVADA pela luta (o predador da Fase 4, B3): a pausa dramática do surgimento
+   * pede que ele OLHE — a nave voa, o gatilho não faz nada. É trava de CENA, não o calor da arma: o
+   * painel não mostra superaquecimento. Ausente = nunca trava.
+   */
+  readonly armaTravada?: boolean;
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean;

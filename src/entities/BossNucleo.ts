@@ -3,7 +3,8 @@ import { COLORS, GAME_WIDTH } from '../config';
 import type { StageBoss } from './Boss';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
-import { TerrainSystem, GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
+import type { TerrainSystem } from '../systems/TerrainSystem';
+import { Predador } from './Predador';
 
 /**
  * O CHEFÃO FINAL da Fase 4, em DUAS FORMAS (design do Henrique, 2026-07-19):
@@ -12,14 +13,9 @@ import { TerrainSystem, GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
  *      da massa viva. Móvel: flutua, cospe glóbulos do bico e INVESTE telegrafado. A barriga
  *      vermelha é o alvo PERMANENTE — mas só quando ele está PARADO: em movimento, o corpo
  *      fecha inteiro. O ritmo dele é o do coração dito de outro jeito: mover = sístole.
- *   2. O CORAÇÃO BLINDADO (`nucleo.png`) — a casca morre, estoura, e o que ela protegia
- *      SURGE: sístole (fechado: parede, glóbulos, anticorpos) e diástole (aberto: a ferida
- *      BRILHA e ele fica quieto — a janela é a recompensa). Fases pela vida; paredes de
- *      corredor entram na luta da fase 2 em diante.
- *
- * É a estrutura da serpente (formas que trocam de arte) aplicada ao fim: o chefão final
- * cobra os quatro verbos da campanha — desviar (glóbulos/investida), abater (anticorpos),
- * anatomia (a janela), precisão (as paredes).
+ *   2. O PREDADOR (16/09, B3 — substitui o coração) — a casca morre numa explosão SANGRENTA e o
+ *      que estava dentro dela SAI: urra, salta girando para a nave, e caça. Mora em `Predador.ts`;
+ *      este arquivo fica com o guardião e a TROCA, e delega a luta da 2ª forma.
  *
  * ─── GEOMETRIA MEDIDA, NUNCA CHUTADA (lição 13; find-pad nos dois PNGs) ───
  *
@@ -27,7 +23,7 @@ import { TerrainSystem, GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
  *    (centroide ≈152,141 → offset +24,+13 do centro). Casca/bico à ESQUERDA na MESMA altura da
  *    massa — por isso o corpo-absorvedor cobre SÓ O DOMO SUPERIOR (a bala cruza o rebordo da
  *    casca sem morrer e cobra na massa; o mesmo pacto visual da faixa das cabeças da serpente).
- *  - CORAÇÃO (122×122): ferida em x=52..91, y=56..87 (offset +10,+10 do centro).
+ *  - PREDADOR: ver `Predador.MIOLO`.
  */
 export class BossNucleo implements StageBoss {
   readonly sprite: Phaser.Physics.Arcade.Sprite;
@@ -36,12 +32,15 @@ export class BossNucleo implements StageBoss {
 
   // Antes dos campos de instância que os usam (ordem de inicialização de classe).
   private static readonly HP_GUARDIAO = 90;
-  private static readonly HP_CORACAO = 180;
-  private static readonly HP_TOTAL = BossNucleo.HP_GUARDIAO + BossNucleo.HP_CORACAO;
+  private static readonly HP_TOTAL = BossNucleo.HP_GUARDIAO + Predador.HP;
 
-  private forma: 'guardiao' | 'coracao' = 'guardiao';
+  /** Lida pela sonda (`probe-stage4`). */
+  forma: 'guardiao' | 'predador' = 'guardiao';
   private hpGuardiao = BossNucleo.HP_GUARDIAO;
-  private hpCoracao = BossNucleo.HP_CORACAO;
+  /** A 2ª forma, depois da troca. A sonda lê o estado dela por aqui. */
+  predador: Predador | null = null;
+  /** A arma trava desde a vida do guardião zerar — antes de o predador existir. */
+  private travaTroca = false;
   private dead = false;
   private entering = true;
   private trocando = false;
@@ -51,11 +50,6 @@ export class BossNucleo implements StageBoss {
   private acao: 'flutua' | 'telegrafo' | 'investe' | 'volta' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
-
-  /** Coração: sístole/diástole. */
-  private aberto = false;
-  private cicloT = 0;
-  private cdParede = 0;
 
   private readonly core: Phaser.Physics.Arcade.Sprite;
   private readonly barBg: Phaser.GameObjects.Rectangle;
@@ -85,40 +79,29 @@ export class BossNucleo implements StageBoss {
    */
   private static readonly G_MUZZLE_X = -94;
   private static readonly G_MUZZLE_Y = 44;
-  /** A morte na troca: 9 quadros a 9 q/s, o destruído, e o coração surge. Ver `trocarParaCoracao`. */
+  /** A morte na troca: 9 quadros a 9 q/s, o destruído, e o coração surge. Ver `trocarParaPredador`. */
   private static readonly MORTE_MS = 1000;
   private static readonly TROCA_MS = 1500;
   private static readonly INVESTIDA_CADA = 6;
   private static readonly TELEGRAFO_DUR = 0.55;
-
-  // ─── Coração (122×122 a escala 1.2) ───
-  private static readonly C_ESCALA = 1.2;
-  private static readonly C_STATION_X = GAME_WIDTH - 78;
-  private static readonly C_BASE_Y = 108;
-  private static readonly C_CORE_OFF_X = 10;
-  private static readonly C_CORE_OFF_Y = 10;
-  private static readonly ABERTO_DUR = [0, 3.2, 2.6, 2.2];
-  private static readonly FECHADO_DUR = [0, 4.4, 3.8, 3.2];
-  private static readonly CADENCIA = [0, 1.7, 1.4, 1.1];
 
   private static readonly ENTRY_SPEED = 40;
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly enemies: EnemySystem,
-    private readonly terrain: TerrainSystem,
+    // O terreno era das PAREDES do coração; o predador não usa. Fica na assinatura da cena.
+    _terrain: TerrainSystem,
     private readonly fx: Fx,
   ) {
     this.sprite = scene.physics.add.sprite(GAME_WIDTH + 120, BossNucleo.G_BASE_Y, 'guardiao');
     this.sprite.setScale(BossNucleo.G_ESCALA);
     this.sprite.setData('boss', this);
 
-    // AS FORMAS VIVAS (sheets do PixelLab, 2026-07-21): o guardião RESPIRA (a massa vermelha
-    // pulsa como um coração — mover = sístole, e agora até parado ele é órgão vivo) e o
-    // coração BATE (a ferida acende e apaga no ritmo da janela). Sem a sheet, o estático de
-    // sempre segura a luta (arte entra asset por asset). Yoyo: o pulso vai E VOLTA sem corte.
-    // A âncora não precisa de compensação: a arte do guardião sai toda no mesmo quadro de 256²
-    // (ver `G_CORE_OFF_X`), e a do coração foi medida a <3px do centro do estático.
+    // O GUARDIÃO RESPIRA (sheet do PixelLab): a massa vermelha pulsa como um coração — mover =
+    // sístole, e até parado ele é órgão vivo. Sem a sheet, o estático segura a luta (arte entra
+    // asset por asset). Yoyo: o pulso vai E VOLTA sem corte. A âncora não precisa de compensação:
+    // a arte do guardião sai toda no mesmo quadro de 256² (ver `G_CORE_OFF_X`).
     const anims = scene.anims;
     if (scene.textures.exists('guardiaoMorteSheet') && !anims.exists('guardiao-morte')) {
       anims.create({
@@ -133,15 +116,6 @@ export class BossNucleo implements StageBoss {
         key: 'guardiao-idle',
         frames: anims.generateFrameNumbers('guardiaoIdleSheet', { start: 0, end: 8 }),
         frameRate: 6,
-        repeat: -1,
-        yoyo: true,
-      });
-    }
-    if (scene.textures.exists('nucleoBeatSheet') && !anims.exists('nucleo-beat')) {
-      anims.create({
-        key: 'nucleo-beat',
-        frames: anims.generateFrameNumbers('nucleoBeatSheet', { start: 0, end: 8 }),
-        frameRate: 7,
         repeat: -1,
         yoyo: true,
       });
@@ -190,10 +164,8 @@ export class BossNucleo implements StageBoss {
     return this.dead;
   }
 
-  /** Fase do CORAÇÃO pela vida dele (1→2→3). O guardião tem fase única. */
-  private get fase(): number {
-    const f = this.hpCoracao / BossNucleo.HP_CORACAO;
-    return f > 0.66 ? 1 : f > 0.33 ? 2 : 3;
+  get armaTravada(): boolean {
+    return this.travaTroca || (this.predador?.armaTravada ?? false);
   }
 
   private get body(): Phaser.Physics.Arcade.Body {
@@ -202,17 +174,11 @@ export class BossNucleo implements StageBoss {
 
   /** Corpo = só o DOMO superior: a faixa do alvo fica de corredor livre para a bala. */
   private corpoDomo(): void {
-    // Dimensões CONSTANTES, em px do quadro: `sprite.width/height` muda com a textura (o coração
-    // tem estático de 122² e sheet de 128²), e o corpo cresceria junto.
-    if (this.forma === 'guardiao') {
-      // ⚠️ O DOMO ACABA ONDE A MASSA COMEÇA (y=109 no PNG): y=14..109, x=28..228. Mais baixo e ele
-      // comeria o topo do alvo — a bala morreria no casco em cima do miolo aceso.
-      this.body.setSize(200, 95);
-      this.body.setOffset(28, 14);
-    } else {
-      this.body.setSize(122 * 0.78, 122 * 0.42);
-      this.body.setOffset(122 * 0.11, 122 * 0.06);
-    }
+    // Dimensões CONSTANTES, em px do quadro de 256² (não `sprite.width/height`, que muda com a textura).
+    // ⚠️ O DOMO ACABA ONDE A MASSA COMEÇA (y=109 no PNG): y=14..109, x=28..228. Mais baixo e ele
+    // comeria o topo do alvo — a bala morreria no casco em cima do miolo aceso.
+    this.body.setSize(200, 95);
+    this.body.setOffset(28, 14);
   }
 
   /** Corpo INTEIRO: a investida é toda perigo — e fecha o alvo (bala morre no casco). */
@@ -223,10 +189,15 @@ export class BossNucleo implements StageBoss {
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
+    // O predador roda até DEPOIS de morto (a luz apaga, o breu sai, a lava no ar segue caindo).
+    if (this.predador) {
+      this.predador.update(dt, target);
+      return;
+    }
     if (this.dead || this.trocando) return;
 
     if (this.entering) {
-      const alvo = this.forma === 'guardiao' ? BossNucleo.G_STATION_X : BossNucleo.C_STATION_X;
+      const alvo = BossNucleo.G_STATION_X;
       this.posicionarCore();
       if (this.sprite.x > alvo) return;
       this.body.setVelocityX(0);
@@ -235,8 +206,7 @@ export class BossNucleo implements StageBoss {
 
     this.t += dt;
 
-    if (this.forma === 'guardiao') this.updateGuardiao(dt, target);
-    else this.updateCoracao(dt, target);
+    this.updateGuardiao(dt, target);
 
     this.posicionarCore();
   }
@@ -316,20 +286,22 @@ export class BossNucleo implements StageBoss {
   }
 
   /**
-   * A TROCA: a casca MORRE, estoura — e o CORAÇÃO surge do estouro. O mesmo beat da serpente
-   * pré-fusão: a pausa dramática É o telégrafo da forma nova.
+   * A TROCA: a casca MORRE — e o PREDADOR sai de dentro dela (B3, 16/09).
    *
-   * ⚠️ A MORTE É COMPOSTA NO MOTOR, e é decisão dele (15/09). Duas animações geradas convergiram no
-   * mesmo limite do gerador: o miolo explode, mas o grosso da silhueta fica inteiro — e morte que
-   * acaba com o cadáver intacto lê como "desligou". Então são três camadas:
+   * ⚠️ A MORTE DO GUARDIÃO É COMPOSTA NO MOTOR, e é decisão dele (15/09). Duas animações geradas convergiram
+   * no mesmo limite do gerador: o miolo explode, mas o grosso da silhueta fica inteiro. Então são camadas:
    *   1. a `guardiao-morte` (o miolo estourando até ficar oco), 0 → `MORTE_MS`;
-   *   2. as explosões do jogo subindo pela casca por cima dela, a mesma gramática de todo chefão;
-   *   3. o `guardiaoDestruido` no fim, o único quadro em que o casco PARTE — com a detonação grande.
-   * A carcaça some quando o coração surge, em `TROCA_MS`, como antes (ele escolheu não adiantar o B3).
+   *   2. as explosões do jogo subindo pela casca por cima dela;
+   *   3. o `guardiaoDestruido` + a EXPLOSÃO SANGRENTA + o SANGUE NA TELA em `MORTE_MS` (o pedido dele:
+   *      *"fica imersivo e dá mais desvio para a transição"*) — a carcaça apaga sob o sangue;
+   *   4. o predador em `TROCA_MS`, surgindo (ver `Predador.surgir`).
+   * A arma trava JÁ no golpe fatal: a pausa dramática inteira é para olhar.
    */
-  private trocarParaCoracao(): void {
+  private trocarParaPredador(): void {
     this.trocando = true;
+    this.travaTroca = true;
     this.body.setVelocity(0, 0);
+    this.body.enable = false;
     this.glow.emitting = false;
     this.sprite.clearTint();
 
@@ -337,7 +309,6 @@ export class BossNucleo implements StageBoss {
     this.sprite.anims.stop();
     if (this.scene.anims.exists('guardiao-morte')) this.sprite.play('guardiao-morte');
 
-    // As explosões do motor, espalhadas pelo CASCO (não pelo miolo, que a animação já estoura).
     const e = BossNucleo.G_ESCALA;
     for (let i = 0; i < 6; i++) {
       this.scene.time.delayedCall(80 + i * 150, () => {
@@ -356,126 +327,110 @@ export class BossNucleo implements StageBoss {
       this.sprite.anims.stop();
       if (this.scene.textures.exists('guardiaoDestruido')) this.sprite.setTexture('guardiaoDestruido');
       this.fx.explodeBig(this.core.x, this.core.y, 1.1, 52);
+      this.explosaoSangrenta(this.core.x, this.core.y);
+      this.sangueNaTela();
+      this.scene.tweens.add({ targets: this.sprite, alpha: 0, duration: BossNucleo.TROCA_MS - BossNucleo.MORTE_MS });
     });
 
     this.scene.time.delayedCall(BossNucleo.TROCA_MS, () => {
       if (this.dead) return;
-
-      this.forma = 'coracao';
-      this.sprite.clearTint();
-      // A troca de arte: para a animação do guardião ANTES de mexer na textura (armadilha 26:
-      // a animação sobrescreve a textura no quadro seguinte). Com a sheet do coração, é ela
-      // quem entra — o batimento É o telégrafo da forma nova.
-      this.sprite.anims.stop();
-      if (this.scene.anims.exists('nucleo-beat')) this.sprite.play('nucleo-beat');
-      else this.sprite.setTexture('nucleo');
-      this.sprite.setScale(BossNucleo.C_ESCALA);
-      this.sprite.setPosition(BossNucleo.C_STATION_X, BossNucleo.C_BASE_Y);
-      this.corpoDomo();
-      this.body.reset(BossNucleo.C_STATION_X, BossNucleo.C_BASE_Y);
-
-      (this.core.body as Phaser.Physics.Arcade.Body).setSize(40, 30);
-      this.posicionarCore();
-
-      // Surge FECHADO, num clarão: o jogador aprende a primeira diástole olhando.
-      this.aberto = false;
-      this.cicloT = BossNucleo.FECHADO_DUR[1];
-      this.cdTiro = 0.9;
-      this.glow.explode(14, this.sprite.x, this.sprite.y);
-      this.scene.cameras.main.flash(500, 255, 140, 60);
-
+      this.forma = 'predador';
+      this.scene.tweens.killTweensOf(this.sprite);
+      this.sprite.setPosition(BossNucleo.G_STATION_X, BossNucleo.G_BASE_Y);
+      this.body.reset(BossNucleo.G_STATION_X, BossNucleo.G_BASE_Y);
+      this.predador = new Predador(this.scene, this.enemies, this.fx, this.sprite, this.core, () => this.atualizarBarra());
+      this.travaTroca = false;
       this.trocando = false;
     });
   }
 
-  // ─── FORMA 2: o coração ────────────────────────────────────────────────────
+  /** O jorro: sangue escuro que sobe e CAI (gravidade), um flash vermelho e o tranco forte. */
+  private explosaoSangrenta(x: number, y: number): void {
+    const gotas = this.scene.add
+      .particles(x, y, 'puff', {
+        lifespan: { min: 700, max: 1400 },
+        speed: { min: 70, max: 240 },
+        angle: { min: 200, max: 340 },
+        gravityY: 340,
+        scale: { start: 1.6, end: 0.5 },
+        alpha: { start: 0.95, end: 0.2 },
+        tint: [0x5a0508, 0x7a0a0c, 0x3a0204, 0x9a1812],
+        emitting: false,
+      })
+      .setDepth(53);
+    gotas.explode(90);
+    const nevoa = this.scene.add
+      .particles(x, y, 'puff', {
+        lifespan: { min: 500, max: 900 },
+        speed: { min: 10, max: 60 },
+        scale: { start: 3.5, end: 7 },
+        alpha: { start: 0.7, end: 0 },
+        tint: [0x3a0204, 0x5a0508],
+        emitting: false,
+      })
+      .setDepth(52);
+    nevoa.explode(26);
+    this.scene.time.delayedCall(1600, () => {
+      gotas.destroy();
+      nevoa.destroy();
+    });
+    this.scene.cameras.main.flash(260, 140, 0, 0);
+    this.scene.cameras.main.shake(500, 0.012);
+  }
 
-  private updateCoracao(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
-    const alvoY = BossNucleo.C_BASE_Y + Math.sin(this.t * 0.6) * 18;
-    this.body.setVelocityY((alvoY - this.sprite.y) * 6);
-
-    if (this.aberto) {
-      this.glow.emitParticleAt(this.core.x, this.core.y);
-    }
-
-    this.cicloT -= dt;
-    if (this.cicloT <= 0) {
-      this.aberto = !this.aberto;
-      const f = this.fase;
-      this.cicloT = this.aberto ? BossNucleo.ABERTO_DUR[f] : BossNucleo.FECHADO_DUR[f];
-
-      if (this.aberto) {
-        this.glow.emitting = true;
-        this.glow.explode(10, this.core.x, this.core.y);
-      } else {
-        this.glow.emitting = false;
-        const n = f === 3 ? 2 : 1;
-        for (let i = 0; i < n; i++) {
-          this.enemies.spawn('drone', Phaser.Math.Between(46, 170));
-        }
-        this.cdTiro = 0.7;
+  /**
+   * SANGUE NA TELA: manchas presas à câmera, por cima de tudo, que escorrem e somem ANTES de a arma destravar
+   * — ninguém começa a luta olhando através do sangue. Desenhadas no motor (zero geração).
+   */
+  private sangueNaTela(): void {
+    for (let v = 0; v < 3; v++) {
+      const key = `sangueTela${v}`;
+      if (this.scene.textures.exists(key)) continue;
+      const g = this.scene.add.graphics();
+      const cx = 48;
+      const cy = 40;
+      g.fillStyle(0x4a0306, 0.92);
+      g.fillCircle(cx, cy, 16 + v * 3);
+      for (let i = 0; i < 9; i++) {
+        const a = (i / 9) * Math.PI * 2 + v;
+        const d = 14 + ((i * 7 + v * 5) % 16);
+        g.fillCircle(cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.8, 3 + ((i + v) % 4));
       }
+      g.fillStyle(0x6a0a0c, 0.9);
+      g.fillCircle(cx - 4, cy - 5, 8 + v);
+      // As escorridas.
+      g.fillStyle(0x4a0306, 0.9);
+      for (let i = 0; i < 3; i++) g.fillRect(cx - 10 + i * 9 + v * 2, cy + 8, 3, 22 + ((i * 11 + v * 7) % 30));
+      g.generateTexture(key, 96, 96);
+      g.destroy();
     }
-
-    if (!this.aberto) {
-      this.cdTiro -= dt;
-      if (this.cdTiro <= 0) {
-        const f = this.fase;
-        this.cdTiro = BossNucleo.CADENCIA[f];
-        this.leque(f === 3 ? 5 : 3, { x: this.core.x, y: this.core.y });
-        if (f >= 2) this.mirado(target);
-        this.scene.cameras.main.shake(50, 0.002);
-      }
-    }
-
-    if (this.fase >= 2) {
-      this.cdParede -= dt;
-      if (this.cdParede <= 0) {
-        this.cdParede = this.fase === 3 ? 5 : 6.5;
-        this.parede(this.fase === 3 ? 84 : 92);
-      }
+    for (let i = 0; i < 10; i++) {
+      const img = this.scene.add
+        .image(Phaser.Math.Between(10, 374), Phaser.Math.Between(4, 200), `sangueTela${i % 3}`)
+        .setScrollFactor(0)
+        .setDepth(95)
+        .setScale(Phaser.Math.FloatBetween(0.6, 1.5))
+        .setAngle(Phaser.Math.Between(-30, 30))
+        .setAlpha(0.9);
+      this.scene.tweens.add({
+        targets: img,
+        y: img.y + 18,
+        alpha: 0,
+        delay: Phaser.Math.Between(700, 1000),
+        duration: 1100,
+        ease: 'Sine.easeIn',
+        onComplete: () => img.destroy(),
+      });
     }
   }
 
   /** O alvo acompanha o corpo — `reset` (posição E posição-anterior, lição 3). */
   private posicionarCore(): void {
-    const g = this.forma === 'guardiao';
-    const e = g ? BossNucleo.G_ESCALA : BossNucleo.C_ESCALA;
-    const ox = g ? BossNucleo.G_CORE_OFF_X : BossNucleo.C_CORE_OFF_X;
-    const oy = g ? BossNucleo.G_CORE_OFF_Y : BossNucleo.C_CORE_OFF_Y;
-
-    const x = this.sprite.x + ox * e;
-    const y = this.sprite.y + oy * e;
+    const e = BossNucleo.G_ESCALA;
+    const x = this.sprite.x + BossNucleo.G_CORE_OFF_X * e;
+    const y = this.sprite.y + BossNucleo.G_CORE_OFF_Y * e;
     this.core.setPosition(x, y);
     (this.core.body as Phaser.Physics.Arcade.Body).reset(x, y);
-  }
-
-  /** Par de parede com vão garantido (a regra do roteiro; margem maior — luta parada). */
-  private parede(gap: number): void {
-    const margem = 34;
-    const meio = gap / 2;
-    const vaoY = Phaser.Math.Between(TETO_Y + margem + meio, GROUND_Y - margem - meio);
-
-    // Dentro do Núcleo a parede é CARNE E METAL, não rocha: costela biônica com o mesmo
-    // funil dos corredores da fase (a rocha tingida fica de fallback, ver GameScene).
-    const organico = this.scene.textures.exists('costela');
-    const TINT = 0x6b7894;
-    const funil = (): number => Phaser.Math.Between(5, 11);
-    const alturaChao = GROUND_Y - (vaoY + meio);
-    const alturaTeto = vaoY - meio - TETO_Y;
-    if (alturaChao >= 14) {
-      this.terrain.spawn(organico ? 'costela' : 'spire', {
-        alturaPx: alturaChao,
-        ...(organico ? { angle: -funil() } : { tint: TINT }),
-      });
-    }
-    if (alturaTeto >= 14) {
-      this.terrain.spawn(organico ? 'costela' : 'spire', {
-        anchor: 'teto',
-        alturaPx: alturaTeto,
-        ...(organico ? { angle: funil() } : { tint: TINT }),
-      });
-    }
   }
 
   private leque(n: number, boca: { x: number; y: number }): void {
@@ -485,12 +440,7 @@ export class BossNucleo implements StageBoss {
     }
   }
 
-  private mirado(target: Phaser.Physics.Arcade.Sprite): void {
-    const angle = Phaser.Math.Angle.Between(this.core.x, this.core.y, target.x, target.y);
-    this.gLobulo(angle, 135, { x: this.core.x, y: this.core.y });
-  }
-
-  /** O glóbulo (bolt3 laranja): as DUAS formas cospem o mesmo sangue — é o mesmo organismo. */
+  /** O glóbulo (bolt3 laranja) do bico do guardião. */
   private gLobulo(angle: number, speed: number, boca: { x: number; y: number }): void {
     const b = this.enemies.enemyBullets.get(boca.x, boca.y) as
       | Phaser.Physics.Arcade.Sprite
@@ -512,51 +462,34 @@ export class BossNucleo implements StageBoss {
   }
 
   /**
-   * O gate do dano é o ESTADO, e cada forma tem o seu: o guardião fecha ao MOVER (o corpo
-   * inteiro absorve — este método nem é chamado); o coração fecha por PLACAS (chamado, e
-   * devolve o retinir frio). A bala que chega aqui SEMPRE tocou o alvo — quem decide se
-   * doeu é a forma.
+   * O gate do dano é o ESTADO: o guardião fecha ao MOVER (o corpo inteiro absorve — este método nem é
+   * chamado); o predador decide o dele (o surgimento não fere, a recuperação dobra).
    */
   damage(amount: number): boolean {
+    if (this.predador) {
+      if (!this.predador.damage(amount)) return false;
+      this.dead = true;
+      return true;
+    }
     if (this.dead || this.entering || this.trocando) return false;
 
-    if (this.forma === 'guardiao') {
-      this.hpGuardiao = Math.max(0, this.hpGuardiao - amount);
-      this.atualizarBarra();
-
-      this.sprite.setTint(0xffb090);
-      this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
-
-      if (this.hpGuardiao === 0) this.trocarParaCoracao();
-      return false;
-    }
-
-    if (!this.aberto) {
-      this.sprite.setTint(0xb8c2d4);
-      this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
-      return false;
-    }
-
-    this.hpCoracao = Math.max(0, this.hpCoracao - amount);
+    this.hpGuardiao = Math.max(0, this.hpGuardiao - amount);
     this.atualizarBarra();
 
     this.sprite.setTint(0xffb090);
     this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
 
-    if (this.hpCoracao > 0) return false;
-
-    this.dead = true;
-    this.body.setVelocity(0, 0);
-    this.glow.emitting = false;
-    return true;
+    if (this.hpGuardiao === 0) this.trocarParaPredador();
+    return false;
   }
 
   /** UMA barra para as duas formas: a luta é uma só, e a barra é a promessa do tamanho dela. */
   private atualizarBarra(): void {
-    this.bar.width = 160 * ((this.hpGuardiao + this.hpCoracao) / BossNucleo.HP_TOTAL);
+    this.bar.width = 160 * ((this.hpGuardiao + (this.predador?.hp ?? Predador.HP)) / BossNucleo.HP_TOTAL);
   }
 
   destroy(): void {
+    this.predador?.destroy();
     this.sprite.destroy();
     this.core.destroy();
     this.bar.destroy();

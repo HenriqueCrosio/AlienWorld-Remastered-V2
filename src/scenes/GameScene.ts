@@ -551,7 +551,7 @@ export class GameScene extends Phaser.Scene {
     // arma que se sabota sozinha, e o cinturão inteiro é feito de asteroides.
     this.weapons.update(
       dt,
-      this.controller.autoFire || input.firing,
+      (this.controller.autoFire || input.firing) && this.boss?.armaTravada !== true,
       this.ship.x + 10,
       this.ship.y,
       this.homingTargets(),
