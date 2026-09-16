@@ -239,7 +239,11 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   predadorUrroSheet: { path: 'sprites/predador-urro-sheet.png', w: 256, h: 256 },
   predadorGiroSheet: { path: 'sprites/predador-giro-sheet.png', w: 256, h: 256 },
   predadorPuloSheet: { path: 'sprites/predador-pulo-sheet.png', w: 256, h: 256 },
-  predadorIdleSheet: { path: 'sprites/predador-idle-sheet.png', w: 256, h: 256 },
+  predadorAndarSheet: { path: 'sprites/predador-andar-sheet.png', w: 256, h: 256 },
+  predadorQuatroSheet: { path: 'sprites/predador-quatro-sheet.png', w: 256, h: 256 },
+  predadorCorridaSheet: { path: 'sprites/predador-corrida-sheet.png', w: 256, h: 256 },
+  predadorAgarraSheet: { path: 'sprites/predador-agarra-sheet.png', w: 256, h: 256 },
+  predadorTetoBalancoSheet: { path: 'sprites/predador-teto-balanco-sheet.png', w: 256, h: 256 },
   predadorSlashSheet: { path: 'sprites/predador-slash-sheet.png', w: 256, h: 256 },
   predadorLavaSheet: { path: 'sprites/predador-lava-sheet.png', w: 256, h: 256 },
   predadorTetoLavaSheet: { path: 'sprites/predador-teto-lava-sheet.png', w: 256, h: 256 },
@@ -629,7 +633,7 @@ const ART: Record<string, string> = {
   // O último quadro da morte — o casco partido em anel, o único em que a silhueta QUEBRA.
   guardiaoDestruido: 'sprites/guardiao-destruido.png',
   // O PREDADOR, as três POSES (16/09, B3). Miolo MEDIDO (`scripts/_f4/_medir-predador.mjs`), offset ao
-  // centro do quadro de 256²: S +6,−5 · luta −23,−3 · teto −23,+2 (a luta espelhada) (ver `Predador.MIOLO`).
+  // centro do quadro VIRTUAL: S +6,−5 · luta −23,−3 · pendurado −25,−24 (ver `Predador.QUADRO`) (ver `Predador.MIOLO`).
   predadorS: 'sprites/predador-s.png',
   predadorLuta: 'sprites/predador-luta.png',
   predadorTeto: 'sprites/predador-teto.png',

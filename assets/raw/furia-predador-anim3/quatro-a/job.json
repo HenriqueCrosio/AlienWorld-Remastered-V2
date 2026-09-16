@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "a4e3c8cc-9c70-485a-84a3-7b8e2ba45fe2",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "drops its upper body forward and down onto all fours into a low charging stance like a gorilla, long bladed claws planted on the ground, head low facing left",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

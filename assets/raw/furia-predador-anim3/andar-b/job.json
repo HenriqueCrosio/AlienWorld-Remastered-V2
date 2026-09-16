@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "29409cbf-dd9b-44f5-acd6-2040fde1a516",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "stalks in place with slow heavy predatory steps, hunched forward, bladed claws dragging and planting on the ground, facing left, seamless loop",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

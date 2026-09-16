@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "86c14491-85fa-45f5-bab8-598ef85a9d19",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "walks forward in place with heavy slow stomping steps, legs clearly lifting and stepping one after the other, shoulders rolling, arms swinging, facing left, continuous walk cycle",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

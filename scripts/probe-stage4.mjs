@@ -200,7 +200,8 @@ const troca = await page.evaluate(() => {
     forma: s.boss.forma,
     estado: p?.estado ?? null,
     trava: s.boss.armaTravada === true,
-    escala: +s.boss.sprite.scaleX.toFixed(2),
+    // A escala LÓGICA (a da luta): desde a rodada 3 cada clipe é desenhado em `escala / f` (ver `Predador.QUADRO`).
+    escala: +(p?.escala ?? s.boss.sprite.scaleX).toFixed(2),
     tex: s.boss.sprite.texture.key,
   };
 });
@@ -216,7 +217,7 @@ for (let i = 0; i < 40; i++) {
   luta = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
     const p = s.boss.predador;
-    return { estado: p.estado, trava: s.boss.armaTravada === true, escala: +s.boss.sprite.scaleX.toFixed(2) };
+    return { estado: p.estado, trava: s.boss.armaTravada === true, escala: +p.escala.toFixed(2) };
   });
   if (luta.estado !== 'surgindo') break;
   await page.waitForTimeout(200);

@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "2796ca6c-9176-4b9e-bd04-9b6466a49656",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "stalks forward in place on all fours like a hunting bear, big alternating steps with front claws and hind legs, spine rolling, facing left, slow walk cycle",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

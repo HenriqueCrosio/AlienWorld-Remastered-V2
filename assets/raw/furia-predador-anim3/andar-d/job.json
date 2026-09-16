@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "54efecbe-54ab-4957-8fde-f358de1b26e2",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "stalks forward in place like a hunting beast, hunched, alternating big steps with each leg, claws swinging with each step, head bobbing, facing left, walk cycle",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

@@ -2,7 +2,7 @@
 //
 //   predador-s.png              ← furia-predador-giro/corrigido/0   (a S, o surgimento)
 //   predador-luta.png           ← furia-predador-giro/corrigido/8   (três quartos p/ a esquerda: a pose da luta)
-//   predador-teto.png           ← furia-predador-teto/base-espelhada (a luta espelhada, pendurado no teto)
+//   predador-teto.png           ← furia-predador-anim3/pendurado75  (pendurado por uma garra, quadro de 0,75)
 //   predador-<clipe>-sheet.png  ← os quadros de cada clipe, em linha (N × 256²)
 //
 // ⚠️ SÓ O GIRO leva a correção de brilho (`corrigido/`): ele clareava quadro a quadro SEM querer. No urro,
@@ -18,15 +18,22 @@ const Q = 256;
 const ANIM = 'assets/raw/furia-predador-anim';
 // A RODADA 2 (16/09, depois do 1º teste jogado): as escolhidas de cada clipe refeito. `-mini` = PixMiniMax.
 const ANIM2 = 'assets/raw/furia-predador-anim2';
+// A RODADA 3 (16/09, 2º teste jogado): andar, cair de quatro, galopar, o slash inclinado, agarrar o teto por uma
+// garra, balançar e arremessar pendurado. Gerados de bases REDUZIDAS (0,85 chão / 0,75 teto): ver `Predador.QUADRO`.
+const ANIM3 = 'assets/raw/furia-predador-anim3';
 
 const CLIPES = {
   urro: `${ANIM}/urro`,
   giro: 'assets/raw/furia-predador-giro/corrigido',
   pulo: process.env.PULO ?? `${ANIM2}/pulo-mini`,
-  idle: `${ANIM}/idle`,
-  slash: `${ANIM2}/slash-mini`,
+  andar: `${ANIM3}/andar-c`,
+  quatro: `${ANIM3}/quatro-b`,
+  corrida: `${ANIM3}/corrida-c`,
+  slash: `${ANIM3}/slash-a`,
   lava: `${ANIM}/lava`,
-  'teto-lava': `${ANIM2}/teto-mini`,
+  agarra: `${ANIM3}/teto-a`,
+  'teto-balanco': `${ANIM3}/teto-balanco`,
+  'teto-lava': `${ANIM3}/teto-lava2`,
   morte: process.env.MORTE ?? `${ANIM2}/morte-mini`,
 };
 
@@ -39,7 +46,9 @@ for (const [saida, src] of [
   ['predador-s.png', 'assets/raw/furia-predador-giro/corrigido/0.png'],
   ['predador-luta.png', 'assets/raw/furia-predador-giro/corrigido/8.png'],
   // O teto é a pose de LUTA ESPELHADA: a pose editada (`teto/pose.png`) deformava o bicho (*"quase irreconhecível"*).
-  ['predador-teto.png', 'assets/raw/furia-predador-teto/base-espelhada.png'],
+  // Rodada 3: o teto é o bicho PENDURADO POR UMA GARRA (último quadro do `teto-a`, base de 0,75) — a luta espelhada
+  // *"perdeu a animação de estar preso por uma garra"*.
+  ['predador-teto.png', 'assets/raw/furia-predador-anim3/pendurado75.png'],
 ]) {
   await sharp(src).png().toFile(`${OUT}/${saida}`);
   console.log(`${OUT}/${saida}`);

@@ -51,8 +51,8 @@ outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeir
   medido no `worldstep`: `body.center` = `core.x/y`. A captura `_f4/_ver-guardiao.mjs` desenha pelo centro.
 - Sondas: `probe-stage4` ✔ (bala real fere a massa, troca, coração, cutscene final) · typecheck ✔.
 
-**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). 1º TESTE JOGADO: A MECÂNICA APROVADA, AS ANIMAÇÕES
-REFEITAS (rodada 2) — FALTA ELE JOGAR DE NOVO.** Ver ⏸️ logo abaixo.
+**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). DOIS TESTES JOGADOS: A MECÂNICA, O BREU, A LAVA, A
+MORTE E O SURGIMENTO APROVADOS; A INVESTIDA, O IDLE E O TETO REFEITOS (rodada 3) — FALTA ELE JOGAR DE NOVO.** Ver ⏸️ logo abaixo.
 
 Branch `feat/fase4-visual`, tudo commitado no fim de 16/09.
 
@@ -65,8 +65,9 @@ Branch `feat/fase4-visual`, tudo commitado no fim de 16/09.
 > ele surge em 0,7 urrando, salta girando para 0,47, e luta em três fases — investida com slash e lava;
 > a ronda pelo chão e pelo teto com saída pela direita; e o breu, onde só o core dele revela o corpo.
 > Depois do 1º teste (mecânica aprovada) as animações foram refeitas no PixMiniMax — pulo, slash, teto, morte — e
-> a lava ganhou cor de lava e brilho no breu. A folha é `docs/superpowers/folhas/2026-09-16/predador-em-jogo-r2.png`.
-> Joguei a rodada 2 e: <o que achou>.
+> a lava ganhou cor de lava e brilho no breu. No 2º teste a rodada 3 refez o idle (ele anda no lugar), a investida
+> (cai de quatro e galopa, slash inclinado com salto) e o teto (pendurado por uma garra). A folha é
+> `docs/superpowers/folhas/2026-09-16/predador-em-jogo-r3.png`. Joguei a rodada 3 e: <o que achou>.
 > Siga daí."**
 
 ⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O TESTE JOGADO DELE.** Localhost: `npm run dev` → `L` → `G`
@@ -75,7 +76,41 @@ vai direto ao chefão (mate o guardião para ver a troca). Ele disse *"corrigimo
 
 ---
 
-## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 2, À ESPERA DO TESTE JOGADO
+## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 3, À ESPERA DO TESTE JOGADO
+
+### 🎮 O 2º TESTE JOGADO (16/09) e a rodada 3
+**Aprovado:** *"a fase do escuro ficou bem mais imersiva, a lava está ótima, principalmente quando ricocheteia"* ·
+*"a morte ficou bem melhor"* · *"a fumaça trouxe mais detalhe e cobertura para a troca"* · *"a transição do urro para o
+idle olhando para a nave ficou bem melhor com o giro, ficou realmente ótimo"* · *"a investida com slash ficou boa"*.
+
+| o que ele viu | o que mudou (rodada 3) |
+|---|---|
+| *"o idle do monstro é idle, a fase está em movimento e no idle parece que está deslizando"* | parado no chão ele **ANDA no lugar** (`andar-c`, laço 4..12); pendurado ele **BALANÇA** (`teto-balanco`, laço 5..15) |
+| *"queria ele se inclinando e mexendo mais no slash… correndo como um gorila ou urso"* | fim da carga: **cai de quatro** (`quatro-b`); bote: **galope** no chão (`corrida-c`, laço 1..15); chegada: o **slash inclinado com dois golpes** (`slash-a`) com **SALTO** até a altura da nave e volta ao chão |
+| *"a animação da parede é praticamente o predador de cabeça pra baixo, perdeu a animação de estar preso por uma garra"* | chão→teto: **pula e AGARRA o teto com uma garra** (`teto-a`, o clipe no voo); pendurado por um braço; teto→chão: o mesmo clipe ao **contrário**; arremesso com o braço livre (`teto-lava2`) |
+| *"o corpo não pode flutuar caído. Precisa cair na borda"* | morto fora do chão, ele **despenca até a linha dos pés** (`QUEDA_MS` 420) enquanto desaba |
+| (morreu a morte da rodada 2 no chão, no teto e no salto — medido na captura: cai e fica estendido na borda) | |
+
+**A mudança de estrutura: O QUADRO VIRTUAL.** Galopando ou pendurado ele não cabe no 256² na escala da luta, então esses
+clipes foram gerados da pose de luta REDUZIDA dentro do quadro (0,85 chão, 0,75 teto, presa pela base) e cada clipe
+tem um fator em `Predador.QUADRO` — desenhado em `escala / f` com a origem em `(0,5 ; 1 − f/2)`. ⚠️ Trocar a arte de
+um clipe por outra gerada de outra base OBRIGA a trocar o fator ali. A sonda passou a ler a escala LÓGICA (`predador.escala`).
+
+**As lições de geração da rodada 3:**
+- **Fixar o último quadro = o primeiro para fechar o ciclo TRAVA o PixMiniMax** (os 4 andares/corridas saíram parados).
+  O que funcionou: gerar SEM quadro final e achar o laço dentro do clipe — `scripts/_f4/_achar-loop.mjs` (mede o fecho
+  contra o passo médio; razão < 1 = costura invisível).
+- **O gerador não muda de postura dentro de um ciclo** (em pé → de quatro): gere a TRANSIÇÃO primeiro (`quatro-b`) e o
+  ciclo a partir do último quadro dela.
+- **Base reduzida dá espaço ao gesto**: pendurar e galopar só couberam com a pose a 0,75/0,85.
+- **Perdedoras em `assets/raw/furia-predador-anim3/`**: `andar-a/b/d` (paradas / fundo azul no d), `corrida-a/b/d`,
+  `slash-b`, `teto-b`, `quatro-a`, `ronda-a/b` (a marcha de quatro — fraca de movimento; guardada).
+- **Hitbox ainda a olho:** a casca e o corpo inteiro do pendurado (`CASCA_TETO`/`INTEIRO_TETO`); de quatro, o corpo inteiro.
+
+**PixelLab rodada 3:** 36 gerações (4.252 → **4.216**), todas PixMiniMax. Folhas das candidatas: `r3-chao.png`,
+`r3-slash-teto.png`, `r3b.png`, `r3c.png`. Captura: `predador-em-jogo-r3.png` (25 fotos, a morte no teto caindo).
+
+### A rodada 2 (depois do 1º teste)
 
 ### 🎮 O 1º TESTE JOGADO (16/09) e a rodada 2
 *"Eu gostei de como ficou a luta, a mecânica ficou interessante. Mas as animações deixaram a desejar."*

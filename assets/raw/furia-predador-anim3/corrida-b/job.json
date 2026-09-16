@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "cb8d1f97-463f-4e02-8d67-e94050c08faa",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "runs in place like a charging bear on all fours, powerful bounding gallop, head low, shoulders pumping, facing left, seamless loop",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

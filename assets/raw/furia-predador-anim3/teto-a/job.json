@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "40508f06-971d-4110-b5ac-556a8905e616",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "leaps straight up and hooks one long bladed claw into the ceiling above, ending hanging from the ceiling by that single raised claw, body dangling below, head turned to the left",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}
