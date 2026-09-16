@@ -103,7 +103,7 @@ vai direto ao chefão (mate o guardião para ver a troca). Ele disse *"corrigimo
 - **Via REST a partir de PNG local:** `scripts/_f4/_pl.mjs edit|anim` (o MCP pede base64 inline, que trunca).
 - **A morte gerada quase não se mexe** (o mesmo limite da do guardião): a do predador é o clipe + a cadeia
   do `killBoss` por cima. Se ler como "desligou", compor como a do guardião.
-- **PixelLab 16/09:** ~111 gerações (8 rotações, 3 edições de estilo, 1 teto, 7 clipes v3). Saldo no arranque: 4.401.
+- **PixelLab 16/09:** **100** gerações — 4.401 no arranque, **4.301** no fim (8 rotações, 3 edições de estilo, 1 pose do teto, 7 clipes v3). Ciclo vira em 2026-10-04.
 
 ### O que olhar quando ele jogar (1ª passada — os knobs, todos no topo do `Predador`)
 | o que | knob |
