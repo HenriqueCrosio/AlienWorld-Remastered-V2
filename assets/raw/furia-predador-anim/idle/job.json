@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "468d90ef-b5cf-40a9-99b2-1e9d0a7f0035",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "breathing heavily and snarling, shoulders rising and falling, claws twitching, staying in place",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 8
+  }
+}

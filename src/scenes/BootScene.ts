@@ -233,6 +233,16 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // cima e o `guardiaoDestruido` no fim — a decisão dele de 15/09 (ver `BossNucleo.trocarParaCoracao`).
   guardiaoMorteSheet: { path: 'sprites/guardiao-morte-sheet.png', w: 256, h: 256 },
   nucleoBeatSheet: { path: 'sprites/nucleo-beat-sheet.png', w: 128, h: 128 },
+  // O PREDADOR (16/09, B3): a 2ª forma do chefão final — o que sai de dentro do guardião. Todos os clipes
+  // no MESMO quadro de 256² (v3 do PixelLab a partir de PNG local), montados sem recorte por
+  // `scripts/_f4/_instalar-predador.mjs`. Um offset por POSE vale para os clipes que partem dela.
+  predadorUrroSheet: { path: 'sprites/predador-urro-sheet.png', w: 256, h: 256 },
+  predadorGiroSheet: { path: 'sprites/predador-giro-sheet.png', w: 256, h: 256 },
+  predadorIdleSheet: { path: 'sprites/predador-idle-sheet.png', w: 256, h: 256 },
+  predadorSlashSheet: { path: 'sprites/predador-slash-sheet.png', w: 256, h: 256 },
+  predadorLavaSheet: { path: 'sprites/predador-lava-sheet.png', w: 256, h: 256 },
+  predadorTetoLavaSheet: { path: 'sprites/predador-teto-lava-sheet.png', w: 256, h: 256 },
+  predadorMorteSheet: { path: 'sprites/predador-morte-sheet.png', w: 256, h: 256 },
 
   // AS DUAS PEÇAS-ASSINATURA DO CENÁRIO DA F4, RESPIRANDO (13/09). O coração no chão e o
   // maquinário no teto — as mesmas peças estáticas de sempre (`orgao`/`maquinario`), agora com o
@@ -617,6 +627,11 @@ const ART: Record<string, string> = {
   guardiao: 'sprites/guardiao.png',
   // O último quadro da morte — o casco partido em anel, o único em que a silhueta QUEBRA.
   guardiaoDestruido: 'sprites/guardiao-destruido.png',
+  // O PREDADOR, as três POSES (16/09, B3). Miolo MEDIDO (`scripts/_f4/_medir-predador.mjs`), offset ao
+  // centro do quadro de 256²: S +6,−5 · luta −23,−3 · teto +4,−18 (ver `Predador.MIOLO`).
+  predadorS: 'sprites/predador-s.png',
+  predadorLuta: 'sprites/predador-luta.png',
+  predadorTeto: 'sprites/predador-teto.png',
 
   // ─── O INTERIOR ORGÂNICO DA FASE 4 (2026-07-21) ───
   // Os corredores do Leviatã eram picos e rochas de superfície tingidos — pedra lunar dentro

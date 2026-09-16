@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "10fcfd39-d9f6-4de0-a05e-e10a2ca8da42",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "crouches low, lunges forward to the left and slashes violently downward with both bladed claws",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 8
+  }
+}
