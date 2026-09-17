@@ -6,6 +6,10 @@
 > depois"*). Este plano é executado INLINE na mesma sessão que escreveu a spec, então os passos de
 > código trazem as interfaces, as constantes medidas e o comportamento exato — o código completo vai
 > direto para os arquivos, não é duplicado aqui.
+>
+> **Status (17/09): EXECUTADO** — as 8 tasks entraram em 16/09 (`bd4fe02`…`25ffe5b`). Depois dele, duas rodadas
+> de ajuste FORA deste plano, guiadas pelos testes jogados (`46cce12`, `933daa0`): elas mudaram a arte, o slash, o
+> teto e a estrutura dos quadros. **O estado vivo NÃO é este plano:** é a 🚦/⏸️ do START e a seção 7 da spec.
 
 **Goal:** trocar a 2ª forma do chefão da Fase 4 (o coração) pelo predador — surgimento, luta em três fases, breu.
 

@@ -31,7 +31,7 @@ Sondas 15/09: `probe-f4-moldura` ✔ · `probe-f4-visual` ✔ · `probe-f4-golfi
 
 **🟢 BLOCO B · B1 — O GUARDIÃO NOVO — JOGADO E APROVADO (15/09):** *"o novo modelo ficou melhor que o
 outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeiro** — B1 ✅ → **B3 (a
-2ª forma: o PREDADOR, implementado 16/09, à espera do teste jogado)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
+2ª forma: o PREDADOR, rodada 3 à espera do teste jogado — ver 🚦)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
 (M3, `f4Vivo`, `f4Veu`) seguem sem resposta — ver "🧭 O MAPA PARA FECHAR A FATIA 7".
 - **Arte:** a DELE (PixelLab `9436240c`), montada sem geração por `_f4/_instalar-guardiao.mjs` —
   `guardiao.png`, `guardiao-idle-sheet.png`, `guardiao-morte-sheet.png` e `guardiao-destruido.png`,
@@ -51,32 +51,80 @@ outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeir
   medido no `worldstep`: `body.center` = `core.x/y`. A captura `_f4/_ver-guardiao.mjs` desenha pelo centro.
 - Sondas: `probe-stage4` ✔ (bala real fere a massa, troca, coração, cutscene final) · typecheck ✔.
 
-**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). DOIS TESTES JOGADOS: A MECÂNICA, O BREU, A LAVA, A
-MORTE E O SURGIMENTO APROVADOS; A INVESTIDA, O IDLE E O TETO REFEITOS (rodada 3) — FALTA ELE JOGAR DE NOVO.** Ver ⏸️ logo abaixo.
+**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). TRÊS RODADAS; DOIS TESTES JOGADOS APROVARAM A
+MECÂNICA, O SURGIMENTO/GIRO, O BREU, A LAVA, A MORTE E A FUMAÇA DA TROCA. A RODADA 3 (o idle que anda, a
+investida de quatro com o slash inclinado, o teto por uma garra, o corpo que cai na borda) AINDA NÃO FOI
+JOGADA.** Ver 🚦 e ⏸️ logo abaixo.
 
-Branch `feat/fase4-visual`, tudo commitado no fim de 16/09.
+Branch `feat/fase4-visual`, tudo commitado em 16–17/09 (último commit do código: `933daa0`). ⚠️ **Não empurrado:**
+o `origin` ainda está em `6c2fe4f` — a branch local está vários commits à frente. Empurrar é o 1º passo da 🚦
+se ele pedir (o remoto é o V2; NUNCA o `legacy`).
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção ⏸️.
-> Em 16/09 a 2ª forma do chefão virou O PREDADOR (a candidata B): explosão sangrenta com sangue na tela,
-> ele surge em 0,7 urrando, salta girando para 0,47, e luta em três fases — investida com slash e lava;
-> a ronda pelo chão e pelo teto com saída pela direita; e o breu, onde só o core dele revela o corpo.
-> Depois do 1º teste (mecânica aprovada) as animações foram refeitas no PixMiniMax — pulo, slash, teto, morte — e
-> a lava ganhou cor de lava e brilho no breu. No 2º teste a rodada 3 refez o idle (ele anda no lugar), a investida
-> (cai de quatro e galopa, slash inclinado com salto) e o teto (pendurado por uma garra). A folha é
-> `docs/superpowers/folhas/2026-09-16/predador-em-jogo-r3.png`. Joguei a rodada 3 e: <o que achou>.
-> Siga daí."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 16/09 a 2ª
+> forma do chefão final virou O PREDADOR, e depois de dois testes jogados a rodada 3 refez o idle (ele anda no
+> lugar), a investida (cai de quatro, galopa, slash inclinado com salto), o teto (pula e fica pendurado por uma
+> garra) e a morte (o corpo cai na borda). Eu ainda não tinha jogado a rodada 3. Joguei agora e: <o que achou,
+> item a item da 🚦>. Siga daí."**
 
-⚠️ **A PRIMEIRA COISA DA SESSÃO É COLHER O TESTE JOGADO DELE.** Localhost: `npm run dev` → `L` → `G`
-vai direto ao chefão (mate o guardião para ver a troca). Ele disse *"corrigimos depois"*: tudo abaixo é
-1ª passada, e os knobs estão listados.
+Se ele chegar SEM ter jogado: suba o localhost e entregue o roteiro da 🚦 antes de qualquer outra coisa —
+**nada de gerar arte nem mexer em knob sem o teste dele.**
 
 ---
 
-## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 3, À ESPERA DO TESTE JOGADO
+## 🚦 O QUE FAZER PRIMEIRO NA PRÓXIMA SESSÃO
+
+### 1. Subir e chegar no chefão
+`npm run dev` → http://localhost:5173 → `L` (Fase 4) → `G` (pula para a arena do chefão). Mate o GUARDIÃO para
+ver a troca. As fases do predador vêm pela vida (66% e 33%): jogue a luta inteira ao menos uma vez.
+
+### 2. O roteiro do teste jogado — o que ELE precisa olhar (e responder item a item)
+
+**A. O que a rodada 3 mudou — nunca jogado:**
+| # | olhar | a pergunta |
+|---|---|---|
+| A1 | **o idle no chão** — ele ANDA no lugar (`andar-c`) | *ainda parece deslizando com a fase em movimento?* |
+| A2 | **a carga** — anda, o core acelera, e no fim ele **cai de quatro** | *a queda de quatro lê como aviso? dá tempo de sair da linha?* |
+| A3 | **o bote** — **galopa pelo chão** como gorila/urso | *lê como corrida? a velocidade (`BOTE_VEL` 300) está boa?* |
+| A4 | **o slash** — se inclina, **dois golpes** torcendo, com arcos de fogo, e **SALTA até a altura da nave** | ⚠️ *mudança de JOGO, não só de arte:* antes o bote ia na diagonal até a nave; agora ele corre no chão e o salto é do golpe. *Ficou justo? Nave no alto ainda é atingida do jeito que ele quer?* |
+| A5 | **subir no teto** — pula esticando uma garra e **agarra** | *natural? (o clipe inteiro toca no voo, 850ms)* |
+| A6 | **pendurado por uma garra** — balança (`teto-balanco`) | *lê como preso por uma garra? ⚠️ pendurado ele fica COMPRIDO (da borda de cima até ~40px do chão) — fecha demais a arena?* |
+| A7 | **o arremesso pendurado** — o braço livre joga a lava (`teto-lava2`) | *a lava sai da mão no momento certo? (`TELEG_LAVA_TETO` 0,65s)* |
+| A8 | **descer do teto** — o mesmo clipe de agarrar, ao CONTRÁRIO | *lê como soltar e cair, ou como "rebobinar"?* |
+| A9 | **andar de uma âncora do teto para outra** — vai balançando | *serve, ou precisa de um clipe de "garra em garra"?* |
+| A10 | **a morte fora do chão** — mate-o PENDURADO ou no meio do salto | *o corpo cai e fica na borda do chão?* |
+
+**B. O que já foi aprovado — conferir que NÃO regrediu** (a rodada 3 reescreveu o `Predador` com o "quadro virtual"):
+o surgimento (explosão sangrenta, sangue na tela, fumaça atrás dele, urro, o pulo com giro para a esquerda) · o breu
+(preto total, só o core revela, halo justo na nave) · a lava (cor de lava, brilho no breu, ricochete em estilhaços) ·
+a morte no chão (desaba e fica estendido) · a saída pela direita e o aviso da reentrada.
+
+**C. Pontos nunca perguntados que ele pode querer julgar:**
+- a **lava do chão** ainda é o clipe v3 da 1ª passada (em pé, quase parado 1s — pode "deslizar" como o idle deslizava);
+- o **urro** também é v3 da 1ª passada (ele aprovou a transição, não o clipe isolado);
+- a **emenda vertical da pintura** do núcleo que passa pela arena (anterior ao predador);
+- `nucleo.png` / `nucleo-beat-sheet.png` seguem no disco sem uso — apagar é decisão dele.
+
+### 3. Com o feedback na mão
+- **Ajuste de número** → a tabela de knobs da ⏸️ ("O que ajustar"). Rode `node scripts/probe-stage4.mjs` depois.
+- **Clipe que não serve** → primeiro veja se a perdedora guardada resolve (`assets/raw/furia-predador-anim3/`,
+  folhas `r3-*.png`): trocar é apontar o `_instalar-predador.mjs` e reinstalar, **zero geração** — e conferir o
+  fator em `Predador.QUADRO` (a base de onde o clipe foi gerado).
+- **Clipe novo** → PixMiniMax via `scripts/_f4/_pl.mjs mini`, com as lições da rodada 3 (sem quadro final fixo;
+  ache o laço com `_achar-loop.mjs`; transição de postura antes do ciclo; base reduzida se o gesto não cabe).
+- **Prova para ele** → `node scripts/_f4/_ver-predador.mjs <saida.png>` (25 fotos, incluindo a morte no teto).
+
+### 4. Depois do B3 aprovado — a fila obrigatória dele
+**B2** (a posição do guardião no alto-direita, cortado pela borda) → **M4** (as 3 portas com arte final, a borda C
+grossa, o esfíncter). E os cortes da tabela amarela (M3, `f4Vivo`, `f4Veu`) seguem sem resposta — ver "🧭 O MAPA
+PARA FECHAR A FATIA 7" no fim deste arquivo. Fechar a fatia = merge `--no-ff` de `feat/fase4-visual` em `main`.
+
+---
+
+## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 3, À ESPERA DO TESTE JOGADO (o registro das 3 rodadas)
 
 ### 🎮 O 2º TESTE JOGADO (16/09) e a rodada 3
 **Aprovado:** *"a fase do escuro ficou bem mais imersiva, a lava está ótima, principalmente quando ricocheteia"* ·
@@ -109,8 +157,6 @@ um clipe por outra gerada de outra base OBRIGA a trocar o fator ali. A sonda pas
 
 **PixelLab rodada 3:** 36 gerações (4.252 → **4.216**), todas PixMiniMax. Folhas das candidatas: `r3-chao.png`,
 `r3-slash-teto.png`, `r3b.png`, `r3c.png`. Captura: `predador-em-jogo-r3.png` (25 fotos, a morte no teto caindo).
-
-### A rodada 2 (depois do 1º teste)
 
 ### 🎮 O 1º TESTE JOGADO (16/09) e a rodada 2
 *"Eu gostei de como ficou a luta, a mecânica ficou interessante. Mas as animações deixaram a desejar."*
@@ -167,27 +213,33 @@ apontar o `_instalar-predador.mjs` (`PULO=… MORTE=…` no ambiente) e reinstal
   do `killBoss` por cima. Se ler como "desligou", compor como a do guardião.
 - **PixelLab 16/09 (1ª passada):** **100** gerações — 4.401 no arranque, **4.301** no fim (8 rotações, 3 edições de estilo, 1 pose do teto, 7 clipes v3). Ciclo vira em 2026-10-04.
 
-### O que olhar quando ele jogar (1ª passada — os knobs, todos no topo do `Predador`)
+### O que ajustar quando ele jogar — os knobs (todos `static readonly` no topo de `src/entities/Predador.ts`)
 | o que | knob |
 |---|---|
-| a duração do surgimento (urro 1,2s + salto 0,8s) e a escala | `URRO_MS`, `SALTO_SURGE_MS`, `ESCALA_*` |
-| a carga dá tempo de desviar? (às claras e no breu) | `CARGA` por fase, `CARGA_MIN`, `BOTE_VEL` |
-| a punição da recuperação | `RECUP_SLASH`, `RECUP_LAVA`, `DANO_RECUP` |
-| a lava (quantas, o arco, os estilhaços) | `LAVA_G`, `LAVA_VOO`, `ESTILHACOS` |
+| a duração do surgimento e o pulo com giro (aprovados) | `URRO_MS` 1200, `SALTO_SURGE_MS` 1000, `PULO_QUADROS`, `PULO_IMPULSO`/`PULO_POUSO`, `PULO_ALTURA` 30, `ESCALA_SURGE` 0,7 / `ESCALA_LUTA` 0,47 |
+| o andar no lugar (A1) | `ANDAR_QUADROS` (laço 4..12 do `andar-c`), `ANDAR_MS` 900 — mais rápido = passos mais curtos contra a rolagem |
+| a carga e a queda de quatro (A2) | `CARGA` por fase [1,5 · 1,3 · 1,6], `CARGA_MIN` 0,9, `QUATRO_MS` 380 |
+| o galope (A3) | `BOTE_VEL` 300, `CORRIDA_QUADROS` (1..15), `CORRIDA_MS` 620 |
+| o slash com salto (A4) | `SLASH_QUADROS` (2..16 do `slash-a`), `SLASH_MS` 900, `SLASH_SALTO_ATE` 0,45 (a fração em que ele chega no alto); o alvo do salto é a altura da nave no FIM da carga, preso entre y=70 e o chão |
+| subir, pendurar, descer, balançar (A5–A9) | `SALTO_TETO_MS` 850, `BALANCO_QUADROS` (5..15), `BALANCO_MS` 1300, `TETO_LAVA_MS` 1100, `TELEG_LAVA_TETO` 0,65, `ANCORAS` (x do teto 322/262) |
+| a queda do corpo morto (A10) | `QUEDA_MS` 420 |
+| a punição da recuperação | `RECUP_SLASH` 1,0, `RECUP_LAVA` 0,6, `DANO_RECUP` 2 |
+| a lava (aprovada) | `LAVA_G` 260, `LAVA_VOO` 1,1, `ESTILHACOS` 6, `TELEG_LAVA` 0,5 |
 | o ritmo entre ataques | `PAUSA` por fase |
-| a ronda e a saída | `ANCORAS`, `SALTO_MS`, `FORA_MIN/MAX`, `AVISO`, e as chances em `depoisDoAtaque` |
-| o breu (quão preto, o pulso) | `BREU_ALPHA`, `PULSO_BREU`, o alpha da cópia em `atualizarBreu` (0,62) |
-| a linha de apoio no chão e no teto | `CHAO_APOIO` (190), `TETO_APOIO` (30) — a olho na borda desenhada, conferir |
-| a hitbox da casca (absorve + fere) | `corpoCasca` / `corpoInteiro` — ⚠️ a olho, NÃO medida; só o miolo foi medido |
+| a saída e a reentrada | `FORA_MIN/MAX` 1–2s, `AVISO` 0,5, as chances em `depoisDoAtaque` (25% sai, 50% troca de âncora) |
+| o breu (aprovado) | `BREU_ALPHA` 1, `PULSO_BREU` 2,4, o alpha da cópia revelada em `atualizarBreu` (0,62) |
+| as linhas de apoio | `CHAO_APOIO` 190, `TETO_APOIO` 30 (a ponta da garra pendurada) — a olho na borda desenhada |
+| as hitboxes | `CASCA`/`INTEIRO` (virtuais, medidas só no miolo), `CASCA_TETO`/`INTEIRO_TETO` (px do clipe de 0,75) — ⚠️ **a olho**, só o MIOLO é medido |
+| o fator de cada clipe | `Predador.QUADRO` — ⚠️ obrigatório conferir ao trocar a arte de um clipe |
 
 ### ⚠️ Pontos já vistos na captura, não decididos
 - A **emenda vertical da pintura** do núcleo passa pela arena (x≈270 na foto do aviso) — anterior a isto.
 - O coração saiu inteiro: `nucleo.png`/`nucleo-beat-sheet.png` seguem no disco, sem uso (apagar é dele).
 
-### Sondas 16/09
+### Sondas (a última rodada: 16/09, depois da rodada 3)
 `probe-stage4` ✔ (a troca revela o predador, a arma trava e destrava, 0,7→0,47, a bala real fere o peito,
 o dano dobra na recuperação, a fase 3 liga o breu, matar entrega a cutscene final) · typecheck ✔ · build ✔.
-Captura: `node scripts/_f4/_ver-predador.mjs [saida]` → a rodada 2 está em `docs/superpowers/folhas/2026-09-16/predador-em-jogo-r2.png` (20 fotos: o pulo, os 3 tempos do slash, a lava, o teto, o breu com a lava, a morte).
+A sonda lê a escala LÓGICA (`predador.escala`), não a desenhada (que é `escala / f`). Captura: `node scripts/_f4/_ver-predador.mjs [saida]` → a rodada 3 está em `docs/superpowers/folhas/2026-09-16/predador-em-jogo-r3.png` (25 fotos); as anteriores, `predador-em-jogo.png` (1ª passada) e `-r2.png`.
 
 ---
 
@@ -1134,7 +1186,7 @@ M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprov
 
 ## 🧭 O MAPA PARA FECHAR A FATIA 7 (15/09)
 
-**🔴 Obrigatório, na ordem dele:** B3 (a 2ª forma — o predador, jogar e ajustar) → B2 (a posição) → M4 (portas, borda C, esfíncter).
+**🔴 Obrigatório, na ordem dele:** B3 (a 2ª forma — o predador: JOGAR A RODADA 3 e ajustar, ver 🚦) → B2 (a posição) → M4 (portas, borda C, esfíncter).
 
 **🟡 Cortar ou manter — PERGUNTADO EM 15/09, SEM RESPOSTA:**
 

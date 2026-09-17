@@ -153,3 +153,35 @@ nº de estilhaços · tempo fora da tela (1–2s) · alpha do breu · raio do ha
 
 Ele joga a luta. **A 2ª forma parece o fim do jogo?** E, especificamente: dá para desviar da
 investida no breu lendo só o core?
+
+---
+
+## 7. Revisões depois dos testes jogados (16/09) — o que mudou desta spec
+
+Esta seção **manda sobre as anteriores** onde elas divergem. O registro fino (falas dele, candidatas, lições) está na
+⏸️ do START.
+
+**1º teste** — *"gostei de como ficou a luta, a mecânica ficou interessante. Mas as animações deixaram a desejar."*
+- **Ferramenta:** as animações passaram do v3 para o **PixMiniMax** (venceu todos os gestos grandes; 2 gerações/clipe em 256²).
+- **Pulo do surgimento:** clipe S→luta com quadro final fixo; agacha, torce no ar, pousa. O motor só voa entre o impulso e o pouso.
+- **Morte:** clipe que desaba e fica estendido + o sangue compartilhado (`src/entities/sangue.ts`) + estouros.
+- **Lava (§3):** deixou de ser o glóbulo tingido — bola desenhada com cor de lava, luz ADD e rastro de brasas, **acima do breu**.
+- **Breu (§4):** `BREU_ALPHA` 0,96 → **1**; o halo da nave menor.
+- **Troca (§2):** a fumaça do estouro grande passa para TRÁS do predador quando ele surge.
+
+**2º teste** — aprovou o surgimento/giro, o breu, a lava (*"principalmente quando ricocheteia"*), a morte e a fumaça.
+- **O idle (§3) ANDA no lugar**, e pendurado ele BALANÇA — *"a fase está em movimento e no idle parece que está deslizando"*.
+  **Regra nova: nenhuma pose parada em cena longa**; a arena rola.
+- **A investida (§3) mudou de mecânica:** no fim da carga ele **cai de quatro**; o bote é um **galope PELO CHÃO** (não
+  mais na diagonal até a nave); na chegada, o **slash inclinado com dois golpes** e um **SALTO até a altura em que a nave
+  estava no fim da carga**, voltando ao chão. A mirada continua "no passado".
+- **O teto (§3):** não é mais a pose espelhada. Ele **pula e agarra o teto com UMA garra** (o clipe inteiro no voo), fica
+  **pendurado por um braço**, balança, e arremessa com o braço livre; desce com o clipe de agarrar ao contrário; entre
+  âncoras do teto vai balançando. Entre âncoras do chão para a esquerda ele galopa; para a direita salta recuando.
+- **A morte (§3):** fora do chão, **o corpo despenca até a borda** (*"não pode flutuar caído"*).
+- **Técnica (§5): o quadro virtual.** Galopar e pendurar não cabem no 256² na escala da luta: esses clipes nasceram da
+  pose de luta REDUZIDA no quadro (0,85 chão / 0,75 teto) e cada clipe tem um fator em `Predador.QUADRO` — desenhado em
+  `escala / f`, origem `(0,5 ; 1 − f/2)`; miolo/pés/garra em px virtuais; hitbox em px do clipe. A sonda lê a escala
+  lógica. O rastro do corte desenhado no motor saiu (os clipes trazem o arco).
+
+**A rodada 3 (o que o 2º teste pediu) NÃO foi jogada até 17/09** — o critério de aceite (§6) segue aberto.

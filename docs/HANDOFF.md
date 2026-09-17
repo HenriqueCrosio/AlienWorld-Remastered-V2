@@ -56,13 +56,15 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 
    🟠 **A FATIA 7 (Fase 4, o interior) ESTÁ EM ANDAMENTO na branch `feat/fase4-visual`.** Retome
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
-   com a frase de arranque. **Estado em 2026-09-16:** jogados e aprovados — o Bloco A (os 4 fundos
+   com a frase de arranque e o roteiro de teste (🚦). **Estado em 2026-09-17:** jogados e aprovados — o Bloco A (os 4 fundos
    dele), a MOLDURA (M1, M1.5: o duto, as 3 portas), o GOLFINHO (mini-chefão da câmara B), o M2 (as
    bordas A/B/D, o cenário respirando, as colunas, o pilar nas costuras, a maré), a entrada do núcleo
    pela emenda, o contorno da borda B e o **B1 — o guardião novo** com a morte composta no motor.
    **Em curso: o B3** — a 2ª forma deixou de ser o coração e virou **o predador** que sai de dentro do
    guardião (`src/entities/Predador.ts`): surgimento sangrento, investida+slash, lava, a ronda pelo
-   chão e teto, e o breu. Implementado e verificado na sonda em 16/09; **falta o teste jogado dele**.
+   chão e teto, e o breu. **Três rodadas em 16/09**: dois testes jogados aprovaram a mecânica, o surgimento, o
+   breu, a lava e a morte; a **rodada 3** (idle que anda, investida de quatro com slash inclinado, teto por uma
+   garra, corpo que cai na borda) **ainda não foi jogada — é o 1º passo da próxima sessão** (a 🚦 do START).
    **Na fila, obrigatório:** B2 (a posição do
    chefão) e M4 (portas com arte final, borda C, esfíncter). O mapa inteiro está na seção "🧭 O MAPA
    PARA FECHAR A FATIA 7" do START. Specs, em ordem:
@@ -88,7 +90,8 @@ está pendente por esquecimento. Os números abaixo seguem sendo chute calibrado
 final do passo 4 — não os mexa antes disso:
    - vãos dos corredores: **110 → 96 → 76 (o aperto) → 84** (evento `corredor` no `STAGE_4`)
    - o guardião: `INVESTIDA_CADA` (6s), `TELEGRAFO_DUR` (0.55s), HP 90
-   - o coração: `ABERTO_DUR` / `FECHADO_DUR` / `CADENCIA` por fase, HP 180
+   - ~~o coração~~ **saiu em 16/09** — a 2ª forma é o PREDADOR (`src/entities/Predador.ts`, HP 180); os knobs dele
+     estão na tabela "O que ajustar" do START, e esses SIM estão em ajuste com ele jogando
 
 ⚠️ **A Fatia 7 (Fase 4) mexe em GEOMETRIA, não só em pintura.** As colunas dos corredores são
 props COM hitbox. Instalar arte recortada mais justa no lugar da atual ENCOLHE o vão sem nada no
@@ -107,6 +110,10 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
 7. **Polimento menor**: cabos desenhados ancorando as duas formas do chefão a chão/teto
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
+
+**Estado do repositório (2026-09-17):** a **Fatia 7 corre em `feat/fase4-visual`**, com o B3 (o predador) em três
+rodadas commitadas localmente — ⚠️ **NÃO empurradas** (o `origin` da branch ficou em `6c2fe4f`, de 15/09); empurrar
+quando ele pedir. O resto abaixo é o estado de 15/09 e segue valendo.
 
 **Estado do repositório (2026-09-15, fim de sessão):** `main` está em **`f417c0e`**, com a
 **Fatia 6 mergeada `--no-ff`** e empurrada; a **Fatia 7 corre em `feat/fase4-visual`**, com tudo o
