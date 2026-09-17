@@ -276,7 +276,9 @@ await page.evaluate(() => {
   if (s.boss && !s.boss.isDead && s.boss.damage(999)) s.killBoss();
 });
 
-await page.waitForTimeout(4500);
+// ⚠️ 1,2s do estouro final + `CORPO_FICA_MS` 4200 (o corpo no chão, o piso rachando, a lava subindo e ele
+// afundando — ver `fimDoPredador`). Era 4500 quando a cutscene vinha 1,4s depois do estouro.
+await page.waitForTimeout(6500);
 const meio = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return { cena: s?.scene.key };

@@ -5,6 +5,7 @@ import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
 import type { TerrainSystem } from '../systems/TerrainSystem';
 import { Predador } from './Predador';
+import { afundarNaLava } from './fimDoPredador';
 import { explosaoSangrenta, sangueNaTela } from './sangue';
 
 /**
@@ -34,6 +35,8 @@ export class BossNucleo implements StageBoss {
   // Antes dos campos de instância que os usam (ordem de inicialização de classe).
   private static readonly HP_GUARDIAO = 90;
   private static readonly HP_TOTAL = BossNucleo.HP_GUARDIAO + Predador.HP;
+  /** Do estouro final até a cutscene: o corpo no chão, o piso rachando e a lava subindo (ver `fimDoPredador`). */
+  static readonly CORPO_FICA_MS = 4200;
 
   /** Lida pela sonda (`probe-stage4`). */
   forma: 'guardiao' | 'predador' = 'guardiao';
@@ -414,7 +417,25 @@ export class BossNucleo implements StageBoss {
     this.bar.width = 160 * ((this.hpGuardiao + (this.predador?.hp ?? Predador.HP)) / BossNucleo.HP_TOTAL);
   }
 
+  /** O corpo do predador fica na tela, racha o chão e afunda na lava antes da cutscene — ver `destroy`. */
+  get pausaFinalMs(): number | undefined {
+    return this.predador ? BossNucleo.CORPO_FICA_MS : undefined;
+  }
+
   destroy(): void {
+    // O CORPO FICA (17/09: *"a animação dele morto não apareceu, ele sumiu"*): a cena destrói o chefão 1,2s depois
+    // do golpe final, bem quando o clipe da morte termina estendido. O último quadro vira uma imagem solta no
+    // chão — e dali sai o FIM: o piso racha, estoura, a lava sobe e o corpo afunda (ver `fimDoPredador`).
+    if (this.predador?.dead && this.sprite.active) {
+      const s = this.sprite;
+      const corpo = this.scene.add
+        .image(s.x, s.y, s.texture.key, s.frame.name)
+        .setOrigin(s.originX, s.originY)
+        .setScale(s.scaleX, s.scaleY)
+        .setFlip(s.flipX, s.flipY)
+        .setDepth(s.depth);
+      afundarNaLava(this.scene, corpo, this.fx, Predador.CHAO_APOIO);
+    }
     this.predador?.destroy();
     this.sprite.destroy();
     this.core.destroy();

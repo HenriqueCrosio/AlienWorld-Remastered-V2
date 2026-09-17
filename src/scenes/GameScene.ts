@@ -1465,7 +1465,7 @@ export class GameScene extends Phaser.Scene {
       // a fase só termina depois de o jogador voar nela por alguns segundos (docs/GDD.md §3).
       // No VÁCUO não há atmosfera a romper: a fase acaba quando o chefão acaba.
       if (this.zone === 'atmosfera') this.breakAtmosphere();
-      else this.time.delayedCall(1400, () => this.victory());
+      else this.time.delayedCall(boss.pausaFinalMs ?? 1400, () => this.victory());
     });
   }
 

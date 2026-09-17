@@ -245,8 +245,15 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   predadorAgarraSheet: { path: 'sprites/predador-agarra-sheet.png', w: 256, h: 256 },
   predadorTetoBalancoSheet: { path: 'sprites/predador-teto-balanco-sheet.png', w: 256, h: 256 },
   predadorSlashSheet: { path: 'sprites/predador-slash-sheet.png', w: 256, h: 256 },
+  predadorRasgoSheet: { path: 'sprites/predador-rasgo-sheet.png', w: 256, h: 256 },
   predadorLavaSheet: { path: 'sprites/predador-lava-sheet.png', w: 256, h: 256 },
   predadorTetoLavaSheet: { path: 'sprites/predador-teto-lava-sheet.png', w: 256, h: 256 },
+  // O FIM DO PREDADOR (17/09, rodada 5): o piso rasgando e a poça de lava, assados em PIXEL na resolução
+  // nativa por `scripts/_f4/_assar-fim-f4.mjs` — a paleta sai da própria faixa do chão da arena. Ver
+  // `src/entities/fimDoPredador.ts`.
+  f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
+  f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
+  f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
   predadorMorteSheet: { path: 'sprites/predador-morte-sheet.png', w: 256, h: 256 },
 
   // AS DUAS PEÇAS-ASSINATURA DO CENÁRIO DA F4, RESPIRANDO (13/09). O coração no chão e o

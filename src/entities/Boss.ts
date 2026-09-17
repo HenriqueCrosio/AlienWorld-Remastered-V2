@@ -26,6 +26,12 @@ export interface StageBoss {
    * painel não mostra superaquecimento. Ausente = nunca trava.
    */
   readonly armaTravada?: boolean;
+  /**
+   * Quanto a cena espera, depois do estouro final, antes da vitória (no vácuo). O predador da Fase 4 deixa o
+   * CORPO estendido no chão e pede tempo para ele ser visto (17/09: *"ele sumiu e depois a cutscene abriu"*).
+   * Ausente = 1400ms.
+   */
+  readonly pausaFinalMs?: number;
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean;
