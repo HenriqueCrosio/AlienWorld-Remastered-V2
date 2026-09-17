@@ -185,3 +185,50 @@ Esta seção **manda sobre as anteriores** onde elas divergem. O registro fino (
   lógica. O rastro do corte desenhado no motor saiu (os clipes trazem o arco).
 
 **A rodada 3 (o que o 2º teste pediu) NÃO foi jogada até 17/09** — o critério de aceite (§6) segue aberto.
+
+---
+
+## 8. Revisões de 17/09 — o 3º e o 4º testes jogados (esta seção prevalece sobre a §7 onde as duas divergirem)
+
+**A rodada 3 foi jogada e APROVADA inteira** (andar no lugar, cair de quatro, galopar, slash com salto, agarrar o
+teto, pendurar, descer, ir de âncora em âncora). Ficaram dois defeitos e um pedido novo, resolvidos nas rodadas 4 e 5.
+
+### 8.1 O arremesso pendurado usa a garra LIVRE (rodada 4)
+*"ele está agarrando com a mesma garra que ele joga a lava"*. O `teto-lava2` soltava o teto para arremessar. O clipe
+novo é o **`teto-lava-b`** (`assets/raw/furia-predador-anim4/`): a garra erguida fica cravada no teto do começo ao
+fim e o braço de baixo arremessa. A boca da lava no teto passou a ser medida no clipe (−104, +43 virtuais) e o
+telégrafo foi de 0,65s para **0,68s** (a bola deixa a mão entre os quadros 10 e 11).
+
+### 8.2 A VOLTA É UM ATAQUE — o rasgo com metal incandescente (rodada 4, skill NOVA)
+Pedido dele: *"antes a saída e a reentrada tinham mais efeito visual e não de mecânica"*. A reentrada deixou de ser
+só uma volta à âncora. Agora, **sempre pelo chão**:
+
+1. **Aviso** — o core pisca na borda direita, na altura do chão (`AVISO` 0,5s);
+2. **Entrada** — ele **galopa** da borda até o meio da arena (`RASGO_X` 192), com o core no ritmo da carga;
+3. **Rasgo** — para e **crava as garras no chão**, erguendo um arco em brasa de baixo para cima (clipe `upper-b`:
+   as garras ficam no piso dos quadros 4 a 11 — essa é a janela de fuga — e o arco sobe no 12, `RASGO_SOLTA` 0,7);
+4. **O metal** — lascas incandescentes (`metalBrasa`, desenhadas no motor, distintas da bola de lava) saem **do
+   chão** em arco, com a gravidade da lava, miradas onde a nave estava quando ele parou. `METAL_N` por fase
+   [·, 3, 4, 5], `METAL_VOO` 0,95, `METAL_ABRE` 30. **Não estilhaçam** — o estilhaço continua sendo da lava no breu;
+5. **Recuperação** — `RECUP_RASGO` 0,9s com o dano dobrado, como nos outros ataques.
+
+Jogado e aprovado: *"o aviso avisa e ficou ótimo"* · *"dá tempo de desviar"* · *"o metal derretido ficou ótimo e
+ficou diferente da lava"*.
+
+### 8.3 O FIM DA MORTE — o corpo fica, o piso cede e a lava o engole (rodada 5)
+O defeito medido: a cena destruía o chefão 1,2s depois do golpe final, exatamente quando o clipe da morte terminava
+estendido, e a cutscene entrava 1,4s depois — *"ele sumiu e depois a cutscene abriu"*. Duas correções:
+
+- **O corpo fica.** `BossNucleo.destroy` deixa o último quadro no chão como imagem solta, e a cena passou a esperar
+  `StageBoss.pausaFinalMs` (`CORPO_FICA_MS` 4200) antes da vitória.
+- **O fim, em quatro tempos** (`src/entities/fimDoPredador.ts`), pedido dele: o corpo no chão, o **piso rachando e
+  estourando**, a **lava subindo até a altura de onde era o chão** e o **corpo afundando** nela até sumir. A poça
+  cobre a faixa inteira — é o que responde à queixa de *"o chão continua passando embaixo"* de um corpo imóvel.
+
+⚠️ **A 1ª versão foi reprovada na hora**: *"ficou gerado e sem custos… preciso de uma lava mais condizente com o
+cenário, uma rachadura mais real"*. Ela desenhava tudo com `Graphics` em tempo de jogo. **A lei que fica para todo
+efeito de cenário deste projeto:** assar em PIXEL, na resolução nativa, com a paleta amostrada do vizinho
+(`scripts/_f4/_assar-fim-f4.mjs` — rachadura em 6 estágios que corre com a rolagem, poça Voronoi de crosta com
+costuras acesas e dither Bayer, lascas de placa). O código de cena toca a arte assada e nada mais.
+
+**O critério de aceite (§6) segue aberto só no 8.3** — a rodada 5b não foi jogada até o fim de 17/09.

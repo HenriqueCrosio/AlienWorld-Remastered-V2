@@ -31,7 +31,7 @@ Sondas 15/09: `probe-f4-moldura` ✔ · `probe-f4-visual` ✔ · `probe-f4-golfi
 
 **🟢 BLOCO B · B1 — O GUARDIÃO NOVO — JOGADO E APROVADO (15/09):** *"o novo modelo ficou melhor que o
 outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeiro** — B1 ✅ → **B3 (a
-2ª forma: o PREDADOR, rodada 3 à espera do teste jogado — ver 🚦)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
+2ª forma: o PREDADOR, rodada 5b — o fim da morte — à espera do teste jogado; ver 🚦)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
 (M3, `f4Vivo`, `f4Veu`) seguem sem resposta — ver "🧭 O MAPA PARA FECHAR A FATIA 7".
 - **Arte:** a DELE (PixelLab `9436240c`), montada sem geração por `_f4/_instalar-guardiao.mjs` —
   `guardiao.png`, `guardiao-idle-sheet.png`, `guardiao-morte-sheet.png` e `guardiao-destruido.png`,
@@ -51,39 +51,122 @@ outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeir
   medido no `worldstep`: `body.center` = `core.x/y`. A captura `_f4/_ver-guardiao.mjs` desenha pelo centro.
 - Sondas: `probe-stage4` ✔ (bala real fere a massa, troca, coração, cutscene final) · typecheck ✔.
 
-**🟠 BLOCO B · B3 — A 2ª FORMA VIROU O PREDADOR (16/09). TRÊS RODADAS; DOIS TESTES JOGADOS APROVARAM A
-MECÂNICA, O SURGIMENTO/GIRO, O BREU, A LAVA, A MORTE E A FUMAÇA DA TROCA. A RODADA 3 (o idle que anda, a
-investida de quatro com o slash inclinado, o teto por uma garra, o corpo que cai na borda) AINDA NÃO FOI
-JOGADA.** Ver 🚦 e ⏸️ logo abaixo.
+**🟠 BLOCO B · B3 — A 2ª FORMA É O PREDADOR (16–17/09). CINCO RODADAS, QUATRO TESTES JOGADOS. Aprovados: a
+mecânica, o surgimento/giro, o breu, a lava, a fumaça da troca, o andar no lugar, a investida de quatro com o
+slash saltado, o teto por uma garra, o arremesso com a garra livre e a VOLTA QUE ATACA (o rasgo do chão + o metal
+incandescente). FALTA JOGAR: a rodada 5b — o FIM DA MORTE** (o piso racha, estoura, a lava sobe e o corpo afunda),
+refeita em arte assada em pixel depois de ele reprovar a 1ª versão. Ver 🚦 e ⏸️ logo abaixo.
 
-Branch `feat/fase4-visual`, tudo commitado em 16–17/09 (último commit do código: `933daa0`). ⚠️ **Não empurrado:**
-o `origin` ainda está em `6c2fe4f` — a branch local está vários commits à frente. Empurrar é o 1º passo da 🚦
-se ele pedir (o remoto é o V2; NUNCA o `legacy`).
+Branch `feat/fase4-visual`. ⚠️ **As rodadas 4 e 5 ainda NÃO ESTÃO COMMITADAS** (último commit: `16180c9`, os docs
+de 16/09) e nada foi empurrado: o `origin` segue em `6c2fe4f`. Commitar e/ou empurrar é decisão dele — o remoto é
+o V2; NUNCA o `legacy`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 16/09 a 2ª
-> forma do chefão final virou O PREDADOR, e depois de dois testes jogados a rodada 3 refez o idle (ele anda no
-> lugar), a investida (cai de quatro, galopa, slash inclinado com salto), o teto (pula e fica pendurado por uma
-> garra) e a morte (o corpo cai na borda). Eu ainda não tinha jogado a rodada 3. Joguei agora e: <o que achou,
-> item a item da 🚦>. Siga daí."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 17/09 eu joguei
+> e aprovei a rodada 4 do predador (a volta que ataca: ele entra galopando, para no meio e rasga o chão lançando
+> metal incandescente) e o arremesso pendurado com a garra livre. Depois você refez o FIM DA MORTE — o piso racha,
+> estoura, a lava sobe até a linha do chão e o corpo afunda —, primeiro em `Graphics` (reprovei: *ficou gerado e
+> sem custos*) e depois em arte ASSADA em pixel com a paleta da faixa do chão. Essa última eu ainda não tinha
+> jogado. Joguei agora e: <o que achou, item a item da 🚦>. Siga daí."**
 
-Se ele chegar SEM ter jogado: suba o localhost e entregue o roteiro da 🚦 antes de qualquer outra coisa —
-**nada de gerar arte nem mexer em knob sem o teste dele.**
+Se ele chegar SEM ter jogado: suba o localhost (`npm run dev` → `L` → `G`) e entregue o roteiro da 🚦 antes de
+qualquer outra coisa — **nada de gerar arte nem mexer em knob sem o teste dele.**
 
 ---
 
 ## 🚦 O QUE FAZER PRIMEIRO NA PRÓXIMA SESSÃO
 
+### 🆕 17/09 — o 3º teste jogado (a rodada 3) e a RODADA 4 (jogada e APROVADA — ver a rodada 5 abaixo)
+**Aprovado na rodada 3:** A1 o andar (*"não parece mais deslizar"*) · A2 dá tempo de sair · A3 *"parece uma investida de
+verdade"* · A4 difícil, mas justo (*"a nave precisa colar no teto para fugir, mas dá"*) · A6 o tamanho pendurado não
+fecha a arena · A7 a lava sai natural · A8 lê como soltar e cair · A9 funciona (um clipe de "garra em garra" seria
+bônus, não pedido) · B nada regrediu; os estilhaços no breu são difíceis, **e fica assim** (*"boa camada de
+dificuldade"*: longe, a parábola passa para trás da nave e não estilhaça). **C não foi respondido.**
+
+| o que ele viu | o que mudou (rodada 4) |
+|---|---|
+| A5 *"está agarrando com a mesma garra que ele joga a lava"* | arremesso pendurado novo, **`teto-lava-b`**: a garra de cima segura o teto do começo ao fim, o braço livre arremessa. A boca da lava no teto foi remedida (−104,+43 virtuais) e `TELEG_LAVA_TETO` 0,65 → 0,68 |
+| A10 *"a animação dele morto não apareceu, ele sumiu e depois a cutscene abriu"* | **a causa (medida):** o clipe tocava inteiro, mas a cena DESTRÓI o chefão 1,2s depois do golpe, bem quando ele fica estendido, e a vitória vinha 1,4s depois. Agora o `BossNucleo.destroy` deixa o **corpo** (o último quadro) no chão, e a cena espera `CORPO_FICA_MS` 3200 (`StageBoss.pausaFinalMs`) antes da cutscene |
+| *"na reentrada… vem correndo, para no meio da tela e dá um slash de baixo para cima, como se tacasse metal incandescente na nave"* | **a VOLTA QUE ATACA (skill nova):** aviso na borda direita → galope até `RASGO_X` (o meio) → **`rasgo`** (`upper-b`: crava as garras no chão nos quadros 4–11 e ergue um arco em brasa no 12) → **metal incandescente** (lasca desenhada no motor, `metalBrasa`) sai do chão em arco com a gravidade da lava, mirado onde a nave estava quando ele parou; não estilhaça → recuperação (dano dobrado). A volta agora é SEMPRE pelo chão |
+
+**Os knobs novos (`Predador.ts`):** `RASGO_X` 192, `RASGO_MS` 1100, `RASGO_SOLTA` 0,7, `RECUP_RASGO` 0,9, `METAL_N` [·,3,4,5]
+por fase, `METAL_VOO` 0,95, `METAL_ABRE` 30 · `BossNucleo.CORPO_FICA_MS` 3200.
+**Candidatas** (`assets/raw/furia-predador-anim4/`, folha `folhas/2026-09-17/r4-candidatas.png`): `teto-lava-a` (FALHOU:
+soltou o teto de novo), `upper-a` (de quatro, o arco sobe para trás — guardada; trocar: `RASGO=… node _instalar-predador.mjs`).
+**PixelLab rodada 4:** 8 gerações, todas PixMiniMax. Captura: `folhas/2026-09-17/predador-em-jogo-r4.png` (31 fotos: a
+volta, o rasgo, o metal no ar e o corpo que fica +3s). Sondas: `probe-stage4` ✔ · typecheck ✔ · build ✔.
+
+### 🆕 17/09 — o 4º teste jogado: a rodada 4 PASSOU, e a rodada 5 fecha a morte
+
+**Aprovado, jogado:** R1 o aviso *"avisa e ficou ótimo"* · R2 *"a animação ficou excelente e dá tempo de desviar"* ·
+R3 *"o metal derretido ficou ótimo e ficou diferente da lava"* · R4 *"agora dá a entender que ele joga com a outra
+garra"*. **Os knobs do rasgo e do arremesso estão fechados.**
+
+| o que ele viu | o que mudou (rodada 5) |
+|---|---|
+| R5 *"o corpo fica imóvel e o chão continua passando embaixo… o piso racha e explode, a lava sobe até a altura de onde era o chão, e o corpo some na lava, como se estivesse afundando"* | **`src/entities/fimDoPredador.ts`** (novo, tudo desenhado no motor): 1. as GRETAS abrem sob o corpo e acendem, com o chão tremendo (`RACHA_MS` 560, depois de `ESPERA_MS` 550 de corpo no chão) · 2. o ESTOURO: 5 explosões na linha do chão + 60 brasas · 3. a LAVA SOBE e para em `Predador.CHAO_APOIO` (`SOBE_MS` 900), com a crista ondulando em dois senos e 6 luzes ADD · 4. o CORPO AFUNDA por dentro dela (`AFUNDA_MS` 1100, `AFUNDA_PX` 30) e some. A poça FICA ondulando até a cutscene — **é ela que mata a queixa: cobre a faixa de ponta a ponta, então o chão que rolava embaixo do corpo deixa de existir** |
+
+**⚠️ A 1ª tentativa da rodada 5 FOI REPROVADA na hora** (*"ficou gerado e sem custos… preciso de uma lava mais
+condizente com o cenário, uma rachadura mais real"*): ela montava tudo com `Graphics` em tempo de jogo — traço
+antisserrilhado e faixa de cor chapada, que não pertencem a um jogo de pixel. **A lei que fica:** efeito de cenário
+se ASSA em pixel na resolução nativa, com a paleta do vizinho, e o código de cena só toca a arte assada.
+
+**A rodada 5b — a arte assada** (`scripts/_f4/_assar-fim-f4.mjs`, zero geração, roda em 2s):
+- a paleta sai da PRÓPRIA faixa do chão (`f4-faixa-d.png`, 42 cores: azuis quase pretos + frisos vermelhos), com
+  três degraus quentes a mais. Medido: **~19% da poça acende**, o resto é crosta fria (a lei do dark sci-fi);
+- `f4-racha-sheet.png` (6 estágios × 384×30): o metal RASGANDO — vão preto que abre, lábio claro (a placa
+  levantando), sombra embaixo, calor no fundo da fenda e dentes de chapa. **Corre para a esquerda com o cenário**
+  (`SCROLL_SPEED`) — chapa parada enquanto o chão rola era metade do "gerado";
+- `f4-lava-sheet.png` (8 quadros × 384×36): a poça é um VORONOI de placas de crosta com as costuras acesas, cada
+  degrau costurado com **dither Bayer 2×2** (sem ele o magma vira mancha de balde), rim escuro na beira da placa e
+  crista acesa só onde a costura chega à superfície. Emenda fechada em x, e a crosta escorre no sentido da fase;
+- `f4-destroco.png` (4 lascas de 12×10): voam girando no estouro e caem de volta na fenda.
+Folha da arte: `folhas/2026-09-17/r5-fim-assado.png`. Em jogo: `predador-em-jogo-r5.png` (35 fotos).
+
+**Os tempos:** `CORPO_FICA_MS` 3200 → **4200** (espera + racha + sobe + afunda ≈ 3,1s, e sobra folga). ⚠️ O
+`probe-stage4` esperava 4500ms pela cutscene e passou a esperar **6500** — o número vive no probe, não no jogo.
+Sondas: `probe-stage4` ✔ · typecheck ✔ · build ✔. Captura: `folhas/2026-09-17/predador-em-jogo-r4.png` (35 fotos, os
+9 últimos quadros são a morte de 0,5s a 4,6s).
+
+**O roteiro do próximo teste (R5):** as gretas dão o aviso do que vem? · o estouro do piso tem peso? · a lava sobe
+rápido ou devagar demais (`SOBE_MS`)? · o corpo afunda fundo o bastante (`AFUNDA_PX` 30)? · a poça parada até a
+cutscene cansa (`CORPO_FICA_MS` 4200)? · **e o C da rodada 3 segue sem resposta** (a lava do chão e o urro são
+clipes da 1ª passada, a emenda vertical da pintura, e o `nucleo.png`/`nucleo-beat-sheet.png` sem uso no disco).
+
+---
+
 ### 1. Subir e chegar no chefão
 `npm run dev` → http://localhost:5173 → `L` (Fase 4) → `G` (pula para a arena do chefão). Mate o GUARDIÃO para
-ver a troca. As fases do predador vêm pela vida (66% e 33%): jogue a luta inteira ao menos uma vez.
+ver a troca. As fases do predador vêm pela vida (66% e 33%): jogue a luta inteira **até matá-lo** — o que falta
+julgar é justamente o que vem DEPOIS do golpe final, e dura 4,2s até a cutscene.
 
-### 2. O roteiro do teste jogado — o que ELE precisa olhar (e responder item a item)
+### 2. O roteiro do teste — o FIM DA MORTE (rodada 5b), item a item
 
-**A. O que a rodada 3 mudou — nunca jogado:**
+| # | olhar | a pergunta |
+|---|---|---|
+| F1 | **o corpo no chão**, 0,55s antes de o piso ceder (`ESPERA_MS`) | *dá tempo de ver que ele morreu, ou já vem atropelado?* |
+| F2 | **as gretas** abrindo em 6 estágios sob o corpo, correndo com o chão (`RACHA_MS` 900) | *lê como CHAPA RASGANDO? avisa o que vem?* |
+| F3 | **o estouro** — 5 explosões na linha do chão, brasas e as lascas de placa girando | *tem peso? as lascas ajudam ou poluem?* |
+| F4 | **a lava subindo** até a linha de onde era o chão (`SOBE_MS` 900) | *a velocidade está boa? a poça É DO CENÁRIO (a paleta é a da faixa do chão) ou ainda parece colada por cima?* |
+| F5 | **a crosta** — placas escuras com as costuras acesas, escorrendo para a esquerda | *o movimento resolve o *"o chão continua passando embaixo"*?* |
+| F6 | **o corpo afundando** (`AFUNDA_MS` 1100, `AFUNDA_PX` 30), esfriando até o breu | *afunda fundo o bastante? some na hora certa?* |
+| F7 | **a espera até a cutscene** (`CORPO_FICA_MS` 4200) | *o silêncio com a poça ondulando fecha bem, ou cansa?* |
+
+**Se algo não convencer, o ajuste é no ASSADOR** (`scripts/_f4/_assar-fim-f4.mjs` — tamanho das placas
+`SEMENTES`, espessura da costura `LIMIAR_COSTURA`/`LIMIAR_BOCA`, largura do vão da fenda `abertura`, a paleta `P`),
+e depois `node scripts/_f4/_assar-fim-f4.mjs`. **Não** volte a desenhar isso com `Graphics`.
+
+**Segue sem resposta, de rodadas anteriores (o bloco C):** a lava do chão e o urro ainda são clipes v3 da 1ª
+passada · a emenda vertical da pintura do núcleo · `nucleo.png`/`nucleo-beat-sheet.png` parados no disco.
+
+---
+
+### 📜 Registro: o roteiro da rodada 3 (16/09) — TODO RESPONDIDO em 17/09
+
+**A. O que a rodada 3 mudou:**
 | # | olhar | a pergunta |
 |---|---|---|
 | A1 | **o idle no chão** — ele ANDA no lugar (`andar-c`) | *ainda parece deslizando com a fase em movimento?* |
@@ -109,13 +192,15 @@ a morte no chão (desaba e fica estendido) · a saída pela direita e o aviso da
 - `nucleo.png` / `nucleo-beat-sheet.png` seguem no disco sem uso — apagar é decisão dele.
 
 ### 3. Com o feedback na mão
-- **Ajuste de número** → a tabela de knobs da ⏸️ ("O que ajustar"). Rode `node scripts/probe-stage4.mjs` depois.
-- **Clipe que não serve** → primeiro veja se a perdedora guardada resolve (`assets/raw/furia-predador-anim3/`,
-  folhas `r3-*.png`): trocar é apontar o `_instalar-predador.mjs` e reinstalar, **zero geração** — e conferir o
-  fator em `Predador.QUADRO` (a base de onde o clipe foi gerado).
+- **Efeito de cenário (lava, rachadura)** → mexa no **assador** e rode de novo; o código de cena não desenha nada.
+- **Ajuste de número da luta** → a tabela de knobs da ⏸️ ("O que ajustar"). Rode `node scripts/probe-stage4.mjs` depois.
+- **Clipe que não serve** → primeiro veja se a perdedora guardada resolve (`assets/raw/furia-predador-anim3/` e
+  `anim4/`, folhas `r3-*.png` e `r4-candidatas.png`): trocar é apontar o `_instalar-predador.mjs` e reinstalar,
+  **zero geração** — e conferir o fator em `Predador.QUADRO` (a base de onde o clipe foi gerado).
 - **Clipe novo** → PixMiniMax via `scripts/_f4/_pl.mjs mini`, com as lições da rodada 3 (sem quadro final fixo;
   ache o laço com `_achar-loop.mjs`; transição de postura antes do ciclo; base reduzida se o gesto não cabe).
-- **Prova para ele** → `node scripts/_f4/_ver-predador.mjs <saida.png>` (25 fotos, incluindo a morte no teto).
+- **Prova para ele** → `node scripts/_f4/_ver-predador.mjs <saida.png>` (35 fotos: a luta inteira, a volta com o
+  rasgo e a morte de 0,5s a 4,6s).
 
 ### 4. Depois do B3 aprovado — a fila obrigatória dele
 **B2** (a posição do guardião no alto-direita, cortado pela borda) → **M4** (as 3 portas com arte final, a borda C
@@ -124,7 +209,15 @@ PARA FECHAR A FATIA 7" no fim deste arquivo. Fechar a fatia = merge `--no-ff` de
 
 ---
 
-## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 3, À ESPERA DO TESTE JOGADO (o registro das 3 rodadas)
+## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 5b (O FIM DA MORTE) À ESPERA DO TESTE JOGADO
+
+**Os arquivos da rodada 5b:** `src/entities/fimDoPredador.ts` (a linha do tempo, só toca arte assada) ·
+`scripts/_f4/_assar-fim-f4.mjs` (assa `f4-racha-sheet`, `f4-lava-sheet`, `f4-destroco`) · `BossNucleo.destroy`
+(deixa o corpo e chama o fim) · `StageBoss.pausaFinalMs` + `BossNucleo.CORPO_FICA_MS` 4200 (a espera da cena) ·
+`BootScene` (as 3 folhas novas). **Da rodada 4:** `Predador.reentrar/rasgar/lancarMetal`, o tipo `metal` da lava
+e a textura `metalBrasa`.
+
+### O registro das rodadas 1 a 3 (16/09)
 
 ### 🎮 O 2º TESTE JOGADO (16/09) e a rodada 3
 **Aprovado:** *"a fase do escuro ficou bem mais imersiva, a lava está ótima, principalmente quando ricocheteia"* ·
@@ -226,7 +319,8 @@ apontar o `_instalar-predador.mjs` (`PULO=… MORTE=…` no ambiente) e reinstal
 | a punição da recuperação | `RECUP_SLASH` 1,0, `RECUP_LAVA` 0,6, `DANO_RECUP` 2 |
 | a lava (aprovada) | `LAVA_G` 260, `LAVA_VOO` 1,1, `ESTILHACOS` 6, `TELEG_LAVA` 0,5 |
 | o ritmo entre ataques | `PAUSA` por fase |
-| a saída e a reentrada | `FORA_MIN/MAX` 1–2s, `AVISO` 0,5, as chances em `depoisDoAtaque` (25% sai, 50% troca de âncora) |
+| a saída e a VOLTA QUE ATACA (rodada 4, aprovada) | `FORA_MIN/MAX` 1–2s, `AVISO` 0,5, as chances em `depoisDoAtaque` (25% sai, 50% troca de âncora) · `RASGO_X` 192, `RASGO_MS` 1100, `RASGO_SOLTA` 0,7, `RECUP_RASGO` 0,9, `METAL_N` [·,3,4,5], `METAL_VOO` 0,95, `METAL_ABRE` 30 |
+| o FIM DA MORTE (rodada 5b, a julgar) | em `fimDoPredador.ts`: `ESPERA_MS` 550, `RACHA_MS` 900, `ESTOURO_MS` 380, `SOBE_MS` 900, `AFUNDA_MS` 1100, `AFUNDA_PX` 30, `LAVA_QUADRO_MS` 110 · em `BossNucleo`: `CORPO_FICA_MS` 4200 · **a APARÊNCIA fica no assador**, não aqui |
 | o breu (aprovado) | `BREU_ALPHA` 1, `PULSO_BREU` 2,4, o alpha da cópia revelada em `atualizarBreu` (0,62) |
 | as linhas de apoio | `CHAO_APOIO` 190, `TETO_APOIO` 30 (a ponta da garra pendurada) — a olho na borda desenhada |
 | as hitboxes | `CASCA`/`INTEIRO` (virtuais, medidas só no miolo), `CASCA_TETO`/`INTEIRO_TETO` (px do clipe de 0,75) — ⚠️ **a olho**, só o MIOLO é medido |

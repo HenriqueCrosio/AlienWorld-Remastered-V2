@@ -62,9 +62,16 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    pela emenda, o contorno da borda B e o **B1 — o guardião novo** com a morte composta no motor.
    **Em curso: o B3** — a 2ª forma deixou de ser o coração e virou **o predador** que sai de dentro do
    guardião (`src/entities/Predador.ts`): surgimento sangrento, investida+slash, lava, a ronda pelo
-   chão e teto, e o breu. **Três rodadas em 16/09**: dois testes jogados aprovaram a mecânica, o surgimento, o
-   breu, a lava e a morte; a **rodada 3** (idle que anda, investida de quatro com slash inclinado, teto por uma
-   garra, corpo que cai na borda) **ainda não foi jogada — é o 1º passo da próxima sessão** (a 🚦 do START).
+   chão e teto, e o breu. **Cinco rodadas e quatro testes jogados (16–17/09).** Aprovados: a mecânica, o
+   surgimento/giro, o breu, a lava, o andar no lugar, a investida de quatro com o slash saltado, o teto por uma
+   garra, o arremesso com a garra LIVRE e a **volta que ataca** (ele entra galopando, para no meio e rasga o chão
+   lançando metal incandescente — mecânica nova de 17/09). **Falta jogar: a rodada 5b — o FIM DA MORTE**
+   (`src/entities/fimDoPredador.ts`): o corpo fica no chão, o piso racha e estoura, a lava sobe até a linha do
+   chão e o corpo afunda nela. ⚠️ A 1ª versão desse fim foi feita com `Graphics` e **reprovada na hora**
+   (*"ficou gerado e sem custos"*); foi refeita em **arte assada em pixel** na resolução nativa, com a paleta
+   tirada da própria faixa do chão (`scripts/_f4/_assar-fim-f4.mjs`). **É o 1º passo da próxima sessão** (a 🚦 do
+   START). ⚠️ **As rodadas 4 e 5 ainda não estão commitadas** (último commit: `16180c9`) e o `origin` segue em
+   `6c2fe4f`.
    **Na fila, obrigatório:** B2 (a posição do
    chefão) e M4 (portas com arte final, borda C, esfíncter). O mapa inteiro está na seção "🧭 O MAPA
    PARA FECHAR A FATIA 7" do START. Specs, em ordem:
