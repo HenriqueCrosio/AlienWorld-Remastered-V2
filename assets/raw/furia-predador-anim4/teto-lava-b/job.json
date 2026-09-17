@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "a510c1bd-ae81-46b0-a908-e35779e2426a",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "keeps hanging by the single raised claw gripping the ceiling above its head, that raised arm stays still the whole time; the lower free clawed arm winds back behind the body and flings a glob down and to the left, body swinging from the throw",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

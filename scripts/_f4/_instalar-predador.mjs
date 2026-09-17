@@ -21,6 +21,9 @@ const ANIM2 = 'assets/raw/furia-predador-anim2';
 // A RODADA 3 (16/09, 2º teste jogado): andar, cair de quatro, galopar, o slash inclinado, agarrar o teto por uma
 // garra, balançar e arremessar pendurado. Gerados de bases REDUZIDAS (0,85 chão / 0,75 teto): ver `Predador.QUADRO`.
 const ANIM3 = 'assets/raw/furia-predador-anim3';
+// A RODADA 4 (17/09, 3º teste jogado): o RASGO da volta (crava as garras no chão e ergue um arco de metal em brasa)
+// e o arremesso pendurado com a garra LIVRE (o teto-lava2 soltava o teto com a mesma garra que arremessava).
+const ANIM4 = 'assets/raw/furia-predador-anim4';
 
 const CLIPES = {
   urro: `${ANIM}/urro`,
@@ -30,10 +33,11 @@ const CLIPES = {
   quatro: `${ANIM3}/quatro-b`,
   corrida: `${ANIM3}/corrida-c`,
   slash: `${ANIM3}/slash-a`,
+  rasgo: process.env.RASGO ?? `${ANIM4}/upper-b`,
   lava: `${ANIM}/lava`,
   agarra: `${ANIM3}/teto-a`,
   'teto-balanco': `${ANIM3}/teto-balanco`,
-  'teto-lava': `${ANIM3}/teto-lava2`,
+  'teto-lava': process.env.TETO_LAVA ?? `${ANIM4}/teto-lava-b`,
   morte: process.env.MORTE ?? `${ANIM2}/morte-mini`,
 };
 

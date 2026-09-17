@@ -35,6 +35,8 @@ const foto = async (rotulo, caixas = true) => {
   const info = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
     const b = s.boss;
+    // Depois do estouro final a cena solta o chefão: o que sobra na tela é o CORPO (uma imagem solta).
+    if (!b) return { estado: 'sem chefão (o corpo fica)', corpo: null, alvo: null };
     const p = b.predador;
     const corpo = b.sprite.body;
     const core = b.core.body;
@@ -122,6 +124,19 @@ if (await esperar(() => {
 if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'aviso', null, 40000)) {
   await foto('fase 2 · aviso da reentrada');
 }
+// A VOLTA QUE ATACA (17/09): galopa até o meio, rasga o chão, o metal sobe em arco.
+if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'entrada', null, 20000)) {
+  await page.waitForTimeout(250);
+  await foto('fase 2 · volta galopando');
+}
+if (await esperar(() => window.__game.scene.getScenes(true)[0].boss.predador?.estado === 'rasgo', null, 20000)) {
+  await page.waitForTimeout(250);
+  await foto('fase 2 · rasgo (prepara)');
+  await page.waitForTimeout(300);
+  await foto('fase 2 · rasgo (solta)');
+  await page.waitForTimeout(350);
+  await foto('fase 2 · metal no ar', false);
+}
 
 // FASE 3: o breu. ⚠️ O dano é recusado no aviso/fora (ele não está na tela): insiste até a vida baixar.
 await esperar(() => {
@@ -150,7 +165,7 @@ await page.evaluate(() => {
   if (s.boss && !s.boss.isDead && s.boss.damage(999)) s.killBoss();
 });
 let tm = 0;
-for (const ms of [200, 500, 1000]) {
+for (const ms of [500, 1000, 1500, 1900, 2200, 2700, 3200, 3900, 4600]) {
   await page.waitForTimeout(ms - tm);
   tm = ms;
   await foto(`morte no teto +${ms}ms`, false);

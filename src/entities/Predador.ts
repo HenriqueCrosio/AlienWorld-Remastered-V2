@@ -14,7 +14,9 @@ import { explosaoSangrenta, sangueNaTela } from './sangue';
  *
  *   - o PEITO aceso é o alvo e está SEMPRE aberto; na RECUPERAÇÃO de cada ataque o dano DOBRA;
  *   - fase 1: no chão — investida CORRENDO de quatro + slash com salto (o core CARREGA antes) e lava em arco;
- *   - fase 2: RONDA — corre pelo chão, pula e AGARRA o teto por uma garra, e SAI pela direita;
+ *   - fase 2: RONDA — corre pelo chão, pula e AGARRA o teto por uma garra, e SAI pela direita. A VOLTA é um ataque
+ *     (17/09): entra galopando, para no meio da arena e RASGA o chão de baixo para cima, lançando METAL
+ *     INCANDESCENTE em arco até a nave;
  *   - fase 3: o BREU — a arena apaga; só o core dele revela o corpo, e a lava estoura em estilhaços.
  *
  * O `BossNucleo` continua sendo o `StageBoss` da cena: ele passa o SPRITE e o CORE que a cena já ligou
@@ -45,12 +47,16 @@ export type EstadoPredador =
   | 'salto'
   | 'fora'
   | 'aviso'
+  | 'entrada'
+  | 'rasgo'
   | 'urroBreu'
   | 'morto';
 
 type Pose = 'S' | 'luta' | 'teto';
 type Ancora = { x: number; lado: 'chao' | 'teto' };
 type Retangulo = { x: number; y: number; w: number; h: number };
+/** A bola de lava (arco), a gota do estilhaço (reta) e o metal incandescente do rasgo (arco, não estilhaça). */
+type TipoLava = 'bola' | 'gota' | 'metal';
 
 export class Predador {
   // ─── Knobs ───
@@ -89,6 +95,7 @@ export class Predador {
     'predador-quatro': { f: 0.85, pose: 'luta' },
     'predador-corrida': { f: 0.85, pose: 'luta' },
     'predador-slash': { f: 0.85, pose: 'luta' },
+    'predador-rasgo': { f: 0.85, pose: 'luta' },
     'predador-lava': { f: 1, pose: 'luta' },
     'predador-morte': { f: 1, pose: 'luta' },
     'predador-agarra': { f: 0.75, pose: 'luta' },
@@ -126,7 +133,10 @@ export class Predador {
   static readonly SLASH_QUADROS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
   static readonly SLASH_MS = 900;
   static readonly SLASH_SALTO_ATE = 0.45;
-  /** Pendurado: balança (laço 5..15 do `teto-balanco`) e arremessa no quadro ~10 do `teto-lava2`. */
+  /**
+   * Pendurado: balança (laço 5..15 do `teto-balanco`) e arremessa com a garra LIVRE (`teto-lava-b`, rodada 4 — 17/09:
+   * *"ele está agarrando com a mesma garra que ele joga a lava"*). A bola deixa a mão entre os quadros 10 e 11.
+   */
   static readonly BALANCO_QUADROS = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   static readonly BALANCO_MS = 1300;
   static readonly SALTO_TETO_MS = 850;
@@ -137,7 +147,7 @@ export class Predador {
   static readonly RECUP_SLASH = 1.0;
   static readonly TELEG_LAVA = 0.5;
   static readonly TETO_LAVA_MS = 1100;
-  static readonly TELEG_LAVA_TETO = 0.65;
+  static readonly TELEG_LAVA_TETO = 0.68;
   static readonly RECUP_LAVA = 0.6;
   static readonly DANO_RECUP = 2;
   static readonly LAVA_G = 260;
@@ -147,6 +157,22 @@ export class Predador {
   static readonly FORA_MIN = 1.0;
   static readonly FORA_MAX = 2.0;
   static readonly AVISO = 0.5;
+  /**
+   * A VOLTA QUE ATACA (17/09, pedido dele: *"antes a saída e reentrada tinha mais efeito visual e não de mecânica"*):
+   * galopa da borda direita até `RASGO_X`, para, e rasga o chão de baixo para cima. O metal sai do CHÃO à frente
+   * dele na fração `RASGO_SOLTA` do golpe, em arco com a gravidade da lava, mirado onde a nave estava quando ele
+   * parou. Depois do golpe, a recuperação (dano dobrado).
+   */
+  static readonly RASGO_X = GAME_WIDTH / 2;
+  static readonly RASGO_MS = 1100;
+  static readonly RASGO_QUADROS: number[] | undefined = undefined;
+  /** O arco do `upper-b` sobe do chão no quadro 12 de 17 (as garras cravam de 4 a 11 — é o aviso). */
+  static readonly RASGO_SOLTA = 0.7;
+  static readonly RECUP_RASGO = 0.9;
+  /** Peças de metal por fase (a volta só existe da fase 2 em diante). */
+  static readonly METAL_N = [0, 3, 4, 5];
+  static readonly METAL_VOO = 0.95;
+  static readonly METAL_ABRE = 30;
   static readonly PAUSA: [number, number][] = [[0, 0], [1.2, 2.0], [0.9, 1.6], [1.0, 1.7]];
   /** 0,96 deixava a pintura e a borda aparecendo (16/09: *"a fase pode escurecer mais"*). */
   static readonly BREU_ALPHA = 1;
@@ -179,7 +205,7 @@ export class Predador {
   private pulsoFase = 0;
   /** 0..1 — o brilho do core agora (a captura espera o pico e o vale). */
   pulso = 0;
-  private lavas: { b: Phaser.Physics.Arcade.Sprite; luz: Phaser.GameObjects.Image; bola: boolean }[] = [];
+  private lavas: { b: Phaser.Physics.Arcade.Sprite; luz: Phaser.GameObjects.Image; tipo: TipoLava }[] = [];
   private brasas!: Phaser.GameObjects.Particles.ParticleEmitter;
   private tween: Phaser.Tweens.Tween | null = null;
 
@@ -271,6 +297,7 @@ export class Predador {
     clipe('predador-quatro', 'predadorQuatroSheet', Predador.QUATRO_MS);
     clipe('predador-corrida', 'predadorCorridaSheet', Predador.CORRIDA_MS, -1, Predador.CORRIDA_QUADROS);
     clipe('predador-slash', 'predadorSlashSheet', Predador.SLASH_MS, 0, Predador.SLASH_QUADROS);
+    clipe('predador-rasgo', 'predadorRasgoSheet', Predador.RASGO_MS, 0, Predador.RASGO_QUADROS);
     clipe('predador-lava', 'predadorLavaSheet', 1000);
     clipe('predador-morte', 'predadorMorteSheet', Predador.MORTE_MS);
     clipe('predador-agarra', 'predadorAgarraSheet', Predador.SALTO_TETO_MS);
@@ -462,6 +489,8 @@ export class Predador {
       case 'surgindo':
       case 'salto':
       case 'slash':
+      case 'entrada':
+      case 'rasgo':
       case 'urroBreu':
         break;
 
@@ -510,12 +539,11 @@ export class Predador {
 
       case 'fora':
         if (this.estadoT <= 0) {
-          this.ancora = this.sortearAncora();
-          // O aviso: o core acende no ponto de entrada antes de ele aparecer.
-          const pose: Pose = this.ancora.lado === 'teto' ? 'teto' : 'luta';
-          const m = Predador.MIOLO[pose];
-          const y = this.yApoio(this.ancora.lado);
-          this.luz.setPosition(this.ancora.x + m.x * this.escala, y + m.y * this.escala);
+          // A volta é SEMPRE pelo chão (é dali que o rasgo sai). O aviso: o core acende na borda direita, na
+          // altura em que ele vai entrar galopando.
+          const m = Predador.MIOLO.luta;
+          const y = this.yApoio('chao');
+          this.luz.setPosition(GAME_WIDTH - 14, y + m.y * this.escala);
           this.mudar('aviso', Predador.AVISO);
         }
         break;
@@ -602,15 +630,17 @@ export class Predador {
   private arremessar(target: Phaser.Physics.Arcade.Sprite): void {
     const n = this.fase === 1 ? Phaser.Math.Between(1, 2) : Phaser.Math.Between(2, 3);
     const e = this.escala;
-    const bocaX = this.sprite.x - 70 * e;
-    const bocaY = this.ancora.lado === 'teto' ? this.sprite.y + 30 * e : this.sprite.y - 40 * e;
+    // A mão que solta a bola, em px virtuais. Pendurado: medida no `teto-lava-b` (clipe 50,192 → virtual −104,+43).
+    const teto = this.ancora.lado === 'teto';
+    const bocaX = this.sprite.x - (teto ? 104 : 70) * e;
+    const bocaY = this.sprite.y + (teto ? 43 : -40) * e;
     for (let i = 0; i < n; i++) {
       const T = Predador.LAVA_VOO * (0.85 + i * 0.18);
       const ax = target.x + (i - (n - 1) / 2) * 26;
       const ay = target.y;
       const vx = (ax - bocaX) / T;
       const vy = (ay - bocaY - 0.5 * Predador.LAVA_G * T * T) / T;
-      this.lancarLava(bocaX, bocaY, vx, vy, true);
+      this.lancarLava(bocaX, bocaY, vx, vy, 'bola');
     }
     this.brasas.explode(10, bocaX, bocaY);
     this.scene.cameras.main.shake(70, 0.004);
@@ -621,12 +651,12 @@ export class Predador {
    * no breu (*"lava é fogo, então brilha no escuro"*): a bola (núcleo branco-amarelo → laranja → vermelho),
    * uma luz ADD que tremula por cima dela e um rastro de brasas. Tudo acima da camada do breu.
    */
-  private lancarLava(x: number, y: number, vx: number, vy: number, bola: boolean): void {
+  private lancarLava(x: number, y: number, vx: number, vy: number, tipo: TipoLava): void {
     const b = this.enemies.enemyBullets.get(x, y) as Phaser.Physics.Arcade.Sprite | null;
     if (!b) return;
     b.setActive(true).setVisible(true);
     b.body!.enable = true;
-    b.setTexture(bola ? 'lavaBola' : 'lavaGota');
+    b.setTexture(tipo === 'bola' ? 'lavaBola' : tipo === 'gota' ? 'lavaGota' : 'metalBrasa');
     b.clearTint();
     b.setScale(1);
     b.setFlipX(false);
@@ -639,10 +669,10 @@ export class Predador {
     const luz = this.scene.add
       .image(x, y, 'luzRadial')
       .setBlendMode(Phaser.BlendModes.ADD)
-      .setTint(0xff6a18)
-      .setScale(bola ? 0.62 : 0.34)
+      .setTint(tipo === 'metal' ? 0xffb040 : 0xff6a18)
+      .setScale(tipo === 'bola' ? 0.62 : tipo === 'metal' ? 0.46 : 0.34)
       .setDepth(40);
-    this.lavas.push({ b, luz, bola });
+    this.lavas.push({ b, luz, tipo });
   }
 
   /** A gravidade da lava é DAQUI, não do pool (o `enemyBullets` é compartilhado com a fase inteira). */
@@ -653,12 +683,13 @@ export class Predador {
       return false;
     });
     for (const l of this.lavas) {
-      const { b, luz, bola } = l;
+      const { b, luz, tipo } = l;
+      const bola = tipo === 'bola';
       const body = b.body as Phaser.Physics.Arcade.Body;
-      if (bola) body.velocity.y += Predador.LAVA_G * dt;
+      if (tipo !== 'gota') body.velocity.y += Predador.LAVA_G * dt;
       b.setRotation(Math.atan2(body.velocity.y, body.velocity.x));
       luz.setPosition(b.x, b.y).setAlpha(0.65 + Math.random() * 0.35);
-      if (Math.random() < (bola ? 0.8 : 0.35)) this.brasas.emitParticleAt(b.x, b.y);
+      if (Math.random() < (tipo === 'gota' ? 0.35 : 0.8)) this.brasas.emitParticleAt(b.x, b.y);
 
       const bateuChao = b.y >= GROUND_Y - 4 && body.velocity.y > 0;
       const bateuTeto = b.y <= TETO_Y + 4 && body.velocity.y < 0;
@@ -667,7 +698,7 @@ export class Predador {
       const y = b.y;
       b.setData('lava', false);
       this.enemies.release(b);
-      this.brasas.explode(bola ? 14 : 4, x, y);
+      this.brasas.explode(tipo === 'gota' ? 4 : tipo === 'metal' ? 8 : 14, x, y);
       if (bola && this.fase === 3) this.estilhacar(x, y, bateuChao ? -1 : 1);
     }
   }
@@ -678,7 +709,7 @@ export class Predador {
       const k = i / (Predador.ESTILHACOS - 1);
       const ang = Phaser.Math.DegToRad(sentido < 0 ? -170 + k * 160 : 10 + k * 160);
       const v = Phaser.Math.Between(180, 220);
-      this.lancarLava(x, y - sentido * 6, Math.cos(ang) * v, Math.sin(ang) * v, false);
+      this.lancarLava(x, y - sentido * 6, Math.cos(ang) * v, Math.sin(ang) * v, 'gota');
     }
   }
 
@@ -704,6 +735,31 @@ export class Predador {
     };
     bola('lavaBola', 14);
     bola('lavaGota', 8);
+    // O METAL INCANDESCENTE: uma lasca comprida e irregular (gira com a velocidade), branco-amarelo no miolo e
+    // laranja-vermelho nas pontas — lê como metal em brasa, não como gota.
+    if (!this.scene.textures.exists('metalBrasa')) {
+      const tex = this.scene.textures.createCanvas('metalBrasa', 16, 8);
+      if (tex) {
+        const ctx = tex.getContext();
+        const g = ctx.createLinearGradient(0, 0, 16, 0);
+        g.addColorStop(0, '#8a1604');
+        g.addColorStop(0.3, '#ff7a10');
+        g.addColorStop(0.62, '#fff4c0');
+        g.addColorStop(0.85, '#ffd23a');
+        g.addColorStop(1, '#c83008');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.moveTo(0, 4);
+        ctx.lineTo(4, 1);
+        ctx.lineTo(11, 2);
+        ctx.lineTo(16, 4);
+        ctx.lineTo(12, 6);
+        ctx.lineTo(5, 7);
+        ctx.closePath();
+        ctx.fill();
+        tex.refresh();
+      }
+    }
     this.brasas = this.scene.add
       .particles(0, 0, 'puff', {
         lifespan: { min: 240, max: 480 },
@@ -850,16 +906,66 @@ export class Predador {
     });
   }
 
-  /** A volta: galopando pelo chão, ou balançando pelo teto, a partir da borda direita. */
+  /**
+   * A VOLTA (17/09): galopa da borda direita até o meio da arena, PARA, e rasga o chão de baixo para cima — o metal
+   * incandescente sobe em arco até a nave. Aviso (o core na borda) → galope → rasgo → recuperação.
+   */
   private reentrar(): void {
-    const destino = this.ancora;
     this.sprite.setVisible(true);
     this.coreBody.enable = true;
-    const y = this.yApoio(destino.lado);
-    this.mover(GAME_WIDTH + 90, y);
-    // `irPara` decide o gesto pelo lado de ONDE ele sai: fora da tela ele já está no lado do destino.
-    this.ancora = { x: GAME_WIDTH + 90, lado: destino.lado };
-    this.irPara(destino);
+    const y = this.yApoio('chao');
+    const x0 = GAME_WIDTH + 90;
+    const x1 = Predador.RASGO_X;
+    this.mover(x0, y);
+    this.ancora = { x: x1, lado: 'chao' };
+    this.mudar('entrada');
+    this.tocar('predador-corrida', 'predadorLuta');
+    this.corpoInteiro();
+    this.animarAte(((x0 - x1) / Predador.BOTE_VEL) * 1000, (k) => this.mover(Phaser.Math.Linear(x0, x1, k), y), () => this.rasgar());
+  }
+
+  private rasgar(): void {
+    this.mudar('rasgo');
+    this.tocar('predador-rasgo', 'predadorLuta');
+    this.corpoInteiro();
+    this.scene.cameras.main.shake(80, 0.004);
+    // A mira é de quando ele PARA: quem se move durante o golpe escapa.
+    const ax = this.nave?.x ?? 90;
+    const ay = this.nave?.y ?? 100;
+    let soltou = false;
+    this.animarAte(
+      Predador.RASGO_MS,
+      (k) => {
+        if (soltou || k < Predador.RASGO_SOLTA) return;
+        soltou = true;
+        this.lancarMetal(ax, ay);
+      },
+      () => {
+        if (!soltou) this.lancarMetal(ax, ay);
+        this.recuperando = true;
+        this.idle();
+        this.corpoCasca();
+        this.mudar('recupera', Predador.RECUP_RASGO);
+      },
+    );
+  }
+
+  /** O METAL INCANDESCENTE: sai do chão à frente das garras, num leque de arcos que caem onde a nave estava. */
+  private lancarMetal(ax: number, ay: number): void {
+    const n = Predador.METAL_N[this.fase];
+    const x0 = this.sprite.x - 60 * this.escala;
+    const y0 = Predador.CHAO_APOIO - 4;
+    for (let i = 0; i < n; i++) {
+      const T = Predador.METAL_VOO * (0.8 + i * 0.14);
+      const tx = ax + (i - (n - 1) / 2) * Predador.METAL_ABRE;
+      const vx = (tx - x0) / T;
+      const vy = (ay - y0 - 0.5 * Predador.LAVA_G * T * T) / T;
+      this.lancarLava(x0 + Phaser.Math.Between(-6, 6), y0, vx, vy, 'metal');
+    }
+    // O chão rasgado: um jorro de fagulhas e o tranco.
+    for (let i = 0; i < 26; i++) this.brasas.emitParticleAt(x0 + Phaser.Math.Between(-16, 16), y0 - Phaser.Math.Between(0, 10));
+    this.brasas.explode(18, x0, y0);
+    this.scene.cameras.main.shake(160, 0.009);
   }
 
   // ─── A luz do core e o breu ──────────────────────────────────────────────────
@@ -875,6 +981,11 @@ export class Predador {
       const k = Phaser.Math.Clamp(1 - this.estadoT / dur, 0, 1);
       periodo = Phaser.Math.Linear(0.55, 0.08, k * k);
       base = this.breu ? 0.1 : 0.3;
+      forte = 1;
+    } else if (this.estado === 'entrada') {
+      // Galopando para o rasgo: o core no ritmo mais rápido da carga — o golpe vem quando ele parar.
+      periodo = 0.1;
+      base = this.breu ? 0.2 : 0.4;
       forte = 1;
     } else if (this.estado === 'aviso') {
       // O aviso da reentrada precisa GRITAR: ele vem de fora da tela, e o jogador não o via.

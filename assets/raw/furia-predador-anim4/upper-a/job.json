@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "244797f6-7bf0-4a9e-8621-79763deb7693",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "crouched low on all fours, it drags one long bladed claw scraping along the ground in front of it and rips it violently upward in a rising uppercut slash, body springing up tall, sparks flying up, facing left, then settles",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}
