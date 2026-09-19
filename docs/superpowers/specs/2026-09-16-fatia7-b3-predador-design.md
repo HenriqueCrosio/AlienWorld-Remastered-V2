@@ -193,11 +193,26 @@ Esta seção **manda sobre as anteriores** onde elas divergem. O registro fino (
 **A rodada 3 foi jogada e APROVADA inteira** (andar no lugar, cair de quatro, galopar, slash com salto, agarrar o
 teto, pendurar, descer, ir de âncora em âncora). Ficaram dois defeitos e um pedido novo, resolvidos nas rodadas 4 e 5.
 
-### 8.1 O arremesso pendurado usa a garra LIVRE (rodada 4)
-*"ele está agarrando com a mesma garra que ele joga a lava"*. O `teto-lava2` soltava o teto para arremessar. O clipe
-novo é o **`teto-lava-b`** (`assets/raw/furia-predador-anim4/`): a garra erguida fica cravada no teto do começo ao
-fim e o braço de baixo arremessa. A boca da lava no teto passou a ser medida no clipe (−104, +43 virtuais) e o
-telégrafo foi de 0,65s para **0,68s** (a bola deixa a mão entre os quadros 10 e 11).
+### 8.1 O arremesso pendurado usa a garra LIVRE (rodada 4) — e é SEMPRE A MESMA GARRA (rodada 6) ✅
+*"ele está agarrando com a mesma garra que ele joga a lava"*. O `teto-lava2` soltava o teto para arremessar. O
+`teto-lava-b` (rodada 4) resolveu o teto — a garra erguida fica cravada do começo ao fim —, mas **criou outro**: o
+braço que enrolava passava ATRÁS do tronco e sumia, e o gerador trocava de membro no meio do gesto. Ele pegou
+jogando, em 18/09: *"quando o predador joga a lava, a animação confunde as garras, começa com a de trás e acaba com
+a da frente"*.
+
+**A arte final é o `teto-lava-f`** (`assets/raw/furia-predador-anim5/`, rodada 6): a garra da FRENTE **colhe a bola
+no core aceso** e a solta, visível nos 17 quadros, sem nunca cruzar para trás do corpo. **Jogado e APROVADO em
+19/09:** *"essa animação nova do predador tirando a lava do core ficou ótima e in-game melhor ainda"*.
+
+- **A lei que fica:** num corpo de dois braços iguais, dizer QUAL braço age não basta — o pedido tem de proibir a
+  passagem por trás (*"stays in front of the torso and fully visible in every frame"*). Encenação segura o que a
+  instrução não segura. E julgue clipe em 256² cheio (`scripts/_f4/_zoom-clipe.mjs`): na folha de meia escala a
+  troca de garra passa batida.
+- **A mão foi remedida:** o `f` solta na altura do PEITO, não lá embaixo como o `b`. O offset do teto em
+  `Predador.arremessar` foi de −104,+43 para **−115,+7** virtuais. O telégrafo fica em **0,68s** (a bola deixa a
+  mão entre os quadros 10 e 11, como antes). ⚠️ Trocar o clipe OBRIGA a remedir a mão.
+- Reserva guardada: `teto-lava-e` (o upper de baixo para cima) — `TETO_LAVA=… node scripts/_f4/_instalar-predador.mjs`.
+  Descartadas: `teto-lava-c` (vira jato) e `teto-lava-d` (clareia demais, contra o dark sci-fi).
 
 ### 8.2 A VOLTA É UM ATAQUE — o rasgo com metal incandescente (rodada 4, skill NOVA)
 Pedido dele: *"antes a saída e a reentrada tinham mais efeito visual e não de mecânica"*. A reentrada deixou de ser
@@ -232,3 +247,68 @@ efeito de cenário deste projeto:** assar em PIXEL, na resolução nativa, com a
 costuras acesas e dither Bayer, lascas de placa). O código de cena toca a arte assada e nada mais.
 
 **O critério de aceite (§6) segue aberto só no 8.3** — a rodada 5b não foi jogada até o fim de 17/09.
+
+---
+
+## 9. Revisões de 19/09 — o 5º teste jogado (esta seção prevalece sobre a §8 onde as duas divergirem)
+
+**O FIM DA MORTE foi jogado e APROVADO** em cinco dos sete itens: o corpo no chão (*"me lembra o corpo do Demon no
+Tibia, uma baita referência de boss"*), o rasgo (*"ficou mais bem acabado"*), as lascas (*"ajudam a criar mais caos
+no cenário"*), a crosta (*"melhorou muito desde a primeira versão"*) e o fecho. Sobraram dois pedidos, feitos na
+rodada 7.
+
+### 9.1 A poça cobre o chão INTEIRO, e o corpo afunda por dentro dela
+*"ela pode tomar mais alguns pixels para cima, para cobrir todo o chão, só verificar se o corpo afunda atrás da
+camada de lava e não na frente… afundar na frente dá impressão de estar caindo para outro local"*.
+
+**Não era ordem de camada** — medido em jogo, o corpo sempre esteve em depth 0 contra os 6 da poça. Era geometria: a
+faixa do chão tem 26px e a poça assada tem **36**, então parar na linha do chão jogava 10px da arte fora e deixava a
+crista ABAIXO do corpo (36,7px de altura na escala da luta). A lava nunca chegava nele.
+
+- `SOBE_ACIMA_PX` **10**: a crista sobe até y=180, usando a arte inteira. Isso também é o F7 (*"se levantar um pouco
+  mais a lava dá a impressão que é melhor sair dali logo"*);
+- `AFUNDA_PX` 30 → **36**: o topo visível do corpo vai de 155 a 180 e termina **coberto**;
+- `corpo.setDepth(min(depth, DEPTH_LAVA − 0,5))` — a garantia fica local, e não herdada do sprite do chefão.
+
+### 9.2 A lava DO CHÃO passa a sair do core (rodada 7)
+*"acho que vale gerar uma nova animação com ele tirando do core"*. O clipe velho (`anim/lava`, v3 da 1ª passada) era
+um arremesso genérico por cima do ombro, sem relação com o peito aceso — destoava do `teto-lava-f` aprovado. A arte
+nova é o **`lava-core-c`** (`assets/raw/furia-predador-anim6/`): o core **abre em brasa** nos quadros 7–9, a garra da
+frente colhe a bola ali e a empurra para a esquerda, sempre à frente do tronco (a lei da §8.1).
+
+⚠️ **`TELEG_LAVA` e `TELEG_LAVA_TETO` são SEGUNDOS, não fração do clipe.** Cada um tem de cair no quadro em que a
+bola larga a garra daquela arte; trocar o clipe sem refazer a conta põe a bola nascendo no vazio. No `lava-core-c` a
+bola aparece no quadro **13 de 17** (76%), então `LAVA_MS` **700** (era 1000, cravado no código) com `TELEG_LAVA`
+**0,53s** — o aviso fica igual ao de antes, que ele aprovou. Esticar para 1000ms daria 0,76s de aviso: mais fácil de
+desviar, e isso é decisão de luta, não de arte. A mão do chão: **−70,−40 → −83,+5** virtuais
+(`scripts/_f4/_medir-mao.mjs`).
+
+### 9.3 O bloco C, fechado
+O urro *"ficou ótimo"* · a emenda vertical da pintura do núcleo **fica como está** (*"nem consegui perceber, é muita
+informação para reparar"*) · `nucleo.png` e `nucleo-beat-sheet.png` **não são apagados**: ficam *"como scrap ou
+substitutos caso precisemos futuramente"*.
+
+### 9.4 ✅ JOGADA E APROVADA (19/09) — o B3 está fechado
+*"está ótimo"* (o corpo afundando) · *"ficou bom assim"* (a poça mais alta) · *"a bola sai da mão e a lava sai do
+core dele"* · *"ficou bom"* (o aviso). A arena do golfinho, no mesmo teste: *"a dificuldade está bem balanceada e
+punitiva se errar a batalha"* — fica como está.
+
+**Um defeito pego e consertado na hora:** *"existe um artefato (bola de lava) da própria animação que vai para
+baixo no movimento"*. A bola PINTADA seguia na garra nos quadros 14–16 e descia com o braço, então havia duas bolas
+na tela depois do lançamento. O clipe passou a ser cortado no 14 (`LAVA_QUADROS`, 15 quadros) e `LAVA_MS` 700 →
+**580**, o que põe o telégrafo de volta em **0,5s** caindo no quadro 13 — a soltura. Sobra um quadro de
+acompanhamento e a pintada nunca desce.
+
+---
+
+## 10. ⚠️ FORA DESTA SPEC — a luta do GUARDIÃO (aberta em 19/09)
+
+O mesmo teste que fechou o B3 abriu um problema no B1, que é de LUTA e não de arte: *"a luta com o guardião está a
+mais fácil de todas… a investida é impossível de desviar… tirando ela, os 3 tiros são muito fáceis"*. Medido em
+jogo (`scripts/_f4/_medir-guardiao-luta.mjs`): na investida o corpo é **147×133px** num vão jogável de **160px**
+(y 30..190), o que deixa 27px de folga — ~20px depois de descontar a nave, divididos entre em cima e embaixo — e
+ainda por cima a investida é mirada na altura dela, com deriva de até 70px/s durante a travessia. Os glóbulos do
+leque andam a **100px/s** contra os **110px/s** da nave: projétil mais lento que quem desvia.
+
+**Nada foi mexido.** Isto é comportamento, não arte: precisa de brainstorming e decisão dele antes de qualquer
+código, e sai numa spec própria.

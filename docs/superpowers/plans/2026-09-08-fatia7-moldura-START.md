@@ -32,7 +32,7 @@ Sondas 15/09: `probe-f4-moldura` ✔ · `probe-f4-visual` ✔ · `probe-f4-golfi
 **🟢 BLOCO B · B1 — O GUARDIÃO NOVO — JOGADO E APROVADO (15/09):** *"o novo modelo ficou melhor que o
 outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeiro** — B1 ✅ → **B3 (a
 2ª forma: o PREDADOR, rodada 5b — o fim da morte — à espera do teste jogado; ver 🚦)** → B2 (a posição) → M4 (portas, borda C, esfíncter). Os cortes da tabela amarela
-(M3, `f4Vivo`, `f4Veu`) seguem sem resposta — ver "🧭 O MAPA PARA FECHAR A FATIA 7".
+(M3, `f4Vivo`, `f4Veu`) foram **riscados em 19/09** — ver "🧭 O MAPA PARA FECHAR A FATIA 7".
 - **Arte:** a DELE (PixelLab `9436240c`), montada sem geração por `_f4/_instalar-guardiao.mjs` —
   `guardiao.png`, `guardiao-idle-sheet.png`, `guardiao-morte-sheet.png` e `guardiao-destruido.png`,
   todos no MESMO quadro de 256². Os crus seguem em `assets/raw/anim-guardiao-novo/`.
@@ -51,26 +51,33 @@ outro"*. A ordem para fechar a Fatia 7, decidida por ele: **obrigatório primeir
   medido no `worldstep`: `body.center` = `core.x/y`. A captura `_f4/_ver-guardiao.mjs` desenha pelo centro.
 - Sondas: `probe-stage4` ✔ (bala real fere a massa, troca, coração, cutscene final) · typecheck ✔.
 
-**🟠 BLOCO B · B3 — A 2ª FORMA É O PREDADOR (16–17/09). CINCO RODADAS, QUATRO TESTES JOGADOS. Aprovados: a
+**🟢 BLOCO B · B3 — O PREDADOR: FECHADO (16–19/09).** Sete rodadas, seis testes jogados. A última — o fim da morte
+com a poça cobrindo o chão e a lava do chão tirada do core — foi aprovada em 19/09. **🔴 Mas o teste de 19/09 abriu
+um item NOVO e grande: a luta do GUARDIÃO precisa ser repensada** (a investida é impossível de desviar, os 3 tiros
+são fáceis demais) — ver o bloco 🔴 na 🚦. O registro do B3 abaixo fica como histórico.
+
+**🟠 O REGISTRO DO B3 (16–17/09). CINCO RODADAS, QUATRO TESTES JOGADOS. Aprovados: a
 mecânica, o surgimento/giro, o breu, a lava, a fumaça da troca, o andar no lugar, a investida de quatro com o
 slash saltado, o teto por uma garra, o arremesso com a garra livre e a VOLTA QUE ATACA (o rasgo do chão + o metal
 incandescente). FALTA JOGAR: a rodada 5b — o FIM DA MORTE** (o piso racha, estoura, a lava sobe e o corpo afunda),
-refeita em arte assada em pixel depois de ele reprovar a 1ª versão. Ver 🚦 e ⏸️ logo abaixo.
+refeita em arte assada em pixel depois de ele reprovar a 1ª versão. A rodada 6 (18–19/09) — o arremesso do teto
+refeito, porque a garra trocava no meio do gesto — **já foi jogada e APROVADA**: *"ficou ótima e in-game melhor
+ainda"*. Ver 🚦 e ⏸️ logo abaixo.
 
-Branch `feat/fase4-visual`. ⚠️ **As rodadas 4 e 5 ainda NÃO ESTÃO COMMITADAS** (último commit: `16180c9`, os docs
-de 16/09) e nada foi empurrado: o `origin` segue em `6c2fe4f`. Commitar e/ou empurrar é decisão dele — o remoto é
-o V2; NUNCA o `legacy`.
+Branch `feat/fase4-visual`. As rodadas 4 e 5 foram commitadas em 17/09 (`c5d6816`, `c24451d`, `5867c27`); **a rodada
+6 ainda NÃO está commitada**. Nada foi empurrado: o `origin` segue em `6c2fe4f`. Commitar e/ou empurrar é decisão
+dele — o remoto é o V2; NUNCA o `legacy`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 17/09 eu joguei
-> e aprovei a rodada 4 do predador (a volta que ataca: ele entra galopando, para no meio e rasga o chão lançando
-> metal incandescente) e o arremesso pendurado com a garra livre. Depois você refez o FIM DA MORTE — o piso racha,
-> estoura, a lava sobe até a linha do chão e o corpo afunda —, primeiro em `Graphics` (reprovei: *ficou gerado e
-> sem custos*) e depois em arte ASSADA em pixel com a paleta da faixa do chão. Essa última eu ainda não tinha
-> jogado. Joguei agora e: <o que achou, item a item da 🚦>. Siga daí."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 19/09 fechamos
+> o B3 (o predador) e REDESENHAMOS A LUTA DO GUARDIÃO: ele ganhou uma SERRA lançada num cabo, que crava nas
+> bordas e é onde ele fica exposto, a salva passou a cobrir as bordas, e a luta escala em 3 degraus de vida.
+> Joguei e aprovei tudo isso. Faltavam só duas coisas que você mexeu DEPOIS do meu teste e eu ainda não vi em
+> jogo: o glóbulo novo (a ESCÓRIA) e a altura nova do metal do rasgo. Joguei agora e: <o que achou das duas>.
+> Se estiver bom, seguimos o roadmap: B2 → M4 → fechar a Fatia 7."**
 
 Se ele chegar SEM ter jogado: suba o localhost (`npm run dev` → `L` → `G`) e entregue o roteiro da 🚦 antes de
 qualquer outra coisa — **nada de gerar arte nem mexer em knob sem o teste dele.**
@@ -78,6 +85,28 @@ qualquer outra coisa — **nada de gerar arte nem mexer em knob sem o teste dele
 ---
 
 ## 🚦 O QUE FAZER PRIMEIRO NA PRÓXIMA SESSÃO
+
+### 🎯 O TESTE CURTO — duas coisas, e só elas
+
+Tudo o mais foi jogado e aprovado em 19/09. Sobraram **duas mudanças feitas DEPOIS do teste dele**, que ninguém
+viu em jogo ainda. `npm run dev` → `L` → `G` → mate o guardião → mate o predador.
+
+| # | o que olhar | a pergunta | o knob |
+|---|---|---|---|
+| **E1** | **o glóbulo da salva do guardião** — agora é a **escória** (crosta escura com veios de lava), escolha dele; eu tinha instalado a lasca | lê bem nos 16×8? some no fundo escuro, ou ficou na medida? | trocar é um comando: `GLOBULO=assets/raw/globulo-guardiao/2b-lasca.png node scripts/_f4/_instalar-serra.mjs` |
+| **E2** | **a altura do metal do rasgo** (o predador, na volta que ataca) — `METAL_VOO` 0,95 → **1,5** | força a desviar agora? ficou alto demais? | `METAL_VOO` em `Predador.ts`. 1,5 → a mais alta sobe **152px** (y=34, o teto); 1,35 → 132px (y=54, deixa 24px de faixa livre no topo). Medir: `node scripts/_f4/_medir-metal.mjs` |
+
+⚠️ **O dobro literal que ele pediu no metal não cabe na arena:** do chão (186) ao teto (30) há 156px, e o dobro
+seriam 184. O 1,5 é o máximo que a arena comporta — é o *"menos um pouco"* dele.
+
+**Se as duas passarem, a Fatia 7 volta ao roadmap:** **B2** (a posição do guardião no alto-direita, cortado pela
+borda) → **M4** (as 3 portas com arte final, a borda C grossa, o esfíncter) → fechar a fatia com merge `--no-ff`
+em `main`. A tabela amarela (M3, `f4Vivo`, `f4Veu`) foi **riscada inteira** em 19/09 e a dificuldade do golfinho
+foi **aprovada**, então não sobra mais nada de decisão pendente antes do B2.
+
+---
+
+### 📜 O registro das rodadas — tudo abaixo já foi jogado e aprovado
 
 ### 🆕 17/09 — o 3º teste jogado (a rodada 3) e a RODADA 4 (jogada e APROVADA — ver a rodada 5 abaixo)
 **Aprovado na rodada 3:** A1 o andar (*"não parece mais deslizar"*) · A2 dá tempo de sair · A3 *"parece uma investida de
@@ -133,8 +162,8 @@ Sondas: `probe-stage4` ✔ · typecheck ✔ · build ✔. Captura: `folhas/2026-
 
 **O roteiro do próximo teste (R5):** as gretas dão o aviso do que vem? · o estouro do piso tem peso? · a lava sobe
 rápido ou devagar demais (`SOBE_MS`)? · o corpo afunda fundo o bastante (`AFUNDA_PX` 30)? · a poça parada até a
-cutscene cansa (`CORPO_FICA_MS` 4200)? · **e o C da rodada 3 segue sem resposta** (a lava do chão e o urro são
-clipes da 1ª passada, a emenda vertical da pintura, e o `nucleo.png`/`nucleo-beat-sheet.png` sem uso no disco).
+cutscene cansa (`CORPO_FICA_MS` 4200)? · e o C da rodada 3 (📜 **tudo respondido em 19/09** — ver o bloco de 19/09
+acima: o urro ficou, a emenda da pintura fica como está, o `nucleo.png` fica como scrap e a lava do chão foi refeita).
 
 ---
 
@@ -142,6 +171,170 @@ clipes da 1ª passada, a emenda vertical da pintura, e o `nucleo.png`/`nucleo-be
 `npm run dev` → http://localhost:5173 → `L` (Fase 4) → `G` (pula para a arena do chefão). Mate o GUARDIÃO para
 ver a troca. As fases do predador vêm pela vida (66% e 33%): jogue a luta inteira **até matá-lo** — o que falta
 julgar é justamente o que vem DEPOIS do golpe final, e dura 4,2s até a cutscene.
+
+### 🔨 19/09 — A LUTA DO GUARDIÃO FOI REDESENHADA E IMPLEMENTADA (à espera do teste jogado)
+
+Spec própria: **`docs/superpowers/specs/2026-09-19-fase4-luta-guardiao-design.md`** — o desenho saiu de um
+brainstorming com ele, decisão por decisão. O resumo:
+
+- **a investida NÃO muda.** Ele descobriu jogando que ela já tem saída (*"testei ficar bem nos cantos e, de
+  alguma forma, eu não tomei o dano"* — é a folga de ~20px medida), então a investida em X que tínhamos
+  desenhado foi **cortada**: *"não vamos precisar criar a skill que citei de investir na diagonal"*;
+- **a SERRA** (`src/entities/SerraGuardiao.ts`, arquivo próprio): conjurada num **cabo** como os que prendem o
+  guardião, com um **fio de aviso** marcando a primeira diagonal (sorteada entre 24° e 48°), sobe e **crava** na
+  borda de cima girando travada 2×, desce e crava embaixo 1×, sobe e sai. **A bala ATRAVESSA** (ela vive em
+  `BossNucleo.perigos`, contra o qual ninguém registra as balas do jogador) e o **cabo é só visual**;
+- **a CRAVADA é a janela de dano**, e paga: `DANO_CRAVADA` **×2**. A razão é medida — a nave atira para a
+  DIREITA, então só serve para ela um guardião parado e à direita; na investida ele termina ATRÁS dela;
+- **a salva cobre as BORDAS** (`SALVA_ABRE` 96°) e passou de 100 para **150 px/s** — acima dos 110 px/s da nave,
+  senão não é ameaça. Isso é o que torna caro o canto em que a investida te põe: os dois ataques passam a se
+  contradizer, que é de onde vem a dificuldade;
+- **escala em 3 degraus** por vida (66% / 33%), como o predador: a pausa entre skills cai (4,2 → 3,4 → 2,6s), a
+  salva ganha um glóbulo (3 → 4 → 5) e no último degrau a serra dá **uma cravada a mais**. HP fica em **90**.
+
+**A arte:** a serra saiu de 4 candidatas (`folhas/2026-09-19/serra-candidatas.png`) — a **`a-disco`** é a única
+que lê como serra nos ~44px que tem na tela e respeita a lei do dark sci-fi. Dois clipes (giro no voo, travada),
+instalados por `scripts/_f4/_instalar-serra.mjs`. ⚠️ **Nada de `setRotation`**: girar em tempo de jogo reamostra
+o pixel e alisa o traço; o giro é ARTE. O glóbulo novo ainda está **em candidatura** (`glob2-*`, 32×16 deitadas
+para a esquerda — as primeiras saíram redondas e o glóbulo de hoje é 12×5).
+
+**Duas coisas consertadas já na captura:** o cabo saiu com o tom ESCURO dos cabos dele (0x282018) e sumiu contra
+a pintura — passou para o tom aceso medido no PNG (0x604838); e a âncora saía por cima, o que fazia a primeira
+diagonal virar um toco de 47px — passou para baixo do centro (`G_CABO_Y` −46 → **+20**).
+
+Sondas: `probe-stage4` ✔ · typecheck ✔ · build ✔ · **`_f4/_provar-serra.mjs` ✔** (a serra FERE por contato —
+a captura mostra a coreografia, mas não prova colisão; esta põe a nave no caminho e conta as vidas).
+Capturas: `folhas/2026-09-19/serra-em-jogo.png` (14 fotos, rotuladas pelo estado do jogo).
+
+**✅ JOGADA E APROVADA NA PRIMEIRA (19/09):** G1 *"o ângulo fica bom de perceber, mas com uma certa dificuldade
+saudável"* · G2 *"dão tempo"* · G3 *"o canto: é preciso de uma mecânica de atrair a investida para um lado e
+descer ou subir no canto na hora certa. A salva dificulta de forma saudável"* — **é exatamente a tensão que o
+desenho buscava**: o canto deixou de ser um estacionamento e virou uma jogada de tempo · G4 *"fica boa de lutar,
+os degraus sobem sim"* · G5 *"está num tamanho ótimo"*.
+
+**A única troca pedida:** o glóbulo passou da `2b-lasca` para a **`2d-escoria`** (*"quero o glóbulo seja a
+escória"*) — crosta escura com veios de lava. Já é o padrão do instalador.
+
+---
+
+### ✅ 19/09 — a RODADA 8: o metal do rasgo sobe quase o dobro
+
+*"Na skill onde ele avança e crava as garras, jogando estilhaço de metal em lava para cima, quero que seja mais
+alto, para forçar a nave a desviar mais, hoje em dia está muito baixo, pode subir o dobro ou menos um pouco."*
+
+**A causa, medida** (`scripts/_f4/_medir-metal.mjs`, escrita para isto): não existe knob de altura — a velocidade
+das lascas é RESOLVIDA para cair onde a nave estava, então quem manda na altura é o TEMPO DE VOO. Com
+`METAL_VOO` 0,95 o ápice caía **exatamente na altura da nave** (92px acima do chão, com a nave em y=110): o arco
+nunca passava por cima dela, e era por isso que parecia raso.
+
+⚠️ **O dobro literal não cabe na arena:** do chão (186) ao teto (30) há **156px**, e o dobro seriam 184.
+`METAL_VOO` **0,95 → 1,5** põe a lasca mais alta em **152px** (y=34), **1,65×** — o teto da arena, que é o
+*"menos um pouco"* dele. O leque inteiro passou a cobrir y 34/56/76/92 contra os 94/101/111/118 de antes.
+Medidas com a nave presa em y=110, para as duas leituras serem comparáveis. Captura: `folhas/2026-09-19/predador-r8.png`.
+
+---
+
+### ✅ 18–19/09 — a RODADA 6: o arremesso do teto refeito (JOGADA E APROVADA)
+
+Antes de qualquer outra coisa nesta sessão ele apontou: *"quando o predador joga a lava, a animação confunde as
+garras, começa com a de trás e acaba com a da frente"*. **Confirmado na folha quadro a quadro**
+(`folhas/2026-09-18/r6-teto-lava-b-a-troca.png`): nos quadros 6–8 do `teto-lava-b` o braço que enrola passa ATRÁS
+do tronco e some; quando a lava sai (10–13) quem aparece estendido é o braço da frente. O gerador troca a
+identidade do membro no meio do gesto.
+
+**A lei que sai disto:** num bicho com dois braços iguais, o gerador perde o fio quando o membro sai de vista. O
+pedido tem de proibir a passagem por trás — *"stays in front of the torso and fully visible in every frame"* — e
+não só dizer qual braço trabalha. Encenação resolve o que a instrução não segura.
+
+**4 candidatas, PixMiniMax, 16 quadros, 8 gerações** (`assets/raw/furia-predador-anim5/`, folha
+`folhas/2026-09-18/r6-candidatas.png`) — todas com o braço de cima travado no teto:
+- `teto-lava-c` (recolhe no peito e chicoteia) — **vira jato**: sai um feixe que lê como cuspe, não como arremesso;
+- `teto-lava-d` (arco por cima) — **clareia demais**: o braço vira chicote de fogo amarelo-branco, contra o dark sci-fi;
+- `teto-lava-e` (upper, de baixo para cima) — a identidade da garra se segura, mas **9 quadros mortos** antes do golpe. **É a reserva** (`TETO_LAVA=assets/raw/furia-predador-anim5/teto-lava-e node scripts/_f4/_instalar-predador.mjs`);
+- ✅ **`teto-lava-f` — a INSTALADA**: a garra da FRENTE colhe a bola no core aceso e a solta, visível nos 17 quadros,
+  sem nunca cruzar para trás. Fica escura, na paleta do bicho.
+
+⚠️ **A mão foi REMEDIDA:** o `f` solta na altura do PEITO, não lá embaixo como o `b`. Em `Predador.arremessar`, o
+offset do teto passou de **−104,+43** para **−115,+7** virtuais (a bola no quadro 11 está em clipe 47,159; com
+`TELEG_LAVA_TETO` 0,68 de 17 quadros a soltura cai no quadro 11,6). O knob do telegrafo **não mudou**.
+Ferramenta nova: `scripts/_f4/_zoom-clipe.mjs` (um clipe em 256² cheio — foi na folha de meia escala que a troca de
+garra passou batida) e `scripts/_f4/_ver-teto-lava.mjs` (o gesto em jogo, rotulado pelo QUADRO do clipe, não por ms:
+cada screenshot custa 100–300ms e contar ms mente). Prova: `folhas/2026-09-18/teto-lava-em-jogo.png` (12 fotos,
+q1→q17; a lava nasce entre q10 e q12). Sondas: `probe-stage4` ✔ · typecheck ✔ · build ✔.
+
+**✅ JOGADO E APROVADO EM 19/09:** *"essa animação nova do predador tirando a lava do core ficou ótima e in-game
+melhor ainda"*. **O R6 está fechado** — a garra não troca mais, e a bola sai da mão. O knob do telégrafo fica em 0,68.
+
+---
+
+### 🆕 19/09 — o 5º teste jogado: o FIM DA MORTE passou, e a RODADA 7 fecha os dois pedidos
+
+**Aprovado, jogado:** F1 *"o corpo no chão ficou ótimo, me lembra o corpo do Demon no Tibia, uma baita referência de
+boss"* · F2 *"essa nova geração deixou mais bem acabado e ficou ótimo"* · F3 *"as lascas ajudam a criar mais caos no
+cenário"* · F5 *"as novas gerações de placas, costuras melhorou muito desde a primeira versão"* · F7 *"fecha bem"*.
+**Bloco C:** o urro *"ficou ótimo"* (C2 fechado) · a emenda vertical da pintura *"nem consegui perceber, é muita
+informação para reparar"* — **fica como está** (C3 fechado) · `nucleo.png`/`nucleo-beat-sheet.png` ficam no disco
+*"como scrap ou substitutos caso precisemos futuramente"* — **não apagar** (C4 fechado).
+
+| o que ele viu | o que mudou (rodada 7) |
+|---|---|
+| F4/F6 *"ela pode tomar mais alguns pixels para cima, para cobrir todo o chão, só verificar se o corpo afunda atrás da camada de lava e não na frente"* · *"afundar na frente dá impressão de estar caindo para outro local"* | **não era ordem de camada** — o corpo sempre esteve em depth 0 contra os 6 da poça (medido em jogo, `_f4/_ver-fim.mjs` despeja a ordem das camadas). Era GEOMETRIA: a faixa do chão tem 26px (216 − 190) e a poça ASSADA tem **36**, então parando na linha do chão 10px da arte eram jogados fora **e a crista ficava abaixo do corpo**, que tem 36,7px de altura na escala da luta. Agora `SOBE_ACIMA_PX` 10 leva a crista para y=180 — a arte inteira, 10px acima do chão — e `AFUNDA_PX` 30 → **36**. Medido: o topo visível do corpo vai de 155 a 180 e a sonda fecha em **CORPO COBERTO**. De quebra atende o F7 (*"se levantar um pouco mais a lava dá a impressão que é melhor sair dali logo"*). Garantia local: `corpo.setDepth(min(depth, DEPTH_LAVA − 0,5))`, para o dia em que alguém levantar a camada do predador |
+| C1 *"acho que vale gerar uma nova animação com ele tirando do core"* (a lava do chão) | **`lava-core-c`** (`assets/raw/furia-predador-anim6/`, 4 candidatas, 8 gerações): o core do peito **abre em brasa** (quadros 7–9), a garra da frente colhe a bola ali e a empurra para a esquerda. O clipe velho (`anim/lava`, v3 da 1ª passada, 9 quadros) era um arremesso genérico por cima do ombro, sem relação nenhuma com o peito aceso |
+
+**⚠️ O achado que vale para sempre: `TELEG_LAVA` e `TELEG_LAVA_TETO` são SEGUNDOS, não fração do clipe**
+(`mudar(estado, dur)` grava `estadoT`). Cada um tem de cair no quadro em que a bola larga a garra DAQUELA arte —
+trocar o clipe sem refazer a conta põe a bola nascendo no vazio. No `lava-core-c` a bola aparece no quadro **13 de
+17** (76%), então o clipe passou a durar `LAVA_MS` **700** (era 1000, cravado no código) com `TELEG_LAVA` 0,5 →
+**0,53s**: o aviso fica igual ao que ele já aprovou. Esticar para os 1000ms antigos daria 0,76s de aviso — mais
+fácil de desviar, e isso é decisão de luta, não de arte. A mão do chão foi remedida: **−70,−40 → −83,+5** virtuais.
+
+**Candidatas guardadas** (`folhas/2026-09-19/r7-lava-candidatas.png`): `lava-core-a` (overhand — a garra some e
+brota outra no fim), `lava-core-b` (por baixo — gesto pequeno, a bola fica boiando), `lava-core-d` (o core racha e a
+lava CAI no pé — lê como vazamento, não como arremesso; a abertura do peito é bonita e fica de ideia). Trocar:
+`LAVA=assets/raw/furia-predador-anim6/lava-core-a node scripts/_f4/_instalar-predador.mjs`.
+
+Ferramentas novas: `_f4/_medir-mao.mjs` (onde a bola deixa a garra, em px virtuais, por clipe) · `_f4/_ver-fim.mjs`
+(o fim da morte em jogo com a ordem das camadas e a geometria, pelo relógio do JOGO) · `_f4/_ver-arremesso.mjs`
+(`ONDE=chao|teto`). Provas: `folhas/2026-09-19/fim-em-jogo.png` · `r7-lava-chao-em-jogo.png` · `r7-lava-core-c.png`.
+Sondas: `probe-stage4` ✔ · typecheck ✔ · build ✔.
+
+**✅ A RODADA 7 FOI JOGADA E APROVADA (19/09):** S1 *"está ótimo"* · S2 *"ficou bom assim"* · S3 *"a bola sai da mão
+e a lava sai do core dele"* · S4 *"ficou bom"*. **O B3 está fechado.**
+
+**Um defeito pego no S3, e consertado na hora:** *"existe um artefato (bola de lava) da própria animação que vai
+para baixo no movimento. Mas não atrapalha muito"*. A bola PINTADA continua na garra nos quadros 14–16 do
+`lava-core-c` e desce com o braço — então, depois que o motor lançava a de verdade, havia DUAS na tela. O clipe
+passou a ser CORTADO no quadro 14 (`LAVA_QUADROS`, 15 quadros), com `LAVA_MS` 700 → **580** para o telégrafo cair
+exatamente no 13, onde a bola deixa a garra: `TELEG_LAVA` volta a **0,5s**, o número que ele já tinha aprovado.
+Sobra um só quadro de acompanhamento (~39ms) e a pintada nunca chega a descer.
+
+**✅ E a arena do golfinho (o item 🔵 de fechamento) também foi jogada e aprovada:** *"a dificuldade está bem
+balanceada e punitiva se errar a batalha. Está ótimo assim"*. O `corredor` de t=38,5 com `rate 2.6` **fica como
+está**.
+
+### 🔴 19/09 — O ACHADO NOVO: A LUTA DO GUARDIÃO PRECISA SER REPENSADA
+
+Ele aprovou a RESPIRAÇÃO do guardião (*"está boa"*, o miolo que quase apaga não atrapalha) e, no mesmo fôlego,
+abriu um problema maior, que é de LUTA e não de arte:
+
+> *"nós vamos ter que repensar a luta com o guardião, está a mais fácil de todas, o guardião está bem fraco em
+> questão de ataque. E o ataque de investida dele está desbalanceado, pois é impossível desviar desse ataque. Ou
+> seja, tirando a investida impossível de desviar, os 3 tiros dele são muito fáceis."*
+
+**Medido em jogo** (`scripts/_f4/_medir-guardiao-luta.mjs`), e os números explicam as DUAS queixas de uma vez:
+
+| o que | medida | o que significa |
+|---|---|---|
+| o corpo na INVESTIDA (`corpoInteiro`, 210×190 na escala 0,7) | **147×133px na tela** | ocupa 133 dos **160px** do vão jogável (y 30..190) |
+| a folga | **27px**, menos os 6,3px do corpo da nave | **~20px de escapatória**, divididos entre em cima e embaixo — ~10px de cada lado |
+| a mira | `setVelocity(-300, clamp((alvo.y − y)·1,2, ±70))` | vai na altura da nave E ainda deriva até 70px/s na direção dela durante a travessia |
+| os glóbulos do leque | **100 px/s**, 3 a cada 1,8s | a nave anda a **110 px/s** (`FreeController.SPEED`): ela é mais rápida que o tiro |
+
+**Não é gosto, é geometria:** um corpo que cobre 83% do vão, mirado em você, não tem desvio; e um projétil mais
+lento que a nave não é ameaça. ⚠️ **Nada disso foi mexido** — repensar a luta é decisão dele, e é comportamento,
+não arte. O lugar disso é um brainstorming antes de qualquer código.
+
+---
 
 ### 2. O roteiro do teste — o FIM DA MORTE (rodada 5b), item a item
 
@@ -159,8 +352,9 @@ julgar é justamente o que vem DEPOIS do golpe final, e dura 4,2s até a cutscen
 `SEMENTES`, espessura da costura `LIMIAR_COSTURA`/`LIMIAR_BOCA`, largura do vão da fenda `abertura`, a paleta `P`),
 e depois `node scripts/_f4/_assar-fim-f4.mjs`. **Não** volte a desenhar isso com `Graphics`.
 
-**Segue sem resposta, de rodadas anteriores (o bloco C):** a lava do chão e o urro ainda são clipes v3 da 1ª
-passada · a emenda vertical da pintura do núcleo · `nucleo.png`/`nucleo-beat-sheet.png` parados no disco.
+**📜 O bloco C, FECHADO em 19/09:** a lava do chão foi refeita (`lava-core-c`, tirada do core) · o urro *"ficou
+ótimo"* e continua o clipe v3 · a emenda vertical da pintura fica como está (*"nem consegui perceber"*) ·
+`nucleo.png`/`nucleo-beat-sheet.png` ficam no disco *"como scrap ou substitutos"* — não apagar.
 
 ---
 
@@ -204,8 +398,8 @@ a morte no chão (desaba e fica estendido) · a saída pela direita e o aviso da
 
 ### 4. Depois do B3 aprovado — a fila obrigatória dele
 **B2** (a posição do guardião no alto-direita, cortado pela borda) → **M4** (as 3 portas com arte final, a borda C
-grossa, o esfíncter). E os cortes da tabela amarela (M3, `f4Vivo`, `f4Veu`) seguem sem resposta — ver "🧭 O MAPA
-PARA FECHAR A FATIA 7" no fim deste arquivo. Fechar a fatia = merge `--no-ff` de `feat/fase4-visual` em `main`.
+grossa, o esfíncter). Os cortes da tabela amarela (M3, `f4Vivo`, `f4Veu`) foram todos
+**riscados em 19/09** — ver "🧭 O MAPA PARA FECHAR A FATIA 7" no fim deste arquivo. Fechar a fatia = merge `--no-ff` de `feat/fase4-visual` em `main`.
 
 ---
 
@@ -314,13 +508,15 @@ apontar o `_instalar-predador.mjs` (`PULO=… MORTE=…` no ambiente) e reinstal
 | a carga e a queda de quatro (A2) | `CARGA` por fase [1,5 · 1,3 · 1,6], `CARGA_MIN` 0,9, `QUATRO_MS` 380 |
 | o galope (A3) | `BOTE_VEL` 300, `CORRIDA_QUADROS` (1..15), `CORRIDA_MS` 620 |
 | o slash com salto (A4) | `SLASH_QUADROS` (2..16 do `slash-a`), `SLASH_MS` 900, `SLASH_SALTO_ATE` 0,45 (a fração em que ele chega no alto); o alvo do salto é a altura da nave no FIM da carga, preso entre y=70 e o chão |
-| subir, pendurar, descer, balançar (A5–A9) | `SALTO_TETO_MS` 850, `BALANCO_QUADROS` (5..15), `BALANCO_MS` 1300, `TETO_LAVA_MS` 1100, `TELEG_LAVA_TETO` 0,65, `ANCORAS` (x do teto 322/262) |
+| subir, pendurar, descer, balançar (A5–A9) | `SALTO_TETO_MS` 850, `BALANCO_QUADROS` (5..15), `BALANCO_MS` 1300, `TETO_LAVA_MS` 1100, `TELEG_LAVA_TETO` 0,68, `ANCORAS` (x do teto 322/262) |
+| o arremesso do teto (rodada 6, ✅ aprovada) | a arte é o `teto-lava-f` (reserva: `teto-lava-e`, por `TETO_LAVA=`); a MÃO que solta é o offset do teto em `Predador.arremessar` (−115,+7 virtuais) — ⚠️ trocar o clipe OBRIGA a remedir a mão |
 | a queda do corpo morto (A10) | `QUEDA_MS` 420 |
 | a punição da recuperação | `RECUP_SLASH` 1,0, `RECUP_LAVA` 0,6, `DANO_RECUP` 2 |
-| a lava (aprovada) | `LAVA_G` 260, `LAVA_VOO` 1,1, `ESTILHACOS` 6, `TELEG_LAVA` 0,5 |
+| a lava do chão (rodada 7, ✅ aprovada) | `LAVA_G` 260, `LAVA_VOO` 1,1, `ESTILHACOS` 6 · `LAVA_QUADROS` (0..14, corta a bola pintada que descia), `LAVA_MS` 580 e `TELEG_LAVA` **0,5s** (SEGUNDOS, não fração) · a arte é o `lava-core-c` (trocar por `LAVA=`) · a MÃO é o offset do chão em `Predador.arremessar` (−83,+5) — ⚠️ trocar o clipe OBRIGA a remedir a mão e o telégrafo |
+| a LUTA DO GUARDIÃO (a repensar, 19/09) | `INVESTIDA_CADA` 6, `TELEGRAFO_DUR` 0,55, a velocidade −300 e a deriva ±70 em `telegrafo`→`investe`, `corpoInteiro` 210×190, o `leque(3, …)` a 100px/s a cada 1,8s — ⚠️ **nada decidido**, ver o bloco 🔴 na 🚦 |
 | o ritmo entre ataques | `PAUSA` por fase |
-| a saída e a VOLTA QUE ATACA (rodada 4, aprovada) | `FORA_MIN/MAX` 1–2s, `AVISO` 0,5, as chances em `depoisDoAtaque` (25% sai, 50% troca de âncora) · `RASGO_X` 192, `RASGO_MS` 1100, `RASGO_SOLTA` 0,7, `RECUP_RASGO` 0,9, `METAL_N` [·,3,4,5], `METAL_VOO` 0,95, `METAL_ABRE` 30 |
-| o FIM DA MORTE (rodada 5b, a julgar) | em `fimDoPredador.ts`: `ESPERA_MS` 550, `RACHA_MS` 900, `ESTOURO_MS` 380, `SOBE_MS` 900, `AFUNDA_MS` 1100, `AFUNDA_PX` 30, `LAVA_QUADRO_MS` 110 · em `BossNucleo`: `CORPO_FICA_MS` 4200 · **a APARÊNCIA fica no assador**, não aqui |
+| a saída e a VOLTA QUE ATACA (rodada 4 ✅; a altura do metal, rodada 8) | `FORA_MIN/MAX` 1–2s, `AVISO` 0,5, as chances em `depoisDoAtaque` (25% sai, 50% troca de âncora) · `RASGO_X` 192, `RASGO_MS` 1100, `RASGO_SOLTA` 0,7, `RECUP_RASGO` 0,9, `METAL_N` [·,3,4,5], **`METAL_VOO` 1,5** (é ELE que manda na ALTURA do arco — não há knob de altura; medir com `_f4/_medir-metal.mjs`), `METAL_ABRE` 30 |
+| o FIM DA MORTE (rodadas 5b ✅ e 7, a julgar) | em `fimDoPredador.ts`: `ESPERA_MS` 550, `RACHA_MS` 900, `ESTOURO_MS` 380, `SOBE_MS` 900, `AFUNDA_MS` 1100, **`SOBE_ACIMA_PX` 10** (o quanto a crista passa da linha do chão), **`AFUNDA_PX` 36**, `LAVA_QUADRO_MS` 110 · em `BossNucleo`: `CORPO_FICA_MS` 4200 · **a APARÊNCIA fica no assador**, não aqui |
 | o breu (aprovado) | `BREU_ALPHA` 1, `PULSO_BREU` 2,4, o alpha da cópia revelada em `atualizarBreu` (0,62) |
 | as linhas de apoio | `CHAO_APOIO` 190, `TETO_APOIO` 30 (a ponta da garra pendurada) — a olho na borda desenhada |
 | as hitboxes | `CASCA`/`INTEIRO` (virtuais, medidas só no miolo), `CASCA_TETO`/`INTEIRO_TETO` (px do clipe de 0,75) — ⚠️ **a olho**, só o MIOLO é medido |
@@ -1282,13 +1478,14 @@ M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprov
 
 **🔴 Obrigatório, na ordem dele:** B3 (a 2ª forma — o predador: JOGAR A RODADA 3 e ajustar, ver 🚦) → B2 (a posição) → M4 (portas, borda C, esfíncter).
 
-**🟡 Cortar ou manter — PERGUNTADO EM 15/09, SEM RESPOSTA:**
+**✅ CORTADAS — RESPONDIDO EM 19/09: *"risca as 3 primeiras"*.** A tabela amarela fecha inteira; nenhuma destas
+três peças será construída, e a Fatia 7 não depende mais delas.
 
-| peça da spec de 08/09 | o que já existe | a proposta |
+| peça da spec de 08/09 | o que era | o que ficou no lugar |
 |---|---|---|
-| **M3** — `f4MesaB1/B2` (a garganta) | mesas de aço, mesas do mar, gânglios, canos, o golfinho | cortar — a câmara B já está cheia |
-| `f4VivoA/B` (lâmpada, glândula) | coração e maquinário respirando | cortar — o orçamento do "vivo" já foi gasto |
-| `f4Veu1/2` (primeiro plano orgânico) | nada | decisão dele |
+| **M3** — `f4MesaB1/B2` (a garganta) | duas mesas de carne fechando a passagem da câmara B | ✂️ cortada — mesas de aço, mesas do mar, gânglios, canos e o golfinho já enchem a câmara |
+| **`f4VivoA/B`** (lâmpada, glândula) | duas peças "vivas" soltas pela fase | ✂️ cortada — o coração e o maquinário que respiram (aprovados em 14/09) já pagaram o "vivo" |
+| **`f4Veu1/2`** (primeiro plano orgânico) | teias de carne passando NA FRENTE da nave | ✂️ cortada — nunca existiu, e atrapalharia ver a bala |
 
 **🔵 Fechamento:** rejogar a dificuldade da arena do golfinho (`corredor` de t=38,5 com `rate 2.6`) ·
 atualizar o HANDOFF · merge `--no-ff` na `main`. **Fora da fatia:** auditar as arenas de chefão das F1–F3
