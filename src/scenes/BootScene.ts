@@ -248,6 +248,10 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   predadorRasgoSheet: { path: 'sprites/predador-rasgo-sheet.png', w: 256, h: 256 },
   predadorLavaSheet: { path: 'sprites/predador-lava-sheet.png', w: 256, h: 256 },
   predadorTetoLavaSheet: { path: 'sprites/predador-teto-lava-sheet.png', w: 256, h: 256 },
+  // A SERRA DO GUARDIÃO (19/09, a skill nova da 1ª forma). Montadas por `scripts/_f4/_instalar-serra.mjs`
+  // a partir da candidata `a-disco`. Ver `src/entities/SerraGuardiao.ts`.
+  serraGiroSheet: { path: 'sprites/serra-giro-sheet.png', w: 96, h: 96 },
+  serraTravadaSheet: { path: 'sprites/serra-travada-sheet.png', w: 96, h: 96 },
   // O FIM DO PREDADOR (17/09, rodada 5): o piso rasgando e a poça de lava, assados em PIXEL na resolução
   // nativa por `scripts/_f4/_assar-fim-f4.mjs` — a paleta sai da própria faixa do chão da arena. Ver
   // `src/entities/fimDoPredador.ts`.
@@ -624,6 +628,12 @@ const ART: Record<string, string> = {
   // A BALA DO GOLFINHO: o tiro vermelho que o Henrique aprovou na animação do flip, recortado,
   // virado para a direita e reduzido a 13×9 — o quadro do `bolt2`, de onde a hitbox do pool vem.
   shotGolfinho: 'sprites/shot-golfinho.png',
+
+  // A SERRA parada — o motor cai nela se as folhas faltarem (arte entra asset por asset).
+  serraGuardiao: 'sprites/serra-guardiao.png',
+  // O GLÓBULO da salva do guardião (19/09). Substitui o `bolt3` tingido de laranja, que era um projétil
+  // genérico: este é do mesmo material da serra, e já vem com a própria cor (⚠️ NÃO tingir).
+  globuloGuardiao: 'sprites/globulo-guardiao.png',
 
   // O NÚCLEO: o coração blindado do Leviatã, chefão FINAL (Fase 4). Escolha do Henrique
   // (cf5b3e43, 128px → 122×122 instalado). ⚠️ A FERIDA (a zona vulnerável) é MEDIDA no PNG:

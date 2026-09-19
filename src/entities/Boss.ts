@@ -32,6 +32,12 @@ export interface StageBoss {
    * Ausente = 1400ms.
    */
   readonly pausaFinalMs?: number;
+  /**
+   * O que o chefão põe na arena que FERE POR CONTATO mas NÃO é alvo — a serra do guardião da Fase 4.
+   * A cena liga um `overlap` com a nave e mais nada: ninguém registra as balas do jogador contra este
+   * grupo, e é justamente isso que faz a bala ATRAVESSAR a serra. Ausente = o chefão não põe nada.
+   */
+  readonly perigos?: Phaser.Physics.Arcade.Group;
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean;

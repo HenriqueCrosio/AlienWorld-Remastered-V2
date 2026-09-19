@@ -1264,6 +1264,10 @@ export class GameScene extends Phaser.Scene {
             : new Boss(this, this.enemies.enemyBullets, this.fx, 150);
 
     this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip());
+    // O que o chefão põe na arena e FERE sem ser alvo (a serra do guardião). ⚠️ Só este overlap: não
+    // registrar as balas do jogador contra `perigos` é o que faz o tiro ATRAVESSAR a serra, e é isso
+    // que mantém a linha de tiro limpa na cravada — a janela de dano daquela luta.
+    if (this.boss.perigos) this.physics.add.overlap(this.ship, this.boss.perigos, () => this.damageShip());
 
     // ATENÇÃO À ORDEM. `overlap(grupo, sprite)` entrega os argumentos INVERTIDOS: o Phaser
     // roteia para spriteVsGroup, e o primeiro parâmetro do callback vira o SPRITE.

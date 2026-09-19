@@ -5,6 +5,7 @@ import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
 import type { TerrainSystem } from '../systems/TerrainSystem';
 import { Predador } from './Predador';
+import { SerraGuardiao } from './SerraGuardiao';
 import { afundarNaLava } from './fimDoPredador';
 import { explosaoSangrenta, sangueNaTela } from './sangue';
 
@@ -53,9 +54,22 @@ export class BossNucleo implements StageBoss {
   private t = 0;
 
   /** Guardião: máquina de estados do movimento. Parado = vulnerável; movendo = fechado. */
-  private acao: 'flutua' | 'telegrafo' | 'investe' | 'volta' = 'flutua';
+  private acao: 'flutua' | 'telegrafo' | 'investe' | 'volta' | 'serra' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
+  /**
+   * As duas skills se ALTERNAM (spec de 19/09). A investida empurra o jogador para as bordas; a salva
+   * torna a borda cara; a serra é a ameaça de caminho fixo E a janela de dano. A dificuldade mora na
+   * tensão entre elas, não em cada uma ficar mais rápida.
+   */
+  private proxima: 'serra' | 'investida' = 'serra';
+  private serra: SerraGuardiao | null = null;
+  /**
+   * O que FERE por contato mas NÃO é alvo: a serra. Fica num grupo próprio justamente porque ninguém
+   * registra as balas do jogador contra ele — é o que mantém a linha de tiro limpa na cravada.
+   * A cena liga o `overlap` com a nave em `spawnBoss` (ver `StageBoss.perigos`).
+   */
+  readonly perigos: Phaser.Physics.Arcade.Group;
 
   private readonly core: Phaser.Physics.Arcade.Sprite;
   private readonly barBg: Phaser.GameObjects.Rectangle;
@@ -88,8 +102,47 @@ export class BossNucleo implements StageBoss {
   /** A morte na troca: 9 quadros a 9 q/s, o destruído, e o coração surge. Ver `trocarParaPredador`. */
   private static readonly MORTE_MS = 1000;
   private static readonly TROCA_MS = 1500;
-  private static readonly INVESTIDA_CADA = 6;
+  /**
+   * ─── O RITMO, POR DEGRAU DE VIDA (19/09) ───
+   * Mesma gramática do predador (66% e 33%), por consistência. **Nada de novo aparece nos degraus: o que
+   * muda é o ritmo.** Os três ataques existem desde 100% — a serra precisa estar lá desde o começo,
+   * porque é dela que sai a janela de dano.
+   */
+  private static readonly DEGRAUS = [0.66, 0.33];
+  /** A pausa entre skills, por degrau. Era 6s fixos — e 6s de risco zero eram metade da queixa dele. */
+  private static readonly PAUSA = [4.2, 3.4, 2.6];
+  /** Quantos glóbulos por salva, por degrau. */
+  private static readonly SALVA_N = [3, 4, 5];
+  /** Quantas cravadas a serra dá antes de sair, por degrau. No último ela fica mais tempo na arena. */
+  private static readonly SERRA_CRAVADAS = [2, 2, 3];
   private static readonly TELEGRAFO_DUR = 0.55;
+  /**
+   * ⚠️ A SALVA COBRE AS BORDAS, e é de propósito. A investida empurra o jogador para o canto (medido:
+   * o casco de 133px deixa ~20px de folga num vão de 160px), e no canto não acontecia nada — por isso
+   * os dois ataques eram fáceis SEPARADAMENTE. Abrindo o leque, o canto passa a ter preço.
+   */
+  private static readonly SALVA_ABRE = 96;
+  /**
+   * ⚠️ E ELA PRECISA SER MAIS RÁPIDA QUE A NAVE. Os 100px/s antigos perdiam para os 110px/s do
+   * `FreeController`: dava para simplesmente andar para longe do tiro. Projétil mais lento que quem
+   * desvia não é ameaça — era a outra metade do *"os 3 tiros dele são muito fáceis"*.
+   */
+  private static readonly SALVA_VEL = 150;
+  /** Cravada = ele segurando o cabo, ancorado e em esforço: o dano dobra, como a recuperação do predador. */
+  private static readonly DANO_CRAVADA = 2;
+  /**
+   * A boca do cabo da serra, em px do PNG a partir do centro.
+   *
+   * ⚠️ NASCE ABAIXO DO CENTRO, e é medida de propósito. O feixe de cabos dele sai por CIMA, e foi de lá
+   * que a primeira versão lançou: com a âncora em y≈72 e a borda de cima em 48, a primeira diagonal virou
+   * um TOCO de 47px — ele mal soltava a serra e ela já cravava. Saindo por baixo, a subida tem ~70px de
+   * altura e a coreografia que ele desenhou (sobe, crava, desce, crava) ganha espaço para ser lida.
+   */
+  private static readonly G_CABO_X = 40;
+  private static readonly G_CABO_Y = 20;
+  /** O vão jogável da arena — as bordas em que a serra crava. */
+  private static readonly ARENA_TOPO = 30;
+  private static readonly ARENA_BASE = 190;
 
   private static readonly ENTRY_SPEED = 40;
 
@@ -154,6 +207,10 @@ export class BossNucleo implements StageBoss {
       })
       .setDepth(51);
 
+    // ⚠️ `allowGravity: false`: a serra anda pela própria coreografia, não pela física da cena.
+    this.perigos = scene.physics.add.group({ allowGravity: false });
+    SerraGuardiao.registrarAnims(scene);
+
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, 16, 160, 4, COLORS.enemyDark)
       .setDepth(100);
@@ -162,8 +219,24 @@ export class BossNucleo implements StageBoss {
       .setOrigin(0, 0.5)
       .setDepth(101);
 
-    this.acaoT = BossNucleo.INVESTIDA_CADA;
+    this.acaoT = BossNucleo.pausa(1);
     this.cdTiro = 1.4;
+  }
+
+  /** 0, 1 ou 2 — o degrau de vida em que a luta está. Lido pela sonda. */
+  get degrau(): number {
+    const k = this.hpGuardiao / BossNucleo.HP_GUARDIAO;
+    return k > BossNucleo.DEGRAUS[0] ? 0 : k > BossNucleo.DEGRAUS[1] ? 1 : 2;
+  }
+
+  /** A pausa entre skills no degrau atual. `pausa(1)` serve ao construtor, antes de haver vida lida. */
+  private static pausa(d: number): number {
+    return BossNucleo.PAUSA[d];
+  }
+
+  /** A serra está cravada: ele segura o cabo, ancorado, e o dano dobra. */
+  get segurandoCabo(): boolean {
+    return this.serra?.cravada === true;
   }
 
   get isDead(): boolean {
@@ -233,16 +306,33 @@ export class BossNucleo implements StageBoss {
         this.cdTiro -= dt;
         if (this.cdTiro <= 0) {
           this.cdTiro = 1.8;
-          this.leque(3, this.gMuzzle());
+          this.leque(BossNucleo.SALVA_N[this.degrau], this.gMuzzle());
           this.scene.cameras.main.shake(40, 0.002);
         }
 
         if (this.acaoT <= 0) {
-          // TELEGRAFO: pisca e FECHA o corpo — quem ainda estiver na frente foi avisado.
-          this.acao = 'telegrafo';
-          this.acaoT = BossNucleo.TELEGRAFO_DUR;
-          this.corpoInteiro();
-          this.body.setVelocityY(0);
+          if (this.proxima === 'serra') {
+            // A SERRA. Ele fica na estação segurando o cabo: parado, à direita, miolo aberto.
+            this.proxima = 'investida';
+            this.acao = 'serra';
+            this.body.setVelocityY(0);
+            this.serra = new SerraGuardiao(
+              this.scene,
+              this.perigos,
+              this.fx,
+              () => this.gCabo(),
+              BossNucleo.ARENA_TOPO,
+              BossNucleo.ARENA_BASE,
+              BossNucleo.SERRA_CRAVADAS[this.degrau],
+            );
+          } else {
+            // TELEGRAFO: pisca e FECHA o corpo — quem ainda estiver na frente foi avisado.
+            this.proxima = 'serra';
+            this.acao = 'telegrafo';
+            this.acaoT = BossNucleo.TELEGRAFO_DUR;
+            this.corpoInteiro();
+            this.body.setVelocityY(0);
+          }
         }
         break;
       }
@@ -255,6 +345,22 @@ export class BossNucleo implements StageBoss {
           // Investe NA ALTURA do jogador no instante do disparo — mirada no passado, não
           // teleguiada: dá para reagir saindo da linha (o mesmo pacto da cabeça ciano).
           this.body.setVelocity(-300, Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70));
+        }
+        break;
+      }
+
+      case 'serra': {
+        // Ele NÃO se mexe enquanto a serra corre: está ancorado no cabo. É a janela de dano da luta —
+        // a nave atira para a direita, então só serve para ela um guardião parado e à direita.
+        this.serra?.update(dt);
+        if (Math.random() < (this.segurandoCabo ? 0.5 : 0.35)) {
+          this.glow.emitParticleAt(this.core.x, this.core.y);
+        }
+        if (!this.serra?.viva) {
+          this.serra = null;
+          this.acao = 'flutua';
+          this.acaoT = BossNucleo.pausa(this.degrau);
+          this.cdTiro = 0.6;
         }
         break;
       }
@@ -274,7 +380,7 @@ export class BossNucleo implements StageBoss {
           const alvoY = BossNucleo.G_BASE_Y - this.sprite.y;
           this.body.setVelocityY(alvoY * 2);
           this.acao = 'flutua';
-          this.acaoT = BossNucleo.INVESTIDA_CADA;
+          this.acaoT = BossNucleo.pausa(this.degrau);
           this.cdTiro = 1.0;
           this.corpoDomo();
         }
@@ -306,6 +412,9 @@ export class BossNucleo implements StageBoss {
   private trocarParaPredador(): void {
     this.trocando = true;
     this.travaTroca = true;
+    // A serra é do GUARDIÃO. Se ele morre com ela na arena, ela some junto — o predador tem as armas dele.
+    this.serra?.destroy();
+    this.serra = null;
     this.body.setVelocity(0, 0);
     this.body.enable = false;
     this.glow.emitting = false;
@@ -363,10 +472,20 @@ export class BossNucleo implements StageBoss {
   }
 
   private leque(n: number, boca: { x: number; y: number }): void {
+    const abre = BossNucleo.SALVA_ABRE;
     for (let i = 0; i < n; i++) {
-      const angle = Phaser.Math.DegToRad(152 + (i / (n - 1)) * 56);
-      this.gLobulo(angle, 100, boca);
+      const angle = Phaser.Math.DegToRad(180 - abre / 2 + (i / (n - 1)) * abre);
+      this.gLobulo(angle, BossNucleo.SALVA_VEL, boca);
     }
+  }
+
+  /** A boca do CABO: de onde a serra sai e onde o cabo fica preso. Ele flutua, então é lido a cada quadro. */
+  private gCabo(): { x: number; y: number } {
+    const e = BossNucleo.G_ESCALA;
+    return {
+      x: this.sprite.x + BossNucleo.G_CABO_X * e,
+      y: this.sprite.y + BossNucleo.G_CABO_Y * e,
+    };
   }
 
   /** O glóbulo (bolt3 laranja) do bico do guardião. */
@@ -379,8 +498,15 @@ export class BossNucleo implements StageBoss {
     b.setActive(true).setVisible(true);
     b.body!.enable = true;
 
-    if (this.scene.textures.exists('bolt3')) b.setTexture('bolt3');
-    b.setTint(0xffa040);
+    // ⚠️ SEM TINT. A arte nova já traz a própria cor (casco escuro, só a brasa acesa); tingir de laranja
+    // acendia o corpo inteiro e devolvia o projétil genérico que ele mandou trocar.
+    if (this.scene.textures.exists('globuloGuardiao')) {
+      b.setTexture('globuloGuardiao');
+      b.clearTint();
+    } else if (this.scene.textures.exists('bolt3')) {
+      b.setTexture('bolt3');
+      b.setTint(0xffa040);
+    }
     b.setScale(1);
     b.setFlipX(false);
     b.setRotation(angle);
@@ -402,7 +528,10 @@ export class BossNucleo implements StageBoss {
     }
     if (this.dead || this.entering || this.trocando) return false;
 
-    this.hpGuardiao = Math.max(0, this.hpGuardiao - amount);
+    // Ancorado no cabo, em esforço: o dano dobra. Mesma gramática da recuperação do predador — a
+    // janela de dano da luta tem de PAGAR, senão ela é só um lugar onde nada acontece.
+    const dano = this.segurandoCabo ? amount * BossNucleo.DANO_CRAVADA : amount;
+    this.hpGuardiao = Math.max(0, this.hpGuardiao - dano);
     this.atualizarBarra();
 
     this.sprite.setTint(0xffb090);
@@ -423,6 +552,8 @@ export class BossNucleo implements StageBoss {
   }
 
   destroy(): void {
+    this.serra?.destroy();
+    this.serra = null;
     // O CORPO FICA (17/09: *"a animação dele morto não apareceu, ele sumiu"*): a cena destrói o chefão 1,2s depois
     // do golpe final, bem quando o clipe da morte termina estendido. O último quadro vira uma imagem solta no
     // chão — e dali sai o FIM: o piso racha, estoura, a lava sobe e o corpo afunda (ver `fimDoPredador`).
