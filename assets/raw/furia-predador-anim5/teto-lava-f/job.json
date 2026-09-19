@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "7f222c22-28bc-422b-9473-03a1bada0e0f",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "hangs from the ceiling by its upper right arm, whose pale claws stay hooked at the very top of the frame and never move for a single frame; only the near lower-left clawed arm moves: it reaches into the burning molten core in its own chest, scoops out a glowing glob, and hurls it down to the left; the arm stays in front of the body the whole time and never goes behind the torso",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

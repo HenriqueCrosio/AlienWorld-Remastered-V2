@@ -24,6 +24,14 @@ const ANIM3 = 'assets/raw/furia-predador-anim3';
 // A RODADA 4 (17/09, 3º teste jogado): o RASGO da volta (crava as garras no chão e ergue um arco de metal em brasa)
 // e o arremesso pendurado com a garra LIVRE (o teto-lava2 soltava o teto com a mesma garra que arremessava).
 const ANIM4 = 'assets/raw/furia-predador-anim4';
+// A RODADA 6 (18/09, o arremesso do teto refeito): o `teto-lava-b` TROCAVA de garra no meio do gesto
+// (*"começa com a de trás e acaba com a da frente"*). No `teto-lava-f` a garra da FRENTE faz tudo — colhe a
+// bola no core aceso e a solta —, sem nunca cruzar para trás do tronco, e o braço de cima nem se mexe.
+const ANIM5 = 'assets/raw/furia-predador-anim5';
+// A RODADA 7 (19/09): a lava DO CHÃO tirada do core, pedido dele depois de aprovar o arremesso do teto —
+// *"acho que vale gerar uma nova animação com ele tirando do core"*. O clipe velho (`anim/lava`, v3 da 1ª
+// passada, 9 quadros) era um arremesso genérico por cima do ombro, sem relação com o peito aceso.
+const ANIM6 = 'assets/raw/furia-predador-anim6';
 
 const CLIPES = {
   urro: `${ANIM}/urro`,
@@ -34,10 +42,10 @@ const CLIPES = {
   corrida: `${ANIM3}/corrida-c`,
   slash: `${ANIM3}/slash-a`,
   rasgo: process.env.RASGO ?? `${ANIM4}/upper-b`,
-  lava: `${ANIM}/lava`,
+  lava: process.env.LAVA ?? `${ANIM6}/lava-core-c`,
   agarra: `${ANIM3}/teto-a`,
   'teto-balanco': `${ANIM3}/teto-balanco`,
-  'teto-lava': process.env.TETO_LAVA ?? `${ANIM4}/teto-lava-b`,
+  'teto-lava': process.env.TETO_LAVA ?? `${ANIM5}/teto-lava-f`,
   morte: process.env.MORTE ?? `${ANIM2}/morte-mini`,
 };
 

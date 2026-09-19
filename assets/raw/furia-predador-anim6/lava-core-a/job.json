@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "cb407ac3-fa36-4062-a23f-63e945fb70b3",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "standing monster facing left; the near clawed arm closest to the viewer does the whole action and stays in front of the torso, fully visible in every frame, never crossing behind the body; it digs that claw into the burning molten core in its own chest, pulls out a glowing glob of lava, and hurls it forward to the left in a strong overhand throw",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

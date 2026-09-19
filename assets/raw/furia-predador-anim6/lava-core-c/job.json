@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "00a2384e-8f72-4ff0-971b-a5e628e75189",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "standing monster facing left; the near clawed arm closest to the viewer does the whole action and stays in front of the torso, fully visible in every frame, never crossing behind the body; the core in its chest flares open, that claw cups the glowing glob in front of the chest, then punches it straight forward to the left",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

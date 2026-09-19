@@ -33,13 +33,26 @@ const SOBE_MS = 900;
 const AFUNDA_MS = 1100;
 /** À frente da faixa da moldura (−0,6) e do corpo (0); atrás do HUD (100). */
 const DEPTH_LAVA = 6;
-/** Quanto o corpo desce para sumir dentro da poça. */
-const AFUNDA_PX = 30;
+/**
+ * Quanto a crista passa ACIMA da linha do chão (19/09: *"ela pode tomar mais alguns pixels para cima, para cobrir
+ * todo o chão"* · *"se levantar um pouco mais a lava dá a impressão que é melhor sair dali logo"*). Não é gosto
+ * solto: a faixa do chão tem 26px (216 − 190) e a poça ASSADA tem 36 — parando na linha do chão, 10px da arte
+ * eram jogados fora E a crista ficava ABAIXO do corpo, que tem 36,7px de altura na escala da luta. Daí a
+ * impressão que ele reclamou, de *"estar caindo para outro local"*: não era ordem de camada (o corpo sempre
+ * esteve em depth 0 contra 6 da poça), era a lava nunca chegar nele.
+ */
+const SOBE_ACIMA_PX = 10;
+/** Quanto o corpo desce para sumir dentro da poça — com a crista em 180, 36 levam o topo dele para 3px abaixo dela. */
+const AFUNDA_PX = 36;
 /** O quadro da poça troca a cada tanto (8 quadros no ciclo). */
 const LAVA_QUADRO_MS = 110;
 
 export function afundarNaLava(scene: Phaser.Scene, corpo: Phaser.GameObjects.Image, fx: Fx, superficie: number): void {
   const centro = Phaser.Math.Clamp(corpo.x, 60, GAME_WIDTH - 60);
+  // O corpo tem de afundar ATRÁS da poça. Ele já nasce em depth 0 contra os 6 dela, mas isso vem herdado do
+  // sprite do chefão: o dia em que alguém levantar a camada do predador, o corpo passa para a frente da lava e
+  // volta a ler como *"caindo para outro local"*. Aqui a garantia é local.
+  corpo.setDepth(Math.min(corpo.depth, DEPTH_LAVA - 0.5));
   const brasas = scene.add
     .particles(0, 0, 'puff', {
       lifespan: { min: 300, max: 700 },
@@ -79,6 +92,7 @@ export function afundarNaLava(scene: Phaser.Scene, corpo: Phaser.GameObjects.Ima
     .tileSprite(0, GAME_HEIGHT, GAME_WIDTH, 0, 'f4LavaSheet', 0)
     .setOrigin(0, 1)
     .setDepth(DEPTH_LAVA)
+    .setName('pocaFim') // ⚠️ o `TileSprite` do Phaser troca a `texture` por um canvas de UUID: sem nome, a sonda não acha a poça
     .setVisible(false);
   let quadro = 0;
   scene.time.addEvent({
@@ -104,7 +118,7 @@ export function afundarNaLava(scene: Phaser.Scene, corpo: Phaser.GameObjects.Ima
   /** A poça na altura `k` (0..1), com o brilho acompanhando. */
   const subir = (k: number): void => {
     poca.setVisible(k > 0);
-    poca.height = (GAME_HEIGHT - superficie) * k;
+    poca.height = (GAME_HEIGHT - superficie + SOBE_ACIMA_PX) * k;
     poca.y = GAME_HEIGHT;
     brilho.setY(GAME_HEIGHT - poca.height - 4);
     brilho.setAlpha(0.3 * k);

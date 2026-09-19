@@ -134,8 +134,11 @@ export class Predador {
   static readonly SLASH_MS = 900;
   static readonly SLASH_SALTO_ATE = 0.45;
   /**
-   * Pendurado: balança (laço 5..15 do `teto-balanco`) e arremessa com a garra LIVRE (`teto-lava-b`, rodada 4 — 17/09:
-   * *"ele está agarrando com a mesma garra que ele joga a lava"*). A bola deixa a mão entre os quadros 10 e 11.
+   * Pendurado: balança (laço 5..15 do `teto-balanco`) e arremessa com a garra LIVRE (rodada 4 — 17/09: *"ele está
+   * agarrando com a mesma garra que ele joga a lava"*). ⚠️ RODADA 6 (18/09): o `teto-lava-b` ainda TROCAVA de garra
+   * no meio do gesto — *"começa com a de trás e acaba com a da frente"* —, porque o braço que enrolava passava ATRÁS
+   * do tronco e sumia. O `teto-lava-f` resolve pela encenação: a garra da FRENTE colhe a bola no core aceso e a solta
+   * sem nunca cruzar para trás. A bola deixa a mão entre os quadros 10 e 11, como antes.
    */
   static readonly BALANCO_QUADROS = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   static readonly BALANCO_MS = 1300;
@@ -145,6 +148,24 @@ export class Predador {
   static readonly CARGA_MIN = 0.9;
   static readonly BOTE_VEL = 300;
   static readonly RECUP_SLASH = 1.0;
+  /**
+   * ⚠️ OS DOIS TELEGRAFOS SÃO EM SEGUNDOS, não em fração do clipe (`mudar(estado, dur)` grava `estadoT`). Cada um
+   * tem de cair no quadro em que a bola larga a garra da SUA arte — trocar o clipe sem refazer esta conta põe a
+   * bola nascendo no vazio. Medir com `scripts/_f4/_medir-mao.mjs`.
+   *
+   * No chão (rodada 7, `lava-core-c`): a bola aparece no quadro 13. Com o clipe cortado em 15 quadros e `LAVA_MS`
+   * 580, 0,5s cai justamente aí — o mesmo aviso de sempre, que ele aprovou. Alongar daria mais tempo de desviar, e
+   * isso é decisão de luta, não de arte.
+   */
+  /**
+   * ⚠️ O CLIPE É CORTADO NO 14 (19/09, ele jogando: *"existe um artefato (bola de lava) da própria animação que vai
+   * para baixo no movimento"*). A bola PINTADA continua na garra nos quadros 14–16 do `lava-core-c` e desce junto
+   * com o braço — então, depois que o motor lança a bola de verdade, havia DUAS na tela. Cortando em 14 sobra um só
+   * quadro de acompanhamento depois da soltura (~39ms) e a pintada nunca chega a descer.
+   */
+  static readonly LAVA_QUADROS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+  /** 13 de 15 quadros × 580ms = 0,502s: o telégrafo cai EXATAMENTE no quadro em que a bola deixa a garra. */
+  static readonly LAVA_MS = 580;
   static readonly TELEG_LAVA = 0.5;
   static readonly TETO_LAVA_MS = 1100;
   static readonly TELEG_LAVA_TETO = 0.68;
@@ -171,7 +192,18 @@ export class Predador {
   static readonly RECUP_RASGO = 0.9;
   /** Peças de metal por fase (a volta só existe da fase 2 em diante). */
   static readonly METAL_N = [0, 3, 4, 5];
-  static readonly METAL_VOO = 0.95;
+  /**
+   * O TEMPO DE VOO das lascas — e, por tabela, a ALTURA do arco, porque a velocidade é resolvida para cair
+   * onde a nave estava: voo mais longo = arco mais alto para o mesmo alvo. Não existe knob de "altura".
+   *
+   * 19/09, jogando: *"quero que seja mais alto, para forçar a nave a desviar mais, hoje em dia está muito
+   * baixo, pode subir o dobro ou menos um pouco"*. Com 0,95 o ápice caía EXATAMENTE na altura da nave
+   * (medido: 92px acima do chão, com a nave em y=110) — o arco nunca passava por cima dela, e por isso
+   * parecia raso. ⚠️ O dobro literal (184px) NÃO CABE: do chão ao teto há 156px. Com 1,5 a lasca mais alta
+   * sobe 152px (y=34), 1,65× — o máximo que a arena comporta, que é o *"menos um pouco"* dele.
+   * Medir de novo ao mexer: `node scripts/_f4/_medir-metal.mjs`.
+   */
+  static readonly METAL_VOO = 1.5;
   static readonly METAL_ABRE = 30;
   static readonly PAUSA: [number, number][] = [[0, 0], [1.2, 2.0], [0.9, 1.6], [1.0, 1.7]];
   /** 0,96 deixava a pintura e a borda aparecendo (16/09: *"a fase pode escurecer mais"*). */
@@ -298,7 +330,7 @@ export class Predador {
     clipe('predador-corrida', 'predadorCorridaSheet', Predador.CORRIDA_MS, -1, Predador.CORRIDA_QUADROS);
     clipe('predador-slash', 'predadorSlashSheet', Predador.SLASH_MS, 0, Predador.SLASH_QUADROS);
     clipe('predador-rasgo', 'predadorRasgoSheet', Predador.RASGO_MS, 0, Predador.RASGO_QUADROS);
-    clipe('predador-lava', 'predadorLavaSheet', 1000);
+    clipe('predador-lava', 'predadorLavaSheet', Predador.LAVA_MS, 0, Predador.LAVA_QUADROS);
     clipe('predador-morte', 'predadorMorteSheet', Predador.MORTE_MS);
     clipe('predador-agarra', 'predadorAgarraSheet', Predador.SALTO_TETO_MS);
     clipe('predador-teto-balanco', 'predadorTetoBalancoSheet', Predador.BALANCO_MS, -1, Predador.BALANCO_QUADROS);
@@ -630,10 +662,14 @@ export class Predador {
   private arremessar(target: Phaser.Physics.Arcade.Sprite): void {
     const n = this.fase === 1 ? Phaser.Math.Between(1, 2) : Phaser.Math.Between(2, 3);
     const e = this.escala;
-    // A mão que solta a bola, em px virtuais. Pendurado: medida no `teto-lava-b` (clipe 50,192 → virtual −104,+43).
+    // A mão que solta a bola, em px virtuais, medida em cada clipe (`scripts/_f4/_medir-mao.mjs`).
+    //  · PENDURADO (`teto-lava-f`, rodada 6): −115,+7. O telégrafo de 0,68s num clipe de 1100ms cai no quadro 10,5,
+    //    e a garra ali está um pouco mais acima — este número é o que ele JOGOU e aprovou, com a bola saindo da mão.
+    //  · NO CHÃO (`lava-core-c`, rodada 7): −83,+5, o quadro 13. O velho −70,−40 era do clipe v3, que arremessava
+    //    por cima do ombro; este sai do PEITO, que é de onde ele agora tira a lava.
     const teto = this.ancora.lado === 'teto';
-    const bocaX = this.sprite.x - (teto ? 104 : 70) * e;
-    const bocaY = this.sprite.y + (teto ? 43 : -40) * e;
+    const bocaX = this.sprite.x - (teto ? 115 : 83) * e;
+    const bocaY = this.sprite.y + (teto ? 7 : 5) * e;
     for (let i = 0; i < n; i++) {
       const T = Predador.LAVA_VOO * (0.85 + i * 0.18);
       const ax = target.x + (i - (n - 1) / 2) * 26;

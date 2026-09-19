@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "3a145eac-50c9-4c36-81f7-97428b224b98",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "hangs from the ceiling by its upper right arm, whose pale claws stay hooked at the very top of the frame and never move for a single frame; only the near lower-left clawed arm moves: it drops, cocks back just a little in front of the chest, then swings up and forward from below, launching a molten glob upward to the left; the arm never crosses behind the torso and is visible in every frame",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

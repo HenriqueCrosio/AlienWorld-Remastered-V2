@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "fbc145b6-af07-40b0-ba7c-41d4884713f1",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "standing monster facing left; the near clawed arm closest to the viewer does the whole action and stays in front of the torso, fully visible in every frame, never crossing behind the body; it scoops a glowing glob of lava out of the burning core in its chest and flings it forward and upward to the left from below, an underhand launch",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}
