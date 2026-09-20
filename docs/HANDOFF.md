@@ -58,8 +58,10 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
    com a frase de arranque e o que fazer primeiro (🚦).
 
-   **Estado em 2026-09-20: o M4 começou, e faltam DUAS peças — as 3 PORTAS e o ESFÍNCTER.** A
-   branch está em dia com o `origin` (V2). Tudo abaixo foi jogado e aprovado por ele:
+   **Estado em 2026-09-20: falta UMA peça, o ESFÍNCTER — e as 3 PORTAS esperam o teste jogado.**
+   A branch está em dia com o `origin` (V2). ⏸️ **A sessão parou com as portas construídas e
+   commitadas (`94f84cf` + `6fc3ac3`) e ELE AINDA NÃO JOGOU essa versão** — o roteiro do teste está
+   na seção ⏸️ do START, e é por ele que a próxima sessão abre. Tudo abaixo foi jogado e aprovado:
 
    - o **Bloco A** (os 4 fundos dele) e a **MOLDURA** (M1, M1.5: o duto, as 3 portas provisórias);
    - o **GOLFINHO**, o mini-chefão da câmara B — e a dificuldade da arena, aprovada em 19/09;
@@ -90,19 +92,29 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    e **reprovada na hora** (*"ficou gerado e sem custos"*); foi refeita assada
    (`scripts/_f4/_assar-fim-f4.mjs`). O código de cena só toca a arte assada.
 
-   **O QUE FALTA — duas peças do M4:** as **3 PORTAS com arte final** (hoje `f4-porta-prov.png`) e
-   o **ESFÍNCTER** (`f4VivoC`, 48×48 em 8 quadros: abre e fecha na parede, não colide, só respira).
-   ⚠️ **As portas ficaram a peça mais urgente, e o motivo é novo:** a provisória destoava pouco
-   enquanto a parede ao redor também era provisória; com a borda C virada arte final, ela passou a
-   ser a única coisa borrada na tela — ver a 3ª tira de `scripts/_f4/_folha-duto-luz.png`.
+   **🟡 AS 3 PORTAS ESTÃO CONSTRUÍDAS E ESPERAM O VEREDICTO.** Arte final (a fenda acesa dentro de
+   um soquete de anéis blindados, escolhida por ele entre 8 candidatas), o pulso da fenda em 8
+   quadros **assados** e a morte em dois tempos: a luz apaga, a peça PARTE AO MEIO, e a lasca FICA
+   no duto para a nave atravessar. As três perguntas do teste estão no ⏸️ do START.
 
-   ⚠️ **E A LIÇÃO QUE A BORDA C DEIXOU, porque ela vale para o esfíncter:** arte com uma LINHA
-   FORTE impõe geometria à fase. A veia acesa da borda mora na linha 41 da peça e, no duto, a
-   parede é colada no corredor — então cada degrau do vão quebrava a luz, e ele pegou isso jogando
-   (*"ficar em um degrau diferente fica estranho in game"*). O conserto não foi na arte nem na
-   largura: foi alongar o patamar do `SEGURA OU ANDA` só dentro do duto. Ele ofereceu pagar em
-   aperto (*"mesmo que tenha que apertar mais o duto"*) e não foi preciso — a banda mais estreita
-   segue 84px.
+   **O QUE FALTA CONSTRUIR — uma peça:** o **ESFÍNCTER** (`f4VivoC`, 48×48 em 8 quadros: abre e
+   fecha na parede, não colide, só respira).
+
+   ⚠️ **DUAS PEÇAS DO M4 DEIXARAM O MESMO AVISO, e ele vale direto para o esfíncter:** arte com uma
+   LINHA FORTE impõe geometria à fase. A veia acesa da borda C obrigou o duto a mudar o ritmo da
+   curva (o patamar do `SEGURA OU ANDA`); o núcleo aceso da porta obrigou a peça a ir para trás do
+   layer da borda. O esfíncter ABRE E FECHA numa parede que rola — vale perguntar o que ele impõe
+   ANTES de gerar.
+
+   ⚠️ **E A PORTA DEIXOU UM AVISO DE CÓDIGO:** a arte final expôs dois defeitos que nenhuma sonda
+   pegava — o estouro saindo 56px acima da peça (ela é o único prop de origem `(0.5, 0.5)`) e um
+   `body.enable` desligado que teria congelado a lasca no ar, porque prop é movido por velocidade.
+   **Peça nova nesta fase mexe no motor mais do que parece.**
+
+   ⚠️ **E UM AVISO DE SONDA, o mais caro da sessão:** o assert *"a nave atravessa a lasca sem
+   dano"* passou sozinho e quase foi dado como prova. Com o par — a porta VIVA TEM de cobrar vida,
+   mesma nave, mesmo lugar — ele começou a FALHAR, porque **a nave parada no meio do duto leva de
+   onda, de bala e de parede**. Um "não aconteceu nada" só vale com o discriminador do lado.
 
    **Depois do M4:** rejogar a fase inteira, atualizar este HANDOFF e fechar a fatia com merge
    `--no-ff` em `main`. O mapa inteiro está na seção "🧭 O MAPA PARA FECHAR A FATIA 7" do START.
@@ -561,7 +573,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
-| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. Faltam **as 3 portas com arte final e o esfíncter**. Ver o START |
+| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. As **3 portas** estão construídas e 🟡 **à espera do teste jogado**; falta o **esfíncter**. Ver o ⏸️ do START |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**
