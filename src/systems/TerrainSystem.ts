@@ -161,7 +161,11 @@ const PROPS: Record<PropKind, PropDef> = {
   // ⚠️ O `hp` AQUI É SÓ O PADRÃO — quem manda é o roteiro, porta a porta (6, 8, 10 na spec de
   // 06/09), via `opts.hp`. As três portas do duto têm vidas diferentes de propósito: é a
   // progressão delas que faz o duto ter começo, meio e fim.
-  porta: { hp: 8, score: 200, shoots: false },
+  //
+  // ⚠️ O `anim` ENTROU COM A ARTE FINAL (20/09, M4), e ele faz um trabalho de JOGO, não de enfeite:
+  // uma parede não respira. A fenda pulsando é o que separa *sou destrutível* de *sou cenário* à
+  // distância, que é a metade da promessa do núcleo aceso (a outra metade é *mire aqui*).
+  porta: { hp: 8, score: 200, shoots: false, anim: 'porta-nucleo' },
 };
 
 /**

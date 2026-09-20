@@ -1614,9 +1614,57 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    // A PORTA MORRE EM DOIS TEMPOS — ver `matarPorta`. Todo outro prop morre no quadro em que
+    // zera, e está certo: eles são obstáculo, e obstáculo que some é recompensa suficiente.
+    if (prop.getData('kind') === 'porta' && this.textures.exists('portaLasca')) {
+      this.matarPorta(prop);
+      return;
+    }
+
     this.fx.explode(prop.x, prop.y - prop.displayHeight / 2, 1.5);
     this.score += prop.getData('score') as number;
     prop.destroy();
+  }
+
+  /**
+   * A MORTE DA PORTA DO DUTO, em dois tempos: a luz apaga e a peça PARTE, e só 150ms depois ela
+   * estoura e sai de cena.
+   *
+   * ⚠️ É O ÚNICO QUADRO EM QUE O JOGADOR VÊ QUE GANHOU, e até 20/09 ele não existia: a porta
+   * zerava e sumia no mesmo quadro, com um estouro genérico por cima. A spec de 06/09 já pedia
+   * *"ao morrer, a luz apaga antes da peça quebrar"* — nunca foi implementado, e a arte sozinha
+   * não entregava isso.
+   *
+   * ⚠️ O CORPO SAI NO MESMO QUADRO EM QUE A LASCA ENTRA, e este é o buraco que os 150ms ABREM. O
+   * `overlap(ship, terrain.props)` cobra uma vida por encostar; uma porta já destruída que ainda
+   * machuca seria o jogo mentindo exatamente na hora em que ele deveria recompensar. Ele apontou
+   * a lasca justamente para a nave PASSAR — *"assim a nave consegue passar e dá a sensação que
+   * explodimos uma porta mesmo"* —, e passar tem de valer também para a física.
+   *
+   * ⚠️ E O `hp` VIRA `Infinity` de propósito: o corpo desligado já impede o overlap, mas se algum
+   * caminho futuro reativá-lo, o `bulletHitProp` sai cedo em vez de "matar" a lasca outra vez e
+   * agendar um segundo estouro.
+   *
+   * ⚠️ O ESTOURO SAI DO CENTRO, E NÃO DE `y − displayHeight/2` COMO OS OUTROS. A porta é o único
+   * prop de origem `(0.5, 0.5)` (ver o `case 'porta'` do `TerrainSystem`), então a conta dos props
+   * ancorados pelo pé jogava a explosão 56px ACIMA dela. Estava assim desde que a porta existe.
+   */
+  private matarPorta(porta: Phaser.Physics.Arcade.Sprite): void {
+    porta.anims.stop();
+    porta.clearTint();
+    porta.setTexture('portaLasca');
+    porta.setData('hp', Infinity);
+    const corpo = porta.body as Phaser.Physics.Arcade.Body | null;
+    if (corpo) corpo.enable = false;
+
+    // O PONTO É AGORA, e o estouro é depois: a recompensa não espera a animação.
+    this.score += porta.getData('score') as number;
+
+    this.time.delayedCall(150, () => {
+      if (!porta.active) return;
+      this.fx.explode(porta.x, porta.y, 1.5);
+      porta.destroy();
+    });
   }
 
   /**

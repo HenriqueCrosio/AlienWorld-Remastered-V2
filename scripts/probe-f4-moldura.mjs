@@ -722,6 +722,7 @@ const porta = await (async () => {
         t: Math.round((s.elapsed ?? 0) * 10) / 10,
         hp: p.getData('hp'),
         tex: p.texture.key,
+        anim: p.anims?.currentAnim?.key ?? null,
         dims: `${Math.round(p.displayWidth)}x${Math.round(p.displayHeight)}`,
         escala: p.scaleX,
         // as bordas da peça contra as bordas do corredor, na coluna dela
@@ -737,7 +738,20 @@ const porta = await (async () => {
 console.log('porta    ', JSON.stringify(porta));
 ok(porta !== null, 'a porta do duto nasce');
 if (porta) {
-  ok(porta.tex === 'porta', `a porta não usa a textura de erro — carrega 'porta' (${porta.tex})`);
+  // ⚠️ DUAS CHAVES VÁLIDAS DESDE 20/09, e não é frouxidão: com a arte final a porta passou a
+  // RESPIRAR (`porta-nucleo`), e um sprite tocando animação reporta a textura da FOLHA, não a
+  // estática. O que este assert sempre cobrou continua cobrado — que a peça não caiu na textura de
+  // erro do motor (`__MISSING`, 32×32), que apareceria como um selo minúsculo no meio do vão sem
+  // nenhuma sonda reclamar.
+  ok(
+    porta.tex === 'porta' || porta.tex === 'portaNucleoSheet',
+    `a porta não usa a textura de erro — carrega a arte dela (${porta.tex})`,
+  );
+  // ⚠️ E A RESPIRAÇÃO É COBRADA, não torcida. O `TerrainSystem` só toca a anim se ela EXISTIR no
+  // registro (`anims.exists`), e o registro roda na BootScene, muito antes de a porta nascer — se
+  // alguém mover isso para dentro de uma entidade, a anim simplesmente não toca, sem erro nenhum
+  // na tela. Uma porta parada lê como parede, que é o contrário do que a peça existe para dizer.
+  ok(porta.anim === 'porta-nucleo', `a porta RESPIRA — a fenda pulsa (anim=${porta.anim})`);
   ok(porta.escala === 1, `a porta entra em escala 1, nunca esticada (${porta.escala})`);
   ok(porta.dims === '64x112', `as dimensões batem com a arte — 64×112 (${porta.dims})`);
   ok(porta.hp === 6 || porta.hp === 8 || porta.hp === 10, `o HP vem do ROTEIRO, porta a porta (hp=${porta.hp})`);
@@ -747,6 +761,88 @@ if (porta) {
     porta.sobraCima >= 0 && porta.sobraBaixo >= 0,
     `a porta TAPA o vão inteiro, sem fresta (sobra ${porta.sobraCima}px em cima, ${porta.sobraBaixo}px embaixo)`,
   );
+}
+
+// ─── A MORTE DA PORTA, EM DOIS TEMPOS: a luz apaga, a peça PARTE, e só então estoura ───
+//
+// ⚠️ ESTE BLOCO É O PEDIDO DELE DE 20/09 VIRADO EM ASSERT: *"a porta vai precisar partir ao
+// meio… sobrando apenas uma lasca de cima e de baixo… assim a nave consegue passar e dá a
+// sensação que explodimos uma porta mesmo"*. E o que ele cobra de verdade não é a arte — é que a
+// FÍSICA concorde com ela: a lasca deixa passagem aberta, então ela não pode mais cobrar vida.
+//
+// ⚠️ MATA A PORTA PELO DADO, e não com tiro real. Esperar a bala acertar trocaria um assert
+// determinístico por um sorteio (a sonda voa blindada e não sabe mirar) — é a mesma decisão do
+// bloco da mordida, lá em cima.
+const morte = await (async () => {
+  const achar = () => page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    if (!s || s.scene.key !== 'Game') return null;
+    s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+    const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
+    return p ? true : false;
+  });
+  for (let i = 0; i < 900; i++) { if (await achar()) break; await page.waitForTimeout(100); }
+
+  const depois = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
+    if (!p) return null;
+    const antes = s.score;
+    s.matarPorta(p);
+    return {
+      tex: p.texture.key,
+      anim: p.anims?.isPlaying ?? false,
+      corpo: p.body ? p.body.enable : null,
+      ativa: p.active,
+      ganhou: s.score - antes,
+      // A FRESTA DA LASCA, medida na textura instalada: quantas LINHAS do quadro estão
+      // praticamente vazias no meio. É o que decide se a arte promete uma passagem que existe.
+      fresta: (() => {
+        const src = s.textures.get('portaLasca').getSourceImage();
+        const c = document.createElement('canvas');
+        c.width = src.width; c.height = src.height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(src, 0, 0);
+        const d = ctx.getImageData(0, 0, c.width, c.height).data;
+        const ocup = [];
+        for (let y = 0; y < c.height; y++) {
+          let n = 0;
+          for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] >= 64) n++;
+          ocup.push(n);
+        }
+        let melhor = 0, i = 0;
+        while (i < ocup.length) {
+          if (ocup[i] <= 2) { let j = i; while (j < ocup.length && ocup[j] <= 2) j++; melhor = Math.max(melhor, j - i); i = j; }
+          else i++;
+        }
+        return melhor;
+      })(),
+    };
+  });
+  if (!depois) return null;
+  // 150ms para o estouro, e uma folga para o relógio do Phaser fechar o quadro.
+  await page.waitForTimeout(400);
+  const fim = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    return s.terrain.props.getChildren().filter((o) => o.active && o.getData('kind') === 'porta').length;
+  });
+  return { ...depois, sobrou: fim };
+})();
+console.log('morte    ', JSON.stringify(morte));
+ok(morte !== null, 'a sonda alcançou uma porta viva para matar');
+if (morte) {
+  ok(morte.tex === 'portaLasca', `ao morrer a porta vira a LASCA (tex=${morte.tex})`);
+  ok(morte.anim === false, `a respiração PARA — a fenda apagou (anims.isPlaying=${morte.anim})`);
+  // ⚠️ O ASSERT QUE PAGA OS 150ms. Sem o corpo desligado, a lasca continuaria cobrando uma vida no
+  // `overlap(ship, terrain.props)` — e cobraria exatamente na janela em que ele mandou a nave
+  // PASSAR. Os dois tempos abriram este buraco; é este assert que o mantém fechado.
+  ok(morte.corpo === false, `⭐ o corpo da lasca é DESLIGADO no mesmo quadro — ela não cobra vida (body.enable=${morte.corpo})`);
+  ok(morte.ativa === true, `a lasca FICA na tela antes de estourar (ativa=${morte.ativa})`);
+  ok(morte.ganhou === 200, `o ponto é dado na morte, não no estouro (+${morte.ganhou})`);
+  // ⚠️ A NAVE TEM 17×6 DE CORPO E 31×15 DE SPRITE (`_medir-nave.mjs`). O piso de 20px não é o
+  // corpo: é o DESENHO da nave mais folga — a arte tem de parecer atravessável, não só ser.
+  ok(morte.fresta >= 20, `a lasca deixa passagem de verdade (fresta de ${morte.fresta}px, nave 31×15)`);
+  ok(morte.sobrou === 0, `e a lasca SAI de cena depois do estouro (${morte.sobrou} portas na tela)`);
 }
 
 // ⚠️ NO DUTO NÃO NASCE MESA. Desde que a parede colou no corredor, uma mesa nasceria como uma

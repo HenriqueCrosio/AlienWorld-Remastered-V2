@@ -212,6 +212,16 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
  * no registro das animações, não um placeholder desenhado: explosão procedural JÁ existe, são
  * as fagulhas).
  */
+const SHEET_ANIMS: { key: string; sheet: string; frames: number; frameRate: number }[] = [
+  // A PORTA DO DUTO RESPIRANDO. 8 quadros a 10/s = 0,8s por volta — a batida de uma coisa viva
+  // esperando, não a de um alarme.
+  //
+  // ⚠️ SEM `yoyo`, E É POR CONSTRUÇÃO DA ARTE. Os 8 quadros já são um cosseno completo (aceso →
+  // frio → aceso), então o quadro 7 encosta no 0 com a mesma derivada e o laço fecha sozinho. Um
+  // `yoyo` aqui tocaria a volta duas vezes e dobraria o período sem querer.
+  { key: 'porta-nucleo', sheet: 'portaNucleoSheet', frames: 8, frameRate: 10 },
+];
+
 const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // A explosão-MESTRA do jogo: núcleo branco-quente → chamas → fumaça escura → some.
   explosionSheet: { path: 'sprites/explosion-sheet.png', w: 64, h: 64 },
@@ -233,6 +243,14 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // cima e o `guardiaoDestruido` no fim — a decisão dele de 15/09 (ver `BossNucleo.trocarParaCoracao`).
   guardiaoMorteSheet: { path: 'sprites/guardiao-morte-sheet.png', w: 256, h: 256 },
   nucleoBeatSheet: { path: 'sprites/nucleo-beat-sheet.png', w: 128, h: 128 },
+  // A PORTA DO DUTO RESPIRANDO (20/09, M4): 8 quadros de 64×112, só a FENDA pulsa.
+  //
+  // ⚠️ ASSADA, NÃO GERADA — `scripts/_f4/_assar-porta-nucleo.mjs`, e por duas razões. A primeira é
+  // a de sempre nesta fase (o gerador não obedece limite de cor: *"pulsar = clarear"*, e o núcleo
+  // volta estourado em branco). A segunda é só desta peça: gerar 8 quadros redesenharia a chapa
+  // inteira, e os ~40 REBITES iam rastejar 1px por quadro. A chapa sai IDÊNTICA nos 8; o que
+  // respira é só a brasa, e o pico é o estático que ele aprovou — o pulso só DESCE.
+  portaNucleoSheet: { path: 'sprites/f4-porta-nucleo-sheet.png', w: 64, h: 112 },
   // O PREDADOR (16/09, B3): a 2ª forma do chefão final — o que sai de dentro do guardião. Todos os clipes
   // no MESMO quadro de 256² (v3 do PixelLab a partir de PNG local), montados sem recorte por
   // `scripts/_f4/_instalar-predador.mjs`. Um offset por POSE vale para os clipes que partem dela.
@@ -779,7 +797,27 @@ const ART: Record<string, string> = {
   // ⚠️ A CHAVE É O NOME DO `PropKind`, e é a lei que custou caro em 09/09: `pickVariant(scene,
   // kind)` procura a textura pelo nome do kind, e registrá-la como `f4Porta` faria o Phaser
   // devolver a textura de ERRO (32×32) com a hitbox junto — sem nenhuma sonda ficar vermelha.
-  porta: 'sprites/f4-porta-prov.png',
+  //
+  // A ARTE FINAL ENTROU EM 20/09 (M4), escolhida por ele entre 8 candidatas: o anteparo escuro
+  // rebitado com a FENDA acesa dentro de um soquete de anéis blindados. A fenda é um acento
+  // VERTICAL num duto cujas veias são todas horizontais, e é por isso que ela recorta contra a
+  // parede em vez de sumir nela.
+  //
+  // ⚠️ `f4-porta-prov.png` FICA NO DISCO, como a faixa e a mesa: a regra de saída é dele.
+  porta: 'sprites/f4-porta.png',
+  // A LASCA — o que sobra depois do estouro. A porta PARTE AO MEIO e restam dois cotos presos à
+  // parede, em cima e embaixo, com a passagem aberta entre eles. O pedido é dele, 20/09: *"a porta
+  // vai precisar partir ao meio… sobrando apenas uma lasca de cima e de baixo… assim a nave
+  // consegue passar e dá a sensação que explodimos uma porta mesmo"*.
+  //
+  // ⚠️ NÃO É `porta2`, E A DIFERENÇA É O `pickVariant`: irmãs da mesma base são SORTEADAS quando o
+  // prop nasce, então uma porta inteira nasceria já em cacos de vez em quando. A lasca é um estado,
+  // não uma variante — quem a instala é o `matarPorta` da `GameScene`, trocando a textura.
+  //
+  // ⚠️ A FRESTA MEDE 38px, contra um corpo de nave de 17×6 e um sprite de 31×15
+  // (`scripts/_f4/_medir-nave.mjs`). A arte promete passagem e a passagem existe — se alguém trocar
+  // esta peça por uma de fresta menor, é essa conta que tem de ser refeita.
+  portaLasca: 'sprites/f4-porta-lasca.png',
 
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',
@@ -1058,6 +1096,25 @@ export class BootScene extends Phaser.Scene {
         frames: frames.map((k) => ({ key: k })),
         frameRate,
         repeat: loop ? -1 : 0,
+      });
+    }
+
+    // ─── As anims de SPRITESHEET do cenário ───
+    //
+    // ⚠️ ELAS NÃO CABEM NO LAÇO ACIMA, que é do formato legado (um PNG por quadro, contados em
+    // `FRAMES`). Uma sheet é uma textura só, e os quadros saem de `generateFrameNumbers`.
+    //
+    // ⚠️ E ELAS MORAM AQUI, E NÃO EM QUEM AS USA, porque quem toca a da porta é o `TerrainSystem` —
+    // ele só chama `p.play(def.anim)` se `anims.exists` for verdade, e a porta nasce no meio da fase,
+    // muito depois de qualquer `create` de entidade. Registrar tarde é a animação simplesmente não
+    // tocar, sem erro nenhum na tela.
+    for (const { key, sheet, frames, frameRate } of SHEET_ANIMS) {
+      if (!this.textures.exists(sheet) || this.anims.exists(key)) continue;
+      this.anims.create({
+        key,
+        frames: this.anims.generateFrameNumbers(sheet, { start: 0, end: frames - 1 }),
+        frameRate,
+        repeat: -1,
       });
     }
   }
