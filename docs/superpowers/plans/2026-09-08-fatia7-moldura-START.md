@@ -100,15 +100,56 @@ investir algumas vezes; não precisa nem matar o predador.
 | # | o que olhar | a pergunta | o knob |
 |---|---|---|---|
 | **T1** | **o RASTRO do glóbulo** — uma esteira de brasa que esfria + um véu quente de fumaça, saindo da cauda de cada glóbulo da salva | o projétil lê melhor vindo? o rastro ficou curto de mais, ou virou cometa? | `BossNucleo.RASTRO_MS` 0,016 (o espaçamento: dobrar afina o rastro) · `RASTRO_BRASA` 0,8 (quanta brasa) · a vida das partículas em `this.fumaca`/`this.brasa` |
-| **T2** | **o AVISO da investida** — o casco ESFRIA e o core acelera: a respiração vai de 1× a 5× e um anel de carga fecha no miolo | dá para ler que vem investida, e não que ele levou dano? o aviso ficou longo de mais? | `TELEGRAFO_DUR` 0,7 (era 0,55 — voltar é um número) · `TELEG_RESPIRO` 5 · `CARGA_R0/R1` 26→4 · `CASCO_FRIO` |
+| **T2** | **o AVISO da investida** — o casco ESFRIA e o core acelera: a respiração vai de 1× a 5× e um anel de carga fecha no miolo | dá para ler que vem investida, e não que ele levou dano? | `TELEG_RESPIRO` 5 · `CARGA_R0/R1` 26→4 · `CASCO_FRIO` |
+| **T3** | **a CARGA e a TRAVA da investida** (o pedido de 20/09) — a carga subiu para **1,15s** e a mira CRAVA aos 62% dela: daí em diante ele está comprometido e sobram **450ms** de fuga antes do arranque. O sinal da trava é triplo: ele RECUA, o core estala e a carga para de fechar e segura | dá para atrair a investida para um lado e descer/subir no canto a tempo? o recuo diz "a mira fechou"? a carga ficou longa de mais entre as skills? | `TELEGRAFO_DUR` 1,15 · `TELEG_TRAVA` 0,62 (mais cedo = mais janela) · `RECUO_VEL`/`RECUO_MS` · medir: `node scripts/_f4/_medir-investida.mjs` |
 
-⚠️ **O T2 mexeu na DURAÇÃO do aviso (0,55 → 0,7s), e isso é janela de desvio, não só leitura.** Se ele achar que
-ficou fácil demais escapar, o 0,55 devolve a janela antiga **sem** desfazer a linguagem nova — a aceleração e o
-anel continuam iguais, só cabem em menos tempo.
+⚠️ **O T3 mexe na DIFICULDADE, não só na leitura:** cada investida passou a ter **0,45s a mais de tempo seguro**
+antes do arranque. Se a luta ficar lenta, o caminho é **adiantar a trava** (`TELEG_TRAVA` 0,62 → 0,5 mantém a
+janela e encurta a espera) e não voltar a duração — encurtar a duração desfaz a mecânica que ele pediu.
 
-**Se as duas passarem, só falta o M4** (as 3 portas com arte final, a borda C grossa, o esfíncter) → fechar a
+**Se as três passarem, só falta o M4** (as 3 portas com arte final, a borda C grossa, o esfíncter) → fechar a
 fatia com merge `--no-ff` em `main`. O B2 foi fechado em 20/09 **sem uma linha de código** (ver abaixo), a tabela
 amarela foi riscada inteira em 19/09 e a dificuldade do golfinho foi aprovada: **o M4 é a última peça**.
+
+---
+
+### 🆕 20/09 — o 7º teste: a carga da investida cresce, e a MIRA passa a TRAVAR
+
+> *"o timing da investida está muito curto, preciso que aumente o tempo de carga para a investida, assim o
+> jogador consegue usar a mecânica que citei: esperar até o último segundo de carregamento para travar o boss
+> numa direção e ter tempo de desviar para os cantos"*
+
+**⚠️ E ALONGAR A CARGA SOZINHO NÃO ENTREGAVA A MECÂNICA.** A mira era tomada no INSTANTE DO ARRANQUE — o guardião
+lia a altura da nave no mesmo quadro em que saía. Então *atrair a investida para um lado e depois desviar* não
+existia como jogada: não havia instante nenhum em que ele estivesse comprometido e ainda parado, e mais carga só
+daria mais tempo de esperar pela mesma armadilha. A jogada que ele descreve **pressupõe uma trava**, e a trava
+não existia.
+
+O telégrafo passou a ter **dois tempos**:
+
+| tempo | o que acontece |
+|---|---|
+| 0 → 62% (0,71s) | ele CARREGA e **ainda lê a nave**: o anel fecha de 26px para 4px e a respiração sobe de 1× a 5× |
+| a TRAVA (62%) | a mira CRAVA (`vyTravado`). Três sinais no mesmo quadro, porque a virada precisa ser vista — senão ele não sabe quando parou de valer a pena ficar parado: **o corpo RECUA** (puxa para trás antes de saltar), o core **estala** (coroa de 10) e a câmera treme |
+| 62% → 100% (0,45s) | a **janela de fuga**. A carga para de fechar e SEGURA, a respiração fica cravada em 5× — ele já decidiu, e o corpo diz isso |
+
+**Medido** (`scripts/_f4/_medir-investida.mjs`, escrita para isto): **450ms de janela + 760ms de travessia =
+1210ms** de desvio, contra os 760ms de antes. A 110px/s do `FreeController` são **133px** de deslocamento contra
+83px, num vão de 160px com um corpo de 133px.
+
+⚠️ **A sonda não confia na aparência.** Ela põe a nave em y=170 (que dá vy **+70**), espera a trava, TELEPORTA a
+nave para y=40 (que daria vy **−70**) e confere que o arranque saiu com **+70**: o guardião mergulha onde a nave
+*estava*, não onde ela está. Mira travada é comportamento, e comportamento se prova com um discriminador, não com
+uma foto bonita.
+
+⚠️ **E uma medida de arte no caminho:** segurando o ritmo da carga (16ms, dois sopros por batida) no raio mínimo,
+chegavam **30 partículas** empilhadas no mesmo pixel e o ADD **saturava em BRANCO** no miolo — e branco não
+existe nesta arte. Depois da trava é UM sopro a 26ms com o raio abrindo de leve: assenta em 7–9 vivas, brasa
+acesa e segura.
+
+Folha atualizada: `folhas/2026-09-20/aviso-e-rastro.png` (27 fotos — agora com a linha `MIRA TRAVADA (vy …)` nos
+rótulos, que é onde se vê a virada). Sondas: `probe-stage4` ✔ · `probe-f4-visual` ✔ · `probe-f4-moldura` ✔ ·
+`probe-f4-golfinho` ✔ · `_provar-serra` ✔ · `_medir-investida` ✔ · typecheck ✔ · build ✔.
 
 ---
 

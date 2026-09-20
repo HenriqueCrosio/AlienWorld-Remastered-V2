@@ -302,9 +302,55 @@ batendo no teto, que estavam na lista como defeito, são o acabamento.
 Os quadros 6–8 da `guardiao-idle`, em que a área acesa do miolo cai de ~1.560px para 120–307px, **são o desenho**.
 Deixa de ser item de julgamento.
 
-### 10.5 Ferramenta
+### 10.5 A CARGA E A TRAVA DA INVESTIDA (o 7º teste, 20/09)
+
+> *"o timing da investida está muito curto, preciso que aumente o tempo de carga para a investida, assim o
+> jogador consegue usar a mecânica que citei: esperar até o último segundo de carregamento para travar o boss
+> numa direção e ter tempo de desviar para os cantos"*
+
+A mecânica é a da seção 2 e do G3 do teste de 19/09 — *"é preciso de uma mecânica de atrair a investida para um
+lado e descer ou subir no canto na hora certa"*. **Ela não existia.** A mira era tomada no instante do arranque
+(`setVelocity` lia `target.y` no mesmo quadro em que a investida saía), então não havia momento nenhum em que o
+guardião estivesse comprometido e ainda parado: esticar a carga só daria mais tempo de esperar pela mesma
+armadilha. *Atrair* pressupõe uma trava, e a trava não existia.
+
+**O telégrafo passou a ter dois tempos** (`TELEGRAFO_DUR` 0,7 → **1,15s**, `TELEG_TRAVA` **0,62**):
+
+| tempo | o que acontece |
+|---|---|
+| 0 → 62% · 0,71s | CARREGA e ainda lê a nave: o anel fecha de 26px a 4px, a respiração sobe de 1× a 5× |
+| a TRAVA · 62% | a mira CRAVA em `vyTravado`. **Três sinais no mesmo quadro**: o corpo RECUA (`RECUO_VEL` 45 por `RECUO_MS` 0,18s — ele puxa para trás antes de saltar), o core estala (coroa de 10) e a câmera treme |
+| 62% → 100% · 0,45s | a JANELA DE FUGA. A carga para de fechar e SEGURA; a respiração fica cravada em 5× |
+
+⚠️ **A virada tem de ser VISÍVEL, senão a jogada não existe:** ele precisa saber quando parou de valer a pena
+ficar no lugar. Por isso a trava não é só um campo mudando de valor — é um recuo no corpo, um estalo no core e
+uma carga que muda de comportamento.
+
+**Medido** (`scripts/_f4/_medir-investida.mjs`): **450ms de janela + 760ms de travessia = 1210ms** de desvio,
+contra 760ms. A 110px/s são **133px** contra 83px, num vão de 160px com um corpo de 133px — a diferença entre
+*dá se for perfeito* e uma mecânica.
+
+⚠️ **O discriminador da sonda:** a nave espera em y=170 (vy +70), a sonda aguarda a trava e TELEPORTA a nave para
+y=40 (que daria vy −70), e o arranque tem de sair com **+70**. Mira travada é comportamento; comportamento se
+prova com um discriminador, não com uma foto.
+
+⚠️ **Isto mexe na DIFICULDADE**, não só na leitura: cada investida ganhou 0,45s de tempo seguro. Se a luta ficar
+lenta, o caminho é **adiantar a trava** (0,62 → 0,5 mantém a janela e encurta a espera), nunca encurtar a
+duração — encurtar desfaz a mecânica.
+
+⚠️ **E uma medida de arte no caminho:** mantendo o ritmo da carga (16ms, dois sopros por batida) no raio mínimo,
+chegavam 30 partículas empilhadas no mesmo pixel e o ADD saturava em BRANCO no miolo. Branco não existe nesta
+arte. Depois da trava é um sopro a 26ms (`CARGA_MS_TRAVA`) com o raio abrindo de leve: 7–9 vivas.
+
+### 10.6 Ferramentas
 
 `scripts/_f4/_ver-aviso.mjs` — o rastro e o aviso numa folha só, cada foto rotulada pelo estado do JOGO: o `k` da
-carga, o `timeScale` da respiração e as partículas VIVAS de cada emissor. ⚠️ Contar partículas é o que separa
-*"o rastro não aparece na foto"* de *"o rastro não foi emitido"* — e `emitter.alive` é a LISTA de partículas, não
-o número; quem dá o número é `getAliveParticleCount()`.
+carga, o `timeScale` da respiração, a `MIRA TRAVADA` e as partículas VIVAS de cada emissor. ⚠️ Contar partículas
+é o que separa *"o rastro não aparece na foto"* de *"o rastro não foi emitido"* — e `emitter.alive` é a LISTA de
+partículas, não o número; quem dá o número é `getAliveParticleCount()`. ⚠️ A duração sai da CLASSE
+(`b.constructor.TELEGRAFO_DUR`), nunca cravada no script: ela já mudou três vezes (0,55 → 0,7 → 1,15) e um rótulo
+com o número velho mente sobre a porcentagem da carga.
+
+`scripts/_f4/_medir-investida.mjs` — a sonda da trava e da janela (ver 10.5). ⚠️ O laço da fuga roda DENTRO da
+página, num `requestAnimationFrame`: mover a nave a partir do Playwright custaria um round-trip de 100–300ms por
+passo, e a janela inteira tem 450ms.
