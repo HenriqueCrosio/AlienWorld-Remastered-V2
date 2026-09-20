@@ -230,6 +230,11 @@ escória"*. Já é o padrão de `_instalar-serra.mjs`. ✅ **Jogada e aprovada e
 
 ## 10. 20/09 — O TELÉGRAFO DA INVESTIDA E O RASTRO DO GLÓBULO
 
+**✅ TUDO NESTA SEÇÃO FOI JOGADO E APROVADO EM 20/09:** *"joguei e ficou bom"*. O rastro, o aviso novo e a trava
+da mira ficam como estão, e **com eles a luta do chefão da Fase 4 fecha**. ⚠️ Se um dia a luta parecer lenta, o
+caminho é adiantar a TRAVA (`TELEG_TRAVA` 0,62 → 0,5: mantém a janela e encurta a espera), nunca encurtar a
+duração — encurtar desfaz a mecânica de atrair a investida e desviar.
+
 O teste de 20/09 aprovou a escória e a altura do metal e fechou o B2, e deixou dois pedidos que são os dois de
 LEITURA — nenhum de mecânica. A luta desenhada na seção 0–9 **não muda**: mesmos ataques, mesma escala, mesmos
 degraus.

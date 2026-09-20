@@ -59,8 +59,12 @@ são fáceis demais) — ver o bloco 🔴 na 🚦. O registro do B3 abaixo fica 
 **🟢 20/09 — O E1 E O E2 PASSARAM, E O B2 FECHOU SEM CÓDIGO.** *"A escória ficou boa"* · *"ficou ótimo!"* (o
 metal do rasgo) · *"a posição do guardião está ótima, pois os cabos 'fixam' no topo e se ficarem mais baixos ou
 fora da posição, mostra o corte do sprite"*. A respiração em ondas (o miolo que chega a apagar) foi declarada
-NORMAL. Saíram duas coisas novas do mesmo teste — o RASTRO do glóbulo e o AVISO da investida —, implementadas no
-mesmo dia e **à espera do teste jogado** (ver 🚦). **Com o B2 fechado, o M4 é a última peça da Fatia 7.**
+NORMAL. Saíram três coisas novas dos testes do mesmo dia — o RASTRO do glóbulo, o AVISO da investida e a TRAVA da mira
+com a carga de 1,15s —, e as três foram **jogadas e aprovadas em 20/09**: *"joguei e ficou bom"*.
+
+**🟢 A LUTA DO CHEFÃO DA FASE 4 ESTÁ FECHADA (20/09).** B1 ✅ · B2 ✅ · B3 ✅. **Falta UMA peça na Fatia 7 inteira:
+o M4** — as 3 portas com arte final, a borda C grossa e o esfíncter. Ver a 🚦: ele começa por uma decisão dele,
+parada desde 12/09.
 
 **🟠 O REGISTRO DO B3 (16–17/09). CINCO RODADAS, QUATRO TESTES JOGADOS. Aprovados: a
 mecânica, o surgimento/giro, o breu, a lava, a fumaça da troca, o andar no lugar, a investida de quatro com o
@@ -70,50 +74,74 @@ refeita em arte assada em pixel depois de ele reprovar a 1ª versão. A rodada 6
 refeito, porque a garra trocava no meio do gesto — **já foi jogada e APROVADA**: *"ficou ótima e in-game melhor
 ainda"*. Ver 🚦 e ⏸️ logo abaixo.
 
-Branch `feat/fase4-visual`. As rodadas 4 e 5 foram commitadas em 17/09 (`c5d6816`, `c24451d`, `5867c27`); **a rodada
-6 ainda NÃO está commitada**. Nada foi empurrado: o `origin` segue em `6c2fe4f`. Commitar e/ou empurrar é decisão
-dele — o remoto é o V2; NUNCA o `legacy`.
+Branch `feat/fase4-visual`, **em dia com o `origin` (V2) em `2b8bfff`** — tudo o que está descrito aqui está
+commitado e empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 
 ---
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 20/09 o E1 e o
-> E2 passaram (a escória e a altura do metal), o B2 foi FECHADO sem código — a posição do guardião já estava boa —
-> e você fez as duas coisas que eu pedi no mesmo teste: o RASTRO do glóbulo e o AVISO da investida, que agora é a
-> respiração do core acelerando em vez do corpo piscando. Joguei agora e: <o que achou das duas>. Se estiver bom,
-> só falta o M4 (as 3 portas, a borda C, o esfíncter) e a Fatia 7 fecha."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. A luta do chefão
+> está FECHADA: em 20/09 joguei e aprovei o rastro do glóbulo, o aviso novo da investida e a trava da mira. O B1,
+> o B2 e o B3 estão todos fechados. Falta UMA peça para a Fatia 7 inteira: o M4 — as 3 portas com arte final, a
+> borda C grossa e o esfíncter. Vamos ao M4."**
 
-Se ele chegar SEM ter jogado: suba o localhost (`npm run dev` → `L` → `G`) e entregue o roteiro da 🚦 antes de
-qualquer outra coisa — **nada de gerar arte nem mexer em knob sem o teste dele.**
+⚠️ **O M4 é construção, não ajuste — e começa por uma decisão dele que está parada desde 12/09** (a borda C é
+128×80 e três coisas no código presumem 64). Ver a 🚦 logo abaixo: **brainstorming antes de qualquer código.**
 
 ---
 
 ## 🚦 O QUE FAZER PRIMEIRO NA PRÓXIMA SESSÃO
 
-### 🎯 O TESTE CURTO — duas coisas, e só elas (20/09)
+### 🎯 O M4 — A CÂMARA C. A ÚLTIMA PEÇA DA FATIA 7
 
-O E1 e o E2 de 19/09 **passaram** (ver o bloco ✅ logo abaixo). Sobraram as **duas mudanças que saíram do próprio
-teste dele**, feitas em 20/09 e ainda não vistas em jogo. `npm run dev` → `L` → `G` → deixe o guardião atirar e
-investir algumas vezes; não precisa nem matar o predador.
+**A luta do chefão está fechada.** O T1, o T2 e o T3 foram jogados e aprovados em 20/09 (*"joguei e ficou bom"*):
+o rastro do glóbulo, o aviso novo da investida e a trava da mira com a carga de 1,15s. **Nada mais pende no
+B1/B2/B3.** O que sobra da Fatia 7 é o M4 — e ele é CONSTRUÇÃO, não ajuste.
 
-| # | o que olhar | a pergunta | o knob |
-|---|---|---|---|
-| **T1** | **o RASTRO do glóbulo** — uma esteira de brasa que esfria + um véu quente de fumaça, saindo da cauda de cada glóbulo da salva | o projétil lê melhor vindo? o rastro ficou curto de mais, ou virou cometa? | `BossNucleo.RASTRO_MS` 0,016 (o espaçamento: dobrar afina o rastro) · `RASTRO_BRASA` 0,8 (quanta brasa) · a vida das partículas em `this.fumaca`/`this.brasa` |
-| **T2** | **o AVISO da investida** — o casco ESFRIA e o core acelera: a respiração vai de 1× a 5× e um anel de carga fecha no miolo | dá para ler que vem investida, e não que ele levou dano? | `TELEG_RESPIRO` 5 · `CARGA_R0/R1` 26→4 · `CASCO_FRIO` |
-| **T3** | **a CARGA e a TRAVA da investida** (o pedido de 20/09) — a carga subiu para **1,15s** e a mira CRAVA aos 62% dela: daí em diante ele está comprometido e sobram **450ms** de fuga antes do arranque. O sinal da trava é triplo: ele RECUA, o core estala e a carga para de fechar e segura | dá para atrair a investida para um lado e descer/subir no canto a tempo? o recuo diz "a mira fechou"? a carga ficou longa de mais entre as skills? | `TELEGRAFO_DUR` 1,15 · `TELEG_TRAVA` 0,62 (mais cedo = mais janela) · `RECUO_VEL`/`RECUO_MS` · medir: `node scripts/_f4/_medir-investida.mjs` |
+**⚠️ ANTES DE QUALQUER CÓDIGO: uma decisão dele, parada desde 12/09.** A arte da borda C está aprovada
+(`scripts/_f4/_faixa-C-v.png`, *"as do duto e do núcleo ficaram ótimas"*) e é **128×80** — a "faixa grossa" do
+duto. Três coisas no código presumem **64**:
 
-⚠️ **O T3 mexe na DIFICULDADE, não só na leitura:** cada investida passou a ter **0,45s a mais de tempo seguro**
-antes do arranque. Se a luta ficar lenta, o caminho é **adiantar a trava** (`TELEG_TRAVA` 0,62 → 0,5 mantém a
-janela e encurta a espera) e não voltar a duração — encurtar a duração desfaz a mecânica que ele pediu.
+- `Moldura.ESPESSURA_MAX` = 54, calibrado para a peça de 64px sempre alcançar a borda;
+- a **saia**, ancorada em `superficie ± 64`;
+- o assert de dimensão da sonda (`128x64`).
 
-**Se as três passarem, só falta o M4** (as 3 portas com arte final, a borda C grossa, o esfíncter) → fechar a
-fatia com merge `--no-ff` em `main`. O B2 foi fechado em 20/09 **sem uma linha de código** (ver abaixo), a tabela
-amarela foi riscada inteira em 19/09 e a dificuldade do golfinho foi aprovada: **o M4 é a última peça**.
+**A pergunta:** a `Moldura` aprende a faixa de 128×80 (o trabalho do M4), ou corta-se a C para 64 e entrega-se
+hoje, jogando fora a faixa grossa? **É decisão dele, e é um brainstorming — não uma escolha para eu tomar
+sozinho.**
+
+**As três peças do M4, depois da decisão:**
+
+| peça | o que é | estado |
+|---|---|---|
+| **as 3 PORTAS** | hoje são `f4-porta-prov.png`, arte provisória | falta a arte final |
+| **a BORDA C** | 128×80, arte dele aprovada e parada desde 12/09 | presa na decisão acima |
+| **o ESFÍNCTER** | `f4VivoC`, animado | a construir |
+
+**Depois do M4:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar a fatia com merge `--no-ff` de
+`feat/fase4-visual` em `main`.
 
 ---
 
-### 🆕 20/09 — o 7º teste: a carga da investida cresce, e a MIRA passa a TRAVAR
+### ✅ 20/09 — o 8º teste jogado: o rastro, o aviso e a trava PASSARAM
+
+*"Joguei e ficou bom."* Os três itens do teste curto fecham de uma vez, e com eles **a luta do chefão da Fase 4**:
+
+| # | o que era | veredicto |
+|---|---|---|
+| **T1** | o RASTRO do glóbulo (brasa que esfria + véu quente de fumaça) | ✅ fica como está |
+| **T2** | o AVISO da investida (o casco esfria, a respiração vai a 5×, o anel fecha no miolo) | ✅ fica como está |
+| **T3** | a CARGA de 1,15s e a TRAVA da mira aos 62%, com 450ms de janela de fuga | ✅ fica como está |
+
+**Os knobs ficam onde estão** — `RASTRO_MS` 0,016 · `RASTRO_BRASA` 0,8 · `TELEG_RESPIRO` 5 · `CARGA_R0/R1` 26→4 ·
+`TELEGRAFO_DUR` 1,15 · `TELEG_TRAVA` 0,62 · `RECUO_VEL` 45. ⚠️ Se um dia a luta parecer lenta, o caminho é
+**adiantar a trava** (0,62 → 0,5: mantém a janela e encurta a espera), **nunca** encurtar a duração — encurtar
+desfaz a mecânica de atrair a investida e desviar.
+
+---
+
+### ✅ 20/09 — o 7º teste: a carga da investida cresce, e a MIRA passa a TRAVAR (JOGADA E APROVADA)
 
 > *"o timing da investida está muito curto, preciso que aumente o tempo de carga para a investida, assim o
 > jogador consegue usar a mecânica que citei: esperar até o último segundo de carregamento para travar o boss
@@ -1556,11 +1584,15 @@ O CENÁRIO RESPIRA         ✅ APROVADO (14/09), e as colunas verticais junto
   Assados por `_assar-anim.mjs` contra o sprite estático aprovado.
 A EMENDA C→D + A PINTURA  ✅ APROVADAS (15/09) — a pintura do núcleo fica como está
 BLOCO B · B1 — GUARDIÃO   ✅ APROVADO (15/09) — arte nova dele + morte composta no motor
-BLOCO B · B3 — 2ª FORMA   🟠 ◄ PEGUE AQUI · O PREDADOR implementado (16/09) — falta o teste jogado dele (ver ⏸️)
+BLOCO B · B3 — 2ª FORMA   ✅ O PREDADOR, fechado em 19/09 (7 rodadas, 6 testes jogados)
+BLOCO B · B1 — A LUTA     ✅ a serra, a salva que cobre as bordas, a escala em 3 degraus (19/09), e a
+                             LEITURA fechada em 20/09: o rastro do glóbulo, o aviso que deixou de
+                             falar a língua do dano, e a trava da mira com 450ms de janela de fuga.
 BLOCO B · B2 — A POSIÇÃO  ✅ FECHADO EM 20/09, SEM CÓDIGO: a posição de hoje é a certa. "os cabos
                              'fixam' no topo e se ficarem mais baixos ou fora da posição, mostra o
                              corte do sprite" — os tentáculos no teto são o acabamento, não o defeito.
-M4 — A CÂMARA C           ⬜ as 3 PORTAS com arte final (hoje `f4-porta-prov.png`), a borda C grossa
+M4 — A CÂMARA C           ⬜ ◄ PEGUE AQUI · A ÚLTIMA PEÇA. as 3 PORTAS com arte final (hoje
+                             `f4-porta-prov.png`), a borda C grossa
                              (128×80, arte dele aprovada; a `Moldura` foi feita para 64 de altura) e o
                              esfíncter animado (`f4VivoC`)
 M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprovada)
@@ -1568,8 +1600,8 @@ M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprov
 
 ## 🧭 O MAPA PARA FECHAR A FATIA 7 (15/09)
 
-**🔴 Obrigatório, na ordem dele:** ~~B3~~ ✅ (fechado em 19/09) → ~~B2~~ ✅ (fechado em 20/09, sem código) →
-**M4 (portas, borda C, esfíncter) — a ÚLTIMA peça.**
+**🔴 Obrigatório, na ordem dele:** ~~B3~~ ✅ (19/09) → ~~B2~~ ✅ (20/09, sem código) → ~~a leitura da luta~~ ✅
+(20/09) → **M4 (portas, borda C, esfíncter) — a ÚLTIMA peça da fatia.**
 
 **✅ CORTADAS — RESPONDIDO EM 19/09: *"risca as 3 primeiras"*.** A tabela amarela fecha inteira; nenhuma destas
 três peças será construída, e a Fatia 7 não depende mais delas.
