@@ -392,6 +392,17 @@ export class TerrainSystem {
     if (opts?.centroVao !== undefined) {
       p.setOrigin(0.5, 0.5);
       p.y = opts.centroVao;
+      // ⚠️ E ELA VAI PARA TRÁS DA FAIXA — pedido dele no teste jogado de 20/09: *"as pontas de cima
+      // e de baixo da porta precisam estar atrás do layer da borda"*. A peça tem 112px contra um
+      // vão de 84 a 68, então ela SEMPRE invade a parede em 14px de cada lado; a pergunta nunca foi
+      // se invade, foi se a invasão aparece. Na profundidade de prop (−0,5) as pontas ficavam por
+      // CIMA da borda e a porta lia como colada na frente do duto. Atrás dela, lê encaixada DENTRO
+      // da abertura, que é o que uma comporta é.
+      //
+      // ⚠️ E A PROFUNDIDADE SOZINHA BASTA AQUI, ao contrário da mesa que mergulha (ver o aviso do
+      // `tornaInerte`, que precisou de alpha porque a borda tinha fresta semitransparente).
+      // Medido em 20/09: `f4-faixa-b` e `f4-faixa-c` são 100% opacas, então nada vaza por trás.
+      p.setDepth(TerrainSystem.DEPTH_NA_PAREDE);
     }
     if (opts?.tint !== undefined) p.setTint(opts.tint);
     if (opts?.angle !== undefined) p.setAngle(opts.angle);

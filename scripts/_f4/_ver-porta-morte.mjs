@@ -44,8 +44,12 @@ await page.waitForTimeout(60);
 await foto('2 · a LASCA — a luz morreu, a peça partiu');
 await page.waitForTimeout(140);
 await foto('3 · o estouro');
-await page.waitForTimeout(400);
-await foto('4 · a passagem aberta');
+await page.waitForTimeout(300);
+// ⚠️ NÃO TENTO FOTOGRAFAR A NAVE ATRAVESSANDO. Tentei, e o controlador a puxa de volta no quadro
+// seguinte: a foto saiu sem a nave e sem prova. Quem prova que a lasca não cobra vida é a
+// `probe-f4-moldura` (o par `cobra`/`atravessa`, com inimigos varridos e a mordida da parede
+// conferida). Aqui se julga o que só o olho julga: que a lasca FICA e rola com o duto.
+await foto('4 · a lasca FICA e rola com o mundo — o duto guarda o que foi aberto');
 await browser.close();
 
 const Z = 2, PAD = 8, ROT = 22;
@@ -61,5 +65,5 @@ const svg = `<svg width="${largura}" height="${altura}" xmlns="http://www.w3.org
 }</svg>`;
 await sharp({ create: { width: largura, height: altura, channels: 4, background: { r: 22, g: 22, b: 26, alpha: 1 } } })
   .composite([...comps, { input: Buffer.from(svg), left: 0, top: 0 }])
-  .png().toFile('scripts/_f4/_folha-porta-morte.png');
-console.log('scripts/_f4/_folha-porta-morte.png');
+  .png().toFile('scripts/_f4/_folha-porta-morte3.png');
+console.log('scripts/_f4/_folha-porta-morte3.png');

@@ -1635,27 +1635,35 @@ export class GameScene extends Phaser.Scene {
    * *"ao morrer, a luz apaga antes da peça quebrar"* — nunca foi implementado, e a arte sozinha
    * não entregava isso.
    *
-   * ⚠️ O CORPO SAI NO MESMO QUADRO EM QUE A LASCA ENTRA, e este é o buraco que os 150ms ABREM. O
-   * `overlap(ship, terrain.props)` cobra uma vida por encostar; uma porta já destruída que ainda
-   * machuca seria o jogo mentindo exatamente na hora em que ele deveria recompensar. Ele apontou
-   * a lasca justamente para a nave PASSAR — *"assim a nave consegue passar e dá a sensação que
-   * explodimos uma porta mesmo"* —, e passar tem de valer também para a física.
+   * ⚠️ A LASCA FICA. Todo outro prop é destruído ao morrer; esta não, e o pedido é dele no teste
+   * jogado de 20/09: *"agora que temos ela destruída, podemos deixar o sprite lá e o jogador passa
+   * por dentro dela"*. Ela rola com o mundo e o culling do `TerrainSystem` (`x < −40`) a recolhe
+   * como recolhe qualquer prop — o duto passa a guardar a memória do que o jogador abriu.
    *
-   * ⚠️ E O `hp` VIRA `Infinity` de propósito: o corpo desligado já impede o overlap, mas se algum
-   * caminho futuro reativá-lo, o `bulletHitProp` sai cedo em vez de "matar" a lasca outra vez e
-   * agendar um segundo estouro.
+   * ⚠️ E É O `inerte` QUE TIRA A MORDIDA, NÃO O `body.enable` — a correção mais cara deste método.
+   * Desligar o corpo parecia a resposta óbvia e CONGELA a lasca: prop é movido por velocidade
+   * (`setVelocityX` no `spawn`), então sem corpo ela fica parada no ar enquanto a parede rola por
+   * baixo. O `inerte` é o mecanismo que a casa já tinha para a mesa que mergulha na parede, e os
+   * TRÊS overlaps de prop o consultam pelo `TerrainSystem.solido`: a lasca deixa de matar, de
+   * segurar tiro e de cobrir bala, e continua andando. O jogador atravessa o buraco dela.
+   *
+   * ⚠️ O `hp` VIRA `Infinity` como cinto de segurança: o `solido` já impede o overlap, mas se algum
+   * caminho futuro devolver a mordida, o `bulletHitProp` sai cedo em vez de "matar" a lasca outra
+   * vez e agendar um segundo estouro.
    *
    * ⚠️ O ESTOURO SAI DO CENTRO, E NÃO DE `y − displayHeight/2` COMO OS OUTROS. A porta é o único
    * prop de origem `(0.5, 0.5)` (ver o `case 'porta'` do `TerrainSystem`), então a conta dos props
    * ancorados pelo pé jogava a explosão 56px ACIMA dela. Estava assim desde que a porta existe.
+   *
+   * ⚠️ A PROFUNDIDADE NÃO É MEXIDA AQUI, e não é esquecimento: a porta já nasce atrás da faixa (ver
+   * o `centroVao` do `spawn`), e `setTexture` não toca em depth. A lasca herda o lugar certo.
    */
   private matarPorta(porta: Phaser.Physics.Arcade.Sprite): void {
     porta.anims.stop();
     porta.clearTint();
     porta.setTexture('portaLasca');
     porta.setData('hp', Infinity);
-    const corpo = porta.body as Phaser.Physics.Arcade.Body | null;
-    if (corpo) corpo.enable = false;
+    porta.setData('inerte', true);
 
     // O PONTO É AGORA, e o estouro é depois: a recompensa não espera a animação.
     this.score += porta.getData('score') as number;
@@ -1663,7 +1671,6 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(150, () => {
       if (!porta.active) return;
       this.fx.explode(porta.x, porta.y, 1.5);
-      porta.destroy();
     });
   }
 

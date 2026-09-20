@@ -725,6 +725,13 @@ const porta = await (async () => {
         anim: p.anims?.currentAnim?.key ?? null,
         dims: `${Math.round(p.displayWidth)}x${Math.round(p.displayHeight)}`,
         escala: p.scaleX,
+        // ⚠️ A PROFUNDIDADE, e ela virou assert em 20/09 depois do teste jogado dele: *"as pontas
+        // de cima e de baixo da porta precisam estar atrás do layer da borda"*. A peça tem 112px
+        // contra um vão de 84 a 68, então ela SEMPRE invade a parede — a pergunta nunca foi se
+        // invade, é se a invasão aparece. À frente da faixa (−0,6) a porta lê como colada NA
+        // FRENTE do duto; atrás dela, lê como encaixada DENTRO da abertura.
+        depth: p.depth,
+        faixaDepth: (s.children.list.find((o) => o.name === 'faixaChao') ?? {}).depth ?? null,
         // as bordas da peça contra as bordas do corredor, na coluna dela
         sobraCima: Math.round(vao - gap / 2 - (p.y - p.displayHeight / 2)),
         sobraBaixo: Math.round(p.y + p.displayHeight / 2 - (vao + gap / 2)),
@@ -755,11 +762,90 @@ if (porta) {
   ok(porta.escala === 1, `a porta entra em escala 1, nunca esticada (${porta.escala})`);
   ok(porta.dims === '64x112', `as dimensões batem com a arte — 64×112 (${porta.dims})`);
   ok(porta.hp === 6 || porta.hp === 8 || porta.hp === 10, `o HP vem do ROTEIRO, porta a porta (hp=${porta.hp})`);
+  ok(
+    porta.faixaDepth !== null && porta.depth < porta.faixaDepth,
+    `⭐ as pontas da porta ficam ATRÁS da borda (porta ${porta.depth} < faixa ${porta.faixaDepth})`,
+  );
   // ⚠️ OS DOIS ASSERTS QUE IMPORTAM. A peça de 112px contra um vão de 84, 76 ou 68 tem de sobrar
   // dos DOIS lados. Sobra negativa = fresta = porta contornável.
   ok(
     porta.sobraCima >= 0 && porta.sobraBaixo >= 0,
     `a porta TAPA o vão inteiro, sem fresta (sobra ${porta.sobraCima}px em cima, ${porta.sobraBaixo}px embaixo)`,
+  );
+}
+
+// ⚠️ A NAVE PARADA NO DUTO É ATINGIDA POR TUDO, e isso quase me fez dar um assert falso como
+// prova. A primeira versão do teste da lasca passou (50 → 50); ao acrescentar o discriminador da
+// porta viva, o MESMO teste começou a falhar (50 → 49) — não porque a lasca cobrasse, mas porque
+// a nave parada no meio do duto leva de onda, de bala e de parede. Medir "a lasca cobra vida?" com
+// o duto inteiro ligado é medir o duto.
+//
+// Este ajudante desliga o resto: varre inimigos e balas a cada quadro, e devolve junto a leitura
+// da MORDIDA da parede na caixa da nave — se a parede estiver mordendo, o número não vale e o
+// assert diz isso em vez de mentir.
+const encostaNaPorta = async (quadros = 8) => {
+  const inicio = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
+    if (!p) return null;
+    s.lives = 50;
+    s.invulnerableUntil = 0;
+    s.ship.x = p.x; s.ship.y = p.y;
+    return { vidas: 50, x: Math.round(p.x), tex: p.texture.key };
+  });
+  if (!inicio) return null;
+  let mordeu = false;
+  for (let i = 0; i < quadros; i++) {
+    await page.waitForTimeout(50);
+    const r = await page.evaluate(() => {
+      const s = window.__game.scene.getScenes(true)[0];
+      for (const e of s.enemies.enemies.getChildren()) e.destroy();
+      for (const b of s.enemies.enemyBullets.getChildren()) if (b.active) s.enemies.release(b);
+      const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
+      if (p) { s.ship.x = p.x; s.ship.y = p.y; }
+      const n = s.ship;
+      return s.moldura.morde(n.x - n.displayWidth / 2, n.x + n.displayWidth / 2, n.y - n.displayHeight / 2, n.y + n.displayHeight / 2);
+    });
+    if (r) mordeu = true;
+  }
+  const fim = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const v = s.lives;
+    s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+    s.lives = 99;
+    return v;
+  });
+  return { ...inicio, vidasDepois: fim, mordeu };
+};
+
+// ─── O DISCRIMINADOR: a porta VIVA cobra vida ───
+//
+// ⚠️ SEM ESTE, O ASSERT DA LASCA NÃO VALE NADA. Lá embaixo se prova que a nave atravessa a lasca
+// sem tomar dano — mas "não tomou dano" também é o resultado de um overlap que nunca dispara, de
+// uma nave posta no lugar errado, ou de uma blindagem que ficou ligada. O par é que faz sentido:
+// a MESMA nave, no MESMO lugar, contra a porta viva TEM de perder vida. Um tira a ambiguidade do
+// outro.
+const cobra = await (async () => {
+  for (let i = 0; i < 900; i++) {
+    const r = await page.evaluate(() => {
+      const s = window.__game.scene.getScenes(true)[0];
+      if (!s || s.scene.key !== 'Game') return null;
+      s.lives = 99; s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+      const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
+      return p && p.x > 40 && p.x < 340 ? true : false;
+    });
+    if (r) break;
+    await page.waitForTimeout(100);
+  }
+  return await encostaNaPorta();
+})();
+console.log('cobra    ', JSON.stringify(cobra));
+ok(cobra !== null, 'a sonda alcançou uma porta viva na tela');
+if (cobra) {
+  ok(cobra.mordeu === false, `o teste é limpo: a PAREDE não estava mordendo a nave (mordeu=${cobra.mordeu})`);
+  ok(
+    cobra.vidasDepois < cobra.vidas,
+    `⭐ a porta VIVA COBRA vida — é o par do assert da lasca lá embaixo (${cobra.vidas} → ${cobra.vidasDepois} vidas)`,
   );
 }
 
@@ -792,7 +878,15 @@ const morte = await (async () => {
     return {
       tex: p.texture.key,
       anim: p.anims?.isPlaying ?? false,
+      // ⚠️ O CORPO CONTINUA LIGADO, e isto é uma correção de 20/09. A primeira versão desligava o
+      // `body` para a lasca não cobrar vida — e o prop é movido por VELOCIDADE (`setVelocityX` no
+      // `spawn`), então desligar o corpo congelava a lasca no lugar enquanto o mundo rolava por
+      // baixo dela. Quem tira a mordida é o `inerte`, que os TRÊS overlaps de prop já consultam
+      // pelo `TerrainSystem.solido`: ela para de matar, de segurar tiro e de cobrir bala, e
+      // continua andando.
       corpo: p.body ? p.body.enable : null,
+      inerte: p.getData('inerte') === true,
+      x: Math.round(p.x),
       ativa: p.active,
       ganhou: s.score - antes,
       // A FRESTA DA LASCA, medida na textura instalada: quantas LINHAS do quadro estão
@@ -821,28 +915,67 @@ const morte = await (async () => {
   });
   if (!depois) return null;
   // 150ms para o estouro, e uma folga para o relógio do Phaser fechar o quadro.
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(600);
   const fim = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
-    return s.terrain.props.getChildren().filter((o) => o.active && o.getData('kind') === 'porta').length;
+    const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'porta');
+    return { sobrou: p ? 1 : 0, x: p ? Math.round(p.x) : null, tex: p ? p.texture.key : null };
   });
-  return { ...depois, sobrou: fim };
+  return { ...depois, ...{ sobrou: fim.sobrou, xDepois: fim.x, texDepois: fim.tex } };
 })();
 console.log('morte    ', JSON.stringify(morte));
 ok(morte !== null, 'a sonda alcançou uma porta viva para matar');
 if (morte) {
   ok(morte.tex === 'portaLasca', `ao morrer a porta vira a LASCA (tex=${morte.tex})`);
   ok(morte.anim === false, `a respiração PARA — a fenda apagou (anims.isPlaying=${morte.anim})`);
-  // ⚠️ O ASSERT QUE PAGA OS 150ms. Sem o corpo desligado, a lasca continuaria cobrando uma vida no
-  // `overlap(ship, terrain.props)` — e cobraria exatamente na janela em que ele mandou a nave
-  // PASSAR. Os dois tempos abriram este buraco; é este assert que o mantém fechado.
-  ok(morte.corpo === false, `⭐ o corpo da lasca é DESLIGADO no mesmo quadro — ela não cobra vida (body.enable=${morte.corpo})`);
-  ok(morte.ativa === true, `a lasca FICA na tela antes de estourar (ativa=${morte.ativa})`);
+  // ⚠️ OS DOIS ASSERTS QUE SEGURAM A LASCA ATRAVESSÁVEL, e eles são um PAR — separá-los é como o
+  // defeito volta. `inerte` tira a mordida (os três overlaps de prop consultam o
+  // `TerrainSystem.solido`), e o `body.enable` TEM de continuar verdadeiro: o prop anda por
+  // velocidade, então desligar o corpo congelaria a lasca no lugar enquanto o mundo rola.
+  ok(morte.inerte === true, `⭐ a lasca é INERTE — não mata, não segura tiro, não cobre bala (inerte=${morte.inerte})`);
+  ok(morte.corpo === true, `⭐ e o corpo continua LIGADO — sem ele a lasca congelava no lugar (body.enable=${morte.corpo})`);
+  ok(morte.ativa === true, `a lasca FICA na tela (ativa=${morte.ativa})`);
   ok(morte.ganhou === 200, `o ponto é dado na morte, não no estouro (+${morte.ganhou})`);
   // ⚠️ A NAVE TEM 17×6 DE CORPO E 31×15 DE SPRITE (`_medir-nave.mjs`). O piso de 20px não é o
   // corpo: é o DESENHO da nave mais folga — a arte tem de parecer atravessável, não só ser.
   ok(morte.fresta >= 20, `a lasca deixa passagem de verdade (fresta de ${morte.fresta}px, nave 31×15)`);
-  ok(morte.sobrou === 0, `e a lasca SAI de cena depois do estouro (${morte.sobrou} portas na tela)`);
+  // ⚠️ A LASCA NÃO SOME DEPOIS DO ESTOURO — pedido dele no teste jogado de 20/09: *"podemos deixar
+  // o sprite lá e o jogador passa por dentro dela"*. Antes o prop era destruído junto com a
+  // explosão, e o duto ficava sem memória nenhuma do que o jogador tinha acabado de abrir.
+  ok(morte.sobrou === 1, `⭐ a lasca FICA depois do estouro — o jogador passa por dentro dela (${morte.sobrou} na tela)`);
+  ok(morte.texDepois === 'portaLasca', `e continua sendo a lasca, não volta a ser porta (${morte.texDepois})`);
+  // ⚠️ O ASSERT QUE PROVA O CORPO LIGADO. Uma lasca parada no meio da tela enquanto a parede rola
+  // é o defeito exato que o `body.enable` acima previne, e "está ligado" não prova que ela ANDA.
+  ok(
+    morte.xDepois !== null && morte.xDepois < morte.x,
+    `⭐ e ela ANDA com o mundo, não congela (x ${morte.x} → ${morte.xDepois})`,
+  );
+}
+
+// ─── E A PROVA FINAL: a nave DENTRO da lasca não leva dano ───
+//
+// ⚠️ ESTE É O ASSERT QUE VALE PELO PEDIDO INTEIRO. *"O jogador passa por dentro dela"* é uma
+// promessa de FÍSICA, e `inerte === true` é só o mecanismo — um refactor que troque o predicado
+// dos overlaps deixaria a flag verde e a promessa quebrada.
+//
+// ⚠️ E ELE EXIGE TIRAR A BLINDAGEM. A sonda voa com `invulnerableUntil` no máximo para poder medir
+// a fase inteira; com ela ligada, este teste passaria mesmo se a lasca matasse. A invulnerabilidade
+// sai, a nave é posta em cima da lasca, e volta depois — medir dano com o escudo ligado é medir
+// o escudo.
+//
+// ⚠️ UMA FOTO NÃO PROVA ISTO. Tentei capturar a nave atravessando e o controlador a puxou de volta
+// no quadro seguinte; a imagem ficou sem a nave e sem prova. Comportamento se prova com um
+// discriminador, não com uma foto bonita — a mesma lição da trava da mira, em 20/09.
+const atravessa = await encostaNaPorta();
+console.log('atravessa', JSON.stringify(atravessa));
+ok(atravessa !== null, 'a sonda alcançou a lasca para atravessá-la');
+if (atravessa) {
+  ok(atravessa.tex === 'portaLasca', `o que a nave atravessa É a lasca (${atravessa.tex})`);
+  ok(atravessa.mordeu === false, `o teste é limpo: a PAREDE não estava mordendo a nave (mordeu=${atravessa.mordeu})`);
+  ok(
+    atravessa.vidasDepois === atravessa.vidas,
+    `⭐⭐ a nave ATRAVESSA a lasca sem levar dano — 8 quadros sobreposta, sem blindagem (${atravessa.vidas} → ${atravessa.vidasDepois} vidas)`,
+  );
 }
 
 // ⚠️ NO DUTO NÃO NASCE MESA. Desde que a parede colou no corredor, uma mesa nasceria como uma
