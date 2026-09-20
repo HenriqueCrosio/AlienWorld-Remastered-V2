@@ -58,8 +58,8 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
    com a frase de arranque e o que fazer primeiro (🚦).
 
-   **Estado em 2026-09-20: falta UMA peça, o M4.** A branch está em dia com o `origin` (V2). Tudo
-   abaixo foi jogado e aprovado por ele:
+   **Estado em 2026-09-20: o M4 começou, e faltam DUAS peças — as 3 PORTAS e o ESFÍNCTER.** A
+   branch está em dia com o `origin` (V2). Tudo abaixo foi jogado e aprovado por ele:
 
    - o **Bloco A** (os 4 fundos dele) e a **MOLDURA** (M1, M1.5: o duto, as 3 portas provisórias);
    - o **GOLFINHO**, o mini-chefão da câmara B — e a dificuldade da arena, aprovada em 19/09;
@@ -77,19 +77,32 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
      (`src/entities/fimDoPredador.ts`: o piso racha, estoura, a lava sobe e o corpo afunda);
    - o **B2 — a posição do chefão**: fechado em 20/09 **sem uma linha de código**, porque a
      posição de hoje já era a certa — os cabos encontram a borda de cima, e é ela que esconde o
-     corte do sprite de 256².
+     corte do sprite de 256²;
+   - o **M4 · a BORDA C e o PILAR DA COSTURA**, jogados e aprovados em 20/09 (`28b0a14`): *"ficou
+     bem melhor e dá mais sensação de lugar fechado… a coluna que separa a mudança das bordas
+     ficou de boa, barato e eficiente"*. A faixa grossa (128×80) da câmara C entrou depois de a
+     `Moldura` aprender a ler a altura da PEÇA em vez de um literal 64, e o `cenario` de t=68
+     ganhou `junta: 'mesa3'` — a costura B→C era a única das três sem pilar, porque até então não
+     havia costura ali.
 
    ⚠️ **A LEI MAIS CARA DESTA FATIA:** efeito de cenário se **assa em pixel** na resolução nativa,
    com a paleta do vizinho. A 1ª versão do fim da morte foi feita com `Graphics` em tempo de jogo
    e **reprovada na hora** (*"ficou gerado e sem custos"*); foi refeita assada
    (`scripts/_f4/_assar-fim-f4.mjs`). O código de cena só toca a arte assada.
 
-   **O QUE FALTA — o M4, a câmara C, e só ele:** as 3 portas com arte final (hoje
-   `f4-porta-prov.png`), a **borda C grossa** e o esfíncter animado (`f4VivoC`). ⚠️ **Ele começa
-   por uma decisão dele parada desde 12/09:** a arte da borda C está aprovada e é **128×80**,
-   enquanto três coisas presumem 64 (`Moldura.ESPESSURA_MAX` 54, a saia ancorada em
-   `superficie ± 64`, e o assert `128x64` em `scripts/probe-f4-moldura.mjs:181`). Ou a `Moldura`
-   aprende a faixa grossa, ou corta-se a C para 64. **É brainstorming, não escolha do agente.**
+   **O QUE FALTA — duas peças do M4:** as **3 PORTAS com arte final** (hoje `f4-porta-prov.png`) e
+   o **ESFÍNCTER** (`f4VivoC`, 48×48 em 8 quadros: abre e fecha na parede, não colide, só respira).
+   ⚠️ **As portas ficaram a peça mais urgente, e o motivo é novo:** a provisória destoava pouco
+   enquanto a parede ao redor também era provisória; com a borda C virada arte final, ela passou a
+   ser a única coisa borrada na tela — ver a 3ª tira de `scripts/_f4/_folha-duto-luz.png`.
+
+   ⚠️ **E A LIÇÃO QUE A BORDA C DEIXOU, porque ela vale para o esfíncter:** arte com uma LINHA
+   FORTE impõe geometria à fase. A veia acesa da borda mora na linha 41 da peça e, no duto, a
+   parede é colada no corredor — então cada degrau do vão quebrava a luz, e ele pegou isso jogando
+   (*"ficar em um degrau diferente fica estranho in game"*). O conserto não foi na arte nem na
+   largura: foi alongar o patamar do `SEGURA OU ANDA` só dentro do duto. Ele ofereceu pagar em
+   aperto (*"mesmo que tenha que apertar mais o duto"*) e não foi preciso — a banda mais estreita
+   segue 84px.
 
    **Depois do M4:** rejogar a fase inteira, atualizar este HANDOFF e fechar a fatia com merge
    `--no-ff` em `main`. O mapa inteiro está na seção "🧭 O MAPA PARA FECHAR A FATIA 7" do START.
@@ -548,7 +561,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
-| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador e a posição do chefão **todos jogados e aprovados**. Falta **só o M4** (portas/borda C/esfíncter). Ver o START |
+| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. Faltam **as 3 portas com arte final e o esfíncter**. Ver o START |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**

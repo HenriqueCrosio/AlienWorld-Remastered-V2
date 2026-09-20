@@ -62,9 +62,21 @@ fora da posição, mostra o corte do sprite"*. A respiração em ondas (o miolo 
 NORMAL. Saíram três coisas novas dos testes do mesmo dia — o RASTRO do glóbulo, o AVISO da investida e a TRAVA da mira
 com a carga de 1,15s —, e as três foram **jogadas e aprovadas em 20/09**: *"joguei e ficou bom"*.
 
-**🟢 A LUTA DO CHEFÃO DA FASE 4 ESTÁ FECHADA (20/09).** B1 ✅ · B2 ✅ · B3 ✅. **Falta UMA peça na Fatia 7 inteira:
-o M4** — as 3 portas com arte final, a borda C grossa e o esfíncter. Ver a 🚦: ele começa por uma decisão dele,
-parada desde 12/09.
+**🟢 A LUTA DO CHEFÃO DA FASE 4 ESTÁ FECHADA (20/09).** B1 ✅ · B2 ✅ · B3 ✅.
+
+**🟢 M4 · A BORDA C E O PILAR DA COSTURA — JOGADOS E APROVADOS (20/09):** *"gostei da nova borda da camara C
+(duto), ficou bem melhor e dá mais sensação de lugar fechado. Boa, aprovado. A coluna que separa a mudança das
+bordas ficou de boa, barato e eficiente"*. A decisão parada desde 12/09 foi dele e foi **usar a arte guardada, do
+mesmo jeito que a atual** — a `Moldura` aprendeu a faixa de 128×80 (a altura passou a sair da PEÇA, não de um
+literal 64), o `ESPESSURA_MAX` ficou em 54, e os 16px viraram COBERTURA e não aperto. Commit `28b0a14`.
+- **O pilar da costura B→C** (`junta: 'mesa3'`) entrou junto: instalar a C abriu a emenda mais violenta das três
+  e era a única sem pilar — não por esquecimento, mas porque até então não havia costura nenhuma ali.
+- **A veia acesa emenda.** A luz da borda mora na linha 41 da peça e, no duto, a parede é colada no corredor:
+  cada degrau QUEBRAVA a linha. O botão foi o `SEGURA OU ANDA` de 09/09, com par próprio para o duto (0,45 → 0,85
+  e 3 → 8). Medido: juntas com a luz contínua **25/48 → 38/46**; espalhamento **28/44px → 15/16px**. ⚠️ **E não
+  custou largura** — ele ofereceu apertar o duto e não foi preciso: a banda mais estreita segue 84px.
+
+**Faltam DUAS peças na Fatia 7 inteira: as 3 PORTAS com arte final e o ESFÍNCTER.** Ver a 🚦.
 
 **🟠 O REGISTRO DO B3 (16–17/09). CINCO RODADAS, QUATRO TESTES JOGADOS. Aprovados: a
 mecânica, o surgimento/giro, o breu, a lava, a fumaça da troca, o andar no lugar, a investida de quatro com o
@@ -82,12 +94,13 @@ commitado e empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 ## 🔑 A FRASE DE ARRANQUE
 
 > **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. A luta do chefão
-> está FECHADA: em 20/09 joguei e aprovei o rastro do glóbulo, o aviso novo da investida e a trava da mira. O B1,
-> o B2 e o B3 estão todos fechados. Falta UMA peça para a Fatia 7 inteira: o M4 — as 3 portas com arte final, a
-> borda C grossa e o esfíncter. Vamos ao M4."**
+> está FECHADA, e o M4 já andou: em 20/09 joguei e aprovei a borda grossa da câmara C e o pilar que tapa a
+> costura B→C. Faltam DUAS peças para a Fatia 7 inteira: as 3 PORTAS com arte final e o ESFÍNCTER. Vamos às
+> portas."**
 
-⚠️ **O M4 é construção, não ajuste — e começa por uma decisão dele que está parada desde 12/09** (a borda C é
-128×80 e três coisas no código presumem 64). Ver a 🚦 logo abaixo: **brainstorming antes de qualquer código.**
+⚠️ **AS PORTAS FICARAM A PEÇA MAIS URGENTE, e o motivo é novo:** a `f4-porta-prov.png` destoava pouco enquanto a
+parede ao redor também era provisória. Com a borda C virada arte final, ela passou a ser a única coisa borrada na
+tela — ver a 3ª tira de `scripts/_f4/_folha-duto-luz.png`.
 
 ---
 
@@ -99,25 +112,21 @@ commitado e empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 o rastro do glóbulo, o aviso novo da investida e a trava da mira com a carga de 1,15s. **Nada mais pende no
 B1/B2/B3.** O que sobra da Fatia 7 é o M4 — e ele é CONSTRUÇÃO, não ajuste.
 
-**⚠️ ANTES DE QUALQUER CÓDIGO: uma decisão dele, parada desde 12/09.** A arte da borda C está aprovada
-(`scripts/_f4/_faixa-C-v.png`, *"as do duto e do núcleo ficaram ótimas"*) e é **128×80** — a "faixa grossa" do
-duto. Três coisas no código presumem **64**:
+**✅ A BORDA C SAIU EM 20/09.** A decisão parada desde 12/09 foi dele: *"use a arte que temos guardada e
+utilize-a da mesma forma que a atual"*. O que segurava a peça eram dois literais, e os dois viraram leitura — a
+âncora da saia lê a altura da PEÇA, e o assert da sonda virou uma tabela por câmara.
 
-- `Moldura.ESPESSURA_MAX` = 54, calibrado para a peça de 64px sempre alcançar a borda;
-- a **saia**, ancorada em `superficie ± 64`;
-- o assert de dimensão da sonda (`128x64`).
+⚠️ **O `ESPESSURA_MAX` CONTINUA 54, de propósito.** A peça de 80 permitiria 70, e subir APERTARIA o duto —
+mudança de JOGO numa fase já aprovada jogada. Os 16px viraram cobertura: medido, a saia acende 0 de 8 vezes no
+duto. Se um dia o duto parecer folgado, é esse o número, e só até 70.
 
-**A pergunta:** a `Moldura` aprende a faixa de 128×80 (o trabalho do M4), ou corta-se a C para 64 e entrega-se
-hoje, jogando fora a faixa grossa? **É decisão dele, e é um brainstorming — não uma escolha para eu tomar
-sozinho.**
-
-**As três peças do M4, depois da decisão:**
+**As duas peças que faltam no M4:**
 
 | peça | o que é | estado |
 |---|---|---|
-| **as 3 PORTAS** | hoje são `f4-porta-prov.png`, arte provisória | falta a arte final |
-| **a BORDA C** | 128×80, arte dele aprovada e parada desde 12/09 | presa na decisão acima |
-| **o ESFÍNCTER** | `f4VivoC`, animado | a construir |
+| **as 3 PORTAS** | hoje são `f4-porta-prov.png`, arte provisória | falta a arte final — **e virou a mais urgente** |
+| ~~a BORDA C~~ | 128×80, com o pilar `mesa3` na costura B→C | ✅ jogada e aprovada em 20/09 (`28b0a14`) |
+| **o ESFÍNCTER** | `f4VivoC`, 48×48 em 8 quadros: abre e fecha na parede, não colide, só respira | a construir |
 
 **Depois do M4:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar a fatia com merge `--no-ff` de
 `feat/fase4-visual` em `main`.
@@ -127,14 +136,20 @@ sozinho.**
 ### 🧭 COMO ABRIR O M4 — a ordem, e o que ler antes
 
 ⚠️ **Nada de código na primeira hora.** O fluxo desta fatia é o de sempre — **brainstorming → spec → plano →
-implementação → teste jogado dele → merge** —, e o M4 é a peça que mais depende de decisão dele. A sessão abre
-pelo brainstorming da borda C (a tabela acima), não por um editor aberto.
+implementação → teste jogado dele → merge** —, e as PORTAS são arte dele, não restrição mecânica: a sessão abre
+listando o que vai ser gerado e pedindo o aval, não com um editor aberto.
+
+⚠️ **E A BORDA C DEIXOU UM PRECEDENTE ÚTIL PARA AS PORTAS.** Ela era "só trocar uma imagem" e cobrou três coisas
+que nenhum assert teria pego: um literal escondido no motor (a âncora da saia), uma costura que só nasceu quando
+a arte nova chegou (o pilar B→C), e uma LINHA FORTE na arte que passou a mandar na geometria da fase (a veia
+acesa contra o degrau do vão). A porta tem um **núcleo aceso** que diz "mire aqui" — é outra linha forte, no
+meio do vão. Vale perguntar o que ela vai impor antes de gerar.
 
 **O que ler, na ordem:**
 
-1. esta 🚦 (a decisão da borda C e as três peças);
-2. **`## ⛏️ O QUE FALTA CONSTRUIR — a câmara C`**, mais abaixo neste arquivo — é onde estão os três números que
-   presumem 64 e o veredito dele sobre a arte;
+1. esta 🚦 (as duas peças que faltam);
+2. **`## ⛏️ O QUE FALTA CONSTRUIR — a câmara C`**, mais abaixo neste arquivo — o registro de como a borda C
+   entrou, e os números que NÃO se mexe (o `ESPESSURA_MAX` em 54, o `PASSO_MAX` em 14);
 3. **`## ⛏️ O DEGRAU DO DUTO — o que saiu e o que NÃO sai`** — a `Moldura` já levou uma rodada de "faixa que
    muda de espessura", e as leis de lá valem aqui;
 4. a spec de origem: `docs/superpowers/specs/2026-09-08-fatia7-moldura-fase4-design.md`.
@@ -143,12 +158,15 @@ pelo brainstorming da borda C (a tabela acima), não por um editor aberto.
 
 | coisa | onde |
 |---|---|
-| a arte da borda C, aprovada em 12/09 | `scripts/_f4/_faixa-C-v.png` (128×80) |
+| a borda C, instalada em 20/09 e aprovada | `public/sprites/f4-faixa-c.png` (128×80); o cru em `scripts/_f4/_faixa-C-v.png` |
+| o pilar da costura B→C, aprovado em 20/09 | `junta: 'mesa3'` no `cenario` de t=68 |
 | as portas provisórias | `f4-porta-prov.png` |
 | o motor da faixa, com `setFaixa` e a troca pelo evento `cenario` | `src/systems/Moldura.ts` |
 | as sondas que têm de continuar verdes | `probe-f4-moldura`, `probe-f4-visual`, `probe-stage4`, `probe-f4-golfinho` |
 
-⚠️ **A sonda da moldura tem um assert de dimensão cravado em `128x64`** (`scripts/probe-f4-moldura.mjs:181`) —
+⚠️ **O assert de dimensão da sonda deixou de ser um literal em 20/09** — hoje é uma tabela por câmara
+(A/B/D=64, C=80) em `scripts/probe-f4-moldura.mjs`, e há um bloco novo (`peleC`) que é o único lugar da sonda
+que olha para o duto vestido. O parágrafo abaixo fica como registro de por que ele existia cravado —
 se a decisão for ensinar a faixa grossa à `Moldura`, ele muda junto, e é ele que avisa se alguém instalar a peça
 errada.
 
@@ -833,8 +851,10 @@ Ela criava os 8 segmentos com a chave cravada no construtor e não existia camin
   chance de discordarem — a garganta emoldurada pela doca.
 - **A câmara A não tem evento**, porque é onde a fase começa: `Moldura.FAIXA_INICIAL` já nasce com
   ela. Quem escrever um `cenario` novo antes de t=38,8 tem de lembrar da borda junto.
-- **A guarda da chave inexistente** é o caminho da câmara C: o roteiro pede `f4FaixaC`, não acha, e
-  a borda anterior FICA. Sem ela os 8 segmentos cairiam na textura de erro (32×32).
+- **A guarda da chave inexistente** FOI o caminho da câmara C, de 12/09 a 20/09: o roteiro pedia
+  `f4FaixaC`, não achava, e a borda anterior FICAVA — o duto era jogado vestido com a garganta, e
+  ninguém via um defeito, via um lugar. A C entrou em 20/09 e a guarda fica pelo motivo de sempre:
+  sem ela os 8 segmentos cairiam na textura de erro (32×32).
 
 ⚠️ **E ISSO ABRIU UM BURACO QUE JÁ EXISTIA.** O `aplicaCorredorEMoldura` repõe à mão o estado que o
 `skipTo` descarta, e a **PINTURA nunca esteve na lista**: apertar `G` levava a câmara A — a doca —
@@ -932,16 +952,27 @@ DESENHO e na MORDIDA juntos — dobra os segmentos e reabre a trava; (3) aceitar
 
 ## ⛏️ O QUE FALTA CONSTRUIR — a câmara C
 
-⚠️ **A ARTE DA CÂMARA C ESTÁ APROVADA E PARADA.** `scripts/_f4/_faixa-C-v.png`, veredicto dele em
-12/09: *"as do duto e do núcleo ficaram ótimas."* Ela é **128×80** — a "faixa grossa" do duto — e
-três coisas presumem 64:
+✅ **A ARTE DA CÂMARA C ENTROU EM 20/09** (`public/sprites/f4-faixa-c.png`, 128×80), jogada e
+aprovada: *"ficou bem melhor e dá mais sensação de lugar fechado"*. O que a segurava desde 12/09
+eram dois literais, e os dois viraram leitura:
 
-- `Moldura.ESPESSURA_MAX` = 54, calibrado para a peça de 64px sempre alcançar a borda;
-- a **saia**, que é ancorada em `superficie ± 64`;
-- o assert de dimensão da sonda (`128x64`).
+- a **saia**, ancorada em `superficie ± 64`, hoje lê o `displayHeight` da peça;
+- o assert de dimensão da sonda, cravado em `128x64`, hoje é uma tabela por câmara.
 
-Instalar C é construir isso, e é o M4. **A decisão dele:** esperar o M4, ou cortar C para 64 agora
-e entregar hoje (jogando fora a faixa grossa)?
+⚠️ O `Moldura.ESPESSURA_MAX` NÃO mudou, e não foi esquecimento: os 54 são calibrados para a peça
+mais FINA (64px) alcançar a borda, e uma peça mais alta só SOBRA — com 80 o limite daria 70. Subir
+apertaria o duto, e apertar é mudança de JOGO. Os 16px viraram COBERTURA: medido, a saia acende 0
+de 8 vezes no duto, onde antes ela entrava.
+
+⚠️ **E A LUZ DA BORDA VIROU REGRA DE GEOMETRIA — a lição mais transferível desta peça.** A veia
+acesa mora na linha 41 da arte e, no duto, a parede é colada no corredor (`vaoY + meio + FOLGA`):
+cada degrau do vão QUEBRAVA a linha, e ele pegou jogando (*"ficar em um degrau diferente fica
+estranho in game"*). O conserto não foi na arte nem na largura — foi alongar o patamar do
+`SEGURA OU ANDA` só dentro do duto (`SEGURA_P_DUTO` 0,85 · `SEGURA_MAX_DUTO` 8). **Arte com uma
+linha forte impõe geometria à fase; vale lembrar disso quando o esfíncter entrar.**
+
+⚠️ Se o duto ficar monótono no teste jogado, são esses dois números que descem — **nunca o
+`PASSO_MAX`**, que é o TAMANHO do degrau, não a frequência dele.
 
 ---
 
@@ -1615,7 +1646,7 @@ M2 — AS BORDAS            ✅ REJOGADAS E APROVADAS (14/09) · o contorno da B
   Depois do teste dele: a saia no lugar do enchimento chapado, o relevo contínuo, e o fio
   vertical ligando o degrau. Ver a seção 🎯 no topo.
   └ A MESA, que era parte do M2, está instalada e aprovada (aço engolido, 3 variantes).
-  └ ⚠️ A CÂMARA C NÃO ENTROU: a arte está aprovada mas é 128×80, e instalá-la é o M4.
+  └ ✅ A CÂMARA C ENTROU EM 20/09 (128×80, a faixa grossa) com o pilar `mesa3` na costura B→C.
 O CENÁRIO RESPIRA         ✅ APROVADO (14/09), e as colunas verticais junto
   o coração (chão, 7 q/s) e o maquinário (teto, 5 q/s), quadro inicial sorteado por peça.
   Assados por `_assar-anim.mjs` contra o sprite estático aprovado.
@@ -1628,10 +1659,10 @@ BLOCO B · B1 — A LUTA     ✅ a serra, a salva que cobre as bordas, a escala 
 BLOCO B · B2 — A POSIÇÃO  ✅ FECHADO EM 20/09, SEM CÓDIGO: a posição de hoje é a certa. "os cabos
                              'fixam' no topo e se ficarem mais baixos ou fora da posição, mostra o
                              corte do sprite" — os tentáculos no teto são o acabamento, não o defeito.
-M4 — A CÂMARA C           ⬜ ◄ PEGUE AQUI · A ÚLTIMA PEÇA. as 3 PORTAS com arte final (hoje
-                             `f4-porta-prov.png`), a borda C grossa
-                             (128×80, arte dele aprovada; a `Moldura` foi feita para 64 de altura) e o
-                             esfíncter animado (`f4VivoC`)
+M4 — A CÂMARA C           🟨 ◄ PEGUE AQUI · a borda C grossa (128×80) e o pilar da costura B→C
+                             ✅ JOGADOS E APROVADOS em 20/09. Faltam as 3 PORTAS com arte final
+                             (hoje `f4-porta-prov.png`, e agora a única coisa borrada na tela) e o
+                             esfíncter animado (`f4VivoC`, 48×48 em 8 quadros)
 M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprovada)
 ```
 
