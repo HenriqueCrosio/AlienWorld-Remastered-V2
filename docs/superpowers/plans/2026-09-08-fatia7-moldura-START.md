@@ -124,6 +124,43 @@ sozinho.**
 
 ---
 
+### 🧭 COMO ABRIR O M4 — a ordem, e o que ler antes
+
+⚠️ **Nada de código na primeira hora.** O fluxo desta fatia é o de sempre — **brainstorming → spec → plano →
+implementação → teste jogado dele → merge** —, e o M4 é a peça que mais depende de decisão dele. A sessão abre
+pelo brainstorming da borda C (a tabela acima), não por um editor aberto.
+
+**O que ler, na ordem:**
+
+1. esta 🚦 (a decisão da borda C e as três peças);
+2. **`## ⛏️ O QUE FALTA CONSTRUIR — a câmara C`**, mais abaixo neste arquivo — é onde estão os três números que
+   presumem 64 e o veredito dele sobre a arte;
+3. **`## ⛏️ O DEGRAU DO DUTO — o que saiu e o que NÃO sai`** — a `Moldura` já levou uma rodada de "faixa que
+   muda de espessura", e as leis de lá valem aqui;
+4. a spec de origem: `docs/superpowers/specs/2026-09-08-fatia7-moldura-fase4-design.md`.
+
+**O que já existe e não se refaz:**
+
+| coisa | onde |
+|---|---|
+| a arte da borda C, aprovada em 12/09 | `scripts/_f4/_faixa-C-v.png` (128×80) |
+| as portas provisórias | `f4-porta-prov.png` |
+| o motor da faixa, com `setFaixa` e a troca pelo evento `cenario` | `src/systems/Moldura.ts` |
+| as sondas que têm de continuar verdes | `probe-f4-moldura`, `probe-f4-visual`, `probe-stage4`, `probe-f4-golfinho` |
+
+⚠️ **A sonda da moldura tem um assert de dimensão cravado em `128x64`** (`scripts/probe-f4-moldura.mjs:181`) —
+se a decisão for ensinar a faixa grossa à `Moldura`, ele muda junto, e é ele que avisa se alguém instalar a peça
+errada.
+
+**As três leis desta fatia que mais pesam no M4:**
+
+- **fundo pintado é assado em 384×216 e escala 1** — reduzir pode, AUMENTAR nunca;
+- **efeito de cenário se assa em pixel na resolução nativa**, com a paleta do vizinho; `Graphics` em tempo de
+  jogo lê como "gerado" (a lei que a rodada 5b do predador pagou);
+- **a arena do chefão é só pintura** — nenhuma peça de cenário entra lá.
+
+---
+
 ### ✅ 20/09 — o 8º teste jogado: o rastro, o aviso e a trava PASSARAM
 
 *"Joguei e ficou bom."* Os três itens do teste curto fecham de uma vez, e com eles **a luta do chefão da Fase 4**:
@@ -282,12 +319,12 @@ acima: o urro ficou, a emenda da pintura fica como está, o `nucleo.png` fica co
 
 ---
 
-### 1. Subir e chegar no chefão
+### 📜 Registro: como se chegava no chefão para os testes do B3
 `npm run dev` → http://localhost:5173 → `L` (Fase 4) → `G` (pula para a arena do chefão). Mate o GUARDIÃO para
 ver a troca. As fases do predador vêm pela vida (66% e 33%): jogue a luta inteira **até matá-lo** — o que falta
 julgar é justamente o que vem DEPOIS do golpe final, e dura 4,2s até a cutscene.
 
-### 🔨 19/09 — A LUTA DO GUARDIÃO FOI REDESENHADA E IMPLEMENTADA (à espera do teste jogado)
+### ✅ 19/09 — A LUTA DO GUARDIÃO FOI REDESENHADA E IMPLEMENTADA (jogada e aprovada na primeira)
 
 Spec própria: **`docs/superpowers/specs/2026-09-19-fase4-luta-guardiao-design.md`** — o desenho saiu de um
 brainstorming com ele, decisão por decisão. O resumo:
@@ -427,7 +464,7 @@ Sobra um só quadro de acompanhamento (~39ms) e a pintada nunca chega a descer.
 balanceada e punitiva se errar a batalha. Está ótimo assim"*. O `corredor` de t=38,5 com `rate 2.6` **fica como
 está**.
 
-### 🔴 19/09 — O ACHADO NOVO: A LUTA DO GUARDIÃO PRECISA SER REPENSADA
+### 📜 Registro: 19/09 — O ACHADO QUE ABRIU O REDESENHO DA LUTA (já resolvido, ver acima)
 
 Ele aprovou a RESPIRAÇÃO do guardião (*"está boa"*, o miolo que quase apaga não atrapalha) e, no mesmo fôlego,
 abriu um problema maior, que é de LUTA e não de arte:
@@ -451,7 +488,7 @@ não arte. O lugar disso é um brainstorming antes de qualquer código.
 
 ---
 
-### 2. O roteiro do teste — o FIM DA MORTE (rodada 5b), item a item
+### 📜 Registro: o roteiro do teste do FIM DA MORTE (rodada 5b) — TODO RESPONDIDO em 19/09
 
 | # | olhar | a pergunta |
 |---|---|---|
@@ -500,7 +537,7 @@ a morte no chão (desaba e fica estendido) · a saída pela direita e o aviso da
 - a **emenda vertical da pintura** do núcleo que passa pela arena (anterior ao predador);
 - `nucleo.png` / `nucleo-beat-sheet.png` seguem no disco sem uso — apagar é decisão dele.
 
-### 3. Com o feedback na mão
+### 🔧 Onde mexer, por tipo de pedido (vale para qualquer rodada)
 - **Efeito de cenário (lava, rachadura)** → mexa no **assador** e rode de novo; o código de cena não desenha nada.
 - **Ajuste de número da luta** → a tabela de knobs da ⏸️ ("O que ajustar"). Rode `node scripts/probe-stage4.mjs` depois.
 - **Clipe que não serve** → primeiro veja se a perdedora guardada resolve (`assets/raw/furia-predador-anim3/` e
@@ -511,7 +548,7 @@ a morte no chão (desaba e fica estendido) · a saída pela direita e o aviso da
 - **Prova para ele** → `node scripts/_f4/_ver-predador.mjs <saida.png>` (35 fotos: a luta inteira, a volta com o
   rasgo e a morte de 0,5s a 4,6s).
 
-### 4. Depois do B3 aprovado — a fila obrigatória dele
+### 📜 Registro: a fila obrigatória dele depois do B3 — HOJE TODA FECHADA
 ~~**B2** (a posição do guardião no alto-direita, cortado pela borda)~~ **✅ FECHADO EM 20/09 SEM CÓDIGO** — a
 posição já estava certa, e a razão é geométrica: os cabos encontram a borda de cima, e é ela que esconde o corte
 do sprite de 256². → **M4** (as 3 portas com arte final, a borda C
@@ -520,7 +557,7 @@ grossa, o esfíncter). Os cortes da tabela amarela (M3, `f4Vivo`, `f4Veu`) foram
 
 ---
 
-## ⏸️ ONDE PARAMOS — O PREDADOR, RODADA 5b (O FIM DA MORTE) À ESPERA DO TESTE JOGADO
+## 📜 O PREDADOR, DA RODADA 1 À 8 — O REGISTRO COMPLETO (fechado em 19/09)
 
 **Os arquivos da rodada 5b:** `src/entities/fimDoPredador.ts` (a linha do tempo, só toca arte assada) ·
 `scripts/_f4/_assar-fim-f4.mjs` (assa `f4-racha-sheet`, `f4-lava-sheet`, `f4-destroco`) · `BossNucleo.destroy`

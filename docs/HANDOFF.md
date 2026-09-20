@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-04)
+# HANDOFF — estado do projeto (2026-09-20)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -56,28 +56,47 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 
    🟠 **A FATIA 7 (Fase 4, o interior) ESTÁ EM ANDAMENTO na branch `feat/fase4-visual`.** Retome
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
-   com a frase de arranque e o roteiro de teste (🚦). **Estado em 2026-09-17:** jogados e aprovados — o Bloco A (os 4 fundos
-   dele), a MOLDURA (M1, M1.5: o duto, as 3 portas), o GOLFINHO (mini-chefão da câmara B), o M2 (as
-   bordas A/B/D, o cenário respirando, as colunas, o pilar nas costuras, a maré), a entrada do núcleo
-   pela emenda, o contorno da borda B e o **B1 — o guardião novo** com a morte composta no motor.
-   **Em curso: o B3** — a 2ª forma deixou de ser o coração e virou **o predador** que sai de dentro do
-   guardião (`src/entities/Predador.ts`): surgimento sangrento, investida+slash, lava, a ronda pelo
-   chão e teto, e o breu. **Cinco rodadas e quatro testes jogados (16–17/09).** Aprovados: a mecânica, o
-   surgimento/giro, o breu, a lava, o andar no lugar, a investida de quatro com o slash saltado, o teto por uma
-   garra, o arremesso com a garra LIVRE e a **volta que ataca** (ele entra galopando, para no meio e rasga o chão
-   lançando metal incandescente — mecânica nova de 17/09). **Falta jogar: a rodada 5b — o FIM DA MORTE**
-   (`src/entities/fimDoPredador.ts`): o corpo fica no chão, o piso racha e estoura, a lava sobe até a linha do
-   chão e o corpo afunda nela. ⚠️ A 1ª versão desse fim foi feita com `Graphics` e **reprovada na hora**
-   (*"ficou gerado e sem custos"*); foi refeita em **arte assada em pixel** na resolução nativa, com a paleta
-   tirada da própria faixa do chão (`scripts/_f4/_assar-fim-f4.mjs`). **É o 1º passo da próxima sessão** (a 🚦 do
-   START). ⚠️ **As rodadas 4 e 5 ainda não estão commitadas** (último commit: `16180c9`) e o `origin` segue em
-   `6c2fe4f`.
-   **Na fila, obrigatório:** B2 (a posição do
-   chefão) e M4 (portas com arte final, borda C, esfíncter). O mapa inteiro está na seção "🧭 O MAPA
-   PARA FECHAR A FATIA 7" do START. Specs, em ordem:
-   `2026-09-06-fatia7-fase4-design.md` (a fatia), `2026-09-08-fatia7-moldura-fase4-design.md`,
-   `2026-09-10-fatia7-duto-portas-design.md`, `2026-09-11-fatia7-golfinho-miniboss-design.md` e
-   `2026-09-16-fatia7-b3-predador-design.md`.
+   com a frase de arranque e o que fazer primeiro (🚦).
+
+   **Estado em 2026-09-20: falta UMA peça, o M4.** A branch está em dia com o `origin` (V2). Tudo
+   abaixo foi jogado e aprovado por ele:
+
+   - o **Bloco A** (os 4 fundos dele) e a **MOLDURA** (M1, M1.5: o duto, as 3 portas provisórias);
+   - o **GOLFINHO**, o mini-chefão da câmara B — e a dificuldade da arena, aprovada em 19/09;
+   - o **M2** (as bordas A/B/D, o cenário respirando, as colunas, o pilar nas costuras, a maré), a
+     entrada do núcleo pela emenda e o contorno da borda B;
+   - o **B1 — o guardião**: a arte nova dele, a morte composta no motor, e a **LUTA REDESENHADA**
+     em 19/09 (a SERRA num cabo que crava nas bordas e é a janela de dano, com `DANO_CRAVADA` ×2;
+     a salva cobrindo as bordas a 150px/s; a escala em 3 degraus de vida). Fechada em 20/09 com a
+     **leitura**: o rastro do glóbulo, o aviso da investida — que deixou de falar a língua do
+     flash de dano — e a **trava da mira** aos 62% de uma carga de 1,15s, que dá 450ms de janela
+     de fuga e transforma "atrair a investida e desviar" numa jogada de verdade;
+   - o **B3 — o predador**: a 2ª forma deixou de ser o coração e virou o bicho que sai de dentro
+     do guardião (`src/entities/Predador.ts`). **Oito rodadas, seis testes jogados (16–19/09)**,
+     incluindo a volta que ataca (rasgo do chão + metal incandescente) e o **fim da morte**
+     (`src/entities/fimDoPredador.ts`: o piso racha, estoura, a lava sobe e o corpo afunda);
+   - o **B2 — a posição do chefão**: fechado em 20/09 **sem uma linha de código**, porque a
+     posição de hoje já era a certa — os cabos encontram a borda de cima, e é ela que esconde o
+     corte do sprite de 256².
+
+   ⚠️ **A LEI MAIS CARA DESTA FATIA:** efeito de cenário se **assa em pixel** na resolução nativa,
+   com a paleta do vizinho. A 1ª versão do fim da morte foi feita com `Graphics` em tempo de jogo
+   e **reprovada na hora** (*"ficou gerado e sem custos"*); foi refeita assada
+   (`scripts/_f4/_assar-fim-f4.mjs`). O código de cena só toca a arte assada.
+
+   **O QUE FALTA — o M4, a câmara C, e só ele:** as 3 portas com arte final (hoje
+   `f4-porta-prov.png`), a **borda C grossa** e o esfíncter animado (`f4VivoC`). ⚠️ **Ele começa
+   por uma decisão dele parada desde 12/09:** a arte da borda C está aprovada e é **128×80**,
+   enquanto três coisas presumem 64 (`Moldura.ESPESSURA_MAX` 54, a saia ancorada em
+   `superficie ± 64`, e o assert `128x64` em `scripts/probe-f4-moldura.mjs:181`). Ou a `Moldura`
+   aprende a faixa grossa, ou corta-se a C para 64. **É brainstorming, não escolha do agente.**
+
+   **Depois do M4:** rejogar a fase inteira, atualizar este HANDOFF e fechar a fatia com merge
+   `--no-ff` em `main`. O mapa inteiro está na seção "🧭 O MAPA PARA FECHAR A FATIA 7" do START.
+   Specs, em ordem: `2026-09-06-fatia7-fase4-design.md` (a fatia),
+   `2026-09-08-fatia7-moldura-fase4-design.md`, `2026-09-10-fatia7-duto-portas-design.md`,
+   `2026-09-11-fatia7-golfinho-miniboss-design.md`, `2026-09-16-fatia7-b3-predador-design.md` e
+   `2026-09-19-fase4-luta-guardiao-design.md` (a luta do guardião, com a seção 10 da leitura).
 
    O histórico da Fatia 6: ela **foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
    levou duas voltas: a 1ª caiu em dois blocos (a nadadeira e o portão) e a 2ª passou por cinco
@@ -514,7 +533,7 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 
 ## ROADMAP
 
-### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-16)
+### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-20)
 
 O conteúdo do jogo está todo de pé (tabela abaixo). O que corre agora é o passe visual, fatia a
 fatia, cada uma com spec → plano → implementação → **teste jogado pelo Henrique** → merge.
@@ -529,7 +548,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
-| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas e guardião novo aprovados; B3 (o predador) implementado, falta jogar; falta B2 (posição), M4 (portas/borda C/esfíncter). Ver o START |
+| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador e a posição do chefão **todos jogados e aprovados**. Falta **só o M4** (portas/borda C/esfíncter). Ver o START |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**
