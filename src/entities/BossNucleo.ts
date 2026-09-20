@@ -85,6 +85,13 @@ export class BossNucleo implements StageBoss {
   /** A carga do telégrafo: o anel que FECHA no miolo antes da investida. */
   private readonly carga: Phaser.GameObjects.Particles.ParticleEmitter;
   private cargaT = 0;
+  /**
+   * A mira da investida DEPOIS da trava — `null` enquanto ele ainda lê a nave. É o campo que torna a
+   * jogada dele possível: a partir da trava, mexer a nave não move mais a investida.
+   * ⚠️ Lido pela sonda e pela captura (`_f4/_ver-aviso.mjs`): "travado" é estado, não é aparência.
+   */
+  private vyTravado: number | null = null;
+  private recuoT = 0;
 
   // ─── Guardião (256×256 a escala 0.7 ≈ 179×179) ───
   private static readonly G_ESCALA = 0.7;
@@ -130,9 +137,37 @@ export class BossNucleo implements StageBoss {
    * LIDO: *"o aviso, que é a aceleração do core do guardião, precisa estar mais distinta"*. A
    * aceleração da respiração precisa de ~0,7s para subir de 1× a 5× e o olho perceber que subiu.
    * Voltar é um número: 0,55 devolve a janela antiga sem desfazer a linguagem nova.
+   *
+   * ⚠️ 0,7 → 1,15 (20/09, o 7º teste) — e desta vez a razão é MECÂNICA, não leitura: *"preciso que
+   * aumente o tempo de carga para a investida, assim o jogador consegue usar a mecânica que citei:
+   * esperar até o último segundo de carregamento para travar o boss numa direção e ter tempo de
+   * desviar para os cantos"*. ⚠️ Alongar SOZINHO não entregava a mecânica — ver `TELEG_TRAVA`.
    */
-  private static readonly TELEGRAFO_DUR = 0.7;
-  /** A respiração acelera de 1× até este fator ao longo do telégrafo — é ELE o aviso. */
+  private static readonly TELEGRAFO_DUR = 1.15;
+  /**
+   * ─── ONDE A INVESTIDA TRAVA A MIRA (20/09) ───
+   *
+   * ⚠️ A MIRA ERA TOMADA NO INSTANTE DO ARRANQUE, e é por isso que esticar o telégrafo não bastava: o
+   * guardião lia a altura da nave no MESMO quadro em que saía, então *atrair a investida para um lado e
+   * depois desviar* não existia como jogada — não havia instante em que ele estivesse comprometido e
+   * ainda parado. Mais carga só dava mais tempo de esperar pela mesma armadilha.
+   *
+   * Agora o telégrafo tem DOIS tempos: até `TELEG_TRAVA` ele carrega e ainda lê a nave; dali em diante a
+   * mira está CRAVADA (`vyTravado`) e o resto da carga é a janela de fuga. MEDIDO
+   * (`scripts/_f4/_medir-investida.mjs`), com 1,15s e a trava em 0,62: **450ms de desvio antes do
+   * arranque**, que somados aos 760ms de travessia dão **1210ms** contra os 760ms de antes. A 110px/s
+   * do `FreeController` são **133px** de deslocamento contra 83px — num vão de 160px com um corpo de
+   * 133px, é a diferença entre *dá se for perfeito* e uma mecânica.
+   *
+   * ⚠️ A sonda não confia na aparência: ela põe a nave em y=170 (que dá vy +70), espera a trava,
+   * TELEPORTA a nave para y=40 (que daria vy −70) e confere que o arranque saiu com +70. Mira travada
+   * é comportamento, e comportamento se prova com um discriminador, não com uma foto bonita.
+   */
+  private static readonly TELEG_TRAVA = 0.62;
+  /** O recuo da trava: ele puxa para trás antes de saltar. É o sinal, no corpo, de que a mira FECHOU. */
+  private static readonly RECUO_VEL = 45;
+  private static readonly RECUO_MS = 0.18;
+  /** A respiração acelera de 1× até este fator — e CRAVA no máximo a partir da trava. */
   private static readonly TELEG_RESPIRO = 5;
   /** O tint do casco no telégrafo: FRIO. É o contrário do flash de dano (0xffb090), e é o ponto. */
   private static readonly CASCO_FRIO = 0x7a8290;
@@ -149,6 +184,15 @@ export class BossNucleo implements StageBoss {
    */
   private static readonly CARGA_MS0 = 55;
   private static readonly CARGA_MS1 = 16;
+  /**
+   * DEPOIS da trava a carga SEGURA — não continua subindo.
+   *
+   * ⚠️ MEDIDO: mantendo o ritmo da carga (16ms, dois por batida) no raio mínimo, chegavam **30
+   * partículas vivas** empilhadas no mesmo pixel e o ADD saturava em BRANCO no miolo. Branco não existe
+   * nesta arte. Um sopro por batida a 26ms, com o raio abrindo de leve, assenta em 7–9 vivas: brasa acesa e
+   * segura, que é o que "carregado e comprometido" precisa dizer.
+   */
+  private static readonly CARGA_MS_TRAVA = 26;
   /**
    * ─── O RASTRO DO GLÓBULO (20/09) ───
    * *"pode gerar um efeito de rastro do projétil, como fumaça ou algo incandescente"*. São as duas
@@ -433,6 +477,8 @@ export class BossNucleo implements StageBoss {
             this.acao = 'telegrafo';
             this.acaoT = BossNucleo.TELEGRAFO_DUR;
             this.cargaT = 0;
+            this.vyTravado = null;
+            this.recuoT = 0;
             this.corpoInteiro();
             this.body.setVelocityY(0);
             // O CASCO ESFRIA enquanto o miolo acende. O tint escuro diz "fechado" (a bala morre no
@@ -459,19 +505,51 @@ export class BossNucleo implements StageBoss {
          *   2. o ANEL DE CARGA fecha no miolo (`CARGA_R0` → `CARGA_R1`), com o sopro acelerando de
          *      `CARGA_MS0` a `CARGA_MS1`. Encolher é o oposto do `glow` do `flutua`, que se espalha;
          *   3. no estalo, o `glow` solta uma coroa de 14 de uma vez: a carga SOLTANDO.
+         *
+         * ─── E O AVISO TEM DOIS TEMPOS (20/09, o 7º teste) ───
+         * Até `TELEG_TRAVA` ele CARREGA e ainda lê a nave; dali em diante a mira está cravada e o que
+         * sobra da carga é a JANELA DE FUGA. A virada tem de ser visível, senão a jogada dele não
+         * existe — ele precisa saber QUANDO parou de valer a pena ficar no lugar. São três sinais no
+         * mesmo quadro: o RECUO do corpo (ele puxa para trás antes de saltar), o estalo do `glow`, e a
+         * carga que para de fechar e passa a segurar cravada no miolo.
          */
         const k = 1 - Math.max(0, this.acaoT) / BossNucleo.TELEGRAFO_DUR;
-        this.sprite.anims.timeScale = 1 + k * (BossNucleo.TELEG_RESPIRO - 1);
+        const kCarga = Math.min(1, k / BossNucleo.TELEG_TRAVA);
+        // ⚠️ A respiração acelera até a TRAVA e fica cravada no máximo depois dela: se continuasse
+        // subindo, a rampa contaria uma história que o corpo já não está contando (ele já decidiu).
+        this.sprite.anims.timeScale = 1 + kCarga * (BossNucleo.TELEG_RESPIRO - 1);
+
+        if (this.recuoT > 0) {
+          this.recuoT -= dt;
+          if (this.recuoT <= 0) this.body.setVelocityX(0);
+        }
+
+        if (this.vyTravado === null && k >= BossNucleo.TELEG_TRAVA) {
+          // A MIRA FECHA AQUI. Daqui para a frente mexer a nave não move mais a investida — é o que
+          // transforma "esperar até o último instante" numa jogada em vez de numa armadilha.
+          this.vyTravado = Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70);
+          this.glow.emitParticleAt(this.core.x, this.core.y, 10);
+          this.body.setVelocityX(BossNucleo.RECUO_VEL);
+          this.recuoT = BossNucleo.RECUO_MS;
+          this.scene.cameras.main.shake(70, 0.003);
+        }
 
         this.cargaT -= dt;
         if (this.cargaT <= 0) {
-          this.cargaT = Phaser.Math.Linear(BossNucleo.CARGA_MS0, BossNucleo.CARGA_MS1, k) / 1000;
-          const raio = Phaser.Math.Linear(BossNucleo.CARGA_R0, BossNucleo.CARGA_R1, k);
-          // Na metade final, DOIS por batida e em lados opostos do anel: é o que o transforma de
-          // cacho de partículas em ANEL, e é onde a leitura precisa estar mais alta.
+          const travado = this.vyTravado !== null;
+          this.cargaT =
+            (travado
+              ? BossNucleo.CARGA_MS_TRAVA
+              : Phaser.Math.Linear(BossNucleo.CARGA_MS0, BossNucleo.CARGA_MS1, kCarga)) / 1000;
+          // Travado, o raio ABRE um pouco e o sopro é UM só: sem isso tudo cai no mesmo pixel e o ADD
+          // satura em branco. Antes da trava, o anel fecha — e na metade final saem DOIS por batida,
+          // em lados opostos, que é o que o transforma de cacho de partículas em ANEL.
+          const raio = travado
+            ? BossNucleo.CARGA_R1 + Math.random() * 4
+            : Phaser.Math.Linear(BossNucleo.CARGA_R0, BossNucleo.CARGA_R1, kCarga);
           const a = Math.random() * Math.PI * 2;
           this.carga.emitParticleAt(this.core.x + Math.cos(a) * raio, this.core.y + Math.sin(a) * raio);
-          if (k > 0.5) {
+          if (!travado && kCarga > 0.5) {
             this.carga.emitParticleAt(this.core.x - Math.cos(a) * raio, this.core.y - Math.sin(a) * raio);
           }
         }
@@ -481,9 +559,14 @@ export class BossNucleo implements StageBoss {
           this.sprite.anims.timeScale = 1;
           this.glow.emitParticleAt(this.core.x, this.core.y, 14);
           this.acao = 'investe';
-          // Investe NA ALTURA do jogador no instante do disparo — mirada no passado, não
-          // teleguiada: dá para reagir saindo da linha (o mesmo pacto da cabeça ciano).
-          this.body.setVelocity(-300, Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70));
+          // Investe na altura lida NA TRAVA — mirada no passado, e agora num passado que ele pode ver
+          // acontecer. O `??` é a rede: sem trava (se alguém zerar `TELEG_TRAVA`), vale a leitura do
+          // instante do arranque, que é o comportamento antigo.
+          this.body.setVelocity(
+            -300,
+            this.vyTravado ?? Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70),
+          );
+          this.vyTravado = null;
         }
         break;
       }

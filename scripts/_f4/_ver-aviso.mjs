@@ -45,6 +45,11 @@ const estado = () =>
     return {
       acao: b.acao,
       degrau: b.degrau,
+      // ⚠️ A duração sai da CLASSE, nunca cravada aqui: ela já mudou três vezes (0,55 → 0,7 → 1,15) e
+      // um rótulo com o número velho mente sobre a porcentagem da carga.
+      dur: b.constructor.TELEGRAFO_DUR,
+      travado: b.vyTravado !== null,
+      vy: b.vyTravado === null ? null : Math.round(b.vyTravado),
       acaoT: Math.round((b.acaoT ?? 0) * 1000) / 1000,
       respiro: Math.round((b.sprite.anims.timeScale ?? 1) * 100) / 100,
       globulos: glob.length,
@@ -60,10 +65,11 @@ const estado = () =>
 
 const foto = async (prefixo) => {
   const i = await estado();
-  const k = i.acao === 'telegrafo' ? Math.max(0, Math.min(1, 1 - i.acaoT / 0.7)) : null;
+  const k = i.acao === 'telegrafo' ? Math.max(0, Math.min(1, 1 - i.acaoT / i.dur)) : null;
   const rot =
     `${prefixo} · ${i.acao}` +
     (k !== null ? ` · carga ${Math.round(k * 100)}% (${i.cargaViva} vivas) · respiro ${i.respiro}x` : '') +
+    (i.travado ? ` · MIRA TRAVADA (vy ${i.vy})` : '') +
     (i.globulos ? ` · ${i.globulos} glóbulos · rastro ${i.rastro}` : '') +
     ` · degrau ${i.degrau}`;
   console.log(rot);
@@ -108,10 +114,10 @@ if (!temAviso) {
   await browser.close();
   process.exit(1);
 }
-// Medido: cada foto sai em ~60ms, então 12 cobrem os 0,7s do aviso; as 4 últimas pegam o ESTALO
+// Medido: cada foto sai em ~60ms, então ~19 cobrem os 1,15s do aviso; as 4 últimas pegam o ESTALO
 // (a coroa que o `glow` solta) e a investida já saindo — o aviso só se julga contra o que ele promete.
 let depois = 0;
-for (let i = 0; i < 16; i++) {
+for (let i = 0; i < 24; i++) {
   await foto('AVISO');
   const acabou = await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss?.acao !== 'telegrafo');
   if (acabou && ++depois >= 4) break;
