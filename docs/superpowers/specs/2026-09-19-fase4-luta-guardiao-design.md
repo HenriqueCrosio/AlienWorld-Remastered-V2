@@ -210,8 +210,7 @@ Ele jogou e aprovou os cinco pontos:
 5. *"está num tamanho ótimo"* (a serra, `ESCALA` 0,46 e `VEL` 150).
 
 **A única troca pedida:** o glóbulo passou da `2b-lasca` para a **`2d-escoria`** — *"quero o glóbulo seja a
-escória"*. Já é o padrão de `_instalar-serra.mjs`. ⏳ **Ele ainda não viu a escória em jogo** — é o item E1 do
-teste curto da 🚦 no START.
+escória"*. Já é o padrão de `_instalar-serra.mjs`. ✅ **Jogada e aprovada em 20/09:** *"a escória ficou boa"*.
 
 ---
 
@@ -225,3 +224,87 @@ teste curto da 🚦 no START.
 | a serra **destrutível** | mais coisa para afinar (vida dela, recompensa, o que acontece com o cabo) sem responder nenhuma das duas queixas |
 | **miolo exposto durante a investida** | a nave atira para a direita: ele termina atrás dela e não há o que acertar |
 | serra e investida **ao mesmo tempo** no fim | duas ameaças de caminho fixo podem fechar o vão juntas |
+
+
+---
+
+## 10. 20/09 — O TELÉGRAFO DA INVESTIDA E O RASTRO DO GLÓBULO
+
+O teste de 20/09 aprovou a escória e a altura do metal e fechou o B2, e deixou dois pedidos que são os dois de
+LEITURA — nenhum de mecânica. A luta desenhada na seção 0–9 **não muda**: mesmos ataques, mesma escala, mesmos
+degraus.
+
+### 10.1 O aviso da investida
+
+> *"antes da investida, o aviso que é a aceleração do core do guardião precisa estar mais distinta, informar mais
+> ao jogador que vai haver uma investida"*
+
+**O diagnóstico não é de duração, é de VOCABULÁRIO.** O telégrafo piscava o sprite inteiro entre `0xffd0d0` e
+`0xff6060`; o flash de dano pisca o sprite inteiro em `0xffb090`. São a mesma frase dita com um sinônimo: o
+guardião pisca de rosa, e o jogador lê *"acertei nele"*. Nenhuma duração conserta uma frase ambígua.
+
+**O desenho novo separa por TEMPERATURA e por LUGAR.** Dano: o casco ESQUENTA por 60ms. Aviso: o casco ESFRIA
+(`CASCO_FRIO` 0x7a8290, que também diz *fechado* — a partir dali a bala morre no casco, porque o `corpoInteiro`
+já entrou) e quem acende é o MIOLO, em três camadas que sobem juntas ao longo de `TELEGRAFO_DUR`:
+
+| camada | o que faz | knob |
+|---|---|---|
+| a **respiração acelera** | `sprite.anims.timeScale` 1× → 5×. É literalmente o que ele pediu, e é a única camada que sobrevive sem partícula nenhuma: se a sheet sumir, o aviso degrada em vez de desaparecer | `TELEG_RESPIRO` |
+| o **anel de carga** fecha no miolo | partículas ADD nascendo num anel que encolhe de 26px para 4px, com o sopro acelerando de 55ms para 16ms; na metade final saem DUAS por batida, em lados opostos, senão é cacho e não anel | `CARGA_R0/R1`, `CARGA_MS0/MS1` |
+| o **estalo** | no instante do disparo o `glow` solta uma coroa de 14 — a carga SOLTANDO | — |
+
+⚠️ **E a carga ENCOLHE, ao contrário do `glow` do `flutua`, que cresce e se espalha.** É o que impede o aviso de
+se confundir com a respiração de repouso: um é matéria sendo puxada para dentro, o outro é o bicho respirando.
+
+⚠️ **`TELEGRAFO_DUR` 0,55 → 0,7s, e isso é janela de desvio, não só leitura.** Uma rampa de 1× a 5× precisa de
+~0,7s para o olho perceber que subiu. Se ele achar o desvio fácil demais, 0,55 devolve a janela antiga sem
+desfazer a linguagem nova.
+
+⚠️ **Um bug de ordem consertado junto:** o `clearTint` atrasado do dano (60ms) apagava o tint frio quando um
+golpe caía no último quadro antes do aviso. Agora ele repõe o `CASCO_FRIO` se o estado for `telegrafo`.
+
+### 10.2 O rastro do glóbulo
+
+> *"a escória ficou boa, mas pode gerar um efeito de rastro do projétil, como fumaça ou algo incandescente"*
+
+Um sopro por quadro na CAUDA de cada glóbulo (6px atrás pela rotação, para não engolir a própria silhueta), com
+UM emissor de cada família para todos eles — nunca um por bala. Quem tem rastro é decidido pela TEXTURA
+(`globuloGuardiao`), não por uma lista de referências: o pool de balas é compartilhado com os inimigos comuns e
+uma lista envelheceria mal. Cada bala carrega o próprio relógio, senão o rastro engrossaria junto com a salva.
+
+**Duas medidas mandaram no resultado, e as duas derrubaram a primeira versão:**
+
+1. **fumaça FRIA some.** A primeira tentativa usou a crosta da escória (0x24343c/0x1c292d, blend NORMAL — as
+   cores mais claras do próprio PNG) e a captura não mostrou absolutamente nada: a pintura da arena é vermelho
+   escuro de luminância parecida. A lei do dark sci-fi é *luz só onde há energia*, e o glóbulo **é** energia — a
+   saída não é clarear o rastro, é fazê-lo QUENTE. A fumaça virou ADD de tom BAIXO (0x4a2e22/0x3a241c): soma um
+   véu de calor, não um clarão;
+2. **espaçamento é o que faz rastro ser rastro.** Com um sopro a cada 2 quadros a brasa nascia a cada ~7px e a
+   foto mostrava uma fileira de pontos (só 3 vivas por glóbulo). Um sopro por quadro põe a brasa a cada ~2,5px e
+   mantém ~25 vivas: aí o rastro tem corpo e afina para trás sozinho, pela escala e pelo alpha.
+
+**Comprimento:** ~40px a 150px/s. É comprimento de MUNIÇÃO — cometa é assinatura de chefão, e o glóbulo não é o
+chefão.
+
+### 10.3 O B2, fechado sem código
+
+> *"a posição do guardião está ótima, pois os cabos 'fixam' no topo e se ficarem mais baixos ou fora da posição,
+> mostra o corte do sprite"*
+
+A razão importa mais que o veredito: o alto-direita não é preferência, é **onde os cabos encontram a borda de
+cima** — e é a borda que esconde o corte do sprite de 256². Descer o guardião expõe o corte. Os tentáculos
+batendo no teto, que estavam na lista como defeito, são o acabamento.
+
+### 10.4 A respiração em ondas
+
+> *"o core pode chegar a se apagar, mostrando um movimento de respiração em ondas, normal"*
+
+Os quadros 6–8 da `guardiao-idle`, em que a área acesa do miolo cai de ~1.560px para 120–307px, **são o desenho**.
+Deixa de ser item de julgamento.
+
+### 10.5 Ferramenta
+
+`scripts/_f4/_ver-aviso.mjs` — o rastro e o aviso numa folha só, cada foto rotulada pelo estado do JOGO: o `k` da
+carga, o `timeScale` da respiração e as partículas VIVAS de cada emissor. ⚠️ Contar partículas é o que separa
+*"o rastro não aparece na foto"* de *"o rastro não foi emitido"* — e `emitter.alive` é a LISTA de partículas, não
+o número; quem dá o número é `getAliveParticleCount()`.

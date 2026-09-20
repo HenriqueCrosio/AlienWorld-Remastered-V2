@@ -56,6 +56,12 @@ com a poça cobrindo o chão e a lava do chão tirada do core — foi aprovada e
 um item NOVO e grande: a luta do GUARDIÃO precisa ser repensada** (a investida é impossível de desviar, os 3 tiros
 são fáceis demais) — ver o bloco 🔴 na 🚦. O registro do B3 abaixo fica como histórico.
 
+**🟢 20/09 — O E1 E O E2 PASSARAM, E O B2 FECHOU SEM CÓDIGO.** *"A escória ficou boa"* · *"ficou ótimo!"* (o
+metal do rasgo) · *"a posição do guardião está ótima, pois os cabos 'fixam' no topo e se ficarem mais baixos ou
+fora da posição, mostra o corte do sprite"*. A respiração em ondas (o miolo que chega a apagar) foi declarada
+NORMAL. Saíram duas coisas novas do mesmo teste — o RASTRO do glóbulo e o AVISO da investida —, implementadas no
+mesmo dia e **à espera do teste jogado** (ver 🚦). **Com o B2 fechado, o M4 é a última peça da Fatia 7.**
+
 **🟠 O REGISTRO DO B3 (16–17/09). CINCO RODADAS, QUATRO TESTES JOGADOS. Aprovados: a
 mecânica, o surgimento/giro, o breu, a lava, a fumaça da troca, o andar no lugar, a investida de quatro com o
 slash saltado, o teto por uma garra, o arremesso com a garra livre e a VOLTA QUE ATACA (o rasgo do chão + o metal
@@ -72,12 +78,11 @@ dele — o remoto é o V2; NUNCA o `legacy`.
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 19/09 fechamos
-> o B3 (o predador) e REDESENHAMOS A LUTA DO GUARDIÃO: ele ganhou uma SERRA lançada num cabo, que crava nas
-> bordas e é onde ele fica exposto, a salva passou a cobrir as bordas, e a luta escala em 3 degraus de vida.
-> Joguei e aprovei tudo isso. Faltavam só duas coisas que você mexeu DEPOIS do meu teste e eu ainda não vi em
-> jogo: o glóbulo novo (a ESCÓRIA) e a altura nova do metal do rasgo. Joguei agora e: <o que achou das duas>.
-> Se estiver bom, seguimos o roadmap: B2 → M4 → fechar a Fatia 7."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. Em 20/09 o E1 e o
+> E2 passaram (a escória e a altura do metal), o B2 foi FECHADO sem código — a posição do guardião já estava boa —
+> e você fez as duas coisas que eu pedi no mesmo teste: o RASTRO do glóbulo e o AVISO da investida, que agora é a
+> respiração do core acelerando em vez do corpo piscando. Joguei agora e: <o que achou das duas>. Se estiver bom,
+> só falta o M4 (as 3 portas, a borda C, o esfíncter) e a Fatia 7 fecha."**
 
 Se ele chegar SEM ter jogado: suba o localhost (`npm run dev` → `L` → `G`) e entregue o roteiro da 🚦 antes de
 qualquer outra coisa — **nada de gerar arte nem mexer em knob sem o teste dele.**
@@ -86,23 +91,64 @@ qualquer outra coisa — **nada de gerar arte nem mexer em knob sem o teste dele
 
 ## 🚦 O QUE FAZER PRIMEIRO NA PRÓXIMA SESSÃO
 
-### 🎯 O TESTE CURTO — duas coisas, e só elas
+### 🎯 O TESTE CURTO — duas coisas, e só elas (20/09)
 
-Tudo o mais foi jogado e aprovado em 19/09. Sobraram **duas mudanças feitas DEPOIS do teste dele**, que ninguém
-viu em jogo ainda. `npm run dev` → `L` → `G` → mate o guardião → mate o predador.
+O E1 e o E2 de 19/09 **passaram** (ver o bloco ✅ logo abaixo). Sobraram as **duas mudanças que saíram do próprio
+teste dele**, feitas em 20/09 e ainda não vistas em jogo. `npm run dev` → `L` → `G` → deixe o guardião atirar e
+investir algumas vezes; não precisa nem matar o predador.
 
 | # | o que olhar | a pergunta | o knob |
 |---|---|---|---|
-| **E1** | **o glóbulo da salva do guardião** — agora é a **escória** (crosta escura com veios de lava), escolha dele; eu tinha instalado a lasca | lê bem nos 16×8? some no fundo escuro, ou ficou na medida? | trocar é um comando: `GLOBULO=assets/raw/globulo-guardiao/2b-lasca.png node scripts/_f4/_instalar-serra.mjs` |
-| **E2** | **a altura do metal do rasgo** (o predador, na volta que ataca) — `METAL_VOO` 0,95 → **1,5** | força a desviar agora? ficou alto demais? | `METAL_VOO` em `Predador.ts`. 1,5 → a mais alta sobe **152px** (y=34, o teto); 1,35 → 132px (y=54, deixa 24px de faixa livre no topo). Medir: `node scripts/_f4/_medir-metal.mjs` |
+| **T1** | **o RASTRO do glóbulo** — uma esteira de brasa que esfria + um véu quente de fumaça, saindo da cauda de cada glóbulo da salva | o projétil lê melhor vindo? o rastro ficou curto de mais, ou virou cometa? | `BossNucleo.RASTRO_MS` 0,016 (o espaçamento: dobrar afina o rastro) · `RASTRO_BRASA` 0,8 (quanta brasa) · a vida das partículas em `this.fumaca`/`this.brasa` |
+| **T2** | **o AVISO da investida** — o casco ESFRIA e o core acelera: a respiração vai de 1× a 5× e um anel de carga fecha no miolo | dá para ler que vem investida, e não que ele levou dano? o aviso ficou longo de mais? | `TELEGRAFO_DUR` 0,7 (era 0,55 — voltar é um número) · `TELEG_RESPIRO` 5 · `CARGA_R0/R1` 26→4 · `CASCO_FRIO` |
 
-⚠️ **O dobro literal que ele pediu no metal não cabe na arena:** do chão (186) ao teto (30) há 156px, e o dobro
-seriam 184. O 1,5 é o máximo que a arena comporta — é o *"menos um pouco"* dele.
+⚠️ **O T2 mexeu na DURAÇÃO do aviso (0,55 → 0,7s), e isso é janela de desvio, não só leitura.** Se ele achar que
+ficou fácil demais escapar, o 0,55 devolve a janela antiga **sem** desfazer a linguagem nova — a aceleração e o
+anel continuam iguais, só cabem em menos tempo.
 
-**Se as duas passarem, a Fatia 7 volta ao roadmap:** **B2** (a posição do guardião no alto-direita, cortado pela
-borda) → **M4** (as 3 portas com arte final, a borda C grossa, o esfíncter) → fechar a fatia com merge `--no-ff`
-em `main`. A tabela amarela (M3, `f4Vivo`, `f4Veu`) foi **riscada inteira** em 19/09 e a dificuldade do golfinho
-foi **aprovada**, então não sobra mais nada de decisão pendente antes do B2.
+**Se as duas passarem, só falta o M4** (as 3 portas com arte final, a borda C grossa, o esfíncter) → fechar a
+fatia com merge `--no-ff` em `main`. O B2 foi fechado em 20/09 **sem uma linha de código** (ver abaixo), a tabela
+amarela foi riscada inteira em 19/09 e a dificuldade do golfinho foi aprovada: **o M4 é a última peça**.
+
+---
+
+### ✅ 20/09 — o 6º teste jogado: o E1 e o E2 passaram, o B2 fechou, e saíram DUAS coisas novas
+
+**Aprovado, jogado:** E1 *"a escória ficou boa"* · E2 *"ficou ótimo!"* (o `METAL_VOO` 1,5 fica) · e o **B2 fechou
+sem código**: *"a posição do guardião está ótima, pois os cabos 'fixam' no topo e se ficarem mais baixos ou fora
+da posição, mostra o corte do sprite"*. ⚠️ **Registre a razão, não só o veredito** — o alto-direita não é
+preferência: é onde os cabos encontram a borda de cima, e é ela que esconde o corte do sprite de 256². Descer o
+guardião expõe o corte. O item do roadmap **morre aqui**.
+
+**E a respiração está resolvida também:** *"o core pode chegar a se apagar, mostrando um movimento de respiração
+em ondas, normal"*. Os quadros 6–8 em que o miolo quase apaga (área acesa de ~1.560px caindo para 120–307px)
+**são o desenho, não um defeito** — deixa de ser item de julgamento.
+
+| o que ele pediu | o que mudou (20/09) |
+|---|---|
+| E1 *"pode gerar um efeito de rastro do projétil, como fumaça ou algo incandescente"* | **o rastro do glóbulo** (`BossNucleo.rastroGlobulos`): um sopro por quadro na CAUDA de cada glóbulo — brasa em ADD nas cores dos veios de lava do próprio PNG (0xfc9a04/0xf46b02/0xec3c05) + fumaça em ADD de tom baixo (0x4a2e22/0x3a241c). Medido: 25 partículas vivas por glóbulo, ~40px de esteira a 150px/s |
+| *"o aviso, que é a aceleração do core do guardião, precisa estar mais distinta, informar mais ao jogador que vai haver uma investida"* | **o telégrafo trocou de vocabulário.** Ver o bloco ⚠️ abaixo: ele piscava o corpo inteiro em ROSA — a mesma gramática do flash de dano. Agora o casco esfria (`CASCO_FRIO`), a respiração acelera 1× → 5× (`sprite.anims.timeScale`) e um anel de carga fecha no miolo, de 26px a 4px, soltando dois sopros por batida na metade final (14 partículas vivas no pico, medido). No estalo, o `glow` solta uma coroa de 14 |
+
+**⚠️ A LEI QUE SAI DAQUI — um telégrafo não pode falar a língua do dano.** O aviso antigo não era curto: era
+*indistinguível*. Ele piscava `0xffd0d0`/`0xff6060` no sprite inteiro, e o flash de dano pisca `0xffb090` no
+sprite inteiro. O jogador via o guardião piscar e lia *"acertei nele"*. A separação que ficou é de TEMPERATURA e
+de LUGAR: dano = o casco esquenta por 60ms; aviso = o casco ESFRIA e quem acende é o miolo. ⚠️ E o `clearTint`
+atrasado do dano passou a respeitar o telégrafo — um golpe no último quadro antes do aviso limpava o casco no
+meio da carga.
+
+**⚠️ E uma medida que derrubou a primeira tentativa do rastro:** a fumaça saiu primeiro na **crosta fria** da
+escória (0x24343c/0x1c292d, blend NORMAL — as cores mais claras do próprio PNG) e **sumiu por completo** na
+captura. A pintura da arena é vermelho escuro de luminância parecida; cinza-azulado a 50% em cima dela não tem
+contraste nenhum. A lei do dark sci-fi diz *luz só onde há energia* — e o glóbulo **é** energia: a saída não era
+clarear o rastro, era fazê-lo QUENTE e curto. Segunda medida: com um sopro a cada 2 quadros a brasa nascia a cada
+~7px e a foto mostrava uma FILEIRA DE PONTOS; um sopro POR QUADRO (~2,5px) é o que faz o rastro ter corpo.
+
+Ferramenta nova: **`scripts/_f4/_ver-aviso.mjs`** — as duas coisas numa folha só, e cada foto carrega o estado do
+JOGO (o `k` da carga, o `timeScale` da respiração e as partículas VIVAS de cada emissor). ⚠️ Contar partículas é
+o que separa *"o rastro não aparece na foto"* de *"o rastro não foi emitido"* — e `emitter.alive` é a LISTA, não
+o número: quem dá o número é `getAliveParticleCount()`. Folha: `folhas/2026-09-20/aviso-e-rastro.png` (18 fotos).
+Sondas: `probe-stage4` ✔ · `probe-f4-visual` ✔ · `probe-f4-moldura` ✔ · `probe-f4-golfinho` ✔ · `_provar-serra` ✔
+· typecheck ✔ · build ✔.
 
 ---
 
@@ -397,7 +443,9 @@ a morte no chão (desaba e fica estendido) · a saída pela direita e o aviso da
   rasgo e a morte de 0,5s a 4,6s).
 
 ### 4. Depois do B3 aprovado — a fila obrigatória dele
-**B2** (a posição do guardião no alto-direita, cortado pela borda) → **M4** (as 3 portas com arte final, a borda C
+~~**B2** (a posição do guardião no alto-direita, cortado pela borda)~~ **✅ FECHADO EM 20/09 SEM CÓDIGO** — a
+posição já estava certa, e a razão é geométrica: os cabos encontram a borda de cima, e é ela que esconde o corte
+do sprite de 256². → **M4** (as 3 portas com arte final, a borda C
 grossa, o esfíncter). Os cortes da tabela amarela (M3, `f4Vivo`, `f4Veu`) foram todos
 **riscados em 19/09** — ver "🧭 O MAPA PARA FECHAR A FATIA 7" no fim deste arquivo. Fechar a fatia = merge `--no-ff` de `feat/fase4-visual` em `main`.
 
@@ -522,9 +570,11 @@ apontar o `_instalar-predador.mjs` (`PULO=… MORTE=…` no ambiente) e reinstal
 | as hitboxes | `CASCA`/`INTEIRO` (virtuais, medidas só no miolo), `CASCA_TETO`/`INTEIRO_TETO` (px do clipe de 0,75) — ⚠️ **a olho**, só o MIOLO é medido |
 | o fator de cada clipe | `Predador.QUADRO` — ⚠️ obrigatório conferir ao trocar a arte de um clipe |
 
-### ⚠️ Pontos já vistos na captura, não decididos
-- A **emenda vertical da pintura** do núcleo passa pela arena (x≈270 na foto do aviso) — anterior a isto.
-- O coração saiu inteiro: `nucleo.png`/`nucleo-beat-sheet.png` seguem no disco, sem uso (apagar é dele).
+### ✅ Pontos vistos na captura — TODOS decididos (19–20/09)
+- A **emenda vertical da pintura** do núcleo passa pela arena (x≈270 na foto do aviso): *"nem consegui perceber,
+  é muita informação para reparar"* → **fica como está**.
+- O coração saiu inteiro: `nucleo.png`/`nucleo-beat-sheet.png` seguem no disco, sem uso. *"Mantém por enquanto"*
+  (20/09) → **não apagar**, e não é trabalho pendente.
 
 ### Sondas (a última rodada: 16/09, depois da rodada 3)
 `probe-stage4` ✔ (a troca revela o predador, a arma trava e destrava, 0,7→0,47, a bala real fere o peito,
@@ -1466,8 +1516,9 @@ O CENÁRIO RESPIRA         ✅ APROVADO (14/09), e as colunas verticais junto
 A EMENDA C→D + A PINTURA  ✅ APROVADAS (15/09) — a pintura do núcleo fica como está
 BLOCO B · B1 — GUARDIÃO   ✅ APROVADO (15/09) — arte nova dele + morte composta no motor
 BLOCO B · B3 — 2ª FORMA   🟠 ◄ PEGUE AQUI · O PREDADOR implementado (16/09) — falta o teste jogado dele (ver ⏸️)
-BLOCO B · B2 — A POSIÇÃO  ⬜ o guardião no alto-direita, cortado pela borda de cima (Y escolhido por ele
-                             vendo as opções lado a lado na cena). Hoje os tentáculos batem no teto.
+BLOCO B · B2 — A POSIÇÃO  ✅ FECHADO EM 20/09, SEM CÓDIGO: a posição de hoje é a certa. "os cabos
+                             'fixam' no topo e se ficarem mais baixos ou fora da posição, mostra o
+                             corte do sprite" — os tentáculos no teto são o acabamento, não o defeito.
 M4 — A CÂMARA C           ⬜ as 3 PORTAS com arte final (hoje `f4-porta-prov.png`), a borda C grossa
                              (128×80, arte dele aprovada; a `Moldura` foi feita para 64 de altura) e o
                              esfíncter animado (`f4VivoC`)
@@ -1476,7 +1527,8 @@ M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprov
 
 ## 🧭 O MAPA PARA FECHAR A FATIA 7 (15/09)
 
-**🔴 Obrigatório, na ordem dele:** B3 (a 2ª forma — o predador: JOGAR A RODADA 3 e ajustar, ver 🚦) → B2 (a posição) → M4 (portas, borda C, esfíncter).
+**🔴 Obrigatório, na ordem dele:** ~~B3~~ ✅ (fechado em 19/09) → ~~B2~~ ✅ (fechado em 20/09, sem código) →
+**M4 (portas, borda C, esfíncter) — a ÚLTIMA peça.**
 
 **✅ CORTADAS — RESPONDIDO EM 19/09: *"risca as 3 primeiras"*.** A tabela amarela fecha inteira; nenhuma destas
 três peças será construída, e a Fatia 7 não depende mais delas.
