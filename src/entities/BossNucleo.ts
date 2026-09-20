@@ -75,6 +75,16 @@ export class BossNucleo implements StageBoss {
   private readonly barBg: Phaser.GameObjects.Rectangle;
   private readonly bar: Phaser.GameObjects.Rectangle;
   private readonly glow: Phaser.GameObjects.Particles.ParticleEmitter;
+  /**
+   * O rastro dos glóbulos: UM emissor de cada família para TODOS eles (armadilha nº 5 — nunca um
+   * emissor por bala). Quem decide de quem é o rastro é a TEXTURA do projétil, lida no laço: só a
+   * `globuloGuardiao` deixa fumaça, e a bala volta limpa para o pool sozinha.
+   */
+  private readonly fumaca: Phaser.GameObjects.Particles.ParticleEmitter;
+  private readonly brasa: Phaser.GameObjects.Particles.ParticleEmitter;
+  /** A carga do telégrafo: o anel que FECHA no miolo antes da investida. */
+  private readonly carga: Phaser.GameObjects.Particles.ParticleEmitter;
+  private cargaT = 0;
 
   // ─── Guardião (256×256 a escala 0.7 ≈ 179×179) ───
   private static readonly G_ESCALA = 0.7;
@@ -115,7 +125,51 @@ export class BossNucleo implements StageBoss {
   private static readonly SALVA_N = [3, 4, 5];
   /** Quantas cravadas a serra dá antes de sair, por degrau. No último ela fica mais tempo na arena. */
   private static readonly SERRA_CRAVADAS = [2, 2, 3];
-  private static readonly TELEGRAFO_DUR = 0.55;
+  /**
+   * ⚠️ 0,55 → 0,7 (20/09). O aviso não era curto de mais para DESVIAR — era curto de mais para ser
+   * LIDO: *"o aviso, que é a aceleração do core do guardião, precisa estar mais distinta"*. A
+   * aceleração da respiração precisa de ~0,7s para subir de 1× a 5× e o olho perceber que subiu.
+   * Voltar é um número: 0,55 devolve a janela antiga sem desfazer a linguagem nova.
+   */
+  private static readonly TELEGRAFO_DUR = 0.7;
+  /** A respiração acelera de 1× até este fator ao longo do telégrafo — é ELE o aviso. */
+  private static readonly TELEG_RESPIRO = 5;
+  /** O tint do casco no telégrafo: FRIO. É o contrário do flash de dano (0xffb090), e é o ponto. */
+  private static readonly CASCO_FRIO = 0x7a8290;
+  /** O raio do anel de carga em volta do miolo: abre em `CARGA_R0` e FECHA em `CARGA_R1`. */
+  private static readonly CARGA_R0 = 26;
+  private static readonly CARGA_R1 = 4;
+  /**
+   * O intervalo entre sopros da carga, do começo (lento) ao fim (jorro).
+   *
+   * ⚠️ MEDIDO na captura, e o intervalo sozinho não resolveu: com 70→22ms o anel fechava com 6
+   * partículas vivas no pico, e apertar para 55→16 deu 7 — a vida de 240ms limita o acúmulo, não o
+   * intervalo. Por isso a METADE FINAL solta DOIS sopros por batida (ver o `case 'telegrafo'`): 14
+   * vivas no fim, e a densidade dobra exatamente onde o aviso precisa gritar.
+   */
+  private static readonly CARGA_MS0 = 55;
+  private static readonly CARGA_MS1 = 16;
+  /**
+   * ─── O RASTRO DO GLÓBULO (20/09) ───
+   * *"pode gerar um efeito de rastro do projétil, como fumaça ou algo incandescente"*. São as duas
+   * coisas: uma BRASA que esfria (a espinha do rastro) e uma FUMAÇA quente em volta dela.
+   *
+   * ⚠️ A 1ª TENTATIVA FOI MEDIDA E DESCARTADA: fumaça na CROSTA FRIA da escória (0x24343c/0x1c292d,
+   * blend NORMAL, as cores mais claras do próprio PNG) some por completo no fundo — a pintura da
+   * arena é vermelho escuro de luminância parecida, e cinza-azulado a 50% em cima dela não tem
+   * contraste nenhum. A lei do dark sci-fi diz *luz só onde há energia*, e o glóbulo É energia: a
+   * saída não é clarear o rastro, é fazê-lo QUENTE e curto. A fumaça vira ADD com tom baixo
+   * (0x3a241c/0x2a1a16) — acrescenta calor, não clarão — e a brasa passa a sair quase todo sopro.
+   */
+  /**
+   * ⚠️ O ESPAÇAMENTO É O QUE FAZ O RASTRO SER RASTRO. Com 0,034s (um sopro a cada 2 quadros) e 150px/s
+   * a brasa nascia a cada ~7px e a captura mostrou uma FILEIRA DE PONTOS, não uma esteira: com 130–220ms
+   * de vida, só 3 brasas ficavam vivas por glóbulo. Um sopro POR QUADRO põe a brasa a cada ~2,5px e
+   * mantém 8–10 vivas — aí o rastro tem corpo e afina para trás sozinho, pela escala e pelo alpha.
+   */
+  private static readonly RASTRO_MS = 0.016;
+  /** Chance de um sopro também soltar brasa. É a espinha do rastro: abaixo de ~0,6 vira ponto solto. */
+  private static readonly RASTRO_BRASA = 0.8;
   /**
    * ⚠️ A SALVA COBRE AS BORDAS, e é de propósito. A investida empurra o jogador para o canto (medido:
    * o casco de 133px deixa ~20px de folga num vão de 160px), e no canto não acontecia nada — por isso
@@ -207,6 +261,50 @@ export class BossNucleo implements StageBoss {
       })
       .setDepth(51);
 
+    // ─── O rastro do glóbulo (ver `RASTRO_MS`) ───
+    // A FUMAÇA: ADD com tom BAIXO (não é o mesmo que ADD com tom claro — somar 0x3a241c acrescenta
+    // um véu de calor, não um clarão). Ela cresce e apaga: 280ms a 150px/s ≈ 42px de esteira, que é
+    // comprimento de munição. Cometa é assinatura de chefão, e o glóbulo não é o chefão.
+    this.fumaca = scene.add
+      .particles(0, 0, 'puff', {
+        lifespan: { min: 220, max: 340 },
+        speed: { min: 2, max: 14 },
+        scale: { start: 0.6, end: 1.8 },
+        alpha: { start: 0.85, end: 0 },
+        tint: [0x4a2e22, 0x3a241c, 0x2a1a16],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(19);
+    // A BRASA é a luz — e é a espinha do rastro. Curta (160ms ≈ 24px) e apertada, para ler como
+    // material incandescente desprendendo da crosta, não como chama.
+    this.brasa = scene.add
+      .particles(0, 0, 'spark', {
+        lifespan: { min: 130, max: 220 },
+        speed: { min: 2, max: 16 },
+        scale: { start: 0.9, end: 0 },
+        alpha: { start: 0.95, end: 0 },
+        tint: [0xfc9a04, 0xf46b02, 0xec3c05],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(20);
+
+    // A CARGA do telégrafo. Ao contrário do `glow` (que CRESCE e se espalha: o bicho respirando), a
+    // partícula da carga ENCOLHE — e o anel de onde ela nasce fecha no miolo. É matéria sendo puxada
+    // para dentro, o oposto visual da respiração, e é por isso que o aviso não se confunde com ela.
+    this.carga = scene.add
+      .particles(0, 0, 'puff', {
+        lifespan: 240,
+        speed: { min: 0, max: 8 },
+        scale: { start: 1.3, end: 0.2 },
+        alpha: { start: 0.9, end: 0 },
+        tint: [0xffd447, 0xff8a2a, 0xff4a10],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(52);
+
     // ⚠️ `allowGravity: false`: a serra anda pela própria coreografia, não pela física da cena.
     this.perigos = scene.physics.add.group({ allowGravity: false });
     SerraGuardiao.registrarAnims(scene);
@@ -268,6 +366,10 @@ export class BossNucleo implements StageBoss {
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
+    // ANTES de qualquer saída antecipada: os glóbulos no ar continuam sendo glóbulos depois que o
+    // guardião morre (a salva sobrevive à troca por ~2s), e um rastro que corta no meio se denuncia.
+    this.rastroGlobulos(dt);
+
     // O predador roda até DEPOIS de morto (a luz apaga, o breu sai, a lava no ar segue caindo).
     if (this.predador) {
       this.predador.update(dt, target);
@@ -330,17 +432,54 @@ export class BossNucleo implements StageBoss {
             this.proxima = 'serra';
             this.acao = 'telegrafo';
             this.acaoT = BossNucleo.TELEGRAFO_DUR;
+            this.cargaT = 0;
             this.corpoInteiro();
             this.body.setVelocityY(0);
+            // O CASCO ESFRIA enquanto o miolo acende. O tint escuro diz "fechado" (a bala morre no
+            // casco a partir de agora) e libera a linguagem do CALOR para o aviso — ver o `case`.
+            this.sprite.setTint(BossNucleo.CASCO_FRIO);
           }
         }
         break;
       }
 
       case 'telegrafo': {
-        this.sprite.setTint(Math.floor(this.acaoT * 24) % 2 === 0 ? 0xffd0d0 : 0xff6060);
+        /**
+         * ─── O AVISO É A ACELERAÇÃO DO CORE (20/09, pedido dele) ───
+         *
+         * ⚠️ O QUE ESTAVA ERRADO NÃO ERA A DURAÇÃO, ERA O VOCABULÁRIO: o telégrafo piscava o corpo
+         * INTEIRO em rosa (0xffd0d0/0xff6060) — a MESMA gramática do flash de dano (0xffb090, ver
+         * `damage`). O jogador via o guardião piscar e lia "acertei nele", não "ele vai investir".
+         * Agora as duas coisas não podem ser confundidas: no dano, o casco esquenta por 60ms; aqui o
+         * casco ESFRIA e quem acende é o miolo, em três camadas que sobem juntas:
+         *
+         *   1. a RESPIRAÇÃO acelera (`timeScale` 1× → `TELEG_RESPIRO`) — é o coração disparando, e é
+         *      literalmente o que ele pediu. ⚠️ Ela é a única camada que existe mesmo sem partícula:
+         *      se um dia a sheet sumir, o aviso degrada, não desaparece;
+         *   2. o ANEL DE CARGA fecha no miolo (`CARGA_R0` → `CARGA_R1`), com o sopro acelerando de
+         *      `CARGA_MS0` a `CARGA_MS1`. Encolher é o oposto do `glow` do `flutua`, que se espalha;
+         *   3. no estalo, o `glow` solta uma coroa de 14 de uma vez: a carga SOLTANDO.
+         */
+        const k = 1 - Math.max(0, this.acaoT) / BossNucleo.TELEGRAFO_DUR;
+        this.sprite.anims.timeScale = 1 + k * (BossNucleo.TELEG_RESPIRO - 1);
+
+        this.cargaT -= dt;
+        if (this.cargaT <= 0) {
+          this.cargaT = Phaser.Math.Linear(BossNucleo.CARGA_MS0, BossNucleo.CARGA_MS1, k) / 1000;
+          const raio = Phaser.Math.Linear(BossNucleo.CARGA_R0, BossNucleo.CARGA_R1, k);
+          // Na metade final, DOIS por batida e em lados opostos do anel: é o que o transforma de
+          // cacho de partículas em ANEL, e é onde a leitura precisa estar mais alta.
+          const a = Math.random() * Math.PI * 2;
+          this.carga.emitParticleAt(this.core.x + Math.cos(a) * raio, this.core.y + Math.sin(a) * raio);
+          if (k > 0.5) {
+            this.carga.emitParticleAt(this.core.x - Math.cos(a) * raio, this.core.y - Math.sin(a) * raio);
+          }
+        }
+
         if (this.acaoT <= 0) {
           this.sprite.clearTint();
+          this.sprite.anims.timeScale = 1;
+          this.glow.emitParticleAt(this.core.x, this.core.y, 14);
           this.acao = 'investe';
           // Investe NA ALTURA do jogador no instante do disparo — mirada no passado, não
           // teleguiada: dá para reagir saindo da linha (o mesmo pacto da cabeça ciano).
@@ -421,6 +560,9 @@ export class BossNucleo implements StageBoss {
     this.sprite.clearTint();
 
     // ⚠️ `anims.stop()` ANTES de tocar a morte: a respiração está em yoyo e sobrescreveria o quadro.
+    // E o `timeScale` VOLTA A 1: morrer no meio do telégrafo deixava a respiração em 5× e a morte
+    // inteira tocava acelerada — o `timeScale` é do sprite, não do clipe.
+    this.sprite.anims.timeScale = 1;
     this.sprite.anims.stop();
     if (this.scene.anims.exists('guardiao-morte')) this.sprite.play('guardiao-morte');
 
@@ -488,6 +630,37 @@ export class BossNucleo implements StageBoss {
     };
   }
 
+  /**
+   * O RASTRO dos glóbulos no ar. Quem tem rastro é decidido pela TEXTURA, não por uma lista: o pool
+   * de balas é compartilhado com os inimigos comuns, e uma lista de referências envelheceria mal
+   * (a bala volta para o pool e renasce como outra coisa). `globuloGuardiao` só ele atira.
+   *
+   * ⚠️ Cada bala carrega o PRÓPRIO relógio (`rt`), e não o do quadro: com 5 glóbulos abertos num
+   * leque, emitir "uma vez por quadro por bala" faria o rastro engrossar junto com a salva.
+   */
+  private rastroGlobulos(dt: number): void {
+    if (!this.scene.textures.exists('globuloGuardiao')) return;
+    for (const obj of this.enemies.enemyBullets.getChildren()) {
+      const b = obj as Phaser.Physics.Arcade.Sprite;
+      if (!b.active || b.texture.key !== 'globuloGuardiao') continue;
+
+      const rt = ((b.getData('rt') as number) ?? 0) - dt;
+      if (rt > 0) {
+        b.setData('rt', rt);
+        continue;
+      }
+      b.setData('rt', BossNucleo.RASTRO_MS);
+
+      // Atrás da bala, nunca em cima dela: o sopro nasce na cauda (o glóbulo tem 12px de corpo no
+      // sprite de 32×16) para o rastro sair de trás e não engolir a própria silhueta.
+      const ang = b.rotation;
+      const x = b.x - Math.cos(ang) * 6;
+      const y = b.y - Math.sin(ang) * 6;
+      this.fumaca.emitParticleAt(x, y);
+      if (Math.random() < BossNucleo.RASTRO_BRASA) this.brasa.emitParticleAt(x, y);
+    }
+  }
+
   /** O glóbulo (bolt3 laranja) do bico do guardião. */
   private gLobulo(angle: number, speed: number, boca: { x: number; y: number }): void {
     const b = this.enemies.enemyBullets.get(boca.x, boca.y) as
@@ -535,7 +708,13 @@ export class BossNucleo implements StageBoss {
     this.atualizarBarra();
 
     this.sprite.setTint(0xffb090);
-    this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
+    // ⚠️ O flash de dano NÃO pode apagar o tint frio do telégrafo: um golpe que cai no último quadro
+    // antes do aviso deixava o `clearTint` atrasado limpar o casco no meio da carga.
+    this.scene.time.delayedCall(60, () => {
+      if (this.dead) return;
+      if (this.acao === 'telegrafo') this.sprite.setTint(BossNucleo.CASCO_FRIO);
+      else this.sprite.clearTint();
+    });
 
     if (this.hpGuardiao === 0) this.trocarParaPredador();
     return false;
@@ -573,5 +752,8 @@ export class BossNucleo implements StageBoss {
     this.bar.destroy();
     this.barBg.destroy();
     this.glow.destroy();
+    this.fumaca.destroy();
+    this.brasa.destroy();
+    this.carga.destroy();
   }
 }
