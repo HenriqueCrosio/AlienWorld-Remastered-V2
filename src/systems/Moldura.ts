@@ -119,10 +119,49 @@ export class Moldura {
   static readonly PASSO_MAX = 14;
 
   /**
-   * ⚠️ O TETO DA ESPESSURA, e ele é uma conta, não um gosto: a peça tem 64px de altura e é
-   * ancorada pela SUPERFÍCIE, sem crop e sem escala. Para ela ainda alcançar a borda da tela,
-   * `espessura + relevo` não pode passar de 54 (206 − 54 + 64 = 216 = a base da tela; 10 + 54 −
-   * 64 = 0 = o topo). Passar disso abriria uma fresta entre a faixa e a borda.
+   * SEGURA OU ANDA — a chance de a placa repetir a altura da anterior, e o teto de repetições.
+   *
+   * ⚠️ O PAR DO DUTO É MAIOR, E ISSO É ARTE VIRANDO REGRA DE GEOMETRIA. A borda da câmara C tem
+   * uma VEIA ACESA horizontal na linha 41 da peça, e no duto a parede é colada no corredor
+   * (`superficieChao = vaoY + meio + FOLGA`) — então a luz cai em `vaoY + 50` e anda com o vão.
+   * Com o par normal, metade das juntas do duto pulava de 7 a 14px e a veia lia como uma linha
+   * QUEBRADA. O veredicto dele, 20/09: *"as luzes são importantes para a arte da borda, mas ficar
+   * em um degrau diferente fica estranho in game. O certo seria emendar na linha das luzes"*.
+   *
+   * ⚠️ E O PREÇO NÃO É APERTO — ele ofereceu pagar em largura (*"mesmo que tenha que apertar mais
+   * o duto"*) e não precisa: o `gap` do roteiro (84 → 76 → 68) não muda uma linha. Achatar a
+   * parede no envelope é que custaria 44px de banda (100 → 56), e por isso não foi esse o caminho.
+   * O que se paga é RITMO: o duto pede menos subida e descida, em patamares mais longos.
+   *
+   * ⚠️ O DEGRAU RARO NÃO É DEFEITO — ele sobra de propósito. Quando o patamar acaba, o FIO já
+   * desenha o trecho VERTICAL que liga as duas alturas (ver `ligaDegrau`), então um degrau isolado
+   * lê como a emenda de duas seções de um duto. É a lição de 14/09: *"ligando as duas pontas, o
+   * mesmo degrau passa a ler como uma SALIÊNCIA da parede"*.
+   *
+   * ⚠️ SE O DUTO FICAR MONÓTONO no teste jogado, estes dois números descem — nunca o `PASSO_MAX`,
+   * que é o TAMANHO do degrau, não a frequência dele.
+   */
+  private static readonly SEGURA_P = 0.45;
+  private static readonly SEGURA_MAX = 3;
+  private static readonly SEGURA_P_DUTO = 0.85;
+  private static readonly SEGURA_MAX_DUTO = 8;
+
+  /**
+   * ⚠️ O TETO DA ESPESSURA, e ele é uma conta, não um gosto: a peça é ancorada pela SUPERFÍCIE,
+   * sem crop e sem escala, então para ela ainda alcançar a borda da tela `espessura + relevo` não
+   * pode passar de 54 (206 − 54 + 64 = 216 = a base da tela; 10 + 54 − 64 = 0 = o topo).
+   * Passar disso abriria uma fresta entre a faixa e a borda.
+   *
+   * ⚠️ A CONTA É SOBRE A PEÇA MAIS FINA (64px), E É POR ISSO QUE ELA VALE PARA TODAS. A câmara C
+   * entrou no M4 com 80px — a "faixa grossa" do duto — e uma peça mais alta só SOBRA: com 80 o
+   * limite daria 70. O número fica em 54 mesmo assim, e a decisão é dele (20/09): *"use a arte que
+   * temos guardada e utilize-a da mesma forma que a atual"*. Subir o teto para 70 estreitaria o
+   * duto, e apertar o corredor é mudança de JOGO numa fase que ele já aprovou jogada — os 16px da
+   * peça grossa viram COBERTURA (parede desenhada onde antes entrava saia), não aperto.
+   *
+   * ⚠️ E SE UM DIA O DUTO PARECER FOLGADO, é este número que sobe — mas só até 70, e só enquanto a
+   * C for a única câmara em jogo: com uma peça de 64 na tela, 70 abre a fresta que esta conta
+   * existe para não ter.
    */
   static readonly ESPESSURA_MAX = 54;
 
@@ -404,9 +443,10 @@ export class Moldura {
       // A SAIA. Ver `enche` para o porquê e para a conta do espelho.
       //
       // ⚠️ O `flipY` DE CADA LADO É O OPOSTO DO DA PEÇA QUE ELA CONTINUA, e é isso que faz a
-      // emenda sumir sem ninguém casar pixel nenhum: a peça do chão termina na linha 63 da arte,
-      // e a saia espelhada COMEÇA na linha 63. A do teto é o inverso exato, porque a peça de lá
-      // já nasce virada.
+      // emenda sumir sem ninguém casar pixel nenhum: a peça do chão termina na ÚLTIMA linha da
+      // arte (63 nas câmaras finas, 79 na C) e a saia espelhada COMEÇA nessa mesma linha. A do
+      // teto é o inverso exato, porque a peça de lá já nasce virada. Quem garante que as duas
+      // falam da mesma linha é a âncora do `enche`, que lê a altura da peça em vez de cravá-la.
       for (const lado of ['saiaChao', 'saiaTeto']) {
         this.saia.push(
           scene.add
@@ -462,11 +502,11 @@ export class Moldura {
    * atravessando uma passagem, está-se chegando numa câmara, e a borda velha rolando para fora
    * seria a câmara errada na tela por cinco segundos.
    *
-   * ⚠️ A GUARDA DA CHAVE INEXISTENTE NÃO É CAUTELA, É O CAMINHO DA CÂMARA C. A arte dela está
-   * aprovada mas é 128×80, e instalá-la é trabalho do M4 (ver a nota no `ART` da `BootScene`).
-   * Até lá o roteiro pede `f4FaixaC`, não acha, e a borda anterior FICA — o duto herda a borda da
-   * garganta em vez de cair na textura de erro do motor, que é 32×32 e apareceria como oito
-   * selos minúsculos alinhados no rodapé.
+   * ⚠️ A GUARDA DA CHAVE INEXISTENTE FOI O CAMINHO DA CÂMARA C, e agora que a C chegou (M4,
+   * 20/09) ela continua aqui pelo motivo de sempre: uma chave que não existe faz a borda anterior
+   * FICAR, em vez de cair na textura de erro do motor — 32×32, que apareceria como oito selos
+   * minúsculos alinhados no rodapé. De 12/09 a 20/09 foi isto que fez o duto ser jogado vestido
+   * com a borda da garganta, e ninguém viu um defeito: viu um lugar.
    */
   setFaixa(base: string, imediato = false, junta?: string): void {
     const scene = this.scene;
@@ -876,24 +916,33 @@ export class Moldura {
     const teto = this.saia[i * 2 + 1];
 
     // ⚠️ A SAIA ENCOSTA, NÃO SE ESTICA — e é isto que a separa do retângulo que ela substituiu.
-    // Ela é ancorada exatamente na linha onde a peça acaba, com 64px próprios, e o que sobrar sai
-    // da tela. Sem `setSize`, sem escala, sem crop: a mesma lei da peça (`ESPESSURA_MAX`), pelo
-    // mesmo motivo — esticar arte de 64px para tapar um vão variável é o que dá aquele aspecto
-    // borrado que nenhuma sonda pega.
+    // Ela é ancorada exatamente na linha onde a peça acaba, com a altura própria dela, e o que
+    // sobrar sai da tela. Sem `setSize`, sem escala, sem crop: a mesma lei da peça
+    // (`ESPESSURA_MAX`), pelo mesmo motivo — esticar arte para tapar um vão variável é o que dá
+    // aquele aspecto borrado que nenhuma sonda pega.
     //
-    // A CONTA DE QUE 64 BASTA: no duto a superfície é `vaoY + meio + FOLGA`, e o `vaoY` mais alto
-    // possível é `TETO_Y + MARGEM + meio` = 66. Com `gap` 84 (o do duto), a superfície do chão não
-    // sobe além de 66 + 42 + 8 = 116; a peça vai até 180 e a tela acaba em 216, então o pior caso
-    // descoberto é 36px. A saia cobre 64.
-    chao.setPosition(x, p.superficieChao + 64);
-    teto.setPosition(x, p.superficieTeto - 64);
+    // ⚠️ A ALTURA SAI DA PEÇA, E NÃO DE UM LITERAL 64 — e este era o número que segurava a câmara
+    // C desde 12/09. A peça do duto tem 80px (a "faixa grossa"), as outras três têm 64, e a saia é
+    // a MESMA arte espelhada: ler `displayHeight` é a única forma de a emenda cair no pixel
+    // qualquer que seja a câmara. Com o 64 cravado, a saia da C nascia 16px DENTRO do desenho e
+    // riscava uma costura no meio da parede — exatamente o defeito que ela veio consertar.
+    //
+    // A CONTA DE QUE A PEÇA BASTA: no duto a superfície é `vaoY + meio + FOLGA`, e o `vaoY` mais
+    // alto possível é `TETO_Y + MARGEM + meio` = 66. Com `gap` 84 (o do duto), a superfície do
+    // chão não sobe além de 66 + 42 + 8 = 116; a peça de 64 vai até 180 e a tela acaba em 216,
+    // então o pior caso descoberto é 36px — e a saia de 64 cobre. Com a peça de 80 da C o
+    // descoberto cai para 20px antes de a saia entrar, que é o que os 16px a mais compraram.
+    const alturaChao = this.chao[i].displayHeight;
+    const alturaTeto = this.teto[i].displayHeight;
+    chao.setPosition(x, p.superficieChao + alturaChao);
+    teto.setPosition(x, p.superficieTeto - alturaTeto);
 
     // ⚠️ A SAIA APARECE ONDE A PEÇA NÃO ALCANÇA A BORDA DA TELA — e não "no duto". Até 14/09 ela
     // seguia o `duto` global, e em t=106 sumia no mesmo quadro de toda a parede colada que ainda
     // estava na tela: 30–40px de fundo aparecendo embaixo de cada placa do fim do duto. Foi o
     // "sem acabamento" que ele apontou. A pergunta certa é de geometria, placa a placa.
-    chao.setVisible(p.superficieChao + 64 < GAME_HEIGHT);
-    teto.setVisible(p.superficieTeto - 64 > 0);
+    chao.setVisible(p.superficieChao + alturaChao < GAME_HEIGHT);
+    teto.setVisible(p.superficieTeto - alturaTeto > 0);
   }
 
   /**
@@ -961,8 +1010,14 @@ export class Moldura {
     // peça só de 128px: duas ou três placas na mesma altura LEEM como uma placa larga. Onda lisa
     // lê como onda; placa lê como parede.
     //
+    // ⚠️ NO DUTO O PATAMAR É MAIS LONGO, e o porquê está em `SEGURA_P_DUTO`: ali a borda tem uma
+    // veia acesa horizontal, a parede é colada no corredor, e cada degrau QUEBRA a luz.
+    //
     // ⚠️ `Phaser.Math` AQUI, e não `Math.random`. O vão é JOGO, e jogo sorteia do fluxo do jogo.
-    const segura = ant !== undefined && ant.repetida < 3 && Phaser.Math.FloatBetween(0, 1) < 0.45;
+    const maxRepetida = this.duto ? Moldura.SEGURA_MAX_DUTO : Moldura.SEGURA_MAX;
+    const chanceSegura = this.duto ? Moldura.SEGURA_P_DUTO : Moldura.SEGURA_P;
+    const segura =
+      ant !== undefined && ant.repetida < maxRepetida && Phaser.Math.FloatBetween(0, 1) < chanceSegura;
 
     let vaoY: number;
     let repetida: number;

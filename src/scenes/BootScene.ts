@@ -722,16 +722,23 @@ const ART: Record<string, string> = {
   // A convenção do `pickVariant` (src/art.ts) continua de pé — `<base>`, `<base>2`, `<base>3`… —
   // e é por isso que desfazer isto é copiar um PNG e escrever uma linha aqui, sem tocar em código.
   //
-  // ⚠️ A CÂMARA C NÃO ESTÁ AQUI, E A ARTE DELA EXISTE E FOI APROVADA (`_faixa-C-v.png`). Ela é
-  // 128×**80** — a "faixa grossa" do duto — e três coisas presumem 64: o `ESPESSURA_MAX` de 54, o
-  // `Moldura.corDoFundo` lendo a linha 63, e o assert de dimensão da sonda. Instalar C é construir
-  // isso, e é exatamente o que o M4 está escalado para fazer. Até lá o `setFaixa('f4FaixaC')` não
-  // acha a chave e MANTÉM a borda anterior — ver a guarda em `Moldura.setFaixa`.
+  // ⚠️ A CÂMARA C É A ÚNICA GROSSA — 128×**80**, contra 128×64 das outras três —, e isso é arte
+  // dele aprovada em 12/09 (*"as do duto e do núcleo ficaram ótimas"*), não um acidente de
+  // exportação. Ela ficou PARADA de 12/09 a 20/09 porque o motor media a peça por um literal 64;
+  // quem ensinou a altura variável foi o M4. Ver a conta em `Moldura.ESPESSURA_MAX` e a âncora da
+  // saia em `Moldura.enche`, que hoje saem da peça e não de um número.
+  //
+  // ⚠️ E OS 16px A MAIS SÃO COBERTURA, NÃO APERTO — decisão dele em 20/09: *"use a arte que temos
+  // guardada e utilize-a da mesma forma que a atual"*. O `ESPESSURA_MAX` continua 54, então o duto
+  // tem exatamente a mesma largura de antes; o que muda é que a parede vira ARTE onde antes entrava
+  // saia. Subir o teto para 70 (que a peça de 80 permitiria) apertaria o duto, e isso é mudança de
+  // JOGO numa fase que ele já aprovou jogada — não entra de carona numa troca de arte.
   //
   // ⚠️ `f4-faixa-prov.png` FICA NO DISCO. A regra de saída é dele — *"caso não fique bom, mantemos
   // a que está agora"* — e voltar atrás é reapontar estas chaves para o provisório.
   f4FaixaA: 'sprites/f4-faixa-a.png',
   f4FaixaB: 'sprites/f4-faixa-b.png',
+  f4FaixaC: 'sprites/f4-faixa-c.png',
   f4FaixaD: 'sprites/f4-faixa-d.png',
   // A MESA: 96×112, TOPO CHATO. A hitbox sai da largura da TEXTURA, então topo chato é o que a
   // torna honesta por construção (`scripts/_f4/_medir-colunas.mjs`).

@@ -586,7 +586,22 @@ export const STAGE_4: StageEvent[] = [
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
   // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
   // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
-  { t: 68, type: 'cenario', key: 'paintBgF4c', faixa: 'f4FaixaC' },
+  //
+  // ⚠️ A `junta` ENTROU EM 20/09, JUNTO COM A ARTE DA C — e ela faltava porque até então não havia
+  // costura nenhuma aqui: sem `f4FaixaC` instalada o `setFaixa` recusava a chave e a borda da
+  // garganta seguia reta duto adentro. Instalar a C abriu a emenda mais violenta das três (anéis
+  // de cartilagem azul-claros encostando em carne vermelha escura, sem transição), e as outras
+  // duas já eram tapadas por um pilar — t=38,8 leva `mesaMar`, t=109 leva `mesa`.
+  //
+  // ⚠️ `mesa3` E NÃO `mesa`: o pilar é a arte do lugar para ONDE se entra (spec de 06/09), e para
+  // dentro do duto entra-se em carne. A `mesa3` é a única das cinco com tendão vermelho-arroxeado
+  // sobre pedra escura — ela faz a ponte entre o azul de B e o vermelho de C. A `mesa` de aço
+  // plantaria metal no meio da única câmara onde *"o metal acabou"*.
+  //
+  // ⚠️ E ELE NÃO VIRA OBSTÁCULO NO DUTO, apesar de `no duto não nasce mesa`: a junta é DECORAÇÃO
+  // (ver `Moldura.JUNTA_ESCALA`) — sem corpo, sem mordida, e sobe só 5px acima da superfície,
+  // dentro dos 8px da `FOLGA`. Quem fecha o caminho aqui continua sendo só as portas.
+  { t: 68, type: 'cenario', key: 'paintBgF4c', faixa: 'f4FaixaC', junta: 'mesa3' },
   // O DUTO: a faixa CHEIA, E ELA PASSA A MORDER. 54 é o teto da peça de 64px ancorada pela
   // superfície (`Moldura.ESPESSURA_MAX`), e a partir daqui a mesa vira parede — a trava dos 8px
   // apara o resto sozinha enquanto o corredor existir.

@@ -11,7 +11,7 @@ import sharp from 'sharp';
 const PARADAS = [
   { t: 7, nome: 'A · a doca engolida' },
   { t: 45, nome: 'B · a garganta' },
-  { t: 74, nome: 'C · o duto (borda de B, herdada)' },
+  { t: 74, nome: 'C · o duto (a faixa grossa, 128x80)' },
   { t: 111, nome: 'D · o nucleo' },
 ];
 

@@ -177,9 +177,17 @@ ok(
   camaras.length === 1,
   `⭐ os 8 segmentos são todos da MESMA câmara (${JSON.stringify(camaras)})`,
 );
+// ⚠️ A ALTURA SAI DA CÂMARA, E NÃO DE UM LITERAL. Este assert nasceu cravado em `128x64`, e foi ele
+// que segurou a arte da câmara C de 12/09 até o M4 — que é exatamente o trabalho dele. A peça da C é
+// a "faixa grossa" do duto (128×80) e as outras três são 128×64: um número só ou reprova a peça
+// CERTA da C, ou aprova uma peça fina instalada onde devia estar a grossa. A tabela deixa o assert
+// cobrando o que ele sempre cobrou — a peça instalada é a peça desenhada, sem esticar nem encolher —
+// sabendo agora que peça esperar de cada lugar.
+const ALTURA_DA_CAMARA = { A: 64, B: 64, C: 80, D: 64 };
+const dimEsperada = `128x${ALTURA_DA_CAMARA[camaras[0]] ?? 64}`;
 ok(
-  faixa.dims.length === 1 && faixa.dims[0] === '128x64',
-  `as dimensões da faixa batem com a arte — 128×64, sem esticar nem encolher (${JSON.stringify(faixa.dims)})`,
+  faixa.dims.length === 1 && faixa.dims[0] === dimEsperada,
+  `as dimensões da faixa batem com a arte da câmara ${camaras[0]} — ${dimEsperada}, sem esticar nem encolher (${JSON.stringify(faixa.dims)})`,
 );
 ok(
   faixa.desviosChao.every((d) => d === 0),
@@ -563,14 +571,19 @@ const colada = await page.evaluate(() => {
     bandas.push(c - t);
     folgas.push(c - (v + gap / 2), (v - gap / 2) - t);
   }
-  // A peça tem 64px; onde a parede passa disso, quem continua até a borda é a SAIA.
+  // A peça vai de 64px (A, B e D) a 80px (C, a faixa grossa do duto); onde a parede passa disso,
+  // quem continua até a borda é a SAIA.
+  //
+  // ⚠️ A ALTURA SAI DO PRÓPRIO SEGMENTO (`displayHeight`), nunca de um literal — e é esta linha que
+  // faz o bloco inteiro valer no M4. Com o 64 cravado aqui a sonda reprovaria a saia CERTA da
+  // câmara C por 16px, e alguém acabaria "consertando" o motor para agradar a sonda.
   const saias = s.children.list.filter((o) => o.name === 'saiaChao' || o.name === 'saiaTeto');
   const buracos = [];
   const desalinhadas = [];
   for (const seg of s.children.list.filter((o) => o.name === 'faixaChao')) {
     const x = Math.round(seg.x + 64);
     if (x < 0 || x > 384) continue;
-    const fim = seg.y + 64;                     // onde a peça do chão termina
+    const fim = seg.y + seg.displayHeight;      // onde a peça do chão termina
     const e = saias.find((o) => o.name === 'saiaChao' && Math.abs(o.x - seg.x) < 1);
     if (fim < 216 && (!e || !e.visible || e.y > fim || e.y + e.displayHeight < 216)) buracos.push({ x, fim });
     // ⚠️ A EMENDA TEM DE SER EXATA, e é um assert separado do buraco de propósito: uma saia 1px
@@ -585,7 +598,7 @@ const colada = await page.evaluate(() => {
   for (const lado of ['Chao', 'Teto']) {
     for (const seg of s.children.list.filter((o) => o.name === `faixa${lado}`)) {
       const e = saias.find((o) => o.name === `saia${lado}` && Math.abs(o.x - seg.x) < 1);
-      const precisa = lado === 'Chao' ? seg.y + 64 < 216 : seg.y - 64 > 0;
+      const precisa = lado === 'Chao' ? seg.y + seg.displayHeight < 216 : seg.y - seg.displayHeight > 0;
       if (!e || e.visible !== precisa) erradas.push({ lado, x: Math.round(seg.x), precisa, acesa: e?.visible });
     }
   }
@@ -643,6 +656,47 @@ ok(
 ok(
   colada.buracos.length === 0,
   `a parede vai da superfície até a borda da tela, sem fresta (${colada.buracos.length} buracos: ${JSON.stringify(colada.buracos)})`,
+);
+
+// ─── A CÂMARA C VESTE A PRÓPRIA PELE, E O TRAÇO ACESO CONTINUA NA SUPERFÍCIE ───
+//
+// ⚠️ ESTE BLOCO É O PEDIDO DELE DE 20/09 VIRADO EM ASSERT: *"troque a arte da borda, mas deixe o
+// acabamento da linha de moldura"*. No duto esse acabamento é o FIO — a linha acesa na superfície
+// que MORDE —, e ele é posicionado pela mesma `superficieChao` da placa, não pela arte. Ou seja: a
+// altura da peça é justamente a única coisa de que o fio não depende, e é exatamente por isso que
+// a troca de 64 para 80 tem de ser medida com os dois no mesmo instante. Se um dia alguém
+// posicionar o fio a partir do rodapé da peça, é aqui que isso aparece.
+//
+// ⚠️ E O PRIMEIRO ASSERT É O ÚNICO LUGAR DA SONDA QUE VÊ A CÂMARA C. Os asserts de textura lá de
+// cima medem a fase em t≈32 — a doca —, então até o M4 nada aqui olhava para o duto vestido.
+const peleC = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const segs = s.children.list.filter((o) => o.name === 'faixaChao');
+  const fios = s.children.list.filter((o) => o.name === 'fioChao');
+  const desvios = [];
+  for (const seg of segs) {
+    const fio = fios.find((o) => Math.abs(o.x - seg.x) < 1);
+    if (fio && fio.visible) desvios.push(Math.round(fio.y - seg.y));
+  }
+  return {
+    texturas: [...new Set(segs.map((o) => o.texture.key))].sort(),
+    dims: [...new Set(segs.map((o) => `${o.width}x${o.height}`))],
+    acesos: fios.filter((o) => o.visible).length,
+    desvios,
+  };
+});
+console.log('peleC    ', JSON.stringify(peleC));
+ok(
+  peleC.texturas.length > 0 && peleC.texturas.every((k) => /^f4FaixaCd*$/.test(k)),
+  `⭐ no duto a borda é a arte da CÂMARA C, e não mais a herdada da garganta (${JSON.stringify(peleC.texturas)})`,
+);
+ok(
+  peleC.dims.length === 1 && peleC.dims[0] === '128x80',
+  `a faixa grossa entrou INTEIRA — 128×80, sem crop e sem escala (${JSON.stringify(peleC.dims)})`,
+);
+ok(
+  peleC.acesos > 0 && peleC.desvios.every((d) => d === 0),
+  `⭐ o acabamento aceso continua EXATAMENTE na superfície depois da troca de arte (${peleC.acesos} fios, desvios=${JSON.stringify(peleC.desvios)})`,
 );
 
 // ─── AS PORTAS: o duto deixa de ser uma passagem estreita ───
