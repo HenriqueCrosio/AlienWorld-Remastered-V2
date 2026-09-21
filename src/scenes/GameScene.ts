@@ -258,7 +258,14 @@ export class GameScene extends Phaser.Scene {
     // é a `Moldura` que sabe — deduzi-la do topo da criatura fazia o cano FLUTUAR, o mesmo defeito
     // que as passarelas levaram em 13/09 (*"terminaram com o problema do início das passarelas
     // flutuando"*).
-    this.esfincter = new Esfincter(this, this.fx, (x) => this.moldura.superficieTetoEm(x));
+    this.esfincter = new Esfincter(
+      this,
+      this.fx,
+      (x) => this.moldura.superficieTetoEm(x),
+      // ⚠️ O MEIO DAS DUAS SUPERFÍCIES, e não o `vaoEm`: o corredor é ASSIMÉTRICO em volta da linha
+      // nominal (relevos diferentes nas duas bandas). Ver o `meioEm` do `Esfincter`.
+      (x) => (this.moldura.superficieTetoEm(x) + this.moldura.superficieChaoEm(x)) / 2,
+    );
     this.weapons = new WeaponSystem(this);
     this.enemies = new EnemySystem(this, this.stage.id, this.fx);
     this.pickups = new PickupSystem(this);

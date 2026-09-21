@@ -64,7 +64,7 @@ const ler = () =>
       anim: p.anims?.currentAnim?.key ?? null,
       escala: p.scaleX,
       dims: `${p.width}x${p.height}`,
-      hp: p.getData('hp'),
+      hpInfinito: p.getData('hp') === Infinity,
       inerte: p.getData('inerte') === true,
       solido: s.terrain.constructor.solido(p),
       depth: p.depth,
@@ -72,9 +72,15 @@ const ler = () =>
       // Sobra = quanto da peça passa da borda do corredor. Negativo = FRESTA por onde contornar.
       sobraCima: Math.round(p.y - p.displayHeight / 2 - teto) * -1,
       sobraBaixo: Math.round(chao - (p.y + p.displayHeight / 2)) * -1,
-      centrada: Math.abs(Math.round(p.y - vao)) <= 1,
+      // ⚠️ CENTRADA ENTRE AS DUAS SUPERFÍCIES, NÃO NO `vaoEm`. O corredor é assimétrico em volta
+      // da linha nominal (a `Moldura` soma relevos diferentes às duas bandas), e esta peça não tem
+      // folga para absorver isso. Ver o `meioEm` do `Esfincter`.
+      centrada: Math.abs(Math.round(p.y - (teto + chao) / 2)) <= 1,
+      desvioDoNominal: Math.round(p.y - vao),
       gas: s.children.list.filter((o) => o.name === 'f4Gas').length,
       canoY: cano ? Math.round(cano.y) : null,
+      canoDims: cano ? `${cano.width}x${cano.height}` : null,
+      canoEscala: cano ? cano.scaleX : null,
       tetoY: Math.round(teto),
       denso: s.esfincter?.denso === true,
     };
@@ -101,8 +107,35 @@ if (viva) {
   ok(viva.anim === 'garganta-viva', `ela RESPIRA, na folha corrigida (anim=${viva.anim})`);
   ok(viva.escala === 1, `entra em escala 1, nunca esticada (${viva.escala})`);
   ok(viva.dims === '97x171', `as dimensões batem com a arte — 97×171 (${viva.dims})`);
-  ok(!Number.isFinite(viva.hp), `bala não a fere: hp infinito (${viva.hp})`);
-  ok(viva.centrada, 'ela nasce CENTRADA no vão, como a porta');
+  // ⚠️ `=== Infinity` LIDO DENTRO DA PÁGINA, não `!isFinite` do lado de cá: `Infinity` vira `null`
+  // ao cruzar o JSON, e `null` também não é finito — o assert antigo passaria com o `hp` AUSENTE.
+  ok(viva.hpInfinito, 'bala não a fere: o hp dela é Infinity');
+  ok(
+    viva.centrada,
+    `ela fica centrada ENTRE AS DUAS SUPERFÍCIES (${viva.desvioDoNominal}px longe da linha nominal)`,
+  );
+  // ⭐ O DISCRIMINADOR DESTE PAR, e ele precisou de DUAS voltas para ficar honesto.
+  //
+  // Sem ele, o assert acima passaria de graça mesmo usando o `vaoEm` — e o defeito que ele existe
+  // para pegar (7px de fresta em cima) voltaria sem ninguém notar.
+  //
+  // ⚠️ A 1ª versão media UM ponto e falhou dizendo "1px de diferença": a assimetria NÃO é
+  // constante, ela varia placa a placa com o relevo. Um ponto não prova nada sobre uma curva.
+  // Agora ele varre o duto e cobra o PIOR ponto.
+  const assimetria = await page.evaluate(() => {
+    const m = window.__game.scene.getScenes(true)[0].moldura;
+    let pior = 0;
+    for (let x = 0; x <= 384; x += 8) {
+      const d = Math.abs(m.vaoEm(x) - (m.superficieTetoEm(x) + m.superficieChaoEm(x)) / 2);
+      if (d > pior) pior = d;
+    }
+    return Math.round(pior);
+  });
+  ok(
+    assimetria >= 3,
+    `⭐ e os dois centros REALMENTE não são o mesmo ponto: o corredor chega a ${assimetria}px de ` +
+      `assimetria ao longo da tela (medido nas 49 colunas)`,
+  );
   ok(
     viva.faixaDepth !== null && viva.depth < viva.faixaDepth,
     `⭐ as pontas dela ficam ATRÁS da borda (peça ${viva.depth} < faixa ${viva.faixaDepth})`,
@@ -112,11 +145,20 @@ if (viva) {
     `ela TAPA o vão, sem fresta (sobra ${viva.sobraCima}px em cima, ${viva.sobraBaixo}px embaixo)`,
   );
   ok(viva.gas === 1, 'a nuvem de gás está plantada');
-  // ⚠️ O CANO PENDURA NA PAREDE, não no topo da criatura. Deduzi-lo do sprite dela o fazia
-  // flutuar a meio corredor — o defeito das passarelas de 13/09.
+  // ⚠️ AS MANGUEIRAS PENDURAM NA PAREDE, não no topo da criatura. Deduzi-las do sprite dela as
+  // fazia flutuar a meio corredor — o defeito das passarelas de 13/09.
+  //
+  // ⚠️ E A PLACA FICA ENTERRADA, NÃO ENCOSTADA. Pedido dele em 21/09; encostada na linha da
+  // superfície ela lia como POUSADA. O assert cobre os dois erros de uma vez: flutuar (y maior que
+  // o teto) e encostar (y igual ao teto). Só o intervalo enterrado passa.
   ok(
-    viva.canoY !== null && Math.abs(viva.canoY - viva.tetoY) <= 1,
-    `o cano do gás ENCOSTA no teto, não flutua (cano ${viva.canoY} · teto ${viva.tetoY})`,
+    viva.canoY !== null && viva.tetoY - viva.canoY >= 2 && viva.tetoY - viva.canoY <= 10,
+    `as mangueiras ficam ENTERRADAS no teto, nem flutuando nem pousadas ` +
+      `(${viva.tetoY - viva.canoY}px dentro da parede)`,
+  );
+  ok(
+    viva.canoDims === '32x44',
+    `as mangueiras são a peça REDUZIDA pela metade, em escala 1 (${viva.canoDims})`,
   );
   ok(!viva.solido || !viva.inerte, 'ela nasce SÓLIDA — quem não atira, bate nela');
 }

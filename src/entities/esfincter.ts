@@ -45,6 +45,20 @@ export class Esfincter {
   /** A folga entre as mangueiras e a criatura, em px. Elas ficam À FRENTE dela. */
   private static readonly CANO_ADIANTE = 62;
 
+  /**
+   * Quantos px da PLACA das mangueiras ficam ENTERRADOS na banda do teto.
+   *
+   * ⚠️ PEDIDO DELE DEPOIS DE JOGAR: *"quero que suba até 'enfiar' alguns pixels da base da
+   * mangueira no teto da borda"*. Encostada exatamente na linha da superfície, a placa lia como
+   * POUSADA na parede — um objeto apoiado, não preso. Enfiada, ela lê como ARRANCADA de dentro
+   * dela, que é a ficção da peça inteira.
+   *
+   * ⚠️ É a mesma correção que a porta levou em `6fc3ac3` e que ele aprovou em 21/09: *"as pontas de
+   * baixo são ângulos mais retos, bom que fiquem escondidas"*. Peça que invade a parede lê
+   * encaixada; peça que encosta lê colada.
+   */
+  private static readonly CANO_ENTERRADO = 5;
+
   private cano?: Phaser.GameObjects.Sprite;
   private nuvem?: Phaser.GameObjects.Sprite;
   private zonaGas?: Phaser.GameObjects.Zone;
@@ -57,6 +71,20 @@ export class Esfincter {
     private readonly fx: Fx,
     /** A linha de BAIXO da faixa do teto naquela coluna. Ver `Moldura.superficieTetoEm`. */
     private readonly tetoEm: (xTela: number) => number,
+    /**
+     * O MEIO GEOMÉTRICO entre as duas superfícies naquela coluna — NÃO o `vaoEm`.
+     *
+     * ⚠️ E A DIFERENÇA ENTRE OS DOIS CUSTOU UMA VOLTA. O `vaoEm` é a linha NOMINAL do corredor, e
+     * o corredor não é simétrico em volta dela: a `Moldura` soma relevos diferentes às duas bandas
+     * (`relevoEm(n, 0)` no chão, `relevoEm(n, 37)` no teto). Medido no ponto onde a sonda falhava:
+     * 92px do nominal até o teto contra 65px até o chão. Centrar a criatura no nominal abria 7px
+     * de fresta EM CIMA e enterrava 20px embaixo — e 7px passa o corpo da nave, que tem 6.
+     *
+     * ⚠️ A PORTA USA O `vaoEm` E ESTÁ CERTA, porque ela tem 112px num vão de 84 a 68: os 14px de
+     * folga de cada lado absorvem a assimetria. Esta peça tem 167px num corredor de ~172 e não
+     * absorve nada. Mesmo problema, folgas diferentes, respostas diferentes.
+     */
+    private readonly meioEm: (xTela: number) => number,
   ) {}
 
   /** A zona que a bala tem de tocar. Some na ignição — a nuvem já pegou fogo. */
@@ -101,7 +129,7 @@ export class Esfincter {
     if (this.scene.textures.exists('f4MangueirasSheet')) {
       const x = criatura.x - Esfincter.CANO_ADIANTE;
       const m = this.scene.add
-        .sprite(x, this.tetoEm(x), 'f4MangueirasSheet')
+        .sprite(x, this.tetoEm(x) - Esfincter.CANO_ENTERRADO, 'f4MangueirasSheet')
         .setOrigin(0.5, 0)
         .setDepth(-0.55)
         .setName('f4Cano');
@@ -145,10 +173,33 @@ export class Esfincter {
     // ⚠️ O TETO É RELIDO A CADA QUADRO, e não guardado: a parede é uma ESCADA de placas de 128px e
     // ainda está recuando quando o cano entra. Um y congelado no nascimento descolaria no primeiro
     // degrau que passasse por baixo dele.
-    this.cano?.setPosition(xc, this.tetoEm(xc));
+    this.cano?.setPosition(xc, this.tetoEm(xc) - Esfincter.CANO_ENTERRADO);
+
+    // ⚠️ ELA SEGUE O MEIO DAS DUAS SUPERFÍCIES, NÃO FICA PARADA NA ALTURA EM QUE NASCEU — e isto é conserto de
+    // um defeito que a sonda pegou, não enfeite.
+    //
+    // O vão é uma CURVA: a linha do meio sobe e desce ao longo do duto. Nascendo centrada em
+    // x=414 e só rolando, a criatura chegava ao meio da tela 6px FORA do centro — e 6px é
+    // exatamente a altura do corpo da nave. A comporta ficava contornável por cima, que é o
+    // defeito que a porta existe para não ter (*"porta que dá para contornar não é porta"*).
+    //
+    // ⚠️ A PORTA NÃO PRECISA DISTO, e a diferença é de FOLGA: ela tem 112px num vão de 84 a 68, ou
+    // seja 14px sobrando de cada lado que absorvem a deriva. A garganta tem 167px num corredor de
+    // 172 — não sobra nada, então qualquer deriva vira fresta.
+    //
+    // ⚠️ E O `reset` ZERA A VELOCIDADE, por isso ela é salva e devolvida. Prop é movido por
+    // velocidade; um `reset` cru pararia a criatura no ar enquanto a parede rola por baixo — o
+    // mesmo defeito que o `body.enable` causaria, pela mesma razão.
+    const corpo = this.criatura.body as Phaser.Physics.Arcade.Body;
+    const vx = corpo.velocity.x;
+    this.criatura.y = this.meioEm(this.criatura.x);
+    corpo.reset(this.criatura.x, this.criatura.y);
+    corpo.setVelocityX(vx);
+
     if (this.acesa) return;
 
     this.relogio += this.scene.game.loop.delta;
+
 
     // ⚠️ A NUVEM ANDA COM A CRIATURA, LIDA DELA A CADA QUADRO. Ela é movida por velocidade como
     // todo prop; dar velocidade PRÓPRIA à nuvem criaria dois relógios que divergem, e uma nuvem

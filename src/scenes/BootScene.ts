@@ -330,7 +330,11 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // ⚠️ E ELAS NÃO CLAREARAM, o que é raro neste gerador. Medido pelo `_instalar-mangueiras.mjs`:
   // 0% dos px acima do teto do quadro parado, nos 9 quadros. O assador fica no lugar mesmo assim —
   // ele é a rede, e regerar sem ele traria o estouro de volta sem ninguém notar.
-  f4MangueirasSheet: { path: 'sprites/f4-mangueiras-sheet.png', w: 64, h: 88 },
+  // ⚠️ 32×44, METADE DA FONTE — pedido dele depois de jogar (*"diminua quase pela metade do
+  // tamanho do sprite"*): a 64×88 elas competiam com a criatura. A redução é por 2 exato, que é o
+  // único fator que mapeia 4 px em 1 sem inventar cor; 0,55 ou 0,6 borrariam a linha do metal.
+  // Assada no `_instalar-mangueiras.mjs`, então a peça vive em ESCALA 1 no jogo.
+  f4MangueirasSheet: { path: 'sprites/f4-mangueiras-sheet.png', w: 32, h: 44 },
   f4GasSheet: { path: 'sprites/f4-gas-sheet.png', w: 128, h: 176 },
   f4ConeSheet: { path: 'sprites/f4-cone-sheet.png', w: 256, h: 176 },
   f4GoreSheet: { path: 'sprites/f4-gore-sheet.png', w: 24, h: 24 },

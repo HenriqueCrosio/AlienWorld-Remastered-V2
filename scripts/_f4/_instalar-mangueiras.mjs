@@ -14,6 +14,15 @@
 import sharp from 'sharp';
 
 const SAIDA = 'public/sprites/f4-mangueiras-sheet.png';
+
+// ⚠️ A PEÇA SAI PELA METADE, E A METADE EXATA É ESCOLHA DE PIXEL ART, não arredondamento. Ele
+// pediu *"quase pela metade"* depois de jogar — a 64×88 as mangueiras competiam com a criatura. A
+// redução por 2 é a única que mapeia 4 px da fonte em 1 sem inventar cor: qualquer fator
+// quebrado (0,55 · 0,6) borra a linha do metal e o pixel deixa de cair na grade.
+//
+// ⚠️ E REDUZIR PODE, AMPLIAR NUNCA — a lei da resolução, cravada em 06/09. Esta peça nasceu 64×88
+// e vive a 32×44; se um dia precisar ser maior, REGERA, não estica.
+const DIVISOR = 2;
 const urls = process.argv.slice(2);
 if (urls.length === 0) {
   console.error('uso: node scripts/_f4/_instalar-mangueiras.mjs <url dos quadros, em ordem>');
@@ -63,8 +72,15 @@ for (const [n, u] of urls.entries()) {
     data[i + 2] = Math.round(data[i + 2] * k);
   }
   console.log(`  quadro ${n}: ${((acima / total) * 100).toFixed(1)}% dos px estavam acima do teto`);
-  quadros.push(await sharp(data, { raw: { width: W, height: H, channels: 4 } }).png().toBuffer());
+  quadros.push(
+    await sharp(data, { raw: { width: W, height: H, channels: 4 } })
+      .resize({ width: Math.round(W / DIVISOR), height: Math.round(H / DIVISOR), kernel: 'nearest' })
+      .png()
+      .toBuffer(),
+  );
 }
+W = Math.round(W / DIVISOR);
+H = Math.round(H / DIVISOR);
 
 await sharp({
   create: { width: W * quadros.length, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
