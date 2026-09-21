@@ -39,8 +39,8 @@ export class Esfincter {
   /** Quantos pedaços de gore partem para dentro do núcleo. */
   private static readonly PEDACOS = 14;
 
-  /** Quantas artes de pedaço a folha tem (ver `_assar-gore.mjs`). */
-  private static readonly GORE_QUADROS = 8;
+  /** Quantas artes de pedaço a folha tem (ver `_instalar-destroco.mjs`). */
+  private static readonly GORE_QUADROS = 7;
 
   /** A folga entre as mangueiras e a criatura, em px. Elas ficam À FRENTE dela. */
   private static readonly CANO_ADIANTE = 62;
@@ -175,26 +175,36 @@ export class Esfincter {
     // degrau que passasse por baixo dele.
     this.cano?.setPosition(xc, this.tetoEm(xc) - Esfincter.CANO_ENTERRADO);
 
-    // ⚠️ ELA SEGUE O MEIO DAS DUAS SUPERFÍCIES, NÃO FICA PARADA NA ALTURA EM QUE NASCEU — e isto é conserto de
-    // um defeito que a sonda pegou, não enfeite.
+    // ⚠️ ELA SEGUE O MEIO DAS DUAS SUPERFÍCIES, NÃO FICA PARADA NA ALTURA EM QUE NASCEU — e isto é
+    // conserto de um defeito que a sonda pegou, não enfeite.
     //
-    // O vão é uma CURVA: a linha do meio sobe e desce ao longo do duto. Nascendo centrada em
-    // x=414 e só rolando, a criatura chegava ao meio da tela 6px FORA do centro — e 6px é
-    // exatamente a altura do corpo da nave. A comporta ficava contornável por cima, que é o
-    // defeito que a porta existe para não ter (*"porta que dá para contornar não é porta"*).
+    // O corredor é uma CURVA e é ASSIMÉTRICO em volta da linha nominal: a `Moldura` soma relevos
+    // diferentes às duas bandas (`relevoEm(n, 0)` no chão, `relevoEm(n, 37)` no teto). Nascendo
+    // centrada e só rolando, a criatura chegava ao meio da tela com 7px de FRESTA em cima — e o
+    // corpo da nave tem 6. A comporta ficava contornável por cima, o defeito que a porta existe
+    // para não ter (*"porta que dá para contornar não é porta"*).
     //
-    // ⚠️ A PORTA NÃO PRECISA DISTO, e a diferença é de FOLGA: ela tem 112px num vão de 84 a 68, ou
-    // seja 14px sobrando de cada lado que absorvem a deriva. A garganta tem 167px num corredor de
-    // 172 — não sobra nada, então qualquer deriva vira fresta.
+    // ⚠️ A PORTA NÃO PRECISA DISTO, e a diferença é de FOLGA: 112px num vão de 84 a 68, ou seja
+    // 14px sobrando de cada lado que absorvem a assimetria. A garganta tem 167px num corredor de
+    // ~172 e não absorve nada. Mesmo problema, folgas diferentes, respostas diferentes.
     //
-    // ⚠️ E O `reset` ZERA A VELOCIDADE, por isso ela é salva e devolvida. Prop é movido por
-    // velocidade; um `reset` cru pararia a criatura no ar enquanto a parede rola por baixo — o
-    // mesmo defeito que o `body.enable` causaria, pela mesma razão.
-    const corpo = this.criatura.body as Phaser.Physics.Arcade.Body;
-    const vx = corpo.velocity.x;
-    this.criatura.y = this.meioEm(this.criatura.x);
-    corpo.reset(this.criatura.x, this.criatura.y);
-    corpo.setVelocityX(vx);
+    // ⚠️ E O AJUSTE É POR DELTA NO `y`, NUNCA UM `body.reset` — a 1ª versão usou `reset` e
+    // CONGELOU a criatura no ponto de nascimento (medido: x parado em 414 por 4s, com velocidade
+    // −84 e `moves: true`). O `reset` reescreve a posição inteira todo quadro e a integração do
+    // Arcade nunca acumula. É o mesmo congelamento que o `body.enable` causaria na lasca da porta,
+    // pela mesma razão: **prop é movido por velocidade, e quem mexe na posição dele atropela isso.**
+    // Mexer só no eixo que precisa mudar deixa o `x` em paz.
+    // ⚠️ SÓ O CORPO, NUNCA O SPRITE JUNTO — a 2ª armadilha deste seguimento. Mexer nos dois faz a
+    // correção ser APLICADA DUAS VEZES: o `postUpdate` do Arcade reescreve a posição do sprite a
+    // partir do corpo depois da cena, então o que eu escrevo no sprite é descartado e o delta é
+    // somado de novo no quadro seguinte. Medido: a criatura oscilava 16px por quadro (y alternando
+    // 115/99/115/99) — em jogo ela VIBRARIA. Quem manda na posição de um prop com corpo é o corpo.
+    //
+    // ⚠️ E A ZONA MORTA DE 1px É CONTRA A ESCADA. A parede é feita de placas de 128px: num degrau a
+    // superfície salta de uma vez, e sem a zona morta a criatura persegue cada arredondamento.
+    const alvoY = this.meioEm(this.criatura.x);
+    const dy = alvoY - this.criatura.y;
+    if (Math.abs(dy) > 1) (this.criatura.body as Phaser.Physics.Arcade.Body).y += dy;
 
     if (this.acesa) return;
 

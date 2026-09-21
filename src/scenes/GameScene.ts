@@ -1307,10 +1307,18 @@ export class GameScene extends Phaser.Scene {
 
     criatura.setData('inerte', true);
     this.score += criatura.getData('score') as number;
+
+    // ⚠️ TROCA DE TEXTURA SECA, NÃO ANIMAÇÃO DE MORTE — e a troca é o pedido dele depois de jogar.
+    // Até aqui ela tocava a `garganta-morta`: 11 quadros em que a boca FECHA e o corpo amolece.
+    // Bonita, e contava a história errada. *"Quero que o player sinta que explodiu a criatura e
+    // rompeu o obstáculo rumo ao núcleo"* — uma carcaça arrombada no mesmo quadro do estouro diz
+    // isso; uma morte lenta diz *ela morreu*.
+    //
+    // ⚠️ É EXATAMENTE O QUE A PORTA FAZ, e é dele também, de 20/09: *"a porta vai precisar partir
+    // ao meio… assim a nave consegue passar e dá a sensação que explodimos uma porta mesmo"*. O
+    // esfíncter fala a mesma língua no mesmo duto.
     criatura.anims.stop();
-    // ⚠️ `garganta-morta`, NÃO `garganta-morte` — a folha com o teto de brilho (ver `BootScene`).
-    // A `garganta-morte` crua fica para a cutscene 3, que está mergeada e aprovada com ela.
-    if (this.anims.exists('garganta-morta')) criatura.play('garganta-morta');
+    if (this.textures.exists('gargantaDestroco')) criatura.setTexture('gargantaDestroco');
   }
 
   /** O mesmo relógio dos props, para os destroços do vácuo. */

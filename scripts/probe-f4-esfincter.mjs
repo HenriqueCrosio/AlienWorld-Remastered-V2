@@ -79,6 +79,10 @@ const ler = () =>
       desvioDoNominal: Math.round(p.y - vao),
       gas: s.children.list.filter((o) => o.name === 'f4Gas').length,
       canoY: cano ? Math.round(cano.y) : null,
+      // ⚠️ O TETO NA COLUNA DELA, NÃO NA DA CRIATURA. A 1ª versão media o teto em `p.x` e acusava
+      // 13px de enterro numa peça posta a 5 — as mangueiras ficam 62px à frente, e a parede é uma
+      // ESCADA de placas de 128px: duas colunas distantes têm superfícies diferentes.
+      canoTetoY: cano ? Math.round(s.moldura.superficieTetoEm(cano.x)) : null,
       canoDims: cano ? `${cano.width}x${cano.height}` : null,
       canoEscala: cano ? cano.scaleX : null,
       tetoY: Math.round(teto),
@@ -110,40 +114,6 @@ if (viva) {
   // ⚠️ `=== Infinity` LIDO DENTRO DA PÁGINA, não `!isFinite` do lado de cá: `Infinity` vira `null`
   // ao cruzar o JSON, e `null` também não é finito — o assert antigo passaria com o `hp` AUSENTE.
   ok(viva.hpInfinito, 'bala não a fere: o hp dela é Infinity');
-  ok(
-    viva.centrada,
-    `ela fica centrada ENTRE AS DUAS SUPERFÍCIES (${viva.desvioDoNominal}px longe da linha nominal)`,
-  );
-  // ⭐ O DISCRIMINADOR DESTE PAR, e ele precisou de DUAS voltas para ficar honesto.
-  //
-  // Sem ele, o assert acima passaria de graça mesmo usando o `vaoEm` — e o defeito que ele existe
-  // para pegar (7px de fresta em cima) voltaria sem ninguém notar.
-  //
-  // ⚠️ A 1ª versão media UM ponto e falhou dizendo "1px de diferença": a assimetria NÃO é
-  // constante, ela varia placa a placa com o relevo. Um ponto não prova nada sobre uma curva.
-  // Agora ele varre o duto e cobra o PIOR ponto.
-  const assimetria = await page.evaluate(() => {
-    const m = window.__game.scene.getScenes(true)[0].moldura;
-    let pior = 0;
-    for (let x = 0; x <= 384; x += 8) {
-      const d = Math.abs(m.vaoEm(x) - (m.superficieTetoEm(x) + m.superficieChaoEm(x)) / 2);
-      if (d > pior) pior = d;
-    }
-    return Math.round(pior);
-  });
-  ok(
-    assimetria >= 3,
-    `⭐ e os dois centros REALMENTE não são o mesmo ponto: o corredor chega a ${assimetria}px de ` +
-      `assimetria ao longo da tela (medido nas 49 colunas)`,
-  );
-  ok(
-    viva.faixaDepth !== null && viva.depth < viva.faixaDepth,
-    `⭐ as pontas dela ficam ATRÁS da borda (peça ${viva.depth} < faixa ${viva.faixaDepth})`,
-  );
-  ok(
-    viva.sobraCima >= 0 && viva.sobraBaixo >= 0,
-    `ela TAPA o vão, sem fresta (sobra ${viva.sobraCima}px em cima, ${viva.sobraBaixo}px embaixo)`,
-  );
   ok(viva.gas === 1, 'a nuvem de gás está plantada');
   // ⚠️ AS MANGUEIRAS PENDURAM NA PAREDE, não no topo da criatura. Deduzi-las do sprite dela as
   // fazia flutuar a meio corredor — o defeito das passarelas de 13/09.
@@ -152,9 +122,9 @@ if (viva) {
   // superfície ela lia como POUSADA. O assert cobre os dois erros de uma vez: flutuar (y maior que
   // o teto) e encostar (y igual ao teto). Só o intervalo enterrado passa.
   ok(
-    viva.canoY !== null && viva.tetoY - viva.canoY >= 2 && viva.tetoY - viva.canoY <= 10,
+    viva.canoY !== null && viva.canoTetoY - viva.canoY >= 2 && viva.canoTetoY - viva.canoY <= 10,
     `as mangueiras ficam ENTERRADAS no teto, nem flutuando nem pousadas ` +
-      `(${viva.tetoY - viva.canoY}px dentro da parede)`,
+      `(${viva.canoTetoY - viva.canoY}px dentro da parede, medido na coluna DELAS)`,
   );
   ok(
     viva.canoDims === '32x44',
@@ -171,6 +141,71 @@ const vazando = await page.evaluate(() => {
 ok(
   !vazando.denso && !vazando.acendeu,
   'tiro na nuvem VAZANDO não acende — a espera existe de verdade',
+);
+
+  // ⚠️ A COBERTURA É MEDIDA AO LONGO DO TRECHO, NÃO NUM INSTANTE — e a 1ª versão media num
+// instante e mentia nos dois sentidos.
+//
+// A parede é uma ESCADA de placas de 128px: num degrau, 1px de `x` faz a superfície saltar
+// vários px de uma vez, então o seguimento da criatura chega sempre um quadro atrasado na
+// costura. Um instante sorteado pode pegar ela no pior degrau (e reprovar uma peça boa) ou entre
+// dois (e aprovar uma que abre fresta meio segundo depois). O que a peça promete é *nunca abrir
+// fresta*, e isso só se mede varrendo.
+const varredura = await page.evaluate(async () => {
+  const s = window.__game.scene.getScenes(true)[0];
+  let piorCima = 999, piorBaixo = 999, amostras = 0;
+  for (let i = 0; i < 40; i++) {
+    const p = s.terrain.props.getChildren().find((o) => o.active && o.getData('kind') === 'garganta');
+    if (p) {
+      // ⚠️ MESMO SINAL DO ASSERT DO INSTANTE, e a 1ª versão inverteu um dos dois: positivo =
+      // a peça INVADE a parede (bom, ela está enterrada); negativo = sobra corredor descoberto
+      // (fresta). Com os sinais trocados a varredura reprovava uma peça que cobria perfeitamente.
+      const cima = Math.round(s.moldura.superficieTetoEm(p.x) - (p.y - p.displayHeight / 2));
+      const baixo = Math.round((p.y + p.displayHeight / 2) - s.moldura.superficieChaoEm(p.x));
+      if (cima < piorCima) piorCima = cima;
+      if (baixo < piorBaixo) piorBaixo = baixo;
+      amostras++;
+    }
+    await new Promise((r) => setTimeout(r, 40));
+  }
+  return { piorCima, piorBaixo, amostras };
+});
+console.log('varredura', JSON.stringify(varredura));
+ok(varredura.amostras >= 20, `⭐ a varredura pegou a criatura viva (${varredura.amostras} amostras)`);
+ok(
+  varredura.piorCima >= 0 && varredura.piorBaixo >= 0,
+  `ela NUNCA abre fresta ao longo do trecho (pior caso: ${varredura.piorCima}px em cima, ` +
+    `${varredura.piorBaixo}px embaixo)`,
+);
+// ⭐ O DISCRIMINADOR DESTE PAR, e ele precisou de DUAS voltas para ficar honesto.
+//
+// Sem ele, o assert acima passaria de graça mesmo usando o `vaoEm` — e o defeito que ele existe
+// para pegar (7px de fresta em cima) voltaria sem ninguém notar.
+//
+// ⚠️ A 1ª versão media UM ponto e falhou dizendo "1px de diferença": a assimetria NÃO é
+// constante, ela varia placa a placa com o relevo. Um ponto não prova nada sobre uma curva.
+// Agora ele varre o duto e cobra o PIOR ponto.
+const assimetria = await page.evaluate(() => {
+  const m = window.__game.scene.getScenes(true)[0].moldura;
+  let pior = 0;
+  for (let x = 0; x <= 384; x += 8) {
+    const d = Math.abs(m.vaoEm(x) - (m.superficieTetoEm(x) + m.superficieChaoEm(x)) / 2);
+    if (d > pior) pior = d;
+  }
+  return Math.round(pior);
+});
+ok(
+  assimetria >= 3,
+  `⭐ e os dois centros REALMENTE não são o mesmo ponto: o corredor chega a ${assimetria}px de ` +
+    `assimetria ao longo da tela (medido nas 49 colunas)`,
+);
+ok(
+  viva.faixaDepth !== null && viva.depth < viva.faixaDepth,
+  `⭐ as pontas dela ficam ATRÁS da borda (peça ${viva.depth} < faixa ${viva.faixaDepth})`,
+);
+ok(
+  viva.sobraCima >= 0 && viva.sobraBaixo >= 0,
+  `ela TAPA o vão, sem fresta (sobra ${viva.sobraCima}px em cima, ${viva.sobraBaixo}px embaixo)`,
 );
 
 // ⭐ O DISCRIMINADOR. Sem ele o assert acima passaria mesmo se a zona nunca ficasse densa, ou se
@@ -190,7 +225,9 @@ const aceso = await page.evaluate(() => {
   return {
     inerte: p?.getData('inerte') === true,
     solido: s.terrain.constructor.solido(p),
-    anim: p?.anims?.currentAnim?.key ?? null,
+    anim: p?.anims?.isPlaying ? p.anims.currentAnim?.key : null,
+    tex: p?.texture.key ?? null,
+    dims: p ? `${p.width}x${p.height}` : null,
     ponto: s.score - antes,
     cone: s.children.list.filter((o) => o.name === 'f4Cone').length,
     gore: s.children.list.filter((o) => o.name === 'f4Gore').length,
@@ -201,10 +238,23 @@ const aceso = await page.evaluate(() => {
 console.log('ignição  ', JSON.stringify(aceso));
 ok(aceso.inerte, 'a ignição abre a passagem NA HORA — a criatura vira inerte');
 ok(!aceso.solido, '⭐ e o `solido` concorda: a nave atravessa a carcaça');
-ok(aceso.anim === 'garganta-morta', `ela toca a morte CORRIGIDA (anim=${aceso.anim})`);
+// ⚠️ TEXTURA, NÃO ANIMAÇÃO. A morte deixou de ser os 11 quadros de amolecer e virou uma troca
+// seca para a carcaça arrombada, como a `portaLasca`. Se este assert voltar a cobrar uma `anim`,
+// a morte lenta voltou junto — e com ela a leitura *ela morreu* no lugar de *eu rompi isto*.
+ok(
+  aceso.tex === 'gargantaDestroco',
+  `a criatura vira o DESTROÇO no mesmo quadro do estouro (tex=${aceso.tex})`,
+);
+ok(aceso.anim === null, `e não toca animação de morte nenhuma (anim=${aceso.anim})`);
+// ⭐ O DISCRIMINADOR: o destroço tem de ocupar o MESMO quadro da viva, senão a peça salta de
+// lugar e de tamanho na ignição. É a lei da `portaLasca` (64×112, os mesmos da porta).
+ok(
+  aceso.dims === '97x171',
+  `⭐ e o destroço nasce no MESMO quadro da viva, sem saltar (${aceso.dims})`,
+);
 ok(aceso.ponto === 400, `o ponto é agora, não no fim da animação (${aceso.ponto})`);
 ok(aceso.cone === 1, 'o cone entrou');
-ok(aceso.gore === 14, `o gore partiu (${aceso.gore} pedaços)`);
+ok(aceso.gore === 14, `o gore partiu (${aceso.gore} pedaços, sorteados entre 7 artes)`);
 ok(aceso.gas === 0, 'a nuvem SOME na ignição — gás que segue vazando é gás que não pegou fogo');
 ok(aceso.cano === 1, 'o cano FICA: ele não estourou, o que queimou foi o gás que saiu dele');
 

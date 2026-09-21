@@ -337,7 +337,11 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   f4MangueirasSheet: { path: 'sprites/f4-mangueiras-sheet.png', w: 32, h: 44 },
   f4GasSheet: { path: 'sprites/f4-gas-sheet.png', w: 128, h: 176 },
   f4ConeSheet: { path: 'sprites/f4-cone-sheet.png', w: 256, h: 176 },
-  f4GoreSheet: { path: 'sprites/f4-gore-sheet.png', w: 24, h: 24 },
+  // ⚠️ 53×76 POR CÉLULA, E OS PEDAÇOS VÊM DO PIXELLAB — a 1ª versão eram recortes MEUS de 24×24
+  // tirados da criatura por script, e ele reprovou jogando: liam como estilhaço genérico, não como
+  // bicho. Os de agora são placas de casco rasgadas, presas curvas e segmentos do anel de dentes.
+  // Recortados por ILHA (o `_instalar-destroco.mjs`), porque uma grade fixa cortaria caco ao meio.
+  f4GoreSheet: { path: 'sprites/f4-gore-sheet.png', w: 53, h: 76 },
   f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
   f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
@@ -883,6 +887,23 @@ const ART: Record<string, string> = {
   // (`scripts/_f4/_medir-nave.mjs`). A arte promete passagem e a passagem existe — se alguém trocar
   // esta peça por uma de fresta menor, é essa conta que tem de ser refeita.
   portaLasca: 'sprites/f4-porta-lasca.png',
+
+  // O DESTROÇO DA GARGANTA (21/09, 2ª volta do esfíncter): o que sobra dela depois do estouro —
+  // um anel arrombado com a goela arrancada e cotos de dente na borda.
+  //
+  // ⚠️ É A MESMA IDEIA DA `portaLasca`, E PELO MESMO MOTIVO. A morte dela era a `garganta-morta`:
+  // 11 quadros em que a boca FECHA e o corpo amolece. Bonita, e contava a história errada — *ela
+  // morreu*, quando o que ele pediu foi *"que o player sinta que explodiu a criatura e rompeu o
+  // obstáculo rumo ao núcleo"*. Uma troca de textura seca diz isso; uma morte lenta não.
+  //
+  // ⚠️ E ELA NASCE NO QUADRO DA VIVA (97×171), montada pelo `_instalar-destroco.mjs`. O cru veio
+  // 170×170 com 80×134 de conteúdo; colado assim, a peça saltaria de lugar no quadro da ignição.
+  // É a lei da `portaLasca`, que tem exatamente os 64×112 da porta.
+  //
+  // ⚠️ Gerado com `edit_image` A PARTIR DA ORIGINAL — pedido dele: *"a explosão gore precisa vir
+  // de criar no pixellab a partir da imagem original"*. Não é um desenho novo: são os pixels dela,
+  // arrombados.
+  gargantaDestroco: 'sprites/garganta-destroco.png',
 
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',

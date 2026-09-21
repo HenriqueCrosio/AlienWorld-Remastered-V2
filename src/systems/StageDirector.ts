@@ -665,7 +665,19 @@ export const STAGE_4: StageEvent[] = [
   // o tint — *"a linha do duto não existe e o sprite da borda é diferente de todo o duto, quero que
   // fique igual ao do duto"*. O duto agora dura até a câmara D ENTRAR: a parede recua (o `gap` já é
   // 0, então nada cola nela) mas continua sendo o duto, com fio e mordida honestos placa a placa.
-  { t: 106, type: 'moldura', espessura: 16, duto: true },
+  // ⚠️ 26, E NÃO 16 — A PAREDE SEGURA ATÉ O ESFÍNCTER PASSAR, e isto é geometria, não ritmo.
+  //
+  // A criatura tem 171px de quadro. Com espessura 16 o corredor mede 184, e ela fica MENOR que o
+  // vão: medido por varredura na `probe-f4-esfincter`, abria até 14px de fresta em cima e 13
+  // embaixo. Uma comporta contornável não é comporta — e o corpo da nave tem 6px. Ampliar a arte
+  // é proibido (a lei da resolução, 06/09), então quem cede é a parede: 26 dá um corredor de 164,
+  // e a peça sobra dos dois lados.
+  //
+  // ⚠️ E O BEAT MELHOROU DE CARONA. A abertura da câmara era *"a recompensa de ter saído do duto
+  // com vida"* e acontecia ANTES do esfíncter; agora ela acontece DEPOIS de ele estourar. O
+  // jogador arromba a última comporta e a sala se abre — que é exatamente o *"rompeu o obstáculo
+  // rumo ao núcleo"* que ele pediu.
+  { t: 106, type: 'moldura', espessura: 26, duto: true },
   { t: 106.5, type: 'hazard', rate: 0, mix: [] },
   // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
   // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
@@ -676,7 +688,7 @@ export const STAGE_4: StageEvent[] = [
   // O DUTO ACABA AQUI, UMA LINHA ANTES DA CÂMARA — e a ordem importa: o `setDuto(false)` corre
   // antes do `setFaixa`, então a primeira placa D já nasce fria e todas as placas B que restam na
   // tela seguem sendo duto até a emenda, onde o pilar da junta planta a fronteira.
-  { t: 109, type: 'moldura', espessura: 16, duto: false },
+  { t: 109, type: 'moldura', espessura: 26, duto: false },
   // ⚠️ `entrada: 'emenda'` (14/09, 3º teste jogado): o mergulho no escuro de 600ms foi reprovado aqui
   // — *"a transição de fundos, de novo, está muito seca"*. O núcleo se revela atrás do pilar.
   { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD', soFundo: true, junta: 'mesa', entrada: 'emenda' },
@@ -710,6 +722,10 @@ export const STAGE_4: StageEvent[] = [
   // ⚠️ E `t` É UM NÚMERO SOLTO AQUI, verificado: a música do chefão nasce no `spawnBoss`, não
   // numa linha própria do roteiro, então ela espera junto. A cena acontece no SILÊNCIO — que é o
   // que o silêncio antes do chefão serve para fazer em todas as fases.
+  // A CÂMARA ABRE, agora que a comporta caiu. `RAMPA` é 8px/s, então 26→16 leva 1,25s: termina em
+  // t≈115,8 e o chefão (t=118) luta numa arena emoldurada, como sempre lutou.
+  { t: 114.5, type: 'moldura', espessura: 16, duto: false },
+
   { t: 118, type: 'boss' },
 ];
 
