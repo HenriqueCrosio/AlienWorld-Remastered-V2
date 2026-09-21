@@ -103,7 +103,18 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    destroço — e tirá-las de vista deixou sobrar só o que comunica passagem livre. **Esconder o que a
    arte tem de menos orgânico foi ganho duplo: encaixe E leitura.**
 
-   **🟡 O ESFÍNCTER — CONSTRUÍDO EM 21/09, À ESPERA DO TESTE JOGADO. A ÚLTIMA PEÇA DA FATIA 7.**
+   **🟡 O ESFÍNCTER — 2ª VOLTA FEITA EM 21/09, À ESPERA DO TESTE JOGADO. A ÚLTIMA PEÇA DA FATIA 7.**
+   ⚠️ **Ele jogou a 1ª versão e pediu três coisas, todas feitas:** (1) o gore passou a vir do PixelLab
+   A PARTIR DA ORIGINAL — 7 cacos de 26 a 53px no lugar dos meus recortes de 24×24, que liam como
+   estilhaço genérico; (2) o cano virou **mangueiras soltas vazando**, na língua dos cabos do
+   guardião, animadas, reduzidas pela metade e enterradas 5px na parede; (3) a `garganta-morta`
+   (11 quadros de amolecer) saiu, e a criatura vira uma **carcaça arrombada** numa troca de
+   textura SECA, como a `portaLasca` — *"quero que o player sinta que explodiu a criatura e rompeu
+   o obstáculo rumo ao núcleo"*.
+   ⚠️ **E A PAREDE PASSOU A SEGURAR EM 26 ATÉ t=114,5**, o que mudou sem ele pedir: a varredura da
+   sonda achou que a criatura abria até **14px de fresta**, porque ela tem 171px e o corredor
+   chegava a 184 — ela era MENOR que o vão, e o corpo da nave tem 6px. Ampliar é proibido, então
+   cedeu a parede. De carona, a câmara passou a abrir **depois** do arrombamento, não antes.
    A peça MUDOU DE TRABALHO por decisão dele: o `f4VivoC` da spec de 08/09 era decoração de parede e
    herdava o argumento que riscou as irmãs A e B em 19/09. O que o salvou foi uma dívida do próprio
    jogo — o banner de t=88 prometia *ESFÍNCTER FINAL* desde antes das portas existirem, e o que

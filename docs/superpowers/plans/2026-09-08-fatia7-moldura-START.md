@@ -85,7 +85,10 @@ ficaram, o pulso não foi reassado. Arte final, respiração e morte em dois tem
 foi respondida ao contrário:** as pontas de baixo são ângulos mais retos, e **é bom que fiquem escondidas**. O que
 sobra da lasca comunica passagem livre melhor do que a peça inteira comunicava.
 
-**🟡 O ESFÍNCTER — CONSTRUÍDO EM 21/09, À ESPERA DO TESTE JOGADO. É A ÚLTIMA PEÇA DA FATIA 7.**
+**🟡 O ESFÍNCTER — 2ª VOLTA FEITA EM 21/09, À ESPERA DO TESTE JOGADO. É A ÚLTIMA PEÇA DA FATIA 7.**
+
+⚠️ **ELE JÁ JOGOU A 1ª VERSÃO E PEDIU TRÊS COISAS** — gore do PixelLab a partir da original, mangueiras soltas
+no lugar do cano, e que a morte dissesse *arrombei isto* em vez de *ela morreu*. As três estão feitas. Ver o ⏸️.
 
 A peça MUDOU DE TRABALHO, por decisão dele. O `f4VivoC` da spec de 08/09 era decoração de parede (48×48, não
 colide, só respira) e herdava o argumento que riscou as irmãs A e B em 19/09. O que o salvou foi uma dívida que
@@ -120,12 +123,12 @@ empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. As 3 PORTAS
-> foram jogadas e APROVADAS sem ajuste em 21/09. O ESFÍNCTER — a GARGANTA na soleira do núcleo — está
-> construído e commitado, e eu ainda NÃO joguei. Vou jogar e te dar o veredicto. Com ele, a Fatia 7 fecha."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pelo ⏸️. O ESFÍNCTER levou uma
+> 2ª volta em 21/09 com os três pedidos que eu fiz depois de jogar, e está commitado. Vou jogar e te dar o
+> veredicto. Com ele, a Fatia 7 fecha."**
 
-⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé; o que falta é o
-julgamento dele. O roteiro do teste está na seção ⏸️ logo abaixo.
+⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé e commitadas; o que
+falta é o julgamento dele. O roteiro do teste, com as perguntas e o conserto de cada uma, está no ⏸️ abaixo.
 
 ---
 
@@ -151,79 +154,71 @@ duto. Se um dia o duto parecer folgado, é esse o número, e só até 70.
 |---|---|---|
 | ~~a BORDA C~~ | 128×80, com o pilar `mesa3` na costura B→C | ✅ jogada e aprovada em 20/09 (`28b0a14`) |
 | ~~as 3 PORTAS~~ | arte final, respiração e morte em dois tempos | ✅ jogadas e aprovadas em 21/09, **sem ajuste pedido** |
-| ~~o ESFÍNCTER~~ | **mudou de trabalho**: a GARGANTA (97×171) na costura, destrutível, com cano de gás e estouro em cone | 🟡 **construído — à espera do TESTE JOGADO** |
+| ~~o ESFÍNCTER~~ | a GARGANTA (97×171) na costura, destrutível, com mangueiras vazando, estouro em cone e carcaça arrombada | 🟡 **2ª volta feita em 21/09 — à espera do TESTE JOGADO** |
 
 **Depois do esfíncter:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar
 a fatia com merge `--no-ff` de `feat/fase4-visual` em `main`.
 
 ---
 
-## ⏸️ ONDE PARAMOS — O ESFÍNCTER ESPERA O TESTE JOGADO (21/09)
+## ⏸️ ONDE PARAMOS — O ESFÍNCTER, 2ª VOLTA, ESPERA O TESTE JOGADO (21/09)
 
-**A Fatia 7 tem as TRÊS peças do M4 de pé.** A borda C e as portas foram jogadas e aprovadas; o esfíncter está
-construído, commitado e **ele ainda não jogou**. Nada está pendente de código.
+**Ele JOGOU a 1ª versão e pediu três coisas. As três estão feitas e commitadas, e ele ainda NÃO jogou esta.**
+
+> *"o que eu pedi foi a explosão e temos, em cone. Mas a explosão gore precisa vir de criar no pixellab a partir
+> da imagem original. Quero um sprite novo do cano de gás — na verdade, quero mangueiras soltas e soltando o
+> gás, parecidas com a do guardião. Quero que o player sinta que explodiu a criatura e rompeu o obstáculo rumo
+> ao núcleo."*
 
 ### Como jogar
 
-`npm run dev` noutro terminal · `L` leva direto à Fase 4 · o duto começa em **t≈68**, as portas em t=72/82/94, e
-o **esfíncter em t≈110**, na costura onde a parede do duto vira a do núcleo. O chefão agora é **t=118**.
+`npm run dev` · `L` → Fase 4 · o esfíncter chega em **t≈110**, na costura · o chefão agora é **t=118**.
 
-### O que vai acontecer
+O cano quebrado virou **mangueiras soltas** pendurando do teto, vazando · a criatura entra respirando · a nuvem
+engrossa ~1,5s · **qualquer tiro** acende · cone para dentro do núcleo + 7 cacos dela · e ela vira uma
+**carcaça arrombada** no mesmo quadro, que fica rolando · a câmara só abre **depois** disso.
 
-O cano quebrado entra pelo teto vazando gás · a garganta entra com a costura, respirando · a nuvem engrossa por
-~1,5s · **qualquer tiro** acende · o cone dispara para dentro do núcleo e os pedaços dela vão junto · a passagem
-abre NA HORA da ignição, não no fim da animação.
+### O que mudou nesta volta
 
-Se não atirar, ela alcança a nave em ~3,5s e **cobra uma vida**, como as portas.
+| pedido | o que foi feito |
+|---|---|
+| o gore vem do PixelLab, da original | `edit_image` sobre a arte dela → 7 cacos de 26 a 53px (placas rasgadas, presas, segmentos do anel). Os meus recortes de 24×24 saíram |
+| mangueiras soltas vazando, como as do guardião | PixelLab `b82c971d`, animadas em 9 quadros (balançam, a pluma sobe). Reduzidas **pela metade** e **enterradas 5px** na parede, como ele pediu |
+| *"que o player sinta que rompeu o obstáculo"* | a `garganta-morta` (11 quadros de amolecer) saiu. A criatura vira o **destroço** numa troca de textura SECA, como a `portaLasca` |
 
-### As cinco perguntas — e o conserto de cada uma já escrito
+**A peça escolhida por ele entre 7 candidatas:** o `anel` — *"da folha 8 eu gostei do primeiro desenho"*. As duas
+tentativas de abrir o topo dele (a 2ª rodada) foram descartadas por ele.
+
+### As perguntas — e o conserto de cada uma já escrito
 
 | # | a pergunta | se a resposta for "não" |
 |---|---|---|
-| **1** | *a espera do gás engrossando é tensão, ou é tempo morto?* | `Esfincter.VAZANDO_MS` (hoje 1500). É um número, não uma peça |
-| **2** | *o estouro parece grande o bastante para o que ela era?* | reassar o cone mais largo/longo (`_assar-cone.mjs`: a `meia` e o `alcance`). ⚠️ **NÃO** clarear — ele já é a coisa mais quente da tela |
-| **3** | *o gore diz "isso era um bicho", ou lê como estilhaço genérico?* | `Esfincter.PEDACOS` (14) ou o `LADO` do `_assar-gore.mjs` (24px). Os oito pontos de recorte também são escolha, e estão na tabela `PONTOS` |
-| **4** | *ela recorta contra o azul do núcleo, ou some nele?* | ⚠️ **ESTA É A QUE EU MAIS DESCONFIO** — ver logo abaixo |
-| **5** | *o chefão 5s depois ainda chega como chegava?* | o `t: 118` do `StageDirector` volta em direção a 113 |
+| **1** | *agora dá a sensação de ter ARROMBADO a criatura, e não de tê-la matado?* | é o critério da volta inteira. Se ainda não, o próximo passo é a carcaça **afastar-se em duas metades** no motor, não mais arte |
+| **2** | *os 7 cacos dizem "isso era um bicho"?* | `Esfincter.PEDACOS` (14 lançados) ou o piso de 200px do `_instalar-destroco.mjs`, que decide quantas ilhas viram caco |
+| **3** | *as mangueiras ficaram no tamanho certo, e enfiadas o bastante?* | `Esfincter.CANO_ENTERRADO` (5) e o `DIVISOR` do `_instalar-mangueiras.mjs` (2). ⚠️ O divisor só aceita inteiro — ver a lei da redução |
+| **4** | *o gás ficou duplicado?* | a pluma da mangueira é a ORIGEM, a nuvem assada é o acúmulo que você acende. Se poluiu, tiro a nuvem e deixo só a pluma crescendo |
+| **5** | *a câmara abrindo DEPOIS do estouro ficou melhor ou pior?* | ⚠️ **ISTO MUDOU SEM VOCÊ PEDIR** — ver abaixo |
 
-### ⚠️ UMA CORREÇÃO MINHA, E ELA É A PERGUNTA 4
+### ⚠️ O QUE EU MUDEI SEM VOCÊ PEDIR, E POR QUÊ
 
-**Eu te vendi a posição na costura dizendo que "a boca é magenta e o núcleo é azul, então ela recorta". Isso
-estava pela metade.** A medição que eu usei era da BOCA. Abrindo a arte inteira: a boca é magenta, mas o **corpo
-dela é azul-esverdeado escuro** — e o núcleo também é azul. Contra o duto vermelho ela recortaria melhor.
+**A parede segura em espessura 26 até t=114,5, e só então abre para 16.** Antes ela abria em t≈110,75, ou seja,
+ANTES do esfíncter.
 
-O que sobra a favor da costura continua de pé (ela tapa a emenda, tapa o degrau do chão, e a boca acesa segue
-recortando). Mas **se ela sumir no azul, a culpa é desta conta minha**, e o conserto é um `tint` na peça ou
-antecipar a chegada dela para o vermelho do duto. **Não mexi por conta própria: é julgamento seu.**
+Não foi escolha de ritmo: foi geometria. A varredura da sonda achou que a criatura **abria até 14px de fresta**,
+porque ela tem 171px e o corredor chegava a **184** — ela era MENOR que o vão no ponto mais aberto, e o corpo da
+nave tem 6px. Comporta contornável não é comporta. Ampliar a arte é proibido (a lei da resolução), então quem
+cedeu foi a parede.
 
-### O que eu mexi sem você pedir, e por quê
-
-**As animações da garganta estouravam em BRANCO PURO** — o defeito que este projeto já documentou duas vezes
-(*o gerador ignora limite de cor: "pulsar" vira "clarear"*), e que é a razão inteira de o `_assar-porta-nucleo.mjs`
-existir. Medido:
-
-| | px claros (lum > 150) |
-|---|---|
-| `garganta.png` (o estático) | **0,8%** |
-| `garganta-idle-anim-6` | **10,2%** — o miolo não está aceso, está BRANCO |
-| `garganta-morte-anim-3` | **18,2%** — os dentes voltam brancos |
-
-Na cutscene do hangar isso passa (cena clara, ela é um elemento entre muitos). No DUTO, a câmara mais escura das
-quatro, vira a coisa mais brilhante da tela e briga com as veias e com o próprio estouro.
-
-Assei cópias corrigidas em **chaves novas** (`garganta-viva` / `garganta-morta`), com teto de brilho.
-⚠️ **A `garganta-idle` e a `garganta-morte` originais estão INTOCADAS** — a cutscene 3 está mergeada e aprovada
-com elas, e você as aprovou lá. Se preferir o cru aqui também, é trocar a `anim` do `PropKind`.
-
-⚠️ **E a correção precisou ser DIFERENTE nas duas, o que custou uma volta:** no idle o que é claro é a GOELA, e
-puxar a luz de volta ao magenta devolve a cor que o gerador comeu. Na morte o que é claro são os DENTES, e o
-mesmo puxão deixou a criatura com **dentes rosa-choque**. Dente é osso: escurece, não muda de cor.
+**E o beat melhorou de carona:** a abertura da câmara era *"a recompensa de ter saído do duto com vida"*; agora
+ela é a recompensa de ter **arrombado a comporta**. Arromba, e a sala se abre. Se você preferir como era, o
+número é um só (o `espessura` do `t: 106`) — mas aí a fresta volta, e aí a peça precisa de outra resposta.
 
 ### O que NÃO se refaz sem você pedir
 
-- **a criatura e as duas animações**: arte sua, e mexer nelas mexe na **cutscene 3**, que está mergeada e aprovada;
-- **o cano**: `f4-cano2`, peça aprovada, entrou sem uma linha de mudança;
-- **o gore recortado dela**: regerar pedaços traria outra paleta e faria o magenta brigar consigo mesmo.
+- **a criatura e o destroço**: arte dela, e o destroço é a escolha dele entre 7 candidatas;
+- **as duas animações originais** (`garganta-idle` / `garganta-morte`): intocadas, porque a **cutscene 3** as usa
+  e está mergeada e aprovada. As do jogo são cópias corrigidas em chaves novas;
+- **os cacos recortados por ilha**: regerar traria outra paleta.
 
 ---
 
@@ -249,54 +244,58 @@ ESFÍNCTER.**
 
 ---
 
-### 🧭 COMO ABRIR O ESFÍNCTER — a ordem, e o que ler antes
+### 📜 REGISTRO: O QUE O ESFÍNCTER ENSINOU (21/09)
 
-✅ **AS PORTAS JÁ TÊM VEREDICTO (21/09, aprovadas sem ajuste).** O esfíncter é a última peça, e o
-fluxo desta fatia é o de sempre — **brainstorming → spec → plano → implementação → teste jogado dele → merge**.
-Ele é arte dele, não restrição mecânica: abre-se listando o que vai ser gerado e pedindo o aval.
+A seção "como abrir" virou registro — a peça está aberta e construída. O que ela deixou:
 
-⚠️ **E DUAS PEÇAS DO M4 JÁ DEIXARAM O MESMO AVISO, cada uma do seu jeito:** arte com uma LINHA FORTE impõe
-geometria à fase. A veia acesa da borda C obrigou o duto a mudar o ritmo da curva; o núcleo da porta é outra
-linha forte, e obrigou a peça a ir para trás do layer da borda. **O esfíncter é uma peça que ABRE E FECHA numa
-parede que rola** — vale perguntar o que ele vai impor ANTES de gerar, não depois.
+**⚠️ 1 · O AVISO DA LINHA FORTE SE CONFIRMOU PELA TERCEIRA VEZ, e desta vez a arte empurrou o CHEFÃO.** A veia
+da borda C mudou o ritmo da curva do duto; o núcleo da porta empurrou a peça para trás do layer da borda; e a
+garganta, com 171px, não cabia no corredor antes de t≈110 — o `t: 113` do chefão virou `t: 118`, e a espessura da
+parede virou 26. **Nesta fase, decidir a arte É decidir o roteiro.**
 
-⚠️ **E A PORTA DEIXOU UM AVISO PRÓPRIO, que é de código:** a arte final expôs dois defeitos que nenhuma sonda
-pegava — o estouro saindo 56px acima da peça (a porta é o único prop de origem `(0.5, 0.5)`) e um `body.enable`
-que congelaria a lasca. **Peça nova nesta fase mexe no motor mais do que parece.**
+**⚠️ 2 · PEÇA NOVA MEXE NO MOTOR MAIS DO QUE PARECE — e foram TRÊS armadilhas de física, todas a mesma lei.**
+*Prop é movido por VELOCIDADE, e quem mexe na posição dele atropela isso:*
+- um `body.reset()` por quadro **congelou** a criatura no ponto de nascimento (x parado em 414 por 4s, com
+  velocidade −84 e `moves: true`). É o mesmo congelamento que o `body.enable` causaria na lasca da porta;
+- mexer **no sprite E no corpo** aplica a correção DUAS vezes, porque o `postUpdate` reescreve o sprite a partir
+  do corpo: ela oscilava 16px por quadro e teria VIBRADO em jogo;
+- o corredor é **assimétrico** em volta do `vaoEm` (a `Moldura` soma relevos diferentes às duas bandas), então
+  uma peça sem folga se centra entre as **superfícies**, não na linha nominal. ⚠️ **A porta usa o `vaoEm` e está
+  CERTA** — ela tem 14px de folga de cada lado que absorvem a assimetria. Mesmo problema, folgas diferentes,
+  respostas diferentes.
 
-**O que ler, na ordem:**
+**⚠️ 3 · ASSERT DE INSTANTE MENTE NUMA PAREDE QUE É ESCADA.** A fresta foi medida num instante e passou; a
+**varredura** de 40 amostras achou 14px de abertura. A parede é feita de placas de 128px — num degrau, 1px de `x`
+faz a superfície saltar vários px de uma vez. Um instante sorteado aprova peça que abre fresta meio segundo
+depois. **Peça que promete "nunca" se mede varrendo.**
 
-1. esta 🚦 e o ✅ do veredicto das portas (o estado das três peças do M4: duas fechadas, o esfíncter aberto);
-2. **`## ⛏️ O QUE FALTA CONSTRUIR — a câmara C`**, mais abaixo neste arquivo — o registro de como a borda C
-   entrou, e os números que NÃO se mexe (o `ESPESSURA_MAX` em 54, o `PASSO_MAX` em 14);
-3. **`## ⛏️ O DEGRAU DO DUTO — o que saiu e o que NÃO sai`** — a `Moldura` já levou uma rodada de "faixa que
-   muda de espessura", e as leis de lá valem aqui;
-4. a spec de origem: `docs/superpowers/specs/2026-09-08-fatia7-moldura-fase4-design.md`.
+**⚠️ 4 · E DOIS ERROS MORAVAM NA PRÓPRIA SONDA**, achados porque o resultado discordou do olho: o sinal da
+varredura estava invertido num dos dois lados (reprovava uma peça que cobria perfeitamente), e o enterro das
+mangueiras era medido na coluna da CRIATURA, 62px longe — outra placa, outra superfície. **Quando a régua
+discorda da imagem, desconfie da régua primeiro.**
 
-**O que já existe e não se refaz:**
+**⚠️ 5 · O GERADOR CLAREIA, E AGORA TEM REDE.** A `garganta-idle` voltava com **10,2%** de px claros contra
+**0,8%** do estático — o miúlo não estava aceso, estava BRANCO. Assadas cópias corrigidas em chaves novas
+(`garganta-viva` / `garganta-morta`), com as originais intocadas porque a **cutscene 3** as usa.
+⚠️ **E a correção teve de ser diferente nas duas:** no idle o claro é a GOELA (puxa para o magenta); na morte o
+claro são os DENTES, e o mesmo puxão os deixou rosa-choque. **Dente é osso: escurece, não muda de cor.**
 
-| coisa | onde |
+**⚠️ 6 · O QUE FEZ A MORTE FUNCIONAR JÁ ESTAVA ESCRITO NO CÓDIGO.** O `BootScene.ts` guardava o pedido dele de
+20/09 sobre a porta: *"partir ao meio… assim a nave consegue passar e dá a sensação que explodimos uma porta
+mesmo"*. É a mesma frase do pedido de 21/09 sobre o esfíncter. **A solução estava a uma busca de distância** —
+troca de textura seca para uma carcaça arrombada, nunca animação de morte.
+
+**As ferramentas que ficaram:**
+
+| script | o que faz |
 |---|---|
-| a borda C, instalada em 20/09 e aprovada | `public/sprites/f4-faixa-c.png` (128×80); o cru em `scripts/_f4/_faixa-C-v.png` |
-| o pilar da costura B→C, aprovado em 20/09 | `junta: 'mesa3'` no `cenario` de t=68 |
-| as 3 portas, com arte final, respiração e morte em dois tempos | `f4-porta.png` · `f4-porta-lasca.png` · `f4-porta-nucleo-sheet.png` (✅ aprovadas em 21/09) |
-| o assador do pulso da porta — quem impõe o limite de cor que o gerador ignora | `scripts/_f4/_assar-porta-nucleo.mjs` |
-| ~~as portas provisórias~~ | `f4-porta-prov.png` fica no disco, como a faixa e a mesa: a regra de saída é dele |
-| o motor da faixa, com `setFaixa` e a troca pelo evento `cenario` | `src/systems/Moldura.ts` |
-| as sondas que têm de continuar verdes | `probe-f4-moldura`, `probe-f4-visual`, `probe-stage4`, `probe-f4-golfinho` |
-
-⚠️ **O assert de dimensão da sonda deixou de ser um literal em 20/09** — hoje é uma tabela por câmara
-(A/B/D=64, C=80) em `scripts/probe-f4-moldura.mjs`, e há um bloco novo (`peleC`) que é o único lugar da sonda
-que olha para o duto vestido. O parágrafo abaixo fica como registro de por que ele existia cravado —
-se a decisão for ensinar a faixa grossa à `Moldura`, ele muda junto, e é ele que avisa se alguém instalar a peça
-errada.
-
-**As três leis desta fatia que mais pesam no M4:**
-
-- **fundo pintado é assado em 384×216 e escala 1** — reduzir pode, AUMENTAR nunca;
-- **efeito de cenário se assa em pixel na resolução nativa**, com a paleta do vizinho; `Graphics` em tempo de
-  jogo lê como "gerado" (a lei que a rodada 5b do predador pagou);
-- **a arena do chefão é só pintura** — nenhuma peça de cenário entra lá.
+| `_f4/_medir-fresta.mjs` | quanto de passagem a arte de um destroço promete, varrendo LINHAS com tolerância para cabo pendurado |
+| `_f4/_instalar-destroco.mjs` | monta o destroço no quadro da viva e recorta os cacos por ILHA |
+| `_f4/_instalar-mangueiras.mjs` | baixa a animação, aplica o teto de brilho e reduz por inteiro |
+| `_f4/_assar-garganta-viva.mjs` | o teto de brilho das duas animações da criatura |
+| `_f4/_folha-candidatas.mjs` | folha de contato a partir de URLs do PixelLab, **sobre o tom do vizinho** |
+| `_f4/_ver-esfincter.mjs` | a cena inteira, da chegada ao gore |
+| `probe-f4-esfincter.mjs` | 30 asserts, com o par discriminador em cada "não aconteceu nada" |
 
 ---
 
@@ -1830,7 +1829,8 @@ BLOCO B · B2 — A POSIÇÃO  ✅ FECHADO EM 20/09, SEM CÓDIGO: a posição de
 M4 — A CÂMARA C           🟨 ◄ PEGUE AQUI · a borda C grossa (128×80) + o pilar da costura B→C
                              ✅ JOGADOS E APROVADOS em 20/09. As 3 PORTAS com arte final, respiração
                              e morte em dois tempos ✅ JOGADAS E APROVADAS em 21/09, SEM AJUSTE.
-                             Falta SÓ o esfíncter (`f4VivoC`, 48×48 em 8 quadros) — a última
+                             O ESFÍNCTER (a GARGANTA na costura) está na 2ª volta, construída
+                             em 21/09 e à espera do teste jogado — a última
                              peça da Fatia 7 inteira
 M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprovada)
 ```
