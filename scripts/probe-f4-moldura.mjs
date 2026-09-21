@@ -987,12 +987,24 @@ const mesaNoDuto = await page.evaluate(() => {
 });
 ok(mesaNoDuto === 0, `no duto não nasce mesa — quem fecha o caminho são as portas (${mesaNoDuto} mesas)`);
 
-// ─── A REABERTURA: a parede recua no silêncio, e o chefão luta numa arena emoldurada ───
-const e112 = await espessuraEm(112);
+// ─── A REABERTURA: a parede recua, e o chefão luta numa arena emoldurada ───
+//
+// ⚠️ A AMOSTRA SAIU DE t=112 PARA t=116,5 EM 21/09, e a razão é o ESFÍNCTER. A parede passou a
+// SEGURAR em espessura 26 até t=114,5 porque a garganta tem 171px e, com espessura 16, o corredor
+// mede 184 — ela ficava MENOR que o vão e abria até 14px de fresta (medido por varredura na
+// `probe-f4-esfincter`). Comporta contornável não é comporta.
+//
+// ⚠️ O QUE O ASSERT COBRA NÃO MUDOU: a parede TEM de estar recuada quando o chefão nasce, senão
+// ele luta dentro de um duto em vez de uma arena. Mudou só QUANDO, porque o chefão também mudou
+// (t=113 → t=118). A rampa é 8px/s, então 26→16 leva 1,25s a partir de 114,5 e termina em ≈115,8.
+const eArena = await espessuraEm(116.5);
 const arena = await caixas();
-console.log('espessura', JSON.stringify(e112));
+console.log('espessura', JSON.stringify(eArena));
 console.log('mordida  ', JSON.stringify(arena));
-ok(e112 && e112.e <= 20, `t=112s: a parede recuou antes do chefão (${e112 && e112.e}px, esperado ~16)`);
+ok(
+  eArena && eArena.e <= 20,
+  `t=116,5s: a parede recuou antes do chefão de t=118 (${eArena && eArena.e}px, esperado ~16)`,
+);
 ok(arena.duto === false, `t=${arena.t}s: a arena do núcleo não morde (duto=${arena.duto})`);
 
 console.log(falhas === 0 ? '\n✔ A MOLDURA ESTÁ DE PÉ' : `\n✘ ${falhas} asserts falharam`);
