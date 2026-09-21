@@ -42,10 +42,10 @@ export class Esfincter {
   /** Quantas artes de pedaço a folha tem (ver `_assar-gore.mjs`). */
   private static readonly GORE_QUADROS = 8;
 
-  /** A folga entre a boca do cano e a criatura, em px. O cano fica À FRENTE dela. */
+  /** A folga entre as mangueiras e a criatura, em px. Elas ficam À FRENTE dela. */
   private static readonly CANO_ADIANTE = 62;
 
-  private cano?: Phaser.GameObjects.Image;
+  private cano?: Phaser.GameObjects.Sprite;
   private nuvem?: Phaser.GameObjects.Sprite;
   private zonaGas?: Phaser.GameObjects.Zone;
   private criatura?: Phaser.Physics.Arcade.Sprite;
@@ -82,9 +82,14 @@ export class Esfincter {
     // um asset sem relação nenhuma com a arte"*). O jogador chega no cano ANTES da criatura, vê
     // de onde o gás sai, e só então encontra o que vai estourar.
     //
-    // ⚠️ E O CANO NÃO PRECISOU DE VERSÃO QUEBRADA: o `f4Cano2` já pendura de uma placa de teto,
-    // com volante e um risco âmbar de pressão. Um cano com gás jorrando É um cano quebrado — a
-    // pluma conta a história inteira, e uma arte nova só teria como destoar.
+      // ⚠️ SÃO MANGUEIRAS SOLTAS, NÃO UM CANO — e a 1ª versão errou isto. O `f4Cano2` é um cano
+    // INTEIRO com volante: ele lê como encanamento em ordem, e nada em ordem sobrevive numa parede
+    // que está sendo digerida. Pedido dele depois de jogar: *"quero mangueiras soltas e soltando o
+    // gás, parecidas com a do guardião"*. São os cabos arrancados do guardião, mesma língua.
+    //
+    // ⚠️ E A ARTE JÁ VAZA SOZINHA (9 quadros: elas balançam e a pluma sobe). A nuvem grande continua
+    // existindo porque é ELA que o tiro acende — mas agora o gás tem ORIGEM, e não é mais um efeito
+    // colado no ar.
     //
     // ⚠️ ANCORADO NA PAREDE, PELA `Moldura`, e não no topo da criatura. Deduzir o teto do sprite
     // dela fazia o cano FLUTUAR a meio corredor — o mesmo defeito que as passarelas levaram em
@@ -93,13 +98,15 @@ export class Esfincter {
     //
     // ⚠️ E `setOrigin(0.5, 1)`: o cano pendura, então o que encosta na parede é a placa de CIMA
     // dele. Ancorar pelo topo o deixaria pendurado a partir do vazio.
-    if (this.scene.textures.exists('f4Cano2')) {
+    if (this.scene.textures.exists('f4MangueirasSheet')) {
       const x = criatura.x - Esfincter.CANO_ADIANTE;
-      this.cano = this.scene.add
-        .image(x, this.tetoEm(x), 'f4Cano2')
+      const m = this.scene.add
+        .sprite(x, this.tetoEm(x), 'f4MangueirasSheet')
         .setOrigin(0.5, 0)
         .setDepth(-0.55)
         .setName('f4Cano');
+      if (this.scene.anims.exists('f4-mangueiras')) m.play('f4-mangueiras');
+      this.cano = m;
     }
 
     // A nuvem nasce ENTRE o cano e a criatura, puxada para o lado do cano: o gás sai dali.

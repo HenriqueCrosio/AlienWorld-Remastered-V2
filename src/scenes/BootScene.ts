@@ -243,6 +243,9 @@ const SHEET_ANIMS: {
   // do estouro, enquanto a carcaça rola pelo duto. No cru os dentes voltam BRANCOS (18,2% de px
   // claros contra 0,8% do estático) e a criatura morta lia mais clara que viva.
   { key: 'garganta-morta', sheet: 'gargantaMortaSheet', frames: 11, frameRate: 5, loop: false },
+  // AS MANGUEIRAS a 7/s: elas BALANÇAM, não tremem. O gesto é de coisa pendurada num sopro lento,
+  // e acelerar aqui as transformaria em algo agitado — que é o oposto de uma parede vazando.
+  { key: 'f4-mangueiras', sheet: 'f4MangueirasSheet', frames: 9, frameRate: 7 },
   { key: 'f4-gas', sheet: 'f4GasSheet', frames: 8, frameRate: 8 },
   // O CONE a 14/s e UMA vez só: 10 quadros = 0,71s. Rápido, porque ele é o pagamento, não a
   // espera. ⚠️ `loop: false` — um estouro em laço é um incêndio, e a passagem já está aberta.
@@ -316,6 +319,18 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // ⚠️ A `garganta-idle` ORIGINAL FICA INTOCADA: a cutscene 3 está mergeada e aprovada com ela.
   gargantaVivaSheet: { path: 'sprites/garganta-viva-sheet.png', w: 97, h: 171 },
   gargantaMortaSheet: { path: 'sprites/garganta-morta-sheet.png', w: 97, h: 171 },
+  // AS MANGUEIRAS DA SOLEIRA (21/09, 2ª volta): substituem o `f4Cano2`, que era um cano INTEIRO e
+  // lia como encanamento em ordem. Pedido dele: *"quero mangueiras soltas e soltando o gás,
+  // parecidas com a do guardião"* — e é a mesma língua mesmo, os cabos arrancados do guardião.
+  //
+  // ⚠️ A ARTE JÁ TRAZ A PLUMA. O gás não é só o `f4GasSheet` colado por cima: a peça vaza sozinha,
+  // então a NUVEM tem de onde sair. Foi a queixa contra o portão da cutscene 3 que ensinou isto —
+  // efeito sem causa lê como adesivo.
+  //
+  // ⚠️ E ELAS NÃO CLAREARAM, o que é raro neste gerador. Medido pelo `_instalar-mangueiras.mjs`:
+  // 0% dos px acima do teto do quadro parado, nos 9 quadros. O assador fica no lugar mesmo assim —
+  // ele é a rede, e regerar sem ele traria o estouro de volta sem ninguém notar.
+  f4MangueirasSheet: { path: 'sprites/f4-mangueiras-sheet.png', w: 64, h: 88 },
   f4GasSheet: { path: 'sprites/f4-gas-sheet.png', w: 128, h: 176 },
   f4ConeSheet: { path: 'sprites/f4-cone-sheet.png', w: 256, h: 176 },
   f4GoreSheet: { path: 'sprites/f4-gore-sheet.png', w: 24, h: 24 },

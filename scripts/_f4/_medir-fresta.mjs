@@ -39,11 +39,25 @@ for (const f of process.argv.slice(2)) {
     if (tem) { if (topo < 0) topo = y; base = y; }
   }
 
+  // ⚠️ TOLERÂNCIA: UM CABO PENDURADO NÃO É PAREDE. A 2ª versão desta régua exigia a linha
+  // PERFEITAMENTE vazia e dava 0 para um destroço que o olho lê como aberto — porque dois ou três
+  // fios de cabo arrancado cruzam o vão. Esses fios são a parte que faz a peça parecer arrancada, e
+  // mecanicamente não bloqueiam nada: o destroço é `inerte`, como a lasca da porta.
+  //
+  // Uma linha conta como LIVRE quando menos de 8% da largura da peça a ocupa. O 8% é largo o
+  // bastante para os fios e estreito o bastante para não deixar passar uma chapa.
+  const larguraPeca = (() => {
+    let e = W, d = 0;
+    for (let x = 0; x < W; x++) for (let y = topo; y <= base; y++) if (opaco(x, y)) { if (x < e) e = x; if (x > d) d = x; break; }
+    return Math.max(1, d - e + 1);
+  })();
+  const LIMITE = Math.max(2, Math.round(larguraPeca * 0.08));
+
   let maior = 0, corrente = 0, fimDaFaixa = -1;
   for (let y = topo; y <= base; y++) {
-    let bloqueia = false;
-    for (let x = 0; x < W && !bloqueia; x++) if (opaco(x, y)) bloqueia = true;
-    if (bloqueia) corrente = 0;
+    let ocupado = 0;
+    for (let x = 0; x < W; x++) if (opaco(x, y)) ocupado++;
+    if (ocupado > LIMITE) corrente = 0;
     else { corrente++; if (corrente > maior) { maior = corrente; fimDaFaixa = y; } }
   }
 
