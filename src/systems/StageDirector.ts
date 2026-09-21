@@ -84,6 +84,13 @@ export type StageEvent =
    */
   | { t: number; type: 'porta'; hp: number }
   /**
+   * O ESFÍNCTER da soleira (F4, M4): a garganta que segura a entrada do núcleo.
+   *
+   * ⚠️ SEM `hp`, ao contrário da porta — e a ausência é a regra da peça. Ela não cai na bala:
+   * cai na ignição do gás (ver `src/entities/esfincter.ts`).
+   */
+  | { t: number; type: 'garganta' }
+  /**
    * TROCA O CENÁRIO PINTADO (Fase 4). A fase é uma jornada anatômica — o hangar engolido, a
    * caixa torácica, o duto e a câmara do núcleo — e cada câmara tem a pintura dela.
    *
@@ -630,7 +637,11 @@ export const STAGE_4: StageEvent[] = [
   { t: 78, type: 'corredor', rate: 1.7, gap: 76 },
   { t: 82, type: 'porta', hp: 8 },
   { t: 84, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
-  { t: 88, type: 'banner', text: 'ESFÍNCTER FINAL' },
+  // ⚠️ ERA 'ESFÍNCTER FINAL', E APONTAVA PARA A COISA ERRADA desde antes das portas existirem.
+  // Os banners desta campanha ANUNCIAM o que vem; este anunciava um esfíncter e o que chegava em
+  // t=94 era a terceira comporta rebitada, igual às outras duas. O esfíncter de verdade é a
+  // garganta da soleira, em t=110 — ver o bloco da soleira mais abaixo.
+  { t: 88, type: 'banner', text: 'A ÚLTIMA COMPORTA' },
   { t: 89, type: 'corredor', rate: 1.7, gap: 68 },
   { t: 94, type: 'porta', hp: 10 },
 
@@ -670,7 +681,36 @@ export const STAGE_4: StageEvent[] = [
   // — *"a transição de fundos, de novo, está muito seca"*. O núcleo se revela atrás do pilar.
   { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD', soFundo: true, junta: 'mesa', entrada: 'emenda' },
   { t: 109, type: 'banner', text: 'ALERTA · O NÚCLEO' },
-  { t: 113, type: 'boss' },
+
+  // ─── A SOLEIRA: O ESFÍNCTER. A última coisa entre o jogador e o núcleo. ───
+  //
+  // ⚠️ ELA CHEGA EM t=110 PORQUE A ARTE MANDA, não o roteiro. A criatura tem 167px de conteúdo e
+  // o corredor só abre para isso quando a parede recua: em t=106,5 sobrariam 51px enterrados, em
+  // t=108,5 ainda 19, e só em t=110 ela cabe com folga. Medido pelo motor em
+  // `scripts/_f4/_ver-soleira.mjs`. É a TERCEIRA vez nesta fatia que arte com linha forte impõe
+  // geometria à fase — a veia da borda C mudou o ritmo da curva, o núcleo da porta empurrou a
+  // peça para trás do layer da borda, e agora o esfíncter empurra o chefão.
+  //
+  // ⚠️ E ELA NASCE NA COSTURA DE PROPÓSITO: a boca dela é magenta, o duto é vermelho e o núcleo é
+  // AZUL. Contra a parede do duto ela sumiria; contra o núcleo ela RECORTA. É o mesmo princípio
+  // que fez a fenda VERTICAL da porta funcionar contra as veias horizontais do duto. Decisão dele
+  // em 21/09: *"ela vai ficar bem na linha que separa a arte da borda do duto e começo da arte da
+  // borda do núcleo"*.
+  //
+  // ⚠️ DE QUEBRA ELA TAPA O DEGRAU DO CHÃO na emenda — o mesmo ganho que esconder as pontas da
+  // porta deu. E o `entrada: 'emenda'` de t=109 FICA: o fade de 1400ms corre por trás dela, então
+  // nada do que foi aprovado em 15/09 é tocado.
+  { t: 109.5, type: 'banner', text: 'ESFÍNCTER' },
+  { t: 110, type: 'garganta' },
+
+  // ⚠️ O CHEFÃO ERA t=113, E ATRASOU POR CAUSA DELA (21/09, autorizado: *"não tem problema
+  // atrasar um pouco a chegada do guardião"*). A cena da soleira — chegar, respirar, o gás
+  // engrossar, o tiro, o estouro e o gore — não cabe em 3s.
+  //
+  // ⚠️ E `t` É UM NÚMERO SOLTO AQUI, verificado: a música do chefão nasce no `spawnBoss`, não
+  // numa linha própria do roteiro, então ela espera junto. A cena acontece no SILÊNCIO — que é o
+  // que o silêncio antes do chefão serve para fazer em todas as fases.
+  { t: 118, type: 'boss' },
 ];
 
 /** Onde a nave está. A física do mundo, não uma preferência do jogador (docs/GDD.md §3). */

@@ -26,6 +26,7 @@ import { BossSerpente } from '../entities/BossSerpente';
 import { BossNucleo } from '../entities/BossNucleo';
 import { Golfinho, type SentidoGolfinho } from '../entities/Golfinho';
 import { Agua } from '../systems/Agua';
+import { Esfincter } from '../entities/esfincter';
 import { SHIPS, DEFAULT_SHIP } from '../ships';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
@@ -72,6 +73,10 @@ export class GameScene extends Phaser.Scene {
   private parallax!: Parallax;
   /** A moldura da F4: a curva do vão e a faixa contínua. Ver `Moldura`. */
   private moldura!: Moldura;
+  /** A soleira do núcleo (F4, M4): a garganta, o gás e o estouro. Ver `Esfincter`. */
+  private esfincter!: Esfincter;
+  /** O overlap bala×gás, vivo só enquanto a garganta existe. Ver `spawnGarganta`. */
+  private colisorGas?: Phaser.Physics.Arcade.Collider;
   private reader!: InputReader;
   private weapons!: WeaponSystem;
   private enemies!: EnemySystem;
@@ -249,6 +254,11 @@ export class GameScene extends Phaser.Scene {
     );
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
+    // ⚠️ O `tetoEm` É PASSADO, NÃO DEDUZIDO. O cano do gás pendura na parede, e a linha da parede
+    // é a `Moldura` que sabe — deduzi-la do topo da criatura fazia o cano FLUTUAR, o mesmo defeito
+    // que as passarelas levaram em 13/09 (*"terminaram com o problema do início das passarelas
+    // flutuando"*).
+    this.esfincter = new Esfincter(this, this.fx, (x) => this.moldura.superficieTetoEm(x));
     this.weapons = new WeaponSystem(this);
     this.enemies = new EnemySystem(this, this.stage.id, this.fx);
     this.pickups = new PickupSystem(this);
@@ -605,6 +615,7 @@ export class GameScene extends Phaser.Scene {
     // Leviatã e têm de rolar com o corredor. Cano parado enquanto o mundo anda lê como marca
     // d'água da interface, não como encanamento de uma doca engolida.
     this.agua.update(dt, SCROLL_SPEED * frenagem);
+    this.esfincter.update();
     // Rede: se ele deixou de viver por um caminho que não passou por `matarGolfinho`, a arena solta.
     if (this.golfinho && !this.golfinho.vivo) this.encerrarGolfinho();
     this.updateHud();
@@ -802,6 +813,9 @@ export class GameScene extends Phaser.Scene {
         // tela escurecendo); na entrada pela emenda não há escuro para esconder nada, então elas se
         // dissolvem devagar, no tempo de a emenda chegar à tela.
         if (e.soFundo) this.parallax.limpaCenario(e.entrada === 'emenda' ? 1400 : (e.fadeMs ?? 600) / 2);
+        break;
+      case 'garganta':
+        this.spawnGarganta();
         break;
       case 'boss':
         this.spawnBoss();
@@ -1212,6 +1226,84 @@ export class GameScene extends Phaser.Scene {
   private spawnPorta(hp: number): void {
     if (!this.textures.exists('porta')) return;
     this.terrain.spawn('porta', { centroVao: this.moldura.vaoEm(GAME_WIDTH + 30), hp });
+  }
+
+  /**
+   * O ESFÍNCTER DA SOLEIRA: a GARGANTA que segura a entrada do núcleo — a última comporta da
+   * Fase 4, e a mesma criatura que engole a nave na cutscene do hangar.
+   *
+   * ⚠️ NASCE PELA MESMA CURVA E NO MESMO x QUE A PORTA (`GAME_WIDTH + 30`), pelo mesmo motivo:
+   * perguntar a curva em outro ponto faria a peça nascer numa altura que não é a do corredor onde
+   * ela vai chegar, e comporta desalinhada deixa passagem por cima ou por baixo.
+   *
+   * ⚠️ E ELA CHEGA COM A COSTURA, NÃO ANTES. A criatura tem 167px de conteúdo e o corredor só
+   * abre para isso quando a parede recua — em t=106,5 sobrariam 51px enterrados, em t=108,5 ainda
+   * 19, e só em t=110 ela cabe (medido pelo motor em `scripts/_f4/_ver-soleira.mjs`). É a TERCEIRA
+   * vez nesta fatia que arte com linha forte impõe geometria à fase, e é por isso que o chefão
+   * atrasou de t=113 para t=118.
+   *
+   * ⚠️ O OVERLAP NASCE AQUI, e não no `create`: a zona do gás só existe depois do `armar`.
+   * Registrá-lo na criação da cena exigiria um alvo vazio vivendo a fase inteira.
+   */
+  private spawnGarganta(): void {
+    if (!this.textures.exists('garganta')) return;
+    this.terrain.spawn('garganta', { centroVao: this.moldura.vaoEm(GAME_WIDTH + 30) });
+
+    const criatura = this.terrain.props
+      .getChildren()
+      .find(
+        (o) => (o as Phaser.Physics.Arcade.Sprite).getData('kind') === 'garganta',
+      ) as Phaser.Physics.Arcade.Sprite | undefined;
+    if (!criatura) return;
+
+    this.esfincter.armar(criatura);
+    const zona = this.esfincter.zona;
+    if (!zona) return;
+
+    // ⚠️ OVERLAP CONTRA A ZONA, e não teste de distância: o que importa é o tiro ATRAVESSAR o
+    // gás, não passar perto do centro dele. A nuvem tem 128×176 e cobre a faixa do corredor, que
+    // é o que faz *qualquer tiro serve* ser verdade por construção.
+    this.colisorGas = this.physics.add.overlap(this.weapons.bullets, zona, () =>
+      this.matarGarganta(),
+    );
+  }
+
+  /**
+   * A MORTE DA GARGANTA — disparada pela IGNIÇÃO DO GÁS, nunca por dano acumulado.
+   *
+   * ⚠️ A CRIATURA VIRA `inerte` AQUI, NA IGNIÇÃO, e não no fim da animação. O jogador atirou e
+   * ganhou; fazê-lo esperar os 2,2s do `garganta-morte` para poder passar seria cobrar duas
+   * vezes. É a mesma razão do `delayedCall` da porta — o ponto é agora, o espetáculo é depois.
+   *
+   * ⚠️ E É O `inerte` QUE TIRA A MORDIDA, NUNCA O `body.enable`. Prop é movido por velocidade, e
+   * desligar o corpo CONGELA a carcaça no ar enquanto a parede rola por baixo. Foi o defeito que
+   * a porta expôs em 20/09, e esta peça nasce sabendo dele.
+   *
+   * ⚠️ O `hp` JÁ É `Infinity` (ver o `PropKind`), então não há o que zerar: bala nenhuma fere a
+   * criatura. O que muda é o `inerte`, que os três overlaps de prop consultam pelo
+   * `TerrainSystem.solido`.
+   *
+   * ⚠️ O `acender()` PODE DEVOLVER `false`, e esse `false` é a cena inteira: enquanto a nuvem só
+   * vaza, o tiro não faz nada e o jogador espera vendo o gás engrossar.
+   */
+  private matarGarganta(): void {
+    const criatura = this.terrain.props
+      .getChildren()
+      .find(
+        (o) => (o as Phaser.Physics.Arcade.Sprite).getData('kind') === 'garganta',
+      ) as Phaser.Physics.Arcade.Sprite | undefined;
+    if (!criatura || !criatura.active) return;
+    if (!this.esfincter.acender()) return;
+
+    this.colisorGas?.destroy();
+    this.colisorGas = undefined;
+
+    criatura.setData('inerte', true);
+    this.score += criatura.getData('score') as number;
+    criatura.anims.stop();
+    // ⚠️ `garganta-morta`, NÃO `garganta-morte` — a folha com o teto de brilho (ver `BootScene`).
+    // A `garganta-morte` crua fica para a cutscene 3, que está mergeada e aprovada com ela.
+    if (this.anims.exists('garganta-morta')) criatura.play('garganta-morta');
   }
 
   /** O mesmo relógio dos props, para os destroços do vácuo. */

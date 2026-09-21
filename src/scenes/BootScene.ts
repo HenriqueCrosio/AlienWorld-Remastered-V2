@@ -212,7 +212,14 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
  * no registro das animações, não um placeholder desenhado: explosão procedural JÁ existe, são
  * as fagulhas).
  */
-const SHEET_ANIMS: { key: string; sheet: string; frames: number; frameRate: number }[] = [
+const SHEET_ANIMS: {
+  key: string;
+  sheet: string;
+  frames: number;
+  frameRate: number;
+  /** Ausente = laço infinito, como sempre foi. `false` = toca UMA vez (o cone do estouro). */
+  loop?: boolean;
+}[] = [
   // A PORTA DO DUTO RESPIRANDO. 8 quadros a 10/s = 0,8s por volta — a batida de uma coisa viva
   // esperando, não a de um alarme.
   //
@@ -220,6 +227,26 @@ const SHEET_ANIMS: { key: string; sheet: string; frames: number; frameRate: numb
   // frio → aceso), então o quadro 7 encosta no 0 com a mesma derivada e o laço fecha sozinho. Um
   // `yoyo` aqui tocaria a volta duas vezes e dobraria o período sem querer.
   { key: 'porta-nucleo', sheet: 'portaNucleoSheet', frames: 8, frameRate: 10 },
+
+  // ─── A SOLEIRA DO NÚCLEO (21/09, o esfíncter) ───
+  //
+  // O GÁS a 8/s: devagar o bastante para o jogador ver ENGROSSAR. É a única parte da cena que
+  // pede paciência dele, e acelerar aqui mataria a antecipação — que é a peça inteira. Ver o
+  // `VAZANDO_MS` do `Esfincter`.
+  // A GARGANTA DA F4 RESPIRANDO, a 6/s — a mesma cadência da versão da cutscene, porque é o mesmo
+  // bicho. O que muda é só o teto de brilho (ver `gargantaVivaSheet`).
+  { key: 'garganta-viva', sheet: 'gargantaVivaSheet', frames: 11, frameRate: 6 },
+  // A MORTE DA GARGANTA DA F4, a 5/s e UMA vez — os mesmos números da versão da cutscene, medidos
+  // lá em 04/09 (a 12 ela passava em 480ms debaixo do estouro e ele não conseguia vê-la).
+  //
+  // ⚠️ E AQUI O TETO DE BRILHO IMPORTA MAIS QUE NO IDLE: é esta animação que fica na tela depois
+  // do estouro, enquanto a carcaça rola pelo duto. No cru os dentes voltam BRANCOS (18,2% de px
+  // claros contra 0,8% do estático) e a criatura morta lia mais clara que viva.
+  { key: 'garganta-morta', sheet: 'gargantaMortaSheet', frames: 11, frameRate: 5, loop: false },
+  { key: 'f4-gas', sheet: 'f4GasSheet', frames: 8, frameRate: 8 },
+  // O CONE a 14/s e UMA vez só: 10 quadros = 0,71s. Rápido, porque ele é o pagamento, não a
+  // espera. ⚠️ `loop: false` — um estouro em laço é um incêndio, e a passagem já está aberta.
+  { key: 'f4-cone', sheet: 'f4ConeSheet', frames: 10, frameRate: 14, loop: false },
 ];
 
 const SHEETS: Record<string, { path: string; w: number; h: number }> = {
@@ -273,6 +300,25 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // O FIM DO PREDADOR (17/09, rodada 5): o piso rasgando e a poça de lava, assados em PIXEL na resolução
   // nativa por `scripts/_f4/_assar-fim-f4.mjs` — a paleta sai da própria faixa do chão da arena. Ver
   // `src/entities/fimDoPredador.ts`.
+  // A SOLEIRA DO NÚCLEO (21/09, o esfíncter): as três assadas em PIXEL na resolução nativa por
+  // `_assar-gas.mjs`, `_assar-cone.mjs` e `_assar-gore.mjs`. Ver `src/entities/esfincter.ts`.
+  //
+  // ⚠️ O GORE SAI RECORTADO DOS PIXELS DA PRÓPRIA GARGANTA, e é daí que vem a garantia de paleta:
+  // a peça é a fonte da própria luz, então não existe como o destroço destoar da criatura de que
+  // ele saiu. É o mesmo princípio do `_assar-porta-nucleo`, onde o pico do pulso É o estático.
+  // ⚠️ A GARGANTA RESPIRANDO, COM O ESTOURO DE BRANCO CORRIGIDO — chave NOVA, e a razão é medida.
+  // A `garganta-idle` crua caiu na armadilha que este projeto já documentou duas vezes: o gerador
+  // não obedece limite de cor, e "pulsar" virou "clarear". No quadro 6 ela tem 10,2% de px claros
+  // contra 0,8% do estático — o miolo não está aceso, está BRANCO PURO. Na cutscene do hangar
+  // passa; no DUTO, a câmara mais escura das quatro, vira a coisa mais brilhante da tela.
+  // `_assar-garganta-viva.mjs` põe um teto e puxa a luz de volta para o magenta da goela.
+  //
+  // ⚠️ A `garganta-idle` ORIGINAL FICA INTOCADA: a cutscene 3 está mergeada e aprovada com ela.
+  gargantaVivaSheet: { path: 'sprites/garganta-viva-sheet.png', w: 97, h: 171 },
+  gargantaMortaSheet: { path: 'sprites/garganta-morta-sheet.png', w: 97, h: 171 },
+  f4GasSheet: { path: 'sprites/f4-gas-sheet.png', w: 128, h: 176 },
+  f4ConeSheet: { path: 'sprites/f4-cone-sheet.png', w: 256, h: 176 },
+  f4GoreSheet: { path: 'sprites/f4-gore-sheet.png', w: 24, h: 24 },
   f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
   f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
@@ -970,6 +1016,12 @@ const ART: Record<string, string> = {
   // ⚠️ ELA EXISTE DESDE O PRIMEIRO QUADRO. Respira durante a queda, a derrapagem e o painel de
   // escolha. Surgir foi exatamente a queixa contra o portão.
   gargantaCut3: 'sprites/garganta.png',
+  // ⚠️ A MESMA IMAGEM SOB DUAS CHAVES, e não é descuido. A chave da arte de um prop É o nome do
+  // `PropKind` (`pickVariant(scene, kind)`), então o esfíncter da Fase 4 precisa dela como
+  // `garganta`. A `gargantaCut3` fica INTOCADA: a cutscene 3 está mergeada e aprovada, e trocar a
+  // chave dela de carona seria atravessar a mesma fronteira que o M1 pagou caro para aprender —
+  // a faixa da F4 foi parar nas Fases 1, 2 e 3 e nenhuma sonda pegou.
+  garganta: 'sprites/garganta.png',
   ...animFrames('gargantaIdleAnim', 'garganta-idle-anim'),
   ...animFrames('gargantaMorteAnim', 'garganta-morte-anim'),
 
@@ -1108,13 +1160,13 @@ export class BootScene extends Phaser.Scene {
     // ele só chama `p.play(def.anim)` se `anims.exists` for verdade, e a porta nasce no meio da fase,
     // muito depois de qualquer `create` de entidade. Registrar tarde é a animação simplesmente não
     // tocar, sem erro nenhum na tela.
-    for (const { key, sheet, frames, frameRate } of SHEET_ANIMS) {
+    for (const { key, sheet, frames, frameRate, loop } of SHEET_ANIMS) {
       if (!this.textures.exists(sheet) || this.anims.exists(key)) continue;
       this.anims.create({
         key,
         frames: this.anims.generateFrameNumbers(sheet, { start: 0, end: frames - 1 }),
         frameRate,
-        repeat: -1,
+        repeat: loop === false ? 0 : -1,
       });
     }
   }

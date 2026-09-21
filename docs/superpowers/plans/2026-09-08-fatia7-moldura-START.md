@@ -85,7 +85,25 @@ ficaram, o pulso não foi reassado. Arte final, respiração e morte em dois tem
 foi respondida ao contrário:** as pontas de baixo são ângulos mais retos, e **é bom que fiquem escondidas**. O que
 sobra da lasca comunica passagem livre melhor do que a peça inteira comunicava.
 
-**Falta UMA peça na Fatia 7 inteira: o ESFÍNCTER** (`f4VivoC`). Ver a 🚦.
+**🟡 O ESFÍNCTER — CONSTRUÍDO EM 21/09, À ESPERA DO TESTE JOGADO. É A ÚLTIMA PEÇA DA FATIA 7.**
+
+A peça MUDOU DE TRABALHO, por decisão dele. O `f4VivoC` da spec de 08/09 era decoração de parede (48×48, não
+colide, só respira) e herdava o argumento que riscou as irmãs A e B em 19/09. O que o salvou foi uma dívida que
+o jogo já tinha: o banner de t=88 prometia **ESFÍNCTER FINAL** desde antes das portas existirem, e o que chegava
+em t=94 era a terceira comporta rebitada. Hoje esse banner diz **A ÚLTIMA COMPORTA**, e o esfíncter de verdade
+está em t=110.
+
+- **A criatura é a GARGANTA do hangar** (PixelLab `15f111fd`), reusada por escolha dele. ⚠️ **E a descrição com
+  que ele a gerou é, palavra por palavra, a spec do esfíncter:** *"o anel de dentes contrai e relaxa lentamente"*.
+  A peça que faltava já estava no disco.
+- **Nenhuma geração no PixelLab.** Idle e morte já existiam; o cano (`f4-cano2`) entrou sem tocar; o gás, o cone
+  e o gore são **assados**, e o gore sai RECORTADO dos pixels dela — a paleta sai de graça.
+- **A cena:** o cano quebrado vaza → a nuvem engrossa por 1,5s → **qualquer tiro** acende → cone para dentro do
+  núcleo + gore. A criatura vira `inerte` NA IGNIÇÃO, não no fim da animação.
+- **O chefão atrasou de t=113 para t=118**, autorizado por ele: a cena não cabia em 3s.
+- Sonda `probe-f4-esfincter` 27/27 · captura `_f4/_ver-esfincter.mjs`.
+
+Ver a 🚦 e o ⏸️.
 
 **🟠 O REGISTRO DO B3 (16–17/09). CINCO RODADAS, QUATRO TESTES JOGADOS. Aprovados: a
 mecânica, o surgimento/giro, o breu, a lava, a fumaça da troca, o andar no lugar, a investida de quatro com o
@@ -103,11 +121,11 @@ empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 ## 🔑 A FRASE DE ARRANQUE
 
 > **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. As 3 PORTAS
-> foram jogadas e APROVADAS sem ajuste em 21/09. Falta UMA peça para fechar a Fatia 7: o ESFÍNCTER."**
+> foram jogadas e APROVADAS sem ajuste em 21/09. O ESFÍNCTER — a GARGANTA na soleira do núcleo — está
+> construído e commitado, e eu ainda NÃO joguei. Vou jogar e te dar o veredicto. Com ele, a Fatia 7 fecha."**
 
-⚠️ **O esfíncter é arte DELE, não restrição mecânica** — então o fluxo é o de sempre: **brainstorming → spec →
-plano → implementação → teste jogado → merge**, e abre-se **listando o que vai ser gerado e pedindo o aval**,
-nunca gerando primeiro. Ver `🧭 COMO ABRIR O ESFÍNCTER`.
+⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé; o que falta é o
+julgamento dele. O roteiro do teste está na seção ⏸️ logo abaixo.
 
 ---
 
@@ -133,10 +151,79 @@ duto. Se um dia o duto parecer folgado, é esse o número, e só até 70.
 |---|---|---|
 | ~~a BORDA C~~ | 128×80, com o pilar `mesa3` na costura B→C | ✅ jogada e aprovada em 20/09 (`28b0a14`) |
 | ~~as 3 PORTAS~~ | arte final, respiração e morte em dois tempos | ✅ jogadas e aprovadas em 21/09, **sem ajuste pedido** |
-| **o ESFÍNCTER** | `f4VivoC`, 48×48 em 8 quadros: abre e fecha na parede, não colide, só respira | ⬜ a construir |
+| ~~o ESFÍNCTER~~ | **mudou de trabalho**: a GARGANTA (97×171) na costura, destrutível, com cano de gás e estouro em cone | 🟡 **construído — à espera do TESTE JOGADO** |
 
 **Depois do esfíncter:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar
 a fatia com merge `--no-ff` de `feat/fase4-visual` em `main`.
+
+---
+
+## ⏸️ ONDE PARAMOS — O ESFÍNCTER ESPERA O TESTE JOGADO (21/09)
+
+**A Fatia 7 tem as TRÊS peças do M4 de pé.** A borda C e as portas foram jogadas e aprovadas; o esfíncter está
+construído, commitado e **ele ainda não jogou**. Nada está pendente de código.
+
+### Como jogar
+
+`npm run dev` noutro terminal · `L` leva direto à Fase 4 · o duto começa em **t≈68**, as portas em t=72/82/94, e
+o **esfíncter em t≈110**, na costura onde a parede do duto vira a do núcleo. O chefão agora é **t=118**.
+
+### O que vai acontecer
+
+O cano quebrado entra pelo teto vazando gás · a garganta entra com a costura, respirando · a nuvem engrossa por
+~1,5s · **qualquer tiro** acende · o cone dispara para dentro do núcleo e os pedaços dela vão junto · a passagem
+abre NA HORA da ignição, não no fim da animação.
+
+Se não atirar, ela alcança a nave em ~3,5s e **cobra uma vida**, como as portas.
+
+### As cinco perguntas — e o conserto de cada uma já escrito
+
+| # | a pergunta | se a resposta for "não" |
+|---|---|---|
+| **1** | *a espera do gás engrossando é tensão, ou é tempo morto?* | `Esfincter.VAZANDO_MS` (hoje 1500). É um número, não uma peça |
+| **2** | *o estouro parece grande o bastante para o que ela era?* | reassar o cone mais largo/longo (`_assar-cone.mjs`: a `meia` e o `alcance`). ⚠️ **NÃO** clarear — ele já é a coisa mais quente da tela |
+| **3** | *o gore diz "isso era um bicho", ou lê como estilhaço genérico?* | `Esfincter.PEDACOS` (14) ou o `LADO` do `_assar-gore.mjs` (24px). Os oito pontos de recorte também são escolha, e estão na tabela `PONTOS` |
+| **4** | *ela recorta contra o azul do núcleo, ou some nele?* | ⚠️ **ESTA É A QUE EU MAIS DESCONFIO** — ver logo abaixo |
+| **5** | *o chefão 5s depois ainda chega como chegava?* | o `t: 118` do `StageDirector` volta em direção a 113 |
+
+### ⚠️ UMA CORREÇÃO MINHA, E ELA É A PERGUNTA 4
+
+**Eu te vendi a posição na costura dizendo que "a boca é magenta e o núcleo é azul, então ela recorta". Isso
+estava pela metade.** A medição que eu usei era da BOCA. Abrindo a arte inteira: a boca é magenta, mas o **corpo
+dela é azul-esverdeado escuro** — e o núcleo também é azul. Contra o duto vermelho ela recortaria melhor.
+
+O que sobra a favor da costura continua de pé (ela tapa a emenda, tapa o degrau do chão, e a boca acesa segue
+recortando). Mas **se ela sumir no azul, a culpa é desta conta minha**, e o conserto é um `tint` na peça ou
+antecipar a chegada dela para o vermelho do duto. **Não mexi por conta própria: é julgamento seu.**
+
+### O que eu mexi sem você pedir, e por quê
+
+**As animações da garganta estouravam em BRANCO PURO** — o defeito que este projeto já documentou duas vezes
+(*o gerador ignora limite de cor: "pulsar" vira "clarear"*), e que é a razão inteira de o `_assar-porta-nucleo.mjs`
+existir. Medido:
+
+| | px claros (lum > 150) |
+|---|---|
+| `garganta.png` (o estático) | **0,8%** |
+| `garganta-idle-anim-6` | **10,2%** — o miolo não está aceso, está BRANCO |
+| `garganta-morte-anim-3` | **18,2%** — os dentes voltam brancos |
+
+Na cutscene do hangar isso passa (cena clara, ela é um elemento entre muitos). No DUTO, a câmara mais escura das
+quatro, vira a coisa mais brilhante da tela e briga com as veias e com o próprio estouro.
+
+Assei cópias corrigidas em **chaves novas** (`garganta-viva` / `garganta-morta`), com teto de brilho.
+⚠️ **A `garganta-idle` e a `garganta-morte` originais estão INTOCADAS** — a cutscene 3 está mergeada e aprovada
+com elas, e você as aprovou lá. Se preferir o cru aqui também, é trocar a `anim` do `PropKind`.
+
+⚠️ **E a correção precisou ser DIFERENTE nas duas, o que custou uma volta:** no idle o que é claro é a GOELA, e
+puxar a luz de volta ao magenta devolve a cor que o gerador comeu. Na morte o que é claro são os DENTES, e o
+mesmo puxão deixou a criatura com **dentes rosa-choque**. Dente é osso: escurece, não muda de cor.
+
+### O que NÃO se refaz sem você pedir
+
+- **a criatura e as duas animações**: arte sua, e mexer nelas mexe na **cutscene 3**, que está mergeada e aprovada;
+- **o cano**: `f4-cano2`, peça aprovada, entrou sem uma linha de mudança;
+- **o gore recortado dela**: regerar pedaços traria outra paleta e faria o magenta brigar consigo mesmo.
 
 ---
 

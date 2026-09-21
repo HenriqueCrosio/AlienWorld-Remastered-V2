@@ -58,7 +58,7 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
    com a frase de arranque e o que fazer primeiro (🚦).
 
-   **Estado em 2026-09-21: falta UMA peça na Fatia 7 inteira — o ESFÍNCTER.** A branch está em dia
+   **Estado em 2026-09-21: as TRÊS peças do M4 estão de pé. A fatia espera o ÚLTIMO teste jogado.** A branch está em dia
    com o `origin` (V2). ✅ **As 3 PORTAS foram jogadas e APROVADAS em 21/09, sem um único ajuste
    pedido** (`94f84cf` + `6fc3ac3`): *"é visível que você tem que atirar nela, se o jogador não
    perceber no começo, vai cobrar com a vida"* · *"dá pra ver que você ganhou"* · *"não chama muita
@@ -103,8 +103,23 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    destroço — e tirá-las de vista deixou sobrar só o que comunica passagem livre. **Esconder o que a
    arte tem de menos orgânico foi ganho duplo: encaixe E leitura.**
 
-   **O QUE FALTA CONSTRUIR — uma peça:** o **ESFÍNCTER** (`f4VivoC`, 48×48 em 8 quadros: abre e
-   fecha na parede, não colide, só respira).
+   **🟡 O ESFÍNCTER — CONSTRUÍDO EM 21/09, À ESPERA DO TESTE JOGADO. A ÚLTIMA PEÇA DA FATIA 7.**
+   A peça MUDOU DE TRABALHO por decisão dele: o `f4VivoC` da spec de 08/09 era decoração de parede e
+   herdava o argumento que riscou as irmãs A e B em 19/09. O que o salvou foi uma dívida do próprio
+   jogo — o banner de t=88 prometia *ESFÍNCTER FINAL* desde antes das portas existirem, e o que
+   chegava em t=94 era a terceira comporta rebitada. Hoje ele diz *A ÚLTIMA COMPORTA*.
+   - **A criatura é a GARGANTA do hangar** (PixelLab `15f111fd`), reusada por escolha dele. ⚠️ **E a
+     descrição com que ele a gerou é, palavra por palavra, a spec do esfíncter:** *"o anel de dentes
+     contrai e relaxa lentamente"*. A peça que faltava já estava no disco.
+   - **Nenhuma geração no PixelLab.** O cano (`f4-cano2`) entrou sem tocar; o gás, o cone e o gore são
+     **assados**, e o gore sai RECORTADO dos pixels dela — a paleta sai de graça.
+   - **A cena:** o cano quebrado vaza → a nuvem engrossa por 1,5s → **qualquer tiro** acende → cone
+     para dentro do núcleo + gore. A criatura vira `inerte` NA IGNIÇÃO, não no fim da animação.
+   - **O chefão atrasou de t=113 para t=118**, autorizado: a cena não cabia em 3s. A `probe-stage4`
+     segue fechando a corrente de ponta a ponta.
+   - ⚠️ **AS ANIMAÇÕES DELA ESTOURAVAM EM BRANCO** (0,8% de px claros no estático contra 10,2% no
+     idle e 18,2% na morte) — o defeito que o `_assar-porta-nucleo` existe para impedir. Assadas
+     cópias corrigidas em chaves NOVAS; as originais ficam intocadas porque a **cutscene 3** as usa.
 
    ⚠️ **DUAS PEÇAS DO M4 DEIXARAM O MESMO AVISO, e ele vale direto para o esfíncter:** arte com uma
    LINHA FORTE impõe geometria à fase. A veia acesa da borda C obrigou o duto a mudar o ritmo da

@@ -1,0 +1,245 @@
+import Phaser from 'phaser';
+import type { Fx } from '../systems/Fx';
+
+/**
+ * A SOLEIRA DO NÚCLEO — a cena do esfíncter, em três tempos: o gás VAZA, o gás fica DENSO, e o
+ * primeiro tiro ACENDE.
+ *
+ * ⚠️ A NUVEM ENGROSSA ANTES DE ACENDER, E ISSO NÃO É ENFEITE. Num shmup o dedo já está no
+ * gatilho. Se qualquer tiro acendesse no instante em que a criatura aparece, ela morreria em
+ * ~0,2s e o jogador não veria nada — nem a criatura, nem o gás, nem o motivo. O acúmulo é o que
+ * transforma o tiro numa espera em que ele SABE o que vem, e a antecipação é a peça inteira.
+ * Pedido dele em 21/09: *"pensei em algo fácil, mas dinâmico"* — o fácil é o tiro, o dinâmico é
+ * a espera.
+ *
+ * ⚠️ QUALQUER TIRO SERVE. A nuvem cobre a faixa inteira do corredor, então todo tiro atravessa
+ * gás por construção. O gás existe para o estouro ser plausível e gigante, NÃO para ser
+ * resolvido — não é um enigma de mira, e transformá-lo num travaria o jogador a segundos do
+ * chefão.
+ *
+ * ⚠️ O CONE DISPARA PARA A DIREITA, para dentro do núcleo. É regra de JOGO, não de estilo: um
+ * estouro que se abrisse para trás mataria o jogador pelo próprio acerto.
+ *
+ * ⚠️ TUDO AQUI É ARTE ASSADA. Nenhum `Graphics`, nenhum retângulo em tempo de jogo — a lei mais
+ * cara da Fatia 7, e a razão de o 1º fim do predador ter sido reprovado na hora (*"ficou gerado e
+ * sem custos"*).
+ *
+ * ⚠️ E ELA MORA FORA DA `GameScene` de propósito: a cena já é grande, e a soleira tem estado
+ * próprio (a fase da nuvem, o relógio, a criatura que ela acompanha).
+ */
+export class Esfincter {
+  /**
+   * Quanto tempo a nuvem leva para ficar densa.
+   *
+   * ⚠️ É O KNOB DA PERGUNTA 1 DO TESTE JOGADO — *"a espera do gás engrossando é tensão, ou é tempo
+   * morto?"*. Se for tempo morto, este número desce. É um número, não uma peça.
+   */
+  static readonly VAZANDO_MS = 1500;
+
+  /** Quantos pedaços de gore partem para dentro do núcleo. */
+  private static readonly PEDACOS = 14;
+
+  /** Quantas artes de pedaço a folha tem (ver `_assar-gore.mjs`). */
+  private static readonly GORE_QUADROS = 8;
+
+  /** A folga entre a boca do cano e a criatura, em px. O cano fica À FRENTE dela. */
+  private static readonly CANO_ADIANTE = 62;
+
+  private cano?: Phaser.GameObjects.Image;
+  private nuvem?: Phaser.GameObjects.Sprite;
+  private zonaGas?: Phaser.GameObjects.Zone;
+  private criatura?: Phaser.Physics.Arcade.Sprite;
+  private relogio = 0;
+  private acesa = false;
+
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly fx: Fx,
+    /** A linha de BAIXO da faixa do teto naquela coluna. Ver `Moldura.superficieTetoEm`. */
+    private readonly tetoEm: (xTela: number) => number,
+  ) {}
+
+  /** A zona que a bala tem de tocar. Some na ignição — a nuvem já pegou fogo. */
+  get zona(): Phaser.GameObjects.Zone | undefined {
+    return this.acesa ? undefined : this.zonaGas;
+  }
+
+  get denso(): boolean {
+    return !this.acesa && this.relogio >= Esfincter.VAZANDO_MS;
+  }
+
+  get ativa(): boolean {
+    return this.criatura !== undefined;
+  }
+
+  /** Planta a nuvem em cima da criatura. A partir daqui o relógio corre. */
+  armar(criatura: Phaser.Physics.Arcade.Sprite): void {
+    this.limpar();
+    this.criatura = criatura;
+
+    // ⚠️ O CANO QUEBRADO, NO TETO E À FRENTE DELA. É a CAUSA do gás, e sem ela a nuvem seria um
+    // efeito sem origem — exatamente a queixa que derrubou o portão da cutscene 3 (*"apenas surge
+    // um asset sem relação nenhuma com a arte"*). O jogador chega no cano ANTES da criatura, vê
+    // de onde o gás sai, e só então encontra o que vai estourar.
+    //
+    // ⚠️ E O CANO NÃO PRECISOU DE VERSÃO QUEBRADA: o `f4Cano2` já pendura de uma placa de teto,
+    // com volante e um risco âmbar de pressão. Um cano com gás jorrando É um cano quebrado — a
+    // pluma conta a história inteira, e uma arte nova só teria como destoar.
+    //
+    // ⚠️ ANCORADO NA PAREDE, PELA `Moldura`, e não no topo da criatura. Deduzir o teto do sprite
+    // dela fazia o cano FLUTUAR a meio corredor — o mesmo defeito que as passarelas levaram em
+    // 13/09 (*"terminaram com o problema do início das passarelas flutuando"*). Quem sabe onde a
+    // parede está é quem a desenha, e `superficieTetoEm` é o MESMO número que posiciona a faixa.
+    //
+    // ⚠️ E `setOrigin(0.5, 1)`: o cano pendura, então o que encosta na parede é a placa de CIMA
+    // dele. Ancorar pelo topo o deixaria pendurado a partir do vazio.
+    if (this.scene.textures.exists('f4Cano2')) {
+      const x = criatura.x - Esfincter.CANO_ADIANTE;
+      this.cano = this.scene.add
+        .image(x, this.tetoEm(x), 'f4Cano2')
+        .setOrigin(0.5, 0)
+        .setDepth(-0.55)
+        .setName('f4Cano');
+    }
+
+    // A nuvem nasce ENTRE o cano e a criatura, puxada para o lado do cano: o gás sai dali.
+    //
+    // ⚠️ DEPTH −0,45: À FRENTE da criatura (que mora em `DEPTH_NA_PAREDE`, −0,65) e atrás da nave
+    // (0). O gás tem de passar POR CIMA dela, senão não lê como gás no ar — lê como mancha na
+    // parede, que é o defeito que a arte provisória da porta já tinha documentado.
+    this.nuvem = this.scene.add
+      .sprite(criatura.x - Esfincter.CANO_ADIANTE / 2, criatura.y, 'f4GasSheet')
+      .setDepth(-0.45)
+      .setName('f4Gas');
+    if (this.scene.anims.exists('f4-gas')) this.nuvem.play('f4-gas');
+
+    // ⚠️ A ZONA É MAIS LARGA QUE A NUVEM (186 contra 128) e cobre do cano até depois da criatura.
+    // É o que faz *qualquer tiro serve* ser verdade por construção, em vez de depender de o
+    // jogador acertar o meio da pluma.
+    this.zonaGas = this.scene.add.zone(criatura.x - Esfincter.CANO_ADIANTE / 2, criatura.y, 186, 176);
+    this.scene.physics.world.enable(this.zonaGas);
+    const corpo = this.zonaGas.body as Phaser.Physics.Arcade.Body;
+    corpo.setAllowGravity(false);
+    // A zona é carregada pela criatura no `update`, não por velocidade própria.
+    corpo.moves = false;
+  }
+
+  update(): void {
+    if (!this.criatura) return;
+
+    // A criatura saiu de cena sem acender (o jogador não atirou e ela passou): recolhe tudo.
+    if (!this.criatura.active) {
+      this.limpar();
+      return;
+    }
+    // ⚠️ O CANO CONTINUA ANDANDO DEPOIS DA IGNIÇÃO, e por isso esta linha vem ANTES do `acesa`:
+    // ele sobreviveu ao estouro e tem de rolar com o mundo como qualquer peça de parede.
+    const xc = this.criatura.x - Esfincter.CANO_ADIANTE;
+    // ⚠️ O TETO É RELIDO A CADA QUADRO, e não guardado: a parede é uma ESCADA de placas de 128px e
+    // ainda está recuando quando o cano entra. Um y congelado no nascimento descolaria no primeiro
+    // degrau que passasse por baixo dele.
+    this.cano?.setPosition(xc, this.tetoEm(xc));
+    if (this.acesa) return;
+
+    this.relogio += this.scene.game.loop.delta;
+
+    // ⚠️ A NUVEM ANDA COM A CRIATURA, LIDA DELA A CADA QUADRO. Ela é movida por velocidade como
+    // todo prop; dar velocidade PRÓPRIA à nuvem criaria dois relógios que divergem, e uma nuvem
+    // que descola da peça denuncia o truque. É a mesma razão de o `QUADRO` do predador ser
+    // derivado da pose em vez de um segundo número.
+    const { x, y } = this.criatura;
+    const xg = x - Esfincter.CANO_ADIANTE / 2;
+    this.nuvem?.setPosition(xg, y);
+    this.zonaGas?.setPosition(xg, y);
+    (this.zonaGas?.body as Phaser.Physics.Arcade.Body | undefined)?.reset(xg, y);
+  }
+
+  /**
+   * A IGNIÇÃO. Devolve `false` se a nuvem ainda está só vazando — e é esse `false` que faz o
+   * jogador esperar em vez de matar a cena no primeiro quadro.
+   */
+  acender(): boolean {
+    if (!this.denso || !this.criatura) return false;
+    this.acesa = true;
+
+    const { x, y } = this.criatura;
+
+    // 1 · A NUVEM VIRA O CLARÃO: ela some no mesmo quadro em que o cone entra. Gás que continua
+    // vazando depois de pegar fogo é gás que não pegou fogo.
+    this.nuvem?.destroy();
+    this.nuvem = undefined;
+    this.zonaGas?.destroy();
+    this.zonaGas = undefined;
+
+    // ⚠️ O CANO FICA. Ele não estourou — o que pegou fogo foi o gás que já tinha saído dele. Um
+    // cano que some junto contaria que ele era parte da criatura, e ele é parte da PAREDE: rola
+    // com o mundo até o culling, como a lasca da porta fica no duto.
+
+    // 2 · O CONE. `setOrigin(0, 0.5)`: a ESQUERDA da arte é a boca dele, então ele nasce na
+    // criatura e abre para a direita, para dentro do núcleo.
+    const cone = this.scene.add
+      .sprite(x, y, 'f4ConeSheet')
+      .setOrigin(0, 0.5)
+      .setDepth(-0.4)
+      .setName('f4Cone');
+    if (this.scene.anims.exists('f4-cone')) {
+      cone.play('f4-cone');
+      cone.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => cone.destroy());
+      // ⚠️ O CONE ANDA COM O MUNDO. Sem isto ele fica parado na tela enquanto a parede rola por
+      // baixo, e um estouro que não acompanha a peça que estourou lê como flash de interface.
+      this.scene.tweens.add({
+        targets: cone,
+        x: x - 110 * 0.71,
+        duration: 710,
+      });
+    } else {
+      cone.destroy();
+    }
+
+    // 3 · O GORE — pedaços dela cuspidos para dentro do núcleo.
+    this.cuspirGore(x, y);
+
+    return true;
+  }
+
+  /**
+   * OS PEDAÇOS. Todos vão para a DIREITA, com espalhamento vertical — é o cone que os empurra, e
+   * um destroço que voltasse para a nave contaria a história errada.
+   *
+   * ⚠️ SÃO `GameObjects`, NÃO PROPS. Eles não têm corpo, não cobram vida e não seguram tiro: o
+   * jogador já ganhou quando eles nascem. Dar corpo a destroço de comemoração é cobrar duas vezes.
+   */
+  private cuspirGore(x: number, y: number): void {
+    for (let i = 0; i < Esfincter.PEDACOS; i++) {
+      const p = this.scene.add
+        .sprite(x, y, 'f4GoreSheet', i % Esfincter.GORE_QUADROS)
+        .setDepth(-0.42)
+        .setName('f4Gore');
+      const vx = 150 + Math.random() * 260;
+      const vy = (Math.random() - 0.5) * 190;
+      this.scene.tweens.add({
+        targets: p,
+        x: x + vx * 1.6,
+        y: y + vy * 1.6,
+        angle: (Math.random() - 0.5) * 540,
+        alpha: { from: 1, to: 0 },
+        duration: 1100 + Math.random() * 700,
+        ease: 'Quad.easeOut',
+        onComplete: () => p.destroy(),
+      });
+    }
+    this.fx.explode(x, y, 2.2);
+  }
+
+  limpar(): void {
+    this.cano?.destroy();
+    this.cano = undefined;
+    this.nuvem?.destroy();
+    this.nuvem = undefined;
+    this.zonaGas?.destroy();
+    this.zonaGas = undefined;
+    this.criatura = undefined;
+    this.acesa = false;
+    this.relogio = 0;
+  }
+}

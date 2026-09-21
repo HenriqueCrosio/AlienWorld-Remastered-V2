@@ -71,7 +71,23 @@ export type PropKind =
    * Falhar em destruí-la custa UMA vida e ela segue: os 1400ms de i-frames do `damageShip`
    * impedem que a mesma porta cobre duas vezes, e a fase nunca trava.
    */
-  | 'porta';
+  | 'porta'
+  /**
+   * O ESFÍNCTER da soleira do núcleo (Fase 4, M4): a GARGANTA — a mesma criatura que engole a
+   * nave na cutscene do hangar, agora segurando a entrada do núcleo.
+   *
+   * ⚠️ SEGUNDO PROP ANCORADO PELO CENTRO DO VÃO, depois da porta, e pelo mesmo motivo: uma
+   * comporta presa a uma das bordas deixaria passagem pela outra.
+   *
+   * ⚠️ E ELA MORRE COM UM TIRO SÓ — mas não por ser fraca. Quem mata é a NUVEM DE GÁS (ver
+   * `src/entities/esfincter.ts`): o `hp` dela é `Infinity` porque bala nenhuma fere a criatura
+   * diretamente. Sem isso o jogador a mataria a tiro antes de a nuvem engrossar, e a cena
+   * inteira — a espera, o gás, o estouro — nunca aconteceria. É o contrário da progressão 6/8/10
+   * das portas, de propósito: aqui o espetáculo é a peça, não a corrida de dano.
+   *
+   * Falhar em estourá-la custa UMA vida e ela segue, como a porta.
+   */
+  | 'garganta';
 
 interface PropDef {
   /** Vida. Infinity = indestrutível (rocha: existe para ser desviada). */
@@ -166,6 +182,13 @@ const PROPS: Record<PropKind, PropDef> = {
   // uma parede não respira. A fenda pulsando é o que separa *sou destrutível* de *sou cenário* à
   // distância, que é a metade da promessa do núcleo aceso (a outra metade é *mire aqui*).
   porta: { hp: 8, score: 200, shoots: false, anim: 'porta-nucleo' },
+  // ⚠️ `hp: Infinity` É A REGRA DA PEÇA, NÃO UM DESCUIDO — ver o `PropKind`. A garganta não cai na
+  // bala: ela cai na ignição do gás.
+  //
+  // ⚠️ E O `anim` FAZ O MESMO TRABALHO DE JOGO QUE O DA PORTA: uma parede não respira. É a
+  // respiração que diz *isto está vivo* antes de o jogador chegar perto — e nesta peça ela vem de
+  // graça, porque a `garganta-idle` já existia para a cutscene do hangar.
+  garganta: { hp: Infinity, score: 400, shoots: false, anim: 'garganta-viva' },
 };
 
 /**
