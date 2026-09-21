@@ -19,38 +19,41 @@ const pegar = async (f) => {
   return sharp(Buffer.from(await r.arrayBuffer()));
 };
 
+// ⚠️ A 1ª VERSÃO DESTA RÉGUA MEDIA A PERGUNTA ERRADA, e o erro só apareceu porque o resultado
+// discordou do olho. Ela media, por COLUNA, o maior vazio vertical — e dava 0 para uma peça em
+// forma de ANEL, que obviamente tem passagem. O que a nave precisa não é de uma coluna vazia: é de
+// uma FAIXA HORIZONTAL livre de ponta a ponta, porque é na horizontal que ela voa.
+//
+// A régua agora varre LINHAS: uma linha é livre se nenhuma coluna da peça a obstrui. O maior bloco
+// de linhas livres consecutivas é a fresta. Na lasca da porta isso dá a banda entre as duas metades.
 for (const f of process.argv.slice(2)) {
   const { data, info } = await (await pegar(f)).raw().ensureAlpha().toBuffer({ resolveWithObject: true });
   const { width: W, height: H } = info;
   const opaco = (x, y) => data[(y * W + x) * 4 + 3] > 40;
 
-  let piorCentro = Infinity;
-  let melhor = 0;
-  let colMelhor = -1;
-  for (let x = 0; x < W; x++) {
-    // O topo e a base da SILHUETA nesta coluna. Sem peça na coluna, ela não conta.
-    let topo = -1,
-      base = -1;
-    for (let y = 0; y < H; y++) if (opaco(x, y)) { if (topo < 0) topo = y; base = y; }
-    if (topo < 0) continue;
-    // A maior faixa transparente ENTRE o topo e a base: o buraco.
-    let maior = 0,
-      corrente = 0;
-    for (let y = topo; y <= base; y++) {
-      if (opaco(x, y)) corrente = 0;
-      else { corrente++; if (corrente > maior) maior = corrente; }
-    }
-    if (maior > melhor) { melhor = maior; colMelhor = x; }
-    // A metade central é por onde a nave passa de verdade.
-    if (x > W * 0.3 && x < W * 0.7 && maior < piorCentro) piorCentro = maior;
+  // O topo e a base da SILHUETA inteira: fora disso é o vazio em volta, não passagem.
+  let topo = -1, base = -1;
+  for (let y = 0; y < H; y++) {
+    let tem = false;
+    for (let x = 0; x < W && !tem; x++) if (opaco(x, y)) tem = true;
+    if (tem) { if (topo < 0) topo = y; base = y; }
   }
 
-  const nome = f.split('/').slice(-3).join('/');
-  const veredicto =
-    piorCentro >= 38 ? 'PASSA' : piorCentro >= 24 ? 'apertado' : 'NÃO PROMETE PASSAGEM';
+  let maior = 0, corrente = 0, fimDaFaixa = -1;
+  for (let y = topo; y <= base; y++) {
+    let bloqueia = false;
+    for (let x = 0; x < W && !bloqueia; x++) if (opaco(x, y)) bloqueia = true;
+    if (bloqueia) corrente = 0;
+    else { corrente++; if (corrente > maior) { maior = corrente; fimDaFaixa = y; } }
+  }
+
+  const nome = f.split('/').slice(-2).join('/');
+  const veredicto = maior >= 38 ? 'PASSA' : maior >= 24 ? 'apertado' : 'NÃO PROMETE PASSAGEM';
   console.log(
-    `${String(piorCentro === Infinity ? 0 : piorCentro).padStart(3)}px no pior ponto do meio  ` +
-      `(maior buraco ${melhor}px na coluna ${colMelhor})  ${veredicto.padEnd(21)} ${nome}`,
+    `${String(maior).padStart(3)}px de faixa livre  ` +
+      `(y ${fimDaFaixa - maior + 1}..${fimDaFaixa} de uma peça de ${base - topo + 1}px)  ` +
+      `${veredicto.padEnd(21)} ${nome}`,
   );
 }
-console.log('\nreferência: a lasca da porta promete 38px, e a nave tem corpo 17×6 / sprite 31×15');
+console.log('');
+console.log('referência: a lasca da porta promete 38px, e a nave tem corpo 17×6 / sprite 31×15');
