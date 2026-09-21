@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-20)
+# HANDOFF — estado do projeto (2026-09-21)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -58,10 +58,12 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
    com a frase de arranque e o que fazer primeiro (🚦).
 
-   **Estado em 2026-09-20: falta UMA peça, o ESFÍNCTER — e as 3 PORTAS esperam o teste jogado.**
-   A branch está em dia com o `origin` (V2). ⏸️ **A sessão parou com as portas construídas e
-   commitadas (`94f84cf` + `6fc3ac3`) e ELE AINDA NÃO JOGOU essa versão** — o roteiro do teste está
-   na seção ⏸️ do START, e é por ele que a próxima sessão abre. Tudo abaixo foi jogado e aprovado:
+   **Estado em 2026-09-21: falta UMA peça na Fatia 7 inteira — o ESFÍNCTER.** A branch está em dia
+   com o `origin` (V2). ✅ **As 3 PORTAS foram jogadas e APROVADAS em 21/09, sem um único ajuste
+   pedido** (`94f84cf` + `6fc3ac3`): *"é visível que você tem que atirar nela, se o jogador não
+   perceber no começo, vai cobrar com a vida"* · *"dá pra ver que você ganhou"* · *"não chama muita
+   atenção e serve para o propósito"* · *"as lascas que sobram depois da explosão indicam exatamente
+   o que queremos, passagem livre"*. Tudo abaixo também foi jogado e aprovado:
 
    - o **Bloco A** (os 4 fundos dele) e a **MOLDURA** (M1, M1.5: o duto, as 3 portas provisórias);
    - o **GOLFINHO**, o mini-chefão da câmara B — e a dificuldade da arena, aprovada em 19/09;
@@ -92,10 +94,14 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    e **reprovada na hora** (*"ficou gerado e sem custos"*); foi refeita assada
    (`scripts/_f4/_assar-fim-f4.mjs`). O código de cena só toca a arte assada.
 
-   **🟡 AS 3 PORTAS ESTÃO CONSTRUÍDAS E ESPERAM O VEREDICTO.** Arte final (a fenda acesa dentro de
+   **✅ AS 3 PORTAS FORAM JOGADAS E APROVADAS (21/09), SEM AJUSTE.** Arte final (a fenda acesa dentro de
    um soquete de anéis blindados, escolhida por ele entre 8 candidatas), o pulso da fenda em 8
    quadros **assados** e a morte em dois tempos: a luz apaga, a peça PARTE AO MEIO, e a lasca FICA
-   no duto para a nave atravessar. As três perguntas do teste estão no ⏸️ do START.
+   no duto para a nave atravessar. O núcleo não engrossou, os 150ms ficaram, o pulso não foi reassado.
+   ⚠️ **E a desconfiança de que esconder as pontas tivesse enfraquecido o *"eu abri isso"* estava
+   ERRADA, ao contrário:** as pontas de baixo eram ângulos RETOS — a parte da peça que menos parecia
+   destroço — e tirá-las de vista deixou sobrar só o que comunica passagem livre. **Esconder o que a
+   arte tem de menos orgânico foi ganho duplo: encaixe E leitura.**
 
    **O QUE FALTA CONSTRUIR — uma peça:** o **ESFÍNCTER** (`f4VivoC`, 48×48 em 8 quadros: abre e
    fecha na parede, não colide, só respira).

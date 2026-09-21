@@ -76,9 +76,14 @@ literal 64), o `ESPESSURA_MAX` ficou em 54, e os 16px viraram COBERTURA e não a
   e 3 → 8). Medido: juntas com a luz contínua **25/48 → 38/46**; espalhamento **28/44px → 15/16px**. ⚠️ **E não
   custou largura** — ele ofereceu apertar o duto e não foi preciso: a banda mais estreita segue 84px.
 
-**🟡 M4 · AS 3 PORTAS — CONSTRUÍDAS, COMMITADAS E À ESPERA DO TESTE JOGADO (20/09).** Arte final, respiração e
-morte em dois tempos estão no jogo (`94f84cf`), e os dois ajustes que ele pediu depois de jogar a 1ª versão
-também (`6fc3ac3`). **Ele ainda não jogou esta versão** — ver o ⏸️ na 🚦, que é por onde a próxima sessão abre.
+**🟢 M4 · AS 3 PORTAS — JOGADAS E APROVADAS (21/09).** As quatro perguntas do teste voltaram SIM. *"É visível
+que você tem que atirar nela, se o jogador não perceber no começo, vai cobrar com a vida"* · *"dá pra ver que
+você ganhou"* · *"não chama muita atenção e serve para o propósito"* · *"as lascas que sobram depois da explosão
+indicam exatamente o que queremos, passagem livre"*. **Nenhum ajuste pedido** — o núcleo não engrossou, os 150ms
+ficaram, o pulso não foi reassado. Arte final, respiração e morte em dois tempos em `94f84cf` + `6fc3ac3`.
+⚠️ **E a 4ª pergunta — a minha desconfiança de que esconder as pontas tivesse enfraquecido o *"eu abri isso"* —
+foi respondida ao contrário:** as pontas de baixo são ângulos mais retos, e **é bom que fiquem escondidas**. O que
+sobra da lasca comunica passagem livre melhor do que a peça inteira comunicava.
 
 **Falta UMA peça na Fatia 7 inteira: o ESFÍNCTER** (`f4VivoC`). Ver a 🚦.
 
@@ -88,7 +93,7 @@ slash saltado, o teto por uma garra, o arremesso com a garra livre e a VOLTA QUE
 incandescente). FALTA JOGAR: a rodada 5b — o FIM DA MORTE** (o piso racha, estoura, a lava sobe e o corpo afunda),
 refeita em arte assada em pixel depois de ele reprovar a 1ª versão. A rodada 6 (18–19/09) — o arremesso do teto
 refeito, porque a garra trocava no meio do gesto — **já foi jogada e APROVADA**: *"ficou ótima e in-game melhor
-ainda"*. Ver 🚦 e ⏸️ logo abaixo.
+ainda"*. Ver 🚦 logo abaixo.
 
 Branch `feat/fase4-visual`, **em dia com o `origin` (V2)** — tudo o que está descrito aqui está commitado e
 empurrado. O remoto é o **V2**; NUNCA o `legacy`.
@@ -97,14 +102,12 @@ empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦, e pare no ⏸️. As
-> 3 PORTAS estão construídas e commitadas, mas eu ainda NÃO joguei esta versão — a sessão passada terminou aí. Vou
-> jogar o duto e te dar o veredicto. Depois dele, falta só o ESFÍNCTER para fechar a Fatia 7."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pela seção 🚦. As 3 PORTAS
+> foram jogadas e APROVADAS sem ajuste em 21/09. Falta UMA peça para fechar a Fatia 7: o ESFÍNCTER."**
 
-⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** Ela abre pelo ⏸️ logo abaixo, que é o roteiro do teste — as
-três perguntas que só o controle na mão responde, e o que fazer com cada resposta. **Nada de mexer nas portas
-antes do veredicto dele**: elas já foram ajustadas uma vez a partir de um teste jogado, e o que falta é o
-julgamento, não mais construção.
+⚠️ **O esfíncter é arte DELE, não restrição mecânica** — então o fluxo é o de sempre: **brainstorming → spec →
+plano → implementação → teste jogado → merge**, e abre-se **listando o que vai ser gerado e pedindo o aval**,
+nunca gerando primeiro. Ver `🧭 COMO ABRIR O ESFÍNCTER`.
 
 ---
 
@@ -129,59 +132,39 @@ duto. Se um dia o duto parecer folgado, é esse o número, e só até 70.
 | peça | o que é | estado |
 |---|---|---|
 | ~~a BORDA C~~ | 128×80, com o pilar `mesa3` na costura B→C | ✅ jogada e aprovada em 20/09 (`28b0a14`) |
-| ~~as 3 PORTAS~~ | arte final, respiração e morte em dois tempos | 🟡 **construídas (`94f84cf` + `6fc3ac3`) — à espera do TESTE JOGADO** |
+| ~~as 3 PORTAS~~ | arte final, respiração e morte em dois tempos | ✅ jogadas e aprovadas em 21/09, **sem ajuste pedido** |
 | **o ESFÍNCTER** | `f4VivoC`, 48×48 em 8 quadros: abre e fecha na parede, não colide, só respira | ⬜ a construir |
 
-**Depois do veredicto das portas e do esfíncter:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar
+**Depois do esfíncter:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar
 a fatia com merge `--no-ff` de `feat/fase4-visual` em `main`.
 
 ---
 
-## ⏸️ ONDE PARAMOS — AS PORTAS ESPERAM O TESTE JOGADO (20/09)
+## ✅ O VEREDICTO DAS PORTAS — APROVADAS SEM AJUSTE (21/09)
 
-**A sessão terminou com as portas construídas e commitadas, e ELE AINDA NÃO JOGOU esta versão.** Tudo está
-empurrado; nada está pendente de código. O que falta é o julgamento dele.
+**As 3 portas do duto foram jogadas e passaram nas quatro perguntas.** Nenhum número mudou, nenhuma peça foi
+refeita. O que estava em `94f84cf` + `6fc3ac3` é a versão final.
 
-### Como jogar
-
-`npm run dev` noutro terminal · `L` leva direto à Fase 4 · o duto começa em **t≈68** e as três portas chegam em
-**t=72 (hp 6)**, **t=82 (hp 8)** e **t=94 (hp 10)**.
-
-### As três perguntas — e o que fazer com cada resposta
-
-| # | a pergunta | se a resposta for "não" |
+| # | a pergunta | a resposta dele |
 |---|---|---|
-| **1** | *a porta diz "atire em mim" ANTES de você bater nela?* (é o critério de aceite do Bloco C, escrito na spec de 06/09) | engrossar o núcleo ou adiantar a respiração. ⚠️ **NÃO** clarear: ela já é a coisa mais acesa da tela depois das veias (4,1% de px claros contra 1,4% da parede) |
-| **2** | *os 150ms da lasca dão tempo de ver que você ganhou, ou passam batido?* | subir o `delayedCall(150)` do `matarPorta` (`GameScene`). É um número, não uma peça |
-| **3** | *a fenda pulsando chama demais, num duto que é a câmara mais escura das quatro?* | baixar a amplitude do pulso: `node scripts/_f4/_assar-porta-nucleo.mjs scripts/_f4/_portas/2e-fenda-alvo.png public/sprites/f4-porta-nucleo-sheet.png 8 0.65` (o `0,45` é o mínimo do cosseno; subir = pulso mais discreto) |
+| **1** | *a porta diz "atire em mim" antes de você bater nela?* | **sim** — *"é visível que você tem que atirar nela, se o jogador não perceber no começo, vai cobrar com a vida"*. ⚠️ A leitura não só existe: **ela cobra**, que é o que o critério de aceite de 06/09 pedia |
+| **2** | *os 150ms da lasca dão tempo de ver que você ganhou?* | **sim** — *"dá pra ver que você ganhou"*. O `delayedCall(150)` do `matarPorta` fica |
+| **3** | *a fenda pulsando chama demais no duto escuro?* | **não** — *"ficou boa, não chama muita atenção e serve para o propósito"*. O pulso **não** foi reassado; o `0,45` do cosseno fica |
+| **4** | *(minha desconfiança) esconder as pontas enfraqueceu o "eu abri isso"?* | **ao contrário** — *"as pontas de baixo são ângulos mais retos, bom que fiquem escondidas. Mas as lascas que sobram depois da explosão indicam exatamente o que queremos, passagem livre"* |
 
-⚠️ **E UMA QUARTA, que é minha desconfiança e não dele:** com as pontas escondidas atrás da borda (o ajuste que
-ele pediu), **a lasca ficou mais discreta** — o que sobra dela na tela é menor do que era antes. Se o *"eu abri
-isso"* enfraqueceu junto, dá para engrossar os cotos na arte ou segurar a explosão mais tempo.
+⚠️ **A 4ª vale como lição, porque eu errei o diagnóstico.** Eu supus que esconder as pontas tivesse custado a
+sensação de conquista. Custou o oposto: as pontas de baixo eram **ângulos retos** — a parte da peça que menos
+parecia destroço — e tirá-las de vista deixou sobrar só o que comunica **passagem livre**. Esconder o que a arte
+tem de menos orgânico foi ganho duplo: encaixe E leitura. Não adivinhe o custo de um ajuste que ele pediu.
 
-### O que NÃO se refaz sem ele pedir
-
-- **a peça escolhida** (`public/sprites/f4-porta.png`): ele escolheu entre 8 candidatas em duas rodadas. Os crus
-  ficam em `scripts/_f4/_portas/`, e a folha de contato é `_folha-portas-fenda.png`;
-- **a lasca** (`f4-porta-lasca.png`): o desenho de partir ao meio é pedido dele, e a fresta de 38px está medida
-  contra a nave (17×6 de corpo, 31×15 de sprite);
-- **o pulso assado**: 8 quadros em que só a brasa muda. Regerar no PixelLab faz os ~40 rebites rastejarem — a
-  razão inteira de o `_assar-porta-nucleo.mjs` existir.
-
-### Depois do veredicto
-
-Aprovado → **o ESFÍNCTER**, a última peça da Fatia 7. Ver a tabela acima e a seção
-`## ⛏️ O QUE FALTA CONSTRUIR — a câmara C`.
-
-⚠️ **E a borda C deixou uma lição que vale direto para ele:** arte com uma LINHA FORTE impõe geometria à fase (a
-veia acesa da borda obrigou o duto a mudar o ritmo da curva). O esfíncter é uma peça que ABRE E FECHA numa parede
-que rola — vale perguntar o que ele vai impor antes de gerar.
+**Com isso o M4 tem duas de três peças fechadas** (borda C ✅ · portas ✅) e **falta UMA na Fatia 7 inteira: o
+ESFÍNCTER.**
 
 ---
 
 ### 🧭 COMO ABRIR O ESFÍNCTER — a ordem, e o que ler antes
 
-⚠️ **PRIMEIRO O VEREDICTO DAS PORTAS (o ⏸️ acima), e só então esta seção.** O esfíncter é a última peça, e o
+✅ **AS PORTAS JÁ TÊM VEREDICTO (21/09, aprovadas sem ajuste).** O esfíncter é a última peça, e o
 fluxo desta fatia é o de sempre — **brainstorming → spec → plano → implementação → teste jogado dele → merge**.
 Ele é arte dele, não restrição mecânica: abre-se listando o que vai ser gerado e pedindo o aval.
 
@@ -196,7 +179,7 @@ que congelaria a lasca. **Peça nova nesta fase mexe no motor mais do que parece
 
 **O que ler, na ordem:**
 
-1. esta 🚦 e o ⏸️ (o estado das três peças e o teste pendente);
+1. esta 🚦 e o ✅ do veredicto das portas (o estado das três peças do M4: duas fechadas, o esfíncter aberto);
 2. **`## ⛏️ O QUE FALTA CONSTRUIR — a câmara C`**, mais abaixo neste arquivo — o registro de como a borda C
    entrou, e os números que NÃO se mexe (o `ESPESSURA_MAX` em 54, o `PASSO_MAX` em 14);
 3. **`## ⛏️ O DEGRAU DO DUTO — o que saiu e o que NÃO sai`** — a `Moldura` já levou uma rodada de "faixa que
@@ -209,7 +192,7 @@ que congelaria a lasca. **Peça nova nesta fase mexe no motor mais do que parece
 |---|---|
 | a borda C, instalada em 20/09 e aprovada | `public/sprites/f4-faixa-c.png` (128×80); o cru em `scripts/_f4/_faixa-C-v.png` |
 | o pilar da costura B→C, aprovado em 20/09 | `junta: 'mesa3'` no `cenario` de t=68 |
-| as 3 portas, com arte final, respiração e morte em dois tempos | `f4-porta.png` · `f4-porta-lasca.png` · `f4-porta-nucleo-sheet.png` (🟡 à espera do teste) |
+| as 3 portas, com arte final, respiração e morte em dois tempos | `f4-porta.png` · `f4-porta-lasca.png` · `f4-porta-nucleo-sheet.png` (✅ aprovadas em 21/09) |
 | o assador do pulso da porta — quem impõe o limite de cor que o gerador ignora | `scripts/_f4/_assar-porta-nucleo.mjs` |
 | ~~as portas provisórias~~ | `f4-porta-prov.png` fica no disco, como a faixa e a mesa: a regra de saída é dele |
 | o motor da faixa, com `setFaixa` e a troca pelo evento `cenario` | `src/systems/Moldura.ts` |
@@ -608,7 +591,7 @@ a morte no chão (desaba e fica estendido) · a saída pela direita e o aviso da
 
 ### 🔧 Onde mexer, por tipo de pedido (vale para qualquer rodada)
 - **Efeito de cenário (lava, rachadura)** → mexa no **assador** e rode de novo; o código de cena não desenha nada.
-- **Ajuste de número da luta** → a tabela de knobs da ⏸️ ("O que ajustar"). Rode `node scripts/probe-stage4.mjs` depois.
+- **Ajuste de número da luta** → a tabela de knobs da seção da luta do guardião ("O que ajustar"). Rode `node scripts/probe-stage4.mjs` depois.
 - **Clipe que não serve** → primeiro veja se a perdedora guardada resolve (`assets/raw/furia-predador-anim3/` e
   `anim4/`, folhas `r3-*.png` e `r4-candidatas.png`): trocar é apontar o `_instalar-predador.mjs` e reinstalar,
   **zero geração** — e conferir o fator em `Predador.QUADRO` (a base de onde o clipe foi gerado).
@@ -1027,7 +1010,7 @@ linha forte impõe geometria à fase; vale lembrar disso quando o esfíncter ent
 
 ---
 
-### 🟡 AS 3 PORTAS — construídas em 20/09, à espera do teste jogado
+### ✅ AS 3 PORTAS — construídas em 20/09, JOGADAS E APROVADAS SEM AJUSTE em 21/09
 
 A arte provisória era um retângulo escuro com um borrão laranja, e ela destoava pouco enquanto a parede ao redor
 também era provisória. Com a borda C virada arte final, ela virou a única coisa borrada na tela.
@@ -1759,8 +1742,9 @@ BLOCO B · B2 — A POSIÇÃO  ✅ FECHADO EM 20/09, SEM CÓDIGO: a posição de
                              corte do sprite" — os tentáculos no teto são o acabamento, não o defeito.
 M4 — A CÂMARA C           🟨 ◄ PEGUE AQUI · a borda C grossa (128×80) + o pilar da costura B→C
                              ✅ JOGADOS E APROVADOS em 20/09. As 3 PORTAS com arte final, respiração
-                             e morte em dois tempos 🟡 CONSTRUÍDAS e à espera do teste jogado —
-                             ver o ⏸️ no topo. Falta o esfíncter (`f4VivoC`, 48×48 em 8 quadros)
+                             e morte em dois tempos ✅ JOGADAS E APROVADAS em 21/09, SEM AJUSTE.
+                             Falta SÓ o esfíncter (`f4VivoC`, 48×48 em 8 quadros) — a última
+                             peça da Fatia 7 inteira
 M5 — A CÂMARA D           ✅ absorvido pelo M2 (`f4FaixaD` instalada e aprovada)
 ```
 
