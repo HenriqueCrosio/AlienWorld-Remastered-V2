@@ -307,6 +307,22 @@ await p2.waitForFunction(() => window.__game.scene.getScenes(true)[0].esfincter?
   timeout: 40000,
   polling: 40,
 });
+// ⚠️ O DEPTH DA MANGUEIRA É LIDO ANTES DO TIRO, porque depois dele o cano ainda existe mas a cena
+// está cheia — e o que se quer provar é onde ela mora em relação à PAREDE, não se ela sobreviveu.
+const camadas = await p2.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const cano = s.children.list.find((o) => o.name === 'f4Cano');
+  const faixa = s.children.list.find((o) => o.name === 'faixaTeto');
+  return { cano: cano?.depth ?? null, faixa: faixa?.depth ?? null };
+});
+console.log('camadas  ', JSON.stringify(camadas));
+// ⭐ MEDIDO CONTRA A FAIXA DE VERDADE, não contra o literal −0,6. Se a `Moldura` mudar de camada, é
+// a mangueira que tem de acompanhar — e um assert cravado no número não avisaria.
+ok(
+  camadas.cano !== null && camadas.faixa !== null && camadas.cano < camadas.faixa,
+  `⭐ a mangueira fica ATRÁS da borda (cano ${camadas.cano} < faixa ${camadas.faixa}) — cravada, não colada`,
+);
+
 const g = await p2.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   s.matarGarganta();
@@ -337,7 +353,6 @@ const g = await p2.evaluate(() => {
     tela: dos('f4SangueTela').length,
   };
 });
-await p2.close();
 console.log('gore     ', JSON.stringify(g));
 // ⚠️ AS DUAS FOLHAS SAEM JUNTAS — escolha dele em 22/09 (*"gostei das gerações de pedaços e
 // sangue"*). Se um destes dois cair para zero, o estouro perdeu metade da matéria sem ninguém ver:
@@ -349,6 +364,41 @@ ok(g.respingo === 5, `5 respingos grudam nas duas bandas (${g.respingo})`);
 ok(g.respingoFora === 0, `⭐ e os 5 nascem ENCOSTADOS na superfície da Moldura (${g.respingoFora} fora)`);
 ok(g.poca === 1 && g.pocaNoChao === true, `⭐ a poça cai no CHÃO da Moldura, e o chão deduzido bate`);
 ok(g.tela === 5, `e o vidro suja (${g.tela} manchas, que somem antes do chefão)`);
+
+// ─── A CÂMERA LENTA ──────────────────────────────────────────────────────────
+// ⚠️ MEDIDA DEPOIS DE UM QUADRO, nunca no mesmo. O `matarGarganta` só arma a rampa; quem aplica as
+// escalas é o `update`. Ler no mesmo `evaluate` devolveria 1 em tudo e o assert passaria ao contrário.
+await p2.waitForTimeout(120);
+const lenta = await p2.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return {
+    tweens: s.tweens.timeScale,
+    relogio: s.time.timeScale,
+    anims: s.anims.globalTimeScale,
+    fisica: s.physics.world.timeScale,
+  };
+});
+console.log('lenta    ', JSON.stringify(lenta));
+ok(lenta.tweens < 0.8, `o mundo entra em câmera lenta no estouro (tweens ${lenta.tweens.toFixed(2)})`);
+ok(lenta.relogio < 0.8 && lenta.anims < 0.8, `o relógio e as animações vão junto (${lenta.relogio.toFixed(2)} / ${lenta.anims.toFixed(2)})`);
+// ⭐ O DISCRIMINADOR DA INVERSÃO. O Arcade conta `msPerFrame = _frameTimeMS * timeScale`, então
+// devagar é MAIOR que 1. Se um dia alguém "consertar" isto para acompanhar os outros três, a física
+// acelera enquanto o resto desacelera — e nenhum assert de "está lento" pegaria.
+ok(lenta.fisica > 1.2, `⭐ e a física vai no INVERSO, como o Arcade exige (${lenta.fisica.toFixed(2)})`);
+
+// ⚠️ E O FIM DA RAMPA É METADE DO PEDIDO — *"e o final normal"*. Sem este assert, uma rampa que
+// travasse no piso deixaria o jogo inteiro em 30% até o fim da fase, e o teste acima passaria igual.
+await p2.waitForTimeout(1100);
+const voltou = await p2.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  return [s.tweens.timeScale, s.time.timeScale, s.anims.globalTimeScale, s.physics.world.timeScale];
+});
+ok(
+  voltou.every((v) => v === 1),
+  `⭐ e o tempo VOLTA sozinho ao normal (${voltou.join(' / ')})`,
+);
+
+await p2.close();
 
 await browser.close();
 console.log(falhas === 0 ? '\nTUDO OK' : `\n${falhas} FALHA(S)`);

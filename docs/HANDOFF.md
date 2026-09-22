@@ -106,7 +106,7 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    **🟢 O ESFÍNCTER PASSOU NO TESTE JOGADO (22/09), nas cinco perguntas** — *"a explosão e o arrombamento
    da criatura ficou muito boa"* — **e o gore fechou no mesmo dia**: *"mantém a carcaça que já temos e
    segue, gostei das gerações de pedaços e sangue"*. As 14 placas de casco e as 11 vísceras do PixelLab
-   saem JUNTAS, com o sangue dela no ar e grudado na cena. Sonda 38/38.
+   saem JUNTAS, com o sangue dela no ar e grudado na cena. Sonda 43/43.
    **🔵 A FATIA 7 NÃO TEM MAIS ARTE NEM CÓDIGO PENDENTE** — falta rejogar a fase, atualizar este arquivo
    e fazer o merge `--no-ff` em `main`.
    ⚠️ **Ele jogou a 1ª versão e pediu três coisas, todas feitas:** (1) o gore passou a vir do PixelLab

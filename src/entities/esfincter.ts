@@ -169,7 +169,16 @@ export class Esfincter {
       const m = this.scene.add
         .sprite(x, this.tetoEm(x) - Esfincter.CANO_ENTERRADO, 'f4MangueirasSheet')
         .setOrigin(0.5, 0)
-        .setDepth(-0.55)
+        // ⚠️ DEPTH −0,61: ATRÁS DA BORDA (a faixa mora em −0,6), e isso é pedido dele de 22/09 —
+        // *"coloque o cano de gás para trás do layer da borda, para parecer que ele está cravado
+        // lá"*. A −0,55 a peça ficava À FRENTE da parede: os px que ela enfia no teto eram
+        // DESENHADOS por cima dele, então a mangueira lia como colada na superfície — o defeito
+        // exato que o `CANO_ENTERRADO` existia para resolver e não resolvia sozinho. Enterrar sem
+        // mandar para trás é pintar a peça em cima do buraco em que ela deveria estar.
+        //
+        // ⚠️ E −0,61 é um degrau, não um número redondo: a saia mora em −0,62 e as bandas de placas
+        // em −0,75. A mangueira tem de entrar ENTRE a face da parede e o enchimento dela.
+        .setDepth(-0.61)
         .setName('f4Cano');
       if (this.scene.anims.exists('f4-mangueiras')) m.play('f4-mangueiras');
       this.cano = m;
@@ -526,7 +535,10 @@ export class Esfincter {
         .sprite(x, noTeto ? teto + 1 : chao - 1, 'f4RespingoSheet', i % 4)
         // No teto ele PENDURA (as escorridas descem da superfície); no chão ele se apoia.
         .setOrigin(0.5, noTeto ? 0 : 1)
-        .setDepth(-0.6)
+        // ⚠️ −0,59, NÃO −0,6: a faixa da `Moldura` mora exatamente em −0,6, e empate de depth no
+        // Phaser se resolve pela ORDEM DE CRIAÇÃO. Funcionava por acidente (o respingo nasce
+        // depois), e ia parar de funcionar no dia em que a parede fosse recriada durante a cena.
+        .setDepth(-0.59)
         .setAlpha(0)
         .setName('f4Respingo');
       this.scene.tweens.add({ targets: m, alpha: 1, duration: 80, delay: 40 + i * 30 });

@@ -93,7 +93,7 @@ sem ele pedir foi aprovada).
 **🟢 E O PEDIDO DE 22/09 — *"quero ela com a adição de ser mais sanguinolenta"* — FOI FECHADO NO MESMO
 DIA.** Eu montei três variações; ele não escolheu um lado: *"mantém a carcaça que já temos e segue,
 gostei das gerações de pedaços e sangue"*. As duas coisas novas entraram juntas — 14 placas de casco +
-11 vísceras do PixelLab + o sangue dela, no ar e grudado na cena. Sonda 38/38. **O ESFÍNCTER ESTÁ
+11 vísceras do PixelLab + o sangue dela, no ar e grudado na cena. Sonda 43/43. **O ESFÍNCTER ESTÁ
 FECHADO, E COM ELE AS TRÊS PEÇAS DO M4.**
 
 **🔵 A FATIA 7 NÃO TEM MAIS ARTE NEM CÓDIGO PENDENTE.** O que falta é rejogar a fase inteira (inclusive
@@ -218,7 +218,7 @@ PixelLab (bem mais sangrenta, mas com o buraco quase fechado) ficou **fora do jo
 asset carregado-nunca é peso no build. A leitura de *passagem aberta* vem do vão do anel, e ele
 aprovou essa leitura na pergunta 1.
 
-**Verificação:** `probe-f4-esfincter` **38/38** — inclusive o par que separa as duas folhas (`14 placas`
+**Verificação:** `probe-f4-esfincter` **43/43** — inclusive o par que separa as duas folhas (`14 placas`
 e `11 vísceras` contadas pela CHAVE DE TEXTURA, não pelo total: se uma das duas cair para zero, 25
 pedaços continuam saindo e a contagem total não denuncia nada) e o discriminador da poça contra a
 `Moldura`. `probe-stage4`, `probe-f4-moldura`, `probe-f4-visual`, `probe-f4-golfinho`,
@@ -226,6 +226,49 @@ pedaços continuam saindo e a contagem total não denuncia nada) e o discriminad
 
 **Para conferir:** `scripts\_f4\_folha-gore-final.png` (a cheia) · `_folha-gore-final-zoom.png` (o zoom
 na ferida) · `_folha-esfincter.png` (a cena inteira, da chegada à passagem aberta).
+
+### ✅ MAIS DOIS PEDIDOS, FECHADOS NA MESMA SESSÃO (22/09)
+
+> *"coloque o cano de gás para trás do layer da borda, para parecer que ele está cravado lá"* · *"faça
+> com que o início da explosão seja em câmera lenta e o final normal"*
+
+**1 · A MANGUEIRA DESCEU DE −0,55 PARA −0,61 — atrás da faixa, que mora em −0,6.** ⚠️ **E isto explica
+por que o `CANO_ENTERRADO` sozinho nunca resolveu.** Ele já enfiava 5px da placa no teto desde 21/09,
+mas a −0,55 a peça era desenhada POR CIMA da parede: os px enterrados apareciam, e a mangueira lia como
+colada na superfície. **Enterrar sem mandar para trás é pintar a peça em cima do buraco em que ela
+deveria estar.** Agora a linha acesa da borda corta o topo dela, e ela sai de DENTRO do teto.
+⚠️ −0,61 é um degrau escolhido, não um número redondo: a saia mora em −0,62 e as bandas de placas em
+−0,75 — a mangueira tem de entrar entre a FACE da parede e o enchimento dela. De carona, o respingo saiu
+do empate em −0,6 (empate de depth no Phaser se resolve pela ordem de criação: funcionava por acidente).
+
+**2 · A CÂMERA LENTA — 820ms, piso 0,3, rampa `k²`,** armada no `matarGarganta` **depois** do
+`acender()` e só dele: antes do `if`, ela dispararia a cada tiro dado enquanto o gás ainda vaza, e a
+espera tensa que ele aprovou viraria engasgo.
+
+⚠️ **É CÂMERA LENTA, NÃO `hitstop`, e o `hitstop` estava ali de graça.** O hitstop é um SOCO: prega o
+mundo e solta (por isso é dos chefões). Aqui o que precisa ser visto dura quase um segundo — o clarão
+abrindo, as placas partindo, as vísceras saindo, o sangue voando. Congelar o primeiro quadro esconderia
+o que ele pediu para ver.
+
+⚠️ **QUATRO SUBSISTEMAS, E UM É INVERSO.** Tweens, `Clock` e animações usam a escala direta; o mundo do
+Arcade conta `msPerFrame = _frameTimeMS * timeScale`, ou seja **2 = metade da velocidade**. Esquecer a
+inversão faria a física ACELERAR enquanto todo o resto desacelera — e nenhum assert de "está lento"
+pegaria isso. Tem assert só para ela.
+
+⚠️ **E O `dt` DA CENA É O QUINTO.** O `elapsed`, o starfield, o parallax e o avanço da `Moldura` não
+passam por tween nem por física: sem escalar o `dt`, o estouro ficaria lento e o corredor continuaria
+correndo por baixo dele.
+
+⚠️ **A RAMPA É MEDIDA NO `delta` CRU, como o `hitstopAte`** — uma rampa que se medisse no tempo já
+escalado se arrastaria por ~2,7s em vez dos 820ms. E o `tempoNormal()` é chamado também no `create` e
+nos dois `over = true`: o `globalTimeScale` é **do jogo**, não da cena, e morrer no meio da rampa
+deixaria o menu e o interlúdio inteiros em 30% — a armadilha do `BossNucleo` de 20/09, com o alcance do
+jogo inteiro em vez de um sprite.
+
+**Sonda: 43/43.** Os dois pedidos levaram assert, e os dois medem contra a coisa certa: a mangueira
+contra o depth da FAIXA (não contra o literal −0,6, que não avisaria se a `Moldura` mudasse de camada),
+e a rampa em dois instantes — que ela desce **e que ela volta**, porque uma rampa travada no piso
+passaria no primeiro teste e deixaria o jogo em 30% até o fim da fase.
 
 ### 🔵 O QUE FALTA PARA FECHAR A FATIA 7
 

@@ -184,6 +184,21 @@ export class GameScene extends Phaser.Scene {
    * morte do chefão sem ajuste).
    */
   private hitstopAte = 0;
+
+  /**
+   * A CÂMERA LENTA DO ESTOURO (22/09). Quanto ainda falta da rampa, quanto ela durava e onde é o
+   * piso da escala. `lentidaoRestante = 0` significa tempo normal.
+   *
+   * ⚠️ MEDIDOS EM MS DO RELÓGIO CRU, como o `hitstopAte`, e pela mesma razão: quem conta a volta
+   * do tempo com o tempo já escalado nunca chega ao fim — a rampa desaceleraria a si mesma.
+   */
+  private lentidaoRestante = 0;
+  private lentidaoTotal = 0;
+  private lentidaoPiso = 1;
+
+  /** Quanto dura a rampa do estouro do esfíncter, e até onde o mundo desce. */
+  private static readonly LENTA_MS = 820;
+  private static readonly LENTA_PISO = 0.3;
   private static readonly HITSTOP_BOSS_MS = 150;
 
   constructor() {
@@ -239,6 +254,7 @@ export class GameScene extends Phaser.Scene {
     this.tookDamage = false;
     this.invulnerableUntil = 0;
     this.hitstopAte = 0;
+    this.tempoNormal();
     this.over = false;
 
     // As texturas mudam entre execuções (arte entra asset por asset): o cache de variantes
@@ -533,7 +549,30 @@ export class GameScene extends Phaser.Scene {
       this.anims.resumeAll();
     }
 
-    const dt = delta / 1000;
+    // A CÂMERA LENTA: a escala do quadro, e a rampa que a devolve a 1. ⚠️ Comandada pelo `delta`
+    // CRU — é o mesmo cuidado do hitstop logo acima, e aqui ele é ainda mais obrigatório: uma rampa
+    // que se medisse no tempo já escalado se arrastaria por ~2,7s em vez dos 820ms pedidos.
+    let escala = 1;
+    if (this.lentidaoRestante > 0) {
+      this.lentidaoRestante = Math.max(0, this.lentidaoRestante - delta);
+      if (this.lentidaoRestante === 0) {
+        this.tempoNormal();
+      } else {
+        const k = 1 - this.lentidaoRestante / this.lentidaoTotal;
+        escala = this.lentidaoPiso + (1 - this.lentidaoPiso) * k * k;
+        this.tweens.timeScale = escala;
+        this.time.timeScale = escala;
+        this.anims.globalTimeScale = escala;
+        // ⚠️ INVERSO. O Arcade conta `msPerFrame = _frameTimeMS * timeScale`: 2 é METADE da
+        // velocidade, não o dobro.
+        this.physics.world.timeScale = 1 / escala;
+      }
+    }
+
+    // ⚠️ O `dt` DA CENA TAMBÉM ENTRA NA ESCALA, e é ele que carrega o mundo: o `elapsed`, o
+    // starfield, o parallax e o avanço da `Moldura` não passam por tween nem por física. Sem esta
+    // linha o estouro ficaria lento e o corredor continuaria correndo por baixo dele.
+    const dt = (delta / 1000) * escala;
     // A ARENA DO GOLFINHO: enquanto ele viver, o relógio da fase não passa do `seguraEm` do roteiro.
     // O mundo continua rolando (fundo, parede, física, armas) — só o roteiro, a aproximação, a barra
     // de progresso e os pontos por tempo esperam. `Math.max` porque o teto nunca faz o relógio VOLTAR.
@@ -1302,6 +1341,18 @@ export class GameScene extends Phaser.Scene {
     if (!criatura || !criatura.active) return;
     if (!this.esfincter.acender()) return;
 
+    // ⚠️ A CÂMERA LENTA ENTRA AQUI, DEPOIS DO `acender()` E SÓ DELE. Pedido dele de 22/09: *"faça
+    // com que o início da explosão seja em câmera lenta e o final normal"*. Posta antes do `if`,
+    // ela dispararia a cada tiro dado enquanto o gás ainda só vaza — o jogo inteiro engasgaria
+    // durante a espera, que é exatamente a parte que ele aprovou por ser tensa.
+    //
+    // ⚠️ E É CÂMERA LENTA, NÃO HITSTOP, embora o `hitstop` estivesse ali de graça. O hitstop é um
+    // SOCO: prega o mundo e solta, e serve para um impacto pontual (por isso ele é dos chefões).
+    // Aqui o que tem de ser visto dura quase um segundo — o clarão abrindo, as placas partindo, as
+    // vísceras saindo e o sangue voando. Congelar o primeiro quadro esconderia justamente o que
+    // ele pediu para ver; segurar o tempo e devolvê-lo mostra.
+    this.camaraLenta(GameScene.LENTA_MS, GameScene.LENTA_PISO);
+
     this.colisorGas?.destroy();
     this.colisorGas = undefined;
 
@@ -1540,6 +1591,51 @@ export class GameScene extends Phaser.Scene {
    * 150ms de relógio correndo durante o freeze é o que deixa a primeira explosão da cadeia
    * estourar DENTRO do quadro pregado, e o efeito é cinematográfico, não bug.
    */
+  /**
+   * A CÂMERA LENTA — o mundo entra devagar e SAI no tempo normal, sem corte.
+   *
+   * ⚠️ É PRIMA DO `hitstop`, NÃO IRMÃ. O hitstop PREGA o mundo (pausa física, tweens e anims) e o
+   * solta inteiro: é um soco. Esta aqui não pausa nada — ela reescala o tempo e devolve a escala
+   * a 1 por uma rampa. Pedido dele de 22/09 sobre o estouro do esfíncter: *"faça com que o início
+   * da explosão seja em câmera lenta e o final normal"*.
+   *
+   * ⚠️ E A RAMPA É `k²`, DE PROPÓSITO. Linear, metade do tempo já estaria em 65% da velocidade e o
+   * "lento" duraria um piscar. Com `k²` a escala quase não sobe no começo — o mundo SEGURA no piso
+   * enquanto o clarão abre — e só acelera no fim, que é onde ele pediu o tempo normal.
+   *
+   * ⚠️ QUATRO SUBSISTEMAS, E UM DELES É INVERSO. Tweens, `Clock` e animações usam a escala direta
+   * (`accumulator += delta * timeScale * globalTimeScale`); o mundo do Arcade usa `msPerFrame =
+   * _frameTimeMS * timeScale`, ou seja **2 = metade da velocidade**. Esquecer a inversão faria a
+   * física ACELERAR enquanto todo o resto desacelera.
+   *
+   * ⚠️ O `fixedStep` DO ARCADE ESTÁ LIGADO (padrão), então a física não fica lenta e lisa: ela dá
+   * MENOS passos. A 0,3 são ~18 passos/s. Num jogo de 384×216 isso não aparece — a posição já é
+   * arredondada para o pixel, e um passo de 1,4px não tem como ser mais liso.
+   */
+  private camaraLenta(ms: number, piso: number): void {
+    this.lentidaoTotal = ms;
+    this.lentidaoRestante = ms;
+    this.lentidaoPiso = piso;
+  }
+
+  /**
+   * DEVOLVE O TEMPO. Chamada pela rampa ao terminar E por quem encerra a fase.
+   *
+   * ⚠️ O `globalTimeScale` É DO JOGO, NÃO DA CENA. Morrer ou vencer no meio da rampa deixaria o
+   * menu e o interlúdio inteiros rodando em 30% — é a mesma armadilha do `anims.timeScale` que o
+   * `BossNucleo` já pagou em 20/09 (*"morrer no meio do telégrafo deixava a respiração em 5×"*),
+   * só que com o alcance do jogo inteiro em vez de um sprite.
+   */
+  private tempoNormal(): void {
+    this.lentidaoRestante = 0;
+    this.lentidaoTotal = 0;
+    this.lentidaoPiso = 1;
+    this.tweens.timeScale = 1;
+    this.time.timeScale = 1;
+    this.anims.globalTimeScale = 1;
+    this.physics.world.timeScale = 1;
+  }
+
   private hitstop(ms: number): void {
     this.hitstopAte = Math.max(this.hitstopAte, this.time.now + ms);
     this.physics.world.pause();
@@ -1620,6 +1716,7 @@ export class GameScene extends Phaser.Scene {
   private victory(): void {
     if (this.over) return;
     this.over = true;
+    this.tempoNormal();
 
     // O BÔNUS DE NO-HIT (GDD §8): cruzar a fase sem tomar um arranhão vale tanto quanto
     // meio chefão. É a recompensa do jogador disciplinado — e o que dá profundidade ao placar.
@@ -1998,6 +2095,7 @@ export class GameScene extends Phaser.Scene {
 
   private gameOver(): void {
     this.over = true;
+    this.tempoNormal();
 
     this.ship.setVisible(false);
     (this.ship.body as Phaser.Physics.Arcade.Body).enable = false;
