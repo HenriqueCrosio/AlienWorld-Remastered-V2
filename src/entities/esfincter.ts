@@ -2,21 +2,6 @@ import Phaser from 'phaser';
 import { SCROLL_SPEED } from '../config';
 import type { Fx } from '../systems/Fx';
 
-/**
- * AS TRÊS VERSÕES DO GORE (22/09), pedidas por ele depois de jogar a 2ª volta: *"quero ela com a
- * adição de ser mais sanguinolenta"*.
- *
- * ⚠️ AS TRÊS DIFEREM EM **ONDE O SANGUE MORA**, não em quantidade — comparar "mais" com "menos" não
- * responde nada, e ele já disse o que o estouro tem de bom: *"a explosão é rápida e não se nota
- * tanto os detalhes dos cacos, eles voam para frente e servem para o propósito"*. Num estouro que
- * dura menos de um segundo o olho não lê DETALHE, lê massa, cor e direção — então cada variação
- * põe a massa num lugar diferente e deixa o resto igual.
- *
- * - `jorro`   — no AR: os cacos aprovados + o esguicho dela, com cauda atrás de cada peça.
- * - `viscera` — na MATÉRIA: os cacos viram as vísceras do PixelLab, maiores e girando mais devagar.
- * - `estrago` — na CENA: o jorro, mais o que GRUDA — respingo nas duas paredes, poça e o vidro sujo.
- */
-export type GoreVariante = 'jorro' | 'viscera' | 'estrago';
 
 /**
  * A SOLEIRA DO NÚCLEO — a cena do esfíncter, em três tempos: o gás VAZA, o gás fica DENSO, e o
@@ -63,9 +48,12 @@ export class Esfincter {
   private static readonly VISCERA_QUADROS = 13;
 
   /**
-   * Quantas vísceras voam. MENOS que os cacos de casco, e não por economia: elas têm de 17 a 39px
-   * contra 53, e catorze peças desse tamanho saindo do mesmo ponto viram uma mancha só — some
-   * justamente a leitura de "pedaço" que elas existem para dar.
+   * Quantas vísceras voam, ALÉM das placas de casco.
+   *
+   * ⚠️ MENOS QUE AS 14 PLACAS, e não por economia: elas ficam em cima da ferida enquanto as placas
+   * já saíram do quadro, então é o número delas que decide se o estouro lê como *matéria* ou como
+   * *mancha*. A 11 as formas ainda se separam; acima disso elas se empilham no mesmo lugar e a
+   * leitura de "pedaço" — que é a razão de elas existirem — some.
    */
   private static readonly VISCERAS = 11;
 
@@ -115,12 +103,6 @@ export class Esfincter {
   private criatura?: Phaser.Physics.Arcade.Sprite;
   private relogio = 0;
   private acesa = false;
-
-  /**
-   * QUAL DAS TRÊS VERSÕES A IGNIÇÃO USA. Campo de instância de propósito: a captura e a sonda
-   * chegam nele por `scene.esfincter.variante`, sem tocar em estado global.
-   */
-  variante: GoreVariante = 'jorro';
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -341,58 +323,76 @@ export class Esfincter {
    * jogador já ganhou quando eles nascem. Dar corpo a destroço de comemoração é cobrar duas vezes.
    */
   private cuspirGore(x: number, y: number): void {
-    const viscera = this.variante === 'viscera' && this.scene.textures.exists('f4VisceraSheet');
-    const folha = viscera ? 'f4VisceraSheet' : 'f4GoreSheet';
-    const quadros = viscera ? Esfincter.VISCERA_QUADROS : Esfincter.GORE_QUADROS;
-    const n = viscera ? Esfincter.VISCERAS : Esfincter.PEDACOS;
+    // ⚠️ AS DUAS FOLHAS SAEM JUNTAS, e isso é a escolha dele de 22/09: *"mantém a carcaça que já
+    // temos e segue, gostei das gerações de pedaços e sangue"*. As três variações que ele viu eram
+    // um eixo MEU — casco OU víscera, sangue no ar OU na cena —, e ele não escolheu um lado: gostou
+    // das duas coisas novas. O eixo era falso, e o bicho concorda: uma criatura de casco com
+    // matéria mole dentro, arrombada, cospe as DUAS.
+    //
+    // ⚠️ E ELAS SE COMPLETAM EM VEZ DE COMPETIR, porque ocupam tempos e lugares diferentes. A placa
+    // é seca, voa longe e some rápido — ela diz *aquilo era uma peça dele* de relance, que foi
+    // exatamente o veredicto dele sobre os cacos (*"não se nota tanto os detalhes... servem para o
+    // propósito"*). A víscera é lenta, fica em cima da ferida e segura a opacidade — ela diz *aquilo
+    // era um BICHO*, e precisa de tempo para dizer.
+    this.arremessar(x, y, 'f4GoreSheet', Esfincter.GORE_QUADROS, Esfincter.PEDACOS, false);
+    this.arremessar(x, y, 'f4VisceraSheet', Esfincter.VISCERA_QUADROS, Esfincter.VISCERAS, true);
 
+    this.jorrar(x, y, Esfincter.GOTAS);
+    this.sujarAParede(x);
+    this.abrirPoca(x);
+    this.sangrarNaTela();
+
+    this.fx.explode(x, y, 2.2);
+  }
+
+  /**
+   * UM ARREMESSO DE PEDAÇOS — uma folha, um número, um jeito de voar.
+   *
+   * ⚠️ `molhado` NÃO É UM ENFEITE, É O QUE SEPARA AS DUAS MATÉRIAS. A placa de casco e a víscera
+   * saem do mesmo ponto no mesmo quadro; se voassem igual, a segunda folha seria só "mais cacos".
+   */
+  private arremessar(
+    x: number,
+    y: number,
+    folha: string,
+    quadros: number,
+    n: number,
+    molhado: boolean,
+  ): void {
+    if (!this.scene.textures.exists(folha)) return;
     for (let i = 0; i < n; i++) {
       const p = this.scene.add.sprite(x, y, folha, i % quadros).setDepth(-0.42).setName('f4Gore');
-      // ⚠️ A VÍSCERA VOA MENOS LONGE QUE O CACO DE CASCO, e isto é geometria de TELA, não gosto. A
-      // criatura morre a ~130px da borda direita; o caco percorre 240 a 656px, ou seja ele deixa o
-      // quadro em 0,3 a 0,5s. Para a placa isso é CERTO e ele aprovou assim (*"eles voam para frente
-      // e servem para o propósito"*): ela é seca, o que ela diz, diz de relance. A víscera só diz
-      // "isso era um bicho" se der tempo de ver a forma — e fora do quadro ela não diz nada.
+      // ⚠️ A VÍSCERA VOA MENOS LONGE QUE A PLACA, e isto é geometria de TELA, não gosto. A criatura
+      // morre a ~130px da borda direita; a placa percorre 240 a 656px, ou seja ela deixa o quadro em
+      // 0,3 a 0,5s. Para a placa isso é CERTO e ele aprovou assim. A víscera só diz "isso era um
+      // bicho" se der tempo de ver a forma — e fora do quadro ela não diz nada.
       //
       // ⚠️ E O NÚMERO TEVE DE CAIR DUAS VEZES, porque a 1ª correção media a coisa errada. A 95–280
       // elas ainda saíam do quadro antes de aparecer — não porque fossem rápidas, mas porque a bola
       // de fogo do `fx.explode` tapa tudo por ~0,45s: o que conta não é quanto elas voam, é onde
       // elas estão QUANDO O CLARÃO SAI. A 45–165 elas ainda estão em cima da ferida nesse instante.
-      const vx = (viscera ? 45 : 150) + Math.random() * (viscera ? 120 : 260);
-      // A víscera é PESADA: ela abre mais para baixo do que para cima, e a placa de casco não.
-      const vy = viscera ? (Math.random() - 0.32) * 230 : (Math.random() - 0.5) * 190;
-      // ⚠️ A VÍSCERA VOA MAIS DEVAGAR E GIRA MENOS, e isso é a variação inteira. O caco de casco
-      // pode rodopiar 540° porque é uma PLACA: girando, ela continua lendo como placa. Matéria mole
-      // rodopiando vira borrão, e ela só diz "isso era um bicho" se der tempo de ver a forma.
-      const dur = (viscera ? 1500 : 1100) + Math.random() * 700;
+      const vx = (molhado ? 45 : 150) + Math.random() * (molhado ? 120 : 260);
+      // A víscera é PESADA: ela abre mais para baixo do que para cima, e a placa não.
+      const vy = molhado ? (Math.random() - 0.32) * 230 : (Math.random() - 0.5) * 190;
+      // ⚠️ A VÍSCERA GIRA MENOS. A placa pode rodopiar 540° porque é uma PLACA: girando, ela continua
+      // lendo como placa. Matéria mole rodopiando vira borrão.
+      const dur = (molhado ? 1500 : 1100) + Math.random() * 700;
       this.scene.tweens.add({
         targets: p,
         x: x + vx * 1.6,
         y: y + vy * 1.6,
-        angle: (Math.random() - 0.5) * (viscera ? 260 : 540),
-        // ⚠️ A VÍSCERA SEGURA A OPACIDADE E SÓ APAGA NO FIM (`Quint.easeIn`), o caco de casco some
-        // parelho como sempre. Não é capricho: o caco lê de relance pela SILHUETA, que sobrevive a
-        // meio alpha; a víscera lê pela MATÉRIA — cor e textura —, e matéria a 50% de opacidade
-        // sobre uma parede pintada vira tinta. Ou ela está lá, ou ela não está.
-        alpha: viscera ? { from: 1, to: 0, ease: 'Quint.easeIn' } : { from: 1, to: 0 },
+        angle: (Math.random() - 0.5) * (molhado ? 260 : 540),
+        // ⚠️ A VÍSCERA SEGURA A OPACIDADE E SÓ APAGA NO FIM (`Quint.easeIn`), a placa some parelho
+        // como sempre. Não é capricho: a placa lê de relance pela SILHUETA, que sobrevive a meio
+        // alpha; a víscera lê pela MATÉRIA — cor e textura —, e matéria a 50% de opacidade sobre uma
+        // parede pintada vira tinta. Ou ela está lá, ou ela não está.
+        alpha: molhado ? { from: 1, to: 0, ease: 'Quint.easeIn' } : { from: 1, to: 0 },
         duration: dur,
         ease: 'Quad.easeOut',
         onComplete: () => p.destroy(),
       });
       this.rastroMolhado(x, y, vx, vy, dur);
     }
-
-    // ⚠️ MENOS JORRO QUANDO A MATÉRIA JÁ É O SANGUE. Na `viscera` o esguicho é tempero; nas outras
-    // duas ele é o que o olho pega, porque o caco de casco é SECO.
-    this.jorrar(x, y, viscera ? Math.round(Esfincter.GOTAS * 0.55) : Esfincter.GOTAS);
-
-    if (this.variante === 'estrago') {
-      this.sujarAParede(x);
-      this.sangrarNaTela();
-      this.abrirPoca(x);
-    }
-
-    this.fx.explode(x, y, 2.2);
   }
 
   /**

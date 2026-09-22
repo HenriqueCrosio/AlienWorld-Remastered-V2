@@ -1,24 +1,17 @@
-// AS TRÊS VERSÕES DO GORE, LADO A LADO — uma linha por variação, quatro instantes por linha.
+// O GORE DO ESFÍNCTER, INSTANTE A INSTANTE — a folha cheia e a folha com zoom.
 //
-// ⚠️ A FOLHA É UMA SÓ, DE PROPÓSITO. Três arquivos separados fazem ele comparar de memória, e o
-// que está em julgamento aqui é diferença, não qualidade absoluta: qual das três diz melhor
-// *arrombei um bicho*. Lado a lado, a resposta aparece em um olhar; em três abas, não aparece.
+// ⚠️ NASCEU COM TRÊS LINHAS (uma por variação de gore) e ficou com UMA. Ele viu as três em 22/09 e
+// não escolheu um lado: *"mantém a carcaça que já temos e segue, gostei das gerações de pedaços e
+// sangue"*. As duas coisas novas entraram juntas, a chave de variação saiu do `Esfincter`, e o que
+// sobra aqui é conferir o estouro que existe — não comparar estouros que não existem mais.
 //
-// ⚠️ E OS QUATRO INSTANTES SÃO OS MESMOS NAS TRÊS. Ele já aprovou a VELOCIDADE do estouro (*"a
-// explosão é rápida... eles voam para frente e servem para o propósito"*), então mudar o relógio
-// de uma linha para ela "aparecer melhor" seria trapacear o teste.
-//
-//   npm run dev  noutro terminal, depois  node scripts/_f4/_folha-gore-3.mjs [saida.png]
+//   npm run dev  noutro terminal, depois  node scripts/_f4/_ver-gore.mjs [saida.png]
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
-const saida = process.argv[2] ?? 'scripts/_f4/_folha-gore-3.png';
+const saida = process.argv[2] ?? 'scripts/_f4/_folha-gore-final.png';
 
-const VARIACOES = [
-  ['jorro', 'A · O JORRO — o sangue no AR'],
-  ['viscera', 'B · A VÍSCERA — o sangue na MATÉRIA'],
-  ['estrago', 'C · O ESTRAGO — o sangue na CENA'],
-];
+const VARIACOES = [['final', 'O ESTOURO — 14 placas + 11 vísceras + o sangue']];
 // ⚠️ SEIS INSTANTES CAPTURADOS, QUATRO EM CADA FOLHA, E AS DUAS ESCOLHAS SÃO DIFERENTES. A folha
 // cheia precisa da IGNIÇÃO, porque é lá que ele sente o baque. A folha com zoom não: a bola de fogo
 // do `fx.explode` toma a janela inteira até ~0,45s, e um zoom no clarão não mostra gore nenhum —
@@ -43,10 +36,8 @@ const browser = await chromium.launch({
 
 const linhas = [];
 for (const [chave, rotulo] of VARIACOES) {
-  // ⚠️ UMA PÁGINA NOVA POR VARIAÇÃO, e não um `restart` da cena. O estouro deixa tweens vivos,
-  // texturas em cache e a parede num outro ponto da curva; reaproveitar a página faria a 3ª linha
-  // ser julgada num corredor diferente do da 1ª. Página nova é o único jeito de as três verem a
-  // MESMA parede.
+  // ⚠️ PÁGINA NOVA, e não um `restart` da cena: o estouro deixa tweens vivos, texturas em cache e a
+  // parede noutro ponto da curva.
   const page = await browser.newPage({ viewport: { width: L, height: A } });
   page.on('pageerror', (e) => console.log(`[ERRO ${chave}] ${e.message}`));
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
@@ -73,11 +64,6 @@ for (const [chave, rotulo] of VARIACOES) {
     polling: 16,
   });
   await blindar();
-
-  // A variação entra ANTES do tiro: ela só é lida na ignição.
-  await page.evaluate((v) => {
-    window.__game.scene.getScenes(true)[0].esfincter.variante = v;
-  }, chave);
 
   // Espera o gás ficar denso de verdade, em vez de chutar um instante.
   await page.waitForFunction(() => window.__game.scene.getScenes(true)[0].esfincter?.denso === true, null, {
@@ -109,7 +95,9 @@ for (const [chave, rotulo] of VARIACOES) {
       await page.evaluate(() => {
         const s = window.__game.scene.getScenes(true)[0];
         const n = (nome) => s.children.list.filter((o) => o.name === nome).length;
-        return `${n('f4Gore')}c/${n('f4Sangue')}g/${n('f4Respingo')}r/${n('f4Poca')}p`;
+        const gore = s.children.list.filter((o) => o.name === 'f4Gore');
+        const placas = gore.filter((o) => o.texture.key === 'f4GoreSheet').length;
+        return `${placas}pl/${gore.length - placas}vi/${n('f4Sangue')}g/${n('f4Respingo')}r/${n('f4Poca')}p`;
       }),
     );
   }

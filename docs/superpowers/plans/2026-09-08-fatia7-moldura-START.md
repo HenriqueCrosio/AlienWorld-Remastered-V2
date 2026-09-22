@@ -90,9 +90,14 @@ arrombamento da criatura ficou muito boa"* · *"achei boas e mais corretas agora
 *"não se nota duplicação em gás"* · *"ficou ótimo!"* (a câmara abrindo depois — a mudança que eu fiz
 sem ele pedir foi aprovada).
 
-**🟡 SOBROU UM PEDIDO SÓ, E ELE TEM TRÊS RESPOSTAS À ESPERA DO OLHO DELE:** *"quero ela com a adição de
-ser mais sanguinolenta"*. As três variações de gore estão construídas, sondadas (40/40) e commitadas —
-ver o ⏸️. **É a última escolha da Fatia 7.**
+**🟢 E O PEDIDO DE 22/09 — *"quero ela com a adição de ser mais sanguinolenta"* — FOI FECHADO NO MESMO
+DIA.** Eu montei três variações; ele não escolheu um lado: *"mantém a carcaça que já temos e segue,
+gostei das gerações de pedaços e sangue"*. As duas coisas novas entraram juntas — 14 placas de casco +
+11 vísceras do PixelLab + o sangue dela, no ar e grudado na cena. Sonda 38/38. **O ESFÍNCTER ESTÁ
+FECHADO, E COM ELE AS TRÊS PEÇAS DO M4.**
+
+**🔵 A FATIA 7 NÃO TEM MAIS ARTE NEM CÓDIGO PENDENTE.** O que falta é rejogar a fase inteira (inclusive
+a arena do golfinho), atualizar o HANDOFF e fazer o merge `--no-ff` em `main`. Ver o ⏸️.
 
 ⚠️ **ELE JÁ JOGOU A 1ª VERSÃO E PEDIU TRÊS COISAS** — gore do PixelLab a partir da original, mangueiras soltas
 no lugar do cano, e que a morte dissesse *arrombei isto* em vez de *ela morreu*. As três estão feitas. Ver o ⏸️.
@@ -130,13 +135,12 @@ empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pelo ⏸️. O esfíncter já
-> passou; o que falta é eu escolher entre as TRÊS variações de gore que estão nas folhas. Abra
-> `scripts\_f4\_folha-gore-3.png` e `_folha-gore-3-zoom.png` comigo. Com a escolha, a Fatia 7 fecha."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pelo ⏸️. O esfíncter
+> fechou. Vou REJOGAR a Fase 4 inteira, do começo, e te dizer o que quebrou — inclusive a dificuldade da
+> arena do golfinho. Depois disso a Fatia 7 vai para a `main`."**
 
-⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé, jogadas e aprovadas.
-O que falta é UMA ESCOLHA: qual das três variações de gore fica. As três estão construídas e verificadas —
-trocar a escolhida é uma linha. Ver o ⏸️ abaixo.
+⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé, jogadas e aprovadas,
+e o gore fechou em 22/09. O que falta é o REJOGO da fase inteira — a última coisa antes do merge. Ver o ⏸️.
 
 ---
 
@@ -162,14 +166,14 @@ duto. Se um dia o duto parecer folgado, é esse o número, e só até 70.
 |---|---|---|
 | ~~a BORDA C~~ | 128×80, com o pilar `mesa3` na costura B→C | ✅ jogada e aprovada em 20/09 (`28b0a14`) |
 | ~~as 3 PORTAS~~ | arte final, respiração e morte em dois tempos | ✅ jogadas e aprovadas em 21/09, **sem ajuste pedido** |
-| ~~o ESFÍNCTER~~ | a GARGANTA (97×171) na costura, destrutível, com mangueiras vazando, estouro em cone e carcaça arrombada | ✅ **jogado e aprovado em 22/09, nas cinco perguntas**. 🟡 Falta só ele escolher entre as **3 variações de gore** |
+| ~~o ESFÍNCTER~~ | a GARGANTA (97×171) na costura, destrutível, com mangueiras vazando, estouro em cone, gore em duas folhas + sangue, e carcaça arrombada | ✅ **jogado e aprovado em 22/09, nas cinco perguntas — e o gore fechou no mesmo dia** |
 
 **Depois do esfíncter:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar
 a fatia com merge `--no-ff` de `feat/fase4-visual` em `main`.
 
 ---
 
-## ⏸️ ONDE PARAMOS — O GORE TEM TRÊS VERSÕES, E ELE ESCOLHE UMA (22/09)
+## ⏸️ ONDE PARAMOS — O ESFÍNCTER ESTÁ FECHADO. A FATIA 7 SÓ ESPERA SER REJOGADA (22/09)
 
 **A 2ª VOLTA FOI JOGADA E PASSOU EM TUDO.** As cinco perguntas voltaram SIM:
 
@@ -186,35 +190,51 @@ detalhes" fosse uma queixa e tinha o conserto pronto (menos peças, ou peças ma
 estouro de menos de um segundo o olho não lê detalhe, lê massa, cor e direção.** O caco de casco cumpre o
 papel dele sem ser lido — e é por isso que a resposta ao pedido novo NÃO foi desacelerar o estouro.
 
-### 🟡 O ÚNICO PEDIDO ABERTO — e ele tem três respostas à espera do olho dele
+### ✅ O GORE ESTÁ FECHADO — E ELE NÃO ESCOLHEU UM LADO (22/09)
 
-> *"quero ela com a adição de ser mais sanguinolenta"* · *"crie 3 variações mais sanguinolentas (gore)
-> já que se trata de uma dark sci-fi, me mostre em folhas. Caso queira criar destroços de carcaça da
-> criatura no pixellab, pode fazer"*
+> *"mantém a carcaça que já temos e segue, gostei das gerações de pedaços e sangue"*
 
-**As três estão construídas, sondadas e commitadas. Elas diferem em ONDE O SANGUE MORA, não em
-quantidade** — comparar "mais" com "menos" não responde nada, e o que está em julgamento é qual delas
-diz melhor *arrombei um bicho*.
+**O EIXO DAS TRÊS VARIAÇÕES ERA MEU, E ERA FALSO.** Eu montei a escolha como casco **OU** víscera,
+sangue no ar **OU** na cena. Ele gostou das duas coisas novas e mandou seguir — então as duas
+entraram, a chave `variante` saiu do `Esfincter` e o estouro virou um só. **E o bicho concorda: uma
+criatura de casco com matéria mole dentro, arrombada, cospe as duas.**
 
-| | variação | o que ela faz | o que ela custa |
+⚠️ **E ELAS SE COMPLETAM EM VEZ DE COMPETIR, porque ocupam tempos e lugares diferentes** — que é
+justamente o que as medições da volta anterior tinham revelado sem eu perceber que era a resposta:
+
+| | o que voa | como voa | o que ela diz |
 |---|---|---|---|
-| **A** | **O JORRO** — no AR | os 7 cacos aprovados + 64 gotas dela em leque, com **cauda molhada atrás de cada caco** | nada fica na cena; o estouro passa e some |
-| **B** | **A VÍSCERA** — na MATÉRIA | os cacos de casco dão lugar a **11 vísceras do PixelLab** (anel de dentes com matéria presa, sacos com nervura, membranas, cordões), maiores, mais lentas e girando menos | perde o casco: o que voa é matéria mole, não placa |
-| **C** | **O ESTRAGO** — na CENA | o jorro do A **+ o que GRUDA**: 5 respingos encostados nas duas bandas da parede (que rolam com o mundo), a poça crescendo no chão sob a carcaça e 5 manchas no vidro | é a mais barulhenta; o corredor fica sujo por ~5s |
+| **as 14 placas de casco** | secas, 53px | rápidas (150–410px/s), rodopiando 540°, saem do quadro em 0,3–0,5s | *aquilo era uma peça dele* — de relance, pela SILHUETA |
+| **as 11 vísceras** | matéria mole, 17–39px | lentas (45–165px/s), girando 260°, segurando a opacidade até o fim | *aquilo era um BICHO* — e precisa de tempo, pela MATÉRIA |
+| **o sangue** | 64 gotas + cauda atrás de cada pedaço | leque que abre e CAI; o que gruda fica 5,2s | o estouro continua acontecendo depois do clarão |
 
-**Como ver:** `scripts\_f4\_folha-gore-3.png` (a folha cheia — se o estouro LÊ no quadro do jogo) e
-`_folha-gore-3-zoom.png` (o zoom na ferida — se o pedaço tem FORMA). São duas porque respondem perguntas
-diferentes; julgar detalhe na folha cheia é usar a régua errada, e julgar leitura no zoom é pior, porque
-a 4× tudo lê.
+**O que fica na cena:** 5 respingos encostados nas duas bandas da parede (rolando com o mundo), a poça
+crescendo no chão sob a carcaça, e 5 manchas no vidro que somem ~1,5s depois — muito antes do chefão,
+em t=118.
 
-**Em jogo:** a variação é um campo, `scene.esfincter.variante` (`'jorro' | 'viscera' | 'estrago'`), e o
-padrão hoje é **A**. Trocar a escolhida é uma linha em `src/entities/esfincter.ts`.
+⚠️ **A CARCAÇA NÃO MUDOU, POR DECISÃO DELE.** O `anel` continua sendo o destroço. A alternativa do
+PixelLab (bem mais sangrenta, mas com o buraco quase fechado) ficou **fora do jogo**: o crua está em
+`assets/raw/esfincter-gore-r3/`, e a cópia que eu tinha posto em `public/sprites/` foi apagada, porque
+asset carregado-nunca é peso no build. A leitura de *passagem aberta* vem do vão do anel, e ele
+aprovou essa leitura na pergunta 1.
 
-**E uma peça a mais, que NÃO entrou em nenhuma das três:** `_folha-10-carcaca-alt.png` traz uma carcaça
-alternativa do PixelLab (`garganta-destroco-aberto.png`) — bem mais sangrenta, com a matéria à mostra nas
-bordas rasgadas e o fluido escorrendo pelo casco. **Deixei-a de fora de propósito:** o buraco dela quase
-fecha, e a leitura de *passagem aberta* que ele aprovou na pergunta 1 vem justamente do vão do `anel`.
-Trocar a carcaça para ganhar sangue pagaria com o que já está aprovado. Ela está no disco se ele quiser.
+**Verificação:** `probe-f4-esfincter` **38/38** — inclusive o par que separa as duas folhas (`14 placas`
+e `11 vísceras` contadas pela CHAVE DE TEXTURA, não pelo total: se uma das duas cair para zero, 25
+pedaços continuam saindo e a contagem total não denuncia nada) e o discriminador da poça contra a
+`Moldura`. `probe-stage4`, `probe-f4-moldura`, `probe-f4-visual`, `probe-f4-golfinho`,
+`probe-interlude3` ✔ · build limpo.
+
+**Para conferir:** `scripts\_f4\_folha-gore-final.png` (a cheia) · `_folha-gore-final-zoom.png` (o zoom
+na ferida) · `_folha-esfincter.png` (a cena inteira, da chegada à passagem aberta).
+
+### 🔵 O QUE FALTA PARA FECHAR A FATIA 7
+
+Nada de arte e nada de código. Na ordem:
+
+1. **rejogar a Fase 4 inteira** — inclusive a dificuldade da arena do golfinho (`corredor` de t=38,5
+   com `rate 2.6`), que é o único item de fechamento pendente desde 15/09;
+2. atualizar o `docs/HANDOFF.md`;
+3. **merge `--no-ff` de `feat/fase4-visual` em `main`.**
 
 ### ⚠️ O QUE ESTA VOLTA ENSINOU
 

@@ -254,7 +254,7 @@ ok(
 );
 ok(aceso.ponto === 400, `o ponto é agora, não no fim da animação (${aceso.ponto})`);
 ok(aceso.cone === 1, 'o cone entrou');
-ok(aceso.gore === 14, `o gore partiu (${aceso.gore} pedaços, sorteados entre 7 artes)`);
+ok(aceso.gore === 25, `o gore partiu (${aceso.gore} pedaços: 14 placas de casco + 11 vísceras)`);
 ok(aceso.gas === 0, 'a nuvem SOME na ignição — gás que segue vazando é gás que não pegou fogo');
 ok(aceso.cano === 1, 'o cano FICA: ele não estourou, o que queimou foi o gás que saiu dele');
 
@@ -266,7 +266,7 @@ const dobro = await page.evaluate(() => {
   return { ponto: s.score - antes, gore: s.children.list.filter((o) => o.name === 'f4Gore').length };
 });
 ok(dobro.ponto === 0, `a 2ª ignição não pontua de novo (${dobro.ponto})`);
-ok(dobro.gore <= 14, `nem cospe gore duas vezes (${dobro.gore})`);
+ok(dobro.gore <= 25, `nem cospe gore duas vezes (${dobro.gore})`);
 
 // ─── O CHEFÃO ESPERA ───
 const roteiro = await page.evaluate(() => {
@@ -284,87 +284,71 @@ ok(
 );
 
 
-// ─── AS TRÊS VARIAÇÕES DO GORE (22/09) ───────────────────────────────────────
+// ─── O GORE COMPLETO (22/09) ─────────────────────────────────────────────────
 //
-// ⚠️ CADA UMA RODA NUMA PÁGINA NOVA, e isso não é zelo: a cena acima já acendeu. Depois da ignição
-// a criatura é carcaça, a nuvem morreu e o `acender()` devolve `false` — reaproveitar a página
-// mediria três vezes o mesmo nada e passaria, que é a pior falha possível numa sonda.
-const variacao = async (chave) => {
-  const p2 = await browser.newPage();
-  p2.on('pageerror', (e) => console.log(`[ERRO ${chave}] ${e.message}`));
-  await p2.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  await p2.waitForTimeout(1500);
-  await p2.keyboard.press('L');
-  await p2.waitForTimeout(1200);
-  await p2.evaluate(() => {
-    const s = window.__game.scene.getScenes(true)[0];
-    s.lives = 99;
-    s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
-    s.elapsed = 107;
-    s.director.skipTo(107);
-    s.aplicaCorredorEMoldura(107);
-  });
-  await p2.waitForFunction(() => window.__game.scene.getScenes(true)[0].esfincter?.denso === true, null, {
-    timeout: 40000,
-    polling: 40,
-  });
-  await p2.evaluate((v) => {
-    window.__game.scene.getScenes(true)[0].esfincter.variante = v;
-  }, chave);
-  const r = await p2.evaluate(() => {
-    const s = window.__game.scene.getScenes(true)[0];
-    s.matarGarganta();
-    const dos = (nome) => s.children.list.filter((o) => o.name === nome);
-    const gore = dos('f4Gore');
-    const resp = dos('f4Respingo');
-    // ⭐ O RESPINGO PROMETE ESTAR ENCOSTADO NA PAREDE, e a promessa é medida contra a `Moldura` —
-    // quem DESENHA a parede —, nunca contra o número que a própria peça usou para se posicionar.
-    // A linha de base `[110,110,110]` do M1 é o aviso: um assert alimentado pela mesma conta que
-    // posiciona a peça tem os termos cancelados e é cego por construção.
-    const fora = resp.filter((m) => {
-      const teto = s.moldura.superficieTetoEm(m.x);
-      const chao = s.moldura.superficieChaoEm(m.x);
-      return Math.min(Math.abs(m.y - teto), Math.abs(m.y - chao)) > 2;
-    }).length;
-    const poca = dos('f4Poca')[0];
-    return {
-      gore: gore.length,
-      tex: gore[0]?.texture?.key ?? null,
-      sangue: dos('f4Sangue').length,
-      respingo: resp.length,
-      respingoFora: fora,
-      poca: poca ? 1 : 0,
-      // ⭐ O DISCRIMINADOR DA POÇA. O `Esfincter` não recebe o chão: ele DEDUZ, `chão = 2·meio −
-      // teto`. Se a `Moldura` um dia mudar o que `meioEm` significa, a poça afunda ou flutua e só
-      // este assert avisa.
-      pocaNoChao: poca ? Math.abs(poca.y - s.moldura.superficieChaoEm(poca.x)) <= 2 : null,
-      tela: dos('f4SangueTela').length,
-    };
-  });
-  await p2.close();
-  console.log(`variação ${chave.padEnd(8)}`, JSON.stringify(r));
-  return r;
-};
-
-const vA = await variacao('jorro');
-ok(vA.tex === 'f4GoreSheet', `A · o jorro mantém os cacos de casco aprovados (tex=${vA.tex})`);
-ok(vA.sangue >= 60, `A · e cospe o esguicho dela (${vA.sangue} gotas e caudas)`);
-// ⭐ O PAR QUE PROVA QUE O TESTE SABE FALHAR: se o A também grudasse, a variação C não existiria.
-ok(
-  vA.respingo === 0 && vA.poca === 0 && vA.tela === 0,
-  `⭐ e o A NÃO deixa nada na cena (${vA.respingo} respingos, ${vA.poca} poça, ${vA.tela} na tela)`,
-);
-
-const vB = await variacao('viscera');
-ok(vB.tex === 'f4VisceraSheet', `B · troca a folha de casco pelas vísceras (tex=${vB.tex})`);
-ok(vB.gore === 11, `B · manda 11 vísceras, não os 14 cacos (${vB.gore})`);
-ok(vB.sangue < vA.sangue, `⭐ e jorra MENOS que o A (${vB.sangue} < ${vA.sangue}) — na B a matéria é o sangue`);
-
-const vC = await variacao('estrago');
-ok(vC.respingo === 5, `C · gruda 5 respingos nas duas bandas (${vC.respingo})`);
-ok(vC.respingoFora === 0, `⭐ e os 5 nascem ENCOSTADOS na superfície da Moldura (${vC.respingoFora} fora)`);
-ok(vC.poca === 1 && vC.pocaNoChao === true, `⭐ C · a poça cai no CHÃO da Moldura, e o chão deduzido bate`);
-ok(vC.tela === 5, `C · e suja o vidro (${vC.tela} manchas, que somem antes do chefão)`);
+// ⚠️ NUMA PÁGINA NOVA, e isso não é zelo: a cena acima já acendeu. Depois da ignição a criatura é
+// carcaça, a nuvem morreu e o `acender()` devolve `false` — reaproveitar a página mediria o mesmo
+// nada e PASSARIA, que é a pior falha possível numa sonda.
+const p2 = await browser.newPage();
+p2.on('pageerror', (e) => console.log(`[ERRO gore] ${e.message}`));
+await p2.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await p2.waitForTimeout(1500);
+await p2.keyboard.press('L');
+await p2.waitForTimeout(1200);
+await p2.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  s.lives = 99;
+  s.invulnerableUntil = Number.MAX_SAFE_INTEGER;
+  s.elapsed = 107;
+  s.director.skipTo(107);
+  s.aplicaCorredorEMoldura(107);
+});
+await p2.waitForFunction(() => window.__game.scene.getScenes(true)[0].esfincter?.denso === true, null, {
+  timeout: 40000,
+  polling: 40,
+});
+const g = await p2.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  s.matarGarganta();
+  const dos = (nome) => s.children.list.filter((o) => o.name === nome);
+  const gore = dos('f4Gore');
+  const resp = dos('f4Respingo');
+  // ⭐ OS RESPINGOS PROMETEM ESTAR ENCOSTADOS NA PAREDE, e a promessa é medida contra a `Moldura` —
+  // quem DESENHA a parede —, nunca contra o número que a própria peça usou para se posicionar. A
+  // linha de base `[110,110,110]` do M1 é o aviso: assert alimentado pela mesma conta que posiciona
+  // a peça tem os termos cancelados e é cego por construção.
+  const fora = resp.filter((m) => {
+    const teto = s.moldura.superficieTetoEm(m.x);
+    const chao = s.moldura.superficieChaoEm(m.x);
+    return Math.min(Math.abs(m.y - teto), Math.abs(m.y - chao)) > 2;
+  }).length;
+  const poca = dos('f4Poca')[0];
+  return {
+    placas: gore.filter((o) => o.texture.key === 'f4GoreSheet').length,
+    visceras: gore.filter((o) => o.texture.key === 'f4VisceraSheet').length,
+    sangue: dos('f4Sangue').length,
+    respingo: resp.length,
+    respingoFora: fora,
+    poca: poca ? 1 : 0,
+    // ⭐ O DISCRIMINADOR DA POÇA. O `Esfincter` não recebe o chão: ele DEDUZ, `chão = 2·meio −
+    // teto`. Se a `Moldura` um dia mudar o que `meioEm` significa, a poça afunda ou flutua e só
+    // este assert avisa.
+    pocaNoChao: poca ? Math.abs(poca.y - s.moldura.superficieChaoEm(poca.x)) <= 2 : null,
+    tela: dos('f4SangueTela').length,
+  };
+});
+await p2.close();
+console.log('gore     ', JSON.stringify(g));
+// ⚠️ AS DUAS FOLHAS SAEM JUNTAS — escolha dele em 22/09 (*"gostei das gerações de pedaços e
+// sangue"*). Se um destes dois cair para zero, o estouro perdeu metade da matéria sem ninguém ver:
+// 25 pedaços continuam saindo e a contagem total não denuncia nada.
+ok(g.placas === 14, `as 14 placas de casco continuam saindo (${g.placas})`);
+ok(g.visceras === 11, `⭐ e as 11 vísceras saem JUNTO, da outra folha (${g.visceras})`);
+ok(g.sangue >= 60, `o esguicho dela sai (${g.sangue} gotas e caudas)`);
+ok(g.respingo === 5, `5 respingos grudam nas duas bandas (${g.respingo})`);
+ok(g.respingoFora === 0, `⭐ e os 5 nascem ENCOSTADOS na superfície da Moldura (${g.respingoFora} fora)`);
+ok(g.poca === 1 && g.pocaNoChao === true, `⭐ a poça cai no CHÃO da Moldura, e o chão deduzido bate`);
+ok(g.tela === 5, `e o vidro suja (${g.tela} manchas, que somem antes do chefão)`);
 
 await browser.close();
 console.log(falhas === 0 ? '\nTUDO OK' : `\n${falhas} FALHA(S)`);

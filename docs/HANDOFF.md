@@ -58,7 +58,7 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
    com a frase de arranque e o que fazer primeiro (🚦).
 
-   **Estado em 2026-09-22: as TRÊS peças do M4 foram jogadas e aprovadas. A fatia espera UMA escolha — a variação de gore do esfíncter.** A branch está em dia
+   **Estado em 2026-09-22: as TRÊS peças do M4 foram jogadas e aprovadas e o gore fechou. A fatia espera o REJOGO da fase inteira, e depois o merge.** A branch está em dia
    com o `origin` (V2). ✅ **As 3 PORTAS foram jogadas e APROVADAS em 21/09, sem um único ajuste
    pedido** (`94f84cf` + `6fc3ac3`): *"é visível que você tem que atirar nela, se o jogador não
    perceber no começo, vai cobrar com a vida"* · *"dá pra ver que você ganhou"* · *"não chama muita
@@ -104,9 +104,11 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    arte tem de menos orgânico foi ganho duplo: encaixe E leitura.**
 
    **🟢 O ESFÍNCTER PASSOU NO TESTE JOGADO (22/09), nas cinco perguntas** — *"a explosão e o arrombamento
-   da criatura ficou muito boa"*. **🟡 Falta UMA escolha: qual das 3 variações de GORE fica** (o jorro, a
-   víscera ou o estrago), pedidas por ele em 22/09 — *"quero ela com a adição de ser mais sanguinolenta"*.
-   As três estão construídas e sondadas (40/40); ver o ⏸️ do START e as folhas em `scripts/_f4/`.
+   da criatura ficou muito boa"* — **e o gore fechou no mesmo dia**: *"mantém a carcaça que já temos e
+   segue, gostei das gerações de pedaços e sangue"*. As 14 placas de casco e as 11 vísceras do PixelLab
+   saem JUNTAS, com o sangue dela no ar e grudado na cena. Sonda 38/38.
+   **🔵 A FATIA 7 NÃO TEM MAIS ARTE NEM CÓDIGO PENDENTE** — falta rejogar a fase, atualizar este arquivo
+   e fazer o merge `--no-ff` em `main`.
    ⚠️ **Ele jogou a 1ª versão e pediu três coisas, todas feitas:** (1) o gore passou a vir do PixelLab
    A PARTIR DA ORIGINAL — 7 cacos de 26 a 53px no lugar dos meus recortes de 24×24, que liam como
    estilhaço genérico; (2) o cano virou **mangueiras soltas vazando**, na língua dos cabos do
@@ -608,7 +610,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
-| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. As **3 portas** e o **esfíncter** foram jogados e aprovados (21–22/09). 🟡 Falta UMA escolha: qual das **3 variações de gore** do esfíncter fica. Ver o ⏸️ do START |
+| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. As **3 portas** e o **esfíncter** foram jogados e aprovados (21–22/09), e o **gore** fechou em 22/09. 🔵 Falta só **rejogar a fase** e o merge. Ver o ⏸️ do START |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**
