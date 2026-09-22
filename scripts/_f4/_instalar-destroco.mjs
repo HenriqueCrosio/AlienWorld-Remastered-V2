@@ -13,17 +13,21 @@
 // ilhas opacas conectadas, e só depois elas são centradas em células iguais — que é o que o
 // `generateFrameNumbers` do Phaser exige.
 //
-//   node scripts/_f4/_instalar-destroco.mjs <destroco.png> <pedacos.png>
+// ⚠️ AS SAÍDAS SÃO ARGUMENTO, e isso foi conserto de 22/09. Com os caminhos cravados, montar uma
+// CANDIDATA sobrescrevia a arte que ele já tinha aprovado jogando — e a única forma de comparar
+// duas versões é as duas existirem ao mesmo tempo. Sem argumento, os padrões são os de sempre.
+//
+//   node scripts/_f4/_instalar-destroco.mjs <destroco.png> <pedacos.png> [saidaDestroco] [saidaPedacos]
 import sharp from 'sharp';
 
-const [FONTE_DESTROCO, FONTE_PEDACOS] = process.argv.slice(2);
+const [FONTE_DESTROCO, FONTE_PEDACOS, ARG_SD, ARG_SP] = process.argv.slice(2);
 if (!FONTE_DESTROCO || !FONTE_PEDACOS) {
-  console.error('uso: node scripts/_f4/_instalar-destroco.mjs <destroco.png> <pedacos.png>');
+  console.error('uso: node scripts/_f4/_instalar-destroco.mjs <destroco.png> <pedacos.png> [saidaDestroco] [saidaPedacos]');
   process.exit(1);
 }
 
-const SAIDA_DESTROCO = 'public/sprites/garganta-destroco.png';
-const SAIDA_PEDACOS = 'public/sprites/f4-gore-sheet.png';
+const SAIDA_DESTROCO = ARG_SD ?? 'public/sprites/garganta-destroco.png';
+const SAIDA_PEDACOS = ARG_SP ?? 'public/sprites/f4-gore-sheet.png';
 const VIVA = 'public/sprites/garganta.png';
 
 const cru = async (f) => sharp(f).raw().ensureAlpha().toBuffer({ resolveWithObject: true });

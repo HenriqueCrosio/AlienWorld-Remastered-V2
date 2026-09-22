@@ -342,6 +342,18 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // bicho. Os de agora são placas de casco rasgadas, presas curvas e segmentos do anel de dentes.
   // Recortados por ILHA (o `_instalar-destroco.mjs`), porque uma grade fixa cortaria caco ao meio.
   f4GoreSheet: { path: 'sprites/f4-gore-sheet.png', w: 53, h: 76 },
+
+  // O SANGUE DELA (22/09). Três peças assadas em pixel por `_assar-sangue.mjs`, na resolução
+  // nativa e na paleta MEDIDA da criatura — magenta sobre roxo quase preto, nunca o carmim do
+  // predador. Ver o cabeçalho do assador para o porquê de não serem `Graphics`.
+  f4SangueSheet: { path: 'sprites/f4-sangue-sheet.png', w: 16, h: 10 },
+  f4RespingoSheet: { path: 'sprites/f4-respingo-sheet.png', w: 44, h: 32 },
+
+  // AS VÍSCERAS (22/09, PixelLab, a partir da original). 13 cacos de 17 a 39px: segmentos do anel
+  // de dentes com a matéria ainda presa, sacos com nervura, membranas rasgadas e cordões compridos.
+  // ⚠️ SÃO A ALTERNATIVA AO `f4GoreSheet`, não a substituição: a folha aprovada é de CASCO, esta é
+  // de MATÉRIA MOLE. Qual das duas entra é a escolha dele entre as três variações de 22/09.
+  f4VisceraSheet: { path: 'sprites/f4-viscera-sheet.png', w: 39, h: 61 },
   f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
   f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
@@ -904,6 +916,9 @@ const ART: Record<string, string> = {
   // de criar no pixellab a partir da imagem original"*. Não é um desenho novo: são os pixels dela,
   // arrombados.
   gargantaDestroco: 'sprites/garganta-destroco.png',
+
+  // A poça: o que escorre da carcaça e FICA. Assada em pixel (`_assar-sangue.mjs`).
+  f4Poca: 'sprites/f4-poca.png',
 
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',

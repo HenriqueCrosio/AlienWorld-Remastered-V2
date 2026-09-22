@@ -85,7 +85,14 @@ ficaram, o pulso não foi reassado. Arte final, respiração e morte em dois tem
 foi respondida ao contrário:** as pontas de baixo são ângulos mais retos, e **é bom que fiquem escondidas**. O que
 sobra da lasca comunica passagem livre melhor do que a peça inteira comunicava.
 
-**🟡 O ESFÍNCTER — 2ª VOLTA FEITA EM 21/09, À ESPERA DO TESTE JOGADO. É A ÚLTIMA PEÇA DA FATIA 7.**
+**🟢 O ESFÍNCTER PASSOU NO TESTE JOGADO (22/09) — AS CINCO PERGUNTAS VOLTARAM SIM.** *"A explosão e o
+arrombamento da criatura ficou muito boa"* · *"achei boas e mais corretas agora"* (as mangueiras) ·
+*"não se nota duplicação em gás"* · *"ficou ótimo!"* (a câmara abrindo depois — a mudança que eu fiz
+sem ele pedir foi aprovada).
+
+**🟡 SOBROU UM PEDIDO SÓ, E ELE TEM TRÊS RESPOSTAS À ESPERA DO OLHO DELE:** *"quero ela com a adição de
+ser mais sanguinolenta"*. As três variações de gore estão construídas, sondadas (40/40) e commitadas —
+ver o ⏸️. **É a última escolha da Fatia 7.**
 
 ⚠️ **ELE JÁ JOGOU A 1ª VERSÃO E PEDIU TRÊS COISAS** — gore do PixelLab a partir da original, mangueiras soltas
 no lugar do cano, e que a morte dissesse *arrombei isto* em vez de *ela morreu*. As três estão feitas. Ver o ⏸️.
@@ -123,12 +130,13 @@ empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 
 ## 🔑 A FRASE DE ARRANQUE
 
-> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pelo ⏸️. O ESFÍNCTER levou uma
-> 2ª volta em 21/09 com os três pedidos que eu fiz depois de jogar, e está commitado. Vou jogar e te dar o
-> veredicto. Com ele, a Fatia 7 fecha."**
+> **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pelo ⏸️. O esfíncter já
+> passou; o que falta é eu escolher entre as TRÊS variações de gore que estão nas folhas. Abra
+> `scripts\_f4\_folha-gore-3.png` e `_folha-gore-3-zoom.png` comigo. Com a escolha, a Fatia 7 fecha."**
 
-⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé e commitadas; o que
-falta é o julgamento dele. O roteiro do teste, com as perguntas e o conserto de cada uma, está no ⏸️ abaixo.
+⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé, jogadas e aprovadas.
+O que falta é UMA ESCOLHA: qual das três variações de gore fica. As três estão construídas e verificadas —
+trocar a escolhida é uma linha. Ver o ⏸️ abaixo.
 
 ---
 
@@ -154,71 +162,108 @@ duto. Se um dia o duto parecer folgado, é esse o número, e só até 70.
 |---|---|---|
 | ~~a BORDA C~~ | 128×80, com o pilar `mesa3` na costura B→C | ✅ jogada e aprovada em 20/09 (`28b0a14`) |
 | ~~as 3 PORTAS~~ | arte final, respiração e morte em dois tempos | ✅ jogadas e aprovadas em 21/09, **sem ajuste pedido** |
-| ~~o ESFÍNCTER~~ | a GARGANTA (97×171) na costura, destrutível, com mangueiras vazando, estouro em cone e carcaça arrombada | 🟡 **2ª volta feita em 21/09 — à espera do TESTE JOGADO** |
+| ~~o ESFÍNCTER~~ | a GARGANTA (97×171) na costura, destrutível, com mangueiras vazando, estouro em cone e carcaça arrombada | ✅ **jogado e aprovado em 22/09, nas cinco perguntas**. 🟡 Falta só ele escolher entre as **3 variações de gore** |
 
 **Depois do esfíncter:** rejogar a fase inteira, atualizar o `docs/HANDOFF.md` e fechar
 a fatia com merge `--no-ff` de `feat/fase4-visual` em `main`.
 
 ---
 
-## ⏸️ ONDE PARAMOS — O ESFÍNCTER, 2ª VOLTA, ESPERA O TESTE JOGADO (21/09)
+## ⏸️ ONDE PARAMOS — O GORE TEM TRÊS VERSÕES, E ELE ESCOLHE UMA (22/09)
 
-**Ele JOGOU a 1ª versão e pediu três coisas. As três estão feitas e commitadas, e ele ainda NÃO jogou esta.**
+**A 2ª VOLTA FOI JOGADA E PASSOU EM TUDO.** As cinco perguntas voltaram SIM:
 
-> *"o que eu pedi foi a explosão e temos, em cone. Mas a explosão gore precisa vir de criar no pixellab a partir
-> da imagem original. Quero um sprite novo do cano de gás — na verdade, quero mangueiras soltas e soltando o
-> gás, parecidas com a do guardião. Quero que o player sinta que explodiu a criatura e rompeu o obstáculo rumo
-> ao núcleo."*
-
-### Como jogar
-
-`npm run dev` · `L` → Fase 4 · o esfíncter chega em **t≈110**, na costura · o chefão agora é **t=118**.
-
-O cano quebrado virou **mangueiras soltas** pendurando do teto, vazando · a criatura entra respirando · a nuvem
-engrossa ~1,5s · **qualquer tiro** acende · cone para dentro do núcleo + 7 cacos dela · e ela vira uma
-**carcaça arrombada** no mesmo quadro, que fica rolando · a câmara só abre **depois** disso.
-
-### O que mudou nesta volta
-
-| pedido | o que foi feito |
-|---|---|
-| o gore vem do PixelLab, da original | `edit_image` sobre a arte dela → 7 cacos de 26 a 53px (placas rasgadas, presas, segmentos do anel). Os meus recortes de 24×24 saíram |
-| mangueiras soltas vazando, como as do guardião | PixelLab `b82c971d`, animadas em 9 quadros (balançam, a pluma sobe). Reduzidas **pela metade** e **enterradas 5px** na parede, como ele pediu |
-| *"que o player sinta que rompeu o obstáculo"* | a `garganta-morta` (11 quadros de amolecer) saiu. A criatura vira o **destroço** numa troca de textura SECA, como a `portaLasca` |
-
-**A peça escolhida por ele entre 7 candidatas:** o `anel` — *"da folha 8 eu gostei do primeiro desenho"*. As duas
-tentativas de abrir o topo dele (a 2ª rodada) foram descartadas por ele.
-
-### As perguntas — e o conserto de cada uma já escrito
-
-| # | a pergunta | se a resposta for "não" |
+| # | a pergunta | a resposta dele |
 |---|---|---|
-| **1** | *agora dá a sensação de ter ARROMBADO a criatura, e não de tê-la matado?* | é o critério da volta inteira. Se ainda não, o próximo passo é a carcaça **afastar-se em duas metades** no motor, não mais arte |
-| **2** | *os 7 cacos dizem "isso era um bicho"?* | `Esfincter.PEDACOS` (14 lançados) ou o piso de 200px do `_instalar-destroco.mjs`, que decide quantas ilhas viram caco |
-| **3** | *as mangueiras ficaram no tamanho certo, e enfiadas o bastante?* | `Esfincter.CANO_ENTERRADO` (5) e o `DIVISOR` do `_instalar-mangueiras.mjs` (2). ⚠️ O divisor só aceita inteiro — ver a lei da redução |
-| **4** | *o gás ficou duplicado?* | a pluma da mangueira é a ORIGEM, a nuvem assada é o acúmulo que você acende. Se poluiu, tiro a nuvem e deixo só a pluma crescendo |
-| **5** | *a câmara abrindo DEPOIS do estouro ficou melhor ou pior?* | ⚠️ **ISTO MUDOU SEM VOCÊ PEDIR** — ver abaixo |
+| **1** | *dá a sensação de ter ARROMBADO a criatura?* | **sim** — *"a explosão e o arrombamento da criatura ficou muito boa"*. ⚠️ Era o critério da volta inteira, e com ele **a carcaça arrombada e a troca de textura seca estão FECHADAS** |
+| **2** | *os 7 cacos dizem "isso era um bicho"?* | **sim, e não pelo motivo que eu esperava** — *"a explosão é rápida e não se nota tanto os detalhes dos cacos, eles voam para frente e servem para o propósito de mostrar que aquilo era parte dele"* |
+| **3** | *as mangueiras ficaram no tamanho certo?* | **sim** — *"achei boas e mais corretas agora"*. O `CANO_ENTERRADO` 5 e o `DIVISOR` 2 ficam |
+| **4** | *o gás ficou duplicado?* | **não** — *"não se nota duplicação em gás, mas nota-se que é gás e pode ser explosivo"*. A pluma da mangueira e a nuvem convivem; nenhuma sai |
+| **5** | *a câmara abrindo DEPOIS do estouro ficou melhor ou pior?* | **melhor** — *"ficou ótimo!"*. ⚠️ **A mudança que eu fiz sem ele pedir foi APROVADA**: a parede segura em espessura 26 até t=114,5, a fresta de 14px não volta, e o beat *arromba → a sala se abre* fica |
 
-### ⚠️ O QUE EU MUDEI SEM VOCÊ PEDIR, E POR QUÊ
+⚠️ **E A 2ª RESPOSTA VALE COMO LEI, porque ela contraria o instinto.** Eu esperava que "não se nota os
+detalhes" fosse uma queixa e tinha o conserto pronto (menos peças, ou peças maiores). Não era: **num
+estouro de menos de um segundo o olho não lê detalhe, lê massa, cor e direção.** O caco de casco cumpre o
+papel dele sem ser lido — e é por isso que a resposta ao pedido novo NÃO foi desacelerar o estouro.
 
-**A parede segura em espessura 26 até t=114,5, e só então abre para 16.** Antes ela abria em t≈110,75, ou seja,
-ANTES do esfíncter.
+### 🟡 O ÚNICO PEDIDO ABERTO — e ele tem três respostas à espera do olho dele
 
-Não foi escolha de ritmo: foi geometria. A varredura da sonda achou que a criatura **abria até 14px de fresta**,
-porque ela tem 171px e o corredor chegava a **184** — ela era MENOR que o vão no ponto mais aberto, e o corpo da
-nave tem 6px. Comporta contornável não é comporta. Ampliar a arte é proibido (a lei da resolução), então quem
-cedeu foi a parede.
+> *"quero ela com a adição de ser mais sanguinolenta"* · *"crie 3 variações mais sanguinolentas (gore)
+> já que se trata de uma dark sci-fi, me mostre em folhas. Caso queira criar destroços de carcaça da
+> criatura no pixellab, pode fazer"*
 
-**E o beat melhorou de carona:** a abertura da câmara era *"a recompensa de ter saído do duto com vida"*; agora
-ela é a recompensa de ter **arrombado a comporta**. Arromba, e a sala se abre. Se você preferir como era, o
-número é um só (o `espessura` do `t: 106`) — mas aí a fresta volta, e aí a peça precisa de outra resposta.
+**As três estão construídas, sondadas e commitadas. Elas diferem em ONDE O SANGUE MORA, não em
+quantidade** — comparar "mais" com "menos" não responde nada, e o que está em julgamento é qual delas
+diz melhor *arrombei um bicho*.
 
-### O que NÃO se refaz sem você pedir
+| | variação | o que ela faz | o que ela custa |
+|---|---|---|---|
+| **A** | **O JORRO** — no AR | os 7 cacos aprovados + 64 gotas dela em leque, com **cauda molhada atrás de cada caco** | nada fica na cena; o estouro passa e some |
+| **B** | **A VÍSCERA** — na MATÉRIA | os cacos de casco dão lugar a **11 vísceras do PixelLab** (anel de dentes com matéria presa, sacos com nervura, membranas, cordões), maiores, mais lentas e girando menos | perde o casco: o que voa é matéria mole, não placa |
+| **C** | **O ESTRAGO** — na CENA | o jorro do A **+ o que GRUDA**: 5 respingos encostados nas duas bandas da parede (que rolam com o mundo), a poça crescendo no chão sob a carcaça e 5 manchas no vidro | é a mais barulhenta; o corredor fica sujo por ~5s |
 
-- **a criatura e o destroço**: arte dela, e o destroço é a escolha dele entre 7 candidatas;
-- **as duas animações originais** (`garganta-idle` / `garganta-morte`): intocadas, porque a **cutscene 3** as usa
-  e está mergeada e aprovada. As do jogo são cópias corrigidas em chaves novas;
-- **os cacos recortados por ilha**: regerar traria outra paleta.
+**Como ver:** `scripts\_f4\_folha-gore-3.png` (a folha cheia — se o estouro LÊ no quadro do jogo) e
+`_folha-gore-3-zoom.png` (o zoom na ferida — se o pedaço tem FORMA). São duas porque respondem perguntas
+diferentes; julgar detalhe na folha cheia é usar a régua errada, e julgar leitura no zoom é pior, porque
+a 4× tudo lê.
+
+**Em jogo:** a variação é um campo, `scene.esfincter.variante` (`'jorro' | 'viscera' | 'estrago'`), e o
+padrão hoje é **A**. Trocar a escolhida é uma linha em `src/entities/esfincter.ts`.
+
+**E uma peça a mais, que NÃO entrou em nenhuma das três:** `_folha-10-carcaca-alt.png` traz uma carcaça
+alternativa do PixelLab (`garganta-destroco-aberto.png`) — bem mais sangrenta, com a matéria à mostra nas
+bordas rasgadas e o fluido escorrendo pelo casco. **Deixei-a de fora de propósito:** o buraco dela quase
+fecha, e a leitura de *passagem aberta* que ele aprovou na pergunta 1 vem justamente do vão do `anel`.
+Trocar a carcaça para ganhar sangue pagaria com o que já está aprovado. Ela está no disco se ele quiser.
+
+### ⚠️ O QUE ESTA VOLTA ENSINOU
+
+**1 · O SANGUE DELA NÃO É VERMELHO, e medir isso evitou uma briga de paleta.** A `garganta.png` tem 41
+cores: corpo em azul-roxo quase preto (#141122, #1b2a39) e luz só na goela, em magenta (#ad1f5d,
+#ed2778). O `sangue.ts` do predador — que já existia, pronto, tentador — é carmim (#5a0508): a paleta de
+OUTRO bicho. É o mesmo argumento que faz os cacos serem RECORTADOS dela em vez de gerados. O
+`_assar-sangue.mjs` assa em pixel, na resolução nativa, numa rampa cujo topo (#d9296c) fica ABAIXO do
+#ed2778 que a goela dela já usa.
+
+**2 · ⚠️ A 1ª RAMPA SUMIU NA TELA, e o culpado não era a cor — era o RELÓGIO.** As gotas escuras liam
+como poeira, e a correção óbvia (clarear) só resolveu metade. A outra metade: **a bola de fogo do
+`fx.explode` toma a tela inteira por ~0,45s**, que é exatamente a janela da ignição. O que o jogador vê
+de sangue é o que ainda está no ar *quando o clarão sai da frente* — então o voo subiu de 520–1220ms para
+760–1660ms e a gravidade caiu de 620 para 220. **Efeito novo não compete com o efeito velho: ele espera
+o velho sair.**
+
+**3 · ⚠️ E O SEGUNDO CONSERTO TAMBÉM MEDIA A COISA ERRADA.** A 180–600px/s o esguicho varria os ~130px
+até a borda direita em 0,3s: nascia e morria escondido. Baixar para 100–340 e abrir o leque em vy (±330)
+foi o que o pôs em quadro. **A pergunta certa nunca foi "quanto ele voa", foi "onde ele está no instante
+em que dá para ver".** A víscera precisou do mesmo remédio DUAS vezes (95–280 → 45–165).
+
+**4 · A FOLHA COM ZOOM NASCEU DE UM ERRO MEU.** A 1ª versão recortava 216×132 centrado na criatura e
+devolvia quatro quadros de fogo puro — a janela caía dentro do clarão. Peça que se julga por detalhe
+precisa de janela DEPOIS do efeito que a tapa, e deslocada para onde o estouro foi (`ADIANTE = 70`), não
+centrada em onde ele começou.
+
+**5 · ⚠️ O PIXELLAB BARRA VOCABULÁRIO DE GORE, E A LEI É A MESMA DO LIMITE DE COR.** Os três primeiros
+pedidos voltaram *"against policy"* — `gore`, `flesh`, `blood`, `viscera`, `intestine`, `muscle`. Os
+mesmos desenhos passaram descritos pela MATÉRIA: *wet inner material, ribbed sacs, torn rubbery membrane,
+frayed cords, pulpy lumps*. **Mude o pedido, não repita** — exatamente o que o `animate_object` já tinha
+ensinado com o "nunca branco".
+
+**6 · SAÍDA CRAVADA EM SCRIPT DE INSTALAÇÃO É ARMADILHA.** O `_instalar-destroco.mjs` escrevia em dois
+caminhos fixos, então montar uma CANDIDATA sobrescrevia a arte que ele já tinha aprovado jogando. As
+saídas viraram argumento. **A única forma de comparar duas versões é as duas existirem ao mesmo tempo.**
+
+**7 · ASSERT DE INSTANTE MENTIU DE NOVO, e desta vez na minha própria folha.** A contagem feita só no fim
+dava zero em tudo e parecia que o jorro nem existia — ele só tinha morrido. A contagem virou POR
+INSTANTE. É a terceira vez nesta fatia que medir uma coisa que passa num ponto só engana (a fresta, a
+respiração do guardião, e agora isto).
+
+**As ferramentas novas:**
+
+| script | o que faz |
+|---|---|
+| `_f4/_assar-sangue.mjs` | gotas, respingo de parede e poça, em pixel na resolução nativa e na paleta MEDIDA dela |
+| `_f4/_folha-gore-3.mjs` | roda as três variações em páginas separadas e monta as DUAS folhas (cheia e com zoom) |
+| `probe-f4-esfincter.mjs` | 40 asserts — os 30 de sempre + as três variações, com o par que prova que o A não gruda nada e o discriminador da poça contra a `Moldura` |
 
 ---
 

@@ -1,5 +1,22 @@
 import Phaser from 'phaser';
+import { SCROLL_SPEED } from '../config';
 import type { Fx } from '../systems/Fx';
+
+/**
+ * AS TRÊS VERSÕES DO GORE (22/09), pedidas por ele depois de jogar a 2ª volta: *"quero ela com a
+ * adição de ser mais sanguinolenta"*.
+ *
+ * ⚠️ AS TRÊS DIFEREM EM **ONDE O SANGUE MORA**, não em quantidade — comparar "mais" com "menos" não
+ * responde nada, e ele já disse o que o estouro tem de bom: *"a explosão é rápida e não se nota
+ * tanto os detalhes dos cacos, eles voam para frente e servem para o propósito"*. Num estouro que
+ * dura menos de um segundo o olho não lê DETALHE, lê massa, cor e direção — então cada variação
+ * põe a massa num lugar diferente e deixa o resto igual.
+ *
+ * - `jorro`   — no AR: os cacos aprovados + o esguicho dela, com cauda atrás de cada peça.
+ * - `viscera` — na MATÉRIA: os cacos viram as vísceras do PixelLab, maiores e girando mais devagar.
+ * - `estrago` — na CENA: o jorro, mais o que GRUDA — respingo nas duas paredes, poça e o vidro sujo.
+ */
+export type GoreVariante = 'jorro' | 'viscera' | 'estrago';
 
 /**
  * A SOLEIRA DO NÚCLEO — a cena do esfíncter, em três tempos: o gás VAZA, o gás fica DENSO, e o
@@ -42,6 +59,38 @@ export class Esfincter {
   /** Quantas artes de pedaço a folha tem (ver `_instalar-destroco.mjs`). */
   private static readonly GORE_QUADROS = 7;
 
+  /** Quantas artes de víscera a folha tem (ver `_instalar-destroco.mjs`). */
+  private static readonly VISCERA_QUADROS = 13;
+
+  /**
+   * Quantas vísceras voam. MENOS que os cacos de casco, e não por economia: elas têm de 17 a 39px
+   * contra 53, e catorze peças desse tamanho saindo do mesmo ponto viram uma mancha só — some
+   * justamente a leitura de "pedaço" que elas existem para dar.
+   */
+  private static readonly VISCERAS = 11;
+
+  /**
+   * Quantas gotas o jorro cospe.
+   *
+   * ⚠️ SUBIU DE 46 PARA 64 EM 22/09, e não por gosto: a folha das três variações mostrou que a bola
+   * de fogo do `fx.explode` toma a tela inteira nos primeiros ~0,4s — justamente o instante da
+   * ignição. O que o jogador vê de sangue é o que ainda está NO AR depois que o clarão sai da
+   * frente, então o jorro precisa ser grande o bastante para sobreviver a ele.
+   */
+  private static readonly GOTAS = 64;
+
+  /** Quantos calibres a folha de gota tem (ver `_assar-sangue.mjs`). */
+  private static readonly GOTA_CALIBRES = 6;
+
+  /**
+   * A gravidade do esguicho, px/s². Gota que voa reto lê como faísca; o que a faz LÍQUIDA é cair.
+   *
+   * ⚠️ E ELA CAIU DE 620 PARA 220 JUNTO COM O ALONGAMENTO DO VOO. São o mesmo número visto de dois
+   * lados: a 620, uma gota que vive 1,5s desce 700px — sete vezes a altura útil do corredor, ou
+   * seja, ela deixa a tela por BAIXO antes de qualquer um ver que era sangue.
+   */
+  private static readonly QUEDA = 220;
+
   /** A folga entre as mangueiras e a criatura, em px. Elas ficam À FRENTE dela. */
   private static readonly CANO_ADIANTE = 62;
 
@@ -60,11 +109,18 @@ export class Esfincter {
   private static readonly CANO_ENTERRADO = 5;
 
   private cano?: Phaser.GameObjects.Sprite;
+  private poca?: Phaser.GameObjects.Sprite;
   private nuvem?: Phaser.GameObjects.Sprite;
   private zonaGas?: Phaser.GameObjects.Zone;
   private criatura?: Phaser.Physics.Arcade.Sprite;
   private relogio = 0;
   private acesa = false;
+
+  /**
+   * QUAL DAS TRÊS VERSÕES A IGNIÇÃO USA. Campo de instância de propósito: a captura e a sonda
+   * chegam nele por `scene.esfincter.variante`, sem tocar em estado global.
+   */
+  variante: GoreVariante = 'jorro';
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -206,6 +262,13 @@ export class Esfincter {
     const dy = alvoY - this.criatura.y;
     if (Math.abs(dy) > 1) (this.criatura.body as Phaser.Physics.Arcade.Body).y += dy;
 
+    // A poça anda colada na carcaça e RELÊ o chão, pela mesma razão do cano: a parede é uma escada
+    // e um y congelado descolaria no primeiro degrau.
+    if (this.poca) {
+      const xp = this.criatura.x;
+      this.poca.setPosition(xp, 2 * this.meioEm(xp) - this.tetoEm(xp));
+    }
+
     if (this.acesa) return;
 
     this.relogio += this.scene.game.loop.delta;
@@ -278,30 +341,242 @@ export class Esfincter {
    * jogador já ganhou quando eles nascem. Dar corpo a destroço de comemoração é cobrar duas vezes.
    */
   private cuspirGore(x: number, y: number): void {
-    for (let i = 0; i < Esfincter.PEDACOS; i++) {
-      const p = this.scene.add
-        .sprite(x, y, 'f4GoreSheet', i % Esfincter.GORE_QUADROS)
-        .setDepth(-0.42)
-        .setName('f4Gore');
-      const vx = 150 + Math.random() * 260;
-      const vy = (Math.random() - 0.5) * 190;
+    const viscera = this.variante === 'viscera' && this.scene.textures.exists('f4VisceraSheet');
+    const folha = viscera ? 'f4VisceraSheet' : 'f4GoreSheet';
+    const quadros = viscera ? Esfincter.VISCERA_QUADROS : Esfincter.GORE_QUADROS;
+    const n = viscera ? Esfincter.VISCERAS : Esfincter.PEDACOS;
+
+    for (let i = 0; i < n; i++) {
+      const p = this.scene.add.sprite(x, y, folha, i % quadros).setDepth(-0.42).setName('f4Gore');
+      // ⚠️ A VÍSCERA VOA MENOS LONGE QUE O CACO DE CASCO, e isto é geometria de TELA, não gosto. A
+      // criatura morre a ~130px da borda direita; o caco percorre 240 a 656px, ou seja ele deixa o
+      // quadro em 0,3 a 0,5s. Para a placa isso é CERTO e ele aprovou assim (*"eles voam para frente
+      // e servem para o propósito"*): ela é seca, o que ela diz, diz de relance. A víscera só diz
+      // "isso era um bicho" se der tempo de ver a forma — e fora do quadro ela não diz nada.
+      //
+      // ⚠️ E O NÚMERO TEVE DE CAIR DUAS VEZES, porque a 1ª correção media a coisa errada. A 95–280
+      // elas ainda saíam do quadro antes de aparecer — não porque fossem rápidas, mas porque a bola
+      // de fogo do `fx.explode` tapa tudo por ~0,45s: o que conta não é quanto elas voam, é onde
+      // elas estão QUANDO O CLARÃO SAI. A 45–165 elas ainda estão em cima da ferida nesse instante.
+      const vx = (viscera ? 45 : 150) + Math.random() * (viscera ? 120 : 260);
+      // A víscera é PESADA: ela abre mais para baixo do que para cima, e a placa de casco não.
+      const vy = viscera ? (Math.random() - 0.32) * 230 : (Math.random() - 0.5) * 190;
+      // ⚠️ A VÍSCERA VOA MAIS DEVAGAR E GIRA MENOS, e isso é a variação inteira. O caco de casco
+      // pode rodopiar 540° porque é uma PLACA: girando, ela continua lendo como placa. Matéria mole
+      // rodopiando vira borrão, e ela só diz "isso era um bicho" se der tempo de ver a forma.
+      const dur = (viscera ? 1500 : 1100) + Math.random() * 700;
       this.scene.tweens.add({
         targets: p,
         x: x + vx * 1.6,
         y: y + vy * 1.6,
-        angle: (Math.random() - 0.5) * 540,
-        alpha: { from: 1, to: 0 },
-        duration: 1100 + Math.random() * 700,
+        angle: (Math.random() - 0.5) * (viscera ? 260 : 540),
+        // ⚠️ A VÍSCERA SEGURA A OPACIDADE E SÓ APAGA NO FIM (`Quint.easeIn`), o caco de casco some
+        // parelho como sempre. Não é capricho: o caco lê de relance pela SILHUETA, que sobrevive a
+        // meio alpha; a víscera lê pela MATÉRIA — cor e textura —, e matéria a 50% de opacidade
+        // sobre uma parede pintada vira tinta. Ou ela está lá, ou ela não está.
+        alpha: viscera ? { from: 1, to: 0, ease: 'Quint.easeIn' } : { from: 1, to: 0 },
+        duration: dur,
         ease: 'Quad.easeOut',
         onComplete: () => p.destroy(),
       });
+      this.rastroMolhado(x, y, vx, vy, dur);
     }
+
+    // ⚠️ MENOS JORRO QUANDO A MATÉRIA JÁ É O SANGUE. Na `viscera` o esguicho é tempero; nas outras
+    // duas ele é o que o olho pega, porque o caco de casco é SECO.
+    this.jorrar(x, y, viscera ? Math.round(Esfincter.GOTAS * 0.55) : Esfincter.GOTAS);
+
+    if (this.variante === 'estrago') {
+      this.sujarAParede(x);
+      this.sangrarNaTela();
+      this.abrirPoca(x);
+    }
+
     this.fx.explode(x, y, 2.2);
+  }
+
+  /**
+   * A CAUDA DE CADA PEDAÇO: duas gotas atrás dele, na mesma direção e um pouco mais curtas.
+   *
+   * ⚠️ ELA EXISTE POR CAUSA DO QUE ELE DISSE SOBRE A 2ª VOLTA — *"a explosão é rápida e não se nota
+   * tanto os detalhes dos cacos"*. A resposta não é desacelerar o estouro (ele APROVOU a
+   * velocidade): é dar ao caco uma coisa que se lê SEM detalhe. Um rastro molhado atrás de uma peça
+   * que passa voando diz "isso saiu de um corpo" num quadro só, e a silhueta não precisa ser lida.
+   */
+  private rastroMolhado(x: number, y: number, vx: number, vy: number, dur: number): void {
+    if (!this.scene.textures.exists('f4SangueSheet')) return;
+    for (let k = 1; k <= 2; k++) {
+      const encolhe = 1 - k * 0.22;
+      const g = this.scene.add.sprite(x, y, 'f4SangueSheet', 3 - k).setDepth(-0.43).setName('f4Sangue');
+      this.scene.tweens.add({
+        targets: g,
+        x: x + vx * 1.6 * encolhe,
+        y: y + vy * 1.6 * encolhe + k * 4,
+        alpha: { from: 0.95, to: 0 },
+        duration: dur * 0.78,
+        ease: 'Quad.easeOut',
+        onComplete: () => g.destroy(),
+      });
+    }
+  }
+
+  /**
+   * O JORRO — o esguicho dela, para dentro do núcleo.
+   *
+   * ⚠️ E O SANGUE DELA NÃO É VERMELHO. Medida a `garganta.png`: o corpo é azul-roxo quase preto e a
+   * luz mora só na goela, em magenta (#ad1f5d, #ed2778). O carmim do `sangue.ts` do predador é a
+   * paleta de OUTRO bicho e brigaria com a criatura de onde ele sai — é o mesmo motivo pelo qual os
+   * cacos são recortados dela em vez de gerados. Ver `_assar-sangue.mjs`.
+   *
+   * ⚠️ A PARÁBOLA É CONTADA NO `onUpdate`, não por corpo de física. Gota é decoração, e dar corpo a
+   * 46 delas põe 46 entradas na árvore de colisão do quadro mais cheio da fase — pelo mesmo
+   * argumento dos cacos ("o jogador já ganhou quando eles nascem"). O `addCounter` é o idioma que o
+   * `fimDoPredador` e o `Predador` já usam para movimento contado à mão.
+   */
+  private jorrar(x: number, y: number, n: number): void {
+    if (!this.scene.textures.exists('f4SangueSheet')) return;
+    for (let i = 0; i < n; i++) {
+      // Um em cada cinco é NACO. Um esguicho só de pontinhos lê como faísca; o naco é o que dá
+      // matéria, e ele tem de ser minoria para não virar uma segunda chuva de cacos.
+      const calibre =
+        i % 3 === 0
+          ? Esfincter.GOTA_CALIBRES - 2 + Math.floor(Math.random() * 2)
+          : 1 + Math.floor(Math.random() * (Esfincter.GOTA_CALIBRES - 3));
+      const g = this.scene.add.sprite(x, y, 'f4SangueSheet', calibre).setDepth(-0.41).setName('f4Sangue');
+      // ⚠️ MENOS A ROLAGEM DO MUNDO. Sem isto o esguicho anda no referencial da TELA e descola da
+      // parede que estourou — o mesmo defeito que obrigou o cone a ganhar o tween de acompanhar.
+      // ⚠️ O ESGUICHO É LENTO E ABRE MAIS PARA CIMA E PARA BAIXO QUE PARA A FRENTE — e a 1ª versão
+      // errou isto feio. A 180–600px/s as gotas varriam os ~130px até a borda direita em 0,3s: na
+      // folha de 22/09 elas viraram uma poeira de pontinhos saindo pelo canto, e o que o olho pegava
+      // era um chuvisco de detrito, não sangue. Leque que ABRE e CAI em cima da ferida fica em
+      // quadro o tempo todo em que o clarão está saindo da frente.
+      const vx = 100 + Math.random() * 240 - SCROLL_SPEED;
+      const vy = (Math.random() - 0.5) * 330;
+      // ⚠️ O VOO É LONGO DE PROPÓSITO (era 520–1220ms). O clarão do `fx.explode` some por volta de
+      // 0,4s; um esguicho que morre em 0,5s nasce e morre ESCONDIDO atrás dele. O que sobra na tela
+      // depois do fogo é a variação inteira.
+      const dur = 760 + Math.random() * 900;
+      const seg = dur / 1000;
+      this.scene.tweens.addCounter({
+        from: 0,
+        to: 1,
+        duration: dur,
+        onUpdate: (tw) => {
+          const k = tw.getValue() ?? 0;
+          const t = seg * k;
+          g.x = x + vx * t;
+          g.y = y + vy * t + 0.5 * Esfincter.QUEDA * t * t;
+          g.alpha = k > 0.72 ? 1 - (k - 0.72) / 0.28 : 1;
+        },
+        onComplete: () => g.destroy(),
+      });
+    }
+  }
+
+  /**
+   * A POÇA — o que escorre da carcaça e se junta no chão, embaixo dela.
+   *
+   * ⚠️ ELA CRESCE, não nasce pronta: uma poça inteira no quadro da ignição lê como decalque colado.
+   * O `scaleX` subindo de 0,25 a 1 em 1,4s é o líquido CHEGANDO, e é o que faz o estouro continuar
+   * acontecendo depois que o clarão passa.
+   *
+   * ⚠️ E ELA SEGUE A CARCAÇA (ver o `update`), o que é o mesmo que rolar com o mundo: a carcaça é
+   * movida por velocidade como todo prop, então colar a poça nela é colá-la na parede de graça.
+   */
+  private abrirPoca(x: number): void {
+    if (!this.scene.textures.exists('f4Poca')) return;
+    const chao = 2 * this.meioEm(x) - this.tetoEm(x);
+    this.poca = this.scene.add
+      .sprite(x, chao, 'f4Poca')
+      .setOrigin(0.5, 1)
+      .setDepth(-0.58)
+      .setAlpha(0)
+      .setScale(0.25, 0.6)
+      .setName('f4Poca');
+    this.scene.tweens.add({
+      targets: this.poca,
+      alpha: 1,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 1400,
+      delay: 120,
+      ease: 'Quad.easeOut',
+    });
+  }
+
+  /**
+   * O QUE GRUDA NA PAREDE — cinco respingos nas duas bandas, depois do ponto do estouro.
+   *
+   * ⚠️ ELES ROLAM COM O MUNDO, senão não são parede: mancha parada na tela enquanto o corredor
+   * passa por baixo lê como sujeira na lente. É a mesma correção que o cone levou.
+   *
+   * ⚠️ E O CHÃO É DEDUZIDO, não recebido: `meioEm` é o ponto médio das duas superfícies, então
+   * `chão = 2·meio − teto`. Pedir um terceiro callback ao construtor por uma peça de enfeite seria
+   * alargar a interface da `Moldura` para nada.
+   */
+  private sujarAParede(xIgn: number): void {
+    if (!this.scene.textures.exists('f4RespingoSheet')) return;
+    const VIDA = 5200;
+    for (let i = 0; i < 5; i++) {
+      const x = xIgn + 12 + Math.random() * 150;
+      const noTeto = i % 2 === 0;
+      const teto = this.tetoEm(x);
+      const chao = 2 * this.meioEm(x) - teto;
+      const m = this.scene.add
+        .sprite(x, noTeto ? teto + 1 : chao - 1, 'f4RespingoSheet', i % 4)
+        // No teto ele PENDURA (as escorridas descem da superfície); no chão ele se apoia.
+        .setOrigin(0.5, noTeto ? 0 : 1)
+        .setDepth(-0.6)
+        .setAlpha(0)
+        .setName('f4Respingo');
+      this.scene.tweens.add({ targets: m, alpha: 1, duration: 80, delay: 40 + i * 30 });
+      this.scene.tweens.add({
+        targets: m,
+        x: x - SCROLL_SPEED * (VIDA / 1000),
+        duration: VIDA,
+        onComplete: () => m.destroy(),
+      });
+    }
+  }
+
+  /**
+   * O VIDRO SUJO — cinco manchas presas à câmera.
+   *
+   * ⚠️ ELAS SOMEM MUITO ANTES DO CHEFÃO. A ignição cai em t≈110,7 e o chefão entra em t=118:
+   * ninguém começa a luta olhando através do próprio troféu. É a lei que o `sangueNaTela` do
+   * predador já cravou — *"escorrem e somem ANTES de a arma destravar"*.
+   *
+   * ⚠️ E ELAS FICAM NA METADE DIREITA. O respingo vem da criatura, que está à frente; mancha em
+   * cima da nave taparia justamente o que o jogador precisa ver para não bater na parede.
+   */
+  private sangrarNaTela(): void {
+    if (!this.scene.textures.exists('f4RespingoSheet')) return;
+    for (let i = 0; i < 5; i++) {
+      const m = this.scene.add
+        .sprite(Phaser.Math.Between(150, 366), Phaser.Math.Between(24, 186), 'f4RespingoSheet', i % 4)
+        .setScrollFactor(0)
+        .setDepth(94)
+        .setAngle(Phaser.Math.Between(-25, 25))
+        .setAlpha(0)
+        .setName('f4SangueTela');
+      this.scene.tweens.add({ targets: m, alpha: 0.9, duration: 70, delay: 30 + i * 25 });
+      this.scene.tweens.add({
+        targets: m,
+        y: m.y + 14,
+        alpha: 0,
+        delay: 620 + i * 90,
+        duration: 900,
+        ease: 'Sine.easeIn',
+        onComplete: () => m.destroy(),
+      });
+    }
   }
 
   limpar(): void {
     this.cano?.destroy();
     this.cano = undefined;
+    this.poca?.destroy();
+    this.poca = undefined;
     this.nuvem?.destroy();
     this.nuvem = undefined;
     this.zonaGas?.destroy();
