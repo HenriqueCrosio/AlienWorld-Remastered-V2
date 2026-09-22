@@ -347,7 +347,7 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // nativa e na paleta MEDIDA da criatura — magenta sobre roxo quase preto, nunca o carmim do
   // predador. Ver o cabeçalho do assador para o porquê de não serem `Graphics`.
   f4SangueSheet: { path: 'sprites/f4-sangue-sheet.png', w: 16, h: 10 },
-  f4RespingoSheet: { path: 'sprites/f4-respingo-sheet.png', w: 44, h: 32 },
+  f4RespingoSheet: { path: 'sprites/f4-respingo-sheet.png', w: 44, h: 28 },
 
   // AS VÍSCERAS (22/09, PixelLab, a partir da original). 13 cacos de 17 a 39px: segmentos do anel
   // de dentes com a matéria ainda presa, sacos com nervura, membranas rasgadas e cordões compridos.

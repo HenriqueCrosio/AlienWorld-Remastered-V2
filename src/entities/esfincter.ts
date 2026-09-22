@@ -79,6 +79,26 @@ export class Esfincter {
    */
   private static readonly QUEDA = 220;
 
+  /** Quanto tempo o respingo fica na parede antes de secar. */
+  private static readonly RESPINGO_MS = 5200;
+
+  /**
+   * A LINHA DA ARTE QUE ENCOSTA NA PAREDE — o contrato com o `_assar-sangue.mjs`.
+   *
+   * ⚠️ ELE EXISTE PORQUE ANCORAR PELA BORDA DO QUADRO PÔS O SANGUE NO AR. A arte tem margem vazia
+   * em cima (a peça precisa de espaço para o borrão e para as escorridas), então encostar o TOPO do
+   * quadro na superfície deixava a massa 12 a 18px dentro do corredor — ele fotografou. O assador
+   * agora desenha o borrão nesta linha e o motor põe ESTA linha na parede.
+   *
+   * ⚠️ E O QUE FICA ACIMA DELA É DE PROPÓSITO: pinta a FACE da borda. Sangue que só escorre PARA
+   * FORA lê como pingo pendurado; sangue que cobre um pedaço da parede e escorre lê como jorro que
+   * BATEU ali — que foi o pedido dele, *"como se tivesse jorrado lá"*.
+   */
+  private static readonly IMPACTO = 4;
+
+  /** Quantos px depois da borda esquerda o respingo é recolhido. */
+  private static readonly RESPINGO_FORA = 60;
+
   /** A folga entre as mangueiras e a criatura, em px. Elas ficam À FRENTE dela. */
   private static readonly CANO_ADIANTE = 62;
 
@@ -98,6 +118,8 @@ export class Esfincter {
 
   private cano?: Phaser.GameObjects.Sprite;
   private poca?: Phaser.GameObjects.Sprite;
+  /** O que grudou na parede, com a banda em que cada um mora e a idade em ms. */
+  private respingos: { sp: Phaser.GameObjects.Sprite; noTeto: boolean; idade: number }[] = [];
   private nuvem?: Phaser.GameObjects.Sprite;
   private zonaGas?: Phaser.GameObjects.Zone;
   private criatura?: Phaser.Physics.Arcade.Sprite;
@@ -206,7 +228,10 @@ export class Esfincter {
     corpo.moves = false;
   }
 
-  update(): void {
+  update(dt: number, velocidade: number): void {
+    // ⚠️ ANTES DO `return` DA CRIATURA. O sangue que ficou na parede não depende dela: a carcaça é
+    // recolhida pelo culling e o respingo tem de continuar grudado até secar.
+    this.acompanharSangue(dt, velocidade);
     if (!this.criatura) return;
 
     // A criatura saiu de cena sem acender (o jogador não atirou e ela passou): recolhe tudo.
@@ -252,13 +277,6 @@ export class Esfincter {
     const alvoY = this.meioEm(this.criatura.x);
     const dy = alvoY - this.criatura.y;
     if (Math.abs(dy) > 1) (this.criatura.body as Phaser.Physics.Arcade.Body).y += dy;
-
-    // A poça anda colada na carcaça e RELÊ o chão, pela mesma razão do cano: a parede é uma escada
-    // e um y congelado descolaria no primeiro degrau.
-    if (this.poca) {
-      const xp = this.criatura.x;
-      this.poca.setPosition(xp, 2 * this.meioEm(xp) - this.tetoEm(xp));
-    }
 
     if (this.acesa) return;
 
@@ -496,8 +514,10 @@ export class Esfincter {
     if (!this.scene.textures.exists('f4Poca')) return;
     const chao = 2 * this.meioEm(x) - this.tetoEm(x);
     this.poca = this.scene.add
-      .sprite(x, chao, 'f4Poca')
-      .setOrigin(0.5, 1)
+      .sprite(x, chao - Esfincter.IMPACTO, 'f4Poca')
+      // ⚠️ ORIGEM NO TOPO, como o respingo de teto: a massa da poça mora na linha `IMPACTO` da arte,
+      // e é ela que tem de deitar no chão. Ancorada pela BASE, a poça pairava 10px acima dele.
+      .setOrigin(0.5, 0)
       .setDepth(-0.58)
       .setAlpha(0)
       .setScale(0.25, 0.6)
@@ -516,38 +536,85 @@ export class Esfincter {
   /**
    * O QUE GRUDA NA PAREDE — cinco respingos nas duas bandas, depois do ponto do estouro.
    *
-   * ⚠️ ELES ROLAM COM O MUNDO, senão não são parede: mancha parada na tela enquanto o corredor
-   * passa por baixo lê como sujeira na lente. É a mesma correção que o cone levou.
+   * ⚠️ ELES NÃO GANHAM TWEEN DE POSIÇÃO, E ISSO FOI CONSERTO DE 22/09. A 1ª versão gravava o `y` da
+   * superfície no nascimento e só arrastava o `x` por tween — e ele fotografou o resultado:
+   * *"elas ficam flutuando depois, quero que elas fiquem na borda, como se tivesse jorrado lá"*.
    *
-   * ⚠️ E O CHÃO É DEDUZIDO, não recebido: `meioEm` é o ponto médio das duas superfícies, então
-   * `chão = 2·meio − teto`. Pedir um terceiro callback ao construtor por uma peça de enfeite seria
-   * alargar a interface da `Moldura` para nada.
+   * ⚠️ E A CAUSA É A MESMA QUE ESTE ARQUIVO JÁ TINHA ESCRITO PARA O CANO, dez linhas acima: *"o teto
+   * é RELIDO a cada quadro, e não guardado"*. A parede não é só uma escada de placas de 128px que
+   * rola — ela **muda de espessura durante a cena**: em t=114,5 a câmara abre de 26 para 16, e a
+   * superfície sobe 10px de uma vez. Quem gravou o `y` fica onde a parede ESTAVA. A lei já estava
+   * no arquivo; eu só não a apliquei à peça nova.
+   *
+   * ⚠️ POR ISSO O MOVIMENTO VEM DO `dt` DA CENA, e não de um tween de 5,2s: durante a câmera lenta
+   * do estouro o `dt` já vem escalado, então o respingo desacelera junto com o corredor. Um tween
+   * também desaceleraria — mas ele carregaria o `x` para um destino calculado no nascimento, e
+   * destino fixo é a mesma doença do `y` fixo. É o idioma da `agua.update(dt, SCROLL_SPEED)`.
    */
   private sujarAParede(xIgn: number): void {
     if (!this.scene.textures.exists('f4RespingoSheet')) return;
-    const VIDA = 5200;
     for (let i = 0; i < 5; i++) {
       const x = xIgn + 12 + Math.random() * 150;
       const noTeto = i % 2 === 0;
-      const teto = this.tetoEm(x);
-      const chao = 2 * this.meioEm(x) - teto;
-      const m = this.scene.add
-        .sprite(x, noTeto ? teto + 1 : chao - 1, 'f4RespingoSheet', i % 4)
-        // No teto ele PENDURA (as escorridas descem da superfície); no chão ele se apoia.
+      const sp = this.scene.add
+        .sprite(x, 0, 'f4RespingoSheet', i % 4)
+        // ⚠️ NO CHÃO A PEÇA VAI ESPELHADA, e não é só para variar: a arte escorre para BAIXO a
+        // partir do impacto, que é o certo para o teto. No chão, escorrer para baixo enfiaria tudo
+        // dentro da banda e não sobraria nada visível — espelhada, o mesmo desenho vira o esguicho
+        // subindo da batida, que é o que sangue faz ao acertar o chão.
         .setOrigin(0.5, noTeto ? 0 : 1)
+        .setFlipY(!noTeto)
         // ⚠️ −0,59, NÃO −0,6: a faixa da `Moldura` mora exatamente em −0,6, e empate de depth no
         // Phaser se resolve pela ORDEM DE CRIAÇÃO. Funcionava por acidente (o respingo nasce
         // depois), e ia parar de funcionar no dia em que a parede fosse recriada durante a cena.
         .setDepth(-0.59)
         .setAlpha(0)
         .setName('f4Respingo');
-      this.scene.tweens.add({ targets: m, alpha: 1, duration: 80, delay: 40 + i * 30 });
-      this.scene.tweens.add({
-        targets: m,
-        x: x - SCROLL_SPEED * (VIDA / 1000),
-        duration: VIDA,
-        onComplete: () => m.destroy(),
-      });
+      this.respingos.push({ sp, noTeto, idade: -(40 + i * 30) });
+      this.encostar(sp, noTeto);
+    }
+  }
+
+  /**
+   * Cola uma peça na superfície da banda, LENDO a parede no `x` em que ela está agora e pondo a
+   * linha `IMPACTO` da arte em cima dela.
+   *
+   * ⚠️ O DESLOCAMENTO MUDA DE SINAL COM A ORIGEM. No teto a peça é ancorada pelo TOPO, então a
+   * linha do impacto está `IMPACTO` abaixo da âncora e a âncora sobe. No chão ela é ancorada pela
+   * BASE e vai espelhada, então a mesma linha está `IMPACTO` acima da âncora e a âncora desce.
+   */
+  private encostar(sp: Phaser.GameObjects.Sprite, noTeto: boolean): void {
+    const teto = this.tetoEm(sp.x);
+    const chao = 2 * this.meioEm(sp.x) - teto;
+    sp.y = noTeto ? teto - Esfincter.IMPACTO : chao + Esfincter.IMPACTO;
+  }
+
+  /**
+   * O SANGUE QUE FICOU: anda com o corredor e RECOLA na parede a cada quadro.
+   *
+   * ⚠️ RODA ANTES DO `return` DA CRIATURA, de propósito. O respingo tem de continuar grudado depois
+   * de a carcaça ser recolhida — amarrá-lo à criatura o faria congelar no ar no instante em que ela
+   * sai de cena, que é o mesmo defeito por outro caminho.
+   */
+  private acompanharSangue(dt: number, velocidade: number): void {
+    for (let i = this.respingos.length - 1; i >= 0; i--) {
+      const r = this.respingos[i];
+      r.idade += dt * 1000;
+      r.sp.x -= velocidade * dt;
+      this.encostar(r.sp, r.noTeto);
+      // Aparece em 80ms, segura, e seca nos últimos 700ms. Contado à mão porque a peça já é movida
+      // à mão: um tween de alpha rodando por cima seria um segundo dono do mesmo número.
+      const resta = Esfincter.RESPINGO_MS - r.idade;
+      r.sp.alpha = Math.max(0, Math.min(1, r.idade / 80, resta / 700));
+      if (resta <= 0 || r.sp.x < -Esfincter.RESPINGO_FORA) {
+        r.sp.destroy();
+        this.respingos.splice(i, 1);
+      }
+    }
+    if (this.poca) {
+      this.poca.x -= velocidade * dt;
+      // A poça é ancorada pelo TOPO e deita no chão, então ela usa o mesmo desvio do respingo de teto.
+      this.poca.y = 2 * this.meioEm(this.poca.x) - this.tetoEm(this.poca.x) - Esfincter.IMPACTO;
     }
   }
 
@@ -589,6 +656,8 @@ export class Esfincter {
     this.cano = undefined;
     this.poca?.destroy();
     this.poca = undefined;
+    for (const r of this.respingos) r.sp.destroy();
+    this.respingos = [];
     this.nuvem?.destroy();
     this.nuvem = undefined;
     this.zonaGas?.destroy();

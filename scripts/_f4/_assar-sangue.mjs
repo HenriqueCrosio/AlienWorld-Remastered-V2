@@ -108,29 +108,41 @@ console.log(`public/sprites/f4-sangue-sheet.png  ${gotas.length} gotas em ${CEL_
 // ─── 2 · O RESPINGO DE PAREDE ───────────────────────────────────────────────
 // Quatro manchas que GRUDAM e escorrem. Elas rolam com o mundo, então são cenário: a escorrida
 // desce, porque sangue parado obedece à gravidade e mancha que não escorre lê como tinta.
+//
+// ⚠️ A LINHA `IMPACTO` É UM CONTRATO COM O MOTOR, e ela nasceu de um defeito que ele fotografou:
+// *"elas ficam flutuando depois, quero que elas fiquem na borda, como se tivesse jorrado lá"*. A 1ª
+// versão desenhava o borrão no MEIO do quadro (tinta de y=8 a y=28, massa em y=12–18) e o motor
+// ancorava o TOPO do quadro na superfície — então a mancha nascia 12 a 18px dentro do corredor.
+//
+// ⚠️ E A SONDA APROVAVA, porque ela media a ÂNCORA contra a parede, e a âncora estava certíssima.
+// **Quem promete encostar tem de ser medido pela TINTA, não pelo ponto de origem.** Agora o borrão
+// mora na linha `IMPACTO` e o motor põe ESSA linha na superfície; o que está acima dela pinta a
+// FACE da parede (é sangue na borda) e o que está abaixo escorre para o corredor.
 const RW = 44,
-  RH = 32;
+  RH = 28,
+  IMPACTO = 4;
 const respingos = [];
 for (let v = 0; v < 4; v++) {
   const t = tela(RW, RH);
   const cx = 14 + rnd() * 6;
-  const cy = RH * 0.42;
+  const cy = IMPACTO;
   borrao(t, cx, cy, 5 + v * 0.9, { achatar: 1.35 });
-  // Os satélites, jogados para a DIREITA: o cone empurra para dentro do núcleo.
+  // Os satélites, jogados para a DIREITA e para BAIXO: o cone empurra para dentro do núcleo, e o
+  // que respinga para cima bate na parede que já está ali.
   const n = 16 + v * 5;
   for (let i = 0; i < n; i++) {
     // Adensado para perto do impacto: satélite espalhado por igual lê como poeira, não como
     // esguicho. A raiz puxa a nuvem para o centro e deixa poucos longe.
     const d = 4 + Math.pow(rnd(), 1.7) * (22 + v * 5);
-    const a = (rnd() - 0.5) * 1.5;
-    borrao(t, cx + d, cy + Math.sin(a) * d * 0.55, 0.9 + rnd() * 1.9, { umido: false });
+    const a = rnd() * 1.2 - 0.15;
+    borrao(t, cx + d, cy + Math.sin(a) * d * 0.7, 0.9 + rnd() * 1.9, { umido: false });
   }
-  // As escorridas.
+  // As escorridas, todas a partir da linha do impacto.
   for (let i = 0; i < 3 + v; i++) {
     const x = cx - 4 + rnd() * (14 + v * 4);
-    const h = 3 + rnd() * (9 + v * 2);
-    for (let y = 0; y < h; y++) t.pt(x, cy + 4 + y, y > h - 3 ? SOMBRA : CORPO);
-    t.pt(x, cy + 4 + h, SOMBRA);
+    const h = 4 + rnd() * (11 + v * 2);
+    for (let y = 0; y < h; y++) t.pt(x, cy + 3 + y, y > h - 3 ? SOMBRA : CORPO);
+    t.pt(x, cy + 3 + h, SOMBRA);
   }
   respingos.push(await t.png());
 }
@@ -140,18 +152,20 @@ await sharp({
   .composite(respingos.map((input, i) => ({ input, left: i * RW, top: 0 })))
   .png()
   .toFile('public/sprites/f4-respingo-sheet.png');
-console.log(`public/sprites/f4-respingo-sheet.png  ${respingos.length} respingos em ${RW}x${RH}`);
+console.log(`public/sprites/f4-respingo-sheet.png  ${respingos.length} respingos em ${RW}x${RH}, impacto na linha ${IMPACTO}`);
 
 // ─── 3 · A POÇA ─────────────────────────────────────────────────────────────
-// O que escorre da carcaça e fica. 80x18, com pingos caindo da borda de baixo.
+// O que escorre da carcaça e fica. ⚠️ MESMO CONTRATO: a massa mora na linha `IMPACTO`, e é ELA que
+// o motor encosta no chão. Antes o corpo da poça ficava a ~7px do fundo de um quadro de 18 e a peça
+// era ancorada pela base — a poça pairava 10px acima do chão.
 const PW = 80,
-  PH = 18;
+  PH = 14;
 const p = tela(PW, PH);
-for (let i = 0; i < 9; i++) borrao(p, 10 + i * 7.5 + rnd() * 3, PH * 0.42 + (rnd() - 0.5) * 4, 3.4 + rnd() * 2.6, { achatar: 1.8 });
+for (let i = 0; i < 9; i++) borrao(p, 10 + i * 7.5 + rnd() * 3, IMPACTO + (rnd() - 0.5) * 2.5, 3.4 + rnd() * 2.2, { achatar: 1.8 });
 for (let i = 0; i < 11; i++) {
   const x = 8 + rnd() * (PW - 16);
-  const h = 2 + rnd() * 6;
-  for (let y = 0; y < h; y++) p.pt(x, PH * 0.42 + 3 + y, SOMBRA);
+  const h = 2 + rnd() * 5;
+  for (let y = 0; y < h; y++) p.pt(x, IMPACTO + 3 + y, SOMBRA);
 }
-await (await p.png()) && (await sharp(p.b, { raw: { width: PW, height: PH, channels: 4 } }).png().toFile('public/sprites/f4-poca.png'));
-console.log(`public/sprites/f4-poca.png  ${PW}x${PH}`);
+await sharp(p.b, { raw: { width: PW, height: PH, channels: 4 } }).png().toFile('public/sprites/f4-poca.png');
+console.log(`public/sprites/f4-poca.png  ${PW}x${PH}, impacto na linha ${IMPACTO}`);

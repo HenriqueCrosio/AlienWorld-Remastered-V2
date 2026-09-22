@@ -661,7 +661,10 @@ export class GameScene extends Phaser.Scene {
     // Leviatã e têm de rolar com o corredor. Cano parado enquanto o mundo anda lê como marca
     // d'água da interface, não como encanamento de uma doca engolida.
     this.agua.update(dt, SCROLL_SPEED * frenagem);
-    this.esfincter.update();
+    // ⚠️ O ESFÍNCTER RECEBE O `dt` E A VELOCIDADE, pelo mesmo motivo que a água logo acima: o
+    // sangue que ficou na parede é PAREDE, e tem de rolar com o corredor. E o `dt` já vem escalado,
+    // então durante a câmera lenta do estouro ele desacelera junto em vez de deslizar por baixo dela.
+    this.esfincter.update(dt, SCROLL_SPEED * frenagem);
     // Rede: se ele deixou de viver por um caminho que não passou por `matarGolfinho`, a arena solta.
     if (this.golfinho && !this.golfinho.vivo) this.encerrarGolfinho();
     this.updateHud();

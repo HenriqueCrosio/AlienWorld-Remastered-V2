@@ -93,11 +93,19 @@ sem ele pedir foi aprovada).
 **🟢 E O PEDIDO DE 22/09 — *"quero ela com a adição de ser mais sanguinolenta"* — FOI FECHADO NO MESMO
 DIA.** Eu montei três variações; ele não escolheu um lado: *"mantém a carcaça que já temos e segue,
 gostei das gerações de pedaços e sangue"*. As duas coisas novas entraram juntas — 14 placas de casco +
-11 vísceras do PixelLab + o sangue dela, no ar e grudado na cena. Sonda 43/43. **O ESFÍNCTER ESTÁ
+11 vísceras do PixelLab + o sangue dela, no ar e grudado na cena. Sonda 49/49. **O ESFÍNCTER ESTÁ
 FECHADO, E COM ELE AS TRÊS PEÇAS DO M4.**
+
+**🟢 E MAIS TRÊS PEDIDOS DELE FECHARAM NA MESMA SESSÃO (22/09):** a mangueira foi para trás do layer da
+borda (*"para parecer que ele está cravado lá"*), o estouro passou a abrir em câmera lenta e terminar no
+tempo normal, e o sangue que gruda deixou de flutuar — ele agora nasce NA borda, *"como se tivesse
+jorrado lá"*. Sonda 49/49.
 
 **🔵 A FATIA 7 NÃO TEM MAIS ARTE NEM CÓDIGO PENDENTE.** O que falta é rejogar a fase inteira (inclusive
 a arena do golfinho), atualizar o HANDOFF e fazer o merge `--no-ff` em `main`. Ver o ⏸️.
+
+⚠️ **E UMA SONDA PISCA, `probe-f4-moldura`, ~1 vez em 3** — num assert de amostragem que NÃO é desta
+volta e NÃO é defeito do jogo. Rode de novo antes de investigar; o diagnóstico está no ⏸️.
 
 ⚠️ **ELE JÁ JOGOU A 1ª VERSÃO E PEDIU TRÊS COISAS** — gore do PixelLab a partir da original, mangueiras soltas
 no lugar do cano, e que a morte dissesse *arrombei isto* em vez de *ela morreu*. As três estão feitas. Ver o ⏸️.
@@ -136,8 +144,9 @@ empurrado. O remoto é o **V2**; NUNCA o `legacy`.
 ## 🔑 A FRASE DE ARRANQUE
 
 > **"Leia `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`, começando pelo ⏸️. O esfíncter
-> fechou. Vou REJOGAR a Fase 4 inteira, do começo, e te dizer o que quebrou — inclusive a dificuldade da
-> arena do golfinho. Depois disso a Fatia 7 vai para a `main`."**
+> fechou e a fatia não tem mais arte nem código. Suba o localhost: vou REJOGAR a Fase 4 inteira, do
+> começo, com o roteiro do ⏸️ na mão — inclusive a dificuldade da arena do golfinho, que está parada
+> desde 15/09. Te dou o veredicto e aí a Fatia 7 vai para a `main`."**
 
 ⚠️ **A PRÓXIMA SESSÃO NÃO ABRE ESCREVENDO CÓDIGO.** As TRÊS peças do M4 estão de pé, jogadas e aprovadas,
 e o gore fechou em 22/09. O que falta é o REJOGO da fase inteira — a última coisa antes do merge. Ver o ⏸️.
@@ -173,7 +182,7 @@ a fatia com merge `--no-ff` de `feat/fase4-visual` em `main`.
 
 ---
 
-## ⏸️ ONDE PARAMOS — O ESFÍNCTER ESTÁ FECHADO. A FATIA 7 SÓ ESPERA SER REJOGADA (22/09)
+## ⏸️ ONDE PARAMOS — O ESFÍNCTER ESTÁ FECHADO. FALTA REJOGAR A FASE INTEIRA (22/09)
 
 **A 2ª VOLTA FOI JOGADA E PASSOU EM TUDO.** As cinco perguntas voltaram SIM:
 
@@ -218,14 +227,26 @@ PixelLab (bem mais sangrenta, mas com o buraco quase fechado) ficou **fora do jo
 asset carregado-nunca é peso no build. A leitura de *passagem aberta* vem do vão do anel, e ele
 aprovou essa leitura na pergunta 1.
 
-**Verificação:** `probe-f4-esfincter` **43/43** — inclusive o par que separa as duas folhas (`14 placas`
+**Verificação:** `probe-f4-esfincter` **49/49** — inclusive o par que separa as duas folhas (`14 placas`
 e `11 vísceras` contadas pela CHAVE DE TEXTURA, não pelo total: se uma das duas cair para zero, 25
 pedaços continuam saindo e a contagem total não denuncia nada) e o discriminador da poça contra a
 `Moldura`. `probe-stage4`, `probe-f4-moldura`, `probe-f4-visual`, `probe-f4-golfinho`,
 `probe-interlude3` ✔ · build limpo.
 
-**Para conferir:** `scripts\_f4\_folha-gore-final.png` (a cheia) · `_folha-gore-final-zoom.png` (o zoom
-na ferida) · `_folha-esfincter.png` (a cena inteira, da chegada à passagem aberta).
+**As folhas, todas em `scripts\_f4\` e todas reassadas em 22/09:**
+
+| folha | o que ela responde |
+|---|---|
+| `_folha-esfincter.png` | a cena inteira, da chegada à passagem aberta |
+| `_folha-gore-final.png` | o estouro no quadro do jogo — se ele LÊ |
+| `_folha-gore-final-zoom.png` | o zoom na ferida — se o pedaço tem FORMA |
+| `_folha-11-visceras.png` | as 11 vísceras e as 14 placas, lado a lado |
+| `_folha-12-sangue.png` | as gotas, o respingo e a poça, ampliados |
+| `_folha-10-carcaca-alt.png` | a carcaça alternativa que ficou de FORA (registro) |
+
+⚠️ **Elas são `.gitignore` (`scripts/_f4/**/*.png`), então não vêm do `git pull`** — quem quiser vê-las
+numa máquina nova roda `node scripts/_f4/_ver-esfincter.mjs` e `node scripts/_f4/_ver-gore.mjs` com o
+`npm run dev` de pé.
 
 ### ✅ MAIS DOIS PEDIDOS, FECHADOS NA MESMA SESSÃO (22/09)
 
@@ -265,19 +286,98 @@ nos dois `over = true`: o `globalTimeScale` é **do jogo**, não da cena, e morr
 deixaria o menu e o interlúdio inteiros em 30% — a armadilha do `BossNucleo` de 20/09, com o alcance do
 jogo inteiro em vez de um sprite.
 
-**Sonda: 43/43.** Os dois pedidos levaram assert, e os dois medem contra a coisa certa: a mangueira
+**Sonda: 49/49.** Os dois pedidos levaram assert, e os dois medem contra a coisa certa: a mangueira
 contra o depth da FAIXA (não contra o literal −0,6, que não avisaria se a `Moldura` mudasse de camada),
 e a rampa em dois instantes — que ela desce **e que ela volta**, porque uma rampa travada no piso
 passaria no primeiro teste e deixaria o jogo em 30% até o fim da fase.
 
-### 🔵 O QUE FALTA PARA FECHAR A FATIA 7
+### ✅ O SANGUE FOI PARA A BORDA — E A SONDA ESTAVA MEDINDO A COISA ERRADA (22/09)
 
-Nada de arte e nada de código. Na ordem:
+> *"veja no print que assinalei em vermelho as 'poças de sangue', elas ficam flutuando depois, quero
+> que elas fiquem na borda, como se tivesse jorrado lá"*
 
-1. **rejogar a Fase 4 inteira** — inclusive a dificuldade da arena do golfinho (`corredor` de t=38,5
-   com `rate 2.6`), que é o único item de fechamento pendente desde 15/09;
-2. atualizar o `docs/HANDOFF.md`;
-3. **merge `--no-ff` de `feat/fase4-visual` em `main`.**
+**Ele estava certo, e a sonda dizia que não.** O assert `respingoFora === 0` media a distância da
+ÂNCORA do sprite até a superfície, achava 1px e aprovava. A âncora estava certíssima — **a tinta é
+que não estava lá.** Medido no PNG: a arte tinha margem vazia em cima (tinta de y=8 a y=28, borrão em
+y=12–18), então encostar o TOPO do quadro na parede punha a massa **12 a 18px dentro do corredor**.
+
+⚠️ **ISTO É A LIÇÃO Nº 4 DESTA FATIA COBRADA PELA QUARTA VEZ, e a mais cara delas:** *"quando a régua
+discorda da imagem, desconfie da régua primeiro"*. Desta vez a régua não estava quebrada — **ela estava
+medindo outra coisa**, o que é pior, porque parece certa. **Quem promete encostar tem de ser medido
+pela TINTA, não pelo ponto de origem.**
+
+**O conserto foi um contrato entre o assador e o motor: a linha `IMPACTO` (4).** O
+`_assar-sangue.mjs` desenha o borrão nessa linha; o `Esfincter` põe ESSA linha na superfície. O que
+fica acima dela pinta a FACE da borda — é de propósito: sangue que só escorre para fora lê como pingo
+pendurado; sangue que cobre um pedaço da parede e escorre lê como jorro que BATEU ali.
+
+- o respingo do teto pendura da superfície, com as escorridas descendo para o corredor;
+- o do chão vai **espelhado** (`flipY`): a mesma arte vira o esguicho subindo da batida, porque
+  escorrer para baixo enfiaria tudo dentro da banda e não sobraria nada visível;
+- a poça deitou: ela era ancorada pela BASE de um quadro de 18px com a massa a 7px do topo — pairava
+  10px acima do chão. Agora é ancorada pelo topo, na linha do impacto.
+
+⚠️ **E O MOVIMENTO SAIU DO TWEEN.** O respingo agora anda pelo `dt` da cena (`esfincter.update(dt,
+SCROLL_SPEED)`, o idioma da `agua.update`) e **RECOLA na parede a cada quadro**, como o cano já fazia
+desde 21/09. Um tween de 5,2s carregava o `x` para um destino calculado no nascimento — destino fixo é
+a mesma doença do `y` fixo. E de carona o sangue desacelera junto na câmera lenta, em vez de deslizar
+por baixo dela.
+
+**Três asserts novos, e os três medem a tinta:**
+
+| assert | o que ele pega |
+|---|---|
+| a tinta ALCANÇA a linha do impacto (lido do PNG, com `sharp`, antes do browser) | arte reassada com o borrão no meio do quadro — o defeito exato de 22/09 |
+| e o borrão não desce mais que 6px dela | arte cujo corpo escorregou para o fundo do quadro |
+| a VARREDURA: 18 amostras em 4,5s, atravessando a abertura da câmara em t=114,5 | peça que nasce colada e descola depois |
+
+---
+
+### ⚠️ UMA SONDA PISCA, E NÃO É DESTA VOLTA: `probe-f4-moldura`
+
+**Ela falha ~1 vez em 3, sempre no mesmo assert:** *"o degrau nunca salta mais que 14px (maior=20)"*.
+
+⚠️ **NÃO É DEFEITO DO JOGO E NÃO VEIO DAQUI.** Essa varredura roda de **t≈3 a t=32**, amostrando
+`vaoEm(414)` a cada 200ms de relógio de parede e guardando só os valores DISTINTOS. Quando uma amostra
+se perde (pausa de GC, quadro lento), dois degraus de 14px viram um salto de 28 na medição — é a
+própria sonda medindo, não a curva saltando. **E a câmera lenta não alcança isso:** ela só existe
+depois do `matarGarganta`, em t≈111, então naquela janela `escala` é 1 e o `dt` é idêntico ao de antes.
+
+**Não mexi nela de propósito** — afrouxar a tolerância de uma sonda para ela ficar verde é o caminho
+mais curto para uma sonda que não serve. Se for para consertar, o conserto é a AMOSTRAGEM (sondar mais
+rápido, ou medir entre amostras consecutivas em vez de valores distintos), nunca o número. **Rodar de
+novo antes de investigar.**
+
+---
+
+### 🔵 O QUE FALTA PARA FECHAR A FATIA 7 — O REJOGO
+
+**Nada de arte e nada de código.** A fatia espera UMA coisa: a Fase 4 jogada do começo ao fim.
+
+`npm run dev` · **`L`** → Fase 4, do zero (sem pular).
+
+**O roteiro do rejogo, em ordem de relógio — e o que perguntar em cada ponto:**
+
+| t | o quê | a pergunta |
+|---|---|---|
+| 0–38 | a câmara A, o duto, as pontes, os gânglios | *a fase ainda lê como LUGAR, depois de tudo o que entrou?* |
+| ~38,5 | **a arena do golfinho** | ⚠️ **o único item de fechamento parado desde 15/09**: *a dificuldade dela está certa?* O knob é o `corredor` de t=38,5, hoje com `rate 2.6` |
+| 38–94 | as câmaras B e C, a borda nova do duto, o pilar da costura | *alguma emenda denuncia?* |
+| ~94 | **as 3 portas** (aprovadas em 21/09) | *continuam dizendo "atire em mim"?* |
+| **~110** | **o esfíncter** — a costura | ⚠️ **é o que mudou desta vez.** Ver as quatro perguntas abaixo |
+| 118 | o chefão (guardião → predador → núcleo) | *a luta continua de pé depois da câmera lenta?* |
+
+**As quatro perguntas do esfíncter, que são as desta sessão:**
+
+1. **o sangue está NA borda agora** — ou ainda sobra alguma coisa flutuando?
+2. **a mangueira parece cravada na parede**, ou ainda lê como colada por cima?
+3. **a câmera lenta tem a duração certa?** São 820ms com piso 0,3. Se for demais ou de menos, são dois
+   números em `GameScene`: `LENTA_MS` e `LENTA_PISO`;
+4. **as vísceras e as placas juntas ficaram demais?** São 14 + 11. Se poluiu, o número das vísceras é
+   `Esfincter.VISCERAS`.
+
+**Depois do rejogo:** atualizar o `docs/HANDOFF.md` e fechar a fatia com **merge `--no-ff` de
+`feat/fase4-visual` em `main`**.
 
 ### ⚠️ O QUE ESTA VOLTA ENSINOU
 
@@ -326,7 +426,8 @@ respiração do guardião, e agora isto).
 |---|---|
 | `_f4/_assar-sangue.mjs` | gotas, respingo de parede e poça, em pixel na resolução nativa e na paleta MEDIDA dela |
 | `_f4/_folha-gore-3.mjs` | roda as três variações em páginas separadas e monta as DUAS folhas (cheia e com zoom) |
-| `probe-f4-esfincter.mjs` | 40 asserts — os 30 de sempre + as três variações, com o par que prova que o A não gruda nada e o discriminador da poça contra a `Moldura` |
+| `_f4/_ver-gore.mjs` | roda o estouro e monta as duas folhas (cheia e com zoom), com a contagem por INSTANTE |
+| `probe-f4-esfincter.mjs` | **49 asserts** — a cena, o gore nas duas folhas, a mangueira medida contra o depth da FAIXA, a câmera lenta em dois instantes (desce E volta), a tinta do sangue lida do PNG e a VARREDURA que prova que ele não descola |
 
 ---
 

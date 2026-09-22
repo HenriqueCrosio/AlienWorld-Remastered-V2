@@ -11,12 +11,48 @@
 //
 // ⚠️ Exige `npm run dev` rodando. UMA sonda por vez: dois browsers headless no mesmo Vite quebram.
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 
 let falhas = 0;
 const ok = (cond, msg) => {
   console.log(`${cond ? '✔' : '✘'} ${msg}`);
   if (!cond) falhas++;
 };
+
+// ─── A TINTA CUMPRE O CONTRATO DA LINHA DE IMPACTO ───────────────────────────
+//
+// ⚠️ ESTE ASSERT É A LIÇÃO MAIS CARA DE 22/09. O `Esfincter` promete que a linha 4 da arte é a que
+// encosta na parede; a sonda media a ÂNCORA contra a superfície, achava 1px de desvio e aprovava —
+// enquanto a massa da mancha nascia 12 a 18px dentro do corredor, porque a arte tinha margem vazia
+// em cima. **A régua estava certa e a peça estava errada: eu media o ponto de origem, não o sangue.**
+//
+// Aqui a régua é a TINTA: a linha mais cheia de cada quadro tem de cair na linha do contrato.
+const IMPACTO = 4;
+for (const [arte, cel] of [
+  ['public/sprites/f4-respingo-sheet.png', 44],
+  ['public/sprites/f4-poca.png', 80],
+]) {
+  const { data, info } = await sharp(arte).raw().ensureAlpha().toBuffer({ resolveWithObject: true });
+  const quadros = Math.round(info.width / cel);
+  let piorTopo = 0;
+  let piorMassa = 0;
+  for (let q = 0; q < quadros; q++) {
+    const linhas = [];
+    for (let y = 0; y < info.height; y++) {
+      let n = 0;
+      for (let x = q * cel; x < (q + 1) * cel; x++) if (data[(y * info.width + x) * 4 + 3] > 40) n++;
+      linhas.push(n);
+    }
+    // ⚠️ DUAS RÉGUAS, E A PRIMEIRA É A QUE IMPORTA. A tinta tem de COMEÇAR na linha do impacto ou
+    // acima dela — é isso que faz a mancha tocar a parede em vez de pairar. A 2ª só impede que o
+    // corpo desça demais: as escorridas podem ir longe, o BORRÃO não.
+    piorTopo = Math.max(piorTopo, linhas.findIndex((n) => n > 0) - IMPACTO);
+    piorMassa = Math.max(piorMassa, linhas.indexOf(Math.max(...linhas)) - IMPACTO);
+  }
+  const nome = arte.split('/').pop();
+  ok(piorTopo <= 0, `⭐ a tinta de ${nome} ALCANÇA a linha do impacto (sobra ${piorTopo}px em ${quadros} quadros)`);
+  ok(piorMassa <= 6, `e o borrão não desce para longe dela (${piorMassa}px abaixo)`);
+}
 
 const browser = await chromium.launch({
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
@@ -333,10 +369,14 @@ const g = await p2.evaluate(() => {
   // quem DESENHA a parede —, nunca contra o número que a própria peça usou para se posicionar. A
   // linha de base `[110,110,110]` do M1 é o aviso: assert alimentado pela mesma conta que posiciona
   // a peça tem os termos cancelados e é cego por construção.
+  // ⚠️ MEDIDO NA LINHA DO IMPACTO, não no `y` do sprite. A peça de teto é ancorada pelo topo (o
+  // impacto está 4px ABAIXO da âncora) e a de chão pela base, espelhada (4px ACIMA). Medir a âncora
+  // é o erro que deixou o sangue flutuando passar por uma sonda verde.
+  const impacto = (m) => (m.originY === 0 ? m.y + 4 : m.y - 4);
   const fora = resp.filter((m) => {
     const teto = s.moldura.superficieTetoEm(m.x);
     const chao = s.moldura.superficieChaoEm(m.x);
-    return Math.min(Math.abs(m.y - teto), Math.abs(m.y - chao)) > 2;
+    return Math.min(Math.abs(impacto(m) - teto), Math.abs(impacto(m) - chao)) > 2;
   }).length;
   const poca = dos('f4Poca')[0];
   return {
@@ -349,7 +389,7 @@ const g = await p2.evaluate(() => {
     // ⭐ O DISCRIMINADOR DA POÇA. O `Esfincter` não recebe o chão: ele DEDUZ, `chão = 2·meio −
     // teto`. Se a `Moldura` um dia mudar o que `meioEm` significa, a poça afunda ou flutua e só
     // este assert avisa.
-    pocaNoChao: poca ? Math.abs(poca.y - s.moldura.superficieChaoEm(poca.x)) <= 2 : null,
+    pocaNoChao: poca ? Math.abs(impacto(poca) - s.moldura.superficieChaoEm(poca.x)) <= 2 : null,
     tela: dos('f4SangueTela').length,
   };
 });
@@ -396,6 +436,47 @@ const voltou = await p2.evaluate(() => {
 ok(
   voltou.every((v) => v === 1),
   `⭐ e o tempo VOLTA sozinho ao normal (${voltou.join(' / ')})`,
+);
+
+// ─── O RESPINGO CONTINUA GRUDADO — A VARREDURA ───────────────────────────────
+//
+// ⚠️ ESTE É O ASSERT QUE FALTAVA, E A FALTA DELE CUSTOU UM TESTE JOGADO. O assert de instante logo
+// acima (`respingoFora === 0`) passava com o defeito de pé: no quadro do nascimento a peça ESTÁ
+// colada — ela descola depois, quando a parede muda de espessura em t=114,5 e a superfície sobe
+// 10px de uma vez. Ele fotografou o sangue flutuando no vazio.
+//
+// ⚠️ É A TERCEIRA VEZ NESTA FATIA que medir num ponto só engana (a fresta de 14px, a respiração do
+// guardião, e agora isto). **Peça que promete ficar colada se mede VARRENDO.**
+const VARRIDAS = 18;
+let piorDesvio = 0;
+let amostras = 0;
+for (let i = 0; i < VARRIDAS; i++) {
+  await p2.waitForTimeout(250);
+  const d = await p2.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const alvos = s.children.list.filter(
+      (o) => (o.name === 'f4Respingo' || o.name === 'f4Poca') && o.x > 0 && o.x < 384,
+    );
+    if (alvos.length === 0) return null;
+    let pior = 0;
+    for (const m of alvos) {
+      const teto = s.moldura.superficieTetoEm(m.x);
+      const chao = s.moldura.superficieChaoEm(m.x);
+      const imp = m.originY === 0 ? m.y + 4 : m.y - 4;
+      pior = Math.max(pior, Math.min(Math.abs(imp - teto), Math.abs(imp - chao)));
+    }
+    return { pior, n: alvos.length, t: Math.round(s.elapsed * 10) / 10 };
+  });
+  if (!d) continue;
+  amostras++;
+  piorDesvio = Math.max(piorDesvio, d.pior);
+}
+console.log(`varredura  ${amostras} amostras · pior desvio ${piorDesvio.toFixed(1)}px`);
+ok(amostras >= 8, `a varredura pegou o sangue vivo em ${amostras} instantes`);
+// ⭐ 2px de tolerância: é o `+1` / `−1` com que a peça encosta na superfície, mais o arredondamento.
+ok(
+  piorDesvio <= 2,
+  `⭐ e ele NUNCA descola da borda, nem quando a câmara abre (pior desvio ${piorDesvio.toFixed(1)}px)`,
 );
 
 await p2.close();
