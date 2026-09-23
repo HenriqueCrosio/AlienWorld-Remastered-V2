@@ -356,6 +356,9 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   f4VisceraSheet: { path: 'sprites/f4-viscera-sheet.png', w: 39, h: 61 },
   f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
   f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
+  // FATIA 8 · A CUTSCENE FINAL. P1: as rachaduras da convulsão, assadas com a paleta da câmara D
+  // (`scripts/_f8/_assar-convulsao.mjs`). 8 estágios cumulativos sobre a pintura inteira.
+  f8ConvulsaoSheet: { path: 'sprites/f8-convulsao-sheet.png', w: 384, h: 216 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
   predadorMorteSheet: { path: 'sprites/predador-morte-sheet.png', w: 256, h: 256 },
 

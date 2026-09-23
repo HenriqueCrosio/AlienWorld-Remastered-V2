@@ -39,6 +39,24 @@ export function montarDentro(c: CenaFinal, fundo: 'f8Costura' | 'paintBgF4d'): C
     },
   });
 
+  // AS RACHADURAS (P1): a PINTURA rachando, estágio a estágio, até o rasgo. Por cima do fundo, atrás da poça.
+  const rachas = scene.add.image(0, 0, 'f8ConvulsaoSheet', 0).setOrigin(0, 0).setDepth(DEPTH.FUNDO + 1);
+  objetos.push(rachas);
+  estado.rachadura = 0;
+  scene.tweens.addCounter({
+    from: 0,
+    to: 7.99,
+    duration: T.RASGO - 400,
+    ease: 'Quad.easeIn',
+    onUpdate: (tw) => {
+      const q = Math.floor(tw.getValue() ?? 0);
+      if (q !== estado.rachadura) {
+        estado.rachadura = q;
+        rachas.setFrame(q);
+      }
+    },
+  });
+
   // O TREMOR CRESCE em três degraus até o rasgo: o bicho morrendo em volta da nave.
   const cam = scene.cameras.main;
   cam.shake(1600, 0.002);

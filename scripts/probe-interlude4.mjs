@@ -58,8 +58,11 @@ ok(c1.cena === 'Interlude4', `a cena é a Interlude4 (${c1.cena})`);
 ok(c1.capitulo === 1, `abre no capítulo 1 (capitulo=${c1.capitulo})`);
 ok(c1.fundo === 'paintBgF4d', `pelo menu, o fundo é a pintura da câmara D (fundo=${c1.fundo})`);
 ok(c1.nave?.id === 'alien', `a nave é a escolhida (id=${c1.nave?.id})`);
-ok(c1.nave?.x === 120 && c1.nave?.y === 110, `a nave está na posição padrão do menu (${c1.nave?.x},${c1.nave?.y})`);
+// ±3 no y: a nave TREME no capítulo 1 (até 2px de amplitude) — a tolerância é o tremor, não folga.
+ok(c1.nave?.x === 120 && Math.abs((c1.nave?.y ?? 0) - 110) <= 3, `a nave está na posição padrão do menu (${c1.nave?.x},${c1.nave?.y})`);
 ok(c1.baleias?.length === 0, `nenhuma baleia errada carregada (${c1.baleias?.join(',')})`);
+const c1b = await espera('cap 1 rachas', (e) => (e.rachadura ?? -1) >= 5, 8000);
+ok(c1b.rachadura >= 5, `as rachaduras avançam pela pintura (quadro=${c1b.rachadura})`);
 await page.screenshot({ path: 'probe-interlude4-cap1.png' });
 
 // ─── [CAPÍTULOS 2–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
