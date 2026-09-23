@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-21)
+# HANDOFF — estado do projeto (2026-09-23)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -51,14 +51,28 @@ GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online
 que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele — playtestar e
 balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
 
-1. **PASSE VISUAL INTEIRO** — fatias 7–8. **As fatias 0 a 6 estão FECHADAS E MERGEADAS** (a 4 =
-   Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`; a 6 = Cutscene 3 em `f29c46d`).
+1. **PASSE VISUAL INTEIRO** — falta só a fatia 8. **As fatias 0 a 7 estão FECHADAS E MERGEADAS** (a 4 =
+   Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`; a 6 = Cutscene 3 em `f29c46d`; a 7 = Fase 4,
+   mergeada `--no-ff` em 23/09 sobre `86771fd`).
 
-   🟠 **A FATIA 7 (Fase 4, o interior) ESTÁ EM ANDAMENTO na branch `feat/fase4-visual`.** Retome
-   SEMPRE por `docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md` — é a porta de entrada,
-   com a frase de arranque e o que fazer primeiro (🚦).
+   🟢 **A FATIA 7 (Fase 4, o interior) FECHOU EM 23/09, no REJOGO DA FASE INTEIRA.** Ele jogou do
+   zero e aprovou tudo: *"a arena do golfinho está com a dificuldade certa"* (o item parado desde
+   15/09 — o `rate 2.6` do `corredor` de t=38,5 fica) · *"tudo ok para as perguntas, tá fechado"*
+   (as emendas B/C, as 3 portas, o chefão depois da câmera lenta). No esfíncter: *"o sangue ficou
+   muito bom"* · a mangueira *"na posição correta e seu aspecto melhorou"* · o gore *"não achei
+   demais, achei gore e justamente o que a cena representa"*. A câmera lenta MUDOU DE FORMA no
+   mesmo rejogo, a pedido dele — o baque sai em tempo NORMAL (200ms), o mundo mergulha para 0,3,
+   SEGURA 1100ms para os pedaços serem vistos e volta em 600ms para mostrar o tamanho da explosão
+   (`LENTA_*` no `GameScene`, `86771fd`): *"ficou perfeito"*. Sonda `probe-f4-esfincter` 50/50.
 
-   **Estado em 2026-09-22: as TRÊS peças do M4 foram jogadas e aprovadas, e o gore, a câmera lenta e o sangue na borda fecharam. A fatia não tem mais arte nem código — ela espera o REJOGO da fase inteira, e depois o merge.** A branch está em dia
+   🔵 **A PRÓXIMA FRENTE É A FATIA 8 — a cutscene final e as duas baleias erradas** (ainda dentro da
+   F3 e da cutscene final; o Leviatã canônico é o do menu). Ela ainda NÃO tem spec nem START: abre
+   pelo fluxo de sempre, brainstorming → spec → plano. O START da Fatia 7
+   (`docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`) vira registro.
+
+   O registro da Fatia 7, como estava antes do rejogo:
+
+   **Estado em 2026-09-22 (histórico — ver o 🟢 acima): as TRÊS peças do M4 foram jogadas e aprovadas, e o gore, a câmera lenta e o sangue na borda fecharam. A fatia não tem mais arte nem código — ela espera o REJOGO da fase inteira, e depois o merge.** A branch está em dia
    com o `origin` (V2). ✅ **As 3 PORTAS foram jogadas e APROVADAS em 21/09, sem um único ajuste
    pedido** (`94f84cf` + `6fc3ac3`): *"é visível que você tem que atirar nela, se o jogador não
    perceber no começo, vai cobrar com a vida"* · *"dá pra ver que você ganhou"* · *"não chama muita
@@ -203,6 +217,10 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
 7. **Polimento menor**: cabos desenhados ancorando as duas formas do chefão a chão/teto
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
+
+**Estado do repositório (2026-09-23):** a **Fatia 7 foi mergeada `--no-ff` em `main`** e empurrada
+para o `origin` (V2). A branch `feat/fase4-visual` fica no `origin` e pode ser apagada quando ele quiser.
+Os blocos abaixo são histórico.
 
 **Estado do repositório (2026-09-17):** a **Fatia 7 corre em `feat/fase4-visual`**, com o B3 (o predador) em três
 rodadas commitadas localmente — ⚠️ **NÃO empurradas** (o `origin` da branch ficou em `6c2fe4f`, de 15/09); empurrar
@@ -615,7 +633,7 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
-| 7 | **Fase 4 — o interior** | 🟠 **em curso em `feat/fase4-visual`** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. As **3 portas** e o **esfíncter** foram jogados e aprovados (21–22/09); o **gore**, a câmera lenta do estouro e o sangue na borda fecharam em 22/09. 🔵 Falta só **rejogar a fase inteira** (com a arena do golfinho) e o merge. O roteiro do rejogo está no ⏸️ do START |
+| 7 | **Fase 4 — o interior** | ✅ **mergeada `--no-ff` em 23/09, aprovada no rejogo da fase inteira** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. As **3 portas** e o **esfíncter** foram jogados e aprovados (21–22/09); o **gore**, a câmera lenta do estouro e o sangue na borda fecharam em 22/09. O rejogo inteiro passou em 23/09, com a câmera lenta em quatro tempos |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**

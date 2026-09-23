@@ -1,5 +1,10 @@
 # START — FATIA 7 · A FASE 4: ONDE A PRÓXIMA SESSÃO PEGA
 
+**✅ A FATIA 7 ESTÁ FECHADA E MERGEADA (23/09/2026).** O rejogo da fase inteira passou — *"a arena do
+golfinho está com a dificuldade certa"* · *"tudo ok para as perguntas, tá fechado"* — e
+`feat/fase4-visual` entrou em `main` com `--no-ff`. **Este arquivo virou REGISTRO.** A próxima
+frente é a Fatia 8 (a cutscene final + as baleias erradas); ver o `docs/HANDOFF.md`.
+
 **🟢 A MOLDURA — DESIGN FECHADO E APROVADO (08/09/2026).**
 **🟢 O M1 — O MOTOR — IMPLEMENTADO, VERIFICADO E JOGADO (09–10/09/2026).**
 **🟢 O M1.5 — O DUTO E AS PORTAS — JOGADO E APROVADO (11/09/2026).**
