@@ -41,7 +41,7 @@ const DEPTH_LAVA = 6;
  * impressão que ele reclamou, de *"estar caindo para outro local"*: não era ordem de camada (o corpo sempre
  * esteve em depth 0 contra 6 da poça), era a lava nunca chegar nele.
  */
-const SOBE_ACIMA_PX = 10;
+export const SOBE_ACIMA_PX = 10;
 /** Quanto o corpo desce para sumir dentro da poça — com a crista em 180, 36 levam o topo dele para 3px abaixo dela. */
 const AFUNDA_PX = 36;
 /** O quadro da poça troca a cada tanto (8 quadros no ciclo). */

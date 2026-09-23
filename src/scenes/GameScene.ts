@@ -1765,7 +1765,7 @@ export class GameScene extends Phaser.Scene {
     // vitória: a CUTSCENE FINAL era inalcançável. Só se vai direto para o GameOver quando
     // a fase NÃO declara interlude.
     if (interlude) {
-      this.scene.start(interlude, {
+      const payload = {
         // A fase SEGUINTE (null na final — a Interlude4 sabe que não há próxima) e a
         // COMPLETADA (é com ela que a interlude final monta o GameOver).
         stage: next,
@@ -1778,7 +1778,15 @@ export class GameScene extends Phaser.Scene {
         // para montar o MESMO payload que esta cena montaria.
         practice: this.practice,
         baseScore: this.scoreBase,
-      });
+        // A COSTURA DA CUTSCENE FINAL (Fatia 8): onde a nave estava no último quadro.
+        naveX: this.ship.x,
+        naveY: this.ship.y,
+      };
+      if (interlude === 'Interlude4') {
+        this.fotografarCostura(() => this.scene.start(interlude, { ...payload, costura: true }));
+        return;
+      }
+      this.scene.start(interlude, payload);
       return;
     }
 
@@ -1804,6 +1812,26 @@ export class GameScene extends Phaser.Scene {
       stage: this.stage.id,
       ship: this.shipId,
       baseScore: this.scoreBase,
+    });
+  }
+
+  /**
+   * A COSTURA DA CUTSCENE FINAL (spec 2026-09-23 §5): a cena abre NA câmara D, sem corte. Esconde o HUD
+   * (depth ≥ 100) e a nave, fotografa o próximo quadro e guarda em `f8Costura` — a pintura, a borda e a
+   * lava exatamente como o jogador as deixou. A nave volta como sprite da cutscene, no mesmo lugar.
+   */
+  private fotografarCostura(pronto: () => void): void {
+    for (const o of this.children.list) {
+      const d = o as unknown as Phaser.GameObjects.Components.Depth & Phaser.GameObjects.Components.Visible;
+      if (typeof d.depth === 'number' && d.depth >= 100 && typeof d.setVisible === 'function') d.setVisible(false);
+    }
+    this.ship.setVisible(false);
+    this.game.renderer.snapshot((img) => {
+      if (img instanceof HTMLImageElement) {
+        if (this.textures.exists('f8Costura')) this.textures.remove('f8Costura');
+        this.textures.addImage('f8Costura', img);
+      }
+      pronto();
     });
   }
 
