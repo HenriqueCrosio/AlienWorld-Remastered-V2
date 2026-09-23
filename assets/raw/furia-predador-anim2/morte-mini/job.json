@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "d2a9e285-8990-4344-8952-62f015aa03cc",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "shrieks, staggers backward, convulses violently and collapses to the ground, body buckling, limbs going limp, lying dead",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

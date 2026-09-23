@@ -15,8 +15,18 @@ export type StageEvent =
    * (as duas coisas são o mesmo fade, ver Parallax.setNebulaDensity).
    */
   | { t: number; type: 'nebula'; density: number }
-  /** O MINI-BOSS do Ato 2 (a aranha que anda no casco). Um por fase, roteirizado. */
-  | { t: number; type: 'miniboss' }
+  /**
+   * O MINI-CHEFÃO de uma fase, roteirizado — um por fase.
+   *
+   * `kind` ausente é a ARANHA (Fase 3): o `STAGE_3` não muda uma linha. `golfinho` é o da câmara B
+   * da Fase 4 (spec 2026-09-11), e ele traz a ARENA: `seguraEm` é o `t` que o relógio da fase não
+   * passa enquanto ele viver.
+   *
+   * ⚠️ O TETO É DO ROTEIRO, NÃO DA ENTIDADE, e é "não passa de", não "para quando o duelo começa".
+   * O X do golfinho não tem duração exata — cada cambalhota o freia — e, se a pausa esperasse o
+   * estado de duelo, um X mais longo deixaria os eventos seguintes nascerem DENTRO da arena.
+   */
+  | { t: number; type: 'miniboss'; kind?: 'aranha' | 'golfinho'; seguraEm?: number }
   /**
    * O RABO DO LEVIATÃ atravessando a tela (Fase 3): a nadadeira traseira entra pela DIREITA,
    * bate uma vez com tudo — o nado espacial dele — e sai pela esquerda. É a TRANSIÇÃO do Ato 1
@@ -34,6 +44,111 @@ export type StageEvent =
    * podem somar uma parede impassável, e corredor impassável não é difícil, é roubado.
    */
   | { t: number; type: 'corredor'; rate: number; gap: number }
+  /**
+   * A ESPESSURA DA FAIXA da moldura (Fase 4), em px — do `GROUND_Y` para cima no chão e do
+   * `TETO_Y` para baixo no teto, as mesmas âncoras que o `TerrainSystem` já usa.
+   *
+   * ⚠️ É UM EVENTO SEPARADO DO `corredor`, DE PROPÓSITO. O `gap` manda na COLISÃO; a espessura
+   * manda no DESENHO — é a separação que protege a fase de virar um conserto de colisão. E, na
+   * prática: a batida do duto (t=68) não tem evento `corredor` nenhum.
+   *
+   * A fase inteira vira uma frase: **a fase é emoldurada, o duto fecha, e o núcleo reabre.**
+   *
+   * ⚠️ A CURVA NÃO SOBE MAIS MONOTONICAMENTE, e isso foi uma decisão, não um descuido. Até o teste
+   * jogado de 10/09 ela subia em seis degraus do começo ao fim; o Henrique jogou e pediu borda de
+   * MARGEM na fase inteira, fechando só no duto e **abrindo no chefão** — *"isso dá o desafio
+   * extra de desviar e conseguir sair do duto com vida"*. Quem quiser voltar a exigir monotonia
+   * numa sonda vai reprovar o desenho aprovado.
+   *
+   * `letal` é a parede COBRANDO o encosto, e só o duto pede isso. ⚠️ Ela NÃO é deduzida da
+   * espessura: um roteiro futuro que pedisse 54px por outro motivo ganharia parede assassina sem
+   * ninguém ter escrito isso. Quem manda é esta linha. Ver `Moldura.morde`.
+   *
+   * ⚠️ Os números são CHUTE CALIBRADO até o playtest, com a mesma etiqueta dos vãos e dos HP das
+   * portas.
+   */
+  | { t: number; type: 'moldura'; espessura: number; duto?: boolean }
+  /**
+   * UMA PORTA do duto (Fase 4): a comporta que TAPA O VÃO INTEIRO e só deixa passar quem a
+   * destrói. Ela é o que faz o duto ser um lugar em vez de uma passagem estreita — o veredicto
+   * do teste jogado de 10/09.
+   *
+   * ⚠️ É UM EVENTO PONTUAL, não uma taxa. `corredor` e `hazard` cravam um RITMO que persiste; a
+   * porta é um instante, como o `miniboss` e o `rabo`. Três portas roteirizadas uma a uma valem
+   * mais que um `rate`: elas têm HP crescente, e é essa progressão que dá começo, meio e fim ao
+   * duto.
+   *
+   * ⚠️ O `hp` VIVE AQUI, e não na tabela de props. Ele sobrepõe o `PropDef` porta a porta (6, 8,
+   * 10 — os números da spec de 06/09, chute calibrado até o playtest): a conta é que a porta
+   * chega em quem voa em ~3,5s e a PULSE, o pior caso, entrega 7 de dano/s.
+   */
+  | { t: number; type: 'porta'; hp: number }
+  /**
+   * O ESFÍNCTER da soleira (F4, M4): a garganta que segura a entrada do núcleo.
+   *
+   * ⚠️ SEM `hp`, ao contrário da porta — e a ausência é a regra da peça. Ela não cai na bala:
+   * cai na ignição do gás (ver `src/entities/esfincter.ts`).
+   */
+  | { t: number; type: 'garganta' }
+  /**
+   * TROCA O CENÁRIO PINTADO (Fase 4). A fase é uma jornada anatômica — o hangar engolido, a
+   * caixa torácica, o duto e a câmara do núcleo — e cada câmara tem a pintura dela.
+   *
+   * ⚠️ É O ROTEIRO QUE MANDA, não o `Parallax`: a forma da fase mora toda num lugar só. Um
+   * relógio interno no fundo derivaria do roteiro na primeira vez que alguém mexesse nos
+   * tempos, e a troca cairia no meio de uma onda em vez de no respiro.
+   */
+  /**
+   * Troca a pintura da câmara (Fase 4). `fadeMs` ajusta o mergulho no escuro do `setPintura`
+   * (600 por omissão).
+   *
+   * ⚠️ `faixa` É A BORDA DA MOLDURA, E ELA VIAJA NESTE EVENTO DE PROPÓSITO. A borda e a pintura
+   * são o MESMO lugar visto de dois ângulos, então separá-las num evento `faixa` próprio criaria
+   * a chance de as duas discordarem — a garganta emoldurada pela doca. Um evento, uma câmara.
+   * É a BASE (`f4FaixaA`), nunca a chave final: cada segmento sorteia a irmã dele.
+   *
+   * ⚠️ A CÂMARA A NÃO TEM EVENTO porque é onde a fase começa — `Moldura.FAIXA_INICIAL` já nasce
+   * com ela. Quem escrever um `cenario` novo antes de t=38,8 tem de lembrar da borda junto.
+   *
+   * ⚠️ `soFundo` É A CÂMARA DO CHEFÃO: a partir dela, a tela é SÓ a pintura e a borda — todas as
+   * camadas de peças de cenário apagam no mergulho no escuro. A regra é dele, de 14/09, e vale
+   * para toda luta de chefão: *"todas as fases de BOSS ficam apenas com o fundo e, no caso da
+   * fase 4, a borda"*. Ver `Parallax.limpaCenario`.
+   */
+  | {
+      t: number;
+      type: 'cenario';
+      key: string;
+      fadeMs?: number;
+      faixa?: string;
+      soFundo?: boolean;
+      /**
+       * A PEÇA PLANTADA NA EMENDA entre a borda anterior e a desta câmara — o `PropKind` de uma mesa,
+       * cuja arte vira o pilar da junta (ver `Moldura.JUNTA_ESCALA`). A da câmara para onde se ENTRA:
+       * é ela que o jogador está chegando para ver.
+       */
+      junta?: string;
+      /**
+       * COMO A PINTURA ENTRA. Ausente: o mergulho no escuro do `setPintura`. `'emenda'`: a câmara nova
+       * se revela atrás do pilar da junta, andando com ele — ver `Parallax.setPinturaPelaEmenda`. Só
+       * faz sentido com `faixa` (é a troca de borda que cria a emenda).
+       */
+      entrada?: 'emenda';
+    }
+  /**
+   * A ÁGUA DA CÂMARA B (Fase 4) — enche ou drena.
+   *
+   * ⚠️ ELE EXISTE PORQUE O ENCHIMENTO PRECISOU SAIR DE CIMA DO GOLFINHO. Até o teste jogado de
+   * 12/09 quem enchia era o nascimento do bicho, e os dois eventos disputavam os mesmos segundos:
+   * *"o efeito de encher a tela de água casa/atrapalha com a chegada (aviso) do golfinho"*. Com o
+   * enchimento no ROTEIRO, ele começa em t=36 e termina antes de o bicho existir — que é a receita
+   * dele: *"enchendo até ficar completamente cheio na hora do golfinho, mesmo que comece a encher
+   * antes do encontro"*.
+   *
+   * ⚠️ A DRENAGEM CONTINUA SENDO DA MORTE DO GOLFINHO, não do roteiro: ela tem de esperar o duelo,
+   * que dura o que o jogador levar.
+   */
+  | { t: number; type: 'agua'; acao: 'encher' }
   | { t: number; type: 'boss' };
 
 /**
@@ -342,15 +457,39 @@ export const STAGE_3: StageEvent[] = [
 export const STAGE_4: StageEvent[] = [
   { t: 0.5, type: 'banner', text: 'O INTERIOR · SEM VOLTA' },
 
-  // Corredores LARGOS primeiro (vão 110px): o jogador precisa descobrir que o teto mata
-  // ANTES de o vão apertar. Aprender a regra nova no aperto é sonegação, não dificuldade.
-  { t: 1, type: 'corredor', rate: 2.2, gap: 110 },
+  // Corredores LARGOS primeiro: o jogador precisa descobrir que o teto mata ANTES de o vão
+  // apertar. Aprender a regra nova no aperto é sonegação, não dificuldade.
+  //
+  // ⚠️ OS TRÊS VÃOS ANTES DO GOLFINHO SUBIRAM +16 (110→126, 96→112, 104→120) no teste jogado de
+  // 12/09: *"diminua o tamanho das mesas no início da fase 4 — diminuir elas quer dizer aumentar
+  // o espaço de navegação da nave; deixe para as mesas crescerem a partir do golfinho"*. O vão é
+  // o ÚNICO knob da mesa: ela nasce da borda até a borda do vão, então +16 de vão é −16 de mesa
+  // somados chão e teto. A maior mesa isolada da abertura cai de 62px para 46px.
+  //
+  // ⚠️ O RITMO INTERNO FOI PRESERVADO — os três andaram juntos, então largo→aperta→respira
+  // continua sendo a forma da câmara A. E a queda para 76 em t=50 fica MAIOR de propósito: é o
+  // golfinho que passa a ser a fronteira entre o lugar largo e a garganta.
+  //
+  // ⚠️ O PREÇO ESTÁ NA ONDULAÇÃO, e é aritmética, não gosto: o centro do vão anda em
+  // [TETO_Y + MARGEM + meio, GROUND_Y − MARGEM − meio], uma faixa de "148 − gap" px. Em 110 o
+  // corredor tinha 38px de sobe-e-desce; em 126 tem 22. Se a abertura ficar RETA demais no teste
+  // jogado, o knob é a Moldura.MARGEM (24) para baixo, não o vão de volta para 110.
+  { t: 1, type: 'corredor', rate: 2.2, gap: 126 },
+  // ⚠️ A ESPESSURA É A DRAMATURGIA DA FASE — e ela já estava escrita nos vãos desde a Fatia 7, só
+  // não estava visível. A moldura é o que faz o jogador ENXERGAR o que os números já faziam com
+  // ele. 16px: você entrou num lugar grande.
+  //
+  // ⚠️ E 16px É ONDE ELA FICA ATÉ t=55. Depois do teste jogado de 10/09 a moldura é uma BORDA que
+  // margeia a fase, não uma parede que cresce a fase inteira: o aperto do miolo vem do VÃO (76px
+  // em t=43), e é o duto — e só ele — que fecha de verdade. Ver a spec de 10/09.
+  { t: 1, type: 'moldura', espessura: 16 },
   { t: 5, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 90 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.38, y: 120 },
 
   // O interior REAGE: minas sensoras nos vãos (a defesa imune do bicho) + pressão aérea.
   { t: 14, type: 'banner', text: 'ANTICORPOS · SENSORES ATIVOS' },
-  { t: 15, type: 'corredor', rate: 2.4, gap: 96 },
+  { t: 15, type: 'corredor', rate: 2.4, gap: 112 },
+  { t: 15, type: 'moldura', espessura: 16 },        // a borda margeia, e é só isso
   { t: 15.5, type: 'hazard', rate: 2.2, mix: ['sensor', 'destroco'] },
   { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
   { t: 21, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 140 },
@@ -361,36 +500,233 @@ export const STAGE_4: StageEvent[] = [
   { t: 30, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 80 },
   { t: 33, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.65, y: 130 },
 
+  // ─── A CÂMARA COMEÇA A ALAGAR, QUATRO SEGUNDOS ANTES DO BICHO ───
+  //
+  // ⚠️ t=36, E NÃO t=40 JUNTO COM O GOLFINHO. Veredicto do teste jogado de 12/09: *"a água e o
+  // efeito da água ficaram ótimos. Mas achei o encher da tela muito repentino e forçado... do
+  // jeito que está agora o efeito de encher a tela de água casa/atrapalha com a chegada (aviso)
+  // do golfinho."* Dois eventos grandes nos mesmos dois segundos, e um comia o outro.
+  //
+  // A conta: `Agua.ENCHE_DUR` 2,6 leva a água ao topo em t=38,6, e o repuxo de `ASSENTA_DUR` 0,9
+  // termina em t=39,5 — meio segundo antes de o golfinho nascer. **A câmara alaga, DEPOIS o
+  // habitante chega.** A ordem deixa de ser simultânea e vira dramaturgia.
+  //
+  // ⚠️ ELE CAI NO RESPIRO (t=37–38,5: corredor solto, hazard em 0, nenhuma onda no ar), e não é
+  // coincidência — é o único trecho da fase em que o jogador tem olho sobrando para reparar no
+  // cenário.
+  { t: 36, type: 'agua', acao: 'encher' },
+
   // Respiro estrutural: corredor solto, sem onda — o jogador reaprende a voar antes do aperto.
-  { t: 37, type: 'corredor', rate: 2.6, gap: 104 },
+  { t: 37, type: 'corredor', rate: 2.6, gap: 120 },
+  { t: 37, type: 'moldura', espessura: 16 },        // ainda margem: o respiro é largo de verdade
   { t: 38, type: 'hazard', rate: 0, mix: [] },
+  // ⚠️ A ARENA TEM MESA DESDE 14/09. Até ali o corredor parava aqui (`rate: 0`) para a arena ser só
+  // o jogador e o golfinho. O pedido dele trocou isso: *"quando o mapa encher de água, quero que
+  // utilize novas mesas… assim que o golfinho for morto, as mesas vão explodir e afundar"* — e mesa
+  // que explode na morte do golfinho tem de estar na tela durante o duelo.
+  //
+  // O corredor segue no ritmo e no vão do respiro (2,6s, 120px, o mais largo depois da abertura): a
+  // arena continua sendo a mais aberta da câmara. Quem troca a mesa de aço pela do mar é a MARÉ
+  // (`GameScene.mare`), não esta linha. ⚠️ Se o duelo ficar apertado demais jogando, o knob é o
+  // `rate` daqui para cima — ou voltar a 0, que devolve a arena vazia e tira as mesas do mar junto.
+  { t: 38.5, type: 'corredor', rate: 2.6, gap: 120 },
+
+  // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
+  // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
+  // mesmo lugar.
+  //
+  // ⚠️ ELA ANDOU DUAS VEZES EM 12/09, E A SEGUNDA DESFEZ METADE DA PRIMEIRA. Foi de t=40 para
+  // t=40,95 para cair dentro do "surto" da água — um pico OPACO que existia só para tapar o corte.
+  // Com o enchimento adiantado para t=36, o surto perdeu a função e morreu: quando a pintura troca,
+  // **a água já está cheia há 0,2s**, e quem esconde o corte volta a ser o mergulho no escuro do
+  // `setPintura`, com os 600ms de sempre. É a outra receita dele, palavra por palavra: *"tela
+  // preta por milissegundos e já aparecer cheia de água, transição feita do fundo"*.
+  //
+  // ⚠️ E ELA TEM DE CAIR COM A ÁGUA CHEIA. `ENCHE_DUR` 2,6 a partir de t=36 topa em t=38,6; esta
+  // linha em t=38,8 cai 0,2s depois, e o mergulho termina em t=39,4 — meio segundo antes do bicho.
+  // **A `probe-f4-agua` cobra exatamente isso.** Antecipar esta linha sem antecipar o `agua`
+  // devolve o defeito que ele apontou: a câmara mudando de lugar e de nível ao mesmo tempo.
+  { t: 38.8, type: 'cenario', key: 'paintBgF4b', faixa: 'f4FaixaB', junta: 'mesaMar' },
+
+  // ─── O GOLFINHO: o motivo de a câmara mudar (spec 2026-09-11). ───
+  //
+  // O Henrique, depois de jogar o M1.5: *"quero que tenha um porquê de mudar o fundo"*. Antes daqui
+  // os inimigos, as minas e a mesa eram os mesmos dos dois lados da troca. Agora a pintura azul chega
+  // junto com o primeiro habitante do Leviatã: aviso A→B, o X, e o duelo em arena.
+  //
+  // ⚠️ `seguraEm: 49.5`: o relógio não passa daqui enquanto ele viver, e entre 41 e 50 o roteiro
+  // não tem NADA marcado — é isso que faz a arena ser só o jogador e o golfinho.
+  { t: 40, type: 'miniboss', kind: 'golfinho', seguraEm: 49.5 },
+
+  // A CÂMARA 2 — a caixa torácica. Azul frio contra o vermelho da câmara 1: é a troca de
+  // PALETA que faz "estou indo fundo" ser lido. Duas câmaras vermelhas seguidas leriam como o
+  // mesmo lugar. Cai no RESPIRO (sem onda no ar), não no meio de uma.
+  //
+  { t: 41, type: 'banner', text: 'AS PROFUNDEZAS' },
 
   // ─── O APERTO: o coração da fase. Vão 76px (a nave tem ~22 de hitbox: passa com folga
   // CURTA), minas nos vãos, cargueiro cuspindo drones no corredor. Posição sob pressão. ───
-  { t: 42, type: 'banner', text: 'O DUTO APERTA' },
-  { t: 43, type: 'corredor', rate: 1.9, gap: 76 },
-  { t: 44, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
-  { t: 46, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 100 },
-  { t: 50, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
-  { t: 51, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 100 },
+  //
+  // ⚠️ ENCOLHEU DE 20s PARA 13s (e a onda de batedores de t=46 saiu) para o golfinho caber sem
+  // empurrar o duto aprovado para fora de t=68.
+  { t: 50, type: 'banner', text: 'A GARGANTA APERTA' },
+  { t: 50, type: 'corredor', rate: 1.9, gap: 76 },
+  // ⚠️ O APERTO NÃO É DA PAREDE, É DO VÃO. A borda continua em 16 aqui: quem cobra posição é o
+  // `corredor` de 76px acima, e empilhar parede grossa em cima do vão mais estreito da fase era
+  // justamente o que fazia a moldura deixar de ler como borda.
+  { t: 50, type: 'moldura', espessura: 16 },
+  { t: 50.5, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
+  { t: 52, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
+  { t: 52.5, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 100 },
   { t: 54, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 90 },
+  // A PAREDE COMEÇA A GANHAR CORPO — o primeiro degrau real da fase, e ele cai no meio do pico,
+  // sem evento `corredor` junto: o jogador sente o lugar apertar sem que o vão tenha mudado.
+  { t: 55, type: 'moldura', espessura: 32 },
   { t: 58, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 110 },
 
   // PICO FINAL: o corredor continua estreito e TUDO vem junto — mas menos volume que o pico
   // da F2/F3: aqui o terreno já cobra metade da atenção, e pressão dupla total é ilegível.
   { t: 63, type: 'banner', text: 'REJEIÇÃO TOTAL' },
   { t: 63.5, type: 'corredor', rate: 1.7, gap: 84 },
+  { t: 63.5, type: 'moldura', espessura: 44 },      // não é mais câmara
   { t: 64, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
+  // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
+  // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
+  //
+  // ⚠️ A `junta` ENTROU EM 20/09, JUNTO COM A ARTE DA C — e ela faltava porque até então não havia
+  // costura nenhuma aqui: sem `f4FaixaC` instalada o `setFaixa` recusava a chave e a borda da
+  // garganta seguia reta duto adentro. Instalar a C abriu a emenda mais violenta das três (anéis
+  // de cartilagem azul-claros encostando em carne vermelha escura, sem transição), e as outras
+  // duas já eram tapadas por um pilar — t=38,8 leva `mesaMar`, t=109 leva `mesa`.
+  //
+  // ⚠️ `mesa3` E NÃO `mesa`: o pilar é a arte do lugar para ONDE se entra (spec de 06/09), e para
+  // dentro do duto entra-se em carne. A `mesa3` é a única das cinco com tendão vermelho-arroxeado
+  // sobre pedra escura — ela faz a ponte entre o azul de B e o vermelho de C. A `mesa` de aço
+  // plantaria metal no meio da única câmara onde *"o metal acabou"*.
+  //
+  // ⚠️ E ELE NÃO VIRA OBSTÁCULO NO DUTO, apesar de `no duto não nasce mesa`: a junta é DECORAÇÃO
+  // (ver `Moldura.JUNTA_ESCALA`) — sem corpo, sem mordida, e sobe só 5px acima da superfície,
+  // dentro dos 8px da `FOLGA`. Quem fecha o caminho aqui continua sendo só as portas.
+  { t: 68, type: 'cenario', key: 'paintBgF4c', faixa: 'f4FaixaC', junta: 'mesa3' },
+  // O DUTO: a faixa CHEIA, E ELA PASSA A MORDER. 54 é o teto da peça de 64px ancorada pela
+  // superfície (`Moldura.ESPESSURA_MAX`), e a partir daqui a mesa vira parede — a trava dos 8px
+  // apara o resto sozinha enquanto o corredor existir.
+  //
+  // ⚠️ `duto` CAI JUNTO COM A TROCA DE PINTURA, e não é coincidência: a faixa acende no mesmo
+  // instante (ver `Moldura.setDuto`), então a regra nova chega ANUNCIADA. Parede que foi cenário
+  // por 68s e de repente cobra é sonegação — a mesma lei que abre esta fase com corredor largo
+  // para o jogador descobrir que o teto mata.
+  //
+  // ⚠️ `duto: true` FAZ DUAS COISAS: a parede COLA no corredor (deixa de sair da espessura) e ela
+  // MORDE. A primeira é o conserto de 10/09 — sem ela o duto media 127px de banda aberta para um
+  // corredor de 84, e a parede do teto ficava em 16,6px de média onde esta linha pede 54.
+  { t: 68, type: 'moldura', espessura: 54, duto: true },
   { t: 69, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
-  { t: 72, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
-  { t: 75, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
+
+  // ─── AS TRÊS PORTAS. O duto deixa de ser uma passagem estreita e vira um LUGAR. ───
+  //
+  // ⚠️ ELAS SÃO O MOTIVO DE O DUTO TER 38s EM VEZ DE 11s. Uma porta chega em quem voa em ~3,5s;
+  // três portas coladas viravam uma fila, e o duto que o teste jogado pediu precisa de espaço
+  // entre elas para as ondas respirarem. A fase passa de 86s para 113s, autorizado em 10/09.
+  //
+  // ⚠️ O VÃO APERTA A CADA PORTA (84 → 76 → 68) e o HP SOBE (6 → 8 → 10). É a progressão que dá
+  // começo, meio e fim ao duto — e é ela, não a duração, que faz o trecho ter forma.
+  { t: 72, type: 'porta', hp: 6 },
+  { t: 74, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
+  { t: 78, type: 'corredor', rate: 1.7, gap: 76 },
+  { t: 82, type: 'porta', hp: 8 },
+  { t: 84, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
+  // ⚠️ ERA 'ESFÍNCTER FINAL', E APONTAVA PARA A COISA ERRADA desde antes das portas existirem.
+  // Os banners desta campanha ANUNCIAM o que vem; este anunciava um esfíncter e o que chegava em
+  // t=94 era a terceira comporta rebitada, igual às outras duas. O esfíncter de verdade é a
+  // garganta da soleira, em t=110 — ver o bloco da soleira mais abaixo.
+  { t: 88, type: 'banner', text: 'A ÚLTIMA COMPORTA' },
+  { t: 89, type: 'corredor', rate: 1.7, gap: 68 },
+  { t: 94, type: 'porta', hp: 10 },
+
+  // O PICO: o duto no seu mais fechado, e tudo junto. Menos volume que o pico da F2/F3 — aqui a
+  // parede morde e cobra metade da atenção sozinha.
+  { t: 97, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 100 },
+  { t: 100, type: 'wave', kind: 'drone', count: 7, spacing: 0.2, y: 90 },
+  { t: 103, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.55, y: 120 },
 
   // Silêncio → o NÚCLEO. O mesmo telégrafo de todas as fases.
-  { t: 79, type: 'corredor', rate: 0, gap: 0 },
-  { t: 79.5, type: 'hazard', rate: 0, mix: [] },
-  { t: 82, type: 'banner', text: 'ALERTA · O NÚCLEO' },
-  { t: 86, type: 'boss' },
+  { t: 106, type: 'corredor', rate: 0, gap: 0 },
+  // A PAREDE RECUA NO SILÊNCIO. `RAMPA` é 8px/s, então 54→16 leva 4,75s: a abertura termina em
+  // t≈110,75 e o chefão (t=113) luta numa arena EMOLDURADA, não dentro de um duto. O jogador VÊ a
+  // parede abrir enquanto sai — é a recompensa de ter saído do duto com vida.
+  //
+  // ⚠️ `duto: false` é explícito, e tem de ser: sem ele a parede continuaria colada e mordendo
+  // durante os 4,75s em que ainda está grossa, numa fase que já tirou o corredor do jogador.
+  //
+  // ⚠️ `duto: true` ATÉ t=109, e não mais `false` aqui (14/09, 2º teste jogado). Com o duto acabando
+  // em 106, o trecho entre o fim do duto e a borda do núcleo virava uma parede sem linha acesa e sem
+  // o tint — *"a linha do duto não existe e o sprite da borda é diferente de todo o duto, quero que
+  // fique igual ao do duto"*. O duto agora dura até a câmara D ENTRAR: a parede recua (o `gap` já é
+  // 0, então nada cola nela) mas continua sendo o duto, com fio e mordida honestos placa a placa.
+  // ⚠️ 26, E NÃO 16 — A PAREDE SEGURA ATÉ O ESFÍNCTER PASSAR, e isto é geometria, não ritmo.
+  //
+  // A criatura tem 171px de quadro. Com espessura 16 o corredor mede 184, e ela fica MENOR que o
+  // vão: medido por varredura na `probe-f4-esfincter`, abria até 14px de fresta em cima e 13
+  // embaixo. Uma comporta contornável não é comporta — e o corpo da nave tem 6px. Ampliar a arte
+  // é proibido (a lei da resolução, 06/09), então quem cede é a parede: 26 dá um corredor de 164,
+  // e a peça sobra dos dois lados.
+  //
+  // ⚠️ E O BEAT MELHOROU DE CARONA. A abertura da câmara era *"a recompensa de ter saído do duto
+  // com vida"* e acontecia ANTES do esfíncter; agora ela acontece DEPOIS de ele estourar. O
+  // jogador arromba a última comporta e a sala se abre — que é exatamente o *"rompeu o obstáculo
+  // rumo ao núcleo"* que ele pediu.
+  { t: 106, type: 'moldura', espessura: 26, duto: true },
+  { t: 106.5, type: 'hazard', rate: 0, mix: [] },
+  // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
+  // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
+  //
+  // ⚠️ `soFundo`: a câmara do núcleo é a ARENA, e arena é só pintura e borda. O coração, o
+  // maquinário e as costelas que ainda estavam na tela apagam no mesmo mergulho da pintura — a sala
+  // chega vazia. Pedido dele no teste de 14/09: *"retire os maquinários do fundo do núcleo"*.
+  // O DUTO ACABA AQUI, UMA LINHA ANTES DA CÂMARA — e a ordem importa: o `setDuto(false)` corre
+  // antes do `setFaixa`, então a primeira placa D já nasce fria e todas as placas B que restam na
+  // tela seguem sendo duto até a emenda, onde o pilar da junta planta a fronteira.
+  { t: 109, type: 'moldura', espessura: 26, duto: false },
+  // ⚠️ `entrada: 'emenda'` (14/09, 3º teste jogado): o mergulho no escuro de 600ms foi reprovado aqui
+  // — *"a transição de fundos, de novo, está muito seca"*. O núcleo se revela atrás do pilar.
+  { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD', soFundo: true, junta: 'mesa', entrada: 'emenda' },
+  { t: 109, type: 'banner', text: 'ALERTA · O NÚCLEO' },
+
+  // ─── A SOLEIRA: O ESFÍNCTER. A última coisa entre o jogador e o núcleo. ───
+  //
+  // ⚠️ ELA CHEGA EM t=110 PORQUE A ARTE MANDA, não o roteiro. A criatura tem 167px de conteúdo e
+  // o corredor só abre para isso quando a parede recua: em t=106,5 sobrariam 51px enterrados, em
+  // t=108,5 ainda 19, e só em t=110 ela cabe com folga. Medido pelo motor em
+  // `scripts/_f4/_ver-soleira.mjs`. É a TERCEIRA vez nesta fatia que arte com linha forte impõe
+  // geometria à fase — a veia da borda C mudou o ritmo da curva, o núcleo da porta empurrou a
+  // peça para trás do layer da borda, e agora o esfíncter empurra o chefão.
+  //
+  // ⚠️ E ELA NASCE NA COSTURA DE PROPÓSITO: a boca dela é magenta, o duto é vermelho e o núcleo é
+  // AZUL. Contra a parede do duto ela sumiria; contra o núcleo ela RECORTA. É o mesmo princípio
+  // que fez a fenda VERTICAL da porta funcionar contra as veias horizontais do duto. Decisão dele
+  // em 21/09: *"ela vai ficar bem na linha que separa a arte da borda do duto e começo da arte da
+  // borda do núcleo"*.
+  //
+  // ⚠️ DE QUEBRA ELA TAPA O DEGRAU DO CHÃO na emenda — o mesmo ganho que esconder as pontas da
+  // porta deu. E o `entrada: 'emenda'` de t=109 FICA: o fade de 1400ms corre por trás dela, então
+  // nada do que foi aprovado em 15/09 é tocado.
+  { t: 109.5, type: 'banner', text: 'ESFÍNCTER' },
+  { t: 110, type: 'garganta' },
+
+  // ⚠️ O CHEFÃO ERA t=113, E ATRASOU POR CAUSA DELA (21/09, autorizado: *"não tem problema
+  // atrasar um pouco a chegada do guardião"*). A cena da soleira — chegar, respirar, o gás
+  // engrossar, o tiro, o estouro e o gore — não cabe em 3s.
+  //
+  // ⚠️ E `t` É UM NÚMERO SOLTO AQUI, verificado: a música do chefão nasce no `spawnBoss`, não
+  // numa linha própria do roteiro, então ela espera junto. A cena acontece no SILÊNCIO — que é o
+  // que o silêncio antes do chefão serve para fazer em todas as fases.
+  // A CÂMARA ABRE, agora que a comporta caiu. `RAMPA` é 8px/s, então 26→16 leva 1,25s: termina em
+  // t≈115,8 e o chefão (t=118) luta numa arena emoldurada, como sempre lutou.
+  { t: 114.5, type: 'moldura', espessura: 16, duto: false },
+
+  { t: 118, type: 'boss' },
 ];
 
 /** Onde a nave está. A física do mundo, não uma preferência do jogador (docs/GDD.md §3). */
@@ -494,7 +830,32 @@ export const STAGES: Record<number, StageDef> = {
 export class StageDirector {
   private next = 0;
 
-  constructor(private readonly script: StageEvent[]) {}
+  /**
+   * ⚠️ O ROTEIRO TEM DE ESTAR EM ORDEM CRESCENTE DE `t`, E ISTO NÃO É ESTILO — É CORRETUDE. O
+   * `update` caminha com um CURSOR MONOTÔNICO (`next`), então um evento fora de ordem não dispara
+   * no instante que ele declara: dispara quando o cursor chega nele, ou seja, no `t` do vizinho
+   * anterior. Ele fica escrito no roteiro com um número e acontece com outro.
+   *
+   * ⚠️ ESTE GUARD NASCEU DE UM DEFEITO REAL, em 10/09: o evento `{ t: 55, moldura 32 }` foi
+   * inserido depois de um `{ t: 58, wave }`, e a parede só começava a engrossar em t=58. A sonda
+   * passou VERDE — ela amostrava em t=60, e a rampa de 2s terminava justo a tempo. Quem pegou foi
+   * uma CAPTURA de tela em t=58. Um assert de sonda não teria segurado isso; este segura, porque
+   * falha na carga da fase e não depende de instante amostrado.
+   *
+   * Lança em vez de ordenar sozinho: ordenar em silêncio faria o roteiro rodar diferente do que
+   * está escrito no arquivo, que é exatamente o defeito que se quer impedir.
+   */
+  constructor(private readonly script: StageEvent[]) {
+    for (let i = 1; i < script.length; i++) {
+      if (script[i].t < script[i - 1].t) {
+        throw new Error(
+          `Roteiro fora de ordem no índice ${i}: t=${script[i].t} (${script[i].type}) vem depois ` +
+            `de t=${script[i - 1].t} (${script[i - 1].type}). O cursor de \`update\` é monotônico: ` +
+            `este evento dispararia em t=${script[i - 1].t}, não em t=${script[i].t}.`,
+        );
+      }
+    }
+  }
 
   /**
    * Instante em que o chefão entra — o modo treino salta para cá.

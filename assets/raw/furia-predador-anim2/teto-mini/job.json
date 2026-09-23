@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "5f65f018-1668-4d2b-bfad-7a92bc214cbe",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "hangs upside down clinging to the ceiling with its feet, pulls one clawed arm back and hurls something down toward the left, then recovers",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

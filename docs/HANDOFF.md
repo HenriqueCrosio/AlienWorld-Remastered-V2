@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-04)
+# HANDOFF — estado do projeto (2026-09-23)
 
 Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
 
@@ -51,9 +51,135 @@ GameOver). **O que falta não é construir — é PLAYTEST HUMANO, placar online
 que depende do olho do Henrique foi deliberadamente empurrado para DEPOIS dele — playtestar e
 balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já cobrou isso uma vez.
 
-1. **PASSE VISUAL INTEIRO** — fatias 6–8. **As fatias 0 a 6 estão FECHADAS** (a 4 = Cutscene 2 em
-   `ee4e2a0`; a 5 = Fase 3 em `a28dd07`). A **Fatia 6 (Cutscene 3: a queda no hangar do Leviatã)
-   foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
+1. **PASSE VISUAL INTEIRO** — falta só a fatia 8. **As fatias 0 a 7 estão FECHADAS E MERGEADAS** (a 4 =
+   Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`; a 6 = Cutscene 3 em `f29c46d`; a 7 = Fase 4,
+   mergeada `--no-ff` em 23/09 sobre `86771fd`).
+
+   🟢 **A FATIA 7 (Fase 4, o interior) FECHOU EM 23/09, no REJOGO DA FASE INTEIRA.** Ele jogou do
+   zero e aprovou tudo: *"a arena do golfinho está com a dificuldade certa"* (o item parado desde
+   15/09 — o `rate 2.6` do `corredor` de t=38,5 fica) · *"tudo ok para as perguntas, tá fechado"*
+   (as emendas B/C, as 3 portas, o chefão depois da câmera lenta). No esfíncter: *"o sangue ficou
+   muito bom"* · a mangueira *"na posição correta e seu aspecto melhorou"* · o gore *"não achei
+   demais, achei gore e justamente o que a cena representa"*. A câmera lenta MUDOU DE FORMA no
+   mesmo rejogo, a pedido dele — o baque sai em tempo NORMAL (200ms), o mundo mergulha para 0,3,
+   SEGURA 1100ms para os pedaços serem vistos e volta em 600ms para mostrar o tamanho da explosão
+   (`LENTA_*` no `GameScene`, `86771fd`): *"ficou perfeito"*. Sonda `probe-f4-esfincter` 50/50.
+
+   🔵 **A PRÓXIMA FRENTE É A FATIA 8 — a cutscene final e as duas baleias erradas** (ainda dentro da
+   F3 e da cutscene final; o Leviatã canônico é o do menu). Ela ainda NÃO tem spec nem START: abre
+   pelo fluxo de sempre, brainstorming → spec → plano. O START da Fatia 7
+   (`docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`) vira registro.
+
+   O registro da Fatia 7, como estava antes do rejogo:
+
+   **Estado em 2026-09-22 (histórico — ver o 🟢 acima): as TRÊS peças do M4 foram jogadas e aprovadas, e o gore, a câmera lenta e o sangue na borda fecharam. A fatia não tem mais arte nem código — ela espera o REJOGO da fase inteira, e depois o merge.** A branch está em dia
+   com o `origin` (V2). ✅ **As 3 PORTAS foram jogadas e APROVADAS em 21/09, sem um único ajuste
+   pedido** (`94f84cf` + `6fc3ac3`): *"é visível que você tem que atirar nela, se o jogador não
+   perceber no começo, vai cobrar com a vida"* · *"dá pra ver que você ganhou"* · *"não chama muita
+   atenção e serve para o propósito"* · *"as lascas que sobram depois da explosão indicam exatamente
+   o que queremos, passagem livre"*. Tudo abaixo também foi jogado e aprovado:
+
+   - o **Bloco A** (os 4 fundos dele) e a **MOLDURA** (M1, M1.5: o duto, as 3 portas provisórias);
+   - o **GOLFINHO**, o mini-chefão da câmara B — e a dificuldade da arena, aprovada em 19/09;
+   - o **M2** (as bordas A/B/D, o cenário respirando, as colunas, o pilar nas costuras, a maré), a
+     entrada do núcleo pela emenda e o contorno da borda B;
+   - o **B1 — o guardião**: a arte nova dele, a morte composta no motor, e a **LUTA REDESENHADA**
+     em 19/09 (a SERRA num cabo que crava nas bordas e é a janela de dano, com `DANO_CRAVADA` ×2;
+     a salva cobrindo as bordas a 150px/s; a escala em 3 degraus de vida). Fechada em 20/09 com a
+     **leitura**: o rastro do glóbulo, o aviso da investida — que deixou de falar a língua do
+     flash de dano — e a **trava da mira** aos 62% de uma carga de 1,15s, que dá 450ms de janela
+     de fuga e transforma "atrair a investida e desviar" numa jogada de verdade;
+   - o **B3 — o predador**: a 2ª forma deixou de ser o coração e virou o bicho que sai de dentro
+     do guardião (`src/entities/Predador.ts`). **Oito rodadas, seis testes jogados (16–19/09)**,
+     incluindo a volta que ataca (rasgo do chão + metal incandescente) e o **fim da morte**
+     (`src/entities/fimDoPredador.ts`: o piso racha, estoura, a lava sobe e o corpo afunda);
+   - o **B2 — a posição do chefão**: fechado em 20/09 **sem uma linha de código**, porque a
+     posição de hoje já era a certa — os cabos encontram a borda de cima, e é ela que esconde o
+     corte do sprite de 256²;
+   - o **M4 · a BORDA C e o PILAR DA COSTURA**, jogados e aprovados em 20/09 (`28b0a14`): *"ficou
+     bem melhor e dá mais sensação de lugar fechado… a coluna que separa a mudança das bordas
+     ficou de boa, barato e eficiente"*. A faixa grossa (128×80) da câmara C entrou depois de a
+     `Moldura` aprender a ler a altura da PEÇA em vez de um literal 64, e o `cenario` de t=68
+     ganhou `junta: 'mesa3'` — a costura B→C era a única das três sem pilar, porque até então não
+     havia costura ali.
+
+   ⚠️ **A LEI MAIS CARA DESTA FATIA:** efeito de cenário se **assa em pixel** na resolução nativa,
+   com a paleta do vizinho. A 1ª versão do fim da morte foi feita com `Graphics` em tempo de jogo
+   e **reprovada na hora** (*"ficou gerado e sem custos"*); foi refeita assada
+   (`scripts/_f4/_assar-fim-f4.mjs`). O código de cena só toca a arte assada.
+
+   **✅ AS 3 PORTAS FORAM JOGADAS E APROVADAS (21/09), SEM AJUSTE.** Arte final (a fenda acesa dentro de
+   um soquete de anéis blindados, escolhida por ele entre 8 candidatas), o pulso da fenda em 8
+   quadros **assados** e a morte em dois tempos: a luz apaga, a peça PARTE AO MEIO, e a lasca FICA
+   no duto para a nave atravessar. O núcleo não engrossou, os 150ms ficaram, o pulso não foi reassado.
+   ⚠️ **E a desconfiança de que esconder as pontas tivesse enfraquecido o *"eu abri isso"* estava
+   ERRADA, ao contrário:** as pontas de baixo eram ângulos RETOS — a parte da peça que menos parecia
+   destroço — e tirá-las de vista deixou sobrar só o que comunica passagem livre. **Esconder o que a
+   arte tem de menos orgânico foi ganho duplo: encaixe E leitura.**
+
+   **🟢 O ESFÍNCTER PASSOU NO TESTE JOGADO (22/09), nas cinco perguntas** — *"a explosão e o arrombamento
+   da criatura ficou muito boa"* — **e o gore fechou no mesmo dia**: *"mantém a carcaça que já temos e
+   segue, gostei das gerações de pedaços e sangue"*. As 14 placas de casco e as 11 vísceras do PixelLab
+   saem JUNTAS, com o sangue dela no ar e grudado na cena. Mais três pedidos dele fecharam no mesmo
+   dia: a mangueira foi para trás do layer da borda (*"para parecer que ele está cravado lá"*), o
+   estouro passou a abrir em CÂMERA LENTA e terminar no tempo normal, e o sangue que gruda deixou de
+   flutuar — ele nasce NA borda, *"como se tivesse jorrado lá"*. Sonda `probe-f4-esfincter` 49/49.
+   ⚠️ **A `probe-f4-moldura` pisca ~1 em 3**, num assert de AMOSTRAGEM que não é defeito do jogo nem
+   veio desta volta — rode de novo antes de investigar; o diagnóstico está no ⏸️ do START.
+   **🔵 A FATIA 7 NÃO TEM MAIS ARTE NEM CÓDIGO PENDENTE** — falta rejogar a fase, atualizar este arquivo
+   e fazer o merge `--no-ff` em `main`.
+   ⚠️ **Ele jogou a 1ª versão e pediu três coisas, todas feitas:** (1) o gore passou a vir do PixelLab
+   A PARTIR DA ORIGINAL — 7 cacos de 26 a 53px no lugar dos meus recortes de 24×24, que liam como
+   estilhaço genérico; (2) o cano virou **mangueiras soltas vazando**, na língua dos cabos do
+   guardião, animadas, reduzidas pela metade e enterradas 5px na parede; (3) a `garganta-morta`
+   (11 quadros de amolecer) saiu, e a criatura vira uma **carcaça arrombada** numa troca de
+   textura SECA, como a `portaLasca` — *"quero que o player sinta que explodiu a criatura e rompeu
+   o obstáculo rumo ao núcleo"*.
+   ⚠️ **E A PAREDE PASSOU A SEGURAR EM 26 ATÉ t=114,5**, o que mudou sem ele pedir: a varredura da
+   sonda achou que a criatura abria até **14px de fresta**, porque ela tem 171px e o corredor
+   chegava a 184 — ela era MENOR que o vão, e o corpo da nave tem 6px. Ampliar é proibido, então
+   cedeu a parede. De carona, a câmara passou a abrir **depois** do arrombamento, não antes.
+   A peça MUDOU DE TRABALHO por decisão dele: o `f4VivoC` da spec de 08/09 era decoração de parede e
+   herdava o argumento que riscou as irmãs A e B em 19/09. O que o salvou foi uma dívida do próprio
+   jogo — o banner de t=88 prometia *ESFÍNCTER FINAL* desde antes das portas existirem, e o que
+   chegava em t=94 era a terceira comporta rebitada. Hoje ele diz *A ÚLTIMA COMPORTA*.
+   - **A criatura é a GARGANTA do hangar** (PixelLab `15f111fd`), reusada por escolha dele. ⚠️ **E a
+     descrição com que ele a gerou é, palavra por palavra, a spec do esfíncter:** *"o anel de dentes
+     contrai e relaxa lentamente"*. A peça que faltava já estava no disco.
+   - **Nenhuma geração no PixelLab.** O cano (`f4-cano2`) entrou sem tocar; o gás, o cone e o gore são
+     **assados**, e o gore sai RECORTADO dos pixels dela — a paleta sai de graça.
+   - **A cena:** o cano quebrado vaza → a nuvem engrossa por 1,5s → **qualquer tiro** acende → cone
+     para dentro do núcleo + gore. A criatura vira `inerte` NA IGNIÇÃO, não no fim da animação.
+   - **O chefão atrasou de t=113 para t=118**, autorizado: a cena não cabia em 3s. A `probe-stage4`
+     segue fechando a corrente de ponta a ponta.
+   - ⚠️ **AS ANIMAÇÕES DELA ESTOURAVAM EM BRANCO** (0,8% de px claros no estático contra 10,2% no
+     idle e 18,2% na morte) — o defeito que o `_assar-porta-nucleo` existe para impedir. Assadas
+     cópias corrigidas em chaves NOVAS; as originais ficam intocadas porque a **cutscene 3** as usa.
+
+   ⚠️ **DUAS PEÇAS DO M4 DEIXARAM O MESMO AVISO, e ele vale direto para o esfíncter:** arte com uma
+   LINHA FORTE impõe geometria à fase. A veia acesa da borda C obrigou o duto a mudar o ritmo da
+   curva (o patamar do `SEGURA OU ANDA`); o núcleo aceso da porta obrigou a peça a ir para trás do
+   layer da borda. O esfíncter ABRE E FECHA numa parede que rola — vale perguntar o que ele impõe
+   ANTES de gerar.
+
+   ⚠️ **E A PORTA DEIXOU UM AVISO DE CÓDIGO:** a arte final expôs dois defeitos que nenhuma sonda
+   pegava — o estouro saindo 56px acima da peça (ela é o único prop de origem `(0.5, 0.5)`) e um
+   `body.enable` desligado que teria congelado a lasca no ar, porque prop é movido por velocidade.
+   **Peça nova nesta fase mexe no motor mais do que parece.**
+
+   ⚠️ **E UM AVISO DE SONDA, o mais caro da sessão:** o assert *"a nave atravessa a lasca sem
+   dano"* passou sozinho e quase foi dado como prova. Com o par — a porta VIVA TEM de cobrar vida,
+   mesma nave, mesmo lugar — ele começou a FALHAR, porque **a nave parada no meio do duto leva de
+   onda, de bala e de parede**. Um "não aconteceu nada" só vale com o discriminador do lado.
+
+   **Depois do M4:** rejogar a fase inteira, atualizar este HANDOFF e fechar a fatia com merge
+   `--no-ff` em `main`. O mapa inteiro está na seção "🧭 O MAPA PARA FECHAR A FATIA 7" do START.
+   Specs, em ordem: `2026-09-06-fatia7-fase4-design.md` (a fatia),
+   `2026-09-08-fatia7-moldura-fase4-design.md`, `2026-09-10-fatia7-duto-portas-design.md`,
+   `2026-09-11-fatia7-golfinho-miniboss-design.md`, `2026-09-16-fatia7-b3-predador-design.md` e
+   `2026-09-19-fase4-luta-guardiao-design.md` (a luta do guardião, com a seção 10 da leitura).
+
+   O histórico da Fatia 6: ela **foi APROVADA no teste jogado de 2026-09-05** — *"Agora sim. Podemos fechar essa etapa."* Ela
    levou duas voltas: a 1ª caiu em dois blocos (a nadadeira e o portão) e a 2ª passou por cinco
    rodadas de ajuste com ele jogando. A branch `feat/cutscene3-visual` está empurrada para
    `origin`. **A PRÓXIMA FRENTE É A FATIA 7 (Fase 4, o interior)** — e ela é diferente das
@@ -71,7 +197,8 @@ está pendente por esquecimento. Os números abaixo seguem sendo chute calibrado
 final do passo 4 — não os mexa antes disso:
    - vãos dos corredores: **110 → 96 → 76 (o aperto) → 84** (evento `corredor` no `STAGE_4`)
    - o guardião: `INVESTIDA_CADA` (6s), `TELEGRAFO_DUR` (0.55s), HP 90
-   - o coração: `ABERTO_DUR` / `FECHADO_DUR` / `CADENCIA` por fase, HP 180
+   - ~~o coração~~ **saiu em 16/09** — a 2ª forma é o PREDADOR (`src/entities/Predador.ts`, HP 180); os knobs dele
+     estão na tabela "O que ajustar" do START, e esses SIM estão em ajuste com ele jogando
 
 ⚠️ **A Fatia 7 (Fase 4) mexe em GEOMETRIA, não só em pintura.** As colunas dos corredores são
 props COM hitbox. Instalar arte recortada mais justa no lugar da atual ENCOLHE o vão sem nada no
@@ -91,8 +218,17 @@ os vãos ANTES e DEPOIS**, como a regressão da Task 6 fez com as hitboxes.
    (receita da catenária da doca); acabamento da cutscene 3. Modo Sobrevivência (roadmap 10)
    fica para depois dessas frentes.
 
-**Estado do repositório (2026-09-06):** `main` está em **`f29c46d`**, com a **Fatia 6 mergeada
-`--no-ff`** e empurrada — a branch `feat/cutscene3-visual` também está em `origin` e pode ser
+**Estado do repositório (2026-09-23):** a **Fatia 7 foi mergeada `--no-ff` em `main`** e empurrada
+para o `origin` (V2). A branch `feat/fase4-visual` fica no `origin` e pode ser apagada quando ele quiser.
+Os blocos abaixo são histórico.
+
+**Estado do repositório (2026-09-17):** a **Fatia 7 corre em `feat/fase4-visual`**, com o B3 (o predador) em três
+rodadas commitadas localmente — ⚠️ **NÃO empurradas** (o `origin` da branch ficou em `6c2fe4f`, de 15/09); empurrar
+quando ele pedir. O resto abaixo é o estado de 15/09 e segue valendo.
+
+**Estado do repositório (2026-09-15, fim de sessão):** `main` está em **`f417c0e`**, com a
+**Fatia 6 mergeada `--no-ff`** e empurrada; a **Fatia 7 corre em `feat/fase4-visual`**, com tudo o
+que está acima commitado e empurrado — a branch `feat/cutscene3-visual` também está em `origin` e pode ser
 apagada quando ele quiser. O remoto é `origin`
 (github.com/HenriqueCrosio/AlienWorld-Remastered-V2 — ⚠️ o remoto `legacy` é o repositório
 ANTIGO, **não empurre nada para lá**). Verificado ANTES do merge, não de memória: `npm run build`
@@ -482,7 +618,7 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 
 ## ROADMAP
 
-### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-01)
+### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-20)
 
 O conteúdo do jogo está todo de pé (tabela abaixo). O que corre agora é o passe visual, fatia a
 fatia, cada uma com spec → plano → implementação → **teste jogado pelo Henrique** → merge.
@@ -496,8 +632,8 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | 4 | Cutscene 2 — a doca do cinturão | ✅ mergeada (`ee4e2a0`) |
 | 5 | **Fase 3 — o casco do Leviatã** | ✅ **mergeada (`a28dd07`), 5 testes jogados** |
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
-| 6 | **Cutscene 3 — a queda no hangar** | 🟠 **TESTADA em 2026-09-03: 3 blocos aprovados, 2 reprovados.** 2ª volta especificada, **falta implementar** |
-| 7 | Fase 4 — o interior | ⬜ ⚠️ mexe em GEOMETRIA, não só em pintura (ver aviso acima) |
+| 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
+| 7 | **Fase 4 — o interior** | ✅ **mergeada `--no-ff` em 23/09, aprovada no rejogo da fase inteira** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. As **3 portas** e o **esfíncter** foram jogados e aprovados (21–22/09); o **gore**, a câmera lenta do estouro e o sangue na borda fecharam em 22/09. O rejogo inteiro passou em 23/09, com a câmera lenta em quatro tempos |
 | 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**

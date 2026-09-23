@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "de185fc7-b63f-4901-bcb8-4201039f82cc",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "leans its whole body far forward into a lunge to the left and slashes violently with both long bladed claws one after the other, torso twisting hard, then pulls back",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

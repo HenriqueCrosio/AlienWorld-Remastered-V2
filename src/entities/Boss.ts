@@ -20,6 +20,24 @@ export interface StageBoss {
    * A lista é VIVA: o chefão a atualiza quando uma parte morre — a cena a lê a cada uso.
    */
   readonly targets?: Phaser.Physics.Arcade.Sprite[];
+  /**
+   * A ARMA DO JOGADOR TRAVADA pela luta (o predador da Fase 4, B3): a pausa dramática do surgimento
+   * pede que ele OLHE — a nave voa, o gatilho não faz nada. É trava de CENA, não o calor da arma: o
+   * painel não mostra superaquecimento. Ausente = nunca trava.
+   */
+  readonly armaTravada?: boolean;
+  /**
+   * Quanto a cena espera, depois do estouro final, antes da vitória (no vácuo). O predador da Fase 4 deixa o
+   * CORPO estendido no chão e pede tempo para ele ser visto (17/09: *"ele sumiu e depois a cutscene abriu"*).
+   * Ausente = 1400ms.
+   */
+  readonly pausaFinalMs?: number;
+  /**
+   * O que o chefão põe na arena que FERE POR CONTATO mas NÃO é alvo — a serra do guardião da Fase 4.
+   * A cena liga um `overlap` com a nave e mais nada: ninguém registra as balas do jogador contra este
+   * grupo, e é justamente isso que faz a bala ATRAVESSAR a serra. Ausente = o chefão não põe nada.
+   */
+  readonly perigos?: Phaser.Physics.Arcade.Group;
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean;

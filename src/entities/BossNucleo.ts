@@ -2,7 +2,12 @@ import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
 import type { StageBoss } from './Boss';
 import type { EnemySystem } from '../systems/EnemySystem';
-import { TerrainSystem, GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
+import type { Fx } from '../systems/Fx';
+import type { TerrainSystem } from '../systems/TerrainSystem';
+import { Predador } from './Predador';
+import { SerraGuardiao } from './SerraGuardiao';
+import { afundarNaLava } from './fimDoPredador';
+import { explosaoSangrenta, sangueNaTela } from './sangue';
 
 /**
  * O CHEFÃO FINAL da Fase 4, em DUAS FORMAS (design do Henrique, 2026-07-19):
@@ -11,22 +16,17 @@ import { TerrainSystem, GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
  *      da massa viva. Móvel: flutua, cospe glóbulos do bico e INVESTE telegrafado. A barriga
  *      vermelha é o alvo PERMANENTE — mas só quando ele está PARADO: em movimento, o corpo
  *      fecha inteiro. O ritmo dele é o do coração dito de outro jeito: mover = sístole.
- *   2. O CORAÇÃO BLINDADO (`nucleo.png`) — a casca morre, estoura, e o que ela protegia
- *      SURGE: sístole (fechado: parede, glóbulos, anticorpos) e diástole (aberto: a ferida
- *      BRILHA e ele fica quieto — a janela é a recompensa). Fases pela vida; paredes de
- *      corredor entram na luta da fase 2 em diante.
- *
- * É a estrutura da serpente (formas que trocam de arte) aplicada ao fim: o chefão final
- * cobra os quatro verbos da campanha — desviar (glóbulos/investida), abater (anticorpos),
- * anatomia (a janela), precisão (as paredes).
+ *   2. O PREDADOR (16/09, B3 — substitui o coração) — a casca morre numa explosão SANGRENTA e o
+ *      que estava dentro dela SAI: urra, salta girando para a nave, e caça. Mora em `Predador.ts`;
+ *      este arquivo fica com o guardião e a TROCA, e delega a luta da 2ª forma.
  *
  * ─── GEOMETRIA MEDIDA, NUNCA CHUTADA (lição 13; find-pad nos dois PNGs) ───
  *
- *  - GUARDIÃO (256×227): massa vermelha em x=106..197, y=105..186 (centroide ≈155,145 →
- *    offset +27,+31 do centro). Casca/bico à ESQUERDA na MESMA altura da massa — por isso o
- *    corpo-absorvedor cobre SÓ O DOMO SUPERIOR (a bala cruza o rebordo da casca sem morrer e
- *    cobra na massa; o mesmo pacto visual da faixa das cabeças da serpente).
- *  - CORAÇÃO (122×122): ferida em x=52..91, y=56..87 (offset +10,+10 do centro).
+ *  - GUARDIÃO (256×256, a arte nova de 15/09): massa vermelha em x=115..192, y=109..176
+ *    (centroide ≈152,141 → offset +24,+13 do centro). Casca/bico à ESQUERDA na MESMA altura da
+ *    massa — por isso o corpo-absorvedor cobre SÓ O DOMO SUPERIOR (a bala cruza o rebordo da
+ *    casca sem morrer e cobra na massa; o mesmo pacto visual da faixa das cabeças da serpente).
+ *  - PREDADOR: ver `Predador.MIOLO`.
  */
 export class BossNucleo implements StageBoss {
   readonly sprite: Phaser.Physics.Arcade.Sprite;
@@ -35,87 +35,244 @@ export class BossNucleo implements StageBoss {
 
   // Antes dos campos de instância que os usam (ordem de inicialização de classe).
   private static readonly HP_GUARDIAO = 90;
-  private static readonly HP_CORACAO = 180;
-  private static readonly HP_TOTAL = BossNucleo.HP_GUARDIAO + BossNucleo.HP_CORACAO;
+  private static readonly HP_TOTAL = BossNucleo.HP_GUARDIAO + Predador.HP;
+  /** Do estouro final até a cutscene: o corpo no chão, o piso rachando e a lava subindo (ver `fimDoPredador`). */
+  static readonly CORPO_FICA_MS = 4200;
 
-  private forma: 'guardiao' | 'coracao' = 'guardiao';
+  /** Lida pela sonda (`probe-stage4`). */
+  forma: 'guardiao' | 'predador' = 'guardiao';
   private hpGuardiao = BossNucleo.HP_GUARDIAO;
-  private hpCoracao = BossNucleo.HP_CORACAO;
+  /** A 2ª forma, depois da troca. A sonda lê o estado dela por aqui. */
+  predador: Predador | null = null;
+  /** O estouro grande da troca (ver a fumaça em `trocarParaPredador`). */
+  private estouro: Phaser.GameObjects.Sprite | null = null;
+  /** A arma trava desde a vida do guardião zerar — antes de o predador existir. */
+  private travaTroca = false;
   private dead = false;
   private entering = true;
   private trocando = false;
   private t = 0;
 
   /** Guardião: máquina de estados do movimento. Parado = vulnerável; movendo = fechado. */
-  private acao: 'flutua' | 'telegrafo' | 'investe' | 'volta' = 'flutua';
+  private acao: 'flutua' | 'telegrafo' | 'investe' | 'volta' | 'serra' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
-
-  /** Coração: sístole/diástole. */
-  private aberto = false;
-  private cicloT = 0;
-  private cdParede = 0;
+  /**
+   * As duas skills se ALTERNAM (spec de 19/09). A investida empurra o jogador para as bordas; a salva
+   * torna a borda cara; a serra é a ameaça de caminho fixo E a janela de dano. A dificuldade mora na
+   * tensão entre elas, não em cada uma ficar mais rápida.
+   */
+  private proxima: 'serra' | 'investida' = 'serra';
+  private serra: SerraGuardiao | null = null;
+  /**
+   * O que FERE por contato mas NÃO é alvo: a serra. Fica num grupo próprio justamente porque ninguém
+   * registra as balas do jogador contra ele — é o que mantém a linha de tiro limpa na cravada.
+   * A cena liga o `overlap` com a nave em `spawnBoss` (ver `StageBoss.perigos`).
+   */
+  readonly perigos: Phaser.Physics.Arcade.Group;
 
   private readonly core: Phaser.Physics.Arcade.Sprite;
   private readonly barBg: Phaser.GameObjects.Rectangle;
   private readonly bar: Phaser.GameObjects.Rectangle;
   private readonly glow: Phaser.GameObjects.Particles.ParticleEmitter;
+  /**
+   * O rastro dos glóbulos: UM emissor de cada família para TODOS eles (armadilha nº 5 — nunca um
+   * emissor por bala). Quem decide de quem é o rastro é a TEXTURA do projétil, lida no laço: só a
+   * `globuloGuardiao` deixa fumaça, e a bala volta limpa para o pool sozinha.
+   */
+  private readonly fumaca: Phaser.GameObjects.Particles.ParticleEmitter;
+  private readonly brasa: Phaser.GameObjects.Particles.ParticleEmitter;
+  /** A carga do telégrafo: o anel que FECHA no miolo antes da investida. */
+  private readonly carga: Phaser.GameObjects.Particles.ParticleEmitter;
+  private cargaT = 0;
+  /**
+   * A mira da investida DEPOIS da trava — `null` enquanto ele ainda lê a nave. É o campo que torna a
+   * jogada dele possível: a partir da trava, mexer a nave não move mais a investida.
+   * ⚠️ Lido pela sonda e pela captura (`_f4/_ver-aviso.mjs`): "travado" é estado, não é aparência.
+   */
+  private vyTravado: number | null = null;
+  private recuoT = 0;
 
-  // ─── Guardião (256×227 a escala 0.7 ≈ 179×159) ───
+  // ─── Guardião (256×256 a escala 0.7 ≈ 179×179) ───
   private static readonly G_ESCALA = 0.7;
   private static readonly G_STATION_X = GAME_WIDTH - 86;
   private static readonly G_BASE_Y = 104;
-  /** Centro da massa vermelha, em px do PNG a partir do centro do sprite (medido). */
-  private static readonly G_CORE_OFF_X = 27;
-  private static readonly G_CORE_OFF_Y = 31;
-  /** Bico (a boca dos glóbulos): topo-esquerda da cabeça, medido a olho na arte. */
-  private static readonly G_MUZZLE_X = -100;
-  private static readonly G_MUZZLE_Y = -20;
-  private static readonly INVESTIDA_CADA = 6;
-  private static readonly TELEGRAFO_DUR = 0.55;
-
-  // ─── Coração (122×122 a escala 1.2) ───
-  private static readonly C_ESCALA = 1.2;
-  private static readonly C_STATION_X = GAME_WIDTH - 78;
-  private static readonly C_BASE_Y = 108;
-  private static readonly C_CORE_OFF_X = 10;
-  private static readonly C_CORE_OFF_Y = 10;
-  private static readonly ABERTO_DUR = [0, 3.2, 2.6, 2.2];
-  private static readonly FECHADO_DUR = [0, 4.4, 3.8, 3.2];
-  private static readonly CADENCIA = [0, 1.7, 1.4, 1.1];
+  /**
+   * Centro da massa vermelha, em px do PNG a partir do centro do sprite (medido,
+   * `scripts/_f4/_medir-guardiao.mjs`).
+   *
+   * ⚠️ E AGORA ELE VALE DURANTE A RESPIRAÇÃO TAMBÉM. A arte antiga tinha o estático em 256×227 e a
+   * sheet em 256² alinhada no topo: com a sheet tocando (o tempo todo), o centro do quadro descia
+   * 14,5px e o +31 medido no estático punha o alvo ~10px de tela ABAIXO do miolo desenhado. A arte
+   * nova sai toda no mesmo quadro.
+   */
+  private static readonly G_CORE_OFF_X = 24;
+  private static readonly G_CORE_OFF_Y = 13;
+  /**
+   * O bico (a boca dos glóbulos): a ponta do gancho da cabeça, em (34,172) do PNG.
+   *
+   * ⚠️ O ANTIGO (−100,−20) ERA "A OLHO" E CAÍA NO VAZIO: 64px acima da cabeça, fora do casco. O leque
+   * saía do ar. Este ponto é medido, e baixa a origem dos glóbulos ~45px na tela.
+   */
+  private static readonly G_MUZZLE_X = -94;
+  private static readonly G_MUZZLE_Y = 44;
+  /** A morte na troca: 9 quadros a 9 q/s, o destruído, e o coração surge. Ver `trocarParaPredador`. */
+  private static readonly MORTE_MS = 1000;
+  private static readonly TROCA_MS = 1500;
+  /**
+   * ─── O RITMO, POR DEGRAU DE VIDA (19/09) ───
+   * Mesma gramática do predador (66% e 33%), por consistência. **Nada de novo aparece nos degraus: o que
+   * muda é o ritmo.** Os três ataques existem desde 100% — a serra precisa estar lá desde o começo,
+   * porque é dela que sai a janela de dano.
+   */
+  private static readonly DEGRAUS = [0.66, 0.33];
+  /** A pausa entre skills, por degrau. Era 6s fixos — e 6s de risco zero eram metade da queixa dele. */
+  private static readonly PAUSA = [4.2, 3.4, 2.6];
+  /** Quantos glóbulos por salva, por degrau. */
+  private static readonly SALVA_N = [3, 4, 5];
+  /** Quantas cravadas a serra dá antes de sair, por degrau. No último ela fica mais tempo na arena. */
+  private static readonly SERRA_CRAVADAS = [2, 2, 3];
+  /**
+   * ⚠️ 0,55 → 0,7 (20/09). O aviso não era curto de mais para DESVIAR — era curto de mais para ser
+   * LIDO: *"o aviso, que é a aceleração do core do guardião, precisa estar mais distinta"*. A
+   * aceleração da respiração precisa de ~0,7s para subir de 1× a 5× e o olho perceber que subiu.
+   * Voltar é um número: 0,55 devolve a janela antiga sem desfazer a linguagem nova.
+   *
+   * ⚠️ 0,7 → 1,15 (20/09, o 7º teste) — e desta vez a razão é MECÂNICA, não leitura: *"preciso que
+   * aumente o tempo de carga para a investida, assim o jogador consegue usar a mecânica que citei:
+   * esperar até o último segundo de carregamento para travar o boss numa direção e ter tempo de
+   * desviar para os cantos"*. ⚠️ Alongar SOZINHO não entregava a mecânica — ver `TELEG_TRAVA`.
+   */
+  private static readonly TELEGRAFO_DUR = 1.15;
+  /**
+   * ─── ONDE A INVESTIDA TRAVA A MIRA (20/09) ───
+   *
+   * ⚠️ A MIRA ERA TOMADA NO INSTANTE DO ARRANQUE, e é por isso que esticar o telégrafo não bastava: o
+   * guardião lia a altura da nave no MESMO quadro em que saía, então *atrair a investida para um lado e
+   * depois desviar* não existia como jogada — não havia instante em que ele estivesse comprometido e
+   * ainda parado. Mais carga só dava mais tempo de esperar pela mesma armadilha.
+   *
+   * Agora o telégrafo tem DOIS tempos: até `TELEG_TRAVA` ele carrega e ainda lê a nave; dali em diante a
+   * mira está CRAVADA (`vyTravado`) e o resto da carga é a janela de fuga. MEDIDO
+   * (`scripts/_f4/_medir-investida.mjs`), com 1,15s e a trava em 0,62: **450ms de desvio antes do
+   * arranque**, que somados aos 760ms de travessia dão **1210ms** contra os 760ms de antes. A 110px/s
+   * do `FreeController` são **133px** de deslocamento contra 83px — num vão de 160px com um corpo de
+   * 133px, é a diferença entre *dá se for perfeito* e uma mecânica.
+   *
+   * ⚠️ A sonda não confia na aparência: ela põe a nave em y=170 (que dá vy +70), espera a trava,
+   * TELEPORTA a nave para y=40 (que daria vy −70) e confere que o arranque saiu com +70. Mira travada
+   * é comportamento, e comportamento se prova com um discriminador, não com uma foto bonita.
+   */
+  private static readonly TELEG_TRAVA = 0.62;
+  /** O recuo da trava: ele puxa para trás antes de saltar. É o sinal, no corpo, de que a mira FECHOU. */
+  private static readonly RECUO_VEL = 45;
+  private static readonly RECUO_MS = 0.18;
+  /** A respiração acelera de 1× até este fator — e CRAVA no máximo a partir da trava. */
+  private static readonly TELEG_RESPIRO = 5;
+  /** O tint do casco no telégrafo: FRIO. É o contrário do flash de dano (0xffb090), e é o ponto. */
+  private static readonly CASCO_FRIO = 0x7a8290;
+  /** O raio do anel de carga em volta do miolo: abre em `CARGA_R0` e FECHA em `CARGA_R1`. */
+  private static readonly CARGA_R0 = 26;
+  private static readonly CARGA_R1 = 4;
+  /**
+   * O intervalo entre sopros da carga, do começo (lento) ao fim (jorro).
+   *
+   * ⚠️ MEDIDO na captura, e o intervalo sozinho não resolveu: com 70→22ms o anel fechava com 6
+   * partículas vivas no pico, e apertar para 55→16 deu 7 — a vida de 240ms limita o acúmulo, não o
+   * intervalo. Por isso a METADE FINAL solta DOIS sopros por batida (ver o `case 'telegrafo'`): 14
+   * vivas no fim, e a densidade dobra exatamente onde o aviso precisa gritar.
+   */
+  private static readonly CARGA_MS0 = 55;
+  private static readonly CARGA_MS1 = 16;
+  /**
+   * DEPOIS da trava a carga SEGURA — não continua subindo.
+   *
+   * ⚠️ MEDIDO: mantendo o ritmo da carga (16ms, dois por batida) no raio mínimo, chegavam **30
+   * partículas vivas** empilhadas no mesmo pixel e o ADD saturava em BRANCO no miolo. Branco não existe
+   * nesta arte. Um sopro por batida a 26ms, com o raio abrindo de leve, assenta em 7–9 vivas: brasa acesa e
+   * segura, que é o que "carregado e comprometido" precisa dizer.
+   */
+  private static readonly CARGA_MS_TRAVA = 26;
+  /**
+   * ─── O RASTRO DO GLÓBULO (20/09) ───
+   * *"pode gerar um efeito de rastro do projétil, como fumaça ou algo incandescente"*. São as duas
+   * coisas: uma BRASA que esfria (a espinha do rastro) e uma FUMAÇA quente em volta dela.
+   *
+   * ⚠️ A 1ª TENTATIVA FOI MEDIDA E DESCARTADA: fumaça na CROSTA FRIA da escória (0x24343c/0x1c292d,
+   * blend NORMAL, as cores mais claras do próprio PNG) some por completo no fundo — a pintura da
+   * arena é vermelho escuro de luminância parecida, e cinza-azulado a 50% em cima dela não tem
+   * contraste nenhum. A lei do dark sci-fi diz *luz só onde há energia*, e o glóbulo É energia: a
+   * saída não é clarear o rastro, é fazê-lo QUENTE e curto. A fumaça vira ADD com tom baixo
+   * (0x3a241c/0x2a1a16) — acrescenta calor, não clarão — e a brasa passa a sair quase todo sopro.
+   */
+  /**
+   * ⚠️ O ESPAÇAMENTO É O QUE FAZ O RASTRO SER RASTRO. Com 0,034s (um sopro a cada 2 quadros) e 150px/s
+   * a brasa nascia a cada ~7px e a captura mostrou uma FILEIRA DE PONTOS, não uma esteira: com 130–220ms
+   * de vida, só 3 brasas ficavam vivas por glóbulo. Um sopro POR QUADRO põe a brasa a cada ~2,5px e
+   * mantém 8–10 vivas — aí o rastro tem corpo e afina para trás sozinho, pela escala e pelo alpha.
+   */
+  private static readonly RASTRO_MS = 0.016;
+  /** Chance de um sopro também soltar brasa. É a espinha do rastro: abaixo de ~0,6 vira ponto solto. */
+  private static readonly RASTRO_BRASA = 0.8;
+  /**
+   * ⚠️ A SALVA COBRE AS BORDAS, e é de propósito. A investida empurra o jogador para o canto (medido:
+   * o casco de 133px deixa ~20px de folga num vão de 160px), e no canto não acontecia nada — por isso
+   * os dois ataques eram fáceis SEPARADAMENTE. Abrindo o leque, o canto passa a ter preço.
+   */
+  private static readonly SALVA_ABRE = 96;
+  /**
+   * ⚠️ E ELA PRECISA SER MAIS RÁPIDA QUE A NAVE. Os 100px/s antigos perdiam para os 110px/s do
+   * `FreeController`: dava para simplesmente andar para longe do tiro. Projétil mais lento que quem
+   * desvia não é ameaça — era a outra metade do *"os 3 tiros dele são muito fáceis"*.
+   */
+  private static readonly SALVA_VEL = 150;
+  /** Cravada = ele segurando o cabo, ancorado e em esforço: o dano dobra, como a recuperação do predador. */
+  private static readonly DANO_CRAVADA = 2;
+  /**
+   * A boca do cabo da serra, em px do PNG a partir do centro.
+   *
+   * ⚠️ NASCE ABAIXO DO CENTRO, e é medida de propósito. O feixe de cabos dele sai por CIMA, e foi de lá
+   * que a primeira versão lançou: com a âncora em y≈72 e a borda de cima em 48, a primeira diagonal virou
+   * um TOCO de 47px — ele mal soltava a serra e ela já cravava. Saindo por baixo, a subida tem ~70px de
+   * altura e a coreografia que ele desenhou (sobe, crava, desce, crava) ganha espaço para ser lida.
+   */
+  private static readonly G_CABO_X = 40;
+  private static readonly G_CABO_Y = 20;
+  /** O vão jogável da arena — as bordas em que a serra crava. */
+  private static readonly ARENA_TOPO = 30;
+  private static readonly ARENA_BASE = 190;
 
   private static readonly ENTRY_SPEED = 40;
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly enemies: EnemySystem,
-    private readonly terrain: TerrainSystem,
+    // O terreno era das PAREDES do coração; o predador não usa. Fica na assinatura da cena.
+    _terrain: TerrainSystem,
+    private readonly fx: Fx,
   ) {
     this.sprite = scene.physics.add.sprite(GAME_WIDTH + 120, BossNucleo.G_BASE_Y, 'guardiao');
     this.sprite.setScale(BossNucleo.G_ESCALA);
     this.sprite.setData('boss', this);
 
-    // AS FORMAS VIVAS (sheets do PixelLab, 2026-07-21): o guardião RESPIRA (a massa vermelha
-    // pulsa como um coração — mover = sístole, e agora até parado ele é órgão vivo) e o
-    // coração BATE (a ferida acende e apaga no ritmo da janela). Sem a sheet, o estático de
-    // sempre segura a luta (arte entra asset por asset). Yoyo: o pulso vai E VOLTA sem corte.
-    // A âncora não precisa de compensação: o centro visual das sheets foi MEDIDO (bbox do
-    // alfa, média dos quadros) e cai a <3px do centro da arte estática nas duas formas.
+    // O GUARDIÃO RESPIRA (sheet do PixelLab): a massa vermelha pulsa como um coração — mover =
+    // sístole, e até parado ele é órgão vivo. Sem a sheet, o estático segura a luta (arte entra
+    // asset por asset). Yoyo: o pulso vai E VOLTA sem corte. A âncora não precisa de compensação:
+    // a arte do guardião sai toda no mesmo quadro de 256² (ver `G_CORE_OFF_X`).
     const anims = scene.anims;
+    if (scene.textures.exists('guardiaoMorteSheet') && !anims.exists('guardiao-morte')) {
+      anims.create({
+        key: 'guardiao-morte',
+        frames: anims.generateFrameNumbers('guardiaoMorteSheet', { start: 0, end: 8 }),
+        frameRate: 9000 / BossNucleo.MORTE_MS,
+        repeat: 0,
+      });
+    }
     if (scene.textures.exists('guardiaoIdleSheet') && !anims.exists('guardiao-idle')) {
       anims.create({
         key: 'guardiao-idle',
         frames: anims.generateFrameNumbers('guardiaoIdleSheet', { start: 0, end: 8 }),
         frameRate: 6,
-        repeat: -1,
-        yoyo: true,
-      });
-    }
-    if (scene.textures.exists('nucleoBeatSheet') && !anims.exists('nucleo-beat')) {
-      anims.create({
-        key: 'nucleo-beat',
-        frames: anims.generateFrameNumbers('nucleoBeatSheet', { start: 0, end: 8 }),
-        frameRate: 7,
         repeat: -1,
         yoyo: true,
       });
@@ -131,7 +288,8 @@ export class BossNucleo implements StageBoss {
     this.core.setVisible(false);
     const coreBody = this.core.body as Phaser.Physics.Arcade.Body;
     coreBody.setAllowGravity(false);
-    coreBody.setSize(56, 44);
+    // A massa medida (78×68 no PNG) na escala 0,7.
+    coreBody.setSize(54, 48);
     this.targets = [this.core];
 
     this.glow = scene.add
@@ -147,6 +305,54 @@ export class BossNucleo implements StageBoss {
       })
       .setDepth(51);
 
+    // ─── O rastro do glóbulo (ver `RASTRO_MS`) ───
+    // A FUMAÇA: ADD com tom BAIXO (não é o mesmo que ADD com tom claro — somar 0x3a241c acrescenta
+    // um véu de calor, não um clarão). Ela cresce e apaga: 280ms a 150px/s ≈ 42px de esteira, que é
+    // comprimento de munição. Cometa é assinatura de chefão, e o glóbulo não é o chefão.
+    this.fumaca = scene.add
+      .particles(0, 0, 'puff', {
+        lifespan: { min: 220, max: 340 },
+        speed: { min: 2, max: 14 },
+        scale: { start: 0.6, end: 1.8 },
+        alpha: { start: 0.85, end: 0 },
+        tint: [0x4a2e22, 0x3a241c, 0x2a1a16],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(19);
+    // A BRASA é a luz — e é a espinha do rastro. Curta (160ms ≈ 24px) e apertada, para ler como
+    // material incandescente desprendendo da crosta, não como chama.
+    this.brasa = scene.add
+      .particles(0, 0, 'spark', {
+        lifespan: { min: 130, max: 220 },
+        speed: { min: 2, max: 16 },
+        scale: { start: 0.9, end: 0 },
+        alpha: { start: 0.95, end: 0 },
+        tint: [0xfc9a04, 0xf46b02, 0xec3c05],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(20);
+
+    // A CARGA do telégrafo. Ao contrário do `glow` (que CRESCE e se espalha: o bicho respirando), a
+    // partícula da carga ENCOLHE — e o anel de onde ela nasce fecha no miolo. É matéria sendo puxada
+    // para dentro, o oposto visual da respiração, e é por isso que o aviso não se confunde com ela.
+    this.carga = scene.add
+      .particles(0, 0, 'puff', {
+        lifespan: 240,
+        speed: { min: 0, max: 8 },
+        scale: { start: 1.3, end: 0.2 },
+        alpha: { start: 0.9, end: 0 },
+        tint: [0xffd447, 0xff8a2a, 0xff4a10],
+        blendMode: 'ADD',
+        emitting: false,
+      })
+      .setDepth(52);
+
+    // ⚠️ `allowGravity: false`: a serra anda pela própria coreografia, não pela física da cena.
+    this.perigos = scene.physics.add.group({ allowGravity: false });
+    SerraGuardiao.registrarAnims(scene);
+
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, 16, 160, 4, COLORS.enemyDark)
       .setDepth(100);
@@ -155,18 +361,32 @@ export class BossNucleo implements StageBoss {
       .setOrigin(0, 0.5)
       .setDepth(101);
 
-    this.acaoT = BossNucleo.INVESTIDA_CADA;
+    this.acaoT = BossNucleo.pausa(1);
     this.cdTiro = 1.4;
+  }
+
+  /** 0, 1 ou 2 — o degrau de vida em que a luta está. Lido pela sonda. */
+  get degrau(): number {
+    const k = this.hpGuardiao / BossNucleo.HP_GUARDIAO;
+    return k > BossNucleo.DEGRAUS[0] ? 0 : k > BossNucleo.DEGRAUS[1] ? 1 : 2;
+  }
+
+  /** A pausa entre skills no degrau atual. `pausa(1)` serve ao construtor, antes de haver vida lida. */
+  private static pausa(d: number): number {
+    return BossNucleo.PAUSA[d];
+  }
+
+  /** A serra está cravada: ele segura o cabo, ancorado, e o dano dobra. */
+  get segurandoCabo(): boolean {
+    return this.serra?.cravada === true;
   }
 
   get isDead(): boolean {
     return this.dead;
   }
 
-  /** Fase do CORAÇÃO pela vida dele (1→2→3). O guardião tem fase única. */
-  private get fase(): number {
-    const f = this.hpCoracao / BossNucleo.HP_CORACAO;
-    return f > 0.66 ? 1 : f > 0.33 ? 2 : 3;
+  get armaTravada(): boolean {
+    return this.travaTroca || (this.predador?.armaTravada ?? false);
   }
 
   private get body(): Phaser.Physics.Arcade.Body {
@@ -175,28 +395,34 @@ export class BossNucleo implements StageBoss {
 
   /** Corpo = só o DOMO superior: a faixa do alvo fica de corredor livre para a bala. */
   private corpoDomo(): void {
-    // Dimensões CONSTANTES (as das artes estáticas, 256×227 / 122×122): com a sheet animada
-    // tocando, `sprite.width/height` é o QUADRO da sheet (256² / 128²) e o corpo cresceria.
-    if (this.forma === 'guardiao') {
-      this.body.setSize(256 * 0.78, 227 * 0.42);
-      this.body.setOffset(256 * 0.11, 227 * 0.06);
-    } else {
-      this.body.setSize(122 * 0.78, 122 * 0.42);
-      this.body.setOffset(122 * 0.11, 122 * 0.06);
-    }
+    // Dimensões CONSTANTES, em px do quadro de 256² (não `sprite.width/height`, que muda com a textura).
+    // ⚠️ O DOMO ACABA ONDE A MASSA COMEÇA (y=109 no PNG): y=14..109, x=28..228. Mais baixo e ele
+    // comeria o topo do alvo — a bala morreria no casco em cima do miolo aceso.
+    this.body.setSize(200, 95);
+    this.body.setOffset(28, 14);
   }
 
   /** Corpo INTEIRO: a investida é toda perigo — e fecha o alvo (bala morre no casco). */
   private corpoInteiro(): void {
-    this.body.setSize(256 * 0.82, 227 * 0.8);
-    this.body.setOffset(256 * 0.09, 227 * 0.08);
+    // O casco inteiro do quadro de 256² (x=27..255, y=0..249), sem as pontas dos tentáculos.
+    this.body.setSize(210, 190);
+    this.body.setOffset(23, 18);
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
+    // ANTES de qualquer saída antecipada: os glóbulos no ar continuam sendo glóbulos depois que o
+    // guardião morre (a salva sobrevive à troca por ~2s), e um rastro que corta no meio se denuncia.
+    this.rastroGlobulos(dt);
+
+    // O predador roda até DEPOIS de morto (a luz apaga, o breu sai, a lava no ar segue caindo).
+    if (this.predador) {
+      this.predador.update(dt, target);
+      return;
+    }
     if (this.dead || this.trocando) return;
 
     if (this.entering) {
-      const alvo = this.forma === 'guardiao' ? BossNucleo.G_STATION_X : BossNucleo.C_STATION_X;
+      const alvo = BossNucleo.G_STATION_X;
       this.posicionarCore();
       if (this.sprite.x > alvo) return;
       this.body.setVelocityX(0);
@@ -205,8 +431,7 @@ export class BossNucleo implements StageBoss {
 
     this.t += dt;
 
-    if (this.forma === 'guardiao') this.updateGuardiao(dt, target);
-    else this.updateCoracao(dt, target);
+    this.updateGuardiao(dt, target);
 
     this.posicionarCore();
   }
@@ -227,28 +452,137 @@ export class BossNucleo implements StageBoss {
         this.cdTiro -= dt;
         if (this.cdTiro <= 0) {
           this.cdTiro = 1.8;
-          this.leque(3, this.gMuzzle());
+          this.leque(BossNucleo.SALVA_N[this.degrau], this.gMuzzle());
           this.scene.cameras.main.shake(40, 0.002);
         }
 
         if (this.acaoT <= 0) {
-          // TELEGRAFO: pisca e FECHA o corpo — quem ainda estiver na frente foi avisado.
-          this.acao = 'telegrafo';
-          this.acaoT = BossNucleo.TELEGRAFO_DUR;
-          this.corpoInteiro();
-          this.body.setVelocityY(0);
+          if (this.proxima === 'serra') {
+            // A SERRA. Ele fica na estação segurando o cabo: parado, à direita, miolo aberto.
+            this.proxima = 'investida';
+            this.acao = 'serra';
+            this.body.setVelocityY(0);
+            this.serra = new SerraGuardiao(
+              this.scene,
+              this.perigos,
+              this.fx,
+              () => this.gCabo(),
+              BossNucleo.ARENA_TOPO,
+              BossNucleo.ARENA_BASE,
+              BossNucleo.SERRA_CRAVADAS[this.degrau],
+            );
+          } else {
+            // TELEGRAFO: pisca e FECHA o corpo — quem ainda estiver na frente foi avisado.
+            this.proxima = 'serra';
+            this.acao = 'telegrafo';
+            this.acaoT = BossNucleo.TELEGRAFO_DUR;
+            this.cargaT = 0;
+            this.vyTravado = null;
+            this.recuoT = 0;
+            this.corpoInteiro();
+            this.body.setVelocityY(0);
+            // O CASCO ESFRIA enquanto o miolo acende. O tint escuro diz "fechado" (a bala morre no
+            // casco a partir de agora) e libera a linguagem do CALOR para o aviso — ver o `case`.
+            this.sprite.setTint(BossNucleo.CASCO_FRIO);
+          }
         }
         break;
       }
 
       case 'telegrafo': {
-        this.sprite.setTint(Math.floor(this.acaoT * 24) % 2 === 0 ? 0xffd0d0 : 0xff6060);
+        /**
+         * ─── O AVISO É A ACELERAÇÃO DO CORE (20/09, pedido dele) ───
+         *
+         * ⚠️ O QUE ESTAVA ERRADO NÃO ERA A DURAÇÃO, ERA O VOCABULÁRIO: o telégrafo piscava o corpo
+         * INTEIRO em rosa (0xffd0d0/0xff6060) — a MESMA gramática do flash de dano (0xffb090, ver
+         * `damage`). O jogador via o guardião piscar e lia "acertei nele", não "ele vai investir".
+         * Agora as duas coisas não podem ser confundidas: no dano, o casco esquenta por 60ms; aqui o
+         * casco ESFRIA e quem acende é o miolo, em três camadas que sobem juntas:
+         *
+         *   1. a RESPIRAÇÃO acelera (`timeScale` 1× → `TELEG_RESPIRO`) — é o coração disparando, e é
+         *      literalmente o que ele pediu. ⚠️ Ela é a única camada que existe mesmo sem partícula:
+         *      se um dia a sheet sumir, o aviso degrada, não desaparece;
+         *   2. o ANEL DE CARGA fecha no miolo (`CARGA_R0` → `CARGA_R1`), com o sopro acelerando de
+         *      `CARGA_MS0` a `CARGA_MS1`. Encolher é o oposto do `glow` do `flutua`, que se espalha;
+         *   3. no estalo, o `glow` solta uma coroa de 14 de uma vez: a carga SOLTANDO.
+         *
+         * ─── E O AVISO TEM DOIS TEMPOS (20/09, o 7º teste) ───
+         * Até `TELEG_TRAVA` ele CARREGA e ainda lê a nave; dali em diante a mira está cravada e o que
+         * sobra da carga é a JANELA DE FUGA. A virada tem de ser visível, senão a jogada dele não
+         * existe — ele precisa saber QUANDO parou de valer a pena ficar no lugar. São três sinais no
+         * mesmo quadro: o RECUO do corpo (ele puxa para trás antes de saltar), o estalo do `glow`, e a
+         * carga que para de fechar e passa a segurar cravada no miolo.
+         */
+        const k = 1 - Math.max(0, this.acaoT) / BossNucleo.TELEGRAFO_DUR;
+        const kCarga = Math.min(1, k / BossNucleo.TELEG_TRAVA);
+        // ⚠️ A respiração acelera até a TRAVA e fica cravada no máximo depois dela: se continuasse
+        // subindo, a rampa contaria uma história que o corpo já não está contando (ele já decidiu).
+        this.sprite.anims.timeScale = 1 + kCarga * (BossNucleo.TELEG_RESPIRO - 1);
+
+        if (this.recuoT > 0) {
+          this.recuoT -= dt;
+          if (this.recuoT <= 0) this.body.setVelocityX(0);
+        }
+
+        if (this.vyTravado === null && k >= BossNucleo.TELEG_TRAVA) {
+          // A MIRA FECHA AQUI. Daqui para a frente mexer a nave não move mais a investida — é o que
+          // transforma "esperar até o último instante" numa jogada em vez de numa armadilha.
+          this.vyTravado = Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70);
+          this.glow.emitParticleAt(this.core.x, this.core.y, 10);
+          this.body.setVelocityX(BossNucleo.RECUO_VEL);
+          this.recuoT = BossNucleo.RECUO_MS;
+          this.scene.cameras.main.shake(70, 0.003);
+        }
+
+        this.cargaT -= dt;
+        if (this.cargaT <= 0) {
+          const travado = this.vyTravado !== null;
+          this.cargaT =
+            (travado
+              ? BossNucleo.CARGA_MS_TRAVA
+              : Phaser.Math.Linear(BossNucleo.CARGA_MS0, BossNucleo.CARGA_MS1, kCarga)) / 1000;
+          // Travado, o raio ABRE um pouco e o sopro é UM só: sem isso tudo cai no mesmo pixel e o ADD
+          // satura em branco. Antes da trava, o anel fecha — e na metade final saem DOIS por batida,
+          // em lados opostos, que é o que o transforma de cacho de partículas em ANEL.
+          const raio = travado
+            ? BossNucleo.CARGA_R1 + Math.random() * 4
+            : Phaser.Math.Linear(BossNucleo.CARGA_R0, BossNucleo.CARGA_R1, kCarga);
+          const a = Math.random() * Math.PI * 2;
+          this.carga.emitParticleAt(this.core.x + Math.cos(a) * raio, this.core.y + Math.sin(a) * raio);
+          if (!travado && kCarga > 0.5) {
+            this.carga.emitParticleAt(this.core.x - Math.cos(a) * raio, this.core.y - Math.sin(a) * raio);
+          }
+        }
+
         if (this.acaoT <= 0) {
           this.sprite.clearTint();
+          this.sprite.anims.timeScale = 1;
+          this.glow.emitParticleAt(this.core.x, this.core.y, 14);
           this.acao = 'investe';
-          // Investe NA ALTURA do jogador no instante do disparo — mirada no passado, não
-          // teleguiada: dá para reagir saindo da linha (o mesmo pacto da cabeça ciano).
-          this.body.setVelocity(-300, Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70));
+          // Investe na altura lida NA TRAVA — mirada no passado, e agora num passado que ele pode ver
+          // acontecer. O `??` é a rede: sem trava (se alguém zerar `TELEG_TRAVA`), vale a leitura do
+          // instante do arranque, que é o comportamento antigo.
+          this.body.setVelocity(
+            -300,
+            this.vyTravado ?? Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70),
+          );
+          this.vyTravado = null;
+        }
+        break;
+      }
+
+      case 'serra': {
+        // Ele NÃO se mexe enquanto a serra corre: está ancorado no cabo. É a janela de dano da luta —
+        // a nave atira para a direita, então só serve para ela um guardião parado e à direita.
+        this.serra?.update(dt);
+        if (Math.random() < (this.segurandoCabo ? 0.5 : 0.35)) {
+          this.glow.emitParticleAt(this.core.x, this.core.y);
+        }
+        if (!this.serra?.viva) {
+          this.serra = null;
+          this.acao = 'flutua';
+          this.acaoT = BossNucleo.pausa(this.degrau);
+          this.cdTiro = 0.6;
         }
         break;
       }
@@ -268,7 +602,7 @@ export class BossNucleo implements StageBoss {
           const alvoY = BossNucleo.G_BASE_Y - this.sprite.y;
           this.body.setVelocityY(alvoY * 2);
           this.acao = 'flutua';
-          this.acaoT = BossNucleo.INVESTIDA_CADA;
+          this.acaoT = BossNucleo.pausa(this.degrau);
           this.cdTiro = 1.0;
           this.corpoDomo();
         }
@@ -286,161 +620,131 @@ export class BossNucleo implements StageBoss {
   }
 
   /**
-   * A TROCA: a casca morre em convulsão, estoura — e o CORAÇÃO surge do estouro. O mesmo
-   * beat da serpente pré-fusão: a pausa dramática É o telégrafo da forma nova.
+   * A TROCA: a casca MORRE — e o PREDADOR sai de dentro dela (B3, 16/09).
+   *
+   * ⚠️ A MORTE DO GUARDIÃO É COMPOSTA NO MOTOR, e é decisão dele (15/09). Duas animações geradas convergiram
+   * no mesmo limite do gerador: o miolo explode, mas o grosso da silhueta fica inteiro. Então são camadas:
+   *   1. a `guardiao-morte` (o miolo estourando até ficar oco), 0 → `MORTE_MS`;
+   *   2. as explosões do jogo subindo pela casca por cima dela;
+   *   3. o `guardiaoDestruido` + a EXPLOSÃO SANGRENTA + o SANGUE NA TELA em `MORTE_MS` (o pedido dele:
+   *      *"fica imersivo e dá mais desvio para a transição"*) — a carcaça apaga sob o sangue;
+   *   4. o predador em `TROCA_MS`, surgindo (ver `Predador.surgir`).
+   * A arma trava JÁ no golpe fatal: a pausa dramática inteira é para olhar.
    */
-  private trocarParaCoracao(): void {
+  private trocarParaPredador(): void {
     this.trocando = true;
+    this.travaTroca = true;
+    // A serra é do GUARDIÃO. Se ele morre com ela na arena, ela some junto — o predador tem as armas dele.
+    this.serra?.destroy();
+    this.serra = null;
     this.body.setVelocity(0, 0);
+    this.body.enable = false;
     this.glow.emitting = false;
+    this.sprite.clearTint();
 
-    // Convulsão: flashes + explosões subindo pela casca.
-    for (let i = 0; i < 7; i++) {
-      this.scene.time.delayedCall(i * 170, () => {
+    // ⚠️ `anims.stop()` ANTES de tocar a morte: a respiração está em yoyo e sobrescreveria o quadro.
+    // E o `timeScale` VOLTA A 1: morrer no meio do telégrafo deixava a respiração em 5× e a morte
+    // inteira tocava acelerada — o `timeScale` é do sprite, não do clipe.
+    this.sprite.anims.timeScale = 1;
+    this.sprite.anims.stop();
+    if (this.scene.anims.exists('guardiao-morte')) this.sprite.play('guardiao-morte');
+
+    const e = BossNucleo.G_ESCALA;
+    for (let i = 0; i < 6; i++) {
+      this.scene.time.delayedCall(80 + i * 150, () => {
         if (this.dead) return;
-        this.sprite.setTint(i % 2 === 0 ? 0xff8080 : 0xffffff);
-        this.glow.explode(
-          6,
-          this.sprite.x + Phaser.Math.Between(-50, 50),
-          this.sprite.y + Phaser.Math.Between(-40, 40),
+        this.fx.explode(
+          this.sprite.x + Phaser.Math.Between(-90, 90) * e,
+          this.sprite.y + Phaser.Math.Between(-70, 80) * e,
+          1.6,
+          52,
         );
-        this.scene.cameras.main.shake(90, 0.004);
       });
     }
 
-    this.scene.time.delayedCall(1300, () => {
+    this.scene.time.delayedCall(BossNucleo.MORTE_MS, () => {
       if (this.dead) return;
-
-      this.forma = 'coracao';
-      this.sprite.clearTint();
-      // A troca de arte: para a animação do guardião ANTES de mexer na textura (armadilha 26:
-      // a animação sobrescreve a textura no quadro seguinte). Com a sheet do coração, é ela
-      // quem entra — o batimento É o telégrafo da forma nova.
       this.sprite.anims.stop();
-      if (this.scene.anims.exists('nucleo-beat')) this.sprite.play('nucleo-beat');
-      else this.sprite.setTexture('nucleo');
-      this.sprite.setScale(BossNucleo.C_ESCALA);
-      this.sprite.setPosition(BossNucleo.C_STATION_X, BossNucleo.C_BASE_Y);
-      this.corpoDomo();
-      this.body.reset(BossNucleo.C_STATION_X, BossNucleo.C_BASE_Y);
+      if (this.scene.textures.exists('guardiaoDestruido')) this.sprite.setTexture('guardiaoDestruido');
+      this.estouro = this.fx.explodeBig(this.core.x, this.core.y, 1.1, 52);
+      explosaoSangrenta(this.scene, this.core.x, this.core.y);
+      sangueNaTela(this.scene);
+      this.scene.tweens.add({ targets: this.sprite, alpha: 0, duration: BossNucleo.TROCA_MS - BossNucleo.MORTE_MS });
+    });
 
-      (this.core.body as Phaser.Physics.Arcade.Body).setSize(40, 30);
-      this.posicionarCore();
-
-      // Surge FECHADO, num clarão: o jogador aprende a primeira diástole olhando.
-      this.aberto = false;
-      this.cicloT = BossNucleo.FECHADO_DUR[1];
-      this.cdTiro = 0.9;
-      this.glow.explode(14, this.sprite.x, this.sprite.y);
-      this.scene.cameras.main.flash(500, 255, 140, 60);
-
+    this.scene.time.delayedCall(BossNucleo.TROCA_MS, () => {
+      if (this.dead) return;
+      this.forma = 'predador';
+      // ⚠️ A FUMAÇA do fim do estouro ainda está no ar e caía como uma MANCHA PRETA sobre a barriga dele recém-
+      // surgido (capturas de 16/09). Ela passa para TRÁS do predador: o que sobra dela vira fundo do surgimento.
+      if (this.estouro?.active) this.estouro.setDepth(-0.05);
+      this.scene.tweens.killTweensOf(this.sprite);
+      this.sprite.setPosition(BossNucleo.G_STATION_X, BossNucleo.G_BASE_Y);
+      this.body.reset(BossNucleo.G_STATION_X, BossNucleo.G_BASE_Y);
+      this.predador = new Predador(this.scene, this.enemies, this.fx, this.sprite, this.core, () => this.atualizarBarra());
+      this.travaTroca = false;
       this.trocando = false;
     });
   }
 
-  // ─── FORMA 2: o coração ────────────────────────────────────────────────────
-
-  private updateCoracao(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
-    const alvoY = BossNucleo.C_BASE_Y + Math.sin(this.t * 0.6) * 18;
-    this.body.setVelocityY((alvoY - this.sprite.y) * 6);
-
-    if (this.aberto) {
-      this.glow.emitParticleAt(this.core.x, this.core.y);
-    }
-
-    this.cicloT -= dt;
-    if (this.cicloT <= 0) {
-      this.aberto = !this.aberto;
-      const f = this.fase;
-      this.cicloT = this.aberto ? BossNucleo.ABERTO_DUR[f] : BossNucleo.FECHADO_DUR[f];
-
-      if (this.aberto) {
-        this.glow.emitting = true;
-        this.glow.explode(10, this.core.x, this.core.y);
-      } else {
-        this.glow.emitting = false;
-        const n = f === 3 ? 2 : 1;
-        for (let i = 0; i < n; i++) {
-          this.enemies.spawn('drone', Phaser.Math.Between(46, 170));
-        }
-        this.cdTiro = 0.7;
-      }
-    }
-
-    if (!this.aberto) {
-      this.cdTiro -= dt;
-      if (this.cdTiro <= 0) {
-        const f = this.fase;
-        this.cdTiro = BossNucleo.CADENCIA[f];
-        this.leque(f === 3 ? 5 : 3, { x: this.core.x, y: this.core.y });
-        if (f >= 2) this.mirado(target);
-        this.scene.cameras.main.shake(50, 0.002);
-      }
-    }
-
-    if (this.fase >= 2) {
-      this.cdParede -= dt;
-      if (this.cdParede <= 0) {
-        this.cdParede = this.fase === 3 ? 5 : 6.5;
-        this.parede(this.fase === 3 ? 84 : 92);
-      }
-    }
-  }
-
   /** O alvo acompanha o corpo — `reset` (posição E posição-anterior, lição 3). */
   private posicionarCore(): void {
-    const g = this.forma === 'guardiao';
-    const e = g ? BossNucleo.G_ESCALA : BossNucleo.C_ESCALA;
-    const ox = g ? BossNucleo.G_CORE_OFF_X : BossNucleo.C_CORE_OFF_X;
-    const oy = g ? BossNucleo.G_CORE_OFF_Y : BossNucleo.C_CORE_OFF_Y;
-
-    const x = this.sprite.x + ox * e;
-    const y = this.sprite.y + oy * e;
+    const e = BossNucleo.G_ESCALA;
+    const x = this.sprite.x + BossNucleo.G_CORE_OFF_X * e;
+    const y = this.sprite.y + BossNucleo.G_CORE_OFF_Y * e;
     this.core.setPosition(x, y);
     (this.core.body as Phaser.Physics.Arcade.Body).reset(x, y);
   }
 
-  /** Par de parede com vão garantido (a regra do roteiro; margem maior — luta parada). */
-  private parede(gap: number): void {
-    const margem = 34;
-    const meio = gap / 2;
-    const vaoY = Phaser.Math.Between(TETO_Y + margem + meio, GROUND_Y - margem - meio);
-
-    // Dentro do Núcleo a parede é CARNE E METAL, não rocha: costela biônica com o mesmo
-    // funil dos corredores da fase (a rocha tingida fica de fallback, ver GameScene).
-    const organico = this.scene.textures.exists('costela');
-    const TINT = 0x6b7894;
-    const funil = (): number => Phaser.Math.Between(5, 11);
-    const alturaChao = GROUND_Y - (vaoY + meio);
-    const alturaTeto = vaoY - meio - TETO_Y;
-    if (alturaChao >= 14) {
-      this.terrain.spawn(organico ? 'costela' : 'spire', {
-        alturaPx: alturaChao,
-        ...(organico ? { angle: -funil() } : { tint: TINT }),
-      });
-    }
-    if (alturaTeto >= 14) {
-      this.terrain.spawn(organico ? 'costela' : 'spire', {
-        anchor: 'teto',
-        alturaPx: alturaTeto,
-        ...(organico ? { angle: funil() } : { tint: TINT }),
-      });
-    }
-  }
-
   private leque(n: number, boca: { x: number; y: number }): void {
+    const abre = BossNucleo.SALVA_ABRE;
     for (let i = 0; i < n; i++) {
-      const angle = Phaser.Math.DegToRad(152 + (i / (n - 1)) * 56);
-      this.gLobulo(angle, 100, boca);
+      const angle = Phaser.Math.DegToRad(180 - abre / 2 + (i / (n - 1)) * abre);
+      this.gLobulo(angle, BossNucleo.SALVA_VEL, boca);
     }
   }
 
-  private mirado(target: Phaser.Physics.Arcade.Sprite): void {
-    const angle = Phaser.Math.Angle.Between(this.core.x, this.core.y, target.x, target.y);
-    this.gLobulo(angle, 135, { x: this.core.x, y: this.core.y });
+  /** A boca do CABO: de onde a serra sai e onde o cabo fica preso. Ele flutua, então é lido a cada quadro. */
+  private gCabo(): { x: number; y: number } {
+    const e = BossNucleo.G_ESCALA;
+    return {
+      x: this.sprite.x + BossNucleo.G_CABO_X * e,
+      y: this.sprite.y + BossNucleo.G_CABO_Y * e,
+    };
   }
 
-  /** O glóbulo (bolt3 laranja): as DUAS formas cospem o mesmo sangue — é o mesmo organismo. */
+  /**
+   * O RASTRO dos glóbulos no ar. Quem tem rastro é decidido pela TEXTURA, não por uma lista: o pool
+   * de balas é compartilhado com os inimigos comuns, e uma lista de referências envelheceria mal
+   * (a bala volta para o pool e renasce como outra coisa). `globuloGuardiao` só ele atira.
+   *
+   * ⚠️ Cada bala carrega o PRÓPRIO relógio (`rt`), e não o do quadro: com 5 glóbulos abertos num
+   * leque, emitir "uma vez por quadro por bala" faria o rastro engrossar junto com a salva.
+   */
+  private rastroGlobulos(dt: number): void {
+    if (!this.scene.textures.exists('globuloGuardiao')) return;
+    for (const obj of this.enemies.enemyBullets.getChildren()) {
+      const b = obj as Phaser.Physics.Arcade.Sprite;
+      if (!b.active || b.texture.key !== 'globuloGuardiao') continue;
+
+      const rt = ((b.getData('rt') as number) ?? 0) - dt;
+      if (rt > 0) {
+        b.setData('rt', rt);
+        continue;
+      }
+      b.setData('rt', BossNucleo.RASTRO_MS);
+
+      // Atrás da bala, nunca em cima dela: o sopro nasce na cauda (o glóbulo tem 12px de corpo no
+      // sprite de 32×16) para o rastro sair de trás e não engolir a própria silhueta.
+      const ang = b.rotation;
+      const x = b.x - Math.cos(ang) * 6;
+      const y = b.y - Math.sin(ang) * 6;
+      this.fumaca.emitParticleAt(x, y);
+      if (Math.random() < BossNucleo.RASTRO_BRASA) this.brasa.emitParticleAt(x, y);
+    }
+  }
+
+  /** O glóbulo (bolt3 laranja) do bico do guardião. */
   private gLobulo(angle: number, speed: number, boca: { x: number; y: number }): void {
     const b = this.enemies.enemyBullets.get(boca.x, boca.y) as
       | Phaser.Physics.Arcade.Sprite
@@ -450,8 +754,15 @@ export class BossNucleo implements StageBoss {
     b.setActive(true).setVisible(true);
     b.body!.enable = true;
 
-    if (this.scene.textures.exists('bolt3')) b.setTexture('bolt3');
-    b.setTint(0xffa040);
+    // ⚠️ SEM TINT. A arte nova já traz a própria cor (casco escuro, só a brasa acesa); tingir de laranja
+    // acendia o corpo inteiro e devolvia o projétil genérico que ele mandou trocar.
+    if (this.scene.textures.exists('globuloGuardiao')) {
+      b.setTexture('globuloGuardiao');
+      b.clearTint();
+    } else if (this.scene.textures.exists('bolt3')) {
+      b.setTexture('bolt3');
+      b.setTint(0xffa040);
+    }
     b.setScale(1);
     b.setFlipX(false);
     b.setRotation(angle);
@@ -462,55 +773,70 @@ export class BossNucleo implements StageBoss {
   }
 
   /**
-   * O gate do dano é o ESTADO, e cada forma tem o seu: o guardião fecha ao MOVER (o corpo
-   * inteiro absorve — este método nem é chamado); o coração fecha por PLACAS (chamado, e
-   * devolve o retinir frio). A bala que chega aqui SEMPRE tocou o alvo — quem decide se
-   * doeu é a forma.
+   * O gate do dano é o ESTADO: o guardião fecha ao MOVER (o corpo inteiro absorve — este método nem é
+   * chamado); o predador decide o dele (o surgimento não fere, a recuperação dobra).
    */
   damage(amount: number): boolean {
+    if (this.predador) {
+      if (!this.predador.damage(amount)) return false;
+      this.dead = true;
+      return true;
+    }
     if (this.dead || this.entering || this.trocando) return false;
 
-    if (this.forma === 'guardiao') {
-      this.hpGuardiao = Math.max(0, this.hpGuardiao - amount);
-      this.atualizarBarra();
-
-      this.sprite.setTint(0xffb090);
-      this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
-
-      if (this.hpGuardiao === 0) this.trocarParaCoracao();
-      return false;
-    }
-
-    if (!this.aberto) {
-      this.sprite.setTint(0xb8c2d4);
-      this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
-      return false;
-    }
-
-    this.hpCoracao = Math.max(0, this.hpCoracao - amount);
+    // Ancorado no cabo, em esforço: o dano dobra. Mesma gramática da recuperação do predador — a
+    // janela de dano da luta tem de PAGAR, senão ela é só um lugar onde nada acontece.
+    const dano = this.segurandoCabo ? amount * BossNucleo.DANO_CRAVADA : amount;
+    this.hpGuardiao = Math.max(0, this.hpGuardiao - dano);
     this.atualizarBarra();
 
     this.sprite.setTint(0xffb090);
-    this.scene.time.delayedCall(60, () => !this.dead && this.sprite.clearTint());
+    // ⚠️ O flash de dano NÃO pode apagar o tint frio do telégrafo: um golpe que cai no último quadro
+    // antes do aviso deixava o `clearTint` atrasado limpar o casco no meio da carga.
+    this.scene.time.delayedCall(60, () => {
+      if (this.dead) return;
+      if (this.acao === 'telegrafo') this.sprite.setTint(BossNucleo.CASCO_FRIO);
+      else this.sprite.clearTint();
+    });
 
-    if (this.hpCoracao > 0) return false;
-
-    this.dead = true;
-    this.body.setVelocity(0, 0);
-    this.glow.emitting = false;
-    return true;
+    if (this.hpGuardiao === 0) this.trocarParaPredador();
+    return false;
   }
 
   /** UMA barra para as duas formas: a luta é uma só, e a barra é a promessa do tamanho dela. */
   private atualizarBarra(): void {
-    this.bar.width = 160 * ((this.hpGuardiao + this.hpCoracao) / BossNucleo.HP_TOTAL);
+    this.bar.width = 160 * ((this.hpGuardiao + (this.predador?.hp ?? Predador.HP)) / BossNucleo.HP_TOTAL);
+  }
+
+  /** O corpo do predador fica na tela, racha o chão e afunda na lava antes da cutscene — ver `destroy`. */
+  get pausaFinalMs(): number | undefined {
+    return this.predador ? BossNucleo.CORPO_FICA_MS : undefined;
   }
 
   destroy(): void {
+    this.serra?.destroy();
+    this.serra = null;
+    // O CORPO FICA (17/09: *"a animação dele morto não apareceu, ele sumiu"*): a cena destrói o chefão 1,2s depois
+    // do golpe final, bem quando o clipe da morte termina estendido. O último quadro vira uma imagem solta no
+    // chão — e dali sai o FIM: o piso racha, estoura, a lava sobe e o corpo afunda (ver `fimDoPredador`).
+    if (this.predador?.dead && this.sprite.active) {
+      const s = this.sprite;
+      const corpo = this.scene.add
+        .image(s.x, s.y, s.texture.key, s.frame.name)
+        .setOrigin(s.originX, s.originY)
+        .setScale(s.scaleX, s.scaleY)
+        .setFlip(s.flipX, s.flipY)
+        .setDepth(s.depth);
+      afundarNaLava(this.scene, corpo, this.fx, Predador.CHAO_APOIO);
+    }
+    this.predador?.destroy();
     this.sprite.destroy();
     this.core.destroy();
     this.bar.destroy();
     this.barBg.destroy();
     this.glow.destroy();
+    this.fumaca.destroy();
+    this.brasa.destroy();
+    this.carga.destroy();
   }
 }

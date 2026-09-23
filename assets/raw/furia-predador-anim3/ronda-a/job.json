@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "34df6fbb-8cf6-42bc-8cfb-921196120d12",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "prowls forward in place on all fours like a gorilla knuckle-walking, each limb clearly lifting and planting in turn, shoulders rolling, head low, facing left, walk cycle",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

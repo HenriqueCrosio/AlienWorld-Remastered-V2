@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "4b1909b9-190b-4fdc-80b3-38a362059647",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "skids to a stop, drops low and plunges both bladed claws into the ground, then tears them upward in a huge rising slash from the floor to above its head, flinging glowing debris up to the left, facing left",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "642ae12a-d895-46b3-823f-aa4df7a87a2d",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "charges forward in place on all fours like an enraged bear, powerful bounding gallop, claws tearing the ground, head low and driving forward, facing left, fast run cycle",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

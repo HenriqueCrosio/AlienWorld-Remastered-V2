@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "6a1312c4-4e25-482c-9582-0694080f4160",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "crouches low gathering strength, then springs upward and twists its whole body around in mid-air, landing heavily in a crouch facing left",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

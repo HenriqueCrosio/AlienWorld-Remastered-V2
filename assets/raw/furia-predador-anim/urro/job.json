@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "6b2fbb27-59ff-4a27-9e9f-56acfa1c2d53",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "raises both long bladed clawed arms high and roars furiously at the camera, jaw opening wide, chest heaving",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 8
+  }
+}

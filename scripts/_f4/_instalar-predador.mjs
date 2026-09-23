@@ -1,0 +1,86 @@
+// INSTALA O PREDADOR (B3 da Fatia 7) — a 2ª forma do chefão final. Zero geração: só monta as folhas.
+//
+//   predador-s.png              ← furia-predador-giro/corrigido/0   (a S, o surgimento)
+//   predador-luta.png           ← furia-predador-giro/corrigido/8   (três quartos p/ a esquerda: a pose da luta)
+//   predador-teto.png           ← furia-predador-anim3/pendurado75  (pendurado por uma garra, quadro de 0,75)
+//   predador-<clipe>-sheet.png  ← os quadros de cada clipe, em linha (N × 256²)
+//
+// ⚠️ SÓ O GIRO leva a correção de brilho (`corrigido/`): ele clareava quadro a quadro SEM querer. No urro,
+// no idle e na lava o clarão do core é o gesto — igualar a lum ao quadro 0 apagaria o que o clipe diz.
+// ⚠️ Clipe sem quadros é pulado (arte entra asset por asset): o motor cai no estático.
+//
+//   node scripts/_f4/_instalar-predador.mjs
+import fs from 'node:fs';
+import sharp from 'sharp';
+
+const OUT = 'public/sprites';
+const Q = 256;
+const ANIM = 'assets/raw/furia-predador-anim';
+// A RODADA 2 (16/09, depois do 1º teste jogado): as escolhidas de cada clipe refeito. `-mini` = PixMiniMax.
+const ANIM2 = 'assets/raw/furia-predador-anim2';
+// A RODADA 3 (16/09, 2º teste jogado): andar, cair de quatro, galopar, o slash inclinado, agarrar o teto por uma
+// garra, balançar e arremessar pendurado. Gerados de bases REDUZIDAS (0,85 chão / 0,75 teto): ver `Predador.QUADRO`.
+const ANIM3 = 'assets/raw/furia-predador-anim3';
+// A RODADA 4 (17/09, 3º teste jogado): o RASGO da volta (crava as garras no chão e ergue um arco de metal em brasa)
+// e o arremesso pendurado com a garra LIVRE (o teto-lava2 soltava o teto com a mesma garra que arremessava).
+const ANIM4 = 'assets/raw/furia-predador-anim4';
+// A RODADA 6 (18/09, o arremesso do teto refeito): o `teto-lava-b` TROCAVA de garra no meio do gesto
+// (*"começa com a de trás e acaba com a da frente"*). No `teto-lava-f` a garra da FRENTE faz tudo — colhe a
+// bola no core aceso e a solta —, sem nunca cruzar para trás do tronco, e o braço de cima nem se mexe.
+const ANIM5 = 'assets/raw/furia-predador-anim5';
+// A RODADA 7 (19/09): a lava DO CHÃO tirada do core, pedido dele depois de aprovar o arremesso do teto —
+// *"acho que vale gerar uma nova animação com ele tirando do core"*. O clipe velho (`anim/lava`, v3 da 1ª
+// passada, 9 quadros) era um arremesso genérico por cima do ombro, sem relação com o peito aceso.
+const ANIM6 = 'assets/raw/furia-predador-anim6';
+
+const CLIPES = {
+  urro: `${ANIM}/urro`,
+  giro: 'assets/raw/furia-predador-giro/corrigido',
+  pulo: process.env.PULO ?? `${ANIM2}/pulo-mini`,
+  andar: `${ANIM3}/andar-c`,
+  quatro: `${ANIM3}/quatro-b`,
+  corrida: `${ANIM3}/corrida-c`,
+  slash: `${ANIM3}/slash-a`,
+  rasgo: process.env.RASGO ?? `${ANIM4}/upper-b`,
+  lava: process.env.LAVA ?? `${ANIM6}/lava-core-c`,
+  agarra: `${ANIM3}/teto-a`,
+  'teto-balanco': `${ANIM3}/teto-balanco`,
+  'teto-lava': process.env.TETO_LAVA ?? `${ANIM5}/teto-lava-f`,
+  morte: process.env.MORTE ?? `${ANIM2}/morte-mini`,
+};
+
+const quadros = (dir) =>
+  fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter((f) => /^\d+\.png$/.test(f)).sort((a, b) => parseInt(a) - parseInt(b)).map((f) => `${dir}/${f}`)
+    : [];
+
+for (const [saida, src] of [
+  ['predador-s.png', 'assets/raw/furia-predador-giro/corrigido/0.png'],
+  ['predador-luta.png', 'assets/raw/furia-predador-giro/corrigido/8.png'],
+  // O teto é a pose de LUTA ESPELHADA: a pose editada (`teto/pose.png`) deformava o bicho (*"quase irreconhecível"*).
+  // Rodada 3: o teto é o bicho PENDURADO POR UMA GARRA (último quadro do `teto-a`, base de 0,75) — a luta espelhada
+  // *"perdeu a animação de estar preso por uma garra"*.
+  ['predador-teto.png', 'assets/raw/furia-predador-anim3/pendurado75.png'],
+]) {
+  await sharp(src).png().toFile(`${OUT}/${saida}`);
+  console.log(`${OUT}/${saida}`);
+}
+
+for (const [nome, dir] of Object.entries(CLIPES)) {
+  const qs = quadros(dir);
+  if (!qs.length) {
+    console.log(`(pulado) ${nome}: sem quadros em ${dir}`);
+    continue;
+  }
+  const comp = [];
+  for (const [i, q] of qs.entries()) {
+    const m = await sharp(q).metadata();
+    if (m.width !== Q || m.height !== Q) throw new Error(`${q} é ${m.width}x${m.height}, esperado ${Q}²`);
+    comp.push({ input: q, left: i * Q, top: 0 });
+  }
+  await sharp({ create: { width: qs.length * Q, height: Q, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite(comp)
+    .png()
+    .toFile(`${OUT}/predador-${nome}-sheet.png`);
+  console.log(`${OUT}/predador-${nome}-sheet.png  (${qs.length} × ${Q}²)`);
+}

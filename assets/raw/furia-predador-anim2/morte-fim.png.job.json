@@ -1,0 +1,26 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "5f299cff-5ea5-4551-871a-484cb90aad8a",
+    "image_id": "eae88d85-27c4-5237-8a2d-b67e5386e2dc",
+    "source_image_id": "eae88d85-27c4-5237-8a2d-b67e5386e2dc",
+    "status": "processing",
+    "output_count": 1,
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "estimated_generations": 9,
+    "pricing_provisional": true
+  },
+  "fim": {
+    "usage": {
+      "type": "generations",
+      "generations": 9
+    },
+    "id": "5f299cff-5ea5-4551-871a-484cb90aad8a",
+    "status": "completed",
+    "created_at": "2026-09-16T20:00:57.425273+00:00",
+    "last_response": "[omitido]"
+  }
+}

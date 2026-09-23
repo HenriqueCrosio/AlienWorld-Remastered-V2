@@ -212,6 +212,46 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
  * no registro das animações, não um placeholder desenhado: explosão procedural JÁ existe, são
  * as fagulhas).
  */
+const SHEET_ANIMS: {
+  key: string;
+  sheet: string;
+  frames: number;
+  frameRate: number;
+  /** Ausente = laço infinito, como sempre foi. `false` = toca UMA vez (o cone do estouro). */
+  loop?: boolean;
+}[] = [
+  // A PORTA DO DUTO RESPIRANDO. 8 quadros a 10/s = 0,8s por volta — a batida de uma coisa viva
+  // esperando, não a de um alarme.
+  //
+  // ⚠️ SEM `yoyo`, E É POR CONSTRUÇÃO DA ARTE. Os 8 quadros já são um cosseno completo (aceso →
+  // frio → aceso), então o quadro 7 encosta no 0 com a mesma derivada e o laço fecha sozinho. Um
+  // `yoyo` aqui tocaria a volta duas vezes e dobraria o período sem querer.
+  { key: 'porta-nucleo', sheet: 'portaNucleoSheet', frames: 8, frameRate: 10 },
+
+  // ─── A SOLEIRA DO NÚCLEO (21/09, o esfíncter) ───
+  //
+  // O GÁS a 8/s: devagar o bastante para o jogador ver ENGROSSAR. É a única parte da cena que
+  // pede paciência dele, e acelerar aqui mataria a antecipação — que é a peça inteira. Ver o
+  // `VAZANDO_MS` do `Esfincter`.
+  // A GARGANTA DA F4 RESPIRANDO, a 6/s — a mesma cadência da versão da cutscene, porque é o mesmo
+  // bicho. O que muda é só o teto de brilho (ver `gargantaVivaSheet`).
+  { key: 'garganta-viva', sheet: 'gargantaVivaSheet', frames: 11, frameRate: 6 },
+  // A MORTE DA GARGANTA DA F4, a 5/s e UMA vez — os mesmos números da versão da cutscene, medidos
+  // lá em 04/09 (a 12 ela passava em 480ms debaixo do estouro e ele não conseguia vê-la).
+  //
+  // ⚠️ E AQUI O TETO DE BRILHO IMPORTA MAIS QUE NO IDLE: é esta animação que fica na tela depois
+  // do estouro, enquanto a carcaça rola pelo duto. No cru os dentes voltam BRANCOS (18,2% de px
+  // claros contra 0,8% do estático) e a criatura morta lia mais clara que viva.
+  { key: 'garganta-morta', sheet: 'gargantaMortaSheet', frames: 11, frameRate: 5, loop: false },
+  // AS MANGUEIRAS a 7/s: elas BALANÇAM, não tremem. O gesto é de coisa pendurada num sopro lento,
+  // e acelerar aqui as transformaria em algo agitado — que é o oposto de uma parede vazando.
+  { key: 'f4-mangueiras', sheet: 'f4MangueirasSheet', frames: 9, frameRate: 7 },
+  { key: 'f4-gas', sheet: 'f4GasSheet', frames: 8, frameRate: 8 },
+  // O CONE a 14/s e UMA vez só: 10 quadros = 0,71s. Rápido, porque ele é o pagamento, não a
+  // espera. ⚠️ `loop: false` — um estouro em laço é um incêndio, e a passagem já está aberta.
+  { key: 'f4-cone', sheet: 'f4ConeSheet', frames: 10, frameRate: 14, loop: false },
+];
+
 const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // A explosão-MESTRA do jogo: núcleo branco-quente → chamas → fumaça escura → some.
   explosionSheet: { path: 'sprites/explosion-sheet.png', w: 64, h: 64 },
@@ -222,11 +262,125 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // capital. Explosão tem TAMANHO DE CASO agora (ver Fx.explode): pequena/média/grande.
   explosionSmallSheet: { path: 'sprites/explosion-small-sheet.png', w: 32, h: 32 },
   // O GUARDIÃO respirando (9f 256² — a massa vermelha pulsa como coração) e o NÚCLEO
-  // batendo (9f 128² — a ferida acende e apaga). CANVAS QUADRADO com a criatura centralizada:
-  // a âncora é OUTRA em relação aos estáticos recortados (guardiao.png 256×227, nucleo.png
-  // 122×122) — o BossNucleo compensa (a mesma armadilha da sheet do Leviatã, nº 33).
+  // batendo (9f 128² — a ferida acende e apaga). O núcleo tem CANVAS QUADRADO com a criatura
+  // centralizada, e a âncora é outra em relação ao estático recortado (nucleo.png 122×122).
+  //
+  // ⚠️ O GUARDIÃO NÃO TEM MAIS ESSA ARMADILHA (15/09, B1): a arte nova DELE (PixelLab 9436240c) sai
+  // com estático, respiração, morte e destruído no MESMO quadro de 256², montados sem recorte por
+  // `scripts/_f4/_instalar-guardiao.mjs`. Um offset vale para os quatro.
   guardiaoIdleSheet: { path: 'sprites/guardiao-idle-sheet.png', w: 256, h: 256 },
+  // A MORTE (9f, a que termina OCA). Toca na troca para a 2ª forma, com as explosões do motor por
+  // cima e o `guardiaoDestruido` no fim — a decisão dele de 15/09 (ver `BossNucleo.trocarParaCoracao`).
+  guardiaoMorteSheet: { path: 'sprites/guardiao-morte-sheet.png', w: 256, h: 256 },
   nucleoBeatSheet: { path: 'sprites/nucleo-beat-sheet.png', w: 128, h: 128 },
+  // A PORTA DO DUTO RESPIRANDO (20/09, M4): 8 quadros de 64×112, só a FENDA pulsa.
+  //
+  // ⚠️ ASSADA, NÃO GERADA — `scripts/_f4/_assar-porta-nucleo.mjs`, e por duas razões. A primeira é
+  // a de sempre nesta fase (o gerador não obedece limite de cor: *"pulsar = clarear"*, e o núcleo
+  // volta estourado em branco). A segunda é só desta peça: gerar 8 quadros redesenharia a chapa
+  // inteira, e os ~40 REBITES iam rastejar 1px por quadro. A chapa sai IDÊNTICA nos 8; o que
+  // respira é só a brasa, e o pico é o estático que ele aprovou — o pulso só DESCE.
+  portaNucleoSheet: { path: 'sprites/f4-porta-nucleo-sheet.png', w: 64, h: 112 },
+  // O PREDADOR (16/09, B3): a 2ª forma do chefão final — o que sai de dentro do guardião. Todos os clipes
+  // no MESMO quadro de 256² (v3 do PixelLab a partir de PNG local), montados sem recorte por
+  // `scripts/_f4/_instalar-predador.mjs`. Um offset por POSE vale para os clipes que partem dela.
+  predadorUrroSheet: { path: 'sprites/predador-urro-sheet.png', w: 256, h: 256 },
+  predadorGiroSheet: { path: 'sprites/predador-giro-sheet.png', w: 256, h: 256 },
+  predadorPuloSheet: { path: 'sprites/predador-pulo-sheet.png', w: 256, h: 256 },
+  predadorAndarSheet: { path: 'sprites/predador-andar-sheet.png', w: 256, h: 256 },
+  predadorQuatroSheet: { path: 'sprites/predador-quatro-sheet.png', w: 256, h: 256 },
+  predadorCorridaSheet: { path: 'sprites/predador-corrida-sheet.png', w: 256, h: 256 },
+  predadorAgarraSheet: { path: 'sprites/predador-agarra-sheet.png', w: 256, h: 256 },
+  predadorTetoBalancoSheet: { path: 'sprites/predador-teto-balanco-sheet.png', w: 256, h: 256 },
+  predadorSlashSheet: { path: 'sprites/predador-slash-sheet.png', w: 256, h: 256 },
+  predadorRasgoSheet: { path: 'sprites/predador-rasgo-sheet.png', w: 256, h: 256 },
+  predadorLavaSheet: { path: 'sprites/predador-lava-sheet.png', w: 256, h: 256 },
+  predadorTetoLavaSheet: { path: 'sprites/predador-teto-lava-sheet.png', w: 256, h: 256 },
+  // A SERRA DO GUARDIÃO (19/09, a skill nova da 1ª forma). Montadas por `scripts/_f4/_instalar-serra.mjs`
+  // a partir da candidata `a-disco`. Ver `src/entities/SerraGuardiao.ts`.
+  serraGiroSheet: { path: 'sprites/serra-giro-sheet.png', w: 96, h: 96 },
+  serraTravadaSheet: { path: 'sprites/serra-travada-sheet.png', w: 96, h: 96 },
+  // O FIM DO PREDADOR (17/09, rodada 5): o piso rasgando e a poça de lava, assados em PIXEL na resolução
+  // nativa por `scripts/_f4/_assar-fim-f4.mjs` — a paleta sai da própria faixa do chão da arena. Ver
+  // `src/entities/fimDoPredador.ts`.
+  // A SOLEIRA DO NÚCLEO (21/09, o esfíncter): as três assadas em PIXEL na resolução nativa por
+  // `_assar-gas.mjs`, `_assar-cone.mjs` e `_assar-gore.mjs`. Ver `src/entities/esfincter.ts`.
+  //
+  // ⚠️ O GORE SAI RECORTADO DOS PIXELS DA PRÓPRIA GARGANTA, e é daí que vem a garantia de paleta:
+  // a peça é a fonte da própria luz, então não existe como o destroço destoar da criatura de que
+  // ele saiu. É o mesmo princípio do `_assar-porta-nucleo`, onde o pico do pulso É o estático.
+  // ⚠️ A GARGANTA RESPIRANDO, COM O ESTOURO DE BRANCO CORRIGIDO — chave NOVA, e a razão é medida.
+  // A `garganta-idle` crua caiu na armadilha que este projeto já documentou duas vezes: o gerador
+  // não obedece limite de cor, e "pulsar" virou "clarear". No quadro 6 ela tem 10,2% de px claros
+  // contra 0,8% do estático — o miolo não está aceso, está BRANCO PURO. Na cutscene do hangar
+  // passa; no DUTO, a câmara mais escura das quatro, vira a coisa mais brilhante da tela.
+  // `_assar-garganta-viva.mjs` põe um teto e puxa a luz de volta para o magenta da goela.
+  //
+  // ⚠️ A `garganta-idle` ORIGINAL FICA INTOCADA: a cutscene 3 está mergeada e aprovada com ela.
+  gargantaVivaSheet: { path: 'sprites/garganta-viva-sheet.png', w: 97, h: 171 },
+  gargantaMortaSheet: { path: 'sprites/garganta-morta-sheet.png', w: 97, h: 171 },
+  // AS MANGUEIRAS DA SOLEIRA (21/09, 2ª volta): substituem o `f4Cano2`, que era um cano INTEIRO e
+  // lia como encanamento em ordem. Pedido dele: *"quero mangueiras soltas e soltando o gás,
+  // parecidas com a do guardião"* — e é a mesma língua mesmo, os cabos arrancados do guardião.
+  //
+  // ⚠️ A ARTE JÁ TRAZ A PLUMA. O gás não é só o `f4GasSheet` colado por cima: a peça vaza sozinha,
+  // então a NUVEM tem de onde sair. Foi a queixa contra o portão da cutscene 3 que ensinou isto —
+  // efeito sem causa lê como adesivo.
+  //
+  // ⚠️ E ELAS NÃO CLAREARAM, o que é raro neste gerador. Medido pelo `_instalar-mangueiras.mjs`:
+  // 0% dos px acima do teto do quadro parado, nos 9 quadros. O assador fica no lugar mesmo assim —
+  // ele é a rede, e regerar sem ele traria o estouro de volta sem ninguém notar.
+  // ⚠️ 32×44, METADE DA FONTE — pedido dele depois de jogar (*"diminua quase pela metade do
+  // tamanho do sprite"*): a 64×88 elas competiam com a criatura. A redução é por 2 exato, que é o
+  // único fator que mapeia 4 px em 1 sem inventar cor; 0,55 ou 0,6 borrariam a linha do metal.
+  // Assada no `_instalar-mangueiras.mjs`, então a peça vive em ESCALA 1 no jogo.
+  f4MangueirasSheet: { path: 'sprites/f4-mangueiras-sheet.png', w: 32, h: 44 },
+  f4GasSheet: { path: 'sprites/f4-gas-sheet.png', w: 128, h: 176 },
+  f4ConeSheet: { path: 'sprites/f4-cone-sheet.png', w: 256, h: 176 },
+  // ⚠️ 53×76 POR CÉLULA, E OS PEDAÇOS VÊM DO PIXELLAB — a 1ª versão eram recortes MEUS de 24×24
+  // tirados da criatura por script, e ele reprovou jogando: liam como estilhaço genérico, não como
+  // bicho. Os de agora são placas de casco rasgadas, presas curvas e segmentos do anel de dentes.
+  // Recortados por ILHA (o `_instalar-destroco.mjs`), porque uma grade fixa cortaria caco ao meio.
+  f4GoreSheet: { path: 'sprites/f4-gore-sheet.png', w: 53, h: 76 },
+
+  // O SANGUE DELA (22/09). Três peças assadas em pixel por `_assar-sangue.mjs`, na resolução
+  // nativa e na paleta MEDIDA da criatura — magenta sobre roxo quase preto, nunca o carmim do
+  // predador. Ver o cabeçalho do assador para o porquê de não serem `Graphics`.
+  f4SangueSheet: { path: 'sprites/f4-sangue-sheet.png', w: 16, h: 10 },
+  f4RespingoSheet: { path: 'sprites/f4-respingo-sheet.png', w: 44, h: 28 },
+
+  // AS VÍSCERAS (22/09, PixelLab, a partir da original). 13 cacos de 17 a 39px: segmentos do anel
+  // de dentes com a matéria ainda presa, sacos com nervura, membranas rasgadas e cordões compridos.
+  // ⚠️ SÃO A ALTERNATIVA AO `f4GoreSheet`, não a substituição: a folha aprovada é de CASCO, esta é
+  // de MATÉRIA MOLE. Qual das duas entra é a escolha dele entre as três variações de 22/09.
+  f4VisceraSheet: { path: 'sprites/f4-viscera-sheet.png', w: 39, h: 61 },
+  f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
+  f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
+  f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
+  predadorMorteSheet: { path: 'sprites/predador-morte-sheet.png', w: 256, h: 256 },
+
+  // AS DUAS PEÇAS-ASSINATURA DO CENÁRIO DA F4, RESPIRANDO (13/09). O coração no chão e o
+  // maquinário no teto — as mesmas peças estáticas de sempre (`orgao`/`maquinario`), agora com o
+  // que acende passeando. 9 quadros de 122×122, assados por `scripts/_f4/_assar-anim.mjs`.
+  //
+  // ⚠️ O QUADRO 0 É O SPRITE ESTÁTICO, e isso não é coincidência: o assador ancora a animação
+  // inteira nele (média 42,5 nos dois). A peça respira EM VOLTA do que já foi aprovado jogando,
+  // em vez de trocar de aparência.
+  //
+  // ⚠️ E O ASSADOR EXISTE PORQUE O GERADOR NÃO OBEDECE LIMITE DE COR: duas rodadas pediram "nunca
+  // branco" com todas as letras e as duas voltaram com o núcleo estourado. O teto se impõe no
+  // disco, onde é determinístico. Ver o cabeçalho do script.
+  //
+  // ⚠️ AS DUAS PEÇAS FORAM REGERADAS EM 14/09, VERTICAIS. A arte de 13/09 era radial — tubos para
+  // todos os lados — e os laterais ficavam no ar mesmo dissolvidos: *"os tubos dos maquinários
+  // ainda aparecem sim, podemos tentar gerar novos assets com tubos somente em cima e embaixo"*.
+  // Objetos PixelLab `7d5df865` (o coração em coluna, 9 quadros de 96×128) e `a4f7f9e0` (o
+  // maquinário, 6 quadros de 96×128: os quadros 6–8 do gerador estouravam a brasa num halo que a
+  // trava de brilho transformava em mancha bege). Os dois são COLUNAS, do chão ao teto — ver o
+  // `maquinario` no `Parallax`. Brutos em `assets/raw/anim-
+  // orgao-v` e `anim-maquinario-v`.
+  orgaoAnimSheet: { path: 'sprites/orgao-anim.png', w: 96, h: 128 },
+  maquinarioAnimSheet: { path: 'sprites/maquinario-anim.png', w: 96, h: 128 },
   // O Leviatã-BALEIA (o mesmo do menu) com fissuras pulsando e explosões na espinha (cutscene
   // final, beat 3). ⚠️ CANVAS QUADRADO 144×144 com a criatura CENTRALIZADA — a âncora é outra
   // em relação ao sprite estático `leviathanWhaleDying` (140×87 recortado). O centro visual do
@@ -247,6 +401,15 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // O EMBLEMA do jogo que SURGE quando o Leviatã some atrás da lua (menu). Brasão circular que
   // faísca em loop. Célula 64×64; 9 quadros lado a lado.
   menuLogoSheet: { path: 'sprites/menu-logo-sheet.png', w: 64, h: 64 },
+
+  // O GOLFINHO BIOMECÂNICO — o mini-chefão da câmara B da Fase 4 (spec 2026-09-11). Animações
+  // PixMiniMax aprovadas pelo Henrique, 80×80 com o bicho virado para a ESQUERDA (o sentido dos
+  // inimigos). ⚠️ O QUADRO NÃO É O CORPO: o golfinho ocupa ~42×30 do quadro, e a hitbox é fixada à
+  // mão no `Golfinho`. ⚠️ A bala que as animações traziam desenhada foi APAGADA por
+  // `scripts/_f4/_golfinho-sheets.mjs` — rodar de novo a cada reinstalação.
+  golfinhoNado: { path: 'sprites/golfinho-nado.png', w: 80, h: 80 },
+  golfinhoFlip: { path: 'sprites/golfinho-flip.png', w: 80, h: 80 },
+  golfinhoCambalhota: { path: 'sprites/golfinho-cambalhota.png', w: 80, h: 80 },
 };
 
 /** Registra os quadros de uma animação no mapa de ART. */
@@ -546,6 +709,31 @@ const ART: Record<string, string> = {
   // ferramenta: node scripts/find-pad.mjs hangar 80). Trocar a arte OBRIGA a remedir.
   hangar: 'sprites/hangar.png',
 
+  // ─── OS QUATRO FUNDOS DA FASE 4 (Fatia 7, arte do Henrique) ───
+  // A jornada anatômica: o hangar engolido → a caixa torácica → o duto → a câmara do núcleo.
+  // Quem troca de um para o outro é o ROTEIRO (evento `cenario` no STAGE_4), não o Parallax.
+  //
+  // ⚠️ 384×216 = a resolução EXATA do jogo, ASSADA no arquivo
+  // (`scripts/instalar-fundos-f4.mjs`), e desenhados em escala 1. É a grade de pixel casando com
+  // a da tela que dá a PROFUNDIDADE — pintura esticada em runtime achata o fundo. Reduzir pode;
+  // AMPLIAR, nunca: se ficar pequena para o enquadramento, gere de novo maior.
+  //
+  // Sem placeholder: sem eles, o `interior` cai nas camadas procedurais de sempre.
+  paintBgF4a: 'sprites/paint-bg-f4-a.png',
+  paintBgF4b: 'sprites/paint-bg-f4-b.png',
+  paintBgF4c: 'sprites/paint-bg-f4-c.png',
+  paintBgF4d: 'sprites/paint-bg-f4-d.png',
+
+  // A BALA DO GOLFINHO: o tiro vermelho que o Henrique aprovou na animação do flip, recortado,
+  // virado para a direita e reduzido a 13×9 — o quadro do `bolt2`, de onde a hitbox do pool vem.
+  shotGolfinho: 'sprites/shot-golfinho.png',
+
+  // A SERRA parada — o motor cai nela se as folhas faltarem (arte entra asset por asset).
+  serraGuardiao: 'sprites/serra-guardiao.png',
+  // O GLÓBULO da salva do guardião (19/09). Substitui o `bolt3` tingido de laranja, que era um projétil
+  // genérico: este é do mesmo material da serra, e já vem com a própria cor (⚠️ NÃO tingir).
+  globuloGuardiao: 'sprites/globulo-guardiao.png',
+
   // O NÚCLEO: o coração blindado do Leviatã, chefão FINAL (Fase 4). Escolha do Henrique
   // (cf5b3e43, 128px → 122×122 instalado). ⚠️ A FERIDA (a zona vulnerável) é MEDIDA no PNG:
   // x=52..91 y=56..87 (node scripts/find-pad.mjs nucleo 0 — os vermelhos de y<52 são luzes da
@@ -553,10 +741,18 @@ const ART: Record<string, string> = {
   nucleo: 'sprites/nucleo.png',
 
   // O GUARDIÃO: a 1ª forma do chefão final — a besta blindada ENROLADA em volta da massa
-  // viva (arte CRIADA PELO HENRIQUE na interface do PixelLab, 03ef8c07, 256px → 256×227).
-  // ⚠️ A massa vermelha (alvo) é MEDIDA: x=106..197 y=105..186 (find-pad guardiao 0).
-  // Trocar a arte OBRIGA a remedir (BossNucleo.G_CORE_OFF_*).
+  // viva. A ARTE NOVA DELE (15/09, B1 da Fatia 7): PixelLab 9436240c, 256×256, casco escuro com
+  // a massa exposta — substitui a 03ef8c07 (256×227, casco verde-oliva).
+  // ⚠️ A massa vermelha (alvo) é MEDIDA: x=115..192 y=109..176, centroide 152,141
+  // (`scripts/_f4/_medir-guardiao.mjs`). Trocar a arte OBRIGA a remedir (BossNucleo.G_CORE_OFF_*).
   guardiao: 'sprites/guardiao.png',
+  // O último quadro da morte — o casco partido em anel, o único em que a silhueta QUEBRA.
+  guardiaoDestruido: 'sprites/guardiao-destruido.png',
+  // O PREDADOR, as três POSES (16/09, B3). Miolo MEDIDO (`scripts/_f4/_medir-predador.mjs`), offset ao
+  // centro do quadro VIRTUAL: S +6,−5 · luta −23,−3 · pendurado −25,−24 (ver `Predador.QUADRO`) (ver `Predador.MIOLO`).
+  predadorS: 'sprites/predador-s.png',
+  predadorLuta: 'sprites/predador-luta.png',
+  predadorTeto: 'sprites/predador-teto.png',
 
   // ─── O INTERIOR ORGÂNICO DA FASE 4 (2026-07-21) ───
   // Os corredores do Leviatã eram picos e rochas de superfície tingidos — pedra lunar dentro
@@ -566,6 +762,163 @@ const ART: Record<string, string> = {
   costela: 'sprites/costela.png',
   orgao: 'sprites/orgao.png',
   maquinario: 'sprites/maquinario.png',
+
+  // ─── AS PEÇAS QUE SAÍRAM DAS 64 CANDIDATURAS DELE (12/09) ───
+  //
+  // ⚠️ ELAS FORAM REPROVADAS COMO FAIXA E APROVADAS COMO PROP, e a diferença é a pergunta. Faixa
+  // precisa sangrar nas três bordas com topo reto — medido, nenhuma das 64 tem (o sangramento
+  // lateral varia de 0% a 100% da altura, sem regra). Mas `create_1_direction_object` faz bem
+  // exatamente o que a faixa não queria: RECORTAR um objeto do fundo. Como prop, o recorte é a
+  // virtude. Ver `scripts/_f4/_assar-cand.mjs`.
+  //
+  // A PONTE é a assinatura da câmara A — a doca engolida: dois pilares de convés industrial com
+  // guarda-corpo e lâmpada âmbar, tomados pelas veias do bicho, e um VÃO suspenso entre eles.
+  //
+  // ⚠️ ELA ERA SÓ UM PILAR ATÉ O TESTE JOGADO DE 12/09. Veredicto dele: *"sobre o asset da ponte,
+  // eu achei, é que ele está pequeno e as mesas e bordas tampam ele... hoje nós temos o que seria
+  // o INÍCIO de uma ponte"*. O diagnóstico é dele e está certo: a peça de 71px não era pequena por
+  // acidente — ela é a PONTA de uma ponte, e ponta sozinha não lê como ponte.
+  //
+  // ⚠️ O VÃO É PROCEDURAL (`scripts/_f4/_assar-ponte.mjs`), desenhado coluna a coluna a partir do
+  // próprio original — não é uma fatia repetida, que denunciaria a costura a cada 18px. As
+  // `f4-passarela*.png` continuam no disco porque são a ENTRADA desse forno, mas não são mais
+  // carregadas: quem entra em cena é a ponte inteira.
+  f4Ponte: 'sprites/f4-ponte.png',
+  f4Ponte2: 'sprites/f4-ponte2.png',
+  f4Ponte3: 'sprites/f4-ponte3.png',
+  // O GÂNGLIO é um núcleo nervoso ACESO. ⚠️ A escolha anterior eram os anéis de cartilagem da
+  // câmara B, e o mock contra a pintura os matou: a pintura da câmara B JÁ É uma caixa torácica,
+  // então a peça repetia o que já estava lá. Estes dizem o que nenhuma das quatro pinturas diz —
+  // um ponto de luz PRÓPRIO, que é a fase inteira em uma peça (*luz só onde há energia*).
+  // ESFUMADOS numa elipse irregular: são textura de quadro cheio, e sem isso entrariam como
+  // quadrado colado ("sprite com BORDA RETA é veneno").
+  f4Ganglio: 'sprites/f4-ganglio.png',
+  f4Ganglio2: 'sprites/f4-ganglio2.png',
+  // O CANO DE DESPEJO da câmara B: a FONTE da água. ⚠️ Pedido dele depois de jogar o enchimento —
+  // *"se quiser implementar canos soltando a água, como um asset visual diferente. Assim fica mais
+  // plausível"*. Nível que sobe sozinho é exatamente o que um cenário não pode fazer; o Leviatã
+  // engoliu uma doca, e doca tem encanamento. Nasceram deitados e entram de pé (giro de 90°, que
+  // em pixel art é exato) — flange no teto, boca despejando para baixo. scripts/_f4/_assar-cano.mjs.
+  f4Cano: 'sprites/f4-cano.png',
+  f4Cano2: 'sprites/f4-cano2.png',
+  f4Cano3: 'sprites/f4-cano3.png',
+
+  // ─── A MOLDURA DA FASE 4 (Fatia 7 · M1) ───
+  //
+  // AS BORDAS DAS CÂMARAS — a arte de verdade da moldura, instalada no M2 (13/09).
+  //
+  // ⚠️ A FAIXA É 128×64 E ENTRA EM ESCALA 1, ancorada pela SUPERFÍCIE — o que sobra dela sai da
+  // tela. É por isso que `Moldura.ESPESSURA_MAX` é 54 e não 64. **Qualquer peça registrada aqui
+  // TEM de ser 128×64**; a `probe-f4-moldura` cobra isso de cada uma, uma a uma.
+  //
+  // ⚠️ UMA ARTE POR CÂMARA, E ISSO É DECISÃO DELE, NÃO LIMITAÇÃO. A câmara A entrou com duas
+  // irmãs sorteadas (A-0 e A-2) para matar as 3 cópias idênticas na tela ao mesmo tempo
+  // (384 ÷ 128 = 3). Ele jogou e reprovou: *"quero a pintura que tem o músculo apenas e não o
+  // músculo com ossos… unifique as câmaras com sua única arte, não tenha duas"*. As duas irmãs
+  // não liam como variedade da mesma parede — liam como duas paredes emendadas, que é um defeito
+  // PIOR que a repetição que elas vieram resolver.
+  //
+  // A convenção do `pickVariant` (src/art.ts) continua de pé — `<base>`, `<base>2`, `<base>3`… —
+  // e é por isso que desfazer isto é copiar um PNG e escrever uma linha aqui, sem tocar em código.
+  //
+  // ⚠️ A CÂMARA C É A ÚNICA GROSSA — 128×**80**, contra 128×64 das outras três —, e isso é arte
+  // dele aprovada em 12/09 (*"as do duto e do núcleo ficaram ótimas"*), não um acidente de
+  // exportação. Ela ficou PARADA de 12/09 a 20/09 porque o motor media a peça por um literal 64;
+  // quem ensinou a altura variável foi o M4. Ver a conta em `Moldura.ESPESSURA_MAX` e a âncora da
+  // saia em `Moldura.enche`, que hoje saem da peça e não de um número.
+  //
+  // ⚠️ E OS 16px A MAIS SÃO COBERTURA, NÃO APERTO — decisão dele em 20/09: *"use a arte que temos
+  // guardada e utilize-a da mesma forma que a atual"*. O `ESPESSURA_MAX` continua 54, então o duto
+  // tem exatamente a mesma largura de antes; o que muda é que a parede vira ARTE onde antes entrava
+  // saia. Subir o teto para 70 (que a peça de 80 permitiria) apertaria o duto, e isso é mudança de
+  // JOGO numa fase que ele já aprovou jogada — não entra de carona numa troca de arte.
+  //
+  // ⚠️ `f4-faixa-prov.png` FICA NO DISCO. A regra de saída é dele — *"caso não fique bom, mantemos
+  // a que está agora"* — e voltar atrás é reapontar estas chaves para o provisório.
+  f4FaixaA: 'sprites/f4-faixa-a.png',
+  f4FaixaB: 'sprites/f4-faixa-b.png',
+  f4FaixaC: 'sprites/f4-faixa-c.png',
+  f4FaixaD: 'sprites/f4-faixa-d.png',
+  // A MESA: 96×112, TOPO CHATO. A hitbox sai da largura da TEXTURA, então topo chato é o que a
+  // torna honesta por construção (`scripts/_f4/_medir-colunas.mjs`).
+  //
+  // ⚠️ A CHAVE TEM DE SE CHAMAR `mesa`, NÃO `f4Mesa`. `TerrainSystem.spawn` resolve a textura por
+  // `pickVariant(scene, kind)` (src/art.ts) — o nome do `PropKind` É a chave da arte, sem
+  // tradução no meio. Uma chave fora dessa convenção não gera erro nenhum: o `pickVariant` procura
+  // 'mesa', não acha, e o Phaser devolve a textura de erro (`__MISSING`) — que tem 32×32, então
+  // `body.setSize(width * 0.6, height)` também sai errado, e o obstáculo perde a hitbox junto com
+  // a arte. Foi exatamente o que aconteceu: a Task 5 criou o kind `mesa`, a Task 3 registrou a
+  // arte como `f4Mesa`, e as quatro sondas passaram porque nenhuma olhava a TEXTURA carregada
+  // (ver os asserts novos em `scripts/probe-f4-moldura.mjs`). Quando a arte de verdade entrar
+  // (M2–M5), as variantes são `mesa2`, `mesa3`… — o `pickVariant` sorteia entre elas sem mudar
+  // nenhuma linha de código, DE GRAÇA, porque a convenção foi respeitada desde o nome.
+  // ⚠️ A ARTE DE VERDADE ENTROU EM 12/09 (M2). A estrutura foi decidida com ele: **aço ENGOLIDO,
+  // não carne**. A mesa é a única coisa da fase que mata por ser TERRENO — todo o resto ou é fundo
+  // (tingido escuro, depth negativo) ou é inimigo (se move, atira), e por isso ela é a única peça
+  // da F4 que nasce SEM tint. Biomecânica seria feita da mesma matéria da faixa, das costelas e da
+  // parede de onde ela cresce: camuflagem. É a mesma língua da `f4Ponte` e do `f4Cano`, então a
+  // fase passa a ter uma frase só — *isto era uma doca, e o bicho está digerindo*.
+  //
+  // ⚠️ AS TRÊS ENTRAM COM O MESMO RODAPÉ HORIZONTAL (94px de largura em tela), e isso é
+  // deliberado: o prop nasce em escala 1, então a largura em tela é a da TEXTURA. As candidaturas
+  // vieram quase quadradas (101–112 para 110 de altura) e instalar assim engordaria o obstáculo em
+  // até 19% — o que estica o tempo que o jogador passa dentro do aperto. **O vão é dele**
+  // (126/112/120, calibrado jogando em 12/09); arte não mexe em dificuldade de lado. Ver
+  // `scripts/_f4/_assar-mesa.mjs`.
+  //
+  // ⚠️ `f4-mesa-prov.png` FICA NO DISCO de propósito. A regra de saída é dele: *"caso não fique
+  // bom, mantemos a que está agora"* — voltar atrás é trocar esta linha, não regerar nada.
+  mesa: 'sprites/f4-mesa.png',
+  mesa2: 'sprites/f4-mesa2.png',
+  mesa3: 'sprites/f4-mesa3.png',
+  // A MESA DO MAR — a câmara alagada do golfinho (14/09). Um `PropKind` próprio, não `mesa4`: ver o
+  // `mesaMar` do `TerrainSystem`. Assadas por `scripts/_f4/_assar-mesa-mar.mjs`, 94px como as de aço.
+  mesaMar: 'sprites/f4-mesa-mar.png',
+  mesaMar2: 'sprites/f4-mesa-mar2.png',
+  // ⚠️ A CHAVE É O NOME DO `PropKind`, e é a lei que custou caro em 09/09: `pickVariant(scene,
+  // kind)` procura a textura pelo nome do kind, e registrá-la como `f4Porta` faria o Phaser
+  // devolver a textura de ERRO (32×32) com a hitbox junto — sem nenhuma sonda ficar vermelha.
+  //
+  // A ARTE FINAL ENTROU EM 20/09 (M4), escolhida por ele entre 8 candidatas: o anteparo escuro
+  // rebitado com a FENDA acesa dentro de um soquete de anéis blindados. A fenda é um acento
+  // VERTICAL num duto cujas veias são todas horizontais, e é por isso que ela recorta contra a
+  // parede em vez de sumir nela.
+  //
+  // ⚠️ `f4-porta-prov.png` FICA NO DISCO, como a faixa e a mesa: a regra de saída é dele.
+  porta: 'sprites/f4-porta.png',
+  // A LASCA — o que sobra depois do estouro. A porta PARTE AO MEIO e restam dois cotos presos à
+  // parede, em cima e embaixo, com a passagem aberta entre eles. O pedido é dele, 20/09: *"a porta
+  // vai precisar partir ao meio… sobrando apenas uma lasca de cima e de baixo… assim a nave
+  // consegue passar e dá a sensação que explodimos uma porta mesmo"*.
+  //
+  // ⚠️ NÃO É `porta2`, E A DIFERENÇA É O `pickVariant`: irmãs da mesma base são SORTEADAS quando o
+  // prop nasce, então uma porta inteira nasceria já em cacos de vez em quando. A lasca é um estado,
+  // não uma variante — quem a instala é o `matarPorta` da `GameScene`, trocando a textura.
+  //
+  // ⚠️ A FRESTA MEDE 38px, contra um corpo de nave de 17×6 e um sprite de 31×15
+  // (`scripts/_f4/_medir-nave.mjs`). A arte promete passagem e a passagem existe — se alguém trocar
+  // esta peça por uma de fresta menor, é essa conta que tem de ser refeita.
+  portaLasca: 'sprites/f4-porta-lasca.png',
+
+  // O DESTROÇO DA GARGANTA (21/09, 2ª volta do esfíncter): o que sobra dela depois do estouro —
+  // um anel arrombado com a goela arrancada e cotos de dente na borda.
+  //
+  // ⚠️ É A MESMA IDEIA DA `portaLasca`, E PELO MESMO MOTIVO. A morte dela era a `garganta-morta`:
+  // 11 quadros em que a boca FECHA e o corpo amolece. Bonita, e contava a história errada — *ela
+  // morreu*, quando o que ele pediu foi *"que o player sinta que explodiu a criatura e rompeu o
+  // obstáculo rumo ao núcleo"*. Uma troca de textura seca diz isso; uma morte lenta não.
+  //
+  // ⚠️ E ELA NASCE NO QUADRO DA VIVA (97×171), montada pelo `_instalar-destroco.mjs`. O cru veio
+  // 170×170 com 80×134 de conteúdo; colado assim, a peça saltaria de lugar no quadro da ignição.
+  // É a lei da `portaLasca`, que tem exatamente os 64×112 da porta.
+  //
+  // ⚠️ Gerado com `edit_image` A PARTIR DA ORIGINAL — pedido dele: *"a explosão gore precisa vir
+  // de criar no pixellab a partir da imagem original"*. Não é um desenho novo: são os pixels dela,
+  // arrombados.
+  gargantaDestroco: 'sprites/garganta-destroco.png',
+
+  // A poça: o que escorre da carcaça e FICA. Assada em pixel (`_assar-sangue.mjs`).
+  f4Poca: 'sprites/f4-poca.png',
 
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',
@@ -718,6 +1071,12 @@ const ART: Record<string, string> = {
   // ⚠️ ELA EXISTE DESDE O PRIMEIRO QUADRO. Respira durante a queda, a derrapagem e o painel de
   // escolha. Surgir foi exatamente a queixa contra o portão.
   gargantaCut3: 'sprites/garganta.png',
+  // ⚠️ A MESMA IMAGEM SOB DUAS CHAVES, e não é descuido. A chave da arte de um prop É o nome do
+  // `PropKind` (`pickVariant(scene, kind)`), então o esfíncter da Fase 4 precisa dela como
+  // `garganta`. A `gargantaCut3` fica INTOCADA: a cutscene 3 está mergeada e aprovada, e trocar a
+  // chave dela de carona seria atravessar a mesma fronteira que o M1 pagou caro para aprender —
+  // a faixa da F4 foi parar nas Fases 1, 2 e 3 e nenhuma sonda pegou.
+  garganta: 'sprites/garganta.png',
   ...animFrames('gargantaIdleAnim', 'garganta-idle-anim'),
   ...animFrames('gargantaMorteAnim', 'garganta-morte-anim'),
 
@@ -844,6 +1203,25 @@ export class BootScene extends Phaser.Scene {
         frames: frames.map((k) => ({ key: k })),
         frameRate,
         repeat: loop ? -1 : 0,
+      });
+    }
+
+    // ─── As anims de SPRITESHEET do cenário ───
+    //
+    // ⚠️ ELAS NÃO CABEM NO LAÇO ACIMA, que é do formato legado (um PNG por quadro, contados em
+    // `FRAMES`). Uma sheet é uma textura só, e os quadros saem de `generateFrameNumbers`.
+    //
+    // ⚠️ E ELAS MORAM AQUI, E NÃO EM QUEM AS USA, porque quem toca a da porta é o `TerrainSystem` —
+    // ele só chama `p.play(def.anim)` se `anims.exists` for verdade, e a porta nasce no meio da fase,
+    // muito depois de qualquer `create` de entidade. Registrar tarde é a animação simplesmente não
+    // tocar, sem erro nenhum na tela.
+    for (const { key, sheet, frames, frameRate, loop } of SHEET_ANIMS) {
+      if (!this.textures.exists(sheet) || this.anims.exists(key)) continue;
+      this.anims.create({
+        key,
+        frames: this.anims.generateFrameNumbers(sheet, { start: 0, end: frames - 1 }),
+        frameRate,
+        repeat: loop === false ? 0 : -1,
       });
     }
   }

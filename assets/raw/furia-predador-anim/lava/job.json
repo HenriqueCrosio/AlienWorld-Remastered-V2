@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "4b4622ba-f074-418c-9933-4c280e9f088f",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "pulls one clawed arm back and hurls something forward to the left in a strong overhand throw, then recovers",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 8
+  }
+}

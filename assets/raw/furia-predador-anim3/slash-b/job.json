@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "c278cfdc-aa5e-43b6-b46a-5c6f9a97d7c8",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "rears up, then throws all its weight forward to the left, leaning far in, raking both bladed claws down in a huge double slash, shoulders twisting, then recovers",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

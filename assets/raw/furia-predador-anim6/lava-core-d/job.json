@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "8a9436ae-1df5-4b20-94c7-49003fa59857",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "standing monster facing left; the near clawed arm closest to the viewer does the whole action and stays in front of the torso, fully visible in every frame, never crossing behind the body; it hunches forward, the core in its chest splits open, that claw rips a glowing glob of lava out of it and slams it down and forward to the left at the ground",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

@@ -31,6 +31,15 @@ interface ScatterLayer {
   /** Distância entre um sprite e o próximo, em px. */
   gap: [number, number];
   /**
+   * A SHEET que faz esta camada RESPIRAR, se ela tiver uma. Sem a chave, ou sem o PNG em disco,
+   * a camada nasce `image` como sempre e o estático segura — arte entra asset por asset.
+   *
+   * ⚠️ O QUADRO INICIAL É SORTEADO POR SPRITE (`emit`), e é o detalhe que faz ou quebra a coisa:
+   * três corações batendo em uníssono na tela leem como uma máquina, não como órgãos. É a mesma
+   * lei do `pickVariant` — o que se repete igual denuncia o truque.
+   */
+  anim?: { sheet: string; key: string; frameRate: number };
+  /**
    * Cai para trás ao romper a atmosfera?
    * Terreno sim. Nebulosa e planeta NÃO — eles são o espaço, e o espaço continua lá.
    */
@@ -52,6 +61,19 @@ interface ScatterLayer {
    * cinturão porque é uma BANDA, viraria pedra espalhada igual a todo o resto.
    */
   faixa?: [number, number];
+  /**
+   * BANDAS DE BORDA: como a `faixa`, mas são VÁRIAS e o sprite sorteia uma. Existe para uma peça
+   * poder morar COLADA numa borda sem poder nascer no meio da tela.
+   *
+   * ⚠️ ELA NASCEU DO TESTE JOGADO DE 12/09, com print: o destroço de primeiro plano tapando o
+   * miolo da Fase 4. *"alguns destroços estão atrapalhando muito a visão da fase"*, e a receita
+   * dele: *"os destroços podem ser movidos para perto da borda, mas não no meio da fase"*. Uma
+   * `faixa` só não resolve — ela é um intervalo CONTÍNUO, e "perto de cima OU perto de baixo" é
+   * exatamente o que um intervalo contínuo não sabe dizer sem passar pelo meio.
+   *
+   * Quando presente, ela GANHA da `faixa`.
+   */
+  faixas?: Array<[number, number]>;
   /**
    * Ancorada no TETO (Fase 4, o interior): origem no TOPO, o sprite cresce para BAIXO e vai de
    * cabeça para baixo (flipY). O espelho exato de `terreno` — o interior tem teto, e um teto
@@ -127,6 +149,11 @@ export class Parallax {
    * dos padrões do chefão.
    */
   private foregroundDim = 1;
+  /**
+   * Multiplicador de alpha de TODAS as camadas de peças (1 = fase, 0 = arena do chefão). Ver
+   * `limpaCenario`. Guardado pelo mesmo motivo do `foregroundDim`: a camada recicla.
+   */
+  private cenarioDim = 1;
   /** Densidade da nebulosa (Fase 3): 1 = dentro da nuvem. Ver `setNebulaDensity`. */
   private nebulaDim = 1;
   /**
@@ -157,6 +184,27 @@ export class Parallax {
    * `setNebulaDensity`, à mão. Ver o comentário lá.
    */
   private nebulaPainting: Phaser.GameObjects.Image[] = [];
+
+  /** As duas cópias da pintura do interior (Fase 4). `setPintura` troca a textura delas. */
+  private pinturaF4: Phaser.GameObjects.Image[] = [];
+
+  /**
+   * A PINTURA NOVA ENTRANDO PELA EMENDA (ver `setPinturaPelaEmenda`): as cópias dela por cima das
+   * da pintura atual, recortadas por uma máscara de borda macia que anda com a emenda da `Moldura`.
+   */
+  private entrada: {
+    key: string;
+    copias: Phaser.GameObjects.Image[];
+    mascara: Phaser.GameObjects.Image;
+    bitmap: Phaser.Display.Masks.BitmapMask;
+    emendaX: () => number;
+  } | null = null;
+
+  /** A largura da borda macia da cortina, em px. Larga o bastante para não ler como corte reto. */
+  private static readonly ENTRADA_RAMPA = 112;
+
+  /** A chave da pintura do interior que está na tela. A sonda da fatia cobra este valor. */
+  pinturaAtual: string | null = null;
   /**
    * A FAIXA DE CASCO DA FRENTE (Fase 3, Ato 2): o equivalente do `groundFront` da Fase 1. Ela
    * existe por um motivo só — esconder o PÉ dos props, que sem ela terminam numa borda reta e
@@ -278,36 +326,38 @@ export class Parallax {
    * fundo anuncia o verbo dela (precisão) antes de o primeiro corredor apertar.
    */
   private buildInterior(): void {
-    // A nebulosa pelas janelas: só fragmentos dela são visíveis (pelos buracos vazados), então
-    // ela pode ser esparsa — está ali para dar COR ao vazio, não para ser protagonista.
-    this.addLayer({
-      key: 'nebula3',
-      factor: 0.03,
-      baseY: 0,
-      depth: -96,
-      tint: 0xffffff,
-      tints: [0xb8c4e8, 0x8fa0c8, 0xe8d8c0],
-      alpha: 0.5,
-      scale: [1.6, 2.4],
-      gap: [180, 300],
-      terreno: false,
-      flutua: true,
-    });
-
-    // A PAREDE: hangar atrás de hangar, quase contínuo (gap < largura da arte). Tint frio e
-    // escuro — é fundo, e fundo distante é ESCURO (a mesma perspectiva aérea das montanhas).
-    this.addLayer({
-      key: 'hangar',
-      factor: 0.06,
-      baseY: 208,
-      depth: -90,
-      tint: 0x707a98,
-      tints: [0x707a98, 0x64708c, 0x7a82a0],
-      alpha: 0.95,
-      scale: [1.15, 1.3],
-      gap: [150, 180],
-      terreno: false,
-    });
+    // ─── A PINTURA DO INTERIOR (Fatia 7) ───
+    //
+    // A parede era o `hangar.png` repetido, COM JANELAS MOSTRANDO O ESPAÇO — o jogador acabava
+    // de ser engolido por uma garganta e a primeira coisa que via era uma parede de hangar com
+    // vista para a nebulosa. O lugar mentia sobre o que é.
+    //
+    // Agora é a pintura do Henrique, e ela TROCA ao longo da fase (ver `setPintura`): o hangar
+    // engolido → a caixa torácica → o duto → a câmara do núcleo. Quem manda na troca é o
+    // ROTEIRO (evento `cenario` no `STAGE_4`), não este arquivo.
+    //
+    // ⚠️ A `nebula3` saiu junto, e não por gosto: ela existia para aparecer PELAS JANELAS do
+    // hangar. Com uma pintura opaca na frente, ela era sprite gasto atrás de parede.
+    //
+    // ⚠️ ESCALA 1, SEMPRE. A pintura está assada em 384×216 (a resolução do jogo). É a grade de
+    // pixel casando com a da tela que dá a PROFUNDIDADE — esticar aqui achata o fundo.
+    //
+    // Duas cópias lado a lado, como o `paintBgF2`/`paintBgF3`, para a rolagem nunca mostrar
+    // buraco. Depth −96: atrás de tudo que é do interior, à frente do planeta (−97).
+    if (this.scene.textures.exists('paintBgF4a')) {
+      const w = (this.scene.textures.get('paintBgF4a').getSourceImage() as { width: number }).width;
+      for (let i = 0; i < 2; i++) {
+        this.pinturaF4.push(
+          this.scene.add
+            .image(i * w, 0, 'paintBgF4a')
+            .setOrigin(0, 0)
+            .setDepth(-96)
+            .setData('bgFactor', 0.02),
+        );
+      }
+      this.paintedBg.push(...this.pinturaF4);
+      this.pinturaAtual = 'paintBgF4a';
+    }
 
     // O CHÃO: a banda de placas do casco (receita da F3), sempre visível.
     this.addLayer({
@@ -350,11 +400,33 @@ export class Parallax {
       depth: 60,
       tint: 0x1a2440,
       alpha: 1,
-      scale: [1.0, 1.4],
+      // ⚠️ 1.6–1.9, E A FAIXA TEM DOIS TETOS. O piso subiu de 1.0 porque a viga nascia do MESMO
+      // tamanho das bandas de chão e teto (1.1–1.5) e lia como a terceira cópia da mesma placa em
+      // vez de como uma viga PERTO. O teto de 1.9 é a revisão visual anterior, que mediu a placa
+      // girada a 2.1 lendo como borrão preto tapando um canto da tela.
+      scale: [1.6, 1.9],
       gap: [380, 560],
       terreno: false,
       flutua: true,
-      faixa: [30, 186],
+      // ⚠️ ELA MOROU EM `faixa: [30, 186]` E ERA O DEFEITO QUE O HENRIQUE CIRCULOU no print de
+      // 12/09: *"o marcado de número 1 é o destroço tomando quase 80% da tela"*. A conta explica
+      // o print — a peça tem 123×46 e a escala 1.6–1.9 a leva a 234×87; num campo de 384×216,
+      // centrada em y=108, ela é uma placa OPACA (depth 60, na frente da nave) atravessando o
+      // miolo exato de onde se joga.
+      //
+      // ⚠️ A RECEITA É DELE, E É DE POSIÇÃO, NÃO DE TAMANHO: *"os destroços podem ser movidos
+      // para perto da borda, mas não no meio da fase"*. Uma viga grande COLADA na borda continua
+      // sendo a silhueta de primeiro plano que a fase quer; a mesma viga no meio é um tapa-olho.
+      // (É a mesma lei do `orgao` logo abaixo, escrita para a outra ponta da tela.)
+      //
+      // ⚠️ OS NÚMEROS SAEM DE UMA INVARIANTE, não de gosto: com meia-altura máxima de 44px
+      // (46 × 1,9 ÷ 2), um centro em 28 põe a base em 72 e um centro em 188 põe o topo em 144 —
+      // ou seja, **o TERÇO CENTRAL (72–144) nunca é tocado**, que é onde o corredor vive. A
+      // sonda cobra exatamente isso.
+      faixas: [
+        [6, 28],
+        [188, 210],
+      ],
       primeiroPlano: true,
     });
 
@@ -366,18 +438,17 @@ export class Parallax {
     // meio-fundo e maquinário pesado pendurado no teto. Os tints são ESCUROS de propósito:
     // perspectiva aérea — e é o que separa cenário dos obstáculos jogáveis (as costelas do
     // corredor, que nascem SEM tint, claras).
-    this.addLayer({
-      key: 'costela',
-      factor: 0.45,
-      baseY: GAME_HEIGHT + 30,
-      depth: -85,
-      tint: 0x2e2838,
-      alpha: 1,
-      scale: [0.3, 0.48],
-      gap: [130, 210],
-      terreno: false,
-    });
-    // O teto tem a caixa torácica dele: o espelho escuro, um degrau mais lento e esparso.
+    // ⚠️ A COSTELA ERAM TRÊS CAMADAS, E VIROU DUAS (teste jogado de 10/09: *"alguns se repetem em
+    // outros tamanhos e ficou repetitivo"*). A que morreu era a do chão distante (fator 0.45,
+    // escala 0.3–0.48) — ela e a do teto nasciam praticamente do mesmo tamanho, e duas cópias da
+    // mesma arte no mesmo tamanho não leem como duas distâncias, leem como uma cópia.
+    //
+    // ⚠️ E AS DUAS QUE FICARAM TIVERAM AS ESCALAS SEPARADAS (0.28–0.38 contra 0.5–0.7, sem
+    // sobreposição). É a SOBREPOSIÇÃO das faixas de escala que fazia a peça ler como repetição:
+    // a mesma arte em tamanhos claramente diferentes lê como profundidade; em tamanhos parecidos,
+    // lê como a mesma peça colada duas vezes.
+    //
+    // O teto tem a caixa torácica dele: o espelho escuro, longe, lento e esparso.
     this.addLayer({
       key: 'costela',
       factor: 0.4,
@@ -385,7 +456,7 @@ export class Parallax {
       depth: -85,
       tint: 0x282234,
       alpha: 1,
-      scale: [0.3, 0.46],
+      scale: [0.28, 0.38],
       gap: [150, 250],
       terreno: false,
       teto: true,
@@ -399,34 +470,179 @@ export class Parallax {
       depth: -74,
       tint: 0x4a3e48,
       alpha: 1,
-      scale: [0.42, 0.6],
+      scale: [0.5, 0.7],
       gap: [180, 300],
       terreno: false,
     });
-    // ÓRGÃOS à deriva no meio-fundo: massas vivas presas entre as costelas, longe e lentas.
+    // ÓRGÃOS ANCORADOS NO CHÃO: massas vivas CRESCENDO do piso do bicho, grandes e raras.
+    //
+    // ⚠️ ESTA CAMADA FLUTUAVA, E ERA O DEFEITO QUE O HENRIQUE FOTOGRAFOU. Ela nascia com
+    // `flutua: true` numa faixa de 50 a 170 e escala 0.5–0.9 — um coração PEQUENO SOLTO NO MEIO DA
+    // TELA. Veredicto dele, com print: *"coração pequeno jogado no ar da fase"*, contra o
+    // maquinário pendurado no teto logo abaixo, que ele aprovou por *"trazer noção de grandeza"*.
+    //
+    // ⚠️ A LEI QUE SAI DAÍ, E ELA VALE PARA TODA PEÇA DE CENÁRIO DESTA FASE: **peça grande
+    // ANCORADA numa borda lê como grandeza; peça pequena SOLTA no meio da tela lê como asset
+    // jogado na cena.** É a mesma frase que abriu a Fatia 7 inteira em 08/09 — e as duas camadas
+    // são a MESMA arte (`orgao.png`, 121×118). O que mudava era âncora e tamanho, só isso.
+    //
+    // O chão fica com a carne e o teto com a máquina (`maquinario`, logo abaixo): cada borda ganha
+    // a sua peça-assinatura, as duas grandes, e nenhuma das duas flutua.
+    // ⚠️ E A ESCALA SUBIU DE 0.9–1.3 PARA 1.85–2.15 NO TESTE JOGADO DE 12/09, pelo mesmo print.
+    // Ancorar no chão matou o coração FLUTUANDO, mas não os CABOS: eles fazem parte do desenho
+    // (`orgao.png` é o coração numa gaiola COM tubos saindo para todos os lados), e a 1.3 o topo
+    // da peça parava em y≈83 — no ar. Quatro setas dele marcaram exatamente esses tocos:
+    // *"o coração com os cabos flutuando no ar, fica feio e dá aspecto de não polido"*.
+    //
+    // ⚠️ A RECEITA, de novo dele: *"quando for utilizado o sprite dele grande, tentar deixar suas
+    // extremidades encostadas na parede de cima ou de baixo, para tapar aqueles cabos suspensos"*.
+    // Não se apaga o cabo — ENTERRA-SE a ponta dele. A faixa da moldura é desenhada em depth −0,6
+    // contra os −88 desta camada, então tudo o que passa da superfície some atrás dela.
+    //
+    // ⚠️ A BASE SUBIU DE `GAME_HEIGHT + 20` (236) PARA `GROUND_Y` (206), E ISSO É O QUE MANTÉM A
+    // PEÇA MAGRA. A peça cresce para cima, então o topo é `base − 118 × escala`: quanto mais
+    // fundo a base, MAIOR a escala necessária para o topo alcançar o teto — e escala é largura.
+    // Medido na captura: com base em 236 a cobertura exigia 1.85 e a peça saía com **263px de
+    // largura**, dois terços da tela, uma massa marrom no meio do campo de jogo. Com a base na
+    // linha do chão, a mesma cobertura sai em 1.62 e **196px**.
+    //
+    // ⚠️ AS DUAS PONTAS FICAM ENTERRADAS, e as duas contas são estas — na abertura da fase, com
+    // espessura 16: a superfície do teto está em `TETO_Y + 16` = 26 e a do chão em
+    // `GROUND_Y − 16` = 190. Em cima, `206 − 118 × 1,62 = 14,8` entra 11px na faixa; embaixo, a
+    // base em 206 fica 16px atrás dela. E só melhora conforme a espessura cresce (em 54 a
+    // superfície do teto desce para 64). ⚠️ **Baixar deste 1.62 devolve os cabos ao ar** — é um
+    // piso calculado, não uma preferência.
+    //
+    // ⚠️ O QUE ESTA CONTA NÃO RESOLVIA: os tubos LATERAIS. A arte era radial e só sumia no lado
+    // quem fosse mais largo que a tela. Em 14/09 a peça foi REGERADA como COLUNA — o coração numa
+    // cápsula, com os cabos só para cima e para baixo — e os laterais deixaram de existir.
+    //
+    // ⚠️ E A ESCALA É OUTRA CONTA, COM A MESMA LEI: a coluna tem 128px e as duas pontas são cabo
+    // cortado, então as DUAS têm de enterrar. A base em `GROUND_Y` (206) já está 16px atrás da
+    // faixa do chão; o topo é `206 − 128 × escala`, e para entrar na faixa do teto (superfície em 26
+    // na abertura) a escala precisa passar de **1,41**. Em 1,45 o topo cai em 20. ⚠️ **Baixar deste
+    // piso devolve o cabo de cima ao ar.** E ela emagreceu de brinde: a coluna tem ~43px de corpo,
+    // 62px em tela contra os 196 da peça radial.
     this.addLayer({
       key: 'orgao',
       factor: 0.3,
-      baseY: 0,
+      baseY: GROUND_Y,
       depth: -88,
       tint: 0x5a4048,
       alpha: 0.9,
-      scale: [0.5, 0.9],
-      gap: [220, 420],
+      scale: [1.45, 1.6],
+      gap: [400, 700],
       terreno: false,
-      flutua: true,
-      faixa: [50, 170],
+      // ⚠️ 7 QUADROS/s COM YOYO = 16 quadros por volta, ou ~2,3s por batida — um coração EM
+      // REPOUSO. É o mesmo `frameRate` do `nucleo-beat` do chefão, e de propósito: o cenário e o
+      // núcleo são o mesmo bicho, e dois ritmos diferentes na mesma tela seriam dois bichos.
+      anim: { sheet: 'orgaoAnimSheet', key: 'f4-orgao-bate', frameRate: 7 },
     });
-    // MAQUINÁRIO PESADO pendurado no teto: o bicho é biomecânico — carne E máquina.
+    // MAQUINÁRIO PESADO: o bicho é biomecânico — carne E máquina.
+    //
+    // ⚠️ ELE ERA PENDURADO NO TETO, E VIROU COLUNA COMO O CORAÇÃO (14/09, 2º teste jogado). Ele
+    // disse *"ficaram melhores na vertical para pegar teto e chão, só que percebi que só aparece um
+    // deles"* — e a medição mostrou que o maquinário ESTAVA na tela (em 100% das amostras de 100s,
+    // contra 86% do coração), só que como uma peça de 93px em y=−18, meio escondida atrás da borda
+    // do teto. Não lia como a peça nova. Agora é a mesma conta do `orgao`: 128px, origem no teto em
+    // `TETO_Y` (10), pontas enterradas nas duas bordas a partir de escala 1,45.
+    //
+    // ⚠️ E O `gap` SUBIU (260–480 → 520–860): coluna de chão a teto a cada 5–9s viraria grade. Com
+    // ~55px/s ele passa a cada 9–16s, perto do ritmo do coração, e os dois se revezam.
     this.addLayer({
       key: 'maquinario',
       factor: 0.65,
-      baseY: -18,
+      baseY: 10,
       depth: -80,
       tint: 0x3a4258,
       alpha: 0.95,
-      scale: [0.6, 1.0],
-      gap: [260, 480],
+      scale: [1.45, 1.6],
+      gap: [520, 860],
+      terreno: false,
+      teto: true,
+      // ⚠️ 5 QUADROS/s — MAIS LENTO QUE O CORAÇÃO, e a diferença é a frase da fase. O chão é
+      // carne e o teto é máquina: se os dois respirassem no mesmo compasso, o teto viraria
+      // víscera junto e a metade industrial da fase sumiria. ~3,2s por ciclo é uma fornalha
+      // esfriando, não um órgão.
+      anim: { sheet: 'maquinarioAnimSheet', key: 'f4-maquinario-brasa', frameRate: 5 },
+    });
+
+    // ─── O QUE O BICHO ENGOLIU (12/09) — as peças que saíram das 64 candidaturas dele ───
+    //
+    // ⚠️ A PONTE É O QUE FALTAVA PARA A CÂMARA A DIZER O QUE ELA É. A fase abre na "doca
+    // engolida", mas até aqui nada na tela dizia DOCA: costela, órgão e maquinário são todos do
+    // bicho, então o lugar lia como víscera desde o primeiro segundo. Esta peça é a metade humana
+    // da frase — dois pilares de convés industrial com guarda-corpo e lâmpada âmbar, tomados pelas
+    // veias do Leviatã, e um vão suspenso entre eles.
+    //
+    // ⚠️ ELA ERA UM PILAR SÓ, E ELE JOGOU E DIAGNOSTICOU: *"está pequeno e as mesas e bordas
+    // tampam ele... hoje nós temos o que seria o INÍCIO de uma ponte"*. Duas coisas mudaram por
+    // causa disso, e as duas estão nos números abaixo:
+    //
+    // 1. **A PEÇA TRIPLICOU DE LARGURA** (71 → 178–198px), com o vão gerado coluna a coluna em
+    //    `_assar-ponte.mjs`. Pilar sozinho não lê como ponte, por maior que seja a escala.
+    //
+    // 2. **A ESCALA SUBIU DE 0.8–1.05 PARA 1.45–1.7, E O NÚMERO É UMA CONTA.** O convés mora nas
+    //    linhas 15–31 de uma peça de ~60 — de 28 a 44px acima da base. Com a base em
+    //    `GAME_HEIGHT + 6` = 222, o topo do convés cai em `222 − 44·escala`. A mesa mais alta da
+    //    abertura tem 46px e o topo dela fica em ~160, então a escala precisa passar de **1,41**
+    //    só para o convés começar a assomar acima do terreno. Abaixo disso a mesa tapa a ponte —
+    //    que é exatamente o que ele viu. Em 1,45 o guarda-corpo sai em y≈136, bem acima da mesa.
+    //
+    // ⚠️ E AS PONTAS GANHARAM TORRE na 2ª rodada de 12/09, por outro print dele: *"começam do nada
+    // e ficam com aparência de cortadas"*. O corrimão do original atravessa o quadro e é fatiado
+    // pelos 72px da peça; na ponte os cortes internos somem, mas os externos ficavam expostos. A
+    // primeira tentativa foi erodir a ponta e ele descartou — *"você pode criar uma estrutura que
+    // feche a ponte no PixelLab, ou mais de uma para ter troca"*. Ele está certo: esfarelar
+    // disfarça o corte, uma TORRE o resolve. A peça foi de 198 para **248px**.
+    //
+    // ⚠️ E POR ISSO O VÃO ENCURTOU DE 3 MONTANTES PARA 2. A escala tem PISO em 1,41 (abaixo disso a
+    // mesa tapa o convés), então a largura em tela é no mínimo `largura × 1,41`: com as torres e o
+    // vão antigo a ponte passaria de 400px numa tela de 384, e as duas pontas nunca apareceriam
+    // juntas — o conserto viraria invisível. Em 248px ela fecha em 350px no piso da escala.
+    //
+    // ⚠️ O `gap` TEM DE PASSAR DA LARGURA EM TELA, senão duas pontes se sobrepõem — uma emenda que
+    // nenhuma escala esconde.
+    this.addLayer({
+      key: 'f4Ponte',
+      factor: 0.55,
+      baseY: GAME_HEIGHT + 6,
+      depth: -78,
+      // ⚠️ TINT CLARO PARA UM FUNDO, e é por causa da LÂMPADA. Um tint de força de costela
+      // (0x4a3e48) apagaria o âmbar, que é a única coisa acesa da peça — e numa fase cujo rumo é
+      // *luz só onde há energia*, apagar a luz é apagar o motivo de a peça existir.
+      tint: 0x6d788f,
+      alpha: 1,
+      scale: [1.41, 1.55],
+      gap: [620, 1000],
+      terreno: false,
+    });
+
+    // OS GÂNGLIOS ACESOS: os núcleos nervosos do bicho, pendurados no teto e raros.
+    //
+    // ⚠️ ESTA CAMADA ERA OUTRA, E A CAPTURA A TROCOU. A primeira escolha foram os empilhamentos
+    // de anéis de cartilagem do mesmo lote, para dizer "caixa torácica" na câmara B — e o mock
+    // contra a pintura mostrou o óbvio: **a pintura da câmara B JÁ É uma caixa torácica**, com as
+    // costelas ocupando o meio do quadro. A peça repetia o que já estava lá e só somava massa
+    // escura no caminho.
+    //
+    // ⚠️ A LEI QUE SAI DAÍ, E ELA VALE PARA AS 10 PEÇAS DO M2–M5: **peça de cenário tem de dizer
+    // o que a PINTURA não diz.** O critério não é "combina com a câmara" — combinar demais é como
+    // se desenha papel de parede. Estes dizem: são o único ponto de luz PRÓPRIO do cenário, e é a
+    // fase inteira numa peça (*luz só onde há energia*).
+    //
+    // ⚠️ O TINT É QUASE NEUTRO DE PROPÓSITO. Um tint escuro de costela apagaria a brasa, que é o
+    // motivo de a peça existir — a mesma conta que a passarela faz pela lâmpada âmbar. Quem
+    // segura a peça no fundo aqui é o ALPHA e a raridade do gap, não a multiplicação de cor.
+    this.addLayer({
+      key: 'f4Ganglio',
+      factor: 0.4,
+      baseY: -14,
+      depth: -87,
+      tint: 0x9aa2b8,
+      alpha: 0.85,
+      scale: [0.55, 0.85],
+      gap: [420, 760],
       terreno: false,
       teto: true,
     });
@@ -1273,19 +1489,61 @@ export class Parallax {
     return pickVariant(this.scene, Phaser.Utils.Array.GetRandom(zona));
   }
 
+  /**
+   * Registra a animação de uma camada, uma vez por cena.
+   *
+   * ⚠️ `yoyo`, E É O QUE FECHA O LOOP. A sheet vem do gerador com 9 quadros que NÃO voltam ao
+   * primeiro — o último é o pico, e um `repeat: -1` seco daria um corte duro de pico para
+   * repouso a cada volta. Tocando 0→8→0 a batida fecha por construção, sem tocar na arte. É a
+   * mesma solução que o `nucleo-beat` do chefão já usa, pelo mesmo motivo.
+   */
+  private registraAnim(a: { sheet: string; key: string; frameRate: number }): void {
+    if (this.scene.anims.exists(a.key)) return;
+    this.scene.anims.create({
+      key: a.key,
+      // Todos os quadros da folha, quantos forem: o coração tem 9, o maquinário 6 (ver a `BootScene`).
+      frames: this.scene.anims.generateFrameNumbers(a.sheet),
+      frameRate: a.frameRate,
+      repeat: -1,
+      yoyo: true,
+    });
+  }
+
   private emit(layer: ScatterLayer): void {
     // No vácuo o sprite nasce em qualquer altura e é ancorado pelo CENTRO — ele flutua, não
     // cresce do chão. Na superfície é o contrário: origem na base, sobre a linha do solo.
     // A `faixa`, quando existe, prende a camada a uma banda: é o que faz o cinturão ser um
     // cinturão, e não pedra espalhada.
-    const y = layer.flutua
-      ? Phaser.Math.Between(...(layer.faixa ?? [-10, GAME_HEIGHT + 10]))
-      : layer.baseY;
+    // As `faixas` (plural) sorteiam PRIMEIRO a banda, depois a altura dentro dela — é o que
+    // permite "colado em cima ou colado embaixo, nunca no meio".
+    const banda = layer.faixas
+      ? Phaser.Utils.Array.GetRandom(layer.faixas)
+      : (layer.faixa ?? [-10, GAME_HEIGHT + 10]);
+    const y = layer.flutua ? Phaser.Math.Between(...banda) : layer.baseY;
 
-    const img = this.scene.add
+    // A CAMADA QUE RESPIRA nasce `sprite` em vez de `image`; todo o resto é idêntico, porque
+    // `Sprite` ESTENDE `Image` e o array da camada continua servindo os dois. Sem a sheet em
+    // disco, `anima` é nulo e a peça nasce estática como sempre.
+    const anima = layer.anim && this.scene.textures.exists(layer.anim.sheet) ? layer.anim : null;
+
+    // ⚠️ O OBJETO NASCE NUMA EXPRESSÃO SÓ, E A CADEIA DE SETTERS VEM DEPOIS, SEM TERNÁRIO NO
+    // MEIO. A 1ª versão escrevia `anima ? add.sprite(...) : add.image(...).setOrigin()...` e a
+    // cadeia inteira grudava no ramo FALSO: a peça animada nascia sem depth (0 — na frente do
+    // jogo), sem escala (1 em vez de 1,62–1,85), sem tint e sem origem. Ele jogou e diagnosticou
+    // pela tela: *"os corações estão na primeira camada do parallax, aumente eles como fez com as
+    // imagens estáticas e coloque-os na mesma camada de antes"*. Não havia nada de errado com a
+    // arte — era precedência de operador.
+    const base = anima
+      ? this.scene.add.sprite(layer.nextX, y, anima.sheet)
       // Sorteia entre as variantes da camada: montanhas repetidas denunciam o truque.
       // O CASCO é a exceção — lá a peça não é sorteada, é o lugar do corpo que decide.
-      .image(layer.nextX, y, layer.casco ? this.familiaDoCasco() : pickVariant(this.scene, layer.key))
+      : this.scene.add.image(
+          layer.nextX,
+          y,
+          layer.casco ? this.familiaDoCasco() : pickVariant(this.scene, layer.key),
+        );
+
+    const img = base
       // Teto: origem no TOPO e de cabeça para baixo — o espelho do terreno (ver ScatterLayer).
       .setOrigin(0.5, layer.teto ? 0 : layer.flutua ? 0.5 : 1)
       .setFlipY(layer.teto ?? false)
@@ -1306,7 +1564,22 @@ export class Parallax {
     // A FAIXA é a exceção, e por isso ela é reconhecida aqui: ela só lê como cinturão porque é
     // HORIZONTAL. Rodada em ângulo aleatório como as pedras, viraria cascalho picado no céu — e
     // a banda, que é a coisa toda, some.
-    if (layer.flutua && !layer.faixa) img.setAngle(Phaser.Math.Between(0, 359));
+    if (layer.flutua && !layer.faixa && !layer.faixas) img.setAngle(Phaser.Math.Between(0, 359));
+
+    // E A RESPIRAÇÃO COMEÇA NUM PONTO SORTEADO DA BATIDA. `play` reinicia do quadro 0, então sem
+    // o `startFrame` cada peça que entra pela direita nasceria em sístole junto com todas as
+    // outras — e a tela inteira pulsaria em uníssono, que é a leitura de máquina, não de órgão.
+    if (anima) {
+      this.registraAnim(anima);
+      // ⚠️ O SORTEIO VAI ATÉ O ÚLTIMO QUADRO DA ANIMAÇÃO, NUNCA ATÉ UM NÚMERO CRAVADO. Era `0..8`
+      // enquanto as duas folhas tinham 9 quadros; o maquinário de 14/09 tem 6, e um sorteio 6–8
+      // apontava para um quadro que não existe — a cena caía com "reading 'duration'", só às vezes.
+      const quadros = this.scene.anims.get(anima.key).frames.length;
+      (img as Phaser.GameObjects.Sprite).play({
+        key: anima.key,
+        startFrame: Phaser.Math.Between(0, quadros - 1),
+      });
+    }
 
     layer.sprites.push(img);
     layer.nextX += Phaser.Math.Between(...layer.gap);
@@ -1327,6 +1600,7 @@ export class Parallax {
         if (bg.x <= -bg.width) bg.x += 2 * bg.width;
       }
     }
+    this.avancaEntrada();
 
     for (const layer of this.layers) {
       const dx = worldSpeed * layer.factor * dt;
@@ -1464,12 +1738,53 @@ export class Parallax {
   }
 
   /**
+   * A ARENA DO CHEFÃO: apaga TODAS as camadas de peças e deixa na tela só a pintura (e, na Fase 4,
+   * a borda da `Moldura`, que não é camada deste arquivo). Quem chama é o roteiro — o `cenario`
+   * com `soFundo` — e o salto do `G`/treino, pelo mesmo evento.
+   *
+   * ⚠️ A REGRA É DELE (14/09), e ela nasceu no núcleo da Fase 4: *"retire os maquinários do fundo
+   * do núcleo. Todas as fases de BOSS ficam apenas com o fundo e, no caso da fase 4, a borda"*. O
+   * `setForegroundDimmed` já tirava o PRIMEIRO PLANO da luta; o que sobrava atrás — coração,
+   * maquinário, costelas, ponte — era cenário competindo com o chefão pelo olho.
+   *
+   * ⚠️ SÓ MEXE EM ALPHA, E A CAMADA CONTINUA EMITINDO — invisível. Não é preguiça: o `emit` gasta
+   * `Phaser.Math.Between`, que é o fluxo de dado do JOGO. Parar de emitir mudaria a sequência
+   * de sorteios da luta de chefão inteira, e a sonda passaria a medir um chefão diferente por
+   * causa de uma decisão de arte de fundo. Um sprite em alpha 0 nem chega ao renderizador.
+   *
+   * Não tem volta, e não precisa: depois do chefão a fase acaba, e um restart reconstrói o
+   * Parallax do zero (a mesma lei do `setForegroundDimmed`).
+   */
+  limpaCenario(durationMs = 300): void {
+    if (this.cenarioDim === 0) return;
+    this.cenarioDim = 0;
+
+    for (const layer of this.layers) {
+      if (layer.sprites.length === 0) continue;
+      const alvo = this.alphaFor(layer);
+      if (durationMs <= 0) {
+        for (const s of layer.sprites) {
+          this.scene.tweens.killTweensOf(s);
+          s.setAlpha(alvo);
+        }
+        continue;
+      }
+      this.scene.tweens.add({
+        targets: layer.sprites.slice(),
+        alpha: alvo,
+        duration: durationMs,
+        ease: 'Sine.easeIn',
+      });
+    }
+  }
+
+  /**
    * O alpha REAL de um sprite da camada, com todos os fades de estado aplicados. É a fonte
    * única: `emit()` (sprite novo nasce certo), `setForegroundDimmed` e `setNebulaDensity`
    * calculam por aqui — dois fades escrevendo alpha por contas diferentes dessincronizam.
    */
   private alphaFor(layer: ScatterLayer): number {
-    let a = layer.alpha;
+    let a = layer.alpha * this.cenarioDim;
     if (layer.primeiroPlano) a *= this.foregroundDim;
     if (layer.nebulosaExtra) a *= this.nebulaDim;
     if (layer.casco) a *= this.cascoReveal;
@@ -1487,6 +1802,127 @@ export class Parallax {
    * Counter em vez de tween por sprite: as camadas RECICLAM durante o fade, e um sprite novo
    * tem que nascer no alpha do instante (ver `emit`).
    */
+  /**
+   * TROCA a pintura do interior (Fase 4). Quem manda é o ROTEIRO (evento `cenario` no
+   * `STAGE_4`), não um relógio interno — a forma da fase mora toda num lugar só.
+   *
+   * ⚠️ O fade MERGULHA NO ESCURO e volta, em vez de dissolver uma pintura na outra. As quatro
+   * são opacas e detalhadas: um crossfade direto vira sopa no meio do caminho, com duas
+   * anatomias diferentes somadas em alpha 0,5. O escuro lê como passar por um estreitamento —
+   * que é exatamente o que a ficção diz que está acontecendo.
+   *
+   * ⚠️ E A TEXTURA TROCA NO MEIO DO MERGULHO, com a tela já escura. Trocar no começo mostraria
+   * o corte.
+   *
+   * ⚠️ A duração é PONTO DE PARTIDA, não número fechado — é o tipo de coisa que só o olho do
+   * Henrique jogando decide (a Fatia 6 provou isso três vezes).
+   */
+  setPintura(key: string, durationMs = 600): void {
+    // Um salto no meio de uma entrada pela emenda termina a entrada antes: duas trocas por cima uma
+    // da outra deixariam a cortina recortando a pintura errada.
+    this.terminaEntrada();
+    if (!this.pinturaF4.length || !this.scene.textures.exists(key)) return;
+    if (this.pinturaAtual === key) return;
+
+    const meio = durationMs / 2;
+    this.scene.tweens.addCounter({
+      from: 1,
+      to: 0,
+      duration: meio,
+      ease: 'Sine.easeIn',
+      onUpdate: (tw) => {
+        const a = tw.getValue() ?? 0;
+        for (const img of this.pinturaF4) img.setAlpha(a);
+      },
+      onComplete: () => {
+        for (const img of this.pinturaF4) img.setTexture(key);
+        this.pinturaAtual = key;
+        this.scene.tweens.addCounter({
+          from: 0,
+          to: 1,
+          duration: meio,
+          ease: 'Sine.easeOut',
+          onUpdate: (tw) => {
+            const a = tw.getValue() ?? 1;
+            for (const img of this.pinturaF4) img.setAlpha(a);
+          },
+        });
+      },
+    });
+  }
+
+  /**
+   * TROCA A PINTURA PELA EMENDA — a câmara nova se revela ATRÁS do pilar da junta, acompanhando-o
+   * enquanto ele atravessa a tela.
+   *
+   * ⚠️ ELA EXISTE PORQUE O MERGULHO NO ESCURO FOI REPROVADO NA ENTRADA DO NÚCLEO (14/09, 3º teste
+   * jogado): *"a transição de fundos, de novo, está muito seca. Não está agradável"*. A borda já
+   * tinha aprendido a entrar pela direita com o mundo, e o pilar a tapar a costura; a pintura
+   * piscando no escuro de uma vez era a última coisa trocando "no quadro". Agora o lugar muda onde o
+   * jogador PASSA: à esquerda do pilar ainda é o duto, à direita já é o núcleo.
+   *
+   * ⚠️ NÃO É UM CROSSFADE, e a lei do `setPintura` continua de pé: as duas pinturas nunca se somam
+   * em alpha 0,5 no quadro inteiro — só na faixa de `ENTRADA_RAMPA` px da borda macia, que anda.
+   *
+   * `emendaX` é a borda esquerda da primeira placa nova, em x de tela (`Moldura.xDaEmenda`).
+   * Quando a borda macia inteira passou da esquerda da tela, a troca se completa e a cortina some.
+   */
+  setPinturaPelaEmenda(key: string, emendaX: () => number): void {
+    this.terminaEntrada();
+    if (!this.pinturaF4.length || !this.scene.textures.exists(key) || this.pinturaAtual === key) return;
+
+    const R = Parallax.ENTRADA_RAMPA;
+    const CHAVE = 'f4EntradaMascara';
+    if (!this.scene.textures.exists(CHAVE)) {
+      // A máscara: transparente → opaca ao longo de R px, e opaca daí até cobrir a tela inteira mais
+      // uma placa, que é de onde a emenda parte.
+      const w = R + GAME_WIDTH + 256;
+      const tex = this.scene.textures.createCanvas(CHAVE, w, GAME_HEIGHT)!;
+      const ctx = tex.getContext();
+      const g = ctx.createLinearGradient(0, 0, R, 0);
+      g.addColorStop(0, 'rgba(255,255,255,0)');
+      g.addColorStop(1, 'rgba(255,255,255,1)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, R, GAME_HEIGHT);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(R, 0, w - R, GAME_HEIGHT);
+      tex.refresh();
+    }
+
+    const mascara = this.scene.make.image({ x: GAME_WIDTH, y: 0, key: CHAVE }, false).setOrigin(0, 0);
+    const bitmap = mascara.createBitmapMask();
+    // Logo acima da pintura atual (−96) e abaixo de tudo o que é camada do interior (−88 em diante).
+    const copias = this.pinturaF4.map((img) =>
+      this.scene.add.image(img.x, img.y, key).setOrigin(0, 0).setDepth(-95.5).setMask(bitmap),
+    );
+    this.entrada = { key, copias, mascara, bitmap, emendaX };
+    this.avancaEntrada();
+  }
+
+  /** Um quadro da entrada: a cortina segue a emenda, as cópias seguem a deriva da pintura. */
+  private avancaEntrada(): void {
+    const e = this.entrada;
+    if (!e) return;
+    e.copias.forEach((c, i) => c.setX(this.pinturaF4[i].x));
+    const x = e.emendaX();
+    // A borda macia é CENTRADA na emenda: metade dela ainda mostra o lugar de onde se vem.
+    const esquerda = Math.min(GAME_WIDTH, x) - Parallax.ENTRADA_RAMPA / 2;
+    e.mascara.setX(Math.round(esquerda));
+    if (esquerda + Parallax.ENTRADA_RAMPA <= 0) this.terminaEntrada();
+  }
+
+  /** Completa a entrada em curso, se houver: a pintura nova vira a pintura, e a cortina some. */
+  private terminaEntrada(): void {
+    const e = this.entrada;
+    if (!e) return;
+    this.entrada = null;
+    for (const img of this.pinturaF4) img.setTexture(e.key).setAlpha(1);
+    this.pinturaAtual = e.key;
+    for (const c of e.copias) c.destroy();
+    e.bitmap.destroy();
+    e.mascara.destroy();
+  }
+
   setNebulaDensity(density: number, durationMs = 5000): void {
     const alvo = Phaser.Math.Clamp(density, 0, 1);
 

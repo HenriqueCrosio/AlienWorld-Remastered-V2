@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "74627a39-b088-4999-b366-e0c830675dc0",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "hangs from the ceiling by one raised claw and swings its dangling body back and forth like a pendulum, legs kicking, snarling",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

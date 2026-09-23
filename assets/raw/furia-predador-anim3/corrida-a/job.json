@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "5db6df3c-601d-4bd2-82c8-087e175b0704",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "charges in place galloping on all fours like an enraged gorilla, long arms and claws pounding the ground, body rocking forward, facing left, fast seamless run cycle",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

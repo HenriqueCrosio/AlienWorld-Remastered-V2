@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "138751ed-ef73-46ae-a18f-36bbd9219435",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "gallops forward in place on all fours like a charging gorilla, front arms reaching far forward and slamming down, back legs pushing off, body bounding up and down, facing left, fast run cycle",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

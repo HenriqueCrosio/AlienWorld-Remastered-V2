@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "2c7ec10f-be80-4ea2-8924-fe4b9136e4e1",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "hanging from the ceiling: the RIGHT arm stays raised straight up and locked, its claws hooked into the ceiling, it never lets go and never moves. Only the LEFT arm, the one dangling in front of the chest, swings back and hurls something down to the left in a strong throw, then sways",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "e2e61781-7771-4819-a308-3101f487e99e",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "rears back lifting the long bladed right claw high over its head, then slashes it down and across in a wide fast diagonal arc toward the left, claws fully extended, strong follow-through",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

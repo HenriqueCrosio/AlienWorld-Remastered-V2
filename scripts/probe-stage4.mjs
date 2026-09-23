@@ -67,9 +67,14 @@ console.log('corredores', JSON.stringify(corredores));
 ok(corredores.teto >= 2, `o TETO existe (${corredores.teto} colunas penduradas)`);
 ok(corredores.chao >= 2, `o chão existe (${corredores.chao} colunas)`);
 ok(corredores.vaos.length >= 2, `colunas nascem em PARES (${corredores.vaos.length} pares medidos)`);
-// t≈8s: o roteiro está no gap 110 (t=1). Margem de ±14 para arredondamento de escala/altura.
-const vaosOk = corredores.vaos.every((v) => v >= 96 && v <= 124);
-ok(vaosOk, `todo vão respeita o prometido (~110px): [${corredores.vaos}]`);
+// t≈8s: o roteiro está no gap 126 (t=1). Margem de ±14 para arredondamento de escala/altura.
+//
+// ⚠️ ERA 110, E A LINHA DE BASE MUDOU DE PROPÓSITO EM 12/09 — o Henrique, jogando: *"diminua o
+// tamanho das mesas no início da fase 4"*. Esta janela é a guarda de que a MESA não come o vão;
+// quando o ROTEIRO muda o vão, é a janela que acompanha. ⚠️ Se ela falhar sem ninguém ter mexido
+// no `STAGE_4`, aí sim o erro é da ARTE — ver a nota da linha de base no START da fatia.
+const vaosOk = corredores.vaos.every((v) => v >= 112 && v <= 140);
+ok(vaosOk, `todo vão respeita o prometido (~126px): [${corredores.vaos}]`);
 
 // ─── O teto MATA: leva a nave até uma coluna pendurada e mede a vida ───
 const dano = await page.evaluate(() => {
@@ -96,6 +101,22 @@ if (dano === null) {
 
 // ─── O NÚCLEO: a batida sístole/diástole, por BALA REAL (armadilha 19) ───
 await page.keyboard.press('G');
+
+// ⚠️ O `G` TEM DE ENTREGAR A ARENA FINAL REAL, E ATÉ 12/09 NÃO ENTREGAVA. `StageDirector.skipTo`
+// DESCARTA os eventos pulados sem executar, e o `G` não reaplicava o estado que eles deixariam —
+// então esta sonda media o chefão contra a parede que valia no instante do salto (espessura 16),
+// não contra a arena de 16px que o roteiro monta em t=79 depois de abrir os 54 do duto. O modo
+// treino já fazia isso certo desde 10/09; o `G` ficou para trás, e como É ESTA SONDA que usa o
+// `G`, ninguém percebia. Agora o `G` chama `aplicaCorredorEMoldura` e este assert cobra o
+// resultado. ⚠️ Se ele falhar, a luta que o resto do arquivo mede não é a luta do jogo.
+const arena = await page.evaluate(async () => {
+  const s = window.__game.scene.getScenes(true)[0];
+  await new Promise((r) => setTimeout(r, 600));
+  return { t: Math.round(s.elapsed), espessura: Math.round(s.moldura.espessura ?? -1), duto: s.moldura.duto };
+});
+console.log('arena    ', JSON.stringify(arena));
+ok(arena.espessura >= 14 && arena.espessura <= 20, `o G entrega a ARENA do chefão (parede ~16px, veio ${arena.espessura})`);
+ok(arena.duto === false, `e fora do duto: a parede não morde na arena final (duto=${arena.duto})`);
 
 // Espera o coração estacionar. A sonda não sabe jogar: vidas e invulnerabilidade para cima —
 // testa-se o CHEFÃO, não a habilidade de quem segura o teclado.
@@ -166,100 +187,98 @@ await atirar(900);
 const hpG1 = await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.hpGuardiao);
 ok(hpG1 < hpG0, `a bala real fere a MASSA do guardião parado (hp ${hpG0} → ${hpG1})`);
 
-// Mata a casca → a TROCA: convulsão e o coração surge.
+// Mata a casca → a TROCA (B3, 16/09): a explosão sangrenta, e o PREDADOR sai de dentro dela.
 await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.damage(999));
-await page.waitForTimeout(2200);
+await page.waitForTimeout(200);
+const travaNaMorte = await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.armaTravada === true);
+ok(travaNaMorte, 'a arma TRAVA assim que o guardião morre (a pausa dramática é para olhar)');
+await page.waitForTimeout(1600);
 const troca = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
+  const p = s.boss.predador;
   return {
     forma: s.boss.forma,
+    estado: p?.estado ?? null,
+    trava: s.boss.armaTravada === true,
+    // A escala LÓGICA (a da luta): desde a rodada 3 cada clipe é desenhado em `escala / f` (ver `Predador.QUADRO`).
+    escala: +(p?.escala ?? s.boss.sprite.scaleX).toFixed(2),
     tex: s.boss.sprite.texture.key,
-    aberto: s.boss.aberto,
-    anim: s.boss.sprite.anims?.currentAnim?.key ?? null,
-    tocando: s.boss.sprite.anims?.isPlaying ?? null,
   };
 });
 console.log('troca    ', JSON.stringify(troca));
-ok(troca.forma === 'coracao', `a casca morta revela o CORAÇÃO (forma=${troca.forma})`);
-// A arte trocou junto: a SHEET do batimento (ou o estático de fallback, se a sheet faltar).
-ok(
-  troca.tex === 'nucleoBeatSheet' || troca.tex === 'nucleo',
-  `a arte trocou junto (tex=${troca.tex})`,
-);
-ok(
-  troca.anim === 'nucleo-beat' && troca.tocando === true,
-  `o coração BATE (anim=${troca.anim}, tocando=${troca.tocando})`,
-);
-await page.screenshot({ path: 'probe-stage4-nucleo.png' });
+ok(troca.forma === 'predador', `a casca morta revela o PREDADOR (forma=${troca.forma})`);
+ok(troca.estado === 'surgindo' && troca.trava, `ele SURGE com a arma travada (estado=${troca.estado}, trava=${troca.trava})`);
+ok(troca.escala === 0.7, `surge GRANDE, na escala 0,7 (${troca.escala})`);
+await page.screenshot({ path: 'probe-stage4-predador-surge.png' });
 
-const esperarEstado = async (aberto) => {
-  for (let i = 0; i < 30; i++) {
-    const ok = await page.evaluate(
-      (a) => window.__game.scene.getScenes(true)[0].boss.aberto === a,
-      aberto,
-    );
-    if (ok) return true;
-    await page.waitForTimeout(300);
-  }
-  return false;
-};
+// O surgimento acaba: pousa em 0,47 e a arma destrava.
+let luta = null;
+for (let i = 0; i < 40; i++) {
+  luta = await page.evaluate(() => {
+    const s = window.__game.scene.getScenes(true)[0];
+    const p = s.boss.predador;
+    return { estado: p.estado, trava: s.boss.armaTravada === true, escala: +p.escala.toFixed(2) };
+  });
+  if (luta.estado !== 'surgindo') break;
+  await page.waitForTimeout(200);
+}
+console.log('luta     ', JSON.stringify(luta));
+ok(luta.estado !== 'surgindo', `o surgimento TERMINA (estado=${luta.estado})`);
+ok(!luta.trava, 'a arma DESTRAVA quando a luta começa');
+ok(luta.escala === 0.47, `ele luta na escala 0,47 (${luta.escala})`);
+await page.screenshot({ path: 'probe-stage4-predador.png' });
 
-await esperarEstado(false);
-const hpAntesFechado = await page.evaluate(
-  () => window.__game.scene.getScenes(true)[0].boss.hpCoracao,
-);
-await atirar(900);
-const hpDepoisFechado = await page.evaluate(
-  () => window.__game.scene.getScenes(true)[0].boss.hpCoracao,
-);
-ok(
-  hpDepoisFechado === hpAntesFechado,
-  `FECHADO, a blindagem segura a bala real (hp ${hpAntesFechado} → ${hpDepoisFechado})`,
-);
+// A bala real fere o PEITO (o alvo está sempre aberto). Espera um momento em que ele está no chão.
+for (let i = 0; i < 30; i++) {
+  const quieto = await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.predador.estado === 'chao');
+  if (quieto) break;
+  await page.waitForTimeout(150);
+}
+const hpP0 = await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.predador.hp);
+await atirar(700);
+const hpP1 = await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.predador.hp);
+ok(hpP1 < hpP0, `a bala real fere o PEITO do predador (hp ${hpP0} → ${hpP1})`);
 
-await esperarEstado(true);
-await atirar(1200);
-const hpDepoisAberto = await page.evaluate(
-  () => window.__game.scene.getScenes(true)[0].boss.hpCoracao,
-);
-ok(
-  hpDepoisAberto < hpAntesFechado,
-  `ABERTO, a bala real fere a ferida (hp ${hpAntesFechado} → ${hpDepoisAberto})`,
-);
+// O dano DOBRA na recuperação — a mistura (c).
+const dobra = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const p = s.boss.predador;
+  const salvo = p.recuperando;
+  p.recuperando = false;
+  const a = p.hp; s.boss.damage(5); const normal = a - p.hp;
+  p.recuperando = true;
+  const b = p.hp; s.boss.damage(5); const recup = b - p.hp;
+  p.recuperando = salvo;
+  return { normal, recup };
+});
+ok(dobra.normal === 5 && dobra.recup === 10, `o dano DOBRA na recuperação (normal=${dobra.normal}, recuperando=${dobra.recup})`);
 
-// Fase 2 (<66%): as PAREDES entram na luta. Derruba a vida pela ferida e conta o terreno.
+// Fase 3 (≤33%): o BREU.
 await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
-  if (s.boss.aberto) s.boss.damage(Math.ceil(s.boss.hpCoracao - 180 * 0.5));
+  const p = s.boss.predador;
+  p.recuperando = false;
+  s.boss.damage(Math.ceil(p.hp - 180 * 0.3));
 });
-const propsAntes = await page.evaluate(
-  () => window.__game.scene.getScenes(true)[0].terrain.props.getChildren().filter((p) => p.active).length,
-);
-await page.waitForTimeout(8000);
-const propsDepois = await page.evaluate(
-  () => window.__game.scene.getScenes(true)[0].terrain.props.getChildren().filter((p) => p.active).length,
-);
-console.log(`paredes   antes=${propsAntes} depois=${propsDepois}`);
-ok(propsDepois > 0, `as PAREDES nascem durante a luta (${propsDepois} colunas vivas)`);
-await page.screenshot({ path: 'probe-stage4-paredes.png' });
-
-// Mata pela ferida — o contrato do jogo real: damage() true no golpe fatal, o CHAMADOR
-// dispara o killBoss (o mesmo espelho da probe-stage3).
-for (let i = 0; i < 60; i++) {
-  const morto = await page.evaluate(() => {
-    const s = window.__game.scene.getScenes(true)[0];
-    if (!s.boss || s.boss.isDead) return true;
-    if (s.boss.aberto && s.boss.damage(999)) {
-      s.killBoss();
-      return true;
-    }
-    return false;
-  });
-  if (morto) break;
-  await page.waitForTimeout(300);
+let breu = false;
+for (let i = 0; i < 25; i++) {
+  breu = await page.evaluate(() => window.__game.scene.getScenes(true)[0].boss.predador.breu === true);
+  if (breu) break;
+  await page.waitForTimeout(200);
 }
+ok(breu, 'a fase 3 apaga a arena — o BREU');
+await page.waitForTimeout(1500);
+await page.screenshot({ path: 'probe-stage4-breu.png' });
 
-await page.waitForTimeout(4500);
+// Mata — o contrato do jogo real: damage() true no golpe fatal, o CHAMADOR dispara o killBoss.
+await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  if (s.boss && !s.boss.isDead && s.boss.damage(999)) s.killBoss();
+});
+
+// ⚠️ 1,2s do estouro final + `CORPO_FICA_MS` 4200 (o corpo no chão, o piso rachando, a lava subindo e ele
+// afundando — ver `fimDoPredador`). Era 4500 quando a cutscene vinha 1,4s depois do estouro.
+await page.waitForTimeout(6500);
 const meio = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return { cena: s?.scene.key };
@@ -267,7 +286,7 @@ const meio = await page.evaluate(() => {
 console.log('meio     ', JSON.stringify(meio));
 // A CUTSCENE FINAL entra entre o NÚCLEO e o GameOver (2026-07-20): vencer a Fase 4 agora
 // entrega a Interlude4 — a vitória amarga — e é ELA quem fecha a campanha.
-ok(meio.cena === 'Interlude4', `matar o NÚCLEO entrega a CUTSCENE FINAL (cena=${meio.cena})`);
+ok(meio.cena === 'Interlude4', `matar o PREDADOR entrega a CUTSCENE FINAL (cena=${meio.cena})`);
 await page.screenshot({ path: 'probe-stage4-cutscene-final.png' });
 
 // Atravessa a interlude SEM tecla de pular (de propósito — docs/HANDOFF.md): espera a
@@ -284,6 +303,6 @@ for (let i = 0; i < 55; i++) {
 console.log('fim      ', JSON.stringify(fim));
 ok(fim.cena === 'GameOver', `a cutscene final fecha a campanha na tela de vitória (cena=${fim.cena})`);
 
-console.log(falhas === 0 ? '\n✔ FASE 4 DE PONTA A PONTA (com o NÚCLEO)' : `\n✘ ${falhas} asserts falharam`);
+console.log(falhas === 0 ? '\n✔ FASE 4 DE PONTA A PONTA (com o PREDADOR)' : `\n✘ ${falhas} asserts falharam`);
 await browser.close();
 process.exit(falhas === 0 ? 0 : 1);

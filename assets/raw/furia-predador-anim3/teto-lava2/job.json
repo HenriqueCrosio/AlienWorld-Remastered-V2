@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "4e37f30b-5efa-41ae-b1b9-7c3e28c7c5ff",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "hanging from the ceiling by its one raised claw, swings the free clawed arm back and hurls something down to the left in a strong throw, then sways",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

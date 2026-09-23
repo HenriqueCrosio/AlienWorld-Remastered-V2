@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "ccec3401-7540-4b65-b52b-747d02ce964f",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "jumps up, grabs the ceiling at the top edge with one clawed hand and hangs from it by one arm, legs and body swinging below, facing left",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}
