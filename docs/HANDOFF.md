@@ -1,6 +1,126 @@
 # HANDOFF — estado do projeto (2026-09-23)
 
-Documento de retomada. **Leia isto primeiro**, depois `GDD.md` → `TECH.md` → `ASSETS.md`.
+Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
+inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
+consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALANCEAMENTO.md`.
+
+---
+
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-09-23) — O ESTADO VIVO
+
+> ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
+> julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
+> deste arquivo contradisser o 🧭, **vale o 🧭**. Atualize AQUI ao fechar cada etapa.
+
+### A frase de arranque da próxima sessão
+
+> **"Leia `docs/superpowers/plans/2026-09-23-fatia8-cutscene-final-START.md`. A Fatia 7 fechou e
+> está na `main`. Vamos abrir a Fatia 8 — a cutscene final — pelo brainstorming."**
+
+### O estado em uma linha
+
+**O jogo está COMPLETO e encadeia sozinho** — 4 fases, 4 cutscenes, chefão final, do menu à
+vitória (`probe-stage4` atravessa tudo). O que falta é **acabamento, ajuste e publicação**, não
+construção. `main` = `origin/main` (V2), com a Fatia 7 mergeada em `5be4b2a`. Nenhuma branch aberta.
+
+```
+MENU → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
+```
+
+### O ROADMAP — a ordem fechada em 24/08, com o estado de hoje
+
+**A regra que decidiu a ordem:** nada que dependa do olho do Henrique vem antes de a arte parar
+de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já cobrou isso uma vez.
+
+| # | Etapa | Estado |
+|---|---|---|
+| 1 | **Passe visual por fatias** (0–8) | 🟠 **0–7 fechadas e mergeadas. Falta só a FATIA 8** |
+| 2 | **Calibragem** do passe visual | ⬜ depois da 8 |
+| 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
+| 4 | **Playtest humano de TODAS as fases** | ⬜ |
+| 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
+| 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
+| 7 | **Polimento e dívidas** (lista abaixo) | ⬜ |
+| — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
+
+### O que mora em cada etapa
+
+**1 · A FATIA 8 — a cutscene final (`Interlude4Scene`, "O AFASTAMENTO", ~42s).** O veredito dele
+de julho: *"interessante no conceito, fraca no visual e design"*. Carrega a **troca das baleias
+erradas** pelo Leviatã certo — e ⚠️ **a dívida é SÓ desta cena** (conferido no código em 25/08 e
+de novo em 23/09: `leviathanWhale*` só aparece na `Interlude4Scene`; a F3 e a F4 NÃO têm baleia
+errada). Pela regra dos dois Leviatãs, o da cena final é o **biomecânico sem armadura**
+(`f397793a`, o ENFRAQUECIDO). Sem spec: abre por brainstorming. Porta de entrada: o START acima.
+
+**2 · A calibragem** — os números visuais que ficaram no chute, de propósito, até as fatias acabarem:
+- o hitstop de 150ms na morte de chefão; os fps das explosões (18/13/12);
+- o halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`); os fades e pulsos do menu;
+- a espessura das bordas por trecho da Fase 4 (`Moldura`, `ESPESSURA_MAX` 54 — só até 70).
+
+**3 · O balanceamento** — o que ainda é chute calibrado no olho:
+- **Fase 4:** os vãos `110 → 96 → 76 → 84`; o guardião (`INVESTIDA_CADA` 6s, HP 90); o predador (HP 180,
+  knobs no topo de `src/entities/Predador.ts`). ⚠️ A arena do golfinho foi APROVADA em 23/09 (`rate 2.6`).
+- **Fases 1–3:** a vida da Capitânia (150) e do cargueiro (24), o dano 3 da Lança, o alcance 110 do Dispersor.
+- **O ENXAME** (arma do Arauto) **nunca foi jogado por humano**. A causa estrutural da dificuldade:
+  `src/ships.ts` tem UM eixo só (a nave É a arma). Teste barato: para cada arma, saber dizer em que
+  ela é RUIM. Ferramenta: `node scripts/probe-armas.mjs`.
+- **FECHADO, não mexer sem motivo novo:** a dificuldade da Fase 1 e da Fase 2 (validada em 14/07)
+  e a HMG (giro e calor — rodar `probe-hmg.mjs` antes de tocar).
+
+**4 · O playtest de todas as fases**, só depois de 2 e 3. A F4 já foi jogada várias vezes, mas
+contra arte que mudava — o playtest de balanço é este.
+
+**5 · O placar:** tabela `scores` (name, score, handling, stage, ship, victory, created_at) + RLS
+(insert anônimo, select público); submit via fetch REST na `GameOverScene`, sem SDK; tela de ranking.
+⚠️ O CORS do Supabase precisa do DOMÍNIO FINAL — configurar depois do 1º deploy.
+
+**7 · As dívidas registradas pelas fatias** (nenhuma bloqueia nada; cada uma diz onde nasceu):
+
+| de onde | a dívida |
+|---|---|
+| Fatia 1 (F1 inimigos) | o **batedor** não virou o dardo magro — quase não se distingue do drone à distância |
+| Fatia 1 | as **chamas dos propulsores** do chefão aéreo são colunas chapadas, não fogo |
+| Fatia 1 | conferir a **duração do flash magenta** da decolagem do chefão da F1 |
+| Fatia 3 (F2) | a baia do cargueiro camufla na F4; o batedor do cinturão é a silhueta mais frágil do róster |
+| Fatia 4 (Cutscene 2) | o **painel de escolha de nave tapa a cena inteira** |
+| Fatia 4 | apagar a `doca.png` antiga (fallback; a nova está aprovada e mergeada) |
+| Fatia 6 (Cutscene 3) | acabamento geral |
+| chefão F4 | cabos desenhados ancorando as formas ao chão/teto (receita da catenária da doca) |
+| ferramenta | **a sonda de VÍDEO**: as sondas fotografam, e beat de explosão só se julga em movimento. Molde em `scripts/_ver-cargueiro-mov.mjs` |
+| ferramenta | a `probe-f4-moldura` pisca ~1 em 3 — o conserto é a AMOSTRAGEM, nunca afrouxar o número (diagnóstico no START da Fatia 7) |
+| repositório | apagar as branches `feat/*` já mergeadas no `origin`, quando ele quiser |
+
+### As fatias do passe visual
+
+| Fatia | O quê | Estado | Porta de entrada / registro (em `docs/superpowers/`) |
+|---|---|---|---|
+| 0 | Menu "O Despertar" | ✅ | `specs/2026-07-21-menu-visual-design.md` (tem o mapa original das fatias) |
+| 1 | Fase 1 — leva 1 (cenário) + leva 2 (inimigos e chefão) | ✅ | `plans/2026-07-22-fase1-cenario-visual.md` · `plans/2026-07-22-fase1-inimigos-chefao-START.md` |
+| 2 | Cutscene 1 (a Aurora) | ✅ | `plans/2026-07-24-cutscene1-visual-START.md` |
+| 3 | Fase 2 — frota morta | ✅ `138acf7` | `plans/2026-08-05-fase2-visual-START.md` |
+| 4 | Cutscene 2 — a doca | ✅ `ee4e2a0` | `plans/2026-08-25-cutscene2-visual-START.md` |
+| 5 | Fase 3 — o casco (+ a fusão da serpente) | ✅ `a28dd07` | `plans/2026-08-25-fase3-visual-START.md` |
+| 6 | Cutscene 3 — a queda no hangar | ✅ `f29c46d` | `plans/2026-09-01-cutscene3-visual-START.md` |
+| 7 | Fase 4 — o interior | ✅ `5be4b2a` (23/09) | `plans/2026-09-08-fatia7-moldura-START.md` |
+| **8** | **Cutscene final + o Leviatã certo** | ⬜ **PRÓXIMA** | `plans/2026-09-23-fatia8-cutscene-final-START.md` |
+
+O fluxo de cada fatia, regra dele: **brainstorming → spec (`docs/superpowers/specs/`) → plano
+(`docs/superpowers/plans/`) → implementação → teste jogado por ele → merge `--no-ff`**.
+
+### ✅ O que a sessão de 23/09 fez
+
+- **Rejogo da Fase 4 inteira: aprovado.** *"a arena do golfinho está com a dificuldade certa"* ·
+  *"tudo ok para as perguntas, tá fechado"*. O esfíncter: *"o sangue ficou muito bom"* · a mangueira
+  *"na posição correta e seu aspecto melhorou"* · o gore *"justamente o que a cena representa"*.
+- **A câmera lenta do estouro ganhou quatro tempos** a pedido dele (`86771fd`): o baque em tempo
+  NORMAL (200ms) → desce (120ms) → SEGURA no piso 0,3 (1100ms, para ver os pedaços) → volta (600ms,
+  para mostrar o tamanho). `LENTA_*` no topo do `GameScene`. *"ficou perfeito"*.
+- **Fatia 7 mergeada `--no-ff` em `main` (`5be4b2a`)** e empurrada para o V2.
+- **Este 🧭** — os três roadmaps juntados, e quatro registros velhos corrigidos: as baleias erradas
+  (só na cutscene final), o menu com moldura nova (feito na Fatia 0), o score entre fases (já passa
+  pelas interludes via `data.score`) e a numeração das fatias (a tabela antiga partia a F1 em duas
+  fatias e sumia com a Fase 2; vale o mapa da spec do menu: 1 = F1, 2 = C1, 3 = F2).
+- **O START da Fatia 8** preparado.
 
 ---
 
@@ -15,7 +135,8 @@ com cinemática de abertura**:
   costelas: PixelLab `f397793a-0e59-49e2-9853-848b674b3fd7`. Gerei a animação **VIVO/idle** dele
   (anim group `9b548573`) → `public/sprites/leviathan-alive-sheet.png` (9 frames 116×116) →
   anim `leviathan-alive` (registrada na `MenuScene`). ⚠️ **As baleias erradas ainda estão DENTRO
-  do jogo/cutscene (Fase 3/4) — corrigir nas fatias 7/8.**
+  da cutscene final — e SÓ nela** (a nota original dizia "Fase 3/4 — fatias 7/8" e estava errada;
+  conferido em 25/08 e 23/09). É a Fatia 8.
 - **Fundo COMPOSTO em camadas** (não uma placa pintada): o PixelLab só gera cena 384×216
   EMOLDURADA (`create_ui_asset` = painel com bezel), e o higgsfield exige plano pago. Então o
   fundo é montado com a arte do jogo — estrelas, nebulosa, **lua morta nova** (`menu-moon.png`,
@@ -32,7 +153,7 @@ com cinemática de abertura**:
 
 ---
 
-## ⏭️ ONDE PARAMOS
+## 📜 REGISTRO — O "ONDE PARAMOS" ANTIGO (até 23/09 · o estado vivo é o 🧭 do topo)
 
 ### 🏁 A CAMPANHA INTEIRA EXISTE E ENCADEIA SOZINHA (2026-07-19/20)
 
@@ -53,7 +174,7 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
 
 1. **PASSE VISUAL INTEIRO** — falta só a fatia 8. **As fatias 0 a 7 estão FECHADAS E MERGEADAS** (a 4 =
    Cutscene 2 em `ee4e2a0`; a 5 = Fase 3 em `a28dd07`; a 6 = Cutscene 3 em `f29c46d`; a 7 = Fase 4,
-   mergeada `--no-ff` em 23/09 sobre `86771fd`).
+   mergeada `--no-ff` em 23/09, `5be4b2a`).
 
    🟢 **A FATIA 7 (Fase 4, o interior) FECHOU EM 23/09, no REJOGO DA FASE INTEIRA.** Ele jogou do
    zero e aprovou tudo: *"a arena do golfinho está com a dificuldade certa"* (o item parado desde
@@ -65,9 +186,8 @@ balancear contra arte que ainda vai mudar é pagar duas vezes, e a Fase 2 já co
    SEGURA 1100ms para os pedaços serem vistos e volta em 600ms para mostrar o tamanho da explosão
    (`LENTA_*` no `GameScene`, `86771fd`): *"ficou perfeito"*. Sonda `probe-f4-esfincter` 50/50.
 
-   🔵 **A PRÓXIMA FRENTE É A FATIA 8 — a cutscene final e as duas baleias erradas** (ainda dentro da
-   F3 e da cutscene final; o Leviatã canônico é o do menu). Ela ainda NÃO tem spec nem START: abre
-   pelo fluxo de sempre, brainstorming → spec → plano. O START da Fatia 7
+   🔵 **A PRÓXIMA FRENTE É A FATIA 8 — a cutscene final e as baleias erradas** (SÓ na cutscene
+   final). Porta de entrada: `docs/superpowers/plans/2026-09-23-fatia8-cutscene-final-START.md`. O START da Fatia 7
    (`docs/superpowers/plans/2026-09-08-fatia7-moldura-START.md`) vira registro.
 
    O registro da Fatia 7, como estava antes do rejogo:
@@ -618,7 +738,7 @@ o build compilado em `AlienWorld_v2/`. Portanto isto é um **rebuild**, não um 
 
 ## ROADMAP
 
-### O PASSE VISUAL POR FATIAS — a única frente aberta (estado em 2026-09-20)
+### 📜 O PASSE VISUAL POR FATIAS — registro (o roadmap vivo e a numeração certa estão no 🧭 do topo)
 
 O conteúdo do jogo está todo de pé (tabela abaixo). O que corre agora é o passe visual, fatia a
 fatia, cada uma com spec → plano → implementação → **teste jogado pelo Henrique** → merge.
@@ -634,12 +754,12 @@ fatia, cada uma com spec → plano → implementação → **teste jogado pelo H
 | — | *a fusão da serpente (o último item da 5)* | ✅ fechada em `4848820`, aprovada por ele |
 | 6 | **Cutscene 3 — a queda no hangar** | ✅ **mergeada (`f29c46d`), aprovada no teste jogado de 2026-09-05** |
 | 7 | **Fase 4 — o interior** | ✅ **mergeada `--no-ff` em 23/09, aprovada no rejogo da fase inteira** — lugar, moldura, golfinho, bordas, o guardião (arte + luta + leitura), o predador, a posição do chefão e a **borda C do duto com o pilar da costura** — **todos jogados e aprovados**. As **3 portas** e o **esfíncter** foram jogados e aprovados (21–22/09); o **gore**, a câmera lenta do estouro e o sangue na borda fecharam em 22/09. O rejogo inteiro passou em 23/09, com a câmera lenta em quatro tempos |
-| 8 | Cutscene final + as baleias erradas | ⬜ ⚠️ as duas baleias erradas ainda estão na F3/F4 |
+| 8 | Cutscene final + as baleias erradas | ⬜ **PRÓXIMA** — as baleias erradas estão SÓ na cutscene final |
 
 Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **balanceamento**
 (armas e naves, o ENXAME) → **playtest humano de todas as fases** → placar (Supabase) → deploy.
 
-### O CONTEÚDO DO JOGO
+### O CONTEÚDO DO JOGO (revisada em 23/09)
 
 | # | O quê | Estado |
 |---|---|---|
@@ -647,18 +767,18 @@ Depois das fatias, na ordem já fechada: **calibragem** do passe visual → **ba
 | 2 | **Interlude** (pouso + escolha de nave) | ✅ jogável, arte final |
 | 3 | **Fase 2 — Frota Morta** | ✅ jogável, arte final |
 | 4 | **BALANCEAMENTO por humano** | 🔶 **1ª rodada aplicada — ver abaixo** |
-| 5 | Menu inicial com a moldura nova | ⬜ |
+| 5 | Menu inicial com a moldura nova | ✅ (Fatia 0, "O Despertar") |
 | 6 | Animações dos sprites da Fase 2 | ✅ |
 | 6b | **2ª cutscene** (Doca Kepler-9) + **nave ALIENÍGENA** | ✅ jogável (`[O]` no menu) |
 | 6c | **RÓSTER v2** (7 naves de perfil + 7 armas-base) | ✅ (2026-07-18) |
 | 6d | **Efeitos de projétil + passe visual** das Fases 1-2 | ✅ (2026-07-18) |
 | 7 | **Fase 3 — O Casco** | ✅ jogável e **APROVADA pelo Henrique** (2026-07-19) |
 | 7b | **3ª cutscene** (queda no hangar do Leviatã) | ✅ jogável (`[P]` no menu, 2026-07-19) |
-| 8 | **Fase 4 — O Interior** (voo LIVRE + corredores; é a fase FINAL) | ✅ **construída COM o NÚCLEO (2026-07-19) — pendente playtest humano** |
-| 8b | **4ª cutscene** (a FINAL — o afastamento) | ✅ **implementada** (2026-07-20, `[F]` no menu) — pendente o Henrique assistir |
-| 9 | Score acumulado entre fases | ⬜ |
+| 8 | **Fase 4 — O Interior** (voo LIVRE + corredores; é a fase FINAL) | ✅ jogada e aprovada no rejogo de 23/09 (Fatia 7); o playtest de BALANÇO é a etapa 4 do 🧭 |
+| 8b | **4ª cutscene** (a FINAL — o afastamento) | ✅ implementada e assistida (*"fraca no visual e design"*) — é a Fatia 8 |
+| 9 | Score acumulado entre fases | ✅ (as interludes passam `data.score` adiante) |
 | 10 | Modo Sobrevivência (Legacy) | ⬜ |
-| 11 | Deploy (itch.io, build estático) | ⬜ |
+| 11 | Deploy (build estático; destino em aberto: itch.io ou Vercel) | ⬜ |
 | 12 | Mobile/touch | ⬜ (decisão: desktop primeiro) |
 
 ### 🔶 1ª RODADA DE BALANCEAMENTO — o que mudou, e por quê
