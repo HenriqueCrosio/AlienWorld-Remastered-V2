@@ -408,7 +408,14 @@ ok(g.tela === 5, `e o vidro suja (${g.tela} manchas, que somem antes do chefão)
 // ─── A CÂMERA LENTA ──────────────────────────────────────────────────────────
 // ⚠️ MEDIDA DEPOIS DE UM QUADRO, nunca no mesmo. O `matarGarganta` só arma a rampa; quem aplica as
 // escalas é o `update`. Ler no mesmo `evaluate` devolveria 1 em tudo e o assert passaria ao contrário.
-await p2.waitForTimeout(120);
+//
+// ⚠️ E DESDE 23/09 O 1º TEMPO É NORMAL (*"quero que os ms iniciais sejam normais para o jogador
+// sentir a explosão"*). A curva é IMPACTO 200 → DESCE 120 → SEGURA 1100 → VOLTA 600, em ms crus.
+// Por isso dois instantes: o baque ainda em 1, e o miolo da segurada no piso.
+await p2.waitForTimeout(60);
+const baque = await p2.evaluate(() => window.__game.scene.getScenes(true)[0].tweens.timeScale);
+ok(baque === 1, `⭐ o baque do estouro sai no tempo NORMAL (tweens ${baque})`);
+await p2.waitForTimeout(640);
 const lenta = await p2.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return {
@@ -428,7 +435,7 @@ ok(lenta.fisica > 1.2, `⭐ e a física vai no INVERSO, como o Arcade exige (${l
 
 // ⚠️ E O FIM DA RAMPA É METADE DO PEDIDO — *"e o final normal"*. Sem este assert, uma rampa que
 // travasse no piso deixaria o jogo inteiro em 30% até o fim da fase, e o teste acima passaria igual.
-await p2.waitForTimeout(1100);
+await p2.waitForTimeout(1500);
 const voltou = await p2.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return [s.tweens.timeScale, s.time.timeScale, s.anims.globalTimeScale, s.physics.world.timeScale];

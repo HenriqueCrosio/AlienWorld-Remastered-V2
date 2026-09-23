@@ -196,8 +196,20 @@ export class GameScene extends Phaser.Scene {
   private lentidaoTotal = 0;
   private lentidaoPiso = 1;
 
-  /** Quanto dura a rampa do estouro do esfíncter, e até onde o mundo desce. */
-  private static readonly LENTA_MS = 820;
+  /**
+   * A CURVA DO ESTOURO DO ESFÍNCTER, em quatro tempos de relógio CRU (23/09). Pedido dele: *"quero
+   * que os ms iniciais sejam normais para o jogador sentir a explosão e mais um pouco de câmera lenta
+   * pois quero que o jogador tenha a possibilidade de ver os pedaços, depois ela continua na
+   * velocidade normal para mostrar o tamanho da explosão"*.
+   *
+   * IMPACTO (normal: o baque) → DESCE (mergulha no piso) → SEGURA (no piso: os pedaços) → VOLTA
+   * (sobe ao normal: o tamanho). A 1ª versão (22/09) era só a rampa `k²` de 820ms, lenta DESDE o
+   * 1º quadro — e o baque, que é o que ele quer sentir primeiro, saía amortecido.
+   */
+  private static readonly LENTA_IMPACTO_MS = 200;
+  private static readonly LENTA_DESCE_MS = 120;
+  private static readonly LENTA_SEGURA_MS = 1100;
+  private static readonly LENTA_VOLTA_MS = 600;
   private static readonly LENTA_PISO = 0.3;
   private static readonly HITSTOP_BOSS_MS = 150;
 
@@ -551,15 +563,14 @@ export class GameScene extends Phaser.Scene {
 
     // A CÂMERA LENTA: a escala do quadro, e a rampa que a devolve a 1. ⚠️ Comandada pelo `delta`
     // CRU — é o mesmo cuidado do hitstop logo acima, e aqui ele é ainda mais obrigatório: uma rampa
-    // que se medisse no tempo já escalado se arrastaria por ~2,7s em vez dos 820ms pedidos.
+    // que se medisse no tempo já escalado se arrastaria muito além dos tempos pedidos.
     let escala = 1;
     if (this.lentidaoRestante > 0) {
       this.lentidaoRestante = Math.max(0, this.lentidaoRestante - delta);
       if (this.lentidaoRestante === 0) {
         this.tempoNormal();
       } else {
-        const k = 1 - this.lentidaoRestante / this.lentidaoTotal;
-        escala = this.lentidaoPiso + (1 - this.lentidaoPiso) * k * k;
+        escala = this.escalaDaLentidao(this.lentidaoTotal - this.lentidaoRestante);
         this.tweens.timeScale = escala;
         this.time.timeScale = escala;
         this.anims.globalTimeScale = escala;
@@ -1354,7 +1365,7 @@ export class GameScene extends Phaser.Scene {
     // Aqui o que tem de ser visto dura quase um segundo — o clarão abrindo, as placas partindo, as
     // vísceras saindo e o sangue voando. Congelar o primeiro quadro esconderia justamente o que
     // ele pediu para ver; segurar o tempo e devolvê-lo mostra.
-    this.camaraLenta(GameScene.LENTA_MS, GameScene.LENTA_PISO);
+    this.camaraLenta(GameScene.LENTA_PISO);
 
     this.colisorGas?.destroy();
     this.colisorGas = undefined;
@@ -1595,16 +1606,11 @@ export class GameScene extends Phaser.Scene {
    * estourar DENTRO do quadro pregado, e o efeito é cinematográfico, não bug.
    */
   /**
-   * A CÂMERA LENTA — o mundo entra devagar e SAI no tempo normal, sem corte.
+   * A CÂMERA LENTA — o baque no tempo normal, o mundo mergulha, segura, e SAI no tempo normal.
    *
    * ⚠️ É PRIMA DO `hitstop`, NÃO IRMÃ. O hitstop PREGA o mundo (pausa física, tweens e anims) e o
    * solta inteiro: é um soco. Esta aqui não pausa nada — ela reescala o tempo e devolve a escala
-   * a 1 por uma rampa. Pedido dele de 22/09 sobre o estouro do esfíncter: *"faça com que o início
-   * da explosão seja em câmera lenta e o final normal"*.
-   *
-   * ⚠️ E A RAMPA É `k²`, DE PROPÓSITO. Linear, metade do tempo já estaria em 65% da velocidade e o
-   * "lento" duraria um piscar. Com `k²` a escala quase não sobe no começo — o mundo SEGURA no piso
-   * enquanto o clarão abre — e só acelera no fim, que é onde ele pediu o tempo normal.
+   * a 1. Os quatro tempos e o pedido dele estão nos `LENTA_*`.
    *
    * ⚠️ QUATRO SUBSISTEMAS, E UM DELES É INVERSO. Tweens, `Clock` e animações usam a escala direta
    * (`accumulator += delta * timeScale * globalTimeScale`); o mundo do Arcade usa `msPerFrame =
@@ -1615,10 +1621,34 @@ export class GameScene extends Phaser.Scene {
    * MENOS passos. A 0,3 são ~18 passos/s. Num jogo de 384×216 isso não aparece — a posição já é
    * arredondada para o pixel, e um passo de 1,4px não tem como ser mais liso.
    */
-  private camaraLenta(ms: number, piso: number): void {
+  private camaraLenta(piso: number): void {
+    const ms =
+      GameScene.LENTA_IMPACTO_MS + GameScene.LENTA_DESCE_MS + GameScene.LENTA_SEGURA_MS + GameScene.LENTA_VOLTA_MS;
     this.lentidaoTotal = ms;
     this.lentidaoRestante = ms;
     this.lentidaoPiso = piso;
+  }
+
+  /**
+   * A escala do mundo `ms` de relógio cru depois da ignição.
+   *
+   * ⚠️ A DESCIDA É `smoothstep` e não um degrau: cair de 1 para 0,3 num quadro lê como engasgo do
+   * jogo, não como câmera lenta. ⚠️ E A VOLTA É `k²`, a mesma da 1ª versão — ela quase não sobe no
+   * começo e só acelera no fim, então o "lento" não vira um piscar.
+   */
+  private escalaDaLentidao(ms: number): number {
+    const piso = this.lentidaoPiso;
+    const desceEm = GameScene.LENTA_IMPACTO_MS;
+    const seguraEm = desceEm + GameScene.LENTA_DESCE_MS;
+    const voltaEm = seguraEm + GameScene.LENTA_SEGURA_MS;
+    if (ms < desceEm) return 1;
+    if (ms < seguraEm) {
+      const k = (ms - desceEm) / GameScene.LENTA_DESCE_MS;
+      return 1 - (1 - piso) * k * k * (3 - 2 * k);
+    }
+    if (ms < voltaEm) return piso;
+    const k = Math.min(1, (ms - voltaEm) / GameScene.LENTA_VOLTA_MS);
+    return piso + (1 - piso) * k * k;
   }
 
   /**

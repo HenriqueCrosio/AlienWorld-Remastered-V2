@@ -376,6 +376,22 @@ novo antes de investigar.**
 4. **as vísceras e as placas juntas ficaram demais?** São 14 + 11. Se poluiu, o número das vísceras é
    `Esfincter.VISCERAS`.
 
+**🟢 AS QUATRO VOLTARAM (23/09):**
+1. *"o sangue ficou muito bom"* ✅
+2. *"a mangueira está na posição correta e seu aspecto melhorou"* ✅
+3. **a câmera lenta MUDOU DE FORMA, a pedido dele:** *"quero que os ms iniciais sejam normais para o
+   jogador sentir a explosão e mais um pouco de câmera lenta pois quero que o jogador tenha a
+   possibilidade de ver os pedaços, depois ela continua na velocidade normal para mostrar o tamanho da
+   explosão"*. A rampa `k²` de 820ms virou quatro tempos crus — **IMPACTO 200 (normal) → DESCE 120
+   (smoothstep) → SEGURA 1100 (piso 0,3) → VOLTA 600 (`k²`)**, ~2s no total, em `LENTA_*` no topo do
+   `GameScene`. Jogado: *"ficou perfeito"* ✅. Folha em tempo de parede: `_f4/_ver-lenta.mjs`.
+   ⚠️ Visto na folha e avisado: a fumaça do `fx.explode` também desacelera e fica sobre a ferida até
+   ~1,6s; os pedaços leem nas bordas. Ele aprovou assim.
+4. *"não achei demais, achei gore e justamente o que a cena representa"* ✅ — `VISCERAS` fica 11.
+
+Sonda `probe-f4-esfincter` **50/50** (o assert novo: o baque sai em escala 1) · `probe-stage4` ✔ · build ✔.
+**Do roteiro, falta o resto do rejogo** — sobretudo a arena do golfinho.
+
 **Depois do rejogo:** atualizar o `docs/HANDOFF.md` e fechar a fatia com **merge `--no-ff` de
 `feat/fase4-visual` em `main`**.
 
