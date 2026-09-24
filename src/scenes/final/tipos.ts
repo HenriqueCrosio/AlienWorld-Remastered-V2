@@ -19,6 +19,8 @@ export interface EstadoFinal {
   carcacaX: number | null;
   /** O alfa da camada de lava da carcaça (capítulo 7): 1 acesa, 0 apagada. */
   lavaCarcaca: number | null;
+  /** true quando a nave terminou de ser sugada pela fenda (capítulo 3) — ela SOME, não fica derivando. */
+  naveSumiu: boolean;
 }
 
 /** O que todo capítulo recebe da regente. */

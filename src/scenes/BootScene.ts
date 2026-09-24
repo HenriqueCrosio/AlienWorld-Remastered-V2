@@ -360,9 +360,10 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // (`scripts/_f8/_gerar-pulso.mjs`), 9 quadros de 256×216 colados em x=128. Duas variantes em comparação.
   f8Pulso3: { path: 'sprites/f8-pulso-3.png', w: 256, h: 216 },
   f8Pulso17: { path: 'sprites/f8-pulso-17.png', w: 256, h: 216 },
-  // P2: as BORDAS do rasgo se mexendo — v3 sobre a parede já rasgada do conceito aprovado (seed 21), 138×197
-  // colados na caixa da máscara (x=215, y=5). O estouro é um corte seco; esta folha é o depois.
-  f8Rasgo: { path: 'sprites/f8-rasgo-21.png', w: 138, h: 197 },
+  // P2: as BORDAS do rasgo se mexendo — v3 sobre a parede já rasgada do conceito aprovado (seed 21), 137×164
+  // colados em (204, 37): o rasgo se FECHA por dentro antes do teto da moldura. O estouro é um corte seco;
+  // esta folha é o depois.
+  f8Rasgo: { path: 'sprites/f8-rasgo-21.png', w: 137, h: 164 },
   // Os pedaços do estouro: as formas das vísceras da F4 repintadas na rampa vermelha da câmara D
   // (`scripts/_f8/_repintar-pedacos.mjs`) — a folha original é ROXA, a matéria do esfíncter.
   f8PedacosSheet: { path: 'sprites/f8-pedacos-sheet.png', w: 39, h: 61 },

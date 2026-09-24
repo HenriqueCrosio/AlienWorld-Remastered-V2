@@ -25,10 +25,13 @@ const PULSO_X = 128;
 const TOPO = 32;
 const PULSO_MS = 110;
 /** A caixa do rasgo na tela (`scripts/_f8/_rasgo-caixa.json`, a caixa da máscara do conceito aprovado). */
-const RASGO_X = 215;
-const RASGO_Y = 5;
-const RASGO_W = 138;
-const RASGO_H = 197;
+// ⚠️ A caixa começa em y=38, ABAIXO do teto da moldura: o rasgo se FECHA por dentro, com um lábio de
+// membrana (2ª rodada, 24/09). Antes ele ia até o topo e um recorte em y=32 o cortava numa linha reta.
+const RASGO_X = 204;
+const RASGO_Y = 37;
+/** O fundo do buraco — onde tudo é sugado e onde a nave SOME (medido no rasgado, `_rasgado-cheio.png`). */
+const BURACO_X = 292;
+const BURACO_Y = 112;
 /** Os quadros bons da folha das bordas (o 8 da v3 desmancha — ver `_gerar-rasgo.mjs`). */
 const RASGO_QUADROS = 8;
 const RASGO_MS = 95;
@@ -107,10 +110,9 @@ export function montarDentro(c: CenaFinal, fundo: 'f8Costura' | 'paintBgF4d'): C
   // escondem o corte. Não há interpolação do intacto ao rasgado — a v3 inventa manchas nessa distância.
   // Depois, as BORDAS se mexem (v3 sobre o próprio rasgado, `_gerar-rasgo.mjs`, seed 21).
   const rasgo = scene.add.image(RASGO_X, RASGO_Y, 'f8Rasgo', 0).setOrigin(0, 0).setDepth(DEPTH.FUNDO + 2).setVisible(false);
-  rasgo.setCrop(0, TOPO - RASGO_Y, RASGO_W, RASGO_H);
   objetos.push(rasgo);
-  const buracoX = RASGO_X + RASGO_W * 0.62;
-  const buracoY = RASGO_Y + RASGO_H * 0.42;
+  const buracoX = BURACO_X;
+  const buracoY = BURACO_Y;
 
   const estouro = scene.add
     .particles(buracoX, buracoY, 'f8PedacosSheet', {
@@ -204,14 +206,22 @@ export function montarDentro(c: CenaFinal, fundo: 'f8Costura' | 'paintBgF4d'): C
         .setDepth(DEPTH.EFEITO);
       objetos.push(rastros, tecido);
       cam.shake(T.FERIDA - T.DESCOMPRESSAO, 0.004);
-      // A NAVE É ARRANCADA: acelera para o buraco girando — ela perde o controle.
+      // A NAVE É ARRANCADA E SOME PELA FENDA (24/09: *"ela precisa ser sugada e desaparecer por entre a fenda
+      // aberta"* — antes ela parava na boca do buraco, derivando). Acelera girando até o fundo do buraco e, na
+      // segunda metade, ENCOLHE: está indo para longe, através dele. Some ~1s antes do corte para fora, e o
+      // vácuo segue puxando o resto sem ela.
+      const puxao = T.FERIDA - T.DESCOMPRESSAO - 1100;
+      scene.tweens.add({ targets: nave, x: buracoX, y: buracoY, angle: 900, duration: puxao, ease: 'Quad.easeIn' });
       scene.tweens.add({
         targets: nave,
-        x: buracoX + 12,
-        y: buracoY,
-        angle: 720,
-        duration: T.FERIDA - T.DESCOMPRESSAO - 300,
+        scale: 0.1,
+        delay: puxao * 0.5,
+        duration: puxao * 0.5,
         ease: 'Quad.easeIn',
+        onComplete: () => {
+          nave.setVisible(false).setScale(1).setAngle(0);
+          estado.naveSumiu = true;
+        },
       });
     }),
   );

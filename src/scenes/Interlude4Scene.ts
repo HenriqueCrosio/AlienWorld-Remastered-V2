@@ -71,6 +71,7 @@ export class Interlude4Scene extends Phaser.Scene {
       escalasLua: [],
       carcacaX: null,
       lavaCarcaca: null,
+      naveSumiu: false,
     };
 
     resetVariantCache();

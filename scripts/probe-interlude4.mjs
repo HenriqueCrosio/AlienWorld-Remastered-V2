@@ -84,6 +84,8 @@ await page.waitForTimeout(1500);
 const c3b = await estado();
 ok(c3b.nave.x > c3.nave.x, `a nave é PUXADA para o rasgo (x ${c3.nave.x} → ${c3b.nave.x})`);
 ok(c3b.faltando === 0, `toda a arte da descompressão carregou (${c3b.faltando} faltando)`);
+const c3c = await espera('cap 3 fim', (e) => e.naveSumiu === true, 5000);
+ok(c3c.naveSumiu === true && c3c.nave.visivel === false, 'a nave SOME pela fenda antes do corte (não fica derivando)');
 await page.screenshot({ path: 'probe-interlude4-cap3.png' });
 
 // ─── [CAPÍTULOS 4–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
