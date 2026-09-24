@@ -9,7 +9,11 @@ import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
  * sobre ela.
  *
  * O Leviatã é RECORTADO do conceito aprovado (`scripts/_f8/_recortar-leviata.mjs`), não gerado de novo. O corpo
- * vem com a lava APAGADA; a camada de lava por cima pulsa fraca — ele ainda está morrendo. A nuvem que vinha no
+ * vem com a lava APAGADA; a camada de lava por cima ESMORECE devagar, sem pulso — ele já está ABATIDO (24/09:
+ * *"podemos manter o leviatã imovel e deixá-lo com o aspecto de já estar abatido"*). ⚠️ Tentei animar a região da
+ * ferida pela v3 (o corpo inteiro não cabe nos 256): a emenda entre a parte animada e a cabeça parada QUEBRAVA —
+ * ele reprovou. O movimento do plano é o que sai da ferida (*"já temos um movimento, que são expelidos do rasgo"*).
+ * A nuvem que vinha no
  * conceito se desfaz em pontilhado (sobre este céu ela lia como mancha); o vazamento segue em partículas.
  *
  * ⚠️ A LUA É FIXA: ela é o próprio fundo, parado o plano todo (a regra física da spec — astro não cresce sem a
@@ -23,6 +27,9 @@ const FERIDA_Y = LEV_Y + 69;
 /** A deriva do corpo no plano todo: devagar, para baixo e para a direita — rumo à lua (a queda começa aqui). */
 const DERIVA_X = 10;
 const DERIVA_Y = 16;
+/** A lava das rachaduras: do corte ao fim do plano, esmorecendo. */
+const LAVA_INICIO = 0.85;
+const LAVA_FIM = 0.5;
 
 export function montarFora(c: CenaFinal): Capitulo {
   const { scene, nave, estado } = c;
@@ -32,8 +39,6 @@ export function montarFora(c: CenaFinal): Capitulo {
   const fundo = scene.add.image(0, 0, 'f8FundoFerida').setOrigin(0, 0).setDepth(DEPTH.FUNDO);
   const corpo = scene.add.image(LEV_X, LEV_Y, 'f8Leviata').setOrigin(0, 0).setDepth(DEPTH.CENARIO);
   const lava = scene.add.image(LEV_X, LEV_Y, 'f8LeviataLava').setOrigin(0, 0).setDepth(DEPTH.CENARIO + 1);
-  // O PULSO da lava: fraco e irregular (dois senos fora de fase) — um coração falhando, não um alarme.
-  let t = 0;
 
   // O VAZAMENTO: o que ainda sai da ferida, devagar, sem gravidade (é vácuo) — fluido escuro e gotas de lava.
   const fluido = scene.add
@@ -59,6 +64,9 @@ export function montarFora(c: CenaFinal): Capitulo {
     .setDepth(DEPTH.CENARIO + 2);
 
   const dur = T.QUEDA - T.FERIDA;
+  // A LAVA ESMORECE: acesa no corte e cada vez mais fraca — o anúncio do capítulo 7, quando ela se apaga de vez.
+  lava.setAlpha(LAVA_INICIO);
+  scene.tweens.add({ targets: lava, alpha: LAVA_FIM, duration: dur, ease: 'Sine.easeIn' });
   scene.tweens.add({ targets: [corpo, lava, fluido, gotas], x: `+=${DERIVA_X}`, y: `+=${DERIVA_Y}`, duration: dur, ease: 'Sine.easeIn' });
 
   // A NAVE sai DA FERIDA rolando e CRESCENDO — o espelho de quando sumiu pela fenda, encolhendo (capítulo 3):
@@ -69,9 +77,7 @@ export function montarFora(c: CenaFinal): Capitulo {
   scene.tweens.add({ targets: nave, x: 360, y: 26, delay: 2400, duration: dur - 2400, ease: 'Sine.easeInOut' });
 
   return {
-    update(dt: number) {
-      t += dt;
-      lava.setAlpha(0.55 + 0.3 * Math.sin(t * 2.1) * Math.sin(t * 0.7 + 1));
+    update() {
       estado.escalasLua.push(+fundo.scaleX.toFixed(3));
     },
     limpar() {
