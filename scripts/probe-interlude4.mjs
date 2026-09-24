@@ -105,7 +105,7 @@ ok(c5.capitulo === 5, `o corte para a queda (capitulo=${c5.capitulo})`);
 ok(c5.nave.visivel === false, 'na queda, a câmera está com o CORPO: a nave fora do plano');
 ok(c5.faltando === 0, `toda a arte da queda carregou (${c5.faltando} faltando)`);
 const c5b = await espera('cap 5 imp', (e) => e.impacto === true, 8000);
-ok(c5b.impacto === true, 'o corpo bate atrás do horizonte');
+ok(c5b.impacto === true, 'o corpo bate NA colônia, à vista (não atrás do horizonte)');
 await page.screenshot({ path: 'probe-interlude4-cap5.png' });
 
 // ─── [CAPÍTULOS 6–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───

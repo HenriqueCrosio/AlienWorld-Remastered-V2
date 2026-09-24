@@ -132,3 +132,39 @@ if (modo === 'escalas') {
     .composite(quadros).png().toFile('public/sprites/f8-reentrada-escalas.png');
   console.log(`f8-reentrada-escalas.png: ${N} tamanhos de ${m.width}×${m.height}, do inteiro a ${FIM}`);
 }
+
+if (modo === 'camadas') {
+  // O IMPACTO À VISTA (24/09): *"o leviatã está caindo atrás da linha do horizonte da lua. Eu quero ele caindo
+  // nela… o jogador veja ela colidindo com a lua e consequentemente a colonia"* + *"um abismo espacial como fundo
+  // de primeira camada daria mais profundidade"*. Duas peças:
+  //
+  //   f8-lua-perto-lua.png  a LUA sem o céu dela: do horizonte para baixo, com o halo da atmosfera se desfazendo
+  //                         em pontilhado nos HALO px de cima — atrás dela entra o abismo (o céu da Cutscene 1);
+  //   f8-colonia-longe.png  a COLÔNIA DA F1 vista de longe: a base, a base-2 e duas torres, REDUZIDAS fora do jogo
+  //                         (reduzir pode), pousadas numa faixa — é onde ele bate.
+  // ⚠️ o halo em pontilhado de 16px lia como PENEIRA contra o abismo: agora só 3px acima da linha acesa, cheios
+  const HALO = 3;
+  const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+  const horizonte = JSON.parse(fs.readFileSync('scripts/_f8/_horizonte.json', 'utf8'));
+  const { data, info } = await sharp('public/sprites/f8-lua-perto.png').ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let x = 0; x < info.width; x++) for (let y = 0; y < info.height; y++) {
+    const i = (y * info.width + x) * 4, topo = horizonte[x] - HALO;
+    if (y < topo) data[i + 3] = 0;
+  }
+  await sharp(data, { raw: info }).png().toFile('public/sprites/f8-lua-perto-lua.png');
+
+  const reduz = async (arq, w) => {
+    const img = await sharp(`public/sprites/${arq}`).resize({ width: w, kernel: 'lanczos3' }).png().toBuffer();
+    const { data: d, info: inf } = await sharp(img).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    for (let i = 3; i < d.length; i += 4) d[i] = d[i] >= 128 ? 255 : 0;
+    return { buf: await sharp(d, { raw: inf }).png().toBuffer(), w: inf.width, h: inf.height };
+  };
+  // ⚠️ menor que o bicho no impacto (~68px): a 1ª rodada saiu com 123px — a colônia maior que o Leviatã
+  const pecas = [await reduz('building.png', 7), await reduz('base.png', 19), await reduz('building-3.png', 7), await reduz('base-2.png', 18), await reduz('building-2.png', 6)];
+  const H = Math.max(...pecas.map((p) => p.h));
+  let x = 0;
+  const comp = [];
+  for (const p of pecas) { comp.push({ input: p.buf, left: x, top: H - p.h }); x += p.w + 1; }
+  await sharp({ create: { width: x, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite(comp).png().toFile('public/sprites/f8-colonia-longe.png');
+  console.log(`f8-lua-perto-lua.png (halo de ${HALO}px) · f8-colonia-longe.png ${x}×${H}`);
+}

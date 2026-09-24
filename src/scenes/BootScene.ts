@@ -453,10 +453,11 @@ const ART: Record<string, string> = {
   f8LeviataLava: 'sprites/f8-leviata-lava.png',
   // O céu da ferida: o zero-G ESPELHADO (a lua da colônia perto, embaixo) — o arranjo D que ele escolheu.
   f8FundoFerida: 'sprites/f8-fundo-ferida.png',
-  // Capítulo 5, A QUEDA: a mesma lua, de perto (gerada com o céu do 4 como referência), o chão dela numa camada
-  // à frente do corpo (é ele que engole o bicho no horizonte) e o corpo em brasa recortado do conceito 5★.
+  // Capítulo 5, A QUEDA: a mesma lua, de perto (gerada com o céu do 4 como referência) SEM o céu dela — atrás
+  // entra o abismo da Cutscene 1 — e a colônia da F1 reduzida, onde ele bate (`_gerar-queda.mjs camadas`).
   f8LuaPerto: 'sprites/f8-lua-perto.png',
-  f8LuaPertoChao: 'sprites/f8-lua-perto-chao.png',
+  f8LuaPertoLua: 'sprites/f8-lua-perto-lua.png',
+  f8ColoniaLonge: 'sprites/f8-colonia-longe.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
   // o jogo roda com as três, e a arte entra depois.
   ship2: 'sprites/ship-2.png',
