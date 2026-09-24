@@ -159,8 +159,8 @@ if (modo === 'camadas') {
     for (let i = 3; i < d.length; i += 4) d[i] = d[i] >= 128 ? 255 : 0;
     return { buf: await sharp(d, { raw: inf }).png().toBuffer(), w: inf.width, h: inf.height };
   };
-  // ⚠️ menor que o bicho no impacto (~68px): a 1ª rodada saiu com 123px — a colônia maior que o Leviatã
-  const pecas = [await reduz('building.png', 7), await reduz('base.png', 19), await reduz('building-3.png', 7), await reduz('base-2.png', 18), await reduz('building-2.png', 6)];
+  // ⚠️ bem menor que o bicho: a 1ª rodada saiu com 123px (maior que o Leviatã), a 2ª com 62; ele pediu "até menor"
+  const pecas = [await reduz('building.png', 5), await reduz('base.png', 13), await reduz('building-3.png', 5), await reduz('base-2.png', 12), await reduz('building-2.png', 4)];
   const H = Math.max(...pecas.map((p) => p.h));
   let x = 0;
   const comp = [];
