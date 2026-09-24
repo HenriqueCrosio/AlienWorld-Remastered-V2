@@ -367,6 +367,9 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // Os pedaços do estouro: as formas das vísceras da F4 repintadas na rampa vermelha da câmara D
   // (`scripts/_f8/_repintar-pedacos.mjs`) — a folha original é ROXA, a matéria do esfíncter.
   f8PedacosSheet: { path: 'sprites/f8-pedacos-sheet.png', w: 39, h: 61 },
+  // Capítulo 4: a FERIDA VIVA — a região da ferida e das costelas do Leviatã animada pela v3 (seed 3), 140×131,
+  // colada em x=100 do recorte (`scripts/_f8/_gerar-ferida-viva.mjs`).
+  f8Ferida: { path: 'sprites/f8-ferida.png', w: 140, h: 131 },
   // P3: o que o vácuo puxa pelo rasgo — rastros, gota de lava, tendão, osso, tecido (16×16, assadas).
   f8SuccaoSheet: { path: 'sprites/f8-succao-sheet.png', w: 16, h: 16 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
@@ -448,6 +451,7 @@ const ART: Record<string, string> = {
   // numa camada que pulsa — `scripts/_f8/_recortar-leviata.mjs`) e a lua do menu reduzida fora do jogo.
   f8Leviata: 'sprites/f8-leviata.png',
   f8LeviataLava: 'sprites/f8-leviata-lava.png',
+  f8LeviataLavaFora: 'sprites/f8-leviata-lava-fora.png',
   // O céu da ferida: o zero-G ESPELHADO (a lua da colônia perto, embaixo) — o arranjo D que ele escolheu.
   f8FundoFerida: 'sprites/f8-fundo-ferida.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
