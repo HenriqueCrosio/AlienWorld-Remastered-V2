@@ -73,6 +73,27 @@ const frio = Buffer.from(corpo);
 for (let p = 0; p < cw * ch; p++) if (lava[p * 4 + 3]) { frio[p * 4] = 26; frio[p * 4 + 1] = 22; frio[p * 4 + 2] = 29; }
 await sharp(frio, { raw: { width: cw, height: ch, channels: 4 } }).png().toFile('public/sprites/f8-leviata.png');
 
-// 4 · a lua DE LONGE: a do menu, REDUZIDA fora do jogo (reduzir pode; reduzir no motor tremeluz os pixels)
-await sharp('public/sprites/menu-moon.png').resize({ width: 34, kernel: 'lanczos3' }).png().toFile('public/sprites/f8-lua-longe.png');
-console.log('corpo frio + f8-lua-longe.png (34px)');
+console.log('corpo frio');
+
+// 5 · A NUVEM SE DESFAZ (24/09, arranjo D sobre o zero-G espelhado): a massa escura à direita da ferida foi
+//     pintada sobre o preto do espaço, e sobre um fundo mais claro lia como MANCHA. Ela se desfaz num pontilhado
+//     ordenado entre DESFAZ_DE e DESFAZ_ATE (no corpo e na lava) — detrito se espalhando; as partículas da cena
+//     continuam o vazamento dali para fora.
+const DESFAZ_DE = 225, DESFAZ_ATE = 300;
+const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+for (const arq of ['public/sprites/f8-leviata.png', 'public/sprites/f8-leviata-lava.png']) {
+  const { data: d, info: inf } = await sharp(arq).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let y = 0; y < inf.height; y++) for (let x = DESFAZ_DE; x < inf.width; x++) {
+    const k = Math.min(1, (x - DESFAZ_DE) / (DESFAZ_ATE - DESFAZ_DE)); // 0 → some nada, 1 → some tudo
+    if (k * 16 > BAYER[y % 4][x % 4]) d[(y * inf.width + x) * 4 + 3] = 0;
+  }
+  await sharp(d, { raw: inf }).png().toFile(arq + '.tmp');
+  fs.renameSync(arq + '.tmp', arq);
+}
+console.log(`a nuvem se desfaz de x=${DESFAZ_DE} a ${DESFAZ_ATE}`);
+
+// 6 · O FUNDO DA FERIDA (arranjo D com a lua do B, escolha dele em 24/09): o céu do zero-G ESPELHADO — reaproveita
+//     a pintura da decolagem, mas não repete o começo (*"reutilizaria o fundo, mas nao igual ao começo"*).
+//     Recorte 384×216 em escala 1 (x=96, y=54 da pintura de 480×270) e espelhado.
+await sharp('public/sprites/paint-bg-zerog.png').extract({ left: 96, top: 54, width: 384, height: 216 }).flop().png().toFile('public/sprites/f8-fundo-ferida.png');
+console.log('f8-fundo-ferida.png (zero-G espelhado)');

@@ -1,37 +1,35 @@
-import { Starfield } from '../../Starfield';
 import { T } from './tempos';
 import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
 
 /**
- * FORA — capítulo 4, A FERIDA (spec §3): o plano do A4 que ele escolheu (*"o 4 da A ficou muito bom"*). O
- * biomecânico inteiro, com o flanco aberto vazando; a nave sai rolando da ferida, estabiliza e se afasta.
+ * FORA — capítulo 4, A FERIDA (spec §3). O arranjo que ele escolheu na folha de 24/09 (*"D com a lua espelhada
+ * igual à lua do B"*): o biomecânico INTEIRO por cima da lua da colônia, que aparece PERTO, embaixo, com a
+ * atmosfera acesa. O fundo é o céu do zero-G espelhado (`f8-fundo-ferida.png`) — a pintura da decolagem
+ * reaproveitada, mas não igual ao começo. A queda do capítulo 5 vira consequência do que se vê: o corpo já está
+ * sobre ela.
  *
- * O Leviatã é RECORTADO do conceito aprovado (`scripts/_f8/_recortar-leviata.mjs`), não gerado de novo: é o
- * biomecânico certo, com a ferida no lugar, e na mesma posição do conceito (x=19, y=41 — ver `_leviata-caixa.json`).
- * O corpo vem com a lava APAGADA; a camada de lava por cima pulsa fraca — ele ainda está morrendo.
+ * O Leviatã é RECORTADO do conceito aprovado (`scripts/_f8/_recortar-leviata.mjs`), não gerado de novo. O corpo
+ * vem com a lava APAGADA; a camada de lava por cima pulsa fraca — ele ainda está morrendo. A nuvem que vinha no
+ * conceito se desfaz em pontilhado (sobre este céu ela lia como mancha); o vazamento segue em partículas.
  *
- * ⚠️ A LUA É FIXA: posição e escala constantes do primeiro ao último quadro do plano (a regra física da spec —
- * astro não cresce sem a câmera ir até ele). A sonda cobra `escalasLua` com UM valor só.
+ * ⚠️ A LUA É FIXA: ela é o próprio fundo, parado o plano todo (a regra física da spec — astro não cresce sem a
+ * câmera ir até ele). A sonda cobra `escalasLua` com UM valor só.
  */
-const LEV_X = 19;
-const LEV_Y = 41;
-/** A ferida, na tela: a boca das costelas abertas, de onde a nave sai (medida no recorte). */
-const FERIDA_X = 225;
-const FERIDA_Y = 110;
-const LUA_X = 340;
-const LUA_Y = 34;
-/** A deriva do corpo no plano todo: devagar, para a direita e para baixo — rumo à lua (a queda começa aqui). */
-const DERIVA_X = 14;
-const DERIVA_Y = 6;
+const LEV_X = 12;
+const LEV_Y = 6;
+/** A ferida, na tela: a boca das costelas abertas, de onde a nave sai (medida no recorte: x=206, y=69). */
+const FERIDA_X = LEV_X + 206;
+const FERIDA_Y = LEV_Y + 69;
+/** A deriva do corpo no plano todo: devagar, para baixo e para a direita — rumo à lua (a queda começa aqui). */
+const DERIVA_X = 10;
+const DERIVA_Y = 16;
 
 export function montarFora(c: CenaFinal): Capitulo {
   const { scene, nave, estado } = c;
   estado.capitulo = 4;
-  const cam = scene.cameras.main;
-  cam.resetFX();
+  scene.cameras.main.resetFX();
 
-  const estrelas = new Starfield(scene);
-  const lua = scene.add.image(LUA_X, LUA_Y, 'f8LuaLonge').setDepth(DEPTH.FUNDO + 1);
+  const fundo = scene.add.image(0, 0, 'f8FundoFerida').setOrigin(0, 0).setDepth(DEPTH.FUNDO);
   const corpo = scene.add.image(LEV_X, LEV_Y, 'f8Leviata').setOrigin(0, 0).setDepth(DEPTH.CENARIO);
   const lava = scene.add.image(LEV_X, LEV_Y, 'f8LeviataLava').setOrigin(0, 0).setDepth(DEPTH.CENARIO + 1);
   // O PULSO da lava: fraco e irregular (dois senos fora de fase) — um coração falhando, não um alarme.
@@ -61,26 +59,23 @@ export function montarFora(c: CenaFinal): Capitulo {
     .setDepth(DEPTH.CENARIO + 2);
 
   const dur = T.QUEDA - T.FERIDA;
-  scene.tweens.add({ targets: [corpo, lava], x: `+=${DERIVA_X}`, y: `+=${DERIVA_Y}`, duration: dur, ease: 'Sine.easeIn' });
-  scene.tweens.add({ targets: [fluido, gotas], x: `+=${DERIVA_X}`, y: `+=${DERIVA_Y}`, duration: dur, ease: 'Sine.easeIn' });
+  scene.tweens.add({ targets: [corpo, lava, fluido, gotas], x: `+=${DERIVA_X}`, y: `+=${DERIVA_Y}`, duration: dur, ease: 'Sine.easeIn' });
 
   // A NAVE sai DA FERIDA rolando e CRESCENDO — o espelho de quando sumiu pela fenda, encolhendo (capítulo 3):
-  // lá ela foi para dentro, aqui vem de dentro para fora. Estabiliza e se afasta para a direita.
+  // lá ela foi para dentro, aqui vem de dentro para fora. Estabiliza e se afasta, para cima e para a direita.
   nave.setVisible(true).setScale(0.15).setFlipX(false).setAngle(-540).setPosition(FERIDA_X, FERIDA_Y);
   scene.tweens.add({ targets: nave, scale: 1, duration: 1300, ease: 'Quad.easeOut' });
-  scene.tweens.add({ targets: nave, angle: 0, x: FERIDA_X + 70, y: FERIDA_Y - 8, duration: 2200, ease: 'Cubic.easeOut' });
-  scene.tweens.add({ targets: nave, x: 356, y: 70, delay: 2400, duration: dur - 2400, ease: 'Sine.easeInOut' });
+  scene.tweens.add({ targets: nave, angle: 0, x: FERIDA_X + 60, y: FERIDA_Y - 14, duration: 2200, ease: 'Cubic.easeOut' });
+  scene.tweens.add({ targets: nave, x: 360, y: 26, delay: 2400, duration: dur - 2400, ease: 'Sine.easeInOut' });
 
   return {
     update(dt: number) {
       t += dt;
-      estrelas.update(dt);
       lava.setAlpha(0.55 + 0.3 * Math.sin(t * 2.1) * Math.sin(t * 0.7 + 1));
-      estado.escalasLua.push(+lua.scaleX.toFixed(3));
+      estado.escalasLua.push(+fundo.scaleX.toFixed(3));
     },
     limpar() {
-      estrelas.destroy();
-      [lua, corpo, lava, fluido, gotas].forEach((o) => o.destroy());
+      [fundo, corpo, lava, fluido, gotas].forEach((o) => o.destroy());
     },
   };
 }

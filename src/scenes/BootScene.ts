@@ -448,7 +448,8 @@ const ART: Record<string, string> = {
   // numa camada que pulsa — `scripts/_f8/_recortar-leviata.mjs`) e a lua do menu reduzida fora do jogo.
   f8Leviata: 'sprites/f8-leviata.png',
   f8LeviataLava: 'sprites/f8-leviata-lava.png',
-  f8LuaLonge: 'sprites/f8-lua-longe.png',
+  // O céu da ferida: o zero-G ESPELHADO (a lua da colônia perto, embaixo) — o arranjo D que ele escolheu.
+  f8FundoFerida: 'sprites/f8-fundo-ferida.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
   // o jogo roda com as três, e a arte entra depois.
   ship2: 'sprites/ship-2.png',
