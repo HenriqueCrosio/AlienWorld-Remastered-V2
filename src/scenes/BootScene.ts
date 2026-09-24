@@ -367,6 +367,9 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // Os pedaços do estouro: as formas das vísceras da F4 repintadas na rampa vermelha da câmara D
   // (`scripts/_f8/_repintar-pedacos.mjs`) — a folha original é ROXA, a matéria do esfíncter.
   f8PedacosSheet: { path: 'sprites/f8-pedacos-sheet.png', w: 39, h: 61 },
+  // Capítulo 5: o corpo em brasa em 12 tamanhos ASSADOS (do inteiro a 18%) — ele encolhe caindo, se afastando
+  // (`scripts/_f8/_gerar-queda.mjs escalas`). Todos centrados no quadro do inteiro.
+  f8ReentradaEscalas: { path: 'sprites/f8-reentrada-escalas.png', w: 170, h: 161 },
   // P3: o que o vácuo puxa pelo rasgo — rastros, gota de lava, tendão, osso, tecido (16×16, assadas).
   f8SuccaoSheet: { path: 'sprites/f8-succao-sheet.png', w: 16, h: 16 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
@@ -454,7 +457,6 @@ const ART: Record<string, string> = {
   // à frente do corpo (é ele que engole o bicho no horizonte) e o corpo em brasa recortado do conceito 5★.
   f8LuaPerto: 'sprites/f8-lua-perto.png',
   f8LuaPertoChao: 'sprites/f8-lua-perto-chao.png',
-  f8Reentrada: 'sprites/f8-reentrada.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
   // o jogo roda com as três, e a arte entra depois.
   ship2: 'sprites/ship-2.png',

@@ -108,3 +108,27 @@ if (modo === 'superficie') {
   fs.writeFileSync('scripts/_f8/_horizonte.json', JSON.stringify(horizonte));
   console.log(`f8-lua-perto-chao.png · horizonte de y=${Math.min(...horizonte)} a ${Math.max(...horizonte)}`);
 }
+
+if (modo === 'escalas') {
+  // A PERSPECTIVA DA QUEDA (24/09): *"enquanto o leviatã cai, ele vai diminuindo de tamanho para parecer que ele
+  // vai se distanciando até cair na lua (o leviatã é grande, mas não do tamanho de uma lua)"*. Reduzir no motor a
+  // cada quadro cintila a pixel art; então os tamanhos são ASSADOS aqui (redução com filtro bom, fora do jogo —
+  // reduzir pode) e a cena troca de quadro conforme ele cai. N passos em progressão geométrica, do inteiro a FIM.
+  // Todos no mesmo quadro (o tamanho do inteiro), CENTRADOS — a cena ancora pelo centro.
+  const N = 12, FIM = 0.18;
+  const SRC = 'public/sprites/f8-reentrada.png';
+  const m = await sharp(SRC).metadata();
+  const quadros = [];
+  for (let k = 0; k < N; k++) {
+    const e = Math.pow(FIM, k / (N - 1));
+    const w = Math.max(4, Math.round(m.width * e)), h = Math.max(4, Math.round(m.height * e));
+    const img = k === 0 ? await sharp(SRC).png().toBuffer() : await sharp(SRC).resize(w, h, { kernel: 'lanczos3' }).png().toBuffer();
+    // o lanczos cria meio-alfa nas bordas: pixel art não tem — corta em 50%
+    const { data, info } = await sharp(img).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    for (let i = 3; i < data.length; i += 4) data[i] = data[i] >= 128 ? 255 : 0;
+    quadros.push({ input: await sharp(data, { raw: info }).png().toBuffer(), left: k * m.width + Math.round((m.width - info.width) / 2), top: Math.round((m.height - info.height) / 2) });
+  }
+  await sharp({ create: { width: m.width * N, height: m.height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite(quadros).png().toFile('public/sprites/f8-reentrada-escalas.png');
+  console.log(`f8-reentrada-escalas.png: ${N} tamanhos de ${m.width}×${m.height}, do inteiro a ${FIM}`);
+}
