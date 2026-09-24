@@ -58,6 +58,26 @@ type Retangulo = { x: number; y: number; w: number; h: number };
 /** A bola de lava (arco), a gota do estilhaço (reta) e o metal incandescente do rasgo (arco, não estilhaça). */
 type TipoLava = 'bola' | 'gota' | 'metal';
 
+/**
+ * A LUZ REDONDA de verdade: degradê radial que chega a ZERO antes da borda do quadro. ⚠️ A 1ª versão (anéis de
+ * alpha somados) tinha alpha > 0 na borda — em ADD e ampliada, lia como RETÂNGULO (16/09). Exportada porque a
+ * cutscene final (a queda) usa a mesma luz sem haver predador na cena (pelo atalho F do menu, ela não existiria).
+ */
+export function garantirLuzRadial(scene: Phaser.Scene): void {
+  if (scene.textures.exists('luzRadial')) return;
+  const tex = scene.textures.createCanvas('luzRadial', 64, 64);
+  if (!tex) return;
+  const ctx = tex.getContext();
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 31);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.25, 'rgba(255,255,255,0.55)');
+  grad.addColorStop(0.6, 'rgba(255,255,255,0.15)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+  tex.refresh();
+}
+
 export class Predador {
   // ─── Knobs ───
   static readonly HP = 180;
@@ -258,22 +278,7 @@ export class Predador {
   ) {
     this.criarAnims();
     this.criarLava();
-    if (!scene.textures.exists('luzRadial')) {
-      // Uma luz redonda de verdade: degradê radial que chega a ZERO antes da borda do quadro. ⚠️ A 1ª versão
-      // (anéis de alpha somados) tinha alpha > 0 na borda — em ADD e ampliada, lia como RETÂNGULO (16/09).
-      const tex = scene.textures.createCanvas('luzRadial', 64, 64);
-      if (tex) {
-        const ctx = tex.getContext();
-        const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 31);
-        grad.addColorStop(0, 'rgba(255,255,255,1)');
-        grad.addColorStop(0.25, 'rgba(255,255,255,0.55)');
-        grad.addColorStop(0.6, 'rgba(255,255,255,0.15)');
-        grad.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 64, 64);
-        tex.refresh();
-      }
-    }
+    garantirLuzRadial(scene);
 
     // A LUZ DO CORE: existe sempre (às claras é o brilho do peito; na carga é o telégrafo; no breu é
     // a única coisa que mostra onde ele está).

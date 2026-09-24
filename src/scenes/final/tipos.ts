@@ -21,6 +21,8 @@ export interface EstadoFinal {
   lavaCarcaca: number | null;
   /** true quando a nave terminou de ser sugada pela fenda (capítulo 3) — ela SOME, não fica derivando. */
   naveSumiu: boolean;
+  /** true quando o corpo bateu atrás do horizonte (capítulo 5). */
+  impacto: boolean;
 }
 
 /** O que todo capítulo recebe da regente. */

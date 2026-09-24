@@ -99,7 +99,16 @@ ok(c4b.nave.visivel && c4b.nave.flipX === false, 'a nave está lá fora, apontan
 ok(c4b.faltando === 0, `toda a arte da ferida carregou (${c4b.faltando} faltando)`);
 await page.screenshot({ path: 'probe-interlude4-cap4.png' });
 
-// ─── [CAPÍTULOS 5–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
+// ─── CAPÍTULO 5 — A QUEDA: o corpo em brasa entra na lua, por corte; a nave fora do plano ───
+const c5 = await espera('cap 5    ', (e) => e.capitulo === 5, 12000);
+ok(c5.capitulo === 5, `o corte para a queda (capitulo=${c5.capitulo})`);
+ok(c5.nave.visivel === false, 'na queda, a câmera está com o CORPO: a nave fora do plano');
+ok(c5.faltando === 0, `toda a arte da queda carregou (${c5.faltando} faltando)`);
+const c5b = await espera('cap 5 imp', (e) => e.impacto === true, 8000);
+ok(c5b.impacto === true, 'o corpo bate atrás do horizonte');
+await page.screenshot({ path: 'probe-interlude4-cap5.png' });
+
+// ─── [CAPÍTULOS 6–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
 
 // ─── O fim: a tela de vitória da FASE 4, com o crédito ───
 await espera('fim      ', (e) => e.cena === 'GameOver', 70000);
