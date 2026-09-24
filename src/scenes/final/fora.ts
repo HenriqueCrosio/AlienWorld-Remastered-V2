@@ -20,9 +20,6 @@ const LEV_Y = 6;
 /** A ferida, na tela: a boca das costelas abertas, de onde a nave sai (medida no recorte: x=206, y=69). */
 const FERIDA_X = LEV_X + 206;
 const FERIDA_Y = LEV_Y + 69;
-/** A região animada da ferida no recorte (`scripts/_f8/_ferida-regiao.json`) e o passo do vai-e-vem. */
-const FERIDA_REGIAO_X = 100;
-const FERIDA_MS = 150;
 /** A deriva do corpo no plano todo: devagar, para baixo e para a direita — rumo à lua (a queda começa aqui). */
 const DERIVA_X = 10;
 const DERIVA_Y = 16;
@@ -34,23 +31,7 @@ export function montarFora(c: CenaFinal): Capitulo {
 
   const fundo = scene.add.image(0, 0, 'f8FundoFerida').setOrigin(0, 0).setDepth(DEPTH.FUNDO);
   const corpo = scene.add.image(LEV_X, LEV_Y, 'f8Leviata').setOrigin(0, 0).setDepth(DEPTH.CENARIO);
-  // A lava pulsante FORA da ferida — dentro dela, a lava vem na própria animação (duas lavas seriam fantasma).
-  const lava = scene.add.image(LEV_X, LEV_Y, 'f8LeviataLavaFora').setOrigin(0, 0).setDepth(DEPTH.CENARIO + 1);
-  // A FERIDA VIVA (24/09): o coração deste plano, como o núcleo foi o da câmara D — as costelas arfam, a carne
-  // contrai, a lava lateja (v3 sobre a própria região, `scripts/_f8/_gerar-ferida-viva.mjs`, seed 3), em vai-e-vem.
-  const ferida = scene.add.image(LEV_X + FERIDA_REGIAO_X, LEV_Y, 'f8Ferida', 0).setOrigin(0, 0).setDepth(DEPTH.CENARIO + 1);
-  const nFerida = ferida.texture.frameTotal - 1; // o Phaser conta o `__BASE`
-  let qf = 0;
-  let sf = 1;
-  const bater = scene.time.addEvent({
-    delay: FERIDA_MS,
-    loop: true,
-    callback: () => {
-      qf += sf;
-      if (qf >= nFerida - 1 || qf <= 0) sf = -sf;
-      ferida.setFrame(qf);
-    },
-  });
+  const lava = scene.add.image(LEV_X, LEV_Y, 'f8LeviataLava').setOrigin(0, 0).setDepth(DEPTH.CENARIO + 1);
   // O PULSO da lava: fraco e irregular (dois senos fora de fase) — um coração falhando, não um alarme.
   let t = 0;
 
@@ -78,7 +59,7 @@ export function montarFora(c: CenaFinal): Capitulo {
     .setDepth(DEPTH.CENARIO + 2);
 
   const dur = T.QUEDA - T.FERIDA;
-  scene.tweens.add({ targets: [corpo, lava, ferida, fluido, gotas], x: `+=${DERIVA_X}`, y: `+=${DERIVA_Y}`, duration: dur, ease: 'Sine.easeIn' });
+  scene.tweens.add({ targets: [corpo, lava, fluido, gotas], x: `+=${DERIVA_X}`, y: `+=${DERIVA_Y}`, duration: dur, ease: 'Sine.easeIn' });
 
   // A NAVE sai DA FERIDA rolando e CRESCENDO — o espelho de quando sumiu pela fenda, encolhendo (capítulo 3):
   // lá ela foi para dentro, aqui vem de dentro para fora. Estabiliza e se afasta, para cima e para a direita.
@@ -94,8 +75,7 @@ export function montarFora(c: CenaFinal): Capitulo {
       estado.escalasLua.push(+fundo.scaleX.toFixed(3));
     },
     limpar() {
-      bater.remove();
-      [fundo, corpo, lava, ferida, fluido, gotas].forEach((o) => o.destroy());
+      [fundo, corpo, lava, fluido, gotas].forEach((o) => o.destroy());
     },
   };
 }
