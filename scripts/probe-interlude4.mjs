@@ -88,7 +88,18 @@ const c3c = await espera('cap 3 fim', (e) => e.naveSumiu === true, 5000);
 ok(c3c.naveSumiu === true && c3c.nave.visivel === false, 'a nave SOME pela fenda antes do corte (não fica derivando)');
 await page.screenshot({ path: 'probe-interlude4-cap3.png' });
 
-// ─── [CAPÍTULOS 4–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
+// ─── CAPÍTULO 4 — A FERIDA: fora, o biomecânico aberto; a nave sai de dentro dele; a lua PARADA ───
+const c4 = await espera('cap 4    ', (e) => e.capitulo === 4, 8000);
+ok(c4.capitulo === 4, `o corte para fora (capitulo=${c4.capitulo})`);
+await page.waitForTimeout(3000);
+const c4b = await estado();
+const escalas = [...new Set(c4b.escalasLua ?? [])];
+ok(escalas.length === 1, `a lua NÃO muda de escala no plano (${escalas.join(',')})`);
+ok(c4b.nave.visivel && c4b.nave.flipX === false, 'a nave está lá fora, apontando para a direita');
+ok(c4b.faltando === 0, `toda a arte da ferida carregou (${c4b.faltando} faltando)`);
+await page.screenshot({ path: 'probe-interlude4-cap4.png' });
+
+// ─── [CAPÍTULOS 5–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
 
 // ─── O fim: a tela de vitória da FASE 4, com o crédito ───
 await espera('fim      ', (e) => e.cena === 'GameOver', 70000);

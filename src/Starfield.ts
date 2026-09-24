@@ -38,6 +38,12 @@ export class Starfield {
     }
   }
 
+  /** Tira as estrelas da tela: o corte de um plano de espaço para outro (a cutscene final, capítulo 4 → 5). */
+  destroy(): void {
+    this.gfx.destroy();
+    this.stars.length = 0;
+  }
+
   update(dt: number): void {
     this.gfx.clear();
 

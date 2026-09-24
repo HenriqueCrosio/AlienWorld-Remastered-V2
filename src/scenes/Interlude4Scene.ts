@@ -7,6 +7,7 @@ import { T } from './final/tempos';
 import { DEPTH, type CenaFinal, type Capitulo, type EstadoFinal } from './final/tipos';
 import { montarDentro } from './final/dentro';
 import { montarProvisorio } from './final/provisorio';
+import { montarFora } from './final/fora';
 
 /**
  * O AFASTAMENTO — a cutscene FINAL, refeita na Fatia 8 (spec 2026-09-23-fatia8-cutscene-final-design.md).
@@ -95,7 +96,7 @@ export class Interlude4Scene extends Phaser.Scene {
 
     // OS CAPÍTULOS, NA LINHA DO TEMPO. Os que ainda não existem são marcadores (`provisorio.ts`): a cena anda
     // pelos tempos reais enquanto é construída — cada tarefa troca o seu marcador pelo capítulo de verdade.
-    this.aos(T.FERIDA, () => montarProvisorio(this.cena, 4, 'A FERIDA'));
+    this.aos(T.FERIDA, () => montarFora(this.cena));
     this.aos(T.QUEDA, () => montarProvisorio(this.cena, 5, 'A QUEDA'));
     this.aos(T.SOBREVOO, () => montarProvisorio(this.cena, 6, 'O SOBREVOO'));
     this.aos(T.APAGA, () => montarProvisorio(this.cena, 7, 'A LUZ SE APAGA'));

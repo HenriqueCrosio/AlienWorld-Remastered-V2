@@ -444,6 +444,11 @@ function animFrames(prefix: string, file: string): Record<string, string> {
  */
 const ART: Record<string, string> = {
   ship: 'sprites/ship.png',
+  // FATIA 8 · capítulo 4, A FERIDA: o Leviatã RECORTADO do conceito aprovado (corpo com a lava apagada + a lava
+  // numa camada que pulsa — `scripts/_f8/_recortar-leviata.mjs`) e a lua do menu reduzida fora do jogo.
+  f8Leviata: 'sprites/f8-leviata.png',
+  f8LeviataLava: 'sprites/f8-leviata-lava.png',
+  f8LuaLonge: 'sprites/f8-lua-longe.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
   // o jogo roda com as três, e a arte entra depois.
   ship2: 'sprites/ship-2.png',
