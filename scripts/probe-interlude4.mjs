@@ -31,6 +31,9 @@ const estado = () =>
       cena: s.scene.key,
       ...s.estado,
       nave: { x: Math.round(s.ship.x), y: Math.round(s.ship.y), id: s.naveId, flipX: s.ship.flipX, visivel: s.ship.visible },
+      // ⚠️ A LIÇÃO DE 24/09: a sonda contava os quadros da pulsação enquanto a tela desenhava `__MISSING` (a folha
+      // nem carregava). Contar quadro não prova arte na tela — isto prova.
+      faltando: s.children.list.filter((o) => o.texture?.key === '__MISSING').length,
       baleias: ['leviathanWhale', 'leviathanWhaleDying', 'leviathanWhaleDyingSheet', 'leviathanWhaleSplit'].filter((k) => tex.exists(k)),
     };
   });
@@ -61,11 +64,29 @@ ok(c1.nave?.id === 'alien', `a nave é a escolhida (id=${c1.nave?.id})`);
 // ±3 no y: a nave TREME no capítulo 1 (até 2px de amplitude) — a tolerância é o tremor, não folga.
 ok(c1.nave?.x === 120 && Math.abs((c1.nave?.y ?? 0) - 110) <= 3, `a nave está na posição padrão do menu (${c1.nave?.x},${c1.nave?.y})`);
 ok(c1.baleias?.length === 0, `nenhuma baleia errada carregada (${c1.baleias?.join(',')})`);
-const c1b = await espera('cap 1 rachas', (e) => (e.rachadura ?? -1) >= 5, 8000);
-ok(c1b.rachadura >= 5, `as rachaduras avançam pela pintura (quadro=${c1b.rachadura})`);
+const c1b = await espera('cap 1 pulso', (e) => (e.rachadura ?? -1) >= 5, 8000);
+ok(c1b.rachadura >= 5, `o núcleo PULSA (${c1b.rachadura} quadros avançados)`);
+ok(c1b.faltando === 0, `toda a arte do capítulo 1 carregou (${c1b.faltando} texturas faltando)`);
 await page.screenshot({ path: 'probe-interlude4-cap1.png' });
 
-// ─── [CAPÍTULOS 2–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
+// ─── CAPÍTULO 2 — O ESTOURO: a parede arrebenta logo depois, e a música morre ───
+const c2 = await espera('cap 2    ', (e) => e.capitulo === 2 && (e.rasgo ?? -1) >= 3, 6000);
+ok(c2.capitulo === 2, `a parede estourou (capitulo=${c2.capitulo})`);
+ok(c2.rasgo >= 3, `as bordas do rasgo se mexem (quadro=${c2.rasgo})`);
+ok(c2.musicaCortada === true, 'a música MORRE no estouro');
+ok(c2.faltando === 0, `toda a arte do estouro carregou (${c2.faltando} faltando)`);
+await page.screenshot({ path: 'probe-interlude4-cap2.png' });
+
+// ─── CAPÍTULO 3 — DESCOMPRESSÃO: tudo é sugado, a nave é arrancada girando ───
+const c3 = await espera('cap 3    ', (e) => e.capitulo === 3, 6000);
+ok(c3.capitulo === 3, `a descompressão começou (capitulo=${c3.capitulo})`);
+await page.waitForTimeout(1500);
+const c3b = await estado();
+ok(c3b.nave.x > c3.nave.x, `a nave é PUXADA para o rasgo (x ${c3.nave.x} → ${c3b.nave.x})`);
+ok(c3b.faltando === 0, `toda a arte da descompressão carregou (${c3b.faltando} faltando)`);
+await page.screenshot({ path: 'probe-interlude4-cap3.png' });
+
+// ─── [CAPÍTULOS 4–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
 
 // ─── O fim: a tela de vitória da FASE 4, com o crédito ───
 await espera('fim      ', (e) => e.cena === 'GameOver', 70000);

@@ -1,7 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH } from '../config';
 import { resetVariantCache } from '../art';
-import { pixelText } from '../ui';
 import { Fx } from '../systems/Fx';
 import { SHIPS, DEFAULT_SHIP } from '../ships';
 import type { HandlingMode } from './GameScene';
@@ -90,7 +88,8 @@ export class Interlude4Scene extends Phaser.Scene {
 
     const costura = data.costura === true && this.textures.exists('f8Costura');
     this.troca(montarDentro(this.cena, costura ? 'f8Costura' : 'paintBgF4d'));
-    this.placar();
+    // ⚠️ SEM PLACAR (24/09): com a câmara D durando 1,5s, a faixa do placar cobria o núcleo pulsando — o
+    // único instante de reconhecer o lugar. A pontuação está na tela de vitória, que vem logo depois.
 
     this.time.delayedCall(T.FADE, () => {
       if (!this.done) this.cameras.main.fadeOut(T.FIM - T.FADE, 0, 0, 0);
@@ -106,29 +105,6 @@ export class Interlude4Scene extends Phaser.Scene {
 
   override update(_time: number, delta: number): void {
     this.capitulo?.update?.(delta / 1000);
-  }
-
-  private placar(): void {
-    const banda = this.add.rectangle(0, 64, GAME_WIDTH, 78, COLORS.bgDeep, 0.72).setOrigin(0, 0).setDepth(DEPTH.TEXTO - 1);
-    const t = (y: number, v: string, size: number, color: number) =>
-      pixelText(this, GAME_WIDTH / 2, y, v, { size, color }).setDepth(DEPTH.TEXTO);
-    const linhas = [
-      t(74, 'FASE 4 · O INTERIOR', 11, COLORS.playerBright),
-      t(92, 'CONCLUÍDA', 8, COLORS.metalLight),
-      t(116, String(this.score), 17, COLORS.hotBright),
-      t(132, 'PONTOS', 7, COLORS.metalLight),
-    ];
-    // Sai ANTES do rasgo: o placar não pode estar na tela quando a parede abre.
-    this.tweens.add({
-      targets: [banda, ...linhas],
-      alpha: 0,
-      duration: 700,
-      delay: 2200,
-      onComplete: () => {
-        banda.destroy();
-        linhas.forEach((l) => l.destroy());
-      },
-    });
   }
 
   /** O fim da campanha, com o MESMO payload que a GameScene montaria. */
