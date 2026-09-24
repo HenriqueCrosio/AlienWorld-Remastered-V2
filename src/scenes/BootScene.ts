@@ -398,13 +398,6 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // orgao-v` e `anim-maquinario-v`.
   orgaoAnimSheet: { path: 'sprites/orgao-anim.png', w: 96, h: 128 },
   maquinarioAnimSheet: { path: 'sprites/maquinario-anim.png', w: 96, h: 128 },
-  // O Leviatã-BALEIA (o mesmo do menu) com fissuras pulsando e explosões na espinha (cutscene
-  // final, beat 3). ⚠️ CANVAS QUADRADO 144×144 com a criatura CENTRALIZADA — a âncora é outra
-  // em relação ao sprite estático `leviathanWhaleDying` (140×87 recortado). O centro visual do
-  // bicho no quadro é MEDIDO no PNG (bbox do alfa, média dos quadros) — a Interlude4 posiciona
-  // por ele (Interlude4Scene.LEVI_VIS_*).
-  leviathanWhaleDyingSheet: { path: 'sprites/leviathan-whale-dying-sheet.png', w: 144, h: 144 },
-
   // O LEVIATÃ VIVO (menu "O DESPERTAR"): o objeto canônico biomecânico com a lava das costelas
   // pulsando num ritmo cardíaco e o corpo ondulando. É a cara do jogo. Célula quadrada 116×116
   // (o tamanho impresso por anim-sheet.mjs); 9 quadros lado a lado.
@@ -1005,15 +998,6 @@ const ART: Record<string, string> = {
   // runtime, e contra o fundo novo ele aparecia como uma laje azul-clara de bordas retas no meio
   // do céu. O parallax o desenha com TINT escuro — o que está longe é escuro (ver Parallax.ts).
   leviathan: 'sprites/leviathan.png',
-
-  // O LEVIATÃ-BALEIA MORRENDO e PARTIDO EM DOIS — os dois estados dele na CUTSCENE FINAL
-  // (Interlude4Scene). É A MESMA BALEIA DA KEY ART DO MENU (gerada com ela como style_images):
-  // primeiro o casco rachado com fissuras de lava e explosões na espinha; depois o corpo
-  // rasgado no meio, com o interior incandescente exposto. Paleta Deep Void + laranja #ff8c1a,
-  // nariz à direita (140×87 e 140×75, PixelLab). Sem placeholder: só a cena final os usa.
-  leviathanWhale: 'sprites/leviathan-whale.png',
-  leviathanWhaleDying: 'sprites/leviathan-whale-dying.png',
-  leviathanWhaleSplit: 'sprites/leviathan-whale-split.png',
 
   mtnFar: 'sprites/mtn-far.png',
   mtnFar2: 'sprites/mtn-far-2.png',
