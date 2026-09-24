@@ -108,7 +108,24 @@ const c5b = await espera('cap 5 imp', (e) => e.impacto === true, 8000);
 ok(c5b.impacto === true, 'o corpo bate NA colônia, à vista (não atrás do horizonte)');
 await page.screenshot({ path: 'probe-interlude4-cap5.png' });
 
-// ─── [CAPÍTULOS 6–7 — cada tarefa do plano insere o seu bloco AQUI, em ordem] ───
+// ─── CAPÍTULO 6 — O SOBREVOO: a colônia da F1 em ruínas, a nave voltando para a ESQUERDA ───
+const c6 = await espera('cap 6    ', (e) => e.capitulo === 6, 12000);
+ok(c6.capitulo === 6, `a colônia morta (capitulo=${c6.capitulo})`);
+await page.waitForTimeout(2500);
+const c6a = await estado();
+await page.waitForTimeout(1500);
+const c6b = await estado();
+ok(c6b.nave.flipX === true && c6b.nave.visivel, 'a nave voa virada para a ESQUERDA (o caminho da F1 ao contrário)');
+ok(c6b.nave.x < c6a.nave.x, `e anda para a esquerda (x ${c6a.nave.x} → ${c6b.nave.x})`);
+ok(c6b.faltando === 0, `toda a arte do sobrevoo carregou (${c6b.faltando} faltando)`);
+await page.screenshot({ path: 'probe-interlude4-cap6.png' });
+
+// ─── CAPÍTULO 7 — A LUZ SE APAGA: a lava da carcaça esfria placa por placa até o breu ───
+const c7 = await espera('cap 7    ', (e) => e.capitulo === 7, 15000);
+ok(c7.capitulo === 7, `a câmera fica sobre a carcaça (capitulo=${c7.capitulo})`);
+const c7b = await espera('cap 7 fim', (e) => e.lavaCarcaca === 0, 8000);
+ok(c7b.lavaCarcaca === 0, `a última luz se apagou (lavaCarcaca=${c7b.lavaCarcaca})`);
+await page.screenshot({ path: 'probe-interlude4-cap7.png' });
 
 // ─── O fim: a tela de vitória da FASE 4, com o crédito ───
 await espera('fim      ', (e) => e.cena === 'GameOver', 70000);

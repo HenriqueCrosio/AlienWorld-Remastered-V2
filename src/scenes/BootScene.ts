@@ -370,6 +370,7 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // Capítulo 5: o corpo em brasa em 12 tamanhos ASSADOS (do inteiro a 18%) — ele encolhe caindo, se afastando
   // (`scripts/_f8/_gerar-queda.mjs escalas`). Todos centrados no quadro do inteiro.
   f8ReentradaEscalas: { path: 'sprites/f8-reentrada-escalas.png', w: 170, h: 161 },
+  f8SobrevooLava: { path: 'sprites/f8-sobrevoo-lava-sheet.png', w: 258, h: 96 },
   // P3: o que o vácuo puxa pelo rasgo — rastros, gota de lava, tendão, osso, tecido (16×16, assadas).
   f8SuccaoSheet: { path: 'sprites/f8-succao-sheet.png', w: 16, h: 16 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
@@ -458,6 +459,9 @@ const ART: Record<string, string> = {
   f8LuaPerto: 'sprites/f8-lua-perto.png',
   f8LuaPertoLua: 'sprites/f8-lua-perto-lua.png',
   f8ColoniaLonge: 'sprites/f8-colonia-longe.png',
+  // Capítulos 6–7, O SOBREVOO e A LUZ SE APAGA: o conceito 6★ com o corpo rasgado no meio (seed 44), com a lava da
+  // carcaça APAGADA — ela mora na folha de estágios que esfria placa por placa (`_gerar-sobrevoo.mjs instalar`).
+  f8SobrevooFrio: 'sprites/f8-sobrevoo-frio.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
   // o jogo roda com as três, e a arte entra depois.
   ship2: 'sprites/ship-2.png',

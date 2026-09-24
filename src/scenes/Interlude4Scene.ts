@@ -6,9 +6,9 @@ import type { HandlingMode } from './GameScene';
 import { T } from './final/tempos';
 import { DEPTH, type CenaFinal, type Capitulo, type EstadoFinal } from './final/tipos';
 import { montarDentro } from './final/dentro';
-import { montarProvisorio } from './final/provisorio';
 import { montarFora } from './final/fora';
 import { montarQueda } from './final/queda';
+import { montarSobrevoo } from './final/sobrevoo';
 
 /**
  * O AFASTAMENTO — a cutscene FINAL, refeita na Fatia 8 (spec 2026-09-23-fatia8-cutscene-final-design.md).
@@ -96,12 +96,11 @@ export class Interlude4Scene extends Phaser.Scene {
     // ⚠️ SEM PLACAR (24/09): com a câmara D durando 1,5s, a faixa do placar cobria o núcleo pulsando — o
     // único instante de reconhecer o lugar. A pontuação está na tela de vitória, que vem logo depois.
 
-    // OS CAPÍTULOS, NA LINHA DO TEMPO. Os que ainda não existem são marcadores (`provisorio.ts`): a cena anda
-    // pelos tempos reais enquanto é construída — cada tarefa troca o seu marcador pelo capítulo de verdade.
+    // OS CAPÍTULOS, NA LINHA DO TEMPO.
     this.aos(T.FERIDA, () => montarFora(this.cena));
     this.aos(T.QUEDA, () => montarQueda(this.cena));
-    this.aos(T.SOBREVOO, () => montarProvisorio(this.cena, 6, 'O SOBREVOO'));
-    this.aos(T.APAGA, () => montarProvisorio(this.cena, 7, 'A LUZ SE APAGA'));
+    // os capítulos 6 e 7 são um plano só (a câmera fica): o 7 mora dentro do sobrevoo
+    this.aos(T.SOBREVOO, () => montarSobrevoo(this.cena));
 
     this.time.delayedCall(T.FADE, () => {
       if (!this.done) this.cameras.main.fadeOut(T.FIM - T.FADE, 0, 0, 0);
