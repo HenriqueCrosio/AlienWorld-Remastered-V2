@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../../config';
 import { garantirLuzRadial } from '../../entities/Predador';
 import { pixelText } from '../../ui';
+import { PERFIS } from '../../systems/atmosfera/perfis';
 import { T } from './tempos';
 import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
 
@@ -40,6 +41,7 @@ const RASANTE_MS = 7200;
 export function montarSobrevoo(c: CenaFinal): Capitulo {
   const { scene, nave, estado } = c;
   estado.capitulo = 6;
+  c.atm.perfil(PERFIS.superficie);
   const cam = scene.cameras.main;
   cam.resetFX();
   garantirLuzRadial(scene);
@@ -89,6 +91,8 @@ export function montarSobrevoo(c: CenaFinal): Capitulo {
   // ─── 7 · A LUZ SE APAGA ───
   const apagar = scene.time.delayedCall(T.APAGA - T.SOBREVOO, () => {
     estado.capitulo = 7;
+    // A névoa esfria junto com a lava — mas NÃO some (o piso dele): 4,6s até o fade.
+    c.atm.perfil(PERFIS.apagando, T.FADE - T.APAGA);
     fumacas.forEach((f) => f.stop());
     const dur = T.FADE - T.APAGA - 900;
     scene.tweens.add({ targets: fogos, alpha: 0, duration: dur, ease: 'Sine.easeIn' });

@@ -1,3 +1,4 @@
+import { PERFIS } from '../../systems/atmosfera/perfis';
 import { T } from './tempos';
 import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
 
@@ -34,6 +35,7 @@ const LAVA_FIM = 0.5;
 export function montarFora(c: CenaFinal): Capitulo {
   const { scene, nave, estado } = c;
   estado.capitulo = 4;
+  c.atm.perfil(PERFIS.vacuo);
   scene.cameras.main.resetFX();
 
   const fundo = scene.add.image(0, 0, 'f8FundoFerida').setOrigin(0, 0).setDepth(DEPTH.FUNDO);

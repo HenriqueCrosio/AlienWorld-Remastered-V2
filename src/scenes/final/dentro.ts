@@ -174,6 +174,7 @@ export function montarDentro(c: CenaFinal, fundo: 'f8Costura' | 'paintBgF4d'): C
   eventos.push(
     scene.time.delayedCall(T.DESCOMPRESSAO, () => {
       estado.capitulo = 3;
+      c.atm.perfil(PERFIS.visceraSuccao);
       gotas.stop();
       // Os RASTROS giram para o buraco no nascimento (a folha aponta para a direita, 0°) — sem isso eles
       // liam como TIRO, risquinhos horizontais (folha de 24/09). E os pedaços de tecido vão junto, menores.

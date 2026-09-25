@@ -81,6 +81,7 @@ ok(c2.capitulo === 2, `a parede estourou (capitulo=${c2.capitulo})`);
 ok(c2.rasgo >= 3, `as bordas do rasgo se mexem (quadro=${c2.rasgo})`);
 ok(c2.musicaCortada === true, 'a música MORRE no estouro');
 ok(c2.faltando === 0, `toda a arte do estouro carregou (${c2.faltando} faltando)`);
+ok(c2.atm?.perfil === 'viscera' && c2.atm.densidade >= 0.6, `o estouro segue na víscera (${c2.atm?.perfil}, ${c2.atm?.densidade})`);
 await page.screenshot({ path: 'probe-interlude4-cap2.png' });
 
 // ─── CAPÍTULO 3 — DESCOMPRESSÃO: tudo é sugado, a nave é arrancada girando ───
@@ -90,6 +91,7 @@ await page.waitForTimeout(1500);
 const c3b = await estado();
 ok(c3b.nave.x > c3.nave.x, `a nave é PUXADA para o rasgo (x ${c3.nave.x} → ${c3b.nave.x})`);
 ok(c3b.faltando === 0, `toda a arte da descompressão carregou (${c3b.faltando} faltando)`);
+ok(c3b.atm?.perfil === 'visceraSuccao', `na descompressão, a névoa é arrancada para o rasgo (${c3b.atm?.perfil})`);
 const c3c = await espera('cap 3 fim', (e) => e.naveSumiu === true, 5000);
 ok(c3c.naveSumiu === true && c3c.nave.visivel === false, 'a nave SOME pela fenda antes do corte (não fica derivando)');
 await page.screenshot({ path: 'probe-interlude4-cap3.png' });
@@ -103,6 +105,7 @@ const escalas = [...new Set(c4b.escalasLua ?? [])];
 ok(escalas.length === 1, `a lua NÃO muda de escala no plano (${escalas.join(',')})`);
 ok(c4b.nave.visivel && c4b.nave.flipX === false, 'a nave está lá fora, apontando para a direita');
 ok(c4b.faltando === 0, `toda a arte da ferida carregou (${c4b.faltando} faltando)`);
+ok(c4b.atm?.perfil === 'vacuo' && c4b.atm.densidade >= 0.6, `fora, o vácuo — denso mesmo assim (${c4b.atm?.perfil}, ${c4b.atm?.densidade})`);
 await page.screenshot({ path: 'probe-interlude4-cap4.png' });
 
 // ─── CAPÍTULO 5 — A QUEDA: o corpo em brasa entra na lua, por corte; a nave fora do plano ───
@@ -110,6 +113,7 @@ const c5 = await espera('cap 5    ', (e) => e.capitulo === 5, 12000);
 ok(c5.capitulo === 5, `o corte para a queda (capitulo=${c5.capitulo})`);
 ok(c5.nave.visivel === false, 'na queda, a câmera está com o CORPO: a nave fora do plano');
 ok(c5.faltando === 0, `toda a arte da queda carregou (${c5.faltando} faltando)`);
+ok(c5.atm?.perfil === 'vacuoQueda' && c5.atm.densidade >= 0.6, `na queda, o vácuo mais frio (${c5.atm?.perfil}, ${c5.atm?.densidade})`);
 const c5b = await espera('cap 5 imp', (e) => e.impacto === true, 8000);
 ok(c5b.impacto === true, 'o corpo bate NA colônia, à vista (não atrás do horizonte)');
 await page.screenshot({ path: 'probe-interlude4-cap5.png' });
@@ -124,13 +128,24 @@ const c6b = await estado();
 ok(c6b.nave.flipX === true && c6b.nave.visivel, 'a nave voa virada para a ESQUERDA (o caminho da F1 ao contrário)');
 ok(c6b.nave.x < c6a.nave.x, `e anda para a esquerda (x ${c6a.nave.x} → ${c6b.nave.x})`);
 ok(c6b.faltando === 0, `toda a arte do sobrevoo carregou (${c6b.faltando} faltando)`);
+ok(c6b.atm?.perfil === 'superficie' && c6b.atm.densidade >= 0.6, `na superfície, névoa baixa (${c6b.atm?.perfil}, ${c6b.atm?.densidade})`);
+const bannerLimpo = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const main = s.cameras.main;
+  const limpa = s.cameras.getCamera('limpa');
+  const textos = s.children.list.filter((o) => o.depth >= 100);
+  return { n: textos.length, ok: !!limpa && textos.length > 0 && textos.every((o) => (o.cameraFilter & main.id) !== 0 && (o.cameraFilter & limpa.id) === 0) };
+});
+ok(bannerLimpo.ok, `o banner fica FORA do tratamento, na câmera limpa (${bannerLimpo.n} texto[s])`);
 await page.screenshot({ path: 'probe-interlude4-cap6.png' });
 
 // ─── CAPÍTULO 7 — A LUZ SE APAGA: a lava da carcaça esfria placa por placa até o breu ───
 const c7 = await espera('cap 7    ', (e) => e.capitulo === 7, 15000);
 ok(c7.capitulo === 7, `a câmera fica sobre a carcaça (capitulo=${c7.capitulo})`);
+ok(c7.atm?.perfil === 'apagando', `no apagar, o perfil é o apagando (${c7.atm?.perfil})`);
 const c7b = await espera('cap 7 fim', (e) => e.lavaCarcaca === 0, 8000);
 ok(c7b.lavaCarcaca === 0, `a última luz se apagou (lavaCarcaca=${c7b.lavaCarcaca})`);
+ok((c7b.atm?.gradeQuente ?? 1) < 0.5 && c7b.atm.densidade >= 0.6, `o âmbar esfriou e a névoa NÃO sumiu (gradeQuente=${c7b.atm?.gradeQuente}, densidade=${c7b.atm?.densidade})`);
 await page.screenshot({ path: 'probe-interlude4-cap7.png' });
 
 // ─── O FADE FINAL CHEGA AO PRETO (a correção de 25/09) ───

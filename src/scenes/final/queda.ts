@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { DERIVA_ESPACO } from '../../config';
 import { garantirLuzRadial } from '../../entities/Predador';
+import { PERFIS } from '../../systems/atmosfera/perfis';
 import { T } from './tempos';
 import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
 
@@ -44,6 +45,7 @@ const JANELAS = [
 export function montarQueda(c: CenaFinal): Capitulo {
   const { scene, nave, estado } = c;
   estado.capitulo = 5;
+  c.atm.perfil(PERFIS.vacuoQueda);
   nave.setVisible(false);
   const cam = scene.cameras.main;
   cam.resetFX();
