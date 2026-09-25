@@ -907,3 +907,36 @@ In `docs/HANDOFF.md`, in the 🧭 section "**7 · As dívidas registradas pelas 
 git add docs/superpowers/folhas/2026-09-25/atmos-real-capitulos.png docs/superpowers/plans/2026-09-25-fatia8-retomada-START.md docs/HANDOFF.md src/systems/atmosfera/perfis.ts
 git commit -m "docs(f8): a Atmosfera na cena — a folha real, o registro e a dívida das outras cutscenes"
 ```
+
+---
+
+### Task 5: A Atmosfera nas Cutscenes 1, 2 e 3 (acrescentada em 25/09, a pedido dele)
+
+> *"Se quiser já aproveitar a engine para aplicar nas demais cutscenes do jogo, fique à vontade"* — e a ordem
+> aprovada: **só depois da calibragem da Task 4** (os números calibrados na final valem para todas; aplicar antes
+> seria calibrar quatro cenas duas vezes).
+
+**Files:**
+- Modify: `src/systems/atmosfera/perfis.ts` (perfis novos: `aurora`, `doca`, `hangar` — nomes finais após a folha)
+- Modify: `src/scenes/InterludeScene.ts`, `src/scenes/Interlude2Scene.ts`, `src/scenes/Interlude3Scene.ts`
+- Modify: `scripts/test-atmosfera-perfis.mjs` (os perfis novos existem e respeitam o piso)
+- Create: `docs/superpowers/folhas/2026-09-25/atmos-cutscenes-123.png`
+
+**O caráter proposto (a folha decide os números):**
+
+| Cutscene | Clima |
+|---|---|
+| 1 · Aurora, a aproximação | espaço frio; névoa rala mas presente; poeira lenta — a calmaria antes |
+| 2 · a Doca no cinturão | poeira de asteroide mais densa; halo nas luzes da doca |
+| 3 · o Hangar | interior pesado; névoa baixa e quente, perto da víscera da final |
+
+- [ ] **Step 1: Levantar o que cada cena desenha por cima** (textos, `ShipPanel`, placar) e as profundidades — o
+  `limiteLimpo` de cada cena sai daí (tudo que é UI fica limpo; a nave fica dentro).
+- [ ] **Step 2: Amostrar as cores** de névoa e luz dos fundos de cada cena (a mesma conta de `perfis.ts`).
+- [ ] **Step 3: Folha para ele** — o 1º quadro de cada trecho, ORIGINAL | TRATADO, com os perfis propostos
+  (`_preview-atmos.mjs` adaptado, ou a cena real com a Atmosfera ligada). **Esperar a aprovação do tom.**
+- [ ] **Step 4: Ligar** — em cada cena: `new Atmosfera(this, { limiteLimpo, profundidadePoeira })`, `atm.perfil(...)`,
+  `atm.update(dt)`, e o fade pela Atmosfera. Perfis novos no teste de Node.
+- [ ] **Step 5: Verificar** — `node scripts/test-atmosfera-perfis.mjs`, `npx tsc --noEmit`, as sondas que passam
+  pelas cutscenes (`probe-stage4` atravessa o jogo inteiro) e `probe-menu`.
+- [ ] **Step 6: Commit** — `feat(atmosfera): as cutscenes 1, 2 e 3 na Atmosfera`.
