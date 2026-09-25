@@ -6,6 +6,7 @@
 //
 //   npm run dev  noutro terminal, depois  node scripts/probe-interlude4.mjs
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 
 let falhas = 0;
 const ok = (cond, msg) => {
@@ -131,6 +132,31 @@ ok(c7.capitulo === 7, `a câmera fica sobre a carcaça (capitulo=${c7.capitulo})
 const c7b = await espera('cap 7 fim', (e) => e.lavaCarcaca === 0, 8000);
 ok(c7b.lavaCarcaca === 0, `a última luz se apagou (lavaCarcaca=${c7b.lavaCarcaca})`);
 await page.screenshot({ path: 'probe-interlude4-cap7.png' });
+
+// ─── O FADE FINAL CHEGA AO PRETO (a correção de 25/09) ───
+// ⚠️ A JANELA É CURTA: o fade dura só (T.FIM - T.FADE) e `terminar()` troca de cena assim que ele acaba — um
+// poll do Node a cada 100ms de fora arrisca pular o instante. Por isso a espera roda DENTRO da página, quadro a
+// quadro (`polling: 'raf'`, sem ida-e-volta), lendo `escuro` direto do pipeline (a lição de sempre: o estado, não
+// o relógio) — e ele só CRESCE até a troca de cena, então o screenshot logo depois do resolve fica igual ou mais
+// escuro, nunca mais claro.
+let achouFadePreto = true;
+try {
+  await page.waitForFunction(
+    () => {
+      const s = window.__game.scene.getScenes(true)[0];
+      return s?.scene.key === 'Interlude4' && (s.atm?.pipeline?.escuro ?? 0) >= 0.95;
+    },
+    null,
+    { timeout: 10000, polling: 'raf' },
+  );
+} catch {
+  achouFadePreto = false;
+}
+ok(achouFadePreto, 'o fade final atinge escuro>=0,95 ainda na Interlude4 (a janela não passou batida)');
+const fotoFade = await page.screenshot();
+const { channels } = await sharp(fotoFade).greyscale().stats();
+const luminancia = channels[0].mean;
+ok(luminancia < 6, `o fade final chega ao PRETO (luminância média=${luminancia.toFixed(2)})`);
 
 // ─── O fim: a tela de vitória da FASE 4, com o crédito ───
 await espera('fim      ', (e) => e.cena === 'GameOver', 70000);

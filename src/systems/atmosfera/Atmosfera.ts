@@ -111,6 +111,13 @@ export class Atmosfera {
     }
     this.pipeline.perfil = this.atual;
     this.pipeline.tempo = this.tempo;
+    // O FADE PARA O PRETO (spec da correção de 25/09): o `WebGLRenderer#postRenderCamera` desenha o fade da
+    // câmera principal ANTES do shader (`postBatchCamera`), então sem repassar o progresso pro pipeline o fade
+    // "final" passa por dentro da Atmosfera e vira névoa em movimento em vez de preto. `fadeEffect.progress` (não
+    // `.alpha`, que o `phaser.d.ts` mantém privado) serve igual: aqui só se usa `fadeOut` — nunca `fadeIn` — e
+    // nesse sentido (`direction = true`) o Phaser faz `alpha === progress` (`Fade.js#update`).
+    const fade = this.scene.cameras.main.fadeEffect;
+    this.pipeline.escuro = fade.isRunning || fade.isComplete ? fade.progress : 0;
     this.triar();
   }
 
@@ -175,8 +182,15 @@ export class Atmosfera {
     this.poeira?.destroy();
     this.poeira = null;
     // ⚠️ DESVIO (25/09): o `CameraManager` registra o PRÓPRIO `SHUTDOWN` no boot da cena, antes do nosso —
-    // ele dispara primeiro, zera `cameras.main` e destrói todas as câmeras. `main` já pode não existir aqui.
-    this.scene.cameras.main?.removePostPipeline(CHAVE_ATMOSFERA);
+    // ele dispara primeiro, zera `cameras.main` e destrói todas as câmeras. `Camera#destroy` só chama
+    // `resetFX()` (rotação/pan/shake/flash/fade), que NÃO conhece post-pipeline: sem isto, nem a câmera nem o
+    // `CameraManager` jamais destruíam o `AtmosferaPipeline` — cada corrida vazava a instância e os RenderTargets.
+    const main = this.scene.cameras.main;
+    if (main) {
+      main.removePostPipeline(CHAVE_ATMOSFERA); // já destrói a instância por dentro (`PostPipeline#removePostPipeline`)
+    } else {
+      this.pipeline?.destroy(); // o caso de sempre: `main` já não existe, então destrua DIRETO
+    }
     if (this.limpa) this.scene.cameras.remove(this.limpa);
     this.limpa = null;
     this.pipeline = null;

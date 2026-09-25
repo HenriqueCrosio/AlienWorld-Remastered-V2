@@ -34,6 +34,7 @@ uniform float uGrade;
 uniform float uGradeQuente;
 uniform float uVinheta;
 uniform float uGrao;
+uniform float uEscuro;
 
 varying vec2 outTexCoord;
 
@@ -66,7 +67,6 @@ void main() {
   // y de TELA (0 = topo): a textura do framebuffer vem com y de baixo para cima.
   vec2 tela = vec2(px.x, uResolucao.y - 1.0 - px.y);
   vec3 cor = texture2D(uMainSampler, (px + 0.5) / uResolucao).rgb;
-  vec3 original = cor;
   float d = bayer4(px);
 
   // 1 · NÉVOA — duas camadas; a velocidade é a da TELA (a amostra anda ao contrário).
@@ -87,6 +87,7 @@ void main() {
   float v = floor(min(1.0, soma / 49.0 * 2.4) * 4.0 + d - 0.5) / 4.0;
   float respira = 0.8 + 0.2 * sin(uTempo * 6.2831853 / 2.4);
   cor += uCorHalo * max(v, 0.0) * uForcaHalo * respira;
+  cor = clamp(cor, 0.0, 1.0);
 
   // 3 · CORREÇÃO DE COR — sombra para o petróleo, luz para o âmbar.
   float l = dot(clamp(cor, 0.0, 1.0), vec3(0.299, 0.587, 0.114));
@@ -103,6 +104,11 @@ void main() {
   float g = hash(px, uQuadroGrao) + hash(px + 17.0, uQuadroGrao + 0.3) + hash(px + 43.0, uQuadroGrao + 0.7) - 1.5;
   cor += g * uGrao * 9.0 / 255.0;
 
+  // 6 · O FADE PARA O PRETO — por CIMA de tudo (névoa, grade, grão). O Phaser desenha o fade da câmera
+  // ANTES do postBatchCamera (WebGLRenderer#postRenderCamera), então sem isto o fade final passava pelo
+  // shader e virava névoa cinza-azulada em movimento em vez de chegar ao preto (a lição de 25/09).
+  cor *= 1.0 - uEscuro;
+
   gl_FragColor = vec4(clamp(cor, 0.0, 1.0), 1.0);
 }
 `;
@@ -112,6 +118,8 @@ export class AtmosferaPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPip
   perfil: PerfilAtmosfera | null = null;
   /** Segundos desde que a Atmosfera nasceu. */
   tempo = 0;
+  /** O fade da câmera principal (0 = nada, 1 = tela toda preta). Escrito pelo controlador a cada quadro. */
+  escuro = 0;
 
   constructor(game: Phaser.Game) {
     super({ game, name: CHAVE_ATMOSFERA, fragShader: FRAG });
@@ -122,6 +130,7 @@ export class AtmosferaPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPip
     this.set2f('uResolucao', this.renderer.width, this.renderer.height);
     this.set1f('uTempo', this.tempo);
     this.set1f('uQuadroGrao', Math.floor(this.tempo * 12));
+    this.set1f('uEscuro', this.escuro);
     if (!p) {
       this.set1f('uDensidade', 0);
       this.set1f('uForcaHalo', 0);
