@@ -41,7 +41,8 @@ export interface PerfilAtmosfera {
   gradeQuente: number;
   /** 0–1: quanto a borda escurece. */
   vinheta: number;
-  /** 1 = o grão da prévia (amplitude 9/255). */
+  /** 1 = o grão da prévia (amplitude 9/255). ⚠️ 25/09, ele, vendo a cena: *"acho que o ruido ficou demais, mas é um
+   *  ajuste leve para baixo"* → todos os perfis desceram ~25% (a víscera, de 1 para 0,75). */
   grao: number;
   poeira: {
     /** Quantas partículas de 1 px vivas na tela. */
@@ -64,7 +65,7 @@ const viscera: PerfilAtmosfera = {
   grade: 1,
   gradeQuente: 1,
   vinheta: 0.6,
-  grao: 1,
+  grao: 0.75,
   poeira: { quantidade: 140, cor: [150, 70, 50], deriva: [-3, -2], espalhar: 4 },
 };
 
@@ -85,7 +86,7 @@ export const PERFIS = {
     grade: 1,
     gradeQuente: 1,
     vinheta: 0.5,
-    grao: 0.85,
+    grao: 0.65,
     poeira: { quantidade: 110, cor: [120, 118, 190], deriva: [2, -1], espalhar: 2 },
   },
   /** A queda (cap 5): o do 4, mais frio; o rastro de fogo acende o halo. */
@@ -96,7 +97,7 @@ export const PERFIS = {
     grade: 1,
     gradeQuente: 1,
     vinheta: 0.5,
-    grao: 0.85,
+    grao: 0.65,
     poeira: { quantidade: 110, cor: [115, 114, 175], deriva: [-2, -3], espalhar: 2 },
   },
   /** O sobrevoo (cap 6): névoa baixa, rente ao chão; cinza caindo devagar. */
@@ -107,7 +108,7 @@ export const PERFIS = {
     grade: 1,
     gradeQuente: 1,
     vinheta: 0.55,
-    grao: 0.9,
+    grao: 0.7,
     poeira: { quantidade: 130, cor: [110, 120, 135], deriva: [-3, 6], espalhar: 3 },
   },
   /** A luz se apaga (cap 7): o âmbar sai, a vinheta fecha; o halo apaga sozinho com a lava (é lido da imagem). */
@@ -118,7 +119,7 @@ export const PERFIS = {
     grade: 1,
     gradeQuente: 0,
     vinheta: 0.7,
-    grao: 1,
+    grao: 0.75,
     poeira: { quantidade: 130, cor: [110, 120, 135], deriva: [-3, 6], espalhar: 3 },
   },
 } as const satisfies Record<string, PerfilAtmosfera>;
