@@ -2,7 +2,7 @@
 // descompressão arranca a nave, o Leviatã ferido cai na lua, o sobrevoo espelha a Fase 1 e a luz
 // dele se apaga. SONDA POR ESTADO (a lição de julho): cada trecho ESPERA o estado que vai assertar.
 //
-// ⚠️ Sem tecla de pular: a sonda espera a timeline real (~47s de CENA).
+// ⚠️ Sem tecla de pular: a sonda espera a timeline real (~42s de CENA — `src/scenes/final/tempos.ts`).
 //
 //   npm run dev  noutro terminal, depois  node scripts/probe-interlude4.mjs
 import { chromium } from 'playwright';

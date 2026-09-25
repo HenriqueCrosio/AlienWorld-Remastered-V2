@@ -1,5 +1,10 @@
 # Fatia 8 · A Cutscene Final Refeita: plano de implementação
 
+> 🟠 **ESTADO EM 25/09: as Tasks 1–9 foram executadas; falta a 10 (o teste assistido e o fechamento).** A retomada é
+> `docs/superpowers/plans/2026-09-25-fatia8-retomada-START.md`. ⚠️ A EXECUÇÃO DESVIOU DO PLANO em vários pontos, todos
+> a pedido dele no teste de cada capítulo — o registro está na spec (§8) e o estado real está no START da retomada.
+> O código deste plano vale como ponto de partida, não como descrição do que existe.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** refazer a `Interlude4Scene` ("O AFASTAMENTO") nos sete capítulos da spec

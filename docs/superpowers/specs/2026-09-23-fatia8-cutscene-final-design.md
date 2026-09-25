@@ -165,3 +165,26 @@ para a sonda). Um capítulo se ajusta sem abrir os outros.
 Teste assistido aprovado → sondas verdes → o 🧭 do `docs/HANDOFF.md` marca a etapa 1 como ✅ e
 aponta para a CALIBRAGEM → a dívida das baleias sai da tabela → merge `--no-ff` de
 `feat/cutscene-final-visual` em `main`. **Ao fechar a 8, o passe visual acaba.**
+
+---
+
+## 8 · O QUE MUDOU NA EXECUÇÃO (24–25/09)
+
+Cada mudança veio dele, assistindo a cada capítulo. O estado real está em
+`docs/superpowers/plans/2026-09-25-fatia8-retomada-START.md`.
+
+| Onde | A spec dizia | Ficou | Por quê |
+|---|---|---|---|
+| Linha do tempo | ~47s; capítulo 1 com 5s | **~42s; capítulo 1 com 1,5s** | *"o rasgo na estrutura tem que vir logo depois"* |
+| Capítulo 1 | rachaduras assadas (P1) | **o núcleo pulsando** — a pintura animada pela v3 | *"essas rachaduras lembram teias"* |
+| Capítulo 2 | o rasgo interpolado (P2) | **corte seco** para o rasgado + as bordas se mexendo; o topo **fecha por dentro** | a interpolação longa gera manchas; o recorte reto no topo foi reprovado |
+| Capítulo 3 | a nave sai girando | a nave é puxada, **encolhe e some pela fenda** | ela ficava derivando na boca do buraco |
+| Placar | — (herdado da cena velha) | **saiu da cutscene** | cobria o núcleo, o único instante de reconhecer o lugar |
+| Capítulo 4 | um estado novo gerado do biomecânico (P4) + a nuvem em clipe (P5) | o Leviatã **recortado do conceito 4★**, **imóvel e abatido**; o céu é o **zero-G espelhado** (a lua perto, embaixo) | a geração nova saía fora do modelo; a ferida animada por região quebrava na emenda |
+| Capítulo 5 | o corpo some atrás do horizonte | ele **encolhe caindo** (12 tamanhos assados) e **bate NA colônia, à vista**; atrás da lua, o **abismo da Cutscene 1** | *"o leviatã é grande, mas não do tamanho de uma lua"* · *"o jogador veja ela colidindo com a lua e consequentemente a colonia"* |
+| Capítulo 6 | rolagem em camadas (P7) | **plano fixo e largo** sobre o conceito 6★ com o corpo **rasgado no meio** (entranhas biomecânicas) | a pintura é de um quadro só; a cratera das duas primeiras rodadas foi reprovada |
+| Capítulo 7 | P8 assado sobre a carcaça do P7 | igual, sobre a carcaça do capítulo 6 | — |
+| Sonda | um assert por capítulo | + **`faltando === 0`** em todo capítulo | ela contava quadros de uma folha que nem carregava |
+
+**Ainda em aberto:** o veredito dele nos capítulos 6–7, o corte do M4 (§3) e a variante do pulso (seed 3; a 17 só
+por `?pulso=17`).
