@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { resetVariantCache } from '../art';
 import { Fx } from '../systems/Fx';
+import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { SHIPS, DEFAULT_SHIP } from '../ships';
 import type { HandlingMode } from './GameScene';
 import { T } from './final/tempos';
@@ -24,6 +25,8 @@ import { montarSobrevoo } from './final/sobrevoo';
  */
 export class Interlude4Scene extends Phaser.Scene {
   private fx!: Fx;
+  /** Lido pela sonda (`atm.estado()`). */
+  private atm!: Atmosfera;
   private ship!: Phaser.GameObjects.Sprite;
   private cena!: CenaFinal;
   private capitulo: Capitulo | null = null;
@@ -80,6 +83,8 @@ export class Interlude4Scene extends Phaser.Scene {
 
     resetVariantCache();
     this.fx = new Fx(this);
+    // A ATMOSFERA (spec 2026-09-25): o texto fica limpo; a poeira mora logo abaixo da nave.
+    this.atm = new Atmosfera(this, { limiteLimpo: DEPTH.TEXTO, profundidadePoeira: DEPTH.NAVE - 1 });
 
     const nave = SHIPS[this.naveId];
     const naveTex = this.textures.exists(nave.texture) ? nave.texture : 'ship';
@@ -89,7 +94,7 @@ export class Interlude4Scene extends Phaser.Scene {
     const naveAnim = naveTex === nave.texture ? (nave.anim ?? 'ship-thrust') : 'ship-thrust';
     if (this.anims.exists(naveAnim)) this.ship.play(naveAnim);
 
-    this.cena = { scene: this, fx: this.fx, nave: this.ship, estado: this.estado };
+    this.cena = { scene: this, fx: this.fx, nave: this.ship, estado: this.estado, atm: this.atm };
 
     const costura = data.costura === true && this.textures.exists('f8Costura');
     this.troca(montarDentro(this.cena, costura ? 'f8Costura' : 'paintBgF4d'));
@@ -103,7 +108,7 @@ export class Interlude4Scene extends Phaser.Scene {
     this.aos(T.SOBREVOO, () => montarSobrevoo(this.cena));
 
     this.time.delayedCall(T.FADE, () => {
-      if (!this.done) this.cameras.main.fadeOut(T.FIM - T.FADE, 0, 0, 0);
+      if (!this.done) this.atm.fadeOut(T.FIM - T.FADE);
     });
     this.time.delayedCall(T.FIM, () => this.terminar());
   }
@@ -123,6 +128,7 @@ export class Interlude4Scene extends Phaser.Scene {
 
   override update(_time: number, delta: number): void {
     this.capitulo?.update?.(delta / 1000);
+    this.atm.update(delta / 1000);
   }
 
   /** O fim da campanha, com o MESMO payload que a GameScene montaria. */

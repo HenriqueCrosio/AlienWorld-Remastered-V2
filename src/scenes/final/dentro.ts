@@ -3,6 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../../config';
 import { Predador } from '../../entities/Predador';
 import { SOBE_ACIMA_PX } from '../../entities/fimDoPredador';
 import { Music } from '../../systems/Music';
+import { PERFIS } from '../../systems/atmosfera/perfis';
 import { T } from './tempos';
 import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
 
@@ -42,6 +43,7 @@ export function montarDentro(c: CenaFinal, fundo: 'f8Costura' | 'paintBgF4d'): C
   const eventos: Phaser.Time.TimerEvent[] = [];
   estado.capitulo = 1;
   estado.fundo = fundo;
+  c.atm.perfil(PERFIS.viscera);
 
   objetos.push(scene.add.image(0, 0, fundo).setOrigin(0, 0).setDepth(DEPTH.FUNDO));
 

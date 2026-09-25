@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { Fx } from '../../systems/Fx';
+import type { Atmosfera } from '../../systems/atmosfera/Atmosfera';
 
 /** O que a sonda lê da cena (`scene.estado`). Cada capítulo escreve o seu pedaço. */
 export interface EstadoFinal {
@@ -32,6 +33,8 @@ export interface CenaFinal {
   /** A nave que ELE escolheu — uma só, que atravessa os capítulos. */
   nave: Phaser.GameObjects.Sprite;
   estado: EstadoFinal;
+  /** O tratamento atmosférico (névoa, halo, grão): cada capítulo escolhe o próprio perfil. */
+  atm: Atmosfera;
 }
 
 /** Um capítulo montado. `limpar` destrói tudo o que ele pôs na tela: é o corte do próximo. */

@@ -35,6 +35,8 @@ const estado = () =>
       // nem carregava). Contar quadro não prova arte na tela — isto prova.
       faltando: s.children.list.filter((o) => o.texture?.key === '__MISSING').length,
       baleias: ['leviathanWhale', 'leviathanWhaleDying', 'leviathanWhaleDyingSheet', 'leviathanWhaleSplit'].filter((k) => tex.exists(k)),
+      // A ATMOSFERA (spec 2026-09-25): o perfil do capítulo e os números que a sonda cobra.
+      atm: s.atm?.estado() ?? null,
     };
   });
 
@@ -67,6 +69,9 @@ ok(c1.baleias?.length === 0, `nenhuma baleia errada carregada (${c1.baleias?.joi
 const c1b = await espera('cap 1 pulso', (e) => (e.rachadura ?? -1) >= 5, 8000);
 ok(c1b.rachadura >= 5, `o núcleo PULSA (${c1b.rachadura} quadros avançados)`);
 ok(c1b.faltando === 0, `toda a arte do capítulo 1 carregou (${c1b.faltando} texturas faltando)`);
+ok(c1b.atm?.ativo === true, `a Atmosfera está ligada (ativo=${c1b.atm?.ativo})`);
+ok(c1b.atm?.perfil === 'viscera', `dentro do corpo, o perfil é a víscera (${c1b.atm?.perfil})`);
+ok((c1b.atm?.densidade ?? 0) >= 0.6, `a névoa é densa (${c1b.atm?.densidade})`);
 await page.screenshot({ path: 'probe-interlude4-cap1.png' });
 
 // ─── CAPÍTULO 2 — O ESTOURO: a parede arrebenta logo depois, e a música morre ───
