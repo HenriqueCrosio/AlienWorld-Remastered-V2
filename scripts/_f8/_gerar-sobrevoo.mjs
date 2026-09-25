@@ -95,7 +95,11 @@ if (modo === 'instalar') {
   // ⚠️ o limiar pega os tons MÉDIOS da lava também (r>95): com r>150 sobravam rachas laranja fracas no fim do 7
   const quente = (i) => data[i] > 95 && data[i] > data[i + 2] * 1.7 && data[i] > data[i + 1] * 1.25;
   // a região da carcaça (a mesma elipse das rodadas de inpaint, um pouco maior)
-  const naCarcaca = (x, y) => ((x - 214) / 130) ** 2 + ((y - 132) / 58) ** 2 <= 1;
+  // ⚠️ 25/09 — as LUZES DO MORRO caem dentro da elipse e têm a cor da lava: apagavam junto com o bicho (*"logo
+  // acima da cabeça, as luzes da montanha se apagam junto"*). Ficam de fora — elas são o mundo, não a carcaça.
+  const LUZES_DO_MORRO = [[295, 96], [299, 96], [304, 110], [325, 111], [310, 116], [322, 117], [326, 117], [87, 143]];
+  const noMorro = (x, y) => LUZES_DO_MORRO.some(([mx, my]) => Math.abs(x - mx) <= 1 && Math.abs(y - my) <= 1);
+  const naCarcaca = (x, y) => ((x - 214) / 130) ** 2 + ((y - 132) / 58) ** 2 <= 1 && !noMorro(x, y);
   const placa = new Int32Array(W * H).fill(-1);
   let n = 0;
   for (let p0 = 0; p0 < W * H; p0++) {

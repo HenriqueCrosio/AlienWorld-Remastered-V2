@@ -20,7 +20,7 @@ import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
  * estágios (`f8-sobrevoo-lava-sheet.png`). No capítulo 6 a folha fica no estágio 0 — o quadro aceso, como aprovado.
  */
 /** A caixa da lava da carcaça no quadro (`scripts/_f8/_sobrevoo-lava-caixa.json`). */
-const LAVA_X = 86;
+const LAVA_X = 98;
 const LAVA_Y = 93;
 const LAVA_ESTAGIOS = 8;
 /** As bases das duas colunas de fumaça do quadro e os focos de fogo nas cúpulas. */

@@ -370,7 +370,7 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // Capítulo 5: o corpo em brasa em 12 tamanhos ASSADOS (do inteiro a 18%) — ele encolhe caindo, se afastando
   // (`scripts/_f8/_gerar-queda.mjs escalas`). Todos centrados no quadro do inteiro.
   f8ReentradaEscalas: { path: 'sprites/f8-reentrada-escalas.png', w: 170, h: 161 },
-  f8SobrevooLava: { path: 'sprites/f8-sobrevoo-lava-sheet.png', w: 258, h: 96 },
+  f8SobrevooLava: { path: 'sprites/f8-sobrevoo-lava-sheet.png', w: 246, h: 96 },
   // P3: o que o vácuo puxa pelo rasgo — rastros, gota de lava, tendão, osso, tecido (16×16, assadas).
   f8SuccaoSheet: { path: 'sprites/f8-succao-sheet.png', w: 16, h: 16 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
