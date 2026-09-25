@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { DERIVA_ESPACO } from '../../config';
 import { garantirLuzRadial } from '../../entities/Predador';
 import { T } from './tempos';
 import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
@@ -31,9 +32,10 @@ const ESCALA_FIM = 0.18;
 const ULTIMO_QUADRO = 9;
 /** Quanto do capítulo é a queda; o resto é a colônia queimando. */
 const QUEDA_MS = 5000;
-/** A deriva do abismo no capítulo todo — a câmera descendo com o corpo faz o fundo subir. */
-const ABISMO_DE = { x: -96, y: -40 };
-const ABISMO_ATE = { x: -70, y: -6 };
+/** Onde o abismo TERMINA o capítulo (o enquadramento do impacto, aprovado). Ele chega aqui derivando para a esquerda
+ *  na deriva comum do espaço (`DERIVA_ESPACO`, a mesma da Cutscene 1) — 25/09: a deriva antiga (26×34px em 8s, pico
+ *  de ~7px/s) corria demais: *"o movimento precisa ser bem lento… pois se trata do espaço"*. */
+const ABISMO = { x: -70, y: -6 };
 /** As janelas acesas da colônia (em relação ao canto esquerdo de baixo dela) — na redução elas somem da arte. */
 const JANELAS = [
   [2, -6], [8, -4], [12, -5], [16, -4], [22, -5], [29, -4], [34, -5], [41, -4],
@@ -47,8 +49,10 @@ export function montarQueda(c: CenaFinal): Capitulo {
   cam.resetFX();
   garantirLuzRadial(scene);
 
-  const abismo = scene.add.image(ABISMO_DE.x, ABISMO_DE.y, 'paintBgCut1').setOrigin(0, 0).setDepth(DEPTH.FUNDO);
-  scene.tweens.add({ targets: abismo, x: ABISMO_ATE.x, y: ABISMO_ATE.y, duration: T.SOBREVOO - T.QUEDA, ease: 'Sine.easeInOut' });
+  const abismo = scene.add
+    .image(ABISMO.x + DERIVA_ESPACO * ((T.SOBREVOO - T.QUEDA) / 1000), ABISMO.y, 'paintBgCut1')
+    .setOrigin(0, 0)
+    .setDepth(DEPTH.FUNDO);
   const lua = scene.add.image(0, 0, 'f8LuaPertoLua').setOrigin(0, 0).setDepth(DEPTH.FUNDO + 1);
   const colonia = scene.add.image(COLONIA.x, COLONIA.y, 'f8ColoniaLonge').setOrigin(0.5, 1).setDepth(DEPTH.FUNDO + 2);
   const esq = COLONIA.x - colonia.width / 2;
@@ -184,6 +188,9 @@ export function montarQueda(c: CenaFinal): Capitulo {
   });
 
   return {
+    update(dt) {
+      abismo.x -= DERIVA_ESPACO * dt;
+    },
     limpar() {
       queda.remove();
       impacto.remove();

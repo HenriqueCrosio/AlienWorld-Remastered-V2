@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { COLORS, DERIVA_ESPACO, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
@@ -265,7 +265,7 @@ export class InterludeScene extends Phaser.Scene {
     // A pintura deriva bem mais devagar que a F1 (pedido do Henrique: 0.04 corria demais para um
     // fundo que devia ler como DISTANTE) — ~0.4px/s. Na cena de <40s anda ~16px — a folga é
     // 96px (480−384), nunca acaba.
-    if (this.paintedBg) this.paintedBg.x -= 26 * 0.015 * dt;
+    if (this.paintedBg) this.paintedBg.x -= DERIVA_ESPACO * dt;
   }
 
   // ─── O roteiro, em tempos ───────────────────────────────────────────────────
