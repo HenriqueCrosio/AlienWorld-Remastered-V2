@@ -96,7 +96,7 @@ contra arte que mudava — o playtest de balanço é este.
 | GDD pilar 5 (26/09) | *"nenhuma imagem vai crua para a tela"* — avaliar a Atmosfera no **menu** e em cada **fase jogável** (só onde não custar a leitura do pilar 3), com o olho dele. Entra na CALIBRAGEM |
 | ferramenta | **a sonda de VÍDEO**: as sondas fotografam, e beat de explosão só se julga em movimento. Molde em `scripts/_ver-cargueiro-mov.mjs` |
 | ferramenta | a `probe-f4-moldura` pisca ~1 em 3 — o conserto é a AMOSTRAGEM, nunca afrouxar o número (diagnóstico no START da Fatia 7) |
-| repositório | as `feat/*` mergeadas do `origin` foram apagadas em 23/09; restam **7 locais** já na `main` (`git branch -d`), quando ele quiser |
+| repositório | ✅ 26/09 — todas as `feat/*` apagadas (as 8 locais e a do `origin`); só resta a `main` |
 | Fatia 8 | tirar o `?pulso=17` de `src/scenes/final/dentro.ts` e o `f8-pulso-17.png` se ele ficar com a seed 3 (é código de comparação) |
 
 ### As fatias do passe visual
@@ -111,7 +111,7 @@ contra arte que mudava — o playtest de balanço é este.
 | 5 | Fase 3 — o casco (+ a fusão da serpente) | ✅ `a28dd07` | `plans/2026-08-25-fase3-visual-START.md` |
 | 6 | Cutscene 3 — a queda no hangar | ✅ `f29c46d` | `plans/2026-09-01-cutscene3-visual-START.md` |
 | 7 | Fase 4 — o interior | ✅ `5be4b2a` (23/09) | `plans/2026-09-08-fatia7-moldura-START.md` |
-| **8** | **Cutscene final + o Leviatã certo** | 🟠 **construída na branch, falta o veredito dos caps. 6–7 e o merge** | `plans/2026-09-25-fatia8-retomada-START.md` · spec `specs/2026-09-23-fatia8-cutscene-final-design.md` |
+| 8 | Cutscene final + o Leviatã certo + a Atmosfera nas 4 cutscenes | ✅ `56f4842` (26/09) | `plans/2026-09-25-fatia8-retomada-START.md` · spec `specs/2026-09-23-fatia8-cutscene-final-design.md` |
 
 O fluxo de cada fatia, regra dele: **brainstorming → spec (`docs/superpowers/specs/`) → plano
 (`docs/superpowers/plans/`) → implementação → teste jogado por ele → merge `--no-ff`**.
@@ -126,6 +126,17 @@ O fluxo de cada fatia, regra dele: **brainstorming → spec (`docs/superpowers/s
 - **O método que funcionou:** partir da arte aprovada (recorte e inpaint sobre os conceitos), animar só distância
   pequena, assar em vez de escalar no motor, nunca deixar corte reto. As lições estão no START da retomada.
 - **Parou no feedback dos capítulos 6–7.** A branch foi empurrada para o V2, sem merge.
+
+### ✅ O que a sessão de 25–26/09 fez — a Fatia 8 fechada
+
+- **Os vereditos:** capítulos 5–7 aprovados, sem o corte do M4, o pulso é a seed 3 (a 17 saiu).
+- **A Atmosfera** (spec `specs/2026-09-25-atmosfera-engine-design.md`, plano `plans/2026-09-25-atmosfera-engine.md`):
+  névoa em dither, halo lido da imagem, cor, vinheta e grão — a curva dramática na cutscene final e um perfil em
+  cada uma das outras três. Virou o **pilar 5 do GDD** (*"nenhuma imagem vai crua para a tela"*).
+- **Dois ajustes na cena:** o abismo da queda deriva no ritmo do espaço da Cutscene 1; as luzes do morro não apagam
+  mais com a carcaça.
+- **Merge `--no-ff` em `main` (`56f4842`) e push.** Todas as `feat/*` apagadas (locais e a do `origin`): o
+  repositório tem só a `main`.
 
 ### ✅ O que a sessão de 23/09 fez
 
