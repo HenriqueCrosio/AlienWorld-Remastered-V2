@@ -35,6 +35,7 @@ uniform float uGradeQuente;
 uniform float uVinheta;
 uniform float uGrao;
 uniform float uEscuro;
+uniform float uFlash;
 
 varying vec2 outTexCoord;
 
@@ -86,7 +87,9 @@ void main() {
   }
   float v = floor(min(1.0, soma / 49.0 * 2.4) * 4.0 + d - 0.5) / 4.0;
   float respira = 0.8 + 0.2 * sin(uTempo * 6.2831853 / 2.4);
-  cor += uCorHalo * max(v, 0.0) * uForcaHalo * respira;
+  // ⚠️ O FLASH É DESENHADO ANTES DESTE SHADER: um flash quente faria a tela inteira passar no teste de "quente" e
+  // o halo acenderia tudo. Enquanto a câmera pisca, o halo cede (uFlash = o quanto do flash está na tela).
+  cor += uCorHalo * max(v, 0.0) * uForcaHalo * respira * (1.0 - uFlash);
   cor = clamp(cor, 0.0, 1.0);
 
   // 3 · CORREÇÃO DE COR — sombra para o petróleo, luz para o âmbar.
@@ -120,6 +123,8 @@ export class AtmosferaPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPip
   tempo = 0;
   /** O fade da câmera principal (0 = nada, 1 = tela toda preta). Escrito pelo controlador a cada quadro. */
   escuro = 0;
+  /** 0–1: o quanto do flash da câmera está na tela agora (o halo cede enquanto isso). */
+  flash = 0;
 
   constructor(game: Phaser.Game) {
     super({ game, name: CHAVE_ATMOSFERA, fragShader: FRAG });
@@ -131,6 +136,7 @@ export class AtmosferaPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPip
     this.set1f('uTempo', this.tempo);
     this.set1f('uQuadroGrao', Math.floor(this.tempo * 12));
     this.set1f('uEscuro', this.escuro);
+    this.set1f('uFlash', this.flash);
     if (!p) {
       this.set1f('uDensidade', 0);
       this.set1f('uForcaHalo', 0);

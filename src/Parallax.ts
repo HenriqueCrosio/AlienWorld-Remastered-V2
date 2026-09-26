@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from './config';
 import { pickVariant } from './art';
 import { GROUND_Y } from './systems/TerrainSystem';
+import type { ChavePintura } from './systems/atmosfera/perfis';
 
 /**
  * Que lugar este parallax desenha. É a mesma decisão da física: tem chão ou não tem.
@@ -2031,6 +2032,25 @@ export class Parallax {
     this.scene.tweens.add({ targets: this.leviathan, alpha: 0.55, duration: 3500, delay: 1400 });
 
     this.playAtmosphereExit();
+  }
+
+  /**
+   * A PINTURA NA TELA — o que a Atmosfera segue (Fatia 9): cada pintura tem o seu tom. Na F1, depois de romper a
+   * atmosfera, o céu é o zero-G; na F4, a câmara corrente (`pinturaAtual`, A–D).
+   */
+  pinturaNaTela(): ChavePintura {
+    switch (this.mode) {
+      case 'superficie':
+        return this.exiting ? 'paintBgZeroG' : 'paintBgF1';
+      case 'espaco':
+        return 'paintBgF2';
+      case 'nebulosa':
+        return 'paintBgF3';
+      case 'interior': {
+        const p = this.pinturaAtual;
+        return p === 'paintBgF4b' || p === 'paintBgF4c' || p === 'paintBgF4d' ? p : 'paintBgF4a';
+      }
+    }
   }
 
   /**

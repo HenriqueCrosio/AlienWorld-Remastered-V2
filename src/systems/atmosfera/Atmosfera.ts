@@ -33,6 +33,10 @@ export interface EstadoAtmosfera {
   gradeQuente: number;
   /** Quantos objetos a câmera limpa está desenhando agora. */
   limpos: number;
+  /** 0–1: o quanto do flash da câmera está na tela (o halo cede). */
+  flash: number;
+  /** 0–1: o quanto do fade de saída já escureceu. */
+  escuro: number;
 }
 
 const TEX_PX = 'atmPx';
@@ -118,6 +122,9 @@ export class Atmosfera {
     // nesse sentido (`direction = true`) o Phaser faz `alpha === progress` (`Fade.js#update`).
     const fade = this.scene.cameras.main.fadeEffect;
     this.pipeline.escuro = fade.isRunning || fade.isComplete ? fade.progress : 0;
+    // O FLASH: `alpha` cai de 1 a 0 ao longo do flash (Phaser `Effects.Flash`, público e tipado).
+    const flash = this.scene.cameras.main.flashEffect;
+    this.pipeline.flash = flash.isRunning ? flash.alpha : 0;
     this.triar();
   }
 
@@ -136,6 +143,8 @@ export class Atmosfera {
       grao: p ? +p.grao.toFixed(3) : 0,
       gradeQuente: p ? +p.gradeQuente.toFixed(3) : 0,
       limpos: this.limpos,
+      flash: this.pipeline ? +this.pipeline.flash.toFixed(3) : 0,
+      escuro: this.pipeline ? +this.pipeline.escuro.toFixed(3) : 0,
     };
   }
 
