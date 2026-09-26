@@ -357,9 +357,8 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
   f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
   // FATIA 8 · A CUTSCENE FINAL. P1: a parede da direita da câmara D PULSANDO — a pintura animada pela v3
-  // (`scripts/_f8/_gerar-pulso.mjs`), 9 quadros de 256×216 colados em x=128. Duas variantes em comparação.
+  // (`scripts/_f8/_gerar-pulso.mjs`), 9 quadros de 256×216 colados em x=128. A seed 3, escolhida por ele em 26/09.
   f8Pulso3: { path: 'sprites/f8-pulso-3.png', w: 256, h: 216 },
-  f8Pulso17: { path: 'sprites/f8-pulso-17.png', w: 256, h: 216 },
   // P2: as BORDAS do rasgo se mexendo — v3 sobre a parede já rasgada do conceito aprovado (seed 21), 137×164
   // colados em (204, 37): o rasgo se FECHA por dentro antes do teto da moldura. O estouro é um corte seco;
   // esta folha é o depois.

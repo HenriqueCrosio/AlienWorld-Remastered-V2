@@ -69,8 +69,8 @@ export function montarDentro(c: CenaFinal, fundo: 'f8Costura' | 'paintBgF4d'): C
   // ⚠️ As rachas assadas foram reprovadas (*"lembram teias"*). E o tremor forte também: ele leu a 1ª versão
   // como *"só a tela tremendo"* — que era verdade, porque a folha da pulsação nem carregava (a troca no
   // BootScene tinha falhado em silêncio). Tremor agora é só um fio; quem mexe é a parede.
-  const variante = new URLSearchParams(window.location.search).get('pulso') === '17' ? 'f8Pulso17' : 'f8Pulso3';
-  const pulso = scene.add.image(PULSO_X, 0, variante, 0).setOrigin(0, 0).setDepth(DEPTH.FUNDO + 1);
+  // A seed 3 é a escolhida (26/09); a 17, que só existia para comparação, saiu do jogo.
+  const pulso = scene.add.image(PULSO_X, 0, 'f8Pulso3', 0).setOrigin(0, 0).setDepth(DEPTH.FUNDO + 1);
   pulso.setCrop(0, TOPO, 256, CRISTA - TOPO);
   objetos.push(pulso);
   estado.rachadura = 0;

@@ -186,5 +186,6 @@ Cada mudança veio dele, assistindo a cada capítulo. O estado real está em
 | Capítulo 7 | P8 assado sobre a carcaça do P7 | igual, sobre a carcaça do capítulo 6 | — |
 | Sonda | um assert por capítulo | + **`faltando === 0`** em todo capítulo | ela contava quadros de uma folha que nem carregava |
 
-**Ainda em aberto:** o veredito dele nos capítulos 6–7, o corte do M4 (§3) e a variante do pulso (seed 3; a 17 só
-por `?pulso=17`).
+**Fechado em 26/09 (ele, depois de assistir):** os capítulos 5, 6 e 7 **aprovados**; **sem o corte do M4** (o
+capítulo 4 já mostra o jorro, e o corte seco 3→4 fica); o pulso é a **seed 3** — a 17 e o `?pulso=17` saíram do jogo.
+Depois da cena pronta, ela ganhou a Atmosfera (spec `2026-09-25-atmosfera-engine-design.md`).
