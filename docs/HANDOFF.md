@@ -14,8 +14,8 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. A Fatia 8 está mergeada (com a Atmosfera nas quatro cutscenes); o passe
-> visual segue na FATIA 9 — a Atmosfera nas fases e chefões, um tom abaixo das cutscenes."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O passe visual acabou (Fatias 0–9, com a Atmosfera nas cutscenes e nas
+> fases); a próxima frente é a CALIBRAGEM."**
 
 ### O estado em uma linha
 
@@ -23,9 +23,9 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 vitória (`probe-stage4` atravessa tudo). O que falta é **acabamento, ajuste e publicação**, não
 construção. **A Fatia 8 fechou (26/09):** a cutscene final refeita nos sete capítulos, as baleias erradas fora do
 jogo e a **Atmosfera** (o tratamento de imagem, GDD pilar 5) nas QUATRO cutscenes — aprovada e mergeada (`56f4842`).
-**O passe visual NÃO acabou:** ele pediu a **Fatia 9 — a Atmosfera nas fases e chefões, 15–25% abaixo das
-cutscenes** (*"vai trazer um acabamento e polimento mais profissional"*). Ela muda a leitura das fases, então vem
-ANTES da calibragem (a regra do 🧭: nada que dependa do olho dele antes de a arte parar de mudar).
+**A Fatia 9 fechou (26/09):** a Atmosfera nas quatro fases e nos chefões, um tom por pintura (−25% nas abertas F1,
+zero-G, F2; −15% nas densas F3 e F4 A–D), a pedido dele (*"vai trazer um acabamento e polimento mais
+profissional"*). **O PASSE VISUAL ACABOU. A próxima frente é a CALIBRAGEM (etapa 2).**
 
 ```
 MENU → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
@@ -38,8 +38,8 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 
 | # | Etapa | Estado |
 |---|---|---|
-| 1 | **Passe visual por fatias** (0–9) | 🟠 **0–8 fechadas e mergeadas** (a 8 em 26/09, com a Atmosfera). **Aberta: a FATIA 9 — a Atmosfera nas fases e chefões** |
-| 2 | **Calibragem** do passe visual | ⬜ depois da 9 |
+| 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
+| 2 | **Calibragem** do passe visual | 🟠 **A PRÓXIMA** — inclui avaliar a Atmosfera no menu |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
@@ -113,8 +113,8 @@ contra arte que mudava — o playtest de balanço é este.
 | 5 | Fase 3 — o casco (+ a fusão da serpente) | ✅ `a28dd07` | `plans/2026-08-25-fase3-visual-START.md` |
 | 6 | Cutscene 3 — a queda no hangar | ✅ `f29c46d` | `plans/2026-09-01-cutscene3-visual-START.md` |
 | 7 | Fase 4 — o interior | ✅ `5be4b2a` (23/09) | `plans/2026-09-08-fatia7-moldura-START.md` |
-| 8 | Cutscene final + o Leviatã certo + a Atmosfera nas 4 cutscenes | ✅ `56f4842` (26/09) |
-| **9** | **A Atmosfera nas fases e chefões** (um tom abaixo das cutscenes; a leitura do pilar 3 manda) | 🟠 **aberta em 26/09** — brainstorming | branch `feat/atmosfera-fases` | `plans/2026-09-25-fatia8-retomada-START.md` · spec `specs/2026-09-23-fatia8-cutscene-final-design.md` |
+| 8 | Cutscene final + o Leviatã certo + a Atmosfera nas 4 cutscenes | ✅ `56f4842` (26/09) | `plans/2026-09-25-fatia8-retomada-START.md` · spec `specs/2026-09-23-fatia8-cutscene-final-design.md` · Atmosfera `specs/2026-09-25-atmosfera-engine-design.md` |
+| 9 | A Atmosfera nas fases e chefões (um tom por pintura: −25% nas abertas, −15% nas densas) | ✅ 26/09 | spec `specs/2026-09-26-fatia9-atmosfera-fases-design.md` · plano `plans/2026-09-26-fatia9-atmosfera-fases.md` · folha `folhas/2026-09-26/atmos-fases-real.png` |
 
 O fluxo de cada fatia, regra dele: **brainstorming → spec (`docs/superpowers/specs/`) → plano
 (`docs/superpowers/plans/`) → implementação → teste jogado por ele → merge `--no-ff`**.

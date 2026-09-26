@@ -24,6 +24,8 @@ const blindar = setInterval(() => {
       if (s?.scene.key === 'Game') {
         s.invulnerableUntil = 1e12;
         s.lives = 9;
+        // a arena do golfinho SEGURA o relógio da F4 até ele morrer — sem isto as câmaras C e D nunca chegam
+        if (s.golfinho?.vulneravel) s.golfinho.damage(9999);
       }
     })
     .catch(() => {});
