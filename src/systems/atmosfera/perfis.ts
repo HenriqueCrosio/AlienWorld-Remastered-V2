@@ -122,6 +122,40 @@ export const PERFIS = {
     grao: 0.75,
     poeira: { quantidade: 130, cor: [110, 120, 135], deriva: [-3, 6], espalhar: 3 },
   },
+  // ─── AS OUTRAS CUTSCENES (26/09, Task 5): cores amostradas de `paint-bg-cut1/2/3.png` com a mesma conta ───
+  /** Cutscene 1 · a Aurora na aproximação: o espaço frio, névoa rala mas presente, poeira passando — a calmaria. */
+  aurora: {
+    nome: 'aurora',
+    nevoa: { densidade: 0.6, cor: [70, 76, 98], altura: 1.6, velTras: [-8, 0], velFrente: [-18, 0], evolucao: 0.02 },
+    halo: { forca: 0.27, limiar: 0.59, cor: [230, 110, 40] },
+    grade: 1,
+    gradeQuente: 1,
+    vinheta: 0.5,
+    grao: 0.6,
+    poeira: { quantidade: 90, cor: [110, 118, 150], deriva: [-12, 0], espalhar: 3 },
+  },
+  /** Cutscene 2 · a Doca no cinturão: poeira de asteroide mais densa, azul-escura. */
+  doca: {
+    nome: 'doca',
+    nevoa: { densidade: 0.75, cor: [46, 62, 119], altura: 1.4, velTras: [-6, 0], velFrente: [-14, 1], evolucao: 0.02 },
+    halo: { forca: 0.3, limiar: 0.59, cor: [230, 120, 50] },
+    grade: 1,
+    gradeQuente: 1,
+    vinheta: 0.55,
+    grao: 0.65,
+    poeira: { quantidade: 150, cor: [100, 110, 160], deriva: [-10, 1], espalhar: 4 },
+  },
+  /** Cutscene 3 · o Hangar: interior pesado, névoa baixa e quente — perto da víscera da final. */
+  hangar: {
+    nome: 'hangar',
+    nevoa: { densidade: 0.95, cor: [84, 62, 59], altura: 2, velTras: [-4, 0], velFrente: [-9, 0], evolucao: 0.03 },
+    halo: { forca: 0.27, limiar: 0.59, cor: [183, 88, 57] },
+    grade: 1,
+    gradeQuente: 1,
+    vinheta: 0.6,
+    grao: 0.7,
+    poeira: { quantidade: 130, cor: [140, 90, 70], deriva: [-2, -2], espalhar: 3 },
+  },
 } as const satisfies Record<string, PerfilAtmosfera>;
 
 const lerp = (a: number, b: number, k: number): number => (k >= 1 ? b : a + (b - a) * k);

@@ -5,6 +5,8 @@ import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
 import { Fx } from '../systems/Fx';
+import { Atmosfera } from '../systems/atmosfera/Atmosfera';
+import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
 import { SHIPS, DEFAULT_SHIP, ROSTER_FINAL } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
@@ -44,6 +46,8 @@ export class Interlude3Scene extends Phaser.Scene {
   private starfield!: Starfield;
   private parallax!: Parallax;
   private fx!: Fx;
+  /** A névoa, a luz e o grão (spec 2026-09-25-atmosfera-engine-design.md). */
+  private atm!: Atmosfera;
 
   private ship!: Phaser.GameObjects.Sprite;
   /** A criatura que substituiu o portão. Existe desde `create()`; morre no beat final. */
@@ -321,6 +325,9 @@ export class Interlude3Scene extends Phaser.Scene {
     this.parallax.setNebulaDensity(0.45, 0);
     this.parallax.setLeviathanVisible(false);
     this.fx = new Fx(this);
+    // A ATMOSFERA: o placar e o painel de escolha (profundidade 99+) ficam limpos; a poeira mora logo abaixo da nave.
+    this.atm = new Atmosfera(this, { limiteLimpo: 99, profundidadePoeira: Interlude3Scene.DEPTH_NAVE - 1 });
+    this.atm.perfil(PERFIS.hangar);
 
     this.construirHangar();
     this.plantarCarcacas();
@@ -617,6 +624,7 @@ export class Interlude3Scene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     const dt = delta / 1000;
     this.t += dt;
+    this.atm.update(dt);
 
     this.starfield.update(dt);
     this.parallax.update(dt, 14);

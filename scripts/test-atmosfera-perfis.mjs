@@ -8,8 +8,9 @@ const ok = (cond, msg) => {
   if (!cond) falhas++;
 };
 
-const nomes = ['viscera', 'visceraSuccao', 'vacuo', 'vacuoQueda', 'superficie', 'apagando'];
-ok(nomes.every((n) => PERFIS[n]?.nome === n), `os seis perfis existem com o próprio nome (${Object.keys(PERFIS).join(',')})`);
+// os seis da cutscene final + os três das outras cutscenes (Task 5)
+const nomes = ['viscera', 'visceraSuccao', 'vacuo', 'vacuoQueda', 'superficie', 'apagando', 'aurora', 'doca', 'hangar'];
+ok(nomes.every((n) => PERFIS[n]?.nome === n), `os nove perfis existem com o próprio nome (${Object.keys(PERFIS).join(',')})`);
 ok(PISO_DENSIDADE === 0.6, `o piso é 0,6 (${PISO_DENSIDADE})`);
 for (const n of nomes) {
   ok(PERFIS[n].nevoa.densidade >= PISO_DENSIDADE, `${n}: densidade ${PERFIS[n].nevoa.densidade} >= piso`);

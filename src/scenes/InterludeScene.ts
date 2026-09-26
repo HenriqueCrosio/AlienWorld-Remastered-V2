@@ -5,6 +5,8 @@ import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
 import { Fx } from '../systems/Fx';
+import { Atmosfera } from '../systems/atmosfera/Atmosfera';
+import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
 import { SHIPS, DEFAULT_SHIP, ROSTER_AURORA } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
@@ -41,6 +43,8 @@ export class InterludeScene extends Phaser.Scene {
   /** Fallback do céu (o parallax pixel da Fase 2) — só existe quando a pintura NÃO existe. */
   private parallax: Parallax | null = null;
   private fx!: Fx;
+  /** A névoa, a luz e o grão (spec 2026-09-25-atmosfera-engine-design.md). */
+  private atm!: Atmosfera;
 
   private ship!: Phaser.GameObjects.Image;
   private carrier!: Phaser.GameObjects.Image;
@@ -125,6 +129,9 @@ export class InterludeScene extends Phaser.Scene {
       this.parallax = new Parallax(this, 'espaco');
     }
     this.fx = new Fx(this);
+    // A ATMOSFERA: o placar e o painel de escolha (profundidade 99+) ficam limpos; a poeira mora logo abaixo da nave.
+    this.atm = new Atmosfera(this, { limiteLimpo: 99, profundidadePoeira: 19 });
+    this.atm.perfil(PERFIS.aurora);
 
     // A nave que POUSA é a que o jogador acabou de voar — a Fase 1 é sempre a nave padrão
     // (o jato, no róster v2). Desenhar outra aqui desmentiria o voo que ele acabou de fazer.
@@ -259,6 +266,7 @@ export class InterludeScene extends Phaser.Scene {
 
   override update(_time: number, delta: number): void {
     const dt = delta / 1000;
+    this.atm.update(dt);
     this.starfield.update(dt);
     // Devagar: a nave está em aproximação, não em fuga. O fundo dita o ritmo da cena.
     this.parallax?.update(dt, 26);
