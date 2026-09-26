@@ -1839,6 +1839,12 @@ export class GameScene extends Phaser.Scene {
    * lava exatamente como o jogador as deixou. A nave volta como sprite da cutscene, no mesmo lugar.
    */
   private fotografarCostura(pronto: () => void): void {
+    // ⚠️ SUSPENDE A ATMOSFERA ANTES DE PEDIR O SNAPSHOT (achado do review, 26/09): `renderer.snapshot`
+    // só entrega a imagem DEPOIS que o quadro corrente termina de renderizar — ou seja, o snapshot é
+    // do PRÓXIMO `onPreRender` do pipeline, não de um quadro futuro qualquer. Sem isto, `f8Costura`
+    // saía com a névoa/vinheta/grão do perfil da fase (F4d) e a poeira dela congelada — e `dentro.ts`
+    // aplicava `PERFIS.viscera` OUTRA VEZ em cima (vinheta e grão em dobro, poeira presa no ar).
+    this.atm.suspender();
     for (const o of this.children.list) {
       const d = o as unknown as Phaser.GameObjects.Components.Depth & Phaser.GameObjects.Components.Visible;
       if (typeof d.depth === 'number' && d.depth >= 100 && typeof d.setVisible === 'function') d.setVisible(false);

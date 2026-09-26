@@ -1825,6 +1825,20 @@ export class Parallax {
     if (!this.pinturaF4.length || !this.scene.textures.exists(key)) return;
     if (this.pinturaAtual === key) return;
 
+    if (durationMs <= 0) {
+      // O CORTE SECO, SÍNCRONO (achado do review, 26/09). Era um `tweens.addCounter` de duração 0 —
+      // e o Tween Manager só resolve o `onComplete` no PRÓXIMO passo dele, não no mesmo quadro em que
+      // `setPintura` foi chamado. O treino (F4) e os saltos de dev (`applyState`) abrem exatamente
+      // assim: o primeiro quadro ainda lia `paintBgF4a` (`pinturaAtual` só trocava um quadro depois),
+      // e como `GameScene.update` lê `parallax.pinturaNaTela()` no MESMO quadro em que chama
+      // `setPintura`, a Atmosfera começava com o perfil errado e só chegava ao certo por um fade de
+      // 1500ms — um treino que deveria abrir na câmara D entrava na A e desbotava até D na frente do
+      // jogador. Sem tween nenhum, a troca (textura + `pinturaAtual`) já vale para o quadro que pediu.
+      for (const img of this.pinturaF4) img.setTexture(key).setAlpha(1);
+      this.pinturaAtual = key;
+      return;
+    }
+
     const meio = durationMs / 2;
     this.scene.tweens.addCounter({
       from: 1,
