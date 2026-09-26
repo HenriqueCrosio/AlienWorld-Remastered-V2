@@ -1,5 +1,8 @@
 # START — FATIA 8 · RETOMADA: A CENA ESTÁ INTEIRA, FALTA O VEREDITO DA ÚLTIMA
 
+> ✅ **EXECUTADO E SUPERADO (26/09).** Os vereditos saíram (caps 5–7 aprovados, sem M4, seed 3), a cena ganhou a
+> Atmosfera, e a Fatia 8 foi mergeada na `main`. O estado vivo é o 🧭 do `docs/HANDOFF.md`. Abaixo, o registro.
+
 **🟠 A FATIA 8 ESTÁ QUASE FECHADA.** Os sete capítulos da cutscene final existem, as baleias erradas saíram do
 jogo, e as sondas estão verdes. **Paramos no feedback da última cena (capítulos 6 e 7)**: ele ainda não assistiu à
 versão final e não deu o veredito.

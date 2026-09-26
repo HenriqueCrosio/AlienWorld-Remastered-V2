@@ -44,3 +44,5 @@ scripts/_f4/**/*.png
 
 # Fatia 8: o último job do PixelLab (só para recuperar um job num timeout)
 scripts/_f8/_ultimo-job.txt
+# ...e os quadros de captura das cutscenes 1–3 (`_ver-cena.mjs`, 26/09) — insumo das folhas, não arte do jogo
+scripts/_f8/_cenas/

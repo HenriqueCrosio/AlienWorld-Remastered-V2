@@ -14,16 +14,16 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia `docs/superpowers/plans/2026-09-25-fatia8-retomada-START.md`. A cutscene final está inteira na branch
-> `feat/cutscene-final-visual`; paramos no meu feedback da última cena (sobrevoo e a luz que se apaga)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O passe visual acabou (Fatia 8 mergeada, com a Atmosfera nas quatro
+> cutscenes); a próxima frente é a CALIBRAGEM."**
 
 ### O estado em uma linha
 
 **O jogo está COMPLETO e encadeia sozinho** — 4 fases, 4 cutscenes, chefão final, do menu à
 vitória (`probe-stage4` atravessa tudo). O que falta é **acabamento, ajuste e publicação**, não
-construção. `main` = `origin/main` (V2), com a Fatia 7 mergeada em `5be4b2a`. **Aberta:
-`feat/cutscene-final-visual`** (a Fatia 8, empurrada para o V2, sem merge) — a cutscene final refeita nos sete
-capítulos, as baleias erradas fora do jogo, as sondas verdes; **falta o veredito dele nos capítulos 6–7 e o merge**.
+construção. **O PASSE VISUAL ACABOU (26/09):** a Fatia 8 — a cutscene final refeita nos sete capítulos, as
+baleias erradas fora do jogo e a **Atmosfera** (o tratamento de imagem, GDD pilar 5) nas QUATRO cutscenes — foi
+aprovada por ele e mergeada na `main` (`feat/cutscene-final-visual`). **A próxima frente é a CALIBRAGEM (etapa 2).**
 
 ```
 MENU → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
@@ -36,8 +36,8 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 
 | # | Etapa | Estado |
 |---|---|---|
-| 1 | **Passe visual por fatias** (0–8) | 🟠 **0–7 fechadas e mergeadas. A FATIA 8 está construída na branch; falta o veredito dos capítulos 6–7 e o merge** |
-| 2 | **Calibragem** do passe visual | ⬜ depois da 8 |
+| 1 | **Passe visual por fatias** (0–8) | ✅ **0–8 fechadas e mergeadas** (a 8 em 26/09, com a Atmosfera) |
+| 2 | **Calibragem** do passe visual | 🟠 **A PRÓXIMA** — inclui avaliar a Atmosfera no menu e nas fases (pilar 5) |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
@@ -92,6 +92,7 @@ contra arte que mudava — o playtest de balanço é este.
 | Fatia 6 (Cutscene 3) | acabamento geral |
 | chefão F4 | cabos desenhados ancorando as formas ao chão/teto (receita da catenária da doca) |
 | Fatia 8 (Atmosfera) | ✅ 26/09 — as cutscenes 1, 2 e 3 na Atmosfera (`aurora`, `doca`, `hangar`; `69a1704`). As QUATRO cutscenes têm tratamento |
+| Atmosfera (revisão final, 26/09) | nada bloqueia; polimento opcional: (a) o fade final escurece 3× (a câmera limpa já cobre tudo — fazer fade SÓ nela e aposentar o `uEscuro`, que hoje só vale para fade de SAÍDA); (b) flash QUENTE (Fx 255,190,110 e os da Cutscene 3) passa no teste de "quente" e acende o halo na tela inteira; (c) a triagem da câmera limpa roda no `update` da cena — mover para o `PRE_RENDER`; (d) o halo amostra 7×7 passo 2 (~6px) e perde linha de 1px em pixel alternado |
 | GDD pilar 5 (26/09) | *"nenhuma imagem vai crua para a tela"* — avaliar a Atmosfera no **menu** e em cada **fase jogável** (só onde não custar a leitura do pilar 3), com o olho dele. Entra na CALIBRAGEM |
 | ferramenta | **a sonda de VÍDEO**: as sondas fotografam, e beat de explosão só se julga em movimento. Molde em `scripts/_ver-cargueiro-mov.mjs` |
 | ferramenta | a `probe-f4-moldura` pisca ~1 em 3 — o conserto é a AMOSTRAGEM, nunca afrouxar o número (diagnóstico no START da Fatia 7) |
