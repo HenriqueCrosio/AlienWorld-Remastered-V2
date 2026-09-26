@@ -5,6 +5,8 @@ import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
 import { Fx } from '../systems/Fx';
+import { Atmosfera } from '../systems/atmosfera/Atmosfera';
+import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
 import { SHIPS, DEFAULT_SHIP, ROSTER_DOCA } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
@@ -60,6 +62,8 @@ export class Interlude2Scene extends Phaser.Scene {
   /** Fallback do céu (o parallax pixel da Fase 2) — só existe quando a pintura NÃO existe. */
   private parallax: Parallax | null = null;
   private fx!: Fx;
+  /** A névoa, a luz e o grão (spec 2026-09-25-atmosfera-engine-design.md). */
+  private atm!: Atmosfera;
 
   private ship!: Phaser.GameObjects.Image;
   private doca!: Phaser.GameObjects.Image;
@@ -211,6 +215,9 @@ export class Interlude2Scene extends Phaser.Scene {
       this.parallax = new Parallax(this, 'espaco');
     }
     this.fx = new Fx(this);
+    // A ATMOSFERA: o placar e o painel de escolha (profundidade 99+) ficam limpos; a poeira mora logo abaixo da nave.
+    this.atm = new Atmosfera(this, { limiteLimpo: 99, profundidadePoeira: Interlude2Scene.DEPTH_NAVE - 1 });
+    this.atm.perfil(PERFIS.doca);
 
     // O PLANETA PARTIDO FOI RETIRADO DAQUI (decisão do Henrique): a pintura do céu já tem uma
     // lua, e a arte nova da doca também tem a dela — com o `planetShattered` a cena mostrava TRÊS
@@ -525,6 +532,7 @@ export class Interlude2Scene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     const dt = delta / 1000;
     this.t += dt;
+    this.atm.update(dt);
 
     this.starfield.update(dt);
     // Devagar: a nave está em aproximação, não em fuga. (Só roda de fato sem a pintura — é o

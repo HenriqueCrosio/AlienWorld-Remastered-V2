@@ -76,8 +76,6 @@ export class Fx {
    *   ampliada).
    * - `implosion-big`: os MESMOS quadros ao contrário. Fumaça → chama → núcleo branco: matéria
    *   sendo SUGADA para dentro. É a morte da Aurora (Interlude 1).
-   * - `leviathan-dying` (11f, pingpong): fissuras pulsando na espinha — toca o beat INTEIRO da
-   *   cutscene final sem congelar no último quadro (o yoyo é o que impede o "adesivo parado").
    */
   private registerAnims(): void {
     const anims = this.scene.anims;
@@ -118,16 +116,6 @@ export class Fx {
           repeat: 0,
         });
       }
-    }
-
-    if (tex.exists('leviathanWhaleDyingSheet') && !anims.exists('leviathan-dying')) {
-      anims.create({
-        key: 'leviathan-dying',
-        frames: anims.generateFrameNumbers('leviathanWhaleDyingSheet', { start: 0, end: 10 }),
-        frameRate: 8,
-        repeat: -1,
-        yoyo: true,
-      });
     }
   }
 

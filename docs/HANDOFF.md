@@ -6,7 +6,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-09-23) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-09-25) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -14,14 +14,16 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia `docs/superpowers/plans/2026-09-23-fatia8-cutscene-final-START.md`. A Fatia 7 fechou e
-> está na `main`. Vamos abrir a Fatia 8 — a cutscene final — pelo brainstorming."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O passe visual acabou (Fatia 8 mergeada, com a Atmosfera nas quatro
+> cutscenes); a próxima frente é a CALIBRAGEM."**
 
 ### O estado em uma linha
 
 **O jogo está COMPLETO e encadeia sozinho** — 4 fases, 4 cutscenes, chefão final, do menu à
 vitória (`probe-stage4` atravessa tudo). O que falta é **acabamento, ajuste e publicação**, não
-construção. `main` = `origin/main` (V2), com a Fatia 7 mergeada em `5be4b2a`. Nenhuma branch aberta.
+construção. **O PASSE VISUAL ACABOU (26/09):** a Fatia 8 — a cutscene final refeita nos sete capítulos, as
+baleias erradas fora do jogo e a **Atmosfera** (o tratamento de imagem, GDD pilar 5) nas QUATRO cutscenes — foi
+aprovada por ele e mergeada na `main` (`feat/cutscene-final-visual`). **A próxima frente é a CALIBRAGEM (etapa 2).**
 
 ```
 MENU → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
@@ -34,8 +36,8 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 
 | # | Etapa | Estado |
 |---|---|---|
-| 1 | **Passe visual por fatias** (0–8) | 🟠 **0–7 fechadas e mergeadas. Falta só a FATIA 8** |
-| 2 | **Calibragem** do passe visual | ⬜ depois da 8 |
+| 1 | **Passe visual por fatias** (0–8) | ✅ **0–8 fechadas e mergeadas** (a 8 em 26/09, com a Atmosfera) |
+| 2 | **Calibragem** do passe visual | 🟠 **A PRÓXIMA** — inclui avaliar a Atmosfera no menu e nas fases (pilar 5) |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
@@ -51,6 +53,9 @@ erradas** pelo Leviatã certo — e ⚠️ **a dívida é SÓ desta cena** (conf
 de novo em 23/09: `leviathanWhale*` só aparece na `Interlude4Scene`; a F3 e a F4 NÃO têm baleia
 errada). Pela regra dos dois Leviatãs, o da cena final é o **biomecânico sem armadura**
 (`f397793a`, o ENFRAQUECIDO). Sem spec: abre por brainstorming. Porta de entrada: o START acima.
+> 🟠 **25/09 — CONSTRUÍDA.** Spec `specs/2026-09-23-fatia8-cutscene-final-design.md` (a §8 registra o que mudou na
+> execução), plano `plans/2026-09-23-fatia8-cutscene-final.md` (Tasks 1–9 feitas), e a porta de entrada agora é
+> `plans/2026-09-25-fatia8-retomada-START.md`. A dívida das baleias erradas foi **paga** (`4cc116b`).
 
 **2 · A calibragem** — os números visuais que ficaram no chute, de propósito, até as fatias acabarem:
 - o hitstop de 150ms na morte de chefão; os fps das explosões (18/13/12);
@@ -86,9 +91,13 @@ contra arte que mudava — o playtest de balanço é este.
 | Fatia 4 | apagar a `doca.png` antiga (fallback; a nova está aprovada e mergeada) |
 | Fatia 6 (Cutscene 3) | acabamento geral |
 | chefão F4 | cabos desenhados ancorando as formas ao chão/teto (receita da catenária da doca) |
+| Fatia 8 (Atmosfera) | ✅ 26/09 — as cutscenes 1, 2 e 3 na Atmosfera (`aurora`, `doca`, `hangar`; `69a1704`). As QUATRO cutscenes têm tratamento |
+| Atmosfera (revisão final, 26/09) | nada bloqueia; polimento opcional: (a) o fade final escurece 3× (a câmera limpa já cobre tudo — fazer fade SÓ nela e aposentar o `uEscuro`, que hoje só vale para fade de SAÍDA); (b) flash QUENTE (Fx 255,190,110 e os da Cutscene 3) passa no teste de "quente" e acende o halo na tela inteira; (c) a triagem da câmera limpa roda no `update` da cena — mover para o `PRE_RENDER`; (d) o halo amostra 7×7 passo 2 (~6px) e perde linha de 1px em pixel alternado |
+| GDD pilar 5 (26/09) | *"nenhuma imagem vai crua para a tela"* — avaliar a Atmosfera no **menu** e em cada **fase jogável** (só onde não custar a leitura do pilar 3), com o olho dele. Entra na CALIBRAGEM |
 | ferramenta | **a sonda de VÍDEO**: as sondas fotografam, e beat de explosão só se julga em movimento. Molde em `scripts/_ver-cargueiro-mov.mjs` |
 | ferramenta | a `probe-f4-moldura` pisca ~1 em 3 — o conserto é a AMOSTRAGEM, nunca afrouxar o número (diagnóstico no START da Fatia 7) |
-| repositório | apagar as branches `feat/*` já mergeadas no `origin`, quando ele quiser |
+| repositório | as `feat/*` mergeadas do `origin` foram apagadas em 23/09; restam **7 locais** já na `main` (`git branch -d`), quando ele quiser |
+| Fatia 8 | tirar o `?pulso=17` de `src/scenes/final/dentro.ts` e o `f8-pulso-17.png` se ele ficar com a seed 3 (é código de comparação) |
 
 ### As fatias do passe visual
 
@@ -102,10 +111,21 @@ contra arte que mudava — o playtest de balanço é este.
 | 5 | Fase 3 — o casco (+ a fusão da serpente) | ✅ `a28dd07` | `plans/2026-08-25-fase3-visual-START.md` |
 | 6 | Cutscene 3 — a queda no hangar | ✅ `f29c46d` | `plans/2026-09-01-cutscene3-visual-START.md` |
 | 7 | Fase 4 — o interior | ✅ `5be4b2a` (23/09) | `plans/2026-09-08-fatia7-moldura-START.md` |
-| **8** | **Cutscene final + o Leviatã certo** | ⬜ **PRÓXIMA** | `plans/2026-09-23-fatia8-cutscene-final-START.md` |
+| **8** | **Cutscene final + o Leviatã certo** | 🟠 **construída na branch, falta o veredito dos caps. 6–7 e o merge** | `plans/2026-09-25-fatia8-retomada-START.md` · spec `specs/2026-09-23-fatia8-cutscene-final-design.md` |
 
 O fluxo de cada fatia, regra dele: **brainstorming → spec (`docs/superpowers/specs/`) → plano
 (`docs/superpowers/plans/`) → implementação → teste jogado por ele → merge `--no-ff`**.
+
+### 🟠 O que a sessão de 23–25/09 (a 2ª) fez — a Fatia 8
+
+- **Brainstorming → spec → plano → execução** da cutscene final, capítulo a capítulo, com ele julgando cada um.
+- **A cena velha saiu inteira**; a nova tem sete capítulos em ~42s: o núcleo da câmara D pulsa → a parede estoura →
+  a descompressão arranca a nave → a ferida sobre a lua → a queda em perspectiva, batendo NA colônia → o sobrevoo da
+  colônia da F1 em ruínas → a lava da carcaça se apaga. A costura com a luta é uma **fotografia do último quadro**.
+- **As baleias erradas saíram do jogo** — a última dívida do Leviatã canônico.
+- **O método que funcionou:** partir da arte aprovada (recorte e inpaint sobre os conceitos), animar só distância
+  pequena, assar em vez de escalar no motor, nunca deixar corte reto. As lições estão no START da retomada.
+- **Parou no feedback dos capítulos 6–7.** A branch foi empurrada para o V2, sem merge.
 
 ### ✅ O que a sessão de 23/09 fez
 

@@ -34,3 +34,11 @@ export const COLORS = {
  * Subiu de 60 para 84 no playtest: a 60 o jogo era "um passeio no parque".
  */
 export const SCROLL_SPEED = 84;
+
+/**
+ * A deriva da PINTURA DO ESPAÇO profundo (px/s, para a esquerda) — a MESMA em toda cena em que ela aparece
+ * (Cutscene 1 e a queda da cutscene final). ~0.4px/s: se sente o movimento, mas é o espaço — longe e lento.
+ * Pedido dele duas vezes: na Cutscene 1 (0.04×26 corria demais) e na queda (25/09: *"o movimento precisa ser bem
+ * lento, para dar a sensação de movimento, mas nao tao rapido, pois se trata do espaço"*).
+ */
+export const DERIVA_ESPACO = 26 * 0.015;

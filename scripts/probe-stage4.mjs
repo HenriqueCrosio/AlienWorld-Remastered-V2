@@ -287,12 +287,21 @@ console.log('meio     ', JSON.stringify(meio));
 // A CUTSCENE FINAL entra entre o NÚCLEO e o GameOver (2026-07-20): vencer a Fase 4 agora
 // entrega a Interlude4 — a vitória amarga — e é ELA quem fecha a campanha.
 ok(meio.cena === 'Interlude4', `matar o PREDADOR entrega a CUTSCENE FINAL (cena=${meio.cena})`);
+// A COSTURA (Fatia 8): a cutscene abre na FOTOGRAFIA do último quadro da luta, com a nave no mesmo lugar.
+const costura = await page.evaluate(() => {
+  const s = window.__game.scene.getScenes(true)[0];
+  const src = s.textures.exists('f8Costura') ? s.textures.get('f8Costura').getSourceImage() : null;
+  return { fundo: s.estado?.fundo, w: src?.width, h: src?.height };
+});
+console.log('costura  ', JSON.stringify(costura));
+ok(costura.fundo === 'f8Costura', `a cutscene abre na fotografia da luta (fundo=${costura.fundo})`);
+ok(costura.w === 384 && costura.h === 216, `a fotografia tem a resolução nativa (${costura.w}×${costura.h})`);
 await page.screenshot({ path: 'probe-stage4-cutscene-final.png' });
 
 // Atravessa a interlude SEM tecla de pular (de propósito — docs/HANDOFF.md): espera a
 // timeline real (~42s) até ela entregar o GameOver.
 let fim = { cena: null };
-for (let i = 0; i < 55; i++) {
+for (let i = 0; i < 65; i++) {
   await page.waitForTimeout(1000);
   fim = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];

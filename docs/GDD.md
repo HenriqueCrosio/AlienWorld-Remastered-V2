@@ -24,6 +24,19 @@ atira, coleta armas e mata o que estiver no caminho.
 2. **Duas conduções, um jogo.** O flap não é um modo secundário nem um minigame — é uma forma legítima e mais difícil de jogar a campanha inteira.
 3. **Leitura clara no escuro.** Cenário escuro e dessaturado; inimigos, projéteis e itens brilham. O jogador nunca morre por não ter enxergado.
 4. **Sessão curta.** Uma fase dura 3-5 minutos. A campanha inteira, ~20 minutos. É um jogo de navegador.
+5. **Nenhuma imagem vai crua para a tela.** Toda cena ou sequência de imagens passa por um TRATAMENTO de atmosfera
+   — névoa, luz, cor, vinheta, grão — pensado para o momento dela, e não só pela arte bruta. A arte pintada é a
+   matéria-prima; o tratamento é o que a faz ler como UM filme, com UM tom, e dá peso ao momento. Registrado pelo
+   Henrique em 26/09/2026, depois de ver a cutscene final tratada: *"é um forte indicativo que é necessário sempre
+   fazer um tratamento na imagem ou sequencia delas"*. Na prática:
+   - o tratamento é o motor **Atmosfera** (`src/systems/atmosfera/`, ver `TECH.md`) — cada cena escolhe um
+     **perfil** (quanto de névoa, que cor, quanto grão) e, numa sequência, a **curva** dos perfis acompanha a
+     dramaturgia (mais denso no que é pesado, sem nunca zerar onde o momento pede peso);
+   - **toda cutscene tem tratamento** (a final desde 25/09; as outras três na Task 5 do plano da Atmosfera). Cena
+     nova já nasce com o seu perfil;
+   - o texto e a UI ficam FORA do tratamento — a legibilidade não depende da atmosfera;
+   - nas FASES JOGÁVEIS o pilar 3 manda: o tratamento só entra se não custar leitura (inimigo, tiro e item continuam
+     brilhando). Avaliar fase a fase, com o olho dele.
 
 ---
 

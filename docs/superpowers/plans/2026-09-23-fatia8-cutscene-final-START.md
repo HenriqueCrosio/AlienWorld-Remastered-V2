@@ -1,5 +1,8 @@
 # START — FATIA 8 · A CUTSCENE FINAL: ONDE A PRÓXIMA SESSÃO PEGA
 
+> ⚠️ **SUPERADO EM 25/09.** Este START abriu a fatia (brainstorming → spec → plano) e foi executado. A retomada é
+> **`docs/superpowers/plans/2026-09-25-fatia8-retomada-START.md`**. O que está abaixo fica como registro.
+
 **⬜ A FATIA 8 NÃO COMEÇOU.** Sem spec, sem plano, sem branch. É a **última fatia do passe visual**:
 depois dela vêm a calibragem, o balanceamento, o playtest de todas as fases, o placar e o deploy
 (o roadmap inteiro está no 🧭 do topo do `docs/HANDOFF.md`).

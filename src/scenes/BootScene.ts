@@ -356,6 +356,22 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   f4VisceraSheet: { path: 'sprites/f4-viscera-sheet.png', w: 39, h: 61 },
   f4RachaSheet: { path: 'sprites/f4-racha-sheet.png', w: 384, h: 30 },
   f4LavaSheet: { path: 'sprites/f4-lava-sheet.png', w: 384, h: 36 },
+  // FATIA 8 · A CUTSCENE FINAL. P1: a parede da direita da câmara D PULSANDO — a pintura animada pela v3
+  // (`scripts/_f8/_gerar-pulso.mjs`), 9 quadros de 256×216 colados em x=128. A seed 3, escolhida por ele em 26/09.
+  f8Pulso3: { path: 'sprites/f8-pulso-3.png', w: 256, h: 216 },
+  // P2: as BORDAS do rasgo se mexendo — v3 sobre a parede já rasgada do conceito aprovado (seed 21), 137×164
+  // colados em (204, 37): o rasgo se FECHA por dentro antes do teto da moldura. O estouro é um corte seco;
+  // esta folha é o depois.
+  f8Rasgo: { path: 'sprites/f8-rasgo-21.png', w: 137, h: 164 },
+  // Os pedaços do estouro: as formas das vísceras da F4 repintadas na rampa vermelha da câmara D
+  // (`scripts/_f8/_repintar-pedacos.mjs`) — a folha original é ROXA, a matéria do esfíncter.
+  f8PedacosSheet: { path: 'sprites/f8-pedacos-sheet.png', w: 39, h: 61 },
+  // Capítulo 5: o corpo em brasa em 12 tamanhos ASSADOS (do inteiro a 18%) — ele encolhe caindo, se afastando
+  // (`scripts/_f8/_gerar-queda.mjs escalas`). Todos centrados no quadro do inteiro.
+  f8ReentradaEscalas: { path: 'sprites/f8-reentrada-escalas.png', w: 170, h: 161 },
+  f8SobrevooLava: { path: 'sprites/f8-sobrevoo-lava-sheet.png', w: 246, h: 96 },
+  // P3: o que o vácuo puxa pelo rasgo — rastros, gota de lava, tendão, osso, tecido (16×16, assadas).
+  f8SuccaoSheet: { path: 'sprites/f8-succao-sheet.png', w: 16, h: 16 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
   predadorMorteSheet: { path: 'sprites/predador-morte-sheet.png', w: 256, h: 256 },
 
@@ -381,13 +397,6 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // orgao-v` e `anim-maquinario-v`.
   orgaoAnimSheet: { path: 'sprites/orgao-anim.png', w: 96, h: 128 },
   maquinarioAnimSheet: { path: 'sprites/maquinario-anim.png', w: 96, h: 128 },
-  // O Leviatã-BALEIA (o mesmo do menu) com fissuras pulsando e explosões na espinha (cutscene
-  // final, beat 3). ⚠️ CANVAS QUADRADO 144×144 com a criatura CENTRALIZADA — a âncora é outra
-  // em relação ao sprite estático `leviathanWhaleDying` (140×87 recortado). O centro visual do
-  // bicho no quadro é MEDIDO no PNG (bbox do alfa, média dos quadros) — a Interlude4 posiciona
-  // por ele (Interlude4Scene.LEVI_VIS_*).
-  leviathanWhaleDyingSheet: { path: 'sprites/leviathan-whale-dying-sheet.png', w: 144, h: 144 },
-
   // O LEVIATÃ VIVO (menu "O DESPERTAR"): o objeto canônico biomecânico com a lava das costelas
   // pulsando num ritmo cardíaco e o corpo ondulando. É a cara do jogo. Célula quadrada 116×116
   // (o tamanho impresso por anim-sheet.mjs); 9 quadros lado a lado.
@@ -431,6 +440,20 @@ function animFrames(prefix: string, file: string): Record<string, string> {
  */
 const ART: Record<string, string> = {
   ship: 'sprites/ship.png',
+  // FATIA 8 · capítulo 4, A FERIDA: o Leviatã RECORTADO do conceito aprovado (corpo com a lava apagada + a lava
+  // numa camada que pulsa — `scripts/_f8/_recortar-leviata.mjs`) e a lua do menu reduzida fora do jogo.
+  f8Leviata: 'sprites/f8-leviata.png',
+  f8LeviataLava: 'sprites/f8-leviata-lava.png',
+  // O céu da ferida: o zero-G ESPELHADO (a lua da colônia perto, embaixo) — o arranjo D que ele escolheu.
+  f8FundoFerida: 'sprites/f8-fundo-ferida.png',
+  // Capítulo 5, A QUEDA: a mesma lua, de perto (gerada com o céu do 4 como referência) SEM o céu dela — atrás
+  // entra o abismo da Cutscene 1 — e a colônia da F1 reduzida, onde ele bate (`_gerar-queda.mjs camadas`).
+  f8LuaPerto: 'sprites/f8-lua-perto.png',
+  f8LuaPertoLua: 'sprites/f8-lua-perto-lua.png',
+  f8ColoniaLonge: 'sprites/f8-colonia-longe.png',
+  // Capítulos 6–7, O SOBREVOO e A LUZ SE APAGA: o conceito 6★ com o corpo rasgado no meio (seed 44), com a lava da
+  // carcaça APAGADA — ela mora na folha de estágios que esfria placa por placa (`_gerar-sobrevoo.mjs instalar`).
+  f8SobrevooFrio: 'sprites/f8-sobrevoo-frio.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
   // o jogo roda com as três, e a arte entra depois.
   ship2: 'sprites/ship-2.png',
@@ -974,15 +997,6 @@ const ART: Record<string, string> = {
   // runtime, e contra o fundo novo ele aparecia como uma laje azul-clara de bordas retas no meio
   // do céu. O parallax o desenha com TINT escuro — o que está longe é escuro (ver Parallax.ts).
   leviathan: 'sprites/leviathan.png',
-
-  // O LEVIATÃ-BALEIA MORRENDO e PARTIDO EM DOIS — os dois estados dele na CUTSCENE FINAL
-  // (Interlude4Scene). É A MESMA BALEIA DA KEY ART DO MENU (gerada com ela como style_images):
-  // primeiro o casco rachado com fissuras de lava e explosões na espinha; depois o corpo
-  // rasgado no meio, com o interior incandescente exposto. Paleta Deep Void + laranja #ff8c1a,
-  // nariz à direita (140×87 e 140×75, PixelLab). Sem placeholder: só a cena final os usa.
-  leviathanWhale: 'sprites/leviathan-whale.png',
-  leviathanWhaleDying: 'sprites/leviathan-whale-dying.png',
-  leviathanWhaleSplit: 'sprites/leviathan-whale-split.png',
 
   mtnFar: 'sprites/mtn-far.png',
   mtnFar2: 'sprites/mtn-far-2.png',
