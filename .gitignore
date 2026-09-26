@@ -46,3 +46,4 @@ scripts/_f4/**/*.png
 scripts/_f8/_ultimo-job.txt
 # ...e os quadros de captura das cutscenes 1–3 (`_ver-cena.mjs`, 26/09) — insumo das folhas, não arte do jogo
 scripts/_f8/_cenas/
+scripts/_f9/_quadros/
