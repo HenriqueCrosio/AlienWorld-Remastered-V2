@@ -185,3 +185,74 @@ export function interpolarPerfil(de: PerfilAtmosfera, para: PerfilAtmosfera, k: 
     poeira: para.poeira,
   };
 }
+
+// ─── FATIA 9: AS FASES (spec 2026-09-26-fatia9-atmosfera-fases-design.md) ───
+// ⚠️ Ele: *"utilizar o filtro um tom abaixo (talvez 15% a 25% menos) nas proprias fases e chefoes"*. Escolhas
+// na folha `atmos-fases-15-25.png`: −15% nas DENSAS (F3, F4), −25% nas ABERTAS (F1, zero-G, F2); o chefão usa o
+// perfil da fase; o tom segue a PINTURA na tela (o `Parallax` diz qual — `pinturaNaTela()`).
+
+/** As pinturas de fundo das fases — cada uma tem o seu tom. */
+export type ChavePintura =
+  | 'paintBgF1'
+  | 'paintBgZeroG'
+  | 'paintBgF2'
+  | 'paintBgF3'
+  | 'paintBgF4a'
+  | 'paintBgF4b'
+  | 'paintBgF4c'
+  | 'paintBgF4d';
+
+/** O nível médio das cutscenes aprovadas (grão já suavizado) — o que o fator da fase multiplica. */
+const BASE_FASE = { densidade: 0.8, grao: 0.7, halo: 0.27, vinheta: 0.55, grade: 1 } as const;
+/** O laranja dos tiros e explosões: o halo das fases abertas, cujas pinturas quase não têm quente. */
+const HALO_COMBATE: Cor = [230, 110, 40];
+
+/**
+ * Um perfil de fase: a base × `fator` (névoa, grão, halo, vinheta, cor). A névoa é BAIXA (rente ao chão — o céu,
+ * onde o combate acontece, fica mais limpo) e corre para a esquerda com o mundo; a poeira é rala e rápida.
+ */
+function perfilDeFase(nome: string, fator: number, nevoa: Cor, halo: Cor): PerfilAtmosfera {
+  const [r, g, b] = nevoa;
+  return {
+    nome,
+    nevoa: { densidade: BASE_FASE.densidade * fator, cor: nevoa, altura: 2, velTras: [-10, 0], velFrente: [-25, 0], evolucao: 0.02 },
+    halo: { forca: BASE_FASE.halo * fator, limiar: 0.59, cor: halo },
+    grade: BASE_FASE.grade * fator,
+    gradeQuente: 1,
+    vinheta: BASE_FASE.vinheta * fator,
+    grao: BASE_FASE.grao * fator,
+    poeira: {
+      quantidade: 60,
+      cor: [Math.min(255, Math.round(r * 1.6)), Math.min(255, Math.round(g * 1.6)), Math.min(255, Math.round(b * 1.6))],
+      deriva: [-30, 0],
+      espalhar: 6,
+    },
+  };
+}
+
+const ABERTA = 0.75;
+const DENSA = 0.85;
+
+/** Os perfis das fases — cores amostradas de cada pintura (a mesma conta das cutscenes). */
+export const PERFIS_FASE = {
+  faseF1: perfilDeFase('faseF1', ABERTA, [45, 64, 83], HALO_COMBATE),
+  faseZeroG: perfilDeFase('faseZeroG', ABERTA, [75, 73, 134], HALO_COMBATE),
+  faseF2: perfilDeFase('faseF2', ABERTA, [52, 68, 107], HALO_COMBATE),
+  faseF3: perfilDeFase('faseF3', DENSA, [74, 76, 113], [220, 120, 60]),
+  faseF4a: perfilDeFase('faseF4a', DENSA, [69, 59, 83], [187, 85, 61]),
+  faseF4b: perfilDeFase('faseF4b', DENSA, [48, 92, 142], [184, 84, 71]),
+  faseF4c: perfilDeFase('faseF4c', DENSA, [70, 68, 101], [186, 74, 59]),
+  faseF4d: perfilDeFase('faseF4d', DENSA, [96, 61, 83], [188, 65, 47]),
+} satisfies Record<string, PerfilAtmosfera>;
+
+/** A pintura na tela → o perfil dela. O `GameScene` troca quando a pintura muda. */
+export const PERFIL_DA_PINTURA: Record<ChavePintura, PerfilAtmosfera> = {
+  paintBgF1: PERFIS_FASE.faseF1,
+  paintBgZeroG: PERFIS_FASE.faseZeroG,
+  paintBgF2: PERFIS_FASE.faseF2,
+  paintBgF3: PERFIS_FASE.faseF3,
+  paintBgF4a: PERFIS_FASE.faseF4a,
+  paintBgF4b: PERFIS_FASE.faseF4b,
+  paintBgF4c: PERFIS_FASE.faseF4c,
+  paintBgF4d: PERFIS_FASE.faseF4d,
+};
