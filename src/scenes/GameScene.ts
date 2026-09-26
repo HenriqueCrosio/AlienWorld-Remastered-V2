@@ -7,6 +7,8 @@ import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import { InputReader } from '../input';
 import { Fx } from '../systems/Fx';
+import { Atmosfera } from '../systems/atmosfera/Atmosfera';
+import { PERFIL_DA_PINTURA, type ChavePintura } from '../systems/atmosfera/perfis';
 import { Moldura } from '../systems/Moldura';
 import { WeaponSystem } from '../systems/WeaponSystem';
 import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
@@ -82,6 +84,10 @@ export class GameScene extends Phaser.Scene {
   private enemies!: EnemySystem;
   private pickups!: PickupSystem;
   private fx!: Fx;
+  /** A névoa, a luz e o grão (Fatia 9). Lido pela sonda. */
+  private atm!: Atmosfera;
+  /** A pintura cujo perfil está aplicado — quando a do `Parallax` muda, o tom troca. */
+  private pinturaAtm: ChavePintura | null = null;
   private director!: StageDirector;
   private boss: StageBoss | null = null;
   /** O mini-chefão da câmara B da Fase 4 (spec 2026-09-11). `null` fora da arena dele. */
@@ -282,6 +288,10 @@ export class GameScene extends Phaser.Scene {
     );
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
+    // A ATMOSFERA (Fatia 9): a HUD, o banner e as barras de vida (profundidade 99+) ficam limpos; a nave e o combate
+    // ficam dentro. O perfil entra no primeiro `update` (o da pintura na tela).
+    this.atm = new Atmosfera(this, { limiteLimpo: 99, profundidadePoeira: -0.5 });
+    this.pinturaAtm = null;
     // ⚠️ O `tetoEm` É PASSADO, NÃO DEDUZIDO. O cano do gás pendura na parede, e a linha da parede
     // é a `Moldura` que sabe — deduzi-la do topo da criatura fazia o cano FLUTUAR, o mesmo defeito
     // que as passarelas levaram em 13/09 (*"terminaram com o problema do início das passarelas
@@ -584,6 +594,14 @@ export class GameScene extends Phaser.Scene {
     // starfield, o parallax e o avanço da `Moldura` não passam por tween nem por física. Sem esta
     // linha o estouro ficaria lento e o corredor continuaria correndo por baixo dele.
     const dt = (delta / 1000) * escala;
+    // O TOM SEGUE A PINTURA: a largada entra seca; cada troca de pintura (a câmara da F4, a saída para o zero-G)
+    // faz 1,5s de transição. Depois do hitstop: o freeze-frame congela a névoa junto.
+    const pintura = this.parallax.pinturaNaTela();
+    if (pintura !== this.pinturaAtm) {
+      this.atm.perfil(PERFIL_DA_PINTURA[pintura], this.pinturaAtm ? 1500 : 0);
+      this.pinturaAtm = pintura;
+    }
+    this.atm.update(dt);
     // A ARENA DO GOLFINHO: enquanto ele viver, o relógio da fase não passa do `seguraEm` do roteiro.
     // O mundo continua rolando (fundo, parede, física, armas) — só o roteiro, a aproximação, a barra
     // de progresso e os pontos por tempo esperam. `Math.max` porque o teto nunca faz o relógio VOLTAR.
@@ -1821,6 +1839,12 @@ export class GameScene extends Phaser.Scene {
    * lava exatamente como o jogador as deixou. A nave volta como sprite da cutscene, no mesmo lugar.
    */
   private fotografarCostura(pronto: () => void): void {
+    // ⚠️ SUSPENDE A ATMOSFERA ANTES DE PEDIR O SNAPSHOT (achado do review, 26/09): `renderer.snapshot`
+    // só entrega a imagem DEPOIS que o quadro corrente termina de renderizar — ou seja, o snapshot é
+    // do PRÓXIMO `onPreRender` do pipeline, não de um quadro futuro qualquer. Sem isto, `f8Costura`
+    // saía com a névoa/vinheta/grão do perfil da fase (F4d) e a poeira dela congelada — e `dentro.ts`
+    // aplicava `PERFIS.viscera` OUTRA VEZ em cima (vinheta e grão em dobro, poeira presa no ar).
+    this.atm.suspender();
     for (const o of this.children.list) {
       const d = o as unknown as Phaser.GameObjects.Components.Depth & Phaser.GameObjects.Components.Visible;
       if (typeof d.depth === 'number' && d.depth >= 100 && typeof d.setVisible === 'function') d.setVisible(false);

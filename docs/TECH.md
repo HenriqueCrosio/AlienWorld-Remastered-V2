@@ -93,6 +93,11 @@ this.atm.fadeOut(ms);                     // em vez de cameras.main.fadeOut
 - a nave fica DENTRO do tratamento (limpa, parece colada na cena);
 - perfil novo entra em `scripts/test-atmosfera-perfis.mjs` (o piso de densidade vale para todos).
 
+**Nas FASES (Fatia 9):** o `GameScene` segue `Parallax.pinturaNaTela()` → `PERFIL_DA_PINTURA` (um perfil por
+pintura; troca em 1,5 s, largada seca); a HUD e as barras de vida (profundidade 99+) ficam limpas; o halo cede
+durante o flash da câmera (`uFlash`), senão um flash quente acendia a tela inteira. Sonda:
+`scripts/probe-atmosfera-fases.mjs`.
+
 ### Data-driven
 
 Armas, inimigos e waves vivem em JSON, não em código. Balancear o jogo não pode exigir recompilar

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from './config';
 import { pickVariant } from './art';
 import { GROUND_Y } from './systems/TerrainSystem';
+import type { ChavePintura } from './systems/atmosfera/perfis';
 
 /**
  * Que lugar este parallax desenha. É a mesma decisão da física: tem chão ou não tem.
@@ -1824,6 +1825,20 @@ export class Parallax {
     if (!this.pinturaF4.length || !this.scene.textures.exists(key)) return;
     if (this.pinturaAtual === key) return;
 
+    if (durationMs <= 0) {
+      // O CORTE SECO, SÍNCRONO (achado do review, 26/09). Era um `tweens.addCounter` de duração 0 —
+      // e o Tween Manager só resolve o `onComplete` no PRÓXIMO passo dele, não no mesmo quadro em que
+      // `setPintura` foi chamado. O treino (F4) e os saltos de dev (`applyState`) abrem exatamente
+      // assim: o primeiro quadro ainda lia `paintBgF4a` (`pinturaAtual` só trocava um quadro depois),
+      // e como `GameScene.update` lê `parallax.pinturaNaTela()` no MESMO quadro em que chama
+      // `setPintura`, a Atmosfera começava com o perfil errado e só chegava ao certo por um fade de
+      // 1500ms — um treino que deveria abrir na câmara D entrava na A e desbotava até D na frente do
+      // jogador. Sem tween nenhum, a troca (textura + `pinturaAtual`) já vale para o quadro que pediu.
+      for (const img of this.pinturaF4) img.setTexture(key).setAlpha(1);
+      this.pinturaAtual = key;
+      return;
+    }
+
     const meio = durationMs / 2;
     this.scene.tweens.addCounter({
       from: 1,
@@ -2031,6 +2046,25 @@ export class Parallax {
     this.scene.tweens.add({ targets: this.leviathan, alpha: 0.55, duration: 3500, delay: 1400 });
 
     this.playAtmosphereExit();
+  }
+
+  /**
+   * A PINTURA NA TELA — o que a Atmosfera segue (Fatia 9): cada pintura tem o seu tom. Na F1, depois de romper a
+   * atmosfera, o céu é o zero-G; na F4, a câmara corrente (`pinturaAtual`, A–D).
+   */
+  pinturaNaTela(): ChavePintura {
+    switch (this.mode) {
+      case 'superficie':
+        return this.exiting ? 'paintBgZeroG' : 'paintBgF1';
+      case 'espaco':
+        return 'paintBgF2';
+      case 'nebulosa':
+        return 'paintBgF3';
+      case 'interior': {
+        const p = this.pinturaAtual;
+        return p === 'paintBgF4b' || p === 'paintBgF4c' || p === 'paintBgF4d' ? p : 'paintBgF4a';
+      }
+    }
   }
 
   /**
