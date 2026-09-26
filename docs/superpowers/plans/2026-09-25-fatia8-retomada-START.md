@@ -43,6 +43,14 @@ versão final e não deu o veredito.
 `src/scenes/Interlude4Scene.ts` é a REGENTE; os capítulos moram em `src/scenes/final/`. Tempos em
 `src/scenes/final/tempos.ts` (a única fonte). Sonda: `node scripts/probe-interlude4.mjs` (33 asserts, um por beat).
 
+**A ATMOSFERA (25–26/09, APROVADA):** a cena inteira passa pelo motor `src/systems/atmosfera/` (spec
+`specs/2026-09-25-atmosfera-engine-design.md`, plano `plans/2026-09-25-atmosfera-engine.md`): névoa em dither, halo
+lido da imagem, correção de cor, vinheta e grão, com a curva dramática por capítulo (`viscera` → `visceraSuccao` →
+`vacuo` → `vacuoQueda` → `superficie` → `apagando`) e piso de densidade 0,6. O grão já desceu ~25% a pedido dele.
+Calibrar = mexer em `perfis.ts`. Teste: `node scripts/test-atmosfera-perfis.mjs`. Folha: `folhas/2026-09-25/atmos-real-capitulos.png`.
+Também em 25/09: o abismo da queda deriva na `DERIVA_ESPACO` (~0,4px/s, a da Cutscene 1) e as luzes do morro não
+apagam mais com a carcaça (`LUZES_DO_MORRO` no `_gerar-sobrevoo.mjs`).
+
 | # | Capítulo | ms | Arquivo | De onde vem a arte |
 |---|---|---|---|---|
 | 1 | **CONVULSÃO** | 0 – 1.500 | `dentro.ts` | a **fotografia do último quadro da luta** (`f8Costura`, feita no `GameScene.victory`) ou, pelo `F`, a `paintBgF4d`; o núcleo pulsa: a pintura animada pela v3 (`_gerar-pulso.mjs`, seed 3) |
