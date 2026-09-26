@@ -91,7 +91,7 @@ contra arte que mudava — o playtest de balanço é este.
 | Fatia 4 | apagar a `doca.png` antiga (fallback; a nova está aprovada e mergeada) |
 | Fatia 6 (Cutscene 3) | acabamento geral |
 | chefão F4 | cabos desenhados ancorando as formas ao chão/teto (receita da catenária da doca) |
-| Fatia 8 (Atmosfera) | 🟠 levar a Atmosfera às cutscenes 1, 2 e 3 — **em curso** (Task 5 de `plans/2026-09-25-atmosfera-engine.md`) |
+| Fatia 8 (Atmosfera) | ✅ 26/09 — as cutscenes 1, 2 e 3 na Atmosfera (`aurora`, `doca`, `hangar`; `69a1704`). As QUATRO cutscenes têm tratamento |
 | GDD pilar 5 (26/09) | *"nenhuma imagem vai crua para a tela"* — avaliar a Atmosfera no **menu** e em cada **fase jogável** (só onde não custar a leitura do pilar 3), com o olho dele. Entra na CALIBRAGEM |
 | ferramenta | **a sonda de VÍDEO**: as sondas fotografam, e beat de explosão só se julga em movimento. Molde em `scripts/_ver-cargueiro-mov.mjs` |
 | ferramenta | a `probe-f4-moldura` pisca ~1 em 3 — o conserto é a AMOSTRAGEM, nunca afrouxar o número (diagnóstico no START da Fatia 7) |
