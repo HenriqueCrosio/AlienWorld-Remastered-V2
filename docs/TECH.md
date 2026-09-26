@@ -66,6 +66,33 @@ armas, waves e bosses **não sabem** qual condução está ativa. O único lugar
 desacoplada do passo de física (o v2 fazia flag no `Update` e força no `FixedUpdate` — em Phaser,
 o equivalente é ler o input no `update` e aplicar velocidade com `dt` fixo).
 
+### A Atmosfera — o tratamento de imagem OBRIGATÓRIO das cenas (GDD, pilar 5)
+
+`src/systems/atmosfera/` (spec `docs/superpowers/specs/2026-09-25-atmosfera-engine-design.md`). Toda cena narrativa
+(cutscene) liga o motor; nenhuma vai à tela com a arte crua.
+
+| Peça | Papel |
+|---|---|
+| `AtmosferaPipeline.ts` | o shader (PostFXPipeline) na câmera principal, na resolução nativa: névoa em 2 camadas e halo lido da imagem, AMBOS em dither Bayer 4×4; correção de cor, vinheta, grão a 12 fps; `uEscuro` segue o fade da câmera (o fade chega ao preto) |
+| `Atmosfera.ts` | o controlador: câmera LIMPA para a UI (tudo com `depth >= limiteLimpo`), poeira de 1 px, perfis e transições, `fadeOut` nas duas câmeras, `estado()` para as sondas, limpeza no `shutdown`; sem WebGL, no-op |
+| `perfis.ts` | só números — um perfil por ambiente. **Calibrar = mexer aqui**, nunca no shader |
+
+Ligar numa cena nova (4 linhas):
+
+```ts
+this.atm = new Atmosfera(this, { limiteLimpo: 99, profundidadePoeira: DEPTH_NAVE - 1 }); // no create
+this.atm.perfil(PERFIS.meuPerfil);        // corte seco; perfil(p, ms) = transição
+this.atm.update(dt);                      // no update
+this.atm.fadeOut(ms);                     // em vez de cameras.main.fadeOut
+```
+
+⚠️ Regras que já custaram caro:
+- o fade/flash da câmera é desenhado ANTES do shader — por isso o `uEscuro`; um `cameras.main.fadeIn` exigiria
+  inverter o `progress` (hoje só existe fade de saída);
+- a triagem da câmera limpa é por PROFUNDIDADE, a cada quadro: UI nova nasce em `depth >= limiteLimpo`;
+- a nave fica DENTRO do tratamento (limpa, parece colada na cena);
+- perfil novo entra em `scripts/test-atmosfera-perfis.mjs` (o piso de densidade vale para todos).
+
 ### Data-driven
 
 Armas, inimigos e waves vivem em JSON, não em código. Balancear o jogo não pode exigir recompilar
