@@ -8,6 +8,7 @@ import { Interlude2Scene } from './scenes/Interlude2Scene';
 import { Interlude3Scene } from './scenes/Interlude3Scene';
 import { Interlude4Scene } from './scenes/Interlude4Scene';
 import { GameOverScene } from './scenes/GameOverScene';
+import { CartasScene } from './scenes/CartasScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -30,7 +31,7 @@ const game = new Phaser.Game({
     arcade: { gravity: { x: 0, y: 0 }, debug: false },
   },
 
-  scene: [BootScene, MenuScene, GameScene, InterludeScene, Interlude2Scene, Interlude3Scene, Interlude4Scene, GameOverScene],
+  scene: [BootScene, MenuScene, GameScene, InterludeScene, Interlude2Scene, Interlude3Scene, Interlude4Scene, GameOverScene, CartasScene],
 });
 
 // Em dev, expõe o jogo para inspeção externa (probe headless, console do navegador).

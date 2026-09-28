@@ -91,6 +91,16 @@ const FRAMES: Record<string, number> = {
   shipAlien2Anim: 9,
   // O ARAUTO também ganhou propulsão (2026-07-21): era a única nave jogável sem motor animado.
   shipArautoAnim: 9,
+  // PROTÓTIPO DAS CARTAS (28/09): o motor dos tiers humanos novos (PixMiniMax, 8 quadros, só a chama anda).
+  naveHumanaT0Anim: 8,
+  naveHumanaT2Anim: 8,
+  naveHumanaT3Anim: 8,
+  // A MANTA T1 (28/09): o CORPO é o da arte aprovada em todos os quadros (colado por cima no disco); só a
+  // nadadeira e a cauda vêm do PixMiniMax. Laço fechado de 10 quadros, batida curta — a aprovada.
+  naveAlienT1Anim: 10,
+  // A MANTA T2 (28/09, aprovada): o MOVIMENTO é o da T1 aprovada, quadro a quadro (transfer-outfit do PixelLab
+  // sobre os 10 quadros dela); chifres travados num quadro só e a 3ª nadadeira dos quadros 2-3 apagada no disco.
+  naveAlienT2Anim: 10,
 
   // A AURORA da cutscene 1. Remodelada em 2026-08-09 (casco escuro, luzes vermelhas piscando e
   // os propulsores roxos pulsando atrás) — a arte anterior tinha saído da linha dark sci-fi.
@@ -197,6 +207,12 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'ship-canhoes-thrust', prefix: 'shipCanhoesAnim', frameRate: 12 },
   { key: 'ship-alien2-thrust', prefix: 'shipAlien2Anim', frameRate: 12 },
   { key: 'ship-arauto-thrust', prefix: 'shipArautoAnim', frameRate: 12 },
+  { key: 'nave-humana-t0-thrust', prefix: 'naveHumanaT0Anim', frameRate: 12 },
+  { key: 'nave-humana-t2-thrust', prefix: 'naveHumanaT2Anim', frameRate: 12 },
+  { key: 'nave-humana-t3-thrust', prefix: 'naveHumanaT3Anim', frameRate: 12 },
+  // ~120ms por quadro: a manta plana devagar (a de 12fps lia "nervosa").
+  { key: 'nave-alien-t1-nado', prefix: 'naveAlienT1Anim', frameRate: 8 },
+  { key: 'nave-alien-t2-nado', prefix: 'naveAlienT2Anim', frameRate: 8 },
 
   // A AURORA respira a 8, como a Capitânia: navio ancorado, luzes e propulsores em marcha lenta.
   { key: 'carrier-big-idle', prefix: 'carrierBigAnim', frameRate: 8 },
@@ -471,6 +487,11 @@ const ART: Record<string, string> = {
   shipCanhoes: 'sprites/ship-canhoes.png',
   shipAlien2: 'sprites/ship-alien2.png',
   ...animFrames('shipJatoAnim', 'ship-jato-anim'),
+  ...animFrames('naveHumanaT0Anim', 'naves/humana-t0-anim'),
+  ...animFrames('naveHumanaT2Anim', 'naves/humana-t2-anim'),
+  ...animFrames('naveHumanaT3Anim', 'naves/humana-t3-anim'),
+  ...animFrames('naveAlienT1Anim', 'naves/alien-t1-anim'),
+  ...animFrames('naveAlienT2Anim', 'naves/alien-t2-anim'),
   ...animFrames('shipVerdeAnim', 'ship-verde-anim'),
   ...animFrames('shipCremeAnim', 'ship-creme-anim'),
   ...animFrames('shipCinzaAnim', 'ship-cinza-anim'),
@@ -965,6 +986,23 @@ const ART: Record<string, string> = {
   // Moldura de HUD (PixelLab `create_ui_asset`, 384×216 = a tela inteira, miolo TRANSPARENTE).
   // Sem placeholder: se não existir, o menu de naves simplesmente aparece sem moldura.
   uiFrame: 'sprites/ui-frame.png',
+
+  // PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): os ícones da 1ª leva (PixelLab object 75460844, 32×32).
+  // Sem PNG, a carta mostra a categoria em texto.
+  ...Object.fromEntries(
+    ['WPN_001', 'WPN_002', 'WPN_004', 'WPN_007', 'WPN_008', 'EFF_001', 'EFF_004', 'EFF_006', 'DEF_001', 'DEF_002',
+      'DEF_003', 'DEF_004', 'MOV_001'].map((id) => [`icone-${id}`, `sprites/cartas/icone-${id}.png`]),
+  ),
+  // Os TIERS das linhagens (aprovados em 27/09; o T1 humano é o `shipJato`). Todos 44×26, de perfil.
+  naveHumanaT0: 'sprites/naves/humana-t0.png',
+  naveHumanaT2: 'sprites/naves/humana-t2.png',
+  naveHumanaT3: 'sprites/naves/humana-t3.png',
+  naveAlienT1: 'sprites/naves/alien-t1.png',
+  naveAlienT2: 'sprites/naves/alien-t2.png',
+  // A moldura aprovada (o CARTUCHO, PixelLab 9aba58b5 #1, 112×160); a energia recolorida por raridade.
+  ...Object.fromEntries(
+    ['comum', 'incomum', 'rara', 'epica'].map((r) => [`carta-${r}`, `sprites/cartas/carta-${r}.png`]),
+  ),
 
   // Fundo profundo. Sem placeholder: se não existirem, a camada simplesmente não entra.
   nebula: 'sprites/nebula.png',

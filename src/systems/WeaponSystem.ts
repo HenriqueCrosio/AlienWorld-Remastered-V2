@@ -275,6 +275,17 @@ export const WEAPONS: Record<string, WeaponDef> = {
     id: 'lamina', name: 'LÂMINA', bullet: 'shotLamina', bulletScale: 1, rate: 2,
     speed: 260, damage: 2, pellets: 1, spread: 0, ammo: null, range: null,
   },
+
+  // ─── PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): as bases das DUAS linhagens. ───
+  // Tiro SIMPLES — é a carta que dobra. Números provisórios: o balanceamento é etapa própria.
+  baseHumana: {
+    id: 'baseHumana', name: 'TRAÇANTE', bullet: 'tracerRound', bulletScale: 1, rate: 4.5, speed: 420,
+    damage: 1, pellets: 1, spread: 0, ammo: null, range: null,
+  },
+  baseAlien: {
+    id: 'baseAlien', name: 'PULSO ALIEN', bullet: 'shotPulse', bulletScale: 1, rate: 4.5, speed: 360,
+    damage: 1, pellets: 1, spread: 0, ammo: null, range: null, tint: 0x5ef2d8,
+  },
 };
 
 /**

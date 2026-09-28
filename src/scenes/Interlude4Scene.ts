@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import { resetVariantCache } from '../art';
 import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
-import { SHIPS, DEFAULT_SHIP } from '../ships';
+import { SHIPS, DEFAULT_SHIP, visualDaNave } from '../ships';
+import { tierDaNave } from '../pecas';
 import type { HandlingMode } from './GameScene';
 import { T } from './final/tempos';
 import { DEPTH, type CenaFinal, type Capitulo, type EstadoFinal } from './final/tipos';
@@ -86,13 +87,15 @@ export class Interlude4Scene extends Phaser.Scene {
     // A ATMOSFERA (spec 2026-09-25): o texto fica limpo; a poeira mora logo abaixo da nave.
     this.atm = new Atmosfera(this, { limiteLimpo: DEPTH.TEXTO, profundidadePoeira: DEPTH.NAVE - 1 });
 
-    const nave = SHIPS[this.naveId];
+    // PROTÓTIPO DAS CARTAS: a nave da cutscene final é o tier da F4 da linhagem. ⚠️ Sem animação própria, NÃO cai
+    // na `ship-thrust`: os quadros dela sobrescreveriam a textura (a armadilha das variantes de arte).
+    const nave = visualDaNave(this.naveId, tierDaNave(this.registry));
     const naveTex = this.textures.exists(nave.texture) ? nave.texture : 'ship';
     this.ship = this.add
       .sprite(Math.round(data.naveX ?? 120), Math.round(data.naveY ?? 110), naveTex)
       .setDepth(DEPTH.NAVE);
-    const naveAnim = naveTex === nave.texture ? (nave.anim ?? 'ship-thrust') : 'ship-thrust';
-    if (this.anims.exists(naveAnim)) this.ship.play(naveAnim);
+    const naveAnim = naveTex === nave.texture ? nave.anim : 'ship-thrust';
+    if (naveAnim && this.anims.exists(naveAnim)) this.ship.play(naveAnim);
 
     this.cena = { scene: this, fx: this.fx, nave: this.ship, estado: this.estado, atm: this.atm };
 

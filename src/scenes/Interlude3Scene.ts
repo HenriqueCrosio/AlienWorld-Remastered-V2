@@ -8,7 +8,8 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
-import { SHIPS, DEFAULT_SHIP, ROSTER_FINAL } from '../ships';
+import { SHIPS, DEFAULT_SHIP } from '../ships';
+import { mesaDaCutscene } from '../cartas';
 import { ShipPanel } from '../ui/ShipPanel';
 import { STAGES } from '../systems/StageDirector';
 import type { HandlingMode } from './GameScene';
@@ -777,14 +778,9 @@ export class Interlude3Scene extends Phaser.Scene {
   private escolha(): void {
     if (this.done) return;
 
-    this.aviso('CARCAÇAS DA FROTA · UMA AINDA VOA', COLORS.playerBright);
-
-    this.panel = new ShipPanel(
-      this,
-      ROSTER_FINAL,
-      (t, c) => this.aviso(t, c),
-      (id) => this.escolher(id),
-      () => this.sair(),
+    // PROTÓTIPO DAS CARTAS: a MESA DA CONQUISTA da Serpente — a única que pode trazer ÉPICA.
+    mesaDaCutscene(this, 'CONQUISTA · A SERPENTE', { fase: 4, garante: 'rara', pesos: { epica: 12 } }, () =>
+      this.escolher(this.naveId), () => this.sair(),
     );
   }
 

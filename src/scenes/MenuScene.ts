@@ -521,12 +521,12 @@ export class MenuScene extends Phaser.Scene {
         this.scene.start('Interlude2', {
           score: 9140,
           handling: 'diegetico',
-          ship: 'cinza',
+          ship: 'humana',
           stage: 3,
         }),
       );
       kb.on('keydown-L', () =>
-        this.scene.start('Game', { stage: 4, handling: 'diegetico', ship: 'alien' }),
+        this.scene.start('Game', { stage: 4, handling: 'diegetico', ship: 'humana' }),
       );
       kb.on('keydown-K', () =>
         this.scene.start('Game', { stage: 4, handling: 'diegetico', practice: true }),
@@ -535,7 +535,7 @@ export class MenuScene extends Phaser.Scene {
         this.scene.start('Interlude3', {
           score: 15200,
           handling: 'diegetico',
-          ship: 'alien',
+          ship: 'humana',
           stage: 4,
         }),
       );
@@ -543,7 +543,7 @@ export class MenuScene extends Phaser.Scene {
         this.scene.start('Interlude4', {
           score: 21000,
           handling: 'diegetico',
-          ship: 'alien',
+          ship: 'humana',
           stage: null,
           stageDone: 4,
           practice: false,

@@ -29,7 +29,10 @@ import { BossNucleo } from '../entities/BossNucleo';
 import { Golfinho, type SentidoGolfinho } from '../entities/Golfinho';
 import { Agua } from '../systems/Agua';
 import { Esfincter } from '../entities/esfincter';
-import { SHIPS, DEFAULT_SHIP } from '../ships';
+import { SHIPS, DEFAULT_SHIP, visualDaNave } from '../ships';
+import { CartasEmJogo } from '../systems/CartasEmJogo';
+import { entrarNaFase } from '../cartas';
+import { PecasEmJogo, colecaoCompleta, reiniciarLinhagem, temUmUp, tierDaNave } from '../pecas';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
 import { FreeController } from '../flight/FreeController';
@@ -100,6 +103,10 @@ export class GameScene extends Phaser.Scene {
   private stage!: StageDef;
   /** A nave escolhida na interlude. Ela DEFINE a arma base (src/ships.ts). */
   private shipId: string = DEFAULT_SHIP;
+  /** PROTÓTIPO DAS CARTAS (feat/cartas-preview): as mesas e os efeitos em jogo. */
+  private cartas!: CartasEmJogo;
+  /** PROTÓTIPO DAS CARTAS: as 3 peças da fase (as "moedas-estrela") — a coleção completa evolui a nave. */
+  private pecas!: PecasEmJogo;
 
   private controller!: FlightController;
   private readonly controllers: Record<ConduçãoId, FlightController> = {
@@ -218,6 +225,8 @@ export class GameScene extends Phaser.Scene {
   private static readonly LENTA_VOLTA_MS = 600;
   private static readonly LENTA_PISO = 0.3;
   private static readonly HITSTOP_BOSS_MS = 150;
+  /** A hitbox da nave do jogador — IGUAL para toda nave e todo tier (ver o `setSize` no `create`). */
+  private static readonly HITBOX_NAVE = { w: 21, h: 9 } as const;
 
   constructor() {
     super('Game');
@@ -345,14 +354,18 @@ export class GameScene extends Phaser.Scene {
 
     // A textura da nave escolhida — e a `ship` padrão enquanto a arte dela não existir. Uma
     // nave sem PNG cai na do Interceptor em vez de virar o quadrado verde do Phaser.
-    const tex = this.textures.exists(nave.texture) ? nave.texture : 'ship';
+    // PROTÓTIPO DAS CARTAS: a linhagem evolui no visual — o tier desta fase (`visualDaNave`).
+    // A F1 é sempre jogada nova (ou o retry dela): a linhagem volta ao tier 0, sem 1-UP pendente.
+    if (this.stage.id === 1) reiniciarLinhagem(this.registry);
+    const visual = visualDaNave(this.shipId, tierDaNave(this.registry));
+    const tex = this.textures.exists(visual.texture) ? visual.texture : 'ship';
     this.ship = this.physics.add.sprite(70, GAME_HEIGHT / 2, tex);
 
     // A ANIMAÇÃO É DA NAVE (róster v2): cada uma declara a sua em `ShipDef.anim`. Tocar a
     // animação de OUTRA nave substituiria a textura pelos quadros errados (a armadilha das
     // variantes de arte: ver src/art.ts) — por isso só toca se a textura equipada é a da nave.
-    const anim = nave.anim ?? (tex === 'ship' ? 'ship-thrust' : undefined);
-    if (anim && tex === nave.texture && this.anims.exists(anim)) this.ship.play(anim);
+    const anim = visual.anim ?? (tex === 'ship' ? 'ship-thrust' : undefined);
+    if (anim && tex === visual.texture && this.anims.exists(anim)) this.ship.play(anim);
     else if (tex === 'ship' && this.anims.exists('ship-thrust')) this.ship.play('ship-thrust');
 
     // A NAVE AVARIADA (última vida) — dano por CÓDIGO, a técnica da Interlude3: fumaça
@@ -394,11 +407,40 @@ export class GameScene extends Phaser.Scene {
 
     // A NAVE É A ARMA. É aqui que a escolha da interlude vira jogo — e é `setBase`, não `equip`:
     // ao morrer, o jogador tem que voltar para a arma DELE, não para a Pulse.
-    this.weapons.setBase(nave.weapon);
+    //
+    // PROTÓTIPO DAS CARTAS: a base da linhagem + as cartas de armamento da mão. O checkpoint da mão é da ENTRADA
+    // da fase (`entrarNaFase`): um retry devolve as cartas com que se entrou, não as ganhas antes de morrer.
+    entrarNaFase(this.registry, this.stage.id);
+    this.cartas = new CartasEmJogo({
+      scene: this,
+      fx: this.fx,
+      weapons: this.weapons,
+      inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],
+      nave: () => this.ship,
+      matar: (e) => this.matarInimigo(e),
+      baseDaNave: nave.weapon,
+      fase: this.stage.id,
+      ganharVida: () => this.lives++,
+    });
+    this.pecas = new PecasEmJogo({
+      scene: this,
+      fx: this.fx,
+      fase: this.stage.id,
+      bossTime: this.director.bossTime,
+      nave: () => this.ship,
+      inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],
+      aviso: (t) => this.showBanner(t, COLORS.hotBright),
+    });
+    // O 1-UP da coleção completa da fase ANTERIOR vale só nesta fase (e no retry dela) — não acumula.
+    this.lives = 3 + this.cartas.vidasExtras() + (temUmUp(this.registry, this.stage.id) ? 1 : 0);
+    this.weapons.setBase(this.cartas.arma());
     this.ship.setCollideWorldBounds(true);
     // Hitbox menor que o sprite: perdoar é o que faz um shmup parecer justo.
-    // Derivada da textura — a arte real (32×32) entra sem recalibrar.
-    this.ship.body!.setSize(this.ship.width * 0.55, this.ship.height * 0.42);
+    // ⚠️ FIXA, não derivada da textura (protótipo das cartas, 28/09): com as linhagens, a nave troca de desenho a
+    // cada fase, e uma hitbox derivada cresceria junto com o tier — a evolução visual mudaria a dificuldade. 21×9 é
+    // a do jato (38×22 × 0.55/0.42), a medida com que a F1 e a F2 foram validadas. Todas as naves têm quadro 44×26
+    // com o desenho centrado, então a hitbox centrada cai no mesmo lugar do casco em todas.
+    this.ship.body!.setSize(GameScene.HITBOX_NAVE.w, GameScene.HITBOX_NAVE.h, true);
 
     // ⚠️ O `TerrainSystem.solido` NOS TRÊS OVERLAPS DE PROP: a mesa que entra ou sai da parede (a
     // maré da câmara do golfinho) não está onde a hitbox estaria — ela não mata, não para tiro e
@@ -554,6 +596,19 @@ export class GameScene extends Phaser.Scene {
       // inteira e a cutscene da Doca a cada tentativa — e ela é a arma que MAIS precisa de
       // playtest: a curva de 150°/s é a única coisa que a separa de um "modo fácil".
       kb.on('keydown-FOUR', () => this.weapons.equip('enxame'));
+      // PROTÓTIPO DAS CARTAS: `C` abre uma mesa a qualquer hora — testar carta sem jogar até a próxima mesa.
+      let mesasDev = 0;
+      kb.on('keydown-C', () => {
+        if (!this.over) this.cartas.abrirMesa(`dev${mesasDev++}`, 'MESA DE TESTE (DEV)');
+      });
+      // `L` alterna o LAYOUT da mesa (cartucho → compacto → lista), para comparar jogando (mockups de 28/09).
+      kb.on('keydown-L', () => {
+        const ordem = ['cartucho', 'compacto', 'lista'];
+        const atual = (this.registry.get('layoutCartas') as string | undefined) ?? 'cartucho';
+        const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
+        this.registry.set('layoutCartas', prox);
+        this.showBanner(`MESA: ${prox.toUpperCase()}`, COLORS.playerBright);
+      });
     }
   }
 
@@ -628,6 +683,9 @@ export class GameScene extends Phaser.Scene {
     const body = this.ship.body as Phaser.Physics.Arcade.Body;
     const input = this.reader.read();
     this.controller.update(body, input);
+    // PROTÓTIPO DAS CARTAS: a mesa do meio da fase, o casco, a queima e os propulsores.
+    this.cartas.tick(time, dt, this.elapsed, this.controller.id === 'free', body);
+    this.pecas.tick(this.elapsed);
 
     // A condução decide se o gatilho é manual ou automático. A arma não sabe a diferença.
     //
@@ -1551,6 +1609,7 @@ export class GameScene extends Phaser.Scene {
     this.fx.explodeBig(g.sprite.x, g.sprite.y, 0.8);
     this.score += Golfinho.SCORE;
     this.encerrarGolfinho();
+    this.cartas.aoMorrerGuardiao();
   }
 
   /**
@@ -1777,6 +1836,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     const { next, interlude } = this.stage;
+
+    // AS PEÇAS: coleção completa = a nave evolui um tier na conquista + 1-UP na fase seguinte.
+    if (!this.practice && this.pecas.total && this.pecas.pegas >= this.pecas.total) {
+      colecaoCompleta(this.registry, this.shipId, next);
+    }
 
     // ⚠️ A INTERLUDE ENTRA SEMPRE QUE EXISTE — mesmo com `next: null`. Antes o teste era
     // `next !== null`, e a FASE 4 (a final, sem fase seguinte) caía direto na tela de
@@ -2067,16 +2131,20 @@ export class GameScene extends Phaser.Scene {
     const hp = (enemy.getData('hp') as number) - (bullet.getData('damage') as number);
     enemy.setData('hp', hp);
 
+    const bx = bullet.x;
+    const by = bullet.y;
     if (hp > 0) {
       enemy.setTint(0xffb0b0);
       // Restaura o tint do TIPO: o inimigo já era tingido antes do flash.
       this.time.delayedCall(40, () => {
         if (enemy.active) enemy.setTint(enemy.getData('tint') as number);
       });
+      this.cartas.aoAcertar(bx, by, enemy);
       return;
     }
 
     this.matarInimigo(enemy);
+    this.cartas.aoAcertar(bx, by, enemy);
   }
 
   /**
@@ -2096,7 +2164,9 @@ export class GameScene extends Phaser.Scene {
       this.fx.explode(e.x, e.y, e.scale);
     }
     this.score += e.getData('score') as number;
-    this.pickups.maybeDrop(e.x, e.y, 0.18);
+    // PROTÓTIPO DAS CARTAS: as cápsulas de HMG/Shotgun não caem mais — a PEÇA é o drop do jogo (28/09).
+    this.pecas.aoMorrer(e);
+    this.cartas.aoMorrer(e);
     e.destroy();
   }
 
@@ -2161,6 +2231,12 @@ export class GameScene extends Phaser.Scene {
 
   private damageShip(): void {
     if (this.over || this.time.now < this.invulnerableUntil) return;
+
+    // PROTÓTIPO DAS CARTAS: o CASCO absorve o golpe inteiro — a vida, a especial e as bombas ficam.
+    if (this.cartas.absorver(this.time.now)) {
+      this.invulnerableUntil = this.time.now + 1000;
+      return;
+    }
 
     this.lives--;
     this.invulnerableUntil = this.time.now + 1400;
@@ -2255,7 +2331,7 @@ export class GameScene extends Phaser.Scene {
     const nome = this.weapons.overheated ? 'TRAVADA' : w.name;
 
     this.hud.setText(
-      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}   B×${this.bombs}   ${this.totalScore()}`,
+      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

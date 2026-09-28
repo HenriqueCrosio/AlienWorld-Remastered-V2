@@ -26,7 +26,58 @@ export interface ShipDef {
   tagline: string;
 }
 
+/**
+ * OS TIERS DAS LINHAGENS (protótipo das cartas, 27/09) — a nave evolui SÓ no visual, uma forma por fase.
+ * Humana: T0 (1 asa) → T1 (o jato) → T2 → T3. Alien: T1 (a manta encontrada na Doca) → T2 (os chifres abertos).
+ * Os humanos têm motor animado; as duas mantas nadam com a MESMA batida (a T2 herdou o movimento da T1).
+ */
+const TIERS: Record<string, Record<number, { texture: string; anim?: string }>> = {
+  // Indexado pelo TIER (28/09): a evolução deixou de ser por fase e passou a depender da coleção de peças (src/pecas.ts).
+  humana: {
+    0: { texture: 'naveHumanaT0', anim: 'nave-humana-t0-thrust' },
+    1: { texture: 'shipJato', anim: 'ship-jato-thrust' },
+    2: { texture: 'naveHumanaT2', anim: 'nave-humana-t2-thrust' },
+    3: { texture: 'naveHumanaT3', anim: 'nave-humana-t3-thrust' },
+  },
+  alienigena: {
+    1: { texture: 'naveAlienT1', anim: 'nave-alien-t1-nado' },
+    2: { texture: 'naveAlienT2', anim: 'nave-alien-t2-nado' },
+  },
+};
+
+/** O visual da nave no TIER dado (preso aos tiers que a linhagem tem), ou a textura fixa da nave. */
+export function visualDaNave(id: string, tier: number): { texture: string; anim?: string } {
+  const t = TIERS[id];
+  if (t) {
+    const tiers = Object.keys(t).map(Number);
+    const n = Math.max(Math.min(...tiers), Math.min(tier, Math.max(...tiers)));
+    return t[n];
+  }
+  const nave = SHIPS[id];
+  return { texture: nave.texture, anim: nave.anim };
+}
+
 export const SHIPS: Record<string, ShipDef> = {
+  // ─── PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): DUAS LINHAGENS, uma nave cada. ───
+  // A humana é o jato da F1; a alien é oferecida na Aurora e já entra no tier 1. O poder vem das CARTAS — a nave
+  // só evolui no VISUAL a cada chefão. Até a arte dos tiers chegar, as duas usam os sprites existentes.
+  humana: {
+    id: 'humana',
+    name: 'LINHAGEM HUMANA',
+    weapon: 'baseHumana',
+    texture: 'shipJato',
+    anim: 'ship-jato-thrust',
+    tagline: 'o jato da colônia',
+  },
+  alienigena: {
+    id: 'alienigena',
+    name: 'LINHAGEM ALIEN',
+    weapon: 'baseAlien',
+    // A manta (T1): é a forma que o painel da Doca mostra e que a cutscene troca.
+    texture: 'naveAlienT1',
+    tagline: 'tecnologia do inimigo',
+  },
+
   // ─── O RÓSTER v2 (2026-07-17, direção do Henrique). ───
   //
   // O JATO é a nave "terrestre" — a Fase 1 inteira é jogada nele, ANTES de qualquer escolha.
@@ -136,7 +187,7 @@ export const SHIPS: Record<string, ShipDef> = {
 };
 
 /** A nave da Fase 1: ela acontece ANTES da escolha, então é sempre esta. O jato "terrestre". */
-export const DEFAULT_SHIP = 'jato';
+export const DEFAULT_SHIP = 'humana';
 
 /**
  * QUAIS NAVES CADA INTERLUDE OFERECE.
@@ -150,11 +201,13 @@ export const DEFAULT_SHIP = 'jato';
  * É por isso que o róster é DADO da cena, e não a lista inteira de `SHIPS`: a escolha cresce com
  * a campanha.
  */
-export const ROSTER_AURORA = ['jato', 'verde', 'creme', 'cinza'];
-export const ROSTER_DOCA = ['jato', 'verde', 'creme', 'cinza', 'branca', 'alien2', 'alien'];
+export const ROSTER_AURORA = ['humana'];
+// PROTÓTIPO DAS CARTAS: a Doca oferece o certo (a humana) e o incerto (a alien, largada ali).
+export const ROSTER_DOCA = ['humana', 'alienigena'];
+const ROSTER_DOCA_ANTIGO = ['jato', 'verde', 'creme', 'cinza', 'branca', 'alien2', 'alien'];
 /**
  * A nave de 4 canhões entra QUANDO A FASE FINAL EXISTIR — não ligue este róster a cena nenhuma
  * antes disso (a mesma regra do STAGES[3]: oferecer o que não existe despeja o jogador no lugar
  * errado sem aviso).
  */
-export const ROSTER_FINAL = [...ROSTER_DOCA, 'canhoes'];
+export const ROSTER_FINAL = [...ROSTER_DOCA_ANTIGO, 'canhoes'];

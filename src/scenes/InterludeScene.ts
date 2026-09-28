@@ -8,8 +8,9 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
-import { SHIPS, DEFAULT_SHIP, ROSTER_AURORA } from '../ships';
+import { SHIPS, DEFAULT_SHIP } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
+import { mesaDaCutscene } from '../cartas';
 import type { HandlingMode } from './GameScene';
 
 /**
@@ -404,14 +405,11 @@ export class InterludeScene extends Phaser.Scene {
   private escolha(): void {
     if (this.done) return;
 
-    this.aviso('DOCA 3 · SELECIONE SUA NAVE', COLORS.playerBright);
-
-    this.panel = new ShipPanel(
-      this,
-      ROSTER_AURORA,
-      (t, c) => this.aviso(t, c),
-      (id) => this.escolher(id),
-      () => this.sair(),
+    // PROTÓTIPO DAS CARTAS: o painel de nave virou a MESA DA CONQUISTA do chefão da F1 (≥1 Incomum, §15 do
+    // documento). A nave é a mesma — a humana — e só evolui no visual (arte dos tiers pendente). A alien NÃO está
+    // aqui: ela é encontrada na Doca.
+    mesaDaCutscene(this, 'CONQUISTA · A TORRE', { fase: 2, garante: 'incomum' }, () => this.escolher(this.naveId), () =>
+      this.sair(),
     );
   }
 
