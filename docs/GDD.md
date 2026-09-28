@@ -154,6 +154,11 @@ Sem combate — é o jogo antigo, preservado.
 
 ## 5. Armas (modelo Metal Slug)
 
+> ⚠️ **EM REVISÃO (27–28/09):** o protótipo `feat/cartas-preview` troca este modelo — as naves não dão mais arma
+> (duas linhagens com o mesmo tiro base), o poder vem de **cartas** (3 na mesa, escolhe 1) e as cápsulas de
+> HMG/Shotgun deram lugar às **peças** (coleção de 3 por fase). Ver
+> `superpowers/specs/2026-09-27-cartas-linhagens-pecas-design.md`. Esta seção vale até o protótipo ser fechado.
+
 Arma base infinita e fraca. Pickups dão armas especiais com **munição limitada**; ao esgotar,
 volta para a base. **Ao morrer, perde a arma.** Só uma arma especial equipada por vez —
 pegar outra descarta a atual.

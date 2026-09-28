@@ -6,7 +6,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-09-25) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-09-28) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -14,8 +14,9 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. O passe visual acabou (Fatias 0–9, com a Atmosfera nas cutscenes e nas
-> fases); a próxima frente é a CALIBRAGEM."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-09-28-cartas-retomada-START.md`. O protótipo das cartas,
+> linhagens e peças está na `feat/cartas-preview`; vamos analisar os mockups da mesa de cartas e seguir com as
+> implementações."**
 
 ### O estado em uma linha
 
@@ -25,7 +26,14 @@ construção. **A Fatia 8 fechou (26/09):** a cutscene final refeita nos sete ca
 jogo e a **Atmosfera** (o tratamento de imagem, GDD pilar 5) nas QUATRO cutscenes — aprovada e mergeada (`56f4842`).
 **A Fatia 9 fechou (26/09):** a Atmosfera nas quatro fases e nos chefões, um tom por pintura (−25% nas abertas F1,
 zero-G, F2; −15% nas densas F3 e F4 A–D), a pedido dele (*"vai trazer um acabamento e polimento mais
-profissional"*). **O PASSE VISUAL ACABOU. A próxima frente é a CALIBRAGEM (etapa 2).**
+profissional"*). **O PASSE VISUAL ACABOU.**
+
+**27–28/09 — ANTES da calibragem, o Henrique trocou o eixo das naves** (*"adicionei muitas naves e perdeu o
+sentido"*): o róster de 8 naves saiu; entraram **duas linhagens** (humana T0→T3, manta alien T1→T2, escolhida só na
+Doca), **um sistema de cartas** (3 na mesa, escolhe 1) e **3 peças por fase** (as "moedas-estrela": coleção completa
+evolui a nave + 1-UP na fase seguinte). Tudo jogável como **PROTÓTIPO na `feat/cartas-preview`** (não mergeada).
+Spec: `specs/2026-09-27-cartas-linhagens-pecas-design.md` · porta de entrada: `plans/2026-09-28-cartas-retomada-START.md`.
+**A frente agora é fechar esse protótipo (etapa 1.5); a calibragem vem depois.**
 
 ```
 MENU → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
@@ -39,7 +47,8 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
-| 2 | **Calibragem** do passe visual | 🟠 **A PRÓXIMA** — inclui avaliar a Atmosfera no menu |
+| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`; falta escolher o layout da mesa (mockups prontos), fonte pixel, arte da mesa/ícones/peça, tier nas cutscenes do meio, e o que a F4 dá. Ver o START de 28/09 |
+| 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
@@ -64,7 +73,9 @@ errada). Pela regra dos dois Leviatãs, o da cena final é o **biomecânico sem 
 - o halo dos tiros (`lifespan/scale/alpha` do `halo` no `WeaponSystem`); os fades e pulsos do menu;
 - a espessura das bordas por trecho da Fase 4 (`Moldura`, `ESPESSURA_MAX` 54 — só até 70).
 
-**3 · O balanceamento** — o que ainda é chute calibrado no olho:
+**3 · O balanceamento** — o que ainda é chute calibrado no olho.
+> ⚠️ **28/09:** os itens sobre as NAVES/ARMAS abaixo (o ENXAME, "a nave é a arma", a Lança, o Dispersor) ficaram
+> OBSOLETOS com a etapa 1.5 — as naves não dão mais arma; o poder vem das cartas. Os das FASES e CHEFÕES continuam.
 - **Fase 4:** os vãos `110 → 96 → 76 → 84`; o guardião (`INVESTIDA_CADA` 6s, HP 90); o predador (HP 180,
   knobs no topo de `src/entities/Predador.ts`). ⚠️ A arena do golfinho foi APROVADA em 23/09 (`rate 2.6`).
 - **Fases 1–3:** a vida da Capitânia (150) e do cargueiro (24), o dano 3 da Lança, o alcance 110 do Dispersor.
@@ -119,6 +130,20 @@ contra arte que mudava — o playtest de balanço é este.
 
 O fluxo de cada fatia, regra dele: **brainstorming → spec (`docs/superpowers/specs/`) → plano
 (`docs/superpowers/plans/`) → implementação → teste jogado por ele → merge `--no-ff`**.
+
+### 🟠 O que as sessões de 27–28/09 fizeram — a etapa 1.5 (cartas, linhagens, peças)
+
+- **Brainstorming com o doc dele** (`sistema_de_cartas_skills_shoot_em_up_v2.md`) → protótipo jogável na
+  `feat/cartas-preview`: 13 cartas, mesas no meio da fase e nas 3 conquistas, reset da alien na Doca.
+- **Naves:** as 8 saíram; ficaram duas linhagens com **todos os tiers animados** (motor nos humanos; nado nas mantas —
+  a T2 herdou o movimento da T1 pelo `/transfer-outfit-v2`). **Hitbox fixa 21×9**, quadros padronizados em 44×26.
+- **Peças:** 3 portadores por fase (F1–F3) → evolução + 1-UP na fase seguinte; HMG/Shotgun não caem mais.
+- **Mesa de cartas:** o cartucho foi reprovado (*"muito grande e estourado"*); pesquisa de referência (Deep Rock
+  Galactic: Survivor, 20 Minutes Till Dawn, Nova Drift) e **dois layouts novos implementados** para comparar
+  (`L` em dev). Folha: `superpowers/folhas/2026-09-28/mockups-cartas.png`.
+- **Correções de caminho:** o Arauto verde saiu dos atalhos de dev e da vaga da Doca (a manta ficou no lugar); a
+  elipse do Casco virou texto na HUD; a boca branca da manta T2 ficou transparente.
+- **Parou em:** escolher o layout da mesa — ver o START de 28/09.
 
 ### 🟠 O que a sessão de 23–25/09 (a 2ª) fez — a Fatia 8
 
