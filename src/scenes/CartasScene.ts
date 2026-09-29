@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
+import { ehHD, escalaHD, jogoHD, pixelFino, prepararCameraHD } from '../uiHD';
 import { CARTAS, COR_RARIDADE, NOME_RARIDADE, type CartaDef } from '../cartas';
 
 /**
@@ -28,7 +29,8 @@ export interface CartasData {
 type Layout = 'cartucho' | 'compacto' | 'lista';
 
 /** O CARTUCHO (112×160). */
-const CART = { w: 112, h: 160, passo: 124, cy: 110, visor: { x: 4, y: -44 }, nomeY: 16, textoY: 41 };
+const CART_BASE = { w: 112, h: 160, passo: 124, cy: 110, visor: { x: 4, y: -44 }, nomeY: 16, textoY: 41 };
+const CART = CART_BASE;
 /** A CARTA COMPACTA (72×96). */
 const COMP = { w: 72, h: 96, passo: 84, cy: 108 };
 /** A LISTA: fileira de ícones + painel. */
@@ -46,12 +48,44 @@ export class CartasScene extends Phaser.Scene {
   private realces: Phaser.GameObjects.GameObject[] = [];
   private painel: Phaser.GameObjects.Container | null = null;
   private fechando = false;
+  /** A escala do cartucho: 1 no mundo, o pixel fino na camada HD. */
+  private f = 1;
 
   constructor() {
     super('Cartas');
   }
 
   create(data: CartasData): void {
+    // PROTÓTIPO (29/09, `?ui3x=`): a mesa mora na CAMADA HD. Esta cena fica viva e vazia no mundo — a fase continua
+    // vendo 'Cartas' ativa, pausada por baixo como antes — e fecha junto com a de lá.
+    const hd = jogoHD();
+    if (hd && !ehHD(this)) {
+      hd.registry.set('layoutCartas', this.registry.get('layoutCartas'));
+      let fechada = false;
+      const fechar = () => {
+        fechada = true;
+        this.scene.stop();
+      };
+      this.events.once('shutdown', () => {
+        if (!fechada) hd.scene.stop('Cartas');
+      });
+      hd.scene.start('Cartas', {
+        ...data,
+        onEscolha: (id: string) => {
+          fechar();
+          data.onEscolha(id);
+        },
+        onSair: data.onSair && (() => {
+          fechar();
+          data.onSair!();
+        }),
+      });
+      return;
+    }
+    if (ehHD(this)) prepararCameraHD(this);
+    // Na camada HD o cartucho encolhe para o pixel fino (~⅔): a mesma moldura, no espaço da compacta, mais densa.
+    this.f = ehHD(this) ? pixelFino() / escalaHD() : 1;
+
     this.opcoes = data.opcoes.map((id) => CARTAS[id]).filter(Boolean);
     this.onEscolha = data.onEscolha;
     this.cursor = Math.min(1, this.opcoes.length - 1);
@@ -69,7 +103,7 @@ export class CartasScene extends Phaser.Scene {
 
     if (this.layout === 'lista') this.montarLista();
     else {
-      const passo = this.layout === 'compacto' ? COMP.passo : CART.passo;
+      const passo = this.layout === 'compacto' ? COMP.passo : Math.round(CART.passo * this.f);
       const x0 = GAME_WIDTH / 2 - ((this.opcoes.length - 1) * passo) / 2;
       this.opcoes.forEach((c, i) =>
         this.layout === 'compacto' ? this.montarCompacta(c, x0 + i * passo, i) : this.montarCartucho(c, x0 + i * passo, i),
@@ -118,11 +152,16 @@ export class CartasScene extends Phaser.Scene {
 
   private montarCartucho(c: CartaDef, x: number, i: number): void {
     const cor = COR_RARIDADE[c.raridade];
+    const f = this.f;
+    const CART = {
+      w: CART_BASE.w * f, h: CART_BASE.h * f, cy: CART_BASE.cy,
+      visor: { x: CART_BASE.visor.x * f, y: CART_BASE.visor.y * f }, nomeY: CART_BASE.nomeY * f, textoY: CART_BASE.textoY * f,
+    };
     const k = this.add.container(x, CART.cy);
     const moldura = `carta-${c.raridade}`;
-    if (this.textures.exists(moldura)) k.add(this.add.image(0, 0, moldura));
+    if (this.textures.exists(moldura)) k.add(this.add.image(0, 0, moldura).setScale(f));
     else k.add(this.add.rectangle(0, 0, CART.w, CART.h, 0x10141c).setStrokeStyle(2, ACO));
-    this.icone(k, c, CART.visor.x, CART.visor.y, 1.5, cor);
+    this.icone(k, c, CART.visor.x, CART.visor.y, 1.5 * f, cor);
     k.add(pixelText(this, 0, CART.nomeY, c.nome, { size: 8, color: COLORS.metalLight }));
     k.add(pixelText(this, 0, CART.textoY, c.texto, { size: 7, color: 0xa8b0c2, stroke: 2 }).setAlign('center'));
     k.add(pixelText(this, 0, CART.h / 2 + 7, NOME_RARIDADE[c.raridade], { size: 7, color: cor, stroke: 2 }));

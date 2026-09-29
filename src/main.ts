@@ -9,6 +9,12 @@ import { Interlude3Scene } from './scenes/Interlude3Scene';
 import { Interlude4Scene } from './scenes/Interlude4Scene';
 import { GameOverScene } from './scenes/GameOverScene';
 import { CartasScene } from './scenes/CartasScene';
+import { carregarFonte } from './fonte';
+import { criarCamadaHD } from './uiHD';
+import { EspelhoHDScene } from './scenes/EspelhoHDScene';
+
+// PROTÓTIPO (29/09): `?fonte=tiny5|pixelify|silkscreen` assa a fonte pixel antes do jogo nascer. Sem ela, nada muda.
+await carregarFonte();
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -33,6 +39,9 @@ const game = new Phaser.Game({
 
   scene: [BootScene, MenuScene, GameScene, InterludeScene, Interlude2Scene, Interlude3Scene, Interlude4Scene, GameOverScene, CartasScene],
 });
+
+// PROTÓTIPO (29/09): `?ui3x=pixel|lisa` liga a camada de interface em alta por cima do mundo (resolução mista).
+void criarCamadaHD(game, [CartasScene, EspelhoHDScene]);
 
 // Em dev, expõe o jogo para inspeção externa (probe headless, console do navegador).
 if (import.meta.env.DEV) {
