@@ -24,11 +24,12 @@ Spec: `docs/superpowers/specs/2026-09-27-cartas-linhagens-pecas-design.md` (as d
 
 ## 3. Próximos passos (na ordem combinada)
 
-1. **Analisar os mockups da mesa** com ele e escolher o layout (compacto ou lista — o cartucho foi reprovado).
-2. **Fonte pixel (bitmap)** para o jogo inteiro — o achado dos mockups: a monospace do sistema escalada é o que deixa o
-   texto "não nítido" em qualquer layout.
-3. **Arte da mesa escolhida** e dos **ícones** (as referências usam ícone simples, de uma cor, legível num relance; os
-   nossos são coloridos e detalhados).
+1. ✅ 29/09 — **o layout da mesa: o COMPACTO** (cartucho e lista saíram do código).
+2. ✅ 29/09 — **o texto nítido: as TRÊS VOZES numa camada HD** (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`,
+   plano `plans/2026-09-29-tres-vozes-camada-hd.md`). Implementado; **falta ele jogar para aprovar**.
+3. **A spec 2: a arte nova do compacto** e dos **ícones**, no pixel fino da camada HD (as referências usam ícone
+   simples, de uma cor, legível num relance; os nossos são coloridos e detalhados). As molduras do cartucho ficaram no
+   disco (`sprites/cartas/carta-*.png`) como material. Lista de peças + divisão dele × PixelLab ANTES de gerar.
 4. **Arte da peça** (hoje um losango dourado desenhado em código).
 5. **Tier certo nas cutscenes do meio** (Aurora/Doca/Hangar mostram a nave parada na forma de entrada da linhagem).
 6. **EM ABERTO com ele:** o que a F4 dá (não tem peças porque não há tier depois dela).

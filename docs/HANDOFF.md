@@ -14,9 +14,9 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-09-28-cartas-retomada-START.md`. O protótipo das cartas,
-> linhagens e peças está na `feat/cartas-preview`; vamos analisar os mockups da mesa de cartas e seguir com as
-> implementações."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-09-28-cartas-retomada-START.md`. As três vozes e a mesa
+> compacta estão na `feat/cartas-preview`; vou jogar para aprovar o texto, e depois seguimos para a spec 2 (a arte
+> nova do compacto)."**
 
 ### O estado em uma linha
 
@@ -47,7 +47,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
-| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`; falta escolher o layout da mesa (mockups prontos), fonte pixel, arte da mesa/ícones/peça, tier nas cutscenes do meio, e o que a F4 dá. Ver o START de 28/09 |
+| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). Falta: **spec 2 = a arte nova do compacto** (molduras + ícones), arte da peça, tier nas cutscenes do meio, e o que a F4 dá. Ver o START de 28/09 |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
@@ -144,6 +144,25 @@ O fluxo de cada fatia, regra dele: **brainstorming → spec (`docs/superpowers/s
 - **Correções de caminho:** o Arauto verde saiu dos atalhos de dev e da vaga da Doca (a manta ficou no lugar); a
   elipse do Casco virou texto na HUD; a boca branca da manta T2 ficou transparente.
 - **Parou em:** escolher o layout da mesa — ver o START de 28/09.
+
+### 🟠 O que a sessão de 29/09 fez — o texto nítido e a mesa compacta
+
+- **A causa do texto borrado, medida:** a monospace do sistema espremida em 7–8px no canvas 384×216 (o canvas sempre
+  suaviza a borda; o `setResolution(3)` antigo não ajudava). Folha: `superpowers/folhas/2026-09-29/fontes-pixel.png`.
+- **A resolução mista:** o mundo continua 384×216 (arte e Atmosfera intocadas); o texto e a mesa moram numa **camada
+  HD** — 2º canvas na resolução da tela (384·s × 216·s, `s` inteiro), com uma cena IRMÃ por cena do mundo. Folhas
+  `mista-*.png`.
+- **As TRÊS VOZES (ideia dele):** JOGO = Silkscreen (menu, fim de fase — o W *"parece uma carinha alien"*) · NAVE =
+  **Chivo Mono** (HUD, alertas, cutscenes; a JetBrains caiu porque o zero marcado deixava o placar *"estranho"* — só 3
+  de 18 monos livres têm zero limpo) · PILOTO = Chakra Petch (a mesa, o painel da Doca). Folhas `vozes-*.png`.
+- **A mesa = o COMPACTO** (*"traz mais foco no conteúdo, deixa mais o background do jogo à vista"*); cartucho e lista
+  saíram do código. "0G LIVRE" → "ZERO-G LIVRE".
+- **Spec** `specs/2026-09-29-tres-vozes-camada-hd-design.md` (spec 1 de 2) · **plano**
+  `plans/2026-09-29-tres-vozes-camada-hd.md` · sonda `scripts/probe-vozes.mjs` (duas escalas, mouse, fade, janela).
+- **Um bug achado e consertado no caminho:** o reset da alien (mesas encadeadas) abria a mesa nova antes do `stop`
+  pendente da anterior entre os dois jogos — a `CartasScene` agora enfileira o `start` (`queueOp`).
+- **Parou em:** ele jogar para aprovar. Depois: a **spec 2** (a arte nova do compacto — a lista de peças e a divisão
+  dele × PixelLab ANTES de gerar).
 
 ### 🟠 O que a sessão de 23–25/09 (a 2ª) fez — a Fatia 8
 
