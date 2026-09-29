@@ -1,5 +1,6 @@
 // PROTÓTIPO DAS CARTAS (feat/cartas-preview): abre a F2 na linhagem alien, abre a mesa (C), fotografa, escolhe,
 // atira e fotografa de novo. Depois a Aurora: o painel das linhagens e a mesa da conquista.
+// (29/09) A mesa mora na camada HD (`window.__gameHD`); a 'Cartas' do mundo só repassa.
 import { chromium } from 'playwright';
 
 const OUT = process.argv[2] ?? '.';
@@ -26,7 +27,7 @@ await page.waitForTimeout(900);
 await page.screenshot({ path: `${OUT}/cartas-mesa-fase.png` });
 
 const mesa = await page.evaluate(() => {
-  const c = window.__game.scene.getScene('Cartas');
+  const c = (window.__gameHD ?? window.__game).scene.getScene('Cartas');
   return { ativa: c.scene.isActive(), opcoes: c.opcoes?.map((o) => o.id), jogoPausado: window.__game.scene.getScene('Game').scene.isPaused() };
 });
 await page.keyboard.press('Enter');
@@ -76,7 +77,7 @@ const mesas = [];
 for (let k = 0; k < 6; k++) {
   await page.waitForTimeout(1100);
   const m = await page.evaluate(() => {
-    const c = window.__game.scene.getScene('Cartas');
+    const c = (window.__gameHD ?? window.__game).scene.getScene('Cartas');
     return c.scene.isActive() ? { opcoes: c.opcoes.map((o) => o.id), mao: [...window.__game.registry.get('cartas')] } : null;
   });
   if (!m) break;

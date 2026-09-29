@@ -1,27 +1,28 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from './config';
+import { IrmaHDScene } from './scenes/IrmaHDScene';
 
 /**
- * PROTÓTIPO (29/09) — a CAMADA DE INTERFACE EM ALTA (resolução mista), com `?ui3x=pixel|lisa` na URL.
+ * A CAMADA HD — a resolução mista (spec `2026-09-29-tres-vozes-camada-hd-design.md`).
  *
- * O mundo continua em 384×216 (a arte aprovada e a Atmosfera intocadas). Por cima dele nasce um SEGUNDO canvas,
- * transparente, na resolução da TELA: 384·s × 216·s, onde `s` é a escala inteira em que o jogo aparece (3 numa
- * janela de 1152, 5 em 1080p). A câmera dele tem zoom `s`, então as cenas continuam escritas em coordenadas do
- * mundo — só o texto e a moldura ganham pixel mais fino.
+ * O mundo continua em 384×216 (a arte aprovada e a Atmosfera intocadas). Por cima dele vive um SEGUNDO jogo Phaser,
+ * transparente, na resolução da TELA: 384·s × 216·s, com `s` = a escala inteira em que o jogo aparece (3 numa janela
+ * de 1152, 5 em 1080p). As cenas daqui têm câmera em zoom `s` a partir do canto, então continuam escritas em
+ * coordenadas do mundo — só o texto (e a mesa) ganham o pixel da tela.
  *
- * ⚠️ A razão camada:tela TEM que ser inteira, ou o pixel fino sai irregular. Por isso `s` acompanha a tela, e o
- * "pixel fino" da interface é o inteiro de pixels de tela mais perto de ⅔ do pixel do mundo (`pixelFino`).
+ * ⚠️ A razão camada:tela TEM que ser inteira, ou o pixel sai irregular: por isso `s` segue a tela, e a camada se
+ * refaz quando a janela muda (`alinhar`).
  *
- * - `pixel`: a fonte pixel (Silkscreen) com o pixel fino — a identidade mantida, com mais resolução;
- * - `lisa`: uma fonte vetorial (Chakra Petch), suavizada na resolução da tela — a leitura máxima.
+ * Todo texto de uma cena do mundo nasce na IRMÃ dela (`irmaDe`): uma cena daqui que nasce com o 1º texto, copia o fade
+ * da câmera do mundo e morre com a cena. O código das cenas não sabe de nada disso — o `pixelText` devolve o próprio
+ * texto de cá, e `setText`/`setAlpha`/tweens funcionam nele igual.
  */
-export type EstiloHD = 'pixel' | 'lisa' | 'vozes';
 
 /**
- * AS TRÊS VOZES (29/09, ideia do Henrique): cada fonte é uma voz, e uma tela fala com UMA voz só.
- * - `jogo`   — a marca: menu, título, fim de fase. Silkscreen no pixel da mista.
- * - `nave`   — o computador de bordo: alertas, nome da fase, legendas das cutscenes, a HUD. Monospace.
- * - `piloto` — o piloto decidindo: a mesa de cartas inteira. Chakra Petch, lisa (a leitura confortável).
+ * AS TRÊS VOZES (ideia do Henrique): cada fonte é uma voz, e uma tela fala com UMA voz só.
+ * - `jogo`   — a marca: menu, fim de fase. Silkscreen.
+ * - `nave`   — o computador de bordo: a fase (HUD, alertas), as cutscenes. Chivo Mono.
+ * - `piloto` — o piloto decidindo, jogo pausado: a mesa, o painel da Doca. Chakra Petch.
  */
 export type Voz = 'jogo' | 'nave' | 'piloto';
 
@@ -38,112 +39,124 @@ const VOZ_DA_CENA: Record<string, Voz> = {
 
 export const vozDaCena = (scene: Phaser.Scene): Voz => VOZ_DA_CENA[scene.scene.key] ?? 'jogo';
 
-/**
- * A voz da nave: CHIVO MONO bold (29/09). A JetBrains foi aprovada e caiu no mesmo dia — as monos de programação
- * marcam o zero (ponto/risco) e o placar ficava "estranho" (ele). Das 18 monos livres medidas, só Azeret, B612 e
- * Chivo têm o zero limpo; a Chivo é a de proporção mais perto da aprovada. A Consolas (`?mono=consolas`) fica só
- * como referência: é da Microsoft, não pode ir no jogo publicado.
- */
-export const MONOS: Record<string, { familia: string; arquivo?: string }> = {
-  chivo: { familia: 'fonte-mono', arquivo: 'fonts/chivo-mono-700.woff2' },
-  consolas: { familia: 'Consolas' },
-};
-let mono = MONOS.chivo;
-export const familiaMono = (): string => mono.familia;
-
 let jogo: Phaser.Game | null = null;
-let estilo: EstiloHD | null = null;
+let mundo: Phaser.Game | null = null;
 let s = 3;
 
-export const estiloHD = (): EstiloHD | null => estilo;
+/** A camada, ou `null` se ela não nasceu — aí o texto fica no mundo (`ui.ts`). */
 export const jogoHD = (): Phaser.Game | null => jogo;
 export const ehHD = (scene: Phaser.Scene): boolean => jogo !== null && scene.game === jogo;
-/** Pixels de tela por pixel do mundo, na camada HD. */
+/** Pixels de tela por pixel do mundo. */
 export const escalaHD = (): number => s;
 /** Pixels de tela por pixel da interface fina: o inteiro mais perto de ⅔ do pixel do mundo. */
 export const pixelFino = (): number => Math.max(1, Math.round((s * 2) / 3));
 
-/** Carrega as texturas que as cenas da camada usam (a camada é outro jogo: não enxerga as do mundo). */
-class BootHD extends Phaser.Scene {
-  constructor() {
-    super('BootHD');
-  }
-  preload(): void {
-    const ids = ['WPN_001', 'WPN_002', 'WPN_004', 'WPN_007', 'WPN_008', 'EFF_001', 'EFF_004', 'EFF_006', 'DEF_001',
-      'DEF_002', 'DEF_003', 'DEF_004', 'MOV_001'];
-    ids.forEach((id) => this.load.image(`icone-${id}`, `sprites/cartas/icone-${id}.png`));
-    ['comum', 'incomum', 'rara', 'epica'].forEach((r) => this.load.image(`carta-${r}`, `sprites/cartas/carta-${r}.png`));
-  }
+/** Os textos da camada e como cada um se redesenha quando `s` muda. */
+const textos = new Map<Phaser.GameObjects.GameObject, (s: number) => void>();
+
+export function registrarTextoHD(obj: Phaser.GameObjects.GameObject, restyle: (s: number) => void): void {
+  textos.set(obj, restyle);
+  obj.once(Phaser.GameObjects.Events.DESTROY, () => textos.delete(obj));
 }
 
-/** ESPELHO (só para as folhas): redesenha aqui, na camada HD, os textos de uma cena do mundo. */
-export interface TextoEspelho {
-  value: string;
-  x: number;
-  y: number;
-  size: number;
-  color: number;
-  align: 'center' | 'left';
-  stroke: number;
-  ox: number;
-  oy: number;
-  alpha: number;
-  /** A voz da cena de ORIGEM — no espelho, a cena é outra, e a voz não pode vir dela. */
-  voz: Voz;
-}
-
-export async function criarCamadaHD(mundo: Phaser.Game, cenas: (typeof Phaser.Scene)[]): Promise<void> {
-  const q = new URLSearchParams(location.search);
-  const p = q.get('ui3x');
-  if (p !== 'pixel' && p !== 'lisa' && p !== 'vozes') return;
-  estilo = p;
-  const carregar = async (familia: string, arquivo: string) => {
-    const face = new FontFace(familia, `url(${arquivo})`);
-    await face.load();
-    (document.fonts as unknown as Set<FontFace>).add(face);
-  };
-  if (p !== 'pixel') await carregar('fonte-lisa', 'fonts/chakra-petch-600.woff2');
-  if (p === 'vozes') {
-    mono = MONOS[q.get('mono') ?? ''] ?? MONOS.chivo;
-    if (mono.arquivo) await carregar(mono.familia, mono.arquivo);
-  }
-
-  await new Promise<void>((ok) => (mundo.isBooted ? ok() : mundo.events.once('ready', () => ok())));
-  const r = mundo.canvas.getBoundingClientRect();
-  s = Math.max(1, Math.round((r.width * (window.devicePixelRatio || 1)) / GAME_WIDTH));
-
-  jogo = new Phaser.Game({
-    type: Phaser.WEBGL,
-    parent: document.body,
-    width: GAME_WIDTH * s,
-    height: GAME_HEIGHT * s,
-    transparent: true,
-    pixelArt: true,
-    roundPixels: true,
-    scale: { mode: Phaser.Scale.NONE },
-    scene: [BootHD, ...cenas],
-    // Os cliques continuam no mundo (o canvas daqui não pega mouse); o teclado a cena daqui escuta na janela.
-    input: { mouse: false, touch: false },
-  });
-
-  // O canvas da camada cobre EXATAMENTE o do mundo, a cada redimensionar.
-  const alinhar = () => {
-    const c = jogo?.canvas;
-    if (!c) return;
-    const m = mundo.canvas.getBoundingClientRect();
-    Object.assign(c.style, {
-      position: 'fixed', left: `${m.left}px`, top: `${m.top}px`, width: `${m.width}px`, height: `${m.height}px`,
-      margin: '0', pointerEvents: 'none', zIndex: '2',
-      imageRendering: estilo === 'lisa' ? 'auto' : 'pixelated',
-    });
-  };
-  jogo.events.once('ready', alinhar);
-  mundo.scale.on('resize', alinhar);
-  window.addEventListener('resize', () => requestAnimationFrame(alinhar));
-  if (import.meta.env.DEV) (window as unknown as { __gameHD: Phaser.Game }).__gameHD = jogo;
-}
-
-/** Cena da camada: a câmera em zoom `s` a partir do canto, para as coordenadas seguirem as do mundo. */
+/** Cena da camada: câmera em zoom `s` a partir do canto, para as coordenadas seguirem as do mundo. */
 export function prepararCameraHD(scene: Phaser.Scene): void {
   scene.cameras.main.setOrigin(0, 0).setZoom(s).setScroll(0, 0);
+}
+
+const irmas = new Map<Phaser.Scene, Phaser.Scene>();
+let nIrmas = 0;
+
+/**
+ * A irmã de uma cena do mundo: nasce na 1ª chamada, morre no `shutdown` da cena (um `restart` ganha uma irmã nova).
+ * `null` se a camada não existe ou ainda não acabou de nascer — o texto fica no mundo.
+ */
+export function irmaDe(cena: Phaser.Scene): Phaser.Scene | null {
+  if (!jogo || !jogo.isBooted) return null;
+  const tem = irmas.get(cena);
+  if (tem) return tem;
+  const chave = `irma:${cena.scene.key}:${nIrmas++}`;
+  const irma = jogo.scene.add(chave, IrmaHDScene, true, { mundo: cena }) as Phaser.Scene | null;
+  if (!irma) return null;
+  // A MESA fica sempre por cima: a irmã nasce logo abaixo dela (a ordem de desenho é a ordem das cenas, e uma irmã
+  // nova entraria no topo — a HUD e o alerta da fase saíam por cima das cartas). Entre as irmãs, a mais nova fica em
+  // cima, como no mundo, onde a cena lançada por último desenha por cima.
+  jogo.scene.moveBelow('Cartas', chave);
+  prepararCameraHD(irma);
+  irmas.set(cena, irma);
+  const soltar = () => {
+    if (irmas.get(cena) !== irma) return;
+    irmas.delete(cena);
+    jogo?.scene.remove(chave);
+  };
+  cena.events.once(Phaser.Scenes.Events.SHUTDOWN, soltar);
+  cena.events.once(Phaser.Scenes.Events.DESTROY, soltar);
+  return irma;
+}
+
+/** O mouse vai para a camada só enquanto uma tela de decisão DELA (a mesa) está aberta; no resto, para o mundo. */
+export function mouseHD(ligado: boolean): void {
+  if (jogo?.canvas) jogo.canvas.style.pointerEvents = ligado ? 'auto' : 'none';
+}
+
+function medirEscala(): number {
+  const r = mundo!.canvas.getBoundingClientRect();
+  return Math.max(1, Math.round((r.width * (window.devicePixelRatio || 1)) / GAME_WIDTH));
+}
+
+/** Cobre EXATAMENTE o canvas do mundo; se a escala da tela mudou, refaz a camada nela. */
+function alinhar(): void {
+  if (!jogo?.canvas || !mundo?.canvas) return;
+  const novo = medirEscala();
+  if (novo !== s) {
+    s = novo;
+    jogo.scale.resize(GAME_WIDTH * s, GAME_HEIGHT * s);
+    for (const cena of jogo.scene.getScenes(false)) {
+      // Cena parada ainda não tem câmera — quando abrir, já nasce na escala nova (`prepararCameraHD`).
+      if (!cena.cameras?.main) continue;
+      cena.cameras.main.setSize(GAME_WIDTH * s, GAME_HEIGHT * s);
+      prepararCameraHD(cena);
+    }
+    for (const restyle of textos.values()) restyle(s);
+  }
+  const m = mundo.canvas.getBoundingClientRect();
+  Object.assign(jogo.canvas.style, {
+    position: 'fixed', left: `${m.left}px`, top: `${m.top}px`, width: `${m.width}px`, height: `${m.height}px`,
+    margin: '0', zIndex: '2',
+  });
+  // Os limites novos do canvas: é deles que o mouse tira a posição.
+  jogo.scale.refresh();
+}
+
+/** Liga a camada por cima do mundo. Se ela falhar, o jogo segue com o texto no mundo. */
+export async function criarCamadaHD(mundoJogo: Phaser.Game, cenas: (typeof Phaser.Scene)[]): Promise<void> {
+  mundo = mundoJogo;
+  await new Promise<void>((ok) => (mundo!.isBooted ? ok() : mundo!.events.once(Phaser.Core.Events.READY, () => ok())));
+  s = medirEscala();
+  try {
+    jogo = new Phaser.Game({
+      type: Phaser.AUTO,
+      parent: document.body,
+      width: GAME_WIDTH * s,
+      height: GAME_HEIGHT * s,
+      transparent: true,
+      pixelArt: true,
+      roundPixels: true,
+      scale: { mode: Phaser.Scale.NONE },
+      scene: cenas,
+      banner: false,
+    });
+  } catch (e) {
+    console.warn('[camada HD] não nasceu — o texto fica no mundo', e);
+    jogo = null;
+    return;
+  }
+  await new Promise<void>((ok) => jogo!.events.once(Phaser.Core.Events.READY, () => ok()));
+  // A camada nasce surda ao mouse (o clique é do mundo); a mesa o liga enquanto está aberta.
+  mouseHD(false);
+  alinhar();
+  mundo.scale.on(Phaser.Scale.Events.RESIZE, () => requestAnimationFrame(alinhar));
+  window.addEventListener('resize', () => requestAnimationFrame(alinhar));
+  document.addEventListener('fullscreenchange', () => requestAnimationFrame(alinhar));
+  if (import.meta.env.DEV) (window as unknown as { __gameHD: Phaser.Game }).__gameHD = jogo;
 }

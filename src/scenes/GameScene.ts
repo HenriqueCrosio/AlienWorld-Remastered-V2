@@ -601,14 +601,6 @@ export class GameScene extends Phaser.Scene {
       kb.on('keydown-C', () => {
         if (!this.over) this.cartas.abrirMesa(`dev${mesasDev++}`, 'MESA DE TESTE (DEV)');
       });
-      // `L` alterna o LAYOUT da mesa (cartucho → compacto → lista), para comparar jogando (mockups de 28/09).
-      kb.on('keydown-L', () => {
-        const ordem = ['cartucho', 'compacto', 'lista'];
-        const atual = (this.registry.get('layoutCartas') as string | undefined) ?? 'cartucho';
-        const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
-        this.registry.set('layoutCartas', prox);
-        this.showBanner(`MESA: ${prox.toUpperCase()}`, COLORS.playerBright);
-      });
     }
   }
 
@@ -2324,7 +2316,8 @@ export class GameScene extends Phaser.Scene {
   private updateHud(): void {
     const w = this.weapons.current;
     const ammo = this.weapons.ammoLeft === null ? '--' : String(this.weapons.ammoLeft);
-    const zona = this.zone === 'atmosfera' ? '1G' : '0G';
+    // ZERO-G, não "0G": a Chivo Mono (a voz da nave) tem o zero LIMPO, e "0G" lia "OG" (29/09).
+    const zona = this.zone === 'atmosfera' ? '1G' : 'ZERO-G';
 
     // TRAVADA no lugar do nome da arma: a palavra é o aviso mais barato que existe, e a barra
     // sozinha exige que o jogador desvie o olho do centro da tela para entender por que parou.

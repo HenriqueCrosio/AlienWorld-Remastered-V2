@@ -58,7 +58,8 @@ for (let k = 0; k < 3; k++) {
   const pegas = await page.evaluate(() => window.__game.scene.getScene('Game').pecas.pegas);
   passos.push({ marca: k + 1, portador: marcado, pecaSoltou: r.soltas, pegas });
 }
-const hud = await page.evaluate(() => window.__game.scene.getScene('Game').children.list.filter((o) => o.type === 'Text').map((t) => t.text).find((t) => t.includes('PEÇAS')));
+// (29/09) O texto da HUD mora na camada HD (a lista da cena da fase não o tem mais): lido pelo campo.
+const hud = await page.evaluate(() => window.__game.scene.getScene('Game').hud.text);
 await page.screenshot({ path: `${OUT}/peca-hud.png` });
 
 // end of phase with the full collection

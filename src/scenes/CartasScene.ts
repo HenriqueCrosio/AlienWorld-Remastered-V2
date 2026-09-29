@@ -1,22 +1,22 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
-import { ehHD, escalaHD, jogoHD, pixelFino, prepararCameraHD } from '../uiHD';
+import { ehHD, jogoHD, mouseHD, prepararCameraHD } from '../uiHD';
 import { CARTAS, COR_RARIDADE, NOME_RARIDADE, type CartaDef } from '../cartas';
 
 /**
- * A MESA DE CARTAS — PROTÓTIPO (feat/cartas-preview, 27–28/09).
+ * A MESA DE CARTAS — o COMPACTO (decisão de 29/09: *"traz mais foco no conteúdo, deixa mais o background do jogo à
+ * vista"*). O cartucho (112×160, *"muito grande e estourado"*) e a lista saíram. A arte é PROVISÓRIA até a spec 2
+ * (a arte nova do compacto, no pixel fino da camada HD).
  *
  * Uma cena SOBREPOSTA (`scene.launch`), não objetos dentro da cena de baixo, por dois motivos:
  * - a fase PAUSA inteira por baixo (`scene.pause` congela física, tweens, timers e o relógio do roteiro) — escolher
  *   carta com tiro vindo na cara não é escolha, é punição;
- * - a câmera desta cena não passa pela Atmosfera da fase: a carta fica LIMPA, como a HUD.
+ * - a mesa não passa pela Atmosfera da fase: a carta fica LIMPA, como a HUD.
  *
- * TRÊS LAYOUTS em avaliação (registry `layoutCartas`), depois do feedback de 28/09 (*"muito grandes e estourados"*):
- * - `cartucho` — o primeiro: 3 cartuchos de 112×160 (94% da largura);
- * - `compacto` — referência Deep Rock Galactic: Survivor: 3 cartas de 72×96 (~62% da largura), nome numa faixa na cor
- *   da raridade, ícone no tamanho nativo, etiqueta forte de raridade e o efeito em UMA linha;
- * - `lista` — referência 20 Minutes Till Dawn: uma fileira de 3 ícones + UM painel de descrição da opção em foco.
+ * Ela MORA NA CAMADA HD (`uiHD.ts`) e fala com a voz do PILOTO. A cena 'Cartas' do mundo continua sendo a que a fase
+ * lança: ela fica viva e vazia (a fase segue vendo 'Cartas' ativa) e repassa a mesa para a 'Cartas' da camada, que
+ * desenha e responde — teclado e mouse. Sem a camada, a mesa roda no próprio mundo.
  */
 export interface CartasData {
   opcoes: string[];
@@ -26,15 +26,8 @@ export interface CartasData {
   onSair?: () => void;
 }
 
-type Layout = 'cartucho' | 'compacto' | 'lista';
-
-/** O CARTUCHO (112×160). */
-const CART_BASE = { w: 112, h: 160, passo: 124, cy: 110, visor: { x: 4, y: -44 }, nomeY: 16, textoY: 41 };
-const CART = CART_BASE;
 /** A CARTA COMPACTA (72×96). */
 const COMP = { w: 72, h: 96, passo: 84, cy: 108 };
-/** A LISTA: fileira de ícones + painel. */
-const LISTA = { slot: 40, passo: 54, iy: 80, py: 148, pw: 236, ph: 52 };
 
 const FUNDO_CARTA = 0x0d1118;
 const ACO = 0x3a4252;
@@ -43,72 +36,41 @@ export class CartasScene extends Phaser.Scene {
   private opcoes: CartaDef[] = [];
   private onEscolha: (id: string) => void = () => {};
   private cursor = 1;
-  private layout: Layout = 'cartucho';
   private cartas: Phaser.GameObjects.Container[] = [];
   private realces: Phaser.GameObjects.GameObject[] = [];
-  private painel: Phaser.GameObjects.Container | null = null;
   private fechando = false;
-  /** A escala do cartucho: 1 no mundo, o pixel fino na camada HD. */
-  private f = 1;
 
   constructor() {
     super('Cartas');
   }
 
   create(data: CartasData): void {
-    // PROTÓTIPO (29/09, `?ui3x=`): a mesa mora na CAMADA HD. Esta cena fica viva e vazia no mundo — a fase continua
-    // vendo 'Cartas' ativa, pausada por baixo como antes — e fecha junto com a de lá.
     const hd = jogoHD();
     if (hd && !ehHD(this)) {
-      hd.registry.set('layoutCartas', this.registry.get('layoutCartas'));
-      let fechada = false;
-      const fechar = () => {
-        fechada = true;
-        this.scene.stop();
-      };
-      this.events.once('shutdown', () => {
-        if (!fechada) hd.scene.stop('Cartas');
-      });
-      hd.scene.start('Cartas', {
-        ...data,
-        onEscolha: (id: string) => {
-          fechar();
-          data.onEscolha(id);
-        },
-        onSair: data.onSair && (() => {
-          fechar();
-          data.onSair!();
-        }),
-      });
+      this.repassar(hd, data);
       return;
     }
-    if (ehHD(this)) prepararCameraHD(this);
-    // Na camada HD o cartucho encolhe para o pixel fino (~⅔): a mesma moldura, no espaço da compacta, mais densa.
-    this.f = ehHD(this) ? pixelFino() / escalaHD() : 1;
+    if (ehHD(this)) {
+      prepararCameraHD(this);
+      mouseHD(true);
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => mouseHD(false));
+    }
 
     this.opcoes = data.opcoes.map((id) => CARTAS[id]).filter(Boolean);
     this.onEscolha = data.onEscolha;
     this.cursor = Math.min(1, this.opcoes.length - 1);
-    this.layout = (this.registry.get('layoutCartas') as Layout | undefined) ?? 'cartucho';
     this.cartas = [];
     this.realces = [];
-    this.painel = null;
     this.fechando = false;
 
-    // O compacto e a lista deixam o jogo aparecer mais (as referências mostram a ação escurecida por trás).
-    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.bgDeep, this.layout === 'cartucho' ? 0.72 : 0.6).setOrigin(0);
+    // O jogo aparece por trás, escurecido (as referências mostram a ação por baixo da escolha).
+    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.bgDeep, 0.6).setOrigin(0);
     // A faixa do título apaga a HUD da fase por baixo: os dois textos moram na mesma altura.
     this.add.rectangle(0, 0, GAME_WIDTH, 22, COLORS.bgDeep, 0.9).setOrigin(0);
     pixelText(this, GAME_WIDTH / 2, 12, data.titulo, { size: 9, color: COLORS.playerBright });
 
-    if (this.layout === 'lista') this.montarLista();
-    else {
-      const passo = this.layout === 'compacto' ? COMP.passo : Math.round(CART.passo * this.f);
-      const x0 = GAME_WIDTH / 2 - ((this.opcoes.length - 1) * passo) / 2;
-      this.opcoes.forEach((c, i) =>
-        this.layout === 'compacto' ? this.montarCompacta(c, x0 + i * passo, i) : this.montarCartucho(c, x0 + i * passo, i),
-      );
-    }
+    const x0 = GAME_WIDTH / 2 - ((this.opcoes.length - 1) * COMP.passo) / 2;
+    this.opcoes.forEach((c, i) => this.montarCompacta(c, x0 + i * COMP.passo, i));
 
     pixelText(this, GAME_WIDTH / 2, 209, '[<-  ->] escolher   [ENTER] confirmar', { size: 7, color: COLORS.metalMid });
 
@@ -148,30 +110,41 @@ export class CartasScene extends Phaser.Scene {
     });
   }
 
-  // ─── CARTUCHO (o primeiro) ─────────────────────────────────────────────────────────────────────
-
-  private montarCartucho(c: CartaDef, x: number, i: number): void {
-    const cor = COR_RARIDADE[c.raridade];
-    const f = this.f;
-    const CART = {
-      w: CART_BASE.w * f, h: CART_BASE.h * f, cy: CART_BASE.cy,
-      visor: { x: CART_BASE.visor.x * f, y: CART_BASE.visor.y * f }, nomeY: CART_BASE.nomeY * f, textoY: CART_BASE.textoY * f,
+  /**
+   * No MUNDO, com a camada viva: a mesa vai para a 'Cartas' de lá. Esta fica vazia até a de lá decidir, e fecha
+   * junto — e se a fase fechar esta primeiro (ESC, dev), fecha a de lá.
+   */
+  private repassar(hd: Phaser.Game, data: CartasData): void {
+    let fechada = false;
+    const fechar = () => {
+      fechada = true;
+      this.scene.stop();
     };
-    const k = this.add.container(x, CART.cy);
-    const moldura = `carta-${c.raridade}`;
-    if (this.textures.exists(moldura)) k.add(this.add.image(0, 0, moldura).setScale(f));
-    else k.add(this.add.rectangle(0, 0, CART.w, CART.h, 0x10141c).setStrokeStyle(2, ACO));
-    this.icone(k, c, CART.visor.x, CART.visor.y, 1.5 * f, cor);
-    k.add(pixelText(this, 0, CART.nomeY, c.nome, { size: 8, color: COLORS.metalLight }));
-    k.add(pixelText(this, 0, CART.textoY, c.texto, { size: 7, color: 0xa8b0c2, stroke: 2 }).setAlign('center'));
-    k.add(pixelText(this, 0, CART.h / 2 + 7, NOME_RARIDADE[c.raridade], { size: 7, color: cor, stroke: 2 }));
-    if (c.requer) k.add(pixelText(this, 0, -CART.h / 2 - 6, `requer ${CARTAS[c.requer].nome.toLowerCase()}`, { size: 7, color: COLORS.metalMid, stroke: 2 }));
-    this.realces.push(this.add.rectangle(x, CART.cy, CART.w + 6, CART.h + 6).setStrokeStyle(2, COLORS.hotBright).setVisible(false));
-    this.zona(x, CART.cy, CART.w, CART.h, i);
-    this.cartas.push(k);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      if (!fechada) hd.scene.stop('Cartas');
+    });
+    // ⚠️ NA FILA, não `hd.scene.start`: a mesa de lá fecha com `this.scene.stop()`, que o Phaser ENFILEIRA, e o
+    // `start` do gerenciador roda NA HORA. Os dois jogos têm cada um o seu laço — no reset da alien (mesas
+    // encadeadas), a mesa nova abria antes do `stop` pendente da anterior, e o `stop` a matava. Na fila, o `start`
+    // espera atrás do `stop`.
+    // (`queueOp` é público no Phaser, só não está no `phaser.d.ts`; a fila chama `start(keyA, keyB)`.)
+    const fila = hd.scene as unknown as { queueOp(op: 'start', chave: string, dados: CartasData): void };
+    fila.queueOp('start', 'Cartas', {
+      ...data,
+      onEscolha: (id: string) => {
+        fechar();
+        data.onEscolha(id);
+      },
+      onSair:
+        data.onSair &&
+        (() => {
+          fechar();
+          data.onSair!();
+        }),
+    });
   }
 
-  // ─── COMPACTO (referência: Deep Rock Galactic: Survivor) ───────────────────────────────────────
+  // ─── A CARTA COMPACTA (referência: Deep Rock Galactic: Survivor) ───────────────────────────────
 
   private montarCompacta(c: CartaDef, x: number, i: number): void {
     const cor = COR_RARIDADE[c.raridade];
@@ -179,7 +152,6 @@ export class CartasScene extends Phaser.Scene {
     const k = this.add.container(x, COMP.cy);
     k.add(this.add.rectangle(0, 0, w, h, FUNDO_CARTA, 0.96).setStrokeStyle(1, ACO));
     // O NOME numa faixa na cor da raridade: é a primeira coisa que o olho lê.
-    // (Texto CLARO com contorno escuro: texto escuro sobre a cor, como no Deep Rock, borra a 7px.)
     k.add(this.add.rectangle(0, -h / 2 + 7, w, 14, cor, 0.85));
     k.add(pixelText(this, 0, -h / 2 + 7, c.nome, { size: 7, color: COLORS.metalLight, stroke: 3 }));
     // O ÍCONE no tamanho nativo (32px): escala inteira, nítido.
@@ -194,40 +166,6 @@ export class CartasScene extends Phaser.Scene {
     this.realces.push(this.cantos(x, COMP.cy, w + 6, h + 6));
     this.zona(x, COMP.cy, w, h, i);
     this.cartas.push(k);
-  }
-
-  // ─── LISTA (referência: 20 Minutes Till Dawn) ──────────────────────────────────────────────────
-
-  private montarLista(): void {
-    const { slot, passo, iy } = LISTA;
-    const x0 = GAME_WIDTH / 2 - ((this.opcoes.length - 1) * passo) / 2;
-    this.opcoes.forEach((c, i) => {
-      const cor = COR_RARIDADE[c.raridade];
-      const x = x0 + i * passo;
-      const k = this.add.container(x, iy);
-      k.add(this.add.rectangle(0, 0, slot, slot, FUNDO_CARTA, 0.96).setStrokeStyle(1, cor));
-      this.icone(k, c, 0, 0, 1, cor);
-      // A seta embaixo do ícone em foco.
-      this.realces.push(this.add.triangle(x, iy + slot / 2 + 7, 0, 0, 8, 0, 4, 5, COLORS.hotBright).setVisible(false));
-      this.zona(x, iy, slot, slot, i);
-      this.cartas.push(k);
-    });
-    this.painel = this.add.container(GAME_WIDTH / 2, LISTA.py);
-  }
-
-  /** O painel ÚNICO da lista: só a opção em foco é lida, então o texto pode ser maior. */
-  private preencherPainel(): void {
-    if (!this.painel) return;
-    const c = this.opcoes[this.cursor];
-    const cor = COR_RARIDADE[c.raridade];
-    const { pw, ph } = LISTA;
-    this.painel.removeAll(true);
-    this.painel.add(this.add.rectangle(0, 0, pw, ph, FUNDO_CARTA, 0.96).setStrokeStyle(1, cor));
-    this.painel.add(pixelText(this, -pw / 2 + 8, -ph / 2 + 11, c.nome, { size: 9, color: cor, align: 'left' }));
-    this.painel.add(this.add.rectangle(pw / 2 - 30, -ph / 2 + 11, 50, 10, cor, 0.85));
-    this.painel.add(pixelText(this, pw / 2 - 30, -ph / 2 + 11, NOME_RARIDADE[c.raridade], { size: 7, color: COLORS.metalLight, stroke: 3 }));
-    this.painel.add(pixelText(this, -pw / 2 + 8, 4, c.texto.replace('\n', ' '), { size: 8, color: COLORS.metalLight, align: 'left', stroke: 2 }));
-    if (c.requer) this.painel.add(pixelText(this, -pw / 2 + 8, 17, `requer ${CARTAS[c.requer].nome.toLowerCase()}`, { size: 7, color: COLORS.metalMid, align: 'left', stroke: 2 }));
   }
 
   // ─── comum ─────────────────────────────────────────────────────────────────────────────────────
@@ -260,11 +198,6 @@ export class CartasScene extends Phaser.Scene {
 
   private marcar(): void {
     this.realces.forEach((r, i) => (r as Phaser.GameObjects.Graphics).setVisible(i === this.cursor));
-    if (this.layout === 'cartucho') this.cartas.forEach((c, i) => c.setScale(i === this.cursor ? 1.04 : 1));
-    if (this.layout === 'lista') {
-      this.cartas.forEach((c, i) => c.setScale(i === this.cursor ? 1.15 : 1));
-      this.preencherPainel();
-    }
   }
 
   private confirmar(i: number): void {
@@ -288,7 +221,7 @@ export class CartasScene extends Phaser.Scene {
   }
 }
 
-// ASCII puro: a fonte monospace do jogo não tem os símbolos Unicode (o ShipPanel já tomou caixas vazias assim).
+// ASCII puro: a fonte pode não ter os símbolos Unicode (o ShipPanel já tomou caixas vazias assim).
 const SIGLA: Record<CartaDef['categoria'], string> = {
   arma: 'ARMA',
   efeito: 'EFEITO',

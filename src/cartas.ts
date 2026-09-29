@@ -79,6 +79,13 @@ export const NOME_RARIDADE: Record<Raridade, string> = {
   epica: 'ÉPICA',
 };
 
+/**
+ * As cartas que TÊM ícone (PixelLab object 75460844, 32×32, em `sprites/cartas/icone-<id>.png`). Sem PNG, a carta
+ * mostra a categoria em texto. Carregados no mundo (`BootScene`) e na camada HD (`BootHDScene`, onde a mesa mora).
+ */
+export const ICONES_CARTAS = ['WPN_001', 'WPN_002', 'WPN_004', 'WPN_007', 'WPN_008', 'EFF_001', 'EFF_004', 'EFF_006',
+  'DEF_001', 'DEF_002', 'DEF_003', 'DEF_004', 'MOV_001'];
+
 const ORDEM: Raridade[] = ['comum', 'incomum', 'rara', 'epica'];
 
 // ─── O ESTADO DA JOGADA (registry) ───────────────────────────────────────────────────────────────

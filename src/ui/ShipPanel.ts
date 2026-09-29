@@ -103,6 +103,7 @@ export class ShipPanel {
         size: 7,
         color: COLORS.hot,
         align: 'left',
+        voz: 'piloto',
       }).setDepth(102),
     );
 
@@ -119,15 +120,16 @@ export class ShipPanel {
     this.objetos.push(this.preview);
 
     // ─── Coluna da esquerda: nome + ficha ───
-    this.nome = pixelText(s, 48, 54, '', { size: 13, color: COLORS.playerBright, align: 'left' })
+    // A VOZ DO PILOTO (29/09): o painel é uma DECISÃO, mesmo morando dentro de uma cutscene (que fala como a nave).
+    this.nome = pixelText(s, 48, 54, '', { size: 13, color: COLORS.playerBright, align: 'left', voz: 'piloto' })
       .setDepth(101);
-    this.tag = pixelText(s, 48, 68, '', { size: 7, color: COLORS.metalLight, align: 'left' })
+    this.tag = pixelText(s, 48, 68, '', { size: 7, color: COLORS.metalLight, align: 'left', voz: 'piloto' })
       .setDepth(101);
     this.objetos.push(this.nome, this.tag);
 
     for (const f of FICHA) {
       this.objetos.push(
-        pixelText(s, 48, f.y, f.rotulo, { size: 8, color: COLORS.metalLight, align: 'left' })
+        pixelText(s, 48, f.y, f.rotulo, { size: 8, color: COLORS.metalLight, align: 'left', voz: 'piloto' })
           .setDepth(101),
       );
 
@@ -161,7 +163,7 @@ export class ShipPanel {
       this.objetos.push(caixa, s.add.image(x, SLOT.y, tex).setDepth(101));
     });
 
-    this.rodape = pixelText(s, GAME_WIDTH / 2, 158, '', { size: 7, color: COLORS.metalLight })
+    this.rodape = pixelText(s, GAME_WIDTH / 2, 158, '', { size: 7, color: COLORS.metalLight, voz: 'piloto' })
       .setDepth(101);
     this.objetos.push(this.rodape);
   }

@@ -1,29 +1,35 @@
 import Phaser from 'phaser';
 
 /**
- * PROTÓTIPO (29/09) — a fonte pixel, em avaliação com `?fonte=tiny5|pixelify|silkscreen` na URL.
+ * AS FONTES DAS TRÊS VOZES (spec `2026-09-29-tres-vozes-camada-hd-design.md`), carregadas ANTES do jogo nascer.
  *
- * Por que não basta trocar o `fontFamily`: o canvas do navegador SEMPRE suaviza a borda da letra, até de fonte
- * pixel no tamanho nativo, e o jogo é 384×216 — a borda meio acesa vira o borrão que o Henrique viu no menu. Então a
- * fonte é ASSADA: cada glifo é desenhado no tamanho nativo, binarizado (aceso ou apagado, nada no meio) e ganha 1px
- * de contorno escuro (o papel do `stroke` antigo). Vira uma BitmapFont, que o Phaser desenha sem suavizar.
+ * - JOGO: a Silkscreen, ASSADA. O canvas do navegador SEMPRE suaviza a borda da letra, até de fonte pixel no tamanho
+ *   nativo — e a borda meio acesa é o borrão que o Henrique viu no menu. Então cada glifo é desenhado no tamanho
+ *   nativo, binarizado (aceso ou apagado, nada no meio) e ganha 1px de contorno escuro (o papel do `stroke` antigo).
+ *   Vira uma BitmapFont, que o Phaser desenha sem suavizar. Tiny5 (minúscula de 4px, V≈T) e Pixelify (racha o R)
+ *   perderam — `folhas/2026-09-29/fontes-pixel.png`.
+ * - NAVE: a Chivo Mono bold — das 18 monos livres medidas, uma das 3 com o ZERO LIMPO (as de programação marcam o
+ *   zero, e o placar ficava "estranho").
+ * - PILOTO: a Chakra Petch 600, a leitura confortável da mesa.
+ *
+ * Nenhuma falha de fonte impede o jogo de abrir: a voz que perdeu a fonte cai para a Silkscreen, e sem a Silkscreen
+ * o texto volta para a fonte do sistema (`fontesOk`).
  */
-export interface FontePixel {
-  arquivo: string;
-  /** O tamanho em que 1 unidade da grade da fonte = 1 pixel (lido do arquivo: unitsPerEm ÷ passo da grade). */
-  nativo: number;
-}
 
-/**
- * 29/09: a Silkscreen venceu (nativo 8px, lido do arquivo). Tiny5 (minúscula de 4px, V≈T) e Pixelify (racha o R)
- * saíram — folhas `folhas/2026-09-29/fontes-pixel.png`.
- */
-export const FONTES: Record<string, FontePixel> = {
-  silkscreen: { arquivo: 'fonts/silkscreen.woff2', nativo: 8 },
-};
+/** O tamanho em que 1 unidade da grade da Silkscreen = 1 pixel (lido do arquivo: unitsPerEm ÷ passo da grade). */
+export const NATIVO_PIXEL = 8;
+
+/** As famílias CSS das duas vozes lisas. */
+export const FAMILIA = { nave: 'fonte-nave', piloto: 'fonte-piloto' } as const;
 
 /** A chave das duas BitmapFonts assadas: com e sem contorno. */
 export const BMF = { contorno: 'pixel-c', limpa: 'pixel' };
+
+const ARQUIVO = {
+  jogo: 'fonts/silkscreen.woff2',
+  nave: 'fonts/chivo-mono-700.woff2',
+  piloto: 'fonts/chakra-petch-600.woff2',
+};
 
 const CHARS = (() => {
   let s = '';
@@ -40,25 +46,32 @@ interface Assada {
   linha: number;
 }
 
-let escolhida: FontePixel | null = null;
 let assadas: { contorno: Assada; limpa: Assada } | null = null;
+const ok = { jogo: false, nave: false, piloto: false };
 
-export function fonteAtiva(): FontePixel | null {
-  return escolhida;
-}
+/** Quais vozes têm a sua fonte. */
+export const fontesOk = (): Readonly<typeof ok> => ok;
 
-/** Chamada uma vez antes do jogo nascer. Sem `?fonte=`, não faz nada — o jogo fica como está. */
-export async function carregarFonte(): Promise<void> {
-  const q = new URLSearchParams(location.search);
-  // A mista `pixel` (`?ui3x=pixel`) usa a Silkscreen — o mundo e a camada HD falam a mesma fonte.
-  const nome = q.get('fonte') ?? (q.get('ui3x') === 'pixel' || q.get('ui3x') === 'vozes' ? 'silkscreen' : null);
-  const f = nome ? FONTES[nome] : undefined;
-  if (!f) return;
-  const face = new FontFace('fonte-pixel', `url(${f.arquivo})`);
+async function carregar(familia: string, arquivo: string): Promise<void> {
+  const face = new FontFace(familia, `url(${arquivo})`);
   await face.load();
   (document.fonts as unknown as Set<FontFace>).add(face);
-  escolhida = f;
-  assadas = { contorno: assar(f.nativo, true), limpa: assar(f.nativo, false) };
+}
+
+/** Chamada uma vez, antes do `new Phaser.Game`. */
+export async function carregarFontes(): Promise<void> {
+  const [jogo, nave, piloto] = await Promise.allSettled([
+    carregar('fonte-pixel', ARQUIVO.jogo),
+    carregar(FAMILIA.nave, ARQUIVO.nave),
+    carregar(FAMILIA.piloto, ARQUIVO.piloto),
+  ]);
+  if (jogo.status === 'fulfilled') {
+    assadas = { contorno: assar(NATIVO_PIXEL, true), limpa: assar(NATIVO_PIXEL, false) };
+    ok.jogo = true;
+  }
+  ok.nave = nave.status === 'fulfilled';
+  ok.piloto = piloto.status === 'fulfilled';
+  for (const r of [jogo, nave, piloto]) if (r.status === 'rejected') console.warn('[fonte]', r.reason);
 }
 
 function assar(tam: number, contorno: boolean): Assada {
@@ -158,7 +171,7 @@ export function registrarFonte(scene: Phaser.Scene): void {
       fr?.setUVs(c.w, c.h, u0, v0, u1, v1);
     }
     scene.cache.bitmapFont.add(chave, {
-      data: { font: chave, size: escolhida!.nativo, lineHeight: a.linha, retroFont: false, chars },
+      data: { font: chave, size: NATIVO_PIXEL, lineHeight: a.linha, retroFont: false, chars },
       texture: chave,
       frame: null,
     });

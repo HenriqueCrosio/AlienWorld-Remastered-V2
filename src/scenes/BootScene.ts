@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
+import { ICONES_CARTAS } from '../cartas';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -987,22 +988,17 @@ const ART: Record<string, string> = {
   // Sem placeholder: se não existir, o menu de naves simplesmente aparece sem moldura.
   uiFrame: 'sprites/ui-frame.png',
 
-  // PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): os ícones da 1ª leva (PixelLab object 75460844, 32×32).
-  // Sem PNG, a carta mostra a categoria em texto.
-  ...Object.fromEntries(
-    ['WPN_001', 'WPN_002', 'WPN_004', 'WPN_007', 'WPN_008', 'EFF_001', 'EFF_004', 'EFF_006', 'DEF_001', 'DEF_002',
-      'DEF_003', 'DEF_004', 'MOV_001'].map((id) => [`icone-${id}`, `sprites/cartas/icone-${id}.png`]),
-  ),
+  // PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): os ícones da 1ª leva. Sem PNG, a carta mostra a categoria em
+  // texto. (A mesa mora na camada HD, que carrega os seus — `BootHDScene`; estes servem à mesa sem a camada.)
+  ...Object.fromEntries(ICONES_CARTAS.map((id) => [`icone-${id}`, `sprites/cartas/icone-${id}.png`])),
   // Os TIERS das linhagens (aprovados em 27/09; o T1 humano é o `shipJato`). Todos 44×26, de perfil.
   naveHumanaT0: 'sprites/naves/humana-t0.png',
   naveHumanaT2: 'sprites/naves/humana-t2.png',
   naveHumanaT3: 'sprites/naves/humana-t3.png',
   naveAlienT1: 'sprites/naves/alien-t1.png',
   naveAlienT2: 'sprites/naves/alien-t2.png',
-  // A moldura aprovada (o CARTUCHO, PixelLab 9aba58b5 #1, 112×160); a energia recolorida por raridade.
-  ...Object.fromEntries(
-    ['comum', 'incomum', 'rara', 'epica'].map((r) => [`carta-${r}`, `sprites/cartas/carta-${r}.png`]),
-  ),
+  // (As molduras do CARTUCHO — `sprites/cartas/carta-*.png`, PixelLab 9aba58b5 #1 — saíram do jogo em 29/09 junto com o
+  // layout; os PNGs ficam no disco como material para a arte nova do compacto, spec 2.)
 
   // Fundo profundo. Sem placeholder: se não existirem, a camada simplesmente não entra.
   nebula: 'sprites/nebula.png',
