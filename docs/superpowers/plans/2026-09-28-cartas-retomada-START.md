@@ -1,5 +1,8 @@
 # START — retomada das cartas, linhagens e peças (depois de 28/09/2026)
 
+> ⚠️ **SUBSTITUÍDO em 29/09** pelo `plans/2026-09-29-vozes-retomada-START.md` (o layout e o texto fecharam). Fica
+> como registro.
+
 > **Frase de arranque:** *"Leia o 🧭 do `docs/HANDOFF.md` e este START. O protótipo das cartas, linhagens e peças
 > está na `feat/cartas-preview`; vamos analisar os mockups da mesa de cartas e seguir com as implementações."*
 
