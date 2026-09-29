@@ -48,6 +48,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
 | 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). Falta: **spec 2 = a arte nova do compacto** (molduras + ícones), arte da peça, tier nas cutscenes do meio, e o que a F4 dá. Ver o START de 28/09 |
+| 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
