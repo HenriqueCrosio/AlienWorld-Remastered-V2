@@ -492,7 +492,9 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setDepth(99);
 
-    this.hud = pixelText(this, 4, 7, '', {
+    // y=6, não 7: a Chivo Mono (camada HD, por cima do mundo) desce mais que a fonte antiga — o Ç e os
+    // parênteses iam até y≈12 e o contorno cortava a faixa de progresso logo abaixo (30/09).
+    this.hud = pixelText(this, 4, 6, '', {
       size: 9,
       color: COLORS.metalLight,
       align: 'left',
@@ -517,12 +519,14 @@ export class GameScene extends Phaser.Scene {
     // informação só — o quanto falta para o chefão. Esguia de propósito: é leitura de
     // relance, não ornamento; quando a luta começa ela completa e pulsa em vermelho.
     // O trilho é estático (alpha baixo, quase some na faixa): vive na display list, sem campo.
+    // Na ÚLTIMA linha da faixa (13): o texto da HUD desenha por cima, na camada HD, e colado nele
+    // a faixa lia como sublinhado (probe-vozes cobra ≥1px de folga).
     this.add
-      .rectangle(4, 12, GAME_WIDTH - 8, 1, COLORS.metalMid, 0.25)
+      .rectangle(4, 13, GAME_WIDTH - 8, 1, COLORS.metalMid, 0.25)
       .setOrigin(0, 0)
       .setDepth(100);
     this.progressFill = this.add
-      .rectangle(4, 12, 1, 1, COLORS.player, 0.55)
+      .rectangle(4, 13, 1, 1, COLORS.player, 0.55)
       .setOrigin(0, 0)
       .setDepth(101);
 

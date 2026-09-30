@@ -3,6 +3,7 @@
 // Cobra, em duas janelas (1152×648 → s=3 e 1920×1080 → s=5): zero erro · a escala da camada · o texto NA camada e
 // nenhum no mundo · a HUD com "ZERO-G" · o mouse na mesa · o fade apagando o texto · a camada refeita ao redimensionar.
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 
 const OUT = process.argv[2] ?? '.';
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -59,6 +60,22 @@ for (const [W, H, esperado] of [[1152, 648, 3], [1920, 1080, 5]]) {
   cobrar(jogo.naCamada > 0 && jogo.noMundo === 0, `${tag}: fase — ${jogo.naCamada} textos na camada, ${jogo.noMundo} no mundo`);
   cobrar(hud.includes('ZERO-G'), `${tag}: a HUD diz ZERO-G ("${hud.slice(0, 24)}…")`);
   await shot('jogo');
+
+  // A FAIXA DE PROGRESSO não encosta na HUD (30/09): o texto mora na camada, POR CIMA do mundo, e o contorno das
+  // letras cortava a faixa — lia como sublinhado. Mede a tinta ciana do texto (só a camada) contra a linha da faixa.
+  const faixaY = await page.evaluate(() => window.__game.scene.getScene('Game').progressFill.y);
+  await page.evaluate(() => { document.querySelectorAll('canvas')[0].style.visibility = 'hidden'; });
+  const soTexto = await page.screenshot({ clip: { x: 0, y: 0, width: W, height: (H / 216) * 20 } });
+  await page.evaluate(() => { document.querySelectorAll('canvas')[0].style.visibility = ''; });
+  const { data: px, info: dim } = await sharp(soTexto).raw().toBuffer({ resolveWithObject: true });
+  let pe = 0; // a última linha de tela com tinta ciana da HUD
+  for (let y = 0; y < dim.height; y++)
+    for (let x = 0; x < dim.width; x++) {
+      const i = (y * dim.width + x) * dim.channels;
+      if (px[i + 1] > 150 && px[i + 2] > 150) { pe = y; break; }
+    }
+  const peMundo = (pe + 1) / (H / 216);
+  cobrar(faixaY - peMundo >= 1, `${tag}: a faixa de progresso (y=${faixaY}) fica ≥1px abaixo da tinta da HUD (pé em ${peMundo.toFixed(1)})`);
 
   // A MESA, com o mouse sobre a 3ª carta (x = 192 + 84 no mundo, y = 108).
   await page.evaluate(() => {
