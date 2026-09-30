@@ -53,7 +53,10 @@ calibragem, o Henrique trocou o eixo: **menos naves, poder vindo de cartas, evol
 - As cartas duram a jogada; o checkpoint é a **entrada** de cada fase (retry devolve as cartas com que se entrou).
 - **2ª leva (depois do playtest):** Quádruplo, Cadência Máxima, Concentrado, Crítico, Dash, Explosão Maior,
   Fragmentação, Fogo Intenso, Reação em Cadeia.
-- **EM ABERTO — o layout da mesa.** Feedback de 28/09: o cartucho (112×160) ficou *"muito grande e estourado"*.
+- ✅ **FECHADO em 29–30/09 — o COMPACTO**, com o texto nas três vozes (spec `2026-09-29-tres-vozes-camada-hd-design.md`)
+  e a arte nova — moldura M2+M3, raridade P1, ícones nas cores reais (spec `2026-09-30-mesa-compacta-arte-design.md`).
+  O registro da comparação fica abaixo.
+- ~~EM ABERTO — o layout da mesa.~~ Feedback de 28/09: o cartucho (112×160) ficou *"muito grande e estourado"*.
   Três layouts implementados para comparar (tecla `L` em dev): `cartucho`, **`compacto`** (ref. Deep Rock Galactic:
   Survivor) e **`lista`** (ref. 20 Minutes Till Dawn). Folha: `folhas/2026-09-28/mockups-cartas.png`; referências em
   `folhas/2026-09-28/referencias-cartas/`. Achado transversal: a fonte do jogo é a monospace do sistema escalada —
