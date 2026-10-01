@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
-import { ICONES_CARTAS } from '../cartas';
+import { ICONES_CARTAS, RARIDADES } from '../cartas';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -991,6 +991,9 @@ const ART: Record<string, string> = {
   // PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): os ícones da 1ª leva. Sem PNG, a carta mostra a categoria em
   // texto. (A mesa mora na camada HD, que carrega os seus — `BootHDScene`; estes servem à mesa sem a camada.)
   ...Object.fromEntries(ICONES_CARTAS.map((id) => [`icone-${id}`, `sprites/cartas/icone-${id}.png`])),
+  // A MOLDURA da carta por raridade e o canto do realce (spec 2026-09-30) — para a mesa sem a camada.
+  ...Object.fromEntries(RARIDADES.map((r) => [`moldura-${r}`, `sprites/cartas/moldura-${r}.png`])),
+  'realce-canto': 'sprites/cartas/realce-canto.png',
   // Os TIERS das linhagens (aprovados em 27/09; o T1 humano é o `shipJato`). Todos 44×26, de perfil.
   naveHumanaT0: 'sprites/naves/humana-t0.png',
   naveHumanaT2: 'sprites/naves/humana-t2.png',

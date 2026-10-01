@@ -51,6 +51,19 @@ export const escalaHD = (): number => s;
 /** Pixels de tela por pixel da interface fina: o inteiro mais perto de ⅔ do pixel do mundo. */
 export const pixelFino = (): number => Math.max(1, Math.round((s * 2) / 3));
 
+/**
+ * As cenas da camada desenhadas no GRID DE PIXEL FINO (spec 2026-09-30-mesa-compacta-arte-design.md §2.4): câmera em
+ * zoom = pixel fino, coordenadas em pixels finos — a arte delas cai pixel a pixel na tela em qualquer janela. Hoje,
+ * só a mesa.
+ */
+const CENAS_FINAS = new Set(['Cartas']);
+
+/** O zoom da câmera de uma cena da camada: `s` (coordenadas do mundo) ou o pixel fino (coordenadas finas). */
+export const zoomHD = (scene: Phaser.Scene): number => (CENAS_FINAS.has(scene.scene.key) ? pixelFino() : s);
+
+/** Emitido em `jogoHD().events` quando a escala da tela muda (janela, tela cheia) — depois das câmeras refeitas. */
+export const EVENTO_ESCALA = 'escala-hd';
+
 /** Os textos da camada e como cada um se redesenha quando `s` muda. */
 const textos = new Map<Phaser.GameObjects.GameObject, (s: number) => void>();
 
@@ -59,9 +72,9 @@ export function registrarTextoHD(obj: Phaser.GameObjects.GameObject, restyle: (s
   obj.once(Phaser.GameObjects.Events.DESTROY, () => textos.delete(obj));
 }
 
-/** Cena da camada: câmera em zoom `s` a partir do canto, para as coordenadas seguirem as do mundo. */
+/** Cena da camada: câmera a partir do canto, no zoom dela (`zoomHD`). */
 export function prepararCameraHD(scene: Phaser.Scene): void {
-  scene.cameras.main.setOrigin(0, 0).setZoom(s).setScroll(0, 0);
+  scene.cameras.main.setOrigin(0, 0).setZoom(zoomHD(scene)).setScroll(0, 0);
 }
 
 const irmas = new Map<Phaser.Scene, Phaser.Scene>();
@@ -118,6 +131,7 @@ function alinhar(): void {
       prepararCameraHD(cena);
     }
     for (const restyle of textos.values()) restyle(s);
+    jogo.events.emit(EVENTO_ESCALA, s);
   }
   const m = mundo.canvas.getBoundingClientRect();
   Object.assign(jogo.canvas.style, {

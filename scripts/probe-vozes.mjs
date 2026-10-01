@@ -77,15 +77,20 @@ for (const [W, H, esperado] of [[1152, 648, 3], [1920, 1080, 5]]) {
   const peMundo = (pe + 1) / (H / 216);
   cobrar(faixaY - peMundo >= 1, `${tag}: a faixa de progresso (y=${faixaY}) fica ≥1px abaixo da tinta da HUD (pé em ${peMundo.toFixed(1)})`);
 
-  // A MESA, com o mouse sobre a 3ª carta (x = 192 + 84 no mundo, y = 108).
+  // A MESA, com o mouse sobre o meio da 3ª carta (as cartas moram no grid fino — a posição sai da geometria).
   await page.evaluate(() => {
     const s = window.__game.scene.getScene('Game'); s.scene.pause();
     s.scene.launch('Cartas', { opcoes: ['WPN_001', 'EFF_006', 'DEF_003'], titulo: 'SUPRIMENTO ENCONTRADO', onEscolha: () => {} });
   });
   await page.waitForTimeout(900);
   const alvo = await page.evaluate(() => {
-    const r = window.__gameHD.canvas.getBoundingClientRect();
-    return { x: r.left + (276 / 384) * r.width, y: r.top + (108 / 216) * r.height };
+    const hd = window.__gameHD;
+    const c = hd.scene.getScene('Cartas');
+    const g = c.geometria();
+    const k = g.cartas[2];
+    const r = hd.canvas.getBoundingClientRect();
+    const z = c.cameras.main.zoom * (r.width / hd.canvas.width);
+    return { x: r.left + (k.x + g.moldura.w / 2) * z, y: r.top + (k.y + g.moldura.h / 2) * z };
   });
   await page.mouse.move(alvo.x, alvo.y);
   await page.waitForTimeout(250);
