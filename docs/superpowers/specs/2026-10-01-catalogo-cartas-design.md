@@ -191,6 +191,27 @@ arte nova. Ao quebrar, o contorno estoura (efeito do PixelLab) e some até a rec
 | Casco (aura, quebra, Reativo) | **código** — sutil, nunca tampa a nave | o escudo partido do PixelLab vira candidato ao ícone |
 | Explosão das skills | **em aberto** — as de plasma geradas leem como arma de energia, não como projétil explosivo | proposta: a explosão segue a linhagem (humana = chama + pouca fumaça; alien = estouro de energia) |
 
+### 5.1c A explosão de impacto, por linhagem (rodadas 5 e 6 — FECHADO)
+
+A física dele: *"com a velocidade do tiro em direção ao inimigo, ao pegar no inimigo a tendência é que a fumaça e a
+explosão sejam projetadas para um lado"* — o impacto é **DIRECIONAL** (o leque segue o movimento do tiro). Os tiros
+retos vão quase sempre para a direita; quando o tiro tem ângulo, a explosão vira junto (0/90/180/270° exatos por
+espelho/rotação; diagonais com desenho próprio se precisar).
+
+| Uso | Humana (explosivo real: fogo + pouca fumaça) | Alien (energia: plasma, sem fogo) |
+|---|---|---|
+| Explosivo / impacto pequeno | **direcional #3 a 75%** (`rodada6/dir-peq-3-0.75.png`) | **cone próprio #15 a 75%** (`rodada6/energia-dir-15-0.75.png`) |
+| Explosão Maior / impacto grande | **direcional #15 a 75%** (`rodada6/dir-grande-15-0.75.png`) | **cone próprio #15** (`rodada6/energia-dir-15.png`) — pixel não se amplia |
+| Míssil (chega de qualquer ângulo) | **redonda #53** (`rodada5/redonda-grande-53.png`) — dispensa as 8 direções | a mesma, repintada na manta |
+| Míssil (o projétil) | **16×5 à mão** (`rodada5/missil-humano-pequeno.png`) | **16×5 alien B** (`rodada5/missil-alien-pequeno.png`) |
+
+As reduções a 75% são da PRÓPRIA arte aprovada (`scripts/_reduzir.mjs`, vizinho mais próximo + alfa binário) — o
+redesenho menor do PixelLab perdeu o desenho. Animações: PixMiniMax, 8 quadros cada (jobs af68126f, 9fd83af2,
+22ed0c71, 4ef19a0b).
+
+**Os tiros:** o da NAVE é o que já existe (humana `tracerRound` 8×1; alien `shotPulse` 11×6); o do DRONE é menor
+(6×1, à mão) — *"os das naves têm que ser ligeiramente maiores que os do drone"*.
+
 **O drone desvia** (pedido dele): segue a nave; todo inimigo e todo tiro a ~24px o empurra para longe; passou de ~60px
 da nave, a repulsão desliga e ele volta. **Sem vida** (não morre) — o desvio é charme.
 
