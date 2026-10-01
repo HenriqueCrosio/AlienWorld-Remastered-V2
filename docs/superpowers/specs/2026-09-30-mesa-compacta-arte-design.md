@@ -72,7 +72,7 @@ Um módulo (`src/molduraCarta.ts`) guarda a geometria medida da `moldura-final-b
 |---|---|---|---|---|
 | NOME | 24 | 4 | 57 × 11 | o nome, uma linha |
 | VISOR | 13 | 20 | 78 × 67 | o "requer…" (topo), o ícone (meio), a raridade (pé) |
-| PLAQUETA | 18 | 105 | 68 × 21 | o efeito, 1–2 linhas |
+| PLAQUETA | 18 | 105 | 70 × 21 | o efeito, 1–2 linhas (medida corrigida em 01/10 pelo `test-molduras`: era 68) |
 
 (Os números são os medidos em 30/09; o plano os confirma por código contra o PNG antes de usar — um teste lê a
 arte e cobra que cada retângulo é miolo escuro cercado de borda.) **Nenhum texto tem coordenada digitada**: todo

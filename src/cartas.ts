@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import { WEAPONS, type WeaponDef } from './systems/WeaponSystem';
+import { RARIDADES, type Raridade } from './raridade';
 
 /**
  * AS CARTAS — o PROTÓTIPO do sistema de cartas (branch `feat/cartas-preview`, 2026-09-27).
@@ -20,7 +21,7 @@ import { WEAPONS, type WeaponDef } from './systems/WeaponSystem';
  * CHECKPOINT das cartas na entrada: morrer e repetir a fase devolve as cartas de ENTRADA, não as ganhas nela.
  */
 
-export type Raridade = 'comum' | 'incomum' | 'rara' | 'epica';
+export { COR_RARIDADE, NOME_RARIDADE, RARIDADES, type Raridade } from './raridade';
 export type Categoria = 'arma' | 'efeito' | 'defesa' | 'movimento';
 
 export interface CartaDef {
@@ -64,21 +65,6 @@ export const CARTAS: Record<string, CartaDef> = {
   MOV_001: { id: 'MOV_001', nome: 'PROPULSORES', texto: '+12% de\nvelocidade', curto: '+12% VELOCIDADE', categoria: 'movimento', raridade: 'comum', max: 2, semF1: true },
 };
 
-/** A cor da raridade — é a ENERGIA da carta (dark sci-fi: a luz só onde há energia). */
-export const COR_RARIDADE: Record<Raridade, number> = {
-  comum: 0x8a93a6,
-  incomum: 0x3ee0f0,
-  rara: 0xb07cff,
-  epica: 0xff8c1a,
-};
-
-export const NOME_RARIDADE: Record<Raridade, string> = {
-  comum: 'COMUM',
-  incomum: 'INCOMUM',
-  rara: 'RARA',
-  epica: 'ÉPICA',
-};
-
 /**
  * As cartas que TÊM ícone (PixelLab object 75460844, 32×32, em `sprites/cartas/icone-<id>.png`). Sem PNG, a carta
  * mostra a categoria em texto. Carregados no mundo (`BootScene`) e na camada HD (`BootHDScene`, onde a mesa mora).
@@ -86,7 +72,7 @@ export const NOME_RARIDADE: Record<Raridade, string> = {
 export const ICONES_CARTAS = ['WPN_001', 'WPN_002', 'WPN_004', 'WPN_007', 'WPN_008', 'EFF_001', 'EFF_004', 'EFF_006',
   'DEF_001', 'DEF_002', 'DEF_003', 'DEF_004', 'MOV_001'];
 
-const ORDEM: Raridade[] = ['comum', 'incomum', 'rara', 'epica'];
+const ORDEM = RARIDADES;
 
 // ─── O ESTADO DA JOGADA (registry) ───────────────────────────────────────────────────────────────
 

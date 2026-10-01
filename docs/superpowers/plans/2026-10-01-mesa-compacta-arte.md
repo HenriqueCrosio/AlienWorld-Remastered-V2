@@ -24,7 +24,7 @@ direto, com o type stripping nativo) · PixelLab MCP (ícones).
 - As sondas precisam do `npm run dev` rodando (http://localhost:5173/).
 - Paleta P1: comum `0xa8b0bc` · incomum `0x4fc85a` · rara `0x3f7bff` · épica `0xa45cff`.
 - Moldura: **105×141** pixels finos. Encaixes internos: NOME `{x:24,y:4,w:57,h:11}` · VISOR `{x:13,y:20,w:78,h:67}` ·
-  PLAQUETA `{x:18,y:105,w:68,h:21}`. Folga mínima **2px finos**; centro a **≤1px fino**.
+  PLAQUETA `{x:18,y:105,w:70,h:21}` (era 68; corrigida pelo teste na Task 1). Folga mínima **2px finos**; centro a **≤1px fino**.
 - Tudo dentro da carta em MAIÚSCULAS. Um tamanho só de nome para as 13; um só de efeito; efeito em 1–2 linhas,
   quebra em palavra inteira. Nenhum nome é renomeado para caber.
 - **Critério de pronto (palavra dele):** *"só termine quando constatar e visualizar que não tem mais isso em todas"* —
@@ -228,7 +228,7 @@ export const ENCAIXE: Record<'nome' | 'visor' | 'plaqueta', Caixa> = {
   /** O visor (contornado pela energia): o "REQUER…" no topo, o ícone no meio, a raridade no pé. */
   visor: { x: 13, y: 20, w: 78, h: 67 },
   /** A plaqueta de baixo: o efeito, uma ou duas linhas. */
-  plaqueta: { x: 18, y: 105, w: 68, h: 21 },
+  plaqueta: { x: 18, y: 105, w: 70, h: 21 },
 };
 
 /** A folga mínima entre a tinta de um texto e a borda do encaixe — e entre dois elementos do visor (§3.2). */
