@@ -1,4 +1,4 @@
-# Spec — O catálogo de cartas: 21 cartas que cabem no jogo (01/10/2026)
+# Spec — O catálogo de cartas: 24 cartas que cabem no jogo (01/10/2026)
 
 > Estado: **desenho aprovado com o Henrique em 01/10** (a revisar no arquivo). É a **frente A** da ordem combinada
 > (A = catálogo → B = inimigos novos que atiram + ondas maiores → C = calibragem). Branch `feat/cartas-preview`.
@@ -10,7 +10,7 @@
 
 O protótipo tinha 13 cartas, recortadas do documento dele sem olhar o jogo. O Henrique (01/10): *"existem cartas que
 não vão de encontro com o jogo"* e, com o ganho que elas dão, *"as fases vão ser passeios no parque"*. O alvo: **até
-25, fechado em 21**, cada uma revisada contra o que o jogo É:
+25, fechado em 24**, cada uma revisada contra o que o jogo É:
 
 - **o voo livre para seco** (`FreeController`, drag alto, sem inércia) — carta de "acelerar/frear melhor" não muda nada;
 - **a bomba já existe** (3 por vida, limpa todo tiro inimigo e fere a tela inteira — `GameScene`);
@@ -33,7 +33,10 @@ E a regra 2 do documento dele: **o efeito precisa ser percebido** — carta de n
 | MOV_004 Dash Rápido | o Dash é UM só (decisão dele) |
 | (proposta) Ímã | *"faz o jogador perder outras cartas por visual"* (ele) — conveniência ocupando escolha |
 
-## 3. As 21 cartas
+## 3. As 24 cartas
+
+(21 fechadas primeiro; a **build elétrica** — 3 cartas — entrou no mesmo dia, pedido dele: *"no GDD original de cartas
+eu tinha idealizado uma build elétrica"*.)
 
 Números são **provisórios** (vão para a calibragem, frente C). `máx` = quantas vezes pode ser pega. Nenhum nome passa
 de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-compacta-arte-design.md` §3.2).
@@ -50,7 +53,7 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 | WPN_009 🆕 | MÍSSIL GUIADO | incomum | a cada ~3s um míssil persegue o inimigo mais próximo e **explode ao acertar** | — | 2 |
 | WPN_010 🆕 | DRONE AUXILIAR | épica | um drone discreto acompanha a nave e dá um **tiro próprio: fraco, guiado ao inimigo mais próximo, cadência baixa** — NÃO copia Duplo/Triplo/Cadência da nave | — | 1 |
 
-### 💥 Efeito (7)
+### 💥 Efeito (10)
 
 | ID | Nome | Raridade | Efeito | Requer | Máx |
 |---|---|---|---|---|---|
@@ -61,6 +64,9 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 | EFF_006 | COMBUSTÃO | épica | o inimigo queimado explode ao morrer | Incendiário | 1 |
 | EFF_007 🆕 | EM CADEIA | épica | toda explosão incendeia quem está no raio | Incendiário + Combustão | 1 |
 | EFF_010 🆕 | FLARE | incomum | a cada ~4s solta um flare para trás; ele **explode no inimigo que tocar** — e, se ninguém tocar, **explode sozinho depois de ~3s** (armadilha para quem persegue, bomba de retaguarda para quem escapou) | — | 1 |
+| EFF_011 🆕 | ELÉTRICO | incomum | chance de o tiro **eletrificar**: o inimigo leva um choque e **trava por um instante** (não anda, não atira) | — | 1 |
+| EFF_012 🆕 | ARCO EM CADEIA | rara | o choque **salta** do eletrificado para até 3 inimigos próximos | Elétrico | 1 |
+| EFF_013 🆕 | SOBRECARGA | épica | o eletrificado que morre **descarrega um pulso** em todos ao redor | Arco em Cadeia | 1 |
 
 ### 🛡️ Defesa (5)
 
@@ -79,8 +85,12 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 | MOV_001 | PROPULSORES | comum | +12% de velocidade (fora da F1) | — | 2 |
 | MOV_003 🆕 | DASH | rara | **dois toques** numa direção: um avanço curto para lá, **invulnerável**, com **espera** (fora da F1) | — | 1 |
 
-**Distribuição:** 5 comuns · 7 incomuns · 6 raras · 3 épicas. Três cadeias: **fogo** (Incendiário → Combustão → Em
-Cadeia), **explosões** (Explosivo → Explosão Maior / Fragmentação), **casco** (Casco → Recarga / Casco Reativo).
+**Distribuição:** 5 comuns · 8 incomuns · 7 raras · 4 épicas = 24. Quatro cadeias: **fogo** (Incendiário → Combustão →
+Em Cadeia), **elétrica** (Elétrico → Arco em Cadeia → Sobrecarga), **explosões** (Explosivo → Explosão Maior /
+Fragmentação), **casco** (Casco → Recarga / Casco Reativo).
+
+**O fogo mata em área; o elétrico CONTROLA.** O "trava por um instante" é a resposta direta aos atiradores novos da
+frente B (eletrificou, não atira) — as builds pedem jogos diferentes, não só números diferentes.
 
 ## 4. As regras novas
 
@@ -95,6 +105,19 @@ o tiro Explosivo, a Combustão, o Casco Reativo, o Flare e o Míssil Guiado cham
 Assim as cadeias se cruzam (o Míssil com Fragmentação; o Flare com Em Cadeia) sem carta nova. **Os estilhaços não
 fazem explosão nova** (sem recursão infinita); **Em Cadeia incendeia, não explode** — quem explode é a Combustão
 quando o queimado morre.
+
+### 4.1b A build elétrica
+
+- **Eletrificado** é um ESTADO do inimigo (como o queimado): dura ~0,4s, trava movimento e tiro, e mostra o efeito de
+  eletrificado. Chefões e minichefes **não travam** (só levam o dano) — travar chefão quebra a luta.
+- **Arco em Cadeia:** ao eletrificar, o choque salta para até 3 inimigos próximos (raio ~50px), um por vez, sem voltar
+  a quem já levou. **Quem leva o arco é eletrificado, mas não solta arco novo** (sem recursão).
+- **Sobrecarga:** o eletrificado que morre solta um pulso (raio ~30px) que FERE quem está perto; o pulso **não
+  eletrifica** (sem reação infinita).
+- **O raio é desenhado em pixel na resolução do jogo** (384×216): zigue-zague quebrado entre os dois pontos, na paleta
+  do choque (ciano/branco), 2–3 quadros — não sprite esticada (esticar pixel art deforma) e não linha vetorial
+  (memória `efeito-de-cena-assado-em-pixel`). O PixelLab entra na **faísca do acerto**, no **inimigo eletrificado** e
+  no **pulso da Sobrecarga**.
 
 ### 4.2 O Dash
 
@@ -119,7 +142,16 @@ quando o queimado morre.
 | Papel | conforto: limpa quem você não está mirando | dano em área: **explode** e entra na cadeia das explosões |
 
 O drone é **um por linhagem**: humano = esfera pequena (estilo astromecânico, redondo); alien = água-viva pequena nas
-cores da manta. Discreto, segue a nave com atraso curto.
+cores da manta. Discreto, segue a nave com atraso curto. O **tiro do drone** é próprio, pequeno, na cor da linhagem.
+O **míssil** também é por linhagem: humano = o #46; alien = um desenho próprio, orgânico, nas cores da manta.
+
+### 4.3b A aura do Casco (volta, de outro jeito)
+
+Em 28/09 o desenho em volta da nave saiu: era uma **elipse** de 30px que, nas naves de 44px, sumia atrás do casco e
+lia como "feixe de luz". Agora volta como **contorno de 1px que segue a SILHUETA da própria nave** (tirado do alfa de
+cada sprite, em cada tier), ciano, pulsando devagar — sem forma própria para "virar feixe", e serve às 6 naves sem
+arte nova. Ao quebrar, o contorno estoura (efeito do PixelLab) e some até a recarga. O **"CASCO" continua na HUD**
+(*"o escudo precisa estar no painel da nave, mas o jogador precisa saber que tem só de olhar a aura"* — ele).
 
 ### 4.4 O resto
 
@@ -130,25 +162,40 @@ cores da manta. Discreto, segue a nave com atraso curto.
 
 ## 5. A arte (PixelLab, folha antes de instalar)
 
-| Peça | Direção (dele) | Estado |
+### 5.1 O que ele já escolheu (01/10, folha `pecas-novas-rodada2.png`)
+
+| Peça | Escolha | Falta |
 |---|---|---|
-| Drone humano | esfera pequena, estilo astromecânico, redonda; discreto | 2ª rodada (16×16) |
-| Drone alien | água-viva pequena nas cores da manta | 2ª rodada (16×16) |
-| Míssil do jogador | tamanho entre o #36 e o #19 da 1ª rodada — reconhecível | 2ª rodada |
-| Flare | estilo do #22, com **animação própria** (luz e faíscas saindo) | animação do #22 |
-| Dash | **imagens-fantasma**, sem arte | código |
-| Estilhaço | pequeno, do material da explosão | depois |
-| 21 ícones | nas cores reais do objeto (spec da mesa §2.2) | depois do catálogo — a Task 4 da mesa roda com estes IDs |
+| Drone humano | **esfera #9** (job 2de6c6a0) — *"ficou muito bom"* | **menor em relação à nave** |
+| Drone alien | **água-viva #60** (job bd1197f4) | **um pouco menor** em relação à nave |
+| Míssil humano | **#46** (job 7f990d98, desenrolado) | — |
+| Míssil alien | — | **desenho próprio**, orgânico, nas cores da manta (*"puxa muito para a nave humana"*) |
+| Flare aceso | **o loop da PixMiniMax** (job c95f2927) — *"ficou ótimo"* | — |
+| Flare explodindo | quadros 1–4 do job d95b0189 | entra na fila das explosões para comparar |
+| Dash | **imagens-fantasma** — *"ótimo"* | código |
+
+### 5.2 A fila (roda agora; folha antes de instalar)
+
+1. **Drones menores** (o #9 e o #60 como referência, canvas menor) e o **míssil alien**.
+2. **Explosões por skill** (1º quadro no PixelLab, depois animação): a pequena (tiro Explosivo e Míssil), a grande
+   (Explosão Maior), a de fogo (Combustão), a **onda de choque** (Casco Reativo); e o **estilhaço** (Fragmentação).
+3. **Estados e efeitos**: inimigo **queimando**, **faísca** do acerto elétrico, inimigo **eletrificado**, **pulso** da
+   Sobrecarga, **Casco quebrando** (o contorno estoura).
+4. **Tiros dos drones** (pequenos, guiados; laranja humano, ciano alien).
+5. **Os 24 ícones** (nas cores reais do objeto) — a Task 4 da mesa roda com estes IDs.
+
+Sem arte nova (código, pixel na resolução do jogo): o **raio** do Arco em Cadeia, a **aura do Casco** (contorno da
+silhueta), o **dash** (imagens-fantasma).
 
 Regra: partir da arte aprovada; folha crua + em cena na escala real; ele escolhe antes de instalar.
 
 ## 6. Ordem de construção
 
-1. O catálogo no código (`src/cartas.ts`: entram 8, saem nenhuma das 13, Recarga máx. 1) + o **sistema único de
-   explosão**.
+1. O catálogo no código (`src/cartas.ts`: entram 11, saem nenhuma das 13, Recarga máx. 1) + o **sistema único de
+   explosão** + o **estado eletrificado**.
 2. As mecânicas novas com **arte provisória** (formas simples) — ele joga e sente: Míssil, Drone, Flare, Fragmentação,
-   Em Cadeia, Explosão Maior, Bomba Extra, Dash.
-3. A arte aprovada entra no lugar da provisória; os 21 ícones (Task 4 da mesa).
+   Em Cadeia, Explosão Maior, Bomba Extra, Dash, Elétrico, Arco em Cadeia, Sobrecarga, a aura do Casco.
+3. A arte aprovada entra no lugar da provisória; os 24 ícones (Task 4 da mesa).
 
 ## 7. Fora desta spec
 
@@ -157,7 +204,9 @@ Regra: partir da arte aprovada; folha crua + em cena na escala real; ele escolhe
 
 ## 8. Testes
 
-- `probe-cartas` e `probe-mesa-texto` continuam passando — a mesa agora com **21** cartas (o tamanho único da letra é
+- `probe-cartas` e `probe-mesa-texto` continuam passando — a mesa agora com **24** cartas (o tamanho único da letra é
   recalculado com os nomes novos; nenhum passa de 14 letras).
 - Uma sonda nova por mecânica (`probe-cartas-novas`): cada carta aplicada faz o que diz (o míssil persegue e explode; o
-  flare explode sozinho; o dash atravessa um tiro sem dano; a Fragmentação solta estilhaços; a Bomba Extra soma).
+  flare explode sozinho; o dash atravessa um tiro sem dano; a Fragmentação solta estilhaços; a Bomba Extra soma; o
+  eletrificado não atira enquanto trava; o arco salta para no máximo 3 e não recursa; o pulso da Sobrecarga não
+  eletrifica; chefão não trava; a aura aparece com o Casco pronto e some quando ele quebra).
