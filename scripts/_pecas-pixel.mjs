@@ -28,6 +28,20 @@ await desenhar('tiro-alien-A', ['abcdef'], CIANO);
 await desenhar('tiro-alien-B', ['.bcdd.', 'abcdef', '.bcdd.'].map((l, i) => (i === 1 ? l : l.replace(/./g, (c) => (c === '.' ? '.' : 'a')))), CIANO);
 await desenhar('tiro-alien-C', ['bcdef'], CIANO);
 
+// THE MISSILE, redrawn small (16×5) from the approved #46: flame · fins · rusty body · steel band · nose. He found the
+// 26×7 too big next to the 44×26 ship. Same drawing, two palettes (human; alien B = manta, keeps the steel).
+const MISSIL_PEQ = [
+  '....oR..........',
+  '.Fo,,,,,,ssss o.'.replace(' ', 's'),
+  'FGHR,RRRRSSssnno',
+  '.Fo RRRRRRSSSSo.'.replace(' ', 'R'),
+  '....oR..........',
+];
+const HUMANO = { o: 0x040202, R: 0x603c28, ',': 0x956143, S: 0x404547, s: 0x8a8c89, n: 0x686a69, F: 0xdd4f0f, G: 0xfb9317, H: 0xfecf5c };
+const ALIEN = { ...HUMANO, R: 0x163a3b, ',': 0x2f6e66, F: 0x0e6b7a, G: 0x3ee0f0, H: 0xe8feff };
+await desenhar('missil-humano-pequeno', MISSIL_PEQ, HUMANO);
+await desenhar('missil-alien-pequeno', MISSIL_PEQ, ALIEN);
+
 // SHARDS (Fragmentação) — 2 to 4 px slivers, hot metal.
 await desenhar('estilhaco-A', ['..f', '.d.', 'b..'], QUENTE);
 await desenhar('estilhaco-B', ['df', 'bd'], QUENTE);
