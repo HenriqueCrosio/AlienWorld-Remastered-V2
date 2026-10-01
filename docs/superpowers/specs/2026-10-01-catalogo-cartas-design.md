@@ -174,6 +174,26 @@ arte nova. Ao quebrar, o contorno estoura (efeito do PixelLab) e some até a rec
 | Flare explodindo | quadros 1–4 do job d95b0189 | entra na fila das explosões para comparar |
 | Dash | **imagens-fantasma** — *"ótimo"* | código |
 
+### 5.1b O que ele escolheu nas rodadas 3 e 4 (01/10, `pecas-novas-rodada3.png` e `-rodada4.png`, GIFs em `gif/`)
+
+| Peça | Escolha | Nota |
+|---|---|---|
+| Drone humano | esfera **menor #26** (job 70d7c6f9) + a animação (622e8130) | *"ficou bom desse tamanho"* |
+| Drone alien | água-viva **#60** + a animação (2832d22a) | a versão de 9px falhou (virou mancha) |
+| Tiro do drone | **humano A** e **alien A** — à mão, 6×1px, fino como "–" | |
+| Estilhaço | **D** — à mão (3×3) | peça minúscula não vai ao gerador |
+| Míssil | humano #46 e **alien B** (o #46 repintado, mantém o aço) | ⚠️ *grande demais* ao lado da nave → **redesenhar à mão em ~16×5px**, mesma forma |
+| Combustão | **#11** + a animação (a730d9eb) | as com fumaça "poluídas" |
+| Sobrecarga | **#4** + a animação (eecbb4a7) | |
+| Queimando | **#12** + a animação (6a04f01c) | |
+| Faísca do acerto | **#17** + a animação (6e0532c8) | e a eletricidade **percorrendo o corpo** em código, pela silhueta |
+| Eletrificado | **#29** + a animação (ea51cd0a) | ver em jogo contra a versão em código |
+| Casco (aura, quebra, Reativo) | **código** — sutil, nunca tampa a nave | o escudo partido do PixelLab vira candidato ao ícone |
+| Explosão das skills | **em aberto** — as de plasma geradas leem como arma de energia, não como projétil explosivo | proposta: a explosão segue a linhagem (humana = chama + pouca fumaça; alien = estouro de energia) |
+
+**O drone desvia** (pedido dele): segue a nave; todo inimigo e todo tiro a ~24px o empurra para longe; passou de ~60px
+da nave, a repulsão desliga e ele volta. **Sem vida** (não morre) — o desvio é charme.
+
 ### 5.2 A fila (roda agora; folha antes de instalar)
 
 1. **Drones menores** (o #9 e o #60 como referência, canvas menor) e o **míssil alien**.
