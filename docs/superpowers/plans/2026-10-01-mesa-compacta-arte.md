@@ -1245,6 +1245,11 @@ git commit -m "feat(cartas): a mesa no grid fino — moldura por raridade, texto
 
 ### Task 4: Os 13 ícones nas cores reais (PixelLab + aprovação dele)
 
+> ⏸ **EM ESPERA (01/10, decisão dele):** as Tasks 1–3 estão feitas (`587594a`, `ff301d9`, `e3f165f`; a letra fica
+> no tamanho que saiu — *"bem legível em jogo em tela maior"*). Os ícones esperam o **catálogo novo de cartas**
+> (até 25, frente A) — não se gera ícone para carta que pode sair. Quando o catálogo fechar, esta task roda com a
+> lista nova de IDs.
+
 **Files:**
 - Modify (substituir): `public/sprites/cartas/icone-<ID>.png` ×13 (40×40)
 - Create: `docs/superpowers/folhas/2026-10-01/icones-candidatos.png` (a data do dia em que gerar)
