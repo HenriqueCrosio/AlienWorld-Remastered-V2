@@ -29,7 +29,12 @@ const NOVAS = {
   DEF_005: { id: 'DEF_005', nome: 'BOMBA EXTRA', texto: '', curto: '+1 BOMBA', categoria: 'defesa', raridade: 'comum', max: 2 },
   MOV_003: { id: 'MOV_003', nome: 'DASH', texto: '', curto: 'AVANÇO INVULNERÁVEL', categoria: 'movimento', raridade: 'rara', max: 1 },
 };
-const IDS = Object.keys(PICKS);
+// Optional 3rd arg: a JSON { "ID": ["file.png", ...] } — only those cards, those files (1–3 each; short lists repeat
+// the last). Without it: all 24 from PICKS/PASTA.
+const CONFIG = process.argv[4] ? JSON.parse(fs.readFileSync(process.argv[4], 'utf8')) : null;
+const IDS = CONFIG ? Object.keys(CONFIG) : Object.keys(PICKS);
+const arquivo = (id, v) => (CONFIG ? CONFIG[id][Math.min(v, CONFIG[id].length - 1)] : `${ICONES}/${PASTA[id] ?? id}/${PICKS[id][v]}.png`);
+const rotulo = (id, v) => (CONFIG ? (CONFIG[id][v] ? CONFIG[id][v].split('/').slice(-2).join('/').replace('.png', '') : '—') : id === 'MOV_003' ? ROTULO_MOV_003[v] : `#${PICKS[id][v]}`);
 const M = 6, Z = 2; // margin around the card (fine px) · zoom of the shot in the sheet
 const uri = (f) => `data:image/png;base64,${fs.readFileSync(f).toString('base64')}`;
 
@@ -41,7 +46,7 @@ for (let v = 0; v < 3; v++) {
   page.on('console', (m) => m.type() === 'error' && console.log('[console]', m.text()));
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(6000);
-  const tex = Object.fromEntries(IDS.map((id) => [id, uri(`${ICONES}/${PASTA[id] ?? id}/${PICKS[id][v]}.png`)]));
+  const tex = Object.fromEntries(IDS.map((id) => [id, uri(arquivo(id, v))]));
   await page.evaluate(async ({ novas, tex }) => {
     // The SAME module instance the game loaded: after an edit Vite serves it as `/src/cartas.ts?t=…`, and a bare
     // import('/src/cartas.ts') would be another copy.
@@ -94,14 +99,17 @@ await browser.close();
 const texto = (s, w, size = 18, cor = '#ffb040') => Buffer.from(`<svg width="${w}" height="${size + 10}" xmlns="http://www.w3.org/2000/svg"><text x="0" y="${size}" font-family="Consolas, monospace" font-size="${size}" fill="${cor}">${s}</text></svg>`);
 const m0 = await sharp(fotos[IDS[0]][0]).metadata();
 const CW = m0.width * Z, CH = m0.height * Z, G = 14, BLOCO = 3 * CW + 2 * G + 40;
-const comp = [{ input: texto('OS 24 ÍCONES DENTRO DA CARTA REAL — 3 candidatos cada (mesa a 1152, ampliada 2×). Escolha um número por carta.', 2 * BLOCO, 22, '#e0e6f0'), left: 20, top: 16 }];
+const TITULO = CONFIG
+  ? 'AS TROCAS DE ÍCONE — dentro da carta real (mesa a 1152, ampliada 2×). O rótulo diz de onde veio cada um.'
+  : 'OS 24 ÍCONES DENTRO DA CARTA REAL — 3 candidatos cada (mesa a 1152, ampliada 2×). Escolha um número por carta.';
+const comp = [{ input: texto(TITULO, 2 * BLOCO, 22, '#e0e6f0'), left: 20, top: 16 }];
 let y = 60;
 for (let i = 0; i < IDS.length; i += 2) {
   for (const [j, id] of IDS.slice(i, i + 2).entries()) {
     const x0 = 20 + j * BLOCO;
     comp.push({ input: texto(id, 300, 18), left: x0, top: y });
     for (let v = 0; v < 3; v++) {
-      const rot = id === 'MOV_003' ? ROTULO_MOV_003[v] : `#${PICKS[id][v]}`;
+      const rot = rotulo(id, v);
       comp.push({ input: texto(rot, CW, 15, '#8a93a6'), left: x0 + v * (CW + G), top: y + 26 });
       comp.push({ input: await sharp(fotos[id][v]).resize(CW, CH, { kernel: 'nearest' }).toBuffer(), left: x0 + v * (CW + G), top: y + 48 });
     }
