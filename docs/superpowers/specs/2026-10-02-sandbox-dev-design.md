@@ -1,6 +1,9 @@
 # Spec — O sandbox de dev: montar a build, os inimigos e o fundo, e jogar (02/10/2026)
 
-> Estado: **desenho aprovado com o Henrique em 02/10** (três partes, uma a uma). Branch `feat/cartas-preview`.
+> Estado: **aprovado e IMPLEMENTADO em 02/10** (*"ficou ótimo e interessante de testar"*). `probe-sandbox` (13 casos:
+> montagem pela tela, build na mão, ondas, medidas, I/X/N, ESC, fundos F1/F3/F4 e o chefão) e `test-sandbox-arvore`
+> (21) passando. Além do desenhado: no sandbox as PEÇAS ficam desligadas (ruído no teste), e morrer ou vencer volta à
+> montagem. Branch `feat/cartas-preview`.
 > Por quê (ele): *"para facilitar o teste … isso é bom para testarmos de forma mais crítica e focada. Facilita o
 > balanceamento futuro."* Ferramenta de DEV: não entra no jogo do jogador.
 

@@ -1,5 +1,15 @@
 # O catálogo de 24 cartas — Plano de implementação
 
+> **EXECUTADO em 02/10** (as 9 tasks, com checkpoint dele em cada uma). **Desvios pedidos por ele no caminho** — o
+> código vale sobre o texto abaixo onde divergirem:
+> - **Explosão:** a arte aprovada já entrou (A + B: a de cada carta, variando) — `instalar-explosoes-cartas.mjs`.
+> - **Míssil:** mira travada no disparo (um alvo por míssil, o 2º sai 140ms depois), perseguição com inércia e
+>   amortecedor de lado, explode no ar em 2,5s — no lugar do `homing` do pool.
+> - **Flare:** solto pelo JOGADOR (tecla L provisória, espera 8s), não a cada 4s.
+> - **Drone:** desvia de LADO de quem anda em linha reta; o tiro dele sem o rastro teal.
+> - **Dash:** espera de 8s (não 2,5s), 3 fantasmas; a HUD conta as recargas ("DASH 5s", "FLARE 6s").
+> - A sonda da HUD lê "DASH Ns"/"FLARE Ns" contando, em vez de "sem DASH".
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or
 > superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
