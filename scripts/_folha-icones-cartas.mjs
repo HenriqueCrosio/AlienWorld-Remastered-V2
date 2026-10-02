@@ -20,7 +20,7 @@ const NOVAS = {
   WPN_009: { id: 'WPN_009', nome: 'MÍSSIL GUIADO', texto: '', curto: 'MÍSSIL QUE PERSEGUE', categoria: 'arma', raridade: 'incomum', max: 2 },
   WPN_010: { id: 'WPN_010', nome: 'DRONE AUXILIAR', texto: '', curto: 'DRONE QUE ATIRA', categoria: 'arma', raridade: 'epica', max: 1 },
   EFF_002: { id: 'EFF_002', nome: 'EXPLOSÃO MAIOR', texto: '', curto: 'EXPLOSÕES MAIORES', categoria: 'efeito', raridade: 'rara', max: 1, requer: 'EFF_001' },
-  EFF_003: { id: 'EFF_003', nome: 'FRAGMENTOS', texto: '', curto: 'SOLTA ESTILHAÇOS', categoria: 'efeito', raridade: 'rara', max: 1, requer: 'EFF_001' },
+  EFF_003: { id: 'EFF_003', nome: 'FRAGMENTADO', texto: '', curto: 'SOLTA ESTILHAÇOS', categoria: 'efeito', raridade: 'rara', max: 1, requer: 'EFF_001' },
   EFF_007: { id: 'EFF_007', nome: 'EM CADEIA', texto: '', curto: 'EXPLOSÃO INCENDEIA', categoria: 'efeito', raridade: 'epica', max: 1, requer: 'EFF_006' },
   EFF_010: { id: 'EFF_010', nome: 'FLARE', texto: '', curto: 'ARMADILHA TRASEIRA', categoria: 'efeito', raridade: 'incomum', max: 1 },
   EFF_011: { id: 'EFF_011', nome: 'ELÉTRICO', texto: '', curto: 'CHOQUE QUE TRAVA', categoria: 'efeito', raridade: 'incomum', max: 1 },

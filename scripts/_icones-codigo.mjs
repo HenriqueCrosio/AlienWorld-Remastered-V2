@@ -72,14 +72,17 @@ for (const [n, sprite] of [[0, 'public/sprites/enemy-kamikaze.png'], [1, 'public
 
 // ── RECARGA: the Casco #0 inside a cyan recharge ring with a clear gap and an arrow head ──
 const CIANO = { escuro: hex(0x0e6b7a), meio: hex(0x17a6bd), claro: hex(0x3ee0f0), brilho: hex(0xb5f7ff), contorno: hex(0x05060d) };
-for (const [n, R, esp] of [[0, 20, 2], [1, 20, 3]]) {
-  const W = 44, c = tela(W, W), cx = (W - 1) / 2, cy = (W - 1) / 2;
-  const folgaInt = R - esp - 1 - 3; // inner radius of the casco area (3px of air)
-  const casco = await trim(`${IC}/DEF_001/0.png`);
-  const fator = Math.min(1, (2 * folgaInt) / Math.max(casco.info.width, casco.info.height));
-  const k = fator < 1 ? await encolher(`${IC}/DEF_001/0.png`, fator) : casco;
-  colar(c, k, Math.round(cx - k.info.width / 2 + 0.5), Math.round(cy - k.info.height / 2 + 0.5));
-  const A0 = -60, A1 = 250; // the arc (degrees, 0 = right, clockwise in screen space), gap at the top-right
+// (02/10) "o círculo está torto, não está centrado": the casco was SHRUNK (nearest, uneven) and pasted on an even
+// canvas. Now: the casco at its native size, an ODD canvas sized from it, and both centred on the same whole pixel.
+for (const [n, esp] of [[0, 3], [1, 2]]) {
+  const k = await trim(`${IC}/DEF_001/0.png`);
+  // the ring clears the casco by 3px (a shield: no bottom corners — its half-height, not the diagonal, is the radius)
+  const R = Math.ceil(Math.max(k.info.width, k.info.height) / 2) + 5 + esp;
+  const W = 2 * (R + 2) + 1, c = tela(W, W), cx = R + 2, cy = R + 2;
+  colar(c, k, cx - Math.floor(k.info.width / 2), cy - Math.floor(k.info.height / 2));
+  // the arc (degrees, 0 = right, clockwise in screen space): the GAP sits at the TOP, where the shield's two wide
+  // corners are — the ring hugs the sides and the bottom without touching them; the arrow closes the turn there
+  const A0 = -25, A1 = 200; // the arrow stops BELOW the shield's top-left corner (~230°)
   const noArco = (ang) => { const a = ((ang - A0) % 360 + 360) % 360; return a <= A1 - A0; };
   for (let y = 0; y < W; y++) for (let x = 0; x < W; x++) {
     const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy), ang = (Math.atan2(dy, dx) * 180) / Math.PI;
@@ -100,8 +103,10 @@ for (const [n, R, esp] of [[0, 20, 2], [1, 20, 3]]) {
   await salvar('DEF_002', n, c);
 }
 
-// ── CASCO REATIVO: the Casco #0 with the blast bursting out of its CENTRE ──
-for (const [n, exp] of [[0, `${R5}/redonda-peq-13.png`], [1, `${R5}/redonda-peq-30.png`]]) {
+// ── CASCO REATIVO: the Casco #0 with the blast bursting out of its CENTRE — (02/10) "mais fumaça, estilhaço": the
+// missile's round blast #53 (it has smoke) + the approved shard D flying outward ──
+const ESTILHACO = { data: Buffer.from([0, 0, 0, 0, 0, 0, 0, 0, 255, 241, 192, 255, 0, 0, 0, 0, 255, 176, 64, 255, 0, 0, 0, 0, 168, 58, 14, 255, 0, 0, 0, 0, 0, 0, 0, 0]), info: { width: 3, height: 3, channels: 4 } };
+for (const [n, exp, fator] of [[0, `${R5}/redonda-grande-53.png`, 0.6], [1, `${R5}/redonda-grande-53.png`, 0.72]]) {
   const casco = await trim(`${IC}/DEF_001/0.png`);
   const W = 40, c = tela(W, W);
   const x0 = Math.round((W - casco.info.width) / 2), y0 = Math.round((W - casco.info.height) / 2);
@@ -112,8 +117,15 @@ for (const [n, exp] of [[0, `${R5}/redonda-peq-13.png`], [1, `${R5}/redonda-peq-
     const x = Math.round(cx + ax * s), y = Math.round(cy + ay * s), i = (y * W + x) * 4;
     if (c.data[i + 3]) c.data.set([5, 6, 13, 255], i);
   }
-  const e = await encolher(exp, 0.85);
+  const e = await encolher(exp, fator);
   colar(c, e, Math.round(cx - e.info.width / 2), Math.round(cy - e.info.height / 2));
+  // shards flying out past the blast (mirrored so each points away from the centre)
+  for (const [ax, ay] of [[1, -1], [-1, -1], [1.2, 0.4], [-1.2, 0.5], [0.3, 1.2]]) {
+    const dist = e.info.width / 2 + 3;
+    const s = { data: Buffer.from(ESTILHACO.data), info: ESTILHACO.info };
+    const m = await sharp(s.data, { raw: s.info }).flop(ax < 0).flip(ay > 0).raw().toBuffer({ resolveWithObject: true });
+    colar(c, m, Math.round(cx + ax * dist - 1), Math.round(cy + ay * dist - 1));
+  }
   await salvar('DEF_004', n, c);
 }
 
@@ -125,6 +137,10 @@ for (const [n, exp] of [[0, `${R5}/redonda-peq-13.png`], [1, `${R5}/redonda-peq-
     const i = (y * W + x) * 4, [r, g, bb, a] = [b.data[i], b.data[i + 1], b.data[i + 2], b.data[i + 3]];
     if (a && bb > 150 && g > 150 && r < 170 && x > W / 2 && y < b.info.height / 2) mais.push([x, y, b.data.slice(i, i + 4)]);
   }
+  // keep only the "+" itself: the pixels near the cluster's median (a stray cyan glint elsewhere was dragged along)
+  const med = (a) => a.slice().sort((p, q) => p - q)[a.length >> 1];
+  const mx = med(mais.map((m) => m[0])), my = med(mais.map((m) => m[1]));
+  for (let i = mais.length - 1; i >= 0; i--) if (Math.abs(mais[i][0] - mx) > 4 || Math.abs(mais[i][1] - my) > 4) mais.splice(i, 1);
   const x0 = Math.min(...mais.map((m) => m[0])), y0 = Math.min(...mais.map((m) => m[1]));
   // the "+" also has a WHITE centre the cyan mask misses: take every bright pixel inside its box
   const x1 = Math.max(...mais.map((m) => m[0])), y1 = Math.max(...mais.map((m) => m[1]));
@@ -132,7 +148,15 @@ for (const [n, exp] of [[0, `${R5}/redonda-peq-13.png`], [1, `${R5}/redonda-peq-
     const i = (y * W + x) * 4;
     if (b.data[i + 3] && b.data[i] > 190 && b.data[i + 1] > 190 && b.data[i + 2] > 190 && !mais.some((m) => m[0] === x && m[1] === y)) mais.push([x, y, b.data.slice(i, i + 4)]);
   }
-  for (const [n, nx, ny] of [[0, 2, 2], [1, W - 2 - (Math.max(...mais.map((m) => m[0])) - x0 + 1), b.info.height - 2 - (Math.max(...mais.map((m) => m[1])) - y0 + 1)]]) {
+  // (02/10) "no canto superior direito DA BOMBA": the body = the widest rows (the fuse is thin); the "+" goes centred on
+  // the body's top-right corner.
+  const largura = (y) => { let a = W, z = -1; for (let x = 0; x < W; x++) if (b.data[(y * W + x) * 4 + 3] && !mais.some((m) => m[0] === x && m[1] === y)) { a = Math.min(a, x); z = Math.max(z, x); } return z < 0 ? 0 : z - a + 1; };
+  const larguras = Array.from({ length: b.info.height }, (_, y) => largura(y));
+  const corpoTopo = larguras.findIndex((l) => l >= Math.max(...larguras) * 0.5);
+  let corpoDir = 0;
+  for (let y = corpoTopo; y < b.info.height; y++) for (let x = 0; x < W; x++) if (b.data[(y * W + x) * 4 + 3]) corpoDir = Math.max(corpoDir, x);
+  const pw = x1 - x0 + 1, ph = y1 - y0 + 1;
+  for (const [n, nx, ny] of [[0, corpoDir - Math.floor(pw / 2), corpoTopo - Math.floor(ph / 2) + 1], [1, corpoDir - pw + 2, corpoTopo - 1]]) {
     const d = { data: Buffer.from(b.data), info: b.info };
     for (const [x, y] of mais) d.data.fill(0, (y * W + x) * 4, (y * W + x) * 4 + 4);
     for (const [x, y, p] of mais) { const X = nx + x - x0, Y = ny + y - y0; d.data.set(p, (Y * W + X) * 4); }
