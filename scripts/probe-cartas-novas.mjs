@@ -144,6 +144,46 @@ const queima = await page.evaluate(async () => {
 });
 conferir(queima, 'Em Cadeia: quem está no raio da explosão pega fogo', queima);
 
+// ── MÍSSIL GUIADO (WPN_009) ──
+await fase(['WPN_009']);
+const missil = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const e = t.alvo('drone', s.ship.x + 140, s.ship.y - 30, 99);
+  let visto = 0;
+  for (let i = 0; i < 50 && e.getData('hp') === 99; i++) {
+    visto = Math.max(visto, t.projeteis('missil').length);
+    await t.dormir(100);
+  }
+  return { visto, hp: e.getData('hp') };
+});
+conferir(missil.visto >= 1 && missil.hp < 99, 'o míssil sai, persegue e acerta', missil);
+
+// ── FLARE (EFF_010) ──
+await fase(['EFF_010']);
+const flare = await page.evaluate(async () => {
+  const t = window.__teste;
+  const fontes = t.espiarExplosoes();
+  let solto = false;
+  for (let i = 0; i < 90 && !fontes.includes('flare'); i++) {
+    solto ||= t.projeteis('flare').length > 0;
+    await t.dormir(100);
+  }
+  return { solto, fontes };
+});
+conferir(flare.solto && flare.fontes.includes('flare'), 'o flare sai para trás e explode sozinho', flare);
+
+await fase(['EFF_010']);
+const toque = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const fontes = t.espiarExplosoes();
+  const e = t.alvo('drone', s.ship.x - 30, s.ship.y, 99);
+  for (let i = 0; i < 60 && !fontes.includes('flare'); i++) await t.dormir(100);
+  return { fontes, hp: e.getData('hp') };
+});
+conferir(toque.fontes.includes('flare') && toque.hp < 99, 'o flare explode no inimigo que toca', toque);
+
 // ─── FIM ───
 
 conferir(erros.length === 0, 'nenhum erro no console', erros);

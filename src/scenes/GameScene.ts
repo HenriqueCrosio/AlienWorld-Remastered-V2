@@ -767,7 +767,7 @@ export class GameScene extends Phaser.Scene {
    * um array descartado por frame, para nada.
    */
   private homingTargets(): Phaser.Physics.Arcade.Sprite[] {
-    if (!this.weapons.current.homing) return [];
+    if (!this.weapons.current.homing && !this.cartas.temGuiado) return [];
 
     const alvos = this.enemies.enemies
       .getChildren()

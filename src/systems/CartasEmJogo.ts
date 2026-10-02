@@ -4,6 +4,7 @@ import type { OrigemProjetil } from './WeaponSystem';
 import { CARTAS, adicionar, montarArma, quantas, sortear, tem, type Mesa } from '../cartas';
 import type { Contexto, HostCartas, Inimigo } from './cartas/contexto';
 import { ExplosaoDoJogador } from './cartas/ExplosaoDoJogador';
+import { Lancadores } from './cartas/Lancadores';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 
 export type { HostCartas } from './cartas/contexto';
@@ -35,6 +36,7 @@ const COR_QUEIMANDO = 0xff9a50;
 
 export class CartasEmJogo {
   readonly explosao: ExplosaoDoJogador;
+  readonly lancadores: Lancadores;
   private readonly c: Contexto;
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
@@ -59,12 +61,21 @@ export class CartasEmJogo {
       },
     };
     this.explosao = new ExplosaoDoJogador(this.c);
+    this.lancadores = new Lancadores(this.c, this.explosao);
     this.cascoPronto = tem(this.reg, 'DEF_001');
   }
 
   /** O Casco está pronto para absorver o próximo golpe? (a HUD mostra) */
   get cascoAtivo(): boolean {
     return this.cascoPronto;
+  }
+
+  /**
+   * Há projétil GUIADO de carta na mão (Míssil ou Drone)? A cena só monta a lista de alvos da perseguição quando
+   * alguém persegue (`GameScene.homingTargets`) — sem isto o míssil voaria reto.
+   */
+  get temGuiado(): boolean {
+    return tem(this.reg, 'WPN_009') || tem(this.reg, 'WPN_010');
   }
 
   /** O aviso de que o Casco voltou: a nave pisca ciano, rápido. */
@@ -158,6 +169,8 @@ export class CartasEmJogo {
         this.ferir(e, 1);
       }
     }
+
+    this.lancadores.tick(dt);
   }
 
   /**
