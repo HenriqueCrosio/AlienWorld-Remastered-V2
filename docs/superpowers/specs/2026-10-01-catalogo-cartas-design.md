@@ -63,7 +63,7 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 | EFF_004 | INCENDIÁRIO | incomum | chance de incendiar | — | 1 |
 | EFF_006 | COMBUSTÃO | épica | o inimigo queimado explode ao morrer | Incendiário | 1 |
 | EFF_007 🆕 | EM CADEIA | épica | toda explosão incendeia quem está no raio | Incendiário + Combustão | 1 |
-| EFF_010 🆕 | FLARE | incomum | a cada ~4s solta um flare para trás; ele **explode no inimigo que tocar** — e, se ninguém tocar, **explode sozinho depois de ~3s** (armadilha para quem persegue, bomba de retaguarda para quem escapou) | — | 1 |
+| EFF_010 🆕 | FLARE | incomum | **o jogador solta** um flare para trás (tecla, espera de ~8s, "FLARE" na HUD — 02/10: *"para não ficar muito roubado"*); ele **explode no inimigo que tocar** — e, se ninguém tocar, **explode sozinho depois de ~3s** (armadilha para quem persegue, bomba de retaguarda para quem escapou). A tecla (L) é provisória: o mapa de teclas ainda vai ser feito | — | 1 |
 | EFF_011 🆕 | ELÉTRICO | incomum | chance de o tiro **eletrificar**: o inimigo leva um choque e **trava por um instante** (não anda, não atira) | — | 1 |
 | EFF_012 🆕 | ARCO EM CADEIA | rara | o choque **salta** do eletrificado para até 3 inimigos próximos | Elétrico | 1 |
 | EFF_013 🆕 | SOBRECARGA | épica | o eletrificado que morre **descarrega um pulso** em todos ao redor | Arco em Cadeia | 1 |
@@ -140,6 +140,13 @@ quando o queimado morre.
 |---|---|---|
 | Tiro | leve, guiado, constante, cadência baixa | forte, raro (~3s) |
 | Papel | conforto: limpa quem você não está mirando | dano em área: **explode** e entra na cadeia das explosões |
+
+**O míssil (02/10, pedido dele):** a mira **trava no disparo** — com a carta ×2, o 1º persegue o inimigo mais próximo
+e o 2º o segundo mais próximo, e o 2º sai ~140ms depois (antes os dois iam no mesmo e o que sobrava "pulava" para
+outro, lendo como reação em cadeia). Se o alvo morrer antes, pega o livre mais próximo. Persegue como o
+**interceptador**: acelera com inércia — erra, faz a curva e volta — com travas: velocidade máxima, o movimento de lado
+amortecido (sem isso ele ORBITAVA o alvo) e vida de ~2,5s, no fim da qual **explode no ar**. GIF:
+`folhas/2026-10-02/gif/missil-mira-e-inercia.gif`.
 
 O drone é **um por linhagem**: humano = esfera pequena (estilo astromecânico, redondo); alien = água-viva pequena nas
 cores da manta. Discreto, segue a nave com atraso curto. O **tiro do drone** é próprio, pequeno, na cor da linhagem.

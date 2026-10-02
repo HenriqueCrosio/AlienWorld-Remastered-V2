@@ -78,6 +78,11 @@ export class CartasEmJogo {
     return tem(this.reg, 'WPN_009') || tem(this.reg, 'WPN_010');
   }
 
+  /** "FLARE" aceso na HUD: o jogador pode soltar o próximo. */
+  get flarePronto(): boolean {
+    return this.lancadores.flareProntoAgora;
+  }
+
   /** O aviso de que o Casco voltou: a nave pisca ciano, rápido. */
   private piscarCasco(): void {
     const nave = this.h.nave();

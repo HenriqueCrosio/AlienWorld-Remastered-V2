@@ -1,36 +1,44 @@
 // UM GIF DA CARTA EM JOGO, na velocidade real: o relógio do Phaser é CONGELADO e avançado à mão, 1/60s por passo, com
 // uma foto do mundo a cada 3 passos (20 qps no GIF: o atraso do GIF é em centésimos, e 50ms é exato). A captura é
-// lenta (SwiftShader), mas o jogo não sabe disso. A cena é a F2 limpa (como a probe-cartas-novas), a nave atirando
-// num bando de alvos parados.
+// lenta (SwiftShader), mas o jogo não sabe disso. A cena é a F2 limpa (como a probe-cartas-novas): roteiro desligado,
+// nave intocável, alvos postos à mão.
 //
-// Com VÁRIOS modos de arte (`ExplosaoDoJogador.arte`), grava o MESMO cenário uma vez por modo e empilha os painéis,
-// um em cima do outro, com o nome de cada um — a comparação lado a lado.
+// PAINÉIS EMPILHADOS: cada cenário × cada modo de arte (`ExplosaoDoJogador.arte`) vira um painel, um em cima do outro,
+// com o nome em cima — a comparação lado a lado.
 //
-// Uso: node scripts/_gif-cartas.mjs <out.gif> <cenario> [segundos] [modos] [nave]   (npm run dev rodando)
-//   cenários: fragmentado · emcadeia · explosivo · casco
+// Uso: node scripts/_gif-cartas.mjs <out.gif> <cenarios> [segundos] [modos] [nave]   (npm run dev rodando)
+//   cenários (separados por vírgula): explosivo · fragmentado · emcadeia · missil · missil1 · missil2 · missilvolta · flare
 //   modos: jogo,variada,aprovada (padrão: aprovada) · nave: humana | alienigena
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
 const [OUT, CENARIO = 'fragmentado', SEG = '2.5', MODOS = 'aprovada', NAVE = 'humana'] = process.argv.slice(2);
-// cartas · se a nave atira · onde ficam os alvos · [segundo, lançador] = forçar um disparo de carta naquele instante
-// (a espera real é de 3–4s, e o GIF ficaria longo esperando).
+
+// nome · cartas · se a nave atira · os alvos · [segundo, lançador] = forçar um disparo de carta naquele instante (a
+// espera real é de 3s no míssil, e o flare é do jogador) · a janela do mundo (padrão abaixo).
+// Alvo: [x, dy da nave, vida, tipo?, vx?, vy?, teto?] — sem tipo é drone PARADO; com velocidade, ele anda; o teto de
+// velocidade é ENCENAÇÃO do GIF (o kamikaze do jogo voa a 190, e o míssil, a 150, não o alcança na volta).
 const CENARIOS = {
-  explosivo: { cartas: ['EFF_001'], atira: true, bando: 'cacho' },
-  fragmentado: { cartas: ['EFF_001', 'EFF_002', 'EFF_003'], atira: true, bando: 'cacho' },
-  emcadeia: { cartas: ['EFF_004', 'EFF_006', 'EFF_007', 'EFF_001'], atira: true, bando: 'cacho' },
-  missil: { cartas: ['WPN_009', 'WPN_009'], atira: false, bando: 'espalhado', forcar: [[0.1, 'missil'], [1.6, 'missil']] },
-  flare: { cartas: ['EFF_010'], atira: false, bando: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
+  explosivo: { nome: 'EXPLOSIVO', cartas: ['EFF_001'], atira: true, alvos: 'cacho' },
+  fragmentado: { nome: 'EXPLOSIVO + EXPLOSÃO MAIOR + FRAGMENTADO', cartas: ['EFF_001', 'EFF_002', 'EFF_003'], atira: true, alvos: 'cacho' },
+  emcadeia: { nome: 'INCENDIÁRIO + COMBUSTÃO + EM CADEIA + EXPLOSIVO', cartas: ['EFF_004', 'EFF_006', 'EFF_007', 'EFF_001'], atira: true, alvos: 'cacho' },
+  missil: { nome: 'MÍSSIL ×2', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'espalhado', forcar: [[0.1, 'missil'], [1.6, 'missil']] },
+  missil1: { nome: 'MÍSSIL — tiro único', cartas: ['WPN_009'], atira: false, alvos: 'um', forcar: [[0.1, 'missil']] },
+  missil2: { nome: 'MÍSSIL ×2 — um alvo para cada, o 2º sai depois', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', forcar: [[0.1, 'missil']] },
+  missilvolta: { nome: 'MÍSSIL — o alvo desvia (encenado): erra, faz a curva e volta', cartas: ['WPN_009'], atira: false, alvos: 'cruzando', desvio: true, forcar: [[0.1, 'missil']], clip: { x: 46, y: 20, w: 270, h: 176 } },
+  flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
-const cen = CENARIOS[CENARIO];
-if (!cen) throw new Error(`cenário desconhecido: ${CENARIO}`);
-const { cartas } = cen;
+const cenarios = CENARIO.split(',').map((c) => {
+  if (!CENARIOS[c]) throw new Error(`cenário desconhecido: ${c}`);
+  return CENARIOS[c];
+});
 const modos = MODOS.split(',');
+const paineis = cenarios.flatMap((cen) => modos.map((modo) => ({ cen, modo })));
 const QUADRO = 1000 / 60;
 const POR_FOTO = 3;
 const ZOOM = 2; // o mundo é 384×216; a foto sai em 2× do mundo, sem suavizar
-const CLIP = cen.clip ?? { x: 46, y: 46, w: 270, h: 116 }; // a janela do mundo que entra no GIF
+const CLIP_PADRAO = { x: 46, y: 46, w: 270, h: 116 };
 const ROTULO = 26;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -39,7 +47,8 @@ page.on('pageerror', (e) => console.log('[pageerror]', e.message));
 await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(1500);
 
-async function gravar(modo) {
+async function gravar(cen, modo) {
+  const clip = cen.clip ?? CLIP_PADRAO;
   // A F2 limpa: o roteiro desligado, a nave intocável, as cartas dadas.
   await page.evaluate(() => {
     const g = window.__game;
@@ -57,7 +66,7 @@ async function gravar(modo) {
   }, NAVE);
   await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').cartas);
   await page.waitForTimeout(600);
-  await page.evaluate(({ cartas, modo, bando }) => {
+  await page.evaluate(({ cartas, modo, alvos }) => {
     const s = window.__game.scene.getScene('Game');
     s.director.update = () => [];
     s.enemies.enemies.clear(true, true);
@@ -65,27 +74,32 @@ async function gravar(modo) {
     s.damageShip = () => {};
     for (const id of cartas) s.cartas.aplicar(id);
     s.cartas.explosao.arte = modo;
-    // Os lançadores só disparam quando o GIF manda (`forcar`).
+    // O míssil só sai quando o GIF manda (`forcar`); o flare já é só do jogador.
     s.cartas.lancadores.proximoMissil = Infinity;
-    s.cartas.lancadores.proximoFlare = Infinity;
-    // O bando, parado: um CACHO na linha da nave; ESPALHADO na vertical (o míssil tem que fazer a curva); ATRÁS da nave
-    // (o flare é armadilha para quem persegue).
     const y0 = s.ship.y;
     const x0 = s.ship.x;
-    const BANDOS = {
+    const ALVOS = {
+      // um CACHO na linha da nave
       cacho: [[190, 0, 6], [205, -12, 6], [205, 12, 6], [222, -4, 6], [222, 18, 6], [238, -14, 6], [240, 6, 6]],
+      // ESPALHADOS na vertical: o míssil tem que fazer a curva
       espalhado: [[230, -45, 6], [250, 40, 6], [270, -10, 6]],
+      um: [[250, -35, 6]],
+      dois: [[230, -45, 6], [250, 42, 6]],
+      // um drone parado que DESVIA quando o míssil chega (ver `desvio`)
+      cruzando: [[250, -20, 2]],
+      // ATRÁS da nave: o flare é armadilha para quem persegue
       atras: [[x0 - 30, 0, 1]],
     };
-    BANDOS[bando].forEach(([x, dy, hp]) => {
-      s.enemies.spawn('drone', y0 + dy, x);
+    ALVOS[alvos].forEach(([x, dy, hp, tipo = 'drone', vx = 0, vy = 0, teto]) => {
+      s.enemies.spawn(tipo, y0 + dy, x);
       const kids = s.enemies.enemies.getChildren();
       const e = kids[kids.length - 1];
       e.setPosition(x, y0 + dy);
-      e.body.setVelocity(0, 0);
+      e.body.setVelocity(vx, vy);
+      if (teto) e.body.setMaxVelocity(teto, teto);
       e.setData('hp', hp);
     });
-    // Sem o letreiro da fase por cima do bando.
+    // Sem o letreiro da fase por cima.
     s.tweens.killTweensOf([s.banner, s.bannerFaixa]);
     s.banner.setAlpha(0);
     s.bannerFaixa.setAlpha(0);
@@ -93,7 +107,7 @@ async function gravar(modo) {
     const g = window.__game;
     g.loop.sleep();
     window.__passo = { t: g.loop.now };
-  }, { cartas, modo, bando: cen.bando });
+  }, { cartas: cen.cartas, modo, alvos: cen.alvos });
 
   const geo = await page.evaluate(() => {
     const c = window.__game.canvas.getBoundingClientRect();
@@ -116,49 +130,74 @@ async function gravar(modo) {
     while (forcar.length && forcar[0][0] <= seg) {
       const [, qual] = forcar.shift();
       await page.evaluate((qual) => {
-        const s = window.__game.scene.getScene('Game');
-        s.cartas.lancadores[qual === 'missil' ? 'proximoMissil' : 'proximoFlare'] = s.time.now;
+        const l = window.__game.scene.getScene('Game').cartas.lancadores;
+        const agora = window.__game.scene.getScene('Game').time.now;
+        if (qual === 'missil') l.proximoMissil = agora;
+        // O flare é do JOGADOR: o GIF "aperta a tecla" (e ignora a espera, para caber no GIF).
+        else {
+          l.flarePronto = 0;
+          l.pediuFlare = true;
+        }
       }, qual);
       await passo(1);
       await page.evaluate(() => {
-        const l = window.__game.scene.getScene('Game').cartas.lancadores;
-        l.proximoMissil = Infinity;
-        l.proximoFlare = Infinity;
+        window.__game.scene.getScene('Game').cartas.lancadores.proximoMissil = Infinity;
       });
     }
     await passo(POR_FOTO);
+    // O DESVIO ENCENADO: com o míssil a 30px, o alvo dá uma esquivada rápida para baixo (0,3s) e para — o míssil, com
+    // inércia, passa reto, faz a curva e volta.
+    if (cen.desvio) {
+      await page.evaluate(() => {
+        const s = window.__game.scene.getScene('Game');
+        const e = s.enemies.enemies.getChildren().find((x) => x.active);
+        const m = s.cartas.lancadores.misseis[0];
+        if (!e || !m || e.getData('desviou')) return;
+        if (Math.hypot(m.b.x - e.x, m.b.y - e.y) > 30) return;
+        e.setData('desviou', true);
+        e.body.setVelocity(0, 170);
+        s.time.delayedCall(300, () => e.active && e.body.setVelocity(0, 0));
+      });
+    }
     const foto = await page.screenshot({
-      clip: { x: geo.left + CLIP.x * geo.k, y: geo.top + CLIP.y * geo.k, width: CLIP.w * geo.k, height: CLIP.h * geo.k },
+      clip: { x: geo.left + clip.x * geo.k, y: geo.top + clip.y * geo.k, width: clip.w * geo.k, height: clip.h * geo.k },
     });
-    quadros.push(await sharp(foto).resize(CLIP.w * ZOOM, CLIP.h * ZOOM, { kernel: 'nearest' }).png().toBuffer());
+    quadros.push(await sharp(foto).resize(clip.w * ZOOM, clip.h * ZOOM, { kernel: 'nearest' }).png().toBuffer());
   }
   if (cen.atira) await page.keyboard.up('Space');
   return quadros;
 }
 
-const porModo = [];
-for (const m of modos) porModo.push(await gravar(m));
+const porPainel = [];
+for (const { cen, modo } of paineis) porPainel.push(await gravar(cen, modo));
 await browser.close();
 
-// Os painéis empilhados, cada um com o nome do modo em cima.
-const W = CLIP.w * ZOOM;
-const H = CLIP.h * ZOOM;
-const comRotulo = modos.length > 1;
-const PH = H + (comRotulo ? ROTULO : 0);
-const rotulos = await Promise.all(modos.map((m) => sharp(Buffer.from(
-  `<svg width="${W}" height="${ROTULO}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#0b0d14"/><text x="8" y="18" font-family="Consolas, monospace" font-size="15" fill="#ffb040">${NOME_MODO[m] ?? m}</text></svg>`,
+// Os painéis empilhados, cada um com o nome em cima (o do cenário, ou o do modo quando o cenário é um só).
+const larguras = await Promise.all(porPainel.map(async (q) => (await sharp(q[0]).metadata()).width));
+const alturas = await Promise.all(porPainel.map(async (q) => (await sharp(q[0]).metadata()).height));
+const W = Math.max(...larguras);
+const comRotulo = paineis.length > 1;
+const nomeDo = ({ cen, modo }) => (cenarios.length > 1 ? cen.nome : NOME_MODO[modo] ?? modo);
+const rotulos = await Promise.all(paineis.map((p) => sharp(Buffer.from(
+  `<svg width="${W}" height="${ROTULO}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#0b0d14"/><text x="8" y="18" font-family="Consolas, monospace" font-size="15" fill="#ffb040">${nomeDo(p)}</text></svg>`,
 )).png().toBuffer()));
-const n = Math.min(...porModo.map((q) => q.length));
+const topos = [];
+let H = 0;
+for (const h of alturas) {
+  topos.push(H);
+  H += h + (comRotulo ? ROTULO : 0);
+}
+const n = Math.min(...porPainel.map((q) => q.length));
 const quadros = [];
 for (let i = 0; i < n; i++) {
   const comp = [];
-  porModo.forEach((q, k) => {
-    if (comRotulo) comp.push({ input: rotulos[k], left: 0, top: k * PH });
-    comp.push({ input: q[i], left: 0, top: k * PH + (comRotulo ? ROTULO : 0) });
+  porPainel.forEach((q, k) => {
+    if (comRotulo) comp.push({ input: rotulos[k], left: 0, top: topos[k] });
+    comp.push({ input: q[i], left: 0, top: topos[k] + (comRotulo ? ROTULO : 0) });
   });
-  quadros.push(await sharp({ create: { width: W, height: PH * modos.length, channels: 4, background: '#0b0d14' } }).composite(comp).png().toBuffer());
+  quadros.push(await sharp({ create: { width: W, height: H, channels: 4, background: '#0b0d14' } }).composite(comp).png().toBuffer());
 }
 await sharp(quadros, { join: { animated: true } })
   .gif({ delay: Array(quadros.length).fill(Math.round(QUADRO * POR_FOTO)), loop: 0 })
   .toFile(OUT);
-console.log(OUT, quadros.length, 'quadros ×', modos.length, 'painéis');
+console.log(OUT, quadros.length, 'quadros ×', paineis.length, 'painéis');

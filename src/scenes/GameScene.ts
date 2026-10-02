@@ -417,6 +417,7 @@ export class GameScene extends Phaser.Scene {
       weapons: this.weapons,
       inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],
       tirosInimigos: () => this.enemies.enemyBullets.getChildren() as Phaser.Physics.Arcade.Sprite[],
+      alvos: () => this.homingTargets(),
       nave: () => this.ship,
       matar: (e) => this.matarInimigo(e),
       baseDaNave: nave.weapon,
@@ -2338,7 +2339,7 @@ export class GameScene extends Phaser.Scene {
     const nome = this.weapons.overheated ? 'TRAVADA' : w.name;
 
     this.hud.setText(
-      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
+      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.flarePronto ? ' FLARE' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

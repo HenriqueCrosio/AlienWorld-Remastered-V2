@@ -48,7 +48,8 @@ export const CARTAS: Record<string, CartaDef> = {
   EFF_006: { id: 'EFF_006', nome: 'COMBUSTÃO', texto: 'queimado\nexplode', curto: 'QUEIMADO EXPLODE', categoria: 'efeito', raridade: 'epica', max: 1, requer: 'EFF_004' },
   // Requer Incendiário + Combustão: a Combustão já exige o Incendiário, então basta ela.
   EFF_007: { id: 'EFF_007', nome: 'EM CADEIA', texto: 'explosão\nincendeia', curto: 'EXPLOSÃO INCENDEIA', categoria: 'efeito', raridade: 'epica', max: 1, requer: 'EFF_006' },
-  EFF_010: { id: 'EFF_010', nome: 'FLARE', texto: 'armadilha\ntraseira', curto: 'ARMADILHA TRASEIRA', categoria: 'efeito', raridade: 'incomum', max: 1 },
+  // Solto pelo JOGADOR (02/10). O texto não cita a tecla: o mapa de teclas ainda vai ser decidido.
+  EFF_010: { id: 'EFF_010', nome: 'FLARE', texto: 'solta\narmadilha', curto: 'SOLTA ARMADILHA', categoria: 'efeito', raridade: 'incomum', max: 1 },
   EFF_011: { id: 'EFF_011', nome: 'ELÉTRICO', texto: 'choque que\ntrava', curto: 'CHOQUE QUE TRAVA', categoria: 'efeito', raridade: 'incomum', max: 1 },
   EFF_012: { id: 'EFF_012', nome: 'ARCO EM CADEIA', texto: 'o choque\nsalta', curto: 'CHOQUE SALTA', categoria: 'efeito', raridade: 'rara', max: 1, requer: 'EFF_011' },
   EFF_013: { id: 'EFF_013', nome: 'SOBRECARGA', texto: 'eletrificado\nexplode', curto: 'ELETRIFICADO EXPLODE', categoria: 'efeito', raridade: 'epica', max: 1, requer: 'EFF_012' },

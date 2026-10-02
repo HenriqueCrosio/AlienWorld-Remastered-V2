@@ -159,30 +159,75 @@ const missil = await page.evaluate(async () => {
 });
 conferir(missil.visto >= 1 && missil.hp < 99, 'o míssil sai, persegue e acerta', missil);
 
-// ── FLARE (EFF_010) ──
+// Míssil ×2: cada um trava no SEU alvo, e o 2º sai um instante depois do 1º.
+await fase(['WPN_009', 'WPN_009']);
+const duplo = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const a = t.alvo('drone', s.ship.x + 150, s.ship.y - 50, 99);
+  const b = t.alvo('drone', s.ship.x + 170, s.ship.y + 50, 99);
+  const l = s.cartas.lancadores;
+  l.proximoMissil = s.time.now;
+  const saidas = [];
+  for (let i = 0; i < 40 && saidas.length < 2; i++) {
+    for (const m of l.misseis) if (!saidas.some((x) => x.id === m.id)) saidas.push({ id: m.id, t: s.time.now, alvo: m.alvo === a ? 'a' : m.alvo === b ? 'b' : null });
+    await t.dormir(20);
+  }
+  return { saidas, atraso: saidas.length === 2 ? saidas[1].t - saidas[0].t : null };
+});
+conferir(
+  duplo.saidas.length === 2 && duplo.saidas[0].alvo !== duplo.saidas[1].alvo && duplo.saidas.every((x) => x.alvo) && duplo.atraso >= 80,
+  'míssil ×2: um alvo para cada, e o 2º sai depois do 1º',
+  duplo,
+);
+
+// Sem ninguém para acertar, o míssil explode no ar no fim da vida (~2,5s).
+await fase(['WPN_009']);
+const noAr = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const fontes = t.espiarExplosoes();
+  s.cartas.lancadores.proximoMissil = s.time.now;
+  for (let i = 0; i < 40 && !fontes.includes('missil'); i++) await t.dormir(100);
+  return { fontes, vivos: t.projeteis('missil').length };
+});
+conferir(noAr.fontes.includes('missil') && noAr.vivos === 0, 'o míssil que não acha ninguém explode no ar no fim da vida', noAr);
+
+// ── FLARE (EFF_010): solto pelo JOGADOR (tecla provisória L), com espera de 8s ──
 await fase(['EFF_010']);
+await page.keyboard.press('KeyL');
 const flare = await page.evaluate(async () => {
   const t = window.__teste;
   const fontes = t.espiarExplosoes();
   let solto = false;
-  for (let i = 0; i < 90 && !fontes.includes('flare'); i++) {
+  for (let i = 0; i < 50 && !fontes.includes('flare'); i++) {
     solto ||= t.projeteis('flare').length > 0;
     await t.dormir(100);
   }
-  return { solto, fontes };
+  return { solto, fontes, hud: t.cena().hud.text.includes('FLARE') };
 });
-conferir(flare.solto && flare.fontes.includes('flare'), 'o flare sai para trás e explode sozinho', flare);
+conferir(flare.solto && flare.fontes.includes('flare'), 'a tecla solta o flare para trás, e ele explode sozinho', flare);
+await page.keyboard.press('KeyL');
+await page.waitForTimeout(300);
+const naEsperaFlare = await page.evaluate(() => window.__teste.projeteis('flare').length);
+conferir(naEsperaFlare === 0 && !flare.hud, 'na espera, a tecla não solta outro e a HUD não mostra FLARE', { naEsperaFlare, hud: flare.hud });
 
 await fase(['EFF_010']);
 const toque = await page.evaluate(async () => {
   const t = window.__teste;
   const s = t.cena();
-  const fontes = t.espiarExplosoes();
-  const e = t.alvo('drone', s.ship.x - 30, s.ship.y, 99);
-  for (let i = 0; i < 60 && !fontes.includes('flare'); i++) await t.dormir(100);
-  return { fontes, hp: e.getData('hp') };
+  window.__fontesFlare = t.espiarExplosoes();
+  window.__alvoFlare = t.alvo('drone', s.ship.x - 30, s.ship.y, 99);
+  await t.dormir(150); // a HUD redesenha no quadro seguinte à carta
+  return s.hud.text.includes('FLARE');
 });
-conferir(toque.fontes.includes('flare') && toque.hp < 99, 'o flare explode no inimigo que toca', toque);
+await page.keyboard.press('KeyL');
+const toqueFim = await page.evaluate(async () => {
+  const t = window.__teste;
+  for (let i = 0; i < 30 && !window.__fontesFlare.includes('flare'); i++) await t.dormir(100);
+  return { fontes: window.__fontesFlare, hp: window.__alvoFlare.getData('hp') };
+});
+conferir(toque && toqueFim.fontes.includes('flare') && toqueFim.hp < 99, 'com "FLARE" aceso, o flare explode no inimigo que toca', { hud: toque, ...toqueFim });
 
 // ─── FIM ───
 

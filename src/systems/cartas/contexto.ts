@@ -14,6 +14,8 @@ export interface HostCartas {
   inimigos: () => Inimigo[];
   /** Os tiros inimigos em voo — o drone desvia deles. */
   tirosInimigos: () => Phaser.Physics.Arcade.Sprite[];
+  /** Os alvos que um míssil pode perseguir: inimigos vivos, o chefão (as cabeças, na serpente) e o golfinho. */
+  alvos: () => Phaser.Physics.Arcade.Sprite[];
   nave: () => Phaser.Physics.Arcade.Sprite;
   matar: (e: Inimigo) => void;
   baseDaNave: string;
