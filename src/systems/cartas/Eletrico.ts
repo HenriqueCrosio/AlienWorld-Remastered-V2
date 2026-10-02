@@ -49,7 +49,7 @@ export class Eletrico {
     e.setData('eletrificadoAte', this.c.h.scene.time.now + TRAVA_MS);
     if (!NAO_TRAVA.has(e.getData('kind') as string)) this.c.h.travar(e, TRAVA_MS);
     this.c.h.fx.estalo(e.x, e.y, e.displayWidth * 0.42);
-    if (dano) this.c.depois(() => this.c.ferir(e, dano));
+    if (dano) this.c.depois(() => this.c.ferir(e, dano, 'choque'));
     if (saltar && this.c.tem('EFF_012')) this.arco(e);
   }
 
@@ -60,7 +60,7 @@ export class Eletrico {
     const { x, y } = e;
     this.c.h.fx.choque(x, y, 0.8);
     this.c.depois(() => {
-      for (const o of this.c.noRaio(x, y, PULSO.raio)) if (o !== e) this.c.ferir(o, PULSO.dano);
+      for (const o of this.c.noRaio(x, y, PULSO.raio)) if (o !== e) this.c.ferir(o, PULSO.dano, 'pulso');
     });
   }
 

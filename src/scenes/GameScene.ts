@@ -32,6 +32,9 @@ import { Esfincter } from '../entities/esfincter';
 import { SHIPS, DEFAULT_SHIP, visualDaNave } from '../ships';
 import { CartasEmJogo } from '../systems/CartasEmJogo';
 import { entrarNaFase } from '../cartas';
+import type { ConfigSandbox } from '../sandbox/config.ts';
+import { SandboxArena } from '../systems/SandboxArena';
+import { Medidas } from '../systems/Medidas';
 import { PecasEmJogo, colecaoCompleta, reiniciarLinhagem, temUmUp, tierDaNave } from '../pecas';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
@@ -118,6 +121,11 @@ export class GameScene extends Phaser.Scene {
   private zone: Zone = 'atmosfera';
   /** Treino de chefão: pula direto para a luta e reinicia nela. */
   private practice = false;
+  /** O SANDBOX de dev, se a fase foi aberta por ele (ver `src/sandbox/`). */
+  private sandbox: ConfigSandbox | null = null;
+  private arena: SandboxArena | null = null;
+  /** As MEDIDAS do sandbox (dano por fonte, abates, recebidos) — só existem nele. */
+  medidas: Medidas | null = null;
 
   private hud!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
@@ -237,6 +245,8 @@ export class GameScene extends Phaser.Scene {
     handling?: HandlingMode;
     practice?: boolean;
     ship?: string;
+    /** O SANDBOX de dev (`src/sandbox/`): roteiro desligado, as ondas da montagem, teclas de dev, medidas. */
+    sandbox?: ConfigSandbox;
     /** Total acumulado das fases anteriores (a campanha soma; a fase começa do checkpoint). */
     score?: number;
   }): void {
@@ -248,6 +258,7 @@ export class GameScene extends Phaser.Scene {
 
     this.handling = data.handling ?? 'diegetico';
     this.practice = data.practice ?? false;
+    this.sandbox = data.sandbox ?? null;
     // A ZONA VEM DA FASE. É ela que decide a condução no modo diegético — e é por isso que a
     // Fase 2 começa em voo livre sem que ninguém escolha nada.
     this.zone = this.stage.zone;
@@ -356,7 +367,8 @@ export class GameScene extends Phaser.Scene {
     // nave sem PNG cai na do Interceptor em vez de virar o quadrado verde do Phaser.
     // PROTÓTIPO DAS CARTAS: a linhagem evolui no visual — o tier desta fase (`visualDaNave`).
     // A F1 é sempre jogada nova (ou o retry dela): a linhagem volta ao tier 0, sem 1-UP pendente.
-    if (this.stage.id === 1) reiniciarLinhagem(this.registry);
+    // (No sandbox o tier é o da montagem — nada de zerar.)
+    if (this.stage.id === 1 && !this.sandbox) reiniciarLinhagem(this.registry);
     const visual = visualDaNave(this.shipId, tierDaNave(this.registry));
     const tex = this.textures.exists(visual.texture) ? visual.texture : 'ship';
     this.ship = this.physics.add.sprite(70, GAME_HEIGHT / 2, tex);
@@ -410,7 +422,8 @@ export class GameScene extends Phaser.Scene {
     //
     // PROTÓTIPO DAS CARTAS: a base da linhagem + as cartas de armamento da mão. O checkpoint da mão é da ENTRADA
     // da fase (`entrarNaFase`): um retry devolve as cartas com que se entrou, não as ganhas antes de morrer.
-    entrarNaFase(this.registry, this.stage.id);
+    // (No sandbox a mão é a da montagem: o checkpoint da F1 a zeraria.)
+    if (!this.sandbox) entrarNaFase(this.registry, this.stage.id);
     this.cartas = new CartasEmJogo({
       scene: this,
       fx: this.fx,
@@ -426,11 +439,15 @@ export class GameScene extends Phaser.Scene {
       linhagem: this.shipId === 'alienigena' ? 'alien' : 'humana',
       ganharVida: () => this.lives++,
       ganharBomba: () => this.bombs++,
+      // O sandbox não abre mesa no meio da fase: a build é a da montagem (o C de dev ainda abre).
+      semMesas: !!this.sandbox,
+      medir: (fonte, dano) => this.medidas?.dano(fonte, dano),
     });
     this.pecas = new PecasEmJogo({
       scene: this,
       fx: this.fx,
-      fase: this.stage.id,
+      // No sandbox, sem peças (fase 0 não tem): o portador e a peça seriam ruído no teste.
+      fase: this.sandbox ? 0 : this.stage.id,
       bossTime: this.director.bossTime,
       nave: () => this.ship,
       inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],
@@ -570,7 +587,12 @@ export class GameScene extends Phaser.Scene {
     Music.play(this, this.practice ? 'boss' : 'stage1');
 
     const kb = this.input.keyboard!;
-    kb.on('keydown-ESC', () => this.scene.start('Menu'));
+    // No sandbox, ESC volta à MONTAGEM (com tudo como estava) — não ao menu.
+    kb.on('keydown-ESC', () => (this.sandbox ? this.voltarMontagem() : this.scene.start('Menu')));
+    if (this.sandbox) {
+      this.medidas = new Medidas(() => this.time.now);
+      this.arena = new SandboxArena(this, this.sandbox, this.enemies, this.medidas);
+    }
 
     if (import.meta.env.DEV) {
       // Pula da fase direto para o chefão, sem reiniciar.
@@ -681,7 +703,11 @@ export class GameScene extends Phaser.Scene {
     // acabou, e o fundo não deve continuar "andando" durante a luta.
     this.parallax.setApproach(this.elapsed / this.director.bossTime);
 
-    for (const e of this.director.update(this.elapsed)) this.runEvent(e);
+    // O SANDBOX desliga o roteiro (a arena é limpa; as ondas são as da montagem) — menos quando começa no chefão.
+    if (!this.sandbox || this.sandbox.chefe) {
+      for (const e of this.director.update(this.elapsed)) this.runEvent(e);
+    }
+    this.arena?.tick(time);
 
     const body = this.ship.body as Phaser.Physics.Arcade.Body;
     const input = this.reader.read();
@@ -1604,6 +1630,7 @@ export class GameScene extends Phaser.Scene {
     // A fagulha sai mesmo no PISO: o jogador vê que acertou, e só a barra para.
     this.fx.hit(bullet.x, bullet.y);
     this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
+    this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, bullet.getData('damage') as number);
     if (g.damage(bullet.getData('damage') as number)) this.matarGolfinho();
   }
 
@@ -1678,6 +1705,7 @@ export class GameScene extends Phaser.Scene {
     this.fx.hit(bullet.x, bullet.y);
     this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
 
+    this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, bullet.getData('damage') as number);
     if (this.boss.damage(bullet.getData('damage') as number)) this.killBoss();
   }
 
@@ -1834,6 +1862,11 @@ export class GameScene extends Phaser.Scene {
     if (this.over) return;
     this.over = true;
     this.tempoNormal();
+    // No sandbox, vencer o chefão volta à montagem (não há campanha para seguir).
+    if (this.sandbox) {
+      this.time.delayedCall(1500, () => this.voltarMontagem());
+      return;
+    }
 
     // O BÔNUS DE NO-HIT (GDD §8): cruzar a fase sem tomar um arranhão vale tanto quanto
     // meio chefão. É a recompensa do jogador disciplinado — e o que dá profundidade ao placar.
@@ -2138,7 +2171,9 @@ export class GameScene extends Phaser.Scene {
     }
     this.fx.hit(bullet.x, bullet.y);
 
-    const hp = (enemy.getData('hp') as number) - (bullet.getData('damage') as number);
+    const antes = enemy.getData('hp') as number;
+    const hp = antes - (bullet.getData('damage') as number);
+    this.medidas?.dano(origem ?? 'tiro', Math.min(antes - hp, Math.max(0, antes)));
     enemy.setData('hp', hp);
 
     const bx = bullet.x;
@@ -2174,6 +2209,7 @@ export class GameScene extends Phaser.Scene {
       this.fx.explode(e.x, e.y, e.scale);
     }
     this.score += e.getData('score') as number;
+    this.medidas?.abate(e.getData('kind') as string, e);
     // PROTÓTIPO DAS CARTAS: as cápsulas de HMG/Shotgun não caem mais — a PEÇA é o drop do jogo (28/09).
     this.pecas.aoMorrer(e);
     this.cartas.aoMorrer(e);
@@ -2199,6 +2235,7 @@ export class GameScene extends Phaser.Scene {
   private useBomb(): void {
     if (this.over || this.bombs <= 0) return;
     this.bombs--;
+    if (this.medidas) this.medidas.bombasUsadas++;
 
     this.cameras.main.flash(220, 255, 232, 180);
     this.cameras.main.shake(280, 0.008);
@@ -2222,7 +2259,9 @@ export class GameScene extends Phaser.Scene {
       ...this.enemies.enemies.getChildren(),
     ] as Phaser.Physics.Arcade.Sprite[]) {
       if (!e.active) continue;
-      const hp = (e.getData('hp') as number) - 12;
+      const antes = e.getData('hp') as number;
+      const hp = antes - 12;
+      this.medidas?.dano('bomba', Math.min(12, Math.max(0, antes)));
       e.setData('hp', hp);
 
       if (hp <= 0) {
@@ -2241,14 +2280,19 @@ export class GameScene extends Phaser.Scene {
 
   private damageShip(): void {
     if (this.over || this.time.now < this.invulnerableUntil || this.cartas.intocavel(this.time.now)) return;
+    // O INVULNERÁVEL do sandbox (tecla I): para olhar as skills sem morrer.
+    if (this.arena?.invulneravel) return;
 
     // PROTÓTIPO DAS CARTAS: o CASCO absorve o golpe inteiro — a vida, a especial e as bombas ficam.
+    if (this.medidas) this.medidas.golpes++;
     if (this.cartas.absorver(this.time.now)) {
+      if (this.medidas) this.medidas.cascoGasto++;
       this.invulnerableUntil = this.time.now + 1000;
       return;
     }
 
     this.lives--;
+    if (this.medidas) this.medidas.vidasPerdidas++;
     this.invulnerableUntil = this.time.now + 1400;
     this.tookDamage = true;
     // 3 por vida (GDD §5) + a Bomba Extra: a vida nova vem com o estoque cheio.
@@ -2264,6 +2308,12 @@ export class GameScene extends Phaser.Scene {
     if (this.lives <= 0) this.gameOver();
   }
 
+  /** O SANDBOX: de volta à montagem (o `sandbox/iniciar.ts` escuta o evento, para a cena e reabre a tela). */
+  private voltarMontagem(): void {
+    this.tempoNormal();
+    this.game.events.emit('sandbox:montagem');
+  }
+
   private gameOver(): void {
     this.over = true;
     this.tempoNormal();
@@ -2272,6 +2322,11 @@ export class GameScene extends Phaser.Scene {
     (this.ship.body as Phaser.Physics.Arcade.Body).enable = false;
     this.fx.explode(this.ship.x, this.ship.y, 2.2);
 
+    // No sandbox, morrer volta à montagem.
+    if (this.sandbox) {
+      this.time.delayedCall(900, () => this.voltarMontagem());
+      return;
+    }
     const final = this.totalScore();
     this.time.delayedCall(900, () =>
       this.scene.start('GameOver', {
@@ -2342,7 +2397,7 @@ export class GameScene extends Phaser.Scene {
     const nome = this.weapons.overheated ? 'TRAVADA' : w.name;
 
     this.hud.setText(
-      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
+      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}${this.arena?.invulneravel ? ' INVULN.' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

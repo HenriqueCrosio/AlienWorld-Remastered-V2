@@ -43,6 +43,8 @@ const game = new Phaser.Game({
 // Em dev, expõe o jogo para inspeção externa (probe headless, console do navegador).
 if (import.meta.env.DEV) {
   (window as unknown as { __game: Phaser.Game }).__game = game;
+  // O SANDBOX (só em dev): `?sandbox` na URL, ou X no menu. Import dinâmico — fora do build do jogador.
+  void import('./sandbox/iniciar.ts').then((m) => m.ligarSandbox(game));
 }
 
 // A CAMADA HD por cima do mundo (`uiHD.ts`): o texto das três vozes e a mesa. O mundo carrega os assets enquanto

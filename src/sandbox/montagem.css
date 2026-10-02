@@ -1,0 +1,93 @@
+/* A TELA DE MONTAGEM do sandbox (só em dev) — spec 2026-10-02-sandbox-dev-design.md. */
+#sandbox {
+  --fundo: #0b0d14;
+  --painel: #141824;
+  --linha: #232a3a;
+  --texto: #d8deea;
+  --fraco: #8a93a6;
+  --ouro: #ffb040;
+  --ciano: #3ee0f0;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow: auto;
+  background: var(--fundo);
+  color: var(--texto);
+  font: 14px/1.4 system-ui, sans-serif;
+  padding: 16px;
+  box-sizing: border-box;
+}
+#sandbox[hidden] { display: none; }
+#sandbox * { box-sizing: border-box; }
+#sandbox h1 { margin: 0; font-size: 18px; letter-spacing: 0.04em; }
+#sandbox h1 small { color: var(--fraco); font-weight: 400; font-size: 13px; margin-left: 8px; }
+#sandbox .barra { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 12px 0 16px; }
+#sandbox .grupo { display: flex; gap: 6px; align-items: center; }
+#sandbox .rotulo { color: var(--fraco); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+#sandbox select, #sandbox input[type='number'] {
+  background: var(--painel); color: var(--texto); border: 1px solid var(--linha); border-radius: 4px; padding: 4px 6px; font: inherit;
+}
+#sandbox input[type='number'] { width: 64px; }
+#sandbox button {
+  background: #1d2333; color: var(--texto); border: 1px solid #2c3446; border-radius: 4px; padding: 5px 10px; font: inherit; cursor: pointer;
+}
+#sandbox button:hover { border-color: var(--ciano); }
+#sandbox button.jogar { background: var(--ouro); color: #1a1205; border: 0; font-weight: 700; font-size: 16px; padding: 10px 28px; }
+#sandbox button.jogar:disabled { opacity: 0.4; cursor: not-allowed; }
+#sandbox .pontos { font-weight: 700; font-size: 16px; }
+#sandbox .pontos.cheio { color: var(--ouro); }
+#sandbox .pontos.estourou { color: #ff5a6a; }
+
+/* AS 4 ÁRVORES */
+#sandbox .arvores { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+#sandbox .arvore { background: var(--painel); border: 1px solid var(--linha); border-radius: 8px; padding: 10px 12px 14px; }
+#sandbox .arvore h2 { margin: 0 0 8px; font-size: 14px; color: var(--ouro); letter-spacing: 0.05em; }
+#sandbox .arvore h2 span { color: var(--fraco); font-weight: 400; }
+#sandbox .grade { position: relative; }
+#sandbox .grade svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+#sandbox .no {
+  position: absolute; width: 56px; height: 56px; border-radius: 8px; border: 2px solid var(--cor); background: #0d1019;
+  display: grid; place-items: center; cursor: pointer; user-select: none;
+}
+#sandbox .no img { width: 40px; height: 40px; image-rendering: pixelated; }
+#sandbox .no .nivel {
+  position: absolute; right: -6px; bottom: -6px; background: #0b0d14; border: 1px solid var(--cor); border-radius: 4px;
+  font: 700 11px/1 ui-monospace, monospace; padding: 2px 3px; color: var(--texto);
+}
+#sandbox .no.bloqueado { filter: grayscale(1) brightness(0.45); border-color: #3a4152; }
+#sandbox .no.bloqueado .nivel { border-color: #3a4152; }
+#sandbox .no.disponivel:hover { box-shadow: 0 0 0 2px var(--cor); }
+#sandbox .no.ativo { background: #18203a; box-shadow: 0 0 10px -2px var(--cor); }
+#sandbox .no.cheio .nivel { color: var(--ouro); }
+#sandbox .dica {
+  position: fixed; z-index: 11; max-width: 260px; background: #0a0c12; border: 1px solid #2c3446; border-radius: 6px; padding: 8px 10px;
+  pointer-events: none; font-size: 13px;
+}
+#sandbox .dica b { display: block; font-size: 14px; }
+#sandbox .dica .rar { font-size: 12px; font-weight: 600; }
+#sandbox .dica .req { color: var(--fraco); font-size: 12px; }
+
+/* FUNDO, INIMIGOS E ONDAS */
+#sandbox .baixo { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; align-items: stretch; }
+#sandbox .caixa { background: var(--painel); border: 1px solid var(--linha); border-radius: 8px; padding: 10px 12px; }
+#sandbox .caixa h3 { margin: 0 0 8px; font-size: 13px; color: var(--ouro); letter-spacing: 0.05em; }
+#sandbox .inimigos { display: grid; grid-template-columns: repeat(2, auto); gap: 6px 18px; }
+#sandbox .contador { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+#sandbox .contador button { padding: 1px 8px; }
+#sandbox .contador output { min-width: 22px; text-align: center; font: 700 14px ui-monospace, monospace; }
+#sandbox .fundos label { margin-right: 10px; }
+#sandbox .teclas { color: var(--fraco); font-size: 12px; margin-top: 10px; }
+#sandbox .teclas kbd { color: var(--texto); border: 1px solid #2c3446; border-radius: 3px; padding: 0 4px; font: 11px ui-monospace, monospace; }
+
+/* O PAINEL DE MEDIDAS (durante o jogo) */
+#sandbox-medidas {
+  position: fixed; bottom: 8px; right: 8px; z-index: 9; background: rgba(8, 10, 16, 0.86); color: #d8deea;
+  border: 1px solid #2c3446; border-radius: 6px; padding: 8px 10px; font: 12px/1.45 ui-monospace, monospace; min-width: 260px;
+  max-width: 340px;
+}
+#sandbox-medidas[hidden] { display: none; }
+#sandbox-medidas b { color: #ffb040; font-weight: 700; }
+#sandbox-medidas .fraco { color: #8a93a6; }
+#sandbox-medidas button {
+  margin-top: 6px; background: #1d2333; color: #d8deea; border: 1px solid #2c3446; border-radius: 4px; padding: 3px 8px; font: inherit; cursor: pointer;
+}

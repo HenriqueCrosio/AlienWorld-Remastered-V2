@@ -506,6 +506,8 @@ export class MenuScene extends Phaser.Scene {
 
     if (import.meta.env.DEV) {
       kb.on('keydown-B', () => this.scene.start('Game', { handling: 'diegetico', practice: true }));
+      // O SANDBOX de dev (`src/sandbox/`): monte a build, os inimigos e o fundo, e jogue.
+      kb.on('keydown-X', () => this.game.events.emit('sandbox:montagem'));
       kb.on('keydown-V', () => this.scene.start('Game', { stage: 2, handling: 'diegetico' }));
       kb.on('keydown-C', () =>
         this.scene.start('Game', { stage: 2, handling: 'diegetico', practice: true }),

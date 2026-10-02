@@ -60,7 +60,7 @@ export class CartasEmJogo {
       h,
       tem: (id) => tem(this.reg, id),
       quantas: (id) => quantas(this.reg, id),
-      ferir: (e, dano) => this.ferir(e, dano),
+      ferir: (e, dano, fonte) => this.ferir(e, dano, fonte),
       incendiar: (e) => this.incendiar(e),
       noRaio: (x, y, raio) =>
         h.inimigos().filter((e) => e.active && Phaser.Math.Distance.Between(x, y, e.x, e.y) <= raio),
@@ -176,7 +176,7 @@ export class CartasEmJogo {
 
   tick(time: number, dt: number, elapsed: number, livre: boolean, body: Phaser.Physics.Arcade.Body): void {
     const t = MESA_NO_TEMPO[this.h.fase];
-    if (t !== undefined && elapsed >= t) this.abrirMesa('meio', 'SUPRIMENTO ENCONTRADO');
+    if (t !== undefined && elapsed >= t && !this.h.semMesas) this.abrirMesa('meio', 'SUPRIMENTO ENCONTRADO');
 
     // O CASCO: volta sozinho depois da recarga.
     if (tem(this.reg, 'DEF_001') && !this.cascoPronto && time >= this.cascoVoltaEm) {
@@ -204,7 +204,7 @@ export class CartasEmJogo {
           continue;
         }
         this.h.fx.hit(e.x + Phaser.Math.Between(-4, 4), e.y + Phaser.Math.Between(-4, 4));
-        this.ferir(e, 1);
+        this.ferir(e, 1, 'queima');
       }
     }
 
@@ -241,13 +241,14 @@ export class CartasEmJogo {
     const queimando = ((e.getData('queimaAte') as number | undefined) ?? 0) > this.h.scene.time.now;
     if (queimando && tem(this.reg, 'EFF_006')) this.explosao.explodir('combustao', e.x, e.y, null, e);
     this.eletrico.aoMorrer(e);
-    if (e.getData('kind') === 'aranha') {
+    if (e.getData('kind') === 'aranha' && !this.h.semMesas) {
       this.h.scene.time.delayedCall(250, () => this.abrirMesa('aranha', 'DESTROÇOS DA ARANHA', { garante: 'incomum' }));
     }
   }
 
   /** O golfinho (o guardião da F4) morreu. */
   aoMorrerGuardiao(): void {
+    if (this.h.semMesas) return;
     this.h.scene.time.delayedCall(400, () => this.abrirMesa('guardiao', 'O NÚCLEO DO GUARDIÃO', { garante: 'rara' }));
   }
 
@@ -274,9 +275,11 @@ export class CartasEmJogo {
     e.setTint(COR_QUEIMANDO);
   }
 
-  private ferir(e: Inimigo, dano: number): void {
+  private ferir(e: Inimigo, dano: number, fonte: string): void {
     if (!e.active) return;
-    const hp = (e.getData('hp') as number) - dano;
+    const antes = e.getData('hp') as number;
+    const hp = antes - dano;
+    this.h.medir?.(fonte, Math.min(dano, Math.max(0, antes)));
     e.setData('hp', hp);
     if (hp <= 0) this.h.matar(e);
   }

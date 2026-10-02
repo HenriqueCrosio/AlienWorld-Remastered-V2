@@ -25,6 +25,10 @@ export interface HostCartas {
   linhagem: Linhagem;
   ganharVida: () => void;
   ganharBomba: () => void;
+  /** O SANDBOX: sem as mesas automáticas (meio da fase, aranha, guardião) — a build é a da montagem. */
+  semMesas?: boolean;
+  /** As MEDIDAS do sandbox: o dano efetivo e de onde veio. */
+  medir?: (fonte: string, dano: number) => void;
 }
 
 /** O que cada subsistema de `systems/cartas/` recebe de `CartasEmJogo`. */
@@ -32,8 +36,8 @@ export interface Contexto {
   h: HostCartas;
   tem: (id: string) => boolean;
   quantas: (id: string) => number;
-  /** Tira vida; zerou, mata pelo caminho único da cena (`matarInimigo`). */
-  ferir: (e: Inimigo, dano: number) => void;
+  /** Tira vida; zerou, mata pelo caminho único da cena (`matarInimigo`). `fonte` é para as medidas do sandbox. */
+  ferir: (e: Inimigo, dano: number, fonte: string) => void;
   incendiar: (e: Inimigo) => void;
   /** Os inimigos VIVOS a até `raio` px de (x, y) — uma cópia, pode matar no meio do laço. */
   noRaio: (x: number, y: number, raio: number) => Inimigo[];
