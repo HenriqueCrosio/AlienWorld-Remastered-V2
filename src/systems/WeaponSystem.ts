@@ -64,6 +64,29 @@ export interface HomingDef {
   range: number;
 }
 
+/**
+ * QUEM soltou o projétil, quando não foi o gatilho da nave (o catálogo de cartas, 01/10). `null` = tiro da nave.
+ * A cena lê no acerto: o tiro da nave dispara os efeitos de carta (Explosivo, Incendiário, Elétrico); o míssil e o
+ * flare explodem; o tiro do drone e o estilhaço só fazem o dano — o estilhaço NÃO explode de novo (sem recursão).
+ */
+export type OrigemProjetil = 'missil' | 'flare' | 'drone' | 'estilhaco';
+
+/** Um projétil de CARTA. Sai do MESMO pool da nave: acerta inimigo, chefão, golfinho e rocha pelos overlaps de sempre. */
+export interface ProjetilExtra {
+  x: number;
+  y: number;
+  /** Graus; 0 = para a direita. */
+  angulo: number;
+  textura: string;
+  velocidade: number;
+  dano: number;
+  origem: OrigemProjetil;
+  /** Alcance em px; ausente = infinito. */
+  alcance?: number | null;
+  homing?: HomingDef;
+  tint?: number;
+}
+
 export interface WeaponDef {
   id: string;
   name: string;
@@ -704,6 +727,8 @@ export class WeaponSystem {
       b.body!.setSize(Math.max(b.width * 0.9, 3) / stretch, Math.max(b.height * 0.9, 3));
 
       b.setData('damage', damage);
+      // O pool é um só: um slot que foi míssil de carta tem que voltar a ser tiro da NAVE.
+      b.setData('origem', null);
       // Perfurante: o projétil não morre no inimigo, mas fere cada um só 1× — o Set guarda quem
       // já pagou. Setado a CADA disparo (o pool é compartilhado; um slot que foi perfurante não
       // pode continuar atravessando quando virar bala de pulse).
@@ -777,6 +802,44 @@ export class WeaponSystem {
         b.setAlpha(0.75 + 0.25 * Math.sin(t * 0.02 + (b.getData('ox') as number)));
       }
     }
+  }
+
+  /**
+   * Um projétil de CARTA (míssil, flare, tiro do drone, estilhaço). Não passa por cadência, munição nem calor: quem
+   * decide quando sai é a carta. Tudo o que o `shoot()` seta por disparo é setado aqui também — o pool é um só.
+   */
+  disparar(p: ProjetilExtra): Phaser.Physics.Arcade.Sprite | null {
+    const b = this.bullets.get(p.x, p.y) as Phaser.Physics.Arcade.Sprite | null;
+    if (!b) {
+      if (import.meta.env.DEV) console.warn('[armas] pool cheio, projétil de carta descartado');
+      return null;
+    }
+    b.setActive(true).setVisible(true);
+    b.body!.enable = true;
+    b.anims.stop();
+    b.setTexture(p.textura);
+    b.setScale(1);
+    if (p.tint !== undefined) b.setTint(p.tint);
+    else b.clearTint();
+    b.setBlendMode(Phaser.BlendModes.NORMAL);
+    b.setAlpha(1);
+    b.setData('glow', false);
+    b.setData('glowKind', null);
+    // O piso de 3px do traçante vale aqui: o tiro do drone é 6×1 e atravessaria inimigo sem tocar.
+    b.body!.setSize(Math.max(b.width, 3), Math.max(b.height, 3));
+    b.setData('damage', p.dano);
+    b.setData('pierce', false);
+    b.setData('hits', null);
+    b.setData('ox', p.x);
+    b.setData('oy', p.y);
+    b.setData('range', p.alcance ?? null);
+    b.setData('homing', p.homing);
+    b.setData('speed', p.velocidade);
+    b.setData('origem', p.origem);
+    const rad = Phaser.Math.DegToRad(p.angulo);
+    b.setVelocity(Math.cos(rad) * p.velocidade, Math.sin(rad) * p.velocidade);
+    b.setRotation(rad);
+    return b;
   }
 
   /** Devolve ao pool em vez de destruir. */

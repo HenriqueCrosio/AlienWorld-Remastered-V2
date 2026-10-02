@@ -10,7 +10,7 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIL_DA_PINTURA, type ChavePintura } from '../systems/atmosfera/perfis';
 import { Moldura } from '../systems/Moldura';
-import { WeaponSystem } from '../systems/WeaponSystem';
+import { WeaponSystem, type OrigemProjetil } from '../systems/WeaponSystem';
 import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
 import { PickupSystem } from '../systems/PickupSystem';
 import { TerrainSystem, GROUND_Y, type PropKind } from '../systems/TerrainSystem';
@@ -416,11 +416,14 @@ export class GameScene extends Phaser.Scene {
       fx: this.fx,
       weapons: this.weapons,
       inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],
+      tirosInimigos: () => this.enemies.enemyBullets.getChildren() as Phaser.Physics.Arcade.Sprite[],
       nave: () => this.ship,
       matar: (e) => this.matarInimigo(e),
       baseDaNave: nave.weapon,
       fase: this.stage.id,
+      linhagem: this.shipId === 'alienigena' ? 'alien' : 'humana',
       ganharVida: () => this.lives++,
+      ganharBomba: () => this.bombs++,
     });
     this.pecas = new PecasEmJogo({
       scene: this,
@@ -1592,9 +1595,11 @@ export class GameScene extends Phaser.Scene {
     // No aviso ele é intocável: a bala ATRAVESSA (não é devolvida ao pool).
     if (!bullet.active || !g || !g.vulneravel) return;
 
+    const origem = bullet.getData('origem') as OrigemProjetil | null;
     this.weapons.release(bullet);
     // A fagulha sai mesmo no PISO: o jogador vê que acertou, e só a barra para.
     this.fx.hit(bullet.x, bullet.y);
+    this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
     if (g.damage(bullet.getData('damage') as number)) this.matarGolfinho();
   }
 
@@ -1664,8 +1669,10 @@ export class GameScene extends Phaser.Scene {
     if (!this.weapons.bullets.contains(bullet)) return;
     if (!bullet.active || !this.boss || this.boss.isDead) return;
 
+    const origem = bullet.getData('origem') as OrigemProjetil | null;
     this.weapons.release(bullet);
     this.fx.hit(bullet.x, bullet.y);
+    this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
 
     if (this.boss.damage(bullet.getData('damage') as number)) this.killBoss();
   }
@@ -2112,6 +2119,9 @@ export class GameScene extends Phaser.Scene {
     enemy: Phaser.Physics.Arcade.Sprite,
   ): void {
     if (!bullet.active || !enemy.active) return;
+    // Quem soltou e para onde ia: lido ANTES de o projétil voltar ao pool.
+    const origem = bullet.getData('origem') as OrigemProjetil | null;
+    const angulo = bullet.rotation;
 
     // PERFURANTE: o projétil segue vivo, mas cada inimigo paga só 1× por projétil — sem o Set,
     // o overlap cobraria o mesmo inimigo todo frame e o dano 2 viraria dano infinito.
@@ -2135,12 +2145,12 @@ export class GameScene extends Phaser.Scene {
       this.time.delayedCall(40, () => {
         if (enemy.active) enemy.setTint(enemy.getData('tint') as number);
       });
-      this.cartas.aoAcertar(bx, by, enemy);
+      this.cartas.aoAcertar(bx, by, enemy, origem, angulo);
       return;
     }
 
     this.matarInimigo(enemy);
-    this.cartas.aoAcertar(bx, by, enemy);
+    this.cartas.aoAcertar(bx, by, enemy, origem, angulo);
   }
 
   /**

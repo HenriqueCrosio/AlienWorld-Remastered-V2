@@ -1,40 +1,41 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config';
-import type { Fx } from './Fx';
-import type { WeaponSystem } from './WeaponSystem';
+import type { OrigemProjetil } from './WeaponSystem';
 import { CARTAS, adicionar, montarArma, quantas, sortear, tem, type Mesa } from '../cartas';
+import type { Contexto, HostCartas, Inimigo } from './cartas/contexto';
+import { ExplosaoDoJogador } from './cartas/ExplosaoDoJogador';
+import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
+
+export type { HostCartas } from './cartas/contexto';
 
 /**
- * AS CARTAS DENTRO DA FASE — PROTÓTIPO (feat/cartas-preview, 27/09).
+ * AS CARTAS DENTRO DA FASE (feat/cartas-preview; o catálogo de 24 é de 01/10 — spec `2026-10-01-catalogo-cartas`).
  *
- * A `GameScene` só chama os GANCHOS (acerto, morte, dano, tick); tudo o que as cartas fazem em jogo mora aqui:
+ * A `GameScene` só chama os GANCHOS (acerto, morte, dano, tick); tudo o que as cartas fazem em jogo mora aqui e nos
+ * subsistemas de `systems/cartas/`, que recebem um `Contexto` comum:
  * - as MESAS no meio da fase (quando abrir, pausar a fase, aplicar a escolha);
- * - EXPLOSIVO, INCENDIÁRIO e COMBUSTÃO (no acerto e na morte do inimigo);
+ * - a EXPLOSÃO ÚNICA (`ExplosaoDoJogador`): Explosivo, Combustão, Casco Reativo, Flare e Míssil chamam a mesma;
+ * - INCENDIÁRIO (no acerto) e a queima;
  * - o CASCO, a RECARGA e o CASCO REATIVO (no dano à nave);
  * - os PROPULSORES (no teto de velocidade do voo livre).
  *
- * As cartas de ARMAMENTO não passam por aqui depois de escolhidas: elas viram a `WeaponDef` montada
- * (`montarArma`), e a arma não sabe que existe carta.
+ * As cartas de ARMAMENTO de número (Duplo, Triplo, Cadência, Perfurante, Pesado) não passam por aqui depois de
+ * escolhidas: viram a `WeaponDef` montada (`montarArma`), e a arma não sabe que existe carta. Míssil e Drone, que são
+ * lançadores PRÓPRIOS, passam — e não copiam Duplo, Triplo nem Cadência da nave (spec §4.3).
  */
-export interface HostCartas {
-  scene: Phaser.Scene;
-  fx: Fx;
-  weapons: WeaponSystem;
-  inimigos: () => Phaser.Physics.Arcade.Sprite[];
-  nave: () => Phaser.Physics.Arcade.Sprite;
-  matar: (e: Phaser.Physics.Arcade.Sprite) => void;
-  baseDaNave: string;
-  fase: number;
-  ganharVida: () => void;
-}
 
 /** Onde cada fase abre a mesa do MEIO (segundos do roteiro): o silêncio antes do chefão. */
 const MESA_NO_TEMPO: Record<number, number> = { 1: 63, 2: 70 };
 
-const CASCO_RECARGA = [8, 5.5, 3.5];
+/** Segundos até o Casco voltar: sem Recarga · com Recarga (máx. 1 — com 2 chegava a 3,5s, quase invulnerável; §4.4). */
+const CASCO_RECARGA = [8, 5.5];
 const VELOCIDADE_LIVRE = 110;
+const QUEIMA_MS = 2000;
+const COR_QUEIMANDO = 0xff9a50;
 
 export class CartasEmJogo {
+  readonly explosao: ExplosaoDoJogador;
+  private readonly c: Contexto;
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
   private cascoVoltaEm = 0;
@@ -44,6 +45,20 @@ export class CartasEmJogo {
   // nas de 44px ela sumia atrás do casco e só o arco de cima aparecia, sobre a barbatana — lia como um "feixe de luz"
   // saindo da nave. O estado mora na HUD (`cascoAtivo`) e a nave pisca ciano quando ele volta.
   constructor(private readonly h: HostCartas) {
+    criarTexturasProvisorias(h.scene);
+    this.c = {
+      h,
+      tem: (id) => tem(this.reg, id),
+      quantas: (id) => quantas(this.reg, id),
+      ferir: (e, dano) => this.ferir(e, dano),
+      incendiar: (e) => this.incendiar(e),
+      noRaio: (x, y, raio) =>
+        h.inimigos().filter((e) => e.active && Phaser.Math.Distance.Between(x, y, e.x, e.y) <= raio),
+      depois: (fn) => {
+        h.scene.time.delayedCall(0, fn);
+      },
+    };
+    this.explosao = new ExplosaoDoJogador(this.c);
     this.cascoPronto = tem(this.reg, 'DEF_001');
   }
 
@@ -145,29 +160,31 @@ export class CartasEmJogo {
     }
   }
 
-  /** O projétil acertou um inimigo (depois do dano normal). */
-  aoAcertar(x: number, y: number, alvo: Phaser.Physics.Arcade.Sprite): void {
-    if (tem(this.reg, 'EFF_004') && alvo.active && Math.random() < 0.25) {
-      alvo.setData('queimaAte', this.h.scene.time.now + 2000);
-      alvo.setTint(0xff9a50);
+  /**
+   * Um projétil acertou um inimigo (depois do dano normal). `origem` diz quem soltou (`null` = o gatilho da nave) e
+   * `angulo` (rad) é o rumo do projétil — a explosão do tiro é direcional (§5.1c).
+   */
+  aoAcertar(x: number, y: number, alvo: Inimigo, origem: OrigemProjetil | null, angulo: number): void {
+    if (origem === 'missil' || origem === 'flare') {
+      this.explosao.explodir(origem, x, y, null, alvo);
+      return;
     }
-    if (tem(this.reg, 'EFF_001')) {
-      this.h.fx.explode(x, y, 0.45);
-      // Adiado um quadro, pelo mesmo motivo da Combustão (ver `aoMorrer`).
-      this.h.scene.time.delayedCall(0, () => this.emArea(x, y, 18, 1, alvo));
-    }
+    // O tiro do drone e o estilhaço só fazem o dano deles (o drone não copia as cartas da nave; o estilhaço não
+    // explode de novo).
+    if (origem) return;
+    if (tem(this.reg, 'EFF_004') && alvo.active && Math.random() < 0.25) this.incendiar(alvo);
+    if (tem(this.reg, 'EFF_001')) this.explosao.explodir('explosivo', x, y, Phaser.Math.RadToDeg(angulo), alvo);
+  }
+
+  /** Um projétil de carta acertou o CHEFÃO ou o golfinho: o míssil e o flare explodem ali também. */
+  aoAcertarChefe(x: number, y: number, origem: OrigemProjetil | null): void {
+    if (origem === 'missil' || origem === 'flare') this.explosao.explodir(origem, x, y, null, null);
   }
 
   /** Um inimigo morreu. */
-  aoMorrer(e: Phaser.Physics.Arcade.Sprite): void {
+  aoMorrer(e: Inimigo): void {
     const queimando = ((e.getData('queimaAte') as number | undefined) ?? 0) > this.h.scene.time.now;
-    if (queimando && tem(this.reg, 'EFF_006')) {
-      this.h.fx.explode(e.x, e.y, 0.9);
-      // Adiado um quadro: a morte acontece DENTRO do laço de colisão, e matar vizinhos ali mexe no grupo que o
-      // Arcade ainda está percorrendo.
-      const { x, y } = e;
-      this.h.scene.time.delayedCall(0, () => this.emArea(x, y, 26, 2, null));
-    }
+    if (queimando && tem(this.reg, 'EFF_006')) this.explosao.explodir('combustao', e.x, e.y, null, e);
     if (e.getData('kind') === 'aranha') {
       this.h.scene.time.delayedCall(250, () => this.abrirMesa('aranha', 'DESTROÇOS DA ARANHA', { garante: 'incomum' }));
     }
@@ -184,29 +201,23 @@ export class CartasEmJogo {
   absorver(time: number): boolean {
     if (!this.cascoPronto) return false;
     this.cascoPronto = false;
-    this.cascoVoltaEm = time + CASCO_RECARGA[Math.min(quantas(this.reg, 'DEF_002'), 2)] * 1000;
+    this.cascoVoltaEm = time + CASCO_RECARGA[Math.min(quantas(this.reg, 'DEF_002'), 1)] * 1000;
     const n = this.h.nave();
     this.h.fx.hit(n.x, n.y);
     this.h.scene.cameras.main.flash(70, 62, 224, 240);
-    if (tem(this.reg, 'DEF_004')) {
-      this.h.fx.explode(n.x, n.y, 1.2);
-      const { x, y } = n;
-      this.h.scene.time.delayedCall(0, () => this.emArea(x, y, 40, 3, null));
-    }
+    if (tem(this.reg, 'DEF_004')) this.explosao.explodir('reativo', n.x, n.y, null, null);
     return true;
   }
 
-  // ─── ÁREA ─────────────────────────────────────────────────────────────────────────────────────
+  // ─── O DANO DAS CARTAS ────────────────────────────────────────────────────────────────────────
 
-  private emArea(x: number, y: number, r: number, dano: number, exceto: Phaser.GameObjects.GameObject | null): void {
-    for (const e of this.h.inimigos()) {
-      if (!e.active || e === exceto) continue;
-      if (Phaser.Math.Distance.Between(x, y, e.x, e.y) > r) continue;
-      this.ferir(e, dano);
-    }
+  private incendiar(e: Inimigo): void {
+    if (!e.active) return;
+    e.setData('queimaAte', this.h.scene.time.now + QUEIMA_MS);
+    e.setTint(COR_QUEIMANDO);
   }
 
-  private ferir(e: Phaser.Physics.Arcade.Sprite, dano: number): void {
+  private ferir(e: Inimigo, dano: number): void {
     if (!e.active) return;
     const hp = (e.getData('hp') as number) - dano;
     e.setData('hp', hp);
