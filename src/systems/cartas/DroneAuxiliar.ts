@@ -9,6 +9,8 @@ const DRONE = {
   mola: 6,
   raioDesvio: 24,
   forcaDesvio: 400,
+  /** Abaixo disto (px/s) o inimigo conta como PARADO: sem rumo para desviar de lado, ele empurra para longe. */
+  rumoMinimo: 10,
   /** Passou disto da nave, o desvio desliga e a mola traz de volta. */
   longe: 60,
   esperaS: 1.2,
@@ -48,8 +50,9 @@ export class DroneAuxiliar {
         const dist = Math.hypot(d.x - o.x, d.y - o.y);
         if (dist === 0 || dist >= DRONE.raioDesvio) continue;
         const f = ((DRONE.raioDesvio - dist) / DRONE.raioDesvio) * DRONE.forcaDesvio;
-        vx += ((d.x - o.x) / dist) * f;
-        vy += ((d.y - o.y) / dist) * f;
+        const [ex, ey] = this.saida(d, o, dist);
+        vx += ex * f;
+        vy += ey * f;
       }
     }
     d.setPosition(d.x + vx * dt, d.y + vy * dt);
@@ -71,6 +74,26 @@ export class DroneAuxiliar {
       homing: DRONE.homing,
       tint: COR_TIRO[this.c.h.linhagem],
     });
+  }
+
+  /**
+   * Para ONDE o drone sai da frente de `o` (vetor unitário). ⚠️ NÃO É "PARA LONGE" (02/10, ele): os inimigos andam em
+   * linha reta, e fugir para longe de quem vem da direita EMPURRA O DRONE PARA TRÁS, até ele se afastar demais da nave.
+   * Quem ANDA é desviado de LADO — perpendicular ao rumo dele, para o lado da trajetória em que o drone já está: um
+   * passo para o lado, o inimigo passa, a mola traz de volta. Só quem está PARADO (sem rumo) empurra para longe.
+   */
+  private saida(d: Phaser.GameObjects.Image, o: Phaser.Physics.Arcade.Sprite, dist: number): [number, number] {
+    const v = (o.body as Phaser.Physics.Arcade.Body | null)?.velocity;
+    const vel = v ? Math.hypot(v.x, v.y) : 0;
+    if (!v || vel < DRONE.rumoMinimo) return [(d.x - o.x) / dist, (d.y - o.y) / dist];
+    // A perpendicular ao rumo, virada para o lado em que o drone está (no empate exato, para cima).
+    let px = -v.y / vel;
+    let py = v.x / vel;
+    if ((d.x - o.x) * px + (d.y - o.y) * py < 0 || ((d.x - o.x) * px + (d.y - o.y) * py === 0 && py > 0)) {
+      px = -px;
+      py = -py;
+    }
+    return [px, py];
   }
 
   private maisProximo(x: number, y: number): Inimigo | null {

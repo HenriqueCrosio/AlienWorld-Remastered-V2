@@ -261,6 +261,30 @@ const desvio = await page.evaluate(async () => {
 });
 conferir(desvio > 14, 'o drone se afasta de um inimigo encostado', desvio);
 
+// Inimigo vindo em LINHA RETA na direção do drone: ele sai da FRENTE (para o lado da trajetória), não recua.
+const lateral = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  s.enemies.enemies.clear(true, true);
+  await t.dormir(500);
+  const d = s.cartas.drone.sprite;
+  const x0 = d.x;
+  const y0 = d.y;
+  const e = t.alvo('drone', d.x + 70, d.y + 2, 99);
+  e.body.setVelocity(-90, 0);
+  let maxDx = 0;
+  let maxDy = 0;
+  let menor = 999;
+  for (let i = 0; i < 40; i++) {
+    maxDx = Math.max(maxDx, Math.abs(d.x - x0));
+    maxDy = Math.max(maxDy, Math.abs(d.y - y0));
+    menor = Math.min(menor, Math.hypot(d.x - e.x, d.y - e.y));
+    await t.dormir(30);
+  }
+  return { maxDx: Math.round(maxDx), maxDy: Math.round(maxDy), menor: Math.round(menor) };
+});
+conferir(lateral.maxDy > lateral.maxDx && lateral.maxDy >= 8, 'com o inimigo vindo reto, o drone desvia para o lado, não para trás', lateral);
+
 // ─── FIM ───
 
 conferir(erros.length === 0, 'nenhum erro no console', erros);
