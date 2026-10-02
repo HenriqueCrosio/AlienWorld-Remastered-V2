@@ -30,6 +30,8 @@ const CENARIOS = {
   dronealien: { nome: 'DRONE — nave alien: tiro ciano', cartas: ['WPN_010'], atira: false, alvos: 'drone', nave: 'alienigena', clip: { x: 20, y: 46, w: 250, h: 116 } },
   eletrico: { nome: 'ELÉTRICO + ARCO EM CADEIA + SOBRECARGA — o raio salta, o pulso fere', cartas: ['EFF_011', 'EFF_012', 'EFF_013'], atira: true, alvos: 'cacho4' },
   eletricotrava: { nome: 'ELÉTRICO — a canhoneira eletrificada para e não atira', cartas: ['EFF_011'], atira: true, alvos: 'canhoneiras' },
+  casco: { nome: 'CASCO — a aura pulsa; no golpe, estoura e some (nave humana)', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
+  cascoalien: { nome: 'CASCO — nave alien', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', nave: 'alienigena', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
@@ -75,7 +77,9 @@ async function gravar(cen, modo) {
     s.director.update = () => [];
     s.enemies.enemies.clear(true, true);
     // Nave intocável SEM i-frames: com eles ela pisca (60ms), e o GIF a pegaria some-aparece.
+    s.__golpe = s.damageShip.bind(s);
     s.damageShip = () => {};
+    s.invulnerableUntil = 0;
     for (const id of cartas) s.cartas.aplicar(id);
     s.cartas.explosao.arte = modo;
     // O míssil só sai quando o GIF manda (`forcar`); o flare já é só do jogador.
@@ -96,6 +100,7 @@ async function gravar(cen, modo) {
       cruzando: [[250, -20, 2]],
       // dois parados à frente e um que PASSA rente ao drone (ele desvia)
       drone: [[175, -40, 3], [195, 35, 3], [190, -12, 99, 'drone', -70, 0]],
+      nenhum: [],
       // ATRÁS da nave: o flare é armadilha para quem persegue
       atras: [[x0 - 30, 0, 1]],
     };
@@ -141,7 +146,12 @@ async function gravar(cen, modo) {
       await page.evaluate((qual) => {
         const l = window.__game.scene.getScene('Game').cartas.lancadores;
         const agora = window.__game.scene.getScene('Game').time.now;
-        if (qual === 'missil') l.proximoMissil = agora;
+        if (qual === 'golpe') {
+          // Um golpe de verdade (o caminho do dano da cena), para o Casco absorver.
+          const s = window.__game.scene.getScene('Game');
+          s.invulnerableUntil = 0;
+          s.__golpe();
+        } else if (qual === 'missil') l.proximoMissil = agora;
         // O flare é do JOGADOR: o GIF "aperta a tecla" (e ignora a espera, para caber no GIF).
         else {
           l.flarePronto = 0;

@@ -7,6 +7,7 @@ import { ExplosaoDoJogador } from './cartas/ExplosaoDoJogador';
 import { Lancadores } from './cartas/Lancadores';
 import { DroneAuxiliar } from './cartas/DroneAuxiliar';
 import { Eletrico } from './cartas/Eletrico';
+import { AuraDoCasco } from './cartas/AuraDoCasco';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 
 export type { HostCartas } from './cartas/contexto';
@@ -42,15 +43,15 @@ export class CartasEmJogo {
   readonly lancadores: Lancadores;
   readonly drone: DroneAuxiliar;
   readonly eletrico: Eletrico;
+  readonly aura: AuraDoCasco;
   private readonly c: Contexto;
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
   private cascoVoltaEm = 0;
   private queimaTick = 0;
 
-  // ⚠️ O CASCO NÃO TEM DESENHO EM VOLTA DA NAVE (28/09). Era uma elipse ciano de 30px, do tamanho das naves antigas:
-  // nas de 44px ela sumia atrás do casco e só o arco de cima aparecia, sobre a barbatana — lia como um "feixe de luz"
-  // saindo da nave. O estado mora na HUD (`cascoAtivo`) e a nave pisca ciano quando ele volta.
+  // O CASCO tem AURA de novo (01/10, spec §4.3b): não a elipse de 28/09 (que lia como "feixe de luz"), e sim o
+  // contorno de 1px da silhueta da nave — ver `AuraDoCasco`. A HUD continua dizendo "CASCO".
   constructor(private readonly h: HostCartas) {
     criarTexturasProvisorias(h.scene);
     this.c = {
@@ -70,6 +71,8 @@ export class CartasEmJogo {
     this.drone = new DroneAuxiliar(this.c);
     this.eletrico = new Eletrico(this.c);
     this.cascoPronto = tem(this.reg, 'DEF_001');
+    this.aura = new AuraDoCasco(this.c);
+    if (this.cascoPronto) this.aura.mostrar();
   }
 
   /** O Casco está pronto para absorver o próximo golpe? (a HUD mostra) */
@@ -111,6 +114,11 @@ export class CartasEmJogo {
     return quantas(this.reg, 'DEF_003');
   }
 
+  /** Bombas a mais por vida (Bomba Extra, máx. 2) — somam às 3 de cada vida (§4.4). */
+  bombasExtras(): number {
+    return quantas(this.reg, 'DEF_005');
+  }
+
   // ─── A MESA ───────────────────────────────────────────────────────────────────────────────────
 
   /**
@@ -145,8 +153,10 @@ export class CartasEmJogo {
     if (id === 'DEF_003') this.h.ganharVida();
     if (id === 'DEF_001') {
       this.cascoPronto = true;
+      this.aura.mostrar();
       this.piscarCasco();
     }
+    if (id === 'DEF_005') this.h.ganharBomba();
   }
 
   // ─── GANCHOS ──────────────────────────────────────────────────────────────────────────────────
@@ -158,6 +168,7 @@ export class CartasEmJogo {
     // O CASCO: volta sozinho depois da recarga.
     if (tem(this.reg, 'DEF_001') && !this.cascoPronto && time >= this.cascoVoltaEm) {
       this.cascoPronto = true;
+      this.aura.mostrar();
       this.piscarCasco();
     }
 
@@ -185,6 +196,7 @@ export class CartasEmJogo {
     this.lancadores.tick(dt);
     this.drone.tick(dt);
     this.eletrico.tick();
+    this.aura.tick(time);
   }
 
   /**
@@ -230,6 +242,7 @@ export class CartasEmJogo {
   absorver(time: number): boolean {
     if (!this.cascoPronto) return false;
     this.cascoPronto = false;
+    this.aura.quebrar();
     this.cascoVoltaEm = time + CASCO_RECARGA[Math.min(quantas(this.reg, 'DEF_002'), 1)] * 1000;
     const n = this.h.nave();
     this.h.fx.hit(n.x, n.y);

@@ -340,6 +340,39 @@ const aranha = await page.evaluate(() => {
 });
 conferir(!aranha.travado && aranha.eletrificado, 'a minichefe leva o choque mas não trava', aranha);
 
+// ── BOMBA EXTRA (DEF_005 ×2): 3 + 2 na hora, e de novo a cada vida ──
+await fase(['DEF_005', 'DEF_005']);
+const bombas = await page.evaluate(() => {
+  const s = window.__teste.cena();
+  const agora = s.bombs;
+  s.bombs = 0;
+  s.invulnerableUntil = 0;
+  s.damageShip();
+  return { agora, naVidaNova: s.bombs };
+});
+conferir(bombas.agora === 5 && bombas.naVidaNova === 5, 'Bomba Extra ×2: 5 bombas, e 5 de novo na vida nova', bombas);
+
+// ── A AURA DO CASCO (§4.3b) ──
+await fase(['DEF_001']);
+// Sem os i-frames: com eles a nave PISCA, e a aura (que pisca junto, de propósito) seria lida apagada.
+await page.evaluate(() => {
+  window.__teste.cena().invulnerableUntil = 0;
+});
+await page.waitForTimeout(300);
+const naveCasco = await page.evaluate(() => ({ x: window.__teste.cena().ship.x, y: window.__teste.cena().ship.y }));
+await foto('aura-do-casco', naveCasco.x, naveCasco.y, 70, 40);
+const aura = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const antes = s.cartas.aura.visivel && s.cartas.aura.img.visible;
+  const vidas = s.lives;
+  s.invulnerableUntil = 0;
+  s.damageShip();
+  await t.dormir(100);
+  return { antes, depois: s.cartas.aura.img.visible, vidas, vidasDepois: s.lives };
+});
+conferir(aura.antes && !aura.depois && aura.vidas === aura.vidasDepois, 'a aura aparece com o Casco pronto e some quando ele quebra', aura);
+
 // ─── FIM ───
 
 conferir(erros.length === 0, 'nenhum erro no console', erros);

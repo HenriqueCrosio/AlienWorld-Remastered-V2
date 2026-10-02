@@ -438,6 +438,8 @@ export class GameScene extends Phaser.Scene {
     });
     // O 1-UP da coleção completa da fase ANTERIOR vale só nesta fase (e no retry dela) — não acumula.
     this.lives = 3 + this.cartas.vidasExtras() + (temUmUp(this.registry, this.stage.id) ? 1 : 0);
+    // BOMBA EXTRA: 3 por vida (GDD §5) + as da mão.
+    this.bombs = 3 + this.cartas.bombasExtras();
     this.weapons.setBase(this.cartas.arma());
     this.ship.setCollideWorldBounds(true);
     // Hitbox menor que o sprite: perdoar é o que faz um shmup parecer justo.
@@ -2249,8 +2251,8 @@ export class GameScene extends Phaser.Scene {
     this.lives--;
     this.invulnerableUntil = this.time.now + 1400;
     this.tookDamage = true;
-    // 3 por vida (GDD §5): a vida nova vem com o estoque de bombas cheio.
-    this.bombs = 3;
+    // 3 por vida (GDD §5) + a Bomba Extra: a vida nova vem com o estoque cheio.
+    this.bombs = 3 + this.cartas.bombasExtras();
 
     // Perde a ESPECIAL ao tomar dano — o modelo Metal Slug (docs/GDD.md §5). Volta para a arma
     // da NAVE, não para a Pulse: devolver o jogador à arma de outra nave apagaria a escolha dele.
