@@ -59,7 +59,7 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 |---|---|---|---|---|---|
 | EFF_001 | EXPLOSIVO | incomum | o tiro explode ao acertar | — | 1 |
 | EFF_002 🆕 | EXPLOSÃO MAIOR | rara | toda explosão fica maior | Explosivo | 1 |
-| EFF_003 🆕 | FRAGMENTAÇÃO | rara | toda explosão solta 4–6 estilhaços em leque | Explosivo | 1 |
+| EFF_003 🆕 | FRAGMENTADO | rara | toda explosão solta 4–6 estilhaços em leque | Explosivo | 1 |
 | EFF_004 | INCENDIÁRIO | incomum | chance de incendiar | — | 1 |
 | EFF_006 | COMBUSTÃO | épica | o inimigo queimado explode ao morrer | Incendiário | 1 |
 | EFF_007 🆕 | EM CADEIA | épica | toda explosão incendeia quem está no raio | Incendiário + Combustão | 1 |
@@ -87,7 +87,7 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 
 **Distribuição:** 5 comuns · 8 incomuns · 7 raras · 4 épicas = 24. Quatro cadeias: **fogo** (Incendiário → Combustão →
 Em Cadeia), **elétrica** (Elétrico → Arco em Cadeia → Sobrecarga), **explosões** (Explosivo → Explosão Maior /
-Fragmentação), **casco** (Casco → Recarga / Casco Reativo).
+Fragmentado), **casco** (Casco → Recarga / Casco Reativo).
 
 **O fogo mata em área; o elétrico CONTROLA.** O "trava por um instante" é a resposta direta aos atiradores novos da
 frente B (eletrificou, não atira) — as builds pedem jogos diferentes, não só números diferentes.
@@ -99,10 +99,10 @@ frente B (eletrificou, não atira) — as builds pedem jogos diferentes, não s�
 Hoje cada carta explode do seu jeito (`CartasEmJogo`). Passa a haver **uma função de explosão** do jogo do jogador:
 o tiro Explosivo, a Combustão, o Casco Reativo, o Flare e o Míssil Guiado chamam a mesma. Nela se penduram:
 - **Explosão Maior** → multiplica o raio;
-- **Fragmentação** → solta os estilhaços;
+- **Fragmentado** → solta os estilhaços;
 - **Em Cadeia** → incendeia quem está no raio.
 
-Assim as cadeias se cruzam (o Míssil com Fragmentação; o Flare com Em Cadeia) sem carta nova. **Os estilhaços não
+Assim as cadeias se cruzam (o Míssil com Fragmentado; o Flare com Em Cadeia) sem carta nova. **Os estilhaços não
 fazem explosão nova** (sem recursão infinita); **Em Cadeia incendeia, não explode** — quem explode é a Combustão
 quando o queimado morre.
 
@@ -215,15 +215,38 @@ redesenho menor do PixelLab perdeu o desenho. Animações: PixMiniMax, 8 quadros
 **O drone desvia** (pedido dele): segue a nave; todo inimigo e todo tiro a ~24px o empurra para longe; passou de ~60px
 da nave, a repulsão desliga e ele volta. **Sem vida** (não morre) — o desvio é charme.
 
+### 5.1d Os 24 ícones (02/10 — FECHADO)
+
+Todos em `folhas/2026-10-01/pecas-novas/icones-finais/<ID>.png` (40×40, o Dash 39×17), conferidos dentro da carta
+real em `icones-24-finais.png`. A mesa centra cada um pela tinta, então a margem do PNG não importa.
+
+| Carta | Origem | | Carta | Origem |
+|---|---|---|---|---|
+| Tiro Duplo | #0 | | Em Cadeia | gerado do Arco #41 em fogo, #4 (desenrolado) |
+| Tiro Triplo | #0 | | Flare | #3 |
+| Cadência | #60 | | Elétrico | #0 |
+| Perfurante | #3 | | Arco em Cadeia | #41 |
+| Tiro Pesado | #13 | | Sobrecarga | #10 |
+| Míssil Guiado | #17 | | Casco | #0 |
+| Drone | #36 | | Recarga | o Casco menor com o anel centrado, #2 |
+| Explosivo | #2 | | Vida Extra | #0 |
+| Explosão Maior | #2 | | Casco Reativo | o Casco #0 + a redonda #53 com fumaça e estilhaços (código) |
+| Fragmentado | #22 | | Bomba Extra | a #24 com o "+" no canto superior direito (código) |
+| Incendiário | refeito, #21 | | Propulsores | #0 |
+| Combustão | o kamikaze do jogo em chamas, #12 | | Dash | »»» em pixel (código) |
+
+O nome **FRAGMENTADO** substitui FRAGMENTAÇÃO: o Ç e o Ã encolhiam a letra das 24 cartas (6,25 → 5,25px) e
+derrubavam o "REQUER…" abaixo do mínimo.
+
 ### 5.2 A fila (roda agora; folha antes de instalar)
 
 1. **Drones menores** (o #9 e o #60 como referência, canvas menor) e o **míssil alien**.
 2. **Explosões por skill** (1º quadro no PixelLab, depois animação): a pequena (tiro Explosivo e Míssil), a grande
-   (Explosão Maior), a de fogo (Combustão), a **onda de choque** (Casco Reativo); e o **estilhaço** (Fragmentação).
+   (Explosão Maior), a de fogo (Combustão), a **onda de choque** (Casco Reativo); e o **estilhaço** (Fragmentado).
 3. **Estados e efeitos**: inimigo **queimando**, **faísca** do acerto elétrico, inimigo **eletrificado**, **pulso** da
    Sobrecarga, **Casco quebrando** (o contorno estoura).
 4. **Tiros dos drones** (pequenos, guiados; laranja humano, ciano alien).
-5. **Os 24 ícones** (nas cores reais do objeto) — a Task 4 da mesa roda com estes IDs.
+5. **Os 24 ícones** (nas cores reais do objeto) — a Task 4 da mesa roda com estes IDs. ✅ fechados (§5.1d).
 
 Sem arte nova (código, pixel na resolução do jogo): o **raio** do Arco em Cadeia, a **aura do Casco** (contorno da
 silhueta), o **dash** (imagens-fantasma).
@@ -234,7 +257,7 @@ Regra: partir da arte aprovada; folha crua + em cena na escala real; ele escolhe
 
 1. O catálogo no código (`src/cartas.ts`: entram 11, saem nenhuma das 13, Recarga máx. 1) + o **sistema único de
    explosão** + o **estado eletrificado**.
-2. As mecânicas novas com **arte provisória** (formas simples) — ele joga e sente: Míssil, Drone, Flare, Fragmentação,
+2. As mecânicas novas com **arte provisória** (formas simples) — ele joga e sente: Míssil, Drone, Flare, Fragmentado,
    Em Cadeia, Explosão Maior, Bomba Extra, Dash, Elétrico, Arco em Cadeia, Sobrecarga, a aura do Casco.
 3. A arte aprovada entra no lugar da provisória; os 24 ícones (Task 4 da mesa).
 
@@ -248,6 +271,6 @@ Regra: partir da arte aprovada; folha crua + em cena na escala real; ele escolhe
 - `probe-cartas` e `probe-mesa-texto` continuam passando — a mesa agora com **24** cartas (o tamanho único da letra é
   recalculado com os nomes novos; nenhum passa de 14 letras).
 - Uma sonda nova por mecânica (`probe-cartas-novas`): cada carta aplicada faz o que diz (o míssil persegue e explode; o
-  flare explode sozinho; o dash atravessa um tiro sem dano; a Fragmentação solta estilhaços; a Bomba Extra soma; o
+  flare explode sozinho; o dash atravessa um tiro sem dano; a Fragmentado solta estilhaços; a Bomba Extra soma; o
   eletrificado não atira enquanto trava; o arco salta para no máximo 3 e não recursa; o pulso da Sobrecarga não
   eletrifica; chefão não trava; a aura aparece com o Casco pronto e some quando ele quebra).

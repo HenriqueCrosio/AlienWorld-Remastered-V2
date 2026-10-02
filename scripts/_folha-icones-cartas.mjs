@@ -40,7 +40,9 @@ const uri = (f) => `data:image/png;base64,${fs.readFileSync(f).toString('base64'
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const fotos = {}; // id → [buf, buf, buf]
-for (let v = 0; v < 3; v++) {
+// Variants per card: 3, or — when every list in the JSON has ONE file — 1 (the final sheet: 6 cards per row).
+const V = CONFIG ? Math.max(...Object.values(CONFIG).map((l) => l.length)) : 3;
+for (let v = 0; v < V; v++) {
   const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
   page.on('pageerror', (e) => console.log('[pageerror]', e.message));
   page.on('console', (m) => m.type() === 'error' && console.log('[console]', m.text()));
@@ -98,17 +100,19 @@ await browser.close();
 // THE SHEET: 2 cards per row, each with its 3 candidates in the real card.
 const texto = (s, w, size = 18, cor = '#ffb040') => Buffer.from(`<svg width="${w}" height="${size + 10}" xmlns="http://www.w3.org/2000/svg"><text x="0" y="${size}" font-family="Consolas, monospace" font-size="${size}" fill="${cor}">${s}</text></svg>`);
 const m0 = await sharp(fotos[IDS[0]][0]).metadata();
-const CW = m0.width * Z, CH = m0.height * Z, G = 14, BLOCO = 3 * CW + 2 * G + 40;
-const TITULO = CONFIG
+const CW = m0.width * Z, CH = m0.height * Z, G = 14, BLOCO = V * CW + (V - 1) * G + 40, P = V === 1 ? 6 : 2;
+const TITULO = V === 1
+  ? 'OS 24 ÍCONES FINAIS — dentro da carta real (mesa a 1152, ampliada 2×).'
+  : CONFIG
   ? 'AS TROCAS DE ÍCONE — dentro da carta real (mesa a 1152, ampliada 2×). O rótulo diz de onde veio cada um.'
   : 'OS 24 ÍCONES DENTRO DA CARTA REAL — 3 candidatos cada (mesa a 1152, ampliada 2×). Escolha um número por carta.';
-const comp = [{ input: texto(TITULO, 2 * BLOCO, 22, '#e0e6f0'), left: 20, top: 16 }];
+const comp = [{ input: texto(TITULO, P * BLOCO, 22, '#e0e6f0'), left: 20, top: 16 }];
 let y = 60;
-for (let i = 0; i < IDS.length; i += 2) {
-  for (const [j, id] of IDS.slice(i, i + 2).entries()) {
+for (let i = 0; i < IDS.length; i += P) {
+  for (const [j, id] of IDS.slice(i, i + P).entries()) {
     const x0 = 20 + j * BLOCO;
     comp.push({ input: texto(id, 300, 18), left: x0, top: y });
-    for (let v = 0; v < 3; v++) {
+    for (let v = 0; v < V; v++) {
       const rot = rotulo(id, v);
       comp.push({ input: texto(rot, CW, 15, '#8a93a6'), left: x0 + v * (CW + G), top: y + 26 });
       comp.push({ input: await sharp(fotos[id][v]).resize(CW, CH, { kernel: 'nearest' }).toBuffer(), left: x0 + v * (CW + G), top: y + 48 });
@@ -116,5 +120,5 @@ for (let i = 0; i < IDS.length; i += 2) {
   }
   y += 48 + CH + 28;
 }
-await sharp({ create: { width: 20 + 2 * BLOCO, height: y, channels: 4, background: '#0b0d14' } }).composite(comp).png().toFile(OUT);
+await sharp({ create: { width: 20 + P * BLOCO, height: y, channels: 4, background: '#0b0d14' } }).composite(comp).png().toFile(OUT);
 console.log(OUT);
