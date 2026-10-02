@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-br"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>As 24 cartas em jogo</title>
+<style>
+  :root { --fundo:#0b0d14; --cartao:#141824; --texto:#d8deea; --fraco:#8a93a6; --ouro:#ffb040; }
+  body { margin:0; padding:24px 16px 48px; background:var(--fundo); color:var(--texto); font:15px/1.45 system-ui, sans-serif; }
+  h1 { margin:0 0 4px; font-size:24px; } .sub { color:var(--fraco); margin:0 0 24px; max-width:900px; }
+  h2 { margin:32px 0 12px; color:var(--ouro); font-size:19px; }
+  .grade { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 580px), 1fr)); gap:16px; }
+  article { background:var(--cartao); border:1px solid #232a3a; border-left:4px solid var(--cor); border-radius:8px; padding:14px; min-width:0; }
+  header { display:flex; gap:12px; align-items:center; }
+  .icone { width:80px; height:80px; image-rendering:pixelated; flex:none; }
+  h3 { margin:0; font-size:17px; letter-spacing:.02em; } .meta { margin:2px 0 0; color:var(--fraco); font-size:13px; }
+  .rar { color:var(--cor); font-weight:600; } .curto { margin:4px 0 0; font-weight:600; font-size:13px; }
+  .como { margin:10px 0; } .gif { image-rendering:pixelated; max-width:100%; height:auto; display:block; border-radius:4px; }
+  .sem { color:var(--fraco); font-style:italic; padding:16px; border:1px dashed #2c3446; border-radius:4px; text-align:center; }
+</style></head><body>
+<h1>As 24 cartas em jogo</h1>
+<p class="sub">Cada skill na F2, com a nave atirando (ou o lançador disparando) em alvos postos à mão. Os números são os provisórios de hoje (calibragem é a frente C). A explosão já é a arte aprovada (A + B); o resto da arte das peças — drones, mísseis, tiros finos, estilhaço, faísca, eletrificado — ainda é provisória. GIFs em 20 qps, velocidade real, ampliados 2× sem suavizar.</p>
+<h2>🔫 Armamento</h2><div class="grade"><article style="--cor:#a8b0bc">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/WPN_001.png" alt=""><div><h3>TIRO DUPLO</h3><p class="meta"><span class="rar">COMUM</span> · WPN_001 · máx. 1</p><p class="curto">2 PROJÉTEIS</p></div></header>
+  <p class="como">Dois tiros paralelos. No GIF: em cima, a nave sem a carta; embaixo, com ela.</p>
+  <img class="gif" src="WPN_001.gif" width="540" height="528" alt="TIRO DUPLO em jogo">
+</article><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/WPN_002.png" alt=""><div><h3>TIRO TRIPLO</h3><p class="meta"><span class="rar">INCOMUM</span> · WPN_002 · máx. 1</p><p class="curto">3 EM LEQUE</p></div></header>
+  <p class="como">Três tiros em leque curto (±5°). Substitui o Duplo.</p>
+  <img class="gif" src="WPN_002.gif" width="540" height="528" alt="TIRO TRIPLO em jogo">
+</article><article style="--cor:#a8b0bc">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/WPN_004.png" alt=""><div><h3>CADÊNCIA</h3><p class="meta"><span class="rar">COMUM</span> · WPN_004 · máx. 3</p><p class="curto">+15% CADÊNCIA</p></div></header>
+  <p class="como">+15% de tiros por segundo por carta (até ×3, +52%).</p>
+  <img class="gif" src="WPN_004.gif" width="540" height="528" alt="CADÊNCIA em jogo">
+</article><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/WPN_007.png" alt=""><div><h3>PERFURANTE</h3><p class="meta"><span class="rar">INCOMUM</span> · WPN_007 · máx. 1</p><p class="curto">ATRAVESSA INIMIGOS</p></div></header>
+  <p class="como">O tiro atravessa inimigos — cada um leva o dano uma vez. Rocha ainda para o tiro.</p>
+  <img class="gif" src="WPN_007.gif" width="540" height="232" alt="PERFURANTE em jogo">
+</article><article style="--cor:#3f7bff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/WPN_008.png" alt=""><div><h3>TIRO PESADO</h3><p class="meta"><span class="rar">RARA</span> · WPN_008 · máx. 1</p><p class="curto">DANO x2</p></div></header>
+  <p class="como">Dano ×2; o tiro sai 30% mais lento e 30% maior.</p>
+  <img class="gif" src="WPN_008.gif" width="540" height="528" alt="TIRO PESADO em jogo">
+</article><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/WPN_009.png" alt=""><div><h3>MÍSSIL GUIADO</h3><p class="meta"><span class="rar">INCOMUM</span> · WPN_009 · máx. 2</p><p class="curto">MÍSSIL QUE PERSEGUE</p></div></header>
+  <p class="como">A cada 3s. Trava a mira no disparo; ×2 = um alvo para cada, o 2º sai 140ms depois. Persegue com inércia: erra, faz a curva e volta. No fim da vida (2,5s) explode no ar.</p>
+  <img class="gif" src="WPN_009.gif" width="540" height="912" alt="MÍSSIL GUIADO em jogo">
+</article><article style="--cor:#a45cff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/WPN_010.png" alt=""><div><h3>DRONE AUXILIAR</h3><p class="meta"><span class="rar">ÉPICA</span> · WPN_010 · máx. 1</p><p class="curto">DRONE QUE ATIRA</p></div></header>
+  <p class="como">Segue a nave e dá um tiro próprio — fraco, guiado, a cada 1,2s, até 160px —, laranja na humana, ciano na manta. Não copia as cartas da nave. Desvia de LADO de quem passa.</p>
+  <img class="gif" src="WPN_010.gif" width="500" height="528" alt="DRONE AUXILIAR em jogo">
+</article></div><h2>💥 Efeito</h2><div class="grade"><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_001.png" alt=""><div><h3>EXPLOSIVO</h3><p class="meta"><span class="rar">INCOMUM</span> · EFF_001 · máx. 1</p><p class="curto">EXPLODE AO ACERTAR</p></div></header>
+  <p class="como">O tiro explode ao acertar (raio 18px, 1 de dano). O leque abre para o lado de onde o tiro veio.</p>
+  <img class="gif" src="EFF_001.gif" width="540" height="232" alt="EXPLOSIVO em jogo">
+</article><article style="--cor:#3f7bff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_002.png" alt=""><div><h3>EXPLOSÃO MAIOR</h3><p class="meta"><span class="rar">RARA</span> · EFF_002 · máx. 1 · requer EXPLOSIVO</p><p class="curto">EXPLOSÕES MAIORES</p></div></header>
+  <p class="como">Toda explosão do jogador fica 50% maior (18 → 27px) — e o impacto troca para o leque grande.</p>
+  <img class="gif" src="EFF_002.gif" width="540" height="528" alt="EXPLOSÃO MAIOR em jogo">
+</article><article style="--cor:#3f7bff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_003.png" alt=""><div><h3>FRAGMENTADO</h3><p class="meta"><span class="rar">RARA</span> · EFF_003 · máx. 1 · requer EXPLOSIVO</p><p class="curto">SOLTA ESTILHAÇOS</p></div></header>
+  <p class="como">Toda explosão solta 5 estilhaços: em leque para a frente, se veio de um tiro; em círculo, se não. Estilhaço não explode de novo.</p>
+  <img class="gif" src="EFF_003.gif" width="540" height="232" alt="FRAGMENTADO em jogo">
+</article><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_004.png" alt=""><div><h3>INCENDIÁRIO</h3><p class="meta"><span class="rar">INCOMUM</span> · EFF_004 · máx. 1</p><p class="curto">PODE INCENDIAR</p></div></header>
+  <p class="como">25% de chance de pôr fogo: 1 de dano a cada 0,4s por 2s.</p>
+  <img class="gif" src="EFF_004.gif" width="540" height="232" alt="INCENDIÁRIO em jogo">
+</article><article style="--cor:#a45cff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_006.png" alt=""><div><h3>COMBUSTÃO</h3><p class="meta"><span class="rar">ÉPICA</span> · EFF_006 · máx. 1 · requer INCENDIÁRIO</p><p class="curto">QUEIMADO EXPLODE</p></div></header>
+  <p class="como">O queimado que morre explode em fogo (raio 26px, 2 de dano).</p>
+  <img class="gif" src="EFF_006.gif" width="540" height="232" alt="COMBUSTÃO em jogo">
+</article><article style="--cor:#a45cff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_007.png" alt=""><div><h3>EM CADEIA</h3><p class="meta"><span class="rar">ÉPICA</span> · EFF_007 · máx. 1 · requer COMBUSTÃO</p><p class="curto">EXPLOSÃO INCENDEIA</p></div></header>
+  <p class="como">Toda explosão incendeia quem está no raio — com a Combustão, um queimado puxa o outro.</p>
+  <img class="gif" src="EFF_007.gif" width="540" height="232" alt="EM CADEIA em jogo">
+</article><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_010.png" alt=""><div><h3>FLARE</h3><p class="meta"><span class="rar">INCOMUM</span> · EFF_010 · máx. 1</p><p class="curto">SOLTA ARMADILHA</p></div></header>
+  <p class="como">O jogador solta (tecla L, provisória; espera de 8s; "FLARE 6s" contando na HUD). Fica para trás, freando: explode em quem tocar, ou sozinho em 3s.</p>
+  <img class="gif" src="EFF_010.gif" width="400" height="232" alt="FLARE em jogo">
+</article><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_011.png" alt=""><div><h3>ELÉTRICO</h3><p class="meta"><span class="rar">INCOMUM</span> · EFF_011 · máx. 1</p><p class="curto">CHOQUE QUE TRAVA</p></div></header>
+  <p class="como">20% de chance de eletrificar: o inimigo trava 0,4s — não anda, não atira. Chefões e a aranha levam o choque mas não travam.</p>
+  <img class="gif" src="EFF_011.gif" width="540" height="232" alt="ELÉTRICO em jogo">
+</article><article style="--cor:#3f7bff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_012.png" alt=""><div><h3>ARCO EM CADEIA</h3><p class="meta"><span class="rar">RARA</span> · EFF_012 · máx. 1 · requer ELÉTRICO</p><p class="curto">CHOQUE SALTA</p></div></header>
+  <p class="como">O choque salta para até 3 próximos (50px), um por vez, sem voltar. O raio é desenhado em pixel.</p>
+  <img class="gif" src="EFF_012.gif" width="540" height="232" alt="ARCO EM CADEIA em jogo">
+</article><article style="--cor:#a45cff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/EFF_013.png" alt=""><div><h3>SOBRECARGA</h3><p class="meta"><span class="rar">ÉPICA</span> · EFF_013 · máx. 1 · requer ARCO EM CADEIA</p><p class="curto">ELETRIFICADO EXPLODE</p></div></header>
+  <p class="como">O eletrificado que morre solta um pulso (30px, 2 de dano). O pulso não eletrifica.</p>
+  <img class="gif" src="EFF_013.gif" width="540" height="232" alt="SOBRECARGA em jogo">
+</article></div><h2>🛡️ Defesa</h2><div class="grade"><article style="--cor:#a8b0bc">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/DEF_001.png" alt=""><div><h3>CASCO</h3><p class="meta"><span class="rar">COMUM</span> · DEF_001 · máx. 1</p><p class="curto">ABSORVE 1 GOLPE</p></div></header>
+  <p class="como">Absorve 1 golpe e volta em 8s. A aura é o contorno de 1px da silhueta da nave; no golpe, estoura.</p>
+  <img class="gif" src="DEF_001.gif" width="260" height="288" alt="CASCO em jogo">
+</article><article style="--cor:#4fc85a">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/DEF_002.png" alt=""><div><h3>RECARGA</h3><p class="meta"><span class="rar">INCOMUM</span> · DEF_002 · máx. 1 · requer CASCO</p><p class="curto">CASCO VOLTA RÁPIDO</p></div></header>
+  <p class="como">Sem GIF (número): o Casco volta em 5,5s em vez de 8s. Máx. 1.</p>
+  <div class="sem">sem GIF — efeito de número</div>
+</article><article style="--cor:#3f7bff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/DEF_003.png" alt=""><div><h3>VIDA EXTRA</h3><p class="meta"><span class="rar">RARA</span> · DEF_003 · máx. 1</p><p class="curto">+1 VIDA</p></div></header>
+  <p class="como">Sem GIF (número): +1 vida (um ♦ a mais na HUD).</p>
+  <div class="sem">sem GIF — efeito de número</div>
+</article><article style="--cor:#3f7bff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/DEF_004.png" alt=""><div><h3>CASCO REATIVO</h3><p class="meta"><span class="rar">RARA</span> · DEF_004 · máx. 1 · requer CASCO</p><p class="curto">CASCO EXPLODE</p></div></header>
+  <p class="como">O casco partido explode (raio 40px, 3 de dano).</p>
+  <img class="gif" src="DEF_004.gif" width="320" height="192" alt="CASCO REATIVO em jogo">
+</article><article style="--cor:#a8b0bc">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/DEF_005.png" alt=""><div><h3>BOMBA EXTRA</h3><p class="meta"><span class="rar">COMUM</span> · DEF_005 · máx. 2</p><p class="curto">+1 BOMBA</p></div></header>
+  <p class="como">Sem GIF (número): +1 bomba por vida — "B×4" na HUD (×2: "B×5").</p>
+  <div class="sem">sem GIF — efeito de número</div>
+</article></div><h2>⚡ Movimento</h2><div class="grade"><article style="--cor:#a8b0bc">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/MOV_001.png" alt=""><div><h3>PROPULSORES</h3><p class="meta"><span class="rar">COMUM</span> · MOV_001 · máx. 2</p><p class="curto">+12% VELOCIDADE</p></div></header>
+  <p class="como">Sem GIF (número): +12% de velocidade no voo livre, por carta. Fora da F1.</p>
+  <div class="sem">sem GIF — efeito de número</div>
+</article><article style="--cor:#3f7bff">
+  <header><img class="icone" src="../../2026-10-01/pecas-novas/icones-finais/MOV_003.png" alt=""><div><h3>DASH</h3><p class="meta"><span class="rar">RARA</span> · MOV_003 · máx. 1</p><p class="curto">AVANÇO INVULNERÁVEL</p></div></header>
+  <p class="como">Dois toques numa direção: ~40px em 0,15s, invulnerável por 0,2s, com imagens-fantasma. Espera de 8s ("DASH 5s" contando na HUD). Fora da F1.</p>
+  <img class="gif" src="MOV_003.gif" width="340" height="220" alt="DASH em jogo">
+</article></div>
+</body></html>

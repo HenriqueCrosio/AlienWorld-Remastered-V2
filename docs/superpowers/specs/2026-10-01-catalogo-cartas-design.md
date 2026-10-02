@@ -1,6 +1,8 @@
 # Spec — O catálogo de cartas: 24 cartas que cabem no jogo (01/10/2026)
 
-> Estado: **desenho aprovado com o Henrique em 01/10** (a revisar no arquivo). É a **frente A** da ordem combinada
+> Estado: **desenho aprovado em 01/10; ícones em 02/10; as 24 JOGÁVEIS em 02/10** (plano
+> `plans/2026-10-02-catalogo-cartas.md`; folha `folhas/2026-10-02/skills/index.html`, um GIF por carta). A explosão já é
+> a arte aprovada; falta a arte aprovada das outras peças (§5.1–5.1b), num plano próprio. É a **frente A** da ordem combinada
 > (A = catálogo → B = inimigos novos que atiram + ondas maiores → C = calibragem). Branch `feat/cartas-preview`.
 > Fonte: `sistema_de_cartas_skills_shoot_em_up_v2.md` (o documento dele, 25 cartas) e as 13 do protótipo de 27/09.
 > Folhas: `docs/superpowers/folhas/2026-10-01/pecas-novas-conceitos.png` (1ª rodada) e a 2ª rodada (drones pequenos,
@@ -127,7 +129,7 @@ quando o queimado morre.
 | Direção | a dos dois toques (as 4 direções) |
 | Movimento | ~40px do mundo em ~0,15s |
 | Invulnerável | durante o dash (~0,2s) — escapar de tiro, míssil, enxame, dano certo |
-| Espera | ~2,5s; **"DASH"** aceso na HUD quando pronto (como o "CASCO") |
+| Espera | **8s** (02/10, ele: *"precisa ter um cooldown que justifique a raridade e o uso"* — com 2,5s era invulnerabilidade de graça); **"DASH"** na HUD quando pronto e **"DASH 5s"** contando enquanto recarrega (o Flare, também de 8s, faz igual) |
 | Fases | fora da F1 (voo por impulso) |
 | Visual | **imagens-fantasma** da própria sprite (3 cópias que somem) — vale para as 6 naves sem arte nova |
 | Controle (etapa 1.6) | um botão (o duplo toque no analógico não é confiável) — decidido na spec do controle |

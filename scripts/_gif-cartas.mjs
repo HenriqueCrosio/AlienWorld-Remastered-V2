@@ -19,20 +19,32 @@ const [OUT, CENARIO = 'fragmentado', SEG = '2.5', MODOS = 'aprovada', NAVE = 'hu
 // Alvo: [x, dy da nave, vida, tipo?, vx?, vy?, teto?] — sem tipo é drone PARADO; com velocidade, ele anda; o teto de
 // velocidade é ENCENAÇÃO do GIF (o kamikaze do jogo voa a 190, e o míssil, a 150, não o alcança na volta).
 const CENARIOS = {
+  base: { nome: 'SEM A CARTA', cartas: [], atira: true, alvos: 'cacho' },
+  duplo: { nome: 'TIRO DUPLO', cartas: ['WPN_001'], atira: true, alvos: 'cacho' },
+  triplo: { nome: 'TIRO TRIPLO', cartas: ['WPN_002'], atira: true, alvos: 'cacho' },
+  cadencia: { nome: 'CADÊNCIA ×3', cartas: ['WPN_004', 'WPN_004', 'WPN_004'], atira: true, alvos: 'cacho' },
+  perfurante: { nome: 'PERFURANTE', cartas: ['WPN_007'], atira: true, alvos: 'fila' },
+  pesado: { nome: 'TIRO PESADO', cartas: ['WPN_008'], atira: true, alvos: 'cacho' },
+  maior: { nome: 'EXPLOSIVO + EXPLOSÃO MAIOR', cartas: ['EFF_001', 'EFF_002'], atira: true, alvos: 'cacho' },
+  fragmentos: { nome: 'EXPLOSIVO + FRAGMENTADO', cartas: ['EFF_001', 'EFF_003'], atira: true, alvos: 'cacho' },
+  incendiario: { nome: 'INCENDIÁRIO', cartas: ['EFF_004'], atira: true, alvos: 'cacho' },
+  combustao: { nome: 'INCENDIÁRIO + COMBUSTÃO', cartas: ['EFF_004', 'EFF_006'], atira: true, alvos: 'cacho' },
+  arco: { nome: 'ELÉTRICO + ARCO EM CADEIA', cartas: ['EFF_011', 'EFF_012'], atira: true, alvos: 'cacho4' },
+  reativo: { nome: 'CASCO + CASCO REATIVO', cartas: ['DEF_001', 'DEF_004'], atira: false, alvos: 'perto', forcar: [[1.0, 'golpe']], clip: { x: 20, y: 60, w: 160, h: 96 } },
   explosivo: { nome: 'EXPLOSIVO', cartas: ['EFF_001'], atira: true, alvos: 'cacho' },
   fragmentado: { nome: 'EXPLOSIVO + EXPLOSÃO MAIOR + FRAGMENTADO', cartas: ['EFF_001', 'EFF_002', 'EFF_003'], atira: true, alvos: 'cacho' },
   emcadeia: { nome: 'INCENDIÁRIO + COMBUSTÃO + EM CADEIA + EXPLOSIVO', cartas: ['EFF_004', 'EFF_006', 'EFF_007', 'EFF_001'], atira: true, alvos: 'cacho' },
   missil: { nome: 'MÍSSIL ×2', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'espalhado', forcar: [[0.1, 'missil'], [1.6, 'missil']] },
   missil1: { nome: 'MÍSSIL — tiro único', cartas: ['WPN_009'], atira: false, alvos: 'um', forcar: [[0.1, 'missil']] },
-  missil2: { nome: 'MÍSSIL ×2 — um alvo para cada, o 2º sai depois', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', forcar: [[0.1, 'missil']] },
-  missilvolta: { nome: 'MÍSSIL — o alvo desvia (encenado): erra, faz a curva e volta', cartas: ['WPN_009'], atira: false, alvos: 'cruzando', desvio: true, forcar: [[0.1, 'missil']], clip: { x: 46, y: 20, w: 270, h: 176 } },
-  drone: { nome: 'DRONE — nave humana: tiro laranja; desvia de quem passa perto', cartas: ['WPN_010'], atira: false, alvos: 'drone', clip: { x: 20, y: 46, w: 250, h: 116 } },
-  dronealien: { nome: 'DRONE — nave alien: tiro ciano', cartas: ['WPN_010'], atira: false, alvos: 'drone', nave: 'alienigena', clip: { x: 20, y: 46, w: 250, h: 116 } },
+  missil2: { nome: 'MÍSSIL ×2 — um alvo cada, 2º depois', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', forcar: [[0.1, 'missil']] },
+  missilvolta: { nome: 'MÍSSIL — o alvo desvia: erra e volta', cartas: ['WPN_009'], atira: false, alvos: 'cruzando', desvio: true, forcar: [[0.1, 'missil']], clip: { x: 46, y: 20, w: 270, h: 176 } },
+  drone: { nome: 'DRONE — humana: tiro laranja', cartas: ['WPN_010'], atira: false, alvos: 'drone', clip: { x: 20, y: 46, w: 250, h: 116 } },
+  dronealien: { nome: 'DRONE — alien: tiro ciano', cartas: ['WPN_010'], atira: false, alvos: 'drone', nave: 'alienigena', clip: { x: 20, y: 46, w: 250, h: 116 } },
   eletrico: { nome: 'ELÉTRICO + ARCO EM CADEIA + SOBRECARGA — o raio salta, o pulso fere', cartas: ['EFF_011', 'EFF_012', 'EFF_013'], atira: true, alvos: 'cacho4' },
   eletricotrava: { nome: 'ELÉTRICO — a canhoneira eletrificada para e não atira', cartas: ['EFF_011'], atira: true, alvos: 'canhoneiras' },
-  casco: { nome: 'CASCO — a aura pulsa; no golpe, estoura e some (nave humana)', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
-  cascoalien: { nome: 'CASCO — nave alien', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', nave: 'alienigena', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
-  dash: { nome: 'DASH — dois toques: avanço invulnerável com imagens-fantasma; espera de 2,5s', cartas: ['MOV_003'], atira: false, alvos: 'nenhum', forcar: [[0.4, 'dashD'], [1.2, 'dashD'], [3.0, 'dashW']], clip: { x: 30, y: 36, w: 170, h: 110 } },
+  casco: { nome: 'CASCO — humana', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
+  cascoalien: { nome: 'CASCO — alien', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', nave: 'alienigena', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
+  dash: { nome: 'DASH — dois toques: avanço invulnerável com imagens-fantasma; espera de 8s', cartas: ['MOV_003'], atira: false, alvos: 'nenhum', forcar: [[0.4, 'dashD'], [1.2, 'dashD'], [1.8, 'dashW']], clip: { x: 30, y: 36, w: 170, h: 110 } },
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
@@ -44,9 +56,11 @@ const modos = MODOS.split(',');
 const paineis = cenarios.flatMap((cen) => modos.map((modo) => ({ cen, modo })));
 const QUADRO = 1000 / 60;
 const POR_FOTO = 3;
-const ZOOM = 2; // o mundo é 384×216; a foto sai em 2× do mundo, sem suavizar
+// O mundo é 384×216; a foto sai em ZOOM× do mundo, sem suavizar. GIF_ZOOM=1 = o pixel nativo (a folha amplia na tela).
+const ZOOM = Number(process.env.GIF_ZOOM ?? 2);
 const CLIP_PADRAO = { x: 46, y: 46, w: 270, h: 116 };
-const ROTULO = 26;
+const ROTULO = ZOOM >= 2 ? 26 : 16;
+const FONTE = ZOOM >= 2 ? 15 : 10;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
@@ -102,6 +116,10 @@ async function gravar(cen, modo) {
       // dois parados à frente e um que PASSA rente ao drone (ele desvia)
       drone: [[175, -40, 3], [195, 35, 3], [190, -12, 99, 'drone', -70, 0]],
       nenhum: [],
+      // em FILA na linha da nave: o tiro perfurante atravessa todos
+      fila: [[170, 0, 6], [195, 0, 6], [220, 0, 6], [245, 0, 6], [270, 0, 6]],
+      // em volta da nave: o Casco Reativo explode neles
+      perto: [[x0 + 22, -10, 3], [x0 + 26, 12, 3], [x0 - 18, 14, 3]],
       // ATRÁS da nave: o flare é armadilha para quem persegue
       atras: [[x0 - 30, 0, 1]],
     };
@@ -211,7 +229,7 @@ const W = Math.max(...larguras);
 const comRotulo = paineis.length > 1;
 const nomeDo = ({ cen, modo }) => (cenarios.length > 1 ? cen.nome : NOME_MODO[modo] ?? modo);
 const rotulos = await Promise.all(paineis.map((p) => sharp(Buffer.from(
-  `<svg width="${W}" height="${ROTULO}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#0b0d14"/><text x="8" y="18" font-family="Consolas, monospace" font-size="15" fill="#ffb040">${nomeDo(p)}</text></svg>`,
+  `<svg width="${W}" height="${ROTULO}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#0b0d14"/><text x="6" y="${ROTULO - 5}" font-family="Consolas, monospace" font-size="${FONTE}" fill="#ffb040">${nomeDo(p)}</text></svg>`,
 )).png().toBuffer()));
 const topos = [];
 let H = 0;

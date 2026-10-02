@@ -72,6 +72,12 @@ export class Lancadores {
     return this.c.tem('EFF_010') && this.c.h.scene.time.now >= this.flarePronto;
   }
 
+  /** Quanto falta para o próximo flare (ms; 0 = pronto) — ou `null` sem a carta. A HUD conta a recarga. */
+  get flareFalta(): number | null {
+    if (!this.c.tem('EFF_010')) return null;
+    return Math.max(0, this.flarePronto - this.c.h.scene.time.now);
+  }
+
   tick(dt: number): void {
     const agora = this.c.h.scene.time.now;
     const n = this.c.h.nave();

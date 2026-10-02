@@ -14,12 +14,19 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-09-29-vozes-retomada-START.md`. As três vozes e a mesa
-> compacta estão na `feat/cartas-preview`; vou jogar para aprovar o texto, e depois seguimos para a spec 2 (a arte
-> nova do compacto)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`, a spec `specs/2026-10-01-catalogo-cartas-design.md` e a folha
+> `folhas/2026-10-02/skills/index.html`. As 24 cartas estão jogáveis na `feat/cartas-preview`; seguimos para a arte
+> aprovada das peças (plano novo) e depois para a frente B."**
 >
-> 📍 **29/09 — O PONTO MARCADO:** tudo commitado e empurrado (`feat/cartas-preview`, sem merge). A porta de entrada é
-> o START de 29/09 (onde está, como testar, o que olhar jogando, os próximos passos e as lições).
+> 📍 **02/10 — O PONTO MARCADO:** as **24 cartas** jogáveis na `feat/cartas-preview` (sem merge): o catálogo, os 24
+> ícones aprovados na mesa, a explosão única com a arte aprovada (Explosão Maior, Fragmentado, Em Cadeia), o Míssil
+> (mira travada, inércia), o Flare (do jogador, tecla L provisória), o Drone (desvia de lado), a build elétrica, a aura
+> do Casco, a Bomba Extra e o Dash (8s). Sondas: `test-catalogo-cartas`, `test-cartas-regras`, `probe-cartas-novas`
+> (26 casos), `probe-mesa-texto` (24 cartas). **Pendentes:** a arte aprovada das peças (drones, mísseis 16×5, tiros 6×1,
+> estilhaço D, faísca/eletrificado/pulso, flare, estouro do casco) num plano próprio; o MAPA DE TECLAS (L do flare e
+> duplo toque do dash são provisórios); depois a frente B (inimigos que atiram + ondas maiores) e a C (calibragem).
+>
+> (29/09 — o ponto anterior: as três vozes e a mesa compacta; START em `plans/2026-09-29-vozes-retomada-START.md`.)
 
 ### O estado em uma linha
 

@@ -2342,7 +2342,7 @@ export class GameScene extends Phaser.Scene {
     const nome = this.weapons.overheated ? 'TRAVADA' : w.name;
 
     this.hud.setText(
-      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.flarePronto ? ' FLARE' : ''}${this.cartas.dashPronto ? ' DASH' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
+      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

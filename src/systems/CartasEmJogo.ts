@@ -91,19 +91,19 @@ export class CartasEmJogo {
     return tem(this.reg, 'WPN_009') || tem(this.reg, 'WPN_010');
   }
 
-  /** "DASH" aceso na HUD. */
-  get dashPronto(): boolean {
-    return this.dash.pronto;
-  }
-
   /** Durante o dash a nave não leva dano (nem o Casco gasta). */
   intocavel(agora: number): boolean {
     return this.dash.intocavel(agora);
   }
 
-  /** "FLARE" aceso na HUD: o jogador pode soltar o próximo. */
-  get flarePronto(): boolean {
-    return this.lancadores.flareProntoAgora;
+  /**
+   * As RECARGAS na HUD, depois do "CASCO": `" FLARE"` / `" DASH"` quando prontos, `" FLARE 6s"` / `" DASH 3s"`
+   * contando enquanto recarregam (8s cada — com espera longa o jogador quer saber quanto falta), nada sem a carta.
+   */
+  get hudRecargas(): string {
+    const rotulo = (nome: string, falta: number | null): string =>
+      falta === null ? '' : falta > 0 ? ` ${nome} ${Math.ceil(falta / 1000)}s` : ` ${nome}`;
+    return rotulo('FLARE', this.lancadores.flareFalta) + rotulo('DASH', this.dash.falta);
   }
 
   /** O aviso de que o Casco voltou: a nave pisca ciano, rápido. */

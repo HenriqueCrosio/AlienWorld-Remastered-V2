@@ -7,7 +7,12 @@ const JANELA_MS = 220;
 const DISTANCIA = 40;
 const DURACAO_MS = 150;
 const INTOCAVEL_MS = 200;
-const ESPERA_MS = 2500;
+/**
+ * 8s (02/10, ele: *"precisa ter um cooldown que justifique a raridade e o uso"*). Com 2,5s o dash era invulnerabilidade
+ * de graça; com 10s+ viraria uma mini-bomba esquecida (a bomba já faz esse papel melhor). Em 8s ele é um SALVAMENTO —
+ * guardado para o tiro que não dá para desviar —, e a janela de 0,2s ainda cobra o momento certo.
+ */
+const ESPERA_MS = 8000;
 /** Um fantasma a cada 50ms: 3 no avanço de 150ms (a spec: "3 cópias que somem"). */
 const FANTASMA_MS = 50;
 const VELOCIDADE = DISTANCIA / (DURACAO_MS / 1000);
@@ -61,6 +66,12 @@ export class Dash {
   /** Tem a carta, está fora da F1 e a espera passou — a HUD acende "DASH". */
   get pronto(): boolean {
     return this.c.tem('MOV_003') && this.c.h.fase > 1 && this.c.h.scene.time.now >= this.prontoEm;
+  }
+
+  /** Quanto falta para o próximo (ms; 0 = pronto) — ou `null` sem a carta ou na F1. A HUD conta a recarga. */
+  get falta(): number | null {
+    if (!this.c.tem('MOV_003') || this.c.h.fase <= 1) return null;
+    return Math.max(0, this.prontoEm - this.c.h.scene.time.now);
   }
 
   intocavel(agora: number): boolean {

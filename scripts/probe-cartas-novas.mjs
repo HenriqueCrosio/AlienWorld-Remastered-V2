@@ -51,6 +51,9 @@ await page.evaluate(() => {
 });
 
 const falhas = [];
+// A HUD das recargas (8s): "FLARE" / "DASH" quando prontos; "FLARE 6s" / "DASH 3s" contando.
+const hudPronto = (texto, nome) => new RegExp(`${nome}(?! \\d)`).test(texto);
+const hudContando = (texto, nome) => new RegExp(`${nome} \\d+s`).test(texto);
 const conferir = (ok, msg, visto) => {
   console.log(`${ok ? 'OK  ' : 'FALHA'} ${msg}${ok ? '' : ` — visto: ${JSON.stringify(visto)}`}`);
   if (!ok) falhas.push(msg);
@@ -204,13 +207,13 @@ const flare = await page.evaluate(async () => {
     solto ||= t.projeteis('flare').length > 0;
     await t.dormir(100);
   }
-  return { solto, fontes, hud: t.cena().hud.text.includes('FLARE') };
+  return { solto, fontes, hud: t.cena().hud.text };
 });
 conferir(flare.solto && flare.fontes.includes('flare'), 'a tecla solta o flare para trás, e ele explode sozinho', flare);
 await page.keyboard.press('KeyL');
 await page.waitForTimeout(300);
 const naEsperaFlare = await page.evaluate(() => window.__teste.projeteis('flare').length);
-conferir(naEsperaFlare === 0 && !flare.hud, 'na espera, a tecla não solta outro e a HUD não mostra FLARE', { naEsperaFlare, hud: flare.hud });
+conferir(naEsperaFlare === 0 && hudContando(flare.hud, 'FLARE'), 'na espera, a tecla não solta outro e a HUD conta a recarga (FLARE Ns)', { naEsperaFlare, hud: flare.hud });
 
 await fase(['EFF_010']);
 const toque = await page.evaluate(async () => {
@@ -219,7 +222,7 @@ const toque = await page.evaluate(async () => {
   window.__fontesFlare = t.espiarExplosoes();
   window.__alvoFlare = t.alvo('drone', s.ship.x - 30, s.ship.y, 99);
   await t.dormir(150); // a HUD redesenha no quadro seguinte à carta
-  return s.hud.text.includes('FLARE');
+  return s.hud.text;
 });
 await page.keyboard.press('KeyL');
 const toqueFim = await page.evaluate(async () => {
@@ -227,7 +230,7 @@ const toqueFim = await page.evaluate(async () => {
   for (let i = 0; i < 30 && !window.__fontesFlare.includes('flare'); i++) await t.dormir(100);
   return { fontes: window.__fontesFlare, hp: window.__alvoFlare.getData('hp') };
 });
-conferir(toque && toqueFim.fontes.includes('flare') && toqueFim.hp < 99, 'com "FLARE" aceso, o flare explode no inimigo que toca', { hud: toque, ...toqueFim });
+conferir(hudPronto(toque, 'FLARE') && toqueFim.fontes.includes('flare') && toqueFim.hp < 99, 'com "FLARE" aceso, o flare explode no inimigo que toca', { hud: toque, ...toqueFim });
 
 // ── DRONE AUXILIAR (WPN_010) — e ele NÃO copia Triplo nem Cadência da nave ──
 await fase(['WPN_010', 'WPN_002', 'WPN_004', 'WPN_004']);
@@ -401,15 +404,15 @@ await page.waitForTimeout(280);
 const comDash = (await xDaNave()) - x0;
 conferir(semCarta < 15 && comDash >= 30, 'dois toques: o dash avança ~40px (sem a carta, nada)', { semCarta, comDash });
 
-const hud = await page.evaluate(() => window.__teste.cena().hud.text.includes('DASH'));
+const hud = await page.evaluate(() => window.__teste.cena().hud.text);
 x0 = await xDaNave();
 await duploToque('KeyD');
 await page.waitForTimeout(300);
 const naEspera = (await xDaNave()) - x0;
-conferir(!hud && naEspera < 15, 'na espera, o duplo toque não dispara e a HUD não mostra DASH', { hud, naEspera });
-await page.waitForTimeout(2500);
-const hudDepois = await page.evaluate(() => window.__teste.cena().hud.text.includes('DASH'));
-conferir(hudDepois, 'passada a espera, "DASH" acende na HUD', hudDepois);
+conferir(hudContando(hud, 'DASH') && naEspera < 15, 'na espera (8s), o duplo toque não dispara e a HUD conta a recarga (DASH Ns)', { hud, naEspera });
+await page.waitForTimeout(8000);
+const hudDepois = await page.evaluate(() => window.__teste.cena().hud.text);
+conferir(hudPronto(hudDepois, 'DASH'), 'passada a espera, "DASH" acende na HUD', hudDepois);
 
 await duploToque('KeyW');
 const inv = await page.evaluate(() => {
