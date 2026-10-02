@@ -209,6 +209,12 @@ As reduções a 75% são da PRÓPRIA arte aprovada (`scripts/_reduzir.mjs`, vizi
 redesenho menor do PixelLab perdeu o desenho. Animações: PixMiniMax, 8 quadros cada (jobs af68126f, 9fd83af2,
 22ed0c71, 4ef19a0b).
 
+**Em jogo (02/10, escolha dele: "A + B"):** a explosão das cartas usa ESTA arte (B) com variação por cima (A) —
+espelho/giro de 90° ao acaso, ritmo ±15%, e Combustão/Casco Reativo em 3 estouros defasados. Combustão = o fogo #11;
+míssil, flare e Casco Reativo = a redonda #53 (só os 4 primeiros quadros: o gerador desenhou o míssil nos outros). A
+explosão do flare (d95b0189) fica de fora — mostra a lata em todos os quadros. Comparação em
+`folhas/2026-10-02/gif/comparacao-*.gif`; código em `ExplosaoDoJogador` (`arte`).
+
 **Os tiros:** o da NAVE é o que já existe (humana `tracerRound` 8×1; alien `shotPulse` 11×6); o do DRONE é menor
 (6×1, à mão) — *"os das naves têm que ser ligeiramente maiores que os do drone"*.
 
