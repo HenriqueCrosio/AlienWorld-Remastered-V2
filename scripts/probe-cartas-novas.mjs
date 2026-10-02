@@ -229,6 +229,38 @@ const toqueFim = await page.evaluate(async () => {
 });
 conferir(toque && toqueFim.fontes.includes('flare') && toqueFim.hp < 99, 'com "FLARE" aceso, o flare explode no inimigo que toca', { hud: toque, ...toqueFim });
 
+// ── DRONE AUXILIAR (WPN_010) — e ele NÃO copia Triplo nem Cadência da nave ──
+await fase(['WPN_010', 'WPN_002', 'WPN_004', 'WPN_004']);
+const drone = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  await t.dormir(800);
+  const d = s.cartas.drone.sprite;
+  const dist = d ? Math.hypot(d.x - s.ship.x, d.y - s.ship.y) : null;
+  const tiros = [];
+  const orig = s.weapons.disparar.bind(s.weapons);
+  s.weapons.disparar = (p) => {
+    if (p.origem === 'drone') tiros.push(p.angulo);
+    return orig(p);
+  };
+  const e = t.alvo('drone', s.ship.x + 110, s.ship.y - 12, 99);
+  await t.dormir(2600);
+  return { existe: !!d, dist, tiros: tiros.length, hp: e.getData('hp') };
+});
+conferir(drone.existe && drone.dist < 30, 'o drone acompanha a nave de perto', drone);
+conferir(drone.tiros >= 1 && drone.tiros <= 3 && drone.hp < 99, 'o drone atira guiado, devagar, um tiro por vez, e acerta', drone);
+
+const desvio = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  s.enemies.enemies.clear(true, true);
+  const d = s.cartas.drone.sprite;
+  const e = t.alvo('drone', d.x + 8, d.y, 99);
+  await t.dormir(400);
+  return Math.hypot(d.x - e.x, d.y - e.y);
+});
+conferir(desvio > 14, 'o drone se afasta de um inimigo encostado', desvio);
+
 // ─── FIM ───
 
 conferir(erros.length === 0, 'nenhum erro no console', erros);

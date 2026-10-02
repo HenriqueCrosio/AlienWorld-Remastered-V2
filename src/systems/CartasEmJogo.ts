@@ -5,6 +5,7 @@ import { CARTAS, adicionar, montarArma, quantas, sortear, tem, type Mesa } from 
 import type { Contexto, HostCartas, Inimigo } from './cartas/contexto';
 import { ExplosaoDoJogador } from './cartas/ExplosaoDoJogador';
 import { Lancadores } from './cartas/Lancadores';
+import { DroneAuxiliar } from './cartas/DroneAuxiliar';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 
 export type { HostCartas } from './cartas/contexto';
@@ -37,6 +38,7 @@ const COR_QUEIMANDO = 0xff9a50;
 export class CartasEmJogo {
   readonly explosao: ExplosaoDoJogador;
   readonly lancadores: Lancadores;
+  readonly drone: DroneAuxiliar;
   private readonly c: Contexto;
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
@@ -62,6 +64,7 @@ export class CartasEmJogo {
     };
     this.explosao = new ExplosaoDoJogador(this.c);
     this.lancadores = new Lancadores(this.c, this.explosao);
+    this.drone = new DroneAuxiliar(this.c);
     this.cascoPronto = tem(this.reg, 'DEF_001');
   }
 
@@ -176,6 +179,7 @@ export class CartasEmJogo {
     }
 
     this.lancadores.tick(dt);
+    this.drone.tick(dt);
   }
 
   /**

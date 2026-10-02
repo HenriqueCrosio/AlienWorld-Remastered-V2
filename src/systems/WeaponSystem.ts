@@ -784,7 +784,9 @@ export class WeaponSystem {
       const b = obj as Phaser.Physics.Arcade.Sprite;
       if (!b.active) continue;
 
-      if (b.getData('homing')) {
+      // O rastro teal é da arma TELEGUIADA da nave. Projétil de carta guiado (o tiro do drone) não arrasta cauda: ele
+      // tem a cor da linhagem, e um rastro teal atrás do tiro laranja da humana leria como duas coisas.
+      if (b.getData('homing') && !b.getData('origem')) {
         this.homingTrail.emitParticleAt(
           b.x - Math.cos(b.rotation) * 6,
           b.y - Math.sin(b.rotation) * 6,

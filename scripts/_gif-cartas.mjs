@@ -26,6 +26,8 @@ const CENARIOS = {
   missil1: { nome: 'MÍSSIL — tiro único', cartas: ['WPN_009'], atira: false, alvos: 'um', forcar: [[0.1, 'missil']] },
   missil2: { nome: 'MÍSSIL ×2 — um alvo para cada, o 2º sai depois', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', forcar: [[0.1, 'missil']] },
   missilvolta: { nome: 'MÍSSIL — o alvo desvia (encenado): erra, faz a curva e volta', cartas: ['WPN_009'], atira: false, alvos: 'cruzando', desvio: true, forcar: [[0.1, 'missil']], clip: { x: 46, y: 20, w: 270, h: 176 } },
+  drone: { nome: 'DRONE — nave humana: tiro laranja; desvia de quem passa perto', cartas: ['WPN_010'], atira: false, alvos: 'drone', clip: { x: 20, y: 46, w: 250, h: 116 } },
+  dronealien: { nome: 'DRONE — nave alien: tiro ciano', cartas: ['WPN_010'], atira: false, alvos: 'drone', nave: 'alienigena', clip: { x: 20, y: 46, w: 250, h: 116 } },
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
@@ -63,7 +65,7 @@ async function gravar(cen, modo) {
     g.registry.set('cartas', []);
     g.registry.set('cartasCheckpoint', {});
     g.scene.start('Game', { stage: 2, ship: nave, handling: 'diegetico' });
-  }, NAVE);
+  }, cen.nave ?? NAVE);
   await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').cartas);
   await page.waitForTimeout(600);
   await page.evaluate(({ cartas, modo, alvos }) => {
@@ -87,6 +89,8 @@ async function gravar(cen, modo) {
       dois: [[230, -45, 6], [250, 42, 6]],
       // um drone parado que DESVIA quando o míssil chega (ver `desvio`)
       cruzando: [[250, -20, 2]],
+      // dois parados à frente e um que PASSA rente ao drone (ele desvia)
+      drone: [[175, -40, 3], [195, 35, 3], [190, -12, 99, 'drone', -70, 0]],
       // ATRÁS da nave: o flare é armadilha para quem persegue
       atras: [[x0 - 30, 0, 1]],
     };
