@@ -278,6 +278,15 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // mestra de 64px — o estouro de um drone de 24px cobria o dobro do cadáver e lia como
   // capital. Explosão tem TAMANHO DE CASO agora (ver Fx.explode): pequena/média/grande.
   explosionSmallSheet: { path: 'sprites/explosion-small-sheet.png', w: 32, h: 32 },
+  // AS EXPLOSÕES DAS CARTAS (aprovadas em 01/10, spec do catálogo §5.1c — `scripts/instalar-explosoes-cartas.mjs`):
+  // o impacto DIRECIONAL humano (pequeno e grande) e o cone alien apontam para a DIREITA; a redonda #53 (míssil), o
+  // fogo da Combustão #11 e o pulso da Sobrecarga #4 não têm rumo. Ver `ExplosaoDoJogador`.
+  expHumPeqSheet: { path: 'sprites/cartas/fx/exp-hum-peq.png', w: 32, h: 32 },
+  expHumGrandeSheet: { path: 'sprites/cartas/fx/exp-hum-grande.png', w: 48, h: 48 },
+  expAlienSheet: { path: 'sprites/cartas/fx/exp-alien.png', w: 32, h: 32 },
+  expMissilSheet: { path: 'sprites/cartas/fx/exp-missil.png', w: 48, h: 48 },
+  expFogoSheet: { path: 'sprites/cartas/fx/exp-fogo.png', w: 64, h: 64 },
+  expPulsoSheet: { path: 'sprites/cartas/fx/exp-pulso.png', w: 64, h: 64 },
   // O GUARDIÃO respirando (9f 256² — a massa vermelha pulsa como coração) e o NÚCLEO
   // batendo (9f 128² — a ferida acende e apaga). O núcleo tem CANVAS QUADRADO com a criatura
   // centralizada, e a âncora é outra em relação ao estático recortado (nucleo.png 122×122).

@@ -124,7 +124,7 @@ export class Fx {
    * poder ajustar profundidade/escala (as cutscenes precisam dele NA FRENTE dos cenários —
    * os emissores de partícula vivem no depth 50, atrás de doca/Leviatã).
    */
-  private sheetSprite(
+  sheetSprite(
     anim: string,
     texKey: string,
     x: number,
@@ -156,8 +156,7 @@ export class Fx {
    * `depth` expõe a frente de cena das cutscenes.
    */
   explode(x: number, y: number, size = 1, depth = 50): Phaser.GameObjects.Sprite | null {
-    this.burst.explode(Math.floor(10 * size), x, y);
-    this.scene.cameras.main.shake(90 * size, 0.004 * size);
+    this.abalo(x, y, size);
     if (size <= 1.25) {
       return this.sheetSprite('explosion-small', 'explosionSmallSheet', x, y, 1.1 * size, depth)
         ?? this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth);
@@ -169,6 +168,15 @@ export class Fx {
       this.sheetSprite('explosion-big', 'explosionBigSheet', x, y, 0.5 * size, depth) ??
       this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth)
     );
+  }
+
+  /**
+   * Só o ABALO de uma explosão — as fagulhas e o tremor da tela, sem o desenho. Para quem estoura com a PRÓPRIA arte
+   * (as explosões das cartas, `ExplosaoDoJogador`) e quer o mesmo peso de impacto do `explode`.
+   */
+  abalo(x: number, y: number, size = 1): void {
+    this.burst.explode(Math.floor(10 * size), x, y);
+    this.scene.cameras.main.shake(90 * size, 0.004 * size);
   }
 
   /**
