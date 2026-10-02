@@ -18,6 +18,8 @@ export interface HostCartas {
   alvos: () => Phaser.Physics.Arcade.Sprite[];
   nave: () => Phaser.Physics.Arcade.Sprite;
   matar: (e: Inimigo) => void;
+  /** Congela o inimigo por `ms` (`EnemySystem.travar`). */
+  travar: (e: Inimigo, ms: number) => void;
   baseDaNave: string;
   fase: number;
   linhagem: Linhagem;

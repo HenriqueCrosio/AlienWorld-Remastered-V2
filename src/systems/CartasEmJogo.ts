@@ -6,6 +6,7 @@ import type { Contexto, HostCartas, Inimigo } from './cartas/contexto';
 import { ExplosaoDoJogador } from './cartas/ExplosaoDoJogador';
 import { Lancadores } from './cartas/Lancadores';
 import { DroneAuxiliar } from './cartas/DroneAuxiliar';
+import { Eletrico } from './cartas/Eletrico';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 
 export type { HostCartas } from './cartas/contexto';
@@ -18,6 +19,7 @@ export type { HostCartas } from './cartas/contexto';
  * - as MESAS no meio da fase (quando abrir, pausar a fase, aplicar a escolha);
  * - a EXPLOSÃO ÚNICA (`ExplosaoDoJogador`): Explosivo, Combustão, Casco Reativo, Flare e Míssil chamam a mesma;
  * - INCENDIÁRIO (no acerto) e a queima;
+ * - a BUILD ELÉTRICA (`Eletrico`): Elétrico, Arco em Cadeia e Sobrecarga;
  * - o CASCO, a RECARGA e o CASCO REATIVO (no dano à nave);
  * - os PROPULSORES (no teto de velocidade do voo livre).
  *
@@ -39,6 +41,7 @@ export class CartasEmJogo {
   readonly explosao: ExplosaoDoJogador;
   readonly lancadores: Lancadores;
   readonly drone: DroneAuxiliar;
+  readonly eletrico: Eletrico;
   private readonly c: Contexto;
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
@@ -65,6 +68,7 @@ export class CartasEmJogo {
     this.explosao = new ExplosaoDoJogador(this.c);
     this.lancadores = new Lancadores(this.c, this.explosao);
     this.drone = new DroneAuxiliar(this.c);
+    this.eletrico = new Eletrico(this.c);
     this.cascoPronto = tem(this.reg, 'DEF_001');
   }
 
@@ -180,6 +184,7 @@ export class CartasEmJogo {
 
     this.lancadores.tick(dt);
     this.drone.tick(dt);
+    this.eletrico.tick();
   }
 
   /**
@@ -195,6 +200,7 @@ export class CartasEmJogo {
     // explode de novo).
     if (origem) return;
     if (tem(this.reg, 'EFF_004') && alvo.active && Math.random() < 0.25) this.incendiar(alvo);
+    this.eletrico.aoAcertar(alvo);
     if (tem(this.reg, 'EFF_001')) this.explosao.explodir('explosivo', x, y, Phaser.Math.RadToDeg(angulo), alvo);
   }
 
@@ -207,6 +213,7 @@ export class CartasEmJogo {
   aoMorrer(e: Inimigo): void {
     const queimando = ((e.getData('queimaAte') as number | undefined) ?? 0) > this.h.scene.time.now;
     if (queimando && tem(this.reg, 'EFF_006')) this.explosao.explodir('combustao', e.x, e.y, null, e);
+    this.eletrico.aoMorrer(e);
     if (e.getData('kind') === 'aranha') {
       this.h.scene.time.delayedCall(250, () => this.abrirMesa('aranha', 'DESTROÇOS DA ARANHA', { garante: 'incomum' }));
     }

@@ -285,6 +285,61 @@ const lateral = await page.evaluate(async () => {
 });
 conferir(lateral.maxDy > lateral.maxDx && lateral.maxDy >= 8, 'com o inimigo vindo reto, o drone desvia para o lado, não para trás', lateral);
 
+// ── ELÉTRICO (EFF_011): trava movimento e tiro ──
+await fase(['EFF_011']);
+const trava = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const e = t.alvo('canhoneira', 300, 90, 99);
+  e.body.setVelocity(-40, 0);
+  await t.dormir(100);
+  e.setData('cooldown', 0.25);
+  s.cartas.eletrico.eletrificar(e, false, 0);
+  const x0 = e.x;
+  await t.dormir(250);
+  const travado = { dx: Math.abs(e.x - x0), cd: e.getData('cooldown'), tiros: s.enemies.enemyBullets.countActive(true) };
+  await t.dormir(400);
+  return { travado, vx: e.body.velocity.x };
+});
+conferir(trava.travado.dx < 0.5 && trava.travado.cd === 0.25 && trava.travado.tiros === 0, 'eletrificado não anda nem atira', trava);
+conferir(trava.vx === -40, 'ao destravar, volta a andar no rumo de antes', trava);
+
+// ── ARCO EM CADEIA (EFF_012): no máximo 3 saltos, sem recursão ──
+await fase(['EFF_011', 'EFF_012']);
+const arco = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const fila = [0, 1, 2, 3, 4, 5].map((i) => t.alvo('drone', 200 + i * 20, 60, 99));
+  s.cartas.eletrico.eletrificar(fila[0], true, 0);
+  await t.dormir(60);
+  return fila.map((e) => (e.getData('eletrificadoAte') ?? 0) > s.time.now);
+});
+conferir(arco[0] && arco.filter(Boolean).length === 4, 'o arco salta para no máximo 3 e não recursa', arco);
+
+// ── SOBRECARGA (EFF_013): o pulso fere e NÃO eletrifica ──
+await fase(['EFF_011', 'EFF_012', 'EFF_013']);
+const pulso = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  const a = t.alvo('drone', 200, 150, 99);
+  const b = t.alvo('drone', 215, 150, 99);
+  s.cartas.eletrico.eletrificar(a, false, 0);
+  s.matarInimigo(a);
+  await t.dormir(120);
+  return { hp: b.getData('hp'), eletrificado: (b.getData('eletrificadoAte') ?? 0) > s.time.now };
+});
+conferir(pulso.hp === 97 && !pulso.eletrificado, 'o pulso da Sobrecarga fere e não eletrifica', pulso);
+
+// ── MINICHEFE leva o choque mas não trava ──
+const aranha = await page.evaluate(() => {
+  const t = window.__teste;
+  const s = t.cena();
+  const e = t.alvo('aranha', 300, 170, 99);
+  s.cartas.eletrico.eletrificar(e, false, 0);
+  return { travado: (e.getData('travadoAte') ?? 0) > s.time.now, eletrificado: (e.getData('eletrificadoAte') ?? 0) > s.time.now };
+});
+conferir(!aranha.travado && aranha.eletrificado, 'a minichefe leva o choque mas não trava', aranha);
+
 // ─── FIM ───
 
 conferir(erros.length === 0, 'nenhum erro no console', erros);

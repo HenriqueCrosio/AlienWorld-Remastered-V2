@@ -28,6 +28,8 @@ const CENARIOS = {
   missilvolta: { nome: 'MÍSSIL — o alvo desvia (encenado): erra, faz a curva e volta', cartas: ['WPN_009'], atira: false, alvos: 'cruzando', desvio: true, forcar: [[0.1, 'missil']], clip: { x: 46, y: 20, w: 270, h: 176 } },
   drone: { nome: 'DRONE — nave humana: tiro laranja; desvia de quem passa perto', cartas: ['WPN_010'], atira: false, alvos: 'drone', clip: { x: 20, y: 46, w: 250, h: 116 } },
   dronealien: { nome: 'DRONE — nave alien: tiro ciano', cartas: ['WPN_010'], atira: false, alvos: 'drone', nave: 'alienigena', clip: { x: 20, y: 46, w: 250, h: 116 } },
+  eletrico: { nome: 'ELÉTRICO + ARCO EM CADEIA + SOBRECARGA — o raio salta, o pulso fere', cartas: ['EFF_011', 'EFF_012', 'EFF_013'], atira: true, alvos: 'cacho4' },
+  eletricotrava: { nome: 'ELÉTRICO — a canhoneira eletrificada para e não atira', cartas: ['EFF_011'], atira: true, alvos: 'canhoneiras' },
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
@@ -83,6 +85,9 @@ async function gravar(cen, modo) {
     const ALVOS = {
       // um CACHO na linha da nave
       cacho: [[190, 0, 6], [205, -12, 6], [205, 12, 6], [222, -4, 6], [222, 18, 6], [238, -14, 6], [240, 6, 6]],
+      cacho4: [[190, 0, 4], [205, -12, 4], [205, 12, 4], [222, -4, 4], [222, 18, 4], [238, -14, 4], [240, 6, 4]],
+      // canhoneiras andando e atirando (a trava se vê nelas)
+      canhoneiras: [[230, 0, 10, 'canhoneira', -30, 0], [250, -40, 10, 'canhoneira', -30, 0], [250, 40, 10, 'canhoneira', -30, 0]],
       // ESPALHADOS na vertical: o míssil tem que fazer a curva
       espalhado: [[230, -45, 6], [250, 40, 6], [270, -10, 6]],
       um: [[250, -35, 6]],

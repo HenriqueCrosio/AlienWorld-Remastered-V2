@@ -417,6 +417,20 @@ export class EnemySystem {
     }
   }
 
+  /**
+   * O ELETRIFICADO (carta Elétrico, spec do catálogo §4.1b): congela movimento E tiro por `ms`. Chamado de novo
+   * enquanto travado, só ESTENDE — a velocidade guardada é a de antes do 1º choque, não o zero do travamento.
+   */
+  travar(e: Phaser.Physics.Arcade.Sprite, ms: number): void {
+    const agora = this.scene.time.now;
+    const ate = (e.getData('travadoAte') as number | undefined) ?? 0;
+    const body = e.body as Phaser.Physics.Arcade.Body;
+    if (ate <= agora) e.setData('velAntes', { x: body.velocity.x, y: body.velocity.y });
+    e.setData('travadoAte', Math.max(ate, agora + ms));
+    body.setVelocity(0, 0);
+    body.setAcceleration(0, 0);
+  }
+
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
     // SNAPSHOT do grupo. `getChildren()` devolve o array vivo: o cargueiro ACRESCENTA a ele
     // (cospe drones) e o culling REMOVE dele, os dois no meio da iteração. Percorrer o array
@@ -427,6 +441,21 @@ export class EnemySystem {
       if (!e.active) continue;
 
       const def = DEFS[e.getData('kind') as EnemyKind];
+
+      // TRAVADO (eletrificado): nada anda, nada atira, nenhum relógio de tiro corre — o `continue` pula tudo abaixo.
+      // Ao destravar, volta a velocidade de antes (a do roteiro, ou a da deriva vertical da água-viva).
+      const travadoAte = e.getData('travadoAte') as number | undefined;
+      if (travadoAte) {
+        const body = e.body as Phaser.Physics.Arcade.Body;
+        if (this.scene.time.now < travadoAte) {
+          body.setVelocity(0, 0);
+          body.setAcceleration(0, 0);
+          continue;
+        }
+        e.setData('travadoAte', 0);
+        const v = e.getData('velAntes') as { x: number; y: number } | undefined;
+        if (v) body.setVelocity(v.x, v.y);
+      }
 
       if (def.travessia === 'vertical') {
         // OS EIXOS TROCADOS: a física cuida da subida/descida, e aqui se escreve o X — a deriva
