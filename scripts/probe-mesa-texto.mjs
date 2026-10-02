@@ -1,12 +1,12 @@
 // A MESA — nenhum texto fora do quadro, nenhum fora do centro (spec 2026-09-30-mesa-compacta-arte-design.md §3.3).
 // Uso: node scripts/probe-mesa-texto.mjs <dir-da-folha>   (com `npm run dev` rodando)
 //
-// Monta as 13 cartas (em lotes de 3) em 1152×648, 1920×1080 e 2560×1440. Para CADA grupo (nome, efeito, requer,
+// Monta as 24 cartas (em lotes de 3) em 1152×648, 1920×1080 e 2560×1440. Para CADA grupo (nome, efeito, requer,
 // raridade, ícone) de CADA carta, isola a TINTA por diferença de fotos (o grupo apagado × só ele aceso) e cobra:
 // - a tinta dentro da caixa com ≥2px finos de folga nos quatro lados;
 // - o centro da tinta a ≤1px fino do centro da caixa (nos eixos que o grupo centra);
 // - no visor, ≥2px finos entre "requer", ícone e raridade, nessa ordem de cima para baixo.
-// Escreve <dir>/mesa-13-cartas.png: as 13 cartas em 1152 (2×, sem suavizar) e em 1920 (1×).
+// Escreve <dir>/mesa-24-cartas.png: as 24 cartas em 1152 (2×, sem suavizar) e em 1920 (1×).
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
@@ -134,14 +134,14 @@ for (const [W, H] of JANELAS) {
       }
     }
   }
-  cobrar(grupos >= 13 * 4, `${tag}: ${grupos} grupos medidos (≥52)`);
+  cobrar(grupos >= 24 * 4, `${tag}: ${grupos} grupos medidos (≥96)`);
   cobrar(erros.length === 0, `${tag}: zero erro${erros.length ? ` (${erros.slice(0, 3).join(' | ')})` : ''}`);
   console.log(`${tag}: ${grupos} grupos medidos`);
   await page.close();
 }
 await browser.close();
 
-// A FOLHA: 13 cartas por janela, 7 por linha.
+// A FOLHA: 24 cartas por janela, 7 por linha.
 const blocos = [];
 let y = 20;
 for (const [W, zoom] of [[1152, 2], [1920, 1]]) {
@@ -155,8 +155,8 @@ for (const [W, zoom] of [[1152, 2], [1920, 1]]) {
   y += Math.ceil(fotos.length / 7) * fh + 30;
 }
 const largura = Math.max(...blocos.map((b) => b.left)) + 600;
-await sharp({ create: { width: largura, height: y, channels: 4, background: '#0b0d14' } }).composite(blocos).png().toFile(`${OUT}/mesa-13-cartas.png`);
-console.log(`folha: ${OUT}/mesa-13-cartas.png`);
+await sharp({ create: { width: largura, height: y, channels: 4, background: '#0b0d14' } }).composite(blocos).png().toFile(`${OUT}/mesa-24-cartas.png`);
+console.log(`folha: ${OUT}/mesa-24-cartas.png`);
 
 console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTUDO OK');
 process.exit(falhas.length ? 1 : 0);

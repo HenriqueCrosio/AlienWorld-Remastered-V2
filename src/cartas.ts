@@ -1,12 +1,14 @@
 import type Phaser from 'phaser';
 import { WEAPONS, type WeaponDef } from './systems/WeaponSystem';
 import { RARIDADES, type Raridade } from './raridade';
+import { CARTAS, type CartaDef } from './data/catalogoCartas';
 
 /**
- * AS CARTAS — o PROTÓTIPO do sistema de cartas (branch `feat/cartas-preview`, 2026-09-27).
+ * AS CARTAS — o sistema de cartas (branch `feat/cartas-preview`; protótipo de 27/09, catálogo de 24 em 01/10).
  *
- * Fonte: `sistema_de_cartas_skills_shoot_em_up_v2.md` (o documento do Henrique), recortado para a 1ª leva de 13
- * cartas. As regras que vieram de lá e que este arquivo guarda:
+ * Fonte: `sistema_de_cartas_skills_shoot_em_up_v2.md` (o documento do Henrique), revisado contra o jogo na spec
+ * `2026-10-01-catalogo-cartas-design.md`. O CATÁLOGO mora em `data/catalogoCartas.ts` (puro, testado em node); aqui
+ * ficam as regras de mão e de mesa:
  * - uma ideia por carta, efeito que se VÊ, poucos números;
  * - 3 cartas na mesa, escolhe 1;
  * - cartas com LIMITE de acúmulo (`max`) e com REQUISITO (`requer`);
@@ -22,55 +24,7 @@ import { RARIDADES, type Raridade } from './raridade';
  */
 
 export { COR_RARIDADE, NOME_RARIDADE, RARIDADES, type Raridade } from './raridade';
-export type Categoria = 'arma' | 'efeito' | 'defesa' | 'movimento';
-
-export interface CartaDef {
-  id: string;
-  nome: string;
-  /** UMA linha curta — cabe em ~16 caracteres por linha, duas linhas no máximo. */
-  texto: string;
-  /** O efeito em UMA linha só, em caixa alta (a carta compacta; referência: Deep Rock Galactic: Survivor). */
-  curto: string;
-  categoria: Categoria;
-  raridade: Raridade;
-  /** Quantas vezes pode ser escolhida. */
-  max: number;
-  /** Só aparece com esta carta já na mão. */
-  requer?: string;
-  /** Some da mesa quando esta outra já foi escolhida (o Duplo depois do Triplo). */
-  excluiSe?: string;
-  /** Não aparece na Fase 1 (voo por impulso). */
-  semF1?: boolean;
-  /** Textura do ícone, se a arte já existir. */
-  icone?: string;
-}
-
-export const CARTAS: Record<string, CartaDef> = {
-  // ─── 🔫 ARMAMENTO ───
-  WPN_001: { id: 'WPN_001', nome: 'TIRO DUPLO', texto: 'dispara 2\nprojéteis', curto: '2 PROJÉTEIS', categoria: 'arma', raridade: 'comum', max: 1, excluiSe: 'WPN_002' },
-  WPN_002: { id: 'WPN_002', nome: 'TIRO TRIPLO', texto: 'dispara 3\nem leque', curto: '3 EM LEQUE', categoria: 'arma', raridade: 'incomum', max: 1 },
-  WPN_004: { id: 'WPN_004', nome: 'CADÊNCIA', texto: '+15% de\ncadência', curto: '+15% CADÊNCIA', categoria: 'arma', raridade: 'comum', max: 3 },
-  WPN_007: { id: 'WPN_007', nome: 'PERFURANTE', texto: 'atravessa\ninimigos', curto: 'ATRAVESSA INIMIGOS', categoria: 'arma', raridade: 'incomum', max: 1 },
-  WPN_008: { id: 'WPN_008', nome: 'TIRO PESADO', texto: 'dano x2,\nmais lento', curto: 'DANO x2', categoria: 'arma', raridade: 'rara', max: 1 },
-  // ─── 💥 EFEITO ───
-  EFF_001: { id: 'EFF_001', nome: 'EXPLOSIVO', texto: 'explode ao\nacertar', curto: 'EXPLODE AO ACERTAR', categoria: 'efeito', raridade: 'incomum', max: 1 },
-  EFF_004: { id: 'EFF_004', nome: 'INCENDIÁRIO', texto: 'chance de\nincendiar', curto: 'PODE INCENDIAR', categoria: 'efeito', raridade: 'incomum', max: 1 },
-  EFF_006: { id: 'EFF_006', nome: 'COMBUSTÃO', texto: 'queimado\nexplode', curto: 'QUEIMADO EXPLODE', categoria: 'efeito', raridade: 'epica', max: 1, requer: 'EFF_004' },
-  // ─── 🛡️ DEFESA (dentro das 3 vidas) ───
-  DEF_001: { id: 'DEF_001', nome: 'CASCO', texto: 'absorve 1\ngolpe', curto: 'ABSORVE 1 GOLPE', categoria: 'defesa', raridade: 'comum', max: 1 },
-  DEF_002: { id: 'DEF_002', nome: 'RECARGA', texto: 'o casco\nvolta rápido', curto: 'CASCO VOLTA RÁPIDO', categoria: 'defesa', raridade: 'incomum', max: 2, requer: 'DEF_001' },
-  DEF_003: { id: 'DEF_003', nome: 'VIDA EXTRA', texto: '+1 vida', curto: '+1 VIDA', categoria: 'defesa', raridade: 'rara', max: 1 },
-  DEF_004: { id: 'DEF_004', nome: 'CASCO REATIVO', texto: 'casco partido\nexplode', curto: 'CASCO EXPLODE', categoria: 'defesa', raridade: 'rara', max: 1, requer: 'DEF_001' },
-  // ─── ⚡ MOVIMENTO ───
-  MOV_001: { id: 'MOV_001', nome: 'PROPULSORES', texto: '+12% de\nvelocidade', curto: '+12% VELOCIDADE', categoria: 'movimento', raridade: 'comum', max: 2, semF1: true },
-};
-
-/**
- * As cartas que TÊM ícone (PixelLab object 75460844, 32×32, em `sprites/cartas/icone-<id>.png`). Sem PNG, a carta
- * mostra a categoria em texto. Carregados no mundo (`BootScene`) e na camada HD (`BootHDScene`, onde a mesa mora).
- */
-export const ICONES_CARTAS = ['WPN_001', 'WPN_002', 'WPN_004', 'WPN_007', 'WPN_008', 'EFF_001', 'EFF_004', 'EFF_006',
-  'DEF_001', 'DEF_002', 'DEF_003', 'DEF_004', 'MOV_001'];
+export { CARTAS, ICONES_CARTAS, type CartaDef, type Categoria } from './data/catalogoCartas';
 
 const ORDEM = RARIDADES;
 
