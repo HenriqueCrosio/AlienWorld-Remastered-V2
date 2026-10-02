@@ -373,6 +373,54 @@ const aura = await page.evaluate(async () => {
 });
 conferir(aura.antes && !aura.depois && aura.vidas === aura.vidasDepois, 'a aura aparece com o Casco pronto e some quando ele quebra', aura);
 
+// ── DASH (MOV_003): dois toques, avanço curto, invulnerável, espera ──
+async function duploToque(tecla) {
+  await page.keyboard.down(tecla);
+  await page.waitForTimeout(40);
+  await page.keyboard.up(tecla);
+  await page.waitForTimeout(60);
+  await page.keyboard.down(tecla);
+  await page.waitForTimeout(40);
+  await page.keyboard.up(tecla);
+}
+const xDaNave = () => page.evaluate(() => window.__teste.cena().ship.x);
+
+await fase([]);
+let x0 = await xDaNave();
+await duploToque('KeyD');
+await page.waitForTimeout(300);
+const semCarta = (await xDaNave()) - x0;
+
+await fase(['MOV_003']);
+x0 = await xDaNave();
+await duploToque('KeyD');
+await page.waitForTimeout(20);
+const naveDash = await page.evaluate(() => ({ x: window.__teste.cena().ship.x, y: window.__teste.cena().ship.y }));
+await foto('dash-fantasmas', naveDash.x - 15, naveDash.y, 90, 40);
+await page.waitForTimeout(280);
+const comDash = (await xDaNave()) - x0;
+conferir(semCarta < 15 && comDash >= 30, 'dois toques: o dash avança ~40px (sem a carta, nada)', { semCarta, comDash });
+
+const hud = await page.evaluate(() => window.__teste.cena().hud.text.includes('DASH'));
+x0 = await xDaNave();
+await duploToque('KeyD');
+await page.waitForTimeout(300);
+const naEspera = (await xDaNave()) - x0;
+conferir(!hud && naEspera < 15, 'na espera, o duplo toque não dispara e a HUD não mostra DASH', { hud, naEspera });
+await page.waitForTimeout(2500);
+const hudDepois = await page.evaluate(() => window.__teste.cena().hud.text.includes('DASH'));
+conferir(hudDepois, 'passada a espera, "DASH" acende na HUD', hudDepois);
+
+await duploToque('KeyW');
+const inv = await page.evaluate(() => {
+  const s = window.__teste.cena();
+  s.invulnerableUntil = 0;
+  const antes = s.lives;
+  s.damageShip();
+  return { antes, depois: s.lives };
+});
+conferir(inv.antes === inv.depois, 'durante o dash a nave não leva dano', inv);
+
 // ─── FIM ───
 
 conferir(erros.length === 0, 'nenhum erro no console', erros);

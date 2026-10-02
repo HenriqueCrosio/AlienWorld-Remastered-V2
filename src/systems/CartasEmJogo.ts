@@ -8,6 +8,7 @@ import { Lancadores } from './cartas/Lancadores';
 import { DroneAuxiliar } from './cartas/DroneAuxiliar';
 import { Eletrico } from './cartas/Eletrico';
 import { AuraDoCasco } from './cartas/AuraDoCasco';
+import { Dash } from './cartas/Dash';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 
 export type { HostCartas } from './cartas/contexto';
@@ -44,6 +45,7 @@ export class CartasEmJogo {
   readonly drone: DroneAuxiliar;
   readonly eletrico: Eletrico;
   readonly aura: AuraDoCasco;
+  readonly dash: Dash;
   private readonly c: Contexto;
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
@@ -73,6 +75,7 @@ export class CartasEmJogo {
     this.cascoPronto = tem(this.reg, 'DEF_001');
     this.aura = new AuraDoCasco(this.c);
     if (this.cascoPronto) this.aura.mostrar();
+    this.dash = new Dash(this.c);
   }
 
   /** O Casco está pronto para absorver o próximo golpe? (a HUD mostra) */
@@ -86,6 +89,16 @@ export class CartasEmJogo {
    */
   get temGuiado(): boolean {
     return tem(this.reg, 'WPN_009') || tem(this.reg, 'WPN_010');
+  }
+
+  /** "DASH" aceso na HUD. */
+  get dashPronto(): boolean {
+    return this.dash.pronto;
+  }
+
+  /** Durante o dash a nave não leva dano (nem o Casco gasta). */
+  intocavel(agora: number): boolean {
+    return this.dash.intocavel(agora);
   }
 
   /** "FLARE" aceso na HUD: o jogador pode soltar o próximo. */
@@ -175,6 +188,8 @@ export class CartasEmJogo {
     // PROPULSORES: só no voo livre (a F1 é impulso, e a carta nem aparece nela).
     const prop = quantas(this.reg, 'MOV_001');
     if (livre && prop) body.setMaxVelocity(VELOCIDADE_LIVRE * (1 + 0.12 * prop));
+    // O DASH depois dos Propulsores: durante o avanço, o teto de velocidade é dele.
+    this.dash.tick(livre, body);
 
     // A QUEIMA: 1 de dano a cada 0.4s enquanto durar.
     this.queimaTick -= dt;

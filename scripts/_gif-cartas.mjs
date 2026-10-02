@@ -32,6 +32,7 @@ const CENARIOS = {
   eletricotrava: { nome: 'ELÉTRICO — a canhoneira eletrificada para e não atira', cartas: ['EFF_011'], atira: true, alvos: 'canhoneiras' },
   casco: { nome: 'CASCO — a aura pulsa; no golpe, estoura e some (nave humana)', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
   cascoalien: { nome: 'CASCO — nave alien', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', nave: 'alienigena', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
+  dash: { nome: 'DASH — dois toques: avanço invulnerável com imagens-fantasma; espera de 2,5s', cartas: ['MOV_003'], atira: false, alvos: 'nenhum', forcar: [[0.4, 'dashD'], [1.2, 'dashD'], [3.0, 'dashW']], clip: { x: 30, y: 36, w: 170, h: 110 } },
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
@@ -143,6 +144,18 @@ async function gravar(cen, modo) {
     const seg = (i * POR_FOTO) / 60;
     while (forcar.length && forcar[0][0] <= seg) {
       const [, qual] = forcar.shift();
+      // O DASH é o duplo toque de VERDADE: teclas reais entre os passos do relógio (40ms desce, 60ms solta, desce de novo).
+      if (qual.startsWith('dash')) {
+        const tecla = qual === 'dashD' ? 'KeyD' : 'KeyW';
+        await page.keyboard.down(tecla);
+        await passo(2);
+        await page.keyboard.up(tecla);
+        await passo(4);
+        await page.keyboard.down(tecla);
+        await passo(2);
+        await page.keyboard.up(tecla);
+        continue;
+      }
       await page.evaluate((qual) => {
         const l = window.__game.scene.getScene('Game').cartas.lancadores;
         const agora = window.__game.scene.getScene('Game').time.now;

@@ -2240,7 +2240,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private damageShip(): void {
-    if (this.over || this.time.now < this.invulnerableUntil) return;
+    if (this.over || this.time.now < this.invulnerableUntil || this.cartas.intocavel(this.time.now)) return;
 
     // PROTÓTIPO DAS CARTAS: o CASCO absorve o golpe inteiro — a vida, a especial e as bombas ficam.
     if (this.cartas.absorver(this.time.now)) {
@@ -2342,7 +2342,7 @@ export class GameScene extends Phaser.Scene {
     const nome = this.weapons.overheated ? 'TRAVADA' : w.name;
 
     this.hud.setText(
-      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.flarePronto ? ' FLARE' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
+      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.flarePronto ? ' FLARE' : ''}${this.cartas.dashPronto ? ' DASH' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 
