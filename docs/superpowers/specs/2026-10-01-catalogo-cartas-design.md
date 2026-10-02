@@ -271,6 +271,6 @@ Regra: partir da arte aprovada; folha crua + em cena na escala real; ele escolhe
 - `probe-cartas` e `probe-mesa-texto` continuam passando — a mesa agora com **24** cartas (o tamanho único da letra é
   recalculado com os nomes novos; nenhum passa de 14 letras).
 - Uma sonda nova por mecânica (`probe-cartas-novas`): cada carta aplicada faz o que diz (o míssil persegue e explode; o
-  flare explode sozinho; o dash atravessa um tiro sem dano; a Fragmentado solta estilhaços; a Bomba Extra soma; o
+  flare explode sozinho; o dash atravessa um tiro sem dano; o Fragmentado solta estilhaços; a Bomba Extra soma; o
   eletrificado não atira enquanto trava; o arco salta para no máximo 3 e não recursa; o pulso da Sobrecarga não
   eletrifica; chefão não trava; a aura aparece com o Casco pronto e some quando ele quebra).
