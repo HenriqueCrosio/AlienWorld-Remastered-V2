@@ -20,8 +20,8 @@ interface Onda {
 
 /**
  * A ARENA DO SANDBOX (spec `2026-10-02-sandbox-dev-design.md` §3–4): solta as ondas da montagem (pela direita,
- * espalhadas na altura, escalonadas; repetindo no intervalo ou uma só), as teclas de dev (N onda agora, X limpar,
- * I invulnerável, M medidas) e o painel de medidas no canto da tela. Mede quanto cada onda levou para sumir.
+ * espalhadas na altura, escalonadas; repetindo no intervalo ou uma só), as teclas de dev (1 onda agora, 2 limpar,
+ * 3 invulnerável, 4 medidas — eram N/X/I/M até 03/10) e o painel de medidas no canto da tela. Mede quanto cada onda levou para sumir.
  */
 export class SandboxArena {
   invulneravel = false;
@@ -39,11 +39,12 @@ export class SandboxArena {
   ) {
     this.proxima = this.total > 0 ? scene.time.now + PRIMEIRA_MS : Infinity;
 
+    // As teclas de dev nos NÚMEROS (03/10): as letras de antes (N, X, I, M) colidiam com o perfil clássico (Z/X/C).
     const kb = scene.input.keyboard!;
-    kb.on('keydown-N', () => this.onda());
-    kb.on('keydown-X', () => this.limpar());
-    kb.on('keydown-I', () => (this.invulneravel = !this.invulneravel));
-    kb.on('keydown-M', () => (this.painel.hidden = !this.painel.hidden));
+    kb.on('keydown-ONE', () => this.onda());
+    kb.on('keydown-TWO', () => this.limpar());
+    kb.on('keydown-THREE', () => (this.invulneravel = !this.invulneravel));
+    kb.on('keydown-FOUR', () => (this.painel.hidden = !this.painel.hidden));
 
     this.painel = document.createElement('div');
     this.painel.id = 'sandbox-medidas';

@@ -595,8 +595,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     if (import.meta.env.DEV) {
-      // Pula da fase direto para o chefão, sem reiniciar.
-      kb.on('keydown-G', () => {
+      // 5: pula da fase direto para o chefão, sem reiniciar (era o G até 03/10 — as teclas de dev foram para 1–6).
+      kb.on('keydown-FIVE', () => {
         if (this.boss || this.over) return;
         // ⚠️ A ARENA NUNCA PRENDE A FASE: pular para o chefão encerra o golfinho primeiro, senão o
         // teto do relógio seguraria o `elapsed` que a linha abaixo acabou de escrever. Sem reacender
@@ -605,7 +605,7 @@ export class GameScene extends Phaser.Scene {
         this.elapsed = this.director.bossTime - 1;
         this.director.skipTo(this.elapsed);
         // ⚠️ E O ESTADO QUE OS EVENTOS DESCARTADOS DEIXARIAM, À MÃO — a mesma linha que o modo
-        // treino já tinha e que o `G` não tinha. `skipTo` DESCARTA sem executar: sem isto, apertar
+        // treino já tinha e que o `G` (hoje o 5) não tinha. `skipTo` DESCARTA sem executar: sem isto, apertar
         // `G` em t=10 chegava ao chefão com a parede que valia em t=10 (espessura 16) em vez dos
         // 54 que o roteiro já teria mandado, e sem o `duto`.
         //
@@ -620,18 +620,9 @@ export class GameScene extends Phaser.Scene {
         this.corredorRate = 0;
       });
 
-      // Troca de arma. No treino você chega só com a PULSE (não passou pelos pickups),
-      // e balancear o chefão contra a arma base mede o pior caso, não o caso real.
-      kb.on('keydown-ONE', () => this.weapons.equip('pulse'));
-      kb.on('keydown-TWO', () => this.weapons.equip('hmg'));
-      kb.on('keydown-THREE', () => this.weapons.equip('shotgun'));
-      // O ENXAME (a arma da nave alienígena). Sem este atalho, testá-la exige jogar a Fase 2
-      // inteira e a cutscene da Doca a cada tentativa — e ela é a arma que MAIS precisa de
-      // playtest: a curva de 150°/s é a única coisa que a separa de um "modo fácil".
-      kb.on('keydown-FOUR', () => this.weapons.equip('enxame'));
-      // PROTÓTIPO DAS CARTAS: `C` abre uma mesa a qualquer hora — testar carta sem jogar até a próxima mesa.
+      // PROTÓTIPO DAS CARTAS: o 6 abre uma mesa a qualquer hora (era o C — que hoje é o dash do perfil clássico).
       let mesasDev = 0;
-      kb.on('keydown-C', () => {
+      kb.on('keydown-SIX', () => {
         if (!this.over) this.cartas.abrirMesa(`dev${mesasDev++}`, 'MESA DE TESTE (DEV)');
       });
     }
@@ -2279,7 +2270,7 @@ export class GameScene extends Phaser.Scene {
 
   private damageShip(): void {
     if (this.over || this.time.now < this.invulnerableUntil || this.cartas.intocavel(this.time.now)) return;
-    // O INVULNERÁVEL do sandbox (tecla I): para olhar as skills sem morrer.
+    // O INVULNERÁVEL do sandbox (tecla 3): para olhar as skills sem morrer.
     if (this.arena?.invulneravel) return;
 
     // PROTÓTIPO DAS CARTAS: o CASCO absorve o golpe inteiro — a vida, a especial e as bombas ficam.

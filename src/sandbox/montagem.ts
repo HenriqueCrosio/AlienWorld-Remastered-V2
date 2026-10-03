@@ -163,7 +163,7 @@ function desenhar(): void {
   <div class="caixa"><h3>ONDA</h3>
     <label class="grupo">intervalo <input type="number" id="sb-intervalo" min="3" max="30" value="${cfg.intervalo}"> s</label>
     <div style="margin-top:6px"><label><input type="checkbox" id="sb-repetir"${cfg.repetir ? ' checked' : ''}> repetir</label></div>
-    <div class="teclas">no jogo: <kbd>ESC</kbd> montagem · <kbd>N</kbd> onda agora · <kbd>X</kbd> limpar · <kbd>I</kbd> invulnerável · <kbd>G</kbd> chefão · <kbd>M</kbd> medidas · <kbd>L</kbd> flare · dois toques = dash</div></div>
+    <div class="teclas">no jogo: <kbd>ESPAÇO</kbd> tiro · <kbd>SHIFT</kbd> bomba · <kbd>E</kbd> dash · <kbd>F</kbd> flare · <kbd>ESC</kbd> montagem — dev: <kbd>1</kbd> onda · <kbd>2</kbd> limpar · <kbd>3</kbd> invulnerável · <kbd>4</kbd> medidas · <kbd>5</kbd> chefão · <kbd>6</kbd> mesa</div></div>
   <div class="caixa" style="display:grid;place-items:center"><button class="jogar" data-acao="jogar"${estourou ? ' disabled title="pontos acima do limite da nave"' : ''}>JOGAR</button></div>
 </div>
 <div class="dica" hidden></div>`;
