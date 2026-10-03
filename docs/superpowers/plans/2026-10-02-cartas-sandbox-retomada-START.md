@@ -21,9 +21,10 @@
 ## 2. Como testar
 
 - `npm run dev` → **http://localhost:5173/?sandbox** — a montagem (clique +1, botão direito −1; atalhos FOGO,
-  ELÉTRICA, EXPLOSÕES, CASCO). No jogo: **ESC** montagem · **N** onda · **X** limpar · **I** invulnerável · **G**
-  chefão · **M** medidas · **L** flare · dois toques = dash · **C** abre uma mesa.
-- Sem o sandbox: `C` abre uma mesa na fase; no console, `__game.scene.getScene('Game').cartas.aplicar('EFF_002')`.
+  ELÉTRICA, EXPLOSÕES, CASCO). No jogo (⚠️ o MAPA DE TECLAS de 03/10): **Espaço** tiro · **Shift** bomba · **E** dash
+  · **F** flare · **ESC** montagem — dev: **1** onda · **2** limpar · **3** invulnerável · **4** medidas · **5**
+  chefão · **6** abre uma mesa. Perfil clássico: `?teclas=classico` (Z/X/C/F; `?teclas=padrao` volta).
+- Sem o sandbox: `6` abre uma mesa na fase; no console, `__game.scene.getScene('Game').cartas.aplicar('EFF_002')`.
 - **Testes em node:** `test-catalogo-cartas` · `test-cartas-regras` · `test-sandbox-arvore` · `test-texto-encaixe` ·
   `test-molduras`.
 - **Sondas:** `probe-cartas-novas` (26 casos, uma por mecânica) · `probe-sandbox` (13) · `probe-cartas` ·

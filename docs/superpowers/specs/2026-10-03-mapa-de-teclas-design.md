@@ -2,6 +2,7 @@
 
 > Etapa 1.5 do 🧭 (cartas) → base da 1.6 (controle de Xbox/PS) e do futuro menu de OPÇÕES (controles, áudio).
 > Brainstorming com ele em 03/10. Substitui as teclas PROVISÓRIAS de 02/10 (memória `mapa-de-teclas-pendente`).
+> ✅ **IMPLEMENTADA em 03/10** (plano `plans/2026-10-03-mapa-de-teclas.md`). O que mudou na execução está na §8.
 
 ## 1. O problema
 
@@ -143,3 +144,21 @@ A coluna "Controle" da §3.1 é o alvo. Na 1.6, o `InputReader` soma o `scene.in
   (com a carta, fora da F1); F solta o flare; segurar Espaço com a mesa abrindo NÃO escolhe carta; `?teclas=classico`
   troca para Z/X/C.
 - **Ele joga** a F1 (o tiro manual) e o sandbox (Dash no E, Flare no F) — é o teste que fecha.
+
+## 8. O que mudou na execução (03/10) — três defeitos que a `probe-teclas` achou
+
+1. **O toque rápido se perdia.** A §4.2 dizia que o `JustDown` pegava o toque que desce e sobe no mesmo quadro — ERRADO:
+   o `onUp` do Phaser APAGA o `_justDown`. O `InputReader` agora escuta o evento `down` de cada tecla (que já ignora a
+   repetição do sistema) e guarda a borda num conjunto até o próximo `read`.
+2. **A mesa nunca via as teclas que a fase captura** — defeito ANTIGO, de antes deste mapa. Os dois jogos (o mundo e a
+   camada HD) escutam a mesma janela; o mundo dá `preventDefault` no Espaço, nas setas e no WASD, e o Phaser da camada
+   ignora evento já bloqueado. Com a mesa aberta, ← → e A/D não moviam o cursor (só Enter, 1–3 e o mouse funcionavam).
+   A `CartasScene` do mundo (a que repassa para a HD) agora SOLTA a captura (`disableGlobalCapture`) enquanto a mesa
+   está aberta e devolve no `shutdown`.
+3. **Um evento lido duas vezes.** O Phaser reprocessa a fila INTEIRA de teclas a cada evento novo e só a limpa no fim
+   do quadro; o filtro de duplicata dele compara só com o evento anterior. Soltar o Espaço e apertar → no mesmo
+   quadro fazia o → andar duas casas. A mesa trata cada `KeyboardEvent` uma vez só (`WeakSet`). No `InputReader` não
+   acontece: a borda é um conjunto por quadro.
+
+E nas sondas: as do ENXAME (`probe-enxame`, `probe-enxame-taxa`) equipam a arma direto na cena (o 1–4 saiu); a
+`probe-bomba` confirma a mesa do meio da fase que abre no treino da F1 (estava parada nela desde as cartas de 27/09).

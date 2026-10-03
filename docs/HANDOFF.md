@@ -26,6 +26,14 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > o START de 02/10 (onde está, como testar, as decisões dele, os próximos passos e as lições). **Pendentes:** o MAPA
 > DE TECLAS; a arte aprovada das peças (plano novo); a frente B (inimigos que atiram + ondas maiores) e a C.
 >
+> 📍 **03/10 — O MAPA DE TECLAS, fechado e implementado** (spec `specs/2026-10-03-mapa-de-teclas-design.md`, plano
+> `plans/2026-10-03-mapa-de-teclas.md`): as ações na mão esquerda, iguais para WASD ou setas — **Espaço** tiro ·
+> **Shift** bomba · **E** dash · **F** flare · W/↑ flap; o perfil **clássico** `?teclas=classico` (Z/X/C/F) é o gancho
+> do futuro menu de controles. O **tiro da F1 virou manual** (a dificuldade da F1 volta para a calibragem). Dev em
+> **1–6**. No caminho, dois defeitos antigos consertados: a mesa nunca via ← → / A D (o mundo bloqueava as teclas) e
+> um toque rápido se perdia. **Próximo:** ele jogar a F1 e o sandbox com as teclas novas; depois a arte aprovada das
+> peças. **Novo no roadmap:** o menu de OPÇÕES (controles com remapeamento + áudio), antes da 1.6.
+>
 > (29/09 — o ponto anterior: as três vozes e a mesa compacta; START em `plans/2026-09-29-vozes-retomada-START.md`.)
 
 ### O estado em uma linha
@@ -58,6 +66,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
 | 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
+| 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ⬜ spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
