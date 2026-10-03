@@ -1,54 +1,49 @@
 import Phaser from 'phaser';
 import type { InputState } from './flight/FlightController';
+import { ACOES, mapaAtivo, type Acao, type Mapa } from './controles';
 
 /**
- * Lê teclado + ponteiro e devolve um InputState neutro.
- * As conduções recebem intenção ("subir"), nunca teclas — é o que permite plugar
- * touch/gamepad depois sem tocar em FlapController/FreeController.
+ * Lê o teclado PELO MAPA DE TECLAS (`src/controles.ts`) e devolve um InputState neutro.
+ * As conduções e as cartas recebem intenção ("subir", "dash"), nunca teclas — é o que permite plugar o gamepad
+ * (etapa 1.6) somando no MESMO estado, sem tocar em quem consome.
+ *
+ * ⚠️ UM LEITOR SÓ, UMA LEITURA POR QUADRO: o `JustDown` do Phaser é CONSUMIDO por quem lê primeiro. Até 02/10 o Dash
+ * escutava o evento por fora porque o flap já gastava o `JustDown` da tecla de cima. Aqui cada tecla é lida uma vez e
+ * as bordas das ações saem dessa leitura — um toque que desce e sobe dentro do mesmo quadro continua contando (o
+ * `_justDown` nasce no evento, não no `isDown`).
+ *
+ * O mouse não entra mais no jogo (03/10): ele atirava e fazia flap — entrada duplicada.
  */
 export class InputReader {
-  private readonly keys: Record<string, Phaser.Input.Keyboard.Key>;
-  private readonly pointer: Phaser.Input.Pointer;
+  private readonly mapa: Mapa;
+  private readonly keys = new Map<string, Phaser.Input.Keyboard.Key>();
 
   constructor(scene: Phaser.Scene) {
     const kb = scene.input.keyboard!;
-    this.keys = {
-      up: kb.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-      down: kb.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-      left: kb.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-      right: kb.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-      upArrow: kb.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
-      downArrow: kb.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
-      leftArrow: kb.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
-      rightArrow: kb.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
-      space: kb.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
-      fire: kb.addKey(Phaser.Input.Keyboard.KeyCodes.J),
-      bomb: kb.addKey(Phaser.Input.Keyboard.KeyCodes.K),
-    };
-    this.pointer = scene.input.activePointer;
+    this.mapa = mapaAtivo();
+    for (const a of ACOES) {
+      for (const nome of this.mapa[a]) if (!this.keys.has(nome)) this.keys.set(nome, kb.addKey(nome));
+    }
   }
 
   read(): InputState {
-    const k = this.keys;
-    const up = k.up.isDown || k.upArrow.isDown;
-
-    // O flap dispara na BORDA da tecla, não enquanto segurada — senão vira voo contínuo.
-    const flapPressed =
-      Phaser.Input.Keyboard.JustDown(k.space) ||
-      Phaser.Input.Keyboard.JustDown(k.up) ||
-      Phaser.Input.Keyboard.JustDown(k.upArrow) ||
-      (this.pointer.isDown && this.pointer.getDuration() < 32);
+    const desceu = new Set<string>();
+    for (const [nome, k] of this.keys) if (Phaser.Input.Keyboard.JustDown(k)) desceu.add(nome);
+    const segura = (a: Acao): boolean => this.mapa[a].some((n) => this.keys.get(n)!.isDown);
+    const apertou = (a: Acao): boolean => this.mapa[a].some((n) => desceu.has(n));
 
     return {
-      up,
-      down: k.down.isDown || k.downArrow.isDown,
-      left: k.left.isDown || k.leftArrow.isDown,
-      right: k.right.isDown || k.rightArrow.isDown,
-      flapPressed,
-      // No Livre o Espaço não impulsiona, então serve de gatilho.
-      firing: k.fire.isDown || k.space.isDown || this.pointer.isDown,
-      // A bomba é BORDA (JustDown): segurar o K não pode gastar o estoque inteiro.
-      bombPressed: Phaser.Input.Keyboard.JustDown(k.bomb),
+      up: segura('cima'),
+      down: segura('baixo'),
+      left: segura('esquerda'),
+      right: segura('direita'),
+      // O flap dispara na BORDA da tecla, não enquanto segurada — senão vira voo contínuo.
+      flapPressed: apertou('flap'),
+      firing: segura('tiro'),
+      // A bomba é BORDA: segurar não pode gastar o estoque inteiro.
+      bombPressed: apertou('bomba'),
+      dashPressed: apertou('dash'),
+      flarePressed: apertou('flare'),
     };
   }
 }

@@ -7,12 +7,14 @@ import type { FlightController, InputState } from './FlightController';
  * Gravidade constante puxa a nave para baixo; o input aplica um impulso vertical.
  * No v2 isso era `Rigidbody2D.AddForce` no FixedUpdate; aqui é o Arcade Physics,
  * que também roda em passo fixo. A nave nunca para no ar.
+ *
+ * Desde 03/10 o TIRO É MANUAL aqui também (o mapa de teclas): o flap é W / ↑ e o tiro é o Espaço — cada tecla faz
+ * uma coisa só no jogo inteiro. A dificuldade da F1 volta para a calibragem.
  */
 export class FlapController implements FlightController {
   readonly id = 'flap' as const;
   readonly label = 'FLAP (LEGACY)';
   readonly scoreMultiplier = 1.25;
-  readonly autoFire = true;
 
   private static readonly GRAVITY = 420;
   private static readonly IMPULSE = 170;

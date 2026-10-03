@@ -7,12 +7,16 @@ export interface InputState {
   down: boolean;
   left: boolean;
   right: boolean;
-  /** true apenas no frame em que a tecla desceu — o flap depende disso. */
+  /** FLAP (W / ↑): true apenas no frame em que a tecla desceu — o flap depende disso. */
   flapPressed: boolean;
-  /** Gatilho segurado. Ignorado por conduções com autoFire. */
+  /** TIRO segurado (Espaço no padrão, Z no clássico). Manual nas duas conduções desde 03/10. */
   firing: boolean;
-  /** BOMBA (K): true apenas no frame em que a tecla desceu. A cena decide se gasta. */
+  /** BOMBA (Shift / X): true apenas no frame em que a tecla desceu. A cena decide se gasta. */
   bombPressed: boolean;
+  /** DASH (E / C): borda. Quem decide se sai é a carta (`Dash`). */
+  dashPressed: boolean;
+  /** FLARE (F): borda. Quem decide se sai é a carta (`Lancadores`). */
+  flarePressed: boolean;
 }
 
 /**
@@ -40,16 +44,6 @@ export interface FlightController {
 
   /** Multiplicador de score (o flap é mais difícil, logo paga mais). */
   readonly scoreMultiplier: number;
-
-  /**
-   * A nave atira sozinha nesta condução?
-   *
-   * No Flap a mão está 100% ocupada com a altitude — exigir o gatilho ali torna o
-   * run'n'gun impraticável (constatado no playtest do M1). O tiro automático devolve
-   * o gênero: o sabor Metal Slug vem da variedade de armas e do volume de inimigos,
-   * não de segurar o botão.
-   */
-  readonly autoFire: boolean;
 }
 
 /**

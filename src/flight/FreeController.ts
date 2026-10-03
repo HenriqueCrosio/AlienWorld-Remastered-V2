@@ -9,7 +9,6 @@ export class FreeController implements FlightController {
   readonly id = 'free' as const;
   readonly label = 'LIVRE (NEW)';
   readonly scoreMultiplier = 1;
-  readonly autoFire = false;
 
   private static readonly SPEED = 110;
   /** Drag alto = parada seca. Controle direto, sem inércia de nave espacial "realista". */

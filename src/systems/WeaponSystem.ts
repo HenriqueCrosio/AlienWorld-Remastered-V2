@@ -480,7 +480,7 @@ export class WeaponSystem {
   }
 
   /**
-   * `wantsToFire` já vem resolvido pela condução (autoFire ou gatilho).
+   * `wantsToFire` já vem resolvido pela cena (o gatilho, e a trava do chefão).
    *
    * `targets` são os alvos VÁLIDOS da perseguição (inimigos e chefão — nunca rocha). A cena os
    * fornece; a arma não sabe o que é um inimigo, só que aquilo ali é uma coisa em que se mira.

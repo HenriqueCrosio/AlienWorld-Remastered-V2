@@ -716,14 +716,14 @@ export class GameScene extends Phaser.Scene {
     this.cartas.tick(time, dt, this.elapsed, this.controller.id === 'free', body);
     this.pecas.tick(this.elapsed);
 
-    // A condução decide se o gatilho é manual ou automático. A arma não sabe a diferença.
+    // O gatilho é manual nas duas conduções (03/10 — o tiro automático da F1 saiu com o mapa de teclas).
     //
     // Os ALVOS da perseguição (a nave alienígena) saem daqui: inimigos vivos + o chefão. Rocha
     // NÃO entra — um projétil teleguiado que se joga no primeiro asteroide da frente seria uma
     // arma que se sabota sozinha, e o cinturão inteiro é feito de asteroides.
     this.weapons.update(
       dt,
-      (this.controller.autoFire || input.firing) && this.boss?.armaTravada !== true,
+      input.firing && this.boss?.armaTravada !== true,
       this.ship.x + 10,
       this.ship.y,
       this.homingTargets(),
@@ -732,8 +732,7 @@ export class GameScene extends Phaser.Scene {
     this.ship.setAngle(Phaser.Math.Clamp(body.velocity.y * 0.06, -25, 25));
     this.ship.setVisible(time > this.invulnerableUntil || Math.floor(time / 60) % 2 === 0);
 
-    // A BOMBA é da cena, não da arma: funciona nas duas conduções (no flap o K está livre,
-    // já que o gatilho é automático) e independe da arma equipada.
+    // A BOMBA é da cena, não da arma: funciona nas duas conduções e independe da arma equipada.
     if (input.bombPressed) this.useBomb();
 
     // O CHÃO MACHUCA. Sem isto, a estratégia ótima no flap é raspar no solo — o que
