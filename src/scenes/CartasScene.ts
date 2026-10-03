@@ -144,18 +144,30 @@ export class CartasScene extends Phaser.Scene {
     this.posicionar();
 
     const kb = this.input.keyboard!;
+    // ⚠️ UM EVENTO, UMA VEZ: o Phaser reprocessa a fila INTEIRA de teclas a cada evento novo e só a limpa no fim do
+    // quadro (o filtro de duplicata dele compara só com o evento anterior). Dois toques no mesmo quadro — soltar o
+    // Espaço e apertar → — faziam o → andar duas casas (a `probe-teclas` pegou, 03/10).
+    const vistos = new WeakSet<KeyboardEvent>();
+    const uma = (f: () => void) => (ev: KeyboardEvent) => {
+      if (vistos.has(ev)) return;
+      vistos.add(ev);
+      f();
+    };
     const mover = (d: number) => {
       this.cursor = Phaser.Math.Wrap(this.cursor + d, 0, this.opcoes.length);
       this.marcar();
     };
-    kb.on('keydown-LEFT', () => mover(-1));
-    kb.on('keydown-A', () => mover(-1));
-    kb.on('keydown-RIGHT', () => mover(1));
-    kb.on('keydown-D', () => mover(1));
+    kb.on('keydown-LEFT', uma(() => mover(-1)));
+    kb.on('keydown-A', uma(() => mover(-1)));
+    kb.on('keydown-RIGHT', uma(() => mover(1)));
+    kb.on('keydown-D', uma(() => mover(1)));
     // ⚠️ SÓ TOQUE NOVO: quem segura o TIRO (o Espaço) quando a mesa abre manda a repetição automática do sistema como
     // `keydown` — sem este filtro, a carta do cursor era escolhida sem ele ver.
-    const novo = (f: () => void) => (ev: KeyboardEvent) => {
-      if (!ev.repeat) f();
+    const novo = (f: () => void) => {
+      const g = uma(f);
+      return (ev: KeyboardEvent) => {
+        if (!ev.repeat) g(ev);
+      };
     };
     kb.on('keydown-ONE', novo(() => this.confirmar(0)));
     kb.on('keydown-TWO', novo(() => this.confirmar(1)));
@@ -207,7 +219,13 @@ export class CartasScene extends Phaser.Scene {
       fechada = true;
       this.scene.stop();
     };
+    // ⚠️ O MUNDO SOLTA AS TECLAS ENQUANTO A MESA ESTÁ ABERTA (03/10). Os dois jogos escutam a MESMA janela, e o do
+    // mundo bloqueia (`preventDefault`) as teclas que a fase captura — Espaço, setas, WASD. O Phaser da camada HD
+    // ignora evento já bloqueado: a mesa nunca via ← → nem A/D (o cursor não andava) nem o tiro (não confirmava).
+    const kb = this.input.keyboard;
+    kb?.disableGlobalCapture();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      kb?.enableGlobalCapture();
       if (!fechada) hd.scene.stop('Cartas');
     });
     // ⚠️ NA FILA, não `hd.scene.start`: a mesa de lá fecha com `this.scene.stop()`, que o Phaser ENFILEIRA, e o

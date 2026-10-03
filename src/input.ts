@@ -7,28 +7,35 @@ import { ACOES, mapaAtivo, type Acao, type Mapa } from './controles';
  * As conduções e as cartas recebem intenção ("subir", "dash"), nunca teclas — é o que permite plugar o gamepad
  * (etapa 1.6) somando no MESMO estado, sem tocar em quem consome.
  *
- * ⚠️ UM LEITOR SÓ, UMA LEITURA POR QUADRO: o `JustDown` do Phaser é CONSUMIDO por quem lê primeiro. Até 02/10 o Dash
- * escutava o evento por fora porque o flap já gastava o `JustDown` da tecla de cima. Aqui cada tecla é lida uma vez e
- * as bordas das ações saem dessa leitura — um toque que desce e sobe dentro do mesmo quadro continua contando (o
- * `_justDown` nasce no evento, não no `isDown`).
+ * ⚠️ AS BORDAS VÊM DO EVENTO, NÃO DO `JustDown`. O `JustDown` do Phaser é CONSUMIDO por quem lê primeiro (o flap
+ * gastava o da tecla de cima — por isso o Dash escutava o evento por fora até 02/10) e é APAGADO quando a tecla sobe:
+ * um toque que desce e sobe dentro do mesmo quadro sumia (a `probe-teclas` provou, 03/10). Aqui cada tecla avisa
+ * quando DESCE (o evento `down` do Phaser, que ignora a repetição do sistema) e a borda espera o próximo `read`.
  *
  * O mouse não entra mais no jogo (03/10): ele atirava e fazia flap — entrada duplicada.
  */
 export class InputReader {
   private readonly mapa: Mapa;
   private readonly keys = new Map<string, Phaser.Input.Keyboard.Key>();
+  /** As teclas que DESCERAM desde o último `read`. */
+  private readonly desceram = new Set<string>();
 
   constructor(scene: Phaser.Scene) {
     const kb = scene.input.keyboard!;
     this.mapa = mapaAtivo();
     for (const a of ACOES) {
-      for (const nome of this.mapa[a]) if (!this.keys.has(nome)) this.keys.set(nome, kb.addKey(nome));
+      for (const nome of this.mapa[a]) {
+        if (this.keys.has(nome)) continue;
+        const k = kb.addKey(nome);
+        k.on(Phaser.Input.Keyboard.Events.DOWN, () => this.desceram.add(nome));
+        this.keys.set(nome, k);
+      }
     }
   }
 
   read(): InputState {
-    const desceu = new Set<string>();
-    for (const [nome, k] of this.keys) if (Phaser.Input.Keyboard.JustDown(k)) desceu.add(nome);
+    const desceu = new Set(this.desceram);
+    this.desceram.clear();
     const segura = (a: Acao): boolean => this.mapa[a].some((n) => this.keys.get(n)!.isDown);
     const apertou = (a: Acao): boolean => this.mapa[a].some((n) => desceu.has(n));
 
