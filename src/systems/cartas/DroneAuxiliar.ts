@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { Contexto, Inimigo } from './contexto';
+import { texturaDaLinhagem } from './texturasProvisorias';
 
 /** PROVISÓRIOS (calibragem). Posição de descanso: atrás e acima da nave. */
 const DRONE = {
@@ -30,7 +31,7 @@ const COR_TIRO = { humana: 0xffa040, alien: 0x5ef2d8 };
  * ~60px da nave, o empurrão desliga e ele volta. Sem vida — ele não morre; o desvio é charme.
  */
 export class DroneAuxiliar {
-  sprite: Phaser.GameObjects.Image | null = null;
+  sprite: Phaser.GameObjects.Sprite | null = null;
   private espera = DRONE.esperaS;
 
   constructor(private readonly c: Contexto) {}
@@ -38,9 +39,7 @@ export class DroneAuxiliar {
   tick(dt: number): void {
     if (!this.c.tem('WPN_010')) return;
     const n = this.c.h.nave();
-    if (!this.sprite) {
-      this.sprite = this.c.h.scene.add.image(n.x + DRONE.dx, n.y + DRONE.dy, 'carta-drone').setDepth(n.depth);
-    }
+    if (!this.sprite) this.sprite = this.criar(n.x + DRONE.dx, n.y + DRONE.dy, n.depth);
     const d = this.sprite;
     let vx = (n.x + DRONE.dx - d.x) * DRONE.mola;
     let vy = (n.y + DRONE.dy - d.y) * DRONE.mola;
@@ -59,6 +58,7 @@ export class DroneAuxiliar {
 
     this.espera -= dt;
     if (this.espera > 0) return;
+    const tiro = texturaDaLinhagem(this.c.h.scene, 'carta-tiro-drone', this.c.h.linhagem);
     const alvo = this.maisProximo(d.x, d.y);
     if (!alvo) return;
     this.espera = DRONE.esperaS;
@@ -66,14 +66,32 @@ export class DroneAuxiliar {
       x: d.x,
       y: d.y,
       angulo: (Math.atan2(alvo.y - d.y, alvo.x - d.x) * 180) / Math.PI,
-      textura: 'carta-tiro-drone',
+      textura: tiro,
       velocidade: DRONE.velocidade,
       dano: DRONE.dano,
       alcance: DRONE.alcance * 1.5,
       origem: 'drone',
       homing: DRONE.homing,
-      tint: COR_TIRO[this.c.h.linhagem],
+      // A arte aprovada já vem na cor da linhagem; só a provisória (branca) é tingida. (A `-alien` só existe se o
+      // `BootScene` carregou o PNG — a provisória nunca cria essa chave.)
+      tint: this.c.h.scene.textures.exists('carta-tiro-drone-alien') ? undefined : COR_TIRO[this.c.h.linhagem],
     });
+  }
+
+  /**
+   * O DRONE da linhagem (03/10, a arte aprovada §5.1b): a esfera #26 (humana) ou a água-viva #60 (alien), animados —
+   * 9 quadros da PixMiniMax, em VAIVÉM: o loop dela não fecha (o último quadro não emenda no primeiro). Sem a tira,
+   * a bolinha provisória.
+   */
+  private criar(x: number, y: number, depth: number): Phaser.GameObjects.Sprite {
+    const s = this.c.h.scene;
+    const sheet = this.c.h.linhagem === 'alien' ? 'droneAlienSheet' : 'droneHumanoSheet';
+    if (!s.textures.exists(sheet)) return s.add.sprite(x, y, 'carta-drone').setDepth(depth);
+    const anim = `${sheet}-voo`;
+    if (!s.anims.exists(anim)) {
+      s.anims.create({ key: anim, frames: s.anims.generateFrameNumbers(sheet, {}), frameRate: 10, repeat: -1, yoyo: true });
+    }
+    return s.add.sprite(x, y, sheet).setDepth(depth).play(anim);
   }
 
   /**

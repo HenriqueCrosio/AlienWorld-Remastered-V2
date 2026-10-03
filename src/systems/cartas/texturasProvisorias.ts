@@ -1,9 +1,17 @@
 import type Phaser from 'phaser';
 
 /**
- * A ARTE PROVISÓRIA das cartas novas (spec §6.2): formas simples para ele JOGAR e sentir a mecânica. A arte aprovada
- * (drones, mísseis 16×5, tiros 6×1, estilhaço D, explosões) entra no lugar destas num plano próprio — com as MESMAS
- * chaves de textura, para nada mais mudar.
+ * A versão da LINHAGEM de uma peça (03/10): `<chave>-alien` quando a nave é alien E a arte existe; senão a chave base
+ * (a humana, ou a provisória). As duas linhagens têm míssil e tiro de drone próprios (spec do catálogo §5.1b).
+ */
+export function texturaDaLinhagem(scene: Phaser.Scene, chave: string, linhagem: string): string {
+  return linhagem === 'alien' && scene.textures.exists(`${chave}-alien`) ? `${chave}-alien` : chave;
+}
+
+/**
+ * A ARTE PROVISÓRIA das cartas novas (spec §6.2): formas simples para ele JOGAR e sentir a mecânica. Desde 03/10 a arte
+ * aprovada (mísseis 16×5, tiros 6×1, estilhaço D, drones animados) é carregada pelo `BootScene` com as MESMAS chaves —
+ * e aí estas aqui não nascem (`fazer` pula chave que já existe). Ficam como rede: sem o PNG, o jogo segue jogável.
  */
 export function criarTexturasProvisorias(scene: Phaser.Scene): void {
   const fazer = (chave: string, w: number, h: number, desenhar: (g: Phaser.GameObjects.Graphics) => void): void => {

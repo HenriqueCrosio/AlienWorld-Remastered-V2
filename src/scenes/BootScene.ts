@@ -287,6 +287,10 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   expMissilSheet: { path: 'sprites/cartas/fx/exp-missil.png', w: 48, h: 48 },
   expFogoSheet: { path: 'sprites/cartas/fx/exp-fogo.png', w: 64, h: 64 },
   expPulsoSheet: { path: 'sprites/cartas/fx/exp-pulso.png', w: 64, h: 64 },
+  // OS DRONES das cartas (03/10, a arte aprovada §5.1b): a esfera #26 (humana) e a água-viva #60 (alien), 9 quadros
+  // da PixMiniMax. Tiras montadas por `scripts/_montar-pecas.mjs`.
+  droneHumanoSheet: { path: 'sprites/cartas/pecas/drone-humano.png', w: 32, h: 32 },
+  droneAlienSheet: { path: 'sprites/cartas/pecas/drone-alien.png', w: 32, h: 32 },
   // O GUARDIÃO respirando (9f 256² — a massa vermelha pulsa como coração) e o NÚCLEO
   // batendo (9f 128² — a ferida acende e apaga). O núcleo tem CANVAS QUADRADO com a criatura
   // centralizada, e a âncora é outra em relação ao estático recortado (nucleo.png 122×122).
@@ -1006,6 +1010,13 @@ const ART: Record<string, string> = {
   // A BOMBA DE QUEDA (03/10): a DESENHADA pixel a pixel (18×7, a paleta da nave) — ele: *"a melhor de aspecto ficou a
   // desenhada, mas ainda acho que ela pode ser um pouco menor"*. Sem o PNG, o `Bombas` desenha a provisória em código.
   bomba: 'sprites/bomba.png',
+  // A ARTE APROVADA DAS PEÇAS (03/10, spec do catálogo §5.1b–c) com as MESMAS chaves das provisórias — quem existe
+  // aqui, a `criarTexturasProvisorias` pula. O sufixo `-alien` é a versão da linhagem alien (`texturaDaLinhagem`).
+  'carta-missil': 'sprites/cartas/pecas/missil-humano.png',
+  'carta-missil-alien': 'sprites/cartas/pecas/missil-alien.png',
+  'carta-tiro-drone': 'sprites/cartas/pecas/tiro-drone-humano.png',
+  'carta-tiro-drone-alien': 'sprites/cartas/pecas/tiro-drone-alien.png',
+  'carta-estilhaco': 'sprites/cartas/pecas/estilhaco.png',
   // Os TIERS das linhagens (aprovados em 27/09; o T1 humano é o `shipJato`). Todos 44×26, de perfil.
   naveHumanaT0: 'sprites/naves/humana-t0.png',
   naveHumanaT2: 'sprites/naves/humana-t2.png',

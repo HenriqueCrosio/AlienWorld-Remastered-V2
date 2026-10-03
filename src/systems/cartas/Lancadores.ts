@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { Contexto } from './contexto';
 import type { ExplosaoDoJogador } from './ExplosaoDoJogador';
+import { texturaDaLinhagem } from './texturasProvisorias';
 
 /**
  * PROVISÓRIOS (calibragem). O míssil é forte e raro; o tiro leve e constante é do drone (spec §4.3).
@@ -112,7 +113,7 @@ export class Lancadores {
       x: n.x + 6,
       y: n.y + dy,
       angulo: 0,
-      textura: 'carta-missil',
+      textura: texturaDaLinhagem(this.c.h.scene, 'carta-missil', this.c.h.linhagem),
       velocidade: MISSIL.velocidadeInicial,
       dano: MISSIL.dano,
       origem: 'missil',
