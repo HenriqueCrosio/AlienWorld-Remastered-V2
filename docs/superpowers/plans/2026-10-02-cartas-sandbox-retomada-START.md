@@ -24,6 +24,8 @@
   ELÉTRICA, EXPLOSÕES, CASCO). No jogo (⚠️ o MAPA DE TECLAS de 03/10): **Espaço** tiro · **Shift** bomba · **E** dash
   · **F** flare · **ESC** montagem — dev: **1** onda · **2** limpar · **3** invulnerável · **4** medidas · **5**
   chefão · **6** abre uma mesa. Perfil clássico: `?teclas=classico` (Z/X/C/F; `?teclas=padrao` volta).
+- **A bomba (03/10)** é a DE QUEDA: cai na atmosfera, é arremessada no vácuo. A de pânico volta com
+  `__game.scene.getScene('Game').bombaModo = 'panico'` (ou `BOMBA.modo` em `src/bombaRegras.ts`).
 - Sem o sandbox: `6` abre uma mesa na fase; no console, `__game.scene.getScene('Game').cartas.aplicar('EFF_002')`.
 - **Testes em node:** `test-catalogo-cartas` · `test-cartas-regras` · `test-sandbox-arvore` · `test-texto-encaixe` ·
   `test-molduras`.

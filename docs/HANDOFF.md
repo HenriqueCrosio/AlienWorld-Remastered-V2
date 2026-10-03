@@ -34,6 +34,13 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > um toque rápido se perdia. **Próximo:** ele jogar a F1 e o sandbox com as teclas novas; depois a arte aprovada das
 > peças. **Novo no roadmap:** o menu de OPÇÕES (controles com remapeamento + áudio), antes da 1.6.
 >
+> 📍 **03/10 (2) — A BOMBA DE QUEDA** (spec `specs/2026-10-03-bomba-de-queda-design.md`, plano
+> `plans/2026-10-03-bomba-de-queda.md`): a bomba deixou de limpar a tela — na ATMOSFERA cai em parábola da barriga e
+> explode no solo; no VÁCUO é arremessada reta e explode no pavio (1,5s); nos dois, explode no CONTATO e fere no raio
+> (36px, 12) — inclusive as construções da F1. A de pânico ficou guardada (`BOMBA.modo = 'panico'`). Arte PROVISÓRIA
+> (8×4 em código); GIF em `folhas/2026-10-03/bomba/`. **Próximo:** ele jogar; depois a arte final da bomba (pixel a
+> pixel no `pixelart_workbench`, a lista antes de gerar).
+>
 > (29/09 — o ponto anterior: as três vozes e a mesa compacta; START em `plans/2026-09-29-vozes-retomada-START.md`.)
 
 ### O estado em uma linha

@@ -3,6 +3,8 @@
 > Etapa 1.5 do 🧭. Pedido dele ao testar a bomba no mapa de teclas novo: *"não existe nenhuma animação de bomba caindo
 > e ela mais parece um míssil do que uma bomba... bomba se solta da nave para cair em algum lugar, na F1 temos bases,
 > torres e artilharia, a bomba é para acertar solo"*. Brainstorming com ele em 03/10.
+> ✅ **IMPLEMENTADA em 03/10** (plano `plans/2026-10-03-bomba-de-queda.md`) — sem desvio da spec. GIF na velocidade
+> real: `folhas/2026-10-03/bomba/bomba-de-queda.gif` (`node scripts/_gif-bomba.mjs <out.gif>`).
 
 ## 1. Hoje
 
