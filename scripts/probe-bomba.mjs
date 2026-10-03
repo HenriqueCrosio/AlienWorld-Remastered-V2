@@ -78,13 +78,31 @@ const depois = await page.evaluate(() => {
 
 ok(depois.bombas === 2, `a bomba foi gasta (3 → ${depois.bombas})`);
 ok(depois.balasAtivas === 0, `a tela ficou SEM tiros inimigos (${depois.balasAtivas} ativos)`);
-ok(depois.iFrames, 'a bomba deu i-frames');
+// SEM i-frames desde 03/10: ficar intocável é das cartas (Dash, Casco), não da bomba. Medido NO MESMO quadro, com o
+// relógio de i-frames zerado antes: entre duas leituras o chefão atira, e qualquer golpe dá 1,4s de i-frames.
+const iFramesDaBomba = await page.evaluate(() => {
+  const scene = window.__game.scene.getScene('Game');
+  const estoque = scene.bombs;
+  scene.invulnerableUntil = 0;
+  scene.bombs = Math.max(estoque, 1);
+  scene.useBomb();
+  const ate = scene.invulnerableUntil;
+  scene.bombs = estoque;
+  return ate;
+});
+ok(iFramesDaBomba === 0, `a bomba NÃO dá i-frames — isso é das cartas (invulnerável até ${iFramesDaBomba})`);
 if (typeof hpAntes === 'number' && typeof depois.hpBoss === 'number') {
   // ≥ 12, não exato: o tiro automático do flap também acerta o chefão entre as duas medições.
   ok(hpAntes - depois.hpBoss >= 12, `o chefão pagou ao menos os 12 da bomba (${hpAntes} → ${depois.hpBoss})`);
 }
 
 // K de novo imediatamente: o estoque é gasto de verdade (JustDown, não segurar).
+// A nave intocável SÓ neste trecho: sem os i-frames da bomba (03/10), um golpe do chefão no meio repõe o estoque (3
+// por vida) e a conta da sonda mediria o dano, não a bomba.
+await page.evaluate(() => {
+  const scene = window.__game.scene.getScene('Game');
+  scene.invulnerableUntil = scene.time.now + 2000;
+});
 await page.keyboard.down('Shift');
 await page.waitForTimeout(120);
 await page.keyboard.up('Shift');

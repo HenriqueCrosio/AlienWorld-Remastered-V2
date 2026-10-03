@@ -125,7 +125,8 @@ export class Bombas {
 
 /**
  * A bomba PROVISÓRIA (8×4, nariz para a direita): casco escuro, uma faixa quente perto do nariz e as aletas atrás —
- * dark sci-fi (luz só onde há energia). A arte final troca a textura `bomba` sem mexer em nada daqui.
+ * dark sci-fi (luz só onde há energia). Só nasce se o `sprites/bomba.png` (a arte final de 03/10, 18×7, carregada pelo
+ * `BootScene`) faltar.
  */
 function criarTextura(scene: Phaser.Scene): void {
   if (scene.textures.exists(TEXTURA)) return;

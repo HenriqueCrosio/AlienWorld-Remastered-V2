@@ -2278,14 +2278,16 @@ export class GameScene extends Phaser.Scene {
    * *"com as cartas, a bomba do pânico é mais facilidade para limpar wave"* — e *"se ficar ruim a nova mecânica,
    * voltamos à antiga"*.
    *
-   * É a válvula de escape para quando a tela fecha: limpa TODO tiro inimigo em voo, fere tudo
-   * que vive na tela e dá 1s de i-frames. O dano (12) mata o miúdo e fere o sério sem virar
-   * botão de vencer — um cargueiro (24) sobrevive, um chefão mal sente.
+   * É a válvula de escape para quando a tela fecha: limpa TODO tiro inimigo em voo e fere tudo
+   * que vive na tela. O dano (12) mata o miúdo e fere o sério sem virar botão de vencer — um
+   * cargueiro (24) sobrevive, um chefão mal sente.
+   *
+   * ⚠️ SEM I-FRAMES desde 03/10 (ela dava 1s): *"tire a invulnerabilidade das naves ao tacar a bomba, deixe isso para
+   * as cartas"* — ficar intocável é do Dash e do Casco. Vale para as duas bombas.
    */
   private bombaDePanico(): void {
     this.cameras.main.flash(220, 255, 232, 180);
     this.cameras.main.shake(280, 0.008);
-    this.invulnerableUntil = Math.max(this.invulnerableUntil, this.time.now + 1000);
     this.fx.explode(this.ship.x + 14, this.ship.y, 1.8);
     // A detonação CENTRAL: a bomba é um evento de tela inteira, e a explosão grande no meio
     // dela é o que vende isso (o efeito existente — flash/shake/limpeza — continua por cima).

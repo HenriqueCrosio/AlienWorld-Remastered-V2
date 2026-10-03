@@ -1003,6 +1003,9 @@ const ART: Record<string, string> = {
   // A MOLDURA da carta por raridade e o canto do realce (spec 2026-09-30) — para a mesa sem a camada.
   ...Object.fromEntries(RARIDADES.map((r) => [`moldura-${r}`, `sprites/cartas/moldura-${r}.png`])),
   'realce-canto': 'sprites/cartas/realce-canto.png',
+  // A BOMBA DE QUEDA (03/10): a DESENHADA pixel a pixel (18×7, a paleta da nave) — ele: *"a melhor de aspecto ficou a
+  // desenhada, mas ainda acho que ela pode ser um pouco menor"*. Sem o PNG, o `Bombas` desenha a provisória em código.
+  bomba: 'sprites/bomba.png',
   // Os TIERS das linhagens (aprovados em 27/09; o T1 humano é o `shipJato`). Todos 44×26, de perfil.
   naveHumanaT0: 'sprites/naves/humana-t0.png',
   naveHumanaT2: 'sprites/naves/humana-t2.png',

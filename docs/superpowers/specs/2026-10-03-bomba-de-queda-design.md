@@ -5,6 +5,10 @@
 > torres e artilharia, a bomba é para acertar solo"*. Brainstorming com ele em 03/10.
 > ✅ **IMPLEMENTADA em 03/10** (plano `plans/2026-10-03-bomba-de-queda.md`) — sem desvio da spec. GIF na velocidade
 > real: `folhas/2026-10-03/bomba/bomba-de-queda.gif` (`node scripts/_gif-bomba.mjs <out.gif>`).
+> **Ajustes do 2º teste dele (03/10):** no vácuo ela RODA (540°/s; o nariz só segue a velocidade na queda); na
+> atmosfera sai com `soltura` +80 px/s e `freio` 0,5 (era 1,5 — *"quase não vi parábola nela"*); a de PÂNICO também
+> perdeu os i-frames (*"tire a invulnerabilidade… deixe isso para as cartas"*). A arte (§5): gerada (A, PixelLab
+> `e0ca3929`) × desenhada (B) — ficou a **B, 18×7** (`folhas/.../bomba-arte-A-B.png`, `bomba-B-tamanhos.png`).
 
 ## 1. Hoje
 

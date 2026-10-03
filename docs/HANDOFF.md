@@ -37,9 +37,11 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > 📍 **03/10 (2) — A BOMBA DE QUEDA** (spec `specs/2026-10-03-bomba-de-queda-design.md`, plano
 > `plans/2026-10-03-bomba-de-queda.md`): a bomba deixou de limpar a tela — na ATMOSFERA cai em parábola da barriga e
 > explode no solo; no VÁCUO é arremessada reta e explode no pavio (1,5s); nos dois, explode no CONTATO e fere no raio
-> (36px, 12) — inclusive as construções da F1. A de pânico ficou guardada (`BOMBA.modo = 'panico'`). Arte PROVISÓRIA
-> (8×4 em código); GIF em `folhas/2026-10-03/bomba/`. **Próximo:** ele jogar; depois a arte final da bomba (pixel a
-> pixel no `pixelart_workbench`, a lista antes de gerar).
+> (36px, 12) — inclusive as construções da F1. A de pânico ficou guardada (`BOMBA.modo = 'panico'`). No 2º teste
+> dele: ela **RODA no vácuo**, na atmosfera **sai mais para a frente** (o arco aparece — *"ficou perfeito agora"*),
+> **nenhuma bomba dá i-frames** (*"deixe isso para as cartas"*), e a arte é a **DESENHADA** pixel a pixel, 18×7
+> (`public/sprites/bomba.png`; a gerada no PixelLab, `e0ca3929`, perdeu no aspecto). Folhas e GIF em
+> `folhas/2026-10-03/bomba/`. **Próximo:** ele jogar.
 >
 > (29/09 — o ponto anterior: as três vozes e a mesa compacta; START em `plans/2026-09-29-vozes-retomada-START.md`.)
 
