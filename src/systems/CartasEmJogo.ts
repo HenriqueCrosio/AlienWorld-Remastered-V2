@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config';
 import type { OrigemProjetil } from './WeaponSystem';
+import type { InputState } from '../flight/FlightController';
 import { CARTAS, adicionar, montarArma, quantas, sortear, tem, type Mesa } from '../cartas';
 import type { Contexto, HostCartas, Inimigo } from './cartas/contexto';
 import { ExplosaoDoJogador } from './cartas/ExplosaoDoJogador';
@@ -174,7 +175,7 @@ export class CartasEmJogo {
 
   // ─── GANCHOS ──────────────────────────────────────────────────────────────────────────────────
 
-  tick(time: number, dt: number, elapsed: number, livre: boolean, body: Phaser.Physics.Arcade.Body): void {
+  tick(time: number, dt: number, elapsed: number, livre: boolean, body: Phaser.Physics.Arcade.Body, input: InputState): void {
     const t = MESA_NO_TEMPO[this.h.fase];
     if (t !== undefined && elapsed >= t && !this.h.semMesas) this.abrirMesa('meio', 'SUPRIMENTO ENCONTRADO');
 
@@ -189,7 +190,7 @@ export class CartasEmJogo {
     const prop = quantas(this.reg, 'MOV_001');
     if (livre && prop) body.setMaxVelocity(VELOCIDADE_LIVRE * (1 + 0.12 * prop));
     // O DASH depois dos Propulsores: durante o avanço, o teto de velocidade é dele.
-    this.dash.tick(livre, body);
+    this.dash.tick(livre, body, input);
 
     // A QUEIMA: 1 de dano a cada 0.4s enquanto durar.
     this.queimaTick -= dt;
@@ -208,7 +209,7 @@ export class CartasEmJogo {
       }
     }
 
-    this.lancadores.tick(dt);
+    this.lancadores.tick(dt, input.flarePressed);
     this.drone.tick(dt);
     this.eletrico.tick();
     this.aura.tick(time);

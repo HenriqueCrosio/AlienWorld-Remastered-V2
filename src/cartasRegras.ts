@@ -136,27 +136,15 @@ export function contornoDoAlfa(alfa: ArrayLike<number>, w: number, h: number): U
   return out;
 }
 
-export type Direcao = 'cima' | 'baixo' | 'esquerda' | 'direita';
-
 /**
- * O DUPLO TOQUE do Dash (§4.2): dois toques na MESMA direção, até `janelaMs` entre eles. Quem chama passa só a
- * DESCIDA da tecla e já descarta a repetição do sistema (tecla segurada) — "vale só se foi solta e apertada de novo".
- * Fechado o duplo toque, a contagem recomeça: um 3º toque não emenda outro dash.
+ * O RUMO do Dash (03/10, o mapa de teclas): a direção SEGURADA no movimento, em 8 direções e normalizada (a diagonal
+ * anda a mesma distância); parado — ou com esquerda e direita juntas —, para a FRENTE. O duplo toque saiu: disparava
+ * sem querer em quem corrige a posição rápido, e no analógico nem existe.
  */
-export class DuploToque {
-  private readonly janela: number;
-  private ultimo: { dir: Direcao; t: number } | null = null;
-
-  constructor(janelaMs: number) {
-    this.janela = janelaMs;
-  }
-
-  apertou(dir: Direcao, t: number): Direcao | null {
-    if (this.ultimo && this.ultimo.dir === dir && t - this.ultimo.t <= this.janela) {
-      this.ultimo = null;
-      return dir;
-    }
-    this.ultimo = { dir, t };
-    return null;
-  }
+export function rumoDoDash(cima: boolean, baixo: boolean, esquerda: boolean, direita: boolean): [number, number] {
+  const x = (direita ? 1 : 0) - (esquerda ? 1 : 0);
+  const y = (baixo ? 1 : 0) - (cima ? 1 : 0);
+  if (!x && !y) return [1, 0];
+  const n = Math.hypot(x, y);
+  return [x / n, y / n];
 }

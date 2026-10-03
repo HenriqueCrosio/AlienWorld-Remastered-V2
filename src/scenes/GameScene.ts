@@ -713,7 +713,7 @@ export class GameScene extends Phaser.Scene {
     const input = this.reader.read();
     this.controller.update(body, input);
     // PROTÓTIPO DAS CARTAS: a mesa do meio da fase, o casco, a queima e os propulsores.
-    this.cartas.tick(time, dt, this.elapsed, this.controller.id === 'free', body);
+    this.cartas.tick(time, dt, this.elapsed, this.controller.id === 'free', body, input);
     this.pecas.tick(this.elapsed);
 
     // O gatilho é manual nas duas conduções (03/10 — o tiro automático da F1 saiu com o mapa de teclas).

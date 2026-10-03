@@ -26,11 +26,11 @@ const MISSIL = {
   dano: 2,
 };
 /**
- * O FLARE é SOLTO PELO JOGADOR (02/10, *"para não ficar muito roubado"*): uma tecla, com espera; "FLARE" acende na HUD
- * quando pronto. Sai para trás a 60px/s e FREIA (×0,1 por segundo) até parar — fica na rota de quem persegue.
- * ⚠️ A TECLA É PROVISÓRIA: o mapa inteiro de teclas (e o controle, etapa 1.6) ainda vai ser decidido com ele.
+ * O FLARE é SOLTO PELO JOGADOR (02/10, *"para não ficar muito roubado"*): a ação FLARE (F — 03/10, *"em jogos de naves
+ * o flare é F"*), com espera; "FLARE" acende na HUD quando pronto. Sai para trás a 60px/s e FREIA (×0,1 por segundo)
+ * até parar — fica na rota de quem persegue.
  */
-const FLARE = { tecla: 'L', esperaMs: 8000, velocidade: 60, freio: 0.1, vidaMs: 3000, dano: 1 };
+const FLARE = { esperaMs: 8000, velocidade: 60, freio: 0.1, vidaMs: 3000, dano: 1 };
 
 type Alvo = Phaser.Physics.Arcade.Sprite;
 
@@ -49,7 +49,6 @@ interface Missil {
 export class Lancadores {
   private proximoMissil = 0;
   private flarePronto = 0;
-  private pediuFlare = false;
   private serie = 0;
   private readonly misseis: Missil[] = [];
   private readonly flares: { b: Phaser.Physics.Arcade.Sprite; id: number; explodeEm: number }[] = [];
@@ -57,15 +56,7 @@ export class Lancadores {
   constructor(
     private readonly c: Contexto,
     private readonly explosao: ExplosaoDoJogador,
-  ) {
-    const kb = c.h.scene.input.keyboard;
-    if (!kb) return;
-    const aoApertar = (): void => {
-      this.pediuFlare = true;
-    };
-    kb.on(`keydown-${FLARE.tecla}`, aoApertar);
-    c.h.scene.events.once('shutdown', () => kb.off(`keydown-${FLARE.tecla}`, aoApertar));
-  }
+  ) {}
 
   /** "FLARE" aceso na HUD: tem a carta e a espera passou. */
   get flareProntoAgora(): boolean {
@@ -78,7 +69,7 @@ export class Lancadores {
     return Math.max(0, this.flarePronto - this.c.h.scene.time.now);
   }
 
-  tick(dt: number): void {
+  tick(dt: number, flarePedido: boolean): void {
     const agora = this.c.h.scene.time.now;
     const n = this.c.h.nave();
 
@@ -91,12 +82,9 @@ export class Lancadores {
       }
     }
 
-    if (this.pediuFlare) {
-      this.pediuFlare = false;
-      if (this.flareProntoAgora) {
-        this.flarePronto = agora + FLARE.esperaMs;
-        this.soltarFlare(n.x - 12, n.y, agora);
-      }
+    if (flarePedido && this.flareProntoAgora) {
+      this.flarePronto = agora + FLARE.esperaMs;
+      this.soltarFlare(n.x - 12, n.y, agora);
     }
 
     this.tickMisseis(dt, agora);

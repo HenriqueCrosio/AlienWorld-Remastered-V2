@@ -1,7 +1,7 @@
 // As REGRAS PURAS das cartas novas (spec 2026-10-01-catalogo-cartas-design.md §4). Uso, da raiz:
 // node scripts/test-cartas-regras.mjs
 import {
-  DuploToque, angulosDoLeque, contornoDoAlfa, pixelsDoRaio, raioDaExplosao, saltosDoArco,
+  rumoDoDash, angulosDoLeque, contornoDoAlfa, pixelsDoRaio, raioDaExplosao, saltosDoArco,
 } from '../src/cartasRegras.ts';
 
 const falhas = [];
@@ -43,14 +43,13 @@ igual([...contornoDoAlfa([255], 1, 1)], [0, 1, 0, 1, 0, 1, 0, 1, 0], 'um pixel: 
 igual([...contornoDoAlfa([255, 255], 2, 1)], [0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0], 'dois pixels: o contorno não cobre a silhueta');
 igual([...contornoDoAlfa([0], 1, 1)], [0, 0, 0, 0, 0, 0, 0, 0, 0], 'tudo transparente: sem contorno');
 
-// DuploToque — dois toques na MESMA direção dentro da janela
-const dt = new DuploToque(220);
-igual(dt.apertou('direita', 1000), null, '1º toque: nada');
-igual(dt.apertou('direita', 1150), 'direita', '2º toque a 150ms: dash para a direita');
-igual(dt.apertou('direita', 1200), null, 'depois do dash, o próximo toque começa de novo');
-igual(dt.apertou('direita', 1500), null, 'fora da janela (300ms): nada');
-igual(dt.apertou('cima', 1600), null, 'direção diferente reinicia');
-igual(dt.apertou('esquerda', 1650), null, '... e de novo diferente: nada');
+// rumoDoDash — a direção SEGURADA (8 direções, normalizada); parado, para a FRENTE
+const r = (v) => v.map((n) => Math.round(n * 1000) / 1000);
+igual(r(rumoDoDash(false, false, false, false)), [1, 0], 'parado: o dash vai para a frente (direita)');
+igual(r(rumoDoDash(true, false, false, false)), [0, -1], 'segurando cima: para cima');
+igual(r(rumoDoDash(false, false, true, false)), [-1, 0], 'segurando esquerda: para trás');
+igual(r(rumoDoDash(true, false, false, true)), [0.707, -0.707], 'diagonal: normalizada (mesma distância)');
+igual(r(rumoDoDash(false, false, true, true)), [1, 0], 'esquerda e direita juntas se anulam: para a frente');
 
 console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTUDO OK');
 process.exit(falhas.length ? 1 : 0);
