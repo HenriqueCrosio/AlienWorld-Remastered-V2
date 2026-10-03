@@ -14,11 +14,17 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-10-02-cartas-sandbox-retomada-START.md`. As 24 cartas estão
-> jogáveis e o sandbox de dev existe na `feat/cartas-preview`; vamos mapear as teclas e depois seguir para a arte
-> aprovada das peças (plano novo)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-10-03-pecas-retomada-START.md`. Parei para avaliar a folha
+> `folhas/2026-10-03/pecas/pecas-animadas-tamanhos.gif` (flare, faísca, eletrificado e queimando a 100/75/50%); vou
+> dizer o tamanho de cada uma e seguimos instalando o 2º lote das peças."**
 >
-> 📍 **02/10 — O PONTO MARCADO:** tudo commitado e empurrado (`feat/cartas-preview`, sem merge). As **24 cartas**
+> 📍 **03/10 — O PONTO MARCADO (o mais recente):** tudo commitado e empurrado (`feat/cartas-preview`, sem merge).
+> **Ele tem de OLHAR A FOLHA e escolher o tamanho** de quatro peças animadas antes de qualquer código:
+> `folhas/2026-10-03/pecas/pecas-animadas-tamanhos.gif` (recomendado: flare 75% · faísca 50% · eletrificado 75% ·
+> queimando 100%). O 1º lote das peças JÁ ENTROU (mísseis 16×5 e tiros 6×1 por linhagem, estilhaço D, drones
+> animados — GIFs em jogo na mesma pasta). O 2º lote, a lista e as lições estão no START de 03/10.
+>
+> 📍 **02/10 — o ponto anterior:** tudo commitado e empurrado (`feat/cartas-preview`, sem merge). As **24 cartas**
 > jogáveis: o catálogo, os 24 ícones aprovados na mesa, a explosão única com a arte aprovada (A + B), o Míssil (mira
 > travada, inércia), o Flare (do jogador, tecla L provisória), o Drone (desvia de lado), a build elétrica, a aura do
 > Casco, a Bomba Extra e o Dash (8s). E o **SANDBOX DE DEV** (`localhost:5173/?sandbox`): árvore WoW com os pontos
@@ -42,6 +48,13 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > **nenhuma bomba dá i-frames** (*"deixe isso para as cartas"*), e a arte é a **DESENHADA** pixel a pixel, 18×7
 > (`public/sprites/bomba.png`; a gerada no PixelLab, `e0ca3929`, perdeu no aspecto). Folhas e GIF em
 > `folhas/2026-10-03/bomba/`. **Próximo:** ele jogar.
+>
+> 📍 **03/10 (3) — A ARTE APROVADA DAS PEÇAS, 1º lote** (a §5 da spec do catálogo; as chaves das provisórias, então
+> sem PNG a provisória volta): mísseis 16×5 e tiros de drone 6×1 POR LINHAGEM (`texturaDaLinhagem`, a chave
+> `-alien`), o estilhaço D e os drones animados (esfera #26 humana / água-viva #60 alien, em vaivém) — montados por
+> `scripts/_montar-pecas.mjs`. **Parou na folha de tamanhos** das animadas (ver o 📍 do topo). Faltam também: a
+> explosão do míssil ALIEN repintada na manta (§5.1c) e a faísca/eletrificado/queimando saírem do TINT para efeitos
+> por cima do inimigo.
 >
 > (29/09 — o ponto anterior: as três vozes e a mesa compacta; START em `plans/2026-09-29-vozes-retomada-START.md`.)
 
@@ -74,7 +87,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
-| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
+| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. 🟠 **AGORA: ele escolhe o tamanho das 4 peças animadas** (a folha de 03/10) → o 2º lote → frente B → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ⬜ spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
