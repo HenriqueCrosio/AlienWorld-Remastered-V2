@@ -18,12 +18,20 @@ export const BOMBA = {
   dano: 12,
   /** A mesma do flap (`FlapController.GRAVITY`): a bomba cai no mesmo mundo que a nave. */
   gravidade: 420,
+  /**
+   * Na atmosfera, a bomba sai um pouco para a FRENTE (px/s, somado à velocidade da nave) — 03/10, ele: *"pode ser solta
+   * um pouco mais para frente, quase não vi parábola nela"*. Com 80 e o freio de 0,5, parada ela avança ~45px antes de
+   * cair 120px (a altura de voo típica da F1): o arco aparece.
+   */
+  soltura: 80,
   /** O ar leva o `vx` (px/s, na tela) até aqui: a bomba vai ficando para trás da nave enquanto cai. */
   freioAlvo: -30,
-  /** Fração por segundo que o `vx` anda até o `freioAlvo`. */
-  freio: 1.5,
+  /** Fração por segundo que o `vx` anda até o `freioAlvo` (era 1,5 — matava o arco antes de ele aparecer). */
+  freio: 0.5,
   /** No vácuo, o empurrão para a frente (px/s), somado à velocidade da nave. */
   arremesso: 120,
+  /** No vácuo ela sai RODANDO (graus/s) — *"fica um visual melhor"* (03/10). Na atmosfera o nariz segue a queda. */
+  giro: 540,
   pavioMs: 1500,
 };
 
@@ -34,6 +42,8 @@ export interface EstadoBomba {
   vy: number;
   gravidade: number;
   freia: boolean;
+  /** Graus por segundo: 0 = o nariz segue a velocidade (a queda); > 0 = rodando (o arremesso no vácuo). */
+  giro: number;
 }
 
 /** Onde e como a bomba nasce: da barriga na atmosfera (sem pavio — explode no solo); à frente no vácuo (com pavio). */
@@ -44,8 +54,10 @@ export function lancamento(
   vx: number,
   vy: number,
 ): EstadoBomba & { pavioMs: number | null } {
-  if (zona === 'atmosfera') return { x, y: y + 6, vx, vy, gravidade: BOMBA.gravidade, freia: true, pavioMs: null };
-  return { x: x + 10, y, vx: vx + BOMBA.arremesso, vy, gravidade: 0, freia: false, pavioMs: BOMBA.pavioMs };
+  if (zona === 'atmosfera') {
+    return { x, y: y + 6, vx: vx + BOMBA.soltura, vy, gravidade: BOMBA.gravidade, freia: true, giro: 0, pavioMs: null };
+  }
+  return { x: x + 10, y, vx: vx + BOMBA.arremesso, vy, gravidade: 0, freia: false, giro: BOMBA.giro, pavioMs: BOMBA.pavioMs };
 }
 
 /** Um passo da física (Euler semi-implícito: a velocidade primeiro, a posição com a velocidade nova). */

@@ -59,7 +59,8 @@ await cena(() => {
   const s = window.__game.scene.getScene('Game');
   s.terrain.spawn('turret');
   const t = s.terrain.props.getChildren().at(-1);
-  t.setX(78);
+  // Onde a bomba cai: ela sai à FRENTE (a soltura) e avança ~45px na queda de 100px (a nave em y 110).
+  t.setX(122);
   t.body.setVelocity(0, 0);
   window.__torreta = t;
 });

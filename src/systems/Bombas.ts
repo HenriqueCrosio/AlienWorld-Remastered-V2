@@ -70,8 +70,10 @@ export class Bombas {
     for (let i = this.noAr.length - 1; i >= 0; i--) {
       const b = this.noAr[i];
       b.e = passo(b.e, dt);
-      // O NARIZ SEGUE A VELOCIDADE: na parábola ela vira de bico para o chão.
-      b.img.setPosition(b.e.x, b.e.y).setRotation(Math.atan2(b.e.vy, b.e.vx));
+      b.img.setPosition(b.e.x, b.e.y);
+      // Na queda o NARIZ SEGUE A VELOCIDADE (vira de bico para o chão); no vácuo ela RODA.
+      if (b.e.giro) b.img.rotation += Phaser.Math.DegToRad(b.e.giro) * dt;
+      else b.img.setRotation(Math.atan2(b.e.vy, b.e.vx));
 
       if (b.e.x < -16 || b.e.x > GAME_WIDTH + 16 || b.e.y < -16 || b.e.y > GAME_HEIGHT + 16) {
         this.tirar(i);
