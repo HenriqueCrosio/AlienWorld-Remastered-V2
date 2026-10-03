@@ -49,9 +49,9 @@ await page.evaluate(async (turn) => {
   };
 }, turnArg);
 
-// Enxame equipado (atalho de dev `4`), gatilho segurado o trecho inteiro.
-await page.keyboard.press('4');
-await page.keyboard.down('j');
+// Enxame equipado (direto na cena — o atalho de dev `4` saiu em 03/10), gatilho segurado o trecho inteiro.
+await page.evaluate(() => window.__game.scene.getScenes(true)[0].weapons.equip('enxame'));
+await page.keyboard.down('Space');
 
 // ─── Janela A: batedores (t≈8s → t≈34s) ───
 await page.waitForTimeout(26000);

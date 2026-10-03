@@ -52,13 +52,13 @@ await page.evaluate(() => {
 });
 
 console.log('── 1. GATILHO SEGURADO: ela gira, esquenta e TRAVA ──');
-await page.keyboard.down('J');
+await page.keyboard.down('Space');
 for (let i = 0; i < 10; i++) {
   await imortal();
   await page.waitForTimeout(500);
   console.log(`t=${((i + 1) * 0.5).toFixed(1)}s`, JSON.stringify(await arma()));
 }
-await page.keyboard.up('J');
+await page.keyboard.up('Space');
 
 console.log('\n── 2. SOLTOU: o giro cai rápido, o calor cai DEVAGAR ──');
 for (let i = 0; i < 6; i++) {
@@ -79,10 +79,10 @@ let travouTamborilando = false;
 // "exploit aberto" quando ele estava fechado — um teste que erra por chegar cedo demais é pior
 // do que não ter teste, porque ele manda consertar o que não está quebrado.
 for (let i = 0; i < 20; i++) {
-  await page.keyboard.down('J');
+  await page.keyboard.down('Space');
   await imortal();
   await page.waitForTimeout(400);
-  await page.keyboard.up('J');
+  await page.keyboard.up('Space');
   await page.waitForTimeout(400);
 
   const e = await arma();

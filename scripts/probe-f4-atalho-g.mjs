@@ -50,7 +50,7 @@ ok(noDuto.espessura >= 50, `o teste parte do duto de verdade (parede ${noDuto.es
 ok(noDuto.duto === true, 'e com a parede MORDENDO (duto=true)');
 
 // ─── O `G` ───
-await page.keyboard.press('G');
+await page.keyboard.press('5');
 // ⚠️ 6,5s DE ESPERA, E O NÚMERO É UMA CONTA: a parede não salta, ela PERSEGUE o alvo a
 // `Moldura.RAMPA` = 8px/s (ver `avanca`). De 54 para 16 são 38px, ou 4,75s. Medir antes disso
 // pega a rampa no meio e reprova uma parede que está apenas a caminho — foi o que aconteceu na

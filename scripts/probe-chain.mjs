@@ -25,17 +25,22 @@ const estado = () =>
     };
   });
 
-/** Espera flapando e imortal. Sem isto a nave cai, morre, e o teste vira um teste do GameOver. */
+/**
+ * Espera flapando e imortal. Sem isto a nave cai, morre, e o teste vira um teste do GameOver.
+ * (W faz o flap; o Espaço segurado atira — o tiro da F1 é manual desde 03/10.)
+ */
 async function voar(ms) {
   const fim = Date.now() + ms;
+  await page.keyboard.down('Space');
   while (Date.now() < fim) {
     await page.evaluate(() => {
       const s = window.__game.scene.getScenes(true)[0];
       if (s?.lives !== undefined) s.lives = 9;
     });
-    await page.keyboard.press('Space');
+    await page.keyboard.press('KeyW');
     await page.waitForTimeout(110);
   }
+  await page.keyboard.up('Space');
 }
 
 await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
@@ -45,11 +50,17 @@ await page.keyboard.press('1'); // menu: diegético -> Fase 1
 await voar(800);
 console.log('início    ', JSON.stringify(await estado()));
 
-await page.keyboard.press('G'); // dev: pula direto para o chefão
+await page.keyboard.press('5'); // dev: pula direto para o chefão
+await page.waitForTimeout(500);
+// O pulo passa do tempo da MESA DO MEIO DA FASE (cartas, 27/09): ela abre e pausa o jogo — confirma e segue.
+if (await page.evaluate(() => (window.__gameHD ?? window.__game).scene.isActive('Cartas'))) {
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(600);
+}
 await voar(5000);
 console.log('no chefão ', JSON.stringify(await estado()));
 
-// Deixa a Torre quase morta e o tiro automático do flap termina o serviço.
+// Deixa a Torre quase morta e o tiro termina o serviço.
 //
 // ⚠️ 7s, não 3s. Escrever `hp = 2` é escrever no CAMPO, não chamar `damage()` — então o golpe
 // seguinte é que cruza os 50% e dispara a DECOLAGEM, e a Torre passa 1.3s imune subindo antes de

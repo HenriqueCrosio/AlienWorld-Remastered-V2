@@ -22,7 +22,7 @@ await page.evaluate(() => {
   g.scene.start('Game', { stage: 2, ship: 'alienigena', handling: 'diegetico' });
 });
 await page.waitForTimeout(2500);
-await page.keyboard.press('c');
+await page.keyboard.press('6');
 await page.waitForTimeout(900);
 await page.screenshot({ path: `${OUT}/cartas-mesa-fase.png` });
 

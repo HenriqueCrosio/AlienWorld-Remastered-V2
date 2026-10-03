@@ -101,11 +101,11 @@ const puniu = estourada.estilhacosNoAr > 0 && dano.vidas < 9;
 console.log('\n── 2. ATIRAR NELA ANTES ──');
 console.log('plantada  ', JSON.stringify(await plantar()));
 
-await page.keyboard.down('J'); // gatilho (voo LIVRE)
+await page.keyboard.down('Space'); // gatilho (voo LIVRE)
 await page.waitForTimeout(2500);
 const abatida = await estado();
 console.log('abatida   ', JSON.stringify(abatida));
-await page.keyboard.up('J');
+await page.keyboard.up('Space');
 
 const seguro = abatida.minasVivas === 0 && abatida.estilhacosNoAr === 0 && abatida.vidas === 9;
 

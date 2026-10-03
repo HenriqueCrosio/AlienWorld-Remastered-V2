@@ -21,7 +21,7 @@ await page.waitForTimeout(1200);
 
 // Pula para o chefão DENTRO da fase: os destroços que sobraram do enxame continuam na tela,
 // que é justamente a diferença entre a fase e o treino.
-await page.keyboard.press('G');
+await page.keyboard.press('5');
 await page.waitForTimeout(6000);
 
 // Instrumenta o chefão: conta cada nascimento e cada estouro, e vigia o destino de cada cápsula.

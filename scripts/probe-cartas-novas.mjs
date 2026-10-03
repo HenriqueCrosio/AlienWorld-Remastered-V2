@@ -196,9 +196,9 @@ const noAr = await page.evaluate(async () => {
 });
 conferir(noAr.fontes.includes('missil') && noAr.vivos === 0, 'o míssil que não acha ninguém explode no ar no fim da vida', noAr);
 
-// ── FLARE (EFF_010): solto pelo JOGADOR (tecla provisória L), com espera de 8s ──
+// ── FLARE (EFF_010): solto pelo JOGADOR (tecla F), com espera de 8s ──
 await fase(['EFF_010']);
-await page.keyboard.press('KeyL');
+await page.keyboard.press('KeyF');
 const flare = await page.evaluate(async () => {
   const t = window.__teste;
   const fontes = t.espiarExplosoes();
@@ -210,7 +210,7 @@ const flare = await page.evaluate(async () => {
   return { solto, fontes, hud: t.cena().hud.text };
 });
 conferir(flare.solto && flare.fontes.includes('flare'), 'a tecla solta o flare para trás, e ele explode sozinho', flare);
-await page.keyboard.press('KeyL');
+await page.keyboard.press('KeyF');
 await page.waitForTimeout(300);
 const naEsperaFlare = await page.evaluate(() => window.__teste.projeteis('flare').length);
 conferir(naEsperaFlare === 0 && hudContando(flare.hud, 'FLARE'), 'na espera, a tecla não solta outro e a HUD conta a recarga (FLARE Ns)', { naEsperaFlare, hud: flare.hud });
@@ -224,7 +224,7 @@ const toque = await page.evaluate(async () => {
   await t.dormir(150); // a HUD redesenha no quadro seguinte à carta
   return s.hud.text;
 });
-await page.keyboard.press('KeyL');
+await page.keyboard.press('KeyF');
 const toqueFim = await page.evaluate(async () => {
   const t = window.__teste;
   for (let i = 0; i < 30 && !window.__fontesFlare.includes('flare'); i++) await t.dormir(100);
@@ -376,46 +376,43 @@ const aura = await page.evaluate(async () => {
 });
 conferir(aura.antes && !aura.depois && aura.vidas === aura.vidasDepois, 'a aura aparece com o Casco pronto e some quando ele quebra', aura);
 
-// ── DASH (MOV_003): dois toques, avanço curto, invulnerável, espera ──
-async function duploToque(tecla) {
+// ── DASH (MOV_003): a tecla E (03/10) na direção segurada, avanço curto, invulnerável, espera ──
+async function dash(tecla) {
   await page.keyboard.down(tecla);
-  await page.waitForTimeout(40);
-  await page.keyboard.up(tecla);
-  await page.waitForTimeout(60);
-  await page.keyboard.down(tecla);
-  await page.waitForTimeout(40);
+  await page.keyboard.press('KeyE');
   await page.keyboard.up(tecla);
 }
 const xDaNave = () => page.evaluate(() => window.__teste.cena().ship.x);
 
 await fase([]);
 let x0 = await xDaNave();
-await duploToque('KeyD');
+await dash('KeyD');
 await page.waitForTimeout(300);
 const semCarta = (await xDaNave()) - x0;
 
 await fase(['MOV_003']);
 x0 = await xDaNave();
-await duploToque('KeyD');
+await dash('KeyD');
 await page.waitForTimeout(20);
 const naveDash = await page.evaluate(() => ({ x: window.__teste.cena().ship.x, y: window.__teste.cena().ship.y }));
 await foto('dash-fantasmas', naveDash.x - 15, naveDash.y, 90, 40);
 await page.waitForTimeout(280);
 const comDash = (await xDaNave()) - x0;
-conferir(semCarta < 15 && comDash >= 30, 'dois toques: o dash avança ~40px (sem a carta, nada)', { semCarta, comDash });
+conferir(semCarta < 15 && comDash >= 30, 'E: o dash avança ~40px (sem a carta, nada)', { semCarta, comDash });
 
 const hud = await page.evaluate(() => window.__teste.cena().hud.text);
 x0 = await xDaNave();
-await duploToque('KeyD');
+await dash('KeyD');
 await page.waitForTimeout(300);
 const naEspera = (await xDaNave()) - x0;
-conferir(hudContando(hud, 'DASH') && naEspera < 15, 'na espera (8s), o duplo toque não dispara e a HUD conta a recarga (DASH Ns)', { hud, naEspera });
+conferir(hudContando(hud, 'DASH') && naEspera < 15, 'na espera (8s), o E não dispara e a HUD conta a recarga (DASH Ns)', { hud, naEspera });
 await page.waitForTimeout(8000);
 const hudDepois = await page.evaluate(() => window.__teste.cena().hud.text);
 conferir(hudPronto(hudDepois, 'DASH'), 'passada a espera, "DASH" acende na HUD', hudDepois);
 
-await duploToque('KeyW');
-const inv = await page.evaluate(() => {
+await dash('KeyW');
+await page.waitForTimeout(40); // o dash começa no quadro SEGUINTE ao E (o leitor entrega a borda no update)
+const inv =await page.evaluate(() => {
   const s = window.__teste.cena();
   s.invulnerableUntil = 0;
   const antes = s.lives;

@@ -40,9 +40,11 @@ async function medir(teclaArma, nomeArma) {
     };
   });
 
-  // Equipa a arma do experimento (atalhos de dev) e segura o gatilho o trecho inteiro.
-  await page.keyboard.press(teclaArma);
-  await page.keyboard.down('j');
+  // Equipa a arma do experimento e segura o gatilho o trecho inteiro. (O atalho de dev 1–4 saiu em 03/10 — as teclas
+  // de dev do jogo viraram as do sandbox; a arma agora é equipada direto na cena.)
+  const arma = { 1: 'pulse', 2: 'hmg', 3: 'shotgun', 4: 'enxame' }[teclaArma];
+  await page.evaluate((a) => window.__game.scene.getScenes(true)[0].weapons.equip(a), arma);
+  await page.keyboard.down('Space');
 
   // Janela A: t≈8s → t≈34s (batedores + drones; kamikazes chegam depois).
   await page.waitForTimeout(26000);
@@ -85,7 +87,7 @@ async function medir(teclaArma, nomeArma) {
     }
   }
 
-  await page.keyboard.up('j');
+  await page.keyboard.up('Space');
   await page.close();
   return { nomeArma, janelaA, ttkCargueiro: ttk };
 }

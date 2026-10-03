@@ -39,8 +39,8 @@ conferir(pontos === 'PONTOS 6/7', 'a árvore soma pelo clique, o atalho monta a 
 
 // ── 2. JOGAR: a build na mão, as ondas saindo ──
 await jogar();
-// Invulnerável já (tecla I): parada atirando, a nave morreria e o sandbox voltaria à montagem no meio da medida.
-await page.keyboard.press('KeyI');
+// Invulnerável já (tecla 3): parada atirando, a nave morreria e o sandbox voltaria à montagem no meio da medida.
+await page.keyboard.press('Digit3');
 await page.waitForTimeout(3500);
 const jogo = await page.evaluate(() => {
   const g = window.__game;
@@ -61,19 +61,19 @@ await page.waitForTimeout(4000);
 await page.keyboard.up('Space');
 const medidas = await page.evaluate(() => window.__game.scene.getScene('Game').medidas.resumo());
 conferir(medidas.dano > 0 && medidas.dano_por_fonte.tiro > 0, 'as medidas contam o dano por fonte', medidas);
-await page.keyboard.press('KeyX');
+await page.keyboard.press('Digit2');
 await page.waitForTimeout(200);
 const limpou = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemies.countActive(true));
-conferir(limpou === 0, 'X limpa a tela', limpou);
+conferir(limpou === 0, '2 limpa a tela', limpou);
 const antesN = await page.evaluate(() => window.__game.scene.getScene('Game').arena.contador);
-await page.keyboard.press('KeyN');
+await page.keyboard.press('Digit1');
 await page.waitForTimeout(2000);
 const teclas = await page.evaluate((antesN) => {
   const s = window.__game.scene.getScene('Game');
   return { invulneravel: s.arena.invulneravel, hud: s.hud.text.includes('INVULN.'), novaOnda: s.arena.contador >= antesN + 1, inimigos: s.enemies.enemies.countActive(true) };
 }, antesN);
-conferir(teclas.invulneravel && teclas.hud && teclas.novaOnda && teclas.inimigos > 0, 'I liga o invulnerável (HUD) e N chama uma onda', teclas);
-await page.keyboard.press('KeyI');
+conferir(teclas.invulneravel && teclas.hud && teclas.novaOnda && teclas.inimigos > 0, '3 liga o invulnerável (HUD) e 1 chama uma onda', teclas);
+await page.keyboard.press('Digit3');
 const desligou = await page.evaluate(() => !window.__game.scene.getScene('Game').arena.invulneravel);
 conferir(desligou, 'I de novo desliga o invulnerável', desligou);
 
@@ -94,7 +94,7 @@ for (const [fase, chefe] of [[1, false], [3, false], [4, false], [2, true]]) {
   }, { fase, chefe });
   await montagemAberta();
   await jogar();
-  await page.keyboard.press('KeyI');
+  await page.keyboard.press('Digit3');
   await page.waitForTimeout(chefe ? 7000 : 3000);
   const r = await page.evaluate(() => {
     const s = window.__game.scene.getScene('Game');

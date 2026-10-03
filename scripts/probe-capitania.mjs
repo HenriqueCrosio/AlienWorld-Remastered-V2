@@ -47,7 +47,7 @@ async function observar(ms) {
 await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(1500);
 await page.keyboard.press('C'); // menu: treino da Capitânia
-await page.keyboard.down('J'); // no voo LIVRE o tiro é manual
+await page.keyboard.down('Space'); // no voo LIVRE o tiro é manual
 await observar(4000);
 
 console.log('\n── INTEIRA (salva rolante + lançamento) ──');
@@ -77,5 +77,5 @@ for (let i = 0; i < 10; i++) {
 }
 
 console.log(viuFlak ? '\n✔ FLAK observado no ar' : '\n✘ FLAK NUNCA apareceu');
-await page.keyboard.up('J');
+await page.keyboard.up('Space');
 await browser.close();

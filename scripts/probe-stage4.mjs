@@ -100,7 +100,7 @@ if (dano === null) {
 }
 
 // ─── O NÚCLEO: a batida sístole/diástole, por BALA REAL (armadilha 19) ───
-await page.keyboard.press('G');
+await page.keyboard.press('5');
 
 // ⚠️ O `G` TEM DE ENTREGAR A ARENA FINAL REAL, E ATÉ 12/09 NÃO ENTREGAVA. `StageDirector.skipTo`
 // DESCARTA os eventos pulados sem executar, e o `G` não reaplicava o estado que eles deixariam —

@@ -24,6 +24,11 @@ await page.waitForTimeout(1500);
 // rápido de ter TIRO INIMIGO DE VERDADE na tela para a bomba apagar.
 await page.keyboard.press('b');
 await page.waitForTimeout(1500);
+// A MESA DO MEIO DA FASE (cartas, 27/09) abre no treino e pausa o jogo: confirma a carta do cursor e segue.
+if (await page.evaluate(() => (window.__gameHD ?? window.__game).scene.isActive('Cartas'))) {
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(600);
+}
 
 // Vidas para cima: testa-se a MECÂNICA, não a habilidade da sonda (a lição do probe-chain).
 await page.evaluate(() => {
@@ -53,9 +58,9 @@ const hpAntes = await page.evaluate(
 
 // K — detona. Segurar alguns frames: `press()` desce e sobe a tecla dentro do MESMO frame
 // do navegador, e o JustDown do Phaser (lido no update seguinte) nunca a vê descida.
-await page.keyboard.down('k');
+await page.keyboard.down('Shift');
 await page.waitForTimeout(120);
-await page.keyboard.up('k');
+await page.keyboard.up('Shift');
 await page.waitForTimeout(250);
 
 const depois = await page.evaluate(() => {
@@ -77,9 +82,9 @@ if (typeof hpAntes === 'number' && typeof depois.hpBoss === 'number') {
 }
 
 // K de novo imediatamente: o estoque é gasto de verdade (JustDown, não segurar).
-await page.keyboard.down('k');
+await page.keyboard.down('Shift');
 await page.waitForTimeout(120);
-await page.keyboard.up('k');
+await page.keyboard.up('Shift');
 await page.waitForTimeout(250);
 const estoque = await page.evaluate(() => window.__game.scene.getScene('Game').bombs);
 ok(estoque === 1, `a segunda bomba saiu do estoque (${estoque})`);

@@ -53,7 +53,7 @@ await page.waitForTimeout(1200);
 await page.evaluate(() => {
   window.__game.scene.getScene('Game').lives = 99; // mede-se o FX, não a habilidade da sonda
 });
-await page.keyboard.down('J'); // gatilho (voo livre = tiro manual)
+await page.keyboard.down('Space'); // gatilho (voo livre = tiro manual)
 
 // Mata de verdade: alinha a nave na altura do 1º inimigo vivo a cada 250ms e espera a bala
 // fazer o trabalho. Quando um sprite da sheet aparecer, fotografa — a explosão DURA ~720ms,
@@ -83,7 +83,7 @@ for (let i = 0; i < 120; i++) {
   await page.waitForTimeout(250);
 }
 
-await page.keyboard.up('J');
+await page.keyboard.up('Space');
 
 ok(!!visto, 'uma explosão da SHEET apareceu quando o inimigo morreu (não só fagulha)');
 ok(visto?.anim === 'explosion', `a animação é a ` + `'explosion' (${visto?.anim})`);

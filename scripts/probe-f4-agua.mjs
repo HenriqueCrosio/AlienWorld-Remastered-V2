@@ -183,7 +183,7 @@ const antesDoG = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return s.agua?.estadoAtual ?? null;
 });
-await page.keyboard.press('G');
+await page.keyboard.press('5');
 await page.waitForTimeout(200);
 const depoisDoG = await page.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];

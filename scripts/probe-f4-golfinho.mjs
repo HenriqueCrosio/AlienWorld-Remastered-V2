@@ -430,7 +430,7 @@ const preso = await page.evaluate(() => {
 await page.waitForTimeout(700);
 const presoDepois = await page.evaluate(() => window.__game.scene.getScenes(true)[0].elapsed);
 ok(presoDepois === preso, `com o golfinho vivo o relógio não passa do teto (${preso} → ${presoDepois})`);
-await page.keyboard.press('G');
+await page.keyboard.press('5');
 const escape = await esperar(() => {
   const s = window.__game.scene.getScenes(true)[0];
   return s.boss ? { semGolfinho: s.golfinho === null, t: Math.round(s.elapsed) } : null;

@@ -56,7 +56,7 @@ await page.waitForTimeout(1500);
 await page.keyboard.press('V');
 await page.waitForTimeout(1200);
 
-await page.keyboard.down('J'); // no voo LIVRE o tiro é manual
+await page.keyboard.down('Space'); // no voo LIVRE o tiro é manual
 
 console.log('t≈2s  ', JSON.stringify(await estado()));
 await page.waitForTimeout(6000);
@@ -72,18 +72,18 @@ await page.waitForTimeout(12000);
 await page.screenshot({ path: 'probe-stage2-cargueiro.png' });
 console.log('t≈49s ', JSON.stringify(await estado()));
 
-await page.keyboard.up('J');
+await page.keyboard.up('Space');
 
 // ─── 2. A Capitânia, direto ──────────────────────────────────────────────────
 await page.keyboard.press('Escape');
 await page.waitForTimeout(700);
 await page.keyboard.press('C');
 await page.waitForTimeout(1500);
-await page.keyboard.down('J');
+await page.keyboard.down('Space');
 
 await page.waitForTimeout(6000);
 await page.screenshot({ path: 'probe-stage2-capitania.png' });
 console.log('CAPITÂNIA', JSON.stringify(await estado()));
 
-await page.keyboard.up('J');
+await page.keyboard.up('Space');
 await browser.close();
