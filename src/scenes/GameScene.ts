@@ -14,6 +14,8 @@ import { WeaponSystem, type OrigemProjetil } from '../systems/WeaponSystem';
 import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
 import { PickupSystem } from '../systems/PickupSystem';
 import { TerrainSystem, GROUND_Y, type PropKind } from '../systems/TerrainSystem';
+import { Bombas } from '../systems/Bombas';
+import { BOMBA, type ModoBomba } from '../bombaRegras';
 import { DebrisSystem, MINE_BLAST_RADIUS, type HazardKind } from '../systems/DebrisSystem';
 import {
   StageDirector,
@@ -108,6 +110,9 @@ export class GameScene extends Phaser.Scene {
   private shipId: string = DEFAULT_SHIP;
   /** PROTÓTIPO DAS CARTAS (feat/cartas-preview): as mesas e os efeitos em jogo. */
   private cartas!: CartasEmJogo;
+  private bombas!: Bombas;
+  /** A bomba da partida: a de queda, ou a de pânico guardada (`BOMBA.modo`; a sonda troca aqui). */
+  private bombaModo: ModoBomba = BOMBA.modo;
   /** PROTÓTIPO DAS CARTAS: as 3 peças da fase (as "moedas-estrela") — a coleção completa evolui a nave. */
   private pecas!: PecasEmJogo;
 
@@ -443,6 +448,40 @@ export class GameScene extends Phaser.Scene {
       semMesas: !!this.sandbox,
       medir: (fonte, dano) => this.medidas?.dano(fonte, dano),
     });
+    // A BOMBA DE QUEDA (03/10): cai na atmosfera, é arremessada no vácuo, explode no solo, no pavio ou no contato.
+    this.bombaModo = BOMBA.modo;
+    this.bombas = new Bombas({
+      scene: this,
+      nave: () => {
+        const b = this.ship.body as Phaser.Physics.Arcade.Body;
+        return { x: this.ship.x, y: this.ship.y, vx: b.velocity.x, vy: b.velocity.y };
+      },
+      zona: () => this.zone,
+      inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],
+      construcoes: () =>
+        (this.terrain.props.getChildren() as Phaser.Physics.Arcade.Sprite[]).filter(
+          (p) => p.active && TerrainSystem.solido(p),
+        ),
+      alvosDoChefe: () => (this.boss && !this.boss.isDead ? (this.boss.targets ?? [this.boss.sprite]) : []),
+      ferirInimigo: (e, dano) => this.ferirInimigo(e, dano),
+      ferirConstrucao: (p, dano) => this.ferirConstrucao(p, dano),
+      ferirChefe: (dano) => {
+        if (!this.boss || this.boss.isDead) return;
+        this.medidas?.dano('bomba (chefão)', dano);
+        if (this.boss.damage(dano)) this.killBoss();
+      },
+      ferirGolfinho: (x, y, raio, dano) => {
+        const g = this.golfinho;
+        if (!g?.vulneravel) return;
+        const alcance = raio + g.sprite.displayWidth / 2;
+        if ((g.sprite.x - x) ** 2 + (g.sprite.y - y) ** 2 > alcance * alcance) return;
+        if (g.damage(dano)) this.matarGolfinho();
+      },
+      explosao: (x, y) => {
+        this.fx.explodeBig(x, y, 1);
+        this.cameras.main.shake(160, 0.006);
+      },
+    });
     this.pecas = new PecasEmJogo({
       scene: this,
       fx: this.fx,
@@ -719,6 +758,7 @@ export class GameScene extends Phaser.Scene {
       this.ship.y,
       this.homingTargets(),
     );
+    this.bombas.tick(dt, time);
 
     this.ship.setAngle(Phaser.Math.Clamp(body.velocity.y * 0.06, -25, 25));
     this.ship.setVisible(time > this.invulnerableUntil || Math.floor(time / 60) % 2 === 0);
@@ -2229,7 +2269,8 @@ export class GameScene extends Phaser.Scene {
     if (this.over || this.bombs <= 0) return;
     this.bombs--;
     if (this.medidas) this.medidas.bombasUsadas++;
-    this.bombaDePanico();
+    if (this.bombaModo === 'panico') this.bombaDePanico();
+    else this.bombas.lancar(this.time.now);
   }
 
   /**
