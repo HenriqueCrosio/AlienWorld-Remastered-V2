@@ -1982,9 +1982,14 @@ export class GameScene extends Phaser.Scene {
 
     this.weapons.release(bullet);
     this.fx.hit(bullet.x, bullet.y);
+    this.ferirConstrucao(prop, bullet.getData('damage') as number);
+  }
 
+  /** O dano numa peça do cenário — do tiro e da bomba de queda (que desde 03/10 acerta as construções de solo). */
+  private ferirConstrucao(prop: Phaser.Physics.Arcade.Sprite, dano: number): void {
+    if (!prop.active) return;
     // Rocha é indestrutível (hp = Infinity): o tiro ricocheteia, e é só isso.
-    const hp = (prop.getData('hp') as number) - (bullet.getData('damage') as number);
+    const hp = (prop.getData('hp') as number) - dano;
     if (!Number.isFinite(hp)) return;
 
     prop.setData('hp', hp);
@@ -2215,18 +2220,28 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
-   * A BOMBA (K) — 3 por vida (GDD §5).
+   * A BOMBA (Shift / X) — 3 por vida (GDD §5). Ela cobra pelo estoque: acabou, acabou até perder a vida.
    *
-   * É a válvula de escape para quando a tela fecha: limpa TODO tiro inimigo em voo, fere tudo
-   * que vive na tela e dá 1s de i-frames. O dano (12) mata o miúdo e fere o sério sem virar
-   * botão de vencer — um cargueiro (24) sobrevive, um chefão mal sente. Ela cobra pelo
-   * estoque: acabou, acabou até perder a vida.
+   * Desde 03/10 é a BOMBA DE QUEDA (spec `2026-10-03-bomba-de-queda-design.md`): um objeto que cai em parábola na
+   * atmosfera e é arremessado no vácuo (`Bombas`). A de pânico continua aqui, inteira — `bombaModo = 'panico'`.
    */
   private useBomb(): void {
     if (this.over || this.bombs <= 0) return;
     this.bombs--;
     if (this.medidas) this.medidas.bombasUsadas++;
+    this.bombaDePanico();
+  }
 
+  /**
+   * A BOMBA DE PÂNICO — a de antes de 03/10, guardada inteira (`BOMBA.modo = 'panico'` a devolve). Ele, ao trocar:
+   * *"com as cartas, a bomba do pânico é mais facilidade para limpar wave"* — e *"se ficar ruim a nova mecânica,
+   * voltamos à antiga"*.
+   *
+   * É a válvula de escape para quando a tela fecha: limpa TODO tiro inimigo em voo, fere tudo
+   * que vive na tela e dá 1s de i-frames. O dano (12) mata o miúdo e fere o sério sem virar
+   * botão de vencer — um cargueiro (24) sobrevive, um chefão mal sente.
+   */
+  private bombaDePanico(): void {
     this.cameras.main.flash(220, 255, 232, 180);
     this.cameras.main.shake(280, 0.008);
     this.invulnerableUntil = Math.max(this.invulnerableUntil, this.time.now + 1000);
@@ -2248,24 +2263,29 @@ export class GameScene extends Phaser.Scene {
     for (const e of [
       ...this.enemies.enemies.getChildren(),
     ] as Phaser.Physics.Arcade.Sprite[]) {
-      if (!e.active) continue;
-      const antes = e.getData('hp') as number;
-      const hp = antes - 12;
-      this.medidas?.dano('bomba', Math.min(12, Math.max(0, antes)));
-      e.setData('hp', hp);
-
-      if (hp <= 0) {
-        this.matarInimigo(e);
-      } else {
-        e.setTint(0xffb0b0);
-        this.time.delayedCall(60, () => {
-          if (e.active) e.setTint(e.getData('tint') as number);
-        });
-      }
+      this.ferirInimigo(e, 12);
     }
 
     if (this.boss && !this.boss.isDead && this.boss.damage(12)) this.killBoss();
     if (this.golfinho?.vulneravel && this.golfinho.damage(12)) this.matarGolfinho();
+  }
+
+  /** O dano de BOMBA num inimigo (as duas bombas): mata ou pisca, e conta nas medidas do sandbox. */
+  private ferirInimigo(e: Phaser.Physics.Arcade.Sprite, dano: number): void {
+    if (!e.active) return;
+    const antes = e.getData('hp') as number;
+    const hp = antes - dano;
+    this.medidas?.dano('bomba', Math.min(dano, Math.max(0, antes)));
+    e.setData('hp', hp);
+
+    if (hp <= 0) {
+      this.matarInimigo(e);
+    } else {
+      e.setTint(0xffb0b0);
+      this.time.delayedCall(60, () => {
+        if (e.active) e.setTint(e.getData('tint') as number);
+      });
+    }
   }
 
   private damageShip(): void {
