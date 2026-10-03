@@ -3,6 +3,7 @@ import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { FAMILIA, fontesOk } from '../fonte';
 import { EVENTO_ESCALA, ehHD, escalaHD, jogoHD, mouseHD, pixelFino, prepararCameraHD, registrarTextoHD } from '../uiHD';
 import { CARTAS, COR_RARIDADE, NOME_RARIDADE, type CartaDef } from '../cartas';
+import { mapaAtivo } from '../controles';
 import { ENCAIXE, FOLGA, MOLDURA, type Caixa } from '../molduraCarta';
 import { medidorDaFonte, posicionar, quebrar, tamanhoUnico, type Medir } from '../textoNoEncaixe';
 
@@ -151,12 +152,17 @@ export class CartasScene extends Phaser.Scene {
     kb.on('keydown-A', () => mover(-1));
     kb.on('keydown-RIGHT', () => mover(1));
     kb.on('keydown-D', () => mover(1));
-    kb.on('keydown-ONE', () => this.confirmar(0));
-    kb.on('keydown-TWO', () => this.confirmar(1));
-    kb.on('keydown-THREE', () => this.confirmar(2));
-    kb.on('keydown-ENTER', () => this.confirmar(this.cursor));
-    kb.on('keydown-SPACE', () => this.confirmar(this.cursor));
-    kb.on('keydown-J', () => this.confirmar(this.cursor));
+    // ⚠️ SÓ TOQUE NOVO: quem segura o TIRO (o Espaço) quando a mesa abre manda a repetição automática do sistema como
+    // `keydown` — sem este filtro, a carta do cursor era escolhida sem ele ver.
+    const novo = (f: () => void) => (ev: KeyboardEvent) => {
+      if (!ev.repeat) f();
+    };
+    kb.on('keydown-ONE', novo(() => this.confirmar(0)));
+    kb.on('keydown-TWO', novo(() => this.confirmar(1)));
+    kb.on('keydown-THREE', novo(() => this.confirmar(2)));
+    kb.on('keydown-ENTER', novo(() => this.confirmar(this.cursor)));
+    // A tecla de TIRO do perfil confirma (Espaço no padrão, Z no clássico). O J saiu com o mapa de 03/10.
+    for (const t of mapaAtivo().tiro) kb.on(`keydown-${t}`, novo(() => this.confirmar(this.cursor)));
     const sair = data.onSair;
     if (sair) {
       kb.on('keydown-ESC', () => {

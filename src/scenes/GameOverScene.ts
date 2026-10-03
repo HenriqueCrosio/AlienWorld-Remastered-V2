@@ -3,6 +3,7 @@ import { COLORS, GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import type { HandlingMode } from './GameScene';
+import { mapaAtivo, rotuloDaTecla } from '../controles';
 
 type Medal = 'ouro' | 'prata' | 'bronze' | null;
 
@@ -93,25 +94,32 @@ export class GameOverScene extends Phaser.Scene {
       this.text(GAME_WIDTH / 2, 202, 'UM JOGO DE HENRIQUE CROSIO', 7, COLORS.metalMid);
     }
 
+    // A tecla de TIRO do perfil repete (Espaço no padrão, Z no clássico).
+    const tiro = mapaAtivo().tiro[0];
+    const tecla = rotuloDaTecla(tiro);
     this.text(
       GAME_WIDTH / 2,
       180,
       practice
-        ? 'ESPAÇO repete o CHEFÃO · ESC menu'
+        ? `${tecla} repete o CHEFÃO · ESC menu`
         : victory
-          ? 'ESPAÇO joga de novo · ESC menu'
-          : `ESPAÇO tenta a FASE ${stage} de novo · ESC menu`,
+          ? `${tecla} joga de novo · ESC menu`
+          : `${tecla} tenta a FASE ${stage} de novo · ESC menu`,
       6,
       COLORS.metalMid,
     );
 
     const kb = this.input.keyboard!;
-    // No treino, ESPAÇO volta direto para a luta — sem a fase antes dela. Fora do treino,
+    // No treino, o TIRO volta direto para a luta — sem a fase antes dela. Fora do treino,
     // o retry é da FASE em que o jogador caiu (com a mesma nave e o placar do checkpoint):
     // morrer reinicia a fase, não a campanha (GDD §8).
-    kb.once('keydown-SPACE', () =>
-      this.scene.start('Game', { stage, handling, practice, ship, score: baseScore }),
-    );
+    // ⚠️ SÓ TOQUE NOVO: quem morre segurando o tiro manda a repetição do sistema — e a fase recomeçaria sozinha.
+    let saiu = false;
+    kb.on(`keydown-${tiro}`, (ev: KeyboardEvent) => {
+      if (ev.repeat || saiu) return;
+      saiu = true;
+      this.scene.start('Game', { stage, handling, practice, ship, score: baseScore });
+    });
     kb.once('keydown-ESC', () => this.scene.start('Menu'));
   }
 
