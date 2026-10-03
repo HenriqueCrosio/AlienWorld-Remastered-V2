@@ -31,9 +31,12 @@ if (await page.evaluate(() => (window.__gameHD ?? window.__game).scene.isActive(
 }
 
 // Vidas para cima: testa-se a MECÂNICA, não a habilidade da sonda (a lição do probe-chain).
+// E a BOMBA DE PÂNICO: esta sonda mede a limpeza dos tiros, que é da bomba antiga — desde 03/10 a padrão é a de queda
+// (a `probe-bomba-queda` mede essa), e a de pânico fica guardada atrás da chave.
 await page.evaluate(() => {
   const scene = window.__game.scene.getScene('Game');
   scene.lives = 99;
+  scene.bombaModo = 'panico';
 });
 
 // Espera o chefão entrar e cuspir o primeiro leque.
