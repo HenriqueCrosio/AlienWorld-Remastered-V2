@@ -147,54 +147,99 @@ const queima = await page.evaluate(async () => {
 });
 conferir(queima, 'Em Cadeia: quem está no raio da explosão pega fogo', queima);
 
-// ── MÍSSIL GUIADO (WPN_009) ──
+// ── MÍSSIL GUIADO (WPN_009): solto pelo JOGADOR (tecla Q), com recarga — 04/10, o automático era "apelão" ──
+// Os tempos pelo relógio do JOGO (no SwiftShader ele anda mais devagar que o real).
 await fase(['WPN_009']);
+const sozinho = await page.evaluate(async () => {
+  const t = window.__teste;
+  const s = t.cena();
+  window.__alvoMissil = t.alvo('drone', s.ship.x + 140, s.ship.y - 30, 99);
+  const fim = s.time.now + 1500;
+  let visto = 0;
+  while (s.time.now < fim) {
+    visto = Math.max(visto, t.projeteis('missil').length);
+    await t.dormir(50);
+  }
+  return { visto };
+});
+conferir(sozinho.visto === 0, 'sem a tecla, o míssil não sai sozinho', sozinho);
+await page.keyboard.press('KeyQ');
 const missil = await page.evaluate(async () => {
   const t = window.__teste;
   const s = t.cena();
-  const e = t.alvo('drone', s.ship.x + 140, s.ship.y - 30, 99);
+  const e = window.__alvoMissil;
+  // A recarga lida no quadro em que o míssil aparece (o Q só é processado no tick seguinte ao aperto).
+  let recarga = null;
   let visto = 0;
-  for (let i = 0; i < 50 && e.getData('hp') === 99; i++) {
+  const fim = s.time.now + 3000;
+  while (s.time.now < fim && e.getData('hp') === 99) {
     visto = Math.max(visto, t.projeteis('missil').length);
-    await t.dormir(100);
+    if (visto && recarga === null) recarga = s.cartas.lancadores.missilFalta;
+    await t.dormir(50);
   }
-  return { visto, hp: e.getData('hp') };
+  return { visto, hp: e.getData('hp'), recarga, hud: s.hud.text };
 });
-conferir(missil.visto >= 1 && missil.hp < 99, 'o míssil sai, persegue e acerta', missil);
+conferir(missil.visto >= 1 && missil.hp < 99, 'Q solta o míssil, que persegue e acerta', missil);
+conferir(missil.recarga > 7000 && missil.recarga <= 8000, 'com a carta ×1, a recarga é de 8s', missil);
+await page.keyboard.press('KeyQ');
+await page.waitForTimeout(300);
+const naEsperaMissil = await page.evaluate(() => ({ vivos: window.__teste.projeteis('missil').length, hud: window.__teste.cena().hud.text }));
+conferir(naEsperaMissil.vivos === 0 && hudContando(naEsperaMissil.hud, 'MÍSSIL'), 'na recarga, o Q não solta outro e a HUD conta (MÍSSIL Ns)', naEsperaMissil);
 
-// Míssil ×2: cada um trava no SEU alvo, e o 2º sai um instante depois do 1º.
+// Míssil ×2: a recarga encurta para 5s.
 await fase(['WPN_009', 'WPN_009']);
+await page.evaluate(() => {
+  const s = window.__teste.cena();
+  window.__teste.alvo('drone', s.ship.x + 150, s.ship.y - 50, 99);
+});
+await page.keyboard.press('KeyQ');
 const duplo = await page.evaluate(async () => {
   const t = window.__teste;
-  const s = t.cena();
-  const a = t.alvo('drone', s.ship.x + 150, s.ship.y - 50, 99);
-  const b = t.alvo('drone', s.ship.x + 170, s.ship.y + 50, 99);
-  const l = s.cartas.lancadores;
-  l.proximoMissil = s.time.now;
-  const saidas = [];
-  for (let i = 0; i < 40 && saidas.length < 2; i++) {
-    for (const m of l.misseis) if (!saidas.some((x) => x.id === m.id)) saidas.push({ id: m.id, t: s.time.now, alvo: m.alvo === a ? 'a' : m.alvo === b ? 'b' : null });
-    await t.dormir(20);
-  }
-  return { saidas, atraso: saidas.length === 2 ? saidas[1].t - saidas[0].t : null };
+  await t.dormir(100);
+  return { recarga: t.cena().cartas.lancadores.missilFalta, saiu: t.cena().cartas.lancadores.misseis.length };
 });
-conferir(
-  duplo.saidas.length === 2 && duplo.saidas[0].alvo !== duplo.saidas[1].alvo && duplo.saidas.every((x) => x.alvo) && duplo.atraso >= 80,
-  'míssil ×2: um alvo para cada, e o 2º sai depois do 1º',
-  duplo,
-);
+conferir(duplo.saiu === 1 && duplo.recarga > 4000 && duplo.recarga <= 5000, 'com a carta ×2, um míssil e a recarga de 5s', duplo);
 
-// Sem ninguém para acertar, o míssil explode no ar no fim da vida (~2,5s).
+// Sem ninguém para travar, o Q não solta e não gasta a recarga.
 await fase(['WPN_009']);
+await page.keyboard.press('KeyQ');
+const semNinguem = await page.evaluate(async () => {
+  const t = window.__teste;
+  await t.dormir(300);
+  return { vivos: t.projeteis('missil').length, falta: t.cena().cartas.lancadores.missilFalta };
+});
+conferir(semNinguem.vivos === 0 && semNinguem.falta === 0, 'sem inimigo na tela, o Q não solta nem gasta a recarga', semNinguem);
+
+// Perdeu o alvo (morreu antes) e não sobrou outro: explode no ar logo (~0,4s), ainda na tela.
+await fase(['WPN_009']);
+await page.evaluate(() => {
+  const t = window.__teste;
+  const s = t.cena();
+  window.__fontesMissil = t.espiarExplosoes();
+  window.__alvoMissil = t.alvo('drone', s.ship.x + 160, s.ship.y - 40, 99);
+});
+await page.keyboard.press('KeyQ');
 const noAr = await page.evaluate(async () => {
   const t = window.__teste;
   const s = t.cena();
-  const fontes = t.espiarExplosoes();
-  s.cartas.lancadores.proximoMissil = s.time.now;
-  for (let i = 0; i < 40 && !fontes.includes('missil'); i++) await t.dormir(100);
-  return { fontes, vivos: t.projeteis('missil').length };
+  const fontes = window.__fontesMissil;
+  const e = window.__alvoMissil;
+  const l = s.cartas.lancadores;
+  // Espera o míssil sair e acender, e tira o alvo do jogo.
+  let fim = s.time.now + 1500;
+  while (s.time.now < fim && !l.misseis.some((m) => m.aceso)) await t.dormir(20);
+  const saiu = l.misseis.length;
+  e.setActive(false).setVisible(false);
+  const tirado = s.time.now;
+  fim = s.time.now + 1500;
+  while (s.time.now < fim && !fontes.includes('missil')) await t.dormir(20);
+  return { saiu, fontes, depoisMs: Math.round(s.time.now - tirado), vivos: t.projeteis('missil').length };
 });
-conferir(noAr.fontes.includes('missil') && noAr.vivos === 0, 'o míssil que não acha ninguém explode no ar no fim da vida', noAr);
+conferir(
+  noAr.saiu === 1 && noAr.fontes.includes('missil') && noAr.vivos === 0 && noAr.depoisMs <= 700,
+  'o míssil que perde o alvo (e não acha outro) explode no ar logo',
+  noAr,
+);
 
 // ── FLARE (EFF_010): solto pelo JOGADOR (tecla F), com espera de 8s ──
 await fase(['EFF_010']);

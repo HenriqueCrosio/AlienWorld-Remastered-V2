@@ -42,7 +42,12 @@
 | **Bomba** | **Shift** (esq. ou dir.) | B / ○ |
 | **Dash** | **E** | RB / R1 |
 | **Flare** | **F** | LB / L1 |
+| **Míssil** (04/10) | **Q** (clássico: **V**) | a definir na 1.6 (LT / L2?) |
 | Pausa / voltar | ESC | Start / Options |
+
+> **04/10 — a ação MÍSSIL:** o míssil deixou de ser automático (*"apelão demais — imagina quantas vezes ele vai soltar
+> durante uma fase inteira"*) e virou tecla com recarga, como o flare e o dash. **Q** no padrão (vizinho do E),
+> **V** no clássico (seguindo a fileira Z/X/C). Detalhes na spec do catálogo, §4.3.
 
 ### 3.2 Perfil CLÁSSICO
 

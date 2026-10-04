@@ -25,8 +25,8 @@ for (const [nome, mapa] of Object.entries(PERFIS)) {
   igual([...dono.keys()].filter((t) => t === 'CTRL'), [], `${nome}: sem CTRL (Ctrl+W fecha a aba)`);
 }
 
-igual([PERFIS.padrao.tiro, PERFIS.padrao.bomba, PERFIS.padrao.dash, PERFIS.padrao.flare], [['SPACE'], ['SHIFT'], ['E'], ['F']], 'padrão: Espaço · Shift · E · F');
-igual([PERFIS.classico.tiro, PERFIS.classico.bomba, PERFIS.classico.dash, PERFIS.classico.flare], [['Z'], ['X'], ['C'], ['F']], 'clássico: Z · X · C · F');
+igual([PERFIS.padrao.tiro, PERFIS.padrao.bomba, PERFIS.padrao.dash, PERFIS.padrao.flare, PERFIS.padrao.missil], [['SPACE'], ['SHIFT'], ['E'], ['F'], ['Q']], 'padrão: Espaço · Shift · E · F · Q');
+igual([PERFIS.classico.tiro, PERFIS.classico.bomba, PERFIS.classico.dash, PERFIS.classico.flare, PERFIS.classico.missil], [['Z'], ['X'], ['C'], ['F'], ['V']], 'clássico: Z · X · C · F · V');
 igual([PERFIS.padrao.flap, PERFIS.classico.flap], [['W', 'UP'], ['W', 'UP']], 'o flap é W / ↑ nos dois (o Espaço não faz flap)');
 
 igual(resolverPerfil(null, ''), { perfil: 'padrao', gravar: null }, 'nada salvo, nada na URL: padrão');

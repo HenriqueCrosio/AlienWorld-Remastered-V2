@@ -353,6 +353,12 @@ export class EnemySystem {
     // terminar (ver `damage`), e restaurar o do DEFS repintaria a arte do cinturão no 1º tiro.
     e.setData('tint', tint);
     e.setData('baseY', y);
+    // Os ESTADOS das cartas (queimando, eletrificado): o slot é reciclado, e um inimigo que morreu queimando há menos de
+    // 2s faria o próximo nascer em chamas.
+    e.setData('queimaAte', 0);
+    e.setData('eletrificadoAte', 0);
+    e.setData('anelDesde', 0);
+    e.setData('anelAte', 0);
     e.setData('t', Phaser.Math.FloatBetween(0, Math.PI * 2));
     // Espera antes do PRIMEIRO tiro: uma canhoneira não dispara no frame em que aparece.
     e.setData('cooldown', Phaser.Math.FloatBetween(1.2, 2.0));

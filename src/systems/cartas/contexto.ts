@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import type { Fx } from '../Fx';
 import type { WeaponSystem } from '../WeaponSystem';
+import type { EstadosNoInimigo } from './EstadosNoInimigo';
 
 export type Inimigo = Phaser.Physics.Arcade.Sprite;
 /** A linhagem da nave: o tiro do drone (e, depois, a arte das peças) segue ela (spec §4.3). */
@@ -39,6 +40,8 @@ export interface Contexto {
   /** Tira vida; zerou, mata pelo caminho único da cena (`matarInimigo`). `fonte` é para as medidas do sandbox. */
   ferir: (e: Inimigo, dano: number, fonte: string) => void;
   incendiar: (e: Inimigo) => void;
+  /** Os estados (eletrificado, queimando) desenhados por cima do inimigo — e se ainda TINGEM (sem a arte). */
+  estados: EstadosNoInimigo;
   /** Os inimigos VIVOS a até `raio` px de (x, y) — uma cópia, pode matar no meio do laço. */
   noRaio: (x: number, y: number, raio: number) => Inimigo[];
   /**

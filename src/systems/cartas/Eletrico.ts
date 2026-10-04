@@ -9,6 +9,18 @@ const ARCO = { saltos: 3, raio: 50, dano: 1 };
 const PULSO = { raio: 30, dano: 2 };
 const COR_CHOQUE = 0x9ff6ff;
 const COR_QUEIMANDO = 0xff9a50;
+/**
+ * PRIMEIRO O RAIO, DEPOIS O ANEL (04/10, ele: *"o raio precisa ficar aparente"*). Um `Fx.estalo` vive só 90ms — o
+ * anel nascendo junto o cobria, e só atrasar o anel deixaria um buraco vazio. Então o raio ESTALA NO CORPO durante a
+ * trava inteira, redesenhado a cada `ESTALO_CADA_MS` (cada um sai torto de um jeito: o raio treme); quando a trava
+ * acaba, o anel #29 acende como a carga que sobrou, por `ANEL_MS`. É SÓ VISUAL: a trava e a Sobrecarga seguem o
+ * `eletrificadoAte`.
+ */
+const RAIO_NO_CORPO_MS = TRAVA_MS;
+const ESTALO_CADA_MS = 80;
+/** O último estalo ainda leva 90ms para apagar (`Fx.estalo`): o anel espera, para os dois não se misturarem. */
+const ESTALO_VIVE_MS = 90;
+const ANEL_MS = 400;
 /** O raio vive 3 quadros de 40ms, redesenhado a cada um (o zigue-zague treme). */
 const RAIO_MS = 120;
 const QUADRO_MS = 40;
@@ -27,12 +39,15 @@ const NAO_TRAVA = new Set(['aranha']);
  * - SOBRECARGA: o eletrificado que morre solta um pulso que FERE em volta; o pulso NÃO eletrifica.
  *
  * O raio é desenhado em PIXEL na resolução do jogo (`pixelsDoRaio`) — não sprite esticada, não linha vetorial.
- * Provisório: o tint ciano e o `Fx.estalo`; a faísca e o eletrificado do PixelLab (#17, #29) entram depois.
+ * No acerto, o raio em código atravessando o corpo (`Fx.estalo`); enquanto dura, o anel #29 do PixelLab por cima
+ * (`EstadosNoInimigo`, 04/10 — a escolha dele: "raio + anel"). O tint ciano só sem a arte do anel.
  */
 export class Eletrico {
   private readonly g: Phaser.GameObjects.Graphics;
   private readonly raios: { a: Ponto; b: Ponto; ate: number; troca: number; pts: Ponto[] }[] = [];
   private readonly tingidos = new Set<Inimigo>();
+  /** Quem está com o raio estalando no corpo, até quando, e o próximo estalo. */
+  private readonly noCorpo = new Map<Inimigo, { ate: number; proximo: number }>();
 
   constructor(private readonly c: Contexto) {
     this.g = c.h.scene.add.graphics().setDepth(45);
@@ -46,9 +61,14 @@ export class Eletrico {
 
   eletrificar(e: Inimigo, saltar: boolean, dano: number): void {
     if (!e.active) return;
-    e.setData('eletrificadoAte', this.c.h.scene.time.now + TRAVA_MS);
+    const agora = this.c.h.scene.time.now;
+    e.setData('eletrificadoAte', agora + TRAVA_MS);
     if (!NAO_TRAVA.has(e.getData('kind') as string)) this.c.h.travar(e, TRAVA_MS);
-    this.c.h.fx.estalo(e.x, e.y, e.displayWidth * 0.42);
+    // O raio em código atravessando o corpo — ele preferiu este à faísca #17 do PixelLab (04/10) — estalando até o fim
+    // da trava; depois, o anel (`EstadosNoInimigo` lê `anelDesde`/`anelAte`). Um choque novo recomeça os dois.
+    e.setData('anelDesde', agora + RAIO_NO_CORPO_MS + ESTALO_VIVE_MS);
+    e.setData('anelAte', agora + RAIO_NO_CORPO_MS + ESTALO_VIVE_MS + ANEL_MS);
+    this.noCorpo.set(e, { ate: agora + RAIO_NO_CORPO_MS, proximo: 0 });
     if (dano) this.c.depois(() => this.c.ferir(e, dano, 'choque'));
     if (saltar && this.c.tem('EFF_012')) this.arco(e);
   }
@@ -68,18 +88,31 @@ export class Eletrico {
     const agora = this.c.h.scene.time.now;
 
     // O TINT do eletrificado, reescrito todo quadro: o flash de dano (40ms) restauraria o tint do tipo por cima dele.
+    // Desde 04/10 o eletrificado é o ANEL #29 por cima (`EstadosNoInimigo`); o tint só volta sem a arte.
+    const tinge = this.c.estados.tingeEletrico;
     for (const e of this.c.h.inimigos()) {
       if (!e.active) continue;
-      const ligado = ((e.getData('eletrificadoAte') as number | undefined) ?? 0) > agora;
+      const ligado = tinge && ((e.getData('eletrificadoAte') as number | undefined) ?? 0) > agora;
       if (ligado) {
         e.setTint(COR_CHOQUE);
         this.tingidos.add(e);
       } else if (this.tingidos.delete(e)) {
-        const queimando = ((e.getData('queimaAte') as number | undefined) ?? 0) > agora;
+        const queimando = this.c.estados.tingeQueima && ((e.getData('queimaAte') as number | undefined) ?? 0) > agora;
         e.setTint(queimando ? COR_QUEIMANDO : (e.getData('tint') as number));
       }
     }
     for (const e of this.tingidos) if (!e.active) this.tingidos.delete(e);
+
+    // O RAIO NO CORPO, estalando até o fim da trava (ver `RAIO_NO_CORPO_MS`).
+    for (const [e, r] of this.noCorpo) {
+      if (!e.active || agora >= r.ate) {
+        this.noCorpo.delete(e);
+        continue;
+      }
+      if (agora < r.proximo) continue;
+      r.proximo = agora + ESTALO_CADA_MS;
+      this.c.h.fx.estalo(e.x, e.y, e.displayWidth * 0.42);
+    }
 
     this.g.clear();
     for (let i = this.raios.length - 1; i >= 0; i--) {

@@ -12,10 +12,15 @@ import { texturaDaLinhagem } from './texturasProvisorias';
  * ar onde estiver (o míssil que errou ainda entra na cadeia das explosões).
  */
 const MISSIL = {
-  esperaMs: 3000,
-  atrasoDo2oMs: 140,
-  velocidadeInicial: 80,
-  velocidadeMax: 150,
+  /**
+   * O MÍSSIL É SOLTO PELO JOGADOR (04/10, ele: automático a cada 1,5s era *"apelão demais — imagina quantas vezes ele
+   * vai soltar durante uma fase inteira"*): a ação MÍSSIL (Q / V no clássico), com recarga — como o flare e o dash.
+   * A recarga por número de cartas: ×1 = 8s, ×2 = 5s. A calibragem (frente C) mexe nestes números.
+   */
+  recargaMs: [8000, 5000],
+  /** Na ignição o míssil parte a esta velocidade, na direção do nariz (já virado para o alvo durante a queda). */
+  velocidadeIgnicao: 130,
+  velocidadeMax: 180,
   aceleracao: 420,
   /**
    * ⚠️ O AMORTECEDOR DE LADO (por segundo). Sem ele, aceleração fixa + velocidade no teto = ÓRBITA: o míssil que errou
@@ -23,8 +28,32 @@ const MISSIL = {
    * Amortecer só a componente PERPENDICULAR ao alvo deixa a curva de volta larga, mas faz ela fechar NO alvo.
    */
   amortecimentoLateral: 3,
+  /** Contada da IGNIÇÃO (a queda não gasta vida). */
   vidaMs: 2500,
+  /**
+   * Perdeu o alvo e não há outro: explode no ar logo. ⚠️ Rápido como ele sai agora (130→180px/s), esperar a vida
+   * inteira o levaria para fora da tela, e o míssil sumiria sem estourar.
+   */
+  semAlvoMs: 400,
   dano: 2,
+};
+/**
+ * A SAÍDA DO MÍSSIL (04/10, ele: *"ele sai para baixo como se tivesse se estabilizando e depois segue rápido em direção
+ * ao inimigo que ele travou"*): solto da BARRIGA da nave, ele cai com o motor apagado — a queda freia (o míssil se
+ * estabiliza) enquanto o nariz gira para o alvo travado — e na ignição parte rápido para ele.
+ */
+const QUEDA = {
+  ms: 300,
+  /** Onde nasce, em relação ao centro da nave: um pouco atrás e embaixo (a barriga). */
+  dx: 2,
+  dy: 4,
+  /** A velocidade da soltura (px/s): para baixo, e um pouco para a frente (herda metade do avanço da nave). */
+  vx: 15,
+  vy: 60,
+  /** Quanto a queda freia por segundo (o "estabilizar"). */
+  freio: 6,
+  /** O giro do nariz para o alvo (rad/s). */
+  giro: 9,
 };
 /**
  * O FLARE é SOLTO PELO JOGADOR (02/10, *"para não ficar muito roubado"*): a ação FLARE (F — 03/10, *"em jogos de naves
@@ -39,6 +68,9 @@ interface Missil {
   b: Phaser.Physics.Arcade.Sprite;
   id: number;
   alvo: Alvo | null;
+  /** Fim da queda: o motor acende. */
+  ignicaoEm: number;
+  aceso: boolean;
   explodeEm: number;
 }
 
@@ -48,7 +80,7 @@ interface Missil {
  * alguém ou, se ninguém tocar, sozinho depois de ~3s (armadilha para quem persegue, bomba de retaguarda).
  */
 export class Lancadores {
-  private proximoMissil = 0;
+  private missilPronto = 0;
   private flarePronto = 0;
   private serie = 0;
   private readonly misseis: Missil[] = [];
@@ -70,17 +102,21 @@ export class Lancadores {
     return Math.max(0, this.flarePronto - this.c.h.scene.time.now);
   }
 
-  tick(dt: number, flarePedido: boolean): void {
+  /** Quanto falta para o próximo míssil (ms; 0 = pronto) — ou `null` sem a carta. A HUD conta a recarga. */
+  get missilFalta(): number | null {
+    if (!this.c.tem('WPN_009')) return null;
+    return Math.max(0, this.missilPronto - this.c.h.scene.time.now);
+  }
+
+  tick(dt: number, flarePedido: boolean, missilPedido: boolean): void {
     const agora = this.c.h.scene.time.now;
     const n = this.c.h.nave();
 
-    const quantos = this.c.quantas('WPN_009');
-    if (quantos) {
-      if (!this.proximoMissil) this.proximoMissil = agora + MISSIL.esperaMs;
-      else if (agora >= this.proximoMissil) {
-        this.proximoMissil = agora + MISSIL.esperaMs;
-        this.salva(quantos);
-      }
+    // Sem ninguém para travar, a tecla não gasta: o míssil fica pronto para quando aparecer um alvo.
+    if (missilPedido && this.missilFalta === 0 && this.c.h.alvos().some((a) => a.active)) {
+      const recarga = MISSIL.recargaMs[Math.min(this.c.quantas('WPN_009'), MISSIL.recargaMs.length) - 1];
+      this.missilPronto = agora + recarga;
+      this.lancar();
     }
 
     if (flarePedido && this.flareProntoAgora) {
@@ -95,33 +131,36 @@ export class Lancadores {
   // ─── O MÍSSIL ─────────────────────────────────────────────────────────────────────────────────
 
   /**
-   * Uma SALVA: com a carta duas vezes, dois mísseis — o 2º sai um instante depois do 1º, e CADA UM trava no seu alvo
-   * (o mais próximo da nave e o 2º mais próximo). Antes os dois corriam para o mesmo, e o que sobrava "pulava" para
-   * outro inimigo — lia como reação em cadeia, não como míssil.
+   * Um míssil. CADA UM trava no seu alvo: o livre mais próximo da nave — se o anterior ainda estiver perseguindo, o
+   * novo pega outro. Antes dois corriam para o mesmo, e o que sobrava "pulava" para outro inimigo — lia como reação em
+   * cadeia, não como míssil.
    */
-  private salva(quantos: number): void {
-    for (let i = 0; i < quantos; i++) {
-      if (i === 0) this.lancar(-4);
-      else this.c.h.scene.time.delayedCall(MISSIL.atrasoDo2oMs * i, () => this.lancar(4));
-    }
-  }
-
-  private lancar(dy: number): void {
+  private lancar(): void {
     const n = this.c.h.nave();
     if (!n.active) return;
     const b = this.c.h.weapons.disparar({
-      x: n.x + 6,
-      y: n.y + dy,
+      x: n.x + QUEDA.dx,
+      y: n.y + QUEDA.dy,
       angulo: 0,
       textura: texturaDaLinhagem(this.c.h.scene, 'carta-missil', this.c.h.linhagem),
-      velocidade: MISSIL.velocidadeInicial,
+      velocidade: 0,
       dano: MISSIL.dano,
       origem: 'missil',
     });
     if (!b) return;
+    const avanco = (n.body as Phaser.Physics.Arcade.Body | null)?.velocity.x ?? 0;
+    b.setVelocity(avanco * 0.5 + QUEDA.vx, QUEDA.vy);
     const id = ++this.serie;
     b.setData('missil', id);
-    this.misseis.push({ b, id, alvo: this.alvoLivre(n.x, n.y), explodeEm: this.c.h.scene.time.now + MISSIL.vidaMs });
+    const agora = this.c.h.scene.time.now;
+    this.misseis.push({
+      b,
+      id,
+      alvo: this.alvoLivre(n.x, n.y),
+      ignicaoEm: agora + QUEDA.ms,
+      aceso: false,
+      explodeEm: agora + QUEDA.ms + MISSIL.vidaMs,
+    });
   }
 
   /** O alvo vivo mais próximo de (x, y) que NENHUM outro míssil está perseguindo; se todos estão, o mais próximo. */
@@ -153,8 +192,23 @@ export class Lancadores {
       }
       // O alvo morreu antes (o tiro da nave chegou primeiro): pega o livre mais próximo DO MÍSSIL.
       if (!m.alvo?.active) m.alvo = this.alvoLivre(m.b.x, m.b.y);
+      if (!m.alvo) m.explodeEm = Math.min(m.explodeEm, Math.max(agora, m.ignicaoEm) + MISSIL.semAlvoMs);
 
       const body = m.b.body as Phaser.Physics.Arcade.Body;
+      if (agora < m.ignicaoEm) {
+        // A QUEDA: motor apagado, a queda freia, o nariz gira para o alvo travado (ou fica reto, sem alvo).
+        const freia = Math.exp(-QUEDA.freio * dt);
+        body.velocity.x *= freia;
+        body.velocity.y *= freia;
+        const mira = m.alvo ? Math.atan2(m.alvo.y - m.b.y, m.alvo.x - m.b.x) : 0;
+        m.b.setRotation(Phaser.Math.Angle.RotateTo(m.b.rotation, mira, QUEDA.giro * dt));
+        continue;
+      }
+      if (!m.aceso) {
+        // A IGNIÇÃO: parte rápido na direção do nariz.
+        m.aceso = true;
+        body.velocity.setToPolar(m.b.rotation, MISSIL.velocidadeIgnicao);
+      }
       if (m.alvo) {
         const ang = Math.atan2(m.alvo.y - m.b.y, m.alvo.x - m.b.x);
         const ux = Math.cos(ang);
@@ -186,6 +240,18 @@ export class Lancadores {
       origem: 'flare',
     });
     if (!b) return;
+    // A ARTE APROVADA (04/10, o loop aceso da PixMiniMax a 75%, 12×14): a lata em PÉ — o `disparar` gira o projétil
+    // para o rumo (180°), e de cabeça para baixo a chama desceria. A caixa é a da LATA, não a do quadro (o quadro tem
+    // as fagulhas em volta): 5×10, perto da provisória que ele jogou.
+    if (this.c.h.scene.textures.get('carta-flare').frameTotal > 2) {
+      const s = this.c.h.scene;
+      if (!s.anims.exists('carta-flare-aceso')) {
+        // O loop dela não fecha: vaivém.
+        s.anims.create({ key: 'carta-flare-aceso', frames: s.anims.generateFrameNumbers('carta-flare', {}), frameRate: 10, repeat: -1, yoyo: true });
+      }
+      b.setRotation(0).play('carta-flare-aceso');
+      b.body!.setSize(5, 10);
+    }
     const id = ++this.serie;
     b.setData('flare', id);
     this.flares.push({ b, id, explodeEm: agora + FLARE.vidaMs });

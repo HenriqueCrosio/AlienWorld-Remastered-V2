@@ -291,6 +291,14 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // da PixMiniMax. Tiras montadas por `scripts/_montar-pecas.mjs`.
   droneHumanoSheet: { path: 'sprites/cartas/pecas/drone-humano.png', w: 32, h: 32 },
   droneAlienSheet: { path: 'sprites/cartas/pecas/drone-alien.png', w: 32, h: 32 },
+  // AS PEÇAS ANIMADAS no tamanho que ele escolheu (04/10): o flare 75% (com a chave da provisória — o `Lancadores`
+  // toca o loop), o eletrificado 75% e o queimando 75% (`EstadosNoInimigo`). Tiras de `_montar-pecas`. (A faísca #17
+  // saiu: ele ficou com o raio em código.)
+  'carta-flare': { path: 'sprites/cartas/pecas/flare.png', w: 12, h: 14 },
+  cartaEletrificadoSheet: { path: 'sprites/cartas/pecas/eletrificado.png', w: 16, h: 17 },
+  cartaQueimandoSheet: { path: 'sprites/cartas/pecas/queimando.png', w: 6, h: 8 },
+  // A redonda do míssil repintada na MANTA (§5.1c) — o míssil da linhagem alien.
+  expMissilAlienSheet: { path: 'sprites/cartas/fx/exp-missil-alien.png', w: 48, h: 48 },
   // O GUARDIÃO respirando (9f 256² — a massa vermelha pulsa como coração) e o NÚCLEO
   // batendo (9f 128² — a ferida acende e apaga). O núcleo tem CANVAS QUADRADO com a criatura
   // centralizada, e a âncora é outra em relação ao estático recortado (nucleo.png 122×122).

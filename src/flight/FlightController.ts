@@ -17,6 +17,8 @@ export interface InputState {
   dashPressed: boolean;
   /** FLARE (F): borda. Quem decide se sai é a carta (`Lancadores`). */
   flarePressed: boolean;
+  /** MÍSSIL (Q / V): borda. Quem decide se sai é a carta (`Lancadores`). */
+  missilPressed: boolean;
 }
 
 /**

@@ -8,6 +8,7 @@
 //
 // Uso: node scripts/_gif-cartas.mjs <out.gif> <cenarios> [segundos] [modos] [nave]   (npm run dev rodando)
 //   cenários (separados por vírgula): explosivo · fragmentado · emcadeia · missil · missil1 · missil2 · missilvolta · flare
+//     · estadoeletrico · estadoqueimando · missilalien (as chaves de `CENARIOS`)
 //   modos: jogo,variada,aprovada (padrão: aprovada) · nave: humana | alienigena
 import { chromium } from 'playwright';
 import sharp from 'sharp';
@@ -36,7 +37,8 @@ const CENARIOS = {
   emcadeia: { nome: 'INCENDIÁRIO + COMBUSTÃO + EM CADEIA + EXPLOSIVO', cartas: ['EFF_004', 'EFF_006', 'EFF_007', 'EFF_001'], atira: true, alvos: 'cacho' },
   missil: { nome: 'MÍSSIL ×2', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'espalhado', forcar: [[0.1, 'missil'], [1.6, 'missil']] },
   missil1: { nome: 'MÍSSIL — tiro único', cartas: ['WPN_009'], atira: false, alvos: 'um', forcar: [[0.1, 'missil']] },
-  missil2: { nome: 'MÍSSIL ×2 — um alvo cada, 2º depois', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', forcar: [[0.1, 'missil']] },
+  // A saída em queda antes da ignição (04/10), em DOIS apertos do Q (o GIF zera a recarga entre eles).
+  missil2: { nome: 'MÍSSIL — humana, na tecla Q: cai, estabiliza, acende', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', forcar: [[0.1, 'missil'], [1.6, 'missil']] },
   missilvolta: { nome: 'MÍSSIL — o alvo desvia: erra e volta', cartas: ['WPN_009'], atira: false, alvos: 'cruzando', desvio: true, forcar: [[0.1, 'missil']], clip: { x: 46, y: 20, w: 270, h: 176 } },
   drone: { nome: 'DRONE — humana: tiro laranja', cartas: ['WPN_010'], atira: false, alvos: 'drone', clip: { x: 20, y: 46, w: 250, h: 116 } },
   dronealien: { nome: 'DRONE — alien: tiro ciano', cartas: ['WPN_010'], atira: false, alvos: 'drone', nave: 'alienigena', clip: { x: 20, y: 46, w: 250, h: 116 } },
@@ -46,6 +48,14 @@ const CENARIOS = {
   cascoalien: { nome: 'CASCO — alien', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', nave: 'alienigena', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
   dash: { nome: 'DASH — tecla E: avanço invulnerável com imagens-fantasma; espera de 8s', cartas: ['MOV_003'], atira: false, alvos: 'nenhum', forcar: [[0.4, 'dashD'], [1.2, 'dashD'], [1.8, 'dashW']], clip: { x: 30, y: 36, w: 170, h: 110 } },
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
+  // OS ESTADOS NO INIMIGO (04/10), de perto: a faísca e o anel do elétrico, a chama do incendiário.
+  // O estado é FORÇADO em tempos fixos (`eletrificar:N` / `incendiar:N`, N = o alvo), e não pela chance da carta: o
+  // efeito novo e o antigo gastam o `Math.random` diferente, e a sorte dos painéis se separaria no 1º acerto.
+  estadoeletrico: { nome: 'ELÉTRICO — o raio no acerto, o anel enquanto trava', cartas: [], atira: true, alvos: 'trio', forcar: [[0.4, 'eletrificar:0'], [1.0, 'eletrificar:1'], [1.6, 'eletrificar:0'], [2.2, 'eletrificar:2']], clip: { x: 150, y: 70, w: 120, h: 70 } },
+  // SEM o tiro da nave (04/10): a piscada de dano de cada tiro devolve a cor do inimigo, e o tint laranja do painel
+  // ANTES sumia — os três painéis pareciam iguais.
+  estadoqueimando: { nome: 'INCENDIÁRIO — a chama enquanto queima', cartas: [], atira: false, alvos: 'trio', forcar: [[0.3, 'incendiar:0'], [0.6, 'incendiar:1'], [0.9, 'incendiar:2']], clip: { x: 172, y: 74, w: 66, h: 64 } },
+  missilalien: { nome: 'MÍSSIL — alien, na tecla Q: a redonda repintada na manta', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', nave: 'alienigena', forcar: [[0.1, 'missil'], [1.6, 'missil']] },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
 const cenarios = CENARIO.split(',').map((c) => {
@@ -97,13 +107,13 @@ async function gravar(cen, modo) {
     s.invulnerableUntil = 0;
     for (const id of cartas) s.cartas.aplicar(id);
     s.cartas.explosao.arte = modo;
-    // O míssil só sai quando o GIF manda (`forcar`); o flare já é só do jogador.
-    s.cartas.lancadores.proximoMissil = Infinity;
     const y0 = s.ship.y;
     const x0 = s.ship.x;
     const ALVOS = {
       // um CACHO na linha da nave
       cacho: [[190, 0, 6], [205, -12, 6], [205, 12, 6], [222, -4, 6], [222, 18, 6], [238, -14, 6], [240, 6, 6]],
+      // três ESPAÇADOS e duros: o estado se vê em cada um, sem um tapar o outro
+      trio: [[190, 0, 14], [218, -22, 14], [218, 22, 14]],
       cacho4: [[190, 0, 4], [205, -12, 4], [205, 12, 4], [222, -4, 4], [222, 18, 4], [238, -14, 4], [240, 6, 4]],
       // canhoneiras andando e atirando (a trava se vê nelas)
       canhoneiras: [[230, 0, 10, 'canhoneira', -30, 0], [250, -40, 10, 'canhoneira', -30, 0], [250, 40, 10, 'canhoneira', -30, 0]],
@@ -136,6 +146,15 @@ async function gravar(cen, modo) {
     s.tweens.killTweensOf([s.banner, s.bannerFaixa]);
     s.banner.setAlpha(0);
     s.bannerFaixa.setAlpha(0);
+    // A SORTE FIXA (04/10): as chances das cartas (20% do elétrico, 25% do incendiário) usam `Math.random` — com a
+    // mesma semente em todo painel, a comparação mostra o MESMO acerto nos três.
+    let a = 20261004;
+    Math.random = () => {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
     // O RELÓGIO À MÃO: o laço do Phaser dorme e cada `step` avança exatamente um quadro.
     const g = window.__game;
     g.loop.sleep();
@@ -171,23 +190,32 @@ async function gravar(cen, modo) {
         await page.keyboard.up(tecla);
         continue;
       }
+      if (qual.startsWith('eletrificar') || qual.startsWith('incendiar')) {
+        await page.evaluate((qual) => {
+          const s = window.__game.scene.getScene('Game');
+          const [acao, n] = qual.split(':');
+          const e = s.enemies.enemies.getChildren().filter((x) => x.active)[Number(n)];
+          if (!e) return;
+          if (acao === 'eletrificar') s.cartas.eletrico.eletrificar(e, false, 0);
+          else s.cartas.incendiar(e);
+        }, qual);
+        continue;
+      }
       await page.evaluate((qual) => {
         const l = window.__game.scene.getScene('Game').cartas.lancadores;
-        const agora = window.__game.scene.getScene('Game').time.now;
         if (qual === 'golpe') {
           // Um golpe de verdade (o caminho do dano da cena), para o Casco absorver.
           const s = window.__game.scene.getScene('Game');
           s.invulnerableUntil = 0;
           s.__golpe();
-        } else if (qual === 'missil') l.proximoMissil = agora;
-        // O flare é do JOGADOR: o GIF zera a espera (para caber no GIF) e aperta o F de verdade logo abaixo.
+        } else if (qual === 'missil') l.missilPronto = 0;
+        // O flare e o míssil são do JOGADOR (04/10): o GIF zera a espera (para caber no GIF) e aperta a tecla de
+        // verdade logo abaixo.
         else l.flarePronto = 0;
       }, qual);
-      if (qual !== 'golpe' && qual !== 'missil') await page.keyboard.press('KeyF');
+      if (qual === 'missil') await page.keyboard.press('KeyQ');
+      else if (qual !== 'golpe') await page.keyboard.press('KeyF');
       await passo(1);
-      await page.evaluate(() => {
-        window.__game.scene.getScene('Game').cartas.lancadores.proximoMissil = Infinity;
-      });
     }
     await passo(POR_FOTO);
     // O DESVIO ENCENADO: com o míssil a 30px, o alvo dá uma esquivada rápida para baixo (0,3s) e para — o míssil, com

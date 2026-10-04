@@ -2,7 +2,8 @@
 
 > Estado: **desenho aprovado em 01/10; ícones em 02/10; as 24 JOGÁVEIS em 02/10** (plano
 > `plans/2026-10-02-catalogo-cartas.md`; folha `folhas/2026-10-02/skills/index.html`, um GIF por carta). A explosão já é
-> a arte aprovada; falta a arte aprovada das outras peças (§5.1–5.1b), num plano próprio. É a **frente A** da ordem combinada
+> a arte aprovada; **a arte das peças entrou toda em 03–04/10** (1º lote §5.1c, 2º lote §5.1e) e o **míssil virou tecla**
+> (§4.3, 04/10). É a **frente A** da ordem combinada
 > (A = catálogo → B = inimigos novos que atiram + ondas maiores → C = calibragem). Branch `feat/cartas-preview`.
 > Fonte: `sistema_de_cartas_skills_shoot_em_up_v2.md` (o documento dele, 25 cartas) e as 13 do protótipo de 27/09.
 > Folhas: `docs/superpowers/folhas/2026-10-01/pecas-novas-conceitos.png` (1ª rodada) e a 2ª rodada (drones pequenos,
@@ -52,7 +53,7 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 | WPN_004 | CADÊNCIA | comum | +15% de cadência | — | 3 |
 | WPN_007 | PERFURANTE | incomum | o tiro atravessa inimigos | — | 1 |
 | WPN_008 | TIRO PESADO | rara | dano ×2, tiro mais lento | — | 1 |
-| WPN_009 🆕 | MÍSSIL GUIADO | incomum | a cada ~3s um míssil persegue o inimigo mais próximo e **explode ao acertar** | — | 2 |
+| WPN_009 🆕 | MÍSSIL GUIADO | incomum | ~~a cada ~3s~~ **na tecla Q, com recarga (04/10, §4.3)**: um míssil persegue o inimigo mais próximo e **explode ao acertar** | — | 2 |
 | WPN_010 🆕 | DRONE AUXILIAR | épica | um drone discreto acompanha a nave e dá um **tiro próprio: fraco, guiado ao inimigo mais próximo, cadência baixa** — NÃO copia Duplo/Triplo/Cadência da nave | — | 1 |
 
 ### 💥 Efeito (10)
@@ -150,6 +151,17 @@ outro, lendo como reação em cadeia). Se o alvo morrer antes, pega o livre mais
 amortecido (sem isso ele ORBITAVA o alvo) e vida de ~2,5s, no fim da qual **explode no ar**. GIF:
 `folhas/2026-10-02/gif/missil-mira-e-inercia.gif`.
 
+**O míssil (04/10, pedidos dele — substitui a cadência acima):**
+- **É DO JOGADOR:** a ação MÍSSIL (**Q**; clássico **V**), com recarga — ×1 = **8s**, ×2 = **5s** (a calibragem mexe).
+  O automático (a cada 3s; com ×2, um a cada 1,5s) era *"apelão demais — imagina quantas vezes ele vai soltar durante
+  uma fase inteira"*. A HUD conta: "MÍSSIL" pronto / "MÍSSIL 7s". Sem inimigo na tela, o Q não solta nem gasta.
+- **A SAÍDA:** *"ele sai para baixo como se tivesse se estabilizando e depois segue rápido em direção ao inimigo que ele
+  travou"* — solto da barriga com o motor apagado, cai ~0,3s freando enquanto o nariz gira para o alvo, e na ignição
+  parte a 130px/s (máx. 180). A vida (2,5s) conta da ignição.
+- **Perdeu o alvo e não há outro:** explode no ar em 0,4s (rápido como sai agora, esperar a vida inteira o levaria
+  para fora da tela, e ele sumiria sem estourar).
+- GIF: `folhas/2026-10-04/pecas/missil-saida.gif` (humana e alien).
+
 O drone é **um por linhagem**: humano = esfera pequena (estilo astromecânico, redondo); alien = água-viva pequena nas
 cores da manta. Discreto, segue a nave com atraso curto. O **tiro do drone** é próprio, pequeno, na cor da linhagem.
 O **míssil** também é por linhagem: humano = o #46; alien = um desenho próprio, orgânico, nas cores da manta.
@@ -229,6 +241,22 @@ explosão do flare (d95b0189) fica de fora — mostra a lata em todos os quadros
 
 **O drone desvia** (pedido dele): segue a nave; todo inimigo e todo tiro a ~24px o empurra para longe; passou de ~60px
 da nave, a repulsão desliga e ele volta. **Sem vida** (não morre) — o desvio é charme.
+
+### 5.1e O 2º lote das peças (04/10 — FECHADO)
+
+Os tamanhos escolhidos na folha `folhas/2026-10-03/pecas/pecas-animadas-tamanhos.gif`, e os efeitos julgados em jogo
+(`folhas/2026-10-04/pecas/`, com as comparações ANTES × NOVO × AS DUAS):
+
+| Peça | Escolha | Em jogo |
+|---|---|---|
+| Flare aceso | **75%** (12×14) | a lata em pé, animada (vaivém); caixa 5×10 — *"ficou boa a lata acesa"* |
+| Faísca do acerto #17 | escolhida a 50%, **SAIU** | na comparação ele preferiu o **raio em código** atravessando o corpo (`Fx.estalo`) — *"fica muito bem acabado"* |
+| Eletrificado #29 | **75%** (16×17) | **raio + anel, nessa ordem:** o raio estala no corpo durante a trava (~0,4s, redesenhado a cada 80ms), e DEPOIS o anel acende 0,4s — *"agora sim ficou ótimo"* |
+| Queimando #12 | **75%** (6×8) | a chama por cima, **sem tint** (o "NOVO") |
+| Explosão do míssil alien | a redonda #53 **repintada na manta** (fumaça → casco, fogo → energia) | aprovada nas duas naves |
+
+Os estados por cima moram em `EstadosNoInimigo`; o tint de antes só volta se o PNG faltar. Tiras de
+`scripts/_montar-pecas.mjs`; a repintura em `scripts/instalar-explosoes-cartas.mjs`.
 
 ### 5.1d Os 24 ícones (02/10 — FECHADO)
 

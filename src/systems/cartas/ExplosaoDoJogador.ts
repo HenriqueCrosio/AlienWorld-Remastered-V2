@@ -23,11 +23,13 @@ interface AnimDaCarta {
   origemX: number;
 }
 
-const ANIM: Record<'humPeq' | 'humGrande' | 'alien' | 'missil' | 'fogo', AnimDaCarta> = {
+const ANIM: Record<'humPeq' | 'humGrande' | 'alien' | 'missil' | 'missilAlien' | 'fogo', AnimDaCarta> = {
   humPeq: { chave: 'carta-exp-hum-peq', sheet: 'expHumPeqSheet', quadros: 8, fps: 20, direcional: true, origemX: 0.35 },
   humGrande: { chave: 'carta-exp-hum-grande', sheet: 'expHumGrandeSheet', quadros: 8, fps: 18, direcional: true, origemX: 0.35 },
   alien: { chave: 'carta-exp-alien', sheet: 'expAlienSheet', quadros: 8, fps: 20, direcional: true, origemX: 0.3 },
   missil: { chave: 'carta-exp-missil', sheet: 'expMissilSheet', quadros: 4, fps: 14, direcional: false, origemX: 0.5 },
+  // A MESMA redonda, repintada na manta (§5.1c; `scripts/instalar-explosoes-cartas.mjs`).
+  missilAlien: { chave: 'carta-exp-missil-alien', sheet: 'expMissilAlienSheet', quadros: 4, fps: 14, direcional: false, origemX: 0.5 },
   fogo: { chave: 'carta-exp-fogo', sheet: 'expFogoSheet', quadros: 9, fps: 16, direcional: false, origemX: 0.5 },
 };
 
@@ -124,7 +126,11 @@ export class ExplosaoDoJogador {
       if (this.c.h.linhagem === 'alien') return ANIM.alien;
       return maior ? ANIM.humGrande : ANIM.humPeq;
     }
-    // Míssil, flare e casco: a redonda #53 — chegam de qualquer ângulo, e a redonda dispensa as direções.
+    // Míssil, flare e casco: a redonda #53 — chegam de qualquer ângulo, e a redonda dispensa as direções. O míssil da
+    // manta estoura na redonda repintada (o flare e o casco não têm versão por linhagem na spec).
+    if (fonte === 'missil' && this.c.h.linhagem === 'alien' && this.c.h.scene.textures.exists(ANIM.missilAlien.sheet)) {
+      return ANIM.missilAlien;
+    }
     return ANIM.missil;
   }
 

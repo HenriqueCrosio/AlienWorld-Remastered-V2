@@ -11,11 +11,11 @@
  *
  * É o gancho do MENU DE CONTROLES (spec própria, junto com o áudio): ele só vai escrever em `aw.teclas`.
  */
-export type Acao = 'cima' | 'baixo' | 'esquerda' | 'direita' | 'flap' | 'tiro' | 'bomba' | 'dash' | 'flare';
+export type Acao = 'cima' | 'baixo' | 'esquerda' | 'direita' | 'flap' | 'tiro' | 'bomba' | 'dash' | 'flare' | 'missil';
 export type Perfil = 'padrao' | 'classico';
 export type Mapa = Record<Acao, readonly string[]>;
 
-export const ACOES: readonly Acao[] = ['cima', 'baixo', 'esquerda', 'direita', 'flap', 'tiro', 'bomba', 'dash', 'flare'];
+export const ACOES: readonly Acao[] = ['cima', 'baixo', 'esquerda', 'direita', 'flap', 'tiro', 'bomba', 'dash', 'flare', 'missil'];
 
 /** WASD OU setas. O flap é o "para cima" da F1 (W / ↑) — o Espaço não faz flap desde 03/10. */
 const MOVIMENTO = {
@@ -27,10 +27,12 @@ const MOVIMENTO = {
 } as const;
 
 export const PERFIS: Record<Perfil, Mapa> = {
-  // Espaço no polegar, Shift no mindinho (os dois lados), E e F no indicador — o par clássico de habilidade no PC.
-  padrao: { ...MOVIMENTO, tiro: ['SPACE'], bomba: ['SHIFT'], dash: ['E'], flare: ['F'] },
-  // O old school do shmup (Z atira, X bomba) — *"para quem quer ter o prazer de jogar x/z"* (03/10).
-  classico: { ...MOVIMENTO, tiro: ['Z'], bomba: ['X'], dash: ['C'], flare: ['F'] },
+  // Espaço no polegar, Shift no mindinho (os dois lados), E e F no indicador — o par clássico de habilidade no PC. O
+  // MÍSSIL (04/10: deixou de ser automático — *"apelão demais"*) no Q, o vizinho do E na fileira de cima.
+  padrao: { ...MOVIMENTO, tiro: ['SPACE'], bomba: ['SHIFT'], dash: ['E'], flare: ['F'], missil: ['Q'] },
+  // O old school do shmup (Z atira, X bomba) — *"para quem quer ter o prazer de jogar x/z"* (03/10). O míssil no V,
+  // seguindo a fileira de baixo.
+  classico: { ...MOVIMENTO, tiro: ['Z'], bomba: ['X'], dash: ['C'], flare: ['F'], missil: ['V'] },
 };
 
 export const CHAVE_STORAGE = 'aw.teclas';

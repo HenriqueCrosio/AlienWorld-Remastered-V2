@@ -10,6 +10,7 @@ import { DroneAuxiliar } from './cartas/DroneAuxiliar';
 import { Eletrico } from './cartas/Eletrico';
 import { AuraDoCasco } from './cartas/AuraDoCasco';
 import { Dash } from './cartas/Dash';
+import { EstadosNoInimigo } from './cartas/EstadosNoInimigo';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 
 export type { HostCartas } from './cartas/contexto';
@@ -47,6 +48,7 @@ export class CartasEmJogo {
   readonly eletrico: Eletrico;
   readonly aura: AuraDoCasco;
   readonly dash: Dash;
+  readonly estados: EstadosNoInimigo;
   private readonly c: Contexto;
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
@@ -57,12 +59,14 @@ export class CartasEmJogo {
   // contorno de 1px da silhueta da nave — ver `AuraDoCasco`. A HUD continua dizendo "CASCO".
   constructor(private readonly h: HostCartas) {
     criarTexturasProvisorias(h.scene);
+    this.estados = new EstadosNoInimigo(h);
     this.c = {
       h,
       tem: (id) => tem(this.reg, id),
       quantas: (id) => quantas(this.reg, id),
       ferir: (e, dano, fonte) => this.ferir(e, dano, fonte),
       incendiar: (e) => this.incendiar(e),
+      estados: this.estados,
       noRaio: (x, y, raio) =>
         h.inimigos().filter((e) => e.active && Phaser.Math.Distance.Between(x, y, e.x, e.y) <= raio),
       depois: (fn) => {
@@ -98,13 +102,15 @@ export class CartasEmJogo {
   }
 
   /**
-   * As RECARGAS na HUD, depois do "CASCO": `" FLARE"` / `" DASH"` quando prontos, `" FLARE 6s"` / `" DASH 3s"`
-   * contando enquanto recarregam (8s cada — com espera longa o jogador quer saber quanto falta), nada sem a carta.
+   * As RECARGAS na HUD, depois do "CASCO": `" MÍSSIL"` / `" FLARE"` / `" DASH"` quando prontos, `" FLARE 6s"` etc.
+   * contando enquanto recarregam (5–8s — com espera longa o jogador quer saber quanto falta), nada sem a carta.
    */
   get hudRecargas(): string {
     const rotulo = (nome: string, falta: number | null): string =>
       falta === null ? '' : falta > 0 ? ` ${nome} ${Math.ceil(falta / 1000)}s` : ` ${nome}`;
-    return rotulo('FLARE', this.lancadores.flareFalta) + rotulo('DASH', this.dash.falta);
+    return (
+      rotulo('MÍSSIL', this.lancadores.missilFalta) + rotulo('FLARE', this.lancadores.flareFalta) + rotulo('DASH', this.dash.falta)
+    );
   }
 
   /** O aviso de que o Casco voltou: a nave pisca ciano, rápido. */
@@ -209,10 +215,11 @@ export class CartasEmJogo {
       }
     }
 
-    this.lancadores.tick(dt, input.flarePressed);
+    this.lancadores.tick(dt, input.flarePressed, input.missilPressed);
     this.drone.tick(dt);
     this.eletrico.tick();
     this.aura.tick(time);
+    this.estados.tick(this.h.scene.time.now);
   }
 
   /**
@@ -273,7 +280,8 @@ export class CartasEmJogo {
   private incendiar(e: Inimigo): void {
     if (!e.active) return;
     e.setData('queimaAte', this.h.scene.time.now + QUEIMA_MS);
-    e.setTint(COR_QUEIMANDO);
+    // A chama #12 por cima (`EstadosNoInimigo`); o tint laranja só sem a arte.
+    if (this.estados.tingeQueima) e.setTint(COR_QUEIMANDO);
   }
 
   private ferir(e: Inimigo, dano: number, fonte: string): void {

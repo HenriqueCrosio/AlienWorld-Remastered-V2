@@ -34,4 +34,38 @@ for (const [destino, pasta] of Object.entries(TIRAS)) {
     .toFile(`${DESTINO}/${destino}`);
   console.log(destino, quadros.length, 'quadros');
 }
+
+// As ANIMADAS no tamanho que ele escolheu (04/10, folha `folhas/2026-10-03/pecas/pecas-animadas-tamanhos.gif`).
+// A redução da casa (`_reduzir.mjs`): vizinho mais próximo + alfa binário, com o recorte pela UNIÃO dos quadros —
+// recortar quadro a quadro faria a peça pular. O tamanho do quadro sai no console: é o que o `BootScene` carrega.
+const ANIMADAS = {
+  'flare.png': ['flare-loop', 0.75], // o loop aceso da PixMiniMax (c95f2927)
+  // (a faísca #17 a 50% saiu em 04/10: na comparação em jogo ele ficou com o raio em código)
+  'eletrificado.png': ['rodada4/anim/anim-eletrificado', 0.75], // #29 + ea51cd0a
+  'queimando.png': ['rodada4/anim/anim-queimando', 0.75], // #12 + 6a04f01c
+};
+for (const [destino, [pasta, f]] of Object.entries(ANIMADAS)) {
+  const nomes = fs
+    .readdirSync(`${ORIGEM}/${pasta}`)
+    .filter((n) => /^\d+\.png$/.test(n))
+    .sort((a, b) => parseInt(a) - parseInt(b));
+  const brutos = await Promise.all(nomes.map((n) => sharp(`${ORIGEM}/${pasta}/${n}`).ensureAlpha().raw().toBuffer({ resolveWithObject: true })));
+  let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+  for (const { data, info } of brutos)
+    for (let y = 0; y < info.height; y++)
+      for (let x = 0; x < info.width; x++)
+        if (data[(y * info.width + x) * 4 + 3] > 40) [x0, y0, x1, y1] = [Math.min(x0, x), Math.min(y0, y), Math.max(x1, x), Math.max(y1, y)];
+  const w = x1 - x0 + 1, h = y1 - y0 + 1;
+  const W = Math.max(1, Math.round(w * f)), H = Math.max(1, Math.round(h * f));
+  const quadros = await Promise.all(brutos.map(async ({ data, info }) => {
+    const c = await sharp(data, { raw: info }).extract({ left: x0, top: y0, width: w, height: h }).resize(W, H, { kernel: 'nearest' }).raw().toBuffer({ resolveWithObject: true });
+    for (let i = 3; i < c.data.length; i += 4) c.data[i] = c.data[i] > 110 ? 255 : 0;
+    return sharp(c.data, { raw: c.info }).png().toBuffer();
+  }));
+  await sharp({ create: { width: W * quadros.length, height: H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite(quadros.map((input, i) => ({ input, left: i * W, top: 0 })))
+    .png()
+    .toFile(`${DESTINO}/${destino}`);
+  console.log(destino, `${quadros.length} quadros de ${W}×${H}`, `(${f * 100}%)`);
+}
 console.log('ok:', fs.readdirSync(DESTINO).join(', '));

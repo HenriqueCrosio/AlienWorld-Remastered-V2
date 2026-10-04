@@ -51,6 +51,7 @@ export class InputReader {
       bombPressed: apertou('bomba'),
       dashPressed: apertou('dash'),
       flarePressed: apertou('flare'),
+      missilPressed: apertou('missil'),
     };
   }
 }
