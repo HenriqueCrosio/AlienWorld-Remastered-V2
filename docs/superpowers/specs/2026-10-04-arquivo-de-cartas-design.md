@@ -3,6 +3,16 @@
 > Etapa 1.5 do 🧭 (cartas). Brainstorming com ele em 04/10. Pedido dele: *"montasse uma folha ou algumas, com a skills e
 > o efeito, como fez no gif. Isso pode ser usado depois para o jogador conhecer e entender as skills, como o lol faz ao
 > mostrar as skills dos heroes"* — *"como um wiki do jogo"*. Branch `feat/cartas-preview`.
+>
+> ✅ **IMPLEMENTADA em 04/10** (plano `plans/2026-10-04-arquivo-de-cartas.md`). O que mudou na execução:
+> - **O fundo** é o céu do menu (estrelas + nebulosas) sob um véu — o menu ainda não passa pela Atmosfera (isso é
+>   da calibragem), então o arquivo também não.
+> - **Sem miniaturas:** a grade usa o ícone GRANDE (*"pode deixar somente o grande"*), 7 por linha, no maior inteiro
+>   de px de tela que cabe em 27px do mundo.
+> - **As descrições ficaram DIRETAS** na revisão dele (uma frase, sem número — *"também ajuda depois quando formos
+>   traduzir para o inglês"*), e o **Perfurante passou a perder força** (100% → 90% → 60% → 30%, e o tiro acaba).
+> - **O cursor do menu** é `> <` (a Silkscreen não tem `▸ ◂`); sem a camada HD, o item ARQUIVO não aparece.
+> - **Os clipes** são PNG de paleta (256 cores): ~0,6 MB cada; a nave fica parada no clipe (menos no Dash).
 
 ## 1. O que é
 
