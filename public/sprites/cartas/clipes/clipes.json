@@ -1,0 +1,68 @@
+{
+ "w": 160,
+ "h": 90,
+ "fps": 20,
+ "colunas": 10,
+ "cartas": {
+  "WPN_009": {
+   "quadros": 60
+  },
+  "WPN_001": {
+   "quadros": 50
+  },
+  "WPN_002": {
+   "quadros": 50
+  },
+  "WPN_004": {
+   "quadros": 50
+  },
+  "WPN_007": {
+   "quadros": 50
+  },
+  "WPN_008": {
+   "quadros": 60
+  },
+  "WPN_010": {
+   "quadros": 60
+  },
+  "EFF_001": {
+   "quadros": 50
+  },
+  "EFF_002": {
+   "quadros": 50
+  },
+  "EFF_003": {
+   "quadros": 50
+  },
+  "EFF_004": {
+   "quadros": 50
+  },
+  "EFF_006": {
+   "quadros": 60
+  },
+  "EFF_007": {
+   "quadros": 60
+  },
+  "EFF_010": {
+   "quadros": 70
+  },
+  "EFF_011": {
+   "quadros": 60
+  },
+  "EFF_012": {
+   "quadros": 50
+  },
+  "EFF_013": {
+   "quadros": 60
+  },
+  "DEF_001": {
+   "quadros": 60
+  },
+  "DEF_004": {
+   "quadros": 50
+  },
+  "MOV_003": {
+   "quadros": 50
+  }
+ }
+}

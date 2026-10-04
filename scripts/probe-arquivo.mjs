@@ -82,6 +82,21 @@ const tecla = await arquivo(() => {
 });
 conferir(/TECLA Q/.test(tecla), 'o Míssil mostra a tecla Q', tecla);
 
+// ── O clipe: carrega sob demanda e toca; as cartas sem movimento mostram o ícone grande ──
+await arquivo(() => window.__game.scene.getScene('Arquivo').selecionar('WPN_009'));
+await page.waitForFunction(() => window.__game.scene.getScene('Arquivo').clipe?.anims.isPlaying, null, { timeout: 8000 }).catch(() => {});
+const clipe = await arquivo(() => {
+  const a = window.__game.scene.getScene('Arquivo');
+  return { tocando: !!a.clipe?.anims.isPlaying, textura: a.textures.exists('clipe-WPN_009'), x: a.clipe?.x, y: a.clipe?.y };
+});
+conferir(clipe.tocando && clipe.textura && clipe.x === 216 && clipe.y === 20, 'o clipe do Míssil carrega e toca na caixa', clipe);
+const semClipe = await arquivo(() => {
+  const a = window.__game.scene.getScene('Arquivo');
+  a.selecionar('DEF_003');
+  return { clipe: !!a.clipe, icone: !!a.iconeGrande?.visible };
+});
+conferir(!semClipe.clipe && semClipe.icone, 'a Vida Extra (sem clipe) mostra o ícone grande', semClipe);
+
 // ── ESC volta ao menu, com o cursor no ARQUIVO; ↑ + Enter começa o jogo ──
 await page.keyboard.press('Escape');
 await page.waitForFunction(() => window.__game.scene.isActive('Menu'), null, { timeout: 5000 }).catch(() => {});

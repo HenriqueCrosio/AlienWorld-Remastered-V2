@@ -66,9 +66,17 @@ export class ArquivoScene extends Phaser.Scene {
   private irma: Phaser.Scene | null = null;
   private iconeGrande: Phaser.GameObjects.Image | null = null;
   private ficha: Phaser.GameObjects.Text[] = [];
+  /** O clipe tocando (público: a sonda confere) e o véu da emenda do loop. */
+  clipe: Phaser.GameObjects.Sprite | null = null;
+  private veu!: Phaser.GameObjects.Rectangle;
 
   constructor() {
     super('Arquivo');
+  }
+
+  preload(): void {
+    // O índice dos clipes (`_gif-cartas.mjs --clipes`); as folhas de quadros carregam sob demanda (`tocarClipe`).
+    if (!this.cache.json.exists('clipes')) this.load.json('clipes', 'sprites/cartas/clipes/clipes.json');
   }
 
   create(): void {
@@ -81,19 +89,22 @@ export class ArquivoScene extends Phaser.Scene {
     this.celulas = [];
     this.ficha = [];
     this.iconeGrande = null;
+    this.clipe = null;
 
     this.montarFundo();
     pixelText(this, GAME_WIDTH / 2, 9, 'ARQUIVO DE CARTAS', { size: 8, color: COLORS.playerGlow, voz: 'jogo' });
     pixelText(this, GAME_WIDTH / 2, 209, '[SETAS] ESCOLHER   [ESC] VOLTAR', { size: 7, color: COLORS.metalMid, voz: 'piloto' });
     this.realce = this.add.graphics().setDepth(10);
     this.montarGrade();
-    // A moldura da caixa do clipe (o clipe entra na Task 4; sem ele, o ícone grande).
+    // A moldura da caixa do clipe (sem clipe — as 4 sem movimento, ou enquanto carrega —, o ícone grande).
     this.add
       .rectangle(CLIPE.x - 1, CLIPE.y - 1, CLIPE.w + 2, CLIPE.h + 2)
       .setOrigin(0, 0)
       .setStrokeStyle(1, COLORS.metalDark)
       .setFillStyle(COLORS.bgDeep, 0.7)
       .setDepth(8);
+    // O VÉU da emenda: o fim do clipe não pula seco para o começo — escurece e clareia num instante.
+    this.veu = this.add.rectangle(CLIPE.x, CLIPE.y, CLIPE.w, CLIPE.h, 0x000000, 1).setOrigin(0, 0).setDepth(10).setAlpha(0);
     this.ligarTeclas();
     this.selecionar(this.selecionada);
   }
@@ -170,6 +181,51 @@ export class ArquivoScene extends Phaser.Scene {
     this.iconeGrande?.destroy();
     this.iconeGrande = this.icone(id, CLIPE.x + CLIPE.w / 2, CLIPE.y + CLIPE.h / 2, ICONE_GRANDE_MAX);
     this.montarFicha(carta);
+    this.tocarClipe(id);
+  }
+
+  // ─── O clipe ────────────────────────────────────────────────────────────────
+
+  /**
+   * O CLIPE da carta (spec §4.3): a folha de quadros gravada em jogo, em pixel nativo, em loop. Carrega SOB DEMANDA —
+   * as 20 folhas somam alguns MB e o boot não paga por elas. Enquanto carrega (ou sem clipe), fica o ícone grande.
+   */
+  private tocarClipe(id: string): void {
+    this.clipe?.destroy();
+    this.clipe = null;
+    this.veu.setAlpha(0);
+    const indice = this.cache.json.get('clipes') as
+      | { w: number; h: number; fps: number; cartas: Record<string, { quadros: number }> }
+      | undefined;
+    const dados = indice?.cartas[id];
+    if (!indice || !dados) return;
+    const chave = `clipe-${id}`;
+    const tocar = (): void => {
+      if (this.selecionada !== id || !this.scene.isActive()) return;
+      if (!this.anims.exists(chave)) {
+        this.anims.create({
+          key: chave,
+          frames: this.anims.generateFrameNumbers(chave, { start: 0, end: dados.quadros - 1 }),
+          frameRate: indice.fps,
+          repeat: -1,
+        });
+      }
+      this.iconeGrande?.destroy();
+      this.iconeGrande = null;
+      this.clipe = this.add.sprite(CLIPE.x, CLIPE.y, chave, 0).setOrigin(0, 0).setDepth(9).play(chave);
+      this.clipe.on(Phaser.Animations.Events.ANIMATION_REPEAT, () => {
+        this.tweens.killTweensOf(this.veu);
+        this.veu.setAlpha(1);
+        this.tweens.add({ targets: this.veu, alpha: 0, duration: 120, ease: 'Quad.easeOut' });
+      });
+    };
+    if (this.textures.exists(chave)) {
+      tocar();
+      return;
+    }
+    this.load.spritesheet(chave, `sprites/cartas/clipes/${id}.png`, { frameWidth: indice.w, frameHeight: indice.h });
+    this.load.once(`filecomplete-spritesheet-${chave}`, tocar);
+    this.load.start();
   }
 
   private montarFicha(carta: CartaDef): void {

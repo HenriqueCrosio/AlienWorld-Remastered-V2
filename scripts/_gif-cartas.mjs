@@ -10,10 +10,13 @@
 //   cenários (separados por vírgula): explosivo · fragmentado · emcadeia · missil · missil1 · missil2 · missilvolta · flare
 //     · estadoeletrico · estadoqueimando · missilalien (as chaves de `CENARIOS`)
 //   modos: jogo,variada,aprovada (padrão: aprovada) · nave: humana | alienigena
+import fs from 'fs';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
 const [OUT, CENARIO = 'fragmentado', SEG = '2.5', MODOS = 'aprovada', NAVE = 'humana'] = process.argv.slice(2);
+/** `--clipes [ID,...]`: os clipes do Arquivo, não um GIF (ver `CLIPES`). */
+const MODO_CLIPES = OUT === '--clipes';
 
 // nome · cartas · se a nave atira · os alvos · [segundo, lançador] = forçar um disparo de carta naquele instante (a
 // espera real é de 3s no míssil, e o flare é do jogador) · a janela do mundo (padrão abaixo).
@@ -63,7 +66,8 @@ const CENARIOS = {
   missilalien: { nome: 'MÍSSIL — alien, na tecla Q: a redonda repintada na manta', cartas: ['WPN_009', 'WPN_009'], atira: false, alvos: 'dois', nave: 'alienigena', forcar: [[0.1, 'missil'], [1.6, 'missil']] },
 };
 const NOME_MODO = { jogo: 'ANTES — a explosão de sempre', variada: 'A — a de sempre, variando', aprovada: 'A + B — a arte aprovada de cada carta, variando' };
-const cenarios = CENARIO.split(',').map((c) => {
+// (No modo `--clipes` o 2º argumento é a lista de cartas, não de cenários.)
+const cenarios = (MODO_CLIPES ? [] : CENARIO.split(',')).map((c) => {
   if (!CENARIOS[c]) throw new Error(`cenário desconhecido: ${c}`);
   return CENARIOS[c];
 });
@@ -71,8 +75,36 @@ const modos = MODOS.split(',');
 const paineis = cenarios.flatMap((cen) => modos.map((modo) => ({ cen, modo })));
 const QUADRO = 1000 / 60;
 const POR_FOTO = 3;
+// OS CLIPES DO ARQUIVO (04/10, spec 2026-10-04-arquivo-de-cartas §4.3): `node scripts/_gif-cartas.mjs --clipes [ID,...]`
+// grava cada carta numa janela FIXA de 160×90 em volta da nave, em pixel NATIVO, e monta a folha de quadros que o jogo
+// toca em loop (`public/sprites/cartas/clipes/<ID>.png` + `clipes.json`). Os alvos são as variantes "C" (mais perto da
+// nave: a nave e o efeito cabem nos 160px). `dx`: a borda esquerda da janela em relação à nave (padrão -30); `dy`:
+// desloca a janela, que fica centrada na altura da nave.
+const CLIPE ={ w: 160, h: 90, fps: 20, colunas: 10 };
+const CLIPES = {
+  WPN_001: { cen: 'duplo', seg: 2.5, alvos: 'cachoC' },
+  WPN_002: { cen: 'triplo', seg: 2.5, alvos: 'cachoC' },
+  WPN_004: { cen: 'cadencia', seg: 2.5, alvos: 'cachoC' },
+  WPN_007: { cen: 'perfurante', seg: 2.5, alvos: 'filaC' },
+  WPN_008: { cen: 'tranco', seg: 3, alvos: 'vindoC' },
+  WPN_009: { cen: 'missil2', seg: 3, alvos: 'doisC' },
+  WPN_010: { cen: 'drone', seg: 3, alvos: 'droneC' },
+  EFF_001: { cen: 'explosivo', seg: 2.5, alvos: 'cachoC' },
+  EFF_002: { cen: 'maior', seg: 2.5, alvos: 'cachoC' },
+  EFF_003: { cen: 'fragmentos', seg: 2.5, alvos: 'cachoC' },
+  EFF_004: { cen: 'estadoqueimando', seg: 2.5, alvos: 'trioC' },
+  EFF_006: { cen: 'combustao', seg: 3, alvos: 'cachoC' },
+  EFF_007: { cen: 'emcadeia', seg: 3, alvos: 'cachoC' },
+  EFF_010: { cen: 'flare', seg: 3.5, alvos: 'atrasC', dx: -100 },
+  EFF_011: { cen: 'estadoeletrico', seg: 3, alvos: 'trioC' },
+  EFF_012: { cen: 'arco', seg: 2.5, alvos: 'cacho4C' },
+  EFF_013: { cen: 'eletrico', seg: 3, alvos: 'cacho4C' },
+  DEF_001: { cen: 'casco', seg: 3, alvos: 'nenhum', dx: -80 },
+  DEF_004: { cen: 'reativo', seg: 2.5, alvos: 'perto', dx: -80 },
+  MOV_003: { cen: 'dash', seg: 2.5, alvos: 'nenhum', dx: -40, dy: -10, naveLivre: true },
+};
 // O mundo é 384×216; a foto sai em ZOOM× do mundo, sem suavizar. GIF_ZOOM=1 = o pixel nativo (a folha amplia na tela).
-const ZOOM = Number(process.env.GIF_ZOOM ?? 2);
+const ZOOM = MODO_CLIPES ? 1 : Number(process.env.GIF_ZOOM ?? 2);
 const CLIP_PADRAO = { x: 46, y: 46, w: 270, h: 116 };
 const ROTULO = ZOOM >= 2 ? 26 : 16;
 const FONTE = ZOOM >= 2 ? 15 : 10;
@@ -84,7 +116,7 @@ await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(1500);
 
 async function gravar(cen, modo) {
-  const clip = cen.clip ?? CLIP_PADRAO;
+  let clip = cen.clip ?? CLIP_PADRAO;
   // A F2 limpa: o roteiro desligado, a nave intocável, as cartas dadas.
   await page.evaluate(() => {
     const g = window.__game;
@@ -139,6 +171,16 @@ async function gravar(cen, modo) {
       perto: [[x0 + 22, -10, 3], [x0 + 26, 12, 3], [x0 - 18, 14, 3]],
       // ATRÁS da nave: o flare é armadilha para quem persegue
       atras: [[x0 - 30, 0, 1]],
+      // AS VARIANTES DOS CLIPES do Arquivo (janela de 160×90 a partir de x0 - 30): os mesmos grupos, mais perto da nave.
+      cachoC: [[x0 + 70, 0, 6], [x0 + 82, -12, 6], [x0 + 82, 12, 6], [x0 + 95, -4, 6], [x0 + 95, 18, 6], [x0 + 108, -14, 6], [x0 + 110, 6, 6]],
+      cacho4C: [[x0 + 70, 0, 4], [x0 + 82, -12, 4], [x0 + 82, 12, 4], [x0 + 95, -4, 4], [x0 + 95, 18, 4], [x0 + 108, -14, 4], [x0 + 110, 6, 4]],
+      filaC: [[x0 + 60, 0, 6], [x0 + 78, 0, 6], [x0 + 96, 0, 6], [x0 + 114, 0, 6]],
+      trioC: [[x0 + 75, 0, 14], [x0 + 100, -22, 14], [x0 + 100, 22, 14]],
+      vindoC: [[x0 + 115, 0, 200, 'drone', -45, 0], [x0 + 128, -26, 200, 'drone', -45, 0], [x0 + 128, 26, 200, 'drone', -45, 0]],
+      doisC: [[x0 + 95, -30, 6], [x0 + 115, 30, 6]],
+      droneC: [[x0 + 80, -34, 3], [x0 + 100, 30, 3], [x0 + 120, -12, 99, 'drone', -70, 0]],
+      // o perseguidor vem de LONGE, por trás, na linha da nave: o flare fica no caminho dele
+      atrasC: [[x0 - 95, 0, 1, 'drone', 28, 0], [x0 - 95, 10, 1, 'drone', 22, 0]],
     };
     ALVOS[alvos].forEach(([x, dy, hp, tipo = 'drone', vx = 0, vy = 0, teto]) => {
       s.enemies.spawn(tipo, y0 + dy, x);
@@ -166,23 +208,46 @@ async function gravar(cen, modo) {
     const g = window.__game;
     g.loop.sleep();
     window.__passo = { t: g.loop.now };
-  }, { cartas: cen.cartas, modo, alvos: cen.alvos });
+    return { x0, y0 };
+  }, { cartas: cen.cartas, modo, alvos: cen.alvos }).then((nave) => {
+    // O CLIPE do Arquivo: a janela fixa em volta da nave (ver `CLIPES`).
+    if (cen.clipe) {
+      const x = Math.round(nave.x0 + (cen.clipe.dx ?? -30));
+      const y = Math.round(nave.y0 - CLIPE.h / 2 + (cen.clipe.dy ?? 0));
+      clip = { x: Math.max(0, Math.min(384 - CLIPE.w, x)), y: Math.max(0, Math.min(216 - CLIPE.h, y)), w: CLIPE.w, h: CLIPE.h };
+    }
+  });
 
   const geo = await page.evaluate(() => {
     const c = window.__game.canvas.getBoundingClientRect();
     return { k: c.width / 384, left: c.left, top: c.top };
   });
-  const passo = (n) => page.evaluate(({ n, QUADRO }) => {
+  // NOS CLIPES a nave fica PARADA onde nasceu (sem tiro, a do voo livre deriva para a esquerda e sai da janela de
+  // 160px) — menos no Dash, em que o avanço é a carta.
+  const fixar = !!cen.clipe && !cen.clipe.naveLivre;
+  const passo = (n) => page.evaluate(({ n, QUADRO, fixar }) => {
     const g = window.__game;
+    const s = g.scene.getScene('Game');
+    window.__naveEm ??= { x: s.ship.x, y: s.ship.y };
     for (let i = 0; i < n; i++) {
       window.__passo.t += QUADRO;
       g.step(window.__passo.t, QUADRO);
+      if (fixar) {
+        s.ship.setPosition(window.__naveEm.x, window.__naveEm.y);
+        s.ship.body.setVelocity(0, 0);
+      }
+      // Nos clipes a nave NÃO pisca (o pisca-pisca de invulnerável, num loop curto, parece defeito).
+      if (window.__clipe) s.ship.setVisible(true);
     }
-  }, { n, QUADRO });
+  }, { n, QUADRO, fixar });
+  await page.evaluate((clipe) => {
+    window.__naveEm = null;
+    window.__clipe = clipe;
+  }, !!cen.clipe);
 
   if (cen.atira) await page.keyboard.down('Space'); // a nave atira o tempo todo
   const quadros = [];
-  const total = Math.round((Number(SEG) * 60) / POR_FOTO);
+  const total = Math.round((Number(cen.seg ?? SEG) * 60) / POR_FOTO);
   const forcar = [...(cen.forcar ?? [])];
   for (let i = 0; i < total; i++) {
     const seg = (i * POR_FOTO) / 60;
@@ -246,6 +311,33 @@ async function gravar(cen, modo) {
   }
   if (cen.atira) await page.keyboard.up('Space');
   return quadros;
+}
+
+if (MODO_CLIPES) {
+  // Os clipes: um por carta, em grade de `CLIPE.colunas`, e o índice `clipes.json` (o que já existia é mantido).
+  const OUT_CLIPES = 'public/sprites/cartas/clipes';
+  fs.mkdirSync(OUT_CLIPES, { recursive: true });
+  const indice = `${OUT_CLIPES}/clipes.json`;
+  const json = fs.existsSync(indice) ? JSON.parse(fs.readFileSync(indice, 'utf8')) : { cartas: {} };
+  const ids = process.argv[3] ? process.argv[3].split(',') : Object.keys(CLIPES);
+  for (const id of ids) {
+    const c = CLIPES[id];
+    if (!c) throw new Error(`carta sem clipe: ${id}`);
+    const base = CENARIOS[c.cen];
+    // A duração vem da carta (o `SEG` é dos GIFs).
+    const quadros = await gravar({ ...base, alvos: c.alvos ?? base.alvos, clipe: { dx: c.dx, dy: c.dy, naveLivre: c.naveLivre }, seg: c.seg }, 'aprovada');
+    const linhas = Math.ceil(quadros.length / CLIPE.colunas);
+    await sharp({ create: { width: CLIPE.w * CLIPE.colunas, height: CLIPE.h * linhas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+      .composite(quadros.map((input, i) => ({ input, left: (i % CLIPE.colunas) * CLIPE.w, top: Math.floor(i / CLIPE.colunas) * CLIPE.h })))
+      // PNG de PALETA (256 cores, sem pontilhar): o grão da Atmosfera deixava cada folha com ~1,4 MB.
+      .png({ palette: true, colours: 256, dither: 0 })
+      .toFile(`${OUT_CLIPES}/${id}.png`);
+    json.cartas[id] = { quadros: quadros.length };
+    console.log(`${OUT_CLIPES}/${id}.png`, quadros.length, 'quadros');
+  }
+  fs.writeFileSync(indice, `${JSON.stringify({ w: CLIPE.w, h: CLIPE.h, fps: CLIPE.fps, colunas: CLIPE.colunas, cartas: json.cartas }, null, 1)}\n`);
+  await browser.close();
+  process.exit(0);
 }
 
 const porPainel = [];
