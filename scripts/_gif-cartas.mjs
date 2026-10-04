@@ -58,6 +58,8 @@ const CENARIOS = {
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
   // OS PROPULSORES (04/10): o jato da nave humana fica azul.
   propulsores: { nome: 'PROPULSORES — o jato azul', cartas: ['MOV_001'], atira: false, alvos: 'nenhum', clip: { x: 20, y: 70, w: 120, h: 70 } },
+  // A EXAUSTÃO do jato (04/10): a nave parada, de perto — com `GIF_TIER=1`.
+  motor: { nome: 'O MOTOR — a exaustão', cartas: [], atira: false, alvos: 'nenhum', clip: { x: 20, y: 70, w: 120, h: 70 } },
   // OS ESTADOS NO INIMIGO (04/10), de perto: a faísca e o anel do elétrico, a chama do incendiário.
   // O estado é FORÇADO em tempos fixos (`eletrificar:N` / `incendiar:N`, N = o alvo), e não pela chance da carta: o
   // efeito novo e o antigo gastam o `Math.random` diferente, e a sorte dos painéis se separaria no 1º acerto.
@@ -130,12 +132,14 @@ async function gravar(cen, modo) {
     if (velha) velha.cartas = undefined;
   });
   await page.waitForFunction(() => !window.__game.scene.isActive('Game'));
-  await page.evaluate((nave) => {
+  await page.evaluate(({ nave, tier }) => {
     const g = window.__game;
     g.registry.set('cartas', []);
     g.registry.set('cartasCheckpoint', {});
+    // O TIER da nave (`tierNave`, `src/pecas.ts`): `GIF_TIER=1` grava o jato (T1 humano), por exemplo.
+    if (tier !== null) g.registry.set('tierNave', tier);
     g.scene.start('Game', { stage: 2, ship: nave, handling: 'diegetico' });
-  }, cen.nave ?? NAVE);
+  }, { nave: cen.nave ?? NAVE, tier: process.env.GIF_TIER !== undefined ? Number(process.env.GIF_TIER) : null });
   await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').cartas);
   await page.waitForTimeout(600);
   await page.evaluate(({ cartas, modo, alvos, clipe }) => {

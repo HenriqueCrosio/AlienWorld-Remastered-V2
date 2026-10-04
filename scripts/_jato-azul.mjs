@@ -7,9 +7,9 @@ import fs from 'fs';
 import sharp from 'sharp';
 
 const NAVES = [
-  // O JATO (T1): só a chama do MEIO (linhas 6–15). As amarelas no alto e embaixo da traseira são as LUZES das asas
-  // (ele, 04/10: *"aquelas luzes na asa pra mim sempre foram luzes"*) — ficam como estão.
-  { de: 'public/sprites/ship-jato-anim', para: 'public/sprites/ship-jato-azul-anim', linhas: [6, 15] },
+  // O JATO (T1): só a EXAUSTÃO desenhada à mão em 04/10 (`_exaustao-jato.mjs`, linhas 10–13). As amarelas no alto e
+  // embaixo da traseira são as LUZES das asas (ele: *"aquelas luzes na asa pra mim sempre foram luzes"*) — ficam.
+  { de: 'public/sprites/ship-jato-anim', para: 'public/sprites/ship-jato-azul-anim', linhas: [10, 13] },
   { de: 'public/sprites/naves/humana-t0-anim', para: 'public/sprites/naves/humana-t0-azul-anim' },
   { de: 'public/sprites/naves/humana-t2-anim', para: 'public/sprites/naves/humana-t2-azul-anim' },
   { de: 'public/sprites/naves/humana-t3-anim', para: 'public/sprites/naves/humana-t3-azul-anim' },
