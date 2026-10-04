@@ -6,6 +6,11 @@ dist/
 
 # Screenshots de sonda (artefatos de teste, gerados por scripts/probe-*.mjs)
 probe-*.png
+# ...e os da `probe-cartas` / `probe-cartas-novas`, que gravam com o nome da carta na raiz (04/10)
+/aura-do-casco.png
+/cartas-*.png
+/dash-fantasmas.png
+/fragmentado.png
 
 # Temporários dos scripts de arte (ampliações, medições, capturas em movimento)
 scripts/_*.png
