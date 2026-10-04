@@ -13,6 +13,11 @@
 >   traduzir para o inglês"*), e o **Perfurante passou a perder força** (100% → 90% → 60% → 30%, e o tiro acaba).
 > - **O cursor do menu** é `> <` (a Silkscreen não tem `▸ ◂`); sem a camada HD, o item ARQUIVO não aparece.
 > - **Os clipes** são PNG de paleta (256 cores): ~0,6 MB cada; a nave fica parada no clipe (menos no Dash).
+> - **Ajustes dele (04/10, 2ª rodada):** o Flare mostra UM flare só, sem inimigo (*"o jogador vai entender a ideia"*);
+>   o Casco e o Casco Reativo agora quebram de verdade no clipe (o golpe forçado falhava da 2ª gravação em diante); o
+>   ícone dos Propulsores ganhou a ponta da chama (estava cortada na borda); e os **Propulsores deixam o jato da nave
+>   humana AZUL** (`scripts/_jato-azul.mjs`, animação `…-thrust-azul`) — o que dá a eles um clipe também: só Recarga,
+>   Vida Extra e Bomba Extra ficam com o ícone grande.
 
 ## 1. O que é
 

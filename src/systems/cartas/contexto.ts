@@ -30,6 +30,8 @@ export interface HostCartas {
   ganharBomba: () => void;
   /** O SANDBOX: sem as mesas automáticas (meio da fase, aranha, guardião) — a build é a da montagem. */
   semMesas?: boolean;
+  /** Uma carta que muda o MOTOR da nave entrou (os Propulsores: o jato azul) — a cena troca a propulsão. */
+  motorMudou?: () => void;
   /** As MEDIDAS do sandbox: o dano efetivo e de onde veio. */
   medir?: (fonte: string, dano: number) => void;
 }

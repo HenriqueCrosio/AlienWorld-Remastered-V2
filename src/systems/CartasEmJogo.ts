@@ -189,6 +189,12 @@ export class CartasEmJogo {
       this.piscarCasco();
     }
     if (id === 'DEF_005') this.h.ganharBomba();
+    if (id === 'MOV_001') this.h.motorMudou?.();
+  }
+
+  /** Os PROPULSORES na mão: o jato da nave humana fica azul (`GameScene.tocarMotor`). */
+  get temPropulsores(): boolean {
+    return tem(this.reg, 'MOV_001');
   }
 
   // ─── GANCHOS ──────────────────────────────────────────────────────────────────────────────────

@@ -421,6 +421,33 @@ const aura = await page.evaluate(async () => {
 });
 conferir(aura.antes && !aura.depois && aura.vidas === aura.vidasDepois, 'a aura aparece com o Casco pronto e some quando ele quebra', aura);
 
+// ── PROPULSORES (MOV_001): o jato da nave humana fica AZUL (04/10) — na mão desde o início e ao escolher no meio ──
+await fase([]);
+const jato = await page.evaluate(() => {
+  const s = window.__teste.cena();
+  const antes = s.ship.anims.currentAnim?.key;
+  s.cartas.aplicar('MOV_001');
+  return { antes, depois: s.ship.anims.currentAnim?.key };
+});
+conferir(!jato.antes?.endsWith('-azul') && jato.depois === `${jato.antes}-azul`, 'Propulsores: o jato da nave humana fica azul', jato);
+// A carta JÁ NA MÃO (vinda de uma fase anterior): o `fase()` zera a mão, então este começa a fase à mão.
+await page.evaluate(() => {
+  const g = window.__game;
+  g.scene.getScenes(true).forEach((s) => s.scene.stop());
+  const velha = g.scene.getScene('Game');
+  if (velha) velha.cartas = undefined;
+});
+await page.waitForFunction(() => !window.__game.scene.isActive('Game'));
+await page.evaluate(() => {
+  const g = window.__game;
+  g.registry.set('cartas', ['MOV_001']);
+  g.registry.set('cartasCheckpoint', {});
+  g.scene.start('Game', { stage: 2, ship: 'humana', handling: 'diegetico' });
+});
+await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').cartas);
+const jatoDeAntes = await page.evaluate(() => window.__game.scene.getScene('Game').ship.anims.currentAnim?.key);
+conferir(jatoDeAntes?.endsWith('-azul'), 'Propulsores já na mão: a fase começa com o jato azul', jatoDeAntes);
+
 // ── DASH (MOV_003): a tecla E (03/10) na direção segurada, avanço curto, invulnerável, espera ──
 async function dash(tecla) {
   await page.keyboard.down(tecla);

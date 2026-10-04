@@ -192,6 +192,8 @@ export class GameScene extends Phaser.Scene {
   /** Tomou dano nesta fase? O bônus de no-hit é pago na vitória (GDD §8). */
   private tookDamage = false;
   private invulnerableUntil = 0;
+  /** A propulsão da nave (a animação do motor) — a base da versão `-azul` dos Propulsores (`tocarMotor`). */
+  private animMotor: string | null = null;
   private over = false;
   /** Fumaça da nave avariada (última vida). Criada apagada; o relógio de 240ms a liga. */
   private fumaca!: Phaser.GameObjects.Particles.ParticleEmitter;
@@ -383,8 +385,10 @@ export class GameScene extends Phaser.Scene {
     // animação de OUTRA nave substituiria a textura pelos quadros errados (a armadilha das
     // variantes de arte: ver src/art.ts) — por isso só toca se a textura equipada é a da nave.
     const anim = visual.anim ?? (tex === 'ship' ? 'ship-thrust' : undefined);
-    if (anim && tex === visual.texture && this.anims.exists(anim)) this.ship.play(anim);
-    else if (tex === 'ship' && this.anims.exists('ship-thrust')) this.ship.play('ship-thrust');
+    this.animMotor = null;
+    if (anim && tex === visual.texture && this.anims.exists(anim)) this.animMotor = anim;
+    else if (tex === 'ship' && this.anims.exists('ship-thrust')) this.animMotor = 'ship-thrust';
+    if (this.animMotor) this.ship.play(this.animMotor);
 
     // A NAVE AVARIADA (última vida) — dano por CÓDIGO, a técnica da Interlude3: fumaça
     // escura seguindo o casco + o motor TOSSINDO (timeScale da propulsão sorteado a cada
@@ -449,7 +453,10 @@ export class GameScene extends Phaser.Scene {
       // O sandbox não abre mesa no meio da fase: a build é a da montagem (o C de dev ainda abre).
       semMesas: !!this.sandbox,
       medir: (fonte, dano) => this.medidas?.dano(fonte, dano),
+      motorMudou: () => this.tocarMotor(),
     });
+    // As cartas da mão já valem desde o início da fase: o jato azul se os Propulsores vieram de antes.
+    this.tocarMotor();
     // A BOMBA DE QUEDA (03/10): cai na atmosfera, é arremessada no vácuo, explode no solo, no pavio ou no contato.
     this.bombaModo = BOMBA.modo;
     this.bombas = new Bombas({
@@ -2337,6 +2344,18 @@ export class GameScene extends Phaser.Scene {
         if (e.active) e.setTint(e.getData('tint') as number);
       });
     }
+  }
+
+  /**
+   * O MOTOR da nave: a propulsão dela — e AZUL com os Propulsores (04/10, ele: *"ao escolher o propulsor, o jato da
+   * nave humana receba a coloração azul"*), quando a nave tem a versão `-azul` (as humanas; a manta nada, não tem
+   * jato). Chamado no início da fase e quando uma carta entra (`motorMudou`).
+   */
+  private tocarMotor(): void {
+    if (!this.animMotor) return;
+    const azul = `${this.animMotor}-azul`;
+    const chave = this.cartas?.temPropulsores && this.anims.exists(azul) ? azul : this.animMotor;
+    if (this.ship.anims.currentAnim?.key !== chave) this.ship.play(chave);
   }
 
   private damageShip(): void {

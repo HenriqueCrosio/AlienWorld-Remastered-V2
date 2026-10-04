@@ -44,7 +44,7 @@
    "quadros": 60
   },
   "EFF_010": {
-   "quadros": 70
+   "quadros": 76
   },
   "EFF_011": {
    "quadros": 60
@@ -63,6 +63,9 @@
   },
   "MOV_003": {
    "quadros": 50
+  },
+  "MOV_001": {
+   "quadros": 40
   }
  }
 }

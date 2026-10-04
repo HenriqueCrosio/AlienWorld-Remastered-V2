@@ -56,6 +56,8 @@ const CENARIOS = {
   cascoalien: { nome: 'CASCO — alien', cartas: ['DEF_001'], atira: false, alvos: 'nenhum', nave: 'alienigena', forcar: [[1.6, 'golpe']], clip: { x: 40, y: 80, w: 130, h: 56 } },
   dash: { nome: 'DASH — tecla E: avanço invulnerável com imagens-fantasma; espera de 8s', cartas: ['MOV_003'], atira: false, alvos: 'nenhum', forcar: [[0.4, 'dashD'], [1.2, 'dashD'], [1.8, 'dashW']], clip: { x: 30, y: 36, w: 170, h: 110 } },
   flare: { nome: 'FLARE — na tecla', cartas: ['EFF_010'], atira: false, alvos: 'atras', forcar: [[0.1, 'flare'], [1.2, 'flare']], clip: { x: 0, y: 46, w: 200, h: 116 } },
+  // OS PROPULSORES (04/10): o jato da nave humana fica azul.
+  propulsores: { nome: 'PROPULSORES — o jato azul', cartas: ['MOV_001'], atira: false, alvos: 'nenhum', clip: { x: 20, y: 70, w: 120, h: 70 } },
   // OS ESTADOS NO INIMIGO (04/10), de perto: a faísca e o anel do elétrico, a chama do incendiário.
   // O estado é FORÇADO em tempos fixos (`eletrificar:N` / `incendiar:N`, N = o alvo), e não pela chance da carta: o
   // efeito novo e o antigo gastam o `Math.random` diferente, e a sorte dos painéis se separaria no 1º acerto.
@@ -95,12 +97,14 @@ const CLIPES = {
   EFF_004: { cen: 'estadoqueimando', seg: 2.5, alvos: 'trioC' },
   EFF_006: { cen: 'combustao', seg: 3, alvos: 'cachoC' },
   EFF_007: { cen: 'emcadeia', seg: 3, alvos: 'cachoC' },
-  EFF_010: { cen: 'flare', seg: 3.5, alvos: 'atrasC', dx: -100 },
+  // UM flare só, sem inimigo (04/10, ele: *"o jogador vai entender a ideia"*): sai, freia e explode sozinho em ~3s.
+  EFF_010: { cen: 'flare', seg: 3.8, alvos: 'nenhum', forcar: [[0.2, 'flare']], dx: -70 },
   EFF_011: { cen: 'estadoeletrico', seg: 3, alvos: 'trioC' },
   EFF_012: { cen: 'arco', seg: 2.5, alvos: 'cacho4C' },
   EFF_013: { cen: 'eletrico', seg: 3, alvos: 'cacho4C' },
   DEF_001: { cen: 'casco', seg: 3, alvos: 'nenhum', dx: -80 },
   DEF_004: { cen: 'reativo', seg: 2.5, alvos: 'perto', dx: -80 },
+  MOV_001: { cen: 'propulsores', seg: 2, alvos: 'nenhum', dx: -80 },
   MOV_003: { cen: 'dash', seg: 2.5, alvos: 'nenhum', dx: -40, dy: -10, naveLivre: true },
 };
 // O mundo é 384×216; a foto sai em ZOOM× do mundo, sem suavizar. GIF_ZOOM=1 = o pixel nativo (a folha amplia na tela).
@@ -139,7 +143,9 @@ async function gravar(cen, modo) {
     s.director.update = () => [];
     s.enemies.enemies.clear(true, true);
     // Nave intocável SEM i-frames: com eles ela pisca (60ms), e o GIF a pegaria some-aparece.
-    s.__golpe = s.damageShip.bind(s);
+    // ⚠️ O golpe ORIGINAL vem da CLASSE: o Phaser reaproveita a instância da cena, e a partir da 2ª gravação o
+    // `s.damageShip` já é o vazio da gravação anterior — o golpe forçado não acontecia (o Casco nunca quebrava).
+    s.__golpe = Object.getPrototypeOf(s).damageShip.bind(s);
     s.damageShip = () => {};
     s.invulnerableUntil = 0;
     for (const id of cartas) s.cartas.aplicar(id);
@@ -179,8 +185,6 @@ async function gravar(cen, modo) {
       vindoC: [[x0 + 115, 0, 200, 'drone', -45, 0], [x0 + 128, -26, 200, 'drone', -45, 0], [x0 + 128, 26, 200, 'drone', -45, 0]],
       doisC: [[x0 + 95, -30, 6], [x0 + 115, 30, 6]],
       droneC: [[x0 + 80, -34, 3], [x0 + 100, 30, 3], [x0 + 120, -12, 99, 'drone', -70, 0]],
-      // o perseguidor vem de LONGE, por trás, na linha da nave: o flare fica no caminho dele
-      atrasC: [[x0 - 95, 0, 1, 'drone', 28, 0], [x0 - 95, 10, 1, 'drone', 22, 0]],
     };
     ALVOS[alvos].forEach(([x, dy, hp, tipo = 'drone', vx = 0, vy = 0, teto]) => {
       s.enemies.spawn(tipo, y0 + dy, x);
@@ -236,8 +240,6 @@ async function gravar(cen, modo) {
         s.ship.setPosition(window.__naveEm.x, window.__naveEm.y);
         s.ship.body.setVelocity(0, 0);
       }
-      // Nos clipes a nave NÃO pisca (o pisca-pisca de invulnerável, num loop curto, parece defeito).
-      if (window.__clipe) s.ship.setVisible(true);
     }
   }, { n, QUADRO, fixar });
   await page.evaluate((clipe) => {
@@ -280,6 +282,9 @@ async function gravar(cen, modo) {
           const s = window.__game.scene.getScene('Game');
           s.invulnerableUntil = 0;
           s.__golpe();
+          // Nos CLIPES, sem o pisca-pisca do invulnerável depois do golpe: num loop curto ele lê como defeito.
+          // (⚠️ Tem que ser AQUI: o `g.step` já desenha o quadro, e mexer na nave depois do passo não aparece.)
+          if (window.__clipe) s.invulnerableUntil = 0;
         } else if (qual === 'missil') l.missilPronto = 0;
         // O flare e o míssil são do JOGADOR (04/10): o GIF zera a espera (para caber no GIF) e aperta a tecla de
         // verdade logo abaixo.
@@ -325,7 +330,10 @@ if (MODO_CLIPES) {
     if (!c) throw new Error(`carta sem clipe: ${id}`);
     const base = CENARIOS[c.cen];
     // A duração vem da carta (o `SEG` é dos GIFs).
-    const quadros = await gravar({ ...base, alvos: c.alvos ?? base.alvos, clipe: { dx: c.dx, dy: c.dy, naveLivre: c.naveLivre }, seg: c.seg }, 'aprovada');
+    const quadros = await gravar(
+      { ...base, alvos: c.alvos ?? base.alvos, forcar: c.forcar ?? base.forcar, clipe: { dx: c.dx, dy: c.dy, naveLivre: c.naveLivre }, seg: c.seg },
+      'aprovada',
+    );
     const linhas = Math.ceil(quadros.length / CLIPE.colunas);
     await sharp({ create: { width: CLIPE.w * CLIPE.colunas, height: CLIPE.h * linhas, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
       .composite(quadros.map((input, i) => ({ input, left: (i % CLIPE.colunas) * CLIPE.w, top: Math.floor(i / CLIPE.colunas) * CLIPE.h })))
