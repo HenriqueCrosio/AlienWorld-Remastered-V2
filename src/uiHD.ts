@@ -30,6 +30,7 @@ const VOZ_DA_CENA: Record<string, Voz> = {
   Menu: 'jogo',
   GameOver: 'jogo',
   Cartas: 'piloto',
+  Arquivo: 'piloto',
   Game: 'nave',
   Interlude: 'nave',
   Interlude2: 'nave',

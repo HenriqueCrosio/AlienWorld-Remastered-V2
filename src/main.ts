@@ -9,6 +9,7 @@ import { Interlude3Scene } from './scenes/Interlude3Scene';
 import { Interlude4Scene } from './scenes/Interlude4Scene';
 import { GameOverScene } from './scenes/GameOverScene';
 import { CartasScene } from './scenes/CartasScene';
+import { ArquivoScene } from './scenes/ArquivoScene';
 import { BootHDScene } from './scenes/BootHDScene';
 import { carregarFontes } from './fonte';
 import { criarCamadaHD } from './uiHD';
@@ -37,7 +38,7 @@ const game = new Phaser.Game({
     arcade: { gravity: { x: 0, y: 0 }, debug: false },
   },
 
-  scene: [BootScene, MenuScene, GameScene, InterludeScene, Interlude2Scene, Interlude3Scene, Interlude4Scene, GameOverScene, CartasScene],
+  scene: [BootScene, MenuScene, GameScene, InterludeScene, Interlude2Scene, Interlude3Scene, Interlude4Scene, GameOverScene, CartasScene, ArquivoScene],
 });
 
 // Em dev, expõe o jogo para inspeção externa (probe headless, console do navegador).

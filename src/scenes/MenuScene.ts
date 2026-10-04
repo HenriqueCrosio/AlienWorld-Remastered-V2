@@ -3,6 +3,7 @@ import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { Starfield } from '../Starfield';
 import { resetVariantCache, pickVariant } from '../art';
 import { pixelText } from '../ui';
+import { jogoHD } from '../uiHD';
 import { Music } from '../systems/Music';
 import type { HandlingMode } from './GameScene';
 
@@ -21,6 +22,15 @@ import type { HandlingMode } from './GameScene';
 export class MenuScene extends Phaser.Scene {
   // Público: a sonda lê `settled`.
   settled = false;
+  /**
+   * A LISTA do menu (04/10, o ARQUIVO DE CARTAS — spec `2026-10-04-arquivo-de-cartas-design.md` §2): COMEÇAR e
+   * ARQUIVO; o OPÇÕES (etapa 1.55) entra aqui depois. Público: a sonda lê o cursor.
+   */
+  cursorMenu = 0;
+  private itensMenu: Phaser.GameObjects.Text[] = [];
+  private pulsoMenu: Phaser.Tweens.Tween | null = null;
+  /** Voltando do Arquivo: o menu já montado, sem a abertura. */
+  private direto = false;
 
   // A TRAVESSIA do Leviatã. Ele nasce fora da tela à esquerda (START_X), nada pelo alto do céu
   // (Y — dentro do disco da lua, para ela poder ocluí-lo) e SOME atrás da lua (END_X = o centro
@@ -55,6 +65,11 @@ export class MenuScene extends Phaser.Scene {
     super('Menu');
   }
 
+  init(data: { cursor?: number; direto?: boolean } = {}): void {
+    this.cursorMenu = data.cursor ?? 0;
+    this.direto = data.direto === true;
+  }
+
   create(): void {
     resetVariantCache();
     this.registerLeviathanSwim();
@@ -80,6 +95,7 @@ export class MenuScene extends Phaser.Scene {
 
     if (this.reducedMotion) this.settle();
     else this.playIntro();
+    if (this.direto) this.skipIntro();
   }
 
   // ─── Camadas ────────────────────────────────────────────────────────────────
@@ -290,13 +306,18 @@ export class MenuScene extends Phaser.Scene {
   private buildUI(): void {
     const titulo = this.t(GAME_WIDTH / 2, 122, 'ALIEN WORLD', 20, COLORS.playerGlow);
     const sub = this.t(GAME_WIDTH / 2, 139, 'R E M A S T E R E D', 8, COLORS.player);
-    const cta = this.t(GAME_WIDTH / 2, 157, 'ENTER · COMEÇAR', 8, COLORS.playerGlow);
+    // A LISTA: COMEÇAR e, com a camada HD (onde o Arquivo desenha os ícones), o ARQUIVO DE CARTAS.
+    const nomes = jogoHD() ? ['COMEÇAR', 'ARQUIVO DE CARTAS'] : ['COMEÇAR'];
+    const yLista = nomes.length > 1 ? 151 : 157;
+    this.itensMenu = nomes.map((n, i) => this.t(GAME_WIDTH / 2, yLista + i * 9, n, 8, COLORS.playerGlow));
+    this.cursorMenu = Math.min(this.cursorMenu, nomes.length - 1);
+    const [cta, ...outros] = this.itensMenu;
     const rot = this.t(GAME_WIDTH / 2, 170, '— CONDUÇÃO —', 7, COLORS.metalLight);
     const c1 = this.t(GAME_WIDTH / 2, 182, '[1]  DIEGÉTICA · a gravidade decide · recomendado', 8, COLORS.playerBright);
     const c2 = this.t(GAME_WIDTH / 2, 194, '[2]  LEGACY · flap sempre · score ×1.25', 8, COLORS.hot);
     const c3 = this.t(GAME_WIDTH / 2, 206, '[3]  LIVRE · voo livre sempre · acessível', 8, COLORS.player);
 
-    for (const obj of [titulo, sub, cta, rot, c1, c2, c3]) {
+    for (const obj of [titulo, sub, cta, rot, c1, c2, c3, ...outros]) {
       obj.setAlpha(0);
       this.uiTargets.push({ obj, alpha: 1 });
     }
@@ -322,6 +343,8 @@ export class MenuScene extends Phaser.Scene {
     // além do assentamento da UI) e se destrói sozinho ao sumir atrás da lua. Só o SKIP — que rompe
     // a travessia no meio — precisa removê-lo, e faz isso em `skipIntro`.
     this.settled = true;
+    // A lista: o cursor e o pisca-pisca no item dele (todos os caminhos passam aqui, inclusive o movimento reduzido).
+    this.marcarMenu();
   }
 
   /**
@@ -402,17 +425,40 @@ export class MenuScene extends Phaser.Scene {
   private startRestPulses(): void {
     if (this.reducedMotion) return;
     const titulo = this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined;
-    const cta = this.uiTargets[2]?.obj as Phaser.GameObjects.Text | undefined;
     if (titulo) {
       this.tweens.add({
         targets: titulo, alpha: 0.82, duration: 2600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
       });
     }
-    if (cta) {
-      this.tweens.add({
-        targets: cta, alpha: 0.4, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+    // O pisca-pisca do CTA é do item do cursor (`marcarMenu`, chamado pelo `settle`).
+  }
+
+  /**
+   * O item do cursor ganha o "> <" e o pisca-pisca do CTA; os outros ficam quietos, mais apagados. (Não "▸ ◂": a
+   * Silkscreen da voz do jogo não tem esses glifos — sumiam.)
+   */
+  private marcarMenu(): void {
+    this.pulsoMenu?.remove();
+    this.pulsoMenu = null;
+    this.itensMenu.forEach((t, i) => {
+      const nome = t.text.replace(/^> | <$/g, '');
+      const sel = i === this.cursorMenu;
+      t.setText(sel && this.itensMenu.length > 1 ? `> ${nome} <` : nome);
+      t.setColor(Phaser.Display.Color.IntegerToColor(sel ? COLORS.playerGlow : COLORS.metalLight).rgba);
+      if (this.settled) t.setAlpha(sel ? 1 : 0.7);
+    });
+    const sel = this.itensMenu[this.cursorMenu];
+    if (sel && this.settled && !this.reducedMotion) {
+      this.pulsoMenu = this.tweens.add({
+        targets: sel, alpha: 0.4, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
       });
     }
+  }
+
+  /** Confirma o item do cursor (Enter / Espaço). */
+  private confirmarMenu(): void {
+    if (this.cursorMenu === 1) this.scene.start('Arquivo');
+    else this.start('diegetico');
   }
 
   /** Pula a abertura: mata os tweens em curso, tira o véu e vai ao repouso (com os pulsos). */
@@ -498,8 +544,21 @@ export class MenuScene extends Phaser.Scene {
       if (!this.settled) this.skipIntro();
     });
 
-    kb.on('keydown-ENTER', () => this.start('diegetico'));
-    kb.on('keydown-SPACE', () => this.start('diegetico'));
+    kb.on('keydown-ENTER', () => this.confirmarMenu());
+    kb.on('keydown-SPACE', () => this.confirmarMenu());
+    // ↑↓ / W S movem o cursor da lista (só depois da abertura: durante ela, a 1ª tecla pula para o repouso).
+    // ⚠️ UM EVENTO, UMA VEZ (a lição da mesa, 03/10): o Phaser reprocessa a fila de teclas a cada evento novo, e o ↓
+    // andava duas casas — numa lista de dois, voltava para onde estava (a `probe-arquivo` pegou).
+    const vistos = new WeakSet<KeyboardEvent>();
+    const mover = (d: number) => (ev: KeyboardEvent) => {
+      if (vistos.has(ev)) return;
+      vistos.add(ev);
+      if (!this.settled || this.itensMenu.length < 2) return;
+      this.cursorMenu = Phaser.Math.Wrap(this.cursorMenu + d, 0, this.itensMenu.length);
+      this.marcarMenu();
+    };
+    for (const t of ['UP', 'W']) kb.on(`keydown-${t}`, mover(-1));
+    for (const t of ['DOWN', 'S']) kb.on(`keydown-${t}`, mover(1));
     kb.on('keydown-ONE', () => this.start('diegetico'));
     kb.on('keydown-TWO', () => this.start('flap'));
     kb.on('keydown-THREE', () => this.start('free'));
