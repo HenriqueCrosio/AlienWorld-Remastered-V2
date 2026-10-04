@@ -30,6 +30,11 @@ Playwright + SwiftShader nas sondas, sharp nas folhas.
   com a calibragem. (2) Os ícones 40×40 da mesa não cabem 24 numa coluna com títulos de grupo: a grade usa
   MINIATURAS (os ícones reduzidos a 50% pela redução da casa — vizinho + alfa binário), e a ficha mostra o ícone
   grande. As miniaturas entram na folha de revisão (Task 2). (3) Sem a camada HD, o menu não mostra o item ARQUIVO.
+- **Revisão dele (04/10, Task 2):** as descrições viraram DIRETAS (uma frase, sem explicar demais — *"também ajuda
+  depois quando formos traduzir para o inglês"*); **as miniaturas SAÍRAM** (*"pode deixar somente o grande"*): a grade
+  usa o ícone grande com `k` px de tela por pixel do ícone, o maior inteiro com `40·k/s ≤ 27` px do mundo
+  (`k = max(1, floor(27·s/40))`), 7 por linha. E o **Perfurante perde força**: 100% → 90% → 60% → 30% e o tiro acaba
+  (`NUMEROS.perfurante.queda`).
 
 ---
 

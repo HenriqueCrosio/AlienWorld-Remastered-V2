@@ -31,5 +31,18 @@ igual([CARTAS.WPN_009.max, CARTAS.DEF_005.max], [2, 2], 'Míssil e Bomba Extra: 
 igual(ICONES_CARTAS.length, 24, 'as 24 têm ícone');
 igual(ICONES_CARTAS.filter((id) => !fs.existsSync(`public/sprites/cartas/icone-${id}.png`)), [], 'todo ícone está em public/sprites/cartas');
 
+// A DESCRIÇÃO do ARQUIVO (spec 2026-10-04 §4.1): toda carta tem, sem número (os números vêm de `numerosCartas`), e
+// cabe em 3 linhas de 34 caracteres (a largura da ficha na voz do piloto).
+const linhasDe = (t, w = 34) =>
+  t.split(' ').reduce((ls, p) => {
+    const u = ls[ls.length - 1];
+    if (u && `${u} ${p}`.length <= w) ls[ls.length - 1] = `${u} ${p}`;
+    else ls.push(p);
+    return ls;
+  }, []);
+igual(ids.filter((id) => !CARTAS[id].descricao), [], 'toda carta tem descricao');
+igual(ids.filter((id) => /\d/.test(CARTAS[id].descricao ?? '')), [], 'a descricao não tem número');
+igual(ids.filter((id) => linhasDe(CARTAS[id].descricao ?? '').length > 3), [], 'a descricao cabe em 3 linhas');
+
 console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTUDO OK');
 process.exit(falhas.length ? 1 : 0);

@@ -11,6 +11,11 @@ import { FATOR_EXPLOSAO_MAIOR } from '../cartasRegras.ts';
  */
 export const NUMEROS = {
   cadencia: { fator: 1.15 },
+  /**
+   * O dano do Perfurante a cada inimigo atravessado (04/10, ele): o 1º cheio, depois 90% / 60% / 30% — e no último o
+   * tiro acaba. Antes atravessava todos com o dano cheio.
+   */
+  perfurante: { queda: [1, 0.9, 0.6, 0.3] },
   pesado: { dano: 2, velocidade: 0.7, escala: 1.3 },
   /** O tranco do Tiro Pesado: px por acerto, no máx. um a cada `cadaMs` por inimigo; a aranha recua `aranha` dele. */
   tranco: { px: 8, cadaMs: 250, aranha: 0.5 },
@@ -48,6 +53,7 @@ export function numerosDaCarta(id: string): string {
   const N = NUMEROS;
   const linhas: Record<string, string[]> = {
     WPN_004: [`+${pct(N.cadencia.fator - 1)} por cópia`],
+    WPN_007: [`dano ${N.perfurante.queda.map(pct).join(' → ')}`],
     WPN_008: [`dano ×${n(N.pesado.dano)}`, `tiro ${pct(1 - N.pesado.velocidade)} mais lento`, `tranco ${N.tranco.px}px`],
     WPN_009: [
       `recarga ${s(N.missil.recargaMs[0])} (×2: ${s(N.missil.recargaMs[1])})`,

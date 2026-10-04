@@ -41,6 +41,7 @@ import { PecasEmJogo, colecaoCompleta, reiniciarLinhagem, temUmUp, tierDaNave } 
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
 import { FreeController } from '../flight/FreeController';
+import { NUMEROS } from '../data/numerosCartas';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
@@ -2198,17 +2199,23 @@ export class GameScene extends Phaser.Scene {
 
     // PERFURANTE: o projétil segue vivo, mas cada inimigo paga só 1× por projétil — sem o Set,
     // o overlap cobraria o mesmo inimigo todo frame e o dano 2 viraria dano infinito.
+    // E o dano CAI a cada inimigo atravessado (04/10, ele): `NUMEROS.perfurante.queda` — o 1º
+    // cheio, depois 90/60/30%; no último o tiro acaba.
     const hits = bullet.getData('hits') as Set<Phaser.GameObjects.GameObject> | null;
+    let fator = 1;
     if (bullet.getData('pierce') === true && hits) {
       if (hits.has(enemy)) return;
       hits.add(enemy);
+      const queda = NUMEROS.perfurante.queda;
+      fator = queda[Math.min(hits.size, queda.length) - 1];
+      if (hits.size >= queda.length) this.weapons.release(bullet);
     } else {
       this.weapons.release(bullet);
     }
     this.fx.hit(bullet.x, bullet.y);
 
     const antes = enemy.getData('hp') as number;
-    const hp = antes - (bullet.getData('damage') as number);
+    const hp = antes - (bullet.getData('damage') as number) * fator;
     this.medidas?.dano(origem ?? 'tiro', Math.min(antes - hp, Math.max(0, antes)));
     enemy.setData('hp', hp);
 
