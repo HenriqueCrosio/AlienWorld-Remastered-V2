@@ -2,20 +2,22 @@ import type Phaser from 'phaser';
 import { rumoDoDash } from '../../cartasRegras';
 import type { InputState } from '../../flight/FlightController';
 import type { Contexto } from './contexto';
+import { NUMEROS } from '../../data/numerosCartas';
 
-/** PROVISÓRIOS (calibragem) — a ESPERA é o número que segura "dash invulnerável + Casco" (§4.2). */
-const DISTANCIA = 40;
-const DURACAO_MS = 150;
-const INTOCAVEL_MS = 200;
 /**
- * 8s (02/10, ele: *"precisa ter um cooldown que justifique a raridade e o uso"*). Com 2,5s o dash era invulnerabilidade
+ * PROVISÓRIOS (calibragem) — a ESPERA é o número que segura "dash invulnerável + Casco" (§4.2). Distância, intocável e
+ * espera moram em `numerosCartas` (`NUMEROS.dash`) — o Arquivo mostra os mesmos.
+ */
+const DASH = NUMEROS.dash;
+const DURACAO_MS = 150;
+/**
+ * A ESPERA de 8s (02/10, ele: *"precisa ter um cooldown que justifique a raridade e o uso"*). Com 2,5s o dash era invulnerabilidade
  * de graça; com 10s+ viraria uma mini-bomba esquecida (a bomba já faz esse papel melhor). Em 8s ele é um SALVAMENTO —
  * guardado para o tiro que não dá para desviar —, e a janela de 0,2s ainda cobra o momento certo.
  */
-const ESPERA_MS = 8000;
 /** Um fantasma a cada 50ms: 3 no avanço de 150ms (a spec: "3 cópias que somem"). */
 const FANTASMA_MS = 50;
-const VELOCIDADE = DISTANCIA / (DURACAO_MS / 1000);
+const VELOCIDADE = DASH.distancia / (DURACAO_MS / 1000);
 
 /**
  * O DASH (§4.2): a ação DASH (E no padrão, C no clássico — 03/10) — um avanço curto na direção SEGURADA (parado,
@@ -71,8 +73,8 @@ export class Dash {
   private comecar(rumo: [number, number], agora: number, body: Phaser.Physics.Arcade.Body): void {
     this.rumo = rumo;
     this.ate = agora + DURACAO_MS;
-    this.intocavelAte = agora + INTOCAVEL_MS;
-    this.prontoEm = agora + ESPERA_MS;
+    this.intocavelAte = agora + DASH.intocavelMs;
+    this.prontoEm = agora + DASH.esperaMs;
     this.proximoFantasma = agora;
     if (!this.salvo) this.salvo = { max: body.maxVelocity.clone(), drag: body.drag.clone() };
     body.setMaxVelocity(VELOCIDADE * 2, VELOCIDADE * 2);

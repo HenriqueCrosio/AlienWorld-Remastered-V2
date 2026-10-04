@@ -1,12 +1,12 @@
 import type Phaser from 'phaser';
 import { pixelsDoRaio, saltosDoArco, type Ponto } from '../../cartasRegras';
 import type { Contexto, Inimigo } from './contexto';
+import { NUMEROS } from '../../data/numerosCartas';
 
-/** PROVISÓRIOS (calibragem). */
-const CHANCE = 0.2;
-const TRAVA_MS = 400;
-const ARCO = { saltos: 3, raio: 50, dano: 1 };
-const PULSO = { raio: 30, dano: 2 };
+/** Os PROVISÓRIOS (calibragem) moram em `numerosCartas` — o Arquivo mostra os mesmos. */
+const ELETRICO = NUMEROS.eletrico;
+const ARCO = NUMEROS.arco;
+const PULSO = NUMEROS.sobrecarga;
 const COR_CHOQUE = 0x9ff6ff;
 const COR_QUEIMANDO = 0xff9a50;
 /**
@@ -16,7 +16,7 @@ const COR_QUEIMANDO = 0xff9a50;
  * acaba, o anel #29 acende como a carga que sobrou, por `ANEL_MS`. É SÓ VISUAL: a trava e a Sobrecarga seguem o
  * `eletrificadoAte`.
  */
-const RAIO_NO_CORPO_MS = TRAVA_MS;
+const RAIO_NO_CORPO_MS = (): number => ELETRICO.travaMs;
 const ESTALO_CADA_MS = 80;
 /** O último estalo ainda leva 90ms para apagar (`Fx.estalo`): o anel espera, para os dois não se misturarem. */
 const ESTALO_VIVE_MS = 90;
@@ -55,20 +55,20 @@ export class Eletrico {
 
   /** O tiro da NAVE acertou. */
   aoAcertar(alvo: Inimigo): void {
-    if (!this.c.tem('EFF_011') || !alvo.active || Math.random() >= CHANCE) return;
+    if (!this.c.tem('EFF_011') || !alvo.active || Math.random() >= ELETRICO.chance) return;
     this.eletrificar(alvo, true, 0);
   }
 
   eletrificar(e: Inimigo, saltar: boolean, dano: number): void {
     if (!e.active) return;
     const agora = this.c.h.scene.time.now;
-    e.setData('eletrificadoAte', agora + TRAVA_MS);
-    if (!NAO_TRAVA.has(e.getData('kind') as string)) this.c.h.travar(e, TRAVA_MS);
+    e.setData('eletrificadoAte', agora + ELETRICO.travaMs);
+    if (!NAO_TRAVA.has(e.getData('kind') as string)) this.c.h.travar(e, ELETRICO.travaMs);
     // O raio em código atravessando o corpo — ele preferiu este à faísca #17 do PixelLab (04/10) — estalando até o fim
     // da trava; depois, o anel (`EstadosNoInimigo` lê `anelDesde`/`anelAte`). Um choque novo recomeça os dois.
-    e.setData('anelDesde', agora + RAIO_NO_CORPO_MS + ESTALO_VIVE_MS);
-    e.setData('anelAte', agora + RAIO_NO_CORPO_MS + ESTALO_VIVE_MS + ANEL_MS);
-    this.noCorpo.set(e, { ate: agora + RAIO_NO_CORPO_MS, proximo: 0 });
+    e.setData('anelDesde', agora + RAIO_NO_CORPO_MS() + ESTALO_VIVE_MS);
+    e.setData('anelAte', agora + RAIO_NO_CORPO_MS() + ESTALO_VIVE_MS + ANEL_MS);
+    this.noCorpo.set(e, { ate: agora + RAIO_NO_CORPO_MS(), proximo: 0 });
     if (dano) this.c.depois(() => this.c.ferir(e, dano, 'choque'));
     if (saltar && this.c.tem('EFF_012')) this.arco(e);
   }

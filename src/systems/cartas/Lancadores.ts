@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Contexto } from './contexto';
 import type { ExplosaoDoJogador } from './ExplosaoDoJogador';
 import { texturaDaLinhagem } from './texturasProvisorias';
+import { NUMEROS } from '../../data/numerosCartas';
 
 /**
  * PROVISÓRIOS (calibragem). O míssil é forte e raro; o tiro leve e constante é do drone (spec §4.3).
@@ -15,9 +16,9 @@ const MISSIL = {
   /**
    * O MÍSSIL É SOLTO PELO JOGADOR (04/10, ele: automático a cada 1,5s era *"apelão demais — imagina quantas vezes ele
    * vai soltar durante uma fase inteira"*): a ação MÍSSIL (Q / V no clássico), com recarga — como o flare e o dash.
-   * A recarga por número de cartas: ×1 = 8s, ×2 = 5s. A calibragem (frente C) mexe nestes números.
+   * A recarga por número de cartas (×1 = 8s, ×2 = 5s) e o dano moram em `numerosCartas` (`NUMEROS.missil`) — o
+   * Arquivo mostra os mesmos. Aqui ficam os números de VOO.
    */
-  recargaMs: [8000, 5000],
   /** Na ignição o míssil parte a esta velocidade, na direção do nariz (já virado para o alvo durante a queda). */
   velocidadeIgnicao: 130,
   velocidadeMax: 180,
@@ -35,7 +36,6 @@ const MISSIL = {
    * inteira o levaria para fora da tela, e o míssil sumiria sem estourar.
    */
   semAlvoMs: 400,
-  dano: 2,
 };
 /**
  * A SAÍDA DO MÍSSIL (04/10, ele: *"ele sai para baixo como se tivesse se estabilizando e depois segue rápido em direção
@@ -60,7 +60,8 @@ const QUEDA = {
  * o flare é F"*), com espera; "FLARE" acende na HUD quando pronto. Sai para trás a 60px/s e FREIA (×0,1 por segundo)
  * até parar — fica na rota de quem persegue.
  */
-const FLARE = { esperaMs: 8000, velocidade: 60, freio: 0.1, vidaMs: 3000, dano: 1 };
+/** A espera e o dano moram em `numerosCartas` (`NUMEROS.flare`). */
+const FLARE = { velocidade: 60, freio: 0.1, vidaMs: 3000 };
 
 type Alvo = Phaser.Physics.Arcade.Sprite;
 
@@ -114,13 +115,13 @@ export class Lancadores {
 
     // Sem ninguém para travar, a tecla não gasta: o míssil fica pronto para quando aparecer um alvo.
     if (missilPedido && this.missilFalta === 0 && this.c.h.alvos().some((a) => a.active)) {
-      const recarga = MISSIL.recargaMs[Math.min(this.c.quantas('WPN_009'), MISSIL.recargaMs.length) - 1];
+      const recarga = NUMEROS.missil.recargaMs[Math.min(this.c.quantas('WPN_009'), NUMEROS.missil.recargaMs.length) - 1];
       this.missilPronto = agora + recarga;
       this.lancar();
     }
 
     if (flarePedido && this.flareProntoAgora) {
-      this.flarePronto = agora + FLARE.esperaMs;
+      this.flarePronto = agora + NUMEROS.flare.esperaMs;
       this.soltarFlare(n.x - 12, n.y, agora);
     }
 
@@ -144,7 +145,7 @@ export class Lancadores {
       angulo: 0,
       textura: texturaDaLinhagem(this.c.h.scene, 'carta-missil', this.c.h.linhagem),
       velocidade: 0,
-      dano: MISSIL.dano,
+      dano: NUMEROS.missil.dano,
       origem: 'missil',
     });
     if (!b) return;
@@ -236,7 +237,7 @@ export class Lancadores {
       angulo: 180,
       textura: 'carta-flare',
       velocidade: FLARE.velocidade,
-      dano: FLARE.dano,
+      dano: NUMEROS.flare.dano,
       origem: 'flare',
     });
     if (!b) return;

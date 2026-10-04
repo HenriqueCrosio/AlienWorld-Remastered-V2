@@ -12,6 +12,7 @@ import { AuraDoCasco } from './cartas/AuraDoCasco';
 import { Dash } from './cartas/Dash';
 import { EstadosNoInimigo } from './cartas/EstadosNoInimigo';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
+import { NUMEROS } from '../data/numerosCartas';
 
 export type { HostCartas } from './cartas/contexto';
 
@@ -35,18 +36,22 @@ export type { HostCartas } from './cartas/contexto';
 /** Onde cada fase abre a mesa do MEIO (segundos do roteiro): o silêncio antes do chefão. */
 const MESA_NO_TEMPO: Record<number, number> = { 1: 63, 2: 70 };
 
-/** Segundos até o Casco voltar: sem Recarga · com Recarga (máx. 1 — com 2 chegava a 3,5s, quase invulnerável; §4.4). */
-const CASCO_RECARGA = [8, 5.5];
+/**
+ * Os números PROVISÓRIOS das cartas daqui (o Casco e a Recarga, a queima do Incendiário, os Propulsores, o tranco)
+ * moram em `numerosCartas` — o Arquivo mostra os mesmos. A Recarga vale no máx. 1 (com 2 o Casco chegava a 3,5s, quase
+ * invulnerável; §4.4).
+ */
+const CASCO_RECARGA = NUMEROS.casco.recargaS;
+const QUEIMA = NUMEROS.incendiario;
 const VELOCIDADE_LIVRE = 110;
-const QUEIMA_MS = 2000;
 const COR_QUEIMANDO = 0xff9a50;
 /**
  * O TRANCO DO TIRO PESADO (04/10, ele: *"o eletrificado pausa o movimento e o tiro pesado dá uma jogada para trás"*) —
- * PROVISÓRIOS (calibragem). `px` por acerto, no rumo do tiro; no máximo um tranco a cada `cadaMs` por inimigo (com o
+ * `NUMEROS.tranco`. `px` por acerto, no rumo do tiro; no máximo um tranco a cada `cadaMs` por inimigo (com o
  * tiro contínuo, sem isso o recuo somaria até parar a onda inteira). A ARANHA (minichefe) recua `aranha` do tranco; os
  * CHEFÕES não recuam — nem passam por aqui (não são do grupo de inimigos), como no elétrico.
  */
-const TRANCO = { px: 8, cadaMs: 250, aranha: 0.5 };
+const TRANCO = NUMEROS.tranco;
 
 export class CartasEmJogo {
   readonly explosao: ExplosaoDoJogador;
@@ -201,14 +206,14 @@ export class CartasEmJogo {
 
     // PROPULSORES: só no voo livre (a F1 é impulso, e a carta nem aparece nela).
     const prop = quantas(this.reg, 'MOV_001');
-    if (livre && prop) body.setMaxVelocity(VELOCIDADE_LIVRE * (1 + 0.12 * prop));
+    if (livre && prop) body.setMaxVelocity(VELOCIDADE_LIVRE * (1 + NUMEROS.propulsores.porCopia * prop));
     // O DASH depois dos Propulsores: durante o avanço, o teto de velocidade é dele.
     this.dash.tick(livre, body, input);
 
-    // A QUEIMA: 1 de dano a cada 0.4s enquanto durar.
+    // A QUEIMA: `QUEIMA.dano` a cada `QUEIMA.cadaS` enquanto durar.
     this.queimaTick -= dt;
     if (this.queimaTick <= 0) {
-      this.queimaTick = 0.4;
+      this.queimaTick = QUEIMA.cadaS;
       for (const e of this.h.inimigos()) {
         const ate = e.getData('queimaAte') as number | undefined;
         if (!e.active || !ate) continue;
@@ -218,7 +223,7 @@ export class CartasEmJogo {
           continue;
         }
         this.h.fx.hit(e.x + Phaser.Math.Between(-4, 4), e.y + Phaser.Math.Between(-4, 4));
-        this.ferir(e, 1, 'queima');
+        this.ferir(e, QUEIMA.dano, 'queima');
       }
     }
 
@@ -242,7 +247,7 @@ export class CartasEmJogo {
     // explode de novo).
     if (origem) return;
     if (tem(this.reg, 'WPN_008') && alvo.active) this.tranco(alvo, angulo);
-    if (tem(this.reg, 'EFF_004') && alvo.active && Math.random() < 0.25) this.incendiar(alvo);
+    if (tem(this.reg, 'EFF_004') && alvo.active && Math.random() < QUEIMA.chance) this.incendiar(alvo);
     this.eletrico.aoAcertar(alvo);
     if (tem(this.reg, 'EFF_001')) this.explosao.explodir('explosivo', x, y, Phaser.Math.RadToDeg(angulo), alvo);
   }
@@ -296,7 +301,7 @@ export class CartasEmJogo {
 
   private incendiar(e: Inimigo): void {
     if (!e.active) return;
-    e.setData('queimaAte', this.h.scene.time.now + QUEIMA_MS);
+    e.setData('queimaAte', this.h.scene.time.now + QUEIMA.queimaMs);
     // A chama #12 por cima (`EstadosNoInimigo`); o tint laranja só sem a arte.
     if (this.estados.tingeQueima) e.setTint(COR_QUEIMANDO);
   }

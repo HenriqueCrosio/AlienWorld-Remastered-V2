@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { angulosDoLeque, raioDaExplosao } from '../../cartasRegras';
 import type { Contexto, Inimigo } from './contexto';
+import { NUMEROS } from '../../data/numerosCartas';
 
 export type FonteExplosao = 'explosivo' | 'combustao' | 'reativo' | 'missil' | 'flare';
 
@@ -37,16 +38,16 @@ const ANIM: Record<'humPeq' | 'humGrande' | 'alien' | 'missil' | 'missilAlien' |
 const EM_ESTOUROS: FonteExplosao[] = ['combustao', 'reativo'];
 const PROFUNDIDADE = 50;
 
-/** Raio (px do mundo), dano e o tamanho do `Fx.explode` de cada fonte — PROVISÓRIOS (calibragem). */
-const EXPLOSAO: Record<FonteExplosao, { raio: number; dano: number; visual: number }> = {
-  explosivo: { raio: 18, dano: 1, visual: 0.45 },
-  combustao: { raio: 26, dano: 2, visual: 0.9 },
-  reativo: { raio: 40, dano: 3, visual: 1.2 },
-  missil: { raio: 20, dano: 1, visual: 0.6 },
-  flare: { raio: 22, dano: 2, visual: 0.6 },
-};
+/**
+ * Raio (px do mundo) e dano de cada fonte: PROVISÓRIOS, em `numerosCartas` (`NUMEROS.explosao`) — o Arquivo mostra os
+ * mesmos. Aqui fica só o tamanho do desenho (`Fx.explode`).
+ */
+const EXPLOSAO: Record<FonteExplosao, { raio: number; dano: number }> = NUMEROS.explosao;
+const VISUAL: Record<FonteExplosao, number> = { explosivo: 0.45, combustao: 0.9, reativo: 1.2, missil: 0.6, flare: 0.6 };
 const VISUAL_MAIOR = 1.3;
-const ESTILHACOS = { n: 5, velocidade: 150, alcance: 36, dano: 1 };
+/** Quantos, alcance e dano em `NUMEROS.estilhacos`; a velocidade é do voo. */
+const ESTILHACOS = NUMEROS.estilhacos;
+const VELOCIDADE_ESTILHACO = 150;
 
 /**
  * A EXPLOSÃO DO JOGADOR É UM SISTEMA (§4.1). Explosivo, Combustão, Casco Reativo, Flare e Míssil chamam a MESMA
@@ -71,7 +72,7 @@ export class ExplosaoDoJogador {
     const base = EXPLOSAO[fonte];
     const maior = this.c.tem('EFF_002');
     const raio = raioDaExplosao(base.raio, maior);
-    this.desenhar(fonte, x, y, angulo, maior, base.visual * (maior ? VISUAL_MAIOR : 1), raio);
+    this.desenhar(fonte, x, y, angulo, maior, VISUAL[fonte] * (maior ? VISUAL_MAIOR : 1), raio);
     this.c.depois(() => {
       for (const e of this.c.noRaio(x, y, raio)) {
         // EM CADEIA incendeia TODO mundo no raio — inclusive quem levou o tiro.
@@ -174,7 +175,7 @@ export class ExplosaoDoJogador {
         y,
         angulo: a,
         textura: 'carta-estilhaco',
-        velocidade: ESTILHACOS.velocidade,
+        velocidade: VELOCIDADE_ESTILHACO,
         dano: ESTILHACOS.dano,
         alcance: ESTILHACOS.alcance,
         origem: 'estilhaco',

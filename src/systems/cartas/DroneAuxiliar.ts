@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import type { Contexto, Inimigo } from './contexto';
 import { texturaDaLinhagem } from './texturasProvisorias';
+import { NUMEROS } from '../../data/numerosCartas';
 
 /** PROVISÓRIOS (calibragem). Posição de descanso: atrás e acima da nave. */
 const DRONE = {
@@ -14,10 +15,7 @@ const DRONE = {
   rumoMinimo: 10,
   /** Passou disto da nave, o desvio desliga e a mola traz de volta. */
   longe: 60,
-  esperaS: 1.2,
-  alcance: 160,
   velocidade: 170,
-  dano: 1,
   homing: { turn: 180, range: 160 },
 };
 const COR_TIRO = { humana: 0xffa040, alien: 0x5ef2d8 };
@@ -32,7 +30,7 @@ const COR_TIRO = { humana: 0xffa040, alien: 0x5ef2d8 };
  */
 export class DroneAuxiliar {
   sprite: Phaser.GameObjects.Sprite | null = null;
-  private espera = DRONE.esperaS;
+  private espera = NUMEROS.drone.esperaS;
 
   constructor(private readonly c: Contexto) {}
 
@@ -61,15 +59,15 @@ export class DroneAuxiliar {
     const tiro = texturaDaLinhagem(this.c.h.scene, 'carta-tiro-drone', this.c.h.linhagem);
     const alvo = this.maisProximo(d.x, d.y);
     if (!alvo) return;
-    this.espera = DRONE.esperaS;
+    this.espera = NUMEROS.drone.esperaS;
     this.c.h.weapons.disparar({
       x: d.x,
       y: d.y,
       angulo: (Math.atan2(alvo.y - d.y, alvo.x - d.x) * 180) / Math.PI,
       textura: tiro,
       velocidade: DRONE.velocidade,
-      dano: DRONE.dano,
-      alcance: DRONE.alcance * 1.5,
+      dano: NUMEROS.drone.dano,
+      alcance: NUMEROS.drone.alcance * 1.5,
       origem: 'drone',
       homing: DRONE.homing,
       // A arte aprovada já vem na cor da linhagem; só a provisória (branca) é tingida. (A `-alien` só existe se o
@@ -116,7 +114,7 @@ export class DroneAuxiliar {
 
   private maisProximo(x: number, y: number): Inimigo | null {
     let melhor: Inimigo | null = null;
-    let menor = DRONE.alcance;
+    let menor = NUMEROS.drone.alcance;
     for (const e of this.c.h.inimigos()) {
       if (!e.active) continue;
       const d = Math.hypot(e.x - x, e.y - y);

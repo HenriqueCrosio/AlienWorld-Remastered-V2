@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { WEAPONS, type WeaponDef } from './systems/WeaponSystem';
 import { RARIDADES, type Raridade } from './raridade';
 import { CARTAS, type CartaDef } from './data/catalogoCartas';
+import { NUMEROS } from './data/numerosCartas';
 
 /**
  * AS CARTAS — o sistema de cartas (branch `feat/cartas-preview`; protótipo de 27/09, catálogo de 24 em 01/10).
@@ -162,12 +163,12 @@ export function montarArma(reg: Phaser.Data.DataManager, baseId: string): string
     def.pellets = 2;
   }
   const cadencia = quantas(reg, 'WPN_004');
-  if (cadencia) def.rate = base.rate * Math.pow(1.15, cadencia);
+  if (cadencia) def.rate = base.rate * Math.pow(NUMEROS.cadencia.fator, cadencia);
   if (tem(reg, 'WPN_007')) def.pierce = true;
   if (tem(reg, 'WPN_008')) {
-    def.damage = base.damage * 2;
-    def.speed = base.speed * 0.7;
-    def.bulletScale = base.bulletScale * 1.3;
+    def.damage = base.damage * NUMEROS.pesado.dano;
+    def.speed = base.speed * NUMEROS.pesado.velocidade;
+    def.bulletScale = base.bulletScale * NUMEROS.pesado.escala;
   }
 
   WEAPONS[ARMA_MONTADA] = def;
