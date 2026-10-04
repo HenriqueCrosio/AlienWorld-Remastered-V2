@@ -138,10 +138,19 @@ async function gravar(cen, modo) {
   }, cen.nave ?? NAVE);
   await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').cartas);
   await page.waitForTimeout(600);
-  await page.evaluate(({ cartas, modo, alvos }) => {
+  await page.evaluate(({ cartas, modo, alvos, clipe }) => {
     const s = window.__game.scene.getScene('Game');
     s.director.update = () => [];
     s.enemies.enemies.clear(true, true);
+    // NOS CLIPES, sem os DETRITOS da fase (04/10): a rocha do cinturão passava na frente da nave bem na explosão do
+    // flare. (A instância da cena é reaproveitada: no modo clipe a sessão só grava clipes, então tanto faz que fique.)
+    if (clipe) {
+      s.spawnHazards = () => {};
+      s.debris.hazards.clear(true, true);
+      // E sem o PRIMEIRO PLANO (as silhuetas de asteroide que passam NA FRENTE da nave, profundidade 60): o mesmo
+      // apagar da luta de chefão, na hora. Era a "rocha" grande na frente do Perfurante e do Arco.
+      s.parallax.setForegroundDimmed(true, 0);
+    }
     // Nave intocável SEM i-frames: com eles ela pisca (60ms), e o GIF a pegaria some-aparece.
     // ⚠️ O golpe ORIGINAL vem da CLASSE: o Phaser reaproveita a instância da cena, e a partir da 2ª gravação o
     // `s.damageShip` já é o vazio da gravação anterior — o golpe forçado não acontecia (o Casco nunca quebrava).
@@ -213,7 +222,7 @@ async function gravar(cen, modo) {
     g.loop.sleep();
     window.__passo = { t: g.loop.now };
     return { x0, y0 };
-  }, { cartas: cen.cartas, modo, alvos: cen.alvos }).then((nave) => {
+  }, { cartas: cen.cartas, modo, alvos: cen.alvos, clipe: !!cen.clipe }).then((nave) => {
     // O CLIPE do Arquivo: a janela fixa em volta da nave (ver `CLIPES`).
     if (cen.clipe) {
       const x = Math.round(nave.x0 + (cen.clipe.dx ?? -30));

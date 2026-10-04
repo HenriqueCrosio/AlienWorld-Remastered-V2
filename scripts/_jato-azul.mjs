@@ -7,7 +7,9 @@ import fs from 'fs';
 import sharp from 'sharp';
 
 const NAVES = [
-  { de: 'public/sprites/ship-jato-anim', para: 'public/sprites/ship-jato-azul-anim' },
+  // O JATO (T1): só a chama do MEIO (linhas 6–15). As amarelas no alto e embaixo da traseira são as LUZES das asas
+  // (ele, 04/10: *"aquelas luzes na asa pra mim sempre foram luzes"*) — ficam como estão.
+  { de: 'public/sprites/ship-jato-anim', para: 'public/sprites/ship-jato-azul-anim', linhas: [6, 15] },
   { de: 'public/sprites/naves/humana-t0-anim', para: 'public/sprites/naves/humana-t0-azul-anim' },
   { de: 'public/sprites/naves/humana-t2-anim', para: 'public/sprites/naves/humana-t2-azul-anim' },
   { de: 'public/sprites/naves/humana-t3-anim', para: 'public/sprites/naves/humana-t3-azul-anim' },
@@ -30,7 +32,7 @@ const ehFogo = (r, g, b) => {
   return (max >= 235 && (max - min) / max >= 0.6) || (min >= 200 && max >= 245);
 };
 
-for (const { de, para } of NAVES) {
+for (const { de, para, linhas = [0, Infinity] } of NAVES) {
   const pasta = de.slice(0, de.lastIndexOf('/'));
   const base = de.slice(de.lastIndexOf('/') + 1);
   const quadros = fs.readdirSync(pasta).filter((f) => new RegExp(`^${base}-\\d+\\.png$`).test(f));
@@ -38,7 +40,7 @@ for (const { de, para } of NAVES) {
   for (const f of quadros) {
     const n = f.match(/-(\d+)\.png$/)[1];
     const { data, info } = await sharp(`${pasta}/${f}`).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-    for (let y = 0; y < info.height; y++)
+    for (let y = Math.max(0, linhas[0]); y <= Math.min(info.height - 1, linhas[1]); y++)
       for (let x = 0; x < Math.min(TRASEIRA, info.width); x++) {
         const k = (y * info.width + x) * 4;
         if (!data[k + 3] || !ehFogo(data[k], data[k + 1], data[k + 2])) continue;
