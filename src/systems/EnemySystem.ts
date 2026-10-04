@@ -359,6 +359,8 @@ export class EnemySystem {
     e.setData('eletrificadoAte', 0);
     e.setData('anelDesde', 0);
     e.setData('anelAte', 0);
+    e.setData('tranco', 0);
+    e.setData('trancoPronto', 0);
     e.setData('t', Phaser.Math.FloatBetween(0, Math.PI * 2));
     // Espera antes do PRIMEIRO tiro: uma canhoneira não dispara no frame em que aparece.
     e.setData('cooldown', Phaser.Math.FloatBetween(1.2, 2.0));
@@ -437,6 +439,16 @@ export class EnemySystem {
     body.setAcceleration(0, 0);
   }
 
+  /**
+   * O TRANCO (carta Tiro Pesado, 04/10 — ele: *"o eletrificado pausa o movimento e o tiro pesado dá uma jogada para
+   * trás"*): soma `dx` px ao recuo pendente, que o `update` gasta em ~0,15s (rápido no começo, assentando no fim — um
+   * tranco, não um teleporte). Mexe na POSIÇÃO, não na velocidade: o roteiro de cada inimigo reescreve a velocidade,
+   * e o recuo sumiria no quadro seguinte. Vale também travado (o eletrificado leva o tranco parado).
+   */
+  empurrar(e: Phaser.Physics.Arcade.Sprite, dx: number): void {
+    e.setData('tranco', ((e.getData('tranco') as number | undefined) ?? 0) + dx);
+  }
+
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
     // SNAPSHOT do grupo. `getChildren()` devolve o array vivo: o cargueiro ACRESCENTA a ele
     // (cospe drones) e o culling REMOVE dele, os dois no meio da iteração. Percorrer o array
@@ -447,6 +459,16 @@ export class EnemySystem {
       if (!e.active) continue;
 
       const def = DEFS[e.getData('kind') as EnemyKind];
+
+      // O TRANCO (ver `empurrar`): ~95% do recuo em 0,15s. A água-viva escreve o X a partir do `baseX` — ele recua
+      // junto, senão a senóide a puxaria de volta no quadro seguinte.
+      const tranco = (e.getData('tranco') as number | undefined) ?? 0;
+      if (tranco) {
+        const passo = Math.abs(tranco) < 0.5 ? tranco : tranco * (1 - Math.exp(-20 * dt));
+        e.x += passo;
+        if (def.travessia === 'vertical') e.setData('baseX', (e.getData('baseX') as number) + passo);
+        e.setData('tranco', tranco - passo);
+      }
 
       // TRAVADO (eletrificado): nada anda, nada atira, nenhum relógio de tiro corre — o `continue` pula tudo abaixo.
       // Ao destravar, volta a velocidade de antes (a do roteiro, ou a da deriva vertical da água-viva).

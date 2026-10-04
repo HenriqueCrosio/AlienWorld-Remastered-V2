@@ -26,6 +26,11 @@ const CENARIOS = {
   cadencia: { nome: 'CADÊNCIA ×3', cartas: ['WPN_004', 'WPN_004', 'WPN_004'], atira: true, alvos: 'cacho' },
   perfurante: { nome: 'PERFURANTE', cartas: ['WPN_007'], atira: true, alvos: 'fila' },
   pesado: { nome: 'TIRO PESADO', cartas: ['WPN_008'], atira: true, alvos: 'cacho' },
+  // O TRANCO (04/10): três vindo na direção da nave — sem a carta eles chegam; com o Pesado cada acerto os joga para
+  // trás; com o elétrico junto, o travado leva o tranco parado.
+  trancobase: { nome: 'SEM A CARTA — eles chegam', cartas: [], atira: true, alvos: 'vindo' },
+  tranco: { nome: 'TIRO PESADO — cada acerto joga para trás', cartas: ['WPN_008'], atira: true, alvos: 'vindo' },
+  trancoeletrico: { nome: 'PESADO + ELÉTRICO — trava e tranco', cartas: ['WPN_008'], atira: true, alvos: 'vindo', forcar: [[0.5, 'eletrificar:0'], [1.6, 'eletrificar:0']] },
   maior: { nome: 'EXPLOSIVO + EXPLOSÃO MAIOR', cartas: ['EFF_001', 'EFF_002'], atira: true, alvos: 'cacho' },
   fragmentos: { nome: 'EXPLOSIVO + FRAGMENTADO', cartas: ['EFF_001', 'EFF_003'], atira: true, alvos: 'cacho' },
   incendiario: { nome: 'INCENDIÁRIO', cartas: ['EFF_004'], atira: true, alvos: 'cacho' },
@@ -112,6 +117,8 @@ async function gravar(cen, modo) {
     const ALVOS = {
       // um CACHO na linha da nave
       cacho: [[190, 0, 6], [205, -12, 6], [205, 12, 6], [222, -4, 6], [222, 18, 6], [238, -14, 6], [240, 6, 6]],
+      // três VINDO na linha da nave (o do meio no tiro), duros: o tranco se vê no do meio
+      vindo: [[230, 0, 200, 'drone', -45, 0], [250, -26, 200, 'drone', -45, 0], [250, 26, 200, 'drone', -45, 0]],
       // três ESPAÇADOS e duros: o estado se vê em cada um, sem um tapar o outro
       trio: [[190, 0, 14], [218, -22, 14], [218, 22, 14]],
       cacho4: [[190, 0, 4], [205, -12, 4], [205, 12, 4], [222, -4, 4], [222, 18, 4], [238, -14, 4], [240, 6, 4]],

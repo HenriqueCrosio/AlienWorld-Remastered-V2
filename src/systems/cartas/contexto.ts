@@ -21,6 +21,8 @@ export interface HostCartas {
   matar: (e: Inimigo) => void;
   /** Congela o inimigo por `ms` (`EnemySystem.travar`). */
   travar: (e: Inimigo, ms: number) => void;
+  /** Empurra o inimigo `dx` px (o tranco do Tiro Pesado — `EnemySystem.empurrar`). */
+  empurrar: (e: Inimigo, dx: number) => void;
   baseDaNave: string;
   fase: number;
   linhagem: Linhagem;

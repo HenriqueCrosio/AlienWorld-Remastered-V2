@@ -439,6 +439,7 @@ export class GameScene extends Phaser.Scene {
       nave: () => this.ship,
       matar: (e) => this.matarInimigo(e),
       travar: (e, ms) => this.enemies.travar(e, ms),
+      empurrar: (e, dx) => this.enemies.empurrar(e, dx),
       baseDaNave: nave.weapon,
       fase: this.stage.id,
       linhagem: this.shipId === 'alienigena' ? 'alien' : 'humana',

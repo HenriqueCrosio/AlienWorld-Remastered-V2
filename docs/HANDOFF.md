@@ -15,8 +15,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 ### A frase de arranque da próxima sessão
 
 > **"Leia o 🧭 do `docs/HANDOFF.md` (o 📍 de 04/10) e a spec do catálogo §4.3 e §5.1e. O 2º lote das peças e o míssil
-> na tecla Q entraram; o próximo é o TRANCO do tiro pesado (empurra o inimigo para trás; chefão não recua, aranha
-> recua menos) e depois a frente B."**
+> na tecla Q e o tranco do tiro pesado entraram; o próximo é a WIKI das skills (brainstorming) e depois a frente B."**
 >
 > 📍 **04/10 — O 2º LOTE DAS PEÇAS + O MÍSSIL NA TECLA (o mais recente):** commitado e empurrado (`feat/cartas-preview`,
 > sem merge). Os tamanhos dele: flare 75% · eletrificado 75% · queimando 75% (a faísca saiu). Em jogo: **elétrico =
@@ -24,8 +23,11 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > por cima, sem tint**; a explosão do míssil alien **repintada na manta**; a lata do flare animada. O **MÍSSIL deixou de
 > ser automático** (*"apelão demais"*): tecla **Q** (clássico **V**), recarga 8s (×2: 5s), e a SAÍDA cai da barriga,
 > estabiliza virando o nariz e acende rápido no alvo. Spec do catálogo §4.3 e §5.1e; GIFs em `folhas/2026-10-04/pecas/`.
-> **Em andamento:** o TRANCO do tiro pesado (pedido dele: *"o eletrificado pausa o movimento e o tiro pesado dá uma
-> jogada para trás"*) — chefão não recua, a aranha recua menos.
+> **E o TRANCO do tiro pesado** (pedido dele: *"o eletrificado pausa o movimento e o tiro pesado dá uma jogada para
+> trás"*): ~8px por acerto, no máx. 1 a cada 0,25s por inimigo; a aranha recua metade, chefão não recua. Aprovado
+> sozinho (*"retarda de uma forma boa"*); ⚠️ **elétrico + pesado juntos = "muito roubados"** → rebalanceamento.
+> **Próximo:** a WIKI das skills (pedido dele: uma folha por carta, com o efeito em GIF, *"como o LoL mostra as skills
+> dos heróis"* — para o jogador conhecer as cartas), por brainstorming; depois a frente B.
 >
 > 📍 **03/10 — o ponto anterior:** tudo commitado e empurrado (`feat/cartas-preview`, sem merge).
 > **Ele tem de OLHAR A FOLHA e escolher o tamanho** de quatro peças animadas antes de qualquer código:
@@ -96,7 +98,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
-| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. 🟠 **AGORA: o tranco do tiro pesado** → frente B → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
+| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado. 🟠 **AGORA: a wiki das skills** (pedido dele) → frente B → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ⬜ spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |

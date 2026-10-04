@@ -40,6 +40,13 @@ const CASCO_RECARGA = [8, 5.5];
 const VELOCIDADE_LIVRE = 110;
 const QUEIMA_MS = 2000;
 const COR_QUEIMANDO = 0xff9a50;
+/**
+ * O TRANCO DO TIRO PESADO (04/10, ele: *"o eletrificado pausa o movimento e o tiro pesado dá uma jogada para trás"*) —
+ * PROVISÓRIOS (calibragem). `px` por acerto, no rumo do tiro; no máximo um tranco a cada `cadaMs` por inimigo (com o
+ * tiro contínuo, sem isso o recuo somaria até parar a onda inteira). A ARANHA (minichefe) recua `aranha` do tranco; os
+ * CHEFÕES não recuam — nem passam por aqui (não são do grupo de inimigos), como no elétrico.
+ */
+const TRANCO = { px: 8, cadaMs: 250, aranha: 0.5 };
 
 export class CartasEmJogo {
   readonly explosao: ExplosaoDoJogador;
@@ -234,6 +241,7 @@ export class CartasEmJogo {
     // O tiro do drone e o estilhaço só fazem o dano deles (o drone não copia as cartas da nave; o estilhaço não
     // explode de novo).
     if (origem) return;
+    if (tem(this.reg, 'WPN_008') && alvo.active) this.tranco(alvo, angulo);
     if (tem(this.reg, 'EFF_004') && alvo.active && Math.random() < 0.25) this.incendiar(alvo);
     this.eletrico.aoAcertar(alvo);
     if (tem(this.reg, 'EFF_001')) this.explosao.explodir('explosivo', x, y, Phaser.Math.RadToDeg(angulo), alvo);
@@ -276,6 +284,15 @@ export class CartasEmJogo {
   }
 
   // ─── O DANO DAS CARTAS ────────────────────────────────────────────────────────────────────────
+
+  /** O tranco do Tiro Pesado (ver `TRANCO`). `angulo` (rad) é o rumo do tiro: empurra na componente horizontal dele. */
+  private tranco(e: Inimigo, angulo: number): void {
+    const agora = this.h.scene.time.now;
+    if (agora < ((e.getData('trancoPronto') as number | undefined) ?? 0)) return;
+    e.setData('trancoPronto', agora + TRANCO.cadaMs);
+    const fator = e.getData('kind') === 'aranha' ? TRANCO.aranha : 1;
+    this.h.empurrar(e, Math.cos(angulo) * TRANCO.px * fator);
+  }
 
   private incendiar(e: Inimigo): void {
     if (!e.active) return;

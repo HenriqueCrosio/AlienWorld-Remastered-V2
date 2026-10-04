@@ -52,7 +52,7 @@ de 14 letras (a letra da mesa é uma só para todas — spec `2026-09-30-mesa-co
 | WPN_002 | TIRO TRIPLO | incomum | 3 em leque (substitui o Duplo) | — | 1 |
 | WPN_004 | CADÊNCIA | comum | +15% de cadência | — | 3 |
 | WPN_007 | PERFURANTE | incomum | o tiro atravessa inimigos | — | 1 |
-| WPN_008 | TIRO PESADO | rara | dano ×2, tiro mais lento | — | 1 |
+| WPN_008 | TIRO PESADO | rara | dano ×2, tiro mais lento **+ o TRANCO (04/10)**: cada acerto joga o inimigo ~8px para trás (no máx. 1 a cada 0,25s por inimigo; a aranha recua metade; chefão não recua) — *"o eletrificado pausa o movimento e o tiro pesado dá uma jogada para trás"*. GIF `folhas/2026-10-04/pecas/tiro-pesado-tranco.gif`. ⚠️ **Elétrico + Pesado juntos = "muito roubado"** → rebalanceamento | — | 1 |
 | WPN_009 🆕 | MÍSSIL GUIADO | incomum | ~~a cada ~3s~~ **na tecla Q, com recarga (04/10, §4.3)**: um míssil persegue o inimigo mais próximo e **explode ao acertar** | — | 2 |
 | WPN_010 🆕 | DRONE AUXILIAR | épica | um drone discreto acompanha a nave e dá um **tiro próprio: fraco, guiado ao inimigo mais próximo, cadência baixa** — NÃO copia Duplo/Triplo/Cadência da nave | — | 1 |
 
