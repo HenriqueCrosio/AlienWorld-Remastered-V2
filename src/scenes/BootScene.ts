@@ -1032,6 +1032,9 @@ const ART: Record<string, string> = {
   // A BOMBA DE QUEDA (03/10): a DESENHADA pixel a pixel (18×7, a paleta da nave) — ele: *"a melhor de aspecto ficou a
   // desenhada, mas ainda acho que ela pode ser um pouco menor"*. Sem o PNG, o `Bombas` desenha a provisória em código.
   bomba: 'sprites/bomba.png',
+  // OS TIROS LASER das linhagens (04/10): 7×1 à mão, só a ponta acesa (`scripts/_folha-tiros-laser.mjs`, o "G").
+  tiroLaserHumana: 'sprites/tiros/laser-humana.png',
+  tiroLaserAlien: 'sprites/tiros/laser-alien.png',
   // A ARTE APROVADA DAS PEÇAS (03/10, spec do catálogo §5.1b–c) com as MESMAS chaves das provisórias — quem existe
   // aqui, a `criarTexturasProvisorias` pula. O sufixo `-alien` é a versão da linhagem alien (`texturaDaLinhagem`).
   'carta-missil': 'sprites/cartas/pecas/missil-humano.png',

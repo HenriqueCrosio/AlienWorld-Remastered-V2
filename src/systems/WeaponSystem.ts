@@ -150,6 +150,11 @@ export interface WeaponDef {
    * atravessa a tela devagar tem que parecer CARREGADO, senão lê como bala perdida.
    */
   glow?: boolean;
+  /**
+   * Sem o HALO aditivo do `tickFx` (04/10, os tiros LASER das linhagens): num tiro de 1px o rastro de halo é o que o
+   * engrossava — ele achou os tiros base *"muito grossos e desproporcionais"*.
+   */
+  semHalo?: boolean;
   /** Partículas do flash de boca por disparo (padrão 2). O flash é o coice visual da arma. */
   muzzleFlash?: number;
 }
@@ -301,13 +306,16 @@ export const WEAPONS: Record<string, WeaponDef> = {
 
   // ─── PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): as bases das DUAS linhagens. ───
   // Tiro SIMPLES — é a carta que dobra. Números provisórios: o balanceamento é etapa própria.
+  // OS TIROS LASER (04/10, ele: *"muito grossos e desproporcionais, precisamos deixá-los mais com cara de tiro
+  // laser"*): desenhados à mão, 7×1, só a ponta acesa (o "G · BRASA" da folha `folhas/2026-10-04/tiros/`), e SEM o halo
+  // — era o rastro de halo que engrossava o traçante. Sem o PNG, o traçante em código (`tracerRound`).
   baseHumana: {
-    id: 'baseHumana', name: 'TRAÇANTE', bullet: 'tracerRound', bulletScale: 1, rate: 4.5, speed: 420,
-    damage: 1, pellets: 1, spread: 0, ammo: null, range: null,
+    id: 'baseHumana', name: 'TRAÇANTE', bullet: 'tiroLaserHumana', bulletScale: 1, rate: 4.5, speed: 420,
+    damage: 1, pellets: 1, spread: 0, ammo: null, range: null, semHalo: true,
   },
   baseAlien: {
-    id: 'baseAlien', name: 'PULSO ALIEN', bullet: 'shotPulse', bulletScale: 1, rate: 4.5, speed: 360,
-    damage: 1, pellets: 1, spread: 0, ammo: null, range: null, tint: 0x5ef2d8,
+    id: 'baseAlien', name: 'PULSO ALIEN', bullet: 'tiroLaserAlien', bulletScale: 1, rate: 4.5, speed: 360,
+    damage: 1, pellets: 1, spread: 0, ammo: null, range: null, semHalo: true,
   },
 };
 
@@ -689,7 +697,8 @@ export class WeaponSystem {
         // Fase aleatória: os 5 estilhaços do leque ardendo em uníssono parecem um objeto só.
         b.anims.setProgress(Math.random());
       } else {
-        b.setTexture(this.weapon.bullet);
+        // Sem o PNG do laser (04/10), o traçante desenhado em código — o tiro nunca vira o quadrado verde do Phaser.
+        b.setTexture(this.scene.textures.exists(this.weapon.bullet) ? this.weapon.bullet : 'tracerRound');
       }
 
       // Escala por eixo: a lâmina é ALTA (scaleY próprio) — e a hitbox de mundo acompanha a
@@ -716,7 +725,7 @@ export class WeaponSystem {
       const quente = ['tracerRound', 'blast', 'shotLance', 'shotSpread', 'shotHmg', 'shotObus'].includes(
         this.weapon.bullet,
       );
-      b.setData('glowKind', this.weapon.homing ? null : quente ? 'warm' : 'cyan');
+      b.setData('glowKind', this.weapon.homing || this.weapon.semHalo ? null : quente ? 'warm' : 'cyan');
       // Hitbox derivada da arte, e generosa: bala fina com corpo justo erra o que devia acertar.
       // O PISO de 3px existe pelo traçante (8×1): a 90% da arte, o corpo dele teria ~1px de
       // altura e atravessaria inimigo sem tocar — visualmente acertando.

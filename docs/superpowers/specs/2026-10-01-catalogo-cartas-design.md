@@ -236,7 +236,7 @@ míssil, flare e Casco Reativo = a redonda #53 (só os 4 primeiros quadros: o ge
 explosão do flare (d95b0189) fica de fora — mostra a lata em todos os quadros. Comparação em
 `folhas/2026-10-02/gif/comparacao-*.gif`; código em `ExplosaoDoJogador` (`arte`).
 
-**Os tiros:** o da NAVE é o que já existe (humana `tracerRound` 8×1; alien `shotPulse` 11×6); o do DRONE é menor
+**Os tiros:** o da NAVE é ~~o que já existe (humana `tracerRound` 8×1; alien `shotPulse` 11×6)~~ **o LASER à mão (04/10, ele: os de antes eram *"muito grossos e desproporcionais"*): 7×1, só a ponta acesa (o "G · BRASA" de `folhas/2026-10-04/tiros/`), nas cores de cada linhagem e SEM o halo — *"ficou perfeito"*;** o do DRONE é menor
 (6×1, à mão) — *"os das naves têm que ser ligeiramente maiores que os do drone"*.
 
 **O drone desvia** (pedido dele): segue a nave; todo inimigo e todo tiro a ~24px o empurra para longe; passou de ~60px
