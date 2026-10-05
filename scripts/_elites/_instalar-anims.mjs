@@ -147,9 +147,50 @@ const SENTINELA = {
 };
 const todosS = Object.entries(SENTINELA).flatMap(([c, qs]) => qs.map((q) => path.join(dirS, c, `${q}.png`)));
 const caixaS = await caixaUniao([...new Set(todosS)]);
+/**
+ * THE LIGHTS ON THE GUNS (05/10 (2), his note: *"as luzes na minigun e nos canos de cima ficaram muito estranhos; as
+ * luzes de flash no interior da carcaça ficaram boas, talvez mais leves"*). In the FIRE and OVERLOAD clips: the upper
+ * cannon and the minigun go back to dark metal (their red-hot fill read as a solid block), whatever passes the barrel
+ * tips is cleared (the muzzle flash is code — `PadroesDeTiro`), and the hull lights drop to half. The thrusters (bottom
+ * left) are untouched. Boxes measured on the crop box (art facing RIGHT, 63×50).
+ */
+const CANOS = [
+  { x0: 24, y0: 2, x1: 44, y1: 11 }, // the upper cannon
+  { x0: 27, y0: 20, x1: 44, y1: 37 }, // the minigun (y 20–37: flash remnants sat just above and below it)
+];
+const PONTA_X = 45;
+// The guns are COPIED from the approved still (hover frame 1) — the generator had turned whole barrels into flash, and
+// repainting them grey left a hollow outline.
+const BASE = await sharp(path.join(dirS, 'pairar', '1.png')).extract(caixaS).ensureAlpha().raw().toBuffer();
+const acalmarLuzes = async (buf) => {
+  const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let y = 0; y < info.height; y++)
+    for (let x = 0; x < info.width; x++) {
+      const i = (y * info.width + x) * 4;
+      if (x >= PONTA_X || CANOS.some((c) => x >= c.x0 && x <= c.x1 && y >= c.y0 && y <= c.y1)) {
+        for (let k = 0; k < 4; k++) data[i + k] = BASE[i + k];
+        continue;
+      }
+      if (!data[i + 3]) continue;
+      const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+      // The thruster FLAMES (orange/yellow, bottom left) stay as they are; a pure red dot there is a stray light.
+      if (y >= 32 && x < 24 && g > 70) continue;
+      const vermelho = r > 120 && r > g + 50 && r > b + 50;
+      const branco = r > 200 && g > 160 && b > 120; // the white-hot vents of the overload
+      if (vermelho || branco) {
+        // Hull lights at half: halfway to the dark hull.
+        data[i] = Math.round(r * 0.5 + 60 * 0.5);
+        data[i + 1] = Math.round(g * 0.5 + 40 * 0.5);
+        data[i + 2] = Math.round(b * 0.5 + 44 * 0.5);
+      }
+    }
+  return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer();
+};
+
 for (const [clip, qs] of Object.entries(SENTINELA)) {
   for (const [i, q] of qs.entries()) {
-    const quadro = await sharp(path.join(dirS, clip, `${q}.png`)).extract(caixaS).png().toBuffer();
+    let quadro = await sharp(path.join(dirS, clip, `${q}.png`)).extract(caixaS).png().toBuffer();
+    if (clip === 'disparo' || clip === 'sobrecarga') quadro = await acalmarLuzes(quadro);
     fs.writeFileSync(path.join(OUT, `elite-sentinela-${clip}-${i}.png`), quadro);
     if (clip === 'abrir') fs.writeFileSync(path.join(OUT, `elite-sentinela-fechar-${qs.length - 1 - i}.png`), quadro);
   }

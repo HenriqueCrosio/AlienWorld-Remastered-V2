@@ -292,6 +292,14 @@ export class EnemySystem {
     criarTexturasElites(scene);
   }
 
+  /** Há um ELITE vivo em cena? (a cena atenua o primeiro plano enquanto houver — `Parallax.setForegroundElite`) */
+  temElite(): boolean {
+    return this.enemies.getChildren().some((o) => {
+      const e = o as Phaser.Physics.Arcade.Sprite;
+      return e.active && DEFS[e.getData('kind') as EnemyKind]?.elite !== undefined && e.x < GAME_WIDTH + 40;
+    });
+  }
+
   /** A cena liga as portas dos elites (a rocha do drone, a explosão inimiga) — ver `GanchosElite`. */
   ligarElites(g: GanchosElite): void {
     this.ganchos = g;

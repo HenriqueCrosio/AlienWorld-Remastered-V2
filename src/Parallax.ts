@@ -151,6 +151,12 @@ export class Parallax {
    */
   private foregroundDim = 1;
   /**
+   * O PRIMEIRO PLANO ATENUADO com ELITE em cena (frente B, 05/10, ele: *"atenue o primeiro plano quando tiver elite"*):
+   * as silhuetas de asteroide que passam na frente tapavam o drone na rocha justo na apresentação dele. Atenuado, não
+   * apagado — a fase segue tendo profundidade. Separado do `foregroundDim` (o do chefão), e os dois multiplicam.
+   */
+  private foregroundElite = 1;
+  /**
    * Multiplicador de alpha de TODAS as camadas de peças (1 = fase, 0 = arena do chefão). Ver
    * `limpaCenario`. Guardado pelo mesmo motivo do `foregroundDim`: a camada recicla.
    */
@@ -1723,6 +1729,15 @@ export class Parallax {
     this.moon.setVisible(v);
   }
 
+  /** Atenua (ou devolve) o primeiro plano enquanto há um ELITE em cena — ver `foregroundElite`. */
+  setForegroundElite(atenuado: boolean, durationMs = 600): void {
+    this.foregroundElite = atenuado ? 0.25 : 1;
+    for (const layer of this.layers) {
+      if (!layer.primeiroPlano || layer.sprites.length === 0) continue;
+      this.scene.tweens.add({ targets: layer.sprites.slice(), alpha: this.alphaFor(layer), duration: durationMs, ease: 'Quad.easeOut' });
+    }
+  }
+
   setForegroundDimmed(dimmed: boolean, durationMs = 1500): void {
     this.foregroundDim = dimmed ? 0 : 1;
 
@@ -1786,7 +1801,7 @@ export class Parallax {
    */
   private alphaFor(layer: ScatterLayer): number {
     let a = layer.alpha * this.cenarioDim;
-    if (layer.primeiroPlano) a *= this.foregroundDim;
+    if (layer.primeiroPlano) a *= this.foregroundDim * this.foregroundElite;
     if (layer.nebulosaExtra) a *= this.nebulaDim;
     if (layer.casco) a *= this.cascoReveal;
     return a;

@@ -101,6 +101,8 @@ export class GameScene extends Phaser.Scene {
   private boss: StageBoss | null = null;
   /** O mini-chefão da câmara B da Fase 4 (spec 2026-09-11). `null` fora da arena dele. */
   private golfinho: Golfinho | null = null;
+  /** Há elite em cena (o primeiro plano está atenuado)? Zerado no `create` — a instância da cena é reaproveitada. */
+  private eliteEmCena = false;
   /** A água da arena do golfinho. Existe em toda fase; só a Fase 4 manda encher. */
   private agua!: Agua;
   /** O `t` que o relógio da fase não passa enquanto o golfinho viver (`seguraEm` do roteiro). */
@@ -258,6 +260,7 @@ export class GameScene extends Phaser.Scene {
     /** Total acumulado das fases anteriores (a campanha soma; a fase começa do checkpoint). */
     score?: number;
   }): void {
+    this.eliteEmCena = false;
     // Fase desconhecida cai na 1: um link velho ou um `scene.start` errado não pode
     // derrubar o jogo numa tela preta.
     this.stage = STAGES[data.stage ?? 1] ?? STAGES[1];
@@ -823,6 +826,12 @@ export class GameScene extends Phaser.Scene {
     // A mina sensora precisa saber ONDE o jogador está: é a proximidade dele que a acorda.
     this.debris.update(dt, this.ship);
     this.enemies.update(dt, this.ship);
+    // Com ELITE em cena, o primeiro plano atenua (frente B): as silhuetas que passam na frente tapavam o elite.
+    const elite = this.enemies.temElite();
+    if (elite !== this.eliteEmCena) {
+      this.eliteEmCena = elite;
+      this.parallax.setForegroundElite(elite);
+    }
     this.pickups.update();
     this.boss?.update(dt, this.ship);
     this.golfinho?.update(dt, this.ship);
