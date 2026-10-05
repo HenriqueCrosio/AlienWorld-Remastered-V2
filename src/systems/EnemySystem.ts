@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Fx } from './Fx';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
+import { PadroesDeTiro } from './PadroesDeTiro';
 
 export type EnemyKind =
   | 'drone'
@@ -236,6 +237,9 @@ export class EnemySystem {
    */
   private readonly muzzleFlash: Phaser.GameObjects.Particles.ParticleEmitter;
 
+  /** Os padrões de tiro (mirado/leque/anel) sobre a piscina acima — os elites e a aranha atiram por aqui. */
+  readonly tiros: PadroesDeTiro;
+
   constructor(
     private readonly scene: Phaser.Scene,
     /** A FASE atual (`GameScene.stage.id`) — só usada para a pele por fase (ver `STAGE_2_SKIN`). */
@@ -265,6 +269,7 @@ export class EnemySystem {
         emitting: false,
       })
       .setDepth(40);
+    this.tiros = new PadroesDeTiro(this.enemyBullets, this.muzzleFlash);
   }
 
   /** `x` só é passado quando um inimigo PARE outro (o cargueiro cospe drones de dentro de si). */
@@ -699,22 +704,11 @@ export class EnemySystem {
       if (this.scene.anims.exists('aranha-walk')) e.play('aranha-walk');
 
       // O ANEL da aterrissagem: 6 tiros radiais. É o novo combo — o pulo não é fuga, é área.
-      for (let i = 0; i < 6; i++) {
-        const ang = (i / 6) * Math.PI * 2 + Math.PI / 12;
-        const b = this.enemyBullets.get(e.x, e.y - 6) as Phaser.Physics.Arcade.Sprite | null;
-        if (!b) break;
-        b.setActive(true).setVisible(true);
-        b.body!.enable = true;
-        // A MESMA munição de cobre do leque dela (ver `municaoAranha`). O anel de aterrissagem é
-        // o segundo caminho de tiro da aranha, e os dois têm que cuspir a MESMA coisa — foi um
-        // par de caminhos com a mesma cópia de linhas que já fez a água-viva morrer em fogo por
-        // uma porta e em choque pela outra.
-        EnemySystem.municaoAranha(b);
-        b.setData('ox', e.x);
-        b.setData('oy', e.y);
-        b.setVelocity(Math.cos(ang) * 105, Math.sin(ang) * 105);
-        b.setRotation(ang);
-      }
+      // A MESMA munição de cobre do leque dela (ver `municaoAranha`). O anel de aterrissagem é o
+      // segundo caminho de tiro da aranha, e os dois têm que cuspir a MESMA coisa — foi um par de
+      // caminhos com a mesma cópia de linhas que já fez a água-viva morrer em fogo por uma porta e
+      // em choque pela outra. O clarão sai nos PÉS (o padrão o daria no centro do anel).
+      this.tiros.anel(e.x, e.y - 6, 6, 105, Math.PI / 12, (b) => EnemySystem.municaoAranha(b), false);
       this.muzzleFlash.explode(8, e.x, e.y + 16);
       this.scene.cameras.main.shake(110, 0.005);
     }
