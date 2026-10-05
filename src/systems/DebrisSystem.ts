@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import { pickVariant } from '../art';
+import { ELITES } from '../data/numerosElites';
 
-export type HazardKind = 'asteroid' | 'destroco' | 'mina' | 'sensor';
+export type HazardKind = 'asteroid' | 'destroco' | 'mina' | 'sensor' | 'mineravel';
 
 /**
  * O SENSOR DE PROXIMIDADE — o que faltava na Fase 2.
@@ -98,6 +99,11 @@ const HAZARDS: Record<HazardKind, HazardDef> = {
     drift: 3,
     sensor: { radius: 46, fuse: 0.7, shards: 8, shardSpeed: 105 },
   },
+
+  // O ASTEROIDE MINERÁVEL (frente B §3.1): a rocha do Drone de Mineração. Só nasce COM o drone (`spawnEm`, nunca no
+  // `mix` do roteiro), não gira nem deriva na vertical — o drone está encaixado nela — e não espelha: o cristal e o
+  // encaixe ficam à esquerda.
+  mineravel: { texture: 'eliteRocha', hp: ELITES.rocha.hp, score: ELITES.rocha.score, scale: [1, 1], spin: [0, 0], drift: 0 },
 };
 
 /** Raio (px) em que a mina fere ao explodir. Generoso o bastante para ENSINAR, não para punir. */
@@ -144,14 +150,16 @@ export class DebrisSystem {
   }
 
   spawn(kind: HazardKind): void {
-    const def = HAZARDS[kind];
-
     // Nasce em qualquer altura: é o vácuo, não há linha do chão a respeitar.
     // A faixa evita o HUD no topo e a borda de baixo.
-    const y = Phaser.Math.Between(30, GAME_HEIGHT - 24);
+    this.spawnEm(kind, GAME_WIDTH + 40, Phaser.Math.Between(30, GAME_HEIGHT - 24));
+  }
 
+  /** Um destroço num ponto dado — o roteiro sorteia a altura (`spawn`); o drone de mineração pede a rocha dele aqui. */
+  spawnEm(kind: HazardKind, x: number, y: number): Phaser.Physics.Arcade.Sprite {
+    const def = HAZARDS[kind];
     const texture = pickVariant(this.scene, def.texture);
-    const h = this.hazards.create(GAME_WIDTH + 40, y, texture) as Phaser.Physics.Arcade.Sprite;
+    const h = this.hazards.create(x, y, texture) as Phaser.Physics.Arcade.Sprite;
 
     // A animação SÓ toca na variante BASE. Numa variante ela trocaria a textura pelos quadros da
     // base — e a segunda mina sensora viraria a primeira no primeiro frame (é a mesma armadilha
@@ -168,8 +176,8 @@ export class DebrisSystem {
     h.setData('score', def.score);
 
     h.setScale(Phaser.Math.FloatBetween(...def.scale));
-    // Espelhar metade dobra a variedade de graça.
-    h.setFlipX(Math.random() < 0.5);
+    // Espelhar metade dobra a variedade de graça (menos a rocha minerável: o encaixe do drone é à esquerda).
+    if (kind !== 'mineravel') h.setFlipX(Math.random() < 0.5);
 
     const body = h.body as Phaser.Physics.Arcade.Body;
     // Hitbox derivada da arte e um pouco justa: no vácuo o jogador passa RENTE aos destroços,
@@ -190,6 +198,7 @@ export class DebrisSystem {
 
     // -1 = adormecida. O pavio só passa a contar quando o jogador chega perto.
     if (def.sensor) h.setData('fuse', -1);
+    return h;
   }
 
   /** A mina explode ao morrer — quem estiver perto leva junto. */

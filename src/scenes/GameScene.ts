@@ -359,7 +359,7 @@ export class GameScene extends Phaser.Scene {
     // Os ELITES (frente B): a rocha do drone nasce no DebrisSystem (herda tiro, bomba e colisão) e a explosão dele
     // fere como a da mina.
     this.enemies.ligarElites({
-      criarRocha: () => null,
+      criarRocha: (x, y) => this.debris.spawnEm('mineravel', x, y),
       explodir: (x, y, raio) => {
         this.fx.explode(x, y, 1.8);
         this.cameras.main.shake(120, 0.006);
