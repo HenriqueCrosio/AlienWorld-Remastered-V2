@@ -6,7 +6,7 @@ import type { Nave, Niveis } from './arvore.ts';
  */
 
 /** Os inimigos que o sandbox solta (o `EnemyKind` do jogo; a aranha é minichefe: 0 ou 1). */
-export const INIMIGOS = ['drone', 'batedor', 'canhoneira', 'kamikaze', 'cargueiro', 'aguaViva', 'aranha'] as const;
+export const INIMIGOS = ['drone', 'batedor', 'canhoneira', 'kamikaze', 'cargueiro', 'aguaViva', 'droneMineracao', 'sentinela', 'aranha'] as const;
 export type TipoInimigo = (typeof INIMIGOS)[number];
 export const NOME_INIMIGO: Record<TipoInimigo, string> = {
   drone: 'drone',
@@ -15,6 +15,8 @@ export const NOME_INIMIGO: Record<TipoInimigo, string> = {
   kamikaze: 'kamikaze',
   cargueiro: 'cargueiro',
   aguaViva: 'água-viva',
+  droneMineracao: 'drone de mineração (elite)',
+  sentinela: 'sentinela orbital (elite)',
   aranha: 'aranha (minichefe)',
 };
 export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
@@ -24,6 +26,8 @@ export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
   kamikaze: 20,
   cargueiro: 20,
   aguaViva: 20,
+  droneMineracao: 5,
+  sentinela: 5,
   aranha: 1,
 };
 /** Os tiers que cada linhagem tem (`ships.ts`). */
@@ -49,7 +53,7 @@ export const PADRAO: ConfigSandbox = {
   livre: false,
   fase: 2,
   chefe: false,
-  inimigos: { drone: 6, batedor: 0, canhoneira: 2, kamikaze: 2, cargueiro: 0, aguaViva: 0, aranha: 0 },
+  inimigos: { drone: 6, batedor: 0, canhoneira: 2, kamikaze: 2, cargueiro: 0, aguaViva: 0, droneMineracao: 0, sentinela: 0, aranha: 0 },
   intervalo: 8,
   repetir: true,
 };

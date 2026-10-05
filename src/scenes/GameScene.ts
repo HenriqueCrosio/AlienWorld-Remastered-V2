@@ -356,6 +356,17 @@ export class GameScene extends Phaser.Scene {
       this.fx.explode(x, y, 1.6),
     );
 
+    // Os ELITES (frente B): a rocha do drone nasce no DebrisSystem (herda tiro, bomba e colisão) e a explosão dele
+    // fere como a da mina.
+    this.enemies.ligarElites({
+      criarRocha: () => null,
+      explodir: (x, y, raio) => {
+        this.fx.explode(x, y, 1.8);
+        this.cameras.main.shake(120, 0.006);
+        if (Phaser.Math.Distance.Between(x, y, this.ship.x, this.ship.y) <= raio) this.damageShip();
+      },
+    });
+
     this.director = new StageDirector(this.stage.script);
 
     // TREINO: salta o relógio para 1s antes do chefão. Tudo o que viria antes é

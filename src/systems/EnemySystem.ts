@@ -3,6 +3,9 @@ import { Fx } from './Fx';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
 import { PadroesDeTiro } from './PadroesDeTiro';
+import { ELITES } from '../data/numerosElites';
+import type { ComportamentoElite, CtxElite, GanchosElite } from '../entities/elites/tipos';
+import { criarTexturasElites } from '../entities/elites/texturasProvisorias';
 
 export type EnemyKind =
   | 'drone'
@@ -11,7 +14,10 @@ export type EnemyKind =
   | 'kamikaze'
   | 'cargueiro'
   | 'aranha'
-  | 'aguaViva';
+  | 'aguaViva'
+  // Os ELITES da frente B (spec 2026-10-05-frente-b-elites-design.md).
+  | 'droneMineracao'
+  | 'sentinela';
 
 interface EnemyDef {
   texture: string;
@@ -43,7 +49,7 @@ interface EnemyDef {
    */
   travessia?: 'vertical';
   /** O ELITE (frente B): a máquina de estados que assume o voo e o tiro (ver `entities/elites`). */
-  elite?: { bloqueia?(e: Phaser.Physics.Arcade.Sprite, deX: number, deY: number): boolean };
+  elite?: ComportamentoElite;
 }
 
 /**
@@ -165,6 +171,10 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // `wave` é a gingada lateral. 264px de travessia a 34px/s = ~7,8s no quadro — tempo de sobra
   // para atirar ou desviar, que é o que a mudança comprou.
   aguaViva: { texture: 'aguaViva', anim: 'aguaviva-drift', hp: 10, speed: 34, wave: 26, fireRate: 0, score: 120, scale: 0.6, tint: 0xffffff, homing: 0, spawnRate: 0, travessia: 'vertical' },
+  // OS ELITES (frente B, spec 2026-10-05): a máquina de estados mora em `entities/elites`; `speed`/`fireRate` 0
+  // porque quem anda e atira é ela.
+  droneMineracao: { texture: 'eliteDrone', hp: ELITES.drone.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.drone.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0 },
+  sentinela: { texture: 'eliteSentinelaRoda', hp: ELITES.sentinela.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.sentinela.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0 },
 };
 
 /**
@@ -242,6 +252,11 @@ export class EnemySystem {
   /** Os padrões de tiro (mirado/leque/anel) sobre a piscina acima — os elites e a aranha atiram por aqui. */
   readonly tiros: PadroesDeTiro;
 
+  /** As portas dos elites para fora (a rocha do drone, a explosão inimiga) — a cena liga em `ligarElites`. */
+  private ganchos: GanchosElite = { criarRocha: () => null, explodir: () => {} };
+  /** A nave, guardada no `update` — o `iniciar` de um elite nasce no `spawn`, que não a recebe. */
+  private alvo: Phaser.Physics.Arcade.Sprite | null = null;
+
   constructor(
     private readonly scene: Phaser.Scene,
     /** A FASE atual (`GameScene.stage.id`) — só usada para a pele por fase (ver `STAGE_2_SKIN`). */
@@ -272,6 +287,16 @@ export class EnemySystem {
       })
       .setDepth(40);
     this.tiros = new PadroesDeTiro(this.enemyBullets, this.muzzleFlash);
+    criarTexturasElites(scene);
+  }
+
+  /** A cena liga as portas dos elites (a rocha do drone, a explosão inimiga) — ver `GanchosElite`. */
+  ligarElites(g: GanchosElite): void {
+    this.ganchos = g;
+  }
+
+  private ctxElite(alvo: Phaser.Physics.Arcade.Sprite): CtxElite {
+    return { scene: this.scene, alvo, tiros: this.tiros, ganchos: this.ganchos };
   }
 
   /** `x` só é passado quando um inimigo PARE outro (o cargueiro cospe drones de dentro de si). */
@@ -430,6 +455,10 @@ export class EnemySystem {
       // aqui — quem sabe que morreu é o morto.
       e.once('destroy', () => pulso.remove());
     }
+
+    // O ELITE monta o próprio estado (e o drone, a rocha dele). Antes do 1º `update` não há nave guardada — o
+    // `iniciar` não mira ninguém, então o próprio sprite serve de alvo nesse instante.
+    if (def.elite) def.elite.iniciar(e, this.ctxElite(this.alvo ?? e));
   }
 
   /**
@@ -466,6 +495,7 @@ export class EnemySystem {
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
+    this.alvo = target;
     // SNAPSHOT do grupo. `getChildren()` devolve o array vivo: o cargueiro ACRESCENTA a ele
     // (cospe drones) e o culling REMOVE dele, os dois no meio da iteração. Percorrer o array
     // vivo enquanto ele muda de tamanho pula elementos — um inimigo perderia um frame de update
@@ -499,6 +529,14 @@ export class EnemySystem {
         e.setData('travadoAte', 0);
         const v = e.getData('velAntes') as { x: number; y: number } | undefined;
         if (v) body.setVelocity(v.x, v.y);
+      }
+
+      // O ELITE assume tudo (voo, tiro): nada do róster comum roda nele. O culling é largo nas quatro bordas — a
+      // sentinela sai rolando, o drone persegue para trás da nave.
+      if (def.elite) {
+        def.elite.atualizar(e, dt, this.ctxElite(target));
+        if (e.active && (e.x < -60 || e.x > GAME_WIDTH + 90 || e.y < -60 || e.y > GAME_HEIGHT + 60)) e.destroy();
+        continue;
       }
 
       if (def.travessia === 'vertical') {
