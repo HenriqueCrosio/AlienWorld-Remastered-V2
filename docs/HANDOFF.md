@@ -15,8 +15,8 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 ### A frase de arranque da próxima sessão
 
 > **"Leia o 🧭 do `docs/HANDOFF.md`, a spec `specs/2026-10-05-frente-b-elites-design.md` e o plano
-> `plans/2026-10-05-frente-b-fatia-f2.md`. A fatia F2 dos elites está jogável com arte provisória; falta ele escolher a
-> arte na folha `folhas/2026-10-05/elites/elites-f2-em-jogo.png` (Task 10) e jogar a F1 e a F2."**
+> `plans/2026-10-05-frente-b-fatia-f2.md`. A fatia F2 dos elites está jogável COM A ARTE DELE e animada; falta ele
+> julgar os GIFs (`folhas/2026-10-05/elites/*.gif`) e jogar o sandbox, a F1 e a F2."**
 >
 > 📍 **05/10 — O PONTO MARCADO (o mais recente): a FRENTE B começou — a fatia F2 dos ELITES está jogável.**
 > Brainstorming com as duas folhas de conceito dele (na raiz: `concept art Inimigos.png` e `concept art de Inimigos
@@ -31,8 +31,10 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > UM caminho** (`GameScene.ferirInimigo` — tiro, bomba e cartas perguntam ao escudo), a base de elite
 > (`src/entities/elites/`), o asteroide minerável, os dois elites, o sandbox (eles entram na montagem; as medidas contam
 > os BLOQUEIOS), a sonda `probe-elites` e o roteiro: a F2 vai a ~97s (drone 13s, sentinela 64s, os dois no ENXAME) e a
-> F1 ganhou volume. **Pendente:** ele escolher a arte (drone A–D, rocha A–D, sentinela aberta A–D, roda R1–R4 — a
-> rocha é do PixelLab com o conceito DELE como referência) → Task 10 (instalar + animar + escudo à mão) → ele jogar.
+> F1 ganhou volume. **A ARTE (Task 10, escolhas dele):** drone C (reduzido a 70%), rocha D regerada maior (80×71) com
+> a pedra ESCURECIDA por script (`_elites/_tratar.mjs`), o drone trabalhando DENTRO da cratera (o rabisco dele — a rocha
+> deixa passar o tiro na faixa do drone, senão a janela de matar antes sumia), sentinela roda R3 + aberta A, o escudo
+> desenhado à mão; animações PixMiniMax (minerar, alerta, voo, abrir/fechar). **Pendente:** ele julgar os GIFs e jogar.
 > **Rebalanceamento:** o elétrico desfazer o escudo (ADIADO por ele). As sondas `probe-stage2` (a nave parada morre aos
 > 37s) e `probe-chain` (o chefão da F1 fica vivo) já falhavam em 04/10 — conferido na linha de base, não é da frente B.
 >
