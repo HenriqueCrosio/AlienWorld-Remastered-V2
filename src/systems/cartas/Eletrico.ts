@@ -80,7 +80,7 @@ export class Eletrico {
     const { x, y } = e;
     this.c.h.fx.choque(x, y, 0.8);
     this.c.depois(() => {
-      for (const o of this.c.noRaio(x, y, PULSO.raio)) if (o !== e) this.c.ferir(o, PULSO.dano, 'pulso');
+      for (const o of this.c.noRaio(x, y, PULSO.raio)) if (o !== e) this.c.ferir(o, PULSO.dano, 'pulso', { x, y });
     });
   }
 

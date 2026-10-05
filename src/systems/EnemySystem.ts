@@ -42,6 +42,8 @@ interface EnemyDef {
    * contrário do padrão). Ver `spawn` e o culling em `update`.
    */
   travessia?: 'vertical';
+  /** O ELITE (frente B): a máquina de estados que assume o voo e o tiro (ver `entities/elites`). */
+  elite?: { bloqueia?(e: Phaser.Physics.Arcade.Sprite, deX: number, deY: number): boolean };
 }
 
 /**
@@ -452,6 +454,15 @@ export class EnemySystem {
    */
   empurrar(e: Phaser.Physics.Arcade.Sprite, dx: number): void {
     e.setData('tranco', ((e.getData('tranco') as number | undefined) ?? 0) + dx);
+  }
+
+  /**
+   * O golpe que veio de (deX, deY) é BLOQUEADO? (o escudo da Sentinela, spec frente B §2.2). Quem fere inimigo
+   * pergunta aqui antes — `GameScene.ferirInimigo`, o caminho único do tiro, da bomba e das cartas.
+   */
+  bloqueia(e: Phaser.Physics.Arcade.Sprite, deX: number, deY: number): boolean {
+    const def = DEFS[e.getData('kind') as EnemyKind];
+    return def?.elite?.bloqueia?.(e, deX, deY) ?? false;
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {

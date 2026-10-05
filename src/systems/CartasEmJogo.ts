@@ -76,7 +76,7 @@ export class CartasEmJogo {
       h,
       tem: (id) => tem(this.reg, id),
       quantas: (id) => quantas(this.reg, id),
-      ferir: (e, dano, fonte) => this.ferir(e, dano, fonte),
+      ferir: (e, dano, fonte, de) => this.ferir(e, dano, fonte, de),
       incendiar: (e) => this.incendiar(e),
       estados: this.estados,
       noRaio: (x, y, raio) =>
@@ -312,12 +312,9 @@ export class CartasEmJogo {
     if (this.estados.tingeQueima) e.setTint(COR_QUEIMANDO);
   }
 
-  private ferir(e: Inimigo, dano: number, fonte: string): void {
+  /** Pelo caminho único da cena (o bloqueio, a vida, as medidas e a morte) — ver `HostCartas.ferir`. */
+  private ferir(e: Inimigo, dano: number, fonte: string, de?: { x: number; y: number }): void {
     if (!e.active) return;
-    const antes = e.getData('hp') as number;
-    const hp = antes - dano;
-    this.h.medir?.(fonte, Math.min(dano, Math.max(0, antes)));
-    e.setData('hp', hp);
-    if (hp <= 0) this.h.matar(e);
+    this.h.ferir(e, dano, fonte, de);
   }
 }

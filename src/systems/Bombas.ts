@@ -15,7 +15,8 @@ export interface HostBombas {
   construcoes(): Corpo[];
   /** Os alvos do chefão vivo (`targets` ou o `sprite`); vazio sem chefão. */
   alvosDoChefe(): Corpo[];
-  ferirInimigo(e: Corpo, dano: number): void;
+  /** `de` = o ponto da explosão (o escudo de um elite decide por ele). */
+  ferirInimigo(e: Corpo, dano: number, de?: { x: number; y: number }): void;
   ferirConstrucao(p: Corpo, dano: number): void;
   ferirChefe(dano: number): void;
   ferirGolfinho(x: number, y: number, raio: number, dano: number): void;
@@ -114,7 +115,7 @@ export class Bombas {
       return (px - x) ** 2 + (py - y) ** 2 <= raio * raio;
     };
     // Snapshot: ferir MATA, e matar tira do grupo no meio do laço.
-    for (const e of [...this.h.inimigos()]) if (noRaio(e)) this.h.ferirInimigo(e, BOMBA.dano);
+    for (const e of [...this.h.inimigos()]) if (noRaio(e)) this.h.ferirInimigo(e, BOMBA.dano, { x, y });
     for (const p of [...this.h.construcoes()]) if (noRaio(p)) this.h.ferirConstrucao(p, BOMBA.dano);
     // O chefão leva UMA vez por explosão, mesmo com várias partes no raio.
     if (this.h.alvosDoChefe().some(noRaio)) this.h.ferirChefe(BOMBA.dano);

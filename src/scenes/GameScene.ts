@@ -443,6 +443,10 @@ export class GameScene extends Phaser.Scene {
       alvos: () => this.homingTargets(),
       nave: () => this.ship,
       matar: (e) => this.matarInimigo(e),
+      // O dano das cartas pelo caminho único (com o bloqueio), sem o pisca do tiro.
+      ferir: (e, dano, fonte, de) => {
+        this.ferirInimigo(e, dano, fonte, de, false);
+      },
       travar: (e, ms) => this.enemies.travar(e, ms),
       empurrar: (e, dx) => this.enemies.empurrar(e, dx),
       baseDaNave: nave.weapon,
@@ -472,7 +476,9 @@ export class GameScene extends Phaser.Scene {
           (p) => p.active && TerrainSystem.solido(p),
         ),
       alvosDoChefe: () => (this.boss && !this.boss.isDead ? (this.boss.targets ?? [this.boss.sprite]) : []),
-      ferirInimigo: (e, dano) => this.ferirInimigo(e, dano),
+      ferirInimigo: (e, dano, de) => {
+        this.ferirInimigo(e, dano, 'bomba', de);
+      },
       ferirConstrucao: (p, dano) => this.ferirConstrucao(p, dano),
       ferirChefe: (dano) => {
         if (!this.boss || this.boss.isDead) return;
@@ -2203,6 +2209,11 @@ export class GameScene extends Phaser.Scene {
     // Quem soltou e para onde ia: lido ANTES de o projétil voltar ao pool.
     const origem = bullet.getData('origem') as OrigemProjetil | null;
     const angulo = bullet.rotation;
+    // De onde o tiro VEIO: um pouco atrás dele, no rumo do voo (o escudo decide por aqui) — lido antes do `release`,
+    // que zera a velocidade.
+    const v = (bullet.body as Phaser.Physics.Arcade.Body).velocity;
+    const n = Math.hypot(v.x, v.y) || 1;
+    const de = { x: bullet.x - (v.x / n) * 16, y: bullet.y - (v.y / n) * 16 };
 
     // PERFURANTE: o projétil segue vivo, mas cada inimigo paga só 1× por projétil — sem o Set,
     // o overlap cobraria o mesmo inimigo todo frame e o dano 2 viraria dano infinito.
@@ -2221,24 +2232,14 @@ export class GameScene extends Phaser.Scene {
     }
     this.fx.hit(bullet.x, bullet.y);
 
-    const antes = enemy.getData('hp') as number;
-    const hp = antes - (bullet.getData('damage') as number) * fator;
-    this.medidas?.dano(origem ?? 'tiro', Math.min(antes - hp, Math.max(0, antes)));
-    enemy.setData('hp', hp);
-
     const bx = bullet.x;
     const by = bullet.y;
-    if (hp > 0) {
-      enemy.setTint(0xffb0b0);
-      // Restaura o tint do TIPO: o inimigo já era tingido antes do flash.
-      this.time.delayedCall(40, () => {
-        if (enemy.active) enemy.setTint(enemy.getData('tint') as number);
-      });
-      this.cartas.aoAcertar(bx, by, enemy, origem, angulo);
+    const r = this.ferirInimigo(enemy, (bullet.getData('damage') as number) * fator, origem ?? 'tiro', de);
+    // Bloqueado: o projétil morre no escudo (até o perfurante) e nenhuma carta dispara no acerto.
+    if (r === 'bloqueado') {
+      if (bullet.active) this.weapons.release(bullet);
       return;
     }
-
-    this.matarInimigo(enemy);
     this.cartas.aoAcertar(bx, by, enemy, origem, angulo);
   }
 
@@ -2321,29 +2322,48 @@ export class GameScene extends Phaser.Scene {
     for (const e of [
       ...this.enemies.enemies.getChildren(),
     ] as Phaser.Physics.Arcade.Sprite[]) {
-      this.ferirInimigo(e, 12);
+      this.ferirInimigo(e, 12, 'bomba', { x: this.ship.x, y: this.ship.y });
     }
 
     if (this.boss && !this.boss.isDead && this.boss.damage(12)) this.killBoss();
     if (this.golfinho?.vulneravel && this.golfinho.damage(12)) this.matarGolfinho();
   }
 
-  /** O dano de BOMBA num inimigo (as duas bombas): mata ou pisca, e conta nas medidas do sandbox. */
-  private ferirInimigo(e: Phaser.Physics.Arcade.Sprite, dano: number): void {
-    if (!e.active) return;
+  /**
+   * O DANO EM INIMIGO — UM caminho (spec frente B §2.2): o tiro, as bombas e as cartas passam por aqui. Primeiro
+   * pergunta se o golpe é BLOQUEADO (o escudo da Sentinela, pela direção de onde ele veio — `de`; sem `de`, como a
+   * queima, não há o que bloquear). Depois tira a vida, conta nas medidas, pisca (as cartas não piscam) e mata pelo
+   * `matarInimigo`. Antes eram três cópias, e um escudo que só uma delas consultasse seguraria o tiro e deixaria o
+   * míssil passar.
+   */
+  private ferirInimigo(
+    e: Phaser.Physics.Arcade.Sprite,
+    dano: number,
+    fonte: string,
+    de?: { x: number; y: number },
+    piscar = true,
+  ): 'bloqueado' | 'vivo' | 'morto' {
+    if (!e.active) return 'morto';
+    if (de && this.enemies.bloqueia(e, de.x, de.y)) {
+      this.medidas?.dano(`${fonte} (bloqueado)`, 0);
+      return 'bloqueado';
+    }
     const antes = e.getData('hp') as number;
     const hp = antes - dano;
-    this.medidas?.dano('bomba', Math.min(dano, Math.max(0, antes)));
+    this.medidas?.dano(fonte, Math.min(dano, Math.max(0, antes)));
     e.setData('hp', hp);
-
     if (hp <= 0) {
       this.matarInimigo(e);
-    } else {
+      return 'morto';
+    }
+    if (piscar) {
       e.setTint(0xffb0b0);
-      this.time.delayedCall(60, () => {
+      // Restaura o tint do TIPO: o inimigo já era tingido antes do flash.
+      this.time.delayedCall(40, () => {
         if (e.active) e.setTint(e.getData('tint') as number);
       });
     }
+    return 'vivo';
   }
 
   /**

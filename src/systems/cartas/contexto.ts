@@ -19,6 +19,11 @@ export interface HostCartas {
   alvos: () => Phaser.Physics.Arcade.Sprite[];
   nave: () => Phaser.Physics.Arcade.Sprite;
   matar: (e: Inimigo) => void;
+  /**
+   * O dano pelo caminho único da cena (`GameScene.ferirInimigo`): o bloqueio (o escudo dos elites), a vida, as medidas
+   * e a morte. `de` = de onde o golpe veio; sem ele (a queima, o choque que já passou pelo tiro), não há bloqueio.
+   */
+  ferir: (e: Inimigo, dano: number, fonte: string, de?: { x: number; y: number }) => void;
   /** Congela o inimigo por `ms` (`EnemySystem.travar`). */
   travar: (e: Inimigo, ms: number) => void;
   /** Empurra o inimigo `dx` px (o tranco do Tiro Pesado — `EnemySystem.empurrar`). */
@@ -42,7 +47,7 @@ export interface Contexto {
   tem: (id: string) => boolean;
   quantas: (id: string) => number;
   /** Tira vida; zerou, mata pelo caminho único da cena (`matarInimigo`). `fonte` é para as medidas do sandbox. */
-  ferir: (e: Inimigo, dano: number, fonte: string) => void;
+  ferir: (e: Inimigo, dano: number, fonte: string, de?: { x: number; y: number }) => void;
   incendiar: (e: Inimigo) => void;
   /** Os estados (eletrificado, queimando) desenhados por cima do inimigo — e se ainda TINGEM (sem a arte). */
   estados: EstadosNoInimigo;

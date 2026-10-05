@@ -77,7 +77,7 @@ export class ExplosaoDoJogador {
       for (const e of this.c.noRaio(x, y, raio)) {
         // EM CADEIA incendeia TODO mundo no raio — inclusive quem levou o tiro.
         if (this.c.tem('EFF_007')) this.c.incendiar(e);
-        if (e !== exceto) this.c.ferir(e, base.dano, `explosão (${fonte})`);
+        if (e !== exceto) this.c.ferir(e, base.dano, `explosão (${fonte})`, { x, y });
       }
       if (this.c.tem('EFF_003')) this.estilhacos(x, y, angulo);
     });
