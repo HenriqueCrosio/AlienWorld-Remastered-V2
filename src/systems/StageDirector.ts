@@ -167,15 +167,18 @@ export const STAGE_1: StageEvent[] = [
   { t: 1, type: 'terrain', rate: 2.0, mix: ['spire'] },
 
   // Só picos e drones: o jogador aprende a voar e atirar ao mesmo tempo.
-  { t: 4, type: 'wave', kind: 'drone', count: 4, spacing: 0.45, y: 70 },
-  { t: 8, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 120 },
+  // ONDAS MAIORES (frente B, 05/10): a F1 não ganha elite (é a fase do flap) — ganha VOLUME de drone e batedor. As
+  // canhoneiras seguem 2 (playtest de 14/07). Números para ele calibrar jogando.
+  { t: 4, type: 'wave', kind: 'drone', count: 5, spacing: 0.45, y: 70 },
+  { t: 8, type: 'wave', kind: 'drone', count: 5, spacing: 0.4, y: 120 },
 
   // A COLÔNIA aparece: construções, silos, antenas e destroços entram no relevo.
   // A mistura é o que faz a superfície parecer um lugar habitado (e morto), não um corredor.
   { t: 12, type: 'terrain', rate: 1.5, mix: ['spire', 'spire', 'building', 'silo', 'wreck'] },
-  { t: 13, type: 'wave', kind: 'batedor', count: 3, spacing: 0.5, y: 90 },
-  { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 50 },
-  { t: 18, type: 'wave', kind: 'batedor', count: 3, spacing: 0.5, y: 130 },
+  { t: 13, type: 'wave', kind: 'batedor', count: 4, spacing: 0.5, y: 90 },
+  { t: 17, type: 'wave', kind: 'drone', count: 6, spacing: 0.3, y: 50 },
+  { t: 18, type: 'wave', kind: 'batedor', count: 4, spacing: 0.5, y: 130 },
+  { t: 21, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 90 },
 
   // Torres de solo: agora o CHÃO atira em você. UMA torre a cada 4 props — o relevo
   // precisa ser majoritariamente rocha, senão não sobra cobertura para se esconder.
@@ -187,9 +190,11 @@ export const STAGE_1: StageEvent[] = [
   // Canhoneira: o primeiro inimigo aéreo que revida. Junto com torres no chão.
   { t: 35, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 80 },
   { t: 37, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 120 },
+  { t: 39, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 60 },
   // O coração da colônia: a BASE, grande e valiosa (250 pontos), entre torres.
   { t: 41, type: 'terrain', rate: 1.3, mix: ['spire', 'turret', 'base', 'building', 'spire', 'wreck'] },
   { t: 42, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 60 },
+  { t: 44, type: 'wave', kind: 'drone', count: 5, spacing: 0.25, y: 140 },
 
   // PICO DE PRESSÃO: fogo do chão e do ar ao mesmo tempo. O playtest confirmou que é o
   // melhor momento da fase — mantido intacto, só com rocha extra para dar cobertura.
@@ -200,9 +205,9 @@ export const STAGE_1: StageEvent[] = [
   // agora vem do VOLUME de batedores/drones, não do tiro mirado.
   { t: 48, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 60 },
   { t: 50, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 130 },
-  { t: 54, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 90 },
+  { t: 54, type: 'wave', kind: 'drone', count: 9, spacing: 0.2, y: 90 },
   { t: 57, type: 'wave', kind: 'drone', count: 6, spacing: 0.22, y: 130 },
-  { t: 58, type: 'wave', kind: 'batedor', count: 5, spacing: 0.25, y: 70 },
+  { t: 58, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 70 },
 
   // Silêncio. O vazio anuncia o boss melhor que qualquer aviso.
   { t: 63, type: 'terrain', rate: 0, mix: [] },
@@ -211,7 +216,7 @@ export const STAGE_1: StageEvent[] = [
 ];
 
 /**
- * FASE 2 — FROTA MORTA. Duração ~78s.
+ * FASE 2 — FROTA MORTA. Duração ~97s (era ~78s; a frente B, 05/10, somou os dois ELITES).
  *
  * O vácuo. Sem chão, sem gravidade: a condução é LIVRE, e é a primeira vez que o jogador
  * voa em 8 direções. A Fase 1 acabou de tirar o flap dele — esta fase é onde ele respira.
@@ -224,7 +229,8 @@ export const STAGE_1: StageEvent[] = [
  * LEVIATÃ crescendo ao fundo. É o que dá sentido a "aproximação" sem uma linha de diálogo.
  *
  * RITMO: asteroides desde o início (o obstáculo que se aprende a ATIRAR, não a desviar) →
- * destroços da sua própria frota → minas → kamikazes → cargueiro → Canhoneira-Capitânia.
+ * DRONE DE MINERAÇÃO (13s) → destroços da sua própria frota → minas → kamikazes → cargueiro →
+ * SENTINELA ORBITAL (64s) → enxame → Canhoneira-Capitânia.
  */
 export const STAGE_2: StageEvent[] = [
   { t: 0.5, type: 'banner', text: 'CINTURÃO DE DESTROÇOS · FROTA MORTA' },
@@ -235,12 +241,20 @@ export const STAGE_2: StageEvent[] = [
   { t: 5, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 80 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.4, y: 130 },
 
+  // ─── O DRONE DE MINERAÇÃO ENTRA AQUI, E SOZINHO (frente B, 05/10) ───
+  //
+  // No campo de asteroides da abertura, que é a casa dele: um asteroide minerável com o drone
+  // trabalhando. A primeira vez é sozinha — o jogador tem que ver a broca, ver ele ACORDAR e
+  // descobrir que atirar antes resolve. É a lição da mina sensora: apresentar antes de cobrar.
+  { t: 13, type: 'banner', text: 'SINAL DE MINERAÇÃO' },
+  { t: 13.5, type: 'wave', kind: 'droneMineracao', count: 1, spacing: 0, y: 100 },
+
   // A FROTA MORTA: os destroços são das SUAS naves. Indestrutíveis — massa de metal
   // morto que não se abate, só se contorna. É o cemitério, e ele tem que pesar.
-  { t: 13, type: 'banner', text: 'RESTOS DA 3ª FROTA' },
-  { t: 14, type: 'hazard', rate: 1.2, mix: ['asteroid', 'asteroid', 'destroco'] },
-  { t: 15, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
-  { t: 18, type: 'wave', kind: 'batedor', count: 5, spacing: 0.32, y: 110 },
+  { t: 19, type: 'banner', text: 'RESTOS DA 3ª FROTA' },
+  { t: 20, type: 'hazard', rate: 1.2, mix: ['asteroid', 'asteroid', 'destroco'] },
+  { t: 21, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
+  { t: 24, type: 'wave', kind: 'batedor', count: 5, spacing: 0.32, y: 110 },
 
   // ─── A MINA SENSORA ENTRA AQUI, E SOZINHA ───
   //
@@ -248,47 +262,60 @@ export const STAGE_2: StageEvent[] = [
   // num céu limpo, sem onda nenhuma competindo pela atenção. O jogador tem que poder chegar
   // perto, ver a coisa ACORDAR e piscar, e descobrir no susto que a resposta é o gatilho.
   // Ensinar uma mecânica no meio de um enxame não é dificuldade, é sonegação.
-  { t: 22, type: 'banner', text: 'CAMPO MINADO · SENSORES ATIVOS' },
-  { t: 23, type: 'hazard', rate: 2.0, mix: ['sensor', 'asteroid'] },
-  { t: 27, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 70 },
+  { t: 28, type: 'banner', text: 'CAMPO MINADO · SENSORES ATIVOS' },
+  { t: 29, type: 'hazard', rate: 2.0, mix: ['sensor', 'asteroid'] },
+  { t: 33, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 70 },
 
   // Agora ela é COBRADA: sensor + mina comum + destroço, com pressão aérea por cima. É aqui que
   // a fase deixa de ser "atire no que vem" e passa a exigir que o jogador LIMPE O CAMINHO À
   // FRENTE — que é exatamente o que faltava para ela pesar tanto quanto a Fase 1.
-  { t: 30, type: 'hazard', rate: 1.15, mix: ['asteroid', 'sensor', 'mina', 'destroco'] },
-  { t: 31, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 120 },
+  { t: 36, type: 'hazard', rate: 1.15, mix: ['asteroid', 'sensor', 'mina', 'destroco'] },
+  { t: 37, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 120 },
 
   // KAMIKAZE: acelera na sua direção. O primeiro inimigo que te CAÇA — e a resposta certa
   // é atirar, não desviar. Entra sozinho, para ser lido.
-  { t: 34, type: 'banner', text: 'CONTATO · INTERCEPTADORES' },
-  { t: 35, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.8, y: 90 },
-  { t: 39, type: 'hazard', rate: 1.2, mix: ['asteroid', 'destroco', 'sensor', 'mina'] },
-  { t: 40, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 60 },
-  { t: 42, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
+  { t: 40, type: 'banner', text: 'CONTATO · INTERCEPTADORES' },
+  { t: 41, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.8, y: 90 },
+  { t: 45, type: 'hazard', rate: 1.2, mix: ['asteroid', 'destroco', 'sensor', 'mina'] },
+  { t: 46, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 60 },
+  // O DRONE COBRADO (frente B): minerando no meio dos kamikazes — quem só desvia deixa ele acordar.
+  { t: 47, type: 'wave', kind: 'droneMineracao', count: 1, spacing: 0, y: 150 },
+  { t: 48, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
 
   // O CRUZAMENTO CRUEL: o kamikaze te empurra para trás, a mina sensora pune quem recua sem
   // olhar. Duas peças que, juntas, negam as duas saídas fáceis — e nenhuma delas é nova.
   // É o "fogo cruzado" da Fase 1 traduzido para um espaço sem chão.
-  { t: 46, type: 'banner', text: 'CARGUEIRO INIMIGO' },
-  { t: 47, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 80 },
-  { t: 50, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 120 },
-  { t: 52, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 55 },
+  { t: 52, type: 'banner', text: 'CARGUEIRO INIMIGO' },
+  { t: 53, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 80 },
+  { t: 56, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 120 },
+  { t: 58, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 55 },
+
+  // ─── A SENTINELA ORBITAL ENTRA AQUI, E SOZINHA (frente B, 05/10) ───
+  //
+  // Depois do cargueiro, num céu limpo de inimigos: ela rola, abre, ergue o escudo e atira. O
+  // jogador tem que ver o tiro dele MORRER no escudo e descobrir as duas saídas — flanquear ou
+  // esperar ela fechar. A deriva continua, só de rocha: o cinturão não para por ela.
+  { t: 63, type: 'hazard', rate: 1.6, mix: ['asteroid'] },
+  { t: 63.5, type: 'banner', text: 'SENTINELA ORBITAL' },
+  { t: 64, type: 'wave', kind: 'sentinela', count: 1, spacing: 0, y: 108 },
 
   // PICO DE PRESSÃO: o cinturão inteiro em cima do jogador. Sem chão para raspar e sem
   // rocha para se esconder — no vácuo a cobertura é o próprio destroço.
-  { t: 55, type: 'banner', text: 'ENXAME' },
-  { t: 55.5, type: 'hazard', rate: 0.85, mix: ['asteroid', 'destroco', 'sensor', 'mina'] },
-  { t: 56, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
-  { t: 58, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
-  { t: 61, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 60 },
-  { t: 63, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 140 },
-  { t: 65, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
-  { t: 66, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 120 },
+  { t: 76, type: 'banner', text: 'ENXAME' },
+  { t: 76.5, type: 'hazard', rate: 0.85, mix: ['asteroid', 'destroco', 'sensor', 'mina'] },
+  { t: 77, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
+  { t: 78, type: 'wave', kind: 'droneMineracao', count: 1, spacing: 0, y: 160 },
+  { t: 79, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
+  { t: 82, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 60 },
+  { t: 84, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 140 },
+  { t: 86, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
+  // A SENTINELA COBRADA no lugar da 2ª canhoneira (frente B §3.4).
+  { t: 87, type: 'wave', kind: 'sentinela', count: 1, spacing: 0, y: 120 },
 
   // Silêncio — o mesmo telégrafo da Fase 1. Funciona; não se conserta o que não quebrou.
-  { t: 70, type: 'hazard', rate: 0, mix: [] },
-  { t: 72, type: 'banner', text: 'ALERTA · CANHONEIRA-CAPITÂNIA' },
-  { t: 75, type: 'boss' },
+  { t: 92, type: 'hazard', rate: 0, mix: [] },
+  { t: 94, type: 'banner', text: 'ALERTA · CANHONEIRA-CAPITÂNIA' },
+  { t: 97, type: 'boss' },
 ];
 
 /**
