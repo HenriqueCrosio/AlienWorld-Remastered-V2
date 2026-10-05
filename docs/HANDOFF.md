@@ -14,10 +14,29 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-10-04-arquivo-tiros-retomada-START.md`. Tudo de 04/10 está
-> aprovado e empurrado; vamos começar a FRENTE B (inimigos que atiram + ondas maiores) por brainstorming."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`, a spec `specs/2026-10-05-frente-b-elites-design.md` e o plano
+> `plans/2026-10-05-frente-b-fatia-f2.md`. A fatia F2 dos elites está jogável com arte provisória; falta ele escolher a
+> arte na folha `folhas/2026-10-05/elites/elites-f2-em-jogo.png` (Task 10) e jogar a F1 e a F2."**
 >
-> 📍 **04/10 — O PONTO MARCADO (o mais recente): começar a FRENTE B.** Tudo da sessão está APROVADO, commitado e
+> 📍 **05/10 — O PONTO MARCADO (o mais recente): a FRENTE B começou — a fatia F2 dos ELITES está jogável.**
+> Brainstorming com as duas folhas de conceito dele (na raiz: `concept art Inimigos.png` e `concept art de Inimigos
+> Sci‑Fi.png`) → spec-mãe `specs/2026-10-05-frente-b-elites-design.md`: **2 ELITES por fase** (F2–F4; a F1, fase do
+> flap, só ganha ONDAS MAIORES), **mob elite NO FLUXO** (aparece 2–3×, a 1ª sozinho; nunca segura o relógio — *"o que
+> eu procuro são mais inimigos atirando contra"*). Elenco: F2 **Drone de Mineração** (minera num asteroide → acorda →
+> vem atirando → autodestrói; morto no pisca não explode) e **Sentinela Orbital** à la droideka (rola → abre com
+> ESCUDO frontal → atira → fecha; 3 ciclos e vai embora) · F3 Caçador de Vácuo (nebulosa) e Tentáculo do casco · F4
+> Larva Mecânica e Tubo Pulsante. (O Carrapato saiu: colado na nave ficaria com ~10px.) **Feito (plano
+> `plans/2026-10-05-frente-b-fatia-f2.md`, Tasks 1–9):** as regras puras (`src/elitesRegras.ts`, `test-elites-regras`),
+> os números num endereço (`src/data/numerosElites.ts`), os padrões de tiro (`PadroesDeTiro`), o **dano em inimigo por
+> UM caminho** (`GameScene.ferirInimigo` — tiro, bomba e cartas perguntam ao escudo), a base de elite
+> (`src/entities/elites/`), o asteroide minerável, os dois elites, o sandbox (eles entram na montagem; as medidas contam
+> os BLOQUEIOS), a sonda `probe-elites` e o roteiro: a F2 vai a ~97s (drone 13s, sentinela 64s, os dois no ENXAME) e a
+> F1 ganhou volume. **Pendente:** ele escolher a arte (drone A–D, rocha A–D, sentinela aberta A–D, roda R1–R4 — a
+> rocha é do PixelLab com o conceito DELE como referência) → Task 10 (instalar + animar + escudo à mão) → ele jogar.
+> **Rebalanceamento:** o elétrico desfazer o escudo (ADIADO por ele). As sondas `probe-stage2` (a nave parada morre aos
+> 37s) e `probe-chain` (o chefão da F1 fica vivo) já falhavam em 04/10 — conferido na linha de base, não é da frente B.
+>
+> 📍 **04/10 — o ponto anterior: começar a FRENTE B.** Tudo da sessão está APROVADO, commitado e
 > empurrado (`feat/cartas-preview`, sem merge) — nada pendente de olho dele. A porta de entrada é o START de 04/10
 > (o que se sabe da frente B, o que a sessão fez, o anotado para o rebalanceamento, como testar e as lições). Além do
 > abaixo, no fim da sessão: os **TIROS BASE das duas naves viraram LASER** 7×1 à mão, sem o halo (*"ficou perfeito"*;
@@ -110,7 +129,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
-| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado, o ARQUIVO DE CARTAS (a wiki no menu; os números das cartas num endereço só), os tiros LASER, a exaustão do T1 e o jato azul dos Propulsores. 🟠 **AGORA: frente B** (START de 04/10) → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
+| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado, o ARQUIVO DE CARTAS (a wiki no menu; os números das cartas num endereço só), os tiros LASER, a exaustão do T1 e o jato azul dos Propulsores. 🟠 **AGORA: frente B** — ✅ 05/10 a spec-mãe (2 elites por fase) e a fatia F2 jogável com arte provisória; falta a arte dele e o jogo dele → fatias F3 e F4 → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ⬜ spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
