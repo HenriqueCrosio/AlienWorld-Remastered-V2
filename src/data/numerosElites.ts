@@ -39,22 +39,30 @@ export const ELITES = {
     fogoS: 2.5,
     /**
      * A SOBRECARGA (05/10, ele: *"precisa ter mais um time vulnerável, onde ele faz mais alguma coisa e pode tomar
-     * dano"*): depois do fogo o escudo CAI e ela gira o canhão cuspindo uma ESPIRAL — perigosa, mas aberta.
+     * dano"*): depois do fogo o escudo CAI e a MINIGUN VARRE em leque, de cima para baixo — uma cortina com buracos.
      */
     sobrecargaS: 1.6,
-    espiralCadaS: 0.09,
-    /** O giro da espiral (rad/s). */
-    espiralGiro: 6.5,
-    velEspiral: 90,
+    varreduraCadaS: 0.15,
+    /** O arco TOTAL da varredura, centrado na esquerda. */
+    varreduraArcoGraus: 70,
+    velVarredura: 105,
     fecharS: 0.5,
     ciclos: 3,
     /** A abertura TOTAL do arco do escudo, centrado na esquerda. */
     escudoArcoGraus: 120,
-    rajadaCadaS: 0.8,
-    rajadaN: 3,
-    rajadaEspacoS: 0.1,
-    anelN: 8,
-    velTiro: 110,
+    /**
+     * O FOGO com DOIS TIROS (05/10 (2), ele: *"como o golfinho, dois tipos de tiros"*), um cano de cada vez, alternando a
+     * cada `alternarCadaS`: o CANHÃO DE CIMA solta a bola PESADA (grande e LENTA, mirada — sair da linha) e a MINIGUN o
+     * LEQUE leve (rápido — achar o vão). Era rajada de 3 + anel de 8 + espiral: ~50 tiros por ciclo, impossível no meio
+     * da fase; agora ~18.
+     */
+    alternarCadaS: 0.6,
+    pesadoVel: 60,
+    /** A escala da bola (a `bulletOrb` da canhoneira do cinturão nasce a 0.8). */
+    pesadoEscala: 1.0,
+    lequeN: 3,
+    lequeAberturaGraus: 24,
+    lequeVel: 120,
     postoX: [230, 330] as const,
     postoY: [40, 176] as const,
     postoDistY: 50,

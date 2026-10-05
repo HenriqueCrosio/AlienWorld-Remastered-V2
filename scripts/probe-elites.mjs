@@ -155,16 +155,49 @@ const real = await page.evaluate(() => {
 // O tiro de VERDADE tem de ter batido no escudo (as medidas contam), e não só passado ao lado.
 conferir(real.bloqueados > 0 && (real.fase !== 'fogo' || real.hp === hpAntes), 'o tiro real de frente morre no escudo (as medidas contam os bloqueios)', { hpAntes, ...real });
 
-// A SOBRECARGA (a 2ª janela): o escudo cai, ela cospe a espiral — e o tiro de frente FERE.
+// OS DOIS TIROS DO FOGO (05/10 (2), como o golfinho): a bola PESADA lenta do canhão de cima e o LEQUE leve da minigun.
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  s.enemies.enemyBullets.getChildren().forEach((b) => b.active && s.enemies.release(b));
+  // Longe da linha: os tiros mirados não podem morrer na nave antes da contagem.
+  s.ship.setPosition(30, 200);
+});
+await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela')?.getData('elite')?.fase === 'fogo', null, { timeout: 15000 });
+await espera(1300);
+const municao = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const vivos = s.enemies.enemyBullets.getChildren().filter((b) => b.active);
+  const vel = (b) => Math.round(Math.hypot(b.body.velocity.x, b.body.velocity.y));
+  return {
+    // A bola PULSA: a textura vira os quadros da animação (`bulletOrbAnim0..`).
+    pesados: vivos.filter((b) => b.texture.key.startsWith('bulletOrb')).map(vel),
+    leves: vivos.filter((b) => b.texture.key === 'bolt2').map(vel),
+  };
+});
+conferir(
+  municao.pesados.length >= 1 && municao.leves.length >= 3 && Math.max(...municao.pesados) < Math.min(...municao.leves),
+  'fogo: a bola pesada (mais lenta) e o leque leve (mais rápido), alternando',
+  municao,
+);
+
+// A SOBRECARGA (a 2ª janela): o escudo cai, a minigun varre — e o tiro de frente FERE.
+// Conta os DISPAROS de um ciclo inteiro (fogo + sobrecarga): era ~50 — impossível no meio da fase.
+// (O contador de disparos já foi instalado na parte do drone — só zera.)
+await page.evaluate(() => {
+  window.__disparos = 0;
+});
 await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela')?.getData('elite')?.fase === 'sobrecarga', null, { timeout: 10000 });
-await espera(300);
+await espera(600);
 const sobrecarga = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela');
   const frente = s.ferirInimigo(e, 1, 'probe', { x: e.x - 40, y: e.y });
   return { frente, tiros: s.enemies.enemyBullets.countActive(true), escudoVisivel: e.getData('elite').escudo?.visible ?? false };
 });
-conferir(sobrecarga.frente === 'vivo' && sobrecarga.tiros >= 4 && !sobrecarga.escudoVisivel, 'sobrecarga: sem escudo, a espiral no ar, e o tiro de frente fere', sobrecarga);
+conferir(sobrecarga.frente === 'vivo' && sobrecarga.tiros >= 3 && !sobrecarga.escudoVisivel, 'sobrecarga: sem escudo, a varredura no ar, e o tiro de frente fere', sobrecarga);
+await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela')?.getData('elite')?.fase !== 'sobrecarga', null, { timeout: 10000 });
+const porCiclo = await page.evaluate(() => window.__disparos);
+conferir(porCiclo <= 25, `um ciclo solta ~18 tiros (era ~50): viu ${porCiclo} desde o meio do fogo`, porCiclo);
 
 // Depois dos ciclos, ela vai embora.
 await page.evaluate(() => {

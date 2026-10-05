@@ -40,6 +40,11 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > (*"pernas no zero absoluto ficou slopado"*) com pairar / disparo / sobrecarga / abrir-fechar animados; e a
 > **SOBRECARGA** (a 2ª janela vulnerável: o escudo cai e ela cospe uma espiral). GIFs `*-v2.gif`. **Pendente:** ele
 > julgar os GIFs v2 e jogar. **Sugestão dele, anotada:** o tiro do drone virar CRISTAIS laranja (a cor que ele minera).
+> **3ª rodada:** o primeiro plano ATENUA (25%) com elite em cena; as luzes da S2 acalmadas (canhão e minigun de volta ao
+> metal — copiados do quadro parado —, o interior pela metade); e a LUTA da sentinela refeita como a do golfinho
+> (*"está soltando muita coisa"*): o fogo ALTERNA a bola PESADA lenta do canhão de cima (a `bulletOrb`) e o LEQUE leve
+> da minigun; a sobrecarga virou a minigun VARRENDO de cima para baixo — ~14 tiros por ciclo (eram ~50). GIF
+> `sentinela-orbital-v3.gif`.
 > **Rebalanceamento:** o elétrico desfazer o escudo (ADIADO por ele). As sondas `probe-stage2` (a nave parada morre aos
 > 37s) e `probe-chain` (o chefão da F1 fica vivo) já falhavam em 04/10 — conferido na linha de base, não é da frente B.
 >

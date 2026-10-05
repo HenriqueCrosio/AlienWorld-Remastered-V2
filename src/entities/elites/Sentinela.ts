@@ -10,14 +10,11 @@ interface Estado {
   t: number;
   ciclos: number;
   posto: { x: number; y: number };
-  rajada: number;
-  rajadaT: number;
+  /** A espera até o próximo tiro (fogo ou varredura). */
   cd: number;
-  anel: boolean;
+  /** O próximo tiro do fogo é o PESADO (canhão de cima)? Senão, o leque da minigun. */
+  pesado: boolean;
   escudo: Phaser.GameObjects.Image | null;
-  /** O rumo atual da ESPIRAL da sobrecarga (rad) e a espera até o próximo tiro dela. */
-  espiral: number;
-  espiralT: number;
 }
 
 /**
@@ -26,15 +23,37 @@ interface Estado {
  */
 const CORPO = { w: 26, h: 24 };
 const ESCUDO_DX = 24;
+/**
+ * As BOCAS, medidas na arte (o quadro 63×50 apontando para a DIREITA; em jogo ela está espelhada, virada para a nave):
+ * o canhão de cima na altura y≈6 e a minigun em y≈27, as duas pontas em x≈44. Em relação ao centro do sprite.
+ */
+const BOCA_CIMA = { dx: 13, dy: -19 };
+const BOCA_MINIGUN = { dx: 13, dy: 2 };
 
 const tocar = (e: Sprite, chave: string): void => {
   if (e.scene.anims.exists(chave) && e.anims.currentAnim?.key !== chave) e.play(chave);
 };
 
+/** A BOLA PESADA: a `bulletOrb` da canhoneira do cinturão, maior — o mesmo figurino de `EnemySystem.fireAt`. */
+const vestirPesado = (b: Phaser.Physics.Arcade.Sprite): void => {
+  b.setTexture('bulletOrb').setScale(S.pesadoEscala).clearTint();
+  b.setBlendMode(Phaser.BlendModes.NORMAL);
+  if (b.scene.anims.exists('bullet-orb-pulse')) b.play('bullet-orb-pulse');
+  // A bola ocupa 18×18 de um quadro 20×24, centrada em (10, 12): só ela fere, a fagulha não (ver `fireAt`).
+  (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
+};
+
+/** A boca, no mundo: as medidas da arte, espelhadas quando ela está virada para a nave. */
+const boca = (e: Sprite, b: { dx: number; dy: number }): { x: number; y: number } => ({
+  x: e.x + (e.flipX ? -b.dx : b.dx),
+  y: e.y + b.dy,
+});
+
 /**
  * A SENTINELA ORBITAL (spec frente B §3.3) — à la droideka: ROLANDO (a roda girando até um posto na metade direita)
- * → ABRIR (desdobra e ergue o ESCUDO em arco, virado para a nave) → FOGO (rajadas miradas e um anel) → SOBRECARGA (o
- * escudo CAI e ela cospe uma espiral — perigosa, mas aberta: a 2ª janela, pedido dele de 05/10) → FECHAR (sem escudo)
+ * → ABRIR (desdobra e ergue o ESCUDO em arco, virado para a nave) → FOGO (os DOIS tiros alternando, como o golfinho:
+ * a bola pesada e lenta do canhão de cima, o leque leve da minigun) → SOBRECARGA (o escudo CAI e a minigun VARRE de
+ * cima para baixo — a 2ª janela, pedido dele de 05/10) → FECHAR (sem escudo)
  * → rola para outro posto. Depois de `ciclos` fogos, vai embora rolando. O escudo segura o que vem
  * de FRENTE (`sentinelaBloqueia`); por cima, por baixo ou por trás passa. ⚠️ O elétrico NÃO o desfaz (rebalanceamento).
  */
@@ -42,7 +61,7 @@ export const SENTINELA: ComportamentoElite = {
   iniciar(e) {
     vestir(e, 'eliteSentinelaRoda');
     e.setFlipX(false);
-    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), rajada: 0, rajadaT: 0, cd: 0, anel: false, escudo: null, espiral: 0, espiralT: 0 };
+    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), cd: 0, pesado: true, escudo: null };
     e.setData('elite', s);
     e.once('destroy', () => s.escudo?.destroy());
   },
@@ -78,7 +97,7 @@ export const SENTINELA: ComportamentoElite = {
       if (!disparando) tocar(e, 'elite-sentinela-pairar');
       atirar(e, s, dt, ctx);
     }
-    if (s.fase === 'sobrecarga') espiral(e, s, dt, ctx);
+    if (s.fase === 'sobrecarga') varrer(e, s, dt, ctx);
   },
 
   bloqueia(e, deX, deY) {
@@ -100,12 +119,11 @@ function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
     s.escudo ??= e.scene.add.image(e.x, e.y, 'eliteEscudo').setDepth(e.depth + 1);
     s.escudo.setVisible(true).setAlpha(0);
     s.cd = 0.3;
-    s.anel = false;
+    s.pesado = true;
   } else if (fase === 'sobrecarga') {
-    // O escudo cai; a espiral começa apontada para a nave.
+    // O escudo cai; a varredura começa no alto.
     s.escudo?.setVisible(false);
-    s.espiral = Phaser.Math.Angle.Between(e.x, e.y, e.scene.scale.width * 0.15, e.y);
-    s.espiralT = 0;
+    s.cd = 0;
     tocar(e, 'elite-sentinela-sobrecarga');
   } else if (fase === 'fechar') {
     s.escudo?.setVisible(false);
@@ -120,44 +138,39 @@ function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
 }
 
 /**
- * A ESPIRAL da sobrecarga: dois braços opostos girando a `espiralGiro`, um tiro por braço a cada `espiralCadaS`. O
- * corpo PULSA quente (o tint) — o sinal de que está exposta. (A arte da sobrecarga, se vier, entra pela animação
- * `elite-sentinela-sobrecarga`.)
+ * A VARREDURA da sobrecarga: a minigun varre o arco `varreduraArcoGraus` de CIMA para BAIXO durante a sobrecarga, um
+ * tiro leve a cada `varreduraCadaS` — uma cortina com buracos (~10 tiros). O canhão de cima fica quieto, esquentando.
+ * (Sem a arte da sobrecarga, o corpo pulsa quente em código.)
  */
-function espiral(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
-  s.espiral += S.espiralGiro * dt;
-  s.espiralT -= dt;
-  if (s.espiralT <= 0) {
-    s.espiralT = S.espiralCadaS;
-    ctx.tiros.disparar(e.x, e.y, s.espiral, S.velEspiral);
-    ctx.tiros.disparar(e.x, e.y, s.espiral + Math.PI, S.velEspiral);
+function varrer(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
+  s.cd -= dt;
+  if (s.cd <= 0) {
+    s.cd = S.varreduraCadaS;
+    const arco = Phaser.Math.DegToRad(S.varreduraArcoGraus);
+    // π é a esquerda; π + arco/2 aponta para cima-esquerda (o y cresce para baixo) e desce até π − arco/2.
+    const ang = Math.PI + arco / 2 - arco * Math.min(1, s.t / S.sobrecargaS);
+    const m = boca(e, BOCA_MINIGUN);
+    ctx.tiros.disparar(m.x, m.y, ang, S.velVarredura);
   }
-  // Sem a arte da sobrecarga, o corpo PULSA quente em código (o sinal de que está exposta).
   if (!e.scene.anims.exists('elite-sentinela-sobrecarga')) e.setTint(Math.floor(s.t * 12) % 2 ? 0xffb894 : (e.getData('tint') as number));
 }
 
-/** O FOGO: rajadas miradas de `rajadaN`, uma a cada `rajadaCadaS`, e UM anel no meio do fogo. */
+/**
+ * O FOGO: um cano de cada vez, alternando a cada `alternarCadaS` — a BOLA PESADA do canhão de cima (lenta, mirada) e o
+ * LEQUE da minigun (`lequeN` tiros leves e rápidos). Cada disparo toca o DISPARO da arte.
+ */
 function atirar(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
-  const boca = { x: e.x - e.displayWidth * 0.4, y: e.y - 2 };
-  if (!s.anel && s.t >= S.fogoS / 2) {
-    s.anel = true;
-    ctx.tiros.anel(e.x, e.y, S.anelN, S.velTiro * 0.8, Math.random() * Math.PI);
-  }
-  if (s.rajada > 0) {
-    s.rajadaT -= dt;
-    if (s.rajadaT <= 0) {
-      ctx.tiros.mirado(boca.x, boca.y, ctx.alvo.x, ctx.alvo.y, S.velTiro);
-      s.rajada--;
-      s.rajadaT = S.rajadaEspacoS;
-    }
-    return;
-  }
   s.cd -= dt;
-  if (s.cd <= 0) {
-    s.cd = S.rajadaCadaS;
-    s.rajada = S.rajadaN;
-    // Cada rajada começa com o DISPARO da arte (os canos giram, o clarão pisca).
-    if (e.scene.anims.exists('elite-sentinela-disparo')) e.play('elite-sentinela-disparo');
-    s.rajadaT = 0;
+  if (s.cd > 0) return;
+  s.cd = S.alternarCadaS;
+  if (s.pesado) {
+    const c = boca(e, BOCA_CIMA);
+    ctx.tiros.mirado(c.x, c.y, ctx.alvo.x, ctx.alvo.y, S.pesadoVel, vestirPesado);
+  } else {
+    const m = boca(e, BOCA_MINIGUN);
+    const ang = Phaser.Math.Angle.Between(m.x, m.y, ctx.alvo.x, ctx.alvo.y);
+    ctx.tiros.leque(m.x, m.y, ang, S.lequeN, Phaser.Math.DegToRad(S.lequeAberturaGraus), S.lequeVel);
   }
+  s.pesado = !s.pesado;
+  if (e.scene.anims.exists('elite-sentinela-disparo')) e.play('elite-sentinela-disparo');
 }
