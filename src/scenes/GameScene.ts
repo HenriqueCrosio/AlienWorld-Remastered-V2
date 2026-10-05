@@ -2356,7 +2356,7 @@ export class GameScene extends Phaser.Scene {
   ): 'bloqueado' | 'vivo' | 'morto' {
     if (!e.active) return 'morto';
     if (de && this.enemies.bloqueia(e, de.x, de.y)) {
-      this.medidas?.dano(`${fonte} (bloqueado)`, 0);
+      this.medidas?.bloqueio(fonte);
       return 'bloqueado';
     }
     const antes = e.getData('hp') as number;

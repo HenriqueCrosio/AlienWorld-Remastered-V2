@@ -1,0 +1,142 @@
+// OS ELITES DA F2 NO JOGO REAL (spec 2026-10-05-frente-b-elites-design.md §3.7). Uso: node scripts/probe-elites.mjs
+// (com `npm run dev` rodando). Joga no sandbox, fase 2, invulnerável, e chama cada elite pelo EnemySystem.
+import { chromium } from 'playwright';
+
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const erros = [];
+page.on('pageerror', (e) => erros.push(e.message));
+page.on('console', (m) => m.type() === 'error' && erros.push(m.text()));
+await page.addInitScript(() => {
+  localStorage.setItem('alienworld.sandbox', JSON.stringify({
+    fase: 2, repetir: false, intervalo: 999,
+    inimigos: { drone: 0, batedor: 0, canhoneira: 0, kamikaze: 0, cargueiro: 0, aguaViva: 0, aranha: 0, droneMineracao: 0, sentinela: 0 },
+  }));
+});
+await page.goto('http://localhost:5173/?sandbox', { waitUntil: 'networkidle' });
+await page.waitForSelector('#sandbox:not([hidden]) .no', { timeout: 30000 });
+await page.click('button[data-acao="jogar"]');
+await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').arena, null, { timeout: 30000 });
+await page.keyboard.press('Digit3'); // invulnerável
+
+const falhas = [];
+const conferir = (ok, msg, visto) => {
+  console.log(`${ok ? 'OK  ' : 'FALHA'} ${msg}${ok ? '' : ` — visto: ${JSON.stringify(visto)}`}`);
+  if (!ok) falhas.push(msg);
+};
+const espera = (ms) => page.waitForTimeout(ms);
+const G = () => window.__game.scene.getScene('Game');
+
+// ── O DRONE ──
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  s.ship.setPosition(40, 40);
+  s.enemies.spawn('droneMineracao', 150);
+});
+await espera(400);
+let d = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao');
+  const rochas = s.debris.hazards.getChildren().filter((h) => h.active && h.getData('kind') === 'mineravel');
+  return { fase: e?.getData('elite')?.fase, rochas: rochas.length, colado: rochas[0] ? Math.abs(rochas[0].y - e.y) < 1 : false };
+});
+conferir(d.fase === 'minerando' && d.rochas === 1 && d.colado, 'o drone nasce minerando, encaixado na rocha dele', d);
+
+// Quebrar a rocha acorda o drone.
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const r = s.debris.hazards.getChildren().find((h) => h.active && h.getData('kind') === 'mineravel');
+  s.killHazard(r);
+});
+await espera(700);
+d = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao')?.getData('elite')?.fase);
+conferir(d === 'ataque', 'a rocha quebrada acorda o drone, e depois do alerta ele ataca', d);
+
+// Ele atira enquanto vem.
+const tirosAntes = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.countActive(true));
+await espera(1800);
+const tirosDepois = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.countActive(true));
+conferir(tirosDepois > tirosAntes, 'atacando, ele atira', { tirosAntes, tirosDepois });
+
+// Perto da nave: pisca; morto NO pisca, não explode (nenhum anel de estilhaços).
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao');
+  s.ship.setPosition(e.x - 20, e.y);
+});
+await espera(150);
+const pisca = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  s.enemies.enemyBullets.getChildren().forEach((b) => b.active && s.enemies.release(b));
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao');
+  const fase = e?.getData('elite')?.fase;
+  s.ferirInimigo(e, 99, 'probe');
+  return { fase, vivo: e.active };
+});
+await espera(800);
+const estilhacos = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.countActive(true));
+conferir(pisca.fase === 'pisca' && !pisca.vivo && estilhacos === 0, 'morto no pisca: morre sem explodir', { ...pisca, estilhacos });
+
+// Deixado em paz, explode com o anel.
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  s.ship.setPosition(40, 40);
+  s.enemies.spawn('droneMineracao', 120);
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao');
+  s.ferirInimigo(e, 1, 'probe'); // ferido: acorda
+});
+await page.waitForFunction(() => !window.__game.scene.getScene('Game').enemies.enemies.getChildren().some((x) => x.getData('kind') === 'droneMineracao'), null, { timeout: 12000 });
+const anel = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.countActive(true));
+conferir(anel >= 6, 'deixado em paz, ele pisca e explode soltando o anel', anel);
+
+// ── A SENTINELA ──
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  s.enemies.enemyBullets.getChildren().forEach((b) => b.active && s.enemies.release(b));
+  s.ship.setPosition(40, 108);
+  s.enemies.spawn('sentinela', 108);
+});
+await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela')?.getData('elite')?.fase === 'fogo', null, { timeout: 10000 });
+const escudo = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela');
+  const hp0 = e.getData('hp');
+  const frente = s.ferirInimigo(e, 1, 'probe', { x: e.x - 40, y: e.y });
+  const missil = s.ferirInimigo(e, 1, 'míssil', { x: e.x - 30, y: e.y + 8 });
+  const cima = s.ferirInimigo(e, 1, 'probe', { x: e.x, y: e.y - 40 });
+  return { frente, missil, cima, perdeu: hp0 - e.getData('hp') };
+});
+conferir(escudo.frente === 'bloqueado' && escudo.missil === 'bloqueado' && escudo.cima === 'vivo' && escudo.perdeu === 1, 'aberta: o escudo segura a frente (tiro e míssil); por cima passa', escudo);
+
+// O tiro DE VERDADE: a nave na frente, atirando — a vida não cai no fogo.
+// A nave NA LINHA dela (o posto tem altura sorteada) e à frente — o tiro vai reto no escudo.
+const hpAntes = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela');
+  s.ship.setPosition(e.x - 140, e.y);
+  return e.getData('hp');
+});
+await page.keyboard.down('Space');
+await espera(700);
+await page.keyboard.up('Space');
+const real = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela');
+  return { hp: e.getData('hp'), fase: e.getData('elite').fase, bloqueados: s.medidas.resumo().bloqueados.tiro ?? 0 };
+});
+// O tiro de VERDADE tem de ter batido no escudo (as medidas contam), e não só passado ao lado.
+conferir(real.bloqueados > 0 && (real.fase !== 'fogo' || real.hp === hpAntes), 'o tiro real de frente morre no escudo (as medidas contam os bloqueios)', { hpAntes, ...real });
+
+// Depois dos ciclos, ela vai embora.
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  s.ship.setPosition(40, 20);
+});
+await page.waitForFunction(() => !window.__game.scene.getScene('Game').enemies.enemies.getChildren().some((x) => x.getData('kind') === 'sentinela'), null, { timeout: 30000 }).catch(() => {});
+const foi = await page.evaluate(() => !window.__game.scene.getScene('Game').enemies.enemies.getChildren().some((x) => x.getData('kind') === 'sentinela'));
+conferir(foi, 'depois dos ciclos, a sentinela vai embora rolando', foi);
+
+conferir(erros.length === 0, 'sem erros no console', erros);
+await browser.close();
+console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTUDO OK');
+process.exit(falhas.length ? 1 : 0);

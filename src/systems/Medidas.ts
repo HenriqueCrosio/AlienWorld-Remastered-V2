@@ -13,6 +13,8 @@ export class Medidas {
   total = 0;
   readonly porFonte = new Map<string, number>();
   readonly abates = new Map<string, number>();
+  /** Golpes que um ESCUDO segurou (a Sentinela, frente B), por fonte — quanto o elite bloqueou de verdade. */
+  readonly bloqueados = new Map<string, number>();
   golpes = 0;
   cascoGasto = 0;
   vidasPerdidas = 0;
@@ -32,6 +34,10 @@ export class Medidas {
     this.total += d;
     this.porFonte.set(fonte, (this.porFonte.get(fonte) ?? 0) + d);
     this.recentes.push({ t: this.relogio(), d });
+  }
+
+  bloqueio(fonte: string): void {
+    this.bloqueados.set(fonte, (this.bloqueados.get(fonte) ?? 0) + 1);
   }
 
   abate(tipo: string, quem: object): void {
@@ -90,6 +96,7 @@ export class Medidas {
       dps: Math.round(this.dps * 10) / 10,
       dano_por_fonte: Object.fromEntries([...this.porFonte.entries()].map(([f, d]) => [f, Math.round(d)])),
       abates: Object.fromEntries(this.abates),
+      bloqueados: Object.fromEntries(this.bloqueados),
       ondas: this.ondas.map((o) => ({ n: o.n, s: Math.round(o.ms / 100) / 10, escaparam: o.escaparam })),
       recebidos: { golpes: this.golpes, casco: this.cascoGasto, vidas: this.vidasPerdidas, bombas: this.bombasUsadas },
     };
