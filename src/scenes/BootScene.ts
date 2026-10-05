@@ -52,6 +52,12 @@ const FRAMES: Record<string, number> = {
   // FASE (ver EnemySystem.STAGE_2_SKIN) — estas são as chaves de animação da pele nova.
   scoutCinturaoAnim: 11,
   gunshipCinturaoAnim: 7,
+  // Os ELITES da F2 (frente B, 05/10): PixMiniMax, instalados por `scripts/_elites/_instalar-anims.mjs`.
+  eliteDroneMinerarAnim: 14,
+  eliteDroneAlertaAnim: 5,
+  eliteDroneVooAnim: 8,
+  eliteSentinelaAbrirAnim: 9,
+  eliteSentinelaFecharAnim: 9,
   // A BOLA de energia da canhoneira do cinturão, agora ANIMADA (2026-08-09): ela pulsa e solta
   // fagulha no ar em vez de ser um adesivo. Os quadros nasceram com DERIVA (o desenho escorregava
   // 5.6px para a esquerda ao longo do ciclo, o que num projétil soma à velocidade e vira
@@ -158,6 +164,13 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // A pele do cinturão da canhoneira: MESMA cadência do 'gunship-fly' (8) — é o mesmo
   // comportamento pesado, só a pele muda.
   { key: 'gunship-cinturao-fly', prefix: 'gunshipCinturaoAnim', frameRate: 8 },
+  // Os ELITES da F2 (frente B, 05/10). A broca e o propulsor a 12–14 (máquina trabalhando); o alerta é um gesto
+  // (5 quadros em ~0,4s, o tempo do estado) e o abrir/fechar da sentinela também — tocam uma vez e param.
+  { key: 'elite-drone-minerar', prefix: 'eliteDroneMinerarAnim', frameRate: 14 },
+  { key: 'elite-drone-alerta', prefix: 'eliteDroneAlertaAnim', frameRate: 12, loop: false },
+  { key: 'elite-drone-voo', prefix: 'eliteDroneVooAnim', frameRate: 12 },
+  { key: 'elite-sentinela-abrir', prefix: 'eliteSentinelaAbrirAnim', frameRate: 18, loop: false },
+  { key: 'elite-sentinela-fechar', prefix: 'eliteSentinelaFecharAnim', frameRate: 18, loop: false },
   // A BOLA de energia dela: 14, a mesma cadência do 'comet-burn'/'blast-burn'. Projétil é a
   // única coisa no jogo que pulsa RÁPIDO — energia lenta parece plástico, e um tiro que parece
   // plástico não lê como perigo.
@@ -687,6 +700,11 @@ const ART: Record<string, string> = {
   eliteRocha: 'sprites/elite-rocha.png',
   eliteSentinela: 'sprites/elite-sentinela.png',
   eliteSentinelaRoda: 'sprites/elite-sentinela-roda.png',
+  ...animFrames('eliteDroneMinerarAnim', 'elite-drone-minerar'),
+  ...animFrames('eliteDroneAlertaAnim', 'elite-drone-alerta'),
+  ...animFrames('eliteDroneVooAnim', 'elite-drone-voo'),
+  ...animFrames('eliteSentinelaAbrirAnim', 'elite-sentinela-abrir'),
+  ...animFrames('eliteSentinelaFecharAnim', 'elite-sentinela-fechar'),
   eliteEscudo: 'sprites/elite-escudo.png',
 
   turret: 'sprites/turret.png',

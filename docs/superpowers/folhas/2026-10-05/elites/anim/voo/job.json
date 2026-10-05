@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "dbe1fa05-79cb-46de-9761-75c4365f1270",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the mining robot hovers in place as if flying: claws tucked up under the body, a small orange thruster glow beneath it, gentle bobbing up and down",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

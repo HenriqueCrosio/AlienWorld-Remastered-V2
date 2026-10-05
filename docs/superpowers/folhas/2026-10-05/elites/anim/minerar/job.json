@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "ac42fe98-8759-4af6-9ddd-8f4bd1dd735d",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the mining robot keeps working in place: its front drill spins fast and pushes forward a little, small orange sparks fly from the drill tip, the body vibrates slightly; it does not move away",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}
