@@ -1,7 +1,8 @@
 # FRENTE B — os ELITES por fase + ondas maiores (spec-mãe, 05/10/2026)
 
 > Brainstorming de 05/10 com o Henrique, a partir das duas folhas de conceito dele (na raiz do repositório:
-> `concept art Inimigos.png` — três biomas — e `concept art de Inimigos Sci‑Fi.png` — "Dark Space"). Etapa 1.5 do 🧭,
+> `concept art Inimigos.png` — três biomas — e `concept art de Inimigos Sci‑Fi.png` — "Dark Space"; cópias em
+> `folhas/2026-10-05/elites/conceitos/`). Etapa 1.5 do 🧭,
 > ordem dele de 01/10: A = catálogo ✅ → **B = inimigos que atiram + ondas maiores** → C = calibragem.
 > Esta é a spec-MÃE: o elenco, os princípios e o desenho de cada elite. Cada fase vira uma FATIA com plano próprio;
 > a primeira é a **F2** (§3), e é a única desenhada em detalhe aqui.
@@ -111,7 +112,13 @@ e aguenta mais tiros. **Quebrá-la com o drone em cima o acorda na hora.**
 > o canhão cuspindo uma ESPIRAL de dois braços; toma dano de qualquer lado. O ciclo virou
 > rolando → abrir → fogo (escudo) → **sobrecarga (aberta)** → fechar (aberta) → rola.
 
-### 3.4 O roteiro da F2 (de ~78s para ~95s)
+> **05/10 (3) — A LUTA FINAL (ele: *"está soltando muita coisa… como o golfinho, dois tipos de tiros"*):** o FOGO
+> ALTERNA, a cada 0,6s, a **bola PESADA** do canhão de cima (a `bulletOrb` da canhoneira do cinturão, lenta — 60 px/s —
+> e mirada: sair da linha) e o **LEQUE leve** da minigun (3 tiros a 120 px/s em 24°: achar o vão); o anel saiu. A
+> SOBRECARGA virou a **minigun VARRENDO** 70° de cima para baixo (um tiro a cada 0,15s — uma cortina com buracos), o
+> canhão de cima quieto. ~14 tiros por ciclo (eram ~50).
+
+### 3.4 O roteiro da F2 (de ~78s para ~97s)
 
 - **Drone de Mineração:** apresentado **~10s**, sozinho, no campo de asteroides da abertura; cobrado **~40s** com os
   kamikazes; e no ENXAME.
@@ -146,6 +153,12 @@ jogo** (na pintura da F2, escala real, ao lado da nave) → ele escolhe. Dentro 
 
 **Reaproveitado, sem arte nova:** o tiro inimigo atual; a explosão única aprovada; os estilhaços da mina sensora (o
 anel da autodestruição). Arte nova só se ele pedir depois de ver em jogo.
+
+**A ARTE ESCOLHIDA (05/10, folhas em `folhas/2026-10-05/elites/`):** drone **C** (reduzido a 70% com a paleta
+original) trabalhando DENTRO da cratera (o rabisco dele); a rocha **1** inteira (80×78, regerada do D — a A encostava
+no quadro e saía cortada) com a pedra escurecida; a sentinela **S2 com PROPULSORES** (as pernas da A no zero absoluto
+*"ficou slopado"*) + a roda **R3**; o escudo à mão. Animações PixMiniMax: minerar, alerta (+ o olho acendendo, pixel a
+pixel), voo, abrir/fechar, pairar, disparo, sobrecarga.
 
 ### 3.7 Como se testa
 

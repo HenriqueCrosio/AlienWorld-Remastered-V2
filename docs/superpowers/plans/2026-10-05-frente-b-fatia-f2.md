@@ -10,6 +10,11 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-05-frente-b-elites-design.md` (§2 arquitetura, §3 a fatia F2).
 
+> **ESTADO (05/10, fim da sessão):** Tasks 1–11 FEITAS e empurradas, mais três rodadas de ajuste pedidas por ele (a
+> rocha inteira, o drone dentro da cratera, o olho acendendo, a sentinela com propulsores e a SOBRECARGA, a luta com os
+> dois tiros, o primeiro plano atenuado). O registro está no START `plans/2026-10-05-elites-retomada-START.md`. Falta só
+> ele analisar o v3 e jogar.
+
 ## Global Constraints
 
 - Elite **não segura o relógio** da fase; a fase pode ficar mais longa (§1.1.3).
