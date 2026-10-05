@@ -2141,6 +2141,14 @@ export class GameScene extends Phaser.Scene {
   ): void {
     if (!bullet.active || !hazard.active) return;
 
+    // A ROCHA MINERÁVEL deixa passar o tiro que vem NA ALTURA do drone que trabalha dentro dela (frente B). A cratera
+    // está aberta para quem olha e o drone aparece nela — mas o tiro entra pela borda da rocha antes de chegar nele, e o
+    // overlap com os destroços roda antes do com os inimigos: sem isto a rocha comeria todo tiro, e matar o drone antes
+    // de ele acordar (a janela do elite) seria impossível. Fora da faixa dele, a rocha segue levando o tiro.
+    const ocupante = hazard.getData('ocupante') as Phaser.Physics.Arcade.Sprite | null | undefined;
+    const corpo = ocupante?.active ? (ocupante.body as Phaser.Physics.Arcade.Body) : null;
+    if (corpo && bullet.y >= corpo.top && bullet.y <= corpo.bottom && bullet.x <= corpo.right) return;
+
     this.weapons.release(bullet);
     this.fx.hit(bullet.x, bullet.y);
 

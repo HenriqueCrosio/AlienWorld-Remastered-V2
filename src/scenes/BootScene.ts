@@ -683,6 +683,8 @@ const ART: Record<string, string> = {
 
   // OS ELITES DA F2 (frente B, 05/10 — as escolhas dele na folha `folhas/2026-10-05/elites/`). Sem o PNG, a forma
   // provisória em código nasce na mesma chave (`entities/elites/texturasProvisorias.ts`).
+  eliteDrone: 'sprites/elite-drone.png',
+  eliteRocha: 'sprites/elite-rocha.png',
   eliteSentinela: 'sprites/elite-sentinela.png',
   eliteSentinelaRoda: 'sprites/elite-sentinela-roda.png',
   eliteEscudo: 'sprites/elite-escudo.png',

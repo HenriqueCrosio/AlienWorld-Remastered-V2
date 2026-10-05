@@ -38,9 +38,31 @@ let d = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao');
   const rochas = s.debris.hazards.getChildren().filter((h) => h.active && h.getData('kind') === 'mineravel');
-  return { fase: e?.getData('elite')?.fase, rochas: rochas.length, colado: rochas[0] ? Math.abs(rochas[0].y - e.y) < 1 : false };
+  return { fase: e?.getData('elite')?.fase, rochas: rochas.length, dentro: rochas[0] ? rochas[0].getBounds().contains(e.x, e.y) : false, acima: rochas[0] ? e.depth > rochas[0].depth : false };
 });
-conferir(d.fase === 'minerando' && d.rochas === 1 && d.colado, 'o drone nasce minerando, encaixado na rocha dele', d);
+conferir(d.fase === 'minerando' && d.rochas === 1 && d.dentro && d.acima, 'o drone nasce minerando, DENTRO da cratera e desenhado por cima da rocha', d);
+
+// A JANELA DE MATAR ANTES: o tiro que cai no drone fere o DRONE, não a rocha (a rocha deixa passar).
+await espera(900);
+await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao');
+  s.ship.setPosition(60, e.y);
+});
+// UM tiro (um toque curto): o primeiro acerto já o acorda.
+await page.keyboard.down('Space');
+await espera(40);
+await page.keyboard.up('Space');
+await espera(900);
+const janela = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'droneMineracao');
+  const r = s.debris.hazards.getChildren().find((h) => h.active && h.getData('kind') === 'mineravel');
+  const st = e?.getData('elite');
+  return { hpDrone: e?.getData('hp'), maxDrone: st?.hpMax, hpRocha: r?.getData('hp') };
+});
+conferir(janela.hpDrone < janela.maxDrone && janela.hpRocha === 8, 'atirar no drone minerando fere o drone, e a rocha fica inteira', janela);
+await page.evaluate(() => window.__game.scene.getScene('Game').ship.setPosition(40, 40));
 
 // Quebrar a rocha acorda o drone.
 await page.evaluate(() => {
@@ -53,10 +75,16 @@ d = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemi
 conferir(d === 'ataque', 'a rocha quebrada acorda o drone, e depois do alerta ele ataca', d);
 
 // Ele atira enquanto vem.
-const tirosAntes = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.countActive(true));
+// Conta os DISPAROS (e não os tiros vivos num instante: uns saem da tela enquanto outros nascem).
+await page.evaluate(() => {
+  const t = window.__game.scene.getScene('Game').enemies.tiros;
+  window.__disparos = 0;
+  const orig = t.disparar.bind(t);
+  t.disparar = (...a) => (window.__disparos++, orig(...a));
+});
 await espera(1800);
-const tirosDepois = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.countActive(true));
-conferir(tirosDepois > tirosAntes, 'atacando, ele atira', { tirosAntes, tirosDepois });
+const disparos = await page.evaluate(() => window.__disparos);
+conferir(disparos >= 3, 'atacando, ele atira (rajadas)', disparos);
 
 // Perto da nave: pisca; morto NO pisca, não explode (nenhum anel de estilhaços).
 await page.evaluate(() => {

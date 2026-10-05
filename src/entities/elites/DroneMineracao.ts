@@ -10,13 +10,21 @@ interface Estado {
   t: number;
   rocha: Sprite | null;
   hpMax: number;
-  /** Onde ele fica em relação ao centro da rocha (à esquerda dela, encaixado). */
+  /** Onde ele fica em relação ao centro da rocha (DENTRO da cratera — ver `ENCAIXE`). */
   dx: number;
+  dy: number;
   rumo: number;
   cd: number;
   rajada: number;
   rajadaT: number;
 }
+
+/**
+ * O ENCAIXE NA CRATERA (05/10, o rabisco dele): o drone trabalha DENTRO do geodo, no canto de cima à direita da
+ * cratera, virado para o cristal. Medido na arte aprovada (`elite-rocha.png`, 80×71: a cratera centrada em (34, 30))
+ * — trocou a rocha, mede de novo (`scripts/_elites/_tratar.mjs cratera`).
+ */
+const ENCAIXE = { x: 2, y: -11 };
 
 /** As animações, se a arte já as registrou (a provisória é estática). */
 const tocar = (e: Sprite, chave: string): void => {
@@ -32,13 +40,18 @@ const tocar = (e: Sprite, chave: string): void => {
 export const DRONE_MINERACAO: ComportamentoElite = {
   iniciar(e, ctx) {
     const rocha = ctx.ganchos.criarRocha(e.x + 24, e.y);
-    // De frente para a ROCHA (à direita dele): os sprites nascem apontando para a direita.
-    e.setFlipX(false);
+    // Virado para o CRISTAL (à esquerda dele, no fundo da cratera): os sprites nascem apontando para a direita.
+    e.setFlipX(true);
     (e.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
-    const dx = rocha ? -(rocha.displayWidth / 2 + e.displayWidth * 0.3) : 0;
-    const s: Estado = { fase: 'minerando', t: 0, rocha, hpMax: e.getData('hp') as number, dx, rumo: Math.PI, cd: D.rajadaCadaS * 0.5, rajada: 0, rajadaT: 0 };
+    const s: Estado = { fase: 'minerando', t: 0, rocha, hpMax: e.getData('hp') as number, dx: ENCAIXE.x, dy: ENCAIXE.y, rumo: Math.PI, cd: D.rajadaCadaS * 0.5, rajada: 0, rajadaT: 0 };
     e.setData('elite', s);
-    if (rocha) e.setPosition(rocha.x + dx, rocha.y);
+    if (rocha) {
+      e.setPosition(rocha.x + s.dx, rocha.y + s.dy);
+      // Por cima da rocha (ela nasce depois dele), e a rocha sabe quem trabalha nela: o tiro que cai NO DRONE passa
+      // pela rocha (ver `GameScene.bulletHitHazard`) — senão a janela de matar antes não existiria.
+      e.setDepth(rocha.depth + 1);
+      rocha.setData('ocupante', e);
+    }
     tocar(e, 'elite-drone-minerar');
   },
 
@@ -59,6 +72,8 @@ export const DRONE_MINERACAO: ComportamentoElite = {
       s.t = 0;
       if (prox === 'alerta') tocar(e, 'elite-drone-alerta');
       if (prox === 'ataque') {
+        // Saiu da cratera: a rocha volta a ser só rocha (no alerta ele ainda está lá dentro).
+        if (rochaViva) s.rocha!.setData('ocupante', null);
         s.rumo = Phaser.Math.Angle.Between(e.x, e.y, ctx.alvo.x, ctx.alvo.y);
         tocar(e, 'elite-drone-voo');
       }
@@ -67,7 +82,7 @@ export const DRONE_MINERACAO: ComportamentoElite = {
     if (s.fase === 'minerando' && rochaViva) {
       // Encaixado: anda com a rocha (que anda no scroll).
       body.setVelocity(0, 0);
-      e.setPosition(s.rocha!.x + s.dx, s.rocha!.y);
+      e.setPosition(s.rocha!.x + s.dx, s.rocha!.y + s.dy);
     } else if (s.fase === 'alerta') {
       body.setVelocity(0, 0);
       e.setFlipX(ctx.alvo.x < e.x);
