@@ -92,6 +92,10 @@ e aguenta mais tiros. **Quebrá-la com o drone em cima o acorda na hora.**
    com estilhaços em anel. ⚠️ **Morto DURANTE o pisca, morre SEM explodir** — matar tem de ser melhor que deixar
    (a regra da mina sensora, GDD §6).
 
+> **05/10 (2):** o ALERTA ganhou o **olho acendendo** (laranja → amarelo → núcleo quase branco, pintado pixel a pixel
+> por cima da lâmpada), e o olho fica aceso no voo. **Sugestão dele para depois:** o tiro do drone virar **CRISTAIS
+> da cor que ele minera** (o laranja do geodo) — anotado, não feito.
+
 ### 3.3 Sentinela Orbital (vida ~18)
 
 1. **ROLANDO** — entra pela direita como RODA girando, rápida, até um POSTO na metade direita da tela.
@@ -100,6 +104,12 @@ e aguenta mais tiros. **Quebrá-la com o drone em cima o acorda na hora.**
    de frente**; para feri-la aqui é preciso flanquear (por cima/por baixo) ou esperar.
 4. **FECHAR (~0,5s)** — recolhe, **sem escudo**: a janela. Rola para outro posto.
 5. **2–3 ciclos e vai embora rolando** — elite de fluxo não estaciona.
+
+> **05/10 (2), depois do 1º GIF — o que ele pediu:** (a) **sem pernas** — *"ter pernas no zero absoluto ficou
+> slopado"* —, com **propulsores** e mais **robusta** (arte refeita); (b) **mais uma janela vulnerável** — *"onde ele
+> faz mais alguma coisa e pode tomar dano"*: a **SOBRECARGA**, entre o FOGO e o FECHAR (~1,6s): o escudo CAI e ela gira
+> o canhão cuspindo uma ESPIRAL de dois braços; toma dano de qualquer lado. O ciclo virou
+> rolando → abrir → fogo (escudo) → **sobrecarga (aberta)** → fechar (aberta) → rola.
 
 ### 3.4 O roteiro da F2 (de ~78s para ~95s)
 

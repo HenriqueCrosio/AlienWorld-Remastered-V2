@@ -29,7 +29,8 @@ conferir(!droneExplode('ataque', 99) && !droneExplode('minerando', 99), 'fora do
 conferir(sentinelaAvanca('rolando', 9, { chegou: false, ciclos: 0 }) === 'rolando', 'rola até chegar ao posto', null);
 conferir(sentinelaAvanca('rolando', 0, { chegou: true, ciclos: 0 }) === 'abrir', 'chegou: abre', null);
 conferir(sentinelaAvanca('abrir', S.abrirS, { chegou: true, ciclos: 0 }) === 'fogo', 'abriu: fogo', S.abrirS);
-conferir(sentinelaAvanca('fogo', S.fogoS - 0.01, { chegou: true, ciclos: 0 }) === 'fogo' && sentinelaAvanca('fogo', S.fogoS, { chegou: true, ciclos: 0 }) === 'fechar', 'o fogo dura fogoS', S.fogoS);
+conferir(sentinelaAvanca('fogo', S.fogoS - 0.01, { chegou: true, ciclos: 0 }) === 'fogo' && sentinelaAvanca('fogo', S.fogoS, { chegou: true, ciclos: 0 }) === 'sobrecarga', 'o fogo dura fogoS e vira SOBRECARGA', S.fogoS);
+conferir(sentinelaAvanca('sobrecarga', S.sobrecargaS - 0.01, { chegou: true, ciclos: 1 }) === 'sobrecarga' && sentinelaAvanca('sobrecarga', S.sobrecargaS, { chegou: true, ciclos: 1 }) === 'fechar', 'a sobrecarga dura sobrecargaS e fecha', S.sobrecargaS);
 conferir(sentinelaAvanca('fechar', S.fecharS, { chegou: true, ciclos: 1 }) === 'rolando', 'fechou com ciclos sobrando: rola para outro posto', null);
 conferir(sentinelaAvanca('fechar', S.fecharS, { chegou: true, ciclos: S.ciclos }) === 'saindo', `depois de ${S.ciclos} ciclos: vai embora`, S.ciclos);
 conferir(sentinelaAvanca('saindo', 99, { chegou: true, ciclos: S.ciclos }) === 'saindo', 'saindo não volta', null);
@@ -40,6 +41,7 @@ conferir(sentinelaBloqueia('abrir', 300, 100, 200, 110), 'abrir: o escudo já es
 conferir(!sentinelaBloqueia('fogo', 300, 100, 300, 40), 'fogo: tiro de CIMA passa (flanquear funciona)', null);
 conferir(!sentinelaBloqueia('fogo', 300, 100, 360, 100), 'fogo: tiro de trás passa', null);
 conferir(!sentinelaBloqueia('fechar', 300, 100, 200, 100) && !sentinelaBloqueia('rolando', 300, 100, 200, 100), 'fechada ou rolando: sem escudo', null);
+conferir(!sentinelaBloqueia('sobrecarga', 300, 100, 200, 100), 'SOBRECARGA: o escudo caiu — o tiro de frente passa (a 2ª janela)', null);
 
 // O POSTO: na metade direita, longe do anterior na altura.
 const seq = [0.1, 0.12, 0.13, 0.9, 0.5];

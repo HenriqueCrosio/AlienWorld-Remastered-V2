@@ -35,7 +35,7 @@ export function droneAvanca(estado: EstadoDrone, t: number, s: SinaisDrone): Est
  */
 export const droneExplode = (estado: EstadoDrone, t: number): boolean => estado === 'pisca' && t >= ELITES.drone.piscaS;
 
-export type EstadoSentinela = 'rolando' | 'abrir' | 'fogo' | 'fechar' | 'saindo';
+export type EstadoSentinela = 'rolando' | 'abrir' | 'fogo' | 'sobrecarga' | 'fechar' | 'saindo';
 export interface SinaisSentinela {
   /** Chegou ao posto (só conta rolando). */
   chegou: boolean;
@@ -47,7 +47,9 @@ export function sentinelaAvanca(estado: EstadoSentinela, t: number, s: SinaisSen
   const S = ELITES.sentinela;
   if (estado === 'rolando') return s.chegou ? 'abrir' : 'rolando';
   if (estado === 'abrir') return t >= S.abrirS ? 'fogo' : 'abrir';
-  if (estado === 'fogo') return t >= S.fogoS ? 'fechar' : 'fogo';
+  if (estado === 'fogo') return t >= S.fogoS ? 'sobrecarga' : 'fogo';
+  // A SOBRECARGA: o escudo caiu, ela cospe a espiral — a 2ª janela de dano antes de fechar.
+  if (estado === 'sobrecarga') return t >= S.sobrecargaS ? 'fechar' : 'sobrecarga';
   if (estado === 'fechar') {
     if (t < S.fecharS) return 'fechar';
     return s.ciclos >= S.ciclos ? 'saindo' : 'rolando';

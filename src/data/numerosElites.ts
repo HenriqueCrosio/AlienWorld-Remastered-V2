@@ -11,7 +11,8 @@ export const ELITES = {
     raioAlerta: 90,
     /** ...ou quando a rocha passa deste x (nunca atravessa a tela minerando). */
     acordaAteX: 190,
-    alertaS: 0.4,
+    /** O alerta: a broca recolhe e o OLHO ACENDE (8 quadros a 12 qps). */
+    alertaS: 0.65,
     velAtaque: 55,
     /** Quão rápido ele corrige o rumo para a nave (rad/s). */
     giro: 2.5,
@@ -36,6 +37,15 @@ export const ELITES = {
     giroRolando: 540,
     abrirS: 0.5,
     fogoS: 2.5,
+    /**
+     * A SOBRECARGA (05/10, ele: *"precisa ter mais um time vulnerável, onde ele faz mais alguma coisa e pode tomar
+     * dano"*): depois do fogo o escudo CAI e ela gira o canhão cuspindo uma ESPIRAL — perigosa, mas aberta.
+     */
+    sobrecargaS: 1.6,
+    espiralCadaS: 0.09,
+    /** O giro da espiral (rad/s). */
+    espiralGiro: 6.5,
+    velEspiral: 90,
     fecharS: 0.5,
     ciclos: 3,
     /** A abertura TOTAL do arco do escudo, centrado na esquerda. */

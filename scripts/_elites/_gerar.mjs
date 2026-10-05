@@ -104,6 +104,31 @@ const PECAS = {
       `black-blue, low contrast) around a big open crater full of glowing orange-amber crystals, the crater taking about ` +
       `60% of the rock. The crystals are the only light. Crisp pixel art, clean dark outline, transparent background.`,
   },
+  // 05/10 (2) — rock A was CLIPPED by the 80px canvas (straight cut on the left, a stray chunk on the right): the same
+  // design with room around it, never touching the frame.
+  rochaAInteira: {
+    size: 96,
+    ref: 'escolha-rocha-A.png',
+    usage: 'copy this exact geode asteroid: its shape, the thick dark stone ring and the big crater of orange crystals',
+    style: 'public/sprites/asteroid-2.png',
+    description:
+      `A hollow GEODE ASTEROID, COMPLETE and centered with EMPTY transparent margin all around it (the rock never touches ` +
+      `the edges of the image, about 80% of the frame): a thick ring of DARK charcoal-blue stone with a clean rounded ` +
+      `outline all the way around, and a big open crater full of glowing orange-amber crystals taking about 60% of the ` +
+      `rock. The crystals are the only light. Crisp pixel art, clean dark outline, transparent background.`,
+  },
+  // 05/10 (2) — the sentinel without legs (legs in absolute zero read as "slop"): THRUSTERS, and a sturdier hull.
+  sentinelaPropulsores: {
+    size: 48,
+    ref: 'escolha-aberta-A.png',
+    usage: 'keep this sentinel design: the curved segmented ring hull, the red eye-sensor core and the forward blaster',
+    style: 'escolha-aberta-A.png',
+    description:
+      `An ORBITAL SENTINEL war machine hovering in zero gravity, UNFOLDED for combat, like a droideka from Star Wars but ` +
+      `with NO LEGS: a STURDY, heavily armored core body with a thick curved ring hull arching over it, a heavy twin ` +
+      `blaster aimed forward, a red glowing eye-sensor, and two or three small THRUSTER nozzles underneath and at the back ` +
+      `with a faint red-orange glow. Bulky and robust, not spindly. ${SIDE.replace('facing LEFT', 'facing RIGHT')} ${DARK}`,
+  },
   droneC: {
     size: 40,
     ref: 'escolha-drone-C.png',

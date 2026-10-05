@@ -75,15 +75,61 @@ const reduzir = async (buf, escala) => {
   return sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
 };
 
+/**
+ * THE EYE LIGHTING UP (05/10, his ask): painted over the drone's eye lamp (the warm cluster at the top-front of the
+ * body — found per frame, since the body bobs). Level 1: hot orange · 2: yellow + 1px halo · 3: near-white core + wider
+ * halo. Pixels, not a glow FX: a vector glow reads "generated".
+ */
+const acenderOlho = async (buf, nivel) => {
+  const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const W = info.width;
+  const H = info.height;
+  const quentes = [];
+  for (let y = 0; y < Math.ceil(H * 0.3); y++)
+    for (let x = Math.floor(W * 0.55); x < W; x++) {
+      const i = (y * W + x) * 4;
+      if (data[i + 3] && data[i] > 140 && data[i] > data[i + 2] + 60) quentes.push([x, y]);
+    }
+  if (!quentes.length) return buf;
+  const cx = Math.round(quentes.reduce((s, q) => s + q[0], 0) / quentes.length);
+  const cy = Math.round(quentes.reduce((s, q) => s + q[1], 0) / quentes.length);
+  const pintar = (x, y, [r, g, b], soSobreCorpo = false) => {
+    if (x < 0 || y < 0 || x >= W || y >= H) return;
+    const i = (y * W + x) * 4;
+    if (soSobreCorpo && !data[i + 3]) return; // the halo stays on the hull: no square box around the eye
+    data[i] = r;
+    data[i + 1] = g;
+    data[i + 2] = b;
+    data[i + 3] = 255;
+  };
+  const NUCLEO = [[255, 150, 48], [255, 214, 110], [255, 246, 214]][nivel - 1];
+  const HALO = [null, [214, 96, 28], [240, 140, 44]][nivel - 1];
+  if (HALO) {
+    const r = nivel === 3 ? 2 : 1;
+    for (let dy = -r; dy <= r + 1; dy++)
+      for (let dx = -r; dx <= r + 1; dx++) if (Math.abs(dx - 0.5) + Math.abs(dy - 0.5) <= r + 0.5) pintar(cx + dx, cy + dy, HALO, true);
+  }
+  for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) pintar(cx + dx, cy + dy, NUCLEO);
+  return sharp(data, { raw: { width: W, height: H, channels: 4 } }).png().toBuffer();
+};
+
 // ── the drone ──
 const todosDrone = Object.entries(DRONE).flatMap(([c, qs]) => qs.map((q) => path.join(dir, c, `${q}.png`)));
 const caixaD = await caixaUniao([...new Set(todosDrone)]);
 for (const [clip, qs] of Object.entries(DRONE)) {
-  for (const [i, q] of qs.entries()) {
+  const quadros = [];
+  for (const q of qs) {
     const recorte = await sharp(path.join(dir, clip, `${q}.png`)).extract(caixaD).png().toBuffer();
-    fs.writeFileSync(path.join(OUT, `elite-drone-${clip}-${i}.png`), await reduzir(recorte, ESCALA_DRONE));
+    quadros.push(await reduzir(recorte, ESCALA_DRONE));
   }
-  console.log(`elite-drone-${clip}: ${qs.length} quadros`);
+  // The ALERT ends with the eye lighting up over the last frame (the drill is in); in FLIGHT the eye stays lit.
+  if (clip === 'alerta') {
+    const ultimo = quadros[quadros.length - 1];
+    for (const n of [1, 2, 3]) quadros.push(await acenderOlho(ultimo, n));
+  }
+  if (clip === 'voo') for (const [i, q] of quadros.entries()) quadros[i] = await acenderOlho(q, 2);
+  for (const [i, q] of quadros.entries()) fs.writeFileSync(path.join(OUT, `elite-drone-${clip}-${i}.png`), q);
+  console.log(`elite-drone-${clip}: ${quadros.length} quadros`);
 }
 
 // ── the sentinel ──

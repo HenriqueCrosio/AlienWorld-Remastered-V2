@@ -155,6 +155,17 @@ const real = await page.evaluate(() => {
 // O tiro de VERDADE tem de ter batido no escudo (as medidas contam), e não só passado ao lado.
 conferir(real.bloqueados > 0 && (real.fase !== 'fogo' || real.hp === hpAntes), 'o tiro real de frente morre no escudo (as medidas contam os bloqueios)', { hpAntes, ...real });
 
+// A SOBRECARGA (a 2ª janela): o escudo cai, ela cospe a espiral — e o tiro de frente FERE.
+await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela')?.getData('elite')?.fase === 'sobrecarga', null, { timeout: 10000 });
+await espera(300);
+const sobrecarga = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela');
+  const frente = s.ferirInimigo(e, 1, 'probe', { x: e.x - 40, y: e.y });
+  return { frente, tiros: s.enemies.enemyBullets.countActive(true), escudoVisivel: e.getData('elite').escudo?.visible ?? false };
+});
+conferir(sobrecarga.frente === 'vivo' && sobrecarga.tiros >= 4 && !sobrecarga.escudoVisivel, 'sobrecarga: sem escudo, a espiral no ar, e o tiro de frente fere', sobrecarga);
+
 // Depois dos ciclos, ela vai embora.
 await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');

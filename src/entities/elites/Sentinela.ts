@@ -15,6 +15,9 @@ interface Estado {
   cd: number;
   anel: boolean;
   escudo: Phaser.GameObjects.Image | null;
+  /** O rumo atual da ESPIRAL da sobrecarga (rad) e a espera até o próximo tiro dela. */
+  espiral: number;
+  espiralT: number;
 }
 
 const tocar = (e: Sprite, chave: string): void => {
@@ -23,15 +26,16 @@ const tocar = (e: Sprite, chave: string): void => {
 
 /**
  * A SENTINELA ORBITAL (spec frente B §3.3) — à la droideka: ROLANDO (a roda girando até um posto na metade direita)
- * → ABRIR (desdobra e ergue o ESCUDO em arco, virado para a nave) → FOGO (rajadas miradas e um anel) → FECHAR (sem
- * escudo: a janela) → rola para outro posto. Depois de `ciclos` fogos, vai embora rolando. O escudo segura o que vem
+ * → ABRIR (desdobra e ergue o ESCUDO em arco, virado para a nave) → FOGO (rajadas miradas e um anel) → SOBRECARGA (o
+ * escudo CAI e ela cospe uma espiral — perigosa, mas aberta: a 2ª janela, pedido dele de 05/10) → FECHAR (sem escudo)
+ * → rola para outro posto. Depois de `ciclos` fogos, vai embora rolando. O escudo segura o que vem
  * de FRENTE (`sentinelaBloqueia`); por cima, por baixo ou por trás passa. ⚠️ O elétrico NÃO o desfaz (rebalanceamento).
  */
 export const SENTINELA: ComportamentoElite = {
   iniciar(e) {
     vestir(e, 'eliteSentinelaRoda');
     e.setFlipX(false);
-    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), rajada: 0, rajadaT: 0, cd: 0, anel: false, escudo: null };
+    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), rajada: 0, rajadaT: 0, cd: 0, anel: false, escudo: null, espiral: 0, espiralT: 0 };
     e.setData('elite', s);
     e.once('destroy', () => s.escudo?.destroy());
   },
@@ -62,6 +66,7 @@ export const SENTINELA: ComportamentoElite = {
 
     if (s.escudo) s.escudo.setPosition(e.x - e.displayWidth * 0.5, e.y).setAlpha(s.fase === 'abrir' ? Math.min(1, s.t / S.abrirS) : 0.75 + 0.25 * Math.sin(s.t * 18));
     if (s.fase === 'fogo') atirar(e, s, dt, ctx);
+    if (s.fase === 'sobrecarga') espiral(e, s, dt, ctx);
   },
 
   bloqueia(e, deX, deY) {
@@ -84,8 +89,15 @@ function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
     s.escudo.setVisible(true).setAlpha(0);
     s.cd = 0.3;
     s.anel = false;
+  } else if (fase === 'sobrecarga') {
+    // O escudo cai; a espiral começa apontada para a nave.
+    s.escudo?.setVisible(false);
+    s.espiral = Phaser.Math.Angle.Between(e.x, e.y, e.scene.scale.width * 0.15, e.y);
+    s.espiralT = 0;
+    tocar(e, 'elite-sentinela-sobrecarga');
   } else if (fase === 'fechar') {
     s.escudo?.setVisible(false);
+    e.setTint(e.getData('tint') as number);
     tocar(e, 'elite-sentinela-fechar');
   } else if (fase === 'rolando' || fase === 'saindo') {
     vestir(e, 'eliteSentinelaRoda');
@@ -93,6 +105,22 @@ function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
     s.escudo?.setVisible(false);
     if (fase === 'rolando') s.posto = escolherPosto(Math.random, s.posto.y);
   }
+}
+
+/**
+ * A ESPIRAL da sobrecarga: dois braços opostos girando a `espiralGiro`, um tiro por braço a cada `espiralCadaS`. O
+ * corpo PULSA quente (o tint) — o sinal de que está exposta. (A arte da sobrecarga, se vier, entra pela animação
+ * `elite-sentinela-sobrecarga`.)
+ */
+function espiral(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
+  s.espiral += S.espiralGiro * dt;
+  s.espiralT -= dt;
+  if (s.espiralT <= 0) {
+    s.espiralT = S.espiralCadaS;
+    ctx.tiros.disparar(e.x, e.y, s.espiral, S.velEspiral);
+    ctx.tiros.disparar(e.x, e.y, s.espiral + Math.PI, S.velEspiral);
+  }
+  e.setTint(Math.floor(s.t * 12) % 2 ? 0xffb894 : (e.getData('tint') as number));
 }
 
 /** O FOGO: rajadas miradas de `rajadaN`, uma a cada `rajadaCadaS`, e UM anel no meio do fogo. */
