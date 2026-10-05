@@ -681,6 +681,12 @@ const ART: Record<string, string> = {
   bulletOrb: 'sprites/bullet-orb.png',
   ...animFrames('bulletOrbAnim', 'bullet-orb-anim'),
 
+  // OS ELITES DA F2 (frente B, 05/10 — as escolhas dele na folha `folhas/2026-10-05/elites/`). Sem o PNG, a forma
+  // provisória em código nasce na mesma chave (`entities/elites/texturasProvisorias.ts`).
+  eliteSentinela: 'sprites/elite-sentinela.png',
+  eliteSentinelaRoda: 'sprites/elite-sentinela-roda.png',
+  eliteEscudo: 'sprites/elite-escudo.png',
+
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
 

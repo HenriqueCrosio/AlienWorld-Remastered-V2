@@ -81,6 +81,39 @@ const PECAS = {
       `blaster aimed forward-left from the core, small red glowing turret-eyes along the ring. ${SIDE} Like a droideka ` +
       `from Star Wars, but built from a ring. ${DARK}`,
   },
+  // 05/10 — his picks: rock D bigger (the drone works INSIDE the geode crater) with a DARKER outer rock; drone C smaller.
+  rochaD: {
+    size: 80,
+    ref: 'escolha-rocha-D.png',
+    usage: 'copy this exact asteroid design: a hollow GEODE rock, the big open crater full of glowing orange crystals',
+    style: 'escolha-rocha-D.png',
+    description:
+      `A LARGE hollow GEODE ASTEROID filling most of the frame: a thick ring of DARK charcoal-blue stone (much darker ` +
+      `than the reference, nearly black-blue, low contrast) around a big open crater full of glowing orange-amber ` +
+      `crystals. The crater is wide and deep, taking about 60% of the rock. The crystals are the only light. ` +
+      `Crisp pixel art, clean dark outline, transparent background.`,
+  },
+  // The output followed the STYLE image's size (52×50 = rock D). With the game's small rock as style, it can grow.
+  rochaDGrande: {
+    size: 80,
+    ref: 'escolha-rocha-D.png',
+    usage: 'copy this exact asteroid design: a hollow GEODE rock, the big open crater full of glowing orange crystals',
+    style: 'public/sprites/asteroid-2.png',
+    description:
+      `A LARGE hollow GEODE ASTEROID filling the whole frame: a thick ring of DARK charcoal-blue stone (nearly ` +
+      `black-blue, low contrast) around a big open crater full of glowing orange-amber crystals, the crater taking about ` +
+      `60% of the rock. The crystals are the only light. Crisp pixel art, clean dark outline, transparent background.`,
+  },
+  droneC: {
+    size: 40,
+    ref: 'escolha-drone-C.png',
+    usage: 'copy this exact mining mech design, just smaller: stacked cylindrical armor, hooked claws, front drill, orange lights',
+    style: 'escolha-drone-C.png',
+    description:
+      `The same HEAVY MINING MECH drone as the reference, drawn SMALLER with fewer, cleaner pixels: a compact body of ` +
+      `stacked cylindrical armor segments, hooked crab claws below, a rotary drill at its front pointing right. ${SIDE.replace('facing LEFT', 'facing RIGHT')} ` +
+      `Orange-amber glowing vents and one orange eye lamp. ${DARK}`,
+  },
   sentinelaRoda: {
     size: 32,
     ref: 'sentinela.png',
@@ -97,6 +130,8 @@ const p = PECAS[peca];
 if (!p) throw new Error(`piece? ${Object.keys(PECAS).join(' | ')}`);
 fs.mkdirSync(outDir, { recursive: true });
 const refArq = path.join(REF, p.ref);
+// The style image is a repo sprite or, for the picks of 05/10, a file in the concept-crops folder.
+p.style = fs.existsSync(p.style) ? p.style : path.join(REF, p.style);
 const styleSize = await tamanho(p.style);
 
 for (const seed of seeds.map(Number)) {
