@@ -6,6 +6,8 @@ import { PadroesDeTiro } from './PadroesDeTiro';
 import { ELITES } from '../data/numerosElites';
 import type { ComportamentoElite, CtxElite, GanchosElite } from '../entities/elites/tipos';
 import { criarTexturasElites } from '../entities/elites/texturasProvisorias';
+import { DRONE_MINERACAO } from '../entities/elites/DroneMineracao';
+import { SENTINELA } from '../entities/elites/Sentinela';
 
 export type EnemyKind =
   | 'drone'
@@ -173,8 +175,8 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   aguaViva: { texture: 'aguaViva', anim: 'aguaviva-drift', hp: 10, speed: 34, wave: 26, fireRate: 0, score: 120, scale: 0.6, tint: 0xffffff, homing: 0, spawnRate: 0, travessia: 'vertical' },
   // OS ELITES (frente B, spec 2026-10-05): a máquina de estados mora em `entities/elites`; `speed`/`fireRate` 0
   // porque quem anda e atira é ela.
-  droneMineracao: { texture: 'eliteDrone', hp: ELITES.drone.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.drone.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0 },
-  sentinela: { texture: 'eliteSentinelaRoda', hp: ELITES.sentinela.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.sentinela.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0 },
+  droneMineracao: { texture: 'eliteDrone', hp: ELITES.drone.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.drone.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: DRONE_MINERACAO },
+  sentinela: { texture: 'eliteSentinelaRoda', hp: ELITES.sentinela.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.sentinela.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: SENTINELA },
 };
 
 /**
