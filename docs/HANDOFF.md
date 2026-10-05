@@ -34,7 +34,12 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > F1 ganhou volume. **A ARTE (Task 10, escolhas dele):** drone C (reduzido a 70%), rocha D regerada maior (80×71) com
 > a pedra ESCURECIDA por script (`_elites/_tratar.mjs`), o drone trabalhando DENTRO da cratera (o rabisco dele — a rocha
 > deixa passar o tiro na faixa do drone, senão a janela de matar antes sumia), sentinela roda R3 + aberta A, o escudo
-> desenhado à mão; animações PixMiniMax (minerar, alerta, voo, abrir/fechar). **Pendente:** ele julgar os GIFs e jogar.
+> desenhado à mão; animações PixMiniMax (minerar, alerta, voo, abrir/fechar). **2ª rodada (pedidos dele depois do 1º
+> GIF):** a rocha refeita INTEIRA (a A encostava no quadro de 80px: corte reto + lasca) → a **rocha 1** (80×78, mais
+> arredondada); o **alerta com o OLHO ACENDENDO** (pixel a pixel, e aceso no voo); a sentinela **S2 com PROPULSORES**
+> (*"pernas no zero absoluto ficou slopado"*) com pairar / disparo / sobrecarga / abrir-fechar animados; e a
+> **SOBRECARGA** (a 2ª janela vulnerável: o escudo cai e ela cospe uma espiral). GIFs `*-v2.gif`. **Pendente:** ele
+> julgar os GIFs v2 e jogar. **Sugestão dele, anotada:** o tiro do drone virar CRISTAIS laranja (a cor que ele minera).
 > **Rebalanceamento:** o elétrico desfazer o escudo (ADIADO por ele). As sondas `probe-stage2` (a nave parada morre aos
 > 37s) e `probe-chain` (o chefão da F1 fica vivo) já falhavam em 04/10 — conferido na linha de base, não é da frente B.
 >

@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "185f87e0-809d-4c95-a838-12a86ca328c7",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the armored ball stops rolling and unfolds into the war machine: the shell splits open into a curved ring arching over the body, the gatling blaster unfolds forward and the thrusters underneath ignite",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

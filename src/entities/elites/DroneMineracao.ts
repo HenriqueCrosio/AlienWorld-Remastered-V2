@@ -21,10 +21,10 @@ interface Estado {
 
 /**
  * O ENCAIXE NA CRATERA (05/10, o rabisco dele): o drone trabalha DENTRO do geodo, no canto de cima à direita da
- * cratera, virado para o cristal. Medido na arte aprovada (`elite-rocha.png`, 80×71: a cratera centrada em (34, 30))
- * — trocou a rocha, mede de novo (`scripts/_elites/_tratar.mjs cratera`).
+ * cratera, virado para o cristal. Medido na arte aprovada (`elite-rocha.png` = a rocha 1 inteira, 80×78: a cratera
+ * centrada em (40, 34)) — trocou a rocha, mede de novo (`scripts/_elites/_tratar.mjs cratera`).
  */
-const ENCAIXE = { x: 2, y: -11 };
+const ENCAIXE = { x: 8, y: -11 };
 
 /** As animações, se a arte já as registrou (a provisória é estática). */
 const tocar = (e: Sprite, chave: string): void => {

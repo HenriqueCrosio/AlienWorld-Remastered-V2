@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "211c31e0-d492-4a46-80d6-2428ff7cea0e",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the war machine hovers in place in zero gravity: its thrusters underneath flicker with small red-orange flames and the body bobs gently up and down; it does not move away",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

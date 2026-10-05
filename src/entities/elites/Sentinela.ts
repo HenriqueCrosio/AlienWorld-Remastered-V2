@@ -20,6 +20,13 @@ interface Estado {
   espiralT: number;
 }
 
+/**
+ * A HITBOX da forma aberta, FIXA: o quadro da S2 (63×50) inclui as chamas dos propulsores e o clarão do disparo, e a
+ * hitbox não pode crescer com eles. O escudo fica a `ESCUDO_DX` à frente do centro.
+ */
+const CORPO = { w: 26, h: 24 };
+const ESCUDO_DX = 24;
+
 const tocar = (e: Sprite, chave: string): void => {
   if (e.scene.anims.exists(chave) && e.anims.currentAnim?.key !== chave) e.play(chave);
 };
@@ -64,8 +71,13 @@ export const SENTINELA: ComportamentoElite = {
       body.setVelocity(0, 0);
     }
 
-    if (s.escudo) s.escudo.setPosition(e.x - e.displayWidth * 0.5, e.y).setAlpha(s.fase === 'abrir' ? Math.min(1, s.t / S.abrirS) : 0.75 + 0.25 * Math.sin(s.t * 18));
-    if (s.fase === 'fogo') atirar(e, s, dt, ctx);
+    if (s.escudo) s.escudo.setPosition(e.x - ESCUDO_DX, e.y).setAlpha(s.fase === 'abrir' ? Math.min(1, s.t / S.abrirS) : 0.75 + 0.25 * Math.sin(s.t * 18));
+    if (s.fase === 'fogo') {
+      // Pairando (as chamas piscam) entre um disparo e outro; o DISPARO toca inteiro antes de voltar.
+      const disparando = e.anims.isPlaying && e.anims.currentAnim?.key === 'elite-sentinela-disparo';
+      if (!disparando) tocar(e, 'elite-sentinela-pairar');
+      atirar(e, s, dt, ctx);
+    }
     if (s.fase === 'sobrecarga') espiral(e, s, dt, ctx);
   },
 
@@ -81,7 +93,7 @@ function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
   s.t = 0;
   if (fase === 'abrir') {
     e.setRotation(0);
-    vestir(e, 'eliteSentinela');
+    vestir(e, 'eliteSentinela', CORPO);
     // Virada para a nave: a arte nasce apontando para a direita.
     e.setFlipX(true);
     tocar(e, 'elite-sentinela-abrir');
@@ -120,7 +132,8 @@ function espiral(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
     ctx.tiros.disparar(e.x, e.y, s.espiral, S.velEspiral);
     ctx.tiros.disparar(e.x, e.y, s.espiral + Math.PI, S.velEspiral);
   }
-  e.setTint(Math.floor(s.t * 12) % 2 ? 0xffb894 : (e.getData('tint') as number));
+  // Sem a arte da sobrecarga, o corpo PULSA quente em código (o sinal de que está exposta).
+  if (!e.scene.anims.exists('elite-sentinela-sobrecarga')) e.setTint(Math.floor(s.t * 12) % 2 ? 0xffb894 : (e.getData('tint') as number));
 }
 
 /** O FOGO: rajadas miradas de `rajadaN`, uma a cada `rajadaCadaS`, e UM anel no meio do fogo. */
@@ -143,6 +156,8 @@ function atirar(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
   if (s.cd <= 0) {
     s.cd = S.rajadaCadaS;
     s.rajada = S.rajadaN;
+    // Cada rajada começa com o DISPARO da arte (os canos giram, o clarão pisca).
+    if (e.scene.anims.exists('elite-sentinela-disparo')) e.play('elite-sentinela-disparo');
     s.rajadaT = 0;
   }
 }

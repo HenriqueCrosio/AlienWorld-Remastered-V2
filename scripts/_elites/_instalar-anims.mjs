@@ -132,12 +132,29 @@ for (const [clip, qs] of Object.entries(DRONE)) {
   console.log(`elite-drone-${clip}: ${quadros.length} quadros`);
 }
 
-// ── the sentinel ──
-const abrir = Array.from({ length: 9 }, (_, i) => path.join(dir, 'abrir', `${i}.png`));
-const caixaS = await caixaUniao(abrir);
-for (const [i, f] of abrir.entries()) {
-  const q = await sharp(f).extract(caixaS).png().toBuffer();
-  fs.writeFileSync(path.join(OUT, `elite-sentinela-abrir-${i}.png`), q);
-  fs.writeFileSync(path.join(OUT, `elite-sentinela-fechar-${8 - i}.png`), q);
+// ── the sentinel (05/10 (2): S2 with thrusters — the clips live in a SECOND folder) ──
+// Every open-form frame (and the static) shares ONE crop box: switching animation never jumps. The hitbox is fixed in
+// code (`Sentinela.ts`), so flames and muzzle flashes do not grow it.
+const dirS = process.argv[3] ?? dir;
+const SENTINELA = {
+  abrir: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  // Thrusters flickering while it fires: a cycle (1..8).
+  pairar: [1, 2, 3, 4, 5, 6, 7, 8],
+  // Overheating: the vents open (1..3) then glow — looped from 3 in yo-yo so the vents stay open.
+  sobrecarga: [3, 4, 5, 6, 7, 8, 7, 6, 5, 4],
+  // One burst: barrels spin, flash, settle.
+  disparo: [1, 2, 3, 4, 5, 6, 7, 8],
+};
+const todosS = Object.entries(SENTINELA).flatMap(([c, qs]) => qs.map((q) => path.join(dirS, c, `${q}.png`)));
+const caixaS = await caixaUniao([...new Set(todosS)]);
+for (const [clip, qs] of Object.entries(SENTINELA)) {
+  for (const [i, q] of qs.entries()) {
+    const quadro = await sharp(path.join(dirS, clip, `${q}.png`)).extract(caixaS).png().toBuffer();
+    fs.writeFileSync(path.join(OUT, `elite-sentinela-${clip}-${i}.png`), quadro);
+    if (clip === 'abrir') fs.writeFileSync(path.join(OUT, `elite-sentinela-fechar-${qs.length - 1 - i}.png`), quadro);
+  }
+  console.log(`elite-sentinela-${clip}: ${qs.length} quadros`);
 }
-console.log(`elite-sentinela-abrir/fechar: 9 quadros, ${caixaS.width}x${caixaS.height}; drone ${Math.round(caixaD.width * ESCALA_DRONE)}x${Math.round(caixaD.height * ESCALA_DRONE)}`);
+// The static open form = the first hover frame, in the same box.
+fs.writeFileSync(path.join(OUT, 'elite-sentinela.png'), await sharp(path.join(dirS, 'pairar', '1.png')).extract(caixaS).png().toBuffer());
+console.log(`sentinela: caixa ${caixaS.width}x${caixaS.height}`);

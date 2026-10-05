@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "28a41b1d-9cda-4aa4-b049-bbcfc798a525",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the war machine fires its gatling blaster forward: the barrels spin and a short red muzzle flash blinks at the tip, the body recoils a little and settles back",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

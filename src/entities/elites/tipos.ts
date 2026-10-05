@@ -31,8 +31,13 @@ export interface ComportamentoElite {
   bloqueia?(e: Sprite, deX: number, deY: number): boolean;
 }
 
-/** Troca a textura E refaz a hitbox (o corpo do Arcade não acompanha a troca sozinho). */
-export function vestir(e: Sprite, chave: string): void {
+/**
+ * Troca a textura E refaz a hitbox (o corpo do Arcade não acompanha a troca sozinho). `corpo` = um tamanho FIXO, para
+ * arte cujo quadro inclui chama ou clarão (a hitbox não cresce com eles).
+ */
+export function vestir(e: Sprite, chave: string, corpo?: { w: number; h: number }): void {
   if (e.texture.key !== chave) e.setTexture(chave);
-  (e.body as Phaser.Physics.Arcade.Body).setSize(e.width * 0.6, e.height * 0.55);
+  const b = e.body as Phaser.Physics.Arcade.Body;
+  if (corpo) b.setSize(corpo.w, corpo.h);
+  else b.setSize(e.width * 0.6, e.height * 0.55);
 }

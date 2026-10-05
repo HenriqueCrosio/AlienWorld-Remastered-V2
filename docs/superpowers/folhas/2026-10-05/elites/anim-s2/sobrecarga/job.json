@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "8d4b2b88-1623-4d3d-bb6d-ba2e7a4b8a9c",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the war machine overheats: glowing red-orange heat vents open along its curved ring, the thrusters flare bright and the gatling barrels spin fast; it shakes slightly in place",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

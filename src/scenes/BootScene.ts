@@ -58,6 +58,9 @@ const FRAMES: Record<string, number> = {
   eliteDroneVooAnim: 8,
   eliteSentinelaAbrirAnim: 9,
   eliteSentinelaFecharAnim: 9,
+  eliteSentinelaPairarAnim: 8,
+  eliteSentinelaSobrecargaAnim: 10,
+  eliteSentinelaDisparoAnim: 8,
   // A BOLA de energia da canhoneira do cinturão, agora ANIMADA (2026-08-09): ela pulsa e solta
   // fagulha no ar em vez de ser um adesivo. Os quadros nasceram com DERIVA (o desenho escorregava
   // 5.6px para a esquerda ao longo do ciclo, o que num projétil soma à velocidade e vira
@@ -171,6 +174,11 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'elite-drone-voo', prefix: 'eliteDroneVooAnim', frameRate: 12 },
   { key: 'elite-sentinela-abrir', prefix: 'eliteSentinelaAbrirAnim', frameRate: 18, loop: false },
   { key: 'elite-sentinela-fechar', prefix: 'eliteSentinelaFecharAnim', frameRate: 18, loop: false },
+  // A S2 com propulsores (05/10 (2)): pairando no fogo (as chamas piscam), o DISPARO a cada rajada (uma vez), e a
+  // SOBRECARGA (as frestas do anel em brasa).
+  { key: 'elite-sentinela-pairar', prefix: 'eliteSentinelaPairarAnim', frameRate: 12 },
+  { key: 'elite-sentinela-disparo', prefix: 'eliteSentinelaDisparoAnim', frameRate: 18, loop: false },
+  { key: 'elite-sentinela-sobrecarga', prefix: 'eliteSentinelaSobrecargaAnim', frameRate: 14 },
   // A BOLA de energia dela: 14, a mesma cadência do 'comet-burn'/'blast-burn'. Projétil é a
   // única coisa no jogo que pulsa RÁPIDO — energia lenta parece plástico, e um tiro que parece
   // plástico não lê como perigo.
@@ -705,6 +713,9 @@ const ART: Record<string, string> = {
   ...animFrames('eliteDroneVooAnim', 'elite-drone-voo'),
   ...animFrames('eliteSentinelaAbrirAnim', 'elite-sentinela-abrir'),
   ...animFrames('eliteSentinelaFecharAnim', 'elite-sentinela-fechar'),
+  ...animFrames('eliteSentinelaPairarAnim', 'elite-sentinela-pairar'),
+  ...animFrames('eliteSentinelaSobrecargaAnim', 'elite-sentinela-sobrecarga'),
+  ...animFrames('eliteSentinelaDisparoAnim', 'elite-sentinela-disparo'),
   eliteEscudo: 'sprites/elite-escudo.png',
 
   turret: 'sprites/turret.png',
