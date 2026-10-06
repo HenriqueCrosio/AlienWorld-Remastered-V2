@@ -3,6 +3,26 @@
 > **Frase de arranque:** *"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-10-05-elites-retomada-START.md`. A fatia F2
 > dos elites está jogável com a arte dele e empurrada; vou analisar o GIF v3 da sentinela e jogar o sandbox e a F2."*
 
+## 0. ✅ 06/10 — A FATIA F2 FECHOU (aprovada); agora a F3
+
+O retorno dele ao v3 e o que entrou (commits `923ec61` → `32f725c`):
+
+- **Menos punição** (memória `elites-pressionam-sem-punir`): rajada do drone a 0,3s (não mais "fila indiana"), 5
+  estilhaços, o leque do fogo com 2 tiros em 36°, a varredura com ~7 tiros em 100°. Um ciclo da sentinela: ~9 tiros.
+- **Os canos da sentinela** acompanham o corpo no disparo (coice de 4px) e na sobrecarga (sobe 2px): o
+  `_instalar-anims.mjs` mede o deslocamento do corpo por quadro e cola os canos do quadro parado deslocados.
+- **O escudo com VIDA** (pedido dele): `escudoHp` 8 por ciclo; o `bloqueia` recebe o dano (caminho único
+  `ferirInimigo`), `escudoAbsorve` é regra pura; quebrado, ela fica exposta até o próximo ABRIR. Pisca a cada golpe,
+  enfraquece e estoura em lascas.
+- **Os tiros DESENHADOS** (`scripts/_elites/_folha-tiros-elites.mjs`, folha em `folhas/2026-10-06/elites/tiros/`):
+  minigun M-C (7×1 vermelho, só a ponta acesa) — a minigun tem DOIS canos (linhas 27 e 31 da arte), um tiro do leque
+  de cada; balaço P-A (9×3) do canhão de cima; cristal C-C do drone; estilhaços em losango C-A.
+  `PadroesDeTiro.vestirArte` dá a hitbox própria (o `release` devolve a do `bolt2`, 13×9).
+- **Lição:** no Windows o sharp segura o arquivo aberto — para recodificar um GIF no lugar, leia com
+  `fs.readFileSync` antes. E `interFrameMaxError` vai só até 32 (24 + 96 cores deixa o GIF em ~2–3 MB).
+
+**Próximo: a fatia F3** (Caçador de Vácuo na nebulosa + Tentáculo do casco), o mesmo método.
+
 ## 1. 📍 O PONTO MARCADO — ele ANALISA o v3
 
 Tudo de 05/10 está **commitado e empurrado** (`feat/cartas-preview`, sem merge). O que espera o olho dele:
