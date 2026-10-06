@@ -82,7 +82,8 @@ await page.evaluate(() => {
   const orig = t.disparar.bind(t);
   t.disparar = (...a) => (window.__disparos++, orig(...a));
 });
-await espera(1800);
+// Uma rajada inteira cabe na janela: até `rajadaCadaS` (1,4s) para começar + 2 × `rajadaEspacoS` (0,3s, 06/10).
+await espera(2400);
 const disparos = await page.evaluate(() => window.__disparos);
 conferir(disparos >= 3, 'atacando, ele atira (rajadas)', disparos);
 
@@ -175,7 +176,8 @@ const municao = await page.evaluate(() => {
   };
 });
 conferir(
-  municao.pesados.length >= 1 && municao.leves.length >= 3 && Math.max(...municao.pesados) < Math.min(...municao.leves),
+  // O leque de 2 (06/10; eram 3).
+  municao.pesados.length >= 1 && municao.leves.length >= 2 && Math.max(...municao.pesados) < Math.min(...municao.leves),
   'fogo: a bola pesada (mais lenta) e o leque leve (mais rápido), alternando',
   municao,
 );

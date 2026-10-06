@@ -18,13 +18,15 @@ export const ELITES = {
     giro: 2.5,
     rajadaCadaS: 1.4,
     rajadaN: 3,
-    rajadaEspacoS: 0.12,
+    /** 06/10, ele: os 3 saíam *"colados em fila indiana"* (0.12s ≈ 13px) — agora ~33px entre eles. */
+    rajadaEspacoS: 0.3,
     velTiro: 110,
     ataqueMaxS: 5,
     raioPisca: 34,
     piscaS: 0.6,
     raioExplosao: 30,
-    estilhacos: 8,
+    /** 06/10, ele: *"não precisa ser tão punitivo"* (eram 8). */
+    estilhacos: 5,
     velEstilhaco: 100,
   },
   /** O asteroide minerável (o hazard `mineravel`). */
@@ -60,8 +62,12 @@ export const ELITES = {
     pesadoVel: 60,
     /** A escala da bola (a `bulletOrb` da canhoneira do cinturão nasce a 0.8). */
     pesadoEscala: 1.0,
-    lequeN: 3,
-    lequeAberturaGraus: 24,
+    /**
+     * 06/10, ele: o leque com MENOS tiros e mais espaço entre eles (eram 3 em 24°) — os elites atiram, mas a nave
+     * ainda lida com o resto da fase. Com 2, o vão cai na linha da nave: o leque cerca, não caça.
+     */
+    lequeN: 2,
+    lequeAberturaGraus: 28,
     lequeVel: 120,
     postoX: [230, 330] as const,
     postoY: [40, 176] as const,

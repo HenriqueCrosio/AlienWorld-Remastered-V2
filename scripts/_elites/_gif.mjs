@@ -73,6 +73,8 @@ for (let i = 0; i < total; i++) {
     const s = window.__game.scene.getScene('Game');
     const e = s.enemies.enemies.getChildren().find((x) => x.active);
     if (cena === 'drone' && t > 2.5 && e?.getData('elite')?.fase === 'minerando') s.ship.setPosition(Math.min(s.ship.x + 3, e.x - 70), s.ship.y);
+    // 06/10: the ship backs off while it attacks — the bursts read FROM AFAR (their spacing) — then lets it close in.
+    if (cena === 'drone' && t < 8.5 && e?.getData('elite')?.fase === 'ataque') s.ship.setPosition(Math.max(16, Math.min(s.ship.x, e.x - 130)), s.ship.y);
     if (cena === 'sentinela' && e) s.ship.setPosition(60, s.ship.y + Math.sign(e.y - s.ship.y) * Math.min(1.5, Math.abs(e.y - s.ship.y)));
   }, { cena: CENA, t });
   if (CENA === 'sentinela' && i === 20) await page.keyboard.down('Space');

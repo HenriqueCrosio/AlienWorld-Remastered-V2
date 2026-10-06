@@ -156,19 +156,51 @@ const caixaS = await caixaUniao([...new Set(todosS)]);
  */
 const CANOS = [
   { x0: 24, y0: 2, x1: 44, y1: 11 }, // the upper cannon
+  { x0: 40, y0: 12, x1: 44, y1: 13 }, // a flash remnant just under its tip (06/10)
   { x0: 27, y0: 20, x1: 44, y1: 37 }, // the minigun (y 20–37: flash remnants sat just above and below it)
 ];
 const PONTA_X = 45;
 // The guns are COPIED from the approved still (hover frame 1) — the generator had turned whole barrels into flash, and
 // repainting them grey left a hollow outline.
 const BASE = await sharp(path.join(dirS, 'pairar', '1.png')).extract(caixaS).ensureAlpha().raw().toBuffer();
+const ehCano = (x, y) => x >= PONTA_X || CANOS.some((c) => x >= c.x0 && x <= c.x1 && y >= c.y0 && y <= c.y1);
+/**
+ * THE BODY MOVES, so the copied guns must move with it (06/10, his note: *"ao atirar ele corta parte da minigun e da
+ * metralhadora de cima — a ponta não acompanha o movimento do corpo"*): the fire clip recoils up to 4px back and the
+ * overload rises 2px, and guns pinned at the still's place came off the hull. The offset is measured per frame against
+ * the still, on the hull only (guns, tips and thruster flames out), and the still's guns are pasted at that offset.
+ */
+const medirDesloc = (data, W, H) => {
+  const lum = (d, i) => (d[i + 3] ? (d[i] + d[i + 1] + d[i + 2]) / 3 : -60);
+  const fora = (x, y) => x >= PONTA_X || CANOS.some((c) => x >= c.x0 - 2 && x <= c.x1 && y >= c.y0 - 2 && y <= c.y1 + 2) || (y >= 32 && x < 24);
+  let melhor = { dx: 0, dy: 0, v: Infinity };
+  for (let dy = -4; dy <= 4; dy++)
+    for (let dx = -5; dx <= 5; dx++) {
+      let s = 0;
+      let c = 0;
+      for (let y = 0; y < H; y++)
+        for (let x = 0; x < W; x++) {
+          const xs = x - dx;
+          const ys = y - dy;
+          if (fora(x, y) || xs < 0 || ys < 0 || xs >= W || ys >= H) continue;
+          s += Math.abs(lum(data, (y * W + x) * 4) - lum(BASE, (ys * W + xs) * 4));
+          c++;
+        }
+      if (s / c < melhor.v) melhor = { dx, dy, v: s / c };
+    }
+  return melhor;
+};
 const acalmarLuzes = async (buf) => {
   const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { dx, dy } = medirDesloc(data, info.width, info.height);
   for (let y = 0; y < info.height; y++)
     for (let x = 0; x < info.width; x++) {
       const i = (y * info.width + x) * 4;
-      if (x >= PONTA_X || CANOS.some((c) => x >= c.x0 && x <= c.x1 && y >= c.y0 && y <= c.y1)) {
-        for (let k = 0; k < 4; k++) data[i + k] = BASE[i + k];
+      const xs = x - dx;
+      const ys = y - dy;
+      if (ehCano(xs, ys)) {
+        const dentro = xs >= 0 && ys >= 0 && xs < info.width && ys < info.height;
+        for (let k = 0; k < 4; k++) data[i + k] = dentro ? BASE[(ys * info.width + xs) * 4 + k] : 0;
         continue;
       }
       if (!data[i + 3]) continue;
