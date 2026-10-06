@@ -64,9 +64,8 @@ export const ELITES = {
      * da fase; agora ~18.
      */
     alternarCadaS: 0.6,
+    /** O BALAÇO do canhão de cima (06/10: era a bola rosa da canhoneira; agora o tiro desenhado, ver `Sentinela.ts`). */
     pesadoVel: 60,
-    /** A escala da bola (a `bulletOrb` da canhoneira do cinturão nasce a 0.8). */
-    pesadoEscala: 1.0,
     /**
      * 06/10, ele: o leque com MENOS tiros e mais espaço entre eles (eram 3 em 24°) — os elites atiram, mas a nave
      * ainda lida com o resto da fase. Com 2, o vão cai na linha da nave: o leque cerca, não caça.

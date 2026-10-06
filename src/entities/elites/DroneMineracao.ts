@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
 import { ELITES } from '../../data/numerosElites';
 import { droneAvanca, droneExplode, type EstadoDrone } from '../../elitesRegras';
+import { PadroesDeTiro } from '../../systems/PadroesDeTiro';
 import type { ComportamentoElite, CtxElite, Sprite } from './tipos';
 
 const D = ELITES.drone;
+/** O tiro é um CRISTAL laranja do que ele minera (sugestão dele; 06/10, o "grão + rastro" C-C, 5×3), hitbox 4×3. */
+const vestirCristal = PadroesDeTiro.vestirArte('eliteTiroCristal', { w: 4, h: 3 });
 
 interface Estado {
   fase: EstadoDrone;
@@ -116,7 +119,7 @@ function atirar(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
   if (s.rajada > 0) {
     s.rajadaT -= dt;
     if (s.rajadaT <= 0) {
-      ctx.tiros.mirado(e.x, e.y, ctx.alvo.x, ctx.alvo.y, D.velTiro);
+      ctx.tiros.mirado(e.x, e.y, ctx.alvo.x, ctx.alvo.y, D.velTiro, vestirCristal);
       s.rajada--;
       s.rajadaT = D.rajadaEspacoS;
     }

@@ -19,6 +19,23 @@ export class PadroesDeTiro {
     b.setBlendMode(Phaser.BlendModes.ADD);
   }
 
+  /**
+   * Um tiro DESENHADO (06/10, os dos elites): a arte nas cores dela, sem tint nem brilho, e uma hitbox PRÓPRIA centrada
+   * no quadro — o `release` devolve a do `bolt2` (13×9), grande e torta para um traço de 7×1.
+   */
+  static vestirArte(chave: string, corpo: { w: number; h: number }): (b: Tiro) => void {
+    return (b) => {
+      b.setTexture(chave).setScale(1).clearTint();
+      b.setBlendMode(Phaser.BlendModes.NORMAL);
+      (b.body as Phaser.Physics.Arcade.Body).setSize(corpo.w, corpo.h, true);
+    };
+  }
+
+  /** O clarão de boca, sozinho (quem atira de mais de um cano o desenha em cada um). */
+  clarao(x: number, y: number, n = 3): void {
+    this.flash.explode(n, x, y);
+  }
+
   /** Um tiro. Devolve false se a piscina estiver cheia (o tiro é descartado, como em `fireAt`). */
   disparar(x: number, y: number, angulo: number, vel: number, vestir: (b: Tiro) => void = PadroesDeTiro.vestirPadrao): boolean {
     const b = this.pool.get(x, y) as Tiro | null;

@@ -1072,6 +1072,11 @@ const ART: Record<string, string> = {
   // OS TIROS LASER das linhagens (04/10): 7×1 à mão, só a ponta acesa (`scripts/_folha-tiros-laser.mjs`, o "G").
   tiroLaserHumana: 'sprites/tiros/laser-humana.png',
   tiroLaserAlien: 'sprites/tiros/laser-alien.png',
+  // OS TIROS DOS ELITES DA F2 (06/10), à mão (`scripts/_elites/_folha-tiros-elites.mjs`): a minigun da sentinela no
+  // vermelho dela, só a ponta acesa (M-C); o balaço do canhão de cima (P-A, provisório); o cristal do drone (C-C).
+  eliteTiroMinigun: 'sprites/tiros/elite-minigun.png',
+  eliteTiroBalaco: 'sprites/tiros/elite-balaco.png',
+  eliteTiroCristal: 'sprites/tiros/elite-cristal.png',
   // A ARTE APROVADA DAS PEÇAS (03/10, spec do catálogo §5.1b–c) com as MESMAS chaves das provisórias — quem existe
   // aqui, a `criarTexturasProvisorias` pula. O sufixo `-alien` é a versão da linhagem alien (`texturaDaLinhagem`).
   'carta-missil': 'sprites/cartas/pecas/missil-humano.png',

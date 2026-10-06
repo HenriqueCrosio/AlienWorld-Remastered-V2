@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ELITES } from '../../data/numerosElites';
 import { escolherPosto, escudoAbsorve, sentinelaAvanca, sentinelaBloqueia, type EstadoSentinela } from '../../elitesRegras';
+import { PadroesDeTiro } from '../../systems/PadroesDeTiro';
 import { vestir, type ComportamentoElite, type CtxElite, type Sprite } from './tipos';
 
 const S = ELITES.sentinela;
@@ -27,23 +28,27 @@ const CORPO = { w: 26, h: 24 };
 const ESCUDO_DX = 24;
 /**
  * As BOCAS, medidas na arte (o quadro 63×50 apontando para a DIREITA; em jogo ela está espelhada, virada para a nave):
- * o canhão de cima na altura y≈6 e a minigun em y≈27, as duas pontas em x≈44. Em relação ao centro do sprite.
+ * o canhão de cima com a alma na linha 7 e a minigun com DOIS canos, nas linhas 27 e 31; as pontas em x≈43. Em
+ * relação ao centro do sprite (31,5; 25). 06/10: medido de novo na arte (a de cima estava 1,5px acima do cano).
  */
-const BOCA_CIMA = { dx: 13, dy: -19 };
-const BOCA_MINIGUN = { dx: 13, dy: 2 };
+const BOCA_CIMA = { dx: 13, dy: -18 };
+/** Os DOIS canos da minigun, o de cima primeiro: o leque solta um tiro de cada (06/10, o desenho dele). */
+const CANOS_MINIGUN = [
+  { dx: 13, dy: 2 },
+  { dx: 13, dy: 6 },
+] as const;
 
 const tocar = (e: Sprite, chave: string): void => {
   if (e.scene.anims.exists(chave) && e.anims.currentAnim?.key !== chave) e.play(chave);
 };
 
-/** A BOLA PESADA: a `bulletOrb` da canhoneira do cinturão, maior — o mesmo figurino de `EnemySystem.fireAt`. */
-const vestirPesado = (b: Phaser.Physics.Arcade.Sprite): void => {
-  b.setTexture('bulletOrb').setScale(S.pesadoEscala).clearTint();
-  b.setBlendMode(Phaser.BlendModes.NORMAL);
-  if (b.scene.anims.exists('bullet-orb-pulse')) b.play('bullet-orb-pulse');
-  // A bola ocupa 18×18 de um quadro 20×24, centrada em (10, 12): só ela fere, a fagulha não (ver `fireAt`).
-  (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
-};
+/**
+ * OS TIROS DESENHADOS (06/10, ele: *"mais fiel aos canos das metralhadoras — da minigun os tiros são finos e
+ * vermelhos; o pesado com o aspecto dos outros, mas um balaço"*). Era a bola rosa da canhoneira e o `bolt2` magenta.
+ * A minigun: 7×1, só a ponta acesa (M-C), hitbox 4×3. O balaço: 9×3 (P-A, provisório), hitbox 6×4.
+ */
+const vestirMinigun = PadroesDeTiro.vestirArte('eliteTiroMinigun', { w: 4, h: 3 });
+const vestirPesado = PadroesDeTiro.vestirArte('eliteTiroBalaco', { w: 6, h: 4 });
 
 /** A boca, no mundo: as medidas da arte, espelhadas quando ela está virada para a nave. */
 const boca = (e: Sprite, b: { dx: number; dy: number }): { x: number; y: number } => ({
@@ -193,8 +198,10 @@ function varrer(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
     const arco = Phaser.Math.DegToRad(S.varreduraArcoGraus);
     // π é a esquerda; π + arco/2 aponta para cima-esquerda (o y cresce para baixo) e desce até π − arco/2.
     const ang = Math.PI + arco / 2 - arco * Math.min(1, s.t / S.sobrecargaS);
-    const m = boca(e, BOCA_MINIGUN);
-    ctx.tiros.disparar(m.x, m.y, ang, S.velVarredura);
+    // Os dois canos se revezam na varredura.
+    const m = boca(e, CANOS_MINIGUN[Math.floor(s.t / S.varreduraCadaS) % 2]);
+    ctx.tiros.disparar(m.x, m.y, ang, S.velVarredura, vestirMinigun);
+    ctx.tiros.clarao(m.x, m.y, 2);
   }
   if (!e.scene.anims.exists('elite-sentinela-sobrecarga')) e.setTint(Math.floor(s.t * 12) % 2 ? 0xffb894 : (e.getData('tint') as number));
 }
@@ -211,9 +218,17 @@ function atirar(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
     const c = boca(e, BOCA_CIMA);
     ctx.tiros.mirado(c.x, c.y, ctx.alvo.x, ctx.alvo.y, S.pesadoVel, vestirPesado);
   } else {
-    const m = boca(e, BOCA_MINIGUN);
-    const ang = Phaser.Math.Angle.Between(m.x, m.y, ctx.alvo.x, ctx.alvo.y);
-    ctx.tiros.leque(m.x, m.y, ang, S.lequeN, Phaser.Math.DegToRad(S.lequeAberturaGraus), S.lequeVel);
+    // O LEQUE sai dos DOIS canos: mirado do meio deles, o tiro que sobe sai do cano de cima e o que desce, do de baixo.
+    const meio = boca(e, { dx: CANOS_MINIGUN[0].dx, dy: (CANOS_MINIGUN[0].dy + CANOS_MINIGUN[1].dy) / 2 });
+    const ang = Phaser.Math.Angle.Between(meio.x, meio.y, ctx.alvo.x, ctx.alvo.y);
+    const abertura = Phaser.Math.DegToRad(S.lequeAberturaGraus);
+    const angs = Array.from({ length: S.lequeN }, (_, i) => (S.lequeN === 1 ? ang : ang - abertura / 2 + (abertura * i) / (S.lequeN - 1)));
+    angs.sort((a, b) => Math.sin(a) - Math.sin(b));
+    angs.forEach((a, i) => {
+      const m = boca(e, CANOS_MINIGUN[i < S.lequeN / 2 ? 0 : 1]);
+      ctx.tiros.disparar(m.x, m.y, a, S.lequeVel, vestirMinigun);
+      ctx.tiros.clarao(m.x, m.y, 2);
+    });
   }
   s.pesado = !s.pesado;
   if (e.scene.anims.exists('elite-sentinela-disparo')) e.play('elite-sentinela-disparo');

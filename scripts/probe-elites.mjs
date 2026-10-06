@@ -170,15 +170,17 @@ const municao = await page.evaluate(() => {
   const vivos = s.enemies.enemyBullets.getChildren().filter((b) => b.active);
   const vel = (b) => Math.round(Math.hypot(b.body.velocity.x, b.body.velocity.y));
   return {
-    // A bola PULSA: a textura vira os quadros da animação (`bulletOrbAnim0..`).
-    pesados: vivos.filter((b) => b.texture.key.startsWith('bulletOrb')).map(vel),
-    leves: vivos.filter((b) => b.texture.key === 'bolt2').map(vel),
+    // Os tiros DESENHADOS (06/10): o balaço do canhão de cima e o traço da minigun.
+    pesados: vivos.filter((b) => b.texture.key === 'eliteTiroBalaco').map(vel),
+    leves: vivos.filter((b) => b.texture.key === 'eliteTiroMinigun').map(vel),
+    // Os dois canos da minigun: os tiros do leque nascem em alturas diferentes.
+    alturas: [...new Set(vivos.filter((b) => b.texture.key === 'eliteTiroMinigun').map((b) => b.getData('oy')))].length,
   };
 });
 conferir(
   // O leque de 2 (06/10; eram 3).
-  municao.pesados.length >= 1 && municao.leves.length >= 2 && Math.max(...municao.pesados) < Math.min(...municao.leves),
-  'fogo: a bola pesada (mais lenta) e o leque leve (mais rápido), alternando',
+  municao.pesados.length >= 1 && municao.leves.length >= 2 && municao.alturas >= 2 && Math.max(...municao.pesados) < Math.min(...municao.leves),
+  'fogo: o balaço (mais lento) e o leque leve (mais rápido, um tiro de cada cano), alternando',
   municao,
 );
 
