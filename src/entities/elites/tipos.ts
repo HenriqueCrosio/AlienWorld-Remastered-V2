@@ -27,8 +27,8 @@ export interface CtxElite {
 export interface ComportamentoElite {
   iniciar(e: Sprite, ctx: CtxElite): void;
   atualizar(e: Sprite, dt: number, ctx: CtxElite): void;
-  /** O golpe que veio de (deX, deY) é bloqueado? */
-  bloqueia?(e: Sprite, deX: number, deY: number): boolean;
+  /** O golpe de `dano` que veio de (deX, deY) é bloqueado? (Um escudo com vida o absorve aqui.) */
+  bloqueia?(e: Sprite, deX: number, deY: number, dano: number): boolean;
 }
 
 /**

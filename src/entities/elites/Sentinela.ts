@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ELITES } from '../../data/numerosElites';
-import { escolherPosto, sentinelaAvanca, sentinelaBloqueia, type EstadoSentinela } from '../../elitesRegras';
+import { escolherPosto, escudoAbsorve, sentinelaAvanca, sentinelaBloqueia, type EstadoSentinela } from '../../elitesRegras';
 import { vestir, type ComportamentoElite, type CtxElite, type Sprite } from './tipos';
 
 const S = ELITES.sentinela;
@@ -15,6 +15,8 @@ interface Estado {
   /** O próximo tiro do fogo é o PESADO (canhão de cima)? Senão, o leque da minigun. */
   pesado: boolean;
   escudo: Phaser.GameObjects.Image | null;
+  /** A vida do escudo DESTE ciclo (`escudoAbsorve`); 0 = quebrado até o próximo ABRIR. */
+  escudoHp: number;
 }
 
 /**
@@ -61,7 +63,7 @@ export const SENTINELA: ComportamentoElite = {
   iniciar(e) {
     vestir(e, 'eliteSentinelaRoda');
     e.setFlipX(false);
-    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), cd: 0, pesado: true, escudo: null };
+    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), cd: 0, pesado: true, escudo: null, escudoHp: S.escudoHp };
     e.setData('elite', s);
     e.once('destroy', () => s.escudo?.destroy());
   },
@@ -90,7 +92,12 @@ export const SENTINELA: ComportamentoElite = {
       body.setVelocity(0, 0);
     }
 
-    if (s.escudo) s.escudo.setPosition(e.x - ESCUDO_DX, e.y).setAlpha(s.fase === 'abrir' ? Math.min(1, s.t / S.abrirS) : 0.75 + 0.25 * Math.sin(s.t * 18));
+    if (s.escudo) {
+      // Gasto, ele fica mais fraco e treme mais rápido: a leitura de "está quase quebrando".
+      const resta = s.escudoHp / S.escudoHp;
+      const pulso = 0.75 + 0.25 * Math.sin(s.t * (18 + 30 * (1 - resta)));
+      s.escudo.setPosition(e.x - ESCUDO_DX, e.y).setAlpha(s.fase === 'abrir' ? Math.min(1, s.t / S.abrirS) : pulso * (0.5 + 0.5 * resta));
+    }
     if (s.fase === 'fogo') {
       // Pairando (as chamas piscam) entre um disparo e outro; o DISPARO toca inteiro antes de voltar.
       const disparando = e.anims.isPlaying && e.anims.currentAnim?.key === 'elite-sentinela-disparo';
@@ -100,11 +107,46 @@ export const SENTINELA: ComportamentoElite = {
     if (s.fase === 'sobrecarga') varrer(e, s, dt, ctx);
   },
 
-  bloqueia(e, deX, deY) {
+  bloqueia(e, deX, deY, dano) {
     const s = e.getData('elite') as Estado | undefined;
-    return s ? sentinelaBloqueia(s.fase, e.x, e.y, deX, deY) : false;
+    if (!s || !sentinelaBloqueia(s.fase, e.x, e.y, deX, deY, s.escudoHp)) return false;
+    const r = escudoAbsorve(s.escudoHp, dano);
+    s.escudoHp = r.hp;
+    if (r.quebrou) quebrarEscudo(e, s);
+    else if (s.escudo) {
+      // O golpe acende o escudo (pisca branco), como o pisca do inimigo ferido.
+      s.escudo.setTintFill(0xffffff);
+      e.scene.time.delayedCall(40, () => s.escudo?.clearTint());
+    }
+    return true;
   },
 };
+
+/**
+ * O ESCUDO QUEBRA: some, e o arco estoura em lascas vermelhas que voam para trás — a sentinela fica exposta até o
+ * próximo ABRIR (o fogo e a sobrecarga deste ciclo seguem, agora sem defesa).
+ */
+function quebrarEscudo(e: Sprite, s: Estado): void {
+  const esc = s.escudo;
+  if (!esc) return;
+  esc.setVisible(false);
+  const cena = e.scene;
+  for (let i = 0; i < 9; i++) {
+    const y = esc.y + (i - 4) * 4;
+    const lasca = cena.add.image(esc.x, y, 'spark').setDepth(esc.depth).setTint(i % 3 ? 0xd62c28 : 0xff8870);
+    const ang = Math.PI + (i - 4) * 0.18 + (Math.random() - 0.5) * 0.3;
+    const v = 18 + Math.random() * 22;
+    cena.tweens.add({
+      targets: lasca,
+      x: lasca.x + Math.cos(ang) * v,
+      y: lasca.y + Math.sin(ang) * v,
+      alpha: 0,
+      duration: 380 + Math.random() * 200,
+      ease: 'Quad.easeOut',
+      onComplete: () => lasca.destroy(),
+    });
+  }
+}
 
 function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
   if (s.fase === 'fogo') s.ciclos++;
@@ -117,7 +159,9 @@ function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
     e.setFlipX(true);
     tocar(e, 'elite-sentinela-abrir');
     s.escudo ??= e.scene.add.image(e.x, e.y, 'eliteEscudo').setDepth(e.depth + 1);
-    s.escudo.setVisible(true).setAlpha(0);
+    s.escudo.setVisible(true).setAlpha(0).clearTint();
+    // Cada ciclo ergue um escudo NOVO, inteiro.
+    s.escudoHp = S.escudoHp;
     s.cd = 0.3;
     s.pesado = true;
   } else if (fase === 'sobrecarga') {

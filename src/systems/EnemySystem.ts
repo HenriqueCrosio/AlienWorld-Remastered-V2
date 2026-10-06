@@ -499,9 +499,9 @@ export class EnemySystem {
    * O golpe que veio de (deX, deY) é BLOQUEADO? (o escudo da Sentinela, spec frente B §2.2). Quem fere inimigo
    * pergunta aqui antes — `GameScene.ferirInimigo`, o caminho único do tiro, da bomba e das cartas.
    */
-  bloqueia(e: Phaser.Physics.Arcade.Sprite, deX: number, deY: number): boolean {
+  bloqueia(e: Phaser.Physics.Arcade.Sprite, deX: number, deY: number, dano: number): boolean {
     const def = DEFS[e.getData('kind') as EnemyKind];
-    return def?.elite?.bloqueia?.(e, deX, deY) ?? false;
+    return def?.elite?.bloqueia?.(e, deX, deY, dano) ?? false;
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {

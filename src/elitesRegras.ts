@@ -61,11 +61,29 @@ export function sentinelaAvanca(estado: EstadoSentinela, t: number, s: SinaisSen
  * O ESCUDO: aberta (abrindo ou atirando), ela segura o que vem de FRENTE — o arco de `escudoArcoGraus` centrado na
  * esquerda, o lado da nave. `(deX, deY)` é de onde o golpe veio. Por cima, por baixo ou por trás, passa.
  */
-export function sentinelaBloqueia(estado: EstadoSentinela, ex: number, ey: number, deX: number, deY: number): boolean {
+export function sentinelaBloqueia(
+  estado: EstadoSentinela,
+  ex: number,
+  ey: number,
+  deX: number,
+  deY: number,
+  escudoHp: number = ELITES.sentinela.escudoHp,
+): boolean {
   if (estado !== 'abrir' && estado !== 'fogo') return false;
+  if (escudoHp <= 0) return false;
   const ang = Math.atan2(deY - ey, deX - ex);
   const desvio = Math.abs(Math.atan2(Math.sin(ang - Math.PI), Math.cos(ang - Math.PI)));
   return desvio <= ((ELITES.sentinela.escudoArcoGraus / 2) * Math.PI) / 180;
+}
+
+/**
+ * A VIDA DO ESCUDO (06/10, ele: *"faça o shield ter vida até quebrar se levar muito tiro — isso deixa segundos de
+ * invulnerabilidade, mas se acertar muito no shield, quebra ele"*): cada golpe bloqueado gasta o seu dano do escudo.
+ * Zerado, ele QUEBRA (o golpe que quebra ainda é segurado) e a sentinela fica exposta até o próximo ABRIR.
+ */
+export function escudoAbsorve(hp: number, dano: number): { hp: number; quebrou: boolean } {
+  const resta = Math.max(0, hp - dano);
+  return { hp: resta, quebrou: hp > 0 && resta === 0 };
 }
 
 /** O próximo posto: na metade direita, e pelo menos `postoDistY` longe da altura do anterior (até 8 sorteios). */

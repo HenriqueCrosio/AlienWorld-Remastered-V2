@@ -201,6 +201,32 @@ await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.en
 const porCiclo = await page.evaluate(() => window.__disparos);
 conferir(porCiclo <= 25, `um ciclo solta ~18 tiros (era ~50): viu ${porCiclo} desde o meio do fogo`, porCiclo);
 
+// A VIDA DO ESCUDO (06/10): golpeado o bastante no fogo, ele QUEBRA — e o tiro de frente passa a ferir; o ciclo
+// seguinte ergue um escudo novo, inteiro.
+await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela')?.getData('elite')?.fase === 'fogo', null, { timeout: 15000 });
+const quebra = await page.evaluate(() => {
+  const s = window.__game.scene.getScene('Game');
+  const e = s.enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela');
+  const st = e.getData('elite');
+  const cheio = st.escudoHp;
+  const golpes = [];
+  for (let i = 0; i < 40 && st.escudoHp > 0; i++) golpes.push(s.ferirInimigo(e, 1, 'probe', { x: e.x - 40, y: e.y }));
+  const hp0 = e.getData('hp');
+  const depois = s.ferirInimigo(e, 1, 'probe', { x: e.x - 40, y: e.y });
+  return { cheio, golpes: golpes.length, todosBloqueados: golpes.every((g) => g === 'bloqueado'), depois, perdeu: hp0 - e.getData('hp'), visivel: st.escudo.visible };
+});
+conferir(
+  quebra.golpes === quebra.cheio && quebra.todosBloqueados && quebra.depois === 'vivo' && quebra.perdeu === 1 && !quebra.visivel,
+  'o escudo tem VIDA: segura `escudoHp` golpes, QUEBRA, e o tiro de frente passa a ferir',
+  quebra,
+);
+await page.waitForFunction(() => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela')?.getData('elite')?.fase === 'abrir', null, { timeout: 15000 });
+const novo = await page.evaluate(() => {
+  const st = window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.getData('kind') === 'sentinela').getData('elite');
+  return { escudoHp: st.escudoHp, visivel: st.escudo.visible };
+});
+conferir(novo.escudoHp === quebra.cheio && novo.visivel, 'o ciclo seguinte ergue um escudo NOVO, inteiro', novo);
+
 // Depois dos ciclos, ela vai embora.
 await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');

@@ -53,6 +53,11 @@ export const ELITES = {
     /** A abertura TOTAL do arco do escudo, centrado na esquerda. */
     escudoArcoGraus: 120,
     /**
+     * A VIDA do escudo (06/10, pedido dele): zerada, ele QUEBRA até o próximo ABRIR (cada ciclo ergue um novo). A base
+     * faz ~4 de dano/s e o escudo fica de pé ~3s (abrir + fogo): 8 = fogo concentrado o quebra em ~2s.
+     */
+    escudoHp: 8,
+    /**
      * O FOGO com DOIS TIROS (05/10 (2), ele: *"como o golfinho, dois tipos de tiros"*), um cano de cada vez, alternando a
      * cada `alternarCadaS`: o CANHÃO DE CIMA solta a bola PESADA (grande e LENTA, mirada — sair da linha) e a MINIGUN o
      * LEQUE leve (rápido — achar o vão). Era rajada de 3 + anel de 8 + espiral: ~50 tiros por ciclo, impossível no meio

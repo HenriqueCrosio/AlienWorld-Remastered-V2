@@ -2372,7 +2372,7 @@ export class GameScene extends Phaser.Scene {
     piscar = true,
   ): 'bloqueado' | 'vivo' | 'morto' {
     if (!e.active) return 'morto';
-    if (de && this.enemies.bloqueia(e, de.x, de.y)) {
+    if (de && this.enemies.bloqueia(e, de.x, de.y, dano)) {
       this.medidas?.bloqueio(fonte);
       return 'bloqueado';
     }

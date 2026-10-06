@@ -1,6 +1,6 @@
 // OS ELITES DA F2 (spec 2026-10-05-frente-b-elites-design.md §3). Uso, da raiz: node scripts/test-elites-regras.mjs
 import { ELITES } from '../src/data/numerosElites.ts';
-import { droneAvanca, droneExplode, sentinelaAvanca, sentinelaBloqueia, escolherPosto } from '../src/elitesRegras.ts';
+import { droneAvanca, droneExplode, sentinelaAvanca, sentinelaBloqueia, escudoAbsorve, escolherPosto } from '../src/elitesRegras.ts';
 
 const falhas = [];
 const conferir = (ok, msg, visto) => {
@@ -42,6 +42,13 @@ conferir(!sentinelaBloqueia('fogo', 300, 100, 300, 40), 'fogo: tiro de CIMA pass
 conferir(!sentinelaBloqueia('fogo', 300, 100, 360, 100), 'fogo: tiro de trás passa', null);
 conferir(!sentinelaBloqueia('fechar', 300, 100, 200, 100) && !sentinelaBloqueia('rolando', 300, 100, 200, 100), 'fechada ou rolando: sem escudo', null);
 conferir(!sentinelaBloqueia('sobrecarga', 300, 100, 200, 100), 'SOBRECARGA: o escudo caiu — o tiro de frente passa (a 2ª janela)', null);
+// A VIDA DO ESCUDO (06/10): segura até zerar; o golpe que zera ainda é segurado; quebrado, o tiro de frente passa.
+const HP = ELITES.sentinela.escudoHp;
+conferir(escudoAbsorve(HP, 1).hp === HP - 1 && !escudoAbsorve(HP, 1).quebrou, 'o escudo gasta o dano do golpe', HP);
+conferir(escudoAbsorve(1, 2).hp === 0 && escudoAbsorve(1, 2).quebrou, 'o golpe que zera QUEBRA o escudo (e não fica negativo)', null);
+conferir(!escudoAbsorve(0, 1).quebrou, 'um escudo já quebrado não quebra de novo', null);
+conferir(!sentinelaBloqueia('fogo', 300, 100, 200, 100, 0), 'quebrado: o tiro de frente passa no fogo', null);
+conferir(sentinelaBloqueia('fogo', 300, 100, 200, 100, 1), 'com 1 de vida: ainda segura', null);
 
 // O POSTO: na metade direita, longe do anterior na altura.
 const seq = [0.1, 0.12, 0.13, 0.9, 0.5];
