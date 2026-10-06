@@ -1077,6 +1077,8 @@ const ART: Record<string, string> = {
   eliteTiroMinigun: 'sprites/tiros/elite-minigun.png',
   eliteTiroBalaco: 'sprites/tiros/elite-balaco.png',
   eliteTiroCristal: 'sprites/tiros/elite-cristal.png',
+  // Os ESTILHAÇOS da explosão do drone: o losango de cristal (C-A, 5×3), a pedido dele.
+  eliteEstilhaco: 'sprites/tiros/elite-estilhaco.png',
   // A ARTE APROVADA DAS PEÇAS (03/10, spec do catálogo §5.1b–c) com as MESMAS chaves das provisórias — quem existe
   // aqui, a `criarTexturasProvisorias` pula. O sufixo `-alien` é a versão da linhagem alien (`texturaDaLinhagem`).
   'carta-missil': 'sprites/cartas/pecas/missil-humano.png',

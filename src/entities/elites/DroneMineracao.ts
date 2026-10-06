@@ -7,6 +7,8 @@ import type { ComportamentoElite, CtxElite, Sprite } from './tipos';
 const D = ELITES.drone;
 /** O tiro é um CRISTAL laranja do que ele minera (sugestão dele; 06/10, o "grão + rastro" C-C, 5×3), hitbox 4×3. */
 const vestirCristal = PadroesDeTiro.vestirArte('eliteTiroCristal', { w: 4, h: 3 });
+/** Os ESTILHAÇOS da explosão: losangos do mesmo cristal (06/10, ele), hitbox 3×3. */
+const vestirEstilhaco = PadroesDeTiro.vestirArte('eliteEstilhaco', { w: 3, h: 3 });
 
 interface Estado {
   fase: EstadoDrone;
@@ -98,7 +100,7 @@ export const DRONE_MINERACAO: ComportamentoElite = {
       if (Math.floor(s.t * 16) % 2 === 0) e.setTintFill(0xffd27a);
       else e.setTint(e.getData('tint') as number);
       if (droneExplode(s.fase, s.t)) {
-        ctx.tiros.anel(e.x, e.y, D.estilhacos, D.velEstilhaco, Math.random() * Math.PI);
+        ctx.tiros.anel(e.x, e.y, D.estilhacos, D.velEstilhaco, Math.random() * Math.PI, vestirEstilhaco);
         ctx.ganchos.explodir(e.x, e.y, D.raioExplosao);
         e.destroy();
       }

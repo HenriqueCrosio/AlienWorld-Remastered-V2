@@ -115,8 +115,9 @@ await page.evaluate(() => {
   s.ferirInimigo(e, 1, 'probe'); // ferido: acorda
 });
 await page.waitForFunction(() => !window.__game.scene.getScene('Game').enemies.enemies.getChildren().some((x) => x.getData('kind') === 'droneMineracao'), null, { timeout: 12000 });
-const anel = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.countActive(true));
-conferir(anel >= 6, 'deixado em paz, ele pisca e explode soltando o anel', anel);
+// Os estilhaços são LOSANGOS de cristal (06/10): 5, em anel.
+const anel = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.getChildren().filter((b) => b.active && b.texture.key === 'eliteEstilhaco').length);
+conferir(anel === 5, 'deixado em paz, ele pisca e explode soltando o anel de losangos de cristal', anel);
 
 // ── A SENTINELA ──
 await page.evaluate(() => {

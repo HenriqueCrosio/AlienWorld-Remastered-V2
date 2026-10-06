@@ -44,9 +44,13 @@ export const ELITES = {
      * dano"*): depois do fogo o escudo CAI e a MINIGUN VARRE em leque, de cima para baixo — uma cortina com buracos.
      */
     sobrecargaS: 1.6,
-    varreduraCadaS: 0.15,
+    /**
+     * 06/10, ele: *"o leque precisa ser mais aberto, tire mais alguns projéteis para dar mais espaço"*. Eram ~11 tiros
+     * a cada 0,15s em 70° (~6° entre eles); agora ~7 a cada 0,25s em 100° (~16° entre eles).
+     */
+    varreduraCadaS: 0.25,
     /** O arco TOTAL da varredura, centrado na esquerda. */
-    varreduraArcoGraus: 70,
+    varreduraArcoGraus: 100,
     velVarredura: 105,
     fecharS: 0.5,
     ciclos: 3,
@@ -71,7 +75,8 @@ export const ELITES = {
      * ainda lida com o resto da fase. Com 2, o vão cai na linha da nave: o leque cerca, não caça.
      */
     lequeN: 2,
-    lequeAberturaGraus: 28,
+    /** 06/10 (2): mais aberto (era 28°), junto com a varredura. */
+    lequeAberturaGraus: 36,
     lequeVel: 120,
     postoX: [230, 330] as const,
     postoY: [40, 176] as const,
