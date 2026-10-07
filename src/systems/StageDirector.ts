@@ -361,11 +361,17 @@ export const STAGE_3: StageEvent[] = [
   { t: 8, type: 'wave', kind: 'aguaViva', count: 3, spacing: 1.6, y: 100 },
   { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 130 },
 
+  // ─── O CAÇADOR DE VÁCUO, A LULA (frente B, fatia F3 — spec 2026-10-06 §4 + emenda de 07/10) ───
+  // SOZINHO, com as minas na névoa: 3 ressurgimentos de ~3s, até ~t=20. Ele ocupa o lugar da onda de 6 drones de t=16,
+  // que saiu. A visibilidade curta do ato é o terreno dele: some na tinta, ressurge à frente.
+  { t: 10.5, type: 'banner', text: 'CAÇADOR DE VÁCUO' },
+  { t: 11, type: 'wave', kind: 'cacador', count: 1, spacing: 0, y: 100 },
+
   // Minas em CACHOS na névoa: a visibilidade curta transforma uma peça conhecida em susto
   // honesto — o telégrafo delas (acordar e piscar) continua lá, só se vê mais tarde.
   { t: 13, type: 'banner', text: 'SENSORES NA NÉVOA' },
   { t: 14, type: 'hazard', rate: 1.0, mix: ['sensor', 'sensor', 'asteroid', 'mina'] },
-  { t: 16, type: 'wave', kind: 'drone', count: 6, spacing: 0.28, y: 60 },
+  // (A onda de 6 drones de t=16 saiu em 07/10: o Caçador ocupa o lugar dela.)
   { t: 16, type: 'wave', kind: 'aguaViva', count: 4, spacing: 1.4, y: 75 },
   { t: 20, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 100 },
 
@@ -385,6 +391,9 @@ export const STAGE_3: StageEvent[] = [
   { t: 24, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 70 },
 
   // Pico do Ato 1: cargueiro + kamikazes dentro da nuvem.
+  // O CAÇADOR COBRADO entra no pico com o cargueiro e acaba ~36,7. Se ainda estiver vivo quando o rabo chegar (t=38),
+  // some de vez — o quadro tem de estar vazio (`EnemySystem.aoRabo`, spec F3 §2.2).
+  { t: 27.5, type: 'wave', kind: 'cacador', count: 1, spacing: 0, y: 100 },
   { t: 28, type: 'banner', text: 'CARGUEIRO NA NEBULOSA' },
   { t: 29, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 90 },
   { t: 32, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
@@ -451,11 +460,16 @@ export const STAGE_3: StageEvent[] = [
   { t: 54, type: 'terrain', rate: 0, mix: [] },
 
   { t: 63, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
-  { t: 64, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
-  { t: 67, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
+  // ─── O TENTÁCULO DO CASCO (frente B, fatia F3 — spec 2026-10-06 §4 + a regra do casco de 07/10) ───
+  // SOZINHO, logo depois do respiro da aranha: um ciclo (~5,8s), até ~69,3. Ele ocupa o lugar da onda de batedores de
+  // t=64 e dos kamikazes de t=67, que saíram.
+  { t: 63, type: 'banner', text: 'TENTÁCULO DO CASCO' },
+  { t: 63.5, type: 'wave', kind: 'tentaculo', count: 1, spacing: 0, y: 150 },
   { t: 70, type: 'banner', text: 'DEFESAS DO CASCO' },
   { t: 71, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
   { t: 73, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
+  // O TENTÁCULO COBRADO, no pico final; acaba ~80,8 (antes do silêncio de 82).
+  { t: 75, type: 'wave', kind: 'tentaculo', count: 1, spacing: 0, y: 150 },
   { t: 76, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
   { t: 78, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
 
