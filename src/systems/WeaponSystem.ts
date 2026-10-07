@@ -383,6 +383,8 @@ export class WeaponSystem {
       defaultKey: 'bolt',
       maxSize: 128,
       allowGravity: false,
+      // Depth 1 (07/10): a TINTA da lula (0,5) nunca esconde um tiro — nem o do jogador (spec F3 §2.3).
+      createCallback: (o) => (o as Phaser.Physics.Arcade.Sprite).setDepth(1),
     });
 
     this.muzzle = scene.add

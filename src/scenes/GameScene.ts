@@ -394,6 +394,8 @@ export class GameScene extends Phaser.Scene {
     const visual = visualDaNave(this.shipId, tierDaNave(this.registry));
     const tex = this.textures.exists(visual.texture) ? visual.texture : 'ship';
     this.ship = this.physics.add.sprite(70, GAME_HEIGHT / 2, tex);
+    // Depth 1 (07/10), com os tiros: a TINTA da lula (0,5) cobre os inimigos e nunca a nave (spec F3 §2.3).
+    this.ship.setDepth(1);
 
     // A ANIMAÇÃO É DA NAVE (róster v2): cada uma declara a sua em `ShipDef.anim`. Tocar a
     // animação de OUTRA nave substituiria a textura pelos quadros errados (a armadilha das
@@ -573,6 +575,12 @@ export class GameScene extends Phaser.Scene {
     );
     this.physics.add.overlap(this.weapons.bullets, this.enemies.enemies, (b, e) =>
       this.bulletHitEnemy(b as Phaser.Physics.Arcade.Sprite, e as Phaser.Physics.Arcade.Sprite),
+    );
+    // Os CORPOS dos elites (os gomos do Tentáculo, F3 §3.2): ferem no contato e ABSORVEM o tiro, sem dano — a regra que
+    // ele deu à Serpente (*"invulnerável é telégrafo, não parede"*): só a cabeça fere e é ferida.
+    this.physics.add.overlap(this.ship, this.enemies.corposElite, () => this.damageShip());
+    this.physics.add.overlap(this.weapons.bullets, this.enemies.corposElite, (b) =>
+      this.tiroNoCorpoDoElite(b as Phaser.Physics.Arcade.Sprite),
     );
     this.physics.add.overlap(this.ship, this.pickups.pickups, (_s, p) =>
       this.collectPickup(p as Phaser.Physics.Arcade.Sprite),
@@ -754,6 +762,8 @@ export class GameScene extends Phaser.Scene {
     // cinturão inteiro pareceria pendurado. Só a Fase 1, que ROMPE a atmosfera no fim, freia.
     const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
+    // A velocidade do CHÃO para os elites: o que toca o casco anda com ele (a regra do casco, spec F3 §3.3).
+    this.enemies.velChao = SCROLL_SPEED * frenagem;
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
     this.moldura.avanca(dt, SCROLL_SPEED * frenagem);
@@ -1012,6 +1022,8 @@ export class GameScene extends Phaser.Scene {
         else this.enemies.spawn('aranha', 0);
         break;
       case 'rabo':
+        // O quadro tem de estar VAZIO quando o rabo entra: o Caçador vivo some de vez (spec F3 §2.2).
+        this.enemies.aoRabo();
         this.raboDoLeviata();
         break;
       case 'agua':
@@ -1759,6 +1771,22 @@ export class GameScene extends Phaser.Scene {
     this.fx.hit(bullet.x, bullet.y);
   }
 
+  /**
+   * O tiro morre no CORPO de um elite (o gomo do Tentáculo), sem dano. Perto de uma cabeça exposta, deixa o overlap da
+   * cabeça cobrar — os dois corpos se encostam no pescoço, e a ordem dos callbacks no mesmo quadro não é garantida
+   * (a mesma armadilha do `bulletAbsorvedByBoss`).
+   */
+  private tiroNoCorpoDoElite(bullet: Phaser.Physics.Arcade.Sprite): void {
+    if (!this.weapons.bullets.contains(bullet) || !bullet.active) return;
+    for (const o of this.enemies.enemies.getChildren()) {
+      const e = o as Phaser.Physics.Arcade.Sprite;
+      if (e.active && (e.body as Phaser.Physics.Arcade.Body).enable && Phaser.Math.Distance.Between(bullet.x, bullet.y, e.x, e.y) < 12) return;
+    }
+    this.medidas?.bloqueio((bullet.getData('origem') as OrigemProjetil | null) ?? 'tiro');
+    this.weapons.release(bullet);
+    this.fx.hit(bullet.x, bullet.y);
+  }
+
   private bulletHitBoss(bullet: Phaser.Physics.Arcade.Sprite): void {
     // Rede de segurança contra a inversão de argumentos do Phaser: só devolve ao pool o
     // que REALMENTE saiu dele. Sem isto, um erro de ordem volta a "reciclar" o chefão.
@@ -2372,6 +2400,8 @@ export class GameScene extends Phaser.Scene {
     piscar = true,
   ): 'bloqueado' | 'vivo' | 'morto' {
     if (!e.active) return 'morto';
+    // INTOCÁVEL (a lula escondida, a cabeça do Tentáculo dentro do casco — F3): nada fere, nem a bomba nem a queima.
+    if (this.enemies.intocavel(e)) return 'bloqueado';
     if (de && this.enemies.bloqueia(e, de.x, de.y, dano)) {
       this.medidas?.bloqueio(fonte);
       return 'bloqueado';
