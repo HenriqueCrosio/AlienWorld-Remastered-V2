@@ -61,6 +61,13 @@ const FRAMES: Record<string, number> = {
   eliteSentinelaPairarAnim: 8,
   eliteSentinelaSobrecargaAnim: 10,
   eliteSentinelaDisparoAnim: 8,
+  // Os ELITES da F3 (07/10), assados por `scripts/_elites/_instalar-f3.mjs`: a camuflagem da lula (pontilhado), a
+  // TINTA (sopro e cortina, nos tempos de `ELITES.tinta` a 20 qps) e a rachadura do casco (provisória à mão).
+  eliteCacadorSurgeAnim: 6,
+  eliteCacadorSomeAnim: 6,
+  eliteTintaSoproAnim: 18,
+  eliteTintaCortinaAnim: 38,
+  eliteRachaduraAnim: 3,
   // A BOLA de energia da canhoneira do cinturão, agora ANIMADA (2026-08-09): ela pulsa e solta
   // fagulha no ar em vez de ser um adesivo. Os quadros nasceram com DERIVA (o desenho escorregava
   // 5.6px para a esquerda ao longo do ciclo, o que num projétil soma à velocidade e vira
@@ -179,6 +186,13 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'elite-sentinela-pairar', prefix: 'eliteSentinelaPairarAnim', frameRate: 12 },
   { key: 'elite-sentinela-disparo', prefix: 'eliteSentinelaDisparoAnim', frameRate: 18, loop: false },
   { key: 'elite-sentinela-sobrecarga', prefix: 'eliteSentinelaSobrecargaAnim', frameRate: 14 },
+  // Os ELITES da F3 (07/10). A camuflagem toca em 0,3s (o SURGE dura 0,3s; o SOME, 0,4s). A tinta a 20 qps é o tempo
+  // ASSADO nos quadros — mudar o `frameRate` muda a duração da tinta, e ela já é a dos números.
+  { key: 'elite-cacador-surge', prefix: 'eliteCacadorSurgeAnim', frameRate: 20, loop: false },
+  { key: 'elite-cacador-some', prefix: 'eliteCacadorSomeAnim', frameRate: 20, loop: false },
+  { key: 'elite-tinta-sopro', prefix: 'eliteTintaSoproAnim', frameRate: 20, loop: false },
+  { key: 'elite-tinta-cortina', prefix: 'eliteTintaCortinaAnim', frameRate: 20, loop: false },
+  { key: 'elite-rachadura', prefix: 'eliteRachaduraAnim', frameRate: 8 },
   // A BOLA de energia dela: 14, a mesma cadência do 'comet-burn'/'blast-burn'. Projétil é a
   // única coisa no jogo que pulsa RÁPIDO — energia lenta parece plástico, e um tiro que parece
   // plástico não lê como perigo.
@@ -717,6 +731,16 @@ const ART: Record<string, string> = {
   ...animFrames('eliteSentinelaSobrecargaAnim', 'elite-sentinela-sobrecarga'),
   ...animFrames('eliteSentinelaDisparoAnim', 'elite-sentinela-disparo'),
   eliteEscudo: 'sprites/elite-escudo.png',
+  // OS ELITES DA F3 (07/10): a LULA (a escolha dele, Pro nº 15 a 85%) e o Tentáculo PROVISÓRIO (à mão, 06/10 — a leva de
+  // 07/10 espera a escolha dele). `scripts/_elites/_instalar-f3.mjs`.
+  eliteCacador: 'sprites/elite-cacador.png',
+  ...animFrames('eliteCacadorSurgeAnim', 'elite-cacador-surge'),
+  ...animFrames('eliteCacadorSomeAnim', 'elite-cacador-some'),
+  ...animFrames('eliteTintaSoproAnim', 'elite-tinta-sopro'),
+  ...animFrames('eliteTintaCortinaAnim', 'elite-tinta-cortina'),
+  eliteTentaculoCabeca: 'sprites/elite-tentaculo-cabeca.png',
+  eliteTentaculoGomo: 'sprites/elite-tentaculo-gomo.png',
+  ...animFrames('eliteRachaduraAnim', 'elite-rachadura'),
 
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
@@ -1079,6 +1103,9 @@ const ART: Record<string, string> = {
   eliteTiroCristal: 'sprites/tiros/elite-cristal.png',
   // Os ESTILHAÇOS da explosão do drone: o losango de cristal (C-A, 5×3), a pedido dele.
   eliteEstilhaco: 'sprites/tiros/elite-estilhaco.png',
+  // Os TIROS DA F3 (à mão, 06/10): a AGULHA da lula (5×1, aponta para a direita) e a BOLINHA da meia-lua (3×3).
+  eliteTiroAgulha: 'sprites/tiros/elite-agulha.png',
+  eliteTiroBolinha: 'sprites/tiros/elite-bolinha.png',
   // A ARTE APROVADA DAS PEÇAS (03/10, spec do catálogo §5.1b–c) com as MESMAS chaves das provisórias — quem existe
   // aqui, a `criarTexturasProvisorias` pula. O sufixo `-alien` é a versão da linhagem alien (`texturaDaLinhagem`).
   'carta-missil': 'sprites/cartas/pecas/missil-humano.png',
