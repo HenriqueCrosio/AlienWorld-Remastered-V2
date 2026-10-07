@@ -14,13 +14,14 @@ const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
 await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.waitForFunction(() => window.__game?.scene, null, { timeout: 30000 });
 await page.waitForTimeout(1500);
-await page.evaluate(() => {
+await page.evaluate((cena) => {
   const g = window.__game;
   g.scene.getScenes(true).forEach((s) => s.scene.stop());
   g.registry.set('cartas', []);
   g.registry.set('cartasCheckpoint', {});
-  g.scene.start('Game', { stage: 2, ship: 'humana', handling: 'diegetico' });
-});
+  // The F3 elites (07/10) play in stage 3; the tentacle on the hull (act 2), the squid in the nebula (act 1).
+  g.scene.start('Game', { stage: cena === 'cacador' || cena === 'tentaculo' ? 3 : 2, ship: 'humana', handling: 'diegetico' });
+}, CENA);
 await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').cartas, null, { timeout: 30000 });
 await page.waitForTimeout(600);
 
@@ -35,8 +36,14 @@ await page.evaluate((cena) => {
   s.bannerFaixa.setAlpha(0);
   s.damageShip = () => {};
   s.invulnerableUntil = 0;
-  s.ship.setPosition(60, cena === 'drone' ? 100 : 108);
-  s.enemies.spawn(cena === 'drone' ? 'droneMineracao' : 'sentinela', cena === 'drone' ? 92 : 108);
+  s.ship.setPosition(cena === 'tentaculo' ? 100 : 60, cena === 'drone' ? 100 : 108);
+  // The tentacle lives on the HULL: the act-2 look (no cloud, the hull up), as the sandbox does.
+  if (cena === 'tentaculo') {
+    s.parallax.setNebulaDensity(0, 0);
+    s.parallax.revealCasco(1, 0);
+  }
+  const KIND = { drone: 'droneMineracao', sentinela: 'sentinela', cacador: 'cacador', tentaculo: 'tentaculo' };
+  s.enemies.spawn(KIND[cena], cena === 'drone' ? 92 : 108);
   // Fixed luck: same shots every recording.
   let a = 20261005;
   Math.random = () => {
@@ -76,8 +83,24 @@ for (let i = 0; i < total; i++) {
     // 06/10: the ship backs off while it attacks — the bursts read FROM AFAR (their spacing) — then lets it close in.
     if (cena === 'drone' && t < 8.5 && e?.getData('elite')?.fase === 'ataque') s.ship.setPosition(Math.max(16, Math.min(s.ship.x, e.x - 130)), s.ship.y);
     if (cena === 'sentinela' && e) s.ship.setPosition(60, s.ship.y + Math.sign(e.y - s.ship.y) * Math.min(1.5, Math.abs(e.y - s.ship.y)));
+    // 07/10, the squid: the ship holds still while the line FOLLOWS it, then steps OUT of the locked line (the dodge
+    // the spec asks for) and drifts back between appearances. No firing: the 3 vanishings (sopro, sopro, cortina) show.
+    const fe = e?.getData('elite')?.fase;
+    if (cena === 'cacador') {
+      const alvoY = fe === 'trava' || fe === 'rajada' || fe === 'some' ? 140 : 108;
+      s.ship.setPosition(60, s.ship.y + Math.sign(alvoY - s.ship.y) * Math.min(2.5, Math.abs(alvoY - s.ship.y)));
+    }
+    // 07/10, the tentacle: the ship waits over the crack, dodges the BITE up and back, then faces the tower at the
+    // height of its segments and fires (the body takes the shots).
+    if (cena === 'tentaculo') {
+      const alvo = fe === 'aviso1' ? { x: 100, y: 100 } : fe === 'bote' || fe === 'mergulho' ? { x: 60, y: 48 } : { x: 60, y: 118 };
+      const dx = alvo.x - s.ship.x, dy = alvo.y - s.ship.y, d = Math.hypot(dx, dy);
+      if (d > 0) s.ship.setPosition(s.ship.x + (dx / d) * Math.min(4, d), s.ship.y + (dy / d) * Math.min(4, d));
+      window.__ergueu ||= fe === 'ergue';
+    }
   }, { cena: CENA, t });
   if (CENA === 'sentinela' && i === 20) await page.keyboard.down('Space');
+  if (CENA === 'tentaculo' && (await page.evaluate(() => window.__ergueu === true))) await page.keyboard.down('Space');
   await passo(POR_FOTO);
   const foto = await page.screenshot({ clip: { x: geo.left, y: geo.top, width: 384 * geo.k, height: 216 * geo.k } });
   quadros.push(await sharp(foto).resize(384 * ZOOM, 216 * ZOOM, { kernel: 'nearest' }).png().toBuffer());
