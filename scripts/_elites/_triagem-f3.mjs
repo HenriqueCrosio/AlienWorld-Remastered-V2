@@ -1,21 +1,26 @@
-// Contact sheet: one row per piece, 16 candidates each, zoom 3, index labels.
+// Contact sheet for the triage (before any sheet goes to him): every candidate of one piece, magnified, numbered.
+//   node scripts/_elites/_triagem-f3.mjs <out.png> <piece> <seed> [zoom] [cols]
+// (07/10: the hunter round was cacadorLula/Vespa/Arraia/Louva seed 21; the tentacle round, tentaculo* seed 31.)
+import fs from 'node:fs';
 import sharp from 'sharp';
+
+const [OUT, PECA, SEED, ZOOM = '3', COLS = '8'] = process.argv.slice(2);
 const D = 'docs/superpowers/folhas/2026-10-07/elites/cand';
-const PECAS = ['cacadorLula', 'cacadorVespa', 'cacadorArraia', 'cacadorLouva'];
-const Z = 3, C = 48 * Z + 8, LH = 18;
+const Z = Number(ZOOM), NC = Number(COLS), LH = 18;
+const arqs = fs.readdirSync(D)
+  .filter((f) => new RegExp(`^${PECA}-${SEED}-(\\d+)\\.png$`).test(f))
+  .sort((a, b) => Number(a.match(/-(\d+)\.png$/)[1]) - Number(b.match(/-(\d+)\.png$/)[1]));
+const m = await sharp(`${D}/${arqs[0]}`).metadata();
+const CW = m.width * Z + 8, CH = m.height * Z + LH + 4;
 const comp = [];
-PECAS.forEach((p, r) => {
-  for (let i = 0; i < 16; i++) {
-    const x = i % 8, y = r * 2 + Math.floor(i / 8);
-    comp.push({
-      input: Buffer.from(`<svg width="${C}" height="${LH}" xmlns="http://www.w3.org/2000/svg"><text x="2" y="14" font-family="Consolas" font-size="13" fill="#ffb040">${p.replace('cacador', '')} ${i}</text></svg>`),
-      left: x * C, top: y * (C + LH),
-    });
-    comp.push({ file: `${D}/${p}-21-${i}.png`, left: x * C + 4, top: y * (C + LH) + LH });
-  }
-});
-const inputs = await Promise.all(comp.map(async (c) => c.file
-  ? { input: await sharp(c.file).flop().resize(48 * Z, 48 * Z, { kernel: 'nearest' }).png().toBuffer(), left: c.left, top: c.top }
-  : c));
-await sharp({ create: { width: 8 * C, height: 8 * (C + LH), channels: 4, background: '#2a3040' } })
-  .composite(inputs).png().toFile(process.argv[2]);
+for (const [k, f] of arqs.entries()) {
+  const left = (k % NC) * CW, top = Math.floor(k / NC) * CH;
+  comp.push({
+    input: Buffer.from(`<svg width="${CW}" height="${LH}" xmlns="http://www.w3.org/2000/svg"><text x="2" y="14" font-family="Consolas" font-size="13" fill="#ffb040">${f.match(/-(\d+)\.png$/)[1]}</text></svg>`),
+    left, top,
+  });
+  comp.push({ input: await sharp(`${D}/${f}`).resize(m.width * Z, m.height * Z, { kernel: 'nearest' }).png().toBuffer(), left: left + 4, top: top + LH });
+}
+await sharp({ create: { width: NC * CW, height: Math.ceil(arqs.length / NC) * CH, channels: 4, background: '#2a3040' } })
+  .composite(comp).png().toFile(OUT);
+console.log(OUT, arqs.length);

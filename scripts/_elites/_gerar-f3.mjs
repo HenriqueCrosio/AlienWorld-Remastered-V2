@@ -79,6 +79,49 @@ const PECAS = {
       `forelimbs folded in FRONT of it ready to strike, a small angular head with red glowing eyes, a long tapered ` +
       `abdomen behind with red veins. ${SIDE} An ambush predator, wider than tall. ${DARK}`,
   },
+  // 07/10 — the tentacle, new round: four new HEAD species (no subject ref) + the WHOLE worm as one straight column,
+  // so the segments are sliced from its own body (a lone segment never chains well — lesson of 06/10).
+  tentaculoLampreia: {
+    size: 32,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `The HEAD of a biomechanical lamprey-worm bursting up from a hull, its round SUCKER MAW facing LEFT and slightly ` +
+      `up: concentric rings of small hooked teeth inside, red glowing throat, thick armored ring plates behind the ` +
+      `head. ${SIDE} ${DARK}`,
+  },
+  tentaculoMoreia: {
+    size: 32,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `The HEAD of an armored moray-eel worm, its long JAWS open facing LEFT showing curved fangs, a small red ` +
+      `glowing eye, ridged dark armor plates on the skull and a thick neck going down. ${SIDE} ${DARK}`,
+  },
+  tentaculoPinca: {
+    size: 32,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `The HEAD of a biomechanical centipede-worm: two big curved MANDIBLE pincers open facing LEFT, a cluster of ` +
+      `small red glowing eyes, a segmented armored head capsule and a thick neck going down. ${SIDE} ${DARK}`,
+  },
+  tentaculoFlor: {
+    size: 32,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `The HEAD of a giant sandworm-like tentacle whose tip OPENS LIKE A FLOWER: four armored jaw petals spread ` +
+      `open toward the LEFT, rows of thin teeth and a red glowing throat inside, a thick ringed armored neck going ` +
+      `down. ${SIDE} ${DARK}`,
+  },
+  tentaculoInteiro: {
+    size: [32, 96],
+    ref: 'tentaculo.png',
+    usage: 'the subject: this armored segmented worm-tentacle with a round maw ringed with red lights and hooked claws',
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `This WHOLE armored worm-tentacle standing STRAIGHT UP like a column rising from the ground: its round maw at ` +
+      `the TOP facing LEFT, ringed with red glowing lights and hooked claws, and below it a long body of IDENTICAL ` +
+      `overlapping armored ring segments all the way down, each with one tiny dim red light. ${SIDE} Tall and thin. ` +
+      `${DARK}`,
+  },
   // The first segment batch came out as generic balls: the segment is cut from the chosen HEAD's own neck plates.
   tentaculoGomo2: {
     size: 16,
@@ -101,7 +144,7 @@ const styleSize = await tamanho(p.style);
 for (const seed of seeds.map(Number)) {
   const imgs = await gerar('/generate-image-v2', {
     description: p.description,
-    image_size: { width: p.size, height: p.size },
+    image_size: Array.isArray(p.size) ? { width: p.size[0], height: p.size[1] } : { width: p.size, height: p.size },
     no_background: true,
     seed,
     ...(refArq && {
