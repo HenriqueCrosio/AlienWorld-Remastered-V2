@@ -4,6 +4,10 @@
 > Henrique por brainstorming em 06/10. Vale a regra nova: **o elite pressiona, mas não pune** — a fase já tem
 > inimigos, obstáculos, sondas e kamikazes (memória `elites-pressionam-sem-punir`). Todos os números são o PONTO DE
 > PARTIDA e moram em `src/data/numerosElites.ts`.
+>
+> **EMENDA de 07/10 (brainstorming com ele):** nenhuma arte da folha de 06/10 ficou. O Caçador virou uma **LULA** (Pro
+> nº 15, 85%) que solta **TINTA** a cada sumiço (§2.3); o Tentáculo ganhou a **regra do casco** (§3.3) e a arte dele
+> volta para uma leva nova. As seções tocadas estão marcadas *(07/10)*.
 
 ## 1. Os dois, em uma linha
 
@@ -42,13 +46,33 @@ precisão"*); Tentáculo = folha dark space nº 03 (*"emergente do casco; rajada
 O ato 1 exige o quadro VAZIO quando o rabo entra (t=37,5–38, comentário do `STAGE_3`). Se um Caçador estiver vivo no
 evento `rabo`, ele SOME de vez (sem pontos). Regra, não horário: o roteiro pode mudar.
 
+### 2.3 A lula e a tinta *(07/10)*
+
+- **A arte:** a lula nº 15 do Pro (`folhas/2026-10-07/elites/cand/cacadorLula-21-15.png`), reduzida a **85%
+  (41×41)** com a paleta original (`_tratar.mjs reduzir`), sem o pixel claro entre os tentáculos. Fica na diagonal
+  (carapaça para cima-esquerda); as agulhas saem da base dos tentáculos, junto do olho. Escolha dele entre 10 (folha
+  `folha-cacador-2.png`) e o tamanho na `folha-cacador-3.png`.
+- **O ciclo do §2.1 NÃO muda.** SURGE e SOME são em PONTILHADO (dither ordenado: camuflagem de lula).
+- **A TINTA, em todo SOME** (decisão dele: A — *"a tinta precisa ser algo criado mesmo, com fade, no local que ela
+  joga"*):
+  - 1º e 2º sumiço = o **SOPRO**: uma mancha só do tamanho dela, que a tampa enquanto ela some (cresce 0,15s, segura
+    até 0,5s, esvai até 0,9s);
+  - 3º sumiço (a saída de vez) = a **CORTINA**: a nuvem grande (cresce 0,35s, segura até 1,2s, esvai até 1,9s);
+  - parada NO LUGAR onde foi solta; não fere, não bloqueia tiro;
+  - **camada:** por cima do cenário e dos inimigos, **por baixo de todo tiro e da nave** — esconde a leitura, nunca um
+    tiro (regra `elites-pressionam-sem-punir`).
+- **A técnica:** À MÃO — mancha em pixel (borda com ruído, 3 tons + aro roxo, redemoinho), esvaindo em pontilhado;
+  **assada em quadros** (spritesheet gerado pelo script do teste, `_tinta-f3.mjs`), nunca desenhada ao vivo. A versão
+  vetorial (círculos do Graphics) fica registrada como plano B. O teste que ele aprovou: `tinta-lula.gif`.
+- O sumiço forçado do §2.2 (o rabo) usa o SOPRO.
+
 ## 3. Tentáculo do casco (vida 14, 350 pontos)
 
 ### 3.1 O ciclo — uma aparição = um ciclo (decisão dele: A)
 
 | Estado | Tempo | O que acontece |
 |---|---|---|
-| AVISO 1 | 0,8s | uma RACHADURA brilha no casco SOB A NAVE (presa ao casco: rola com ele) |
+| AVISO 1 | 0,8s | uma RACHADURA brilha no casco e chega SOB A NAVE (presa ao casco: rola com ele — §3.3) |
 | BOTE | ~0,7s | sai da rachadura e MORDE o ponto onde a nave estava no fim do aviso (não persegue) |
 | MERGULHO | ~0,9s | o arco passa do ponto e cai POR TRÁS da borda do casco — some atrás do Leviatã |
 | PAUSA | 0,6s | escondido |
@@ -72,6 +96,24 @@ evento `rabo`, ele SOME de vez (sem pontos). Regra, não horário: o roteiro pod
 - **Distinto da Serpente chefão:** ela é um corpo grande, parado e pintado; ele é fino, ágil e em gomos, no vermelho
   do Leviatã do conceito 03 (não as cabeças coloridas dela).
 
+### 3.3 A regra do casco *(07/10)*
+
+A pergunta dele: *"se a fase corre, o chão também corre, como ele vai surgir do casco sem ser arrastado?"* — o casco
+anda a `SCROLL_SPEED` (84 px/s, × a frenagem); em 0,8s de aviso a rachadura já andou 67px. O "arrastado" é uma parte
+presa à tela e outra presa ao chão AO MESMO TEMPO. A regra:
+
+- **O que toca o casco anda com o casco** (a velocidade real do chão naquele quadro); **o que está solto anda na
+  tela**. Nunca os dois juntos, exceto o instante de passar pelo buraco.
+- **AVISO 1:** a rachadura nasce À FRENTE da nave, em `x_nave + v_casco × 0,8`, para chegar SOB ela no fim do aviso.
+- **BOTE:** o verme sai INTEIRO do buraco — enquanto os gomos passam, a raiz é o buraco (anda com o casco); quando o
+  último gomo sai, a corrente é livre na tela. A mordida (no ponto da nave no fim do aviso) e o MERGULHO por trás da
+  borda são na tela.
+- **AVISO 2 → ERGUE → MEIA-LUA → AFUNDA:** uma **torre enraizada** que rola com o casco, rígida. Brota perto da borda
+  direita (x≈350) e anda ~250px em ~3s na direção da nave. A regra "≥140px à frente da nave" do §3.1 vale para onde a
+  rachadura NASCE. Os tiros, depois de saírem, são livres na tela.
+- **A arte do Tentáculo volta a uma leva nova** (nenhuma de 06/10 ficou); o comportamento se implementa com a arte à
+  mão de 06/10 como provisória.
+
 ## 4. O roteiro da F3
 
 | t | O quê | Ajuste no que existe |
@@ -92,8 +134,9 @@ simétricas antes de mostrar); peça que encosta na borda sai cortada (pedir mar
 
 | Peça | Tamanho-alvo | Versões |
 |---|---|---|
-| Caçador — corpo de perfil, virado à esquerda | ~32px | à mão + PixelLab |
-| ↳ o dissolver (surgir/sumir) | — | à mão (pontilhado em pixel) + animação PixelLab |
+| Caçador — corpo de perfil, virado à esquerda | ~~~32px~~ **41×41: a lula 15** *(07/10)* | ✔ PixelLab Pro |
+| ↳ o dissolver (surgir/sumir) | — | à mão (pontilhado em pixel, em código) |
+| ↳ a tinta: SOPRO e CORTINA *(07/10)* | ~40 / ~70px | à mão, assada em quadros (§2.3) |
 | Tentáculo — cabeça (a boca de dentes em anel) | ~20px | à mão + PixelLab |
 | ↳ o gomo do corpo | ~10–12px | à mão + PixelLab |
 | A rachadura do casco (o aviso) | ~16px | à mão |

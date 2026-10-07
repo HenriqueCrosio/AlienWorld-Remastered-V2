@@ -45,6 +45,40 @@ const PECAS = {
       `ONE round armored SEGMENT of a biomechanical worm body, seen from the side: a dark plated ring with a ridge ` +
       `and one tiny faint red light, made to be chained with copies of itself. ${DARK}`,
   },
+  // 07/10 — he liked none of the crescent hunters: new SILHOUETTES, no subject ref (the concept crop forced the
+  // crescent every time); the approved sentinel stays as the pixel style.
+  cacadorLula: {
+    size: 48,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `A VOID HUNTER like a deep-sea predator squid: a long pointed armored mantle at the FRONT, one red glowing eye, ` +
+      `and a bundle of long hooked tendrils trailing straight BEHIND it to the right, tips curled like hooks. ${SIDE} ` +
+      `Wider than tall, fast and sinister. ${DARK}`,
+  },
+  cacadorVespa: {
+    size: 48,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `A VOID HUNTER like a giant armored wasp: a long thin NEEDLE STINGER pointing FORWARD as its gun, a narrow ` +
+      `segmented thorax, two thin translucent dark wings folded back along the body, a ridged abdomen at the rear ` +
+      `with a red glowing core. ${SIDE} Wider than tall, sleek and fast. ${DARK}`,
+  },
+  cacadorArraia: {
+    size: 48,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `A VOID HUNTER like a phantom manta ray with spikes: a flat wedge body with a sharp nose at the FRONT, wing ` +
+      `edges serrated with small spikes, a long whip tail with a barb trailing behind to the right, red glowing gill ` +
+      `slits and one red core. ${SIDE} Much wider than tall, a gliding silhouette. ${DARK}`,
+  },
+  cacadorLouva: {
+    size: 48,
+    style: 'public/sprites/elite-sentinela.png',
+    description:
+      `A VOID HUNTER like a biomechanical praying mantis: a hunched armored body with two big raptorial SCYTHE ` +
+      `forelimbs folded in FRONT of it ready to strike, a small angular head with red glowing eyes, a long tapered ` +
+      `abdomen behind with red veins. ${SIDE} An ambush predator, wider than tall. ${DARK}`,
+  },
   // The first segment batch came out as generic balls: the segment is cut from the chosen HEAD's own neck plates.
   tentaculoGomo2: {
     size: 16,
@@ -61,7 +95,7 @@ const PECAS = {
 const p = PECAS[peca];
 if (!p) throw new Error(`piece? ${Object.keys(PECAS).join(' | ')}`);
 fs.mkdirSync(outDir, { recursive: true });
-const refArq = path.join(REF, p.ref);
+const refArq = p.ref && path.join(REF, p.ref);
 const styleSize = await tamanho(p.style);
 
 for (const seed of seeds.map(Number)) {
@@ -70,7 +104,9 @@ for (const seed of seeds.map(Number)) {
     image_size: { width: p.size, height: p.size },
     no_background: true,
     seed,
-    reference_images: [{ image: b64(refArq), size: await tamanho(refArq), usage_description: p.usage }],
+    ...(refArq && {
+      reference_images: [{ image: b64(refArq), size: await tamanho(refArq), usage_description: p.usage }],
+    }),
     style_image: { image: b64(p.style), size: styleSize },
     style_options: { color_palette: false, outline: true, detail: true, shading: true },
   });
