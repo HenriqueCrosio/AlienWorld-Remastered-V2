@@ -1,6 +1,9 @@
 // OS ELITES DA F2 (spec 2026-10-05-frente-b-elites-design.md §3). Uso, da raiz: node scripts/test-elites-regras.mjs
 import { ELITES } from '../src/data/numerosElites.ts';
-import { droneAvanca, droneExplode, sentinelaAvanca, sentinelaBloqueia, escudoAbsorve, escolherPosto } from '../src/elitesRegras.ts';
+import {
+  droneAvanca, droneExplode, sentinelaAvanca, sentinelaBloqueia, escudoAbsorve, escolherPosto,
+  cacadorAvanca, cacadorTangivel, tintaDoSumico, tentaculoAvanca, rachadura1X, rachadura2X, tentaculoEnraizado,
+} from '../src/elitesRegras.ts';
 
 const falhas = [];
 const conferir = (ok, msg, visto) => {
@@ -57,6 +60,27 @@ const sorte = () => seq[i++ % seq.length];
 const p = escolherPosto(sorte, S.postoY[0] + 0.12 * (S.postoY[1] - S.postoY[0]));
 conferir(p.x >= S.postoX[0] && p.x <= S.postoX[1] && p.y >= S.postoY[0] && p.y <= S.postoY[1], 'o posto cai na faixa', p);
 conferir(Math.abs(p.y - (S.postoY[0] + 0.12 * (S.postoY[1] - S.postoY[0]))) >= S.postoDistY, 'o posto novo foge da altura do anterior', p);
+
+// ── O CAÇADOR (a lula, spec F3 §2 + emenda de 07/10) ──
+const C = ELITES.cacador;
+conferir(cacadorAvanca('escondido', C.escondidoS - 0.01, 0) === 'escondido' && cacadorAvanca('escondido', C.escondidoS, 0) === 'surge', 'escondido dura escondidoS e surge', C.escondidoS);
+conferir(['surge', 'mira', 'trava', 'rajada'].every((f, k) => cacadorAvanca(f, 99, 1) === ['mira', 'trava', 'rajada', 'some'][k]), 'surge → mira → trava → rajada → some', null);
+conferir(cacadorAvanca('mira', C.miraS - 0.01, 1) === 'mira', 'a mira segura o tempo dela (segue a nave)', C.miraS);
+conferir(cacadorAvanca('some', C.someS, 1) === 'escondido' && cacadorAvanca('some', C.someS, C.ressurgimentos) === 'foi', `depois do ${C.ressurgimentos}º sumiço vai embora`, null);
+conferir(!cacadorTangivel('escondido') && !cacadorTangivel('foi') && ['surge', 'mira', 'trava', 'rajada', 'some'].every(cacadorTangivel), 'escondido não tem corpo; visível, tem', null);
+conferir(tintaDoSumico(1) === 'sopro' && tintaDoSumico(C.ressurgimentos - 1) === 'sopro' && tintaDoSumico(C.ressurgimentos) === 'cortina', 'a tinta: sopro, sopro, CORTINA na saída', null);
+const pc = escolherPosto(() => 0.5, null, C);
+conferir(pc.x >= C.postoX[0] && pc.x <= C.postoX[1] && pc.y >= C.postoY[0] && pc.y <= C.postoY[1], 'o posto do caçador cai na faixa dele (metade direita)', pc);
+
+// ── O TENTÁCULO (spec F3 §3, a regra do casco §3.3) ──
+const T = ELITES.tentaculo;
+const ciclo = ['aviso1', 'bote', 'mergulho', 'pausa', 'aviso2', 'ergue', 'meiaLua', 'segura', 'afunda', 'foi'];
+conferir(ciclo.slice(0, -1).every((f, k) => tentaculoAvanca(f, 99) === ciclo[k + 1]), 'um ciclo por aparição, na ordem da spec', null);
+conferir(tentaculoAvanca('aviso1', T.aviso1S - 0.01) === 'aviso1' && tentaculoAvanca('foi', 99) === 'foi', 'cada estado segura o tempo dele; foi é o fim', T.aviso1S);
+conferir(rachadura1X(100, 84) === 100 + 84 * T.aviso1S, 'a rachadura 1 nasce À FRENTE: o chão a traz até a nave', rachadura1X(100, 84));
+conferir(rachadura2X(60) === T.rachadura2X && rachadura2X(260) === Math.min(T.rachadura2XMax, 260 + T.rachadura2DistMin), 'a rachadura 2 nasce longe da nave (e dentro da tela)', [rachadura2X(60), rachadura2X(260)]);
+conferir(rachadura2X(60) - 60 >= T.rachadura2DistMin, 'a rachadura 2 fica a ≥140px da nave', rachadura2X(60));
+conferir(['aviso1', 'aviso2', 'ergue', 'meiaLua', 'segura', 'afunda'].every(tentaculoEnraizado) && !['bote', 'mergulho', 'pausa'].some(tentaculoEnraizado), 'preso ao casco só quando toca o casco', null);
 
 console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTUDO OK');
 process.exit(falhas.length ? 1 : 0);

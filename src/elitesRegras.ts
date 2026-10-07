@@ -86,9 +86,15 @@ export function escudoAbsorve(hp: number, dano: number): { hp: number; quebrou: 
   return { hp: resta, quebrou: hp > 0 && resta === 0 };
 }
 
+/** A faixa de postos de um elite (a sentinela e o caçador têm a sua). */
+export interface FaixaDePostos {
+  postoX: readonly [number, number];
+  postoY: readonly [number, number];
+  postoDistY: number;
+}
+
 /** O próximo posto: na metade direita, e pelo menos `postoDistY` longe da altura do anterior (até 8 sorteios). */
-export function escolherPosto(sorte: () => number, yAnterior: number | null): { x: number; y: number } {
-  const S = ELITES.sentinela;
+export function escolherPosto(sorte: () => number, yAnterior: number | null, S: FaixaDePostos = ELITES.sentinela): { x: number; y: number } {
   const x = S.postoX[0] + sorte() * (S.postoX[1] - S.postoX[0]);
   let y = S.postoY[0] + sorte() * (S.postoY[1] - S.postoY[0]);
   for (let i = 0; i < 8 && yAnterior !== null && Math.abs(y - yAnterior) < S.postoDistY; i++) {
@@ -96,3 +102,81 @@ export function escolherPosto(sorte: () => number, yAnterior: number | null): { 
   }
   return { x, y };
 }
+
+// ── O CAÇADOR DE VÁCUO, a lula (spec F3 §2 + emenda de 07/10) ──
+
+export type EstadoCacador = 'escondido' | 'surge' | 'mira' | 'trava' | 'rajada' | 'some' | 'foi';
+
+/**
+ * O ciclo da lula. `sumicos` = quantos SOME já COMEÇARAM, contando o atual: o SOME do último ressurgimento termina em
+ * `foi` (vai embora, sem voltar). Morta na MIRA ou na TRAVA ela não chega à RAJADA — não atira (§2.1).
+ */
+export function cacadorAvanca(estado: EstadoCacador, t: number, sumicos: number): EstadoCacador {
+  const C = ELITES.cacador;
+  switch (estado) {
+    case 'escondido':
+      return t >= C.escondidoS ? 'surge' : estado;
+    case 'surge':
+      return t >= C.surgeS ? 'mira' : estado;
+    case 'mira':
+      return t >= C.miraS ? 'trava' : estado;
+    case 'trava':
+      return t >= C.travaS ? 'rajada' : estado;
+    case 'rajada':
+      return t >= C.rajadaS ? 'some' : estado;
+    case 'some':
+      if (t < C.someS) return estado;
+      return sumicos >= C.ressurgimentos ? 'foi' : 'escondido';
+    default:
+      return 'foi';
+  }
+}
+
+/** Escondida ela some DE VERDADE (decisão dele, A): nem visível, nem atingível. No SOME ainda fere, até sumir. */
+export const cacadorTangivel = (estado: EstadoCacador): boolean => estado !== 'escondido' && estado !== 'foi';
+
+/** A tinta do `n`-ésimo sumiço (1-based): o SOPRO, e a CORTINA no último — a saída de vez (§2.3, decisão dele: A). */
+export const tintaDoSumico = (n: number): 'sopro' | 'cortina' => (n >= ELITES.cacador.ressurgimentos ? 'cortina' : 'sopro');
+
+// ── O TENTÁCULO DO CASCO (spec F3 §3 + a regra do casco §3.3) ──
+
+export type EstadoTentaculo = 'aviso1' | 'bote' | 'mergulho' | 'pausa' | 'aviso2' | 'ergue' | 'meiaLua' | 'segura' | 'afunda' | 'foi';
+
+const CICLO_TENTACULO: EstadoTentaculo[] = ['aviso1', 'bote', 'mergulho', 'pausa', 'aviso2', 'ergue', 'meiaLua', 'segura', 'afunda', 'foi'];
+
+/** Um ciclo por aparição (decisão dele: A), na ordem fixa; cada estado dura o seu tempo. */
+export function tentaculoAvanca(estado: EstadoTentaculo, t: number): EstadoTentaculo {
+  if (estado === 'foi') return 'foi';
+  const T = ELITES.tentaculo;
+  const dur: Record<Exclude<EstadoTentaculo, 'foi'>, number> = {
+    aviso1: T.aviso1S,
+    bote: T.boteS,
+    mergulho: T.mergulhoS,
+    pausa: T.pausaS,
+    aviso2: T.aviso2S,
+    ergue: T.ergueS,
+    meiaLua: T.meiaLuaS,
+    segura: T.seguraS,
+    afunda: T.afundaS,
+  };
+  return t < dur[estado] ? estado : CICLO_TENTACULO[CICLO_TENTACULO.indexOf(estado) + 1];
+}
+
+/**
+ * A RACHADURA 1 (§3.3): nasce À FRENTE da nave, na distância que o chão leva para trazê-la até debaixo dela no fim do
+ * aviso — o casco anda a `velChao` e a rachadura é do casco.
+ */
+export const rachadura1X = (naveX: number, velChao: number): number => naveX + velChao * ELITES.tentaculo.aviso1S;
+
+/** A RACHADURA 2: perto da borda direita, nunca a menos de `rachadura2DistMin` à frente da nave, nunca fora da tela. */
+export function rachadura2X(naveX: number): number {
+  const T = ELITES.tentaculo;
+  return Math.min(T.rachadura2XMax, Math.max(T.rachadura2X, naveX + T.rachadura2DistMin));
+}
+
+/**
+ * Preso ao casco (anda com o chão): a rachadura dos avisos e a torre de pé. O bote, o mergulho e a pausa são livres na
+ * tela — a passagem dos gomos pelo buraco no bote é tratada na corrente, ponto a ponto.
+ */
+export const tentaculoEnraizado = (estado: EstadoTentaculo): boolean =>
+  estado === 'aviso1' || estado === 'aviso2' || estado === 'ergue' || estado === 'meiaLua' || estado === 'segura' || estado === 'afunda';

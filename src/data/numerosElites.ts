@@ -83,4 +83,73 @@ export const ELITES = {
     postoDistY: 50,
     velSaida: 140,
   },
+  /**
+   * O CAÇADOR DE VÁCUO (spec F3 §2) — desde 07/10 a LULA (Pro nº 15, 85%): ESCONDIDO (sem corpo) → SURGE → MIRA (segue
+   * a nave) → TRAVA → RAJADA de agulhas na linha travada → SOME na tinta. 3 ressurgimentos, depois vai embora.
+   */
+  cacador: {
+    hp: 10,
+    score: 300,
+    escondidoS: 1.2,
+    surgeS: 0.3,
+    miraS: 0.6,
+    travaS: 0.3,
+    /** As agulhas saem a cada `agulhaEspacoS` (3 em 0,16s); a rajada fecha logo depois. */
+    rajadaS: 0.25,
+    someS: 0.4,
+    ressurgimentos: 3,
+    agulhaN: 3,
+    agulhaEspacoS: 0.08,
+    velAgulha: 200,
+    /** Os postos: só na metade direita, longe da altura do anterior (a regra da sentinela). */
+    postoX: [220, 340] as const,
+    postoY: [36, 140] as const,
+    postoDistY: 50,
+  },
+  /**
+   * A TINTA da lula (spec F3 §2.3, 07/10): o SOPRO nos sumiços 1 e 2 (só a tampa), a CORTINA no último. Tempos desde o
+   * jato: cresce até `cresceS`, segura até `seguraS`, esvai em pontilhado até `someS`. Os quadros são ASSADOS nestes
+   * tempos (`scripts/_elites/_instalar-f3.mjs`, a `qps`) — mudou aqui, reinstale.
+   */
+  tinta: {
+    sopro: { cresceS: 0.15, seguraS: 0.5, someS: 0.9 },
+    cortina: { cresceS: 0.35, seguraS: 1.2, someS: 1.9 },
+    qps: 20,
+  },
+  /**
+   * O TENTÁCULO DO CASCO (spec F3 §3 + a regra do casco §3.3): AVISO 1 → BOTE → MERGULHO → PAUSA → AVISO 2 → ERGUE →
+   * MEIA-LUA → SEGURA → AFUNDA. Um ciclo por aparição.
+   */
+  tentaculo: {
+    hp: 14,
+    score: 350,
+    aviso1S: 0.8,
+    boteS: 0.7,
+    mergulhoS: 0.9,
+    pausaS: 0.6,
+    aviso2S: 0.8,
+    ergueS: 0.4,
+    /** A pose do disparo (os 6 tiros saem na entrada dela). */
+    meiaLuaS: 0.2,
+    seguraS: 0.8,
+    afundaS: 0.6,
+    /** A crista do casco (as placas em depth −75 começam em y≈150): onde a rachadura abre. */
+    chaoY: 153,
+    /** O bote nunca sobe acima disto (e nunca morde abaixo de `chaoY − 10`). */
+    tetoBoteY: 40,
+    /** O mergulho: o arco passa do ponto e cai este tanto para trás, atrás das placas. */
+    mergulhoDX: -56,
+    /** A rachadura 2 nasce perto da borda direita e anda com o chão (~250px em ~2,6s)… */
+    rachadura2X: 350,
+    rachadura2XMax: 370,
+    /** …e nunca a menos disto à frente da nave. */
+    rachadura2DistMin: 140,
+    /** De pé, a cabeça fica a esta altura acima da crista. */
+    alturaErgue: 60,
+    gomos: 8,
+    gomoEspaco: 7,
+    meiaLuaN: 6,
+    meiaLuaArcoGraus: 140,
+    velMeiaLua: 90,
+  },
 };
