@@ -1,5 +1,7 @@
 // OS ELITES DA F3 NO JOGO REAL (spec 2026-10-06-frente-b-fatia-f3-design.md §7, com a emenda de 07/10).
 // Uso: node scripts/probe-elites-f3.mjs [cacador|tentaculo]  (com `npm run dev` rodando). Sandbox, fase 3, invulnerável.
+// O Tentáculo roda no RELÓGIO MANUAL (1/60 s por passo, como o `_gif.mjs`): o bote dura 0,7s, e no software renderer
+// uma ida e volta do playwright demora mais que isso.
 import { chromium } from 'playwright';
 
 const SO = process.argv[2];
@@ -26,8 +28,6 @@ const conferir = (ok, msg, visto) => {
   if (!ok) falhas.push(msg);
 };
 const espera = (ms) => page.waitForTimeout(ms);
-const faseDe = (kind) =>
-  page.evaluate((k) => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.active && x.getData('kind') === k)?.getData('elite')?.fase, kind);
 const esperaFase = (kind, fase, ms = 8000) =>
   page.waitForFunction(({ kind, fase }) => window.__game.scene.getScene('Game').enemies.enemies.getChildren().find((x) => x.active && x.getData('kind') === kind)?.getData('elite')?.fase === fase, { kind, fase }, { timeout: ms });
 
@@ -129,6 +129,124 @@ if (!SO || SO === 'cacador') {
     return { viva: s.enemies.enemies.getChildren().some((x) => x.active && x.getData('kind') === 'cacador'), pontos: s.totalScore() - antes };
   });
   conferir(!rabo.viva && rabo.pontos === 0, 'o rabo chega: a lula some de vez, sem pontos', rabo);
+}
+
+if (!SO || SO === 'tentaculo') {
+  // ── O TENTÁCULO (o casco revelado, como no ato 2), no relógio manual ──
+  await page.evaluate(() => {
+    const g = window.__game;
+    const s = g.scene.getScene('Game');
+    s.parallax.setNebulaDensity(0, 0);
+    s.parallax.revealCasco(1, 0);
+    s.enemies.enemyBullets.getChildren().forEach((b) => b.active && s.enemies.release(b));
+    g.loop.sleep();
+    window.__passo = { t: g.loop.now };
+    window.__step = (n = 1) => {
+      for (let i = 0; i < n; i++) {
+        window.__passo.t += 1000 / 60;
+        g.step(window.__passo.t, 1000 / 60);
+      }
+    };
+    // Passa quadro a quadro até `fn` devolver algo (ou `max` quadros).
+    window.__ate = (fn, max = 600) => {
+      for (let i = 0; i < max; i++) {
+        const r = fn();
+        if (r) return r;
+        window.__step(1);
+      }
+      return null;
+    };
+    window.__tent = () => s.enemies.enemies.getChildren().find((x) => x.active && x.getData('kind') === 'tentaculo');
+    window.__disparos = [];
+    window.__step(2);
+    s.ship.setPosition(100, 100);
+    s.enemies.spawn('tentaculo', 100);
+  });
+  const t0 = await page.evaluate(() => {
+    const s = window.__game.scene.getScene('Game');
+    const e = window.__tent();
+    const st = e.getData('elite');
+    const hp = e.getData('hp');
+    const r = s.ferirInimigo(e, 5, 'probe', { x: e.x - 20, y: e.y });
+    return { fase: st.fase, racha: st.racha.x, vel: s.enemies.velChao, r, perdeu: hp - e.getData('hp') };
+  });
+  conferir(t0.fase === 'aviso1' && t0.racha > 100 + 40 && t0.r === 'bloqueado' && t0.perdeu === 0, 'AVISO 1: a rachadura nasce À FRENTE da nave, e a cabeça dentro do casco é intocável', t0);
+  const t1 = await page.evaluate(() => {
+    window.__step(24);
+    return window.__tent().getData('elite').racha.x;
+  });
+  conferir(Math.abs(t1 - t0.racha + t0.vel * 0.4) < 2, 'a rachadura ANDA COM O CHÃO (a regra do casco)', { andou: t1 - t0.racha, esperado: -t0.vel * 0.4 });
+
+  const bote0 = await page.evaluate(() =>
+    window.__ate(() => {
+      const st = window.__tent().getData('elite');
+      return st.fase === 'bote' && { racha: st.racha.x, nave: window.__game.scene.getScene('Game').ship.x, alvo: st.alvo };
+    }),
+  );
+  conferir(Math.abs(bote0.racha - bote0.nave) < 12 && Math.abs(bote0.alvo.x - 100) < 1 && Math.abs(bote0.alvo.y - 100) < 1, 'no fim do aviso a rachadura chegou SOB a nave, e o bote vai aonde ela estava', bote0);
+  const bote = await page.evaluate(() => {
+    const s = window.__game.scene.getScene('Game');
+    s.ship.setPosition(40, 30); // a nave desvia
+    return window.__ate(() => {
+      const e = window.__tent();
+      const st = e.getData('elite');
+      if (st.fase !== 'bote' || st.t < 0.5) return null;
+      const gomosFora = st.gomos.filter((g) => g.visible && g.body.enable).length;
+      const hp = e.getData('hp');
+      const r = s.ferirInimigo(e, 1, 'probe', { x: e.x - 20, y: e.y });
+      return { x: e.x, y: e.y, gomosFora, r, perdeu: hp - e.getData('hp') };
+    });
+  });
+  conferir(bote && Math.hypot(bote.x - 100, bote.y - 100) < 20 && bote.gomosFora >= 4 && bote.r === 'vivo' && bote.perdeu === 1, 'o BOTE: a cabeça chega ao ponto (não persegue), o corpo sai atrás, e a cabeça exposta é ferida', bote);
+
+  const pausa = await page.evaluate(() =>
+    window.__ate(() => {
+      const e = window.__tent();
+      if (e.getData('elite').fase !== 'pausa') return null;
+      const s = window.__game.scene.getScene('Game');
+      return { visivel: e.visible, corpo: e.body.enable, gomos: s.enemies.corposElite.getChildren().filter((g) => g.visible).length };
+    }),
+  );
+  conferir(pausa && !pausa.visivel && !pausa.corpo && pausa.gomos === 0, 'depois do MERGULHO por trás do casco: sumiu inteiro', pausa);
+
+  const av2 = await page.evaluate(() =>
+    window.__ate(() => {
+      const st = window.__tent().getData('elite');
+      return st.fase === 'aviso2' && { racha: st.racha.x, nave: window.__game.scene.getScene('Game').ship.x };
+    }),
+  );
+  conferir(av2 && av2.racha - av2.nave >= 140, 'AVISO 2: a rachadura LONGE da nave (≥140px à frente)', av2);
+
+  // De pé: a nave na altura dos GOMOS atira — o corpo absorve, a cabeça não perde vida.
+  const dePe = await page.evaluate(() =>
+    window.__ate(() => {
+      const s = window.__game.scene.getScene('Game');
+      const e = window.__tent();
+      const st = e.getData('elite');
+      if (st.fase !== 'segura') return null;
+      const g = st.gomos[4];
+      s.ship.setPosition(Math.max(20, g.x - 90), g.y);
+      return { hp: e.getData('hp'), bloq: s.medidas.resumo().bloqueados.tiro ?? 0, raiz: st.raizX, cabeca: e.x, bolinhas: window.__disparos.length };
+    }),
+  );
+  await page.keyboard.down('Space');
+  await page.evaluate(() => window.__step(21));
+  await page.keyboard.up('Space');
+  const absorveu = await page.evaluate(() => {
+    const s = window.__game.scene.getScene('Game');
+    return { hp: window.__tent()?.getData('hp'), bloq: s.medidas.resumo().bloqueados.tiro ?? 0 };
+  });
+  conferir(absorveu.hp === dePe.hp && absorveu.bloq > dePe.bloq, 'os GOMOS absorvem o tiro sem dano (só a cabeça fere e é ferida)', { antes: dePe, depois: absorveu });
+  conferir(dePe.bolinhas === 6 && Math.abs(dePe.cabeca - dePe.raiz) < 2, 'a MEIA-LUA: 6 tiros; a torre fica rígida sobre a raiz que rola', dePe);
+  const bolinhas = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.getChildren().filter((b) => b.active && b.texture.key === 'eliteTiroBolinha').map((b) => Math.round(b.body.velocity.y)));
+  conferir(bolinhas.length > 0 && bolinhas.every((vy) => vy < 0), 'as bolinhas da meia-lua sobem (cobrem área, não miram)', bolinhas);
+
+  const fim = await page.evaluate(() => {
+    const foi = window.__ate(() => !window.__tent(), 300);
+    return { foi: !!foi, gomos: window.__game.scene.getScene('Game').enemies.corposElite.countActive(true) };
+  });
+  conferir(fim.foi && fim.gomos === 0, 'um ciclo por aparição: afunda e vai embora, sem deixar gomo para trás', fim);
+  await page.evaluate(() => window.__game.loop.wake());
 }
 
 conferir(erros.length === 0, 'sem erros no console', erros);

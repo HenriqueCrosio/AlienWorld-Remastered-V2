@@ -668,6 +668,11 @@ export class GameScene extends Phaser.Scene {
     if (this.sandbox) {
       this.medidas = new Medidas(() => this.time.now);
       this.arena = new SandboxArena(this, this.sandbox, this.enemies, this.medidas);
+      // O Tentáculo mora no CASCO (o ato 2 da F3): no sandbox, a F3 com ele já abre sem nuvem e com o casco de pé.
+      if (this.stage.id === 3 && this.sandbox.inimigos.tentaculo > 0) {
+        this.parallax.setNebulaDensity(0, 0);
+        this.parallax.revealCasco(1, 0);
+      }
     }
 
     if (import.meta.env.DEV) {
