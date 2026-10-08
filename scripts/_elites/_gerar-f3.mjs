@@ -122,6 +122,28 @@ const PECAS = {
       `overlapping armored ring segments all the way down, each with one tiny dim red light. ${SIDE} Tall and thin. ` +
       `${DARK}`,
   },
+  // 08/10 — he picked PINÇA 49 ("uma pegada de Alien"). Its BODY and a TAIL, in its own armour: the whole spine as one
+  // column (the 07/10 lesson: a column comes out with matching, repeated segments to slice).
+  tentaculoCorpoPinca: {
+    size: [32, 96],
+    ref: '../../../2026-10-07/elites/cand/tentaculoPinca-31-49.png',
+    usage: 'the material: this creature\'s dark glossy biomechanical armour, its palette, its ribbed plates and outline',
+    style: 'docs/superpowers/folhas/2026-10-07/elites/cand/tentaculoPinca-31-49.png',
+    description:
+      `The long SEGMENTED BODY AND TAIL of this alien creature, hanging STRAIGHT DOWN as a vertical column (no head): ` +
+      `a spine of identical dark glossy armoured vertebrae, ribbed, each with a small sharp spike on its back, getting ` +
+      `slowly thinner toward the bottom and ending in a sharp blade-like TAIL TIP at the very bottom. Seen from the ` +
+      `side. ${DARK}`,
+  },
+  tentaculoCaudaPinca: {
+    size: 32,
+    ref: '../../../2026-10-07/elites/cand/tentaculoPinca-31-49.png',
+    usage: 'the material: this creature\'s dark glossy biomechanical armour, its palette and outline',
+    style: 'docs/superpowers/folhas/2026-10-07/elites/cand/tentaculoPinca-31-49.png',
+    description:
+      `The TAIL TIP of this alien creature, seen from the side: the last thin armoured vertebrae ending in a long sharp ` +
+      `curved BLADE, like a scorpion-or-xenomorph tail spike, pointing DOWN. ${DARK}`,
+  },
   // The first segment batch came out as generic balls: the segment is cut from the chosen HEAD's own neck plates.
   tentaculoGomo2: {
     size: 16,

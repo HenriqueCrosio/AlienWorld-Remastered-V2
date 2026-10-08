@@ -1,11 +1,11 @@
-// Contact sheet for the triage (before any sheet goes to him): every candidate of one piece, magnified, numbered.
+﻿// Contact sheet for the triage (before any sheet goes to him): every candidate of one piece, magnified, numbered.
 //   node scripts/_elites/_triagem-f3.mjs <out.png> <piece> <seed> [zoom] [cols]
 // (07/10: the hunter round was cacadorLula/Vespa/Arraia/Louva seed 21; the tentacle round, tentaculo* seed 31.)
 import fs from 'node:fs';
 import sharp from 'sharp';
 
 const [OUT, PECA, SEED, ZOOM = '3', COLS = '8'] = process.argv.slice(2);
-const D = 'docs/superpowers/folhas/2026-10-07/elites/cand';
+const D = process.env.CAND ?? 'docs/superpowers/folhas/2026-10-07/elites/cand';
 const Z = Number(ZOOM), NC = Number(COLS), LH = 18;
 const arqs = fs.readdirSync(D)
   .filter((f) => new RegExp(`^${PECA}-${SEED}-(\\d+)\\.png$`).test(f))
