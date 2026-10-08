@@ -144,6 +144,30 @@ const PECAS = {
       `The TAIL TIP of this alien creature, seen from the side: the last thin armoured vertebrae ending in a long sharp ` +
       `curved BLADE, like a scorpion-or-xenomorph tail spike, pointing DOWN. ${DARK}`,
   },
+  // 08/10 (2) — his concept sheet VOID SERPENT (`folhas/2026-10-08/elites/ref/void-serpent-conceito.png`): the body is
+  // OVERLAPPING scale plates with long curved spines sprouting backward and red neural tissue glowing between them; the
+  // tail ends in a FAN of long curved spines. The concept crops are the SUBJECT, the Pinça 49 the pixel style.
+  tentaculoCorpoSerpente: {
+    size: [32, 96],
+    ref: '../../../2026-10-08/elites/ref/corpo-inteiro.png',
+    usage: 'the subject: this serpent body — overlapping dark scale plates, long curved spines sprouting backward from them, red glowing tissue between the plates',
+    style: 'docs/superpowers/folhas/2026-10-07/elites/cand/tentaculoPinca-31-49.png',
+    description:
+      `The long BODY of this void serpent hanging STRAIGHT DOWN as a vertical column (no head): rows of OVERLAPPING ` +
+      `dark armoured SCALE PLATES like a pangolin, long thin CURVED SPINES sprouting from the plates on both sides and ` +
+      `sweeping DOWN and outward, thin RED glowing seams of tissue between the plates, slowly thinner toward the ` +
+      `bottom. Seen from the side. ${DARK}`,
+  },
+  tentaculoCaudaSerpente: {
+    size: 48,
+    ref: '../../../2026-10-08/elites/ref/cauda-detalhe.png',
+    usage: 'the subject: this tail end — the last scales opening into a fan of long curved spines like claws, red glowing tissue',
+    style: 'docs/superpowers/folhas/2026-10-07/elites/cand/tentaculoPinca-31-49.png',
+    description:
+      `The TAIL END of this void serpent, seen from the side: the last overlapping dark scales opening into a FAN of ` +
+      `five or six long thin CURVED SPINES spreading backward like claws, pointing DOWN, faint red glow between the ` +
+      `scales. ${DARK}`,
+  },
   // The first segment batch came out as generic balls: the segment is cut from the chosen HEAD's own neck plates.
   tentaculoGomo2: {
     size: 16,
