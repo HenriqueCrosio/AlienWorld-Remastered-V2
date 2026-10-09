@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "7ac4da6a-53b0-440e-b69e-8a8500186955",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the serpent keeps turning its whole body slowly in place, its head turning away from the viewer, until we see its spined back from behind; a smooth continuous turn, no jumps",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

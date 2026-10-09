@@ -17,6 +17,12 @@ const quadros = async (dir) => {
   return Promise.all([...Array(n).keys()].map((i) => ler(`${dir}/${i}.png`)));
 };
 const CLIPES = { A: await quadros(`${V}/rodopio-a`), B: await quadros(`${V}/rodopio-b`), C: await quadros(`${V}/rodopio-c`) };
+// 09/10 (2): the free rolls were rejected (*"mudanças bruscas de posição, parecem espelhados"* — ~49% of the drawing
+// changed every frame). The GIRO pinned on the real views (side → front → back → side, `vistas/giro-completo`, max 26%
+// per frame) is the one in scene now. `--clipe <dir>` picks another.
+const ci = process.argv.indexOf('--clipe');
+const CLIPE_CENA = await quadros(ci > 0 ? process.argv[ci + 1] : `${V}/giro-completo`);
+const SAIDA = ci > 0 ? 'serpente-rodopio-quadros-demo.gif' : 'serpente-giro-demo.gif';
 
 // ── 1. the three takes side by side, 12 fps (one loop = 17 frames ≈ 1.4s, the dolphin's roll) ──
 {
@@ -58,7 +64,9 @@ const CLIPES = { A: await quadros(`${V}/rodopio-a`), B: await quadros(`${V}/rodo
   // Speed: out of the hull fast; the BRAKE over the ship while she spins (the dolphin brakes to 35% in its roll);
   // fast again down at the camera.
   const S_GIRO = [S[3 * 60], S[7 * 60]];
-  const vel = (s) => (s < S_GIRO[0] ? 170 : s < S_GIRO[1] ? 60 : 170);
+  // The brake lasts EXACTLY the turn (its frames at 12 fps): she spins once over the ship and goes on.
+  const VEL_GIRO = (S_GIRO[1] - S_GIRO[0]) / (CLIPE_CENA.length / 12);
+  const vel = (s) => (s < S_GIRO[0] ? 170 : s < S_GIRO[1] ? VEL_GIRO : 170);
   const posS = [0];
   const dt = 1 / 240;
   for (let t = dt; t < 8; t += dt) posS.push(posS.at(-1) + vel(posS.at(-1)) * dt);
@@ -66,7 +74,7 @@ const CLIPES = { A: await quadros(`${V}/rodopio-a`), B: await quadros(`${V}/rodo
   const T0 = 0.4;
   const tGiro0 = posS.findIndex((s) => s >= S_GIRO[0]) * dt + T0;
   // The frames: idle = frame 0 (the side pose) until the brake; the roll plays ONCE at 12 fps while braked.
-  const clipe = CLIPES.A;
+  const clipe = CLIPE_CENA;
   const quadroEm = (t) => (t < tGiro0 ? 0 : Math.min(clipe.length - 1, Math.floor((t - tGiro0) * 12)));
   // His spines: 3 groups of 3, straight at the ship, released while she rises through the ship's heights.
   const AGULHA = mapa(['.......OOO.', 'OFRMMhhsssO', '.OOOOOOOO..']);
@@ -127,7 +135,15 @@ const CLIPES = { A: await quadros(`${V}/rodopio-a`), B: await quadros(`${V}/rodo
     if (q && q.z >= 0.3) desenharSerpente();
     out.push(await ampliar(img, 3));
   }
-  await sharp(out, { join: { animated: true } }).gif({ delay: Array(out.length).fill(1000 / FPS), loop: 0 }).toFile(`${D}/serpente-rodopio-quadros-demo.gif`);
-  console.log(`${D}/serpente-rodopio-quadros-demo.gif`, out.length);
+  await sharp(out, { join: { animated: true } }).gif({ delay: Array(out.length).fill(1000 / FPS), loop: 0 }).toFile(`${D}/${SAIDA}`);
+  console.log(`${D}/${SAIDA}`, out.length);
+}
+
+// ── 3. the pinned turn alone, at 12 fps, magnified ──
+{
+  const out = [];
+  for (let i = 0; i < CLIPE_CENA.length * 2; i++) out.push(await ampliar(CLIPE_CENA[i % CLIPE_CENA.length], 2));
+  await sharp(out, { join: { animated: true } }).gif({ delay: Array(out.length).fill(Math.round(1000 / 12)), loop: 0 }).toFile(`${D}/serpente-giro-sozinho.gif`);
+  console.log(`${D}/serpente-giro-sozinho.gif`);
 }
 void P;
