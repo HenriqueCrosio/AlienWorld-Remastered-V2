@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "0829550e-9db5-45c8-88eb-a38d0db95156",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the serpent slowly turns its whole body and head toward the viewer until its head faces the camera, its coils keep the same S shape, nothing gets brighter",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 4
+  }
+}

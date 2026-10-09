@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "375834b4-cb09-42f1-9183-ba2160eff1bd",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the serpent twists its whole body in a fast corkscrew spin, rolling over once around its long axis while its coils ripple and its spines sway",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

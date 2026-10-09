@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "220d80d2-e645-41ce-b1f3-cff4031bd9cf",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the serpent rolls over half a turn around the long axis of its body, turning its head toward the viewer on the way, until it lies on the other side",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

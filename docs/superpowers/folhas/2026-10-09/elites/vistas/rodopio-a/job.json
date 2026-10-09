@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "c5c63e71-5f38-47ba-86bf-5cb6ead48a38",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the serpent does one full barrel roll, spinning once around the long axis of its own body like a corkscrew: it turns to show its belly, then its spined back, and comes back to the side pose",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

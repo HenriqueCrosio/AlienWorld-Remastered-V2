@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "75f213f1-3b7c-41a8-8fe1-3301b9f75d05",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the serpent slowly turns its whole body away from the viewer until we see its spined back from behind, its coils keep the same S shape, nothing gets brighter",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 4
+  }
+}
