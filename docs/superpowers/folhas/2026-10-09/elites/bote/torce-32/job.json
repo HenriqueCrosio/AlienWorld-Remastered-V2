@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "faaf1dbe-d353-4475-9b06-5ef05c18843d",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the stretched serpent strikes forward like a snake lunging and TWISTS in mid-air: its body slowly whips around into a tight loop, coiling as it rolls over around its own axis, then straightens out again; one continuous fluid motion with small steps between frames, the head stays clearly visible, the colours stay dark, nothing gets brighter",
+  "quadros": 33,
+  "usage": {
+    "type": "generations",
+    "generations": 5
+  }
+}
