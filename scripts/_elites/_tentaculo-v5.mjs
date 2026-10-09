@@ -120,12 +120,40 @@ function pecaEm(spr, t, dist, i, n) {
   const c = Math.cos(giro(t, dist));
   const lado = Math.sign(c) || 1;
   const sx = lado * (0.72 + 0.28 * Math.abs(c)) * prof;
-  // Far = darker; edge-on in the roll = darker too (the side turned away from the light).
-  const k = (0.62 + 0.38 * (q.z + 1) / 2) * (0.7 + 0.3 * Math.abs(c));
+  // Far = darker; edge-on in the roll = darker too (the side turned away from the light). The body sits a notch under
+  // the head (×0.85), so the head pops.
+  const k = 0.85 * (0.62 + 0.38 * (q.z + 1) / 2) * (0.7 + 0.3 * Math.abs(c));
   let img = luz(escalar(spr, sx, prof), k);
   img = girar(img, q.ang + Math.PI / 2);
   return { img, x: px_, y: py_, z: q.z, i };
 }
+
+// 09/10, he: *"a única coisa que ainda não consigo distinguir é onde está a cabeça"*. The head has to POP, without
+// lighting the whole creature: it is bigger, it never darkens with depth, it gets a 1px rim of light on its silhouette,
+// and its EYE — the only energy on her — glows and leaves a short trail of light: the eye leads the player's eye.
+const ESCALA_CABECA = 1.25;
+const OLHO = (() => {
+  let sx = 0, sy = 0, n = 0;
+  for (let y = 0; y < CABECA.h; y++)
+    for (let x = 0; x < CABECA.w; x++) {
+      const k = (y * CABECA.w + x) * 4;
+      if (CABECA.d[k + 3] && CABECA.d[k] > 120 && CABECA.d[k] > CABECA.d[k + 1] + 60) [sx, sy, n] = [sx + x, sy + y, n + 1];
+    }
+  return { x: sx / n + 0.5 - CABECA.w / 2, y: sy / n + 0.5 - CABECA.h / 2 };
+})();
+/**
+ * The rim light, ON SCREEN (after the head is turned): only the silhouette edges facing the scene's light (up and
+ * left) catch it — a uniform outline turned the head into a grey block and ate its drawing.
+ */
+function aro(spr, cor) {
+  const out = { d: Buffer.from(spr.d), w: spr.w, h: spr.h };
+  const op = (x, y) => x >= 0 && y >= 0 && x < spr.w && y < spr.h && spr.d[(y * spr.w + x) * 4 + 3] > 0;
+  for (let y = 0; y < spr.h; y++)
+    for (let x = 0; x < spr.w; x++)
+      if (op(x, y) && (!op(x, y - 1) || !op(x - 1, y))) [out.d[(y * spr.w + x) * 4], out.d[(y * spr.w + x) * 4 + 1], out.d[(y * spr.w + x) * 4 + 2]] = cor;
+  return out;
+}
+const RASTRO = [];
 
 /** The head LEADS: it looks at a point ahead on the path (the anticipation), not along its own ring. */
 function cabecaEm(t) {
@@ -133,11 +161,14 @@ function cabecaEm(t) {
   if (s <= 0) return null;
   const q = noS(s), adiante = noS(s + 16);
   const ang = Math.atan2(adiante.y - q.y, adiante.x - q.x);
-  const prof = 1 + 0.3 * q.z;
+  const prof = (1 + 0.3 * q.z) * ESCALA_CABECA;
   const c = Math.cos(giro(t, 0));
   const sx = (Math.sign(c) || 1) * (0.72 + 0.28 * Math.abs(c)) * prof;
-  const k = (0.62 + 0.38 * (q.z + 1) / 2) * (0.75 + 0.25 * Math.abs(c));
-  return { img: girar(luz(escalar(CABECA, sx, prof), k), ang + Math.PI / 2), x: q.x, y: q.y, z: q.z, i: -1 };
+  const rot = ang + Math.PI / 2;
+  // Where the eye lands on screen (scaled, mirrored by the roll, turned with the head).
+  const ex = OLHO.x * sx, ey = OLHO.y * prof;
+  const olho = { x: q.x + ex * Math.cos(rot) - ey * Math.sin(rot), y: q.y + ex * Math.sin(rot) + ey * Math.cos(rot) };
+  return { img: aro(girar(escalar(CABECA, sx, prof), rot), P.H), x: q.x, y: q.y, z: q.z, i: -1, olho };
 }
 
 // ── the spines: his 3 groups of 3, released while she rises on the right through the play plane ──
@@ -190,6 +221,24 @@ for (let f = 0; f < Math.round(DUR * FPS); f++) {
     colar(img, g, x - g.w / 2, e.y - g.h / 2);
   }
   for (const q of pecas.filter((q) => q.z >= 0.15)) desenha(q);
+  // The EYE: a glow on it and a fading trail of where it has been (the last 6 frames).
+  if (cab && (cab.z >= 0 || cab.olho.y < cr)) {
+    RASTRO.unshift(cab.olho);
+    RASTRO.length = Math.min(RASTRO.length, 7);
+  } else RASTRO.length = 0;
+  // Drawn oldest first; the live eye is a 2×2 hot core with a red halo.
+  [...RASTRO].reverse().forEach((o, kk) => {
+    const k = RASTRO.length - 1 - kk;
+    const x = Math.round(o.x), y = Math.round(o.y);
+    if (k === 0) {
+      for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) if (Math.abs(dx) + Math.abs(dy) <= 3) px(img, x + dx, y + dy, P.F, 0.35);
+      for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) px(img, x + dx, y + dy, [255, 200, 180], 1);
+    } else {
+      const al = 0.7 * (1 - k / 7);
+      px(img, x, y, P.F, al);
+      px(img, x + 1, y, P.F, al * 0.6);
+    }
+  });
   quadros.push(await ampliar(img, 3));
 }
 const out = `${D}/serpente-rodopio-3d-demo.gif`;
