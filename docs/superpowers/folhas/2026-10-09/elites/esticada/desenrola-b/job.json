@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "5b317075-1ff9-492d-a6bd-08e59d11814d",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the coiled serpent lunges to the left, unrolling its coils one after another until its whole body is stretched out long and straight behind its head, tail fan at the far right; smooth continuous motion",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

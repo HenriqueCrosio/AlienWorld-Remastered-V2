@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "d22908db-d774-40d4-85b2-a5b9490cdd0e",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the serpent uncoils and stretches its whole body out long and nearly straight toward the left, like an eel leaping forward: head leading on the left, body and tail trailing straight behind it to the right; smooth continuous motion",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

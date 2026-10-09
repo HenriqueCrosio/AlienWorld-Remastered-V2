@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "3348269f-0deb-4f3c-aad5-5f7fc68a5d30",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "the stretched serpent stays long and straight and slowly rolls a quarter turn around the long axis of its body, tilting its spined back toward the viewer until we see its back from above; its head stays on the left; smooth continuous motion, nothing gets brighter",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}
