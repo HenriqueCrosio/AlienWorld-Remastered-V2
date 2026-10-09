@@ -168,6 +168,21 @@ const PECAS = {
       `five or six long thin CURVED SPINES spreading backward like claws, pointing DOWN, faint red glow between the ` +
       `scales. ${DARK}`,
   },
+  // 09/10 — THE RIGHT FLOW (he: "criar o conjunto inteiro da serpente … depois os lados … aí a animação"): the WHOLE
+  // creature in one image — head, neck, body and tail drawn together, same light and scale — from his concept sheet,
+  // in the Pinça 49's pixel style. Then its views, then the animation (PixMiniMax).
+  serpenteInteira: {
+    size: 128,
+    ref: '../../../2026-10-08/elites/ref/serpente-inteira.png',
+    usage: 'the subject: this whole void serpent — the elongated alien skull with curved mandible pincers and red eyes, the long body of overlapping dark scale plates with long curved spines sweeping back and red glowing tissue between the plates, and the tail ending in a fan of long curved spines',
+    style: 'docs/superpowers/folhas/2026-10-07/elites/cand/tentaculoPinca-31-49.png',
+    description:
+      `The WHOLE void serpent in ONE piece, seen exactly from the SIDE, head on the LEFT facing LEFT: an elongated ` +
+      `alien skull with curved mandible pincers and one red eye, a thick neck flowing straight into a long body of ` +
+      `overlapping dark scale plates with long curved spines sweeping back, thin red glowing tissue between the ` +
+      `plates, the body curving in a loose S toward the right and ending in a TAIL that opens into a fan of long ` +
+      `curved spines. The whole creature fits inside the frame with a margin. ${DARK}`,
+  },
   // The first segment batch came out as generic balls: the segment is cut from the chosen HEAD's own neck plates.
   tentaculoGomo2: {
     size: 16,
