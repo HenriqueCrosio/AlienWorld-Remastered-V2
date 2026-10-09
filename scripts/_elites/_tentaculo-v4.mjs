@@ -74,24 +74,32 @@ function trajeto(f, t0, t1) {
     return lo;
   };
   return {
+    /** Arc length of the head at time t. */
+    sCabeca: (t) => pts[idx(t)].s,
+    /** Arc length at the first sample matching `fn(point)`. */
+    sOnde: (fn) => (pts.find(fn) ?? pts.at(-1)).s,
     cabeca: (t) => pts[idx(t)],
     /** Position and MOTION heading of the point `d` px behind the head at time t. */
     atras(t, d) {
       const k = porS(pts[idx(t)].s - d);
       const a = pts[Math.max(0, k - 2)], b = pts[Math.min(pts.length - 1, k + 2)];
-      return { x: pts[k].x, y: pts[k].y, ang: Math.atan2(b.y - a.y, b.x - a.x) };
+      return { x: pts[k].x, y: pts[k].y, s: pts[k].s, ang: Math.atan2(b.y - a.y, b.x - a.x) };
     },
   };
 }
 
-/** Draws the serpent at time t: everything below the crest is hidden (she is BEHIND the plates when low). */
-function serpente(img, tr, t) {
-  for (let i = CORPO.pecas.length - 1; i >= 0; i--) {
-    const q = tr.atras(t, CORPO.dist[i]);
-    colarAcima(img, girar(CORPO.pecas[i], q.ang + Math.PI / 2), q.x, q.y, cr);
-  }
-  const h = tr.atras(t, 0);
-  colarAcima(img, girar(CABECA, h.ang + Math.PI / 2), h.x, h.y, cr);
+/**
+ * Draws the serpent at time t: what is below the crest is hidden (she is BEHIND the plates when low) — unless that
+ * piece has passed `sFrente` along the path: from there on she is IN FRONT of the hull (the wrap-around of 09/10).
+ */
+function serpente(img, tr, t, sFrente = Infinity) {
+  const por = (spr, q) => {
+    const g = girar(spr, q.ang + Math.PI / 2);
+    if (q.s >= sFrente) colar(img, g, q.x - g.w / 2, q.y - g.h / 2);
+    else colarAcima(img, g, q.x, q.y, cr);
+  };
+  for (let i = CORPO.pecas.length - 1; i >= 0; i--) por(CORPO.pecas[i], tr.atras(t, CORPO.dist[i]));
+  por(CABECA, tr.atras(t, 0));
 }
 
 function espinho(img, e, t) {
@@ -264,4 +272,69 @@ async function gif(nome, dur, desenhar) {
     }
     serpente(img, tr, t);
   });
+}
+
+// ── C. O RODOPIO (09/10, his correction of the cage's circling): LONGER and SLOWER — she leaves from BEHIND the hull on
+// the right, swings a wide parabola AROUND the ship, over it, and comes down the left side IN FRONT of the hull (the
+// wrap-around: hidden by the plates at the start, drawn over them at the end). Rising on the right, she sheds 3 GROUPS
+// of 3 stacked spines that fly STRAIGHT at the ship (horizontal): the middle group at the ship's height, one above,
+// one below, with a lane between groups. The player chooses: climb/dive far to clear the whole formation, or be good
+// and slip RIGHT THROUGH a lane.
+{
+  CORPO = CORPOS['51-2'];
+  const NAVE_Y = 85;
+  const pontos = [
+    // The top of the arc stays ~20px under the screen edge: the body (~24px wide) must not leave the screen over the top.
+    [216, 196], [214, 152], [212, 118], [210, 90], [205, 64], [192, 42], [168, 26], [130, 20], [92, 25], [60, 40],
+    [38, 64], [28, 94], [32, 126], [42, 160], [52, 205],
+  ];
+  const cr2 = (p0, p1, p2, p3, u) => 0.5 * (2 * p1 + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u ** 3);
+  const curva = [];
+  for (let i = 0; i < pontos.length - 1; i++) {
+    const [a, b, c, d] = [pontos[Math.max(0, i - 1)], pontos[i], pontos[i + 1], pontos[Math.min(pontos.length - 1, i + 2)]];
+    for (let k = 0; k < 60; k++) curva.push({ x: cr2(a[0], b[0], c[0], d[0], k / 60), y: cr2(a[1], b[1], c[1], d[1], k / 60) });
+  }
+  curva.push({ x: pontos.at(-1)[0], y: pontos.at(-1)[1] });
+  const S = [0];
+  for (let i = 1; i < curva.length; i++) S.push(S[i - 1] + Math.hypot(curva[i].x - curva[i - 1].x, curva[i].y - curva[i - 1].y));
+  // SLOW: ~100 px/s (the cage ran at ~200), a touch faster leaving the hull and diving back.
+  const VEL = (s) => (s < 50 ? 150 : s > S.at(-1) - 60 ? 150 : 100);
+  const tempos = [0];
+  for (let i = 1; i < curva.length; i++) tempos.push(tempos[i - 1] + (S[i] - S[i - 1]) / VEL(S[i]));
+  const T_FIM = tempos.at(-1);
+  const f = (t) => {
+    if (t <= 0) return { x: curva[0].x, y: curva[0].y - 150 * t };
+    if (t >= T_FIM) return { x: curva.at(-1).x, y: curva.at(-1).y + 150 * (t - T_FIM) };
+    const k = tempos.findIndex((x) => x >= t);
+    const u = (t - tempos[k - 1]) / (tempos[k] - tempos[k - 1]);
+    return { x: curva[k - 1].x + (curva[k].x - curva[k - 1].x) * u, y: curva[k - 1].y + (curva[k].y - curva[k - 1].y) * u };
+  };
+  const T0 = 0.5;
+  const tr = trajeto((t) => f(t - T0), -2, 9);
+  // In FRONT of the hull from the top of the arc on (point 7): the descending half is drawn over the plates.
+  const sFrente = S[7 * 60];
+  // The 3 groups: when the rising head crosses NAVE_Y + 30, NAVE_Y, NAVE_Y − 30 → 3 spines stacked 6px apart.
+  const ESPACO = 6, VEL_ESP = 55;
+  const alturas = [NAVE_Y + 30, NAVE_Y, NAVE_Y - 30];
+  const espinhos = [];
+  let yAnt = null;
+  for (let t = 0; t < T_FIM && alturas.length; t += 1 / 480) {
+    const p = f(t);
+    if (yAnt !== null && yAnt > alturas[0] && p.y <= alturas[0]) {
+      const yc = alturas.shift();
+      for (const d of [-ESPACO, 0, ESPACO]) espinhos.push({ t0: t + T0, x: p.x - 14, y: yc + d, ang: Math.PI, vel: VEL_ESP, spr: AGULHA });
+    }
+    yAnt = p.y;
+  }
+  // The ship: it holds, then slips into the lane between the MIDDLE and the UPPER group (a lane ~18px) and holds it
+  // while the formation passes — "rente ao meio".
+  const vao = NAVE_Y - 15;
+  const naveEm = (t) => ({ x: 92, y: NAVE_Y + (vao - NAVE_Y) * Math.min(1, Math.max(0, (t - 1.6) / 0.35)) });
+  await gif('serpente-rodopio-demo.gif', 6.4, (img, t) => {
+    const n = naveEm(t);
+    colar(img, nave, n.x, n.y - nave.h / 2);
+    for (const e of espinhos) espinho(img, e, t);
+    serpente(img, tr, t, sFrente);
+  });
+  console.log('rodopio: T_FIM', T_FIM.toFixed(2), 'espinhos', espinhos.length);
 }
