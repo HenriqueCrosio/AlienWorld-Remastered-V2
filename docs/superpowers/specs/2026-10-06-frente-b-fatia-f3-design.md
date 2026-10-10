@@ -114,6 +114,32 @@ presa à tela e outra presa ao chão AO MESMO TEMPO. A regra:
 - **A arte do Tentáculo volta a uma leva nova** (nenhuma de 06/10 ficou); o comportamento se implementa com a arte à
   mão de 06/10 como provisória.
 
+### 3.4 A SENTINELA DO CASCO *(10/10 — EM AVALIAÇÃO, ainda não aprovada)*
+
+Entre 08 e 10/10 o Tentáculo virou a **SERPENTE 63-3** (Pro, a criatura inteira, escolhida por ele) e passou por
+rodopio, giro, esticada e "bote que se torce" — todos abandonados (a serpente animada em trajetória deixava de ser a
+63-3). A direção dele em 10/10: *"uma skill mais simples, que mostre o corpo dela inteiro — uma animação mais simples
+é mais fácil de ficar boa"*. Se ele aprovar, **substitui o §3.1 e o §3.2** (a corrente de gomos e a meia-lua saem):
+
+| Fase | O que acontece |
+|---|---|
+| SOBE | ela sobe de trás da crista do casco até ficar **metade escondida** (~58% da altura à mostra) — *"parece que ela está surgindo da lateral do casco"* |
+| BALANÇA | o idle no lugar (yoyo) — a janela para atirar nela |
+| ESPINHOS | o corpo acende (vermelho ESCURECIDO no código, a pedido dele) e saem **3 trios de espinhos retos na nave**, em fileiras paralelas com vãos — passa no vão ou sobe acima |
+| BALANÇA | curta |
+| BOTE | recua, dá o golpe com a boca aberta **na direção da nave** e volta à pose — *"gostei da animação do ataque, a esticada de corpo está boa"* |
+| AFUNDA | desce de volta atrás da crista; reaparece em outro ponto |
+
+- **A arte:** a 63-3 EXATA; todo gesto é PixMiniMax animado dela mesma, no lugar, e volta a ela (idle, espinhos,
+  bote; 2 takes de cada; a referência é o take 2 dos três). A criatura inteira **inclinada no sentido horário**
+  (cabeça para cima) em volta do ponto onde a crista a corta, para o bote apontar para a nave — RotSprite no código;
+  em avaliação **15° ou 25°** (a 25° a boca chega na altura da nave).
+- **Em aberto:** o ângulo; o tamanho (1:1 ≈ 100px de altura); se o bote fere ou é só ameaça; e **a regra do casco
+  (§3.3)** — ela toca o casco, então deveria rolar com ele (84 px/s; um ciclo de ~6s andaria ~500px): o demo ainda a
+  deixa parada na tela. Decidir com ele (ciclo mais curto nascendo na borda direita, ou ela rola e o ciclo cabe na
+  travessia).
+- Demo: `scripts/_elites/_sentinela-demo.mjs`; GIFs em `folhas/2026-10-10/elites/sentinela/`.
+
 ## 4. O roteiro da F3
 
 | t | O quê | Ajuste no que existe |

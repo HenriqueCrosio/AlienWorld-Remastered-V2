@@ -14,8 +14,19 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-10-07-elites-f3-START.md`. A F3 está jogável — a lula com a
-> tinta e o Tentáculo com a regra do casco; vou ver os GIFs, escolher a arte do Tentáculo e jogar a F3."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-10-10-sentinela-casco-START.md`. Vou analisar os GIFs da
+> Sentinela (o giro de 15° × 25°) e decidir o que falta antes de ela entrar no jogo."**
+>
+> 📍 **10/10 — O TENTÁCULO VIROU A SENTINELA DO CASCO (em avaliação; ele ainda não viu os últimos GIFs).** De 08 a
+> 09/10 o Tentáculo virou a **SERPENTE 63-3** (Pro, gerada INTEIRA — o fluxo criatura inteira → vistas → animar) e
+> passou por rodopio, giro amarrado, esticada e o "bote que se torce" (commits até `ff883ee`). Em 10/10 ele abandonou
+> as trajetórias (*"a serpente da animação não tem nada a ver com a que eu escolhi"*) e pediu *"uma skill mais
+> simples, que mostre o corpo dela inteiro"*: ela SOBE de trás da crista **metade escondida**, BALANÇA, os espinhos
+> acendem (vermelho escurecido) e saem **3 trios retos na nave** com vãos, BALANÇA, dá o **BOTE** (ele gostou) e
+> AFUNDA. Todo gesto é PixMiniMax da 63-3 no lugar. Último pedido: a criatura girada no sentido horário para o bote ir
+> na nave — GIFs com **0°, 15° e 25°** em `folhas/2026-10-10/elites/sentinela/`. Spec: §3.4 (em avaliação) da
+> `specs/2026-10-06-frente-b-fatia-f3-design.md`. No jogo nada mudou (o `Tentaculo.ts` de 07/10). Em aberto: ângulo,
+> tamanho, se o bote fere, e a regra do casco para ela. Nada empurrado desde `2ccd49c` (07/10). Porta: o START de 10/10.
 >
 > 📍 **07/10 — A FATIA F3 ESTÁ JOGÁVEL.** Nenhuma arte de 06/10 ficou. O **Caçador virou a LULA** (Pro nº 15, 85%) que
 > some soltando **TINTA** à mão, assada em quadros (sopro, sopro, e a CORTINA na saída; por cima dos inimigos, por
