@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "211ef299-6a29-4ad0-9e18-9e98afdf3f0b",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The coiled S-shaped serpent sways gently in place: its body breathes and undulates slightly, the head bobs a little, the spines ripple. It stays in the same spot, same coiled S pose, same size, same dark colors.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

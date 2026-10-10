@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "ea0d7b1e-ba96-44d9-bac7-ed25f52849a5",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The coiled serpent rears its head back, the curved spines along its back bristle and flare out, then it strikes its head forward to the left with jaws wide open, then pulls back into its coiled S pose. It stays in the same spot, same size, same dark colors.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

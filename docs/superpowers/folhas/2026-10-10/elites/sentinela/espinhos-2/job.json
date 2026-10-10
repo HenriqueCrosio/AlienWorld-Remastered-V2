@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "4df15501-fba4-4d69-81fd-1283e3e7a451",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The coiled serpent arches its back and shudders, the curved spines along its body flare outward and the red tissue between the scales glows brighter, then the spines settle back. Same coiled S pose, same spot, same size.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}
