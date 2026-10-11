@@ -7,8 +7,9 @@
 //   node scripts/_elites/_sentinela-demo.mjs [idle] [espinhos] [bote]   (take numbers, default 1 1 1)
 import fs from 'node:fs';
 import sharp from 'sharp';
-import { ampliar, colar, girar, ler, novo } from './_pixel-lib.mjs';
+import { ampliar, colar, girar, ler } from './_pixel-lib.mjs';
 import { CRISTA, mapa, nave, px, recorte } from './_cena-casco.mjs';
+import { apagar, rotSprite } from './_sentinela-lib.mjs';
 
 const D = 'docs/superpowers/folhas/2026-10-10/elites/sentinela';
 const [ti = '1', te = '1', tb = '1'] = process.argv.slice(2);
@@ -19,20 +20,7 @@ const clipe = async (dir) => {
 // His note (10/10): the spine glow was too hot (r up to 254 over ~1600px, against ~140 over 81px in the base pose).
 // Every red-dominant pixel is pulled down toward the base's dark maroon, faded in by how red it is (BRILHO=<factor>).
 const BRILHO = Number(process.env.BRILHO ?? 0.45);
-function apagar(q) {
-  for (let i = 0; i < q.d.length; i += 4) {
-    const [r, g, b] = [q.d[i], q.d[i + 1], q.d[i + 2]];
-    const w = Math.max(0, Math.min(1, (r - Math.max(g, b) - 20) / 60));
-    if (!w) continue;
-    const k = 1 - w * (1 - BRILHO);
-    // Darker AND less saturated: green/blue climb toward the base glow's ratio (~0.3 of red), so it reads maroon.
-    // (All three channels dim together, or the hot pinkish cores — 247,188,174 — turn teal.)
-    const [r2, g2, b2] = [r * k, g * k, b * k];
-    q.d[i] = Math.round(r2); q.d[i + 1] = Math.round(g2 + (Math.max(g2, r2 * 0.3) - g2) * w); q.d[i + 2] = Math.round(b2 + (Math.max(b2, r2 * 0.3) - b2) * w);
-  }
-  return q;
-}
-const IDLE = await clipe(`${D}/idle-${ti}`), ESP = (await clipe(`${D}/espinhos-${te}`)).map(apagar), BOTE = await clipe(`${D}/bote-${tb}`);
+const IDLE = await clipe(`${D}/idle-${ti}`), ESP = (await clipe(`${D}/espinhos-${te}`)).map((q) => apagar(q, BRILHO)), BOTE = await clipe(`${D}/bote-${tb}`);
 
 const FPS = 25, ANIM = 12, J = { x: 92, y: 14, w: 260, h: 202 }, cr = CRISTA - J.y;
 const NAVE0 = { x: 64, y: 74 };
@@ -60,31 +48,10 @@ const PIVO = (() => {
   for (let x = 0; x < base.w; x++) if (opaco(base, x, row)) { if (x0 < 0) x0 = x; x1 = x; } else if (x0 >= 0) break; // the first run = the body
   return { x: (x0 + x1) / 2, y: row };
 })();
-function scale2x(q) {
-  const W = q.w * 2, out = novo(W, q.h * 2);
-  const at = (x, y) => (Math.min(q.h - 1, Math.max(0, y)) * q.w + Math.min(q.w - 1, Math.max(0, x))) * 4;
-  const eq = (a, b) => q.d.readUInt32LE(a) === q.d.readUInt32LE(b);
-  for (let y = 0; y < q.h; y++)
-    for (let x = 0; x < q.w; x++) {
-      const P = at(x, y), A = at(x, y - 1), B = at(x + 1, y), C = at(x - 1, y), Dd = at(x, y + 1);
-      const ok = !eq(C, B) && !eq(A, Dd);
-      const src = [ok && eq(C, A) ? A : P, ok && eq(A, B) ? B : P, ok && eq(Dd, C) ? C : P, ok && eq(B, Dd) ? B : P];
-      for (const [k, [dx, dy]] of [[0, 0], [1, 0], [0, 1], [1, 1]].entries()) q.d.copy(out.d, ((y * 2 + dy) * W + x * 2 + dx) * 4, src[k], src[k] + 4);
-    }
-  return out;
-}
 const ROT = (() => {
-  if (!GIRO) return { f: (q) => q, ox: 0, oy: 0 };
-  // Where the pivot lands in the rotated (and re-shrunk) canvas: girar keeps the canvas centre at the output centre.
-  const W = Math.ceil(Math.abs(256 * 8 * Math.cos(GIRO)) + Math.abs(256 * 8 * Math.sin(GIRO))) + 2, M = Math.floor(W / 8);
-  const dx = PIVO.x - 128, dy = PIVO.y - 128, c = Math.cos(GIRO), sn = Math.sin(GIRO);
-  const px2 = W / 16 + c * dx - sn * dy, py2 = W / 16 + sn * dx + c * dy;
-  const f = (q) => {
-    const g = girar(scale2x(scale2x(scale2x(q))), GIRO), out = novo(M, M);
-    for (let y = 0; y < M; y++) for (let x = 0; x < M; x++) g.d.copy(out.d, (y * M + x) * 4, ((y * 8 + 4) * g.w + x * 8 + 4) * 4, ((y * 8 + 4) * g.w + x * 8 + 4) * 4 + 4);
-    return out;
-  };
-  return { f, ox: Math.round(PIVO.x - px2), oy: Math.round(PIVO.y - py2) };
+  // Where the pivot lands in the rotated (and re-shrunk) canvas.
+  const R = rotSprite(GIRO), p2 = R.onde(PIVO.x, PIVO.y);
+  return { f: R.f, ox: Math.round(PIVO.x - p2.x), oy: Math.round(PIVO.y - p2.y) };
 })();
 for (const a of [IDLE, ESP, BOTE]) a.splice(0, a.length, ...a.map(ROT.f));
 // From here on every frame is the tilted one, drawn at (X + OX, y + OY).

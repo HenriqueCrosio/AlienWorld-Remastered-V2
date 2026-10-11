@@ -138,45 +138,63 @@ export const cacadorTangivel = (estado: EstadoCacador): boolean => estado !== 'e
 /** A tinta do `n`-ésimo sumiço (1-based): o SOPRO, e a CORTINA no último — a saída de vez (§2.3, decisão dele: A). */
 export const tintaDoSumico = (n: number): 'sopro' | 'cortina' => (n >= ELITES.cacador.ressurgimentos ? 'cortina' : 'sopro');
 
-// ── O TENTÁCULO DO CASCO (spec F3 §3 + a regra do casco §3.3) ──
+// ── O posto "tentáculo" da F3: a SERPENTE DO CASCO (spec F3 §3.4, 11/10) ──
 
-export type EstadoTentaculo = 'aviso1' | 'bote' | 'mergulho' | 'pausa' | 'aviso2' | 'ergue' | 'meiaLua' | 'segura' | 'afunda' | 'foi';
+export type EstadoTentaculo = 'sobe' | 'balanca1' | 'espinhos' | 'balanca2' | 'bote' | 'balanca3' | 'afunda' | 'foi';
 
-const CICLO_TENTACULO: EstadoTentaculo[] = ['aviso1', 'bote', 'mergulho', 'pausa', 'aviso2', 'ergue', 'meiaLua', 'segura', 'afunda', 'foi'];
+const CICLO_TENTACULO: EstadoTentaculo[] = ['sobe', 'balanca1', 'espinhos', 'balanca2', 'bote', 'balanca3', 'afunda', 'foi'];
 
-/** Um ciclo por aparição (decisão dele: A), na ordem fixa; cada estado dura o seu tempo. */
+/** Um ciclo por aparição (decisão dele: A), na ordem fixa; cada estado dura o seu tempo (os gestos, os quadros deles). */
 export function tentaculoAvanca(estado: EstadoTentaculo, t: number): EstadoTentaculo {
   if (estado === 'foi') return 'foi';
   const T = ELITES.tentaculo;
+  const gestoS = T.gestoQuadros / T.gestoQps;
   const dur: Record<Exclude<EstadoTentaculo, 'foi'>, number> = {
-    aviso1: T.aviso1S,
-    bote: T.boteS,
-    mergulho: T.mergulhoS,
-    pausa: T.pausaS,
-    aviso2: T.aviso2S,
-    ergue: T.ergueS,
-    meiaLua: T.meiaLuaS,
-    segura: T.seguraS,
+    sobe: T.sobeS,
+    balanca1: T.balanca1S,
+    espinhos: gestoS,
+    balanca2: T.balanca2S,
+    bote: gestoS,
+    balanca3: T.balanca3S,
     afunda: T.afundaS,
   };
   return t < dur[estado] ? estado : CICLO_TENTACULO[CICLO_TENTACULO.indexOf(estado) + 1];
 }
 
-/**
- * A RACHADURA 1 (§3.3): nasce À FRENTE da nave, na distância que o chão leva para trazê-la até debaixo dela no fim do
- * aviso — o casco anda a `velChao` e a rachadura é do casco.
- */
-export const rachadura1X = (naveX: number, velChao: number): number => naveX + velChao * ELITES.tentaculo.aviso1S;
-
-/** A RACHADURA 2: perto da borda direita, nunca a menos de `rachadura2DistMin` à frente da nave, nunca fora da tela. */
-export function rachadura2X(naveX: number): number {
+/** Onde ela sobe: à frente da nave, na distância em que o bote a alcança — e sempre dentro da faixa da tela. */
+export function tentaculoRaizX(naveX: number): number {
   const T = ELITES.tentaculo;
-  return Math.min(T.rachadura2XMax, Math.max(T.rachadura2X, naveX + T.rachadura2DistMin));
+  return Math.min(T.raizX[1], Math.max(T.raizX[0], naveX + T.distNave));
+}
+
+/** Quanto dela está DENTRO do casco (1 = sumida, 0 = de pé): sobe rápido e assenta; afunda acelerando. */
+export function tentaculoAfundado(estado: EstadoTentaculo, t: number): number {
+  const T = ELITES.tentaculo;
+  if (estado === 'sobe') return (1 - Math.min(1, Math.max(0, t / T.sobeS))) ** 3;
+  if (estado === 'afunda') return Math.min(1, t / T.afundaS) ** 2;
+  return estado === 'foi' ? 1 : 0;
+}
+
+/** Só tem corpo (fere e é ferida) com mais da metade para fora do casco. */
+export const tentaculoExposta = (estado: EstadoTentaculo, t: number): boolean => tentaculoAfundado(estado, t) < 0.5;
+
+/** A MIRA dos espinhos: de (ox, oy) para a nave, sem passar de `miraMaxGraus` da horizontal para a esquerda. */
+export function tentaculoMira(ox: number, oy: number, naveX: number, naveY: number): number {
+  const max = (ELITES.tentaculo.miraMaxGraus * Math.PI) / 180;
+  const ang = Math.atan2(naveY - oy, naveX - ox);
+  const desvio = Math.atan2(Math.sin(ang - Math.PI), Math.cos(ang - Math.PI));
+  return Math.PI + Math.min(max, Math.max(-max, desvio));
 }
 
 /**
- * Preso ao casco (anda com o chão): a rachadura dos avisos e a torre de pé. O bote, o mergulho e a pausa são livres na
- * tela — a passagem dos gomos pelo buraco no bote é tratada na corrente, ponto a ponto.
+ * Um TRIO de espinhos: 3 pontos de saída numa fileira PARALELA à mira, a `faixaDist` dela — `lado` −1 é a fileira de
+ * baixo (mirando para a esquerda), +1 a de cima. Entre as duas fica o vão, com a linha da mira (a nave) no meio.
  */
-export const tentaculoEnraizado = (estado: EstadoTentaculo): boolean =>
-  estado === 'aviso1' || estado === 'aviso2' || estado === 'ergue' || estado === 'meiaLua' || estado === 'segura' || estado === 'afunda';
+export function tentaculoTrio(ox: number, oy: number, ang: number, lado: -1 | 1): { x: number; y: number }[] {
+  const T = ELITES.tentaculo;
+  const nx = -Math.sin(ang), ny = Math.cos(ang);
+  return [-1, 0, 1].map((k) => {
+    const d = lado * T.faixaDist + k * T.trioAbertura;
+    return { x: ox + nx * d, y: oy + ny * d };
+  });
+}

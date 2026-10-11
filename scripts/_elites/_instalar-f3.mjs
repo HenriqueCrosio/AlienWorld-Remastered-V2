@@ -96,16 +96,7 @@ for (const tipo of ['sopro', 'cortina']) {
   console.log(`tinta ${tipo}: ${n} quadros de ${lado}×${lado}`);
 }
 
-// ── (d) the tentacle (provisional, hand-drawn 06/10) and the shots ──
+// ── (d) the squid's shot (the tentacle's provisional hand art left on 11/10: `_instalar-sentinela.mjs` took the slot) ──
 fs.mkdirSync(`${OUT}/tiros`, { recursive: true });
-const copias = [
-  ['tentaculo-cabeca.png', 'elite-tentaculo-cabeca.png'],
-  ['tentaculo-gomo-A.png', 'elite-tentaculo-gomo.png'],
-  ['rachadura-0.png', 'elite-rachadura-0.png'],
-  ['rachadura-1.png', 'elite-rachadura-1.png'],
-  ['rachadura-2.png', 'elite-rachadura-2.png'],
-  ['tiro-cacador-agulha.png', 'tiros/elite-agulha.png'],
-  ['tiro-tentaculo-bolinha.png', 'tiros/elite-bolinha.png'],
-];
-for (const [de, para] of copias) fs.copyFileSync(`${MAO}/${de}`, `${OUT}/${para}`);
-console.log(`provisórias: ${copias.length} peças`);
+fs.copyFileSync(`${MAO}/tiro-cacador-agulha.png`, `${OUT}/tiros/elite-agulha.png`);
+console.log('a agulha da lula');

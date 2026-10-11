@@ -184,8 +184,8 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   sentinela: { texture: 'eliteSentinelaRoda', hp: ELITES.sentinela.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.sentinela.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: SENTINELA },
   // A F3 (07/10): a LULA nasce escondida num posto — o `x`/`y` do roteiro não valem para ela (ver `Cacador.ts`).
   cacador: { texture: 'eliteCacador', hp: ELITES.cacador.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.cacador.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: CACADOR },
-  // O Tentáculo nasce DENTRO do casco, sob a rachadura à frente da nave — o `x`/`y` do roteiro não valem (`Tentaculo.ts`).
-  tentaculo: { texture: 'eliteTentaculoCabeca', hp: ELITES.tentaculo.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.tentaculo.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: TENTACULO },
+  // A serpente do casco nasce DENTRO do casco, à frente da nave — o `x`/`y` do roteiro não valem (`Tentaculo.ts`).
+  tentaculo: { texture: 'eliteTentaculoIdleAnim0', hp: ELITES.tentaculo.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.tentaculo.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: TENTACULO },
 };
 
 /**

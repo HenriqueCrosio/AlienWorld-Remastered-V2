@@ -90,17 +90,15 @@ for (let i = 0; i < total; i++) {
       const alvoY = fe === 'trava' || fe === 'rajada' || fe === 'some' ? 140 : 108;
       s.ship.setPosition(60, s.ship.y + Math.sign(alvoY - s.ship.y) * Math.min(2.5, Math.abs(alvoY - s.ship.y)));
     }
-    // 07/10, the tentacle: the ship waits over the crack, dodges the BITE up and back, then faces the tower at the
-    // height of its segments and fires (the body takes the shots).
+    // 11/10, the hull serpent (the tentacle's slot): the ship HOLDS while the two trios pass on either side of it (the
+    // lane he asked for), slips up and back out of the STRIKE, and returns. No firing: the whole sequence shows.
     if (cena === 'tentaculo') {
-      const alvo = fe === 'aviso1' ? { x: 100, y: 100 } : fe === 'bote' || fe === 'mergulho' ? { x: 60, y: 48 } : { x: 60, y: 118 };
+      const alvo = fe === 'bote' ? { x: 60, y: 48 } : { x: 100, y: 100 };
       const dx = alvo.x - s.ship.x, dy = alvo.y - s.ship.y, d = Math.hypot(dx, dy);
       if (d > 0) s.ship.setPosition(s.ship.x + (dx / d) * Math.min(4, d), s.ship.y + (dy / d) * Math.min(4, d));
-      window.__ergueu ||= fe === 'ergue';
     }
   }, { cena: CENA, t });
   if (CENA === 'sentinela' && i === 20) await page.keyboard.down('Space');
-  if (CENA === 'tentaculo' && (await page.evaluate(() => window.__ergueu === true))) await page.keyboard.down('Space');
   await passo(POR_FOTO);
   const foto = await page.screenshot({ clip: { x: geo.left, y: geo.top, width: 384 * geo.k, height: 216 * geo.k } });
   quadros.push(await sharp(foto).resize(384 * ZOOM, 216 * ZOOM, { kernel: 'nearest' }).png().toBuffer());

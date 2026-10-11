@@ -2,7 +2,7 @@
 import { ELITES } from '../src/data/numerosElites.ts';
 import {
   droneAvanca, droneExplode, sentinelaAvanca, sentinelaBloqueia, escudoAbsorve, escolherPosto,
-  cacadorAvanca, cacadorTangivel, tintaDoSumico, tentaculoAvanca, rachadura1X, rachadura2X, tentaculoEnraizado,
+  cacadorAvanca, cacadorTangivel, tintaDoSumico, tentaculoAvanca, tentaculoRaizX, tentaculoAfundado, tentaculoExposta, tentaculoMira, tentaculoTrio,
 } from '../src/elitesRegras.ts';
 
 const falhas = [];
@@ -72,15 +72,22 @@ conferir(tintaDoSumico(1) === 'sopro' && tintaDoSumico(C.ressurgimentos - 1) ===
 const pc = escolherPosto(() => 0.5, null, C);
 conferir(pc.x >= C.postoX[0] && pc.x <= C.postoX[1] && pc.y >= C.postoY[0] && pc.y <= C.postoY[1], 'o posto do caçador cai na faixa dele (metade direita)', pc);
 
-// ── O TENTÁCULO (spec F3 §3, a regra do casco §3.3) ──
+// ── A SERPENTE DO CASCO, no posto do Tentáculo (spec F3 §3.4, 11/10) ──
 const T = ELITES.tentaculo;
-const ciclo = ['aviso1', 'bote', 'mergulho', 'pausa', 'aviso2', 'ergue', 'meiaLua', 'segura', 'afunda', 'foi'];
-conferir(ciclo.slice(0, -1).every((f, k) => tentaculoAvanca(f, 99) === ciclo[k + 1]), 'um ciclo por aparição, na ordem da spec', null);
-conferir(tentaculoAvanca('aviso1', T.aviso1S - 0.01) === 'aviso1' && tentaculoAvanca('foi', 99) === 'foi', 'cada estado segura o tempo dele; foi é o fim', T.aviso1S);
-conferir(rachadura1X(100, 84) === 100 + 84 * T.aviso1S, 'a rachadura 1 nasce À FRENTE: o chão a traz até a nave', rachadura1X(100, 84));
-conferir(rachadura2X(60) === T.rachadura2X && rachadura2X(260) === Math.min(T.rachadura2XMax, 260 + T.rachadura2DistMin), 'a rachadura 2 nasce longe da nave (e dentro da tela)', [rachadura2X(60), rachadura2X(260)]);
-conferir(rachadura2X(60) - 60 >= T.rachadura2DistMin, 'a rachadura 2 fica a ≥140px da nave', rachadura2X(60));
-conferir(['aviso1', 'aviso2', 'ergue', 'meiaLua', 'segura', 'afunda'].every(tentaculoEnraizado) && !['bote', 'mergulho', 'pausa'].some(tentaculoEnraizado), 'preso ao casco só quando toca o casco', null);
+const ciclo = ['sobe', 'balanca1', 'espinhos', 'balanca2', 'bote', 'balanca3', 'afunda', 'foi'];
+conferir(ciclo.slice(0, -1).every((f, k) => tentaculoAvanca(f, 99) === ciclo[k + 1]), 'um ciclo por aparição, na ordem da spec (a sequência inteira)', null);
+conferir(tentaculoAvanca('sobe', T.sobeS - 0.01) === 'sobe' && tentaculoAvanca('foi', 99) === 'foi', 'cada estado segura o tempo dele; foi é o fim', T.sobeS);
+const gestoS = T.gestoQuadros / T.gestoQps;
+conferir(tentaculoAvanca('bote', gestoS - 0.01) === 'bote' && tentaculoAvanca('bote', gestoS) === 'balanca3' && tentaculoAvanca('espinhos', gestoS) === 'balanca2', 'os gestos duram os quadros deles (17 a 12 qps)', gestoS);
+conferir(tentaculoRaizX(100) === 100 + T.distNave && tentaculoRaizX(0) === T.raizX[0] && tentaculoRaizX(999) === T.raizX[1], 'sobe à frente da nave, na distância do bote, sem sair da faixa da tela', [tentaculoRaizX(100), tentaculoRaizX(0), tentaculoRaizX(999)]);
+conferir(tentaculoAfundado('sobe', 0) === 1 && tentaculoAfundado('sobe', T.sobeS) === 0 && tentaculoAfundado('balanca1', 0.3) === 0 && tentaculoAfundado('afunda', T.afundaS) === 1, 'nasce sumida, fica de pé, afunda de vez', null);
+conferir(!tentaculoExposta('sobe', 0) && tentaculoExposta('sobe', T.sobeS) && tentaculoExposta('bote', 0.5) && !tentaculoExposta('afunda', T.afundaS), 'só tem corpo com mais da metade para fora do casco', null);
+const max = (T.miraMaxGraus * Math.PI) / 180;
+conferir(Math.abs(tentaculoMira(200, 100, 100, 100) - Math.PI) < 1e-9 && Math.abs(Math.abs(tentaculoMira(200, 100, 300, 100) - Math.PI) - max) < 1e-9 &&Math.abs(Math.abs(tentaculoMira(200, 100, 200, 0) - Math.PI) - max) < 1e-9, 'a mira vai na nave, mas nunca passa do limite para trás ou para cima', [tentaculoMira(200, 100, 100, 100), tentaculoMira(200, 100, 200, 0)]);
+const [baixo, cima] = [tentaculoTrio(200, 100, Math.PI, -1), tentaculoTrio(200, 100, Math.PI, 1)];
+conferir(baixo.length === 3 && cima.length === 3 && baixo.every((p) => p.y > 100) && cima.every((p) => p.y < 100), 'dois trios, um de cada lado da linha da mira', { baixo, cima });
+const vao = Math.min(...baixo.map((p) => p.y)) - Math.max(...cima.map((p) => p.y));
+conferir(vao >= 36, 'o VÃO no meio (onde a nave está) tem pelo menos 36px', vao);
 
 console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTUDO OK');
 process.exit(falhas.length ? 1 : 0);

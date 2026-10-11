@@ -117,39 +117,45 @@ export const ELITES = {
     qps: 20,
   },
   /**
-   * O TENTÁCULO DO CASCO (spec F3 §3 + a regra do casco §3.3): AVISO 1 → BOTE → MERGULHO → PAUSA → AVISO 2 → ERGUE →
-   * MEIA-LUA → SEGURA → AFUNDA. Um ciclo por aparição.
+   * O posto "tentáculo" da F3 — desde 11/10 a SERPENTE DO CASCO (a 63-3, spec F3 §3.4): SOBE de trás da crista →
+   * BALANÇA → ESPINHOS (acende e solta 2 trios com um vão no meio) → BALANÇA → BOTE (fere) → BALANÇA → AFUNDA. Um ciclo
+   * por aparição. Os gestos são quadros assados (`scripts/_elites/_instalar-sentinela.mjs`): 17 de cada.
    */
   tentaculo: {
     hp: 14,
     score: 350,
-    aviso1S: 0.8,
-    boteS: 0.7,
-    mergulhoS: 0.9,
-    pausaS: 0.6,
-    aviso2S: 0.8,
-    ergueS: 0.4,
-    /** A pose do disparo (os 6 tiros saem na entrada dela). */
-    meiaLuaS: 0.2,
-    seguraS: 0.8,
+    sobeS: 0.7,
+    balanca1S: 0.8,
+    balanca2S: 0.6,
+    balanca3S: 0.4,
     afundaS: 0.6,
-    /** A crista do casco (as placas em depth −75 começam em y≈150): onde a rachadura abre. */
-    chaoY: 153,
-    /** O bote nunca sobe acima disto (e nunca morde abaixo de `chaoY − 10`). */
-    tetoBoteY: 40,
-    /** O mergulho: o arco passa do ponto e cai este tanto para trás, atrás das placas. */
-    mergulhoDX: -56,
-    /** A rachadura 2 nasce perto da borda direita e anda com o chão (~250px em ~2,6s)… */
-    rachadura2X: 350,
-    rachadura2XMax: 370,
-    /** …e nunca a menos disto à frente da nave. */
-    rachadura2DistMin: 140,
-    /** De pé, a cabeça fica a esta altura acima da crista. */
-    alturaErgue: 60,
-    gomos: 8,
-    gomoEspaco: 7,
-    meiaLuaN: 6,
-    meiaLuaArcoGraus: 140,
-    velMeiaLua: 90,
+    /** Os gestos (espinhos e bote) tocam os 17 quadros a 12 qps; o balanço vai e volta a 10. */
+    gestoQps: 12,
+    gestoQuadros: 17,
+    balancaQps: 10,
+    /** A crista do casco: as placas (depth −75) começam em y=150–152, e ela fica ATRÁS delas — é a placa que a corta. */
+    cristaY: 151,
+    /** Onde ela sobe: a esta distância à frente da nave (a boca do bote alcança 87px), dentro desta faixa da tela. */
+    distNave: 90,
+    raizX: [170, 300] as const,
+    /**
+     * Os ESPINHOS (11/10, ele: *"tire o conjunto do meio e faça ter um atraso entre os outros, assim abre-se uma lacuna
+     * para o player passar no meio"*): 2 trios paralelos, um de cada lado da linha da mira (`faixaDist`), o 2º
+     * `trioAtrasoS` depois do 1º. A mira trava na nave no 1º trio, sem passar de `miraMaxGraus` da horizontal.
+     */
+    trio1S: 0.5,
+    trioAtrasoS: 0.33,
+    faixaDist: 26,
+    trioAbertura: 6,
+    velEspinho: 85,
+    miraMaxGraus: 60,
+    /**
+     * De onde os trios saem, acima da crista: alto o bastante para a fileira de baixo não nascer dentro do casco, baixo
+     * o bastante para a de cima sair dos espinhos do dorso (e não do ar acima dela).
+     */
+    origemEspinhosY: -34,
+    /** O BOTE FERE (11/10, decisão dele): a caixa da boca, só enquanto a cabeça está lançada. */
+    boteFere: true,
+    boca: { w: 16, h: 14 },
   },
 };

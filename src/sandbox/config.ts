@@ -18,7 +18,7 @@ export const NOME_INIMIGO: Record<TipoInimigo, string> = {
   droneMineracao: 'drone de mineração (elite)',
   sentinela: 'sentinela orbital (elite)',
   cacador: 'caçador de vácuo, a lula (elite)',
-  tentaculo: 'tentáculo do casco (elite; na F3 revela o casco)',
+  tentaculo: 'serpente do casco (elite; na F3 revela o casco)',
   aranha: 'aranha (minichefe)',
 };
 export const MAX_POR_ONDA: Record<TipoInimigo, number> = {

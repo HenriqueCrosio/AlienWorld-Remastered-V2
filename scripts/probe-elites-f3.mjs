@@ -1,8 +1,9 @@
 // OS ELITES DA F3 NO JOGO REAL (spec 2026-10-06-frente-b-fatia-f3-design.md §7, com a emenda de 07/10).
 // Uso: node scripts/probe-elites-f3.mjs [cacador|tentaculo]  (com `npm run dev` rodando). Sandbox, fase 3, invulnerável.
-// O Tentáculo roda no RELÓGIO MANUAL (1/60 s por passo, como o `_gif.mjs`): o bote dura 0,7s, e no software renderer
-// uma ida e volta do playwright demora mais que isso.
+// A serpente do casco (o posto do Tentáculo, §3.4) roda no RELÓGIO MANUAL (1/60 s por passo, como o `_gif.mjs`): os
+// trios saem a 0,33s um do outro, e no software renderer uma ida e volta do playwright demora mais que isso.
 import { chromium } from 'playwright';
+import { ELITES } from '../src/data/numerosElites.ts';
 
 const SO = process.argv[2];
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -132,7 +133,7 @@ if (!SO || SO === 'cacador') {
 }
 
 if (!SO || SO === 'tentaculo') {
-  // ── O TENTÁCULO (o casco revelado, como no ato 2), no relógio manual ──
+  // ── A SERPENTE DO CASCO, no posto do Tentáculo (o casco revelado, como no ato 2), no relógio manual ──
   await page.evaluate(() => {
     const g = window.__game;
     const s = g.scene.getScene('Game');
@@ -162,90 +163,79 @@ if (!SO || SO === 'tentaculo') {
     s.ship.setPosition(100, 100);
     s.enemies.spawn('tentaculo', 100);
   });
+  // Os espinhos, com a posição e o instante de cada um (o contador lá de cima só guarda rumo e velocidade).
+  await page.evaluate(() => {
+    const t = window.__game.scene.getScene('Game').enemies.tiros;
+    const orig = t.disparar.bind(t);
+    window.__esp = [];
+    t.disparar = (x, y, ang, vel, vestir) => {
+      window.__esp.push({ x, y, ang, vel, t: window.__passo.t });
+      return orig(x, y, ang, vel, vestir);
+    };
+  });
+  const T = ELITES.tentaculo;
   const t0 = await page.evaluate(() => {
     const s = window.__game.scene.getScene('Game');
     const e = window.__tent();
     const st = e.getData('elite');
     const hp = e.getData('hp');
+    const placas = s.children.list.filter((o) => o.texture?.key?.startsWith('casco') && o.depth < -1).map((o) => o.depth);
     const r = s.ferirInimigo(e, 5, 'probe', { x: e.x - 20, y: e.y });
-    return { fase: st.fase, racha: st.racha.x, vel: s.enemies.velChao, r, perdeu: hp - e.getData('hp') };
+    return { fase: st.fase, x: e.x, y: e.y, depth: e.depth, placa: Math.min(...placas), corpo: e.body.enable, r, perdeu: hp - e.getData('hp') };
   });
-  conferir(t0.fase === 'aviso1' && t0.racha > 100 + 40 && t0.r === 'bloqueado' && t0.perdeu === 0, 'AVISO 1: a rachadura nasce À FRENTE da nave, e a cabeça dentro do casco é intocável', t0);
-  const t1 = await page.evaluate(() => {
-    window.__step(24);
-    return window.__tent().getData('elite').racha.x;
-  });
-  conferir(Math.abs(t1 - t0.racha + t0.vel * 0.4) < 2, 'a rachadura ANDA COM O CHÃO (a regra do casco)', { andou: t1 - t0.racha, esperado: -t0.vel * 0.4 });
+  conferir(t0.fase === 'sobe' && t0.x === 100 + T.distNave && t0.y > T.cristaY + 40 && !t0.corpo && t0.r === 'bloqueado' && t0.perdeu === 0, 'SOBE: nasce sumida no casco, à frente da nave, e lá dentro é intocável', t0);
+  conferir(t0.depth < t0.placa, 'ela fica ATRÁS das placas do casco: quem a corta é a beirada real da placa (sem fresta)', t0);
 
-  const bote0 = await page.evaluate(() =>
-    window.__ate(() => {
-      const st = window.__tent().getData('elite');
-      return st.fase === 'bote' && { racha: st.racha.x, nave: window.__game.scene.getScene('Game').ship.x, alvo: st.alvo };
-    }),
-  );
-  conferir(Math.abs(bote0.racha - bote0.nave) < 12 && Math.abs(bote0.alvo.x - 100) < 1 && Math.abs(bote0.alvo.y - 100) < 1, 'no fim do aviso a rachadura chegou SOB a nave, e o bote vai aonde ela estava', bote0);
-  const bote = await page.evaluate(() => {
-    const s = window.__game.scene.getScene('Game');
-    s.ship.setPosition(40, 30); // a nave desvia
-    return window.__ate(() => {
-      const e = window.__tent();
-      const st = e.getData('elite');
-      if (st.fase !== 'bote' || st.t < 0.5) return null;
-      const gomosFora = st.gomos.filter((g) => g.visible && g.body.enable).length;
-      const hp = e.getData('hp');
-      const r = s.ferirInimigo(e, 1, 'probe', { x: e.x - 20, y: e.y });
-      return { x: e.x, y: e.y, gomosFora, r, perdeu: hp - e.getData('hp') };
-    });
-  });
-  conferir(bote && Math.hypot(bote.x - 100, bote.y - 100) < 20 && bote.gomosFora >= 4 && bote.r === 'vivo' && bote.perdeu === 1, 'o BOTE: a cabeça chega ao ponto (não persegue), o corpo sai atrás, e a cabeça exposta é ferida', bote);
-
-  const pausa = await page.evaluate(() =>
-    window.__ate(() => {
-      const e = window.__tent();
-      if (e.getData('elite').fase !== 'pausa') return null;
-      const s = window.__game.scene.getScene('Game');
-      return { visivel: e.visible, corpo: e.body.enable, gomos: s.enemies.corposElite.getChildren().filter((g) => g.visible).length };
-    }),
-  );
-  conferir(pausa && !pausa.visivel && !pausa.corpo && pausa.gomos === 0, 'depois do MERGULHO por trás do casco: sumiu inteiro', pausa);
-
-  const av2 = await page.evaluate(() =>
-    window.__ate(() => {
-      const st = window.__tent().getData('elite');
-      return st.fase === 'aviso2' && { racha: st.racha.x, nave: window.__game.scene.getScene('Game').ship.x };
-    }),
-  );
-  conferir(av2 && av2.racha - av2.nave >= 140, 'AVISO 2: a rachadura LONGE da nave (≥140px à frente)', av2);
-
-  // De pé: a nave na altura dos GOMOS atira — o corpo absorve, a cabeça não perde vida.
   const dePe = await page.evaluate(() =>
     window.__ate(() => {
       const s = window.__game.scene.getScene('Game');
       const e = window.__tent();
       const st = e.getData('elite');
-      if (st.fase !== 'segura') return null;
-      const g = st.gomos[4];
-      s.ship.setPosition(Math.max(20, g.x - 90), g.y);
-      return { hp: e.getData('hp'), bloq: s.medidas.resumo().bloqueados.tiro ?? 0, raiz: st.raizX, cabeca: e.x, bolinhas: window.__disparos.length };
+      if (st.fase !== 'balanca1' || st.t < 0.2) return null;
+      const hp = e.getData('hp');
+      const r = s.ferirInimigo(e, 1, 'probe', { x: e.x - 20, y: e.y });
+      s.enemies.empurrar(e, 30);
+      return { x: e.x, y: e.y, base: e.body.bottom, corpo: e.body.enable, r, perdeu: hp - e.getData('hp'), vel: s.enemies.velChao };
     }),
   );
-  await page.keyboard.down('Space');
-  await page.evaluate(() => window.__step(21));
-  await page.keyboard.up('Space');
-  const absorveu = await page.evaluate(() => {
-    const s = window.__game.scene.getScene('Game');
-    return { hp: window.__tent()?.getData('hp'), bloq: s.medidas.resumo().bloqueados.tiro ?? 0 };
+  conferir(dePe && dePe.y === T.cristaY && dePe.corpo && dePe.base <= T.cristaY && dePe.r === 'vivo' && dePe.perdeu === 1, 'BALANÇA: de pé, o pivô na crista, a hitbox toda acima dela — a janela para feri-la', dePe);
+  const parada = await page.evaluate(() => {
+    window.__step(12);
+    return window.__tent().x;
   });
-  conferir(absorveu.hp === dePe.hp && absorveu.bloq > dePe.bloq, 'os GOMOS absorvem o tiro sem dano (só a cabeça fere e é ferida)', { antes: dePe, depois: absorveu });
-  conferir(dePe.bolinhas === 6 && Math.abs(dePe.cabeca - dePe.raiz) < 2, 'a MEIA-LUA: 6 tiros; a torre fica rígida sobre a raiz que rola', dePe);
-  const bolinhas = await page.evaluate(() => window.__game.scene.getScene('Game').enemies.enemyBullets.getChildren().filter((b) => b.active && b.texture.key === 'eliteTiroBolinha').map((b) => Math.round(b.body.velocity.y)));
-  conferir(bolinhas.length > 0 && bolinhas.every((vy) => vy < 0), 'as bolinhas da meia-lua sobem (cobrem área, não miram)', bolinhas);
+  conferir(parada === dePe.x && dePe.vel > 0, 'fica PARADA na tela com o casco correndo, e o tranco não a arrasta', { x: parada, antes: dePe.x, vel: dePe.vel });
+
+  const esp = await page.evaluate(() => window.__ate(() => window.__tent().getData('elite').fase === 'balanca2' && window.__esp));
+  // A distância (com sinal) da nave à linha de cada espinho: o vão é a nave ficar ENTRE os dois trios.
+  const lado = (e) => (100 - e.x) * -Math.sin(e.ang) + (100 - e.y) * Math.cos(e.ang);
+  const tempos = [...new Set((esp ?? []).map((e) => e.t))];
+  const trios = tempos.map((t) => esp.filter((e) => e.t === t).map(lado));
+  conferir(esp?.length === 6 && tempos.length === 2 && trios.every((t) => t.length === 3) && esp.every((e) => e.ang === esp[0].ang && e.vel === T.velEspinho), 'ESPINHOS: 2 trios (sem o do meio), retos e paralelos', esp);
+  conferir(tempos.length === 2 && Math.abs((tempos[1] - tempos[0]) / 1000 - T.trioAtrasoS) < 0.03, 'o 2º trio sai com atraso depois do 1º', tempos);
+  conferir(trios.length === 2 && Math.max(...trios[0]) * Math.min(...trios[1]) < 0 && trios.flat().every((d) => Math.abs(d) >= 14), 'o VÃO: a nave parada fica entre os dois trios (≥14px de cada lado)', trios);
+
+  const bote = await page.evaluate(() => {
+    const s = window.__game.scene.getScene('Game');
+    const st = () => window.__tent().getData('elite');
+    const antes = window.__ate(() => st().fase === 'bote' && { boca: st().boca.body.enable });
+    const pico = window.__ate(() => st().boca.body.enable && st().t > 0.8 && { x: st().boca.x, y: st().boca.y });
+    window.__step(1);
+    const morde = s.physics.overlap(s.ship, st().boca);
+    s.ship.setPosition(60, 48); // a nave desvia
+    window.__step(1);
+    const desviou = !s.physics.overlap(s.ship, st().boca);
+    const depois = window.__ate(() => st().fase === 'balanca3' && { boca: st().boca.body.enable });
+    return { antes, pico, morde, desviou, depois };
+  });
+  conferir(bote.antes && !bote.antes.boca && bote.depois && !bote.depois.boca, 'BOTE: a boca só existe enquanto a cabeça está lançada (o recuo é o aviso)', bote);
+  conferir(bote.pico && Math.hypot(bote.pico.x - 100, bote.pico.y - 100) < 12 && bote.morde && bote.desviou, 'o bote FERE: a boca chega onde a nave estava; quem saiu de lá não é mordido', bote);
 
   const fim = await page.evaluate(() => {
+    const t0 = window.__passo.t;
     const foi = window.__ate(() => !window.__tent(), 300);
-    return { foi: !!foi, gomos: window.__game.scene.getScene('Game').enemies.corposElite.countActive(true) };
+    return { foi: !!foi, corpos: window.__game.scene.getScene('Game').enemies.corposElite.countActive(true), s: (window.__passo.t - t0) / 1000 };
   });
-  conferir(fim.foi && fim.gomos === 0, 'um ciclo por aparição: afunda e vai embora, sem deixar gomo para trás', fim);
+  conferir(fim.foi && fim.corpos === 0 && fim.s < 1.2, 'um ciclo por aparição: balança, afunda e vai embora, sem deixar a boca para trás', fim);
   await page.evaluate(() => window.__game.loop.wake());
 }
 
