@@ -114,7 +114,7 @@ presa à tela e outra presa ao chão AO MESMO TEMPO. A regra:
 - **A arte do Tentáculo volta a uma leva nova** (nenhuma de 06/10 ficou); o comportamento se implementa com a arte à
   mão de 06/10 como provisória.
 
-### 3.4 A SENTINELA DO CASCO *(10/10 — EM AVALIAÇÃO, ainda não aprovada)*
+### 3.4 A SENTINELA DO CASCO *(10/10; no jogo desde 11/10 — em teste, ainda não aprovada)*
 
 Entre 08 e 10/10 o Tentáculo virou a **SERPENTE 63-3** (Pro, a criatura inteira, escolhida por ele) e passou por
 rodopio, giro, esticada e "bote que se torce" — todos abandonados (a serpente animada em trajetória deixava de ser a
@@ -125,7 +125,7 @@ rodopio, giro, esticada e "bote que se torce" — todos abandonados (a serpente 
 |---|---|
 | SOBE | ela sobe de trás da crista do casco até ficar **metade escondida** (~58% da altura à mostra) — *"parece que ela está surgindo da lateral do casco"* |
 | BALANÇA | o idle no lugar (yoyo) — a janela para atirar nela |
-| ESPINHOS | o corpo acende (vermelho ESCURECIDO no código, a pedido dele) e saem **3 trios de espinhos retos na nave**, em fileiras paralelas com vãos — passa no vão ou sobe acima |
+| ESPINHOS | o corpo acende (vermelho ESCURECIDO, a pedido dele) e saem **2 trios de espinhos retos**, em fileiras paralelas, um de cada lado da linha da mira, o 2º 0,33s depois do 1º — *(11/10, ele: "tire o conjunto do meio e faça ter um atraso entre os outros, assim abre-se uma lacuna para o player passar no meio")*: a nave parada fica no vão |
 | BALANÇA | curta |
 | BOTE | recua, dá o golpe com a boca aberta **na direção da nave** e volta à pose — *"gostei da animação do ataque, a esticada de corpo está boa"* |
 | AFUNDA | desce de volta atrás da crista; reaparece em outro ponto |
@@ -134,11 +134,21 @@ rodopio, giro, esticada e "bote que se torce" — todos abandonados (a serpente 
   bote; 2 takes de cada; a referência é o take 2 dos três). A criatura inteira **inclinada no sentido horário**
   (cabeça para cima) em volta do ponto onde a crista a corta, para o bote apontar para a nave — RotSprite no código;
   em avaliação **15° ou 25°** (a 25° a boca chega na altura da nave).
-- **Em aberto:** o ângulo; o tamanho (1:1 ≈ 100px de altura); se o bote fere ou é só ameaça; e **a regra do casco
-  (§3.3)** — ela toca o casco, então deveria rolar com ele (84 px/s; um ciclo de ~6s andaria ~500px): o demo ainda a
-  deixa parada na tela. Decidir com ele (ciclo mais curto nascendo na borda direita, ou ela rola e o ciclo cabe na
-  travessia).
-- Demo: `scripts/_elites/_sentinela-demo.mjs`; GIFs em `folhas/2026-10-10/elites/sentinela/`.
+- **Decidido por ele em 11/10:** o giro é **25°**; **o bote FERE** (só a boca, e só enquanto a cabeça está lançada — o
+  recuo é o aviso); os espinhos em 2 trios com o vão no meio; *"monte a sequência dela inteira, qualquer coisa
+  ajustamos depois"*.
+- **NO JOGO desde 11/10** (ele testa no sandbox; ainda não aprovada): o posto `tentaculo` (`Tentaculo.ts`; a corrente de
+  gomos, a rachadura e a meia-lua saíram). Os 51 quadros entram ASSADOS já girados e escurecidos
+  (`scripts/_elites/_instalar-sentinela.mjs` → `src/data/tentaculoQuadros.ts`: pivô, hitbox por quadro, a boca do bote).
+  **Ela fica ATRÁS das placas do casco (depth −76):** a beirada real da placa (que varia 0–2px por coluna) é quem a
+  corta — o corte reto em y=150 do demo deixava uma fresta de céu entre ela e o casco (o defeito que ele apontou).
+  Sobe a 90px à frente da nave (a boca alcança 87px). Um ciclo por aparição (~5,9s).
+- **Em aberto:** o tamanho (1:1 ≈ 100px de altura); o vermelho e o quanto do corpo fica à mostra; o NOME (a F2 já tem
+  a Sentinela Orbital); a leitura dela sobre fundo escuro (o corpo é quase preto); e **a regra do casco (§3.3)** — ela
+  fica PARADA na tela, como nos GIFs: com a sequência inteira (~5,9s) o casco andaria ~500px, e o bote aconteceria fora
+  da tela. Rolar com o casco exige encurtar o ciclo.
+- Demo: `scripts/_elites/_sentinela-demo.mjs`; GIFs em `folhas/2026-10-10/elites/sentinela/`. Em jogo:
+  `folhas/2026-10-11/elites/gif-serpente-casco.gif` (`_gif.mjs … tentaculo`); sonda `probe-elites-f3 tentaculo`.
 
 ## 4. O roteiro da F3
 
