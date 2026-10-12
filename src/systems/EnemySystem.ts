@@ -9,7 +9,6 @@ import { criarTexturasElites } from '../entities/elites/texturasProvisorias';
 import { DRONE_MINERACAO } from '../entities/elites/DroneMineracao';
 import { SENTINELA } from '../entities/elites/Sentinela';
 import { CACADOR } from '../entities/elites/Cacador';
-import { TENTACULO } from '../entities/elites/Tentaculo';
 
 export type EnemyKind =
   | 'drone'
@@ -22,9 +21,8 @@ export type EnemyKind =
   // Os ELITES da frente B (spec 2026-10-05-frente-b-elites-design.md).
   | 'droneMineracao'
   | 'sentinela'
-  // Os da F3 (spec 2026-10-06-frente-b-fatia-f3-design.md, emenda de 07/10).
-  | 'cacador'
-  | 'tentaculo';
+  // O da F3 (spec 2026-10-06-frente-b-fatia-f3-design.md, emenda de 07/10) — o único: o elite do casco saiu em 12/10.
+  | 'cacador';
 
 interface EnemyDef {
   texture: string;
@@ -184,8 +182,6 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   sentinela: { texture: 'eliteSentinelaRoda', hp: ELITES.sentinela.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.sentinela.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: SENTINELA },
   // A F3 (07/10): a LULA nasce escondida num posto — o `x`/`y` do roteiro não valem para ela (ver `Cacador.ts`).
   cacador: { texture: 'eliteCacador', hp: ELITES.cacador.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.cacador.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: CACADOR },
-  // A serpente do casco nasce DENTRO do casco, à frente da nave — o `x`/`y` do roteiro não valem (`Tentaculo.ts`).
-  tentaculo: { texture: 'eliteTentaculoIdleAnim0', hp: ELITES.tentaculo.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.tentaculo.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: TENTACULO },
 };
 
 /**
@@ -267,10 +263,6 @@ export class EnemySystem {
   private ganchos: GanchosElite = { criarRocha: () => null, explodir: () => {} };
   /** A nave, guardada no `update` — o `iniciar` de um elite nasce no `spawn`, que não a recebe. */
   private alvo: Phaser.Physics.Arcade.Sprite | null = null;
-  /** Os CORPOS dos elites (os gomos do Tentáculo, F3): absorvem o tiro sem dano e ferem a nave — a cena liga os overlaps. */
-  readonly corposElite: Phaser.Physics.Arcade.Group;
-  /** A velocidade do CHÃO neste quadro (px/s) — a cena escreve a cada quadro; o que toca o casco anda com ela. */
-  velChao = 0;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -290,7 +282,6 @@ export class EnemySystem {
       // Depth 1 (07/10): a TINTA da lula (0,5) fica por cima dos inimigos e POR BAIXO de todo tiro (spec F3 §2.3).
       createCallback: (o) => (o as Phaser.Physics.Arcade.Sprite).setDepth(1),
     });
-    this.corposElite = scene.physics.add.group({ allowGravity: false });
 
     // O rosa claro é o mesmo do flash de dano do jogador (0xff7aa8) — a família de cor já
     // existe no jogo (é a mesma dupla do tracerFlash da Capitânia, só que mais contida).
@@ -322,10 +313,10 @@ export class EnemySystem {
   }
 
   private ctxElite(alvo: Phaser.Physics.Arcade.Sprite): CtxElite {
-    return { scene: this.scene, alvo, tiros: this.tiros, ganchos: this.ganchos, velChao: this.velChao, corpos: this.corposElite };
+    return { scene: this.scene, alvo, tiros: this.tiros, ganchos: this.ganchos };
   }
 
-  /** Este inimigo está INTOCÁVEL agora? (a lula escondida, a cabeça do Tentáculo no casco) — `GameScene.ferirInimigo`. */
+  /** Este inimigo está INTOCÁVEL agora? (a lula escondida) — `GameScene.ferirInimigo`. */
   intocavel(e: Phaser.Physics.Arcade.Sprite): boolean {
     const def = DEFS[e.getData('kind') as EnemyKind];
     return def?.elite?.intocavel?.(e) ?? false;
@@ -558,9 +549,6 @@ export class EnemySystem {
         if (def.travessia === 'vertical') e.setData('baseX', (e.getData('baseX') as number) + passo);
         e.setData('tranco', tranco - passo);
       }
-
-      // O que anda COM O CHÃO anda sempre — até travado (o casco não para; ver `ComportamentoElite.noChao`).
-      def.elite?.noChao?.(e, dt, this.ctxElite(target));
 
       // TRAVADO (eletrificado): nada anda, nada atira, nenhum relógio de tiro corre — o `continue` pula tudo abaixo.
       // Ao destravar, volta a velocidade de antes (a do roteiro, ou a da deriva vertical da água-viva).

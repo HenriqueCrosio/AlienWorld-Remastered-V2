@@ -61,17 +61,16 @@ const FRAMES: Record<string, number> = {
   eliteSentinelaPairarAnim: 8,
   eliteSentinelaSobrecargaAnim: 10,
   eliteSentinelaDisparoAnim: 8,
-  // Os ELITES da F3 (07/10), assados por `scripts/_elites/_instalar-f3.mjs`: a camuflagem da lula (pontilhado), a
-  // TINTA (sopro e cortina, nos tempos de `ELITES.tinta` a 20 qps).
-  eliteCacadorSurgeAnim: 6,
-  eliteCacadorSomeAnim: 6,
+  // Os GESTOS da lula (12/10), assados por `scripts/_elites/_instalar-lula-anims.mjs` (uma caixa por clipe, o centro dela no centro).
+  // Não viram animação do Phaser: o quadro sai do relógio do estado (`cacadorQuadro`).
+  eliteCacadorIdleAnim: 9,
+  eliteCacadorAtaqueAnim: 17,
+  eliteCacadorFogeAnim: 9,
+  eliteCacadorEscapaAnim: 20,
+  // A TINTA da lula (07/10), assada por `scripts/_elites/_instalar-f3.mjs`: sopro e cortina, nos tempos de
+  // `ELITES.tinta` a 20 qps.
   eliteTintaSoproAnim: 18,
   eliteTintaCortinaAnim: 38,
-  // A SERPENTE DO CASCO (11/10), assada por `scripts/_elites/_instalar-sentinela.mjs`: os três gestos, 17 quadros cada.
-  // Sem animação do Phaser: quem troca o quadro é o `Tentaculo.ts`, no relógio do estado.
-  eliteTentaculoIdleAnim: 17,
-  eliteTentaculoEspinhosAnim: 17,
-  eliteTentaculoBoteAnim: 17,
   // A BOLA de energia da canhoneira do cinturão, agora ANIMADA (2026-08-09): ela pulsa e solta
   // fagulha no ar em vez de ser um adesivo. Os quadros nasceram com DERIVA (o desenho escorregava
   // 5.6px para a esquerda ao longo do ciclo, o que num projétil soma à velocidade e vira
@@ -190,10 +189,8 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'elite-sentinela-pairar', prefix: 'eliteSentinelaPairarAnim', frameRate: 12 },
   { key: 'elite-sentinela-disparo', prefix: 'eliteSentinelaDisparoAnim', frameRate: 18, loop: false },
   { key: 'elite-sentinela-sobrecarga', prefix: 'eliteSentinelaSobrecargaAnim', frameRate: 14 },
-  // Os ELITES da F3 (07/10). A camuflagem toca em 0,3s (o SURGE dura 0,3s; o SOME, 0,4s). A tinta a 20 qps é o tempo
-  // ASSADO nos quadros — mudar o `frameRate` muda a duração da tinta, e ela já é a dos números.
-  { key: 'elite-cacador-surge', prefix: 'eliteCacadorSurgeAnim', frameRate: 20, loop: false },
-  { key: 'elite-cacador-some', prefix: 'eliteCacadorSomeAnim', frameRate: 20, loop: false },
+  // A TINTA da lula (07/10). Os 20 qps são o tempo ASSADO nos quadros — mudar o `frameRate` muda a duração da tinta, e
+  // ela já é a dos números.
   { key: 'elite-tinta-sopro', prefix: 'eliteTintaSoproAnim', frameRate: 20, loop: false },
   { key: 'elite-tinta-cortina', prefix: 'eliteTintaCortinaAnim', frameRate: 20, loop: false },
   // A BOLA de energia dela: 14, a mesma cadência do 'comet-burn'/'blast-burn'. Projétil é a
@@ -734,16 +731,14 @@ const ART: Record<string, string> = {
   ...animFrames('eliteSentinelaSobrecargaAnim', 'elite-sentinela-sobrecarga'),
   ...animFrames('eliteSentinelaDisparoAnim', 'elite-sentinela-disparo'),
   eliteEscudo: 'sprites/elite-escudo.png',
-  // OS ELITES DA F3: a LULA (07/10, a escolha dele, Pro nº 15 a 85% — `scripts/_elites/_instalar-f3.mjs`) e, no posto do
-  // Tentáculo, a SERPENTE DO CASCO (11/10, a 63-3 girada a 25° — `scripts/_elites/_instalar-sentinela.mjs`).
+  // O ELITE DA F3: a LULA (07/10, a escolha dele, Pro nº 15 a 85% — `scripts/_elites/_instalar-f3.mjs`).
   eliteCacador: 'sprites/elite-cacador.png',
-  ...animFrames('eliteCacadorSurgeAnim', 'elite-cacador-surge'),
-  ...animFrames('eliteCacadorSomeAnim', 'elite-cacador-some'),
+  ...animFrames('eliteCacadorIdleAnim', 'elite-cacador-idle'),
+  ...animFrames('eliteCacadorAtaqueAnim', 'elite-cacador-ataque'),
+  ...animFrames('eliteCacadorFogeAnim', 'elite-cacador-foge'),
+  ...animFrames('eliteCacadorEscapaAnim', 'elite-cacador-escapa'),
   ...animFrames('eliteTintaSoproAnim', 'elite-tinta-sopro'),
   ...animFrames('eliteTintaCortinaAnim', 'elite-tinta-cortina'),
-  ...animFrames('eliteTentaculoIdleAnim', 'elite-tentaculo-idle'),
-  ...animFrames('eliteTentaculoEspinhosAnim', 'elite-tentaculo-espinhos'),
-  ...animFrames('eliteTentaculoBoteAnim', 'elite-tentaculo-bote'),
 
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
@@ -1106,10 +1101,8 @@ const ART: Record<string, string> = {
   eliteTiroCristal: 'sprites/tiros/elite-cristal.png',
   // Os ESTILHAÇOS da explosão do drone: o losango de cristal (C-A, 5×3), a pedido dele.
   eliteEstilhaco: 'sprites/tiros/elite-estilhaco.png',
-  // Os TIROS DA F3 (à mão): a AGULHA da lula (06/10, 5×1) e o ESPINHO da serpente do casco (10/10, 15×3) — os dois
-  // apontam para a direita.
+  // O TIRO DA F3 (à mão): a AGULHA da lula (06/10, 5×1), apontando para a direita.
   eliteTiroAgulha: 'sprites/tiros/elite-agulha.png',
-  eliteTiroEspinho: 'sprites/tiros/elite-espinho.png',
   // A ARTE APROVADA DAS PEÇAS (03/10, spec do catálogo §5.1b–c) com as MESMAS chaves das provisórias — quem existe
   // aqui, a `criarTexturasProvisorias` pula. O sufixo `-alien` é a versão da linhagem alien (`texturaDaLinhagem`).
   'carta-missil': 'sprites/cartas/pecas/missil-humano.png',

@@ -1,5 +1,5 @@
-// THE F3 ELITES' ART SHEETS (spec fatia F3 §5): every candidate IN SCENE — the hunter on the real act-1 nebula, the
-// tentacle on the real act-2 hull — at real scale next to the ship, magnified without smoothing. Hand-drawn (MÃO) and
+// THE F3 ELITE'S ART SHEET (spec fatia F3 §5): every candidate IN SCENE — the hunter on the real act-1 nebula — at
+// real scale next to the ship, magnified without smoothing. Hand-drawn (MÃO) and
 // PixelLab (PRO = generate-image-v2 with his concept as subject; FLASH = create_object_pro_flash) side by side.
 //   node scripts/_elites/_folha-f3.mjs   → folhas/2026-10-06/elites/
 import fs from 'node:fs';
@@ -106,46 +106,4 @@ const nm = await meta(nave);
   }
   paineis.push(await painel(fundo, J, pass, 'MECÂNICA · o DISSOLVER à mão (pontilhado em 3 passos)', '#8fd0ff'));
   await folha(paineis, 2, `${D}/folha-cacador.png`);
-}
-
-// ── THE TENTACLE on the hull ── the crest of the hull sits at y≈150 (the band 150–216).
-{
-  const fundo = `${D}/ref/fundo-casco.png`;
-  const J = { x: 120, y: 96, w: 150, h: 76 };
-  const CRISTA = 150 - J.y;
-  const paineis = [];
-  // HAND: the chain assembled — gomos rising from the crest, the head on top turning to the ship.
-  for (const g of ['A', 'B']) {
-    const gomo = await img(`${D}/mao/tentaculo-gomo-${g}.png`);
-    const cab = await img(`${D}/mao/tentaculo-cabeca.png`);
-    const gm = await meta(gomo);
-    const pecas = [{ buf: nave, x: 6, y: 14 }];
-    const bx = 92;
-    for (let i = 0; i < 6; i++) pecas.push({ buf: gomo, x: bx + Math.round(Math.sin(i * 0.5) * 2), y: CRISTA - 4 - i * 6 - gm.height / 2 });
-    pecas.push({ buf: cab, x: bx - 9, y: CRISTA - 4 - 6 * 6 - 14 });
-    const r = await img(`${D}/mao/rachadura-2.png`);
-    pecas.push({ buf: r, x: 30, y: CRISTA - 3 });
-    paineis.push(await painel(fundo, J, pecas, `TENTÁCULO · MÃO (cabeça + gomo ${g}) e a rachadura`));
-  }
-  for (const n of [3, 4, 8, 13, 24]) {
-    const b = await img(`${D}/cand/pro/tentaculoCabeca-11-${n}.png`, { flop: true });
-    const m = await meta(b);
-    paineis.push(await painel(fundo, J, [{ buf: nave, x: 6, y: 14 }, { buf: b, x: 90, y: CRISTA - m.height + 6 }], `TENTÁCULO · PRO ${n} (cabeça + pescoço, ${m.width}×${m.height})`));
-  }
-  // The PRO segments that came out usable (a red light, matching head 8's armour).
-  const gs = [];
-  for (const [i, n] of [10, 17, 31].entries()) gs.push({ buf: await img(`${D}/cand/pro/tentaculoGomo2-12-${n}.png`, { flop: true }), x: 40 + i * 26, y: CRISTA - 30 });
-  paineis.push(await painel(fundo, J, [{ buf: nave, x: 6, y: 14 }, ...gs], 'TENTÁCULO · PRO gomos 10 / 17 / 31 (feitos da cabeça 8)'));
-  // The crescent volley (hand pellets), fanning up from a head near the crest.
-  const bol = await img(`${D}/mao/tiro-tentaculo-bolinha-B.png`);
-  const cab = await img(`${D}/mao/tentaculo-cabeca.png`, { rot: 90 });
-  const cx = 100;
-  const cy = CRISTA - 18;
-  const meia = [];
-  for (let i = 0; i < 6; i++) {
-    const a = Math.PI + (Math.PI * 0.11) + (i / 5) * (Math.PI * 0.78);
-    meia.push({ buf: bol, x: cx + Math.cos(a) * 30, y: cy + Math.sin(a) * 30 });
-  }
-  paineis.push(await painel(fundo, J, [{ buf: nave, x: 6, y: 14 }, { buf: cab, x: cx - 11, y: cy - 6 }, ...meia], 'MECÂNICA · a MEIA-LUA de 6 (tiro à mão)', '#8fd0ff'));
-  await folha(paineis, 2, `${D}/folha-tentaculo.png`);
 }

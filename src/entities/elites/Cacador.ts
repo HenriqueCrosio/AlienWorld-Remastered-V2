@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { ELITES } from '../../data/numerosElites';
-import { cacadorAvanca, cacadorTangivel, escolherPosto, tintaDoSumico, type EstadoCacador } from '../../elitesRegras';
+import { cacadorAvanca, cacadorFugaLancada, cacadorQuadro, cacadorTangivel, escolherPosto, tintaDoSumico, type ClipeCacador, type EstadoCacador } from '../../elitesRegras';
 import { PadroesDeTiro } from '../../systems/PadroesDeTiro';
 import { vestir, type ComportamentoElite, type CtxElite, type Sprite } from './tipos';
 
@@ -16,15 +16,27 @@ interface Estado {
   ang: number;
   /** Agulhas já disparadas nesta rajada. */
   agulhas: number;
+  /** Na FUGA: já disparou (a cortina saiu e o corpo desligou)? */
+  lancada: boolean;
   /** A linha da mira (telégrafo 1px, como na folha de 06/10). */
   mira: Phaser.GameObjects.Graphics;
 }
 
 /**
  * A HITBOX, fixa: o quadro (41×41) é a lula na DIAGONAL — tentáculos e ponta da carapaça deixam muito vazio na caixa.
- * O miolo (o manto e a base dos tentáculos) é o que fere e é ferido.
+ * O miolo (o manto e a base dos tentáculos) é o que fere e é ferido. Os quadros dos gestos são maiores (53×53, o centro
+ * da lula no centro): a hitbox não cresce com os tentáculos abertos.
  */
 const CORPO = { w: 22, h: 22 };
+/** Os GESTOS (12/10), assados por `_instalar-lula-anims.mjs`: a textura de cada quadro é `<prefixo><n>`. */
+const CLIPE: Record<ClipeCacador, string> = {
+  idle: 'eliteCacadorIdleAnim',
+  ataque: 'eliteCacadorAtaqueAnim',
+  foge: 'eliteCacadorFogeAnim',
+  escapa: 'eliteCacadorEscapaAnim',
+};
+/** O RUMO da fuga, medido na arte: o eixo do dardo (a ponta do manto na frente) — para cima e para a esquerda, a 43°. */
+const FUGA_RUMO = Phaser.Math.DegToRad(-137);
 /** A BOCA, medida na arte: o olho vermelho fica em (22, 25) do quadro 41×41; as agulhas saem da base dos tentáculos. */
 const BOCA = { dx: 0, dy: 5 };
 /** A tinta: um pouco atrás e abaixo do centro (o jato sai do sifão, junto da base dos tentáculos). */
@@ -39,6 +51,8 @@ const boca = (e: Sprite): { x: number; y: number } => ({ x: e.x + BOCA.dx, y: e.
  * O CAÇADOR DE VÁCUO — a LULA (spec F3 §2 + emenda de 07/10): ESCONDIDA (invisível e sem corpo) → SURGE em pontilhado
  * num posto da metade direita → MIRA (a linha segue a nave) → TRAVA (a linha para e pisca) → RAJADA de 3 agulhas na
  * linha travada → SOME soltando TINTA no lugar (sopro, sopro, e a cortina na saída). Morta na mira, não atira.
+ * Desde 12/10 cada estado tem o seu GESTO (`posar`): chega de longe, paira, abre os tentáculos, fecha de golpe, foge.
+ * A última saída é a FUGA (`fugir`): impulso, cortina, e ela dispara esticada para fora da tela.
  */
 export const CACADOR: ComportamentoElite = {
   iniciar(e) {
@@ -52,6 +66,7 @@ export const CACADOR: ComportamentoElite = {
       posto: escolherPosto(Math.random, null, C),
       ang: Math.PI,
       agulhas: 0,
+      lancada: false,
       mira: e.scene.add.graphics().setDepth(0.6),
     };
     e.setData('elite', s);
@@ -70,19 +85,21 @@ export const CACADOR: ComportamentoElite = {
       e.destroy();
       return;
     }
+    if (s.fase === 'fuga') fugir(e, s, dt);
+    posar(e, s);
     desenharMira(e, s, ctx);
     if (s.fase === 'rajada') rajada(e, s, ctx);
   },
 
   intocavel(e) {
     const s = e.getData('elite') as Estado | undefined;
-    return !s || !cacadorTangivel(s.fase);
+    return !s || !cacadorTangivel(s.fase) || s.lancada;
   },
 
   // O RABO (§2.2): viva quando ele chega, ela some DE VEZ — se estiver à vista, no sopro; sem pontos.
   aoRabo(e) {
     const s = e.getData('elite') as Estado | undefined;
-    if (s && cacadorTangivel(s.fase)) soltarTinta(e, 'sopro');
+    if (s && cacadorTangivel(s.fase) && !s.lancada) soltarTinta(e, 'sopro');
     e.destroy();
   },
 };
@@ -92,9 +109,6 @@ function entrar(e: Sprite, s: Estado, fase: EstadoCacador, ctx: CtxElite): void 
   s.t = 0;
   if (fase === 'surge') {
     mostrar(e);
-    if (e.scene.anims.exists('elite-cacador-surge')) e.play('elite-cacador-surge');
-  } else if (fase === 'mira') {
-    if (e.texture.key !== 'eliteCacador') e.setTexture('eliteCacador');
   } else if (fase === 'trava') {
     // A linha CONGELA onde a nave estava — desviar é sair dela agora.
     const b = boca(e);
@@ -104,15 +118,42 @@ function entrar(e: Sprite, s: Estado, fase: EstadoCacador, ctx: CtxElite): void 
   } else if (fase === 'some') {
     s.sumicos++;
     soltarTinta(e, tintaDoSumico(s.sumicos));
-    if (e.scene.anims.exists('elite-cacador-some')) e.play('elite-cacador-some');
+  } else if (fase === 'fuga') {
+    // A última saída: a tinta só sai quando ela dispara (`fugir`).
+    s.sumicos++;
   } else if (fase === 'escondido') {
     esconder(e, s);
   }
 }
 
+/**
+ * A FUGA (12/10, pedido dele: "ela pega impulso com os tentáculos e depois estica eles, fugindo"): no impulso ela fica
+ * parada, enrolando os tentáculos — ainda fere e é ferida. Ao disparar, solta a CORTINA no lugar, o corpo desliga (já
+ * foi: nem atropela a nave, nem leva tiro) e ela voa esticada no rumo do manto, saindo de dentro da nuvem.
+ */
+function fugir(e: Sprite, s: Estado, dt: number): void {
+  if (!cacadorFugaLancada(s.t)) return;
+  if (!s.lancada) {
+    s.lancada = true;
+    soltarTinta(e, tintaDoSumico(s.sumicos));
+    (e.body as Phaser.Physics.Arcade.Body).enable = false;
+  }
+  e.setPosition(e.x + Math.cos(FUGA_RUMO) * C.velFuga * dt, e.y + Math.sin(FUGA_RUMO) * C.velFuga * dt);
+}
+
+/**
+ * O GESTO: o quadro sai do relógio do estado (`cacadorQuadro`), sem animação do Phaser — travada pelo elétrico, ela
+ * congela na pose. A hitbox é refeita a cada troca (o corpo do Arcade não acompanha a textura).
+ */
+function posar(e: Sprite, s: Estado): void {
+  const q = cacadorQuadro(s.fase, s.t);
+  if (!q) return;
+  const chave = `${CLIPE[q.clipe]}${q.quadro}`;
+  if (e.texture.key !== chave && e.scene.textures.exists(chave)) vestir(e, chave, CORPO);
+}
+
 /** Escondida: invisível e SEM CORPO (o tiro atravessa) — e já no próximo posto, longe da altura do anterior. */
 function esconder(e: Sprite, s: Estado): void {
-  e.anims.stop();
   e.setVisible(false);
   (e.body as Phaser.Physics.Arcade.Body).enable = false;
   s.posto = escolherPosto(Math.random, s.fase === 'escondido' && s.sumicos > 0 ? s.posto.y : null, C);

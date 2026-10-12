@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "0aaadf14-4cbf-4bca-b2e8-dfdd2385380d",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The armored squid does a jet-propulsion stroke in place: its tentacles flare wide open like an umbrella, then clap shut hard, and end stretched long and straight in a tight bundle trailing behind the body, like a dart. It holds the stretched dart pose at the end. Same spot, same size (no shrinking), same diagonal orientation, same dark colors.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

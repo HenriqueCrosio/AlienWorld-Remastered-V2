@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "4055ca04-841f-4a4b-bd3f-10164e3b4ae0",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The armored squid escapes with a jet stroke, staying in the same spot: first it gathers impulse, pulling its tentacles in and coiling them tight against its body; then it kicks them out in one powerful push; then the tentacles stretch out straight and close together behind it in a long streamlined trail, and it holds that stretched pose. It keeps the same size (it does not shrink), the same diagonal orientation and the same dark colors.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 2
+  }
+}

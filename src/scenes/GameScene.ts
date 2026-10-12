@@ -576,12 +576,6 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.weapons.bullets, this.enemies.enemies, (b, e) =>
       this.bulletHitEnemy(b as Phaser.Physics.Arcade.Sprite, e as Phaser.Physics.Arcade.Sprite),
     );
-    // Os CORPOS dos elites (os gomos do Tentáculo, F3 §3.2): ferem no contato e ABSORVEM o tiro, sem dano — a regra que
-    // ele deu à Serpente (*"invulnerável é telégrafo, não parede"*): só a cabeça fere e é ferida.
-    this.physics.add.overlap(this.ship, this.enemies.corposElite, () => this.damageShip());
-    this.physics.add.overlap(this.weapons.bullets, this.enemies.corposElite, (b) =>
-      this.tiroNoCorpoDoElite(b as Phaser.Physics.Arcade.Sprite),
-    );
     this.physics.add.overlap(this.ship, this.pickups.pickups, (_s, p) =>
       this.collectPickup(p as Phaser.Physics.Arcade.Sprite),
     );
@@ -668,11 +662,6 @@ export class GameScene extends Phaser.Scene {
     if (this.sandbox) {
       this.medidas = new Medidas(() => this.time.now);
       this.arena = new SandboxArena(this, this.sandbox, this.enemies, this.medidas);
-      // O Tentáculo mora no CASCO (o ato 2 da F3): no sandbox, a F3 com ele já abre sem nuvem e com o casco de pé.
-      if (this.stage.id === 3 && this.sandbox.inimigos.tentaculo > 0) {
-        this.parallax.setNebulaDensity(0, 0);
-        this.parallax.revealCasco(1, 0);
-      }
     }
 
     if (import.meta.env.DEV) {
@@ -767,8 +756,6 @@ export class GameScene extends Phaser.Scene {
     // cinturão inteiro pareceria pendurado. Só a Fase 1, que ROMPE a atmosfera no fim, freia.
     const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
-    // A velocidade do CHÃO para os elites: o que toca o casco anda com ele (a regra do casco, spec F3 §3.3).
-    this.enemies.velChao = SCROLL_SPEED * frenagem;
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
     this.moldura.avanca(dt, SCROLL_SPEED * frenagem);
@@ -1776,22 +1763,6 @@ export class GameScene extends Phaser.Scene {
     this.fx.hit(bullet.x, bullet.y);
   }
 
-  /**
-   * O tiro morre no CORPO de um elite (o gomo do Tentáculo), sem dano. Perto de uma cabeça exposta, deixa o overlap da
-   * cabeça cobrar — os dois corpos se encostam no pescoço, e a ordem dos callbacks no mesmo quadro não é garantida
-   * (a mesma armadilha do `bulletAbsorvedByBoss`).
-   */
-  private tiroNoCorpoDoElite(bullet: Phaser.Physics.Arcade.Sprite): void {
-    if (!this.weapons.bullets.contains(bullet) || !bullet.active) return;
-    for (const o of this.enemies.enemies.getChildren()) {
-      const e = o as Phaser.Physics.Arcade.Sprite;
-      if (e.active && (e.body as Phaser.Physics.Arcade.Body).enable && Phaser.Math.Distance.Between(bullet.x, bullet.y, e.x, e.y) < 12) return;
-    }
-    this.medidas?.bloqueio((bullet.getData('origem') as OrigemProjetil | null) ?? 'tiro');
-    this.weapons.release(bullet);
-    this.fx.hit(bullet.x, bullet.y);
-  }
-
   private bulletHitBoss(bullet: Phaser.Physics.Arcade.Sprite): void {
     // Rede de segurança contra a inversão de argumentos do Phaser: só devolve ao pool o
     // que REALMENTE saiu dele. Sem isto, um erro de ordem volta a "reciclar" o chefão.
@@ -2405,7 +2376,7 @@ export class GameScene extends Phaser.Scene {
     piscar = true,
   ): 'bloqueado' | 'vivo' | 'morto' {
     if (!e.active) return 'morto';
-    // INTOCÁVEL (a lula escondida, a cabeça do Tentáculo dentro do casco — F3): nada fere, nem a bomba nem a queima.
+    // INTOCÁVEL (a lula escondida — F3): nada fere, nem a bomba nem a queima.
     if (this.enemies.intocavel(e)) return 'bloqueado';
     if (de && this.enemies.bloqueia(e, de.x, de.y, dano)) {
       this.medidas?.bloqueio(fonte);

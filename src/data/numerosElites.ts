@@ -97,6 +97,13 @@ export const ELITES = {
     /** As agulhas saem a cada `agulhaEspacoS` (3 em 0,16s); a rajada fecha logo depois. */
     rajadaS: 0.25,
     someS: 0.4,
+    /**
+     * A FUGA (12/10), no lugar do último SOME: ela recolhe os tentáculos (`fugaImpulsoS`, parada — ainda dá para matá-la),
+     * solta a CORTINA e dispara esticada no rumo do manto a `velFuga`; aos `fugaS` já foi.
+     */
+    fugaS: 0.95,
+    fugaImpulsoS: 0.35,
+    velFuga: 320,
     ressurgimentos: 3,
     agulhaN: 3,
     agulhaEspacoS: 0.08,
@@ -115,47 +122,5 @@ export const ELITES = {
     sopro: { cresceS: 0.15, seguraS: 0.5, someS: 0.9 },
     cortina: { cresceS: 0.35, seguraS: 1.2, someS: 1.9 },
     qps: 20,
-  },
-  /**
-   * O posto "tentáculo" da F3 — desde 11/10 a SERPENTE DO CASCO (a 63-3, spec F3 §3.4): SOBE de trás da crista →
-   * BALANÇA → ESPINHOS (acende e solta 2 trios com um vão no meio) → BALANÇA → BOTE (fere) → BALANÇA → AFUNDA. Um ciclo
-   * por aparição. Os gestos são quadros assados (`scripts/_elites/_instalar-sentinela.mjs`): 17 de cada.
-   */
-  tentaculo: {
-    hp: 14,
-    score: 350,
-    sobeS: 0.7,
-    balanca1S: 0.8,
-    balanca2S: 0.6,
-    balanca3S: 0.4,
-    afundaS: 0.6,
-    /** Os gestos (espinhos e bote) tocam os 17 quadros a 12 qps; o balanço vai e volta a 10. */
-    gestoQps: 12,
-    gestoQuadros: 17,
-    balancaQps: 10,
-    /** A crista do casco: as placas (depth −75) começam em y=150–152, e ela fica ATRÁS delas — é a placa que a corta. */
-    cristaY: 151,
-    /** Onde ela sobe: a esta distância à frente da nave (a boca do bote alcança 87px), dentro desta faixa da tela. */
-    distNave: 90,
-    raizX: [170, 300] as const,
-    /**
-     * Os ESPINHOS (11/10, ele: *"tire o conjunto do meio e faça ter um atraso entre os outros, assim abre-se uma lacuna
-     * para o player passar no meio"*): 2 trios paralelos, um de cada lado da linha da mira (`faixaDist`), o 2º
-     * `trioAtrasoS` depois do 1º. A mira trava na nave no 1º trio, sem passar de `miraMaxGraus` da horizontal.
-     */
-    trio1S: 0.5,
-    trioAtrasoS: 0.33,
-    faixaDist: 26,
-    trioAbertura: 6,
-    velEspinho: 85,
-    miraMaxGraus: 60,
-    /**
-     * De onde os trios saem, acima da crista: alto o bastante para a fileira de baixo não nascer dentro do casco, baixo
-     * o bastante para a de cima sair dos espinhos do dorso (e não do ar acima dela).
-     */
-    origemEspinhosY: -34,
-    /** O BOTE FERE (11/10, decisão dele): a caixa da boca, só enquanto a cabeça está lançada. */
-    boteFere: true,
-    boca: { w: 16, h: 14 },
   },
 };

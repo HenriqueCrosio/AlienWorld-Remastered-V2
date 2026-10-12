@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "50b7f372-4077-452b-bf07-09ae63495c34",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The armored squid hovers in place: its mantle pulses slowly as it breathes and its tentacles drift and curl gently like in water. It stays in the same spot, same diagonal pose, same size, same dark colors.",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

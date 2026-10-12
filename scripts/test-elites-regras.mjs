@@ -2,7 +2,7 @@
 import { ELITES } from '../src/data/numerosElites.ts';
 import {
   droneAvanca, droneExplode, sentinelaAvanca, sentinelaBloqueia, escudoAbsorve, escolherPosto,
-  cacadorAvanca, cacadorTangivel, tintaDoSumico, tentaculoAvanca, tentaculoRaizX, tentaculoAfundado, tentaculoExposta, tentaculoMira, tentaculoTrio,
+  cacadorAvanca, cacadorFugaLancada, cacadorQuadro, cacadorTangivel, tintaDoSumico,
 } from '../src/elitesRegras.ts';
 
 const falhas = [];
@@ -69,25 +69,20 @@ conferir(cacadorAvanca('mira', C.miraS - 0.01, 1) === 'mira', 'a mira segura o t
 conferir(cacadorAvanca('some', C.someS, 1) === 'escondido' && cacadorAvanca('some', C.someS, C.ressurgimentos) === 'foi', `depois do ${C.ressurgimentos}º sumiço vai embora`, null);
 conferir(!cacadorTangivel('escondido') && !cacadorTangivel('foi') && ['surge', 'mira', 'trava', 'rajada', 'some'].every(cacadorTangivel), 'escondido não tem corpo; visível, tem', null);
 conferir(tintaDoSumico(1) === 'sopro' && tintaDoSumico(C.ressurgimentos - 1) === 'sopro' && tintaDoSumico(C.ressurgimentos) === 'cortina', 'a tinta: sopro, sopro, CORTINA na saída', null);
+// Os GESTOS (12/10): o quadro sai do relógio do estado.
+conferir(cacadorQuadro('escondido', 0.5) === null && cacadorQuadro('foi', 0) === null, 'escondida ou ida, não se desenha', null);
+const qd = (f, t) => { const q = cacadorQuadro(f, t); return `${q.clipe}${q.quadro}`; };
+conferir(qd('surge', 0) === 'foge8' && qd('surge', C.surgeS - 0.001) === 'foge0', 'o SURGE é a fuga de trás para a frente e acaba na pose parada', [qd('surge', 0), qd('surge', C.surgeS - 0.001)]);
+conferir(qd('mira', 0) === 'idle0' && qd('mira', C.miraS / 2) === 'idle3', 'a MIRA paira: sai da pose parada e vai ao auge no meio', [qd('mira', 0), qd('mira', C.miraS / 2)]);
+conferir(qd('trava', C.travaS - 0.001) === 'ataque6' && qd('rajada', 0) === 'ataque7', 'a TRAVA acaba com os tentáculos abertos e a RAJADA segue dali', [qd('trava', C.travaS - 0.001), qd('rajada', 0)]);
+conferir(qd('some', C.someS - 0.001) === 'foge8' && qd('some', 99) === 'foge8' && qd('mira', -1) === 'idle0', 'o SOME acaba desfeito; fora do tempo, o quadro não estoura', qd('some', 99));
+// A FUGA (12/10): a última saída troca o SOME pelo impulso + voo.
+conferir(cacadorAvanca('rajada', C.rajadaS, C.ressurgimentos - 2) === 'some' && cacadorAvanca('rajada', C.rajadaS, C.ressurgimentos - 1) === 'fuga', 'só a ÚLTIMA saída é a FUGA; as outras seguem no SOME', null);
+conferir(cacadorAvanca('fuga', C.fugaS - 0.01, C.ressurgimentos) === 'fuga' && cacadorAvanca('fuga', C.fugaS, C.ressurgimentos) === 'foi', 'a fuga dura fugaS e ela vai embora', C.fugaS);
+conferir(cacadorTangivel('fuga') && !cacadorFugaLancada(C.fugaImpulsoS - 0.01) && cacadorFugaLancada(C.fugaImpulsoS), 'no impulso ela ainda está ali; depois dispara', C.fugaImpulsoS);
+conferir(qd('fuga', C.fugaImpulsoS - 0.001) === 'escapa8' && qd('fuga', C.fugaImpulsoS) === 'escapa12' && qd('fuga', 99) === 'escapa19', 'a fuga: enrolada até disparar, esticada no voo, desfeita no fim', [qd('fuga', C.fugaImpulsoS - 0.001), qd('fuga', C.fugaImpulsoS), qd('fuga', 99)]);
 const pc = escolherPosto(() => 0.5, null, C);
 conferir(pc.x >= C.postoX[0] && pc.x <= C.postoX[1] && pc.y >= C.postoY[0] && pc.y <= C.postoY[1], 'o posto do caçador cai na faixa dele (metade direita)', pc);
-
-// ── A SERPENTE DO CASCO, no posto do Tentáculo (spec F3 §3.4, 11/10) ──
-const T = ELITES.tentaculo;
-const ciclo = ['sobe', 'balanca1', 'espinhos', 'balanca2', 'bote', 'balanca3', 'afunda', 'foi'];
-conferir(ciclo.slice(0, -1).every((f, k) => tentaculoAvanca(f, 99) === ciclo[k + 1]), 'um ciclo por aparição, na ordem da spec (a sequência inteira)', null);
-conferir(tentaculoAvanca('sobe', T.sobeS - 0.01) === 'sobe' && tentaculoAvanca('foi', 99) === 'foi', 'cada estado segura o tempo dele; foi é o fim', T.sobeS);
-const gestoS = T.gestoQuadros / T.gestoQps;
-conferir(tentaculoAvanca('bote', gestoS - 0.01) === 'bote' && tentaculoAvanca('bote', gestoS) === 'balanca3' && tentaculoAvanca('espinhos', gestoS) === 'balanca2', 'os gestos duram os quadros deles (17 a 12 qps)', gestoS);
-conferir(tentaculoRaizX(100) === 100 + T.distNave && tentaculoRaizX(0) === T.raizX[0] && tentaculoRaizX(999) === T.raizX[1], 'sobe à frente da nave, na distância do bote, sem sair da faixa da tela', [tentaculoRaizX(100), tentaculoRaizX(0), tentaculoRaizX(999)]);
-conferir(tentaculoAfundado('sobe', 0) === 1 && tentaculoAfundado('sobe', T.sobeS) === 0 && tentaculoAfundado('balanca1', 0.3) === 0 && tentaculoAfundado('afunda', T.afundaS) === 1, 'nasce sumida, fica de pé, afunda de vez', null);
-conferir(!tentaculoExposta('sobe', 0) && tentaculoExposta('sobe', T.sobeS) && tentaculoExposta('bote', 0.5) && !tentaculoExposta('afunda', T.afundaS), 'só tem corpo com mais da metade para fora do casco', null);
-const max = (T.miraMaxGraus * Math.PI) / 180;
-conferir(Math.abs(tentaculoMira(200, 100, 100, 100) - Math.PI) < 1e-9 && Math.abs(Math.abs(tentaculoMira(200, 100, 300, 100) - Math.PI) - max) < 1e-9 &&Math.abs(Math.abs(tentaculoMira(200, 100, 200, 0) - Math.PI) - max) < 1e-9, 'a mira vai na nave, mas nunca passa do limite para trás ou para cima', [tentaculoMira(200, 100, 100, 100), tentaculoMira(200, 100, 200, 0)]);
-const [baixo, cima] = [tentaculoTrio(200, 100, Math.PI, -1), tentaculoTrio(200, 100, Math.PI, 1)];
-conferir(baixo.length === 3 && cima.length === 3 && baixo.every((p) => p.y > 100) && cima.every((p) => p.y < 100), 'dois trios, um de cada lado da linha da mira', { baixo, cima });
-const vao = Math.min(...baixo.map((p) => p.y)) - Math.max(...cima.map((p) => p.y));
-conferir(vao >= 36, 'o VÃO no meio (onde a nave está) tem pelo menos 36px', vao);
 
 console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTUDO OK');
 process.exit(falhas.length ? 1 : 0);

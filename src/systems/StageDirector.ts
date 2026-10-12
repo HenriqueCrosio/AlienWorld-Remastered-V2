@@ -460,16 +460,13 @@ export const STAGE_3: StageEvent[] = [
   { t: 54, type: 'terrain', rate: 0, mix: [] },
 
   { t: 63, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
-  // ─── O TENTÁCULO DO CASCO (frente B, fatia F3 — spec 2026-10-06 §4 + a regra do casco de 07/10) ───
-  // SOZINHO, logo depois do respiro da aranha: um ciclo (~5,8s), até ~69,3. Ele ocupa o lugar da onda de batedores de
-  // t=64 e dos kamikazes de t=67, que saíram.
-  { t: 63, type: 'banner', text: 'TENTÁCULO DO CASCO' },
-  { t: 63.5, type: 'wave', kind: 'tentaculo', count: 1, spacing: 0, y: 150 },
+  // (12/10: o elite do casco saiu do jogo — a F3 fica só com a lula. Os batedores de t=64 e os kamikazes de t=67, que
+  // tinham cedido o lugar a ele em 07/10, voltaram.)
+  { t: 64, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
+  { t: 67, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
   { t: 70, type: 'banner', text: 'DEFESAS DO CASCO' },
   { t: 71, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
   { t: 73, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
-  // O TENTÁCULO COBRADO, no pico final; acaba ~80,8 (antes do silêncio de 82).
-  { t: 75, type: 'wave', kind: 'tentaculo', count: 1, spacing: 0, y: 150 },
   { t: 76, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
   { t: 78, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
 

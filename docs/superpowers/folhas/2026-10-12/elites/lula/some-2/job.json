@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "21a64e74-b993-48c1-81d2-250d42fb648c",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The armored squid darts away in place: its tentacles snap tightly together into a narrow bundle and its mantle squeezes thin as it jets, shrinking into a tight streamlined shape. Same spot, same dark colors.",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

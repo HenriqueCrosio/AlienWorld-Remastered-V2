@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "1c1c0753-02be-481e-9c78-e37243514adf",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The armored squid attacks in place: its tentacles spread wide open, the body tenses and pulls back slightly, then it snaps forward spitting three quick times, the tentacles whipping with each spit, and it settles back to the starting pose. Same spot, same size, same dark colors.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

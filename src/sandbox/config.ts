@@ -6,7 +6,7 @@ import type { Nave, Niveis } from './arvore.ts';
  */
 
 /** Os inimigos que o sandbox solta (o `EnemyKind` do jogo; a aranha é minichefe: 0 ou 1). */
-export const INIMIGOS = ['drone', 'batedor', 'canhoneira', 'kamikaze', 'cargueiro', 'aguaViva', 'droneMineracao', 'sentinela', 'cacador', 'tentaculo', 'aranha'] as const;
+export const INIMIGOS = ['drone', 'batedor', 'canhoneira', 'kamikaze', 'cargueiro', 'aguaViva', 'droneMineracao', 'sentinela', 'cacador', 'aranha'] as const;
 export type TipoInimigo = (typeof INIMIGOS)[number];
 export const NOME_INIMIGO: Record<TipoInimigo, string> = {
   drone: 'drone',
@@ -18,7 +18,6 @@ export const NOME_INIMIGO: Record<TipoInimigo, string> = {
   droneMineracao: 'drone de mineração (elite)',
   sentinela: 'sentinela orbital (elite)',
   cacador: 'caçador de vácuo, a lula (elite)',
-  tentaculo: 'serpente do casco (elite; na F3 revela o casco)',
   aranha: 'aranha (minichefe)',
 };
 export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
@@ -31,7 +30,6 @@ export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
   droneMineracao: 5,
   sentinela: 5,
   cacador: 5,
-  tentaculo: 3,
   aranha: 1,
 };
 /** Os tiers que cada linhagem tem (`ships.ts`). */
@@ -57,7 +55,7 @@ export const PADRAO: ConfigSandbox = {
   livre: false,
   fase: 2,
   chefe: false,
-  inimigos: { drone: 6, batedor: 0, canhoneira: 2, kamikaze: 2, cargueiro: 0, aguaViva: 0, droneMineracao: 0, sentinela: 0, cacador: 0, tentaculo: 0, aranha: 0 },
+  inimigos: { drone: 6, batedor: 0, canhoneira: 2, kamikaze: 2, cargueiro: 0, aguaViva: 0, droneMineracao: 0, sentinela: 0, cacador: 0, aranha: 0 },
   intervalo: 8,
   repetir: true,
 };
@@ -68,7 +66,9 @@ export function carregar(): ConfigSandbox {
   try {
     const salvo = JSON.parse(localStorage.getItem(CHAVE) ?? 'null') as Partial<ConfigSandbox> | null;
     if (!salvo) return structuredClone(PADRAO);
-    return { ...structuredClone(PADRAO), ...salvo, inimigos: { ...PADRAO.inimigos, ...salvo.inimigos } };
+    // Só os tipos que ainda existem: a montagem salva pode trazer um inimigo que saiu do jogo (o elite do casco, 12/10).
+    const inimigos = Object.fromEntries(INIMIGOS.map((t) => [t, salvo.inimigos?.[t] ?? PADRAO.inimigos[t]])) as Record<TipoInimigo, number>;
+    return { ...structuredClone(PADRAO), ...salvo, inimigos };
   } catch {
     return structuredClone(PADRAO);
   }

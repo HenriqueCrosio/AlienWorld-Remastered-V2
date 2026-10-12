@@ -146,75 +146,9 @@ async function cacador(variante) {
   return t;
 }
 
-// ── THE TENTACLE HEAD (~20×20, maw facing LEFT) ── a round armoured head, the open maw a dark hole ringed by six red
-// lights, hooked claws around the rim, a neck plate to the right.
-function cabeca() {
-  const t = new Tela(24, 22);
-  const cx = 12;
-  const cy = 11;
-  // The skull: an egg, blunt at the maw (left), tapering into the neck (right).
-  t.encher((x, y) => ((x - cx) / (x < cx ? 6.5 : 9)) ** 2 + ((y - cy) / 6.5) ** 2 <= 1, 'b');
-  // The claws: four hooked fangs around the rim, thick at the root, curling FORWARD (to the left) at the tip.
-  for (const s of [-1, 1])
-    for (const [ry, cx1, tip] of [[5.5, -4, -10], [3, -7, -11]]) {
-      const garra = bezier([cx - 4, cy + s * ry], [cx1 + cx - 1, cy + s * (ry + 4)], [cx + tip + 3, cy + s * (ry + 1.5)], 2.4, 1);
-      t.encher(garra.dentro, 'b');
-    }
-  t.sombrear();
-  t.contornar();
-  // The maw: the rim lit (the concept's ring of red lights), the dark throat inside.
-  t.encher((x, y) => ((x - (cx - 4)) / 2.6) ** 2 + ((y - cy) / 4) ** 2 <= 1, 'K');
-  for (let i = 0; i < 6; i++) {
-    const a = (i / 6) * Math.PI * 2 + Math.PI / 6;
-    t.set(cx - 4 + Math.cos(a) * 3.2, cy + Math.sin(a) * 4.6, i % 2 ? 'R' : 'h');
-  }
-  t.set(cx - 4, cy, 'r'); // the throat glow
-  // The armour bands across the skull and the neck.
-  for (const x of [cx + 2, cx + 6])
-    for (let y = 0; y < t.h; y++) if (t.get(x, y) && !['K', 'R', 'h', 'r'].includes(t.get(x, y))) t.set(x, y, 'a');
-  t.set(cx + 4, cy - 3, 'm');
-  return t;
-}
-
-// ── ONE BODY SEGMENT (~11×11) ── a dark plated ring, a ridge on top and one faint red light; it chains with itself.
-function gomo(variante) {
-  const t = new Tela(13, 13);
-  const r = variante === 'B' ? 4.6 : 5.2;
-  t.encher((x, y) => Math.hypot(x - 6.5, y - 6.5) <= r, 'b');
-  t.encher((x, y) => Math.abs(x - 6.5) <= 1 && y < 6.5 - r + 1.6 && y > 6.5 - r - 1.2, 'b'); // the ridge
-  t.sombrear();
-  t.contornar();
-  // The plate seam (a vertical dark line) and the light.
-  for (let y = 3; y <= 9; y++) if (t.get(8, y) && t.get(8, y) !== 'K') t.set(8, y, 'a');
-  t.set(5, 7, variante === 'B' ? 'R' : 'r');
-  return t;
-}
-
-// ── THE CRACK in the hull (the warning, 3 frames: dim → bright → opening) ── on the hull's own dark, glowing red.
-function rachadura(passo) {
-  const t = new Tela(18, 6);
-  const linha = [[1, 3], [2, 3], [3, 2], [4, 2], [5, 3], [6, 3], [7, 4], [8, 3], [9, 3], [10, 2], [11, 2], [12, 3], [13, 3], [14, 4], [15, 3], [16, 3]];
-  const cor = ['m', 'r', 'R'][passo];
-  for (const [x, y] of linha) t.set(x, y, cor);
-  if (passo >= 1) for (const [x, y] of [[4, 1], [10, 1], [11, 4], [7, 5]]) t.set(x, y, 'm'); // the branches
-  if (passo === 2) for (const [x, y] of [[8, 2], [9, 2], [8, 4], [9, 4]]) t.set(x, y, 'h'); // it opens in the middle
-  return t;
-}
-
-// ── THE SHOTS (≤8px) ── the hunter's precision needle (hot magenta-red: it is not the ship's orange) and the
-// tentacle's crescent pellet (the Leviathan red, round: it is not aimed).
+// ── THE SHOT (≤8px) ── the hunter's precision needle (hot magenta-red: it is not the ship's orange).
 const tiros = {
   'cacador-agulha': [['5a0f3a', 'a01a5a', 'e0306e', 'ff8ac0', 'fff0f6']],
-  'tentaculo-bolinha': [
-    [null, '9a1626', null],
-    ['9a1626', 'ff8f86', '9a1626'],
-    [null, '9a1626', null],
-  ],
-  'tentaculo-bolinha-B': [
-    [null, '4a0c16', '9a1626', null],
-    ['4a0c16', 'e2303c', 'ffe2da', '9a1626'],
-    [null, '4a0c16', '9a1626', null],
-  ],
 };
 
 // ── THE DISSOLVE (surge/some): an ordered 4×4 Bayer dither eats the sprite in 4 steps — pixels, not an alpha fade.
@@ -237,9 +171,6 @@ for (const v of ['A', 'B']) {
   await c.png(`${OUT}/cacador-${v}.png`);
   if (v === 'A') for (const p of [1, 2, 3]) await dissolver(c, p).png(`${OUT}/cacador-A-dissolver-${p}.png`);
 }
-await cabeca().png(`${OUT}/tentaculo-cabeca.png`);
-for (const v of ['A', 'B']) await gomo(v).png(`${OUT}/tentaculo-gomo-${v}.png`);
-for (const p of [0, 1, 2]) await rachadura(p).png(`${OUT}/rachadura-${p}.png`);
 for (const [n, linhas] of Object.entries(tiros)) {
   const t = new Tela(Math.max(...linhas.map((l) => l.length)), linhas.length);
   linhas.forEach((l, y) => l.forEach((c, x) => c && t.set(x, y, c)));

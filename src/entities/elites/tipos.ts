@@ -17,13 +17,6 @@ export interface CtxElite {
   alvo: Sprite;
   tiros: PadroesDeTiro;
   ganchos: GanchosElite;
-  /**
-   * A velocidade do CHÃO neste quadro (px/s, para a esquerda): o casco da F3 anda a `SCROLL_SPEED × frenagem`. O que
-   * toca o casco anda com ele (spec F3 §3.3, a regra do casco).
-   */
-  velChao: number;
-  /** Os CORPOS dos elites (os gomos do Tentáculo): absorvem o tiro sem dano e ferem a nave no contato. */
-  corpos: Phaser.Physics.Arcade.Group;
 }
 
 /**
@@ -37,17 +30,12 @@ export interface ComportamentoElite {
   /** O golpe de `dano` que veio de (deX, deY) é bloqueado? (Um escudo com vida o absorve aqui.) */
   bloqueia?(e: Sprite, deX: number, deY: number, dano: number): boolean;
   /**
-   * INTOCÁVEL agora? (a lula escondida, a cabeça do Tentáculo dentro do casco): nada a fere — nem a bomba, nem a queima.
+   * INTOCÁVEL agora? (a lula escondida): nada a fere — nem a bomba, nem a queima.
    * O tiro já atravessa porque o corpo do Arcade está desligado; isto cobre quem fere sem colisão.
    */
   intocavel?(e: Sprite): boolean;
   /** O RABO do Leviatã chegou (F3, t=38): o ato 1 exige o quadro vazio (spec F3 §2.2). */
   aoRabo?(e: Sprite, ctx: CtxElite): void;
-  /**
-   * O que ANDA COM O CHÃO, chamado SEMPRE — inclusive com o elite travado pelo elétrico: o casco não para, e uma
-   * rachadura parada sobre um chão correndo é exatamente o "arrastado" que a regra do casco proíbe.
-   */
-  noChao?(e: Sprite, dt: number, ctx: CtxElite): void;
 }
 
 /**

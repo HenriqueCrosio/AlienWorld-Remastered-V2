@@ -105,7 +105,7 @@ export function escolherPosto(sorte: () => number, yAnterior: number | null, S: 
 
 // ── O CAÇADOR DE VÁCUO, a lula (spec F3 §2 + emenda de 07/10) ──
 
-export type EstadoCacador = 'escondido' | 'surge' | 'mira' | 'trava' | 'rajada' | 'some' | 'foi';
+export type EstadoCacador = 'escondido' | 'surge' | 'mira' | 'trava' | 'rajada' | 'some' | 'fuga' | 'foi';
 
 /**
  * O ciclo da lula. `sumicos` = quantos SOME já COMEÇARAM, contando o atual: o SOME do último ressurgimento termina em
@@ -123,7 +123,11 @@ export function cacadorAvanca(estado: EstadoCacador, t: number, sumicos: number)
     case 'trava':
       return t >= C.travaS ? 'rajada' : estado;
     case 'rajada':
-      return t >= C.rajadaS ? 'some' : estado;
+      if (t < C.rajadaS) return estado;
+      // A última saída não é um SOME: é a FUGA (12/10).
+      return sumicos + 1 >= C.ressurgimentos ? 'fuga' : 'some';
+    case 'fuga':
+      return t >= C.fugaS ? 'foi' : estado;
     case 'some':
       if (t < C.someS) return estado;
       return sumicos >= C.ressurgimentos ? 'foi' : 'escondido';
@@ -135,66 +139,53 @@ export function cacadorAvanca(estado: EstadoCacador, t: number, sumicos: number)
 /** Escondida ela some DE VERDADE (decisão dele, A): nem visível, nem atingível. No SOME ainda fere, até sumir. */
 export const cacadorTangivel = (estado: EstadoCacador): boolean => estado !== 'escondido' && estado !== 'foi';
 
-/** A tinta do `n`-ésimo sumiço (1-based): o SOPRO, e a CORTINA no último — a saída de vez (§2.3, decisão dele: A). */
-export const tintaDoSumico = (n: number): 'sopro' | 'cortina' => (n >= ELITES.cacador.ressurgimentos ? 'cortina' : 'sopro');
+/** Na FUGA, aos `t` segundos: já DISPAROU? (Antes, o impulso: parada e atingível. Depois: voando, e já não fere nem é ferida.) */
+export const cacadorFugaLancada = (t: number): boolean => t >= ELITES.cacador.fugaImpulsoS;
 
-// ── O posto "tentáculo" da F3: a SERPENTE DO CASCO (spec F3 §3.4, 11/10) ──
-
-export type EstadoTentaculo = 'sobe' | 'balanca1' | 'espinhos' | 'balanca2' | 'bote' | 'balanca3' | 'afunda' | 'foi';
-
-const CICLO_TENTACULO: EstadoTentaculo[] = ['sobe', 'balanca1', 'espinhos', 'balanca2', 'bote', 'balanca3', 'afunda', 'foi'];
-
-/** Um ciclo por aparição (decisão dele: A), na ordem fixa; cada estado dura o seu tempo (os gestos, os quadros deles). */
-export function tentaculoAvanca(estado: EstadoTentaculo, t: number): EstadoTentaculo {
-  if (estado === 'foi') return 'foi';
-  const T = ELITES.tentaculo;
-  const gestoS = T.gestoQuadros / T.gestoQps;
-  const dur: Record<Exclude<EstadoTentaculo, 'foi'>, number> = {
-    sobe: T.sobeS,
-    balanca1: T.balanca1S,
-    espinhos: gestoS,
-    balanca2: T.balanca2S,
-    bote: gestoS,
-    balanca3: T.balanca3S,
-    afunda: T.afundaS,
-  };
-  return t < dur[estado] ? estado : CICLO_TENTACULO[CICLO_TENTACULO.indexOf(estado) + 1];
-}
-
-/** Onde ela sobe: à frente da nave, na distância em que o bote a alcança — e sempre dentro da faixa da tela. */
-export function tentaculoRaizX(naveX: number): number {
-  const T = ELITES.tentaculo;
-  return Math.min(T.raizX[1], Math.max(T.raizX[0], naveX + T.distNave));
-}
-
-/** Quanto dela está DENTRO do casco (1 = sumida, 0 = de pé): sobe rápido e assenta; afunda acelerando. */
-export function tentaculoAfundado(estado: EstadoTentaculo, t: number): number {
-  const T = ELITES.tentaculo;
-  if (estado === 'sobe') return (1 - Math.min(1, Math.max(0, t / T.sobeS))) ** 3;
-  if (estado === 'afunda') return Math.min(1, t / T.afundaS) ** 2;
-  return estado === 'foi' ? 1 : 0;
-}
-
-/** Só tem corpo (fere e é ferida) com mais da metade para fora do casco. */
-export const tentaculoExposta = (estado: EstadoTentaculo, t: number): boolean => tentaculoAfundado(estado, t) < 0.5;
-
-/** A MIRA dos espinhos: de (ox, oy) para a nave, sem passar de `miraMaxGraus` da horizontal para a esquerda. */
-export function tentaculoMira(ox: number, oy: number, naveX: number, naveY: number): number {
-  const max = (ELITES.tentaculo.miraMaxGraus * Math.PI) / 180;
-  const ang = Math.atan2(naveY - oy, naveX - ox);
-  const desvio = Math.atan2(Math.sin(ang - Math.PI), Math.cos(ang - Math.PI));
-  return Math.PI + Math.min(max, Math.max(-max, desvio));
-}
+export type ClipeCacador = 'idle' | 'ataque' | 'foge' | 'escapa';
+type PoseCacador = readonly [clipe: ClipeCacador, quadro: number];
 
 /**
- * Um TRIO de espinhos: 3 pontos de saída numa fileira PARALELA à mira, a `faixaDist` dela — `lado` −1 é a fileira de
- * baixo (mirando para a esquerda), +1 a de cima. Entre as duas fica o vão, com a linha da mira (a nave) no meio.
+ * Os GESTOS da lula (12/10): a fila de quadros de cada estado, ESTICADA pela duração dele — mudou o tempo nos números,
+ * o gesto acompanha. Os quadros são os dos clipes assados por `scripts/_elites/_instalar-lula-anims.mjs`; o quadro 0 de
+ * todo clipe é a arte parada, e cada fila começa onde a anterior acabou (não há salto de pose entre estados).
+ * SURGE: o `foge` de trás para a frente. MIRA: paira, vai e volta. TRAVA: os tentáculos ABREM em estrela (o aviso).
+ * RAJADA: fecham de golpe, uma agulha por batida. SOME: recolhe e dispara para longe, desfazendo-se.
+ * A FUGA (a última saída) tem duas filas: o IMPULSO (enrola os tentáculos numa bola) e o VOO (esticada como um dardo,
+ * desfazendo-se no fim).
  */
-export function tentaculoTrio(ox: number, oy: number, ang: number, lado: -1 | 1): { x: number; y: number }[] {
-  const T = ELITES.tentaculo;
-  const nx = -Math.sin(ang), ny = Math.cos(ang);
-  return [-1, 0, 1].map((k) => {
-    const d = lado * T.faixaDist + k * T.trioAbertura;
-    return { x: ox + nx * d, y: oy + ny * d };
-  });
+const GESTOS: Partial<Record<EstadoCacador, readonly PoseCacador[]>> = {
+  surge: [['foge', 8], ['foge', 7], ['foge', 6], ['foge', 5], ['foge', 3], ['foge', 0]],
+  mira: [['idle', 0], ['idle', 1], ['idle', 2], ['idle', 3], ['idle', 2], ['idle', 1]],
+  trava: [['ataque', 1], ['ataque', 2], ['ataque', 3], ['ataque', 4], ['ataque', 5], ['ataque', 6]],
+  rajada: [['ataque', 7], ['ataque', 8], ['ataque', 9], ['ataque', 10], ['ataque', 12]],
+  some: [['ataque', 13], ['ataque', 14], ['ataque', 15], ['ataque', 16], ['foge', 5], ['foge', 6], ['foge', 7], ['foge', 8]],
+};
+const FUGA_IMPULSO: readonly PoseCacador[] = [['ataque', 13], ['escapa', 3], ['escapa', 4], ['escapa', 5], ['escapa', 6], ['escapa', 7], ['escapa', 8]];
+const FUGA_VOO: readonly PoseCacador[] = [['escapa', 12], ['escapa', 13], ['escapa', 14], ['escapa', 15], ['escapa', 16], ['escapa', 16], ['escapa', 17], ['escapa', 18], ['escapa', 19]];
+const DURACAO: Partial<Record<EstadoCacador, 'surgeS' | 'miraS' | 'travaS' | 'rajadaS' | 'someS'>> = {
+  surge: 'surgeS',
+  mira: 'miraS',
+  trava: 'travaS',
+  rajada: 'rajadaS',
+  some: 'someS',
+};
+
+/** O quadro da lula aos `t` segundos do estado; `null` = não se desenha (escondida, foi). */
+export function cacadorQuadro(estado: EstadoCacador, t: number): { clipe: ClipeCacador; quadro: number } | null {
+  const C = ELITES.cacador;
+  const naFila = (fila: readonly PoseCacador[], f: number) => {
+    const k = Math.min(fila.length - 1, Math.max(0, Math.floor(f * fila.length)));
+    return { clipe: fila[k][0], quadro: fila[k][1] };
+  };
+  if (estado === 'fuga') {
+    return cacadorFugaLancada(t) ? naFila(FUGA_VOO, (t - C.fugaImpulsoS) / (C.fugaS - C.fugaImpulsoS)) : naFila(FUGA_IMPULSO, t / C.fugaImpulsoS);
+  }
+  const fila = GESTOS[estado];
+  const dur = DURACAO[estado];
+  if (!fila || !dur) return null;
+  return naFila(fila, t / C[dur]);
 }
+
+/** A tinta do `n`-ésimo sumiço (1-based): o SOPRO, e a CORTINA no último — a saída de vez (§2.3, decisão dele: A). */
+export const tintaDoSumico = (n: number): 'sopro' | 'cortina' => (n >= ELITES.cacador.ressurgimentos ? 'cortina' : 'sopro');
