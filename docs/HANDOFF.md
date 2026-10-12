@@ -14,10 +14,48 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-11-serpente-casco-START.md`. Testei a serpente
-> do casco no sandbox — vou dizer o que achei das três coisas marcadas e fechamos a F3."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` (os 📍 de 12/10). A F3 ficou só com a lula, agora com gestos — vou dizer o que
+> achei deles (GIFs em `folhas/2026-10-12/elites/lula/`), jogar a F3 inteira e dizer do ato 2 sem elite; depois F4."**
 >
-> 📍 **11/10 — A SERPENTE DO CASCO ESTÁ NO JOGO, com a sequência inteira (ele ainda NÃO testou).** Ele viu os GIFs e
+> 📍 **12/10 (2) — A LULA GANHOU GESTOS E A FUGA — APROVADOS (ele, depois de ver em jogo: *"boa, ficou ótimo"*).** Ele testou no sandbox: *"a primeira skill
+> dela ficou ótima com o lock and shoot, mas precisamos fazer as animações de idle, ataque, stealth etc"*. Feito no
+> PixMiniMax a partir do sprite aprovado (`_lula-base.mjs`: os 41×41 num quadro 80×80; 2 takes por gesto, 1 geração
+> cada): **idle** (paira), **ataque** (os tentáculos abrem em estrela e fecham de golpe) e **foge** (afina e dispara
+> para longe). `_instalar-lula-anims.mjs` assa os takes escolhidos por mim (idle-1, ataque-2, some-1 — trocar é a
+> constante `CLIPES`) numa caixa 53×53, na paleta do sprite aprovado, com o pontilhado no fim do `foge` →
+> `elite-cacador-{idle,ataque,foge}-N.png`. No jogo o quadro sai do relógio do estado (`cacadorQuadro` em
+> `elitesRegras.ts`, filas esticadas pela duração de cada estado): SURGE = o `foge` ao contrário, MIRA = idle vai e
+> volta, TRAVA = abre a estrela (o aviso), RAJADA = fecha, SOME = recolhe e foge sob a tinta. **A 3ª saída virou a
+> FUGA** (ideia dele: *"ela pega impulso com os tentáculos e depois estica eles, fugindo … para marcar a terceira e
+> última fuga"*): estado `fuga` (0,95s) — impulso de 0,35s enrolando os tentáculos (ainda atingível), depois solta a
+> CORTINA e voa esticada para cima-esquerda a 320 px/s, SEM corpo (decisão minha; ele viu e não objetou), desfazendo-se; clipe
+> `escapa` (take 1 de 4; `gif-fugas.gif` compara os quatro). Spec F3 §2.4. Aprovados os gestos, o pontilhado antigo (os 12
+> `elite-cacador-{surge,some}-N.png`, as animações deles no `BootScene` e a seção deles no `_instalar-f3.mjs`) saiu. **Para ele ver:** `gif-lula-gestos.gif` (em jogo, velocidade real), `gif-takes.gif` (os 6 clipes
+> lado a lado) e `instalada-conferencia.png`. **Também nesta sessão:** o `carregar()` do sandbox passou a descartar
+> inimigo que saiu do jogo (a montagem salva dele tinha a serpente e não a lula); e a sonda `probe-elites-f3` passou a
+> vigiar o 1º ciclo de DENTRO da página — a falsa falha das "6 agulhas" acabou (3 de 3).
+>
+> 📍 **12/10 — O ELITE DO CASCO FOI CANCELADO E RETIRADO; A F3 FICA SÓ COM A LULA.** Ele, antes de testar: *"não
+> conseguimos chegar num inimigo interessante para ser acrescentado, a serpente saiu muito do que eu esperava. Ela mais
+> parece um boss ou miniboss do que um novo inimigo, quero retirar completamente ela do jogo e da produção. A lula é
+> mais interessante para a F3 … a fase 3 fica com 1 novo apenas"*. **A regra de 2 elites por fase tem agora uma
+> exceção: a F3 tem 1.** ⚠️ É a ELITE (a 63-3, o posto `tentaculo`) — o CHEFÃO da F3, a Serpente do Casco
+> (`BossSerpente`, `serpente-*.png`), e a Sentinela Orbital da F2 não foram tocados. **Saiu:** `Tentaculo.ts`,
+> `tentaculoQuadros.ts`, as regras e os números dela (`elitesRegras.ts`, `numerosElites.ts`), os 51
+> `elite-tentaculo-*.png` e o `elite-espinho.png`, o posto no sandbox, a metade dela em `probe-elites-f3` e
+> `test-elites-regras`, a cena dela no `_gif.mjs`, os 14 scripts só dela (`_instalar-sentinela`, `_sentinela-*`,
+> `_serpente-*`, `_tentaculo-v2..v5`, `_cena-casco`, `_folha-serpente-inteira`, `_folha-f3c`) e as receitas dela em
+> `_gerar-f3`, `_mao-f3` e `_folha-f3`. Com ela saiu o que só ela usava: `corposElite` (o corpo que absorve tiro),
+> `velChao` e o gancho `noChao`. **No roteiro da F3** as entradas de t=63,5 e t=75 saíram e **voltaram os batedores de
+> t=64 e os kamikazes de t=67** (os que tinham cedido o lugar em 07/10). **Ficou como arquivo:** as folhas e os GIFs em
+> `folhas/2026-10-05..11/elites/` e o que está na biblioteca do PixelLab. Conferido: typecheck, `test-elites-regras`,
+> `probe-stage3` (F3 de ponta a ponta). `probe-elites-f3`: tudo verde menos a contagem da rajada, que falhou 2 vezes em
+> 3 (contou as agulhas de dois ressurgimentos) — é a intermitência de tempo real já anotada em 11/10, não a lula; vale
+> passar essa metade para o relógio manual. **Próximo:** ele joga a F3 inteira (a lula no ato 1; o ato 2 sem elite —
+> ele diz se as ondas devolvidas bastam); os anotados da lula de 07/10 (a leitura no ato 1, a cor das agulhas, a tinta
+> parada); a F3 fecha → **F4** (Larva Mecânica + Tubo Pulsante) → frente C. Tudo commitado e empurrado em 12/10 (`origin/feat/cartas-preview`), a pedido dele.
+>
+> 📍 **11/10 — (SUPERADO pelo 📍 de 12/10: ela foi cancelada antes do teste.) A SERPENTE DO CASCO ESTÁ NO JOGO, com a sequência inteira (ele ainda NÃO testou).** Ele viu os GIFs e
 > decidiu: giro de **25°**, **o bote FERE**, e os espinhos em **2 trios com o vão no meio** (saiu o do meio; o 2º sai
 > 0,33s depois — a nave parada fica no vão). A falha que ele circulou entre a beirada do casco e a criatura era o corte
 > RETO do demo contra uma beirada de placa que varia 0–2px: ela passou para **TRÁS das placas** (depth −76) e é a placa
@@ -193,7 +231,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
-| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado, o ARQUIVO DE CARTAS (a wiki no menu; os números das cartas num endereço só), os tiros LASER, a exaustão do T1 e o jato azul dos Propulsores. 🟠 **AGORA: frente B** — ✅ 05/10 a spec-mãe (2 elites por fase) e a fatia F2 jogável COM A ARTE DELE e animada (drone de mineração + sentinela com propulsores; luta refeita como a do golfinho). ✅ 06/10 a fatia F2 APROVADA (escudo com vida, tiros desenhados). 🟠 AGORA: fatia F3 — ✅ spec + folhas de arte (à mão e PixelLab); ✅ 07/10 JOGÁVEL (a lula com a tinta, o Tentáculo com a regra do casco; arte do Tentáculo provisória); ✅ 08–10/10 o Tentáculo virou a serpente 63-3 e, depois de três dias de trajetórias abandonadas, a Sentinela do casco (gestos no lugar); ✅ 11/10 ela está NO JOGO com a sequência inteira (25°, o bote fere, 2 trios com o vão); **falta ele TESTAR no sandbox e fechar as 3 coisas marcadas** (START de 11/10) → F4 → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
+| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado, o ARQUIVO DE CARTAS (a wiki no menu; os números das cartas num endereço só), os tiros LASER, a exaustão do T1 e o jato azul dos Propulsores. 🟠 **AGORA: frente B** — ✅ 05/10 a spec-mãe (2 elites por fase) e a fatia F2 jogável COM A ARTE DELE e animada (drone de mineração + sentinela com propulsores; luta refeita como a do golfinho). ✅ 06/10 a fatia F2 APROVADA (escudo com vida, tiros desenhados). 🟠 AGORA: fatia F3 — ✅ spec + folhas de arte (à mão e PixelLab); ✅ 07/10 JOGÁVEL (a lula com a tinta, o Tentáculo com a regra do casco; arte do Tentáculo provisória); ✅ 08–10/10 o Tentáculo virou a serpente 63-3 e, depois de três dias de trajetórias abandonadas, a Sentinela do casco (gestos no lugar); ✅ 11/10 ela está NO JOGO com a sequência inteira (25°, o bote fere, 2 trios com o vão); ❌ 12/10 ELA FOI CANCELADA e retirada do jogo e da produção antes do teste (decisão dele) — **a F3 fica só com a lula (1 elite, a exceção à regra de 2)**; **falta ele jogar a F3 inteira** (📍 de 12/10) → F4 → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ⬜ spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |

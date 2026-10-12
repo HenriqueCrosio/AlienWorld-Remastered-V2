@@ -1,5 +1,10 @@
 # START — retomada da FRENTE B: a SERPENTE DO CASCO está no jogo, esperando o teste dele (depois de 11/10/2026)
 
+> ❌ **CANCELADO em 12/10/2026 — NÃO É MAIS A PORTA DE ENTRADA.** Ele retirou a serpente do casco do jogo e da
+> produção antes de testar (*"ela mais parece um boss ou miniboss do que um novo inimigo"*); a F3 fica só com a lula.
+> Nada do que este documento descreve existe mais no repositório (código, quadros, scripts, sonda). Fica só como
+> registro — as lições do §6 seguem valendo. O estado vivo é o 📍 de 12/10 no 🧭 do `docs/HANDOFF.md`.
+
 > **Frase de arranque:** *"Leia o 🧭 do `docs/HANDOFF.md` e o
 > `docs/superpowers/plans/2026-10-11-serpente-casco-START.md`. Testei a serpente do casco no sandbox — vou dizer o que
 > achei das três coisas marcadas e fechamos a F3."*

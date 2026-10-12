@@ -19,6 +19,8 @@
 1. **F1 não ganha elite.** É a fase do flap — criatura complexa ali não rende. Ela ganha **ondas maiores** (mais
    levas, mais densas) com o elenco atual, sempre passando no teste do flap.
 2. **F2, F3 e F4 ganham DOIS ELITES cada** (*"2 por fase é ótimo e não pesa muito"*). Na F3, um por ato.
+   **⚠️ 12/10 — a F3 é a exceção: fica com UM só, a lula** (decisão dele; o elite do casco foi cancelado e retirado do
+   jogo — ver a emenda de 12/10 na spec da fatia F3). Onde este documento citar o Tentáculo do casco, vale a emenda.
 3. **ELITE ≠ MINI-CHEFE.** A complexidade é a do Golfinho (máquina de estados, ataques que se alternam), mas é um
    **mob elite NO FLUXO**: aparece 2–3 vezes por fase, a 1ª SOZINHO e com espaço para ler o verbo, as seguintes
    misturado às ondas. **Nunca segura o relógio** — a fase pode ficar MAIS LONGA, mas não para. Palavras dele: *"se

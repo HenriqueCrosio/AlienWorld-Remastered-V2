@@ -8,13 +8,23 @@
 > **EMENDA de 07/10 (brainstorming com ele):** nenhuma arte da folha de 06/10 ficou. O Caçador virou uma **LULA** (Pro
 > nº 15, 85%) que solta **TINTA** a cada sumiço (§2.3); o Tentáculo ganhou a **regra do casco** (§3.3) e a arte dele
 > volta para uma leva nova. As seções tocadas estão marcadas *(07/10)*.
+>
+> **EMENDA de 12/10 — O ELITE DO CASCO FOI CANCELADO; A F3 FICA SÓ COM A LULA.** Decisão dele: *"não conseguimos
+> chegar num inimigo interessante para ser acrescentado, a serpente saiu muito do que eu esperava. Ela mais parece um
+> boss ou miniboss do que um novo inimigo, quero retirar completamente ela do jogo e da produção. A lula é mais
+> interessante para a F3 … a fase 3 fica com 1 novo apenas"*. Saíram do jogo e da produção: `Tentaculo.ts`,
+> `tentaculoQuadros.ts`, as regras e os números dela, os 51 quadros e o espinho, as duas entradas no roteiro, o posto
+> no sandbox, a metade dela nas sondas e os scripts que só serviam a ela (e, com ela, o que só ela usava: os corpos de
+> elite que absorvem tiro e a velocidade do chão para os elites). As seções marcadas **(CANCELADO)** ficam só como
+> registro do que foi tentado. O chefão da F3 (a Serpente do Casco, `BossSerpente`) não tem nada a ver com isto e não
+> foi tocado.
 
 ## 1. Os dois, em uma linha
 
 | Ato | Elite | O verbo |
 |---|---|---|
 | 1 · nebulosa | **Caçador de Vácuo** | some de verdade → ressurge à frente → a mira segue e TRAVA → 3 tiros na linha travada → some (3×) |
-| 2 · casco | **Tentáculo do casco** | rachadura sob a nave → MORDE onde a nave estava → mergulha por trás do casco → brota longe → MEIA-LUA de tiros → afunda |
+| 2 · casco | ~~**Tentáculo do casco**~~ *(cancelado em 12/10)* | rachadura sob a nave → MORDE onde a nave estava → mergulha por trás do casco → brota longe → MEIA-LUA de tiros → afunda |
 
 Conceitos dele: Caçador = folha dos biomas nº 10 (*"entra e sai do campo de visão; ataca com rajadas de alta
 precisão"*); Tentáculo = folha dark space nº 03 (*"emergente do casco; rajadas, projéteis e investidas"*). Cópias em
@@ -52,7 +62,8 @@ evento `rabo`, ele SOME de vez (sem pontos). Regra, não horário: o roteiro pod
   (41×41)** com a paleta original (`_tratar.mjs reduzir`), sem o pixel claro entre os tentáculos. Fica na diagonal
   (carapaça para cima-esquerda); as agulhas saem da base dos tentáculos, junto do olho. Escolha dele entre 10 (folha
   `folha-cacador-2.png`) e o tamanho na `folha-cacador-3.png`.
-- **O ciclo do §2.1 NÃO muda.** SURGE e SOME são em PONTILHADO (dither ordenado: camuflagem de lula).
+- **O ciclo do §2.1 NÃO muda.** SURGE e SOME são em PONTILHADO (dither ordenado: camuflagem de lula) — desde 12/10
+  o pontilhado é o fim do gesto de chegar/fugir, não mais a arte parada se desfazendo (§2.4).
 - **A TINTA, em todo SOME** (decisão dele: A — *"a tinta precisa ser algo criado mesmo, com fade, no local que ela
   joga"*):
   - 1º e 2º sumiço = o **SOPRO**: uma mancha só do tamanho dela, que a tampa enquanto ela some (cresce 0,15s, segura
@@ -66,7 +77,30 @@ evento `rabo`, ele SOME de vez (sem pontos). Regra, não horário: o roteiro pod
   vetorial (círculos do Graphics) fica registrada como plano B. O teste que ele aprovou: `tinta-lula.gif`.
 - O sumiço forçado do §2.2 (o rabo) usa o SOPRO.
 
-## 3. Tentáculo do casco (vida 14, 350 pontos)
+### 2.4 Os gestos e a FUGA *(12/10 — aprovados: "boa, ficou ótimo")*
+
+Pedido dele depois de testar no sandbox: *"a primeira skill dela ficou ótima com o lock and shoot, mas precisamos fazer
+as animações de idle, ataque, stealth etc"*. Os tempos do §2.1 não mudam; cada estado ganhou um gesto (PixMiniMax a
+partir do sprite aprovado, assado por `_instalar-lula-anims.mjs`; o quadro sai do relógio do estado, `cacadorQuadro`):
+
+| Estado | Gesto |
+|---|---|
+| SURGE | chega pequena e em pontilhado, cresce até a pose (o `foge` ao contrário) |
+| MIRA | paira (idle, vai e volta) |
+| TRAVA | os tentáculos abrem em estrela — o aviso, junto da linha que pisca |
+| RAJADA | fecham de golpe |
+| SOME (1º e 2º) | recolhe e dispara para longe, sob o SOPRO |
+
+**A FUGA — a 3ª e última saída** (ideia dele: *"quando a lula sai e solta tinta ela pega impulso com os tentáculos e
+depois estica eles, fugindo. Podemos deixar essa animação para marcar a terceira e última fuga"*): no lugar do último
+SOME entra o estado `fuga` (0,95s). **Impulso** (0,35s): parada, enrola os tentáculos numa bola — ainda fere e é
+ferida (a última chance de matá-la). **Disparo:** solta a CORTINA no lugar e voa esticada como um dardo no rumo do
+manto (para cima e para a esquerda, 320 px/s), saindo de dentro da nuvem e desfazendo-se em pontilhado. **Voando ela
+não tem corpo** (decisão minha; ele viu em jogo e não objetou): não atropela a nave nem leva tiro — regra
+`elites-pressionam-sem-punir`. Sem pontos, como antes. Números em `ELITES.cacador` (`fugaS`, `fugaImpulsoS`,
+`velFuga`).
+
+## 3. Tentáculo do casco (vida 14, 350 pontos) — (CANCELADO em 12/10; registro)
 
 ### 3.1 O ciclo — uma aparição = um ciclo (decisão dele: A)
 
@@ -114,7 +148,10 @@ presa à tela e outra presa ao chão AO MESMO TEMPO. A regra:
 - **A arte do Tentáculo volta a uma leva nova** (nenhuma de 06/10 ficou); o comportamento se implementa com a arte à
   mão de 06/10 como provisória.
 
-### 3.4 A SENTINELA DO CASCO *(10/10; no jogo desde 11/10 — em teste, ainda não aprovada)*
+### 3.4 A SENTINELA DO CASCO *(10/10; no jogo em 11/10)* — (CANCELADO em 12/10, antes do teste dele; registro)
+
+> Nada do que este item cita existe mais no repositório (o código, os quadros assados, os scripts, a sonda). As
+> folhas e os GIFs de `folhas/2026-10-0{5..9}` e `2026-10-1{0,1}/elites/` ficaram como arquivo.
 
 Entre 08 e 10/10 o Tentáculo virou a **SERPENTE 63-3** (Pro, a criatura inteira, escolhida por ele) e passou por
 rodopio, giro, esticada e "bote que se torce" — todos abandonados (a serpente animada em trajetória deixava de ser a
@@ -157,8 +194,8 @@ rodopio, giro, esticada e "bote que se torce" — todos abandonados (a serpente 
 | 11 | Caçador **sozinho** (até ~20), com as minas na névoa | sai a onda de 6 drones de t=16 (ele ocupa o lugar) |
 | 27,5 | Caçador **cobrado**, no pico com o cargueiro (29); acaba ~36,7 | — |
 | `rabo` | Caçador vivo some de vez (§2.2) | — |
-| 63,5 | Tentáculo **sozinho**, logo depois do respiro da aranha; até ~69,5 | sai a onda de batedores de t=64; os kamikazes de 67 → 69,5 |
-| 75 | Tentáculo **cobrado**, no pico final; acaba ~81 (antes do silêncio de 82) | — |
+| ~~63,5~~ | ~~Tentáculo sozinho~~ *(cancelado em 12/10)* | **voltaram** os batedores de t=64 (5) e os kamikazes de t=67 (4), como antes de 07/10 |
+| ~~75~~ | ~~Tentáculo cobrado~~ *(cancelado em 12/10)* | a entrada saiu; o pico final fica como era (canhoneira 71, drones 73, kamikazes 76, batedores 78) |
 
 ## 5. A arte — DUAS criações de cada peça (pedido dele)
 
@@ -203,4 +240,6 @@ da nave), números em `numerosElites.ts`, `ComportamentoElite` em `src/entities/
    E as sondas antigas seguem passando.
 3. **GIFs em jogo** para ele julgar cada elite; depois ele joga o sandbox e a F3 inteira.
 
-**A fatia F3 fecha quando** os testes passam, ele aprova a arte e o comportamento dos dois e a F3 passa no jogo dele.
+**A fatia F3 fecha quando** os testes passam, ele aprova a arte e o comportamento ~~dos dois~~ da lula (desde 12/10 o
+único elite da F3) e a F3 passa no jogo dele. *(12/10: no §6 e no §7, tudo o que fala do Tentáculo — os gomos, o
+mergulho por trás do casco, o bote, a meia-lua — saiu do código e das sondas.)*

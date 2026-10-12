@@ -1,5 +1,9 @@
 # START — retomada da FRENTE B: o Tentáculo da F3 virou a SENTINELA DO CASCO (depois de 10/10/2026)
 
+> ❌ **CANCELADO em 12/10/2026.** Ele retirou o elite do casco do jogo e da produção; a F3 fica só com a lula. Os
+> scripts e a arte instalada que este documento cita não existem mais. Só registro — o estado vivo é o 📍 de 12/10
+> no 🧭 do `docs/HANDOFF.md`.
+
 > **Frase de arranque:** *"Leia o 🧭 do `docs/HANDOFF.md` e o `plans/2026-10-10-sentinela-casco-START.md`. Vou
 > analisar os GIFs da Sentinela (o giro de 15° × 25°) e decidir o que falta antes de ela entrar no jogo."*
 
