@@ -41,6 +41,10 @@
 | F4 | **Larva Mecânica** | arranca → para → leque → larga cápsulas que estouram por proximidade |
 | F4 | **Tubo Pulsante** | vive na parede (chão/teto) → pulsa em anel → se abre e solta inimigos |
 
+**⚠️ 12/10 — os verbos da F4 mudaram na fatia** (`2026-10-12-frente-b-fatia-f4-design.md`, vale ela): a Larva não
+larga cápsulas nem atira em leque — chega e sai por um buraco, faz ziguezague e PÕE PUPAS que viram moscas; o Tubo
+não se abre nem solta inimigos — é só o pulso em anel, o atirador da fase.
+
 **Fora, e por quê:**
 - **Carrapato** (F4): para colar na nave (44×26, hitbox 21×9) ficaria com ~10px e perderia a definição. Trocado
   pela Larva.
@@ -180,7 +184,7 @@ maiores) e a F2 (com os elites) passam no jogo dele.
 - **F3** — Caçador de Vácuo (nebulosa: usa os véus que escondem o que vem; a mira avisada antes da rajada) e
   Tentáculo do casco (ato 2: brota do chão sob a nave; castiga quem voa rente ao casco, que é o que as torres
   empurram o jogador a fazer).
-- **F4** — Larva Mecânica (arranca / para / leque; as cápsulas pelo caminho castigam o CAMINHO no corredor fechado,
+- **F4** *(detalhada em 12/10 na fatia própria; os verbos abaixo foram trocados lá)* — Larva Mecânica (arranca / para / leque; as cápsulas pelo caminho castigam o CAMINHO no corredor fechado,
   como a mina sensora no aberto) e Tubo Pulsante (na moldura, chão ou teto; pulsa em anel; se abre e solta inimigos).
 
 ## 5. Anotado para o REBALANCEAMENTO (frente C)
