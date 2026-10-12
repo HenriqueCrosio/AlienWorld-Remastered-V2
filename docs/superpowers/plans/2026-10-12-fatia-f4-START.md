@@ -10,7 +10,8 @@
   (a lula no ato 1; o ato 2 sem elite — ele diz se as ondas devolvidas bastam); ficou para quando quiser.
 - **A F4 tem o DESENHO aprovado** (*"de acordo"*) e nada mais: nenhuma arte gerada, nenhum código, nenhum plano de
   implementação. A spec: `docs/superpowers/specs/2026-10-12-frente-b-fatia-f4-design.md`.
-- A spec e este START **não estão commitados** (commit só quando ele pedir, só no nome dele).
+- A spec e este START estão commitados e empurrados (`243f931`, 12/10). Daqui em diante: commit só quando ele pedir,
+  só no nome dele.
 
 ## 2. O que ele decidiu (sete perguntas, 12/10)
 

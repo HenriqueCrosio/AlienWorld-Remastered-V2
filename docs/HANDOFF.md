@@ -27,7 +27,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > solta inimigos. Aparece 1× na 1ª câmara e 2× no aperto da caixa torácica (t=50 a 68), chão e teto. Cada entrada toma
 > o lugar de uma onda comum. **Próximo:** as folhas de candidatas (Larva COMPACTA ~40px do conceito nº 14; Tubo ~36×28
 > do nº 12), em jogo → ele escolhe → o plano de implementação → comportamento → gestos → GIF. ⚠️ O conceito da Larva é
-> um corpo longo, da família da serpente cancelada: ela é desenhada curta. A spec e o START NÃO estão commitados.
+> um corpo longo, da família da serpente cancelada: ela é desenhada curta. A spec e o START estão commitados e empurrados (`243f931`).
 > **Pendente dele, sem pressa:** jogar a F3 inteira (o ato 2 sem elite).
 >
 > 📍 **12/10 (2) — A LULA GANHOU GESTOS E A FUGA — APROVADOS (ele, depois de ver em jogo: *"boa, ficou ótimo"*).** Ele testou no sandbox: *"a primeira skill
