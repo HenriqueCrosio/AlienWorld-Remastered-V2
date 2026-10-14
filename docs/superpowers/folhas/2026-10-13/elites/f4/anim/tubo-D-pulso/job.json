@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "943be0b5-a350-4174-92ca-7203f038f394",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The living twin-mouthed barnacle turret pulses in place: it swells up slowly, both trunks bulging round, holds swollen for an instant, then contracts sharply in one strong pulse as both mouths snap wide open, and it settles back to the starting pose. Its roots stay planted on the ground. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

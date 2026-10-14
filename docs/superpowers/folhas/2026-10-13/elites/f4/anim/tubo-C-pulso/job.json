@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "18244d1e-2729-4400-bd8d-0b069c9f35f2",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The living barnacle turret pulses in place: it swells up slowly, the trunk bulging round, holds swollen for an instant, then contracts sharply in one strong pulse as the toothed mouth on top snaps wide open, and it settles back to the starting pose. Its roots stay planted on the ground. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

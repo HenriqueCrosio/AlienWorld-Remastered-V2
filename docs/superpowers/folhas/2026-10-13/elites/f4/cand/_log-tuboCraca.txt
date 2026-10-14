@@ -1,0 +1,2 @@
+/generate-image-v2 845f9536-d14e-4489-b324-92107396bfdf .........................................✔ 64 imagem(ns), 15 gerações
+tuboCraca seed 31: 64

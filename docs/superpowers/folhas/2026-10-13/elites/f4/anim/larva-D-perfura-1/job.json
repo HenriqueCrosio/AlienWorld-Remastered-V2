@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "ab208bfd-4465-4e43-84f1-fc7e02a7765e",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The stubby armored grub drills in place: it swings its drill tail around, coils up tight into a ball and spins fast around its own center like a drill bit. It ends as a tight spinning ball. Same size. It stays in the same spot, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

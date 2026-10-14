@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "9b45e385-9645-4193-926e-d2de96fa6108",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The stubby armored grub lunges in place: it curls up tight into a compact ball, holds for an instant, then springs open with a jolt, its body stretching out and the drill tail kicking back, and returns to the starting pose. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "c5193a89-c8a6-43fb-9d50-e2dfbbf8e8b6",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The curled armored larva strains in place: its body arches and squeezes in a wave running from the head down to the tail, then the tail tip pushes forward and flicks twice, and it settles back to the starting pose. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

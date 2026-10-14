@@ -1,0 +1,14 @@
+{
+  "pupa": [
+    ["G1 casulo translúcido (larva dentro)", "pupaCasulo-41-29", 12],
+    ["G2 casulo de membrana", "pupaCasulo-41-49", 12],
+    ["G3 casulo enrolado em fibras", "pupaCasulo-41-9", 12],
+    ["G4 pupa curva em anéis", "pupa-41-24", 11]
+  ],
+  "esporo": [
+    ["G1 grão espinhoso", "esporo-41-30", 8],
+    ["G2 grão com espinhos", "esporo-41-23", 7],
+    ["G3 grão celular", "esporo-41-12", 7],
+    ["G4 tufo de grãos", "esporoNuvem-41-31", 9]
+  ]
+}

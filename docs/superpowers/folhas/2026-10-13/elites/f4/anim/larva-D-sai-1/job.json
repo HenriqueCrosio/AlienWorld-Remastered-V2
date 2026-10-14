@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "7ac2b7af-cff3-408e-8be1-eb905cbe2ed9",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The stubby armored grub, coiled in a tight ball, bursts open in place: it uncoils with a snap, rears up stretching its whole body with its mandibles spread wide, shakes once, and settles into its curled hovering pose. Same size. It stays in the same spot, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

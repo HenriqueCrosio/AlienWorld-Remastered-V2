@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "67e91700-65c5-4407-9aad-4fb38f457731",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The stubby armored grub strains in place: its plated back arches and squeezes in a wave running from the head down to the tail, then the drill tail pushes forward under the belly and flicks twice, and it settles back to the starting pose. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

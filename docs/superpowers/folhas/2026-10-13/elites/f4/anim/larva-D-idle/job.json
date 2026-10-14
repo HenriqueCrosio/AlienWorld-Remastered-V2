@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "5f30b38f-7313-43ad-8790-7868c66596be",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The stubby armored grub hovers in place: its plated back flexes slowly as it breathes, its mandibles open and close a little, the glowing drill at its tail turns slowly. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

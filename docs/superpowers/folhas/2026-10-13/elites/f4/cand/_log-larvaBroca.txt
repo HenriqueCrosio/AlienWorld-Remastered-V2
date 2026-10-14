@@ -1,0 +1,2 @@
+/generate-image-v2 ea916800-168e-4fc6-b26f-fa7a6bc912f7 ......................................✔ 64 imagem(ns), 15 gerações
+larvaBroca seed 31: 64

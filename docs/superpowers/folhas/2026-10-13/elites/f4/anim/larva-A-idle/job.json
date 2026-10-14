@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "175de0f8-e72b-47e3-85fb-9b759d0bcbf6",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The curled armored larva hovers in place: its curled body flexes slowly, the curl loosening and tightening a little as it breathes, the tail tip twitching, the red lights pulsing faintly. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

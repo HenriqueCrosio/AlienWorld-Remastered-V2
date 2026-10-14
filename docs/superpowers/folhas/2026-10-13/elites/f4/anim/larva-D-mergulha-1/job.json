@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "871130d1-2aae-4d5f-8319-4856c1499799",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The stubby armored grub, coiled in a tight ball, keeps spinning fast around its own center like a drill bit and burrows away into the wall behind it: the spinning ball shrinks smaller and smaller toward its own center, until only a tiny dark dot is left. It stays in the same spot, same dark colors. No objects come out of it.",
+  "quadros": 9,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

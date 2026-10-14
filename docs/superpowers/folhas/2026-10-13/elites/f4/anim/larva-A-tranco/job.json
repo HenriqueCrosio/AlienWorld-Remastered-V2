@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "435d6500-6def-4cb9-bb18-11ce0688f409",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The curled armored larva lunges in place: it coils up tight into a compact ball, holds for an instant, then springs open with a jolt, its body stretching out, and curls back to the starting pose. It stays in the same spot, same size, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "inicio": {
+    "usage": null,
+    "background_job_id": "994f6cf3-9f25-4f30-a19c-a44e98836b54",
+    "status": "processing",
+    "enhanced_prompt": null,
+    "enhance_usage": null
+  },
+  "acao": "The armored larva, coiled in a tight ball, bursts open in place: it uncoils with a snap, rears up stretching its whole body with its horns thrown back, shakes once, and settles into its curled hovering pose. Same size. It stays in the same spot, same dark colors. No objects come out of it.",
+  "quadros": 17,
+  "usage": {
+    "type": "generations",
+    "generations": 1
+  }
+}
