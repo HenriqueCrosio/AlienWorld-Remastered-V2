@@ -123,4 +123,120 @@ export const ELITES = {
     cortina: { cresceS: 0.35, seguraS: 1.2, someS: 1.9 },
     qps: 20,
   },
+  /**
+   * A LARVA MECÂNICA (spec F4 §2): abre um BURACO no fundo e sai dele → PÕE pupas → TRANCO para o posto seguinte →
+   * (`paradas` vezes) → PERFURA e MERGULHA no buraco. Não atira: o tiro dela são as pupas. O tempo do buraco abrindo
+   * (o aviso, antes de ela existir) é o `buraco.abreS`.
+   */
+  larva: {
+    hp: 12,
+    score: 350,
+    saiS: 0.4,
+    poeS: 0.9,
+    trancoS: 0.35,
+    perfuraS: 0.5,
+    mergulhaS: 0.4,
+    /** No começo do SAI e no fim do MERGULHA ela é um ponto dentro do buraco: sem corpo (nem fere, nem é ferida). */
+    miudaS: 0.18,
+    paradas: 3,
+    /** O knob principal (§2.2): o pior caso é `pupasPorParada × paradas` moscas por aparição. */
+    pupasPorParada: 2,
+    /** As pupas saem neste instante do PÕE (a cauda abre no meio do clipe). */
+    pupaSaiS: 0.5,
+    /** O leque das pupas: o meio-ângulo em volta da direção da nave. */
+    pupaLequeGraus: 17,
+    /** Os postos: só na metade direita (decisão dele: ziguezague, sem cruzar para o lado da nave). */
+    postoX: [230, 340] as const,
+    /** Do posto às bordas do vão: meio corpo + folga — ela nunca encosta em mesa nem em parede. */
+    postoMargem: 14,
+    /**
+     * Cada posto fica pelo menos a isto da altura do anterior. O duto mais fechado (vão de 68) deixa 68 − 2×14 = 40px
+     * de faixa: com 20, a ponta mais longe do anterior sempre serve.
+     */
+    postoDistY: 20,
+  },
+  /**
+   * O BURACO da Larva: abre em `abreS` (5 quadros), fecha em `fechaS` (3 quadros, de trás para a frente) e deixa uma
+   * cicatriz que some em `cicatrizS` (4 quadros, perdendo pixels). Quadros ASSADOS por `scripts/_elites/_instalar-f4.mjs`.
+   */
+  buraco: {
+    abreS: 0.5,
+    fechaS: 0.25,
+    cicatrizS: 1.0,
+    /**
+     * ONDE ELE ABRE (spec F4 §9.5): só na face da BORDA ou de uma MESA — nunca na pintura do fundo. As colunas de
+     * tela em que a borda é candidata (na metade direita, como os postos), a profundidade do centro do buraco dentro
+     * da faixa e dentro da mesa (a partir da beira que dá para o corredor), e a folga de uma mesa que tape a coluna.
+     * ⚠️ O buraco anda com a superfície (84 px/s): ~76px entre abrir e ela sair dele, ~105px do tranco da saída ao fim
+     * do mergulho. Por isso as colunas começam em 280, não em 250 — aberto em 250, ela saía em x≈174 (14/10, a sonda).
+     */
+    colunas: [280, 300, 320, 340, 360] as const,
+    naBordaPx: 14,
+    naMesaPx: 18,
+    folgaMesa: 16,
+  },
+  /**
+   * A PUPA (§2.2): voa `vooPx` em `vooS` e PARA no ar; pulsa cada vez mais rápido; eclode em `eclodeS`. O TREMOR
+   * (§9.2): nos últimos `tremeS` ela treme ±1px, o passo encurtando de 0,1 para 0,03s.
+   */
+  pupa: { hp: 1, score: 20, vooPx: 50, vooS: 0.4, eclodeS: 2.0, tremeS: 0.6, tremePassoS: [0.1, 0.03] as const },
+  /**
+   * A MOSCA (§2.2): mais lenta que o kamikaze (ele: velocidade 45, perseguição 150, teto 190). O TREMOR (§9.6): uma
+   * aceleração lateral de até `tremorAcel` px/s², num ritmo sorteado em `tremorHz`.
+   */
+  mosca: { hp: 1, score: 30, velInicial: 40, perseguicao: 110, velMax: 120, bateAsaS: 0.06, tremorAcel: 160, tremorHz: [1.5, 3] as const },
+  /**
+   * O TUBO PULSANTE (spec F4 §3 e §9.3): preso à parede, rola com ela → INCHA (o aviso) → PULSA uma nuvem de ESPOROS
+   * que deixam a nave lenta. ⚠️ A densidade se decide jogando: os knobs são `esporosN`, `pulsos` e o bloco `esporo`.
+   */
+  tubo: {
+    hp: 10,
+    score: 300,
+    inchaS: 0.6,
+    pulsaS: 0.35,
+    pulsos: 2,
+    /** O x de tela em que cada INCHA começa (ele vem da direita com a parede). Um por pulso. */
+    pulsoX: [310, 190] as const,
+    /** Os ESPOROS de cada pulso (§9.3): uma nuvem de 6 (`esporosDoPulso`), nos dois pulsos. */
+    esporosN: 6,
+    /** Onde ele nasce (fora da tela) e onde as mesas nascem (`TerrainSystem.spawn`: `GAME_WIDTH + 30`). */
+    nasceX: 428,
+    mesaX: 414,
+    /** A mesa (`f4-mesa*.png`, 94px) e a arte dele (35–36px). */
+    larguraMesa: 94,
+    largura: 36,
+    folgaMesa: 6,
+    folgaEmenda: 4,
+    /** A largura de uma placa da borda (`Moldura.LARGURA`): a parede tem degrau nas emendas. */
+    placa: 128,
+    /** O pé entra 5px na borda (§9.4: com 2 ele parecia pousado, não preso). O pé de raízes cobre o resto. */
+    afunda: 5,
+    /** Esperou isto sem caber: nasce assim mesmo — uma entrada do roteiro não some em silêncio. */
+    esperaMaxS: 8,
+  },
+  /**
+   * O ESPORO do Tubo (spec F4 §9.3): cada um sai num rumo sorteado dentro de um cone de ±`coneGraus` para dentro do
+   * corredor, com a velocidade (`vel`) e a freada (`freiaS`) dele, e o sopro se espalha por `soproS` — uma NUVEM, não um
+   * arco (calibragem de 14/10, o desenho dele: *"a soltura de esporos mais orgânica e desorganizada … e para cima,
+   * cobra destreza do jogador"*). Parado, ele anda com o cenário, pairando (`balancoPx`, num ciclo de `balancoS`) e
+   * subindo devagar (`sobe` px/s, para dentro do corredor), e some nos últimos `someS` dos `vidaS`. Não fere; o tiro o
+   * atravessa. `corpo` = a hitbox (quadrada, centrada). A distância de cada um = vel × freiaS / 2 (de ~11 a ~68px).
+   */
+  esporo: {
+    coneGraus: 60,
+    vel: [30, 105] as const,
+    freiaS: [0.7, 1.3] as const,
+    soproS: 0.3,
+    sobe: 5,
+    vidaS: 3.5,
+    someS: 0.5,
+    balancoPx: 1.5,
+    balancoS: [1.2, 2.0] as const,
+    corpo: 5,
+  },
+  /**
+   * A LENTIDÃO do esporo (§9.3): a nave voa a `velocidade` × o normal por `duracaoS`. Outro toque renova, não soma.
+   * 14/10, ele: *"a lentidão pode ser para 60%, punitiva"* — 60% mais lenta (era 40%).
+   */
+  lentidao: { velocidade: 0.4, duracaoS: 2.5 },
 };

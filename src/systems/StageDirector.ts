@@ -522,7 +522,10 @@ export const STAGE_4: StageEvent[] = [
   // em t=43), e é o duto — e só ele — que fecha de verdade. Ver a spec de 10/09.
   { t: 1, type: 'moldura', espessura: 16 },
   { t: 5, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 90 },
-  { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.38, y: 120 },
+  // O TUBO PULSANTE, cedo e SOZINHO (frente B, fatia F4 §4): a 1ª vez com o vão de 126, para o meio-anel ser lido com
+  // espaço. No lugar dos batedores de t=9. ⚠️ O `y` dele só escolhe a parede: metade de baixo = CHÃO, de cima = TETO.
+  { t: 9, type: 'banner', text: 'TUBO PULSANTE' },
+  { t: 10, type: 'wave', kind: 'tubo', count: 1, spacing: 0, y: 190 },
 
   // O interior REAGE: minas sensoras nos vãos (a defesa imune do bicho) + pressão aérea.
   { t: 14, type: 'banner', text: 'ANTICORPOS · SENSORES ATIVOS' },
@@ -530,7 +533,10 @@ export const STAGE_4: StageEvent[] = [
   { t: 15, type: 'moldura', espessura: 16 },        // a borda margeia, e é só isso
   { t: 15.5, type: 'hazard', rate: 2.2, mix: ['sensor', 'destroco'] },
   { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
-  { t: 21, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 140 },
+  // A LARVA MECÂNICA, SOZINHA (F4 §4): a 1ª vez do buraco e das pupas. No lugar dos batedores de t=21. O `y` não vale
+  // para ela — nasce num posto, dentro do buraco que abre no fundo.
+  { t: 20, type: 'banner', text: 'LARVA MECÂNICA' },
+  { t: 21, type: 'wave', kind: 'larva', count: 1, spacing: 0, y: 100 },
 
   // Kamikazes num espaço FECHADO: o perseguidor conhecido, mas agora recuar tem parede.
   { t: 26, type: 'banner', text: 'INTERCEPTADORES NO DUTO' },
@@ -620,14 +626,17 @@ export const STAGE_4: StageEvent[] = [
   // A PAREDE COMEÇA A GANHAR CORPO — o primeiro degrau real da fase, e ele cai no meio do pico,
   // sem evento `corredor` junto: o jogador sente o lugar apertar sem que o vão tenha mudado.
   { t: 55, type: 'moldura', espessura: 32 },
-  { t: 58, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 110 },
+  // OS DOIS TUBOS DO APERTO (F4 §4): um no CHÃO e, 3s depois, um no TETO — a parede ainda não mata, então errar o vão
+  // do anel custa um tiro, não a nave. No lugar dos drones de t=58 e dos kamikazes de t=64. ⚠️ A Larva NÃO entra aqui:
+  // a caixa torácica é o lugar do golfinho (decisão dele, 12/10).
+  { t: 57.5, type: 'wave', kind: 'tubo', count: 1, spacing: 0, y: 190 },
+  { t: 60.5, type: 'wave', kind: 'tubo', count: 1, spacing: 0, y: 30 },
 
   // PICO FINAL: o corredor continua estreito e TUDO vem junto — mas menos volume que o pico
   // da F2/F3: aqui o terreno já cobra metade da atenção, e pressão dupla total é ilegível.
   { t: 63, type: 'banner', text: 'REJEIÇÃO TOTAL' },
   { t: 63.5, type: 'corredor', rate: 1.7, gap: 84 },
   { t: 63.5, type: 'moldura', espessura: 44 },      // não é mais câmara
-  { t: 64, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
   // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
   // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
@@ -671,7 +680,9 @@ export const STAGE_4: StageEvent[] = [
   // ⚠️ O VÃO APERTA A CADA PORTA (84 → 76 → 68) e o HP SOBE (6 → 8 → 10). É a progressão que dá
   // começo, meio e fim ao duto — e é ela, não a duração, que faz o trecho ter forma.
   { t: 72, type: 'porta', hp: 6 },
-  { t: 74, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 60 },
+  // A LARVA NO DUTO (F4 §4): o trecho mais apertado da campanha — é ela quem dá ao jogador algo para atirar além das
+  // portas. Entre a 1ª e a 2ª porta, no lugar dos drones de t=74 (a porta de t=72 já passou dos postos dela).
+  { t: 75, type: 'wave', kind: 'larva', count: 1, spacing: 0, y: 100 },
   { t: 78, type: 'corredor', rate: 1.7, gap: 76 },
   { t: 82, type: 'porta', hp: 8 },
   { t: 84, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 110 },
@@ -685,7 +696,9 @@ export const STAGE_4: StageEvent[] = [
 
   // O PICO: o duto no seu mais fechado, e tudo junto. Menos volume que o pico da F2/F3 — aqui a
   // parede morde e cobra metade da atenção sozinha.
-  { t: 97, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 100 },
+  // A ÚLTIMA LARVA, no pico (F4 §4), no lugar dos batedores de t=97: ela mergulha em ~t=102,7 e as últimas moscas
+  // saem antes do silêncio de t=106.
+  { t: 97.5, type: 'wave', kind: 'larva', count: 1, spacing: 0, y: 100 },
   { t: 100, type: 'wave', kind: 'drone', count: 7, spacing: 0.2, y: 90 },
   { t: 103, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.55, y: 120 },
 

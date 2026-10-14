@@ -42,6 +42,10 @@ import { resetBody, type ConduçãoId, type FlightController } from '../flight/F
 import { FlapController } from '../flight/FlapController';
 import { FreeController } from '../flight/FreeController';
 import { NUMEROS } from '../data/numerosCartas';
+import { fatorDeVelocidade, lentidaoAte } from '../elitesRegras';
+import { Esporos } from '../entities/elites/Esporos';
+import type { LugarElite } from '../entities/elites/tipos';
+import { ELITES } from '../data/numerosElites';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
@@ -160,6 +164,9 @@ export class GameScene extends Phaser.Scene {
   private corredorRate = 0;
   private corredorGap = 0;
   private corredorTimer = 0;
+  /** Até quando (ms de `time.now`) a nave voa LENTA — o esporo do Tubo (spec F4 §9.3). */
+  private lentaAte = 0;
+  private esporos!: Esporos;
   /**
    * A MARÉ DA CÂMARA DO GOLFINHO (14/09) — que mesa o corredor planta, e como ela entra.
    *
@@ -291,6 +298,7 @@ export class GameScene extends Phaser.Scene {
     this.corredorRate = 0;
     this.corredorGap = 0;
     this.corredorTimer = 0;
+    this.lentaAte = 0;
     this.mare = 'aco';
     this.mareEspera = 0;
     this.mareParesEmergindo = 0;
@@ -348,6 +356,11 @@ export class GameScene extends Phaser.Scene {
     // GLOBALMENTE, então `scene.textures.exists` sozinho não bastava como guarda — os 8 segmentos
     // nasciam nas Fases 1, 2 e 3 também, e vazavam uma tira acesa no rodapé (a peça é opaca).
     this.moldura = new Moldura(this, this.stage.id === 4);
+    // O SANDBOX da F4 não roda o roteiro, e sem ele a borda fica com espessura 0 (a superfície quase fora da tela). O
+    // Tubo Pulsante (frente B) vive preso a ela: a borda de margem da fase (16px) nasce cravada.
+    if (this.sandbox && this.stage.id === 4) this.moldura.setEspessura(16);
+    // Os ESPOROS do Tubo da F4 (spec F4 §9.3) andam com a parede, à velocidade do cenário.
+    this.esporos = new Esporos(this, () => SCROLL_SPEED);
     // A ÁGUA é construída sempre e nasce SECA: ela só existe quando alguém chama `encher()`, e
     // quem chama é o nascimento do golfinho. Um pool parado não custa frame — e construí-la só na
     // Fase 4 espalharia um `if (stage === 4)` por três pontos do ciclo de vida.
@@ -368,6 +381,24 @@ export class GameScene extends Phaser.Scene {
         this.cameras.main.shake(120, 0.006);
         if (Phaser.Math.Distance.Between(x, y, this.ship.x, this.ship.y) <= raio) this.damageShip();
       },
+      // A F4: o VÃO do corredor (a Larva nunca sai dele), a PAREDE (o Tubo vive preso a ela), os LUGARES do buraco
+      // da Larva (a borda e as mesas) e os ESPOROS do Tubo.
+      vao: (x) => {
+        const meio = this.corredorGap / 2;
+        if (meio <= 0) return { teto: this.moldura.superficieTetoEm(x), chao: this.moldura.superficieChaoEm(x) };
+        const centro = this.moldura.vaoEm(x);
+        return { teto: centro - meio, chao: centro + meio };
+      },
+      parede: {
+        mundoDe: (x) => this.moldura.mundoDe(x),
+        telaDe: (x) => this.moldura.telaDe(x),
+        superficie: (x, teto) => (teto ? this.moldura.superficieTetoEm(x) : this.moldura.superficieChaoEm(x)),
+        faixa: (x, teto) => this.moldura.faixaEm(x, teto),
+        // No duto não nasce mesa (`spawnCorredores`): para o Tubo, é como não haver plantio.
+        mesas: () => ({ timer: this.corredorTimer, rate: this.moldura.duto ? 0 : this.corredorRate, vel: SCROLL_SPEED }),
+      },
+      lugaresDeBuraco: () => this.lugaresDeBuraco(),
+      soltarEsporo: (x, y, solta) => this.esporos.soltar(x, y, solta),
     });
 
     this.director = new StageDirector(this.stage.script);
@@ -544,6 +575,9 @@ export class GameScene extends Phaser.Scene {
     );
     this.physics.add.overlap(this.ship, this.debris.hazards, () => this.damageShip());
     this.physics.add.overlap(this.ship, this.enemies.enemies, () => this.damageShip());
+    // O ESPORO NÃO FERE (spec F4 §9.3): encostar deixa a nave lenta. Nenhum overlap com os tiros do jogador — o tiro
+    // atravessa.
+    this.physics.add.overlap(this.ship, this.esporos.grupo, (_s, e) => this.tocarEsporo(e as Phaser.Physics.Arcade.Sprite));
     this.physics.add.overlap(this.ship, this.enemies.enemyBullets, (_s, b) => {
       this.enemies.release(b as Phaser.Physics.Arcade.Sprite);
       this.damageShip();
@@ -774,7 +808,7 @@ export class GameScene extends Phaser.Scene {
     const input = this.reader.read();
     this.controller.update(body, input);
     // PROTÓTIPO DAS CARTAS: a mesa do meio da fase, o casco, a queima e os propulsores.
-    this.cartas.tick(time, dt, this.elapsed, this.controller.id === 'free', body, input);
+    this.cartas.tick(time, dt, this.elapsed, this.controller.id === 'free', body, input, fatorDeVelocidade(this.time.now, this.lentaAte));
     this.pecas.tick(this.elapsed);
 
     // O gatilho é manual nas duas conduções (03/10 — o tiro automático da F1 saiu com o mapa de teclas).
@@ -828,6 +862,7 @@ export class GameScene extends Phaser.Scene {
     // A mina sensora precisa saber ONDE o jogador está: é a proximidade dele que a acorda.
     this.debris.update(dt, this.ship);
     this.enemies.update(dt, this.ship);
+    this.esporos.atualizar(dt, this.ship, this.time.now < this.lentaAte);
     // Com ELITE em cena, o primeiro plano atenua (frente B): as silhuetas que passam na frente tapavam o elite.
     const elite = this.enemies.temElite();
     if (elite !== this.eliteEmCena) {
@@ -866,9 +901,11 @@ export class GameScene extends Phaser.Scene {
   private homingTargets(): Phaser.Physics.Arcade.Sprite[] {
     if (!this.weapons.current.homing && !this.cartas.temGuiado) return [];
 
-    const alvos = this.enemies.enemies
-      .getChildren()
-      .filter((e) => (e as Phaser.Physics.Arcade.Sprite).active) as Phaser.Physics.Arcade.Sprite[];
+    // Sem os INTOCÁVEIS (a lula escondida, a Larva ainda no buraco, o Tubo esperando fora da tela): o teleguiado voava
+    // para um alvo que não existe.
+    const alvos = (this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[]).filter(
+      (e) => e.active && !this.enemies.intocavel(e),
+    );
 
     // Chefão multi-parte (a serpente): o teleguiado caça as CABEÇAS, não o corpo — mirar no
     // casco que absorve tiro faria o Enxame se sabotar sozinho na única luta multi-alvo.
@@ -2286,8 +2323,12 @@ export class GameScene extends Phaser.Scene {
    * O `aguaViva` é o único caso hoje; a forma da função é o que impede o próximo de nascer torto.
    */
   private matarInimigo(e: Phaser.Physics.Arcade.Sprite): void {
-    if (e.getData('kind') === 'aguaViva') {
+    const kind = e.getData('kind') as string;
+    if (kind === 'aguaViva') {
       this.fx.choque(e.x, e.y, e.scale);
+    } else if (kind === 'pupa') {
+      // A pupa SOME sem explodir (spec F4 §2.2): só a faísca do acerto — quem ameaça é a mosca.
+      this.fx.hit(e.x, e.y);
     } else {
       this.fx.explode(e.x, e.y, e.scale);
     }
@@ -2410,6 +2451,52 @@ export class GameScene extends Phaser.Scene {
     const azul = `${this.animMotor}-azul`;
     const chave = this.cartas?.temPropulsores && this.anims.exists(azul) ? azul : this.animMotor;
     if (this.ship.anims.currentAnim?.key !== chave) this.ship.play(chave);
+  }
+
+  /**
+   * Um ESPORO tocou a nave (spec F4 §9.3): sem dano — ela voa lenta por `lentidao.duracaoS`, e outro toque renova (não
+   * soma). Durante o dash a nave é intocável e o esporo não pega: o dash é a saída.
+   */
+  private tocarEsporo(e: Phaser.Physics.Arcade.Sprite): void {
+    if (this.over || this.cartas.intocavel(this.time.now)) return;
+    if (this.esporos.tocar(e)) this.lentaAte = lentidaoAte(this.time.now, this.lentaAte);
+  }
+
+  /**
+   * Onde o buraco da Larva pode abrir agora (spec F4 §9.5, ele: *"o verme tem que sair da borda"*): a face da BORDA,
+   * no chão e no teto, nas colunas da metade direita que nenhuma mesa tapa, e a face de cada MESA na metade direita, a
+   * `naMesaPx` da beira que dá para o corredor. Nunca a pintura do fundo — nem no duto, onde a borda é a parede grossa.
+   * Cada lugar leva a sua ÂNCORA: a borda segue a grade de mundo das placas (`telaDe`), a mesa segue o sprite dela.
+   */
+  private lugaresDeBuraco(): LugarElite[] {
+    const B = ELITES.buraco;
+    const mesas = (this.terrain.props.getChildren() as Phaser.Physics.Arcade.Sprite[]).filter(
+      (p) => p.active && (p.getData('kind') === 'mesa' || p.getData('kind') === 'mesaMar'),
+    );
+    const lugares: LugarElite[] = [];
+    for (const x of B.colunas) {
+      if (mesas.some((m) => Math.abs(m.x - x) < m.displayWidth / 2 + B.folgaMesa)) continue;
+      const xMundo = this.moldura.mundoDe(x);
+      for (const teto of [false, true]) {
+        const ancora = (): { x: number; y: number } | null => {
+          const xt = this.moldura.telaDe(xMundo);
+          if (xt < -128) return null;
+          const sup = teto ? this.moldura.superficieTetoEm(xt) : this.moldura.superficieChaoEm(xt);
+          return { x: xt, y: teto ? sup - B.naBordaPx : sup + B.naBordaPx };
+        };
+        const p = ancora();
+        if (p) lugares.push({ ...p, ancora });
+      }
+    }
+    for (const m of mesas) {
+      if (m.x < B.colunas[0] || m.x > B.colunas[B.colunas.length - 1]) continue;
+      // A mesa do teto é ancorada pelo topo (origem y = 0); a do chão, pelo pé.
+      const teto = m.originY === 0;
+      const ancora = (): { x: number; y: number } | null =>
+        m.active ? { x: m.x, y: teto ? m.y + m.displayHeight - B.naMesaPx : m.y - m.displayHeight + B.naMesaPx } : null;
+      lugares.push({ ...ancora()!, ancora });
+    }
+    return lugares;
   }
 
   private damageShip(): void {

@@ -9,6 +9,9 @@ import { criarTexturasElites } from '../entities/elites/texturasProvisorias';
 import { DRONE_MINERACAO } from '../entities/elites/DroneMineracao';
 import { SENTINELA } from '../entities/elites/Sentinela';
 import { CACADOR } from '../entities/elites/Cacador';
+import { LARVA } from '../entities/elites/Larva';
+import { MOSCA, PUPA } from '../entities/elites/Pupa';
+import { TUBO } from '../entities/elites/Tubo';
 
 export type EnemyKind =
   | 'drone'
@@ -22,7 +25,13 @@ export type EnemyKind =
   | 'droneMineracao'
   | 'sentinela'
   // O da F3 (spec 2026-10-06-frente-b-fatia-f3-design.md, emenda de 07/10) — o único: o elite do casco saiu em 12/10.
-  | 'cacador';
+  | 'cacador'
+  // Os da F4 (spec 2026-10-12-frente-b-fatia-f4-design.md): a Larva Mecânica e o Tubo Pulsante…
+  | 'larva'
+  | 'tubo'
+  // …e os MIÚDOS da Larva: a pupa que ela põe e a mosca que nasce dela.
+  | 'pupa'
+  | 'mosca';
 
 interface EnemyDef {
   texture: string;
@@ -55,6 +64,11 @@ interface EnemyDef {
   travessia?: 'vertical';
   /** O ELITE (frente B): a máquina de estados que assume o voo e o tiro (ver `entities/elites`). */
   elite?: ComportamentoElite;
+  /**
+   * MIÚDO: dirigido por um `ComportamentoElite`, mas NÃO é um elite — a pupa e a mosca da Larva (F4). Não atenua o
+   * primeiro plano (`temElite`).
+   */
+  miudo?: boolean;
 }
 
 /**
@@ -182,6 +196,15 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   sentinela: { texture: 'eliteSentinelaRoda', hp: ELITES.sentinela.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.sentinela.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: SENTINELA },
   // A F3 (07/10): a LULA nasce escondida num posto — o `x`/`y` do roteiro não valem para ela (ver `Cacador.ts`).
   cacador: { texture: 'eliteCacador', hp: ELITES.cacador.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.cacador.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: CACADOR },
+  // A F4: a LARVA MECÂNICA nasce dentro de um buraco, num posto — o `x`/`y` do roteiro não valem para ela (ver `Larva.ts`).
+  larva: { texture: 'eliteLarvaAPoeAnim0', hp: ELITES.larva.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.larva.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: LARVA },
+  // A F4: o TUBO PULSANTE vive preso à parede — o `y` do roteiro só escolhe qual (metade de cima = teto), e ele espera
+  // fora da tela um lugar entre duas mesas (ver `Tubo.ts`).
+  tubo: { texture: 'eliteTuboCPulsoAnim0', hp: ELITES.tubo.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.tubo.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: TUBO },
+  // A F4: os MIÚDOS da Larva. Nascem pelo `ctx.nascer` (a pupa, da Larva; a mosca, da pupa) — e, por morarem neste
+  // grupo, todas as cartas funcionam neles sem código novo (o míssil trava na pupa, o elétrico prende a mosca).
+  pupa: { texture: 'elitePupaAnim0', hp: ELITES.pupa.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.pupa.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: PUPA, miudo: true },
+  mosca: { texture: 'eliteMoscaAnim0', hp: ELITES.mosca.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.mosca.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: MOSCA, miudo: true },
 };
 
 /**
@@ -260,7 +283,22 @@ export class EnemySystem {
   readonly tiros: PadroesDeTiro;
 
   /** As portas dos elites para fora (a rocha do drone, a explosão inimiga) — a cena liga em `ligarElites`. */
-  private ganchos: GanchosElite = { criarRocha: () => null, explodir: () => {} };
+  private ganchos: GanchosElite = {
+    criarRocha: () => null,
+    explodir: () => {},
+    vao: () => ({ teto: 10, chao: GAME_HEIGHT - 10 }),
+    parede: {
+      mundoDe: (x) => x,
+      telaDe: (x) => x,
+      superficie: (_x, teto) => (teto ? 10 : GAME_HEIGHT - 10),
+      faixa: () => '',
+      mesas: () => ({ timer: 0, rate: 0, vel: 0 }),
+    },
+    lugaresDeBuraco: () => [],
+    soltarEsporo: () => {},
+  };
+  /** Quantos de cada tipo já nasceram nesta cena — a `ordem` de cada um (as variações da F4 alternam por ela). */
+  private readonly nascidos = new Map<EnemyKind, number>();
   /** A nave, guardada no `update` — o `iniciar` de um elite nasce no `spawn`, que não a recebe. */
   private alvo: Phaser.Physics.Arcade.Sprite | null = null;
 
@@ -303,7 +341,8 @@ export class EnemySystem {
   temElite(): boolean {
     return this.enemies.getChildren().some((o) => {
       const e = o as Phaser.Physics.Arcade.Sprite;
-      return e.active && DEFS[e.getData('kind') as EnemyKind]?.elite !== undefined && e.x < GAME_WIDTH + 40;
+      const def = DEFS[e.getData('kind') as EnemyKind];
+      return e.active && def?.elite !== undefined && !def.miudo && e.x < GAME_WIDTH + 40;
     });
   }
 
@@ -313,7 +352,7 @@ export class EnemySystem {
   }
 
   private ctxElite(alvo: Phaser.Physics.Arcade.Sprite): CtxElite {
-    return { scene: this.scene, alvo, tiros: this.tiros, ganchos: this.ganchos };
+    return { scene: this.scene, alvo, tiros: this.tiros, ganchos: this.ganchos, nascer: (kind, x, y) => this.spawn(kind, y, x) };
   }
 
   /** Este inimigo está INTOCÁVEL agora? (a lula escondida) — `GameScene.ferirInimigo`. */
@@ -334,7 +373,7 @@ export class EnemySystem {
   }
 
   /** `x` só é passado quando um inimigo PARE outro (o cargueiro cospe drones de dentro de si). */
-  spawn(kind: EnemyKind, y: number, x = GAME_WIDTH + 16): void {
+  spawn(kind: EnemyKind, y: number, x = GAME_WIDTH + 16): Phaser.Physics.Arcade.Sprite {
     const def = DEFS[kind];
 
     // A aranha ANDA — o y dela não é do roteiro, é da FÍSICA: os pés na linha do casco
@@ -490,9 +529,15 @@ export class EnemySystem {
       e.once('destroy', () => pulso.remove());
     }
 
+    // A ORDEM de nascimento do tipo (0, 1, 2…): as variações de arte da F4 alternam por ela (`varianteDe`).
+    const ordem = this.nascidos.get(kind) ?? 0;
+    this.nascidos.set(kind, ordem + 1);
+    e.setData('ordem', ordem);
+
     // O ELITE monta o próprio estado (e o drone, a rocha dele). Antes do 1º `update` não há nave guardada — o
     // `iniciar` não mira ninguém, então o próprio sprite serve de alvo nesse instante.
     if (def.elite) def.elite.iniciar(e, this.ctxElite(this.alvo ?? e));
+    return e;
   }
 
   /**
@@ -549,6 +594,10 @@ export class EnemySystem {
         if (def.travessia === 'vertical') e.setData('baseX', (e.getData('baseX') as number) + passo);
         e.setData('tranco', tranco - passo);
       }
+
+      // O que anda COM A PAREDE anda sempre — até travado (ver `ComportamentoElite.noChao`). Ele pode sair da tela ali.
+      def.elite?.noChao?.(e, dt, this.ctxElite(target));
+      if (!e.active) continue;
 
       // TRAVADO (eletrificado): nada anda, nada atira, nenhum relógio de tiro corre — o `continue` pula tudo abaixo.
       // Ao destravar, volta a velocidade de antes (a do roteiro, ou a da deriva vertical da água-viva).

@@ -71,6 +71,25 @@ const FRAMES: Record<string, number> = {
   // `ELITES.tinta` a 20 qps.
   eliteTintaSoproAnim: 18,
   eliteTintaCortinaAnim: 38,
+  // Os ELITES DA F4 (13/10): os gestos PixMiniMax das DUAS variações de cada um (Larva A e D, Tubo C e D) e as peças
+  // à mão, instalados por `scripts/_elites/_instalar-f4.mjs` (a Larva numa caixa por clipe, o centro no centro; o Tubo
+  // com o pé na última linha).
+  eliteLarvaAPoeAnim: 17,
+  eliteLarvaATrancoAnim: 17,
+  eliteLarvaASaiAnim: 17,
+  eliteLarvaAPerfuraAnim: 17,
+  eliteLarvaAMergulhaAnim: 9,
+  eliteLarvaDPoeAnim: 17,
+  eliteLarvaDTrancoAnim: 17,
+  eliteLarvaDSaiAnim: 17,
+  eliteLarvaDPerfuraAnim: 17,
+  eliteLarvaDMergulhaAnim: 9,
+  eliteTuboCPulsoAnim: 17,
+  eliteTuboDPulsoAnim: 17,
+  // O buraco da Larva (0–4 abre, 5–8 cicatriz), a pupa (apagada, acesa) e a mosca (asa para cima, asa para trás).
+  eliteBuracoAnim: 9,
+  elitePupaAnim: 2,
+  eliteMoscaAnim: 2,
   // A BOLA de energia da canhoneira do cinturão, agora ANIMADA (2026-08-09): ela pulsa e solta
   // fagulha no ar em vez de ser um adesivo. Os quadros nasceram com DERIVA (o desenho escorregava
   // 5.6px para a esquerda ao longo do ciclo, o que num projétil soma à velocidade e vira
@@ -739,6 +758,22 @@ const ART: Record<string, string> = {
   ...animFrames('eliteCacadorEscapaAnim', 'elite-cacador-escapa'),
   ...animFrames('eliteTintaSoproAnim', 'elite-tinta-sopro'),
   ...animFrames('eliteTintaCortinaAnim', 'elite-tinta-cortina'),
+  // OS ELITES DA F4 (13/10): a Larva Mecânica (A e D) e o Tubo Pulsante (C e D) — ver `FRAMES`.
+  ...animFrames('eliteLarvaAPoeAnim', 'elite-larva-a-poe'),
+  ...animFrames('eliteLarvaATrancoAnim', 'elite-larva-a-tranco'),
+  ...animFrames('eliteLarvaASaiAnim', 'elite-larva-a-sai'),
+  ...animFrames('eliteLarvaAPerfuraAnim', 'elite-larva-a-perfura'),
+  ...animFrames('eliteLarvaAMergulhaAnim', 'elite-larva-a-mergulha'),
+  ...animFrames('eliteLarvaDPoeAnim', 'elite-larva-d-poe'),
+  ...animFrames('eliteLarvaDTrancoAnim', 'elite-larva-d-tranco'),
+  ...animFrames('eliteLarvaDSaiAnim', 'elite-larva-d-sai'),
+  ...animFrames('eliteLarvaDPerfuraAnim', 'elite-larva-d-perfura'),
+  ...animFrames('eliteLarvaDMergulhaAnim', 'elite-larva-d-mergulha'),
+  ...animFrames('eliteTuboCPulsoAnim', 'elite-tubo-c-pulso'),
+  ...animFrames('eliteTuboDPulsoAnim', 'elite-tubo-d-pulso'),
+  ...animFrames('eliteBuracoAnim', 'elite-buraco'),
+  ...animFrames('elitePupaAnim', 'elite-pupa'),
+  ...animFrames('eliteMoscaAnim', 'elite-mosca'),
 
   turret: 'sprites/turret.png',
   turret2: 'sprites/turret-2.png',
@@ -1103,6 +1138,12 @@ const ART: Record<string, string> = {
   eliteEstilhaco: 'sprites/tiros/elite-estilhaco.png',
   // O TIRO DA F3 (à mão): a AGULHA da lula (06/10, 5×1), apontando para a direita.
   eliteTiroAgulha: 'sprites/tiros/elite-agulha.png',
+  // A RODADA DE 14/10 DA F4 (spec F4 §9): o ESPORO do Tubo (o G4, gerado e reduzido), o GRÃO que gruda na nave lenta e
+  // os PÉS DE RAÍZES do Tubo (um por borda: a da câmara A e a das costelas azuis). `scripts/_elites/_instalar-f4b.mjs`.
+  eliteEsporo: 'sprites/elite-esporo.png',
+  eliteEsporoGrao: 'sprites/elite-esporo-grao.png',
+  eliteTuboPeA: 'sprites/elite-tubo-pe-a.png',
+  eliteTuboPeB: 'sprites/elite-tubo-pe-b.png',
   // A ARTE APROVADA DAS PEÇAS (03/10, spec do catálogo §5.1b–c) com as MESMAS chaves das provisórias — quem existe
   // aqui, a `criarTexturasProvisorias` pula. O sufixo `-alien` é a versão da linhagem alien (`texturaDaLinhagem`).
   'carta-missil': 'sprites/cartas/pecas/missil-humano.png',

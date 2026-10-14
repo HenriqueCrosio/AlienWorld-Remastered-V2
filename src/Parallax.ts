@@ -1592,6 +1592,15 @@ export class Parallax {
     layer.nextX += Phaser.Math.Between(...layer.gap);
   }
 
+  /**
+   * A fração da velocidade do mundo com que a PINTURA de fundo rola (o `bgFactor` dela; 0 sem pintura). O buraco da
+   * Larva (frente B, F4) mora na pintura e anda com ela.
+   */
+  get fatorPintura(): number {
+    const bg = this.paintedBg[0];
+    return bg ? ((bg.getData('bgFactor') as number | undefined) ?? 0.04) : 0;
+  }
+
   update(dt: number, worldSpeed: number): void {
     // FUNDO PINTADO: a camada mais distante rola LENTÍSSIMA — fator 0.04 por padrão (o F1, na
     // fase de ~75s, deriva ~250px, menos que a folga de 384px da imagem, então a paisagem não

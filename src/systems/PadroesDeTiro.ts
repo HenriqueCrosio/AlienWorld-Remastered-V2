@@ -45,12 +45,13 @@ export class PadroesDeTiro {
     }
     b.setActive(true).setVisible(true);
     b.body!.enable = true;
+    // O giro ANTES do `vestir`: um tiro redondo (o do anel do Tubo) o zera ali — girado, o pixel dele entorta.
+    b.setRotation(angulo);
     vestir(b);
     // Origem: a carência contra o relevo (ver GameScene).
     b.setData('ox', x);
     b.setData('oy', y);
     b.setVelocity(Math.cos(angulo) * vel, Math.sin(angulo) * vel);
-    b.setRotation(angulo);
     return true;
   }
 

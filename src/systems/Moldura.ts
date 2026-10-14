@@ -700,6 +700,22 @@ export class Moldura {
     this.posicionaJunta(base, off);
   }
 
+  /** A coordenada de MUNDO da coluna `xTela` — o que o Tubo (frente B, F4) guarda para andar com a parede. */
+  mundoDe(xTela: number): number {
+    return this.xMundo + xTela;
+  }
+
+  /**
+   * Onde a coordenada de mundo `xMundo` está NA TELA — pela mesma conta do `avanca`: quem é arredondado para a grade de
+   * pixel é a PLACA, e a coluna vai dentro dela. Arredondar a coluna sozinha a faria tremer 1px contra a parede.
+   */
+  telaDe(xMundo: number): number {
+    const base = Math.floor(this.xMundo / Moldura.LARGURA);
+    const off = this.xMundo - base * Moldura.LARGURA;
+    const n = Math.floor(xMundo / Moldura.LARGURA);
+    return Math.round((n - base) * Moldura.LARGURA - off) + (xMundo - n * Moldura.LARGURA);
+  }
+
   /**
    * ⚠️ O CONTRATO DAS TRÊS CONSULTAS ABAIXO, E ELE É O QUE SEGURA A PODA DE PÉ:
    * **`xTela >= -128`.** Ou seja, pergunta-se sobre a tela e sobre o que está à direita dela,
@@ -725,6 +741,12 @@ export class Moldura {
   /** A linha de baixo da faixa do teto em `xTela`. */
   superficieTetoEm(xTela: number): number {
     return this.placaEm(xTela).superficieTeto;
+  }
+
+  /** A BORDA (a chave da textura) da placa em `xTela`, a do chão ou a do teto — o pé do Tubo veste a cor dela. */
+  faixaEm(xTela: number, teto: boolean): string {
+    const p = this.placaEm(xTela);
+    return teto ? p.faixaTeto : p.faixaChao;
   }
 
   /**

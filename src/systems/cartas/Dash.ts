@@ -49,6 +49,11 @@ export class Dash {
     return agora < this.intocavelAte;
   }
 
+  /** Avançando agora? Durante o avanço o teto de velocidade é dele — os Propulsores e a lentidão não mexem. */
+  get avancando(): boolean {
+    return this.c.h.scene.time.now < this.ate;
+  }
+
   /** Roda DEPOIS da condução e dos Propulsores: durante o dash, ele manda na velocidade. */
   tick(livre: boolean, body: Phaser.Physics.Arcade.Body, input: InputState): void {
     const agora = this.c.h.scene.time.now;

@@ -199,7 +199,7 @@ export class CartasEmJogo {
 
   // ─── GANCHOS ──────────────────────────────────────────────────────────────────────────────────
 
-  tick(time: number, dt: number, elapsed: number, livre: boolean, body: Phaser.Physics.Arcade.Body, input: InputState): void {
+  tick(time: number, dt: number, elapsed: number, livre: boolean, body: Phaser.Physics.Arcade.Body, input: InputState, fatorVel = 1): void {
     const t = MESA_NO_TEMPO[this.h.fase];
     if (t !== undefined && elapsed >= t && !this.h.semMesas) this.abrirMesa('meio', 'SUPRIMENTO ENCONTRADO');
 
@@ -210,9 +210,12 @@ export class CartasEmJogo {
       this.piscarCasco();
     }
 
-    // PROPULSORES: só no voo livre (a F1 é impulso, e a carta nem aparece nela).
+    // O TETO DO VOO LIVRE sai daqui a cada quadro: os PROPULSORES (só no voo livre — a F1 é impulso, e a carta nem
+    // aparece nela) e a LENTIDÃO do esporo da F4 (`fatorVel`, spec F4 §9.3). Durante o avanço do DASH o teto é dele: ele
+    // não é freado (é a saída). ⚠️ Antes, com os Propulsores, esta linha rodava também durante o dash e o teto dela
+    // prendia o avanço já no 2º quadro.
     const prop = quantas(this.reg, 'MOV_001');
-    if (livre && prop) body.setMaxVelocity(VELOCIDADE_LIVRE * (1 + NUMEROS.propulsores.porCopia * prop));
+    if (livre && !this.dash.avancando) body.setMaxVelocity(VELOCIDADE_LIVRE * (1 + NUMEROS.propulsores.porCopia * prop) * fatorVel);
     // O DASH depois dos Propulsores: durante o avanço, o teto de velocidade é dele.
     this.dash.tick(livre, body, input);
 
