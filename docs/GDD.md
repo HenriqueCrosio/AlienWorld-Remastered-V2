@@ -150,6 +150,22 @@ por tempo (`lerp` entre `tempoFacil` e `tempoDificil`), pontuação por obstácu
 medalhas de **bronze / prata / ouro** ao morrer, recorde salvo em `localStorage`.
 Sem combate — é o jogo antigo, preservado.
 
+### Competitivo — escalada por níveis (IDEIA, anotada em 14/10/2026 — não desenhada ainda)
+> Pedido do Henrique: *"só anote e continuamos na altura certa"*. Não abrir antes de a campanha fechar.
+
+A ideia, nas palavras dele: o jogador sobe por **níveis**. O nível 1 é uma leva de inimigos comuns. No nível 2
+entram mais inimigos e **1 elite**. No nível 3, mais bichos, e assim por diante, até chegar a um nível **insano** de
+inimigos e de skills para desviar.
+
+- **De onde veio:** um teste dele no `?sandbox` (14/10), montando à mão os inimigos por onda: sentinela orbital ×1,
+  lula ×2, larva mecânica ×1 e tubo pulsante ×2, todos juntos na mesma onda. Ele achou *"muito divertido"*. O
+  sandbox já é o protótipo dessa escalada.
+- **O núcleo:** cada nível soma inimigos comuns e elites de todas as fases, misturados. A graça está em desviar das
+  skills sobrepostas.
+- **Para lapidar depois** (ele: *"depois podemos lapidar para deixar ainda mais atrativo"*): a curva de cada nível,
+  como as cartas entram, a pontuação/placar e o que conta como vitória. Ainda nada disso foi decidido.
+- ⚠️ Toca o §9: hoje "leaderboard online" está fora de escopo da v1. Se o competitivo pedir placar, a decisão é dele.
+
 ---
 
 ## 5. Armas (modelo Metal Slug)

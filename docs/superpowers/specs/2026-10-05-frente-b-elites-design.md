@@ -44,6 +44,9 @@
 **⚠️ 12/10 — os verbos da F4 mudaram na fatia** (`2026-10-12-frente-b-fatia-f4-design.md`, vale ela): a Larva não
 larga cápsulas nem atira em leque — chega e sai por um buraco, faz ziguezague e PÕE PUPAS que viram moscas; o Tubo
 não se abre nem solta inimigos — é só o pulso em anel, o atirador da fase.
+**13/10 — os dois estão no jogo**, cada um com DUAS variações de arte (Larva A e D, Tubo C e D; decisão dele), no
+roteiro da F4 e no sandbox: plano `plans/2026-10-13-frente-b-fatia-f4.md`, as decisões no §8 da spec da fatia. Falta
+o teste dele.
 
 **Fora, e por quê:**
 - **Carrapato** (F4): para colar na nave (44×26, hitbox 21×9) ficaria com ~10px e perderia a definição. Trocado

@@ -14,10 +14,51 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-12-fatia-f4-START.md`. O desenho da F4 está
-> fechado — faça as folhas de candidatas da Larva e do Tubo para eu escolher."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-14-f4-rodada-START.md`. A rodada dos esporos
+> está no jogo — eu testei, e isto é o que achei: …"**
 >
-> 📍 **12/10 (3) — A FATIA F4 TEM O DESENHO APROVADO (só o desenho: nenhuma arte, nenhum código, nenhum plano).**
+> 📍 **14/10 (2) — A RODADA NOVA DA F4 ESTÁ NO JOGO; ELE AINDA NÃO TESTOU.** Ele mandou implementar (*"pode
+> implementar"*), e o plano `plans/2026-10-14-f4-rodada-esporos.md` foi executado inteiro no mesmo dia: o **Tubo de
+> esporos** (o leque de 6 e 5 que freia, paira e anda com a parede; a nave a 60% do teto por 2,5s, renovando sem somar;
+> os grãos verdes na nave; o tiro atravessa), o **pé de raízes** (afunda 5px), o **buraco só na borda ou numa mesa**
+> (colunas 280–360 — não 250, porque o buraco anda com a superfície), a Larva com **tranco na chegada e na saída**, a
+> **pupa P1 que treme**, a **mosca desorganizada**. De quebra, o teto dos Propulsores parou de prender o Dash. Tudo
+> verde (regras, a sonda da F4 com 32 checagens, as sondas de sempre, o build). **Ele viu os GIFs e calibrou** (mesma
+> sessão): a lentidão em **60%** (*"punitiva"*: a nave voa a 40% do teto) e a soltura dos esporos **orgânica,
+> desorganizada e para cima** (desenho dele) — `esporosDoPulso`: cone de ±60°, velocidade/freada/atraso sorteados,
+> param de rente à boca a ~70px e sobem devagar; os GIFs `jogo-tubo*-nuvem.gif` mostram. **Esperam por ele:** os GIFs
+> (`folhas/2026-10-14/f4/jogo-*.gif`, ~8–11 MB cada, zoom 1), o sandbox e a F4; a decisão do **Dash não freado**; e
+> a cor do buraco na **câmara A** (carne vermelha na placa de metal — no duto ela casa). A porta é o START
+> `plans/2026-10-14-f4-rodada-START.md`. NADA commitado (13/10 + 14/10 no disco).
+>
+> 📍 **14/10 — (CUMPRIDO em 14/10 (2): a rodada foi implementada.) ELE TESTOU A F4; A RODADA NOVA ESTÁ DESENHADA (spec §9) E PLANEJADA, MAS NÃO IMPLEMENTADA** (ele: *"pode
+> escrever a spec e o plano, implemente depois"*). O que ele decidiu: **o Tubo solta ESPOROS** (sem dano: a nave fica
+> 40% mais lenta por 2,5s, renova sem somar; o tiro atravessa; eles freiam, pairam com balanço mínimo e andam com o
+> cenário) e ganha um **pé de raízes à mão** que o prende à borda (fica NA BORDA, não nas mesas: *"deixando pouco
+> espaço para desvios"*); **o buraco da Larva só abre na face da borda ou de uma mesa, nunca na pintura do fundo, nem
+> no duto** (*"o verme tem que sair da borda"*), e ela chega e sai por um tranco; **a pupa é a P1** (crisálida em
+> anéis, à mão) e treme antes de eclodir; **o esporo é o G4** (gerado); **a mosca** nasce num rumo sorteado e voa
+> tremendo. Aprovados: a mecânica e a quantidade da Larva, as variações, o buraco e a cicatriz à mão. Folhas do dia:
+> `folhas/2026-10-14/f4/` (`folha-`/`detalhe-` `pupas`/`esporos`). ⚠️ Decisão minha para ele confirmar jogando: o Dash
+> não é freado pela lentidão. **Os GIFs de 13/10 (~146 MB) ficam**: não entram na produção, vão para um repositório de
+> backup no GitHub, só no final de tudo. **Anotado no GDD (§4 Modos):** o MODO COMPETITIVO por níveis (ideia dele, de
+> um teste no sandbox; *"só anote e continuamos na altura certa"*). NADA commitado (13/10 + 14/10 no disco).
+>
+> 📍 **13/10 — (CUMPRIDO em 14/10: ele testou e a rodada nova saiu dali.) A FATIA F4 ESTÁ NO JOGO, COM A ARTE E OS GESTOS; ELE AINDA NÃO TESTOU.** Ele escolheu nas folhas e nos
+> GIFs encenados e ficou com **as DUAS variações de cada elite** (*"ficaram ótimos, podemos deixar as duas variações"*;
+> da Larva: *"gostei dos dois… podemos usar a variação, como vamos fazer com o tubo"*): Larva **A** (do conceito) e
+> **D** (a broca), Tubo **C** (coroa de dentes) e **D** (craca dupla) — alternam pela ordem de nascimento na fase. O
+> plano (`plans/2026-10-13-frente-b-fatia-f4.md`, 9 tarefas) foi executado no mesmo dia: regras puras + números, os
+> gestos crus do PixMiniMax instalados (201 quadros), `Larva.ts`/`Buraco.ts`/`Pupa.ts`/`Tubo.ts`, as 6 entradas no
+> `STAGE_4` (cada uma no lugar de uma onda), `larva`/`tubo`/`mosca` no sandbox (a F4 do sandbox ganhou a borda de
+> 16px). Verde: `test-elites-regras`, `probe-elites-f4` (25), `probe-elites`, `probe-elites-f3`, `probe-stage4`, build.
+> ⚠️ `probe-f4-moldura` e `probe-f4-golfinho` JÁ quebravam antes (chamam API que não existe mais) — não são régua.
+> **O buraco, a pupa, a mosca e o tiro do anel são RASCUNHO à mão** (`scripts/_elites/_mao-f4.mjs`).
+> **Esperam por ele:** os 4 GIFs em jogo (`folhas/2026-10-13/elites/f4/jogo-*.gif`), o sandbox e a F4 inteira — e três
+> perguntas: a densidade do anel do Tubo na fase, se 2 pupas × 3 paradas é mosca demais, e a arte das peças à mão.
+> NADA commitado (ele pede). Detalhes e knobs: o START de 13/10.
+>
+> 📍 **12/10 (3) — (CUMPRIDO em 13/10: as folhas saíram, ele escolheu, o plano foi escrito e executado.) A FATIA F4 TEM O DESENHO APROVADO (só o desenho: nenhuma arte, nenhum código, nenhum plano).**
 > Brainstorming de sete perguntas com ele; a spec é `specs/2026-10-12-frente-b-fatia-f4-design.md` e a porta é o START
 > acima. **Larva Mecânica** (vida 12): abre um BURACO no fundo e sai dele, faz ziguezague na metade direita (3
 > paradas), em cada parada PÕE 2 PUPAS, e sai perfurando outro buraco. A pupa (ideia dele) morre com um tiro — *"corta
@@ -244,7 +285,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | # | Etapa | Estado |
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
-| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado, o ARQUIVO DE CARTAS (a wiki no menu; os números das cartas num endereço só), os tiros LASER, a exaustão do T1 e o jato azul dos Propulsores. 🟠 **AGORA: frente B** — ✅ 05/10 a spec-mãe (2 elites por fase) e a fatia F2 jogável COM A ARTE DELE e animada (drone de mineração + sentinela com propulsores; luta refeita como a do golfinho). ✅ 06/10 a fatia F2 APROVADA (escudo com vida, tiros desenhados). 🟠 AGORA: fatia F3 — ✅ spec + folhas de arte (à mão e PixelLab); ✅ 07/10 JOGÁVEL (a lula com a tinta, o Tentáculo com a regra do casco; arte do Tentáculo provisória); ✅ 08–10/10 o Tentáculo virou a serpente 63-3 e, depois de três dias de trajetórias abandonadas, a Sentinela do casco (gestos no lugar); ✅ 11/10 ela está NO JOGO com a sequência inteira (25°, o bote fere, 2 trios com o vão); ❌ 12/10 ELA FOI CANCELADA e retirada do jogo e da produção antes do teste (decisão dele) — **a F3 fica só com a lula (1 elite, a exceção à regra de 2)**, ✅ 12/10 com gestos e a FUGA aprovados; falta ele jogar a F3 inteira (sem pressa). 🟠 AGORA: **fatia F4** — ✅ 12/10 o desenho aprovado (Larva Mecânica com pupas e moscas + Tubo Pulsante com o pulso em anel; spec `specs/2026-10-12-frente-b-fatia-f4-design.md`, START `plans/2026-10-12-fatia-f4-START.md`); falta: as folhas de arte → o plano → jogável → ele joga a F4 → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
+| 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado, o ARQUIVO DE CARTAS (a wiki no menu; os números das cartas num endereço só), os tiros LASER, a exaustão do T1 e o jato azul dos Propulsores. 🟠 **AGORA: frente B** — ✅ 05/10 a spec-mãe (2 elites por fase) e a fatia F2 jogável COM A ARTE DELE e animada (drone de mineração + sentinela com propulsores; luta refeita como a do golfinho). ✅ 06/10 a fatia F2 APROVADA (escudo com vida, tiros desenhados). 🟠 AGORA: fatia F3 — ✅ spec + folhas de arte (à mão e PixelLab); ✅ 07/10 JOGÁVEL (a lula com a tinta, o Tentáculo com a regra do casco; arte do Tentáculo provisória); ✅ 08–10/10 o Tentáculo virou a serpente 63-3 e, depois de três dias de trajetórias abandonadas, a Sentinela do casco (gestos no lugar); ✅ 11/10 ela está NO JOGO com a sequência inteira (25°, o bote fere, 2 trios com o vão); ❌ 12/10 ELA FOI CANCELADA e retirada do jogo e da produção antes do teste (decisão dele) — **a F3 fica só com a lula (1 elite, a exceção à regra de 2)**, ✅ 12/10 com gestos e a FUGA aprovados; falta ele jogar a F3 inteira (sem pressa). 🟠 AGORA: **fatia F4** — ✅ 12/10 o desenho aprovado (Larva Mecânica com pupas e moscas + Tubo Pulsante com o pulso em anel; spec `specs/2026-10-12-frente-b-fatia-f4-design.md`, START `plans/2026-10-12-fatia-f4-START.md`); ✅ 13/10 as folhas, a escolha dele (as DUAS variações de cada elite), o plano (`plans/2026-10-13-frente-b-fatia-f4.md`) e os dois JOGÁVEIS no roteiro e no sandbox; falta: ele ver os GIFs em jogo e jogar a F4 (a densidade do anel, as pupas, as peças à mão) → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ⬜ spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |

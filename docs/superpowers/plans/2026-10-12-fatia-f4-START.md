@@ -1,5 +1,10 @@
 # START — FRENTE B, fatia F4: a Larva Mecânica e o Tubo Pulsante (depois de 12/10/2026)
 
+> ✅ **CUMPRIDO em 13/10/2026 — NÃO É MAIS A PORTA DE ENTRADA.** As folhas saíram, ele escolheu (as DUAS variações de
+> cada elite), o plano foi escrito e executado (`2026-10-13-frente-b-fatia-f4.md`) e os dois estão no jogo. Os quatro
+> itens do §5 ("a conferir no plano") foram medidos e respondidos lá. A porta agora é o
+> `2026-10-13-fatia-f4-START.md`; este fica como registro das decisões de 12/10.
+
 > **Frase de arranque:** *"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-12-fatia-f4-START.md`.
 > O desenho da F4 está fechado — faça as folhas de candidatas da Larva e do Tubo para eu escolher."*
 
