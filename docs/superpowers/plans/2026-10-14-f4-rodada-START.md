@@ -15,15 +15,16 @@
   Falta ele jogar: o sandbox (`?sandbox`, fase 4: `larva`, `tubo`, `mosca`) e a F4 inteira.
 - **Decisão minha, para ele confirmar jogando:** a lentidão NÃO freia o Dash (é a saída), e durante o Dash o esporo
   não pega.
-- **Nada commitado** (13/10 + 14/10 no disco). Commit só quando ele pedir, só no nome dele; push só quando pedir; nunca
-  para `legacy`. As mensagens estão prontas no fim de cada tarefa dos dois planos (13/10 e 14/10). Os `concept art*.png`
-  da raiz não entram. Os GIFs (13/10 e 14/10) não entram na produção: vão para o repositório de backup, no final.
+- **COMMITADO E EMPURRADO em 14/10** (ele: *"Está bom assim, pode commitar e dar push"*), em 3 commits sobre `df7e873`
+  em `feat/cartas-preview` → `origin`: `31b8fac` (o código e os sprites), `1f8fbfa` (o pipeline de arte e as folhas),
+  `e697868` (os docs). Ficaram FORA, no disco: os `jogo-*.gif` de 13 e 14/10 (~200 MB, para o repositório de backup,
+  no final) e os `concept art*.png` da raiz. Commit só quando ele pedir, só no nome dele; nunca para `legacy`.
 
 ### Para retomar
 
 1. `npm run dev` → **http://localhost:5173** (o jogo) e **http://localhost:5173/?sandbox** (fase 4).
 2. Mostrar os 4 GIFs e ouvir o que ele achou — as perguntas estão no §3.
-3. **O que está na árvore sem commit, desta rodada** (além do de 13/10, listado no START de 13/10):
+3. **O que esta rodada mexeu** (commitado em 14/10; a lista do de 13/10 está no START de 13/10):
    - código: `src/elitesRegras.ts`, `src/data/numerosElites.ts`, `src/entities/elites/{Esporos (novo),tipos,Larva,Buraco,Pupa,Tubo}.ts`,
      `src/systems/{EnemySystem,Moldura,CartasEmJogo}.ts`, `src/systems/cartas/Dash.ts`, `src/scenes/{BootScene,GameScene}.ts`;
    - arte: `public/sprites/elite-pupa-{0,1}.png` (a P1), `elite-esporo.png` (o G4), `elite-esporo-grao.png`,

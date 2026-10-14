@@ -29,7 +29,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > param de rente à boca a ~70px e sobem devagar; os GIFs `jogo-tubo*-nuvem.gif` mostram. **Esperam por ele:** os GIFs
 > (`folhas/2026-10-14/f4/jogo-*.gif`, ~8–11 MB cada, zoom 1), o sandbox e a F4; a decisão do **Dash não freado**; e
 > a cor do buraco na **câmara A** (carne vermelha na placa de metal — no duto ela casa). A porta é o START
-> `plans/2026-10-14-f4-rodada-START.md`. NADA commitado (13/10 + 14/10 no disco).
+> `plans/2026-10-14-f4-rodada-START.md`. **Commitado e empurrado em 14/10** (`31b8fac`, `1f8fbfa`, `e697868`; os `jogo-*.gif` ficam fora, para o backup).
 >
 > 📍 **14/10 — (CUMPRIDO em 14/10 (2): a rodada foi implementada.) ELE TESTOU A F4; A RODADA NOVA ESTÁ DESENHADA (spec §9) E PLANEJADA, MAS NÃO IMPLEMENTADA** (ele: *"pode
 > escrever a spec e o plano, implemente depois"*). O que ele decidiu: **o Tubo solta ESPOROS** (sem dano: a nave fica
