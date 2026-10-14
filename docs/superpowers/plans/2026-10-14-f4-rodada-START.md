@@ -13,8 +13,13 @@
   com a nuvem nova são `folhas/2026-10-14/f4/jogo-tubo-camara-a-nuvem.gif` e `jogo-tubos-aperto-nuvem.gif` (os sem
   `-nuvem` mostram o arco antigo). Os da Larva (`jogo-larva-camara-a.gif`, `jogo-larva-duto.gif`) seguem valendo.
   Falta ele jogar: o sandbox (`?sandbox`, fase 4: `larva`, `tubo`, `mosca`) e a F4 inteira.
-- **Decisão minha, para ele confirmar jogando:** a lentidão NÃO freia o Dash (é a saída), e durante o Dash o esporo
-  não pega.
+- **CONFIRMADO por ele (14/10):** *"Pode deixar o dash se livrando de lentidão"* — a lentidão NÃO freia o Dash (é a
+  saída), e durante o Dash o esporo não pega.
+- **O buraco ganhou RACHADURAS DE LAVA (14/10, ele:** *"a cor do buraco pode ter a rachadura de lava, assim destaca um
+  pouco mais"***):** veias de lava que cortam o lábio e saem para fora, quentes na boca e esfriando em brasa na ponta;
+  no 1º quadro do abrir são uma estrela de lava (o aviso), e a cicatriz esfria enquanto some. Um desenho só, para
+  todas as superfícies (`buraco` em `scripts/_elites/_mao-f4.mjs` → `_instalar-f4.mjs`). Folha antes × depois:
+  `folhas/2026-10-14/f4/folha-buraco-lava.png`; em jogo: `jogo-larva-camara-a-lava.gif` e `jogo-larva-duto-lava.gif`.
 - **COMMITADO E EMPURRADO em 14/10** (ele: *"Está bom assim, pode commitar e dar push"*), em 3 commits sobre `df7e873`
   em `feat/cartas-preview` → `origin`: `31b8fac` (o código e os sprites), `1f8fbfa` (o pipeline de arte e as folhas),
   `e697868` (os docs). Ficaram FORA, no disco: os `jogo-*.gif` de 13 e 14/10 (~200 MB, para o repositório de backup,
@@ -54,7 +59,6 @@
 | A lentidão pesa o certo? (60% por 2,5s) | `lentidao.velocidade` (0,4), `lentidao.duracaoS` (2,5) |
 | A nuvem é densa demais, alta demais, ou fica tempo demais no ar? | `tubo.esporosN` (6), `tubo.pulsos` (2), `esporo.coneGraus` (60), `esporo.vel` ([30, 105]), `esporo.freiaS` ([0,7; 1,3]), `esporo.soproS` (0,3), `esporo.sobe` (5), `esporo.vidaS` (3,5) |
 | O balanço lê como "pairando"? | `esporo.balancoPx` (1,5), `esporo.balancoS` ([1,2; 2,0]) |
-| O Dash livre da lentidão está certo? (a decisão minha) | `CartasEmJogo.tick` (`!this.dash.avancando`) e `GameScene.tocarEsporo` (`intocavel`) |
 | O tremor da pupa avisa a tempo? | `pupa.tremeS` (0,6), `pupa.tremePassoS` ([0,1; 0,03]) |
 | As moscas estão desorganizadas o bastante (ou demais)? | `mosca.tremorAcel` (160), `mosca.tremorHz` ([1,5; 3]), `mosca.velInicial` (40) |
 | O buraco abre nos lugares certos? | `buraco.colunas` ([280, 300, 320, 340, 360]), `buraco.naBordaPx` (14), `buraco.naMesaPx` (18), `buraco.folgaMesa` (16) |
@@ -66,9 +70,9 @@ Olhado nos quadros dos GIFs de 14/10 (nenhuma variação feita — a decisão é
 - **Duto (a parede grossa):** o buraco abre na parede do teto e ela sai dali; no fim, mergulha na parede do chão. A cor
   CASA — o buraco foi desenhado com a paleta dessa parede. É o *"saiu das entranhas"* que ele pediu.
 - **Câmara A (a placa de metal azul-esverdeada):** o buraco abre na borda do chão e ela mergulha no chão, como deve.
-  Mas a cor NÃO casa de todo: é uma ferida de carne vermelha numa placa de metal, e o buraco (32×28) ocupa a faixa
-  inteira e desce até a tira vermelha de baixo. Pode ler como "rasgou o metal" — ou pedir uma variação com a paleta
-  da placa. **A pergunta é dele.**
+  A cor da carne vermelha numa placa de metal não casava de todo. **Ele decidiu (14/10): as rachaduras de lava** — elas
+  recortam o buraco na placa e o destacam; no duto continuam conversando com as faixas de lava da parede. Sem variação
+  por superfície.
 - **Costelas azuis e mesas:** não apareceram nos GIFs de Larva (ela foi gravada na câmara A e no duto). O código já
   oferece as mesas da metade direita como lugar; ver no sandbox ou na fase.
 

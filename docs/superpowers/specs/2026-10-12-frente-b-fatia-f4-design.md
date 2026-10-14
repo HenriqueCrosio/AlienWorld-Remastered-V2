@@ -13,7 +13,10 @@
 > a soltura fica *"mais orgânica e desorganizada … e para cima, cobra destreza do jogador"* (um desenho dele: a nuvem
 > espalhada acima da boca). Cada esporo sai num rumo sorteado num cone de ±60° para dentro do corredor, com
 > velocidade, freada e atraso próprios; param de rente à boca a ~70px dela e sobem devagar. 6 em cada pulso. Os
-> números estão em `numerosElites.ts` (`esporo`, `lentidao`); a regra é `esporosDoPulso`.
+> números estão em `numerosElites.ts` (`esporo`, `lentidao`); a regra é `esporosDoPulso`. **Depois, ainda em 14/10:**
+> ele confirmou o Dash livre da lentidão (*"pode deixar o dash se livrando de lentidão"*) e decidiu a cor do buraco —
+> *"pode ter a rachadura de lava, assim destaca um pouco mais"*: veias de lava cortando o lábio, quentes na boca e em
+> brasa na ponta; a cicatriz esfria enquanto some. Um desenho só para todas as superfícies (sem variação por placa).
 
 ## 1. Os dois, em uma linha
 

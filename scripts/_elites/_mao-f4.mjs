@@ -44,9 +44,12 @@ export async function buraco(fotoDoDuto) {
   vermelhos.sort((a, b) => a[0] - b[0]);
   const tom = (p) => vermelhos[Math.floor(p * (vermelhos.length - 1))];
   const PAL = { fundo: [6, 3, 5], breu: tom(0.04).map((c) => c >> 1), garganta: tom(0.12), labio: tom(0.6), luz: tom(0.93) };
+  // 14/10 — LAVA CRACKS (he: "a cor do buraco pode ter a rachadura de lava, assim destaca um pouco mais"): on chamber
+  // A's teal plate the dark cracks vanished. Hot at the lip, cooling to an ember at the tip; the scar cools as it fades.
+  const LAVA = { quente: [255, 196, 92], lava: [240, 112, 36], brasa: [150, 38, 22] };
   const RX = 12, RY = 10;
   const BAYER = [[0, 2], [3, 1]];
-  const RACHAS = [[0.35, 6], [1.5, 4], [2.6, 7], [3.7, 5], [4.6, 6], [5.6, 4]]; // [angle, length]
+  const RACHAS = [[0.35, 7], [1.5, 5], [2.6, 8], [3.7, 6], [4.6, 7], [5.6, 5]]; // [angle, length]
   const borda = (ang) => 1 + 0.13 * Math.sin(3 * ang + 1.3) + 0.08 * Math.sin(7 * ang + 0.4) + 0.05 * Math.sin(11 * ang + 2.1);
   const quadro = (s, resto = 1) => {
     const buf = Buffer.alloc(BW * BH * 4);
@@ -59,13 +62,28 @@ export async function buraco(fotoDoDuto) {
     // The cracks first: they are what is left when the mouth is shut — and then they are the SCAR, in the lip's red
     // (dark cracks vanish on the dark painting: the scar of the 1st draft, 13/10, could not be seen in game).
     const fechada = s <= 0.02;
-    for (const [ang, comp] of RACHAS) {
-      const r0 = Math.max(0, s) * (RX * 0.9), n = Math.round(comp * (0.5 + 0.5 * Math.min(1, s + 0.5)));
-      for (let k = 0; k < n; k++) {
-        const r = r0 + k, quebra = k > 2 ? Math.sin(ang * 5) * 0.25 : 0;
-        pinta(Math.round(cx + Math.cos(ang + quebra) * r), Math.round(cy + Math.sin(ang + quebra) * r * (RY / RX)), fechada ? (k < n - 2 ? PAL.labio : PAL.garganta) : k < n - 2 ? PAL.breu : PAL.garganta);
+    // The lava along a crack, from the lip (u = 0) to the tip (u = 1); shut, it cools with what is left of the scar.
+    const corDaLava = (u) => {
+      const frio = fechada ? 1 - resto : 0;
+      const q = u + frio * 0.6;
+      return q < 0.35 ? LAVA.quente : q < 0.75 ? LAVA.lava : LAVA.brasa;
+    };
+    const vazio = (x, y) => x >= 0 && y >= 0 && x < BW && y < BH && buf[(y * BW + x) * 4 + 3] === 0;
+    // The cracks start at `r0` from the centre. Open, they are drawn OVER the lip (from inside it outwards): lava veins
+    // splitting the rim — drawn under it, the open mouth covered all but the tips.
+    const rachas = (r0, extra) => {
+      for (const [ang, comp] of RACHAS) {
+        const n = Math.round(comp * (0.5 + 0.5 * Math.min(1, s + 0.5))) + extra;
+        for (let k = 0; k < n; k++) {
+          const r = r0 + k, quebra = k > 2 ? Math.sin(ang * 5) * 0.25 : 0;
+          const x = Math.round(cx + Math.cos(ang + quebra) * r), y = Math.round(cy + Math.sin(ang + quebra) * r * (RY / RX));
+          // A dark seam under each lava pixel (one down), only on bare ground: the crack has depth, not a painted line.
+          if ((!fechada || resto > 0.5) && vazio(x, y + 1)) pinta(x, y + 1, PAL.breu);
+          pinta(x, y, corDaLava(k / Math.max(1, n - 1)));
+        }
       }
-    }
+    };
+    if (fechada) rachas(0, 0);
     if (fechada) {
       // Shut: the lips pressed together, a jagged seam still lit.
       for (let x = -7; x <= 7; x++) pinta(Math.round(cx + x), Math.round(cy + Math.sin(x * 1.7) * 1.2), Math.abs(x) % 3 === 0 ? PAL.luz : PAL.labio);
@@ -91,6 +109,7 @@ export async function buraco(fotoDoDuto) {
         else cor = PAL.fundo;
         pinta(x, y, cor);
       }
+    rachas(s * RX * 0.72, 2);
     return sharp(buf, { raw: { width: BW, height: BH, channels: 4 } }).png().toBuffer();
   };
   return {
