@@ -331,6 +331,8 @@ export class TerrainSystem {
       hp?: number;
       /** O CENTRO do vão, em y de tela. Só a porta usa — ver o `PropKind` dela. */
       centroVao?: number;
+      /** Onde a peça nasce, em x de tela. Ausente: logo depois da borda direita. Só o esfíncter usa. */
+      x?: number;
     },
   ): void {
     const teto = opts?.anchor === 'teto';
@@ -348,7 +350,7 @@ export class TerrainSystem {
     // Sorteia entre as variantes: um relevo com um pico só é um padrão, não uma paisagem.
     const texture = pickVariant(this.scene, kind);
     const p = this.props.create(
-      GAME_WIDTH + 30,
+      opts?.x ?? GAME_WIDTH + 30,
       teto ? TETO_Y : pe,
       texture,
     ) as Phaser.Physics.Arcade.Sprite;

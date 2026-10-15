@@ -133,8 +133,11 @@ for (let i = 0; i < 24; i++) {
     });
     const naTela = (o) => o.x > -o.displayWidth && o.x < 384 + o.displayWidth;
     return {
-      // o destroço de PRIMEIRO PLANO é o único `derelict` em depth 60
-      frente: imgs.filter((o) => o.texture?.key === 'derelict' && o.depth === 60 && naTela(o)).map(caixa),
+      // ⚠️ 15/10: a F4 não tem mais `derelict` NENHUM (as bandas e as vigas saíram — ver `buildInterior`).
+      // Qualquer um na tela conta como invasão, em qualquer altura.
+      frente: imgs
+        .filter((o) => o.texture?.key === 'derelict' && naTela(o))
+        .map((o) => ({ ...caixa(o), topo: 0, base: 216 })),
       orgao: imgs.filter((o) => o.texture?.key === 'orgao' && naTela(o)).map(caixa),
     };
   });
@@ -152,7 +155,7 @@ console.log('leitura  ', JSON.stringify(leitura));
 ok(leitura.amostras >= 12, `a amostragem rodou (${leitura.amostras} quadros)`);
 ok(
   leitura.frenteNoMiolo.length === 0,
-  `o destroço de primeiro plano NUNCA entra no terço central (${leitura.frenteNoMiolo.length} invasões)`,
+  `nenhuma silhueta \`derelict\` na F4 (${leitura.frenteNoMiolo.length} na tela)`,
 );
 ok(
   leitura.orgaoNoAr.length === 0,

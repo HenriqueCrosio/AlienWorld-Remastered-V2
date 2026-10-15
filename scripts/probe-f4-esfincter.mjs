@@ -119,6 +119,13 @@ const ler = () =>
       // 13px de enterro numa peça posta a 5 — as mangueiras ficam 62px à frente, e a parede é uma
       // ESCADA de placas de 128px: duas colunas distantes têm superfícies diferentes.
       canoTetoY: cano ? Math.round(s.moldura.superficieTetoEm(cano.x)) : null,
+      canoX: cano ? Math.round(cano.x) : null,
+      // A PONTA DO PILAR DA JUNTA: desde 15/10 as mangueiras pendem dela, de dentro da trepadeira.
+      pilar: s.moldura.pontaDaJunta(true),
+      trepadeira: s.children.list.some((o) => o.name === 'trepadeiraTeto' && o.visible),
+      raizes: s.children.list.filter((o) => o.name === 'f4EsfincterRaiz').length,
+      // Do centro do pilar ao centro dela: o pilar não pode cortar o corpo dela (polimento, 15/10).
+      depoisDoPilar: s.moldura.pontaDaJunta(true) ? Math.round(p.x - s.moldura.pontaDaJunta(true).x) : null,
       canoDims: cano ? `${cano.width}x${cano.height}` : null,
       canoEscala: cano ? cano.scaleX : null,
       tetoY: Math.round(teto),
@@ -151,16 +158,24 @@ if (viva) {
   // ao cruzar o JSON, e `null` também não é finito — o assert antigo passaria com o `hp` AUSENTE.
   ok(viva.hpInfinito, 'bala não a fere: o hp dela é Infinity');
   ok(viva.gas === 1, 'a nuvem de gás está plantada');
-  // ⚠️ AS MANGUEIRAS PENDURAM NA PAREDE, não no topo da criatura. Deduzi-las do sprite dela as
-  // fazia flutuar a meio corredor — o defeito das passarelas de 13/09.
+  // ⚠️ AS MANGUEIRAS PENDURAM DA PONTA DO PILAR DA JUNTA, DE DENTRO DA TREPADEIRA (escolha dele,
+  // 15/10), e nunca do topo da criatura. Deduzi-las do sprite dela as fazia flutuar a meio corredor —
+  // o defeito das passarelas de 13/09.
   //
-  // ⚠️ E A PLACA FICA ENTERRADA, NÃO ENCOSTADA. Pedido dele em 21/09; encostada na linha da
-  // superfície ela lia como POUSADA. O assert cobre os dois erros de uma vez: flutuar (y maior que
-  // o teto) e encostar (y igual ao teto). Só o intervalo enterrado passa.
+  // ⚠️ E A PLACA FICA ENTERRADA, NÃO ENCOSTADA. Pedido dele em 21/09; encostada ela lia como
+  // POUSADA. O assert cobre os dois erros de uma vez: flutuar (y maior que a ponta) e encostar (y
+  // igual a ela). Só o intervalo enterrado passa.
+  ok(viva.pilar !== null, 'o pilar da junta está na tela quando ela nasce');
+  ok(viva.trepadeira, 'e ele está VESTIDO: a trepadeira cobre a ponta dele');
+  ok(viva.raizes === 2, `as raízes dela estão plantadas, no teto e no chão (${viva.raizes})`);
   ok(
-    viva.canoY !== null && viva.canoTetoY - viva.canoY >= 2 && viva.canoTetoY - viva.canoY <= 10,
-    `as mangueiras ficam ENTERRADAS no teto, nem flutuando nem pousadas ` +
-      `(${viva.canoTetoY - viva.canoY}px dentro da parede, medido na coluna DELAS)`,
+    viva.depoisDoPilar !== null && viva.depoisDoPilar >= 79 && viva.depoisDoPilar <= 81,
+    `⭐ ela nasce DEPOIS do pilar, sem ser cortada por ele (${viva.depoisDoPilar}px do centro dele, quer 80)`,
+  );
+  const enterro = viva.pilar ? Math.round(viva.pilar.y) - viva.canoY : null;
+  ok(
+    enterro !== null && enterro >= 2 && enterro <= 10 && Math.abs(viva.canoX - Math.round(viva.pilar.x + 12)) <= 1,
+    `as mangueiras saem ENTERRADAS na ponta do pilar, nem flutuando nem pousadas (${enterro}px dentro dela)`,
   );
   ok(
     viva.canoDims === '32x44',
@@ -348,15 +363,21 @@ await p2.waitForFunction(() => window.__game.scene.getScenes(true)[0].esfincter?
 const camadas = await p2.evaluate(() => {
   const s = window.__game.scene.getScenes(true)[0];
   const cano = s.children.list.find((o) => o.name === 'f4Cano');
-  const faixa = s.children.list.find((o) => o.name === 'faixaTeto');
-  return { cano: cano?.depth ?? null, faixa: faixa?.depth ?? null };
+  const pilar = s.children.list.find((o) => o.name === 'juntaTeto');
+  const trep = s.children.list.find((o) => o.name === 'trepadeiraTeto');
+  return { cano: cano?.depth ?? null, pilar: pilar?.depth ?? null, trepadeira: trep?.depth ?? null };
 });
 console.log('camadas  ', JSON.stringify(camadas));
-// ⭐ MEDIDO CONTRA A FAIXA DE VERDADE, não contra o literal −0,6. Se a `Moldura` mudar de camada, é
-// a mangueira que tem de acompanhar — e um assert cravado no número não avisaria.
+// ⭐ MEDIDO CONTRA AS PEÇAS DE VERDADE, não contra literais. Se a `Moldura` mudar de camada, é a
+// mangueira que tem de acompanhar — e um assert cravado no número não avisaria.
+//
+// ⚠️ ATÉ 15/10 ELA FICAVA ATRÁS DA BORDA (pedido de 22/09, *"cravado lá"*). Agora ela sai de dentro
+// da trepadeira (escolha dele): o cravado é a manta de tecido cobrindo a placa dela, então ela mora
+// À FRENTE da pedra do pilar e ATRÁS do tecido.
 ok(
-  camadas.cano !== null && camadas.faixa !== null && camadas.cano < camadas.faixa,
-  `⭐ a mangueira fica ATRÁS da borda (cano ${camadas.cano} < faixa ${camadas.faixa}) — cravada, não colada`,
+  camadas.cano !== null && camadas.pilar !== null && camadas.trepadeira !== null &&
+    camadas.pilar < camadas.cano && camadas.cano < camadas.trepadeira,
+  `⭐ a mangueira sai de DENTRO da trepadeira (pilar ${camadas.pilar} < cano ${camadas.cano} < trepadeira ${camadas.trepadeira})`,
 );
 
 const g = await p2.evaluate(() => {

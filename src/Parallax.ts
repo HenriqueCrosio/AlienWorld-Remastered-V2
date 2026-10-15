@@ -327,10 +327,9 @@ export class Parallax {
    * partido aparecem ATRAVÉS delas de graça — a referência do Henrique: interior industrial
    * com janelões mostrando o espaço.
    *
-   * Chão e TETO são bandas contínuas de placas (`derelict`) — a mesma receita do casco do
-   * Ato 2 da F3 (continuidade: o chão da F4 é o MESMO material do casco que o jogador
-   * sobrevoou), agora espelhada no alto: o interior é a primeira fase FECHADA POR CIMA, e o
-   * fundo anuncia o verbo dela (precisão) antes de o primeiro corredor apertar.
+   * Chão e TETO são a borda da `Moldura`: o interior é a primeira fase FECHADA POR CIMA, e a
+   * borda anuncia o verbo dela (precisão) antes de o primeiro corredor apertar. (As bandas de
+   * placas `derelict` que faziam esse papel antes da borda saíram em 15/10 — ver abaixo.)
    */
   private buildInterior(): void {
     // ─── A PINTURA DO INTERIOR (Fatia 7) ───
@@ -366,76 +365,20 @@ export class Parallax {
       this.pinturaAtual = 'paintBgF4a';
     }
 
-    // O CHÃO: a banda de placas do casco (receita da F3), sempre visível.
-    this.addLayer({
-      key: 'derelict',
-      factor: 1.0,
-      baseY: GAME_HEIGHT + 26,
-      depth: -75,
-      tint: 0x2f3a55,
-      alpha: 0.95,
-      scale: [1.1, 1.5],
-      gap: [78, 108],
-      terreno: false,
-    });
-
-    // O TETO: a mesma banda, espelhada no alto (flag `teto`). Um tom mais escuro que o chão —
-    // a luz das fases vem sempre de baixo/frente, e um teto tão claro quanto o chão achataria
-    // o túnel.
-    this.addLayer({
-      key: 'derelict',
-      factor: 1.0,
-      baseY: -26,
-      depth: -75,
-      tint: 0x27304a,
-      alpha: 0.95,
-      scale: [1.1, 1.5],
-      gap: [78, 108],
-      terreno: false,
-      teto: true,
-    });
-
-    // VIGAS SOLTAS no primeiro plano: as silhuetas que passam na frente da nave (dificuldade
-    // de leitura na fase; o chefão as apaga via setForegroundDimmed, como nas outras).
-    // Com FAIXA e escala contida: a placa girada em ângulo aleatório a escala 2.1 lia como um
-    // BORRÃO preto tapando um canto da tela, não como viga (revisão visual). A faixa a mantém
-    // horizontal — viga passa deitada — e o tom sobe um degrau para ela ter silhueta, não buraco.
-    this.addLayer({
-      key: 'derelict',
-      factor: 1.3,
-      baseY: 0,
-      depth: 60,
-      tint: 0x1a2440,
-      alpha: 1,
-      // ⚠️ 1.6–1.9, E A FAIXA TEM DOIS TETOS. O piso subiu de 1.0 porque a viga nascia do MESMO
-      // tamanho das bandas de chão e teto (1.1–1.5) e lia como a terceira cópia da mesma placa em
-      // vez de como uma viga PERTO. O teto de 1.9 é a revisão visual anterior, que mediu a placa
-      // girada a 2.1 lendo como borrão preto tapando um canto da tela.
-      scale: [1.6, 1.9],
-      gap: [380, 560],
-      terreno: false,
-      flutua: true,
-      // ⚠️ ELA MOROU EM `faixa: [30, 186]` E ERA O DEFEITO QUE O HENRIQUE CIRCULOU no print de
-      // 12/09: *"o marcado de número 1 é o destroço tomando quase 80% da tela"*. A conta explica
-      // o print — a peça tem 123×46 e a escala 1.6–1.9 a leva a 234×87; num campo de 384×216,
-      // centrada em y=108, ela é uma placa OPACA (depth 60, na frente da nave) atravessando o
-      // miolo exato de onde se joga.
-      //
-      // ⚠️ A RECEITA É DELE, E É DE POSIÇÃO, NÃO DE TAMANHO: *"os destroços podem ser movidos
-      // para perto da borda, mas não no meio da fase"*. Uma viga grande COLADA na borda continua
-      // sendo a silhueta de primeiro plano que a fase quer; a mesma viga no meio é um tapa-olho.
-      // (É a mesma lei do `orgao` logo abaixo, escrita para a outra ponta da tela.)
-      //
-      // ⚠️ OS NÚMEROS SAEM DE UMA INVARIANTE, não de gosto: com meia-altura máxima de 44px
-      // (46 × 1,9 ÷ 2), um centro em 28 põe a base em 72 e um centro em 188 põe o topo em 144 —
-      // ou seja, **o TERÇO CENTRAL (72–144) nunca é tocado**, que é onde o corredor vive. A
-      // sonda cobra exatamente isso.
-      faixas: [
-        [6, 28],
-        [188, 210],
-      ],
-      primeiroPlano: true,
-    });
+    // ⚠️ SEM `derelict` NA F4 — NEM CHÃO, NEM TETO, NEM VIGA DE PRIMEIRO PLANO (polimento de 15/10).
+    //
+    // Eram três camadas: as bandas de placas do chão e do teto (depth −75) e as vigas soltas na frente da
+    // nave (depth 60, faixas y 6–28 e 188–210). As bandas eram o chão e o teto da F4 de ANTES da `Moldura`;
+    // com a borda desenhada, faziam o mesmo papel duas vezes e só vazavam para dentro do corredor — medido
+    // em 14/10: até 24–27px no começo da fase e 6–15px na câmara azul. As vigas moravam exatamente em cima
+    // da borda, e na fase da PRECISÃO a borda é a linha que decide a batida; ao vivo, a borda limpa
+    // aparece só com as três desligadas (`scripts/_polimento/_antes-depois.mjs`). Era o print 1 dele: *a borda
+    // parece cortada*.
+    //
+    // ⚠️ E A PLACA ERA A ERRADA PARA O LUGAR: o `derelict` é o destroço de nave da F2, dentro de um bicho
+    // vivo. A profundidade que as vigas davam volta com um primeiro plano PRÓPRIO da F4 (tendões e membranas
+    // quase pretos, que não cruzam a linha da superfície), já combinado com ele para a rodada de geração.
+    // Não religue estas camadas para tapar a falta dele.
 
     // ─── A ANATOMIA DO BICHO (2026-07-21) ───
     //
@@ -1122,40 +1065,49 @@ export class Parallax {
     // A FROTA MORTA DE VERDADE: cascos capitais partidos, GRANDES e lentíssimos, atravessando
     // o fundo. O cinturão dizia "campo de pedra"; são eles que dizem "cemitério de naves".
     // Presos na horizontal (faixa) — nave capital não deriva de ponta-cabeça.
-    this.addLayer({
-      key: 'derelict',
-      factor: 0.07,
-      baseY: 0,
-      depth: -94,
-      tint: 0x232c46,
-      alpha: 1,
-      scale: [0.9, 1.4],
-      gap: [520, 900],
-      terreno: false,
-      flutua: true,
-      faixa: [40, 130],
-    });
+    //
+    // ⚠️ OS CASCOS E O CINTURÃO SÃO SÓ DA FASE 2 (polimento de 15/10). O modo 'nebulosa' também passa
+    // por aqui, e na F3 os dois ficavam POR CIMA da pintura opaca da nuvem (−94 e −93 sobre −96): o
+    // casco, tingido de escuro, virava um RETÂNGULO PRETO no meio da nebulosa, e o cinturão uma faixa de
+    // pontas retas — as "caixas pretas" do relatório de 14/10. E é a mesma lei do cabeçalho deste
+    // método: o fundo da F3 repetindo o cemitério da F2 desmente a viagem. As pedras soltas (abaixo)
+    // continuam nas duas.
+    if (this.mode === 'espaco') {
+      this.addLayer({
+        key: 'derelict',
+        factor: 0.07,
+        baseY: 0,
+        depth: -94,
+        tint: 0x232c46,
+        alpha: 1,
+        scale: [0.9, 1.4],
+        gap: [520, 900],
+        terreno: false,
+        flutua: true,
+        faixa: [40, 130],
+      });
 
-    this.addLayer({
-      key: 'belt',
-      factor: 0.1,
-      baseY: 0,
-      depth: -93,
-      tint: 0x2a3352,
-      // O cinturão é o cadáver de um MUNDO: pedra, mas também metal morto. O azul de sempre,
-      // um roxo-cinza e uma ferrugem apagada — a faixa ganha textura de escombro variado sem
-      // perder a leitura de banda contínua (todos no mesmo nível de escuro).
-      tints: [0x2a3352, 0x3a3048, 0x40342c],
-      alpha: 0.9,
-      scale: [0.8, 1.25],
-      // Sobreposto de propósito (gap < largura): a faixa tem que ser CONTÍNUA. Espaçada, ela
-      // vira ilhas de cascalho e deixa de ser um cinturão.
-      gap: [70, 110],
-      terreno: false,
-      // Faixa ESTREITA em volta do meio da tela — não espalhada na altura toda como as pedras.
-      flutua: true,
-      faixa: [70, 150],
-    });
+      this.addLayer({
+        key: 'belt',
+        factor: 0.1,
+        baseY: 0,
+        depth: -93,
+        tint: 0x2a3352,
+        // O cinturão é o cadáver de um MUNDO: pedra, mas também metal morto. O azul de sempre,
+        // um roxo-cinza e uma ferrugem apagada — a faixa ganha textura de escombro variado sem
+        // perder a leitura de banda contínua (todos no mesmo nível de escuro).
+        tints: [0x2a3352, 0x3a3048, 0x40342c],
+        alpha: 0.9,
+        scale: [0.8, 1.25],
+        // Sobreposto de propósito (gap < largura): a faixa tem que ser CONTÍNUA. Espaçada, ela
+        // vira ilhas de cascalho e deixa de ser um cinturão.
+        gap: [70, 110],
+        terreno: false,
+        // Faixa ESTREITA em volta do meio da tela — não espalhada na altura toda como as pedras.
+        flutua: true,
+        faixa: [70, 150],
+      });
+    }
 
     // Cinturão distante: a massa de rocha que dá volume ao fundo, bem atrás e quase parada.
     this.addLayer({

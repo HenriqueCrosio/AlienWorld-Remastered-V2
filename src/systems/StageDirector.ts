@@ -129,6 +129,11 @@ export type StageEvent =
        */
       junta?: string;
       /**
+       * O pilar da junta leva a TREPADEIRA — o tecido do esfíncter crescido sobre a ponta dele. Só a
+       * soleira do núcleo. Ver `Moldura.TREPADEIRA_SUP`.
+       */
+      juntaVestida?: boolean;
+      /**
        * COMO A PINTURA ENTRA. Ausente: o mergulho no escuro do `setPintura`. `'emenda'`: a câmara nova
        * se revela atrás do pilar da junta, andando com ele — ver `Parallax.setPinturaPelaEmenda`. Só
        * faz sentido com `faixa` (é a troca de borda que cria a emenda).
@@ -742,7 +747,11 @@ export const STAGE_4: StageEvent[] = [
   { t: 109, type: 'moldura', espessura: 26, duto: false },
   // ⚠️ `entrada: 'emenda'` (14/09, 3º teste jogado): o mergulho no escuro de 600ms foi reprovado aqui
   // — *"a transição de fundos, de novo, está muito seca"*. O núcleo se revela atrás do pilar.
-  { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD', soFundo: true, junta: 'mesa', entrada: 'emenda' },
+  //
+  // ⚠️ `juntaVestida` (15/10, polimento bloco B): o pilar desta junta é a metade esquerda da soleira.
+  // O tecido do esfíncter cresce sobre a ponta dele e o tubo de gás sai de dentro desse tecido, então
+  // pilar e criatura leem como UMA soleira, e não como um pilar de pedra sozinho ao lado de um bicho.
+  { t: 109, type: 'cenario', key: 'paintBgF4d', faixa: 'f4FaixaD', soFundo: true, junta: 'mesa', juntaVestida: true, entrada: 'emenda' },
   { t: 109, type: 'banner', text: 'ALERTA · O NÚCLEO' },
 
   // ─── A SOLEIRA: O ESFÍNCTER. A última coisa entre o jogador e o núcleo. ───

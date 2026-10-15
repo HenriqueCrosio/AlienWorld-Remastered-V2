@@ -71,6 +71,8 @@ interface Placa {
    * chave da arte (uma mesa), já sorteada. Ver `JUNTA_ESCALA`.
    */
   junta?: string;
+  /** O pilar desta junta leva a TREPADEIRA? Só o da soleira do núcleo. Ver `TREPADEIRA_SUP`. */
+  juntaVestida?: boolean;
 }
 
 /**
@@ -273,6 +275,22 @@ export class Moldura {
   /** Quanto o pilar da junta passa da superfície mais alta das duas placas. Menor que a `FOLGA`. */
   private static readonly JUNTA_SOBRA = 5;
 
+  /**
+   * A TREPADEIRA DA SOLEIRA — o tecido do esfíncter crescido sobre a ponta do pilar (polimento, bloco
+   * B, 15/10; o item 4 da análise de 14/10, *"o pilar sozinho em corte reto"*).
+   *
+   * ⚠️ ELA É DO PILAR, NÃO DA CRIATURA, e por isso mora aqui. O pilar entra na tela ~0,7s antes de o
+   * esfíncter nascer; presa à criatura, ela BROTARIA na ponta de um pilar já visível. Presa ao pilar,
+   * ela entra com ele pela direita, como qualquer parte dele.
+   *
+   * O número é a linha da arte que encosta na ponta do pilar (`_raizes-esfincter.mjs`: SUP 4 na peça
+   * de chão; a de teto é a mesma peça virada, então lá a linha é 34 − 1 − 4). A coluna 48 de 104 é o
+   * centro do pilar.
+   */
+  private static readonly TREPADEIRA_SUP = 4;
+  private static readonly TREPADEIRA_ALTURA = 34;
+  private static readonly TREPADEIRA_EIXO = 48 / 104;
+
   /** A distância que o mundo já rolou, em px. É o eixo de tudo. */
   private xMundo = 0;
 
@@ -333,11 +351,15 @@ export class Moldura {
   /** O pilar da junta, um por lado. Invisível enquanto não há emenda na tela. Ver `JUNTA_ESCALA`. */
   private juntaChao: Phaser.GameObjects.Image | null = null;
   private juntaTeto: Phaser.GameObjects.Image | null = null;
+  /** A trepadeira do pilar, um por lado. Só aparece na junta vestida. Ver `TREPADEIRA_SUP`. */
+  private trepadeiraChao: Phaser.GameObjects.Image | null = null;
+  private trepadeiraTeto: Phaser.GameObjects.Image | null = null;
   /**
    * A junta pedida por um `setFaixa` ao vivo que não achou placa fora da tela para carregá-la: a
    * próxima placa GERADA é a primeira da câmara nova, e leva a junta.
    */
   private juntaPendente: string | null = null;
+  private juntaPendenteVestida = false;
 
   /**
    * O ÍNDICE DA PRIMEIRA PLACA DA CÂMARA NOVA — a emenda viva entre duas bordas. `null` com
@@ -479,6 +501,24 @@ export class Moldura {
       .setDepth(-0.54)
       .setVisible(false)
       .setName('juntaTeto');
+
+    // A TREPADEIRA: depth −0,52, à frente do pilar (−0,54) e do tubo de gás que sai dela (−0,525),
+    // atrás dos props (−0,5). Ver `TREPADEIRA_SUP`.
+    if (scene.textures.exists('f4JuntaTrepadeiraChao') && scene.textures.exists('f4JuntaTrepadeiraTeto')) {
+      const alt = Moldura.TREPADEIRA_ALTURA;
+      this.trepadeiraChao = scene.add
+        .image(0, 0, 'f4JuntaTrepadeiraChao')
+        .setOrigin(Moldura.TREPADEIRA_EIXO, Moldura.TREPADEIRA_SUP / alt)
+        .setDepth(-0.52)
+        .setVisible(false)
+        .setName('trepadeiraChao');
+      this.trepadeiraTeto = scene.add
+        .image(0, 0, 'f4JuntaTrepadeiraTeto')
+        .setOrigin(Moldura.TREPADEIRA_EIXO, (alt - 1 - Moldura.TREPADEIRA_SUP) / alt)
+        .setDepth(-0.52)
+        .setVisible(false)
+        .setName('trepadeiraTeto');
+    }
   }
 
   // ⚠️ AQUI MORAVA O `corDoFundo`, e vale saber por quê. Ele MEDIA a última linha da peça para
@@ -508,7 +548,7 @@ export class Moldura {
    * minúsculos alinhados no rodapé. De 12/09 a 20/09 foi isto que fez o duto ser jogado vestido
    * com a borda da garganta, e ninguém viu um defeito: viu um lugar.
    */
-  setFaixa(base: string, imediato = false, junta?: string): void {
+  setFaixa(base: string, imediato = false, junta?: string, juntaVestida = false): void {
     const scene = this.scene;
     if (!scene || !scene.textures.exists(base)) return;
     if (base === this.base && !imediato) return;
@@ -541,6 +581,7 @@ export class Moldura {
       p.faixaTeto = pickVariant(scene, base);
       p.contorno = Moldura.CONTORNO_BASES.has(base);
       p.junta = undefined;
+      p.juntaVestida = undefined;
       // ⚠️ A CÂMARA NOVA NÃO HERDA A RAMPA DO TINT DA ANTERIOR: a placa da borda nova já nasce no
       // estado final do duto. O degradê é para a MESMA borda esfriando; entre duas bordas quem tapa a
       // costura é o pilar da junta, e uma borda D meio avermelhada seria outra costura.
@@ -552,8 +593,13 @@ export class Moldura {
     }
     this.letalAtual = this.duto ? 1 : 0;
     if (chaveJunta) {
-      if (primeira) primeira.junta = chaveJunta;
-      else this.juntaPendente = chaveJunta;
+      if (primeira) {
+        primeira.junta = chaveJunta;
+        primeira.juntaVestida = juntaVestida;
+      } else {
+        this.juntaPendente = chaveJunta;
+        this.juntaPendenteVestida = juntaVestida;
+      }
     }
     // A EMENDA VIVA — o salto não tem uma.
     this.emendaIndice = imediato ? null : primeiraN;
@@ -927,10 +973,24 @@ export class Moldura {
         .setTexture(p.junta)
         .setPosition(x, Math.max(p.superficieTeto, ant.superficieTeto) + Moldura.JUNTA_SOBRA)
         .setVisible(true);
+      // A trepadeira encosta na PONTA do pilar, que é o `y` dele (a origem do pilar é a ponta).
+      this.trepadeiraChao?.setPosition(x, chao.y).setVisible(p.juntaVestida === true);
+      this.trepadeiraTeto?.setPosition(x, teto.y).setVisible(p.juntaVestida === true);
       return;
     }
     chao.setVisible(false);
     teto.setVisible(false);
+    this.trepadeiraChao?.setVisible(false);
+    this.trepadeiraTeto?.setVisible(false);
+  }
+
+  /**
+   * A PONTA DO PILAR DA JUNTA na tela (a que encara o corredor), ou `null` sem pilar na tela. É dela
+   * que o tubo de gás do esfíncter pende: ele sai de dentro da trepadeira. Ver `Esfincter.CANO_NO_PILAR`.
+   */
+  pontaDaJunta(teto: boolean): { x: number; y: number } | null {
+    const j = teto ? this.juntaTeto : this.juntaChao;
+    return j && j.visible ? { x: j.x, y: j.y } : null;
   }
 
   private enche(i: number, x: number, p: Placa): void {
@@ -1116,7 +1176,9 @@ export class Moldura {
 
     // A junta pendente de um `setFaixa` que não achou placa fora da tela: esta é a primeira da câmara.
     const junta = this.juntaPendente ?? undefined;
+    const juntaVestida = junta ? this.juntaPendenteVestida : undefined;
     this.juntaPendente = null;
+    this.juntaPendenteVestida = false;
     if (this.emendaPendente) {
       this.emendaIndice = n;
       this.emendaPendente = false;
@@ -1124,7 +1186,7 @@ export class Moldura {
 
     return {
       vaoY, repetida, superficieChao, superficieTeto, gap: this.gap, faixaChao, faixaTeto,
-      letal: this.avancaLetal(), contorno: Moldura.CONTORNO_BASES.has(this.base), junta,
+      letal: this.avancaLetal(), contorno: Moldura.CONTORNO_BASES.has(this.base), junta, juntaVestida,
     };
   }
 }

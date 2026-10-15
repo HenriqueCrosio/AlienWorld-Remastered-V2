@@ -249,6 +249,13 @@ export class GameScene extends Phaser.Scene {
   private static readonly LENTA_SEGURA_MS = 1100;
   private static readonly LENTA_VOLTA_MS = 600;
   private static readonly LENTA_PISO = 0.3;
+
+  /**
+   * Do centro do pilar da junta ao centro do esfíncter, em px. Medida quadro a quadro nas linhas em
+   * que o pilar invade o corredor: sobram 2px de folga, e a borda direita dela cai em +125,5, ainda
+   * na primeira placa da câmara D (que é plana). Ver `spawnGarganta`.
+   */
+  private static readonly GARGANTA_DEPOIS_DO_PILAR = 80;
   private static readonly HITSTOP_BOSS_MS = 150;
   /** A hitbox da nave do jogador — IGUAL para toda nave e todo tier (ver o `setSize` no `create`). */
   private static readonly HITBOX_NAVE = { w: 21, h: 9 } as const;
@@ -342,6 +349,7 @@ export class GameScene extends Phaser.Scene {
       // ⚠️ O MEIO DAS DUAS SUPERFÍCIES, e não o `vaoEm`: o corredor é ASSIMÉTRICO em volta da linha
       // nominal (relevos diferentes nas duas bandas). Ver o `meioEm` do `Esfincter`.
       (x) => (this.moldura.superficieTetoEm(x) + this.moldura.superficieChaoEm(x)) / 2,
+      () => this.moldura.pontaDaJunta(true),
     );
     this.weapons = new WeaponSystem(this);
     this.enemies = new EnemySystem(this, this.stage.id, this.fx);
@@ -1074,7 +1082,7 @@ export class GameScene extends Phaser.Scene {
         // A JUNTA: o pilar que tapa a costura entre as duas bordas, pedido dele (14/09).
         //
         // ⚠️ A BORDA ANTES DA PINTURA: é o `setFaixa` que cria a emenda que a entrada pela emenda segue.
-        if (e.faixa) this.moldura.setFaixa(e.faixa, false, e.junta);
+        if (e.faixa) this.moldura.setFaixa(e.faixa, false, e.junta, e.juntaVestida);
         if (e.entrada === 'emenda' && e.faixa) {
           this.parallax.setPinturaPelaEmenda(e.key, () => this.moldura.xDaEmenda());
         } else {
@@ -1518,7 +1526,14 @@ export class GameScene extends Phaser.Scene {
    */
   private spawnGarganta(): void {
     if (!this.textures.exists('garganta')) return;
-    this.terrain.spawn('garganta', { centroVao: this.moldura.vaoEm(GAME_WIDTH + 30) });
+    // ⚠️ ELA NASCE A `GARGANTA_DEPOIS_DO_PILAR` DO PILAR DA JUNTA, E NÃO NA BORDA DA TELA (15/10,
+    // polimento bloco B). Nascendo em GAME_WIDTH + 30, ela caía 56px depois do centro do pilar, que
+    // tem 37,6 de meia largura. Ela mora ATRÁS da borda (−0,65) e o pilar na FRENTE (−0,54), então
+    // os 18px que o pilar avança corredor adentro cortavam o corpo dela numa linha reta (ele viu).
+    // Sem pilar na tela, o mesmo lugar contado da borda.
+    const pilar = this.moldura.pontaDaJunta(true);
+    const x = pilar ? pilar.x + GameScene.GARGANTA_DEPOIS_DO_PILAR : GAME_WIDTH + 54;
+    this.terrain.spawn('garganta', { centroVao: this.moldura.vaoEm(x), x });
 
     const criatura = this.terrain.props
       .getChildren()

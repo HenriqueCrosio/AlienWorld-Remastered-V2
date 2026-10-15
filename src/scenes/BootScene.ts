@@ -1094,6 +1094,16 @@ const ART: Record<string, string> = {
   // A poça: o que escorre da carcaça e FICA. Assada em pixel (`_assar-sangue.mjs`).
   f4Poca: 'sprites/f4-poca.png',
 
+  // AS RAÍZES DO ESFÍNCTER E A TREPADEIRA DO PILAR DA SOLEIRA (polimento, bloco B, 15/10): pedido dele,
+  // *"raízes como as do pé do Tubo"*, para ela ler presa ao tecido e não solta no corredor. Desenhadas
+  // à mão por `scripts/_polimento/_raizes-esfincter.mjs` (ele escolheu a B); cada lado é uma peça
+  // própria, já virada, e a LINHA DA SUPERFÍCIE de cada uma é contrato com o código (ver
+  // `Esfincter.RAIZ_SUP` e `Moldura.TREPADEIRA_SUP`).
+  f4EsfincterRaizChao: 'sprites/f4-esfincter-raiz-chao.png',
+  f4EsfincterRaizTeto: 'sprites/f4-esfincter-raiz-teto.png',
+  f4JuntaTrepadeiraChao: 'sprites/f4-junta-trepadeira-chao.png',
+  f4JuntaTrepadeiraTeto: 'sprites/f4-junta-trepadeira-teto.png',
+
   // Emblema do menu. Sem placeholder: se não existir, o título aparece sem ele.
   emblem: 'sprites/emblem.png',
 

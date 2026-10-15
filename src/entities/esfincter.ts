@@ -99,24 +99,61 @@ export class Esfincter {
   /** Quantos px depois da borda esquerda o respingo é recolhido. */
   private static readonly RESPINGO_FORA = 60;
 
-  /** A folga entre as mangueiras e a criatura, em px. Elas ficam À FRENTE dela. */
-  private static readonly CANO_ADIANTE = 62;
+  /**
+   * Quanto a nuvem e a zona do gás ficam À FRENTE da criatura, em px (o centro delas).
+   *
+   * ⚠️ ERA `CANO_ADIANTE / 2`, com o cano a 62px dela. Desde 15/10 o cano mora no PILAR (ver
+   * `CANO_NO_PILAR`), mas a nuvem continua onde sempre esteve: é ela que o tiro acende, e a zona de
+   * 186px é o que faz *qualquer tiro serve* ser verdade. Ela já cobre o cano novo (a 68px dela).
+   */
+  private static readonly NUVEM_ADIANTE = 31;
 
   /**
-   * Quantos px da PLACA das mangueiras ficam ENTERRADOS na banda do teto.
+   * Onde o tubo pende, em px a partir do centro do pilar da junta: SAINDO DE DENTRO DA TREPADEIRA.
+   *
+   * ⚠️ ESCOLHA DELE DE 15/10 (polimento, bloco B), entre duas opções em jogo. O cano andava preso à
+   * criatura, 62px antes dela; com ela nascendo depois do pilar, o cano foi junto e caiu embaixo da
+   * trepadeira, que cobria as mangueiras (*"o tubo de gás tá sumido atrás da mesa"*). Saindo do
+   * tecido do pilar, ele lê como parte da mesma soleira: o tecido que cresce no pilar é o que vaza.
+   */
+  private static readonly CANO_NO_PILAR = 12;
+
+  /**
+   * Quantos px da PLACA das mangueiras ficam ENTERRADOS — no tecido da ponta do pilar ou, sem pilar,
+   * na banda do teto.
    *
    * ⚠️ PEDIDO DELE DEPOIS DE JOGAR: *"quero que suba até 'enfiar' alguns pixels da base da
    * mangueira no teto da borda"*. Encostada exatamente na linha da superfície, a placa lia como
    * POUSADA na parede — um objeto apoiado, não preso. Enfiada, ela lê como ARRANCADA de dentro
-   * dela, que é a ficção da peça inteira.
+   * dela, que é a ficção da peça inteira. No pilar, os 6px somem sob a manta da trepadeira.
    *
    * ⚠️ É a mesma correção que a porta levou em `6fc3ac3` e que ele aprovou em 21/09: *"as pontas de
    * baixo são ângulos mais retos, bom que fiquem escondidas"*. Peça que invade a parede lê
    * encaixada; peça que encosta lê colada.
    */
   private static readonly CANO_ENTERRADO = 5;
+  private static readonly CANO_ENTERRADO_NO_PILAR = 6;
+
+  /** Sem pilar na tela, o cano volta à parede, a esta distância da criatura (o lugar no pilar). */
+  private static readonly CANO_ADIANTE = 68;
+
+  /**
+   * A LINHA DA SUPERFÍCIE NA ARTE DAS RAÍZES (`_raizes-esfincter.mjs`: SUP 7 na peça de chão, de 28px;
+   * a de teto é virada, então lá é 28 − 1 − 7). A coluna 40 de 88 é o centro da criatura.
+   *
+   * ⚠️ AS RAÍZES SÃO O PEDIDO DELE DE 15/10: *"raízes como as do pé do Tubo"*, para ela ler PRESA ao
+   * tecido, não pousada no corredor. O lábio cobre a linha onde o corpo some atrás da borda, e as
+   * raízes abrem em leque cavando a parede. Ela continua ATRÁS da borda: ele testou na frente e
+   * reprovou (*"as raízes dão a base, mas a parte de baixo e de cima do esfíncter atravessam as
+   * raízes"*).
+   */
+  private static readonly RAIZ_SUP = 7;
+  private static readonly RAIZ_ALTURA = 28;
+  private static readonly RAIZ_EIXO = 40 / 88;
 
   private cano?: Phaser.GameObjects.Sprite;
+  /** As raízes dela, no chão e no teto. Ficam depois do estouro: viram os tocos do que foi arrancado. */
+  private raizes: { sp: Phaser.GameObjects.Image; teto: boolean }[] = [];
   private poca?: Phaser.GameObjects.Sprite;
   /** O que grudou na parede, com a banda em que cada um mora e a idade em ms. */
   private respingos: { sp: Phaser.GameObjects.Sprite; noTeto: boolean; idade: number }[] = [];
@@ -145,6 +182,8 @@ export class Esfincter {
      * absorve nada. Mesmo problema, folgas diferentes, respostas diferentes.
      */
     private readonly meioEm: (xTela: number) => number,
+    /** A ponta de baixo do pilar da junta do teto, ou `null` sem pilar na tela. Ver `Moldura.pontaDaJunta`. */
+    private readonly pontaDoPilar: () => { x: number; y: number } | null,
   ) {}
 
   /** A zona que a bala tem de tocar. Some na ignição — a nuvem já pegou fogo. */
@@ -179,32 +218,33 @@ export class Esfincter {
     // existindo porque é ELA que o tiro acende — mas agora o gás tem ORIGEM, e não é mais um efeito
     // colado no ar.
     //
-    // ⚠️ ANCORADO NA PAREDE, PELA `Moldura`, e não no topo da criatura. Deduzir o teto do sprite
-    // dela fazia o cano FLUTUAR a meio corredor — o mesmo defeito que as passarelas levaram em
-    // 13/09 (*"terminaram com o problema do início das passarelas flutuando"*). Quem sabe onde a
-    // parede está é quem a desenha, e `superficieTetoEm` é o MESMO número que posiciona a faixa.
+    // ⚠️ ANCORADO PELA `Moldura` (a ponta do pilar ou a parede), e não no topo da criatura. Deduzir
+    // o teto do sprite dela fazia o cano FLUTUAR a meio corredor — o mesmo defeito que as passarelas
+    // levaram em 13/09 (*"terminaram com o problema do início das passarelas flutuando"*). Quem sabe
+    // onde a parede está é quem a desenha. Ver `posicionarCano`.
     //
-    // ⚠️ E `setOrigin(0.5, 1)`: o cano pendura, então o que encosta na parede é a placa de CIMA
-    // dele. Ancorar pelo topo o deixaria pendurado a partir do vazio.
+    // ⚠️ E A ORIGEM É O TOPO: o cano pendura, então o que encosta é a placa de CIMA dele.
     if (this.scene.textures.exists('f4MangueirasSheet')) {
-      const x = criatura.x - Esfincter.CANO_ADIANTE;
-      const m = this.scene.add
-        .sprite(x, this.tetoEm(x) - Esfincter.CANO_ENTERRADO, 'f4MangueirasSheet')
-        .setOrigin(0.5, 0)
-        // ⚠️ DEPTH −0,61: ATRÁS DA BORDA (a faixa mora em −0,6), e isso é pedido dele de 22/09 —
-        // *"coloque o cano de gás para trás do layer da borda, para parecer que ele está cravado
-        // lá"*. A −0,55 a peça ficava À FRENTE da parede: os px que ela enfia no teto eram
-        // DESENHADOS por cima dele, então a mangueira lia como colada na superfície — o defeito
-        // exato que o `CANO_ENTERRADO` existia para resolver e não resolvia sozinho. Enterrar sem
-        // mandar para trás é pintar a peça em cima do buraco em que ela deveria estar.
-        //
-        // ⚠️ E −0,61 é um degrau, não um número redondo: a saia mora em −0,62 e as bandas de placas
-        // em −0,75. A mangueira tem de entrar ENTRE a face da parede e o enchimento dela.
-        .setDepth(-0.61)
-        .setName('f4Cano');
+      const m = this.scene.add.sprite(0, 0, 'f4MangueirasSheet').setOrigin(0.5, 0).setName('f4Cano');
       if (this.scene.anims.exists('f4-mangueiras')) m.play('f4-mangueiras');
       this.cano = m;
+      this.posicionarCano();
     }
+
+    // AS RAÍZES. Ver `RAIZ_SUP`. Depth −0,52: à frente da borda (−0,6), que é onde o corpo dela some,
+    // e do pilar (−0,54); atrás dos props (−0,5).
+    for (const teto of [false, true]) {
+      const chave = teto ? 'f4EsfincterRaizTeto' : 'f4EsfincterRaizChao';
+      if (!this.scene.textures.exists(chave)) continue;
+      const alt = Esfincter.RAIZ_ALTURA;
+      const sp = this.scene.add
+        .image(0, 0, chave)
+        .setOrigin(Esfincter.RAIZ_EIXO, teto ? (alt - 1 - Esfincter.RAIZ_SUP) / alt : Esfincter.RAIZ_SUP / alt)
+        .setDepth(-0.52)
+        .setName('f4EsfincterRaiz');
+      this.raizes.push({ sp, teto });
+    }
+    this.posicionarRaizes();
 
     // A nuvem nasce ENTRE o cano e a criatura, puxada para o lado do cano: o gás sai dali.
     //
@@ -212,7 +252,7 @@ export class Esfincter {
     // (0). O gás tem de passar POR CIMA dela, senão não lê como gás no ar — lê como mancha na
     // parede, que é o defeito que a arte provisória da porta já tinha documentado.
     this.nuvem = this.scene.add
-      .sprite(criatura.x - Esfincter.CANO_ADIANTE / 2, criatura.y, 'f4GasSheet')
+      .sprite(criatura.x - Esfincter.NUVEM_ADIANTE, criatura.y, 'f4GasSheet')
       .setDepth(-0.45)
       .setName('f4Gas');
     if (this.scene.anims.exists('f4-gas')) this.nuvem.play('f4-gas');
@@ -220,7 +260,7 @@ export class Esfincter {
     // ⚠️ A ZONA É MAIS LARGA QUE A NUVEM (186 contra 128) e cobre do cano até depois da criatura.
     // É o que faz *qualquer tiro serve* ser verdade por construção, em vez de depender de o
     // jogador acertar o meio da pluma.
-    this.zonaGas = this.scene.add.zone(criatura.x - Esfincter.CANO_ADIANTE / 2, criatura.y, 186, 176);
+    this.zonaGas = this.scene.add.zone(criatura.x - Esfincter.NUVEM_ADIANTE, criatura.y, 186, 176);
     this.scene.physics.world.enable(this.zonaGas);
     const corpo = this.zonaGas.body as Phaser.Physics.Arcade.Body;
     corpo.setAllowGravity(false);
@@ -239,13 +279,10 @@ export class Esfincter {
       this.limpar();
       return;
     }
-    // ⚠️ O CANO CONTINUA ANDANDO DEPOIS DA IGNIÇÃO, e por isso esta linha vem ANTES do `acesa`:
-    // ele sobreviveu ao estouro e tem de rolar com o mundo como qualquer peça de parede.
-    const xc = this.criatura.x - Esfincter.CANO_ADIANTE;
-    // ⚠️ O TETO É RELIDO A CADA QUADRO, e não guardado: a parede é uma ESCADA de placas de 128px e
-    // ainda está recuando quando o cano entra. Um y congelado no nascimento descolaria no primeiro
-    // degrau que passasse por baixo dele.
-    this.cano?.setPosition(xc, this.tetoEm(xc) - Esfincter.CANO_ENTERRADO);
+    // ⚠️ O CANO E AS RAÍZES CONTINUAM ANDANDO DEPOIS DA IGNIÇÃO, e por isso vêm ANTES do `acesa`:
+    // eles sobreviveram ao estouro e têm de rolar com o mundo como qualquer peça de parede.
+    this.posicionarCano();
+    this.posicionarRaizes();
 
     // ⚠️ ELA SEGUE O MEIO DAS DUAS SUPERFÍCIES, NÃO FICA PARADA NA ALTURA EM QUE NASCEU — e isto é
     // conserto de um defeito que a sonda pegou, não enfeite.
@@ -288,10 +325,48 @@ export class Esfincter {
     // que descola da peça denuncia o truque. É a mesma razão de o `QUADRO` do predador ser
     // derivado da pose em vez de um segundo número.
     const { x, y } = this.criatura;
-    const xg = x - Esfincter.CANO_ADIANTE / 2;
+    const xg = x - Esfincter.NUVEM_ADIANTE;
     this.nuvem?.setPosition(xg, y);
     this.zonaGas?.setPosition(xg, y);
     (this.zonaGas?.body as Phaser.Physics.Arcade.Body | undefined)?.reset(xg, y);
+  }
+
+  /**
+   * O CANO PENDE DA PONTA DO PILAR, DE DENTRO DA TREPADEIRA (ver `CANO_NO_PILAR`). Sem pilar na tela,
+   * ele volta à parede, antes da criatura, como era até 15/10.
+   *
+   * ⚠️ RELIDO A CADA QUADRO, e não guardado: o pilar anda com a parede, e a parede é uma ESCADA de
+   * placas de 128px que ainda está recuando quando o cano entra. Um y congelado no nascimento
+   * descolaria no primeiro degrau que passasse por baixo dele.
+   */
+  private posicionarCano(): void {
+    if (!this.cano || !this.criatura) return;
+    const pilar = this.pontaDoPilar();
+    if (pilar) {
+      this.cano
+        .setPosition(pilar.x + Esfincter.CANO_NO_PILAR, pilar.y - Esfincter.CANO_ENTERRADO_NO_PILAR)
+        // ⚠️ DEPTH −0,525: À FRENTE do pilar (−0,54) e ATRÁS da trepadeira (−0,52). É a trepadeira que
+        // cobre a placa de cima dele, então ele sai DE DENTRO do tecido em vez de pousar na pedra.
+        .setDepth(-0.525);
+      return;
+    }
+    const x = this.criatura.x - Esfincter.CANO_ADIANTE;
+    this.cano
+      .setPosition(x, this.tetoEm(x) - Esfincter.CANO_ENTERRADO)
+      // ⚠️ DEPTH −0,61: ATRÁS DA BORDA (a faixa mora em −0,6), e isso é pedido dele de 22/09 — *"coloque
+      // o cano de gás para trás do layer da borda, para parecer que ele está cravado lá"*. À frente da
+      // parede, os px que ele enfia no teto seriam DESENHADOS por cima dela, e a mangueira leria
+      // colada. −0,61 fica ENTRE a face da parede e a saia (−0,62).
+      .setDepth(-0.61);
+  }
+
+  /** As raízes seguem a criatura e as DUAS superfícies, relidas a cada quadro, como o cano. */
+  private posicionarRaizes(): void {
+    if (!this.criatura) return;
+    const x = Math.round(this.criatura.x);
+    const teto = this.tetoEm(x);
+    const chao = 2 * this.meioEm(x) - teto;
+    for (const r of this.raizes) r.sp.setPosition(x, Math.round(r.teto ? teto : chao));
   }
 
   /**
@@ -654,6 +729,8 @@ export class Esfincter {
   limpar(): void {
     this.cano?.destroy();
     this.cano = undefined;
+    for (const r of this.raizes) r.sp.destroy();
+    this.raizes = [];
     this.poca?.destroy();
     this.poca = undefined;
     for (const r of this.respingos) r.sp.destroy();
