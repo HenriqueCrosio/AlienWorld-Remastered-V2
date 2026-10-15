@@ -14,8 +14,29 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-14-f4-rodada-START.md`. A rodada dos esporos
-> está no jogo — eu testei, e isto é o que achei: …"**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-15-polimento-START.md`. Vamos para o bloco C
+> do polimento."**
+>
+> 📍 **15/10 — O POLIMENTO F1–F4: BLOCOS A E B APROVADOS E COMMITADOS (não empurrados).** Em 14/10 ele pediu uma análise
+> do que polir em F1–F4 e nas cutscenes antes de um pós-processamento. São 16 itens com a causa medida:
+> `folhas/2026-10-14/polimento/index.html`.
+> - **Bloco A** (*"deu um ar de mais polido"*):
+>   - as silhuetas `derelict` saíram da F4;
+>   - a F3 perdeu os cascos e o cinturão da F2, e as pontas do `belt`/`belt-2` foram esfareladas;
+>   - a `costela` ficou com os tendões recuados;
+>   - as faixas C e B foram roladas meia peça, com a costura por inpaint. Os degraus do duto são jogo e não mudaram.
+>   - Originais em `assets/raw/*-original.png`.
+> - **Bloco B** (aprovado por GIF): o esfíncter nasce 80px depois do pilar da junta, que cortava o corpo dele, e
+>   continua ATRÁS da borda (na frente foi testado e reprovado por ele). Ganhou raízes B à mão. O pilar da soleira
+>   ganhou a trepadeira B, que pertence ao pilar (`juntaVestida`), e o tubo de gás sai de dentro dela (escolha dele).
+> - **Rebalanceamento:** o rabo da F3 *"chegou rápido demais"*. Medido: 38,2s, igual ao roteiro desde 27/08. A opção é
+>   ~45s com o ato 2 empurrado, para decidir junto com o rabo colossal.
+> - **Commits:** `50ef5e9` (código e arte), `a3bca24` (ferramentas e folhas) e o dos docs. Os `jogo-*.gif` e as tiras
+>   cruas ficaram fora, para o backup.
+> - **Próximo, o bloco C:** o rabo colossal (item 6, *"um leviatã espacial que você consegue voar dentro"*), o
+>   primeiro plano PRÓPRIO da F4 e os itens 7 e 8. Depois os itens 9–16 e o pós-processamento.
+> - Porta: o START `plans/2026-10-15-polimento-START.md`. **Pendente dele, sem pressa:** jogar a rodada de 14/10 da F4
+>   e a F3 inteira.
 >
 > 📍 **14/10 (2) — A RODADA NOVA DA F4 ESTÁ NO JOGO; ELE AINDA NÃO TESTOU.** Ele mandou implementar (*"pode
 > implementar"*), e o plano `plans/2026-10-14-f4-rodada-esporos.md` foi executado inteiro no mesmo dia: o **Tubo de
@@ -294,7 +315,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
-| 7 | **Polimento e dívidas** (lista abaixo) | ⬜ |
+| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). Próximo: o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7 e 8), depois os itens 9–16 e o pós-processamento. START `plans/2026-10-15-polimento-START.md` |
 | — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
 
 ### O que mora em cada etapa
@@ -350,7 +371,8 @@ contra arte que mudava — o playtest de balanço é este.
 | Atmosfera nas fases (revisão final da 9) | para a CALIBRAGEM, com ele jogando: (a) os véus pretos (profundidade 90: `pretoDoCasco`, `veuDaFusao`) recebem névoa e grão — o "preto total" fica levemente enevoado; (b) medir o fps numa GPU integrada fraca (o halo lê 49 amostras por pixel em todo quadro de jogo); (c) `Parallax.setPintura(k, 0)` síncrono não cancela um fade em curso de uma troca anterior (nenhum chamador faz isso hoje) |
 | GDD pilar 5 (26/09) | *"nenhuma imagem vai crua para a tela"* — avaliar a Atmosfera no **menu** e em cada **fase jogável** (só onde não custar a leitura do pilar 3), com o olho dele. As fases e chefões viraram a **FATIA 9**; o menu entra na CALIBRAGEM |
 | ferramenta | **a sonda de VÍDEO**: as sondas fotografam, e beat de explosão só se julga em movimento. Molde em `scripts/_ver-cargueiro-mov.mjs` |
-| ferramenta | a `probe-f4-moldura` pisca ~1 em 3 — o conserto é a AMOSTRAGEM, nunca afrouxar o número (diagnóstico no START da Fatia 7) |
+| ferramenta | a `probe-f4-moldura` pisca ~1 em 3 — o conserto é a AMOSTRAGEM, nunca afrouxar o número (diagnóstico no START da Fatia 7). ⚠️ 15/10: hoje ela QUEBRA em t≈50 (`s.terrain` undefined em `lerMesas`), igual no código anterior ao bloco B do polimento — a sonda precisa de conserto |
+| ferramenta | a `probe-f4-visual` tem 4 falhas de sonda velha (as trocas de cenário leem `undefined`, a amostragem roda 0 quadros) — conferido em 15/10 |
 | repositório | ✅ 26/09 — todas as `feat/*` apagadas (as 8 locais e a do `origin`); só resta a `main` |
 | Fatia 8 | tirar o `?pulso=17` de `src/scenes/final/dentro.ts` e o `f8-pulso-17.png` se ele ficar com a seed 3 (é código de comparação) |
 
