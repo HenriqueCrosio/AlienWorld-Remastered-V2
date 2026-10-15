@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polimento · Bloco A</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 0 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .feito { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  dl { display:grid; grid-template-columns: 110px 1fr; gap: 4px 14px; margin: 10px 0 12px; }
+  dt { color: var(--sub); }
+  dd { margin: 0; }
+  figure { margin: 12px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 4px; }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 700px) { .par { grid-template-columns: 1fr; } dl { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Polimento · Bloco A</h1>
+<p class="sub">15/10/2026. Consertos sem arte nova, já aplicados no jogo e sem commit. As fotos de “antes” e “depois” são do jogo jogado até o mesmo instante; inimigos e peças de cenário são sorteados, então não ficam idênticos entre uma foto e outra.</p>
+
+<h2>Item 1 · As silhuetas antigas da F4</h2>
+<div class="item">
+  <h3><span class="tag feito">FEITO</span>Saíram as bandas de chão e teto e as vigas de primeiro plano</h3>
+  <dl>
+    <dt>Mudança</dt><dd>As três camadas <code>derelict</code> do <code>buildInterior</code> saíram. Uma nota no código explica por quê e pede para não religá-las. O primeiro plano próprio da F4 fica para a rodada de geração.</dd>
+    <dt>Conferido</dt><dd>A sonda da F4 agora cobra <b>zero</b> <code>derelict</code> na tela e passa. As outras 4 falhas dela já existiam antes da mudança (rodei com e sem): é a sonda que ficou velha, não o jogo.</dd>
+  </dl>
+  <figure><img src="img/1a-antes.png" alt=""><figcaption>Antes (14/10): a massa em escada mordendo a borda embaixo à esquerda.</figcaption></figure>
+  <div class="par">
+    <figure><img src="img/1b-depois-t48.png" alt=""><figcaption>Depois, t=48,5 (câmara azul).</figcaption></figure>
+    <figure><img src="img/1c-depois-t6.png" alt=""><figcaption>Depois, t=6 (começo da fase).</figcaption></figure>
+  </div>
+</div>
+
+<h2>Item 5 · As caixas pretas no céu</h2>
+<div class="item">
+  <h3><span class="tag feito">FEITO</span>F3 sem o cemitério da F2; o cinturão com as pontas desfeitas</h3>
+  <dl>
+    <dt>F3</dt><dd>Os cascos de nave e o cinturão agora entram <b>só na F2</b>. Na F3 eles ficavam por cima da pintura da nebulosa. O casco escuro virava um retângulo preto, e o cinturão repetia o cenário da fase anterior. As pedras soltas continuam nas duas fases.</dd>
+    <dt>F2</dt><dd>As duas peças do cinturão (<code>belt</code> e <code>belt-2</code>) agora se esfarelam nas pontas em vez de terminar num corte reto. O desgaste é feito em pixel, pedra por pedra, sem transparência pela metade. Os originais ficaram em <code>assets/raw/</code>.</dd>
+  </dl>
+  <figure><img src="img/5a-f3-antes-depois.png" alt=""><figcaption>F3, t=26: antes × depois. O retângulo escuro e a faixa somem; a nebulosa aparece inteira.</figcaption></figure>
+  <figure><img src="img/5b-f2-antes-depois.png" alt=""><figcaption>F2, t=20: antes × depois. Na pintura escura da F2 a diferença é mais discreta.</figcaption></figure>
+  <figure><img src="img/5c-cinturao-pecas.png" alt=""><figcaption>As peças, 3 lado a lado: <code>belt-2</code> antes / depois, <code>belt</code> antes / depois.</figcaption></figure>
+</div>
+
+<h2>A costela do meio da F4</h2>
+<div class="item">
+  <h3><span class="tag feito">FEITO</span>Os cabos que batiam na borda do quadro agora terminam em ponta</h3>
+  <dl>
+    <dt>Mudança</dt><dd>Cada cabo que encostava na borda da imagem recua por um comprimento diferente, então as pontas nunca se alinham numa linha reta. A ponta afina e ganha o contorno escuro do próprio cabo. O osso e o crânio não foram mexidos. O original ficou em <code>assets/raw/</code>.</dd>
+  </dl>
+  <figure><img src="img/c-costela-antes-depois.png" alt=""><figcaption>Antes × depois, ampliada 3×. Repare nas pontas da esquerda e da direita.</figcaption></figure>
+</div>
+
+<h2>Itens 2 e 3 · As emendas do duto e das costelas azuis</h2>
+<div class="item">
+  <h3><span class="tag feito">FEITO</span>As duas peças agora emendam com elas mesmas</h3>
+  <dl>
+    <dt>Como</dt><dd>
+      <ul>
+        <li>O degradê da esquerda para a direita foi aplainado.</li>
+        <li>A peça foi deslocada meia largura. Assim as pontas viram colunas que já eram vizinhas no desenho e emendam sozinhas.</li>
+        <li>A antiga costura, que foi para o meio, foi repintada por inpaint no PixelLab, com o resto da peça congelado. No duto, a faixa de lava agora continua de uma peça para a outra.</li>
+      </ul>
+    </dd>
+    <dt>Forma</dt><dd>Intocada. Muda só o PNG, com o mesmo tamanho e 100% opaco. Os degraus, a colisão e a altura das placas são os mesmos.</dd>
+    <dt>Medida</dt><dd>Duto: as pontas tinham brilho 32 × 7 e agora têm 19,8 × 20,7. A diferença entre as duas colunas da emenda caiu de 80,5 para 36 por linha. Costelas: de 38,9 para 16,9.</dd>
+  </dl>
+  <figure><img src="img/2a-duto-pecas.png" alt=""><figcaption>Duto, 3 peças lado a lado: antes (em cima) × depois.</figcaption></figure>
+  <div class="par">
+    <figure><img src="img/2b-duto-antes.png" alt=""><figcaption>No jogo, antes (14/10).</figcaption></figure>
+    <figure><img src="img/2c-duto-depois.png" alt=""><figcaption>No jogo, depois (t=80).</figcaption></figure>
+  </div>
+  <figure><img src="img/3a-costelas-pecas.png" alt=""><figcaption>Costelas azuis, 3 peças lado a lado: antes × depois.</figcaption></figure>
+  <figure><img src="img/3b-costelas-depois.png" alt=""><figcaption>No jogo, depois (t=52).</figcaption></figure>
+</div>
+
+<h2>Item 4 · O fim do duto</h2>
+<div class="item">
+  <h3><span class="tag decidir">PARA DECIDIR</span>Proposta: resolver junto com o esfíncter (bloco B)</h3>
+  <p>Investigando ao vivo, o fim do duto, o pilar da junta e o esfíncter acontecem nos mesmos 3 segundos e no mesmo lugar da tela. A pintura nova já entra com uma passagem suave de 112px, então a “linha reta” do relatório não era a pintura. O que lê como corte é a soma de três coisas:</p>
+  <ul>
+    <li>a parede do duto terminando reta no pilar;</li>
+    <li>o pilar de pedra sozinho, sem nada orgânico em volta;</li>
+    <li>o esfíncter passando por trás do pilar.</li>
+  </ul>
+  <p>A proposta é desenhar essa soleira como uma peça só. O esfíncter fica preso no tecido, com raízes em cima e embaixo, como o pé do Tubo, e na frente do pilar. As raízes também cobrem o fim da parede. Assim o item 4 sai junto com o bloco B, sem consertar a mesma tela duas vezes.</p>
+</div>
+</main>
+</body>
+</html>

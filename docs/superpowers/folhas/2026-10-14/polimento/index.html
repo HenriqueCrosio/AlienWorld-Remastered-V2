@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polimento F1–F4</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --alta:#ff6a5a; --media:#ffb347; --baixa:#7fb2ff; --ok:#7ad38a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 0 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .alta { background: color-mix(in srgb, var(--alta) 22%, transparent); color: var(--alta); }
+  .media { background: color-mix(in srgb, var(--media) 22%, transparent); color: var(--media); }
+  .baixa { background: color-mix(in srgb, var(--baixa) 22%, transparent); color: var(--baixa); }
+  .esf { color: var(--sub); font-size: 13px; }
+  dl { display:grid; grid-template-columns: 110px 1fr; gap: 4px 14px; margin: 10px 0 12px; }
+  dt { color: var(--sub); }
+  dd { margin: 0; }
+  figure { margin: 12px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 4px; }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  .resumo { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 8px; margin-top: 10px; }
+  .resumo a { color: var(--txt); text-decoration: none; background: var(--card); border:1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
+  .resumo a:hover { border-color: #3a4357; }
+  .ok { color: var(--ok); }
+</style>
+</head>
+<body>
+<main>
+<h1>Polimento F1–F4: o que dá para melhorar</h1>
+<p class="sub">Análise de 14/10/2026. Nada foi mudado no jogo: as imagens de “depois” são simulações ou trocas feitas na memória do navegador.</p>
+
+<h2>Como foi feito</h2>
+<ul>
+  <li><b>A campanha inteira, quadro a quadro:</b> menu → F1 → cutscene → F2 → … → F4 → cutscene final → tela de vitória, fotografada a cada 2s de jogo (401 fotos), com mesas de cartas, minichefões e chefões.</li>
+  <li><b>As 4 cutscenes de novo, em tempo real</b>, porque a varredura quadro a quadro roda o jogo mais rápido que o relógio das animações e engana em tudo que depende de tempo (veja “Conferido e descartado”).</li>
+  <li><b>Causa medida, não chutada:</b> para cada suspeita, o jogo foi pausado no trecho e perguntei quais objetos cobrem aquele pixel (textura, camada, escala, tint), além de medir as bordas e o brilho das peças.</li>
+  <li>Ferramentas novas, que servem para conferir depois de consertar: <code>scripts/_polimento/</code>.</li>
+</ul>
+
+<div class="resumo">
+  <a href="#i1"><span class="tag alta">ALTA</span>1 · Silhuetas antigas na borda da F4</a>
+  <a href="#i2"><span class="tag alta">ALTA</span>2 · Emendas na parede do duto</a>
+  <a href="#i3"><span class="tag alta">ALTA</span>3 · Emendas nas costelas</a>
+  <a href="#i4"><span class="tag alta">ALTA</span>4 · Fim do duto e troca de câmara</a>
+  <a href="#i5"><span class="tag alta">ALTA</span>5 · Caixas pretas no céu (F2/F3)</a>
+  <a href="#i6"><span class="tag alta">ALTA</span>6 · Cauda do Leviatã ampliada 3,4×</a>
+  <a href="#i7"><span class="tag media">MÉDIA</span>7 · Peças ampliadas (pixel gordo)</a>
+  <a href="#i8"><span class="tag media">MÉDIA</span>8 · Destroço cinza no interior</a>
+  <a href="#i9"><span class="tag media">MÉDIA</span>9 · Fumaça de bolinhas</a>
+  <a href="#i10"><span class="tag media">MÉDIA</span>10 · Rótulos de desenvolvimento no HUD</a>
+  <a href="#i11"><span class="tag media">MÉDIA</span>11 · Tela final sem peso</a>
+  <a href="#i12"><span class="tag baixa">BAIXA</span>12 · Subtítulo do menu</a>
+  <a href="#i13"><span class="tag baixa">BAIXA</span>13 · Flashes de tela cheia</a>
+  <a href="#i14"><span class="tag baixa">BAIXA</span>14 · Explosão chapada na cutscene 1</a>
+  <a href="#i15"><span class="tag baixa">BAIXA</span>15 · Drones encavalados</a>
+  <a href="#i16"><span class="tag baixa">BAIXA</span>16 · Setas diferentes nas dicas</a>
+</div>
+
+<h2>Prioridade alta: emendas e encaixes</h2>
+
+<div class="item" id="i1">
+  <h3><span class="tag alta">ALTA</span>1 · Silhuetas escuras antigas por cima e por baixo da borda da F4 <span class="esf">· seu print 1 · esforço pequeno</span></h3>
+  <dl>
+    <dt>Onde</dt><dd>F4, câmara A e câmara azul do golfinho (t≈1 a 65). No duto e na arena final não acontece.</dd>
+    <dt>O que se vê</dt><dd>Massas escuras de borda serrilhada “mordendo” a borda: parece cortado ou mal encaixado.</dd>
+    <dt>Causa</dt><dd>Duas camadas de silhueta <code>derelict</code> do parallax, da F4 de antes da <code>Moldura</code>:
+      <ul><li><b>bandas de placas atrás da borda</b> (chão e teto). Medido: invadem o corredor <b>até 24–27px</b> no começo e <b>6–15px</b> na câmara azul, em boa parte das colunas;</li>
+      <li><b>silhuetas de primeiro plano</b> (escala 1,6–1,9, na frente de tudo), que passam por cima da borda nas pontas da tela.</li></ul></dd>
+    <dt>Solução</dt><dd>Com a borda desenhada, tirar as duas bandas: a borda já é o chão e o teto. No primeiro plano, ou ele sai da F4 ou fica limitado ao meio do corredor, sem cruzar a borda. A foto de baixo é o mesmo quadro com as silhuetas desligadas.</dd>
+  </dl>
+  <figure><img src="img/01a-print-dele.png" alt=""><figcaption>Seu print, com os dois pontos circulados.</figcaption></figure>
+  <figure><img src="img/01b-bandas-antes-depois.png" alt=""><figcaption>Mesmo quadro (t=48,5), ao vivo: à esquerda como está; à direita com as silhuetas <code>derelict</code> desligadas.</figcaption></figure>
+  <figure><img src="img/01c-bandas-detalhe.png" alt=""><figcaption>Detalhe embaixo à esquerda: a massa em escada cobrindo as costelas some.</figcaption></figure>
+</div>
+
+<div class="item" id="i2">
+  <h3><span class="tag alta">ALTA</span>2 · Parede do duto com emenda a cada 128px <span class="esf">· seu print 2 · esforço médio</span></h3>
+  <dl>
+    <dt>Onde</dt><dd>F4, duto (t≈68 a 106), teto e chão.</dd>
+    <dt>O que se vê</dt><dd>Uma linha vertical a cada peça: de um lado escuro, do outro claro, e a faixa de lava acesa cortada.</dd>
+    <dt>Causa</dt><dd>A peça <code>f4-faixa-c</code> não ladrilha. A borda esquerda tem <b>brilho 25,6</b> e a direita <b>8,1</b> (três vezes mais escura). A diferença entre as colunas da ponta é <b>80 por linha</b>, contra 10–14 nas bordas das outras câmaras.</dd>
+    <dt>Solução</dt><dd>Refazer a peça para ladrilhar: tirar o degradê da esquerda para a direita e emendar as pontas (a simulação abaixo faz as duas coisas automaticamente). Na arte final, convém deslocar meia peça, retocar a costura no meio (à mão ou por inpaint) e voltar. A “saia” espelhada do duto herda a correção.</dd>
+  </dl>
+  <figure><img src="img/02a-duto-emendas-no-jogo.png" alt=""><figcaption>No jogo: as emendas em x≈100, 485 e 870 (tela ampliada 3×).</figcaption></figure>
+  <figure><img src="img/02b-duto-ladrilho-antes-depois.png" alt=""><figcaption>Três peças lado a lado. Em cima como está; embaixo a simulação.</figcaption></figure>
+</div>
+
+<div class="item" id="i3">
+  <h3><span class="tag alta">ALTA</span>3 · Costelas azuis: a mesma emenda, mais branda <span class="esf">· esforço pequeno</span></h3>
+  <dl>
+    <dt>Causa</dt><dd><code>f4-faixa-b</code>: brilho 38,6 à esquerda e 58,9 à direita. A estrutura das costelas disfarça, mas a troca de brilho a cada 128px continua.</dd>
+    <dt>Solução</dt><dd>A mesma do item 2.</dd>
+  </dl>
+  <figure><img src="img/03-costelas-ladrilho-antes-depois.png" alt=""><figcaption>Três peças lado a lado: como está × simulação.</figcaption></figure>
+</div>
+
+<div class="item" id="i4">
+  <h3><span class="tag alta">ALTA</span>4 · Fim do duto e troca de câmara com borda reta <span class="esf">· esforço médio</span></h3>
+  <dl>
+    <dt>Onde</dt><dd>F4, saída do duto para a arena do Esfíncter (t≈110 a 113); o mesmo vale para toda troca de pintura de câmara.</dd>
+    <dt>O que se vê</dt><dd>A parede vermelha do duto termina num <b>corte vertical</b>; vem um pilar de pedra solto; e a pintura da câmara nova entra com uma <b>linha vertical reta no meio do corredor</b>.</dd>
+    <dt>Causa</dt><dd>A pintura nova (<code>paintBgF4d</code>) entra por cima da anterior com borda dura. O pilar da junta foi feito para tapar a emenda das <i>bordas</i>, não a do fundo.</dd>
+    <dt>Solução</dt><dd>Fazer a pintura entrar com uma passagem suave de ~48px (simulação abaixo) e fechar o fim da parede com um remate (a junta ou um degrau inclinado), em vez do corte reto.</dd>
+  </dl>
+  <figure><img src="img/04a-fim-do-duto.png" alt=""><figcaption>No jogo: o corte da parede (x≈612) e a emenda da pintura (x≈835).</figcaption></figure>
+  <figure><img src="img/04b-pintura-emenda-antes-depois.png" alt=""><figcaption>As duas pinturas reais: borda reta × passagem suave de 48px.</figcaption></figure>
+</div>
+
+<div class="item" id="i5">
+  <h3><span class="tag alta">ALTA</span>5 · Caixas pretas no céu da F2 e da F3 <span class="esf">· esforço pequeno</span></h3>
+  <dl>
+    <dt>O que se vê</dt><dd>Retângulos escuros de laterais retas no meio da nebulosa, além de áreas mais escuras de borda reta.</dd>
+    <dt>Causa</dt><dd>A peça do cinturão denso (<code>belt-2</code>) <b>termina em corte reto dos dois lados</b>. Com o tint escuro e a escala, vira uma placa retangular. Na F3 ela fica ainda <b>por cima da pintura opaca</b> da nebulosa (camada −93 sobre −96), assim como o cinturão e os cascos que vieram do vácuo da F2.</dd>
+    <dt>Solução</dt><dd>Dissolver as pontas da peça (simulação abaixo). Na F3, avaliar tirar essas camadas da F2 de cima da pintura: a pintura já é o céu.</dd>
+  </dl>
+  <figure><img src="img/05a-caixas-pretas-f3.png" alt=""><figcaption>F3, t≈26: os retângulos escuros (veja as linhas verticais em x≈640 e x≈1020).</figcaption></figure>
+  <figure><img src="img/05b-cinturao-pontas-antes-depois.png" alt=""><figcaption>O cinturão tingido e na escala do jogo sobre a pintura da F3: pontas retas × pontas dissolvidas.</figcaption></figure>
+</div>
+
+<div class="item" id="i6">
+  <h3><span class="tag alta">ALTA</span>6 · A cauda do Leviatã ampliada 3,4× <span class="esf">· esforço médio (arte)</span></h3>
+  <dl>
+    <dt>Onde</dt><dd>F3, a virada para o ato 2 (o casco “gigante” que passa por trás).</dd>
+    <dt>Causa</dt><dd><code>raboLeviata</code> (107×73) desenhado com <code>setScale(3.4)</code>: cada pixel vira um bloco de 3–4 pixels de tela. A torre na frente e os inimigos têm pixel de 1. Isso fere a regra do projeto, “reduzir pode, aumentar nunca”.</dd>
+    <dt>Solução</dt><dd>Gerar a cauda no tamanho de tela (~360×250) a partir da arte atual, com a mesma silhueta e as mesmas rachaduras acesas, e usá-la em escala 1.</dd>
+  </dl>
+  <figure><img src="img/06-rabo-do-leviata.png" alt=""><figcaption>Compare o pixel das placas ao fundo com o da torre de mísseis. ⚠️ Correção de 15/10: a torre junto do rabo é artefato da varredura (o rabo anda no relógio real e ficou na tela até t=70,9). No jogo, o rabo sai em t≈47,6 e as torres entram em t=48, então os dois nunca aparecem juntos.</figcaption></figure>
+</div>
+
+<h2>Prioridade média: acabamento</h2>
+
+<div class="item" id="i7">
+  <h3><span class="tag media">MÉDIA</span>7 · Peças ampliadas acima de 1 (pixel gordo) <span class="esf">· esforço médio</span></h3>
+  <dl>
+    <dt>Lista medida</dt><dd>Perigos: <code>destroco</code> 0,9–1,6 (F2 e F4), <code>asteroid</code> 0,7–1,9 (F2/F3). Meio-plano da F4: órgão e maquinário 1,45–1,6, ponte 1,41–1,55. Primeiro plano: 1,3–2,6 (silhuetas escuras, em que o tint disfarça).</dd>
+    <dt>Solução</dt><dd>Teto de escala 1 nos perigos e no meio-plano, desenhando variantes maiores quando o tamanho for necessário. As silhuetas escuras do primeiro plano podem ficar.</dd>
+  </dl>
+  <figure><img src="img/07-destroco-na-f4.png" alt=""><figcaption>O destroço em escala 1,6 ao lado de peças em escala 1.</figcaption></figure>
+</div>
+
+<div class="item" id="i8">
+  <h3><span class="tag media">MÉDIA</span>8 · Destroço cinza da F2 dentro do Leviatã <span class="esf">· esforço pequeno/médio</span></h3>
+  <dl>
+    <dt>O que se vê</dt><dd>As placas de nave cinza-claras do cemitério da frota (F2) flutuando no interior vivo, mais claras que todo o resto da F4 (fere o rumo dark sci-fi).</dd>
+    <dt>Solução</dt><dd>Uma variante da F4 (pedaço de placa orgânica, osso ou carne endurecida) ou, no mínimo, o tint da câmara. A mesma imagem do item 7 mostra o problema.</dd>
+  </dl>
+</div>
+
+<div class="item" id="i9">
+  <h3><span class="tag media">MÉDIA</span>9 · A fumaça da morte dos chefões são bolinhas <span class="esf">· esforço médio</span></h3>
+  <dl>
+    <dt>O que se vê</dt><dd>Na F1 e na F2, a nuvem após a explosão é feita de círculos perfeitos pretos com miolo marrom: lê como bolinhas, não como fumaça.</dd>
+    <dt>Solução</dt><dd>Fumaça assada em pixel (quadros de contorno irregular, na paleta da cena), como já fazemos com os efeitos de cena.</dd>
+  </dl>
+  <figure><img src="img/08-fumaca-bolinhas.png" alt=""><figcaption>F1 (esquerda) e F2 (direita).</figcaption></figure>
+</div>
+
+<div class="item" id="i10">
+  <h3><span class="tag media">MÉDIA</span>10 · Rótulos de desenvolvimento no HUD <span class="esf">· esforço pequeno</span></h3>
+  <dl>
+    <dt>O que se vê</dt><dd>“1G FLAP (LEGACY)” e “ZERO-G LIVRE (NEW)” no HUD do jogador: são nomes internos da condução. Na luta do chefão, a barra de vida fica colada na linha do HUD.</dd>
+    <dt>Solução</dt><dd>Tirar o nome da condução (ou trocar por um ícone pequeno de 1G/0G), mantendo arma, vidas, bombas, peças e pontos. Dar folga à barra do chefão.</dd>
+  </dl>
+  <figure><img src="img/09a-hud-f1.png" alt=""><figcaption>F1, no chefão.</figcaption></figure>
+  <figure><img src="img/09b-hud-f2.png" alt=""><figcaption>F2.</figcaption></figure>
+</div>
+
+<div class="item" id="i11">
+  <h3><span class="tag media">MÉDIA</span>11 · A tela final não pesa o fim da campanha <span class="esf">· esforço médio</span></h3>
+  <dl>
+    <dt>O que se vê</dt><dd>Depois da cutscene final, texto pequeno sobre preto, com o título “FASE 4 COMPLETA” e “O Leviatã caiu” minúsculo embaixo.</dd>
+    <dt>Solução</dt><dd>Título de campanha (“O LEVIATÃ CAIU”), a pintura do Leviatã caído escurecida atrás, e hierarquia maior para pontos, medalha e recorde.</dd>
+  </dl>
+  <figure><img src="img/10-tela-final.png" alt=""></figure>
+</div>
+
+<h2>Prioridade baixa: detalhes</h2>
+
+<div class="item" id="i12">
+  <h3><span class="tag baixa">BAIXA</span>12 · Subtítulo “REMASTERED” quase invisível no menu</h3>
+  <p>Contraste baixo demais com o fundo. Solução: mais luz no texto ou uma faixa sutil atrás.</p>
+  <figure><img src="img/11-menu-subtitulo.png" alt=""></figure>
+</div>
+
+<div class="item" id="i13">
+  <h3><span class="tag baixa">BAIXA</span>13 · Flashes de tela cheia nas cutscenes <span class="esf">· decisão sua</span></h3>
+  <p>Amarelo, ciano e laranja cobrindo a tela inteira por um instante. Funcionam como golpe, mas são fortes; vale baixar a intensidade ou fazer o flash pela vinheta, e pensar em fotossensibilidade. Combina com a decisão do pós-processamento (bloom).</p>
+  <figure><img src="img/12-flashes.png" alt=""><figcaption>Cutscene 1 (2 flashes) e cutscene 3, em tempo real.</figcaption></figure>
+</div>
+
+<div class="item" id="i14">
+  <h3><span class="tag baixa">BAIXA</span>14 · Explosão vermelha chapada na cutscene 1</h3>
+  <p>No “IMPACTO · A FROTA CAIU”, as explosões são círculos concêntricos lisos, destoando da pintura. Solução: explosão assada em pixel.</p>
+  <figure><img src="img/13-explosao-chapada.png" alt=""></figure>
+</div>
+
+<div class="item" id="i15">
+  <h3><span class="tag baixa">BAIXA</span>15 · Drones em fila, encavalados</h3>
+  <p>Nas ondas em fila (F1, F2), o espaçamento é menor que a largura do sprite e eles se sobrepõem. Solução: espaçamento ≥ largura ou alternar a altura.</p>
+  <figure><img src="img/14-drones-sobrepostos.png" alt=""></figure>
+</div>
+
+<div class="item" id="i16">
+  <h3><span class="tag baixa">BAIXA</span>16 · Setas diferentes nas dicas de controle</h3>
+  <p>A mesa de cartas usa “[&lt;- -&gt;]” e o painel de nave usa “[←——→]”. Solução: unificar.</p>
+  <figure><img src="img/15-setas-das-dicas.png" alt=""></figure>
+</div>
+
+<h2>Conferido e descartado</h2>
+<p class="sub">Pareciam defeitos na varredura quadro a quadro, mas não se confirmaram em tempo real ou no código:</p>
+<ul>
+  <li class="ok">Letreiros de seção que pareciam durar 10–14s duram ~2s reais (entrada 220ms, 1,5s parados, saída 450ms).</li>
+  <li class="ok">O placar da fase por cima do painel de escolha da nave: em tempo real ele some em ~3s, e o painel abre em 8,6s.</li>
+  <li class="ok">O nome do chefão sobre o chefão: é o mesmo letreiro de ~2s.</li>
+  <li class="ok">O sangue na tela no chefão final: ~2s reais.</li>
+  <li class="ok">Esfíncter e garganta “pixelados”: escala 1 e arquivo nativo; é o desenho chapado, não ampliação.</li>
+  <li class="ok">Um erro no chefão final durante a varredura foi causado pelo meu script (morte forçada no meio da troca de forma); no jogo não acontece.</li>
+  <li class="ok">O blecaute no meio da luta da F3 é o escurecimento do casco (t≈48), deslocado pelo mesmo efeito de relógio.</li>
+</ul>
+
+<h2>Sobre o pós-processamento</h2>
+<p>Concordo com a ordem: polir antes. Um shader por cima de uma emenda deixa a emenda bonita, mas ela continua lá. Algumas observações para quando chegarmos lá:</p>
+<ul>
+  <li>O jogo já tem a <b>Atmosfera</b> por cena (pilar 5 do GDD). O pós-processamento deveria ser a camada final unificada <i>sobre</i> ela, não um substituto.</li>
+  <li>Aplicar no quadro nativo 384×216, antes de ampliar, para não borrar o pixel. A camada HD do texto fica de fora.</li>
+  <li>Candidatos: bloom só onde há luz (lava, núcleos, tiros), gradação de cor por fase, vinheta leve, grão único para o jogo todo; CRT/scanlines como opção nas configurações.</li>
+  <li>Os itens 5 e 13 conversam com o bloom: vale decidir os dois juntos.</li>
+</ul>
+
+<h2>Próximo passo</h2>
+<p>Você escolhe o que entra e em que ordem. A minha sugestão é começar pelos itens 1 a 5, que são as emendas que você apontou e têm causa e solução comprovadas, e deixar o 6 (arte nova) e o 7 (escalas) para uma rodada de arte. Depois de cada conserto, a varredura e as consultas de <code>scripts/_polimento/</code> conferem o resultado no mesmo trecho.</p>
+</main>
+</body>
+</html>
