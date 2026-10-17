@@ -49,6 +49,12 @@
    **ESPANTO PELO TAMANHO**: *"imagina o tamanho de um leviatã espacial que você consegue voar dentro"*. A vista é
    lateral, com a batida da nadadeira de lado. É arte nova (rodada de geração), feita na resolução nativa e sem
    aumentar nada. Decidir junto o tempo do rabo na F3 (§1).
+   **✅ 16–17/10, NO JOGO:** o rabo novo é a M2 (nadadeira de tubarão da D + casco da B + lava da A), 16 quadros de
+   368×248 em escala 1 (`public/sprites/rabo-leviata-sheet.png`, a 7/s). O gesto é a tomada 2 do PixMiniMax limpa das
+   bordas brancas; o corpo aparente inteiro enverga com o pivô virtual a 500px, com a luz por normais no corpo e na
+   nadadeira. O ciclo de ida e volta foi REPROVADO. Folha: `folhas/2026-10-16/rabo/`. **Ainda em aberto:** o tempo do
+   rabo na F3 (§1) e o Leviatã do menu (`leviathan-swim-sheet`) e da cena final (`f8-leviata`), que seguem com a
+   nadadeira de baleia.
 2. **O primeiro plano próprio da F4**, que repõe a profundidade perdida no item 1: orgânico, quase preto, sem cruzar a
    linha da superfície da borda. Também é rodada de geração.
 3. **Item 7, as peças ampliadas acima de 1** (pixel gordo). A lei: assar na resolução nativa; reduzir pode, aumentar
