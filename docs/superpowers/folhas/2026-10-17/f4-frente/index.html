@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Primeiro Plano F4</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 760px) { .par { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>Primeiro plano próprio da F4 · conceitos em jogo</h1>
+<p class="sub">17/10/2026 · Polimento, bloco C. No bloco A saíram as silhuetas <code>derelict</code>, que mordiam a borda, e a fase perdeu profundidade. Aqui estão os conceitos para repor isso. Os GIFs dos conceitos (abaixo da seção instalada) são a F4 de verdade com as peças montadas só na memória, andando 1,3× mais rápido que a borda: é o paralaxe que dá a profundidade.</p>
+
+<h2>Instalado no jogo: código real, nada conduzido à mão</h2>
+<div class="item">
+  <p>Pela sua regra: <b>ossos e tendões em toda a borda; pólipos no duto e na câmara do golfinho; membrana em todas</b>. As peças ficam debaixo da névoa (profundidade 60). A câmara sai da borda da placa em que a peça nasce, então a troca de família rola com o mundo, como a própria borda.</p>
+  <ul>
+    <li><b>44 peças</b> (as quatro famílias, em tamanho cheio e reduzidas por 2) num atlas só: <code>public/sprites/f4-frente.png</code>. O código está em <code>src/systems/PrimeiroPlanoF4.ts</code>.</li>
+    <li><b>Nunca cruza a superfície:</b> a peça só entra se couber no trecho de faixa por onde vai escorregar até sair da tela. A sonda nova (<code>scripts/probe-f4-frente.mjs</code>) confere isso coluna a coluna, em todos os 7.500 quadros da fase: nenhum cruzamento.</li>
+    <li><b>Na arena</b> (o esfíncter e o núcleo, depois de t=109) ele apaga junto com as outras peças de cenário e não nasce mais. Com elite em cena ele atenua, como o primeiro plano das outras fases. No duto ele <b>não</b> apaga, ao contrário do <code>derelict</code> antigo: aqui ele não cobre passagem nenhuma.</li>
+    <li><b>Nada sorteia do dado do jogo:</b> a linha de base dos corredores (<code>probe-stage4</code>) não mudou.</li>
+  </ul>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/jogo-duto.gif" alt=""><figcaption><b>Duto (t=92).</b> Onde ele lê melhor.</figcaption></figure>
+    <figure><img src="gif/jogo-b.gif" alt=""><figcaption><b>Câmara do golfinho (t=54).</b> Com os pólipos.</figcaption></figure>
+  </div>
+  <figure style="margin-top:12px; max-width:610px"><img src="gif/jogo-a.gif" alt=""><figcaption><b>Câmara A (t=20).</b> Só nos vãos entre as mesas.</figcaption></figure>
+</div>
+
+<h2>O que a medição mostrou</h2>
+<div class="item">
+  <ul>
+    <li><b>O espaço é pequeno.</b> A regra é não cruzar a linha da superfície da borda, então a peça mora entre a beira da tela e essa linha. Medi a faixa a cada segundo da fase:
+      <table style="margin:8px 0">
+        <tr><th>Trecho</th><th>Espessura da faixa</th></tr>
+        <tr><td>Abertura (t &lt; 8s)</td><td>14–19px</td></tr>
+        <tr><td>Câmara A e câmara azul (B)</td><td>26–34px</td></tr>
+        <tr><td>Duto</td><td>44–82px</td></tr>
+        <tr><td>Câmara D</td><td>28–39px</td></tr>
+      </table>
+    </li>
+    <li><b>A faixa é escura justo na beira da tela</b> e só clareia perto da superfície (a linha de lava, os arcos das costelas). Uma silhueta quase preta e baixa fica sobre a parte escura e some. Por isso a peça precisa ocupar pelo menos 55% da altura disponível.</li>
+    <li><b>Nas câmaras A e B as mesas cobrem quase toda a faixa</b>, então sobra pouco lugar para o primeiro plano aparecer.</li>
+    <li><b>Os primeiros conceitos saíram altos e finos</b> (colunas de 8 a 22px de largura depois de caber na faixa) e sumiam no jogo. Refiz os quatro como massas <b>largas e baixas</b> ao longo da borda. As pontas foram esfareladas, para nenhuma ter corte reto.</li>
+  </ul>
+</div>
+
+<h2>Os quatro conceitos de borda</h2>
+<div class="item">
+  <p>Quase pretos, com só um fio de luz vermelha no topo. No teto, as mesmas peças viradas. Duas sementes de cada um.</p>
+  <figure style="margin-top:10px"><img src="img/conceito-tendoes.png" alt=""><figcaption><b>Tendões</b>: feixes de tendão e fibra torcidos, a mesma matéria da borda da câmara A.</figcaption></figure>
+  <figure style="margin-top:10px"><img src="img/conceito-ossos.png" alt=""><figcaption><b>Ossos</b>: esporões e ganchos de cartilagem, como pontas de costela quebradas.</figcaption></figure>
+  <figure style="margin-top:10px"><img src="img/conceito-polipos.png" alt=""><figcaption><b>Pólipos</b>: cachos de pólipos e tubos, como cracas.</figcaption></figure>
+  <figure style="margin-top:10px"><img src="img/conceito-membrana.png" alt=""><figcaption><b>Membrana</b>: dobras de membrana rasgada entre filamentos.</figcaption></figure>
+</div>
+
+<h2>No duto, onde a faixa é grossa</h2>
+<div class="item">
+  <p>É onde o primeiro plano lê melhor: a faixa tem de 44 a 82px, e a lava clara desenha a silhueta.</p>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/tendoes-duto.gif" alt=""><figcaption><b>Tendões.</b></figcaption></figure>
+    <figure><img src="gif/ossos-duto.gif" alt=""><figcaption><b>Ossos.</b> Os esporões são os que mais recortam contra a lava.</figcaption></figure>
+    <figure><img src="gif/polipos-duto.gif" alt=""><figcaption><b>Pólipos.</b> Massa redonda, lê como cracas grudadas na parede.</figcaption></figure>
+    <figure><img src="gif/membrana-duto.gif" alt=""><figcaption><b>Membrana.</b> A mais fraca: é fina e vazada, e some contra a lava.</figcaption></figure>
+  </div>
+</div>
+
+<h2>Nas câmaras (tendões)</h2>
+<div class="item">
+  <div class="par">
+    <figure><img src="gif/tendoes-a.gif" alt=""><figcaption><b>Câmara A (t=18).</b> A faixa tem 26–33px e as mesas a cobrem; o primeiro plano quase não aparece.</figcaption></figure>
+    <figure><img src="gif/tendoes-b.gif" alt=""><figcaption><b>Câmara azul (t=52).</b> Aparece só nos vãos entre as mesas, sobre os arcos claros.</figcaption></figure>
+  </div>
+  <figure style="margin-top:12px; max-width:610px"><img src="gif/tendoes-d.gif" alt=""><figcaption><b>Arena do núcleo (t=120).</b> A faixa é fina, e nenhuma peça cabe nos 55% exigidos.</figcaption></figure>
+</div>
+
+<h2>Com névoa ou sem névoa</h2>
+<div class="item">
+  <p>Em profundidade 60, a névoa da Atmosfera passa por cima das peças. Em 99 elas vão para a câmera limpa, sem névoa nem grão, como a coisa mais perto da lente. A diferença é pequena: a limpa fica um pouco mais nítida e mais preta. Pela regra do tratamento obrigatório, a minha escolha é ficar em 60.</p>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/tendoes-duto.gif" alt=""><figcaption><b>Profundidade 60</b>, com a névoa.</figcaption></figure>
+    <figure><img src="gif/tendoes-duto-limpo.gif" alt=""><figcaption><b>Profundidade 99</b>, câmera limpa.</figcaption></figure>
+  </div>
+</div>
+
+<h2>A outra leitura: soltos no meio do corredor</h2>
+<div class="item">
+  <p><span class="tag ruim">risco</span>O relatório de 14/10 deixava outra opção: o primeiro plano no meio do corredor, sem tocar a borda. São fragmentos de tecido, coágulos e casulos passando 1,6× mais rápido que o mundo, sempre a 10px das duas superfícies.</p>
+  <figure style="margin-top:10px"><img src="img/conceito-fragmentos.png" alt=""><figcaption>Os fragmentos (à direita, a semente 21, que saiu limpa).</figcaption></figure>
+  <figure style="margin-top:12px; max-width:610px"><img src="gif/fragmentos-b.gif" alt=""><figcaption><b>Câmara azul.</b> Um fragmento escuro no meio do corredor parece um <b>inimigo</b>. Na fase da precisão, isso atrapalha a leitura do jogo.</figcaption></figure>
+</div>
+
+<h2>A decisão (17/10: ele escolheu usar todas as variações)</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag rec">minha aposta</span><b>Primeiro plano de borda, ossos ou tendões</b>, onde a faixa der espaço: no duto ele aparece sempre; nas câmaras, só nos vãos entre as mesas. Os ossos recortam melhor contra a lava; os tendões combinam com a matéria da câmara A.</li>
+    <li><span class="tag decidir">alternativa</span>Os pólipos, que leem bem no duto como cracas grudadas.</li>
+    <li><span class="tag decidir">ou</span>Não pôr primeiro plano. Nas câmaras A e B o efeito é pequeno de qualquer jeito, e a profundidade pode vir de outro lugar.</li>
+    <li>Os fragmentos soltos eu não recomendo, pelo risco de parecerem inimigos.</li>
+  </ul>
+  <p class="sub">Gerações nesta rodada: ~190 (19 tiras de 10, contando a 1ª rodada de colunas altas e uma tira de 32px que voltou vazia). Nada foi commitado.</p>
+</div>
+</main>
+</body>
+</html>

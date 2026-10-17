@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Destroço da F4</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  .pecas img { width:auto; max-width:100%; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .tres { display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
+  @media (max-width: 900px) { .tres { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>O destroço da F4 · item 8</h1>
+<p class="sub">17/10/2026 · Polimento, bloco C. Dentro do Leviatã o destroço é <i>"o que ele engoliu"</i> (o cabeçalho do roteiro da F4), mas usa a arte da F2: placas de nave cinza-claras, a coisa mais clara da fase, ampliadas até 1,6× (o item 7). A variante da F4 nasce no tamanho em que aparece e entra em escala 1, então resolve os itens 7 e 8 de uma vez na F4.</p>
+<p class="sub">Os GIFs são a F4 de verdade, com o destroço trocado só na memória. ⚠️ Para ter o que olhar em 5 segundos, empurrei um destroço a mais no corredor a cada ~1,1s: <b>a densidade dos GIFs é exagerada</b>, e no jogo eles vêm na cadência do roteiro. A caixa de colisão continua em 70% da arte, como hoje.</p>
+
+<h2>Instalado no jogo (17/10): código real, nada conduzido à mão</h2>
+<div class="item">
+  <p>Pela sua escolha: <i>"o casco engolido e suas variações ficaram ótimas, pode usar. Mas na mesma proporção ou até menos um pouco do que existe hoje… Os ossos e coágulos ficaram muito bons também, podem ser usados mais sombreados para flutuar nos layers de trás"</i>. E a regra que veio junto: <i>"os assets que vão para os layers de trás precisam diminuir de tamanho, para parecerem distantes"</i>.</p>
+  <ul>
+    <li><b>O destroço da F4 é o casco engolido</b>: as 7 peças, inteiras e reduzidas por 2, em escala 1 (<code>public/sprites/f4-engolido.png</code>). Entra como pele da F4 no <code>DebrisSystem</code> (<code>STAGE_4_SKIN</code>); a F2 continua com a arte cinza de sempre.</li>
+    <li><b>Menos destroço, e só destroço:</b> ele caiu para <b>2/3</b> do que era. Na câmara A, passou de um a cada 4,4s para um a cada 6,6s; da câmara do golfinho até o fim do duto, de 7,8s para 11,7s. Os sensores e as minas continuam exatamente na cadência de antes (a conta está no roteiro, <code>StageDirector.ts</code>, t=15,5 e t=50,5). Os GIFs dos conceitos, mais abaixo, tinham densidade exagerada de propósito; estes de cima são a cadência real.</li>
+    <li><b>A deriva</b> (<code>src/systems/DerivaF4.ts</code>, atlas <code>f4-deriva.png</code>): ossos e coágulos boiando ATRÁS da borda, em <b>dois planos de distância</b>. Nenhuma peça inteira entra, porque as inteiras têm o tamanho do destroço jogável. O plano de 1/2 anda a 0,55× do mundo, com sombra média. O de 1/3 é <b>menor, mais lento (0,42×), mais escuro e mais fundo</b>. Os dois ficam entre a costela distante e a próxima, girando devagar. Somem na arena junto com o resto do cenário.</li>
+    <li>⚠️ <b>Corrigido no caminho:</b> na 1ª versão a deriva nascia em qualquer altura da tela e caía atrás das mesas e da faixa, onde não aparecia. Agora o centro nasce dentro do corredor.</li>
+  </ul>
+  <div class="tres" style="margin-top:12px">
+    <figure><img src="gif/jogo-a.gif" alt=""><figcaption><b>Câmara A (t=24).</b></figcaption></figure>
+    <figure><img src="gif/jogo-b.gif" alt=""><figcaption><b>Câmara do golfinho (t=56).</b> É onde a deriva mais aparece, contra o azul.</figcaption></figure>
+    <figure><img src="gif/jogo-duto.gif" alt=""><figcaption><b>Duto (t=84).</b> Contra o fundo escuro do duto a deriva quase some: é o "mais sombreado" levado ao limite. Se você quiser que ela leia mais, o ajuste é o <code>tint</code> dos planos.</figcaption></figure>
+  </div>
+  <p class="sub" style="margin-top:10px"><b>Conferido:</b> <code>tsc</code> limpo. Na <code>probe-f4-frente</code>, que agora também confere o destroço e a deriva, deu "tudo certo": todo destroço da F4 nasce como casco engolido em escala 1, a deriva só usa peças reduzidas, e nada da deriva nasce nem fica visível na arena. <code>probe-stage4</code>, <code>probe-f4-esfincter</code> e <code>probe-elites-f4</code> passaram. A <code>probe-stage2</code> roda inteira; a F2 não foi tocada.</p>
+</div>
+
+<h2>As peças</h2>
+<div class="item pecas">
+  <figure><img src="img/conceito-atual.png" alt=""><figcaption><b>Hoje</b>: as três artes da F2 (42–52px, ampliadas de 0,9 a 1,6 no jogo).</figcaption></figure>
+  <figure style="margin-top:14px"><img src="img/conceito-casco.png" alt=""><figcaption><b>A · Casco engolido.</b> Pedaços do casco da frota em aço quase preto, tomados por tecido vinho, tendões e pólipos, com veias acesas. É a mesma história (a SUA frota, que ele engoliu), na luz da F4.</figcaption></figure>
+  <figure style="margin-top:14px"><img src="img/conceito-engolido.png" alt=""><figcaption><b>B · O mesmo casco, editado a partir da arte aprovada</b> (<code>edit-image</code> sobre as três artes de hoje). Só 2 de 9 saíram mantendo o casco, e puxam para o azul-petróleo.</figcaption></figure>
+  <figure style="margin-top:14px"><img src="img/conceito-coagulo.png" alt=""><figcaption><b>C · Coágulo.</b> Nós de tecido endurecido com lascas de metal da frota presas dentro.</figcaption></figure>
+  <figure style="margin-top:14px"><img src="img/conceito-osso.png" alt=""><figcaption><b>D · Osso.</b> Placas de carapaça calcificada e vértebras partidas, com rachaduras acesas e tendões soltos.</figcaption></figure>
+  <p class="sub" style="margin-top:10px">No jogo entra cada peça inteira e também reduzida por 2 (reduzir pode, aumentar nunca). Somando as duas, o tamanho médio (55×47px) fica perto do de hoje (61×44px), e a dificuldade não muda de lado.</p>
+</div>
+
+<h2>Câmara A (t=20)</h2>
+<div class="item">
+  <div class="tres">
+    <figure><img src="gif/atual-a.gif" alt=""><figcaption><b>Hoje.</b></figcaption></figure>
+    <figure><img src="gif/casco-a.gif" alt=""><figcaption><b>A · Casco engolido.</b></figcaption></figure>
+    <figure><img src="gif/engolido-a.gif" alt=""><figcaption><b>B · Editado da aprovada.</b></figcaption></figure>
+    <figure><img src="gif/coagulo-a.gif" alt=""><figcaption><b>C · Coágulo.</b></figcaption></figure>
+    <figure><img src="gif/osso-a.gif" alt=""><figcaption><b>D · Osso.</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>Câmara do golfinho (t=54)</h2>
+<div class="item">
+  <div class="tres">
+    <figure><img src="gif/atual-b.gif" alt=""><figcaption><b>Hoje.</b></figcaption></figure>
+    <figure><img src="gif/casco-b.gif" alt=""><figcaption><b>A · Casco engolido.</b></figcaption></figure>
+    <figure><img src="gif/engolido-b.gif" alt=""><figcaption><b>B · Editado da aprovada.</b></figcaption></figure>
+    <figure><img src="gif/coagulo-b.gif" alt=""><figcaption><b>C · Coágulo.</b></figcaption></figure>
+    <figure><img src="gif/osso-b.gif" alt=""><figcaption><b>D · Osso.</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>Duto (t=82)</h2>
+<div class="item">
+  <div class="tres">
+    <figure><img src="gif/atual-duto.gif" alt=""><figcaption><b>Hoje.</b></figcaption></figure>
+    <figure><img src="gif/casco-duto.gif" alt=""><figcaption><b>A · Casco engolido.</b></figcaption></figure>
+    <figure><img src="gif/engolido-duto.gif" alt=""><figcaption><b>B · Editado da aprovada.</b></figcaption></figure>
+    <figure><img src="gif/coagulo-duto.gif" alt=""><figcaption><b>C · Coágulo.</b></figcaption></figure>
+    <figure><img src="gif/osso-duto.gif" alt=""><figcaption><b>D · Osso.</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>A decisão (17/10: ele escolheu o A, com C e D na deriva de trás)</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag rec">minha aposta</span><b>A · Casco engolido.</b> Some o cinza e continua sendo a frota dele, agora digerida: é a única opção que conta a história da F2 para a F4. Escuro como a fase pede, e as veias acesas o separam do fundo.</li>
+    <li><span class="tag decidir">alternativa</span><b>D · Osso</b>, a que mais aparece na tela; ou <b>A + D misturados</b> (o que ele engoliu e o que é dele).</li>
+    <li><span class="tag ruim">não recomendo</span><b>B</b> (azul-petróleo e quadradão) e <b>C</b> (o coágulo some contra o fundo escuro, e obstáculo que não se lê mata sem aviso).</li>
+  </ul>
+  <p class="sub">Como entra no código: uma pele da F4 no <code>DebrisSystem</code>, no molde da <code>STAGE_2_SKIN</code> dos inimigos. Troca a arte e fixa a escala em 1 só na F4; o sorteio do jogo continua com as mesmas chamadas, e a F2 fica intocada (o destroço dela é do item 7, junto com o bloco F). Gerações nesta rodada: ~80. Nada foi commitado.</p>
+</div>
+</main>
+</body>
+</html>

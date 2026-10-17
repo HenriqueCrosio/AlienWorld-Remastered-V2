@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meio-Plano Nativo</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 760px) { .par { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>O meio-plano da F4 no tamanho nativo · item 7</h1>
+<p class="sub">17/10/2026 · Polimento, bloco C. Feito com você fora; <b>nada instalado</b>. O órgão e o maquinário aparecem a 1,45–1,6× e a ponte a 1,41–1,55× (pixel gordo, contra a lei: reduzir pode, aumentar nunca). A escala não é gosto: é um <b>piso calculado</b>. Abaixo dele, as pontas dos cabos voltam a ficar no ar e a mesa tapa o convés da ponte (as contas estão no <code>Parallax</code>). Então a saída é a <b>mesma peça desenhada no tamanho em que aparece</b>, partindo da arte aprovada, sem desenho novo.</p>
+
+<h2>Decidido (17/10, à noite) · a ponte nativa está no jogo</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag rec">instalado</span><b>A ponte</b>: você escolheu a do <code>image-to-pixelart</code> (a dos detalhes e da lâmpada) e pediu maior, para sair de baixo do piso. Ela foi redesenhada a <b>1,55×</b>, o topo da faixa de escala dela, em <b>duas metades</b>, porque o gerador não passa de 320px e ela precisa de 384. As metades se sobrepõem e são costuradas por um <b>corte torto</b>, que passa onde as duas versões mais concordam (a linha vermelha abaixo). Não há corte reto. No jogo ela entra com escala 0,91–1, só reduzindo, e isso dá os mesmos 1,41–1,55× de antes em tela: o convés fica na mesma altura de antes, acima da mesa. As três pontes foram trocadas, com 6 gerações. As originais estão em <code>assets/raw/f4-ponte*-original.png</code>.</li>
+    <li><span class="tag decidir">mantido</span><b>Órgão e maquinário</b>: ficam os de hoje, por escolha sua (<i>"a animação deles fica mais real, as novas ficaram muito expandidas e grosseiras"</i>). Você leu a folha certo: o da esquerda (atual) é o ampliado de hoje. Nada mudou neles.</li>
+  </ul>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="img/ponte-instalada/ponte1-antes.png" alt=""><figcaption><b>Ponte 1, antes</b> (a de 248px ampliada a 1,48×).</figcaption></figure>
+    <figure><img src="img/ponte-instalada/ponte1-depois.png" alt=""><figcaption><b>Ponte 1, depois</b> (a nativa, no mesmo tamanho em tela).</figcaption></figure>
+    <figure><img src="img/ponte-instalada/ponte2-antes.png" alt=""><figcaption><b>Ponte 2, antes.</b></figcaption></figure>
+    <figure><img src="img/ponte-instalada/ponte2-depois.png" alt=""><figcaption><b>Ponte 2, depois.</b></figcaption></figure>
+    <figure><img src="img/ponte-instalada/ponte3-antes.png" alt=""><figcaption><b>Ponte 3, antes.</b></figcaption></figure>
+    <figure><img src="img/ponte-instalada/ponte3-depois.png" alt=""><figcaption><b>Ponte 3, depois.</b></figcaption></figure>
+  </div>
+  <figure style="margin-top:14px"><img src="img/costura-f4-ponte.png" alt=""><figcaption><b>Onde passa a costura</b> (vermelho, só nesta foto), na ponte 1: ela corre pelo vão e cruza o convés onde as duas metades já coincidem.</figcaption></figure>
+  <figure style="margin-top:8px"><img src="img/costura-f4-ponte2.png" alt=""><figcaption><b>Ponte 2.</b></figcaption></figure>
+  <figure style="margin-top:8px"><img src="img/costura-f4-ponte3.png" alt=""><figcaption><b>Ponte 3.</b></figcaption></figure>
+  <p class="sub" style="margin-top:10px">Ferramentas: <code>_ponte-em-metades.mjs</code> (o redesenho em metades) e <code>_lado-a-lado-ponte.mjs</code> (as fotos). O texto abaixo é a folha de antes da sua decisão.</p>
+</div>
+
+<h2>Como foi feito</h2>
+<div class="item">
+  <ul>
+    <li>A arte aprovada é ampliada <b>suave</b> (para o gerador receber formas, não pixels gordos) até 1,55× e redesenhada pelo PixelLab (<code>scripts/_polimento/_gerar-nativo.mjs</code>). No fim, cada pixel volta para a <b>paleta exata da arte aprovada</b>: muda a resolução e mais nada.</li>
+    <li><b>Órgão e maquinário são animados</b> (a batida tem 9 quadros e a brasa 6). Cada quadro foi redesenhado sozinho com a mesma semente, e a folha foi remontada. O GIF mostra se isso segura ou tremula.</li>
+    <li>Na ponte o <code>image-to-pixelart</code> não serve, porque não passa de 320px e ela precisa de ~365. Usei o <code>edit-image</code>, e comparei com o <code>image-to-pixelart</code> no limite de 320px (1,29×).</li>
+    <li>Gerações: ~25. Ferramentas novas: <code>_gerar-nativo.mjs</code>, <code>_gif-nativo-f4.mjs</code> e <code>_lado-a-lado-nativo.mjs</code>.</li>
+  </ul>
+</div>
+
+<h2>Órgão e maquinário: a animação (hoje ampliado · redesenhado nativo)</h2>
+<div class="item">
+  <div class="par">
+    <figure><img src="gif/orgao-anim.gif" alt=""><figcaption><b>A batida do órgão.</b> A gaiola fica firme. O coração <b>ferve um pouco</b> de quadro a quadro, porque os 9 quadros foram redesenhados separados. Num órgão isso pode até ler como vivo, mas é você quem julga.</figcaption></figure>
+    <figure><img src="gif/maquinario-anim.gif" alt=""><figcaption><b>A brasa do maquinário.</b> Mais nítido e com mais contraste que o ampliado.</figcaption></figure>
+  </div>
+</div>
+
+<h2>No jogo, lado a lado (a mesma câmara, o mesmo tint, a mesma névoa)</h2>
+<div class="item">
+  <figure><img src="img/a-colunas.png" alt=""><figcaption>Câmara A, t=24. Da esquerda para a direita: <b>órgão de hoje</b> (1,55×), <b>órgão nativo</b>, <b>maquinário de hoje</b> (1,55×) e <b>maquinário nativo</b>. O nativo tem o pixel do tamanho do resto da fase; o ampliado mostra os degraus de pixel gordo, principalmente no maquinário. ⚠️ As mesas tapam parte das colunas: é assim no jogo também.</figcaption></figure>
+  <div class="par" style="margin-top:14px">
+    <figure><img src="img/a-ponte-hoje.png" alt=""><figcaption><b>Ponte hoje</b> (1,48×), com as lâmpadas âmbar.</figcaption></figure>
+    <figure><img src="img/a-ponte-edit.png" alt=""><figcaption><b>Ponte nativa (edit-image).</b> Manteve a forma, mas <b>perdeu as lâmpadas</b> e escureceu: virou silhueta. As lâmpadas são a razão do tint claro dela.</figcaption></figure>
+    <figure><img src="img/a-ponte-i2p130.png" alt=""><figcaption><b>Ponte nativa (image-to-pixelart, 1,29×).</b> Mais fiel e com a lâmpada, mas <b>abaixo do piso de 1,41</b>: o convés fica ~7px mais baixo, e a mesa pode tapá-lo.</figcaption></figure>
+  </div>
+</div>
+
+<h2>Em movimento (cadência real, peças sorteadas)</h2>
+<div class="item">
+  <div class="par">
+    <figure><img src="gif/hoje-22.gif" alt=""><figcaption><b>Hoje</b>, câmara A.</figcaption></figure>
+    <figure><img src="gif/nativo-22.gif" alt=""><figcaption><b>Nativo</b>, câmara A.</figcaption></figure>
+    <figure><img src="gif/hoje-56.gif" alt=""><figcaption><b>Hoje</b>, câmara do golfinho.</figcaption></figure>
+    <figure><img src="gif/nativo-56.gif" alt=""><figcaption><b>Nativo</b>, câmara do golfinho.</figcaption></figure>
+  </div>
+  <p class="sub" style="margin-top:8px">O meio-plano é escuro e esparso, e passa atrás das mesas: nos GIFs a diferença quase não aparece. A foto lado a lado, acima, é a comparação justa.</p>
+</div>
+
+<h2>A decisão (sua)</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag rec">minha aposta</span><b>Órgão e maquinário nativos</b>, se a fervura da batida não incomodar. Se incomodar, o caminho é redesenhar só o quadro parado e animar de novo no PixelLab, a partir dele (a regra de animar a peça inteira).</li>
+    <li><span class="tag decidir">a ponte</span>Nenhuma das duas está pronta. A do edit perdeu a lâmpada; a do image-to-pixelart está abaixo do piso. Caminho provável: redesenhar a ponte em duas metades no image-to-pixelart, com a emenda escondida num pilar (sem corte reto na vista), ou repor a lâmpada à mão sobre a do edit. Fica para depois da sua escolha.</li>
+  </ul>
+  <p class="sub"><b>Como entra no código:</b> as folhas novas substituem <code>orgao-anim.png</code> e <code>maquinario-anim.png</code> (quadro de 149×198 na <code>BootScene</code>), e a escala das duas camadas no <code>Parallax</code> vira [0,94, 1]: redução, que é permitida, e equivale aos 1,45–1,55× de hoje, então a variação de tamanho entre as peças continua. Os originais vão para <code>assets/raw/*-original.png</code>.</p>
+</div>
+</main>
+</body>
+</html>

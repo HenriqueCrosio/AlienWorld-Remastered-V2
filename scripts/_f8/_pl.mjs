@@ -22,6 +22,9 @@ export async function gerar(endpoint, body) {
   const r = await fetch(API + endpoint, { method: 'POST', headers: H, body: JSON.stringify(body) });
   const j = await r.json();
   if (!r.ok) throw new Error(`${endpoint} HTTP ${r.status} — ${JSON.stringify(j).slice(0, 400)}`);
+  // Some endpoints (/image-to-pixelart, 17/10) answer at once, with the images and no job.
+  const direto = j.images ?? (j.image ? [j.image] : null);
+  if (direto) return direto.map((im) => Buffer.from(String(im.base64 ?? im).replace(/^data:[^,]+,/, ''), 'base64'));
   const id = j.background_job_id ?? j.job_id ?? j.id;
   fs.writeFileSync('scripts/_f8/_ultimo-job.txt', `${endpoint} ${id}\n`); // o job não se perde num timeout
   process.stdout.write(`${endpoint} ${id} `);

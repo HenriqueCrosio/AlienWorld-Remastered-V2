@@ -5,7 +5,7 @@
 // smear it. A blocky value noise (cells of CELL px) is compared against a ramp that goes from 0 at the edge to 1 at
 // RAMP px inside, so the matter thins out in crumbs toward the end; then specks smaller than MIN px are removed.
 // Deterministic (seeded), and it always reads the ORIGINAL in assets/raw, so running it again gives the same file.
-//   node scripts/_polimento/_dissolver-pontas.mjs <original png> <out png> <ramp px> [sides: lr|l|r|lrb] [cell px] [seed]
+//   node scripts/_polimento/_dissolver-pontas.mjs <original png> <out png> <ramp px> [sides: any of l r b t] [cell px] [seed]
 import sharp from 'sharp';
 
 const [SRC, OUT, RAMP_S, SIDES = 'lr', CELL_S = '3', SEED_S = '7'] = process.argv.slice(2);
@@ -32,6 +32,7 @@ const dist = (x, y) => {
   if (SIDES.includes('l')) d = Math.min(d, x);
   if (SIDES.includes('r')) d = Math.min(d, W - 1 - x);
   if (SIDES.includes('b')) d = Math.min(d, H - 1 - y);
+  if (SIDES.includes('t')) d = Math.min(d, y); // 17/10: a tuft of the F4 foreground that hit the top edge
   return d;
 };
 

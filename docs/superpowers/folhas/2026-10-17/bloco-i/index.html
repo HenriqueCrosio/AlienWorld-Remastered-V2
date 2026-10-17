@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUD e Dicas</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Bloco I · os itens 10 e 16 (HUD e dicas)</h1>
+<p class="sub">17/10/2026 · <b>Aprovados por você</b> (10 e 16), e o 15 foi tentado à noite e DESFEITO a pedido seu (a fila unida é de propósito). <b>Estão no código, NÃO commitados</b>: se algum não agradar, volta numa linha. Os itens 9, 11, 13 e 14 (fumaça, tela final, flashes, explosão da cutscene) pedem arte ou decisão sua, e o 12 (subtítulo do menu) vai junto do bloco E. O 15 (drones encavalados) está no fim da folha.</p>
+
+<h2>Item 10 · os rótulos de desenvolvimento no HUD</h2>
+<div class="item">
+  <ul>
+    <li><b>Saiu o nome da condução</b> ("FLAP (LEGACY)", "LIVRE (NEW)"), que era nome interno de desenvolvimento. A zona continua (1G / ZERO-G), e a <b>cor da linha</b> já dizia a condução: âmbar para o flap, ciano para o livre. O resto da linha não mudou: arma, vidas, bombas, peças e pontos.</li>
+    <li><b>A barra de vida dos chefões ganhou folga:</b> ela ia de y=14 a 18, a 1px da linha de progresso da HUD (y=13), e lia colada nela. Agora vai de 17 a 21, com 3px de folga. Eram cinco cópias do mesmo número (os quatro chefões e o golfinho); viraram uma constante só, <code>BARRA_CHEFAO_Y</code>, no <code>config.ts</code>.</li>
+  </ul>
+  <figure style="margin-top:10px"><img src="img/hud-f1-antes.png" alt=""><figcaption><b>F1, chefão, antes.</b></figcaption></figure>
+  <figure style="margin-top:8px"><img src="img/hud-f1-depois.png" alt=""><figcaption><b>F1, chefão, depois.</b></figcaption></figure>
+  <figure style="margin-top:14px"><img src="img/hud-f2-antes.png" alt=""><figcaption><b>F2, antes.</b></figcaption></figure>
+  <figure style="margin-top:8px"><img src="img/hud-f2-depois.png" alt=""><figcaption><b>F2, depois.</b></figcaption></figure>
+</div>
+
+<h2>Item 16 · as setas das dicas de controle</h2>
+<div class="item">
+  <ul>
+    <li>A mesa de cartas usava <code>[&lt;-  -&gt;]</code> e o painel de nave usava <code>[←→]</code>. Medi no navegador: <b>a Chakra Petch (a voz das duas dicas) não tem as setas ← →</b>. No painel elas saíam na fonte serifada de reserva do navegador, que é a diferença que se via.</li>
+    <li>As duas agora usam <code>[&lt;  &gt;]</code>, que a fonte tem. Testei também <code>‹ ›</code>, que ela tem, mas saem miúdas demais.</li>
+  </ul>
+  <figure style="margin-top:10px"><img src="img/zoom-painel-antes.png" alt=""><figcaption><b>Painel de nave, antes</b>: as setas na serifada de reserva.</figcaption></figure>
+  <figure style="margin-top:8px"><img src="img/zoom-painel-depois.png" alt=""><figcaption><b>Painel de nave, depois.</b></figcaption></figure>
+  <figure style="margin-top:8px"><img src="img/zoom-mesa-depois.png" alt=""><figcaption><b>Mesa de cartas, depois</b> (antes era <code>[&lt;-  -&gt;]</code>, na mesma fonte).</figcaption></figure>
+</div>
+
+<h2>Item 15 · os drones encavalados (17/10, à noite) · DESFEITO</h2>
+<div class="item">
+  <p><span class="tag decidir">desfeito</span><b>Ele mandou voltar como era:</b> <i>"foi decisão manter os inimigos mais unidos, principalmente pela card de reação em cadeia, além de ser mais prazeroso entrar em cadeia, visualmente falando"</i>. A fila apertada é de propósito. O código voltou ao sorteio de ±12 por nave, sem alternar altura, e o item 15 sai da lista. O registro abaixo fica só como histórico.</p>
+  <ul>
+    <li><b>A conta:</b> o drone tem 27px de largura e anda a 70px/s. Com 0,2–0,3s entre um e outro, a distância é de 14–21px, e cada um nascia cobrindo até metade do anterior. Isso acontece em 21 ondas das quatro fases. O batedor (23px, 95px/s) só encavala nas ondas de 0,25s, e o kamikaze nas de 0,5–0,6s, mas ele mergulha em você logo e se separa sozinho.</li>
+    <li><b>O que eu fiz:</b> <span class="tag rec">alternar a altura</span>. Uma fila que encavala no espaçamento do roteiro vira dois andares intercalados: cada nave sobe ou desce 15px em relação ao meio da onda. Entre vizinhos ficam 30px, ou 28 no pior sorteio, mais que os 26 de altura do drone, então eles nunca se cobrem. Quem decide se a fila encavala é a conta (<code>EnemySystem.encavala</code>), não uma lista: onda folgada continua como era.</li>
+    <li><b>O que eu NÃO fiz, e por quê:</b> abrir o espaçamento para ≥0,4s também resolvia, mas dobrava a duração de toda onda de drone (9 drones: de 1,8s para 3,6s) e empurrava o ritmo das quatro fases. Alternar a altura mantém <b>quantos</b> inimigos chegam e <b>quando</b>. Se você preferir a fila reta e mais espaçada, é uma troca de números no roteiro.</li>
+  </ul>
+  <figure style="margin-top:10px"><img src="gif/drones-f1.gif" alt=""><figcaption><b>F1, t=54</b>: 9 drones a 0,2s. Em cima, antes (amontoados); embaixo, depois.</figcaption></figure>
+  <figure style="margin-top:10px"><img src="gif/drones-f2.gif" alt=""><figcaption><b>F2, t=82</b>: 8 drones a 0,2s, no pico do Enxame.</figcaption></figure>
+</div>
+
+<h2>Conferido</h2>
+<div class="item">
+  <p><code>tsc</code> limpo. A <code>probe-vozes</code> (que cobra a folga da HUD) deu TUDO OK. ⚠️ A <code>probe-f4-golfinho</code> falha, mas já estava velha antes disto: ela chama <code>spawnGolfinho</code>, que não existe mais no código, e não é mexida desde 03/10. Ferramentas: <code>_hud-antes-depois.mjs</code> e <code>_dicas-setas.mjs</code>.</p>
+</div>
+</main>
+</body>
+</html>

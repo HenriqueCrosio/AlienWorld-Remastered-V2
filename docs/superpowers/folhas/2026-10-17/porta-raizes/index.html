@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raízes da Porta</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 760px) { .par { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>As portas do duto enraizadas · item 2b</h1>
+<p class="sub">17/10/2026 · Polimento, bloco C. Sua sugestão: <i>"você colocou raízes nos tubos… enraizou o esfíncter final… mas as portas dos dutos ainda estão sem acabamento, não seria interessante enraizá-las também?"</i> Feito enquanto você estava fora. <b>Nada foi instalado:</b> a folha espera a sua escolha, como sempre.</p>
+<p class="sub">Os GIFs são a F4 de verdade com as raízes montadas só na memória, na primeira porta do duto (t=72). Para mostrar a porta quebrada, ela é estourada à força quando passa de x=150.</p>
+
+<h2>Decidido (17/10, à noite) · a D está no jogo</h2>
+<div class="item">
+  <p><span class="tag rec">instalado</span>Você escolheu a <b>D</b>: <i>"ela preenche bem a base e a parte de cima da porta, além de ficar interessante quando estoura"</i>. As duas peças estão em <code>public/sprites/f4-porta-raiz-chao.png</code> e <code>…-teto.png</code>.</p>
+  <ul>
+    <li>Quem as prende é o <code>RaizesPorta</code> (<code>src/systems/</code>). Ele vê cada porta do duto que nasce, prende um par (chão e teto) no x dela e relê as duas superfícies da borda a cada quadro, como o esfíncter faz. Depth −0,52: na frente da borda, atrás dos props.</li>
+    <li>As raízes <b>ficam com a lasca</b> depois do estouro, porque os cotos continuam presos à parede. E não somem de estalo: a porta é recolhida em x=−40, mas a raiz é mais larga, então ela termina de sair da tela sozinha.</li>
+    <li>Elas são posicionadas <b>depois da física</b> de cada quadro. Antes disso elas andariam 1,4px atrás da porta e tremeriam contra ela.</li>
+    <li>A <code>probe-f4-frente</code> confere isso agora: as 3 portas têm raízes no x delas, encostadas nas duas superfícies, com 0px de desvio no pior quadro.</li>
+  </ul>
+  <figure style="margin-top:10px"><img src="gif/jogo-D.gif" alt=""><figcaption><b>No jogo, sem nada montado na memória</b>: a primeira porta do duto, estourada à força em x=150 para mostrar a lasca.</figcaption></figure>
+  <p class="sub" style="margin-top:8px">O texto abaixo é a folha de antes da sua decisão.</p>
+</div>
+
+<h2>O que muda</h2>
+<div class="item">
+  <ul>
+    <li>Hoje a porta mora atrás da faixa do duto e entra 14px na parede de cada lado. A linha acesa da borda passa reto por cima dela: não tem transição nenhuma.</li>
+    <li>As raízes são <b>feitas à mão</b> (<code>scripts/_polimento/_raizes-porta.mjs</code>), com a mesma ferramenta das raízes do esfíncter. Essa ferramenta agora é um módulo compartilhado, <code>_raizes-lib.mjs</code>, e as raízes do esfíncter saem idênticas, byte a byte. Uma peça no chão e a mesma, virada, no teto. Ficam <b>à frente da borda</b> (−0,52, como as do esfíncter), bem na linha da superfície: um lábio de tecido sobre a linha e raízes abrindo em leque para dentro da parede.</li>
+    <li><b>As cores são as do duto</b>, tiradas da própria porta e da faixa C: tecido vinho quase preto, veias vermelhas e o laranja de lava da fenda da porta acendendo as veias.</li>
+    <li><b>Presas à porta</b>: andam com ela e relêem a superfície a cada quadro, como as do esfíncter. <b>Continuam depois do estouro</b>, nos dois cotos da porta quebrada.</li>
+    <li><b>Não invadem a passagem:</b> a fresta da porta quebrada mede 38px, e cada coto aparece com 15–23px. Por isso nada passa de 9px acima da linha nem sai da largura da porta.</li>
+  </ul>
+</div>
+
+<h2>As quatro variações, ampliadas (inteira · quebrada)</h2>
+<div class="item">
+  <div class="par">
+    <figure><img src="img/zoom-atual.png" alt=""><figcaption><b>Hoje</b>, sem raízes.</figcaption></figure>
+    <figure><img src="img/zoom-A.png" alt=""><figcaption><b>A · Lábio e leque.</b> As raízes do esfíncter, nas cores do duto.</figcaption></figure>
+    <figure><img src="img/zoom-B.png" alt=""><figcaption><b>B · Garras.</b> Um lábio mais fino, e as raízes de fora correm deitadas ao longo da parede.</figcaption></figure>
+    <figure><img src="img/zoom-C.png" alt=""><figcaption><b>C · A com gavinhas</b> subindo pela face da porta: a porta cresceu DENTRO do tecido, em vez de só afundar nele.</figcaption></figure>
+    <figure><img src="img/zoom-D.png" alt=""><figcaption><b>D · C com as veias acesas</b> ao longo da raiz inteira. A, B e C leem, mas fracas: o corpo da raiz tem quase o escuro da própria borda. O que lê nesta parede é a linha acesa (a lição das raízes do esfíncter: <i>linha escura com brilho dentro</i>).</figcaption></figure>
+  </div>
+  <p class="sub" style="margin-top:8px">O corredor é sorteado a cada rodada, então a porta não cai exatamente no mesmo lugar em todas as ampliações.</p>
+</div>
+
+<h2>Em movimento</h2>
+<div class="item">
+  <div class="par">
+    <figure><img src="gif/porta-atual.gif" alt=""><figcaption><b>Hoje.</b></figcaption></figure>
+    <figure><img src="gif/porta-D.gif" alt=""><figcaption><b>D</b>, a minha aposta.</figcaption></figure>
+    <figure><img src="gif/porta-A.gif" alt=""><figcaption><b>A.</b></figcaption></figure>
+    <figure><img src="gif/porta-B.gif" alt=""><figcaption><b>B.</b></figcaption></figure>
+    <figure><img src="gif/porta-C.gif" alt=""><figcaption><b>C.</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>A decisão (sua)</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag rec">minha aposta</span><b>D</b>: é a única que lê a meia distância, sem lupa. Lê como uma porta que cresceu dentro do tecido, sem parecer colada na frente da parede.</li>
+    <li><span class="tag decidir">alternativa</span><b>B</b>, se você quiser algo mais discreto: é a que menos mexe na silhueta da porta.</li>
+  </ul>
+  <p class="sub"><b>Como entra no código, depois da sua escolha:</b> as duas peças vão para <code>public/sprites/</code>, e o <code>matarPorta</code>/a porta ganham as raízes presas, no molde do <code>posicionarRaizes</code> do esfíncter. A <code>probe-f4-esfincter</code> ganha a conferência de que elas seguem a porta e ficam fora da fresta. Sem PixelLab: zero gerações.</p>
+</div>
+</main>
+</body>
+</html>
