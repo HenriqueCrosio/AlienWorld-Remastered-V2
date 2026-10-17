@@ -57,15 +57,60 @@
    nadadeira de baleia.
 2. **O primeiro plano próprio da F4**, que repõe a profundidade perdida no item 1: orgânico, quase preto, sem cruzar a
    linha da superfície da borda. Também é rodada de geração.
+   **✅ 17/10, NO JOGO (falta ele ver os GIFs em jogo):** `src/systems/PrimeiroPlanoF4.ts` + o atlas
+   `public/sprites/f4-frente.png` (44 peças). Pela regra dele: ossos e tendões em toda a borda, pólipos no duto e na
+   câmara do golfinho, membrana em todas; debaixo da névoa (depth 60, escolha dele). A peça só nasce se couber no trecho
+   de faixa por onde vai escorregar e se encher ≥ 55% dele (a faixa é escura na beira da tela). Some na arena (t≥109),
+   atenua com elite, não apaga no duto. Sonda: `scripts/probe-f4-frente.mjs`. Folha: `folhas/2026-10-17/f4-frente/`.
 3. **Item 7, as peças ampliadas acima de 1** (pixel gordo). A lei: assar na resolução nativa; reduzir pode, aumentar
    nunca.
+   **📄 17/10, FOLHA PRONTA (feita com ele fora; NADA instalado):** `folhas/2026-10-17/nativo-f4/`. A arte aprovada
+   ampliada suave e redesenhada no PixelLab (`_gerar-nativo.mjs`: `image-to-pixelart` quadro a quadro, com a mesma
+   semente; depois a paleta exata da aprovada). Órgão e maquinário saíram bons; o coração ferve um pouco entre os
+   quadros (decisão dele). A ponte não está pronta: o `edit-image` perdeu a lâmpada, e o `image-to-pixelart` não passa de
+   320px (fica abaixo do piso de 1,41). Foto justa lado a lado: `_lado-a-lado-nativo.mjs`.
+   **✅ 17/10 à noite, DECIDIDO por ele:** órgão e maquinário FICAM os de hoje (*"a animação deles fica mais real, as
+   novas ficaram muito expandidas e grosseiras"*). A ponte nativa ESTÁ NO JOGO: a do `image-to-pixelart`, que ele
+   escolheu, refeita a 1,55× em duas metades sobrepostas e costuradas por um corte de custo mínimo (`_ponte-em-metades.mjs`,
+   6 gerações), com a camada em escala 0,91–1 (só reduz; dá os mesmos 1,41–1,55× em tela). Originais em
+   `assets/raw/f4-ponte*-original.png`. Fotos antes/depois: `_lado-a-lado-ponte.mjs`.
 4. **Item 8, o destroço cinza da F2 dentro do Leviatã.** Em 15/10 ele também apareceu na F4, perto da soleira, em
    algumas rodadas (visto na tira `gif-final`, t≈109,9).
+   **✅ 17/10, NO JOGO (falta ele ver os GIFs em jogo):** a escolha dele foi o casco engolido, entre 4 conceitos
+   (`public/sprites/f4-engolido.png`, 14 peças em escala 1, pele `STAGE_4_SKIN` do `DebrisSystem`). O destroço da F4
+   caiu para 2/3 (*"na mesma proporção ou até menos"*); sensor e mina ficaram na cadência de antes. Os ossos e
+   coágulos foram para a `DerivaF4`, em dois planos atrás da borda (1/2 e 1/3: menor, mais lento, mais escuro, mais
+   fundo — *"os assets que vão para os layers de trás precisam diminuir de tamanho"*). A `probe-f4-frente` cobre os
+   dois. Folha: `folhas/2026-10-17/destroco-f4/`. ⚠️ O destroço visto na soleira (t≈109,9) deve ser o último sorteado
+   antes do `hazard` zerar em t=106,5 (a 84px/s ele leva ~5,5s para cruzar a tela). É um perigo, não cenário, e por
+   isso não some no `soFundo`. Conta, não medição.
+5. **As portas do duto enraizadas** (sugestão dele, 17/10). Os tubos de esporos têm pé de raízes e o esfíncter tem
+   raízes B e a trepadeira; a `porta` do duto não tem acabamento nenhum onde encontra a faixa C. Fazer raízes à mão
+   (base: `_raizes-esfincter.mjs`) nas duas pontas, presas à PORTA e não à borda. Elas continuam na `portaLasca` e
+   ficam fora da fresta de 38px. Detalhe no bloco C do 🧭 (item 2b). Vai logo depois do item 8.
+   **📄 17/10, FOLHA PRONTA (feita com ele fora; NADA instalado):** `folhas/2026-10-17/porta-raizes/`. Quatro
+   variações à mão (`_raizes-porta.mjs`, sobre o kit `_raizes-lib.mjs` que agora o esfíncter também usa, byte a byte
+   igual), em GIF na porta de t=72, inteira e estourada. Aposta: D (gavinhas na face e veias acesas). Instala depois
+   da escolha dele, no molde do `posicionarRaizes` do esfíncter.
+   **✅ 17/10 à noite, NO JOGO:** ele escolheu a D. `src/systems/RaizesPorta.ts` (no `POST_UPDATE`, depois da física)
+   e `f4-porta-raiz-chao/teto.png`; a `probe-f4-frente` cobra o encaixe (3 portas, 0px). GIF `porta-raizes/gif/jogo-D.gif`.
+6. **O rabo da F3 em 45s** (decisão dele, 17/10: *"prefiro que ele vá para 45s"*). ✅ NO JOGO: o `STAGE_3` do
+   `hazard rate 0` em diante andou +7s (serpente em 95), e o ato 1 ganhou batedor 37,5, kamikaze 40 e drones 42.
+   `probe-stage3` e `probe-f3-visual` com as esperas novas, verdes. Falta ele jogar.
+7. **Item 15, os drones encavalados: DESCARTADO por ele.** A fila que alternava a altura foi feita e DESFEITA: a fila
+   unida é decisão antiga dele (*"foi decisão manter os inimigos mais unidos, principalmente pela card de reação em
+   cadeia, além de ser mais prazeroso entrar em cadeia, visualmente falando"*). Não é defeito; não reabrir.
+
+**17/10 à noite: o bloco C FECHOU.** Tudo acima foi COMMITADO e EMPURRADO a pedido dele, em `feat/cartas-preview`, só no
+nome dele e sem Co-Authored-By: o código e a arte; as ferramentas e as folhas sem os GIFs, as tiras `cru/` e as fotos
+`bloco-i/vozes/`; e estes docs. Os `*.gif` ficaram no disco, para o backup.
 
 Pela regra dele: **arte com direção clara → gerar 3–4 conceitos e mostrar a folha, sem brainstorming antes.** A folha
 é aprovada antes de a peça entrar no jogo, e o julgamento final é por GIF em jogo.
 
-**Depois do C:** os itens de média e baixa (9 a 16: a fumaça de bolinhas dos chefões, os rótulos "(LEGACY)/(NEW)" no
+**Depois do C (17/10):** o roadmap seguiu em blocos D a J no 🧭 do `docs/HANDOFF.md`: D o Leviatã novo, E o menu,
+F a frota e o minerador da F2, G a arte da F1, H os efeitos de imersão, I os itens 9–16 e J o pós-processamento.
+Os itens 9–16 eram estes: os itens de média e baixa (9 a 16: a fumaça de bolinhas dos chefões, os rótulos "(LEGACY)/(NEW)" no
 HUD, a tela final, o subtítulo do menu, os flashes de tela cheia, a explosão chapada da cutscene 1, os drones
 encavalados, as setas das dicas) e então o **pós-processamento**, que foi o motivo da análise.
 

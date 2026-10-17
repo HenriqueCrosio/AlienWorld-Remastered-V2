@@ -14,10 +14,80 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-15-polimento-START.md`. Vamos para o bloco C
-> do polimento."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-15-polimento-START.md`. Vamos fechar o bloco
+> C do polimento."**
 >
-> 📍 **15/10 — O POLIMENTO F1–F4: BLOCOS A E B APROVADOS E COMMITADOS (não empurrados).** Em 14/10 ele pediu uma análise
+> 📍 **17/10 — O RABO COLOSSAL ESTÁ NO JOGO; TUDO COMMITADO E EMPURRADO; O ROADMAP GANHOU OS BLOCOS D A J.**
+> - **Item 6 (bloco C), o rabo da F3:** a M2 (nadadeira de tubarão da D + casco da B + lava da A), 16 quadros de
+>   368×248 em escala 1, a 7/s (`public/sprites/rabo-leviata-sheet.png`). O gesto é a tomada 2 do PixMiniMax limpa
+>   das bordas brancas; o corpo aparente inteiro enverga com o pivô virtual a 500px e a luz por normais no corpo e na
+>   nadadeira. A batida de ±6° em código saiu: nadadeira de tubarão faz escorço, não gira. O ciclo de IDA E VOLTA foi
+>   reprovado. Antigo em `assets/raw/rabo-leviata-original.png`; folha `folhas/2026-10-16/rabo/`.
+> - **A sonda da F3 roda inteira de novo** (71 checagens): a bala falsa da água-viva ganhou `body.velocity`, e três
+>   asserts de sorteio (risco de emenda, dutos da proa, contagem de lança-mísseis) viraram medidas sem sorte.
+> - **Commits** `fed34c9` (rabo), `1aa3d35` (sonda), `caea970` (ferramentas + folha, sem GIFs), `1de13b3` (START),
+>   **empurrados** com os dos blocos A e B para `origin/feat/cartas-preview`. GIFs e tiras cruas ficam fora (backup).
+>
+> **🗺️ O ROADMAP EM BLOCOS (17/10, com as tarefas novas dele).** Cada arte nova segue a regra dele: 3–4 conceitos numa
+> folha, aprovação, depois GIF em jogo. Nada aprovado se joga fora: o antigo vai para `assets/raw/*-original.png`.
+>
+> - **C — fechar o polimento já analisado** (✅ FECHADO 17/10, COMMITADO e EMPURRADO a pedido dele, sem os GIFs; START
+>   `plans/2026-10-15-polimento-START.md`). O próximo é o D:
+>   1. ✅ 17/10 no jogo, APROVADO jogando: o primeiro plano PRÓPRIO da F4 (orgânico, quase preto, sem cruzar a
+>      superfície da borda);
+>   2. ✅ 17/10 no jogo, APROVADO jogando (*"a variedade e perfeição nos assets gerados me surpreenderam
+>      positivamente... são mais discretos"*): item 8, o destroço cinza da F2 que aparece na F4. Virou o CASCO ENGOLIDO
+>      (pele `STAGE_4_SKIN` do `DebrisSystem`, escala 1), com o destroço da F4 caído para 2/3 (sensor e mina na cadência
+>      de antes). Os ossos e coágulos da mesma rodada viraram a `DerivaF4`, reduzidos e sombreados nas camadas de trás
+>      (regra dele: o que vai para trás DIMINUI). Folha `folhas/2026-10-17/destroco-f4/`;
+>   2b. ✅ 17/10 no jogo (escolha dele: a **D**, *"preenche bem a base e a parte de cima da porta, além de ficar
+>      interessante quando estoura"*): **as portas do duto ENRAIZADAS**. `src/systems/RaizesPorta.ts` prende o par
+>      chão/teto a cada `porta` no `POST_UPDATE` (depois da física, senão treme 1,4px), relendo as duas superfícies da
+>      borda; fica com a `portaLasca` e sai da tela sozinho depois que a porta é recolhida. A `probe-f4-frente` cobra
+>      (3 portas, desvio 0px). Folha `folhas/2026-10-17/porta-raizes/` (GIF `gif/jogo-D.gif`);
+>   3. ✅ 17/10, item 7 decidido por ele: **órgão e maquinário FICAM os de hoje** (*"a animação deles fica mais real,
+>      as novas ficaram muito expandidas e grosseiras"*); **a ponte nativa está no jogo**: a versão `image-to-pixelart`
+>      (a que ele escolheu, com lâmpada e detalhe), redesenhada a 1,55× em DUAS METADES costuradas por corte torto
+>      (`_ponte-em-metades.mjs`; o gerador para em 320px), camada com escala 0,91–1 (= os 1,41–1,55× de antes em
+>      tela, convés na mesma altura). Originais em `assets/raw/f4-ponte*-original.png`. Folha `folhas/2026-10-17/nativo-f4/`.
+>      O `destroco` saiu da lista com o item 8; o `asteroid` da F2/F3 segue com o bloco F;
+>   4. ✅ 17/10, decisão dele: **o rabo da F3 em 45s** (era 38). O roteiro do `hazard rate 0` em diante andou +7s (a
+>      serpente de 88 para 95) e o ato 1 ganhou 3 ondas novas (batedor 37,5 · kamikaze 40 · drones 42), com a mesma
+>      folga de quadro vazio antes do rabo. `probe-stage3` e `probe-f3-visual` ajustadas e verdes. Falta ele jogar.
+> - **D — o Leviatã novo, o mesmo bicho em toda cena.** Arte do corpo inteiro a partir da M2 do rabo (a nadadeira de
+>   tubarão manda no movimento: escorço lateral, não rotação). Criatura animada = gerar INTEIRA → vistas → animar no
+>   PixelLab. Trocar onde ele aparece: o menu (`leviathanSwimSheet`, 116², 17 quadros), a silhueta distante da F1/F2
+>   (`leviathan.png`, no `Parallax`), a cena final (`f8-leviata` + `f8-leviata-lava`) e conferir se ele está pintado
+>   nos fundos das cutscenes 1 e 2. ⚠️ São DOIS Leviatãs canônicos (armored = vivo e forte; biomecânico =
+>   enfraquecido, o do final): o final precisa da versão enfraquecida do desenho NOVO. Aprovar por GIF em cada cena.
+> - **E — o menu refeito.** Ele não gosta da lua, do fundo nem dos assets que aparecem. Depois de D, porque o Leviatã
+>   novo é a peça principal dele.
+> - **F — Fase 2: a frota e o minerador** (jogabilidade; ele testa jogando):
+>   1. os **batedores da frota** (as naves finas da pele do cinturão): menos naves por frota, voo de NAVE (inclinar,
+>      fazer curva, em vez da senóide), atirar contra o jogador, manobra de evasão, e passar pelo jogador e sair pela
+>      esquerda se não forem abatidos. São difíceis de acertar por serem finas: avaliar a hitbox. ⚠️ O `batedor` também
+>      voa na F3: decidir se a mudança vale só para a F2. Medir o tiro para pressionar sem punir;
+>   2. a **rocha do elite minerador** destoa da F2 e é grande demais: diminuir, ou prendê-la a um canto ou a um
+>      pedaço maior de asteroide (arte nova). Fazer junto com o `asteroid` do item 7.
+> - **G — Fase 1: a arte do cenário.** Os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
+>   cordilheira não ficou como ele queria (perguntar a referência ANTES de gerar). Refazer arte E composição.
+> - **H — efeitos de imersão por fase** (só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
+>   - F1: mísseis caindo do céu nas camadas de trás, e meteoros;
+>   - F2: a silhueta do Leviatã NOVO passando ao fundo, distante (depende de D);
+>   - F3: o verme descartado (ou outro inimigo) como silhueta entre as nebulosas. Só como cenário: o elite 63-3
+>     continua cancelado;
+>   - F4: o golfinho como silhueta em algumas câmaras.
+>   Depois de G, porque os efeitos da F1 moram nas camadas que G vai refazer. Ele está aberto a mais ideias.
+> - **I — os itens 9 a 16 da análise de 14/10** (✅ 17/10: o 10 e o 16 APROVADOS por ele; o 15 DESCARTADO por ele: a fila unida
+>   é DE PROPÓSITO (*"pela card de reação em cadeia, além de ser mais prazeroso entrar em cadeia"*), testado e desfeito;
+>   folha `folhas/2026-10-17/bloco-i/`; tudo NÃO commitado. Faltam o 9, 11, 13 e 14, que pedem arte ou decisão): a fumaça de bolinhas dos chefões, os rótulos "(LEGACY)/(NEW)" do HUD,
+>   a tela final, o subtítulo do menu (vai com E), os flashes de tela cheia, a explosão chapada da cutscene 1, os
+>   drones encavalados e as setas das dicas.
+> - **J — o pós-processamento**, por último, porque ele trata toda a arte que os blocos acima vão trocar.
+>
+> **Pendente dele, sem pressa:** jogar a F4 da rodada de 14/10 e a F3 inteira (já com o rabo novo).
+>
+> 📍 **15/10 — (CUMPRIDO: empurrado em 17/10.) O POLIMENTO F1–F4: BLOCOS A E B APROVADOS E COMMITADOS (não empurrados).** Em 14/10 ele pediu uma análise
 > do que polir em F1–F4 e nas cutscenes antes de um pós-processamento. São 16 itens com a causa medida:
 > `folhas/2026-10-14/polimento/index.html`.
 > - **Bloco A** (*"deu um ar de mais polido"*):
