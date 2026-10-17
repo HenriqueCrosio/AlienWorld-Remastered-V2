@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rabo Colossal · Movimento</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 0 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ref { background: #262c3a; color: var(--sub); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); }
+  .cru img { background:#1b2330; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .tri { display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: start; }
+  @media (max-width: 760px) { .par, .tri { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>Rabo colossal do Leviatã · o movimento em jogo</h1>
+<p class="sub">16/10/2026 · Polimento, bloco C, item 6. Cada GIF é a F3 de verdade a partir de t=38, quando o rabo nasce, com o rabo conduzido pelas curvas exatas do <code>raboDoLeviata</code>: chega em 2,5s, fica parado 5,3s e sai em 1,8s, nadando. Gravado a 15 quadros por segundo, na resolução nativa do jogo. Toda arte nova está em escala 1. A troca foi feita só na memória e o jogo não mudou.</p>
+
+<h2>17/10 · instalado no jogo: pivô virtual a 500px, com as luzes</h2>
+<div class="item">
+  <p>O ciclo de ida e volta foi reprovado. Ficou a versão aprovada: a tomada 2 com o pivô virtual a 500px, mais a luz por normais no corpo e na nadadeira. Este GIF <b>não é conduzido à mão</b>: é o código do jogo rodando sozinho.</p>
+  <ul>
+    <li>São 16 quadros de 368×248 numa folha (<code>public/sprites/rabo-leviata-sheet.png</code>), em <b>escala 1</b>. A arte antiga (107×73 esticada a 3,4) ficou guardada em <code>assets/raw/rabo-leviata-original.png</code>.</li>
+    <li>A batida agora é a animação, a 7 quadros por segundo (2,3s, o mesmo período de antes). O giro de ±6° saiu, e o ângulo fica em 0.</li>
+    <li>A chegada, a espera e a saída pela direita não mudaram. Em x=740 a ponta da nadadeira está em 401, fora da tela.</li>
+  </ul>
+  <figure style="margin-top:12px"><img src="gif/m2-jogo-500-luz.gif" alt=""><figcaption><b>F3, t=38 em diante, código real.</b> O rabo chega, varre, sai, e o casco entra.</figcaption></figure>
+</div>
+
+<h2>M2 · o ciclo completo: afasta e vem para perto da tela <span style="color:#c66">· reprovado</span></h2>
+<div class="item">
+  <p>A base é a que você aprovou (pivô virtual a 500px), agora com as duas metades da batida e o jogo de luzes da v3d aplicado de qualquer jeito, inclusive na nadadeira.</p>
+  <ul>
+    <li><b>A metade nova.</b> Gerei 3 tomadas no PixMiniMax pedindo a nadadeira vindo para perto da tela, todas a partir da mesma pose de descanso. A tomada 6 teve 6 saltos e brilhos soltos e foi descartada. A 4, sem saltos, repete o gesto da tomada 2. A <b>5</b>, sem saltos, faz o gesto complementar: a nadadeira abre e cresce primeiro, depois estreita e volta. Ficou ela.</li>
+    <li><b>A junção.</b> O ciclo tem 32 quadros: a tomada 2 inteira e depois os quadros 1 a 16 da 5. O quadro 0 dela é o próprio descanso, e o 16 é o que mais se aproxima dele. As emendas mudam 6% (no meio) e 12% (na volta do laço), dentro do que muda entre quadros vizinhos. A limpeza das bordas brancas vale para as duas.</li>
+    <li><b>O corpo e a luz.</b> Numa metade o corpo enverga para perto (desce e acende); na outra, para longe (sobe e apaga). A nadadeira agora também recebe a luz: o plano dela, medido no mapa de normais, gira com a virada de cada quadro, e ela inteira acende (até 43 de brilho) ou apaga (até 8), como a lâmina da v3d.</li>
+    <li><b>O ritmo</b> é o mesmo que você aprovou, ~7 quadros por segundo. O ciclo completo leva 4,6s, e o rabo faz duas batidas completas enquanto está na tela.</li>
+  </ul>
+  <p>O gerador desenha sem perspectiva, então “perto” ou “longe” não sai só do desenho dele: quem diz isso é a nossa camada de corpo e luz. Por isso há duas versões, que só trocam qual metade fica com o lado aceso:</p>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/m2-ciclo-s-1.gif" alt=""><figcaption><b>A metade nova (tomada 5) vem para perto:</b> ela acende e o corpo desce; a tomada 2 se afasta e apaga. A minha aposta, porque é o que foi pedido ao gerador.</figcaption></figure>
+    <figure><img src="gif/m2-ciclo-s1.gif" alt=""><figcaption><b>A tomada 2 vem para perto</b>, como na versão a 500px que você aprovou, e a metade nova se afasta e apaga.</figcaption></figure>
+  </div>
+</div>
+
+<h2>M2 · o movimento até o fim do corpo aparente</h2>
+<div class="item">
+  <p>Você marcou no print o trecho da direita (de x≈255 até a borda, com a junta grande de lava), que ficava quase parado. O motivo: a onda nascia no pivô do sprite, em x≈374 da tela, praticamente na borda, então a parte perto dele quase não se mexia. Mas o corpo do Leviatã continua para fora da tela, e a onda deve vir de lá. Agora ela nasce num <b>pivô virtual além da borda direita</b>, e todo o corpo visível enverga, cada vez mais em direção à ponta. O corte reto da arte nunca entra na tela: ele fica em x≥401, e a tela termina em 384.</p>
+  <table>
+    <tr><th>Quanto o contorno de cima se mexe (máximo na batida)</th><th>x=375 (borda)</th><th>x=335</th><th>x=235</th></tr>
+    <tr><td>Antes (pivô na borda, corpo a 20°)</td><td>0px</td><td>1px</td><td>8px</td></tr>
+    <tr><td>Pivô virtual a 500px</td><td>8px</td><td>12px</td><td>17px</td></tr>
+    <tr><td>Pivô virtual a 900px</td><td>19px</td><td>26px</td><td>31px</td></tr>
+  </table>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/m2-pmm-todo500.gif" alt=""><figcaption><b>Pivô virtual a 500px.</b> A frente ondula de leve.</figcaption></figure>
+    <figure><img src="gif/m2-pmm-todo900.gif" alt=""><figcaption><b>Pivô virtual a 900px.</b> O corpo visível inteiro se mexe junto. A minha aposta.</figcaption></figure>
+  </div>
+</div>
+
+<h2>M2 · tomada 2 limpa, com o corpo todo em movimento</h2>
+<div class="item">
+  <p>Você apontou duas coisas: a nadadeira da tomada 2 ficou natural e fluida, mas o corpo tinha <b>bordas brancas grosseiras</b>, e só a parte de trás se mexia.</p>
+  <ul>
+    <li><b>As bordas brancas, medidas.</b> Cinza ou branco com brilho acima de 90: a M2 aprovada inteira tem 3 pixels assim, e os quadros gerados chegam a 99, quase todos no meio da virada. Os quadros 0, 6 e 16 vêm limpos. A mancha que encosta no contorno (os riscos acima das placas) sai; a que fica por dentro é repintada com as cores dos vizinhos. As cracas e a borda clara da lava continuam, porque têm cor.</li>
+    <li><b>O corpo todo.</b> Sobre os quadros limpos, o rabo inteiro enverga a partir do pivô, com a luz do mapa de normais da v3d e a câmera 15° acima. A curva vai para o mesmo lado da virada da nadadeira e começa um quadro e meio antes dela, como uma onda que nasce no corpo e chega à ponta. Da junção para fora, a nadadeira é levada rígida e a luz dela é a do próprio desenho gerado.</li>
+  </ul>
+  <div class="tri" style="margin-top:12px">
+    <figure><img src="gif/m2-pmm-limpo.gif" alt=""><figcaption><b>Limpa, corpo parado.</b> Só a limpeza, para comparar.</figcaption></figure>
+    <figure><img src="gif/m2-pmm-corpo12.gif" alt=""><figcaption><b>Corpo a 12°.</b> Uma onda discreta.</figcaption></figure>
+    <figure><img src="gif/m2-pmm-corpo20.gif" alt=""><figcaption><b>Corpo a 20°.</b> A minha aposta.</figcaption></figure>
+  </div>
+</div>
+
+<h2>M2 · o gerador (PixMiniMax)</h2>
+<div class="item">
+  <p>Você aprovou a v3d como garantia e pediu uma chance ao gerador. Ao contrário da deformação, o PixMiniMax <b>redesenha</b> cada quadro, e por isso a nadadeira consegue virar de verdade: ela fica de quina, como uma lâmina fina, e depois volta.</p>
+  <ul>
+    <li><b>O limite de tamanho.</b> O gerador aceita no máximo 256×256 e a arte tem 368×248. Só a parte de trás foi animada (x de 0 a 256: a nadadeira e o fim do corpo), com a M2 como primeiro quadro. Foram 3 tomadas de 16 quadros, a 2 gerações cada.</li>
+    <li><b>A escolha.</b> A <b>tomada 2</b> é a única sem salto: no máximo 28% do desenho muda de um quadro para o outro, e o último quadro quase repete o primeiro, então o ciclo fecha. A tomada 1 tem 2 saltos e a 3 tem 5.</li>
+    <li><b>A montagem.</b> Em cada quadro, as cores voltam para a paleta da M2 (o gerador muda as cores aos poucos) e as manchas cinzas soltas saem. A parte gerada se encontra com a frente original numa <b>costura de erro mínimo</b>: uma linha irregular, entre x=196 e 255, que passa onde as duas mais se parecem e segue as bordas das placas, nunca uma reta. O erro médio na linha ficou entre 0 e 5,6 (diferença RGB somada por pixel).</li>
+  </ul>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/m2-pmm-t2.gif" alt=""><figcaption><b>Tomada 2, montada, em jogo.</b> 16 quadros por batida de 2,3s.</figcaption></figure>
+    <figure><img src="gif/m2-v3d.gif" alt=""><figcaption><b>v3d, a garantia</b>: deformação com luz.</figcaption></figure>
+  </div>
+  <figure style="margin-top:14px"><img src="gif/pmm-tomadas-cruas.gif" alt=""><figcaption><b>As três tomadas cruas</b> (1, 2, 3), antes da montagem, com as manchas do gerador.</figcaption></figure>
+  <p class="sub" style="margin-top:10px">O que eu ainda não sei: se 16 quadros por batida (~7 por segundo) ficam lentos ou nervosos no seu olho, e se a tomada 2 lê como “um lado e depois o outro” ou só como “vira e volta”. Restam alguns riscos claros de gerador perto do topo das placas em 2 ou 3 quadros, que dá para apagar à mão.</p>
+</div>
+
+<h2>M2 · a luz que corre com o movimento (v3)</h2>
+<div class="item">
+  <p>Na v2, com a câmera a 15°, você notou que a imagem lia <b>achatada, 2D</b>. Concordamos no motivo: a deformação só move os pixels, e cada placa e cada brilho continuam pintados para um ângulo só. O resultado parece um recorte de papel dobrando.</p>
+  <ul>
+    <li><b>Mapa de normais.</b> O PixelLab gerou o mapa de normais da M2 (0,5 geração), que diz para onde cada pixel está virado. A cada quadro, as normais de cada coluna giram junto com a curva do rabo, e a luz é recalculada. A lava não é tocada, porque ela emite a própria luz.</li>
+    <li><b>A luz não foi inventada.</b> Ela foi medida da própria pintura, por mínimos quadrados, e por isso o rabo parado continua com a luz em que foi pintado.</li>
+    <li><b>Uma luz de lado, vinda da direita.</b> A luz da pintura é quase toda frontal, e virar para qualquer lado escureceria igual, que é a simetria que engessava a v1. Com a luz da direita, o lado que vem para a câmera acende e o que vai embora apaga.</li>
+  </ul>
+  <p>Medido ao longo da batida (brilho médio, 0–255): na v2 a nadadeira vai de 20 a 27; na <b>v3c</b>, de 10 a 38; na <b>v3d</b>, de 10 a 45. O corpo vai de 20–22 (v2) para 16–24 (v3c) e 14–27 (v3d).</p>
+  <div class="tri" style="margin-top:12px">
+    <figure><img src="gif/m2-v2-e15.gif" alt=""><figcaption><b>v2 · 15°</b>, a que você escolheu, sem a luz.</figcaption></figure>
+    <figure><img src="gif/m2-v3c.gif" alt=""><figcaption><b>v3c · luz lateral média.</b> A minha aposta.</figcaption></figure>
+    <figure><img src="gif/m2-v3d.gif" alt=""><figcaption><b>v3d · luz lateral forte.</b> No auge, a nadadeira chega a um azul frio.</figcaption></figure>
+  </div>
+  <p class="sub" style="margin-top:10px">O limite que continua: a luz muda, mas nenhuma face escondida aparece. Quando o rabo vira, o dorso não surge, porque ele não está desenhado. Se a v3 ainda ler como papel, o próximo passo é o PixMiniMax redesenhar os quadros.</p>
+</div>
+
+<h2>M2 · o movimento refeito (v2)</h2>
+<div class="item">
+  <p>O que você apontou na v1, e de onde vinha:</p>
+  <ul>
+    <li><b>“Sai do centro para trás, engessado”:</b> a v1 só encurtava a nadadeira, e o encurtamento é igual para os dois lados. O olho via “encolhe e volta” duas vezes por batida, e nunca “vai para um lado e depois para o outro”.</li>
+    <li><b>“A quebra entre o que mexe e o que fica parado”:</b> a curva crescia com o quadrado da distância, então o primeiro terço do rabo ficava duro e a nadadeira dobrava como uma dobradiça.</li>
+  </ul>
+  <p>O que mudou na v2:</p>
+  <ul>
+    <li><b>Uma onda corre pelo rabo inteiro</b> a partir do pivô, e a nadadeira, da junção para fora, fica rígida e acompanha o ângulo da ponta. O deslocamento cresce sem degrau: 0,4px a 5% do comprimento, 14px a 30%, 73px na junção e 128px na ponta.</li>
+    <li><b>Os dois lados ficaram diferentes.</b> O lado que vem na nossa direção fica maior e 16% mais claro; o que se afasta fica menor e mais escuro. A câmera fica levemente acima, então o lado que vem desce um pouco na tela e o que vai sobe. Os três GIFs mudam só essa altura de câmera.</li>
+  </ul>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/m2-v2-e0.gif" alt=""><figcaption><b>Câmera reta (0°).</b> Só o tamanho e a luz separam os lados.</figcaption></figure>
+    <figure><img src="gif/m2-v2-e15.gif" alt=""><figcaption><b>Câmera 15° acima.</b> A minha aposta.</figcaption></figure>
+    <figure><img src="gif/m2-v2-e25.gif" alt=""><figcaption><b>Câmera 25° acima.</b> A batida mais ampla.</figcaption></figure>
+    <figure><img src="gif/m2-tubarao.gif" alt=""><figcaption><b>A v1, para comparar.</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>Por que o movimento muda</h2>
+<div class="item">
+  <div class="par">
+    <div>
+      <h3>Baleia: a nadadeira bate para cima e para baixo</h3>
+      <p>A nadadeira da baleia é horizontal. De perfil, o movimento dela é uma <b>rotação no plano da tela</b> em torno do pedúnculo. É o que o código faz hoje: ±6°, sobe devagar (1,5s) e desce com tudo (0,55s).</p>
+    </div>
+    <div>
+      <h3>Tubarão: a nadadeira varre de um lado para o outro</h3>
+      <p>A nadadeira da D é vertical, como a de tubarão, e varre para perto e para longe da câmera. De perfil ela <b>não gira</b>: ela encurta e alarga (escorço), cresce um pouco quando vem na nossa direção, encolhe quando vai embora e escurece de leve quando vira o rosto. O corpo enverga numa onda que corre até a ponta.</p>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:12px">A varredura de tubarão não usa gerador: foi o gerador que transformou a nadadeira em hélice da última vez. Ela é a própria arte deformada por script (<code>_varrer-tubarao.mjs</code>), 46 quadros por batida de 2,3s, que é o mesmo período de hoje. A deformação é contínua, sem emenda entre uma parte animada e uma parada, e a amostragem é nearest, então o pixel continua limpo.</p>
+</div>
+
+<h2>A mescla que você pediu: nadadeira da D, corpo de A com B</h2>
+<div class="item">
+  <p>As duas mesclas têm o casco de nave-capital da B (placas, respiros âmbar, cracas, destroços soltos) com a lava da A e a nadadeira rasgada da D. A diferença entre elas é a lava: na <b>M1</b> é a rachadura em raio da A; na <b>M2</b> é a junta da B com o miolo em células da A.</p>
+  <div class="par" style="margin-top:12px">
+    <figure><img src="gif/m1-tubarao.gif" alt=""><figcaption><b>M1 · varredura de tubarão.</b> Lava em raio.</figcaption></figure>
+    <figure><img src="gif/m2-tubarao.gif" alt=""><figcaption><b>M2 · varredura de tubarão.</b> Lava em junta com células.</figcaption></figure>
+  </div>
+  <div class="par" style="margin-top:14px">
+    <figure><img src="gif/m1-baleia.gif" alt=""><figcaption><b>M1 com a batida de hoje (baleia), para comparar.</b> A mesma arte com o movimento atual: a nadadeira inteira gira no plano da tela, sem escorço.</figcaption></figure>
+    <figure><img src="gif/0-hoje.gif" alt=""><figcaption><b>Hoje, para referência:</b> a arte de 107×73 esticada 3,4×, com a batida de baleia.</figcaption></figure>
+  </div>
+</div>
+
+<h2>Os quatro da primeira rodada, em movimento</h2>
+<div class="item">
+  <div class="par">
+    <figure><img src="gif/a-fiel.gif" alt=""><figcaption><b>A · Fiel</b>, batida de baleia.</figcaption></figure>
+    <figure><img src="gif/b-casco.gif" alt=""><figcaption><b>B · Casco</b>, batida de baleia.</figcaption></figure>
+    <figure><img src="gif/c-baleia.gif" alt=""><figcaption><b>C · Baleia</b>, batida de baleia.</figcaption></figure>
+    <figure><img src="gif/d-costelas-tubarao.gif" alt=""><figcaption><b>D · Costelas</b>, varredura de tubarão.</figcaption></figure>
+  </div>
+  <p class="sub" style="margin-top:10px">A borda esquerda das nadadeiras foi esfarelada (14px) para não aparecer o corte reto do gerador. Na A e na B o corte de cima ainda aparece: na peça final a nadadeira é fechada por dentro.</p>
+</div>
+
+<h2>O Leviatã nas outras cenas</h2>
+<div class="item">
+  <p>Você tem razão: o Leviatã aparece em mais lugares, e a nadadeira de tubarão muda o bicho. Medi onde ele está e o que cada troca arrasta:</p>
+  <table>
+    <tr><th>Onde</th><th>Arte</th><th>Nadadeira hoje</th><th>Se a nadadeira virar de tubarão</th></tr>
+    <tr><td>Menu</td><td><code>leviathan-swim-sheet</code>, 17 quadros de 116×116, mostrado a 0,6× (~70px) e tingido</td><td>Baleia, dois lóbulos, ~10px na tela</td><td>Refazer: arte base nova + animação de nado nova</td></tr>
+    <tr><td>Céu das fases</td><td><code>leviathan.png</code>, silhueta distante a 0,5×, tingida de escuro</td><td>Quase invisível</td><td>Nada a fazer</td></tr>
+    <tr><td>F3, o rabo</td><td><code>rabo-leviata.png</code></td><td>Uma nadadeira em pé (já era de peixe, não de baleia) com batida de baleia</td><td>É a peça desta rodada</td></tr>
+    <tr><td>F3, o casco</td><td><code>casco-*</code></td><td>Não aparece</td><td>Nada a fazer (o corpo A/B já conversa com as placas e as juntas acobreadas)</td></tr>
+    <tr><td>Cena final</td><td><code>f8-leviata</code>, 359×131, o biomecânico enfraquecido</td><td>Baleia, grande e visível</td><td>Refazer o rabo dele por inpaint, só a região da cauda, e a camada de lava junto</td></tr>
+  </table>
+  <p style="margin-top:12px">O <b>corpo</b> A/B não muda o bicho: o rabo de hoje já é de placas escuras com rachaduras de lava, e a mescla é esse mesmo rabo com o detalhe que o tamanho permite. Quem muda o bicho é a <b>nadadeira</b>. Há dois caminhos:</p>
+  <ol>
+    <li><b>Tubarão de verdade</b> (M1 ou M2, varredura de tubarão): o Leviatã vira outro animal. Precisa refazer o do menu inteiro (arte e nado) e a cauda do da cena final.</li>
+    <li><b>O estilo da D numa nadadeira de baleia</b>: os raios e a membrana rasgada da D em dois lóbulos. O menu e a cena final continuam valendo, e o movimento de hoje continua certo. Pedi isso ao gerador duas vezes e ele devolveu o leque nas duas, então esta versão sairia por inpaint da nadadeira, a partir da M1 ou da M2.</li>
+  </ol>
+</div>
+
+<h2>As artes cruas</h2>
+<div class="item">
+  <div class="tri">
+    <figure class="cru"><img src="cru/mescla-21-0.png" alt=""><figcaption>M1 (368×248)</figcaption></figure>
+    <figure class="cru"><img src="cru/mesclaBaleia-21-0.png" alt=""><figcaption>M2 (368×248)</figcaption></figure>
+    <figure class="cru"><img src="cru/costelas-11-0.png" alt=""><figcaption>D (368×248)</figcaption></figure>
+    <figure class="cru"><img src="cru/fiel-11-0.png" alt=""><figcaption>A (368×248)</figcaption></figure>
+    <figure class="cru"><img src="cru/casco-11-0.png" alt=""><figcaption>B (368×248)</figcaption></figure>
+    <figure class="cru"><img src="cru/baleia-11-0.png" alt=""><figcaption>C (368×248)</figcaption></figure>
+  </div>
+</div>
+</main>
+</body>
+</html>
