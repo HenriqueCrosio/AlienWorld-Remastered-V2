@@ -106,6 +106,26 @@ const HAZARDS: Record<HazardKind, HazardDef> = {
   mineravel: { texture: 'eliteRocha', hp: ELITES.rocha.hp, score: ELITES.rocha.score, scale: [1, 1], spin: [0, 0], drift: 0 },
 };
 
+/**
+ * A PELE DA FASE 4 (17/10, item 8 do polimento). Dentro do Leviatã o destroço é *"o que ele engoliu"* (o cabeçalho do
+ * `STAGE_4`), mas usava a arte da F2: placas de nave cinza-claras, a coisa mais clara da fase, ampliadas até 1,6×. O
+ * `casco engolido` é a MESMA frota, digerida — aço quase preto tomado de tecido vinho e veias acesas —, escolhido por
+ * ele entre quatro conceitos em jogo: *"o casco engulido e suas variações ficaram ótimas"*. Folha:
+ * `docs/superpowers/folhas/2026-10-17/destroco-f4/`.
+ *
+ * ⚠️ UM ATLAS, NÃO VARIANTES `destroco2…`: as 14 peças (7 inteiras e as mesmas reduzidas por 2) têm tamanhos
+ * diferentes, e o sorteio do quadro é um `GetRandom` — o `Math.random` do `pickVariant`, não o dado do jogo.
+ *
+ * ⚠️ ESCALA 1, E É A LEI DA ARTE (item 7): a peça nasce no tamanho em que aparece; reduzir pode, aumentar nunca. O
+ * `FloatBetween(1, 1)` continua sendo chamado, então o dado do jogo anda o mesmo tanto que antes. Somadas as inteiras
+ * e as reduzidas, a média (55×47px) fica perto da de hoje (61×44px a 0,9–1,6): a caixa de colisão não muda de lado.
+ *
+ * A F2 fica intocada: o destroço dela é do item 7, junto do bloco F.
+ */
+const STAGE_4_SKIN: Partial<Record<HazardKind, { atlas: string; scale: [number, number] }>> = {
+  destroco: { atlas: 'f4Engolido', scale: [1, 1] },
+};
+
 /** Raio (px) em que a mina fere ao explodir. Generoso o bastante para ENSINAR, não para punir. */
 export const MINE_BLAST_RADIUS = 30;
 
@@ -143,6 +163,8 @@ export class DebrisSystem {
     private readonly scene: Phaser.Scene,
     bullets: Phaser.Physics.Arcade.Group,
     onBlast: (x: number, y: number) => void,
+    /** A FASE atual (`GameScene.stage.id`) — só usada para a pele por fase (ver `STAGE_4_SKIN`). */
+    private readonly stageId: number,
   ) {
     this.hazards = scene.physics.add.group({ allowGravity: false });
     this.bullets = bullets;
@@ -158,8 +180,14 @@ export class DebrisSystem {
   /** Um destroço num ponto dado — o roteiro sorteia a altura (`spawn`); o drone de mineração pede a rocha dele aqui. */
   spawnEm(kind: HazardKind, x: number, y: number): Phaser.Physics.Arcade.Sprite {
     const def = HAZARDS[kind];
-    const texture = pickVariant(this.scene, def.texture);
-    const h = this.hazards.create(x, y, texture) as Phaser.Physics.Arcade.Sprite;
+    // Sem o atlas (guarda de textura), cai na arte de sempre — ver STAGE_4_SKIN.
+    const skin = this.stageId === 4 ? STAGE_4_SKIN[kind] : undefined;
+    const atlas = skin && this.scene.textures.exists(skin.atlas) ? skin.atlas : undefined;
+    const texture = atlas ?? pickVariant(this.scene, def.texture);
+    const frame = atlas
+      ? Phaser.Utils.Array.GetRandom(this.scene.textures.get(atlas).getFrameNames())
+      : undefined;
+    const h = this.hazards.create(x, y, texture, frame) as Phaser.Physics.Arcade.Sprite;
 
     // A animação SÓ toca na variante BASE. Numa variante ela trocaria a textura pelos quadros da
     // base — e a segunda mina sensora viraria a primeira no primeiro frame (é a mesma armadilha
@@ -175,7 +203,7 @@ export class DebrisSystem {
     h.setData('hp', def.hp);
     h.setData('score', def.score);
 
-    h.setScale(Phaser.Math.FloatBetween(...def.scale));
+    h.setScale(Phaser.Math.FloatBetween(...(atlas ? skin!.scale : def.scale)));
     // Espelhar metade dobra a variedade de graça (menos a rocha minerável: o encaixe do drone é à esquerda).
     if (kind !== 'mineravel') h.setFlipX(Math.random() < 0.5);
 

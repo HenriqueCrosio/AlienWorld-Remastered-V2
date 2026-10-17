@@ -70,7 +70,7 @@ export interface ComportamentoElite {
    * O tiro já atravessa porque o corpo do Arcade está desligado; isto cobre quem fere sem colisão.
    */
   intocavel?(e: Sprite): boolean;
-  /** O RABO do Leviatã chegou (F3, t=38): o ato 1 exige o quadro vazio (spec F3 §2.2). */
+  /** O RABO do Leviatã chegou (F3, t=45 desde 17/10; era 38): o ato 1 exige o quadro vazio (spec F3 §2.2). */
   aoRabo?(e: Sprite, ctx: CtxElite): void;
   /**
    * O que ANDA COM A PAREDE (o Tubo da F4), chamado SEMPRE — inclusive com o elite travado pelo elétrico: a parede não

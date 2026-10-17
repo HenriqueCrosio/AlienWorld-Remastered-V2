@@ -563,7 +563,13 @@ export class Parallax {
       // *luz só onde há energia*, apagar a luz é apagar o motivo de a peça existir.
       tint: 0x6d788f,
       alpha: 1,
-      scale: [1.41, 1.55],
+      // ⚠️ A PONTE NASCE NO TAMANHO EM QUE APARECE (17/10, item 7 do polimento). Ela era a peça de 248px ampliada a
+      // 1,41–1,55× — pixel gordo, contra a lei (reduzir pode, aumentar nunca). Agora a arte é a MESMA ponte
+      // redesenhada a 1,55× pelo `image-to-pixelart` (a versão que ele escolheu: guarda a lâmpada e o detalhe), em
+      // duas metades costuradas por um corte torto (`_ponte-em-metades.mjs`; o gerador não passa de 320px). A escala
+      // só REDUZ: 0,91–1 é o mesmo 1,41–1,55 de antes em tela, então o convés segue acima da mesa (a conta de cima
+      // vale igual). As originais estão em `assets/raw/f4-ponte*-original.png`.
+      scale: [0.91, 1],
       gap: [620, 1000],
       terreno: false,
     });

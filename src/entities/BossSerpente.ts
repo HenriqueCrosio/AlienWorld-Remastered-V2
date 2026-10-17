@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { BARRA_CHEFAO_Y, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
 import type { StageBoss } from './Boss';
@@ -219,9 +219,9 @@ export class BossSerpente implements StageBoss {
       }
     }
 
-    this.barBg = scene.add.rectangle(GAME_WIDTH / 2, 16, 160, 4, 0x531a30).setDepth(100);
+    this.barBg = scene.add.rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 160, 4, 0x531a30).setDepth(100);
     this.bar = scene.add
-      .rectangle(GAME_WIDTH / 2 - 80, 16, 160, 4, 0xff3a78)
+      .rectangle(GAME_WIDTH / 2 - 80, BARRA_CHEFAO_Y, 160, 4, 0xff3a78)
       .setOrigin(0, 0.5)
       .setDepth(101);
   }

@@ -1,0 +1,492 @@
+{
+ "frames": {
+  "coagulo-00-meia": {
+   "frame": {
+    "x": 81,
+    "y": 0,
+    "w": 31,
+    "h": 34
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 31,
+    "h": 34
+   },
+   "sourceSize": {
+    "w": 31,
+    "h": 34
+   }
+  },
+  "coagulo-00-terco": {
+   "frame": {
+    "x": 430,
+    "y": 0,
+    "w": 21,
+    "h": 23
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 21,
+    "h": 23
+   },
+   "sourceSize": {
+    "w": 21,
+    "h": 23
+   }
+  },
+  "coagulo-01-meia": {
+   "frame": {
+    "x": 215,
+    "y": 0,
+    "w": 27,
+    "h": 28
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 27,
+    "h": 28
+   },
+   "sourceSize": {
+    "w": 27,
+    "h": 28
+   }
+  },
+  "coagulo-01-terco": {
+   "frame": {
+    "x": 101,
+    "y": 40,
+    "w": 18,
+    "h": 18
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 18,
+    "h": 18
+   },
+   "sourceSize": {
+    "w": 18,
+    "h": 18
+   }
+  },
+  "coagulo-02-meia": {
+   "frame": {
+    "x": 406,
+    "y": 0,
+    "w": 23,
+    "h": 23
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 23,
+    "h": 23
+   },
+   "sourceSize": {
+    "w": 23,
+    "h": 23
+   }
+  },
+  "coagulo-02-terco": {
+   "frame": {
+    "x": 156,
+    "y": 40,
+    "w": 15,
+    "h": 15
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 15,
+    "h": 15
+   },
+   "sourceSize": {
+    "w": 15,
+    "h": 15
+   }
+  },
+  "coagulo-03-meia": {
+   "frame": {
+    "x": 351,
+    "y": 0,
+    "w": 28,
+    "h": 26
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 28,
+    "h": 26
+   },
+   "sourceSize": {
+    "w": 28,
+    "h": 26
+   }
+  },
+  "coagulo-03-terco": {
+   "frame": {
+    "x": 120,
+    "y": 40,
+    "w": 18,
+    "h": 17
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 18,
+    "h": 17
+   },
+   "sourceSize": {
+    "w": 18,
+    "h": 17
+   }
+  },
+  "coagulo-04-meia": {
+   "frame": {
+    "x": 113,
+    "y": 0,
+    "w": 29,
+    "h": 32
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 29,
+    "h": 32
+   },
+   "sourceSize": {
+    "w": 29,
+    "h": 32
+   }
+  },
+  "coagulo-04-terco": {
+   "frame": {
+    "x": 477,
+    "y": 0,
+    "w": 19,
+    "h": 21
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 19,
+    "h": 21
+   },
+   "sourceSize": {
+    "w": 19,
+    "h": 21
+   }
+  },
+  "coagulo-05-meia": {
+   "frame": {
+    "x": 289,
+    "y": 0,
+    "w": 32,
+    "h": 27
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 32,
+    "h": 27
+   },
+   "sourceSize": {
+    "w": 32,
+    "h": 27
+   }
+  },
+  "coagulo-05-terco": {
+   "frame": {
+    "x": 79,
+    "y": 40,
+    "w": 21,
+    "h": 18
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 21,
+    "h": 18
+   },
+   "sourceSize": {
+    "w": 21,
+    "h": 18
+   }
+  },
+  "osso-00-meia": {
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 42,
+    "h": 39
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 42,
+    "h": 39
+   },
+   "sourceSize": {
+    "w": 42,
+    "h": 39
+   }
+  },
+  "osso-00-terco": {
+   "frame": {
+    "x": 322,
+    "y": 0,
+    "w": 28,
+    "h": 26
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 28,
+    "h": 26
+   },
+   "sourceSize": {
+    "w": 28,
+    "h": 26
+   }
+  },
+  "osso-01-meia": {
+   "frame": {
+    "x": 43,
+    "y": 0,
+    "w": 37,
+    "h": 35
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 37,
+    "h": 35
+   },
+   "sourceSize": {
+    "w": 37,
+    "h": 35
+   }
+  },
+  "osso-01-terco": {
+   "frame": {
+    "x": 380,
+    "y": 0,
+    "w": 25,
+    "h": 23
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 25,
+    "h": 23
+   },
+   "sourceSize": {
+    "w": 25,
+    "h": 23
+   }
+  },
+  "osso-02-meia": {
+   "frame": {
+    "x": 143,
+    "y": 0,
+    "w": 33,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 33,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 33,
+    "h": 30
+   }
+  },
+  "osso-02-terco": {
+   "frame": {
+    "x": 0,
+    "y": 40,
+    "w": 22,
+    "h": 20
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 22,
+    "h": 20
+   },
+   "sourceSize": {
+    "w": 22,
+    "h": 20
+   }
+  },
+  "osso-03-meia": {
+   "frame": {
+    "x": 177,
+    "y": 0,
+    "w": 37,
+    "h": 28
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 37,
+    "h": 28
+   },
+   "sourceSize": {
+    "w": 37,
+    "h": 28
+   }
+  },
+  "osso-03-terco": {
+   "frame": {
+    "x": 23,
+    "y": 40,
+    "w": 24,
+    "h": 19
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 19
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 19
+   }
+  },
+  "osso-04-meia": {
+   "frame": {
+    "x": 243,
+    "y": 0,
+    "w": 45,
+    "h": 27
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 45,
+    "h": 27
+   },
+   "sourceSize": {
+    "w": 45,
+    "h": 27
+   }
+  },
+  "osso-04-terco": {
+   "frame": {
+    "x": 48,
+    "y": 40,
+    "w": 30,
+    "h": 18
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 30,
+    "h": 18
+   },
+   "sourceSize": {
+    "w": 30,
+    "h": 18
+   }
+  },
+  "osso-05-meia": {
+   "frame": {
+    "x": 452,
+    "y": 0,
+    "w": 24,
+    "h": 22
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 22
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 22
+   }
+  },
+  "osso-05-terco": {
+   "frame": {
+    "x": 139,
+    "y": 40,
+    "w": 16,
+    "h": 15
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 16,
+    "h": 15
+   },
+   "sourceSize": {
+    "w": 16,
+    "h": 15
+   }
+  }
+ },
+ "meta": {
+  "image": "f4-deriva.png",
+  "size": {
+   "w": 512,
+   "h": 60
+  },
+  "scale": "1"
+ }
+}

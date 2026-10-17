@@ -258,6 +258,9 @@ await page.screenshot({ path: 'scripts/_f3/probe-anuncio.png' });
 
 // ─── A TRANSIÇÃO: o RABO do Leviatã atravessa a tela ───
 //
+// ⚠️ DESDE 17/10 TUDO DAQUI PARA BAIXO ANDOU +7s: o rabo entra em t=45 (era 38) e o ato 2 inteiro foi junto (ver o
+// `STAGE_3`). As esperas abaixo já são as novas; os horários nos comentários são os de antes, +7.
+//
 // Ele entra em t=38 — ANTES da nuvem abrir em t=42 — e leva ~11s até sumir. A ordem é o
 // desenho todo: primeiro o jogador vê O QUE alcançou, e só depois o casco se revela como o
 // corpo daquilo. Um assert que só perguntasse "o rabo existe" passaria com ele entrando DEPOIS
@@ -265,7 +268,7 @@ await page.screenshot({ path: 'scripts/_f3/probe-anuncio.png' });
 // ⚠️ O QUADRO TEM QUE ESTAR VAZIO QUANDO O RABO CHEGA. A água-viva demora ~13,7s para atravessar
 // — é o inimigo mais lento do jogo, e o único capaz de sobrar para dentro da virada. O vazio é o
 // que faz a chegada do rabo pesar; se alguém empurrar as ondas dela para a frente, reprova aqui.
-while ((await estado()).t < 38) {
+while ((await estado()).t < 45) {
   await page.waitForTimeout(500);
   await respirar();
 }
@@ -273,9 +276,9 @@ const naEntrada = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   return s.enemies.enemies.getChildren().filter((o) => o.active && o.getData('kind') === 'aguaViva').length;
 });
-ok(naEntrada === 0, `a água-viva LIMPOU a tela antes do rabo entrar (achei ${naEntrada} em t=38)`);
+ok(naEntrada === 0, `a água-viva LIMPOU a tela antes do rabo entrar (achei ${naEntrada} em t=45)`);
 
-while ((await estado()).t < 39.5) {
+while ((await estado()).t < 46.5) {
   await page.waitForTimeout(800);
   await respirar();
 }
@@ -360,7 +363,7 @@ await page.screenshot({ path: 'scripts/_f3/probe-rabo.png' });
 
 // A amostra do MEIO da saída (t≈46,5; ela corre de 45,8 a 47,6). O passo é curto de propósito:
 // passar de 47,6 pegaria o sprite já destruído e o teste mediria a coisa errada.
-while ((await estado()).t < 46.5) {
+while ((await estado()).t < 53.5) {
   await page.waitForTimeout(200);
   await respirar();
 }
@@ -438,7 +441,7 @@ await page.screenshot({ path: 'scripts/_f3/probe-travessia.png' });
 //
 // A conta: destroy em 47,6 → preto cheio em 47,95 → casco em 1 e nome na tela → preto segura
 // até 48,37 → clareia até 48,72.
-while ((await estado()).t < 48.2) {
+while ((await estado()).t < 55.2) {
   await page.waitForTimeout(150);
   await respirar();
 }
@@ -483,7 +486,7 @@ await page.screenshot({ path: 'scripts/_f3/probe-escuro.png' });
 
 // E A TELA VOLTA. Um escurecimento que não clareia é uma fase preta, e o retângulo tem de ser
 // DESTRUÍDO: deixado em alpha 0 ele fica de pé para sempre em cima do Ato 2 inteiro.
-while ((await estado()).t < 49.4) {
+while ((await estado()).t < 56.4) {
   await page.waitForTimeout(200);
   await respirar();
 }
@@ -506,7 +509,7 @@ await page.screenshot({ path: 'scripts/_f3/probe-saiu.png' });
 // de pé desde t=21. Agora ele NASCE da SAÍDA do rabo e só fecha em t=48 — amostrar em 47 pegava a
 // revelação no meio (cascoReveal=0,38) e reprovava um casco que estava correto, só inacabado.
 // O assert media a coisa certa na hora errada; quem mudou foi a hora.
-while ((await estado()).t < 50) {
+while ((await estado()).t < 57) {
   await page.waitForTimeout(1500);
   await respirar();
 }
@@ -641,7 +644,7 @@ ok(riscos === 0, `nenhum RISCO de emenda na faixa (${riscos} colunas pretas de 1
 // ⚠️ ISTO NÃO É UM ASSERT DE TEXTURA, É UM ASSERT DE PERCURSO. Ele passa se, e só se, a mesma
 // faixa mostrar coisas DIFERENTES em lugares diferentes do corpo — que é a coisa toda. Um
 // sorteio uniforme (o `pickVariant` cru) reprovaria aqui: ele poria costela na cauda.
-while ((await estado()).t < 68) {
+while ((await estado()).t < 75) {
   await page.waitForTimeout(1500);
   await respirar();
 }
@@ -668,7 +671,7 @@ ok(
 // geometria, nunca do dado.
 // A janela de props do Ato 2 fecha em t=82 (o silêncio que telegrafa a serpente). Esperar até lá
 // é o que torna a contagem uma contagem, e não uma amostra.
-while ((await estado()).t < 82) {
+while ((await estado()).t < 89) {
   await page.waitForTimeout(1500);
   await respirar();
 }

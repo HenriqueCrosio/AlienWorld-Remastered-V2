@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { BARRA_CHEFAO_Y, COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Moldura } from '../systems/Moldura';
 
@@ -238,11 +238,11 @@ export class Golfinho {
 
     // A barra tem a cara da do chefão, mais curta: a promessa de que esta luta é menor que a final.
     this.barBg = scene.add
-      .rectangle(GAME_WIDTH / 2, 16, Golfinho.BARRA_W, 4, COLORS.enemyDark)
+      .rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, Golfinho.BARRA_W, 4, COLORS.enemyDark)
       .setDepth(100)
       .setVisible(false);
     this.bar = scene.add
-      .rectangle(GAME_WIDTH / 2 - Golfinho.BARRA_W / 2, 16, Golfinho.BARRA_W, 4, COLORS.enemyBright)
+      .rectangle(GAME_WIDTH / 2 - Golfinho.BARRA_W / 2, BARRA_CHEFAO_Y, Golfinho.BARRA_W, 4, COLORS.enemyBright)
       .setOrigin(0, 0.5)
       .setDepth(101)
       .setVisible(false);

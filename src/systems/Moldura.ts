@@ -774,6 +774,18 @@ export class Moldura {
    * no frame 1 antes do conserto da poda. Está escrita agora.
    */
 
+  /**
+   * Até que coluna de tela a faixa JÁ EXISTE — a borda direita da última placa gerada. Não gera nada.
+   *
+   * ⚠️ É O LIMITE DE QUEM SÓ DECORA (o `PrimeiroPlanoF4`, 17/10). Gerar placa é sortear o vão do
+   * fluxo do JOGO (`Phaser.Math`, ver `gerar`): uma decoração que perguntasse mais longe que a
+   * `avanca` e o `spawnCorredores` adiantaria esse sorteio e mudaria a fase. Perguntar até aqui é
+   * de graça.
+   */
+  alcance(): number {
+    return (this.ultima + 1) * Moldura.LARGURA - this.xMundo;
+  }
+
   /** O centro do corredor na coluna `xTela` da tela. */
   vaoEm(xTela: number): number {
     return this.placaEm(xTela).vaoY;

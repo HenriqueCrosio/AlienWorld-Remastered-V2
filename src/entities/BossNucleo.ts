@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH } from '../config';
+import { BARRA_CHEFAO_Y, COLORS, GAME_WIDTH } from '../config';
 import type { StageBoss } from './Boss';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
@@ -354,10 +354,10 @@ export class BossNucleo implements StageBoss {
     SerraGuardiao.registrarAnims(scene);
 
     this.barBg = scene.add
-      .rectangle(GAME_WIDTH / 2, 16, 160, 4, COLORS.enemyDark)
+      .rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyDark)
       .setDepth(100);
     this.bar = scene.add
-      .rectangle(GAME_WIDTH / 2 - 80, 16, 160, 4, COLORS.enemyBright)
+      .rectangle(GAME_WIDTH / 2 - 80, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyBright)
       .setOrigin(0, 0.5)
       .setDepth(101);
 

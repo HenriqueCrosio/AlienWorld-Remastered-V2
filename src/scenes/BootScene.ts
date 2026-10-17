@@ -1074,6 +1074,10 @@ const ART: Record<string, string> = {
   // (`scripts/_f4/_medir-nave.mjs`). A arte promete passagem e a passagem existe — se alguém trocar
   // esta peça por uma de fresta menor, é essa conta que tem de ser refeita.
   portaLasca: 'sprites/f4-porta-lasca.png',
+  // AS RAÍZES DA PORTA (17/10, item 2b do polimento): desenhadas à mão por `scripts/_polimento/_raizes-porta.mjs` (ele
+  // escolheu a D, a de veias acesas). A linha da superfície de cada peça é contrato com `RaizesPorta.SUP`.
+  f4PortaRaizChao: 'sprites/f4-porta-raiz-chao.png',
+  f4PortaRaizTeto: 'sprites/f4-porta-raiz-teto.png',
 
   // O DESTROÇO DA GARGANTA (21/09, 2ª volta do esfíncter): o que sobra dela depois do estouro —
   // um anel arrombado com a goela arrancada e cotos de dente na borda.
@@ -1338,6 +1342,15 @@ export class BootScene extends Phaser.Scene {
     for (const [key, sheet] of Object.entries(SHEETS)) {
       this.load.spritesheet(key, sheet.path, { frameWidth: sheet.w, frameHeight: sheet.h });
     }
+
+    // O PRIMEIRO PLANO DA F4 (17/10, ver `PrimeiroPlanoF4`): 44 silhuetas de tamanhos diferentes num ATLAS só — uma
+    // sheet de célula fixa não as comporta. Empacotado por `scripts/_polimento/_instalar-frente-f4.mjs`.
+    this.load.atlas('f4Frente', 'sprites/f4-frente.png', 'sprites/f4-frente.json');
+    // O DESTROÇO DA F4 (17/10, item 8): o casco da frota ENGOLIDO, a pele do `destroco` na F4 (ver `STAGE_4_SKIN` do
+    // `DebrisSystem`); e os ossos e coágulos da DERIVA, a camada de trás (ver `DerivaF4`). Mesmo empacotador.
+    // ⚠️ A CHAVE NÃO É `f4Destroco`: esse nome já é a folha dos cacos do esfíncter (SHEETS, acima).
+    this.load.atlas('f4Engolido', 'sprites/f4-engolido.png', 'sprites/f4-engolido.json');
+    this.load.atlas('f4Deriva', 'sprites/f4-deriva.png', 'sprites/f4-deriva.json');
 
     this.load.audio('stage1', 'audio/stage1.mp3');
     this.load.audio('boss', 'audio/boss.mp3');

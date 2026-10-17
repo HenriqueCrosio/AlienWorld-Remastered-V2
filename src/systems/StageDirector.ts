@@ -324,17 +324,18 @@ export const STAGE_2: StageEvent[] = [
 ];
 
 /**
- * FASE 3 — O CASCO. Duração ~88s. DOIS ATOS (design fechado com o Henrique).
+ * FASE 3 — O CASCO. Duração ~95s (era ~88 até 17/10: o rabo andou de 38 para 45, ver o fim do ato 1). DOIS ATOS
+ * (design fechado com o Henrique). Os tempos abaixo já são os novos.
  *
- * ATO 1 (0–42s): DENTRO da nebulosa. O impacto visual que tira o jogo do tom monótono — e a
+ * ATO 1 (0–49s): DENTRO da nebulosa. O impacto visual que tira o jogo do tom monótono — e a
  * visibilidade reduzida é o tema mecânico: os véus na frente escondem o que vem. O vocabulário
  * é o da Fase 2 (o jogador já sabe ler tudo), com pressão maior e cachos de minas.
  *
- * ~42s: a nave SAI da nuvem (nebula → 0). O fade é a virada de ato: a nebulosa rareia e o que
+ * ~49s: a nave SAI da nuvem (nebula → 0). O fade é a virada de ato: a nebulosa rareia e o que
  * aparece por baixo é o CASCO do Leviatã — o destino da campanha virando CHÃO, o mesmo truque
  * de escala da Aurora e da Doca.
  *
- * ATO 2 (48–88s): o vocabulário da FASE 1 transplantado — torres e radares sobre o casco
+ * ATO 2 (55–95s): o vocabulário da FASE 1 transplantado — torres e radares sobre o casco
  * (TerrainSystem no vácuo: o casco é a superfície). A ARANHA mini-boss abre o ato: um andador
  * finalmente tem chão para andar. Depois dela, 9s de RESPIRO (auditoria: release depois do
  * mini-boss, senão é ruído). O pico final mistura os dois mundos, e o silêncio anuncia a
@@ -353,7 +354,7 @@ export const STAGE_3: StageEvent[] = [
   // contraste que justifica ela existir; sozinha numa janela vazia ela vira só um asteroide
   // bonito que brilha.
   //
-  // ⚠️ O ÚLTIMO SPAWN TEM QUE LIMPAR A TELA ANTES DE t=38, e a margem é APERTADA. Ela nasce em
+  // ⚠️ O ÚLTIMO SPAWN TEM QUE LIMPAR A TELA ANTES DO RABO (t=38 até 17/10, hoje t=45), e a margem ERA APERTADA. Ela nasce em
   // `x = GAME_WIDTH + 16` (400), não em 384 — são 400px a 28px/s, ou seja **14,3s** de travessia,
   // e não os 13,7 que a largura da tela sugere. A primeira versão pôs a segunda onda em t=19: o
   // último nascia em 23,2 e ainda estava vivo em t=38. A sonda pegou.
@@ -403,6 +404,21 @@ export const STAGE_3: StageEvent[] = [
   { t: 29, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 90 },
   { t: 32, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 70 },
   { t: 35, type: 'wave', kind: 'drone', count: 7, spacing: 0.22, y: 120 },
+  // ─── O FIM DO ATO 1, ESTICADO (17/10) ───
+  //
+  // ⚠️ O RABO ANDOU DE 38 PARA 45, E O ATO 2 INTEIRO ANDOU OS MESMOS 7s. Ele jogou e anotou que o rabo *"chegou rápido
+  // demais"*; medido, entrava aos 38,2s, como o roteiro mandava desde 27/08. A escolha foi dele (17/10): *"acho que
+  // podemos aumentar o tempo de fase, então prefiro que ele vá para 45s"*. Tudo do `hazard rate 0` em diante é a mesma
+  // coreografia de antes, com +7 em cada número: o rabo, a nuvem abrindo, os props do casco, a aranha, o respiro, o
+  // pico e a serpente (88 → 95). As contas do `raboDoLeviata` são RELATIVAS ao evento, então seguem valendo.
+  //
+  // ⚠️ E OS 7s NOVOS SÃO DO ATO 1, com o vocabulário dele (o da F2, na névoa): batedores rente ao rodapé, kamikazes no
+  // meio e uma última linha de drones. A última onda nasce em t=42 e o último drone em 43,1 — 1,9s antes do rabo,
+  // a mesma folga de antes (o último drone de t=35 nascia em 36,3, 1,7s antes de t=38). O quadro vazio que faz a chegada
+  // pesar continua lá. NENHUMA ÁGUA-VIVA AQUI: ela leva 14,3s para cruzar e ainda estaria na tela quando o rabo entra.
+  { t: 37.5, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 150 },
+  { t: 40, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.6, y: 95 },
+  { t: 42, type: 'wave', kind: 'drone', count: 6, spacing: 0.22, y: 65 },
 
   // ─── A VIRADA: O RABO. ───
   //
@@ -429,9 +445,9 @@ export const STAGE_3: StageEvent[] = [
   // continua lá afinando a nuvem, mas o casco não está mais amarrado a ele (ver
   // `Parallax.cascoReveal`). O HANDOFF pedia a insinuação desde sempre; ela foi implementada em
   // 26/08, foi JOGADA, e o Henrique reprovou. O teste jogado vence o documento.
-  { t: 37.5, type: 'hazard', rate: 0, mix: [] },
-  { t: 38, type: 'rabo' },
-  { t: 42, type: 'nebula', density: 0 },
+  { t: 44.5, type: 'hazard', rate: 0, mix: [] },
+  { t: 45, type: 'rabo' },
+  { t: 49, type: 'nebula', density: 0 },
 
   // ATO 2: o casco é a superfície — e o que há EM CIMA dele é a defesa do próprio Leviatã.
   //
@@ -453,32 +469,32 @@ export const STAGE_3: StageEvent[] = [
   //
   // O respiradouro cai de ~12,7 para ~3 — e quem garante o ESPAÇAMENTO é a carência no
   // `GameScene.spawnProps`, não esta mistura. Sorteio uniforme pode dar dois seguidos.
-  { t: 48, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
-  { t: 48, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
+  { t: 55, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
+  { t: 55, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
 
   // O MINI-BOSS: a aranha entra andando no casco. As pernas dela finalmente têm motivo.
-  { t: 52, type: 'banner', text: 'SENTINELA DO CASCO' },
-  { t: 53, type: 'miniboss' },
+  { t: 59, type: 'banner', text: 'SENTINELA DO CASCO' },
+  { t: 60, type: 'miniboss' },
 
   // RESPIRO pós-aranha (~9s sem spawns novos): a auditoria pediu, e o silêncio também é o
   // contraste que faz o pico final pesar.
-  { t: 54, type: 'terrain', rate: 0, mix: [] },
+  { t: 61, type: 'terrain', rate: 0, mix: [] },
 
-  { t: 63, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
+  { t: 70, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
   // (12/10: o elite do casco saiu do jogo — a F3 fica só com a lula. Os batedores de t=64 e os kamikazes de t=67, que
   // tinham cedido o lugar a ele em 07/10, voltaram.)
-  { t: 64, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
-  { t: 67, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
-  { t: 70, type: 'banner', text: 'DEFESAS DO CASCO' },
-  { t: 71, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
-  { t: 73, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
-  { t: 76, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
-  { t: 78, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
+  { t: 71, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
+  { t: 74, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
+  { t: 77, type: 'banner', text: 'DEFESAS DO CASCO' },
+  { t: 78, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
+  { t: 80, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
+  { t: 83, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
+  { t: 85, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
 
   // Silêncio → serpente. O mesmo telégrafo das duas fases.
-  { t: 82, type: 'terrain', rate: 0, mix: [] },
-  { t: 84, type: 'banner', text: 'ALERTA · SERPENTE DO CASCO' },
-  { t: 88, type: 'boss' },
+  { t: 89, type: 'terrain', rate: 0, mix: [] },
+  { t: 91, type: 'banner', text: 'ALERTA · SERPENTE DO CASCO' },
+  { t: 95, type: 'boss' },
 ];
 
 /**
@@ -536,7 +552,11 @@ export const STAGE_4: StageEvent[] = [
   { t: 14, type: 'banner', text: 'ANTICORPOS · SENSORES ATIVOS' },
   { t: 15, type: 'corredor', rate: 2.4, gap: 112 },
   { t: 15, type: 'moldura', espessura: 16 },        // a borda margeia, e é só isso
-  { t: 15.5, type: 'hazard', rate: 2.2, mix: ['sensor', 'destroco'] },
+  // ⚠️ O DESTROÇO CAIU PARA 2/3, E O RESTO FICOU ONDE ESTAVA (17/10, com a pele do casco engolido — ver o
+  // `STAGE_4_SKIN` do `DebrisSystem`): *"na mesma proporção ou até menos um pouco do que existe hoje, muitos objetos
+  // flutuando acabam atrapalhando em alguns momentos"*. Era 2,2s com [sensor, destroco]: cada um a cada 4,4s. Agora
+  // 2,64s com 3:2 — o sensor segue a cada 4,4s (2,64 × 5/3) e o destroço vai para 6,6s (2,64 × 5/2).
+  { t: 15.5, type: 'hazard', rate: 2.64, mix: ['sensor', 'sensor', 'sensor', 'destroco', 'destroco'] },
   { t: 17, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
   // A LARVA MECÂNICA, SOZINHA (F4 §4): a 1ª vez do buraco e das pupas. No lugar dos batedores de t=21. O `y` não vale
   // para ela — nasce num posto, dentro do buraco que abre no fundo.
@@ -624,7 +644,10 @@ export const STAGE_4: StageEvent[] = [
   // `corredor` de 76px acima, e empilhar parede grossa em cima do vão mais estreito da fase era
   // justamente o que fazia a moldura deixar de ler como borda.
   { t: 50, type: 'moldura', espessura: 16 },
-  { t: 50.5, type: 'hazard', rate: 2.6, mix: ['sensor', 'mina', 'destroco'] },
+  // ⚠️ O MESMO 2/3 DO DESTROÇO (17/10, ver t=15,5). Era 2,6s com um de cada: cada um a cada 7,8s. Agora 2,925s com
+  // 3:3:2 — sensor e mina seguem a cada 7,8s (2,925 × 8/3) e o destroço vai para 11,7s (2,925 × 4). Vale até o
+  // fim do duto (t=106,5).
+  { t: 50.5, type: 'hazard', rate: 2.925, mix: ['sensor', 'sensor', 'sensor', 'mina', 'mina', 'mina', 'destroco', 'destroco'] },
   { t: 52, type: 'banner', text: 'CARGUEIRO NO CORREDOR' },
   { t: 52.5, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 100 },
   { t: 54, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 90 },

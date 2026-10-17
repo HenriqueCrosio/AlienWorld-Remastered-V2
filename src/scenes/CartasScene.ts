@@ -138,7 +138,8 @@ export class CartasScene extends Phaser.Scene {
     this.escurecer = this.add.rectangle(0, 0, 1, 1, COLORS.bgDeep, 0.6).setOrigin(0);
     this.faixa = this.add.rectangle(0, 0, 1, 1, COLORS.bgDeep, 0.9).setOrigin(0);
     this.titulo = this.criarTexto(data.titulo.toUpperCase(), PX_TITULO, COLORS.playerBright);
-    this.ajuda = this.criarTexto('[<-  ->] ESCOLHER   [ENTER] CONFIRMAR', PX_AJUDA, COLORS.metalMid);
+    // As setas são as do painel de nave (`ShipPanel`): < >, que a Chakra Petch tem — ←→ ela não tem (item 16, 17/10).
+    this.ajuda = this.criarTexto('[<  >] ESCOLHER   [ENTER] CONFIRMAR', PX_AJUDA, COLORS.metalMid);
 
     this.opcoes.forEach((c, i) => this.montarCarta(c, i));
     this.posicionar();

@@ -82,8 +82,10 @@ ok(f.nebulaDim >= 0.95, `dentro da nuvem (nebulaDim=${f.nebulaDim})`);
 ok(f.casco === 1 && f.alphaCasco < 0.05, `casco ainda escondido (${f.casco} camada, alpha=${f.alphaCasco.toFixed(2)})`);
 await page.screenshot({ path: 'probe-stage3-nebulosa.png' });
 
-// Espera a VIRADA (evento aos 42s + fade de 6s) e a aranha (53s). Blindagem renovada no meio.
-for (let i = 0; i < 6; i++) {
+// Espera a VIRADA (evento aos 49s + fade de 6s) e a aranha (60s). Blindagem renovada no meio.
+// ⚠️ 7 VOLTAS DE 9s, E NÃO 6, DESDE 17/10: o rabo andou de 38 para 45 e o ato 2 inteiro andou +7s junto (ver o
+// `STAGE_3`). Com 6 voltas a sonda olhava o casco em t≈54, antes da aranha de t=60.
+for (let i = 0; i < 7; i++) {
   await page.waitForTimeout(9000);
   await blindar();
 }
@@ -91,7 +93,7 @@ for (let i = 0; i < 6; i++) {
 f = await estadoFase();
 console.log('ato 2    ', JSON.stringify(f));
 if (f.cena !== 'Game') await abort(`a sonda morreu no caminho (cena=${f.cena})`);
-if (f.elapsed < 50) await abort(`o relógio não chegou ao Ato 2 (t=${f.elapsed})`);
+if (f.elapsed < 57) await abort(`o relógio não chegou ao Ato 2 (t=${f.elapsed})`);
 ok(f.nebulaDim <= 0.05, `saiu da nuvem (nebulaDim=${f.nebulaDim})`);
 ok(f.alphaCasco > 0.7, `o CASCO apareceu (alpha=${f.alphaCasco.toFixed(2)})`);
 ok(f.aranha, 'a ARANHA nasceu no casco');

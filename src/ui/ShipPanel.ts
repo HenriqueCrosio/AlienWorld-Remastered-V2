@@ -242,7 +242,9 @@ export class ShipPanel {
     this.rodape.setText(
       this.confirmando
         ? '[ENTER] confirmar  ·  [BACKSPACE] voltar  ·  [ESC] sair'
-        : '[←→] escolher  ·  [ENTER] selecionar  ·  [ESC] sair',
+        // ⚠️ < >, NÃO ←→ (17/10, item 16 do polimento): a Chakra Petch não tem as setas, e o navegador as desenhava
+        // na serifada de reserva. ‹ › ela tem, mas saem miúdas; < > leem como as teclas. A mesa de cartas usa as mesmas.
+        : '[<  >] escolher  ·  [ENTER] selecionar  ·  [ESC] sair',
     );
   }
 

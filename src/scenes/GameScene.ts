@@ -10,6 +10,9 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIL_DA_PINTURA, type ChavePintura } from '../systems/atmosfera/perfis';
 import { Moldura } from '../systems/Moldura';
+import { PrimeiroPlanoF4 } from '../systems/PrimeiroPlanoF4';
+import { DerivaF4 } from '../systems/DerivaF4';
+import { RaizesPorta } from '../systems/RaizesPorta';
 import { WeaponSystem, type OrigemProjetil } from '../systems/WeaponSystem';
 import { EnemySystem, type EnemyKind } from '../systems/EnemySystem';
 import { PickupSystem } from '../systems/PickupSystem';
@@ -88,6 +91,10 @@ export class GameScene extends Phaser.Scene {
   private parallax!: Parallax;
   /** A moldura da F4: a curva do vão e a faixa contínua. Ver `Moldura`. */
   private moldura!: Moldura;
+  /** O primeiro plano da F4: silhuetas orgânicas na faixa da borda, sem cruzar a superfície. Ver `PrimeiroPlanoF4`. */
+  private primeiroPlanoF4!: PrimeiroPlanoF4;
+  /** Os ossos e coágulos boiando atrás da borda, escuros e lentos. Ver `DerivaF4`. */
+  private derivaF4!: DerivaF4;
   /** A soleira do núcleo (F4, M4): a garganta, o gás e o estouro. Ver `Esfincter`. */
   private esfincter!: Esfincter;
   /** O overlap bala×gás, vivo só enquanto a garganta existe. Ver `spawnGarganta`. */
@@ -364,6 +371,12 @@ export class GameScene extends Phaser.Scene {
     // GLOBALMENTE, então `scene.textures.exists` sozinho não bastava como guarda — os 8 segmentos
     // nasciam nas Fases 1, 2 e 3 também, e vazavam uma tira acesa no rodapé (a peça é opaca).
     this.moldura = new Moldura(this, this.stage.id === 4);
+    // ⚠️ NÃO NO SANDBOX: lá a borda é a margem cravada de 16px, e nenhuma silhueta cabe em 55% disso sem virar mancha.
+    this.primeiroPlanoF4 = new PrimeiroPlanoF4(this, this.moldura, this.stage.id === 4 && !this.sandbox);
+    this.derivaF4 = new DerivaF4(this, this.moldura, this.stage.id === 4 && !this.sandbox);
+    // As raízes da base e do topo de cada porta do duto (e da lasca, depois do estouro). Elas se prendem sozinhas no
+    // `POST_UPDATE` da cena, então ninguém mais precisa segurá-las. Ver `RaizesPorta`.
+    new RaizesPorta(this, this.moldura, this.terrain.props, this.stage.id === 4);
     // O SANDBOX da F4 não roda o roteiro, e sem ele a borda fica com espessura 0 (a superfície quase fora da tela). O
     // Tubo Pulsante (frente B) vive preso a ela: a borda de margem da fase (16px) nasce cravada.
     if (this.sandbox && this.stage.id === 4) this.moldura.setEspessura(16);
@@ -376,8 +389,11 @@ export class GameScene extends Phaser.Scene {
     // A mina sensora estilhaça em TIROS INIMIGOS — daí o pool. Ela é a única coisa do cenário
     // que revida, e o estilhaço dela obedece às mesmas regras de qualquer tiro do inimigo
     // (acerta o jogador, morre na rocha).
-    this.debris = new DebrisSystem(this, this.enemies.enemyBullets, (x, y) =>
-      this.fx.explode(x, y, 1.6),
+    this.debris = new DebrisSystem(
+      this,
+      this.enemies.enemyBullets,
+      (x, y) => this.fx.explode(x, y, 1.6),
+      this.stage.id,
     );
 
     // Os ELITES (frente B): a rocha do drone nasce no DebrisSystem (herda tiro, bomba e colisão) e a explosão dele
@@ -801,6 +817,9 @@ export class GameScene extends Phaser.Scene {
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
     this.moldura.avanca(dt, SCROLL_SPEED * frenagem);
+    // Depois da borda: o primeiro plano mede a faixa que ela acabou de posicionar.
+    this.primeiroPlanoF4.atualiza(dt, SCROLL_SPEED * frenagem);
+    this.derivaF4.atualiza(dt, SCROLL_SPEED * frenagem);
 
     // A APROXIMAÇÃO: a lua encolhe, o Leviatã cresce. Medida até o chefão — depois dele a fase
     // acabou, e o fundo não deve continuar "andando" durante a luta.
@@ -876,6 +895,7 @@ export class GameScene extends Phaser.Scene {
     if (elite !== this.eliteEmCena) {
       this.eliteEmCena = elite;
       this.parallax.setForegroundElite(elite);
+      this.primeiroPlanoF4.setElite(elite);
     }
     this.pickups.update();
     this.boss?.update(dt, this.ship);
@@ -982,7 +1002,11 @@ export class GameScene extends Phaser.Scene {
       this.parallax.setPintura(cenario.key, 0);
       // `imediato`: chega-se na câmara, não se atravessa a passagem — ver `Moldura.setFaixa`.
       if (faixa) this.moldura.setFaixa(faixa, true);
-      if (cenario.soFundo) this.parallax.limpaCenario(0);
+      if (cenario.soFundo) {
+        this.parallax.limpaCenario(0);
+        this.primeiroPlanoF4.limpa(0);
+        this.derivaF4.limpa(0);
+      }
     }
     if (corredor) {
       this.corredorRate = corredor.rate;
@@ -1038,6 +1062,9 @@ export class GameScene extends Phaser.Scene {
         // ⚠️ NÃO VOLTA DEPOIS, e é de propósito: o que vem depois do duto é o silêncio e o
         // chefão, e o chefão apaga o primeiro plano de novo (`spawnBoss`). Reacender por 7
         // segundos de silêncio seria pisca-pisca de estado, não dramaturgia.
+        //
+        // ⚠️ E ISTO NÃO TOCA O `PrimeiroPlanoF4` (17/10), de propósito: ele mora só na faixa da borda, então não cobre
+        // passagem nenhuma — e o duto, com a faixa grossa e a lava clara, é justo onde ele lê melhor.
         if (e.duto) this.parallax.setForegroundDimmed(true);
         break;
       case 'porta':
@@ -1091,7 +1118,12 @@ export class GameScene extends Phaser.Scene {
         // A ARENA: as peças de cenário apagam. No mergulho, na metade descendente dele (somem com a
         // tela escurecendo); na entrada pela emenda não há escuro para esconder nada, então elas se
         // dissolvem devagar, no tempo de a emenda chegar à tela.
-        if (e.soFundo) this.parallax.limpaCenario(e.entrada === 'emenda' ? 1400 : (e.fadeMs ?? 600) / 2);
+        if (e.soFundo) {
+          const ms = e.entrada === 'emenda' ? 1400 : (e.fadeMs ?? 600) / 2;
+          this.parallax.limpaCenario(ms);
+          this.primeiroPlanoF4.limpa(ms);
+          this.derivaF4.limpa(ms);
+        }
         break;
       case 'garganta':
         this.spawnGarganta();
@@ -1228,6 +1260,9 @@ export class GameScene extends Phaser.Scene {
     //   props em t=48,0     ←  casco sólido em 48,01 (o escurecimento entrega ele pronto)
     //   tela preta em 47,95 ←  fade de 350ms começando no destroy
     //   destroy em 47,6     ←  saída começa em 45,8 (1800ms)  →  delay 7800 sobre o t=38
+    //
+    // ⚠️ DESDE 17/10 O RABO ENTRA EM t=45, e os props em t=55: o roteiro andou tudo +7s junto (ver o fim do ato 1 no
+    // `STAGE_3`). A conta é RELATIVA ao evento `rabo`, então os 7800 seguem certos; só os horários acima são os antigos.
     //
     // O hold subiu de 3,5s para 5,3s: ele segura mais tempo grande demais para caber, que é o
     // que o momento sempre pediu.
@@ -2607,8 +2642,11 @@ export class GameScene extends Phaser.Scene {
     // sozinha exige que o jogador desvie o olho do centro da tela para entender por que parou.
     const nome = this.weapons.overheated ? 'TRAVADA' : w.name;
 
+    // ⚠️ SEM O NOME DA CONDUÇÃO (17/10, item 10 do polimento): "FLAP (LEGACY)" e "LIVRE (NEW)" eram nomes internos
+    // de desenvolvimento na tela do jogador. A zona (1G / ZERO-G) diz a física, e a COR da linha diz a condução
+    // (âmbar = flap, ciano = livre, logo abaixo). O `label` continua nos controladores para quem precisar dele.
     this.hud.setText(
-      `${zona} ${this.controller.label}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}${this.arena?.invulneravel ? ' INVULN.' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
+      `${zona}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}${this.arena?.invulneravel ? ' INVULN.' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
+import { BARRA_CHEFAO_Y, COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { StageBoss } from './Boss';
 
@@ -184,9 +184,9 @@ export class BossCapitania implements StageBoss {
       })
       .setDepth(40);
 
-    this.barBg = scene.add.rectangle(GAME_WIDTH / 2, 16, 160, 4, COLORS.enemyDark).setDepth(100);
+    this.barBg = scene.add.rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyDark).setDepth(100);
     this.bar = scene.add
-      .rectangle(GAME_WIDTH / 2 - 80, 16, 160, 4, COLORS.enemyBright)
+      .rectangle(GAME_WIDTH / 2 - 80, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyBright)
       .setOrigin(0, 0.5)
       .setDepth(101);
   }

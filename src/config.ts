@@ -30,6 +30,13 @@ export const COLORS = {
 } as const;
 
 /**
+ * O CENTRO DA BARRA DE VIDA DOS CHEFÕES (e do golfinho), 4px de altura. Era 16 em cada chefão: a barra ia de 14 a 18,
+ * a 1px da linha de progresso da HUD (y=13), e lia COLADA nela (item 10 do polimento de 14/10). Em 19 ela vai de 17 a
+ * 21, com 3px de folga. Uma constante só, porque eram cinco cópias do mesmo número.
+ */
+export const BARRA_CHEFAO_Y = 19;
+
+/**
  * Velocidade de rolagem do mundo (px/s). Tudo no cenário se move para a esquerda nela.
  * Subiu de 60 para 84 no playtest: a 60 o jogo era "um passeio no parque".
  */
