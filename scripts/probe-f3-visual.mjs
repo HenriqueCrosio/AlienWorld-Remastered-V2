@@ -92,6 +92,14 @@ await page.evaluate(() => {
     });
     return r;
   };
+  // A CONTA DOS ATIRADORES, quadro a quadro (17/10): quantos lança-mísseis a regra do roteiro PROMETE —
+  // `dt / propRate × fatia do lança na mistura`, somado enquanto há props. Ver o assert dos atiradores.
+  window.__lancaEsperado = 0;
+  s.events.on('update', (_t, dt) => {
+    if (s.propRate > 0 && s.propMix.length) {
+      window.__lancaEsperado += (dt / 1000 / s.propRate) * (s.propMix.filter((k) => k === 'lancaMisseis').length / s.propMix.length);
+    }
+  });
 });
 
 const e = await estado();
@@ -185,7 +193,13 @@ const morte = await page.evaluate(() => {
   // pool é desligado durante a chamada: a bala é falsa e devolvê-la ao pool faria o
   // `WeaponSystem` mexer no corpo físico de um objeto que não tem nenhum. O que se está medindo
   // é o caminho da MORTE, não o do projétil.
-  const b = { x: av.x, y: av.y, active: true, getData: (k) => (k === 'damage' ? 99 : undefined) };
+  // ⚠️ `body.velocity` e `rotation` porque o `bulletHitEnemy` lê de onde o tiro VEIO (o escudo decide por aí)
+  // antes do `release`: sem eles a bala falsa derrubava o probe inteiro.
+  const b = {
+    x: av.x, y: av.y, rotation: 0, active: true,
+    body: { velocity: { x: 300, y: 0 } },
+    getData: (k) => (k === 'damage' ? 99 : undefined),
+  };
   const rel = s.weapons.release.bind(s.weapons);
   s.weapons.release = () => {};
   try {
@@ -269,11 +283,11 @@ const naVirada = await page.evaluate(async () => {
   const s = window.__game.scene.getScene('Game');
   const r = s.children.list.find((o) => o.texture && o.texture.key === 'raboLeviata');
   if (!r) return { n: 0 };
-  // A BATIDA é rotação em torno do pedúnculo, feita em código. Amostra o ângulo duas vezes:
-  // se ele não se move, o rabo está pregado; se passar de |90|, virou hélice de novo.
-  const a1 = r.angle;
+  // A BATIDA são os 16 quadros assados (16/10, nadadeira de tubarão), não rotação. Amostra o
+  // quadro e o ângulo duas vezes: o quadro tem de andar e o ângulo tem de ficar em 0.
+  const a1 = r.angle, q1 = Number(r.frame.name);
   await new Promise((res) => setTimeout(res, 700));
-  const a2 = r.angle;
+  const a2 = r.angle, q2 = Number(r.frame.name);
   return {
     t: Number((s.elapsed ?? 0).toFixed(1)),
     nebulaDim: Number(s.parallax.nebulaDim.toFixed(2)),
@@ -286,19 +300,16 @@ const naVirada = await page.evaluate(async () => {
     base: Math.round(r.y + r.displayHeight / 2),
     a1: Number(a1.toFixed(1)),
     a2: Number(a2.toFixed(1)),
+    q1,
+    q2,
     corpo: r.body ?? null,
   };
 });
 console.log('rabo    ' + JSON.stringify(naVirada));
 ok(naVirada.n === 1, `o RABO está na tela na virada (achei ${naVirada.n})`);
-ok(naVirada.a1 !== naVirada.a2, `a nadadeira está BATENDO (ângulo ${naVirada.a1}° → ${naVirada.a2}°)`);
-// ⚠️ O ASSERT QUE PAGA A LIÇÃO DA HÉLICE. A animação gerada pelo PixelLab rodava a nadadeira em
-// torno do próprio eixo, e "o rabo existe e se move" passava numa versão que estava errada. A
-// batida de uma baleia é um ARCO CURTO — nunca uma volta.
-ok(
-  Math.abs(naVirada.a1) <= 20 && Math.abs(naVirada.a2) <= 20,
-  `e o arco é CURTO, não um giro (|${naVirada.a1}| e |${naVirada.a2}| ≤ 20°)`,
-);
+ok(naVirada.q1 !== naVirada.q2, `a nadadeira está BATENDO (quadro ${naVirada.q1} → ${naVirada.q2})`);
+// ⚠️ E SEM GIRO NENHUM POR CIMA: a peça inteira girando descola o corte da direita da borda.
+ok(naVirada.a1 === 0 && naVirada.a2 === 0, `e a peça NÃO gira (ângulo ${naVirada.a1}° e ${naVirada.a2}°)`);
 // ELE SE SEGURA NA DIREITA, com o corpo sangrando para fora da borda. ⚠️ ISTO É O *HOLD*, e ele
 // continua valendo depois da travessia nova (2026-08-29): o rabo chega, PARA na quina, e só
 // muito depois sai pela esquerda. Amostrar aqui em t=39,5 é amostrar a chegada, não a saída.
@@ -590,10 +601,27 @@ const coluna = (x) => {
   }
   return l / n;
 };
-let riscos = 0;
-for (let x = 3; x < info.width - 3; x++) {
-  if (coluna(x) < 0.035 && coluna(x - 3) > 0.06 && coluna(x + 3) > 0.06) riscos++;
+const contaRiscos = (col) => {
+  let n = 0;
+  for (let x = 3; x < info.width - 3; x++) if (col(x) < 0.035 && col(x - 3) > 0.06 && col(x + 3) > 0.06) n++;
+  return n;
+};
+// ⚠️ TRÊS FOTOS, E VALE A MENOR (17/10). Um risco de emenda é da ARTE: ele está em toda foto, a cada ~60px.
+// O ruído descrito abaixo é do INSTANTE: o que cai sob a janela numa foto não cai na seguinte. O limiar não muda.
+const contagens = [contaRiscos(coluna)];
+for (let k = 0; k < 2; k++) {
+  await page.waitForTimeout(700);
+  const f = await sharp(await page.screenshot()).ensureAlpha().raw().toBuffer();
+  contagens.push(contaRiscos((x) => {
+    let l = 0;
+    for (let y = faixaY[0]; y <= faixaY[1]; y++) {
+      const i = (y * info.width + x) * 4;
+      l += (0.2126 * f[i] + 0.7152 * f[i + 1] + 0.0722 * f[i + 2]) / 255;
+    }
+    return l / (faixaY[1] - faixaY[0] + 1);
+  }));
 }
+const riscos = Math.min(...contagens);
 // ⚠️ ESTE ASSERT É RUIDOSO — O TERCEIRO DA SONDA, e ele não estava na lista até 2026-08-29.
 // Reprova com `riscos = 1` em torno de uma execução em quatro. MEDIDO no código de `HEAD`, sem
 // o plantio dos props, justamente porque o plantio pôs sombras dentro da janela que ele amostra
@@ -602,7 +630,7 @@ for (let x = 3; x < info.width - 3; x++) {
 // A causa é a mesma dos outros dois: ele fotografa UM instante de uma fase que rola, e o que cai
 // sob a janela muda a cada execução. RODE DE NOVO ANTES DE CONCLUIR — e nunca afrouxe o 0.035
 // para calar: o dia em que um risco de emenda voltar de verdade, é este número que o pega.
-ok(riscos === 0, `nenhum RISCO de emenda na faixa (${riscos} colunas pretas de 1px entre vizinhos claros)`);
+ok(riscos === 0, `nenhum RISCO de emenda na faixa (${riscos} colunas pretas de 1px entre vizinhos claros; fotos: ${contagens.join('/')})`);
 
 // ─── A MÉTRICA DO CASCO: onde no bicho o jogador está ───
 //
@@ -652,9 +680,18 @@ while ((await estado()).t < 82) {
 const proa = await estado();
 const texProa = proa.camadas.find((c) => c.casco)?.texturas ?? [];
 console.log(`proa     t=${proa.t} dist=${proa.cascoDist}px ${JSON.stringify(texProa)}`);
+// ⚠️ A FOTO DA TELA NÃO BASTA AQUI (17/10). Em t≈83 o percurso passou dos 68% há só ~550px, ~5 peças, e cada uma
+// é duto com chance de 1/2: uma foto sem duto nenhum sai ~1 vez em 30, com o código certo (medido: os dutos
+// dominam a partir daí). Então quem responde é o SORTEADOR, na distância real: 40 escolhas. Ele usa
+// `Math.random`, não o `RND` do jogo (ver `familiaDoCasco`), então perguntar não mexe no dado da fase.
+const sorteioProa = await page.evaluate(() => {
+  const p = window.__game.scene.getScene('Game').parallax;
+  return Array.from({ length: 40 }, () => p.familiaDoCasco());
+});
+const dutosProa = sorteioProa.filter((k) => k.startsWith('cascoDuto')).length;
 ok(
-  texProa.some((k) => k.startsWith('cascoDuto')),
-  `perto da CABEÇA a faixa vira maquinário (${texProa.join(', ')})`,
+  dutosProa >= 10,
+  `perto da CABEÇA a faixa vira maquinário (${dutosProa}/40 escolhas são duto; na tela: ${texProa.join(', ')})`,
 );
 
 const nasc = await page.evaluate(() => window.__nasc);
@@ -675,9 +712,13 @@ ok(
 // ⚠️ O ASSERT QUE PROTEGE O BALANCEAMENTO. O corte no respiradouro foi desenhado para NÃO mexer
 // no volume de tiro do Ato 2 (a cadência caiu pela metade e a mistura dobrou a favor do lança,
 // e os dois se cancelam). Se alguém "melhorar" a mistura depois, é aqui que reprova.
+// ⚠️ A REGRA, NÃO UM SORTEIO (17/10). Cada vaga é 50/50 e são ~8 vagas: contar os que nasceram reprovava ~1 vez
+// em 5 com o roteiro intacto (saiu 1 numa execução). O que o balanceamento protege é a PROMESSA do roteiro —
+// cadência × fatia do lança —, somada quadro a quadro no gancho lá de cima. A contagem real fica no log.
+const lancaEsperado = await page.evaluate(() => window.__lancaEsperado);
 ok(
-  lancas.length >= 3 && lancas.length <= 6,
-  `e os ATIRADORES não mudaram: ${lancas.length} lança-mísseis (a conta antiga dava ~4,2)`,
+  lancaEsperado >= 3.5 && lancaEsperado <= 5,
+  `e os ATIRADORES não mudaram: o roteiro promete ${lancaEsperado.toFixed(2)} lança-mísseis (a conta antiga dava ~4,2; nasceram ${lancas.length})`,
 );
 
 // ─── A MUNIÇÃO DA ARANHA: ela não cospe mais o tiro da NAVE DO JOGADOR ───
