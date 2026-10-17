@@ -1156,26 +1156,15 @@ export class GameScene extends Phaser.Scene {
     // asset do projeto (ausente = a cena continua, ver BootScene).
     if (!this.textures.exists('raboLeviata')) return;
 
-    // ⚠️ ESCALA 3,4 — COLOSSAL PORQUE NÃO CABE. A arte é 107×73 e vira 364×248 numa tela de
-    // 384×216: ela sangra ~20px pelo topo e ~12px pelo rodapé.
+    // ⚠️ ESCALA 1 — COLOSSAL PORQUE NÃO CABE, MAS NASCIDO NO TAMANHO (16/10). A arte é 368×248
+    // numa tela de 384×216: sangra pelo topo e pelo rodapé, como o pedido de 27/08 ("precisa ser
+    // maior, talvez fazer com que ele saia do frame da tela"). Até 15/10 isso era um 107×73
+    // esticado a 3,4 — pixel gordo, contra a lei da arte (reduzir pode, aumentar nunca). Não volte
+    // a escalar este sprite: o tamanho mora na arte.
     //
-    // ⚠️ A REGRA ANTERIOR ERA A OPOSTA, E FOI DERRUBADA JOGANDO (2026-08-27). A sessão de 26/08
-    // travou em 2,4 com a justificativa "é o maior tamanho em que o ARCO INTEIRO da batida ainda
-    // cabe na tela" — e a regra existia porque sair do quadro era tratado como defeito. O
-    // Henrique jogou e pediu o contrário: "precisa ser maior, talvez fazer com que ele saia do
-    // frame da tela, para dar a impressão de colossal". Sem o teto, a escala sobe.
-    //
-    // 3,0 é o degrau abaixo, se um dia 3,4 ficar opressivo — a coreografia não muda com ele.
-    // A régua é `scripts/_medir-rabo.mjs`.
-    //
-    // ⚠️ A ORIGEM VAI PARA A DIREITA (0,92 / 0,5) — E ELA É O PIVÔ DA BATIDA. Numa baleia o
-    // rabo gira em torno do pedúnculo, lá onde ele encontra o corpo; a nadadeira é a ponta do
-    // braço, não o eixo. Com a origem no centro, qualquer rotação faria a peça inteira rodar
-    // em volta de si mesma — que foi exatamente o defeito da animação gerada (ela virou HÉLICE).
-    //
-    // Com origem em 0,92 e escala 3,4 o sprite ocupa de `x − 341` a `x + 23`. Em x=374 isso é
-    // 33..397 (`scripts/_medir-rabo.mjs`): o corpo sangra para fora da borda direita e a
-    // nadadeira varre o miolo da tela. Esse `x + 23` é a conta da SAÍDA — ver o tween 3.
+    // ⚠️ A ORIGEM FICA NA DIREITA (0,92 / 0,5): com ela o sprite ocupa de `x − 339` a `x + 29`,
+    // e em x=374 isso é 35..403 — o corte reto da direita da arte fica FORA da tela e o corpo
+    // continua para lá. Ela não é mais pivô de rotação nenhum: o `angle` fica em 0 (ver a batida).
     //
     // ⚠️ `depth −70` DO INÍCIO AO FIM, sem troca. Ver o cabeçalho: o casco não existe enquanto
     // ele está em cena, então não há profundidade nenhuma para negociar.
@@ -1183,7 +1172,6 @@ export class GameScene extends Phaser.Scene {
       .sprite(GAME_WIDTH + 200, 158, 'raboLeviata')
       .setOrigin(0.92, 0.5)
       .setDepth(-70)
-      .setScale(3.4)
       .setAlpha(0);
 
     // 1. A CHEGADA (2,5s): entra pela direita e DESACELERA até parar. O `easeOut` é o que
@@ -1191,32 +1179,22 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({ targets: rabo, x: 374, duration: 2500, ease: 'Sine.easeOut' });
     this.tweens.add({ targets: rabo, alpha: 1, duration: 1100, ease: 'Sine.easeOut' });
 
-    // 2. A BATIDA, EM CÓDIGO E NÃO EM QUADROS.
+    // 2. A BATIDA, AGORA EM QUADROS (16/10) — e NÃO em `angle`.
     //
-    //    ⚠️ A animação do PixelLab foi DESCARTADA. O v3 leu "bater para cima e para baixo" como
-    //    "girar": os quadros 4 a 8 rodavam a nadadeira em torno do próprio eixo e o bicho virava
-    //    uma hélice. Rotação em torno do pedúnculo é o movimento certo, é uma linha de tween, e
-    //    não tem como sair errado — então é onde ele mora.
+    //    ⚠️ A NADADEIRA É DE TUBARÃO, E ISSO MUDA O MOVIMENTO. A antiga era de baleia, que bate
+    //    para cima e para baixo — de perfil, uma rotação no plano da tela, e por isso a batida era
+    //    um tween de ±6° em torno do pedúnculo. A de agora (a M2) varre de LADO: de perfil isso é
+    //    escorço, a lâmina estreitando e alargando, e rotação nenhuma desenha isso. O gesto é a
+    //    tomada 2 do PixMiniMax ("movimento natural e fluido"), e o corpo aparente INTEIRO enverga
+    //    junto com a luz recalculada por mapa de normais — tudo assado nos 16 quadros. Ver o
+    //    comentário de `raboLeviata` no `BootScene`.
     //
-    //    ⚠️ A BATIDA É ASSIMÉTRICA, e isso é a diferença entre "peixe de aquário" e "propulsão".
-    //    Sobe DEVAGAR (1,5s, easeInOut: o braço carregando) e desce COM TUDO (0,55s, easeIn: a
-    //    remada). Um yoyo simples daria as duas metades com a mesma pressa, e o peso sumiria.
+    //    ⚠️ NÃO SOME UM `angle` POR CIMA. Girar a peça inteira descola o corte da direita da
+    //    borda e quebra a ilusão de que o corpo continua fora da tela.
     //
-    //    ⚠️ ±6°, E O ÂNGULO CAIU PARA O MOVIMENTO NÃO MUDAR. Com a escala em 3,4 a ponta da
-    //    nadadeira passou a ficar a ~335px do pedúnculo, contra 236 antes — a mesma alavanca
-    //    ficou mais longa. ±8° agora varreria 93px e a batida viraria outra coisa; ±6° varre
-    //    ~70px, que é praticamente a varredura que o Henrique aprovou (~66px). Reduzir o ângulo
-    //    aqui é o que PRESERVA a remada, não o que a enfraquece.
-    rabo.setAngle(-6);
-    const batida = this.tweens.chain({
-      targets: rabo,
-      loop: -1,
-      tweens: [
-        { angle: 6, duration: 1500, ease: 'Sine.easeInOut' },
-        { angle: -6, duration: 550, ease: 'Sine.easeIn' },
-        { angle: -6, duration: 250 },
-      ],
-    });
+    //    ⚠️ O CICLO DE IDA E VOLTA FOI TENTADO E REPROVADO (16/10): uma 2ª tomada com a nadadeira
+    //    vindo para perto da tela, emendada nesta. Ficou esta, a de um lado só.
+    if (this.anims.exists('rabo-leviata')) rabo.play('rabo-leviata');
 
     // 3. A SAÍDA — ELE ATRAVESSA E VAI EMBORA. É o plano inteiro num verbo só.
     //
@@ -1228,10 +1206,8 @@ export class GameScene extends Phaser.Scene {
     // ponto em que ela deixaria de ser subordinada: acima de ~80px o gesto vira mergulho de
     // novo e a reclamação volta.
     //
-    // ⚠️ O `−40` É MEDIDO, NÃO CHUTADO. Com origem 0.92 e escala 3,4 o sprite vai até `x + 23`
-    // (`_medir-rabo.mjs`: x 33..397 quando x=374), então ele limpa a borda esquerda em x=−23.
-    // O −40 dá 17px de folga. ⚠️ Se a ESCALA mudar, este número muda junto: é `−(0,08 × 107 ×
-    // escala) − 17`.
+    // ⚠️ O `740` LIMPA A TELA: com origem 0,92 o sprite começa em `x − 339`, então em x=740 a
+    // ponta da nadadeira está em 401, fora da borda direita (384).
     //
     // ⚠️ `Sine.easeIn` É O ESPELHO DA CHEGADA. Ela era `easeOut` — desacelera até parar. A saída
     // ACELERA: arranca devagar e se afasta. Entrou nadando, sai nadando. Um `easeOut` aqui daria
@@ -1241,7 +1217,7 @@ export class GameScene extends Phaser.Scene {
     // `batida.stop()` aqui com a justificativa "um rabo que continua remando enquanto AFUNDA lê
     // como peça solta caindo" — o que estava certo para um mergulho. Para uma travessia é o
     // oposto exato: a remada é o que CAUSA a viagem. Parar de bater e continuar se movendo é
-    // que leria como peça sendo arrastada. Ela só para no `destroy`.
+    // que leria como peça sendo arrastada. Ela só para no `destroy` (a animação morre com o sprite).
     //
     // ⚠️ E NÃO HÁ `alpha` NENHUM NESTE TWEEN, NEM `y`, NEM `angle`. A saída é UMA linha: o `x`.
     //
@@ -1262,7 +1238,6 @@ export class GameScene extends Phaser.Scene {
       duration: 1800,
       ease: 'Sine.easeIn',
       onComplete: () => {
-        batida.stop();
         rabo.destroy();
         this.escurecerParaOCasco();
       },

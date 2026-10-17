@@ -331,6 +331,8 @@ const SHEET_ANIMS: {
   // O CONE a 14/s e UMA vez só: 10 quadros = 0,71s. Rápido, porque ele é o pagamento, não a
   // espera. ⚠️ `loop: false` — um estouro em laço é um incêndio, e a passagem já está aberta.
   { key: 'f4-cone', sheet: 'f4ConeSheet', frames: 10, frameRate: 14, loop: false },
+  // A BATIDA do rabo da F3: 16 quadros a 7/s = 2,3s por varrida, o mesmo período da batida antiga.
+  { key: 'rabo-leviata', sheet: 'raboLeviata', frames: 16, frameRate: 7 },
 ];
 
 const SHEETS: Record<string, { path: string; w: number; h: number }> = {
@@ -439,6 +441,13 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   f4MangueirasSheet: { path: 'sprites/f4-mangueiras-sheet.png', w: 32, h: 44 },
   f4GasSheet: { path: 'sprites/f4-gas-sheet.png', w: 128, h: 176 },
   f4ConeSheet: { path: 'sprites/f4-cone-sheet.png', w: 256, h: 176 },
+  // O RABO do Leviatã (F3, virada do Ato 1 para o Ato 2 — ver `GameScene.raboDoLeviata()`): 16 quadros
+  // de 368×248, NASCIDOS NO TAMANHO DA TELA (escala 1; o antigo era 107×73 esticado a 3,4, guardado em
+  // `assets/raw/rabo-leviata-original.png`). A nadadeira de tubarão (M2) varre de lado — o gesto da
+  // tomada 2 do PixMiniMax — e o corpo aparente inteiro enverga junto, com o pivô virtual 500px além da
+  // borda direita e a luz recalculada por mapa de normais (aprovado por ele em 16/10). Assado por
+  // `scripts/_polimento/_montar-pixminimax.mjs` + `_corpo-todo.mjs` (pasta `t2-todo500-luz` da folha).
+  raboLeviata: { path: 'sprites/rabo-leviata-sheet.png', w: 368, h: 248 },
   // ⚠️ 53×76 POR CÉLULA, E OS PEDAÇOS VÊM DO PIXELLAB — a 1ª versão eram recortes MEUS de 24×24
   // tirados da criatura por script, e ele reprovou jogando: liam como estilhaço genérico, não como
   // bicho. Os de agora são placas de casco rasgadas, presas curvas e segmentos do anel de dentes.
@@ -674,15 +683,7 @@ const ART: Record<string, string> = {
   respiradouro2: 'sprites/respiradouro2.png',
   respiradouro3: 'sprites/respiradouro3.png',
 
-  // O RABO do Leviatã: a nadadeira traseira, em perfil lateral, que chega na virada do Ato 1
-  // para o Ato 2 e se segura na direita batendo.
-  //
-  // ⚠️ SÓ O ESTÁTICO, E DE PROPÓSITO. A animação do PixelLab foi gerada e DESCARTADA: o v3 leu
-  // "bater para cima e para baixo" como "girar", e os quadros 4 a 8 rodavam a nadadeira em
-  // torno do próprio eixo — o bicho virava uma hélice. A batida vive em código, como rotação em
-  // torno do pedúnculo (ver `GameScene.raboDoLeviata()`), que é o movimento real de uma baleia
-  // e não tem como dar a volta.
-  raboLeviata: 'sprites/rabo-leviata.png',
+  // (O RABO do Leviatã virou spritesheet em 16/10: `raboLeviata` em `SHEETS`.)
 
   ...animFrames('bossIdleAnim', 'boss-idle-anim'),
   ...animFrames('bossFireAnim', 'boss-fire-anim'),
