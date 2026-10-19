@@ -17,7 +17,8 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco E fechou; vamos começar o bloco F (a frota e o minerador da F2). O START
 > é `plans/2026-10-19-blocos-f-a-j-START.md`."**
 >
-> 📍 **20/10 — O BLOCO E FECHOU: COMMITADO E EMPURRADO** (os hashes estão no fim deste 📍). O menu é a colônia de
+> 📍 **20/10 — O BLOCO E FECHOU: COMMITADO E EMPURRADO** para `origin/feat/cartas-preview` — `9ef1347` (código e
+> arte), `390d481` (ferramentas, testes e folhas, sem os vídeos e os GIFs) e `911196b` (docs). O menu é a colônia de
 > Kepler à noite, a pintura dele na resolução dela (a exceção aprovada à lei do 384×216), viva e tratada, com perigo no
 > ar (a tempestade, os holofotes antiaéreos, a nave vasculhando), o Leviatã de 96 px em loop, o letreiro de neon que
 > desce freando nos retrofoguetes e acende (os olhos por último) e a condução numa linha só (lembrada entre sessões).
