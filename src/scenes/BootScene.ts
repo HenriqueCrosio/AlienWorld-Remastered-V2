@@ -478,9 +478,23 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // (`scripts/_f8/_repintar-pedacos.mjs`) — a folha original é ROXA, a matéria do esfíncter.
   f8PedacosSheet: { path: 'sprites/f8-pedacos-sheet.png', w: 39, h: 61 },
   // Capítulo 5: o corpo em brasa em 12 tamanhos ASSADOS (do inteiro a 18%) — ele encolhe caindo, se afastando
-  // (`scripts/_f8/_gerar-queda.mjs escalas`). Todos centrados no quadro do inteiro.
-  f8ReentradaEscalas: { path: 'sprites/f8-reentrada-escalas.png', w: 170, h: 161 },
-  f8SobrevooLava: { path: 'sprites/f8-sobrevoo-lava-sheet.png', w: 246, h: 96 },
+  // (`scripts/_f8/_gerar-queda.mjs escalas`). Todos centrados no quadro do inteiro. 18/10 (bloco D): o Leviatã novo,
+  // recortado da edição 83 do conceito 5★ (o antigo, 170×161, em `assets/raw/f8-reentrada*-original.png`).
+  f8ReentradaEscalas: { path: 'sprites/f8-reentrada-escalas.png', w: 160, h: 161 },
+  // 18/10 · a CORTINA DE EJEÇÃO do impacto, assada em pixel (`scripts/_leviata/_ejecao.mjs`): no vácuo a poeira não
+  // ondula — cada grão faz o seu arco balístico, num cone de bordas nítidas, e cai de volta devagar. 48 quadros
+  // (6×8) de 384×200, o ponto do contato em (192, 170), a 18/s.
+  f8EjecaoSheet: { path: 'sprites/f8-ejecao-sheet.png', w: 384, h: 200 },
+  // 19/10 · a EXPLOSÃO do impacto, assada em pixel em tela cheia (`scripts/_leviata/_explosao.mjs`): a bola de fogo,
+  // a onda de poeira rasteira e a coluna — ela cobre a carcaça inteira enquanto o corpo cravado vira a carcaça
+  // deitada do capítulo 6. 48 quadros (6×8) de 384×216, o contato em (258, 160), a 18/s.
+  f8ExplosaoSheet: { path: 'sprites/f8-explosao-sheet.png', w: 384, h: 216 },
+  // 19/10 · a colônia do plano largo vista de órbita: as LUZES da noite dela (`scripts/_leviata/_colonia-luzes.mjs`),
+  // 6 quadros de 160×48 (o 0 aceso; 1–5 a rede falhando), o ponto do impacto em (80, 28). Desenha com ADD.
+  f8ColoniaLuzes: { path: 'sprites/f8-colonia-luzes.png', w: 160, h: 48 },
+  // A lava da carcaça dos capítulos 6–7, em 8 estágios (`scripts/_f8/_gerar-sobrevoo.mjs instalar`). 19/10 (bloco D):
+  // a carcaça 82 com a dorsal da base (a de 24/09, 246×96, em `assets/raw/f8-sobrevoo*-original.png`).
+  f8SobrevooLava: { path: 'sprites/f8-sobrevoo-lava-sheet.png', w: 221, h: 98 },
   // P3: o que o vácuo puxa pelo rasgo — rastros, gota de lava, tendão, osso, tecido (16×16, assadas).
   f8SuccaoSheet: { path: 'sprites/f8-succao-sheet.png', w: 16, h: 16 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
@@ -513,10 +527,17 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // (o tamanho impresso por anim-sheet.mjs); 9 quadros lado a lado.
   leviathanAliveSheet: { path: 'sprites/leviathan-alive-sheet.png', w: 116, h: 116 },
 
-  // O LEVIATÃ que NADA pelo menu "O DESPERTAR": a baleia BLINDADA com as costelas expostas
-  // (objeto `e9f7e0dc`), animada num ciclo de ondulação. Atravessa o céu UMA vez e some atrás da
-  // lua. Célula quadrada 116×116 (o tamanho impresso por anim-sheet.mjs); 17 quadros lado a lado.
-  leviathanSwimSheet: { path: 'sprites/leviathan-swim-sheet.png', w: 116, h: 116 },
+  // O LEVIATÃ que NADA pelo menu "O DESPERTAR". Atravessa o céu UMA vez e some atrás da lua.
+  // 18/10 (bloco D): o Leviatã NOVO, o mesmo bicho da cena final (a gerada 91·0 da base aprovada), nadando como
+  // tubarão (PixMiniMax 92) e com a LUZ DA LUA assada em pixel — preto, ele sumia sob o tint e o véu do menu
+  // (`scripts/_leviata/_menu-nado.mjs`, `_luz-lua.mjs`, `_instalar-menu-nado.mjs`). 16 quadros de 176×80. A baleia
+  // blindada antiga (17 de 116×116) está em `assets/raw/leviathan-swim-sheet-original.png`.
+  leviathanSwimSheet: { path: 'sprites/leviathan-swim-sheet.png', w: 176, h: 80 },
+  // 19/10 (bloco D) · a SILHUETA DISTANTE do Leviatã novo (fim da F1 e F2, `Parallax`): o nado do menu só como SOMBRA
+  // com um aro frio nas costas (escolha dele: *"ao longe, é apenas uma sombra"*), assada em CADA largura de 28 a 72px
+  // (um aro de 1px reduzido pela engine vira pontilhado) — uma linha por largura, 16 quadros do nado por linha, células
+  // de 72×33 (`scripts/_leviata/_silhueta.mjs longe`). O quadro é (largura − 28) × 16 + quadro do nado.
+  leviathanLonge: { path: 'sprites/leviathan-longe-sheet.png', w: 72, h: 33 },
 
   // O EMBLEMA do jogo que SURGE quando o Leviatã some atrás da lua (menu). Brasão circular que
   // faísca em loop. Célula 64×64; 9 quadros lado a lado.
@@ -562,8 +583,15 @@ const ART: Record<string, string> = {
   f8LuaPerto: 'sprites/f8-lua-perto.png',
   f8LuaPertoLua: 'sprites/f8-lua-perto-lua.png',
   f8ColoniaLonge: 'sprites/f8-colonia-longe.png',
+  // 18/10 (bloco D) · O IMPACTO de perto: o MESMO enquadramento do capítulo 6, antes da queda — a colônia sem a
+  // carcaça (inpaint, `scripts/_leviata/_colonia-sem-carcaca.mjs`) e o chão da frente, onde o focinho crava
+  // (`_impacto-camadas.mjs`).
+  f8ImpactoColonia: 'sprites/f8-impacto-colonia.png',
+  f8ImpactoFrente: 'sprites/f8-impacto-frente.png',
   // Capítulos 6–7, O SOBREVOO e A LUZ SE APAGA: o conceito 6★ com o corpo rasgado no meio (seed 44), com a lava da
   // carcaça APAGADA — ela mora na folha de estágios que esfria placa por placa (`_gerar-sobrevoo.mjs instalar`).
+  // 19/10 (bloco D): a carcaça 82 do Leviatã novo, com a dorsal da base atrás das costelas (a de 24/09 em
+  // `assets/raw/f8-sobrevoo*-original.png`). O capítulo 5 também a usa: é o quadro que aparece quando a explosão baixa.
   f8SobrevooFrio: 'sprites/f8-sobrevoo-frio.png',
   // As naves escolhíveis na interlude (src/ships.ts). Sem PNG, a nave cai na `ship` padrão —
   // o jogo roda com as três, e a arte entra depois.

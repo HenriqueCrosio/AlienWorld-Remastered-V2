@@ -508,14 +508,14 @@ export class MenuScene extends Phaser.Scene {
 
   /**
    * Registra a animação de NADO do Leviatã UMA vez (a cena recria a cada entrada; `anims.exists`
-   * evita o grito de chave repetida). 17 quadros de um ciclo desenhado para fechar sem salto —
-   * loop direto, SEM yoyo (a ondulação viaja, não vai-e-volta).
+   * evita o grito de chave repetida). 16 quadros do nado de tubarão (18/10): o 17º gerado era o 1º de
+   * novo e saiu, então o loop fecha direto, SEM yoyo.
    */
   private registerLeviathanSwim(): void {
     if (this.textures.exists('leviathanSwimSheet') && !this.anims.exists('leviathan-swim')) {
       this.anims.create({
         key: 'leviathan-swim',
-        frames: this.anims.generateFrameNumbers('leviathanSwimSheet', { start: 0, end: 16 }),
+        frames: this.anims.generateFrameNumbers('leviathanSwimSheet', { start: 0, end: 15 }),
         frameRate: 10,
         repeat: -1,
       });

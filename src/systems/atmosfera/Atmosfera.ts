@@ -147,10 +147,12 @@ export class Atmosfera {
     // O FADE PARA O PRETO (spec da correção de 25/09): o `WebGLRenderer#postRenderCamera` desenha o fade da
     // câmera principal ANTES do shader (`postBatchCamera`), então sem repassar o progresso pro pipeline o fade
     // "final" passa por dentro da Atmosfera e vira névoa em movimento em vez de preto. `fadeEffect.progress` (não
-    // `.alpha`, que o `phaser.d.ts` mantém privado) serve igual: aqui só se usa `fadeOut` — nunca `fadeIn` — e
-    // nesse sentido (`direction = true`) o Phaser faz `alpha === progress` (`Fade.js#update`).
+    // `.alpha`, que o `phaser.d.ts` mantém privado) serve igual: no `fadeOut` (`direction = true`) o Phaser faz
+    // `alpha === progress` (`Fade.js#update`). ⚠️ 18/10: o capítulo 6 passou a abrir com `fadeIn` (o mergulho depois
+    // do impacto) — nesse sentido o escuro é `1 − progress`; lido como fade-out, ele acabava PRETO.
     const fade = this.scene.cameras.main.fadeEffect;
-    this.pipeline.escuro = fade.isRunning || fade.isComplete ? fade.progress : 0;
+    const progresso = fade.isRunning || fade.isComplete ? fade.progress : 0;
+    this.pipeline.escuro = fade.direction === false ? (fade.isRunning ? 1 - progresso : 0) : progresso;
     // O FLASH: `alpha` cai de 1 a 0 ao longo do flash (Phaser `Effects.Flash`, público e tipado).
     const flash = this.scene.cameras.main.flashEffect;
     this.pipeline.flash = flash.isRunning ? flash.alpha : 0;

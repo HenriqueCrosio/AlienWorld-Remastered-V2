@@ -106,6 +106,41 @@ interface ScatterLayer {
  * crescendo à frente contam a aproximação inteira sem uma linha de diálogo. Vender ESCALA é o
  * mais difícil em pixel art, e estes dois sprites fazem isso sozinhos.
  */
+/**
+ * A SILHUETA DISTANTE do Leviatã novo (19/10, bloco D) — as notas dele:
+ *   · *"se o leviatã é colossal, dependendo do tamanho que ele aparece no fundo, vai parecer que ele é menor do que é"*
+ *     → PEQUENO e ATRÁS: logo à frente do planeta (−97), atrás dos cascos da frota morta (−94), do cinturão e das rochas.
+ *     Uma nave capital cruzando NA FRENTE dele e parecendo do tamanho dele é a régua que diz "colossal" (atrás do
+ *     planeta não: aí ele seria maior que um planeta). E cresce POUCO na fase — crescer 2,3× dizia "vindo depressa";
+ *   · *"ao longe, é apenas uma sombra"* → só a sombra com um aro frio nas costas (a folha `leviathanLonge`);
+ *   · *"um objeto a milhares de km de distância se move como se estivesse parado"* → o nado a 3 quadros/s (5,3 s);
+ *   · *"descartaria a aparição na F3"* → na nebulosa ele não aparece (a nuvem o esconde; o rabo sai dela).
+ * No fim da F1 ele fica acima da pintura do zero-G (−95.5, opaca), na profundidade de sempre.
+ */
+const LEVI_LONGE = {
+  chave: 'leviathanLonge',
+  /** A folha: uma linha por largura (de `wMin` a `wMax`), 16 quadros do nado por linha. */
+  wMin: 28,
+  wMax: 72,
+  quadros: 16,
+  fps: 3,
+  /** A F2 inteira (setApproach 0 → 1): largura, posição do centro e alpha. ⚠️ No CÉU ABERTO acima da faixa do
+   *  cinturão (−93, contínua de propósito, y ~40–150): na altura antiga (y 72–84) ela o tapava inteiro e só sobravam
+   *  pedaços do aro. Aqui o aro desenha a forma contra a nebulosa, e os cascos da frota (faixa 40–130) ainda passam
+   *  na frente dele de vez em quando. */
+  //   E no trecho mais CLARO desse céu (à direita: luminância 21–32 contra 10–16 no meio) — a sombra quase preta
+  //   precisa de fundo mais claro que ela para ler.
+  f2Largura: [40, 60],
+  f2X: [344, 316],
+  f2Y: [44, 46],
+  f2Alpha: [0.85, 1],
+  /** O fim da F1 (o primeiro vislumbre, depois de romper a atmosfera): o menor de todos — e NA FRENTE DA GALÁXIA da
+   *  pintura do zero-G. Todo o céu à direita é quase preto (luminância 9–15) e ali a sombra sumia, sobrando só o risco
+   *  do aro; contra o brilho da galáxia ela lê como corpo, um bicho eclipsando uma galáxia. */
+  f1: { largura: 34, x: 349, y: 24, alpha: 0.85 },
+  profundidadeEspaco: -96.5,
+} as const;
+
 export class Parallax {
   private readonly layers: ScatterLayer[] = [];
   // Não existem no vácuo: lá não há chão. Nulos, e não "invisíveis" — um TileSprite escondido
@@ -139,7 +174,12 @@ export class Parallax {
   private rays: { img: Phaser.GameObjects.Image; deriva: number; pico: number }[] = [];
   /** Ligado por `breakAtmosphere`: é o que faz o `update` gastar quadro com a bruma/fachos. */
   private exiting = false;
-  private readonly leviathan: Phaser.GameObjects.Image;
+  private readonly leviathan: Phaser.GameObjects.Sprite;
+  /** A silhueta nova (`leviathanLonge`) existe? Sem ela, cai na `leviathan` antiga, com o tint e as escalas de antes. */
+  private readonly leviLonge: boolean;
+  /** A largura em que a silhueta está (px de tela, 1 = uma linha da folha) e o relógio do nado dela. */
+  private leviLargura: number = LEVI_LONGE.f2Largura[0];
+  private leviRelogio = 0;
   private readonly moon: Phaser.GameObjects.Image;
   private groundOffset = 0;
   /**
@@ -288,12 +328,21 @@ export class Parallax {
     // É a mesma perspectiva aérea das montanhas da Fase 1: a profundidade vem do TINT, e o que
     // está longe é ESCURO. Vale igual quando a arte de verdade entrar — ele é o destino da
     // campanha, e um destino tem que parecer LONGE até a hora de chegar nele.
+    //
+    // ⚠️ 19/10 (bloco D): com a silhueta NOVA (`leviathanLonge`) a distância já vem ASSADA na arte — a sombra escura e o
+    // aro frio —, então ela não leva tint, e o tamanho é a LINHA da folha, não a escala (ver `LEVI_LONGE`).
+    this.leviLonge = scene.textures.exists(LEVI_LONGE.chave);
     this.leviathan = scene.add
-      .image(330, 60, 'leviathan')
-      .setDepth(-94)
-      .setAlpha(0)
-      .setScale(0.5)
-      .setTint(0x2a3352);
+      .sprite(330, 60, this.leviLonge ? LEVI_LONGE.chave : 'leviathan')
+      .setDepth(this.leviLonge && mode === 'espaco' ? LEVI_LONGE.profundidadeEspaco : -94)
+      .setAlpha(0);
+    if (this.leviLonge) {
+      const f1 = LEVI_LONGE.f1;
+      this.leviathan.setPosition(f1.x, f1.y);
+      this.larguraLeviata(f1.largura);
+    } else {
+      this.leviathan.setScale(0.5).setTint(0x2a3352);
+    }
 
     // No vácuo os dois já estão lá desde o primeiro frame: a Fase 1 terminou mostrando-os, e a
     // Fase 2 não pode "esquecer" o Leviatã e reapresentá-lo. Ele é o destino — está sempre à vista.
@@ -308,13 +357,19 @@ export class Parallax {
       this.moon.setPosition(58, 168).setScale(1.25);
       // this.moon.setAlpha(0.8);
       // O Leviatã, à FRENTE (à direita). Longe e pequeno — por enquanto.
-      this.leviathan.setPosition(304, 72).setScale(0.5).setAlpha(0.45);
+      if (this.leviLonge) this.setApproach(0);
+      else this.leviathan.setPosition(304, 72).setScale(0.5).setAlpha(0.45);
     }
     if (mode === 'nebulosa') {
       // Fase 3: a lua ficou para trás de vez; o Leviatã já entra GRANDE — a Fase 2 terminou
       // com ele a 1.15, e a Fase 3 não pode reapresentá-lo pequeno (mesma regra da Fase 2 não
       // "esquecer" a lua). Ele cresce até virar o chão no Ato 2.
-      this.leviathan.setPosition(310, 66).setScale(1.15).setAlpha(0.5);
+      //
+      // ⚠️ 19/10 (bloco D): com a silhueta nova, ele NÃO aparece na F3 (ele: *"ele vai aparecer o rabo depois de 45s,
+      // ou seja, como ele se aproximaria tão depressa? Acho que descartaria a aparição na F3"*). A nuvem o esconde, e o
+      // rabo sai dela.
+      if (this.leviLonge) this.leviathan.setVisible(false);
+      else this.leviathan.setPosition(310, 66).setScale(1.15).setAlpha(0.5);
     }
   }
 
@@ -1574,6 +1629,11 @@ export class Parallax {
         if (bg.x <= -bg.width) bg.x += 2 * bg.width;
       }
     }
+    // O nado da silhueta, quase parado (3 quadros/s).
+    if (this.leviLonge && this.leviathan.visible) {
+      this.leviRelogio += dt;
+      this.quadroLeviata();
+    }
     this.avancaEntrada();
 
     for (const layer of this.layers) {
@@ -1665,9 +1725,30 @@ export class Parallax {
     this.moon.setPosition(Phaser.Math.Linear(58, -10, k), Phaser.Math.Linear(168, 150, k));
 
     // O Leviatã cresce e ESCURECE menos (ganha alpha): ele não aparece, ele se APROXIMA.
+    if (this.leviLonge) {
+      // 19/10: cresce POUCO (40 → 60px) e quase não anda — longe demais para chegar depressa.
+      const L = LEVI_LONGE;
+      this.larguraLeviata(Phaser.Math.Linear(L.f2Largura[0], L.f2Largura[1], k));
+      this.leviathan.setAlpha(Phaser.Math.Linear(L.f2Alpha[0], L.f2Alpha[1], k));
+      this.leviathan.setPosition(Math.round(Phaser.Math.Linear(L.f2X[0], L.f2X[1], k)), Math.round(Phaser.Math.Linear(L.f2Y[0], L.f2Y[1], k)));
+      return;
+    }
     this.leviathan.setScale(Phaser.Math.Linear(0.5, 1.15, k));
     this.leviathan.setAlpha(Phaser.Math.Linear(0.45, 0.8, k));
     this.leviathan.setPosition(Phaser.Math.Linear(304, 250, k), Phaser.Math.Linear(72, 84, k));
+  }
+
+  /** A silhueta nova numa LARGURA (px de tela): escolhe a linha da folha assada nela — nunca escala. */
+  private larguraLeviata(w: number): void {
+    this.leviLargura = Phaser.Math.Clamp(Math.round(w), LEVI_LONGE.wMin, LEVI_LONGE.wMax);
+    this.quadroLeviata();
+  }
+
+  /** O quadro da silhueta nova: a linha da largura + o quadro do nado no relógio dela. */
+  private quadroLeviata(): void {
+    if (!this.leviLonge) return;
+    const nado = Math.floor(this.leviRelogio * LEVI_LONGE.fps) % LEVI_LONGE.quadros;
+    this.leviathan.setFrame((this.leviLargura - LEVI_LONGE.wMin) * LEVI_LONGE.quadros + nado);
   }
 
   /**
@@ -2025,7 +2106,7 @@ export class Parallax {
       this.scene.tweens.add({ targets: this.moon, alpha: 1, duration: 2000, delay: 600 });
     }
     // O Leviatã entra devagar. Ele é o destino — não deve ser um susto, deve ser um peso.
-    this.scene.tweens.add({ targets: this.leviathan, alpha: 0.55, duration: 3500, delay: 1400 });
+    this.scene.tweens.add({ targets: this.leviathan, alpha: this.leviLonge ? LEVI_LONGE.f1.alpha : 0.55, duration: 3500, delay: 1400 });
 
     this.playAtmosphereExit();
   }

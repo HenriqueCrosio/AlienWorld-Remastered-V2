@@ -20,17 +20,30 @@ import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
  * ⚠️ A LUA É FIXA: ela é o próprio fundo, parado o plano todo (a regra física da spec — astro não cresce sem a
  * câmera ir até ele). A sonda cobra `escalasLua` com UM valor só.
  */
-const LEV_X = 12;
-const LEV_Y = 6;
-/** A ferida, na tela: a boca das costelas abertas, de onde a nave sai (medida no recorte: x=206, y=69). */
-const FERIDA_X = LEV_X + 206;
-const FERIDA_Y = LEV_Y + 69;
+//
+// ⚠️ 18/10 (bloco D) — O LEVIATÃ NOVO, no mesmo ângulo, com o mesmo rombo e o mesmo estado do de 24/09: o conceito
+// aprovado EDITADO com a base nova de referência (casco de placas, cabeça de mandíbula, guelras), a edit-73 escolhida
+// por ele, com o miolo amarelo da boca contido nos laranjas da lava antiga (`scripts/_leviata/_final-conceito.mjs`,
+// `_recortar-novo.mjs`, `_conter-brilho.mjs`; folha `folhas/2026-10-18/leviata/angulo2/`). O recorte novo tem outra
+// caixa no quadro (22, 33 em vez de 19, 41): a posição andou junto e a ferida ficou no MESMO ponto da tela (218, 75).
+// O antigo está em `assets/raw/f8-leviata*-original.png`.
+const LEV_X = 15;
+const LEV_Y = -2;
+/** A ferida, na tela: o rombo no meio da carcaça, de onde a nave sai (medida no recorte: x=203, y=77). */
+const FERIDA_X = LEV_X + 203;
+const FERIDA_Y = LEV_Y + 77;
 /** A deriva do corpo no plano todo: devagar, para baixo e para a direita — rumo à lua (a queda começa aqui). */
 const DERIVA_X = 10;
 const DERIVA_Y = 16;
 /** A lava das rachaduras: do corte ao fim do plano, esmorecendo. */
 const LAVA_INICIO = 0.85;
 const LAVA_FIM = 0.5;
+/**
+ * O tamanho da nave ao sair (18/10, ele: *"diminua a nave na animação de ser expelida ... vai melhorar a percepção
+ * de tamanho entre a nave e o monstro"*). Fator ÚNICO sobre o sprite de cada tier — a evolução entre tiers continua
+ * a mesma; só a distância até a câmera muda.
+ */
+const NAVE_ESCALA = 0.5;
 
 export function montarFora(c: CenaFinal): Capitulo {
   const { scene, nave, estado } = c;
@@ -73,8 +86,8 @@ export function montarFora(c: CenaFinal): Capitulo {
 
   // A NAVE sai DA FERIDA rolando e CRESCENDO — o espelho de quando sumiu pela fenda, encolhendo (capítulo 3):
   // lá ela foi para dentro, aqui vem de dentro para fora. Estabiliza e se afasta, para cima e para a direita.
-  nave.setVisible(true).setScale(0.15).setFlipX(false).setAngle(-540).setPosition(FERIDA_X, FERIDA_Y);
-  scene.tweens.add({ targets: nave, scale: 1, duration: 1300, ease: 'Quad.easeOut' });
+  nave.setVisible(true).setScale(0.15 * NAVE_ESCALA).setFlipX(false).setAngle(-540).setPosition(FERIDA_X, FERIDA_Y);
+  scene.tweens.add({ targets: nave, scale: NAVE_ESCALA, duration: 1300, ease: 'Quad.easeOut' });
   scene.tweens.add({ targets: nave, angle: 0, x: FERIDA_X + 60, y: FERIDA_Y - 14, duration: 2200, ease: 'Cubic.easeOut' });
   scene.tweens.add({ targets: nave, x: 360, y: 26, delay: 2400, duration: dur - 2400, ease: 'Sine.easeInOut' });
 

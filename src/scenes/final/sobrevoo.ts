@@ -20,9 +20,9 @@ import { DEPTH, type CenaFinal, type Capitulo } from './tipos';
  * A carcaça do quadro é FRIA (`f8-sobrevoo-frio.png`); a lava dela é uma folha à parte, na caixa dela, em 8
  * estágios (`f8-sobrevoo-lava-sheet.png`). No capítulo 6 a folha fica no estágio 0 — o quadro aceso, como aprovado.
  */
-/** A caixa da lava da carcaça no quadro (`scripts/_f8/_sobrevoo-lava-caixa.json`). */
-const LAVA_X = 98;
-const LAVA_Y = 93;
+/** A caixa da lava da carcaça no quadro (`scripts/_f8/_sobrevoo-lava-caixa.json`). 19/10: a carcaça 82 (bloco D). */
+export const LAVA_X = 98;
+export const LAVA_Y = 91;
 const LAVA_ESTAGIOS = 8;
 /** As bases das duas colunas de fumaça do quadro e os focos de fogo nas cúpulas. */
 const FUMACAS = [
@@ -44,9 +44,12 @@ export function montarSobrevoo(c: CenaFinal): Capitulo {
   c.atm.perfil(PERFIS.superficie);
   const cam = scene.cameras.main;
   cam.resetFX();
+  // 18/10 (bloco D): a queda termina no mesmo enquadramento e mergulha no escuro (`queda.ts`) — 19/10: já com ele
+  // DEITADO, revelado pela explosão. Abrir do escuro marca o tempo passado até a nave voltar.
+  cam.fadeIn(600, 0, 0, 0);
   garantirLuzRadial(scene);
 
-  const quadro = scene.add.image(0, 0, 'f8SobrevooFrio').setOrigin(0, 0).setDepth(DEPTH.FUNDO);
+  const quadro =scene.add.image(0, 0, 'f8SobrevooFrio').setOrigin(0, 0).setDepth(DEPTH.FUNDO);
   const lava = scene.add.image(LAVA_X, LAVA_Y, 'f8SobrevooLava', 0).setOrigin(0, 0).setDepth(DEPTH.FUNDO + 1);
   estado.lavaCarcaca = 1;
 
