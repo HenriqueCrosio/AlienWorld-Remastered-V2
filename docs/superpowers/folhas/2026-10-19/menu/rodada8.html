@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 8</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 0 0 6px; }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-left:6px; vertical-align: 2px; }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ok { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .grade { display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+  ol, ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 7px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--sub); white-space: nowrap; width: 1%; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 8 · o perigo</h1>
+<p class="sub">19/10/2026. <a href="rodada7.html">← rodada 7</a> · Os seus pedidos: os detalhes pequenos não podem ficar estranhos (as falhas escuras e as luzes atravessando paredes); a nave com propulsores e luzes vasculhando a colônia; a tempestade chegando na massa de nuvem que você marcou; holofotes antiaéreos varrendo o céu. E as suas decisões: o neon do vídeo, com o olho acendendo só no final, e o REMASTERED como texto, com os jatos saindo de baixo das letras.</p>
+
+<h2>O menu</h2>
+<figure><video src="rodada8/abertura.webm" autoplay loop muted playsinline></video><figcaption><b>22 s, em velocidade real, a 30 quadros.</b> <a href="rodada8/teste-tela.html">Tela cheia (F11)</a>. Relâmpagos aos 2,4 s (com raio), 11 s, 16 s e 19,6 s (com raio).</figcaption></figure>
+
+<h2>Os detalhes que estavam estranhos <span class="tag ok">corrigidos</span></h2>
+<div class="item">
+  <h3>As falhas escuras</h3>
+  <p>Eram três defeitos, todos na hora em que uma luz apaga:</p>
+  <ol>
+    <li><b>A luz apagada virava um buraco.</b> O pixel aceso era multiplicado por 0,2 e ficava quase preto, mais escuro que a parede em volta, com uma franja laranja sobrando ao redor. Agora a luz é <b>tirada da pintura</b>: o lugar dela é preenchido a partir da vizinhança. Atrás de uma janela fica a parede, atrás de um farol fica o céu, e a franja quente sai junto.</li>
+    <li><b>O pedaço apagado tapava a névoa.</b> Era um retângulo opaco da cidade desenhado por cima da bruma, então quando a luz apagava aparecia um retângulo sem névoa. Agora o pedaço tem só os pixels que mudam e fica debaixo da névoa, como a cidade.</li>
+    <li><b>Fachadas inteiras piscavam.</b> A detecção de "farol vermelho" pegava também as fachadas laranja-saturadas, áreas grandes que piscavam como quadrados escuros. Agora farol é só vermelho puro e pequeno, e eles são 26.</li>
+  </ol>
+  <figure><img src="rodada8/apagadas-quadros.png" alt=""><figcaption><b>Quadros reais do vídeo, ×2, no mesmo instante:</b> a rodada 7 à esquerda e agora à direita.</figcaption></figure>
+</div>
+<div class="item">
+  <h3>As luzes que atravessavam paredes</h3>
+  <p>O tráfego corria por linhas que passavam das pontas dos deques e entravam em prédios, rochas e torres (a do seu círculo é a ponte do meio, na ponta esquerda). Medi cada deque na pintura: agora cada luz anda só pelo trecho visível, na fileira das lâmpadas, e nas pontas some aos poucos, como quem entra num portão. A ponte curta sobre a cachoeira ganhou uma luz só.</p>
+  <p>Conferi as outras luzes com o mesmo risco: as da nave ficam no casco, as estrelas só no céu aberto, e os halos são brilho em volta das luzes fortes, o que está certo.</p>
+  <figure><img src="rodada8/trafego-antes-depois.png" alt=""><figcaption><b>Três pontes, ×3:</b> em vermelho o caminho antigo, em verde o de agora.</figcaption></figure>
+</div>
+
+<h2>O perigo</h2>
+<div class="item">
+  <h3>A tempestade chegando</h3>
+  <ul>
+    <li><b>Clarões por dentro da massa que você marcou.</b> Cada nuvem acende pela própria claridade, e as silhuetas da frente (a torre, a cúpula, a nave) ficam escuras, em contraluz. O clarão nasce num ponto da massa e se espalha a partir dali, com dois ou três golpes rápidos em cada relâmpago.</li>
+    <li><b>Raios bifurcados</b> em alguns relâmpagos, recortados pela mesma máscara: passam por trás das torres.</li>
+    <li><b>A nuvem pesada rolando:</b> uma bruma escura que anda devagar só sobre as nuvens dessa massa, deixando-a mais densa que o resto do céu. Ela não escurece a cúpula nem a torre.</li>
+    <li>A cena inteira pega um pouco de cada clarão.</li>
+  </ul>
+  <p>No vídeo os relâmpagos têm hora marcada. No menu, viriam a cada 6–12 s, sorteados, e nunca durante a descida do letreiro.</p>
+  <div class="grade">
+    <figure><img src="rodada8/tempestade-raio.png" alt=""><figcaption><b>2,7 s:</b> um raio na massa da esquerda.</figcaption></figure>
+    <figure><img src="rodada8/tempestade-clarao.png" alt=""><figcaption><b>16,3 s:</b> o clarão na borda da cidadela.</figcaption></figure>
+  </div>
+</div>
+<div class="item">
+  <h3>Os holofotes antiaéreos</h3>
+  <p>São três, em estruturas que existem na pintura: o topo da cúpula, o terraço à direita da torre alta e o terraço da direita da cidadela. Cada um varre o céu no seu próprio ritmo, devagar e procurando. Nenhum atravessa uma torre no caminho. O da cidadela sobe pela janela de céu onde o Leviatã nada, e às vezes passa perto dele.</p>
+  <figure><img src="rodada8/pousado.png" alt=""><figcaption><b>13 s:</b> o menu pousado, com os três feixes, o holofote da nave e a tempestade.</figcaption></figure>
+  <figure><img src="rodada8/feixe-leviata.png" alt=""><figcaption><b>19,7 e 21,5 s:</b> o feixe da cidadela procurando e se apagando logo abaixo do Leviatã.</figcaption></figure>
+</div>
+<div class="item">
+  <h3>A nave</h3>
+  <p>Um holofote na quilha varre o vale da colônia, e dois propulsores frios embaixo do casco a seguram no ar.</p>
+  <figure><img src="rodada8/nave.png" alt=""><figcaption><b>A nave, ×2.</b></figcaption></figure>
+</div>
+
+<h2>O letreiro</h2>
+<div class="item">
+  <p>Ele desce apagado e <b>sem nenhum sinal dos olhos</b>; os olhos só aparecem no fim, depois do REMASTERED. Os jatos de baixo agora saem <b>de baixo de letras</b>: o 2º E, o A, o 3º E e o último E, em pares simétricos. São quatro plumas com a força somada da queima que você aprovou.</p>
+  <figure><img src="rodada8/letreiro.png" alt=""><figcaption><b>5 s e 10,2 s:</b> a queima saindo de baixo das letras, e o neon aceso com os olhos.</figcaption></figure>
+</div>
+
+<h2>A sua pergunta: é pesar demais?</h2>
+<div class="item">
+  <p>Não, é cuidado com detalhe, enquanto houver hierarquia. Foi isso que segurei:</p>
+  <ul>
+    <li><b>Um evento por vez.</b> O primeiro relâmpago vem antes do letreiro entrar e o próximo só depois dos olhos acenderem. Na descida, só os jatos do letreiro se mexem rápido.</li>
+    <li><b>O que é constante é lento e fraco:</b> os feixes varrem em 17–25 s, com ~14% de força, e a nuvem pesada anda alguns pixels por segundo.</li>
+    <li><b>O que é forte é raro:</b> o raio dura menos de um décimo de segundo, algumas vezes por minuto.</li>
+    <li>E tudo conta a mesma história: a colônia de noite, sob uma tempestade, vigiando um céu de onde algo vai vir.</li>
+  </ul>
+</div>
+
+<h2>Para decidir <span class="tag decidir">sua vez</span></h2>
+<div class="item">
+  <ol>
+    <li><b>A tempestade:</b> a força e a frequência dos clarões estão boas? Quer raio em todo relâmpago ou só em alguns, como agora?</li>
+    <li><b>Os holofotes:</b> três está bom? A força está boa?</li>
+    <li><b>O holofote da cidadela perto do Leviatã:</b> deixo ele passar perto às vezes (a tensão de quase achá-lo), ou afasto o feixe do caminho do bicho?</li>
+    <li>Ficou algum detalhe estranho que eu não vi?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

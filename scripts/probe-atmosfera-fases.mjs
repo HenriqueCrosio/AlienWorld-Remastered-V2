@@ -62,7 +62,7 @@ const conferir = (rotulo, e) => {
 };
 
 // ─── F1 e a saída para o zero-G ───
-const f1 = await abrir('Enter');
+const f1 = await abrir('Digit1');
 conferir('F1   ', f1);
 ok(f1.pintura === 'paintBgF1', `a F1 abre na pintura da colônia (${f1.pintura})`);
 await page.evaluate(() => window.__game.scene.getScenes(true)[0].parallax.breakAtmosphere());
@@ -112,7 +112,8 @@ ok(['faseF4a', 'faseF4b', 'faseF4c', 'faseF4d'].every((n) => vistas.has(n)), `o 
 // invulnerável pelo resto da sonda) e apagaria o game over antes de ele acontecer.
 await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(1500);
-await page.keyboard.press('Enter');
+// O 1 começa a F1 direto (desde o bloco E, o Enter durante a abertura só pula para o menu pousado).
+await page.keyboard.press('Digit1');
 const cenaCarregada = async () =>
   page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
@@ -149,7 +150,7 @@ ok(
 // `atm.perfil()` novo não desliga `suspenso` — ver o comentário de `Atmosfera.suspender`).
 await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.waitForTimeout(1500);
-await page.keyboard.press('Enter');
+await page.keyboard.press('Digit1');
 {
   const t0 = Date.now();
   let c = await cenaCarregada();

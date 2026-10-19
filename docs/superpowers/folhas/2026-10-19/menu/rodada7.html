@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 7</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 18px; margin: 0 0 4px; }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-left:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figure video, .larga img { width:100%; }
+  .px img { image-rendering: pixelated; background: #0b0d13; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .base { display:grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; align-items: start; }
+  @media (max-width: 900px) { .base { grid-template-columns: 1fr; } }
+  .estados { display:flex; flex-direction:column; gap: 10px; }
+  .estados span { color: var(--sub); font-size: 13px; }
+  ol, ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--sub); white-space: nowrap; width: 1%; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 7 · o letreiro</h1>
+<p class="sub">19/10/2026. <a href="rodada6.html">← rodada 6</a> · As suas respostas: a condução numa linha só ✓, a resolução no seu browser ✓, eu gero as bases do letreiro, o Leviatã em loop. E os pedidos: a queima dos retrofoguetes mais longa, o letreiro descendo mais, e dois olhos no W.</p>
+
+<h2>Quatro bases para o letreiro</h2>
+<div class="item">
+  <p>As quatro partem das letras exatas da Silkscreen do jogo, então a grafia é certa e o W continua sendo a cabeça do alien. Cada pixel da fonte vira 4×4 pixels do letreiro, e na tela de 1536 cada pixel do letreiro ocupa 2 px: o tamanho do título de hoje. Cada base tem três estados: <b>apagada</b> (a descida), <b>acesa</b>, e <b>acesa com os olhos</b>.</p>
+  <p>Os arquivos em 1× (o pixel do letreiro, para você trabalhar por cima) estão em <code>rodada7/bases/*-1x.png</code>, nas quatro versões: apagado, apagado com olhos, aceso e aceso com olhos.</p>
+</div>
+
+<div class="item">
+  <h3>B · Neon <span class="tag rec">recomendo</span></h3>
+  <p>Tubos de vidro correndo pelo contorno de cada letra, com o núcleo branco e o ciano do jogo, e o brilho vazando no ar. O W vira o contorno de uma cabeça, e os olhos vermelhos ficam dentro dela. É literalmente um letreiro que acende, e a piscada das janelas da cidade vira a do neon pegando. Apagado, os tubos são vidro cinza.</p>
+  <div class="base">
+    <div class="estados px">
+      <span>apagado</span><figure><img src="rodada7/bases/neon-apagado.png" alt=""></figure>
+      <span>aceso</span><figure><img src="rodada7/bases/neon-aceso.png" alt=""></figure>
+      <span>aceso com olhos</span><figure><img src="rodada7/bases/neon-aceso-olhos.png" alt=""></figure>
+    </div>
+    <figure class="px"><img src="rodada7/bases/neon-w.png" alt=""><figcaption><b>O W, ×8:</b> sem e com os olhos.</figcaption></figure>
+  </div>
+  <figure class="larga" style="margin-top:12px"><img src="rodada7/bases/neon-cena-corte.png" alt=""><figcaption>Na cena, 1:1, aceso com os olhos.</figcaption></figure>
+</div>
+
+<div class="item">
+  <h3>A · Casco da colônia</h3>
+  <p>Metal escuro com o aro frio das silhuetas da cidade, juntas de painel, e janelas âmbar que acendem como as da colônia. O W não tem janelas, porque é o rosto. É a mais integrada à pintura, e por isso a que menos se destaca dela.</p>
+  <div class="base">
+    <div class="estados px">
+      <span>apagado</span><figure><img src="rodada7/bases/casco-apagado.png" alt=""></figure>
+      <span>aceso</span><figure><img src="rodada7/bases/casco-aceso.png" alt=""></figure>
+      <span>aceso com olhos</span><figure><img src="rodada7/bases/casco-aceso-olhos.png" alt=""></figure>
+    </div>
+    <figure class="px"><img src="rodada7/bases/casco-w.png" alt=""><figcaption><b>O W, ×8:</b> sem e com os olhos.</figcaption></figure>
+  </div>
+  <figure class="larga" style="margin-top:12px"><img src="rodada7/bases/casco-cena-corte.png" alt=""><figcaption>Na cena, 1:1.</figcaption></figure>
+</div>
+
+<div class="item">
+  <h3>C · Placa vazada</h3>
+  <p>Uma placa de metal chanfrado e aparafusado, com as letras recortadas; acesa, a luz âmbar atravessa os recortes e escorre na borda de baixo. Tem leitura forte e cara de sinalização da colônia. O custo é o retângulo escuro cobrindo mais céu.</p>
+  <div class="base">
+    <div class="estados px">
+      <span>apagado</span><figure><img src="rodada7/bases/placa-apagado.png" alt=""></figure>
+      <span>aceso</span><figure><img src="rodada7/bases/placa-aceso.png" alt=""></figure>
+      <span>aceso com olhos</span><figure><img src="rodada7/bases/placa-aceso-olhos.png" alt=""></figure>
+    </div>
+    <figure class="px"><img src="rodada7/bases/placa-w.png" alt=""><figcaption><b>O W, ×8:</b> sem e com os olhos.</figcaption></figure>
+  </div>
+  <figure class="larga" style="margin-top:12px"><img src="rodada7/bases/placa-cena-corte.png" alt=""><figcaption>Na cena, 1:1.</figcaption></figure>
+</div>
+
+<div class="item">
+  <h3>D · Ciano lapidado</h3>
+  <p>O ciano de hoje, lapidado: uma faceta clara em cima, o fundo mais escuro, contorno e sombra. Apagado, é a mesma letra em ardósia. É a mais próxima do título atual, e a mais segura.</p>
+  <div class="base">
+    <div class="estados px">
+      <span>apagado</span><figure><img src="rodada7/bases/ciano-apagado.png" alt=""></figure>
+      <span>aceso</span><figure><img src="rodada7/bases/ciano-aceso.png" alt=""></figure>
+      <span>aceso com olhos</span><figure><img src="rodada7/bases/ciano-aceso-olhos.png" alt=""></figure>
+    </div>
+    <figure class="px"><img src="rodada7/bases/ciano-w.png" alt=""><figcaption><b>O W, ×8:</b> sem e com os olhos.</figcaption></figure>
+  </div>
+  <figure class="larga" style="margin-top:12px"><img src="rodada7/bases/ciano-cena-corte.png" alt=""><figcaption>Na cena, 1:1.</figcaption></figure>
+</div>
+
+<h2>A abertura, com o neon</h2>
+<figure><video src="rodada7/abertura.webm" autoplay loop muted playsinline></video><figcaption><b>18 s, em velocidade real, a 30 quadros.</b> <a href="rodada7/teste-tela.html">Tela cheia (F11)</a>.</figcaption></figure>
+<div class="item">
+  <table>
+    <tr><td>3,5 s</td><td>O letreiro entra pelo alto, apagado, <b>já freando</b>: os três retrofoguetes queimam o caminho todo.</td></tr>
+    <tr><td>3,5 – 5,7 s</td><td><b>A queima longa</b>, forte e constante, aliviando só no fim. Enquanto isso ele deriva para o lado e os jatos laterais corrigem.</td></tr>
+    <tr><td>5,7 – 6,4 s</td><td>Para um pouco além do ponto; um último sopro de baixo o devolve, um de cima o segura, e ele firma.</td></tr>
+    <tr><td>6,0 s</td><td>A lista desce em formação.</td></tr>
+    <tr><td>7,6 s</td><td>O neon pega letra por letra, piscando; depois o REMASTERED.</td></tr>
+    <tr><td>~9,2 s</td><td><b>Por último, os olhos do W acendem.</b></td></tr>
+  </table>
+</div>
+<figure class="larga"><img src="rodada7/queima.png" alt=""><figcaption><b>3,8 · 4,2 · 4,6 · 5,0 · 5,4 · 5,8 · 8,6 · 9,3 s:</b> a descida inteira com a queima acesa e firmando, depois o neon aceso com o rosto vazio, e os olhos.</figcaption></figure>
+<div class="item">
+  <p><b>Mais baixo:</b> o letreiro desceu mais 8 px de jogo, para cerca de 27% da altura da tela.</p>
+  <p><b>O Leviatã em loop:</b> ele sai pela direita (~40 s), o céu fica vazio por 6 s, e ele volta a sair da nuvem, sem corte e sem recomeço. Não aparece nestes 18 s.</p>
+</div>
+
+<h2>Para decidir <span class="tag decidir">sua vez</span></h2>
+<div class="item">
+  <ol>
+    <li><b>Qual base</b> você leva para trabalhar por cima (ou qual mistura)? E <b>com ou sem os olhos</b>?</li>
+    <li><b>O REMASTERED</b> entra no letreiro ou continua como texto embaixo (como no vídeo)?</li>
+    <li><b>A queima</b> ficou como você imaginou?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

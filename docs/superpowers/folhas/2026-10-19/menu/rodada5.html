@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 5</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .grade { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin: 14px 0; }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--sub); white-space: nowrap; width: 1%; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 5 · a abertura</h1>
+<p class="sub">19/10/2026. <a href="rodada4.html">← rodada 4</a> · Os seus pedidos: o título e as palavras no centro; alguns segundos só de cenário; as palavras descendo como se usassem estabilizadores, e a logo depois; a condução fora da tela para limpar o cenário; a nave parada, só com as luzes.</p>
+
+<h2>A abertura</h2>
+<figure><video src="rodada5/abertura.webm" autoplay loop muted playsinline></video><figcaption><b>15 s, em velocidade real</b>, na camada HD, com o texto de verdade do menu. <a href="rodada5/teste-tela.html">Tela cheia (F11)</a>.</figcaption></figure>
+<div class="item">
+  <table>
+    <tr><td>0 – 1,2 s</td><td>O véu preto sai e revela a cidade.</td></tr>
+    <tr><td>~2 s</td><td>O Leviatã sai da nuvem. A travessia começa 3 s adiantada (mesmo caminho, mesma velocidade), para os segundos de espera já terem o bicho.</td></tr>
+    <tr><td>3,5 s</td><td>O título desce de fora da tela; o REMASTERED vem logo atrás.</td></tr>
+    <tr><td>4,5 s</td><td>A lista desce em formação.</td></tr>
+    <tr><td>~6 s</td><td>Tudo pousado: o menu já aceita teclas. Uma tecla antes disso pula direto para o menu pousado.</td></tr>
+    <tr><td>~6,5 s</td><td><b>Aqui entra a logo</b>, que ainda vamos definir (pergunta no fim).</td></tr>
+    <tr><td>8 – 13,5 s</td><td>Só demonstração: o cursor vai à condução e troca os três valores.</td></tr>
+  </table>
+</div>
+
+<h2>Os estabilizadores</h2>
+<div class="grade">
+  <figure><img src="rodada5/t3.9.png" alt=""><figcaption><b>3,9 s:</b> o título descendo, e o Leviatã já fora da nuvem.</figcaption></figure>
+  <figure><img src="rodada5/t5.0.png" alt=""><figcaption><b>5 s:</b> o título pousou, e a lista está no meio da descida.</figcaption></figure>
+  <figure><img src="rodada5/t7.0.png" alt=""><figcaption><b>7 s:</b> tudo pousado.</figcaption></figure>
+</div>
+<div class="item">
+  <p>Cada linha desce, freia, passa um pouco do ponto, volta e firma, como uma nave corrigindo nos estabilizadores. Ao mesmo tempo faz um ajuste lateral pequeno que morre sozinho. O título desce mais (de fora da tela) e a lista menos. As letras andam de pixel em pixel da tela, então ficam nítidas o tempo todo.</p>
+</div>
+
+<h2>O texto no centro</h2>
+<div class="item">
+  <p>O título fica no alto, nas nuvens entre a torre da esquerda e a cidadela. A lista fica embaixo, onde estava a condução. <b>O meio da pintura fica livre.</b></p>
+  <p>O título subiu um pouco em relação à primeira tentativa: lá, o Leviatã saía da nuvem bem atrás do "ED" do REMASTERED. Agora ele sai logo abaixo, com o caminho livre.</p>
+</div>
+
+<h2>A condução numa linha só</h2>
+<div class="item">
+  <p><b>Sobre a sua pergunta:</b> hoje, no jogo publicado, a condução <b>aparece</b>. Só as linhas de atalho de teste ([B] chefão, [I][O][P]…) somem fora do modo de desenvolvimento. A condução é escolha do jogador (o GDD: Diegética, Legacy ×1,25, Livre para acessibilidade), então ela não pode sumir, mas pode encolher:</p>
+  <ul>
+    <li>Ela vira <b>um item da lista</b>: "CONDUÇÃO: DIEGÉTICA". ↑↓ escolhem a linha, e ←→ trocam o valor.</li>
+    <li>A descrição ("a gravidade decide · recomendado") só aparece com o cursor nessa linha.</li>
+    <li>As teclas 1, 2 e 3 continuam funcionando como atalho, só não ficam escritas na tela.</li>
+  </ul>
+</div>
+<div class="grade">
+  <figure><img src="rodada5/t9.0.png" alt=""><figcaption><b>Diegética</b>, com o cursor na linha.</figcaption></figure>
+  <figure><img src="rodada5/t10.5.png" alt=""><figcaption><b>Legacy</b>, com a descrição em laranja, como era antes.</figcaption></figure>
+  <figure><img src="rodada5/t12.0.png" alt=""><figcaption><b>Livre</b>.</figcaption></figure>
+</div>
+
+<h2>A nave</h2>
+<figure><img src="rodada5/nave-parada.png" alt=""><figcaption><b>2 s e 12 s, ×4:</b> a nave fica exatamente onde você pintou. Só as luzes vivem: a fileira da barriga correndo, as de baixo respirando e o farol vermelho no topo.</figcaption></figure>
+
+<h2>A logo <span class="tag decidir">para decidir</span></h2>
+<div class="item">
+  <p>O brasão redondo antigo não conversa com a pintura nova. Três caminhos:</p>
+  <ol type="A">
+    <li><span class="tag rec">recomendo</span><b>A logo é o próprio título.</b> "ALIEN WORLD" vira um letreiro desenhado, no lugar da fonte: o metal escuro e a luz âmbar da colônia, mantendo o W de carinha alien. Na abertura, a lista desce e o letreiro <b>acende</b> por último, com as luzes ligando como as janelas da cidade. Fica uma marca só, e o céu continua livre para o Leviatã.</li>
+    <li><b>Um brasão novo, mais o título.</b> Um emblema da colônia de Kepler, redesenhado para essa cena, entrando depois das palavras. O custo: não cabe acima do título sem empurrá-lo para o caminho do Leviatã, então teria que morar em outro canto.</li>
+    <li><b>Sem logo.</b> O título em Silkscreen já é a marca, e o "momento da logo" vira só um brilho no título.</li>
+  </ol>
+  <p>Em A ou B, é a peça que fica o tempo todo na tela. Por isso eu deixaria com você, como a pintura: eu passo o prompt em inglês e o tamanho exato, ou gero 3–4 bases para você trabalhar por cima.</p>
+</div>
+</main>
+</body>
+</html>

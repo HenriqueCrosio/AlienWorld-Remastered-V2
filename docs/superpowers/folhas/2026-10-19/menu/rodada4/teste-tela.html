@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu · teste na tela cheia</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  /* The 1536×864 capture stretched to the whole window, smoothly — what the game would do on a wider screen. */
+  video { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: contain; }
+  p { position: fixed; left: 16px; bottom: 12px; margin: 0; color: #9aa3b5; font: 13px system-ui, sans-serif; transition: opacity 1s; }
+</style>
+</head>
+<body>
+<video src="menu.webm" autoplay loop muted playsinline></video>
+<p id="dica">Aperte F11 para a tela cheia. A captura tem 1536×864; aqui ela é ampliada para a sua tela.</p>
+<script>setTimeout(() => { document.getElementById('dica').style.opacity = '0'; }, 6000);</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · no jogo</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  .grade figure { margin: 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · no jogo</h1>
+<p class="sub">20/10/2026. <a href="rodada9.html">← rodada 9</a> · É o menu do jogo, não a maquete: o cenário mora numa cena da camada HD, atrás do texto; tudo o que você aprovou nas nove rodadas está nos números de <code>src/menu/numerosMenu.ts</code>. A técnica inteira ficou em <code>docs/CENARIO-VIVO.md</code>.</p>
+
+<h2>O menu</h2>
+<figure><video src="no-jogo/menu.webm" autoplay loop muted playsinline></video><figcaption><b>24 s, em velocidade real, a 30 quadros</b>, filmado do jogo (as duas linhas de atalhos de dev escondidas). <a href="no-jogo/teste-tela.html">Tela cheia (F11)</a>.</figcaption></figure>
+
+<h2>Os instantes</h2>
+<div class="grade">
+  <figure><img src="no-jogo/t2.4.png" alt=""><figcaption><b>2,43 s:</b> o primeiro relâmpago, com raio, antes do letreiro.</figcaption></figure>
+  <figure><img src="no-jogo/t4.0.png" alt=""><figcaption><b>4,0 s:</b> a descida controlada, os retrofoguetes acesos.</figcaption></figure>
+  <figure><img src="no-jogo/t5.5.png" alt=""><figcaption><b>5,5 s:</b> ainda freando, os laterais corrigindo a deriva.</figcaption></figure>
+  <figure><img src="no-jogo/t9.4.png" alt=""><figcaption><b>9,4 s:</b> pousado em y 58; a lista no lugar, o neon pegando.</figcaption></figure>
+  <figure><img src="no-jogo/t10.6.png" alt=""><figcaption><b>10,6 s:</b> por último, os olhos do W.</figcaption></figure>
+  <figure><img src="no-jogo/t14.0.png" alt=""><figcaption><b>14,0 s:</b> o menu em repouso: a cidade viva, os holofotes, a nave vasculhando.</figcaption></figure>
+</div>
+
+<h2>O que mudou para você no jogo</h2>
+<div class="item">
+  <p>Durante a abertura, <b>qualquer tecla</b> (o Enter também) só pula para o menu pousado. O <b>1</b>, o <b>2</b> e o <b>3</b> continuam começando direto.</p>
+  <p>A condução fica numa linha da lista (↑↓ até ela, ←→ trocam) e o jogo lembra a escolha na próxima vez.</p>
+  <p>Do ARQUIVO DE CARTAS, o ESC volta com o cursor no ARQUIVO e o menu já pousado.</p>
+</div>
+</main>
+</body>
+</html>

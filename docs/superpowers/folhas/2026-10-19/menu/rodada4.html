@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 4</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 4 · o volume</h1>
+<p class="sub">19/10/2026. <a href="rodada3.html" style="color:var(--sub)">← rodada 3</a> · As suas escolhas: a resolução da pintura, o Leviatã de 96 px, a travessia de 45 s. E os seus pedidos: o tratamento inteiro das fases e cutscenes só no cenário, o texto nítido por cima de tudo, e o tráfego como luzes embaçadas.</p>
+
+<h2>O menu</h2>
+<figure><video src="rodada4/menu.webm" autoplay loop muted playsinline></video><figcaption><b>48 s, em velocidade real</b>, na camada HD e debaixo do texto de verdade.</figcaption></figure>
+
+<h2>O que entrou</h2>
+<div class="item">
+  <p>O tratamento das fases e das cutscenes não é só a Atmosfera. O "volume" delas vem de mais três peças, e agora as três estão no menu:</p>
+  <ul>
+    <li><b>A bruma em camadas</b> (a das fases): cinco faixas de névoa no vale, correndo para a esquerda em velocidades diferentes. É a diferença de velocidade que vende o volume. As duas mais rápidas passam <b>na frente</b> das luzes e das pontes. Uma sexta faixa, mais distante, fica na janela do céu: atrás da cidade e na frente do Leviatã, que passa por dentro dela.</li>
+    <li><b>Os fachos de luz</b> (os das fases): três fachos frios e fracos, vindos do lado aceso do planeta, atravessando a névoa.</li>
+    <li><b>A volumetria</b> (a da cutscene 2): um halo grande e macio respirando sobre as cinco luzes mais fortes da cidade, e um facho âmbar raro saindo das duas mais fortes.</li>
+    <li><b>A Atmosfera</b> continua: névoa pontilhada, halo nas luzes quentes, cor, vinheta, grão e poeira.</li>
+  </ul>
+  <p>A bruma e os fachos foram redesenhados na resolução da pintura, com a mesma receita e a mesma semente das fases. Ampliados, viravam blocos.</p>
+</div>
+<figure><img src="rodada4/volume-antes-depois.png" alt=""><figcaption><b>A cidadela, 1:1:</b> a rodada 3 à esquerda, com o volume à direita. A névoa vela o vale em camadas, e a cidade ganha profundidade.</figcaption></figure>
+
+<h2>As luzes de longe</h2>
+<figure><img src="rodada4/trafego-perto.png" alt=""><figcaption><b>As pontes, ×2:</b> o tráfego agora é luz embaçada, um brilho macio um pouco mais largo que alto (anda no sentido da ponte) e tremendo no ar. As luzes da nave e as estrelas ganharam o mesmo brilho macio.</figcaption></figure>
+
+<h2>O texto</h2>
+<div class="item">
+  <p>O título, a lista e as conduções ficam numa cena própria, <b>por cima</b> de tudo, fora do tratamento: nenhuma névoa, grão ou brilho passa sobre eles. Na versão final continua assim.</p>
+</div>
+
+<h2>A resolução no seu monitor <span class="tag decidir">teste no seu PC</span></h2>
+<div class="item">
+  <p><b>O único custo é esse:</b> em telas mais largas que 1582 px, o navegador amplia a pintura um pouco e ela fica levemente mais macia. Em Full HD a ampliação é de 21%. Nada quebra nem distorce.</p>
+  <p><b>Como testar agora:</b> abra <a href="rodada4/teste-tela.html" style="color:var(--txt)">a página de teste</a> e aperte F11. Ela estica o vídeo de 1536×864 para a sua tela inteira, do jeito que o jogo faria. Se ficar bom para você, seguimos assim.</p>
+</div>
+
+<div class="item">
+  <p><span class="tag decidir">para decidir</span></p>
+  <ol>
+    <li><b>O volume:</b> a bruma, os fachos e os halos estão na medida, ou quer mais ou menos de algum?</li>
+    <li><b>O tráfego embaçado</b> ficou como você imaginou?</li>
+    <li><b>A resolução no seu monitor</b>, depois do teste.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

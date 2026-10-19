@@ -13,6 +13,7 @@ await page.waitForFunction(() => window.__game?.scene.isActive('Menu'));
 await page.keyboard.press('KeyQ'); // pula a abertura (não o X: é atalho de dev)
 await page.waitForFunction(() => window.__game.scene.getScene('Menu').settled);
 await page.keyboard.press('ArrowDown');
+await page.keyboard.press('ArrowDown');
 await page.waitForTimeout(400);
 const tela = await page.evaluate(() => {
   const c = window.__game.canvas.getBoundingClientRect();

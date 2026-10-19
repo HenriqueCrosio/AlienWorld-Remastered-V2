@@ -23,11 +23,12 @@ await page.waitForFunction(() => window.__game?.scene.isActive('Menu'));
 await page.keyboard.press('KeyQ');
 await page.waitForFunction(() => window.__game.scene.getScene('Menu').settled);
 
-// ── O menu: a lista, e ↓ + Enter abre o Arquivo ──
+// ── O menu: a lista (COMEÇAR, CONDUÇÃO, ARQUIVO), e ↓↓ + Enter abre o Arquivo ──
+await page.keyboard.press('ArrowDown');
 await page.keyboard.press('ArrowDown');
 await page.waitForTimeout(150); // a tecla é processada no quadro seguinte
 const cursor = await page.evaluate(() => window.__game.scene.getScene('Menu').cursorMenu);
-conferir(cursor === 1, '↓ leva o cursor do menu ao ARQUIVO', cursor);
+conferir(cursor === 2, '↓↓ leva o cursor do menu ao ARQUIVO', cursor);
 await page.keyboard.press('Enter');
 await page.waitForFunction(() => window.__game.scene.isActive('Arquivo'), null, { timeout: 5000 }).catch(() => {});
 conferir(await ativa('Arquivo'), 'Enter no ARQUIVO abre a cena Arquivo', null);
@@ -103,7 +104,8 @@ await page.waitForFunction(() => window.__game.scene.isActive('Menu'), null, { t
 conferir(await ativa('Menu'), 'ESC volta ao menu', null);
 await page.waitForFunction(() => window.__game.scene.getScene('Menu').settled, null, { timeout: 5000 }).catch(() => {});
 const deVolta = await page.evaluate(() => window.__game.scene.getScene('Menu').cursorMenu);
-conferir(deVolta === 1, 'de volta, o cursor está no ARQUIVO (e o menu já montado)', deVolta);
+conferir(deVolta === 2, 'de volta, o cursor está no ARQUIVO (e o menu já montado)', deVolta);
+await page.keyboard.press('ArrowUp');
 await page.keyboard.press('ArrowUp');
 await page.keyboard.press('Enter');
 await page.waitForFunction(() => window.__game.scene.isActive('Game'), null, { timeout: 8000 }).catch(() => {});

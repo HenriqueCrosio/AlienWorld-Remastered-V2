@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 9</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-left:6px; vertical-align: 2px; }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  th, td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+  td:first-child { color: var(--sub); white-space: nowrap; width: 1%; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 9 · a queda controlada</h1>
+<p class="sub">19/10/2026. <a href="rodada8.html">← rodada 8</a> · Aprovados: os relâmpagos (alguns sem raio, para dar distância), os holofotes, a nave, e o feixe que passa perto do Leviatã sem iluminá-lo. O seu pedido: o letreiro caindo mais devagar, como se estivesse sendo controlado, com os estabilizadores iguais.</p>
+
+<h2>O menu</h2>
+<figure><video src="rodada9/abertura.webm" autoplay loop muted playsinline></video><figcaption><b>24 s, em velocidade real, a 30 quadros.</b> <a href="rodada9/teste-tela.html">Tela cheia (F11)</a>.</figcaption></figure>
+
+<h2>A queda</h2>
+<div class="item">
+  <table>
+    <tr><th></th><th>Rodada 8</th><th>Agora</th></tr>
+    <tr><td>velocidade ao entrar</td><td>~99 px de jogo/s</td><td><b>~57 px de jogo/s</b></td></tr>
+    <tr><td>a queima até parar</td><td>2,2 s</td><td><b>3,8 s</b>, freando três vezes mais suave</td></tr>
+    <tr><td>os jatos</td><td colspan="2">A mesma pluma: a força de cada bocal segue a mesma curva da rodada 8, só esticada no tempo. Os sopros laterais e o ajuste final ficaram idênticos.</td></tr>
+  </table>
+  <p>Ele entra meio segundo antes (3,0 s), para a abertura não esticar demais.</p>
+  <figure><img src="rodada9/queda.png" alt=""><figcaption><b>3,4 · 4,0 · 4,6 · 5,2 · 5,8 · 6,4 · 7,0 s:</b> a descida inteira com a queima acesa, até firmar.</figcaption></figure>
+</div>
+<div class="item">
+  <table>
+    <tr><td>0 – 1,2 s</td><td>O véu sai.</td></tr>
+    <tr><td>~2 s</td><td>O Leviatã sai da nuvem.</td></tr>
+    <tr><td>2,4 s</td><td>O primeiro relâmpago, com raio.</td></tr>
+    <tr><td>3,0 – 6,8 s</td><td><b>A descida controlada</b>, freando o caminho todo; os laterais corrigem a deriva.</td></tr>
+    <tr><td>6,8 – 7,6 s</td><td>Ele passa um pouquinho do ponto, um sopro o devolve, e ele firma.</td></tr>
+    <tr><td>7,2 s</td><td>A lista desce em formação (pousa ~8,6 s: o menu aceita teclas).</td></tr>
+    <tr><td>8,8 s</td><td>O neon pega letra por letra; depois o REMASTERED; e por último os olhos (~10,4 s).</td></tr>
+    <tr><td>12,2 · 17 · 21 s</td><td>Relâmpagos: com raio, sem raio, com raio.</td></tr>
+  </table>
+</div>
+
+<h2>O artefato da luz que pisca <span class="tag" style="background:color-mix(in srgb, var(--ok) 22%, transparent);color:var(--ok)">corrigido</span></h2>
+<div class="item">
+  <p>O ponto que você marcou era um <b>"farol" falso</b>: um pixel avermelhado dentro de uma porta acesa. Quando ele piscava, o halo vermelho do farol levava junto a porta âmbar inteira, porque o âmbar também passava no teste de "vermelho". O resultado era um borrão cinza com um ponto branco no meio.</p>
+  <p>As correções:</p>
+  <ul>
+    <li><b>Ponto vermelho cercado de luz âmbar é parte da janela, não farol.</b> A porta fica acesa.</li>
+    <li>O halo de um farol agora só leva o vermelho dele, nunca o âmbar das paredes em volta.</li>
+  </ul>
+  <figure><img src="rodada9/artefato-antes-depois.png" alt=""><figcaption><b>O ponto marcado, ×2, nos mesmos instantes:</b> antes em cima, agora embaixo. A porta fica acesa.</figcaption></figure>
+  <p><b>A primeira versão da correção errou a mão</b> (os faróis que você marcou, 1 a 6). Ela tratava como janela qualquer ponto vermelho a até 8 px de uma luz âmbar. Isso pegou os faróis no alto de torres com janelas acesas logo abaixo, e eles pararam de piscar. No 1, o de cima parou e o de baixo continuou. Agora a regra mede o entorno de cada ponto:</p>
+  <ul>
+    <li><b>Farol de verdade fica contra o escuro:</b> no máximo 4% de luz quente em volta. Os seus cinco voltaram a piscar devagar, como antes.</li>
+    <li><b>Os pontos vermelhos dentro de luz</b> (a porta, e a escada de lava da cidadela, com 7–20% de luz em volta) ficam fixos. Apagados, eles deixavam manchas no brilho.</li>
+    <li><b>Os faróis da mesma torre piscam juntos</b>, como luz de sinalização de verdade, então o de cima e os de baixo do 1 não ficam mais em descompasso.</li>
+    <li><b>A luz de baixo de cada torre pisca com a de cima</b>, mesmo quando ela é mais alaranjada (a do 6 ficava fixa e era lida como janela). A regra vale só para luz de torre, isolada contra o escuro: uma lâmpada no meio da fileira acesa de um deque continua acesa.</li>
+  </ul>
+  <figure><img src="rodada9/farois-piscando.png" alt=""><figcaption><b>Os faróis que você marcou (1, 2, 3, 4, 6) e a porta, ×3, a cada 0,4 s:</b> cada farol pisca; as luzes de uma mesma torre juntas (as três do 1, as duas do 6); a porta acesa o tempo todo.</figcaption></figure>
+  <p>Depois disso conferi <b>todas as 48 luzes que piscam</b> no menu (24 janelas e 24 luzes de farol), cada uma acesa e apagada, recortada exatamente como o menu recorta:</p>
+  <figure><img src="rodada9/auditoria.png" alt=""><figcaption><b>A auditoria, em pares (acesa · apagada).</b> Cada janela some na própria fachada e cada farol some no céu, sem borrão.</figcaption></figure>
+</div>
+
+<h2>Próximo passo <span class="tag decidir">sua vez</span></h2>
+<div class="item">
+  <p>Se a queda ficou como você queria, o desenho do menu está completo. Aí eu junto todas as decisões das nove rodadas num documento de design, para você revisar antes de eu planejar a implementação no jogo.</p>
+</div>
+</main>
+</body>
+</html>

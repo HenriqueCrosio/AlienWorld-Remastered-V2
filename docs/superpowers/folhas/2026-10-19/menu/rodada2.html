@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 2</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --nao:#ef7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img, figure video { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 2 · o menu vivo</h1>
+<p class="sub">19/10/2026. <a href="pintura.html" style="color:var(--sub)">← rodada 1 (a pintura)</a> · As suas escolhas: o Leviatã B ainda menor, o tratamento das fases, vida nas luzes, na cachoeira e na nave. Tudo rodando dentro do jogo, em velocidade real. Os vídeos repetem sozinhos.</p>
+
+<h2>O menu, na resolução do jogo <span class="tag decidir">o tamanho</span></h2>
+<p>A sua pintura reduzida uma vez para 384×216, com um perfil da Atmosfera feito para ela (névoa no vale, halo nas luzes âmbar, cor, vinheta e grão). O Leviatã sai de trás das nuvens, passa atrás das agulhas e cruza na frente do planeta, em 26 s.</p>
+<figure><video src="rodada2/jogo-0.22.webm" autoplay loop muted playsinline></video><figcaption><b>Leviatã com 39 px (minha aposta).</b> É o tamanho dele no começo da F2: o mesmo bicho, à mesma distância, de onde o jogador vai vê-lo depois.</figcaption></figure>
+<figure style="margin-top:14px"><video src="rodada2/jogo-0.3.webm" autoplay loop muted playsinline></video><figcaption><b>Leviatã com 53 px.</b> Ainda menor que o de hoje (106 px), mas mais perto.</figcaption></figure>
+
+<h2>Por que o Leviatã ganhou o aro</h2>
+<div class="item">
+  <p>O B da rodada 1, só reduzido, sumiu no jogo: o corpo escuro tem o tom do céu, e sobraram só as brasas da lava, um enxame de luzes que lê como nave, não como bicho. É a mesma lição da silhueta do bloco D: a sombra só lê se for mais escura que o fundo e tiver um contorno.</p>
+  <p>Então ele ganhou o acabamento <b>"arolava"</b> do bloco D: o corpo afundado na noite, a lava acesa e o <b>aro frio de 1 px nas costas</b>, o mesmo da silhueta da F1 e da F2. Cada tamanho é assado no arquivo, quadro a quadro (o jogo encolhendo o nado faz ele "ferver").</p>
+</div>
+<div class="duas">
+  <figure><img src="rodada2/levi-sem-aro.png" alt=""><figcaption><b>Antes</b>, sem o aro: 53 px em cima, 39 px embaixo. Só as brasas.</figcaption></figure>
+  <figure><img src="rodada2/levi-com-aro.png" alt=""><figcaption><b>Agora</b>, com o aro: a forma do tubarão volta. Saindo de trás das agulhas · na frente do planeta · indo embora.</figcaption></figure>
+</div>
+<figure style="margin-top:12px; max-width:860px"><img src="rodada2/levi-folhas.png" alt=""><figcaption>Quatro quadros do nado assado, ×6: 53 px em cima, 39 px embaixo.</figcaption></figure>
+
+<h2>A vida no cenário, de perto <span class="tag decidir">corte o que não gostar</span></h2>
+<figure><video src="rodada2/perto.webm" autoplay loop muted playsinline></video><figcaption><b>A metade esquerda, ×2:</b> a nave pairando e as pontes com o tráfego.</figcaption></figure>
+<div class="item">
+  <ul>
+    <li><b>As janelas:</b> 24 janelas pequenas apagam de vez em quando, algumas com uma piscada falhando antes, e voltam. O halo da Atmosfera faz todas as luzes quentes brilharem e respirarem.</li>
+    <li><b>Os faróis vermelhos:</b> os 15 das pontas das torres piscam, cada um no seu tempo.</li>
+    <li><b>A cachoeira:</b> a água desce em loop, desenhada nos pixels dela mesma.</li>
+    <li><b>O tráfego:</b> pontinhos de luz andando nas cinco pontes acesas, nos dois sentidos.</li>
+    <li><b>A nave:</b> recortada da pintura (o céu atrás dela foi refeito), sobe e desce 1 pixel devagar, com as luzes da barriga correndo em sequência e um farol vermelho no topo. Na resolução do jogo as janelas dela sumiam e ela virava uma mancha, então ganhou o mesmo aro frio do Leviatã.</li>
+    <li><b>As estrelas:</b> nove, piscando na janela do céu.</li>
+  </ul>
+</div>
+
+<h2>Resolução do jogo × resolução original <span class="tag decidir">confirme</span></h2>
+<p>Você pediu para ver também na resolução original. As duas abaixo rodam no mesmo relógio, com a mesma Atmosfera e os mesmos efeitos, ambas em 1536×864: a do jogo ampliada ×4, a original quase no tamanho do arquivo (97%).</p>
+<figure><video src="rodada2/res-jogo.webm" autoplay loop muted playsinline></video><figcaption><b>Na resolução do jogo</b> (384×216, ×4).</figcaption></figure>
+<figure style="margin-top:14px"><video src="rodada2/res-original.webm" autoplay loop muted playsinline></video><figcaption><b>Na resolução original</b> (1536×864).</figcaption></figure>
+<figure style="margin-top:14px"><img src="rodada2/res-detalhe.png" alt=""><figcaption><b>O mesmo pedaço, 1:1:</b> a do jogo à esquerda, a original à direita.</figcaption></figure>
+<div class="item">
+  <p><b>O que eu vejo:</b></p>
+  <ul>
+    <li>Na original, a pintura fica bem mais nítida: as janelas, as agulhas e a cachoeira aparecem.</li>
+    <li>Mas o Leviatã, as luzes que piscam e o tráfego continuam com o pixel do jogo, 4× mais grosso que o da pintura. Na mesma tela convivem duas resoluções, e o bicho parece colado por cima (veja o pedaço 1:1).</li>
+    <li>A névoa e o grão da Atmosfera também ficam 4× mais finos que nas fases, e o menu passa a ter outra textura que o jogo. Ao apertar COMEÇAR, a F1 entra com o pixel grosso de novo.</li>
+  </ul>
+  <p><span class="tag rec">recomendo</span> <b>Continuo com a resolução do jogo.</b> A original só fecharia se todas as peças por cima também fossem refeitas em alta resolução, e aí o menu viraria uma ilustração, diferente do resto do jogo.</p>
+</div>
+
+<div class="item">
+  <p><span class="tag decidir">para decidir</span></p>
+  <ol>
+    <li><b>O tamanho do Leviatã:</b> 39 px (minha aposta) ou 53 px.</li>
+    <li><b>A resolução:</b> a do jogo (recomendo) ou a original.</li>
+    <li><b>Os efeitos:</b> algum para cortar, mais forte ou mais fraco?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

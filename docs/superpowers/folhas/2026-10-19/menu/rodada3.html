@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 3</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 3 · na resolução da pintura</h1>
+<p class="sub">19/10/2026. <a href="rodada2.html" style="color:var(--sub)">← rodada 2</a> · As suas escolhas: a pintura na resolução dela (<i>"mesmo que fuja do estilo do jogo, por ser o menu inicial"</i>), o Leviatã menor e mais lento, e o tratamento das fases nas duas versões. Os vídeos têm 48 s e repetem sozinhos.</p>
+
+<h2>O menu na resolução da pintura <span class="tag decidir">o tamanho</span></h2>
+<p>Agora ele roda dentro da camada HD do jogo (a do texto), debaixo do menu de verdade: é assim que o menu seria construído nessa resolução.</p>
+<figure><video src="rodada3/hd-96.webm" autoplay loop muted playsinline></video><figcaption><b>Leviatã com 96 px (minha aposta).</b> A metade do que você viu na rodada 2. Lê como distante, e o aro ainda segura a forma.</figcaption></figure>
+<figure style="margin-top:14px"><video src="rodada3/hd-128.webm" autoplay loop muted playsinline></video><figcaption><b>Leviatã com 128 px.</b></figcaption></figure>
+<figure style="margin-top:14px"><img src="rodada3/levi-perto.png" alt=""><figcaption>De perto, 128 px em cima, 96 px embaixo: entre as agulhas · na frente do planeta · indo embora.</figcaption></figure>
+<div class="item">
+  <p><b>O que mudou:</b></p>
+  <ul>
+    <li><b>O Leviatã no pixel da pintura.</b> Na rodada 2 ele era o sprite do jogo ampliado ×4, em blocos grossos sobre a pintura fina. Agora ele é assado direto do desenho dele (176 px) no tamanho da tela. É redução, não ampliação. O aro de 1 px fica fino como as linhas da pintura.</li>
+    <li><b>Mais lento:</b> a travessia passou de 26 s para 45 s. O nado desacelerou junto (de 10 para 6 quadros por segundo); senão ele bateria a nadadeira depressa andando devagar.</li>
+    <li><b>Duas correções na pintura</b>, que só apareceram com ele passando:
+      <ul>
+        <li>a versão fria (o céu de trás) tem as agulhas mais altas e um pouco deslocadas, e as pontas dela apareciam pela janela, com o Leviatã nadando NA FRENTE delas. Limpei esse céu numa faixa logo acima das suas agulhas;</li>
+        <li>a pontinha fina da agulha do meio era meio transparente (a borda suavizada do seu recorte), e a cauda dele aparecia através dela. Agora ela é sólida; só a borda das nuvens continua macia.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<h2>O tratamento nas duas versões</h2>
+<p>A névoa, o halo das luzes, a correção de cor, a vinheta, o grão e a poeira: o mesmo perfil nas duas, no mesmo relógio, ambas em 1536×864.</p>
+<figure><video src="rodada3/res-jogo.webm" autoplay loop muted playsinline></video><figcaption><b>Na resolução do jogo</b> (384×216, ×4), com o Leviatã de 32 px do jogo.</figcaption></figure>
+<figure style="margin-top:14px"><video src="rodada3/res-original.webm" autoplay loop muted playsinline></video><figcaption><b>Na resolução da pintura</b>, com o Leviatã de 128 px.</figcaption></figure>
+<figure style="margin-top:14px"><img src="rodada3/res-nevoa.png" alt=""><figcaption><b>O vale, 1:1</b> (o jogo à esquerda, a pintura à direita): a névoa e o brilho das luzes agora têm o mesmo tamanho na tela.</figcaption></figure>
+<figure style="margin-top:14px"><img src="rodada3/res-detalhe.png" alt=""><figcaption><b>A cidadela, 1:1.</b></figcaption></figure>
+<div class="item">
+  <p><b>Por que a rodada 2 enganava:</b> o shader da Atmosfera mede tudo em pixels da tela: as manchas de névoa (70×26 px) e o raio do brilho das luzes. Na versão da pintura, cada pixel é 4× menor, e tudo encolhia 4×. A névoa quase sumia e as luzes ficavam sem brilho.</p>
+  <p>Agora a névoa e o halo são medidos em pixels do jogo nas duas versões. O pontilhado da névoa e o grão ficam no pixel de cada imagem: grosso no jogo, fino na pintura. A poeira anda na mesma velocidade na tela e tem grãos de 2 px.</p>
+</div>
+
+<h2>Um ponto antes de fechar <span class="tag decidir">a sua pintura maior</span></h2>
+<div class="item">
+  <p>A camada HD acompanha a tela do jogador. Numa janela de 1536 px de largura, ela tem 1536×864, o tamanho destes vídeos. Em tela cheia num monitor Full HD (1920×1080), ela passa a 1920×1080.</p>
+  <p>Depois do corte, a sua pintura tem 1582×890. Em Full HD ela teria de ser <b>ampliada 21%</b>, e a sua regra é reduzir sim, ampliar nunca. Para cobrir o Full HD, as duas imagens (a do recorte e a do céu de trás) precisam ter pelo menos <b>2145×1080</b> (ou 2560×1440, que cobre até monitores maiores com folga).</p>
+  <p>Consegue gerar as duas nesse tamanho, com a mesma composição? Se não der, o plano B é desenhar a camada da pintura em 1536×864 e deixar o navegador ampliar em telas maiores. Funciona, mas perde nitidez justamente na tela mais comum.</p>
+</div>
+
+<div class="item">
+  <p><span class="tag decidir">para decidir</span></p>
+  <ol>
+    <li><b>O tamanho do Leviatã:</b> 96 px (minha aposta) ou 128 px.</li>
+    <li><b>A velocidade:</b> a travessia em 45 s está boa?</li>
+    <li><b>A pintura maior:</b> dá para gerar as duas imagens em 2560×1440, ou pelo menos 2145×1080?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

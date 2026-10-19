@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · rodada 6</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .lado { display:grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 760px) { .lado { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--sub); white-space: nowrap; width: 1%; }
+</style>
+</head>
+<body>
+<main>
+<h1>Menu refeito · rodada 6 · o título-foguete</h1>
+<p class="sub">19/10/2026. <a href="rodada5.html">← rodada 5</a> · As suas escolhas: a logo é o próprio título (A), um letreiro que acende; os estabilizadores são os de foguete (jatos que freiam e corrigem); e o título desce mais, para perto do centro.</p>
+
+<h2>A abertura</h2>
+<figure><video src="rodada6/abertura.webm" autoplay loop muted playsinline></video><figcaption><b>16 s, em velocidade real, a 30 quadros</b> (a queda e os jatos são rápidos). <a href="rodada6/teste-tela.html">Tela cheia (F11)</a>.</figcaption></figure>
+<div class="item">
+  <table>
+    <tr><td>0 – 1,2 s</td><td>O véu sai.</td></tr>
+    <tr><td>~2 s</td><td>O Leviatã sai da nuvem.</td></tr>
+    <tr><td>3,5 s</td><td>O título entra caindo de fora da tela, <b>apagado</b> (metal escuro), em queda livre.</td></tr>
+    <tr><td>3,9 s</td><td><b>Os retrofoguetes acendem</b> embaixo e freiam a queda. Ele passa um pouco do ponto, e um sopro de cima o devolve. Os jatos laterais corrigem a deriva. Firma em ~5,3 s.</td></tr>
+    <tr><td>5,1 s</td><td>A lista desce em formação, sem jatos (os jatos são do título).</td></tr>
+    <tr><td>~6,4 s</td><td>A lista pousa, e o menu aceita teclas.</td></tr>
+    <tr><td>6,6 s</td><td><b>O letreiro acende</b> letra por letra, cada uma piscando antes de firmar, como as janelas da cidade. O REMASTERED acende depois (~7,7 s).</td></tr>
+  </table>
+</div>
+
+<h2>Os retrofoguetes</h2>
+<figure><img src="rodada6/jatos.png" alt=""><figcaption><b>4,0 · 4,2 · 4,4 · 4,7 s, 1:1:</b> a ignição, o freio forte (a chama âmbar com núcleo branco virando vapor frio), os jatos laterais corrigindo a deriva, e as faíscas de cima no ajuste final. Cada bocal dispara quando o movimento pede o empurrão dele, então a física comanda os jatos. O gás fica no ar e se espalha com o vento da noite. Tudo nítido, na camada do texto, fora do tratamento.</figcaption></figure>
+
+<h2>O letreiro acendendo</h2>
+<div class="lado">
+  <figure><img src="rodada6/pousado.png" alt=""><figcaption><b>8,5 s:</b> tudo pousado e aceso.</figcaption></figure>
+  <figure><img src="rodada6/acende.png" alt=""><figcaption><b>5,5 · 6,9 · 8,5 s:</b> apagado, o título aceso com o REMASTERED ainda apagado, e tudo aceso. <b>É um marcador de lugar:</b> a fonte Silkscreen está no lugar do seu letreiro, só para mostrar o tempo e o gesto.</figcaption></figure>
+</div>
+
+<h2>A posição</h2>
+<div class="item">
+  <p>O título desceu de 4% para cerca de 20% da altura da tela, nas nuvens entre a torre da esquerda e a cidadela. O Leviatã agora passa <b>acima</b> dele, com o caminho livre.</p>
+  <p><b>Sobre o corte:</b> o jogo usa o modo FIT, então a imagem inteira sempre aparece. Se a proporção da tela for outra, entram faixas pretas, sem nada cortado. Mesmo assim, a margem nova é melhor: título colado na borda incomoda em qualquer tela.</p>
+  <p>Hoje o título encosta nas agulhas da esquerda da cidadela. Se o seu letreiro tiver até ~320 px de largura na tela de 1536, ele cabe livre entre a nave e a cidadela; se for mais largo, passa por cima delas, como agora.</p>
+</div>
+
+<h2>O que ainda espera por você <span class="tag decidir">pendências</span></h2>
+<div class="item">
+  <ol>
+    <li><b>A condução numa linha só</b> (rodada 5): "CONDUÇÃO: DIEGÉTICA" na lista, ←→ trocam, a descrição só com o cursor nela, e 1/2/3 como atalho. Aprova?</li>
+    <li><b>O teste da resolução no seu monitor</b> (<a href="rodada4/teste-tela.html">rodada 4</a>, F11): ficou bom?</li>
+    <li><b>Quem faz o letreiro:</b> você pinta (eu passo o prompt em inglês, o tamanho e as duas versões, apagada e acesa), ou eu gero 3–4 bases para você trabalhar por cima. E o REMASTERED entra no letreiro ou continua como texto?</li>
+    <li><b>O Leviatã depois da travessia:</b> hoje ele cruza uma vez e some. No menu novo a travessia leva ~40 s. Depois disso ele some de vez, ou volta a cruzar de tempos em tempos (por exemplo, a cada 1–2 minutos)?</li>
+    <li><b>O vídeo:</b> os 3,5 s de espera, a força dos jatos e o tempo do acender estão bons?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menu refeito · a pintura</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --nao:#ef7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .nao { background: color-mix(in srgb, var(--nao) 22%, transparent); color: var(--nao); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  .tres { display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas, .tres { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+  .op { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 10px 0; }
+  .op.rec-op { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+</style>
+</head>
+<body>
+<main>
+<h1>Bloco E · a sua pintura · rodada 1</h1>
+<p class="sub">19/10/2026. <a href="abertura.html" style="color:var(--sub)">← a abertura</a> · As três imagens no tamanho do jogo, o que eu conferi, e uma maquete rodando dentro do jogo.</p>
+
+<h2>As três, no tamanho do jogo</h2>
+<p class="sub">Reduzidas de 1768×890 para 384×216 (a tela do jogo) e ampliadas ×2 aqui, com o corte recomendado abaixo.</p>
+<div class="tres">
+  <figure><img src="pintura/frio.png" alt=""><figcaption><b>Cidade-Fortaleza (fria).</b> A noite, com o planeta. No tamanho do jogo ela fica quase preta.</figcaption></figure>
+  <figure><img src="pintura/quente.png" alt=""><figcaption><b>Colônia Futurista (quente).</b> O céu laranja ilumina tudo, e o jogo é dark sci-fi: luz só onde há energia.</figcaption></figure>
+  <figure><img src="pintura/recorte.png" alt=""><figcaption><b>O recorte</b> (o rosa é a parte transparente). As nuvens têm forma, e a névoa do vale é mais clara: é a que lê melhor.</figcaption></figure>
+</div>
+
+<h2>As duas camadas juntas <span class="tag rec">recomendo</span></h2>
+<figure><img src="pintura/composta.png" alt=""><figcaption><b>O céu da versão fria atrás, o recorte na frente.</b> O tom casa com as nuvens do recorte, o planeta aparece pela janela, e as duas agulhas da cidadela ficam na frente dela. O Leviatã nada entre as duas camadas: some atrás das nuvens e das agulhas, e aparece na janela.</figcaption></figure>
+
+<h2>O que eu conferi</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag decidir">o corte</span> A imagem é mais larga que a tela (2:1, a tela é 16:9). Na altura do jogo ela fica com 429 px de largura, e <b>45 px precisam sair</b>, porque ampliar não pode. Recomendo cortar <b>da esquerda</b> (a terceira faixa abaixo): a janela do céu fica maior, e a cidadela cai no terço direito. Perde-se a torre da ponta esquerda.</li>
+    <li><span class="tag nao">a nave pintada</span> O disco voador no céu fica parado (lê como congelado) e cai bem atrás do "ARQUIVO DE CARTAS". Nave é camada viva, como combinamos. Recomendo <b>apagar da pintura</b>. Se quiser uma nave, eu ponho uma cruzando devagar, de verdade.</li>
+    <li><span class="tag rec">eu resolvo</span> No arquivo transparente, a cidade inteira está a 99% de opacidade (não 100%): o céu de trás vazaria de leve por ela. E um farol vermelho da versão fria aparece pela janela, ao lado da agulha. Os dois são correções minhas, sem trabalho para você.</li>
+    <li><span class="tag rec">confere</span> A colônia do capítulo 5 é um bairro de cúpulas numa planície; aqui é a cidade inteira, e as cúpulas também estão nela. Lê como o mesmo lugar: o Leviatã cai num bairro da borda.</li>
+    <li><span class="tag rec">depois</span> A pintura ainda está crua. O tratamento da Atmosfera (névoa, cor, grão) entra quando a composição fechar.</li>
+  </ul>
+</div>
+<figure><img src="pintura/cortes.png" alt="" style="max-width:768px"><figcaption>Os três cortes possíveis: <b>tirando da direita</b> · do centro · <b>tirando da esquerda (recomendo)</b>.</figcaption></figure>
+<div style="max-width:300px; margin-top:12px"><figure><img src="pintura/nave-pintada.png" alt=""><figcaption>A nave pintada, ×4.</figcaption></figure></div>
+
+<h2>A maquete no jogo <span class="tag decidir">escolha</span></h2>
+<p>Montada dentro do jogo, com o texto de verdade: o título e a lista no céu, à esquerda, e as conduções embaixo. O Leviatã sai de trás das nuvens, passa atrás das agulhas e cruza na frente do planeta. Testei três tratamentos para ele, todos em velocidade real (16 s):</p>
+<figure><img src="pintura/maquete-esquerda-nado-0.6-8c9bb6.gif" alt=""><figcaption><b>A · o nado aprovado, no tamanho de hoje (minha aposta).</b> As lavas e o corpo leem contra o planeta, e as agulhas na frente dizem que ele é maior que a cidadela.</figcaption></figure>
+<div class="duas">
+  <figure><img src="pintura/maquete-esquerda-nado-0.4-4a5470.gif" alt=""><figcaption><b>B · o nado menor e mais escuro</b> (mais longe). Ele vira uma mancha.</figcaption></figure>
+  <figure><img src="pintura/maquete-esquerda-longe-72.gif" alt=""><figcaption><b>C · a silhueta com aro</b> do fim da F1 e da F2. Na frente do planeta ela é "algo espreitando"; fora dele, sobra só o risco do aro.</figcaption></figure>
+</div>
+<figure style="margin-top:12px"><img src="pintura/bicho-tres.png" alt=""><figcaption>Os três de perto, em dois momentos: saindo de trás das agulhas (esquerda) e na frente do planeta (direita). De cima para baixo: <b>A</b>, <b>B</b>, <b>C</b>.</figcaption></figure>
+
+<div class="item">
+  <p><span class="tag decidir">para decidir agora</span> <b>O tratamento do Leviatã no menu:</b> A, B ou C.</p>
+  <p class="sub">Se você não disser nada sobre o resto, sigo com o que recomendei: o recorte com o céu frio atrás, o corte tirando da esquerda e a nave apagada da pintura.</p>
+</div>
+
+<h2 id="resolucao">Rodada 2 · a pintura "no tamanho dela" <span class="tag decidir">confirme</span></h2>
+<p>A sua escolha: <b>B, ainda menor</b>; a pintura com o tratamento das fases; vida nas luzes âmbar, na cachoeira e na nave, que <b>fica</b>, pairando. Antes de montar, a resolução, porque ela muda o resto.</p>
+<p class="sub">A tela do jogo tem 384×216 pixels, ampliados ×3. A pintura das fases é reduzida uma vez, do original direto para 384×216 (a sua regra de 06/09: assada no tamanho do jogo, nunca ampliada). A alternativa seria desenhar a pintura na camada HD, a do texto, com 3× mais pixels.</p>
+<div class="duas">
+  <figure><img src="pintura/tela-nativa.png" alt=""><figcaption><b>Na resolução do jogo</b> (384×216, ×3), no tamanho real da tela. Lê como pixel art, igual às fases.</figcaption></figure>
+  <figure><img src="pintura/tela-hd.png" alt=""><figcaption><b>Na camada HD</b> (1152×648). Mais nítida, mas lê como uma ilustração lisa, e o resto do jogo não é assim.</figcaption></figure>
+</div>
+<figure style="margin-top:12px"><img src="pintura/resolucao.png" alt=""><figcaption>A cidadela de perto (×6 à esquerda, ×2 à direita). É aqui que a redução cobra: as janelas viram manchas. Na tela inteira, quase não se nota.</figcaption></figure>
+<div class="item">
+  <p><span class="tag rec">recomendo</span> <b>A resolução do jogo.</b></p>
+  <ul>
+    <li>É o que faz a pintura ler como o resto do jogo. A versão HD lê como imagem gerada, o defeito que você apontou na F1 (bloco G).</li>
+    <li>O Leviatã, a nave, a cachoeira e as luzes ficam na mesma grade de pixel da pintura.</li>
+    <li>A camada HD fica <b>por cima</b> do jogo (ela foi feita para o texto). A pintura lá levaria o menu inteiro junto, e a Atmosfera teria de ser refeita para ela.</li>
+    <li>O detalhe que some nas janelas volta como luz: o halo da Atmosfera faz as luzes quentes brilharem e respirarem, e os efeitos piscam por cima.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>
