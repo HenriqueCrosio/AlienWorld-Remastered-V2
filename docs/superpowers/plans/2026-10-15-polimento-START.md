@@ -1,4 +1,7 @@
-# START — POLIMENTO F1–F4: blocos A e B fechados, próximo é o bloco C (depois de 15/10/2026)
+# START — POLIMENTO F1–F4: blocos A, B e C FECHADOS (15–17/10/2026)
+
+> ✅ **ESTE START ESTÁ ENCERRADO (17/10).** Fica como registro do polimento. A sessão seguinte abre pelo bloco D:
+> `plans/2026-10-18-leviata-novo-START.md`.
 
 > **Frase de arranque:** *"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-15-polimento-START.md`.
 > Vamos para o bloco C do polimento."*

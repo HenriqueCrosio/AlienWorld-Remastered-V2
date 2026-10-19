@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-09-23)
+# HANDOFF — estado do projeto (2026-10-19)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -6,7 +6,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-09-28) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-19) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -14,19 +14,55 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o `docs/superpowers/plans/2026-10-15-polimento-START.md`. Vamos fechar o bloco
-> C do polimento."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco D fechou; vamos começar o bloco E (o menu refeito)."**
+> (O bloco E ainda não tem START: a sessão abre com as perguntas a ele — o que não agrada na lua, no fundo e nas peças
+> do menu, e as referências — antes de gerar. O nado aprovado do Leviatã entra no menu novo.)
 >
-> 📍 **17/10 — O RABO COLOSSAL ESTÁ NO JOGO; TUDO COMMITADO E EMPURRADO; O ROADMAP GANHOU OS BLOCOS D A J.**
-> - **Item 6 (bloco C), o rabo da F3:** a M2 (nadadeira de tubarão da D + casco da B + lava da A), 16 quadros de
->   368×248 em escala 1, a 7/s (`public/sprites/rabo-leviata-sheet.png`). O gesto é a tomada 2 do PixMiniMax limpa
->   das bordas brancas; o corpo aparente inteiro enverga com o pivô virtual a 500px e a luz por normais no corpo e na
->   nadadeira. A batida de ±6° em código saiu: nadadeira de tubarão faz escorço, não gira. O ciclo de IDA E VOLTA foi
->   reprovado. Antigo em `assets/raw/rabo-leviata-original.png`; folha `folhas/2026-10-16/rabo/`.
-> - **A sonda da F3 roda inteira de novo** (71 checagens): a bala falsa da água-viva ganhou `body.velocity`, e três
->   asserts de sorteio (risco de emenda, dutos da proa, contagem de lança-mísseis) viraram medidas sem sorte.
-> - **Commits** `fed34c9` (rabo), `1aa3d35` (sonda), `caea970` (ferramentas + folha, sem GIFs), `1de13b3` (START),
->   **empurrados** com os dos blocos A e B para `origin/feat/cartas-preview`. GIFs e tiras cruas ficam fora (backup).
+> 📍 **19/10 — O BLOCO D FECHOU: COMMITADO E EMPURRADO** para `origin/feat/cartas-preview` — `cbe78ff` (código e
+> arte), `bd8359b` (ferramentas e folhas, sem os GIFs e sem as pastas `cru/`) e o dos docs. Os GIFs e as gerações
+> cruas ficam fora, para o backup; os dois PNGs `concept art …` da raiz ficaram FORA a pedido dele. O registro está no
+> START `plans/2026-10-18-leviata-novo-START.md` (passos 2f e 2g). O próximo é o **bloco E (o menu refeito)**. Folhas
+> do dia: `folhas/2026-10-19/leviata/rodada5|6|7.html`.
+> - ✅ o nado do menu (PixMiniMax 92) APROVADO (volta no bloco E); ✅ o jogo de câmeras do capítulo 5 aprovado.
+> - ✅ **a rodada 5 APROVADA** (*"concordo com todas as suas escolhas"*): o capítulo 5 sem o corpo cravado (ele
+>   desaba, a explosão assada cobre tudo e a fumaça revela a carcaça DEITADA, o quadro do cap. 6); a colônia do plano
+>   largo como LUZES vistas de órbita (o **núcleo**); a dorsal **+4 rasgada**.
+> - Ajuste dele, feito e esperando ele ver: a explosão nasce 70 ms ANTES do contato (o focinho ainda no ar).
+> - ✅ **A silhueta APROVADA** (*"a silhueta mostra que tem algo se aproximando/espreitando"*): o ARO (só a sombra com
+>   o contorno frio), assado em cada largura de 28 a 72px, F2 de 40 a 60px atrás dos cascos da frota, quase parado;
+>   o vislumbre do fim da F1 na frente da galáxia; NADA na F3.
+> - A carcaça 82 com a dorsal JÁ ESTÁ nos capítulos 5–7 (`_gerar-sobrevoo.mjs instalar <fonte> <json>`; antigos em
+>   `assets/raw/f8-sobrevoo*-original.png`).
+>
+> 📍 **18/10 (fim da sessão) — (CUMPRIDO em 19/10: a rodada 4 foi avaliada.) BLOCO D EM ANDAMENTO, NADA COMMITADO. ▶️ A PRÓXIMA SESSÃO COMEÇA NA RODADA 4.**
+> **Nada da rodada 4 está decidido**: ele vai avaliar a leva no começo da próxima sessão. Abra com ele a folha
+> `folhas/2026-10-18/leviata/cenas/rodada4.html` (com `npm run dev`). O roteiro (o que ele decide em cada peça e o que
+> vem depois) está no START `plans/2026-10-18-leviata-novo-START.md`, no bloco **▶️ COMEÇAR AQUI**, no topo.
+> - **Esperam a decisão dele:**
+>   1. o **capítulo 5 REFEITO**, no jogo: o plano largo espelhado, o corte para o plano baixo, os quadros de impacto,
+>      a cortina de ejeção do vácuo e o corpo cravado. A versão antiga está no git;
+>   2. a **carcaça 82 com a dorsal da base atrás das costelas**: rasgada ou inteira. O capítulo 6 ainda tem a antiga;
+>   3. o **nado do menu (PixMiniMax 92)**, já no jogo e escolhido pela folha, ainda sem ele ver no jogo.
+> - **Já aprovado e no jogo:**
+>   - o corpo novo (a cabeça da mandíbula 31 no tubarão 31, 0,7, emenda 42);
+>   - o capítulo 4 com o Leviatã novo (edit-73 contida) e a nave com metade do tamanho na saída da ferida;
+>   - a reentrada 83 sem a mancha.
+> - **Depois:** a silhueta da F2/F3, a instalação da carcaça, as sondas, os GIFs e o commit (só quando ele pedir).
+> - **Lições:**
+>   - a troca parte da ARTE DE HOJE de cada cena, mas sem herdar traços do bicho antigo;
+>   - abrir cada geração AMPLIADA antes de mostrar;
+>   - os GIFs por `game.step` precisam do `Date.now` falso, porque os tweens do Phaser têm relógio próprio.
+>
+> 📍 **17/10 (noite) — O BLOCO C DO POLIMENTO FECHOU; TUDO COMMITADO E EMPURRADO; O PRÓXIMO É O BLOCO D.**
+> - Ele aprovou jogando o primeiro plano e o destroço da F4. Escolheu as raízes D nas portas (`RaizesPorta`) e a
+>   ponte nativa em duas metades, e manteve o órgão e o maquinário antigos. O rabo da F3 foi para 45s (a serpente
+>   em 95s), e os itens 10 e 16 do HUD entraram. O item 15 foi DESCARTADO: a fila de inimigos unida é de propósito
+>   (a carta de reação em cadeia). Detalhe no bloco C abaixo e no START `plans/2026-10-15-polimento-START.md`.
+> - **Commits** `63ca5f0` (código e arte), `f39747f` (ferramentas e folhas, sem GIFs) e `f6dfc15` (docs),
+>   **empurrados** para `origin/feat/cartas-preview`. Os GIFs e as tiras cruas ficam fora, para o backup.
+> - **O bloco D** começa pelo START `plans/2026-10-18-leviata-novo-START.md`. Lá estão o inventário de onde o bicho
+>   aparece (o menu, a silhueta da F1/F2, a cena final; as cutscenes conferidas, sem Leviatã pintado), as leis que
+>   valem, a ordem proposta e as perguntas para abrir a sessão.
 >
 > **🗺️ O ROADMAP EM BLOCOS (17/10, com as tarefas novas dele).** Cada arte nova segue a regra dele: 3–4 conceitos numa
 > folha, aprovação, depois GIF em jogo. Nada aprovado se joga fora: o antigo vai para `assets/raw/*-original.png`.
@@ -54,7 +90,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >   4. ✅ 17/10, decisão dele: **o rabo da F3 em 45s** (era 38). O roteiro do `hazard rate 0` em diante andou +7s (a
 >      serpente de 88 para 95) e o ato 1 ganhou 3 ondas novas (batedor 37,5 · kamikaze 40 · drones 42), com a mesma
 >      folga de quadro vazio antes do rabo. `probe-stage3` e `probe-f3-visual` ajustadas e verdes. Falta ele jogar.
-> - **D — o Leviatã novo, o mesmo bicho em toda cena.** Arte do corpo inteiro a partir da M2 do rabo (a nadadeira de
+> - **D — o Leviatã novo, o mesmo bicho em toda cena** (✅ FECHADO 19/10, COMMITADO e EMPURRADO: o menu, a silhueta da F1/F2 — fora da F3 —, os capítulos 4–7 com a queda nova e a carcaça 82; START `plans/2026-10-18-leviata-novo-START.md`). O próximo é o E. Arte do corpo inteiro a partir da M2 do rabo (a nadadeira de
 >   tubarão manda no movimento: escorço lateral, não rotação). Criatura animada = gerar INTEIRA → vistas → animar no
 >   PixelLab. Trocar onde ele aparece: o menu (`leviathanSwimSheet`, 116², 17 quadros), a silhueta distante da F1/F2
 >   (`leviathan.png`, no `Parallax`), a cena final (`f8-leviata` + `f8-leviata-lava`) e conferir se ele está pintado
@@ -385,7 +421,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
-| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). Próximo: o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7 e 8), depois os itens 9–16 e o pós-processamento. START `plans/2026-10-15-polimento-START.md` |
+| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (próximo: D, START `plans/2026-10-18-leviata-novo-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
 | — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
 
 ### O que mora em cada etapa
