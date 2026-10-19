@@ -245,6 +245,16 @@ PixelLab  →  revisão manual (Aseprite: quantizar paleta, limpar bordas, ajust
 Manter os PNGs originais gerados em `assets/raw/` (fora do bundle) e os atlas em `assets/dist/`.
 Nunca editar o atlas na mão — reempacotar.
 
+### Pastas ASSADAS por script (não edite à mão)
+
+- `public/sprites/menu/k4/` e `k1/` (bloco E, 19–20/10): o menu. As camadas da pintura dele (`ceu`, `cidade`,
+  `apagadas`, `nave`, `cachoeira`), o Leviatã reduzido (`leviata.png`, 16 quadros), `dados.json` (as luzes, a nave,
+  a água) e `tempestade/` (as máscaras dos clarões, dos raios e da nuvem). Geradas por `scripts/_menu/_camadas.mjs`,
+  `_tempestade.mjs` e `_leviata-menor.mjs` a partir de `assets/raw/menu_inicial_transparente.png` e
+  `Cidade-Fortaleza sob a Lua Colossal (1).png`. NÃO edite à mão: asse de novo e rode `_auditar-luzes.mjs`. A técnica
+  inteira está em `docs/CENARIO-VIVO.md`. A arte do menu antigo (a lua e o emblema) está em
+  `assets/raw/menu-moon-original.png` e `menu-logo-sheet-original.png`.
+
 ## ⚠️ O TAMANHO DO SPRITE MORA NO ARQUIVO, NÃO NO `setScale()` (2026-09-02)
 
 O gerador entrega 128px num jogo de 216px de altura. Quando a peça precisa aparecer bem menor, a

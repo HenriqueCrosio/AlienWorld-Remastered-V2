@@ -6,7 +6,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-19) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-20) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -14,9 +14,20 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco D fechou; vamos começar o bloco E (o menu refeito)."**
-> (O bloco E ainda não tem START: a sessão abre com as perguntas a ele — o que não agrada na lua, no fundo e nas peças
-> do menu, e as referências — antes de gerar. O nado aprovado do Leviatã entra no menu novo.)
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco E fechou; vamos começar o bloco F (a frota e o minerador da F2). O START
+> é `plans/2026-10-19-blocos-f-a-j-START.md`."**
+>
+> 📍 **20/10 — O BLOCO E FECHOU: COMMITADO E EMPURRADO** (os hashes estão no fim deste 📍). O menu é a colônia de
+> Kepler à noite, a pintura dele na resolução dela (a exceção aprovada à lei do 384×216), viva e tratada, com perigo no
+> ar (a tempestade, os holofotes antiaéreos, a nave vasculhando), o Leviatã de 96 px em loop, o letreiro de neon que
+> desce freando nos retrofoguetes e acende (os olhos por último) e a condução numa linha só (lembrada entre sessões).
+> Spec `specs/2026-10-19-menu-refeito-design.md` (aprovada 19/10), plano `plans/2026-10-19-menu-refeito.md` (executado
+> 20/10; os desvios no fim dele), folhas `folhas/2026-10-19/menu/` (rodadas 2–9 e `no-jogo.html`, o menu de verdade
+> filmado). **A técnica do cenário vivo ficou documentada em `docs/CENARIO-VIVO.md`** (pedido dele: serve para os
+> próximos menus, as fases e as cutscenes; use no G e no H).
+> - O que mudou para quem testa: durante a abertura, QUALQUER tecla (Enter também) só pula para o menu pousado; o 1/2/3
+>   começam direto. `?semhd` (dev) abre sem a camada HD (o plano B, em 384×216). A sonda é `scripts/probe-menu.mjs`.
+> - A lua e o emblema antigos foram para `assets/raw/menu-moon-original.png` e `menu-logo-sheet-original.png`.
 >
 > 📍 **19/10 — O BLOCO D FECHOU: COMMITADO E EMPURRADO** para `origin/feat/cartas-preview` — `cbe78ff` (código e
 > arte), `bd8359b` (ferramentas e folhas, sem os GIFs e sem as pastas `cru/`) e o dos docs. Os GIFs e as gerações
@@ -96,8 +107,8 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >   (`leviathan.png`, no `Parallax`), a cena final (`f8-leviata` + `f8-leviata-lava`) e conferir se ele está pintado
 >   nos fundos das cutscenes 1 e 2. ⚠️ São DOIS Leviatãs canônicos (armored = vivo e forte; biomecânico =
 >   enfraquecido, o do final): o final precisa da versão enfraquecida do desenho NOVO. Aprovar por GIF em cada cena.
-> - **E — o menu refeito.** Ele não gosta da lua, do fundo nem dos assets que aparecem. Depois de D, porque o Leviatã
->   novo é a peça principal dele.
+> - **E — o menu refeito** (✅ FECHADO 20/10, COMMITADO e EMPURRADO: a colônia de Kepler à noite, viva, com perigo e o
+>   letreiro de neon; spec `specs/2026-10-19-menu-refeito-design.md`; a técnica em `docs/CENARIO-VIVO.md`). O próximo é o F.
 > - **F — Fase 2: a frota e o minerador** (jogabilidade; ele testa jogando):
 >   1. os **batedores da frota** (as naves finas da pele do cinturão): menos naves por frota, voo de NAVE (inclinar,
 >      fazer curva, em vez da senóide), atirar contra o jogador, manobra de evasão, e passar pelo jogador e sair pela
@@ -106,18 +117,23 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >   2. a **rocha do elite minerador** destoa da F2 e é grande demais: diminuir, ou prendê-la a um canto ou a um
 >      pedaço maior de asteroide (arte nova). Fazer junto com o `asteroid` do item 7.
 > - **G — Fase 1: a arte do cenário.** Os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
->   cordilheira não ficou como ele queria (perguntar a referência ANTES de gerar). Refazer arte E composição.
+>   cordilheira não ficou como ele queria (perguntar a referência ANTES de gerar). Refazer arte E composição. A técnica
+>   do menu (`docs/CENARIO-VIVO.md`) é o ponto de partida: camadas, luzes que apagam limpas, volume, perigo, tudo em
+>   função do relógio.
 > - **H — efeitos de imersão por fase** (só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros;
 >   - F2: a silhueta do Leviatã NOVO passando ao fundo, distante (depende de D);
 >   - F3: o verme descartado (ou outro inimigo) como silhueta entre as nebulosas. Só como cenário: o elite 63-3
 >     continua cancelado;
 >   - F4: o golfinho como silhueta em algumas câmaras.
->   Depois de G, porque os efeitos da F1 moram nas camadas que G vai refazer. Ele está aberto a mais ideias.
+>   Depois de G, porque os efeitos da F1 moram nas camadas que G vai refazer. Ele está aberto a mais ideias. A técnica
+>   do menu (`docs/CENARIO-VIVO.md`) é o ponto de partida: camadas, luzes que apagam limpas, volume, perigo, tudo em
+>   função do relógio.
 > - **I — os itens 9 a 16 da análise de 14/10** (✅ 17/10: o 10 e o 16 APROVADOS por ele; o 15 DESCARTADO por ele: a fila unida
 >   é DE PROPÓSITO (*"pela card de reação em cadeia, além de ser mais prazeroso entrar em cadeia"*), testado e desfeito;
 >   folha `folhas/2026-10-17/bloco-i/`; tudo NÃO commitado. Faltam o 9, 11, 13 e 14, que pedem arte ou decisão): a fumaça de bolinhas dos chefões, os rótulos "(LEGACY)/(NEW)" do HUD,
->   a tela final, o subtítulo do menu (vai com E), os flashes de tela cheia, a explosão chapada da cutscene 1, os
+>   a tela final, o subtítulo do menu (✅ resolvido no E: o REMASTERED ficou como texto, acendendo depois do
+>   letreiro), os flashes de tela cheia, a explosão chapada da cutscene 1, os
 >   drones encavalados e as setas das dicas.
 > - **J — o pós-processamento**, por último, porque ele trata toda a arte que os blocos acima vão trocar.
 >
@@ -421,7 +437,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
-| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (próximo: D, START `plans/2026-10-18-leviata-novo-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
+| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
 | — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
 
 ### O que mora em cada etapa
