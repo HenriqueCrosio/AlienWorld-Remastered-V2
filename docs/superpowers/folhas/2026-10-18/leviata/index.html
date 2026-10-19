@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã novo · corpo</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 18px 0 8px; color: var(--sub); font-weight: 600; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: start; }
+  .quatro { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas, .quatro { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã novo · o corpo inteiro</h1>
+<p class="sub">Bloco D, passo 1 · 18/10/2026 · gerado a partir do rabo M2 aprovado (<code>rabo-leviata-sheet.png</code>, quadro 0), que entrou como referência e como estilo.</p>
+
+<div class="item">
+  <p><b>O que está aqui.</b> Quatro cabeças, duas sementes de cada. O resto do corpo é o mesmo nos oito: as placas de casco, a lava nas costuras e a nadadeira em leque de tubarão. Todos saíram de perfil e nenhum precisou ser descartado.</p>
+  <p><b>Como ler.</b> Cada conceito aparece grande (×2) e depois <b>dentro do jogo de verdade</b>. A cena foi pausada e a textura do bicho foi trocada, então valem a mesma profundidade, o tint, o alpha e as camadas da frente:</p>
+  <ul>
+    <li><b>menu</b>: no meio da travessia, a 70px de largura, com o tint <code>0x8c9bb6</code>;</li>
+    <li><b>F2 perto</b>: a silhueta no fim da fase (<code>setApproach(1)</code>, 133px, tint <code>0x2a3352</code>, alpha 0,8).</li>
+  </ul>
+  <p><b>O que eu preciso de você:</b> qual cabeça segue (e de qual semente), ou uma mistura (por exemplo, a cabeça de um com a barbatana dorsal de outro).</p>
+</div>
+
+<h2>Hoje, para comparar</h2>
+<div class="duas">
+  <figure><img src="img/hoje-menu-zoom.png" alt=""><figcaption><b>Menu hoje.</b> As costelas claras são o que faz ele aparecer.</figcaption></figure>
+  <figure><img src="img/hoje-f2-zoom.png" alt=""><figcaption><b>F2 perto, hoje.</b> Lê como uma laje ou uma nave, não como bicho.</figcaption></figure>
+</div>
+
+<h2>A · Baleia blindada <span class="tag decidir">cabeça de cachalote</span></h2>
+<p class="sub">Cabeça rombuda, olho pequeno, boca fechada. É a mais próxima do bicho de hoje. A semente 32 tem os dentes à mostra.</p>
+<div class="duas">
+  <figure><img src="img/baleia-31-0-grande.png" alt=""><figcaption><b>Semente 31.</b></figcaption></figure>
+  <figure><img src="img/baleia-32-0-grande.png" alt=""><figcaption><b>Semente 32.</b></figcaption></figure>
+</div>
+<div class="quatro">
+  <figure><img src="img/baleia-31-0-menu-zoom.png" alt=""><figcaption>31 · menu</figcaption></figure>
+  <figure><img src="img/baleia-31-0-f2-zoom.png" alt=""><figcaption>31 · F2 perto</figcaption></figure>
+  <figure><img src="img/baleia-32-0-menu-zoom.png" alt=""><figcaption>32 · menu</figcaption></figure>
+  <figure><img src="img/baleia-32-0-f2-zoom.png" alt=""><figcaption>32 · F2 perto</figcaption></figure>
+</div>
+
+<h2>B · Tubarão <span class="tag rec">a minha aposta</span></h2>
+<p class="sub">Focinho em ponta, guelras vazando lava, barbatana dorsal com os mesmos raios da nadadeira do rabo. É o que melhor combina com a nadadeira de tubarão que você escolheu, e a silhueta de longe é a que mais lê como bicho (a dorsal e a ponta).</p>
+<div class="duas">
+  <figure><img src="img/tubarao-31-0-grande.png" alt=""><figcaption><b>Semente 31.</b> As guelras mais claras.</figcaption></figure>
+  <figure><img src="img/tubarao-32-0-grande.png" alt=""><figcaption><b>Semente 32.</b> As guelras em brasa e a dorsal mais alta.</figcaption></figure>
+</div>
+<div class="quatro">
+  <figure><img src="img/tubarao-31-0-menu-zoom.png" alt=""><figcaption>31 · menu</figcaption></figure>
+  <figure><img src="img/tubarao-31-0-f2-zoom.png" alt=""><figcaption>31 · F2 perto</figcaption></figure>
+  <figure><img src="img/tubarao-32-0-menu-zoom.png" alt=""><figcaption>32 · menu</figcaption></figure>
+  <figure><img src="img/tubarao-32-0-f2-zoom.png" alt=""><figcaption>32 · F2 perto</figcaption></figure>
+</div>
+
+<h2>C · Mandíbula <span class="tag decidir">a boca do final</span></h2>
+<p class="sub">Mandíbulas abertas com presas e lava lá dentro. Conversa com a boca da cena final, por onde a nave entra. É o mais agressivo e o que mais funciona como "chefão". ⚠️ A semente 32 tem uma presa cinza clara na ponta, que precisaria de retoque.</p>
+<div class="duas">
+  <figure><img src="img/mandibula-31-0-grande.png" alt=""><figcaption><b>Semente 31.</b></figcaption></figure>
+  <figure><img src="img/mandibula-32-0-grande.png" alt=""><figcaption><b>Semente 32.</b> Muita rachadura de lava.</figcaption></figure>
+</div>
+<div class="quatro">
+  <figure><img src="img/mandibula-31-0-menu-zoom.png" alt=""><figcaption>31 · menu</figcaption></figure>
+  <figure><img src="img/mandibula-31-0-f2-zoom.png" alt=""><figcaption>31 · F2 perto</figcaption></figure>
+  <figure><img src="img/mandibula-32-0-menu-zoom.png" alt=""><figcaption>32 · menu</figcaption></figure>
+  <figure><img src="img/mandibula-32-0-f2-zoom.png" alt=""><figcaption>32 · F2 perto</figcaption></figure>
+</div>
+
+<h2>D · Proa <span class="tag decidir">aríete de encouraçado</span></h2>
+<p class="sub">Cabeça em cunha de placas, com fendas no lugar dos olhos e uma costura de lava na boca. É a que mais puxa para nave capital, o que pode ser bom (bicho-nave) ou ruim (o problema de hoje na silhueta).</p>
+<div class="duas">
+  <figure><img src="img/proa-31-0-grande.png" alt=""><figcaption><b>Semente 31.</b> A cunha mais reta.</figcaption></figure>
+  <figure><img src="img/proa-32-0-grande.png" alt=""><figcaption><b>Semente 32.</b> Com olho e boca, mais bicho.</figcaption></figure>
+</div>
+<div class="quatro">
+  <figure><img src="img/proa-31-0-menu-zoom.png" alt=""><figcaption>31 · menu</figcaption></figure>
+  <figure><img src="img/proa-31-0-f2-zoom.png" alt=""><figcaption>31 · F2 perto</figcaption></figure>
+  <figure><img src="img/proa-32-0-menu-zoom.png" alt=""><figcaption>32 · menu</figcaption></figure>
+  <figure><img src="img/proa-32-0-f2-zoom.png" alt=""><figcaption>32 · F2 perto</figcaption></figure>
+</div>
+
+<h2>O que as capturas mostraram (vale para qualquer escolha)</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag ruim">menu</span> O casco quase preto, com o tint do menu, <b>some</b> a 70px: sobra só a lava. O bicho de hoje aparece por causa das costelas claras. Isso fica para o passo 3: a versão do menu nasce já no tamanho, com uma borda de luz fria nas costas (a luz da lua) ou com o tint revisto. A escolha da cabeça não depende disso.</li>
+    <li><span class="tag rec">F2 perto</span> Todos os novos leem como bicho, com rabo, nadadeiras e cabeça. O de hoje lê como laje. É o problema que o START apontou, resolvido pela forma.</li>
+    <li><span class="tag decidir">F2 longe</span> No começo da fase (escala 0,5 e alpha 0,45) a silhueta <b>não se vê</b>, nem a de hoje nem as novas: está escura demais contra a pintura. Decidir no passo 4 se ela deve ser visível desde o início.</li>
+    <li><span class="tag decidir">F3</span> A mesma silhueta também aparece na F3 (<code>mode 'nebulosa'</code>, escala 1,15, alpha 0,5), coisa que o inventário do START não listava. Ela troca junto.</li>
+  </ul>
+  <p class="sub">Os próximos passos, depois da escolha: a versão enfraquecida do mesmo desenho para o final (passo 2) e o nado no PixelLab para o menu (passo 3).</p>
+</div>
+
+<p class="sub">Ferramentas: <code>scripts/_leviata/_gerar-corpo.mjs</code> (o PixelLab, <code>/generate-image-v2</code>, 384×160), <code>_folha-corpo.mjs</code> (o grande e as reduções) e <code>_capturar-corpo.mjs</code> (o jogo pausado com a textura trocada).</p>
+</main>
+</body>
+</html>

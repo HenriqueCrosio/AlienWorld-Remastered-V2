@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã novo · rodada 3</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; margin: 10px 0; font-size: 14px; }
+  td, th { border: 1px solid var(--line); padding: 4px 10px; text-align: left; }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã novo · rodada 3</h1>
+<p class="sub">Bloco D · 18/10/2026. <a href="rodada2.html" style="color:var(--sub)">← rodada 2</a> · <a href="rodada4.html" style="color:var(--ok)">rodada 4 →</a> · A nave menor na ferida: aprovada (<code>NAVE_ESCALA = 0.5</code>). O menu: a gerada 91·0 + luz.</p>
+
+<!-- ───────────── REENTRADA ───────────── -->
+<h2>Capítulo 5 · a mancha na ponta da boca <span class="tag rec">corrigida, no jogo</span></h2>
+<p class="sub">Era um <b>buraco transparente</b>. O recorte de 24/09 só aceita pixel quente abaixo de y=151, onde começa a lua do conceito. Na edição 83 o focinho desce mais, e o miolo branco da brasa (255,255,254) e as placas escuras abaixo dessa linha ficavam de fora, deixando o céu aparecer pelo buraco. A lua desta fonte vai só até a luminância 125, então agora entram também o branco (acima de 170) e o casco escuro até y=156. As 12 escalas foram refeitas, e o GIF também.</p>
+<div class="duas">
+  <figure><img src="img/reentrada-boca-antes.png" alt=""><figcaption><b>Antes</b> (no jogo, ampliado): a falha escura no anel de brasa.</figcaption></figure>
+  <figure><img src="gif/jogo-cap5-novo.gif" alt=""><figcaption><b>Agora</b>, o capítulo 5 em velocidade real.</figcaption></figure>
+</div>
+<figure style="margin-top:12px"><img src="img/reentrada-boca-depois.png" alt=""><figcaption>Agora, ampliado em 4 momentos da queda: o anel fecha a ponta do focinho.</figcaption></figure>
+
+<!-- ───────────── CARCAÇA ───────────── -->
+<h2>Capítulos 6 e 7 · a dorsal no lugar certo</h2>
+<div class="item">
+  <p><span class="tag ruim">o erro da rodada 2</span> Eu pus a região da barbatana em x 240–288, <b>em cima da cabeça</b>: as guelras (os arcos laranja) ficam em x≈260 e marcam onde a cabeça começa. E a barbatana era gerada, sem relação com o desenho dele. Por isso ficou "grudada".</p>
+  <p><b>A anatomia da 82, lida ampliada:</b> focinho em x≈330, olho em (292, 147), guelras em x 258–268, o dorso aberto com as costelas em x 150–245, o rabo em x≈100. Na base, a dorsal fica a 50–65% do comprimento a partir do rabo, ou seja, aqui em x≈190–245: <b>atrás da caixa de costelas</b>.</p>
+  <p><b>Agora a barbatana é a dorsal da própria base</b>, a identidade dele, e não uma gerada. Recortei, pus na escala da carcaça e inclinei para trás (torta). A base dela fica escondida atrás das costelas (os ossos continuam na frente), e a paleta é a da carcaça. Para não parecer colada, recebeu a luz do lugar: a borda azul-aço no bordo de ataque, como no resto do casco, e uma veia de lava subindo da base. Na versão "rasgada" há uma mordida rasa no bordo de trás. (A primeira mordida era funda e partia a barbatana em dois cacos; descartei.)</p>
+</div>
+<div class="duas">
+  <figure><img src="dorsal2/img/dorsal-base-192-102-0.3-0.9-r1-cap6.png" alt=""><figcaption><b>Rasgada <span class="tag rec">a minha aposta</span></b>, no capítulo 6.</figcaption></figure>
+  <figure><img src="dorsal2/dorsal-base-192-102-0.3-0.9-r1-zoom.png" alt=""><figcaption>Ampliada ×4: sai de trás das costelas, a borda clara no bordo da frente e a veia na base.</figcaption></figure>
+  <figure><img src="dorsal2/img/dorsal-base-192-102-0.3-0.9-r0-cap6.png" alt=""><figcaption><b>Inteira</b> (sem a mordida), no capítulo 6.</figcaption></figure>
+  <figure><img src="dorsal2/img/dorsal-base-196-102-0.22-0.85-r1-cap6.png" alt=""><figcaption><b>Rasgada, um pouco menor e mais em pé</b>, no capítulo 6.</figcaption></figure>
+</div>
+<p class="sub">Ferramenta: <code>scripts/_leviata/_carcaca-dorsal-base.mjs</code>. Depois da escolha, roda a instalação de 24/09 (o frio do capítulo 7 e a folha da lava que apaga).</p>
+
+<!-- ───────────── MENU ───────────── -->
+<h2>Menu · o nado da 91·0 + luz</h2>
+<p class="sub">O tubarão nada varrendo o rabo em crescente <b>de lado</b>: de perfil isso é escorço (o rabo estreita e alarga) e uma onda que corre pelo corpo, nunca rotação. São duas tomadas, cada uma em dois tamanhos: ampliada ×3, e no tamanho do menu (×0,6 com o tint do menu, ampliado ×3 para ver). A luz da lua é reaplicada em cada quadro.</p>
+<table>
+  <tr><th>tomada</th><th>o desenho muda por quadro</th><th>fim → início</th><th>o centro anda</th></tr>
+  <tr><td>onda</td><td>8–13%</td><td>20%, emenda em ciclo</td><td>não</td></tr>
+  <tr><td>PixMiniMax 92</td><td>13–31%</td><td>5%</td><td>6 px e volta</td></tr>
+  <tr><td>PixMiniMax 91</td><td>24–38%</td><td>48%, salto</td><td>5 px e não volta</td></tr>
+</table>
+<h3>A onda <span class="tag rec">a minha aposta</span></h3>
+<p class="sub">A própria arte deformada: uma onda vertical que cresce para o rabo, e o rabo comprimido de lado conforme a batida. A identidade é exata e o loop fecha por construção. O movimento é mais contido.</p>
+<div class="duas">
+  <figure><img src="nado/onda-m/nado-x3.gif" alt=""><figcaption>×3.</figcaption></figure>
+  <figure><img src="nado/onda-m/nado-menu.gif" alt=""><figcaption>No tamanho do menu, com o tint.</figcaption></figure>
+</div>
+<h3>PixMiniMax 92</h3>
+<p class="sub">O movimento é mais solto (o corpo enverga de verdade), mas o gerador redesenha as placas e as veias a cada quadro, e elas <b>fervem</b>. O bicho anda e volta. Fecha quase sozinho.</p>
+<div class="duas">
+  <figure><img src="nado/gera-92-m/nado-x3.gif" alt=""><figcaption>×3.</figcaption></figure>
+  <figure><img src="nado/gera-92-m/nado-menu.gif" alt=""><figcaption>No tamanho do menu.</figcaption></figure>
+</div>
+<div class="item">
+  <p><span class="tag ruim">descartada</span> A PixMiniMax 91 anda para a frente e não volta (salto de 48% no loop) e ferve mais.</p>
+  <p><span class="tag decidir">depois da escolha</span> Vira a folha do menu (troca o <code>leviathan-swim-sheet</code>, com a escala acertada para os ~70 px de hoje) e gravo o GIF no menu de verdade. A silhueta da F2 e da F3 sai do mesmo desenho.</p>
+</div>
+</main>
+</body>
+</html>

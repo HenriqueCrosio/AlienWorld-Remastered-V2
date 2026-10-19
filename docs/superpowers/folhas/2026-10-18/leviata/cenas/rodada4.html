@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã novo · rodada 4</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ol, ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã novo · rodada 4</h1>
+<p class="sub">Bloco D · 18/10/2026. <a href="rodada3.html" style="color:var(--sub)">← rodada 3</a> · A reentrada sem a mancha: aprovada.</p>
+
+<!-- ───────────── IMPACTO ───────────── -->
+<h2>Capítulo 5 · a queda refeita <span class="tag decidir">no jogo, para você avaliar</span></h2>
+<p class="sub">A cena como eu recomendei: o corte para o plano baixo, os quadros de impacto, a cortina de ejeção do vácuo e o corpo que fica cravado. A versão antiga continua no git.</p>
+<figure><img src="../impacto/jogo-cap5-impacto.gif" alt=""><figcaption><b>No jogo</b>, velocidade real: do começo do capítulo 5 até o capítulo 6 abrir (9,5 s).</figcaption></figure>
+<figure style="margin-top:12px"><img src="../impacto/quadros-chave.png" alt=""><figcaption>Os quadros-chave, em ordem: o plano largo · o corte · o contato (os 2 quadros de impacto) · a ejeção · a colônia queimando · o mergulho.</figcaption></figure>
+<div class="item">
+  <ol>
+    <li><b>O plano largo, espelhado e com antecipação.</b> O corpo cai do alto à esquerda para a direita, na mesma direção da deriva do capítulo 4. Assim a carcaça do capítulo 6 tem a cabeça à direita, como na pintura. A brasa acende o chão sob ele, e as janelas da colônia tremem no fim.</li>
+    <li><b>O corte para o plano baixo.</b> É o mesmo enquadramento do capítulo 6, antes da queda: a colônia sem a carcaça (inpaint), com as cúpulas e as janelas acesas. O corpo entra inteiro pelo alto, a luz dele lambe o chão, e o focinho crava atrás do chão da frente, no lugar onde a carcaça vai estar.</li>
+    <li><b>O contato.</b> Dois quadros de impacto: silhueta preta sobre laranja-claro, depois o inverso, o hit-stop dos jogos de luta. Depois, o tremor que decai.</li>
+    <li><b>A cortina de ejeção do vácuo</b> (folha assada em pixel). No vácuo a poeira não vira nuvem: cada grão faz o seu arco balístico, e juntos formam um cone invertido de bordas nítidas, que cai de volta devagar. Os grãos do miolo saem em brasa e esfriam no ar. No chão corre o anel de choque, quebrado e pontilhado. Alguns pedregulhos de 2 px fazem o arco inteiro.</li>
+    <li><b>O corpo fica.</b> Ele afunda mais um pouco e a brasa da reentrada esfria. A cratera brilha, as janelas apagam em sequência a partir do impacto e o fogo pega nas cúpulas, uma a uma.</li>
+    <li><b>O mergulho.</b> No fim, um escurecer curto, e o capítulo 6 abre do escuro: marca o tempo passado do corpo cravado à carcaça fria e deitada.</li>
+  </ol>
+</div>
+<div class="duas">
+  <figure><img src="../impacto/ejecao-quadros.png" alt=""><figcaption>A cortina de ejeção sozinha (6 dos 48 quadros).</figcaption></figure>
+  <figure><img src="../impacto/colonia/colonia-11-0.png" alt=""><figcaption>A colônia antes da queda (o quadro do capítulo 6 sem a carcaça, inpaint 11).</figcaption></figure>
+</div>
+<div class="item">
+  <p><span class="tag decidir">a ver</span> No corte, o corpo cravado em diagonal vira a carcaça deitada do capítulo 6. O mergulho no escuro marca o tempo passado. O capítulo 6 ainda mostra a <b>carcaça antiga</b>, porque a 82 com a dorsal só entra quando você aprovar.</p>
+  <p><span class="tag rec">consertado no caminho</span> A Atmosfera lia todo fade da câmera como fade-out: o capítulo 6 abria do escuro e escurecia de novo. E <b>os nossos GIFs estavam errados no tempo dos tweens</b>: o Phaser mede os tweens com o relógio real, então, com o jogo avançado quadro a quadro, eles corriam no ritmo da demora das capturas. As ferramentas de GIF agora seguem o relógio do jogo. Os GIFs das naves da rodada 2 foram refeitos.</p>
+</div>
+
+<!-- ───────────── CARCAÇA ───────────── -->
+<h2>Capítulos 6 e 7 · a dorsal atrás das costelas</h2>
+<p class="sub">Com a sua dica: a barbatana só aparece onde a pintura tem fundo (céu e montanha). Tudo do corpo, inclusive os ossos, a carne entre as costelas e o rasgo, fica na frente dela, e a borda de baixo segue a silhueta da carcaça. A veia de lava saiu (com a base escondida, sobrava um traço solto), as sobras menores que 12 px voltaram à pintura, e a borda clara só existe onde há céu do outro lado.</p>
+<div class="duas">
+  <figure><img src="dorsal3/img/dorsal-base-192-102-0.3-0.9-r1-cap6.png" alt=""><figcaption><b>Rasgada <span class="tag rec">a minha aposta</span></b>, no capítulo 6.</figcaption></figure>
+  <figure><img src="dorsal3/img/dorsal-base-192-102-0.3-0.9-r0-cap6.png" alt=""><figcaption><b>Inteira</b>, no capítulo 6.</figcaption></figure>
+</div>
+<figure style="margin-top:12px"><img src="dorsal3/dorsal-base-192-102-0.3-0.9-r1-zoom.png" alt=""><figcaption>A rasgada ampliada ×4: os dois pontos que você marcou (entre as costelas e sobre o rasgo) agora são pintura original.</figcaption></figure>
+<p class="sub">Depois da escolha, roda a instalação de 24/09 (o frio do capítulo 7 e a folha da lava que apaga).</p>
+
+<!-- ───────────── MENU ───────────── -->
+<h2>Menu · o nado PixMiniMax 92 <span class="tag rec">no jogo</span></h2>
+<p class="sub">São 16 quadros de 176×80 com a luz da lua (o 17º era o 1º de novo e saiu, então o loop fecha). A folha antiga está em <code>assets/raw/leviathan-swim-sheet-original.png</code>. A <code>probe-menu-intro</code> passa no Leviatã (nada, de frente, atrás da lua). As falhas que ela e a <code>probe-menu</code> têm são de texto e do emblema, e <b>já falhavam com a folha antiga</b> (conferido trocando de volta).</p>
+<div class="duas">
+  <figure><img src="nado/menu-jogo/menu-travessia.gif" alt=""><figcaption><b>A travessia no menu de verdade</b>, velocidade real.</figcaption></figure>
+  <figure><img src="nado/menu-jogo/menu-perto.gif" alt=""><figcaption>Acompanhando o bicho, ×4.</figcaption></figure>
+</div>
+<p class="sub">A seguir: a silhueta da F2 e da F3, a partir deste desenho.</p>
+</main>
+</body>
+</html>

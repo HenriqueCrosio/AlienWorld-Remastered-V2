@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã final · ângulo</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; margin-top: 10px; }
+  @media (max-width: 900px) { .duas { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã final · no ângulo e no estado do que já tínhamos</h1>
+<p class="sub">Bloco D, passo 2, 2ª rodada · 18/10/2026 · a sua correção: a troca só vale se chegar igual ao que já estava pronto. <a href="../ferido/index.html" style="color:var(--sub)">← a 1ª rodada (de perfil, descartada)</a></p>
+
+<div class="item">
+  <p><b>O que eu errei.</b> Gerei o bicho de perfil chapado e abri uma ferida oval no flanco. A arte de hoje é outra coisa:</p>
+  <ul>
+    <li>ela é <b>três-quartos, vista de cima e de frente</b>: a cabeça à esquerda vem para a câmera, e o corpo foge em profundidade para a direita até se desfazer em destroços (o rabo nem aparece);</li>
+    <li>o que eu lia como "boca" é o <b>rombo no meio da carcaça</b>: a carne aberta com abas de osso em lâmina, de onde vazam fluido e detritos;</li>
+    <li>as <b>costelas</b> ficam expostas no dorso, vistas de cima;</li>
+    <li>a <b>pele inteira</b> está rachada em teia de lava, e as cores são apagadas. É isso que faz ele ler como abatido.</li>
+  </ul>
+  <p><b>O que mudou no método.</b> A arte de hoje deixou de ser só comparação: <b>ela é o ponto de partida</b>. Ela dá o ângulo, o rombo, as costelas e o estado; a base aprovada dá só o desenho (placas, cabeça de mandíbula, guelras, barbatanas de tubarão). Testei dois caminhos:</p>
+  <ul>
+    <li><b>edição</b>: a arte de hoje editada com a base como referência (<code>/edit-images-v2</code>);</li>
+    <li><b>geração</b>: a arte de hoje como referência de composição e de dano, a base como referência de desenho.</li>
+  </ul>
+  <p>Todas passaram pela paleta da arte de hoje mais a da base.</p>
+  <p><b>Na cena</b> (capítulo 4 pausado, corpo trocado): <b>o painel da direita é a orientação certa</b>, com a cabeça à esquerda como hoje. O da esquerda está espelhado.</p>
+</div>
+
+<h2>Hoje</h2>
+<div class="duas">
+  <figure><img src="img/hoje-grande.png" alt=""><figcaption><b>O <code>f8-leviata</code> de hoje.</b></figcaption></figure>
+  <figure><img src="img/hoje-final.png" alt=""><figcaption><b>No capítulo 4.</b></figcaption></figure>
+</div>
+
+<h2>Geração 62 <span class="tag rec">a mais próxima</span></h2>
+<div class="duas">
+  <figure><img src="img/gera-62-0-grande.png" alt=""><figcaption><b>A silhueta e a composição de hoje</b>, com o rombo de abas de osso, as costelas de cima e a traseira esfarelando, já com o casco de placas, as guelras e a cabeça de mandíbula (levemente em três-quartos).</figcaption></figure>
+  <figure><img src="img/gera-62-0-final.png" alt=""><figcaption>Na cena · <b>direita = orientação certa</b>.</figcaption></figure>
+</div>
+
+<h2>Edição 62</h2>
+<div class="duas">
+  <figure><img src="img/edit-62-0-grande.png" alt=""><figcaption><b>O casco ficou o mais parecido com a base.</b> Mas a traseira termina num <b>corte reto</b> e o rombo virou um redemoinho de lava.</figcaption></figure>
+  <figure><img src="img/edit-62-0-final.png" alt=""><figcaption>Na cena · direita = orientação certa.</figcaption></figure>
+</div>
+
+<h2>Edição 61</h2>
+<div class="duas">
+  <figure><img src="img/edit-61-0-grande.png" alt=""><figcaption><b>Manteve o rombo e as costelas</b>, mas achatou para perfil e ganhou um rabo inteiro à direita. Foge da composição.</figcaption></figure>
+  <figure><img src="img/edit-61-0-final.png" alt=""><figcaption>Na cena · direita = orientação certa.</figcaption></figure>
+</div>
+
+<h2>Geração 61</h2>
+<div class="duas">
+  <figure><img src="img/gera-61-0-grande.png" alt=""><figcaption><b>Casco, dorsal e rombo bons</b>, mas a cabeça ficou de perfil, enorme, rosnando. Menos abatido.</figcaption></figure>
+  <figure><img src="img/gera-61-0-final.png" alt=""><figcaption>Na cena · direita = orientação certa.</figcaption></figure>
+</div>
+
+<h2>O que ainda falta no escolhido</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag ruim">pontilhado</span> A nuvem pontilhada da traseira veio <b>branca</b> (o gerador ignora o limite de cor), e a paleta a puxou para o osso. Na de hoje ela é escura. Reponho a nuvem escura.</li>
+    <li><span class="tag decidir">teia de lava</span> As novas têm menos rachaduras que a de hoje. Se faltar "abatido", a teia se reforça por inpaint, sem mexer no resto.</li>
+    <li><span class="tag decidir">depois</span> A lava separada em camada, <code>FERIDA_X/Y</code> remedido no rombo novo, e o mesmo método nas outras cenas: a reentrada, a carcaça na lua, o menu e a silhueta, cada uma partindo da sua arte de hoje.</li>
+  </ul>
+</div>
+
+<p class="sub">Ferramenta: <code>scripts/_leviata/_final-angulo.mjs</code> (<code>edit</code> | <code>gera</code>). A variante só com texto foi recusada pelo filtro do PixelLab.</p>
+</main>
+</body>
+</html>

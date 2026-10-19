@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã novo · rodada 5</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  .tres { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas, .tres { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ol, ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã novo · rodada 5</h1>
+<p class="sub">Bloco D · 19/10/2026. <a href="../../2026-10-18/leviata/cenas/rodada4.html" style="color:var(--sub)">← rodada 4</a> · O nado do menu: aprovado (volta a ser visto no bloco E).</p>
+
+<!-- ───────────── CAPÍTULO 5 ───────────── -->
+<h2>Capítulo 5 · ele não cai duro <span class="tag decidir">no jogo, para você avaliar</span></h2>
+<p class="sub">A sua ideia: explosão + as partículas, e depois o quadro dele já caído. O corte para o plano baixo e os 2 quadros de impacto ficaram como você aprovou.</p>
+<figure><img src="gif/jogo-cap5-explosao.gif" alt=""><figcaption><b>No jogo</b>, velocidade real: do começo do capítulo 5 até o capítulo 6 abrir (9,5 s).</figcaption></figure>
+<div class="item">
+  <p><span class="tag rec">aprovado</span> Você aprovou a cena, o núcleo e a dorsal +4 rasgada (<i>"concordo com todas as suas escolhas, a animação e a explosão de chegada ficou muito boa"</i>).</p>
+  <p><span class="tag decidir">ajuste novo, no GIF acima</span> <b>A explosão vem ~70 ms ANTES do contato</b>, com o focinho ainda a ~35 px do chão, como um meteoro que estoura antes de tocar. As duas silhuetas mostram o corpo ainda no ar, com o clarão nascendo embaixo dele, e o encosto acontece dentro da bola de fogo.</p>
+</div>
+<figure style="margin-top:12px"><img src="gif/cap5-estouro.png" alt=""><figcaption>O estouro, quadro a quadro (3,90 s → 4,60 s, um quadro a cada 50 ms): ele desce · <b>a silhueta com ele ainda no ar e o clarão no chão</b> · o inverso, o focinho entrando no clarão · a bola de fogo engole o encosto · ele desaba dentro dela.</figcaption></figure>
+<div class="item">
+  <ol>
+    <li><b>O clarão.</b> Depois dos 2 quadros de impacto, a tela acende e apaga em 0,28 s.</li>
+    <li><b>O corpo desaba.</b> O focinho bateu e o resto vem junto: o rabo cai para o chão, girando em volta do focinho, enquanto a bola de fogo cresce. Um segundo tremor quando o rabo bate. Depois ele esmaece dentro da onda de poeira.</li>
+    <li><b>A explosão</b> (folha nova, assada em pixel, tela cheia, 48 quadros): a bola de fogo, a onda de poeira rasteira que corre pelo chão para os dois lados, a nuvem de detritos sobre o dorso e a coluna que sobe. As bolas têm sombra embaixo e se desfazem em pontilhado, sem transparência.</li>
+    <li><b>Ele já está deitado.</b> Enquanto a fumaça cobre 80–96% da carcaça (medido quadro a quadro), o quadro do capítulo 6 aparece por baixo. Quando ela baixa, a carcaça está deitada no meio da colônia, com a lava acesa e o fogo nas cúpulas.</li>
+    <li>Os grãos da cortina de ejeção foram para trás da fumaça: por cima dela, liam como chiado branco.</li>
+  </ol>
+</div>
+<figure><img src="gif/cap5-quadros-chave.png" alt=""><figcaption>O capítulo inteiro em 16 quadros (antes da correção do desabar: aqui o corpo ainda sumia de uma vez em 4,2 s).</figcaption></figure>
+<div class="duas">
+  <figure><img src="explosao/v7-quadros.png" alt=""><figcaption><b>A explosão sozinha</b> sobre o quadro do capítulo 6: o que aparece conforme a fumaça baixa.</figcaption></figure>
+  <figure><img src="explosao/v3-v7-ampliado.png" alt=""><figcaption>×3, o fogo e a fumaça. <b>Em cima a v3</b>, com emendas retas que liam como vetor; <b>embaixo a v7</b>, no jogo, com bolas redondas sobrepostas e sombra. As versões ficam em <code>explosao/</code>.</figcaption></figure>
+</div>
+
+<!-- ───────────── LUZES ───────────── -->
+<h2>Capítulo 5 · a colônia vista de órbita <span class="tag decidir">escolha uma</span></h2>
+<p class="sub">O prédio de 44 px saiu. A colônia agora são as luzes da noite dela, em pixel de 1 px, achatadas pelo ângulo baixo como as crateras em volta, somadas ao chão. No fim da queda a rede falha: pedaços da cidade piscam e apagam, cada vez mais.</p>
+<div class="tres">
+  <figure><img src="luzes/img/hoje-cap5.png" alt=""><figcaption><b>Núcleo</b> <span class="tag rec">no jogo · a minha aposta</span> a cidade orgânica: o centro denso, estradas saindo em ângulos tortos, bairros na ponta delas. É a mais perto da foto de satélite.</figcaption></figure>
+  <figure><img src="luzes/img/q0-anel-cap5.png" alt=""><figcaption><b>Anel</b>: os habitats na borda de uma cratera, um núcleo no meio, e dois postos ligados por estrada. Mais "colônia lunar".</figcaption></figure>
+  <figure><img src="luzes/img/q0-vale-cap5.png" alt=""><figcaption><b>Vale</b>: as luzes enfileiradas no fundo de um cânion sinuoso, como um rio visto de órbita, com a cidade na curva onde ele cai.</figcaption></figure>
+</div>
+<figure style="margin-top:12px"><img src="luzes/rascunho-tres.png" alt=""><figcaption>As três ampliadas ×4 (núcleo, anel, vale). Uma quarta, a grade planejada, foi descartada: achatada pelo ângulo virava um borrão.</figcaption></figure>
+
+<!-- ───────────── DORSAL ───────────── -->
+<h2>Capítulos 6 e 7 · a dorsal mais baixa <span class="tag decidir">escolha a altura</span></h2>
+<p class="sub">Descendo, a base da barbatana entra mais atrás das costelas e a ponta perto da cabeça deixa de parecer solta. A carcaça nova já está <b>instalada</b> com a +4 rasgada (a minha aposta), porque o capítulo 5 agora termina nela. Trocar de altura é rodar a instalação de novo.</p>
+<figure><img src="dorsal4/comparar-alturas.png" alt=""><figcaption><b>×5, da esquerda para a direita: +0 (a da rodada 4), +2, +4, +6 px.</b> Em cima a rasgada, embaixo a inteira.</figcaption></figure>
+<div class="tres">
+  <figure><img src="dorsal4/img/dorsal-base-192-104-0.3-0.9-r1-cap6.png" alt=""><figcaption><b>+2</b> rasgada</figcaption></figure>
+  <figure><img src="dorsal4/img/dorsal-base-192-106-0.3-0.9-r1-cap6.png" alt=""><figcaption><b>+4</b> rasgada <span class="tag rec">instalada · a minha aposta</span></figcaption></figure>
+  <figure><img src="dorsal4/img/dorsal-base-192-108-0.3-0.9-r1-cap6.png" alt=""><figcaption><b>+6</b> rasgada</figcaption></figure>
+  <figure><img src="dorsal4/img/dorsal-base-192-104-0.3-0.9-r0-cap6.png" alt=""><figcaption><b>+2</b> inteira</figcaption></figure>
+  <figure><img src="dorsal4/img/dorsal-base-192-106-0.3-0.9-r0-cap6.png" alt=""><figcaption><b>+4</b> inteira</figcaption></figure>
+  <figure><img src="dorsal4/img/dorsal-base-192-108-0.3-0.9-r0-cap6.png" alt=""><figcaption><b>+6</b> inteira</figcaption></figure>
+</div>
+<div class="duas">
+  <figure><img src="gif/jogo-cap7-apaga.gif" alt=""><figcaption><b>O capítulo 7 com a carcaça nova</b>, velocidade real: a lava esfria da cauda para a cabeça, o olho é a última luz, e o preto.</figcaption></figure>
+  <figure><img src="dorsal4/img/hoje-cap6.png" alt=""><figcaption>Antes: a carcaça de 24/09 (o bicho antigo), guardada em <code>assets/raw/f8-sobrevoo*-original.png</code>.</figcaption></figure>
+</div>
+<div class="item">
+  <p><span class="tag rec">consertado no caminho</span> A instalação da carcaça recebe a pintura por argumento e tem uma lista do que é da COLÔNIA dentro da área do bicho: o fogo da cúpula da direita e um entulho cor de ferrugem não apagam mais junto com a lava no capítulo 7. E o miolo branco do olho, que ficava aceso no quadro frio depois da última luz, agora apaga com ela.</p>
+</div>
+</main>
+</body>
+</html>

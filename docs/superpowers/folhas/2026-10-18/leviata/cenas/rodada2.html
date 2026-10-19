@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã novo · rodada 2</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  .tres { display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas, .tres { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã novo · rodada 2</h1>
+<p class="sub">Bloco D · 18/10/2026 · as suas escolhas da rodada 1 aplicadas. <a href="index.html" style="color:var(--sub)">← rodada 1</a> · <a href="rodada3.html" style="color:var(--ok)">rodada 3 →</a></p>
+
+<!-- ───────────── NAVES ───────────── -->
+<h2>Capítulo 4 · a nave sai da ferida, menor <span class="tag rec">no jogo</span></h2>
+<p class="sub">A nave agora termina a saída na <b>metade</b> do tamanho (<code>NAVE_ESCALA = 0.5</code> em <code>src/scenes/final/fora.ts</code>). É um fator só para todos os tiers, então a evolução entre eles continua a mesma. Os GIFs estão em velocidade real, 8 s, do corte até a queda.</p>
+<figure><img src="../naves/zoom-naves.png" alt=""><figcaption>Ampliado em 2,4 s, já estabilizada: <b>humana T1 · T2 · T3 · alien T1 · T2</b>.</figcaption></figure>
+<div class="tres">
+  <figure><img src="../naves/cap4-humana-t1.gif" alt=""><figcaption><b>Humana T1</b> (o jato).</figcaption></figure>
+  <figure><img src="../naves/cap4-humana-t2.gif" alt=""><figcaption><b>Humana T2</b>.</figcaption></figure>
+  <figure><img src="../naves/cap4-humana-t3.gif" alt=""><figcaption><b>Humana T3</b>.</figcaption></figure>
+  <figure><img src="../naves/cap4-alienigena-t1.gif" alt=""><figcaption><b>Alien T1</b> (a manta).</figcaption></figure>
+  <figure><img src="../naves/cap4-alienigena-t2.gif" alt=""><figcaption><b>Alien T2</b>.</figcaption></figure>
+  <figure><img src="../angulo2/gif/jogo-cap4-novo.gif" alt=""><figcaption><b>Antes</b>: o tamanho inteiro (humana T0, a da tecla F).</figcaption></figure>
+</div>
+<div class="item">
+  <p><span class="tag decidir">a ver</span> As <b>mantas alien</b> são escuras e, na metade do tamanho, quase somem no céu escuro. As humanas, laranja, aparecem bem. Se o tamanho estiver certo, dá para assar versões reduzidas de cada nave fora do jogo (redução com filtro bom, como as 12 escalas da reentrada), o que deixa o contorno mais limpo que a redução do motor. Também dá para usar um fator um pouco maior só na linhagem alien.</p>
+</div>
+
+<!-- ───────────── REENTRADA ───────────── -->
+<h2>Capítulo 5 · a reentrada · edição 83 <span class="tag rec">no jogo</span></h2>
+<p class="sub">Recortada pelo processo de 24/09: a borda em brasa amansada e as 12 escalas assadas. O corpo ficou com 160×161 (o de hoje tinha 170×161). O antigo está em <code>assets/raw/f8-reentrada*-original.png</code>. A sonda da cena final passa nos capítulos 5, 6 e 7.</p>
+<div class="duas">
+  <figure><img src="gif/jogo-cap5-novo.gif" alt=""><figcaption><b>No jogo</b>, velocidade real (8 s).</figcaption></figure>
+  <figure><img src="img/reentrada-x1-83-zoom5.png" alt=""><figcaption>A edição 83, ampliada.</figcaption></figure>
+</div>
+
+<!-- ───────────── CARCAÇA ───────────── -->
+<h2>Capítulos 6 e 7 · a carcaça 82, com a dorsal</h2>
+<p class="sub">A 82 recebeu a barbatana de cima por inpaint, <b>só numa região em cunha no dorso</b>, entre o fim das costelas e a cabeça. O resto são os pixels da 82. Tudo capturado no capítulo 6 de verdade.</p>
+<div class="duas">
+  <figure><img src="dorsal/img/carcaca-x1-82-so-carcaca-cap6.png" alt=""><figcaption><b>A 82</b>, sem a dorsal.</figcaption></figure>
+  <figure><img src="dorsal/img/dorsal-inpaint-92-0-cap6.png" alt=""><figcaption><b>Dorsal 92 <span class="tag rec">a minha aposta</span></b>: inclinada para trás e com um rasgo no meio. Lê como barbatana de tubarão quebrada.</figcaption></figure>
+  <figure><img src="dorsal/img/dorsal-inpaint-98-0-cap6.png" alt=""><figcaption><b>Dorsal 98</b>: mais em pé e esfarelando no topo.</figcaption></figure>
+  <figure><img src="dorsal/img/dorsal-inpaint-93-0-cap6.png" alt=""><figcaption><b>Dorsal 93</b>: rachada de lava, mais quadrada (pega o formato da região).</figcaption></figure>
+</div>
+<div class="item">
+  <p><span class="tag ruim">descartadas</span> A 91 e a 97 vieram com áreas brancas. As 3 de máscara curva (94–96) saíram ralas e se perdem no céu. As 2 feitas por edição inteira da 82 viraram uma crista de espinhos, não uma barbatana. Ficam em <code>cenas/dorsal/</code>.</p>
+  <p><span class="tag decidir">depois da escolha</span> Roda a instalação de 24/09 (<code>_gerar-sobrevoo.mjs instalar</code>): a versão fria do capítulo 7 e a folha da lava que apaga placa por placa, nas duas com a dorsal.</p>
+</div>
+
+<!-- ───────────── MENU ───────────── -->
+<h2>Menu · agora a partir do Leviatã NOVO</h2>
+<p class="sub">Nada do armored antigo: tudo sai da base aprovada (<code>aprovado/leviata-base.png</code>), o mesmo bicho do capítulo 4. São três caminhos: gerado pequeno no PixelLab com a base de referência e de estilo, o <code>/resize</code> de pixel art do PixelLab, e a redução direta.</p>
+<div class="item">
+  <p><b>O problema que apareceu:</b> o bicho novo é quase preto, e no menu (tint frio, véu, bruma) <b>todos sumiram</b>. Veja a captura abaixo. O de hoje aparece por causa das costelas pálidas no flanco, que o novo não tem. A solução foi <b>a luz da lua assada em pixel</b>: uma borda azul-aço clara em toda aresta de cima (dorso, dorsal, lobos do rabo, cabeça), uma segunda fileira mais suave e o casco um pouco mais claro. O desenho é o mesmo, iluminado para o lugar onde ele vive (o lado que vem acende).</p>
+</div>
+<div class="duas">
+  <figure><img src="menu2/base-gera-91-0-menu-zoom.png" alt=""><figcaption><b>Sem a luz</b> (gerada 91·0), no menu: some.</figcaption></figure>
+  <figure><img src="menu2/luz/hoje-menu-zoom.png" alt=""><figcaption><b>Hoje</b> (o armored antigo), no menu.</figcaption></figure>
+</div>
+
+<h3>Gerada 91·0 + luz <span class="tag rec">a minha aposta</span></h3>
+<div class="duas">
+  <figure><img src="menu2/base-gera-91-0-luz-grande.png" alt=""><figcaption>A mais fiel à base: dorsal alta, rabo em crescente, mandíbula com dentes, as guelras.</figcaption></figure>
+  <figure><img src="menu2/luz/base-gera-91-0-luz-menu-zoom.png" alt=""><figcaption>No menu.</figcaption></figure>
+</div>
+<h3>Gerada 91·2 + luz</h3>
+<div class="duas">
+  <figure><img src="menu2/base-gera-91-2-luz-grande.png" alt=""><figcaption>Mais lava no casco, a boca entreaberta.</figcaption></figure>
+  <figure><img src="menu2/luz/base-gera-91-2-luz-menu-zoom.png" alt=""><figcaption>No menu.</figcaption></figure>
+</div>
+<h3>Gerada 91·3 + luz</h3>
+<div class="duas">
+  <figure><img src="menu2/base-gera-91-3-luz-grande.png" alt=""><figcaption>A boca aberta, mais agressiva. A mandíbula é a parte que mais aparece de longe.</figcaption></figure>
+  <figure><img src="menu2/luz/base-gera-91-3-luz-menu-zoom.png" alt=""><figcaption>No menu.</figcaption></figure>
+</div>
+<h3>Gerada 92·2 + luz</h3>
+<div class="duas">
+  <figure><img src="menu2/base-gera-92-2-luz-grande.png" alt=""><figcaption>Corpo mais comprido, lava mais apagada.</figcaption></figure>
+  <figure><img src="menu2/luz/base-gera-92-2-luz-menu-zoom.png" alt=""><figcaption>No menu.</figcaption></figure>
+</div>
+<h3>Resize 91 + luz</h3>
+<div class="duas">
+  <figure><img src="menu2/base-resize-91-luz-grande.png" alt=""><figcaption>A base reduzida pelo PixelLab: a mais idêntica ao desenho grande, com menos leitura de pixel.</figcaption></figure>
+  <figure><img src="menu2/luz/base-resize-91-luz-menu-zoom.png" alt=""><figcaption>No menu.</figcaption></figure>
+</div>
+<div class="item">
+  <p>As versões sem luz de todas as gerações (11 no total) estão em <code>cenas/menu2/</code> (<code>*-grande.png</code>).</p>
+  <p><span class="tag decidir">depois da escolha</span> O escolhido vira o quadro 0 do nado. O nado sai no PixMiniMax, com o gesto de tubarão (escorço lateral do rabo, não rotação), e a luz da lua é reaplicada quadro a quadro. Depois vem o GIF no menu. A silhueta da F2 e da F3 sai do mesmo escolhido.</p>
+</div>
+</main>
+</body>
+</html>

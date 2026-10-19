@@ -89,7 +89,12 @@ if (modo === 'instalar') {
   //   f8-sobrevoo-lava-sheet.png a lava da carcaça, na caixa dela, em 8 estágios: as PLACAS (grupos de pixels
   //                              quentes ligados) apagam uma a uma, da cauda (esquerda) para a cabeça; no último
   //                              resta UMA — a última luz. O fogo das cúpulas não entra: é a colônia, não o bicho.
-  const SRC = 'scripts/_f8/_sobrevoo3-44.png';
+  // ⚠️ 19/10 (bloco D): a fonte e as luzes do morro passaram a ser ARGUMENTOS — a carcaça nova (a 82 com a dorsal da
+  // base) não tem as luzes nos mesmos lugares da 44. Sem argumentos, reinstala a de 24/09.
+  //   node scripts/_f8/_gerar-sobrevoo.mjs instalar [<fonte.png> <luzes-do-morro.json>]
+  const ANTIGA = 'scripts/_f8/_sobrevoo3-44.png';
+  const args = process.argv.slice(3); // (o bloco tem outro `resto` mais abaixo: a ordem das placas)
+  const SRC = args[0] ?? ANTIGA;
   fs.copyFileSync(SRC, 'public/sprites/f8-sobrevoo.png');
   const { data, info } = await sharp(SRC).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   // ⚠️ o limiar pega os tons MÉDIOS da lava também (r>95): com r>150 sobravam rachas laranja fracas no fim do 7
@@ -97,20 +102,53 @@ if (modo === 'instalar') {
   // a região da carcaça (a mesma elipse das rodadas de inpaint, um pouco maior)
   // ⚠️ 25/09 — as LUZES DO MORRO caem dentro da elipse e têm a cor da lava: apagavam junto com o bicho (*"logo
   // acima da cabeça, as luzes da montanha se apagam junto"*). Ficam de fora — elas são o mundo, não a carcaça.
-  const LUZES_DO_MORRO = [[295, 96], [299, 96], [304, 110], [325, 111], [310, 116], [322, 117], [326, 117], [87, 143]];
-  const noMorro = (x, y) => LUZES_DO_MORRO.some(([mx, my]) => Math.abs(x - mx) <= 1 && Math.abs(y - my) <= 1);
+  // O json: { "pontos": [[x, y], ...], "caixas": [[x0, y0, x1, y1], ...] } — as caixas tiram da carcaça o que é
+  // da COLÔNIA e cai na elipse (19/10, a 82: o fogo da cúpula da direita e o entulho cor de ferrugem embaixo).
+  const fora = args[1]
+    ? JSON.parse(fs.readFileSync(args[1], 'utf8'))
+    : { pontos: SRC === ANTIGA ? [[295, 96], [299, 96], [304, 110], [325, 111], [310, 116], [322, 117], [326, 117], [87, 143]] : [] };
+  const LUZES_DO_MORRO = fora.pontos ?? [];
+  const CAIXAS = fora.caixas ?? [];
+  const noMorro = (x, y) =>
+    LUZES_DO_MORRO.some(([mx, my]) => Math.abs(x - mx) <= 1 && Math.abs(y - my) <= 1) ||
+    CAIXAS.some(([x0, y0, x1, y1]) => x >= x0 && x <= x1 && y >= y0 && y <= y1);
   const naCarcaca = (x, y) => ((x - 214) / 130) ** 2 + ((y - 132) / 58) ** 2 <= 1 && !noMorro(x, y);
+  // ⚠️ 19/10 — o miolo BRANCO de uma brasa (o olho da 82: 23 px de amarelo-pálido) não é "quente" pela cor e ficava
+  // aceso no quadro frio depois que a última luz apagava. Uma ilha clara PEQUENA e CERCADA de lava é o miolo da lava:
+  // entra na placa. (O osso das costelas tem a mesma cor clara, mas é grande e não está cercado de lava.)
+  const brasa = new Uint8Array(W * H);
+  {
+    const lum = (p) => 0.3 * data[p * 4] + 0.59 * data[p * 4 + 1] + 0.11 * data[p * 4 + 2];
+    const visto = new Uint8Array(W * H);
+    for (let p0 = 0; p0 < W * H; p0++) {
+      if (visto[p0] || lum(p0) <= 170 || !naCarcaca(p0 % W, (p0 / W) | 0)) continue;
+      const ilha = [p0];
+      visto[p0] = 1;
+      const borda = new Set();
+      for (let k = 0; k < ilha.length; k++) {
+        const p = ilha[k], x = p % W, y = (p / W) | 0;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const xx = x + dx, yy = y + dy, q = yy * W + xx;
+          if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+          if (lum(q) > 170) { if (!visto[q]) { visto[q] = 1; ilha.push(q); } } else borda.add(q);
+        }
+      }
+      const quentes = [...borda].filter((q) => quente(q * 4)).length;
+      if (ilha.length < 40 && quentes >= borda.size * 0.5) for (const p of ilha) brasa[p] = 1;
+    }
+  }
+  const ehQuente = (p) => quente(p * 4) || brasa[p] === 1;
   const placa = new Int32Array(W * H).fill(-1);
   let n = 0;
   for (let p0 = 0; p0 < W * H; p0++) {
     const x0 = p0 % W, y0 = (p0 / W) | 0;
-    if (placa[p0] !== -1 || !naCarcaca(x0, y0) || !quente(p0 * 4)) continue;
+    if (placa[p0] !== -1 || !naCarcaca(x0, y0) || !ehQuente(p0)) continue;
     const f = [p0]; placa[p0] = n;
     for (let k = 0; k < f.length; k++) {
       const p = f[k], x = p % W, y = (p / W) | 0;
       for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
         const xx = x + dx, yy = y + dy, q = yy * W + xx;
-        if (xx < 0 || yy < 0 || xx >= W || yy >= H || placa[q] !== -1 || !naCarcaca(xx, yy) || !quente(q * 4)) continue;
+        if (xx < 0 || yy < 0 || xx >= W || yy >= H || placa[q] !== -1 || !naCarcaca(xx, yy) || !ehQuente(q)) continue;
         placa[q] = n; f.push(q);
       }
     }

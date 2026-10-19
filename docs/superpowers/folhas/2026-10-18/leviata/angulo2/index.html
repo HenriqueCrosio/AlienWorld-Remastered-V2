@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã final · 3ª rodada</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 22px 0 6px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .ruim { background: color-mix(in srgb, var(--bad) 22%, transparent); color: var(--bad); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#05070c; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã final · 3ª rodada, a partir do conceito original</h1>
+<p class="sub">Bloco D, passo 2 · 18/10/2026 · <a href="../angulo/index.html" style="color:var(--sub)">← a 2ª rodada</a></p>
+
+<div class="item">
+  <p><b>O que mudou desta vez:</b></p>
+  <ul>
+    <li><b>A fonte é o conceito aprovado inteiro</b> (<code>conceito-4-ferida-11-limpo</code>, 384×216, no espaço, com a lava acesa), a imagem de onde o <code>f8-leviata</code> foi recortado em 24/09. Antes eu partia do recorte já processado.</li>
+    <li><b>O mesmo processo de hoje até o jogo:</b> recorte do corpo, lava numa camada à parte, corpo "frio" por baixo, pontilhado que desfaz a nuvem, na mesma posição de cena. Conferi o processo no conceito original: ele reproduz o <code>f8-leviata</code> de hoje <b>sem nenhum pixel diferente</b>. Então o que se vê abaixo é exatamente como cada candidato chegaria ao jogo.</li>
+    <li><b>Pedido curto:</b> "a mesma imagem; troque só a pele pelo casco de placas, a cabeça pela da referência e as nadadeiras pelas de tubarão".</li>
+  </ul>
+  <p>Três caminhos, dez candidatos: <b>edição</b> do conceito com a base como referência (4), <b>geração</b> com as duas referências (3) e <b>inpaint</b> só da cabeça e da pele, com o rombo, as costelas e a nuvem nos pixels originais (3).</p>
+  <p><b>O que eu preciso de você:</b> se algum chegou ao nível da original, e qual.</p>
+</div>
+
+<h2>✅ Instalada: edição 73 contida, no jogo</h2>
+<div class="item">
+  <p>Está no capítulo 4. Os antigos estão em <code>assets/raw/f8-leviata*-original.png</code>. O rombo novo caiu no mesmo lugar do quadro, então a nave sai do mesmo ponto da tela (218, 75). A <code>probe-interlude4</code> passa em tudo do capítulo 4. As 4 falhas dela (a nave escolhida, o banner, o título e o crédito da vitória) já existiam com a arte antiga.</p>
+</div>
+<div class="duas">
+  <figure><img src="gif/jogo-cap4-novo.gif" alt=""><figcaption><b>Capítulo 4, novo</b>, em velocidade real (8 s): o corpo deriva, a lava esmorece, a nave sai do rombo.</figcaption></figure>
+  <figure><img src="gif/jogo-cap4-antigo.gif" alt=""><figcaption><b>Capítulo 4, antigo</b>, para comparar.</figcaption></figure>
+</div>
+
+<h2>A sua escolha: edição 73 · o brilho da boca <span class="tag rec">contida</span></h2>
+<div class="item">
+  <p><b>A pergunta:</b> o filtro e o pós-processamento aliviam a luz exagerada? Medi em vez de supor:</p>
+  <ul>
+    <li><b>A Atmosfera do capítulo 4 (<code>vacuo</code>) não alivia.</b> A névoa mistura no máximo ~30% de roxo, igual em tudo. O <b>halo soma</b> luz laranja em volta de tudo que é quente e aceso. A vinheta só pega as bordas. As capturas abaixo já são com o filtro (dá para ver a névoa e o grão).</li>
+    <li><b>O pós-processamento (bloco J)</b> ainda não existe. Não dá para contar com ele.</li>
+    <li><b>O que alivia de verdade é a camada de lava:</b> os pixels quentes da boca moram nela, e ela esmorece de 0,85 para 0,5 ao longo do capítulo.</li>
+    <li><b>O tamanho do excesso:</b> a lava de hoje também tem miolo amarelo (74 pixels). A 73 tem 186, quase todos na boca, num amarelo-lima que não existe na paleta da original.</li>
+  </ul>
+  <p><b>A proposta: conter só o miolo.</b> Os 158 pixels amarelos da cabeça vão para os laranjas da lava de hoje, na mesma ordem de claro e escuro. Nenhum outro pixel muda.</p>
+</div>
+<figure><img src="img/edit-73-brilho-zoom.png" alt=""><figcaption><b>A cabeça na cena.</b> Em cima, como veio: começo do capítulo (lava 0,85) · fim (0,5). Embaixo, <b>contida</b>: começo · fim.</figcaption></figure>
+<div class="duas">
+  <figure><img src="img/edit-73-0-cena85-final.png" alt=""><figcaption><b>Como veio</b>, começo do capítulo.</figcaption></figure>
+  <figure><img src="img/edit-73-0-contido-cena85-final.png" alt=""><figcaption><b>Contida</b>, começo do capítulo.</figcaption></figure>
+  <figure><img src="img/edit-73-0-cena50-final.png" alt=""><figcaption><b>Como veio</b>, fim do capítulo.</figcaption></figure>
+  <figure><img src="img/edit-73-0-contido-cena50-final.png" alt=""><figcaption><b>Contida</b>, fim do capítulo.</figcaption></figure>
+</div>
+
+<h2>Hoje</h2>
+<div class="duas">
+  <figure><img src="img/conceito-4-ferida-11-limpo-quadro.png" alt=""><figcaption><b>O conceito aprovado</b> (24/09), a fonte.</figcaption></figure>
+  <figure><img src="img/hoje-final.png" alt=""><figcaption><b>No capítulo 4</b>, depois do processo.</figcaption></figure>
+</div>
+
+<h2>Edição do conceito <span class="tag rec">o caminho que chegou</span></h2>
+<p class="sub">O conceito é a imagem editada, e a base aprovada é a referência. Composição, rombo, costelas, nuvem e teia de lava ficam; o desenho troca.</p>
+
+<h3>Edição 72 <span class="tag rec">a minha aposta</span></h3>
+<div class="duas">
+  <figure><img src="img/edit-72-0-quadro.png" alt=""><figcaption><b>A mais fiel.</b> A mesma silhueta e a mesma leitura de abatido, com o casco de placas, as guelras em brasa e a cabeça de mandíbula.</figcaption></figure>
+  <figure><img src="img/edit-72-0-cena-final.png" alt=""><figcaption>No capítulo 4.</figcaption></figure>
+</div>
+<h3>Edição 74</h3>
+<div class="duas">
+  <figure><img src="img/edit-74-0-quadro.png" alt=""><figcaption><b>Quase igual à 72</b>, com mais lava no dorso e a boca um pouco mais acesa.</figcaption></figure>
+  <figure><img src="img/edit-74-0-cena-final.png" alt=""><figcaption>No capítulo 4.</figcaption></figure>
+</div>
+<h3>Edição 71</h3>
+<div class="duas">
+  <figure><img src="img/edit-71-0-quadro.png" alt=""><figcaption><b>Ganhou a barbatana dorsal</b> e mais placas, mas menos teia de lava. Lê menos abatido.</figcaption></figure>
+  <figure><img src="img/edit-71-0-cena-final.png" alt=""><figcaption>No capítulo 4.</figcaption></figure>
+</div>
+<h3>Edição 73</h3>
+<div class="duas">
+  <figure><img src="img/edit-73-0-quadro.png" alt=""><figcaption><b>A boca ficou com um brilho amarelo forte demais</b>, que fura o "luz só na energia" contida da original.</figcaption></figure>
+  <figure><img src="img/edit-73-0-cena-final.png" alt=""><figcaption>No capítulo 4.</figcaption></figure>
+</div>
+
+<h2>Inpaint da cabeça e da pele</h2>
+<p class="sub">O rombo, as costelas e a nuvem são os pixels originais. A cabeça veio grande, rosnando, com dentes claros.</p>
+<h3>Inpaint 72</h3>
+<div class="duas">
+  <figure><img src="img/inpaint-72-0-quadro.png" alt=""><figcaption><b>O mais "monstro".</b> A cabeça vem bem para a câmera (o três-quartos mais forte) e a teia de lava é a mais rica. Mas a boca dominou o quadro e as nadadeiras se partiram em lascas.</figcaption></figure>
+  <figure><img src="img/inpaint-72-0-cena-final.png" alt=""><figcaption>No capítulo 4.</figcaption></figure>
+</div>
+<div class="duas">
+  <figure><img src="img/inpaint-71-0-quadro.png" alt=""><figcaption><b>Inpaint 71.</b> A cabeça clara e lisa, de tubarão comum.</figcaption></figure>
+  <figure><img src="img/inpaint-73-0-quadro.png" alt=""><figcaption><b>Inpaint 73.</b> Os dentes brancos (o gerador ignora o limite de cor).</figcaption></figure>
+</div>
+
+<h2>Geração com as duas referências</h2>
+<p class="sub">Vieram sem o espaço de fundo, e duas ganharam rabo, fugindo da composição. Ficam só para registro.</p>
+<div class="duas">
+  <figure><img src="img/gera-73-0-quadro.png" alt=""><figcaption><b>Geração 73</b>, a melhor das três: mais roxa e com rabo.</figcaption></figure>
+  <figure><img src="img/gera-72-0-quadro.png" alt=""><figcaption><b>Geração 72.</b></figcaption></figure>
+</div>
+
+<h2>Depois da escolha</h2>
+<div class="item">
+  <ul>
+    <li><span class="tag decidir">retoque</span> Só se você apontar algo no escolhido: um inpaint localizado (a boca, uma nadadeira), sem mexer no resto.</li>
+    <li><span class="tag decidir">cena</span> Instalar o recorte (corpo frio + lava) no lugar do <code>f8-leviata</code>, com o antigo indo para <code>assets/raw/*-original.png</code>. Remedir <code>FERIDA_X/Y</code> no rombo novo e rodar a <code>probe-interlude4</code>.</li>
+    <li><span class="tag decidir">o resto</span> O mesmo método, partindo do conceito de cada cena: a reentrada (capítulo 5), a carcaça na lua (capítulos 6 e 7), o menu e a silhueta.</li>
+  </ul>
+</div>
+
+<p class="sub">Ferramentas: <code>scripts/_leviata/_final-conceito.mjs</code> (<code>edit</code> | <code>gera</code> | <code>inpaint</code> | <code>mascara</code>), <code>_recortar-novo.mjs</code> (o processo de hoje, conferido sem nenhum pixel diferente) e <code>_capturar-final.mjs</code>.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leviatã novo · rodada 6</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --bad:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-right:6px; vertical-align: 2px; }
+  .rec { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; image-rendering: pixelated; border-radius: 6px; border:1px solid var(--line); background:#3a4150; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .duas { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 10px; }
+  .lado { display:grid; grid-template-columns: 1fr 2fr; gap: 12px; align-items: start; margin-top: 10px; }
+  @media (max-width: 900px) { .duas, .lado { grid-template-columns: 1fr; } }
+  code { background:#0a0c11; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  ol, ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .legenda { display:grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 13px; color: var(--sub); max-width: 520px; margin: 8px 0; }
+  .legenda b { color: var(--txt); }
+</style>
+</head>
+<body>
+<main>
+<h1>Leviatã novo · rodada 6 · a silhueta ao longe</h1>
+<p class="sub">Bloco D · 19/10/2026. <a href="rodada5.html" style="color:var(--sub)">← rodada 5</a> · A silhueta aparece no fim da F1, ao longo da F2 (cresce de longe para perto) e na F3.</p>
+
+<div class="item">
+  <p>A base é o <b>nado do menu que você aprovou</b> (PixMiniMax 92), o corpo inteiro, reduzido a 133 px. É o maior tamanho em que ela aparece; o jogo só reduz. Ela nada no lugar, olhando para a direita: o bicho segue em frente, e a nave o alcança pelo rabo, o mesmo rabo da F3.</p>
+  <p><b>O problema de hoje:</b> a silhueta leva um tint azul-escuro (a perspectiva aérea: longe é escuro). O bicho novo é quase preto, e com esse tint ele <b>some</b> na F2. Os 4 candidatos variam só em como a distância é assada:</p>
+  <div class="legenda">
+    <span><b>↖ menu</b>: a luz do menu + o tint e o alpha de hoje (a referência)</span>
+    <span><b>↗ aro + lava</b> <span class="tag rec">a minha aposta</span>: casco afundado na noite, aro frio de 1 px nas costas, lava acesa</span>
+    <span><b>↙ aro</b>: silhueta chapada, só o contorno frio em cima</span>
+    <span><b>↘ lava</b>: silhueta chapada, só as rachaduras de lava brilhando</span>
+  </div>
+</div>
+<figure><img src="silhueta/tratamentos-x4.png" alt=""><figcaption>Os quatro, quadro 0, ×4, na mesma ordem.</figcaption></figure>
+
+<h2>F2, perto <span class="tag decidir">escolha o tratamento</span></h2>
+<p class="sub">O fim da F2, já na chegada do chefão (o maior tamanho). O nado a 6 quadros/s, um ciclo de 2,7 s: mais lento que o do menu (10/s), porque gigante longe se move pesado.</p>
+<div class="lado">
+  <figure><img src="silhueta/hoje-f2-perto-zoom.png" alt=""><figcaption><b>Hoje</b>: o bicho antigo, que lê como nave.</figcaption></figure>
+  <figure><img src="silhueta/nado-f2-perto.gif" alt=""><figcaption>↖ menu · ↗ aro + lava · ↙ aro · ↘ lava, no jogo pausado (as rochas da frente são as do jogo).</figcaption></figure>
+</div>
+<div class="duas">
+  <figure><img src="silhueta/img/hoje-f2-perto.png" alt=""><figcaption>A tela inteira, hoje.</figcaption></figure>
+  <figure><img src="silhueta/img/arolava-f2-perto.png" alt=""><figcaption>A tela inteira, aro + lava.</figcaption></figure>
+</div>
+
+<h2>F2, longe</h2>
+<p class="sub">O começo da F2: 58 px, quase sumindo. Ele cresce daqui até o tamanho de cima ao longo da fase.</p>
+<div class="lado">
+  <figure><img src="silhueta/hoje-f2-longe-zoom.png" alt=""><figcaption><b>Hoje</b>.</figcaption></figure>
+  <figure><img src="silhueta/nado-f2-longe.gif" alt=""><figcaption>↖ menu · ↗ aro + lava · ↙ aro · ↘ lava.</figcaption></figure>
+</div>
+
+<h2>F3, na nebulosa</h2>
+<p class="sub">Contra a nebulosa clara, todos leem como bicho. O "menu" com o tint de hoje fica meio transparente.</p>
+<div class="lado">
+  <figure><img src="silhueta/hoje-f3-zoom.png" alt=""><figcaption><b>Hoje</b>.</figcaption></figure>
+  <figure><img src="silhueta/nado-f3.gif" alt=""><figcaption>↖ menu · ↗ aro + lava · ↙ aro · ↘ lava.</figcaption></figure>
+</div>
+
+<div class="item">
+  <p><span class="tag decidir">para decidir</span></p>
+  <ol>
+    <li><b>O tratamento:</b> menu, aro + lava (a minha aposta: o aro dá a forma no fundo escuro da F2 e a lava dá a identidade, luz só onde há energia), aro ou lava.</li>
+    <li><b>O ritmo do nado:</b> 6 quadros/s (como nos GIFs) ou os 10/s do menu.</li>
+  </ol>
+  <p>Depois da escolha: ela entra no jogo animada (no fim da F1, na F2 e na F3), com o GIF em velocidade real e as sondas da F1/F2.</p>
+</div>
+</main>
+</body>
+</html>

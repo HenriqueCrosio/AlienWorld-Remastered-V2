@@ -32,7 +32,9 @@ if (modo === 'fundo') {
 }
 
 if (modo === 'corpo') {
-  const SRC = `${F}/conceito-5-queda-11-limpo.png`;
+  // ⚠️ 18/10 (bloco D): o Leviatã novo vem do conceito EDITADO (a edição 83 que ele escolheu) — mesmo quadro, mesma
+  // lua, mesmo espaço (11,14,25, lum 14,3: ainda abaixo do limiar). `corpo <arquivo>` troca a fonte.
+  const SRC = resto[0] ?? `${F}/conceito-5-queda-11-limpo.png`;
   const { data, info } = await sharp(SRC).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: W, height: H } = info;
   const lum = (i) => 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
@@ -64,7 +66,12 @@ if (modo === 'corpo') {
       if (xx < 0 || yy < 0 || xx >= W || yy >= H || espaco[q] || corpo[q]) continue;
       // ⚠️ abaixo de y=151 a lua cinza do conceito encosta no focinho: ali só entra pixel QUENTE (a brasa) — um
       // corte reto nessa linha arrancava a ponta do focinho e deixava uma borda reta (a lição do rasgo)
-      if (yy >= 151 && !(data[q * 4] > data[q * 4 + 2] + 30)) continue;
+      // ⚠️ 18/10: na edição 83 o focinho desce mais, e o miolo BRANCO da brasa (255,255,254 — não passa no "quente") e
+      // as placas escuras abaixo de 151 ficavam de fora: um buraco transparente na ponta da boca (ele viu a mancha no
+      // GIF). A lua desta fonte vai só até lum 125: o branco (lum > 170) é brasa, e o escuro até y=156 é casco.
+      const qi = q * 4, ql = lum(qi);
+      const quente = data[qi] > data[qi + 2] + 30;
+      if (yy >= 151 && !quente && !(ql > 170) && !(ql < 45 && yy <= 156)) continue;
       corpo[q] = 1; f.push(q);
     }
   }
