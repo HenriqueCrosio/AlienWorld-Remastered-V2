@@ -25,6 +25,11 @@ export interface OpcoesAtmosfera {
   limiteLimpo: number;
   /** A profundidade da poeira (abaixo da nave). */
   profundidadePoeira: number;
+  /**
+   * Pixels de tela por pixel do jogo (padrão 1). O menu mora na camada HD, com a câmera em zoom `s`: o shader mede a
+   * névoa e o halo em `tela / s`, e a poeira nasce na área do jogo, em grãos de `s/2` px de tela.
+   */
+  escala?: number;
 }
 
 /** O que a sonda lê. */
@@ -62,6 +67,7 @@ export class Atmosfera {
   private limpos = 0;
   /** Ligado por `suspender()`: a costura pediu um quadro sem tratamento nenhum (ver ali). */
   private suspenso = false;
+  private escala = 1;
   /**
    * A TRIAGEM DAS CÂMERAS, em evento — não mais chamada de dentro de `update()`. ⚠️ 26/09 (achado do
    * review): `triar()` rodava no `update()` da `Atmosfera`, que só é chamado pelo `update()` da cena —
@@ -90,6 +96,8 @@ export class Atmosfera {
     const cam = scene.cameras.main;
     cam.setPostPipeline(CHAVE_ATMOSFERA);
     this.pipeline = cam.getPostPipeline(CHAVE_ATMOSFERA) as AtmosferaPipeline;
+    this.escala = opcoes.escala ?? 1;
+    this.pipeline.escala = this.escala;
     this.limpa = scene.cameras.add(0, 0, cam.width, cam.height, false, 'limpa');
 
     if (!scene.textures.exists(TEX_PX)) {
@@ -181,6 +189,22 @@ export class Atmosfera {
     this.limpa?.fadeOut(ms, 0, 0, 0);
   }
 
+  /** A tela mudou de escala (a camada HD se refez): o shader e a poeira acompanham. */
+  setEscala(s: number): void {
+    if (!this.ativo) return;
+    this.escala = s;
+    if (this.pipeline) this.pipeline.escala = s;
+    if (this.atual) this.montarPoeira(this.atual);
+  }
+
+  /**
+   * Solta o pipeline e a câmera limpa AGORA. Uma cena removida da camada HD (`scene.remove`) só emite `DESTROY`, nunca
+   * `SHUTDOWN` — sem isto, cada volta ao menu vazava o pipeline e os RenderTargets dele.
+   */
+  liberar(): void {
+    this.destruir();
+  }
+
   estado(): EstadoAtmosfera {
     // ⚠️ LÊ DO PIPELINE, NÃO DE `this.atual` — é `pipeline.perfil` quem de fato pinta o quadro, e
     // `suspender()` o zera sem tocar em `this.atual` (o controlador ainda "sabe" qual era o perfil).
@@ -221,7 +245,9 @@ export class Atmosfera {
   /** A poeira do perfil: grãos de 1 px com a própria deriva e cintilar, já espalhados pela tela. */
   private montarPoeira(p: PerfilAtmosfera): void {
     this.poeira?.destroy();
-    const { width: W, height: H } = this.scene.scale;
+    // A área da poeira é a do JOGO: numa câmera em zoom `escala`, o canvas tem `escala`× os pixels do mundo.
+    const W = this.scene.scale.width / this.escala;
+    const H = this.scene.scale.height / this.escala;
     const [r, g, b] = p.poeira.cor;
     const { deriva, espalhar, quantidade } = p.poeira;
     this.poeira = this.scene.add
@@ -234,6 +260,7 @@ export class Atmosfera {
         alpha: { values: [0, 0.6, 0.45, 0.6, 0], interpolation: 'linear' },
         tint: (r << 16) | (g << 8) | b,
         frequency: VIDA_POEIRA / quantidade,
+        scale: this.escala > 1 ? 0.5 : 1,
       })
       .setDepth(this.opcoes.profundidadePoeira);
     this.poeira.fastForward(VIDA_POEIRA);
@@ -243,6 +270,8 @@ export class Atmosfera {
   }
 
   private destruir(): void {
+    // Pode rodar duas vezes (o `liberar` e o `SHUTDOWN`): a segunda não faz nada.
+    if (!this.pipeline && !this.limpa && !this.poeira) return;
     this.scene.events.off(Phaser.Scenes.Events.PRE_RENDER, this.aoPreRenderizar);
     this.poeira?.destroy();
     this.poeira = null;

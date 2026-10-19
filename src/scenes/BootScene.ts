@@ -527,21 +527,11 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // (o tamanho impresso por anim-sheet.mjs); 9 quadros lado a lado.
   leviathanAliveSheet: { path: 'sprites/leviathan-alive-sheet.png', w: 116, h: 116 },
 
-  // O LEVIATÃ que NADA pelo menu "O DESPERTAR". Atravessa o céu UMA vez e some atrás da lua.
-  // 18/10 (bloco D): o Leviatã NOVO, o mesmo bicho da cena final (a gerada 91·0 da base aprovada), nadando como
-  // tubarão (PixMiniMax 92) e com a LUZ DA LUA assada em pixel — preto, ele sumia sob o tint e o véu do menu
-  // (`scripts/_leviata/_menu-nado.mjs`, `_luz-lua.mjs`, `_instalar-menu-nado.mjs`). 16 quadros de 176×80. A baleia
-  // blindada antiga (17 de 116×116) está em `assets/raw/leviathan-swim-sheet-original.png`.
-  leviathanSwimSheet: { path: 'sprites/leviathan-swim-sheet.png', w: 176, h: 80 },
   // 19/10 (bloco D) · a SILHUETA DISTANTE do Leviatã novo (fim da F1 e F2, `Parallax`): o nado do menu só como SOMBRA
   // com um aro frio nas costas (escolha dele: *"ao longe, é apenas uma sombra"*), assada em CADA largura de 28 a 72px
   // (um aro de 1px reduzido pela engine vira pontilhado) — uma linha por largura, 16 quadros do nado por linha, células
   // de 72×33 (`scripts/_leviata/_silhueta.mjs longe`). O quadro é (largura − 28) × 16 + quadro do nado.
   leviathanLonge: { path: 'sprites/leviathan-longe-sheet.png', w: 72, h: 33 },
-
-  // O EMBLEMA do jogo que SURGE quando o Leviatã some atrás da lua (menu). Brasão circular que
-  // faísca em loop. Célula 64×64; 9 quadros lado a lado.
-  menuLogoSheet: { path: 'sprites/menu-logo-sheet.png', w: 64, h: 64 },
 
   // O GOLFINHO BIOMECÂNICO — o mini-chefão da câmara B da Fase 4 (spec 2026-09-11). Animações
   // PixMiniMax aprovadas pelo Henrique, 80×80 com o bicho virado para a ESQUERDA (o sentido dos
@@ -1145,12 +1135,8 @@ const ART: Record<string, string> = {
   // Sem placeholder: se não existir, o menu cai no fundo antigo (parallax + véu).
   menuKeyart: 'sprites/menu-keyart.png',
 
-  // A LUA MORTA do diorama do menu (passe visual "O DESPERTAR"): esfera detalhada de crateras,
-  // sombra à esquerda, borda ciano — o foco do céu. Sem placeholder: sem ela, o MenuScene cai na
-  // lua procedural do Boot (`moon`).
-  menuMoon: 'sprites/menu-moon.png',
-
-  // A MESMA lua, recortada em 96×96 (a caixa da placeholder procedural) para servir de "a lua
+  // A lua do menu antigo (`assets/raw/menu-moon-original.png` desde o bloco E), recortada em 96×96 (a caixa da
+  // placeholder procedural) para servir de "a lua
   // que você deixou" no `Parallax` da Fase 2 (`setApproach()`) — o disco vinha com um cinturão de
   // destroços em volta, que sobra de graça para o tema do cinturão. Sem ela, o `Parallax` cai na
   // lua procedural (`moon`), que ficava com "cara de placeholder" ao lado do fundo pintado.

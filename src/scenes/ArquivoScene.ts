@@ -7,6 +7,7 @@ import { mapaAtivo, rotuloDaTecla, type Acao } from '../controles';
 import { Starfield } from '../Starfield';
 import { pixelText } from '../ui';
 import { escalaHD, irmaDe, registrarTextoHD } from '../uiHD';
+import { ITEM } from '../menu/numerosMenu';
 
 /** Os grupos da grade, na ordem do catálogo. */
 const GRUPOS: { cat: Categoria; nome: string }[] = [
@@ -83,7 +84,7 @@ export class ArquivoScene extends Phaser.Scene {
     this.irma = irmaDe(this);
     if (!this.irma) {
       // Sem a camada HD o menu nem mostra o item; se chegar aqui assim, volta.
-      this.scene.start('Menu', { cursor: 1, direto: true });
+      this.scene.start('Menu', { cursor: ITEM.arquivo, direto: true });
       return;
     }
     this.celulas = [];
@@ -278,7 +279,7 @@ export class ArquivoScene extends Phaser.Scene {
       [['RIGHT', 'D'], () => this.mover(1, 0)],
       [['UP', 'W'], () => this.mover(0, -1)],
       [['DOWN', 'S'], () => this.mover(0, 1)],
-      [['ESC', 'BACKSPACE'], () => this.scene.start('Menu', { cursor: 1, direto: true })],
+      [['ESC', 'BACKSPACE'], () => this.scene.start('Menu', { cursor: ITEM.arquivo, direto: true })],
     ];
     for (const [teclas, f] of pares) for (const t of teclas) kb.on(`keydown-${t}`, uma(f));
   }

@@ -156,6 +156,20 @@ export const PERFIS = {
     grao: 0.7,
     poeira: { quantidade: 130, cor: [140, 90, 70], deriva: [-2, -2], espalhar: 3 },
   },
+  /**
+   * O MENU (bloco E, 19/10): a colônia de Kepler à noite — as cores tiradas da pintura dele (névoa = os tons médio-
+   * escuros ×1,5 + o toque frio; halo = a média do âmbar aceso), uma névoa baixa no vale, lenta.
+   */
+  menu: {
+    nome: 'menu',
+    nevoa: { densidade: 0.75, cor: [42, 52, 67], altura: 2.2, velTras: [-3, 0], velFrente: [-8, 0], evolucao: 0.02 },
+    halo: { forca: 0.3, limiar: 0.59, cor: [182, 120, 70] },
+    grade: 1,
+    gradeQuente: 1,
+    vinheta: 0.55,
+    grao: 0.6,
+    poeira: { quantidade: 50, cor: [67, 83, 107], deriva: [-4, -1], espalhar: 2 },
+  },
 } as const satisfies Record<string, PerfilAtmosfera>;
 
 const lerp = (a: number, b: number, k: number): number => (k >= 1 ? b : a + (b - a) * k);

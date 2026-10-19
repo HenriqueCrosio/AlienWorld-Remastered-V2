@@ -19,6 +19,8 @@ precision highp float;
 
 uniform sampler2D uMainSampler;
 uniform vec2 uResolucao;
+// A escala da tela (bloco E): numa camada em s× a névoa e o halo medem em pixels do JOGO (tela / s), e não encolhem.
+uniform float uEscala;
 uniform float uTempo;
 uniform float uQuadroGrao;
 uniform float uDensidade;
@@ -72,8 +74,8 @@ void main() {
 
   // 1 · NÉVOA — duas camadas; a velocidade é a da TELA (a amostra anda ao contrário).
   float baixo = pow(tela.y / uResolucao.y, uAltura);
-  float f1 = fbm((tela - uVelTras * uTempo) / vec2(70.0, 26.0) + vec2(3.0, uTempo * uEvolucao), 3.0);
-  float f2 = fbm((tela - uVelFrente * uTempo) / vec2(45.0, 18.0) + vec2(9.0, 0.0), 5.0);
+  float f1 = fbm((tela / uEscala - uVelTras * uTempo) / vec2(70.0, 26.0) + vec2(3.0, uTempo * uEvolucao), 3.0);
+  float f2 = fbm((tela / uEscala - uVelFrente * uTempo) / vec2(45.0, 18.0) + vec2(9.0, 0.0), 5.0);
   float f = clamp(((f1 * 0.6 + f2 * 0.4) - 0.35) * 1.6 * (0.35 + baixo), 0.0, 1.0);
   cor = mix(cor, uCorNevoa, floor(f * 3.0 + d) / 3.0 * 0.42 * uDensidade);
 
@@ -81,7 +83,7 @@ void main() {
   float soma = 0.0;
   for (int j = -3; j <= 3; j++) {
     for (int i = -3; i <= 3; i++) {
-      vec3 s = texture2D(uMainSampler, (px + 0.5 + vec2(float(i), float(j)) * 2.0) / uResolucao).rgb;
+      vec3 s = texture2D(uMainSampler, (px + 0.5 + vec2(float(i), float(j)) * 2.0 * uEscala) / uResolucao).rgb;
       soma += step(uLimiarHalo, s.r) * step(s.g * 1.3, s.r);
     }
   }
@@ -125,6 +127,8 @@ export class AtmosferaPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPip
   escuro = 0;
   /** 0–1: o quanto do flash da câmera está na tela agora (o halo cede enquanto isso). */
   flash = 0;
+  /** Pixels de tela por pixel do jogo (1 no mundo; `s` na camada HD, onde mora o menu). */
+  escala = 1;
 
   constructor(game: Phaser.Game) {
     super({ game, name: CHAVE_ATMOSFERA, fragShader: FRAG });
@@ -137,6 +141,7 @@ export class AtmosferaPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPip
     this.set1f('uQuadroGrao', Math.floor(this.tempo * 12));
     this.set1f('uEscuro', this.escuro);
     this.set1f('uFlash', this.flash);
+    this.set1f('uEscala', this.escala);
     if (!p) {
       this.set1f('uDensidade', 0);
       this.set1f('uForcaHalo', 0);

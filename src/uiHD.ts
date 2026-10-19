@@ -175,3 +175,21 @@ export async function criarCamadaHD(mundoJogo: Phaser.Game, cenas: (typeof Phase
   document.addEventListener('fullscreenchange', () => requestAnimationFrame(alinhar));
   if (import.meta.env.DEV) (window as unknown as { __gameHD: Phaser.Game }).__gameHD = jogo;
 }
+
+/**
+ * Uma cena de FUNDO na camada (o cenário do menu, bloco E): entra ATRÁS de todas, inclusive das irmãs (a ordem de
+ * desenho é a ordem das cenas). Se já existe uma com a chave, ela sai antes. `null` se a camada não existe.
+ */
+export function cenaDeFundoHD(chave: string, classe: typeof Phaser.Scene, dados: object): Phaser.Scene | null {
+  if (!jogo || !jogo.isBooted) return null;
+  if (jogo.scene.getScene(chave)) jogo.scene.remove(chave);
+  const cena = jogo.scene.add(chave, classe, true, dados) as Phaser.Scene | null;
+  if (!cena) return null;
+  jogo.scene.sendToBack(chave);
+  return cena;
+}
+
+/** Tira uma cena da camada (só `DESTROY`: quem guarda pipeline solta no evento — ver `Atmosfera.liberar`). */
+export function removerCenaHD(chave: string): void {
+  if (jogo?.scene.getScene(chave)) jogo.scene.remove(chave);
+}

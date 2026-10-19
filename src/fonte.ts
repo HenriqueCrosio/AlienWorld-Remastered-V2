@@ -177,3 +177,78 @@ export function registrarFonte(scene: Phaser.Scene): void {
     });
   }
 }
+
+/** As letras de um texto como o jogo as assa — ver `glifosDaFonte`. */
+export interface Glifos {
+  w: number;
+  h: number;
+  /** Uma string por linha: `#` aceso, `.` apagado. */
+  linhas: string[];
+  /** A faixa de colunas de tinta de cada letra (sem os espaços). */
+  letras: { ch: string; x0: number; x1: number }[];
+}
+
+let pixelsDaFonte: { canvas: HTMLCanvasElement; px: Uint8ClampedArray } | null = null;
+
+/**
+ * As letras de `texto` como o jogo as assa (a Silkscreen no tamanho nativo, binarizada): a grade dos pixels acesos,
+ * sem as linhas e as colunas vazias, e a faixa de colunas de cada letra. É daqui que nasce o letreiro de neon do menu
+ * (`src/menu/letreiro.ts`) — o mesmo método de `scripts/_menu/_glifos.mjs`, que fez o gabarito. `null` sem a fonte.
+ */
+export function glifosDaFonte(texto: string): Glifos | null {
+  if (!assadas) return null;
+  const a = assadas.limpa;
+  const TW = a.canvas.width;
+  // Lida uma vez só: o letreiro pede o título e o subtítulo a cada escala, e cada leitura do canvas custa.
+  if (!pixelsDaFonte || pixelsDaFonte.canvas !== a.canvas) {
+    const ctx = a.canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return null;
+    pixelsDaFonte = { canvas: a.canvas, px: ctx.getImageData(0, 0, TW, a.canvas.height).data };
+  }
+  const px = pixelsDaFonte.px;
+  // A linha inteira: cada letra no avanço acumulado, como o `fillText` do `_glifos.mjs`.
+  const pos: { ch: string; x0: number; adv: number }[] = [];
+  let x = 0;
+  for (const ch of texto) {
+    const c = a.chars[ch.charCodeAt(0)];
+    if (!c) return null;
+    pos.push({ ch, x0: x, adv: c.adv });
+    x += c.adv;
+  }
+  const W = x + 2;
+  const H = a.linha;
+  const tinta = new Uint8Array(W * H);
+  for (const p of pos) {
+    const c = a.chars[p.ch.charCodeAt(0)];
+    for (let gy = 0; gy < c.h && gy < H; gy++) {
+      for (let gx = 0; gx < c.w && p.x0 + gx < W; gx++) {
+        if (px[((c.y + gy) * TW + c.x + gx) * 4 + 3] >= 128) tinta[gy * W + p.x0 + gx] = 1;
+      }
+    }
+  }
+  const colunaTem = (cx: number): boolean => {
+    for (let y = 0; y < H; y++) if (tinta[y * W + cx]) return true;
+    return false;
+  };
+  const linhaTem = (y: number): boolean => {
+    for (let cx = 0; cx < W; cx++) if (tinta[y * W + cx]) return true;
+    return false;
+  };
+  const ys = [...Array(H).keys()].filter(linhaTem);
+  const xs = [...Array(W).keys()].filter(colunaTem);
+  if (!ys.length || !xs.length) return null;
+  const [y0, y1, x0, x1] = [ys[0], ys[ys.length - 1], xs[0], xs[xs.length - 1]];
+  const linhas: string[] = [];
+  for (let y = y0; y <= y1; y++) {
+    let s = '';
+    for (let cx = x0; cx <= x1; cx++) s += tinta[y * W + cx] ? '#' : '.';
+    linhas.push(s);
+  }
+  const letras = pos
+    .filter((p) => p.ch !== ' ')
+    .map((p) => {
+      const cols = [...Array(p.adv).keys()].map((i) => p.x0 + i).filter(colunaTem);
+      return { ch: p.ch, x0: cols[0] - x0, x1: cols[cols.length - 1] - x0 };
+    });
+  return { w: x1 - x0 + 1, h: y1 - y0 + 1, linhas, letras };
+}

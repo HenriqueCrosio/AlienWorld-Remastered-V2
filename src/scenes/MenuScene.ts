@@ -1,536 +1,238 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
-import { Starfield } from '../Starfield';
-import { resetVariantCache, pickVariant } from '../art';
+import { GAME_WIDTH } from '../config';
+import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
-import { jogoHD } from '../uiHD';
+import { cenaDeFundoHD, escalaHD, EVENTO_ESCALA, irmaDe, jogoHD, removerCenaHD } from '../uiHD';
 import { Music } from '../systems/Music';
+import { Atmosfera } from '../systems/atmosfera/Atmosfera';
+import { PERFIS } from '../systems/atmosfera/perfis';
 import type { HandlingMode } from './GameScene';
+import { ABERTURA, CONDUCOES, CORES_TEXTO, ITEM, JATOS, NOMES_ITENS, SUBTITULO } from '../menu/numerosMenu';
+import { T_FIM, T_LISTA_POUSA, alfaItem, particulasDosJatos, posicaoLetreiro, quedaLista, subAcesa } from '../menu/abertura';
+import { Cenario, carregarCamadasMenu, type EstadoMenu } from '../menu/cenario';
+import { CHAVE_MENU_HD, MenuCenaHD } from '../menu/MenuCenaHD';
+import { criarTitulo, tingirLetras, type TituloMenu } from '../menu/titulo';
+import { Jatos } from '../menu/jatos';
+import { lerConducao, salvarConducao } from '../menu/conducao';
+
+const movimentoReduzido = (): boolean =>
+  typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * A TELA-TÍTULO — "O DESPERTAR".
+ * A TELA-TÍTULO — A COLÔNIA DE KEPLER À NOITE (bloco E, spec `docs/superpowers/specs/2026-10-19-menu-refeito-design.md`).
  *
- * Não é mais um quadro parado: é um DIORAMA que compõe camadas (fundo sem criatura + o Leviatã
- * canônico animado por cima + atmosfera em engine + UI) e ACORDA numa cinemática curta que
- * assenta num loop de repouso. Qualquer tecla pula a abertura; `prefers-reduced-motion` vai
- * direto ao repouso.
+ * O cenário — a pintura dele na resolução dela, viva, com perigo no ar, sob a Atmosfera `menu` — mora numa cena da
+ * camada HD (`MenuCenaHD`), atrás do texto; sem a camada, ele roda aqui mesmo, na resolução do jogo (§8.3). Esta cena
+ * fica com o relógio da ABERTURA (§6): alguns segundos só de cenário; o letreiro de neon entra pelo alto freando nos
+ * retrofoguetes e firma; a lista desce em formação; o neon acende letra por letra; por último, os olhos do W. Tudo é
+ * função do relógio (`src/menu/abertura.ts`): a sonda o para em qualquer instante (`irPara`).
  *
- * O fundo é um DIORAMA composto em CAMADAS com a arte do próprio jogo (estrelas, nebulosa, a lua
- * morta e bandas de montanha) — nada de placa pintada. Cada sprite passa pela guarda
- * `textures.exists`, e o starfield é procedural: o jogo nunca abre numa tela preta.
+ * Qualquer tecla antes de a lista pousar pula para o menu pousado; 1/2/3 começam direto; o movimento reduzido abre pousado.
  */
 export class MenuScene extends Phaser.Scene {
-  // Público: a sonda lê `settled`.
+  /** Público: a sonda lê. A lista pousou (ou a abertura foi pulada): o menu aceita teclas. */
   settled = false;
-  /**
-   * A LISTA do menu (04/10, o ARQUIVO DE CARTAS — spec `2026-10-04-arquivo-de-cartas-design.md` §2): COMEÇAR e
-   * ARQUIVO; o OPÇÕES (etapa 1.55) entra aqui depois. Público: a sonda lê o cursor.
-   */
-  cursorMenu = 0;
-  private itensMenu: Phaser.GameObjects.Text[] = [];
-  private pulsoMenu: Phaser.Tweens.Tween | null = null;
-  /** Voltando do Arquivo: o menu já montado, sem a abertura. */
+  /** Público: a sonda lê o cursor. */
+  cursorMenu: number = ITEM.comecar;
+  /** A condução da linha do menu, lembrada entre sessões. Pública: a sonda lê. */
+  conducao: HandlingMode = 'diegetico';
+  /** O relógio da abertura e o que o cenário lê (o véu, a janela quieta da tempestade). Público: a sonda lê. */
+  readonly estado: EstadoMenu = { tAbertura: 0, pulou: false, reduzido: false, pronto: false, congelado: false };
+  /** Sem a camada HD, o cenário mora aqui. Público: a sonda lê. */
+  cenario: Cenario | null = null;
+  /** Público: a sonda conta as partículas. */
+  jatos: Jatos | null = null;
+  private atm: Atmosfera | null = null;
+  private tCena = 0;
+  private tCursor = 0;
   private direto = false;
-
-  // A TRAVESSIA do Leviatã. Ele nasce fora da tela à esquerda (START_X), nada pelo alto do céu
-  // (Y — dentro do disco da lua, para ela poder ocluí-lo) e SOME atrás da lua (END_X = o centro
-  // dela). Escala menor que a antiga (1.6): ele lê DISTANTE, imponente ao longe. No reduced-motion
-  // ele fica ESTÁTICO em REST_X — o usuário de movimento reduzido ainda vê a cara do jogo.
-  private static readonly LEVI_Y = 56;
-  private static readonly LEVI_SCALE = 0.6;
-  /** Tint frio e escuro no Leviatã: ele lê como uma SILHUETA na bruma, não um herói iluminado. */
-  private static readonly LEVI_TINT = 0x8c9bb6;
-  private static readonly LEVI_START_X = -60;
-  private static readonly LEVI_END_X = 322;
-  private static readonly LEVI_REST_X = 96;
-  // Depth 1.5: ATRÁS da lua (2, opaca) — é ela quem o oclui ao sumir. Fica também atrás das
-  // bandas de montanha (3/4), mas ele nada ALTO, acima dos picos, então não há sobreposição.
-  private static readonly LEVI_DEPTH = 1.5;
-
-  // O EMBLEMA que surge DEPOIS que o Leviatã some atrás da lua — o brasão do jogo, no céu livre
-  // acima do título. Aparece no fim da travessia (ou no skip / no reduced-motion, já montado).
-  private static readonly LOGO_X = 192;
-  private static readonly LOGO_Y = 64;
-  private static readonly LOGO_SCALE = 1.15;
-
-  private starfield: Starfield | null = null;
-  private leviatan: Phaser.GameObjects.Sprite | null = null;
-  private logo: Phaser.GameObjects.Sprite | null = null;
-  private reducedMotion = false;
-  private introTweens: Phaser.Tweens.Tween[] = [];
-  /** Tudo que a abertura faz surgir (fade de 0→alvo). O `settle` os fixa no alvo. */
-  private uiTargets: { obj: Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Alpha; alpha: number }[] = [];
+  /** O texto mora na camada HD (a irmã)? Então as posições caem no pixel da tela (1/s). */
+  private naCamada = false;
+  private itens: Phaser.GameObjects.Text[] = [];
+  private coresItens: number[] = [];
+  private sub: Phaser.GameObjects.Text | null = null;
+  private desc: Phaser.GameObjects.Text | null = null;
+  private titulo: TituloMenu | null = null;
+  private readonly aoEscala = (s: number): void => this.titulo?.trocarEscala(s);
 
   constructor() {
     super('Menu');
   }
 
   init(data: { cursor?: number; direto?: boolean } = {}): void {
-    this.cursorMenu = data.cursor ?? 0;
+    this.cursorMenu = data.cursor ?? ITEM.comecar;
     this.direto = data.direto === true;
   }
 
   create(): void {
+    // Cada partida nova sorteia as variantes de arte de novo (como o menu antigo fazia).
     resetVariantCache();
-    this.registerLeviathanSwim();
-    this.registerLogo();
     this.settled = false;
-    this.introTweens = [];
-    this.uiTargets = [];
-    this.reducedMotion =
-      typeof window !== 'undefined' &&
-      !!window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    Object.assign(this.estado, { tAbertura: 0, pulou: false, pronto: false, congelado: false, reduzido: movimentoReduzido() });
+    this.cenario = null;
+    this.atm = null;
+    this.jatos = null;
+    this.titulo = null;
+    this.tCena = 0;
+    this.tCursor = 0;
+    this.itens = [];
+    this.coresItens = [];
+    this.conducao = lerConducao();
+    this.cameras.main.setBackgroundColor('#000000');
 
-    this.buildBackground();
-    this.buildLeviathan();
-    this.buildLogo();
-    this.buildAtmosphere();
-    this.buildUI();
-
+    this.montarCenario();
+    this.montarTexto();
     // A faixa atravessa a transição de cena sem corte (Music.play não reinicia se já toca).
     Music.play(this, 'stage1');
-
     this.bindKeys();
+    if (this.direto || this.estado.reduzido) this.pular();
 
-    if (this.reducedMotion) this.settle();
-    else this.playIntro();
-    if (this.direto) this.skipIntro();
+    const hd = jogoHD();
+    hd?.events.on(EVENTO_ESCALA, this.aoEscala);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      hd?.events.off(EVENTO_ESCALA, this.aoEscala);
+      removerCenaHD(CHAVE_MENU_HD);
+      this.titulo?.destruir();
+      this.jatos?.destruir();
+    });
   }
 
-  // ─── Camadas ────────────────────────────────────────────────────────────────
+  // ─── O cenário e o texto ────────────────────────────────────────────────────
 
-  /**
-   * O fundo do menu: um DIORAMA composto em CAMADAS com a própria arte do jogo — estrelas à
-   * deriva, nebulosa, a lua morta e duas bandas de montanha em profundidade (perspectiva aérea:
-   * o que está longe é mais escuro). Sem placa pintada: as camadas casam com o estilo do resto
-   * do jogo e dão profundidade de verdade. Cada sprite passa pela guarda `textures.exists`; o
-   * starfield é procedural e sempre existe — o menu nunca abre numa tela preta.
-   */
-  private buildBackground(): void {
-    this.starfield = new Starfield(this);
-    // No reduced-motion o campo é DESENHADO uma vez (estático) — `update()` não o deriva.
-    if (this.reducedMotion) this.starfield.update(0);
-
-    // Nebulosa: manchas grandes e dim no céu, dando cor ao vazio (violeta e petróleo, os tons
-    // da nebulosa do jogo — nada que brigue com o ciano do jogador).
-    this.addBg('nebula', 306, 44, 1.8, 0x5e4a8c, 0.5, 0);
-    this.addBg('nebula2', 64, 30, 2.0, 0x3d6a80, 0.42, 0);
-    this.addBg('nebula', 176, 22, 1.5, 0x4a5a8c, 0.3, 0);
-
-    // A LUA MORTA: o foco do céu, no alto à direita — a arte NOVA, cinza-escura com anel de
-    // asteroides (`menuMoon`); senão a lua procedural do Boot. Depth 2: ATRÁS das bandas de
-    // montanha (3/4) — o horizonte próximo passa À FRENTE dela. OPACA (alpha 1): o Leviatã
-    // (depth 1.5) passa ATRÁS e ela tem que ESCONDÊ-LO de verdade — com alpha < 1 a criatura
-    // vazava pela lua. O ar recuado/escuro vem do TINT frio, não da transparência. (`x=322` é o
-    // destino da travessia, LEVI_END_X.)
-    const moonKey = this.textures.exists('menuMoon') ? 'menuMoon' : 'moon';
-    this.add
-      .image(322, 52, moonKey)
-      .setName('menuMoon')
-      .setDepth(2)
-      .setScale(moonKey === 'menuMoon' ? 0.6 : 1.05)
-      .setAlpha(1)
-      .setTint(moonKey === 'menuMoon' ? 0x9aa6c4 : 0xffffff);
-
-    // O HORIZONTE em duas bandas de montanha. A profundidade é o TINT: a distante é quase o
-    // fundo, a média um degrau mais clara (a mesma perspectiva aérea da Fase 1).
-    this.scatterRidge('mtnFar', 156, 0x1a2440, 3, [0.8, 1.15], [42, 74]);
-    this.scatterRidge('mtnMid', 176, 0x33456e, 4, [0.7, 1.0], [58, 92]);
-
-    // O TERRENO ESCURO do terço de baixo: a cama onde o texto pousa. Sem ele, os 3 modos de
-    // condução competem com a montanha e perdem. Faixa da paleta, translúcida.
-    this.add
-      .rectangle(0, 150, GAME_WIDTH, GAME_HEIGHT - 150, COLORS.bgDeep, 0.55)
-      .setOrigin(0, 0)
-      .setDepth(6);
-
-    this.twinkleStars();
-  }
-
-  /** Uma mancha de fundo (nebulosa), com guarda de textura. */
-  private addBg(key: string, x: number, y: number, scale: number, tint: number, alpha: number, depth: number): void {
-    if (!this.textures.exists(key)) return;
-    this.add.image(x, y, key).setDepth(depth).setScale(scale).setTint(tint).setAlpha(alpha);
-  }
-
-  /**
-   * Uma banda de montanha espalhada na horizontal (origem na base, sobre a linha `baseY`).
-   * Sprites repetidos com escala/espelho variados e as variantes da arte — um horizonte sem
-   * costura. O tint dá a distância. Com guarda: sem a arte, a banda simplesmente não entra.
-   */
-  private scatterRidge(
-    key: string,
-    baseY: number,
-    tint: number,
-    depth: number,
-    scale: [number, number],
-    gap: [number, number],
-  ): void {
-    if (!this.textures.exists(key)) return;
-    let x = -12;
-    while (x < GAME_WIDTH + 24) {
-      this.add
-        .image(x, baseY, pickVariant(this, key))
-        .setOrigin(0.5, 1)
-        .setDepth(depth)
-        .setTint(tint)
-        .setScale(Phaser.Math.FloatBetween(...scale))
-        .setFlipX(Math.random() < 0.5);
-      x += Phaser.Math.Between(...gap);
-    }
-  }
-
-  /**
-   * O Leviatã: a estrela do diorama. Uma criatura colossal que NADA pelo céu (anim de ondulação),
-   * atravessando UMA vez — da esquerda até SUMIR atrás da lua. Aqui ele só NASCE (fora da tela à
-   * esquerda); a travessia em si é a tween de `playIntro`. Sem a sheet, o método é um no-op — o
-   * menu roda sem a criatura.
-   */
-  private buildLeviathan(): void {
-    if (!this.anims.exists('leviathan-swim')) return;
-
-    // SEM flip: o sprite do PixelLab já aponta para a DIREITA (ver install-sprite.mjs) — nadando
-    // para a direita, a cabeça lidera naturalmente. O tint escuro o afunda na bruma (mais dark).
-    if (this.reducedMotion) {
-      // Movimento reduzido: sem travessia. O Leviatã fica ESTÁTICO e pequeno à esquerda (quadro 0),
-      // para o usuário de movimento reduzido ainda ver a cara do jogo.
-      this.leviatan = this.add
-        .sprite(MenuScene.LEVI_REST_X, MenuScene.LEVI_Y, 'leviathanSwimSheet', 0)
-        .setDepth(MenuScene.LEVI_DEPTH)
-        .setScale(MenuScene.LEVI_SCALE)
-        .setTint(MenuScene.LEVI_TINT);
-      return;
-    }
-
-    this.leviatan = this.add
-      .sprite(MenuScene.LEVI_START_X, MenuScene.LEVI_Y, 'leviathanSwimSheet', 0)
-      .setDepth(MenuScene.LEVI_DEPTH)
-      .setScale(MenuScene.LEVI_SCALE)
-      .setTint(MenuScene.LEVI_TINT);
-    this.leviatan.play('leviathan-swim');
-  }
-
-  /**
-   * A atmosfera do diorama: BRUMA em camadas. Nada de partículas (as fagulhas `spark` viravam
-   * quadradinhos por toda a tela) — a bruma é feita de manchas de nebulosa translúcidas derivando
-   * devagar À FRENTE do Leviatã, para ele ser visto POR ENTRE a névoa: um leviatã distante e
-   * meio-escondido, não um herói iluminado. No reduced-motion nada disto se move: fica um quadro
-   * parado e legível.
-   */
-  private buildAtmosphere(): void {
-    if (this.reducedMotion) return;
-
-    // VÉU escuro sobre o céu: escurece a cena e afunda o Leviatã na penumbra (pedido: mais dark).
-    // Depth 2.4 — à FRENTE do Leviatã (1.5) e da lua (2), atrás da bruma e da UI.
-    this.add
-      .rectangle(0, 0, GAME_WIDTH, 150, COLORS.bgDeep, 0.24)
-      .setOrigin(0, 0)
-      .setDepth(2.4);
-
-    // A BRUMA: manchas de nebulosa grandes, escuras e translúcidas cobrindo a faixa do céu por
-    // onde o Leviatã passa. Depth 2.6 — À FRENTE dele: a criatura é vista ATRAVÉS da névoa. Cada
-    // mancha deriva de leve na horizontal e respira no alpha — fog vivo, sem costura de partícula.
-    if (this.textures.exists('nebula')) {
-      const bruma: [number, number, number, number][] = [
-        // x, y, escala, alpha-base
-        [70, 58, 3.2, 0.20],
-        [180, 68, 3.6, 0.24],
-        [300, 54, 3.0, 0.18],
-        [130, 46, 2.6, 0.16],
-        [250, 72, 3.2, 0.22],
-      ];
-      for (const [x, y, escala, alpha] of bruma) {
-        const mancha = this.add
-          .image(x, y, 'nebula')
-          .setDepth(2.6)
-          .setScale(escala)
-          .setAlpha(alpha)
-          .setTint(0x1b2338)
-          .setFlipX(Math.random() < 0.5);
-        this.tweens.add({
-          targets: mancha,
-          x: x + Phaser.Math.Between(18, 34),
-          alpha: alpha + 0.06,
-          duration: Phaser.Math.Between(7000, 11000),
-          yoyo: true,
-          repeat: -1,
-          ease: 'Sine.easeInOut',
-        });
+  private montarCenario(): void {
+    if (cenaDeFundoHD(CHAVE_MENU_HD, MenuCenaHD, { estado: this.estado })) return;
+    // Sem a camada HD: o cenário na resolução do jogo, aqui mesmo (§8.3).
+    carregarCamadasMenu(this.load, 'menuK1', 'sprites/menu/k1');
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
+      if (!this.sys.isActive()) return;
+      this.cenario = Cenario.criar(this, 1, 'menuK1', this.estado, 18);
+      if (this.cenario) {
+        // O texto, o título e os jatos ficam em 19+: fora do tratamento.
+        this.atm = new Atmosfera(this, { limiteLimpo: 19, profundidadePoeira: 1.5 });
+        this.atm.perfil(PERFIS.menu);
       }
-    }
-
-    // Névoa baixa: duas faixas translúcidas no horizonte, respirando de leve.
-    for (const [y, h, a] of [[128, 34, 0.12], [150, 30, 0.16]] as const) {
-      const nevoa = this.add
-        .rectangle(0, y, GAME_WIDTH, h, COLORS.bgFar, a)
-        .setOrigin(0, 0)
-        .setDepth(7);
-      this.tweens.add({
-        targets: nevoa, alpha: a + 0.1, duration: 4000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-      });
-    }
+      this.estado.pronto = true;
+    });
+    this.load.start();
   }
 
-  /**
-   * O EMBLEMA do jogo: um brasão circular que SURGE depois que o Leviatã some atrás da lua (o
-   * beat de recompensa). Aqui ele só nasce (invisível, faíscando em loop); `revealLogo` o traz.
-   * No reduced-motion já entra montado. Sem a sheet, é um no-op.
-   */
-  private buildLogo(): void {
-    if (!this.anims.exists('menu-logo')) return;
-
-    this.logo = this.add
-      .sprite(MenuScene.LOGO_X, MenuScene.LOGO_Y, 'menuLogoSheet', 0)
-      .setDepth(11)
-      .setScale(MenuScene.LOGO_SCALE);
-
-    if (this.reducedMotion) {
-      // Movimento reduzido: sem reveal nem faísca — o emblema já está montado, no quadro 0.
-      this.logo.setAlpha(1);
-      return;
+  private montarTexto(): void {
+    const L = ABERTURA.layout;
+    this.sub = this.t(L.x, -40, SUBTITULO, 8, CORES_TEXTO.subApagado).setAlpha(0);
+    // O ARQUIVO desenha os ícones na camada HD: sem ela, a lista é só COMEÇAR e a condução.
+    const n = jogoHD() ? NOMES_ITENS.length : NOMES_ITENS.length - 1;
+    this.cursorMenu = Math.min(this.cursorMenu, n - 1);
+    for (let i = 0; i < n; i++) {
+      this.itens.push(this.t(L.x, L.lista[i] - 40, NOMES_ITENS[i], 8, CORES_TEXTO.item).setAlpha(0));
+      this.coresItens.push(CORES_TEXTO.item);
     }
-    this.logo.setAlpha(0).play('menu-logo');
-  }
-
-  /** Traz o emblema (fade-in). Idempotente: só age na primeira chamada (fim da travessia OU skip). */
-  private revealLogo(): void {
-    if (!this.logo || this.logo.alpha > 0) return;
-    this.tweens.add({ targets: this.logo, alpha: 1, duration: 900, ease: 'Cubic.easeOut' });
-  }
-
-  /**
-   * Título, subtítulo, CTA e conduções — criados JÁ na posição final, com alpha 0. A abertura
-   * (ou o `settle`) é quem os revela. Registrados em `uiTargets` com o alpha de repouso de cada um.
-   */
-  private buildUI(): void {
-    const titulo = this.t(GAME_WIDTH / 2, 122, 'ALIEN WORLD', 20, COLORS.playerGlow);
-    const sub = this.t(GAME_WIDTH / 2, 139, 'R E M A S T E R E D', 8, COLORS.player);
-    // A LISTA: COMEÇAR e, com a camada HD (onde o Arquivo desenha os ícones), o ARQUIVO DE CARTAS.
-    const nomes = jogoHD() ? ['COMEÇAR', 'ARQUIVO DE CARTAS'] : ['COMEÇAR'];
-    const yLista = nomes.length > 1 ? 151 : 157;
-    this.itensMenu = nomes.map((n, i) => this.t(GAME_WIDTH / 2, yLista + i * 9, n, 8, COLORS.playerGlow));
-    this.cursorMenu = Math.min(this.cursorMenu, nomes.length - 1);
-    const [cta, ...outros] = this.itensMenu;
-    const rot = this.t(GAME_WIDTH / 2, 170, '— CONDUÇÃO —', 7, COLORS.metalLight);
-    const c1 = this.t(GAME_WIDTH / 2, 182, '[1]  DIEGÉTICA · a gravidade decide · recomendado', 8, COLORS.playerBright);
-    const c2 = this.t(GAME_WIDTH / 2, 194, '[2]  LEGACY · flap sempre · score ×1.25', 8, COLORS.hot);
-    const c3 = this.t(GAME_WIDTH / 2, 206, '[3]  LIVRE · voo livre sempre · acessível', 8, COLORS.player);
-
-    for (const obj of [titulo, sub, cta, rot, c1, c2, c3, ...outros]) {
-      obj.setAlpha(0);
-      this.uiTargets.push({ obj, alpha: 1 });
-    }
-
+    this.desc = this.t(L.x, L.desc, ' ', 7, CONDUCOES[0].cor).setAlpha(0);
     if (import.meta.env.DEV) {
-      const d1 = this.t(GAME_WIDTH / 2, 8, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, COLORS.metalMid);
-      const d2 = this.t(GAME_WIDTH / 2, 16, '[I][O][P][F] cutscenes  [L] f4  [K] núcleo', 7, COLORS.metalMid);
-      for (const obj of [d1, d2]) {
-        obj.setAlpha(0);
-        this.uiTargets.push({ obj, alpha: 1 });
-      }
+      this.t(GAME_WIDTH / 2, 8, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, CORES_TEXTO.dev);
+      this.t(GAME_WIDTH / 2, 16, '[I][O][P][F] cutscenes  [L] f4  [K] núcleo', 7, CORES_TEXTO.dev);
+    }
+    const irma = irmaDe(this);
+    this.naCamada = irma !== null;
+    this.titulo = criarTitulo(this, irma, escalaHD());
+    this.jatos = new Jatos(irma ?? this, 19, JATOS.max);
+  }
+
+  // ─── A abertura ─────────────────────────────────────────────────────────────
+
+  /** Vai direto ao menu pousado (uma tecla, a volta do Arquivo, o movimento reduzido). O relógio segue (o repouso). */
+  private pular(): void {
+    if (this.estado.pulou) return;
+    this.estado.pulou = true;
+    if (this.estado.tAbertura < T_FIM) this.estado.tAbertura = T_FIM;
+    if (!this.settled) {
+      this.settled = true;
+      this.tCursor = this.estado.tAbertura;
     }
   }
 
-  // ─── Estados: repouso e abertura ─────────────────────────────────────────────
-
-  /** Fixa tudo no estado de repouso, sem animar. É o destino da abertura e do reduced-motion. */
-  private settle(): void {
-    for (const { obj, alpha } of this.uiTargets) obj.setAlpha(alpha);
-    // O título pode ter parado no meio do "baque" (escala > 1) se a abertura foi pulada.
-    (this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined)?.setScale(1);
-    // O Leviatã NÃO é tocado aqui: no fluxo natural ele SEGUE nadando (a travessia dura ~10s, bem
-    // além do assentamento da UI) e se destrói sozinho ao sumir atrás da lua. Só o SKIP — que rompe
-    // a travessia no meio — precisa removê-lo, e faz isso em `skipIntro`.
-    this.settled = true;
-    // A lista: o cursor e o pisca-pisca no item dele (todos os caminhos passam aqui, inclusive o movimento reduzido).
-    this.marcarMenu();
+  /** Para a sonda: o relógio da abertura parado no instante `t` (s), já desenhado. */
+  irPara(t: number): void {
+    this.estado.congelado = true;
+    this.estado.pulou = false;
+    this.estado.tAbertura = t;
+    this.settled = t >= T_LISTA_POUSA;
+    this.desenhar(t);
   }
 
-  /**
-   * A ABERTURA — "O DESPERTAR". O diorama já está montado; um VÉU PRETO por cima o REVELA
-   * (fade-out ~1s), o Leviatã desliza entrando, o título BATE e a UI surge. Cada tween entra em
-   * `introTweens` para o skip poder matá-los; o fecho chama `settle()` + os pulsos de repouso.
-   */
-  private playIntro(): void {
-    // O véu que esconde o diorama montado e some para revelá-lo. Depth 15: acima do fundo e do
-    // Leviatã (≤10), abaixo da UI (20) — o texto surge por conta própria, não sob o véu.
-    const veu = this.add
-      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.bgDeep, 1)
-      .setOrigin(0, 0)
-      .setDepth(15)
-      .setName('introVeu');
-    this.introTweens.push(
-      this.tweens.add({
-        targets: veu,
-        alpha: 0,
-        duration: 1000,
-        ease: 'Cubic.easeOut',
-        onComplete: () => veu.destroy(),
-      }),
-    );
-
-    // A TRAVESSIA do Leviatã: surge da esquerda e NADA pelo céu até SUMIR atrás da lua (~16s —
-    // BEM lento, para vender distância e imponência). Ao se esconder, se DESTRÓI: o repouso é só o
-    // diorama + o emblema (a criatura passa UMA vez). A tween entra em `introTweens` p/ o skip cortá-la.
-    if (this.leviatan) {
-      this.leviatan.setAlpha(0);
-      this.introTweens.push(
-        this.tweens.add({ targets: this.leviatan, alpha: 1, duration: 1600, ease: 'Cubic.easeOut' }),
-      );
-      this.introTweens.push(
-        this.tweens.add({
-          targets: this.leviatan,
-          x: MenuScene.LEVI_END_X,
-          duration: 16000,
-          ease: 'Sine.easeInOut',
-          onComplete: () => {
-            this.leviatan?.destroy();
-            this.leviatan = null;
-            // O Leviatã sumiu atrás da lua — é o momento do EMBLEMA surgir (o beat de recompensa).
-            this.revealLogo();
-          },
-        }),
-      );
-    }
-
-    // O título BATE (surge com leve overshoot de escala) e o resto da UI surge atrás.
-    const titulo = this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined;
-    if (titulo) {
-      titulo.setScale(1.14);
-      this.introTweens.push(
-        this.tweens.add({ targets: titulo, alpha: 1, duration: 500, delay: 2100, ease: 'Cubic.easeOut' }),
-      );
-      this.introTweens.push(
-        this.tweens.add({ targets: titulo, scale: 1, duration: 600, delay: 2100, ease: 'Back.easeOut' }),
-      );
-    }
-    for (let i = 1; i < this.uiTargets.length; i++) {
-      const { obj, alpha } = this.uiTargets[i];
-      this.introTweens.push(
-        this.tweens.add({ targets: obj, alpha, duration: 500, delay: 2500 + i * 40, ease: 'Cubic.easeOut' }),
-      );
-    }
-
-    // Fecho: aos ~3.3s o estado montado é oficial (e liga os pulsos de repouso).
-    this.time.delayedCall(3300, () => {
-      if (!this.settled) {
-        this.settle();
-        this.startRestPulses();
-      }
-    });
+  /** Para a sonda: onde está cada coisa agora. */
+  diagnostico(): {
+    titulo: { x: number; y: number; acesas: number; olhos: boolean } | null;
+    sub: { y: number; alfa: number } | null;
+    jatos: number;
+    lista: { texto: string; y: number; alfa: number }[];
+    desc: { texto: string; alfa: number } | null;
+  } {
+    return {
+      titulo: this.titulo?.estado() ?? null,
+      sub: this.sub ? { y: this.sub.y, alfa: this.sub.alpha } : null,
+      jatos: this.jatos?.quantos ?? 0,
+      lista: this.itens.map((o) => ({ texto: o.text, y: o.y, alfa: +o.alpha.toFixed(3) })),
+      desc: this.desc ? { texto: this.desc.text, alfa: this.desc.alpha } : null,
+    };
   }
 
-  /** Os pulsos do estado de repouso: o brilho vivo do título e o pisca-pisca do CTA. */
-  private startRestPulses(): void {
-    if (this.reducedMotion) return;
-    const titulo = this.uiTargets[0]?.obj as Phaser.GameObjects.Text | undefined;
-    if (titulo) {
-      this.tweens.add({
-        targets: titulo, alpha: 0.82, duration: 2600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-      });
+  override update(_time: number, delta: number): void {
+    const dt = delta / 1000;
+    if (this.cenario) {
+      this.tCena += dt;
+      this.atm?.update(dt);
+      this.cenario.atualizar(this.tCena);
     }
-    // O pisca-pisca do CTA é do item do cursor (`marcarMenu`, chamado pelo `settle`).
+    if (!this.estado.pronto) return;
+    if (!this.estado.congelado) this.estado.tAbertura += dt;
+    const t = this.estado.tAbertura;
+    if (!this.settled && t >= T_LISTA_POUSA) {
+      this.settled = true;
+      this.tCursor = t;
+    }
+    this.desenhar(t);
   }
 
-  /**
-   * O item do cursor ganha o "> <" e o pisca-pisca do CTA; os outros ficam quietos, mais apagados. (Não "▸ ◂": a
-   * Silkscreen da voz do jogo não tem esses glifos — sumiam.)
-   */
-  private marcarMenu(): void {
-    this.pulsoMenu?.remove();
-    this.pulsoMenu = null;
-    this.itensMenu.forEach((t, i) => {
-      const nome = t.text.replace(/^> | <$/g, '');
+  private desenhar(t: number): void {
+    const s = this.naCamada ? escalaHD() : 1;
+    const q = (v: number): number => Math.round(v * s) / s;
+    const L = ABERTURA.layout;
+    const p = posicaoLetreiro(t - ABERTURA.letreiro.t0);
+    const cx = q(p.x);
+    const cy = q(p.y);
+    this.titulo?.atualizar(t, cx, cy);
+    if (this.sub) {
+      this.sub.setPosition(cx, q(p.y + L.sub - L.titulo)).setAlpha(1);
+      tingirLetras(this.sub, (i) => (subAcesa(i, t) ? CORES_TEXTO.subAceso : CORES_TEXTO.subApagado));
+    }
+    this.jatos?.desenhar(this.estado.pulou ? [] : particulasDosJatos(t), s);
+    this.desenharLista(t, q);
+  }
+
+  private desenharLista(t: number, q: (v: number) => number): void {
+    const L = ABERTURA.layout;
+    const c = CONDUCOES.find((x) => x.id === this.conducao) ?? CONDUCOES[0];
+    this.itens.forEach((o, i) => {
+      const nome = i === ITEM.conducao ? `CONDUÇÃO: ${c.nome}` : NOMES_ITENS[i];
       const sel = i === this.cursorMenu;
-      t.setText(sel && this.itensMenu.length > 1 ? `> ${nome} <` : nome);
-      t.setColor(Phaser.Display.Color.IntegerToColor(sel ? COLORS.playerGlow : COLORS.metalLight).rgba);
-      if (this.settled) t.setAlpha(sel ? 1 : 0.7);
-    });
-    const sel = this.itensMenu[this.cursorMenu];
-    if (sel && this.settled && !this.reducedMotion) {
-      this.pulsoMenu = this.tweens.add({
-        targets: sel, alpha: 0.4, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-      });
-    }
-  }
-
-  /** Confirma o item do cursor (Enter / Espaço). */
-  private confirmarMenu(): void {
-    if (this.cursorMenu === 1) this.scene.start('Arquivo');
-    else this.start('diegetico');
-  }
-
-  /** Pula a abertura: mata os tweens em curso, tira o véu e vai ao repouso (com os pulsos). */
-  private skipIntro(): void {
-    if (this.settled) return;
-    for (const tw of this.introTweens) tw.remove();
-    this.introTweens = [];
-    this.children.getByName('introVeu')?.destroy();
-    // Pular rompe a travessia no meio; o repouso é SEM criatura, então o Leviatã é removido — e o
-    // emblema (que só surgiria no fim da travessia) aparece agora, já que vamos direto ao repouso.
-    this.leviatan?.destroy();
-    this.leviatan = null;
-    this.revealLogo();
-    this.settle();
-    this.startRestPulses();
-  }
-
-  /**
-   * Estrelas que CINTILAM sobre o diorama. Posições a dedo no céu livre (a mesma lógica do menu
-   * antigo). Sem custo de animação de pintura — só uma dúzia de pontos piscando.
-   */
-  private twinkleStars(): void {
-    const PONTOS: [number, number][] = [
-      [18, 30], [58, 12], [95, 55], [115, 20], [255, 18], [280, 48],
-      [310, 14], [370, 22], [375, 105], [250, 100], [70, 85], [30, 110],
-    ];
-    for (const [x, y] of PONTOS) {
-      const estrela = this.add
-        .rectangle(x, y, 1, 1, Math.random() < 0.5 ? COLORS.starBright : COLORS.starMid)
-        .setDepth(1)
-        .setAlpha(0.15);
-      if (this.reducedMotion) {
-        estrela.setAlpha(0.7);
-        continue;
+      const txt = sel ? `> ${nome} <` : nome;
+      if (o.text !== txt) o.setText(txt);
+      const cor = sel ? CORES_TEXTO.selecionado : CORES_TEXTO.item;
+      if (this.coresItens[i] !== cor) {
+        o.setColor(Phaser.Display.Color.IntegerToColor(cor).rgba);
+        this.coresItens[i] = cor;
       }
-      this.tweens.add({
-        targets: estrela,
-        alpha: Phaser.Math.FloatBetween(0.6, 1),
-        duration: Phaser.Math.Between(900, 2300),
-        delay: Phaser.Math.Between(0, 2000),
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
-    }
-  }
-
-  /**
-   * Registra a animação de NADO do Leviatã UMA vez (a cena recria a cada entrada; `anims.exists`
-   * evita o grito de chave repetida). 16 quadros do nado de tubarão (18/10): o 17º gerado era o 1º de
-   * novo e saiu, então o loop fecha direto, SEM yoyo.
-   */
-  private registerLeviathanSwim(): void {
-    if (this.textures.exists('leviathanSwimSheet') && !this.anims.exists('leviathan-swim')) {
-      this.anims.create({
-        key: 'leviathan-swim',
-        frames: this.anims.generateFrameNumbers('leviathanSwimSheet', { start: 0, end: 15 }),
-        frameRate: 10,
-        repeat: -1,
-      });
-    }
-  }
-
-  /** Registra a animação de FAÍSCA do emblema UMA vez (loop; 9 quadros de 64×64). */
-  private registerLogo(): void {
-    if (this.textures.exists('menuLogoSheet') && !this.anims.exists('menu-logo')) {
-      this.anims.create({
-        key: 'menu-logo',
-        frames: this.anims.generateFrameNumbers('menuLogoSheet', { start: 0, end: 8 }),
-        frameRate: 8,
-        repeat: -1,
-      });
+      const { dy, alfa } = quedaLista(i, t);
+      o.setPosition(L.x, q(L.lista[i] + dy));
+      o.setAlpha(alfa * alfaItem(sel, t, this.tCursor, this.settled));
+    });
+    if (this.desc) {
+      const mostra = this.settled && this.cursorMenu === ITEM.conducao;
+      if (mostra && this.desc.text !== c.desc) {
+        this.desc.setText(c.desc);
+        this.desc.setColor(Phaser.Display.Color.IntegerToColor(c.cor).rgba);
+      }
+      this.desc.setAlpha(mostra ? 1 : 0);
     }
   }
 
@@ -538,27 +240,25 @@ export class MenuScene extends Phaser.Scene {
 
   private bindKeys(): void {
     const kb = this.input.keyboard!;
-
-    // Qualquer tecla durante a abertura pula direto ao menu montado.
+    // Antes de a lista pousar, qualquer tecla só PULA a abertura. O Phaser emite `keydown-X` ANTES de `keydown`:
+    // os handlers da lista se guardam com `settled` (e não agem), e este pula. Os atalhos 1/2/3 e os de dev começam
+    // direto, como sempre (as sondas contam com isso).
     kb.on('keydown', () => {
-      if (!this.settled) this.skipIntro();
+      if (!this.settled) this.pular();
     });
-
-    kb.on('keydown-ENTER', () => this.confirmarMenu());
-    kb.on('keydown-SPACE', () => this.confirmarMenu());
-    // ↑↓ / W S movem o cursor da lista (só depois da abertura: durante ela, a 1ª tecla pula para o repouso).
     // ⚠️ UM EVENTO, UMA VEZ (a lição da mesa, 03/10): o Phaser reprocessa a fila de teclas a cada evento novo, e o ↓
-    // andava duas casas — numa lista de dois, voltava para onde estava (a `probe-arquivo` pegou).
+    // andava duas casas.
     const vistos = new WeakSet<KeyboardEvent>();
-    const mover = (d: number) => (ev: KeyboardEvent) => {
+    const umaVez = (f: () => void) => (ev: KeyboardEvent): void => {
       if (vistos.has(ev)) return;
       vistos.add(ev);
-      if (!this.settled || this.itensMenu.length < 2) return;
-      this.cursorMenu = Phaser.Math.Wrap(this.cursorMenu + d, 0, this.itensMenu.length);
-      this.marcarMenu();
+      f();
     };
-    for (const t of ['UP', 'W']) kb.on(`keydown-${t}`, mover(-1));
-    for (const t of ['DOWN', 'S']) kb.on(`keydown-${t}`, mover(1));
+    for (const k of ['UP', 'W']) kb.on(`keydown-${k}`, umaVez(() => this.mover(-1)));
+    for (const k of ['DOWN', 'S']) kb.on(`keydown-${k}`, umaVez(() => this.mover(1)));
+    for (const k of ['LEFT', 'A']) kb.on(`keydown-${k}`, umaVez(() => this.trocar(-1)));
+    for (const k of ['RIGHT', 'D']) kb.on(`keydown-${k}`, umaVez(() => this.trocar(1)));
+    for (const k of ['ENTER', 'SPACE']) kb.on(`keydown-${k}`, umaVez(() => this.confirmar()));
     kb.on('keydown-ONE', () => this.start('diegetico'));
     kb.on('keydown-TWO', () => this.start('flap'));
     kb.on('keydown-THREE', () => this.start('free'));
@@ -568,64 +268,48 @@ export class MenuScene extends Phaser.Scene {
       // O SANDBOX de dev (`src/sandbox/`): monte a build, os inimigos e o fundo, e jogue.
       kb.on('keydown-X', () => this.game.events.emit('sandbox:montagem'));
       kb.on('keydown-V', () => this.scene.start('Game', { stage: 2, handling: 'diegetico' }));
-      kb.on('keydown-C', () =>
-        this.scene.start('Game', { stage: 2, handling: 'diegetico', practice: true }),
-      );
+      kb.on('keydown-C', () => this.scene.start('Game', { stage: 2, handling: 'diegetico', practice: true }));
       kb.on('keydown-M', () => this.scene.start('Game', { stage: 3, handling: 'diegetico' }));
-      kb.on('keydown-N', () =>
-        this.scene.start('Game', { stage: 3, handling: 'diegetico', practice: true }),
-      );
-      kb.on('keydown-I', () =>
-        this.scene.start('Interlude', { score: 4820, handling: 'diegetico' }),
-      );
-      kb.on('keydown-O', () =>
-        this.scene.start('Interlude2', {
-          score: 9140,
-          handling: 'diegetico',
-          ship: 'humana',
-          stage: 3,
-        }),
-      );
-      kb.on('keydown-L', () =>
-        this.scene.start('Game', { stage: 4, handling: 'diegetico', ship: 'humana' }),
-      );
-      kb.on('keydown-K', () =>
-        this.scene.start('Game', { stage: 4, handling: 'diegetico', practice: true }),
-      );
-      kb.on('keydown-P', () =>
-        this.scene.start('Interlude3', {
-          score: 15200,
-          handling: 'diegetico',
-          ship: 'humana',
-          stage: 4,
-        }),
-      );
+      kb.on('keydown-N', () => this.scene.start('Game', { stage: 3, handling: 'diegetico', practice: true }));
+      kb.on('keydown-I', () => this.scene.start('Interlude', { score: 4820, handling: 'diegetico' }));
+      kb.on('keydown-O', () => this.scene.start('Interlude2', { score: 9140, handling: 'diegetico', ship: 'humana', stage: 3 }));
+      kb.on('keydown-L', () => this.scene.start('Game', { stage: 4, handling: 'diegetico', ship: 'humana' }));
+      kb.on('keydown-K', () => this.scene.start('Game', { stage: 4, handling: 'diegetico', practice: true }));
+      kb.on('keydown-P', () => this.scene.start('Interlude3', { score: 15200, handling: 'diegetico', ship: 'humana', stage: 4 }));
       kb.on('keydown-F', () =>
         this.scene.start('Interlude4', {
-          score: 21000,
-          handling: 'diegetico',
-          ship: 'humana',
-          stage: null,
-          stageDone: 4,
-          practice: false,
-          baseScore: 15200,
+          score: 21000, handling: 'diegetico', ship: 'humana', stage: null, stageDone: 4, practice: false, baseScore: 15200,
         }),
       );
     }
   }
 
-  override update(_time: number, delta: number): void {
-    // O diorama é estático; só o starfield deriva, dando a vida sutil do fundo. No reduced-motion
-    // ele já foi desenhado estático em `buildBackground` — nada se move aqui.
-    if (this.reducedMotion) return;
-    this.starfield?.update(delta / 1000);
+  private mover(d: number): void {
+    if (!this.settled || this.itens.length < 2) return;
+    this.cursorMenu = Phaser.Math.Wrap(this.cursorMenu + d, 0, this.itens.length);
+    this.tCursor = this.estado.tAbertura;
   }
 
-  private t(x: number, y: number, value: string, size: number, color: number): Phaser.GameObjects.Text {
-    return pixelText(this, x, y, value, { size, color }).setDepth(20);
+  /** ←→ (e Enter) na linha da condução trocam o valor, e ele fica lembrado. */
+  private trocar(d: number): void {
+    if (!this.settled || this.cursorMenu !== ITEM.conducao) return;
+    const i = CONDUCOES.findIndex((c) => c.id === this.conducao);
+    this.conducao = CONDUCOES[Phaser.Math.Wrap(i + d, 0, CONDUCOES.length)].id;
+    salvarConducao(this.conducao);
+  }
+
+  private confirmar(): void {
+    if (!this.settled) return;
+    if (this.cursorMenu === ITEM.comecar) this.start(this.conducao);
+    else if (this.cursorMenu === ITEM.conducao) this.trocar(1);
+    else if (this.cursorMenu === ITEM.arquivo) this.scene.start('Arquivo');
   }
 
   private start(handling: HandlingMode): void {
     this.scene.start('Game', { handling });
+  }
+
+  private t(x: number, y: number, value: string, size: number, color: number): Phaser.GameObjects.Text {
+    return pixelText(this, x, y, value, { size, color }).setDepth(20);
   }
 }

@@ -50,4 +50,6 @@ if (import.meta.env.DEV) {
 
 // A CAMADA HD por cima do mundo (`uiHD.ts`): o texto das três vozes e a mesa. O mundo carrega os assets enquanto
 // ela nasce (ela fica pronta bem antes do menu, que é o 1º a escrever); se falhar, o texto fica no mundo.
-void criarCamadaHD(game, [BootHDScene, CartasScene]);
+// DEV: `?semhd` abre o jogo SEM a camada HD — o plano B do menu e do texto (a sonda do menu passa por ele).
+const semHD = import.meta.env.DEV && new URLSearchParams(location.search).has('semhd');
+if (!semHD) void criarCamadaHD(game, [BootHDScene, CartasScene]);
