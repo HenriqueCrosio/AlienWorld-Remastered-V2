@@ -6,6 +6,7 @@ import type { ChavePintura } from './systems/atmosfera/perfis';
 import { montarHorizonte, type Horizonte } from './f1/horizonte';
 import { AGLOMERADOS_F1, BRUMA_F1, COR } from './f1/numerosF1';
 import { montarChao, type ChaoF1 } from './f1/chaoF1';
+import { montarCaverna, type CavernaF1 } from './f1/cavernaF1';
 
 /**
  * Que lugar este parallax desenha. É a mesma decisão da física: tem chão ou não tem.
@@ -272,6 +273,12 @@ export class Parallax {
   private chaoAndado = 0;
   /** O alfa do primeiro plano AGORA (interpolado): a faixa `perto` do chão o lê a cada quadro. */
   private primeiroPlanoAlfa = { v: 1 };
+  /** A CAVERNA da F1 (21/10, `src/f1/cavernaF1.ts`): montada com o chão, ligada pelo evento `caverna` do roteiro. */
+  private caverna: CavernaF1 | null = null;
+  /** A máscara inversa da caverna está nas faixas da frente do chão (só enquanto a caverna está ativa). */
+  private cavernaMascarando = false;
+  /** A nave (o `GameScene` passa): a troca de cena da caverna passa por ELA, e a aura dela fura a rocha da frente. */
+  private nave: Phaser.GameObjects.Sprite | null = null;
   /** O relógio da fase (s), que o `GameScene` passa a cada quadro: o horizonte é função dele, não do tempo real. */
   private relogio = 0;
 
@@ -710,9 +717,11 @@ export class Parallax {
     //
     // ⚠️ SAÍRAM: a CORDILHEIRA recortada da pintura ("parece mal colado", ele, 20/10 — as peças terminavam em parede
     // vertical) e o ladrilho do chão com a aresta e a faixa da frente tingida (liso, repetido, 4× mais claro que a rocha
-    // da pintura). O `groundTile` segue carregado no `BootScene`, sem uso, até a limpeza do fim do bloco.
+    // da pintura). O ladrilho e as camadas antigas foram para `assets/raw/f1-original/` (21/10).
     // O primeiro plano (`perto`) também é dele: a frente espelhada, quase preta, no lugar do pico de gelo tingido.
     this.chao = montarChao(this.scene);
+    // A CAVERNA (21/10): as peças nascem escondidas; quem a liga é o evento `caverna` do roteiro.
+    this.caverna = montarCaverna(this.scene);
 
     // (O ENTULHO de `asteroid` assentado no chão saiu em 20/10: a rocha do cinturão, recolorida, lia como pedra de outro
     // lugar.)
@@ -1453,6 +1462,42 @@ export class Parallax {
     this.relogio = t;
   }
 
+  /** O evento `caverna` do roteiro (F1): a montanha começa a entrar; dentro dela o entulho e o primeiro plano somem. */
+  iniciarCaverna(): void {
+    if (!this.caverna) return;
+    this.caverna.iniciar();
+    this.mascararFrenteDoChao(true);
+  }
+
+  /** A nave — a troca de cena da caverna passa por ela (o tom, o relógio) e a aura dela fura a rocha da frente. */
+  setNave(nave: Phaser.GameObjects.Sprite): void {
+    this.nave = nave;
+  }
+
+  /** A caverna está aberta (a pintura na tela é ela; o relógio da invasão pausa). */
+  cavernaAberta(): boolean {
+    return this.caverna?.aberta() ?? false;
+  }
+
+  /** O teto/chão da caverna morde a caixa da nave? */
+  cavernaMorde(esq: number, dir: number, topo: number, base: number): boolean {
+    return this.caverna?.morde(esq, dir, topo, base) ?? false;
+  }
+
+  /**
+   * O ENTULHO DA FRENTE E O PRIMEIRO PLANO DO EXTERIOR ficam na frente do fundo da caverna (−0,2 e 60): dentro dela
+   * eles somem pela máscara INVERSA (a região da caverna, invertida). Só enquanto a caverna está ativa: a máscara custa.
+   */
+  private mascararFrenteDoChao(liga: boolean): void {
+    if (!this.caverna || !this.chao || liga === this.cavernaMascarando) return;
+    for (const f of this.chao.faixas) {
+      if (f.nome !== 'frente' && f.nome !== 'perto') continue;
+      if (liga) f.ts.setMask(this.caverna.mascaraInversa);
+      else f.ts.clearMask();
+    }
+    this.cavernaMascarando = liga;
+  }
+
   /** O entulho da frente da F1 (rodada 5), ou `null` fora dela: o incêndio da morte do chefão se prende a ele. */
   chaoDaFrente(): Phaser.GameObjects.TileSprite | null {
     return this.chao?.frente() ?? null;
@@ -1481,6 +1526,11 @@ export class Parallax {
     if (this.chao) {
       this.chaoAndado += worldSpeed * dt;
       this.chao.atualizar(this.relogio, this.chaoAndado, this.primeiroPlanoAlfa.v);
+    }
+    // A caverna anda pelo MESMO mundo do chão (o entulho, os props); ao acabar, a máscara inversa sai das faixas.
+    if (this.caverna?.ativa() && this.nave) {
+      this.caverna.atualizar(worldSpeed * dt, this.nave);
+      if (!this.caverna.ativa()) this.mascararFrenteDoChao(false);
     }
     // O nado da silhueta, quase parado (3 quadros/s).
     if (this.leviLonge && this.leviathan.visible) {
@@ -1985,7 +2035,7 @@ export class Parallax {
   pinturaNaTela(): ChavePintura {
     switch (this.mode) {
       case 'superficie':
-        return this.exiting ? 'paintBgZeroG' : 'paintBgF1';
+        return this.exiting ? 'paintBgZeroG' : this.caverna?.aberta() ? 'paintBgCaverna' : 'paintBgF1';
       case 'espaco':
         return 'paintBgF2';
       case 'nebulosa':

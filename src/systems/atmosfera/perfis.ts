@@ -208,6 +208,8 @@ export function interpolarPerfil(de: PerfilAtmosfera, para: PerfilAtmosfera, k: 
 /** As pinturas de fundo das fases — cada uma tem o seu tom. */
 export type ChavePintura =
   | 'paintBgF1'
+  // A CAVERNA da F1 (21/10): enquanto ela está aberta, o tom é o dela (`Parallax.pinturaNaTela`).
+  | 'paintBgCaverna'
   | 'paintBgZeroG'
   | 'paintBgF2'
   | 'paintBgF3'
@@ -252,6 +254,9 @@ export const PERFIS_FASE = {
   // A F1 do bloco G (20/10): a pintura nova é muito mais escura que as outras, e a conta de sempre (os tons médio-escuros
   // ×1,5) dava uma névoa quase preta ([18, 30, 49]); a névoa é a BRUMA PINTADA dela (`scripts/_g/_cor-nevoa-f1.mjs`).
   faseF1: perfilDeFase('faseF1', ABERTA, [33, 41, 58], HALO_COMBATE),
+  // A CAVERNA da F1 (21/10): fechada como as densas; a névoa é a da faixa do meio do fundo dela (`_caverna-f1.mjs`), o
+  // halo quente das brasas.
+  faseCaverna: perfilDeFase('faseCaverna', DENSA, [31, 40, 47], [230, 120, 50]),
   faseZeroG: perfilDeFase('faseZeroG', ABERTA, [75, 73, 134], HALO_COMBATE),
   faseF2: perfilDeFase('faseF2', ABERTA, [52, 68, 107], HALO_COMBATE),
   faseF3: perfilDeFase('faseF3', DENSA, [74, 76, 113], [220, 120, 60]),
@@ -264,6 +269,7 @@ export const PERFIS_FASE = {
 /** A pintura na tela → o perfil dela. O `GameScene` troca quando a pintura muda. */
 export const PERFIL_DA_PINTURA: Record<ChavePintura, PerfilAtmosfera> = {
   paintBgF1: PERFIS_FASE.faseF1,
+  paintBgCaverna: PERFIS_FASE.faseCaverna,
   paintBgZeroG: PERFIS_FASE.faseZeroG,
   paintBgF2: PERFIS_FASE.faseF2,
   paintBgF3: PERFIS_FASE.faseF3,

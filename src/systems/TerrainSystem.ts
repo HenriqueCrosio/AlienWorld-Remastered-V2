@@ -162,12 +162,14 @@ export interface Plantio {
  * Sortear entre eles é o que faz a superfície parecer um LUGAR, e não um corredor de obstáculos.
  */
 const PROPS: Record<PropKind, PropDef> = {
+  // (As luzes da colônia — janelas, magenta, antena — vêm das peças da F1 desde 21/10: cada variante toca a sua
+  // `<textura>-luz`, ver `spawn` e `src/f1/pecasF1.ts`. Os `anim` antigos daqui saíram junto com os quadros.)
   spire: { hp: Infinity, score: 0, shoots: false },
-  building: { hp: 8, score: 60, shoots: false, anim: 'building-lights' },
-  turret: { hp: 5, score: 150, shoots: true, anim: 'turret-idle' },
-  base: { hp: 16, score: 250, shoots: false, anim: 'base-lights' },
+  building: { hp: 8, score: 60, shoots: false },
+  turret: { hp: 5, score: 150, shoots: true },
+  base: { hp: 16, score: 250, shoots: false },
   silo: { hp: 6, score: 90, shoots: false },
-  radar: { hp: 4, score: 120, shoots: false, anim: 'radar-scan' },
+  radar: { hp: 4, score: 120, shoots: false },
   wreck: { hp: Infinity, score: 0, shoots: false },
   // ⚠️ OS NÚMEROS SÃO OS DA TORRE E DO SILO, DE PROPÓSITO. Esta é uma troca de ARTE, não de
   // balanceamento: o `lancaMisseis` herda `hp 5 / score 150 / shoots` da `turret` e o

@@ -23,10 +23,8 @@ const FRAMES: Record<string, number> = {
   shipAnim: 7,
   droneAnim: 7,
   gunshipAnim: 7,
-  turretAnim: 7,
-  buildingAnim: 7,
-  baseAnim: 7,
-  radarAnim: 7,
+  // (`turretAnim`, `buildingAnim`, `baseAnim`, `radarAnim` saíram em 21/10: as peças da F1 trazem as luzes assadas —
+  // `src/f1/pecasF1.ts`; os quadros antigos em `assets/raw/f1-original/`.)
   cometAnim: 7,
   blastAnim: 7,
 
@@ -173,12 +171,8 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'ship-thrust', prefix: 'shipAnim', frameRate: 12 },
   { key: 'drone-fly', prefix: 'droneAnim', frameRate: 12 },
   { key: 'gunship-fly', prefix: 'gunshipAnim', frameRate: 8 },
-  { key: 'turret-idle', prefix: 'turretAnim', frameRate: 8 },
-  // A colônia viva: janelas piscando e o radar varrendo. Lentas de propósito — luz de
-  // cenário piscando rápido rouba a atenção do que importa (o perigo).
-  { key: 'building-lights', prefix: 'buildingAnim', frameRate: 5 },
-  { key: 'base-lights', prefix: 'baseAnim', frameRate: 5 },
-  { key: 'radar-scan', prefix: 'radarAnim', frameRate: 6 },
+  // (A colônia viva — as janelas piscando, o magenta, a antena — mora nas luzes assadas das peças da F1 desde 21/10:
+  // `<chave>-luz`, `src/f1/pecasF1.ts`. Saíram `turret-idle`, `building-lights`, `base-lights` e `radar-scan`.)
   // Projéteis ardendo. Rápidos: fogo lento parece plástico.
   { key: 'comet-burn', prefix: 'cometAnim', frameRate: 14 },
   { key: 'blast-burn', prefix: 'blastAnim', frameRate: 14 },
@@ -620,15 +614,11 @@ const ART: Record<string, string> = {
 
   boss: 'sprites/boss.png',
   bossAir: 'sprites/boss-air.png',
-  groundTile: 'sprites/ground-tile.png',
 
   // ─── Camadas de FUNDO do passe visual (2026-07-18). Sem placeholder de propósito: fundo
   // opcional — sem o PNG, o addLayer do Parallax pula a camada e nada quebra. ───
-  skyline: 'sprites/skyline.png',
-  skyline2: 'sprites/skyline-2.png',
+  // (O `groundTile`, o `skyline` e o `cometSky` da F1 antiga saíram em 21/10 → `assets/raw/f1-original/`.)
   derelict: 'sprites/derelict.png',
-  cometSky: 'sprites/comet-sky.png',
-  cometSky2: 'sprites/comet-sky-2.png',
 
   // ─── FASE 3 ───
   nebula3: 'sprites/nebula3.png',
@@ -712,10 +702,6 @@ const ART: Record<string, string> = {
   ...animFrames('shipAnim', 'ship-anim'),
   ...animFrames('droneAnim', 'drone-anim'),
   ...animFrames('gunshipAnim', 'gunship-anim'),
-  ...animFrames('turretAnim', 'turret-anim'),
-  ...animFrames('buildingAnim', 'building-anim'),
-  ...animFrames('baseAnim', 'base-anim'),
-  ...animFrames('radarAnim', 'radar-anim'),
   ...animFrames('cometAnim', 'comet-anim'),
   ...animFrames('blastAnim', 'blast-anim'),
 
@@ -1213,17 +1199,11 @@ const ART: Record<string, string> = {
   mtnFar2: 'sprites/mtn-far-2.png',
   mtnFar3: 'sprites/mtn-far-3.png',
 
-  mtnMid: 'sprites/mtn-mid.png',
-  mtnMid2: 'sprites/mtn-mid-2.png',
-  mtnMid3: 'sprites/mtn-mid-3.png',
+  // (O `mtnMid` e a `paintBgF1` — o fundo pintado antigo da F1 — saíram em 21/10 → `assets/raw/f1-original/`. A
+  // chave `paintBgF1` segue viva só como NOME do perfil da Atmosfera da F1, em `atmosfera/perfis.ts`.)
 
-  // FUNDO PINTADO da Fase 1 (estilo Metal Slug): a colônia alienígena escarpada, arte do Henrique.
-  // Camada mais distante do parallax de superfície; substitui o céu pixelado por trás do foreground.
-  paintBgF1: 'sprites/paint-bg-f1.png',
-
-  // A F1 do bloco G (20/10): o horizonte (a pintura dele inteira, as luzes apagadas, a cachoeira) e a cordilheira
-  // tirada da pintura — `scripts/_g/_camadas-f1.mjs` e `_cordilheira-f1.mjs`. O `paintBgF1` antigo fica carregado até
-  // o fim do bloco (a limpeza vem depois da aprovação dele).
+  // A F1 do bloco G (20/10): o horizonte (a pintura dele inteira, as luzes apagadas, a cachoeira) —
+  // `scripts/_g/_camadas-f1.mjs`.
   'f1-pintura': 'sprites/f1/pintura.png',
   'f1-apagadas': 'sprites/f1/apagadas.png',
   'f1-cachoeira': 'sprites/f1/cachoeira.png',
@@ -1233,6 +1213,16 @@ const ART: Record<string, string> = {
   'f1-chao-paisagem': 'sprites/f1/chao-paisagem.png',
   'f1-chao-frente': 'sprites/f1/chao-frente.png',
   'f1-chao-perto': 'sprites/f1/chao-perto.png',
+  // A CAVERNA (21/10, `scripts/_g/_caverna-f1.mjs`): as quatro pinturas dele — a faixa de rocha (o portal com a boca dos
+  // dois lados), o teto, o chão e o fundo.
+  'f1-cav-faixa': 'sprites/f1/cav-faixa.png',
+  'f1-cav-teto': 'sprites/f1/cav-teto.png',
+  'f1-cav-chao': 'sprites/f1/cav-chao.png',
+  'f1-cav-interior': 'sprites/f1/cav-interior.png',
+  // O SALÃO VIVO (21/10, `scripts/_g/_luzes-caverna-f1.mjs`): os terços "apagados" das brasas do fundo, do teto e do chão.
+  ...Object.fromEntries(
+    ['interior', 'teto', 'chao'].flatMap((p) => [0, 1, 2].map((g) => [`f1-cav-${p}-brasa-${g}`, `sprites/f1/cav-${p}-brasa-${g}.png`])),
+  ),
   // Os aglomerados da colônia (rodada 6, `scripts/_g/_aglomerados-f1.mjs`): decoração entre a Paisagem e as estruturas.
   f1Aglomerado: 'sprites/f1-aglomerado.png',
   f1Aglomerado2: 'sprites/f1-aglomerado-2.png',
@@ -1397,6 +1387,7 @@ export class BootScene extends Phaser.Scene {
     this.load.json('f1-chefe', 'sprites/f1/chefe.json');
     this.load.json('f1-chao', 'sprites/f1/chao.json');
     this.load.json('f1-morte', 'sprites/f1/morte.json');
+    this.load.json('f1-caverna', 'sprites/f1/caverna.json');
 
     // O PRIMEIRO PLANO DA F4 (17/10, ver `PrimeiroPlanoF4`): 44 silhuetas de tamanhos diferentes num ATLAS só — uma
     // sheet de célula fixa não as comporta. Empacotado por `scripts/_polimento/_instalar-frente-f4.mjs`.
@@ -1422,8 +1413,6 @@ export class BootScene extends Phaser.Scene {
       spire: () => this.makeSpire(),
       boss: () => this.makeBoss(),
       mtnFar: () => this.makeRidge('mtnFar', COLORS.bgMid, 22, 7),
-      mtnMid: () => this.makeRidge('mtnMid', COLORS.bgFar, 30, 11),
-      groundTile: () => this.makeGroundTile(),
 
       // O cinturão da Fase 2. Estes SÃO placeholders de piloto: a arte do PixelLab está por
       // vir, e por isso eles têm que passar pela guarda `!textures.exists` como todo o resto.
@@ -1536,23 +1525,6 @@ export class BootScene extends Phaser.Scene {
 
     g.fillPoints(pts, true);
     g.generateTexture(key, w, 64);
-    g.destroy();
-  }
-
-  /** Tile de solo 16×16, costurável — o mesmo formato do tileset do PixelLab. */
-  private makeGroundTile(): void {
-    const g = this.make.graphics({ x: 0, y: 0 }, false);
-
-    g.fillStyle(COLORS.metalDark, 1);
-    g.fillRect(0, 0, 16, 16);
-    g.fillStyle(COLORS.bgFar, 1);
-    g.fillRect(0, 0, 16, 2);
-
-    g.fillStyle(COLORS.bgDeep, 1);
-    g.fillRect(3, 6, 2, 2);
-    g.fillRect(11, 10, 2, 2);
-
-    g.generateTexture('groundTile', 16, 16);
     g.destroy();
   }
 

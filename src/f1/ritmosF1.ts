@@ -1,5 +1,5 @@
 import { lcg } from '../menu/acaso.ts';
-import { BRASAS_F1, INVASAO, PINTURA } from './numerosF1.ts';
+import { BRASAS_F1, CAVERNA_F1, INVASAO, PINTURA } from './numerosF1.ts';
 
 /**
  * O TEMPO DO CENÁRIO DA F1, em funções puras do relógio da fase `t` (s): o mesmo instante dá sempre o mesmo quadro —
@@ -31,6 +31,48 @@ export function brasaApagada(t: number, grupo: number): number {
   const [a, b, c] = B.freq;
   const s = 0.5 * Math.sin(t * a + grupo * 2.1) + 0.3 * Math.sin(t * b + grupo * 4.3) + 0.2 * Math.sin(t * c + grupo * 1.3);
   return Math.min(B.max, Math.max(0, B.base + B.amp * s));
+}
+
+// ─── A CAVERNA (21/10) ──────────────────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Onde estão as duas faixas de rocha (x de tela da borda ESQUERDA de cada imagem de `largura` px). A faixa: a boca de fora
+ * à esquerda (aberta até `fundo`), a borda de dentro à direita (o espelho: aberta a partir de `largura − 1 − fundo`); a
+ * rocha da linha y vai de `fundo + 1` a `largura − 2 − fundo` — o contorno é simétrico, o MEIO é o mesmo em toda linha.
+ */
+export interface PosicoesCaverna {
+  /** A faixa da ENTRADA: o lado de fora pela boca à esquerda, o salão depois da borda de dentro "(". */
+  entrada: number;
+  /** A faixa da SAÍDA, ESPELHADA: o salão à esquerda da borda de dentro ")", o lado de fora depois dela. */
+  saida: number;
+}
+
+/** As faixas `d` px de MUNDO depois do evento: elas andam `paralaxe` vezes mais rápido (`fundoMeio`, `largura`: do json). */
+export function posicoesCaverna(d: number, fundoMeio: number, largura: number): PosicoesCaverna {
+  const C = CAVERNA_F1;
+  const k = C.paralaxe;
+  const entrada = C.x0 - k * d;
+  // o salão VISÍVEL dura `salao` px de mundo na linha do meio: da borda de dentro da entrada (largura − 1 − fundoMeio)
+  // à da saída espelhada (fundoMeio), as duas andando k vezes o mundo
+  const saida = entrada + k * C.salao + (largura - 1 - fundoMeio) - fundoMeio;
+  return { entrada, saida };
+}
+
+/** A TROCA de cena: o salão vai do MEIO da rocha da entrada ao meio da rocha da saída — retas, escondidas atrás dela. */
+export function regiaoCaverna(p: PosicoesCaverna, largura: number): [number, number] {
+  const meio = (largura - 1) / 2;
+  return [p.entrada + meio, p.saida + meio];
+}
+
+/** O salão VISÍVEL na linha cujo fundo de boca é `fundoY` (onde o teto e o chão mordem): de borda de dentro a borda de dentro. */
+export function salaoVisivel(p: PosicoesCaverna, fundoY: number, largura: number): [number, number] {
+  return [p.entrada + largura - 1 - fundoY, p.saida + fundoY];
+}
+
+/** A deriva do fundo da caverna (px inteiros): de 0 a −`deriva` enquanto a caverna passa (`percurso` px de mundo). */
+export function derivaCaverna(d: number, percurso: number): number {
+  const C = CAVERNA_F1;
+  return -Math.round(Math.min(1, Math.max(0, d / percurso)) * C.deriva);
 }
 
 // ─── AS LUZES QUE MORREM ────────────────────────────────────────────────────────────────────────────────────────

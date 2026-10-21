@@ -120,6 +120,66 @@ export const CHAO_F1 = {
  */
 export const AGLOMERADOS_F1 = { chave: 'f1Aglomerado', fator: 0.72, depth: -85, baseY: 212, gap: [150, 330] } as const;
 
+/**
+ * A CAVERNA (21/10, a ideia dele — spec `2026-10-21-f1-caverna-design.md`): um trecho NOVO aos `inicio` s que empurra o
+ * resto do roteiro `empurra` s. A FAIXA DE ROCHA (a "Parede de Caverna Vulcânica" dele, a boca dos dois lados) passa NA
+ * FRENTE da nave (`depth.rocha`, acima do primeiro plano do chão), `paralaxe` vezes mais rápida que o mundo (uma camada
+ * mais perto da câmera: ~2 s sobre a nave), larga o bastante para cobrir a tela INTEIRA por um instante — o lado de fora
+ * sai pela esquerda antes de o salão entrar pela direita. A nave aparece pela AURA: a rocha continua pintada POR CIMA
+ * dela, só mais transparente — a nave lê como ATRÁS da rocha (ele: um buraco na rocha fazia a nave parecer passar na
+ * frente). Dois degraus, sem degradê: até `aura.dentro` px da silhueta a rocha fica a `aura.rocha[0]`; num anel de mais
+ * `aura.anel` px, a `aura.rocha[1]`. A troca de cena fica no meio da rocha. O SALÃO visível dura `salao` px de mundo na
+ * linha do meio (12 s a ~83 px/s); a saída é a mesma faixa espelhada. `tetoY`: onde a faixa do teto fica (0: o vão
+ * mínimo já é 100 px).
+ */
+export const CAVERNA_F1 = {
+  inicio: 40,
+  empurra: 16,
+  x0: 384,
+  paralaxe: 2.5,
+  salao: 996,
+  aura: { dentro: 2, anel: 3, rocha: [0.5, 0.75] },
+  tetoY: 0,
+  mordida: 3,
+  deriva: 45,
+  depth: { fundo: -83, bordas: -0.3, rocha: 61 },
+} as const;
+
+/**
+ * O SALÃO VIVO (21/10, ele: "aplique os efeitos de iluminação, brumas, névoa etc no cenário interior") — o cenário vivo
+ * (`docs/CENARIO-VIVO.md`) no fundo da caverna, tudo preso ao salão pela máscara dele, em px do fundo (anda com a deriva):
+ * - `brasas`: as luzes quentes das três pinturas, tiradas por difusão (`_luzes-caverna-f1.mjs`), tremulam por terços
+ *   como as do chão de fora (`BRASAS_F1`); `fase`: o deslocamento do terço de cada peça (fundo, teto, chão);
+ * - `bruma`: a textura das fases em faixas que andam em velocidades diferentes (`fator` × o mundo) — a de trás sobre o
+ *   salão, a do meio na névoa pintada do chão dele, a da frente NA FRENTE do chão (e atrás da nave);
+ * - `fachos`: os fachos frios descendo da ABERTURA (medida: `caverna.json` → `luzes.interior.abertura`), o mesmo
+ *   ângulo do facho pintado, respirando; `abertura`: o halo grande e frio dela;
+ * - `halos`: o brilho âmbar respirando nas brasas mais fortes (medidas);
+ * - `poeira`: grãos de pó (1 px) caindo devagar dentro do facho principal, acendendo e apagando.
+ */
+export const SALAO_F1 = {
+  brasas: { fase: [0, 3, 6], depthFundo: -82.95, depthBordas: -0.29 },
+  bruma: [
+    { y: 60, h: 92, pico: 0.26, fator: 0.12, depth: -82.6, tint: 0x3e4b5a },
+    { y: 122, h: 88, pico: 0.4, fator: 0.3, depth: -82.4, tint: 0x46536a },
+    { y: 156, h: 88, pico: 0.28, fator: 1.1, depth: -0.25, tint: 0x2a3441 },
+  ],
+  fachos: {
+    cor: 0xc8d6ff,
+    angulo: -45,
+    depth: -82.5,
+    // x, y: o meio de cada facho, em px do fundo; escala: o comprimento (× 192 px)
+    itens: [
+      { x: 262, y: 108, escala: 1.4, pico: 0.24, deriva: 3, per: 13 },
+      { x: 236, y: 122, escala: 1.1, pico: 0.17, deriva: 4, per: 17 },
+      { x: 292, y: 96, escala: 0.9, pico: 0.14, deriva: 2, per: 11 },
+    ],
+  },
+  abertura: { cor: 0x9fb4d8, diametro: 96, base: 0.18, amp: 0.06, per: 7, depth: -82.55 },
+  halos: { cor: 0xffb066, diamMin: 20, diamVar: 12, baseMin: 0.24, baseVar: 0.1, durMin: 1.8, durVar: 1.4, semente: 41, depth: -82.45 },
+  poeira: { n: 24, cor: 0xd8e4ff, alfa: 0.7, queda: 2.5, largura: 12, depth: -82.35 },
+} as const;
+
 /** A QUEDA do chão na saída da atmosfera: a duração e a curva (as da queda do terreno de sempre). */
 export const QUEDA_CHAO_F1 = { ms: 2500 } as const;
 

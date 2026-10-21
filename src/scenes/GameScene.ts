@@ -278,6 +278,8 @@ export class GameScene extends Phaser.Scene {
   private static readonly SUBIDA_ENTRA_MS = 400;
   /** Quando a subida começou (ms do relógio da cena), ou −1; e o ângulo de onde ela partiu. */
   private subidaDesde = -1;
+  /** Segundos com a CAVERNA aberta (21/10): o horizonte da F1 recebe o relógio da fase menos isto. */
+  private tempoNaCaverna = 0;
   private subidaAngulo0 = 0;
   /** A hitbox da nave do jogador — IGUAL para toda nave e todo tier (ver o `setSize` no `create`). */
   private static readonly HITBOX_NAVE = { w: 21, h: 9 } as const;
@@ -333,6 +335,7 @@ export class GameScene extends Phaser.Scene {
     this.mareParesEmergindo = 0;
     this.elapsed = 0;
     this.subidaDesde = -1;
+    this.tempoNaCaverna = 0;
     this.clockOffset = 0;
     this.score = 0;
     this.scoreBase = data.score ?? 0;
@@ -832,7 +835,12 @@ export class GameScene extends Phaser.Scene {
     // cinturão inteiro pareceria pendurado. Só a Fase 1, que ROMPE a atmosfera no fim, freia.
     const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
     // O relógio da fase para o horizonte da F1 (bloco G): ele é função do relógio, não do tempo real.
-    this.parallax.setRelogio(this.elapsed);
+    // ⚠️ MENOS o tempo dentro da CAVERNA (21/10): com o exterior escondido, a invasão pausa — a pintura segue casando com
+    // o roteiro (que a caverna empurrou). Não dá para pausar os 15 s inteiros: à vista, as naves congelariam.
+    if (this.parallax.cavernaAberta()) this.tempoNaCaverna += dt;
+    this.parallax.setRelogio(this.elapsed - this.tempoNaCaverna);
+    // A caverna abre e fecha quando a NAVE cruza (no flap ela anda de lado).
+    this.parallax.setNave(this.ship);
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
@@ -906,6 +914,10 @@ export class GameScene extends Phaser.Scene {
     // empurrão cuspiria a nave direto na parede oposta — dois danos por um encosto. Quem separa
     // os dois toques são os 1400ms de i-frames que o `damageShip` já dá.
     if (this.moldura.morde(body.left, body.right, body.top, body.bottom)) this.damageShip();
+    // O TETO E O CHÃO DA CAVERNA MORDEM (F1, 21/10 — "o flap num corredor perigoso já é punitivo o bastante", ele): a
+    // mesma lei da parede do duto acima — uma medição contra os contornos das faixas, sem corpo e SEM empurrão (teto e
+    // chão perto um do outro: um empurrão cuspiria a nave na parede oposta; os i-frames separam os toques).
+    if (this.parallax.cavernaMorde(body.left, body.right, body.top, body.bottom)) this.damageShip();
 
     this.spawnWaves(dt);
     this.spawnProps(dt);
@@ -1153,6 +1165,10 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'garganta':
         this.spawnGarganta();
+        break;
+      case 'caverna':
+        // A montanha entra pela direita (F1, 21/10). Quem anda, abre e fecha é o `Parallax` (`src/f1/cavernaF1.ts`).
+        this.parallax.iniciarCaverna();
         break;
       case 'boss':
         this.spawnBoss();

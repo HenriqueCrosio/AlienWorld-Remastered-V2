@@ -154,10 +154,16 @@ export type StageEvent =
    * que dura o que o jogador levar.
    */
   | { t: number; type: 'agua'; acao: 'encher' }
+  /**
+   * A CAVERNA (Fase 1, 21/10 — a ideia dele, spec `2026-10-21-f1-caverna-design.md`): a rocha passa na frente da nave
+   * e o salão aparece atrás dela; a rocha da saída devolve o lado de fora. Quem anda é o `Parallax` (`iniciarCaverna`).
+   * ⚠️ O roteiro inteiro depois dela foi EMPURRADO `CAVERNA_F1.empurra` s — ela soma tempo, não ocupa um trecho.
+   */
+  | { t: number; type: 'caverna' }
   | { t: number; type: 'boss' };
 
 /**
- * FASE 1 — A DECOLAGEM. Duração ~75s.
+ * FASE 1 — A DECOLAGEM. Duração ~91s (era ~75; a CAVERNA de 21/10 somou 16 s aos 40 s).
  *
  * Arco: rasante na superfície da lua (é o Alien World v2) → chefão → e só ENTÃO a
  * atmosfera rompe. A zero-G é a RECOMPENSA por vencer, não um evento no meio.
@@ -192,32 +198,48 @@ export const STAGE_1: StageEvent[] = [
   { t: 27, type: 'wave', kind: 'batedor', count: 4, spacing: 0.35, y: 70 },
   { t: 31, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 110 },
 
+  // ⚠️ A ROCHA DA CAVERNA PASSA NA FRENTE DE TUDO (~40–44 s e ~54–58 s): nenhum inimigo pode estar na tela quando ela
+  // cobre — ficaria escondido, atirando. Por isso a canhoneira (40 px/s, ~10 s na tela) saiu dos 35 para os 31,5 e os
+  // batedores dos 39 para os 36, e a última onda do salão sai da tela antes de a rocha da saída chegar (a sonda
+  // `_probe-caverna-f1` confere).
   // Canhoneira: o primeiro inimigo aéreo que revida. Junto com torres no chão.
-  { t: 35, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 80 },
+  { t: 31.5, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 80 },
+  { t: 36, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 60 },
   { t: 37, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 120 },
-  { t: 39, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 60 },
+  // A CAVERNA chega aos 40 s: o exterior para de plantar aos 37 (o que nasceu antes sai da tela antes de o salão
+  // aparecer — senão uma construção do lado de fora apareceria dentro dele).
+  { t: 37, type: 'terrain', rate: 0, mix: [] },
+  { t: 40, type: 'caverna' },
+  // No salão (~44 a ~56 s): só drones, poucos — o flap entre o teto e o chão que mordem já é punitivo (ele, 21/10).
+  // (o drone atravessa a tela em ~6,5 s: a última onda tem que nascer até ~49 para sair antes da rocha da saída)
+  { t: 44.5, type: 'wave', kind: 'drone', count: 3, spacing: 0.4, y: 100 },
+  { t: 46.5, type: 'wave', kind: 'drone', count: 3, spacing: 0.4, y: 120 },
+  { t: 48.5, type: 'wave', kind: 'drone', count: 3, spacing: 0.4, y: 95 },
+
+  // ⚠️ DAQUI EM DIANTE TUDO ANDOU +16 s (`CAVERNA_F1.empurra`): a caverna SOMA tempo à fase (ele, 21/10). O exterior
+  // volta a plantar quando o lado de fora reaparece à direita da rocha da saída (`test-f1-caverna`).
   // O coração da colônia: a BASE, grande e valiosa (250 pontos), entre torres.
-  { t: 41, type: 'terrain', rate: 1.3, mix: ['spire', 'turret', 'base', 'building', 'spire', 'wreck'] },
-  { t: 42, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 60 },
-  { t: 44, type: 'wave', kind: 'drone', count: 5, spacing: 0.25, y: 140 },
+  { t: 57, type: 'terrain', rate: 1.3, mix: ['spire', 'turret', 'base', 'building', 'spire', 'wreck'] },
+  { t: 58, type: 'wave', kind: 'drone', count: 6, spacing: 0.25, y: 60 },
+  { t: 60, type: 'wave', kind: 'drone', count: 5, spacing: 0.25, y: 140 },
 
   // PICO DE PRESSÃO: fogo do chão e do ar ao mesmo tempo. O playtest confirmou que é o
   // melhor momento da fase — mantido intacto, só com rocha extra para dar cobertura.
-  { t: 47, type: 'banner', text: 'FOGO CRUZADO' },
-  { t: 47.5, type: 'terrain', rate: 1.1, mix: ['spire', 'spire', 'turret', 'spire'] },
+  { t: 63, type: 'banner', text: 'FOGO CRUZADO' },
+  { t: 63.5, type: 'terrain', rate: 1.1, mix: ['spire', 'spire', 'turret', 'spire'] },
   // Canhoneiras cortadas de 4 para 2 na fase inteira (playtest): mesmo com telégrafo,
   // várias mirando ao mesmo tempo satura o espaço de fuga. A pressão do fogo cruzado
   // agora vem do VOLUME de batedores/drones, não do tiro mirado.
-  { t: 48, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 60 },
-  { t: 50, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 130 },
-  { t: 54, type: 'wave', kind: 'drone', count: 9, spacing: 0.2, y: 90 },
-  { t: 57, type: 'wave', kind: 'drone', count: 6, spacing: 0.22, y: 130 },
-  { t: 58, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 70 },
+  { t: 64, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 60 },
+  { t: 66, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 130 },
+  { t: 70, type: 'wave', kind: 'drone', count: 9, spacing: 0.2, y: 90 },
+  { t: 73, type: 'wave', kind: 'drone', count: 6, spacing: 0.22, y: 130 },
+  { t: 74, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 70 },
 
   // Silêncio. O vazio anuncia o boss melhor que qualquer aviso.
-  { t: 63, type: 'terrain', rate: 0, mix: [] },
-  { t: 65, type: 'banner', text: 'ALERTA · TORRE DE DEFESA' },
-  { t: 68, type: 'boss' },
+  { t: 79, type: 'terrain', rate: 0, mix: [] },
+  { t: 81, type: 'banner', text: 'ALERTA · TORRE DE DEFESA' },
+  { t: 84, type: 'boss' },
 ];
 
 /**

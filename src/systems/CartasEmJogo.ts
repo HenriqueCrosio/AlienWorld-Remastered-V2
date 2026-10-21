@@ -13,6 +13,7 @@ import { Dash } from './cartas/Dash';
 import { EstadosNoInimigo } from './cartas/EstadosNoInimigo';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 import { NUMEROS } from '../data/numerosCartas';
+import { CAVERNA_F1 } from '../f1/numerosF1';
 
 export type { HostCartas } from './cartas/contexto';
 
@@ -33,8 +34,11 @@ export type { HostCartas } from './cartas/contexto';
  * lançadores PRÓPRIOS, passam — e não copiam Duplo, Triplo nem Cadência da nave (spec §4.3).
  */
 
-/** Onde cada fase abre a mesa do MEIO (segundos do roteiro): o silêncio antes do chefão. */
-const MESA_NO_TEMPO: Record<number, number> = { 1: 63, 2: 70 };
+/**
+ * Onde cada fase abre a mesa do MEIO (segundos do roteiro): o silêncio antes do chefão. ⚠️ A F1 anda com a CAVERNA
+ * (21/10): o roteiro depois dela foi empurrado, e a mesa fixa nos 63 caía no meio do FOGO CRUZADO.
+ */
+const MESA_NO_TEMPO: Record<number, number> = { 1: 63 + CAVERNA_F1.empurra, 2: 70 };
 
 /**
  * Os números PROVISÓRIOS das cartas daqui (o Casco e a Recarga, a queima do Incendiário, os Propulsores, o tranco)
