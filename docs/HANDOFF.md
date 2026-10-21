@@ -14,8 +14,11 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco G (a F1) tem as rodadas 1, 2, 4 e 5 no jogo; a próxima é a das
-> estruturas refeitas escuras. Abra `folhas/2026-10-20/f1-cenario/index.html` e siga pelas decisões dele."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco G (a arte da F1) FECHOU em 21/10, commitado e empurrado. O próximo é o
+> bloco H (os efeitos de imersão por fase); antes, se ele quiser, a limpeza das peças antigas da F1."**
+>
+> 📍 **21/10 — O BLOCO G FECHOU**: ele aprovou a instalação das estruturas ("ficou perfeito") → `a364e2a` (o jogo),
+> `906c07c` (ferramentas, testes, folhas sem vídeos), `6da8f91` (docs), em `origin/feat/cartas-preview`.
 >
 > 📍 **20/10 (4) — O RETORNO DELE E A RODADA 5** (`plans/2026-10-20-f1-rodada5-chao-morte.md`, spec §7.4, folha
 > `rodada5.html`; NADA commitado). Ele aprovou a pintura viva, a bruma, a invasão ("perfeita") e o chefão; reprovou a
@@ -179,8 +182,12 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >      voa na F3: decidir se a mudança vale só para a F2. Medir o tiro para pressionar sem punir;
 >   2. a **rocha do elite minerador** destoa da F2 e é grande demais: diminuir, ou prendê-la a um canto ou a um
 >      pedaço maior de asteroide (arte nova). Fazer junto com o `asteroid` do item 7.
-> - **G — Fase 1: a arte do cenário** (▶️ 20/10: EM ANDAMENTO, rodada 1 no jogo; spec
->   `specs/2026-10-20-f1-cenario-design.md`). Os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
+> - **G — Fase 1: a arte do cenário** (✅ FECHADO 21/10, aprovado por ele — "ficou perfeito" — e COMMITADO + EMPURRADO:
+>   `a364e2a` o jogo, `906c07c` as ferramentas/testes/folhas sem os vídeos, `6da8f91` os docs; rodadas 1–6 em
+>   `plans/2026-10-20-f1-rodada*.md`, spec `specs/2026-10-20-f1-cenario-design.md`, folhas
+>   `folhas/2026-10-20/f1-cenario/`. Resta só a LIMPEZA: as peças e camadas antigas da F1 seguem no disco sem registro —
+>   `building*`, `silo*`, `radar`, `base*`, `turret*`, `wreck*`, `spire*`, os `*-anim-*` delas, `paint-bg-f1`, `skyline`,
+>   `mtn-mid` — para `assets/raw/*-original.png`). Era: os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
 >   cordilheira não ficou como ele queria (perguntar a referência ANTES de gerar). Refazer arte E composição. A técnica
 >   do menu (`docs/CENARIO-VIVO.md`) é o ponto de partida: camadas, luzes que apagam limpas, volume, perigo, tudo em
 >   função do relógio.
