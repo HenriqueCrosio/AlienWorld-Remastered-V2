@@ -13,8 +13,9 @@
    - **a rocha do elite minerador:** destoa e é grande demais — diminuir, ou prender a um canto ou a um pedaço maior
      de asteroide (arte nova), junto com o `asteroid` do item 7.
 3. Depois do F, o **G** (a arte do cenário da F1: perguntar a referência da cordilheira ANTES de gerar; refazer arte e
-   composição), o **H** (os efeitos de imersão por fase, só visuais), o **I** (os itens 9, 11 e 14 da análise de
-   14/10; o 13, o subtítulo do menu, foi resolvido no E) e o **J** (o pós-processamento, por último).
+   composição), o **H** (os efeitos de imersão por fase, só visuais), o **I** (os itens 9, 11, 13 e 14 da análise
+   de 14/10; o 12, o subtítulo do menu, foi resolvido no E; o 13, os flashes, decide-se junto com o bloom do J) e o
+   **J** (o pós-processamento, por último).
 
 ## O que vem do bloco E e serve aqui
 

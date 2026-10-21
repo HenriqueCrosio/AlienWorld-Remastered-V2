@@ -14,8 +14,69 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco E fechou; vamos começar o bloco F (a frota e o minerador da F2). O START
-> é `plans/2026-10-19-blocos-f-a-j-START.md`."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco G (a F1) tem as rodadas 1, 2, 4 e 5 no jogo; a próxima é a das
+> estruturas refeitas escuras. Abra `folhas/2026-10-20/f1-cenario/index.html` e siga pelas decisões dele."**
+>
+> 📍 **20/10 (4) — O RETORNO DELE E A RODADA 5** (`plans/2026-10-20-f1-rodada5-chao-morte.md`, spec §7.4, folha
+> `rodada5.html`; NADA commitado). Ele aprovou a pintura viva, a bruma, a invasão ("perfeita") e o chefão; reprovou a
+> cordilheira ("mal colada"), o chão e tudo que pisa nele ("colado", "slopado desde o início") e as peças da rodada 3
+> ("claras demais, nem parece dark sci-fi"). Medido: a rocha da pintura tem brilho 11; as estruturas 37–70; o ladrilho
+> 41 e liso; todos os pés em y 206. Ele PINTOU as duas camadas do chão (`assets/raw/Valle Industrial Devastado…png` e
+> `…Paisagem Montanhosa Sombria com Brasas.png`) e escolheu a ordem: o Vale atrás, a Paisagem na frente dele, as duas
+> atrás das estruturas. No jogo (`src/f1/chaoF1.ts`): as faixas sem emenda, o plantio das estruturas (y 204–213), o
+> entulho da frente, o primeiro plano novo (saiu o pico de gelo tingido), as brasas tremulando e a fumaça das torres,
+> a queda em parallax na saída; a cordilheira e o ladrilho saíram. A morte da Torre maior (`src/f1/morteChefeF1.ts`):
+> a cadeia com a explosão da queda em 84 px, o estouro de 250 px, os estilhaços da própria arte, o incêndio.
+> **5b (o retorno dele):** aprovou a rodada; pediu a CADÊNCIA DE TONS (o Vale e a Paisagem estavam mais claros que a
+> pintura atrás: re-tonalizados no assado, checagem em `scripts/_g/_cadencia-chao.mjs`) e tirar a "parede" da fumaça
+> da explosão (a folha da cena final é cortada na borda da tela: `scripts/_g/_explosao-fonte.mjs` desfaz a nuvem antes
+> do corte, nas três explosões da Torre). ✅ **APROVADA por ele em 20/10** ("agora sim, ficou perfeito"); NADA commitado.
+> **Rodada 6 — as estruturas no escuro, CONCEITOS** (`plans/2026-10-20-f1-rodada6-estruturas-escuras.md`, folha
+> `rodada6.html`): ele escolheu MISTURAR as cúpulas da colônia com o gótico das pinturas dele; o estilo vem da cidadela
+> da pintura dele (sem contorno), o tom medido e ajustado (mediana 30; obstáculos 26), tudo plantado no jogo de
+> verdade (`scripts/_g/_plantar-pecas-f1.mjs`). 21/10: ele escolheu por peça e pediu as peças MENORES → **INSTALADA**
+> (`scripts/_g/_instalar-pecas-f1.mjs` → `public/sprites/f1/pecas/` + `src/f1/pecasF1.dados.ts` GERADO, `src/f1/pecasF1.ts`):
+> 75% das caixas (a torre 85%), as luzes assadas em quadros (`<chave>-luz`), o pilar em 5 alturas assadas (saiu o
+> `setScale`), a boca medida por torre; e os AGLOMERADOS da colônia (ideia dele) numa camada de decoração entre a
+> Paisagem e as estruturas (`AGLOMERADOS_F1`). As peças antigas seguem no disco, sem registro, até a limpeza. Os alvos
+> ficaram menores (a antena virou agulha): anotado para o bloco F. **Próximo: o olho dele na folha `rodada6.html`.**
+>
+> 📍 **20/10 (3) — ELE SAIU E PEDIU PARA AVANÇAR** (*"avance com as fases e vá montando as folhas, assim que eu chegar
+> verifico tudo"*). Feito, NADA commitado, tudo à espera do olho dele na página de entrada
+> `folhas/2026-10-20/f1-cenario/index.html`:
+> - **Rodada 2 — a invasão, no jogo** (`plans/2026-10-20-f1-rodada2-invasao.md`): as 249 janelas apagam de fora para
+>   dentro (16–58 s), o magenta acende onde o âmbar morreu, 3 holofotes e 3 armas de traçantes até caírem (26–45 s),
+>   5 naves invasoras descendo (somem na névoa — a máscara das colinas não fechou), 10 explosões ao longe (a folha da
+>   queda do Leviatã reduzida) deixando fogo e fumaça, a ponta da cidadela magenta aos 55 s, silêncio aos 63 s.
+>   `src/f1/invasao.ts`, `ritmosF1.ts` (testado em `scripts/test-f1-invasao.mjs`), `INVASAO` em `numerosF1.ts`.
+> - **Rodada 3 — as peças do chão, CONCEITOS** (PixelLab Pro com as cúpulas da cena final como referência): folha
+>   `rodada3.html` com 4 por peça no tamanho de jogo, plantadas na fase. A instalação espera a escolha dele.
+> - **Rodada 4 — o chefão e a subida, no jogo** (`plans/2026-10-20-f1-rodada4-chefe-subida.md`): as plumas nos 3
+>   bocais acesos, a poeira da queda na decolagem, a explosão da queda na morte (no lugar da fumaça em bolinhas, só na
+>   F1), a nave travada a −45° do `breakAtmosphere` à vitória.
+> - ⚠️ No TREINO a mesa de cartas do meio abre logo de cara e pausa o jogo (a mesa vive na camada HD): as sondas que
+>   entram pelo treino precisam escolher uma carta (`scripts/_g/_filmar-chefe-f1.mjs` faz isso); a `probe-chefao-arte`
+>   velha não faz, e para antes do chefão.
+>
+> 📍 **20/10 (2) — A ORDEM MUDOU (decisão dele): TODO O VISUAL PRIMEIRO, A JOGABILIDADE DEPOIS → G → H → I → J → F.**
+> *"vamos tratar tudo que é visual primeiro. Depois jogabilidade… prefiro alternar a F com a G"*. As dívidas visuais
+> órfãs da tabela da etapa 7 entram nos blocos: as chamas e o flash do chefão da F1 → G; o painel da cutscene 2, o
+> acabamento da cutscene 3, a baia do cargueiro, os cabos do chefão da F4 e a arte da rocha do minerador + `asteroid`
+> → I; a silhueta do batedor do cinturão fica com o F. (No I, o item 13 — os flashes — segue aberto; o 12 era o
+> subtítulo do menu, resolvido no E.)
+> - **O G ABRIU** (brainstorming → spec aprovada → plano da rodada 1 → executado). Spec
+>   `specs/2026-10-20-f1-cenario-design.md`: a F1 é o **perímetro da colônia de cúpulas** (a mesma que a cena final
+>   mostra destruída), **caindo, tomada pelos invasores**; **UMA pintura dele** (`assets/raw/Cidadela Gótica entre
+>   Montanhas Nebulosas.png`), **inteira** (429×216 — a regra dele: *"todos os fundos das fases são no tamanho
+>   original da pintura, exatamente para dar o aspecto de grandeza e profundidade"*); a invasão avança pela LUZ (o
+>   âmbar apaga, o magenta acende) presa ao relógio da fase; as peças do chão viram uma família (o que tem magenta é do
+>   invasor e quebra); a explosão da queda do Leviatã vira fonte das explosões; a nave a 45° na subida para o zero-G.
+> - **A rodada 1 está no jogo, NÃO commitada** (plano `plans/2026-10-20-f1-rodada1-pintura-camadas.md`, a execução e
+>   os desvios no fim dele): a pintura com 13 faróis piscando e a cachoeira, a cordilheira tirada da pintura (2
+>   peças), a bruma, o chão recolorido, a Atmosfera da F1 recalculada. As regras de luz do menu foram para
+>   `scripts/_cenario/luzes.mjs` (o menu sai idêntico, conferido pixel a pixel). Sonda `scripts/_g/_probe-f1.mjs`.
+>   **Espera por ele:** a folha `rodada1.html` e as quatro decisões (cordilheira, bruma, chão, deriva). Depois: a
+>   rodada 2 (a invasão), cada rodada com o próprio plano.
 >
 > 📍 **20/10 — O BLOCO E FECHOU: COMMITADO E EMPURRADO** para `origin/feat/cartas-preview` — `9ef1347` (código e
 > arte), `390d481` (ferramentas, testes e folhas, sem os vídeos e os GIFs) e `911196b` (docs). O menu é a colônia de
@@ -110,14 +171,16 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >   enfraquecido, o do final): o final precisa da versão enfraquecida do desenho NOVO. Aprovar por GIF em cada cena.
 > - **E — o menu refeito** (✅ FECHADO 20/10, COMMITADO e EMPURRADO: a colônia de Kepler à noite, viva, com perigo e o
 >   letreiro de neon; spec `specs/2026-10-19-menu-refeito-design.md`; a técnica em `docs/CENARIO-VIVO.md`). O próximo é o F.
-> - **F — Fase 2: a frota e o minerador** (jogabilidade; ele testa jogando):
+> - **F — Fase 2: a frota e o minerador** (⏭️ 20/10: passou para DEPOIS do J — o visual primeiro, decisão dele;
+>   jogabilidade; ele testa jogando):
 >   1. os **batedores da frota** (as naves finas da pele do cinturão): menos naves por frota, voo de NAVE (inclinar,
 >      fazer curva, em vez da senóide), atirar contra o jogador, manobra de evasão, e passar pelo jogador e sair pela
 >      esquerda se não forem abatidos. São difíceis de acertar por serem finas: avaliar a hitbox. ⚠️ O `batedor` também
 >      voa na F3: decidir se a mudança vale só para a F2. Medir o tiro para pressionar sem punir;
 >   2. a **rocha do elite minerador** destoa da F2 e é grande demais: diminuir, ou prendê-la a um canto ou a um
 >      pedaço maior de asteroide (arte nova). Fazer junto com o `asteroid` do item 7.
-> - **G — Fase 1: a arte do cenário.** Os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
+> - **G — Fase 1: a arte do cenário** (▶️ 20/10: EM ANDAMENTO, rodada 1 no jogo; spec
+>   `specs/2026-10-20-f1-cenario-design.md`). Os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
 >   cordilheira não ficou como ele queria (perguntar a referência ANTES de gerar). Refazer arte E composição. A técnica
 >   do menu (`docs/CENARIO-VIVO.md`) é o ponto de partida: camadas, luzes que apagam limpas, volume, perigo, tudo em
 >   função do relógio.
