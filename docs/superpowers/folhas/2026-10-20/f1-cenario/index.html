@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 refeita</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--txt); }
+  .sub { color: var(--sub); }
+  .rodada { display:grid; grid-template-columns: 220px 1fr; gap: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin: 12px 0; align-items: center; }
+  .rodada img { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); image-rendering: pixelated; display:block; }
+  .rodada h3 { margin: 0 0 4px; font-size: 17px; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-left:6px; vertical-align: 2px; }
+  .decidir { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .jogo { background: color-mix(in srgb, var(--ok) 22%, transparent); color: var(--ok); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  @media (max-width: 640px) { .rodada { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 refeita · bloco G</h1>
+<p class="sub">20/10/2026. Rodada por rodada. Nada foi commitado. O jogo no <a href="http://localhost:5173/">localhost:5173</a> tem as rodadas 1, 2, 4 e 5. A rodada 5 nasceu do seu retorno: o chão saiu das suas duas pinturas novas, a cordilheira e o ladrilho saíram, e a morte do chefão ficou maior. As estruturas (rodada 3) vão ser refeitas escuras na próxima.</p>
+
+<h2>Antes de começar</h2>
+<div class="rodada">
+  <a href="hoje.html"><img src="hoje/f1-46s.png" alt=""></a>
+  <div><h3><a href="hoje.html">A fase como estava</a></h3><p class="sub">O ponto de partida: as camadas antigas e o que destoava.</p></div>
+</div>
+<div class="rodada">
+  <a href="pintura.html"><img src="pintura/inteira-216-inicio-x4.png" alt=""></a>
+  <div><h3><a href="pintura.html">A sua pintura no tamanho do jogo</a></h3><p class="sub">A pintura inteira, 429×216.</p></div>
+</div>
+
+<h2>As rodadas</h2>
+<div class="rodada">
+  <a href="rodada1.html"><img src="rodada1/t30.png" alt=""></a>
+  <div><h3><a href="rodada1.html">1 · A pintura e as camadas</a> <span class="tag jogo">no jogo</span></h3>
+    <p class="sub">A pintura inteira com os faróis piscando e a cachoeira, a cordilheira tirada da pintura, a bruma, o chão na paleta dela, o tratamento recalculado.</p>
+    <p><b>Seu retorno:</b> a pintura viva e a bruma aprovadas; a cordilheira e o chão reprovados → rodada 5.</p></div>
+</div>
+<div class="rodada">
+  <a href="rodada2.html"><img src="rodada2/instantes/t56.png" alt=""></a>
+  <div><h3><a href="rodada2.html">2 · A invasão</a> <span class="tag jogo">no jogo</span></h3>
+    <p class="sub">A colônia cai pela luz: janelas apagando de fora para dentro, magenta, holofotes e artilharia caindo, naves descendo, explosões ao longe, fogo e fumaça, a ponta da cidadela tomada.</p>
+    <p><b>Seu retorno:</b> aprovada ("perfeita").</p></div>
+</div>
+<div class="rodada">
+  <a href="rodada3.html"><img src="rodada3/folhas/base-1.png" alt=""></a>
+  <div><h3><a href="rodada3.html">3 · As peças do chão</a> <span class="tag decidir">refazer</span></h3>
+    <p class="sub">Conceitos no tamanho de jogo, plantados na fase: os módulos de cúpula, os bunkers, os silos, as antenas, a cúpula grande, a torre invasora, os pilares e os destroços.</p>
+    <p><b>Seu retorno:</b> claras demais ("nem parece um dark sci-fi"), e tudo no chão parecia colado. O chão foi refeito na rodada 5; as peças serão refeitas escuras, com as suas pinturas de referência.</p></div>
+</div>
+<div class="rodada">
+  <a href="rodada4.html"><img src="rodada4/chefe-voo.png" alt=""></a>
+  <div><h3><a href="rodada4.html">4 · O chefão e a subida</a> <span class="tag jogo">no jogo</span></h3>
+    <p class="sub">As plumas dos propulsores, a poeira da queda do Leviatã na decolagem, a explosão da queda na morte e a nave a 45° na subida.</p>
+    <p><b>Seu retorno:</b> aprovada; a morte do chefão maior e mais violenta → rodada 5.</p></div>
+</div>
+<div class="rodada">
+  <a href="rodada5.html"><img src="rodada5/t20.png" alt=""></a>
+  <div><h3><a href="rodada5.html">5 · O chão e a morte do chefão</a> <span class="tag jogo">no jogo</span></h3>
+    <p class="sub">As suas duas pinturas em faixas sem emenda (o Vale atrás, a Paisagem na frente dele), as estruturas plantadas entre a Paisagem e o entulho da frente, o primeiro plano novo, as brasas tremulando e a fumaça das torres; a morte da Torre com a cadeia, o estouro de 250 px, os estilhaços e o incêndio.</p>
+    <p><b>Seu retorno:</b> a cadência de tons e a parede da fumaça corrigidas (5b) → "agora sim, ficou perfeito".</p></div>
+</div>
+<div class="rodada">
+  <a href="rodada6.html"><img src="rodada6/plantadas/colonia-2.png" alt=""></a>
+  <div><h3><a href="rodada6.html">6 · As estruturas no escuro</a> <span class="tag jogo">no jogo</span></h3>
+    <p class="sub">A rodada 3 refeita: as cúpulas da colônia com o gótico das suas pinturas crescendo delas, a sua cidadela como referência de estilo, sem contorno, no tom da cena. Instaladas com a sua escolha, em 75% do tamanho, com as luzes assadas, os pilares em alturas assadas e os aglomerados da colônia ao fundo.</p>
+    <p><b>Você decide:</b> a escala, as luzes, os aglomerados.</p></div>
+</div>
+
+<h2>Para jogar</h2>
+<ul>
+  <li>No menu, <b>1</b> começa a F1 direto.</li>
+  <li>As estruturas ainda são as antigas (os pilares azul-gelo, o silo listrado): destoam até a rodada das peças escuras.</li>
+</ul>
+</main>
+</body>
+</html>

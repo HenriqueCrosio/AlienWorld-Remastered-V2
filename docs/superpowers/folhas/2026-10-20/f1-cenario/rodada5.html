@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 · rodada 5</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ol, ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · rodada 5 · o chão e a morte do chefão</h1>
+<p class="sub">20/10/2026 · <a href="index.html">← todas as rodadas</a> · As suas duas pinturas viraram o chão da fase: o Vale atrás, a Paisagem na frente dele, as estruturas plantadas entre a Paisagem e uma faixa de entulho, e um primeiro plano na frente da nave. A cordilheira recortada e o ladrilho do chão saíram. A morte do chefão ficou maior e mais violenta. <b>As estruturas ainda são as antigas</b> (claras, com contorno): elas são a próxima rodada.</p>
+
+<h2>Os ajustes do seu retorno</h2>
+<div class="item">
+  <h3>1 · A cadência de tons</h3>
+  <p>Você viu certo: medido na tela (cada plano só onde nenhum outro o cobre), o Vale e a Paisagem estavam MAIS CLAROS que a pintura atrás deles. As colinas enevoadas do Vale chegavam a 75 de brilho entre planos de 17 a 31. Cada plano foi re-tonalizado no assado com uma curva de brilho (o matiz fica, as brasas e os fogos ficam como estão, porque são luz e não rocha), um degrau mais escuro por plano. A aresta do entulho e a do primeiro plano também desceram.</p>
+  <table>
+    <tr><th>brilho (mediana / 90%)</th><th>antes</th><th>agora</th></tr>
+    <tr><td>a pintura da cidadela</td><td>17 / 42</td><td>17 / 42</td></tr>
+    <tr><td>o Vale</td><td><b>24 / 75</b></td><td>14 / 31</td></tr>
+    <tr><td>a Paisagem</td><td><b>31 / 51</b></td><td>12 / 23</td></tr>
+    <tr><td>o entulho da frente</td><td>12 / 40</td><td>7 / 17</td></tr>
+    <tr><td>o primeiro plano</td><td>8 / 27</td><td>5 / 14</td></tr>
+  </table>
+  <p class="sub">A conta virou uma checagem (`scripts/_g/_cadencia-chao.mjs`): ela reprova se algum plano ficar mais claro que o de trás.</p>
+  <div class="grade">
+    <figure><img src="rodada5/antes-t20.png" alt=""><figcaption><b>Antes</b> (20 s)</figcaption></figure>
+    <figure><img src="rodada5/t20.png" alt=""><figcaption><b>Agora</b> (20 s)</figcaption></figure>
+    <figure><img src="rodada5/antes-t30.png" alt=""><figcaption><b>Antes</b> (30 s)</figcaption></figure>
+    <figure><img src="rodada5/t30.png" alt=""><figcaption><b>Agora</b> (30 s)</figcaption></figure>
+  </div>
+</div>
+<div class="item">
+  <h3>2 · A parede na fumaça da explosão</h3>
+  <p>A causa: na cena final a nuvem da queda do Leviatã passa da borda da tela, e do quadro 10 ao 42 a folha original sai cortada reta no lado direito. Como o jogo espelha a explosão metade das vezes, o corte aparecia à esquerda também. Agora a nuvem se DESFAZ antes do corte, em fumaça irregular (um ruído quebra o desvanecer, para não virar degradê). O desfazer só entra quando a nuvem chega à borda, então a bola de fogo do começo não é tocada. E a explosão passou a nascer no centro da bola de fogo, não no meio do quadro. Vale para a morte, para a cadeia e para a poeira da decolagem, que usam a mesma arte.</p>
+  <figure><img src="rodada5/parede-antes-depois.png" alt=""><figcaption><b>Em cima, antes</b> (a parede reta à direita nos quadros do meio); <b>embaixo, agora</b>. Quadros 8, 14, 22, 30, 38 e 44 da explosão de 250 px.</figcaption></figure>
+  <div class="grade">
+    <figure><img src="rodada5/antes-chefe-morte-estilhacos.png" alt=""><figcaption><b>Antes</b></figcaption></figure>
+    <figure><img src="rodada5/chefe-morte-estilhacos.png" alt=""><figcaption><b>Agora</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>A fase, em velocidade real</h2>
+<figure><video src="rodada5/f1-limpo.webm" autoplay loop muted playsinline controls></video><figcaption><b>40 s</b> do começo da fase, sem os inimigos (o cenário é o que se julga). As estruturas são as antigas.</figcaption></figure>
+<div class="grade">
+  <figure><img src="rodada5/t10.png" alt=""><figcaption><b>10 s</b></figcaption></figure>
+  <figure><img src="rodada5/t20.png" alt=""><figcaption><b>20 s</b></figcaption></figure>
+  <figure><img src="rodada5/t30.png" alt=""><figcaption><b>30 s</b></figcaption></figure>
+</div>
+
+<h2>Como as camadas se empilham</h2>
+<div class="item">
+  <table>
+    <tr><th>de trás para a frente</th><th>velocidade</th><th>o que é</th></tr>
+    <tr><td>a pintura da cidadela</td><td>deriva 45 px na fase</td><td>a rodada 1 e a invasão da rodada 2, como você aprovou</td></tr>
+    <tr><td><b>o Vale</b></td><td>0,3 do mundo</td><td>a sua "Valle Industrial Devastado": as colinas enevoadas e as torres arruinadas</td></tr>
+    <tr><td>a bruma</td><td>0,4</td><td>passa entre o Vale e a Paisagem</td></tr>
+    <tr><td><b>a Paisagem</b></td><td>0,5</td><td>a sua "Paisagem Montanhosa Sombria com Brasas": o chão em que as estruturas pisam</td></tr>
+    <tr><td>a névoa rasteira</td><td>0,75</td><td>a de antes, na cor da névoa da pintura</td></tr>
+    <tr><td><b>as estruturas</b></td><td>1 (o mundo)</td><td>o pé sorteado numa faixa de 10 px (y 204 a 213), sem dois vizinhos na mesma altura, e quem está mais à frente desenha por cima: a técnica que tirou o "colado" do casco da F3</td></tr>
+    <tr><td><b>o entulho da frente</b></td><td>1,15</td><td>quase preto, cobre o pé de todas as estruturas e passa na frente delas; fica atrás da nave</td></tr>
+    <tr><td>a nave</td><td></td><td></td></tr>
+    <tr><td><b>o primeiro plano</b></td><td>1,5</td><td>o entulho espelhado, mais baixo e mais escuro: só as pontas aparecem rente ao rodapé. Some na luta do chefão e com um elite em cena, como o de antes</td></tr>
+  </table>
+  <p class="sub" style="margin-top:12px">Na saída da atmosfera, o chão cai em parallax: o Vale desce 40 px, a Paisagem 60, o entulho 90 e o primeiro plano 110, enquanto se apagam.</p>
+</div>
+
+<h2>As suas pinturas, sem emenda</h2>
+<div class="item">
+  <p>Cada pintura entrou INTEIRA, reduzida como a da cidadela (429 de largura), e virou uma faixa que se repete sem emenda: o fim de cada uma se sobrepõe ao começo e um corte de menor diferença, linha por linha, decide onde um vira o outro. Abaixo, cada faixa duas vezes seguidas: <b>o tique branco embaixo marca a junta</b>.</p>
+  <figure><img src="rodada5/emenda-vale.png" alt=""><figcaption><b>O Vale</b> (381×83). A fumaça semitransparente das torres saiu do recorte: pontilhada em 1 px ela virava um xadrez. Ela volta animada, subindo dos fogos (abaixo).</figcaption></figure>
+  <figure><img src="rodada5/emenda-paisagem.png" alt=""><figcaption><b>A Paisagem</b> (381×81). O céu dela era um xadrez PINTADO na imagem (sem transparência): recortei por script, sem halo claro na borda.</figcaption></figure>
+  <figure><img src="rodada5/emenda-frente.png" alt=""><figcaption><b>O entulho da frente</b> (381×28). O contorno é a crista da sua Paisagem espelhada e achatada (montanha amassada vira entulho, e mantém o recorte da sua mão); o miolo é o pé do Vale, que fica escondido atrás da Paisagem e por isso não se repete na tela. A primeira tentativa, por limiar de escuro, deu blocos de parede reta, o defeito da cordilheira.</figcaption></figure>
+  <details><summary>a ordem das duas (você escolheu a A)</summary>
+    <figure><img src="rodada5/ordem-a-vale-atras.png" alt=""><figcaption><b>A · o Vale atrás</b></figcaption></figure>
+    <figure><img src="rodada5/ordem-b-paisagem-atras.png" alt=""><figcaption><b>B · a Paisagem atrás</b></figcaption></figure>
+  </details>
+</div>
+
+<h2>Vivo: as brasas e a fumaça</h2>
+<div class="item">
+  <p>A técnica do menu: as luzes quentes das duas pinturas (8 no Vale, 12 na Paisagem) foram tiradas por difusão e divididas em três terços. Cada terço tremula no seu ritmo, nunca em uníssono e nunca apagando de todo. Dos dois fogos maiores, nas torres do Vale, sobe a coluna de fumaça da invasão, presa à faixa.</p>
+  <figure><img src="rodada5/brasas-vale.png" alt=""><figcaption><b>O Vale:</b> em cima aceso, embaixo com todas as brasas no mais apagado.</figcaption></figure>
+  <figure><img src="rodada5/brasas-paisagem.png" alt=""><figcaption><b>A Paisagem</b>, do mesmo jeito.</figcaption></figure>
+</div>
+
+<h2>A saída da atmosfera</h2>
+<figure><video src="rodada5/saida.webm" autoplay loop muted playsinline controls></video><figcaption><b>8 s:</b> o chão cai em parallax e some dentro da bruma, e o zero-G entra.</figcaption></figure>
+
+<h2>A morte do chefão, maior e mais violenta</h2>
+<figure><video src="rodada5/chefe.webm" autoplay loop muted playsinline controls></video><figcaption><b>A luta inteira:</b> a decolagem, o voo, a morte e a subida a 45°. A nave está parada no alto à esquerda, intocável (filmagem).</figcaption></figure>
+<div class="grade">
+  <figure><img src="rodada5/chefe-morte-cadeia.png" alt=""><figcaption><b>A cadeia (1,3 s):</b> a explosão da queda do Leviatã em 84 px estoura doze vezes pelo corpo, cada uma com fagulhas e um tranco; a Torre aderna, afunda e treme. Saiu a explosão em bolinhas.</figcaption></figure>
+  <figure><img src="rodada5/chefe-morte.png" alt=""><figcaption><b>O estouro:</b> a mesma explosão em 250 px (a da cena final tem 344: continua sendo redução), os 48 quadros dela; o tremor mais longo e forte, e o clarão.</figcaption></figure>
+  <figure><img src="rodada5/chefe-morte-estilhacos.png" alt=""><figcaption><b>Os estilhaços:</b> 16 pedaços cortados da própria arte da Torre, com a borda rasgada em brasa, voando em arco e girando, cada um com rastro de fumaça.</figcaption></figure>
+  <figure><img src="rodada5/chefe-morte-incendio.png" alt=""><figcaption><b>O incêndio:</b> onde ela caiu, três fogos e uma coluna de fumaça no entulho da frente, presos a ele: caem junto com o chão na saída.</figcaption></figure>
+</div>
+<figure><img src="rodada5/morte-pecas.png" alt=""><figcaption><b>As peças, assadas em pixel:</b> a explosão grande a cada 6 quadros; os estilhaços (×4); a coluna de fumaça (×2) e o fogo (×4), feito de três línguas tortas (a primeira versão saiu em triângulos regulares).</figcaption></figure>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O chão:</b> as faixas, as velocidades, a altura do entulho da frente, o primeiro plano contínuo (no lugar das rochas espaçadas).</li>
+    <li><b>As brasas e a fumaça:</b> a força do tremular, a fumaça das torres do Vale.</li>
+    <li><b>A morte do chefão:</b> o tamanho, a cadeia, os estilhaços, o incêndio.</li>
+    <li><b>As estruturas (a próxima rodada):</b> refeitas escuras, sem contorno, com as suas pinturas como referência de estilo.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

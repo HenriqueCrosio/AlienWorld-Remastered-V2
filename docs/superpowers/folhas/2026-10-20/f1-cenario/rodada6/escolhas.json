@@ -1,0 +1,10 @@
+{
+  "predio": { "caixa": { "w": 64, "h": 64 }, "escolhas": ["predio-11-1.png", "predio-11-8.png", "predio-11-11.png", "predio-11-14.png"] },
+  "bunker": { "pasta": "predioTexto", "caixa": { "w": 64, "h": 64 }, "escolhas": ["predioTexto-11-0.png", "predioTexto-11-3.png", "predioTexto-11-7.png", "predioTexto-11-11.png"] },
+  "silo": { "caixa": { "w": 63, "h": 64 }, "escolhas": ["silo-11-1.png", "silo-11-3.png", "silo-11-4.png", "silo-11-10.png"] },
+  "radar": { "caixa": { "w": 64, "h": 57 }, "escolhas": ["radar-11-1.png", "radar-11-2.png", "radar-11-9.png", "radar-11-11.png"] },
+  "base": { "caixa": { "w": 127, "h": 128 }, "porTela": 2, "escolhas": ["base-11-0.png", "base-11-2.png", "base-11-3.png", "base-23-3.png"] },
+  "torre": { "caixa": { "w": 32, "h": 30 }, "espelha": true, "escolhas": ["torre-11-1.png", "torre-11-10.png", "torre-11-12.png", "torre-11-15.png"] },
+  "pilar": { "caixa": { "w": 54, "h": 64 }, "escolhas": ["pilar-11-0.png", "pilar-11-4.png", "pilar-11-9.png", "pilar-11-13.png"] },
+  "destroco": { "caixa": { "w": 58, "h": 34 }, "escolhas": ["destroco-11-0.png", "destroco-11-5.png", "destroco-11-9.png", "destroco-11-13.png"] }
+}

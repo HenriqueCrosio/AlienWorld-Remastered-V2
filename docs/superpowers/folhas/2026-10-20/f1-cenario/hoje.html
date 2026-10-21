@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 · o cenário hoje</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --ok:#7ad38a; --pend:#ffb347; --ruim:#ff7a6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 52px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 14px; }
+  figure { margin: 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  th, td { padding: 8px 10px; border-top: 1px solid var(--line); vertical-align: middle; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+  td.n { color: var(--sub); white-space: nowrap; width: 1%; }
+  .pecas { display:flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .pecas span { display:flex; flex-direction: column; align-items:center; gap:4px; font-size:12px; color:var(--sub); }
+  .pecas img { image-rendering: pixelated; background: #1a2030; border-radius: 4px; padding: 4px; }
+  .x2 img { zoom: 2; }
+  .x1 img { zoom: 1; }
+  .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; margin-left:6px; vertical-align: 2px; }
+  .jogo { background: color-mix(in srgb, var(--pend) 22%, transparent); color: var(--pend); }
+  .deco { background: color-mix(in srgb, var(--sub) 22%, transparent); color: var(--sub); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .pergunta { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · o cenário hoje</h1>
+<p class="sub">20/10/2026 · abertura do bloco G. Esta folha mostra a fase como ela está, para você apontar o que incomoda antes de eu gerar qualquer arte. Nada aqui mudou no jogo.</p>
+
+<h2>A fase em jogo</h2>
+<p class="sub">Fotos do jogo de verdade, a nave parada no canto de cima, a cada 6 segundos.</p>
+<div class="grade">
+  <figure><img src="hoje/f1-04s.png" alt=""><figcaption><b>4 s</b> · só pilares</figcaption></figure>
+  <figure><img src="hoje/f1-10s.png" alt=""><figcaption><b>10 s</b></figcaption></figure>
+  <figure><img src="hoje/f1-16s.png" alt=""><figcaption><b>16 s</b></figcaption></figure>
+  <figure><img src="hoje/f1-22s.png" alt=""><figcaption><b>22 s</b></figcaption></figure>
+  <figure><img src="hoje/f1-28s.png" alt=""><figcaption><b>28 s</b> · prédio, torre, entulho</figcaption></figure>
+  <figure><img src="hoje/f1-34s.png" alt=""><figcaption><b>34 s</b></figcaption></figure>
+  <figure><img src="hoje/f1-40s.png" alt=""><figcaption><b>40 s</b> · silo e pilar inclinado</figcaption></figure>
+  <figure><img src="hoje/f1-46s.png" alt=""><figcaption><b>46 s</b> · a base na laje cinza</figcaption></figure>
+  <figure><img src="hoje/f1-52s.png" alt=""><figcaption><b>52 s</b> · a fila de pilares</figcaption></figure>
+  <figure><img src="hoje/f1-58s.png" alt=""><figcaption><b>58 s</b></figcaption></figure>
+</div>
+
+<h2>As camadas, do fundo para a frente</h2>
+<div class="item">
+<table>
+  <tr><th></th><th>camada</th><th>a arte</th></tr>
+  <tr><td class="n">1</td><td><b>céu</b><br><span class="sub">degradê em código</span></td><td class="sub">—</td></tr>
+  <tr><td class="n">2</td><td><b>fundo pintado</b> <span class="tag deco">só cenário</span><br><span class="sub">768×394, rola a 4% do mundo, posto 80 px acima do topo</span></td><td><div class="pecas x1"><span><img src="/sprites/paint-bg-f1.png" width="384" alt="">paint-bg-f1 (metade)</span></div></td></tr>
+  <tr><td class="n">3</td><td><b>tráfego distante</b><br><span class="sub">o batedor escurecido, cruzando o alto</span></td><td class="sub">o sprite do inimigo, com tom escuro</td></tr>
+  <tr><td class="n">4</td><td><b>horizonte da colônia</b><br><span class="sub">em bolsões, rola a 10%</span></td><td><div class="pecas x2"><span><img src="/sprites/skyline.png" alt="">skyline</span><span><img src="/sprites/skyline-2.png" alt="">skyline-2</span></div></td></tr>
+  <tr><td class="n">5</td><td><b>luzes da colônia</b> e <b>cometa</b></td><td class="sub">pontos ciano em código; um cometa raro</td></tr>
+  <tr><td class="n">6</td><td><b>a cordilheira</b><br><span class="sub">duas faixas da mesma arte (35% e 60% do mundo), pintadas de azul pelo código</span></td><td><div class="pecas x2"><span><img src="/sprites/mtn-mid.png" alt="">mtn-mid</span><span><img src="/sprites/mtn-mid-2.png" alt="">mtn-mid-2</span><span><img src="/sprites/mtn-mid-3.png" alt="">mtn-mid-3</span></div></td></tr>
+  <tr><td class="n">7</td><td><b>chão</b>, <b>entulho</b> e <b>névoa rasteira</b></td><td><div class="pecas x2"><span><img src="/sprites/ground-tile.png" alt="">ground-tile</span></div></td></tr>
+  <tr><td class="n">8</td><td><b>as peças do chão</b> <span class="tag jogo">jogo</span><br><span class="sub">batem na nave; o roteiro sorteia</span></td><td>
+    <div class="pecas x2">
+      <span><img src="/sprites/spire.png" alt="">pilar</span><span><img src="/sprites/spire-2.png" alt="">pilar 2</span><span><img src="/sprites/spire-3.png" alt="">pilar 3</span>
+      <span><img src="/sprites/building.png" alt="">prédio</span><span><img src="/sprites/building-2.png" alt="">prédio 2</span><span><img src="/sprites/building-3.png" alt="">prédio 3</span>
+      <span><img src="/sprites/silo.png" alt="">silo</span><span><img src="/sprites/silo-2.png" alt="">silo 2</span>
+      <span><img src="/sprites/radar.png" alt="">radar</span>
+      <span><img src="/sprites/turret.png" alt="">torre (atira)</span><span><img src="/sprites/turret-2.png" alt="">torre 2</span>
+      <span><img src="/sprites/wreck.png" alt="">destroço</span><span><img src="/sprites/wreck-2.png" alt="">destroço 2</span>
+    </div>
+    <div class="pecas x1" style="margin-top:10px"><span><img src="/sprites/base.png" alt="">base (127×128)</span><span><img src="/sprites/base-2.png" alt="">base 2</span></div>
+  </td></tr>
+  <tr><td class="n">9</td><td><b>primeiro plano</b><br><span class="sub">o pilar em silhueta escura, passando na frente da nave</span></td><td class="sub">o mesmo sprite do pilar</td></tr>
+</table>
+</div>
+
+<h2>O que eu vejo</h2>
+<div class="item">
+<ul>
+  <li><b>A cordilheira é uma parede de espinhos azuis.</b> As duas faixas usam a mesma arte, pintada de um azul só pelo código, sem luz nem volume. E ela cobre quase todo o fundo pintado, que já tem montanhas de verdade e a colônia acesa nas encostas.</li>
+  <li><b>Os pilares de cristal são a peça mais clara da cena, e são de outra paleta</b> (azul-gelo). As três variações são quase iguais, e em fila (52 s) leem como carimbo.</li>
+  <li><b>Cada construção é de um estilo e de uma escala:</b> o silo cinza com faixa amarela, a torre de treliça clara, a base escura e redonda em cima de uma laje cinza reta. A base tem 127 px de altura; a torre que atira, 30.</li>
+  <li><b>A colônia da F1 é a mesma do menu</b> (o menu é a colônia de Kepler à noite, e a cena final sobrevoa a colônia da F1 em ruínas). No menu ela é âmbar e quente, nas montanhas, com pontes e cachoeiras. Na F1 ela é fria e azul.</li>
+</ul>
+</div>
+
+<h2>As referências que já temos</h2>
+<div class="grade">
+  <figure><img src="/sprites/paint-bg-f1.png" alt=""><figcaption><b>A pintura de fundo da F1, inteira.</b> Em jogo, só a faixa de baixo aparece, atrás das faixas azuis.</figcaption></figure>
+  <figure><img src="/sprites/menu/k1/ceu.png" alt=""><figcaption><b>A colônia do menu</b> (a sua pintura, aqui reduzida a 384×216).</figcaption></figure>
+</div>
+
+<h2>A primeira pergunta</h2>
+<div class="item pergunta">
+  <h3>Qual cordilheira você tinha em mente?</h3>
+  <p class="sub">A resposta está no terminal.</p>
+</div>
+</main>
+</body>
+</html>

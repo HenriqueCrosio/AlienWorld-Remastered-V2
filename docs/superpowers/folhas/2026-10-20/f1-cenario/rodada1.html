@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 · rodada 1</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · rodada 1 · a pintura e as camadas</h1>
+<p class="sub">20/10/2026 · <a href="pintura.html">← a pintura</a> · <a href="hoje.html">o cenário de antes</a> · A sua pintura inteira ao fundo, com os faróis das torres piscando e a cachoeira correndo; a cordilheira tirada das montanhas da frente dela; a bruma entre os planos; o chão na paleta dela. As peças do chão, o primeiro plano e os inimigos ainda são os de antes (a rodada 3 troca as peças).</p>
+
+<h2>A fase, em velocidade real</h2>
+<figure><video src="rodada1/f1-limpo.webm" autoplay loop muted playsinline controls></video><figcaption><b>Só o cenário (70 s):</b> os inimigos e os tiros escondidos, para julgar o fundo. A fase com o jogo e a saída da atmosfera estão na <a href="rodada2.html">rodada 2</a>, já com a invasão por cima.</figcaption></figure>
+
+<h2>Quadro a quadro</h2>
+<div class="grade">
+  <figure><img src="rodada1/t00.png" alt=""><figcaption><b>0 s</b></figcaption></figure>
+  <figure><img src="rodada1/t20.png" alt=""><figcaption><b>20 s</b></figcaption></figure>
+  <figure><img src="rodada1/t40.png" alt=""><figcaption><b>40 s</b></figcaption></figure>
+  <figure><img src="rodada1/t60.png" alt=""><figcaption><b>60 s</b>: a pintura já andou ~25 px</figcaption></figure>
+</div>
+
+<h2>As peças da rodada</h2>
+<div class="item">
+  <figure><img src="rodada1/cordilheira.png" alt=""><figcaption><b>A cordilheira:</b> duas montanhas da frente da sua pintura, recortadas pelo cume (a encosta da montanha grande da esquerda e a montanha grande da direita). As duas da direita são as mesmas, menores e mais enevoadas: a faixa de trás. As outras massas não serviram: as colinas do meio têm luzes da colônia (iam aparecer duas vezes, andando) e a crista de pinheiros quase não tem névoa acima, então o recorte saía em degraus.</figcaption></figure>
+  <figure><img src="rodada1/chao.png" alt=""><figcaption><b>O chão:</b> em cima o de antes; embaixo o mesmo desenho, um quarto mais escuro, nas cores da rocha da sua pintura.</figcaption></figure>
+  <figure><img src="rodada1/luzes.png" alt=""><figcaption><b>Cada luz, acesa e apagada</b> (8×), recortada como o jogo recorta: primeiro os faróis (piscam agora), depois as janelas (apagam na rodada 2).</figcaption></figure>
+  <div class="grade">
+    <figure><img src="rodada1/acesa-inteira.png" alt=""><figcaption><b>A colônia acesa</b> (o começo da fase).</figcaption></figure>
+    <figure><img src="rodada1/apagada-inteira.png" alt=""><figcaption><b>A colônia com todas as luzes apagadas</b>: um gosto do fim da rodada 2.</figcaption></figure>
+  </div>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ul>
+    <li><b>A cordilheira:</b> a altura e a quantidade das faixas, e se ela tapa demais a colônia.</li>
+    <li><b>A bruma:</b> mais forte, mais leve ou como está.</li>
+    <li><b>O chão:</b> o desenho de antes recolorido na sua rocha basta, ou quer arte nova.</li>
+    <li><b>A deriva:</b> 45 px na fase inteira; ou a pintura parada.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

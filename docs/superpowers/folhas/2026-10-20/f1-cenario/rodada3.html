@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 · rodada 3</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 0 0 6px; }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--sub); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · rodada 3 · as peças do chão (conceitos)</h1>
+<p class="sub">20/10/2026 · <a href="rodada2.html">← rodada 2</a> · <a href="rodada4.html">rodada 4 →</a> · Feita com você fora. Gerados no PixelLab, com as cúpulas da cena final como referência de desenho (a mesma colônia, lá em ruínas). Cada peça aparece no TAMANHO DE JOGO, plantada no chão da fase nova, com a faixa de solo da frente por cima do pé, como no jogo. Escolhi 4 de cada; todos os candidatos estão em "ver todos". <b>Nada foi instalado:</b> a instalação espera a sua escolha.</p>
+
+<h2>A regra</h2>
+<div class="item">
+  <p><b>O que tem magenta é do invasor, quebra e dá pontos; o que não tem é cenário e só se desvia.</b> Os prédios da colônia estão tomados (o crescimento violeta e as bolsas magenta); a torre que atira é do invasor; os pilares e os destroços não têm magenta nenhum. A vida, os pontos e o quadro de cada peça continuam os de hoje.</p>
+</div>
+
+<h2>O módulo de cúpula <span class="sub">(hoje: o prédio · 64×64 · 8 de vida)</span></h2>
+<div class="item">
+  <figure><img src="rodada3/folhas/predio-1.png" alt=""><figcaption><b>1 · 2 · 3 · 4</b> da esquerda para a direita: o módulo habitacional da colônia, tomado.</figcaption></figure>
+  <figure><img src="rodada3/folhas/bunker-1.png" alt=""><figcaption><b>Ou o bunker</b> (sem a referência das cúpulas): <b>5 · 6 · 7 · 8</b>. Dá para usar os dois como variações.</figcaption></figure>
+  <details><summary>ver todos (32)</summary>
+    <figure><img src="rodada3/contato-predio.png" alt=""></figure>
+    <figure><img src="rodada3/contato-predioTexto.png" alt=""></figure>
+  </details>
+</div>
+
+<h2>O tanque <span class="sub">(hoje: o silo · 63×64 · 6 de vida)</span></h2>
+<div class="item">
+  <figure><img src="rodada3/folhas/silo-1.png" alt=""><figcaption><b>1 · 2 · 3 · 4.</b></figcaption></figure>
+  <details><summary>ver todos (16)</summary><figure><img src="rodada3/contato-silo.png" alt=""></figure></details>
+</div>
+
+<h2>A antena de treliça <span class="sub">(hoje: o radar · 64×57 · 4 de vida)</span></h2>
+<div class="item">
+  <figure><img src="rodada3/folhas/radar-1.png" alt=""><figcaption><b>1 · 2 · 3 · 4:</b> o crescimento sobe pela treliça. Na instalação a varredura do radar vira script sobre a arte.</figcaption></figure>
+  <details><summary>ver todos (16)</summary><figure><img src="rodada3/contato-radar.png" alt=""></figure></details>
+</div>
+
+<h2>A cúpula grande <span class="sub">(hoje: a base · 127×128 · 16 de vida · o coração da colônia aos 41 s)</span></h2>
+<div class="item">
+  <div class="grade">
+    <figure><img src="rodada3/folhas/base-1.png" alt=""><figcaption><b>1 · 2</b></figcaption></figure>
+    <figure><img src="rodada3/folhas/base-2.png" alt=""><figcaption><b>3 · 4</b></figcaption></figure>
+    <figure><img src="rodada3/folhas/base-3.png" alt=""><figcaption><b>5 · 6</b></figcaption></figure>
+    <figure><img src="rodada3/folhas/base-4.png" alt=""><figcaption><b>7 · 8</b></figcaption></figure>
+  </div>
+  <details><summary>ver todos (8)</summary><figure><img src="rodada3/contato-base.png" alt=""></figure></details>
+</div>
+
+<h2>A torre invasora <span class="sub">(hoje: a torre que atira · 32×30 · 5 de vida)</span></h2>
+<div class="item">
+  <figure><img src="rodada3/folhas/torre-1.png" alt=""><figcaption><b>1 · 2 · 3 · 4:</b> biomecânica, com o olho magenta e as raízes agarrando o chão; o cano para cima à direita (o jogo espelha). Na instalação a boca do cano é medida de novo, e o olho pisca antes do tiro.</figcaption></figure>
+  <details><summary>ver todos (50)</summary><figure><img src="rodada3/contato-torre.png" alt=""></figure></details>
+</div>
+
+<h2>O pilar de rocha <span class="sub">(hoje: o pico azul-gelo · indestrutível)</span></h2>
+<div class="item">
+  <figure><img src="rodada3/folhas/pilar-1.png" alt=""><figcaption><b>1 · 2 · 3 · 4:</b> a rocha escura com neve das montanhas da pintura. Aqui estão no tamanho em que saíram (~47 px); no jogo o pilar vai de 34 a 76 px de altura, então na instalação gero as formas escolhidas mais altas e asso as 4 alturas (pixel art não se amplia, e acaba o pilar esticado).</figcaption></figure>
+  <details><summary>ver todos (16)</summary><figure><img src="rodada3/contato-pilar.png" alt=""></figure></details>
+</div>
+
+<h2>O destroço <span class="sub">(hoje: 58×34 · indestrutível)</span></h2>
+<div class="item">
+  <figure><img src="rodada3/folhas/destroco-1.png" alt=""><figcaption><b>1 · 2 · 3 · 4:</b> cúpulas partidas, antena caída, sem magenta.</figcaption></figure>
+  <details><summary>ver todos (16)</summary><figure><img src="rodada3/contato-destroco.png" alt=""></figure></details>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ul>
+    <li><b>Por peça, um ou mais números</b> (dois ou três viram variações, como hoje).</li>
+    <li><b>O módulo:</b> a cúpula, o bunker ou os dois.</li>
+    <li>Depois da escolha: a instalação (no mesmo quadro de hoje, com a área de colisão igual), as luzes por script (as janelas, o magenta pulsando, a varredura), os pilares nas 4 alturas e o GIF em jogo. O primeiro plano (as silhuetas que passam na frente da nave) sai das peças escolhidas.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

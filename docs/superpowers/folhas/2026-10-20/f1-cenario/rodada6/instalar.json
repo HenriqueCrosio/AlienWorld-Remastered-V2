@@ -1,0 +1,120 @@
+{
+  "building": {
+    "caixa": [
+      64,
+      64
+    ],
+    "fontes": [
+      "predio/predio-11-1.png",
+      "predio/predio-11-2.png",
+      "predio/predio-11-4.png",
+      "predio/predio-11-14.png",
+      "predioTexto/predioTexto-11-0.png",
+      "predioTexto/predioTexto-11-1.png",
+      "predioTexto/predioTexto-11-3.png",
+      "predioTexto/predioTexto-11-6.png",
+      "predioTexto/predioTexto-11-15.png"
+    ]
+  },
+  "silo": {
+    "caixa": [
+      63,
+      64
+    ],
+    "fontes": [
+      "silo/silo-11-0.png",
+      "silo/silo-11-1.png",
+      "silo/silo-11-4.png",
+      "silo/silo-11-13.png",
+      "silo/silo-11-6.png"
+    ]
+  },
+  "radar": {
+    "caixa": [
+      64,
+      57
+    ],
+    "fontes": [
+      "radar/radar-11-1.png",
+      "radar/radar-11-2.png",
+      "radar/radar-11-6.png",
+      "radar/radar-11-10.png"
+    ]
+  },
+  "base": {
+    "caixa": [
+      128,
+      128
+    ],
+    "fontes": [
+      "base/base-11-0.png",
+      "base/base-11-1.png",
+      "base/base-11-2.png",
+      "base/base-11-3.png",
+      "base/base-23-0.png",
+      "base/base-23-1.png",
+      "base/base-23-3.png"
+    ]
+  },
+  "turret": {
+    "caixa": [
+      32,
+      30
+    ],
+    "boca": true,
+    "fontes": [
+      "torre/torre-11-1.png",
+      "torre/torre-11-10.png",
+      "torre/torre-11-14.png",
+      "torre/torre-11-22.png"
+    ],
+    "escala": 0.85
+  },
+  "wreck": {
+    "caixa": [
+      58,
+      34
+    ],
+    "semLuz": true,
+    "fontes": [
+      "destroco/destroco-11-0.png",
+      "destroco/destroco-11-4.png",
+      "destroco/destroco-11-5.png",
+      "destroco/destroco-11-9.png",
+      "destroco/destroco-11-10.png",
+      "destroco/destroco-11-13.png"
+    ]
+  },
+  "spire": {
+    "larguraMax": 54,
+    "bandas": [
+      {
+        "pasta": "pilar",
+        "alturas": [
+          34,
+          44,
+          55
+        ],
+        "fontes": [
+          "pilar-11-0.png",
+          "pilar-11-4.png",
+          "pilar-11-9.png",
+          "pilar-11-13.png"
+        ]
+      },
+      {
+        "pasta": "pilarAlto",
+        "alturas": [
+          65,
+          76
+        ],
+        "fontes": [
+          "pilarAlto-11-0.png",
+          "pilarAlto-11-1.png",
+          "pilarAlto-11-3.png",
+          "pilarAlto-11-8.png"
+        ]
+      }
+    ]
+  }
+}

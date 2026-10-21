@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 · rodada 4</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · rodada 4 · o chefão e a subida</h1>
+<p class="sub">20/10/2026 · <a href="rodada3.html">← rodada 3</a> · Feita com você fora. A Torre que você refez em agosto fica igual; ganha as plumas dos propulsores, a poeira da queda do Leviatã quando se arranca do chão e a explosão da queda no lugar da fumaça em bolinhas. Na subida para o zero-G, a nave fica com o bico a 45°.</p>
+
+<h2>A luta, em velocidade real</h2>
+<figure><video src="rodada4/chefe.webm" autoplay loop muted playsinline controls></video><figcaption><b>16 s:</b> a Torre pousada leva metade da vida e decola; voa uns 5 s; morre; a atmosfera rompe e a nave sobe a 45°. A nave está parada no alto à esquerda, intocável, e os tiros dela escondidos (filmagem).</figcaption></figure>
+
+<h2>Os quatro momentos</h2>
+<div class="grade">
+  <figure><img src="rodada4/chefe-decolagem.png" alt=""><figcaption><b>A decolagem:</b> a cidadela explode em cadeia e se arranca do chão; atrás da base nasce a poeira da queda do Leviatã, rente ao chão.</figcaption></figure>
+  <figure><img src="rodada4/chefe-voo.png" alt=""><figcaption><b>No ar:</b> as três plumas saem dos bocais acesos (o quarto fica escondido atrás). Fortes na decolagem, respirando no voo.</figcaption></figure>
+  <figure><img src="rodada4/chefe-morte.png" alt=""><figcaption><b>A morte:</b> a explosão da queda do Leviatã no tamanho da Torre, no lugar da fumaça em bolinhas (o item 9 da análise, na F1). O tranco e o flash continuam os de antes.</figcaption></figure>
+  <figure><img src="rodada4/chefe-subida.png" alt=""><figcaption><b>A subida:</b> a nave com o bico a 45°, entrando suave no ângulo (0,4 s). O controle continua na sua mão; o tiro sai reto.</figcaption></figure>
+</div>
+
+<h2>As peças, assadas em pixel</h2>
+<div class="item">
+  <figure><img src="rodada4/pecas.png" alt=""><figcaption><b>Em cima (4×):</b> a pluma maior, seis quadros: branca na boca, âmbar, vermelha, línguas de fogo e o vapor frio no fim (há três tamanhos, um por bocal). <b>Embaixo:</b> a explosão da queda do Leviatã reduzida a 150 px, um quadro a cada quatro.</figcaption></figure>
+</div>
+
+<h2>O que ficou como estava</h2>
+<div class="item">
+  <ul>
+    <li><b>A arte da Torre</b> (as duas formas de agosto).</li>
+    <li><b>O flash magenta da decolagem</b> (160 ms, tela inteira): no vídeo ele não apaga a cadeia de estouros, então não mexi. A regra dos flashes de tela cheia segue para o bloco J.</li>
+    <li><b>A pedra da base</b> conversa com o chão novo; não precisou de ajuste.</li>
+  </ul>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ul>
+    <li><b>As plumas:</b> o tamanho e a força.</li>
+    <li><b>A explosão da morte:</b> o tamanho e a duração (hoje 1 s).</li>
+    <li><b>O ângulo da subida:</b> 45° e a entrada em 0,4 s.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

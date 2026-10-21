@@ -1,0 +1,490 @@
+{
+ "paineis": [
+  {
+   "nome": "predio",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predio/predio-11-1.png",
+     "x": 58,
+     "pe": 208,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predio/predio-11-8.png",
+     "x": 150,
+     "pe": 213,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predio/predio-11-11.png",
+     "x": 242,
+     "pe": 205,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predio/predio-11-14.png",
+     "x": 334,
+     "pe": 210,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "bunker",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predioTexto/predioTexto-11-0.png",
+     "x": 58,
+     "pe": 208,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predioTexto/predioTexto-11-3.png",
+     "x": 150,
+     "pe": 213,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predioTexto/predioTexto-11-7.png",
+     "x": 242,
+     "pe": 205,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predioTexto/predioTexto-11-11.png",
+     "x": 334,
+     "pe": 210,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "silo",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/silo/silo-11-1.png",
+     "x": 58,
+     "pe": 208,
+     "caixa": {
+      "w": 63,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/silo/silo-11-3.png",
+     "x": 150,
+     "pe": 213,
+     "caixa": {
+      "w": 63,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/silo/silo-11-4.png",
+     "x": 242,
+     "pe": 205,
+     "caixa": {
+      "w": 63,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/silo/silo-11-10.png",
+     "x": 334,
+     "pe": 210,
+     "caixa": {
+      "w": 63,
+      "h": 64
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "radar",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/radar/radar-11-1.png",
+     "x": 58,
+     "pe": 208,
+     "caixa": {
+      "w": 64,
+      "h": 57
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/radar/radar-11-2.png",
+     "x": 150,
+     "pe": 213,
+     "caixa": {
+      "w": 64,
+      "h": 57
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/radar/radar-11-9.png",
+     "x": 242,
+     "pe": 205,
+     "caixa": {
+      "w": 64,
+      "h": 57
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/radar/radar-11-11.png",
+     "x": 334,
+     "pe": 210,
+     "caixa": {
+      "w": 64,
+      "h": 57
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "base-1",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/base/base-11-0.png",
+     "x": 105,
+     "pe": 208,
+     "caixa": {
+      "w": 127,
+      "h": 128
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/base/base-11-2.png",
+     "x": 285,
+     "pe": 213,
+     "caixa": {
+      "w": 127,
+      "h": 128
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "base-2",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/base/base-11-3.png",
+     "x": 105,
+     "pe": 208,
+     "caixa": {
+      "w": 127,
+      "h": 128
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/base/base-23-3.png",
+     "x": 285,
+     "pe": 213,
+     "caixa": {
+      "w": 127,
+      "h": 128
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "torre",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/torre/torre-11-1.png",
+     "x": 70,
+     "pe": 208,
+     "caixa": {
+      "w": 32,
+      "h": 30
+     },
+     "espelha": true
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/torre/torre-11-10.png",
+     "x": 160,
+     "pe": 213,
+     "caixa": {
+      "w": 32,
+      "h": 30
+     },
+     "espelha": true
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/torre/torre-11-12.png",
+     "x": 250,
+     "pe": 205,
+     "caixa": {
+      "w": 32,
+      "h": 30
+     },
+     "espelha": true
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/torre/torre-11-15.png",
+     "x": 340,
+     "pe": 210,
+     "caixa": {
+      "w": 32,
+      "h": 30
+     },
+     "espelha": true
+    }
+   ]
+  },
+  {
+   "nome": "pilar",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/pilar/pilar-11-0.png",
+     "x": 58,
+     "pe": 208,
+     "caixa": {
+      "w": 54,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/pilar/pilar-11-4.png",
+     "x": 150,
+     "pe": 213,
+     "caixa": {
+      "w": 54,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/pilar/pilar-11-9.png",
+     "x": 242,
+     "pe": 205,
+     "caixa": {
+      "w": 54,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/pilar/pilar-11-13.png",
+     "x": 334,
+     "pe": 210,
+     "caixa": {
+      "w": 54,
+      "h": 64
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "destroco",
+   "t": 20,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/destroco/destroco-11-0.png",
+     "x": 58,
+     "pe": 208,
+     "caixa": {
+      "w": 58,
+      "h": 34
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/destroco/destroco-11-5.png",
+     "x": 150,
+     "pe": 213,
+     "caixa": {
+      "w": 58,
+      "h": 34
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/destroco/destroco-11-9.png",
+     "x": 242,
+     "pe": 205,
+     "caixa": {
+      "w": 58,
+      "h": 34
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/destroco/destroco-11-13.png",
+     "x": 334,
+     "pe": 210,
+     "caixa": {
+      "w": 58,
+      "h": 34
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "colonia-1",
+   "t": 24,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/pilar/pilar-11-0.png",
+     "x": 40,
+     "pe": 209,
+     "caixa": {
+      "w": 54,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predio/predio-11-1.png",
+     "x": 112,
+     "pe": 206,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/silo/silo-11-4.png",
+     "x": 178,
+     "pe": 212,
+     "caixa": {
+      "w": 63,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/torre/torre-11-12.png",
+     "x": 226,
+     "pe": 207,
+     "caixa": {
+      "w": 32,
+      "h": 30
+     },
+     "espelha": true
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/radar/radar-11-9.png",
+     "x": 276,
+     "pe": 211,
+     "caixa": {
+      "w": 64,
+      "h": 57
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/destroco/destroco-11-5.png",
+     "x": 344,
+     "pe": 208,
+     "caixa": {
+      "w": 58,
+      "h": 34
+     },
+     "espelha": false
+    }
+   ]
+  },
+  {
+   "nome": "colonia-2",
+   "t": 41,
+   "pecas": [
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/base/base-11-0.png",
+     "x": 118,
+     "pe": 210,
+     "caixa": {
+      "w": 127,
+      "h": 128
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/predioTexto/predioTexto-11-3.png",
+     "x": 226,
+     "pe": 205,
+     "caixa": {
+      "w": 64,
+      "h": 64
+     },
+     "espelha": false
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/torre/torre-11-1.png",
+     "x": 282,
+     "pe": 212,
+     "caixa": {
+      "w": 32,
+      "h": 30
+     },
+     "espelha": true
+    },
+    {
+     "arq": "docs/superpowers/folhas/2026-10-20/f1-cenario/rodada6/tom/pilar/pilar-11-13.png",
+     "x": 346,
+     "pe": 207,
+     "caixa": {
+      "w": 54,
+      "h": 64
+     },
+     "espelha": false
+    }
+   ]
+  }
+ ]
+}
