@@ -6,7 +6,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-20) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-21) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -14,8 +14,28 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco G (a arte da F1) FECHOU em 21/10, commitado e empurrado. O próximo é o
-> bloco H (os efeitos de imersão por fase); antes, se ele quiser, a limpeza das peças antigas da F1."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `docs/superpowers/plans/2026-10-21-bloco-h-START.md`. A CAVERNA da F1
+> fechou em 21/10, commitada e empurrada; o próximo é o bloco H (os efeitos de imersão por fase) — abrir com as
+> perguntas a ele."**
+>
+> 📍 **21/10 (2) — A CAVERNA DA F1 FECHOU: COMMITADA E EMPURRADA** para `origin/feat/cartas-preview` — `9864f46` (o
+> jogo e a limpeza das 52 peças antigas da F1 para `assets/raw/f1-original/`), `4476e9f` (ferramentas, testes e folhas,
+> sem os vídeos) e os docs. A ideia é dele ("uma passagem da F1 por uma caverna… mais emoção"), com quatro pinturas
+> dele em `assets/raw/` (a Parede, o fundo, o teto, a Moldura). O que está no jogo (spec
+> `specs/2026-10-21-f1-caverna-design.md`; o caminho inteiro e as lições no fim de `plans/2026-10-21-f1-caverna-rodada1.md`;
+> folhas `folhas/2026-10-21/caverna/`, a atual é `vida.html`):
+> - **a rocha da frente** (`frente.html`): a Parede vira uma faixa com a boca dos dois lados que passa NA FRENTE da nave
+>   (depth 61), sólida, 2,5× o mundo, e cobre a tela INTEIRA por um instante — o lado de fora sai antes de o salão
+>   entrar, a troca de cena e de tom fica atrás dela; a nave aparece pela AURA (a rocha POR CIMA dela a 50%, anel a 75%);
+>   a saída é a mesma rocha espelhada. Recusados no caminho: o desfazer, a cortina, os olhos no escuro, a íris, a faixa
+>   atrás da nave. **Vale para toda troca de cenário nova:** a arte dele na frente, sólida, a nave pela aura, a tela
+>   inteira coberta — nunca fade, dissolve ou máscara animada;
+> - **o salão** (12 s à vista): o teto e o chão que mordem — e NADA mais (as rochas da rodada 2 liam flutuando e saíram:
+>   "as bordas já dão dano"); **o salão vivo** (`vida.html`, `src/f1/salaoVivo.ts`): brasas, bruma em 3 faixas, fachos
+>   frios da abertura, halos, poeira;
+> - **o roteiro** +16 s (o chefão aos 84 s); as ondas perto da rocha mudaram de hora (nenhum inimigo escondido atrás
+>   dela); a mesa de cartas do meio anda com a caverna (79 s — estava presa nos 63, no fogo cruzado).
+> **Pendente dele:** jogar a F1 com a caverna (e, sem pressa, a F4 de 14/10 e a F3).
 >
 > 📍 **21/10 — O BLOCO G FECHOU**: ele aprovou a instalação das estruturas ("ficou perfeito") → `a364e2a` (o jogo),
 > `906c07c` (ferramentas, testes, folhas sem vídeos), `6da8f91` (docs), em `origin/feat/cartas-preview`.
@@ -185,14 +205,19 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > - **G — Fase 1: a arte do cenário** (✅ FECHADO 21/10, aprovado por ele — "ficou perfeito" — e COMMITADO + EMPURRADO:
 >   `a364e2a` o jogo, `906c07c` as ferramentas/testes/folhas sem os vídeos, `6da8f91` os docs; rodadas 1–6 em
 >   `plans/2026-10-20-f1-rodada*.md`, spec `specs/2026-10-20-f1-cenario-design.md`, folhas
->   `folhas/2026-10-20/f1-cenario/`. Resta só a LIMPEZA: as peças e camadas antigas da F1 seguem no disco sem registro —
->   `building*`, `silo*`, `radar`, `base*`, `turret*`, `wreck*`, `spire*`, os `*-anim-*` delas, `paint-bg-f1`, `skyline`,
->   `mtn-mid` — para `assets/raw/*-original.png`). Era: os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
+>   `folhas/2026-10-20/f1-cenario/`. A LIMPEZA foi feita em 21/10, a pedido dele (commitada em `9864f46`): as 52 peças e
+>   camadas antigas da F1 — `building*`, `silo*`, `radar`, `base*`, `turret*`, `wreck*`, `spire*`, os `*-anim-*` delas,
+>   `paint-bg-f1`, `skyline*`, `comet-sky*`, `mtn-mid*`, `ground-tile` — foram com `git mv` para
+>   `assets/raw/f1-original/`, e os registros mortos saíram do `BootScene`/`TerrainSystem`). Era: os pilares, torres, silos e cidades leem como gerados e mal colocados; e a
 >   cordilheira não ficou como ele queria (perguntar a referência ANTES de gerar). Refazer arte E composição. A técnica
 >   do menu (`docs/CENARIO-VIVO.md`) é o ponto de partida: camadas, luzes que apagam limpas, volume, perigo, tudo em
 >   função do relógio.
-> - **H — efeitos de imersão por fase** (só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
->   - F1: mísseis caindo do céu nas camadas de trás, e meteoros;
+> - **G+ — a caverna da F1** (✅ FECHADA 21/10, ideia dele, COMMITADA e EMPURRADA: `9864f46`, `4476e9f`; ver o 📍 de
+>   21/10 (2) acima).
+> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, START `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito
+>   no jogo: sem corpo, sem dano, fora de todo grupo):
+>   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica
+>     abaixo do fundo do salão, −83, some atrás dele sozinho; o que ficar acima precisa da máscara inversa da caverna);
 >   - F2: a silhueta do Leviatã NOVO passando ao fundo, distante (depende de D);
 >   - F3: o verme descartado (ou outro inimigo) como silhueta entre as nebulosas. Só como cenário: o elite 63-3
 >     continua cancelado;
