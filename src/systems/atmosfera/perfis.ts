@@ -249,7 +249,9 @@ const DENSA = 0.85;
 
 /** Os perfis das fases — cores amostradas de cada pintura (a mesma conta das cutscenes). */
 export const PERFIS_FASE = {
-  faseF1: perfilDeFase('faseF1', ABERTA, [45, 64, 83], HALO_COMBATE),
+  // A F1 do bloco G (20/10): a pintura nova é muito mais escura que as outras, e a conta de sempre (os tons médio-escuros
+  // ×1,5) dava uma névoa quase preta ([18, 30, 49]); a névoa é a BRUMA PINTADA dela (`scripts/_g/_cor-nevoa-f1.mjs`).
+  faseF1: perfilDeFase('faseF1', ABERTA, [33, 41, 58], HALO_COMBATE),
   faseZeroG: perfilDeFase('faseZeroG', ABERTA, [75, 73, 134], HALO_COMBATE),
   faseF2: perfilDeFase('faseF2', ABERTA, [52, 68, 107], HALO_COMBATE),
   faseF3: perfilDeFase('faseF3', DENSA, [74, 76, 113], [220, 120, 60]),

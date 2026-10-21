@@ -150,6 +150,13 @@ interface PropDef {
  */
 const PLANTIO = { fundo: 186, frente: 199, saltoMin: 5 } as const;
 
+/** Uma faixa de plantio: o pé sorteado entre `fundo` e `frente` (y de tela), nunca a menos de `saltoMin` do anterior. */
+export interface Plantio {
+  readonly fundo: number;
+  readonly frente: number;
+  readonly saltoMin: number;
+}
+
 /**
  * A colônia da Fase 1. Rocha, construções, silos, antenas, destroços — e as torres que atiram.
  * Sortear entre eles é o que faz a superfície parecer um LUGAR, e não um corredor de obstáculos.
@@ -345,14 +352,23 @@ export class TerrainSystem {
     // ⚠️ `Math.random`, NUNCA `Phaser.Math`. O `Phaser.Math.RND` é o mesmo fluxo que o
     // espaçamento das ondas consome, e arte de fundo não pode adiantar o dado do jogo.
     const naCasca = !teto && PROPS[kind].casco;
-    const pe = naCasca ? this.sortearPlantio() : GROUND_Y;
+    // A SUPERFÍCIE DA F1 (rodada 5, 20/10) usa a mesma regra, com a faixa dela (`plantarNaSuperficie`): o pé entre a
+    // Paisagem e o entulho da frente. Só o prop de chão sem borda cravada pelo roteiro — os corredores da F4 não plantam.
+    const naSuperficie =
+      !teto && !naCasca && this.plantioSuperficie !== null && opts?.bordaVao === undefined && opts?.centroVao === undefined;
+    const faixa = naCasca ? PLANTIO : naSuperficie ? this.plantioSuperficie : null;
+    const pe = faixa ? this.sortearPlantio(faixa) : GROUND_Y;
 
     // Sorteia entre as variantes: um relevo com um pico só é um padrão, não uma paisagem.
     const texture = pickVariant(this.scene, kind);
+    // ⚠️ NO QUADRO 0 quando a textura é uma tira (as peças da F1 com as luzes assadas, `src/f1/pecasF1.ts`): sem o
+    // quadro, o sprite nasce com a tira INTEIRA, e a área de colisão (que sai da largura do quadro) vira a da tira.
+    const tex = this.scene.textures.get(texture);
     const p = this.props.create(
       opts?.x ?? GAME_WIDTH + 30,
       teto ? TETO_Y : pe,
       texture,
+      tex.has('0') ? '0' : undefined,
     ) as Phaser.Physics.Arcade.Sprite;
 
     // Origem na BASE: o prop cresce a partir do chão — ou, no teto, a partir dele para baixo
@@ -375,12 +391,21 @@ export class TerrainSystem {
     // por cima: `−0.5` na aresta de frente, `−0.526` no fundo (13px × 0,002). Toda a faixa fica entre a
     // tira do casco (−0.2, à frente) e a faixa de fundo (−74/−75, atrás), então nada mais no
     // quadro muda de ordem.
-    p.setDepth(naCasca ? -0.5 - (PLANTIO.frente - pe) * 0.002 : -0.5);
+    p.setDepth(faixa ? -0.5 - (faixa.frente - pe) * 0.002 : -0.5);
 
     const def = PROPS[kind];
 
+    // AS LUZES ASSADAS de cada variante (as peças da F1, rodada 6): `<textura>-luz`, cada variante a sua — fase
+    // aleatória, senão a colônia inteira pisca junta.
+    const luz = `${texture}-luz`;
+    const boca = (tex.customData as { boca?: readonly [number, number] }).boca;
+    if (boca) p.setData('bocaArte', boca);
+    if (this.scene.anims.exists(luz)) {
+      p.play(luz);
+      p.anims.setProgress(Math.random());
+    }
     // Anima só a variante base (ver PropDef).
-    if (def.anim && texture === kind && this.scene.anims.exists(def.anim)) {
+    else if (def.anim && texture === kind && this.scene.anims.exists(def.anim)) {
       p.play(def.anim);
       // Fase aleatória: sem isto, TODAS as janelas da colônia piscam em uníssono — o que
       // não é uma colônia, é um letreiro.
@@ -391,7 +416,10 @@ export class TerrainSystem {
 
     // Só a rocha varia de altura: é ela que define o corredor, e é a altura variável que dá
     // ritmo ao flap. Construção esticada parece construção derretida.
-    if (kind === 'spire') p.setScale(1, Phaser.Math.FloatBetween(0.55, 1.25));
+    //
+    // ⚠️ DESDE A RODADA 6 DO BLOCO G (21/10) A ALTURA VEM ASSADA: as variantes da `spire` são a rocha nova em 5 alturas
+    // (34–76 px, a mesma faixa do `setScale(1, 0,55–1,25)` de antes), e sortear a variante É sortear a altura. Esticar
+    // pixel art em Y era a rocha derretida que esta regra condena nas construções.
 
     // Altura CRAVADA pelo roteiro (corredores da F4): sobrepõe o sorteio acima.
     // A rocha estica só na vertical (é o que varia o relevo dela); os props ORGÂNICOS escalam
@@ -476,6 +504,18 @@ export class TerrainSystem {
   /** O último pé sorteado, para o plantio seguinte não repetir a altura. Ver `sortearPlantio`. */
   private ultimoPlantio = 0;
 
+  /** A faixa de plantio da superfície (F1), ou `null`: o pé nasce em `GROUND_Y`, como sempre. */
+  private plantioSuperficie: Plantio | null = null;
+
+  /**
+   * Liga o plantio na SUPERFÍCIE (Fase 1, rodada 5): o pé de cada estrutura sorteado na faixa, entre a Paisagem e o
+   * entulho da frente, e a ordem de desenho pela profundidade — a resposta ao "tudo no chão parece colado" (ele, 20/10).
+   * Sem sombra de contato (a do casco): aqui o pé fica ESCONDIDO atrás da faixa da frente, e não à mostra.
+   */
+  plantarNaSuperficie(faixa: Plantio): void {
+    this.plantioSuperficie = faixa;
+  }
+
   /**
    * SORTEIA O PÉ DO PROP DE CASCO, RECUSANDO ALTURA REPETIDA.
    *
@@ -504,8 +544,8 @@ export class TerrainSystem {
    * ⚠️ `Math.random`, NUNCA `Phaser.Math`. O `Phaser.Math.RND` é o mesmo fluxo que o espaçamento
    * das ondas consome, e arte de fundo não pode adiantar o dado do jogo.
    */
-  private sortearPlantio(): number {
-    const { fundo, frente, saltoMin } = PLANTIO;
+  private sortearPlantio(faixa: Plantio): number {
+    const { fundo, frente, saltoMin } = faixa;
 
     // O primeiro prop da fase não tem vizinho anterior: sorteia livre no alcance inteiro.
     if (this.ultimoPlantio === 0) {
@@ -880,7 +920,9 @@ export class TerrainSystem {
     // A BOCA DE ONDE O TIRO SAI, por prop. Ver `BOCAS`: são offsets MEDIDOS na arte, e o
     // lança-mísseis reveza entre as quatro dele a cada disparo.
     const kind = p.getData('kind') as PropKind;
-    const bocas = BOCAS[kind] ?? BOCAS.turret!;
+    // A boca MEDIDA NA VARIANTE (as torres da F1, rodada 6: cada uma tem o cano num lugar) vem antes da tabela por tipo.
+    const bocaArte = p.getData('bocaArte') as readonly [number, number] | undefined;
+    const bocas = bocaArte ? [bocaArte] : (BOCAS[kind] ?? BOCAS.turret!);
     const i = ((p.getData('boca') as number | undefined) ?? 0) % bocas.length;
     p.setData('boca', i + 1);
     const [bx, by] = bocas[i];

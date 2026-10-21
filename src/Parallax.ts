@@ -3,6 +3,9 @@ import { GAME_HEIGHT, GAME_WIDTH } from './config';
 import { pickVariant } from './art';
 import { GROUND_Y } from './systems/TerrainSystem';
 import type { ChavePintura } from './systems/atmosfera/perfis';
+import { montarHorizonte, type Horizonte } from './f1/horizonte';
+import { AGLOMERADOS_F1, BRUMA_F1, COR } from './f1/numerosF1';
+import { montarChao, type ChaoF1 } from './f1/chaoF1';
 
 /**
  * Que lugar este parallax desenha. É a mesma decisão da física: tem chão ou não tem.
@@ -258,6 +261,19 @@ export class Parallax {
    * parecem colados no casco em vez de plantados nele. Ver `buildNebula()`.
    */
   private cascoFrente: Phaser.GameObjects.TileSprite | null = null;
+
+  /** O HORIZONTE DA F1 (bloco G): a pintura dele, os faróis e a cachoeira, pelo relógio da fase. */
+  private horizonte: Horizonte | null = null;
+  /** A BRUMA ENTRE OS PLANOS da F1 (bloco G): duas bandas `fogBand` na cor da névoa da pintura. */
+  private brumaF1: { ts: Phaser.GameObjects.TileSprite; fator: number }[] = [];
+  /** O CHÃO da F1 (rodada 5, `src/f1/chaoF1.ts`): o Vale, a Paisagem, o entulho da frente e o primeiro plano. */
+  private chao: ChaoF1 | null = null;
+  /** Quanto o mundo andou (px) desde o começo da fase: a posição das faixas do chão é `chaoAndado × fator`, inteira. */
+  private chaoAndado = 0;
+  /** O alfa do primeiro plano AGORA (interpolado): a faixa `perto` do chão o lê a cada quadro. */
+  private primeiroPlanoAlfa = { v: 1 };
+  /** O relógio da fase (s), que o `GameScene` passa a cada quadro: o horizonte é função dele, não do tempo real. */
+  private relogio = 0;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -659,234 +675,71 @@ export class Parallax {
     });
   }
 
-  /** A lua da Fase 1: montanhas, solo, e picos pretos passando na frente da nave. */
+  /**
+   * A F1 (bloco G, spec `2026-10-20-f1-cenario-design.md` §4): a pintura dele INTEIRA ao fundo, a bruma entre os planos,
+   * a cordilheira tirada da própria pintura, o chão na paleta dela e as rochas do primeiro plano.
+   *
+   * ⚠️ SAÍRAM (20/10): o céu em degradê (fica só como rede de segurança atrás da pintura opaca), a `paint-bg-f1`
+   * antiga, o `skyline`, as `colonyLight` (pontos ciano em código), o `cometSky`, o tráfego feito com o `enemyScout`
+   * escurecido, as duas faixas de `mtnMid` pintadas de azul pelo `tint` e o entulho de `asteroid`. Tudo isso lia como
+   * "gerado" contra a pintura (folha `folhas/2026-10-20/f1-cenario/hoje.html`).
+   */
   private buildSurface(): void {
-    // GRADIENTE DE CÉU: topo mais preto → horizonte um tom acima. Dá VOLUME ao céu (era preto
-    // chapado). Estático (é o céu), depth −99 (atrás de tudo). Frio e escuro — a Fase 1 segue dark.
+    // A REDE DE SEGURANÇA: sem as camadas da pintura, a fase ainda tem um céu (a pintura é opaca e o cobre inteiro).
     const ceu = this.scene.add.graphics().setDepth(-99);
     ceu.fillGradientStyle(0x05070f, 0x05070f, 0x141c30, 0x141c30, 1);
     ceu.fillRect(0, 0, GAME_WIDTH, GROUND_Y);
 
-    // FUNDO PINTADO (Metal Slug): a arte da colônia alienígena (do Henrique) como a camada MAIS
-    // DISTANTE, preenchendo o céu azul-escuro vazio ATRÁS das cidades/montanhas pixel (depth −94:
-    // atrás do skyline −93 e das montanhas, à frente do céu procedural). Duas cópias de reserva,
-    // mas o scroll é tão lento (ver `update`, fator 0.04) que a 1ª cópia cobre a fase inteira e a
-    // paisagem NUNCA repete. Y negativo posiciona os picos/colônia no céu.
-    if (this.scene.textures.exists('paintBgF1')) {
-      const w = (this.scene.textures.get('paintBgF1').getSourceImage() as { width: number }).width;
-      for (let i = 0; i < 2; i++) {
-        this.paintedBg.push(
-          this.scene.add.image(i * w, -80, 'paintBgF1').setOrigin(0, 0).setDepth(-94),
-        );
-      }
+    // O HORIZONTE: a pintura dele inteira, os faróis e a cachoeira, derivando pelo relógio da fase.
+    this.horizonte = montarHorizonte(this.scene);
+
+    // A BRUMA ENTRE OS PLANOS: é a diferença de velocidade entre ela, a pintura e a cordilheira que vende o volume.
+    for (const b of BRUMA_F1) {
+      const ts = this.scene.add
+        .tileSprite(0, b.y, GAME_WIDTH, b.h, 'fogBand')
+        .setOrigin(0, 0)
+        .setDepth(b.depth)
+        .setTint(COR.nevoa)
+        .setAlpha(b.pico);
+      ts.setTileScale(1, b.h / 64);
+      this.brumaF1.push({ ts, fator: b.fator });
     }
 
-    // TRÁFEGO DISTANTE DA COLÔNIA (passe visual 2026-07-18): silhuetas minúsculas cruzando o
-    // vão de céu vazio no meio da tela. A colônia embaixo está VIVA (janelas acesas, radar
-    // varrendo) — um céu absolutamente deserto desmentia isso. Eles são CENÁRIO: escuros como
-    // o fundo, lentos como o fundo (factor 0.08), presos numa banda alta onde nenhum inimigo
-    // real voa — a cor e o ritmo dizem "longe" antes de qualquer um mirar neles.
-    // A `faixa` também os mantém HORIZONTAIS (sem o giro aleatório das pedras): nave voa de pé.
-    this.addLayer({
-      key: 'enemyScout',
-      factor: 0.08,
-      baseY: 0,
-      depth: -96,
-      tint: 0x1c2440,
-      alpha: 0.9,
-      scale: [0.45, 0.65],
-      // Denso o bastante para QUASE sempre haver 1 na tela; raro o bastante para nunca virar
-      // esquadrilha (tráfego de colônia, não formação de ataque).
-      gap: [280, 520],
-      terreno: false,
-      flutua: true,
-      faixa: [22, 68],
-    });
-    // ALPHA = 1 nas montanhas. Com alpha < 1, duas sobrepostas somam o escuro e aparece uma
-    // banda vertical na silhueta de uma delas. A profundidade vem do TINT (perspectiva aérea),
-    // não da opacidade.
+    // O CHÃO (rodada 5, 20/10): as DUAS pinturas dele em faixas sem emenda — o Vale atrás, a Paisagem na frente dele, as
+    // estruturas plantadas entre a Paisagem e o entulho da frente (ver `CHAO_F1` e `PLANTIO_F1`). Escala 1, sem tint.
     //
-    // GAP MENOR QUE A LARGURA = sobreposição obrigatória. A arte encosta na borda do canvas,
-    // então cada sprite termina numa PAREDE VERTICAL reta. Espaçados, esse corte fica exposto
-    // contra o céu — era o "risco lateral". Sobrepostos, o vizinho o cobre.
-    // O HORIZONTE DA COLÔNIA: skyline industrial ATRÁS das montanhas distantes (mais escura
-    // que elas — o que está longe é escuro, perspectiva aérea). Em bolsões espaçados: a colônia
-    // é assentamento em cordão, não megacidade contínua.
-    // baseY um pouco ABAIXO da linha do solo (não acima): a base reta dos prédios fica ENTERRADA
-    // atrás do chão (−80) e da faixa da frente (−0.2), que a ocultam. Com `GROUND_Y − 6` o pé
-    // ficava 6px ACIMA do solo, e a borda reta flutuava — invisível na fase (os picos na frente a
-    // tapavam), mas exposta na luta de chefão, que limpa o primeiro plano. O skyline agora nasce
-    // do horizonte em vez de pairar sobre ele.
-    this.addLayer({
-      key: 'skyline',
-      factor: 0.1,
-      baseY: GROUND_Y + 2,
-      depth: -93,
-      tint: 0x151e38,
-      alpha: 1,
-      scale: [0.7, 1.0],
-      gap: [170, 320],
-      terreno: true,
-    });
+    // ⚠️ SAÍRAM: a CORDILHEIRA recortada da pintura ("parece mal colado", ele, 20/10 — as peças terminavam em parede
+    // vertical) e o ladrilho do chão com a aresta e a faixa da frente tingida (liso, repetido, 4× mais claro que a rocha
+    // da pintura). O `groundTile` segue carregado no `BootScene`, sem uso, até a limpeza do fim do bloco.
+    // O primeiro plano (`perto`) também é dele: a frente espelhada, quase preta, no lugar do pico de gelo tingido.
+    this.chao = montarChao(this.scene);
 
-    // LUZES FRIAS DA COLÔNIA: pontos de luz pontilhando o horizonte industrial (o "vale com luz"
-    // do ref, mas alienígena — ciano frio, não janela amarela). Aditivas (glow), na velocidade do
-    // skyline. Faixa NA ALTURA das torres do skyline (não rente ao chão); densas. Depth −92.9:
-    // logo à frente do skyline (−93) — um cume à frente ainda OCLUI a luz distante (perspectiva).
-    this.addLayer({
-      key: 'colonyLight',
-      factor: 0.1,
-      baseY: 0,
-      depth: -92.9,
-      tint: 0xffffff,
-      alpha: 1,
-      scale: [0.8, 1.7],
-      gap: [20, 50],
-      terreno: true,
-      flutua: true,
-      faixa: [GROUND_Y - 68, GROUND_Y - 18],
-      glow: true,
-    });
+    // (O ENTULHO de `asteroid` assentado no chão saiu em 20/10: a rocha do cinturão, recolorida, lia como pedra de outro
+    // lugar.)
 
-    // O CÉU COM EVENTO: um cometa raríssimo cruzando o alto. Raro DE PROPÓSITO — ponto de
-    // interesse é o que quebra a monotonia; dois na mesma tela viram papel de parede animado.
-    this.addLayer({
-      key: 'cometSky',
-      factor: 0.05,
-      baseY: 0,
-      depth: -96,
-      tint: 0x9fb8e0,
-      alpha: 0.8,
-      scale: [0.5, 0.8],
-      gap: [1400, 2600],
-      terreno: false,
-      flutua: true,
-      faixa: [14, 48],
-    });
+    // OS AGLOMERADOS da colônia (rodada 6, 21/10): decoração entre a Paisagem e as estruturas — ver `AGLOMERADOS_F1`.
+    if (this.scene.textures.exists(AGLOMERADOS_F1.chave)) {
+      this.addLayer({
+        key: AGLOMERADOS_F1.chave,
+        factor: AGLOMERADOS_F1.fator,
+        baseY: AGLOMERADOS_F1.baseY,
+        depth: AGLOMERADOS_F1.depth,
+        tint: 0xffffff,
+        alpha: 1,
+        scale: [1, 1],
+        gap: [AGLOMERADOS_F1.gap[0], AGLOMERADOS_F1.gap[1]],
+        terreno: true,
+      });
+    }
 
-    // ─── A CADEIA DO MEIO-DE-CENA ───
-    //
-    // ⚠️ ELAS FORAM REMOVIDAS EM `cbf40fe` E VOLTARAM EM 2026-08-30, PELA METADE E DE PROPÓSITO.
-    // A remoção levou CINCO camadas de uma vez (haze longe, `mtnFar`, haze meio, e duas faixas de
-    // `mtnMid`) com uma justificativa só: elas eram a fonte do "deslizamento" do solo. O Henrique
-    // jogou a Fase 1 de novo e cobrou a cadeia do meio de volta — e olhando as cinco definições
-    // lado a lado, só UMA podia causar o deslize:
-    //
-    //     mtnFar    baseY GROUND_Y − 4   base VISÍVEL acima do chão, correndo a 0,12 contra 1,0
-    //     mtnMid    baseY GROUND_Y + 2   base ENTERRADA
-    //     mtnMid    baseY GROUND_Y + 4   base ENTERRADA
-    //
-    // Deslize é uma aresta COMPARTILHADA entre duas camadas de velocidade diferente. As duas
-    // `mtnMid` nunca tiveram essa aresta: a base delas nasce abaixo da linha do solo, que é o
-    // mesmo truque que mantém o `skyline` (GROUND_Y + 2) funcionando desde sempre. Elas foram
-    // levadas junto sem serem a causa.
-    //
-    // ⚠️ A `mtnFar` E A HAZE DISTANTE CONTINUAM FORA, e isso é a outra metade da justificativa
-    // original, que segue valendo: o FUNDO PINTADO já entrega a cordilheira distante, e a
-    // `mtnFar` desenhava montanha pixel POR CIMA de montanha pintada.
-    //
-    // HAZE ENTRE AS MONTANHAS: a névoa que separa uma cordilheira da próxima — é ela que faz as
-    // duas lerem como PLANOS distintos, e não uma massa só. Ela flutua (`faixa`), não encosta no
-    // chão, então nunca teve parte no deslize.
-    this.addLayer({
-      key: 'nebula',
-      factor: 0.22,
-      baseY: 0,
-      depth: -90,
-      tint: 0x222c44,
-      alpha: 0.22,
-      scale: [1.4, 2.2],
-      gap: [170, 300],
-      terreno: false,
-      flutua: true,
-      faixa: [GROUND_Y - 46, GROUND_Y - 2],
-    });
-
-    this.addLayer({
-      key: 'mtnMid',
-      factor: 0.35,
-      baseY: GROUND_Y + 2,
-      depth: -88,
-      tint: 0x33456e,
-      alpha: 1,
-      scale: [0.6, 0.95],
-      gap: [45, 75],
-      terreno: true,
-    });
-
-    // A 2ª FAIXA: mais próxima e mais rápida que a de cima, um degrau de tint acima. É ela que
-    // PREENCHE o vão do meio-de-cena — o buraco que o Henrique viu entre o fundo pintado e o
-    // skyline. Reusa a arte da `mtnMid` (sem custo de geração) e fica atrás do chão (−86).
-    this.addLayer({
-      key: 'mtnMid',
-      factor: 0.6,
-      baseY: GROUND_Y + 4,
-      depth: -86,
-      tint: 0x435679,
-      alpha: 1,
-      scale: [0.55, 0.9],
-      gap: [50, 82],
-      terreno: true,
-    });
-
-    // Alto o bastante para sangrar para fora da tela: uma faixa fina de solo denuncia
-    // que o mundo acaba ali embaixo.
-    this.ground = this.scene.add
-      .tileSprite(0, GROUND_Y, GAME_WIDTH, 48, 'groundTile')
-      .setOrigin(0, 0)
-      .setDepth(-80)
-      // O tile novo (2026-07-18) é ROCHA rachada, já na paleta — o tile antigo era o "trilho"
-      // de rebites roxo que precisava de correção (e de tint). O PNG é [arte | arte espelhada]
-      // (128px): espelhar garante emenda invisível nos DOIS lados sem depender do gerador.
-      // SEM tint: só 10px do chão aparecem (GROUND_Y = 216-10) — escurecer mataria a textura.
-      .setTint(0xffffff);
-
-    // Aresta de luz no topo do solo. Sem ela, chão e montanhas viram uma massa escura só —
-    // é o contraste que diz ao olho onde o terreno começa.
-    this.groundRim = this.scene.add
-      .rectangle(0, GROUND_Y, GAME_WIDTH, 1, 0x7590b8)
-      .setOrigin(0, 0)
-      .setDepth(-79)
-      .setAlpha(0.7);
-
-    // FAIXA DE SOLO DA FRENTE: a MESMA arte do chão, começando um pouco ACIMA da linha do solo
-    // (GROUND_Y−5) e um tom mais escura (o solo mais PERTO, em leve sombra). Ela cobre o pé dos
-    // props (silos/torres/picos), escondendo a borda reta onde ficavam "colados". Depth −0.2: à
-    // FRENTE dos props (que passam a −0.5, ver TerrainSystem.spawn), mas ATRÁS da nave/inimigos
-    // (depth 0) — a nave NUNCA some atrás da faixa. Rola junto com o mundo (mesmo `groundOffset`),
-    // senão os props deslizariam sobre o chão.
-    this.groundFront = this.scene.add
-      .tileSprite(0, GROUND_Y - 5, GAME_WIDTH, 48, 'groundTile')
-      .setOrigin(0, 0)
-      .setDepth(-0.2)
-      .setTint(0x6878a0);
-
-    // O ENTULHO do chão (pedido do Henrique, 2026-07-18): pedras avulsas ASSENTADAS na linha do
-    // solo, correndo na MESMA velocidade dele (factor 1.0 = o groundOffset). É o que quebra o
-    // "trilho": um chão em que nada muda por 75s lê como esteira; meia dúzia de calhaus
-    // diferentes por tela lê como TERRENO. São decoração pura — nada colide, e o tint na
-    // família do solo os cola nele (não competem com o `spire` jogável, que é claro e alto).
-    this.addLayer({
-      key: 'asteroid',
-      factor: 1.0,
-      baseY: GROUND_Y + 7,
-      depth: -78,
-      tint: 0x5a6e94,
-      alpha: 1,
-      scale: [0.22, 0.45],
-      gap: [60, 140],
-      terreno: true,
-    });
-
-    // NÉVOA RASTEIRA: fog frio e sutil cruzando a linha do chão (o fog de solo do Metal Slug). Dá
-    // "ar" ao terreno. Depth −84: à frente das montanhas, atrás do chão e dos obstáculos; dim
-    // para dar atmosfera sem esconder o jogo.
+    // NÉVOA RASTEIRA: o fog de solo, na cor da névoa da pintura. Dá "ar" ao terreno. Depth −84: à frente da
+    // Paisagem, atrás das estruturas; fraca, para dar atmosfera sem esconder o jogo.
     this.addLayer({
       key: 'nebula',
       factor: 0.75,
       baseY: 0,
       depth: -84,
-      tint: 0x1c2740,
+      tint: COR.nevoa,
       alpha: 0.16,
       scale: [1.2, 2.0],
       gap: [140, 240],
@@ -895,32 +748,13 @@ export class Parallax {
       faixa: [GROUND_Y - 20, GROUND_Y + 8],
     });
 
-    // PRIMEIRO PLANO: rochas em silhueta quase preta, MAIS RÁPIDAS que o mundo, passando NA
-    // FRENTE da nave (depth 60). É o que mais vende profundidade — sem nada à frente, o
-    // cenário é chapado por mais camadas que tenha atrás.
+    // PRIMEIRO PLANO: na F1 ele é a faixa `perto` do chão (montada acima, com as outras): o entulho da frente espelhado,
+    // quase preto, a 1,5 do mundo, na frente da nave. É o que mais vende profundidade — sem nada à frente, o cenário é
+    // chapado por mais camadas que tenha atrás.
     //
-    // Fica baixo e escuro de propósito: um primeiro plano que tapa o jogo é um estorvo, não
-    // uma camada. Só as pontas aparecem, rente ao rodapé.
-    // Usa o PICO, não a montanha média: em silhueta preta, a montanha (uma massa densa que
-    // preenche a própria caixa) vira um retângulo chapado. O pico é recortado e pontudo —
-    // é o que ainda tem FORMA quando reduzido a uma cor só.
-    this.addLayer({
-      key: 'spire',
-      factor: 1.5,
-      baseY: GAME_HEIGHT + 8,
-      depth: 60,
-      // 0x05070f era preto puro na prática: contra a lua ou o céu, o pico virava uma MANCHA sem
-      // forma (parecia um buraco na tela, não uma rocha passando perto). Este azul-abissal
-      // continua o mais escuro da cena — a hierarquia de profundidade fica — mas deixa o relevo
-      // da arte aparecer de leve.
-      tint: 0x121a2e,
-      alpha: 1,
-      scale: [0.9, 1.6],
-      // Espaçado: o primeiro plano é PONTUAL. Contínuo, viraria uma parede tapando o jogo.
-      gap: [120, 230],
-      terreno: true,
-      primeiroPlano: true,
-    });
+    // ⚠️ SAIU O PICO DE GELO TINGIDO de azul-abissal (20/10): contra o chão novo ele lia como mancha azul. E a faixa é
+    // CONTÍNUA, ao contrário do pico (que era espaçado para não virar parede), porque é BAIXA: o chão dela fica no
+    // rodapé (3 px) e só os tocos sobem, até ~16 px — "só as pontas aparecem, rente ao rodapé" continua valendo.
 
     this.buildAtmosphereExit();
   }
@@ -1614,6 +1448,16 @@ export class Parallax {
     return bg ? ((bg.getData('bgFactor') as number | undefined) ?? 0.04) : 0;
   }
 
+  /** O relógio da fase (s). O horizonte da F1 é função dele: o treino, que salta para o chefão, cai no estado certo. */
+  setRelogio(t: number): void {
+    this.relogio = t;
+  }
+
+  /** O entulho da frente da F1 (rodada 5), ou `null` fora dela: o incêndio da morte do chefão se prende a ele. */
+  chaoDaFrente(): Phaser.GameObjects.TileSprite | null {
+    return this.chao?.frente() ?? null;
+  }
+
   update(dt: number, worldSpeed: number): void {
     // FUNDO PINTADO: a camada mais distante rola LENTÍSSIMA — fator 0.04 por padrão (o F1, na
     // fase de ~75s, deriva ~250px, menos que a folga de 384px da imagem, então a paisagem não
@@ -1628,6 +1472,15 @@ export class Parallax {
         bg.x -= dx;
         if (bg.x <= -bg.width) bg.x += 2 * bg.width;
       }
+    }
+    // O HORIZONTE DA F1 e a BRUMA entre os planos (bloco G): o horizonte pelo relógio da fase; a bruma pelo mundo.
+    this.horizonte?.atualizar(this.relogio);
+    for (const b of this.brumaF1) b.ts.tilePositionX += worldSpeed * b.fator * dt;
+    // O chão em pixel inteiro (tilePosition fracionário faz a arte tremular), cada faixa da conta do mesmo andado; as
+    // brasas e a fumaça pelo relógio da fase.
+    if (this.chao) {
+      this.chaoAndado += worldSpeed * dt;
+      this.chao.atualizar(this.relogio, this.chaoAndado, this.primeiroPlanoAlfa.v);
     }
     // O nado da silhueta, quase parado (3 quadros/s).
     if (this.leviLonge && this.leviathan.visible) {
@@ -1780,14 +1633,26 @@ export class Parallax {
   /** Atenua (ou devolve) o primeiro plano enquanto há um ELITE em cena — ver `foregroundElite`. */
   setForegroundElite(atenuado: boolean, durationMs = 600): void {
     this.foregroundElite = atenuado ? 0.25 : 1;
+    this.tweenPrimeiroPlano(durationMs);
     for (const layer of this.layers) {
       if (!layer.primeiroPlano || layer.sprites.length === 0) continue;
       this.scene.tweens.add({ targets: layer.sprites.slice(), alpha: this.alphaFor(layer), duration: durationMs, ease: 'Quad.easeOut' });
     }
   }
 
+  /** O alfa do primeiro plano que não é camada de peças (a faixa `perto` do chão da F1) segue o mesmo alvo. */
+  private tweenPrimeiroPlano(durationMs: number): void {
+    this.scene.tweens.add({
+      targets: this.primeiroPlanoAlfa,
+      v: this.foregroundDim * this.foregroundElite,
+      duration: durationMs,
+      ease: 'Quad.easeOut',
+    });
+  }
+
   setForegroundDimmed(dimmed: boolean, durationMs = 1500): void {
     this.foregroundDim = dimmed ? 0 : 1;
+    this.tweenPrimeiroPlano(durationMs);
 
     for (const layer of this.layers) {
       if (!layer.primeiroPlano || layer.sprites.length === 0) continue;
@@ -2081,6 +1946,8 @@ export class Parallax {
       duration: 2500,
       ease: 'Quad.easeIn',
     });
+    // O chão da F1 cai em PARALLAX: a faixa mais longe desce menos (`CHAO_F1.queda`).
+    this.chao?.cair();
 
     // Para de emitir terreno novo. O espaço segue povoando o fundo.
     //
@@ -2201,10 +2068,15 @@ export class Parallax {
     const saindo: Phaser.GameObjects.GameObject[] = [
       ...this.paintedBg,
       ...(this.groundFront ? [this.groundFront] : []),
+      // A F1 do bloco G: a bruma entre os planos. Não é terreno: não cai, só sai, como a pintura antiga saía.
+      ...this.brumaF1.map((b) => b.ts),
     ];
     if (saindo.length) {
       t.add({ targets: saindo, alpha: 0, delay: 500, duration: 1500, ease: 'Sine.easeInOut' });
     }
+    // E o HORIZONTE (a pintura, as luzes, a invasão) sai pelo multiplicador dele: as peças da invasão escrevem o próprio
+    // alfa a cada quadro, então um tween nelas seria desfeito no quadro seguinte.
+    if (this.horizonte) t.add({ targets: this.horizonte.saida, v: 0, delay: 500, duration: 1500, ease: 'Sine.easeInOut' });
     t.add({ targets: this.zeroGBg, alpha: 1, delay: 500, duration: 1500, ease: 'Sine.easeInOut' });
   }
 }

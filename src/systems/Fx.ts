@@ -191,6 +191,16 @@ export class Fx {
   }
 
   /**
+   * Só o PESO da detonação grande — as fagulhas, o tremor longo e o flash curto do `explodeBig` —, sem a sheet. Para quem
+   * estoura com a PRÓPRIA arte (a morte da Torre da F1 com a explosão da queda do Leviatã, bloco G).
+   */
+  abaloGrande(x: number, y: number, escala = 1): void {
+    this.burst.explode(Math.floor(16 * escala), x, y);
+    this.scene.cameras.main.shake(320 * escala, 0.006 * escala);
+    this.scene.cameras.main.flash(120, 255, 190, 110);
+  }
+
+  /**
    * A IMPLOSÃO: a `explosion-big` INVERTIDA — a fumaça vira chama, a chama vira núcleo branco,
    * e tudo some PARA DENTRO. É a morte da Aurora: matéria sugada, não arremessada.
    * Sem flash: implodir é a tela PERDER luz, não ganhar.

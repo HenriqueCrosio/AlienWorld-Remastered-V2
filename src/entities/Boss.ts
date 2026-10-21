@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BARRA_CHEFAO_Y, COLORS, GAME_WIDTH } from '../config';
 import type { Fx } from '../systems/Fx';
+import { explosaoDaQueda, montarPlumas, type Plumas } from '../f1/chefeF1';
 
 /**
  * O que a GameScene precisa saber de um chefão — e nada mais.
@@ -73,6 +74,8 @@ export class Boss implements StageBoss {
   private airborne = false;
   /** Imune e sem atacar enquanto a animação de decolagem toca. */
   private takingOff = false;
+  /** As plumas dos propulsores (bloco G): nascem com a arte do ar, fortes na decolagem, respirando no voo. */
+  private plumas: Plumas | null = null;
   /** > 0 = o leque está CALADO (a salva de mísseis tomou o compasso). */
   private fanMute = 0;
 
@@ -337,6 +340,8 @@ export class Boss implements StageBoss {
   }
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
+    // A pluma segue o sprite mesmo morrendo (a cadeia de estouros) e decolando (forte).
+    this.plumas?.atualizar(this.scene.time.now, this.takingOff);
     if (this.dead) return;
 
     // Chegou à posição de combate: freia e a luta começa.
@@ -705,6 +710,10 @@ export class Boss implements StageBoss {
 
     const passo = Boss.TAKEOFF_MS / (pontos.length + 1);
 
+    // A POEIRA DA QUEDA DO LEVIATÃ, rente ao chão (bloco G, escolha dele: a explosão da cena final como fonte das do
+    // jogo): a Torre se arranca de dentro dela. Atrás do sprite — a nuvem cobre a base, não a fortaleza.
+    explosaoDaQueda(this.scene, this.sprite.x, this.sprite.y + 73, this.sprite.depth - 0.02);
+
     pontos.forEach(([dx, dy, tam], i) => {
       this.scene.time.delayedCall(Math.round(i * passo), () => {
         if (this.dead || !this.sprite.active) return;
@@ -741,6 +750,8 @@ export class Boss implements StageBoss {
     if (this.scene.anims.exists('boss-air-hover')) this.sprite.play('boss-air-hover');
     else this.sprite.setTexture('bossAir');
     this.sprite.setTint(this.baseTint);
+    // As plumas nascem com a arte dos propulsores (no meio da decolagem, debaixo do estouro grande).
+    if (!this.plumas) this.plumas = montarPlumas(this.scene, this.sprite);
   }
 
   /** Fim da decolagem: ressincroniza o corpo e volta a lutar. */
@@ -764,6 +775,8 @@ export class Boss implements StageBoss {
   }
 
   destroy(): void {
+    this.plumas?.destroy();
+    this.plumas = null;
     this.sprite.destroy();
     this.bar.destroy();
     this.barBg.destroy();

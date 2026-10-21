@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
 import { ICONES_CARTAS, RARIDADES } from '../cartas';
+import { ART_PECAS_F1, registrarPecasF1 } from '../f1/pecasF1';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -794,16 +795,10 @@ const ART: Record<string, string> = {
   ...animFrames('elitePupaAnim', 'elite-pupa'),
   ...animFrames('eliteMoscaAnim', 'elite-mosca'),
 
-  turret: 'sprites/turret.png',
-  turret2: 'sprites/turret-2.png',
-
-  building: 'sprites/building.png',
-  building2: 'sprites/building-2.png',
-  building3: 'sprites/building-3.png',
-
-  spire: 'sprites/spire.png',
-  spire2: 'sprites/spire-2.png',
-  spire3: 'sprites/spire-3.png',
+  // ⚠️ AS PEÇAS DO CHÃO DA F1 (`turret`, `building`, `spire`, `base`, `silo`, `radar`, `wreck` e as variantes) vêm de
+  // `ART_PECAS_F1` desde a rodada 6 do bloco G (21/10): as estruturas no escuro que ele escolheu, com as luzes assadas
+  // (`src/f1/pecasF1.ts`). As antigas seguem no disco até a limpeza do fim do bloco.
+  ...ART_PECAS_F1,
 
   // Projéteis: um sprite por arma. Os inimigos usam o mesmo, tingido de magenta.
   bolt: 'sprites/bolt.png',
@@ -838,14 +833,7 @@ const ART: Record<string, string> = {
   capsule: 'sprites/capsule.png',
   capsule2: 'sprites/capsule-2.png',
 
-  // A colônia: bases, silos, antenas e destroços. Sorteados pelo roteiro da fase.
-  base: 'sprites/base.png',
-  base2: 'sprites/base-2.png',
-  silo: 'sprites/silo.png',
-  silo2: 'sprites/silo-2.png',
-  radar: 'sprites/radar.png',
-  wreck: 'sprites/wreck.png',
-  wreck2: 'sprites/wreck-2.png',
+  // A colônia: bases, silos, antenas e destroços — sorteados pelo roteiro da fase — vêm de `ART_PECAS_F1` (acima).
 
   // O cinturão da Fase 2. A rocha e a mina ainda são PLACEHOLDER procedural — a arte do
   // PixelLab entra só copiando os PNGs para cá: `pickVariant` acha as variantes sozinho e
@@ -1233,6 +1221,52 @@ const ART: Record<string, string> = {
   // Camada mais distante do parallax de superfície; substitui o céu pixelado por trás do foreground.
   paintBgF1: 'sprites/paint-bg-f1.png',
 
+  // A F1 do bloco G (20/10): o horizonte (a pintura dele inteira, as luzes apagadas, a cachoeira) e a cordilheira
+  // tirada da pintura — `scripts/_g/_camadas-f1.mjs` e `_cordilheira-f1.mjs`. O `paintBgF1` antigo fica carregado até
+  // o fim do bloco (a limpeza vem depois da aprovação dele).
+  'f1-pintura': 'sprites/f1/pintura.png',
+  'f1-apagadas': 'sprites/f1/apagadas.png',
+  'f1-cachoeira': 'sprites/f1/cachoeira.png',
+  // O CHÃO (rodada 5, 20/10): as duas pinturas dele em faixas sem emenda (`scripts/_g/_camadas-chao-f1.mjs`). A
+  // cordilheira recortada da pintura saiu ("parece mal colado").
+  'f1-chao-vale': 'sprites/f1/chao-vale.png',
+  'f1-chao-paisagem': 'sprites/f1/chao-paisagem.png',
+  'f1-chao-frente': 'sprites/f1/chao-frente.png',
+  'f1-chao-perto': 'sprites/f1/chao-perto.png',
+  // Os aglomerados da colônia (rodada 6, `scripts/_g/_aglomerados-f1.mjs`): decoração entre a Paisagem e as estruturas.
+  f1Aglomerado: 'sprites/f1-aglomerado.png',
+  f1Aglomerado2: 'sprites/f1-aglomerado-2.png',
+  f1Aglomerado3: 'sprites/f1-aglomerado-3.png',
+  // As brasas do chão em três terços por faixa (`_luzes-chao-f1.mjs`): a luz tirada por difusão, por cima da faixa.
+  'f1-chao-vale-brasa-0': 'sprites/f1/chao-vale-brasa-0.png',
+  'f1-chao-vale-brasa-1': 'sprites/f1/chao-vale-brasa-1.png',
+  'f1-chao-vale-brasa-2': 'sprites/f1/chao-vale-brasa-2.png',
+  'f1-chao-paisagem-brasa-0': 'sprites/f1/chao-paisagem-brasa-0.png',
+  'f1-chao-paisagem-brasa-1': 'sprites/f1/chao-paisagem-brasa-1.png',
+  'f1-chao-paisagem-brasa-2': 'sprites/f1/chao-paisagem-brasa-2.png',
+  // A morte do chefão, maior (rodada 5, `scripts/_g/_morte-chefe-f1.mjs`): a explosão da queda do Leviatã em 250 e em
+  // 84 px, os estilhaços cortados da Torre, a coluna de fumaça e o fogo do incêndio.
+  'f1-explosao-chefe-g': 'sprites/f1/explosao-chefe-g.png',
+  'f1-explosao-chefe-m': 'sprites/f1/explosao-chefe-m.png',
+  'f1-estilhacos-chefe': 'sprites/f1/estilhacos-chefe.png',
+  'f1-fumaca-chefe': 'sprites/f1/fumaca-chefe.png',
+  'f1-fogo-chefe': 'sprites/f1/fogo-chefe.png',
+  // A invasão do horizonte (rodada 2, `scripts/_g/_invasao-f1.mjs`): as naves ao longe, a explosão da queda do Leviatã
+  // reduzida, a fumaça, o fogo, o traçante e o flak.
+  'f1-nave-invasora': 'sprites/f1/nave-invasora.png',
+  'f1-nave-invasora-2': 'sprites/f1/nave-invasora-2.png',
+  'f1-explosao': 'sprites/f1/explosao.png',
+  'f1-fumaca': 'sprites/f1/fumaca.png',
+  'f1-fogo': 'sprites/f1/fogo.png',
+  'f1-tracante': 'sprites/f1/tracante.png',
+  'f1-flak': 'sprites/f1/flak.png',
+  // O chefão da F1 (rodada 4, `scripts/_g/_chefe-f1.mjs`): as plumas dos propulsores e a explosão da queda do Leviatã
+  // no tamanho dele (a decolagem e a morte).
+  'f1-pluma-p': 'sprites/f1/pluma-p.png',
+  'f1-pluma-m': 'sprites/f1/pluma-m.png',
+  'f1-pluma-g': 'sprites/f1/pluma-g.png',
+  'f1-explosao-chefe': 'sprites/f1/explosao-chefe.png',
+
   // FUNDO PINTADO da SAÍDA DA ATMOSFERA (arte do Henrique): a órbita baixa vista de cima do
   // planeta, com o arco de atmosfera ainda aceso embaixo. Entra só nos ~6.5s de zero-G entre a
   // Torre morrer e a cutscene 1 (ver `Parallax.breakAtmosphere`) — sem este PNG, a passagem
@@ -1357,6 +1391,13 @@ export class BootScene extends Phaser.Scene {
       this.load.spritesheet(key, sheet.path, { frameWidth: sheet.w, frameHeight: sheet.h });
     }
 
+    // O mapa das luzes e da cachoeira do horizonte da F1 (`scripts/_g/_camadas-f1.mjs`).
+    this.load.json('f1-dados', 'sprites/f1/dados.json');
+    this.load.json('f1-invasao', 'sprites/f1/invasao.json');
+    this.load.json('f1-chefe', 'sprites/f1/chefe.json');
+    this.load.json('f1-chao', 'sprites/f1/chao.json');
+    this.load.json('f1-morte', 'sprites/f1/morte.json');
+
     // O PRIMEIRO PLANO DA F4 (17/10, ver `PrimeiroPlanoF4`): 44 silhuetas de tamanhos diferentes num ATLAS só — uma
     // sheet de célula fixa não as comporta. Empacotado por `scripts/_polimento/_instalar-frente-f4.mjs`.
     this.load.atlas('f4Frente', 'sprites/f4-frente.png', 'sprites/f4-frente.json');
@@ -1427,6 +1468,8 @@ export class BootScene extends Phaser.Scene {
     this.makeFogBand();
     this.makeGodRay();
     this.registerAnims();
+    // As peças do chão da F1 (rodada 6 do bloco G): os quadros das luzes assadas e a boca de cada torre.
+    registrarPecasF1(this);
 
     this.scene.start('Menu');
   }

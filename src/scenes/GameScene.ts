@@ -28,6 +28,9 @@ import {
   type Zone,
 } from '../systems/StageDirector';
 import { Boss, type StageBoss } from '../entities/Boss';
+import { explosaoDaQueda } from '../f1/chefeF1';
+import { PLANTIO_F1 } from '../f1/numerosF1';
+import { cadeiaDaMorte, estouroDaMorte, MORTE_F1, morteF1Pronta } from '../f1/morteChefeF1';
 import { BossCapitania } from '../entities/BossCapitania';
 import { BossSerpente } from '../entities/BossSerpente';
 import { BossNucleo } from '../entities/BossNucleo';
@@ -264,6 +267,18 @@ export class GameScene extends Phaser.Scene {
    */
   private static readonly GARGANTA_DEPOIS_DO_PILAR = 80;
   private static readonly HITSTOP_BOSS_MS = 150;
+
+  /**
+   * A SUBIDA PARA O ZERO-G (bloco G, pedido dele em 20/10): *"trave a nave num angulo de 45 graus… como se ele tivesse
+   * o bico apontado para cima"*. Entre o `breakAtmosphere` e a vitória, o ângulo deixa de seguir a velocidade vertical
+   * e fica travado com o bico para cima, entrando suave. O CONTROLE CONTINUA na mão dele (a decisão fechada nº 3: o
+   * zero-G é a recompensa com o controle na mão); o tiro sai reto, como já sai quando a nave inclina.
+   */
+  private static readonly SUBIDA_ANGULO = -45;
+  private static readonly SUBIDA_ENTRA_MS = 400;
+  /** Quando a subida começou (ms do relógio da cena), ou −1; e o ângulo de onde ela partiu. */
+  private subidaDesde = -1;
+  private subidaAngulo0 = 0;
   /** A hitbox da nave do jogador — IGUAL para toda nave e todo tier (ver o `setSize` no `create`). */
   private static readonly HITBOX_NAVE = { w: 21, h: 9 } as const;
 
@@ -317,6 +332,7 @@ export class GameScene extends Phaser.Scene {
     this.mareEspera = 0;
     this.mareParesEmergindo = 0;
     this.elapsed = 0;
+    this.subidaDesde = -1;
     this.clockOffset = 0;
     this.score = 0;
     this.scoreBase = data.score ?? 0;
@@ -366,6 +382,8 @@ export class GameScene extends Phaser.Scene {
     // (`terrain` na superfície, `hazard` no vácuo). Um grupo vazio não custa frame nenhum, e
     // assim a montagem das colisões não precisa saber em que fase está.
     this.terrain = new TerrainSystem(this, this.enemies.enemyBullets);
+    // A F1 planta as estruturas ENTRE as camadas do chão (rodada 5 do bloco G): o pé sorteado, escondido atrás do entulho.
+    if (this.zone === 'atmosfera') this.terrain.plantarNaSuperficie(PLANTIO_F1);
     // A MOLDURA é construída sempre — a curva é matemática pura e não custa nada nas outras fases.
     // Os SPRITES dela só nascem na Fase 4 (segundo argumento): a `BootScene` carrega `f4Faixa`
     // GLOBALMENTE, então `scene.textures.exists` sozinho não bastava como guarda — os 8 segmentos
@@ -813,6 +831,8 @@ export class GameScene extends Phaser.Scene {
     // "parada" é uma esteira. Mas a Fase 2 é jogada NO vácuo — lá o mundo tem que correr, ou o
     // cinturão inteiro pareceria pendurado. Só a Fase 1, que ROMPE a atmosfera no fim, freia.
     const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
+    // O relógio da fase para o horizonte da F1 (bloco G): ele é função do relógio, não do tempo real.
+    this.parallax.setRelogio(this.elapsed);
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
@@ -852,7 +872,13 @@ export class GameScene extends Phaser.Scene {
     );
     this.bombas.tick(dt, time);
 
-    this.ship.setAngle(Phaser.Math.Clamp(body.velocity.y * 0.06, -25, 25));
+    if (this.subidaDesde >= 0) {
+      const u = Math.min(1, (this.time.now - this.subidaDesde) / GameScene.SUBIDA_ENTRA_MS);
+      const e = 1 - (1 - u) * (1 - u);
+      this.ship.setAngle(this.subidaAngulo0 + (GameScene.SUBIDA_ANGULO - this.subidaAngulo0) * e);
+    } else {
+      this.ship.setAngle(Phaser.Math.Clamp(body.velocity.y * 0.06, -25, 25));
+    }
     this.ship.setVisible(time > this.invulnerableUntil || Math.floor(time / 60) % 2 === 0);
 
     // A BOMBA é da cena, não da arma: funciona nas duas conduções e independe da arma equipada.
@@ -1927,20 +1953,36 @@ export class GameScene extends Phaser.Scene {
     // cadeia. Sem hitstop, matar o chefão é só mais uma explosão; com ele, é A explosão.
     this.hitstop(GameScene.HITSTOP_BOSS_MS);
 
-    // Explosão em cadeia: um boss não morre num estouro só.
-    for (let i = 0; i < 8; i++) {
-      this.time.delayedCall(i * 140, () => {
-        this.fx.explode(
-          boss.sprite.x + Phaser.Math.Between(-24, 24),
-          boss.sprite.y + Phaser.Math.Between(-32, 32),
-          1.4,
-        );
-      });
+    // ⚠️ A F1 MORRE MAIOR E MAIS VIOLENTA (rodada 5 do bloco G, ver `morteChefeF1.ts`): a cadeia é a explosão da queda
+    // do Leviatã estourando pelo corpo, com a Torre adernando; o estouro final em 250 px, os estilhaços e o incêndio.
+    const morteNova = this.zone === 'atmosfera' && morteF1Pronta(this);
+    if (morteNova) cadeiaDaMorte(this, this.fx, boss.sprite);
+    else {
+      // Explosão em cadeia: um boss não morre num estouro só.
+      for (let i = 0; i < 8; i++) {
+        this.time.delayedCall(i * 140, () => {
+          this.fx.explode(
+            boss.sprite.x + Phaser.Math.Between(-24, 24),
+            boss.sprite.y + Phaser.Math.Between(-32, 32),
+            1.4,
+          );
+        });
+      }
     }
 
-    this.time.delayedCall(1200, () => {
+    this.time.delayedCall(morteNova ? MORTE_F1.estouroMs : 1200, () => {
       // O estouro FINAL é o da sheet grande: a cadeia racha o casco, esta o apaga.
-      this.fx.explodeBig(boss.sprite.x, boss.sprite.y, 1.2);
+      //
+      // ⚠️ NA F1 (bloco G) ELE É A EXPLOSÃO DA QUEDA DO LEVIATÃ, no tamanho da Torre: a bola de fogo e a nuvem escura no
+      // lugar da `explosion-big`, cuja fumaça em bolinhas era o item 9 da análise de 14/10. Sem as peças da rodada 5,
+      // fica a da rodada 4 (150 px). As outras fases seguem com a sheet de sempre até o bloco I.
+      const naF1 = this.zone === 'atmosfera';
+      if (morteNova) estouroDaMorte(this, this.fx, boss.sprite.x, boss.sprite.y, this.parallax.chaoDaFrente());
+      else {
+        const queda = naF1 ? explosaoDaQueda(this, boss.sprite.x, boss.sprite.y + 44, 50) : null;
+        if (queda) this.fx.abaloGrande(boss.sprite.x, boss.sprite.y, 1.2);
+        else this.fx.explodeBig(boss.sprite.x, boss.sprite.y, 1.2);
+      }
       boss.destroy();
       this.boss = null;
 
@@ -1962,6 +2004,9 @@ export class GameScene extends Phaser.Scene {
     this.zone = 'vacuo';
     this.parallax.breakAtmosphere();
     this.applyHandling(true);
+    // A nave sobe com o bico a 45° (ver `SUBIDA_ANGULO`).
+    this.subidaDesde = this.time.now;
+    this.subidaAngulo0 = this.ship.angle;
 
     this.showBanner('ATMOSFERA ROMPIDA · ZERO-G', COLORS.playerBright);
     this.cameras.main.shake(600, 0.01);
