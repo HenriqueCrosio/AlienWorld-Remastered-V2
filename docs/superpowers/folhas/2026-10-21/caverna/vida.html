@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caverna · o salão vivo</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · a caverna · o salão vivo</h1>
+<p class="sub">21/10/2026 · <a href="rochas.html">rodada 2: as rochas do salão (recusada)</a> · <a href="frente.html">← a rocha da frente</a> · A iluminação, as brumas e a névoa no salão, com a mesma técnica do cenário vivo do menu e do exterior da F1. A nave fica parada e intocável, e os inimigos escondidos. Nada commitado.</p>
+
+<h2>A passagem, em velocidade real</h2>
+<figure><video src="vida/f1-limpo.webm" autoplay loop muted playsinline controls></video><figcaption><b>23 s, dos 38 aos 61 s da fase.</b> O salão vai de ~44 a ~56 s.</figcaption></figure>
+<div class="grade">
+  <figure><img src="vida/t44.5.png" alt=""><figcaption><b>44,5 s</b></figcaption></figure>
+  <figure><img src="vida/t46.png" alt=""><figcaption><b>46 s</b></figcaption></figure>
+  <figure><img src="vida/t48.png" alt=""><figcaption><b>48 s</b></figcaption></figure>
+  <figure><img src="vida/t50.png" alt=""><figcaption><b>50 s</b></figcaption></figure>
+  <figure><img src="vida/t52.png" alt=""><figcaption><b>52 s</b></figcaption></figure>
+  <figure><img src="vida/t54.png" alt=""><figcaption><b>54 s</b> — as brasas mudam de foto para foto: elas tremulam.</figcaption></figure>
+</div>
+<figure><img src="vida/antes-depois.png" alt=""><figcaption><b>Antes e depois</b> (o mesmo instante, ampliado 3×): o facho mais largo e vivo, os grãos de pó brilhando nele, a bruma sobre o chão.</figcaption></figure>
+
+<h2>O que está no jogo</h2>
+<div class="item">
+  <ul>
+    <li><b>As brasas tremulam</b> no fundo, no teto e no chão do salão, por terços e nunca juntas, como as do chão de fora. A luz é tirada da própria pintura por difusão, então uma brasa fraca vira a rocha de trás, nunca um buraco preto.</li>
+    <li><b>A bruma</b> em três faixas de velocidades diferentes: uma sobre o salão, uma na névoa pintada do chão e uma <b>na frente do chão</b>, atrás da nave. A diferença de velocidade vende o volume.</li>
+    <li><b>Os fachos frios</b> descem da abertura do alto à direita, no ângulo do facho que você pintou, e respiram devagar. A posição da abertura foi medida na pintura. Ela também tem um <b>halo frio</b> grande.</li>
+    <li><b>Os halos âmbar</b> respiram nas seis brasas mais fortes, cada um no seu fôlego.</li>
+    <li><b>A poeira:</b> grãos de 1 px descendo devagar dentro do facho, acendendo e apagando.</li>
+    <li>Por cima de tudo, o tratamento de imagem com o perfil da caverna: a névoa densa na cor do salão e o halo quente das brasas.</li>
+    <li>Tudo fica preso ao salão: atrás da rocha e do lado de fora, nada disso aparece.</li>
+  </ul>
+</div>
+<div class="grade">
+  <figure><img src="vida/brasas-interior.png" alt=""><figcaption><b>As brasas do fundo:</b> acesas (em cima) e todas apagadas (embaixo). No jogo, cada terço oscila entre as duas.</figcaption></figure>
+  <figure><img src="vida/medidas-interior.png" alt=""><figcaption><b>As medidas:</b> a abertura (azul) e as seis brasas mais fortes (âmbar), de onde saem os fachos e os halos.</figcaption></figure>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li>A força de cada efeito: a bruma, os fachos, os halos, a poeira. Todos os números estão num lugar só (<code>SALAO_F1</code>).</li>
+    <li>A rodada 2: as estalactites e as pontas de rocha como obstáculos, e a cadência de tons.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

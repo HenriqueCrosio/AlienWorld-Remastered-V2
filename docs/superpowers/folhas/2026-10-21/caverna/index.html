@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 · caverna</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · a passagem pela caverna (maquete)</h1>
+<p class="sub">21/10/2026 · Uma maquete com as suas imagens na resolução do jogo, antes de qualquer código: a nave para dar escala, sem o tratamento de imagem (os tons são aproximados). <b>→ <a href="rodada1.html">A rodada 1, no jogo</a></b>.</p>
+
+<h2>O portal (a sua ideia)</h2>
+<div class="item">
+  <p>A sua <b>Parede de Caverna Vulcânica</b> é a montanha vista de fora, com a boca à esquerda: ela <b>esconde a caverna</b>. Quando a nave passa pela boca, o <b>corpo da montanha se abre a partir da boca</b> (a rocha se desfaz para dentro, irregular) e aparecem o fundo da caverna e as bordas dela — o teto de estalactites e o chão. A <b>borda da boca</b> (a faixa de rocha que contorna a abertura, a sua arte) fica sempre: é ela que cobre a costura entre fora e dentro. A saída é o mesmo portal espelhado: o exterior aparece pela abertura dele, e quando a nave sai o corpo da montanha se fecha sobre a caverna atrás.</p>
+  <div class="grade">
+    <figure><img src="portal-1-chegando.png" alt=""><figcaption><b>1 · Chegando:</b> a montanha entra pela direita; pela boca ainda se vê o exterior.</figcaption></figure>
+    <figure><img src="portal-2-no-portal.png" alt=""><figcaption><b>2 · No portal:</b> a nave na boca; a montanha cobre a caverna inteira. (A linha vertical à direita é a emenda da rocha repetida da maquete; no jogo ela some com a mesma técnica das faixas do chão.)</figcaption></figure>
+    <figure><img src="portal-3-abrindo.png" alt=""><figcaption><b>3 · Abrindo:</b> a rocha se desfaz a partir da boca e a caverna aparece.</figcaption></figure>
+    <figure><img src="portal-4-aberto.png" alt=""><figcaption><b>4 · Aberto:</b> o fundo da caverna, o teto e o chão; a borda da boca atrás da nave.</figcaption></figure>
+    <figure><img src="portal-5-saida-vem.png" alt=""><figcaption><b>5 · A saída chegando:</b> o exterior pela abertura do portal da saída.</figcaption></figure>
+    <figure><img src="portal-6-saida-fecha.png" alt=""><figcaption><b>6 · Saiu:</b> a montanha se fechou sobre a caverna; o exterior segue.</figcaption></figure>
+  </div>
+</div>
+
+<h2>A saída: o buraco (o que você pediu)</h2>
+<div class="item">
+  <p>A borda da boca da saída faz um "(" — uma meia-lua invertida aberta para a direita. A <b>camada nova</b>, um layer à frente, é a sua <b>Parede da entrada sem espelhar</b>: a borda da boca dela já é a meia-lua côncava ")" com os dentes de rocha. As duas juntas fecham um <b>buraco</b> oval, por onde se vê um pouco do exterior. Quando a nave atravessa o buraco, a camada da frente se desfaz a partir dele e o exterior abre; atrás, a montanha se fecha sobre a caverna.</p>
+  <div class="grade">
+    <figure><img src="portal-5e-saida-buraco.png" alt=""><figcaption><b>5 · O buraco:</b> a borda "(" atrás, a meia-lua ")" na frente; o exterior pelo oval.</figcaption></figure>
+    <figure><img src="portal-5f-saida-atravessa.png" alt=""><figcaption><b>5½ · Atravessando:</b> a camada da frente se desfaz a partir do buraco.</figcaption></figure>
+    <figure><img src="portal-6-saida-fecha.png" alt=""><figcaption><b>6 · Saiu:</b> a montanha fechada atrás; o exterior segue.</figcaption></figure>
+  </div>
+  <details><summary>as versões descartadas (o arco, a janela, a parede escura)</summary>
+    <div class="grade">
+      <figure><img src="portal-5b-saida-aro.png" alt=""><figcaption>O arco</figcaption></figure>
+      <figure><img src="portal-5c-saida-janela.png" alt=""><figcaption>A janela</figcaption></figure>
+      <figure><img src="portal-5-saida-vem.png" alt=""><figcaption>A parede escura</figcaption></figure>
+    </div>
+  </details>
+</div>
+
+<h2>A primeira tentativa (antes do portal)</h2>
+<p class="sub">Sem a sua Parede: o interior aparecia à direita da parede da Moldura assim que ela entrava na tela.</p>
+
+<h2>A ideia da transição</h2>
+<div class="item">
+  <ul>
+    <li><b>A sua Moldura espelhada é a ENTRADA</b> (a parede fechada fica à esquerda); <b>a Moldura como você pintou é a SAÍDA</b> (a parede à direita).</li>
+    <li>O fundo do interior só existe <b>entre as duas paredes</b>: à direita da parede da entrada, à esquerda da parede da saída. As paredes andam com o mundo; o interior aparece exatamente quando a boca passa, e o exterior volta exatamente quando a saída passa.</li>
+    <li>A rocha da boca cobre a costura entre os dois fundos. Ela era a borda da imagem, um corte reto; aqui ela já está <b>recortada como rocha</b>.</li>
+    <li>Dentro: o fundo do interior, o seu teto de estalactites em cima e o chão da Moldura embaixo, como um corredor.</li>
+  </ul>
+</div>
+
+<h2>Duas formas de boca</h2>
+<div class="item">
+  <h3>B · a parede inteira como corte da montanha (a que eu recomendo)</h3>
+  <p class="sub">A parede fica no plano de trás e a nave passa na frente dela: lê como a borda da montanha com a caverna depois.</p>
+  <div class="grade">
+    <figure><img src="1-chegando-B.png" alt=""><figcaption><b>Chegando</b></figcaption></figure>
+    <figure><img src="2-na-boca-B.png" alt=""><figcaption><b>Na boca</b></figcaption></figure>
+    <figure><img src="4-saindo-B.png" alt=""><figcaption><b>Saindo</b></figcaption></figure>
+  </div>
+</div>
+<div class="item">
+  <h3>A · a boca com garganta escura</h3>
+  <p class="sub">A rocha só em cima e embaixo, e no vão um degradê de escuridão esconde a costura. Em pixel, o degradê vira uma coluna pontilhada: não convence.</p>
+  <div class="grade">
+    <figure><img src="1-chegando-A.png" alt=""><figcaption><b>Chegando</b></figcaption></figure>
+    <figure><img src="2-na-boca-A.png" alt=""><figcaption><b>Na boca</b></figcaption></figure>
+    <figure><img src="4-saindo-A.png" alt=""><figcaption><b>Saindo</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>Dentro</h2>
+<figure><img src="3-dentro.png" alt=""><figcaption><b>O corredor:</b> o interior ao fundo, o teto de estalactites e o chão da Moldura. O vão da Moldura vai de y 30 a 186 (156 px da tela de 216).</figcaption></figure>
+</main>
+</body>
+</html>

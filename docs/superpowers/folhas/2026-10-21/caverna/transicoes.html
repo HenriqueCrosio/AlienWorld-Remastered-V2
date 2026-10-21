@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caverna · as transições</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 18px; margin: 0 0 6px; }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · a caverna · as transições</h1>
+<p class="sub">21/10/2026 · <a href="rodada1.html">← a rodada 1</a> · <b>Recusadas: ele escolheu <a href="faixa.html">a faixa de rocha</a>; o código delas saiu do jogo.</b> · As três que você pediu para ver, no jogo e em velocidade real, ao lado da de hoje. A nave fica parada e intocável, e os inimigos escondidos. Cada célula mostra a <b>entrada</b> (a nave cruza a boca) e depois a <b>saída</b> (a nave atravessa o buraco). Nada commitado.</p>
+
+<h2>As quatro, lado a lado</h2>
+<figure><video src="transicoes/painel.webm" autoplay loop muted playsinline controls></video><figcaption><b>A entrada (2,4 s) e a saída (2,2 s)</b>, as quatro filmadas no mesmo instante da fase. O nome de cada uma está no alto da célula.</figcaption></figure>
+
+<h2>Cada uma</h2>
+<div class="item">
+  <h3>1 · Cortina de rocha</h3>
+  <p>Uma coluna de rocha da sua Parede, <b>quase preta</b> (a regra do plano mais perto, como o primeiro plano do chão), passa rente à câmera, <b>na frente da nave</b>, a 1100 px/s: fica ~0,6 s na tela. A troca acontece <b>atrás dela</b>: à direita da cortina já é o lugar novo, à esquerda ainda o velho. Os dois lados da coluna têm o contorno da boca da sua arte, apertados no meio, como uma estalactite encontrando uma estalagmite. Na saída, a mesma cortina leva a frente embora e fecha a montanha atrás.</p>
+  <figure><video src="transicoes/cortina.webm" autoplay loop muted playsinline controls></video></figure>
+</div>
+<div class="item">
+  <h3>2 · Olhos no escuro</h3>
+  <p>Ao cruzar a boca, a tela <b>escurece em três degraus</b> (0,16 s) e a troca acontece no preto. A caverna volta <b>pelas próprias luzes</b>: as brasas e a claridade do fundo primeiro, depois os tons médios, e por fim o resto (1 s ao todo). A nave fica acesa. Na saída, o <b>clarão de fora estoura</b> e assenta (0,7 s).</p>
+  <figure><video src="transicoes/escuro.webm" autoplay loop muted playsinline controls></video></figure>
+</div>
+<div class="item">
+  <h3>3 · Íris de rocha</h3>
+  <p>Um buraco com os <b>dentes da boca da sua arte</b> cresce a partir de onde a nave cruzou (0,8 s), com um aro escuro e um lábio cor de brasa na borda. Na saída, a frente se abre a partir do buraco e, atrás, a montanha <b>se fecha da borda da tela para a nave</b> (0,9 s).</p>
+  <figure><video src="transicoes/iris.webm" autoplay loop muted playsinline controls></video></figure>
+</div>
+<div class="item">
+  <h3>Hoje · o desfazer</h3>
+  <p class="sub">A rodada 1, para comparar: a rocha se desfaz a partir da boca em 8 quadros (0,6 s).</p>
+  <figure><video src="transicoes/desfazer.webm" autoplay loop muted playsinline controls></video></figure>
+</div>
+<figure><img src="transicoes/pecas.png" alt=""><figcaption><b>As peças novas:</b> a cortina (a rocha do corpo da montanha, escurecida, com o contorno da boca nos dois lados) e o fundo da caverna nos três níveis de luz do "olhos no escuro".</figcaption></figure>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li>Qual das três fica (ou nenhuma).</li>
+    <li>Os ajustes da escolhida: a velocidade e a largura da cortina; os tempos do escuro e do clarão; a velocidade da íris.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

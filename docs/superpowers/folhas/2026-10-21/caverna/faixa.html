@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caverna · a faixa de rocha</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  pre { background:#0a0c11; border:1px solid var(--line); border-radius:6px; padding:10px 14px; overflow-x:auto; color:var(--txt); }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · a caverna · a faixa de rocha</h1>
+<p class="sub">21/10/2026 · <b>→ <a href="frente.html">a versão atual: a rocha da frente</a></b> · <a href="rodada1.html">← a rodada 1</a> · <a href="transicoes.html">as transições recusadas</a> · A sua opção A no jogo: a montanha passa inteira, sem sumir, pular ou esmaecer. A nave fica parada e intocável, e os inimigos escondidos. Nada commitado.</p>
+
+<pre>fora )████( salão ……… 12 s ……… salão )████( fora
+     entrada                         saída (a mesma faixa espelhada)</pre>
+
+<h2>A passagem, em velocidade real</h2>
+<figure><video src="faixa/f1-limpo.webm" autoplay loop muted playsinline controls></video><figcaption><b>26 s, dos 38 aos 64 s da fase:</b> a faixa da entrada chega, a nave passa na frente da rocha, o salão, a faixa da saída, e o lado de fora.</figcaption></figure>
+<div class="grade">
+  <figure><img src="faixa/t42.png" alt=""><figcaption><b>42 s · a faixa chega:</b> a rocha entra pela direita; pela boca, o lado de fora.</figcaption></figure>
+  <figure><img src="faixa/t44.png" alt=""><figcaption><b>44 s · a faixa inteira:</b> o lado de fora pela boca ")", a rocha, e o salão depois da borda "(".</figcaption></figure>
+  <figure><img src="faixa/t45.8.png" alt=""><figcaption><b>45,8 s · a nave na boca:</b> ela entra na frente da rocha, e o tom começa a passar para o da caverna.</figcaption></figure>
+  <figure><img src="faixa/t46.6.png" alt=""><figcaption><b>46,6 s · na frente da rocha</b> (~1,4 s na linha do meio).</figcaption></figure>
+  <figure><img src="faixa/t48.png" alt=""><figcaption><b>48 s · o salão:</b> o fundo, o teto e o chão, que mordem; a faixa sai pela esquerda.</figcaption></figure>
+  <figure><img src="faixa/t53.png" alt=""><figcaption><b>53 s · o salão</b> (12 s ao todo).</figcaption></figure>
+  <figure><img src="faixa/t58.4.png" alt=""><figcaption><b>58,4 s · a faixa da saída chega:</b> o salão, a rocha, o lado de fora.</figcaption></figure>
+  <figure><img src="faixa/t59.8.png" alt=""><figcaption><b>59,8 s · na frente da rocha da saída:</b> o tom volta ao da F1.</figcaption></figure>
+  <figure><img src="faixa/t61.png" alt=""><figcaption><b>61 s · fora:</b> a faixa passa pela esquerda.</figcaption></figure>
+  <figure><img src="faixa/t62.5.png" alt=""><figcaption><b>62,5 s · o exterior segue.</b></figcaption></figure>
+</div>
+
+<h2>O que está no jogo</h2>
+<div class="item">
+  <ul>
+    <li><b>A faixa é o seu portal como está</b> (a boca e a borda ")") com o lado direito <b>recortado pela boca espelhada</b>, a borda "(". Na linha do meio sobram ~100 px de rocha entre as duas bordas: a nave passa ~1,4 s na frente dela.</li>
+    <li><b>A rocha entre as bordas é a sua, sem espelhar.</b> Só a borda "(" e 4 px de rocha vêm do espelho, costurados por uma emenda que acompanha o contorno. Um meio espelhado faria a "borboleta" simétrica.</li>
+    <li><b>Ela nunca abre:</b> anda com o mundo, e o salão começa atrás da rocha, no meio da borda "(". A saída é a mesma faixa espelhada.</li>
+    <li><b>O salão tem 12 s.</b> O teto e o chão mordem só nele; na frente das faixas, nada morde. Dentro, três ondas pequenas de drones (aos 48, 51,5 e 55 s).</li>
+    <li><b>O tom</b> passa para o da caverna quando a nave entra na rocha da entrada, e volta quando ela entra na da saída. A troca leva 1,5 s, o tempo de a rocha passar. O relógio da invasão pausa nesse intervalo (~13,5 s).</li>
+    <li><b>A fase ganhou mais 2 s:</b> o resto do roteiro andou +17 s e o chefão foi para os 85 s. O exterior volta a plantar estruturas logo que o lado de fora reaparece à direita da faixa da saída.</li>
+    <li><b>Um bug da rodada 1, consertado:</b> a mesa de cartas do meio da F1 ("Suprimento encontrado") ficou presa nos 63 s quando a caverna empurrou a fase, e abria no meio do FOGO CRUZADO. Agora ela anda junto e abre aos 80 s, no silêncio antes do chefão, como antes.</li>
+    <li>O desfazer, o buraco da saída e as três transições de teste saíram do jogo.</li>
+  </ul>
+</div>
+<figure><img src="faixa/pecas.png" alt=""><figcaption><b>As peças:</b> a faixa da entrada e ela espelhada (a saída); o teto e o chão do salão, cada um duas vezes seguidas (a junta no meio).</figcaption></figure>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li>A faixa: a largura da rocha (hoje ~1,4 s) e se a saída fica espelhada ou ganha outra forma.</li>
+    <li>O salão: os 12 s, o teto e o chão.</li>
+    <li>A rodada 2: as estalactites e as pontas de rocha como obstáculos, as brasas tremulando e a cadência de tons.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

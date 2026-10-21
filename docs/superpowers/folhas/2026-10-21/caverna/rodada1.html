@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fase 1 · caverna · rodada 1</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · a caverna · rodada 1 (no jogo)</h1>
+<p class="sub">21/10/2026 · <a href="index.html">← a maquete</a> · O portal, o corredor e a saída rodando no jogo, com as suas quatro imagens. A nave está parada no meio do corredor e intocável, e os inimigos escondidos (filmagem). Nada commitado. <a href="transicoes.html">As três transições, lado a lado</a> (recusadas) · <a href="faixa.html">A faixa de rocha</a> · <b>→ <a href="frente.html">A rocha da frente (a versão atual)</a></b>.</p>
+
+<h2>A passagem, em velocidade real</h2>
+<figure><video src="rodada1/f1-limpo.webm" autoplay loop muted playsinline controls></video><figcaption><b>20 s, dos 38 aos 58 s da fase:</b> a montanha chega, abre quando a nave cruza a boca, o corredor, o buraco da saída, a montanha fecha atrás.</figcaption></figure>
+<div class="grade">
+  <figure><img src="rodada1/t42.png" alt=""><figcaption><b>42 s · chegando:</b> a montanha entra pela direita; pela boca ainda se vê o exterior.</figcaption></figure>
+  <figure><img src="rodada1/t45.png" alt=""><figcaption><b>45 s · na boca:</b> a montanha esconde a caverna.</figcaption></figure>
+  <figure><img src="rodada1/t45.8.png" alt=""><figcaption><b>45,8 s · abrindo:</b> a nave cruzou a boca; a rocha se desfaz a partir dela.</figcaption></figure>
+  <figure><img src="rodada1/t47.png" alt=""><figcaption><b>47 s · aberta:</b> o fundo, o teto e o chão; a borda da boca atrás.</figcaption></figure>
+  <figure><img src="rodada1/t50.png" alt=""><figcaption><b>50 s · o corredor</b></figcaption></figure>
+  <figure><img src="rodada1/t54.png" alt=""><figcaption><b>54 s · a saída:</b> o "(" da borda e o ")" da camada da frente fecham o buraco.</figcaption></figure>
+  <figure><img src="rodada1/t55.2.png" alt=""><figcaption><b>55,2 s · atravessando:</b> a frente se desfaz; a montanha começa a fechar atrás.</figcaption></figure>
+  <figure><img src="rodada1/t56.5.png" alt=""><figcaption><b>56,5 s · saiu:</b> o exterior segue.</figcaption></figure>
+</div>
+
+<h2>O que está no jogo</h2>
+<div class="item">
+  <ul>
+    <li><b>O trecho é novo:</b> a caverna entra aos 40 s e o resto da fase andou 15 s (o chefão foi de 68 para 83 s). O exterior para de plantar estruturas aos 37 s, para nenhuma aparecer dentro da caverna.</li>
+    <li><b>A entrada e a saída disparam quando a NAVE cruza</b> (no flap ela anda para os lados): a boca, e depois o buraco.</li>
+    <li><b>O fundo da caverna só aparece entre as duas bordas</b>, linha a linha (uma máscara do formato da boca); o entulho e o primeiro plano do exterior somem lá dentro pela mesma máscara invertida.</li>
+    <li><b>O corredor perigoso:</b> o teto e o chão mordem, como a borda da F4. O vão mínimo é de 100 px (o teto chega a y 76, o chão a y 176), sem mexer na sua arte.</li>
+    <li><b>Dentro:</b> só duas ondas pequenas de drones (3 cada). As estalactites e as pontas de rocha como obstáculos são a rodada 2.</li>
+    <li><b>O relógio da invasão</b> pausa enquanto a caverna está aberta (~9 s); o tratamento de imagem troca para o tom da caverna.</li>
+  </ul>
+</div>
+<figure><img src="rodada1/pecas.png" alt=""><figcaption><b>As peças assadas:</b> a borda da boca; o corpo da montanha (com a extensão costurada à direita) em quatro quadros do desfazer; o teto e o chão, cada um duas vezes seguidas (a junta no meio).</figcaption></figure>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li>A abertura e o fechamento (o desfazer da rocha, a velocidade).</li>
+    <li>O corredor: o vão, o teto e o chão.</li>
+    <li>O tamanho do buraco da saída.</li>
+    <li>A rodada 2: as estalactites e as pontas de rocha, as brasas tremulando, a cadência de tons.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

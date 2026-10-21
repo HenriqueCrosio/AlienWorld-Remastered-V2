@@ -34,6 +34,8 @@ ok(ini.nevoa.densidade === PERFIS.superficie.nevoa.densidade, 'k = 0 começa na 
 const PINTURAS = {
   paintBgF1: 'faseF1', paintBgZeroG: 'faseZeroG', paintBgF2: 'faseF2', paintBgF3: 'faseF3',
   paintBgF4a: 'faseF4a', paintBgF4b: 'faseF4b', paintBgF4c: 'faseF4c', paintBgF4d: 'faseF4d',
+  // a caverna da F1 (21/10)
+  paintBgCaverna: 'faseCaverna',
 };
 for (const [pintura, nome] of Object.entries(PINTURAS)) {
   ok(PERFIL_DA_PINTURA[pintura]?.nome === nome, `${pintura} → ${nome} (${PERFIL_DA_PINTURA[pintura]?.nome})`);
@@ -41,7 +43,7 @@ for (const [pintura, nome] of Object.entries(PINTURAS)) {
   ok(PERFIS_FASE[nome].nevoa.densidade >= PISO_DENSIDADE, `${nome}: densidade ${PERFIS_FASE[nome].nevoa.densidade} >= piso`);
   ok(PERFIS_FASE[nome].nevoa.altura === 2, `${nome}: névoa baixa (altura ${PERFIS_FASE[nome].nevoa.altura})`);
 }
-ok(Object.keys(PERFIL_DA_PINTURA).length === 8, `o mapa cobre as 8 pinturas (${Object.keys(PERFIL_DA_PINTURA).length})`);
+ok(Object.keys(PERFIL_DA_PINTURA).length === 9, `o mapa cobre as 9 pinturas (com a caverna da F1) (${Object.keys(PERFIL_DA_PINTURA).length})`);
 const perto = (a, b) => Math.abs(a - b) < 1e-9;
 ok(perto(PERFIS_FASE.faseF1.nevoa.densidade, 0.8 * 0.75) && perto(PERFIS_FASE.faseF1.grao, 0.7 * 0.75), 'as abertas são −25% da base (névoa 0,6, grão 0,525)');
 ok(perto(PERFIS_FASE.faseF4a.nevoa.densidade, 0.8 * 0.85) && perto(PERFIS_FASE.faseF4a.vinheta, 0.55 * 0.85), 'as densas são −15% da base (névoa 0,68, vinheta 0,4675)');

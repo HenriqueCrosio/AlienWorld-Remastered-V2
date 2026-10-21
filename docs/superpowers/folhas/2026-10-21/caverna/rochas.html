@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caverna · as rochas do salão</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · a caverna · rodada 2: as rochas do salão</h1>
+<p class="sub">21/10/2026 · <a href="vida.html">← o salão vivo</a> · <b>RECUSADA e retirada do jogo:</b> "as bordas (cima e baixo) já dão dano. E os obstáculos que você adicionou estão flutuando." O salão ficou só com o teto e o chão que mordem. Esta folha fica como registro.</p>
+
+<h2>A passagem, em velocidade real</h2>
+<figure><video src="rochas/f1-limpo.webm" autoplay loop muted playsinline controls></video><figcaption><b>23 s, dos 38 aos 61 s da fase.</b> As rochas nascem de ~43,8 a ~50,4 s.</figcaption></figure>
+<div class="grade">
+  <figure><img src="rochas/t44.5.png" alt=""><figcaption><b>44,5 s</b> · a primeira ponta de chão.</figcaption></figure>
+  <figure><img src="rochas/t46.png" alt=""><figcaption><b>46 s</b> · a primeira estalactite.</figcaption></figure>
+  <figure><img src="rochas/t47.5.png" alt=""><figcaption><b>47,5 s</b></figcaption></figure>
+  <figure><img src="rochas/t49.png" alt=""><figcaption><b>49 s</b> · a segunda estalactite.</figcaption></figure>
+  <figure><img src="rochas/t50.5.png" alt=""><figcaption><b>50,5 s</b></figcaption></figure>
+  <figure><img src="rochas/t52.png" alt=""><figcaption><b>52 s</b> · as últimas pontas saindo.</figcaption></figure>
+</div>
+
+<h2>O que está no jogo</h2>
+<div class="item">
+  <ul>
+    <li><b>Seis rochas</b>, alternando teto e chão a cada ~1,2 s: um slalom.</li>
+    <li><b>A base de cada uma fica escondida</b> atrás do teto ou do chão do salão, e a ponta aparece. ⚠️ A rocha do teto da sua pintura é fina em vários trechos (chega a 6 px): a estalactite só cabe onde ela é funda, e isso acontece em duas janelas do salão. Onde não cabe, entra uma ponta de chão. Por isso saem <b>2 estalactites e 4 pontas</b>.</li>
+    <li><b>O vão nunca é menor que 56 px</b> entre uma rocha e a borda de frente. Entre duas rochas há pelo menos 40 px de folga, ~0,5 s para trocar de altura. A F1 é a fase do flap, o berço.</li>
+    <li><b>A arte</b> é a rocha nova da F1, das 5 alturas, sem a borda escura de 1 px. Contra a névoa clara do salão aquela borda lia como contorno desenhado; agora a rocha se funde ao fundo.</li>
+    <li><b>A cadência de tons</b> já fecha sem retoque, medido: a rocha está no tom de obstáculo que você calibrou jogando, legível, entre o fundo do salão (mais claro) e as bordas (mais escuras). A bruma da frente passa por cima dela.</li>
+    <li><b>Nenhuma rocha atrás das rochas da frente:</b> a última sai da tela antes de a rocha da saída cobrir. A sonda confere quadro a quadro, junto com o vão e as bases escondidas.</li>
+    <li>A colisão é a de qualquer rocha da F1: encostar machuca.</li>
+  </ul>
+</div>
+<figure><img src="rochas/rochas-antes-depois.png" alt=""><figcaption><b>A rocha de fora (em cima) e a do salão (embaixo)</b>, ampliadas 5×: a mesma silhueta, sem a borda escura.</figcaption></figure>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li>A dificuldade: a quantidade de rochas, o vão (56 px) e a folga entre elas (40 px). Tudo está em <code>OBSTACULOS_CAVERNA_F1</code>.</li>
+    <li>Jogar a F1 inteira com a caverna.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

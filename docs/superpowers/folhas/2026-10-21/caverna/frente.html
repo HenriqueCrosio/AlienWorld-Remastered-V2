@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caverna · a rocha da frente</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  pre { background:#0a0c11; border:1px solid var(--line); border-radius:6px; padding:10px 14px; overflow-x:auto; color:var(--txt); }
+  .decidir { border-color: var(--pend); }
+</style>
+</head>
+<body>
+<main>
+<h1>Fase 1 · a caverna · a rocha da frente</h1>
+<p class="sub">21/10/2026 · <b>→ <a href="vida.html">o salão vivo</a></b> · <a href="faixa.html">← a faixa atrás da nave</a> · <a href="rodada1.html">a rodada 1</a> · A sua Parede no "Aqui" do seu print: na frente da nave, sólida, a nave aparecendo pela aura. A nave fica parada e intocável, e os inimigos escondidos. Nada commitado.</p>
+
+<pre>fora )██████████( salão ……… 12 s ……… salão )██████████( fora
+     NA FRENTE da nave, 2,5× o mundo        a mesma, espelhada</pre>
+
+<h2>A passagem, em velocidade real</h2>
+<figure><video src="frente/f1-limpo.webm" autoplay loop muted playsinline controls></video><figcaption><b>23 s, dos 38 aos 61 s da fase:</b> a rocha passa na frente da nave e cobre a tela, o salão, e a rocha da saída devolve o lado de fora.</figcaption></figure>
+<div class="grade">
+  <figure><img src="frente/t41.png" alt=""><figcaption><b>41 s · a rocha chega</b> pela direita, mais rápida que o fundo; pela boca, o lado de fora.</figcaption></figure>
+  <figure><img src="frente/t42.4.png" alt=""><figcaption><b>42,4 s · a tela inteira é rocha:</b> o lado de fora já saiu, o salão ainda não entrou. A nave aparece atrás da rocha, pela aura.</figcaption></figure>
+  <figure><img src="frente/t43.2.png" alt=""><figcaption><b>43,2 s · o salão entra</b> pela direita, atrás da borda "(".</figcaption></figure>
+  <figure><img src="frente/t44.png" alt=""><figcaption><b>44 s · a nave sai de trás da rocha.</b></figcaption></figure>
+  <figure><img src="frente/t46.png" alt=""><figcaption><b>46 s · o salão:</b> o fundo, o teto e o chão, que mordem.</figcaption></figure>
+  <figure><img src="frente/t52.png" alt=""><figcaption><b>52 s · o salão</b> (12 s à vista).</figcaption></figure>
+  <figure><img src="frente/t55.6.png" alt=""><figcaption><b>55,6 s · a rocha da saída chega.</b></figcaption></figure>
+  <figure><img src="frente/t56.7.png" alt=""><figcaption><b>56,7 s · a tela inteira é rocha</b> de novo: o salão saiu, o lado de fora ainda não entrou.</figcaption></figure>
+  <figure><img src="frente/t57.6.png" alt=""><figcaption><b>57,6 s · o lado de fora entra</b> pela direita.</figcaption></figure>
+  <figure><img src="frente/t59.png" alt=""><figcaption><b>59 s · o exterior segue.</b></figcaption></figure>
+</div>
+
+<h2>O que está no jogo</h2>
+<div class="item">
+  <ul>
+    <li><b>A sua Parede passa na frente da nave</b> e na frente do primeiro plano do chão. É a mesma faixa de antes (a boca ")" de um lado, a borda espelhada "(" do outro), agora com ~380 px de rocha no meio, para cobrir a tela inteira por um instante. <b>O lado de fora sai pela esquerda antes de o salão entrar pela direita</b> (o seu "obs."), e vice-versa na saída.</li>
+    <li><b>Ela anda 2,5× mais rápido que o fundo</b>, como uma camada mais perto da câmera: a nave fica ~2 s atrás dela.</li>
+    <li><b>A aura (corrigida):</b> a rocha continua pintada <b>por cima</b> da nave, só mais transparente em volta dela: 50% até 2 px da silhueta e 75% num anel de mais 3 px, em dois degraus de pixel, sem degradê. O resto fica sólido. A nave lê como <b>atrás</b> da rocha. A primeira versão abria um buraco na rocha, e a nave parecia passar na frente. A aura acompanha cada quadro do jato e a inclinação da nave.</li>
+    <li><b>A troca de cena</b> acontece no meio da rocha, escondida. O tom da caverna entra e sai ali também.</li>
+    <li><b>O salão tem 12 s à vista.</b> O teto e o chão só mordem onde o salão aparece; atrás da rocha, nada morde.</li>
+    <li><b>A rocha passa na frente de tudo, então nenhum inimigo pode estar na tela quando ela cobre:</b> ficaria escondido, atirando. Mudei de hora as ondas perto dela:
+      <ul>
+        <li>a canhoneira, dos 35 para os 31,5 s;</li>
+        <li>os batedores, dos 39 para os 36 s;</li>
+        <li>os drones do salão, para 44,5, 46,5 e 48,5 s, porque a última onda tem que sair antes da rocha da saída.</li>
+      </ul>
+      A sonda confere quadro a quadro que nada fica escondido.</li>
+    <li><b>A fase:</b> o resto do roteiro andou +16 s, e o chefão foi para os 84 s.</li>
+    <li><b>Dois bugs da rodada 1, consertados:</b>
+      <ul>
+        <li>a mesa de cartas do meio da F1 ficou presa nos 63 s e abria no meio do FOGO CRUZADO. Agora ela anda com a caverna e abre aos 79 s, no silêncio antes do chefão;</li>
+        <li>no instante em que a caverna começava, as peças apareciam por um quadro no canto esquerdo da tela.</li>
+      </ul></li>
+  </ul>
+</div>
+<figure><img src="frente/aura-35-50-65.png" alt=""><figcaption><b>A transparência da rocha sobre a nave</b> (ampliada 4×, aos 42,4 s): a rocha a 35%, <b>50% (a que está no jogo)</b> e 65%. Quanto mais rocha, mais "atrás" a nave fica, e menos ela aparece.</figcaption></figure>
+<figure><img src="frente/pecas.png" alt=""><figcaption><b>As peças:</b> a faixa da entrada e ela espelhada (a saída); o teto e o chão do salão, cada um duas vezes seguidas (a junta no meio).</figcaption></figure>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li>A rocha da frente: a velocidade (2,5×), a cor (é a sua Parede como está; o primeiro plano do chão é mais escuro) e a transparência da aura (35%, 50% ou 65% de rocha por cima da nave).</li>
+    <li>As ondas que mudaram de hora.</li>
+    <li>A rodada 2: as estalactites e as pontas de rocha como obstáculos, as brasas tremulando e a cadência de tons.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>
