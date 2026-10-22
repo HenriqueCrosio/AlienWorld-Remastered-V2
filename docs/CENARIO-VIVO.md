@@ -30,7 +30,7 @@ Reduza do ORIGINAL uma vez só (lanczos3).
 | **água** | os pixels claros dentro de uma caixa, em N quadros com listras que descem 1 px por quadro (o loop fecha sozinho). |
 
 O que passa por trás (o Leviatã) fica ENTRE o céu e a cidade: aparece só na janela. As profundidades do menu:
-céu 0 · estrelas 0,5 · Leviatã 1 · bruma da janela 1,5 · cidade 2 · luzes apagadas 2,01 · água 2,02 · clarões e nuvem
+céu 0 · estrelas 0,5 · Leviatã 1 · véu do espaço 1,45 e 1,55 (22/10) · bruma da janela 1,5 · cidade 2 · luzes apagadas 2,01 · água 2,02 · clarões e nuvem
 2,03–2,04 · bruma de trás 2,05 · fachos 2,07–2,09 · tráfego 2,3 · nave 2,4 · bruma da frente 2,6 · véu 50.
 
 ## 2. As luzes
@@ -51,6 +51,11 @@ e a franja quente dela (K px; no farol, o halo vermelho de 3K, só o que é verm
 DIFUSÃO a partir dos vizinhos que não mudam: atrás da janela fica a parede, atrás do farol o céu. A peça apagada tem só
 os pixels que mudam (o resto transparente) e fica DEBAIXO da névoa (a peça opaca por cima da bruma deixava um retângulo
 limpo). No jogo, cada luz é a camada `apagadas` recortada (`setCrop`) na caixa dela + a margem, visível só quando apagada.
+
+**O farol apaga perdendo o vermelho** (22/10, `apagarFarolPelaTinta`): a difusão trocava o halo pelo céu e levava junto
+o que a luz tingia (o mastro rosado, a quina do topo): *"a torre some"*. O pixel avermelhado mais claro que o céu de trás
+(uma estrutura) fica, sem o vermelho; o halo sobre o céu volta a ser céu; o âmbar e o bege não mudam. Uma correção num
+cenário aprovado é PONTUAL (`CORRECOES` em `_camadas.mjs`): mudar a regra geral muda quais luzes piscam.
 
 **Piscar.** Janelas: 24, sorteadas entre as pequenas (≤ 6 px²), cada uma no seu ciclo (4–11 s, fora 0,4–2,6 s), 35%
 com uma falha a 12 Hz antes de apagar. Faróis: 1,4 s acesos a cada 2,3 s; **os da mesma torre juntos** (≤ 3 px de lado,
@@ -120,6 +125,10 @@ emissão a 60 Hz e um hash por partícula), então a sonda vê as mesmas em qual
 
 ## 9. As armadilhas da implementação
 
+- **O `roundPixels` arredonda a POSIÇÃO em px de JOGO** (Phaser 3.90, `floor` antes do zoom da câmera): na camada HD um
+  objeto que anda devagar vai aos saltos de `s` px de tela (5 em 1920) — o Leviatã "descia degraus" (22/10). A posição
+  fica inteira e a fração vai pela origem de desenho (`setDisplayOrigin`, que não é arredondada): ver `leviata.ts`. As
+  `TileSprite` não sofrem disso (o `tilePosition` anda a textura).
 - **Dentro do `create()`, `sys.isActive()` é falso** (o estado é CREATING). Para "a cena ainda existe?", use
   `sys.settings.status < Phaser.Scenes.SHUTDOWN`.
 - **`scene.remove` só emite `DESTROY`**, não `SHUTDOWN`: quem segura pipeline solta no `DESTROY` (`Atmosfera.liberar`).

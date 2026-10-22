@@ -18,6 +18,22 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 > fechou em 21/10, commitada e empurrada; o próximo é o bloco H (os efeitos de imersão por fase) — abrir com as
 > perguntas a ele."**
 >
+> 📍 **22/10 — AJUSTES DELE NO MENU (COMMITADOS E EMPURRADOS) E AS NAVES NOVAS (RODADA 1 ABERTA).** Uma sessão de
+> pequenos ajustes, antes do H (folha `folhas/2026-10-22/menu.html`):
+> - **as luzes que ele marcou** (*"corrija estritamente o que eu indiquei"*): a antena da torre da esquerda apagava
+>   levando o mastro e a quina do topo (o halo trocado pelo céu) → o farol apaga perdendo só o VERMELHO
+>   (`apagarFarolPelaTinta` em `scripts/_cenario/luzes.mjs`); duas "janelas" que eram a quina bege das torres deixaram de
+>   apagar. Correção pontual (`CORRECOES` em `_camadas.mjs`); provado que só os pixels delas mudaram (k4 e k1);
+> - **o Leviatã do menu**: os degraus e o "travado" eram o `roundPixels` do Phaser (arredonda a posição para o px de
+>   JOGO antes do zoom da camada HD: saltos de 5 px em 1920) → a fração vai pela origem de desenho (`leviata.ts`; medido:
+>   maior salto 5 px → 1 px); a travessia ONDULA e passou de 45 s para **120 s** (escolha dele), no mesmo lugar no título;
+> - **o espaço na janela**: um véu frio de bruma entre o Leviatã/planeta e a colônia (`src/menu/espaco.ts`, `ESPACO`) —
+>   das três variantes (véu, nebulosa, nebulosa iluminada) ele escolheu o véu, "levemente mais densa";
+> - **as naves**: análise na folha (a hitbox é fixa 21×9, a T3 só PARECE maior: 41×22 de desenho; os cascos humanos
+>   laranja-claro contra o dark sci-fi). Decisão dele: **naves humanas NOVAS** (T0–T3, casco grafite, âmbar só nos
+>   motores/cabine/frisos, T3 ~36×15) e **as mantas redesenhadas menores** a partir da arte aprovada. A rodada 1 (3 direções,
+>   a família inteira de perfil, no tamanho final, plantada na fase) abriu nesta sessão.
+>
 > 📍 **21/10 (2) — A CAVERNA DA F1 FECHOU: COMMITADA E EMPURRADA** para `origin/feat/cartas-preview` — `9864f46` (o
 > jogo e a limpeza das 52 peças antigas da F1 para `assets/raw/f1-original/`), `4476e9f` (ferramentas, testes e folhas,
 > sem os vídeos) e os docs. A ideia é dele ("uma passagem da F1 por uma caverna… mais emoção"), com quatro pinturas
