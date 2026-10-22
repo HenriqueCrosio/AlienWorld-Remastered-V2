@@ -52,11 +52,18 @@ export function torres(caixas: readonly Caixa[]): number[] {
   return caixas.map((_, i) => raiz(i));
 }
 
-/** O Leviatã: a travessia de 45 s em loop, 3 s adiantada, com 6 s de céu vazio entre uma e outra. */
+/**
+ * O Leviatã: a travessia de `seg` s em loop, com `pausa` s de céu vazio entre uma e outra, adiantada para estar no
+ * mesmo lugar quando o título acende; em cima da reta, uma ondulação lenta que zera nas duas pontas (22/10).
+ * Devolve a posição EXATA (fracionária): quem desenha cuida do arredondamento.
+ */
 export function travessia(t: number): { x: number; y: number; quadro: number } {
   const T = TRAVESSIA;
-  const u = Math.min(1, ((t + T.adiantar) % (T.seg + T.pausa)) / T.seg);
-  return { x: T.x0 + (T.x1 - T.x0) * u, y: T.y0 + (T.y1 - T.y0) * u, quadro: Math.floor(t * T.nadoFps) % T.quadros };
+  const adiantar = T.noTitulo.u * T.seg - T.noTitulo.t;
+  const ciclo = T.seg + T.pausa;
+  const u = Math.min(1, ((((t + adiantar) % ciclo) + ciclo) % ciclo) / T.seg);
+  const onda = T.onda.amp * Math.sin(Math.PI * T.onda.meias * u);
+  return { x: T.x0 + (T.x1 - T.x0) * u, y: T.y0 + (T.y1 - T.y0) * u + onda, quadro: Math.floor(t * T.nadoFps) % T.quadros };
 }
 
 /**

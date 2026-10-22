@@ -13,8 +13,32 @@ export const SUBTITULO = 'R E M A S T E R E D';
 
 // ─── O CENÁRIO ──────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** §3.1 O Leviatã: a travessia em loop (sai à direita, o céu fica vazio, ele volta a sair da nuvem). */
-export const TRAVESSIA = { x0: 200, y0: 30, x1: 404, y1: 42, seg: 45, adiantar: 3, pausa: 6, nadoFps: 6, quadros: 16 } as const;
+/**
+ * §3.1 O Leviatã: a travessia em loop (sai à direita, o céu fica vazio, ele volta a sair da nuvem).
+ * 22/10, ele: *"vai caindo degraus… parece travado… algo mais orgânico… passar mais lentamente, tipo 1h30 ou 2min"*.
+ * A travessia foi de 45 s para 120 s (escolha dele entre 90 e 120, na folha `folhas/2026-10-22/menu.html`); ela ONDULA
+ * (`onda`: meias-ondas de seno em cima da reta, zero nas pontas) em vez da reta; e o lugar dele quando o título acende
+ * (`noTitulo`: a fração da travessia aos `t` s, a de 19/10) não muda — o `adiantar` sai dele. Os degraus eram o
+ * `roundPixels` (ver `leviata.ts`).
+ */
+export const TRAVESSIA = {
+  x0: 200, y0: 30, x1: 404, y1: 42, seg: 120, pausa: 6, nadoFps: 6, quadros: 16,
+  noTitulo: { t: 9, u: 0.267 },
+  onda: { amp: 2.5, meias: 3 },
+} as const;
+
+/**
+ * §3.5b (22/10) O ESPAÇO entre a colônia e o planeta (ele: *"atrás da imagem da colônia e na frente do leviatã e do
+ * layer de trás haja um efeito de mais fog, que mostre que aquilo é o espaço"*). Mora entre as profundidades do
+ * Leviatã (1) e da cidade (2), na frente dele e do planeta: só aparece na janela. Das três variantes da maquete (véu,
+ * nebulosa, nebulosa iluminada) ele escolheu o VÉU, "levemente mais densa" (os picos subiram 20%: 0,55/0,6 → 0,66/0,72).
+ * Duas faixas da bruma das fases (`menu-fog`), frias, devagar. `y`/`h` em px de jogo; `vel` em px/s (positivo = o
+ * desenho anda para a esquerda).
+ */
+export const ESPACO = [
+  { y: 2, h: 70, tint: 0x3e4a62, pico: 0.66, vel: 0.7, depth: 1.45 },
+  { y: 40, h: 76, tint: 0x36435a, pico: 0.72, vel: 1.6, depth: 1.55 },
+] as const;
 
 /** §3 As estrelas: só na janela aberta (a cidade transparente) e onde o céu é escuro. */
 export const ESTRELAS = {

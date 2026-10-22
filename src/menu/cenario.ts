@@ -6,6 +6,7 @@ import { montarLeviata } from './leviata';
 import { montarVida } from './vida';
 import { montarVolume } from './volume';
 import { montarPerigo } from './perigo';
+import { montarEspaco } from './espaco';
 
 /**
  * O CENÁRIO DO MENU (spec `2026-10-19-menu-refeito-design.md` §2–5): a pintura dele em camadas, viva e com perigo no
@@ -142,7 +143,7 @@ export class Cenario {
     scene.add.image(0, 0, chave('ceu')).setOrigin(0).setScale(1 / k).setDepth(0);
     scene.add.image(0, 0, chave('cidade')).setOrigin(0).setScale(1 / k).setDepth(2);
     const perigo = montarPerigo(ctx, estado);
-    this.pecas = [montarLeviata(ctx), montarVida(ctx), montarVolume(ctx), perigo];
+    this.pecas = [montarLeviata(ctx), montarEspaco(ctx), montarVida(ctx), montarVolume(ctx), perigo];
     this.relampagos = perigo.contagem;
     this.veu = scene.add.rectangle(0, 0, LARGURA, ALTURA, 0x000000, 1).setOrigin(0).setDepth(profundidadeVeu);
   }
