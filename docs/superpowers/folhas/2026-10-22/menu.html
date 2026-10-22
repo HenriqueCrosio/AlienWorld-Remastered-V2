@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajustes de 22/10</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .grade { display:grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 14px; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  .feito { border-color: var(--ok); }
+  code { font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Os ajustes de 22/10 · o menu e as naves</h1>
+<p class="sub">22/10/2026 · As luzes que você marcou (corrigidas, no jogo), o Leviatã sem degraus e mais lento, e a névoa de espaço na janela (três variantes). Os vídeos são o próprio jogo, filmado em velocidade real, só a janela de céu (1536 px de largura: aumente para tela cheia). Nada commitado.</p>
+
+<h2>✅ O que você decidiu <span class="sub">(no jogo)</span></h2>
+<div class="item feito">
+  <p><b>Luzes ok · Leviatã em 120 s · espaço A, levemente mais densa</b> (os dois picos do véu subiram 20%). As variantes B e C e as chaves da maquete (<code>?espaco</code>, <code>?levi</code>) saíram do código.</p>
+</div>
+<figure><video src="menu/final/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>O menu como ficou</b>: o Leviatã de 120 s, liso e ondulando, atrás do véu.</figcaption></figure>
+<figure><img src="menu/espaco-a-final.png" alt=""><figcaption><b>Sem véu · A da folha · A mais densa (a que ficou).</b></figcaption></figure>
+
+<h2>1 · As luzes que você marcou <span class="sub">(no jogo)</span></h2>
+<div class="item feito">
+  <ul>
+    <li><b>A antena (o círculo de cima):</b> ao apagar os três faróis, a regra trocava o halo vermelho pelo céu, e levava junto o mastro (rosado pela luz) e a quina bege do topo da torre: <i>"a torre some"</i>. Agora o farol apaga perdendo só o <b>vermelho</b>: o mastro fica cinza, o topo fica com a quina, e o halo volta a ser céu (medido: sem a mancha escura que sobrava).</li>
+    <li><b>As duas "janelas pretas"</b> (a torre da esquerda e a cidadela, ao lado do título): não eram janelas, eram o brilho bege da quina da torre, que o detector tomou por luz. Ao "apagar", a quina virava um entalhe preto. Elas deixaram de apagar.</li>
+    <li><b>Só elas mudaram:</b> as 24 janelas que piscam e todos os outros faróis são exatamente os de antes (conferido pixel a pixel: o resto do <code>apagadas.png</code> é idêntico, e a escolha das luzes não mudou). Vale também para a versão sem a camada HD.</li>
+  </ul>
+</div>
+<figure><img src="menu/luzes-antes-depois.png" alt=""><figcaption><b>Acesa · apagada antes · apagada agora</b> (ampliado 5×). Em cima, a torre da antena; embaixo, a quina da cidadela.</figcaption></figure>
+<figure><img src="menu/luzes-no-jogo.png" alt=""><figcaption><b>No jogo, em 1920×1080:</b> a antena piscando. Na última foto, apagada: a torre e o mastro ficam.</figcaption></figure>
+
+<h2>2 · O Leviatã: sem degraus, mais lento, ondulando</h2>
+<div class="item">
+  <ul>
+    <li><b>Os degraus e o "travado" eram o arredondamento.</b> O Phaser arredonda a posição de um sprite para o pixel de JOGO inteiro antes de ampliar a camada HD: em 1920 px, cada passo dele virava um salto de 5 px. Ele descia um degrau a cada ~4 s e andava aos trancos. Agora a posição anda por pixel de TELA (só nele: o resto do menu não muda). <b>Medido na tela</b> (1920 px, o nado congelado): antes, parado por 6–7 quadros e um salto de 5 px; agora, 0 ou 1 px por quadro, sempre.</li>
+    <li><b>Orgânico:</b> em vez da reta, ele ondula devagar (sobe e desce 2,5 px, uma onda e meia por travessia), e chega e sai no mesmo lugar de antes.</li>
+    <li><b>Mais lento:</b> a travessia era de 45 s. Aqui estão as de 90 s e 120 s. Quando o título acende, ele está no mesmo lugar de hoje.</li>
+  </ul>
+</div>
+<div class="grade">
+  <figure><video src="menu/antes/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>Antes</b> (45 s): os degraus e os trancos.</figcaption></figure>
+  <figure><video src="menu/levi-90/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>90 s</b>, liso e ondulando.</figcaption></figure>
+  <figure><video src="menu/levi-120/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>120 s</b>, liso e ondulando.</figcaption></figure>
+</div>
+
+<h2>3 · O espaço na janela <span class="sub">(três variantes, com o Leviatã de 90 s)</span></h2>
+<div class="item">
+  <p>Tudo mora entre o céu com o planeta e a colônia, então só aparece na área que você marcou (a colônia cobre o resto).</p>
+  <ul>
+    <li><b>A · Véu:</b> mais duas camadas da bruma das fases, fria, andando devagar.</li>
+    <li><b>B · Nebulosa:</b> gás em fios, em dois planos: um <b>atrás</b> do Leviatã e um <b>na frente</b>. Ele passa a nadar dentro do gás, com fios cruzando por cima dele. O planeta fica velado.</li>
+    <li><b>C · Nebulosa iluminada:</b> a B, com o gás pegando a luz do planeta no lado aceso (a direita), respirando devagar.</li>
+  </ul>
+</div>
+<div class="grade">
+  <figure><video src="menu/levi-90/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>Sem névoa nova</b> (para comparar).</figcaption></figure>
+  <figure><video src="menu/espaco-a/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>A · Véu</b></figcaption></figure>
+  <figure><video src="menu/espaco-b/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>B · Nebulosa</b></figcaption></figure>
+  <figure><video src="menu/espaco-c/janela.webm" autoplay loop muted playsinline controls></video><figcaption><b>C · Nebulosa iluminada</b></figcaption></figure>
+</div>
+<p class="sub">Para ver no menu de verdade: <code>localhost:5173/?espaco=a</code> (ou <code>b</code>, <code>c</code>, <code>0</code>), e <code>&amp;levi=120</code> para a travessia de 120 s.</p>
+
+<h2>4 · As naves: tamanho e visual <span class="sub">(análise, nada mudou no jogo)</span></h2>
+<div class="item">
+  <ul>
+    <li><b>A hitbox é a mesma para toda nave e todo tier: 21×9 px.</b> A T3 não bate mais que a T0; ela <b>parece</b> maior. O desenho da T2/T3 tem 41×22 px, quase 2× a hitbox na largura e 2,4× na altura. No duto da F4 (o vão mais apertado, 68 px), a T3 ocupa um terço do vão "a olho": por isso a travessia fica mais difícil de ler.</li>
+    <li><b>Medidas hoje</b> (o desenho, sem a chama): T0 35×16 · T1 38×20 · T2 41×22 · <b>T3 41×22</b> · manta T1 33×17 · manta T2 40×19.</li>
+    <li><b>O visual:</b> os cascos humanos são laranja-caramelo claro por inteiro. Isso vai contra a regra do dark sci-fi (casco escuro, luz só onde há energia): numa fase escura, a nave é a coisa mais clara da tela. A T3 é uma "T2 mais gorda" (asa dupla), não uma forma nova. As mantas (azul-petróleo escuro) já estão no estilo.</li>
+  </ul>
+</div>
+<div class="grade">
+  <figure><img src="menu/naves-hoje.png" alt=""><figcaption><b>As seis naves de hoje</b> (6×), com a hitbox em vermelho. Em cima: T0, T1, T2. Embaixo: T3, manta T1, manta T2.</figcaption></figure>
+  <figure><img src="menu/naves-duto-t3.png" alt=""><figcaption><b>A T3 no duto da F4 a 100%, 85% e 75%.</b> Só uma régua de tamanho: reduzir a arte assim deforma os pixels. A versão final seria desenhada no tamanho certo.</figcaption></figure>
+</div>
+<div class="item">
+  <p><b>A proposta:</b></p>
+  <ol>
+    <li><b>Tamanho:</b> a evolução continua crescendo, mas numa faixa menor. T0 ~30×12 → T1 ~32×13 → T2 ~34×14 → <b>T3 ~36×15</b> (−12% no comprimento e −32% na altura). Mantas: ~30×13 e ~33×14. A hitbox não muda.</li>
+    <li><b>Visual:</b> casco escuro (metal grafite), o laranja só nos motores, na cabine e nas luzes; silhueta de perfil limpa; cada tier com uma forma própria (a T3 ganha motores e placas, não volume).</li>
+    <li><b>Como:</b> desenhar no tamanho final (nunca reduzir a arte de hoje): 3–4 conceitos por tier no PixelLab, de perfil, numa folha, no tamanho do jogo e plantados na fase. Você escolhe, e só depois vêm as chamas (os 8 quadros, e a versão azul da carta Propulsores).</li>
+  </ol>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li>As luzes: se ficaram como você queria.</li>
+    <li>O Leviatã: <b>90 s</b> ou <b>120 s</b>, e se a ondulação está boa (mais, menos, nenhuma).</li>
+    <li>O espaço: <b>A</b>, <b>B</b> ou <b>C</b>, e a força (cada uma é um número só: dá para deixar mais leve ou mais densa).</li>
+    <li>As naves: se seguimos com a proposta (o tamanho e o casco escuro), e se as mantas entram junto ou só as humanas.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
-import { lum, detectarLuzes, marcarMuda, apagarPorDifusao, gruposDeLuz } from '../_cenario/luzes.mjs';
+import { lum, detectarLuzes, marcarMuda, apagarPorDifusao, apagarFarolPelaTinta, gruposDeLuz } from '../_cenario/luzes.mjs';
 
 const [OUT, K_S = '1'] = process.argv.slice(2);
 const K = Number(K_S);
@@ -173,6 +173,36 @@ const tipo = detectarLuzes(cidade, W, H, K);
 const muda = marcarMuda(cidade, W, H, K, tipo);
 const apagadas = apagarPorDifusao(cidade, W, H, muda);
 const grupos = gruposDeLuz(tipo, W, H, K);
+
+// ─── 3b. 22/10, he: three lights that went off wrong. The rest of the menu is approved ("impecável"), so the fix is
+// HERE, only for them, and only in their off pieces: the detection, the groups and so the lights the game picks to
+// blink do not change. Boxes in game px; the margins are the game's crop (`FAROIS.margem` / `JANELAS.margem` and the
+// `areaMax` of `src/menu/numerosMenu.ts`).
+const CORRECOES = {
+  // The antenna tower, far left: its beacons took the red-lit mast and the beige corner of the top with them (sky
+  // by diffusion) — "the tower vanishes". They go off by losing their red (`apagarFarolPelaTinta`).
+  torreDaAntena: [34, 44, 44, 57],
+  // Two "windows" that are the beige light of a tower corner (the left tower; the citadel, by the title): off, the
+  // fill had only the dark side to feed on and cut a black notch in the corner. They are not lights: they don't go off.
+  quinas: [[41, 65, 44, 72], [250, 45, 254, 52]],
+};
+{
+  const centroEm = (g, [x0, y0, x1, y1]) => g.x + g.w / 2 > x0 && g.x + g.w / 2 < x1 && g.y + g.h / 2 > y0 && g.y + g.h / 2 < y1;
+  const recorte = (g, m, cada) => {
+    const x0 = Math.floor((g.x - m) * K), y0 = Math.floor((g.y - m) * K);
+    const x1 = x0 + Math.ceil((g.w + 2 * m) * K), y1 = y0 + Math.ceil((g.h + 2 * m) * K);
+    for (let y = Math.max(0, y0); y < Math.min(H, y1); y++) for (let x = Math.max(0, x0); x < Math.min(W, x1); x++) cada(y * W + x);
+  };
+  const dentro = new Uint8Array(W * H);
+  for (const g of grupos) if (g.tipo === 'farol' && g.n <= 4 && centroEm(g, CORRECOES.torreDaAntena)) recorte(g, 3, (s) => (dentro[s] = 1));
+  for (let s = 0; s < W * H; s++) if (dentro[s]) apagadas[s * 4 + 3] = 0; // only what changes is in the piece
+  for (const [s, r, g, b] of apagarFarolPelaTinta(cidade, W, H, tipo, dentro)) {
+    apagadas[s * 4] = r; apagadas[s * 4 + 1] = g; apagadas[s * 4 + 2] = b; apagadas[s * 4 + 3] = 255;
+  }
+  for (const caixa of CORRECOES.quinas) {
+    for (const g of grupos) if (g.tipo === 'janela' && g.n <= 6 && centroEm(g, caixa)) recorte(g, 1, (s) => (apagadas[s * 4 + 3] = 0));
+  }
+}
 
 // ─── 4. The waterfall loop ──────────────────────────────────────────────────────────────────────────────────────
 // Box in game pixels (measured on the k = 1 reduction); the water = the bright pixels inside it.

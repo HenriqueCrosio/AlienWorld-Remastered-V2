@@ -172,6 +172,70 @@ export function apagarPorDifusao(cidade, W, H, muda) {
   return apagadas;
 }
 
+/**
+ * A beacon goes off by losing its RED, not its surface (22/10, he: on the menu's antenna tower "the tower vanishes"
+ * when the lights go off — `apagarPorDifusao` filled the red-lit mast and the beige corner of the tower top with sky).
+ * Inside `dentro` (a mask: the crop boxes of the beacons of ONE tower), every pixel is one of:
+ *  - the lamp (a beacon pixel or a white-hot one): filled by diffusion from its surroundings;
+ *  - red-tinted (red-dominant, or the magenta of the halo's rim, and redder than the sky's own hue `rho`): the
+ *    painting's glow REPLACED the sky there (its green and blue are lower than the sky's), so a pixel brighter than the
+ *    sky behind it (a lit structure: the mast) keeps standing without its red (r down to the sky's hue, never below
+ *    neutral grey), and the halo over the sky goes back to the sky (diffusion) — blended, so no edge shows;
+ *  - anything else (the amber, the beige of the tower): it does not change.
+ * Returns the "off" values of the changed pixels as [index, r, g, b][].
+ */
+export function apagarFarolPelaTinta(cidade, W, H, tipo, dentro) {
+  const classe = new Uint8Array(W * H); // 1 = the lamp, 2 = red-tinted
+  const opaco = (s) => cidade[s * 4 + 3] === 255;
+  // Red-dominant (the glow itself), or the magenta of its faint rim (blue as high as red) — not the amber or the beige,
+  // whose blue falls well below their red.
+  const vermelho = (r, g, b = 0) => g < 0.68 * r || (g < 0.85 * r && b >= 0.85 * r);
+  const razoes = [];
+  for (let s = 0; s < W * H; s++) {
+    if (!dentro[s] || !opaco(s)) continue;
+    const r = cidade[s * 4], g = cidade[s * 4 + 1], b = cidade[s * 4 + 2];
+    if (tipo[s] === 2 || lum(r, g, b) >= 150) classe[s] = 1;
+    else if (lum(r, g, b) < 40 && !vermelho(r, g, b)) razoes.push(r / Math.max(1, g, b));
+  }
+  razoes.sort((a, b) => a - b);
+  const rho = razoes.length ? razoes[razoes.length >> 1] : 1; // the sky's own red, measured around the tower
+  for (let s = 0; s < W * H; s++) {
+    if (!dentro[s] || classe[s] || !opaco(s)) continue;
+    const r = cidade[s * 4], g = cidade[s * 4 + 1], b = cidade[s * 4 + 2];
+    if (vermelho(r, g, b) && r > rho * Math.max(g, b) + 2) classe[s] = 2;
+  }
+  const alvo = [];
+  for (let s = 0; s < W * H; s++) if (classe[s]) alvo.push(s);
+  const val = new Float32Array(W * H * 3);
+  for (let s = 0; s < W * H; s++) for (let c = 0; c < 3; c++) val[s * 3 + c] = classe[s] ? 0 : cidade[s * 4 + c];
+  for (let volta = 0; volta < 200; volta++) {
+    const ida = volta % 2 === 0;
+    for (let n = 0; n < alvo.length; n++) {
+      const s = alvo[ida ? n : alvo.length - 1 - n], x = s % W, y = (s / W) | 0;
+      let r = 0, g = 0, b = 0, peso = 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+        const q = ny * W + nx;
+        if (!opaco(q)) continue;
+        const p = classe[q] ? 0.5 : 1;
+        r += val[q * 3] * p; g += val[q * 3 + 1] * p; b += val[q * 3 + 2] * p; peso += p;
+      }
+      if (peso) { val[s * 3] = r / peso; val[s * 3 + 1] = g / peso; val[s * 3 + 2] = b / peso; }
+    }
+  }
+  return alvo.map((s) => {
+    const ceu = [0, 1, 2].map((c) => val[s * 3 + c]);
+    if (classe[s] === 1) return [s, ...ceu.map(Math.round)];
+    // The pixel without its red keeps standing only where it is brighter than the sky behind it (a lit structure: the
+    // mast); a halo over the sky goes back to sky. Blended over 8 levels, so no edge shows.
+    const g = cidade[s * 4 + 1], b = cidade[s * 4 + 2];
+    const sem = [Math.min(cidade[s * 4], Math.max(rho * Math.max(g, b), (g + b) / 2)), g, b];
+    const w = Math.min(1, Math.max(0, (Math.max(g, b) - Math.max(ceu[1], ceu[2]) - 2) / 8));
+    return [s, ...[0, 1, 2].map((c) => Math.round(ceu[c] * (1 - w) + sem[c] * w))];
+  });
+}
+
 /** Clusters (8-connected) of the same type: boxes and area in GAME px (÷K, so every density flickers the SAME lights). */
 export function gruposDeLuz(tipo, W, H, K) {
   const grupos = [];
