@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naves · forma primeiro</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --ruim:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1320px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 8px; }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  .tabela { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ok { color: var(--ok); } .meio { color: var(--pend); } .ruim { color: var(--ruim); }
+</style>
+</head>
+<body>
+<main>
+<h1>As naves · forma primeiro <span class="sub">(rodada 2a)</span></h1>
+<p class="sub">23/10/2026 · <a href="naves-detalhe.html">← o teste de detalhe (1c)</a> · <a href="naves-encolher.html">→ ficou a de hoje: T0 menor, sem a T3</a> ·Você escolheu o caminho A: decidir a <b>forma</b> e o <b>tom do casco</b> antes do detalhe, com referências de naves conhecidas (só o princípio, nada copiado). Nada instalado; a hitbox (21×9) não muda.</p>
+
+<div class="item">
+  <p><b>Por que forma primeiro:</b> nas duas rodadas que erraram, você julgou a nave pronta, com forma, cor e detalhe numa imagem só. Aqui cada coisa se decide sozinha: as naves estão em <b>blocos de cor</b> (casco em três tons, metal, vidro, luz âmbar, chama), desenhadas peça a peça no tamanho do jogo, sem PixelLab. O detalhe vem depois, pintado por cima da forma que você aprovar.</p>
+  <p><b>A régua</b> (o que a nave do jogador precisa fazer, tirado do GDD e das fases):</p>
+  <ol>
+    <li><b>Se achar em meio segundo:</b> contraste com o fundo em toda fase (pilar 3, leitura clara no escuro).</li>
+    <li><b>Ler como flecha:</b> nariz à frente, motor atrás, a cabine sobre a hitbox, e o tiro saindo do nariz.</li>
+    <li><b>A conquista se vê na silhueta:</b> cada tier ganha peça visível, e a T3 tem cara de prêmio.</li>
+    <li><b>Ser da colônia:</b> humano é ângulo, máquina e luz âmbar. Não pode lembrar inimigo nem a manta.</li>
+    <li><b>Peso:</b> motor, canhão e cabine de vidro à vista (a referência é o Metal Slug).</li>
+  </ol>
+</div>
+
+<h2>As três escadas</h2>
+<figure><img src="naves/silhuetas/escadas-osso.png" alt=""><figcaption><b>Ampliado 6×, no casco osso.</b> A caixa verde tracejada é a <b>hitbox</b> (21×9, a mesma em todas); o círculo vermelho é <b>de onde o tiro sai</b>. Embaixo de cada nave, a silhueta chapada: a mudança de tier tem de se ler sem cor nenhuma.</figcaption></figure>
+
+<div class="item tabela">
+  <table>
+    <tr><th></th><th>Caça · a de hoje, escada consertada</th><th>Gótica deitada · as torres viram o nariz</th><th>Pesada · o motor gordo</th></tr>
+    <tr><td>Ideia</td>
+      <td>A família de hoje (as asas grandes e enflechadas carregam a luz), com os dois defeitos dela corrigidos: a T1 volta para a família (hoje é o jato do róster antigo) e a T3 deixa de ser igual à T2.</td>
+      <td>A catedral deitada com as <b>torres apontando para a frente</b>: as torres são o nariz (uma, depois o garfo, e o tiro sai entre elas), a <b>rosácea</b> é o vidro da cabine, os arcobotantes são aletas varridas para trás, o motor é a abside.</td>
+      <td>Casco curto e grosso, cabine-bolha, motores como cápsulas e canhão à vista. Lê como máquina de guerra.</td></tr>
+    <tr><td>T0</td><td>Uma asa grande, a deriva, nariz-agulha, um motor pequeno. Só a cabine acesa.</td><td><b>Capela:</b> uma torre como nariz, a rosácea, uma aleta.</td><td><b>Rebocador:</b> uma cápsula de motor em cima, atrás; cabine-bolha; asa curta.</td></tr>
+    <tr><td>T1</td><td>A <b>asa de lá</b> aparece em cima; cabine e motor maiores; uma luz.</td><td><b>Igreja:</b> o garfo começa (torre longa sobre uma curta); duas aletas; duas janelas.</td><td>O <b>canhão sob o queixo</b>; o motor cresce; a asa de lá; uma luz.</td></tr>
+    <tr><td>T2</td><td><b>Motor duplo</b> (duas chamas), canards no nariz, deriva dupla; duas luzes.</td><td><b>Abadia:</b> o <b>garfo inteiro</b> (o tiro sai entre as torres); três aletas; motor maior; quatro janelas.</td><td><b>Duas cápsulas</b> (em cima e embaixo); a metralhadora giratória com a caixa; uma placa de blindagem.</td></tr>
+    <tr><td>T3</td><td><b>O prêmio:</b> casulos de arma na ponta das duas asas, canhão sob o nariz, pós-combustão; três luzes.</td><td><b>Catedral:</b> torres mais longas, o <b>arcobotante</b> fechando um arco vazado em cima, pináculos nas aletas, motor duplo, a rosácea com anel âmbar, seis janelas.</td><td>Dois motores grandes com chamas grandes, casulo de arma na asa, metralhadora mais pesada, respiros acesos.</td></tr>
+    <tr><td>Referências (só o princípio)</td><td>As suas T0/T2 de hoje (vista ¾, asas como planos de luz); a deriva dupla do F-14/Su-27; o nariz-agulha da Vic Viper (Gradius).</td><td>A fachada e a lateral de uma catedral gótica (torres, rosácea, arcobotantes, pináculos); os caças da Marinha Imperial de Warhammer 40k (gótico num caça horizontal); o nariz em garfo da Vic Viper e da R-9 (R-Type), de onde o tiro sai.</td><td>O Slug Flyer do Metal Slug (gordo, cabine grande, armas à vista); o A-10 (motores em cápsula no alto, atrás; o canhão no nariz); a R-9 (compacta, cabine-bolha).</td></tr>
+  </table>
+</div>
+
+<figure><img src="naves/silhuetas/escadas-ambar.png" alt=""><figcaption><b>As mesmas no casco âmbar</b> (o tom das naves de hoje), para comparar.</figcaption></figure>
+
+<div class="item tabela">
+  <table>
+    <tr><th>Desenho (com contorno)</th><th>T0</th><th>T1</th><th>T2</th><th>T3</th></tr>
+    <tr><td>Hoje</td><td class="n">35×16</td><td class="n">38×20</td><td class="n">41×22</td><td class="n">41×22</td></tr>
+    <tr><td>Caça</td><td class="n">35×17</td><td class="n">38×20</td><td class="n">41×22</td><td class="n">44×24</td></tr>
+    <tr><td>Gótica</td><td class="n">37×14</td><td class="n">39×17</td><td class="n">41×19</td><td class="n">41×23</td></tr>
+    <tr><td>Pesada</td><td class="n">35×14</td><td class="n">39×16</td><td class="n">42×16</td><td class="n">44×19</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px">Os tamanhos ficaram perto dos de hoje, como você pediu ao recusar a 1b (detalhe custa pixel). A T3 da caça está no limite do quadro (44×24) e pode encolher um pouco no acabamento.</p>
+</div>
+
+<h2>O tom do casco</h2>
+<div class="item">
+  <p>Cada linha nos quatro tons, plantada no <b>jogo de verdade</b>, com o tratamento de imagem da fase por cima, no tier daquela fase (T0 na F1, T1 na F2, T2 na F3, T3 na F4). O número é o <b>contraste</b> entre a nave e o fundo logo em volta dela (1× = some no fundo), e a porcentagem é quanto da nave é claro. <span class="ok">Verde ≥ 2×</span>, <span class="meio">laranja 1,5–2×</span>, <span class="ruim">vermelho &lt; 1,5×</span>. Compare dentro da mesma fase: entre uma filmagem e outra o fundo se mexe.</p>
+</div>
+<figure><img src="naves/silhuetas/jogo/f1-grade.png" alt=""><figcaption><b>F1 (T0), aos 50 s:</b> a de hoje · e cada linha em âmbar, osso, aço e grafite.</figcaption></figure>
+<figure><img src="naves/silhuetas/jogo/f2-grade.png" alt=""><figcaption><b>F2 (T1), aos 30 s.</b></figcaption></figure>
+<figure><img src="naves/silhuetas/jogo/f3-grade.png" alt=""><figcaption><b>F3 (T2), aos 30 s:</b> a fase mais difícil, com a nebulosa laranja e a rocha escura atrás. A de hoje cai para 1,3×: o laranja dela some na nebulosa.</figcaption></figure>
+<figure><img src="naves/silhuetas/jogo/f4-grade.png" alt=""><figcaption><b>F4 (T3), no duto aos 92 s.</b></figcaption></figure>
+
+<div class="item tabela">
+  <table>
+    <tr><th>Tom</th><th>Contraste médio</th><th>Pior caso</th><th>Nave clara</th><th>Leitura</th></tr>
+    <tr><td>Osso (marfim sujo)</td><td class="n ok">4,0×</td><td class="n meio">1,75×</td><td class="n">38%</td><td>O que mais aparece em quase todo lugar. O "futuro usado" do Alien (1979): creme industrial, sujo, com luz âmbar. Perde só para o âmbar na gótica da F4, onde a rocha é marrom-acinzentada.</td></tr>
+    <tr><td>Âmbar (o de hoje)</td><td class="n ok">3,5×</td><td class="n meio">1,7×</td><td class="n">30%</td><td>Quase tão bom, e já é a identidade da nave. Na F3 encosta na nebulosa laranja.</td></tr>
+    <tr><td>Aço quente</td><td class="n ok">2,7×</td><td class="n ruim">1,4×</td><td class="n">17%</td><td>O meio-termo dark sci-fi. Cai abaixo de 1,5× na F3 em todas as linhas, e na pesada também na F2.</td></tr>
+    <tr><td>Grafite (o da 1b e da 1c)</td><td class="n ruim">1,7×</td><td class="n ruim">1,06×</td><td class="n">4%</td><td>Some em quase toda fase, e na F3 tem o mesmo brilho do fundo. Foi o que deixou a 1b e a 1c "aquém".</td></tr>
+    <tr><td class="sub">Hoje (para comparar)</td><td class="n">2,8×</td><td class="n ruim">1,3×</td><td class="n">25%</td><td class="sub">A de hoje, no mesmo quadro.</td></tr>
+  </table>
+</div>
+
+<h2>Prévia do acabamento</h2>
+<figure><img src="naves/silhuetas/previa.png" alt=""><figcaption><b>Ampliado 5×.</b> Para cada linha, os blocos e, embaixo, <b>uma passada só</b> do PixelLab por cima deles (as quatro de uma vez, no osso).</figcaption></figure>
+<div class="item">
+  <p>Isto <b>não é o acabamento final</b>. Serve para mostrar que a forma aguenta o detalhe: o PixelLab manteve a silhueta e somou painéis, placas, sujeira e o brilho do vidro. O acabamento de verdade vem na rodada 2b, só na linha e no tom que você escolher, com o detalhe das naves de hoje como referência, retoque à mão e a chama animada.</p>
+  <p class="sub">A prévia da gótica foi feita com a T3 um pixel mais curta nas torres (alonguei depois, para a T3 ficar mais comprida que a T2).</p>
+</div>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li>Os blocos: <code>scripts/_naves/_silhuetas.mjs</code> desenha cada nave a partir de uma lista de peças (<code>silhuetas-linhas.mjs</code>): cada tier é o de baixo mais peças. Sombreamento de cima, costura onde uma placa cobre outra, contorno por fora, centrado no quadro 44×26 como toda nave do jogo. <b>Zero gerações.</b></li>
+    <li>O jogo: as naves plantadas no lugar da sua, no quadro real da fase; o contraste é medido contra o mesmo quadro sem nave (<code>_contraste-jogo.mjs</code>).</li>
+    <li>A prévia: <code>_acabamento-previa.mjs</code>, <code>/edit-images-v2</code> com as quatro de uma linha juntas. 2 sementes por linha, a melhor na folha: <b>60 gerações</b>. As outras em <code>naves/cru/silhuetas/</code>.</li>
+  </ul>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A linha:</b> caça, gótica ou pesada, ou uma mistura (por exemplo, a caça com o nariz em garfo da gótica, ou a pesada com as aletas góticas).</li>
+    <li><b>O tom do casco:</b> osso (o que mais aparece), âmbar (o de hoje), ou outro. O aço e o grafite ficam abaixo da régua.</li>
+    <li><b>A escada:</b> se algum degrau deve mudar (por exemplo, a T3 da caça um pouco menor, ou uma peça trocada de tier).</li>
+  </ol>
+  <p class="sub" style="margin-top:10px">Depois: a rodada 2b pinta o detalhe sobre a forma escolhida, depois vêm os retoques, a chama animada (com a azul da carta Propulsores) e a instalação no jogo. As mantas menores vêm em seguida.</p>
+</div>
+</main>
+</body>
+</html>

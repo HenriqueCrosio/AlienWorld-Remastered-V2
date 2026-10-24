@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naves · os seus concepts</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --ruim:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  details { margin: 18px 0; }
+  summary { cursor: pointer; color: var(--sub); }
+</style>
+</head>
+<body>
+<main>
+<h1>Os seus concepts, no PixelLab</h1>
+<p class="sub">23/10/2026 · <a href="naves-encolher.html">← a T0 menor e a T3 fora</a> · Você perguntou: <i>"veja se você acha interessante esses concepts que eu fiz. Será que conseguiríamos recriar no pixellab?"</i> Teste de 20 gerações; nada instalado.</p>
+
+<div class="item">
+  <p><b>Sim, e funcionou de primeira.</b> As 72 candidatas saíram de perfil, com o nariz para a direita, e todas são reconhecíveis como o seu caça: o nariz de agulha com ponta de aço, a cabine-bolha, a asa varrida, as duas aletas e o bocal do motor. O trem de pouso recolhido, como em voo.</p>
+  <p><b>Por que o concept é bom para o jogo:</b> é da mesma família de caça da T0 e da T2 de hoje, então não briga com o que você já aprovou; a silhueta é uma flecha clara; e as duas pinturas são exatamente a laranja original e a preta extra que você decidiu.</p>
+</div>
+
+<figure><img src="naves/conceito/escolhidas.png" alt=""><figcaption><b>Ampliado 6×.</b> À esquerda o seu concept (a laranja espelhada para ficar de nariz à direita, como no jogo); em cima a T2 de hoje para comparar; depois 4 candidatas de cada pintura. Todas têm o tamanho da T2 de hoje: 41×19 a 41×24.</figcaption></figure>
+
+<h2>No jogo</h2>
+<figure><img src="naves/conceito/jogo/f3-grade.png" alt=""><figcaption><b>Na F3, no lugar da T2.</b> O número é o contraste com o fundo (verde ≥ 2×, laranja 1,5–2×, vermelho &lt; 1,5×).</figcaption></figure>
+<div class="item">
+  <ul>
+    <li><b>A laranja lê como a T2 de hoje</b> (1,5× a 1,75×, a de hoje 1,7×).</li>
+    <li><b>A preta fica escura demais:</b> 1,03× a 1,13× na F3; quem segura a leitura é o contorno e o âmbar. O PixelLab pintou um grafite mais fechado que o da família A. Se ela seguir, dá para clarear um ou dois tons do casco sem mexer no desenho.</li>
+  </ul>
+</div>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li><code>/generate-image-v2</code> (o Pro), a receita das elites da F3: o recorte do seu concept como <b>assunto</b> (prende a forma, aqui era o que se queria) e a T2 de hoje como <b>estilo</b> (paleta, contorno e densidade de detalhe), num quadro de 48×32 (<code>scripts/_naves/_gerar-conceito.mjs</code>).</li>
+    <li>36 candidatas por pintura, 10 gerações cada chamada, 20 no total. Só 3 das 72 tinham pixel solto e ficaram de fora.</li>
+    <li>Os concepts e as candidatas estão em <code>naves/cru/conceito/</code>.</li>
+  </ul>
+  <p class="sub"><b>O que falta para virar nave do jogo:</b> o motor animado (8 quadros e a variante azul dos Propulsores), encaixar no quadro de 44×26 e decidir o lugar na escada.</p>
+</div>
+
+<details>
+  <summary>As 72 candidatas</summary>
+  <figure><img src="naves/conceito/todas-laranja.png" alt=""><figcaption>Laranja (ampliado 5×).</figcaption></figure>
+  <figure><img src="naves/conceito/todas-preta.png" alt=""><figcaption>Preta (ampliado 5×).</figcaption></figure>
+</details>
+
+<h2>O que eu preciso de você</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Se esse é o caminho, e qual candidata:</b> a, b, c ou d de cada pintura, ou outra das 72.</li>
+    <li><b>Onde ela entra:</b> no lugar da T2 de hoje (a T0 e a T1 ficam), ou como base da escada inteira (uma T0 e uma T1 tiradas dela, menores e com menos peças).</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

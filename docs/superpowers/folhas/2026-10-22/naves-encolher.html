@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naves · a T0 menor</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --ruim:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  .feito { border-color: var(--ok); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  details { margin: 18px 0; }
+  summary { cursor: pointer; color: var(--sub); }
+</style>
+</head>
+<body>
+<main>
+<h1>A nave de hoje, com a T0 menor <span class="sub">(e a T3 fora)</span></h1>
+<p class="sub">23/10/2026 · <a href="naves-silhuetas.html">← as silhuetas (2a)</a> · <a href="naves-conceito.html">→ os seus concepts no PixelLab</a> ·Você disse: <i>"ainda acho a nave humana que temos melhor"</i>, <i>"tirar o T3 da nave humana, ele é o mais grosseiro"</i>, <i>"a humana T2 está ok com o tamanho"</i>, <i>"podemos diminuir de forma leve a T0"</i> e <i>"a pintura preta é um extra, a laranja é a original"</i>.</p>
+
+<h2>Já no jogo</h2>
+<div class="item feito">
+  <ul>
+    <li><b>A humana é T0 → T1 → T2.</b> A T2 vai até o fim, inclusive na F4 e na cena final. A T3 não carrega mais; os arquivos continuam na pasta e no git.</li>
+    <li><b>As estrelas:</b> uma fase só solta peças se a nave ainda pode evoluir. A humana no T2 cruza a F3 sem peças. A manta (T1 na Doca) continua indo para o T2 pela F3. Quem perdeu uma coleção ainda alcança o T2 numa fase seguinte.</li>
+    <li><b>A T0 laranja na leve, 33×15</b> (era 35×16): os 17 quadros (a parada, os 8 do motor e os 8 do jato azul). A T1 e a T2 ficam como estão.</li>
+    <li><b>Testado no jogo:</b> peças e nave certas em cada fase e tier (F3 com a humana no T1: 3 peças; no T2: nenhuma; manta T1: 3; manta T2: nenhuma; F4 mostra a T2). Nenhum erro de carregamento.</li>
+  </ul>
+  <p class="sub">Código: <code>src/ships.ts</code>, <code>src/pecas.ts</code> (<code>podeEvoluir</code>), <code>src/scenes/GameScene.ts</code>, <code>src/scenes/BootScene.ts</code>, <code>src/sandbox/config.ts</code>. Arte: <code>public/sprites/naves/humana-t0*.png</code>. Ainda sem commit.</p>
+</div>
+
+<h2>A T0 menor</h2>
+<figure><img src="naves/encolher/escada-t0.png" alt=""><figcaption><b>Ampliado 6×, um quadro do motor de cada tier, com a silhueta chapada embaixo.</b> Em cima a laranja (a original), embaixo a preta (o extra).</figcaption></figure>
+<figure><img src="naves/encolher/jogo-t0/f1-grade.png" alt=""><figcaption><b>T0 na F1.</b> O número é o contraste com o fundo; encolher não muda a leitura.</figcaption></figure>
+<div class="item">
+  <p><b>Como encolheu:</b> sem escala e sem redesenho. A ferramenta tira linhas e colunas de pixels onde o pixel só repete o vizinho e onde o corte não abre degrau numa borda. Cada pixel que fica mantém a cor exata, e o mesmo corte vale para os 17 quadros, então a animação continua alinhada. A hitbox (21×9) não muda.</p>
+  <table>
+    <tr><th></th><th>T0 antes</th><th>T0 leve (instalada)</th><th>T0 32×14</th><th>T1</th><th>T2</th></tr>
+    <tr><td>Tamanho</td><td class="n">35×16</td><td class="n">33×15</td><td class="n">32×14</td><td class="n">38×20</td><td class="n">41×22</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px">A <b>leve</b> fica quase igual, só mais enxuta, e a escada ganha um degrau mais claro até a T1. A <b>32×14</b> já amassa a aleta de cima.</p>
+</div>
+
+<h2>A pintura preta, o extra</h2>
+<div class="item">
+  <p>É a pintura da família A (casco grafite, aresta clara em cada placa, âmbar nas janelas e no motor), levada aos quadros animados da T0, da T1 e da T2:</p>
+  <ul>
+    <li>onde o quadro não muda, entra o pixel exato da A;</li>
+    <li>o que se mexe passa por uma troca de cor aprendida comparando a nave de hoje com a A, pixel a pixel;</li>
+    <li>a chama azul dos Propulsores fica como está.</li>
+  </ul>
+  <p>Ela fica guardada como extra (<code>naves/encolher/preta/</code>, com a T0 em <code>preta-t0-33x15/</code>), sem substituir a laranja.</p>
+</div>
+<figure><img src="naves/encolher/vidro-t1.png" alt=""><figcaption><b>O vidro da T1, corrigido.</b> Os quadros do jato balançam 0–2 px. O vidro âmbar da A só caía nos quadros alinhados com a parada, e no jogo ele piscaria entre âmbar e preto. Agora o vidro é âmbar, com o mesmo degradê da T0 e da T2, em todos os 19 quadros. Só os pixels do vidro mudaram: 8 a 10 por quadro.</figcaption></figure>
+<div class="item">
+  <p class="sub"><b>Duas notas:</b> os flashes amarelos da T1 (quadros 2, 3 e 5) já existem na laranja, são as luzes que piscam com as asas; na preta eles só aparecem mais. E a preta mede menos contraste com o fundo: na F3 cai para 1,3× (a laranja tem 1,8×), segura pelo contorno e pelo âmbar.</p>
+</div>
+<figure><img src="naves/encolher/jogo/f2-grade.png" alt="" style="max-width:528px"><figcaption><b>T1 preta na F2.</b></figcaption></figure>
+
+<details>
+  <summary>A T2 menor (testada e recusada: ela fica no tamanho original)</summary>
+  <figure><img src="naves/encolher/escada.png" alt=""><figcaption>A T2 em 41×22 (hoje), 38×20 e 36×18, nas duas pinturas.</figcaption></figure>
+  <figure><img src="naves/encolher/jogo/f3-grade.png" alt=""><figcaption>T2 na F3.</figcaption></figure>
+  <figure><img src="naves/encolher/jogo/f4-grade.png" alt=""><figcaption>T2 no duto da F4.</figcaption></figure>
+</details>
+
+<h2>O que eu preciso de você</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Confirmar a T0 leve (33×15)</b> jogando, ou pedir a 32×14.</li>
+    <li><b>Como a preta entra no jogo:</b> guardada por enquanto, uma opção de pintura no menu ou na Doca, ou um prêmio (por exemplo, ao terminar o jogo).</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,322 @@
+{
+ "f1": {
+  "hoje": {
+   "razao": 3.79,
+   "claros": 27,
+   "nave": 0.161,
+   "fundo": 0.006
+  },
+  "caca-ambar": {
+   "razao": 5.44,
+   "claros": 42,
+   "nave": 0.252,
+   "fundo": 0.006
+  },
+  "caca-osso": {
+   "razao": 7.01,
+   "claros": 59,
+   "nave": 0.339,
+   "fundo": 0.005
+  },
+  "caca-aco": {
+   "razao": 4.35,
+   "claros": 32,
+   "nave": 0.192,
+   "fundo": 0.005
+  },
+  "caca-grafite": {
+   "razao": 2.58,
+   "claros": 4,
+   "nave": 0.093,
+   "fundo": 0.005
+  },
+  "gotica-ambar": {
+   "razao": 5.79,
+   "claros": 46,
+   "nave": 0.272,
+   "fundo": 0.006
+  },
+  "gotica-osso": {
+   "razao": 7.73,
+   "claros": 63,
+   "nave": 0.379,
+   "fundo": 0.006
+  },
+  "gotica-aco": {
+   "razao": 4.73,
+   "claros": 33,
+   "nave": 0.213,
+   "fundo": 0.006
+  },
+  "gotica-grafite": {
+   "razao": 2.69,
+   "claros": 3,
+   "nave": 0.099,
+   "fundo": 0.006
+  },
+  "pesada-ambar": {
+   "razao": 4.9,
+   "claros": 29,
+   "nave": 0.222,
+   "fundo": 0.005
+  },
+  "pesada-osso": {
+   "razao": 6.06,
+   "claros": 50,
+   "nave": 0.287,
+   "fundo": 0.006
+  },
+  "pesada-aco": {
+   "razao": 3.98,
+   "claros": 23,
+   "nave": 0.171,
+   "fundo": 0.006
+  },
+  "pesada-grafite": {
+   "razao": 2.67,
+   "claros": 6,
+   "nave": 0.099,
+   "fundo": 0.006
+  }
+ },
+ "f2": {
+  "hoje": {
+   "razao": 3.61,
+   "claros": 28,
+   "nave": 0.157,
+   "fundo": 0.007
+  },
+  "caca-ambar": {
+   "razao": 4.55,
+   "claros": 34,
+   "nave": 0.211,
+   "fundo": 0.007
+  },
+  "caca-osso": {
+   "razao": 5.31,
+   "claros": 47,
+   "nave": 0.254,
+   "fundo": 0.007
+  },
+  "caca-aco": {
+   "razao": 3.39,
+   "claros": 14,
+   "nave": 0.144,
+   "fundo": 0.007
+  },
+  "caca-grafite": {
+   "razao": 2.14,
+   "claros": 4,
+   "nave": 0.073,
+   "fundo": 0.007
+  },
+  "gotica-ambar": {
+   "razao": 4.21,
+   "claros": 31,
+   "nave": 0.191,
+   "fundo": 0.007
+  },
+  "gotica-osso": {
+   "razao": 5.12,
+   "claros": 42,
+   "nave": 0.243,
+   "fundo": 0.007
+  },
+  "gotica-aco": {
+   "razao": 3.32,
+   "claros": 17,
+   "nave": 0.14,
+   "fundo": 0.007
+  },
+  "gotica-grafite": {
+   "razao": 1.2,
+   "claros": 3,
+   "nave": 0.053,
+   "fundo": 0.036
+  },
+  "pesada-ambar": {
+   "razao": 2.16,
+   "claros": 18,
+   "nave": 0.135,
+   "fundo": 0.036
+  },
+  "pesada-osso": {
+   "razao": 2.36,
+   "claros": 23,
+   "nave": 0.153,
+   "fundo": 0.036
+  },
+  "pesada-aco": {
+   "razao": 1.68,
+   "claros": 10,
+   "nave": 0.094,
+   "fundo": 0.036
+  },
+  "pesada-grafite": {
+   "razao": 1.25,
+   "claros": 4,
+   "nave": 0.058,
+   "fundo": 0.036
+  }
+ },
+ "f3": {
+  "hoje": {
+   "razao": 1.33,
+   "claros": 20,
+   "nave": 0.129,
+   "fundo": 0.085
+  },
+  "caca-ambar": {
+   "razao": 1.95,
+   "claros": 33,
+   "nave": 0.206,
+   "fundo": 0.081
+  },
+  "caca-osso": {
+   "razao": 2.17,
+   "claros": 39,
+   "nave": 0.229,
+   "fundo": 0.079
+  },
+  "caca-aco": {
+   "razao": 1.49,
+   "claros": 15,
+   "nave": 0.142,
+   "fundo": 0.079
+  },
+  "caca-grafite": {
+   "razao": 1.07,
+   "claros": 5,
+   "nave": 0.087,
+   "fundo": 0.079
+  },
+  "gotica-ambar": {
+   "razao": 1.99,
+   "claros": 31,
+   "nave": 0.207,
+   "fundo": 0.079
+  },
+  "gotica-osso": {
+   "razao": 2.07,
+   "claros": 32,
+   "nave": 0.221,
+   "fundo": 0.081
+  },
+  "gotica-aco": {
+   "razao": 1.48,
+   "claros": 17,
+   "nave": 0.143,
+   "fundo": 0.081
+  },
+  "gotica-grafite": {
+   "razao": 1.06,
+   "claros": 3,
+   "nave": 0.083,
+   "fundo": 0.076
+  },
+  "pesada-ambar": {
+   "razao": 1.68,
+   "claros": 20,
+   "nave": 0.161,
+   "fundo": 0.076
+  },
+  "pesada-osso": {
+   "razao": 1.75,
+   "claros": 23,
+   "nave": 0.17,
+   "fundo": 0.076
+  },
+  "pesada-aco": {
+   "razao": 1.36,
+   "claros": 12,
+   "nave": 0.121,
+   "fundo": 0.076
+  },
+  "pesada-grafite": {
+   "razao": 1.1,
+   "claros": 5,
+   "nave": 0.088,
+   "fundo": 0.076
+  }
+ },
+ "f4": {
+  "hoje": {
+   "razao": 2.65,
+   "claros": 24,
+   "nave": 0.131,
+   "fundo": 0.019
+  },
+  "caca-ambar": {
+   "razao": 3.35,
+   "claros": 27,
+   "nave": 0.178,
+   "fundo": 0.018
+  },
+  "caca-osso": {
+   "razao": 3.96,
+   "claros": 40,
+   "nave": 0.219,
+   "fundo": 0.018
+  },
+  "caca-aco": {
+   "razao": 2.67,
+   "claros": 15,
+   "nave": 0.131,
+   "fundo": 0.018
+  },
+  "caca-grafite": {
+   "razao": 1.84,
+   "claros": 6,
+   "nave": 0.075,
+   "fundo": 0.018
+  },
+  "gotica-ambar": {
+   "razao": 3.46,
+   "claros": 32,
+   "nave": 0.187,
+   "fundo": 0.019
+  },
+  "gotica-osso": {
+   "razao": 2.6,
+   "claros": 20,
+   "nave": 0.119,
+   "fundo": 0.015
+  },
+  "gotica-aco": {
+   "razao": 1.95,
+   "claros": 9,
+   "nave": 0.077,
+   "fundo": 0.015
+  },
+  "gotica-grafite": {
+   "razao": 1.52,
+   "claros": 4,
+   "nave": 0.049,
+   "fundo": 0.015
+  },
+  "pesada-ambar": {
+   "razao": 2.16,
+   "claros": 11,
+   "nave": 0.09,
+   "fundo": 0.015
+  },
+  "pesada-osso": {
+   "razao": 2.3,
+   "claros": 15,
+   "nave": 0.099,
+   "fundo": 0.015
+  },
+  "pesada-aco": {
+   "razao": 1.82,
+   "claros": 7,
+   "nave": 0.068,
+   "fundo": 0.015
+  },
+  "pesada-grafite": {
+   "razao": 1.52,
+   "claros": 4,
+   "nave": 0.049,
+   "fundo": 0.015
+  }
+ }
+}

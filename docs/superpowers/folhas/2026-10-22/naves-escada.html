@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gótica · escada dos tiers</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Gótica · a escada dos tiers <span class="sub">(rodada 1b)</span></h1>
+<p class="sub">23/10/2026 · <a href="naves.html">← a rodada 1 (as três direções)</a> · <a href="naves-detalhe.html">→ recusada; o teste de detalhe (1c)</a> ·Você escolheu a Gótica e apontou: <i>"não existe mudança quase nenhuma entre os tiers"</i>. Aqui ela foi refeita para que cada tier ganhe algo que se vê na silhueta. Nada instalado; a hitbox (21×9) não muda.</p>
+
+<div class="item">
+  <p><b>Por que a rodada 1 saiu igual:</b> a T0, a T1 e a T3 foram geradas com a T2 como "referência de assunto", e o PixelLab copia a forma do assunto. Saiu a mesma nave quatro vezes, só esticada.</p>
+  <p><b>O que mudou:</b> cada tier foi gerado com a nave inteira descrita e com o que ela tem contado peça por peça, sem nave de referência, só com um estilo. A T3 foi a exceção: teve a T2 nova como estilo, para nascer como "a T2 a mais".</p>
+</div>
+
+<h2>A escada</h2>
+<figure><img src="naves/rodada1b/escadas.png" alt=""><figcaption><b>Ampliado 6×.</b> Em cima, a Gótica da rodada 1, o que você viu. Embaixo, a escada nova. Sob cada uma, a <b>silhueta chapada</b>: a mudança de tier tem de se ler sem cor nenhuma. A da rodada 1 é a mesma forma quatro vezes; a nova vai de uma torre à catedral de motor duplo.</figcaption></figure>
+<div class="item">
+  <table>
+    <tr><th>Tier</th><th>Nome</th><th>O que ela ganha</th><th>Desenho</th></tr>
+    <tr><td>T0</td><td>Capela</td><td><b>Uma</b> torre, em arco ogival; só uma aleta embaixo; um motor pequeno; só a cabine acesa.</td><td class="n">30×14</td></tr>
+    <tr><td>T1</td><td>Igreja</td><td><b>Duas</b> torres; a <b>asa-lâmina</b> curvada para baixo aparece; <b>duas janelas</b> acesas.</td><td class="n">35×15</td></tr>
+    <tr><td>T2</td><td>Abadia</td><td><b>Três</b> torres (a do arco da T0 volta na ponta); o <b>canhão</b> sob o nariz; motor maior; uma <b>fileira de quatro janelas</b>.</td><td class="n">35×16</td></tr>
+    <tr><td>T3</td><td>Catedral</td><td>O topo vira <b>catedral</b>, com uma torre central alta; <b>motor duplo, duas chamas</b>; as quatro janelas e a <b>ponta do canhão acesa</b>.</td><td class="n">36×16</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px">A luz cresce com o tier, como as janelas acesas da colônia no menu: mais energia, mais luz (a regra do dark sci-fi). A T3 tem <b>16 px de altura</b> (hoje 22, rodada 1 17).</p>
+</div>
+
+<h2>No jogo <span class="sub">(cada tier na fase em que voa, com o tratamento de imagem da fase por cima)</span></h2>
+<figure><img src="naves/rodada1b/jogo/escada-no-jogo.png" alt=""><figcaption><b>A escada nova, fase a fase:</b> T0 na F1 (50 s) · T1 na F2 (30 s) · T2 na F3 (30 s) · T3 no duto da F4 (92 s).</figcaption></figure>
+<figure><img src="naves/rodada1b/jogo/f1-t0-recorte.png" alt=""><figcaption><b>T0 na F1:</b> hoje · rodada 1 · escada. (A nave subiu na tela em relação à rodada 1: aos 50 s um inimigo passava em cima dela.)</figcaption></figure>
+<figure><img src="naves/rodada1b/jogo/f2-t1-recorte.png" alt=""><figcaption><b>T1 na F2:</b> hoje · rodada 1 · escada.</figcaption></figure>
+<figure><img src="naves/rodada1b/jogo/f3-t2-recorte.png" alt=""><figcaption><b>T2 na F3:</b> hoje · rodada 1 · escada (as três por cima de uma rocha, o mesmo quadro da rodada 1).</figcaption></figure>
+<figure><img src="naves/rodada1b/jogo/f4-t3-recorte.png" alt=""><figcaption><b>T3 no duto da F4:</b> hoje · rodada 1 · escada. As duas chamas e a fileira de janelas se leem no vão mais apertado.</figcaption></figure>
+
+<h2>O que ainda não está bom</h2>
+<div class="item">
+  <ul>
+    <li><b>A T1 e a T2 têm o mesmo comprimento (35).</b> A diferença entre elas está nas torres, no canhão e nas janelas, não no tamanho. A rodada 2 acerta os comprimentos (por exemplo 30 → 32 → 34 → 36).</li>
+    <li><b>A T3 é mais escura que a T2:</b> mais contorno preto no topo da catedral. Lê como blindagem, mas pode ser retocada para o casco voltar ao cinza da T2.</li>
+    <li>As chamas aqui são paradas. A animada (8 quadros, e a azul da carta Propulsores) vem na rodada 2. A T3 terá duas.</li>
+  </ul>
+</div>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li>PixelLab Pro, 64 candidatas por leva, cada uma aberta ampliada. Dois estilos testados: a <code>ship-cinza</code> deu cascos escuros e embaralhados, sem torres legíveis, e ficou de fora. A Gótica T2 da rodada 1 deu o casco limpo das quatro escolhidas.</li>
+    <li>Duas levas da T1 saíram "dando a volta": a nave mais comprida que o quadro, com o nariz encostado na própria chama do outro lado. A T1 foi refeita num quadro de 36 px.</li>
+    <li>A T2 nova como estilo deu a melhor T3. Na T0 e na T1 ela fez cópias da T2 (a fileira de janelas, várias torres), então não foi usada nelas.</li>
+    <li>~140 gerações (restam 1967). As candidatas estão em <code>naves/cru/escada/</code>. Scripts: <code>scripts/_naves/_gerar-goticas.mjs</code> e <code>_montar-goticas.mjs</code>.</li>
+  </ul>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A escada:</b> se a evolução Capela → Igreja → Abadia → Catedral está boa, ou se algum degrau deve mudar (por exemplo, a T3 com menos topo, ou a T1 sem as janelas).</li>
+    <li><b>Os retoques:</b> o comprimento alinhado tier a tier e a T3 mais clara, ou outra coisa que você notar.</li>
+    <li>Depois, a rodada 2: os retoques e as chamas animadas, e então a instalação no jogo.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

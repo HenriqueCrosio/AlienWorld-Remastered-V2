@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naves novas · rodada 1</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+  td.n { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<main>
+<h1>As naves humanas novas · rodada 1</h1>
+<p class="sub">22–23/10/2026 · <a href="menu.html">← os ajustes de 22/10 (a análise das naves, §4)</a> · <a href="naves-escada.html">→ a Gótica refeita em escada (rodada 1b)</a> ·Três direções de desenho, cada uma com a família inteira (T0 → T3), de perfil, no tamanho final, casco grafite e âmbar só onde há energia. Plantadas no jogo de verdade, cada tier na sua fase. Nada instalado; a hitbox (21×9) não muda.</p>
+
+<h2>As três famílias</h2>
+<figure><img src="naves/rodada1/familias.png" alt=""><figcaption><b>Ampliado 6×.</b> Em cima, as de hoje. Da esquerda para a direita: T0, T1, T2, T3. A chama aqui é parada; a animada (8 quadros, e a azul da carta Propulsores) vem na rodada 2, só da direção escolhida.</figcaption></figure>
+<div class="item">
+  <ul>
+    <li><b>A · Lança:</b> o interceptador. Agulha longa, cabine na frente, asa embaixo, deriva em cima. A T3 ganha a segunda linha âmbar e o canhão no nariz. A mais elegante, e a mais fina: é a que menos se lê no escuro (veja a F1 e a F2 abaixo).</li>
+    <li><b>B · Couraça:</b> a canhoneira blindada. Uma cunha de placas inclinadas, a linha âmbar no flanco. A T3 vira outra coisa: dois motores empilhados e mais placa. A que melhor se lê em qualquer fundo (a massa cinza), e a de evolução mais clara; é a mais "pesada" para um protagonista de shmup.</li>
+    <li><b>C · Gótica:</b> a arquitetura da colônia (as cidadelas góticas das suas pinturas) virando caça. Torres no dorso como as da catedral, uma asa em lâmina curvada para baixo. As torres vão de duas para três na T3. A de identidade mais própria: nenhuma outra nave do jogo tem essa silhueta.</li>
+  </ul>
+</div>
+
+<h2>As medidas <span class="sub">(o desenho, sem a margem)</span></h2>
+<div class="item">
+  <table>
+    <tr><th></th><th>T0</th><th>T1</th><th>T2</th><th>T3</th></tr>
+    <tr><td>Hoje</td><td class="n">35×16</td><td class="n">38×20</td><td class="n">41×22</td><td class="n">41×22</td></tr>
+    <tr><td>A · Lança</td><td class="n">28×14</td><td class="n">28×13</td><td class="n">38×15</td><td class="n">37×15</td></tr>
+    <tr><td>B · Couraça</td><td class="n">28×14</td><td class="n">32×14</td><td class="n">37×16</td><td class="n">36×17</td></tr>
+    <tr><td>C · Gótica</td><td class="n">28×14</td><td class="n">32×15</td><td class="n">35×17</td><td class="n">39×17</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px">A altura cai de 22 para 15–17 px na T3 (−23% a −32%): é ela que aperta a travessia. Os tamanhos ainda não estão alinhados degrau a degrau (na Lança, a T1 é do tamanho da T0 e a T2 é mais comprida que a T3): a rodada 2 acerta isso na direção escolhida.</p>
+</div>
+
+<h2>No jogo <span class="sub">(cada tier na fase em que ele voa; o tratamento de imagem da fase por cima, como na nave de verdade)</span></h2>
+<figure><img src="naves/rodada1/jogo/f1-t0-recorte.png" alt=""><figcaption><b>T0 na F1</b> (aos 50 s, no escuro): hoje · Lança · Couraça · Gótica.</figcaption></figure>
+<figure><img src="naves/rodada1/jogo/f2-t1-recorte.png" alt=""><figcaption><b>T1 na F2</b> (30 s): hoje · Lança · Couraça · Gótica.</figcaption></figure>
+<figure><img src="naves/rodada1/jogo/f3-t2-recorte.png" alt=""><figcaption><b>T2 na F3</b> (30 s): hoje · Lança · Couraça · Gótica.</figcaption></figure>
+<figure><img src="naves/rodada1/jogo/f4-t3-recorte.png" alt=""><figcaption><b>T3 no duto da F4</b> (92 s, o vão mais apertado): hoje · Lança · Couraça · Gótica.</figcaption></figure>
+
+<h2>Como saíram <span class="sub">(o caminho)</span></h2>
+<div class="item">
+  <ul>
+    <li>PixelLab Pro, com o estilo da <code>ship-cinza</code> (a FANTASMA do róster antigo: casco grafite, perfil, 30×16) sem forçar a paleta dela. Primeiro uma nave-âncora (a T2) de cada direção, entre 64 candidatas; depois T0, T1 e T3 com a âncora como referência de forma (é o que prende a família).</li>
+    <li>Toda candidata aberta ampliada antes de entrar. Fora: as vistas de cima (simétricas), as com cacos soltos (seis pixels tirados da T1 da Lança).</li>
+    <li>Uma terceira direção caiu antes da folha: a "nave da colônia" (casco arredondado) saiu como cápsula, um tubo com um anel, e virou a Gótica. A primeira leva da T0 da Lança saiu borrada e maior que a T1 (refeita); a leva da T3 da Couraça saiu cópia da T2 (a T3 é a candidata de dois motores da leva da âncora).</li>
+    <li>As 64 candidatas de cada tier estão em <code>naves/cru/</code>, se quiser outra.</li>
+  </ul>
+</div>
+
+<h2>O que você decide</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A direção:</b> A, B ou C, ou uma mistura (por exemplo, a Gótica com os dois motores da T3 da Couraça). A minha escolha é a <b>C · Gótica</b>: liga a nave à colônia das suas pinturas, tem a silhueta mais própria, lê bem em todas as fases e a família evolui clara.</li>
+    <li><b>O tamanho:</b> se a T3 com 15–17 px de altura está boa, ou menor ainda.</li>
+    <li>Depois disso, a rodada 2: os tamanhos alinhados, os retoques que você pedir, e as chamas animadas.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

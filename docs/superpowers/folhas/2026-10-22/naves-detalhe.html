@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naves · teste de detalhe</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+  td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+<main>
+<h1>As naves · o teste de detalhe <span class="sub">(rodada 1c)</span></h1>
+<p class="sub">23/10/2026 · <a href="naves-escada.html">← a escada gótica (1b), recusada</a> · <a href="naves-silhuetas.html">→ recusada; a forma primeiro (2a)</a> ·Você disse: <i>"a nave humana atual tem mais detalhes, essa nave gótica fica muito aquém do que eu imaginava"</i>. Aqui o alvo foi o DETALHE, medido contra a nave de hoje. Nada instalado.</p>
+
+<div class="item">
+  <p><b>O que faltava, medido:</b> a T3 de hoje tem ~440 pixels de desenho, em planos grandes de três tons (luz, meio, sombra), com vidro na cabine, brilho no nariz e asas largas. A gótica 1b tinha ~280, um casco fino e escuro, quase sem contraste por dentro.</p>
+  <p><b>As causas:</b> o estilo que eu usei era uma nave pequena e lisa (a <code>ship-cinza</code>), e o pedido dizia <i>"low contrast"</i>, o que achatou os planos.</p>
+  <p><b>O que testei:</b> partir da nave de hoje (A), e usar como estilo a sua peça dark sci-fi mais detalhada, o gunship do cinturão (B).</p>
+</div>
+
+<h2>As duas famílias</h2>
+<figure><img src="naves/rodada1c/familias.png" alt=""><figcaption><b>Ampliado 6×, com a silhueta chapada embaixo de cada fileira.</b> Hoje · a escada 1b (recusada) · A · B.</figcaption></figure>
+<div class="item">
+  <ul>
+    <li><b>A · A de hoje, gótica:</b> as quatro naves de hoje editadas juntas, numa chamada só. O casco virou grafite com aresta clara em cada placa, o âmbar ficou só nos motores, na cabine e em janelinhas, e a T2 e a T3 ganharam torrezinhas no dorso. <b>Mantém o detalhe e a evolução de hoje.</b> O gótico é sutil, e as torres somaram altura: a T3 tem 24 px, mais que os 22 de hoje.</li>
+    <li><b>B · Catedral blindada:</b> uma nave nova no estilo do gunship. Placas pesadas, rosácea acesa, fileira de janelas ogivais, torres e motor duplo na T3. <b>É a mais gótica e detalhada,</b> mas a família ainda não está coesa: a T1 saiu mais pesada que a T2. É escura, e no estilo do gunship <b>lembra um inimigo</b>.</li>
+  </ul>
+</div>
+<div class="item">
+  <table>
+    <tr><th></th><th>T0</th><th>T1</th><th>T2</th><th>T3</th></tr>
+    <tr><td>Hoje</td><td class="n">35×16 · 251 px</td><td class="n">38×20 · 305</td><td class="n">41×22 · 424</td><td class="n">41×22 · 440</td></tr>
+    <tr><td>1b (recusada)</td><td class="n">30×14 · 191</td><td class="n">35×15 · 214</td><td class="n">35×16 · 256</td><td class="n">36×16 · 282</td></tr>
+    <tr><td>A</td><td class="n">35×16 · 251</td><td class="n">38×20 · 309</td><td class="n">41×25 · 429</td><td class="n">41×24 · 452</td></tr>
+    <tr><td>B</td><td class="n">31×15 · 233</td><td class="n">38×17 · 376</td><td class="n">40×18 · 317</td><td class="n">42×17 · 377</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px"><b>A troca que só você decide:</b> detalhe custa pixel. As que chegam ao detalhe de hoje têm quase o tamanho de hoje. A 1b era menor justamente por ter menos desenho. A hitbox é a mesma (21×9) em todas.</p>
+</div>
+
+<h2>No jogo</h2>
+<figure><img src="naves/rodada1c/jogo/f1-t0-recorte.png" alt=""><figcaption><b>T0 na F1:</b> hoje · A · B.</figcaption></figure>
+<figure><img src="naves/rodada1c/jogo/f2-t1-recorte.png" alt=""><figcaption><b>T1 na F2:</b> hoje · A · B.</figcaption></figure>
+<figure><img src="naves/rodada1c/jogo/f3-t2-recorte.png" alt=""><figcaption><b>T2 na F3:</b> hoje · A · B.</figcaption></figure>
+<figure><img src="naves/rodada1c/jogo/f4-t3-recorte.png" alt=""><figcaption><b>T3 no duto da F4:</b> hoje · A · B. A A lê em todas as fases; a B some um pouco na F1 e na F2.</figcaption></figure>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li>A: <code>/edit-images-v2</code> (editar com texto) sobre as quatro de hoje de uma vez, o que segura a família (<code>scripts/_naves/_editar-hoje.mjs</code>). Editar com o gunship de referência deu quase o mesmo resultado. A edição não sabe reduzir: a saída precisa de pelo menos 32 px de altura.</li>
+    <li>B: <code>/generate-image-v2</code> com o gunship como estilo e o pedido de detalhe novo (<code>_gerar-goticas.mjs --detalhe</code>). Quase todas saíram "dando a volta" no quadro e foram desenroladas.</li>
+    <li>~110 gerações nesta rodada. Candidatas em <code>naves/cru/detalhe/</code>.</li>
+  </ul>
+</div>
+
+<h2>O que eu preciso de você</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O que você imaginava:</b> se tiver uma imagem (uma pintura sua, um esboço, uma nave de outro jogo), ela vira a referência de desenho, e as próximas candidatas saem dela, não do texto. Duas rodadas no escuro já erraram.</li>
+    <li><b>A, B ou nenhuma:</b> qual está mais perto do caminho.</li>
+    <li><b>Detalhe ou tamanho:</b> se o detalhe de hoje vale o tamanho de hoje (ou perto disso), ou se a nave deve ficar menor mesmo com menos desenho.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

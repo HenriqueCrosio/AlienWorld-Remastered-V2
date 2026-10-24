@@ -1,0 +1,46 @@
+{
+ "f1": {
+  "hoje": {
+   "razao": 3.79,
+   "claros": 27,
+   "nave": 0.161,
+   "fundo": 0.006
+  },
+  "laranja-35x16": {
+   "razao": 3.67,
+   "claros": 27,
+   "nave": 0.154,
+   "fundo": 0.006
+  },
+  "laranja-33x15": {
+   "razao": 3.65,
+   "claros": 27,
+   "nave": 0.154,
+   "fundo": 0.006
+  },
+  "laranja-32x14": {
+   "razao": 3.6,
+   "claros": 27,
+   "nave": 0.15,
+   "fundo": 0.006
+  },
+  "preta-35x16": {
+   "razao": 2.44,
+   "claros": 5,
+   "nave": 0.086,
+   "fundo": 0.006
+  },
+  "preta-33x15": {
+   "razao": 2.47,
+   "claros": 5,
+   "nave": 0.087,
+   "fundo": 0.006
+  },
+  "preta-32x14": {
+   "razao": 2.46,
+   "claros": 4,
+   "nave": 0.087,
+   "fundo": 0.006
+  }
+ }
+}
