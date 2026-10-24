@@ -14,13 +14,16 @@ import type { Fx } from './systems/Fx';
  *   daquela fase mantém). Coleção incompleta = a nave fica no tier; a carta da conquista vem sempre.
  * - As cápsulas de HMG/Shotgun deixam de cair: a peça é o drop do jogo agora.
  * - A F4 não tem peças (não há tier depois dela) — em aberto com ele.
+ * - **Só há peças se a nave ainda pode evoluir** (23/10, com a T3 humana retirada): a humana para no T2, então quem
+ *   completou F1 e F2 cruza a F3 sem peças; a manta (T1 na Doca) segue evoluindo para o T2 na F3; e quem perdeu uma
+ *   coleção ainda alcança o teto numa fase seguinte. Ele: *"bem lembrado"*.
  *
  * O TIER mora no registry (`tierNave`): humana começa no 0; a manta entra no 1 ao ser escolhida na Doca.
  */
 
 const CHAVE_TIER = 'tierNave';
 const CHAVE_UMUP = 'umUpNaFase';
-const TIER_MAX: Record<string, number> = { humana: 3, alienigena: 2 };
+const TIER_MAX: Record<string, number> = { humana: 2, alienigena: 2 };
 export const FASES_COM_PECAS = new Set([1, 2, 3]);
 export const PECAS_POR_FASE = 3;
 
@@ -37,6 +40,11 @@ export function tierDaNave(reg: Phaser.Data.DataManager): number {
 /** A manta escolhida na Doca: ela já vem no tier 1. */
 export function entrarNaManta(reg: Phaser.Data.DataManager): void {
   reg.set(CHAVE_TIER, 1);
+}
+
+/** A nave ainda tem tier acima do atual? Sem isso a fase não tem peças (a coleção não teria o que dar). */
+export function podeEvoluir(reg: Phaser.Data.DataManager, nave: string): boolean {
+  return tierDaNave(reg) < (TIER_MAX[nave] ?? 0);
 }
 
 /** Coleção completa no fim da fase: evolui (sem passar do teto da linhagem) e marca o 1-UP da fase seguinte. */
@@ -58,6 +66,8 @@ export interface HostPecas {
   scene: Phaser.Scene;
   fx: Fx;
   fase: number;
+  /** `podeEvoluir` na entrada da fase: no teto da linhagem, a fase fica sem peças. */
+  evolui: boolean;
   bossTime: number;
   nave: () => Phaser.Physics.Arcade.Sprite;
   inimigos: () => Phaser.Physics.Arcade.Sprite[];
@@ -77,7 +87,7 @@ export class PecasEmJogo {
   private readonly brilhos = new Map<Phaser.GameObjects.GameObject, Phaser.GameObjects.Particles.ParticleEmitter>();
 
   constructor(private readonly h: HostPecas) {
-    this.ativa = FASES_COM_PECAS.has(h.fase);
+    this.ativa = FASES_COM_PECAS.has(h.fase) && h.evolui;
     PecasEmJogo.textura(h.scene);
     this.soltas = h.scene.physics.add.group({ allowGravity: false });
     h.scene.physics.add.overlap(h.nave(), this.soltas, (_n, p) => this.pegar(p as Phaser.Physics.Arcade.Sprite));

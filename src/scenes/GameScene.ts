@@ -43,7 +43,7 @@ import { entrarNaFase } from '../cartas';
 import type { ConfigSandbox } from '../sandbox/config.ts';
 import { SandboxArena } from '../systems/SandboxArena';
 import { Medidas } from '../systems/Medidas';
-import { PecasEmJogo, colecaoCompleta, reiniciarLinhagem, temUmUp, tierDaNave } from '../pecas';
+import { PecasEmJogo, colecaoCompleta, podeEvoluir, reiniciarLinhagem, temUmUp, tierDaNave } from '../pecas';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
 import { FreeController } from '../flight/FreeController';
@@ -594,6 +594,7 @@ export class GameScene extends Phaser.Scene {
       fx: this.fx,
       // No sandbox, sem peças (fase 0 não tem): o portador e a peça seriam ruído no teste.
       fase: this.sandbox ? 0 : this.stage.id,
+      evolui: podeEvoluir(this.registry, this.shipId),
       bossTime: this.director.bossTime,
       nave: () => this.ship,
       inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],

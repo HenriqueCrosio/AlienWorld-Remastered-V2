@@ -28,7 +28,8 @@ export interface ShipDef {
 
 /**
  * OS TIERS DAS LINHAGENS (protótipo das cartas, 27/09) — a nave evolui SÓ no visual, uma forma por fase.
- * Humana: T0 (1 asa) → T1 (o jato) → T2 → T3. Alien: T1 (a manta encontrada na Doca) → T2 (os chifres abertos).
+ * Humana: T0 (1 asa) → T1 (o jato) → T2. Alien: T1 (a manta encontrada na Doca) → T2 (os chifres abertos).
+ * A T3 humana saiu em 23/10 (decisão dele: "tirar o T3 da nave humana, ele é o mais grosseiro"); a T2 vai até o fim.
  * Os humanos têm motor animado; as duas mantas nadam com a MESMA batida (a T2 herdou o movimento da T1).
  */
 const TIERS: Record<string, Record<number, { texture: string; anim?: string }>> = {
@@ -37,7 +38,6 @@ const TIERS: Record<string, Record<number, { texture: string; anim?: string }>> 
     0: { texture: 'naveHumanaT0', anim: 'nave-humana-t0-thrust' },
     1: { texture: 'shipJato', anim: 'ship-jato-thrust' },
     2: { texture: 'naveHumanaT2', anim: 'nave-humana-t2-thrust' },
-    3: { texture: 'naveHumanaT3', anim: 'nave-humana-t3-thrust' },
   },
   alienigena: {
     1: { texture: 'naveAlienT1', anim: 'nave-alien-t1-nado' },

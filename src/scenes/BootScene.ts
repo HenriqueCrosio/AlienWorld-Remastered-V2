@@ -135,9 +135,7 @@ const FRAMES: Record<string, number> = {
   shipJatoAzulAnim: 9,
   naveHumanaT0AzulAnim: 8,
   naveHumanaT2AzulAnim: 8,
-  naveHumanaT3AzulAnim: 8,
   naveHumanaT2Anim: 8,
-  naveHumanaT3Anim: 8,
   // A MANTA T1 (28/09): o CORPO é o da arte aprovada em todos os quadros (colado por cima no disco); só a
   // nadadeira e a cauda vêm do PixMiniMax. Laço fechado de 10 quadros, batida curta — a aprovada.
   naveAlienT1Anim: 10,
@@ -264,12 +262,10 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'ship-arauto-thrust', prefix: 'shipArautoAnim', frameRate: 12 },
   { key: 'nave-humana-t0-thrust', prefix: 'naveHumanaT0Anim', frameRate: 12 },
   { key: 'nave-humana-t2-thrust', prefix: 'naveHumanaT2Anim', frameRate: 12 },
-  { key: 'nave-humana-t3-thrust', prefix: 'naveHumanaT3Anim', frameRate: 12 },
   // O JATO AZUL dos Propulsores: a mesma propulsão com o sufixo `-azul` (a cena troca quando a carta entra).
   { key: 'ship-jato-thrust-azul', prefix: 'shipJatoAzulAnim', frameRate: 12 },
   { key: 'nave-humana-t0-thrust-azul', prefix: 'naveHumanaT0AzulAnim', frameRate: 12 },
   { key: 'nave-humana-t2-thrust-azul', prefix: 'naveHumanaT2AzulAnim', frameRate: 12 },
-  { key: 'nave-humana-t3-thrust-azul', prefix: 'naveHumanaT3AzulAnim', frameRate: 12 },
   // ~120ms por quadro: a manta plana devagar (a de 12fps lia "nervosa").
   { key: 'nave-alien-t1-nado', prefix: 'naveAlienT1Anim', frameRate: 8 },
   { key: 'nave-alien-t2-nado', prefix: 'naveAlienT2Anim', frameRate: 8 },
@@ -597,11 +593,9 @@ const ART: Record<string, string> = {
   ...animFrames('shipJatoAnim', 'ship-jato-anim'),
   ...animFrames('naveHumanaT0Anim', 'naves/humana-t0-anim'),
   ...animFrames('naveHumanaT2Anim', 'naves/humana-t2-anim'),
-  ...animFrames('naveHumanaT3Anim', 'naves/humana-t3-anim'),
   ...animFrames('shipJatoAzulAnim', 'ship-jato-azul-anim'),
   ...animFrames('naveHumanaT0AzulAnim', 'naves/humana-t0-azul-anim'),
   ...animFrames('naveHumanaT2AzulAnim', 'naves/humana-t2-azul-anim'),
-  ...animFrames('naveHumanaT3AzulAnim', 'naves/humana-t3-azul-anim'),
   ...animFrames('naveAlienT1Anim', 'naves/alien-t1-anim'),
   ...animFrames('naveAlienT2Anim', 'naves/alien-t2-anim'),
   ...animFrames('shipVerdeAnim', 'ship-verde-anim'),
@@ -1157,7 +1151,6 @@ const ART: Record<string, string> = {
   // Os TIERS das linhagens (aprovados em 27/09; o T1 humano é o `shipJato`). Todos 44×26, de perfil.
   naveHumanaT0: 'sprites/naves/humana-t0.png',
   naveHumanaT2: 'sprites/naves/humana-t2.png',
-  naveHumanaT3: 'sprites/naves/humana-t3.png',
   naveAlienT1: 'sprites/naves/alien-t1.png',
   naveAlienT2: 'sprites/naves/alien-t2.png',
   // (As molduras do CARTUCHO — `sprites/cartas/carta-*.png`, PixelLab 9aba58b5 #1 — saíram do jogo em 29/09 junto com o

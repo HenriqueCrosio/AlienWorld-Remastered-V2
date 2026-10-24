@@ -39,7 +39,7 @@ export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
   aranha: 1,
 };
 /** Os tiers que cada linhagem tem (`ships.ts`). */
-export const TIERS: Record<Nave, number[]> = { humana: [0, 1, 2, 3], alienigena: [1, 2] };
+export const TIERS: Record<Nave, number[]> = { humana: [0, 1, 2], alienigena: [1, 2] };
 
 export interface ConfigSandbox {
   nave: Nave;
