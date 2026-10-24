@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-10-19)
+# HANDOFF — estado do projeto (2026-10-24)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -6,7 +6,7 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-21) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-24) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -14,9 +14,25 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `docs/superpowers/plans/2026-10-21-bloco-h-START.md`. A CAVERNA da F1
-> fechou em 21/10, commitada e empurrada; o próximo é o bloco H (os efeitos de imersão por fase) — abrir com as
-> perguntas a ele."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `docs/superpowers/plans/2026-10-24-naves-decisao-START.md`. A sessão
+> abre na folha `naves-conceito.html`: decidir a nave humana com ele e voltar ao roadmap (o bloco H, pelo START
+> `plans/2026-10-21-bloco-h-START.md`, depois I → J → F)."**
+>
+> 📍 **24/10 — AS NAVES GUARDADAS: COMMITADAS E EMPURRADAS** para `origin/feat/cartas-preview`:
+> - `a246573`: o jogo (a humana T0→T2, peças só se a nave ainda evolui, a T0 33×15);
+> - `bf18db6`: as ferramentas, os testes e as folhas de 22–23/10, sem o `cru/`;
+> - os docs.
+>
+> As ferramentas de teste no jogo (`_plantar.mjs`, `_testar-tiers.mjs`, `_triagem.mjs`) passaram do scratchpad para
+> `scripts/_naves/`. **A próxima sessão abre na folha `folhas/2026-10-22/naves-conceito.html`** com quatro decisões
+> dele:
+> - A. o concept é o caminho, e qual candidata;
+> - B. onde entra (no lugar da T2 ou base da escada);
+> - C. confirmar a T0 33×15 jogando;
+> - D. como a preta entra.
+>
+> Depois, perguntar se a rodada 3 (as mantas menores) vem agora ou depois, e voltar ao **H**. O roteiro, com o que
+> fazer em cada resposta, está no START de 24/10.
 >
 > 📍 **22/10 — AJUSTES DELE NO MENU (COMMITADOS E EMPURRADOS) E AS NAVES NOVAS (RODADA 1 ABERTA).** Uma sessão de
 > pequenos ajustes, antes do H (folha `folhas/2026-10-22/menu.html`):
@@ -33,6 +49,51 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >   laranja-claro contra o dark sci-fi). Decisão dele: **naves humanas NOVAS** (T0–T3, casco grafite, âmbar só nos
 >   motores/cabine/frisos, T3 ~36×15) e **as mantas redesenhadas menores** a partir da arte aprovada. A rodada 1 (3 direções,
 >   a família inteira de perfil, no tamanho final, plantada na fase) abriu nesta sessão.
+> - **23/10 — ele escolheu a GÓTICA**, mas *"não existe mudança quase nenhuma entre os tiers"*: os tiers tinham saído com
+>   a T2 de ASSUNTO, e o Pro prende a forma nele. Refeita como ESCADA (folha `folhas/2026-10-22/naves-escada.html`,
+>   `scripts/_naves/_gerar-goticas.mjs`): cada tier descrito inteiro, sem assunto, só estilo. Capela (1 torre) → Igreja
+>   (2 torres, asa-lâmina, 2 janelas) → Abadia (3 torres, canhão, 4 janelas) → Catedral (motor DUPLO, topo de catedral);
+>   a luz cresce com o tier. A T3 saiu com a T2 nova de ESTILO (na T0/T1 isso copiou a T2). **Ele RECUSOU:** *"a nave
+>   humana atual tem mais detalhes, essa nave gótica fica muito aquém do que eu imaginava"* (medido: ~280 px de desenho
+>   contra ~440 da de hoje, casco chapado; o estilo `ship-cinza` e o "low contrast" do pedido achatavam). Rodada 1c,
+>   teste de DETALHE (folha `naves-detalhe.html`): **A** = as 4 de hoje editadas juntas (`_editar-hoje.mjs`,
+>   /edit-images-v2), grafite com aresta clara e torrezinhas, o detalhe de hoje, mas a T3 cresceu para 24 px; **B** =
+>   nova no estilo do gunship do cinturão (placas, rosácea, motor duplo), a mais gótica, família ainda incoerente, lembra
+>   inimigo. Perguntei a ele a IMAGEM do que imaginava, A/B, e detalhe × tamanho. Nada instalado nem commitado.
+> - **23/10 (2) — ele não gostou da 1c** e perguntou o que o jogador procura numa nave humana. A análise: se achar em
+>   meio segundo (pilar 3), ler como flecha, a conquista na silhueta, ser da colônia, peso; e o CASCO GRAFITE era a
+>   causa comum (contraste 1,06–1,7× com o fundo, os tons viram quase-preto e o detalhe some). Ele aprovou o **caminho
+>   A, forma primeiro**, com referências de naves conhecidas (só referência). Rodada **2a** (folha
+>   `folhas/2026-10-22/naves-silhuetas.html`): três escadas em BLOCOS de cor, desenhadas por peças sem PixelLab
+>   (`scripts/_naves/_silhuetas.mjs` + `silhuetas-linhas.mjs`), com a hitbox e a boca do tiro desenhadas: **caça** (a de
+>   hoje com a T1 na família e a T3 de prêmio), **gótica deitada** (as torres viram o nariz em garfo, a rosácea é a
+>   cabine), **pesada** (motor em cápsula, canhão à vista). Tom do casco medido no jogo real (`_contraste-jogo.mjs`):
+>   osso 4,0× (pior 1,75), âmbar 3,5×, aço 2,7×, grafite 1,7× (pior 1,06). Prévia do acabamento: uma passada do
+>   `/edit-images-v2` por linha (`_acabamento-previa.mjs`, 60 gerações). Pendente dele: a LINHA, o TOM e a escada.
+> - **23/10 (3) — FICA A NAVE DE HOJE, MENOR, E A T3 SAI.** Ele: *"ainda acho a nave humana que temos melhor"*, *"a
+>   pintura preta [a da família A] ficou ótima"*, *"meu problema inicial era achar os tiers 2 e 3 grandes demais"*,
+>   *"tirar o T3 da nave humana, ele é o mais grosseiro"* (os tiers são cosméticos). **No código (`a246573`, 24/10):** a humana
+>   é T0→T1→T2 (`src/ships.ts`, `BootScene` não carrega mais a T3, `sandbox/config.ts`); **só há peças se a nave ainda
+>   pode evoluir** (`podeEvoluir` em `src/pecas.ts`, `TIER_MAX.humana = 2`): a humana no T2 cruza a F3 sem peças, a
+>   manta (T1 na Doca) segue para o T2 na F3 — ele: *"bem lembrado"*. Testado no jogo (peças e textura por fase/tier,
+>   sem erro de carga). **Arte (folha `folhas/2026-10-22/naves-encolher.html`):** encolher SEM redesenho
+>   (`scripts/_naves/_encolher.mjs`: tira costuras de pixel repetido, o mesmo corte nos 17 quadros). A T2 menor foi
+>   testada e RECUSADA (*"a humana T2 está ok com o tamanho"*); em vez dela, **a T0 laranja leve 33×15 (era 35×16)
+>   está INSTALADA** em `public/sprites/naves/humana-t0*` (a 32×14 ficou de alternativa). **A PINTURA PRETA é um EXTRA,
+>   a laranja é a original** (ele): a da A levada aos quadros animados de T0/T1/T2 (`_pintar-preta.mjs`: pixel da A
+>   onde o quadro não muda, tabela hoje→A no resto, chama azul intacta) + o vidro da T1 em âmbar em todos os quadros
+>   (`_vidro-ambar-t1.mjs`; o jato balança 0–2 px e o vidro piscaria), guardada em `naves/encolher/preta/` (T0 em
+>   `preta-t0-33x15/`), NÃO instalada; mede 1,3× na F3 (laranja 1,8×). Pendente dele: jogar a T0 leve e dizer COMO a
+>   preta entra (guardada, opção de pintura, prêmio). Obs. dele guardada: da 2a, a **pesada T0/T1 ficou "muito boa"**;
+>   a T2/T3 dela, estranhas com o motor embaixo.
+> - **23/10 (4) — OS CONCEPTS DELE** (dois renders do mesmo caça num hangar, laranja e grafite com âmbar): *"será que
+>   conseguiríamos recriar no pixellab?"*. Sim: `/generate-image-v2` com o recorte do concept de ASSUNTO e a T2 de hoje
+>   de ESTILO, 48×32 (`scripts/_naves/_gerar-conceito.mjs`, 20 gerações) deu 72 candidatas de perfil, nariz à direita,
+>   fiéis (nariz de agulha, cabine-bolha, asa varrida, 2 aletas), no tamanho da T2 (41×19–24). Folha
+>   `folhas/2026-10-22/naves-conceito.html` (4 escolhidas por pintura + plantadas na F3): a laranja lê como a T2 de hoje
+>   (1,5–1,75×); a preta saiu escura demais (1,03–1,13×), precisa clarear o casco. Concepts e candidatas em
+>   `naves/cru/conceito/`. Pendente dele: se é o caminho, QUAL candidata e ONDE entra (no lugar da T2, ou base da
+>   escada inteira). Depois: motor animado (8 quadros + azul) e encaixe no quadro 44×26.
 >
 > 📍 **21/10 (2) — A CAVERNA DA F1 FECHOU: COMMITADA E EMPURRADA** para `origin/feat/cartas-preview` — `9864f46` (o
 > jogo e a limpeza das 52 peças antigas da F1 para `assets/raw/f1-original/`), `4476e9f` (ferramentas, testes e folhas,
@@ -230,7 +291,8 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >   função do relógio.
 > - **G+ — a caverna da F1** (✅ FECHADA 21/10, ideia dele, COMMITADA e EMPURRADA: `9864f46`, `4476e9f`; ver o 📍 de
 >   21/10 (2) acima).
-> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, START `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito
+> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, depois da decisão das naves do START
+>   `plans/2026-10-24-naves-decisao-START.md`; START do H `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito
 >   no jogo: sem corpo, sem dano, fora de todo grupo):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica
 >     abaixo do fundo do salão, −83, some atrás dele sozinho; o que ficar acima precisa da máscara inversa da caverna);
