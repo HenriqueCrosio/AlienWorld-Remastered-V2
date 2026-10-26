@@ -1,12 +1,14 @@
-# HANDOFF — estado do projeto (2026-10-24)
+# HANDOFF — estado do projeto (2026-10-26)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
 consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALANCEAMENTO.md`.
+As técnicas guardadas (pedido dele, para reusar): `CENARIO-VIVO.md` (um cenário pintado vivo) e `DESTROCOS.md` (um
+sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-24) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-26) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -14,11 +16,49 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `docs/superpowers/plans/2026-10-24-naves-decisao-START.md`. A sessão
-> abre na folha `naves-conceito.html`: decidir a nave humana com ele e voltar ao roadmap (o bloco H, pelo START
-> `plans/2026-10-21-bloco-h-START.md`, depois I → J → F)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. Primeiro, o retorno dele jogando as naves de 25–26/10: o hangar, a morte de
+> cada nave e a lasca do casco (os 24 px e os 1,4 s da cicatriz, em `MORTE.golpe`), e se a haste do motor da Terminus
+> sai da pintura do hangar. Depois, o bloco H, pelo START `plans/2026-10-21-bloco-h-START.md`, e I → J → F."**
 >
-> 📍 **24/10 — AS NAVES GUARDADAS: COMMITADAS E EMPURRADAS** para `origin/feat/cartas-preview`:
+> 📍 **25–26/10 — UMA NAVE POR LINHAGEM, O HANGAR E A MORTE DA NAVE: COMMITADOS E EMPURRADOS** para
+> `origin/feat/cartas-preview`:
+> - `5c61f1c`: o jogo (as naves, o hangar, os nomes, a morte e as lascas);
+> - `7af4064`: as ferramentas, os testes e as folhas, sem os vídeos, os GIFs, o `cru/` e as capturas que as folhas não
+>   usam. As duas pinturas de hangar que o jogo não usa (`assets/raw/Hangar Futurista Sob a Megacidade.png` e `Hangar
+>   Orbital com Dois Caças Futuristas.png`) ficaram fora, como os concepts da raiz;
+> - os docs, com a técnica nova em **`docs/DESTROCOS.md`** (pedido dele: *"faça o que fizemos com a técnica de cenário
+>   vivo"*).
+>
+> O que entrou:
+> - **25/10 — os tiers saíram** (*"ainda nao consegui gostar das evoluções ... retirar os tiers e trabalhar apenas com 1
+>   tipo de nave"*). A humana é uma nave só, da F1 ao fim; a alien é a manta dos chifres abertos (a antiga T2), achada
+>   na Doca. As peças viraram ESTRELAS: caem em toda F1–F3 e dão só o 1-UP, e o HUD mostra as 3 no canto superior
+>   direito (ideia dele). Spec `specs/2026-10-25-escada-humana-conceito-design.md` (o topo diz o que valeu; a escada
+>   da "a" fica de histórico em `folhas/2026-10-25/escada/`). As decisões A–D do START de 24/10 ficaram para trás.
+> - **25/10, à noite — o hangar escolhe** (spec `specs/2026-10-25-naves-do-hangar-design.md`): 4 escolhas, só visual
+>   (mesma hitbox, arma e cartas). A "a" no molde da PRETA, em laranja ou preta, e o jato (a T1 antiga), na pintura
+>   dele ou de OSSO. Estão em `ESCOLHAS`/`naveEscolhida`/`escolherNave` (`src/ships.ts`), e as cutscenes seguem a
+>   escolha.
+> - **A cena do hangar** (spec `specs/2026-10-25-cena-do-hangar-design.md`, folha `folhas/2026-10-25/hangar/hangar.html`):
+>   - `HangarScene` + `src/hangar/`, entre o COMEÇAR e a F1 (os atalhos 1/2/3 do menu seguem direto para a fase);
+>   - a pintura DELE em camadas (`scripts/_hangar/_camadas.mjs`), com a técnica do cenário vivo;
+>   - a seta ←→ entre as naves, ↑↓ repinta, ENTER decola. Ele gostou.
+> - **26/10 — os nomes (dele):** X-AELO (o jato), TERMINUS (a "a"), CHARYBDIS (a manta). A X-Aelo anima só o fogo do
+>   motor (as pontas das asas piscavam).
+> - **26/10 — a morte da nave** (spec `specs/2026-10-26-morte-da-nave-design.md`, folha
+>   `folhas/2026-10-26/morte/morte.html`, técnica em `docs/DESTROCOS.md`):
+>   - os destroços são os pixels da própria nave;
+>   - cada nave com a sua: a X-Aelo se rompe, a Terminus se estilhaça, a Charybdis se desintegra;
+>   - câmera lenta, o mundo andando por baixo e 3,3–3,8 s até o GAME OVER (*"ficou cinemática a morte"*);
+>   - as vidas do meio lascam o casco: 24 px fixos por golpe (a medida é o golpe, não as vidas), e a cicatriz dura só
+>     os i-frames.
+>
+> **Pendente dele:**
+> - jogar e sentir a lasca: o tamanho e a duração, em `MORTE.golpe`;
+> - dizer se a haste fina do motor da Terminus sai da pintura do hangar (a do jato saiu).
+>
+> 📍 **24/10 — (CUMPRIDO em 25/10: os tiers saíram e o hangar escolhe, ver acima.) AS NAVES GUARDADAS: COMMITADAS E
+> EMPURRADAS** para `origin/feat/cartas-preview`:
 > - `a246573`: o jogo (a humana T0→T2, peças só se a nave ainda evolui, a T0 33×15);
 > - `bf18db6`: as ferramentas, os testes e as folhas de 22–23/10, sem o `cru/`;
 > - os docs.
@@ -291,9 +331,8 @@ consulta. Depois: `GDD.md` → `TECH.md` → `ASSETS.md` → `MAPA_TECNICO_BALAN
 >   função do relógio.
 > - **G+ — a caverna da F1** (✅ FECHADA 21/10, ideia dele, COMMITADA e EMPURRADA: `9864f46`, `4476e9f`; ver o 📍 de
 >   21/10 (2) acima).
-> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, depois da decisão das naves do START
->   `plans/2026-10-24-naves-decisao-START.md`; START do H `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito
->   no jogo: sem corpo, sem dano, fora de todo grupo):
+> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, depois do retorno dele sobre as naves de 25–26/10; START do H
+>   `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica
 >     abaixo do fundo do salão, −83, some atrás dele sozinho; o que ficar acima precisa da máscara inversa da caverna);
 >   - F2: a silhueta do Leviatã NOVO passando ao fundo, distante (depende de D);
@@ -590,9 +629,11 @@ Doca), **um sistema de cartas** (3 na mesa, escolhe 1) e **3 peças por fase** (
 evolui a nave + 1-UP na fase seguinte). Tudo jogável como **PROTÓTIPO na `feat/cartas-preview`** (não mergeada).
 Spec: `specs/2026-09-27-cartas-linhagens-pecas-design.md` · porta de entrada: `plans/2026-09-28-cartas-retomada-START.md`.
 **A frente agora é fechar esse protótipo (etapa 1.5); a calibragem vem depois.**
+**25–26/10:** os tiers saíram (uma nave por linhagem; as peças viraram estrelas que dão só o 1-UP), a humana é
+escolhida no hangar antes da F1 (4 escolhas, só visual) e cada nave morre do seu jeito (`docs/DESTROCOS.md`).
 
 ```
-MENU → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
+MENU → HANGAR DA ESCOLHA → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
 ```
 
 ### O ROADMAP — a ordem fechada em 24/08, com o estado de hoje
