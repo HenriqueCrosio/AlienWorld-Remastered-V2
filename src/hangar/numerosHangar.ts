@@ -19,7 +19,11 @@ export const LADO: Record<Lado, { modelo: Modelo; pinturas: readonly Pintura[]; 
   dir: { modelo: 'a', pinturas: ['laranja', 'preta'], nome: NOME_MODELO.a, bocal: { x: 285.9, y: 108.9, dir: 1 } },
 };
 
-export const NOME_PINTURA: Record<Pintura, string> = { laranja: 'LARANJA', preta: 'PRETA', osso: 'OSSO' };
+/**
+ * O nome de cada pintura na tela (26/10, os nomes dele): a laranja é a CLÁSSICA nas duas naves; o osso da X-Aelo é a
+ * REBELD (*"singela referência ao Luke Skywalker"*) e a preta da Terminus é a MORDUR. Grafados como ele escreveu.
+ */
+export const NOME_PINTURA: Record<Pintura, string> = { laranja: 'CLÁSSICA', preta: 'MORDUR', osso: 'REBELD' };
 
 /** O relógio da cena. */
 export const TEMPO = {

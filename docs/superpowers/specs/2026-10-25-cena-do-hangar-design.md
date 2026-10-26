@@ -93,3 +93,28 @@ as naves"*.
 - Os nomes na tela: **26/10, decididos por ele** — X-AELO (o jato), TERMINUS (a "a"), CHARYBDIS (a manta); ver
   `2026-10-26-morte-da-nave-design.md` §6.
 - Se a haste do motor da "a" também sai (ele não respondeu).
+
+## 7. 26/10 (noite): o nariz aceso e os nomes das pinturas
+
+Ele: *"quando passo a seleção para a terminus e a luz sai da x-aelo, o bico fica com luz ainda. O mesmo parece acontecer
+com a terminus"*.
+
+- **A causa:** o recorte da nave (`mascaraNave` em `_camadas.mjs`) deixava partes dela na baia, e a baia não apaga:
+  - na X-Aelo, a caixa terminava em x 694 e o cone do nariz vai até ~722;
+  - na Terminus, a regra só pega pixel quente ou neutro, e o cone prateado, os realces da cabine e os bocais são
+    frios.
+- **A correção** é pontual:
+  - a X-Aelo ganhou uma `ponta` (x 694–728, só a faixa do nariz, y 428–466). A caixa da seta não mudou;
+  - as duas naves ganharam as peças FRIAS: um pixel frio mais claro que qualquer parede perto delas (brilho > 48; a
+    parede mede ≤ 46) que encosta na nave entra no recorte, acima do piso (y < 480);
+  - o escuro dessas peças fica de fora, porque ele lê como a parede, aceso ou não.
+- **A prova:**
+  - a caixa da nave é reduzida exatamente como antes, e a ponta à parte, colada do lado;
+  - fundo, baia, anéis e `dados.json` ficaram idênticos;
+  - nas naves só mudaram a faixa da cabine e o nariz (k4: x 89–309 / y 33–75 na X-Aelo, x 6–211 / y 44–74 na
+    Terminus), e a nave escolhida (acesa) ficou igual à de antes.
+- **Os nomes das pinturas** (dele, grafados como ele escreveu; `NOME_PINTURA` em `numerosHangar.ts`):
+  - a laranja é a **CLÁSSICA** nas duas naves;
+  - o osso da X-Aelo é a **REBELD** (*"singela referência ao Luke Skywalker"*);
+  - a preta da Terminus é a **MORDUR**.
+- **Os nomes internos** (`jato-osso`, `a-preta`…, no registry, no sandbox e na linha de dev do menu) não mudaram.

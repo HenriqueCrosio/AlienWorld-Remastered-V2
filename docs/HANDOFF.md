@@ -53,6 +53,10 @@ sprite que se desfaz nos próprios pixels).
 >   - as vidas do meio lascam o casco: 24 px fixos por golpe (a medida é o golpe, não as vidas), e a cicatriz dura só
 >     os i-frames.
 >
+> - **26/10, à noite (ele revendo o hangar):** a ponta do nariz da nave apagada ficava acesa; ela tinha ficado fora do
+>   recorte, na baia. O recorte foi corrigido de forma pontual (spec do hangar §7). E as pinturas ganharam os nomes
+>   dele: **CLÁSSICA** (a laranja, nas duas), **REBELD** (o osso da X-Aelo) e **MORDUR** (a preta da Terminus).
+>
 > **Pendente dele:**
 > - jogar e sentir a lasca: o tamanho e a duração, em `MORTE.golpe`;
 > - dizer se a haste fina do motor da Terminus sai da pintura do hangar (a do jato saiu).

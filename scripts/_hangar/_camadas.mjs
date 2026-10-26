@@ -99,9 +99,17 @@ const ANEIS = {
 };
 const NAVES = [
   // (the jato's upper wing tip reaches y ≈ 385, the "a"'s fins y ≈ 390)
-  { lado: 'esq', caixa: { x0: 406, y0: 380, x1: 694, y1: 550 } },
+  // `caixa` places the ship in the scene (the arrow centres on it); `ponta` is a piece of the ship OUTSIDE it, cut
+  // with it. 26/10, his eye: the jato's nose cone runs to x ≈ 722, past the box, so it stayed in the bay layer and kept
+  // its light when the ship went dark. Only the nose band: the deck below it stays out.
+  { lado: 'esq', caixa: { x0: 406, y0: 380, x1: 694, y1: 550 }, ponta: { x0: 694, y0: 428, x1: 728, y1: 466 } },
   { lado: 'dir', caixa: { x0: 1056, y0: 380, x1: 1332, y1: 550 } },
 ];
+// The ship's COLD parts (26/10, his eye: the "a"'s silver nose cone, the canopy glass, the nozzles): the warm rule
+// leaves them in the bay, lit, when the ship goes dark. A cold pixel brighter than any wall around the ships (the wall
+// near the noses and canopies measures lum ≤ 46) that touches the ship joins it — above the deck only (the deck is
+// cold and bright too). The dark of those parts stays out: it reads as the wall, lit or not.
+const FRIO = { lum: 48, ateY: 480 };
 // Below the belly only the landing gear (dark, neutral) is ship: the warm saturated pixels there are the deck's
 // reflections of the lights.
 const BARRIGA = 500;
@@ -111,10 +119,18 @@ const ehAnel = (x, y, h, s, v, a) => {
 };
 // The ship = everything warm or neutral in its box (the wall and the deck are blue: b > r), minus the ring and the
 // specks. The repaint only touches warm coloured pixels, so a bit of deck caught in the mask stays as it was.
-function mascaraNave({ x0, y0, x1, y1 }, anel) {
+const naCaixa = (c, x, y) => x >= c.x0 && x < c.x1 && y >= c.y0 && y < c.y1;
+/** The cutout's box: the ship's box, widened to its `ponta` if it has one. */
+const recorteDe = ({ caixa: c, ponta: p }) =>
+  p ? { x0: Math.min(c.x0, p.x0), y0: Math.min(c.y0, p.y0), x1: Math.max(c.x1, p.x1), y1: Math.max(c.y1, p.y1) } : c;
+function mascaraNave(nave, anel) {
+  const { x0, y0, x1, y1 } = recorteDe(nave);
   const bw = x1 - x0, bh = y1 - y0;
+  // (in the widened box, only the ship's box and its `ponta` count)
+  const conta = (x, y) => naCaixa(nave.caixa, x, y) || (nave.ponta && naCaixa(nave.ponta, x, y));
   let m = new Uint8Array(bw * bh);
   for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+    if (!conta(x0 + x, y0 + y)) continue;
     const i = at3(x0 + x, y0 + y), r = rgb[i], g = rgb[i + 1], b = rgb[i + 2];
     const { h, s, v } = hsv(r, g, b);
     const reflexo = y0 + y > BARRIGA && s > 0.35;
@@ -146,6 +162,25 @@ function mascaraNave({ x0, y0, x1, y1 }, anel) {
     const viz = m[s - 1] + m[s + 1] + m[s - bw] + m[s + bw];
     if (viz >= 3) fechada[s] = 1;
   }
+  // The cold parts: grow from the ship through cold pixels brighter than the wall (8-connected), above the deck.
+  const frio = (s) => {
+    const x = s % bw, y = (s / bw) | 0;
+    if (y0 + y >= FRIO.ateY || !conta(x0 + x, y0 + y)) return false;
+    const i = at3(x0 + x, y0 + y), r = rgb[i], g = rgb[i + 1], b = rgb[i + 2];
+    return r < b - 2 && lum(r, g, b) > FRIO.lum;
+  };
+  const fila = [];
+  for (let s = 0; s < bw * bh; s++) if (fechada[s]) fila.push(s);
+  while (fila.length) {
+    const q = fila.pop();
+    const qx = q % bw, qy = (q / bw) | 0;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) {
+      const nx = qx + dx, ny = qy + dy;
+      if (nx < 0 || ny < 0 || nx >= bw || ny >= bh) continue;
+      const t = ny * bw + nx;
+      if (!fechada[t] && frio(t)) { fechada[t] = 1; fila.push(t); }
+    }
+  }
   return { m: fechada, bw, bh };
 }
 // The paints of the parked ships (his painting: the jato is weathered beige with red stripes — the bone paint; the
@@ -175,21 +210,46 @@ const dados = { k: K, w: W, h: H, naves: {}, aneis: {}, luzes: [] };
 // A box in original px → its place in game px (the crop moves it left).
 const emJogo = (x0, y0, x1, y1) => ({ x: ((x0 - CORTE.left) * ESC) / K, y: ((y0 - CORTE.top) * ESC) / K, w: ((x1 - x0) * ESC) / K, h: ((y1 - y0) * ESC) / K });
 
-for (const { lado, caixa } of NAVES) {
-  const { m, bw, bh } = mascaraNave(caixa, ANEIS[lado]);
-  const nW = Math.max(1, Math.round(bw * ESC)), nH = Math.max(1, Math.round(bh * ESC));
+for (const nave of NAVES) {
+  const { lado, caixa } = nave;
+  const rec = recorteDe(nave);
+  // (the cutout starts at the box's corner: a `ponta` only widens it to the right or down, and the scene places the
+  // image at the box's corner)
+  if (rec.x0 !== caixa.x0 || rec.y0 !== caixa.y0) throw new Error(`${lado}: a ponta não pode passar da quina da caixa`);
+  const { m, bw, bh } = mascaraNave(nave, ANEIS[lado]);
+  // The ship's box is reduced EXACTLY as before (the same size in, the same size out: sharp's pixel mapping depends on
+  // both), so every pixel the fix does not touch comes out identical. A `ponta` is reduced apart, with some of the box
+  // on its left as context, at the same scale, and only its own columns are pasted to the right of the box.
+  const bw0 = caixa.x1 - caixa.x0, nW0 = Math.max(1, Math.round(bw0 * ESC)), nH = Math.max(1, Math.round(bh * ESC));
+  const CONTEXTO = 12; // source columns of the box under the ponta's resample (the lanczos3 reach, with room)
+  const xP = bw0 - CONTEXTO; // where the ponta's piece starts, in the cutout's source columns
+  const nP = Math.round(((bw - xP) * nW0) / bw0);
+  const desloca = Math.round((xP * nW0) / bw0); // the piece's first output column, in the box's output
+  const nW = bw > bw0 ? desloca + nP : nW0;
   for (const [pintura, f] of Object.entries(PINTURAS[lado])) {
     const buf = Buffer.alloc(bw * bh * 4);
     for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
       const s = y * bw + x;
       if (!m[s]) continue;
-      const i = at3(caixa.x0 + x, caixa.y0 + y);
+      const i = at3(rec.x0 + x, rec.y0 + y);
       const { h, s: sa, v } = hsv(rgb[i], rgb[i + 1], rgb[i + 2]);
       const quente = rgb[i] >= rgb[i + 2] && sa > 0.08;
       const [r, g, b] = quente ? deHsv(...f(h, sa, v)) : [rgb[i], rgb[i + 1], rgb[i + 2]];
       buf[s * 4] = r; buf[s * 4 + 1] = g; buf[s * 4 + 2] = b; buf[s * 4 + 3] = 255;
     }
-    const red = await sharp(buf, { raw: { width: bw, height: bh, channels: 4 } }).resize(nW, nH, { kernel: 'lanczos3' }).raw().toBuffer();
+    const raw4 = { raw: { width: bw, height: bh, channels: 4 } };
+    const caixaRed = await sharp(buf, raw4).extract({ left: 0, top: 0, width: bw0, height: bh })
+      .resize(nW0, nH, { kernel: 'lanczos3' }).raw().toBuffer();
+    let red = caixaRed;
+    if (bw > bw0) {
+      const pontaRed = await sharp(buf, raw4).extract({ left: xP, top: 0, width: bw - xP, height: bh })
+        .resize(nP, nH, { kernel: 'lanczos3' }).raw().toBuffer();
+      red = Buffer.alloc(nW * nH * 4);
+      for (let y = 0; y < nH; y++) {
+        caixaRed.copy(red, y * nW * 4, y * nW0 * 4, (y + 1) * nW0 * 4);
+        pontaRed.copy(red, (y * nW + nW0) * 4, (y * nP + nW0 - desloca) * 4, (y * nP + nP) * 4);
+      }
+    }
     // At 384×216 no partial alpha (pixel art); at 4× the edge stays soft, like his painting.
     if (K === 1) for (let i = 3; i < red.length; i += 4) red[i] = red[i] >= 128 ? 255 : 0;
     await png(red, nW, nH, `nave-${lado}-${pintura}.png`);
