@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A morte da nave</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  .grade2 { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; align-items: start; }
+</style>
+</head>
+<body>
+<main>
+<h1>A morte da nave</h1>
+<p class="sub">26/10/2026 · <a href="../../2026-10-25/hangar/hangar.html">← o hangar</a> · Cada nave com a sua morte, as lascas do casco nas vidas do meio, e embaixo a primeira rodada (as três versões, a X-Aelo sem a piscada e os nomes).</p>
+
+<h2>Cada nave com a sua morte</h2>
+<div class="item">
+  <p>Você: <i>"Como eu gostei de todos os efeitos, quero fazer com que cada tipo de nave tenha uma."</i></p>
+  <ul>
+    <li><b>X-AELO:</b> C, ruptura.</li>
+    <li><b>TERMINUS:</b> A, estilhaços.</li>
+    <li><b>CHARYBDIS:</b> B, desintegração.</li>
+  </ul>
+  <p>Vale para as duas pinturas de cada modelo. O tempo até o GAME OVER ficou como estava (<i>"ficou cinemática a morte"</i>).</p>
+</div>
+
+<h2>As lascas do casco (as vidas do meio)</h2>
+<div class="item">
+  <p><b>A medida é o golpe, não as vidas.</b> Cada vida perdida (menos a última) arranca do casco uma mordida de <b>exatamente 24 pixels</b>, uns 5% da nave. Ela sai da borda, em qualquer ponto entre o motor e o nariz. Com 3 ou com 6 vidas, o golpe é o mesmo. Nada depende de quantas vidas restam ou de quantas você juntou.</p>
+  <p><b>Cada nave lasca no estilo da morte dela,</b> e é a antecipação dela:</p>
+  <ul>
+    <li><b>X-Aelo:</b> um estalo e a peça sai inteira, girando, soltando lascas e fumaça.</li>
+    <li><b>Terminus:</b> a mordida fica branca e estoura em três estilhaços.</li>
+    <li><b>Charybdis:</b> a mordida queima da borda para dentro em brasas ciano, com uma descarga pequena.</li>
+  </ul>
+  <p><b>A cicatriz:</b> o buraco fica escuro no casco (na Charybdis, com um aro ciano) enquanto dura a invulnerabilidade, 1,4 s com a nave piscando, e depois some. Não fica até o fim da fase porque aí ela contaria golpes: com 6 vidas, a nave estaria toda mordida ainda com metade das vidas, e o aviso mentiria.</p>
+  <p><b>O resto:</b></p>
+  <ul>
+    <li>O aviso de "a próxima é a última" continua sendo a fumaça e o motor tossindo da última vida.</li>
+    <li>A lasca entra no lugar da explosão do PixelLab que o golpe tinha. O clarão rosa da tela ficou.</li>
+    <li>Quando a carta Casco segura o golpe, nada lasca: não se perdeu vida.</li>
+  </ul>
+</div>
+<figure><video src="filme/cada-nave.webm" controls loop muted autoplay playsinline></video><figcaption><b>No jogo, a 30 quadros por segundo:</b> cada nave leva dois golpes (aos 0,5 s e aos 2,3 s; o segundo a deixa na última vida, com a fumaça) e morre aos 4,1 s, do jeito dela. A nave balança devagar para mostrar que a cicatriz vai junto.</figcaption></figure>
+<figure><img src="filme/cada-nave-perto.gif" alt=""><figcaption><b>O primeiro golpe de perto</b> (×4, a 15 quadros por segundo): a peça da X-Aelo, os estilhaços da Terminus, as brasas da Charybdis.</figcaption></figure>
+
+<h2>A primeira rodada: as três versões</h2>
+<div class="item">
+  <p><b>Os destroços são os pixels da própria nave.</b> O quadro que está na tela no momento da morte é lido de volta, cortado em pedaços com linhas tortas (nunca retas) e desenhado pixel a pixel na resolução do jogo. Por isso serve para as quatro escolhas do hangar e para a Charybdis, sem arte nova por nave.</p>
+  <ul>
+    <li><b>A cor:</b> o fogo esfria pelas cores da própria explosão do PixelLab (amostradas da folha dela): branco, amarelo, laranja, vermelho, brasa, cinza. A Charybdis não pega fogo: ela se apaga na bioluminescência dela, em ciano, e no lugar da bola de fogo dá a descarga elétrica que o jogo já usa na água-viva.</li>
+    <li><b>A câmera lenta:</b> o golpe entra na velocidade normal e o mundo mergulha em câmera lenta no momento grande, como na morte de chefão. O cenário continua rolando por baixo (antes ele congelava).</li>
+    <li><b>A F1:</b> na atmosfera os pedaços caem e somem atrás do chão. No vácuo eles derivam.</li>
+    <li><b>Só na última vida:</b> perder uma vida no meio da fase continua com a explosão pequena, e a nave segue voando.</li>
+  </ul>
+  <p><b>As três:</b></p>
+  <ul>
+    <li><b>A — Estilhaços:</b> o casco fica branco por um instante e estoura em sete pedaços grandes, com as rachaduras em brasa e rastro de fumaça, saindo de uma bola de fogo pequena.</li>
+    <li><b>B — Desintegração:</b> uma frente de queima atravessa o casco do motor até o nariz. Cada pixel por onde ela passa se solta como brasa ou cinza. É o "se desintegre" ao pé da letra.</li>
+    <li><b>C — Ruptura:</b> o golpe, a nave perde o controle e capota, mais dois estalos ao longo do casco, o motor tossindo. Então ela se parte em três ou quatro partes grandes que saem girando, e a parte do motor continua cuspindo faísca.</li>
+  </ul>
+</div>
+<figure><video src="filme/f2.webm" controls loop muted autoplay playsinline></video><figcaption><b>No jogo, a 30 quadros por segundo, a TERMINUS laranja na F2:</b> em cima, a morte de hoje (a explosão do PixelLab, com o mundo congelado); embaixo, A, B e C. Mesmo golpe, mesma sorte nos quatro.</figcaption></figure>
+<figure><video src="filme/f1.webm" controls loop muted autoplay playsinline></video><figcaption><b>A X-AELO de osso na F1:</b> com gravidade, os pedaços caem.</figcaption></figure>
+<figure><video src="filme/f3.webm" controls loop muted autoplay playsinline></video><figcaption><b>A CHARYBDIS na F3:</b> brasa ciano e a descarga elétrica no lugar do fogo.</figcaption></figure>
+<div class="grade2">
+  <figure><img src="filme/f2-0_75.png" alt=""><figcaption>0,25 s depois do golpe.</figcaption></figure>
+  <figure><img src="filme/f2-1_4.png" alt=""><figcaption>0,9 s depois.</figcaption></figure>
+</div>
+<figure><img src="cortes.png" alt=""><figcaption><b>Como cada nave se parte, ampliado 6×</b> (uma sorte de exemplo; no jogo cada morte corta diferente). À esquerda, a nave (a chama do motor em vermelho: ela vira fogo, não pedaço). No meio, os estilhaços de A. À direita, as partes grandes de C. Em branco, o corte que fica em brasa.</figcaption></figure>
+
+<h2>A X-Aelo: só o fogo do motor</h2>
+<div class="item">
+  <p>Os quadros 2, 3 e 5 acendiam as pontas das asas em amarelo. Eram as luzes falsas de "jato" de antes da chama de 04/10, que piscavam junto com as asas. Agora o corpo é o do quadro 0 (o limpo) nos nove quadros, e só a chama B (a que você aprovou) anda, como na Terminus. Vale para a pintura dela, a de osso e o jato azul dos Propulsores. O teste confere: nenhum pixel do casco muda entre os quadros.</p>
+</div>
+<figure><img src="x-aelo.gif" alt=""><figcaption><b>×5, a 12 quadros por segundo:</b> antes (a ponta acende), a X-Aelo, a de osso e a dos Propulsores.</figcaption></figure>
+
+<h2>Os nomes</h2>
+<div class="item">
+  <p><b>X-AELO</b> (o jato), <b>TERMINUS</b> (a "a") e <b>CHARYBDIS</b> (a manta: entre Charybdis e Manta, fiquei com Charybdis). Eles aparecem no hangar, embaixo da seta, e no painel da Doca, no lugar de "LINHAGEM HUMANA" e "LINHAGEM ALIEN".</p>
+</div>
+
+<h2>O que ficou decidido</h2>
+<div class="item">
+  <ol>
+    <li><b>As três ficam,</b> uma por nave (acima).</li>
+    <li><b>O tempo até o GAME OVER</b> (3,3 a 3,8 s) ficou.</li>
+    <li><b>As vidas do meio</b> lascam o casco, uma mordida fixa por golpe (acima).</li>
+  </ol>
+</div>
+<div class="item decidir">
+  <p><b>Para você olhar jogando:</b> o tamanho da mordida (24 px) e quanto a cicatriz dura (1,4 s). São dois números em <code>MORTE.golpe</code>.</p>
+</div>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li><b>O efeito:</b> <code>src/systems/morte/</code>: <code>pedacos.ts</code> (o corte, as rampas de calor, sem Phaser), <code>MorteDaNave.ts</code> (as três versões, desenhadas pixel a pixel em três telas: a fumaça, os destroços e o brilho) e <code>numerosMorte.ts</code> (os números e a versão padrão).</li>
+    <li><b>Na cena:</b> o <code>gameOver</code> da <code>GameScene</code> cria a morte e espera ela inteira. Enquanto isso, o mundo continua andando em câmera lenta. A versão vem da nave (<code>estiloDaNave</code>). Para forçar uma: o registry <code>estiloMorte</code> (<code>estilhacos</code>, <code>desintegra</code> ou <code>ruptura</code>).</li>
+    <li><b>As lascas:</b> o <code>damageShip</code> cria uma <code>MorteDaNave</code> com <code>golpe: true</code>. A mordida é a <code>lasca</code> de <code>pedacos.ts</code> (24 px que crescem a partir da borda), e os números estão em <code>MORTE.golpe</code>. A cicatriz é desenhada logo antes do quadro, porque a física move a nave depois do <code>update</code> e, desenhada nele, a cicatriz ficaria um quadro atrás da nave. Filme: <code>scripts/_morte/_filmar-golpe.mjs</code>.</li>
+    <li><b>Os testes:</b> <code>scripts/test-morte.mjs</code> (o corte nas cinco naves de verdade), <code>scripts/_morte/_testar-morte.mjs</code> (a morte no jogo, nas três versões, na Charybdis, na F1 e na F4: a câmera lenta entra, o GAME OVER vem, o tempo volta ao normal) e <code>scripts/_naves/_testar-so-chama.mjs</code> (só a chama anda). O filme é de <code>scripts/_morte/_filmar-morte.mjs</code>.</li>
+    <li><b>A X-Aelo:</b> <code>scripts/_naves/_jato-sem-balanco.mjs</code> (agora com o corpo do quadro 0) e depois <code>_pintar-jato.mjs</code> para o osso.</li>
+    <li>Spec: <code>specs/2026-10-26-morte-da-nave-design.md</code>.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

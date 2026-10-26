@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naves do hangar</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --ruim:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  .grade2 { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+  table { border-collapse: collapse; margin: 10px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 4px 10px; text-align: center; }
+  th { color: var(--sub); font-weight: 500; }
+  .ok { color: var(--ok); } .mid { color: var(--pend); } .ruim { color: var(--ruim); }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 56px 0 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>As naves do hangar</h1>
+<p class="sub">25/10/2026 · <a href="../escada/escada.html">← a escada (substituída)</a> · A cena do hangar no topo; as decisões das naves, de antes, embaixo.</p>
+
+<h2>A cena do hangar, antes da F1</h2>
+<div class="item">
+  <p><b>A limpeza ficou boa, então montei a cena.</b> Do COMEÇAR do menu você cai no hangar.</p>
+  <ul>
+    <li>A seta âmbar fica sobre a nave escolhida. <b>&lt; &gt;</b> leva a seta de uma nave à outra.</li>
+    <li><b>^ v</b> troca a pintura, e a nave estacionada é repintada na hora, numa varredura.</li>
+    <li><b>ENTER</b> acende o motor da escolhida, o anel do pad estoura, a tela fecha e a F1 começa com essa nave.</li>
+    <li><b>ESC</b> volta ao menu.</li>
+    <li>Os atalhos 1/2/3 do menu continuam indo direto para a fase.</li>
+  </ul>
+  <p><b>A névoa:</b> fora do bloco do hangar, a sua pintura vai para baixo de uma névoa pesada, mais densa quanto mais longe do bloco. Dela só atravessam as luzes: as faixas da torre, as cidades do vale e os faróis. A baia fica nítida.</p>
+  <p><b>A vida, no nível do menu:</b></p>
+  <ul>
+    <li>faixas de bruma correndo atrás do bloco;</li>
+    <li>halos respirando nas luzes de fora, e as pequenas tremulando;</li>
+    <li>faróis vermelhos piscando;</li>
+    <li>cones de luz fria descendo das lâmpadas do teto, com poeira dentro;</li>
+    <li>o anel do pad escolhido aceso e a outra nave na sombra.</li>
+  </ul>
+</div>
+<figure><video src="filme/hangar.webm" controls loop muted autoplay playsinline></video><figcaption><b>No jogo, a 30 quadros por segundo, com teclas de verdade:</b> a entrada, as pinturas do jato, a seta para a "a" e as pinturas dela, de volta e de novo, e a decolagem.</figcaption></figure>
+<div class="grade2">
+  <figure><img src="filme/quadro-2_5.png" alt=""><figcaption>O jato, na pintura de osso.</figcaption></figure>
+  <figure><img src="filme/quadro-8_4.png" alt=""><figcaption>A "a", preta.</figcaption></figure>
+  <figure><img src="filme/quadro-15_4.png" alt=""><figcaption>ENTER: o motor acende.</figcaption></figure>
+  <figure><img src="filme/quadro-16.png" alt=""><figcaption>A tela fechando para a F1.</figcaption></figure>
+</div>
+
+<h2>A nave limpa</h2>
+<figure><img src="limpeza.png" alt=""><figcaption><b>O jato da sua pintura.</b> Saíram as duas hastes finas que saíam do motor (a parede de trás no lugar) e a turbina acesa (metal apagado, e o reflexo vermelho embaixo dela também). Mudaram 321 pixels, só nessa traseira; o resto da pintura está intacto.</figcaption></figure>
+<div class="item">
+  <p><b>A "a", à direita, também tem uma haste fina saindo do motor</b> (o cano comprido atrás dos bocais). Não mexi, porque você falou só da esquerda. Se quiser, tiro do mesmo jeito.</p>
+</div>
+
+<h2>O balanço saiu de todas as naves</h2>
+<div class="item">
+  <ul>
+    <li><b>A "a"</b> não balança. Ela tem só a chama, em 8 quadros.</li>
+    <li><b>O jato</b> subia e descia 2 px nos quadros dele. Travei o corpo pelo nariz, a partir dos quadros originais de 04/10, e redesenhei a mesma chama B. As asas continuam batendo. O jato de osso e a chama azul saíram dos mesmos quadros.</li>
+    <li><b>A manta</b> continua nadando: o movimento dela são as nadadeiras, não um flutuar.</li>
+  </ul>
+</div>
+<figure><img src="motor.gif" alt=""><figcaption><b>Em movimento, ×5, a 12 quadros por segundo:</b> "a" laranja, "a" preta, jato na pintura dele e jato de osso, já sem o balanço.</figcaption></figure>
+
+<h2>O que eu preciso de você</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Ver o filme e jogar a cena:</b> COMEÇAR no menu (http://localhost:5173).</li>
+    <li><b>Os nomes na tela:</b> deixei <b>JATO</b> e <b>CAÇA</b> (para a "a"). Se tiver outros nomes, é uma linha.</li>
+    <li><b>A haste do motor da "a":</b> fica ou sai.</li>
+  </ol>
+</div>
+
+<hr>
+<h2>Antes: as quatro escolhas</h2>
+<div class="item">
+  <p><b>Decidido:</b> a "a" no molde da preta, em laranja e preta; o jato na pintura dele e na de osso (a sua escolha). Só o visual muda: as quatro têm a mesma hitbox, a mesma arma e as mesmas cartas.</p>
+</div>
+<figure><img src="escolhas.png" alt=""><figcaption><b>Ampliado 6×.</b> Em cima, o modelo "a": a preta crua do concept (o molde), a laranja e a preta tiradas dela, e a laranja da tarde (saiu). Embaixo, o jato: a pintura dele e as três pinturas testadas.</figcaption></figure>
+<figure><img src="jogo-escolhas.png" alt=""><figcaption><b>As quatro plantadas no jogo</b> (com a Atmosfera). O número é o contraste com o fundo: verde ≥ 2×, laranja 1,5–2×.</figcaption></figure>
+<div class="item">
+  <ul>
+    <li>Todas passam de 1,5× em todas as fases. O ponto mais difícil é a F3: a "a" fica em 1,6× e o jato entre 2× e 2,4×.</li>
+    <li>A preta foi clareada 1,5×, a mais escura que passa em todo lugar (com 1,3, a F3 dá 1,46×).</li>
+    <li>Para reparar jogando: o jato de osso perto dos anéis de osso da F4.</li>
+  </ul>
+</div>
+<figure><img src="jogo-preta.png" alt=""><figcaption>A preta crua e três clareamentos, na F2 e na F3.</figcaption></figure>
+<figure><img src="jogo-jato.png" alt=""><figcaption>O jato na pintura dele e nas três novas, na F1, na F3 e na F4.</figcaption></figure>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li><b>A cena:</b> <code>src/scenes/HangarScene.ts</code> (relógio, teclas e texto) e <code>src/hangar/</code> (o cenário vivo na camada HD, os números, o estado). As camadas são de <code>scripts/_hangar/_camadas.mjs</code>, e a limpeza de <code>_limpar-nave.mjs</code>.</li>
+    <li><b>Os testes:</b> <code>scripts/_hangar/_testar-hangar.mjs</code> (o fluxo com teclas de verdade: menu, hangar, ←→↑↓, ENTER, a F1 na nave escolhida, ESC) e <code>_ver-hangar.mjs</code> (as fotos, também sem a camada HD). O <code>probe-menu</code> passa pelo hangar.</li>
+    <li><b>As naves:</b> <code>scripts/_naves/_nave-molde-preta.mjs</code> (a "a"), <code>_jato-sem-balanco.mjs</code> (o jato travado) e <code>_pintar-jato.mjs</code> (o osso). O teste é <code>_testar-nave-unica.mjs</code>.</li>
+    <li>Spec: <code>specs/2026-10-25-cena-do-hangar-design.md</code> e <code>specs/2026-10-25-naves-do-hangar-design.md</code>.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

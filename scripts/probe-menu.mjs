@@ -126,6 +126,10 @@ conferir((await page.evaluate(() => window.__game.scene.getScene('Menu').conduca
 await page.keyboard.press('KeyQ');
 await page.waitForTimeout(250);
 await page.keyboard.press('Enter');
+// COMEÇAR passa pelo HANGAR (25/10): lá, ENTER decola na nave escolhida e a fase começa.
+await page.waitForFunction(() => window.__game.scene.isActive('Hangar'), null, { timeout: 15000 }).catch(() => {});
+await page.waitForTimeout(600);
+await page.keyboard.press('Enter');
 await page.waitForFunction(() => window.__game.scene.isActive('Game'), null, { timeout: 15000 }).catch(() => {});
 const jogo = await page.evaluate(() => ({ handling: window.__game.scene.getScene('Game')?.handling, cenaHD: !!window.__gameHD.scene.getScene('MenuHD') }));
 conferir(jogo.handling === 'flap', `Enter em COMEÇAR começa com a condução escolhida (${jogo.handling})`, jogo);

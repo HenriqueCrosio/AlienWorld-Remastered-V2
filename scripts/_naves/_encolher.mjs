@@ -6,12 +6,17 @@
 // All frames of one tier (the still, the 8 thrust frames, the 8 blue ones) are carved with the SAME seams, computed
 // on their sum, so the animation stays aligned. The first file is the still: its bbox drives the target size and the
 // output keeps its bbox centre where it was (so the fixed hitbox and the shot origin stay on the ship).
-//   node scripts/_naves/_encolher.mjs <outDir> <W>x<H> <still.png> [<frame.png> ...]
+//   node scripts/_naves/_encolher.mjs <outDir> <W>x<H> <still.png> [<frame.png> ...] [--proteger=x0-x1,x0-x1]
+// 25/10: --proteger keeps COLUMN seams out of those x ranges (canvas coordinates): the cut ladder of the "a" lost its
+// needle nose, the identity of the ship, because a grey run is the cheapest place to cut. Row seams ignore it.
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
-const [OUT, ALVO, ...ARQS] = process.argv.slice(2);
+const ARGS = process.argv.slice(2);
+const PROTEGER = (ARGS.find((a) => a.startsWith('--proteger='))?.slice(11) ?? '')
+  .split(',').filter(Boolean).map((r) => r.split('-').map(Number));
+const [OUT, ALVO, ...ARQS] = ARGS.filter((a) => !a.startsWith('--'));
 const [TW, TH] = ALVO.split('x').map(Number);
 
 const ler = async (f) => {
@@ -44,8 +49,12 @@ const TRANSP = 300;
 const d = (a, b) => (!a && !b ? 0 : !a || !b ? TRANSP : Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]));
 const transpor = (img) => img[0].map((_, x) => img.map((row) => row[x]));
 
-// The cheapest vertical seam of the stack (one x per row) and its cost.
-function costura(stk) {
+// The canvas x of every pixel still in the stack (a seam removes a different x per row, so it is per pixel).
+let origX = stack[0].map((row) => row.map((_, x) => u.x0 + x));
+const protegido = (x) => PROTEGER.some(([a, b]) => x >= a && x <= b);
+
+// The cheapest vertical seam of the stack (one x per row) and its cost. `prot`: per-pixel "never cut here".
+function costura(stk, prot = null) {
   const h = stk[0].length, w = stk[0][0].length;
   const at = (img, y, x) => (x < 0 || x >= w ? null : img[y][x]);
   const M = [], P = [];
@@ -59,7 +68,7 @@ function costura(stk) {
         cU += d(l, r);
         if (y > 0) { cL += d(img[y - 1][x], l); cR += d(img[y - 1][x], r); }
       }
-      const base = perda + cU;
+      const base = perda + cU + (prot && prot[y][x] ? 1e7 : 0);
       if (y === 0) { M[y][x] = base; continue; }
       let best = M[y - 1][x] + base, p = x;
       if (x > 0 && M[y - 1][x - 1] + base + cL < best) { best = M[y - 1][x - 1] + base + cL; p = x - 1; }
@@ -80,12 +89,19 @@ for (;;) {
   const b = bbox(stack[0]);
   const querW = b.w > TW, querH = b.h > TH;
   if (!querW && !querH) break;
-  const v = querW ? costura(stack) : null;
+  const v = querW ? costura(stack, PROTEGER.length ? origX.map((row) => row.map(protegido)) : null) : null;
   const hz = querH ? costura(stack.map(transpor)) : null;
   // Per pixel removed, so a long horizontal seam isn't unfairly dearer than a short vertical one.
   const porV = v ? v.custo / stack[0].length : Infinity, porH = hz ? hz.custo / stack[0][0].length : Infinity;
-  if (porV <= porH) { stack = tirar(stack, v.seam); log.push({ eixo: 'coluna', custo: Math.round(v.custo), seam: v.seam }); }
-  else { stack = tirar(stack.map(transpor), hz.seam).map(transpor); log.push({ eixo: 'linha', custo: Math.round(hz.custo), seam: hz.seam }); }
+  if (porV <= porH) {
+    stack = tirar(stack, v.seam);
+    [origX] = tirar([origX], v.seam);
+    log.push({ eixo: 'coluna', custo: Math.round(v.custo), seam: v.seam });
+  } else {
+    stack = tirar(stack.map(transpor), hz.seam).map(transpor);
+    [origX] = tirar([transpor(origX)], hz.seam).map(transpor);
+    log.push({ eixo: 'linha', custo: Math.round(hz.custo), seam: hz.seam });
+  }
 }
 
 // Back onto the original canvas, the still's bbox centre where it was.
