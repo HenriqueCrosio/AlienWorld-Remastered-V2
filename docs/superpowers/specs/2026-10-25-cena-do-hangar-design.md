@@ -113,8 +113,9 @@ com a terminus"*.
   - fundo, baia, anéis e `dados.json` ficaram idênticos;
   - nas naves só mudaram a faixa da cabine e o nariz (k4: x 89–309 / y 33–75 na X-Aelo, x 6–211 / y 44–74 na
     Terminus), e a nave escolhida (acesa) ficou igual à de antes.
-- **Os nomes das pinturas** (dele, grafados como ele escreveu; `NOME_PINTURA` em `numerosHangar.ts`):
+- **Os nomes das pinturas** (dele, *"referências para as obras que eu admiro"*; `NOME_PINTURA` em `numerosHangar.ts`):
   - a laranja é a **CLÁSSICA** nas duas naves;
-  - o osso da X-Aelo é a **REBELD** (*"singela referência ao Luke Skywalker"*);
-  - a preta da Terminus é a **MORDUR**.
+  - o osso da X-Aelo é a **REBELS** (Star Wars);
+  - a preta da Terminus é a **UNGOLIANT** (Tolkien).
+  - Primeiro foram REBELD e MORDUR. Ele trocou porque, em maiúsculas na tela, podiam ler como erro de digitação.
 - **Os nomes internos** (`jato-osso`, `a-preta`…, no registry, no sandbox e na linha de dev do menu) não mudaram.

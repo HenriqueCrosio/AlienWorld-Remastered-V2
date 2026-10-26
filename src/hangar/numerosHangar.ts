@@ -20,10 +20,11 @@ export const LADO: Record<Lado, { modelo: Modelo; pinturas: readonly Pintura[]; 
 };
 
 /**
- * O nome de cada pintura na tela (26/10, os nomes dele): a laranja é a CLÁSSICA nas duas naves; o osso da X-Aelo é a
- * REBELD (*"singela referência ao Luke Skywalker"*) e a preta da Terminus é a MORDUR. Grafados como ele escreveu.
+ * O nome de cada pintura na tela (26/10, os nomes dele, *"referências para as obras que eu admiro"*): a laranja é a
+ * CLÁSSICA nas duas naves; o osso da X-Aelo é a REBELS (Star Wars) e a preta da Terminus é a UNGOLIANT (Tolkien).
+ * (Primeiro foram REBELD e MORDUR; ele trocou porque podiam ler como erro de digitação.)
  */
-export const NOME_PINTURA: Record<Pintura, string> = { laranja: 'CLÁSSICA', preta: 'MORDUR', osso: 'REBELD' };
+export const NOME_PINTURA: Record<Pintura, string> = { laranja: 'CLÁSSICA', preta: 'UNGOLIANT', osso: 'REBELS' };
 
 /** O relógio da cena. */
 export const TEMPO = {
