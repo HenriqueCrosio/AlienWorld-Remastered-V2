@@ -8,7 +8,7 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
-import { SHIPS, DEFAULT_SHIP } from '../ships';
+import { SHIPS, DEFAULT_SHIP, naveEscolhida, visualDaNave } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
 import { mesaDaCutscene } from '../cartas';
 import type { HandlingMode } from './GameScene';
@@ -135,8 +135,9 @@ export class InterludeScene extends Phaser.Scene {
     this.atm.perfil(PERFIS.aurora);
 
     // A nave que POUSA é a que o jogador acabou de voar — a Fase 1 é sempre a nave padrão
-    // (o jato, no róster v2). Desenhar outra aqui desmentiria o voo que ele acabou de fazer.
-    const chegada = SHIPS[this.naveId];
+    // (o jato, no róster v2). Desenhar outra aqui desmentiria o voo que ele acabou de fazer — por isso a humana vem
+    // no modelo e na pintura do hangar (25/10).
+    const chegada = visualDaNave(this.naveId, naveEscolhida(this.registry));
     const chegadaTex = this.textures.exists(chegada.texture) ? chegada.texture : 'ship';
     const chegadaAnim = chegada.anim ?? 'ship-thrust';
 
@@ -436,10 +437,11 @@ export class InterludeScene extends Phaser.Scene {
     // nave certa ia para a fase) — só a IMAGEM mentia, e mentia exatamente no beat que existe
     // para mostrar o que ele armou. É a mesma briga de animação × textura das variantes de arte.
     const nave = SHIPS[id];
-    if (this.textures.exists(nave.texture)) {
+    const visual = visualDaNave(id, naveEscolhida(this.registry));
+    if (this.textures.exists(visual.texture)) {
       const s = this.ship as Phaser.GameObjects.Sprite;
       s.anims?.stop();
-      s.setTexture(nave.texture);
+      s.setTexture(visual.texture);
     }
 
     this.aviso(`${nave.name} · ARMADA`, COLORS.hotBright);

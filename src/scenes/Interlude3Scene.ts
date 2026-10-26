@@ -8,7 +8,7 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
-import { SHIPS, DEFAULT_SHIP } from '../ships';
+import { SHIPS, DEFAULT_SHIP, naveEscolhida, visualDaNave } from '../ships';
 import { mesaDaCutscene } from '../cartas';
 import { ShipPanel } from '../ui/ShipPanel';
 import { STAGES } from '../systems/StageDirector';
@@ -337,7 +337,7 @@ export class Interlude3Scene extends Phaser.Scene {
     this.faiscar();
 
     // A nave chega DANIFICADA. A fumaça segue o casco; as fagulhas só ligam na derrapagem.
-    const chegada = SHIPS[this.naveId];
+    const chegada = visualDaNave(this.naveId, naveEscolhida(this.registry));
     const chegadaTex = this.textures.exists(chegada.texture) ? chegada.texture : 'ship';
     this.ship = this.add.sprite(-30, 62, chegadaTex).setDepth(Interlude3Scene.DEPTH_NAVE);
     const chegadaAnim = chegadaTex === chegada.texture ? (chegada.anim ?? 'ship-thrust') : 'ship-thrust';
@@ -796,7 +796,7 @@ export class Interlude3Scene extends Phaser.Scene {
    * ver Interlude2Scene.trocarNave).
    */
   private trocarNave(id: string): void {
-    const nave = SHIPS[id];
+    const nave = visualDaNave(id, naveEscolhida(this.registry));
     if (!this.textures.exists(nave.texture)) return;
 
     this.ship.anims?.stop();

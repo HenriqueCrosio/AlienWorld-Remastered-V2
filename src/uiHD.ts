@@ -29,6 +29,8 @@ export type Voz = 'jogo' | 'nave' | 'piloto';
 const VOZ_DA_CENA: Record<string, Voz> = {
   Menu: 'jogo',
   GameOver: 'jogo',
+  // O hangar da escolha da nave: o piloto decidindo.
+  Hangar: 'piloto',
   Cartas: 'piloto',
   Arquivo: 'piloto',
   Game: 'nave',

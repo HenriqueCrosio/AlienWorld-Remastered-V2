@@ -37,13 +37,13 @@ import { BossNucleo } from '../entities/BossNucleo';
 import { Golfinho, type SentidoGolfinho } from '../entities/Golfinho';
 import { Agua } from '../systems/Agua';
 import { Esfincter } from '../entities/esfincter';
-import { SHIPS, DEFAULT_SHIP, visualDaNave } from '../ships';
+import { SHIPS, DEFAULT_SHIP, naveEscolhida, visualDaNave } from '../ships';
 import { CartasEmJogo } from '../systems/CartasEmJogo';
 import { entrarNaFase } from '../cartas';
 import type { ConfigSandbox } from '../sandbox/config.ts';
 import { SandboxArena } from '../systems/SandboxArena';
 import { Medidas } from '../systems/Medidas';
-import { PecasEmJogo, colecaoCompleta, podeEvoluir, reiniciarLinhagem, temUmUp, tierDaNave } from '../pecas';
+import { PecasEmJogo, colecaoCompleta, reiniciarJogada, temUmUp } from '../pecas';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
 import { FreeController } from '../flight/FreeController';
@@ -52,6 +52,8 @@ import { fatorDeVelocidade, lentidaoAte } from '../elitesRegras';
 import { Esporos } from '../entities/elites/Esporos';
 import type { LugarElite } from '../entities/elites/tipos';
 import { ELITES } from '../data/numerosElites';
+import { MorteDaNave, type OpcoesMorte } from '../systems/morte/MorteDaNave';
+import { MORTE, ESTILOS_MORTE, estiloDaNave, type EstiloMorte } from '../systems/morte/numerosMorte';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
@@ -65,6 +67,14 @@ export type HandlingMode = 'diegetico' | 'flap' | 'free';
  * se vê é este número: 5 → ~3 na fase; 3 → ~4; 8 → ~2.
  */
 const RESPIRADOURO_CARENCIA = 5;
+
+/** Os quatro tempos de uma câmera lenta, em ms de relógio cru (ver `GameScene.camaraLenta`). */
+interface CurvaLenta {
+  impactoMs: number;
+  desceMs: number;
+  seguraMs: number;
+  voltaMs: number;
+}
 
 interface PendingWave {
   kind: EnemyKind;
@@ -214,6 +224,13 @@ export class GameScene extends Phaser.Scene {
   /** A propulsão da nave (a animação do motor) — a base da versão `-azul` dos Propulsores (`tocarMotor`). */
   private animMotor: string | null = null;
   private over = false;
+  /**
+   * A MORTE DA NAVE (26/10): os destroços desenhados pixel a pixel (`systems/morte/`). Enquanto ela corre, `over` já é
+   * verdade (nada de comando, dano ou roteiro), mas o MUNDO continua andando por baixo — ver `atualizarMorte`.
+   */
+  private morte: MorteDaNave | null = null;
+  /** A PERDA DE CASCO (26/10): a lasca de cada vida perdida que não é a última, no estilo da morte da nave. */
+  private golpes: MorteDaNave[] = [];
   /** Fumaça da nave avariada (última vida). Criada apagada; o relógio de 240ms a liga. */
   private fumaca!: Phaser.GameObjects.Particles.ParticleEmitter;
 
@@ -254,11 +271,10 @@ export class GameScene extends Phaser.Scene {
    * (sobe ao normal: o tamanho). A 1ª versão (22/09) era só a rampa `k²` de 820ms, lenta DESDE o
    * 1º quadro — e o baque, que é o que ele quer sentir primeiro, saía amortecido.
    */
-  private static readonly LENTA_IMPACTO_MS = 200;
-  private static readonly LENTA_DESCE_MS = 120;
-  private static readonly LENTA_SEGURA_MS = 1100;
-  private static readonly LENTA_VOLTA_MS = 600;
+  private static readonly LENTA_ESFINCTER: CurvaLenta = { impactoMs: 200, desceMs: 120, seguraMs: 1100, voltaMs: 600 };
   private static readonly LENTA_PISO = 0.3;
+  /** A curva da rampa em curso: a do esfíncter, ou a da morte da nave (`MORTE.lenta`, 26/10). */
+  private lentidaoCurva: CurvaLenta = GameScene.LENTA_ESFINCTER;
 
   /**
    * Do centro do pilar da junta ao centro do esfíncter, em px. Medida quadro a quadro nas linhas em
@@ -346,6 +362,8 @@ export class GameScene extends Phaser.Scene {
     this.hitstopAte = 0;
     this.tempoNormal();
     this.over = false;
+    this.morte = null;
+    this.golpes = [];
 
     // As texturas mudam entre execuções (arte entra asset por asset): o cache de variantes
     // não pode sobreviver a uma troca de cena.
@@ -463,11 +481,10 @@ export class GameScene extends Phaser.Scene {
 
     // A textura da nave escolhida — e a `ship` padrão enquanto a arte dela não existir. Uma
     // nave sem PNG cai na do Interceptor em vez de virar o quadrado verde do Phaser.
-    // PROTÓTIPO DAS CARTAS: a linhagem evolui no visual — o tier desta fase (`visualDaNave`).
-    // A F1 é sempre jogada nova (ou o retry dela): a linhagem volta ao tier 0, sem 1-UP pendente.
-    // (No sandbox o tier é o da montagem — nada de zerar.)
-    if (this.stage.id === 1 && !this.sandbox) reiniciarLinhagem(this.registry);
-    const visual = visualDaNave(this.shipId, tierDaNave(this.registry));
+    // UMA NAVE POR LINHAGEM (25/10, os tiers saíram): a humana no modelo e na pintura escolhidos no hangar.
+    // A F1 é sempre jogada nova (ou o retry dela): sem 1-UP pendente.
+    if (this.stage.id === 1 && !this.sandbox) reiniciarJogada(this.registry);
+    const visual = visualDaNave(this.shipId, naveEscolhida(this.registry));
     const tex = this.textures.exists(visual.texture) ? visual.texture : 'ship';
     this.ship = this.physics.add.sprite(70, GAME_HEIGHT / 2, tex);
     // Depth 1 (07/10), com os tiros: a TINTA da lula (0,5) cobre os inimigos e nunca a nave (spec F3 §2.3).
@@ -594,7 +611,6 @@ export class GameScene extends Phaser.Scene {
       fx: this.fx,
       // No sandbox, sem peças (fase 0 não tem): o portador e a peça seriam ruído no teste.
       fase: this.sandbox ? 0 : this.stage.id,
-      evolui: podeEvoluir(this.registry, this.shipId),
       bossTime: this.director.bossTime,
       nave: () => this.ship,
       inimigos: () => this.enemies.enemies.getChildren() as Phaser.Physics.Arcade.Sprite[],
@@ -713,20 +729,22 @@ export class GameScene extends Phaser.Scene {
     //
     // São RETÂNGULOS, não texto: a fonte do jogo não tem os glifos de bloco do Unicode, e a
     // primeira tentativa de barra em texto (na ficha das naves) saiu como caixas vazias.
+    // 25/10: com as 3 estrelas das peças no canto (src/pecas.ts), o medidor encosta à esquerda delas.
+    const medidorX = (this.pecas.hudEsquerda ?? GAME_WIDTH) - 4 - 56;
     this.heatBg = this.add
-      .rectangle(GAME_WIDTH - 60, 5, 56, 3, COLORS.metalDark)
+      .rectangle(medidorX, 5, 56, 3, COLORS.metalDark)
       .setOrigin(0, 0.5)
       .setDepth(100)
       .setVisible(false);
 
     this.heatBar = this.add
-      .rectangle(GAME_WIDTH - 60, 5, 56, 3, COLORS.hot)
+      .rectangle(medidorX, 5, 56, 3, COLORS.hot)
       .setOrigin(0, 0.5)
       .setDepth(101)
       .setVisible(false);
 
     this.spoolBar = this.add
-      .rectangle(GAME_WIDTH - 60, 10, 56, 2, COLORS.player)
+      .rectangle(medidorX, 10, 56, 2, COLORS.player)
       .setOrigin(0, 0.5)
       .setDepth(101)
       .setVisible(false);
@@ -779,7 +797,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   override update(time: number, delta: number): void {
-    if (this.over) return;
+    if (this.over) {
+      if (this.morte) this.atualizarMorte(delta);
+      return;
+    }
 
     // HITSTOP: o mundo está pregado (física/tweens/anims pausados no hitstop()). O relógio
     // NÃO está — `time` continua correndo, e é ele quem destrava. Enquanto não passa, nada
@@ -792,25 +813,7 @@ export class GameScene extends Phaser.Scene {
       this.anims.resumeAll();
     }
 
-    // A CÂMERA LENTA: a escala do quadro, e a rampa que a devolve a 1. ⚠️ Comandada pelo `delta`
-    // CRU — é o mesmo cuidado do hitstop logo acima, e aqui ele é ainda mais obrigatório: uma rampa
-    // que se medisse no tempo já escalado se arrastaria muito além dos tempos pedidos.
-    let escala = 1;
-    if (this.lentidaoRestante > 0) {
-      this.lentidaoRestante = Math.max(0, this.lentidaoRestante - delta);
-      if (this.lentidaoRestante === 0) {
-        this.tempoNormal();
-      } else {
-        escala = this.escalaDaLentidao(this.lentidaoTotal - this.lentidaoRestante);
-        this.tweens.timeScale = escala;
-        this.time.timeScale = escala;
-        this.anims.globalTimeScale = escala;
-        // ⚠️ INVERSO. O Arcade conta `msPerFrame = _frameTimeMS * timeScale`: 2 é METADE da
-        // velocidade, não o dobro.
-        this.physics.world.timeScale = 1 / escala;
-      }
-    }
-
+    const escala = this.escalaDoQuadro(delta);
     // ⚠️ O `dt` DA CENA TAMBÉM ENTRA NA ESCALA, e é ele que carrega o mundo: o `elapsed`, o
     // starfield, o parallax e o avanço da `Moldura` não passam por tween nem por física. Sem esta
     // linha o estouro ficaria lento e o corredor continuaria correndo por baixo dele.
@@ -889,6 +892,8 @@ export class GameScene extends Phaser.Scene {
       this.ship.setAngle(Phaser.Math.Clamp(body.velocity.y * 0.06, -25, 25));
     }
     this.ship.setVisible(time > this.invulnerableUntil || Math.floor(time / 60) % 2 === 0);
+    // Depois da nave (posição, inclinação e pisca do quadro): a cicatriz da lasca anda em cima dela.
+    this.atualizarGolpes(dt);
 
     // A BOMBA é da cena, não da arma: funciona nas duas conduções e independe da arma equipada.
     if (input.bombPressed) this.useBomb();
@@ -953,6 +958,82 @@ export class GameScene extends Phaser.Scene {
     // Rede: se ele deixou de viver por um caminho que não passou por `matarGolfinho`, a arena solta.
     if (this.golfinho && !this.golfinho.vivo) this.encerrarGolfinho();
     this.updateHud();
+  }
+
+  /**
+   * A CÂMERA LENTA: a escala do quadro, e a rampa que a devolve a 1. ⚠️ Comandada pelo `delta`
+   * CRU — é o mesmo cuidado do hitstop, e aqui ele é ainda mais obrigatório: uma rampa
+   * que se medisse no tempo já escalado se arrastaria muito além dos tempos pedidos.
+   */
+  private escalaDoQuadro(delta: number): number {
+    if (this.lentidaoRestante <= 0) return 1;
+    this.lentidaoRestante = Math.max(0, this.lentidaoRestante - delta);
+    if (this.lentidaoRestante === 0) {
+      this.tempoNormal();
+      return 1;
+    }
+    const escala = this.escalaDaLentidao(this.lentidaoTotal - this.lentidaoRestante);
+    this.tweens.timeScale = escala;
+    this.time.timeScale = escala;
+    this.anims.globalTimeScale = escala;
+    // ⚠️ INVERSO. O Arcade conta `msPerFrame = _frameTimeMS * timeScale`: 2 é METADE da
+    // velocidade, não o dobro.
+    this.physics.world.timeScale = 1 / escala;
+    return escala;
+  }
+
+  /**
+   * O MUNDO ENQUANTO A NAVE MORRE (26/10). Antes o `update` parava inteiro no `over` — com a morte de 900ms ninguém
+   * via; com os destroços (~2s, e a câmera lenta) o fundo congelado leria como jogo travado. Aqui só o que é CENÁRIO e
+   * os bichos seguem (na escala da câmera lenta): nada de comando, roteiro, tiro, dano ou pontos.
+   */
+  private atualizarMorte(delta: number): void {
+    const escala = this.escalaDoQuadro(delta);
+    const dt = (delta / 1000) * escala;
+    const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
+    this.atm.update(dt);
+    this.starfield.update(dt);
+    this.parallax.update(dt, SCROLL_SPEED * frenagem);
+    this.moldura.avanca(dt, SCROLL_SPEED * frenagem);
+    this.primeiroPlanoF4.atualiza(dt, SCROLL_SPEED * frenagem);
+    this.derivaF4.atualiza(dt, SCROLL_SPEED * frenagem);
+    this.terrain.update(dt, this.ship);
+    this.debris.update(dt, this.ship);
+    this.enemies.update(dt, this.ship);
+    this.boss?.update(dt, this.ship);
+    this.agua.update(dt, SCROLL_SPEED * frenagem);
+    this.esfincter.update(dt, SCROLL_SPEED * frenagem);
+    this.atualizarGolpes(dt);
+    this.morte?.update(dt);
+  }
+
+  /** As lascas das vidas perdidas: correm no `dt` da cena (a câmera lenta e o hitstop pegam nelas) e se desfazem ao fim. */
+  private atualizarGolpes(dt: number): void {
+    if (!this.golpes.length) return;
+    for (const g of this.golpes) g.update(dt);
+    this.golpes = this.golpes.filter((g) => {
+      if (!g.terminou) return true;
+      g.destroy();
+      return false;
+    });
+  }
+
+  /**
+   * COMO ESTA NAVE MORRE (26/10, ele: *"quero fazer com que cada tipo de nave tenha uma"*): a X-Aelo se rompe, a
+   * Terminus se estilhaça, a Charybdis se desintegra (`estiloDaNave`). O registry `estiloMorte` passa por cima (dev e os
+   * filmes da folha). Serve à morte e às lascas das vidas do meio, que a antecipam.
+   */
+  private opcoesDaMorte(): Omit<OpcoesMorte, 'aoClimax' | 'golpe'> {
+    const pedido = this.registry.get('estiloMorte') as EstiloMorte | undefined;
+    return {
+      estilo: pedido && ESTILOS_MORTE.includes(pedido) ? pedido : estiloDaNave(this.shipId, naveEscolhida(this.registry).modelo),
+      // a manta não pega fogo: ela se apaga na bioluminescência dela
+      material: this.shipId === 'alienigena' ? 'bio' : 'metal',
+      atmosfera: this.zone === 'atmosfera',
+      chao: this.zone === 'atmosfera' ? GROUND_Y : undefined,
+      fx: this.fx,
+      semente: this.registry.get('sementeMorte') as number | undefined,
+    };
   }
 
   /**
@@ -1907,9 +1988,9 @@ export class GameScene extends Phaser.Scene {
    * MENOS passos. A 0,3 são ~18 passos/s. Num jogo de 384×216 isso não aparece — a posição já é
    * arredondada para o pixel, e um passo de 1,4px não tem como ser mais liso.
    */
-  private camaraLenta(piso: number): void {
-    const ms =
-      GameScene.LENTA_IMPACTO_MS + GameScene.LENTA_DESCE_MS + GameScene.LENTA_SEGURA_MS + GameScene.LENTA_VOLTA_MS;
+  private camaraLenta(piso: number, curva: CurvaLenta = GameScene.LENTA_ESFINCTER): void {
+    const ms = curva.impactoMs + curva.desceMs + curva.seguraMs + curva.voltaMs;
+    this.lentidaoCurva = curva;
     this.lentidaoTotal = ms;
     this.lentidaoRestante = ms;
     this.lentidaoPiso = piso;
@@ -1924,16 +2005,17 @@ export class GameScene extends Phaser.Scene {
    */
   private escalaDaLentidao(ms: number): number {
     const piso = this.lentidaoPiso;
-    const desceEm = GameScene.LENTA_IMPACTO_MS;
-    const seguraEm = desceEm + GameScene.LENTA_DESCE_MS;
-    const voltaEm = seguraEm + GameScene.LENTA_SEGURA_MS;
+    const c = this.lentidaoCurva;
+    const desceEm = c.impactoMs;
+    const seguraEm = desceEm + c.desceMs;
+    const voltaEm = seguraEm + c.seguraMs;
     if (ms < desceEm) return 1;
     if (ms < seguraEm) {
-      const k = (ms - desceEm) / GameScene.LENTA_DESCE_MS;
+      const k = (ms - desceEm) / c.desceMs;
       return 1 - (1 - piso) * k * k * (3 - 2 * k);
     }
     if (ms < voltaEm) return piso;
-    const k = Math.min(1, (ms - voltaEm) / GameScene.LENTA_VOLTA_MS);
+    const k = Math.min(1, (ms - voltaEm) / c.voltaMs);
     return piso + (1 - piso) * k * k;
   }
 
@@ -2070,9 +2152,9 @@ export class GameScene extends Phaser.Scene {
 
     const { next, interlude } = this.stage;
 
-    // AS PEÇAS: coleção completa = a nave evolui um tier na conquista + 1-UP na fase seguinte.
+    // AS PEÇAS (as estrelas): coleção completa = 1-UP na fase seguinte.
     if (!this.practice && this.pecas.total && this.pecas.pegas >= this.pecas.total) {
-      colecaoCompleta(this.registry, this.shipId, next);
+      colecaoCompleta(this.registry, next);
     }
 
     // ⚠️ A INTERLUDE ENTRA SEMPRE QUE EXISTE — mesmo com `next: null`. Antes o teste era
@@ -2610,10 +2692,16 @@ export class GameScene extends Phaser.Scene {
     // da NAVE, não para a Pulse: devolver o jogador à arma de outra nave apagaria a escolha dele.
     this.weapons.equipBase();
 
-    this.fx.explode(this.ship.x, this.ship.y, 1.4);
+    // O golpe que MATA não estoura aqui: a morte da nave (`gameOver`) é o estouro dele.
+    if (this.lives <= 0) {
+      this.gameOver();
+      return;
+    }
+    // A PERDA DE CASCO (26/10, no lugar da explosão do PixelLab): uma lasca da borda do casco voa no estilo da morte
+    // desta nave — a MESMA em todo golpe, quantas vidas houver (`MORTE.golpe`). O aviso de "mais um e acabou" continua
+    // sendo a fumaça da última vida.
+    this.golpes.push(new MorteDaNave(this, this.ship, { ...this.opcoesDaMorte(), golpe: true }));
     this.cameras.main.flash(90, 255, 122, 168);
-
-    if (this.lives <= 0) this.gameOver();
   }
 
   /** O SANDBOX: de volta à montagem (o `sandbox/iniciar.ts` escuta o evento, para a cena e reabre a tela). */
@@ -2626,17 +2714,29 @@ export class GameScene extends Phaser.Scene {
     this.over = true;
     this.tempoNormal();
 
+    // A MORTE DA NAVE (26/10): a nave some e os pedaços DELA (o quadro que está na tela) ficam no lugar — ver
+    // `systems/morte/MorteDaNave.ts`. Cada nave morre do seu jeito (`opcoesDaMorte`). A câmera lenta entra no momento
+    // grande de cada estilo (`aoClimax`).
+    const L = MORTE.lenta;
+    this.morte = new MorteDaNave(this, this.ship, {
+      ...this.opcoesDaMorte(),
+      aoClimax: () =>
+        this.camaraLenta(L.piso, { impactoMs: L.impactoMs, desceMs: L.desceMs, seguraMs: L.seguraMs, voltaMs: L.voltaMs }),
+    });
     this.ship.setVisible(false);
     (this.ship.body as Phaser.Physics.Arcade.Body).enable = false;
-    this.fx.explode(this.ship.x, this.ship.y, 2.2);
+    // ⚠️ O RELÓGIO DA CENA anda na escala da câmera lenta: a espera dura a morte inteira, lenta ou não. E quem sai da
+    // cena devolve o tempo ao normal ANTES (o `globalTimeScale` é do jogo, ver `tempoNormal`).
+    const espera = this.morte.duracao * 1000;
 
     // No sandbox, morrer volta à montagem.
     if (this.sandbox) {
-      this.time.delayedCall(900, () => this.voltarMontagem());
+      this.time.delayedCall(espera, () => this.voltarMontagem());
       return;
     }
     const final = this.totalScore();
-    this.time.delayedCall(900, () =>
+    this.time.delayedCall(espera, () => {
+      this.tempoNormal();
       this.scene.start('GameOver', {
         score: final,
         handling: this.handling,
@@ -2647,8 +2747,8 @@ export class GameScene extends Phaser.Scene {
         stage: this.stage.id,
         ship: this.shipId,
         baseScore: this.scoreBase,
-      }),
-    );
+      });
+    });
   }
 
   // ─── HUD ────────────────────────────────────────────────────────────────────
@@ -2708,7 +2808,7 @@ export class GameScene extends Phaser.Scene {
     // de desenvolvimento na tela do jogador. A zona (1G / ZERO-G) diz a física, e a COR da linha diz a condução
     // (âmbar = flap, ciano = livre, logo abaixo). O `label` continua nos controladores para quem precisar dele.
     this.hud.setText(
-      `${zona}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}${this.arena?.invulneravel ? ' INVULN.' : ''}   B×${this.bombs}${this.pecas.total ? `   PEÇAS ${this.pecas.pegas}/${this.pecas.total}` : ''}   ${this.totalScore()}`,
+      `${zona}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}${this.arena?.invulneravel ? ' INVULN.' : ''}   B×${this.bombs}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

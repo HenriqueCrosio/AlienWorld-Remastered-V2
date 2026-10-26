@@ -40,8 +40,8 @@ const LAVA_INICIO = 0.85;
 const LAVA_FIM = 0.5;
 /**
  * O tamanho da nave ao sair (18/10, ele: *"diminua a nave na animação de ser expelida ... vai melhorar a percepção
- * de tamanho entre a nave e o monstro"*). Fator ÚNICO sobre o sprite de cada tier — a evolução entre tiers continua
- * a mesma; só a distância até a câmera muda.
+ * de tamanho entre a nave e o monstro"*). Fator ÚNICO sobre o sprite da nave (a humana em qualquer pintura, ou a
+ * manta); só a distância até a câmera muda.
  */
 const NAVE_ESCALA = 0.5;
 

@@ -27,40 +27,90 @@ export interface ShipDef {
 }
 
 /**
- * OS TIERS DAS LINHAGENS (protótipo das cartas, 27/09) — a nave evolui SÓ no visual, uma forma por fase.
- * Humana: T0 (1 asa) → T1 (o jato) → T2. Alien: T1 (a manta encontrada na Doca) → T2 (os chifres abertos).
- * A T3 humana saiu em 23/10 (decisão dele: "tirar o T3 da nave humana, ele é o mais grosseiro"); a T2 vai até o fim.
- * Os humanos têm motor animado; as duas mantas nadam com a MESMA batida (a T2 herdou o movimento da T1).
+ * UMA NAVE POR LINHAGEM (25/10) — os tiers saíram. Ele: *"retirar os tiers e trabalhar apenas com 1 tipo de nave,
+ * exatamente como aparecem no primeiro hangar e depois a manta no seu tier maximo"* (a escada era só visual e não
+ * convencia). A ALIEN é a manta dos chifres abertos (a antiga T2), já na Doca. As peças (as estrelas) continuam caindo
+ * e dão só o 1-UP (src/pecas.ts).
+ *
+ * A HUMANA É ESCOLHIDA NO HANGAR (25/10, à noite): DOIS MODELOS, duas pinturas cada. Ele: *"uma delas vai ser a
+ * escolha da nave preta e laranja, o outro lado fica para a escolha da nossa nave principal, que era a T1 da nave
+ * humana antiga"*. O modelo "a" é a preta "a" do concept como MOLDE (`scripts/_naves/_nave-molde-preta.mjs`), em
+ * laranja ou preta; o JATO é a T1 antiga (inspirada no X-wing), na pintura dele ou na de osso
+ * (`scripts/_naves/_pintar-jato.mjs`). SÓ O VISUAL muda: a hitbox (21×9), a arma e as cartas são as mesmas — a escolha
+ * é de identidade, não de build (nada novo para balancear).
  */
-const TIERS: Record<string, Record<number, { texture: string; anim?: string }>> = {
-  // Indexado pelo TIER (28/09): a evolução deixou de ser por fase e passou a depender da coleção de peças (src/pecas.ts).
-  humana: {
-    0: { texture: 'naveHumanaT0', anim: 'nave-humana-t0-thrust' },
-    1: { texture: 'shipJato', anim: 'ship-jato-thrust' },
-    2: { texture: 'naveHumanaT2', anim: 'nave-humana-t2-thrust' },
-  },
-  alienigena: {
-    1: { texture: 'naveAlienT1', anim: 'nave-alien-t1-nado' },
-    2: { texture: 'naveAlienT2', anim: 'nave-alien-t2-nado' },
-  },
+export type Modelo = 'a' | 'jato';
+export type Pintura = 'laranja' | 'preta' | 'osso';
+export interface Escolha {
+  modelo: Modelo;
+  pintura: Pintura;
+}
+/** As escolhas do hangar, na ordem da tecla de teste do menu. A 1ª é a de quem ainda não escolheu. */
+export const ESCOLHAS: readonly Escolha[] = [
+  { modelo: 'a', pintura: 'laranja' },
+  { modelo: 'a', pintura: 'preta' },
+  { modelo: 'jato', pintura: 'laranja' },
+  { modelo: 'jato', pintura: 'osso' },
+];
+export const nomeDaEscolha = (e: Escolha): string => `${e.modelo}-${e.pintura}`;
+export const escolhaPorNome = (nome: unknown): Escolha | undefined => ESCOLHAS.find((e) => nomeDaEscolha(e) === nome);
+
+/** O registry do Phaser, só no que a escolha usa (este arquivo é dado — não importa o Phaser). */
+interface Registro {
+  get(chave: string): unknown;
+  set(chave: string, valor: unknown): unknown;
+}
+const CHAVE_MODELO = 'modeloNave';
+const CHAVE_PINTURA = 'pinturaNave';
+
+/** A humana escolhida no hangar (a 1ª de `ESCOLHAS` até ele existir ou até a escolha; sem modelo = a "a"). */
+export function naveEscolhida(reg: Registro): Escolha {
+  const modelo = reg.get(CHAVE_MODELO) ?? 'a';
+  const pintura = reg.get(CHAVE_PINTURA);
+  return ESCOLHAS.find((e) => e.modelo === modelo && e.pintura === pintura) ?? ESCOLHAS[0];
+}
+
+/** O que a cena do hangar chama quando o jogador escolhe a nave (e a tecla de teste do menu, e o sandbox). */
+export function escolherNave(reg: Registro, e: Escolha): void {
+  reg.set(CHAVE_MODELO, e.modelo);
+  reg.set(CHAVE_PINTURA, e.pintura);
+}
+
+/**
+ * OS NOMES (26/10, dele): o jato (o X-wing) é a **X-AELO** — Aelo, a harpia grega —, a "a" é a **TERMINUS**, e a manta
+ * é a **CHARYBDIS** (ele deixou "Charybdis ou Manta mesmo"; ficou Charybdis). O hangar e o painel da Doca leem daqui.
+ */
+export const NOME_MODELO: Record<Modelo, string> = { jato: 'X-AELO', a: 'TERMINUS' };
+export const NOME_ALIEN = 'CHARYBDIS';
+
+/** O nome da nave na tela: a humana pelo modelo escolhido no hangar, a alien pelo dela. */
+export function nomeDaNave(id: string, e: Escolha = ESCOLHAS[0]): string {
+  if (id === 'humana') return NOME_MODELO[e.modelo];
+  if (id === 'alienigena') return NOME_ALIEN;
+  return SHIPS[id]?.name ?? id;
+}
+
+const HUMANA: Record<string, { texture: string; anim: string }> = {
+  'a-laranja': { texture: 'naveHumana', anim: 'nave-humana-thrust' },
+  'a-preta': { texture: 'naveHumanaPreta', anim: 'nave-humana-preta-thrust' },
+  'jato-laranja': { texture: 'shipJato', anim: 'ship-jato-thrust' },
+  'jato-osso': { texture: 'naveJatoOsso', anim: 'nave-jato-osso-thrust' },
 };
 
-/** O visual da nave no TIER dado (preso aos tiers que a linhagem tem), ou a textura fixa da nave. */
-export function visualDaNave(id: string, tier: number): { texture: string; anim?: string } {
-  const t = TIERS[id];
-  if (t) {
-    const tiers = Object.keys(t).map(Number);
-    const n = Math.max(Math.min(...tiers), Math.min(tier, Math.max(...tiers)));
-    return t[n];
-  }
+/**
+ * A nave na tela: a humana na escolha do hangar; as outras, a textura do cadastro. TODA cena que mostra a nave do
+ * jogador passa por aqui (a fase, as chegadas e as trocas das cutscenes, o painel da Doca, a final) — uma cena que
+ * lesse `SHIPS[id].texture` mostraria o jato a quem escolheu a "a".
+ */
+export function visualDaNave(id: string, e: Escolha = ESCOLHAS[0]): { texture: string; anim?: string } {
+  if (id === 'humana') return HUMANA[nomeDaEscolha(e)];
   const nave = SHIPS[id];
   return { texture: nave.texture, anim: nave.anim };
 }
 
 export const SHIPS: Record<string, ShipDef> = {
   // ─── PROTÓTIPO DAS CARTAS (feat/cartas-preview, 27/09): DUAS LINHAGENS, uma nave cada. ───
-  // A humana é o jato da F1; a alien é oferecida na Aurora e já entra no tier 1. O poder vem das CARTAS — a nave
-  // só evolui no VISUAL a cada chefão. Até a arte dos tiers chegar, as duas usam os sprites existentes.
+  // O poder vem das CARTAS; a nave não evolui (25/10: os tiers saíram — `visualDaNave`, acima).
   humana: {
     id: 'humana',
     name: 'LINHAGEM HUMANA',
@@ -73,8 +123,10 @@ export const SHIPS: Record<string, ShipDef> = {
     id: 'alienigena',
     name: 'LINHAGEM ALIEN',
     weapon: 'baseAlien',
-    // A manta (T1): é a forma que o painel da Doca mostra e que a cutscene troca.
-    texture: 'naveAlienT1',
+    // A manta dos chifres abertos (a antiga T2, 25/10): o painel da Doca, a nave parada na doca e a chegada da F3 a
+    // leem daqui — o jogador vê na doca exatamente a nave com que vai sair.
+    texture: 'naveAlienT2',
+    anim: 'nave-alien-t2-nado',
     tagline: 'tecnologia do inimigo',
   },
 

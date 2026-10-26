@@ -170,6 +170,21 @@ export const PERFIS = {
     grao: 0.6,
     poeira: { quantidade: 50, cor: [67, 83, 107], deriva: [-4, -1], espalhar: 2 },
   },
+  /**
+   * O HANGAR DA ESCOLHA (25/10, à noite): a pintura dele, a torre no vale à noite — névoa fria e alta (ele: *"bastante
+   * fog no cenário atrás"*; a pesada já vem assada fora do bloco), halo do âmbar das faixas, poeira fria descendo
+   * devagar pelos cones das lâmpadas.
+   */
+  escolha: {
+    nome: 'escolha',
+    nevoa: { densidade: 0.7, cor: [44, 54, 70], altura: 1.4, velTras: [-3, 0], velFrente: [-7, 0], evolucao: 0.02 },
+    halo: { forca: 0.3, limiar: 0.59, cor: [214, 130, 60] },
+    grade: 1,
+    gradeQuente: 1,
+    vinheta: 0.6,
+    grao: 0.6,
+    poeira: { quantidade: 55, cor: [96, 112, 138], deriva: [-1, 1.5], espalhar: 2 },
+  },
 } as const satisfies Record<string, PerfilAtmosfera>;
 
 const lerp = (a: number, b: number, k: number): number => (k >= 1 ? b : a + (b - a) * k);

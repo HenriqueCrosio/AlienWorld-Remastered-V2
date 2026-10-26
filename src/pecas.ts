@@ -10,49 +10,28 @@ import type { Fx } from './systems/Fx';
  *   que sai vivo, ou peça que sai da tela, é peça perdida — como a moeda-estrela que passou.
  * - Sem inimigo disponível no ponto (um trecho só de rocha), a peça aparece flutuando sozinha alguns segundos depois:
  *   as 3 chances existem em toda fase.
- * - **Coleção completa** = a nave EVOLUI um tier na conquista + **1-UP só na fase seguinte** (não acumula; o retry
- *   daquela fase mantém). Coleção incompleta = a nave fica no tier; a carta da conquista vem sempre.
+ * - **Coleção completa** = **1-UP só na fase seguinte** (não acumula; o retry daquela fase mantém). A carta da conquista
+ *   vem sempre.
  * - As cápsulas de HMG/Shotgun deixam de cair: a peça é o drop do jogo agora.
- * - A F4 não tem peças (não há tier depois dela) — em aberto com ele.
- * - **Só há peças se a nave ainda pode evoluir** (23/10, com a T3 humana retirada): a humana para no T2, então quem
- *   completou F1 e F2 cruza a F3 sem peças; a manta (T1 na Doca) segue evoluindo para o T2 na F3; e quem perdeu uma
- *   coleção ainda alcança o teto numa fase seguinte. Ele: *"bem lembrado"*.
- *
- * O TIER mora no registry (`tierNave`): humana começa no 0; a manta entra no 1 ao ser escolhida na Doca.
+ * - A F4 não tem peças (não há fase seguinte para o 1-UP).
+ * - **25/10: a nave não evolui mais** (os tiers saíram, `src/ships.ts`). Ele: *"As estrelas ou peças podem ficar
+ *   dropando, para o player conseguir a vida extra"* — e a regra de 23/10 ("só há peças se a nave ainda pode evoluir")
+ *   saiu junto: toda F1, F2 e F3 tem as 3. O HUD mostra as 3 estrelas no canto superior direito, vazias, e cada peça
+ *   pega preenche uma (a ideia dele).
  */
 
-const CHAVE_TIER = 'tierNave';
 const CHAVE_UMUP = 'umUpNaFase';
-const TIER_MAX: Record<string, number> = { humana: 2, alienigena: 2 };
 export const FASES_COM_PECAS = new Set([1, 2, 3]);
 export const PECAS_POR_FASE = 3;
 
-/** Jogada nova (entrada na F1): tier 0 e sem 1-UP pendente. */
-export function reiniciarLinhagem(reg: Phaser.Data.DataManager): void {
-  reg.set(CHAVE_TIER, 0);
+/** Jogada nova (entrada na F1): sem 1-UP pendente. */
+export function reiniciarJogada(reg: Phaser.Data.DataManager): void {
   reg.set(CHAVE_UMUP, 0);
 }
 
-export function tierDaNave(reg: Phaser.Data.DataManager): number {
-  return (reg.get(CHAVE_TIER) as number | undefined) ?? 0;
-}
-
-/** A manta escolhida na Doca: ela já vem no tier 1. */
-export function entrarNaManta(reg: Phaser.Data.DataManager): void {
-  reg.set(CHAVE_TIER, 1);
-}
-
-/** A nave ainda tem tier acima do atual? Sem isso a fase não tem peças (a coleção não teria o que dar). */
-export function podeEvoluir(reg: Phaser.Data.DataManager, nave: string): boolean {
-  return tierDaNave(reg) < (TIER_MAX[nave] ?? 0);
-}
-
-/** Coleção completa no fim da fase: evolui (sem passar do teto da linhagem) e marca o 1-UP da fase seguinte. */
-export function colecaoCompleta(reg: Phaser.Data.DataManager, nave: string, proximaFase: number | null): boolean {
-  const antes = tierDaNave(reg);
-  reg.set(CHAVE_TIER, Math.min(antes + 1, TIER_MAX[nave] ?? antes));
+/** Coleção completa no fim da fase: marca o 1-UP da fase seguinte. */
+export function colecaoCompleta(reg: Phaser.Data.DataManager, proximaFase: number | null): void {
   if (proximaFase !== null) reg.set(CHAVE_UMUP, proximaFase);
-  return tierDaNave(reg) > antes;
 }
 
 /** A fase ganha o 1-UP da coleção da fase anterior? (vale também no retry dela) */
@@ -66,8 +45,6 @@ export interface HostPecas {
   scene: Phaser.Scene;
   fx: Fx;
   fase: number;
-  /** `podeEvoluir` na entrada da fase: no teto da linhagem, a fase fica sem peças. */
-  evolui: boolean;
   bossTime: number;
   nave: () => Phaser.Physics.Arcade.Sprite;
   inimigos: () => Phaser.Physics.Arcade.Sprite[];
@@ -79,36 +56,84 @@ const MARCAS = [0.25, 0.5, 0.75];
 const ESPERA_MAX = 8;
 const COR = COLORS.hotBright;
 
+/**
+ * A ESTRELA (25/10): a peça virou estrela — no HUD e no ar —, para o jogador ligar a que ele pega à que preenche no canto.
+ * Desenhada em pixel (peça ≲8px se desenha à mão): 9×9, a ponta de cima com o brilho.
+ */
+const ESTRELA = [
+  '....#....',
+  '...###...',
+  '...###...',
+  '#########',
+  '.#######.',
+  '..#####..',
+  '..#####..',
+  '.###.###.',
+  '.##...##.',
+];
+const EM_ESTRELA = (x: number, y: number) => ESTRELA[y]?.[x] === '#';
+/** Pixel da estrela na borda dela (algum vizinho de fora). */
+const BORDA = (x: number, y: number) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => !EM_ESTRELA(x + dx, y + dy));
+/** O canto do HUD: as 3 estrelas encostadas na direita da faixa do topo, dentro dela (a faixa tem 14px). */
+const HUD_X = GAME_WIDTH - 4, HUD_Y = 2, HUD_PASSO = 11;
+
 export class PecasEmJogo {
   pegas = 0;
   private proxima = 0;
   private readonly ativa: boolean;
   private readonly soltas: Phaser.Physics.Arcade.Group;
   private readonly brilhos = new Map<Phaser.GameObjects.GameObject, Phaser.GameObjects.Particles.ParticleEmitter>();
+  /** As 3 estrelas do HUD, da esquerda para a direita; a i-ésima preenche com a i-ésima peça pega. */
+  private readonly hud: Phaser.GameObjects.Image[] = [];
 
   constructor(private readonly h: HostPecas) {
-    this.ativa = FASES_COM_PECAS.has(h.fase) && h.evolui;
-    PecasEmJogo.textura(h.scene);
+    this.ativa = FASES_COM_PECAS.has(h.fase);
+    PecasEmJogo.texturas(h.scene);
     this.soltas = h.scene.physics.add.group({ allowGravity: false });
     h.scene.physics.add.overlap(h.nave(), this.soltas, (_n, p) => this.pegar(p as Phaser.Physics.Arcade.Sprite));
+    if (this.ativa) {
+      // Origem no centro (o estalo cresce a partir do meio da estrela); 9px de lado → o centro em x.5 cai no pixel inteiro.
+      for (let i = 0; i < PECAS_POR_FASE; i++) {
+        const x = HUD_X - (PECAS_POR_FASE - 1 - i) * HUD_PASSO - 4.5;
+        this.hud.push(h.scene.add.image(x, HUD_Y + 4.5, 'estrela-vazia').setDepth(100));
+      }
+    }
   }
 
   get total(): number {
     return this.ativa ? PECAS_POR_FASE : 0;
   }
 
-  /** A peça, desenhada no código (PROVISÓRIA): um losango dourado de 9px com contorno escuro. */
-  private static textura(scene: Phaser.Scene): void {
+  /** A margem esquerda das estrelas do HUD (o medidor da mini-gun encosta nela), ou null sem peças na fase. */
+  get hudEsquerda(): number | null {
+    return this.ativa ? HUD_X - (PECAS_POR_FASE - 1) * HUD_PASSO - ESTRELA[0].length : null;
+  }
+
+  /**
+   * As texturas, desenhadas no código: `peca` (a estrela no ar, com contorno escuro — 11×11, ela voa sobre qualquer
+   * fundo), `estrela-cheia` e `estrela-vazia` (o HUD, 9×9, sobre a faixa escura do topo: a vazia é só a borda, apagada).
+   */
+  private static texturas(scene: Phaser.Scene): void {
     if (scene.textures.exists('peca')) return;
-    const g = scene.make.graphics({}, false);
-    const px = (x: number, y: number, c: number) => g.fillStyle(c, 1).fillRect(x, y, 1, 1);
-    for (let y = 0; y < 9; y++) for (let x = 0; x < 9; x++) {
-      const d = Math.abs(x - 4) + Math.abs(y - 4);
-      if (d === 4) px(x, y, 0x1a1208);
-      else if (d < 4) px(x, y, d <= 1 ? 0xfff2b0 : d === 2 ? COR : 0xc98a1c);
-    }
-    g.generateTexture('peca', 9, 9);
-    g.destroy();
+    const desenhar = (chave: string, lado: number, m: number, cor: (x: number, y: number) => number | null) => {
+      const g = scene.make.graphics({}, false);
+      for (let y = -m; y < 9 + m; y++) for (let x = -m; x < 9 + m; x++) {
+        const c = cor(x, y);
+        if (c !== null) g.fillStyle(c, 1).fillRect(x + m, y + m, 1, 1);
+      }
+      g.generateTexture(chave, lado, lado);
+      g.destroy();
+    };
+    const cheia = (x: number, y: number) => {
+      if (!EM_ESTRELA(x, y)) return null;
+      if (BORDA(x, y)) return 0xc98a1c;
+      return y <= 3 && Math.abs(x - 4) <= 1 ? 0xfff2b0 : COR;
+    };
+    const contorno = (x: number, y: number) =>
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => EM_ESTRELA(x + dx, y + dy)) ? 0x1a1208 : null;
+    desenhar('peca', 11, 1, (x, y) => cheia(x, y) ?? contorno(x, y));
+    desenhar('estrela-cheia', 9, 0, cheia);
+    desenhar('estrela-vazia', 9, 0, (x, y) => (EM_ESTRELA(x, y) && BORDA(x, y) ? 0x6e5a32 : null));
   }
 
   tick(elapsed: number): void {
@@ -176,6 +201,13 @@ export class PecasEmJogo {
     this.h.fx.hit(p.x, p.y);
     p.destroy();
     this.pegas++;
-    this.h.aviso(this.pegas >= PECAS_POR_FASE ? 'COLEÇÃO COMPLETA · A NAVE VAI EVOLUIR' : `PEÇA ${this.pegas}/${PECAS_POR_FASE}`);
+    // A estrela do HUD preenche com um estalo curto (a escala volta ao 1 — o canto não fica pulsando).
+    const slot = this.hud[this.pegas - 1];
+    if (slot) {
+      slot.setTexture('estrela-cheia');
+      this.h.scene.tweens.add({ targets: slot, scale: { from: 1.6, to: 1 }, duration: 260, ease: 'Back.easeOut' });
+    }
+    // A estrela do canto já conta 1 e 2; o aviso no meio da tela fica só para a coleção completa.
+    if (this.pegas >= PECAS_POR_FASE) this.h.aviso('3 ESTRELAS · +1 VIDA NA PRÓXIMA FASE');
   }
 }

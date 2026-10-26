@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
-import { SHIPS } from '../ships';
+import { SHIPS, naveEscolhida, nomeDaNave, visualDaNave } from '../ships';
 import { WEAPONS } from '../systems/WeaponSystem';
 
 /**
@@ -150,9 +150,10 @@ export class ShipPanel {
     const slotW = Math.min(SLOT.w, step - 6);
 
     this.naves.forEach((id, i) => {
-      const nave = SHIPS[id];
+      // A humana aparece no modelo e na pintura do hangar: o painel mostra a nave que o jogador tem (25/10).
+      const visual = visualDaNave(id, naveEscolhida(s.registry));
       const x = GAME_WIDTH / 2 + (i - (this.naves.length - 1) / 2) * step;
-      const tex = s.textures.exists(nave.texture) ? nave.texture : 'ship';
+      const tex = s.textures.exists(visual.texture) ? visual.texture : 'ship';
 
       const caixa = s.add
         .rectangle(x, SLOT.y, slotW, SLOT.h, COLORS.bgDeep, 0.9)
@@ -215,10 +216,12 @@ export class ShipPanel {
       s.setStrokeStyle(sel ? 2 : 1, sel ? COLORS.hotBright : COLORS.metalMid);
     });
 
-    this.nome.setText(nave.name);
+    // O nome é o da nave (26/10: X-AELO, TERMINUS, CHARYBDIS), não o da linhagem.
+    this.nome.setText(nomeDaNave(nave.id, naveEscolhida(this.scene.registry)));
     this.tag.setText(nave.tagline);
 
-    if (this.scene.textures.exists(nave.texture)) this.preview.setTexture(nave.texture);
+    const visual = visualDaNave(nave.id, naveEscolhida(this.scene.registry));
+    if (this.scene.textures.exists(visual.texture)) this.preview.setTexture(visual.texture);
 
     // Barras de 5 casas: um número solto ("dano 3") não diz nada sem a escala. A barra é a
     // COMPARAÇÃO — e comparar é a única coisa que este painel existe para fazer.
@@ -256,7 +259,7 @@ export class ShipPanel {
 
     if (!this.confirmando) {
       this.confirmando = true;
-      this.onAviso(`${nave.name} — CONFIRMAR?`, COLORS.hotBright);
+      this.onAviso(`${nomeDaNave(nave.id, naveEscolhida(this.scene.registry))} — CONFIRMAR?`, COLORS.hotBright);
       this.marcar();
       return;
     }

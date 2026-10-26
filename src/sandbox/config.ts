@@ -1,4 +1,5 @@
 import type { Nave, Niveis } from './arvore.ts';
+import { ESCOLHAS, escolhaPorNome, nomeDaEscolha } from '../ships.ts';
 
 /**
  * A MONTAGEM do sandbox (spec `2026-10-02-sandbox-dev-design.md`): o que a tela HTML monta e a `GameScene` joga.
@@ -38,12 +39,10 @@ export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
   mosca: 20,
   aranha: 1,
 };
-/** Os tiers que cada linhagem tem (`ships.ts`). */
-export const TIERS: Record<Nave, number[]> = { humana: [0, 1, 2], alienigena: [1, 2] };
-
 export interface ConfigSandbox {
   nave: Nave;
-  tier: number;
+  /** A humana escolhida no hangar, pelo nome (`nomeDaEscolha` em `ships.ts`: "a-laranja", "jato-osso"…). A manta ignora. */
+  humana: string;
   niveis: Niveis;
   livre: boolean;
   fase: 1 | 2 | 3 | 4;
@@ -56,7 +55,7 @@ export interface ConfigSandbox {
 
 export const PADRAO: ConfigSandbox = {
   nave: 'humana',
-  tier: 2,
+  humana: nomeDaEscolha(ESCOLHAS[0]),
   niveis: {},
   livre: false,
   fase: 2,
@@ -74,7 +73,11 @@ export function carregar(): ConfigSandbox {
     if (!salvo) return structuredClone(PADRAO);
     // Só os tipos que ainda existem: a montagem salva pode trazer um inimigo que saiu do jogo (o elite do casco, 12/10).
     const inimigos = Object.fromEntries(INIMIGOS.map((t) => [t, salvo.inimigos?.[t] ?? PADRAO.inimigos[t]])) as Record<TipoInimigo, number>;
-    return { ...structuredClone(PADRAO), ...salvo, inimigos };
+    // A montagem salva antes de 25/10 traz `tier` (saiu); a da tarde de 25/10, só a `pintura` da "a".
+    const velha = salvo as Partial<ConfigSandbox> & { tier?: number; pintura?: string };
+    const humana = escolhaPorNome(velha.humana) ? velha.humana! : velha.pintura === 'preta' ? 'a-preta' : PADRAO.humana;
+    const { tier: _tier, pintura: _pintura, ...resto } = velha;
+    return { ...structuredClone(PADRAO), ...resto, inimigos, humana };
   } catch {
     return structuredClone(PADRAO);
   }

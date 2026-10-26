@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ICONES_CARTAS, RARIDADES } from '../cartas';
 import { carregarCamadasMenu } from '../menu/cenario';
+import { carregarCamadasHangar } from '../hangar/cenarioHangar';
 
 /**
  * O boot da CAMADA HD (`uiHD.ts`): ela é outro jogo Phaser e não enxerga as texturas do mundo — carrega aqui as que
@@ -17,5 +18,7 @@ export class BootHDScene extends Phaser.Scene {
     this.load.image('realce-canto', 'sprites/cartas/realce-canto.png');
     // O MENU (bloco E): a pintura dele em camadas, na densidade da camada (o cenário mora aqui, atrás do texto).
     carregarCamadasMenu(this.load, 'menuK4', 'sprites/menu/k4');
+    // O HANGAR da escolha da nave (25/10): a pintura dele em camadas, idem.
+    carregarCamadasHangar(this.load, 'hangarK4', 'sprites/hangar/k4');
   }
 }

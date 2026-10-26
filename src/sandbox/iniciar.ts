@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { mao } from './arvore.ts';
 import type { ConfigSandbox } from './config.ts';
 import { abrirMontagem } from './montagem.ts';
+import { ESCOLHAS, escolhaPorNome, escolherNave } from '../ships.ts';
 
 /**
  * O SANDBOX DE DEV (spec `2026-10-02-sandbox-dev-design.md`) — só existe no `npm run dev` (o `main.ts` importa este
@@ -28,9 +29,9 @@ export function ligarSandbox(game: Phaser.Game): void {
 }
 
 function jogar(game: Phaser.Game, c: ConfigSandbox): void {
-  // A build vai para a MÃO (o registry) como se tivesse saído das mesas; o tier é o escolhido.
+  // A build vai para a MÃO (o registry) como se tivesse saído das mesas; a humana é a escolhida (como no hangar).
   game.registry.set('cartas', mao(c.niveis));
   game.registry.set('cartasCheckpoint', {});
-  game.registry.set('tierNave', c.tier);
+  escolherNave(game.registry, escolhaPorNome(c.humana) ?? ESCOLHAS[0]);
   game.scene.start('Game', { stage: c.fase, ship: c.nave, handling: 'diegetico', practice: c.chefe, sandbox: c });
 }

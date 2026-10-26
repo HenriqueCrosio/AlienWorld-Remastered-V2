@@ -8,7 +8,7 @@ const PULSO_MS = 1600;
 /**
  * A AURA DO CASCO (§4.3b) — volta, de outro jeito. Em 28/09 o desenho em volta da nave saiu: era uma ELIPSE de 30px
  * que, nas naves de 44px, sumia atrás do casco e lia como "feixe de luz". Agora é o CONTORNO de 1px da SILHUETA da
- * própria nave (tirado do alfa do quadro atual, em cada tier e nas duas linhagens), ciano, pulsando devagar — sem forma
+ * própria nave (tirado do alfa do quadro atual, nas duas linhagens e nas duas pinturas), ciano, pulsando devagar — sem forma
  * própria para "virar feixe". O "CASCO" continua na HUD: *"o jogador precisa saber que tem só de olhar a aura"* (ele).
  *
  * O contorno de cada quadro é calculado UMA vez e guardado como textura (`aura|<textura>|<quadro>`).

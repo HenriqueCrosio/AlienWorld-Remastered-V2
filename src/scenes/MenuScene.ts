@@ -14,6 +14,7 @@ import { CHAVE_MENU_HD, MenuCenaHD } from '../menu/MenuCenaHD';
 import { criarTitulo, tingirLetras, type TituloMenu } from '../menu/titulo';
 import { Jatos } from '../menu/jatos';
 import { lerConducao, salvarConducao } from '../menu/conducao';
+import { ESCOLHAS, escolherNave, naveEscolhida, nomeDaEscolha } from '../ships';
 
 const movimentoReduzido = (): boolean =>
   typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -52,6 +53,8 @@ export class MenuScene extends Phaser.Scene {
   private coresItens: number[] = [];
   private sub: Phaser.GameObjects.Text | null = null;
   private desc: Phaser.GameObjects.Text | null = null;
+  /** A 2ª linha das teclas de dev (só em dev): mostra a pintura da nave que [H] troca. */
+  private devLinha2: Phaser.GameObjects.Text | null = null;
   private titulo: TituloMenu | null = null;
   private readonly aoEscala = (s: number): void => this.titulo?.trocarEscala(s);
 
@@ -129,7 +132,7 @@ export class MenuScene extends Phaser.Scene {
     this.desc = this.t(L.x, L.desc, ' ', 7, CONDUCOES[0].cor).setAlpha(0);
     if (import.meta.env.DEV) {
       this.t(GAME_WIDTH / 2, 8, '[B] chefão 1  [C] capitânia  [N] serpente  [V] f2  [M] f3', 7, CORES_TEXTO.dev);
-      this.t(GAME_WIDTH / 2, 16, '[I][O][P][F] cutscenes  [L] f4  [K] núcleo', 7, CORES_TEXTO.dev);
+      this.devLinha2 = this.t(GAME_WIDTH / 2, 16, this.textoDevLinha2(), 7, CORES_TEXTO.dev);
     }
     const irma = irmaDe(this);
     this.naCamada = irma !== null;
@@ -281,7 +284,19 @@ export class MenuScene extends Phaser.Scene {
           score: 21000, handling: 'diegetico', ship: 'humana', stage: null, stageDone: 4, practice: false, baseScore: 15200,
         }),
       );
+      // A NAVE da humana (25/10): até a cena do hangar dele existir, [H] passa pelas escolhas do hangar (modelo e
+      // pintura) para a próxima jogada.
+      kb.on('keydown-H', () => {
+        const agora = nomeDaEscolha(naveEscolhida(this.registry));
+        const i = ESCOLHAS.findIndex((e) => nomeDaEscolha(e) === agora);
+        escolherNave(this.registry, ESCOLHAS[(i + 1) % ESCOLHAS.length]);
+        this.devLinha2?.setText(this.textoDevLinha2());
+      });
     }
+  }
+
+  private textoDevLinha2(): string {
+    return `[I][O][P][F] cutscenes  [L] f4  [K] núcleo  [H] nave ${nomeDaEscolha(naveEscolhida(this.registry))}`;
   }
 
   private mover(d: number): void {
@@ -300,7 +315,8 @@ export class MenuScene extends Phaser.Scene {
 
   private confirmar(): void {
     if (!this.settled) return;
-    if (this.cursorMenu === ITEM.comecar) this.start(this.conducao);
+    // COMEÇAR passa pelo HANGAR (25/10): o jogador escolhe a nave antes da F1. Os atalhos 1/2/3 seguem direto.
+    if (this.cursorMenu === ITEM.comecar) this.scene.start('Hangar', { handling: this.conducao });
     else if (this.cursorMenu === ITEM.conducao) this.trocar(1);
     else if (this.cursorMenu === ITEM.arquivo) this.scene.start('Arquivo');
   }

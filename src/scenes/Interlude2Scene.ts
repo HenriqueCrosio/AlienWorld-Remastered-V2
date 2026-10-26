@@ -8,9 +8,8 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
-import { SHIPS, DEFAULT_SHIP, ROSTER_DOCA } from '../ships';
+import { SHIPS, DEFAULT_SHIP, ROSTER_DOCA, naveEscolhida, visualDaNave } from '../ships';
 import { mesaDaCutscene, resetDaAlien } from '../cartas';
-import { entrarNaManta } from '../pecas';
 import { ShipPanel } from '../ui/ShipPanel';
 import { STAGES } from '../systems/StageDirector';
 import type { HandlingMode } from './GameScene';
@@ -144,7 +143,8 @@ export class Interlude2Scene extends Phaser.Scene {
   // ser rebalanceado e enxugado (passe de balanceamento), e o Henrique pediu explicitamente que o
   // ponto ficasse pronto para a troca, para não virar retrabalho. Ver `encalharNaveDaVaga()`.
   /** O id em `SHIPS` da nave que ESTA cutscene desbloqueia. Trocar aqui, e só aqui. */
-  // PROTÓTIPO DAS CARTAS: a nave largada na doca é a MANTA (a linhagem alien, já no tier 1).
+  // PROTÓTIPO DAS CARTAS: a nave largada na doca é a MANTA (a linhagem alien; 25/10: a dos chifres abertos, a mesma
+  // com que o jogador sai — `SHIPS.alienigena`).
   private static readonly NAVE_DA_VAGA = 'alienigena';
   /** X do casco na VAGA, em coords da ARTE — medido no trecho livre da laje do meio (136..228). */
   private static readonly VAGA_AX = 190;
@@ -252,8 +252,8 @@ export class Interlude2Scene extends Phaser.Scene {
     this.encalharNaveDaVaga();
 
     // A nave que chega é a ESCOLHIDA na Aurora (this.naveId) — a doca não pode desmentir a
-    // escolha que o jogador fez uma fase atrás.
-    const chegada = SHIPS[this.naveId];
+    // escolha que o jogador fez uma fase atrás (a humana, no modelo e na pintura do hangar).
+    const chegada = visualDaNave(this.naveId, naveEscolhida(this.registry));
     const chegadaTex = this.textures.exists(chegada.texture) ? chegada.texture : 'ship';
     this.ship = this.add.sprite(-30, 70, chegadaTex).setDepth(Interlude2Scene.DEPTH_NAVE);
     const chegadaAnim = chegadaTex === chegada.texture ? (chegada.anim ?? 'ship-thrust') : 'ship-thrust';
@@ -705,7 +705,7 @@ export class Interlude2Scene extends Phaser.Scene {
 
     // PROTÓTIPO DAS CARTAS: a alien está AQUI, largada na doca. O painel oferece o CERTO e o INCERTO:
     // - ficar na humana → a carta normal da conquista (≥1 Rara);
-    // - trocar para a alien (já no tier 1) → o RESET: a mão inteira volta e é refeita em mesas aleatórias, +1 extra.
+    // - trocar para a alien → o RESET: a mão inteira volta e é refeita em mesas aleatórias, +1 extra.
     this.aviso('DOCA KEPLER-9 · UMA NAVE ALIEN FOI DEIXADA AQUI', COLORS.playerBright);
     this.panel = new ShipPanel(
       this,
@@ -715,8 +715,6 @@ export class Interlude2Scene extends Phaser.Scene {
         this.panel?.destroy();
         this.panel = null;
         if (id === 'alienigena') {
-          // A manta encontrada aqui já vem no tier 1 (src/pecas.ts).
-          entrarNaManta(this.registry);
           resetDaAlien(this, () => this.escolher(id), () => this.sair());
         } else {
           mesaDaCutscene(this, 'CONQUISTA · A CAPITÂNIA', { fase: 3, garante: 'rara' }, () => this.escolher(id), () =>
@@ -751,7 +749,7 @@ export class Interlude2Scene extends Phaser.Scene {
    * campo, e quem toca por último ganha.
    */
   private trocarNave(id: string): void {
-    const nave = SHIPS[id];
+    const nave = visualDaNave(id, naveEscolhida(this.registry));
     if (!this.textures.exists(nave.texture)) return;
 
     const s = this.ship as Phaser.GameObjects.Sprite;

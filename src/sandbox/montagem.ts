@@ -2,7 +2,8 @@ import './montagem.css';
 import { CARTAS } from '../data/catalogoCartas.ts';
 import { COR_RARIDADE, NOME_RARIDADE } from '../raridade.ts';
 import { ARVORES, ATALHOS, atalho, gastos, limiteDePontos, podeSomar, podeTirar, semF1Fora, somar, tirar, type Nave } from './arvore.ts';
-import { INIMIGOS, MAX_POR_ONDA, NOME_INIMIGO, TIERS, carregar, salvar, type ConfigSandbox, type TipoInimigo } from './config.ts';
+import { INIMIGOS, MAX_POR_ONDA, NOME_INIMIGO, carregar, salvar, type ConfigSandbox, type TipoInimigo } from './config.ts';
+import { ESCOLHAS, nomeDaEscolha } from '../ships.ts';
 
 /**
  * A TELA DE MONTAGEM do sandbox (spec `2026-10-02-sandbox-dev-design.md`) — HTML por cima do canvas, só em dev.
@@ -91,11 +92,8 @@ function aoClicar(e: MouseEvent): void {
 function aoMudar(e: Event): void {
   const el = e.target as HTMLInputElement | HTMLSelectElement;
   mudar((c) => {
-    if (el.id === 'sb-nave') {
-      c.nave = el.value as Nave;
-      if (!TIERS[c.nave].includes(c.tier)) c.tier = TIERS[c.nave][TIERS[c.nave].length - 1];
-    }
-    if (el.id === 'sb-tier') c.tier = Number(el.value);
+    if (el.id === 'sb-nave') c.nave = el.value as Nave;
+    if (el.id === 'sb-humana') c.humana = el.value;
     if (el.id === 'sb-livre') c.livre = (el as HTMLInputElement).checked;
     if (el.name === 'sb-fase') {
       c.fase = Number(el.value) as ConfigSandbox['fase'];
@@ -146,7 +144,7 @@ function desenhar(): void {
 <div class="barra">
   <div class="grupo"><span class="rotulo">nave</span>
     <select id="sb-nave"><option value="humana"${cfg.nave === 'humana' ? ' selected' : ''}>humana</option><option value="alienigena"${cfg.nave === 'alienigena' ? ' selected' : ''}>alien (manta)</option></select>
-    <select id="sb-tier">${TIERS[cfg.nave].map((t) => `<option value="${t}"${t === cfg.tier ? ' selected' : ''}>T${t}</option>`).join('')}</select></div>
+    ${cfg.nave === 'humana' ? `<select id="sb-humana">${ESCOLHAS.map(nomeDaEscolha).map((n) => `<option value="${n}"${n === cfg.humana ? ' selected' : ''}>${n}</option>`).join('')}</select>` : ''}</div>
   <span class="pontos${estourou ? ' estourou' : g === lim ? ' cheio' : ''}">${pontos}</span>
   <label class="grupo"><input type="checkbox" id="sb-livre"${cfg.livre ? ' checked' : ''}> LIVRE</label>
   <button data-acao="reset">RESET</button>

@@ -129,18 +129,22 @@ const FRAMES: Record<string, number> = {
   shipAlien2Anim: 9,
   // O ARAUTO também ganhou propulsão (2026-07-21): era a única nave jogável sem motor animado.
   shipArautoAnim: 9,
-  // PROTÓTIPO DAS CARTAS (28/09): o motor dos tiers humanos novos (PixMiniMax, 8 quadros, só a chama anda).
-  naveHumanaT0Anim: 8,
   // O JATO AZUL dos Propulsores (04/10, `scripts/_jato-azul.mjs`): os mesmos quadros, só a chama azul.
   shipJatoAzulAnim: 9,
-  naveHumanaT0AzulAnim: 8,
-  naveHumanaT2AzulAnim: 8,
-  naveHumanaT2Anim: 8,
-  // A MANTA T1 (28/09): o CORPO é o da arte aprovada em todos os quadros (colado por cima no disco); só a
-  // nadadeira e a cauda vêm do PixMiniMax. Laço fechado de 10 quadros, batida curta — a aprovada.
-  naveAlienT1Anim: 10,
-  // A MANTA T2 (28/09, aprovada): o MOVIMENTO é o da T1 aprovada, quadro a quadro (transfer-outfit do PixelLab
-  // sobre os 10 quadros dela); chifres travados num quadro só e a 3ª nadadeira dos quadros 2-3 apagada no disco.
+  // A "a" DO HANGAR (25/10, à noite; os tiers saíram à tarde): a laranja e a preta no molde da preta "a"
+  // (`scripts/_naves/_nave-molde-preta.mjs`), a chama à mão em 8 quadros, e o mesmo com a chama azul dos Propulsores.
+  // (O balanço do casco foi testado e saiu: nave no espaço não flutua. A T0, a T2 de 28/09 e a manta T1 saíram do
+  // carregamento; os PNGs ficam no disco.)
+  naveHumanaAnim: 8,
+  naveHumanaAzulAnim: 8,
+  naveHumanaPretaAnim: 8,
+  naveHumanaPretaAzulAnim: 8,
+  // O JATO na pintura de osso (25/10, à noite: o 2º modelo do hangar; os quadros do jato repintados).
+  naveJatoOssoAnim: 9,
+  naveJatoOssoAzulAnim: 9,
+  // A MANTA (28/09, aprovada; 25/10 a única forma da alien): o MOVIMENTO é o da T1 aprovada, quadro a quadro
+  // (transfer-outfit do PixelLab sobre os 10 quadros dela); chifres travados num quadro só e a 3ª nadadeira dos
+  // quadros 2-3 apagada no disco.
   naveAlienT2Anim: 10,
 
   // A AURORA da cutscene 1. Remodelada em 2026-08-09 (casco escuro, luzes vermelhas piscando e
@@ -260,14 +264,15 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'ship-canhoes-thrust', prefix: 'shipCanhoesAnim', frameRate: 12 },
   { key: 'ship-alien2-thrust', prefix: 'shipAlien2Anim', frameRate: 12 },
   { key: 'ship-arauto-thrust', prefix: 'shipArautoAnim', frameRate: 12 },
-  { key: 'nave-humana-t0-thrust', prefix: 'naveHumanaT0Anim', frameRate: 12 },
-  { key: 'nave-humana-t2-thrust', prefix: 'naveHumanaT2Anim', frameRate: 12 },
+  { key: 'nave-humana-thrust', prefix: 'naveHumanaAnim', frameRate: 12 },
+  { key: 'nave-humana-preta-thrust', prefix: 'naveHumanaPretaAnim', frameRate: 12 },
+  { key: 'nave-jato-osso-thrust', prefix: 'naveJatoOssoAnim', frameRate: 12 },
   // O JATO AZUL dos Propulsores: a mesma propulsão com o sufixo `-azul` (a cena troca quando a carta entra).
   { key: 'ship-jato-thrust-azul', prefix: 'shipJatoAzulAnim', frameRate: 12 },
-  { key: 'nave-humana-t0-thrust-azul', prefix: 'naveHumanaT0AzulAnim', frameRate: 12 },
-  { key: 'nave-humana-t2-thrust-azul', prefix: 'naveHumanaT2AzulAnim', frameRate: 12 },
+  { key: 'nave-humana-thrust-azul', prefix: 'naveHumanaAzulAnim', frameRate: 12 },
+  { key: 'nave-humana-preta-thrust-azul', prefix: 'naveHumanaPretaAzulAnim', frameRate: 12 },
+  { key: 'nave-jato-osso-thrust-azul', prefix: 'naveJatoOssoAzulAnim', frameRate: 12 },
   // ~120ms por quadro: a manta plana devagar (a de 12fps lia "nervosa").
-  { key: 'nave-alien-t1-nado', prefix: 'naveAlienT1Anim', frameRate: 8 },
   { key: 'nave-alien-t2-nado', prefix: 'naveAlienT2Anim', frameRate: 8 },
 
   // A AURORA respira a 8, como a Capitânia: navio ancorado, luzes e propulsores em marcha lenta.
@@ -591,12 +596,13 @@ const ART: Record<string, string> = {
   shipCanhoes: 'sprites/ship-canhoes.png',
   shipAlien2: 'sprites/ship-alien2.png',
   ...animFrames('shipJatoAnim', 'ship-jato-anim'),
-  ...animFrames('naveHumanaT0Anim', 'naves/humana-t0-anim'),
-  ...animFrames('naveHumanaT2Anim', 'naves/humana-t2-anim'),
   ...animFrames('shipJatoAzulAnim', 'ship-jato-azul-anim'),
-  ...animFrames('naveHumanaT0AzulAnim', 'naves/humana-t0-azul-anim'),
-  ...animFrames('naveHumanaT2AzulAnim', 'naves/humana-t2-azul-anim'),
-  ...animFrames('naveAlienT1Anim', 'naves/alien-t1-anim'),
+  ...animFrames('naveHumanaAnim', 'naves/humana-anim'),
+  ...animFrames('naveHumanaAzulAnim', 'naves/humana-azul-anim'),
+  ...animFrames('naveHumanaPretaAnim', 'naves/humana-preta-anim'),
+  ...animFrames('naveHumanaPretaAzulAnim', 'naves/humana-preta-azul-anim'),
+  ...animFrames('naveJatoOssoAnim', 'naves/jato-osso-anim'),
+  ...animFrames('naveJatoOssoAzulAnim', 'naves/jato-osso-azul-anim'),
   ...animFrames('naveAlienT2Anim', 'naves/alien-t2-anim'),
   ...animFrames('shipVerdeAnim', 'ship-verde-anim'),
   ...animFrames('shipCremeAnim', 'ship-creme-anim'),
@@ -1148,10 +1154,11 @@ const ART: Record<string, string> = {
   'carta-tiro-drone': 'sprites/cartas/pecas/tiro-drone-humano.png',
   'carta-tiro-drone-alien': 'sprites/cartas/pecas/tiro-drone-alien.png',
   'carta-estilhaco': 'sprites/cartas/pecas/estilhaco.png',
-  // Os TIERS das linhagens (aprovados em 27/09; o T1 humano é o `shipJato`). Todos 44×26, de perfil.
-  naveHumanaT0: 'sprites/naves/humana-t0.png',
-  naveHumanaT2: 'sprites/naves/humana-t2.png',
-  naveAlienT1: 'sprites/naves/alien-t1.png',
+  // UMA NAVE POR LINHAGEM (25/10): a humana nas escolhas do hangar — a "a" (laranja/preta) e o jato (o `shipJato`,
+  // acima, e o de osso) — e a manta. Todas 44×26, de perfil.
+  naveHumana: 'sprites/naves/humana.png',
+  naveHumanaPreta: 'sprites/naves/humana-preta.png',
+  naveJatoOsso: 'sprites/naves/jato-osso.png',
   naveAlienT2: 'sprites/naves/alien-t2.png',
   // (As molduras do CARTUCHO — `sprites/cartas/carta-*.png`, PixelLab 9aba58b5 #1 — saíram do jogo em 29/09 junto com o
   // layout; os PNGs ficam no disco como material para a arte nova do compacto, spec 2.)
