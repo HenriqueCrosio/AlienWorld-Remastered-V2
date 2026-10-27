@@ -180,6 +180,47 @@ export const SALAO_F1 = {
   poeira: { n: 24, cor: 0xd8e4ff, alfa: 0.7, queda: 2.5, largura: 12, depth: -82.35 },
 } as const;
 
+/**
+ * A ARANHA DA CAVERNA (27/10, ele: a silhueta "preta, aparente apenas o contorno e forma dela", no TETO, e o desenho dele
+ * por cima do salão): ela está na boca de luz da abertura OLHANDO para a nave, mexendo as pernas; VIRA para a câmera
+ * ("virando para 'frente'"), encara, desvira e CORRE para a esquerda pelo teto, por trás das estalactites, até o canto
+ * escuro; lá olha e vira de novo, e sai pela curva por trás da outra estalactite — some.
+ * - os quadros e o recorte são assados por `scripts/_g/_aranha-caverna-f1.mjs` (o desenho é procedural,
+ *   `_aranha-silhueta.mjs`; o quadro 0 é a C aprovada, pixel a pixel);
+ * - ela mora na PINTURA do salão (anda com a deriva dela; `inicio` e os caminhos em px da pintura, 429 × 216 — o y é a
+ *   linha dos PÉS no teto): por cima da pintura e por baixo das brasas dela, e o RECORTE das estalactites (a própria
+ *   pintura, só a rocha) por cima dela — por isso ela passa POR TRÁS delas;
+ * - `comecaEm`: o `d` da caverna (px de mundo) em que a rocha da entrada já passou da abertura;
+ * - o roteiro roda no relógio da cena; `corre` anda o caminho em `vel` px/s (média: sai e chega devagar), e as pernas
+ *   seguem a DISTÂNCIA (os pés não escorregam).
+ */
+export const ARANHA_F1 = {
+  chave: 'f1-aranha',
+  dados: 'f1-aranha-dados',
+  chaveFrente: 'f1-cav-aranha-frente',
+  depth: -82.97,
+  depthFrente: -82.96,
+  comecaEm: 300,
+  inicio: [358, 48],
+  caminhos: [
+    [[358, 48], [145, 38]],
+    [[145, 38], [132, 47], [115, 52], [100, 50], [92, 40], [87, 30], [85, 22]],
+  ],
+  fps: 8,
+  roteiro: [
+    { faz: 'olha', s: 1.3 },
+    { faz: 'vira', s: 0.45 },
+    { faz: 'encara', s: 0.7 },
+    { faz: 'desvira', s: 0.45 },
+    { faz: 'corre', caminho: 0, vel: 85 },
+    { faz: 'olha', s: 0.9 },
+    { faz: 'vira', s: 0.45 },
+    { faz: 'encara', s: 0.7 },
+    { faz: 'desvira', s: 0.45 },
+    { faz: 'corre', caminho: 1, vel: 45 },
+  ],
+} as const;
+
 /** A QUEDA do chão na saída da atmosfera: a duração e a curva (as da queda do terreno de sempre). */
 export const QUEDA_CHAO_F1 = { ms: 2500 } as const;
 

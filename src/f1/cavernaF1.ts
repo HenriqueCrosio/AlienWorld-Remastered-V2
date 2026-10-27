@@ -3,6 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { CAVERNA_F1 } from './numerosF1';
 import { derivaCaverna, posicoesCaverna, regiaoCaverna, salaoVisivel, type PosicoesCaverna } from './ritmosF1';
 import { montarSalaoVivo, type LuzesSalao } from './salaoVivo';
+import { montarAranhaCaverna } from './aranhaCaverna';
 
 /**
  * A CAVERNA DA F1 (21/10, a ideia dele — spec `2026-10-21-f1-caverna-design.md`). As quatro pinturas dele assadas por
@@ -116,6 +117,8 @@ export function montarCaverna(scene: Phaser.Scene): CavernaF1 | null {
   chao.setMask(mascara);
   // O SALÃO VIVO: as brasas, a bruma, os fachos, os halos e a poeira — presos à mesma máscara.
   const vida = montarSalaoVivo(scene, D.luzes, mascara, teto, chao);
+  // A ARANHA (27/10): na pintura do salão, atrás do recorte das estalactites — ver `ARANHA_F1`.
+  const aranha = montarAranhaCaverna(scene, mascara);
 
   // A aura: uma imagem FORA da lista de exibição que copia a nave; a máscara invertida dela fura as duas faixas.
   const aura = scene.make.image({ x: 0, y: 0, key: '__WHITE' }, false);
@@ -156,6 +159,7 @@ export function montarCaverna(scene: Phaser.Scene): CavernaF1 | null {
     const a = Math.max(0, Math.round(de)), b = Math.min(GAME_WIDTH, Math.round(ate));
     if (b > a) g.fillRect(a, 0, b - a, GAME_HEIGHT);
     vida?.atualizar(scene.time.now / 1000, d, interior.x);
+    aranha?.atualizar(scene.time.now / 1000, d, interior.x);
   };
 
   return {
@@ -165,6 +169,7 @@ export function montarCaverna(scene: Phaser.Scene): CavernaF1 | null {
       d = 0;
       entrou = false;
       saiu = false;
+      aranha?.mostrar(true);
       colocar(posicoesCaverna(0, D.fundoMeio, L));
       for (const o of todas) o.setVisible(true);
       vida?.mostrar(true);
@@ -185,6 +190,7 @@ export function montarCaverna(scene: Phaser.Scene): CavernaF1 | null {
         ativa = false;
         for (const o of todas) o.setVisible(false);
         vida?.mostrar(false);
+        aranha?.mostrar(false);
         g.clear();
       }
     },

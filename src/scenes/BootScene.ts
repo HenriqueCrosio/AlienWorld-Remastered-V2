@@ -1219,6 +1219,10 @@ const ART: Record<string, string> = {
   'f1-cav-teto': 'sprites/f1/cav-teto.png',
   'f1-cav-chao': 'sprites/f1/cav-chao.png',
   'f1-cav-interior': 'sprites/f1/cav-interior.png',
+  // A ARANHA do salão (27/10, `scripts/_g/_aranha-caverna-f1.mjs`): os quadros numa fileira e o recorte das estalactites
+  // que passam na frente dela (o mapa dos quadros é o `f1-aranha-dados`).
+  'f1-aranha': 'sprites/f1/aranha.png',
+  'f1-cav-aranha-frente': 'sprites/f1/cav-aranha-frente.png',
   // O SALÃO VIVO (21/10, `scripts/_g/_luzes-caverna-f1.mjs`): os terços "apagados" das brasas do fundo, do teto e do chão.
   ...Object.fromEntries(
     ['interior', 'teto', 'chao'].flatMap((p) => [0, 1, 2].map((g) => [`f1-cav-${p}-brasa-${g}`, `sprites/f1/cav-${p}-brasa-${g}.png`])),
@@ -1388,6 +1392,7 @@ export class BootScene extends Phaser.Scene {
     this.load.json('f1-chao', 'sprites/f1/chao.json');
     this.load.json('f1-morte', 'sprites/f1/morte.json');
     this.load.json('f1-caverna', 'sprites/f1/caverna.json');
+    this.load.json('f1-aranha-dados', 'sprites/f1/aranha.json');
 
     // O PRIMEIRO PLANO DA F4 (17/10, ver `PrimeiroPlanoF4`): 44 silhuetas de tamanhos diferentes num ATLAS só — uma
     // sheet de célula fixa não as comporta. Empacotado por `scripts/_polimento/_instalar-frente-f4.mjs`.
