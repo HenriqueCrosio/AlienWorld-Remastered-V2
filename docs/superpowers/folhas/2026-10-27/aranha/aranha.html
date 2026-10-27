@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A aranha da caverna</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  .rec { color: var(--ok); font-weight: 600; }
+  .dupla { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 800px) { .dupla { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+<h1>A aranha da caverna</h1>
+<p class="sub">27/10/2026 · F1, o salão da caverna · Nada foi commitado, e nada entrou em <code>src/</code>.</p>
+
+<div class="item" style="border-color: var(--ok)">
+  <p><b>27/10, depois da sua escolha: a C, em preto puro, já está no jogo e anda</b> (seção 8). Você: <i>"olhando para a direção da nave, mexendo as pernas e virando para 'frente' e sair andando e sumir atrás do layer da estalactite"</i>, e o desenho por cima do salão.</p>
+</div>
+
+<div class="item">
+  <p>Você: <i>"crie no pixellab, caso consiga fazer de forma procedural, melhor. A silhueta de uma aranha, quero colocá-la no fundo da parte da caverna na Fase 1. A silhueta precisa ser preta, aparente apenas o contorno e forma dela."</i></p>
+  <ul>
+    <li><b>Saiu procedural.</b> A aranha é desenhada por código, pixel a pixel, na resolução do jogo: dois ovais no corpo e oito pernas de três juntas. As pernas de 1 px não dobram nos degraus. Cada joelho treme um pouco por sorteio, então nenhuma perna sai igual à outra. Dá para gerar qualquer pose ou tamanho de novo.</li>
+    <li><b>As fotos são do jogo de verdade</b>, no meio do salão. A aranha entrou só naquela janela do teste, na pintura do fundo: atrás da bruma, do halo da abertura e dos fachos frios, presa à máscara do salão e andando com a deriva dele. O tratamento de imagem da F1 está ligado. É por isso que o preto aparece um pouco acinzentado, como os pretos da própria pintura.</li>
+    <li><b>Uma silhueta preta só lê contra a luz.</b> A caverna é quase toda escura, então os quatro lugares ficam na abertura de luz fria, no alto à direita, e na bruma do vale.</li>
+  </ul>
+</div>
+
+<h2>1. O salão, sem aranha</h2>
+<div class="item">
+  <figure><img src="sem-aranha.png" alt="O salão da caverna sem aranha"><figcaption><b>46 s de fase</b>, a 3×. A nave está parada fora da foto, e os inimigos estão escondidos.</figcaption></figure>
+</div>
+
+<h2>2. Quatro lugares</h2>
+<div class="item">
+  <div class="dupla">
+    <figure><img src="pendurada.png" alt=""><figcaption><b>A. Pendurada</b> num fio da borda da abertura, de cabeça para baixo, contra a luz. 25 × 33 px, e o fio sobe 34 px.</figcaption></figure>
+    <figure><img src="perfil.png" alt=""><figcaption><b>B. De perfil, no vale</b>: andando sobre a crista, contra a bruma e o facho. 50 × 20 px.</figcaption></figure>
+    <figure><img src="teto.png" alt=""><figcaption><b>C. No teto da abertura</b>, de cabeça para baixo, andando na borda. 43 × 18 px. É a que menos lê: metade dela cai contra as estalactites escuras.</figcaption></figure>
+    <figure><img src="frente.png" alt=""><figcaption><b>D. De frente, grande na bruma</b>: parada no vale, olhando para a nave. 81 × 29 px.</figcaption></figure>
+  </div>
+</div>
+
+<h2>3. Preto puro ou com aro</h2>
+<div class="item">
+  <p>À esquerda, preto puro: só a forma. À direita, um aro de 1 px na cor da luz fria, só no contorno de fora e só onde o corpo tem pelo menos 3 px de espessura. As pernas ficam pretas, porque um aro numa perna de 1 px acende a perna inteira.</p>
+  <figure><img src="pendurada-aro.png" alt=""><figcaption><b>A. Pendurada</b></figcaption></figure>
+  <figure><img src="perfil-aro.png" alt=""><figcaption><b>B. De perfil</b></figcaption></figure>
+  <figure><img src="teto-aro.png" alt=""><figcaption><b>C. No teto</b></figcaption></figure>
+  <figure><img src="frente-aro.png" alt=""><figcaption><b>D. De frente</b></figcaption></figure>
+</div>
+
+<h2>4. Os sprites</h2>
+<div class="item">
+  <figure><img src="sprites.png" alt="As quatro poses, preto e com aro, a 4×"><figcaption><b>A 4×, sobre a cor da abertura</b>, na ordem perfil, teto, pendurada e frente. Em cada par, o preto puro vem antes do com aro.</figcaption></figure>
+</div>
+
+<h2>5. O PixelLab, para comparar</h2>
+<div class="item">
+  <p>Pedi duas ao PixelLab antes de desenhar: uma de perfil (Pro Flash, paleta de 2 cores) e uma pendurada (Pixflux, sem contorno). As duas saíram de desenho animado: a de perfil lê como formiga, e a pendurada é uma aranhinha de Halloween. Por isso fiquei com a de código.</p>
+  <figure><img src="pixellab.png" alt="As duas do PixelLab a 4×" style="max-width:520px"><figcaption><b>As do PixelLab, a 4×.</b></figcaption></figure>
+</div>
+
+<h2>6. O que eu recomendo</h2>
+<div class="item">
+  <p class="rec">A, a pendurada, em preto puro.</p>
+  <ul>
+    <li>É a que lê mais claro: fica inteira contra a parte mais clara da abertura.</li>
+    <li>É pequena, como pede a regra do fundo (o que está longe diminui).</li>
+    <li>O fio prende a aranha no teto, então ela não flutua, e ainda dá a altura do salão.</li>
+    <li>A D (de frente) assusta mais, mas no tamanho em que lê ela tem 81 px de largura e fica na altura da nave. No meio da luta, pode parecer um inimigo.</li>
+  </ul>
+</div>
+
+<h2>7. O que eu preciso de você</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Qual lugar</b> (A, B, C ou D), ou mais de um.</li>
+    <li><b>Preto puro ou com aro.</b></li>
+    <li><b>O tamanho</b>, se quiser maior ou menor: o desenho sai de novo em qualquer escala.</li>
+    <li><b>Parada ou com vida.</b> Ela pode ficar imóvel, ou mexer bem pouco: a pendurada balançando no fio ou descendo devagar, a do vale dando um passo. Mas a memória do projeto diz que criatura animada sai do PixelLab inteira, e não em partes mexidas por código. Então só faço o movimento por código se você quiser assim.</li>
+  </ol>
+</div>
+
+<h2>8. Ela anda, no jogo</h2>
+<div class="item">
+  <p>Você escolheu a C, em preto puro: <i>"é bom que ela fique atrás das estalactites"</i>. E o seu desenho: <i>"ela sai do ponto inicial, faz o movimento que eu te falei, mas ela sai para a esquerda (passando por trás da estalactite) e sai naquele canto mais escuro, faz o movimento de olhar e virar e sai para trás daquela outra estalactite"</i>.</p>
+  <ol>
+    <li><b>Na boca de luz da abertura</b>, ela olha para a nave mexendo as pernas: as da frente sobem e tateiam, as segundas batem. Isso dura 1,3 s.</li>
+    <li><b>Vira para a câmera</b> (a "frente"), encara 0,7 s e volta ao perfil.</li>
+    <li><b>Corre para a esquerda pelo teto</b>, por trás das duas estalactites da abertura, até o canto escuro (2,5 s). Sai e chega devagar, e as pernas seguem a distância andada, então os pés não escorregam.</li>
+    <li><b>No canto</b>, olha (0,9 s), vira para a câmera, encara e volta.</li>
+    <li><b>Sai pela curva do seu desenho</b>, por trás da outra estalactite, e some. São uns 10 s ao todo, e o roteiro começa quando a rocha da entrada sai da frente da abertura.</li>
+  </ol>
+  <p><b>Como ela passa por trás:</b> ela mora na pintura do salão. Por cima dela vai um recorte da própria pintura, só nos pixels de rocha: as estalactites da abertura e o canto onde ela some. Como o recorte é a pintura mesma, não aparece emenda.</p>
+  <p><b>A virada é o mesmo desenho girando.</b> Cada junta tem o lugar do perfil e o da vista de frente, e o giro mistura os dois. O primeiro quadro é a C que você aprovou, pixel a pixel.</p>
+  <figure><img src="quadros.png" alt="Sete quadros da aranha a 5×"><figcaption><b>Os quadros, a 5×:</b> a C, olhando, no meio do giro, de frente, encarando, correndo.</figcaption></figure>
+  <figure><video src="aranha-teto.webm" controls loop muted autoplay playsinline></video><figcaption><b>O teto, a 4×</b>, do jogo de verdade (41 a 57 s da F1, a nave parada e intocável).</figcaption></figure>
+  <figure><video src="aranha-tela.webm" controls loop muted autoplay playsinline></video><figcaption><b>A tela inteira, a 3×</b>, com a onda do salão passando.</figcaption></figure>
+</div>
+
+<h2>9. O canto escuro</h2>
+<div class="item" style="border-color: var(--ok)">
+  <p><b>Decidido em 27/10: fica assim.</b> Você: <i>"é exatamente essa sensação que eu quero passar. Ela sai do lado mais luminoso e foge para as sombras, típico de uma aranha."</i></p>
+</div>
+<div class="item">
+  <p>Na luz da abertura ela lê bem. No canto escuro, preta contra a rocha escura, ela vira só uma sombra: olhar e virar ali quase não se vê. A imagem abaixo é o canto com o contraste aumentado 4 vezes. Ela está lá, de perfil e virando, mas na tela normal mal aparece.</p>
+  <figure><img src="canto-escuro-x4.png" alt="O canto escuro com o contraste aumentado" style="max-width:900px"><figcaption><b>O canto escuro, contraste ×4</b>: à esquerda, de perfil; à direita, no meio do giro.</figcaption></figure>
+  <p>O que dá para fazer:</p>
+  <ol>
+    <li><b>Deixar assim:</b> no canto ela é uma sombra que se mexe, e só quem olha com atenção vê.</li>
+    <li><b>Um aro de luz fria só no canto escuro:</b> o contorno de 1 px da seção 3, aceso só enquanto ela está ali. Na luz, continua preto puro.</li>
+    <li><b>Mudar o ponto 2</b> para uns 20 a 30 px à direita, onde a parede de trás clareia com o facho.</li>
+  </ol>
+</div>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li><b>O desenho:</b> <code>scripts/_g/_aranha-silhueta.mjs &lt;pasta&gt;</code>. As quatro poses são esqueletos em px (<code>POSES</code>), e <code>k</code> muda a escala. <code>desenharAranha</code> faz a máscara, e <code>pintarAranha</code> pinta o preto ou o aro.</li>
+    <li><b>A montagem no jogo:</b> <code>scripts/_g/_aranha-maquete.mjs &lt;pasta&gt; &lt;conceitos.json&gt;</code>. Roda a F1 até o meio do salão e põe a aranha só naquela página, sem tocar em <code>src/</code>. Ela fica na profundidade −82,9: acima da pintura e das brasas dela, abaixo da bruma de trás (−82,6). Também segue a máscara do salão e a deriva da pintura.</li>
+    <li><b>Os lugares, em px da pintura do salão (429 × 216):</b> A, o fio em (333, 44); B, os pés em (278, 147); C, o teto em (345, 46); D, os pés em (318, 150).</li>
+    <li><b>No jogo</b> (27/10):
+      <ul>
+        <li><code>scripts/_g/_aranha-caverna-f1.mjs</code> assa três arquivos em <code>public/sprites/f1/</code>: <code>aranha.png</code> (35 quadros numa fileira: parada, olha, vira, encara, anda), <code>aranha.json</code> (a célula, a origem, a linha dos pés, os grupos e o passo) e <code>cav-aranha-frente.png</code> (o recorte das estalactites).</li>
+        <li>O desenho que gira é o <code>poseAranha</code> (o perfil e a frente misturados pelo ângulo). <code>marcha</code> são as pernas andando, em dois grupos alternados de quatro, como numa aranha, e <code>inquieta</code> são as pernas enquanto ela olha.</li>
+        <li><code>src/f1/aranhaCaverna.ts</code> roda o roteiro, e os números estão em <code>ARANHA_F1</code> (<code>numerosF1.ts</code>): o início, os dois caminhos em px da pintura, os tempos e a velocidade. A <code>montarCaverna</code> a liga, desliga e põe no lugar a cada quadro.</li>
+        <li><code>scripts/_g/_aranha-filme.mjs</code> filma o salão no jogo.</li>
+        <li>A sonda da caverna e o teste de geometria seguem passando inteiros.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,12 @@
+import sharp from 'sharp';
+const [file, fw, q, out, z = '3'] = process.argv.slice(2);
+const Z = Number(z);
+const m = await sharp(file).metadata();
+const w = Number(fw), h = m.height;
+const t = await sharp(file).extract({ left: Number(q) * w, top: 0, width: w, height: h }).resize(w * Z, h * Z, { kernel: 'nearest' }).png().toBuffer();
+let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w * Z}" height="${h * Z}">`;
+for (let x = 0; x <= w; x += 16) svg += `<line x1="${x * Z}" y1="0" x2="${x * Z}" y2="${h * Z}" stroke="${x % 64 ? '#00ffff55' : '#00ffffaa'}"/><text x="${x * Z + 2}" y="10" font-size="10" fill="#0ff">${x}</text>`;
+for (let y = 0; y <= h; y += 16) svg += `<line x1="0" y1="${y * Z}" x2="${w * Z}" y2="${y * Z}" stroke="${y % 64 ? '#00ffff55' : '#00ffffaa'}"/><text x="2" y="${y * Z - 2}" font-size="10" fill="#0ff">${y}</text>`;
+svg += '</svg>';
+await sharp({ create: { width: w * Z, height: h * Z, channels: 4, background: '#3a4250' } }).composite([{ input: t }, { input: Buffer.from(svg) }]).png().toFile(out);
+console.log(out);

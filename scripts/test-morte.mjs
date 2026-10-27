@@ -1,12 +1,13 @@
 // 26/10 — the pure part of the ship's death (`src/systems/morte/pedacos.ts`), in Node, on the REAL sprites of the five
 // ships: every hull pixel lands in exactly one piece, the flame is found only behind the nozzle, the break-up gives a
 // handful of big pieces, the burning front reaches the whole hull, the ramps step from dark to white; and the hull loss
-// of a lost life (`lasca`) bites the same number of pixels off the edge on every hit.
+// of a lost life (`lasca`) bites the same number of pixels off the edge on every hit. And the ENEMIES' debris (26/10,
+// `Destrocos.ts`): each cut at its drawn size, its pixels kept, a hit's bite on the shot's side, the new ramps.
 //   node scripts/test-morte.mjs
 import sharp from 'sharp';
 import {
   sorte, ruido, ehChama, sementesEspalhadas, sementesNoEixo, partir, temposDeQueima, RAMPA_FOGO, RAMPA_BIO, corDaRampa, canais,
-  lasca, soltarLasca,
+  lasca, soltarLasca, reduzir, sementesAoLongo, RAMPA_CARNE, RAMPA_MEDUSA,
 } from '../src/systems/morte/pedacos.ts';
 import { MORTE } from '../src/systems/morte/numerosMorte.ts';
 const G = MORTE.golpe;
@@ -89,8 +90,63 @@ for (const [nome, arq] of Object.entries(NAVES)) {
   ok(somaErrada === 0 && semCorte === 0, `${nome} / lasca: as partes somam a mordida e todas têm a borda rasgada`);
 }
 
+// THE ENEMIES (26/10, `Destrocos.ts`): every enemy is cut at its DRAWN size (`reduzir`: scale, mirror, tint); its pieces
+// keep every pixel; a hit's bite lands on the side the shot came from (`lasca` with `perto`); the long bodies part in
+// sections along their axis (`sementesAoLongo`).
+const INIMIGOS = {
+  drone: ['public/sprites/drone-anim-0.png', 1],
+  'batedor F2': ['public/sprites/scout-cinturao-anim-0.png', 0.28],
+  'canhoneira F2': ['public/sprites/gunship-cinturao-anim-0.png', 0.72],
+  cargueiro: ['public/sprites/carrier-anim-0.png', 1.1],
+  'água-viva': ['public/sprites/agua-viva-anim-0.png', 0.6],
+  sentinela: ['public/sprites/elite-sentinela-pairar-0.png', 1],
+  lula: ['public/sprites/elite-cacador-idle-0.png', 1],
+  tubo: ['public/sprites/elite-tubo-c-pulso-0.png', 1],
+  aranha: ['public/sprites/aranha-anim-0.png', 0.62],
+  'Capitânia': ['public/sprites/capitania-anim-0.png', 1],
+};
+for (const [nome, [arq, esc]] of Object.entries(INIMIGOS)) {
+  const fonte = await bitmap(arq);
+  const img = reduzir(fonte, esc, esc, false, false);
+  ok(img.w === Math.max(1, Math.round(fonte.w * esc)) && img.h === Math.max(1, Math.round(fonte.h * esc)), `${nome}: reduzido a ${img.w}×${img.h} (×${esc}, o tamanho que o jogo desenha)`);
+  const cheios = img.cor.filter((c) => c >>> 24 >= 128).length;
+  const rnd = sorte(11);
+  const torto = ruido(img.w, img.h, 4, rnd);
+  const nP = Math.min(6, Math.max(3, Math.round(cheios / 90)));
+  const pedacos = partir(img, sementesEspalhadas(img, nP, Math.max(3, Math.sqrt(cheios / nP) * 0.7), rnd), torto, 2);
+  ok(pedacos.reduce((s, p) => s + p.n, 0) === cheios, `${nome}: os ${cheios} px caem em ${pedacos.length} pedaços, cada um uma vez`);
+  const ao = sementesAoLongo(img, 4, rnd);
+  ok(ao.length === 4 && ao.every((p, i) => i === 0 || p.x >= ao[i - 1].x), `${nome}: 4 sementes ao longo do eixo, da cauda ao nariz`);
+  // 30 hits from the left (the ship's side): every bite's centre in the body's left third
+  let xs = [];
+  img.cor.forEach((c, i) => c >>> 24 >= 128 && xs.push(i % img.w));
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let foraDoLado = 0, tamanhoErrado = 0;
+  const alvo = Math.min(30, Math.max(6, Math.round(cheios * 0.1)));
+  for (let s = 1; s <= 30; s++) {
+    const r = sorte(s);
+    const l = lasca(img, [0, 1], alvo, ruido(img.w, img.h, 3, r), 1.4, r, { x: -img.w, y: img.h / 2 });
+    if (!l || l.n !== alvo) { tamanhoErrado++; continue; }
+    if (l.centro.x > x0 + (x1 - x0) / 3 + 1) foraDoLado++;
+  }
+  ok(tamanhoErrado === 0 && foraDoLado === 0, `${nome}: 30 tiros da esquerda mordem ${alvo} px, sempre no terço da esquerda`);
+}
+// the mirror and the tint
+{
+  const f = await bitmap('public/sprites/kamikaze-anim-0.png');
+  const m = reduzir(f, 1, 1, true, false);
+  const t = reduzir(f, 1, 1, false, false, 0x808080);
+  let espelho = true, tinta = true;
+  for (let y = 0; y < f.h; y++) for (let x = 0; x < f.w; x++) {
+    if (m.cor[y * f.w + x] !== f.cor[y * f.w + (f.w - 1 - x)]) espelho = false;
+    const [r0] = canais(f.cor[y * f.w + x]), [r1] = canais(t.cor[y * f.w + x]);
+    if (Math.abs(r1 - Math.round((r0 * 128) / 255)) > 1) tinta = false;
+  }
+  ok(espelho && tinta, 'reduzir: o espelho vira a arte, e a tinta multiplica a cor (como o Phaser)');
+}
+
 const lum = (c) => { const [r, g, b] = canais(c); return 0.3 * r + 0.59 * g + 0.11 * b; };
-for (const [nome, r] of [['fogo', RAMPA_FOGO], ['bio', RAMPA_BIO]]) {
+for (const [nome, r] of [['fogo', RAMPA_FOGO], ['bio', RAMPA_BIO], ['carne', RAMPA_CARNE], ['medusa', RAMPA_MEDUSA]]) {
   // (the fire's coldest stop is the ASH, a grey-brown a little lighter than the dark red before it: the climb starts at 1)
   ok(r.every((c, i) => i <= 1 || lum(c) >= lum(r[i - 1])), `a rampa ${nome} sobe do escuro ao branco`);
   ok(corDaRampa(r, 1) === r[r.length - 1] && corDaRampa(r, 0) === r[0], `a rampa ${nome}: 1 = o branco, 0 = a brasa apagada`);

@@ -53,3 +53,26 @@ scripts/_f8/_ultimo-job.txt
 scripts/_f8/_cenas/
 scripts/_f9/_quadros/
 scripts/_f9/_real/
+
+# 27/10 — AS FOLHAS: o material de trabalho fica no DISCO (o backup dele), fora do git. A regra dele: os vídeos, os
+# GIFs, o `cru/` e as capturas que a folha não usa não entram. (Os GIFs que já estavam versionados seguem no git.)
+docs/superpowers/folhas/**/*.webm
+docs/superpowers/folhas/**/*.gif
+docs/superpowers/folhas/**/cru/
+docs/superpowers/folhas/**/cru-*/
+docs/superpowers/folhas/**/menu-cru/
+docs/superpowers/folhas/**/gif-*/
+# ...e os quadros soltos de cada rodada: insumo dos GIFs e das conferências, nenhuma folha os mostra
+docs/superpowers/folhas/2026-10-15/polimento/*.png
+docs/superpowers/folhas/2026-10-16/rabo/jogo/
+docs/superpowers/folhas/2026-10-16/rabo/pixminimax/
+docs/superpowers/folhas/2026-10-16/rabo/tratado/
+docs/superpowers/folhas/2026-10-16/rabo/tubarao/
+docs/superpowers/folhas/2026-10-17/bloco-i/vozes/
+docs/superpowers/folhas/2026-10-22/menu/*/*.png
+docs/superpowers/folhas/2026-10-25/hangar/filme/*.png
+docs/superpowers/folhas/2026-10-26/morte/filme/*.png
+# Os concepts da raiz e as duas pinturas de hangar que o jogo não usa (no disco, fora do git — HANDOFF, 25–26/10)
+/concept art*.png
+assets/raw/Hangar Futurista Sob a Megacidade.png
+assets/raw/Hangar Orbital com Dois Caças Futuristas.png

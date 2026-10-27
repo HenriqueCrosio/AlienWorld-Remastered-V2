@@ -46,6 +46,9 @@ for (const c of CASOS) {
     g.scene.start('Game', { stage: c.stage, ship: c.ship, handling: 'diegetico' });
   }, c);
   await page.waitForFunction(() => window.__game.scene.isActive('Game') && window.__game.scene.getScene('Game').cartas);
+  // untouchable from the start: in the F1 the ship, with no hand on the flap, fell and hit the ground during this
+  // real-time wait — a hull loss before the test's own (2 losses, 6 canvases, and `golpes[0]` was the wrong one)
+  await page.evaluate(() => { window.__game.scene.getScene('Game').invulnerableUntil = 1e12; });
   await page.waitForTimeout(500);
   const r = await page.evaluate(() => {
     const g = window.__game;
@@ -62,9 +65,14 @@ for (const c of CASOS) {
       t += 1000 / 60;
       g.step(t, 1000 / 60);
     };
+    // the warm-up is untouchable: in the F1 the parked ship was sometimes hit by the scenery before the test's own blow
+    // (2 hull losses, 6 canvases — 27/10)
+    s.invulnerableUntil = 1e12;
     for (let i = 0; i < 10; i++) passo();
 
-    // A LIFE LOST
+    // A LIFE LOST (any earlier one cleared first: only the test's blow counts)
+    for (const v of s.golpes) v.destroy();
+    s.golpes = [];
     s.lives = 3;
     s.invulnerableUntil = 0;
     s.damageShip();
@@ -114,7 +122,8 @@ for (const c of CASOS) {
   });
   const gp = r.golpe;
   ok(gp.vidas === 2 && !gp.over && !gp.morte && gp.n === 1 && gp.golpe && gp.cicatriz && gp.telas === 3,
-    `${nome}: uma vida perdida solta a lasca (3 telas) e a nave segue voando`);
+    `${nome}: uma vida perdida solta a lasca (3 telas) e a nave segue voando` +
+      ` (vidas ${gp.vidas}, over ${gp.over}, morte ${gp.morte}, golpes ${gp.n}, cicatriz ${gp.cicatriz}, telas ${gp.telas})`);
   ok(gp.estilo === c.espera, `${nome}: a lasca é no estilo da nave (${gp.estilo})`);
   ok(gp.desenhou > 10, `${nome}: a lasca aparece na tela (${gp.desenhou} px)`);
   ok(gp.segue, `${nome}: a cicatriz anda com a nave`);

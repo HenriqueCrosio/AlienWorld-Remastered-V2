@@ -3,6 +3,7 @@
 // (`damageShip` on the last life), with the same seed in every panel; the world is cleared (no script, no enemies, no
 // rocks) so only the death is on screen. Panel `antes` replays the old death (the PixelLab fireball, the frozen world).
 //   node scripts/_morte/_filmar-morte.mjs <out.webm> <cena> [estilos=antes,estilhacos,desintegra,ruptura] [--gif]
+//   (a style `X:sem` = without the player's signature of 27/10 — the overload, the ring, the chain)
 //   cenas: f2 (Terminus laranja, vacuum) · f1 (X-Aelo osso, the atmosphere: gravity) · f3 (the Charybdis)
 //          · f4 (X-Aelo laranja) · f2preta (Terminus preta)
 // (with `npm run dev` running; do not touch src/ or .html while it films — Vite reloads)
@@ -61,7 +62,10 @@ async function gravar(estilo) {
     g.registry.set('cartasCheckpoint', {});
     g.registry.set('modeloNave', cena.modelo);
     g.registry.set('pinturaNave', cena.pintura);
-    g.registry.set('estiloMorte', estilo === 'antes' ? undefined : estilo);
+    // `estilo:sem` = the death of 26/10 alone, without the player's signature of 27/10 (`MORTE.assinatura`)
+    const [est, mod] = estilo.split(':');
+    g.registry.set('estiloMorte', est === 'antes' ? undefined : est);
+    g.registry.set('assinaturaMorte', mod !== 'sem');
     g.registry.set('sementeMorte', 20261026);
     g.scene.start('Game', { stage: cena.stage, ship: cena.ship, handling: 'diegetico' });
   }, { cena, estilo });
@@ -161,7 +165,10 @@ const W = CLIP.w * ZOOM, HP = CLIP.h * ZOOM;
 const rotulo = (txt) => sharp(Buffer.from(
   `<svg width="${W}" height="${ROTULO}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#0b0d14"/><text x="8" y="${ROTULO - 7}" font-family="Consolas, monospace" font-size="15" fill="#ffb040">${txt}</text></svg>`,
 )).png().toBuffer();
-const rotulos = await Promise.all(estilos.map((e) => rotulo(`${NOMES[e] ?? e}  ·  ${cena.nome}`)));
+const rotulos = await Promise.all(estilos.map((e) => {
+  const [est, mod] = e.split(':');
+  return rotulo(`${NOMES[est] ?? est}${est === 'antes' ? '' : mod === 'sem' ? ' (26/10, sem a assinatura)' : ' + a assinatura (27/10)'}  ·  ${cena.nome}`);
+}));
 const n = Math.max(...porPainel.map((q) => q.length));
 const H = estilos.length * (HP + ROTULO);
 const dir = path.join(path.dirname(OUT), `_q-${path.basename(OUT, path.extname(OUT))}`);

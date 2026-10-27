@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Destroços dos inimigos</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; background: #11151e; }
+  .tag { display:inline-block; padding: 0 7px; border-radius: 9px; font-size: 12px; border: 1px solid var(--line); color: var(--sub); }
+  .rec { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>Os destroços dos inimigos</h1>
+<p class="sub">26–27/10/2026 · <a href="../morte/morte.html">← a morte da nave</a> · A separação dos inimigos e as variações de dano, explosão e derrota, no jogo de verdade. Nada foi commitado.</p>
+
+<div class="item" style="border-color: var(--ok)">
+  <p><b>27/10, o que você decidiu, e o que entrou no jogo:</b></p>
+  <ul>
+    <li><b>As variações</b> (<i>"Vou com a sua recomendação: A1 e A3 misto, B1, C1, D1"</i>): A1 nos comuns pequenos e A3 na canhoneira e no cargueiro; B1, C1 e D1. A recomendação incluía levar os destroços aos chefões que tinham ficado de fora (seção 10).</li>
+    <li><b>As marcas dos golpes</b> (seção 11). Você viu no sandbox que o pedaço grande não acompanha o corpo que se mexe, e propôs: o tiro tira 1 px, a explosão 3 e a bomba 4, e os pedaços grandes só no fim, como as patas da aranha caindo antes de ela morrer.</li>
+    <li><b>A assinatura da nave do jogador</b> (seção 12). A Terminus morria igual a um kamikaze. Cada nave mantém a sua morte, e por cima entram a sobrecarga antes, o anel de choque e os cacos estourando em cadeia.</li>
+    <li><b>27/10, 2ª rodada: a marca na borda</b> (seção 13). A mancha no Guardião, a Torre sem marca e a Serpente marcando o toco tinham causa. Agora cada tiro come o primeiro pixel da borda na linha dele, a fagulha acende ali, e os estilhaços no ar caem direto.</li>
+    <li><b>27/10, etapa 2: as peças destrutíveis</b> (seção 14). O cinturão da F2 e os destroços de nave levam as marcas; o destroço segue indestrutível; o asteroide quebra como rocha (a sua escolha: o grande esfarela, o pequeno se parte).</li>
+    <li><b>27/10, etapa 3: a bala passa pela brecha</b> (seção 15). E a Serpente da fusão não deixa mais marcas vermelhas fixas nos pedaços.</li>
+  </ul>
+  <p>As seções 3 a 7 são a comparação de ontem e ficam como registro. Os limiares delas mudaram com as marcas.</p>
+</div>
+
+<div class="item">
+  <p>Você: <i>"Já faça uma separação dos inimigos, elites, mini boss e boss do jogo para aplicarmos efeitos de dano, explosões, derrotas decentes iguais ao das naves."</i></p>
+  <p>A técnica é a da nave (<code>docs/DESTROCOS.md</code>): o inimigo se desfaz nos próprios pixels, desenhados pixel a pixel na resolução do jogo. Ela agora roda num motor só para a fase inteira, porque um drone morre dezenas de vezes por fase e uma carta de reação em cadeia mata uma fila inteira no mesmo quadro.</p>
+  <p>Cada filme é o jogo de verdade, a 30 quadros por segundo. O mesmo inimigo, no mesmo lugar e com a mesma sorte em cada coluna: só a variação muda. A coluna <b>hoje</b> é a morte de antes, para comparar. Nos filmes de comparação os inimigos ficam parados (o voo deles foi congelado), para a morte ser vista; o filme <b>como no jogo</b>, logo abaixo, mostra eles voando.</p>
+</div>
+
+<h2>1. A separação</h2>
+<div class="item">
+  <p>A classe decide <b>quanto a morte pode durar</b>: quem morre muito tem que morrer rápido e sem tapar a tela. O material decide <b>as cores</b>.</p>
+  <table>
+    <tr><th>Classe</th><th>Quem</th><th>Quantos</th><th>A morte pode</th></tr>
+    <tr><td><b>Comum</b></td><td>drone, batedor, canhoneira, kamikaze, cargueiro, água-viva, pupa, mosca</td><td>dezenas por fase</td><td>0,5 a 1 s, sem parar o jogo</td></tr>
+    <tr><td><b>Elite</b></td><td>drone minerador, sentinela (F2) · lula (F3) · larva, tubo (F4)</td><td>alguns por fase</td><td>1 a 1,5 s, com peso</td></tr>
+    <tr><td><b>Mini chefão</b></td><td>aranha (F3) · golfinho (F4)</td><td>um por fase</td><td>2 s, com câmera lenta</td></tr>
+    <tr><td><b>Chefão</b></td><td>Torre (F1) · Capitânia (F2) · Serpente (F3) · Guardião e Predador (F4)</td><td>um por fase</td><td>o momento da fase</td></tr>
+  </table>
+  <table>
+    <tr><th>Material</th><th>Quem</th><th>Como se desfaz</th></tr>
+    <tr><td><b>Metal</b></td><td>as naves das facções, a aranha, a Capitânia, a Torre</td><td>queima nas cores da explosão do PixelLab: o corte em brasa, a bola de fogo embaixo, fumaça, faíscas</td></tr>
+    <tr><td><b>Luz</b></td><td>a água-viva (e os pescoços néon da Serpente)</td><td>se apaga na cor dela: cada pixel vira brasa azul-violeta, com a descarga elétrica no lugar do fogo</td></tr>
+    <tr><td><b>Carne</b></td><td>o tubo, a pupa, a mosca (e o Guardião e o Predador)</td><td>rasga em pedaços com a borda vermelha molhada e um jorro de gotas; sem fogo e sem branco (rampa nova, tirada do vermelho do tubo e da larva)</td></tr>
+    <tr><td><b>Biomecânico</b></td><td>a lula, a larva (e o golfinho)</td><td>a carne com placas: o corte vermelho, as gotas, e uma bola de fogo pequena</td></tr>
+  </table>
+  <figure><img src="prancha.png" alt=""><figcaption><b>Todos os inimigos no tamanho do jogo (×3)</b>, por classe, com o material. É desta prancha que saiu a separação.</figcaption></figure>
+</div>
+
+<h2>2. Como fica no jogo</h2>
+<div class="item">
+  <figure><video src="filme/jogo.webm" controls loop muted autoplay playsinline></video><figcaption><b>Uma onda da F2 voando de verdade, abatida tiro a tiro</b> (um acerto a cada 0,1 s no inimigo mais à frente), com o tremor da câmera ligado. À esquerda a morte de hoje, à direita a A1. Repare nos drones que levam o primeiro tiro e perdem um pedaço antes de morrer.</figcaption></figure>
+</div>
+
+<h2>3. Os comuns: três variações</h2>
+<div class="item">
+  <ul>
+    <li><b>A1 · Lascas</b> <span class="rec">(recomendo)</span>: três a seis pedaços do próprio inimigo saem girando de uma bola de fogo menor que a de hoje, com o corte em brasa por um instante. Some em 0,5 a 0,7 s.</li>
+    <li><b>A2 · Ao meio</b>: o tiro parte o inimigo em dois por uma linha torta. As metades se separam girando em sentidos opostos, com o corte aceso e fumaçando.</li>
+    <li><b>A3 · Carcaça</b>: o inimigo perde o controle, carboniza e capota fumaçando por meio segundo, e só então estoura em pedaços. É a mais dramática e a mais lenta.</li>
+  </ul>
+  <figure><video src="filme/comuns.webm" controls loop muted autoplay playsinline></video><figcaption><b>A F2</b>: drone, batedor, canhoneira, kamikaze e cargueiro. Os primeiros tiros cruzam os limiares de vida e arrancam pedaços (seção 4); o último mata.</figcaption></figure>
+  <figure><video src="filme/f1.webm" controls loop muted autoplay playsinline></video><figcaption><b>A F1, na atmosfera</b>: os pedaços caem com gravidade e somem atrás do chão.</figcaption></figure>
+  <figure><video src="filme/vivos.webm" controls loop muted autoplay playsinline></video><figcaption><b>Luz e carne</b>: a água-viva se desmancha em brasa azul-violeta em todas as variações (ela não tem casco para partir); a pupa e a mosca respingam carne.</figcaption></figure>
+  <p><b>Uma ideia para decidir:</b> misturar. A1 nos pequenos que morrem em quantidade (drone, batedor, kamikaze) e A3 nos grandes, mais raros (canhoneira e cargueiro). A carcaça do cargueiro capotando antes de estourar foi o melhor momento dos filmes de comuns.</p>
+</div>
+
+<h2>4. As lascas por vida (o dano)</h2>
+<div class="item">
+  <p>Na nave, a medida era o golpe e não as vidas, porque as vidas mudam com as cartas e o 1-UP. Nos inimigos é o contrário: a vida de cada tipo é fixa, então <b>a medida é a barra de vida</b>. Cada limiar cruzado arranca um pedaço, e o pedaço sai do lado de onde veio o tiro.</p>
+  <table>
+    <tr><th>Classe</th><th>Limiares de vida</th><th>Cada mordida</th></tr>
+    <tr><td>Comum</td><td>50% (vida até 3) · 60 e 30% (até 10) · 75, 50 e 25%</td><td>10% do corpo (6 a 30 px)</td></tr>
+    <tr><td>Elite</td><td>75, 50 e 25%</td><td>8% (10 a 50 px)</td></tr>
+    <tr><td>Mini chefão</td><td>80, 60, 40 e 20%</td><td>5% (14 a 90 px); na aranha, a mordida mira as patas</td></tr>
+    <tr><td>Chefão</td><td>85, 70, 55, 40, 25 e 12%</td><td>3% (40 a 240 px)</td></tr>
+  </table>
+  <ul>
+    <li><b>O buraco é de verdade:</b> o inimigo passa a mostrar o próprio quadro com os pixels mordidos transparentes, e o fundo aparece pelo buraco. A animação, o piscar do dano e a tinta continuam. Na primeira rodada o buraco era pintado de escuro e lia como mancha.</li>
+    <li><b>A mordida fica até ele morrer</b>, e o aro dela diz o material: no metal, brasas que continuam piscando (ele ainda queima); na carne, a ferida vermelha aberta; na luz, a própria cor acesa.</li>
+    <li><b>A ferida solta</b> fumaça e faíscas no metal, gotas na carne e brasas na luz.</li>
+    <li><b>Na morte, o que já foi arrancado não volta:</b> os pedaços saem do corpo mordido.</li>
+  </ul>
+</div>
+
+<h2>5. Os elites: duas variações</h2>
+<div class="item">
+  <ul>
+    <li><b>B1 · Ruptura</b> <span class="rec">(recomendo)</span>: dois estalos pelo corpo enquanto ele capota, e então ele se parte em partes grandes, com lascas voando do corte. É a morte da X-Aelo, em tamanho de elite.</li>
+    <li><b>B2 · Estilhaços</b>: o corpo fica branco por um instante e estoura de uma vez. O jogo congela 45 ms (o "peso" do acerto). Na carne e no biomecânico não há clarão: eles rebentam com um jorro maior.</li>
+  </ul>
+  <figure><video src="filme/elites.webm" controls loop muted autoplay playsinline></video><figcaption><b>Três tiros cruzam os limiares (75, 50 e 25%), o quarto mata.</b> Metal (drone minerador, sentinela), biomecânico (lula, larva) e carne (tubo). Só para o filme, a intocabilidade e o escudo estão desligados (com o comportamento congelado, a lula ficaria escondida).</figcaption></figure>
+</div>
+
+<h2>6. O mini chefão: a aranha</h2>
+<div class="item">
+  <ul>
+    <li><b>C1 · Ruptura com câmera lenta</b> <span class="rec">(recomendo)</span>: os estalos, a quebra com a teia de corte acesa, e a câmera lenta da morte da nave no momento da quebra.</li>
+    <li><b>C2 · Carcaça com câmera lenta</b>: ela carboniza, capota fumaçando e estoura.</li>
+  </ul>
+  <figure><video src="filme/mini.webm" controls loop muted autoplay playsinline></video><figcaption><b>Quatro tiros cruzam os limiares e ela vai perdendo as patas; o quinto mata.</b> Hoje ela morre numa explosão pequena, do tamanho de um drone. (Só no filme, a mesa de cartas que abre com a morte dela está desligada.)</figcaption></figure>
+</div>
+
+<h2>7. O chefão: a Capitânia (o exemplo)</h2>
+<div class="item">
+  <p><b>D1</b>: cada limiar arranca um pedaço grande do casco do lado da nave, com estouro, e a ferida fica queimando. Na morte, a cadeia de explosões vira cinco mordidas com estouro. Depois a nave se parte nos próprios pedaços, com a explosão grande atrás deles e a câmera lenta.</p>
+  <figure><video src="filme/chefe.webm" controls loop muted autoplay playsinline></video><figcaption><b>Seis limiares ao longo da luta, e a morte.</b> Hoje: oito explosões e a grande, com a fumaça em bolinhas (o item 9 do bloco I).</figcaption></figure>
+  <p>Escolhi a Capitânia porque ela ainda morre do jeito antigo. A Torre (F1), o Guardião e o Predador (F4) já têm mortes aprovadas por você, e eu não mexi nelas. A Serpente e o golfinho ficaram para depois da sua escolha.</p>
+</div>
+
+<h2>8. O que eu recomendo</h2>
+<div class="item">
+  <ul>
+    <li><b>Comuns:</b> A1 nos pequenos e A3 nos grandes (canhoneira e cargueiro). Se preferir uma só, A1.</li>
+    <li><b>Elites:</b> B1. A B2 é forte, mas o branco chama mais atenção que o elite merece.</li>
+    <li><b>Mini chefões:</b> C1.</li>
+    <li><b>Chefões:</b> D1 na Capitânia, e levar para a Serpente, com cada cabeça se desfazendo na cor dela quando morre. Na Torre, no Guardião e no Predador, só as lascas por vida, sem tocar nas mortes aprovadas.</li>
+    <li><b>As lascas por vida:</b> em todas as classes.</li>
+  </ul>
+</div>
+
+<h2>9. As decisões</h2>
+<div class="item">
+  <ol>
+    <li><b>Comuns:</b> o misto. A1 nos pequenos, A3 na canhoneira e no cargueiro (27/10).</li>
+    <li><b>Elites:</b> B1 (27/10).</li>
+    <li><b>Mini chefões:</b> C1, e o golfinho também (27/10).</li>
+    <li><b>Chefões:</b> D1 na Capitânia e na Serpente. A Torre, o Guardião e o Predador mantêm as mortes aprovadas (27/10).</li>
+    <li><b>As mordidas:</b> viraram as marcas dos golpes e os pedaços perto da morte (27/10, seção 11).</li>
+  </ol>
+</div>
+
+<h2>10. Os outros chefões e o golfinho</h2>
+<div class="item">
+  <table>
+    <tr><th>Quem</th><th>Material</th><th>Morte</th><th>Os pedaços grandes, perto da morte</th></tr>
+    <tr><td>Torre (F1)</td><td>metal</td><td>a aprovada (bloco G)</td><td>na cabeça e no ombro, do lado da nave. Sem mira, eles caíam na base de pedra, que vira propulsor na decolagem, e o buraco sumia junto.</td></tr>
+    <tr><td>Capitânia (F2)</td><td>metal</td><td>D1</td><td>do lado da nave</td></tr>
+    <tr><td>Serpente (F3)</td><td>biomec</td><td>D1, na fusão</td><td>no crânio da fusão. Durante as cabeças, só as marcas, e só na cabeça viva; cada arte nova leva as marcas da velha junto.</td></tr>
+    <tr><td>Guardião (F4)</td><td>biomec</td><td>a aprovada</td><td>nos tubos de cima, depois nos tubos do alto à direita e nos tentáculos de baixo (não na cara, que tem muito detalhe). Saem na troca para o Predador.</td></tr>
+    <tr><td>Predador (F4)</td><td>carne</td><td>a aprovada</td><td><b>sem buraco:</b> o pedaço voa e a carne jorra, mas o corpo fica inteiro</td></tr>
+    <tr><td>golfinho (F4)</td><td>biomec</td><td>C1, com a câmera lenta</td><td><b>sem buraco</b>, pela mesma razão</td></tr>
+  </table>
+  <p><b>Por que sem buraco no Predador e no golfinho:</b> eles mudam tanto de pose que até a borda de cada quadro é outra parte do corpo. O Predador anda, golpeia, gira e se pendura no teto, e o golfinho dá cambalhota dentro do quadro. Neles o pixel e o pedaço voam, mas o corpo não fura. (Os outros chefões agora refazem as marcas na arte de cada quadro, ver a seção 13.)</p>
+  <p>A luta inteira, no modo treino, com as transições imunes como no jogo. <b>Desde a 2ª rodada a nave atira de verdade</b>: as balas do jogo, a cada 0,1 s, com a altura variando devagar sobre o chefão. Os filmes de antes usavam um golpe de mentira vindo de fora do corpo, e foi isso que escondeu a mancha. Torre, Serpente e Guardião estão recortados em volta do chefão, a 3×, para as marcas aparecerem. À esquerda, a morte de antes; à direita, a escolha:</p>
+  <figure><video src="filme/torre.webm" controls loop muted autoplay playsinline></video><figcaption><b>Torre (F1)</b>: as marcas comendo a beira da cabeça e do cano, a decolagem, o pedaço grande na cabeça perto da morte, e a morte aprovada.</figcaption></figure>
+  <figure><video src="filme/serpente.webm" controls loop muted autoplay playsinline></video><figcaption><b>Serpente (F3)</b>: as marcas e a fagulha na cabeça viva, as trocas de arte, os pedaços no crânio da fusão e a D1.</figcaption></figure>
+  <figure><video src="filme/nucleo.webm" controls loop muted autoplay playsinline></video><figcaption><b>Guardião e Predador (F4)</b>: as marcas na beira da cara, o pedaço grande nos tubos de cima, a troca, e o Predador soltando pixels e carne sem furar.</figcaption></figure>
+  <figure><video src="filme/capitania.webm" controls loop muted autoplay playsinline></video><figcaption><b>Capitânia (F2)</b>: as marcas ao longo da luta, os dois pedaços em 15% e 6%, e a D1.</figcaption></figure>
+  <figure><video src="filme/golfinho.webm" controls loop muted autoplay playsinline></video><figcaption><b>O golfinho (F4)</b>: os pixels voam sem furar, e a C1.</figcaption></figure>
+</div>
+
+<h2>11. As marcas dos golpes (a sua ideia)</h2>
+<div class="item">
+  <p>Você: <i>"um tiro tira 1 px e explosões pequenas 3 px e maiores 4 px. Ser simbólico mas dar um efeito que, os tiros realmente tiram pixels e explosões também"</i>. E: <i>"as patas saírem pode ser no momento final antes de matá-la ... os danos já serão visíveis com os tiros"</i>.</p>
+  <ul>
+    <li><b>Cada golpe tira pixels da face de onde veio:</b> o tiro 1, a explosão das cartas e o míssil 3, a bomba 4. O pixel do corpo mais perto de onde o golpe veio sai voando na própria cor, e o furo fica, com um aro que esquenta um instante e depois carboniza (na carne, fica vermelho). A queima e o choque não têm lado e não tiram pixel. <i>(Trocado na 2ª rodada: o pixel agora é o da borda, na linha do tiro, ver a seção 13.)</i></li>
+    <li><b>Vale para todos os inimigos e para os chefões.</b> Um furo de 1 a 4 px que não acompanha o corpo quase não se nota, e era isso que o pedaço grande não conseguia.</li>
+    <li><b>Os pedaços grandes ficaram para perto da morte:</b> comum em 30% (os de 2 a 3 de vida, em 50%), elite em 20%, mini em 20% e 10% (as patas da aranha), chefão em 15% e 6%.</li>
+    <li><b>Custo:</b> o furo de cada golpe é aplicado direto nas cópias de textura que já existem, sem criar textura nova por tiro.</li>
+  </ul>
+  <figure><video src="filme/marcas.webm" controls loop muted autoplay playsinline></video><figcaption><b>Um tiro a cada 0,1 s, da esquerda, em alturas variadas, até a morte.</b> A aranha está viva e anda enquanto apanha; os outros ficam parados, com a animação tocando. A coluna da direita é a escolha (com o misto dos comuns). Refeito depois da brecha (seção 15): a bala já entra nos sulcos.</figcaption></figure>
+  <p>São simbólicas: 30 tiros são 30 px. Se no jogo ficarem fracas demais, as opções são subir o tiro para 2 px ou escurecer mais o aro.</p>
+</div>
+
+<h2>12. A assinatura da nave do jogador</h2>
+<div class="item">
+  <p>Você: <i>"o efeito de destruição da nave Terminus ficou muito parecida com o efeito de destruição dos inimigos ... a explosão é idêntica"</i>. A causa: as mortes dos inimigos saíram das mortes das naves, e a bola de fogo da Terminus (0,5) era até menor que a de um comum (0,62).</p>
+  <p>Cada nave mantém a morte de ontem. Por cima entram três camadas que nenhum inimigo tem, e cada uma liga e desliga sozinha em <code>MORTE.assinatura</code>:</p>
+  <ul>
+    <li><b>A sobrecarga, antes (0,34 s):</b> o casco treme cada vez mais, pixels esquentam e piscam pelo corpo como rachaduras se formando, saem faíscas do casco e do bocal, o fogo do motor engasga, e um arco elétrico curto corre pelo casco (na Charybdis, dois arcos pequenos no corpo, a cada vez). Ela roda num relógio próprio, então nenhum tempo da morte mudou.</li>
+    <li><b>O anel de choque</b>, no momento grande (o clarão e a câmera lenta): um anel de pixel que abre até ~46 px na cor da nave. Ele nasce sólido e some em degradê enquanto abre.</li>
+    <li><b>A cadeia:</b> quatro a seis pedaços estouram pequenos enquanto voam, até 1 s depois.</li>
+  </ul>
+  <p>Em cima, a morte de ontem; embaixo, com a assinatura:</p>
+  <figure><video src="filme/nave-terminus.webm" controls loop muted autoplay playsinline></video><figcaption><b>Terminus</b>: os estilhaços.</figcaption></figure>
+  <figure><video src="filme/nave-xaelo.webm" controls loop muted autoplay playsinline></video><figcaption><b>X-Aelo, na F1</b>: a ruptura. Ela cai com a gravidade enquanto capota, e o anel abre perto do chão.</figcaption></figure>
+  <figure><video src="filme/nave-charybdis.webm" controls loop muted autoplay playsinline></video><figcaption><b>Charybdis</b>: a desintegração, com os arcos pequenos antes e o anel em ciano. A descarga grande no início da desintegração é a morte de ontem.</figcaption></figure>
+  <p><b>27/10, depois do seu retorno:</b> os arcos encolheram em todas as naves (de 8–14 px para 3–5 px de meio comprimento). A Charybdis troca a descarga cheia por dois arcos pequenos no próprio corpo. O anel some em degradê em vez de pontilhado: sólido ao nascer, quase invisível quando está grande.</p>
+</div>
+
+<h2>13. A marca na borda (a sua regra)</h2>
+<div class="item">
+  <p>Você, jogando: <i>"as marcas se concentram onde, provavelmente, é o hitbox e isso fica parecendo uma mancha"</i> (o Guardião); <i>"não vejo o impacto dos tiros e explosões nele ... o corte ficou com pixels flutuantes"</i> (a Torre); os tiros depois da 1ª cabeça <i>"atingem somente o primeiro toco"</i> (a Serpente). E a regra: <i>"pense nos inimigos, bosses, mini bosses e elites como um asset, cada tiro tira 1 px da borda do asset, para começar a deformá-lo"</i>.</p>
+  <h3>Por que acontecia</h3>
+  <ul>
+    <li><b>Guardião:</b> a marca ia para o pixel do corpo mais perto de onde a bala tocou a hitbox. A hitbox dele fica dentro do desenho, então todos os tiros cavavam a mesma coluna no meio da casca.</li>
+    <li><b>Torre:</b> pela mesma regra, o pixel mais perto era a parte de baixo do cano. Metal escuro contra o céu escuro: ninguém via.</li>
+    <li><b>Serpente: a hitbox e a regra juntas.</b> O círculo de acerto da cabeça (33 px de raio) estava fora do lugar, uns 15 px abaixo e à direita da cabeça desenhada, em cima do pescoço e do toco. A bala era pega ali, a fagulha acendia ali, e a marca ia para o toco. Não era o sprite ser plano.</li>
+    <li><b>Os pixels flutuantes:</b> a mordida não olhava o que ficava solto depois dela.</li>
+  </ul>
+  <h3>O que mudou</h3>
+  <ul>
+    <li><b>A marca come a borda, na linha do tiro:</b> o primeiro pixel do corpo, do lado de onde o golpe veio. Tiros seguidos no mesmo lugar cavam um V estreito, e a explosão faz uma mordida redonda pequena. A lança, que tem dano 3, cava 3.</li>
+    <li><b>A fagulha acende no pixel que saiu</b>, na borda, e não onde a bala tocou a hitbox.</li>
+    <li><b>A marca acompanha a animação:</b> o Guardião balança até 3 px dentro do próprio quadro. Cada quadro refaz as marcas na arte dele, com o balanço compensado.</li>
+    <li><b>O que o corte deixa solto cai</b>, na marca e na mordida. A arte que toca a beira do quadro segura (os tubos do Guardião até o teto).</li>
+    <li><b>Guardião:</b> os pedaços grandes saem dos tubos de cima, dos tubos do alto à direita e dos tentáculos de baixo, não da cara. A borda das marcas é a cor da casca escurecida (o vermelho de carne fazia a linha rosa da mancha).</li>
+    <li><b>Serpente:</b> as marcas só caem na cabeça viva, numa borda de verdade. O círculo de acerto foi centrado na cabeça, <b>com o mesmo raio</b>: a folga da mira é a mesma de antes, só que no lugar certo.</li>
+    <li><b>Os estilhaços no ar caem já</b> (<i>"estilhaços já quebram e caem direto"</i>): na F1 nenhum pedaço é jogado para cima; a fagulha e a brasa, que são leves, ainda sobem. No espaço não há gravidade, e eles seguem à deriva.</li>
+  </ul>
+  <p>Os filmes dos chefões (seção 10) agora atiram com a nave e as balas do jogo. Os de antes usavam um golpe de mentira vindo de fora do corpo, e foi isso que escondeu a mancha.</p>
+  <figure><video src="filme/f1-cair.webm" controls loop muted autoplay playsinline></video><figcaption><b>F1, no ar:</b> à esquerda a explosão de antes; à direita a escolha, com os estilhaços caindo direto.</figcaption></figure>
+  <p><b>Custo:</b> 0,16 ms por marca em média. A mordida grande, refeita em cada quadro na primeira vez que ele aparece, custa até ~7 ms, duas vezes por luta.</p>
+</div>
+
+<h2>14. As peças destrutíveis (etapa 2, no jogo)</h2>
+<div class="item">
+  <p>Você: <i>"pensa no asset como um asset destrutível, cada pixel é um pedacinho dele que pode tomar dano e se desfazer"</i>. As suas decisões, e o que entrou:</p>
+  <ul>
+    <li><b>Quais:</b> o cinturão da F2 (asteroide, mina, mina sensora, o asteroide minerável) e os destroços de nave (a frota da F2 e o que o Leviatã engoliu na F4). <b>Cada tiro marca a peça</b> como marca um inimigo: come a borda e a fagulha acende ali.</li>
+    <li><b>A resistência é pelo material:</b> a rocha perde 1 px por tiro; o metal de destroço é mais duro, 1 px a cada 2 tiros (na sonda: 21 px em 42 tiros), e solta faísca quando não chega a perder pixel. A lança cava mais. <b>O destroço segue indestrutível</b>, e antes ele só ricocheteava.</li>
+    <li><b>A rocha é um material novo, sem fogo:</b> a marca solta cascalho na cor da pedra e uma poeirinha, e a face comida fica um pouco mais clara (rocha recém-quebrada), em vez de carbonizar.</li>
+    <li><b>O destroço da F4</b> é a frota engolida, aço tomado de tecido: a borda dele escurece como a carne-metal dos chefões da F4.</li>
+  </ul>
+  <h3>O asteroide: como ele quebra</h3>
+  <p>Você: <i>"a explosão pode continuar, mas o estilhaçar dela precisa ser algo mais parecido como estilhaçar uma rocha no espaço. Para não ter um estilhaço igual ao dos inimigos"</i>. A explosão do PixelLab continua. Por baixo dela, a rocha se parte nos próprios pixels:</p>
+  <ul>
+    <li><b>sem bola de fogo própria, sem corte em brasa, sem fumaça</b> (o que os inimigos têm);</li>
+    <li>os pedaços são <b>blocos angulosos</b> (o corte quase não entorta), que se afastam e giram devagar;</li>
+    <li>a face nova pisca clara um instante e fica um pouco mais clara;</li>
+    <li>cascalho sai dos cortes, e um <b>anel de poeira</b> se abre e se desfaz.</li>
+  </ul>
+  <p><b>A sua escolha</b> (<i>"Vou com R2 para as rochas grandes e R3 para as pequenas. Mas faça com que os pedaços desapareçam mais rápido"</i>):</p>
+  <ul>
+    <li><b>a rocha grande esfarela (R2)</b> em muitos pedaços pequenos; <b>a pequena se parte (R3)</b> em dois ou três. O jogo decide pelo tamanho desenhado: um asteroide é grande a partir de ~1,3×, e a rocha minerável é sempre grande;</li>
+    <li><b>os pedaços, o cascalho e a poeira somem em cerca de metade do tempo</b> (os pedaços em 0,5 a 0,9 s, antes 1 a 2,3 s).</li>
+  </ul>
+  <figure><video src="filme/rocha.webm" controls loop muted autoplay playsinline></video><figcaption><b>O asteroide grande e o pequeno</b>, a nave atirando de verdade: as duas marcas e a quebra. À esquerda a explosão sozinha; à direita a escolha, com o grande esfarelando e o pequeno partindo em dois.</figcaption></figure>
+  <figure><video src="filme/pecas.webm" controls loop muted autoplay playsinline></video><figcaption><b>As outras peças:</b> o destroço da F2 e o engolido da F4 levando tiro por 7 s (perdem a borda e ficam lá), a mina sensora e o asteroide minerável (que esfarela, R2, por ser grande). À esquerda, como era.</figcaption></figure>
+</div>
+
+<h2>15. A bala passa pela brecha (etapa 3, no jogo)</h2>
+<div class="item">
+  <p>Você: <i>"eu acharia interessante que o buraco mudasse o jogo e visual"</i>. Entrou nos inimigos e nas peças do cinturão:</p>
+  <ul>
+    <li><b>A bala segue pela parte que os tiros já tiraram.</b> Na linha dela, se antes do primeiro pixel vivo algum pixel foi comido, ela não para na borda: entra na brecha e acerta o pixel vivo do fundo (e come ele). Sem pixel vivo na linha, é um túnel, e ela sai do outro lado.</li>
+    <li><b>Onde nada foi comido, acerta onde sempre acertou</b>, inclusive na folga da hitbox antes da arte. A dificuldade não muda.</li>
+    <li><b>A nave não passa</b>: ela continua batendo na forma inteira do destroço.</li>
+    <li><b>Os chefões ficam de fora:</b> a hitbox deles fica dentro da arte (o Guardião) ou é outra peça (a cabeça da Serpente), e a brecha quase nunca fica no caminho da bala.</li>
+    <li><b>Custo:</b> uma olhada numa linha de pixels por bala, só enquanto ela encosta num inimigo ou peça marcada.</li>
+  </ul>
+  <p>Na sonda (<code>_sonda-brecha.mjs</code>), um túnel de 7 linhas aberto de ponta a ponta num destroço: a bala do túnel sai do outro lado, e a de uma linha intacta para no casco e marca, 1 px a cada 2 tiros.</p>
+  <figure><img src="filme/brecha-tunel.png" alt="O destroço com o túnel aberto pela sonda" style="max-width:440px"><figcaption><b>O túnel da sonda</b> (aberto de propósito, para testar): a fenda escura no meio do destroço. As balas da arma base saem 2 px acima e 2 px abaixo da linha da nave, por isso o túnel tem 7 linhas.</figcaption></figure>
+  <figure><video src="filme/brecha.webm" controls loop muted autoplay playsinline></video><figcaption><b>No ritmo do jogo:</b> a nave parada numa altura, atirando num destroço por 25 s. A brecha vai fundando, as balas entram nela e a fagulha acende no fundo. Em 25 s ela não chega a atravessar: furar um destroço pede fogo concentrado por muito mais tempo, como combinamos.</figcaption></figure>
+</div>
+
+<h2>16. O que eu preciso de você</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A rocha:</b> a grande esfarelando, a pequena partindo, e os pedaços mais rápidos (seção 14).</li>
+    <li><b>A Serpente na hora da morte</b> (seção 10): os discos vermelhos e as linhas rosa dos pedaços saíram. As marcas dos estouros ficam pequenas e só escurecem a cor dela, e a borda do corte fica vermelha só um instante. As mordidas de chefão de carne (a Serpente e o Guardião) também deixaram de ter o aro rosa: a borda delas escurece na cor do bicho. <b>E os pedaços grandes que as mordidas arrancam na fusão</b> (em 15% e 6%), que na primeira correção ainda voavam com o contorno vermelho, agora saem na cor dela: o rosa fica só no instante do corte. Os filmes da Serpente e do Guardião foram refeitos com isso.</li>
+    <li><b>A brecha</b> (seção 15).</li>
+    <li><b>A cabeça da Serpente:</b> o círculo de acerto agora está na cabeça, com o mesmo tamanho. Quer que ele encolha até o tamanho da cabeça (a bala chega nos pixels dela, mas fica mais difícil de acertar)?</li>
+    <li><b>Ainda em aberto:</b> o tamanho das marcas jogando (1, 3 e 4 px), e os arcos menores e o anel em degradê da nave.</li>
+  </ol>
+  <p>Decidido em 27/10: a pupa e a mosca ficam com o respingo de carne (<i>"estão com ótimo efeito"</i>); as marcas na borda ficaram boas nos chefões e nas peças; os estilhaços da F1 caem direto.</p>
+</div>
+
+<h2>Como saiu</h2>
+<div class="item">
+  <ul>
+    <li><b>O motor:</b> <code>src/systems/morte/Destrocos.ts</code>. É um por fase, com as três telas de pixel (fumaça, destroços, brilho) compartilhadas por todos os inimigos. Desenha no <code>PRE_RENDER</code>, porque a física move o sprite depois do <code>update</code>.</li>
+    <li><b>Os números e a separação:</b> <code>src/systems/morte/numerosDestrocos.ts</code>. <code>SEPARACAO</code> diz a classe e o material de cada tipo, <code>VARIANTES</code> e <code>PADRAO</code> as variações, e <code>DESTROCOS.lasca</code> os limiares.</li>
+    <li><b>As funções puras novas:</b> em <code>pedacos.ts</code>. <code>reduzir</code> desenha o quadro no tamanho de tela, com espelho e tinta; <code>sementesAoLongo</code> dá as sementes da quebra; a <code>lasca</code> aceita o lado do tiro; e há as rampas <code>RAMPA_CARNE</code> e <code>RAMPA_MEDUSA</code>.</li>
+    <li><b>Na cena:</b> <code>matarInimigo</code> chama a morte, e <code>ferirInimigo</code> chama a marca (<code>marcar</code>) e o pedaço perto da morte. O chefão diz ao motor quem é, a vida e a forma pelo <code>StageBoss.destrocos</code> (a tabela é <code>CHEFOES</code>), e a vida dele e a do golfinho são vigiadas a cada quadro (<code>vigiar</code>). O <code>bulletHitBoss</code> e as bombas marcam o chefão. Para trocar a variação, use o registry <code>destrocosVariantes</code> (por exemplo <code>{ comum: 'A3' }</code>); <code>'hoje'</code> volta à morte de antes.</li>
+    <li><b>A assinatura da nave:</b> em <code>MorteDaNave.ts</code> (<code>sobrecarga</code>, <code>assinar</code>, <code>desenharAneis</code>, <code>estourarCadeia</code>), com os números em <code>MORTE.assinatura</code>. O registry <code>assinaturaMorte = false</code> a desliga (dev e os filmes de comparação).</li>
+    <li><b>As sondas novas:</b> <code>scripts/_inimigos/_sonda-chefes.mjs</code> (as marcas e os pedaços de cada chefão, as trocas de arte, a mordida sem buraco do Predador e do golfinho) e <code>_sonda-movimento.mjs</code> (um inimigo vivo apanhando, fotografado enquanto se mexe). Na 2ª rodada:
+      <ul>
+        <li><code>_sonda-tiro-real.mjs</code>: a nave e as balas do jogo contra um chefão. Diz se cada marca caiu na borda, o custo dela e os pixels soltos, e desenha o mapa do que foi comido.</li>
+        <li><code>_sonda-circulo-serpente.mjs</code>: o círculo de acerto da cabeça contra a cabeça desenhada.</li>
+        <li><code>_registro.mjs</code>: quanto a arte balança dentro do quadro.</li>
+        <li><code>_tempo-mordida.mjs</code>: o custo de uma mordida grande.</li>
+        <li><code>_quadros-filme.mjs</code>: tira quadros de um filme pronto.</li>
+      </ul>
+    </li>
+    <li><b>Os testes:</b> <code>scripts/test-morte.mjs</code> roda em dez inimigos de verdade e confere que:
+      <ul>
+        <li>cada um é cortado no tamanho de tela;</li>
+        <li>nenhum pixel se perde nem se repete;</li>
+        <li>30 tiros da esquerda mordem sempre o terço da esquerda;</li>
+        <li>o espelho e a tinta saem como no Phaser;</li>
+        <li>as rampas novas sobem do escuro ao claro.</li>
+      </ul>
+    </li>
+    <li><b>Os filmes:</b> <code>scripts/_inimigos/_filmar-destrocos.mjs &lt;out.webm&gt; &lt;grupo&gt;</code>, com os grupos <code>jogo</code>, <code>comuns</code>, <code>f1</code>, <code>vivos</code>, <code>elites</code>, <code>mini</code> e <code>chefe</code> (26/10), e <code>marcas</code>, <code>capitania</code>, <code>torre</code>, <code>serpente</code>, <code>nucleo</code> e <code>golfinho</code> (27/10). Os da nave são do <code>scripts/_morte/_filmar-morte.mjs</code>, com o painel <code>estilo:sem</code>. A prancha é <code>scripts/_inimigos/_prancha.mjs</code>, e a das poses <code>_poses.mjs</code>.</li>
+    <li><b>O custo</b> (<code>scripts/_inimigos/_custo-destrocos.mjs</code>, medindo só o motor, num Chrome sem placa de vídeo):
+      <ul>
+        <li>na onda da F2: 0,5 ms por quadro em média, 1 ms em 95% dos quadros e 2,2 ms no pior;</li>
+        <li>no pior caso (doze drones mortos no mesmo quadro, com três cargueiros feridos soltando fumaça): 0,6 ms em média e 2,9 ms no pior quadro.</li>
+      </ul>
+      Um quadro do jogo tem 16,7 ms. Na primeira medição havia picos de até 135 ms: o motor lia de volta a própria cópia furada da textura, e ler da placa de vídeo é caro. Agora ele lê o quadro original, e a máscara sabe onde estão os buracos.</li>
+    <li><b>As peças do cinturão (etapa 2):</b> a tabela <code>PECAS</code> em <code>numerosDestrocos.ts</code> (material e dureza), <code>marcarPeca</code> e <code>killHazard</code> na cena, o material e a quebra de rocha no motor (<code>DESTROCOS.rocha</code>, <code>RAMPA_ROCHA</code>, <code>clarear</code>). A sonda é <code>scripts/_inimigos/_sonda-cinturao.mjs</code>, e os filmes são os grupos <code>rocha</code> e <code>pecas</code>. O registry <code>destrocosVariantes.rocha</code> troca a quebra.</li>
+    <li><b>A brecha (etapa 3):</b> <code>Destrocos.atravessa</code>, chamado pelo segundo callback do overlap das balas com os inimigos e as peças (<code>GameScene.pelaBrecha</code>). A sonda é <code>scripts/_inimigos/_sonda-brecha.mjs</code>, e o filme é o grupo <code>brecha</code>.</li>
+    <li><b>Ficou de fora:</b> as peças que você não escolheu (a colônia da F1, o cenário da F4), e a brecha nos chefões.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>
