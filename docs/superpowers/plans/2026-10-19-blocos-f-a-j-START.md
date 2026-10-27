@@ -1,5 +1,9 @@
 # START — os blocos F a J (depois do menu)
 
+> ⏭️ **SUPERADO em 20/10 — NÃO É MAIS A PORTA DE ENTRADA.** A ordem mudou (decisão dele: o visual primeiro): G ✅ → H
+> → I → J → F. O F ficou para depois do J. A porta agora é o `plans/2026-10-21-bloco-h-START.md`; este fica como
+> registro.
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco E fechou; vamos começar o bloco F."**
 > O roadmap vivo é o 🧭 do HANDOFF; este START é o mapa de entrada da sessão.
 

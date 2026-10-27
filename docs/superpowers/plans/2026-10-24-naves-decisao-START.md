@@ -1,5 +1,9 @@
 # START — decidir a nave humana (os concepts dele) e voltar ao roadmap
 
+> ✅ **CUMPRIDO em 25–26/10 — NÃO É MAIS A PORTA DE ENTRADA.** Os tiers saíram, o hangar escolhe entre quatro naves,
+> e vieram os nomes e a morte da nave (commitados em `5c61f1c`…`7eb9d8c`). A porta agora é o
+> `plans/2026-10-21-bloco-h-START.md`; este fica como registro.
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. A sessão abre na folha
 > `naves-conceito.html`: decidir a nave humana com ele e voltar ao roadmap (H → I → J → F)."**
 > O roadmap vivo é o 🧭 do HANDOFF; este START é o mapa de entrada da sessão.

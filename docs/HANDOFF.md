@@ -16,10 +16,10 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. Tudo de 25–27/10 está commitado e empurrado. A sessão abre no retorno dele
-> JOGANDO: o tamanho das marcas (1/3/4 px), o círculo da cabeça da Serpente (encolher até a cabeça?), os arcos e o anel
-> da morte da nave, e a lasca do casco (`MORTE.golpe`). Depois, o bloco H, pelo START
-> `plans/2026-10-21-bloco-h-START.md`, e I → J → F."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-10-21-bloco-h-START.md`. Tudo de 22–27/10 está commitado e
+> empurrado. A sessão abre no retorno dele JOGANDO (o §0 do START diz onde mexer em cada coisa): o tamanho das marcas
+> (1/3/4 px), o círculo da cabeça da Serpente (encolher até a cabeça?), os arcos e o anel da morte da nave, a lasca do
+> casco, a rocha e a aranha. Depois, o bloco H, abrindo com as perguntas a ele, e I → J → F."**
 >
 > 📍 **27/10 (2) — A DESTRUIÇÃO POR PIXEL NO JOGO TODO, E A ARANHA DA CAVERNA: COMMITADAS E EMPURRADAS** para
 > `origin/feat/cartas-preview`:
