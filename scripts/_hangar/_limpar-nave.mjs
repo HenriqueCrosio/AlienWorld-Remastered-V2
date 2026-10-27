@@ -7,6 +7,7 @@
 //     the nozzle the dark lower body, interpolated between the rows above and below the rod;
 //   - the lit nozzle (the orange/red mouth, x 470–479, y 430–436) → unlit dark metal at 0,4× its luminance;
 //   - the red glow it threw on the underside (y 441–444) → the same dark, without the red.
+// And the right ship (the "a", the Terminus), 26/10 at night: the thin rod out of its engine's tail (step 4).
 // Everything else is his painting, untouched. `_camadas.mjs` calls `limparNave`; alone it writes a PNG to compare:
 //   node scripts/_hangar/_limpar-nave.mjs <out.png>
 import { pathToFileURL } from 'node:url';
@@ -64,6 +65,17 @@ export function limparNave(data, W) {
   for (let y = 441; y <= 444; y++) for (let x = 466; x <= 478; x++) {
     const i = at(x, y);
     if (fonte[i] > fonte[i + 1] * 1.5 && fonte[i] > 20) { metal(i, 1); marcar(x, y); }
+  }
+
+  // 4. 26/10 (night), he: "pode tirar a haste do motor da Terminus também". The "a" (right) has a thin rod out of the
+  // engine's tail, rows 443–449, from x 1284 (the short collar at the nozzle, x 1273–1283, stays: it reads as the
+  // engine's tail) to its tip at x ≈ 1327, with a dark halo around it that cuts the bay's door pillar (x 1319–1329).
+  // The wall comes back from 8 rows up, same columns: the pillar and the panel lines run straight through.
+  const HASTE_A = { x0: 1284, x1: 1331, y0: 443, y1: 449, doadorY: -8 };
+  for (let y = HASTE_A.y0; y <= HASTE_A.y1; y++) for (let x = HASTE_A.x0; x <= HASTE_A.x1; x++) {
+    const i = at(x, y), j = at(x, y + HASTE_A.doadorY);
+    for (let c = 0; c < 3; c++) data[i + c] = fonte[j + c];
+    marcar(x, y);
   }
   return { mudou, caixa: [bx0, by0, bx1, by1] };
 }
