@@ -1,15 +1,29 @@
-# OS DESTROÇOS — a técnica da morte da nave (26/10/2026)
+# OS DESTROÇOS — a destruição por pixel, no jogo inteiro (26–27/10/2026)
 
-Como um sprite se desfaz nos PRÓPRIOS pixels: ele estilhaça, queima em brasas ou se parte. Tudo é desenhado pixel a
-pixel na resolução do jogo, sem uma peça de arte nova. A técnica foi feita para a morte da nave e para a lasca do casco
-a cada vida perdida (spec `docs/superpowers/specs/2026-10-26-morte-da-nave-design.md`, folha
-`docs/superpowers/folhas/2026-10-26/morte/morte.html`). Ela vale para qualquer coisa que se quebra em cena: um inimigo,
-um chefão, uma peça do cenário.
+Como um sprite se desfaz nos PRÓPRIOS pixels: ele estilhaça, queima em brasas ou se parte, e cada golpe que leva tira
+pixels da borda dele. Tudo é desenhado pixel a pixel na resolução do jogo, sem uma peça de arte nova. A técnica nasceu
+na morte da nave e na lasca do casco a cada vida perdida (spec `docs/superpowers/specs/2026-10-26-morte-da-nave-design.md`,
+folha `docs/superpowers/folhas/2026-10-26/morte/morte.html`). Em 26–27/10 ela foi para o jogo todo: inimigos, elites,
+minis, chefões, o golfinho, o cinturão da F2 e os destroços de nave (spec
+`docs/superpowers/specs/2026-10-26-destrocos-inimigos-design.md`, folha `docs/superpowers/folhas/2026-10-26/inimigos/inimigos.html`).
+Ele: *"pensa no asset como um asset destrutível, cada pixel é um pedacinho dele que pode tomar dano e se desfazer"*.
 
 Onde fica:
-- o código está em `src/systems/morte/`: `pedacos.ts` é a parte pura, sem Phaser; `MorteDaNave.ts` é o efeito;
-  `numerosMorte.ts` guarda os números aprovados;
-- as ferramentas estão em `scripts/_morte/`, e o teste puro em `scripts/test-morte.mjs`.
+- o código está em `src/systems/morte/`:
+  - `pedacos.ts` é a parte pura, sem Phaser: o corte, a mordida e as rampas;
+  - `MorteDaNave.ts` é a morte da nave do jogador, e `numerosMorte.ts` os números dela;
+  - `Destrocos.ts` é o motor dos outros (um por cena), e `numerosDestrocos.ts` a separação, as tabelas e os números;
+- na cena, os ganchos são do `GameScene` (§15);
+- as ferramentas estão em `scripts/_morte/` (a nave) e `scripts/_inimigos/` (os outros), e o teste puro em
+  `scripts/test-morte.mjs`.
+
+Como ler:
+- **§0–13:** a técnica de base, na morte da nave (o corte, a mordida, a queima, as cores, as telas, a física);
+- **§13½:** a assinatura que só a nave do jogador tem;
+- **§14:** os inimigos e os chefões (as mortes, as marcas na borda, a cicatriz refeita por quadro);
+- **§14.1–14.3:** as peças do cinturão, a bala pela brecha e os chefões de carne;
+- **§15:** o mapa do motor (as funções, as tabelas e os ganchos);
+- **§16:** a receita para ligar a destruição numa coisa nova.
 
 ## 0. O método (antes de qualquer código)
 
@@ -286,3 +300,290 @@ por golpe, nunca uma fração das vidas que restam.
    efeito.
 7. **Um dano que se repete** (vidas, escudo, pedaços de chefão) segue a regra do §9: uma medida fixa por golpe, que
    some antes do próximo, e nunca uma fração de um total que pode mudar.
+
+## 13½. A assinatura da nave do jogador (27/10)
+
+As mortes dos inimigos saíram das naves, e ele viu: *"a explosão é idêntica"* à de um kamikaze. **Uma morte do jogador
+precisa de algo que nenhum inimigo tem.** Cada nave mantém a sua morte (escolhida em 26/10), e por cima entram três
+camadas (`MORTE.assinatura`, cada uma liga e desliga sozinha):
+- **a sobrecarga antes**, num relógio próprio, para nenhum tempo da morte mudar: tremor crescente, pixels quentes
+  piscando, faíscas, o fogo engasgando e um arco;
+- **o anel de choque** no momento grande, na rampa da nave;
+- **a cadeia**: pedaços estourando pequenos enquanto voam.
+
+Ao inventar uma morte nova de inimigo, não reaproveite estas três camadas: elas são o que diz "foi você".
+
+## 14. Os inimigos (26–27/10)
+
+A técnica foi levada aos inimigos: `src/systems/morte/Destrocos.ts` e `numerosDestrocos.ts`, spec
+`docs/superpowers/specs/2026-10-26-destrocos-inimigos-design.md`, folha `folhas/2026-10-26/inimigos/inimigos.html`.
+Em 27/10 ele escolheu: *"Vou com a sua recomendação: A1 e A3 misto, B1, C1, D1"*.
+- A1 nos comuns pequenos e A3 na canhoneira e no cargueiro (`PADRAO_DO_TIPO`).
+- B1, C1 e D1 nas outras classes.
+- D1 na Capitânia e na Serpente.
+- A Torre, o Guardião e o Predador ficam com as mortes aprovadas e só levam as mordidas (`CHEFOES`).
+
+O que vale para a técnica:
+
+- **Um motor por cena, não um efeito por morte.** Um drone morre dezenas de vezes por fase, e uma carta de reação em
+  cadeia mata uma fila no mesmo quadro. São três telas de pixel compartilhadas, e corpos, partículas (com a rampa de
+  cada uma) e fumos em listas planas. Ele desenha no `PRE_RENDER` e só manda as telas quando há o que desenhar.
+- **A separação manda na duração.** Comum, elite, mini e chefão: quem morre muito morre rápido. O material manda nas
+  cores:
+  - **metal:** o fogo;
+  - **luz:** a rampa MEDUSA e a descarga;
+  - **carne:** a rampa CARNE, gotas e nada de fogo nem branco;
+  - **biomec:** a carne com uma bola de fogo pequena.
+- **O corte no tamanho em que o jogo desenha** (`reduzir`: escala por vizinho mais próximo, espelho e a tinta de
+  repouso, `getData('tint')` e não a do piscar do dano). Os inimigos aparecem de 0,28 a 1,1×, e os pedaços têm que
+  sair em pixel de jogo.
+- **A medida do dano do inimigo é a barra de vida** (limiares por classe). A vida dele é fixa, ao contrário das vidas
+  do jogador (§9). A mordida mira o lado do tiro (`lasca` com `perto`).
+- **O buraco de verdade** (`furar`):
+  - pintar o buraco de escuro por cima lê como mancha numa pata cinza;
+  - o sprite passa a mostrar uma cópia do quadro atual com os pixels mordidos transparentes (uma `CanvasTexture` por
+    quadro, feita quando ele aparece);
+  - a animação devolve o original quando avança, e o motor põe a cópia de volta antes do desenho;
+  - um golpe novo é furado na cópia de cada quadro quando ele aparece de novo (ver abaixo, "a cicatriz é uma história");
+  - por cima fica só o aro: em brasa piscando no metal, vermelho na carne, aceso na luz.
+- **Armadilha:** os elites que se vestem por estado comparam `texture.key` (`vestir`) e trocam de volta a cada
+  `update`. Funciona, porque a cópia volta no `PRE_RENDER`. Mas nenhuma lógica pode decidir coisas pela chave da
+  textura de um inimigo mordido.
+- **O chefão** leva dano por vários caminhos, então a vida dele é vigiada a cada quadro (`vigiar`, com o
+  `StageBoss.destrocos`). O golfinho também. A cadeia de explosões da morte vira mordidas com estouro, e a ruptura final
+  ganha a folha grande atrás dos pedaços.
+- **Onde sai o pedaço grande de um chefão** (`mira`, em rodízio): o pedaço não sai de onde o desenho tem mais detalhe.
+  - **O Guardião (27/10):** do lado da nave, o pedaço saía da cara, e ele disse: *"a cabeça tem muito detalhe, o que
+    podem sair são os tubos de cima, pedaços de outras partes"*. Agora sai dos tubos de cima, dos tubos do alto à
+    direita e dos tentáculos de baixo.
+  - **A Torre:** sai da cabeça e do ombro, que as duas formas dela têm.
+- **As marcas dos golpes (27/10, ideia dele).** Todo golpe que não mata tira pixels do corpo (`marcar`,
+  `DESTROCOS.marca`): o tiro tira o seu dano, de 1 a 3 (a lança cava mais); a explosão e o míssil tiram 3; a bomba
+  tira 4. Os pixels voam na própria cor, e o furo fica com um aro que carboniza. Os pedaços grandes ficaram para perto
+  da morte (a aranha perde as patas no fim).
+- **A marca come a BORDA, na linha do golpe** (27/10, 2ª rodada, ele: *"pense nos inimigos … como um asset, cada
+  tiro tira 1 px da borda do asset, para começar a deformá-lo"*).
+  - **O erro da 1ª versão:** ela tirava o pixel do corpo mais perto de um ponto 16 px atrás de onde a bala tocou a
+    hitbox. A hitbox de um chefão fica DENTRO da arte. No Guardião, todos os tiros cavaram a mesma coluna no meio da
+    casca, uma mancha. Na Torre, o pixel mais perto era a parte de baixo do cano, escuro contra o céu escuro, e
+    ninguém via nada.
+  - **A regra:** o golpe come o primeiro pixel vivo na faixa dele (a linha, para um tiro de lado; a coluna, de cima
+    ou de baixo), a partir do lado de onde veio.
+  - **O sulco:** uma série de tiros no mesmo lugar cava um V estreito. Uma faixa só come o vizinho quando está
+    `sulco` (3) px mais funda que ele. Os pixels de uma explosão se espalham numa mordida redonda pequena. Furar uma
+    chapa de 10 px pede uns 30 tiros no mesmo lugar, e um destroço maciço de 40 px uns 500: o ritmo da fase não deixa.
+  - **A dureza:** um corpo duro perde um pixel a cada `dureza` px de golpe (a sobra vai acumulando). Quando o golpe
+    não chega a tirar um pixel, sai só a fagulha.
+  - **A fagulha acende no pixel comido** (`marcar` devolve onde), e não onde a bala tocou a hitbox.
+- **A cicatriz é uma história de golpes, refeita em cada quadro da animação** (27/10).
+  - **O problema:** o Guardião balança até 3 px dentro do próprio quadro, e os tubos dele se mexem. Um furo fixo no
+    pixel do quadro escorregava para fora do corpo.
+  - **O que o motor guarda:** os golpes (`Golpe`), cada um com a faixa e a hora; a mordida guarda ainda a sorte e o
+    ruído. Os lugares ficam no quadro de referência, o primeiro que apareceu.
+  - **Cada quadro joga os golpes na própria arte** (`Desgaste`), deslocado do quadro de referência pelo `registro`.
+    O `registro` compara os perfis de pixels opacos por coluna e por linha.
+  - **O resultado:** a marca fica na borda em qualquer pose, e a mordida volta a crescer da borda mais perto do
+    mesmo ponto.
+  - **A preguiça:** um quadro só recebe os golpes quando aparece (`emDia`, chamado do `furar`). As cópias tocadas
+    vão para a placa de vídeo uma vez por desenho (`sujas`).
+    - **Antes:** furar todas as cópias a cada tiro custava 2 ms, com picos de 20 ms.
+    - **Agora:** a marca custa 0,16 ms em média.
+- **O que o corte deixa pendurado cai** (`soltos`), na marca e na mordida (ele: *"o corte ficou com pixels
+  flutuantes"*).
+  - **O que cai:** partes que perderam a ligação (8 vizinhos) com o corpo, até `ilha` (20%) do corpo.
+  - **O que não cai:** a arte que toca a beira do quadro continua alguma coisa fora dele, como os tubos do Guardião
+    até o teto. Ela segura.
+  - **O atalho:** o pixel único de uma marca só procura o que se soltou quando os vizinhos dele não se ligam em volta
+    dele (`anelUnido`).
+- **A zona** (a Serpente). As marcas só caem dentro do círculo da cabeça viva e só numa borda de verdade, um pixel
+  com vazio antes dele na faixa. Sem a segunda condição, o círculo da zona virou borda falsa e as marcas desenharam o
+  arco dele atravessando o pescoço.
+- **Quem não ganha buraco:** o Predador anda, golpeia e se pendura no teto, e o golfinho dá cambalhota. Mudam tanto de
+  pose que até a borda de cada quadro é outra parte do corpo. Neles o golpe arranca sem furar (`furo: false`): o pixel
+  e o pedaço voam, e o corpo fica inteiro. Confira as poses (`scripts/_inimigos/_poses.mjs`) e o balanço dentro do
+  quadro (`scripts/_inimigos/_registro.mjs`) antes de ligar o buraco num corpo novo.
+- **Armadilha das sondas:** uma sonda que "atira" com um ponto de fora do corpo esconde tudo isso. A de 27/10 passava
+  com a mancha no jogo. As marcas se conferem com a nave e as balas do próprio jogo (`_sonda-tiro-real.mjs`, que
+  também desenha o mapa do que foi comido) e com os filmes, que atiram de verdade desde 27/10.
+- **Armadilha da Serpente (antiga, achada pelas marcas):**
+  - **O defeito:** o círculo da cabeça (`setCircle(15)`, 30 px de diâmetro) estava num `flash` de 16×16 px sem
+    deslocamento. Ele nascia no canto do quadro e, na escala 2,2, ficava uns 15 px abaixo e à direita da cabeça, em
+    cima do pescoço e do toco da cabeça morta.
+  - **A correção:** o círculo está centrado na cabeça, com o mesmo raio.
+- **No ar, os pedaços caem já** (`cairJa`, ele: *"estilhaços já quebram e caem direto"*).
+  - **Na F1:** o estouro só espalha os pedaços para os lados, e nenhum é jogado para cima. A fagulha e a brasa
+    continuam subindo, porque são leves.
+  - **No vácuo:** nada puxa, e os pedaços seguem à deriva.
+- **A arte que vira outra leva as cicatrizes junto** (`esquecer`, quando a `forma` muda).
+  - A Serpente perde a cabeça e veste a arte com o coto. As mordidas dela miram a CABEÇA VIVA (`mira`), então o
+    pedaço some junto com a cabeça morta.
+  - O Guardião vira o Predador no mesmo sprite, e os buracos da casca não podem aparecer no bicho novo.
+  - A vida vigiada NÃO volta a 1 numa forma nova: voltar faria os limiares já cruzados morderem de novo.
+- **Chefão desenhado acima das telas** (a Serpente está na profundidade 30): o motor sobe as três telas para logo
+  acima dele (`acima`). Senão o aro e os pedaços ficam escondidos atrás dela.
+- **Armadilha:** o `furar` guardava "este quadro não tem buraco" quando o quadro aparecia num tamanho diferente (o
+  aperto da fusão da Serpente é uma escala animada), e o quadro nunca mais furava. Agora o tamanho é conferido antes,
+  e o quadro só é guardado como "sem buraco" quando nenhum pixel dele foi mordido.
+
+### 14.1 As peças do cinturão (27/10, etapa 2)
+
+Ele: *"pensa no asset como um asset destrutível, cada pixel é um pedacinho dele que pode tomar dano e se desfazer"*.
+As escolhas dele: o cinturão da F2 e os destroços de nave; a resistência pelo material; o asteroide com a explosão do
+PixelLab e uma quebra de rocha.
+
+- **A tabela `PECAS`** (`numerosDestrocos.ts`) diz a classe, o material e a `dureza` de cada peça.
+  - O asteroide e o asteroide minerável são de rocha, dureza 1, e quebram como rocha.
+  - O destroço é metal na F2 e `biomec` na F4 (a frota engolida, aço tomado de tecido), com dureza 2. Ele continua
+    indestrutível e só perde pixel.
+  - A mina e a mina sensora são de metal.
+- **O tiro marca a peça** como marca um inimigo (`GameScene.marcarPeca`, chamado do `bulletHitHazard`). A fagulha acende
+  no pixel comido. O destroço, que antes só ricocheteava, agora fica marcado.
+- **O material ROCHA não tem fogo:**
+  - a rampa `RAMPA_ROCHA` foi tirada da própria arte dos asteroides;
+  - a poeira tem o tom de pó azul-cinza da pedra;
+  - a face nova fica um pouco mais clara (`clarear`), em vez de carbonizar;
+  - o cascalho guarda a cor da pedra (a brasa da carne e do metal escurece para o vermelho);
+  - a marca solta uma poeirinha, sem faísca.
+- **A quebra de rocha** (`estilo: 'rocha'`, `DESTROCOS.rocha`). É diferente do A1 dos inimigos:
+  - sem bola de fogo própria (a explosão do PixelLab continua por cima, no `killHazard`), sem corte em brasa e sem
+    fumaça;
+  - blocos angulosos (o corte quase não entorta), que derivam e giram devagar no vácuo;
+  - a face nova pisca clara um instante e fica mais clara;
+  - cascalho saindo dos cortes, e um anel de poeira que fica no ar e se desfaz.
+- **As três quebras, para ele escolher no filme `rocha.webm`:**
+  - **R1, a fratura:** de 4 a 7 blocos;
+  - **R2, o esfarelar:** muitos pedaços pequenos numa nuvem;
+  - **R3, partir em dois ou três.**
+  
+  A quebra sai pelo tamanho (a escolha dele, abaixo). O registry `destrocosVariantes.rocha` força uma (dev), e
+  `'hoje'` volta à explosão sozinha.
+- **A sonda:** `scripts/_inimigos/_sonda-cinturao.mjs`, com tiro de verdade. O asteroide leva as marcas e quebra; o
+  destroço continua lá e perde 1 px a cada 2 tiros; o da F4 é marcado como `biomec`.
+- **Armadilha das sondas:** trocar de fase na mesma página (parar e começar no mesmo tique) deixa a fase nova
+  carregando para sempre. Use uma página por fase, ou espere a cena parar antes de começar a outra, como o filme faz.
+- **A escolha dele (27/10):** *"Vou com R2 para as rochas grandes e R3 para as pequenas. Mas faça com que os pedaços
+  desapareçam mais rápido"*.
+  - A rocha de `pxGrande` (850) px opacos ou mais, como é desenhada, esfarela (R2). A menor se parte (R3). Um asteroide
+    é grande a partir de ~1,3×, e a rocha minerável é sempre grande.
+  - Os pedaços, o cascalho e a poeira duram cerca de metade do que duravam.
+
+### 14.2 A bala passa pela brecha (27/10, etapa 3)
+
+Ele: *"eu acharia interessante que o buraco mudasse o jogo e visual"*.
+
+- **`Destrocos.atravessa`**, chamado pelo segundo callback do overlap de bala (`GameScene.pelaBrecha`), nas peças do
+  cinturão e nos inimigos.
+  - **A regra:** na faixa da bala, a partir do lado de onde ela veio, procura o primeiro pixel vivo. Se antes dele
+    algum pixel foi tirado e a bala ainda não chegou nele, ela segue voando e come o pixel quando chega lá. Sem pixel
+    vivo na faixa, é um túnel, e ela atravessa.
+  - **O que não muda:** a faixa sem nada tirado acerta onde sempre acertou, inclusive na folga da hitbox antes da
+    arte. O balanço fica igual, e a nave continua batendo na forma inteira.
+- **Armadilha (a 1ª versão):** ela só olhava a faixa até a bala. A hitbox do destroço começa antes da arte, então a bala
+  era pega nessa folga e nunca chegava ao túnel. Agora ela olha a faixa à frente até o primeiro pixel vivo.
+- **A sonda:** `scripts/_inimigos/_sonda-brecha.mjs`.
+  - Abre um túnel de 7 linhas num destroço, pelo próprio caminho das marcas. A arma base atira duas balas, a 2 px
+    acima e abaixo da linha da nave.
+  - Na linha do túnel, a bala sai do outro lado. Numa linha inteira, ela para no casco e marca, 1 px a cada 2 tiros.
+- **Os chefões ficam de fora:** a hitbox deles fica dentro da arte (o Guardião) ou é outra peça (a cabeça da
+  Serpente), e a brecha quase nunca está no caminho.
+
+### 14.3 A Serpente sem marcas vermelhas fixas (27/10)
+
+Ele, na fusão: *"os pedaços grandes que saem dela na hora da explosão deixam marcas cor avermelhadas fixadas"*.
+
+- **A causa:** os estouros da quebra (B1/C1/D1) deixam uma marca cujo raio cresce com o corpo. Na fusão, ela passava
+  de 20 px. Na carne-metal ela era pintada de vermelho de carne e gravada nos pedaços quando o corpo se partia. A borda
+  do corte também ficava vermelho-molhado para sempre.
+- **A correção** (`Corpo.limpa`), só para chefão de carne ou carne-metal: na morte, é a Serpente (a única dessas com
+  ruptura); nas mordidas, a Serpente, o Guardião e o Predador:
+  - a marca fica pequena (até 5 px);
+  - ela respinga vermelho um instante e depois só escurece a cor do próprio corpo;
+  - nada vermelho é gravado nos pedaços;
+  - a borda do corte, depois de 0,25 s, vira a cor do corpo escurecida. Com 0,7 s, a câmera lenta da morte esticava o
+    rosa por 1,5 s de filme;
+  - as mordidas de chefão de carne ou carne-metal (a Serpente e o Guardião) também perderam o aro rosa no corpo vivo:
+    a borda delas escurece na cor do bicho;
+  - o pedaço que cada mordida arranca (em 15% e 6%) leva a mesma regra: a borda rosa dura 0,25 s e escurece. Na
+    primeira correção só a morte usava o `limpa`, e os pedaços das mordidas da fusão seguiam voando com o contorno
+    vermelho. Eram eles os *"pedaços grandes que saem dela"* (`morder` liga o `limpa` nos pedaços).
+  
+  A pupa, a mosca e os elites de carne seguem como foram aprovados.
+
+## 15. O mapa do motor (27/10)
+
+### O motor (`Destrocos.ts`, um por cena)
+
+| Função | O que faz |
+| --- | --- |
+| `morrer(s, o)` | A morte nos próprios pixels, no `estilo` da variação (`lascas`, `meio`, `carcaca`, `ruptura`, `estilhacos`, `desintegra`, `rocha`). O sprite sai de cena, e os pedaços ficam com o motor. |
+| `marcar(s, px, de, classe, material, furo, { zona, rumo, dureza })` | A marca de um golpe que não mata: come `px` pixels da BORDA, na faixa de onde o golpe veio (`rumo`). Devolve o ponto comido, onde a cena acende a fagulha (ou `null`). |
+| `ferir(s, antes, hp, hpMax, classe, material, de, perto)` | Os pedaços grandes nos limiares da vida (`DESTROCOS.lasca`). Usado pelos inimigos. |
+| `vigiar(s, fracao, classe, material, de, { mira, furo })` | O mesmo para quem leva dano por muitos caminhos (o chefão, o golfinho): a cena passa a vida a cada quadro. |
+| `morder(s, classe, material, de, perto, furo)` | Uma mordida agora: o pedaço voa e o corpo fica com o buraco (ou sem ele, com `furo: false`). |
+| `esquecer(s)` | A arte virou outra (a Serpente sem a cabeça, o Guardião virando o Predador): as cicatrizes da velha saem. |
+| `acima(depth)` | Sobe as telas para logo acima de um chefão desenhado alto (a Serpente, na profundidade 30). |
+| `atravessa(s, x, y, rumo)` | A bala passa pela brecha? (§14.2) |
+| `furosDe(s)`, `mordidas(s)` | Quantos pixels foram comidos e quantas mordidas houve (as sondas). |
+| `update(dt)`, `destroy()` | O relógio e o fim da cena. |
+
+O que ele guarda:
+- **`Corpo`:** um pedaço que voa ou cai (o bitmap, o mapa do corte, as manchas, a física, o `limpa`);
+- **`Cicatriz`:** a história de um sprite vivo: os golpes (`Golpe`, uma `marca` ou uma `mordida`, cada um com a faixa
+  ou a sorte, no quadro de referência), a dureza que sobrou e as cópias furadas de cada quadro;
+- **`Desgaste`:** um quadro da animação com os golpes já aplicados (o que foi comido, o aro, o deslocamento do
+  `registro`). É feito quando o quadro aparece (`emDia`).
+
+### As tabelas (`numerosDestrocos.ts`)
+
+- **`SEPARACAO`:** o tipo de inimigo → a classe e o material.
+- **`CHEFOES`:** o chefão → a classe, o material, se a morte vira a ruptura nos próprios pixels (`morte`) e se as
+  mordidas furam (`furo`).
+- **`PECAS`:** a peça do cenário → a classe, o material, a `dureza`, se quebra como rocha, e o material na F4.
+- **`VARIANTES`, `PADRAO`, `PADRAO_DO_TIPO`, `ESTILO_DA_VARIANTE`:** que morte cada classe e cada tipo usa.
+- **`DESTROCOS`:** os números:
+  - o mundo (a gravidade, o arrasto);
+  - a lasca (os limiares, os tamanhos);
+  - a marca (`px` por fonte de dano, `sulco`, `alcance`, `ilha`, `registro`);
+  - as variações e a rocha (`pxGrande`, R1–R3).
+- **O registry `destrocosVariantes`** troca a variação de uma classe ou da rocha (dev e filmes). `'hoje'` volta à morte
+  de antes.
+
+### Os ganchos na cena (`GameScene`)
+
+- **Os inimigos:**
+  - `bulletHitEnemy` → `deOndeVeio` (o ponto e o rumo da bala) → `ferirInimigo` (`marcar` e `ferir`);
+  - a morte → `matarInimigo` (`morrer`, com a variação de `varianteDe`).
+- **Os chefões:**
+  - `bulletHitBoss` → `marcarChefe`, e a fagulha vai no ponto comido;
+  - a vida é vigiada em `atualizarDestrocos` pelo `StageBoss.destrocos` (`quem`, `vida`, `forma`, `mira`, `zona`);
+  - `killBoss`: a ruptura, ou a morte aprovada.
+- **O golfinho:** `bulletHitGolfinho` → `marcarGolfinho`.
+- **As bombas:** `ferirChefe(dano, de)` marca o chefão no ponto da explosão.
+- **As peças:**
+  - `bulletHitHazard` → `marcarPeca` (a dureza e o material da F4);
+  - `killHazard` → `morrer` com o estilo `rocha`, e a explosão do PixelLab continua por cima.
+- **A brecha:** `pelaBrecha` é o segundo callback dos overlaps de bala contra inimigos e contra peças.
+
+## 16. A receita: ligar a destruição numa coisa nova
+
+1. **Diga quem é.** Escolha a tabela:
+   - um inimigo vai em `SEPARACAO`;
+   - um chefão vai em `CHEFOES`, e o `StageBoss` dele expõe `destrocos`;
+   - uma peça do cenário vai em `PECAS`.
+   O material decide as cores e o fogo (metal, luz, carne, biomec, rocha). A classe decide quanto a morte pode durar.
+2. **Veja se o corpo aguenta buraco.** Rode:
+   - `scripts/_inimigos/_poses.mjs`, para ver as poses;
+   - `scripts/_inimigos/_registro.mjs`, para ver quanto a arte balança dentro do quadro.
+   Se a borda de cada quadro é outra parte do corpo (cambalhota, golpe, pendurar), use `furo: false`. O pixel e o pedaço
+   voam, e o corpo fica inteiro.
+3. **Diga onde.** Para os pedaços grandes, a `mira`: longe do detalhe que identifica o bicho (a cara do Guardião). Para
+   as marcas, a `zona`: quando a hitbox pega a bala longe da arte, como na cabeça da Serpente.
+4. **A dureza** de uma peça: quanto golpe por pixel. A rocha é 1 e o destroço de nave é 2.
+5. **Confira com tiro de verdade**, nunca com um golpe de mentira vindo de fora do corpo (foi o que escondeu a mancha
+   do Guardião). Rode:
+   - `_sonda-tiro-real.mjs` (a borda, o custo, os pixels soltos e o mapa do que foi comido);
+   - `_sonda-chefes.mjs`, `_sonda-cinturao.mjs` e `_sonda-brecha.mjs`, conforme o caso.
+6. **Filme com a nave atirando** (`_filmar-destrocos.mjs`, com a coluna `hoje` ao lado) e confira os quadros
+   ampliados (`_quadros-filme.mjs`, `_grade.mjs`) antes de montar a folha.
+7. **Custo:** uma marca custa ~0,16 ms. Uma mordida grande custa até ~7 ms na primeira vez que cada quadro aparece. Meça
+   com `_custo-destrocos.mjs` e `_tempo-mordida.mjs` se o corpo for grande ou tiver muitos quadros.

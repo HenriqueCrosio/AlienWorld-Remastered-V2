@@ -154,3 +154,35 @@ emissão a 60 Hz e um hash por partícula), então a sonda vê as mesmas em qual
    cenário em qualquer instante; `_filmar-menu.mjs` filma.
 7. Numa fase (384×216, k = 1), as mesmas peças rodam no mundo, abaixo das camadas de jogo; o tratamento já é o da
    fase.
+
+## 11. Um bicho de fundo desenhado por código (a aranha da caverna da F1, 27/10)
+
+Ele pediu uma silhueta de aranha *"preta, aparente apenas o contorno e forma dela"* no fundo do salão da caverna, no
+PixelLab ou, *"caso consiga fazer de forma procedural, melhor"*. O PixelLab deu desenho animado (uma formiga, uma
+aranhinha de Halloween), e a de código ficou. Folha: `docs/superpowers/folhas/2026-10-27/aranha/aranha.html`.
+
+- **O desenho é um esqueleto** (`scripts/_g/_aranha-silhueta.mjs`): dois ovais no corpo e oito pernas de três juntas,
+  em px, com uma escala `k`.
+  - O que é grosso (o corpo, a coxa perto do corpo) é preenchido pelo centro do pixel.
+  - O que é fino (1 px) é uma linha de Bresenham sem as quinas em L, então a perna nunca dobra no degrau.
+  - Cada junta treme um pouco, com semente, e nenhuma perna sai igual à outra.
+- **Uma silhueta preta só lê contra a luz.** Os lugares se medem no jogo, com a Atmosfera ligada
+  (`_aranha-maquete.mjs` põe a imagem só numa página de teste, sem tocar em `src/`). Na caverna, só a boca de luz da
+  abertura e a bruma do vale deixam ver o preto.
+- **O movimento também é do esqueleto** (`poseAranha`, `marcha`, `inquieta`):
+  - **a virada é pseudo-3D:** cada junta tem o lugar do perfil e o da vista de frente, e o ângulo mistura os dois.
+    O primeiro quadro é a pose aprovada, pixel a pixel;
+  - **o andar** usa os dois grupos alternados de quatro pernas de uma aranha;
+  - **as pernas seguem a DISTÂNCIA andada**, e não o relógio, então os pés não escorregam.
+  - Isso foi decisão dele para este bicho. A regra geral de criatura animada continua sendo gerar inteira e animar no
+    PixelLab.
+- **Passar por trás de uma pintura:** a pintura não tem camadas, então o bicho vai por cima dela, e por cima dele vai um
+  RECORTE da própria pintura, só nos pixels de rocha (`cav-aranha-frente.png`, onde a luz fria não está). Como é a
+  pintura mesma, não aparece emenda. As duas peças seguem a deriva e a máscara do salão.
+- **No jogo:**
+  - o assado é `scripts/_g/_aranha-caverna-f1.mjs` (os quadros, o mapa deles e o recorte);
+  - o roteiro é `src/f1/aranhaCaverna.ts`, com os números em `ARANHA_F1`: o caminho em px da pintura, os tempos e a
+    velocidade;
+  - o filme do salão é `scripts/_g/_aranha-filme.mjs`.
+- **O escuro é de propósito.** No canto onde ela olha a segunda vez, preta contra a rocha, ela quase some. Ele: *"é
+  exatamente essa sensação que eu quero passar. Ela sai do lado mais luminoso e foge para as sombras"*.

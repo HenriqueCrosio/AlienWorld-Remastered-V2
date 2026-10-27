@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-26) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-27) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,9 +16,88 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. Primeiro, o retorno dele jogando as naves de 25–26/10: o hangar, a morte de
-> cada nave e a lasca do casco (os 24 px e os 1,4 s da cicatriz, em `MORTE.golpe`), e se a haste do motor da Terminus
-> sai da pintura do hangar. Depois, o bloco H, pelo START `plans/2026-10-21-bloco-h-START.md`, e I → J → F."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. Tudo de 25–27/10 está commitado e empurrado. A sessão abre no retorno dele
+> JOGANDO: o tamanho das marcas (1/3/4 px), o círculo da cabeça da Serpente (encolher até a cabeça?), os arcos e o anel
+> da morte da nave, e a lasca do casco (`MORTE.golpe`). Depois, o bloco H, pelo START
+> `plans/2026-10-21-bloco-h-START.md`, e I → J → F."**
+>
+> 📍 **27/10 (2) — A DESTRUIÇÃO POR PIXEL NO JOGO TODO, E A ARANHA DA CAVERNA: COMMITADAS E EMPURRADAS** para
+> `origin/feat/cartas-preview`:
+> - `7132126`: a haste do motor da Terminus saiu da pintura do hangar (o pedido de 26/10 à noite);
+> - `159646a`: os destroços (a 1ª e a 2ª rodada abaixo, as peças e a brecha);
+> - `5b0d522`: a aranha da caverna da F1;
+> - `a0e5708`: as ferramentas, os testes e as folhas, sem os vídeos. O `.gitignore` ganhou o material de trabalho das
+>   folhas (vídeos, GIFs, `cru/`, os quadros soltos) e os concepts da raiz, que ficam no disco, como backup;
+> - os docs, com a técnica inteira no **`docs/DESTROCOS.md`** (o mapa do motor no §15, a receita no §16) e a aranha no
+>   §11 do **`docs/CENARIO-VIVO.md`**.
+>
+> O que entrou depois da 1ª rodada (abaixo):
+> - **A marca come a BORDA** (ele: *"cada tiro tira 1 px da borda do asset, para começar a deformá-lo"*): o primeiro
+>   pixel vivo na linha do golpe, refeito em cada quadro da animação (a cicatriz é uma história de golpes). O que fica
+>   solto cai, e a fagulha acende no pixel comido. A mancha do Guardião, a Torre sem marca e a Serpente marcando o toco
+>   tinham causa (o §14 do DESTROCOS). O círculo da cabeça da Serpente foi centrado nela.
+> - **As peças destrutíveis:** o cinturão da F2 e os destroços de nave levam as marcas, pela dureza do material; o
+>   destroço segue indestrutível. O asteroide quebra como rocha: R2 (esfarela) nos grandes, R3 (parte) nos pequenos,
+>   com os pedaços sumindo rápido (a escolha dele).
+> - **A bala passa pela brecha:** ela entra no que os tiros tiraram e atravessa um túnel; a nave segue batendo na forma
+>   inteira. Os chefões ficam de fora.
+> - **Os chefões de carne não guardam vermelho:** os pedaços da Serpente na fusão (a morte e as mordidas) e as bordas
+>   das mordidas da Serpente e do Guardião escurecem na cor do bicho.
+> - **No ar, os estilhaços caem direto** (ele: *"estilhaços já quebram e caem direto"*).
+> - **A aranha da caverna** (folha `folhas/2026-10-27/aranha/aranha.html`), uma silhueta preta desenhada por código.
+>   Na luz da abertura ela olha a nave, vira para a câmera, corre por trás das estalactites até o canto escuro, olha e
+>   vira de novo, e some (o desenho dele). Sumir no escuro é de propósito: *"ela sai do lado mais luminoso e foge para
+>   as sombras"*.
+>
+> **Pendente dele (jogando):** o tamanho das marcas; se o círculo da cabeça da Serpente encolhe até a cabeça; os arcos
+> menores e o anel em degradê da nave; a lasca do casco.
+>
+> 📍 **27/10 — (COMMITADO em 27/10, ver o 📍 acima.) A ESCOLHA DOS DESTROÇOS, LIGADA E ESTENDIDA AOS CHEFÕES.** Ele: *"Vou com a sua
+> recomendação: A1 e A3 misto, B1, C1, D1"*.
+> - **Os comuns** ficam com a A1, e a canhoneira e o cargueiro com a A3 (`PADRAO_DO_TIPO`).
+> - **A recomendação também estendia os destroços aos chefões e ao golfinho, que tinham ficado de fora.** A tabela é
+>   `CHEFOES`:
+>   - a Serpente ganhou a D1, com as mordidas na cabeça viva;
+>   - o golfinho ganhou a C1;
+>   - a Torre, o Guardião e o Predador ficam com as mortes aprovadas e só levam as mordidas;
+>   - o Predador e o golfinho levam as mordidas sem buraco, porque mudam de pose demais.
+> - **O motor ganhou:**
+>   - `vigiar`, no lugar do `vigiarChefe`;
+>   - `esquecer`, para quando a arte vira outra;
+>   - `acima`, para a Serpente, que está na profundidade 30;
+>   - a mordida sem buraco.
+> - **O chefão diz quem é** pelo `StageBoss.destrocos` (que substituiu o `fracaoVida`).
+> - **Os filmes da luta inteira** são `filme/capitania`, `torre`, `serpente`, `nucleo` e `golfinho`.
+> - **As marcas (ideia dele, testando no sandbox):** o pedaço grande não acompanhava o corpo que se mexe, porque o
+>   buraco mora no pixel do quadro e os filmes de 26/10 congelavam o movimento. Agora:
+>   - todo golpe tira pixels da face de onde veio: tiro 1, explosão 3, bomba 4 (`marcar`);
+>   - os pedaços grandes só perto da morte: elite 20%, mini 20 e 10%, chefão 15 e 6%.
+>   - O filme é `filme/marcas`.
+> - **A assinatura da nave do jogador:** a Terminus morria igual a um kamikaze. Cada nave mantém a sua morte, e entram
+>   três camadas: a sobrecarga antes, o anel de choque e a cadeia de cacos (`MORTE.assinatura`). Os filmes são
+>   `filme/nave-*`.
+> - **Em aberto (§13 da folha):** o tamanho das marcas jogando, e se os arcos menores e o anel em degradê ficaram bons
+>   (ajustados no retorno dele). Decidido: a pupa e a mosca ficam com o respingo de carne.
+>
+> 📍 **26/10 (noite) — (COMMITADO em 27/10, ver o 📍 de 27/10 (2).) OS DESTROÇOS DOS INIMIGOS, EM MESA.** Ele pediu a separação dos inimigos para
+> aplicar *"efeitos de dano, explosões, derrotas decentes iguais ao das naves"* e saiu: *"vai trabalhar sozinho ... até
+> criar uma folha com exemplos, quando eu voltar eu analiso e decidimos"*.
+> - **A separação** (`SEPARACAO` em `src/systems/morte/numerosDestrocos.ts`):
+>   - as classes são comum, elite, mini e chefão, e a classe decide quanto a morte pode durar;
+>   - os materiais são metal, luz, carne e biomec, e decidem as cores (as rampas novas CARNE e MEDUSA, em `pedacos.ts`).
+> - **O motor** `src/systems/morte/Destrocos.ts` é um por cena, com as telas compartilhadas:
+>   - seis formas de morte;
+>   - as lascas por limiar de vida, com buraco de verdade (uma cópia do quadro com os pixels mordidos transparentes) e o
+>     aro por material;
+>   - a Capitânia como exemplo de chefão, com a vida vigiada e a cadeia de mordidas.
+> - **Na cena:** `matarInimigo` e `ferirInimigo` (com o lado do tiro), `atualizarDestrocos`, e o `killBoss` da
+>   Capitânia.
+> - **As variações:** A1, A2 e A3 (comuns), B1 e B2 (elites), C1 e C2 (mini) e D1 (chefão). O jogo está com A1, B1, C1
+>   e D1 ligados. O registry `destrocosVariantes` troca a variação, e `'hoje'` volta à morte de antes.
+> - **As provas:** os filmes de `scripts/_inimigos/_filmar-destrocos.mjs` e os testes novos em `test-morte.mjs`. A
+>   técnica foi para o §14 de `docs/DESTROCOS.md`.
+> - **Também nesta noite (não commitado):** a haste do motor da Terminus saiu da pintura do hangar, como a do jato (spec
+>   do hangar §7).
 >
 > 📍 **25–26/10 — UMA NAVE POR LINHAGEM, O HANGAR E A MORTE DA NAVE: COMMITADOS E EMPURRADOS** para
 > `origin/feat/cartas-preview`:
@@ -58,8 +137,7 @@ sprite que se desfaz nos próprios pixels).
 >   dele: **CLÁSSICA** (a laranja, nas duas), **REBELS** (o osso da X-Aelo) e **UNGOLIANT** (a preta da Terminus).
 >
 > **Pendente dele:**
-> - jogar e sentir a lasca: o tamanho e a duração, em `MORTE.golpe`;
-> - dizer se a haste fina do motor da Terminus sai da pintura do hangar (a do jato saiu).
+> - jogar e sentir a lasca: o tamanho e a duração, em `MORTE.golpe`.
 >
 > 📍 **24/10 — (CUMPRIDO em 25/10: os tiers saíram e o hangar escolhe, ver acima.) AS NAVES GUARDADAS: COMMITADAS E
 > EMPURRADAS** para `origin/feat/cartas-preview`:
@@ -334,7 +412,12 @@ sprite que se desfaz nos próprios pixels).
 >   do menu (`docs/CENARIO-VIVO.md`) é o ponto de partida: camadas, luzes que apagam limpas, volume, perigo, tudo em
 >   função do relógio.
 > - **G+ — a caverna da F1** (✅ FECHADA 21/10, ideia dele, COMMITADA e EMPURRADA: `9864f46`, `4476e9f`; ver o 📍 de
->   21/10 (2) acima).
+>   21/10 (2) acima). Em 27/10 ganhou a aranha (✅ COMMITADA: `5b0d522`).
+> - **Os extras de 22–27/10, fora dos blocos, pedidos por ele** (✅ todos COMMITADOS e EMPURRADOS, ver os 📍 do topo):
+>   - as naves: uma por linhagem, a cena do hangar, os nomes;
+>   - a morte da nave, a lasca do casco e a assinatura;
+>   - a destruição por pixel no jogo todo: os inimigos, os chefões, as peças do cinturão e a bala pela brecha
+>     (`docs/DESTROCOS.md`).
 > - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, depois do retorno dele sobre as naves de 25–26/10; START do H
 >   `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica
@@ -348,7 +431,7 @@ sprite que se desfaz nos próprios pixels).
 >   função do relógio.
 > - **I — os itens 9 a 16 da análise de 14/10** (✅ 17/10: o 10 e o 16 APROVADOS por ele; o 15 DESCARTADO por ele: a fila unida
 >   é DE PROPÓSITO (*"pela card de reação em cadeia, além de ser mais prazeroso entrar em cadeia"*), testado e desfeito;
->   folha `folhas/2026-10-17/bloco-i/`; tudo NÃO commitado. Faltam o 9, 11, 13 e 14, que pedem arte ou decisão): a fumaça de bolinhas dos chefões, os rótulos "(LEGACY)/(NEW)" do HUD,
+>   folha `folhas/2026-10-17/bloco-i/`; o 10 e o 16 foram COMMITADOS com o bloco C, em `63ca5f0`. Faltam o 9, 11, 13 e 14, que pedem arte ou decisão): a fumaça de bolinhas dos chefões, os rótulos "(LEGACY)/(NEW)" do HUD,
 >   a tela final, o subtítulo do menu (✅ resolvido no E: o REMASTERED ficou como texto, acendendo depois do
 >   letreiro), os flashes de tela cheia, a explosão chapada da cutscene 1, os
 >   drones encavalados e as setas das dicas.

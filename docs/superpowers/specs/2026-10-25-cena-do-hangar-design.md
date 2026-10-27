@@ -119,3 +119,10 @@ com a terminus"*.
   - a preta da Terminus é a **UNGOLIANT** (Tolkien).
   - Primeiro foram REBELD e MORDUR. Ele trocou porque, em maiúsculas na tela, podiam ler como erro de digitação.
 - **Os nomes internos** (`jato-osso`, `a-preta`…, no registry, no sandbox e na linha de dev do menu) não mudaram.
+- **A haste do motor da Terminus saiu** (ele: *"pode tirar a haste do motor da Terminus também"*), passo 4 de
+  `_limpar-nave.mjs`:
+  - sai a parte fina, x 1284–1331, nas linhas 443–449, com o halo escuro que cortava o pilar da porta;
+  - o colar curto no fim do bocal (x 1273–1283) fica, porque lê como a cauda do motor;
+  - a parede volta copiada de 8 linhas acima, nas mesmas colunas, então o pilar segue reto;
+  - só mudaram a baia e o fundo nessa região (k4: x 1153–1201, y 429–440) e a traseira dos recortes da Terminus; os
+    anéis, o `dados.json` e a X-Aelo ficaram idênticos.
