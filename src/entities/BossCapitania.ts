@@ -606,6 +606,11 @@ export class BossCapitania implements StageBoss {
 
   // ─── Dano ───────────────────────────────────────────────────────────────────
 
+  /** Os DESTROÇOS (26/10): os limiares mordem o casco, e a morte o parte nos próprios pixels (D1). */
+  get destrocos(): { quem: string; vida: number } {
+    return { quem: 'capitania', vida: this.hp / this.maxHp };
+  }
+
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean {
     // Invulnerável enquanto desliza para dentro da tela — senão dá para matá-la ANTES DE ELA

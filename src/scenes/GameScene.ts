@@ -54,6 +54,8 @@ import type { LugarElite } from '../entities/elites/tipos';
 import { ELITES } from '../data/numerosElites';
 import { MorteDaNave, type OpcoesMorte } from '../systems/morte/MorteDaNave';
 import { MORTE, ESTILOS_MORTE, estiloDaNave, type EstiloMorte } from '../systems/morte/numerosMorte';
+import { Destrocos } from '../systems/morte/Destrocos';
+import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, SEPARACAO, type Classe, type Variante, type VarianteRocha } from '../systems/morte/numerosDestrocos';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
@@ -231,6 +233,11 @@ export class GameScene extends Phaser.Scene {
   private morte: MorteDaNave | null = null;
   /** A PERDA DE CASCO (26/10): a lasca de cada vida perdida que não é a última, no estilo da morte da nave. */
   private golpes: MorteDaNave[] = [];
+  /**
+   * OS DESTROÇOS DOS INIMIGOS (26/10, em mesa para ele decidir): a técnica da nave para comuns, elites, mini chefões
+   * e chefões — a morte nos pixels deles e as lascas por limiar de vida (`systems/morte/Destrocos.ts`). Um por cena.
+   */
+  private destrocos!: Destrocos;
   /** Fumaça da nave avariada (última vida). Criada apagada; o relógio de 240ms a liga. */
   private fumaca!: Phaser.GameObjects.Particles.ParticleEmitter;
 
@@ -378,6 +385,12 @@ export class GameScene extends Phaser.Scene {
     );
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
+    this.destrocos = new Destrocos(
+      this,
+      this.fx,
+      () => ({ atmosfera: this.zone === 'atmosfera', chao: this.zone === 'atmosfera' ? GROUND_Y : undefined }),
+      this.registry.get('sementeMorte') as number | undefined,
+    );
     // A ATMOSFERA (Fatia 9): a HUD, o banner e as barras de vida (profundidade 99+) ficam limpos; a nave e o combate
     // ficam dentro. O perfil entra no primeiro `update` (o da pintura na tela).
     this.atm = new Atmosfera(this, { limiteLimpo: 99, profundidadePoeira: -0.5 });
@@ -589,9 +602,10 @@ export class GameScene extends Phaser.Scene {
         this.ferirInimigo(e, dano, 'bomba', de);
       },
       ferirConstrucao: (p, dano) => this.ferirConstrucao(p, dano),
-      ferirChefe: (dano) => {
+      ferirChefe: (dano, de) => {
         if (!this.boss || this.boss.isDead) return;
         this.medidas?.dano('bomba (chefão)', dano);
+        this.marcarChefe('bomba', de ?? { x: this.ship.x, y: this.ship.y });
         if (this.boss.damage(dano)) this.killBoss();
       },
       ferirGolfinho: (x, y, raio, dano) => {
@@ -599,6 +613,7 @@ export class GameScene extends Phaser.Scene {
         if (!g?.vulneravel) return;
         const alcance = raio + g.sprite.displayWidth / 2;
         if ((g.sprite.x - x) ** 2 + (g.sprite.y - y) ** 2 > alcance * alcance) return;
+        this.marcarGolfinho('bomba', { x, y });
         if (g.damage(dano)) this.matarGolfinho();
       },
       explosao: (x, y) => {
@@ -650,8 +665,12 @@ export class GameScene extends Phaser.Scene {
       (b, p) => this.bulletHitProp(b as Phaser.Physics.Arcade.Sprite, p as Phaser.Physics.Arcade.Sprite),
       (_b, p) => TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
     );
-    this.physics.add.overlap(this.weapons.bullets, this.debris.hazards, (b, h) =>
-      this.bulletHitHazard(b as Phaser.Physics.Arcade.Sprite, h as Phaser.Physics.Arcade.Sprite),
+    // (the 2nd callback: a bullet inside what the shots took off the piece flies on — see `pelaBrecha`)
+    this.physics.add.overlap(
+      this.weapons.bullets,
+      this.debris.hazards,
+      (b, h) => this.bulletHitHazard(b as Phaser.Physics.Arcade.Sprite, h as Phaser.Physics.Arcade.Sprite),
+      (b, h) => !this.pelaBrecha(b as Phaser.Physics.Arcade.Sprite, h as Phaser.Physics.Arcade.Sprite),
     );
 
     // O CENÁRIO É COBERTURA. Tiro inimigo bate na rocha e morre — então o pico que te
@@ -669,8 +688,11 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.enemies.enemyBullets, this.debris.hazards, (b, h) =>
       this.enemyBulletHitCover(b as Phaser.Physics.Arcade.Sprite, h as Phaser.Physics.Arcade.Sprite),
     );
-    this.physics.add.overlap(this.weapons.bullets, this.enemies.enemies, (b, e) =>
-      this.bulletHitEnemy(b as Phaser.Physics.Arcade.Sprite, e as Phaser.Physics.Arcade.Sprite),
+    this.physics.add.overlap(
+      this.weapons.bullets,
+      this.enemies.enemies,
+      (b, e) => this.bulletHitEnemy(b as Phaser.Physics.Arcade.Sprite, e as Phaser.Physics.Arcade.Sprite),
+      (b, e) => !this.pelaBrecha(b as Phaser.Physics.Arcade.Sprite, e as Phaser.Physics.Arcade.Sprite),
     );
     this.physics.add.overlap(this.ship, this.pickups.pickups, (_s, p) =>
       this.collectPickup(p as Phaser.Physics.Arcade.Sprite),
@@ -894,6 +916,7 @@ export class GameScene extends Phaser.Scene {
     this.ship.setVisible(time > this.invulnerableUntil || Math.floor(time / 60) % 2 === 0);
     // Depois da nave (posição, inclinação e pisca do quadro): a cicatriz da lasca anda em cima dela.
     this.atualizarGolpes(dt);
+    this.atualizarDestrocos(dt);
 
     // A BOMBA é da cena, não da arma: funciona nas duas conduções e independe da arma equipada.
     if (input.bombPressed) this.useBomb();
@@ -1004,7 +1027,56 @@ export class GameScene extends Phaser.Scene {
     this.agua.update(dt, SCROLL_SPEED * frenagem);
     this.esfincter.update(dt, SCROLL_SPEED * frenagem);
     this.atualizarGolpes(dt);
+    this.destrocos.update(dt);
     this.morte?.update(dt);
+  }
+
+  /**
+   * OS DESTROÇOS DOS INIMIGOS a cada quadro, e a vida do chefão e do golfinho vigiada (eles levam dano por muitos
+   * caminhos: o tiro, a bomba, as cartas): cruzou um limiar, perdem um pedaço do lado da nave (ou da cabeça viva da
+   * serpente). A arte que vira outra (`forma`) leva as cicatrizes junto; o chefão desenhado no alto (a serpente, a 30)
+   * puxa as camadas dos destroços para cima dele.
+   */
+  private atualizarDestrocos(dt: number): void {
+    this.destrocos.update(dt);
+    const nave = { x: this.ship.x, y: this.ship.y };
+    const b = this.boss;
+    const d = b && !b.isDead ? b.destrocos : undefined;
+    const c = d ? CHEFOES[d.quem] : undefined;
+    if (b && d && c && this.varianteDe(c.classe) !== 'hoje') {
+      if (d.forma !== this.formaDoChefe) {
+        this.destrocos.esquecer(b.sprite);
+        this.formaDoChefe = d.forma;
+      }
+      this.destrocos.acima(b.sprite.depth);
+      this.destrocos.vigiar(b.sprite, d.vida, c.classe, c.material, nave, { mira: d.mira, furo: c.furo });
+    }
+    const g = this.golfinho;
+    const cg = CHEFOES.golfinho;
+    if (g?.vivo && this.varianteDe(cg.classe) !== 'hoje') {
+      this.destrocos.vigiar(g.sprite, g.hp / Golfinho.HP, cg.classe, cg.material, nave, { furo: cg.furo });
+    }
+  }
+
+  /** A arte do chefão em que as cicatrizes estão (ver `atualizarDestrocos`). */
+  private formaDoChefe: number | string | undefined;
+
+  /**
+   * A variação de morte (escolhida 27/10): a do sprite (os filmes), a do registry (dev), a do TIPO (o misto dos comuns:
+   * canhoneira e cargueiro em A3) ou a da classe.
+   */
+  private varianteDe(classe: Classe, e?: Phaser.GameObjects.GameObject): Variante {
+    const doSprite = e?.getData('variante') as Variante | undefined;
+    if (doSprite) return doSprite;
+    const reg = this.registry.get('destrocosVariantes') as Partial<Record<Classe, Variante>> | undefined;
+    const doTipo = PADRAO_DO_TIPO[e?.getData('kind') as string];
+    return reg?.[classe] ?? doTipo ?? PADRAO[classe];
+  }
+
+  /** A câmera lenta da morte da nave, emprestada ao momento grande de um mini chefão ou de um chefão. */
+  private lentaDeMorte(): void {
+    const L = MORTE.lenta;
+    this.camaraLenta(L.piso, { impactoMs: L.impactoMs, desceMs: L.desceMs, seguraMs: L.seguraMs, voltaMs: L.voltaMs });
   }
 
   /** As lascas das vidas perdidas: correm no `dt` da cena (a câmera lenta e o hitstop pegam nelas) e se desfazem ao fim. */
@@ -1033,6 +1105,8 @@ export class GameScene extends Phaser.Scene {
       chao: this.zone === 'atmosfera' ? GROUND_Y : undefined,
       fx: this.fx,
       semente: this.registry.get('sementeMorte') as number | undefined,
+      // a assinatura do jogador (27/10): o registry `assinaturaMorte` = false a desliga (dev e os filmes de comparação)
+      assinatura: this.registry.get('assinaturaMorte') !== false,
     };
   }
 
@@ -1881,19 +1955,35 @@ export class GameScene extends Phaser.Scene {
     if (!bullet.active || !g || !g.vulneravel) return;
 
     const origem = bullet.getData('origem') as OrigemProjetil | null;
+    const de = this.deOndeVeio(bullet);
+    const dano = bullet.getData('damage') as number;
     this.weapons.release(bullet);
-    // A fagulha sai mesmo no PISO: o jogador vê que acertou, e só a barra para.
-    this.fx.hit(bullet.x, bullet.y);
+    // A fagulha sai mesmo no PISO: o jogador vê que acertou, e só a barra para. Ela acende no pixel da borda que o
+    // tiro tocou (27/10, ver `bulletHitBoss`).
+    const onde = this.marcarGolfinho(origem ?? 'tiro', de, dano);
+    this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
     this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
-    this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, bullet.getData('damage') as number);
-    if (g.damage(bullet.getData('damage') as number)) this.matarGolfinho();
+    this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, dano);
+    if (g.damage(dano)) this.matarGolfinho();
   }
 
-  /** A morte: explosão grande, 500 pontos, SEM hitstop (a pausa dramática é dos chefões). */
+  /**
+   * A morte: 500 pontos, SEM hitstop (a pausa dramática é dos chefões). Desde 27/10 ele se parte nos próprios pixels
+   * (a C1 dos mini chefões, com a câmera lenta no momento grande); `hoje` = a explosão grande de antes.
+   */
   private matarGolfinho(): void {
     const g = this.golfinho;
     if (!g) return;
-    this.fx.explodeBig(g.sprite.x, g.sprite.y, 0.8);
+    const v = this.varianteDe(CHEFOES.golfinho.classe, g.sprite);
+    if (v !== 'hoje') {
+      this.destrocos.morrer(g.sprite, {
+        estilo: ESTILO_DA_VARIANTE[v],
+        material: CHEFOES.golfinho.material,
+        classe: CHEFOES.golfinho.classe,
+        de: { x: this.ship.x, y: this.ship.y },
+        aoClimax: () => this.lentaDeMorte(),
+      });
+    } else this.fx.explodeBig(g.sprite.x, g.sprite.y, 0.8);
     this.score += Golfinho.SCORE;
     this.encerrarGolfinho();
     this.cartas.aoMorrerGuardiao();
@@ -1956,12 +2046,47 @@ export class GameScene extends Phaser.Scene {
     if (!bullet.active || !this.boss || this.boss.isDead) return;
 
     const origem = bullet.getData('origem') as OrigemProjetil | null;
+    const de = this.deOndeVeio(bullet);
+    const dano = bullet.getData('damage') as number;
     this.weapons.release(bullet);
-    this.fx.hit(bullet.x, bullet.y);
+    // A fagulha vai para o pixel da BORDA que o tiro comeu (27/10): a hitbox do chefão não é o desenho — o círculo da
+    // cabeça da serpente tem 33 px de raio, e a fagulha acendia no toco da cabeça morta, na frente da viva.
+    const onde = this.marcarChefe(origem ?? 'tiro', de, dano);
+    this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
     this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
 
-    this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, bullet.getData('damage') as number);
-    if (this.boss.damage(bullet.getData('damage') as number)) this.killBoss();
+    this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, dano);
+    if (this.boss.damage(dano)) this.killBoss();
+  }
+
+  /**
+   * De onde o projétil VEIO: um pouco atrás dele, no rumo do voo (e o rumo, para a marca). Lido antes do `release`,
+   * que zera a velocidade.
+   */
+  private deOndeVeio(bullet: Phaser.Physics.Arcade.Sprite): { x: number; y: number; rumo: { x: number; y: number } } {
+    const v = (bullet.body as Phaser.Physics.Arcade.Body).velocity;
+    const n = Math.hypot(v.x, v.y) || 1;
+    return { x: bullet.x - (v.x / n) * 16, y: bullet.y - (v.y / n) * 16, rumo: { x: v.x / n, y: v.y / n } };
+  }
+
+  /**
+   * A MARCA DO GOLPE no chefão (27/10, ele: *"um tiro tira 1 px e explosões pequenas 3 px e maiores 4 px"*; e depois:
+   * *"cada tiro tira 1 px da borda do asset"*): o primeiro pixel do casco na linha do golpe sai voando — na cabeça viva
+   * da serpente, só nela (`zona`). Devolve onde: a fagulha acende ali. Os inimigos marcam no `ferirInimigo`.
+   */
+  private marcarChefe(fonte: string, de: { x: number; y: number; rumo?: { x: number; y: number } }, dano = 1): { x: number; y: number } | null {
+    const b = this.boss;
+    const d = b && !b.isDead ? b.destrocos : undefined;
+    const c = d ? CHEFOES[d.quem] : undefined;
+    if (!b || !d || !c || this.varianteDe(c.classe) === 'hoje') return null;
+    return this.destrocos.marcar(b.sprite, DESTROCOS.marca.px(fonte, dano), de, c.classe, c.material, c.furo, { zona: d.zona, rumo: de.rumo });
+  }
+
+  /** A marca do golpe no golfinho: o pixel voa, e o corpo fica inteiro (ele dá cambalhota — ver `CHEFOES`). */
+  private marcarGolfinho(fonte: string, de: { x: number; y: number; rumo?: { x: number; y: number } }, dano = 1): { x: number; y: number } | null {
+    const g = this.golfinho, c = CHEFOES.golfinho;
+    if (!g?.vivo || this.varianteDe(c.classe) === 'hoje') return null;
+    return this.destrocos.marcar(g.sprite, DESTROCOS.marca.px(fonte, dano), de, c.classe, c.material, c.furo, { rumo: de.rumo });
   }
 
   /**
@@ -2055,8 +2180,19 @@ export class GameScene extends Phaser.Scene {
     // ⚠️ A F1 MORRE MAIOR E MAIS VIOLENTA (rodada 5 do bloco G, ver `morteChefeF1.ts`): a cadeia é a explosão da queda
     // do Leviatã estourando pelo corpo, com a Torre adernando; o estouro final em 250 px, os estilhaços e o incêndio.
     const morteNova = this.zone === 'atmosfera' && morteF1Pronta(this);
+    // OS DESTROÇOS NO CHEFÃO (D1, escolhida 27/10 — a Capitânia e a Serpente, que morriam nas 8 explosões de sempre): a
+    // cadeia vira MORDIDAS no casco, cada uma com o seu estouro, e no fim ele se parte nos próprios pixels. Os chefões
+    // de morte aprovada (`CHEFOES[...].morte` falso: a Torre, o guardião e o predador) seguem com a deles.
+    const quem = boss.destrocos ? CHEFOES[boss.destrocos.quem] : undefined;
+    const destrocosChefe = !morteNova && !!quem?.morte && this.varianteDe('chefe') === 'D1';
     if (morteNova) cadeiaDaMorte(this, this.fx, boss.sprite);
-    else {
+    else if (destrocosChefe && quem) {
+      for (let i = 0; i < 5; i++) {
+        this.time.delayedCall(i * 200, () => {
+          if (boss.sprite.active) this.destrocos.morder(boss.sprite, 'chefe', quem.material, { x: this.ship.x, y: this.ship.y }, undefined, quem.furo);
+        });
+      }
+    } else {
       // Explosão em cadeia: um boss não morre num estouro só.
       for (let i = 0; i < 8; i++) {
         this.time.delayedCall(i * 140, () => {
@@ -2077,7 +2213,9 @@ export class GameScene extends Phaser.Scene {
       // fica a da rodada 4 (150 px). As outras fases seguem com a sheet de sempre até o bloco I.
       const naF1 = this.zone === 'atmosfera';
       if (morteNova) estouroDaMorte(this, this.fx, boss.sprite.x, boss.sprite.y, this.parallax.chaoDaFrente());
-      else {
+      else if (destrocosChefe && quem) {
+        this.destrocos.morrer(boss.sprite, { estilo: 'ruptura', material: quem.material, classe: 'chefe', aoClimax: () => this.lentaDeMorte() });
+      } else {
         const queda = naF1 ? explosaoDaQueda(this, boss.sprite.x, boss.sprite.y + 44, 50) : null;
         if (queda) this.fx.abaloGrande(boss.sprite.x, boss.sprite.y, 1.2);
         else this.fx.explodeBig(boss.sprite.x, boss.sprite.y, 1.2);
@@ -2368,11 +2506,19 @@ export class GameScene extends Phaser.Scene {
     const corpo = ocupante?.active ? (ocupante.body as Phaser.Physics.Arcade.Body) : null;
     if (corpo && bullet.y >= corpo.top && bullet.y <= corpo.bottom && bullet.x <= corpo.right) return;
 
+    const de = this.deOndeVeio(bullet);
+    const dano = bullet.getData('damage') as number;
+    const origem = bullet.getData('origem') as OrigemProjetil | null;
     this.weapons.release(bullet);
-    this.fx.hit(bullet.x, bullet.y);
 
-    const hp = (hazard.getData('hp') as number) - (bullet.getData('damage') as number);
-    // Destroço é indestrutível (hp = Infinity): o tiro ricocheteia, e é só isso.
+    const hp = (hazard.getData('hp') as number) - dano;
+    // A MARCA (27/10, ele: *"cada pixel é um pedacinho dele que pode tomar dano e se desfazer"*): o tiro que não mata
+    // tira pixels da borda, como num inimigo — a rocha solta cascalho e poeira; o destroço, de metal duro, perde um
+    // pixel a cada 2 tiros e solta a fagulha. A fagulha acende no pixel comido.
+    const onde = hp > 0 ? this.marcarPeca(hazard, origem ?? 'tiro', de, dano) : null;
+    this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
+
+    // Destroço é indestrutível (hp = Infinity): o tiro ricocheteia — e, desde 27/10, deixa a marca.
     if (!Number.isFinite(hp)) return;
 
     hazard.setData('hp', hp);
@@ -2385,13 +2531,50 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.score += hazard.getData('score') as number;
-    this.killHazard(hazard);
+    this.killHazard(hazard, de);
   }
 
-  /** A MINA leva junto quem estiver perto. É isso que faz dela controle de espaço. */
-  private killHazard(hazard: Phaser.Physics.Arcade.Sprite): void {
+  /**
+   * A BALA PASSA PELA BRECHA (27/10, etapa 3 — ele: *"eu acharia interessante que o buraco mudasse o jogo e visual"*):
+   * dentro do que os tiros já tiraram do inimigo ou da peça, ela segue voando, e acerta o primeiro pixel vivo quando
+   * chega nele — com fogo bastante, ela atravessa um destroço. Só onde um pixel foi TIRADO: o vazio da própria arte,
+   * dentro de uma hitbox folgada, segue pegando a bala como antes. A nave não passa: bate na forma inteira.
+   */
+  private pelaBrecha(b: Phaser.Physics.Arcade.Sprite, alvo: Phaser.Physics.Arcade.Sprite): boolean {
+    const v = (b.body as Phaser.Physics.Arcade.Body | null)?.velocity;
+    if (!v || !b.active) return false;
+    const n = Math.hypot(v.x, v.y);
+    if (!n) return false;
+    return this.destrocos.atravessa(alvo, b.x, b.y, { x: v.x / n, y: v.y / n });
+  }
+
+  /** A marca do tiro numa peça do cinturão (ver `PECAS`); null = a peça não marca. */
+  private marcarPeca(h: Phaser.Physics.Arcade.Sprite, fonte: string, de: { x: number; y: number; rumo?: { x: number; y: number } }, dano: number): { x: number; y: number } | null {
+    const p = PECAS[h.getData('kind') as string];
+    // (`hoje` = the comparison in the films: the piece as it was, no mark)
+    if (!p || this.varianteDe(p.classe, h) === 'hoje') return null;
+    const material = this.stage.id === 4 && p.materialF4 ? p.materialF4 : p.material;
+    return this.destrocos.marcar(h, DESTROCOS.marca.px(fonte, dano), de, p.classe, material, true, { rumo: de.rumo, dureza: p.dureza });
+  }
+
+  /**
+   * A MINA leva junto quem estiver perto. É isso que faz dela controle de espaço.
+   *
+   * A ROCHA (27/10, ele: *"a explosão pode continuar, mas o estilhaçar dela precisa ser algo mais parecido como
+   * estilhaçar uma rocha no espaço"*): a explosão de sempre, e por baixo dela a rocha se parte nos próprios pixels
+   * (`DESTROCOS.rocha`). A escolha dele: a rocha grande esfarela (R2) e a pequena se parte (R3) — o motor decide pelo
+   * tamanho. A do sprite (os filmes) ou a do registry `destrocosVariantes.rocha` (dev) passam por cima.
+   */
+  private killHazard(hazard: Phaser.Physics.Arcade.Sprite, de?: { x: number; y: number }): void {
     const explode = this.debris.explodesOnDeath(hazard);
     const { x, y } = hazard;
+
+    const p = PECAS[hazard.getData('kind') as string];
+    if (p?.rocha) {
+      const reg = this.registry.get('destrocosVariantes') as { rocha?: VarianteRocha } | undefined;
+      const v = (hazard.getData('variante') as VarianteRocha | undefined) ?? reg?.rocha;
+      if (v !== 'hoje') this.destrocos.morrer(hazard, { estilo: 'rocha', material: 'rocha', classe: p.classe, de: de ?? { x: this.ship.x, y: this.ship.y }, rocha: v });
+    }
 
     this.fx.explode(x, y, explode ? 2 : hazard.scale);
     hazard.destroy();
@@ -2449,9 +2632,7 @@ export class GameScene extends Phaser.Scene {
     const angulo = bullet.rotation;
     // De onde o tiro VEIO: um pouco atrás dele, no rumo do voo (o escudo decide por aqui) — lido antes do `release`,
     // que zera a velocidade.
-    const v = (bullet.body as Phaser.Physics.Arcade.Body).velocity;
-    const n = Math.hypot(v.x, v.y) || 1;
-    const de = { x: bullet.x - (v.x / n) * 16, y: bullet.y - (v.y / n) * 16 };
+    const de = this.deOndeVeio(bullet);
 
     // PERFURANTE: o projétil segue vivo, mas cada inimigo paga só 1× por projétil — sem o Set,
     // o overlap cobraria o mesmo inimigo todo frame e o dano 2 viraria dano infinito.
@@ -2491,9 +2672,21 @@ export class GameScene extends Phaser.Scene {
    *
    * O `aguaViva` é o único caso hoje; a forma da função é o que impede o próximo de nascer torto.
    */
-  private matarInimigo(e: Phaser.Physics.Arcade.Sprite): void {
+  private matarInimigo(e: Phaser.Physics.Arcade.Sprite, de?: { x: number; y: number }): void {
     const kind = e.getData('kind') as string;
-    if (kind === 'aguaViva') {
+    // OS DESTROÇOS (26/10, em mesa): cada classe morre nos próprios pixels, na variação escolhida; `hoje` é a de antes.
+    const sep = SEPARACAO[kind];
+    const variante = sep ? this.varianteDe(sep.classe, e) : 'hoje';
+    if (sep && variante !== 'hoje') {
+      this.destrocos.morrer(e, {
+        estilo: ESTILO_DA_VARIANTE[variante],
+        material: sep.material,
+        classe: sep.classe,
+        de: de ?? { x: this.ship.x, y: this.ship.y },
+        aoClimax: sep.classe === 'mini' ? () => this.lentaDeMorte() : undefined,
+      });
+      if (variante === 'B2') this.hitstop(DESTROCOS.estilhacos.congelaMs);
+    } else if (kind === 'aguaViva') {
       this.fx.choque(e.x, e.y, e.scale);
     } else if (kind === 'pupa') {
       // A pupa SOME sem explodir (spec F4 §2.2): só a faísca do acerto — quem ameaça é a mosca.
@@ -2567,7 +2760,10 @@ export class GameScene extends Phaser.Scene {
       this.ferirInimigo(e, 12, 'bomba', { x: this.ship.x, y: this.ship.y });
     }
 
+    // (a marca da bomba de tela: do lado da nave)
+    if (this.boss && !this.boss.isDead) this.marcarChefe('bomba', { x: this.ship.x, y: this.ship.y });
     if (this.boss && !this.boss.isDead && this.boss.damage(12)) this.killBoss();
+    if (this.golfinho?.vulneravel) this.marcarGolfinho('bomba', { x: this.ship.x, y: this.ship.y });
     if (this.golfinho?.vulneravel && this.golfinho.damage(12)) this.matarGolfinho();
   }
 
@@ -2582,7 +2778,7 @@ export class GameScene extends Phaser.Scene {
     e: Phaser.Physics.Arcade.Sprite,
     dano: number,
     fonte: string,
-    de?: { x: number; y: number },
+    de?: { x: number; y: number; rumo?: { x: number; y: number } },
     piscar = true,
   ): 'bloqueado' | 'vivo' | 'morto' {
     if (!e.active) return 'morto';
@@ -2597,8 +2793,20 @@ export class GameScene extends Phaser.Scene {
     this.medidas?.dano(fonte, Math.min(dano, Math.max(0, antes)));
     e.setData('hp', hp);
     if (hp <= 0) {
-      this.matarInimigo(e);
+      this.matarInimigo(e, de);
       return 'morto';
+    }
+    // A PERDA DE CASCO dos inimigos:
+    // - cada golpe tira a sua MARCA, de 1 a 4 px, da BORDA do lado de onde veio (27/10, ele: o tiro tira 1 — a lança,
+    //   de dano 3, cava mais —, a explosão 3 e a bomba 4; a queima e o choque não têm lado e não tiram);
+    // - perto da morte, um limiar arranca o PEDAÇO grande do lado do tiro, e a mordida fica no corpo. A aranha perde
+    //   as PATAS no fim (a mordida mira a base dela).
+    const sep = SEPARACAO[e.getData('kind') as string];
+    if (sep && this.varianteDe(sep.classe, e) !== 'hoje') {
+      if (de) this.destrocos.marcar(e, DESTROCOS.marca.px(fonte, dano), de, sep.classe, sep.material, true, { rumo: de.rumo });
+      const hpMax = (e.getData('hpMax') as number | undefined) ?? antes;
+      const pernas = e.getData('kind') === 'aranha' ? (b: { w: number; h: number }) => ({ x: Math.random() * b.w, y: b.h + 4 }) : undefined;
+      this.destrocos.ferir(e, antes, hp, hpMax, sep.classe, sep.material, de, pernas);
     }
     if (piscar) {
       e.setTint(0xffb0b0);

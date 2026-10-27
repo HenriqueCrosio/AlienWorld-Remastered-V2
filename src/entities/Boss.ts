@@ -39,6 +39,21 @@ export interface StageBoss {
    * grupo, e é justamente isso que faz a bala ATRAVESSAR a serra. Ausente = o chefão não põe nada.
    */
   readonly perigos?: Phaser.Physics.Arcade.Group;
+  /**
+   * OS DESTROÇOS (26–27/10): quem diz isto perde pedaços do casco nos limiares da vida. `quem` é a linha de `CHEFOES`
+   * (o material; se a morte vira a ruptura nos próprios pixels ou fica a aprovada). `vida` (0–1) é a do corpo que
+   * apanha agora. `forma` muda quando a arte vira outra (a serpente perdeu a cabeça; o guardião virou o predador): as
+   * cicatrizes da arte velha saem com ela. `mira` é onde as mordidas caem (a cabeça viva da serpente; uma lista =
+   * em rodízio, a Torre); ausente = o lado da nave. `zona` (27/10) é onde as MARCAS dos tiros podem cair: a cabeça viva
+   * da serpente, cuja hitbox (33 px de raio) pega a bala na frente dela, em cima do toco da cabeça morta.
+   */
+  readonly destrocos?: {
+    quem: string;
+    vida: number;
+    forma?: number | string;
+    mira?: { x: number; y: number } | { x: number; y: number }[];
+    zona?: { x: number; y: number; r: number };
+  };
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean;
@@ -334,6 +349,31 @@ export class Boss implements StageBoss {
   get isDead(): boolean {
     return this.dead;
   }
+
+  /**
+   * Os DESTROÇOS (27/10): os limiares mordem a Torre do lado da nave. A morte dela é a aprovada (a do bloco G): os
+   * buracos só vão junto.
+   *
+   * ⚠️ AS MORDIDAS MIRAM O QUE AS DUAS FORMAS TÊM: o canhão, a cabeça do olho e o ombro (y < 65 dos 145 do quadro
+   * desenhado). Do lado da nave, sem mira, elas caíam no canto da base de pedra — e a base vira propulsor na
+   * decolagem: o buraco sumia com ela. São três pontos em rodízio na cabeça e no ombro, do lado da nave, em fração do
+   * tamanho desenhado, a partir do centro (medidos na grade das duas artes). A raiz do canhão ficou de fora: mordida
+   * ali corta o cano, e o cano fica solto no ar.
+   */
+  get destrocos(): { quem: string; vida: number; mira: { x: number; y: number }[] } {
+    const s = this.sprite, w = s.displayWidth, h = s.displayHeight;
+    return {
+      quem: 'torre',
+      vida: this.hp / this.maxHp,
+      mira: Boss.MIRAS.map((m) => ({ x: s.x + m.x * w, y: s.y + m.y * h })),
+    };
+  }
+
+  private static readonly MIRAS = [
+    { x: -0.23, y: -0.19 },
+    { x: -0.23, y: -0.09 },
+    { x: -0.25, y: -0.14 },
+  ];
 
   private get body(): Phaser.Physics.Arcade.Body {
     return this.sprite.body as Phaser.Physics.Arcade.Body;

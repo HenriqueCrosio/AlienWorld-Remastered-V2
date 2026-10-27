@@ -55,6 +55,8 @@ export interface OpcoesMorte {
   aoClimax?: () => void;
   /** a life lost, not the death: one bite of the hull flies off and the ship goes on (`MORTE.golpe`) */
   golpe?: boolean;
+  /** the player's signature over the death (`MORTE.assinatura`); false = the death of 26/10 alone (the comparisons) */
+  assinatura?: boolean;
 }
 
 /** A rigid piece in the world: its bitmap, the pivot inside it, where it is and how it moves. */
@@ -85,8 +87,8 @@ interface Corpo {
 const W = GAME_WIDTH;
 const H = GAME_HEIGHT;
 
-/** A full-screen pixel canvas: the debris layer, or the glow layer on top of it (additive). */
-class Tela {
+/** A full-screen pixel canvas: the debris layer, or the glow layer on top of it (additive). (The enemies' `Destrocos` use it too.) */
+export class Tela {
   readonly px: Uint32Array;
   private readonly tex: Phaser.Textures.CanvasTexture;
   private readonly dados: ImageData;
@@ -103,6 +105,11 @@ class Tela {
   enviar(): void {
     this.tex.context.putImageData(this.dados, 0, 0);
     this.tex.refresh();
+  }
+
+  /** (the enemies' debris raise their layers over a boss drawn high: the serpent, at 30) */
+  set depth(d: number) {
+    this.img.setDepth(d);
   }
 
   destroy(): void {
@@ -254,6 +261,9 @@ function lerQuadro(nave: Phaser.GameObjects.Sprite): Bitmap {
   return { w: cv.width, h: cv.height, cor: new Uint32Array(d.data.buffer.slice(0)) };
 }
 
+/** A deterministic flicker in [0, 1) per pixel and frame (the overload's hot pixels: the same in every film). */
+const piscar = (k: number, quadro: number): number => ((((k * 2654435761) ^ (quadro * 40503)) >>> 0) % 1000) / 1000;
+
 export class MorteDaNave {
   /** game seconds until the GAME OVER can come */
   readonly duracao: number;
@@ -292,6 +302,15 @@ export class MorteDaNave {
   private mordida: Ponto | null = null;
   /** golpe: the ship's frames, read once each (the scar is drawn on the frame on screen: the manta's fins move) */
   private readonly quadros = new Map<string, Bitmap>();
+  /**
+   * THE PLAYER'S SIGNATURE (`MORTE.assinatura`, 27/10): the overload runs on its own clock (`pre`) for `sobra` seconds
+   * BEFORE the death starts — none of the death's own times moves; the rings and the chain of pops at the big moment.
+   */
+  private pre = 0;
+  private sobra = 0;
+  private arcos: number[] = [];
+  private aneis: { x: number; y: number; t0: number }[] = [];
+  private cadeia: number[] = [];
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -348,11 +367,14 @@ export class MorteDaNave {
       motor: false,
     };
 
-    this.duracao = o.golpe ? MORTE.golpe.duracao : MORTE[o.estilo].duracao + MORTE.folga;
+    // the overload comes first (only on the death, not on a life lost)
+    const S = MORTE.assinatura.sobrecarga;
+    this.sobra = !o.golpe && o.assinatura !== false && S.liga ? S.dur : 0;
+    this.arcos = this.sobra ? S.arcos.map((f) => f * this.sobra) : [];
+    this.duracao = (o.golpe ? MORTE.golpe.duracao : MORTE[o.estilo].duracao + MORTE.folga) + this.sobra;
     if (o.golpe) this.iniciarGolpe();
-    else if (o.estilo === 'estilhacos') this.iniciarEstilhacos();
-    else if (o.estilo === 'desintegra') this.iniciarDesintegra();
-    else this.iniciarRuptura();
+    else if (!this.sobra) this.iniciarEstilo();
+    else this.o.fx.abalo(nave.x, nave.y, 0.35);
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.destroy());
     // golpe: the scar is drawn right before the render — the physics moves the ship AFTER the scene's update, and a scar
     // drawn in the update would trail it by a frame (3 px at full flap speed).
@@ -366,6 +388,136 @@ export class MorteDaNave {
   }
 
   // ─── the three styles ─────────────────────────────────────────────────────────────────────────────────────────────
+
+  private iniciarEstilo(): void {
+    if (this.o.estilo === 'estilhacos') this.iniciarEstilhacos();
+    else if (this.o.estilo === 'desintegra') this.iniciarDesintegra();
+    else this.iniciarRuptura();
+  }
+
+  // ─── the player's signature (`MORTE.assinatura`) ─────────────────────────────────────────────────────────────────────
+
+  /**
+   * THE OVERLOAD, before the death: the hull drifts on, trembling harder and harder; pixels flare hot along it (more
+   * and more: cracks forming); sparks fly off it and out of the nozzle; the flame chokes; a small arc crosses it.
+   */
+  private sobrecarga(dt: number): void {
+    const S = MORTE.assinatura.sobrecarga;
+    const c = this.casco!;
+    const freio = Math.max(0, 1 - this.arrasto * dt);
+    c.vx = c.vx * freio + this.ax * dt;
+    c.vy = c.vy * freio + this.g * dt;
+    c.x += c.vx * dt;
+    c.y += c.vy * dt;
+    const u = Math.min(1, this.pre / this.sobra);
+    // the sparks: off the hull, and out of the nozzle (the engine's last tenth)
+    const n = S.faiscas * dt * (0.5 + u);
+    for (let i = 0; i < n || (i === 0 && this.rnd() < n); i++) {
+      const p = this.pixelDoCasco(c, this.rnd() < 0.4 ? 0 : 0.1, this.rnd() < 0.4 ? 0.12 : 1);
+      if (!p) break;
+      const [wx, wy] = this.noMundo(c, p.x, p.y);
+      const a = this.rnd() * Math.PI * 2, v = 30 + this.rnd() * 60;
+      this.brasas.add(wx, wy, c.vx + Math.cos(a) * v, c.vy + Math.sin(a) * v - 10, 0.15 + this.rnd() * 0.3, 0.85 + this.rnd() * 0.15, 0, 0, this.rnd());
+    }
+    // the arcs: short, across a bit of the hull (the manta: a few of them on her body — small, contained)
+    while (this.arcos.length && this.arcos[0] <= this.pre) {
+      this.arcos.shift();
+      const n = this.o.material === 'bio' ? S.arcosManta : 1;
+      for (let i = 0; i < n; i++) {
+        const p = this.pixelDoCasco(c, 0.15, 0.85);
+        if (!p) continue;
+        const [wx, wy] = this.noMundo(c, p.x, p.y);
+        this.o.fx.estalo(wx, wy, Math.round(this.entre(S.arco)));
+      }
+    }
+    this.brasas.passo(dt, this.ax * 0.5, this.g * MORTE.mundo.gravidadeBrasa + (this.o.atmosfera ? -30 : 0), this.arrasto * 1.6);
+    this.fumos.passo(dt, this.ax * 0.8, this.o.atmosfera ? -18 : 0, 1.2);
+    // draw: the trembling hull with its hot pixels, the choking flame, the sparks
+    this.tela.px.fill(0);
+    this.brilho.px.fill(0);
+    this.fumo.px.fill(0);
+    this.desenharFumos();
+    this.fumo.enviar();
+    const amp = S.treme[0] + (S.treme[1] - S.treme[0]) * u;
+    const tx = Math.round((this.rnd() - 0.5) * 2 * amp), ty = Math.round((this.rnd() - 0.5) * 2 * amp);
+    const quadro = Math.floor(this.pre * 30);
+    this.desenharCorpo(c, (k, cor, X, Y) => {
+      if (piscar(k, quadro) >= S.quentes * (0.3 + 0.7 * u)) return cor;
+      const h = 0.55 + 0.4 * piscar(k + 11, quadro);
+      const q = corDaRampa(this.rampa, h);
+      this.luz(X, Y, q, (h - 0.3) * 0.9);
+      return q;
+    }, tx, ty);
+    this.desenharChama(c, tx, ty);
+    this.desenharBrasas();
+    this.tela.enviar();
+    this.brilho.enviar();
+  }
+
+  /** The big moment (the flash, the slow motion): the shock ring, and the chain of pops on the pieces to come. */
+  private assinar(x: number, y: number): void {
+    const A = MORTE.assinatura;
+    if (this.o.assinatura === false) return;
+    if (A.anel.liga) this.aneis.push({ x, y, t0: this.t });
+    if (A.cadeia.liga) {
+      const n = Math.round(this.entre(A.cadeia.n));
+      for (let i = 0; i < n; i++) this.cadeia.push(this.t + this.entre(A.cadeia.quando));
+      this.cadeia.sort((a, b) => a - b);
+    }
+  }
+
+  /** The chain: a piece still flying pops small (or, the manta, what is left of her hull discharges). */
+  private estourarCadeia(): void {
+    const C = MORTE.assinatura.cadeia;
+    while (this.cadeia.length && this.cadeia[0] <= this.t) {
+      this.cadeia.shift();
+      const vivos = this.corpos.filter((p) => p.n >= C.pecaMin && this.t < p.some);
+      let x: number, y: number;
+      if (vivos.length) {
+        const p = vivos[Math.floor(this.rnd() * vivos.length)];
+        x = p.x;
+        y = p.y;
+      } else if (this.casco) {
+        const q = this.pixelDoCasco(this.casco, 0, 1);
+        if (!q) continue;
+        [x, y] = this.noMundo(this.casco, q.x, q.y);
+      } else continue;
+      this.estouro('explosion-small', x, y, C.escala, C.abalo, true);
+      for (let n = 0; n < 6; n++) {
+        const a = this.rnd() * Math.PI * 2, v = 25 + this.rnd() * 45;
+        this.brasas.add(x, y, Math.cos(a) * v, Math.sin(a) * v, 0.2 + this.rnd() * 0.3, 1, 0, 0, this.rnd());
+      }
+    }
+  }
+
+  /**
+   * The shock rings: a pixel ring opening in the ship's ramp, hot to cool — and FADING as it opens (a real gradient,
+   * his note of 27/10): solid at birth, barely there by the time it is big, then gone.
+   */
+  private desenharAneis(): void {
+    const A = MORTE.assinatura.anel;
+    this.aneis = this.aneis.filter((a) => this.t - a.t0 < A.dur);
+    for (const a of this.aneis) {
+      const u = (this.t - a.t0) / A.dur;
+      const r = A.raio[0] + (A.raio[1] - A.raio[0]) * (1 - (1 - u) * (1 - u));
+      const meia = A.espessura / 2 + 0.5;
+      const X0 = Math.max(0, Math.floor(a.x - r - 2)), X1 = Math.min(W - 1, Math.ceil(a.x + r + 2));
+      const Y0 = Math.max(0, Math.floor(a.y - r - 2)), Y1 = Math.min(H - 1, Math.ceil(a.y + r + 2));
+      const h = 0.95 - 0.55 * u;
+      const alfa = Math.pow(1 - u, A.alfa);
+      const [cr, cg, cb] = canais(corDaRampa(this.rampa, h));
+      const cor = rgba(cr, cg, cb, Math.round(255 * alfa));
+      for (let Y = Y0; Y <= Y1; Y++) {
+        if (this.o.chao !== undefined && Y >= this.o.chao) continue;
+        for (let X = X0; X <= X1; X++) {
+          const d = Math.hypot(X + 0.5 - a.x, Y + 0.5 - a.y);
+          if (Math.abs(d - r) > meia) continue;
+          this.tela.px[Y * W + X] = cor;
+          this.luz(X, Y, cor, h * 0.7 * alfa);
+        }
+      }
+    }
+  }
 
   /** A: the hull flashes white and shatters at once, out of a small fireball. */
   private iniciarEstilhacos(): void {
@@ -392,6 +544,7 @@ export class MorteDaNave {
     this.casco = null;
     this.estouro('explosion', cx, cy, E.bola, E.abalo, false);
     this.clarao();
+    this.assinar(cx, cy);
     this.o.aoClimax?.();
   }
 
@@ -431,6 +584,7 @@ export class MorteDaNave {
     const [wx, wy] = this.noMundo(c, origem.x - 0.5, origem.y - 0.5);
     this.estouro('explosion-small', wx, wy, 0.7, E.abalo, true);
     this.clarao();
+    this.assinar(c.x, c.y);
     this.o.aoClimax?.();
   }
 
@@ -576,6 +730,7 @@ export class MorteDaNave {
     this.casco = null;
     this.estouro('explosion', c.x, c.y, E.bola, E.abalo, false);
     this.clarao();
+    this.assinar(c.x, c.y);
     this.o.aoClimax?.();
   }
 
@@ -584,7 +739,15 @@ export class MorteDaNave {
   /** `dt` in game seconds, already slowed by the slow motion (everything here runs on it, the smoke included). */
   update(dt: number): void {
     if (this.acabou) return;
+    // the overload first, on its own clock; the death starts when it ends
+    if (this.pre < this.sobra) {
+      this.pre += dt;
+      this.sobrecarga(dt);
+      if (this.pre >= this.sobra) this.iniciarEstilo();
+      return;
+    }
     this.t += dt;
+    this.estourarCadeia();
     const ay = this.g;
     const freio = Math.max(0, 1 - this.arrasto * dt);
     const mover = (c: Corpo): void => {
@@ -766,6 +929,7 @@ export class MorteDaNave {
       if (this.o.estilo === 'ruptura') this.desenharChama(c, tx, ty);
     }
     for (const p of this.corpos) this.desenharCorpo(p, (k, cor, X, Y, i, j) => this.corPedaco(p, k, cor, X, Y, i, j));
+    this.desenharAneis();
     this.desenharBrasas();
     this.tela.enviar();
     this.brilho.enviar();
@@ -1062,7 +1226,7 @@ export class MorteDaNave {
   }
 
   get terminou(): boolean {
-    return this.t >= this.duracao;
+    return this.pre >= this.sobra && this.t >= this.duracao - this.sobra;
   }
 
   destroy(): void {

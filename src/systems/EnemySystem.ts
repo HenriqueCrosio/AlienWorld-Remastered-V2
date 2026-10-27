@@ -452,6 +452,8 @@ export class EnemySystem {
 
     e.setData('kind', kind);
     e.setData('hp', def.hp);
+    // A vida cheia: os DESTROÇOS (26/10) medem os limiares das lascas por ela.
+    e.setData('hpMax', def.hp);
     e.setData('score', def.score);
     // Guardado para restaurar depois do flash branco de dano.
     // O tint DA PELE, não o do DEFS: é este valor que o flash branco de dano restaura ao

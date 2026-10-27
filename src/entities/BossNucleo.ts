@@ -385,6 +385,36 @@ export class BossNucleo implements StageBoss {
     return this.dead;
   }
 
+  /**
+   * Os DESTROÇOS (27/10): as duas formas têm as mortes aprovadas e só levam as mordidas. O guardião perde pedaços da
+   * casca (as folhas da respiração e da morte têm a casca no mesmo lugar do quadro: os buracos vão até o destruído). O
+   * predador é OUTRA arte no mesmo sprite (`forma`): as cicatrizes do guardião saem na troca, e as dele não furam
+   * (`CHEFOES`: ele anda, golpeia e se pendura no teto — o buraco ficaria no lugar errado do corpo).
+   */
+  get destrocos(): { quem: string; vida: number; forma: string; mira?: { x: number; y: number }[] } {
+    if (this.predador) return { quem: 'predador', vida: this.predador.hp / Predador.HP, forma: 'predador' };
+    const s = this.sprite, w = s.displayWidth, h = s.displayHeight;
+    return {
+      quem: 'guardiao',
+      vida: this.hpGuardiao / BossNucleo.HP_GUARDIAO,
+      forma: 'guardiao',
+      mira: BossNucleo.MIRAS.map((m) => ({ x: s.x + m.x * w, y: s.y + m.y * h })),
+    };
+  }
+
+  /**
+   * ONDE OS PEDAÇOS GRANDES SAEM do guardião (27/10, ele: *"a primeira lasca que sai dele é a cabeça, fica estranho por
+   * que a cabeça tem muito detalhe, o que podem sair são os tubos de cima, pedaços de outras partes"*): do lado da nave
+   * a mordida caía na cara. Em rodízio: os tubos de cima, os tubos do alto à direita, os tentáculos de baixo à direita
+   * — em fração do quadro desenhado, a partir do centro (medidos na grade do `guardiao-idle-sheet`, 256²: (124, 44),
+   * (186, 62), (200, 196)).
+   */
+  private static readonly MIRAS = [
+    { x: -0.016, y: -0.33 },
+    { x: 0.227, y: -0.258 },
+    { x: 0.281, y: 0.266 },
+  ];
+
   get armaTravada(): boolean {
     return this.travaTroca || (this.predador?.armaTravada ?? false);
   }

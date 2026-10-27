@@ -169,7 +169,11 @@ export class BossSerpente implements StageBoss {
     this.cabeca = scene.physics.add.sprite(this.sprite.x, this.sprite.y, 'flash');
     this.cabeca.setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.28).setScale(2.2).setDepth(31);
     (this.cabeca.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
-    (this.cabeca.body as Phaser.Physics.Arcade.Body).setCircle(15);
+    // ⚠️ O CÍRCULO CENTRADO NA CABEÇA (27/10). O `flash` tem 16×16 e o círculo 30 de diâmetro: sem o deslocamento, ele
+    // nascia no canto do quadro — e, na escala 2,2, ficava ~15 px abaixo e à direita da cabeça desenhada, em cima do
+    // pescoço e do toco da cabeça morta (ele: *"agora é visível que não atinge a segunda cabeça"*). O raio é o mesmo.
+    const raio = 15;
+    (this.cabeca.body as Phaser.Physics.Arcade.Body).setCircle(raio, this.cabeca.frame.width / 2 - raio, this.cabeca.frame.height / 2 - raio);
     this.cabeca.setData('boss', this);
     this.targets.push(this.cabeca);
 
@@ -229,6 +233,34 @@ export class BossSerpente implements StageBoss {
   get isDead(): boolean {
     return this.dead;
   }
+
+  /**
+   * Os DESTROÇOS (27/10): as mordidas caem na CABEÇA VIVA (é onde a luta acontece), e a cicatriz sai com a arte quando
+   * ela morre — a arte nova já tem o coto. A vida é a da luta inteira (seis limiares: um na ciano, dois na verde, um na
+   * laranja, dois na fusão), e a morte é a ruptura nos próprios pixels (D1).
+   */
+  get destrocos(): {
+    quem: string;
+    vida: number;
+    forma: number;
+    mira?: { x: number; y: number };
+    zona?: { x: number; y: number; r: number };
+  } {
+    const viva = this.cabeca.active ? { x: this.cabeca.x, y: this.cabeca.y } : undefined;
+    return {
+      quem: 'serpente',
+      vida: Math.max(0, this.hpTotal / this.maxHpTotal),
+      forma: this.faseIdx,
+      mira: viva,
+      // ⚠️ AS MARCAS DOS TIROS SÓ NA CABEÇA VIVA (27/10, ele: *"os tiros seguidos a isso atingem somente o primeiro
+      // toco"*). A hitbox dela é um círculo de 33 px de raio, maior que a cabeça: a bala é pega na frente dela, e o
+      // primeiro pixel na linha do tiro era o toco da cabeça morta. A zona é a cabeça desenhada.
+      zona: viva && { ...viva, r: BossSerpente.RAIO_CABECA * this.fase.escala },
+    };
+  }
+
+  /** Meia cabeça, em px da arte: a verde da `serpente-2c` vai de x 85 a 150 e de y 5 a 75 (medida na grade, 27/10). */
+  private static readonly RAIO_CABECA = 30;
 
   private get fase(): FaseSerpente {
     return BossSerpente.FASES[this.faseIdx];

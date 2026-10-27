@@ -52,6 +52,35 @@ export const MORTE = {
   /** The smoke, drawn in pixels (the `puff` particles read as grey squares next to the pixel debris). */
   fumaca: { vida: [0.55, 1.15], raio: [1.2, 4.6], densidade: 0.62, cada: 0.06 },
 
+  /**
+   * THE PLAYER'S SIGNATURE (27/10). Him: *"o efeito de destruição da nave Terminus ficou muito parecida com o efeito de
+   * destruição dos inimigos ... a explosão é idêntica"*: the enemies' deaths came from the ships'. Each ship keeps ITS
+   * death (*"ontem já tínhamos escolhido uma explosão para cada nave"*); three layers over it that no enemy has, each
+   * switched on its own (`liga`):
+   * - `sobrecarga`: BEFORE it, the reactor overloads — the hull trembles harder and harder, pixels flare hot along it
+   *   like cracks forming, sparks fly off it and out of the nozzle, the flame chokes, a small arc crosses it. Its own
+   *   clock: none of the three deaths' times moves.
+   * - `anel`: at the big moment (the flash and the slow motion), a shock ring of pixels in the ship's own ramp, opening
+   *   and going away in dither.
+   * - `cadeia`: the pieces keep popping small as they fly, for a second (the manta, made of embers, discharges on what is
+   *   left of her).
+   */
+  assinatura: {
+    /**
+     * `arco`: the arc's half-length (px). At 8–14 they crossed the whole ship (his note, 27/10: *"os arcos ficaram
+     * grandes em todas as naves"*); the manta's are small arcs on her body too, not the jellyfish's full discharge
+     * (*"menores e mais contidos"*), `arcosManta` of them each time.
+     */
+    sobrecarga: { liga: true, dur: 0.34, treme: [1, 2.6] as [number, number], quentes: 0.2, faiscas: 70, arcos: [0.1, 0.24], arco: [3, 5] as [number, number], arcosManta: 2 },
+    /**
+     * `alfa`: the ring fades as it opens — solid at birth, almost gone by the time it is big (his note: *"usando um
+     * degradê de sólido no início e dar um fade para no crescimento do anel ser visto pouco antes de sumir"*): alpha =
+     * (1 − u)^alfa over its life u.
+     */
+    anel: { liga: true, raio: [5, 46] as [number, number], dur: 0.42, espessura: 1.6, alfa: 1.6 },
+    cadeia: { liga: true, n: [4, 6] as [number, number], quando: [0.14, 1.0] as [number, number], escala: 0.34, abalo: 0.35, pecaMin: 10 },
+  },
+
   /** A — the hull SHATTERS into big shards, white-hot along the cracks, out of a small fireball. */
   estilhacos: {
     /** few and big: the ship is 40×20 px — a dozen shards were all crack and no hull */

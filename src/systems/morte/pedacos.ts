@@ -254,6 +254,8 @@ export function lasca(
   torto: (x: number, y: number) => number,
   amp: number,
   rnd: () => number,
+  /** (the enemies, 26/10) the bite's centre is one of the edge pixels nearest to this point: the side the shot came from */
+  perto?: Ponto,
 ): { mascara: Uint8Array; centro: Ponto; n: number } | null {
   const cheio = (x: number, y: number): boolean => x >= 0 && y >= 0 && x < img.w && y < img.h && img.cor[y * img.w + x] >>> 24 >= 128;
   let x0 = img.w, x1 = -1;
@@ -271,7 +273,22 @@ export function lasca(
     }
   }
   if (!borda.length) return null;
-  const k0 = borda[Math.floor(rnd() * borda.length)];
+  let k0 = borda[Math.floor(rnd() * borda.length)];
+  if (perto) {
+    // one of the 6 edge pixels nearest to `perto` (a little luck: two shots from the same place bite next to each other)
+    // (the six nearest picked in place, in the order a stable sort would give them: the sort of the whole edge was most
+    // of a bite's cost, and a boss's bite is replayed on every frame of its animation)
+    const ds = borda.map((i) => Math.hypot((i % img.w) + 0.5 - perto.x, Math.floor(i / img.w) + 0.5 - perto.y));
+    const perto6: number[] = [];
+    const usado = new Uint8Array(borda.length);
+    for (let q = 0; q < Math.min(6, borda.length); q++) {
+      let m = -1;
+      for (let j = 0; j < borda.length; j++) if (!usado[j] && (m < 0 || ds[j] < ds[m])) m = j;
+      usado[m] = 1;
+      perto6.push(borda[m]);
+    }
+    k0 = perto6[Math.floor(rnd() * perto6.length)];
+  }
   const centro = { x: (k0 % img.w) + 0.5, y: Math.floor(k0 / img.w) + 0.5 };
   // grow from the centre through 4-neighbours, the nearest (bent) first: one piece, never across a gap
   const chave = (i: number): number => {
@@ -280,13 +297,16 @@ export function lasca(
   };
   const mascara = new Uint8Array(img.w * img.h);
   const visto = new Uint8Array(img.w * img.h);
+  // (each frontier pixel's key, computed once: the bites are replayed on every frame of a boss's animation — 27/10)
   const fronteira = [k0];
+  const chaves = [chave(k0)];
   visto[k0] = 1;
   let n = 0;
   while (n < alvo && fronteira.length) {
     let m = 0;
-    for (let q = 1; q < fronteira.length; q++) if (chave(fronteira[q]) < chave(fronteira[m])) m = q;
+    for (let q = 1; q < fronteira.length; q++) if (chaves[q] < chaves[m]) m = q;
     const i = fronteira.splice(m, 1)[0];
+    chaves.splice(m, 1);
     mascara[i] = 2;
     n++;
     const x = i % img.w, y = (i - x) / img.w;
@@ -295,16 +315,20 @@ export function lasca(
       if (!cheio(xx, yy) || visto[yy * img.w + xx]) continue;
       visto[yy * img.w + xx] = 1;
       fronteira.push(yy * img.w + xx);
+      chaves.push(chave(yy * img.w + xx));
     }
   }
+  // the rim: the hull touching the bite (found from the bite's own pixels, not by sweeping the whole hull — that sweep
+  // was most of a bite's cost)
   for (let i = 0; i < mascara.length; i++) {
-    if (mascara[i] || img.cor[i] >>> 24 < 128) continue;
+    if (mascara[i] !== 2) continue;
     const x = i % img.w, y = (i - x) / img.w;
-    const toca = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => {
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
       const xx = x + dx, yy = y + dy;
-      return xx >= 0 && yy >= 0 && xx < img.w && yy < img.h && mascara[yy * img.w + xx] === 2;
-    });
-    if (toca) mascara[i] = 1;
+      if (xx < 0 || yy < 0 || xx >= img.w || yy >= img.h) continue;
+      const v = yy * img.w + xx;
+      if (!mascara[v] && img.cor[v] >>> 24 >= 128) mascara[v] = 1;
+    }
   }
   return { mascara, centro, n };
 }
@@ -386,6 +410,87 @@ export function queimar(c: number, k: number): number {
   const [r, g, b, a] = canais(c);
   // charring pulls towards the ember's dark red-brown, not towards grey
   return rgba(Math.round(r * passo + 18 * (1 - passo)), Math.round(g * passo * 0.92), Math.round(b * passo * 0.85), a);
+}
+
+/**
+ * THE ENEMIES' RAMPS (26/10, `docs/DESTROCOS.md` → the enemies): FLESH, sampled from the Tubo and the Larva (their dark
+ * reds), with two livelier reds on top for the open wound — it never goes white, flesh does not burn; and the
+ * JELLYFISH, sampled from the água-viva (its blue-violet and cyan), up to a cold white.
+ */
+export const RAMPA_CARNE = ['d87060', 'b84850', '94343c', '6c2434', '541c2c', '3c1424', '2c0c1c', '1c0c14', '0c040c'].reverse().map(hex);
+/**
+ * ROCK (27/10, the F2 belt): no fire — dust and the fresh face. Sampled from the asteroids' own art by brightness
+ * (their blue-grey, from the shadow to the lit facet) with one lighter stop: the rock's inside, never weathered.
+ */
+export const RAMPA_ROCHA = ['dce4e4', 'aabcc0', '8099a9', '6a8291', '4a5e6c', '313d4c', '1d2935', '0e1621'].reverse().map(hex);
+
+/** A colour lightened in steps towards the rock's inside (a FRESH face: a cut, a chip off a rock), `k` 0..1. */
+export function clarear(c: number, k: number): number {
+  const passo = k < 0.25 ? 0 : k < 0.6 ? 0.28 : 0.45;
+  if (!passo) return c;
+  const [r, g, b, a] = canais(c);
+  return rgba(Math.round(r + (0xc4 - r) * passo), Math.round(g + (0xd0 - g) * passo), Math.round(b + (0xd4 - b) * passo), a);
+}
+export const RAMPA_MEDUSA = ['e0f8ff', '94e4fc', '74e4fc', '947cf4', '8444ec', '6454bc', '2c34c4', '2c2c74', '1c1c5c'].reverse().map(hex);
+
+/**
+ * A frame as the game DRAWS it: scaled by nearest (Phaser's `pixelArt`), mirrored, and multiplied by the sprite's tint.
+ * The enemies are shown at 0.28–1.1×: the debris are cut in GAME pixels, the size the player sees, not in the art's.
+ */
+export function reduzir(img: Bitmap, sx: number, sy: number, flipX: boolean, flipY: boolean, tint = 0xffffff): Bitmap {
+  const w = Math.max(1, Math.round(img.w * Math.abs(sx))), h = Math.max(1, Math.round(img.h * Math.abs(sy)));
+  const cor = new Uint32Array(w * h);
+  const tr = (tint >> 16) & 255, tg = (tint >> 8) & 255, tb = tint & 255;
+  const tingir = tint !== 0xffffff;
+  for (let y = 0; y < h; y++) {
+    const fy = flipY ? h - 1 - y : y;
+    const sy0 = Math.min(img.h - 1, Math.floor(((fy + 0.5) * img.h) / h));
+    for (let x = 0; x < w; x++) {
+      const fx = flipX ? w - 1 - x : x;
+      const sx0 = Math.min(img.w - 1, Math.floor(((fx + 0.5) * img.w) / w));
+      let c = img.cor[sy0 * img.w + sx0];
+      if (tingir && c >>> 24) {
+        const [r, g, b, a] = canais(c);
+        c = rgba(Math.round((r * tr) / 255), Math.round((g * tg) / 255), Math.round((b * tb) / 255), a);
+      }
+      cor[y * w + x] = c;
+    }
+  }
+  return { w, h, cor };
+}
+
+/** The opaque columns' range and each column's mean height (the long axis of a side-view body). */
+function eixo(img: Bitmap): { x0: number; x1: number; yMedio: (x: number) => number } | null {
+  let x0 = img.w, x1 = -1;
+  const somaY = new Float32Array(img.w), conta = new Float32Array(img.w);
+  for (let y = 0; y < img.h; y++) {
+    for (let x = 0; x < img.w; x++) {
+      if (img.cor[y * img.w + x] >>> 24 < 128) continue;
+      x0 = Math.min(x0, x);
+      x1 = Math.max(x1, x);
+      somaY[x] += y;
+      conta[x]++;
+    }
+  }
+  if (x1 < 0) return null;
+  const yMedio = (x: number): number => {
+    for (let d = 0; d < img.w; d++) {
+      for (const xx of [x - d, x + d]) if (xx >= 0 && xx < img.w && conta[xx]) return somaY[xx] / conta[xx] + 0.5;
+    }
+    return img.h / 2;
+  };
+  return { x0, x1, yMedio };
+}
+
+/** `n` seeds spread along the long axis (each at its column's mean height, a little luck in x): a body cut in `n` sections. */
+export function sementesAoLongo(img: Bitmap, n: number, rnd: () => number): Ponto[] {
+  const e = eixo(img);
+  if (!e) return [];
+  return Array.from({ length: n }, (_, i) => {
+    const k = (i + 0.5) / n + (rnd() - 0.5) * (0.5 / n);
+    const x = Math.round(e.x0 + (e.x1 - e.x0) * Math.min(1, Math.max(0, k)));
+    return { x: x + 0.5, y: e.yMedio(x) };
+  });
 }
 
 /** The 4×4 Bayer matrix (0..15)/16: the pixel-art fade — a piece goes away pixel by pixel, never by alpha. */

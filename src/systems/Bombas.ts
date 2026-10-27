@@ -18,7 +18,8 @@ export interface HostBombas {
   /** `de` = o ponto da explosão (o escudo de um elite decide por ele). */
   ferirInimigo(e: Corpo, dano: number, de?: { x: number; y: number }): void;
   ferirConstrucao(p: Corpo, dano: number): void;
-  ferirChefe(dano: number): void;
+  /** `de` = o ponto da explosão (a marca dela no casco: os destroços, 27/10). */
+  ferirChefe(dano: number, de?: { x: number; y: number }): void;
   ferirGolfinho(x: number, y: number, raio: number, dano: number): void;
   explosao(x: number, y: number): void;
 }
@@ -118,7 +119,7 @@ export class Bombas {
     for (const e of [...this.h.inimigos()]) if (noRaio(e)) this.h.ferirInimigo(e, BOMBA.dano, { x, y });
     for (const p of [...this.h.construcoes()]) if (noRaio(p)) this.h.ferirConstrucao(p, BOMBA.dano);
     // O chefão leva UMA vez por explosão, mesmo com várias partes no raio.
-    if (this.h.alvosDoChefe().some(noRaio)) this.h.ferirChefe(BOMBA.dano);
+    if (this.h.alvosDoChefe().some(noRaio)) this.h.ferirChefe(BOMBA.dano, { x, y });
     this.h.ferirGolfinho(x, y, raio, BOMBA.dano);
     this.h.explosao(x, y);
   }
