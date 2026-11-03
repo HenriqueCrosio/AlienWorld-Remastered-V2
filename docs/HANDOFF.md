@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-10-26)
+# HANDOFF — estado do projeto (2026-11-03)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-10-27) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-03) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,10 +16,291 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-10-21-bloco-h-START.md`. Tudo de 22–27/10 está commitado e
-> empurrado. A sessão abre no retorno dele JOGANDO (o §0 do START diz onde mexer em cada coisa): o tamanho das marcas
-> (1/3/4 px), o círculo da cabeça da Serpente (encolher até a cabeça?), os arcos e o anel da morte da nave, a lasca do
-> casco, a rocha e a aranha. Depois, o bloco H, abrindo com as perguntas a ele, e I → J → F."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-03-serpente-grande-START.md`. Tudo até 03/11 está
+> commitado e empurrado. A sessão abre na FASE 2 DA LUTA DA SERPENTE: a serpente grande (a fusão refeita, o S2) surge
+> do rombo quando a de 3 cabeças morre, se solta do casco e luta MÓVEL. Começar pelas perguntas a ele (o §2 do START),
+> antes de gerar qualquer arte."**
+>
+> (O arranque de 27/10 apontava `plans/2026-10-21-bloco-h-START.md`: o retorno dele jogando, feito em 28/10, e o bloco
+> H, que segue esperando. A ordem dele hoje: a Serpente grande → o CENÁRIO da luta → H → I → J → F.)
+>
+> 📍 **28/10 — O RETORNO DELE JOGANDO, E A LUTA DA SERPENTE.** Aprovados: o tamanho das marcas (tiro, bomba, explosão),
+> o anel menor e o degradê da morte da nave, as lascas dos cascos, as rochas, a aranha (*"perfeita"*). A FUSÃO DA
+> SERPENTE refeita e aprovada por ele na folha (*"ficaram ótimos"*; spec `specs/2026-10-28-serpente-fusao-mordidas-design.md`,
+> plano `plans/2026-10-28-serpente-fusao-mordidas.md`, folha `folhas/2026-10-28/serpente/serpente.html`; SEM commit):
+> sem a estrela, três pedaços orgânicos — pescoço → queixo → crânio — a 22/13/5%. **E um item NOVO, que não estava em
+> nenhum roadmap — S, a luta da Serpente** (ele, 28/10: *"ela está muito central, sobrando pouco espaço para o player …
+> a estrela não me agrada muito, o jogador precisa saber por outro método qual cabeça atacar … a avançada dela para
+> frente não está fazendo muito sentido, quero deixar essa skill mais importante para a luta. É um dos bosses mais
+> fáceis"*). Entra ANTES do H, como parte do retorno dele:
+> 1. **a posição:** mais à direita (hoje o posto é x 252 de 384: o corpo vai de ~182 a ~322 nas cabeças e de 174 a 330
+>    na fusão — o jogador fica com a metade da esquerda);
+> 2. **a estrela sai de TODAS as formas** e a cabeça vulnerável ganha uma marca orgânica;
+> 3. **a investida vira o centro da luta:** hoje ela recua 0,6 s piscando e avança na MESMA altura só até x 150, e só as
+>    roscas (a metade de baixo) ferem por contato — passa longe de onde a nave luta;
+> 4. **a luta mais difícil** (o círculo de acerto da cabeça, 33 px de raio, maior que a cabeça, esperava a decisão dele
+>    desde 27/10: é uma das alavancas).
+>
+> Dividido em três (aprovado por ele): **S1** = a arena e a luta com a arte de hoje; **S2** = a FUSÃO NOVA (a união das
+> três, a partir da de hoje, solta do casco, nadando; os pontos das mordidas medidos de novo); **S3** = os GESTOS das
+> formas de cabeças no PixelLab. **O S1 está IMPLEMENTADO (28/10, à noite), SEM commit** — spec
+> `specs/2026-10-28-serpente-luta-s1-design.md`, plano `plans/2026-10-28-serpente-luta-s1.md` (com os desvios no fim),
+> folhas `folhas/2026-10-28/serpente-luta/rombo.html` (ele escolheu o **A, o rasgo**) e **`luta.html` (espera por ele)**:
+> o casco freia e para com o rombo (uma peça da faixa do casco) no posto e ela sobe dele; o treino mostra o casco da
+> proa; ela vive no terço direito (x ~300) em três postos; a investida em toda forma — mira, TRAVA branca, atravessa,
+> recua até a cabeça ficar na frente da nave (a janela) — com a dupla da B e a rajada da C; o acerto do tamanho da cabeça
+> (16,5 px); a estrela fora de todas as formas; as VEIAS acesas (sobreposições por quadro, `scripts/_serpente/_veias.mjs`)
+> e o ACERTO QUE SANGRA. Medido: o jogador parado leva 5 de 5 investidas (hoje 0) e a luta vai de 24,9 s a ~40 s; o que
+> desvia não leva nenhuma. Os números moram em `src/entities/numerosSerpente.ts`.
+>
+> 📍 **29/10 — A S1 VOLTOU: O MOVIMENTO CONTINUAVA O MESMO → S1b, "ELA VIVE NO CASCO"** (nada commitado). Ele:
+> *"ainda estou achando as serpentes muito engessadas … o corpo todo se move para frente num movimento que antes, com a
+> plataforma, justificava mais do que ela voar pelo casco sem nenhum tipo de movimento convincente"*, e *"Ficou a mesma
+> coisa, só mudou a base e a distância da investida"*. Ele tem razão: na S1 todo deslocamento ainda era o DESENHO
+> INTEIRO transladando. A visão dele: o casco EXPLODE e o buraco se abre, ela surge e a base fica ENCAIXADA nele; a
+> investida rasga o casco até o jogador (o rasgo se regenera); quando a de 3 cabeças morre ela VOLTA para o buraco e a
+> maior surge dele (a S2 a solta). **A escolha dele: a investida POR BAIXO DO CASCO** — ela mergulha no rombo, uma
+> rachadura corre até embaixo da nave e trava (branca), ela rompe o casco ali e sobe em bote encaixada no rasgo (a
+> esquiva vira para o LADO), a janela ao lado da nave, ela afunda, e o rasgo e a rachadura se fecham. Spec
+> `specs/2026-10-29-serpente-luta-s1b-design.md`; **conceitos na folha `folhas/2026-10-29/serpente-casco/conceitos.html`
+> (esperam ele)**: as maquetes da investida inteira com os dois gestos do PixMiniMax (**erguer**, recomendado, e
+> **bote**; a cabeça laranja ganhou boca nos dois), e quatro visuais da rachadura (R1 lombada, R2 acesa, **R3 lombada +
+> fissura escura**, recomendada, R4 carne). Ferramentas: `scripts/_serpente/_arena-foto.mjs`, `_rachadura-conceitos.mjs`,
+> `_bote-maquete.mjs`.
+>
+> Na mesma tarde, as escolhas dele:
+> - o **erguer**, a **R3**, a laranja com mandíbula;
+> - **O CORTE:** *"o melhor é sair apenas a parte de cima de onde fiz o corte vermelho"*, ou seja, as roscas NUNCA saem do casco;
+> - dois pedidos novos: a **CHUVA TRIPLA** (o ataque em conjunto: as cabeças vivas cospem para o alto e cai uma onda por cabeça, cada uma com um vão) e **uma cor por cabeça** (azul, verde, âmbar).
+>
+> **A S1b ESTÁ IMPLEMENTADA, SEM commit** (plano `plans/2026-10-29-serpente-luta-s1b.md`, com os desvios no fim):
+> - a chegada que estoura;
+> - o bote por baixo do casco (o casco vivo da arena, `src/entities/cascoVivo.ts`);
+> - o erguer instalado nas três formas (`_erguer-instalar.mjs`, `gestoSerpente.ts`);
+> - a chuva alternando com o bote;
+> - a fusão surgindo do rombo, sem véu.
+>
+> Achados no caminho:
+> - o círculo de acerto da S1 caía no PESCOÇO (agora fica no crânio);
+> - os tiros dela sumiam ao reaproveitar a vaga do pool (`body.reset`).
+>
+> Medido: parado 42,0 s, com 7 contatos; desviando 41,7 s, com 0 contatos e 15 tiros. A folha é `folhas/2026-10-29/serpente-casco/luta.html`.
+>
+> 📍 **29/10 (noite) — ELE REVIU A S1b: "o restante ficou muito fraco e mal feito".**
+>
+> - **Ficam:** a explosão do casco, a chuva (*"adiciona uma mecânica que não tinha no jogo"*) e o erguer, como gesto de ataque NO ROMBO.
+> - **O erro:** ele pediu o corpo escondido SÓ na aparição depois do bote. Eu cortei em todo lugar, e a "sombra" (a bacia escura + a faixa escura na largura dela) virou um quadrado feio: *"aquela sombra para cobrir parte do corpo ficou feio"*.
+> - **A regra dele:** o jogador vive sempre À ESQUERDA dela, então tem que haver espaço para desviar.
+>
+> Revisei a luta inteira quadro a quadro. JÁ FEITO no código:
+> - no rombo, ela inteira (os postos da S1, a respiração de 14 px);
+> - o erguer como gesto de ataque no rombo;
+> - a trava e a lombada mais visíveis;
+> - a chuva mais justa (vão de 3 gotas que anda no máximo uma vaga, ondas a 0,55 s);
+> - a trava a no mínimo x 60;
+> - sem o flash rosa na troca de forma;
+> - a fusão sem a estrela e sem os blocos vermelhos.
+>
+> FALTA, esperando a escolha dele na folha **`folhas/2026-10-29/serpente-casco/revisao/revisao.html`**: a aparição depois do bote. É uma saída do PixelLab já desenhada CORTADA na linha do casco: a E2 (subir ondulando) + o erguer, a recomendada, ou a E1. Ela sai de um buraco de casco rasgado de verdade (H1, recomendado), no lugar da sombra.
+> Ferramenta: `scripts/_serpente/_aparicao-maquete.mjs`.
+>
+> 📍 **30/10 — A SERPENTE VAI SER REVISTA INTEIRA COM O CCGS (Claude Code Game Studios), TEMPORÁRIO.** Ele: *"Não
+> estamos conseguindo chegar num acordo. Precisamos rever o boss da fase 3 inteiro. Dos modelos, animações, skills etc."*
+> E: *"usá-la … somente para ela. Depois de finalizarmos, voltamos ao desenvolvimento normal"*.
+> - **As escolhas dele:** instalar temporário (agentes, comandos, docs e o leitor de config; SEM os hooks dele) e a equipe completa (`team.size: small`).
+> - **Onde está:** a lista do que foi copiado e de como remover em `docs/ccgs-serpente/INSTALADO.md`; tudo fora do git pelo `.git/info/exclude`.
+> - **O ponto de partida dele:** `production/session-state/active.md`.
+> - **O GUARDRAIL:** ele pediu que a sessão principal *"monitore qualquer coisa que afete o jogo todo"*. O `CLAUDE.md` temporário manda os agentes do CCGS pararem e avisarem antes de tocar em sistemas compartilhados (GameScene, BootScene, Parallax, `src/systems/`, outros chefões, cartas, nave, HUD, docs do projeto).
+> - **A ordem sugerida:** reabrir o Claude Code na raiz → `/reverse-document` (a Serpente de hoje) → `/team-combat` → `/asset-spec` → ele joga → `/playtest-report`, `/balance-check`.
+> - **No fim:** remover o CCGS e guardar `design/` + `production/` em `docs/ccgs-serpente/`.
+>
+> 📍 **31/10 — O CCGS SAIU.** A equipe fez o GDD, a arquitetura e o M1 (a forma A saindo de uma toca real), e ele
+> reprovou: *"me entregam exatamente o que eu tinha antes"*, com os defeitos que circulou (o vão embaixo dela no rombo,
+> a emenda do casco atravessando o buraco, ela atrás da camada do buraco) e *"nenhum me perguntou quais seriam as
+> skills"*. A instalação foi removida, e o registro e o código do M1 estão em `docs/ccgs-serpente/` (restauráveis).
+> A Serpente voltou à S1b, com o aviso de nave atingida e o teto de dano. **A DIREÇÃO NOVA, dele:**
+> - a de 3 cabeças tem **tiros normais como os da primeira** (esparsos, mirados), agora na cor de cada cabeça;
+> - **a investida SAI**, e a surpresa dela (o tiro depois do avanço, que dava sentido à da plataforma) vira um padrão de tiro;
+> - **a chuva fica**;
+> - mais habilidades **no estilo Cuphead**: ele quer ver em maquete o **cuspe quicante** e o **raio com carga**;
+> - depois vem a serpente maior.
+>
+> E: perguntar a ele, com opções, antes de cada decisão de desenho.
+>
+> **31/10 (2) — as animações por habilidade.** A 1ª folha (`folhas/2026-10-31/serpente-habilidades/habilidades.html`)
+> teve duas críticas dele: só as cabeças se mexiam (*"me refiro a ter um movimento tambem corporal"*) e a cor da primeira
+> cabeça mudava a cada animação. As duas eram dos meus pedidos ao gerador (eu pedia o corpo parado e não dizia a cor das
+> bocas). A 2ª rodada está em **`corpo-cor.html`**, esperando as respostas dele: os tiros normais (3 cuspes curtos), o
+> cuspe quicante, a chuva e o raio (com o fechamento), todos com o corpo se movendo e a boca de cada cabeça na sua cor; o
+> registro e os números em `PROGRESSO-corpo-cor.md`. As 3 perguntas: aprovar as 4; os rastros do gerador ficam ou saem;
+> o desvio do raio (a maquete propõe o lugar seguro embaixo da mandíbula dela). Depois: o visual da bola e do raio.
+>
+> **31/10 (3) — sem gravidade.** Vendo a `corpo-cor.html`, ele: *"o quique e a chuva não condizem com gravidade zero"*
+> (a F3 é vácuo). Antes de responder às 3 perguntas, ele quer acertar essas duas. A chuva vira **pequenos mísseis** que
+> sobem e voltam empurrados pelos motores (ideia dele). A bola ganha **jatos como os do letreiro do menu** (ideia dele: *"é
+> possível?"*): a mesma regra de `src/menu/abertura.ts`, o caminho primeiro e cada bocal pelo −a·u. A folha
+> **`gravidade-zero.html`** tem três formas de pilotar (segura a altura, natural, mira), a chuva de mísseis e 3 perguntas:
+> a forma de pilotar, a cor do fogo, os mísseis assim? Registro em `PROGRESSO-gravidade-zero.md`. As outras habilidades
+> (tiros e raio) ele comenta depois.
+> **Respostas:**
+> - **Os mísseis estão APROVADOS;** o formato deles fica para depois.
+> - **As 3 bolas foram reprovadas** (*"os propulsores ficaram desenhados na bola... jatos de propulsão de
+>   estabilizadores mesmo. Algo mais natural"*).
+> - Ele escolheu **bola de verdade + instável, brigando**, com **gás frio e branco**, e a soltura em degraus: a 1ª antes
+>   e mais alta, a 2ª depois na metade da altura, e assim por diante.
+> - A 4ª rodada está em **`bola-viva.html`** (brigando × mais calma), esperando as respostas dele.
+> - **Depois, O QUIQUE SAIU** (*"precisamos adimitir que será dificil"*). Cada cabeça ganhou uma identidade: **azul = o
+>   raio, verde = gás/veneno, laranja = a faísca**. A habilidade nova no lugar do quique: a verde solta gás em volta
+>   delas e um pouco à frente, a laranja acende, e bolas de fogo com formato de plasma vão na direção da nave e se
+>   fragmentam. A física e as decisões em aberto estão em `PROGRESSO-gravidade-zero.md`.
+> - **As escolhas dele para o gás:**
+>   - o tiro da nave também acende a nuvem e a explosão volta nela, mas leva alguns tiros: esquenta o LUGAR atingido e
+>     um raio pequeno em volta, com uma dica sutil;
+>   - com a carta INCENDIÁRIO, acende no primeiro toque;
+>   - a laranja acende 2–3 vezes; as bolas se partem em leque legível; só o fogo machuca.
+> - A maquete está em **`gas-faisca.html`**: a habilidade, o contra-ataque e a carta. Ela fica no idle, porque as
+>   animações da verde soprando e da laranja faiscando vêm depois da aprovação.
+> - **01/11 — a resposta dele à `gas-faisca.html`** (a rodada 6 está em **`geleia-plasma.html`**, esperando as
+>   respostas):
+>   - *"bolas maiores como se fossem geleias [...] o comportamento de algo viscoso, como se fosse liquido"* → as bolas
+>     viraram **geleia de plasma**: balançam como gota, se desfazem por FIOS que afinam e arrebentam, e grudam no casco.
+>     Há duas versões: A pinga gotas pelo caminho; B racha em três (o leque).
+>   - *"precisa ficar claro que o jogador conseguiu quebrar isso [...] uma explosão apontando para a cara das
+>     serpentes"* → o fogo corre de volta pelo sopro, e uma geleia explode na cara de cada cabeça e fica grudada
+>     queimando. Ela leva o golpe, a tela treme, a verde para de soprar, e nada volta para a nave.
+>   - *"não existe nada saindo da cabeça laranja"* → a boca dela carrega por 0,6 s (brilho e fagulhas) e um arco salta
+>     até o gás.
+>   - Perguntas: A ou B (ou mistura)? Agora dá para ver a quebra? E a faísca?
+> - **01/11 (2) — a resposta dele à `geleia-plasma.html`**: *"B que depois pinga, o resto ficou bom"*, e três pedidos.
+>   A rodada 7, em **`termometro-esquivas.html`**, foi **APROVADA no mesmo dia** (*"o padrão da faísca para saber a
+>   esquiva ficou excepcional. O termômetro e ritmo ficaram ótimos"*; o vapor e o gás baixo também). **O gás + faísca
+>   está fechado como mecânica**; faltam as animações (a verde soprando, a laranja carregando e faiscando) e a
+>   instalação no jogo. O que entrou:
+>   - *"os pingos pequenos ficam bem no espaço criado [...] 3 padrões, um para cada tiro"* → ele escolheu **as três
+>     esquivas**: 1ª o leque (rasga atravessado; sair da linha), 2ª os trilhos (arco bifurcado, duas fileiras acima e
+>     abaixo; ficar parado), 3ª a fila (três arcos, cada bola mirada onde a nave está; continuar andando). As gotas só
+>     saem por TRÁS. Medido: esquiva certa = folga mínima de 12,7 px; esquiva errada = dano em todos os casos.
+>   - *"um termômetro pequeno que sobe a temperatura [...] a vermelha vai carregar alguns segundos"* → o termômetro
+>     fica à direita dela, sobe com tiro que atravessa o gás (~12 tiros no banco, 1,5 s) e **zera a cada faísca** (a
+>     escolha dele). Cheio, o fogo volta pelo sopro até a boca da verde e respinga nas outras duas; com a carta, ele pega
+>     fogo e estoura. A laranja carrega 2,5 s.
+>   - *"o gás saia da boca ou do nariz como um vapor para baixo em forma de leque instável"* → sai da mandíbula da
+>     verde, desce a ~50° por baixo do queixo da azul, balança, e vira um banco no casco. Consequência: o gás que a nave
+>     alcança fica baixo (perguntado na folha).
+> - **01/11 (3) — O RAIO DA AZUL, a varredura avisada** (a escolha dele; a rodada 8 está em **`raio-varredura.html`**,
+>   esperando as respostas):
+>   - o raio varre só uma FATIA, sempre na ordem cima → baixo → quase tudo (este com o seguro embaixo da mandíbula);
+>   - na carga aparecem a linha de início, a de parada, a fatia em azul entre elas e pontos correndo no sentido do giro;
+>   - carga de 1,6/1,6/2,0 s;
+>   - medido: quem sai da fatia passa com 12–19 px de folga, quem fica no meio é atingido nas três;
+>   - a animação da azul vai ter que girar a cabeça junto com o raio.
+> - **01/11 (4) — a resposta dele à `raio-varredura.html`** (a rodada 9 está em **`raio-salva.html`**, esperando as
+>   respostas):
+>   - *"o raio-x pode sair dos olhos da serpente, o raio sai da boca"* → o olho da azul solta dois feixes finos até
+>     as linhas da fatia. A fatia é desenhada EXATAMENTE onde o raio passa; conferido: 0 pontos fora;
+>   - o 3º raio virou **a SALVA**, ideia dele: seis raios finos (6 px, *"cortar o cenário com menos largura"*), um a
+>     cada 0,7 s, com o aviso do próximo já na tela;
+>   - a salva é **sorteada a cada luta, com regra** (a escolha dele): cada fatia cobre a nave e deixa saída ≤ 25 px;
+>   - medido em 4 sorteios: a nave sempre escapa, e parada é atingida.
+> - **01/11 (5) — a resposta dele à `raio-salva.html`** (a rodada 10 está em **`raio-foco-faiscas.html`**, esperando as
+>   respostas):
+>   - *"O foco sai como um foco de verdade, não faz curva. Assim, a cabeça da serpente precisa mexer para cada ataque e
+>     varredura"* → o feixe do olho que DOBRAVA saiu. Agora o foco é UMA linha reta do olho, que ensaia a varredura na
+>     carga. A cabeça girando vem da animação;
+>   - o caminho ficou bem suave;
+>   - **faíscas elétricas** no raio e no plasma, só visuais, num sorteio separado: as medidas não mudaram;
+>   - pergunta em aberto: a animação da azul agora ou junto com todas.
+> - **01/11 (6) — a análise que ele trouxe** (radar pouco ameaçador, disparo sem antecipação, laser "uma linha", sem
+>   conclusão). As respostas dele: a ameaça fica NA CABEÇA (seguir a nave, pulso no olho, olho trava; caminho segue
+>   sutil, sem cone nem interferência); a preparação sai DE DENTRO do aviso de 1,6 s; a recuperação é SÓ RESPIRO
+>   (~1,2 s, dano igual); a animação AGORA, antes dos efeitos. A rodada 11 está em **`raio-cabeca.html`**, esperando
+>   as respostas:
+>   - 4 gestos da azul no PixelLab (olhar 19 q, abrir 9, mirar 22, recuperar 13), em `cru3/cabeca-raio/` com
+>     `pontos.json` (olho e boca por quadro). O gerador SOBE/DESCE a cabeça em vez de girar; o raio sai reto da goela
+>     aberta (~100°);
+>   - a maquete tem as fases: lê 0,35 / ensaia 0,45 / prepara 0,8 / dispara / recupera ~1,2;
+>   - folgas 20,4 / 12,5 / salva ≥ 6,7 px; 0 ponto do raio fora do caminho;
+>   - a seguir (combinado): brilho externo, frente de energia, impacto no casco, descargas e resíduo, energia entrando
+>     na boca. O som fica para depois do balanceamento.
+> - **01/11 (7) — "Gostei dos gestos, pode seguir para os efeitos"** (os gestos da rodada 11 APROVADOS). A rodada 12
+>   está em **`raio-efeitos.html`**, esperando as respostas:
+>   - energia entrando na boca + esfera; as luzes da cabeça acendem com a carga; o raio em camadas (núcleo branco, azul
+>     elétrico, brilho ciano ondulando, no lugar da borda escura); a FRENTE de energia (0,09 s; salva 0,05) — só o que
+>     está desenhado machuca; clarão + tranco de 2 px na tela; descargas nas mandíbulas e resíduo de vapor depois;
+>   - a fatia de baixo agora COMEÇA no casco (150 → 172): o raio corta a chapa (branco-quente → laranja → esfria);
+>   - folgas iguais (20,4 / 12,5 / salva ≥ 6,7 px); 0 ponto fora do caminho;
+>   - perguntas: a força dos efeitos; a fatia sobre o casco fica?; seguir para as animações da verde e da laranja.
+> - **02/11 — "Ficou bom, pode seguir para a verde e a laranja"** (os efeitos do raio APROVADOS, a fatia sobre o casco
+>   FICA) + *"faça junto os efeitos e visuais também, depois eu vejo numa folha só"*. As escolhas dele: a verde ABRE E
+>   DESPEJA (pescoço bombeando), a laranja RECUA E DÁ O BOTE, UM gesto para os três padrões (o arco avisa; na fila, 3
+>   bicadas), no contra AS TRÊS SE ENCOLHEM. A rodada 13 está em **`gas-cabecas.html`**, esperando as respostas:
+>   - 6 conjuntos no PixelLab em `cru3/cabeca-gas/` + `pontos.json` (as 3 bocas por quadro): abre 12, sopra 9, carga 9,
+>     bote 3, fecha 9, encolhe 13. A laranja manteve o focinho de canhão (as bocarras trocavam a cabeça); o bote é uma
+>     bicada curta (o longo cruzava na frente da verde);
+>   - `gas pose=<dir>` na maquete (sem `pose=` ela é a rodada 7, idêntica quadro a quadro); o tranco de mola do contra
+>     saiu (o encolher do PixelLab);
+>   - efeitos: luzes da verde pulsando com as baforadas, luzes da laranja acendendo com a carga, arcos no focinho,
+>     tranco de 1 px + fumaça + descargas a cada bicada, o último sopro ao fechar;
+>   - folgas 15,6 / 14,5 / 17,1 px (eram 17,0 / 12,7 / 17,3), 0 toques; faíscas nos mesmos instantes;
+>   - perguntas: os gestos; a força dos efeitos; a bicada curta fica?; o próximo (projéteis ou instalar no jogo).
+> - **02/11 (2) — "Ficou bom, pode seguir para os projéteis"** (a rodada 13 APROVADA: gestos, efeitos, bicada curta). A
+>   rodada 14 está em **`projeteis.html`**, esperando as respostas:
+>   - os tiros normais e os mísseis (os dois provisórios) desenhados à mão em pixel por
+>     `scripts/_serpente/_projeteis-assar.mjs` → `projeteis/` (grades de texto, a paleta da gota do jogo: borda quase
+>     preta, miolo quase branco, a azul em azul FUNDO);
+>   - tiros: A a gota de hoje em pixel · **B uma arma por cabeça** (agulha elétrica / gota de veneno que pinga / brasa
+>     com fumaça; recomendada) · C orbe · D traçante fino;
+>   - mísseis nas placas dela com a chama na cor da cabeça: A ferrão · B casulo · **C torpedo** (recomendado) · C curto
+>     (9 px);
+>   - a maquete gira o sprite como o `setRotation` do jogo (`tiros proj=`, `misseis forma=`); sem as opções, idêntica;
+>   - corrigido: a onda AZUL da chuva nunca caía na maquete (arredondamento; a verde caía duas vezes), agora são três;
+>   - perguntas: o tiro; o míssil e o tamanho; a chama na cor da cabeça; o próximo (instalar no jogo).
+>   - **as respostas dele:** tiros **B**, míssil **B o casulo**, chama na cor da cabeça, e o próximo é **INSTALAR AS
+>     HABILIDADES NO JOGO**. E o cuspe pintado pelo gerador na verde e na laranja era *"muito forte e grande"* → limpo da
+>     animação (`ferramentas/hab14-cuspe.mjs` → `cru2/tirosK-limpo/`, o corpo reposto do quadro vizinho, o movimento
+>     igual), no lugar um clarão de 3 px + fagulhas/gotinhas; a azul ficou como estava (oferecido). Corrigido também: os
+>     tiros saíam da boca do idle (36 px fora na laranja), agora da boca no quadro do gesto. Seção nova no topo de
+>     `projeteis.html`.
+> - **02/11 (3) — A INSTALAÇÃO NO JOGO: a spec está escrita, esperando a revisão dele**
+>   (`docs/superpowers/specs/2026-11-02-serpente-habilidades-instalacao-design.md`). As escolhas dele: as habilidades
+>   MORREM COM A CABEÇA (A tudo; B sem o raio; C e fusão como hoje); o contra tira 15% da forma; a investida SAI de todas;
+>   TUDO NUMA ENTREGA; na A o ciclo chuva → raio → gás com tiros comuns entre (mirado + **leque de veneno** + **cerco**,
+>   as duplas se revezando); na B gestos NOVOS do gás, **feridas e furiosas** (verde sacode, laranja gira como torre e
+>   recua como canhão, no contra se debatem); portar as maquetes com os efeitos numa camada de pixels.
+> - **02/11 (4) — a spec APROVADA ("pode seguir para o plano"); o PLANO está escrito**
+>   (`docs/superpowers/plans/2026-11-02-serpente-habilidades-instalacao.md`, 16 tarefas, esperando ele escolher como
+>   executar). O método: a maquete é o ORÁCULO do porte (o raio e o gás rodados no Node a 30 quadros/s com as sementes
+>   dela batem com o `rastreia=` dela quadro a quadro); cada tarefa tem a sua sonda (`_sonda-hab.mjs <modo>`). Seis
+>   correções à spec, a mostrar para ele: duas lonas de pixels (a nave fica na profundidade 1, abaixo dela, então "acima
+>   dela e abaixo da nave" pede duas, separadas pela máscara do corpo dela); os tiros e casulos dela desenhados na camada
+>   com a bala do pool invisível (a caixa de hoje por construção); a salva do raio sorteada fatia a fatia com a nave
+>   onde está; o vão da chuva sorteado (início e sentido); veias nos quadros novos; as bocas do idle da B só do quadro 0.
+>
+> 📍 **02–03/11 — AS HABILIDADES DA SERPENTE DE 3 CABEÇAS ESTÃO NO JOGO, APROVADAS, COMMITADAS E EMPURRADAS.** Ele
+> escolheu executar o plano INLINE, com pausas para ver cada parte (as folhas em `folhas/2026-11-02/serpente-instalacao/`).
+> As Tarefas 1–13 e 16 estão feitas; ficaram as 14 (a troca de forma no meio de uma habilidade e o desempenho, medidos)
+> e 15 (os vídeos de tudo numa folha só), que não bloqueiam a próxima fase. Ele, ao fechar: *"Pronto, agora fechamos
+> isso"*.
+> - **O que entrou:** os tiros B (agulha, veneno, brasa) com o mirado, o leque de veneno e o cerco; a chuva de casulos;
+>   o raio da azul (a varredura avisada + a salva); o gás + faísca (as 3 esquivas, o termômetro, o contra de 15%, a carta
+>   INCENDIÁRIO); a arte nova do PixelLab (o cerco na A, o gás da B "feridas e furiosas"). A investida saiu de todas as
+>   formas. O código mora em `src/entities/serpente/` (um módulo por habilidade + a camada de pixels em duas lonas); os
+>   números em `numerosHab.ts`.
+> - **O método:** a maquete aprovada é o ORÁCULO do porte (`scripts/_serpente/_oraculo.mjs`): o raio e o gás rodados
+>   no Node batem com ela quadro a quadro (`node scripts/test-serpente-hab.mjs`). A sonda no jogo é
+>   `scripts/_serpente/_sonda-hab.mjs <modo>`, e o atalho de dev é `?serpente=A&hab=raio`.
+> - **A emenda da pausa 2 (ele jogando):** ela fica FIXA no posto baixo (y 142), só as animações a mexem; o CORPO
+>   INTEIRO leva dano (a cabeça que vai cair vale 1,5×; a vida de cada forma dobrou, provisória).
+> - **As pausas 3–5:** o cuspe pintado do gesto da chuva saiu; a boca de carne da laranja no erguer foi para a brasa;
+>   a boca aberta conta como cabeça nos gestos; **a B ganhou a SUA sequência do gás** (rasteira → cortina → fila funda).
+> - **A correção dele: o casco NÃO é chão** (*"A nave não bate no casco, então ela pode se esconder embaixo dele"*). Na
+>   F3 a nave desce sobre o casco até ~211; a fila funda termina com dois leques que ATRAVESSAM a crista e pegam quem se
+>   escondeu (a memória `casco-nao-e-chao`).
+> - **Anotado, sem pedido dele:** a boca cor de pêssego no quadro 4 do `tiroC`; a garganta vermelho-escura da verde no
+>   erguer da B; o erguer da A (rosa) que a luta não usa mais; a camada de brilho dos destroços que escurece as nuvens
+>   semitransparentes (para o cenário).
+> - **O próximo, nas palavras dele:** *"continuarmos com a fase 2 da luta da serpente, onde a serpente grande entra"*.
+>   Depois da luta, ele quer o CENÁRIO da arena melhorado. O START é `plans/2026-11-03-serpente-grande-START.md`.
 >
 > 📍 **27/10 (2) — A DESTRUIÇÃO POR PIXEL NO JOGO TODO, E A ARANHA DA CAVERNA: COMMITADAS E EMPURRADAS** para
 > `origin/feat/cartas-preview`:
@@ -418,6 +699,14 @@ sprite que se desfaz nos próprios pixels).
 >   - a morte da nave, a lasca do casco e a assinatura;
 >   - a destruição por pixel no jogo todo: os inimigos, os chefões, as peças do cinturão e a bala pela brecha
 >     (`docs/DESTROCOS.md`).
+> - **S — a luta da Serpente** (28/10, do retorno dele jogando; ANTES do H; ver o 📍 de 28/10 no topo): a posição mais
+>   à direita, a estrela trocada por uma marca orgânica da cabeça vulnerável, a investida como o centro da luta, e a
+>   luta mais difícil (*"É um dos bosses mais fáceis"*). A fusão (as três mordidas, sem a estrela) já entrou em 28/10.
+>   **S1** (a arena e a luta) implementado em 28/10, sem commit; ele reprovou o MOVIMENTO em 29/10 (o desenho ainda
+>   deslizava) → **S1b** (ela vive no casco: a chegada que explode, o corte, o bote por baixo do casco com o erguer, a
+>   chuva tripla e uma cor por cabeça, a fusão surgindo do rombo) implementada em 29/10, sem commit; ele REVIU à noite
+>   (ficam a explosão, a chuva, o erguer no rombo; a sombra que escondia o corpo sai) → a aparição nova depois do bote,
+>   esperando a escolha dele em `serpente-casco/revisao/revisao.html` → **S2** (a fusão nova, solta do casco) → **S3** (os outros gestos).
 > - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, depois do retorno dele sobre as naves de 25–26/10; START do H
 >   `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica

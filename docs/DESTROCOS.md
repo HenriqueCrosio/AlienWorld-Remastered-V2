@@ -246,6 +246,18 @@ por golpe, nunca uma fração das vidas que restam.
 - **O sprite pode trocar de quadro:** a cicatriz confere se o quadro de agora tem o tamanho do bitmap da mordida, e não
   desenha se não tiver.
 - **Pedaço pequeno vira brasa,** senão sobra pó girando como corpo rígido.
+- **O motor guarda os pixels de um sprite pelo NOME da textura** (`visto`: a chave é textura, quadro, escala, espelho
+  e tinta). Quem quebra um sprite TEMPORÁRIO (os estouros do casco da Serpente, 29/10) dá a cada textura um nome que
+  NUNCA se repete. Se pegar "o primeiro livre", o 2º estouro reusa o nome do 1º, já removido, e quebra os pixels do 1º.
+  (Na 1ª sonda, o rasgo do bote jogou de novo o buraco da chegada, em vermelho, sobre o rombo.)
+- **As telas dos pedaços ficam ACIMA do chefão** (`acima`). Um estouro ao lado de um corpo VIVO que precisa ser visto
+  logo em seguida (a Serpente saindo do rasgo) fica coberto pelos pedaços por ~1 s, com qualquer material: metal (placa
+  branca), biomec (nuvem vermelha que lê como carne) ou rocha (cacos de gelo). Ali, o cascalho dos próprios pixels foi
+  feito como partículas POR TRÁS dela (`cascoVivo.cascalhoDoRasgo`). O motor ficou para a chegada (o casco estourando
+  sozinho, antes dela).
+- **O sprite que vai morrer herda a velocidade do corpo físico** (`herda` 0,45): um sprite temporário com
+  `physics.add.existing` e uma velocidade empurra os pedaços. Com uma velocidade só, eles sobem juntos, como uma laje;
+  em fatias, cada uma para fora do centro, eles se abrem.
 
 ## 12. Os testes e as ferramentas
 
