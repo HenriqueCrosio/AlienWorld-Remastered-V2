@@ -17,9 +17,31 @@ sprite que se desfaz nos próprios pixels).
 ### A frase de arranque da próxima sessão
 
 > **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-03-serpente-grande-START.md`. Tudo até 03/11 está
-> commitado e empurrado. A sessão abre na FASE 2 DA LUTA DA SERPENTE: a serpente grande (a fusão refeita, o S2) surge
-> do rombo quando a de 3 cabeças morre, se solta do casco e luta MÓVEL. Começar pelas perguntas a ele (o §2 do START),
-> antes de gerar qualquer arte."**
+> commitado e empurrado. A sessão abre na ESCOLHA DA CABEÇA da enguia colossal (a serpente grande, o S2): a folha
+> `folhas/2026-11-03/enguia-cabeca/cabecas.html` espera a resposta dele. A spec está escrita e aprovada:
+> `specs/2026-11-03-serpente-grande-enguia-design.md`."**
+>
+> (O arranque da 1ª sessão de 03/11 abria pelas perguntas do §2 do START: respondidas, ver o 📍 de 03/11 (2) abaixo.)
+>
+> 📍 **03/11 (2) — O BUG DOS TIROS, A SPEC DA ENGUIA COLOSSAL E AS CABEÇAS.** Commitado e empurrado.
+> - **O bug** (`b38f2c7`, ele jogando: *"os tiros somem no início e não aparecem mais"*): os tiros da NAVE sumiam na boca
+>   do canhão desde o começo da luta. A bala reusada do pool nascia com a caixa de colisão onde a anterior morreu, e o
+>   acerto pelo desenho de 03/11 (`tirosNoCorpo`) a lia no mesmo quadro: a anterior tinha morrido no corpo dela, então a
+>   nova "acertava" e sumia, em cadeia — e todo tiro acertava, mirado ou não. O `body.reset` no `shoot` e no `disparar`
+>   (`WeaponSystem.ts`). Medido por sonda: 51 balas mortas em x 80 antes, nenhuma depois. ⚠️ A vida dobrada das formas
+>   foi calibrada COM o bug: rever com ele jogando.
+> - **A spec da serpente grande** (`4549868`), as perguntas do START respondidas uma a uma e as 7 partes aprovadas: a
+>   grande é **outra criatura, a ENGUIA COLOSSAL** (*"dark sci-fi bio mecanica bem desenhada"*), em **passagens +
+>   pausas**, **ondulação + jatos**, **cabeça animada no PixelLab + corpo em anéis** recortados da enguia inteira; a fusão
+>   de hoje + a 1ª passagem; na ORDEM FIXA, os **canos de fogo** (o desenho DELE: 4 faixas de 54 px, uma livre
+>   branco-azulada, salva de 3 com o aviso encurtando), **o Eco** (o rastro da nave + sementes que detonam na ordem do
+>   caminho) e os **gêiseres** sob o casco (colunas que atravessam a crista); a **reta final** a 5% (ela só morre no
+>   rombo — ele: *"ela precisa estar no buraco na hora da morte"*). Os caminhos são coerentes: *"ela só consegue entrar
+>   para baixo do casco se ela estiver no buraco"*. A ordem de trabalho: o movimento em blocos, depois a arte.
+> - **As cabeças antes da maquete** (ele: *"crie primeiro o modelo no pixellab para vermos como vai sair essa cabeça"*):
+>   quatro conceitos no Pro, 9 candidatas cada (moreia, engolidora, lança, fusão das três), folha
+>   **`folhas/2026-11-03/enguia-cabeca/cabecas.html` (espera ele)**; recomendada a **D4** (as três cores em três peças:
+>   olho azul, guelras verdes, canhão laranja), a 2ª a B0. As escolhidas nativas e limpas em `escolhidas/` (no git).
 >
 > (O arranque de 27/10 apontava `plans/2026-10-21-bloco-h-START.md`: o retorno dele jogando, feito em 28/10, e o bloco
 > H, que segue esperando. A ordem dele hoje: a Serpente grande → o CENÁRIO da luta → H → I → J → F.)
@@ -707,6 +729,9 @@ sprite que se desfaz nos próprios pixels).
 >   chuva tripla e uma cor por cabeça, a fusão surgindo do rombo) implementada em 29/10, sem commit; ele REVIU à noite
 >   (ficam a explosão, a chuva, o erguer no rombo; a sombra que escondia o corpo sai) → a aparição nova depois do bote,
 >   esperando a escolha dele em `serpente-casco/revisao/revisao.html` → **S2** (a fusão nova, solta do casco) → **S3** (os outros gestos).
+>   (02–03/11: a de 3 cabeças FECHADA no jogo. 03/11 (2): o S2 virou a **ENGUIA COLOSSAL**, spec
+>   `specs/2026-11-03-serpente-grande-enguia-design.md`; a escolha da cabeça espera ele em
+>   `folhas/2026-11-03/enguia-cabeca/cabecas.html` — ver o 📍 de 03/11 (2) no topo.)
 > - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, depois do retorno dele sobre as naves de 25–26/10; START do H
 >   `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica

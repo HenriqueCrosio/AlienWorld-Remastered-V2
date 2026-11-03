@@ -1,11 +1,50 @@
-# START — a fase 2 da luta da Serpente: a serpente grande entra
+# START — a fase 2 da luta da Serpente: a ENGUIA COLOSSAL (a serpente grande)
 
-> A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. Tudo até 03/11 está commitado e empurrado. A
-> sessão abre na fase 2 da luta da Serpente: a serpente grande (a fusão refeita, o S2) surge do rombo quando a de 3
-> cabeças morre, se solta do casco e luta móvel. Primeiro as perguntas a ele (§2), antes de gerar qualquer arte."**
+> A frase de arranque (atualizada no fim de 03/11): **"Leia o 🧭 do `docs/HANDOFF.md` e este START. Tudo até 03/11
+> está commitado e empurrado. A sessão abre na ESCOLHA DA CABEÇA da enguia colossal: a folha
+> `folhas/2026-11-03/enguia-cabeca/cabecas.html` espera a resposta dele (qual cabeça segue e o tamanho na tela). A
+> spec está escrita: `specs/2026-11-03-serpente-grande-enguia-design.md`."**
 > O roadmap vivo é o 🧭 do HANDOFF. A ordem dele hoje: **a Serpente grande → o CENÁRIO da luta → H → I → J → F.**
 
-## Onde o projeto está (03/11, fim da sessão)
+## ▶️ COMEÇAR AQUI (o estado no fim de 03/11)
+
+**O que a sessão de 03/11 (2) fez:**
+1. **Um bug do jogo, consertado** (`b38f2c7`): ele notou, jogando a Serpente, que *"os tiros somem no início e não
+   aparecem mais"*. Eram os tiros da NAVE: a bala reusada do pool nascia com a caixa de colisão onde a anterior morreu,
+   e o acerto pelo desenho de 03/11 (`tirosNoCorpo`) a lia no mesmo quadro — ela "acertava" o corpo dela na boca do
+   canhão e sumia, em cadeia (e todo tiro acertava, mirado ou não). O `body.reset` no `shoot` e no `disparar`
+   (`src/systems/WeaponSystem.ts`). Medido: 51 balas mortas em x 80 antes, nenhuma depois. ⚠️ A vida dobrada das
+   formas (provisória) foi calibrada COM o bug: rever com ele jogando.
+2. **As perguntas do §2 respondidas, uma a uma, e a SPEC escrita** (`specs/2026-11-03-serpente-grande-enguia-design.md`,
+   `4549868`; ele aprovou as 7 partes). Em resumo: a grande é **outra criatura, a ENGUIA COLOSSAL**, dark sci-fi
+   biomecânica bem desenhada; **passagens + pausas**; **ondulação + jatos**; **cabeça animada no PixelLab + corpo em
+   anéis** recortados da enguia inteira aprovada; a **fusão de hoje + a 1ª passagem** (o rombo vira a toca); três
+   habilidades na ORDEM FIXA — os **canos de fogo** (o desenho DELE: 4 faixas, uma livre, salva de 3), **o Eco** (a
+   minha: o rastro da nave e as sementes que detonam na ordem do caminho) e os **gêiseres** sob o casco (colunas que
+   atravessam a crista); o corpo inteiro leva dano, a cabeça 1,5×; as mordidas na cauda (22/13%) e no crânio (5%); a
+   **reta final** a 5% (ela só morre no rombo, presa na boca dele). Os caminhos são coerentes: todo acesso a baixo do
+   casco é pelo rombo (*"ela só consegue entrar para baixo do casco se ela estiver no buraco"*).
+3. **A 1ª rodada da arte: as CABEÇAS** — ele pediu antes da maquete: *"crie primeiro o modelo no pixellab para vermos
+   como vai sair essa cabeça. Assim escolhemos antes"*. Quatro conceitos distintos no Pro (`/generate-image-v2`), 9
+   candidatas cada, 40 gerações, a cabeça azul da de 3 cabeças como ESTILO e sem referência de forma
+   (`scripts/_serpente/_enguia-cabeca.mjs`; a folha por `_enguia-cabeca-folha.mjs`). Todas de perfil, à esquerda.
+   - A moreia blindada · B a engolidora · C a lança · **D a fusão das três** (olho azul, guelras verdes, canhão laranja
+     na garganta).
+   - Escolhidas e mostradas: A3, A6, B0, B5, C0, C7, D1, **D4** (a minha recomendação; a 2ª é a B0).
+   - As escolhidas, nativas (96×64) e limpas, estão em `folhas/2026-11-03/enguia-cabeca/escolhidas/` (no git); os 36
+     quadros crus em `cru/` (fora do git, no disco). A barra branca solta que o gerador pôs embaixo de algumas foi
+     apagada (só pixels quase brancos nas 6 últimas linhas).
+
+**O próximo, na ordem:**
+1. **A resposta dele à `cabecas.html`:** qual cabeça segue (ou uma mistura numa 2ª rodada: ex. a D4 com a crista da
+   C7) e o tamanho na tela (hoje ~3× a nave no posto dos canos).
+2. **A enguia INTEIRA a partir da cabeça escolhida** (de perfil, corpo e cauda), de onde saem os anéis (spec §1.3,
+   §7.2). Conferir ampliado antes de mostrar.
+3. **O plano** (`superpowers:writing-plans`) a partir da spec, e a **maquete do movimento em blocos** (spec §7.1)
+   aprovada por vídeo — a ordem que ele escolheu: o movimento antes do resto da arte. (Ele pediu a cabeça antes, para
+   ter noção de como ela fica; a ordem da spec para o resto segue.)
+
+## Onde o projeto estava (03/11, a 1ª sessão — registro)
 
 - **Branch `feat/cartas-preview`, empurrada para `origin`** (nunca `legacy`). Os commits de 03/11 levaram tudo o que
   ele aprovou de 28/10 a 03/11: a luta da Serpente de 3 cabeças (S1 → S1b → a instalação das habilidades), a fusão
@@ -27,7 +66,7 @@
   - leva as três mordidas (pescoço → queixo → crânio, a 22/13/5% da vida total), sem a estrela;
   - tem vida 120 (provisória).
 
-## ▶️ COMEÇAR AQUI
+## O começo da 1ª sessão (registro — CUMPRIDO em 03/11)
 
 1. **Ler** o 🧭 do HANDOFF (os 📍 de 28/10 a 03/11) e, nesta ordem, o que já foi dito sobre a maior:
    - `specs/2026-10-28-serpente-luta-s1-design.md` §9 (o S2 como foi definido);
@@ -43,7 +82,7 @@
    Conceitos e maquetes numa folha HTML antes de instalar (3–4 conceitos; conferidos ampliados antes de mostrar). Cada
    habilidade nasce numa MAQUETE aprovada por vídeo, e a maquete vira o ORÁCULO do porte para o jogo.
 
-## 2. As perguntas a ele (antes de qualquer arte)
+## 2. As perguntas a ele (antes de qualquer arte) — RESPONDIDAS em 03/11: as respostas estão na spec da enguia
 
 O que ele já disse: *"Ai chega a serpente maior, quando a serpente de 3 cabeças morre, o interessante é ela voltar
 para o buraco e depois a serpente maior surge dele. A serpente maior, decidimos que ela se desgarra da forma imóvel e
