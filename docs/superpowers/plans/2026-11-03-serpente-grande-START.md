@@ -51,10 +51,16 @@ se torna mais móvel, esse é o desafio dessa nova batalha"* (29/10). E o S2 de 
 partir da de hoje, corpo inteiro com cauda), nadando solta pela metade direita, o bote atravessando a tela, a cena da
 fusão arrancando-a do rombo, e os pontos das mordidas medidos de novo na arte nova"*.
 
-Mudou desde então (perguntar o que vale):
-- **a investida saiu de todas as formas** (02/11), e o S2 falava em "o bote atravessando a tela";
-- **o corpo inteiro leva dano** (03/11): numa serpente que nada, qual parte leva, e vale mais em algum ponto?
-- **o casco é FUNDO, não chão:** a nave desce sobre ele até ~211. Uma serpente solta pode passar por baixo da crista?
+Mudou desde então (03/11, confirmado por ele: são FATOS, não perguntas):
+- **a investida saiu de vez, de todas as formas** (02/11). Ela não servia para o que a luta precisava e dava mais
+  trabalho do que valia; outras habilidades entraram no lugar. O "bote atravessando a tela" do S2 de 28/10 caiu junto.
+  Não propor investida de novo;
+- **o dano no corpo inteiro é a regra da de 3 cabeças** (03/11): o corpo todo leva dano, e as cabeças levam dano
+  aumentado. A de 3 cabeças NÃO nada: fica fixa no rombo, e só as animações a mexem. A grande ainda não existe, então
+  ainda não se sabe se ela vai nadar; isso se decide nas perguntas abaixo;
+- **o casco não é chão** (03/11): foi uma correção ao agente anterior, que tratava o casco como um chão em que a nave
+  batia e fazia as habilidades estourarem na borda dele. A nave não colide com o casco e voa sobre ele até a borda de
+  baixo; nenhum ataque "bate no chão do casco" (`casco-nao-e-chao`).
 
 As perguntas (uma de cada vez, com opções e a recomendação):
 1. **A arte:** a maior parte da fusão de hoje (a união das três, corpo inteiro com cauda) ou é outra criatura? Ela é
