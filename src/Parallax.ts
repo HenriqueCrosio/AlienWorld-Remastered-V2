@@ -1938,6 +1938,58 @@ export class Parallax {
   }
 
   /**
+   * O ROMBO DA SERPENTE ENTRA NA FAIXA DO CASCO (28/10, S1 — ele: *"o cenário do boss não condiz com a fase"*). A peça
+   * `key` (uma faixa mais larga que as de sempre, com o rasgo no meio) nasce como a PRÓXIMA peça do casco: a borda
+   * esquerda onde a de uma peça normal estaria, e a seguinte depois dela, com o espaçamento de sempre — as emendas são
+   * as de qualquer peça, e ela rola com o mundo como as outras. Sem espelho (o lábio que a acompanha é desenhado nela).
+   * Devolve a peça: o chefão freia o mundo pela posição dela.
+   */
+  inserirNoCasco(key: string, largura: number): Phaser.GameObjects.Image | null {
+    const layer = this.layers.find((l) => l.casco);
+    if (!layer || !this.scene.textures.exists(key)) return null;
+    const PECA = 114;
+    const img = this.scene.add
+      .image(layer.nextX - PECA / 2 + largura / 2, layer.baseY, key)
+      .setOrigin(0.5, 1)
+      .setDepth(layer.depth)
+      .setTint(layer.tint)
+      .setAlpha(this.alphaFor(layer));
+    layer.sprites.push(img);
+    layer.nextX += largura - PECA + Phaser.Math.Between(...layer.gap);
+    return img;
+  }
+
+  /**
+   * AS PEÇAS DA FAIXA DO CASCO, na ordem em que são desenhadas (29/10, S1b): o casco vivo da arena da Serpente copia a
+   * faixa delas, pixel a pixel, quando o mundo para (`cascoVivo.ts`).
+   */
+  pecasDoCasco(): Phaser.GameObjects.Image[] {
+    const layer = this.layers.find((l) => l.casco);
+    return layer ? (layer.sprites as Phaser.GameObjects.Image[]) : [];
+  }
+
+  /**
+   * O CASCO DA PROA, JÁ À VISTA (28/10, S1): o que o `rabo` e o percurso teriam deixado quando a luta da Serpente
+   * começa — para o TREINO, cujo `skipTo` descarta o mergulho do rabo (e com ele o casco: a arena era espaço vazio). O
+   * casco revelado, a régua do percurso no fim (a PROA) e as peças da tela refeitas nessa família; a tira da frente
+   * acesa e a nuvem limpa. A mesma regra do `aplicaCorredorEMoldura`: o treino recebe o estado que o roteiro deixaria.
+   */
+  cascoNaProa(): void {
+    this.cascoReveal = 1;
+    this.cascoAndando = true;
+    this.cascoDist = 3500;
+    for (const layer of this.layers) {
+      if (!layer.casco) continue;
+      for (const s of layer.sprites) s.destroy();
+      layer.sprites = [];
+      layer.nextX = 0;
+      while (layer.nextX < GAME_WIDTH + 120) this.emit(layer);
+    }
+    this.cascoFrente?.setAlpha(1);
+    this.setNebulaDensity(0, 1);
+  }
+
+  /**
    * O CASCO NASCE (Fase 3, a virada do Ato 1 para o Ato 2).
    *
    * ⚠️ QUEM CHAMA É A SAÍDA DO RABO (`GameScene.raboDoLeviata`), NÃO O ROTEIRO. O casco tem que

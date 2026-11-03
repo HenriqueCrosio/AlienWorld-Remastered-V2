@@ -47,6 +47,8 @@ if (import.meta.env.DEV) {
   (window as unknown as { __game: Phaser.Game }).__game = game;
   // O SANDBOX (só em dev): `?sandbox` na URL, ou X no menu. Import dinâmico — fora do build do jogador.
   void import('./sandbox/iniciar.ts').then((m) => m.ligarSandbox(game));
+  // A SERPENTE DIRETO NA LUTA (só em dev): `?serpente=A&hab=raio` (spec das habilidades §5.6).
+  void import('./entities/serpente/atalho.ts').then((m) => m.ligarAtalhoSerpente(game));
 }
 
 // A CAMADA HD por cima do mundo (`uiHD.ts`): o texto das três vozes e a mesa. O mundo carrega os assets enquanto

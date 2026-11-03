@@ -22,6 +22,7 @@ import {
   RAMPA_MEDUSA,
   RAMPA_CARNE,
   RAMPA_ROCHA,
+  RAMPA_FLUIDO,
   clarear,
   corDaRampa,
   queimar,
@@ -29,7 +30,7 @@ import {
   canais,
   rgba,
 } from './pedacos';
-import { DESTROCOS, type Classe, type Estilo, type Material, type VarianteRocha } from './numerosDestrocos';
+import { DESTROCOS, type Classe, type Estilo, type Material, type Mordida, type VarianteRocha } from './numerosDestrocos';
 
 /**
  * THE ENEMIES' DEBRIS (26/10, his ask: *"aplicarmos efeitos de dano, explosões, derrotas decentes iguais ao das
@@ -50,8 +51,10 @@ import { DESTROCOS, type Classe, type Estilo, type Material, type VarianteRocha 
 
 const W = GAME_WIDTH;
 const H = GAME_HEIGHT;
-const RAMPAS = [RAMPA_FOGO, RAMPA_MEDUSA, RAMPA_CARNE, RAMPA_ROCHA];
+const RAMPAS = [RAMPA_FOGO, RAMPA_MEDUSA, RAMPA_CARNE, RAMPA_ROCHA, RAMPA_FLUIDO];
 const RAMPA_DO: Record<Material, number> = { metal: 0, luz: 1, carne: 2, biomec: 2, rocha: 3 };
+/** the serpent's fluid (28/10, the organic bite's droplets): its ramp in `RAMPAS` */
+const FLUIDO = 4;
 /**
  * the smoke's two tones (the core, the rim) per material: a grey-blue a step lighter than the ship's (the ship's
  * vanished on the F2's dark sky), a deep blue, a dark flesh mist; the rock's DUST (27/10), the asteroids' own blue-grey
@@ -117,6 +120,8 @@ interface Corpo {
    * into the body's own colour, darkened. (The commons' and elites' flesh keep the wet red they were approved with.)
    */
   limpa?: boolean;
+  /** an organic bite's piece (28/10, the serpent's fusion): it drips flesh and fluid as it spins, instead of embers */
+  pinga?: boolean;
   /** the jellyfish: when each pixel burns away (absolute), and the pixels in that order */
   tempos: Float32Array | null;
   ordem: number[];
@@ -130,11 +135,12 @@ interface Corpo {
  * pixels (`Desgaste.dx/dy` is how far each frame's art sits from it).
  *   - a MARK (`marcar`, his rule: *"cada tiro tira 1 px da borda do asset"*): the first live pixel along one lane of the
  *     frame (a row for a shot from a side, a column from above or below), from the side the shot came;
- *   - a BITE (`morder`): `alvo` pixels grown from the edge nearest `perto`, by the same bent distance and luck (`semente`).
+ *   - a BITE (`morder`): `alvo` pixels grown from the edge nearest `perto`, by the same bent distance and luck (`semente`);
+ *     `amp` = how much the bend weighs (the class's `DESTROCOS.lasca.torto`; the organic bite's is more ragged).
  */
 type Golpe =
   | { tipo: 'marca'; lado: number; faixa: number; t: number; zona?: { x: number; y: number; r: number } }
-  | { tipo: 'mordida'; alvo: number; perto?: Ponto; torto: (x: number, y: number) => number; semente: number; t: number };
+  | { tipo: 'mordida'; alvo: number; perto?: Ponto; torto: (x: number, y: number) => number; amp?: number; semente: number; t: number };
 // (`lado`: 0 from the left — along +x —, 1 from the right, 2 from above — along +y —, 3 from below)
 
 /**
@@ -168,7 +174,8 @@ interface Cicatriz {
   desgastes: Map<string, Desgaste>;
   /** the hardness's leftover: a hard body loses a pixel every second hit (`marcar`'s `dureza`) */
   sobra: number;
-  feridas: Ponto[];
+  /** where each bite opened (`org`: an organic bite's wound drips flesh and fluid, no smoke) */
+  feridas: (Ponto & { org?: boolean })[];
   mat: Material;
   classe: Classe;
   relogio: number;
@@ -812,7 +819,8 @@ export class Destrocos {
   /**
    * A body that takes damage by many roads (a boss: shot, bomb, cards; the dolphin): its life (0–1) is watched every
    * frame instead. `mira` (world) = where the bites land (the serpent's live head; a list = in turn, one per bite: the
-   * tower), else the side facing `de`; `furo: false` = pieces torn off without a hole (see `CHEFOES`).
+   * tower; the serpent's fusion: neck, chin, skull), else the side facing `de`; `furo: false` = pieces torn off without
+   * a hole (see `CHEFOES`); `limiares` = the boss's own thresholds, in place of its class's; `estilo` = the bites' style.
    */
   vigiar(
     s: Phaser.GameObjects.Sprite,
@@ -820,17 +828,18 @@ export class Destrocos {
     classe: Classe,
     material: Material,
     de?: Ponto,
-    o: { mira?: Ponto | Ponto[]; furo?: boolean } = {},
+    o: { mira?: Ponto | Ponto[]; furo?: boolean; limiares?: number[]; estilo?: Mordida } = {},
   ): void {
     const antes = this.vidaVista.get(s) ?? 1;
     this.vidaVista.set(s, fracao);
     if (fracao >= antes || fracao <= 0) return;
-    const cruzou = DESTROCOS.lasca[classe].limiares(Infinity).filter((f) => antes > f && fracao <= f).length;
+    const limiares = o.limiares ?? DESTROCOS.lasca[classe].limiares(Infinity);
+    const cruzou = limiares.filter((f) => antes > f && fracao <= f).length;
     const miras = Array.isArray(o.mira) ? o.mira : o.mira ? [o.mira] : [];
     for (let i = 0; i < cruzou; i++) {
       const m = miras.length ? miras[(this.vezes.get(s) ?? 0) % miras.length] : undefined;
       this.vezes.set(s, (this.vezes.get(s) ?? 0) + 1);
-      this.morder(s, classe, material, de, m ? (bmp: Bitmap) => this.noBitmap(s, bmp, m) : undefined, o.furo ?? true);
+      this.morder(s, classe, material, de, m ? (bmp: Bitmap) => this.noBitmap(s, bmp, m) : undefined, o.furo ?? true, o.estilo);
     }
   }
 
@@ -862,9 +871,11 @@ export class Destrocos {
 
   /**
    * One bite now (the boss's death pops bite too). `furo: false` = the piece flies off, but the body keeps its pixels
-   * (no scar): for a body whose poses would carry a hole to the wrong place.
+   * (no scar): for a body whose poses would carry a hole to the wrong place. `estilo: 'organica'` (28/10, the serpent's
+   * fusion): a ragged tear, no fire, no metal sparks, no smoke — a jet of flesh and fluid, pieces and a wound that drip.
    */
-  morder(s: Phaser.GameObjects.Sprite, classe: Classe, material: Material, de?: Ponto, perto?: (bmp: Bitmap) => Ponto, furo = true): void {
+  morder(s: Phaser.GameObjects.Sprite, classe: Classe, material: Material, de?: Ponto, perto?: (bmp: Bitmap) => Ponto, furo = true, estilo?: Mordida): void {
+    const org = estilo === 'organica';
     const vis = this.visto(s);
     const cic = furo ? this.cicatrizDe(s, vis, material, classe) : undefined;
     const d = cic ? this.emDia(s, cic) : null;
@@ -880,7 +891,8 @@ export class Destrocos {
     const torto = ruido(vis.w, vis.h, 3, this.rnd);
     // (its own luck: every frame of the animation replays this bite the same way — `aplicar`)
     const semente = Math.floor(this.rnd() * 1e9);
-    const l = lasca(atual, [0, 1], alvo, torto, DESTROCOS.lasca.torto, sorte(semente), alvoPonto);
+    const amp = org ? DESTROCOS.organica.torto : DESTROCOS.lasca.torto;
+    const l = lasca(atual, [0, 1], alvo, torto, amp, sorte(semente), alvoPonto);
     if (!l) return;
     // what the bite left hanging goes with it (his report: the tower's first bite left pixels floating)
     const cortados: number[] = [];
@@ -888,8 +900,8 @@ export class Destrocos {
     const vivo = (k: number): boolean => atual.cor[k] >>> 24 >= 128 && l.mascara[k] !== 2;
     for (const k of soltos(vis.w, vis.h, vivo, cortados, this.ilhaMax(d?.vivos ?? n))) l.mascara[k] = 2;
     if (cic && d) {
-      cic.golpes.push({ tipo: 'mordida', alvo, perto: alvoPonto && { x: alvoPonto.x - d.dx, y: alvoPonto.y - d.dy }, torto, semente, t: this.t });
-      cic.feridas.push({ x: l.centro.x - 0.5 - d.dx, y: l.centro.y - 0.5 - d.dy });
+      cic.golpes.push({ tipo: 'mordida', alvo, perto: alvoPonto && { x: alvoPonto.x - d.dx, y: alvoPonto.y - d.dy }, torto, amp, semente, t: this.t });
+      cic.feridas.push({ x: l.centro.x - 0.5 - d.dx, y: l.centro.y - 0.5 - d.dy, org });
     }
     // the bitten piece flies off, out of the body through the bite (without a hole: torn off a body that stays whole —
     // a flesh creature's chunk in its spray)
@@ -912,8 +924,15 @@ export class Destrocos {
       r.someEm = 0.25;
       r.calor = 0.35;
       r.limpa = limpa;
-      r.fumacaAte = p.n >= 12 ? this.t + 0.4 : 0;
+      r.fumacaAte = !org && p.n >= 12 ? this.t + 0.4 : 0;
+      r.pinga = org;
       this.corpos.push(r);
+    }
+    if (org) {
+      // THE ORGANIC BITE (28/10): no explosion sheet, no metal sparks — the flesh's short shake, and the jet out of the tear
+      this.estouro('carne', wx, wy, DESTROCOS.lasca.estouro[classe], false);
+      this.jato(wx, wy, base.vx, base.vy, ux, uy, 6 + alvo * DESTROCOS.organica.jato);
+      return;
     }
     const porte = DESTROCOS.porte(alvo * 6);
     this.faiscas(material, wx, wy, base.vx + ux * 30, base.vy + uy * 30, Math.round(5 * porte), 0.8);
@@ -1132,7 +1151,7 @@ export class Destrocos {
         if (k >= 0) novos.push(k);
       } else {
         const img: Bitmap = { w, h, cor: d.bmp.cor.map((c, k) => (d.comido[k] ? 0 : c)) };
-        const l = lasca(img, [0, 1], g.alvo, g.torto, DESTROCOS.lasca.torto, sorte(g.semente), g.perto && { x: g.perto.x + d.dx, y: g.perto.y + d.dy });
+        const l = lasca(img, [0, 1], g.alvo, g.torto, g.amp ?? DESTROCOS.lasca.torto, sorte(g.semente), g.perto && { x: g.perto.x + d.dx, y: g.perto.y + d.dy });
         if (l) l.mascara.forEach((m, k) => m === 2 && novos.push(k));
       }
       if (!novos.length) continue;
@@ -1270,7 +1289,14 @@ export class Destrocos {
       if (fumacaAgora && this.t < c.fumacaAte) this.soltarFumo(c.mat, c.x, c.y, c.vx, c.vy, c.queimaAte > 0 ? 1.3 : 1);
       // the hot cut sheds embers; flesh drips
       const calor = Math.max(0, 1 - (this.t - c.t0) / Math.max(0.05, c.calor));
-      if (c.bordas.length && this.t < c.some) {
+      if (c.pinga) {
+        // (an organic bite's piece drips flesh and fluid from its torn edge as it spins — 28/10)
+        if (this.t < c.some && this.rnd() < DESTROCOS.organica.pingo * Math.min(1, c.n / 30) * dt) {
+          const k = c.bordas.length ? c.bordas[Math.floor(this.rnd() * c.bordas.length)] : -1;
+          const [wx, wy] = k >= 0 ? this.noMundo(c, k % c.bmp.w, Math.floor(k / c.bmp.w)) : [c.x, c.y];
+          this.gotasOrganicas(wx, wy, c.vx * 0.6, c.vy * 0.6, 1);
+        }
+      } else if (c.bordas.length && this.t < c.some) {
         const taxa = (c.mat === 'carne' || c.mat === 'biomec' ? 10 : 14 * calor) * Math.min(1, c.n / 30);
         if (this.rnd() < taxa * dt) {
           const k = c.bordas[Math.floor(this.rnd() * c.bordas.length)];
@@ -1319,6 +1345,11 @@ export class Destrocos {
       // (kept in the first frame's place: where it sits in this frame)
       const d = cic.desgastes.get(this.idDoQuadro(s));
       const [wx, wy] = this.noMundo(base, f.x + (d?.dx ?? 0), f.y + (d?.dy ?? 0));
+      // (an organic bite's wound drips flesh and fluid, no smoke — 28/10)
+      if (f.org) {
+        this.gotasOrganicas(wx, wy, base.vx, base.vy + 10, DESTROCOS.organica.ferida);
+        continue;
+      }
       if (cic.mat === 'metal' || cic.mat === 'biomec') this.soltarFumo(cic.mat, wx, wy, base.vx, base.vy, cic.classe === 'comum' ? 0.6 : 0.9);
       if (cic.mat === 'metal' && this.rnd() < 0.45) {
         const a = -Math.PI / 2 + (this.rnd() - 0.5) * 2.4, v = 20 + this.rnd() * 40;
@@ -1604,9 +1635,9 @@ export class Destrocos {
       const rampa = RAMPAS[b.rampa[n]];
       const k = b.idade[n] / b.vida[n];
       if (b.tipo[n] === 2) {
-        // a droplet: dark red, darkening; gone in dither at its end
+        // a droplet: dark red (or the serpent's fluid — its own ramp), darkening; gone in dither at its end
         if (k > 0.7 && (k - 0.7) / 0.3 > b.limiar[n]) continue;
-        this.tela.px[Y * W + X] = corDaRampa(RAMPA_CARNE, b.h0[n] * (1 - k * 0.5));
+        this.tela.px[Y * W + X] = corDaRampa(rampa, b.h0[n] * (1 - k * 0.5));
         continue;
       }
       const h = b.h0[n] * (1 - k * (b.tipo[n] === 1 ? 1.6 : 1));
@@ -1682,6 +1713,53 @@ export class Destrocos {
     for (let i = 0; i < conta; i++) {
       const a = this.rnd() * Math.PI * 2, v = this.entre(C.velGota);
       this.brasas.add(x + (this.rnd() - 0.5) * 2, y + (this.rnd() - 0.5) * 2, vx + Math.cos(a) * v, vy + Math.sin(a) * v, this.entre(C.vidaGota), 0.55 + this.rnd() * 0.3, 0, 2, 2, this.rnd(), C.gravidadeGota);
+    }
+  }
+
+  /**
+   * One ORGANIC droplet (28/10, the serpent's fusion): flesh (dark red, almost black) or her dark oily fluid, half and
+   * half; a share of the fluid is born on its orange glint and darkens as it falls.
+   */
+  private gotaOrganica(x: number, y: number, vx: number, vy: number): void {
+    const C = DESTROCOS.carne, O = DESTROCOS.organica;
+    const fluido = this.rnd() < 0.5;
+    const h0 = fluido && this.rnd() < O.reflexo ? this.entre(O.brilhoReflexo) : this.entre(fluido ? O.brilhoFluido : O.brilhoCarne);
+    this.brasas.add(x + (this.rnd() - 0.5) * 2, y + (this.rnd() - 0.5) * 2, vx, vy, this.entre(C.vidaGota), h0, 0, 2, fluido ? FLUIDO : RAMPA_DO.carne, this.rnd(), C.gravidadeGota);
+  }
+
+  /**
+   * THE HIT THAT BLEEDS (28/10, S1 — him, for the serpent's live head in place of the star: *"podem ser pixels
+   * pequenos, apenas para informar"*): 2–4 tiny droplets of flesh and her fluid, slow and short-lived, at the hit — it
+   * says "this is the head that takes damage", nothing more. (The armour keeps the spark.)
+   */
+  respingo(x: number, y: number): void {
+    const C = DESTROCOS.carne;
+    const n = 2 + Math.floor(this.rnd() * 3);
+    for (let i = 0; i < n; i++) {
+      const a = this.rnd() * Math.PI * 2, v = 15 + this.rnd() * 25;
+      const fluido = this.rnd() < 0.5;
+      this.brasas.add(x + (this.rnd() - 0.5) * 2, y + (this.rnd() - 0.5) * 2, Math.cos(a) * v, Math.sin(a) * v - 10, 0.25 + this.rnd() * 0.25, 0.35 + this.rnd() * 0.25, 0, 2, fluido ? FLUIDO : RAMPA_DO.carne, this.rnd(), C.gravidadeGota);
+    }
+  }
+
+  /** Organic droplets out of a point, every way (a wound, a dripping piece). */
+  private gotasOrganicas(x: number, y: number, vx: number, vy: number, n: number): void {
+    const C = DESTROCOS.carne;
+    const conta = Math.round(n);
+    for (let i = 0; i < conta; i++) {
+      const a = this.rnd() * Math.PI * 2, v = this.entre(C.velGota);
+      this.gotaOrganica(x, y, vx + Math.cos(a) * v, vy + Math.sin(a) * v);
+    }
+  }
+
+  /** The organic bite's JET: droplets in a cone out of the tear (`ux`, `uy`: from the body's centre through the bite). */
+  private jato(x: number, y: number, vx: number, vy: number, ux: number, uy: number, n: number): void {
+    const O = DESTROCOS.organica;
+    const rumo = Math.atan2(uy, ux);
+    const conta = Math.round(n);
+    for (let i = 0; i < conta; i++) {
+      const a = rumo + (this.rnd() - 0.5) * O.cone, v = this.entre(O.vel);
+      this.gotaOrganica(x, y, vx + Math.cos(a) * v, vy + Math.sin(a) * v);
     }
   }
 

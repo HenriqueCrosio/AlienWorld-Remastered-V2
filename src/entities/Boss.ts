@@ -28,6 +28,11 @@ export interface StageBoss {
    */
   readonly armaTravada?: boolean;
   /**
+   * A FRAÇÃO DA VELOCIDADE DO MUNDO que o chefão deixa (0–1; ausente = 1). A Serpente da Fase 3 (28/10, S1) freia o
+   * casco até parar com o rombo dela no posto — ela sai do próprio Leviatã, e um chão rolando embaixo não deixava.
+   */
+  readonly mundo?: number;
+  /**
    * Quanto a cena espera, depois do estouro final, antes da vitória (no vácuo). O predador da Fase 4 deixa o
    * CORPO estendido no chão e pede tempo para ele ser visto (17/09: *"ele sumiu e depois a cutscene abriu"*).
    * Ausente = 1400ms.
@@ -39,6 +44,21 @@ export interface StageBoss {
    * grupo, e é justamente isso que faz a bala ATRAVESSAR a serra. Ausente = o chefão não põe nada.
    */
   readonly perigos?: Phaser.Physics.Arcade.Group;
+  /**
+   * O que fere POR MEDIÇÃO, sem corpo e sem empurrão (a Serpente da Fase 3, 02/11: o raio e a geleia de fogo): a cena
+   * chama a cada quadro com a caixa da nave — a mesma lei da parede do duto e do teto da caverna (`moldura.morde`).
+   * Ausente = nada fere assim.
+   */
+  morde?(esq: number, dir: number, topo: number, base: number): boolean;
+  /**
+   * O CORPO INTEIRO LEVA DANO (a Serpente da Fase 3, 03/11 — ele: *"basta acertar o corpo e as cabeças vão caindo
+   * conforme a vida desce"*): onde a caixa de um tiro do jogador cai no DESENHO dela — `cabeca` (a que vai cair, vale
+   * `valeAlvo`) e `corpo` ferem, `casco` (o lábio do rombo na frente das roscas) absorve, `null` passa. Presente, o
+   * `sprite` deixa de ser só cobertura dos `targets`. Ausente = o corpo dos chefões de partes absorve (o Núcleo).
+   */
+  acertoNoCorpo?(x0: number, y0: number, x1: number, y1: number): 'cabeca' | 'corpo' | 'casco' | null;
+  /** quanto vale o acerto nos `targets` e na `cabeca` desenhada (a que vai cair: mais, não o dobro); ausente = 1 */
+  readonly valeAlvo?: number;
   /**
    * OS DESTROÇOS (26–27/10): quem diz isto perde pedaços do casco nos limiares da vida. `quem` é a linha de `CHEFOES`
    * (o material; se a morte vira a ruptura nos próprios pixels ou fica a aprovada). `vida` (0–1) é a do corpo que
@@ -55,8 +75,12 @@ export interface StageBoss {
     zona?: { x: number; y: number; r: number };
   };
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
-  /** @returns true se este dano matou o chefão. */
-  damage(amount: number): boolean;
+  /**
+   * @param onde por onde o tiro entrou, quando a cena sabe: `corpo` é o corpo desenhado (a Serpente, 03/11 — ela não
+   *   pisca no corpo: com o corpo inteiro levando dano, o clarão de cada tiro virava um pisca-pisca a luta toda).
+   * @returns true se este dano matou o chefão.
+   */
+  damage(amount: number, onde?: 'alvo' | 'corpo'): boolean;
   destroy(): void;
 }
 

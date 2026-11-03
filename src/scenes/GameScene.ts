@@ -33,6 +33,7 @@ import { PLANTIO_F1 } from '../f1/numerosF1';
 import { cadeiaDaMorte, estouroDaMorte, MORTE_F1, morteF1Pronta } from '../f1/morteChefeF1';
 import { BossCapitania } from '../entities/BossCapitania';
 import { BossSerpente } from '../entities/BossSerpente';
+import { LUTA as LUTA_SERPENTE } from '../entities/numerosSerpente';
 import { BossNucleo } from '../entities/BossNucleo';
 import { Golfinho, type SentidoGolfinho } from '../entities/Golfinho';
 import { Agua } from '../systems/Agua';
@@ -41,6 +42,7 @@ import { SHIPS, DEFAULT_SHIP, naveEscolhida, visualDaNave } from '../ships';
 import { CartasEmJogo } from '../systems/CartasEmJogo';
 import { entrarNaFase } from '../cartas';
 import type { ConfigSandbox } from '../sandbox/config.ts';
+import type { DevSerpente } from '../entities/serpente/atalho';
 import { SandboxArena } from '../systems/SandboxArena';
 import { Medidas } from '../systems/Medidas';
 import { PecasEmJogo, colecaoCompleta, reiniciarJogada, temUmUp } from '../pecas';
@@ -157,6 +159,8 @@ export class GameScene extends Phaser.Scene {
   private practice = false;
   /** O SANDBOX de dev, se a fase foi aberta por ele (ver `src/sandbox/`). */
   private sandbox: ConfigSandbox | null = null;
+  /** O ATALHO DA SERPENTE de dev (ver `entities/serpente/atalho.ts`), se a luta foi aberta por ele. */
+  private serpenteDev: DevSerpente | null = null;
   private arena: SandboxArena | null = null;
   /** As MEDIDAS do sandbox (dano por fonte, abates, recebidos) — só existem nele. */
   medidas: Medidas | null = null;
@@ -318,6 +322,8 @@ export class GameScene extends Phaser.Scene {
     ship?: string;
     /** O SANDBOX de dev (`src/sandbox/`): roteiro desligado, as ondas da montagem, teclas de dev, medidas. */
     sandbox?: ConfigSandbox;
+    /** O ATALHO DA SERPENTE (só em dev, `?serpente=A&hab=raio`): a forma e a habilidade forçadas na luta da F3. */
+    serpente?: DevSerpente;
     /** Total acumulado das fases anteriores (a campanha soma; a fase começa do checkpoint). */
     score?: number;
   }): void {
@@ -331,6 +337,7 @@ export class GameScene extends Phaser.Scene {
     this.handling = data.handling ?? 'diegetico';
     this.practice = data.practice ?? false;
     this.sandbox = data.sandbox ?? null;
+    this.serpenteDev = data.serpente ?? null;
     // A ZONA VEM DA FASE. É ela que decide a condução no modo diegético — e é por isso que a
     // Fase 2 começa em voo livre sem que ninguém escolha nada.
     this.zone = this.stage.zone;
@@ -488,6 +495,10 @@ export class GameScene extends Phaser.Scene {
       this.clockOffset = this.elapsed;
       this.director.skipTo(this.elapsed);
       this.aplicaCorredorEMoldura(this.elapsed);
+      // O CASCO DO LEVIATÃ (28/10, S1 — ele: *"o cenário do boss não condiz com a fase"*): o `skipTo` descarta o mergulho
+      // do rabo, que é quem revela o casco, e o treino da Serpente lutava no espaço vazio. Se o roteiro tinha o `rabo`
+      // antes do salto, o casco chega pronto, na PROA (onde a luta acontece na fase de verdade).
+      if (this.stage.script.some((e) => e.type === 'rabo' && e.t < this.elapsed)) this.parallax.cascoNaProa();
     }
 
     const nave = SHIPS[this.shipId];
@@ -597,7 +608,12 @@ export class GameScene extends Phaser.Scene {
         (this.terrain.props.getChildren() as Phaser.Physics.Arcade.Sprite[]).filter(
           (p) => p.active && TerrainSystem.solido(p),
         ),
-      alvosDoChefe: () => (this.boss && !this.boss.isDead ? (this.boss.targets ?? [this.boss.sprite]) : []),
+      alvosDoChefe: () => {
+        const b = this.boss;
+        if (!b || b.isDead) return [];
+        // (03/11: o chefão cujo corpo inteiro leva dano — a Serpente — leva a bomba também no corpo)
+        return b.targets ? (b.acertoNoCorpo ? [...b.targets, b.sprite] : b.targets) : [b.sprite];
+      },
       ferirInimigo: (e, dano, de) => {
         this.ferirInimigo(e, dano, 'bomba', de);
       },
@@ -859,7 +875,8 @@ export class GameScene extends Phaser.Scene {
     // No vácuo o fundo quase para: sem chão passando, uma nebulosa correndo denunciaria que a
     // "parada" é uma esteira. Mas a Fase 2 é jogada NO vácuo — lá o mundo tem que correr, ou o
     // cinturão inteiro pareceria pendurado. Só a Fase 1, que ROMPE a atmosfera no fim, freia.
-    const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
+    // (e o CHEFÃO pode frear o mundo: a Serpente para o casco com o rombo dela no posto — `StageBoss.mundo`, 28/10)
+    const frenagem = (this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1) * (this.boss?.mundo ?? 1);
     // O relógio da fase para o horizonte da F1 (bloco G): ele é função do relógio, não do tempo real.
     // ⚠️ MENOS o tempo dentro da CAVERNA (21/10): com o exterior escondido, a invasão pausa — a pintura segue casando com
     // o roteiro (que a caverna empurrou). Não dá para pausar os 15 s inteiros: à vista, as naves congelariam.
@@ -947,6 +964,11 @@ export class GameScene extends Phaser.Scene {
     // mesma lei da parede do duto acima — uma medição contra os contornos das faixas, sem corpo e SEM empurrão (teto e
     // chão perto um do outro: um empurrão cuspiria a nave na parede oposta; os i-frames separam os toques).
     if (this.parallax.cavernaMorde(body.left, body.right, body.top, body.bottom)) this.damageShip();
+    // O QUE O CHEFÃO FERE POR MEDIÇÃO (02/11, a Serpente: o raio e a geleia de fogo) — a mesma lei acima, sem corpo e
+    // sem empurrão; os i-frames do `damageShip` separam os toques.
+    if (this.boss?.morde && !this.boss.isDead && this.boss.morde(body.left, body.right, body.top, body.bottom)) this.damageShip();
+    // O CORPO INTEIRO LEVA DANO (03/11, a Serpente): os tiros do jogador contra o DESENHO dela, por medição.
+    if (this.boss?.acertoNoCorpo && !this.boss.isDead) this.tirosNoCorpo();
 
     this.spawnWaves(dt);
     this.spawnProps(dt);
@@ -1013,7 +1035,8 @@ export class GameScene extends Phaser.Scene {
   private atualizarMorte(delta: number): void {
     const escala = this.escalaDoQuadro(delta);
     const dt = (delta / 1000) * escala;
-    const frenagem = this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1;
+    // (o mundo que o chefão parou segue parado na morte dele — a Serpente, no rombo)
+    const frenagem = (this.zone === 'vacuo' && this.stage.zone === 'atmosfera' ? 0.15 : 1) * (this.boss?.mundo ?? 1);
     this.atm.update(dt);
     this.starfield.update(dt);
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
@@ -1049,7 +1072,7 @@ export class GameScene extends Phaser.Scene {
         this.formaDoChefe = d.forma;
       }
       this.destrocos.acima(b.sprite.depth);
-      this.destrocos.vigiar(b.sprite, d.vida, c.classe, c.material, nave, { mira: d.mira, furo: c.furo });
+      this.destrocos.vigiar(b.sprite, d.vida, c.classe, c.material, nave, { mira: d.mira, furo: c.furo, limiares: c.limiares, estilo: c.mordida });
     }
     const g = this.golfinho;
     const cg = CHEFOES.golfinho;
@@ -1864,7 +1887,28 @@ export class GameScene extends Phaser.Scene {
       this.stage.id === 4
         ? new BossNucleo(this, this.enemies, this.terrain, this.fx)
         : this.stage.id === 3
-          ? new BossSerpente(this, this.enemies, this.fx)
+          ? // O ROMBO (28/10, S1): a faixa do casco entra como a próxima peça do casco, e ela sai dele. 29/10 (S1b — ele:
+            // *"o casco explode e o buraco se abre"*): a faixa entra INTEIRA e estoura de dentro para fora; o chefão
+            // recebe as peças da faixa (o casco vivo da arena as copia) e o motor de destroços (os estouros nos próprios
+            // pixels: a faixa, o rasgo do bote, o lábio na fusão).
+            new BossSerpente(
+              this,
+              this.enemies,
+              this.fx,
+              this.parallax.inserirNoCasco(
+                this.textures.exists('serpenteRomboInteiro') ? 'serpenteRomboInteiro' : 'serpenteRombo',
+                LUTA_SERPENTE.faixa.largura,
+              ),
+              {
+                pecas: () => this.parallax.pecasDoCasco(),
+                // (biomec: o casco do Leviatã; o metal pisca branco no estouro e a peça inteira virava uma placa branca)
+                estourar: (s, de, material) => this.destrocos.morrer(s, { estilo: 'estilhacos', material, classe: 'chefe', de }),
+                // (o gás, 02/11: as balas ativas do jogador aquecem o que atravessam; a carta acende na hora — spec §5.4)
+                balas: () => this.weapons.bullets.getChildren().filter((b) => b.active) as Phaser.Physics.Arcade.Sprite[],
+                incendiario: () => this.cartas.temIncendiario,
+              },
+              this.serpenteDev,
+            )
           : this.stage.id === 2
             ? new BossCapitania(this, this.enemies, 150)
             : new Boss(this, this.enemies.enemyBullets, this.fx, 150);
@@ -1881,17 +1925,22 @@ export class GameScene extends Phaser.Scene {
     // projéteis (inativo, invisível, corpo desligado) — o boss sumia e nunca se movia.
     // Com o sprite PRIMEIRO, a ordem é determinística: (boss, projétil).
     if (this.boss.targets) {
-      // CHEFÃO MULTI-PARTE (a serpente): o dano entra pelas HITBOXES da lista, e o CORPO
-      // vira cobertura dele mesmo — absorve o tiro sem dano (invulnerável é telégrafo; o
-      // jogador vê a fagulha morrer no casco e aprende a mirar na cabeça que brilha).
+      // CHEFÃO MULTI-PARTE: o dano entra pelas HITBOXES da lista, valendo `valeAlvo` (a Serpente, 03/11: a cabeça que vai
+      // cair vale mais, não o dobro).
+      const vale = this.boss.valeAlvo ?? 1;
       for (const alvo of this.boss.targets) {
         this.physics.add.overlap(alvo, this.weapons.bullets, (_a, b) =>
-          this.bulletHitBoss(b as Phaser.Physics.Arcade.Sprite),
+          this.bulletHitBoss(b as Phaser.Physics.Arcade.Sprite, vale),
         );
       }
-      this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
-        this.bulletAbsorvedByBoss(b as Phaser.Physics.Arcade.Sprite),
-      );
+      // O CORPO: na Serpente (03/11 — ele: *"basta acertar o corpo e as cabeças vão caindo conforme a vida desce"*) ele
+      // leva dano onde é DESENHADO, por medição a cada quadro (`tirosNoCorpo`): a caixa de arcade dela é a do toque na
+      // nave, não o desenho. Nos outros (o Núcleo) ele vira cobertura — absorve o tiro sem dano (invulnerável é
+      // telégrafo; o jogador vê a fagulha morrer no casco e aprende a mirar no que brilha).
+      if (!this.boss.acertoNoCorpo)
+        this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
+          this.bulletAbsorvedByBoss(b as Phaser.Physics.Arcade.Sprite),
+        );
     } else {
       this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
         this.bulletHitBoss(b as Phaser.Physics.Arcade.Sprite),
@@ -2029,7 +2078,8 @@ export class GameScene extends Phaser.Scene {
     for (const alvo of this.boss.targets ?? []) {
       if (
         alvo.active &&
-        Phaser.Math.Distance.Between(bullet.x, bullet.y, alvo.x, alvo.y) < 22
+        // (o raio do PRÓPRIO alvo — 28/10, S1: o círculo da cabeça da serpente ficou do tamanho da cabeça; eram 22 fixos)
+        Phaser.Math.Distance.Between(bullet.x, bullet.y, alvo.x, alvo.y) < (alvo.body as Phaser.Physics.Arcade.Body).halfWidth
       ) {
         return;
       }
@@ -2039,7 +2089,12 @@ export class GameScene extends Phaser.Scene {
     this.fx.hit(bullet.x, bullet.y);
   }
 
-  private bulletHitBoss(bullet: Phaser.Physics.Arcade.Sprite): void {
+  /**
+   * O tiro que acertou o chefão. `vale` multiplica o dano (a cabeça da Serpente que vai cair: `valeAlvo`); `noAlvo` diz se
+   * entrou por um dos `targets` (a cabeça: a marca na zona dela e o respingo) ou pelo corpo desenhado (03/11: a marca onde
+   * tocou e a fagulha).
+   */
+  private bulletHitBoss(bullet: Phaser.Physics.Arcade.Sprite, vale = 1, noAlvo = true): void {
     // Rede de segurança contra a inversão de argumentos do Phaser: só devolve ao pool o
     // que REALMENTE saiu dele. Sem isto, um erro de ordem volta a "reciclar" o chefão.
     if (!this.weapons.bullets.contains(bullet)) return;
@@ -2047,16 +2102,21 @@ export class GameScene extends Phaser.Scene {
 
     const origem = bullet.getData('origem') as OrigemProjetil | null;
     const de = this.deOndeVeio(bullet);
-    const dano = bullet.getData('damage') as number;
+    const dano = (bullet.getData('damage') as number) * vale;
     this.weapons.release(bullet);
     // A fagulha vai para o pixel da BORDA que o tiro comeu (27/10): a hitbox do chefão não é o desenho — o círculo da
     // cabeça da serpente tem 33 px de raio, e a fagulha acendia no toco da cabeça morta, na frente da viva.
-    const onde = this.marcarChefe(origem ?? 'tiro', de, dano);
-    this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
+    const onde = this.marcarChefe(origem ?? 'tiro', de, dano, noAlvo);
+    // O ACERTO QUE SANGRA (28/10, S1 — ele, no lugar da estrela: o jogador aprende pelo retorno do tiro; *"podem ser
+    // pixels pequenos, apenas para informar"*): no chefão de partes (a serpente), a bala que entrou pela cabeça viva solta
+    // 2–4 gotas pequenas de carne e fluido em vez da fagulha. O corpo (03/11, ferido também) e a blindagem do Núcleo
+    // seguem com a fagulha: o respingo é o que diz "a cabeça vale mais".
+    if (this.boss.targets && noAlvo) this.destrocos.respingo(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
+    else this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
     this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
 
     this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, dano);
-    if (this.boss.damage(dano)) this.killBoss();
+    if (this.boss.damage(dano, noAlvo ? 'alvo' : 'corpo')) this.killBoss();
   }
 
   /**
@@ -2074,12 +2134,37 @@ export class GameScene extends Phaser.Scene {
    * *"cada tiro tira 1 px da borda do asset"*): o primeiro pixel do casco na linha do golpe sai voando — na cabeça viva
    * da serpente, só nela (`zona`). Devolve onde: a fagulha acende ali. Os inimigos marcam no `ferirInimigo`.
    */
-  private marcarChefe(fonte: string, de: { x: number; y: number; rumo?: { x: number; y: number } }, dano = 1): { x: number; y: number } | null {
+  /** A marca do golpe no chefão; `naZona` falso (o corpo da Serpente, 03/11) solta a marca de onde a zona a prende. */
+  private marcarChefe(fonte: string, de: { x: number; y: number; rumo?: { x: number; y: number } }, dano = 1, naZona = true): { x: number; y: number } | null {
     const b = this.boss;
     const d = b && !b.isDead ? b.destrocos : undefined;
     const c = d ? CHEFOES[d.quem] : undefined;
     if (!b || !d || !c || this.varianteDe(c.classe) === 'hoje') return null;
-    return this.destrocos.marcar(b.sprite, DESTROCOS.marca.px(fonte, dano), de, c.classe, c.material, c.furo, { zona: d.zona, rumo: de.rumo });
+    return this.destrocos.marcar(b.sprite, DESTROCOS.marca.px(fonte, dano), de, c.classe, c.material, c.furo, { zona: naZona ? d.zona : undefined, rumo: de.rumo });
+  }
+
+  /**
+   * OS TIROS NO CORPO DESENHADO (03/11, a Serpente — `StageBoss.acertoNoCorpo`): a cada quadro, a caixa de cada tiro do
+   * jogador contra os pixels dela. A cabeça que vai cair (o focinho inclusive) → ×`valeAlvo`, o respingo; o corpo → ×1,
+   * a fagulha; o lábio do rombo cobrindo as roscas → o casco absorve; fora do desenho → passa. O círculo da cabeça (os
+   * `targets`) pega antes, na física, o tiro que entra nele.
+   */
+  private tirosNoCorpo(): void {
+    const b = this.boss;
+    if (!b?.acertoNoCorpo) return;
+    for (const o of [...this.weapons.bullets.getChildren()]) {
+      const bala = o as Phaser.Physics.Arcade.Sprite;
+      const c = bala.body as Phaser.Physics.Arcade.Body | null;
+      if (!bala.active || !c) continue;
+      const onde = b.acertoNoCorpo(c.left, c.top, c.right, c.bottom);
+      if (onde === 'cabeca') this.bulletHitBoss(bala, b.valeAlvo ?? 1, true);
+      else if (onde === 'corpo') this.bulletHitBoss(bala, 1, false);
+      else if (onde === 'casco') {
+        this.weapons.release(bala);
+        this.fx.hit(bala.x, bala.y);
+      }
+      if (b.isDead) return;
+    }
   }
 
   /** A marca do golpe no golfinho: o pixel voa, e o corpo fica inteiro (ele dá cambalhota — ver `CHEFOES`). */
@@ -2880,6 +2965,11 @@ export class GameScene extends Phaser.Scene {
     if (this.over || this.time.now < this.invulnerableUntil || this.cartas.intocavel(this.time.now)) return;
     // O INVULNERÁVEL do sandbox (tecla 3): para olhar as skills sem morrer.
     if (this.arena?.invulneravel) return;
+
+    // QUANDO A NAVE FOI ATINGIDA (30/10, a Serpente refeita pelo CCGS): o chefão lê `ship.getData('golpeEm')` para dar o
+    // respiro de 0,8 s antes do próximo aviso letal. Um dado na nave, só lido — nenhum outro sistema muda. (Também no
+    // golpe que o casco das cartas absorve: foi um golpe.)
+    this.ship.setData('golpeEm', this.time.now);
 
     // PROTÓTIPO DAS CARTAS: o CASCO absorve o golpe inteiro — a vida, a especial e as bombas ficam.
     if (this.medidas) this.medidas.golpes++;

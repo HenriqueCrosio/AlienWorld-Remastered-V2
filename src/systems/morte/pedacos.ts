@@ -419,6 +419,12 @@ export function queimar(c: number, k: number): number {
  */
 export const RAMPA_CARNE = ['d87060', 'b84850', '94343c', '6c2434', '541c2c', '3c1424', '2c0c1c', '1c0c14', '0c040c'].reverse().map(hex);
 /**
+ * THE SERPENT'S FLUID (28/10, the fusion's organic bites): dark and oily, with an orange glint — her own seams' colours
+ * (sampled from `serpente-fusao-anim`: 1a0b06, 2c0b04, 4a1d05, 5c2300, 7d2900, 913300), from an oily black up to one
+ * step brighter than the brightest seam (the glint).
+ */
+export const RAMPA_FLUIDO = ['b5500c', '913300', '7d2900', '5c2300', '4a1d05', '2c0b04', '1a0b06', '140a0a', '0a0608'].reverse().map(hex);
+/**
  * ROCK (27/10, the F2 belt): no fire — dust and the fresh face. Sampled from the asteroids' own art by brightness
  * (their blue-grey, from the shadow to the lit facet) with one lighter stop: the rock's inside, never weathered.
  */

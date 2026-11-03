@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_WIDTH } from '../config';
 import { ICONES_CARTAS, RARIDADES } from '../cartas';
 import { ART_PECAS_F1, registrarPecasF1 } from '../f1/pecasF1';
+import { CONJUNTOS, IDLE_HAB } from '../entities/serpente/gestosHab';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -103,6 +104,10 @@ const FRAMES: Record<string, number> = {
   serpente2cAnim: 9,
   serpente1cAnim: 9,
   serpenteFusaoAnim: 9,
+  // O ERGUER (29/10, S1b): o gesto das formas de cabeças no bote e na chuva tripla — 17 quadros de 256² (PixMiniMax)
+  serpenteErguerA: 17,
+  serpenteErguerB: 17,
+  serpenteErguerC: 17,
   aranhaAnim: 9,
   aranhaJumpAnim: 9,
   aguaVivaAnim: 9,
@@ -232,6 +237,10 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   { key: 'serpente-2c-idle', prefix: 'serpente2cAnim', frameRate: 8 },
   { key: 'serpente-1c-idle', prefix: 'serpente1cAnim', frameRate: 8 },
   { key: 'serpente-fusao-fury', prefix: 'serpenteFusaoAnim', frameRate: 10 },
+  // O ERGUER toca UMA vez (o bote e a chuva tripla; 29/10, S1b): sobe, segura de boca aberta, volta à pose do idle.
+  { key: 'serpente-erguer-A', prefix: 'serpenteErguerA', frameRate: 12, loop: false },
+  { key: 'serpente-erguer-B', prefix: 'serpenteErguerB', frameRate: 12, loop: false },
+  { key: 'serpente-erguer-C', prefix: 'serpenteErguerC', frameRate: 12, loop: false },
   { key: 'aranha-walk', prefix: 'aranhaAnim', frameRate: 10 },
   // O PULO toca UMA vez por salto (o EnemySystem devolve o walk na aterrissagem).
   { key: 'aranha-jump', prefix: 'aranhaJumpAnim', frameRate: 10, loop: false },
@@ -628,6 +637,15 @@ const ART: Record<string, string> = {
   serpente2c: 'sprites/serpente-2c.png',
   serpente1c: 'sprites/serpente-1c.png',
   serpenteFusao: 'sprites/serpente-fusao.png',
+  // O ROMBO DA SERPENTE (28/10, S1, a escolha dele: o conceito A, o rasgo): uma faixa do casco da PROA (duto2 | duto |
+  // placa, 318×100, 34 px de céu acima da crista) com o rasgo no meio, por inpaint no PixelLab — ela entra NA faixa do
+  // casco (`Parallax.inserirNoCasco`), e por isso não há emenda. O LÁBIO é a face do casco na frente das roscas dela:
+  // a faixa da crista para baixo, menos o buraco (`scripts/_serpente/_rombo-instalar.mjs`).
+  serpenteRombo: 'sprites/serpente-rombo.png',
+  serpenteRomboLabio: 'sprites/serpente-rombo-labio.png',
+  // A FAIXA INTEIRA (29/10, S1b — ele: *"o casco explode e o buraco se abre"*): a mesma faixa sem o rasgo; ela para
+  // inteira na arena e estoura de dentro para fora (`scripts/_serpente/_erguer-instalar.mjs` a monta).
+  serpenteRomboInteiro: 'sprites/serpente-rombo-inteiro.png',
 
   // ⚠️ O NÚCLEO DA FUSÃO — a única peça de ARTE da cena da fusão; o resto dela é tween.
   // A divisão segue a lição que esta fatia pagou: o v3 do PixelLab leu "bater para cima e para
@@ -645,6 +663,30 @@ const ART: Record<string, string> = {
   ...animFrames('serpente2cAnim', 'serpente-2c-anim'),
   ...animFrames('serpente1cAnim', 'serpente-1c-anim'),
   ...animFrames('serpenteFusaoAnim', 'serpente-fusao-anim'),
+  // AS VEIAS DA CABEÇA VIVA (28/10, S1 — no lugar da estrela): por forma (A, B, C) e por quadro da animação dela, os
+  // pixels de acento da cabeça viva (`serpenteVeias*`, em ADD) e os das outras cabeças, apagados (`serpenteSombra*`; a C
+  // tem uma cabeça só). Assadas por `scripts/_serpente/_veias.mjs`; o `BossSerpente` as põe no quadro dela.
+  ...Object.fromEntries(
+    (['A', 'B', 'C'] as const).flatMap((f) =>
+      Array.from({ length: 9 }, (_, i) => [
+        [`serpenteVeias${f}${i}`, `sprites/serpente-veias-${f}-${i}.png`],
+        ...(f === 'C' ? [] : [[`serpenteSombra${f}${i}`, `sprites/serpente-sombra-${f}-${i}.png`]]),
+      ]).flat(),
+    ),
+  ),
+  // O ERGUER (29/10, S1b — `scripts/_serpente/_erguer-instalar.mjs`): os quadros do gesto, e as veias e a sombra de
+  // cada um (a cabeça viva acesa, as outras apagadas — como as do idle).
+  ...animFrames('serpenteErguerA', 'serpente-erguer-A'),
+  ...animFrames('serpenteErguerB', 'serpente-erguer-B'),
+  ...animFrames('serpenteErguerC', 'serpente-erguer-C'),
+  ...Object.fromEntries(
+    (['A', 'B', 'C'] as const).flatMap((f) =>
+      Array.from({ length: 17 }, (_, i) => [
+        [`serpenteVeiasErguer${f}${i}`, `sprites/serpente-veias-erguer-${f}-${i}.png`],
+        ...(f === 'C' ? [] : [[`serpenteSombraErguer${f}${i}`, `sprites/serpente-sombra-erguer-${f}-${i}.png`]]),
+      ]).flat(),
+    ),
+  ),
   ...animFrames('aranhaAnim', 'aranha-anim'),
   ...animFrames('aranhaJumpAnim', 'aranha-jump-anim'),
   ...animFrames('aguaVivaAnim', 'agua-viva-anim'),
@@ -1385,6 +1427,21 @@ export class BootScene extends Phaser.Scene {
       this.load.spritesheet(key, sheet.path, { frameWidth: sheet.w, frameHeight: sheet.h });
     }
 
+    // AS HABILIDADES DA SERPENTE (02/11 — `scripts/_serpente/_hab-instalar.mjs`): uma folha de quadros de 256² (8
+    // colunas) por conjunto, e as veias, a sombra e as máscaras de luz dele; as máscaras de luz dos idles no tamanho do
+    // quadro do idle. O `Tocador` mostra o quadro i de um conjunto pela folha (`serpenteHab_<chave>`, quadro i).
+    for (const [k, c] of Object.entries(CONJUNTOS)) {
+      const q = { frameWidth: 256, frameHeight: 256 };
+      this.load.spritesheet(`serpenteHab_${k}`, `sprites/serpente-hab/${k}.png`, q);
+      this.load.spritesheet(`serpenteHabVeias_${k}`, `sprites/serpente-hab/${k}-veias.png`, q);
+      if (c.sombra) this.load.spritesheet(`serpenteHabSombra_${k}`, `sprites/serpente-hab/${k}-sombra.png`, q);
+      for (const cor of c.luzes) this.load.spritesheet(`serpenteHabLuz_${cor}_${k}`, `sprites/serpente-hab/${k}-luz-${cor}.png`, q);
+    }
+    for (const F of ['A', 'B'] as const) {
+      const q = { frameWidth: IDLE_HAB[F].quadro.w, frameHeight: IDLE_HAB[F].quadro.h };
+      for (const cor of IDLE_HAB[F].luzes) this.load.spritesheet(`serpenteHabLuz_${cor}_idle${F}`, `sprites/serpente-hab/idle${F}-luz-${cor}.png`, q);
+    }
+
     // O mapa das luzes e da cachoeira do horizonte da F1 (`scripts/_g/_camadas-f1.mjs`).
     this.load.json('f1-dados', 'sprites/f1/dados.json');
     this.load.json('f1-invasao', 'sprites/f1/invasao.json');
@@ -1927,21 +1984,30 @@ export class BootScene extends Phaser.Scene {
     // Nascendo no quadro do `bolt2`, o corpo que o `release` devolve já é o certo, não há
     // `setSize` nenhum, e a caixa fica PROVADAMENTE igual à de antes desta mudança — que é o
     // único jeito de trocar a arte de um chefe já balanceado sem reabrir o balanceamento.
-    tex('shotVeneno', 13, 9, (g) => {
-      g.fillStyle(0x60f088, 0.18);
-      g.fillCircle(8, 4, 4);
-      g.fillStyle(0x07120c, 1); // a borda: o que a separa do próprio bicho
-      g.fillEllipse(8, 4, 10, 9);
-      g.fillStyle(0x2f7a52, 1);
-      g.fillEllipse(8, 4, 8, 7);
-      g.fillStyle(0x60f088, 1);
-      g.fillEllipse(8, 4, 6, 5);
-      // A CAUDA: o rastro do cuspe, afinando para trás. É o que separa "gota lançada" de "bola".
-      g.fillStyle(0x50b080, 0.8);
-      g.fillTriangle(5, 2, 5, 6, 0, 4);
-      g.fillStyle(0xe8fff0, 1); // o núcleo: quase branco, e é ele que carrega a leitura
-      g.fillEllipse(9, 4, 4, 4);
-    });
+    // CADA CABEÇA NA SUA COR (29/10, S1b — ele: *"Cada cabeça atira de uma cor, a cabeça azul, verde e ambar têm tiros
+    // com as suas cores"*). A mesma gota, o mesmo quadro 13×9 (o corpo do `bolt2`, ver acima), três paletas: a VERDE
+    // de sempre (a cabeça do meio); a AZUL da ciano — ⚠️ um azul FUNDO (~230°), nunca o ciano da arte, que é quase o
+    // `playerBright` (`#3ee0f0`) da nave e leria como tiro do jogador; e a ÂMBAR da laranja. Borda quase preta e núcleo
+    // quase branco nas três: a leitura é a luminância, a cor só diz de qual cabeça veio.
+    const gota = (key: string, c: { brilho: number; borda: number; meio: number; corpo: number; cauda: number; nucleo: number }): void =>
+      tex(key, 13, 9, (g) => {
+        g.fillStyle(c.brilho, 0.18);
+        g.fillCircle(8, 4, 4);
+        g.fillStyle(c.borda, 1); // a borda: o que a separa do próprio bicho
+        g.fillEllipse(8, 4, 10, 9);
+        g.fillStyle(c.meio, 1);
+        g.fillEllipse(8, 4, 8, 7);
+        g.fillStyle(c.corpo, 1);
+        g.fillEllipse(8, 4, 6, 5);
+        // A CAUDA: o rastro do cuspe, afinando para trás. É o que separa "gota lançada" de "bola".
+        g.fillStyle(c.cauda, 0.8);
+        g.fillTriangle(5, 2, 5, 6, 0, 4);
+        g.fillStyle(c.nucleo, 1); // o núcleo: quase branco, e é ele que carrega a leitura
+        g.fillEllipse(9, 4, 4, 4);
+      });
+    gota('shotVeneno', { brilho: 0x60f088, borda: 0x07120c, meio: 0x2f7a52, corpo: 0x60f088, cauda: 0x50b080, nucleo: 0xe8fff0 });
+    gota('shotVenenoAzul', { brilho: 0x5878ff, borda: 0x070a1c, meio: 0x2a3c9c, corpo: 0x5878ff, cauda: 0x4660d0, nucleo: 0xe8ecff });
+    gota('shotVenenoAmbar', { brilho: 0xffa040, borda: 0x160c04, meio: 0x8a4a14, corpo: 0xffa040, cauda: 0xd08030, nucleo: 0xfff2dc });
   }
 
   private makeShots(): void {

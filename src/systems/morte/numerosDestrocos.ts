@@ -18,6 +18,8 @@ export type Material = 'metal' | 'luz' | 'carne' | 'biomec' | 'rocha';
 export type Estilo = 'lascas' | 'meio' | 'carcaca' | 'ruptura' | 'estilhacos' | 'desintegra' | 'rocha';
 /** How a rock breaks (27/10, for him to choose in the film): R1 the fracture, R2 the crumble, R3 split in two. */
 export type VarianteRocha = 'hoje' | 'R1' | 'R2' | 'R3';
+/** A bite's own style (28/10): `organica` = flesh and fluid, no fire (the serpent's fusion — `DESTROCOS.organica`). */
+export type Mordida = 'organica';
 
 /**
  * THE BELT'S PIECES (27/10, his ask: *"pensa no asset como um asset destrutível, cada pixel é um pedacinho dele que pode
@@ -62,11 +64,16 @@ export const SEPARACAO: Record<string, { classe: Classe; material: Material }> =
  * `furo: false` = the bite tears a piece off but leaves no hole: a hole lives in the frame's pixels, and a body that
  * changes pose too much would carry it to the wrong place (the predator walks, slashes, hangs from the ceiling; the
  * dolphin flips).
+ * `limiares` (28/10) = the boss's own bite thresholds, in place of its class's; `mordida` = the bites' own style.
+ * THE SERPENT (28/10, him on the fusion: the skull's piece is great, but it would leave any enemy too weak — first the
+ * neck, then the chin, and only then the skull; *"mais orgânicos, do ponto de vista gore"*): three bites, all in the
+ * fusion (it starts at 60/210 = 0.286 of the life), each about a third of it apart, on its own point
+ * (`serpenteFusao.ts`), in the organic style (`DESTROCOS.organica`).
  */
-export const CHEFOES: Record<string, { classe: Classe; material: Material; morte: boolean; furo: boolean }> = {
+export const CHEFOES: Record<string, { classe: Classe; material: Material; morte: boolean; furo: boolean; limiares?: number[]; mordida?: Mordida }> = {
   torre: { classe: 'chefe', material: 'metal', morte: false, furo: true },
   capitania: { classe: 'chefe', material: 'metal', morte: true, furo: true },
-  serpente: { classe: 'chefe', material: 'biomec', morte: true, furo: true },
+  serpente: { classe: 'chefe', material: 'biomec', morte: true, furo: true, limiares: [0.22, 0.13, 0.05], mordida: 'organica' },
   guardiao: { classe: 'chefe', material: 'biomec', morte: false, furo: true },
   predador: { classe: 'chefe', material: 'carne', morte: false, furo: false },
   golfinho: { classe: 'mini', material: 'biomec', morte: true, furo: false },
@@ -224,6 +231,30 @@ export const DESTROCOS = {
     calor: 0.4,
     /** the blast of a bite (metal), per class: a boss's death chain is made of these */
     estouro: { comum: 0.28, elite: 0.36, mini: 0.5, chefe: 0.95 } as Record<Classe, number>,
+  },
+
+  /**
+   * THE ORGANIC BITE (28/10, the serpent's fusion — him: *"podem ser mais orgânicos, do ponto de vista gore"*, and his
+   * picks: flesh and fluid mixed, no fire). No explosion sheet, no metal sparks, no smoke: the flesh's short shake, a
+   * ragged tear, a jet of droplets out of it — half flesh (dark red, almost black), half her dark oily fluid with an
+   * orange glint (`RAMPA_FLUIDO`) —, pieces that drip as they spin, and a wound that drips until the death.
+   */
+  organica: {
+    /** the tear's bend (the class's is 1.4): ragged, not round */
+    torto: 3,
+    /** droplets at the tear: 6 + this × the bitten px, in a cone (rad) out of the tear, at this speed (px/s) */
+    jato: 1 / 3,
+    cone: 1.4,
+    vel: [40, 110] as [number, number],
+    /** the droplets' brightness at birth (their ramp's position): flesh dark red, the fluid dark and oily; a share glints */
+    brilhoCarne: [0.3, 0.6] as [number, number],
+    brilhoFluido: [0.25, 0.55] as [number, number],
+    reflexo: 0.25,
+    brilhoReflexo: [0.8, 0.95] as [number, number],
+    /** a flying piece drips this many droplets a second (a piece of 30 px or more; fewer for smaller ones) */
+    pingo: 12,
+    /** the wound drips this many droplets per tick of the class's `ferida` */
+    ferida: 1,
   },
 
   /** The smoke, drawn in pixels (the ship's: `MORTE.fumaca`), per material. */

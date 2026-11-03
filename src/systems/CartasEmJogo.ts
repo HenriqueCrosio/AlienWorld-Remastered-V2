@@ -112,6 +112,11 @@ export class CartasEmJogo {
     return tem(this.reg, 'WPN_009') || tem(this.reg, 'WPN_010');
   }
 
+  /** INCENDIÁRIO na mão? O gás da Serpente (02/11) acende no primeiro tiro que o toca (spec das habilidades §3.4). */
+  get temIncendiario(): boolean {
+    return tem(this.reg, 'EFF_004');
+  }
+
   /** Durante o dash a nave não leva dano (nem o Casco gasta). */
   intocavel(agora: number): boolean {
     return this.dash.intocavel(agora);
