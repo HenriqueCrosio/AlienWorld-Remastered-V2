@@ -736,6 +736,11 @@ export class WeaponSystem {
       // o sprite, então dividir pelo stretch devolve o MESMO tamanho de mundo de antes (o truque
       // do míssil do TerrainSystem). O visual cresceu, a hitbox não — balanceamento fechado.
       b.body!.setSize(Math.max(b.width * 0.9, 3) / stretch, Math.max(b.height * 0.9, 3));
+      // O SLOT REUSADO GUARDA A CAIXA VELHA (03/11): até o próximo passo da física, o corpo fica onde a bala anterior
+      // morreu. O acerto pelo desenho da Serpente (`tirosNoCorpo`) lê a caixa NO MESMO quadro em que a bala nasce — e a
+      // anterior tinha morrido no corpo dela: a nova "acertava" na boca do canhão e sumia, em cadeia. O `reset` traz a
+      // caixa para a boca. Antes do `setVelocity`: o `reset` zera a velocidade.
+      (b.body as Phaser.Physics.Arcade.Body).reset(b.x, b.y);
 
       b.setData('damage', damage);
       // O pool é um só: um slot que foi míssil de carta tem que voltar a ser tiro da NAVE.
@@ -840,6 +845,8 @@ export class WeaponSystem {
     b.setData('glowKind', null);
     // O piso de 3px do traçante vale aqui: o tiro do drone é 6×1 e atravessaria inimigo sem tocar.
     b.body!.setSize(Math.max(b.width, 3), Math.max(b.height, 3));
+    // (a caixa velha do slot reusado: ver o `shoot` — antes do `setVelocity`, o `reset` zera a velocidade)
+    (b.body as Phaser.Physics.Arcade.Body).reset(b.x, b.y);
     b.setData('damage', p.dano);
     b.setData('pierce', false);
     b.setData('hits', null);
