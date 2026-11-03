@@ -1,0 +1,15 @@
+{
+ "nome": "Traçante fino",
+ "quadros": {
+  "ciano": 2,
+  "verde": 2,
+  "laranja": 2
+ },
+ "fps": {
+  "ciano": 12,
+  "verde": 12,
+  "laranja": 12
+ },
+ "rastro": {},
+ "cauda": 0
+}

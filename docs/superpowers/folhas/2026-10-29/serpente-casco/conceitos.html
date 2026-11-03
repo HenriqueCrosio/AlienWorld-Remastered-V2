@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente no casco</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  p { margin: 6px 0; }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .rec { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente no casco (S1b): conceitos</h1>
+<p class="sub">29/10/2026 · spec <code>docs/superpowers/specs/2026-10-29-serpente-luta-s1b-design.md</code> · <a href="../../2026-10-28/serpente-luta/luta.html" style="color:var(--sub)">← a S1</a>. Nada foi commitado.</p>
+
+<div class="item">
+  <p>Você: <i>"na serpente de 3 cabeças ela vai e volta na investida... só que o corpo todo se move para frente … sem nenhum tipo de movimento convincente"</i>, e <i>"Ficou a mesma coisa, só mudou a base e a distância da investida"</i>.</p>
+  <p>Na S1 o corpo dela continuava sendo o desenho inteiro deslizando. Agora:</p>
+  <ul>
+    <li><b>O caminho é o casco:</b> ela some no rombo, corre por baixo e rompe o casco embaixo da nave.</li>
+    <li><b>O corpo se move por animação:</b> um gesto do PixelLab sobre a arte de hoje.</li>
+    <li><b>O mundo reage:</b> as placas sobem, a rachadura abre, o rasgo fica e depois fecha.</li>
+  </ul>
+  <p>Nenhum quadro mostra ela atravessando o ar.</p>
+</div>
+
+<h2>0. A 2ª maquete: só a parte de cima sai do casco</h2>
+<div class="item">
+  <p>Você escolheu o <b>erguer</b>, a rachadura <b>R3</b> e a cabeça laranja com mandíbula. E pediu: <i>"o melhor é sair apenas a parte de cima de onde fiz o corte vermelho … quando sai todo o corpo, encontramos o mesmo problema … o corpo ainda está imóvel na parte de baixo"</i>.</p>
+  <ul>
+    <li><b>Agora a linha do seu corte fica na crista do casco.</b> As roscas nunca saem e, dentro do rasgo, o corpo some no escuro.</li>
+    <li><b>A linha preta que você viu</b> era da maquete: eu cortava o corpo a partir da linha 147, mas a crista do casco começa na 151–152, e o céu aparecia por essas quatro linhas. Agora o corte segue a crista coluna a coluna. No jogo, a frente do casco vai ser feita dos pixels do próprio casco.</li>
+    <li><b>A consequência:</b> com as roscas dentro do casco, a cabeça viva não passa de y ~105 (de 216). A luta acontece na metade de baixo, e o leque de tiros cobre o alto.</li>
+  </ul>
+  <div class="par">
+    <figure><video src="maquete2-erguer.webm" autoplay loop muted playsinline controls></video><figcaption><b>Erguer, com o corte</b> <span class="rec">(o escolhido)</span>: a cabeça ciano de boca aberta na altura da nave, a ~20 px dela. É a janela.</figcaption></figure>
+    <figure><video src="maquete2-bote.webm" autoplay loop muted playsinline controls></video><figcaption><b>Bote, com o corte</b>: as cabeças caem para a frente e a ciano morde a nave que já desviou. Não sobra janela.</figcaption></figure>
+  </div>
+</div>
+
+<h2>1. A investida inteira (1ª maquete)</h2>
+<div class="item decidir">
+  <p>A maquete foi montada quadro a quadro em cima da foto da arena tirada do jogo. Ainda não é o jogo, mas está na escala e na cor dele. A sequência:</p>
+  <ol>
+    <li>A rachadura corre do rombo até embaixo da nave e trava (a ponta fica branca).</li>
+    <li>A nave desvia para a esquerda.</li>
+    <li>O casco estoura e ela sobe <b>encaixada no rasgo</b>, com a base escondida atrás da faixa e o gesto tocando.</li>
+    <li>Na janela, a nave atira na cabeça.</li>
+    <li>Ela afunda, e o rasgo e a rachadura se fecham.</li>
+  </ol>
+  <div class="par">
+    <figure><video src="maquete-erguer.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com o "erguer"</b> <span class="rec">(recomendo)</span>: ela sobe e se ergue de boca aberta, com a cabeça viva na altura da nave. O alcance não muda para o lado.</figcaption></figure>
+    <figure><video src="maquete-bote.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com o "bote"</b>: as cabeças caem para a frente de boca aberta. Elas avançam ~30 px e mordem a nave que já tinha desviado. Para escapar seria preciso desviar ~65 px.</figcaption></figure>
+  </div>
+  <p>Nas duas maquetes a rachadura é a R3 (§3). No jogo, o estouro vai ser o próprio casco voando nos próprios pixels, pelo motor de destroços.</p>
+</div>
+
+<h2>2. Os gestos (PixMiniMax)</h2>
+<div class="item decidir">
+  <p>Os dois gestos têm 16 quadros e partem da arte aprovada como primeiro quadro, no lugar. Nenhum tem salto: a maior mudança entre dois quadros é de 14% no "erguer" e de 17% no "bote" (o limite é ~30%). Aqui estão ampliados 2× a 12 quadros/s.</p>
+  <div class="par">
+    <figure><img src="bote-erguer.gif" alt="O gesto erguer"><figcaption><b>Erguer:</b> as cabeças sobem nos pescoços, se abrem e escancaram as bocas, e seguram 10 quadros (a janela).</figcaption></figure>
+    <figure><img src="bote-bote.gif" alt="O gesto bote"><figcaption><b>Bote:</b> as cabeças recuam e golpeiam para a frente juntas. As línguas saem na cor de cada cabeça.</figcaption></figure>
+  </div>
+  <p><b>O defeito dos dois:</b> a cabeça laranja (o canhão) ganhou mandíbula e boca nas duas versões. A ciano e a verde ficaram fiéis. Se isso te incomodar, dá para travar a laranja no desenho de hoje em todos os quadros, como foi feito com o corpo da manta.</p>
+  <p>Com o gesto escolhido, a forma de 2 cabeças e a de 1 cabeça saem com o mesmo pedido.</p>
+</div>
+
+<h2>3. A rachadura (ela correndo por baixo)</h2>
+<div class="item decidir">
+  <p>Os quatro visuais foram assados em pixel em cima do casco da arena, com a paleta dele. Cada GIF mostra a rachadura correndo do rombo até a nave, seguindo-a por 0,4 s, travando (branco), estourando e se fechando.</p>
+  <div class="par">
+    <figure><img src="rachadura-R1.gif" alt="R1"><figcaption><b>R1, a lombada:</b> as placas sobem por cima dela e solta pó da crista. Não fica marca.</figcaption></figure>
+    <figure><img src="rachadura-R2.gif" alt="R2"><figcaption><b>R2, a fissura acesa:</b> quente na frente e esfriando atrás, com faíscas. Acende luz onde não há energia.</figcaption></figure>
+    <figure><img src="rachadura-R3.gif" alt="R3"><figcaption><b>R3, a lombada e a fissura escura</b> <span class="rec">(recomendo)</span>: as placas sobem na frente e fica uma rachadura escura atrás, com cascalho. É casco, sem luz.</figcaption></figure>
+    <figure><img src="rachadura-R4.gif" alt="R4"><figcaption><b>R4, a carne:</b> a lombada, e a rachadura abre e mostra a carne escura do Leviatã, com brilho molhado.</figcaption></figure>
+  </div>
+  <h3>A trava, de perto (3×)</h3>
+  <div class="par">
+    <figure><img src="rachadura-R3-trava.png" alt="R3 trava"><figcaption>R3 travada: a ponta branca embaixo da nave.</figcaption></figure>
+    <figure><img src="rachadura-R4-trava.png" alt="R4 trava"><figcaption>R4 travada.</figcaption></figure>
+  </div>
+</div>
+
+<h2>4. O que a spec traz e chega no filme</h2>
+<div class="item">
+  <ul>
+    <li><b>A chegada:</b> o casco para inteiro, treme, e explode de dentro para fora. O rombo se abre e ela sobe por ele.</li>
+    <li><b>Em repouso:</b> a base fica encaixada no rombo, e ela só sobe e desce (o x fixo).</li>
+    <li><b>A forma de 2 cabeças:</b> o bote duplo (a rachadura sai de novo do rasgo). <b>A de 1 cabeça:</b> a rajada de perto na janela.</li>
+    <li><b>A morte da de 3 cabeças:</b> ela afunda no rombo, as três luzes (ciano, verde e laranja) convergem lá dentro, e a maior irrompe dele. Sem véu preto, porque o casco esconde a troca.</li>
+    <li>A fusão nova, solta do casco, continua sendo a S2.</li>
+  </ul>
+</div>
+
+<h2>Para você escolher</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O gesto:</b> erguer (recomendo) ou bote.</li>
+    <li><b>A rachadura:</b> R1, R2, R3 (recomendo) ou R4.</li>
+    <li><b>A cabeça laranja:</b> deixar como o gerador fez, ou travar no desenho de hoje.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

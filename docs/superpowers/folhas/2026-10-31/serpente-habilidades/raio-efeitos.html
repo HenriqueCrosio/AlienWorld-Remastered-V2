@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: efeitos do raio</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 860px) { .par { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; margin: 8px 0; }
+  td, th { border: 1px solid var(--line); padding: 5px 10px; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: os efeitos do raio</h1>
+<p class="sub">01/11/2026 · rodada 12 das habilidades (o raio da azul) · nada foi commitado.</p>
+
+<div class="item">
+  <p>Você aprovou os gestos da cabeça (<i>"Gostei dos gestos, pode seguir para os efeitos"</i>). Esta rodada põe os efeitos que ficaram combinados a partir da análise. Todos são só visuais: usam um sorteio próprio e não mudam onde o raio machuca.</p>
+</div>
+
+<h2>A maquete</h2>
+<div class="item">
+  <figure><video src="maquete12-raio.webm" autoplay loop muted playsinline controls></video><figcaption><b>As três vezes, com os efeitos:</b> a fatia de cima, a de baixo (agora cortando o casco) e a salva.</figcaption></figure>
+</div>
+
+<h2>Carga e disparo</h2>
+<div class="item">
+  <figure><img src="raio-carga-disparo.png" alt="a carga e o disparo, ampliados"><figcaption><b>A fatia de cima, ampliada 3×:</b> a energia entrando na boca e a esfera crescendo; a cabeça erguida com a esfera cheia; a frente de energia saindo; o clarão; o raio em camadas.</figcaption></figure>
+  <ul>
+    <li><b>Energia entrando na boca:</b> faíscas nascem num anel em volta da boca e caem para dentro cada vez mais rápido.</li>
+    <li><b>Uma esfera pequena</b> cresce na boca enquanto ela carrega, tremendo um pouco.</li>
+    <li><b>As luzes da cabeça acendem</b> com a carga: só os pixels de luz ciano da própria cabeça e do pescoço azul. Ficam acesas no disparo e apagam na recuperação.</li>
+    <li><b>O raio não aparece inteiro:</b> uma frente de energia, com uma ponta brilhante, corre da boca até a borda em 0,09 s (0,05 s na salva). Só o que já foi desenhado machuca.</li>
+    <li><b>O clarão:</b> uma explosão de luz na boca no primeiro instante, e a tela dá um tranco de 2 px nos raios grandes.</li>
+  </ul>
+  <figure><img src="raio-camadas.png" alt="as camadas do raio"><figcaption><b>As camadas, ampliadas 5×</b> (o raio grande e o fino da salva): o núcleo branco fino, o azul elétrico e o brilho ciano por fora, com a opacidade ondulando para fora ao longo do raio. O brilho ciano substituiu a borda escura de antes.</figcaption></figure>
+</div>
+
+<h2>O casco</h2>
+<div class="item">
+  <figure><img src="raio-casco.png" alt="o raio cortando o casco"><figcaption><b>O casco à esquerda, ampliado 4×:</b> o raio morde a chapa e a corta. O corte fica branco-quente, passa a laranja e vai esfriando.</figcaption></figure>
+  <ul>
+    <li><b>Mudei o começo da fatia de baixo</b> para cima do casco (antes ela só raspava nele): o raio corta a chapa primeiro e depois sobe. O casco é a única coisa no campo que ele pode atingir. Nenhuma nave fica abaixo de 143 px, então a esquiva não muda. Se preferir como era, volto.</li>
+    <li>No ponto do corte saem faíscas em linha reta (vácuo, sem gravidade) e pequenas explosões de metal.</li>
+  </ul>
+</div>
+
+<h2>Depois do disparo</h2>
+<div class="item">
+  <figure><img src="raio-depois.png" alt="as descargas e o resíduo"><figcaption><b>O fim da fatia de cima e a recuperação, ampliados 3×:</b> o raio apagando; descargas saindo das mandíbulas; o tranco; o resíduo saindo da boca e se espalhando.</figcaption></figure>
+  <ul>
+    <li><b>Descargas elétricas</b> saem das mandíbulas e vão diminuindo. Elas seguem a cabeça durante o tranco. Depois de cada tiro da salva são curtas; depois do raio grande e do último tiro da salva, são fortes.</li>
+    <li><b>O resíduo:</b> um vapor sai da boca na direção do último disparo, reto, e vai se espalhando e sumindo. No vácuo ele não sobe.</li>
+  </ul>
+  <p class="sub">Tirei um anel de luz que corria para fora da boca no disparo: parecia um círculo desenhado, e no vácuo não há nada para a luz iluminar no caminho.</p>
+</div>
+
+<h2>Medidas</h2>
+<div class="item medida">
+  <table>
+    <tr><th>folga do manequim</th><th>rodada 11</th><th>agora</th></tr>
+    <tr><td>fatia de cima</td><td>20,4 px</td><td>20,4 px</td></tr>
+    <tr><td>fatia de baixo</td><td>12,5 px</td><td>12,5 px</td></tr>
+    <tr><td>salva (o tiro mais apertado)</td><td>6,7 px</td><td>6,7 px</td></tr>
+    <tr><td>pontos do raio fora do caminho desenhado</td><td>0</td><td>0</td></tr>
+  </table>
+  <p>A frente de energia só deixa o raio chegar um pouco depois, então algumas folgas da salva até subiram (por exemplo, 6,8 → 10,2 px). A nave parada continua sendo atingida. O som fica para depois do balanceamento.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Os efeitos:</b> a intensidade está boa, ou algum está demais ou de menos? (a esfera, as luzes da cabeça, o brilho do raio, o clarão, o tranco da tela)</li>
+    <li><b>A fatia de baixo começando sobre o casco</b>, para o raio cortar a chapa: fica?</li>
+    <li><b>Com o raio pronto:</b> sigo para as animações das outras cabeças (a verde soltando o gás, a laranja carregando e faiscando), do mesmo jeito que fiz a azul?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

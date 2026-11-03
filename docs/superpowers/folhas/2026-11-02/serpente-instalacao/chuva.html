@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: a chuva</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .ok { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a chuva de casulos no jogo</h1>
+<p class="sub">03/11/2026 · pausa 3, a primeira habilidade instalada · nada foi commitado.</p>
+
+<h2>Depois das suas respostas: as duas correções</h2>
+<div class="item medida">
+  <p><b>O cuspe da chuva saiu.</b> No clipe da chuva da A, o gerador tinha pintado três jatos grandes no quadro do ataque e riscos soltos no seguinte. Tirei só isso, como nos tiros da rodada 14.</p>
+  <ul>
+    <li>A boca aberta e acesa de cada cabeça ficou: onde o jato cobria a boca, ela volta do quadro vizinho, que tem a mesma boca sem o jato.</li>
+    <li>Os outros 14 quadros do clipe são idênticos, byte a byte.</li>
+    <li>A salva agora são só os casulos saindo das bocas.</li>
+  </ul>
+  <figure><img src="chuva-cuspe-antes-depois.png" alt="os quadros 10 e 11 do clipe da chuva, antes e agora"><figcaption><b>Os dois quadros do cuspe, 3×:</b> antes à esquerda, agora à direita.</figcaption></figure>
+  <p><b>A boca da laranja no erguer agora é a brasa,</b> como no tiro aprovado e nos cercos. O erguer aparece na luta na forma B (tiros comuns e chuva) e na forma C (rajada e leque).</p>
+  <ul>
+    <li>Recolori só a garganta e a língua, pelo brilho de cada pixel.</li>
+    <li>O olho, o focinho, as aberturas laterais e a faixa vermelha do pescoço da C ficaram como eram, porque são luzes e arte da cabeça. Conferi cada um, quadro a quadro.</li>
+    <li>Os quadros de boca fechada, e todo o erguer da A, ficaram idênticos.</li>
+  </ul>
+  <figure><img src="erguer-boca-antes-depois.png" alt="o erguer da B e da C, antes e agora"><figcaption><b>O erguer com a boca aberta, 2×:</b> a B em cima e a C embaixo.</figcaption></figure>
+  <figure><video src="jogo-erguer-C.webm" autoplay loop muted playsinline controls></video><figcaption><b>A forma C atirando no jogo.</b> A boca aberta acende como a garganta do tiro aprovado.</figcaption></figure>
+</div>
+
+<h2>O que entrou</h2>
+<div class="item">
+  <p>A chuva é a da maquete que você aprovou (rodada 3, com o casulo da rodada 14):</p>
+  <ul>
+    <li><b>Cada cabeça viva lança uma salva de 9 casulos</b> para cima e para fora, com o motor desligado.</li>
+    <li><b>Acima da tela, eles viram e voltam de nariz,</b> parados no começo e acelerando até o casco, onde estouram. É uma onda por cabeça, na cor dela.</li>
+    <li><b>Forma A:</b> 3 ondas (azul, verde, laranja), com o clipe da chuva. <b>Forma B:</b> 2 ondas (verde, laranja), com o erguer.</li>
+    <li><b>São 10 vagas de 22 px, todas na frente dela.</b> O vão de 3 vagas anda uma vaga por onda.
+      <ul>
+        <li>Na maquete o vão começava sempre na mesma vaga e andava para a direita.</li>
+        <li>No jogo, a vaga de início e o sentido são sorteados a cada chuva.</li>
+      </ul></li>
+    <li><b>O casulo fere subindo e descendo.</b></li>
+  </ul>
+  <div class="par">
+    <figure><video src="jogo-chuva-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>Forma A.</b> A nave segue o vão, como o manequim da maquete.</figcaption></figure>
+    <figure><video src="jogo-chuva-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>Forma B.</b> A salva sai no erguer.</figcaption></figure>
+  </div>
+</div>
+
+<h2>Ampliado</h2>
+<div class="item">
+  <figure><img src="chuva-salva-A.png" alt="a salva da forma A saindo das bocas"><figcaption><b>A salva na forma A, 4×,</b> no quadro de ataque do clipe da chuva.</figcaption></figure>
+  <figure><img src="chuva-salva-B.png" alt="a salva da forma B saindo das bocas"><figcaption><b>A salva na forma B, 4×,</b> no erguer.</figcaption></figure>
+  <figure><img src="chuva-onda-estouro.png" alt="a onda descendo e o estouro no casco"><figcaption><b>A onda descendo e o estouro, 6×.</b> O casulo vem de nariz para baixo, a chama na cor da cabeça sai da cauda e o gás do motor sobe. No casco, um clarão e um anel na cor da cabeça.</figcaption></figure>
+</div>
+
+<h2>Medido no jogo</h2>
+<div class="item medida">
+  <p>A sonda nova (<code>_sonda-hab.mjs chuva</code>) passou nas duas formas:</p>
+  <ul>
+    <li><b>As ondas:</b> 3 na A e 2 na B, com 7 casulos cada.</li>
+    <li><b>A salva:</b> 27 casulos sobem na A e 18 na B (9 por cabeça).</li>
+    <li><b>Quem segue o vão passa:</b> <span class="ok">0 acertos</span>.</li>
+    <li><b>Quem fica parado embaixo de um casulo é atingido:</b> 3 acertos na A, 2 na B.</li>
+    <li><b>A caixa do acerto segue o voo:</b> 7×11 descendo e 9×9 subindo, em todas as medidas.</li>
+    <li><b>Nenhum casulo passa do casco.</b></li>
+  </ul>
+  <p class="sub">As outras sondas continuam passando: ela fica no posto também durante a chuva, o corpo leva dano, e os tiros comuns seguem iguais.</p>
+</div>
+
+<h2>Ficou anotado</h2>
+<div class="item decidir">
+  <ul>
+    <li><b>Na verde do erguer da B,</b> a garganta também é vermelho-escura (a língua e o céu da boca são verdes). Ela é pequena e escura, e você falou da laranja, então não mexi. Se quiser, recoloro com o verde.</li>
+    <li><b>O erguer da A</b> tem as três bocas rosa de carne, mas ele não aparece mais na luta: a A tem os gestos próprios. Fica como está.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

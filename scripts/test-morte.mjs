@@ -152,5 +152,76 @@ for (const [nome, r] of [['fogo', RAMPA_FOGO], ['bio', RAMPA_BIO], ['carne', RAM
   ok(corDaRampa(r, 1) === r[r.length - 1] && corDaRampa(r, 0) === r[0], `a rampa ${nome}: 1 = o branco, 0 = a brasa apagada`);
 }
 
+// THE SERPENT'S FUSION (28/10, spec `2026-10-28-serpente-fusao-mordidas-design.md`): the organic bite's fluid ramp; its
+// own thresholds, all inside the fusion; on each of the fusion's 9 frames, as the game draws it (×0.63), a bite aimed at
+// each declared point starts on its own part (the neck in front of the gap under the jaw, the chin at the jaw's
+// bottom or front, the skull at the top-left of the forehead) and stays one piece of the exact size — with the ragged
+// edge of the organic bite too.
+{
+  const P = await import('../src/systems/morte/pedacos.ts');
+  const N = await import('../src/systems/morte/numerosDestrocos.ts');
+  const S = await import('../src/entities/serpenteFusao.ts').catch(() => ({}));
+  const fluido = P.RAMPA_FLUIDO;
+  ok(Array.isArray(fluido) && fluido.length >= 6 && fluido.every((c, i) => i === 0 || lum(c) > lum(fluido[i - 1])), 'a rampa do fluido sobe do escuro ao claro');
+  const [r0, g0, b0] = fluido ? canais(fluido[fluido.length - 1]) : [0, 0, 0];
+  ok(r0 > g0 && g0 > b0 && r0 - b0 > 120, `a rampa do fluido acaba no reflexo laranja (${[r0, g0, b0].map((v) => v.toString(16).padStart(2, '0')).join('')})`);
+  const lim = N.CHEFOES.serpente.limiares;
+  const comecoFusao = 60 / 210;
+  ok(Array.isArray(lim) && lim.length === 3 && lim.every((f, i) => i === 0 || f < lim[i - 1]) && lim[0] < comecoFusao,
+    `a Serpente tem três limiares próprios, decrescentes, todos dentro da fusão (${lim} < ${comecoFusao.toFixed(3)})`);
+  ok(N.CHEFOES.serpente.mordida === 'organica' && N.DESTROCOS.organica?.torto > N.DESTROCOS.lasca.torto, 'a Serpente morde no estilo orgânico, com o rasgo mais torto que o de hoje');
+  ok(Object.entries(N.CHEFOES).every(([q, c]) => q === 'serpente' || (c.limiares === undefined && c.mordida === undefined)), 'os outros chefões seguem com os limiares e o estilo da classe');
+  const M = S.MORDIDAS_FUSAO;
+  ok(Array.isArray(M) && M.length === 3, 'a fusão declara três pontos de mordida');
+  if (Array.isArray(M) && M.length === 3) {
+    // where each bite may start (art px from the sprite's centre), measured on the art: the neck's front, the jaw's
+    // bottom or front, the forehead's top-left
+    const PARTES = [
+      { nome: 'pescoço', dentro: (x, y) => x >= -26 && x <= -10 && y >= -10 && y <= 10 },
+      { nome: 'queixo', dentro: (x, y) => x >= -66 && x <= -46 && y >= -14 && y <= 10 },
+      { nome: 'crânio', dentro: (x, y) => x <= -60 && y <= -82 },
+    ];
+    const ESC = 0.63;
+    const ampOrg = N.DESTROCOS.organica?.torto ?? 3;
+    const L = N.DESTROCOS.lasca.chefe;
+    let foraDaParte = [], tamanho = 0, pedacos = 0;
+    for (let f = 0; f < 9; f++) {
+      const img = reduzir(await bitmap(`public/sprites/serpente-fusao-anim-${f}.png`), ESC, ESC, false, false);
+      const cheios = img.cor.filter((c) => c >>> 24 >= 128).length;
+      const alvo = Math.min(L.max, Math.max(L.min, Math.round(cheios * L.fracao)));
+      M.forEach((p, i) => {
+        for (const [amp, s] of [[N.DESTROCOS.lasca.torto, 1], [ampOrg, 2], [ampOrg, 3]]) {
+          const r = sorte(100 * f + 10 * i + s);
+          const l = lasca(img, [0, 1], alvo, ruido(img.w, img.h, 3, r), amp, r, { x: img.w / 2 + p.x * ESC, y: img.h / 2 + p.y * ESC });
+          if (!l || l.n !== alvo) { tamanho++; continue; }
+          const ax = (l.centro.x - img.w / 2) / ESC, ay = (l.centro.y - img.h / 2) / ESC;
+          if (!PARTES[i].dentro(ax, ay)) foraDaParte.push(`q${f} ${PARTES[i].nome} (${ax.toFixed(0)}, ${ay.toFixed(0)})`);
+          // one piece: every bitten pixel reached from the first through 4-neighbours inside the bite
+          const k0 = l.mascara.indexOf(2);
+          const visto = new Uint8Array(l.mascara.length);
+          const fila = [k0];
+          visto[k0] = 1;
+          let n = 0;
+          while (fila.length) {
+            const k = fila.pop();
+            n++;
+            const x = k % img.w, y = (k - x) / img.w;
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+              const xx = x + dx, yy = y + dy, kk = yy * img.w + xx;
+              if (xx < 0 || yy < 0 || xx >= img.w || yy >= img.h || visto[kk] || l.mascara[kk] !== 2) continue;
+              visto[kk] = 1;
+              fila.push(kk);
+            }
+          }
+          if (n !== alvo) pedacos++;
+        }
+      });
+    }
+    ok(foraDaParte.length === 0, `fusão: nos 9 quadros, cada mordida começa na sua parte${foraDaParte.length ? ` — fora: ${foraDaParte.join('; ')}` : ''}`);
+    ok(tamanho === 0, `fusão: toda mordida tem o alvo exato, com o rasgo de hoje e com o orgânico (${tamanho} erradas)`);
+    ok(pedacos === 0, `fusão: toda mordida é uma peça só (${pedacos} partidas)`);
+  }
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\ntudo ok');
 process.exit(falhas ? 1 : 0);

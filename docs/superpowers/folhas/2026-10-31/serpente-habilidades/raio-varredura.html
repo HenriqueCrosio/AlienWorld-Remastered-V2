@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: varredura avisada</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 1000px) { .trio { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: o raio, a varredura avisada</h1>
+<p class="sub">01/11/2026 · rodada 8 das habilidades (o raio da azul) · nada foi commitado.</p>
+
+<div class="item">
+  <p><b>Antes:</b> o raio varria a tela inteira, do alto até o casco, e o único lugar seguro era embaixo da mandíbula dela. O jogador só aprendia isso morrendo, e a resposta era sempre a mesma.</p>
+  <p><b>Agora</b> (a sua escolha, a varredura avisada): o raio sai da boca da azul e varre só uma <b>fatia</b> da tela. Enquanto ela carrega, a fatia aparece desenhada, e cada vez é uma fatia diferente, então o lugar seguro muda e o jogador o lê.</p>
+</div>
+
+<h2>O aviso</h2>
+<div class="item">
+  <ul>
+    <li><b>A linha onde o raio começa:</b> pontilhada, sai da boca dela e fica mais forte conforme a carga enche.</li>
+    <li><b>A linha onde ele para:</b> tracejada, e continua na tela até o raio chegar nela.</li>
+    <li><b>A fatia entre as duas</b> fica levemente marcada de azul. Quando o raio sai, só o pedaço que ele ainda vai varrer continua marcado.</li>
+    <li><b>Pontos claros correm</b> da linha de início para a de parada: é o sentido em que ele vai girar.</li>
+    <li><b>A boca da azul</b> brilha e pulsa cada vez mais rápido durante a carga, e solta um clarão quando o raio sai.</li>
+  </ul>
+  <figure><img src="raio-avisos.png" alt="os três avisos da varredura"><figcaption><b>Os três avisos, no fim da carga</b> (ampliados 2×): a fatia de cima, a de baixo e a tela quase toda. A nave já está saindo de cada uma.</figcaption></figure>
+  <figure><img src="raio-boca.png" alt="a boca da azul carregando e disparando"><figcaption><b>A boca da azul</b> (ampliada 4×): a carga cresce, e o raio sai com um clarão.</figcaption></figure>
+</div>
+
+<h2>As três fatias</h2>
+<div class="item">
+  <p>Três disparos por uso, sempre nesta ordem:</p>
+  <ol>
+    <li><b>A fatia de cima</b> (1,6 s de carga, varre em 0,9 s): <b>fica embaixo</b>.</li>
+    <li><b>A fatia de baixo</b> (1,6 s de carga, varre subindo em 0,9 s): <b>sobe</b>.</li>
+    <li><b>Quase a tela toda</b>, do alto até a altura do casco (2 s de carga, porque é a viagem mais longa; varre em 1,3 s): <b>só embaixo da mandíbula dela, perto do casco</b>. O esconderijo antigo virou o final da sequência.</li>
+  </ol>
+  <figure><video src="maquete8-varredura.webm" autoplay loop muted playsinline controls></video><figcaption><b>A nave lê cada fatia e sai dela:</b> desce na fatia de cima, sobe na de baixo e atravessa até embaixo da mandíbula na última.</figcaption></figure>
+  <div class="trio">
+    <figure><img src="mapa-raio-cima.png" alt="o que a fatia de cima varre"><figcaption><b>A fatia de cima:</b> em azul, tudo o que o raio varreu. O retângulo é a hitbox da nave (21×9), que desce para fora.</figcaption></figure>
+    <figure><img src="mapa-raio-baixo.png" alt="o que a fatia de baixo varre"><figcaption><b>A fatia de baixo:</b> a nave sobe para fora dela.</figcaption></figure>
+    <figure><img src="mapa-raio-quase.png" alt="o que a última fatia varre"><figcaption><b>Quase a tela toda:</b> a nave atravessa até o canto embaixo da mandíbula, o único lugar fora da fatia.</figcaption></figure>
+  </div>
+  <p class="sub">Ela continua no idle. No vácuo o raio é reto, então ele só pode girar porque a cabeça gira: a animação da azul vai virar a cabeça junto com a varredura (a de hoje só treme parada). Isso entra na fase das animações. O desenho do raio também é provisório.</p>
+</div>
+<div class="item medida">
+  <p><b>Medido quadro a quadro</b>, contra a hitbox da nave e a largura do raio (12 px):</p>
+  <ul>
+    <li>Saindo de cada fatia, a menor folga foi de <b>19 px</b> na de cima, <b>14 px</b> na de baixo e <b>12 px</b> embaixo da mandíbula. Nenhum toque.</li>
+    <li>Parada no meio da tela, a nave é atingida nas três. O lugar seguro de uma fatia é atingido na outra: quem fica embaixo leva a de baixo, e quem fica em cima leva a última.</li>
+  </ul>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O aviso:</b> dá para ler a fatia a tempo (as duas linhas, o azul entre elas e os pontos correndo)?</li>
+    <li><b>O ritmo:</b> 1,6 s de carga nas duas primeiras e 2 s na última está bom?</li>
+    <li><b>A ordem:</b> fica sempre cima, baixo, quase tudo (como os padrões do gás), ou varia?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

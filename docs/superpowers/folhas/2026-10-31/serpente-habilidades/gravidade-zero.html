@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente sem gravidade</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 4px; }
+  p { margin: 6px 0; }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente sem gravidade: a bola com jatos e a chuva de mísseis</h1>
+<p class="sub">31/10/2026 · terceira rodada das habilidades · nada foi commitado.</p>
+
+<div class="item">
+  <p>Você:</p>
+  <ol>
+    <li><i>"o quique e a chuva não condizem com gravidade zero"</i></li>
+    <li><i>"pense numa bola com propulsores, semelhantes aos usados no menu inicial quando o letreiro desce na tela [...] o desafio vai ser: Calcular ou recriar a física por trás de uma bola quicar naturalmente, sendo guiada ou pilotada por propulsores. É possível?"</i></li>
+  </ol>
+  <p><b>É possível, e o jogo já faz isso.</b> A F3 é vácuo: o HUD mostra ZERO-G, e no GDD a gravidade é do lugar (na atmosfera a nave cai, no vácuo ela flutua). O letreiro do menu não segue uma animação desenhada à mão. O código calcula o caminho dele primeiro, e <b>cada bocal dispara quando a aceleração daquele instante pede o empurrão dele</b> (<code>src/menu/abertura.ts</code>). A bola usa a mesma regra, com o mesmo gás: branco quente, chama âmbar, vapor frio.</p>
+</div>
+
+<h2>1. Como uma bola quica sem gravidade</h2>
+<div class="item">
+  <ul>
+    <li><b>Quatro bocais:</b> em cima, embaixo, à esquerda e à direita.</li>
+    <li><b>Ela sai da boca do mesmo jeito de antes.</b> Os bocais acendem 0,12 s depois, e até lá ela voa reto, porque no vácuo nada a curva.</li>
+    <li><b>No voo, o bocal de cima queima o tempo todo:</b> o gás sobe e empurra a bola para baixo. A força é a mesma da gravidade da maquete antiga. Força constante desenha uma parábola, pela mesma conta da gravidade, então o arco não é uma imitação.</li>
+    <li><b>No casco, a batida é de verdade:</b> o casco é uma superfície, a bola perde 20% da velocidade, achata e solta faísca da placa.</li>
+    <li><b>Na saída do casco, os jatos pilotam,</b> e cada versão abaixo pilota de um jeito.</li>
+  </ul>
+  <figure><img src="quique-quadro-a-quadro.png" alt="uma batida no casco, quadro a quadro"><figcaption><b>Uma batida, quadro a quadro (ampliada 6×):</b> ela cai com o jato de cima aceso, bate, achata e solta faísca, os jatos de baixo dão o chute, e depois o de cima volta a queimar.</figcaption></figure>
+</div>
+
+<h2>2. As três formas de pilotar</h2>
+<div class="item decidir">
+  <div class="par">
+    <figure><video src="maquete3-quic-gravidade.webm" autoplay loop muted playsinline controls></video><figcaption><b>Antes (com gravidade):</b> a maquete anterior, agora com o rastro do arco. Compare com a do lado.</figcaption></figure>
+    <figure><video src="maquete3-quic-altura.webm" autoplay loop muted playsinline controls></video><figcaption><b>Segura a altura:</b> depois de cada batida, os jatos de baixo devolvem o que a batida tirou. Cada cabeça tem a sua altura (a ciano baixa e rápida, a verde alta, a laranja no meio), sempre a mesma. É o quicante que você já viu, agora com causa. Para desviar, você lê o ritmo.</figcaption></figure>
+    <figure><video src="maquete3-quic-natural.webm" autoplay loop muted playsinline controls></video><figcaption><b>Natural:</b> só o jato de cima trabalha. A cada batida a bola perde energia e os quiques ficam mais baixos, como numa bola de verdade, até ela quase rolar rente ao casco. Fica mais fácil desviar no fim.</figcaption></figure>
+    <figure><video src="maquete3-quic-mira.webm" autoplay loop muted playsinline controls></video><figcaption><b>Mira:</b> segura a altura e, na decolagem, os jatos de lado escolhem o próximo pouso embaixo da nave. Ela só corrige na decolagem; depois o arco fica fixo e dá para ler. É a mais difícil das três: as bolas acabam juntas na nave.</figcaption></figure>
+  </div>
+  <p class="sub">O rastro pontilhado só existe na maquete, para dar para ler o arco; ele não vai para o jogo. O desenho da bola, dos bocais e do fogo continua provisório.</p>
+</div>
+
+<h2>3. A chuva de mísseis</h2>
+<div class="item decidir">
+  <ul>
+    <li><b>A subida:</b> cada cabeça solta uma salva de nove mísseis, de motor desligado. Eles sobem retos e saem pelo alto.</li>
+    <li><b>A volta (a sua ideia):</b> lá em cima eles viram e acendem o motor, que freia a subida e empurra o míssil de volta para baixo. Por isso cada onda entra de bico para baixo, <b>começando parada</b>: devagar no alto, e esse é o aviso de onde vão cair; rápida perto do casco.</li>
+    <li><b>O fim:</b> eles estouram no casco, com um núcleo branco, um anel na cor da cabeça e faíscas.</li>
+    <li><b>O padrão é o de antes:</b> três ondas, uma por cor, e o vão anda uma casa a cada onda. <b>Mudei uma coisa:</b> a chuva cai só na frente dela, em 10 casas e não 12. Na versão anterior, os mísseis da direita caíam em cima dela.</li>
+  </ul>
+  <figure><video src="maquete3-misseis.webm" autoplay loop muted playsinline controls></video><figcaption><b>A chuva de mísseis</b> em velocidade real; o boneco da nave segue o vão.</figcaption></figure>
+  <figure><img src="misseis-estouro.png" alt="a primeira onda chegando no casco, quadro a quadro"><figcaption><b>A primeira onda chegando no casco, quadro a quadro:</b> o fogo atrás, depois o estouro e o anel se abrindo.</figcaption></figure>
+  <p class="sub">A virada acontece acima da tela. Dá para trazer esse ponto para dentro da tela e mostrar a virada, mas aí os mísseis ficam um instante parados no alto, dentro da área onde a nave voa.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A bola:</b> qual forma de pilotar? Segura a altura, natural, mira, ou uma mistura (por exemplo, segura a altura no começo da luta e passa a mirar quando ela estiver ferida)?</li>
+    <li><b>A cor do fogo:</b> o mesmo gás âmbar do letreiro, como está, ou o fogo na cor de cada cabeça?</li>
+    <li><b>Os mísseis:</b> ficam assim, com a virada fora da tela e a entrada lenta servindo de aviso?</li>
+  </ol>
+  <p>Depois disso, as outras habilidades (os tiros normais e o raio), como você disse.</p>
+</div>
+</main>
+</body>
+</html>

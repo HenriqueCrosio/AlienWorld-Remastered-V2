@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revisão da Serpente</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --ruim:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tres { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par, .tres { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; background: #11151e; }
+  .ok { color: var(--ok); font-weight: 600; }
+  .ruim { color: var(--ruim); font-weight: 600; }
+  .rec { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A luta da Serpente, revista do começo ao fim</h1>
+<p class="sub">29/10/2026, à noite · <a href="../luta.html">← a S1b</a>. Nada foi commitado.</p>
+
+<div class="item">
+  <p>Você: <i>"o aparecimento da serpente já deixa a desejar, eu pedi para não deixar aparecer o corpo na aparição logo depois da investida, não na posição inicial dela … existe um quadrado mais escuro em volta da serpente … a chuva ficou boa … o jogador sempre vai estar para a esquerda da serpente"</i>. E o que fica: <i>"A animação nova que escolhemos pode ser uma animação no set de animações dela, quando ela está na posição inicial e atirando … Precisamos urgente de uma animação decente para depois da investida. A chuva é reaproveitável, os efeitos estão bons na explosão do casco, mas aquela sombra para cobrir parte do corpo ficou feio"</i>.</p>
+  <p>Eu revi a luta inteira quadro a quadro, ampliada. A tabela tem o que achei em cada momento e o que já está feito.</p>
+</div>
+
+<h2>1. A revisão, momento a momento</h2>
+<div class="item">
+  <table>
+    <tr><th>momento</th><th>o que estava</th><th>agora</th></tr>
+    <tr><td>a explosão do casco</td><td class="ok">boa (você)</td><td>fica como está</td></tr>
+    <tr><td>a 1ª aparição, no rombo</td><td class="ruim">eu cortava o corpo dela no rombo também: ela subia pela metade, entalada</td><td><b>feito:</b> no rombo ela aparece inteira, como na S1, com o lábio do rombo na frente das roscas. O corte só vale depois do bote.</td></tr>
+    <tr><td>parada no rombo</td><td class="ruim">quase sem movimento: ondulação de 6 px, presa ao corte</td><td><b>feito:</b> as três alturas da S1 e a respiração de 14 px. E o <b>erguer virou o gesto de ataque dela no rombo</b>: ela se ergue e o tiro sai da boca de quem atira, quando as bocas abrem.</td></tr>
+    <tr><td>a rachadura e a trava</td><td class="ruim">na resolução do jogo, a lombada e a ponta branca quase não apareciam</td><td><b>feito:</b> a lombada ficou maior; a trava ficou mais larga (13 px) e solta faíscas brancas</td></tr>
+    <tr><td>a aparição depois do bote</td><td class="ruim">o "quadrado escuro": a bacia do rasgo pintada com o fundo do rombo, mais uma faixa escura em toda a largura dela, para esconder o corpo. Ficou feio.</td><td><b>a refazer, com a arte da §2:</b> uma animação de saída já desenhada cortada na linha do casco, e um buraco de casco rasgado de verdade. Nada mais cobre o corpo dela.</td></tr>
+    <tr><td>a chuva</td><td class="ok">boa (você)</td><td><b>feito:</b> mais justa para quem está à esquerda. O vão tem 3 gotas (eram 2) e anda no máximo uma vaga de uma onda para a outra (antes era sorteado em qualquer lugar, e a nave, a 110 px/s, não alcançava). As ondas vêm a cada 0,55 s (eram 0,35) e caem a 100 px/s.</td></tr>
+    <tr><td>o espaço para desviar</td><td class="ruim">o bote podia travar a 24 px da borda esquerda, sem saída para a esquerda</td><td><b>feito:</b> a trava não passa de x 60: sempre há espaço para desviar pela esquerda</td></tr>
+    <tr><td>a troca de 3 para 2 cabeças</td><td class="ruim">um quadro inteiro da tela piscava rosa, a cor de dano<br><img src="antes-troca.png" alt="a tela rosa" style="max-width:100%;margin-top:6px"></td><td><b>feito:</b> sem o flash. Ficam a cadeia de estouros e o tremor.</td></tr>
+    <tr><td>a cena da fusão</td><td class="ruim">a estrela que você tirou na S1 voltava dentro do rombo (o halo das luzes usava a mesma textura), e o lábio estourava em blocos vermelho-lava<br><img src="antes-fusao.png" alt="a fusão antes" style="max-width:100%;margin-top:6px"></td><td><b>feito:</b> o halo é um brilho redondo, e o lábio solta o cascalho e o pó do próprio casco</td></tr>
+  </table>
+  <figure><img src="rombo-inteira.png" alt="no rombo, inteira"><figcaption><b>No rombo, agora:</b> ela inteira, erguida no gesto de ataque, com o lábio do rombo na frente das roscas.</figcaption></figure>
+</div>
+
+<h2>2. A aparição depois do bote (para escolher)</h2>
+<div class="item decidir">
+  <p>A ideia nova: <b>a animação já nasce cortada na linha do casco.</b> Gerei a saída no PixelLab a partir da arte dela, com a borda de baixo do quadro sendo o chão: o corpo abaixo da linha nunca existe e não precisa ser escondido. Ela sai de um <b>buraco de casco rasgado</b> (arte gerada sobre as placas da proa), com o fundo do buraco atrás dela e as placas da borda na frente dos pescoços.</p>
+  <p>As maquetes estão na escala e na cor do jogo, sobre a foto da arena:</p>
+  <div class="tres">
+    <figure><video src="aparicao-E2-erguer.webm" autoplay loop muted playsinline controls></video><figcaption><b>E2 + erguer</b> <span class="rec">(recomendo)</span>: ela sobe do buraco ondulando e emenda no erguer que você já aprovou (as bocas abrem). Os dois clipes não têm nenhum salto, e as cabeças são as dela.</figcaption></figure>
+    <figure><video src="aparicao-E1.webm" autoplay loop muted playsinline controls></video><figcaption><b>E1, irromper:</b> mais violenta, com os pescoços chicoteando. Mas o gerador desenhou um estouro amarelo de desenho animado no chão, e o clipe tem 7 saltos. Teria que ser limpo à mão.</figcaption></figure>
+    <figure><video src="aparicao-E2.webm" autoplay loop muted playsinline controls></video><figcaption><b>E2 sozinha:</b> ela sobe ondulando e para na pose de repouso, sem abrir as bocas.</figcaption></figure>
+  </div>
+  <p>Os clipes inteiros (17 quadros cada, ampliados):</p>
+  <figure><img src="clipe-E2.png" alt="E2"><figcaption><b>E2</b>, subir ondulando: limpa, sem saltos.</figcaption></figure>
+  <figure><img src="clipe-E1.png" alt="E1"><figcaption><b>E1</b>, irromper: forte, com o estouro amarelo nos quadros 4 a 8.</figcaption></figure>
+  <figure><img src="clipe-E3.png" alt="E3"><figcaption><b>E3</b> (descartada): perdeu a identidade (as cabeças redesenhadas, língua roxa) e desenhou terra de desenho animado.</figcaption></figure>
+  <figure><img src="clipe-E4.png" alt="E4"><figcaption><b>E4</b> (descartada): pedi "sem efeitos" e ela desenhou feixes coloridos, pedras e um tronco que ela não tem.</figcaption></figure>
+</div>
+
+<h2>3. O buraco (para escolher)</h2>
+<div class="item decidir">
+  <p>Quatro buracos gerados sobre as placas da proa, cada um com a aparição <b>E2 + erguer</b> na pose final:</p>
+  <figure><img src="buracos.png" alt="os quatro buracos"><figcaption>
+    <ul>
+      <li><b>H1, o casco estourado</b> <span class="rec">(recomendo)</span>, em cima à esquerda: placas dobradas para cima e cabos rompidos lá dentro. É da mesma família do rombo A.</li>
+      <li><b>H2, as pétalas</b>, em cima à direita: duas placas abertas para fora.</li>
+      <li><b>H3, a fenda</b>, embaixo à esquerda: mais estreita que ela, então as roscas ficam sobre o casco. Não serve.</li>
+      <li><b>H4, a crista estilhaçada</b>, embaixo à direita: um buraco raso, com cacos.</li>
+    </ul>
+  </figcaption></figure>
+  <p>No jogo, o buraco abre no estouro do bote, com o cascalho e o clarão que já existem, e depois se fecha: a cura vira o buraco se fechando quadro a quadro, e não mais a sombra.</p>
+</div>
+
+<h2>Para você escolher</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A aparição depois do bote:</b> E2 + erguer (recomendo), E1 (limpa à mão) ou E2 sozinha.</li>
+    <li><b>O buraco:</b> H1 (recomendo), H2 ou H4.</li>
+  </ol>
+  <p>Com as duas escolhas, eu gero a mesma aparição para as formas de 2 e de 1 cabeça, troco a sombra pelo buraco no jogo e filmo a luta inteira de novo.</p>
+</div>
+</main>
+</body>
+</html>

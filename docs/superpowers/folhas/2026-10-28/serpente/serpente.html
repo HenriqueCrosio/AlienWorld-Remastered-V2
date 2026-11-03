@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fusão da Serpente</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .decidir { border-color: var(--pend); }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; background: #11151e; }
+  .c1 { color: #4fd1ff; } .c2 { color: #ff5ad1; } .c3 { color: #ffe14f; }
+</style>
+</head>
+<body>
+<main>
+<h1>A fusão da Serpente: pescoço, queixo, crânio</h1>
+<p class="sub">28/10/2026 · <a href="../../2026-10-26/inimigos/inimigos.html">← os destroços dos inimigos</a> · A spec: <code>docs/superpowers/specs/2026-10-28-serpente-fusao-mordidas-design.md</code>. Nada foi commitado.</p>
+
+<div class="item">
+  <p>Você: <i>"na serpente grande da segunda fase dela, a estrela fica e quando o pedaço da cabeça sai, a estrela fica no meio disso tudo, causando um efeito estranho e mal acabado."</i> E: <i>"o pedaço da cabeça saindo é ótimo, mas numa luta isso já deixaria qualquer inimigo muito fraco, o que pode sair é outro tipo de pedaço: Queixo, pedaço do pescoço e, ai sim, aquele pedaço da cabeça."</i></p>
+  <p>As suas escolhas: três pedaços na ordem <b>pescoço → queixo → crânio</b>; carne e fluido misturados, <b>sem fogo</b>; a estrela sai <b>só da fusão</b>.</p>
+</div>
+
+<h2>1. O que mudou</h2>
+<div class="item">
+  <ul>
+    <li><b>A estrela</b> sumiu da fusão. O ponto de acerto continua no crânio, do mesmo tamanho, só que sem o brilho. Nas formas de 3, 2 e 1 cabeça ela continua, porque lá diz qual cabeça leva dano.</li>
+    <li><b>Os pedaços</b> saem com 22%, 13% e 5% da vida total. Antes eram dois, ambos no crânio, a 15% e 6%.</li>
+    <li><b>O gore:</b> nada de bola de fogo, faísca de metal ou fumaça. O rasgo sai mais irregular. No rasgo, um jato de gotas: metade carne (vermelho-escuro quase preto), metade um fluido escuro e oleoso, com reflexo laranja nas cores das costuras dela. O pedaço pinga enquanto gira, e a ferida pinga até a morte.</li>
+  </ul>
+</div>
+
+<h2>2. Onde cada pedaço sai</h2>
+<div class="item">
+  <figure>
+    <img src="pontos.png" alt="Três quadros da fusão com os três pedaços marcados">
+    <figcaption>Três quadros da animação no tamanho do jogo (ampliados 3×). As cruzes brancas são os pontos; cada pedaço sai do corpo que o anterior deixou: <b class="c1">1 pescoço</b>, <b class="c2">2 queixo</b>, <b class="c3">3 crânio</b> (o pedaço que você aprovou). O pedaço começa na borda mais perto do ponto, por isso acompanha a boca abrindo.</figcaption>
+  </figure>
+</div>
+
+<h2>3. Antes e depois, no jogo</h2>
+<div class="item decidir">
+  <figure>
+    <video src="lado.webm" controls loop muted autoplay playsinline></video>
+    <figcaption>O jogo de verdade, a 30 quadros por segundo, ampliado 3×: a fusão do primeiro quadro até 4 s depois da morte, sob os tiros da nave (5 por segundo, na cabeça). Os dois lados partem do mesmo estado e com a mesma sorte; só o código muda. <b>Antes:</b> dois pedaços, os dois no crânio (aos 5,1 s e 9,0 s), com a bola de fogo, e a estrela pulsando em cima do buraco. <b>Depois:</b> <span class="c1">o pescoço</span> aos 2,3 s, <span class="c2">o queixo</span> aos 6,1 s e <span class="c3">o crânio</span> aos 9,3 s; a morte aos 11,5 s nos dois.</figcaption>
+  </figure>
+  <p><b>Para você julgar:</b> o quanto o rasgo é irregular e a quantidade de gotas (o jato, o pingo do pedaço, a ferida). Os dois números são ajustáveis.</p>
+</div>
+
+<h2>4. A prova de que o resto ficou igual</h2>
+<div class="item">
+  <table>
+    <tr><th>o quê</th><th>como</th><th>resultado</th></tr>
+    <tr><td>As formas de 3, 2 e 1 cabeça</td><td>A sonda roda a luta inteira duas vezes, uma com o código de antes e outra com o de agora, com a mesma sorte e o relógio a passos. Ela tira seis recortes da cabeça viva: no começo de cada forma e 1,5 s depois.</td><td>Os seis recortes saem <b>idênticos pixel a pixel</b>, com a estrela, as marcas dos tiros e o fundo</td></tr>
+    <tr><td>A fusão</td><td>A mesma sonda, com o código de agora</td><td>Três pedaços, todos na fusão: a 21,6%, 12,7% e 5%. Cada um começa no seu ponto (o pescoço a 4,5 px de arte, o queixo a 12, o crânio a 17). A estrela some em 100% dos quadros da fusão e fica em 100% dos das cabeças. Nenhuma folha de explosão nas mordidas (antes: 2).</td></tr>
+    <tr><td>Os outros chefões</td><td><code>_sonda-chefes</code> (a Torre, o Guardião, o Predador, o golfinho)</td><td>Tudo como em 27/10</td></tr>
+    <tr><td>A arte</td><td><code>test-morte</code>: nos 9 quadros da fusão, uma mordida mirada em cada ponto</td><td>Sempre começa na parte certa, tem o tamanho exato (240 px) e é uma peça só, com o rasgo de antes e com o novo</td></tr>
+  </table>
+  <p class="sub">As ferramentas: <code>scripts/_inimigos/_sonda-serpente-fusao.mjs</code>, <code>_filmar-serpente-fusao.mjs</code> e <code>_pontos-fusao.mjs</code>.</p>
+</div>
+</main>
+</body>
+</html>

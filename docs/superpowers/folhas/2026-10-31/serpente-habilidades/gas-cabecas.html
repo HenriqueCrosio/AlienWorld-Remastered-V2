@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: verde e laranja</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 860px) { .tres { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; margin: 8px 0; }
+  td, th { border: 1px solid var(--line); padding: 5px 10px; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a verde e a laranja se mexem</h1>
+<p class="sub">02/11/2026 · rodada 13 das habilidades (o gás + a faísca): os gestos do PixelLab e os efeitos juntos · nada foi commitado.</p>
+
+<div class="item">
+  <p>Suas escolhas: <b>a verde abre e despeja</b> (boca aberta para baixo, o pescoço bombeando com as baforadas), <b>a laranja recua e dá o bote</b> (recua tremendo na carga, bica na faísca e o arco sai do focinho), <b>um gesto só</b> para os três padrões (o arco continua sendo o aviso; na fila, três bicadas) e, no contra, <b>as três se encolhem</b>. Você pediu os efeitos junto, nesta mesma folha.</p>
+  <p>A mecânica não mudou: as faíscas saem nos mesmos instantes (3,6 / 7,1 / 10,6 s), com as mesmas esquivas e o mesmo termômetro. Os efeitos usam um sorteio próprio.</p>
+</div>
+
+<h2>As maquetes</h2>
+<div class="item">
+  <div class="tres">
+    <figure><video src="maquete13-padroes.webm" autoplay loop muted playsinline controls></video><figcaption><b>Sozinha:</b> as três esquivas (leque, trilhos, fila). A verde abre antes do gás e fecha no fim.</figcaption></figure>
+    <figure><video src="maquete13-contra.webm" autoplay loop muted playsinline controls></video><figcaption><b>Atirando no gás:</b> o termômetro enche, o fogo volta para a boca e as três se encolhem.</figcaption></figure>
+    <figure><video src="maquete13-carta.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com a carta INCENDIÁRIO:</b> o primeiro toque acende, e elas se encolhem.</figcaption></figure>
+  </div>
+</div>
+
+<h2>Os gestos</h2>
+<div class="item">
+  <div class="tres">
+    <figure><img src="gas-verde.gif" alt="a verde"><figcaption><b>A verde:</b> abre a boca para baixo, o pescoço bombeia e ela fecha.</figcaption></figure>
+    <figure><img src="gas-laranja.gif" alt="a laranja"><figcaption><b>A laranja:</b> recua e treme na carga (só a mandíbula de baixo cede), bica uma vez, bica de novo e relaxa.</figcaption></figure>
+    <figure><img src="gas-encolhe.gif" alt="as três se encolhem"><figcaption><b>O contra:</b> a verde fecha a boca de estalo, as três se recolhem e o corpo balança até voltar ao idle.</figcaption></figure>
+  </div>
+  <ul>
+    <li><b>A laranja continua com o focinho de canhão.</b> Nos clipes em que ela abria uma bocarra de dentes, a cabeça virava outra em um quadro. Pedi de novo mantendo o focinho e a lente, e só a mandíbula de baixo cede.</li>
+    <li><b>O bote é uma bicada curta.</b> O bote longo cruzava na frente do pescoço da verde e passava da bolsa de gás que a faísca acerta por trás. Ficou: carga → meio → pico e volta, com o arco saindo no pico.</li>
+    <li><b>O pescoço da verde bombeia quando a laranja está parada</b>: no começo do sopro e nas pausas entre as cargas. Cada quadro do PixelLab é a serpente inteira, e juntar o gesto de uma cabeça com o de outra no mesmo quadro seria emenda. As luzes da verde pulsam com as baforadas o tempo todo.</li>
+    <li><b>No contra, a laranja solta a carga</b> (o gesto de carga tocado de volta) enquanto o fogo corre até a boca. Com a carta, o fogo chega em 0,1 s, e o encolher começa no meio dessa volta, junto com a explosão na cara.</li>
+  </ul>
+</div>
+
+<h2>Ampliados</h2>
+<div class="item">
+  <figure><img src="gas-abre-sopro.png" alt="a verde abrindo e soprando"><figcaption><b>A verde, 3×:</b> abrindo antes do gás (−0,8 → 0,2 s), o sopro saindo da boca, e as luzes dela no pico de uma baforada (0,39 s) e entre duas (0,75 s).</figcaption></figure>
+  <figure><img src="gas-carga-bote.png" alt="a laranja carregando e bicando"><figcaption><b>A laranja na 1ª faísca, 4×:</b> a carga com os arcos pequenos no focinho e as luzes acendendo, a bicada (3,57 → 3,60 s), o arco até a bolsa de gás, a fumaça saindo do focinho e a volta ao repouso.</figcaption></figure>
+  <figure><img src="gas-fila.png" alt="as três bicadas da fila"><figcaption><b>A fila, 3×:</b> uma bicada por arco (10,6 / 11,0 / 11,4 s).</figcaption></figure>
+  <figure><img src="gas-contra.png" alt="o contra"><figcaption><b>O contra, 3×:</b> o fogo volta pelo sopro, explode na cara das três, e elas se encolhem com a geleia grudada e voltam ao idle.</figcaption></figure>
+  <figure><img src="gas-fecha.png" alt="a verde fechando"><figcaption><b>O fim, 4×:</b> a verde fecha a boca e o último sopro escapa pela mandíbula.</figcaption></figure>
+</div>
+
+<h2>Os efeitos</h2>
+<div class="item">
+  <ul>
+    <li><b>As luzes da verde pulsam com cada baforada:</b> só os pixels de luz verde da própria cabeça e do pescoço.</li>
+    <li><b>As luzes da laranja acendem com a carga</b> e ficam acesas até a última faísca. Pequenos arcos elétricos rastejam no focinho, mais à medida que a carga enche.</li>
+    <li><b>Cada bicada:</b> a tela dá um tranco de 1 px, sai uma fumaça do focinho na direção do golpe (reta, sem subir: é vácuo) e descargas correm pelo focinho, fortes na última faísca.</li>
+    <li><b>Ao fechar</b>, o último sopro escapa da boca da verde e some.</li>
+    <li><b>No contra</b>, o tranco de mola que era feito em código saiu, e quem reage é o gesto do PixelLab. O clarão quente, a tela tremendo e a geleia grudada continuam.</li>
+  </ul>
+</div>
+
+<h2>Medidas</h2>
+<div class="item medida">
+  <table>
+    <tr><th>folga do manequim</th><th>rodada 7</th><th>agora</th></tr>
+    <tr><td>1ª esquiva, o leque</td><td>17,0 px</td><td>15,6 px</td></tr>
+    <tr><td>2ª esquiva, os trilhos</td><td>12,7 px</td><td>14,5 px</td></tr>
+    <tr><td>3ª esquiva, a fila</td><td>17,3 px</td><td>17,1 px</td></tr>
+    <tr><td>toques na nave</td><td>0</td><td>0</td></tr>
+  </table>
+  <ul>
+    <li>Com a boca aberta, a verde solta o gás 4 px mais à esquerda e 2 px mais abaixo que no idle, por isso as folgas mudaram um pouco. No modo atirando, o termômetro enche em 9,63 s (era 9,77 s).</li>
+    <li>Sem os gestos, a maquete continua idêntica à rodada 7 aprovada, quadro a quadro nos três modos.</li>
+    <li>Continuidade da cabeça: no máximo 4% do desenho muda de um quadro para o outro nas esquivas, sem saltos. No contra o maior é 13%, no estalo do encolher.</li>
+  </ul>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Os gestos:</b> a verde abrindo e bombeando, a laranja recuando e bicando, e as três se encolhendo estão bons?</li>
+    <li><b>Os efeitos:</b> a força está boa? (as luzes das duas, os arcos no focinho, a fumaça, o tranco)</li>
+    <li><b>O bote:</b> a bicada curta fica, ou quer um bote maior?</li>
+    <li><b>O próximo passo:</b> o visual dos projéteis, ou já instalar as habilidades no jogo?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

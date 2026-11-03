@@ -72,6 +72,18 @@ docs/superpowers/folhas/2026-10-17/bloco-i/vozes/
 docs/superpowers/folhas/2026-10-22/menu/*/*.png
 docs/superpowers/folhas/2026-10-25/hangar/filme/*.png
 docs/superpowers/folhas/2026-10-26/morte/filme/*.png
+# 03/11 — a Serpente (28/10–03/11): os quadros crus do PixelLab (cru2/, cru3/) ficam no disco; os `pontos.json` das
+# cabeças entram (o `test-serpente-hab` lê). As conferências ampliadas e as maquetes que nenhuma folha mostra, idem.
+docs/superpowers/folhas/**/cru2/**/*.png
+docs/superpowers/folhas/**/cru3/**/*.png
+docs/superpowers/folhas/2026-11-02/serpente-instalacao/conferencia-*.png
+docs/superpowers/folhas/2026-10-28/serpente-luta/rombo/maquete-*.png
+docs/superpowers/folhas/2026-10-29/serpente-casco/rachadura-R1-trava.png
+docs/superpowers/folhas/2026-10-29/serpente-casco/rachadura-R2-trava.png
+docs/superpowers/folhas/2026-10-29/serpente-casco/revisao/antes-bote.png
+# ...e os backups do CCGS (o registro em .md entra; os .tar e .patch, restauráveis, ficam no disco — INSTALADO.md)
+docs/ccgs-serpente/**/*.tar
+docs/ccgs-serpente/**/*.patch
 # Os concepts da raiz e as duas pinturas de hangar que o jogo não usa (no disco, fora do git — HANDOFF, 25–26/10)
 /concept art*.png
 assets/raw/Hangar Futurista Sob a Megacidade.png

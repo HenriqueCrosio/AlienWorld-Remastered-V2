@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: consistência da arte</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --mal:#ff7a7a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .ok { color: var(--ok); font-weight: 600; }
+  .mal { color: var(--mal); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a consistência da arte nova, e as duas mudanças</h1>
+<p class="sub">02–03/11/2026 · antes de seguir para a chuva de casulos · nada foi commitado.</p>
+
+<h2>O que eu conferi</h2>
+<div class="item medida">
+  <ul>
+    <li><b>Todos os 23 conjuntos do jogo, quadro a quadro, por um script</b> (<code>scripts/_serpente/_consistencia.mjs</code>). Ele mede a cor própria de cada cabeça em volta dela (o azul da azul, o verde da verde, o laranja da laranja) e compara com a pose aprovada. Uma cabeça que vira outra perde as suas luzes. O limite é o pior quadro dos conjuntos que você já aprovou.
+      <br>Resultado: <span class="mal">só o encolhe da verde (forma B) falhou</span>, em 5 quadros. Depois de refeito, <span class="ok">os 23 passam</span>.</li>
+    <li><b>Cada conjunto novo ampliado, de olho, ao lado da arte aprovada:</b> os três cercos e os seis gestos do gás da B.
+      <ul>
+        <li>A azul de boca aberta tem a mesma cabeça longa com a garganta azul do raio aprovado.</li>
+        <li>A verde tem o mesmo crânio redondo com a boca verde do gás aprovado.</li>
+        <li>A laranja continua com o canhão.</li>
+        <li>O toco continua um toco.</li>
+      </ul>
+      Só o encolhe trocava a cabeça.</li>
+    <li><b>O que o script não enxerga,</b> e por isso eu confiro de olho:
+      <ul>
+        <li>uma cabeça que muda de forma mas mantém as luzes;</li>
+        <li>a cor da boca da laranja: a carne que o gerador pinta é a mesma paleta das placas do pescoço, então contar pixels não separa uma coisa da outra.</li>
+      </ul></li>
+  </ul>
+</div>
+
+<h2>A boca da laranja</h2>
+<div class="item">
+  <p>Nos cercos e na carga da forma B, o gerador encheu a boca aberta da laranja com a paleta das placas (pêssego e terracota), o que dava a boca de carne. Eu recoloro <b>só a abertura da mandíbula</b> com a rampa de brasa do tiro aprovado (a da rodada 14).</p>
+  <ul>
+    <li>A lente do canhão, o "olho" de cima, as aberturas laterais e o resto da serpente ficam idênticos, pixel por pixel.</li>
+    <li>Na forma B a cabeça é maior e a primeira passada pegou também a lente e as aberturas laterais. Eu refiz pegando só a mancha da mandíbula, quadro a quadro.</li>
+    <li>No bote, a boca está fechada, então ele ficou como era.</li>
+  </ul>
+  <figure><img src="boca-antes-depois.png" alt="a boca da laranja antes e depois, ao lado do tiro aprovado"><figcaption><b>Em cima, o tiro aprovado para comparar.</b> Embaixo, antes e depois, ampliado 3×.</figcaption></figure>
+  <div class="par">
+    <figure><img src="boca-laranja-cerco.gif" alt="os dois cercos com a laranja"><figcaption><b>Os cercos</b> verde + laranja e azul + laranja.</figcaption></figure>
+    <figure><img src="boca-laranja-B.gif" alt="a carga e o bote da laranja na forma B"><figcaption><b>A carga e o bote</b> da laranja na forma B.</figcaption></figure>
+  </div>
+  <p class="sub">Uma observação: no próprio tiro aprovado, um quadro (o 4, em cima à direita) ainda tem a boca no pêssego. Deixei como está, porque é arte aprovada. Se quiser, igualo esse quadro também.</p>
+</div>
+
+<h2>O encolhe da verde (forma B)</h2>
+<div class="item">
+  <p>No encolhe antigo, entre os quadros 2 e 8 a verde virava outra cabeça: um focinho longo, chato e cinza, com um olho pequeno. Ela só voltava a ser ela no fim.</p>
+  <p>O novo tem as duas pontas fixas: a boca aberta do gás e a pose aprovada. A verde fecha a boca, se encolhe para trás e para a direita, e volta. O crânio redondo, o olho e as guelras verdes ficam o tempo todo. A laranja fica quieta.</p>
+  <div class="par">
+    <figure><img src="encolhe-B-antigo.gif" alt="o encolhe antigo"><figcaption><b>Antigo</b> (recusado).</figcaption></figure>
+    <figure><img src="encolhe-B-novo.gif" alt="o encolhe novo"><figcaption><b>Novo.</b></figcaption></figure>
+  </div>
+  <figure><img src="encolhe-B-quadros.png" alt="os quadros do encolhe antigo e do novo"><figcaption><b>Na primeira linha, a pose aprovada e o antigo.</b> Nas de baixo, os 9 quadros do novo.</figcaption></figure>
+  <ul>
+    <li><b>Foram 8 tentativas.</b> As recusadas:
+      <ul>
+        <li>as cabeças avançavam em vez de recuar;</li>
+        <li>a verde virava uma cabeça fina de espinhos;</li>
+        <li>em quatro delas, o canhão da laranja disparava sozinho. A palavra "recuo" (<i>recoil</i>) faz o gerador tratar a laranja como uma arma.</li>
+      </ul></li>
+    <li><b>São 9 quadros em vez de 13.</b> A maquete toca o encolhe em 1,2 s, qualquer que seja o número de quadros, então o tempo não muda.</li>
+    <li><b>A posição da cabeça vulnerável em cada quadro</b> (para o acerto e as veias) foi lida de novo nas guelras.</li>
+  </ul>
+</div>
+
+<h2>As duas mudanças que você escolheu</h2>
+<div class="item">
+  <p><b>Ela fica fixa no posto.</b> Saíram a troca entre 3 alturas, o balanço de "respirar" e a descida antes de cada habilidade. Só as animações a mexem. Ela sobe pelo rombo só na chegada e afunda só na fusão. A sonda mediu y = 142 o tempo todo, nas quatro formas.</p>
+  <p><b>O corpo inteiro leva dano.</b> Qualquer pixel visível dela leva dano; o tiro que passa no vazio entre os pescoços continua voando. A cabeça que vai cair vale <b>1,5×</b>.</p>
+  <ul>
+    <li><b>Onde o lábio do rombo cobre as roscas,</b> o casco absorve o tiro. Dentro do buraco as roscas aparecem e levam dano.</li>
+    <li><b>A "cabeça" é o desenho dela do crânio até um pouco depois da boca.</b> O focinho da verde e o canhão da laranja contam como cabeça. Isso precisou de duas correções:
+      <ul>
+        <li>a ponta do focinho da verde ficava de fora;</li>
+        <li>a primeira versão pegava o pescoço da azul morta, ao lado da boca da verde.</li>
+      </ul></li>
+    <li><b>Na forma C,</b> o toco da verde fica na frente do crânio da laranja. Na altura do crânio, o tiro acerta o toco e vale 1×; pelo alto da cabeça (10 linhas), vale 1,5×.</li>
+    <li><b>A vida de cada forma dobrou</b> (100, 100, 100 e 120 na fusão), porque agora quase todo tiro acerta. O número é provisório: a gente calibra jogando.</li>
+    <li><b>O clarão rosa de dano agora acende só no acerto da cabeça.</b> Com o corpo levando dano, ele piscava a cada tiro, a luta toda (medi 1 quadro em cada 3). No corpo ficam a fagulha e a marca; na cabeça, o respingo e o clarão. Isso também mostra que a cabeça vale mais.</li>
+    <li><b>A bomba</b> também fere o corpo.</li>
+  </ul>
+  <figure><img src="mapa-do-acerto.png" alt="o mapa do acerto nas quatro formas"><figcaption><b>O mapa do acerto</b>, nas formas A, B, C e na fusão. Vermelho é a cabeça (1,5×), verde é o corpo (1×) e azul é o lábio do rombo (absorve). O círculo tracejado é o crânio, e a linha amarela vai até a boca.</figcaption></figure>
+  <div class="par">
+    <figure><video src="jogo-corpo-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>Forma A.</b> A nave sobe e desce atirando: fagulha no corpo, respingo e clarão na cabeça. Ela não sai do lugar.</figcaption></figure>
+    <figure><video src="jogo-corpo-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>Forma B.</b> O mesmo.</figcaption></figure>
+  </div>
+  <p class="sub">As sondas passaram: os tiros (leque com vão em 17 de 17; o cerco erra quem fica no meio em 16 de 16 e acerta quem sobe em 16 de 16) e a fase 3 de ponta a ponta, até o hangar.</p>
+</div>
+
+<h2>A tela preta em volta da serpente</h2>
+<div class="item">
+  <p><b>Corrigida.</b> Era a camada das veias: o brilho aditivo do Phaser escurece o que é semitransparente atrás dela, e a nuvem do fundo é semitransparente. Por isso a caixa aparecia mais quando passava nuvem clara.</p>
+  <p>Troquei por um aditivo puro, que só soma luz. Medida no céu logo dentro da borda do quadro:</p>
+  <ul>
+    <li>antes: 28,9;</li>
+    <li>fora do quadro: 32,3;</li>
+    <li>agora: 35,1, igual a sem as veias.</li>
+  </ul>
+  <figure><img src="tela-preta-antes-depois.png" alt="antes e depois, com o contraste aumentado"><figcaption><b>Com o contraste triplicado para enxergar:</b> à direita da cabeça verde, a nuvem azul atrás dela aparece cortada e escura antes, e inteira depois.</figcaption></figure>
+  <p class="sub">Achei mais uma coisa, que fica para o cenário: a camada de brilho dos destroços cobre a tela inteira e escurece um pouco todas as nuvens do jogo, do mesmo jeito. Como é a tela inteira, não forma caixa. Não mexi porque é um sistema do jogo todo. Anotei para quando formos melhorar o cenário, logo depois da luta.</p>
+</div>
+
+<h2>Para você conferir</h2>
+<div class="item decidir">
+  <ol>
+    <li>A boca da laranja ficou na cor certa?</li>
+    <li>O encolhe novo da verde ficou bom?</li>
+    <li>Ela parada no posto, e o acerto no corpo, ficaram como você queria? O clarão só na cabeça está bom?</li>
+    <li>Posso seguir para a chuva de casulos?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

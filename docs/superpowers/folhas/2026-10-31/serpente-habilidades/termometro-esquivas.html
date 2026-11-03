@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: esquivas e termômetro</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 1000px) { .trio { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) { .par { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: as três esquivas e o termômetro</h1>
+<p class="sub">01/11/2026 · rodada 7 do gás e da faísca · nada foi commitado.</p>
+
+<div class="item">
+  <p>O que você disse sobre a folha anterior:</p>
+  <ul>
+    <li><i>"B que depois pinga, o resto ficou bom."</i></li>
+    <li><i>"no Leque de plasma, ele precisa dar espaço suficiente para a nave conseguir achar o melhor caminho sem tomar dano [...] alguns pingos pequenos ficam bem no espaço criado [...] pensei em criar 3 padroes, um para cada tiro. Quem perceber, aprende a tecnica."</i></li>
+    <li><i>"a pessoa que não tem o incendiar precisa carregar uma pequena barrinha [...] um termometro pequeno que sobe a temperatura, quando chegar, explode de volta na serpente [...] a vermelha vai carregar alguns segundos [...] e atirar [...] Caso tenha incendiar, a barrinha de termometro pega fogo e explode."</i></li>
+    <li><i>"A cabeça verde que solta o gás precisa fazer com que o gás saia da boca ou do nariz como um vapor para baixo em forma de leque instável, hoje em dia ele está solto no rosto dela."</i></li>
+  </ul>
+  <p>Depois você escolheu: <b>o termômetro zera a cada faísca</b>, e <b>as três esquivas</b> como padrões.</p>
+  <p>O que mudou:</p>
+  <ul>
+    <li><b>O vapor sai da boca da verde</b> e escorre para baixo, num leque que balança. No casco, ele vira um banco baixo na frente dela.</li>
+    <li><b>Cada faísca tem um padrão, e cada padrão ensina uma esquiva:</b> o leque (sair da linha), os trilhos (ficar parado), a fila (continuar andando). A geleia é a B que depois pinga, e as gotas só saem por trás.</li>
+    <li><b>O termômetro</b> fica ao lado dela. Sobe com os tiros que passam pelo gás, zera a cada faísca e, cheio, explode de volta nela. Com a carta, pega fogo e estoura.</li>
+    <li><b>A laranja carrega 2,5 s</b> antes de cada faísca (antes eram 0,6 s).</li>
+  </ul>
+</div>
+
+<h2>O vapor da verde</h2>
+<div class="item">
+  <ul>
+    <li><b>Sai da frente da mandíbula aberta</b> e desce a uns 50°, passando por baixo do queixo da azul. Testei 36° primeiro, mas aí o balanço deitava o vapor na cara da azul, que é o mesmo "solto no rosto".</li>
+    <li><b>O leque é instável:</b> a direção oscila, a abertura abre e fecha, e o vapor sai em baforadas.</li>
+    <li><b>A raiz acompanha a cabeça.</b> No idle ela mexe até uns 4 px (medi nos 9 quadros), e o vapor continua saindo da boca.</li>
+    <li><b>No vácuo ele não cai:</b> é ela que sopra para baixo. No casco ele se espalha pela chapa e vira um banco baixo que avança na frente dela. É ali que a nave esquenta o gás.</li>
+  </ul>
+  <figure><img src="vapor-verde.png" alt="a raiz do sopro da verde a cada 0,1 s"><figcaption><b>A raiz do sopro, a cada 0,1 s</b> (ampliada 3×): sai da mandíbula da verde (no alto, à direita), balança e escorre até o casco.</figcaption></figure>
+</div>
+
+<h2>As três esquivas</h2>
+<div class="item">
+  <p>O arco da laranja bate atrás de um bolsão do sopro, e a explosão arremessa o bolsão para longe do golpe. É assim que ela mira. O jeito de faiscar já entrega o padrão:</p>
+  <ul>
+    <li><b>1ª faísca, o leque</b> (um arco): uma bola grande mirada na nave rasga <i>atravessada</i> em três, e o pedaço do meio vem na linha da nave. <b>Sair da linha para um vão.</b></li>
+    <li><b>2ª faísca, os trilhos</b> (um arco que se bifurca): duas bolas, uma mirada 30 px acima da nave e outra 30 px abaixo. Cada uma rasga <i>ao longo</i> do caminho e vira uma fileira. <b>Ficar parado:</b> o vão é a linha da própria nave.</li>
+    <li><b>3ª faísca, a fila</b> (três arcos em ritmo, 0,4 s entre eles): três bolas, cada uma mirada onde a nave está naquele golpe. Elas voam inteiras e só rasgam depois. <b>Continuar andando.</b></li>
+  </ul>
+  <p><b>A geleia pinga só por trás.</b> A gota sai das costas do pedaço, mais devagar que ele, e fica na mesma pista (as gotas que saíam para os lados caíam nos vãos). Ela é menor e tão quente quanto o pedaço, então não vive mais que ele. A gotinha que o fio arrebentado deixa no vão do leque apaga na hora.</p>
+  <figure><video src="maquete7-esquivas.webm" autoplay loop muted playsinline controls></video><figcaption><b>A nave faz cada esquiva:</b> sobe para o vão do leque, fica parada entre os trilhos e sobe sem parar pela fila. Ela não atira aqui, então o termômetro fica vazio.</figcaption></figure>
+  <div class="trio">
+    <figure><img src="mapa-leque.png" alt="por onde o fogo do leque passou"><figcaption><b>O leque:</b> todo lugar por onde o fogo passou nessa faísca. O retângulo azul é a hitbox da nave (21×9): ela começa na linha do meio e sobe para o vão. O pedaço de baixo gruda no casco.</figcaption></figure>
+    <figure><img src="mapa-trilhos.png" alt="por onde o fogo dos trilhos passou"><figcaption><b>Os trilhos:</b> passam acima e abaixo, e a nave não se mexe.</figcaption></figure>
+    <figure><img src="mapa-fila.png" alt="por onde o fogo da fila passou"><figcaption><b>A fila:</b> as três linhas apontam para onde a nave estava em cada golpe. Ela cruza cada linha antes de o fogo chegar e segue subindo.</figcaption></figure>
+  </div>
+  <figure><img src="geleia-b-pinga.png" alt="a geleia do leque rasgando e pingando, quadro a quadro"><figcaption><b>A geleia do leque, a cada 0,1 s:</b> sai amassada, estica, rasga em três ligadas por fios, os fios arrebentam e as gotas saem por trás (para a direita, já que ela voa para a esquerda).</figcaption></figure>
+</div>
+<div class="item medida">
+  <p><b>Medido quadro a quadro</b>, contra a hitbox da nave e o raio visível de cada pedaço (com o balanço):</p>
+  <ul>
+    <li>Fazendo a esquiva certa, a menor folga no vídeo inteiro foi de <b>12,7 px</b> (uma gotinha). Nenhum toque.</li>
+    <li>Errando a técnica, a nave leva dano em todos os casos: parada na linha do leque, desviando 27 px nos trilhos, ou parando depois de qualquer golpe da fila.</li>
+  </ul>
+</div>
+
+<h2>O termômetro</h2>
+<div class="item">
+  <ul>
+    <li><b>Onde fica:</b> ao lado dela, à direita, perto da boca da laranja. A corrida se lê de uma vez: a boca dela enchendo e o termômetro subindo. Ele aparece com o sopro e some quando a habilidade acaba.</li>
+    <li><b>O que enche:</b> só tiro que atravessa o gás, contando o gás mais grosso que o tiro cruzou. Tiro no corpo dela não conta. Calibrei para uns <b>12 tiros seguidos no banco, cerca de 1,5 s</b>. Se a nave para de atirar, ele esfria devagar.</li>
+    <li><b>Zera a cada faísca</b> (sua escolha): a faísca queima o gás que a nave esquentou, e o gás novo sai frio. O vidro escurece e a coluna desce. Tiros que ainda estavam no ar não contam.</li>
+    <li><b>Cheio:</b> ele pisca branco, e o fogo corre pelo banco, sobe o sopro até a boca da verde e explode na cara dela. A explosão respinga geleia na laranja e na azul, e a verde para de soprar. É o contra-ataque que você aprovou, agora saindo do sopro novo.</li>
+    <li><b>Com a carta INCENDIÁRIO:</b> no primeiro toque no gás, o termômetro dispara até o topo, pega fogo e estoura em cacos.</li>
+  </ul>
+  <div class="par">
+    <figure><video src="maquete7-termometro.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com o tiro comum, a história inteira:</b> (1) a nave começa tarde, chega a 1/5 e a laranja faísca primeiro: zera. (2) Desviar do leque tira a nave do gás, e ela não enche a tempo: zera de novo. (3) Nos trilhos, ficar parado é a esquiva, então ela segue atirando no banco. Enche aos 9,8 s, antes da 3ª faísca.</figcaption></figure>
+    <figure><video src="maquete7-carta.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com a carta:</b> a nave desce até o banco e, no primeiro toque, o termômetro pega fogo e estoura. Nenhuma faísca sai.</figcaption></figure>
+  </div>
+  <div class="par">
+    <figure><img src="termometro-quadros.png" alt="o termômetro subindo, zerando e enchendo"><figcaption><b>O termômetro ampliado 5×:</b> vazio; sobe (o topo pisca a cada tiro); a laranja faísca, o vidro escurece e a coluna desce; sobe de novo, de vermelho até branco; cheio, pisca branco com um halo e some.</figcaption></figure>
+    <figure><img src="termometro-carta.png" alt="o termômetro pegando fogo e estourando"><figcaption><b>Com a carta, ampliado 5×:</b> dispara até o topo, pega fogo por cima e pelos lados e estoura em cacos.</figcaption></figure>
+  </div>
+</div>
+
+<h2>Uma consequência do vapor para baixo</h2>
+<div class="item decidir">
+  <ul>
+    <li>Agora o gás que a nave alcança fica <b>baixo</b>, no banco sobre o casco. A parte de cima do sopro está na frente do corpo dela, e o tiro bate nela antes. Para encher o termômetro, é preciso voar baixo.</li>
+    <li>Isso criou um ritmo. A 1ª janela é a mais fácil, porque nada está voando ainda: quem desce cedo quebra antes de qualquer leque sair. A 2ª é difícil, porque desviar do leque tira a nave do gás. A 3ª combina com a esquiva dos trilhos, já que ficar parado deixa a nave atirando. A fila só aparece para quem não esquentou o gás.</li>
+  </ul>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O vapor:</b> agora dá para ver que ele sai da boca da verde?</li>
+    <li><b>As três esquivas:</b> dá para ler qual vem pelo jeito que a laranja faísca (um arco, um arco bifurcado, três arcos)?</li>
+    <li><b>O termômetro:</b> o lugar (à direita dela) e o ritmo (~12 tiros, 1,5 s) estão bons? E está ok o gás ficar baixo, obrigando a voar baixo para esquentar?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

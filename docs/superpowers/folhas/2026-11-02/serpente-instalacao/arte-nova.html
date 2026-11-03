@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: a arte nova</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+  .dois { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 860px) { .tres, .dois { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a arte nova das habilidades</h1>
+<p class="sub">02/11/2026 · a primeira pausa da instalação · os gestos que faltavam, gerados no PixelLab · nada foi commitado.</p>
+
+<div class="item">
+  <p>Antes de pôr as habilidades no jogo, faltavam dois grupos de gestos. Os GIFs estão na velocidade do jogo e ampliados 2×.</p>
+  <ul>
+    <li><b>O cerco na forma A:</b> três gestos, um para cada dupla que ataca junta. As duas cabeças da dupla avançam e abrem a boca, e a terceira fica parada.</li>
+    <li><b>O gás na forma B, "feridas e furiosas":</b> os seis gestos do gás, diferentes dos da forma A.</li>
+  </ul>
+  <p>Todos começam e terminam no quadro aprovado, sem saltos entre quadros e sem escurecer o corpo (o brilho fica a 92% ou mais do aprovado). Limpei a mancha cinza que o gerador pinta no buraco das roscas e as fagulhas soltas que ele pinta em volta das cabeças. O que sai das bocas (o tiro, o gás, a faísca) vem depois, desenhado pelo jogo.</p>
+</div>
+
+<h2>O cerco (forma A)</h2>
+<div class="item">
+  <div class="tres">
+    <figure><img src="arte-cerco-cv.gif" alt="cerco azul e verde"><figcaption><b>Azul + verde.</b> A laranja fica quieta.</figcaption></figure>
+    <figure><img src="arte-cerco-vl.gif" alt="cerco verde e laranja"><figcaption><b>Verde + laranja.</b> A laranja não abre uma bocarra: mantém o canhão e só solta a mandíbula pequena, como no gás aprovado.</figcaption></figure>
+    <figure><img src="arte-cerco-cl.gif" alt="cerco azul e laranja"><figcaption><b>Azul + laranja.</b> A verde fica idêntica ao quadro aprovado.</figcaption></figure>
+  </div>
+  <figure><img src="arte-cerco.png" alt="os quadros do cerco"><figcaption><b>Todos os quadros</b> (10 por gesto). O tiro sai quando as duas bocas estão abertas.</figcaption></figure>
+</div>
+
+<h2>O gás na forma B: feridas e furiosas</h2>
+<div class="item">
+  <div class="dois">
+    <figure><img src="arte-gasB-sequencia.gif" alt="a sequência do gás na B"><figcaption><b>A sequência, como o gás vai tocá-la:</b>
+      <ul>
+        <li>a verde se ergue com raiva e abre a boca para baixo;</li>
+        <li>sacode a cabeça aos trancos enquanto sopra;</li>
+        <li>a laranja gira o focinho como uma torre, mira e treme;</li>
+        <li>recua num tranco seco, como um canhão;</li>
+        <li>a verde volta a sacudir, e no fim fecha a boca.</li>
+      </ul>
+    </figcaption></figure>
+    <figure><img src="arte-gasB-encolhe.gif" alt="o contra na B"><figcaption><b>O contra:</b> as duas recuam de uma vez e se encolhem, e depois voltam à pose.</figcaption></figure>
+  </div>
+  <figure><img src="arte-gasB.png" alt="os quadros do gás na B"><figcaption><b>Os seis conjuntos, quadro a quadro:</b> abrir, soprar, carregar, o tranco, fechar e se encolher.</figcaption></figure>
+</div>
+
+<h2>O que vale saber</h2>
+<div class="item">
+  <ul>
+    <li><b>Na forma B, a boca da verde fica mais alta e mais à frente que hoje</b> (uns 20 px de tela). Ela se ergue por cima do toco, onde há espaço livre. Ergui de propósito: as versões em que a cabeça descia mudavam de onde o gás sai, a lição de 02/11. Por isso as três esquivas da forma B vão ser medidas de novo no jogo, como a spec previa.</li>
+    <li><b>O que não passou</b> (o registro está em <code>cru/cerco.json</code> e <code>cru/gasB.json</code>):
+      <ul>
+        <li>a laranja virando uma bocarra de dentes;</li>
+        <li>uma cabeça que devia ficar parada abrindo a boca;</li>
+        <li>o toco virando uma cabeça;</li>
+        <li>uma explosão pintada em cima da serpente inteira, quando o pedido dizia "atira como um canhão";</li>
+        <li>babas e jatos pintados saindo das bocas.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li>Os três gestos do cerco ficam assim?</li>
+    <li>Os gestos do gás na forma B ficam assim (a verde erguida por cima do toco, a laranja de torre e canhão)?</li>
+  </ol>
+  <p class="sub">Com o seu ok, eu sigo para a instalação (as medidas de cada quadro, a camada de pixels, a luta sem a investida).</p>
+</div>
+</main>
+</body>
+</html>

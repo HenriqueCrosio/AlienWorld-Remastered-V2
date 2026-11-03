@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente M1</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente refeita pelo CCGS: M1</h1>
+<p class="sub">31/10/2026 · GDD <code>design/gdd/serpente-do-casco.md</code> · arquitetura <code>docs/architecture/serpente-do-casco-sketch.md</code> e <code>…-ai-sketch.md</code>. Nada foi commitado. O backup da forma anterior está no branch <code>backup/serpente-s1b</code>.</p>
+
+<div class="item">
+  <p>O M1 é o primeiro passo, antes de qualquer outra coisa: <b>um buraco e um clipe</b>. A forma A sai de uma toca real no casco, no jogo, com o bote travado de verdade (o cérebro novo). Você aprova a emergência e só depois vem a forma A inteira (M2).</p>
+  <ul>
+    <li><b>No rombo, ela aparece inteira</b> (as roscas atrás do lábio do rombo), como você pediu.</li>
+    <li><b>O bote:</b> ela mergulha, a lombada corre por baixo do casco até a nave, a ponta trava branca, e ela irrompe de uma toca real com o buraco H1. Ela sobe com a emergência (a E2 emendada no erguer) e para de boca aberta. Depois afunda, volta por baixo e sobe de novo no rombo.</li>
+    <li><b>Nada cobre o corpo dela:</b> a emergência já é desenhada cortada na linha do chão, e a borda do buraco H1 fica na frente dos pescoços. O escuro saiu do código.</li>
+    <li>O estouro do casco solta o cascalho dos próprios pixels <b>por trás</b> dela. Na primeira filmagem, os pedaços do motor de destroços cobriam os pescoços com linhas vermelhas; foi corrigido antes desta folha.</li>
+  </ul>
+  <p>A nave no filme é um boneco intocável e não atira. Ela fica em três lugares e desvia 45 px para a esquerda quando a ponta trava, para cada bote sair num x diferente.</p>
+</div>
+
+<h2>1. No jogo, em velocidade real</h2>
+<div class="item decidir">
+  <figure><video src="m1.webm" autoplay loop muted playsinline controls></video><figcaption><b>Três botes seguidos</b>, a partir do repouso no rombo.</figcaption></figure>
+  <figure><video src="m1-bote-zoom.webm" autoplay loop muted playsinline controls></video><figcaption><b>Um bote ampliado</b> (2×): a trava, o estouro, a subida pela toca, a janela, a descida e a cura do buraco.</figcaption></figure>
+</div>
+
+<h2>2. O que ainda não está aqui (é o M2 em diante)</h2>
+<div class="item">
+  <ul>
+    <li>Na janela ainda não há contra-ataque (o "dente"), a chuva ou os tiros de fundo. A forma A completa é o M2.</li>
+    <li>Ela não morre neste modo de teste. A luta normal continua a de antes, intacta, e as sondas da fase 3, da fusão e dos chefões passam.</li>
+  </ul>
+</div>
+
+<h2>3. Para você julgar (os pontos fracos que eu já vejo)</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A descida é a subida tocada ao contrário,</b> porque ainda não há arte de descida, e pode ler como rebobinar.</li>
+    <li><b>A altura do bote é fixa:</b> a boca só está aberta no quadro 11, com a cabeça em y ~98. Para ela morder na altura da nave, o clipe precisaria de bocas abertas em mais de uma altura (arte nova).</li>
+    <li><b>Na emenda E2 → erguer</b> a cor do pescoço muda um pouco. Isso já estava na maquete que você viu.</li>
+    <li><b>A cura do buraco</b> desfaz as placas em pontinhos. Pode ler como "esfarelando"; trocar por um ruído mais grosso é uma linha.</li>
+    <li><b>A lombada e a trava branca</b> na escala do jogo: diga se você enxerga o aviso.</li>
+    <li><b>As cores do buraco H1</b> ficaram como na maquete. Se quiser, dá para ajustá-las ao tom do casco.</li>
+  </ol>
+</div>
+
+<h2>4. A arte instalada (conferida ampliada)</h2>
+<div class="item">
+  <figure><img src="emerge-A.png" alt="a emergência"><figcaption><b>A emergência da forma A</b>, 21 quadros. Em branco, o círculo de acerto na cabeça viva; em amarelo, as outras cabeças; em rosa, as bocas.</figcaption></figure>
+  <figure><img src="toca-H1.png" alt="a toca H1"><figcaption><b>A toca H1:</b>
+    <ul>
+      <li>em cima, o fundo, a borda e o mapa de abertura;</li>
+      <li>no meio, o buraco no casco em vários pontos e ela saindo dele;</li>
+      <li>embaixo, a cura e ela no rombo.</li>
+    </ul>
+  </figcaption></figure>
+</div>
+</main>
+</body>
+</html>

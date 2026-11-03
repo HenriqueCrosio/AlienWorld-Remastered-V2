@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: geleia de plasma</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 860px) { .par { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a geleia de plasma</h1>
+<p class="sub">01/11/2026 · rodada 6 do gás e da faísca · nada foi commitado.</p>
+
+<div class="item">
+  <p>O que você disse sobre a folha anterior:</p>
+  <ul>
+    <li><i>"bolas maiores como se fossem geleias [...] e se desfazer ou desgrudar em pequenos pedaços [...] quero o comportamento de algo viscoso, como se fosse liquido"</i></li>
+    <li><i>"Quando a nave explode o gas com o tiro, precisa ficar claro que o jogador conseguiu quebrar isso.... talvez uma explosão apontando para a cara das serpentes?"</i></li>
+    <li><i>"não existe nada saindo da cabeça laranja que mostre que é ela fazendo isso"</i></li>
+  </ul>
+  <p>O que mudou:</p>
+  <ul>
+    <li>As bolas viraram <b>geleia de plasma</b>: maiores, balançam o tempo todo e se desfazem como líquido grosso.</li>
+    <li>Quando a nave acende a nuvem, <b>o fogo corre de volta pelo sopro e a geleia explode na cara das três cabeças</b>, e fica grudada queimando.</li>
+    <li>A <b>laranja carrega antes de cada faísca</b>: a boca acende, solta fagulhas e o arco salta dela até o gás.</li>
+  </ul>
+</div>
+
+<h2>A geleia</h2>
+<div class="item">
+  <ul>
+    <li><b>Ela balança como uma gota de verdade.</b> A explosão que a arremessa a amassa no sentido do empurrão, e ela sai tremendo. A pele queimando ferve, então ela nunca fica parada. As gotas pequenas tremem mais rápido e assentam antes, como na física dos líquidos.</li>
+    <li><b>Ela se desfaz como líquido grosso:</b> um lado incha, um <b>fio</b> se forma entre o pedaço e o resto, o fio afina conforme estica e arrebenta, vira uma gotinha no meio, e as duas pontas voltam com o tranco.</li>
+    <li><b>Ela não quica:</b> a que bate no casco se espalha, gruda e queima ali até apagar em fumaça.</li>
+    <li><b>Ela esfria:</b> escurece, encolhe um pouco e apaga em fumaça. O alcance continua limitado.</li>
+  </ul>
+  <p>Fiz dois jeitos de ela se desfazer:</p>
+  <div class="par">
+    <figure><video src="maquete6-geleia-pinga.webm" autoplay loop muted playsinline controls></video><figcaption><b>A. Pinga:</b> pelo caminho ela solta gotas para os lados, cada uma presa por um fio que arrebenta. A bola vai diminuindo, e as gotas abrem um leque espalhado.</figcaption></figure>
+    <figure><video src="maquete6-geleia-racha.webm" autoplay loop muted playsinline controls></video><figcaption><b>B. Racha:</b> ela estica de lado e rasga em duas; o fio grosso entre elas vira uma terceira gota no meio. É o leque de três de antes, com o pedaço do meio na linha, agora em líquido.</figcaption></figure>
+  </div>
+  <figure><img src="geleia-pinga-quadros.png" alt="uma geleia pingando, quadro a quadro"><figcaption><b>A, quadro a quadro</b> (a cada 0,1 s): ela sai amassada, balança, um lado incha, a gota sai presa pelo fio, o fio arrebenta.</figcaption></figure>
+  <figure><img src="geleia-racha-quadros.png" alt="uma geleia rachando, quadro a quadro"><figcaption><b>B, quadro a quadro</b> (a cada 0,07 s): ela balança, estica de lado, vira um amendoim, rasga em três ligadas por fios, os fios arrebentam.</figcaption></figure>
+</div>
+
+<h2>A faísca da laranja</h2>
+<div class="item">
+  <p>Por 0,6 s antes de cada faísca, a boca da laranja acende e pulsa, crescendo, e solta fagulhas pela frente. Na hora da faísca, ela dá um clarão e um arco quente salta da boca dela até a raiz do gás, junto com um jato de fagulhas. A nuvem acende ali.</p>
+  <figure><img src="faisca-laranja.png" alt="a boca da laranja carregando e a faísca saltando até o gás"><figcaption><b>A carga e o salto</b> (a cada 0,07 s): a boca da laranja, à direita, acende e solta fagulhas; o arco salta até a raiz do gás, atrás da boca da verde, e a nuvem acende.</figcaption></figure>
+  <p class="sub">Ela continua no idle: a animação da laranja faiscando (e a da verde soprando) eu gero depois que a mecânica for aprovada. O brilho e as fagulhas ficam no lugar da boca dela.</p>
+</div>
+
+<h2>O contra-ataque</h2>
+<div class="item decidir">
+  <ul>
+    <li><b>O fogo corre de volta pelo sopro.</b> A nave acende a nuvem pelo lado dela, e a chama segue o gás até a fonte, na boca delas. É o que acontece com uma mangueira de gás que pega fogo na ponta.</li>
+    <li><b>A explosão vai na cara.</b> O gás em frente a cada cara é arremessado nela, para longe do ponto aceso: uma bola de geleia por cabeça, a da verde maior. Cada uma estoura apontada para a cara, com um anel de choque, gruda e fica queimando, soltando fumaça.</li>
+    <li><b>O golpe aparece:</b> ela pisca, é empurrada para trás, a tela treme, e a verde para de soprar. A habilidade acabou.</li>
+    <li><b>Nada volta para a nave.</b> O gás do lado da nave é ralo e só pisca. Na folha anterior, alguns bolsões vinham para a nave; agora a explosão vai toda nelas, como você pediu.</li>
+  </ul>
+  <div class="par">
+    <figure><video src="maquete6-contra.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com o tiro comum:</b> a primeira leva sai. Quando a nuvem se refaz, o lugar já está quente e ela acende enquanto a laranja carrega a segunda faísca. O jogador corta a faísca.</figcaption></figure>
+    <figure><video src="maquete6-carta.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com a carta INCENDIÁRIO:</b> acende no primeiro toque, antes da primeira faísca. Nenhuma leva sai.</figcaption></figure>
+  </div>
+  <figure><img src="contra-na-cara.png" alt="o fogo voltando pelo sopro e explodindo na cara das três cabeças"><figcaption><b>O contra-ataque, quadro a quadro</b> (a cada 0,07 s): a chama corre de volta pelo sopro, a geleia explode na cara da azul, da verde e da laranja, em sequência, e fica grudada queimando.</figcaption></figure>
+  <p class="sub">O tempo para acender e a dica de calor (os pontos âmbar onde os tiros passam) ficaram como na folha anterior.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A geleia:</b> A (pinga pelo caminho) ou B (racha em três)? Ou uma mistura, por exemplo a B que depois pinga?</li>
+    <li><b>O contra-ataque:</b> agora dá para ver que o jogador quebrou a habilidade?</li>
+    <li><b>A faísca:</b> agora dá para ver que é a laranja que acende o gás?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: gás e faísca</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: o gás e a faísca</h1>
+<p class="sub">31/10/2026 · a habilidade nova, no lugar do quique · nada foi commitado.</p>
+
+<div class="item">
+  <p>Você: <i>"Temos o azul que solta o raio, o verde pode ter uma caracteristica de poison ou gas, e o laranja a faísca. [...] o verde começa a soltar gás em volta deles e um pouco a frente, o laranja começa a fagulhar esse gás e fogos com formato de plasma começam a ir na direção da nave e se fragmentar"</i>.</p>
+  <p>As decisões que você tomou:</p>
+  <ul>
+    <li>O tiro da nave também acende a nuvem e joga a explosão de volta nela, mas leva alguns tiros. O tiro esquenta o lugar onde passa e um raio pequeno em volta, não a nuvem inteira, e a dica é sutil. Com a carta INCENDIÁRIO, a nuvem acende no primeiro toque.</li>
+    <li>A laranja acende 2 ou 3 vezes por uso.</li>
+    <li>As bolas se partem num leque que dá para ler.</li>
+    <li>Só o fogo machuca; o gás sozinho não.</li>
+  </ul>
+</div>
+
+<h2>A física que segura a habilidade</h2>
+<div class="item">
+  <ul>
+    <li><b>O gás traz o próprio oxidante,</b> como combustível de foguete. Sem isso, nada queimaria no vácuo.</li>
+    <li><b>O gás não fica parado nem sobe:</b> sai da boca da verde, se espalha por igual e vai ficando ralo. Por isso a nuvem só é densa em volta delas e um pouco à frente, e só queima ali.</li>
+    <li><b>A faísca voa até a raiz do gás,</b> na boca da verde, e acende ali. A explosão empurra o fogo para longe desse ponto, ao longo do sopro, ou seja, para frente, na direção da nave.</li>
+    <li><b>Fogo sem gravidade é redondo:</b> por isso as bolas de plasma.</li>
+    <li><b>As bolas seguem retas</b> e vão esfriando até apagar, então o alcance tem limite. Cada uma se parte em três, num leque em volta da própria linha; o pedaço do meio continua na linha.</li>
+    <li><b>A verde continua soprando</b> e a nuvem se refaz entre uma faísca e outra (cerca de 1,8 s), por isso as três levas saem com a mesma força.</li>
+  </ul>
+  <figure><img src="gas-sequencia.png" alt="a habilidade, da nuvem aos leques"><figcaption><b>Uma leva, na ordem:</b> a nuvem em volta delas; a faísca acende a raiz; a chama atravessa o gás; as bolas de plasma saem para frente; elas se partem em leques.</figcaption></figure>
+</div>
+
+<h2>As três situações</h2>
+<div class="item decidir">
+  <figure><video src="maquete5-gas-habilidade.webm" autoplay loop muted playsinline controls></video><figcaption><b>1. A habilidade sozinha:</b> três faíscas e três levas; cada leva vira uma cortina de pedaços com vãos, que anda até a nave.</figcaption></figure>
+  <figure><video src="maquete5-gas-contra.webm" autoplay loop muted playsinline controls></video><figcaption><b>2. O contra-ataque, com o tiro comum:</b> a nave atira na frente da nuvem. A primeira leva sai sempre, porque não dá tempo de esquentar o bastante antes. Quando a nuvem se refaz, o lugar já está quente e acende pelo lado da nave, antes da segunda faísca. A chama corre de volta por cima dela, ela se machuca e a habilidade acaba ali. Os bolsões que estavam do lado de cá do ponto aceso são empurrados para a nave: é a mesma física, e o contra-ataque não sai de graça.</figcaption></figure>
+  <figure><video src="maquete5-gas-carta.webm" autoplay loop muted playsinline controls></video><figcaption><b>3. Com a carta INCENDIÁRIO:</b> o tiro já leva fogo e acende a nuvem no primeiro toque, antes da primeira faísca. Nenhuma leva sai, e a explosão volta nela.</figcaption></figure>
+  <figure><img src="gas-dica-calor.png" alt="a mesma parte da nuvem, sem e com o calor dos tiros"><figcaption><b>A dica sutil:</b> o mesmo trecho da nuvem no mesmo instante; à esquerda sem tiros, à direita com a nave atirando. Os pontos âmbar aparecem só onde os tiros passaram e ficam mais densos conforme esquenta.</figcaption></figure>
+  <p class="sub">O calor esfria devagar (em cerca de 3 s), então quem insiste no mesmo lugar acende a nuvem no segundo ciclo. No jogo, cada arma esquenta conforme o dano dela: a maquete usa uma arma só. Ela fica no idle porque as animações da verde soprando e da laranja faiscando ainda não existem; eu gero depois que a mecânica for aprovada. Os desenhos do gás, do fogo e das bolas são provisórios.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>A habilidade</b> está como você imaginou: a nuvem, a faísca e os leques?</li>
+    <li><b>O contra-ataque:</b> o tempo para acender (o segundo ciclo) e a dica estão bons, ou a dica está sutil demais?</li>
+    <li><b>Os bolsões que vêm para a nave quando ela acende a nuvem:</b> ficam, como a física manda, ou a explosão vai toda de volta nela?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: o olho e a salva</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 860px) { .par { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: o raio-x no olho e a salva</h1>
+<p class="sub">01/11/2026 · rodada 9 das habilidades (o raio da azul) · nada foi commitado.</p>
+
+<div class="item">
+  <p>O que você disse sobre a <code>raio-varredura.html</code>:</p>
+  <ul>
+    <li><i>"Gostei do estilo: o raio-x pode sair dos olhos da serpente, o raio sai da boca."</i></li>
+    <li><i>"No último raio vai acontecer uma salva de raios mais rápidos, a varredura vai ser mais rápida também [...] Em diferentes locais, vai durar mais segundos que o raio 3, mas vai ser divertido desviar de muitos seguidos."</i></li>
+    <li><i>"O raio, consequentemente, vai cortar o cenário com menos largura."</i></li>
+  </ul>
+  <p>Depois você escolheu que os lugares da salva são <b>sorteados a cada luta, com uma regra</b> que garante a saída.</p>
+  <p>O que mudou:</p>
+  <ul>
+    <li><b>O aviso sai do olho da azul.</b> O olho brilha e solta dois feixes finos que acendem as linhas da fatia, e o raio continua saindo da boca.</li>
+    <li><b>O terceiro raio virou a salva:</b> seis raios finos, cada um numa fatia estreita, um atrás do outro.</li>
+    <li>Os dois primeiros (a fatia de cima e a de baixo) continuam iguais.</li>
+  </ul>
+</div>
+
+<h2>O raio-x no olho</h2>
+<div class="item">
+  <ul>
+    <li>O olho da frente da azul fica uns 13 px acima da boca. Na carga, ele acende e solta <b>dois feixes finos</b> que vão até onde começam as duas linhas da fatia. Ela mira com o olho e atira com a boca.</li>
+    <li><b>A fatia desenhada é exatamente onde o raio vai passar</b>, contando a largura dele. Tentei primeiro girar a fatia inteira no olho, mas, para cobrir o raio de verdade perto da cabeça, ela abria tanto na borda da tela que a fatia estreita da salva virava meia tela. Com os feixes do olho indo até as linhas, o aviso fica exato e o estilo fica o seu.</li>
+  </ul>
+  <figure><img src="raio-olho.png" alt="o olho da azul acendendo a fatia e a boca disparando"><figcaption><b>A cabeça da azul, ampliada 4×:</b> o olho acende e os dois feixes saem dele até as linhas, enquanto a boca carrega embaixo; depois o raio sai da boca. Os dois últimos quadros são da salva, com o raio fino.</figcaption></figure>
+  <figure><img src="raio-avisos2.png" alt="os avisos da fatia de cima, da de baixo e da salva"><figcaption><b>Os avisos, ampliados 2×:</b> a fatia de cima, a de baixo e um raio da salva disparando com o aviso do próximo já na tela.</figcaption></figure>
+</div>
+
+<h2>A salva</h2>
+<div class="item">
+  <ul>
+    <li><b>Seis raios finos</b>, com a metade da largura dos outros (6 px). Cada um varre uma fatia estreita em 0,3 s, e sai um a cada 0,7 s.</li>
+    <li><b>O aviso do próximo raio já aparece enquanto o atual dispara</b>, então o jogador sempre vê um raio à frente.</li>
+    <li>A primeira carga é mais longa (1 s), para anunciar a salva. Ela inteira dura uns 4,5 s; o terceiro raio antigo durava 3,5 s.</li>
+    <li><b>Sorteada a cada luta, com uma regra:</b> cada fatia cobre o lugar onde a nave está, então é preciso se mexer. A saída fica a no máximo 25 px, o que a nave percorre em 0,23 s, menos que os 0,34 s entre o fim de um raio e o disparo do próximo. A saída nunca sai da tela; o lado da saída e o sentido da varredura são sorteados.</li>
+  </ul>
+  <figure><video src="maquete9-salva.webm" autoplay loop muted playsinline controls></video><figcaption><b>As três vezes:</b> a nave desce na fatia de cima, sobe na de baixo e desvia dos seis raios da salva.</figcaption></figure>
+  <figure><img src="raio-salva-quadros.png" alt="a salva quadro a quadro"><figcaption><b>A salva, quadro a quadro:</b> cada raio fino varre a sua fatia, o aviso do próximo já está na tela e a nave sai da fatia antes do disparo.</figcaption></figure>
+  <div class="par">
+    <figure><img src="mapa-raio-cima2.png" alt="o que a fatia de cima varre"><figcaption><b>A fatia de cima</b> (igual à rodada anterior): em azul, tudo o que o raio varreu; a nave desce para fora.</figcaption></figure>
+    <figure><img src="mapa-raio-baixo2.png" alt="o que a fatia de baixo varre"><figcaption><b>A fatia de baixo:</b> a nave sobe para fora.</figcaption></figure>
+  </div>
+  <p class="sub">Ela continua no idle. Na animação, a cabeça da azul gira acompanhando cada raio; na salva, ela vira rápido de um alvo para o outro. O desenho do raio continua provisório.</p>
+</div>
+<div class="item medida">
+  <p><b>Medido quadro a quadro:</b></p>
+  <ul>
+    <li><b>O aviso é exato:</b> nenhum ponto do raio passou fora da fatia desenhada.</li>
+    <li><b>A regra se sustenta:</b> em quatro sorteios diferentes, a nave sempre escapou dos seis raios, sem nenhum toque. A nave do teste para bem na saída, com 4 a 5 px de folga, e dá para ir mais longe.</li>
+    <li>Parada no mesmo lugar, a nave é atingida na salva em todos os casos.</li>
+  </ul>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O raio-x no olho:</b> lê como ela mirando com o olho e atirando com a boca?</li>
+    <li><b>O ritmo da salva:</b> um raio a cada 0,7 s, com saídas de até 25 px, está divertido? Ou apertado, ou folgado demais?</li>
+    <li><b>O raio fino da salva</b> (6 px, metade do normal) está na largura que você imaginou?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

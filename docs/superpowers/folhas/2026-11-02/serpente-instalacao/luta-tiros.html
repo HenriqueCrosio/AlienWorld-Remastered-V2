@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: a luta sem a investida</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a luta sem a investida, com os tiros novos</h1>
+<p class="sub">02/11/2026 · a segunda pausa da instalação · gravado no jogo, em velocidade real · nada foi commitado.</p>
+
+<div class="item">
+  <p><b>Já está no jogo:</b></p>
+  <ul>
+    <li><b>A investida saiu de todas as formas.</b> Ela fica sempre no rombo: em 3 minutos de luta, passando pelas quatro formas, ela não saiu do lugar nenhuma vez.</li>
+    <li><b>O ciclo novo das formas A e B:</b> uma pausa de 2,4 s com dois tiros comuns, e depois a próxima habilidade. As habilidades ainda não estão instaladas, então por enquanto ela só faz as pausas.</li>
+    <li><b>Os tiros B:</b> a agulha da azul, a gota de veneno da verde e a brasa da laranja, desenhados em pixel como na maquete. A verde pinga e a laranja solta fumaça e fagulhas. A verde e a laranja dão o clarão pequeno na boca.</li>
+    <li><b>As três variações, em rodízio:</b> o mirado (uma cabeça por vez), o leque de veneno (três gotas abertas) e o cerco (uma dupla atira junto, 22 px acima e abaixo da nave; as duplas se revezam). Na forma A, cada uma tem o seu gesto. Na B, vale o erguer.</li>
+    <li><b>A forma C</b> ficou com a rajada e o leque de hoje, agora com a brasa.</li>
+  </ul>
+</div>
+
+<h2>Os vídeos</h2>
+<div class="item">
+  <figure><video src="jogo-tiros-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>Forma A.</b> Os gestos dos tiros, e os cercos novos do PixelLab.</figcaption></figure>
+  <figure><video src="jogo-tiros-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>Forma B:</b> verde e laranja, com o erguer.</figcaption></figure>
+  <figure><video src="jogo-tiros-C.webm" autoplay loop muted playsinline controls></video><figcaption><b>Forma C:</b> a rajada e o leque com a brasa.</figcaption></figure>
+  <p class="sub">A nave nos vídeos é a da sonda: ela fica parada e só pula para o vão quando vem um leque.</p>
+</div>
+
+<h2>O que a sonda mediu</h2>
+<div class="item medida">
+  <ul>
+    <li><b>A caixa de colisão de cada tiro é a de hoje,</b> 11,7 × 8,1 px, em mais de 7 mil medidas. A bala do jogo virou só a caixa, invisível. O tiro em si é desenhado na camada, e por isso aparece por cima do corpo dela quando sai da boca; antes, ele nascia por baixo.</li>
+    <li><b>O leque deixa vão:</b> com a nave no vão, 0 acertos em 11 leques, tanto na A quanto na B.</li>
+    <li><b>O cerco erra quem fica no meio:</b> 0 acertos em 11. Quem sobe 22 px leva o tiro: 10 acertos em 11.</li>
+  </ul>
+</div>
+
+<h2>Para você conferir</h2>
+<div class="item decidir">
+  <ol>
+    <li>Os tiros e as variações ficam assim, inclusive a velocidade e o ritmo das pausas?</li>
+    <li>Posso seguir para a chuva de casulos?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

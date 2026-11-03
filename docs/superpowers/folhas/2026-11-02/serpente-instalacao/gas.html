@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: o gás</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tres { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .tres { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .ok { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: o gás + faísca no jogo</h1>
+<p class="sub">03/11/2026 · pausa 5, nas formas A e B · nada foi commitado.</p>
+
+<h2>Depois das suas respostas</h2>
+<div class="item medida">
+  <h3>A sequência nova do gás na forma B</h3>
+  <p>A forma A segue com o leque, os trilhos e a fila. A B ganhou três golpes próprios.</p>
+  <p><b>O casco não é chão.</b> Ele fica no fundo, e a nave pode descer por cima dele até a borda de baixo da tela. Quem se esconde embaixo da crista escapa das geleias, que estouram nela. Por isso o último golpe da B atravessa a crista e cobre essa faixa:</p>
+  <ul>
+    <li><b>Rasteira:</b> uma geleia na direção da nave, que rasga em três como o leque, e outra que corre rente à crista e estoura nela. O certo é <b>subir</b>.</li>
+    <li><b>Cortina:</b> três trens de uma vez: um acima da nave, um na linha dela e um rente à crista. O certo é <b>meio passo para o vão</b> entre o de cima e o do meio.</li>
+    <li><b>Fila funda</b> (o último): três geleias em ritmo. A primeira vai na nave; as outras duas <b>atravessam o casco para baixo</b> e rasgam em leque, cobrindo a faixa onde a nave se esconderia. O certo é <b>continuar subindo</b>; quem se escondeu embaixo do casco nas outras é queimado aqui.</li>
+  </ul>
+  <div class="par">
+    <figure><video src="jogo-gas-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>A esquiva certa:</b> a nave sobe; na fila funda, os dois leques de baixo atravessam o casco e se abrem embaixo dele.</figcaption></figure>
+    <figure><video src="jogo-gas-B-escondida.webm" autoplay loop muted playsinline controls></video><figcaption><b>A nave escondida embaixo do casco:</b> escapa da rasteira e da cortina, e a fila funda a pega.</figcaption></figure>
+  </div>
+  <figure><img src="gas-padroes-B.png" alt="os três golpes da forma B"><figcaption><b>3×:</b> a rasteira (q282, q312), a cortina (q390, q420) e a fila funda atravessando o casco (q500, q520).</figcaption></figure>
+  <figure><img src="gas-escondida-B.png" alt="a fila funda chegando à nave escondida"><figcaption><b>A nave escondida, 2×:</b> a fila funda atravessa a crista e desce até ela (q494 a q534).</figcaption></figure>
+  <p><b>Medido no jogo, em quatro voltas:</b></p>
+  <ul>
+    <li><b>a esquiva certa passa nos três,</b> com folga de 18,1 px (rasteira), 14,0 px (cortina) e 61 px (fila funda), acima do mínimo de 12;</li>
+    <li><b>a nave parada e a que fica rente acima da crista</b> são queimadas nos três;</li>
+    <li><b>a nave escondida embaixo do casco</b> escapa da rasteira e da cortina, como você queria, e é queimada na fila funda;</li>
+    <li><b>não sobra esconderijo:</b> com o mesmo código, testei 100 pontos embaixo do casco (5 colunas, de y 152 a 211). Na fila funda, nenhum fica seguro.</li>
+  </ul>
+  <p class="sub">Para fechar a faixa toda, os dois leques de baixo miram em y 168 e 196 e voam a 135 px/s. Mais devagar, eles chegavam frios na beira esquerda (só a geleia acesa queima) e deixavam um ou dois cantos seguros. Antes disso, a cortina subiu o trem de cima de 48 para 54 px acima da nave, para a folga passar de 11,7 px.</p>
+
+  <h3>A boca aberta conta como cabeça</h3>
+  <p>Olhando de perto, o que tampava a cabeça da verde durante o gás era principalmente o toco da azul morta, curvado logo ao lado; as mandíbulas abertas também ficavam de fora. Agora, nos gestos, a cabeça vai um pouco além da boca e pega as mandíbulas, e a garganta acesa também conta. O toco continua sendo corpo.</p>
+  <ul>
+    <li>Na B, durante o gás, a cabeça passa a ser acertável de frente em 11 a 17 linhas de tiro. Antes eram 2 a 4.</li>
+    <li>Na A conferi os gestos da azul (tiro, chuva, cercos, raio, gás): nenhuma outra cabeça entra.</li>
+    <li>Parada no posto, nada muda.</li>
+  </ul>
+  <figure><img src="boca-aberta-cabeca.png" alt="o mapa do acerto antes e agora, em dois quadros do gás da B"><figcaption><b>O mapa do acerto em dois quadros do gás da B:</b> vermelho é cabeça (1,5×), verde é corpo. O ponto amarelo é a boca e o branco é o crânio.</figcaption></figure>
+</div>
+
+<h2>O que entrou</h2>
+<div class="item">
+  <p>É o gás das rodadas 5 a 7 e 13 que você aprovou:</p>
+  <ul>
+    <li><b>A verde abre a boca e solta o gás para baixo,</b> em leque e aos sopros. No casco ele se espalha num banco baixo na frente dela.</li>
+    <li><b>A laranja carrega 2,5 s</b> (a boca brilha, ela recua tremendo) e golpeia um bolsão do gás por trás. O estouro joga geleia em chamas na nave, numa das <b>três esquivas</b>, em rodízio:
+      <ul>
+        <li><b>leque:</b> uma geleia que rasga em três de través: saia da linha;</li>
+        <li><b>trilhos:</b> duas geleias, acima e abaixo da nave: fique parado;</li>
+        <li><b>fila:</b> três geleias em ritmo: continue se mexendo.</li>
+      </ul></li>
+    <li><b>Os tiros que atravessam o gás enchem o termômetro</b> ao lado dela. Cheio, o fogo volta pelo sopro até a boca da verde, a geleia gruda nas caras e queima: <b>o contra</b>, 15% da vida da forma, num toque só. As cabeças se encolhem.</li>
+    <li><b>Com o INCENDIÁRIO,</b> o gás acende no primeiro toque, e o termômetro pega fogo e estoura.</li>
+    <li><b>Só a geleia acesa fere.</b> O gás fino do lado da nave só pisca.</li>
+  </ul>
+  <h3>Forma A</h3>
+  <div class="tres">
+    <figure><video src="jogo-gas-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>As três esquivas.</b> A nave faz a esquiva certa de cada uma.</figcaption></figure>
+    <figure><video src="jogo-contra-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>O contra:</b> a nave atira pelo gás até o termômetro encher.</figcaption></figure>
+    <figure><video src="jogo-carta-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com o INCENDIÁRIO.</b></figcaption></figure>
+  </div>
+  <h3>Forma B (os gestos feridos e furiosos)</h3>
+  <div class="tres">
+    <figure><video src="jogo-gas-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>A sequência nova</b> (acima). A verde solta o gás do alto; a laranja gira como torre e recua como canhão.</figcaption></figure>
+    <figure><video src="jogo-contra-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>O contra:</b> as duas se debatem.</figcaption></figure>
+    <figure><video src="jogo-carta-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>Com o INCENDIÁRIO.</b></figcaption></figure>
+  </div>
+</div>
+
+<h2>Ampliado</h2>
+<div class="item">
+  <figure><img src="gas-cabecas-A.png" alt="as cabeças da forma A no gás"><figcaption><b>Forma A, 4×:</b> a verde abre e solta o gás (q150 a q200), a laranja carrega (q250) e golpeia, e o gás queima a partir do bolsão (q264 a q280).</figcaption></figure>
+  <figure><img src="gas-geleia-A.png" alt="a geleia das três esquivas"><figcaption><b>A geleia, 3×:</b> o leque rasgando em três (q290, q305), os dois trens dos trilhos (q395, q415) e a fila (q500, q525).</figcaption></figure>
+  <figure><img src="gas-contra-A.png" alt="o contra na forma A"><figcaption><b>O contra na A, 3×:</b> o termômetro cheio, o fogo voltando pelo sopro, o estouro na cara da verde, a geleia queimando nas três e o encolhe.</figcaption></figure>
+  <figure><img src="gas-carta-A.png" alt="a carta na forma A"><figcaption><b>A carta na A, 2×:</b> o gás acende no primeiro toque, o termômetro pega fogo (q204) e estoura (q212).</figcaption></figure>
+  <figure><img src="gas-cabecas-B.png" alt="as cabeças da forma B no gás"><figcaption><b>Forma B, 4×:</b> a verde de boca aberta no alto, a laranja recuada carregando, o golpe.</figcaption></figure>
+  <figure><img src="gas-contra-B.png" alt="o contra na forma B"><figcaption><b>O contra na B, 3×.</b></figcaption></figure>
+</div>
+
+<h2>Medido</h2>
+<div class="item medida">
+  <ul>
+    <li><b>O gás do jogo é o da maquete aprovada, quadro a quadro,</b> nos três registros dela (as esquivas, o contra e a carta: 466, 418 e 184 quadros). <span class="ok">Não há diferença nenhuma</span> na posição e no tamanho de cada geleia, no termômetro nem nas cabeças. Com o sorteio da física trocado de propósito, a comparação acusa 255 quadros de geleia diferentes: ela pega erro.</li>
+    <li><b>No jogo, a esquiva certa passa e a errada é mordida,</b> nas duas formas. A folga mínima entre a geleia acesa e a nave, na esquiva certa:
+      <ul>
+        <li>forma A: leque 16,8 px, trilhos 17,9 px, fila 16,3 px;</li>
+        <li>forma B, com a sequência nova: veja acima.</li>
+      </ul>
+      O mínimo das rodadas 7 e 13 era 12 px.</li>
+    <li><b>O contra:</b> atirando pelo gás de verdade, o termômetro enche (no segundo 10,0 do gás na A e 9,4 na B), ela perde 15 de 100 num toque só, e as cabeças se encolhem.</li>
+    <li><b>A carta:</b> o gás acende 0,09 s depois do primeiro tiro que toca o gás (0,01 s na B).</li>
+    <li><b>Ela continua no posto,</b> o corpo leva dano, os tiros comuns seguem iguais, e a fase 3 roda inteira até o hangar com a chuva, o raio e o gás no ciclo.</li>
+  </ul>
+</div>
+
+<h2>O que resolvi no caminho (você pode vetar)</h2>
+<div class="item">
+  <ul>
+    <li><b>Os tiros que contam para o termômetro:</b> o jogo acompanha cada tiro que entra no gás e conta uma vez só, quando ele chega no corpo dela.</li>
+    <li><b>Nos trilhos, a esquiva errada é subir para um trilho</b>, porque ficar parado é a certa ali. No leque e na fila, a errada é ficar parado. É o que a sonda testa.</li>
+    <li><b>O gás que sobra</b> continua se desfazendo depois que a habilidade acaba, sem segurar a luta.</li>
+    <li><b>Os números de cada golpe</b> (tamanho, velocidade, mira) ficam por forma, para calibrar jogando.</li>
+  </ul>
+</div>
+
+<h2>Para você conferir</h2>
+<div class="item decidir">
+  <ol>
+    <li>A sequência nova da B (rasteira, cortina, fila funda) ficou como você queria?</li>
+    <li>Quais são os próximos passos? Pelo plano, falta a troca de forma no meio de uma habilidade, o desempenho, o resto do jogo e a folha final com todas as habilidades.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+ "nome": "Torpedo curto",
+ "quadros": {
+  "ciano": 2,
+  "verde": 2,
+  "laranja": 2
+ },
+ "fps": {
+  "ciano": 6,
+  "verde": 6,
+  "laranja": 6
+ },
+ "rastro": {},
+ "cauda": 0
+}

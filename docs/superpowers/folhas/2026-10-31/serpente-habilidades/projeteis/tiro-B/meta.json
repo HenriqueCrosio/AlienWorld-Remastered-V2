@@ -1,0 +1,18 @@
+{
+ "nome": "Uma arma por cabeça",
+ "quadros": {
+  "ciano": 3,
+  "verde": 4,
+  "laranja": 2
+ },
+ "fps": {
+  "ciano": 15,
+  "verde": 10,
+  "laranja": 12
+ },
+ "rastro": {
+  "verde": "pinga",
+  "laranja": "fumaca"
+ },
+ "cauda": 0
+}

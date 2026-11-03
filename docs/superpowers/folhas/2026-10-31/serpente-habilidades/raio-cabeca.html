@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: a cabeça do raio</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .quatro { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 980px) { .quatro { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .quatro { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; margin: 8px 0; }
+  td, th { border: 1px solid var(--line); padding: 5px 10px; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a cabeça do raio se mexe</h1>
+<p class="sub">01/11/2026 · rodada 11 das habilidades (o raio da azul) · nada foi commitado.</p>
+
+<div class="item">
+  <p>Da análise que você trouxe, você escolheu:</p>
+  <ul>
+    <li><b>A ameaça fica na cabeça.</b> Ela segue a nave, solta um pulso pequeno no olho a cada leitura, e o olho trava antes do disparo. O caminho continua sutil, sem cone e sem interferência na tela.</li>
+    <li><b>A preparação sai de dentro do aviso que já existia</b> (1,6 s), então as folgas medidas não mudam.</li>
+    <li><b>A recuperação é só respiro</b>, de ~1,2 s sem raio, sem mudar o dano.</li>
+    <li><b>A animação vem agora, antes dos efeitos.</b> Esta rodada é a cabeça. Os efeitos novos do raio vêm na próxima.</li>
+  </ul>
+</div>
+
+<h2>A maquete</h2>
+<div class="item">
+  <figure><video src="maquete11-raio.webm" autoplay loop muted playsinline controls></video><figcaption><b>As três vezes:</b> a fatia de cima, a de baixo e a salva. A cabeça agora segue cada fase, e os efeitos são os da rodada 10.</figcaption></figure>
+  <p><b>Cada raio grande, dentro do mesmo 1,6 s de aviso:</b></p>
+  <ol>
+    <li><b>Lê</b> (0,35 s): de boca fechada, a cabeça segue a nave, com um pulso pequeno saindo do olho a cada leitura.</li>
+    <li><b>Ensaia</b> (0,45 s): o foco sai reto do olho e corre o caminho uma vez, com a cabeça acompanhando. No fim, o olho <b>trava</b>: um clarão, depois um brilho firme.</li>
+    <li><b>Prepara</b> (0,8 s): a cabeça volta ao meio e recua, a boca abre e começa a carregar. Depois ela sobe (ou desce) até o começo do caminho.</li>
+    <li><b>Dispara:</b> a cabeça acompanha o raio pela varredura inteira.</li>
+    <li><b>Se recupera</b> (~1,2 s, sem raio): fecha a boca de uma vez, a cabeça é jogada para trás e o corpo balança. A verde chega a se inclinar.</li>
+  </ol>
+  <p><b>Na salva,</b> a boca fica aberta entre os tiros. Cada tiro tem seu pulso, sua passada do foco e sua trava.</p>
+  <figure><img src="raio-fases.png" alt="a cabeça em cada fase da fatia de cima"><figcaption><b>A fatia de cima, ampliada 3×, da esquerda para a direita:</b> lê, ensaia, abre a boca recuada, começa a subir, no topo, dispara; a varredura descendo (duas), fecha a boca, o tranco para trás, o corpo balançando, assentando.</figcaption></figure>
+</div>
+
+<h2>Os gestos, do PixelLab</h2>
+<div class="item">
+  <div class="quatro">
+    <figure><img src="cabeca-olha.gif" alt="a cabeça de boca fechada subindo e descendo"><figcaption><b>Olhar</b> (boca fechada, 19 quadros): sobe e desce. É usado para seguir a nave e o foco.</figcaption></figure>
+    <figure><img src="cabeca-abre.gif" alt="a boca abrindo"><figcaption><b>Abrir</b> (9 quadros): recua e abre a boca, com o brilho ciano por dentro.</figcaption></figure>
+    <figure><img src="cabeca-mira.gif" alt="a cabeça de boca aberta subindo e descendo"><figcaption><b>Mirar</b> (boca aberta, 22 quadros): sobe e desce para cada ângulo do raio.</figcaption></figure>
+    <figure><img src="cabeca-recupera.gif" alt="a recuperação"><figcaption><b>Recuperar</b> (13 quadros): fecha a boca, toma o tranco, o corpo balança e volta à pose aprovada.</figcaption></figure>
+  </div>
+  <ul>
+    <li><b>Todos partem da arte aprovada</b> e voltam a ela. As trocas de gesto acontecem sempre na pose do meio, que é igual nos dois lados, então não há salto. Medido: no máximo 4% do desenho muda de um quadro para o outro, e nenhum salto.</li>
+    <li><b>O gerador não gira a cabeça para mirar: ele a sobe e desce</b>, com a boca bem aberta (~100°). O raio sai reto do meio da goela, e todos os ângulos das fatias passam por entre as mandíbulas. Quem escolhe o quadro é a altura do raio na borda da tela: raio alto, cabeça erguida; raio baixo, cabeça baixa.</li>
+    <li><b>A subida saía em 3 quadros</b> (o gerador faz o movimento todo no começo do clipe), e a cabeça andaria aos saltos. Gerei quadros intermediários entre os vizinhos que tinham salto grande, com as duas pontas fixas: cada salto virou 3 passos.</li>
+    <li><b>A boca aberta saiu verde-menta misturada no ciano</b>, a cor da cabeça verde. Troquei esse verde pelo ciano das luzes da própria cabeça, só na área da cabeça azul. Nada mais foi mexido.</li>
+    <li>O olho e a boca foram medidos quadro a quadro, então o foco sai do olho e o raio sai da boca em todos os quadros.</li>
+  </ul>
+</div>
+
+<h2>Medidas</h2>
+<div class="item medida">
+  <table>
+    <tr><th></th><th>rodada 10</th><th>agora</th></tr>
+    <tr><td>folga do manequim na fatia de cima</td><td>19,1 px</td><td>20,4 px</td></tr>
+    <tr><td>na fatia de baixo</td><td>13,9 px</td><td>12,5 px</td></tr>
+    <tr><td>na salva (o tiro mais apertado)</td><td>5,4 px</td><td>6,7 px</td></tr>
+    <tr><td>pontos do raio fora do caminho desenhado</td><td>0</td><td>0</td></tr>
+  </table>
+  <p>Com a boca se movendo junto da cabeça, o caminho desenhado agora é a soma exata de todas as posições do raio. A regra da salva também foi recalculada com a boca se movendo, e o sorteio é o mesmo de antes. A nave parada continua sendo atingida.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Os gestos:</b> a cabeça seguindo a nave, abrindo recuada, subindo ou descendo para mirar, e a recuperação. Estão certos?</li>
+    <li><b>A subida antes da fatia de cima</b> é rápida, ~0,35 s até o topo. Fica assim, como um bote, ou mais lenta? Mais lenta tira tempo da leitura.</li>
+    <li><b>A cor da boca:</b> o ciano das luzes dela no lugar do verde-menta. Fica?</li>
+    <li><b>Próximo passo:</b> os efeitos do raio que ficaram combinados (o brilho externo, a frente de energia saindo da boca, o impacto mais forte no casco, as descargas e o resíduo depois do disparo, a energia entrando na boca). Sigo para eles?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

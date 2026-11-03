@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: habilidades</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tres { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par, .tres { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .rec { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente de 3 cabeças: uma animação por habilidade</h1>
+<p class="sub">31/10/2026 · depois do CCGS (a Serpente voltou à S1b) · nada foi commitado.</p>
+
+<div class="item">
+  <p>Você: <i>"quero animações para a serpente de 3 cabeças, para cada skill precisa ter uma animação diferente. Para sairmos do idle eterno"</i>, e <i>"o erguer é algo que precisa ser revisto para ver se cabe"</i>. A sua direção para a de 3 cabeças:</p>
+  <ul>
+    <li><b>tiros normais</b> como os da primeira, cada um na cor da sua cabeça;</li>
+    <li><b>a chuva</b> fica;</li>
+    <li><b>a investida sai;</b></li>
+    <li><b>habilidades no estilo Cuphead</b>: o cuspe quicante e o raio com carga.</li>
+  </ul>
+  <p>Cada animação foi gerada no PixelLab a partir da arte aprovada, <b>no lugar</b> (o corpo não desliza; só pescoços e cabeças se movem), em duas versões. Conferi todas ampliadas: nenhuma tem salto entre quadros, e as cabeças continuam as dela.</p>
+  <p><b>O gerador desenhou efeitos</b> (rastros, jatos, uma bola de fogo) mesmo com o pedido de "sem efeitos", como já acontece com ele. Em alguns casos combinam com a habilidade, e é você quem decide se ficam ou se eu limpo.</p>
+</div>
+
+<h2>1. As habilidades nas maquetes (velocidade real, na arena)</h2>
+<div class="item decidir">
+  <p>As maquetes estão montadas na resolução e na cor do jogo, sobre a foto da arena. Ela fica no rombo, no posto baixo, sem o vão embaixo dela que você circulou. A nave é um boneco.</p>
+  <p><b>⚠️ As bolas e o raio estão desenhados de forma provisória</b> (círculos e uma faixa lisa). O que está em julgamento aqui é a animação dela e a mecânica; o visual do projétil e do raio é o próximo passo, com o mesmo cuidado.</p>
+  <div class="par">
+    <figure><video src="maquete-chuva1.webm" autoplay loop muted playsinline controls></video><figcaption><b>A chuva:</b> as três cabeças abaixam, chicoteiam para cima e cospem para o céu. A chuva cai em três ondas, nas cores das cabeças, com o vão andando.</figcaption></figure>
+    <figure><video src="maquete-quic2.webm" autoplay loop muted playsinline controls></video><figcaption><b>O cuspe quicante:</b> as três cabeças recuam e se projetam. As bolas, uma por cabeça, quicam no casco em arcos de alturas diferentes (a azul baixa e rápida, a verde alta, a âmbar no meio). Você lê o ritmo e passa por baixo ou por cima.</figcaption></figure>
+    <figure><video src="maquete-raio1.webm" autoplay loop muted playsinline controls></video><figcaption><b>O raio, com a cabeça ciano sozinha:</b> ela recua e abre a boca devagar enquanto a carga cresce; o raio varre de cima até o casco. Você vai para onde ele já passou.</figcaption></figure>
+    <figure><video src="maquete-raio2.webm" autoplay loop muted playsinline controls></video><figcaption><b>O raio, com as três cabeças juntas:</b> as três aproximam as bocas e seguram tremendo; o raio sai do ponto em que elas se juntam.</figcaption></figure>
+  </div>
+</div>
+
+<h2>2. As animações, as duas versões de cada uma</h2>
+<div class="item decidir">
+  <h3>A chuva</h3>
+  <div class="par">
+    <figure><img src="clipe-chuva1.gif" alt="chuva 1"><figcaption><b>As três juntas</b> <span class="rec">(recomendo)</span>: abaixam, chicoteiam para cima de boca aberta e voltam. O gerador pôs um rastro em cada cuspe, na cor de cada cabeça (azul, verde, laranja), o que combina com a chuva colorida.</figcaption></figure>
+    <figure><img src="clipe-chuva2.gif" alt="chuva 2"><figcaption><b>Uma de cada vez:</b> fraca. Na prática só a cabeça laranja se mexe, e ela nem olha para cima.</figcaption></figure>
+  </div>
+  <h3>O cuspe quicante</h3>
+  <div class="par">
+    <figure><img src="clipe-quic2.gif" alt="cuspe 2"><figcaption><b>As três juntas</b> <span class="rec">(recomendo)</span>: incham, recuam e se projetam juntas de boca aberta. Há jatos coloridos nas bocas, que podem ficar como o "cuspe" ou ser limpos.</figcaption></figure>
+    <figure><img src="clipe-quic1.gif" alt="cuspe 1"><figcaption><b>Uma de cada vez:</b> na prática só a cabeça laranja dá o bote, cruzando por cima do corpo, com um jato de fogo. É forte, mas só uma cabeça age.</figcaption></figure>
+  </div>
+  <h3>O raio com carga</h3>
+  <div class="par">
+    <figure><img src="clipe-raio1.gif" alt="raio 1"><figcaption><b>A cabeça ciano sozinha</b> <span class="rec">(recomendo)</span>: recua, abre a boca cada vez mais e segura. Sem efeitos inventados, e a preparação é bem visível.</figcaption></figure>
+    <figure><img src="clipe-raio2.gif" alt="raio 2"><figcaption><b>As três juntas:</b> as cabeças se aproximam, abrem as bocas e seguram tremendo. É mais espetáculo e menos clareza de onde o raio sai.</figcaption></figure>
+  </div>
+</div>
+
+<h2>3. Os tiros normais: o erguer, ou um cuspe curto por cabeça</h2>
+<div class="item decidir">
+  <p>Você pediu para rever se o erguer cabe. Para comparar, gerei um gesto curto de cuspe para cada cabeça (8 quadros): a cabeça que atira dá um bote curto para a frente, e as outras ficam paradas.</p>
+  <div class="par">
+    <figure><img src="clipe-erguer.gif" alt="erguer"><figcaption><b>O erguer</b> (o de antes): as três cabeças sobem e abrem as bocas juntas. Para tiros frequentes, as três se mexem a cada tiro, e isso cansa e confunde qual cabeça atirou.</figcaption></figure>
+    <figure><img src="clipe-tiroA.gif" alt="tiro ciano"><figcaption><b>O cuspe da ciano</b> <span class="rec">(recomendo os três cuspes)</span>: a cabeça certa se mexe, e você vê de onde o tiro vem.</figcaption></figure>
+  </div>
+  <div class="par">
+    <figure><img src="clipe-tiroB.gif" alt="tiro verde"><figcaption><b>O cuspe da verde.</b></figcaption></figure>
+    <figure><img src="clipe-tiroC.gif" alt="tiro laranja"><figcaption><b>O cuspe da laranja:</b> o gerador soltou uma bola de fogo, que combina com o tiro âmbar dela.</figcaption></figure>
+  </div>
+  <p>Com os cuspes curtos, o erguer fica livre para outro uso, ou sai.</p>
+</div>
+
+<h2>Para você escolher</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Os tiros normais:</b> os três cuspes curtos (recomendo) ou o erguer.</li>
+    <li><b>A chuva:</b> as três juntas (recomendo) ou uma de cada vez.</li>
+    <li><b>O cuspe quicante:</b> as três juntas (recomendo) ou uma de cada vez.</li>
+    <li><b>O raio:</b> a cabeça ciano sozinha (recomendo) ou as três juntas.</li>
+    <li><b>Os efeitos que o gerador desenhou</b> (rastros, jatos, a bola de fogo): ficam, ou eu limpo.</li>
+  </ol>
+  <p>Com as escolhas, o próximo passo é o visual da bola e do raio, também numa folha, antes de levar tudo para o jogo.</p>
+</div>
+</main>
+</body>
+</html>

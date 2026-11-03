@@ -26,7 +26,9 @@ const abort = async (msg) => {
   process.exit(1);
 };
 
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+// (03/11: `networkidle` estourava os 30 s — o boot carrega ~3100 arquivos e leva ~33 s; espera o menu como a `_sonda-hab`)
+await page.goto('http://localhost:5173/', { waitUntil: 'domcontentloaded' });
+await page.waitForFunction(() => window.__game?.scene?.isActive('Menu'), null, { timeout: 90000 });
 await page.waitForTimeout(1500);
 
 // ─── PARTE 1: a fase real ───
@@ -106,6 +108,15 @@ await page.evaluate(() => {
 });
 await page.waitForTimeout(6500);
 await blindar();
+// (28/10, S1: a entrada nova — o casco freia com o rombo no posto e ela SOBE dele — leva ~8 s de jogo: espera ela chegar)
+await page.evaluate(async () => {
+  for (let i = 0; i < 1800; i++) {
+    const s = window.__game.scene.getScenes(true)[0];
+    if (s.boss && !s.boss.entering) return;
+    if (s.lives !== undefined) s.lives = 9;
+    await new Promise((res) => requestAnimationFrame(res));
+  }
+});
 
 // ⚠️ A ANIMAÇÃO SOBRESCREVE A TEXTURE.KEY (armadilha 26, versão sonda): com o idle tocando, a
 // key é 'serpenteAnim7', nunca 'serpente'. A FORMA se lê por PREFIXO — do mais específico
@@ -141,6 +152,18 @@ const estadoBoss = () =>
  * que cair — se o corpo absorver tudo no caminho, a fase é invencível e a campanha trava.
  */
 async function alcancavelPorBala(nome) {
+  // ⚠️ 28/10 (S1): ela se MOVE (postos no rombo) e INVESTE em toda forma — o que este teste mede é se o corpo bloqueia a
+  // bala no caminho da cabeça, não se a nave sobrevive à investida. Espera ela estar no rombo (fora da investida) e
+  // segura os padrões dela durante o teste (os relógios voltam depois).
+  await page.evaluate(async () => {
+    const s = window.__game.scene.getScenes(true)[0];
+    for (let i = 0; i < 600 && s.boss && (s.boss.entering || (s.boss.ciclo && s.boss.ciclo.estado !== 'pausa') || s.boss.imune > 0); i++) {
+      await new Promise((res) => requestAnimationFrame(res));
+    }
+    const b = s.boss;
+    if (b) window.__relogios = [b.cdPrincipal, b.cdSecundario, b.cdInvestida];
+    if (b) b.cdPrincipal = b.cdSecundario = b.cdInvestida = 99;
+  });
   const antes = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
     return s.boss?.hpTotal ?? -1;
@@ -161,7 +184,9 @@ async function alcancavelPorBala(nome) {
   await page.keyboard.up('Space');
   const depois = await page.evaluate(() => {
     const s = window.__game.scene.getScenes(true)[0];
-    return s.boss?.hpTotal ?? -1;
+    const b = s.boss;
+    if (b && window.__relogios) [b.cdPrincipal, b.cdSecundario, b.cdInvestida] = window.__relogios;
+    return b?.hpTotal ?? -1;
   });
   ok(antes - depois >= 3, `${nome}: a cabeça é ALCANÇÁVEL por bala (dano real ${antes - depois})`);
 }

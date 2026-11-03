@@ -1,0 +1,15 @@
+{
+ "nome": "A gota de hoje",
+ "quadros": {
+  "ciano": 2,
+  "verde": 2,
+  "laranja": 2
+ },
+ "fps": {
+  "ciano": 8,
+  "verde": 8,
+  "laranja": 8
+ },
+ "rastro": {},
+ "cauda": 0
+}

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: foco e faíscas</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 860px) { .par { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: o foco reto e as faíscas</h1>
+<p class="sub">01/11/2026 · rodada 10 das habilidades (o raio da azul e o plasma) · nada foi commitado.</p>
+
+<div class="item">
+  <p>O que você disse sobre a <code>raio-salva.html</code>:</p>
+  <ul>
+    <li><i>"essa aberração de foco saiu em todos os raios. Isso é para compensar a falta de movimento da cabeça da serpente azul, isso não pode acontecer. O foco sai como um foco de verdade, não faz curva. Assim, a cabeça da serpente precisa mexer para cada ataque e varredura."</i></li>
+    <li><i>"o desenho da varredura pode ser bem mais suave, ele aparece, mas não com tanta intensidade, ele é um aviso sutil do caminho que o laser/raio vai fazer"</i></li>
+    <li><i>"quero que adicione efeitos no raio, como se faíscas elétricas saíssem ou em volta dele. O mesmo eu quero com o plasma. os efeitos não machucam, só visual"</i></li>
+  </ul>
+  <p>Você tem razão: os feixes do olho dobravam para encontrar as linhas, e era isso que escondia a cabeça parada. O que mudou:</p>
+  <ul>
+    <li><b>O foco sai reto do olho.</b> É uma linha só, fina, que vai do olho até o fim do caminho e corre pelo caminho do raio durante a carga, como se o olho ensaiasse a varredura (duas vezes na carga longa, uma na salva). Não dobra mais.</li>
+    <li><b>O caminho ficou sutil:</b> sobraram só um sombreado bem fraco, exatamente onde o raio vai passar, e o foco. Saíram as linhas tracejadas, os pontos correndo e os feixes dobrados.</li>
+    <li><b>Faíscas elétricas no raio e no plasma</b>, só visuais: não machucam e não mudam nada do jogo.</li>
+  </ul>
+</div>
+
+<h2>O foco e o caminho</h2>
+<div class="item">
+  <figure><img src="raio-foco.png" alt="o foco reto saindo do olho e varrendo o caminho"><figcaption><b>A carga da fatia de cima, ampliada 2×:</b> o foco sai reto do olho da azul e corre do começo ao fim do caminho. O sombreado do caminho mal aparece.</figcaption></figure>
+  <figure><video src="maquete10-raio.webm" autoplay loop muted playsinline controls></video><figcaption><b>As três vezes, com o aviso novo:</b> a fatia de cima, a de baixo e a salva. Na salva, o foco do próximo raio já corre enquanto o atual dispara.</figcaption></figure>
+  <p class="sub"><b>A cabeça:</b> no vídeo ela continua no idle, então o foco e o raio giram sem ela. Como você disse, a cabeça precisa girar em cada ataque e em cada varredura. Isso vem da animação do PixelLab, porque girar a cabeça em código seria movimento fingido.</p>
+</div>
+
+<h2>As faíscas</h2>
+<div class="item">
+  <ul>
+    <li><b>No raio:</b> arcos curtos e quebrados pulam das bordas, mudando a cada quadro, e faíscas azuis saem voando dele. O raio grosso tem mais faíscas que o fino da salva.</li>
+    <li><b>No plasma:</b> arcos pequenos lambem a pele de cada bola de geleia (raiz branca, ponta âmbar), e de vez em quando ela solta uma faísca.</li>
+    <li>Elas usam um sorteio separado do da física, então tudo o que foi medido continua igual: as folgas do raio (19, 14 e 5 px) e a do plasma (12,7 px).</li>
+  </ul>
+  <div class="par">
+    <figure><img src="raio-faiscas.png" alt="as faíscas elétricas no raio"><figcaption><b>O raio, ampliado 3×:</b> o grosso das duas fatias e, embaixo à direita, o fino da salva com o foco do próximo raio.</figcaption></figure>
+    <figure><img src="plasma-faiscas.png" alt="as faíscas elétricas no plasma"><figcaption><b>O plasma, ampliado 3×:</b> o leque rachando, as bolas pingando e os trilhos, com os arcos na pele.</figcaption></figure>
+  </div>
+  <figure><video src="maquete10-plasma.webm" autoplay loop muted playsinline controls></video><figcaption><b>As três esquivas do plasma</b>, iguais às aprovadas, agora com as faíscas.</figcaption></figure>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O foco e o caminho:</b> estão na intensidade certa, ou o caminho ficou suave demais para a salva, que é rápida?</li>
+    <li><b>As faíscas:</b> a quantidade está boa, no raio e no plasma?</li>
+    <li><b>A cabeça girando:</b> faço agora a animação da azul (a cabeça virando com o foco e o raio), antes das outras habilidades, ou junto com todas?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

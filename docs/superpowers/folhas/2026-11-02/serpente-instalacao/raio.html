@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: o raio</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .ok { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: o raio da azul no jogo</h1>
+<p class="sub">03/11/2026 · pausa 4 · nada foi commitado.</p>
+
+<h2>O que entrou</h2>
+<div class="item">
+  <p>O raio é o das rodadas 8 a 12 que você aprovou, só na forma A:</p>
+  <ul>
+    <li><b>Duas fatias grandes</b>, a de cima e a de baixo, que começa cortando o casco. Cada uma vem dentro do mesmo aviso de 1,6 s:
+      <ul>
+        <li>a cabeça fechada segue a nave, com um pulso do olho a cada leitura;</li>
+        <li>o foco do olho percorre o caminho uma vez, e o olho trava;</li>
+        <li>a boca abre carregando, com a energia caindo para dentro dela;</li>
+        <li>o raio sai, e a cabeça acompanha o raio; depois ela fecha a boca e recua.</li>
+      </ul></li>
+    <li><b>O caminho que ainda vem fica sombreado de leve,</b> exatamente por onde o raio vai passar.</li>
+    <li><b>No casco, o corte esfria</b> do branco ao laranja e ao vermelho, com faíscas saindo retas (é vácuo).</li>
+    <li><b>Depois vem a salva de 6 raios finos,</b> sorteada a cada luta. Cada um cobre a nave e sempre deixa uma saída de até 25 px.</li>
+  </ul>
+  <figure><video src="jogo-raio-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>O raio inteiro, no jogo.</b> A nave faz o que o manequim da maquete fazia: lê cada fatia e sai dela.</figcaption></figure>
+</div>
+
+<h2>Ampliado</h2>
+<div class="item">
+  <figure><img src="raio-cabeca.png" alt="a cabeça da azul lendo, carregando, atirando e recuando"><figcaption><b>A cabeça, 4×:</b> o foco do olho (q140, q152), a boca abrindo e carregando (q162 a q174), o disparo com o clarão (q178, q182) e o recuo (q228).</figcaption></figure>
+  <figure><img src="raio-casco.png" alt="a fatia de baixo cortando o casco"><figcaption><b>A fatia de baixo, 3×:</b> a frente de energia saindo da boca (q296), o corte no casco (q302) e a marca esfriando (q310, q330).</figcaption></figure>
+  <figure><img src="raio-salva.png" alt="a salva passando rente à nave"><figcaption><b>A salva, 2×:</b> cada raio fino passa rente à nave que saiu a tempo, e a esfera carrega de novo na boca entre um tiro e outro.</figcaption></figure>
+</div>
+
+<h2>Medido</h2>
+<div class="item medida">
+  <ul>
+    <li><b>O raio do jogo é o da maquete aprovada, quadro a quadro.</b> Rodei o código do jogo com o relógio, os pontos e a nave da maquete e comparei com o registro dela: <span class="ok">470 quadros, 0 px de diferença na posição do raio e 0 quadros com a cabeça diferente</span>. Para ter certeza de que a comparação pega erro, rodei também com a semente errada da salva: ela acusou 58 px.</li>
+    <li><b>No jogo:</b>
+      <ul>
+        <li>a nave que segue o manequim da maquete não é mordida nenhuma vez;</li>
+        <li>a nave parada no caminho é mordida em todas as 8 fatias;</li>
+        <li>em 200 sorteios da salva, com a boca de verdade, a maior saída é de 24,5 px.</li>
+      </ul></li>
+    <li><b>Ela fica no posto</b> durante a chuva e o raio, e a fase 3 roda inteira até o hangar.</li>
+  </ul>
+</div>
+
+<h2>O que resolvi no caminho (você pode vetar)</h2>
+<div class="item">
+  <ul>
+    <li><b>O sombreado das fatias grandes</b> levava 50 ms para calcular de uma vez, e o jogo daria um tranco no começo de cada uma. Agora ele é calculado aos poucos, no segundo de espera antes da primeira leitura, e guardado para as próximas vezes.</li>
+    <li><b>A marca no casco</b> leva alguns segundos para esfriar. Antes ela sumiria de uma vez quando o raio terminasse. Agora ela continua esfriando enquanto a luta segue.</li>
+    <li><b>A salva é sorteada fatia a fatia,</b> com a nave onde ela está naquela hora. A maquete sorteava as seis no começo, contando com o manequim. A regra é a mesma, e a comparação acima prova que, com a nave no manequim, o resultado é idêntico.</li>
+    <li><b>Os vídeos da sonda piscavam a nave,</b> porque ela fica invulnerável para contar os acertos. Daqui em diante a nave aparece sempre. Os vídeos da chuva vão ser refeitos assim na folha final.</li>
+  </ul>
+</div>
+
+<h2>Para você conferir</h2>
+<div class="item decidir">
+  <ol>
+    <li>O raio ficou como o que você aprovou?</li>
+    <li>Posso seguir para o gás + faísca?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rombo da Serpente</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .rec { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>O rombo da Serpente: 4 conceitos</h1>
+<p class="sub">28/10/2026 · S1, a luta da Serpente · spec <code>docs/superpowers/specs/2026-10-28-serpente-luta-s1-design.md</code> · <a href="../serpente/serpente.html">← a fusão (aprovada)</a>. Nada foi instalado nem commitado.</p>
+
+<div class="item">
+  <p>Você: <i>"o cenário do boss não condiz com a fase"</i>. A sua escolha: ela sai de um rombo rasgado no próprio casco, na arte e nas cores dele. É dele que a fusão nova vai se arrancar no S2.</p>
+  <p><b>Como foram feitos.</b> Juntei as peças aprovadas da proa do casco (o duto, o duto 2 e a placa), do jeito que a faixa as põe. O PixelLab redesenhou só o miolo, por inpaint, e o casco em volta ficou idêntico. Cada conceito aparece de três formas:</p>
+  <ul>
+    <li>sozinho e ampliado;</li>
+    <li><b>no jogo de verdade</b>: o treino da F3, com o casco parado na proa e o tratamento de imagem (Atmosfera) por cima;</li>
+    <li>com ela no posto novo (x 300) e <b>afundada no rombo</b>, a borda da frente cobrindo as roscas. A estrela já saiu, porque o S1 a tira.</li>
+  </ul>
+  <p><b>É uma maquete.</b> A borda da frente foi separada automaticamente, só para mostrar a ideia. A do conceito escolhido vai ser recortada à mão.</p>
+</div>
+
+<h2>A — O rasgo <span class="rec">(recomendado)</span></h2>
+<div class="item">
+  <p>As chapas dobradas para cima e para fora, os canos de cobre partidos e o interior escuro com o maquinário e duas luzes azuis. É o que a spec pedia ("rasgado e com as bordas viradas para fora") e o que mais conversa com o casco. As chapas erguidas emolduram a serpente.</p>
+  <figure><img src="rombo/conceito-A-x3.png" alt="Conceito A ampliado"></figure>
+  <div class="par">
+    <figure><img src="rombo/maquete-A-so-zoom.png" alt="A no jogo, sem ela"><figcaption>No jogo, sozinho (3×)</figcaption></figure>
+    <figure><img src="rombo/maquete-A-ela-zoom.png" alt="A no jogo, com ela"><figcaption>Com ela afundada no posto baixo (3×)</figcaption></figure>
+  </div>
+  <figure><img src="rombo/maquete-A-ela.png" alt="A, a tela inteira"><figcaption>A tela inteira: ela à direita, a metade da esquerda livre para a nave.</figcaption></figure>
+</div>
+
+<h2>B — A cratera</h2>
+<div class="item">
+  <p>Um buraco redondo de explosão, com as bordas enroladas em pétalas, costelas claras atravessando e um brilho laranja no fundo. Lê bem, mas como um buraco de impacto, e a borda erguida forma uma cúpula acima do casco. As costelas passam na frente dela.</p>
+  <figure><img src="rombo/conceito-B-x3.png" alt="Conceito B ampliado"></figure>
+  <div class="par">
+    <figure><img src="rombo/maquete-B-so-zoom.png" alt="B no jogo, sem ela"><figcaption>No jogo, sozinho (3×)</figcaption></figure>
+    <figure><img src="rombo/maquete-B-ela-zoom.png" alt="B no jogo, com ela"><figcaption>Com ela (3×)</figcaption></figure>
+  </div>
+</div>
+
+<h2>C — A fenda</h2>
+<div class="item">
+  <p>Uma fenda longa e rasa, com as duas bordas erguidas, canos cruzando o vão e faíscas laranja. É a mais larga e a mais rasa: ela sairia de uma rachadura, não de um buraco. ⚠️ A borda de cima seguiu a linha da minha máscara e ficou quase reta. Se for a escolhida, ela precisa de mais uma passada para sair irregular.</p>
+  <figure><img src="rombo/conceito-C-x3.png" alt="Conceito C ampliado"></figure>
+  <div class="par">
+    <figure><img src="rombo/maquete-C-so-zoom.png" alt="C no jogo, sem ela"><figcaption>No jogo, sozinho (3×)</figcaption></figure>
+    <figure><img src="rombo/maquete-C-ela-zoom.png" alt="C no jogo, com ela"><figcaption>Com ela (3×)</figcaption></figure>
+  </div>
+</div>
+
+<h2>D — A chapa arrancada</h2>
+<div class="item">
+  <p>A blindagem arrancada mostra por baixo uma membrana escura em gomos, com veias laranja e uma fenda negra no meio. É a mais orgânica: o Leviatã como bicho vivo por baixo do metal, que conversa com o gore da fusão. ⚠️ O mesmo da C: a borda de cima saiu quase reta e precisaria de mais uma passada.</p>
+  <figure><img src="rombo/conceito-D-x3.png" alt="Conceito D ampliado"></figure>
+  <div class="par">
+    <figure><img src="rombo/maquete-D-so-zoom.png" alt="D no jogo, sem ela"><figcaption>No jogo, sozinho (3×)</figcaption></figure>
+    <figure><img src="rombo/maquete-D-ela-zoom.png" alt="D no jogo, com ela"><figcaption>Com ela (3×)</figcaption></figure>
+  </div>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <p><b>Qual rombo?</b> A, B, C, D, uma mistura (por exemplo, as chapas do A com a membrana do D por dentro), ou outra rodada.</p>
+  <p>Depois da escolha: recorto o fundo e a borda da frente à mão e passo para o código do S1. O casco freia e para com o rombo no posto, ela sobe de dentro dele, e vêm os postos, a investida, as veias e o resto.</p>
+</div>
+</main>
+</body>
+</html>

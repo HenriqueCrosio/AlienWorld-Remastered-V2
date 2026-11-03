@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: a bola viva</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .ok { border-color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: a bola viva</h1>
+<p class="sub">31/10/2026 · quarta rodada do cuspe quicante · nada foi commitado.</p>
+
+<div class="item ok">
+  <p><b>Os mísseis da chuva estão aprovados</b> (<i>"depois vemos o formato que eles farão"</i>). Nada mudou neles.</p>
+</div>
+
+<div class="item">
+  <p>Você, sobre as três bolas anteriores: <i>"os propulsores ficaram desenhados na bola, eu pensei em algo mais parecido com jatos de propulsao de estabilzadores mesmo. Algo mais natural, todos os exemplos ficaram muito irreais e duros de movimento."</i></p>
+  <p>Nas opções, você escolheu: <b>a bola de verdade + instável, brigando</b>, com <b>gás frio e branco</b>. E a soltura: <i>"Uma delas precisa sair antes e mais alta, a segunda meia altura e depois da 1 e assim sucessivamente."</i></p>
+</div>
+
+<h2>O que mudou</h2>
+<div class="item">
+  <ul>
+    <li><b>A bola não tem mais bocal desenhado.</b> Os sopros saem da própria superfície dela: um clarão branco no ponto de saída e um jato curto de gás frio que abre e some. Não tem mais fogo nem chama fixa.</li>
+    <li><b>Ela se move como uma bola de verdade.</b> O arco é suave e ela perde altura a cada quique. Também gira no ar: a faixa atravessada nela mostra o giro, e a batida no casco transforma parte do atrito em giro. O achatamento na batida volta como uma mola, passando um pouco do ponto, em vez de estalar de volta.</li>
+    <li><b>Ela é instável e os estabilizadores brigam.</b> Um empurrão e uma torção que mudam devagar tiram a bola do rumo. Os estabilizadores não ficam ligados o tempo todo: cada sopro sai só quando já há correção suficiente acumulada, como os estabilizadores de uma nave de verdade. Por isso ela sai um pouco do rumo, o sopro a corrige e ela se acerta. Depois da batida, sopros dos dois lados freiam o giro.</li>
+    <li><b>A soltura em degraus:</b> a ciano sai primeiro e mais alto; a laranja sai depois, com metade da altura; a verde sai por último, com metade de novo.</li>
+    <li><b>A animação usada aqui é a dos tiros normais,</b> em que as três cabeças cospem uma de cada vez. Assim cada bola sai da boca aberta dela. A do quicante cospe as três juntas e não serve para a soltura em degraus; a animação própria do quicante em sequência eu gero depois que o movimento for aprovado.</li>
+  </ul>
+  <figure><img src="bola-viva-quadros.png" alt="a bola ciano no voo, quadro a quadro"><figcaption><b>A bola ciano no voo, quadro a quadro (ampliada 6×):</b> a faixa gira, e os sopros brancos saem em lados diferentes, corrigindo o rumo.</figcaption></figure>
+</div>
+
+<h2>Duas intensidades, para você calibrar</h2>
+<div class="item decidir">
+  <div class="par">
+    <figure><video src="maquete4-bola-brigando.webm" autoplay loop muted playsinline controls></video><figcaption><b>Brigando:</b> mais instável. Ela treme mais fora do rumo, e os sopros disparam mais vezes e em mais direções.</figcaption></figure>
+    <figure><video src="maquete4-bola-calma.webm" autoplay loop muted playsinline controls></video><figcaption><b>Mais calma:</b> metade da instabilidade. Quase uma bola comum, com sopros de vez em quando.</figcaption></figure>
+  </div>
+  <p class="sub">O rastro pontilhado só existe na maquete, para dar para ler o arco. O desenho da bola e dos sopros continua provisório.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>O movimento</b> ficou natural agora?</li>
+    <li><b>A intensidade:</b> brigando, mais calma ou um meio-termo?</li>
+    <li><b>A soltura:</b> está certa assim (a ciano alta, depois a laranja na metade, depois a verde na metade de novo, cerca de meio segundo entre uma e outra)?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

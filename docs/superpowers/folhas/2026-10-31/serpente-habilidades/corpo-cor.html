@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: corpo e cor</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 4px; }
+  p { margin: 6px 0; }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; margin: 10px 0; font-size: 14px; }
+  td, th { border: 1px solid var(--line); padding: 5px 10px; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente de 3 cabeças: o corpo e a cor da primeira cabeça</h1>
+<p class="sub">31/10/2026 · segunda rodada das animações por habilidade · nada foi commitado.</p>
+
+<div class="item">
+  <p>Você:</p>
+  <ol>
+    <li><i>"quando eu falo do movimento sair do idle, me refiro a ter um movimento tambem corporal"</i></li>
+    <li><i>"Existe discrepâncias na cor da primeira cabeça, cada animação deixa a cor diferente, verifique."</i></li>
+  </ol>
+  <p>As duas coisas estavam certas e as duas eram minhas: no pedido ao gerador eu escrevia "o corpo enrolado fica parado", e não dizia de que cor é a boca de cada cabeça. Esta rodada refez as quatro animações com as duas correções.</p>
+</div>
+
+<h2>1. A cor da primeira cabeça</h2>
+<div class="item">
+  <p><b>O que mudava era a boca aberta, não as placas.</b> Quase todos os pixels das animações já usam as 52 cores da arte aprovada. Mas, quando a boca abre, o gerador inventava o interior: vermelho numa, roxo em outra, rosa, laranja. E o cuspe da cabeça ciano saía laranja.</p>
+  <p><b>A correção:</b> o pedido agora diz a cor de cada boca (ciano-azul na esquerda, verde no meio, laranja na direita). As três cabeças abrem a boca e cospem na cor do tiro delas, em todas as animações.</p>
+  <figure><img src="cabeca-antes-agora.png" alt="a cabeça ciano antes e agora"><figcaption><b>Em cima, a rodada anterior; embaixo, esta</b>, a cabeça ciano ampliada 3×. A primeira de cada linha é a arte aprovada.</figcaption></figure>
+</div>
+
+<h2>2. O corpo</h2>
+<div class="item decidir">
+  <p>Agora o corpo inteiro participa: as roscas apertam, o corpo abaixa, se ergue, se projeta e recua. Medido pela silhueta das roscas, a mudança passou de 0–2% para 6–20%. Todas saem da arte aprovada e voltam para ela, e nenhuma escurece o corpo no meio do caminho.</p>
+  <h3>Os tiros normais (os três cuspes curtos, um depois do outro)</h3>
+  <div class="par">
+    <figure><img src="clipe-tiroA.gif" alt="antes"><figcaption><b>Antes:</b> só a cabeça.</figcaption></figure>
+    <figure><img src="clipe2-tiros.gif" alt="agora"><figcaption><b>Agora:</b> a ciano, a laranja e a verde, cada uma com o próprio cuspe; o corpo dá um tranco a cada tiro.</figcaption></figure>
+  </div>
+  <h3>O cuspe quicante</h3>
+  <div class="par">
+    <figure><img src="clipe-quic2.gif" alt="antes"><figcaption><b>Antes.</b></figcaption></figure>
+    <figure><img src="clipe2-quic.gif" alt="agora"><figcaption><b>Agora:</b> as roscas apertam e o corpo recua, depois o corpo inteiro se projeta com as três cabeças.</figcaption></figure>
+  </div>
+  <h3>A chuva</h3>
+  <div class="par">
+    <figure><img src="clipe-chuva1.gif" alt="antes"><figcaption><b>Antes.</b></figcaption></figure>
+    <figure><img src="clipe2-chuva.gif" alt="agora"><figcaption><b>Agora:</b> ela afunda nas roscas, se ergue, e as três cospem para cima.</figcaption></figure>
+  </div>
+  <h3>O raio com carga</h3>
+  <div class="par">
+    <figure><img src="clipe-raio1.gif" alt="antes"><figcaption><b>Antes.</b></figcaption></figure>
+    <figure><img src="clipe2-raio.gif" alt="agora"><figcaption><b>Agora:</b> o corpo se agacha atrás da cabeça ciano, que avança, segura a boca aberta tremendo e depois fecha. O gerador terminava sempre de boca aberta, então o fechamento é uma segunda animação, gerada a partir do último quadro. A parte "segurando" foi esticada indo e voltando pelos quadros do tremor, para durar o tempo do raio.</figcaption></figure>
+  </div>
+  <p class="sub">No quadro do bote do cuspe e da chuva, o corpo muda muito de uma vez e o rastro aparece no mesmo quadro. É o golpe rápido, não uma falha; no resto, nenhuma animação tem salto.</p>
+</div>
+
+<h2>3. Nas maquetes (velocidade real, na arena)</h2>
+<div class="item decidir">
+  <p>Agora cada projétil sai da boca onde ela está no quadro do golpe, porque com o corpo se mexendo a boca não está mais no lugar do idle. Os projéteis e o raio continuam desenhados de forma provisória.</p>
+  <div class="par">
+    <figure><video src="maquete2-tiros.webm" autoplay loop muted playsinline controls></video><figcaption><b>Os tiros normais:</b> um tiro mirado por cabeça, na cor dela.</figcaption></figure>
+    <figure><video src="maquete2-quic.webm" autoplay loop muted playsinline controls></video><figcaption><b>O cuspe quicante:</b> as três cospem juntas, cada bola num ritmo de quique.</figcaption></figure>
+    <figure><video src="maquete2-chuva.webm" autoplay loop muted playsinline controls></video><figcaption><b>A chuva:</b> o cuspe sai na direção das mandíbulas, e a chuva cai em três ondas com o vão andando.</figcaption></figure>
+    <figure><video src="maquete2-raio.webm" autoplay loop muted playsinline controls></video><figcaption><b>O raio:</b> agora ele sai da boca e desce girando até o casco. Na maquete anterior, o raio era uma faixa solta no alto da tela e a nave "desviava" atravessando ele.</figcaption></figure>
+  </div>
+</div>
+
+<h2>4. O que eu descartei, e por quê</h2>
+<div class="item">
+  <ul>
+    <li><b>Animações que escurecem o corpo:</b> em algumas gerações, da metade em diante, as roscas caíam para 66–87% do brilho e ficavam assim. Na volta ao idle isso daria um piscar, o mesmo tipo de defeito de cor que você apontou. Tentei corrigir o brilho depois e ficou ruim (os contornos pretos viraram cinza, apareceram faixas), então a regra é: escureceu, descarta e gera de novo.</li>
+    <li><b>Manchas cinza:</b> o gerador pinta uma mancha cinza no buraco das roscas. Elas são apagadas em todas as animações; a cor delas é a de uma placa dela, então só some a mancha grande, e a placa fica.</li>
+    <li><b>No total:</b> das 23 gerações desta rodada, ficaram 7 (os três cuspes, o quicante, a chuva, o raio e o fechamento dele). As outras tinham a boca na cor errada, escureciam, quase não mexiam o corpo ou terminavam de boca aberta.</li>
+  </ul>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>As quatro animações</b> (os tiros, o cuspe, a chuva, o raio): o corpo e a cor estão como você quer?</li>
+    <li><b>Os rastros que o gerador desenha</b> (agora na cor de cada cabeça): ficam, ou eu limpo e deixo só o projétil do jogo?</li>
+    <li><b>Como desviar do raio:</b> um raio que varre a tela inteira não deixa lugar seguro. Na maquete, o lugar seguro é embaixo da mandíbula dela, perto do casco (chegar perto para escapar, bem Cuphead). Isso é uma proposta: ela fica, ou a gente decide isso na folha do visual do raio?</li>
+  </ol>
+  <table>
+    <tr><th>Habilidade</th><th>Corpo (roscas)</th><th>Cor das bocas</th><th>Volta ao idle</th></tr>
+    <tr><td>Tiros normais</td><td>6–9%</td><td>ciano · laranja · verde</td><td>sim</td></tr>
+    <tr><td>Cuspe quicante</td><td>14%</td><td>as três</td><td>sim</td></tr>
+    <tr><td>Chuva</td><td>15%</td><td>as três</td><td>sim (igual à aprovada)</td></tr>
+    <tr><td>Raio</td><td>10%</td><td>ciano</td><td>sim (com o fechamento)</td></tr>
+  </table>
+  <p>Com isso aprovado, o próximo passo é o visual da bola e do raio, também numa folha, antes de levar tudo para o jogo.</p>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente no casco</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; background: #11151e; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente no casco (S1b)</h1>
+<p class="sub">29/10/2026 · spec <code>docs/superpowers/specs/2026-10-29-serpente-luta-s1b-design.md</code> · plano <code>docs/superpowers/plans/2026-10-29-serpente-luta-s1b.md</code> · <a href="conceitos.html">← os conceitos</a>. Nada foi commitado.</p>
+
+<div class="item">
+  <p>O que entrou no jogo, com as suas escolhas (o erguer, a rachadura R3, o corte, a laranja com mandíbula, a chuva tripla e uma cor por cabeça):</p>
+  <ul>
+    <li><b>A chegada:</b> o casco para inteiro na arena, treme sobre ela e estoura de dentro para fora, nos próprios pixels. O rombo se abre e ela sobe por ele.</li>
+    <li><b>O corte:</b> só pescoços e cabeças saem do casco, em qualquer momento. Dentro de um buraco, o corpo dela some no escuro.</li>
+    <li><b>Em repouso:</b> a base fica no rombo, e ela só sobe e desce.</li>
+    <li><b>O bote por baixo do casco:</b>
+      <ol>
+        <li>Ela mergulha.</li>
+        <li>As placas sobem sobre ela e a fissura fica atrás.</li>
+        <li>Embaixo da nave, a ponta trava branca.</li>
+        <li>O casco estoura e ela sobe do rasgo fazendo o erguer.</li>
+        <li>A janela.</li>
+        <li>Ela afunda, a lombada volta ao rombo, e o rasgo e a fissura se fecham.</li>
+      </ol>
+      Na forma de 2 cabeças o bote é duplo; na de 1 cabeça, a rajada vem de perto.</li>
+    <li><b>A chuva tripla:</b> no rombo, ela se ergue e as bocas acendem, cada uma na sua cor. Cada cabeça viva cospe para o alto, e cai uma onda por cabeça, cada uma com um vão. Ela alterna com o bote: a de 3 cabeças faz bote → chuva, e a de 2 abre com a chuva.</li>
+    <li><b>As cores:</b> a cabeça ciano cospe <b>azul</b> (um azul fundo, para não confundir com o ciano do tiro da nave), a verde cospe verde e a laranja, <b>âmbar</b>. Cada tiro sai da boca de quem atira.</li>
+    <li><b>A morte da de 3 cabeças:</b> ela afunda no rombo e fica o silêncio. As três luzes convergem dentro do buraco, vem o clarão, o lábio estoura e a maior irrompe dele. Não há véu preto.</li>
+  </ul>
+</div>
+
+<h2>1. A luta, no jogo</h2>
+<div class="item decidir">
+  <p>Os filmes são da luta inteira no treino, jogada pela sonda que desvia: ela sai para o lado na trava e procura o vão na chuva.</p>
+  <div class="par">
+    <figure><video src="chegada.webm" autoplay loop muted playsinline controls></video><figcaption><b>A chegada:</b> o casco treme, estoura e ela sobe pelo rombo.</figcaption></figure>
+    <figure><video src="bote-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>O bote da de 3 cabeças:</b> a rachadura, a trava, o rasgo, o erguer, a janela e a volta por baixo.</figcaption></figure>
+    <figure><video src="chuva-A.webm" autoplay loop muted playsinline controls></video><figcaption><b>A chuva tripla:</b> as bocas acendem, o cuspe sobe, e caem as ondas azul, verde e âmbar.</figcaption></figure>
+    <figure><video src="bote-B.webm" autoplay loop muted playsinline controls></video><figcaption><b>A de 2 cabeças:</b> o bote duplo. A segunda rachadura sai do rasgo da primeira.</figcaption></figure>
+    <figure><video src="bote-C.webm" autoplay loop muted playsinline controls></video><figcaption><b>A de 1 cabeça:</b> a cabeça laranja se ergue com a mandíbula e cospe a rajada de perto.</figcaption></figure>
+    <figure><video src="fusao.webm" autoplay loop muted playsinline controls></video><figcaption><b>A maior surge do rombo:</b> ela afunda, as luzes convergem lá dentro e a fusão irrompe. Por enquanto com a arte de hoje; ela se solta na S2.</figcaption></figure>
+  </div>
+  <figure><video src="luta.webm" controls muted playsinline></video><figcaption><b>A luta inteira</b> (~50 s, da chegada à morte da fusão).</figcaption></figure>
+</div>
+
+<h2>2. A dificuldade, medida</h2>
+<div class="item">
+  <p>Os mesmos dois jogadores de sonda das outras rodadas, no treino, com a mesma sorte. Os dois param em x 60, seguem a altura da cabeça viva e andam na velocidade da nave:</p>
+  <ul>
+    <li><b>o parado</b> não desvia;</li>
+    <li><b>o que desvia</b> sai 40 px para o lado na trava e procura o vão na chuva.</li>
+  </ul>
+  <table>
+    <tr><th></th><th>a luta</th><th>contatos (o bote e a janela)</th><th>tiros levados</th></tr>
+    <tr><td>antes da S1, parado</td><td>24,9 s</td><td>0</td><td>8</td></tr>
+    <tr><td>S1, parado</td><td>39,7 s</td><td>5</td><td>8</td></tr>
+    <tr><td>S1, desviando</td><td>41,4 s</td><td>0</td><td>2</td></tr>
+    <tr><td><b>S1b, parado</b></td><td>42,0 s</td><td>7</td><td>10</td></tr>
+    <tr><td><b>S1b, desviando</b></td><td>41,7 s</td><td>0</td><td>15</td></tr>
+  </table>
+  <p>Quem fica no lugar leva o bote. Quem desvia não leva, mas a chuva cobre o alto da tela e cobra quem não acha o vão. Para quem desvia, a janela rende 40 do total de 210 de vida, e o resto ela leva no rombo.</p>
+</div>
+
+<h2>3. O que a sonda achou no caminho</h2>
+<div class="item">
+  <ul>
+    <li><b>O círculo de acerto da S1 ficava no pescoço.</b> Os números de julho vinham do centro da cor da cabeça, que soma as costuras do pescoço. Na ciano e na verde, o círculo caía 25 a 35 px de arte abaixo do crânio e não tocava a cabeça desenhada. Agora fica no crânio, medido na grade em cada quadro do gesto:
+      <figure><img src="cabecas.png" alt="As cabeças no gesto"><figcaption>O erguer das três formas (quadros 0, 2, 4, 8, 12, 14 e 16). Em branco, o círculo de acerto da cabeça viva. Em amarelo, as outras cabeças. Em rosa, as bocas. A linha vermelha é o corte.</figcaption></figure>
+    </li>
+    <li><b>Na forma de 1 cabeça, a cabeça laranja varre ~39 px para a esquerda ao se erguer</b> e mordia quem tinha desviado para lá. Agora o bote mira a cabeça na pose segurada.</li>
+    <li><b>Os tiros que sumiam:</b> a vaga reaproveitada do pool guardava a posição velha no corpo físico. A gota que tinha acabado de sair pelo alto levava a onda seguinte junto, e 9 de 10 gotas azuis sumiam. Isso já valia para os tiros dela na S1.</li>
+    <li><b>O estouro do bote</b> passou por quatro versões com o motor de destroços: uma laje rachada, uma nuvem vermelha que lia como carne, depois cacos de gelo, todos cobrindo os pescoços por um segundo. Ficou o cascalho das placas da crista saltando <b>por trás</b> dela, com um clarão branco curto na crista. A chegada continua com o motor de destroços, na quebra lenta de costuras vermelhas.</li>
+    <li><b>A morte:</b> o motor quebrava o desenho inteiro, e as roscas escondidas saíam em pedaços por cima do casco. Agora só quebra o que está acima do corte.</li>
+  </ul>
+</div>
+
+<h2>4. A fase de verdade</h2>
+<div class="item">
+  <figure><img src="fase-real.png" alt="A arena na fase de verdade"><figcaption>Sem o treino, a arena também chega:
+    <ul>
+      <li>aos 95 s, a faixa inteira chega com o casco;</li>
+      <li>aos 98 s, o mundo freia;</li>
+      <li>aos 101 s, o casco treme;</li>
+      <li>aos 102 s, estoura e ela sobe.</li>
+    </ul>
+  </figcaption></figure>
+</div>
+
+<h2>5. Para você julgar</h2>
+<div class="item decidir">
+  <ul>
+    <li>Se o movimento convence agora: o casco reagindo, ela saindo dele, o erguer.</li>
+    <li>O tempo da trava branca (0,55 s), a velocidade da rachadura (300 px/s) e a janela (1,1 s).</li>
+    <li>A chuva: a densidade (um vão de duas gotas por onda), a velocidade (110 px/s) e de quanto em quanto tempo ela vem.</li>
+    <li>O estouro da chegada (as costuras vermelhas) e o do bote (o cascalho e o clarão).</li>
+  </ul>
+  <p>Os números ficam em <code>src/entities/numerosSerpente.ts</code>.</p>
+</div>
+
+<h2>6. Depois</h2>
+<div class="item">
+  <ul>
+    <li><b>S2:</b> a maior com a arte nova, que se solta do casco e fica móvel.</li>
+    <li><b>S3:</b> os outros gestos, como o recuo no aviso e o cuspe antes do leque.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

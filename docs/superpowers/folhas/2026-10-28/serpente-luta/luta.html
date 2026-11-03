@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Luta da Serpente</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  a { color: var(--sub); }
+  code { font-size: 13px; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; background: #11151e; }
+  .bom { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A luta da Serpente (S1)</h1>
+<p class="sub">28/10/2026 · spec <code>docs/superpowers/specs/2026-10-28-serpente-luta-s1-design.md</code> · plano <code>docs/superpowers/plans/2026-10-28-serpente-luta-s1.md</code> · <a href="rombo.html">← os conceitos do rombo</a>. Nada foi commitado.</p>
+
+<div class="item">
+  <p>Você: <i>"ela está muito central, sobrando pouco espaço para o player … a estrela não me agrada muito … a avançada dela para frente não está fazendo muito sentido … É um dos bosses mais fáceis"</i>; <i>"muito engessadas"</i>; <i>"o cenário do boss não condiz com a fase"</i>.</p>
+  <p>O que entrou no jogo:</p>
+  <ul>
+    <li><b>A arena:</b> na chegada do chefão o casco do Leviatã freia e para, com o rombo A no posto dela, e ela sobe de dentro dele. As placas soltas saíram. O treino <code>[N]</code> mostra o mesmo casco, já na proa.</li>
+    <li><b>A posição:</b> ela vive no terço direito, no rombo (centro em x ~300; antes 252), e troca entre três alturas: afundada, média e erguida. Sobe antes de atacar e afunda para se recuperar.</li>
+    <li><b>A investida, em toda forma:</b> ela mira a altura da nave, <b>trava e fica branca</b> (o sinal de sair da linha) e atravessa a tela até a borda. Depois <b>recua até ficar com a cabeça na frente da nave</b> e segura ali: é a janela para bater.
+      <ul>
+        <li><b>A:</b> investida simples.</li>
+        <li><b>B:</b> dupla. Depois da janela ela recua, mira de novo e avança outra vez.</li>
+        <li><b>C:</b> cospe uma rajada de perto na janela.</li>
+        <li><b>Fusão:</b> a mais rápida.</li>
+      </ul>
+    </li>
+    <li><b>O acerto do tamanho da cabeça:</b> 16,5 px de raio, antes 33. <b>A estrela saiu de todas as formas.</b></li>
+    <li><b>As veias acesas:</b> as costuras da cabeça viva batem como um coração, mais rápido no aviso e na janela. As das outras cabeças apagam.</li>
+    <li><b>O acerto que sangra:</b> 2 a 4 pixels de carne e fluido na cabeça viva. Na blindagem continua a faísca.</li>
+  </ul>
+</div>
+
+<h2>1. A dificuldade, medida</h2>
+<div class="item">
+  <p>Dois jogadores automáticos na luta inteira, no treino, com a mesma sorte, fazem a medida:</p>
+  <ul>
+    <li><b>o parado:</b> fica na altura da cabeça viva, atirando;</li>
+    <li><b>o que desvia:</b> sai da linha quando ela trava e volta depois que ela passou.</li>
+  </ul>
+  <table>
+    <tr><th></th><th>a luta</th><th>golpes da investida</th><th>tiros levados</th></tr>
+    <tr><td>hoje, parado</td><td>24,9 s</td><td>0</td><td>8</td></tr>
+    <tr><td>hoje, desviando</td><td>35,1 s</td><td>0</td><td>17</td></tr>
+    <tr><td>S1, parado</td><td>39,7 s</td><td class="bom">5 de 5</td><td>8</td></tr>
+    <tr><td>S1, desviando</td><td>41,4 s</td><td class="bom">0</td><td>2</td></tr>
+  </table>
+  <p>Hoje desviar só atrapalhava, porque a investida nunca chegava na nave. Agora quem fica parado leva um golpe em cada investida, e quem desvia não leva nenhum. A luta ficou ~60% mais longa sem aumentar a vida dela: os 210 continuam os mesmos.</p>
+</div>
+
+<h2>2. A luta, no jogo</h2>
+<div class="item decidir">
+  <div class="par">
+    <figure><video src="luta-antes.webm" controls loop muted playsinline></video><figcaption><b>Antes:</b> a luta de hoje, no treino, com o jogador que desvia. Ela no meio da tela, a estrela e a investida que para no meio.</figcaption></figure>
+    <figure><video src="luta-depois.webm" controls loop muted autoplay playsinline></video><figcaption><b>Depois (S1):</b> a mesma luta, com o mesmo jogador. O casco para, o rombo chega, ela sobe dele, e cada investida trava e atravessa. A nave pula por cima e volta para bater na janela.</figcaption></figure>
+  </div>
+  <p class="sub">Os dois vídeos são o jogo de verdade a 30 quadros por segundo, ampliados 2×. Não estão sincronizados, porque são lutas diferentes.</p>
+  <p><b>Para você julgar:</b></p>
+  <ul>
+    <li>a velocidade e o alcance da investida;</li>
+    <li>quanto dura o aviso e a trava branca;</li>
+    <li>a janela, com a cabeça em x ~140 por 1 s;</li>
+    <li>a frequência das trocas de posto;</li>
+    <li>o pulso das veias.</li>
+  </ul>
+  <p>Todos esses números ficam num arquivo só (<code>src/entities/numerosSerpente.ts</code>).</p>
+</div>
+
+<h2>3. A chegada e a investida, quadro a quadro</h2>
+<div class="item">
+  <figure><img src="entrada.png" alt="A chegada"><figcaption><b>A chegada, no treino</b> (1, 3, 4,5, 6, 7 e 8 s): o casco da proa, o rombo entrando com ele, o mundo freando, ela subindo de dentro do rombo.</figcaption></figure>
+  <figure><img src="fase-real.png" alt="A fase de verdade"><figcaption><b>A fase de verdade</b> (88, 96, 97,5, 99, 101 e 106 s): o mesmo rombo entra pela faixa do casco depois do banner, o mundo para aos ~101 s e ela sai. A aranha está viva só porque a sonda não atira nela.</figcaption></figure>
+  <figure><img src="investida.png" alt="Uma investida"><figcaption><b>Uma investida da forma de 3 cabeças</b>, a cada 0,38 s. No posto, ela pisca no aviso e trava. Atravessa a tela, recua até a cabeça ficar na frente da nave, segura ali (a janela) e volta ao rombo. O vermelho que aparece em alguns quadros é o dano dos tiros, como sempre foi.</figcaption></figure>
+</div>
+
+<h2>4. As veias</h2>
+<div class="item">
+  <p>A cor sozinha não separa as cabeças: as costuras ciano também correm pelo corpo. Por isso a máscara de cada cabeça é a cor dela <b>dentro da região da cabeça e do pescoço</b>, quadro a quadro. Na forma de 1 cabeça, a laranja se abre em canos com luzes quase brancas, e essas luzes também contam.</p>
+  <figure><img src="veias-mascaras.png" alt="As máscaras das veias"><figcaption>Linha de cima: 3 cabeças (a ciano acesa; a verde e a laranja em cinza, apagadas). No meio: 2 cabeças (a verde). Embaixo: 1 cabeça (a laranja). Quadros 0, 3 e 6 da animação, ampliados 2×.</figcaption></figure>
+  <figure><img src="veias-jogo.png" alt="As veias no jogo"><figcaption><b>No jogo</b> (a cada 0,1 s, ampliado 3×): a cabeça ciano é a viva, e as costuras dela batem. As da verde ficam apagadas. Os pontinhos vermelhos no pescoço dela são o acerto que sangra.</figcaption></figure>
+</div>
+
+<h2>5. O que ficou para depois</h2>
+<div class="item">
+  <ul>
+    <li><b>S2, a fusão nova:</b> a união das três, solta do casco, saindo deste rombo. Na S1 a fusão já ganhou o posto novo, a investida e o acerto do tamanho da cabeça, mas ainda é a arte de hoje, presa.</li>
+    <li><b>S3, os gestos:</b> recuar no aviso e cuspir antes do leque, gerados no PixelLab para as formas de cabeças. Hoje o aviso é o corpo piscando, como antes.</li>
+  </ul>
+</div>
+</main>
+</body>
+</html>

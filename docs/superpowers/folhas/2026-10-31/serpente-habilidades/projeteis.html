@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serpente: os projéteis</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .medida { border-color: var(--ok); }
+  .dois { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 860px) { .dois { grid-template-columns: 1fr; } }
+  figure { margin: 14px 0 0; }
+  figure img, figure video { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .rec { color: var(--ok); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A Serpente: os projéteis</h1>
+<p class="sub">02/11/2026 · rodada 14 das habilidades: o desenho dos tiros normais e dos mísseis da chuva · nada foi commitado.</p>
+
+<h2>Sua resposta, e o cuspe mais discreto</h2>
+<div class="item medida">
+  <p>Suas escolhas: <b>tiros B, uma arma por cabeça</b>; <b>míssil B, o casulo</b>; <b>a chama do míssil na cor da cabeça</b>. O próximo passo é instalar as habilidades no jogo.</p>
+  <p>Você também disse: <i>"no movimento de atirar, a cabeça verde e a cabeça laranja soltam um efeito muito forte e grande, quero algo mais discreto, mantendo o movimento das cabeças"</i>. Era o efeito que o gerador pintou dentro da própria animação: a labareda, os anéis de explosão e as fagulhas da laranja, e os jatos da verde.</p>
+  <ul>
+    <li><b>Tirei só o efeito.</b> O movimento das cabeças é o mesmo, quadro a quadro. Onde o efeito cobria o corpo (o pescoço e a cauda da azul, o pescoço da verde), o corpo foi reposto a partir do quadro limpo vizinho. A boca aberta e acesa faz parte do gesto e ficou: na laranja, a labareda que saía de dentro da boca virou a goela acesa, escura no quadro em que ela começa a abrir.</li>
+    <li><b>No lugar, um efeito pequeno desenhado por código:</b> um clarão de 3 px por um instante na boca. A laranja solta junto duas fagulhas e um fio de fumaça, e a verde três gotinhas.</li>
+    <li><b>A azul ficou como estava</b>, porque você não falou dela. Ela ainda tem o cuspe azul do gerador no quadro em que atira. Se quiser, eu limpo do mesmo jeito.</li>
+    <li><b>Corrigi um erro meu:</b> nos vídeos de antes, o tiro saía da boca do idle, e não da boca no quadro do gesto. Na laranja, que avança para atirar, a diferença era de 36 px. Agora cada tiro sai da boca onde ela está.</li>
+  </ul>
+  <figure><video src="maquete14b-cuspe.webm" autoplay loop muted playsinline controls></video><figcaption><b>Antes e agora</b>, com os tiros B. A azul atira primeiro, depois a laranja e por fim a verde.</figcaption></figure>
+  <figure><img src="cuspe-laranja.png" alt="a laranja antes e agora"><figcaption><b>A laranja, 3×</b>, do quadro em que ela abre a boca até a volta.</figcaption></figure>
+  <figure><img src="cuspe-verde.png" alt="a verde antes e agora"><figcaption><b>A verde, 3×.</b></figcaption></figure>
+</div>
+
+<h2>A rodada 14, como foi mostrada</h2>
+
+<div class="item">
+  <p>Os tiros e os mísseis ainda estavam provisórios na maquete: o tiro era um ponto de 3 px e o míssil um traço de 7×2. Desenhei <b>4 opções de tiro</b> e <b>3 de míssil</b> (mais o torpedo em tamanho menor) pixel a pixel, nas cores de cada cabeça. Cada uma roda na maquete em velocidade real, girando do jeito que o jogo gira.</p>
+  <p>A geleia de plasma, o raio e o gás já estão aprovados e não mudaram. O comportamento também não mudou: os tiros saem mirados, um por cabeça, e os mísseis sobem, viram e voltam com o motor, como você aprovou.</p>
+  <p>Todas seguem as regras que já valem para tiro inimigo neste jogo:</p>
+  <ul>
+    <li><b>Borda quase preta e miolo quase branco</b>, para o tiro aparecer até em cima do corpo dela, que é o pior fundo.</li>
+    <li><b>O tiro da azul é azul fundo</b>, porque o ciano da arte é a cor do tiro da sua nave.</li>
+    <li><b>O tamanho do tiro segue a caixa de colisão de hoje</b> (cerca de 12×8 px).</li>
+  </ul>
+</div>
+
+<h2>Os tiros</h2>
+<div class="item">
+  <figure><video src="maquete14-tiros.webm" autoplay loop muted playsinline controls></video><figcaption><b>As quatro opções lado a lado</b>, com o mesmo gesto e os mesmos tiros. As cabeças atiram uma de cada vez: a azul, a laranja e depois a verde.</figcaption></figure>
+  <ul>
+    <li><b>A · a gota de hoje, em pixel:</b> é o tiro que está no jogo agora (a gota com cauda), redesenhado em pixel. Hoje ela é desenhada por código, com elipses lisas. É a mesma forma nas três cores.</li>
+    <li><b>B · uma arma por cabeça</b> <span class="rec">(recomendo)</span>: cada tiro ecoa a habilidade da sua cabeça.
+      <ul>
+        <li>A azul solta uma agulha elétrica, com estalos que pulam dela, como o raio.</li>
+        <li>A verde solta uma gota de veneno que balança e pinga pelo caminho, como o gás.</li>
+        <li>A laranja solta uma brasa que deixa fumaça e fagulhas, como a faísca.</li>
+      </ul>
+      Você sabe de qual cabeça veio o tiro sem olhar para ela.</li>
+    <li><b>C · orbe pulsante:</b> a bala redonda clássica de shmup, com um halo que respira. Por ser redonda, não serrilha quando gira.</li>
+    <li><b>D · traçante fino:</b> um "–" como você pediu para os tiros dos drones, só que na cor de cada cabeça.</li>
+  </ul>
+  <p class="sub">A agulha (B azul) e o traçante (D) são mais finos que a caixa de colisão de hoje: têm 5 px de altura contra 8. Se você escolher um deles, eu afino a caixa junto, o que deixa o tiro um pouco mais fácil de desviar, ou engrosso o desenho.</p>
+  <figure><img src="proj-tiros-fila.png" alt="os tiros ampliados"><figcaption><b>Ampliados 6×, na cena:</b> cada tiro logo depois de sair da boca, ainda em cima do corpo dela, e no meio do voo. A primeira linha é a maquete de hoje.</figcaption></figure>
+  <figure><img src="projeteis/vitrine-tiro.png" alt="os sprites dos tiros" style="max-width:684px"><figcaption><b>Os desenhos, 10×:</b> todos os quadros de cada tiro, por cabeça. No jogo eles giram na direção do voo.</figcaption></figure>
+</div>
+
+<h2>Os mísseis</h2>
+<div class="item">
+  <figure><video src="maquete14-misseis.webm" autoplay loop muted playsinline controls></video><figcaption><b>As opções lado a lado:</b> cada cabeça lança uma salva para cima, e as três ondas voltam de cima com o motor aceso.</figcaption></figure>
+  <ul>
+    <li><b>A · ferrão:</b> um espinho da armadura dela, com um canal aceso até a ponta.</li>
+    <li><b>B · casulo:</b> uma semente com a costura rachada e brilhando. É a mais orgânica e a mais redonda.</li>
+    <li><b>C · torpedo</b> <span class="rec">(recomendo)</span>: um torpedo pequeno nas placas dela, com uma faixa e o nariz acesos na cor da cabeça. É o que mais se lê como míssil e combina com o focinho de canhão da laranja. <b>C curto</b> é o mesmo torpedo com 9 px de comprimento em vez de 12.</li>
+  </ul>
+  <p>Em todas, o corpo é a armadura dela e <b>a chama sai na cor da cabeça</b> (antes era âmbar). Assim o míssil dela não se confunde com o do lança-mísseis do casco (corpo de metal, chama fria) nem com o do Leviatã (corpo de osso, chama âmbar).</p>
+  <figure><img src="proj-misseis-fila.png" alt="os mísseis ampliados"><figcaption><b>Ampliados 5×:</b> a salva subindo, a onda descendo, mais perto do casco e o estouro (o estouro não mudou). A primeira linha é a maquete de hoje.</figcaption></figure>
+  <figure><img src="projeteis/vitrine-missil.png" alt="os sprites dos mísseis" style="max-width:412px"><figcaption><b>Os desenhos, 10×</b>, apontando para a direita. Descendo, eles giram de nariz para baixo.</figcaption></figure>
+</div>
+
+<h2>Um erro corrigido</h2>
+<div class="item medida">
+  <p><b>Na maquete da chuva que você aprovou, a onda azul nunca caía.</b> O instante dela coincidia exatamente com a virada de um quadro, um erro de arredondamento meu, e a onda verde caía duas vezes no lugar dela. Agora são três ondas: azul, verde e laranja.</p>
+  <ul>
+    <li>Medi o manequim passando por elas: o centro dele fica a 42 px do míssil mais perto nas três.</li>
+    <li>Fora isso, sem as opções novas, as maquetes continuam idênticas quadro a quadro: a dos tiros inteira, e a dos mísseis até a onda azul entrar (1,43 s).</li>
+  </ul>
+  <p class="sub">O cuspe que o gerador pinta na boca de cada cabeça continua servindo de clarão do tiro. Se preferir, eu limpo e deixo só o projétil.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Os tiros:</b> A, B, C ou D (ou uma mistura)?</li>
+    <li><b>Os mísseis:</b> ferrão, casulo ou torpedo? E o tamanho: 12 px ou o curto de 9 px?</li>
+    <li><b>A chama do míssil na cor da cabeça</b> fica, ou volta a ser âmbar?</li>
+    <li><b>O próximo passo:</b> instalar as habilidades no jogo?</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

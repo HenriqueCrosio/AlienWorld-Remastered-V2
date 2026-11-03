@@ -128,7 +128,8 @@ if (QUAIS.includes('serpente')) {
   ok(trocas.length === 3, `Serpente: três trocas de arte (${trocas.length})`);
   ok(trocas.every((e) => e.furos === 0), `Serpente: a arte nova nasce sem as marcas da velha (${trocas.map((e) => e.furos).join(', ')})`);
   ok(v.every((e) => e.forma === 3 || e.mordidas === 0), 'Serpente: nenhum pedaço grande nas cabeças (só as marcas)');
-  ok(v.some((e) => e.forma === 3 && e.mordidas === 2), 'Serpente: os dois pedaços grandes na fusão, perto da morte');
+  // (28/10: three, all in the fusion — neck, chin, skull; `_sonda-serpente-fusao.mjs` checks where each lands)
+  ok(v.some((e) => e.forma === 3 && e.mordidas === 3), 'Serpente: os três pedaços grandes na fusão (pescoço, queixo, crânio)');
   await page.waitForTimeout(1500);
   const morte = await page.evaluate(() => window.__game.scene.getScene('Game').destrocos.ativo);
   ok(morte, 'Serpente: a morte é a ruptura nos próprios pixels (os destroços no ar 1,5 s depois)');
