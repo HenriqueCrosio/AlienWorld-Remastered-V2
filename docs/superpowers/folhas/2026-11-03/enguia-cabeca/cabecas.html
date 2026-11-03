@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enguia: as cabeças</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .rec { border-color: var(--ok); }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 5fr 7fr; gap: 12px; align-items: start; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A enguia colossal: as cabeças</h1>
+<p class="sub">03/11/2026 · a 1ª rodada da arte da serpente grande (spec <code>specs/2026-11-03-serpente-grande-enguia-design.md</code>) · nada instalado.</p>
+
+<div class="item">
+  <p>Você: <i>"crie primeiro o modelo no pixellab para vermos como vai sair essa cabeça. Assim escolhemos antes para ter uma noção de como ela vai ficar"</i>, e <i>"a enguia precisa ser uma enguia dark sci-fi bio mecanica bem desenhada"</i>.</p>
+  <p><b>Como saíram:</b> no PixelLab (o Pro), com <b>quatro conceitos diferentes de cabeça</b> e não variações de uma só, 9 candidatas cada, 40 gerações. Usei a cabeça azul da de 3 cabeças como referência de ESTILO (o material que ela herda: o casco preto-oleoso, as placas, a luz só nos pontos de energia), sem referência de forma, para não prender o desenho.</p>
+  <p><b>Conferido ampliado:</b> as 36 saíram de perfil e viradas para a esquerda (nenhuma vista de cima). Fora da escolha: três moreias que copiaram a cabeça azul da referência (0, 5 e 8) e a fusão 0 (toda cinza, sem luz). Algumas moreias tinham uma barra branca solta embaixo, um defeito do gerador; nas escolhidas ela foi apagada, sem tocar no desenho.</p>
+</div>
+
+<h2>Os quatro conceitos</h2>
+
+<h3>A — a moreia blindada</h3>
+<p>Cabeça longa e afilada, com dentes de agulha, olho azul fundo, guelras verdes e respiros laranja no pescoço. O pescoço desce em curva, o que combina com o posto dos canos (o corpo descendo pela borda direita).</p>
+<figure><img src="grade-moreia.png" alt="as 9 moreias"><figcaption>As 9, ×3 (numeradas da esquerda para a direita e de cima para baixo, a partir de 0).</figcaption></figure>
+<div class="par">
+  <figure><img src="esc-moreia-1103-3.png" alt="moreia 3"><figcaption><b>A3</b>, ×5: a mais limpa.</figcaption></figure>
+  <figure><img src="jogo-moreia-1103-3.png" alt="moreia 3 no jogo"><figcaption>A3 no tamanho real, no posto dos canos.</figcaption></figure>
+</div>
+<div class="par">
+  <figure><img src="esc-moreia-1103-6.png" alt="moreia 6"><figcaption><b>A6</b>, ×5: a mesma, com espinhos no dorso.</figcaption></figure>
+  <figure><img src="jogo-moreia-1103-6.png" alt="moreia 6 no jogo"><figcaption>A6 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>B — a engolidora</h3>
+<p>Inspirada na enguia-pelicano das profundezas: a mandíbula enorme, a garganta escura com um núcleo laranja aceso no fundo, olho azul pequeno e respiros verdes no pescoço. É a mais "horror do fundo do mar", e a boca grande serve ao cuspe das sementes do Eco.</p>
+<figure><img src="grade-engolidora.png" alt="as 9 engolidoras"><figcaption>As 9, ×3.</figcaption></figure>
+<div class="par">
+  <figure><img src="esc-engolidora-1103-0.png" alt="engolidora 0"><figcaption><b>B0</b>, ×5.</figcaption></figure>
+  <figure><img src="jogo-engolidora-1103-0.png" alt="engolidora 0 no jogo"><figcaption>B0 no tamanho real.</figcaption></figure>
+</div>
+<div class="par">
+  <figure><img src="esc-engolidora-1103-5.png" alt="engolidora 5"><figcaption><b>B5</b>, ×5: o pescoço oco, com brasas por dentro das placas.</figcaption></figure>
+  <figure><img src="jogo-engolidora-1103-5.png" alt="engolidora 5 no jogo"><figcaption>B5 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>C — a lança</h3>
+<p>Inspirada na enguia-fita: o crânio fino como uma ponta de lança e uma crista de placas finas no dorso. É a mais elegante e rápida de silhueta, e a menos ameaçadora; a boca é pequena.</p>
+<figure><img src="grade-lanca.png" alt="as 9 lanças"><figcaption>As 9, ×3.</figcaption></figure>
+<div class="par">
+  <figure><img src="esc-lanca-1103-0.png" alt="lança 0"><figcaption><b>C0</b>, ×5.</figcaption></figure>
+  <figure><img src="jogo-lanca-1103-0.png" alt="lança 0 no jogo"><figcaption>C0 no tamanho real.</figcaption></figure>
+</div>
+<div class="par">
+  <figure><img src="esc-lanca-1103-7.png" alt="lança 7"><figcaption><b>C7</b>, ×5: a crista em leque, com a boca aberta.</figcaption></figure>
+  <figure><img src="jogo-lanca-1103-7.png" alt="lança 7 no jogo"><figcaption>C7 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>D — a fusão das três</h3>
+<p>A cabeça que nasce das três fundidas, com cada cor num traço próprio: o olho AZUL, as guelras VERDES e um canhão LARANJA na garganta, embaixo da mandíbula. Os chifres curtos para trás e a costura de placas lembram as três cabeças de antes.</p>
+<figure><img src="grade-fusao.png" alt="as 9 fusões"><figcaption>As 9, ×3.</figcaption></figure>
+<div class="par">
+  <figure><img src="esc-fusao-1103-4.png" alt="fusão 4"><figcaption><b>D4</b>, ×5: a boca aberta, as três cores.</figcaption></figure>
+  <figure><img src="jogo-fusao-1103-4.png" alt="fusão 4 no jogo"><figcaption>D4 no tamanho real.</figcaption></figure>
+</div>
+<div class="par">
+  <figure><img src="esc-fusao-1103-1.png" alt="fusão 1"><figcaption><b>D1</b>, ×5: mais placas e anéis acesos; a boca lê menos.</figcaption></figure>
+  <figure><img src="jogo-fusao-1103-1.png" alt="fusão 1 no jogo"><figcaption>D1 no tamanho real.</figcaption></figure>
+</div>
+
+<h2>A minha recomendação</h2>
+<div class="item rec">
+  <p><b>D4, a fusão.</b> É a única em que as três cores são três peças diferentes da cabeça: o olho da azul, as guelras da verde e o canhão da laranja. O jogador lê, sem texto, que as três viraram esta. A boca aberta serve ao cuspe do Eco, e o canhão da garganta é um bom lugar para a carga dos canos acender.</p>
+  <p>A segunda opção é a <b>B0, a engolidora</b>: é a mais enguia e a mais assustadora, mas fica só com o laranja forte e perde a história das três.</p>
+  <p>Dá para misturar numa 2ª rodada, por exemplo a cabeça da D4 com a crista da C7 ou o pescoço oco da B5.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Qual cabeça segue?</b> Uma das oito acima, ou uma mistura (diga o quê de qual).</li>
+    <li><b>O tamanho na tela</b> (cerca de 3× a nave, no posto dos canos): está bom, ou ela deve ser maior ou menor?</li>
+  </ol>
+  <p class="sub">Depois da escolha: a enguia INTEIRA a partir dessa cabeça (de perfil, com o corpo e a cauda), de onde saem os anéis. A maquete do movimento em blocos vem em seguida (spec §7).</p>
+</div>
+
+</main>
+</body>
+</html>
