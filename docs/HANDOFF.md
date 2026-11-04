@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-03) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-04) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,12 +16,24 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-03-serpente-grande-START.md`. Tudo até 03/11 está
-> commitado e empurrado. A sessão abre na ESCOLHA DA CABEÇA da enguia colossal (a serpente grande, o S2): a folha
-> `folhas/2026-11-03/enguia-cabeca/cabecas.html` espera a resposta dele. A spec está escrita e aprovada:
-> `specs/2026-11-03-serpente-grande-enguia-design.md`."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-03-serpente-grande-START.md`. Tudo até 04/11 está
+> commitado e empurrado. A ARTE DA ENGUIA COLOSSAL (o S2) ESTÁ APROVADA (`folhas/2026-11-04/enguia-corpo/aprovada/`).
+> A sessão abre no PLANO (`superpowers:writing-plans`, a partir da spec
+> `specs/2026-11-03-serpente-grande-enguia-design.md`) e depois na MAQUETE DO MOVIMENTO EM BLOCOS (spec §7.1)."**
 >
-> (O arranque da 1ª sessão de 03/11 abria pelas perguntas do §2 do START: respondidas, ver o 📍 de 03/11 (2) abaixo.)
+> (O arranque de 03/11 (2) abria na escolha da cabeça: respondida, ver o 📍 de 04/11 abaixo.)
+>
+> 📍 **04/11 — A ARTE DA ENGUIA COLOSSAL, APROVADA.** Commitada e empurrada. Os detalhes no ▶️ do START.
+> - **A cabeça:** da 1ª rodada ele ficou com a B5 (*"mas com a cabeça maior e mais larga"*); da 2ª, com a **E3**
+>   (*"me lembra a cabeça do Alien"*) + o pescoço levado até a borda pelas duas linhas que ele desenhou (inpaint só
+>   entre elas, 0 px mudou fora). Folha `folhas/2026-11-04/enguia-b5/cabecas-b5.html`.
+> - **O corpo:** a cabeça congelada e o inpaint pintando corpo + cauda; 4 conceitos; ele escolheu a **A2** (as costelas
+>   acesas por dentro) com dois ajustes dele: o corpo subiu 6 px para encaixar no pescoço (N1) e a ponta da cauda ganhou
+>   ranhuras e painel azuis, da serpente de cabeça azul (N2). **Aprovada a F1.** Folha
+>   `folhas/2026-11-04/enguia-corpo/corpo.html`; a arte em `aprovada/enguia-f1.png` (384×80) e
+>   `aprovada/cabeca-e3-pescoco.png` (96×64).
+> - **A ordem mudou de propósito:** a spec punha a maquete antes da arte; ele pediu ver a cabeça (e depois o corpo)
+>   antes. O próximo é o plano e a maquete em blocos; a arte já serve de medida para ela.
 >
 > 📍 **03/11 (2) — O BUG DOS TIROS, A SPEC DA ENGUIA COLOSSAL E AS CABEÇAS.** Commitado e empurrado.
 > - **O bug** (`b38f2c7`, ele jogando: *"os tiros somem no início e não aparecem mais"*): os tiros da NAVE sumiam na boca

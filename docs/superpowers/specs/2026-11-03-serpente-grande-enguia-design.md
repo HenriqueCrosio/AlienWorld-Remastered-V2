@@ -189,6 +189,12 @@ as habilidades por vídeo antes de qualquer arte (`forma-antes-do-detalhe`, `ava
 (`conferir-ampliado-antes-de-mostrar`, `gerar-arte-direto-e-mostrar`). Da aprovada: os anéis recortados + os mapas de
 normais; a cabeça e os gestos no PixelLab. O PixelLab recusa "gore/flesh/blood": descrever a matéria.
 
+> **Emenda 04/11 — a arte saiu ANTES da maquete, a pedido dele, e está APROVADA:** a enguia inteira
+> `folhas/2026-11-04/enguia-corpo/aprovada/enguia-f1.png` (384×80: a cabeça E3 com o pescoço levado à borda, o corpo A2
+> de costelas acesas por dentro, subido 6 px no encaixe, e a ponta da cauda com ranhuras e painel azuis) e a cabeça
+> sozinha `aprovada/cabeca-e3-pescoco.png` (96×64). Tem ~10 anéis; os 16–20 do §1.1 vêm repetindo os do meio. A
+> maquete (§7.1) segue com silhuetas, agora medidas por esta arte. O registro está no START de 03/11, ▶️ de 04/11.
+
 ### 7.3 Os efeitos
 O fogo dos canos, o rastro e as sementes do Eco, os gêiseres e o vapor, os jatos — assados em pixel na resolução nativa
 (`efeito-de-cena-assado-em-pixel`), na camada de pixels de hoje (`camadaPixels.ts`).

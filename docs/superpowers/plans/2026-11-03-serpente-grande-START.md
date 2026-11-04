@@ -1,12 +1,63 @@
 # START — a fase 2 da luta da Serpente: a ENGUIA COLOSSAL (a serpente grande)
 
-> A frase de arranque (atualizada no fim de 03/11): **"Leia o 🧭 do `docs/HANDOFF.md` e este START. Tudo até 03/11
-> está commitado e empurrado. A sessão abre na ESCOLHA DA CABEÇA da enguia colossal: a folha
-> `folhas/2026-11-03/enguia-cabeca/cabecas.html` espera a resposta dele (qual cabeça segue e o tamanho na tela). A
-> spec está escrita: `specs/2026-11-03-serpente-grande-enguia-design.md`."**
+> A frase de arranque (atualizada no fim de 04/11): **"Leia o 🧭 do `docs/HANDOFF.md` e este START. Tudo até 04/11
+> está commitado e empurrado. A ARTE DA ENGUIA COLOSSAL ESTÁ APROVADA (`folhas/2026-11-04/enguia-corpo/aprovada/`).
+> A sessão abre no PLANO (`superpowers:writing-plans`, a partir da spec
+> `specs/2026-11-03-serpente-grande-enguia-design.md`) e depois na MAQUETE DO MOVIMENTO EM BLOCOS (spec §7.1),
+> aprovada por vídeo."**
 > O roadmap vivo é o 🧭 do HANDOFF. A ordem dele hoje: **a Serpente grande → o CENÁRIO da luta → H → I → J → F.**
 
-## ▶️ COMEÇAR AQUI (o estado no fim de 03/11)
+## ▶️ COMEÇAR AQUI (o estado no fim de 04/11)
+
+**O que a sessão de 04/11 fez: a arte da enguia, da cabeça ao corpo, APROVADA por ele em quatro passos.**
+1. **A cabeça, rodada 1 respondida** (`folhas/2026-11-03/enguia-cabeca/cabecas.html`): ele gostou da D1 e da B5 e
+   ficou com a **B5**, *"mas com a cabeça maior e mais larga"*, mantendo ~3× a nave na tela.
+2. **A cabeça, rodada 2** (`folhas/2026-11-04/enguia-b5/cabecas-b5.html`, `scripts/_serpente/_enguia-cabeca-b5.mjs`):
+   21 candidatas partindo da própria B5 (editar × conceito, quadros 96×64 e 112×76). Ele escolheu a **E3**
+   (`b5-editar-96x64-2-0`, *"me lembra a cabeça do Alien"*) com UM ajuste desenhado por ele: o pescoço terminava num
+   corte reto 10 px antes da borda, com um degrau atrás da cúpula → as duas linhas dele levam o pescoço até a borda.
+   Feito por inpaint só entre as linhas (`_enguia-pescoco-e3.mjs`, a seed 11): fora da faixa, 0 de 5.491 px mudou.
+   *"Boa, gostei. Pode seguir para o corpo."*
+3. **O corpo, rodada 1** (`folhas/2026-11-04/enguia-corpo/corpo.html`, `_enguia-corpo.mjs`): a cabeça CONGELADA à
+   esquerda de 384×80 e o inpaint pinta só corpo + cauda à direita (máscara a partir de x 90), as cores puxadas para a
+   paleta da cabeça. Quatro conceitos × 2 (costelas, barbatana, canos, espinhos). Ele escolheu a **A2**
+   (`costelas-22`, a caixa de costelas acesa por dentro) com dois ajustes:
+   - **N1** — *"na junção da cabeça com o pescoço existe um desnível, é só subir um pouco"*: o corpo saiu 6 px mais
+     BAIXO que o pescoço, exatamente na coluna onde a máscara começava → o corpo inteiro (x ≥ 90) subiu 6 px como
+     peça rígida (testados 3–7; o 6 casa o topo e dá o menor salto de cor).
+   - **N2** — *"a ponta da cauda, onde eu quero que as ranhuras e painéis sejam azuis. Assim traz mais da serpente de
+     cabeça azul"*: inpaint só da ponta (x ≥ 322), a silhueta presa à da A2, linhas ciano nas ranhuras; o painel da
+     ponta ficou cinza em todas as seeds e teve os entalhes acesos à mão nos cianos do gerador
+     (`_enguia-corpo-ajuste.mjs`, inclusive `--painel`).
+4. **APROVADA: a F1** (seed 32), *"Boa, eu vou de F1 também"*. Conferido: cabeça 0 px diferente, corpo idêntico (só
+   6 px acima), fora da ponta 0 px, silhueta da cauda 0 px.
+
+**A arte aprovada (no git):**
+- `folhas/2026-11-04/enguia-corpo/aprovada/enguia-f1.png` — a enguia INTEIRA, 384×80 (a cabeça em x 0–95, y 8–71;
+  ~10 anéis de costela até a cauda azul). É dela que saem os anéis e os mapas de normais (spec §1.3).
+- `folhas/2026-11-04/enguia-corpo/aprovada/cabeca-e3-pescoco.png` — a cabeça sozinha, 96×64 (a base dos gestos no
+  PixelLab, spec §1.2).
+
+**Fatos para o plano (medidos nesta sessão):**
+- A cabeça desenhada tem ~76×61 px no quadro 96×64; a nave tem ~40 px de comprimento. O corpo, ~35–45 px de altura,
+  afinando até a cauda. Na F1 ela tem a largura da tela (~10 anéis); a spec pede 16–20 no jogo → os anéis do MEIO se
+  repetem (cortar pelas costelas, que já marcam os segmentos).
+- A boca da B5/E3 é ABERTA (a brasa laranja no fundo). Os gestos de boca (fechar nas passagens? abrir no cuspe do Eco)
+  são pergunta para a etapa de animação, não para a maquete.
+- As três cores no corpo: laranja (as costelas por dentro), verde (dois respiros no pescoço/corpo), azul (o olho e a
+  ponta da cauda). O anel com canos (spec §1.3, os canos de fogo) ainda NÃO existe: desenhar a partir de um anel da
+  F1 quando chegar a arte das peças especiais.
+- Lição da técnica (vale para todo inpaint com parte congelada): o gerador pode deslocar o que pinta em relação à
+  parte presa — **medir o contorno coluna a coluna na borda da máscara** antes de mostrar (o N1 passou por não medir).
+
+**O próximo, na ordem:**
+1. **O plano** (`superpowers:writing-plans`) a partir da spec + a arte aprovada.
+2. **A maquete do movimento em blocos** (spec §7.1): a luta inteira com silhuetas sobre a foto da arena, em vídeo na
+   velocidade real, no molde da `_habilidades-maquete.mjs`; ele aprova o movimento e as habilidades antes do resto da
+   arte.
+3. Depois: os anéis recortados + normais, os gestos da cabeça no PixelLab, os efeitos, a instalação (spec §7.2–7.4).
+
+## O estado no fim de 03/11 (registro)
 
 **O que a sessão de 03/11 (2) fez:**
 1. **Um bug do jogo, consertado** (`b38f2c7`): ele notou, jogando a Serpente, que *"os tiros somem no início e não
@@ -35,7 +86,7 @@
      quadros crus em `cru/` (fora do git, no disco). A barra branca solta que o gerador pôs embaixo de algumas foi
      apagada (só pixels quase brancos nas 6 últimas linhas).
 
-**O próximo, na ordem:**
+**O próximo, na ordem (03/11 — os passos 1 e 2 CUMPRIDOS em 04/11, ver acima):**
 1. **A resposta dele à `cabecas.html`:** qual cabeça segue (ou uma mistura numa 2ª rodada: ex. a D4 com a crista da
    C7) e o tamanho na tela (hoje ~3× a nave no posto dos canos).
 2. **A enguia INTEIRA a partir da cabeça escolhida** (de perfil, corpo e cauda), de onde saem os anéis (spec §1.3,
