@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enguia: a B5 maior</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .rec { border-color: var(--ok); }
+  code { background:#0a0c11; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:13px; }
+  figure { margin: 14px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  .par { display:grid; grid-template-columns: 5fr 7fr; gap: 12px; align-items: start; }
+  @media (max-width: 720px) { .par { grid-template-columns: 1fr; } }
+  table { border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+  td, th { border: 1px solid var(--line); padding: 4px 10px; text-align: left; }
+  th { color: var(--sub); font-weight: 600; }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A enguia colossal: a B5 maior e mais larga</h1>
+<p class="sub">04/11/2026 · a 2ª rodada da cabeça (a 1ª: <code>folhas/2026-11-03/enguia-cabeca/cabecas.html</code>) · nada instalado.</p>
+
+<div class="item">
+  <p>Você: <i>"pode ser a B5, mas com a cabeça maior e mais larga"</i>, mantendo cerca de 3× a nave na tela.</p>
+  <p><b>Como saíram:</b> no PixelLab, sempre partindo da própria B5, por dois caminhos:</p>
+  <ul>
+    <li><b>Editar</b>: a B5 vai para o gerador, que aumenta e alarga o crânio e mantém o resto (a bocarra, a brasa, o pescoço oco, o olho azul, as guelras verdes). 8 tentativas.</li>
+    <li><b>Conceito</b>: uma geração nova com a B5 como referência de forma e de estilo, pedindo um crânio maciço. 13 candidatas.</li>
+  </ul>
+  <p>Cada caminho rodou em dois quadros: o <b>96×64</b> da B5 (o mesmo tamanho na tela, a cabeça ocupando mais dele) e um <b>112×76</b>, um pouco maior.</p>
+  <p><b>Conferido ampliado:</b> as 21 saíram de perfil e viradas para a esquerda. Fora da escolha: três edições que voltaram iguais à B5, as que perderam a brasa da garganta, uma com a garganta branca demais e uma com rachaduras laranja pelo crânio todo (luz fora dos pontos de energia).</p>
+</div>
+
+<h2>A E3 com o pescoço (o seu desenho)</h2>
+<div class="item">
+  <p>Você escolheu a <b>E3</b> (<i>"me lembra a cabeça do Alien"</i>) com uma correção, desenhada por você: as duas linhas vermelhas. A de cima desce das costas da cúpula até a borda da tela; a de baixo continua a parte de baixo do pescoço até a mesma borda.</p>
+  <p><b>O que estava errado:</b> a E3 terminava num <b>corte reto</b>, 10 px antes da borda da tela, e as costas da cúpula caíam num degrau logo antes dele.</p>
+  <p><b>Como foi feito:</b> o PixelLab repintou <b>só a faixa entre as suas duas linhas</b>, à direita da cabeça (inpaint), num quadro mais largo, para o pescoço sair da imagem em vez de ganhar uma ponta. As cores novas foram puxadas para a paleta da própria E3. <b>Conferido pixel por pixel: fora da faixa, 0 de 5.491 pixels mudou.</b> A boca, o olho, a brasa e as guelras verdes são os da E3.</p>
+</div>
+<div class="par">
+  <figure><img src="pedido-pescoco-amp.png" alt="o seu desenho"><figcaption>O seu desenho.</figcaption></figure>
+  <figure><img src="jogo-e3-pescoco-11.png" alt="E3 com o pescoço no jogo"><figcaption><b>E3 com o pescoço</b>, no tamanho real, no posto dos canos.</figcaption></figure>
+</div>
+<div class="par">
+  <figure><img src="esc-b5-editar-96x64-2-0.png" alt="E3 antes"><figcaption><b>Antes</b> (E3), ×5: o corte reto e o degrau atrás da cúpula.</figcaption></figure>
+  <figure><img src="esc-e3-pescoco-11.png" alt="E3 depois"><figcaption><b>Depois</b>, ×5: a linha de cima desce suave até a borda, e as costelas e as placas do pescoço continuam as da cabeça.</figcaption></figure>
+</div>
+<figure><img src="pescoco-outras.png" alt="as outras duas tentativas"><figcaption>Duas das outras cinco tentativas, ×5, para comparar: a da esquerda termina num canto quadrado embaixo; a da direita tem uma risca clara solta no pescoço. As outras três tinham um degrau na parte de baixo.</figcaption></figure>
+
+<div class="item rec">
+  <p><b>✅ APROVADA (04/11):</b> você, <i>"Boa, gostei. Pode seguir para o corpo"</i>. A cabeça é <code>escolhidas/e3-pescoco-11.png</code>; o corpo saiu dela em <code>folhas/2026-11-04/enguia-corpo/corpo.html</code>.</p>
+</div>
+
+<h2>A 2ª rodada (registro)</h2>
+<p class="sub">O que estava na folha antes da sua escolha.</p>
+
+<h2>As grades</h2>
+<p class="sub">Em cada grade, a 1ª é a <b>B5 de antes</b>, na mesma escala, para comparar. Ampliadas ×4.</p>
+<h3>Editar · 112×76</h3>
+<figure><img src="grade-editar-112x76.png" alt="edições no 112x76"></figure>
+<h3>Editar · 96×64</h3>
+<figure><img src="grade-editar-96x64.png" alt="edições no 96x64"></figure>
+<h3>Conceito · 112×76</h3>
+<figure><img src="grade-conceito-112x76.png" alt="conceitos no 112x76"></figure>
+<h3>Conceito · 96×64</h3>
+<figure><img src="grade-conceito-96x64.png" alt="conceitos no 96x64"></figure>
+
+<h2>As seis escolhidas</h2>
+<p class="sub">À esquerda ×5; à direita no tamanho real, no posto dos canos, com a nave como medida (×3, sem a Atmosfera do jogo, que escurece um pouco).</p>
+
+<table>
+  <tr><th></th><th>quadro</th><th>a cabeça (px)</th><th>desenho a mais que a B5</th></tr>
+  <tr><td>B5 (antes)</td><td>96×64</td><td>76×46</td><td>—</td></tr>
+  <tr><td><b>E1</b></td><td>112×76</td><td>95×62</td><td>+52%</td></tr>
+  <tr><td><b>E2</b></td><td>112×76</td><td>76×63</td><td>+31%</td></tr>
+  <tr><td><b>E3</b></td><td>96×64</td><td>76×61</td><td>+27%</td></tr>
+  <tr><td><b>E4</b></td><td>96×64</td><td>76×58</td><td>+25%</td></tr>
+  <tr><td><b>C1</b></td><td>112×76</td><td>77×56</td><td>+19%</td></tr>
+  <tr><td><b>C2</b></td><td>112×76</td><td>77×56</td><td>+19%</td></tr>
+</table>
+
+<h3>A B5 de antes</h3>
+<figure><img src="jogo-b5.png" alt="B5 no jogo"><figcaption>B5 no tamanho real: a medida.</figcaption></figure>
+
+<h3>E1 — a B5 inteira, maior</h3>
+<div class="par">
+  <figure><img src="esc-b5-editar-112x76-4-0.png" alt="E1"><figcaption><b>E1</b>, ×5: a única que cresceu nas duas direções. É a B5 desenho por desenho, com o crânio e a mandíbula mais pesados.</figcaption></figure>
+  <figure><img src="jogo-b5-editar-112x76-4-0.png" alt="E1 no jogo"><figcaption>E1 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>E2 — o crânio alto</h3>
+<div class="par">
+  <figure><img src="esc-b5-editar-112x76-2-0.png" alt="E2"><figcaption><b>E2</b>, ×5: o mesmo comprimento, com uma cúpula alta de placas sobre o crânio.</figcaption></figure>
+  <figure><img src="jogo-b5-editar-112x76-2-0.png" alt="E2 no jogo"><figcaption>E2 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>E3 — a mais pesada no quadro de hoje</h3>
+<div class="par">
+  <figure><img src="esc-b5-editar-96x64-2-0.png" alt="E3"><figcaption><b>E3</b>, ×5: crânio largo e grosso, mandíbula funda; o contraste fica um pouco mais baixo.</figcaption></figure>
+  <figure><img src="jogo-b5-editar-96x64-2-0.png" alt="E3 no jogo"><figcaption>E3 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>E4 — a cúpula, no quadro de hoje</h3>
+<div class="par">
+  <figure><img src="esc-b5-editar-96x64-1-0.png" alt="E4"><figcaption><b>E4</b>, ×5: parecida com a E3, com a cúpula das placas mais redonda.</figcaption></figure>
+  <figure><img src="jogo-b5-editar-96x64-1-0.png" alt="E4 no jogo"><figcaption>E4 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>C1 — conceito, placas grossas</h3>
+<div class="par">
+  <figure><img src="esc-b5-conceito-112x76-1104-0.png" alt="C1"><figcaption><b>C1</b>, ×5: redesenhada, com placas grossas em mosaico e dentes cor de osso. Se afasta mais da B5.</figcaption></figure>
+  <figure><img src="jogo-b5-conceito-112x76-1104-0.png" alt="C1 no jogo"><figcaption>C1 no tamanho real.</figcaption></figure>
+</div>
+
+<h3>C2 — conceito, mandíbula grande</h3>
+<div class="par">
+  <figure><img src="esc-b5-conceito-112x76-1104-3.png" alt="C2"><figcaption><b>C2</b>, ×5: casco mais liso, mandíbula enorme, dentes cor de osso.</figcaption></figure>
+  <figure><img src="jogo-b5-conceito-112x76-1104-3.png" alt="C2 no jogo"><figcaption>C2 no tamanho real.</figcaption></figure>
+</div>
+
+<h2>A minha recomendação</h2>
+<div class="item rec">
+  <p><b>E1.</b> É literalmente o que você pediu: a B5 que você escolheu, maior e mais larga, sem trocar nenhuma peça. Na tela ela fica um pouco maior que a B5 (95 px contra 76; a nave tem cerca de 40), ainda na faixa dos "3× a nave".</p>
+  <p>Se você quiser a cabeça maior <b>sem</b> aumentar o tamanho na tela, a <b>E3</b> faz isso no quadro de hoje: cresce para cima e para baixo, não para os lados.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Qual segue?</b> E1, E2, E3, E4, C1 ou C2 (ou uma das grades, pelo número).</li>
+    <li><b>Ainda maior ou mais larga?</b> Dá para fazer mais uma rodada partindo da escolhida.</li>
+  </ol>
+  <p class="sub">Depois: a enguia INTEIRA a partir dessa cabeça (de perfil, corpo e cauda), de onde saem os anéis. Em seguida o plano e a maquete do movimento em blocos (spec §7).</p>
+</div>
+
+</main>
+</body>
+</html>

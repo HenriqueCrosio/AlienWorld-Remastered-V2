@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enguia: o corpo</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 26px 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .rec { border-color: var(--ok); }
+  code { background:#0a0c11; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:13px; }
+  figure { margin: 12px 0 0; }
+  figure img { display:block; max-width:100%; height:auto; border-radius: 6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  figcaption { color: var(--sub); font-size: 13px; margin-top: 6px; }
+  figcaption b { color: var(--txt); }
+  ul, ol { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A enguia colossal: o corpo</h1>
+<p class="sub">04/11/2026 · a enguia inteira a partir da cabeça aprovada (a E3 com o pescoço, <code>folhas/2026-11-04/enguia-b5/cabecas-b5.html</code>) · spec §1.3 e §7.2 · nada instalado.</p>
+
+<div class="item">
+  <p>Você: <i>"Boa, gostei. Pode seguir para o corpo"</i>.</p>
+  <p><b>Como saíram:</b> a cabeça aprovada fica à esquerda de um quadro de 384×80 e o PixelLab pinta <b>só o corpo e a cauda</b> à direita dela (inpaint). As cores novas foram puxadas para a paleta da cabeça, para ser o mesmo material. <b>A cabeça não mudou: 0 pixel diferente nas cinco escolhidas.</b></p>
+  <p>Quatro conceitos de corpo, duas tentativas de cada: <b>as costelas</b> (o pescoço oco seguindo pelo corpo), <b>a barbatana</b> (a fita de enguia em cima e embaixo), <b>os canos</b> (canos e respiros nas três cores) e <b>os espinhos</b> (no dorso).</p>
+  <p><b>O tamanho:</b> aqui ela tem a largura da tela, com cerca de 10 anéis até a cauda. No jogo ela é maior que a tela (16 a 20 anéis, spec §1.1): os anéis do meio se repetem. Ela está esticada quase reta de propósito; os anéis são recortados dela e seguem o caminho da cabeça, em S, na maquete.</p>
+  <p><b>Conferido ampliado:</b> as oito saíram de perfil, inteiras, com cauda. Na barbatana e nos canos o corpo engrossa de repente logo atrás do pescoço e lê como uma peça encaixada; nas costelas e nos espinhos a emenda some.</p>
+</div>
+
+<h2>A A2 com os seus dois ajustes</h2>
+<div class="item">
+  <p>Você escolheu a <b>A2</b> com dois ajustes, circulados na imagem abaixo:</p>
+  <ul>
+    <li><b>N1</b>: <i>"na junção da cabeça com o pescoço existe um desnível, é só subir um pouco para cima e encaixar a peça"</i>. O corpo tinha saído <b>6 px mais baixo</b> que o pescoço, exatamente na coluna onde a pintura do corpo começou. O corpo inteiro subiu <b>6 px, como uma peça só</b>, sem redesenhar nada. Testei 3 a 7 px; o 6 foi o que casou o contorno de cima exatamente e deu a menor diferença de cor nas linhas de dentro.</li>
+    <li><b>N2</b>: <i>"a ponta da cauda, onde eu quero que as ranhuras e painéis sejam azuis"</i>. O PixelLab repintou só a ponta da cauda, mantendo a silhueta exata, com linhas ciano nas ranhuras entre as placas, no estilo da serpente de cabeça azul. O painel da ponta (a fenda com os entalhes) tinha ficado cinza nas seis tentativas, então acendi os entalhes à mão nos mesmos cianos.</li>
+  </ul>
+  <p><b>Conferido pixel por pixel:</b> a cabeça, 0 pixel diferente; o corpo, idêntico ao da A2 (só mais alto); fora da ponta da cauda, 0 pixel diferente; a silhueta da cauda, 0 pixel diferente.</p>
+</div>
+<figure><img src="pedido-a2.png" alt="o seu desenho"><figcaption>O seu pedido.</figcaption></figure>
+
+<h3>N1 · a junção, antes e depois</h3>
+<figure><img src="n1-antes-depois.png" alt="N1 antes e depois"><figcaption>×6. À esquerda, antes: o corpo entra mais baixo que o pescoço. À direita, depois: a peça encaixada.</figcaption></figure>
+
+<h3>N2 · a ponta da cauda</h3>
+<figure><img src="n2-caudas.png" alt="N2 antes e as três"><figcaption>×6, da esquerda para a direita: antes, <b>F1</b>, <b>F2</b>, <b>F3</b>. F1 tem linhas longas que seguem as placas até a ponta; F2 é a mais contida, as ranhuras em espinha; F3 é a mais acesa.</figcaption></figure>
+
+<h3>F1 · a enguia inteira</h3>
+<figure><img src="esc-a2-final-32.png" alt="F1"><figcaption><b>F1</b>, ×3.</figcaption></figure>
+<figure><img src="jogo-a2-final-32.png" alt="F1 no jogo"><figcaption>F1 no tamanho real.</figcaption></figure>
+<h3>F2</h3>
+<figure><img src="esc-a2-final-35.png" alt="F2"><figcaption><b>F2</b>, ×3.</figcaption></figure>
+<h3>F3</h3>
+<figure><img src="esc-a2-final-36.png" alt="F3"><figcaption><b>F3</b>, ×3.</figcaption></figure>
+
+<div class="item rec">
+  <p><b>A minha recomendação: F1.</b> As linhas longas pelas placas, com a linha do meio indo até a ponta, são as que mais lembram as costuras acesas da serpente de cabeça azul. A F2 é a alternativa mais discreta.</p>
+</div>
+<div class="item rec">
+  <p><b>✅ ESCOLHIDA (04/11): a F1.</b> Você: <i>"Boa, eu vou de F1 também"</i>. A arte da enguia está fechada: <code>aprovada/enguia-f1.png</code> (384×80, a enguia inteira) e <code>aprovada/cabeca-e3-pescoco.png</code> (96×64, a cabeça sozinha). O próximo é o plano e a maquete do movimento em blocos (spec §7.1); os anéis e os mapas de normais saem dela.</p>
+</div>
+
+<h2>A 1ª rodada do corpo (registro)</h2>
+
+<h2>Todas as oito</h2>
+<figure><img src="grade.png" alt="as oito"><figcaption>×3, de cima para baixo: costelas 21 e 22, barbatana 21 e 22, canos 21 e 22, espinhos 21 e 22.</figcaption></figure>
+
+<h2>As cinco escolhidas</h2>
+<p class="sub">Cada uma ×3 e depois no tamanho real sobre a arena, esticada no alto da tela, com a nave como medida (sem a Atmosfera do jogo, que escurece um pouco).</p>
+
+<h3>A1 · As costelas, a esguia</h3>
+<figure><img src="esc-costelas-21.png" alt="costelas 21"><figcaption><b>A1</b>: as costelas ocas do pescoço seguem pela barriga, com a brasa laranja por dentro; o corpo afina devagar até uma cauda fina e longa. A emenda com o pescoço não aparece.</figcaption></figure>
+<figure><img src="jogo-costelas-21.png" alt="costelas 21 no jogo"></figure>
+
+<h3>A2 · As costelas, a pesada</h3>
+<figure><img src="esc-costelas-22.png" alt="costelas 22"><figcaption><b>A2</b>: o corpo engrossa depois do pescoço e a caixa de costelas acesa corre o corpo todo; a cauda termina numa ponta mecânica.</figcaption></figure>
+<figure><img src="jogo-costelas-22.png" alt="costelas 22 no jogo"></figure>
+
+<h3>B · A barbatana</h3>
+<figure><img src="esc-barbatana-21.png" alt="barbatana 21"><figcaption><b>B</b>: anéis grossos em sequência e a fita de barbatana com pontas azuis em cima e embaixo. Lê mais como uma lagarta do que como enguia, e o encaixe atrás do pescoço aparece.</figcaption></figure>
+<figure><img src="jogo-barbatana-21.png" alt="barbatana 21 no jogo"></figure>
+
+<h3>C · Os canos</h3>
+<figure><img src="esc-canos-21.png" alt="canos 21"><figcaption><b>C</b>: canos e conduítes pelo flanco, respiros azuis, verdes e laranja, e um anel largo com escapes atrás do pescoço (um bom lugar para os canos de fogo). É a mais máquina das cinco.</figcaption></figure>
+<figure><img src="jogo-canos-21.png" alt="canos 21 no jogo"></figure>
+
+<h3>D · Os espinhos</h3>
+<figure><img src="esc-espinhos-22.png" alt="espinhos 22"><figcaption><b>D</b>: espinhos no dorso diminuindo até a cauda, barriga em faixas cinza-claras, respiros verdes e a cauda numa lâmina de ponta azul. A barriga clara é a parte mais clara da criatura.</figcaption></figure>
+<figure><img src="jogo-espinhos-22.png" alt="espinhos 22 no jogo"></figure>
+
+<h2>A minha recomendação</h2>
+<div class="item rec">
+  <p><b>A1, as costelas esguias.</b> É a que continua a cabeça que você escolheu: o pescoço oco e a brasa seguem pelo corpo sem emenda, e a silhueta lê como enguia de verdade. A cauda fina e longa deixa as mordidas nela bem visíveis (spec §6.2).</p>
+  <p>O que ela tem pouco são as três cores: é quase toda laranja, com um pouco de verde atrás. Se quiser, numa próxima rodada partindo da A1, ponho respiros azuis e verdes pelo corpo e o anel dos canos (o da C) logo atrás do pescoço.</p>
+</div>
+
+<h2>Para você decidir</h2>
+<div class="item decidir">
+  <ol>
+    <li><b>Qual corpo segue?</b> A1, A2, B, C ou D, ou uma mistura (diga o quê de qual).</li>
+    <li><b>As três cores:</b> pôr os respiros azuis e verdes e o anel dos canos no corpo escolhido?</li>
+  </ol>
+  <p class="sub">Depois: o plano (a partir da spec) e a maquete do movimento em blocos, aprovada por vídeo (spec §7.1). Os anéis e os mapas de normais saem do corpo aprovado.</p>
+</div>
+
+</main>
+</body>
+</html>
