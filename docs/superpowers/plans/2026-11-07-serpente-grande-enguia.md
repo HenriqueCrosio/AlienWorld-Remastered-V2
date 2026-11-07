@@ -240,6 +240,116 @@ A foto da arena: `folhas/2026-10-29/serpente-casco/cru/arena-semnave.png` (a mes
 **✅ A MAQUETE ESTÁ APROVADA (07/11)** — ele: *"Boa, ficou ótimo assim."* Os módulos de `scripts/_serpente/enguia/` e
 os números de `numeros.mjs` são agora a fonte (o oráculo) da Parte B.
 
+## B1 · os anéis (07/11, feito; a folha espera ele)
+
+- **A faixa do corpo** (`scripts/_serpente/enguia/arte.mjs`, `_enguia-faixa.mjs`): a F1 endireitada pela linha do meio
+  e alongada CORTANDO NAS COSTELAS — 15 pedaços de 18 px (2 costelas) do trecho de grossura constante, alternados entre
+  4 começos que emendam bem (x 211/217/224/233); 519 px (meta 520). Conferida ampliada: as juntas não aparecem.
+- **As normais** (PixelLab `create_normal_map` lite): a cabeça E3 e a faixa em duas metades de 300 px sobrepostas 80 px
+  (o limite é 512; a ponta cortada de cada metade ganha uma borda falsa — emendadas no meio da sobreposição). 0,5 geração.
+  A luz da pintura ajustada por mínimos quadrados e o realce do rabo (`realce`, ganho 1,2); o que brilha sozinho fica.
+- **A virada de lado** decidida PELO CAMINHO (`R.rola`): troca o lado com o rumo além de ±0,55 (a onda do nado inclina
+  até ~0,44 e não pode virar ela) e corre pelo corpo em ±40 px. A cabeça vira com o meio da sua corda. 17 viradas na luta.
+- **Os dois jeitos** no vídeo (`_enguia-maquete.mjs ... corpo=aneis|pele [luz=0] [de=]`): A anéis rígidos (fatias de
+  26 px giradas inteiras, 4 px de sobreposição, viram anel a anel) × B pele contínua (a faixa dobrada no caminho; a
+  virada como cilindro rolando, amostrando dentro da silhueta da coluna). Folha
+  `folhas/2026-11-07/enguia-aneis/aneis.html` (`_enguia-aneis-folha.mjs`). Recomendado: B, com a virada anel a anel da A.
+- **Rodada 2 dos anéis** (ele: *"A Pele contínua está muito boa, movimento natural, fluido"* + 4 prints circulados:
+  *"falhas bem visíveis e feias no modelo. Precisa ser algo mais natural"*; e a cauda *"rasgado e dilacerado"*):
+  - **a pele (B) ESCOLHIDA**; o modo `aneis` fica no código, fora da folha;
+  - **a cabeça girada quebrava** (o vizinho mais próximo parte as linhas finas): agora RotSprite — `amplia8` (Scale2x ×3,
+    um mapa de ÍNDICES dos pixels-fonte: cor e normal do mesmo pixel, nenhuma cor inventada) e amostragem no 8× (cabeça e
+    pele); teste em `test-enguia.mjs`;
+  - **a junta cabeça/corpo**: só o CRÂNIO é rígido (x < 66, corda 54 px no caminho); o pescoço x 66–95 virou o começo da
+    pele (u −30…0) e dobra com ela; as normais do pescoço vêm do mapa da cabeça;
+  - **a cabeça presa** tomba ~55° de lado sobre a borda (para o lado da cara: nunca de ponta-cabeça);
+  - **o toco rasgado**: o corte por linha (senos + fiapos sorteados), a borda de carne escura com brasas, a pele
+    machucada atrás.
+- **Rodada 3 dos anéis** (4 prints dele + 2 pedidos no meio):
+  - **a fenda crânio/pescoço**: SOBREPOSIÇÃO — a faixa começa em x 56 (10 px sob o crânio, `FAIXA_X0`, índice
+    `PESCOCO` = 40), o crânio desenhado até x 72 (`SOBRE` 6); a corda do crânio continua 54 (`JUNTA` 30);
+  - **a fenda no topo do pescoço (erguida)** era a VIRADA à vista: a regra do lado agora lê o caminho DE TRÁS PARA
+    FRENTE — um trecho sem rumo decidido (reto, subindo/descendo) mostra o lado da PRÓXIMA curva decidida, e a virada
+    cai onde o caminho vira, fora da tela; limite ±0,66 (o afundar depois do Eco inclina até 0,62); o afundar perdeu a
+    onda do nado; 12 viradas, só 2 à vista (o arco e a curva do mergulho);
+  - **a raspada**: a borda do corpo NA TOCA que toca o lábio enquanto ela se move solta faíscas na direção do movimento
+    e acende pontos de brasa no lábio (`calor`, esfria em ~0,5 s);
+  - **os gêiseres saem da fissura**: a ruptura na linha R3 (a fenda aberta, verde, os lábios erguidos), a coluna sobe
+    da fissura e escorre mais estreita até o pé; o perigo segue de y 70 ao pé;
+  - **a morte com gore** (pedido dele): clarão, 2 anéis de choque, o crânio em pedaços inteiros (células 5×5 dos
+    próprios pixels, escurecendo, brasas na borda), brasas, névoa de carne e gotas; o pescoço decapitado rasgado na
+    frente BOMBEIA o fluido em pulsos (0,34 s, enfraquecendo em ~2 s); as rampas do jogo (`RAMPA_FLUIDO`/`RAMPA_CARNE`);
+    gotas esticadas no voo com brilho laranja; nada cai (arrasto); `desfaz` 1,8 s;
+  - **a virada anel por anel** (pedido dele, para comparar com o cilindro): `rolagem=aneis`; a folha mostra o mesmo
+    trecho do mergulho nos dois jeitos.
+- **Rodada 4 dos anéis** (ele: *"Se no cilindro você conseguir deixar essas placas menos esticadas… Acho que fica
+  perfeito"* → o CILINDRO fica, sem as placas esticadas):
+  - **o cilindro sem esticar**: no meio da virada a textura é lida pelo COMPRIMENTO DE ARCO ao redor do cilindro (a
+    projeção tinha derivada zero no centro da face = estiramento infinito), misturada pela projeção com peso sin²(φ):
+    nas pontas da virada é a arte como foi desenhada;
+  - **a borda raspada INCANDESCENTE** (*"fique incandescente a borda onde foi raspada, depois volta ao normal"*):
+    `bordaLabio` (os pixels do lábio que encostam no buraco, não o corte da textura); qualquer trecho do corpo na zona
+    do rombo cuja borda toque nela aquece um raio de 4 px (acumula, +0,6), esfria a 0,4^dt (~2 s); a rampa branco →
+    amarelo → laranja → vermelho-escuro → o metal; 1 px de calor vaza para dentro do lábio;
+  - **o gêiser melhor**: o veneno sobe na textura (~170 px/s), bordas em ondas subindo, bolhas, a NUVEM no topo; a
+    ruptura cospe gotas, a coluna solta gotas dos lados, vapor maior (0,9 s); a rampa `VENENO`;
+  - **o 1º gêiser longe do rombo** (*"o primeiro ficou muito perto do rombo"*): início x 220 (era 250), passo 55, a
+    lombada até x 20 → 7 gêiseres (ida 220/165/110/55, volta 82,5/137,5/192,5).
+- **Rodada 5 dos anéis** (8 prints dele):
+  - **a girada da chegada "rápida e seca"** + **o "movimento estranho nas giradas"** eram o mesmo: a virada de lado À
+    VISTA (a cabeça rígida troca de lado num quadro; o corpo rola em leque). A regra do lado agora põe cada virada no
+    PRIMEIRO PONTO ESCONDIDO do trecho sem rumo entre dois rumos decididos de lados diferentes (abaixo de y 230, acima
+    de −14, fora das laterais); só se o trecho todo estiver à vista ela cai no meio. A queda do mergulho ficou íngreme
+    (rumo < 0,66) para ela entrar no rombo sem virar. Resultado: NENHUMA virada à vista. J 32;
+  - **a curva do arco**: começa antes, mais aberta, e ela DESACELERA (`vIni`: a velocidade varia linear no trecho, sem
+    tranco) 160 → 100 na curva e 100 → 160 na descida; a cabeça gira em ~1,2 s;
+  - **o gêiser só para cima** (sem o reflexo); o perigo vai do alto à rachadura (a linha da fissura agora é uma só,
+    `trilhaFissura` em `geiseres.mjs`, para o desenho e o toque);
+  - **a mordida do crânio** vira FERIDA opaca (borda rasgada, carne escura, brasas) — antes era furo e deixava ver a pele
+    sob o crânio;
+  - **a raspada = SOLDA** (ele recusou a borda fina: *"quero algo que mostre que uma estrutura de metal gigante friccionou
+    contra a borda, causando faísca, pedaços voando, efeito de solda"*, e o corpo "clipa" a borda): só na faixa de 6 px em
+    volta da borda do buraco (`pertoBorda`), onde a faixa da borda do corpo (r−3…r+1) cruza o metal; calor (0,42^dt) +
+    marca de queimado (0,78^dt); padrão vivo de metal derretido; no contato: clarão POR CIMA do corpo, faíscas em risco
+    na direção do movimento, gotas fundidas, lascas da placa, fumaça.
+- **Rodada 6 dos anéis** (ele: o gêiser *"ficou ótimo, gostei da posição deles"*):
+  - **o rolar de volta, à vista, em todas as viradas** (*"estava muito natural, com o movimento de uma serpente
+    mesmo"*): a regra da rodada 4 (o trecho sem rumo mostra o lado da próxima curva decidida, ±0,66, J 40) e o mergulho
+    da rodada 4. O estalo da cabeça trocando de lado → na etapa do PixelLab, com as vistas 8-dir da E3 (o pedido dele);
+  - **a textura atrás do crânio** (o Eco final, a cabeça girando para a nave): o pedaço da faixa sob o crânio (x 56–65)
+    ficou só com a faixa do meio (±10 linhas);
+  - **a raspada sem bordas acesas** (*"em todos os lados ela fica voando"*): saíram a solda e o clarão parado; mais
+    faíscas (3 por contato, até 28 contatos/quadro) e mais fumaça.
+- **Rodada 6, ajuste da entrada no rombo** (ele: o clipe ainda aparecia; o rolar e a cabeça ficam para as gerações; *"a
+  textura atrás do crânio ficou boa e sumiu"*): a queda do mergulho ~12 px à direita (até x 294); o contato agora é a
+  LINHA onde a borda do buraco corta o corpo (`bordaLabio` só contra o furo de verdade — dentro do anel, abaixo de y 128,
+  não o topo da textura nem as frestas entre as placas; faixa ≤ 3 px dentro da silhueta); as faíscas voam para LONGE do
+  buraco (as que desciam junto com ela cobriam o corpo de "purpurina"); fumaça grossa e longa (2–3,2 s) faz o grosso do
+  esconder; cada ponto segue fumegando por ~1,2 s depois (`raspado`).
+- **✅ OS ANÉIS ESTÃO APROVADOS (07/11)** — ele: *"Boa, agora ficou muito bom."* A virada seca da cabeça e as costas
+  esticando no rolar ficam para as gerações do PixelLab (as 8 direções da cabeça E3, pedido dele). O próximo:
+  `plans/2026-11-07-enguia-geracoes-START.md`.
+
+### B1½ · A girada do corpo + cabeça (07/11, noite) — ✅ APROVADA
+
+O registro completo está no START `plans/2026-11-07-enguia-geracoes-START.md` (etapas 1 e 2).
+- **Rodada 1:** a folha `enguia-cabeca-8dir` com 4 caminhos para a cabeça, e a causa das costas achada na curva.
+  - Os caminhos: 8-dir de pé, 8-dir deitada, a ponte v3 e o rolar procedural.
+  - A curva: a chegada aberta da rodada 5 punha o meio do rolar num trecho reto; a proposta foi a `r4lenta`.
+  - Ele recusou as duas: o dorso ainda esticava, e a cabeça devia ser gerada de novo ou procedural.
+- **Rodada 2 (`enguia-girada`):** a causa de verdade — a faixa é só o LADO, e as costas não existiam desenhadas.
+  - O dorso gerado no PixelLab (`/generate-image-v2`, a arte aprovada de estilo), do corpo e da cabeça.
+  - O cilindro com duas fontes: o lado nos flancos, o dorso nas costas, o dorso crescendo com sin²φ (nada em repouso).
+  - A cabeça em 19 vistas de 10°, as normais girando junto.
+  - Ele: *"O restante eu aprovo"*, com 2 ajustes: tirar a espinha do dorso do corpo e fechar a fenda pescoço × mandíbula
+    no clarão. Feitos, commitados e empurrados.
+- **Os arquivos:**
+  - `enguia-dorso/dorso-corpo.png` (montado por `_enguia-dorso-faixa.mjs`);
+  - `enguia-dorso/dorso-cabeca.png`;
+  - `arte.mjs` `carregaDorso` / `vistasCabeca`;
+  - `desenho.mjs` (a pele com `dw`, a cabeça por vista).
+- `ENGUIA_DORSO=0` / `ENGUIA_VISTAS=0` voltam ao jeito antigo, para comparar.
+
 ## PARTE B — depois da maquete aprovada (o detalhe sai da maquete; um plano novo por parte)
 
 Os números e os caminhos aprovados na maquete são a fonte. Cada parte abre o seu plano curto quando chegar a vez:

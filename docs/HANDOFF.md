@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-04) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-07) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,12 +16,38 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-03-serpente-grande-START.md`. Tudo até 04/11 está
-> commitado e empurrado. A ARTE DA ENGUIA COLOSSAL (o S2) ESTÁ APROVADA (`folhas/2026-11-04/enguia-corpo/aprovada/`).
-> A sessão abre no PLANO (`superpowers:writing-plans`, a partir da spec
-> `specs/2026-11-03-serpente-grande-enguia-design.md`) e depois na MAQUETE DO MOVIMENTO EM BLOCOS (spec §7.1)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-07-enguia-geracoes-START.md`. A maquete, os anéis e a
+> GIRADA da enguia estão APROVADOS (etapas 1 e 2 fechadas). A sessão abre na etapa 3: as animações da cabeça, uma por
+> momento, com a boca variando o máximo possível."**
 >
-> (O arranque de 03/11 (2) abria na escolha da cabeça: respondida, ver o 📍 de 04/11 abaixo.)
+> (O arranque de 07/11 abria nas 8 direções e na girada: feitas e aprovadas no mesmo dia, ver o 📍 abaixo.)
+>
+> 📍 **07/11 (noite) — A GIRADA APROVADA: O DORSO DESENHADO.** Ele: *"O restante eu aprovo"* (com 2 ajustes, feitos).
+> Folha `folhas/2026-11-07/enguia-girada/girada.html`:
+> - **A causa do esticado:** a faixa é só o LADO; as costas não existiam desenhadas, então qualquer leitura esticava (nem
+>   a curva da rodada 4 resolvia).
+> - **A correção:** o DORSO gerado no PixelLab (`enguia-dorso/dorso-corpo.png`, sem a espinha a pedido dele;
+>   `dorso-cabeca.png`) e o cilindro com DUAS fontes: o lado nos flancos, o dorso nas costas, crescendo com o rolar
+>   (nada em repouso: parada, a arte aprovada intacta).
+> - **A cabeça rola junto:** 19 vistas de 10° (E3 nos flancos + dorso no topo, as normais girando).
+> - **A fenda no clarão** (pescoço × mandíbula) fechada.
+> - As 8 direções do PixelLab (a folha `enguia-cabeca-8dir`) ficaram como registro: ele pediu o caminho procedural.
+> - **Commitado e empurrado.** O próximo: a etapa 3 do START (as animações da cabeça, a boca variando).
+>
+> 📍 **07/11 (fim) — OS ANÉIS DA ENGUIA APROVADOS: A PELE CONTÍNUA.** Ele: *"Boa, agora ficou muito bom."* Folha
+> `folhas/2026-11-07/enguia-aneis/aneis.html` (6 rodadas, registradas na seção B1 do plano):
+> - **O corpo:** a pele contínua (a faixa da F1 endireitada e alongada pelas costelas, desde o pescoço; só o crânio
+>   é rígido), reacesa pelas normais do PixelLab; a cabeça gira por RotSprite.
+> - **O rolar à vista** em todas as viradas (*"muito natural, com o movimento de uma serpente mesmo"*).
+> - **As mordidas e o rombo:** a cauda mordida rasgada, o crânio mordido como ferida; o rombo com faíscas e fumaça na
+>   entrada (sem bordas acesas).
+> - **Os gêiseres** saem da rachadura (*"ficou ótimo"*).
+> - **A morte com gore:** a explosão da cabeça e o pescoço bombeando fluido.
+>
+> **Ficou para as gerações, a pedido dele:** a virada seca da cabeça e as costas esticando no rolar. Ele: *"no pixellab
+> existe a expansão para 8 lados… assim você terá posição para a cabeça virar de forma mais natural"*.
+>
+> **Commitados junto com a girada** (07/11, noite).
 >
 > 📍 **07/11 — O PLANO E A MAQUETE EM BLOCOS DA ENGUIA.** Nada commitado ainda. O plano
 > `plans/2026-11-07-serpente-grande-enguia.md` (Parte A feita, Parte B depois da aprovação). A maquete é uma ferramenta
@@ -38,7 +64,9 @@ sprite que se desfaz nos próprios pixels).
 > tampa a lateral direita inteira e a faixa de baixo tem cano mesmo depois das mordidas (o enrolamento de cima é
 > elástico). O `patch-gg/pixelfx` (MIT) foi CLONADO em `Projetos folder/_referencias/pixelfx` e entra com o modelo da
 > serpente (Parte B), a pedido dele. **✅ A MAQUETE ESTÁ APROVADA** (*"Boa, ficou ótimo assim."*). O próximo é a Parte B
-> do plano: anéis + normais → gestos da cabeça no PixelLab → efeitos (pixelfx) → instalação no jogo.
+> do plano: anéis + normais → gestos da cabeça no PixelLab → efeitos (pixelfx) → instalação no jogo. Commitado e
+> empurrado (`475f9af`, `b9d3458`). **B1 (os anéis) feito no mesmo dia, sem commit:** a folha
+> `folhas/2026-11-07/enguia-aneis/aneis.html` espera ele — A anéis rígidos × B pele contínua (recomendada).
 >
 > 📍 **04/11 — A ARTE DA ENGUIA COLOSSAL, APROVADA.** Commitada e empurrada. Os detalhes no ▶️ do START.
 > - **A cabeça:** da 1ª rodada ele ficou com a B5 (*"mas com a cabeça maior e mais larga"*); da 2ª, com a **E3**

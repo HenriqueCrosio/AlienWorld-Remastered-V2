@@ -1,5 +1,8 @@
 # START — a fase 2 da luta da Serpente: a ENGUIA COLOSSAL (a serpente grande)
 
+> ⏭️ **SUPERADO no fim de 07/11 — a porta de entrada agora é `plans/2026-11-07-enguia-geracoes-START.md`** (a maquete e
+> os anéis aprovados; o próximo são as gerações do PixelLab). Este fica como registro de 03–07/11.
+
 > A frase de arranque (atualizada no fim de 04/11): **"Leia o 🧭 do `docs/HANDOFF.md` e este START. Tudo até 04/11
 > está commitado e empurrado. A ARTE DA ENGUIA COLOSSAL ESTÁ APROVADA (`folhas/2026-11-04/enguia-corpo/aprovada/`).
 > A sessão abre no PLANO (`superpowers:writing-plans`, a partir da spec
@@ -31,6 +34,22 @@
 - **✅ A MAQUETE ESTÁ APROVADA** (ele: *"Boa, ficou ótimo assim."*). **O próximo é a Parte B do plano**, um plano curto
   por parte: (1) os anéis recortados da F1 + os mapas de normais → (2) os gestos da cabeça no PixelLab (a pergunta da
   boca: fecha nas passagens?) → (3) os efeitos, com o pixelfx → (4) a instalação no jogo, com a maquete como oráculo.
+- **B1, os anéis — FEITO, espera ele** na folha `folhas/2026-11-07/enguia-aneis/aneis.html`: a maquete aprovada vestida
+  com a arte (a faixa da F1 alongada pelas costelas + a E3, reacesas por normais), em dois jeitos lado a lado — A anéis
+  rígidos × B pele contínua (recomendada, com a virada de lado anel a anel). Registro no plano, seção B1.
+  **Rodada 2:** ele escolheu a PELE e circulou falhas; corrigidas — a cabeça gira por RotSprite (sem quebrar), só o crânio
+  é rígido (o pescoço dobra com a pele), a cabeça presa tomba de lado, a cauda mordida fica rasgada.
+  **Rodada 3:** a fenda crânio/pescoço fechada (sobreposição), as viradas de lado fora da tela (só 2 à vista), a
+  raspada no lábio do rombo (faíscas + brasa), os gêiseres saindo da fissura, a morte com gore (explosão + o pescoço
+  bombeando fluido).
+  **Rodada 4:** o CILINDRO fica (ele), agora sem esticar as placas (leitura pelo arco no meio da virada); a borda raspada
+  do rombo fica incandescente e esfria em ~2 s; o gêiser de veneno mais vivo (escorre, nuvem, gotas); o 1º gêiser em x 220.
+  **Rodada 5:** nenhuma virada de lado à vista (todas em trechos escondidos), a curva da chegada mais lenta, o gêiser só
+  para cima, a mordida do crânio como ferida, a raspada como SOLDA (faíscas, lascas, metal derretido esfriando, clarão
+  por cima do corpo).
+  **Rodada 6:** o rolar VOLTOU à vista em todas as viradas (ele gostou dele); a textura atrás do crânio resolvida; a
+  raspada só com faíscas e fumaça (sem bordas acesas). **Espera ele.** Depois: passo 2 (animações da cabeça no PixelLab,
+  COM as vistas 8-dir da E3 para a virada de lado — pedido dele) e passo 3 (estabilizadores e efeitos com o pixelfx).
 
 ## ▶️ O estado no fim de 04/11 (registro)
 
