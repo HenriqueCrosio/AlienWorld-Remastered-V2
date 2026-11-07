@@ -154,7 +154,12 @@ for (let f = 0; f * dt <= T; f++) {
   const contato = [];
   {
     const vel = Math.abs(R.estado(t + dt).s - e.s) / dt, W = N.tela.W;
-    if (vel > 30) for (let i = 0; i < P.tubo.length; i += 2) {
+    // (7 Nov, his ask: while she stands in the breach — hovering through the Echo — the rim keeps smoking and throwing
+    // a few sparks where her body crosses it, as the scrape's afterglow does; it hides the crossing and holds the
+    // moment. Standing still, the crossing only feeds the smouldering spots, never the moving scrape's burst; once she
+    // moves off, the scrape is as before)
+    const fumega = vel <= 30 && tr.cap === 'erguida';
+    if (vel > 30 || fumega) for (let i = 0; i < P.tubo.length; i += 2) {
       const a = P.tubo[i];
       if (a.x < N.rombo.x0 - 40 || a.x > N.rombo.x1 + 40 || a.y < N.rombo.labio.y - a.r || a.y > N.tela.H + a.r) continue;
       // (6th round (2): where she CLIPS — the hole's edge cutting across her body, her body vanishing behind the lip: the
@@ -172,7 +177,11 @@ for (let f = 0; f * dt <= T; f++) {
     }
     // (6th round (2), his note: the clip still showed — more sparks and smoke, over more of the rim, lasting longer: every
     // contact spot keeps smoking and throwing a few sparks for ~1.2 s after her body has passed, dying down)
-    for (const c of contato) if (sorte() < 0.25) raspado.push({ ...c, t });
+    for (const c of contato) if (sorte() < (fumega ? 0.12 : 0.25)) raspado.push({ ...c, t });
+    // (standing: his picture is THICK smoke with a few sparks — so the crossing breathes the scrape's heavy smoke, and
+    // feeds half as many smouldering spots, which are what throw the sparks)
+    if (fumega) for (const c of contato) if (sorte() < 0.5)
+      nasce({ x: c.x + (sorte() - 0.5) * 8, y: c.y + (sorte() - 0.5) * 6, vx: (sorte() - 0.5) * 14 + c.ox * 8, vy: -6 - sorte() * 12, vida: 2.0 + sorte() * 1.2, cor: sorte() < 0.5 ? [52, 48, 52] : [36, 34, 38], tam: 3.5 + sorte() * 3, cresce: true, a: 0.5 });
     for (let i = raspado.length - 1; i >= 0; i--) {
       const c = raspado[i], idade = t - c.t, k = 1 - idade / 1.2;
       if (k <= 0) { raspado.splice(i, 1); continue; }
@@ -180,7 +189,7 @@ for (let f = 0; f * dt <= T; f++) {
       if (sorte() < 0.08 * k) { const an = -Math.PI / 2 + (sorte() - 0.5) * 2.2, v = 40 + sorte() * 70; nasce({ x: c.x, y: c.y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 0.3 + sorte() * 0.4, cor: [255, 210, 120], arrasto: 1.4, gota: true }); }
     }
     // the contact's debris (a capped number per frame)
-    for (const c of contato.slice(0, 36)) {
+    for (const c of fumega ? [] : contato.slice(0, 36)) {
       // sparks: thrown OUT from her body at the contact, fanning (most), a few dragged along her motion — never riding
       // down with her (that buried her body in sparks)
       for (let k = 0; k < 2; k++) {
