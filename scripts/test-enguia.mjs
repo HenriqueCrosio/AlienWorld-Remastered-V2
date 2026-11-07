@@ -12,6 +12,7 @@ import { duracaoCanos, duracaoEco } from './_serpente/enguia/roteiro.mjs';
 import { Trilha, Eco } from './_serpente/enguia/eco.mjs';
 import { geiseres, pontosGeiser } from './_serpente/enguia/geiseres.mjs';
 import { folga } from './_serpente/enguia/perigos.mjs';
+import { JUNTA, amplia8 } from './_serpente/enguia/arte.mjs';
 
 let falhas = 0;
 const ok = (c, m) => { console.log(c ? 'ok  ' : 'FALHA', m); if (!c) falhas++; };
@@ -88,7 +89,8 @@ const R = montaRoteiro(N, med);
 // ── A2 · the body, measured on the approved art
 const mord = mordidas(R, N, med);
 {
-  ok(Math.abs(med.cabeca.comp - N.corpo.cabeca) <= 2, `a corda da cabeça na arte tem ${med.cabeca.comp.toFixed(1)} px (N: ${N.corpo.cabeca})`);
+  // (the rigid part is the SKULL now; the neck bends with the body — 2nd round of the rings)
+  ok(Math.abs(med.cabeca.comp - (N.corpo.cabeca - JUNTA)) <= 3, `a corda do crânio na arte tem ${med.cabeca.comp.toFixed(1)} px (no caminho: ${N.corpo.cabeca - JUNTA})`);
   const t = R.trechos.find((x) => x.hab === 'canos').t0 + 0.1;
   const P = pose(R, N, med, t, { mord });
   let passo = true;
@@ -106,10 +108,18 @@ const mord = mordidas(R, N, med);
   ok(toca, 'toca só com o centro no buraco abaixo de y 150');
   ok(mord.length === 3 && mord[0].t >= mord[0].tPedido && mord[1].t >= mord[1].tPedido, `as mordidas: ${mord.map((m) => `${m.pct}% em ${m.t.toFixed(1)} s (pedida ${m.tPedido.toFixed(1)})`).join(' · ')}`);
   ok(nAneisEm(mord[0].t + 0.01, N, mord) === N.corpo.aneis - 3 && nAneisEm(mord[1].t + 0.01, N, mord) === N.corpo.aneis - 6, 'cada mordida tira 3 anéis da cauda');
-  // the head never upside down: mirrored exactly when heading right
-  let espelhoCerto = true;
-  for (let tq = 0; tq < R.T; tq += 0.5) { const q = pose(R, N, med, tq, { mord }); if (q.cabeca.espelho !== Math.cos(q.cabeca.ang) > 0) espelhoCerto = false; }
-  ok(espelhoCerto, 'a cabeça espelha quando aponta para a direita');
+  // the head never clearly upside down (Part B: the roll is the path's, with a margin — so on a vertical run it keeps
+  // the side it had, but pointing well right it is mirrored and well left it is not)
+  let espelhoCerto = true, viradas = 0, antes = null;
+  for (let tq = 0; tq < R.T; tq += 1 / 30) {
+    const q = pose(R, N, med, tq, { mord }), c = Math.cos(q.cabeca.ang), f = q.cabeca.focinho;
+    const aVista = f.x > -10 && f.x < N.tela.W + 10 && f.y > -10 && f.y < N.tela.H + 10; // (off the canvas nobody sees it)
+    if (aVista && ((q.cabeca.espelho && c < -0.7) || (!q.cabeca.espelho && c > 0.7))) espelhoCerto = false;
+    if (antes != null && antes !== q.cabeca.espelho) viradas++;
+    antes = q.cabeca.espelho;
+  }
+  ok(espelhoCerto, 'a cabeça nunca fica de ponta-cabeça (espelha quando aponta para a direita)');
+  ok(viradas <= 40, `a cabeça vira de lado ${viradas} vezes na luta inteira (sem piscar)`);
 }
 
 // ── A3 · the pipes' free lane
@@ -206,6 +216,19 @@ const geis = geiseres(R, N);
   ok(folga(nave, hit, { c: { x: 100, y: 100, r: 3 } }) < -3, 'círculo dentro da caixa: folga negativa');
   ok(Math.abs(folga(nave, hit, { r: { x0: 0, x1: 384, y0: 110, y1: 160 } }) - 5.5) < 1e-6, 'folga a uma faixa abaixo');
   ok(folga(nave, hit, { r: { x0: 0, x1: 384, y0: 102, y1: 160 } }) < 0, 'faixa que pega a caixa: negativa');
+}
+
+// ── B1 · turning pixel art: the 8× map (Scale2x ×3) only ever copies source pixels, and a straight line stays straight
+{
+  const w = 6, h = 4, rgba = new Uint8Array(w * h * 4);
+  for (let x = 0; x < w; x++) { const i = (1 * w + x) * 4; rgba.set([200, 40, 40, 255], i); } // a red row
+  const m = amplia8(rgba, w, h);
+  ok(m.w === 48 && m.h === 32, `amplia8: ${w}×${h} → ${m.w}×${m.h}`);
+  const fontes = new Set(m.idx);
+  ok([...fontes].every((p) => p === -1 || (rgba[p * 4 + 3] > 128)), 'amplia8 só copia pixels da própria arte (nenhuma cor inventada)');
+  let reta = true;
+  for (let X = 0; X < m.w; X++) for (let Y = 0; Y < m.h; Y++) if ((m.idx[Y * m.w + X] >= 0) !== (Y >= 8 && Y < 16)) reta = false;
+  ok(reta, 'amplia8: a linha reta continua reta e com a mesma espessura');
 }
 
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\ntudo ok');

@@ -2,6 +2,7 @@
 // E3's silhouette (drawn flat grey as "the simple head"), its neck joint and snout (the head's rigid chord), the eye and
 // the mouth's ember, the circles that stand for it in the touch, and the body's height profile (the rings' radii).
 import sharp from 'sharp';
+import { CRANIO_X } from './arte.mjs';
 
 const DIR = 'docs/superpowers/folhas/2026-11-04/enguia-corpo/aprovada/';
 
@@ -30,10 +31,12 @@ const centroide = (img, teste, x1 = img.w) => {
 export async function medidas(N) {
   const cab = await cru('cabeca-e3-pescoco.png');
   const cc = colunas(cab);
-  const x0 = cc.findIndex(Boolean), x1 = cc.length - 1 - [...cc].reverse().findIndex(Boolean);
+  // (2nd round of the rings: only the SKULL is rigid — the neck, x ≥ 66, bends with the body; `pescoco` is now the
+  // skull's joint, the head's anchor)
+  const x0 = cc.findIndex(Boolean), x1 = CRANIO_X;
   const pescoco = { x: x1, y: cc[x1].m }, focinho = { x: x0, y: cc[x0].m };
   const mascara = new Uint8Array(cab.w * cab.h);
-  for (let i = 0; i < cab.w * cab.h; i++) mascara[i] = cab.data[i * 4 + 3] > 128 ? 1 : 0;
+  for (let i = 0; i < cab.w * cab.h; i++) mascara[i] = cab.data[i * 4 + 3] > 128 && i % cab.w < CRANIO_X ? 1 : 0;
   const olho = centroide(cab, ([r, g, b]) => b > 170 && b > r + 60);
   const boca = centroide(cab, ([r, g, b]) => r > 180 && r > b + 80, 80);
   // the touch: 4 circles along the chord, each the half-height of the silhouette at its column
@@ -56,7 +59,7 @@ export async function medidas(N) {
     return X0 + cab0 + k * (artLen - cauda - cab0);
   };
   const perfil = (u) => {
-    const x = Math.round(Math.min(X1, Math.max(X0, coluna(u))));
+    const x = Math.round(Math.min(X1, Math.max(CRANIO_X, coluna(u))));
     return fc[x] ? fc[x].h : 2;
   };
 
@@ -66,6 +69,7 @@ export async function medidas(N) {
     perfil,
     raio: (k) => Math.max(2.5, perfil((k + 0.5) * N.corpo.passo) / 2),
     // the tube's radius at any arc u from the neck (smoothed over ±4 px: the art's columns step)
-    raioU: (u) => { let s = 0; for (let d = -4; d <= 4; d += 2) s += perfil(Math.max(0, u + d)); return Math.max(2, s / 10); },
+    // (u < 0 is the neck: the art's columns 66–95)
+    raioU: (u) => { let s = 0; for (let d = -4; d <= 4; d += 2) s += perfil(Math.max(CRANIO_X - X0, u + d)); return Math.max(2, s / 10); },
   };
 }

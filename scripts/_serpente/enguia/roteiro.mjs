@@ -84,7 +84,7 @@ function resolvePosto(N, alcance, dirEntrada) {
 }
 
 // `med` (the art's measures) sizes the post's coil to the body she has left
-export function montaRoteiro(N, med) {
+export function montaRoteiro(N, med, opcoes = {}) {
   const V = N.vel, CORPO = N.corpo.cabeca + N.corpo.aneis * N.corpo.passo;
   // the rings at each post: the mock's scripted bites take 3 off the tail during the way back of cycle 1 and the dive
   // of cycle 2 (`corpo.mjs`, `mordidas`; the test checks they land before the next post)
@@ -102,9 +102,38 @@ export function montaRoteiro(N, med) {
   let sRecuo = null; // after the death's sinking, the pauses stand where she stopped, not at the path's end
   const s = () => sRecuo ?? cam.L;
   const pausa = (nome, cap, dur, extra = {}) => { trechos.push({ nome, cap, tipo: 'pausa', t0: t, t1: t + dur, s0: s(), s1: s(), ...extra }); t += dur; };
-  const move = (nome, cap, pontos, v, { para0 = false, para1 = false, onda = false, ...extra } = {}) => {
+  // (`vIni`: the speed eases linearly from vIni to v over the leg — 5th round: she slows into the arrival's turn and
+  // picks up again after it, with no jolt)
+  // (`velPts` [[x, y, v], …]: the speed set at the path points nearest those spots, linear between them, `v` before the
+  // first and after the last — one leg, one wave, any easing; 7 Nov, the 4th round's arc with the 5th round's slowing)
+  const move = (nome, cap, pontos, v, { para0 = false, para1 = false, onda = false, vIni = null, velPts = null, ...extra } = {}) => {
     const [s0, s1] = cam.junta(pontos, { onda: onda ? N.onda : null, calma0: para0, calma1: para1 });
-    const p = perfil(s1 - s0, v, V.rampa, para0, para1);
+    let p = perfil(s1 - s0, v, V.rampa, para0, para1);
+    if (vIni != null) {
+      const L = s1 - s0, D = (2 * L) / (vIni + v);
+      p = { D, pos: (tt) => { tt = Math.min(D, Math.max(0, tt)); return vIni * tt + ((v - vIni) * tt * tt) / (2 * D); } };
+    }
+    if (velPts) {
+      const marcas = velPts.map(([x, y, vv]) => {
+        let melhor = 0, dm = Infinity;
+        for (let q = 0; q <= s1 - s0; q++) { const pp = cam.ponto(s0 + q), d = Math.hypot(pp.x - x, pp.y - y); if (d < dm) { dm = d; melhor = q; } }
+        return [melhor, vv];
+      }).sort((a, b) => a[0] - b[0]);
+      const vEm = (q) => {
+        if (q <= marcas[0][0]) return marcas[0][1];
+        for (let i = 1; i < marcas.length; i++) if (q <= marcas[i][0]) { const [qa, va] = marcas[i - 1], [qb, vb] = marcas[i]; return va + ((vb - va) * (q - qa)) / Math.max(1, qb - qa); }
+        return marcas[marcas.length - 1][1];
+      };
+      const L = s1 - s0, tq = [0]; // the time at each px of the leg
+      for (let q = 1; q <= Math.ceil(L); q++) tq.push(tq[q - 1] + 2 / (vEm(q - 1) + vEm(q)));
+      const D = tq[tq.length - 1];
+      p = { D, pos: (tt) => {
+        tt = Math.min(D, Math.max(0, tt));
+        let a = 0, b = tq.length - 1;
+        while (b - a > 1) { const m = (a + b) >> 1; if (tq[m] <= tt) a = m; else b = m; }
+        return Math.min(L, a + (tt - tq[a]) / Math.max(1e-9, tq[b] - tq[a]));
+      } };
+    }
     trechos.push({ nome, cap, tipo: 'move', t0: t, t1: t + p.D, s0, s1, pos: p.pos, ...extra });
     t += p.D;
   };
@@ -124,7 +153,20 @@ export function montaRoteiro(N, med) {
   // ── the arrival (§2.1): the fusion scene's end stands in as a flash; she bursts out, arcs over the arena toward the
   // ship's side and out by the bottom edge while her tail still leaves the breach, then climbs the right edge to the post
   pausa('fusao', 'chegada', 1.6, { hab: 'fusao' });
-  move('arco', 'chegada', [[300, 150], [288, 72], [252, 38], [190, 28], [130, 40], [96, 78], [92, 130], [104, 190], [120, 262]], N.vel.chegada, { onda: true, emerge: true });
+  // (5th round: the turn from heading left to heading down was "muito rápida e seca" — the arc now bends earlier and
+  // wider, so the head swings round over more path)
+  // ...and she slows into it (160 → 100 px/s) and picks up after it (100 → 160)
+  const ARCO_R4 = [[300, 150], [288, 72], [252, 38], [190, 28], [130, 40], [96, 78], [92, 130], [104, 190], [120, 262]];
+  if (opcoes.chegada === 'r4') { // (the 4th round's arc, kept only to film the comparison of the stretched back)
+    move('arco', 'chegada', ARCO_R4, N.vel.chegada, { onda: true, emerge: true });
+  } else if (opcoes.chegada === 'r4lenta') { // the 4th round's arc (its tight bend: the roll inside it) + the slowing
+    const v = N.vel.chegada;
+    move('arco', 'chegada', ARCO_R4, v, { onda: true, emerge: true, velPts: [[190, 28, v], [130, 40, 100], [92, 130, 100], [120, 262, v]] });
+  } else {
+    move('arco', 'chegada', [[300, 150], [288, 72], [252, 38], [196, 26], [158, 30]], N.vel.chegada, { onda: true, emerge: true });
+    move('arco-curva', 'chegada', [[126, 44], [102, 66], [88, 96], [82, 128]], 100, { vIni: N.vel.chegada });
+    move('arco-desce', 'chegada', [[86, 168], [96, 214], [108, 262]], N.vel.chegada, { vIni: 100 });
+  }
   move('arco-fora', 'chegada', [[150, 330], [260, 360], [350, 330], [372, 262]], N.vel.chegada);
   move('posto', 'chegada', POSTO(1), N.vel.chegada, { para1: true });
 
@@ -133,8 +175,11 @@ export function montaRoteiro(N, med) {
     pausa('canos', 'canos', final ? corteCanos(N.canos) + 0.3 : duracaoCanos(N.canos), { hab: 'canos', ciclo: c, corte: final ? corteCanos(N.canos) : null });
     // 2 · the dive: from the top-right corner to the middle, straight down into the breach; the tail goes in last
     prepara('mergulho', c);
-    move('mergulho', 'mergulho', [[226, 50], [196, 74], [186, 104], [200, 132], [232, 158], [264, 184], [278, 216], [282, 300]], V.passagem, { para0: true, onda: true, ciclo: c });
-    move('mergulho-cauda', 'mergulho', [[282, FUNDO]], V.passagem, { para1: true, ciclo: c });
+    // (the 4th round's dive, restored in the 6th: she rolls over on the way down, in sight — he wants that roll)
+    // (6th round (2): the drop moved ~12 px right — she clipped the breach's left rim going in; now she drops nearer the
+    // middle of the hole)
+    move('mergulho', 'mergulho', [[226, 50], [198, 74], [192, 104], [210, 130], [244, 154], [276, 182], [290, 216], [294, 300]], V.passagem, { para0: true, onda: true, ciclo: c });
+    move('mergulho-cauda', 'mergulho', [[294, FUNDO]], V.passagem, { para1: true, ciclo: c });
     // (hidden: nothing of her on screen) the U-turn under the breach
     move('volta-escondida', 'mergulho', [[296, FUNDO + 40], [312, FUNDO], [312, 300]], V.escondido, { para1: true, ciclo: c });
     // 3 · the rise in the breach: the head almost at the top edge, the body a swaying column from the crest up
@@ -144,7 +189,8 @@ export function montaRoteiro(N, med) {
     if (final) return;
     // 4 · under the hull: the WHOLE body sinks into the breach first; then the bump runs left under the hull and back
     prepara('sob', c);
-    move('afunda', 'sob', [[222, 38], [210, 60], [216, 94], [242, 126], [270, 164], [278, 216], [278, FUNDO]], V.afunda, { para0: true, onda: true, ciclo: c });
+    // (no swimming S here: it is a straight drop into the hole, and the S tipped her lean past the roll's margin)
+    move('afunda', 'sob', [[222, 38], [212, 62], [214, 96], [232, 128], [256, 160], [272, 190], [278, 216], [278, FUNDO]], V.afunda, { para0: true, ciclo: c });
     move('sob-ida', 'sob', [[262, FUNDO + 26], [230, FUNDO + 36], [N.geiser.fim, FUNDO + 36]], V.sob, { ciclo: c, sob: 'ida' });
     move('sob-volta', 'sob', [[N.geiser.fim - 18, FUNDO + 48], [N.geiser.fim, FUNDO + 60], [300, FUNDO + 60]], V.sob, { ciclo: c, sob: 'volta' });
     // (hidden) up under the breach, fast, to where she breaks out
@@ -164,7 +210,7 @@ export function montaRoteiro(N, med) {
     for (let q = s(); q > 0; q -= 1) { const p = cam.ponto(q - N.corpo.cabeca); if (p.y >= 168) { alvo = q; break; } }
     recua('afunda-morte', 'morte', alvo, V.recua);
     pausa('presa', 'morte', 0.9, { hab: 'presa' });
-    pausa('desfaz', 'morte', 1.3, { hab: 'desfaz' });
+    pausa('desfaz', 'morte', 1.8, { hab: 'desfaz' }); // (3rd round: the head blows apart, the neck starts pumping)
     recua('resto', 'morte', alvo - 320, 180, { hab: 'resto' });
     pausa('fim', 'morte', 1.8, { hab: 'fim' });
   }
@@ -192,5 +238,38 @@ export function montaRoteiro(N, med) {
     }
   }
 
-  return { caminho: cam, trechos, estado, sinais, postos, T, CORPO };
+  // the ROLL (Part B, the rings): the art is one side of her, so when she heads right she shows the other side (the art
+  // mirrored, the dorsal still up). Decided ALONG THE PATH, not per ring — with a margin (it turns over past ±0.55 of
+  // the heading's x, never flickering on a vertical run) — and eased over ±24 px: every ring rolls over as it passes the
+  // spot where the head rolled, a twist running down her body. φ = 0 (as drawn) … π (mirrored).
+  const rolagem = new Float32Array(cam.L + 1);
+  {
+    // A heading decides the side only past ±0.55 of its x (the swimming S tilts a vertical run by up to ~0.44 — that
+    // must never turn her over). 3rd round, his circle on the top of her neck when she stands in the breach: she rose
+    // still turned over from the dive and rolled back right in her neck, in sight. So an undecided run (straight up or
+    // down) already shows the side of the NEXT decided turn — read backwards along the path — and the turning over
+    // falls where the path turns: under the breach, above the screen, at the bottom edge — out of sight.
+    // (±0.66, not 0.55: the drop back into the breach after the Echo leans right by up to 0.62 for a moment — that brief
+    // lean flipped her twice in half a second; the real turns — the dive ~0.78, the hump of the way back ~1 — clear it)
+    // (5th round tried moving every turn-over out of sight; 6th round, his answer: the roll in sight "estava muito
+    // natural, com o movimento de uma serpente mesmo" — it stays in EVERY turn, as in the 4th round. The head's snap at
+    // the turn-over is for the PixelLab stage: its extra views will let it turn naturally)
+    const lado = new Uint8Array(cam.L + 1);
+    let m = 0;
+    for (let q = cam.L; q >= 0; q--) {
+      const d = cam.rumo(q);
+      if (d.x > 0.66) m = 1; else if (d.x < -0.66) m = 0;
+      lado[q] = m;
+    }
+    const J = 40; // (a roll over ~80 px of body: it reads as the body turning over, not as a fold)
+    let soma = 0;
+    for (let q = -J; q <= J; q++) soma += lado[Math.min(cam.L, Math.max(0, q))];
+    for (let q = 0; q <= cam.L; q++) {
+      rolagem[q] = (Math.PI * soma) / (2 * J + 1);
+      soma += lado[Math.min(cam.L, q + J + 1)] - lado[Math.max(0, q - J)];
+    }
+  }
+  const rola = (q) => rolagem[Math.min(cam.L, Math.max(0, Math.round(q)))];
+
+  return { caminho: cam, trechos, estado, sinais, postos, rola, T, CORPO };
 }

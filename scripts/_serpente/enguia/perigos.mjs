@@ -3,6 +3,7 @@
 // probe dodges is exactly what is counted.
 import { pose } from './corpo.mjs';
 import { bocasDosCanos } from './canos.mjs';
+import { trilhaFissura } from './geiseres.mjs';
 
 export function folga(nave, hit, f) {
   const x0 = nave.x - hit.w / 2, x1 = nave.x + hit.w / 2, y0 = nave.y - hit.h / 2, y1 = nave.y + hit.h / 2;
@@ -48,8 +49,11 @@ export function perigos(M, t, P = null) {
   }
   // the geysers' columns
   const G = N.geiser;
+  // (5th round: the column rises from the crack only — it hurts from y ~70 down to the crack; the crack runs at y
+  // 163–173, under the crest (151), so who hides under the crest is still caught)
+  const { trilha } = trilhaFissura(N);
   for (const g of M.geis) if (t >= g.tColuna && t < g.tFim)
-    out.push({ tipo: 'geiser', id: `geiser-${g.tAviso.toFixed(2)}`, forma: { r: { x0: g.x - G.largura / 2, x1: g.x + G.largura / 2, y0: G.topo, y1: N.tela.H } } });
+    out.push({ tipo: 'geiser', id: `geiser-${g.tAviso.toFixed(2)}`, forma: { r: { x0: g.x - G.largura / 2, x1: g.x + G.largura / 2, y0: G.topo, y1: trilha[Math.round(g.x)] + 2 } } });
   // the Echo's blasts
   for (const E of M.ecos) for (const x of E.estado(t).explosoes) if (x.fere)
     out.push({ tipo: 'eco', id: `eco-${x.x.toFixed(1)}-${x.y.toFixed(1)}`, forma: { c: { x: x.x, y: x.y, r: x.r } } });

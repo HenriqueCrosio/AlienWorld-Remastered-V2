@@ -3,6 +3,24 @@
 // from the screen's foot to y ~70, THROUGH the crest), the green steam that spreads and fades (nothing falls). The way
 // back's geysers fall BETWEEN the way out's (the safe spots change).
 
+// the living hull's crack path: the same seeded walk as `cascoVivo.ts` (the panel's row 168 ±5, little branches every
+// 13 columns) — shared by the drawing and the touch (5th round: the geysers rise FROM it, so the column's foot is it)
+let trilhaMemo = null;
+export function trilhaFissura(N) {
+  if (trilhaMemo) return trilhaMemo;
+  const W = N.tela.W, trilha = new Int16Array(W), ramos = [];
+  let semente = 20261029;
+  const rnd = () => { semente = (Math.imul(semente, 1664525) + 1013904223) >>> 0; return semente / 4294967296; };
+  let y = N.geiser.yLombada, passo = 0;
+  for (let x = W - 1; x >= 0; x--) {
+    if (--passo <= 0) { y = Math.max(N.geiser.yLombada - 5, Math.min(N.geiser.yLombada + 5, y + (rnd() < 0.5 ? -1 : 1))); passo = 2 + Math.floor(rnd() * 3); }
+    trilha[x] = y;
+    if (x % 13 === 0) { const sobe = rnd() < 0.5 ? -1 : 1, n = 2 + Math.floor(rnd() * 3); for (let q = 1; q <= n; q++) ramos.push({ x: x - Math.round(q * 0.7), y: y + sobe * q }); }
+  }
+  trilhaMemo = { trilha, ramos };
+  return trilhaMemo;
+}
+
 // the x of each geyser: the way out from `inicio` every `passo` while ≥ fim + passo/3; the way back on the midpoints
 export function pontosGeiser(G) {
   const ida = [];

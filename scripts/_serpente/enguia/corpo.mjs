@@ -57,16 +57,22 @@ export function telaParaCabeca(C, med, q) {
   return { x: H.pescoco.x + vx, y: H.pescoco.y + vy };
 }
 
+import { PESCOCO, JUNTA } from './arte.mjs';
+
 // the pose. `giro` (rad): the Echo turns the head about the neck; `treme` {x, y}: the stuck head's struggle
 export function pose(R, N, med, t, { giro = 0, treme = null, mord = [] } = {}) {
   const e = R.estado(t);
-  const C = R.caminho, sH = e.s, L = N.corpo.cabeca;
-  const pesc = C.ponto(sH - L), foc0 = C.ponto(sH);
+  // L: from the snout to the strip's u = 0 (the old joint, x 96); Lc: the rigid SKULL only (to x 66) — the neck between
+  // them is the tube's u < 0 and bends with the body (2nd round of the rings)
+  const C = R.caminho, sH = e.s, L = N.corpo.cabeca, Lc = L - JUNTA;
+  const pesc = C.ponto(sH - Lc), foc0 = C.ponto(sH);
   let ang = Math.atan2(foc0.y - pesc.y, foc0.x - pesc.x) + giro;
   const tx = treme ? treme.x : 0, ty = treme ? treme.y : 0;
   const pescoco = { x: pesc.x + tx, y: pesc.y + ty };
-  const focinho = { x: pescoco.x + Math.cos(ang) * L, y: pescoco.y + Math.sin(ang) * L };
-  const espelho = Math.cos(ang) > 0;
+  const focinho = { x: pescoco.x + Math.cos(ang) * Lc, y: pescoco.y + Math.sin(ang) * Lc };
+  // (the roll is the path's: the head shows the other side once the middle of its chord has rolled past half)
+  const fiC = R.rola ? R.rola(sH - Lc / 2) : Math.cos(ang) > 0 ? Math.PI : 0; // (the head's roll: picks its view)
+  const espelho = fiC > Math.PI / 2;
   const ux = Math.cos(ang), uy = Math.sin(ang), nx = -uy, ny = ux;
   // the art's circles sit off the chord by `dy` (its "down"); mirrored, the side flips
   const lado = espelho ? -1 : 1;
@@ -78,8 +84,9 @@ export function pose(R, N, med, t, { giro = 0, treme = null, mord = [] } = {}) {
   const R2 = N.respira;
   const ponto = (u) => {
     const p = C.ponto(sH - L - u), d = C.rumo(sH - L - u);
-    const o = R2.A * Math.sin((2 * Math.PI * u) / R2.lambda - R2.w * t) * Math.min(1, u / R2.ate);
-    return { x: p.x - d.y * o + tx * Math.max(0, 1 - u / 30), y: p.y + d.x * o + ty * Math.max(0, 1 - u / 30), dx: d.x, dy: d.y };
+    const o = R2.A * Math.sin((2 * Math.PI * u) / R2.lambda - R2.w * t) * Math.max(0, Math.min(1, u / R2.ate));
+    const k = Math.max(0, Math.min(1, 1 - (u + PESCOCO) / 40)); // (the struggle shakes the neck, fading down it)
+    return { x: p.x - d.y * o + tx * k, y: p.y + d.x * o + ty * k, dx: d.x, dy: d.y };
   };
   const aneis = [];
   for (let k = 0; k < nAneis; k++) {
@@ -88,9 +95,9 @@ export function pose(R, N, med, t, { giro = 0, treme = null, mord = [] } = {}) {
   }
   // the tube (drawn and touched): a sample every `passo` px from the neck to the tail, its ring index for the joints
   const comp = nAneis * N.corpo.passo, tubo = [];
-  for (let u = 0; u <= comp; u += N.tubo.passo) {
+  for (let u = -PESCOCO; u <= comp; u += N.tubo.passo) {
     const q = ponto(u), fimK = Math.min(1, (comp - u) / 10);
-    tubo.push({ u, x: q.x, y: q.y, r: med.raioU(u) * (nAneis < N.corpo.aneis ? 0.55 + 0.45 * fimK : 1), seg: Math.floor(u / N.corpo.passo), toca: naToca(q, N) });
+    tubo.push({ u, x: q.x, y: q.y, dx: q.dx, dy: q.dy, fi: R.rola ? R.rola(sH - L - u) : 0, r: med.raioU(u) * (nAneis < N.corpo.aneis ? 0.55 + 0.45 * fimK : 1), seg: Math.floor(u / N.corpo.passo) + 2, toca: naToca(q, N) });
   }
-  return { e, cabeca: { pescoco, focinho, ang, espelho, circulos }, aneis, tubo, nAneis };
+  return { e, cabeca: { pescoco, focinho, ang, espelho, fi: fiC, circulos }, aneis, tubo, nAneis };
 }

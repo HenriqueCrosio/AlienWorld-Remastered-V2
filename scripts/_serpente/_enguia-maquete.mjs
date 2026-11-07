@@ -18,7 +18,7 @@ import { Eco, Trilha } from './enguia/eco.mjs';
 import { geiseres, lombada, fissuras } from './enguia/geiseres.mjs';
 import { perigos, folga } from './enguia/perigos.mjs';
 import { Jogador } from './enguia/jogador.mjs';
-import { preparaDesenho, quadro, pixelsDaCabeca, bocaNaTela } from './enguia/desenho.mjs';
+import { preparaDesenho, quadro, pixelsDaCabeca, bocaNaTela, VENENO } from './enguia/desenho.mjs';
 
 const [JOG = 'desvia', OUT = 'docs/superpowers/folhas/2026-11-07/enguia-maquete/cru', ...resto] = process.argv.slice(2);
 const opc = Object.fromEntries(resto.map((a) => a.split('=')));
@@ -26,13 +26,25 @@ const ARENA = opc.arena ?? 'docs/superpowers/folhas/2026-10-29/serpente-casco/cr
 fs.mkdirSync(OUT, { recursive: true });
 
 const med = await medidas(N);
-const R = montaRoteiro(N, med);
+const R = montaRoteiro(N, med, { chegada: opc.chegada }); // (`chegada=r4`: the 4th round's arc, to compare)
 const mord = mordidas(R, N, med);
 const geis = geiseres(R, N);
 const D = await preparaDesenho(N, med, ARENA);
-const FPS = N.tela.fps, dt = 1 / FPS, T = Math.min(R.T, opc.ate ? Number(opc.ate) : R.T);
+// Part B (the rings): `corpo=pele|aneis` dresses her in the approved art (the strip + the head, relit by their normal
+// maps) instead of the grey blocks; `de=<s>` films from there on (the fight is still simulated from 0)
+const CORPO = opc.corpo ?? 'blocos';
+if (CORPO !== 'blocos') { const { carregaArte } = await import('./enguia/arte.mjs'); D.arte = await carregaArte(N); }
+D.semLuz = opc.luz === '0'; // (`luz=0`: the art as drawn, no relight — for the sheet's comparison)
+D.rolagemAneis = opc.rolagem === 'aneis'; // (`rolagem=aneis`: the skin, but the roll ring by ring — his comparison)
+const NOME = `${JOG}${CORPO !== 'blocos' ? `-${CORPO}` : ''}${D.semLuz ? '-semluz' : ''}${D.rolagemAneis ? '-rolaneis' : ''}${opc.chegada ? `-cheg${opc.chegada}` : ''}`;
+const FPS = N.tela.fps, dt = 1 / FPS, T = Math.min(R.T, opc.ate ? Number(opc.ate) : R.T), DE = Number(opc.de ?? 0);
 const rnd = LCG(20261107), sorte = LCG(5);
 const cranio = mord.find((m) => m.cranio);
+// the game's flesh ramps (`src/systems/morte/pedacos.ts`): the oily fluid with its orange glint, and the flesh reds
+const hex = (h) => [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+const raspado = []; // (the rim's recent contact spots, still smoking: {x, y, dx, dy, t})
+const FLUIDO = ['0a0608', '140a0a', '1a0b06', '2c0b04', '4a1d05', '5c2300', '7d2900', '913300', 'b5500c'].map(hex);
+const CARNE = ['0c040c', '1c0c14', '2c0c1c', '3c1424', '541c2c', '6c2434', '94343c', 'b84850', 'd87060'].map(hex);
 const MORDIDA_CRANIO = { x: 48, y: 4, r: 7 };
 
 // the world the hazards and the probe read
@@ -57,19 +69,28 @@ const momentos = {
   geiser: geis[2].tColuna + 0.15,
   volta: R.trechos.find((t) => t.nome === 'volta').t0 + 1.4,
   mordida: mord[0].t + 0.1,
+  // (his note: the stump torn, ragged — seen once the debris has gone)
+  toco: mord[0].t + 0.35,
+  toco2: mord[1].t + 1.5,
   'sob-vazio': R.trechos.find((t) => t.sob === 'ida').t0 + 0.9,
   posto: R.trechos.find((t) => t.hab === 'canos').t0 + 0.3,
   // (his note: the 2nd and 3rd pipes, with the tail bitten off — the bottom lane still fires from her body)
   'posto2-fogo': R.trechos.filter((t) => t.hab === 'canos')[1].t0 + N.canos.antes + N.canos.aviso[0] + 0.3,
   'posto3-fogo': R.trechos.filter((t) => t.hab === 'canos')[2].t0 + N.canos.antes + N.canos.aviso[0] + 0.3,
-  presa: R.trechos.find((t) => t.hab === 'presa').t0 + 0.4,
+  presa: R.trechos.find((t) => t.hab === 'presa').t0 + 0.8,
+  // (3rd round: the scrape on the rim, the head blowing apart, the neck pumping)
+  raspa: R.trechos.find((t) => t.nome === 'mergulho-cauda').t0 + 1.2,
+  'raspa-esfria': R.trechos.find((t) => t.nome === 'mergulho-cauda').t1 + 0.3,
+  explode: R.trechos.find((t) => t.hab === 'desfaz').t0 + 0.12,
+  ferida: R.trechos.filter((t) => t.hab === 'eco').at(-1).t0 + 1.0, // (5th round: the skull's bite as a wound)
+  jorro: R.trechos.find((t) => t.hab === 'desfaz').t0 + 1.2,
   fim: R.trechos.find((t) => t.hab === 'fim').t0 + 0.6,
 };
 const fotosFeitas = new Set();
 
 // the video: raw frames into ffmpeg (×3, nearest)
 const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${N.tela.W}x${N.tela.H}`, '-r', String(FPS), '-i', '-',
-  '-vf', 'scale=iw*3:ih*3:flags=neighbor', '-c:v', 'libx264', '-crf', '16', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', path.join(OUT, `${JOG}.mp4`)], { stdio: ['pipe', 'inherit', 'inherit'] });
+  '-vf', 'scale=iw*3:ih*3:flags=neighbor', '-c:v', 'libx264', '-crf', '16', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', path.join(OUT, `${NOME}.mp4`)], { stdio: ['pipe', 'inherit', 'inherit'] });
 const escreve = (buf) => new Promise((ok) => (ff.stdin.write(buf) ? ok() : ff.stdin.once('drain', ok)));
 
 const nasce = (p) => particulas.push({ idade: 0, tam: 1, ...p });
@@ -97,6 +118,9 @@ for (let f = 0; f * dt <= T; f++) {
     const lim = (N.eco.giro * Math.PI) / 180;
     alvoGiro = tr.t1 - t < 0.5 ? 0 : Math.max(-lim, Math.min(lim, d));
     rapido = 5;
+  } else if (['presa', 'desfaz'].includes(tr.hab) || (tr.nome === 'afunda-morte' && e.tl > (tr.t1 - tr.t0) * 0.6)) {
+    // (his circle on the stuck head: straight up it read wrong — it slumps sideways onto the breach's rim, spent)
+    alvoGiro = (P0.cabeca.espelho ? 1 : -1) * 0.95; rapido = 3; // (toward the side her face looks: never upside down)
   } else if (tr.prepara && cabecaVisivel) {
     const k = Math.min(1, e.tl / (N.prepara.dur * 0.7));
     alvoGiro = acima * N.prepara.giro * k * k * (3 - 2 * k);
@@ -118,6 +142,63 @@ for (let f = 0; f * dt <= T; f++) {
     E.rodadas.forEach((r, i) => { // the spit's flash at the mouth
       if (!antes[i] && r.sementes) { const b = bocaNaTela(P, med); for (let k = 0; k < 14; k++) { const an = sorte() * Math.PI * 2; nasce({ x: b.x, y: b.y, vx: Math.cos(an) * 40, vy: Math.sin(an) * 40, vida: 0.25, cor: [150, 220, 255] }); } nasce({ x: b.x, y: b.y, vx: 0, vy: 0, vida: 0.15, cor: [220, 245, 255], tam: 5 }); }
     });
+  }
+  // ── the SCRAPE (5th round, his drawing over the breach and: "uma estrutura de metal gigante friccionou contra a
+  // borda, causando faísca, pedaços voando, efeito de solda"; and the body clips the rim, so the effect must hide it).
+  // Wherever the EDGE of her body crosses the lip's metal while she moves (a band of the body's rim, not a line), the
+  // metal is welded: it melts (heat), cools slowly from white to dull red, and leaves a scorch that fades; every frame
+  // of contact flashes at the contact (drawn over her body), throws a shower of sparks along her motion, molten drops,
+  // shards of the plate itself and smoke.
+  // (6th round, his note: no lit edges on the lip — "em todos os lados ela fica voando"; the sparks and the smoke hide it
+  // well: more of both, no weld left on the metal)
+  const contato = [];
+  {
+    const vel = Math.abs(R.estado(t + dt).s - e.s) / dt, W = N.tela.W;
+    if (vel > 30) for (let i = 0; i < P.tubo.length; i += 2) {
+      const a = P.tubo[i];
+      if (a.x < N.rombo.x0 - 40 || a.x > N.rombo.x1 + 40 || a.y < N.rombo.labio.y - a.r || a.y > N.tela.H + a.r) continue;
+      // (6th round (2): where she CLIPS — the hole's edge cutting across her body, her body vanishing behind the lip: the
+      // lip's edge pixels (3 px band) inside her silhouette; sparks fly from there AWAY from the hole, over the lip)
+      const r1 = a.r;
+      for (let Y = Math.floor(a.y - r1); Y <= a.y + r1; Y++) for (let X = Math.floor(a.x - r1); X <= a.x + r1; X++) {
+        if (X < 0 || X >= W || Y < N.rombo.labio.y + 2 || Y >= N.tela.H) continue;
+        const d = Math.hypot(X + 0.5 - a.x, Y + 0.5 - a.y), j = Y * W + X;
+        if (d > r1 || !D.pertoBorda[j] || D.pertoBorda[j] > 3) continue;
+        if (sorte() < 0.04) {
+          const hx = X + 0.5 - N.rombo.x, hy = Y + 0.5 - 200, m = Math.hypot(hx, hy) || 1;
+          contato.push({ x: X, y: Y, dx: a.dx, dy: a.dy, ox: hx / m, oy: hy / m });
+        }
+      }
+    }
+    // (6th round (2), his note: the clip still showed — more sparks and smoke, over more of the rim, lasting longer: every
+    // contact spot keeps smoking and throwing a few sparks for ~1.2 s after her body has passed, dying down)
+    for (const c of contato) if (sorte() < 0.25) raspado.push({ ...c, t });
+    for (let i = raspado.length - 1; i >= 0; i--) {
+      const c = raspado[i], idade = t - c.t, k = 1 - idade / 1.2;
+      if (k <= 0) { raspado.splice(i, 1); continue; }
+      if (sorte() < 0.12 * k) nasce({ x: c.x + (sorte() - 0.5) * 3, y: c.y, vx: (sorte() - 0.5) * 14, vy: -6 - sorte() * 12, vida: 1.6 + sorte() * 1.2, cor: sorte() < 0.5 ? [58, 54, 58] : [40, 38, 42], tam: 2.5 + sorte() * 2.5, cresce: true, a: 0.38 * k });
+      if (sorte() < 0.08 * k) { const an = -Math.PI / 2 + (sorte() - 0.5) * 2.2, v = 40 + sorte() * 70; nasce({ x: c.x, y: c.y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 0.3 + sorte() * 0.4, cor: [255, 210, 120], arrasto: 1.4, gota: true }); }
+    }
+    // the contact's debris (a capped number per frame)
+    for (const c of contato.slice(0, 36)) {
+      // sparks: thrown OUT from her body at the contact, fanning (most), a few dragged along her motion — never riding
+      // down with her (that buried her body in sparks)
+      for (let k = 0; k < 2; k++) {
+        const fora = sorte() < 0.75, bx = fora ? c.ox : c.dx, by = fora ? c.oy : c.dy;
+        const v = fora ? 60 + sorte() * 110 : vel * (0.5 + sorte() * 0.6), an = (sorte() - 0.5) * (fora ? 1.6 : 0.8), ca = Math.cos(an), sa = Math.sin(an);
+        const ux = bx * ca - by * sa, uy = bx * sa + by * ca;
+        nasce({ x: c.x + c.ox * 2, y: c.y + c.oy * 2, vx: ux * v, vy: uy * v, vida: 0.2 + sorte() * 0.3, cor: sorte() < 0.35 ? [255, 252, 230] : sorte() < 0.7 ? [255, 214, 120] : [255, 150, 60], arrasto: 1.4, gota: true });
+      }
+      // (the smoke carries the hiding: thick, dark, lasting)
+      if (sorte() < 0.6) nasce({ x: c.x + (sorte() - 0.5) * 8, y: c.y + (sorte() - 0.5) * 8, vx: (sorte() - 0.5) * 14 + c.ox * 10, vy: -6 - sorte() * 12, vida: 2.0 + sorte() * 1.2, cor: sorte() < 0.5 ? [52, 48, 52] : [36, 34, 38], tam: 3.5 + sorte() * 3, cresce: true, a: 0.5 });
+      if (sorte() < 0.35) { const an = sorte() * Math.PI * 2, v = 25 + sorte() * 55; nasce({ x: c.x, y: c.y, vx: Math.cos(an) * v + c.dx * 40, vy: Math.sin(an) * v + c.dy * 40, vida: 0.5 + sorte() * 0.5, cor: sorte() < 0.5 ? [255, 160, 60] : [255, 110, 30], tam: 1.5, arrasto: 1.2, gota: true }); } // molten drops
+      if (sorte() < 0.18) { // a shard of the plate itself, glowing at its edge
+        const i0 = (c.y * N.tela.W + c.x) * 4, cor = [D.fundo[i0], D.fundo[i0 + 1], D.fundo[i0 + 2]], an = sorte() * Math.PI * 2, v = 30 + sorte() * 60;
+        const pedaco = [[0, 0], [1, 0], [0, 1], [1, 1], [2, 0]].slice(0, 2 + Math.floor(sorte() * 4)).map(([dx, dy]) => ({ dx, dy, c: cor, borda: true, brasa: sorte() < 0.5 }));
+        nasce({ x: c.x, y: c.y, vx: Math.cos(an) * v + c.dx * 30, vy: Math.sin(an) * v + c.dy * 30, vida: 0.8 + sorte() * 0.6, arrasto: 0.8, pedaco });
+      }
+      if (sorte() < 0.7) nasce({ x: c.x + (sorte() - 0.5) * 6, y: c.y + (sorte() - 0.5) * 6, vx: (sorte() - 0.5) * 18 + c.dx * 15, vy: -8 - sorte() * 16 + c.dy * 15, vida: 1.6 + sorte() * 1.2, cor: sorte() < 0.5 ? [64, 60, 62] : [44, 42, 46], tam: 3 + sorte() * 3, cresce: true, a: 0.45 }); // smoke
+    }
   }
   // the breach's tell: dust breathing out of it before she breaks out
   for (const g of R.sinais) if (t >= g.t0 && t < g.t1 && sorte() < 0.8)
@@ -192,14 +273,63 @@ for (let f = 0; f * dt <= T; f++) {
     nasce({ x: p.x, y: p.y, vx: 0, vy: 0, vida: 0.3, cor: [255, 236, 200], tam: 9, cresce: true });
   }
   for (const g of geis) {
-    if (Math.abs(t - g.tFim) < dt / 2) for (let i = 0; i < 26; i++) nasce({ x: g.x + (sorte() - 0.5) * 16, y: N.geiser.topo + sorte() * 120, vx: (sorte() - 0.5) * 30, vy: -10 - sorte() * 20, vida: N.geiser.vapor, cor: [120, 190, 150], tam: 2 + sorte() * 2, cresce: true, a: 0.5 });
-    if (t >= g.tAviso && t < g.tColuna && sorte() < 0.5) nasce({ x: g.x + (sorte() - 0.5) * 14, y: N.geiser.yLombada + 3, vx: (sorte() - 0.5) * 12, vy: -18 - sorte() * 14, vida: 0.4, cor: [150, 230, 180], tam: 1.5, a: 0.6 });
+    const yc = D.trilha[Math.round(g.x)];
+    // the steam left behind: a bank of green-grey that spreads and drifts up (nothing falls)
+    if (Math.abs(t - g.tFim) < dt / 2) for (let i = 0; i < 34; i++) nasce({ x: g.x + (sorte() - 0.5) * 18, y: N.geiser.topo + sorte() * (yc - N.geiser.topo), vx: (sorte() - 0.5) * 36, vy: -8 - sorte() * 22, vida: N.geiser.vapor * (0.7 + sorte() * 0.6), cor: sorte() < 0.5 ? [96, 170, 128] : [70, 120, 100], tam: 2 + sorte() * 3, cresce: true, a: 0.45 });
+    // the warning: the crack hisses — puffs out of it
+    if (t >= g.tAviso && t < g.tColuna && sorte() < 0.6) nasce({ x: g.x + (sorte() - 0.5) * 14, y: yc - 1, vx: (sorte() - 0.5) * 14, vy: -14 - sorte() * 18, vida: 0.45, cor: [150, 230, 170], tam: 1.5, a: 0.6 });
+    // (4th round) the rupture spits venom as it bursts, and the column sheds globules that fly off and float
+    if (Math.abs(t - g.tColuna) < dt / 2) for (let i = 0; i < 16; i++) {
+      const an = -Math.PI / 2 + (sorte() - 0.5) * 2.4, v = 60 + sorte() * 90;
+      nasce({ x: g.x + (sorte() - 0.5) * 8, y: yc, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 0.6 + sorte() * 0.5, cor: VENENO[3 + Math.floor(sorte() * 4)], tam: sorte() < 0.4 ? 1.5 : 1, arrasto: 1.4, gota: true });
+    }
+    if (t >= g.tColuna && t < g.tFim && sorte() < 0.9) for (let i = 0; i < 2; i++) {
+      const lado = sorte() < 0.5 ? -1 : 1, y = N.geiser.topo + sorte() * (yc - N.geiser.topo);
+      nasce({ x: g.x + lado * 7, y, vx: lado * (30 + sorte() * 60), vy: -20 - sorte() * 50, vida: 0.5 + sorte() * 0.5, cor: VENENO[3 + Math.floor(sorte() * 4)], tam: sorte() < 0.3 ? 1.5 : 1, arrasto: 1.6, gota: true });
+    }
   }
+  // ── the death (3rd round, his note: "mais efeitos e depois fluidos saindo do corpo decapitado, trazer o gore"): the
+  // head BLOWS APART — a flash, a shock ring, the skull in pieces carried whole, embers, a mist of flesh — and then the
+  // neck, torn open, pumps her fluid out in pulses that weaken (the game's flesh language: the dark oily fluid with the
+  // orange glint and the flesh reds of the fusion's bites, `RAMPA_FLUIDO`/`RAMPA_CARNE`). In the vacuum nothing falls:
+  // the globules fly out and float, slowing.
   if (tr.hab === 'desfaz' && !desfeita) {
     desfeita = true;
     const ps = pixelsDaCabeca(D, P, { mordida: MORDIDA_CRANIO });
     const cx = ps.reduce((a, p) => a + p.x, 0) / ps.length, cy = ps.reduce((a, p) => a + p.y, 0) / ps.length;
-    for (const p of ps) { const an = Math.atan2(p.y - cy, p.x - cx) + (sorte() - 0.5) * 0.8, v = 8 + sorte() * 40; nasce({ x: p.x, y: p.y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 0.7 + sorte() * 0.7, cor: sorte() < 0.08 ? [255, 140, 48] : sorte() < 0.05 ? [96, 210, 255] : [104, 108, 120] }); }
+    const cor0 = (p) => p.c ?? [104, 108, 120];
+    // the skull in pieces: 5×5 cells of her own pixels, most flying as a whole piece
+    const celulas = new Map();
+    for (const p of ps) { const k = `${Math.floor(p.x / 5)},${Math.floor(p.y / 5)}`; if (!celulas.has(k)) celulas.set(k, []); celulas.get(k).push(p); }
+    for (const cel of celulas.values()) {
+      const mx = cel.reduce((a, p) => a + p.x, 0) / cel.length, my = cel.reduce((a, p) => a + p.y, 0) / cel.length;
+      const an = Math.atan2(my - cy, mx - cx) + (sorte() - 0.5) * 0.7, v = 25 + sorte() * 70;
+      if (cel.length >= 6 && sorte() < 0.7) {
+        const tem = new Set(cel.map((p) => `${p.x},${p.y}`));
+        nasce({ x: mx, y: my, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 1.2 + sorte() * 0.9, arrasto: 0.5,
+          pedaco: cel.map((p) => ({ dx: p.x - mx, dy: p.y - my, c: cor0(p), brasa: sorte() < 0.3, borda: [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => !tem.has(`${p.x + a},${p.y + b}`)) })) });
+      } else for (const p of cel) nasce({ x: p.x, y: p.y, vx: Math.cos(an) * v * 0.7, vy: Math.sin(an) * v * 0.7, vida: 0.6 + sorte() * 0.7, cor: cor0(p), arrasto: 0.6 });
+    }
+    nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.22, cor: [255, 244, 220], tam: 16, cresce: true });
+    nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.45, cor: [255, 150, 60], tam: 10, cresce: true, a: 0.7 });
+    nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.5, cor: [255, 200, 140], tam: 9, anel: true });
+    nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.75, cor: [200, 70, 40], tam: 6, anel: true, a: 0.6 });
+    for (let i = 0; i < 46; i++) { const an = sorte() * Math.PI * 2, v = 60 + sorte() * 120; nasce({ x: cx, y: cy, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 0.4 + sorte() * 0.5, cor: sorte() < 0.5 ? [255, 210, 120] : [255, 120, 40], arrasto: 1.2 }); }
+    for (let i = 0; i < 34; i++) { const an = sorte() * Math.PI * 2, v = 50 + sorte() * 110; nasce({ x: cx + (sorte() - 0.5) * 10, y: cy + (sorte() - 0.5) * 10, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 1.0 + sorte() * 1.0, cor: sorte() < 0.5 ? CARNE[4 + Math.floor(sorte() * 5)] : FLUIDO[4 + Math.floor(sorte() * 5)], tam: sorte() < 0.5 ? 1.5 + sorte() * 1.5 : 1, arrasto: 0.8, gota: true }); }
+    for (let i = 0; i < 16; i++) { const an = sorte() * Math.PI * 2, v = 10 + sorte() * 30; nasce({ x: cx + (sorte() - 0.5) * 14, y: cy + (sorte() - 0.5) * 14, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 0.9 + sorte() * 0.7, cor: CARNE[2 + Math.floor(sorte() * 4)], tam: 3 + sorte() * 3, cresce: true, a: 0.55, arrasto: 1 }); }
+  }
+  // the neck pumping her fluid out, from the head blowing off to the end, weaker and weaker
+  if (['desfaz', 'resto', 'fim'].includes(tr.hab) && desfeita) {
+    const morte0 = R.trechos.find((q) => q.hab === 'desfaz').t0, tm = t - morte0;
+    const forca = Math.exp(-tm / 2.2), pulso = tm % 0.34 < dt;
+    const a = P.tubo[Math.min(P.tubo.length - 1, 8)], b = P.tubo[0];
+    const fx = b.x + (a.x - b.x) * 0.2, fy = b.y + (a.y - b.y) * 0.2, ux = a.dx, uy = a.dy;
+    const n = pulso ? Math.round(16 * forca) + 3 : sorte() < 0.6 * forca ? 1 : 0;
+    for (let i = 0; i < n; i++) {
+      const v = (pulso ? 70 + sorte() * 90 : 30 + sorte() * 40) * (0.4 + 0.6 * forca), lado = (sorte() - 0.5) * 2;
+      const g = sorte() < 0.3 ? CARNE[4 + Math.floor(sorte() * 4)] : FLUIDO[4 + Math.floor(sorte() * 5)];
+      nasce({ x: fx + (sorte() - 0.5) * 6, y: fy + (sorte() - 0.5) * 6, vx: ux * v - uy * lado * 35, vy: uy * v + ux * lado * 35, vida: 1.4 + sorte() * 1.2, cor: g, tam: sorte() < 0.45 ? 1.5 + sorte() * 1.2 : 1, arrasto: 0.9, gota: true });
+    }
   }
   // the fusion's stand-in: three lights (blue, green, orange) converge on the breach and implode
   const efemeras = [];
@@ -214,6 +344,7 @@ for (let f = 0; f * dt <= T; f++) {
   for (let i = particulas.length - 1; i >= 0; i--) {
     const p = particulas[i];
     p.idade += dt; p.x += (p.vx ?? 0) * dt; p.y += (p.vy ?? 0) * dt;
+    if (p.arrasto) { const k = Math.max(0, 1 - p.arrasto * dt); p.vx *= k; p.vy *= k; } // (slowing, never falling)
     if (p.idade >= p.vida) particulas.splice(i, 1);
   }
 
@@ -232,13 +363,16 @@ for (let f = 0; f * dt <= T; f++) {
     sinais: R.sinais.filter((a) => t >= a.t0 && t < a.t1), fissuras: fissuras(R, N, t),
     particulas: [...particulas, ...efemeras], tiros, nave: { x: jog.x, y: jog.y }, naveFerida: ferida,
     semCabeca: ['desfaz', 'resto', 'fim'].includes(hab), morta: hab === 'fusao',
-    mordida: t >= cranio.t ? MORDIDA_CRANIO : null, olhoAceso: !!eco?.lendo,
+    mordida: t >= cranio.t ? MORDIDA_CRANIO : null, olhoAceso: !!eco?.lendo, modoCorpo: CORPO,
+    decapitada: desfeita,
   };
+  const filma = t >= DE - 1e-9, foto = opc.fotos && Object.entries(momentos).some(([nome, tm]) => !fotosFeitas.has(nome) && t >= tm);
+  if (!filma && !foto) continue;
   const buf = quadro(D, s);
-  await escreve(buf);
+  if (filma) await escreve(buf);
   if (opc.fotos) for (const [nome, tm] of Object.entries(momentos)) if (!fotosFeitas.has(nome) && t >= tm) {
     fotosFeitas.add(nome);
-    await sharp(Buffer.from(buf), { raw: { width: N.tela.W, height: N.tela.H, channels: 4 } }).resize(N.tela.W * 3, N.tela.H * 3, { kernel: 'nearest' }).png().toFile(path.join(OUT, `${JOG}-${nome}.png`));
+    await sharp(Buffer.from(buf), { raw: { width: N.tela.W, height: N.tela.H, channels: 4 } }).resize(N.tela.W * 3, N.tela.H * 3, { kernel: 'nearest' }).png().toFile(path.join(OUT, `${NOME}-${nome}.png`));
   }
 }
 ff.stdin.end();
@@ -265,6 +399,6 @@ const json = {
   geiseres: geis.map((g) => ({ x: g.x, ciclo: g.ciclo, via: g.via, t: +g.tAviso.toFixed(2) })),
   aneis: { inicio: N.corpo.aneis, fim: nAneisEm(R.T, N, mord) },
 };
-fs.writeFileSync(path.join(OUT, `${JOG}.json`), JSON.stringify(json, null, 1));
+fs.writeFileSync(path.join(OUT, `${NOME}.json`), JSON.stringify(json, null, 1));
 console.log(`${JOG}: ${f2(T)} s · toques ${JSON.stringify(json.toquesPorTipo)} · ciclo ${json.ciclo} s · acertos ${JSON.stringify(acertos)}`);
 function f2(x) { return x.toFixed(1); }

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enguia: a girada</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --cia:#58c8ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  code { background:#0a0c11; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:13px; }
+  img, video { display:block; max-width:100%; border-radius:6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  video { width: 100%; }
+  .meio { max-width: 760px; }
+  .par { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items:start; }
+  @media (max-width: 860px) { .par { grid-template-columns: 1fr; } }
+  .rot { color: var(--sub); font-size: 13px; margin: 4px 0 0; }
+  .rot b { color: var(--txt); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A enguia colossal: a girada do corpo e da cabeça</h1>
+<p class="sub">07/11/2026 · START <code>plans/2026-11-07-enguia-geracoes-START.md</code>, etapas 1 e 2 · instalado na maquete, fora do jogo · substitui a folha <code>enguia-cabeca-8dir</code></p>
+
+<div class="item decidir">
+  <h3>Rodada 2: os seus dois ajustes (o resto você aprovou)</h3>
+  <ul>
+    <li><b>A espinha saiu do dorso.</b> Os nós de energia no meio das costas não existem na arte do lado, então apareciam do nada no meio do rolar. Agora as divisas se encontram em ponta no centro, e o rolar mostra só as placas escuras passando. Os vídeos e as imagens abaixo já são desta rodada.</li>
+    <li><b>A fenda no clarão fechou.</b> Era um vão de 2 px entre o fundo da mandíbula e o pescoço: a pele sob o crânio parava antes da mandíbula. Ela agora desce em rampa até encostar, só nas 5 colunas da junta. O Eco, onde essa pele já tinha aparecido, continua limpo.</li>
+  </ul>
+  <img src="fenda-antes-depois.png" alt="a fenda: antes em cima, depois embaixo" class="meio">
+  <p class="rot"><b>A fenda no clarão dos canos</b> (0:19), ampliada: em cima antes, embaixo depois.</p>
+</div>
+
+<div class="item">
+  <h3>O que mudou, em uma frase</h3>
+  <p>A enguia agora tem o <b>dorso desenhado</b>, do corpo e da cabeça. No meio do rolar, as costas aparecem de verdade em vez de esticar a lateral, e a cabeça rola junto com o corpo, passando por ¾ e pelo dorso, em vez de trocar de lado num quadro.</p>
+  <p><b>Para você ver:</b> o vídeo das viradas logo abaixo (antes e depois, velocidade real e 4× mais lento) e a luta inteira no fim. Aprovado em 07/11 com os dois ajustes acima; as etapas 1 e 2 fecharam com commit e push.</p>
+</div>
+
+<h2>1 · As viradas, antes × depois</h2>
+<p>Em cima, como estava; embaixo, o novo. À esquerda, a chegada (4,4 s); à direita, o mergulho (21 s; o mesmo nos outros ciclos). Primeiro em velocidade real, depois 4× mais lento.</p>
+<video class="meio" src="cru/viradas.mp4" controls preload="auto" muted loop autoplay></video>
+
+<h3>A chegada, quadro a quadro</h3>
+<img src="chegada-antes-depois.png" alt="a chegada: antes em cima, depois embaixo">
+<p class="rot">Um quadro a cada 0,25 s desde o começo do rolar. <b>Em cima:</b> as placas lisas e esticadas (o seu círculo). <b>Embaixo:</b> as divisas do dorso, no tamanho das costelas.</p>
+<h3>O mergulho, quadro a quadro</h3>
+<img src="mergulho-antes-depois.png" alt="o mergulho: antes em cima, depois embaixo">
+<p class="rot">Um quadro a cada 0,1 s. <b>Em cima:</b> a cabeça estala entre o 3º e o 4º quadro, e o leque liso abre na curva. <b>Embaixo:</b> a cabeça passa pelo dorso e pelo ¾, e a curva mostra as costas.</p>
+
+<h2>2 · Por que esticava, e o que fiz</h2>
+<div class="item">
+  <p><b>A causa:</b> a faixa do corpo é só o LADO da enguia. As placas das costas aparecem nela de viés, em poucas linhas. No meio do rolar, quem encara a câmera são as costas, e elas não existiam desenhadas: qualquer conta só podia esticar aquelas poucas linhas. Mudar a curva da chegada (a <code>r4lenta</code> da folha anterior) só diminuía o trecho esticado.</p>
+  <p><b>A correção, a mesma para o corpo e a cabeça:</b> o cilindro agora tem duas texturas, e cada ponto usa a que o vê de frente.</p>
+  <ul>
+    <li><b>Os flancos:</b> a arte aprovada, sem esticar.</li>
+    <li><b>As costas:</b> um dorso visto de cima, gerado no PixelLab no estilo da arte aprovada.</li>
+    <li><b>A parte das costas cresce com o rolar:</b> nenhuma em repouso, então a enguia parada e de perfil continua idêntica à aprovada; as placas todas no meio da virada.</li>
+    <li><b>A emenda</b> fica na divisa natural entre as placas e as costelas, com um pontilhado de 1 px.</li>
+  </ul>
+  <p><b>A luz acompanha:</b> a normal de cada pixel gira junto com ele, então o lado que vira para a luz acende, como no resto do corpo.</p>
+</div>
+
+<h3>O dorso do corpo</h3>
+<img src="dorso-corpo-x4.png" alt="o dorso do corpo" class="meio">
+<p class="rot">As divisas em chevron, num período limpo repetido pelo comprimento do corpo (19 px, duas placas). A espinha de energia do original foi retirada na rodada 2. (×4)</p>
+
+<h3>A cabeça: o dorso e as vistas</h3>
+<div class="par">
+  <div><img src="dorso-cabeca-x4.png" alt="o dorso da cabeça"><p class="rot"><b>O dorso da cabeça</b> (×4): escolhido entre 18 candidatas por ter o vocabulário da E3, com brasas na espinha, respiros verdes e olhos ciano. Entra só no topo do crânio; os olhos vêm sempre da E3.</p></div>
+  <div><img src="cabeca-vistas.png" alt="as vistas da cabeça"><p class="rot"><b>As vistas do rolar</b>: 0° (a E3), 20°, 40°, 60°, 90° (o dorso), 120°, 140°, 160°. São 19 vistas de 10° em 10°, calculadas da E3 e do dorso; o 180° é a E3 espelhada.</p></div>
+</div>
+
+<div class="item">
+  <h3>Para observar no vídeo</h3>
+  <ul>
+    <li><b>De 140° a 170°</b> aparece o segundo olho (o do lado de lá) por um ou dois quadros, antes de a cabeça fechar no perfil espelhado.</li>
+    <li><b>O mergulho rola rápido</b> (0,34 s): a cabeça passa por ~4 vistas. A chegada leva 0,65 s.</li>
+    <li><b>A curva da chegada é a de hoje</b> (a da rodada 6), não a <code>r4lenta</code>: com o dorso, ela deixou de esticar.</li>
+  </ul>
+</div>
+
+<h2>3 · A luta inteira</h2>
+<video src="cru/desvia-pele.mp4" controls preload="auto" muted></video>
+<p class="rot">A sonda que desvia, com o corpo e a cabeça novos. Nenhum número da luta mudou.</p>
+
+<h2>Como refazer</h2>
+<ul>
+  <li>Os dorsos: <code>node scripts/_serpente/_enguia-dorso-gerar.mjs corpo|cabecaTexto &lt;seed&gt;</code> (PixelLab Pro, 10 gerações por chamada); o do corpo vira a faixa com <code>_enguia-dorso-faixa.mjs</code>.</li>
+  <li>Os arquivos: <code>enguia-dorso/dorso-corpo.png</code> e <code>enguia-dorso/dorso-cabeca.png</code>, lidos por <code>arte.mjs</code> (<code>carregaDorso</code>, <code>vistasCabeca</code>). <code>ENGUIA_DORSO=0</code> / <code>ENGUIA_VISTAS=0</code> voltam ao jeito antigo, para comparar.</li>
+  <li>A maquete: <code>node scripts/_serpente/_enguia-maquete.mjs desvia &lt;dir&gt; corpo=pele fotos=1</code></li>
+</ul>
+</main>
+</body>
+</html>

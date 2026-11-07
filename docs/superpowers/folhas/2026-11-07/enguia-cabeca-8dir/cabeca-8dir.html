@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enguia: a cabeça girando</title>
+<style>
+  :root { --bg:#0d0f15; --card:#151923; --line:#262c3a; --txt:#d9dde6; --sub:#9aa3b5; --pend:#ffb347; --ok:#6fcf97; --ruim:#eb5757; --cia:#58c8ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.55 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 17px; margin: 22px 0 8px; }
+  p { margin: 6px 0; }
+  .sub { color: var(--sub); }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 18px 0; }
+  .decidir { border-color: var(--pend); }
+  .rec { border-color: var(--ok); }
+  .fora { opacity: .75; }
+  code { background:#0a0c11; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:13px; }
+  img, video { display:block; max-width:100%; border-radius:6px; border:1px solid var(--line); background:#000; image-rendering: pixelated; }
+  video { width: 100%; }
+  .tres { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items:start; }
+  .quatro { display:grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 6px; text-align:center; color: var(--sub); font-size: 13px; }
+  .quatro b { color: var(--txt); }
+  @media (max-width: 860px) { .tres { grid-template-columns: 1fr; } }
+  .rot { color: var(--sub); font-size: 13px; margin: 4px 0 0; }
+  .rot b { color: var(--txt); }
+  .tag { display:inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--line); margin-left: 6px; vertical-align: 2px; }
+  .tag.ok { border-color: var(--ok); color: var(--ok); }
+  .tag.ruim { border-color: var(--ruim); color: var(--ruim); }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>A enguia colossal: a cabeça girando</h1>
+<p class="sub">07/11/2026 · START <code>plans/2026-11-07-enguia-geracoes-START.md</code>, etapa 1 (as vistas da cabeça E3) e a investigação da etapa 2 (as costas esticando) · fora do jogo, nada instalado ainda.</p>
+
+<div class="item decidir">
+  <h3>O que preciso de você</h3>
+  <ol>
+    <li><b>Qual caminho de cabeça instalo na maquete:</b> A, A+C′, B ou D. Eu recomendo o <b>B</b>.</li>
+    <li><b>As costas:</b> posso voltar a chegada para a curva da rodada 4, mantendo a desaceleração (a <code>r4lenta</code>)?</li>
+  </ol>
+  <p class="sub">Depois da sua escolha, instalo as duas coisas na maquete e mando o vídeo da luta inteira, com o zoom das viradas. As etapas 1 e 2 fecham com o commit e o push.</p>
+</div>
+
+<h2>1 · As vistas da cabeça em movimento</h2>
+<p>Cada painel faz a virada como na luta: a cabeça vai de "olhando para a esquerda", passa por baixo e termina "olhando para a direita", em 0,64 s (o tempo de hoje na chegada). A troca de vista acompanha o ângulo do rolar. Primeiro na velocidade real (duas vezes), depois 4× mais lenta. Só o crânio gira: na luta, o pescoço é a pele do corpo.</p>
+<video src="cru/previa.mp4" controls preload="auto" muted loop autoplay></video>
+<div class="quatro"><div><b>A</b> · 8 direções de pé</div><div><b>A+C′</b> · ponte + dorso do A</div><div><b>B</b> · 8 direções deitada</div><div><b>D</b> · rolar da própria arte</div></div>
+
+<h2>2 · Os quatro caminhos</h2>
+<p>Hoje a cabeça troca de lado num quadro (o espelho seco). Quando o corpo rola, ele mostra o <b>dorso</b> para a câmera no meio da virada. Então a cabeça precisa de vistas intermediárias: perfil → ¾ → (dorso ou frente) → perfil do outro lado. Da metade em diante uso o espelho das vistas da primeira metade, porque a cabeça é simétrica.</p>
+
+<div class="item rec">
+  <h3>B · as 8 direções do PixelLab com a cabeça deitada <span class="tag ok">recomendo</span></h3>
+  <img src="vistas-B.png" alt="B: original, ¾ de frente, de frente">
+  <p class="rot"><b>original</b> · ¾ de frente · de frente (×4)</p>
+  <ul>
+    <li><b>A cabeça vira para a câmera</b>, não pelo dorso: no meio da virada ela encara você, de boca acesa, e chega ao perfil do outro lado.</li>
+    <li><b>O traço mais fiel dos quatro:</b> as placas, as brasas, o olho ciano e a boca laranja ficaram iguais à E3. Não alisou, ao contrário do que a memória avisava para as rotações.</li>
+    <li><b>A vista de frente também serve ao Eco</b> (a cabeça encarando a nave no cuspe).</li>
+    <li><b>A diferença:</b> o corpo mostra o dorso no meio do rolar, e a cabeça mostra a cara. Lê como a serpente girando a cabeça para olhar o jogador enquanto o corpo vira. Se você quiser a cabeça presa ao rolar do corpo, o caminho é o A+C′.</li>
+  </ul>
+</div>
+
+<div class="item">
+  <h3>A+C′ · a ponte animada + o dorso do A</h3>
+  <img src="vistas-AC.png" alt="A+C′: original, ponte 1, ponte 2, ponte 3, dorso">
+  <p class="rot"><b>original</b> · 3 quadros da ponte v3 (das duas pontas fixas: a original → o dorso do A) · <b>o dorso</b> (×4)</p>
+  <ul>
+    <li><b>A cabeça rola junto com o corpo</b> e mostra o dorso no meio da virada, o mesmo que o corpo mostra.</li>
+    <li><b>Os primeiros ~35° saem no traço da E3:</b> as placas do dorso aparecem aos poucos.</li>
+    <li><b>O dorso alisa:</b> placas grandes e chapadas, mais "cartum". O olho e as brasas somem. No movimento, o meio da virada lê como uma casca de placas.</li>
+  </ul>
+</div>
+
+<div class="item">
+  <h3>A · as 8 direções do PixelLab com a cabeça de pé</h3>
+  <img src="vistas-A.png" alt="A: original, ¾ por cima, dorso">
+  <p class="rot"><b>original</b> · ¾ por cima · dorso (×4)</p>
+  <ul>
+    <li><b>O truque:</b> com a cabeça de pé (focinho para cima), o giro das 8 direções em volta do eixo vertical vira exatamente o rolar do crânio sobre o próprio eixo. Depois deito as vistas de volta.</li>
+    <li><b>O defeito:</b> o mesmo dorso liso do A+C′. O ¾ salta direto da E3 para um desenho mais simples, e no movimento a troca pula.</li>
+  </ul>
+</div>
+
+<div class="item">
+  <h3>D · o rolar da própria arte aprovada (sem PixelLab)</h3>
+  <img src="vistas-D.png" alt="D: 0°, 30°, 60°, 90°, 120°, 150°">
+  <p class="rot"><b>0°</b> · 30° · 60° · 90° (o dorso) · 120° · 150° (×4)</p>
+  <ul>
+    <li><b>O mesmo método do corpo:</b> cada coluna do crânio vira um cilindro e rola, lido pelo comprimento de arco. Os pixels são os da E3.</li>
+    <li><b>O dorso é inventado pela conta:</b> o lado de cima tem poucas linhas na arte, e o vão da boca vira um risco escuro. Nos ¾ (30° e 60°) a boca e o olho se embaralham; no movimento, borra.</li>
+  </ul>
+</div>
+
+<div class="item fora">
+  <h3>Descartados antes da folha <span class="tag ruim">fora</span></h3>
+  <ul>
+    <li><b>C · animação v3 direto da original</b> ("rola sobre o próprio eixo"): quase não sai do lugar, a cabeça só inclina um pouco (o v3 tende a ficar perto de parado).</li>
+    <li><b>A ponte até o dorso do D:</b> vira metamorfose em vez de giro (a boca fecha e aparecem quatro olhos no meio).</li>
+  </ul>
+  <div class="tres">
+    <div><img src="cru/c1-tira-x4.png" alt="C direto"><p class="rot"><b>C</b> direto</p></div>
+    <div><img src="cru/c4-tira-x4.png" alt="ponte até o D"><p class="rot"><b>Ponte até o D</b>: os quatro olhos</p></div>
+    <div><img src="cru/b-tira-x4.png" alt="B, as 8"><p class="rot"><b>B</b>, as 8 direções cruas (as de trás não entram)</p></div>
+  </div>
+</div>
+
+<h2>3 · As costas esticando no rolar</h2>
+<div class="item">
+  <h3>A causa</h3>
+  <p><b>Na rodada 4, o rolar inteiro acontecia dentro de uma curva fechada.</b> Nos 80 px de corpo em que ela rola, o rumo virava ~87°, então o dorso de frente ficava curto e dobrado.</p>
+  <p><b>Na rodada 5, a curva da chegada abriu</b> (para a cabeça virar menos seca), e a curva e a descida perderam a onda do nado. Hoje, nos mesmos 80 px, o rumo vira só ~46°. O meio do rolar cai num trecho quase reto, e o dorso de frente vira a faixa lisa que desce a coluna: as "costas esticadas".</p>
+  <p><b>A correção (<code>chegada=r4lenta</code>):</b> a curva da rodada 4 (com a onda) e a desaceleração de hoje (160 → 100 → 160 px/s), num trecho só. O rumo volta a virar 87° no rolar, e a cabeça leva um pouco mais para virar que na rodada 4. Com as vistas novas, a curva aberta deixa de ser necessária para a cabeça não estalar.</p>
+</div>
+<img src="costas-compara.png" alt="hoje, rodada 4, r4lenta">
+<p class="rot">Cada linha começa quando a cabeça começa a rolar, um quadro a cada 0,25 s. <b>1ª linha: hoje</b> (a faixa lisa desce a coluna) · <b>2ª: a rodada 4</b> · <b>3ª: a r4lenta</b> (a proposta).</p>
+<div class="tres" style="margin-top:14px">
+  <div><video src="cru/costas-desvia-pele.mp4" controls preload="auto" muted loop></video><p class="rot"><b>Hoje</b></p></div>
+  <div><video src="cru/costas-desvia-pele-chegr4.mp4" controls preload="auto" muted loop></video><p class="rot"><b>Rodada 4</b></p></div>
+  <div><video src="cru/costas-desvia-pele-chegr4lenta.mp4" controls preload="auto" muted loop></video><p class="rot"><b>r4lenta</b> (proposta)</p></div>
+</div>
+<p class="rot">Os vídeos ainda têm a cabeça antiga, a do espelho seco: aqui só importa o corpo.</p>
+
+<h2>Como refazer</h2>
+<ul>
+  <li><code>node scripts/_serpente/_enguia-cabeca-8dir.mjs prepara | rola | previa</code> (as entradas, o caminho D, a prévia e as tiras)</li>
+  <li>PixelLab: A = objeto <code>aaa23a94</code>, B = objeto <code>59eae766</code> (8 direções, vista lateral, 15 gerações cada); as pontes v3 por <code>scripts/_f4/_pl.mjs anim</code> (2 gerações cada).</li>
+  <li>A maquete com a chegada nova: <code>node scripts/_serpente/_enguia-maquete.mjs desvia &lt;dir&gt; corpo=pele chegada=r4lenta</code></li>
+</ul>
+</main>
+</body>
+</html>

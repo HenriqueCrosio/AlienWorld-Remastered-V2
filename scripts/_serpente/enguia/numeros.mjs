@@ -36,7 +36,9 @@ export const N = {
   // (the bump and the crack are the living hull's, `cascoVivo.ts`: the R3 he approved — the band's columns pushed up
   // over her, `amp` px at the crest fading `fundo` px down, `larg` wide; the crack on the panel's row 168 ±5, healing
   // from the breach in `cura` s)
-  geiser: { passo: 60, aviso: 0.45, coluna: 0.5, largura: 16, topo: 70, vapor: 0.6, inicio: 250, fim: 40, yLombada: 168,
+  // (4th round, his note: the first geyser was too close to the breach — it starts at x 220, every 55 px, and the bump
+  // runs on to x 20 so the passage still has 7)
+  geiser: { passo: 55, aviso: 0.45, coluna: 0.5, largura: 16, topo: 70, vapor: 0.9, inicio: 220, fim: 20, yLombada: 168,
     lombada: { amp: 4, larg: 9, fundo: 46 }, cura: 2.5 },
   // spec §6 — the bites (rings off the tail) and the scripted life of the mock (PROPOSAL: when each threshold falls)
   mordida: { aneis: 3 },
