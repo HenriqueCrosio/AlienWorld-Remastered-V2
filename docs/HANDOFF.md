@@ -16,8 +16,8 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-07-enguia-geracoes-START.md`. A maquete, os anéis e a
-> GIRADA da enguia estão APROVADOS (etapas 1 e 2 fechadas). A sessão abre na etapa 3: as animações da cabeça, uma por
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-07-enguia-animacoes-START.md`. A maquete, os anéis, a
+> GIRADA e a fumaça do rombo estão APROVADOS e commitados. A sessão abre na etapa 3: as animações da cabeça, uma por
 > momento, com a boca variando o máximo possível."**
 >
 > (O arranque de 07/11 abria nas 8 direções e na girada: feitas e aprovadas no mesmo dia, ver o 📍 abaixo.)
@@ -32,7 +32,10 @@ sprite que se desfaz nos próprios pixels).
 > - **A cabeça rola junto:** 19 vistas de 10° (E3 nos flancos + dorso no topo, as normais girando).
 > - **A fenda no clarão** (pescoço × mandíbula) fechada.
 > - As 8 direções do PixelLab (a folha `enguia-cabeca-8dir`) ficaram como registro: ele pediu o caminho procedural.
-> - **Commitado e empurrado.** O próximo: a etapa 3 do START (as animações da cabeça, a boca variando).
+> - **A fumaça do rombo (rodada 3, pedido dele):** enquanto ela fica erguida no rombo (o Eco), o cruzamento com a
+>   borda solta fumaça grossa e algumas faíscas, sem parar; quando ela sai, volta a raspada de sempre. *"aprovado"*.
+> - **Commitado e empurrado.** O próximo: o START `plans/2026-11-07-enguia-animacoes-START.md` (a etapa 3, as
+>   animações da cabeça, a boca variando).
 >
 > 📍 **07/11 (fim) — OS ANÉIS DA ENGUIA APROVADOS: A PELE CONTÍNUA.** Ele: *"Boa, agora ficou muito bom."* Folha
 > `folhas/2026-11-07/enguia-aneis/aneis.html` (6 rodadas, registradas na seção B1 do plano):

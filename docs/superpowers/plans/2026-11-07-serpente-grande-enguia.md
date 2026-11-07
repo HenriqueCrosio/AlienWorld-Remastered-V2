@@ -349,6 +349,12 @@ O registro completo está no START `plans/2026-11-07-enguia-geracoes-START.md` (
   - `arte.mjs` `carregaDorso` / `vistasCabeca`;
   - `desenho.mjs` (a pele com `dw`, a cabeça por vista).
 - `ENGUIA_DORSO=0` / `ENGUIA_VISTAS=0` voltam ao jeito antigo, para comparar.
+- **Rodada 3 (pedido dele):** a fumaça do rombo enquanto ela fica erguida (o Eco), aprovada.
+  - Parada (`vel ≤ 30` no `erguida`), o cruzamento com a borda alimenta os pontos que fumegam, a metade das faíscas,
+    mais a fumaça grossa da raspada.
+  - Sem a rajada do atrito; quando ela sai, volta a raspada de sempre.
+  - Só o sorteio dos efeitos muda; a luta e a sonda são as mesmas.
+- **O próximo:** a etapa 3, `plans/2026-11-07-enguia-animacoes-START.md`.
 
 ## PARTE B — depois da maquete aprovada (o detalhe sai da maquete; um plano novo por parte)
 

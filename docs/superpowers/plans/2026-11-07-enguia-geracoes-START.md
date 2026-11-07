@@ -5,6 +5,9 @@
 > (a virada de lado), depois as animações de cada momento."**
 > O roadmap vivo é o 🧭 do HANDOFF. A ordem dele hoje: **a Serpente grande → o CENÁRIO da luta → H → I → J → F.**
 >
+> ➡️ **A etapa 3 tem START próprio: `plans/2026-11-07-enguia-animacoes-START.md`.** Este fica como o registro das
+> etapas 1 e 2 (e da rodada 3, a fumaça do rombo enquanto ela fica erguida, aprovada).
+>
 > ✅ **07/11 (noite): AS ETAPAS 1 E 2 FECHARAM, commitadas e empurradas.** A girada do corpo + cabeça foi aprovada pelo
 > caminho do DORSO desenhado (ver o fim da etapa 1 abaixo e a folha `folhas/2026-11-07/enguia-girada/girada.html`). **A
 > próxima sessão abre na ETAPA 3** (as animações da cabeça), sozinha, a pedido dele. Atenção na etapa 3:
