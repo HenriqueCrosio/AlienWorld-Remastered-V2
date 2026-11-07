@@ -23,6 +23,23 @@ sprite que se desfaz nos próprios pixels).
 >
 > (O arranque de 03/11 (2) abria na escolha da cabeça: respondida, ver o 📍 de 04/11 abaixo.)
 >
+> 📍 **07/11 — O PLANO E A MAQUETE EM BLOCOS DA ENGUIA.** Nada commitado ainda. O plano
+> `plans/2026-11-07-serpente-grande-enguia.md` (Parte A feita, Parte B depois da aprovação). A maquete é uma ferramenta
+> fora do jogo, sobre módulos puros em `scripts/_serpente/enguia/` (testes `node scripts/test-enguia.mjs`): a luta
+> inteira em blocos cinzas medidos na arte aprovada, sobre a foto da arena, com duas sondas (quem desvia: 0 toques; a
+> parada: pega pelo fogo, Eco, gêiseres e corpo). **A folha `folhas/2026-11-07/enguia-maquete/maquete.html` espera
+> ele**, com três decisões: o ciclo de 36,8 s (spec ~27; recomendo 1 rodada de Eco), a folga do pior caso da 1ª salva
+> (0,13 s; recomendo o aviso em 1,8 s) e as propostas da maquete (o aviso pontilhado das passagens, o arco da chegada, a
+> cabeça inclinada no posto, as velocidades, a morte). O ▶️ de 07/11 do START tem o resto.
+> **Rodada 2 no mesmo dia** (a folha refeita, espera ele): um Eco por ciclo, o 1º aviso em 1,8 s, o arco fica, sem
+> pontilhado, o posto pelo truque DELE (o corpo sai pelo canto de cima e volta só a cabeça), gêiseres só com o corpo
+> inteiro no rombo (a R3 do `cascoVivo.ts`), o corpo em tubo e mais fluido, o rombo ABERTO no fim (a entrada da nave no
+> Leviatã). Ciclo 35,6 s. Ele: *"Ficou muito mais natural e fluido"*; o ajuste dele também feito — nos canos o corpo
+> tampa a lateral direita inteira e a faixa de baixo tem cano mesmo depois das mordidas (o enrolamento de cima é
+> elástico). O `patch-gg/pixelfx` (MIT) foi CLONADO em `Projetos folder/_referencias/pixelfx` e entra com o modelo da
+> serpente (Parte B), a pedido dele. **✅ A MAQUETE ESTÁ APROVADA** (*"Boa, ficou ótimo assim."*). O próximo é a Parte B
+> do plano: anéis + normais → gestos da cabeça no PixelLab → efeitos (pixelfx) → instalação no jogo.
+>
 > 📍 **04/11 — A ARTE DA ENGUIA COLOSSAL, APROVADA.** Commitada e empurrada. Os detalhes no ▶️ do START.
 > - **A cabeça:** da 1ª rodada ele ficou com a B5 (*"mas com a cabeça maior e mais larga"*); da 2ª, com a **E3**
 >   (*"me lembra a cabeça do Alien"*) + o pescoço levado até a borda pelas duas linhas que ele desenhou (inpaint só

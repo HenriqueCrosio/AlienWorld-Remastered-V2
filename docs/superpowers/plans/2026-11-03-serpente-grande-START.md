@@ -7,7 +7,32 @@
 > aprovada por vídeo."**
 > O roadmap vivo é o 🧭 do HANDOFF. A ordem dele hoje: **a Serpente grande → o CENÁRIO da luta → H → I → J → F.**
 
-## ▶️ COMEÇAR AQUI (o estado no fim de 04/11)
+## ▶️ 07/11 — O PLANO E A MAQUETE EM BLOCOS (esperam ele)
+
+- **O plano:** `plans/2026-11-07-serpente-grande-enguia.md` — Parte A (a maquete, FEITA) e Parte B (anéis + normais,
+  gestos no PixelLab, efeitos, instalação: um plano curto por parte, depois da maquete aprovada). O fim da Parte A
+  registra o que mudou na execução.
+- **A maquete:** `node scripts/_serpente/_enguia-maquete.mjs <desvia|parado> <dir> [fotos=1]` sobre módulos puros em
+  `scripts/_serpente/enguia/` (os números em `numeros.mjs`; testes `node scripts/test-enguia.mjs`). A folha
+  **`folhas/2026-11-07/enguia-maquete/maquete.html`** (gerada por `_enguia-maquete-folha.mjs`): os dois vídeos, os
+  capítulos, as medidas, as fotos e três decisões para ele — **(1)** o ciclo mediu 36,8 s (a spec estimou ~27; recomendo
+  uma rodada de Eco), **(2)** o pior caso da 1ª salva sobra 0,13 s (recomendo o 1º aviso em 1,8 s), **(3)** as propostas
+  da maquete (o aviso pontilhado das passagens, o arco da chegada, a cabeça inclinada no posto, as velocidades, a morte).
+- **Medido:** quem desvia, 0 toques; a parada é pega pelo fogo (8), pelo Eco (21), pelos gêiseres (2) e pelo corpo na
+  chegada. A luta roteirizada vai da chegada à morte em 101 s.
+- **O próximo:** a resposta dele na folha → rodadas da maquete até aprovar → a Parte B.
+- **Rodada 2 (07/11, mesma folha refeita):** as respostas dele aplicadas — um Eco, o 1º aviso 1,8 s, o arco fica, sem
+  pontilhado (gestos no lugar), o posto pelo TRUQUE do canto (20 anéis), os gêiseres só com o corpo inteiro no rombo
+  (a lombada/fissura R3 do `cascoVivo.ts`), o corpo em TUBO e mais fluido, o rombo ABERTO no fim. Ciclo 35,6 s;
+  desvia 0 toques. Registro no fim da Parte A do plano.
+- **Rodada 2, ajuste** (ele: *"Ficou muito mais natural e fluido"*): o corpo agora TAMPA a lateral direita nos três
+  postos e a faixa de baixo sempre tem cano, mesmo depois das mordidas (o enrolamento de cima é elástico). O pixelfx foi
+  clonado em `Projetos folder/_referencias/pixelfx` e entra com o modelo da serpente (Parte B).
+- **✅ A MAQUETE ESTÁ APROVADA** (ele: *"Boa, ficou ótimo assim."*). **O próximo é a Parte B do plano**, um plano curto
+  por parte: (1) os anéis recortados da F1 + os mapas de normais → (2) os gestos da cabeça no PixelLab (a pergunta da
+  boca: fecha nas passagens?) → (3) os efeitos, com o pixelfx → (4) a instalação no jogo, com a maquete como oráculo.
+
+## ▶️ O estado no fim de 04/11 (registro)
 
 **O que a sessão de 04/11 fez: a arte da enguia, da cabeça ao corpo, APROVADA por ele em quatro passos.**
 1. **A cabeça, rodada 1 respondida** (`folhas/2026-11-03/enguia-cabeca/cabecas.html`): ele gostou da D1 e da B5 e
