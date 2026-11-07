@@ -1,5 +1,9 @@
 # START — a enguia colossal (S2): a etapa 3, as ANIMAÇÕES da cabeça, uma por momento
 
+> ✅ **FEITA E APROVADA em 07/11** (os 6 gestos + a boca fechada nos mergulhos, commitados). O registro está na folha
+> `folhas/2026-11-07/enguia-gestos/gestos.html` e no 📍 do 🧭. **O próximo é o START
+> `plans/2026-11-07-enguia-parte-b-START.md`** (a Parte B: os efeitos do corpo e a instalação no jogo).
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. A maquete, os anéis, a girada e a fumaça do
 > rombo estão APROVADOS e commitados. A sessão abre nas animações da cabeça (PixMiniMax), uma por momento, com a boca
 > variando o máximo possível."**

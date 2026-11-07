@@ -16,11 +16,73 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-07-enguia-animacoes-START.md`. A maquete, os anéis, a
-> GIRADA e a fumaça do rombo estão APROVADOS e commitados. A sessão abre na etapa 3: as animações da cabeça, uma por
-> momento, com a boca variando o máximo possível."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-07-enguia-parte-b-START.md`. A maquete, os anéis, a
+> girada e as 6 ANIMAÇÕES DA CABEÇA estão APROVADOS e commitados. A sessão abre na Parte B do plano: os efeitos do corpo
+> (os respiros com jato; o pixelfx só com o ok dele) e depois a instalação da enguia no jogo."**
 >
-> (O arranque de 07/11 abria nas 8 direções e na girada: feitas e aprovadas no mesmo dia, ver o 📍 abaixo.)
+> (O arranque anterior abria na etapa 3, as animações da cabeça: feitas e aprovadas em 07/11, ver o 📍 abaixo.)
+>
+> 📍 **07/11 (noite, 3) — A ETAPA 3 FECHADA: AS 6 ANIMAÇÕES DA CABEÇA APROVADAS E COMMITADAS.** Ele, nos dois últimos
+> (o grito e a agonia): *"Boa"*. A boca muda a cada momento: entreaberta (a E3), respirando ao nadar, fechada lendo a
+> nave, escancarada no cuspe, abrindo na carga e batendo no fogo dos canos, o sibilo apagado na preparação, fechada nos
+> mergulhos, o grito na mordida e a agonia na presa. Tudo
+> instalado na MAQUETE (fora do jogo); a folha `folhas/2026-11-07/enguia-gestos/gestos.html` tem o registro de cada
+> rodada, e o detalhe técnico está nos itens abaixo. O próximo é o START `plans/2026-11-07-enguia-parte-b-START.md`.
+>
+> 📍 **07/11 (noite, 2) — ETAPA 3, GESTO 1: O ECO ✅ APROVADO** (*"tudo está certo e bem feito"*). Folha
+> `folhas/2026-11-07/enguia-gestos/gestos.html`:
+> - **Medido:** TODO gesto cai de perfil (φ = 0, sem espelho; `scripts/_serpente/_enguia-gestos-medir.mjs`), então as
+>   animações nunca disputam com as vistas do rolar (só o nadar tem 1,7 s de 24 s fora do perfil).
+> - **O Eco:** a boca fecha ao ler a nave (dentes cerrados), ESTALA escancarada no cuspe e volta à E3. São 12 quadros
+>   PixMiniMax (`enguia-gestos/eco/q00–q11` + `normais.png`, uma chamada `create_normal_map` lite; as normais da E3
+>   saíram idênticas às aprovadas). O módulo é `scripts/_serpente/enguia/gestos.mjs` (`quadroEco`), o desenho é o
+>   `s.gesto` no `cabecaArte`, e `gestos=0` na maquete volta à E3 parada. Medidor de clipe:
+>   `_enguia-gesto-medir-clipe.mjs` (luz, junta, crânio, salto por quadro).
+> - **Lição:** o intermediário com as 2 pontas fixas (fechada → escancarada) NÃO fez intermediário (71% num quadro); o
+>   estalo saiu dos clipes reais encadeados (o fechar de trás para a frente até a E3, depois o escancarar).
+> - **Rodada 2 (o apontamento dele):** o degrau no topo da cabeça na leitura. O gesto INCLINA a cabeça (fechar: focinho
+>   −4,5 px, nuca −2,6), e a pele do pescoço fica na altura da E3. A correção recola cada quadro pela NUCA, rígido
+>   (`scripts/_serpente/_enguia-gesto-junta.mjs <pasta> <n>`; os originais em `<pasta>/original/`). Puxar só a nuca
+>   deu corcova.
+> - **Gesto 2, OS CANOS (espera ele):** o ritmo inverso do Eco. No aviso a boca abre devagar e a goela clareia (a
+>   carga); no fogo as mandíbulas BATEM fechadas (0,1 s) com um tranco de 0,12 rad; ela segura fechada e reabre na salva
+>   seguinte. Pasta `enguia-gestos/canos/` (17 quadros: E3, carga 1–8, batida 9–10, o fechar do Eco 11–16),
+>   `quadroCanos`/`chuteCanos`. A garganta da carga pendia 9–10 px (o pedido "neck swells") e deixava um corte reto
+>   atrás da mandíbula: o mesmo script comprime a base até a E3 na junta (o Eco saiu idêntico byte a byte).
+> - **✅ Os canos APROVADOS** (*"O restante ficou bom, podemos seguir"*), com um apontamento: **os vãos na junta, em
+>   todas as gerações**. O fundo aparecia num bolsão entre a garganta e o pescoço: a garganta dos quadros não segue a
+>   linha da E3, e o giro da cabeça contra o pescoço (o tranco, o giro do Eco) abre uma cunha. Com a E3 parada o vão
+>   também existia, menor. A correção está no DESENHO (`selaJunta` no `desenho.mjs`): depois do crânio e da pele, todo
+>   pixel do fundo a até 24 px da junta preso entre partes dela (a até 3 px de cada lado) recebe a cor mais escura
+>   vizinha. Medido pela sonda `vaos=1` da maquete: de ~4.000 px para 67 px nos canos e no 1º Eco. A maquete também
+>   ganhou `em=<t>,<t>` (fotos em instantes escolhidos + a junta em `-juntas.json`).
+> - **Gesto 3, A PREPARAÇÃO (espera ele):** o SIBILO. Nos 0,6 s do recuo, a boca fica entreaberta e tensa, os dentes à
+>   mostra e a brasa apagando (o estado que faltava: entreaberta e apagada); ao partir, volta à E3 em 0,35 s. Visível no
+>   posto (antes do mergulho) e no rombo (antes do sob). Pasta `enguia-gestos/prepara/` (9 quadros), `quadroPrepara`.
+>   Para emendar, a volta dos canos à E3 passou para os últimos 0,4 s da brasa da 3ª salva.
+>   ✅ APROVADA (*"Podem servir"*).
+> - **Gesto 4, O NADAR (espera ele):** a RESPIRAÇÃO, a mandíbula descendo e subindo pouco, a cabeça firme. Cada
+>   respiração sai da E3 e volta a ela (o rolar e os outros gestos partem da E3) e só começa se couber (0,8–2,4 s) antes
+>   da próxima virada/gesto: os trechos à vista e de perfil são curtos (o maior, 2,3 s); 11 respirações na luta. Pasta
+>   `enguia-gestos/nadar/` (12 quadros), `quadroNadar` + `podeRespirar` na maquete. "Brasa pulsando" pintou pontinhos e
+>   um anel no olho; "sem faíscas" pintou faíscas; ficou o pedido só da mandíbula, com uma estrela apagada em 2 quadros
+>   (`_enguia-gesto-limpa.mjs`). Vídeo que segue a cabeça: `_enguia-segue-cabeca.mjs`.
+>   ✅ A respiração APROVADA (*"A respiração está boa"*), com um pedido: **nos mergulhos em direção ao rombo, a boca
+>   fecha** (*"pode fechar no meio das descidas"*). Feito (espera ele): no mergulho do posto, no afundar e no afundar da
+>   morte, o sibilo se desfaz para a E3 e, a 45% do tempo da cabeça à vista, ela fecha com o fechar do Eco (0,4 s) e
+>   entra fechada (`quadroMergulho`/`MERGULHOS`). O mergulho do posto ROLA no meio: os quadros do fechar (eco 1–6)
+>   ganharam vistas do rolar próprias (`vistasCabeca` sobre cada quadro; o desenho usa `s.gesto.vistas`). Ir do sibilo
+>   direto para a fechada era um salto de 74%, e gerar "sibilo → fecha" terminava noutra boca (66%): descartado.
+>   ✅ APROVADO (*"Perfeito"*).
+> - **Gestos 5 e 6 ✅ APROVADOS** (*"Boa"*): **a MORDIDA no crânio = o GRITO** (`quadroMordida`, pasta `dor/`: a boca explode
+>   escancarada em 0,1 s, segura com tranco `chuteMordida` + tremor, volta pelo escancarar do Eco à E3 e emenda no
+>   sibilo, então o mergulho sai igual) e **a PRESA = a AGONIA** (`quadroPresa`, pasta `agonia/`, que começa na boca
+>   fechada do Eco: as mandíbulas caem frouxas em 0,7 s e a goela apaga até a explosão). Descartados: os riscos de
+>   "ferimento" pintados no 1º quadro do grito (pulado) e a brasa derramando como líquido numa agonia. O
+>   `_enguia-gesto-junta.mjs` agora usa a E3 aprovada como referência e recola todos os quadros (as 4 pastas aprovadas
+>   saíram idênticas).
+> - **Próximo:** a Parte B do plano (os efeitos do corpo, a instalação no jogo), START
+>   `plans/2026-11-07-enguia-parte-b-START.md`.
 >
 > 📍 **07/11 (noite) — A GIRADA APROVADA: O DORSO DESENHADO.** Ele: *"O restante eu aprovo"* (com 2 ajustes, feitos).
 > Folha `folhas/2026-11-07/enguia-girada/girada.html`:

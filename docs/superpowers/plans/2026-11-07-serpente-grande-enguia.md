@@ -356,7 +356,31 @@ O registro completo está no START `plans/2026-11-07-enguia-geracoes-START.md` (
   - Só o sorteio dos efeitos muda; a luta e a sonda são as mesmas.
 - **O próximo:** a etapa 3, `plans/2026-11-07-enguia-animacoes-START.md`.
 
+### B2 · As animações da cabeça (07/11, noite) — ✅ APROVADAS
+
+A folha `folhas/2026-11-07/enguia-gestos/gestos.html` tem cada rodada; o START `plans/2026-11-07-enguia-animacoes-START.md`
+tinha o pedido.
+- **Os 6 gestos**, todos de perfil (medido: nenhum cai numa virada), PixMiniMax a partir da E3, a boca variando:
+  - o Eco: fecha lendo, estala no cuspe;
+  - os canos: abre na carga, bate no fogo;
+  - a preparação: o sibilo;
+  - o nadar: a respiração;
+  - a mordida no crânio: o grito;
+  - a presa: a agonia.
+  - E, a pedido dele, a boca fecha no meio dos mergulhos em direção ao rombo.
+- **Os arquivos:**
+  - as pastas `enguia-gestos/<gesto>/` (q00…, `normais.png` de uma chamada `create_normal_map`, `original/`);
+  - `enguia/gestos.mjs` (o tempo de cada gesto, puro);
+  - `desenho.mjs` (`s.gesto` no `cabecaArte`, as vistas por quadro, o `selaJunta`);
+  - a maquete (`gestos=0`, `vaos=1`, `em=`).
+- **Os consertos dele no caminho:**
+  - o degrau no topo da cabeça → os quadros recolados pela nuca (`_enguia-gesto-junta.mjs`);
+  - os vãos na junta em todas as gerações → o `selaJunta` no desenho (de ~4.000 px para ~70 px perto da junta).
+- **O próximo:** os passos 3 e 4 abaixo, START `plans/2026-11-07-enguia-parte-b-START.md`.
+
 ## PARTE B — depois da maquete aprovada (o detalhe sai da maquete; um plano novo por parte)
+
+> **07/11:** os passos 1 (os anéis, B1) e 2 (os gestos, B2) estão FEITOS e aprovados. Falta do 3 em diante.
 
 Os números e os caminhos aprovados na maquete são a fonte. Cada parte abre o seu plano curto quando chegar a vez:
 
