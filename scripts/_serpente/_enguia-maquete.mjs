@@ -12,7 +12,7 @@ import sharp from 'sharp';
 import { N, LCG } from './enguia/numeros.mjs';
 import { montaRoteiro } from './enguia/roteiro.mjs';
 import { medidas } from './enguia/medidas.mjs';
-import { pose, mordidas, nAneisEm } from './enguia/corpo.mjs';
+import { pose, mordidas, nAneisEm, cabecaParaTela } from './enguia/corpo.mjs';
 import { Canos, faixaDe } from './enguia/canos.mjs';
 import { Eco, Trilha } from './enguia/eco.mjs';
 import { geiseres, lombada, fissuras } from './enguia/geiseres.mjs';
@@ -34,6 +34,36 @@ const D = await preparaDesenho(N, med, ARENA);
 // maps) instead of the grey blocks; `de=<s>` films from there on (the fight is still simulated from 0)
 const CORPO = opc.corpo ?? 'blocos';
 if (CORPO !== 'blocos') { const { carregaArte } = await import('./enguia/arte.mjs'); D.arte = await carregaArte(N); }
+// stage 3 (the head's animations): `gestos=0` keeps the E3 still, to compare
+const GESTOS = CORPO !== 'blocos' && opc.gestos !== '0' ? await (await import('./enguia/gestos.mjs')).carregaGestos() : null;
+const { quadroEco, quadroCanos, chuteCanos, quadroPrepara, quadroNadar, quadroMergulho, MERGULHOS, quadroMordida, chuteMordida, quadroPresa } = await import('./enguia/gestos.mjs');
+// (the swim's breath: only while she swims in sight on the profile — no skill, no draw-back, no turn-over view)
+const respira = {};
+// (the dives: how long the head stays in sight from the stretch's start — the mouth shuts in the middle of that)
+const vistaCache = new Map();
+function vistaNoTrecho(tr) {
+  if (!vistaCache.has(tr)) {
+    let v = tr.t1 - tr.t0;
+    for (let u = tr.t0; u < tr.t1; u += 1 / 30) {
+      const C = pose(R, N, med, u, { mord }).cabeca;
+      if (C.focinho.y < -10 || C.focinho.y > N.tela.H || C.focinho.x < -10 || C.focinho.x > N.tela.W + 10) { v = u - tr.t0; break; }
+    }
+    vistaCache.set(tr, v);
+  }
+  return vistaCache.get(tr);
+}
+function podeRespirar(t0) { // the seconds free ahead of t0 (up to a whole breath)
+  for (let u = t0; u <= t0 + 2.4 + 1e-9; u += 0.05) {
+    const tr = R.estado(u).trecho;
+    let livre = !(tr.hab || tr.prepara || MERGULHOS.includes(tr.nome) || quadroPrepara(u, R.trechos) != null);
+    if (livre) {
+      const C = pose(R, N, med, u, { mord }).cabeca, kV = Math.round((C.fi * 180) / Math.PI / 10);
+      if (C.focinho.y < -10 || C.focinho.y > N.tela.H || C.focinho.x < -10 || C.focinho.x > N.tela.W + 10 || (kV > 0 && kV < 18)) livre = false;
+    }
+    if (!livre) return u - t0 - 0.05;
+  }
+  return 2.4;
+}
 D.semLuz = opc.luz === '0'; // (`luz=0`: the art as drawn, no relight — for the sheet's comparison)
 D.rolagemAneis = opc.rolagem === 'aneis'; // (`rolagem=aneis`: the skin, but the roll ring by ring — his comparison)
 const NOME = `${JOG}${CORPO !== 'blocos' ? `-${CORPO}` : ''}${D.semLuz ? '-semluz' : ''}${D.rolagemAneis ? '-rolaneis' : ''}${opc.chegada ? `-cheg${opc.chegada}` : ''}`;
@@ -66,6 +96,12 @@ const momentos = {
   'canos-fogo': R.trechos.find((t) => t.hab === 'canos').t0 + N.canos.antes + N.canos.aviso[0] + 0.3,
   mergulho: R.trechos.find((t) => t.nome === 'mergulho').t0 + 1.3,
   'erguida-eco': R.trechos.find((t) => t.hab === 'eco').t0 + N.eco.leitura + N.eco.voo + 0.35,
+  // (stage 3: the Echo's mouth — shut while reading, wide at the spit)
+  'eco-lendo': R.trechos.find((t) => t.hab === 'eco').t0 + 1.2,
+  // (stage 3: the pipes' mouth — charged at the end of the 1st warning, slammed shut in its fire)
+  'canos-carga': R.trechos.find((t) => t.hab === 'canos').t0 + N.canos.antes + N.canos.aviso[0] - 0.05,
+  'canos-bate': R.trechos.find((t) => t.hab === 'canos').t0 + N.canos.antes + N.canos.aviso[0] + 0.15,
+  'eco-cuspe': R.trechos.find((t) => t.hab === 'eco').t0 + N.eco.leitura + 0.1,
   geiser: geis[2].tColuna + 0.15,
   volta: R.trechos.find((t) => t.nome === 'volta').t0 + 1.4,
   mordida: mord[0].t + 0.1,
@@ -87,6 +123,36 @@ const momentos = {
   fim: R.trechos.find((t) => t.hab === 'fim').t0 + 0.6,
 };
 const fotosFeitas = new Set();
+// (`em=<t>,<t>…`: photos at chosen times too, with the skull joint's screen place in <nome>-juntas.json)
+const juntas = {};
+for (const tm of (opc.em ?? '').split(',').filter(Boolean)) momentos[`em-${tm}`] = Number(tm);
+
+// the gap probe (`vaos=1`)
+const MAGENTA = Buffer.alloc(N.tela.W * N.tela.H * 4);
+for (let i = 0; i < MAGENTA.length; i += 4) { MAGENTA[i] = 255; MAGENTA[i + 1] = 0; MAGENTA[i + 2] = 255; MAGENTA[i + 3] = 255; }
+const vaosLista = [];
+function vaosNoQuadro(s, t, gesto) {
+  const fundo = D.fundo, naFrente = D.naFrente;
+  D.fundo = MAGENTA; D.naFrente = new Uint8Array(N.tela.W * N.tela.H);
+  const buf = quadro(D, { ...s, particulas: [], tiros: [], canos: null, brasas: [], eco: null, geis: [], sinais: [], fissuras: [] });
+  D.fundo = fundo; D.naFrente = naFrente;
+  const W = N.tela.W, H = N.tela.H, J = s.pose.cabeca.pescoco, R0 = 22, Rf = 2;
+  const x0 = Math.max(0, Math.floor(J.x - R0)), x1 = Math.min(W - 1, Math.ceil(J.x + R0)), y0 = Math.max(0, Math.floor(J.y - R0)), y1 = Math.min(H - 1, Math.ceil(J.y + R0));
+  const bicho = (x, y) => { const i = (y * W + x) * 4; return !(buf[i] === 255 && buf[i + 1] === 0 && buf[i + 2] === 255); };
+  const vaos = [];
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    if (bicho(x, y)) continue;
+    // closed by the eel: eel pixels on both sides within Rf, horizontally or vertically or on a diagonal
+    const lados = [[1, 0], [0, 1], [1, 1], [1, -1]].some(([dx, dy]) => {
+      let a = false, b = false;
+      for (let k = 1; k <= Rf + 1; k++) { const X = x + dx * k, Y = y + dy * k; if (X >= 0 && X < W && Y >= 0 && Y < H && bicho(X, Y)) { a = true; break; } }
+      for (let k = 1; k <= Rf + 1; k++) { const X = x - dx * k, Y = y - dy * k; if (X >= 0 && X < W && Y >= 0 && Y < H && bicho(X, Y)) { b = true; break; } }
+      return a && b;
+    });
+    if (lados) vaos.push([x, y]);
+  }
+  if (vaos.length) vaosLista.push({ t: +t.toFixed(2), n: vaos.length, gesto: gesto ? gesto.k : 0, hab: s.pose.e.trecho.hab ?? s.pose.e.trecho.nome, rel: vaos.map(([x, y]) => [x - Math.round(J.x), y - Math.round(J.y)]) });
+}
 
 // the video: raw frames into ffmpeg (×3, nearest)
 const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${N.tela.W}x${N.tela.H}`, '-r', String(FPS), '-i', '-',
@@ -129,18 +195,31 @@ for (let f = 0; f * dt <= T; f++) {
   giro += (alvoGiro - giro) * Math.min(1, dt * rapido);
   let tranco = 0;
   for (const E of M.ecos) for (const r of E.rodadas) if (t >= r.cospe && t < r.cospe + 0.35) tranco = acima * 0.22 * (1 - (t - r.cospe) / 0.35);
+  if (GESTOS && tr.hab === 'canos') tranco += acima * chuteCanos(t, M.canos.at(-1)); // (stage 3: the slam's kick)
+  if (GESTOS) tranco += acima * chuteMordida(t, cranio.t); // (stage 3: the shriek's jerk)
   let treme = null;
-  if (tr.hab === 'presa') treme = { x: Math.round(sorte() * 2 - 1), y: Math.round(sorte() * 2 - 1) };
+  if (tr.hab === 'presa' || (GESTOS && t >= cranio.t && t < cranio.t + 0.45)) treme = { x: Math.round(sorte() * 2 - 1), y: Math.round(sorte() * 2 - 1) };
   else if (tr.hab === 'canos') {
     const q = M.canos.at(-1)?.estado(t);
     if (q && q.fase === 'aviso' && sorte() < q.k * 0.7) treme = { x: Math.round(sorte() * 2 - 1), y: Math.round(sorte() * 2 - 1) };
   }
   const P = pose(R, N, med, t, { mord, giro: giro + tranco, treme });
+  // the head's gesture frame now (null = the E3 as approved)
+  let gesto = null, gestoFixo = false;
+  // (the bite in the skull and the death come first: they play over the canos' cut and the draw-back)
+  if (GESTOS) { const m = quadroMordida(t, cranio.t); if (m) { gestoFixo = true; gesto = m[0] === 'eco' && !m[1] ? null : GESTOS[m[0]][m[1]]; } }
+  if (GESTOS && !gestoFixo) { const k = quadroPresa(t, tr); if (k != null) { gestoFixo = true; gesto = GESTOS.agonia[k]; } } // (0 is the shut mouth here)
+  if (GESTOS && !gestoFixo && tr.hab === 'eco') { const k = quadroEco(t, M.ecos.flatMap((E) => E.rodadas)); if (k) gesto = GESTOS.eco[k]; }
+  if (GESTOS && !gestoFixo && tr.hab === 'canos') { const k = quadroCanos(t, M.canos.at(-1)); if (k) gesto = GESTOS.canos[k]; }
+  if (GESTOS && !gesto && !gestoFixo) { const m = quadroMergulho(t, tr, R.trechos, vistaNoTrecho(tr)); if (m && m[1]) gesto = GESTOS[m[0]][m[1]]; } // (the dives: shut)
+  if (GESTOS && !gesto && !gestoFixo && !tr.hab && !MERGULHOS.includes(tr.nome) && cabecaVisivel) { const k = quadroPrepara(t, R.trechos); if (k) gesto = GESTOS.prepara[k]; }
+  if (GESTOS && !gesto && !gestoFixo) { const k = quadroNadar(t, respira, podeRespirar); if (k) gesto = GESTOS.nadar[k]; }
+  const boca = () => (gesto?.boca ? cabecaParaTela(P.cabeca, med, gesto.boca) : bocaNaTela(P, med));
   for (const E of M.ecos) {
     const antes = E.rodadas.map((r) => !!r.sementes);
-    E.atualiza(t, trilha, bocaNaTela(P, med));
+    E.atualiza(t, trilha, boca());
     E.rodadas.forEach((r, i) => { // the spit's flash at the mouth
-      if (!antes[i] && r.sementes) { const b = bocaNaTela(P, med); for (let k = 0; k < 14; k++) { const an = sorte() * Math.PI * 2; nasce({ x: b.x, y: b.y, vx: Math.cos(an) * 40, vy: Math.sin(an) * 40, vida: 0.25, cor: [150, 220, 255] }); } nasce({ x: b.x, y: b.y, vx: 0, vy: 0, vida: 0.15, cor: [220, 245, 255], tam: 5 }); }
+      if (!antes[i] && r.sementes) { const b = boca(); for (let k = 0; k < 14; k++) { const an = sorte() * Math.PI * 2; nasce({ x: b.x, y: b.y, vx: Math.cos(an) * 40, vy: Math.sin(an) * 40, vida: 0.25, cor: [150, 220, 255] }); } nasce({ x: b.x, y: b.y, vx: 0, vy: 0, vida: 0.15, cor: [220, 245, 255], tam: 5 }); }
     });
   }
   // ── the SCRAPE (5th round, his drawing over the breach and: "uma estrutura de metal gigante friccionou contra a
@@ -372,9 +451,13 @@ for (let f = 0; f * dt <= T; f++) {
     sinais: R.sinais.filter((a) => t >= a.t0 && t < a.t1), fissuras: fissuras(R, N, t),
     particulas: [...particulas, ...efemeras], tiros, nave: { x: jog.x, y: jog.y }, naveFerida: ferida,
     semCabeca: ['desfaz', 'resto', 'fim'].includes(hab), morta: hab === 'fusao',
-    mordida: t >= cranio.t ? MORDIDA_CRANIO : null, olhoAceso: !!eco?.lendo, modoCorpo: CORPO,
+    mordida: t >= cranio.t ? MORDIDA_CRANIO : null, olhoAceso: !!eco?.lendo, modoCorpo: CORPO, gesto,
     decapitada: desfeita,
   };
+  // (stage 3, his note "esses gaps em todas as gerações": `vaos=1` probes every frame for the scene showing through at
+  // the skull's joint — the frame drawn again on a flat magenta ground; magenta pixels near the joint that a closing of
+  // the eel's pixels would fill are gaps)
+  if (opc.vaos === '1' && t >= DE - 1e-9 && !s.semCabeca) vaosNoQuadro(s, t, gesto);
   const filma = t >= DE - 1e-9, foto = opc.fotos && Object.entries(momentos).some(([nome, tm]) => !fotosFeitas.has(nome) && t >= tm);
   if (!filma && !foto) continue;
   const buf = quadro(D, s);
@@ -382,6 +465,7 @@ for (let f = 0; f * dt <= T; f++) {
   if (opc.fotos) for (const [nome, tm] of Object.entries(momentos)) if (!fotosFeitas.has(nome) && t >= tm) {
     fotosFeitas.add(nome);
     await sharp(Buffer.from(buf), { raw: { width: N.tela.W, height: N.tela.H, channels: 4 } }).resize(N.tela.W * 3, N.tela.H * 3, { kernel: 'nearest' }).png().toFile(path.join(OUT, `${NOME}-${nome}.png`));
+    if (nome.startsWith('em-')) juntas[nome] = { x: +P.cabeca.pescoco.x.toFixed(1), y: +P.cabeca.pescoco.y.toFixed(1), ang: +P.cabeca.ang.toFixed(3), gesto: gesto?.k ?? 0 };
   }
 }
 ff.stdin.end();
@@ -409,5 +493,7 @@ const json = {
   aneis: { inicio: N.corpo.aneis, fim: nAneisEm(R.T, N, mord) },
 };
 fs.writeFileSync(path.join(OUT, `${NOME}.json`), JSON.stringify(json, null, 1));
+if (opc.em) fs.writeFileSync(path.join(OUT, `${NOME}-juntas.json`), JSON.stringify(juntas, null, 1));
+if (opc.vaos === '1') fs.writeFileSync(path.join(OUT, `${NOME}-vaos.json`), JSON.stringify(vaosLista));
 console.log(`${JOG}: ${f2(T)} s · toques ${JSON.stringify(json.toquesPorTipo)} · ciclo ${json.ciclo} s · acertos ${JSON.stringify(acertos)}`);
 function f2(x) { return x.toFixed(1); }

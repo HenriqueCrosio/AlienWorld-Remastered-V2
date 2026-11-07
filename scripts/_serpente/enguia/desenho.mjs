@@ -156,10 +156,15 @@ function corpoArte(D, s, put, filtro) {
 function cabecaArte(D, s, put) {
   const A = D.arte, H = D.med.cabeca, img = A.cabeca;
   // (7 Nov: mid-roll, the turn-over view nearest the head's φ — already rolled, so never mirrored; at rest, the art)
-  const kV = A.vistas ? Math.round((s.pose.cabeca.fi * 180) / Math.PI / A.vistas.passo) : 0;
-  const V = A.vistas && kV > 0 && kV < A.vistas.lista.length - 1 ? A.vistas.lista[kV] : null;
+  // (stage 3: a gesture frame with its own turn-over views — the shut mouth of the dives — rolls with them)
+  const VS = s.gesto?.vistas ?? A.vistas;
+  const kV = VS ? Math.round((s.pose.cabeca.fi * 180) / Math.PI / VS.passo) : 0;
+  const V = VS && kV > 0 && kV < VS.lista.length - 1 ? VS.lista[kV] : null;
   const C = V ? { ...s.pose.cabeca, espelho: false } : s.pose.cabeca;
-  const dados = V ? V.data : img.data, mapa8 = V ? V.m8 : A.cabeca8, nC = V ? V.n : A.nCabeca, n0 = V ? V.n0 : A.nCabeca;
+  // (stage 3: a gesture's frame in place of the E3 — only on the profile; mid-roll the view wins)
+  const Gq = !V && s.gesto ? s.gesto : null, fw = Gq ? Gq.w : img.w, oy = Gq ? Gq.oy : 0;
+  const dados = Gq ? Gq.data : V ? V.data : img.data, mapa8 = Gq ? Gq.m8 : V ? V.m8 : A.cabeca8;
+  const nC = Gq ? Gq.n : V ? V.n : A.nCabeca, n0 = Gq ? Gq.n : V ? V.n0 : A.nCabeca;
   const a = { x: Math.cos(H.ang), y: Math.sin(H.ang) }, r = C.ang - H.ang, cr = Math.cos(r), sr = Math.sin(r);
   const vira = (vx, vy) => { // an art vector (y down) → the screen, the same map as the points
     if (C.espelho) { const d = vx * a.x + vy * a.y; vx = 2 * d * a.x - vx; vy = 2 * d * a.y - vy; }
@@ -168,9 +173,9 @@ function cabecaArte(D, s, put) {
   for (let Y = Math.floor(C.pescoco.y - 70); Y <= C.pescoco.y + 70; Y++) for (let X = Math.floor(C.pescoco.x - 70); X <= C.pescoco.x + 70; X++) {
     const p = telaParaCabeca(C, D.med, { x: X + 0.5, y: Y + 0.5 });
     if (p.x >= CRANIO_X + SOBRE) continue; // (the neck is the skin's; the skull overlaps it by SOBRE px)
-    const src = fonte8(mapa8, p.x, p.y); // (the 8× map: the turned lines stay whole)
+    const src = fonte8(mapa8, p.x, p.y + oy); // (the 8× map: the turned lines stay whole)
     if (src < 0) continue;
-    const ax = src % img.w, ay = Math.floor(src / img.w), i = src * 4;
+    const ax = src % fw, ay = Math.floor(src / fw), i = src * 4;
     // (5th round, his circle: through the bite in her skull showed what lay behind — the bite is a WOUND now: torn
     // flesh at its rim, dark and glowing inside, never a see-through hole)
     if (s.mordida) {
@@ -183,7 +188,7 @@ function cabecaArte(D, s, put) {
     }
     let rr = dados[i], g = dados[i + 1], b = dados[i + 2];
     if (!brilha(rr, g, b)) {
-      const q = (ay * img.w + ax) * 3, [vx, vy] = vira(nC[q], -nC[q + 1]);
+      const q = (ay * fw + ax) * 3, [vx, vy] = vira(nC[q], -nC[q + 1]);
       const k = D.semLuz ? 1 : realce(A.luzCabeca, n0[q], n0[q + 1], n0[q + 2], vx, -vy, nC[q + 2]);
       rr *= k; g *= k; b *= k;
     } else if (s.olhoAceso && b > rr + 40) { rr = rr + (220 - rr) * 0.5; g = g + (245 - g) * 0.5; b = b + (255 - b) * 0.5; }
@@ -296,7 +301,11 @@ export function quadro(D, s) {
     disco(g.x, 214, 3 + 5 * k, [200, 240, 255], 0.3 * k);
   }
   const comArte = D.arte && s.modoCorpo && s.modoCorpo !== 'blocos';
-  const corpo = (filtro) => (comArte ? corpoArte(D, s, put, filtro) : tubo(filtro));
+  // (stage 3, his note "esses gaps em todas as gerações": every pixel of her skin and skull is marked, so the joint can
+  // be sealed after the head — `selaJunta`)
+  const bicho = new Uint8Array(W * H);
+  const putB = (x, y, c, a = 1) => { put(x, y, c, a); x = Math.round(x); y = Math.round(y); if (a >= 1 && x >= 0 && x < W && y >= 0 && y < H) bicho[y * W + x] = 1; };
+  const corpo = (filtro) => (comArte ? corpoArte(D, s, putB, filtro) : tubo(filtro));
   corpo((a) => a.toca);
   const cabecaNaToca = naToca(P.cabeca.pescoco, N);
   if (cabecaNaToca) cabeca();
@@ -413,9 +422,36 @@ export function quadro(D, s) {
     }
   }
   if (!cabecaNaToca) cabeca();
+  // THE JOINT'S SEAL (stage 3, his note on every generation): where the skull meets the neck skin, the scene showed
+  // through — the gesture frames' throat doesn't follow the E3's line to the joint, and the head turning against the
+  // neck (the Echo's follow, the pipes' kick) opens a wedge under it. Near the joint, any pixel that isn't hers but has
+  // her on both sides within 3 px (across, down, or on a diagonal) is a gap: it takes the darker of those two pixels
+  // (her outline or throat), twice over so a wider wedge closes from its edges in.
+  function selaJunta() {
+    const J = P.cabeca.pescoco, R0 = 24, Rf = 3;
+    const x0 = Math.max(0, Math.floor(J.x - R0)), x1 = Math.min(W - 1, Math.ceil(J.x + R0));
+    const y0 = Math.max(0, Math.floor(J.y - R0)), y1 = Math.min(H - 1, Math.ceil(J.y + R0));
+    for (let passada = 0; passada < 2; passada++) {
+      const novos = [];
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+        if (bicho[y * W + x] || (x - J.x) ** 2 + (y - J.y) ** 2 > R0 * R0) continue;
+        let melhor = null;
+        for (const [dx, dy] of [[1, 0], [0, 1], [1, 1], [1, -1]]) {
+          const lado = (sg) => { for (let k = 1; k <= Rf; k++) { const X = x + sg * dx * k, Y = y + sg * dy * k; if (X >= 0 && X < W && Y >= 0 && Y < H && bicho[Y * W + X]) return Y * W + X; } return -1; };
+          const a = lado(1), b = lado(-1);
+          if (a < 0 || b < 0) continue;
+          const lum = (j) => out[j * 4] + out[j * 4 + 1] + out[j * 4 + 2];
+          const c = lum(a) <= lum(b) ? a : b;
+          if (!melhor || lum(c) < lum(melhor)) melhor = c;
+        }
+        if (melhor != null) novos.push([y * W + x, melhor]);
+      }
+      for (const [i, j] of novos) { out[i * 4] = out[j * 4]; out[i * 4 + 1] = out[j * 4 + 1]; out[i * 4 + 2] = out[j * 4 + 2]; bicho[i] = 1; }
+    }
+  }
   function cabeca() {
     if (s.semCabeca) return;
-    if (D.arte && s.modoCorpo && s.modoCorpo !== 'blocos') { cabecaArte(D, s, put); return; }
+    if (D.arte && s.modoCorpo && s.modoCorpo !== 'blocos') { cabecaArte(D, s, putB); selaJunta(); return; }
     const C = P.cabeca, M = med.cabeca;
     const R = 70;
     for (let y = Math.floor(C.pescoco.y - R); y <= C.pescoco.y + R; y++) for (let x = Math.floor(C.pescoco.x - R); x <= C.pescoco.x + R; x++) {
