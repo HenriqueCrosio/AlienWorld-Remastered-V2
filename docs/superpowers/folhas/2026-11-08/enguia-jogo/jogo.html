@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enguia no jogo</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); }
+  .rotulos { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; color: var(--suave); font-size: 13px; margin-top: 4px; }
+  table { border-collapse: collapse; margin: 8px 0; }
+  td, th { border-bottom: 1px solid var(--linha); padding: 6px 12px 6px 0; text-align: left; font-variant-numeric: tabular-nums; }
+  th { color: var(--suave); font-weight: 500; }
+  .pergunta li { margin-bottom: 8px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>A enguia no jogo — o passo 4</h1>
+  <p class="suave">08/11 · plano <code>plans/2026-11-08-enguia-instalacao.md</code> · o atalho de dev:
+    <code>?serpente=fusao</code> (com <code>&amp;roteiro=maquete</code> para repetir o roteiro da maquete, <code>&amp;vida=10</code>
+    para começar com pouca vida, <code>&amp;taxa=auto</code> para a taxa de 60)</p>
+
+  <h2>O que está no jogo</h2>
+  <p>A luta inteira da maquete aprovada, no lugar da fusão de hoje. A cena da fusão continua até a implosão (agora a do
+    pixelfx), e a enguia irrompe do rombo: a chegada, os canos, o mergulho, o Eco, os gêiseres, a volta, as mordidas na
+    cauda e no crânio, a reta final e a morte presa no rombo. A vida dela decide as mordidas (22 / 13 / 5 %) e a hora de
+    ir para a toca. Fora da pausa do último Eco ela não morre.</p>
+  <p><b>A prova:</b> a luta inteira, rodada pelo código do jogo, dá exatamente os mesmos quadros da maquete (o md5 de
+    todos os 3.300 quadros igual, com os dois jogadores de sonda; os toques e os acertos iguais).</p>
+
+  <h2>Maquete × jogo a 30 × jogo a 60 — a chegada</h2>
+  <video src="cru/lado-a-lado-a.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>maquete (aprovada, 30 quadros/s)</span><span>jogo, a enguia a 30</span><span>jogo, a enguia a 60</span></div>
+
+  <h2>O mergulho (a raspada no rombo)</h2>
+  <video src="cru/lado-a-lado-b.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>maquete</span><span>jogo, a enguia a 30</span><span>jogo, a enguia a 60</span></div>
+  <p class="suave">No jogo a imagem passa pela Atmosfera (o tratamento da cena), como tudo; a maquete desenhava sobre a
+    foto já tratada. Os vídeos do jogo andam a 60 quadros/s; a coluna de 30 repete cada quadro dela duas vezes.</p>
+
+  <h2>O desempenho (no navegador, a luta inteira)</h2>
+  <table>
+    <tr><th>onde</th><th>mediana</th><th>p95</th><th>máximo</th></tr>
+    <tr><td>a linha do jogo (o quadro inteiro, com as lonas dela)</td><td>0,5 ms</td><td>1,0 ms</td><td>—</td></tr>
+    <tr><td>o worker da enguia (um passo dela)</td><td>12,3 ms</td><td>26,5 ms</td><td>37,2 ms</td></tr>
+  </table>
+  <p>Ela roda numa linha separada (o worker), então o jogo não trava: segue a 60. A 30 passos por segundo ela tem 33 ms
+    por passo, e só os picos (a fumaça grossa da raspada, o fogo dos canos) passam disso, por pouco.</p>
+  <p class="suave">Achado de passagem, fora deste passo: quando o mundo para na chegada da Serpente, a cópia da faixa do
+    casco (o <code>cascoVivo</code>, de 29/10) dá um tranco de ~0,6–0,8 s na sonda (que usa GPU por software). Já existia.</p>
+
+  <h2>Para você decidir</h2>
+  <ul class="pergunta">
+    <li><b>A taxa:</b> 30 (o ritmo do vídeo aprovado) ou 60 quando der (cai para 30 nos picos)? Compare as duas colunas
+      do jogo acima. Hoje o padrão é 30.</li>
+    <li><b>A reta final na volta ao posto:</b> se os 5 % caem enquanto ela volta ao posto ou está sob o casco, ela termina o
+      caminho até o posto e mergulha direto, sem os canos (a spec pedia meia-volta, que a maquete não provou).</li>
+    <li><b>Depois do último Eco:</b> se ela ainda vive, repete o Eco final até morrer.</li>
+  </ul>
+
+  <h2>O próximo</h2>
+  <p>O passo 5: você joga e calibra a vida (o alvo: 2–3 voltas, ~60–80 s). Hoje ela tem 120 de vida, a de antes.</p>
+</main>
+</body>
+</html>
