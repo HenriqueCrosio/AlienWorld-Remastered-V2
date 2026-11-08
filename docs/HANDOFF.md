@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-03)
+# HANDOFF — estado do projeto (2026-11-08)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-07) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-08) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,11 +16,30 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-07-enguia-parte-b-START.md`. A maquete, os anéis, a
-> girada e as 6 ANIMAÇÕES DA CABEÇA estão APROVADOS e commitados. A sessão abre na Parte B do plano: os efeitos do corpo
-> (os respiros com jato; o pixelfx só com o ok dele) e depois a instalação da enguia no jogo."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-08-enguia-instalacao-START.md`. A Parte B passos 1–3
+> (os anéis, a girada, as 6 animações da cabeça, os respiros e os 5 efeitos do pixelfx) estão APROVADOS e commitados,
+> tudo na MAQUETE. A sessão abre no passo 4: escrever o PLANO NOVO da instalação da enguia no jogo
+> (superpowers:writing-plans) e mostrar a ele antes de mexer no `src/`."**
 >
-> (O arranque anterior abria na etapa 3, as animações da cabeça: feitas e aprovadas em 07/11, ver o 📍 abaixo.)
+> (O arranque anterior abria na Parte B passo 3, os efeitos do corpo: feitos e aprovados em 08/11, ver o 📍 abaixo.)
+>
+> 📍 **08/11 — A PARTE B PASSO 3 FECHADO: OS RESPIROS E OS EFEITOS DO PIXELFX, APROVADOS E COMMITADOS.** Tudo na
+> MAQUETE; folha `folhas/2026-11-08/enguia-respiros/respiros.html` (3 rodadas):
+> - **Os respiros com jato** (`scripts/_serpente/enguia/respiros.mjs`): fluxo de pixels na cor da luz de cada anel, o
+>   gás herdando o bocal e nascendo na borda; nas curvas, arrancadas, no rolar, nos estalos da cabeça e numa onda de
+>   repouso. Eles também escondem os pontos fracos medidos (`_enguia-respiros-medir.mjs`): o estalo da cabeça, o laço da
+>   volta, a coluna do posto. Ele: *"ficou muito bom"*.
+> - **A fumaça na girada do início** (pedido dele: esconder a esticada do desenho ao girar). Ele: *"Perfeito"*.
+> - **Os 5 efeitos do pixelfx** (o ok dele às recomendações): o fogo dos canos (`flamethrower`, reto, sem ceder), as
+>   sementes do Eco (`plasma-ball`), a implosão da fusão (`implosion`, as luzes chegam aos 0,8 s), o vapor dos gêiseres
+>   (`poison-cloud`, rampa escura) e o estouro da cabeça (só o corpo do `big-explosion`, que é explosão de chão). O motor
+>   foi COPIADO para `scripts/_serpente/enguia/pixelfx/` (MIT, com LICENSE/NOTICE/ORIGEM); as adaptações em
+>   `enguia/efeitos.mjs`. O gêiser e o resto da morte ficaram como aprovados. Ele: *"Perfeito, todos ficaram ótimos"*.
+> - **A prova do resto igual:** `md5=1` na maquete grava a impressão de cada quadro cru; só mudaram os trechos de cada
+>   efeito, e os toques (0) e acertos (404 corpo, 48 cabeça) seguem iguais. Lição: ao trocar partículas por efeito novo,
+>   manter os sorteios do dado comum (no-op), senão o resto da luta muda.
+> - **O próximo:** o passo 4, a instalação no jogo, START `plans/2026-11-08-enguia-instalacao-START.md` (o inventário do
+>   porte, as decisões que o plano tem de tomar: o pixelfx em TS, a camada de pixels, o corpo por pixel, o desempenho).
 >
 > 📍 **07/11 (noite, 3) — A ETAPA 3 FECHADA: AS 6 ANIMAÇÕES DA CABEÇA APROVADAS E COMMITADAS.** Ele, nos dois últimos
 > (o grito e a agonia): *"Boa"*. A boca muda a cada momento: entreaberta (a E3), respirando ao nadar, fechada lendo a

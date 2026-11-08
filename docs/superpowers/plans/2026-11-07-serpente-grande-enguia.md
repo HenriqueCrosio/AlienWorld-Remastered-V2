@@ -381,6 +381,9 @@ tinha o pedido.
 ## PARTE B — depois da maquete aprovada (o detalhe sai da maquete; um plano novo por parte)
 
 > **07/11:** os passos 1 (os anéis, B1) e 2 (os gestos, B2) estão FEITOS e aprovados. Falta do 3 em diante.
+> **08/11:** o passo 3 (os efeitos) FEITO e aprovado na maquete: os respiros com jato (`enguia/respiros.mjs`) e 5
+> efeitos do pixelfx copiados e adaptados (`enguia/efeitos.mjs`, `enguia/pixelfx/`); folha
+> `folhas/2026-11-08/enguia-respiros/respiros.html`. O passo 4 abre pelo START `plans/2026-11-08-enguia-instalacao-START.md`.
 
 Os números e os caminhos aprovados na maquete são a fonte. Cada parte abre o seu plano curto quando chegar a vez:
 

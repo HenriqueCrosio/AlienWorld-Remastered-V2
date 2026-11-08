@@ -1,5 +1,9 @@
 # START — a enguia colossal (S2): a PARTE B do plano, os efeitos do corpo e a instalação no jogo
 
+> ✅ **08/11: o passo 3 FECHOU** (os respiros, a fumaça da girada, os 5 efeitos do pixelfx; folha
+> `folhas/2026-11-08/enguia-respiros/respiros.html`). Este START fica como registro; **o passo 4 abre pelo START
+> `plans/2026-11-08-enguia-instalacao-START.md`.**
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. A maquete, os anéis, a girada e as 6 animações
 > da cabeça estão APROVADOS e commitados. A sessão abre na Parte B do plano: os efeitos do corpo (os respiros com jato;
 > o pixelfx só com o ok dele) e depois a instalação da enguia no jogo."**
