@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 import { N, LCG } from './enguia/numeros.mjs';
 import { montaRoteiro } from './enguia/roteiro.mjs';
@@ -64,9 +65,15 @@ function podeRespirar(t0) { // the seconds free ahead of t0 (up to a whole breat
   }
   return 2.4;
 }
+// Part B, step 3 (8 Nov): the breathers' jets and the gas that hides the weak spots; `respiros=0` keeps the old dots
+const RESP = CORPO !== 'blocos' && opc.respiros !== '0' ? new (await import('./enguia/respiros.mjs')).Respiros(R, N, med, mord, { girada: opc.girada !== '0' }) : null; // (`girada=0`: without the arrival roll's smoke)
+// (8 Nov, the pixelfx round he approved: the fire, the seeds, the implosion, the vapour, the fireball; `pixelfx=0` keeps
+// the stand-ins)
+const PFX = CORPO !== 'blocos' && opc.pixelfx !== '0' ? await import('./enguia/efeitos.mjs') : null;
+const pfx = PFX ? { mod: PFX, camada: new PFX.Camada(N.tela.W, N.tela.H), vivos: [], estouro: null, fusao: null } : null;
 D.semLuz = opc.luz === '0'; // (`luz=0`: the art as drawn, no relight — for the sheet's comparison)
 D.rolagemAneis = opc.rolagem === 'aneis'; // (`rolagem=aneis`: the skin, but the roll ring by ring — his comparison)
-const NOME = `${JOG}${CORPO !== 'blocos' ? `-${CORPO}` : ''}${D.semLuz ? '-semluz' : ''}${D.rolagemAneis ? '-rolaneis' : ''}${opc.chegada ? `-cheg${opc.chegada}` : ''}`;
+const NOME = `${JOG}${CORPO !== 'blocos' ? `-${CORPO}` : ''}${CORPO !== 'blocos' && !RESP ? '-semresp' : ''}${CORPO !== 'blocos' && !PFX ? '-sempfx' : ''}${D.semLuz ? '-semluz' : ''}${D.rolagemAneis ? '-rolaneis' : ''}${opc.chegada ? `-cheg${opc.chegada}` : ''}`;
 const FPS = N.tela.fps, dt = 1 / FPS, T = Math.min(R.T, opc.ate ? Number(opc.ate) : R.T), DE = Number(opc.de ?? 0);
 const rnd = LCG(20261107), sorte = LCG(5);
 const cranio = mord.find((m) => m.cranio);
@@ -122,7 +129,7 @@ const momentos = {
   jorro: R.trechos.find((t) => t.hab === 'desfaz').t0 + 1.2,
   fim: R.trechos.find((t) => t.hab === 'fim').t0 + 0.6,
 };
-const fotosFeitas = new Set();
+const fotosFeitas = new Set(), md5s = [];
 // (`em=<t>,<t>…`: photos at chosen times too, with the skull joint's screen place in <nome>-juntas.json)
 const juntas = {};
 for (const tm of (opc.em ?? '').split(',').filter(Boolean)) momentos[`em-${tm}`] = Number(tm);
@@ -327,7 +334,8 @@ for (let f = 0; f * dt <= T; f++) {
   }
 
   // the looks: jets on the bends, the bites, the steam, the undoing
-  if (tr.tipo === 'move' && !tr.recua) {
+  if (RESP) RESP.passo(t, dt, P);
+  else if (tr.tipo === 'move' && !tr.recua) {
     for (let k = 1; k < P.aneis.length - 1; k++) {
       const a = P.aneis[k], b0 = P.aneis[k - 1], b1 = P.aneis[k + 1];
       const curva = (b0.x - a.x) * (b1.y - a.y) - (b0.y - a.y) * (b1.x - a.x);
@@ -363,7 +371,11 @@ for (let f = 0; f * dt <= T; f++) {
   for (const g of geis) {
     const yc = D.trilha[Math.round(g.x)];
     // the steam left behind: a bank of green-grey that spreads and drifts up (nothing falls)
-    if (Math.abs(t - g.tFim) < dt / 2) for (let i = 0; i < 34; i++) nasce({ x: g.x + (sorte() - 0.5) * 18, y: N.geiser.topo + sorte() * (yc - N.geiser.topo), vx: (sorte() - 0.5) * 36, vy: -8 - sorte() * 22, vida: N.geiser.vapor * (0.7 + sorte() * 0.6), cor: sorte() < 0.5 ? [96, 170, 128] : [70, 120, 100], tam: 2 + sorte() * 3, cresce: true, a: 0.45 });
+    // (8 Nov: with pixelfx the bank is the `poison-cloud` — the old puffs still roll their dice, unseen, so every later
+    // spark and puff of the fight comes out as approved)
+    if (pfx && Math.abs(t - g.tFim) < dt / 2) { const v = PFX.vaporFx(g.x, yc, Math.round(g.x)); v.para = t + N.geiser.vapor; pfx.vivos.push(v); }
+    const nasceVapor = pfx ? () => {} : nasce;
+    if (Math.abs(t - g.tFim) < dt / 2) for (let i = 0; i < 34; i++) nasceVapor({ x: g.x + (sorte() - 0.5) * 18, y: N.geiser.topo + sorte() * (yc - N.geiser.topo), vx: (sorte() - 0.5) * 36, vy: -8 - sorte() * 22, vida: N.geiser.vapor * (0.7 + sorte() * 0.6), cor: sorte() < 0.5 ? [96, 170, 128] : [70, 120, 100], tam: 2 + sorte() * 3, cresce: true, a: 0.45 });
     // the warning: the crack hisses — puffs out of it
     if (t >= g.tAviso && t < g.tColuna && sorte() < 0.6) nasce({ x: g.x + (sorte() - 0.5) * 14, y: yc - 1, vx: (sorte() - 0.5) * 14, vy: -14 - sorte() * 18, vida: 0.45, cor: [150, 230, 170], tam: 1.5, a: 0.6 });
     // (4th round) the rupture spits venom as it bursts, and the column sheds globules that fly off and float
@@ -398,8 +410,11 @@ for (let f = 0; f * dt <= T; f++) {
           pedaco: cel.map((p) => ({ dx: p.x - mx, dy: p.y - my, c: cor0(p), brasa: sorte() < 0.3, borda: [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => !tem.has(`${p.x + a},${p.y + b}`)) })) });
       } else for (const p of cel) nasce({ x: p.x, y: p.y, vx: Math.cos(an) * v * 0.7, vy: Math.sin(an) * v * 0.7, vida: 0.6 + sorte() * 0.7, cor: cor0(p), arrasto: 0.6 });
     }
-    nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.22, cor: [255, 244, 220], tam: 16, cresce: true });
-    nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.45, cor: [255, 150, 60], tam: 10, cresce: true, a: 0.7 });
+    if (pfx) pfx.estouro = { t, x: cx, y: cy }; // (8 Nov: the fireball in place of the two flat flashes)
+    else {
+      nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.22, cor: [255, 244, 220], tam: 16, cresce: true });
+      nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.45, cor: [255, 150, 60], tam: 10, cresce: true, a: 0.7 });
+    }
     nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.5, cor: [255, 200, 140], tam: 9, anel: true });
     nasce({ x: cx, y: cy, vx: 0, vy: 0, vida: 0.75, cor: [200, 70, 40], tam: 6, anel: true, a: 0.6 });
     for (let i = 0; i < 46; i++) { const an = sorte() * Math.PI * 2, v = 60 + sorte() * 120; nasce({ x: cx, y: cy, vx: Math.cos(an) * v, vy: Math.sin(an) * v, vida: 0.4 + sorte() * 0.5, cor: sorte() < 0.5 ? [255, 210, 120] : [255, 120, 40], arrasto: 1.2 }); }
@@ -422,12 +437,19 @@ for (let f = 0; f * dt <= T; f++) {
   // the fusion's stand-in: three lights (blue, green, orange) converge on the breach and implode
   const efemeras = [];
   if (tr.hab === 'fusao') {
-    const k = Math.min(1, e.tl / 1.2), alvo = { x: N.rombo.x, y: 178 };
-    [[230, 120, [88, 200, 255]], [290, 110, [96, 240, 136]], [350, 125, [255, 160, 64]]].forEach(([x, y, cor]) => {
+    // (8 Nov: with the implosion they arrive by 0.8 s, when it ends its pull — the pop at 1.02 s)
+    const k = Math.min(1, e.tl / (pfx ? 0.8 : 1.2)), alvo = { x: N.rombo.x, y: 178 };
+    if (!pfx || e.tl < 1.02) [[230, 120, [88, 200, 255]], [290, 110, [96, 240, 136]], [350, 125, [255, 160, 64]]].forEach(([x, y, cor]) => { // (swallowed at the pop)
       const px = x + (alvo.x - x) * k * k, py = y + (alvo.y - y) * k * k;
       efemeras.push({ x: px, y: py, vida: 1, idade: 0, tam: 3, cor }, { x: px, y: py, vida: 1, idade: 0, tam: 6, cor, a: 0.3 });
     });
-    if (e.tl > 1.2) efemeras.push({ x: alvo.x, y: alvo.y, vida: 1, idade: (e.tl - 1.2) / 0.4, tam: 26, cor: [255, 245, 230], cresce: true });
+    // (8 Nov: the white disc they ended in gives way to the pixelfx implosion, started with the fusion)
+    if (pfx && !pfx.fusao) { pfx.fusao = PFX.implosaoFx(alvo.x, alvo.y); pfx.vivos.push(pfx.fusao); }
+    if (!pfx && e.tl > 1.2) efemeras.push({ x: alvo.x, y: alvo.y, vida: 1, idade: (e.tl - 1.2) / 0.4, tam: 26, cor: [255, 245, 230], cresce: true });
+  }
+  if (pfx) {
+    for (const v of pfx.vivos) { v.update(dt); if (v.para != null && t >= v.para) v.stop(); }
+    pfx.vivos = pfx.vivos.filter((v) => !v.done());
   }
   for (let i = particulas.length - 1; i >= 0; i--) {
     const p = particulas[i];
@@ -453,6 +475,8 @@ for (let f = 0; f * dt <= T; f++) {
     semCabeca: ['desfaz', 'resto', 'fim'].includes(hab), morta: hab === 'fusao',
     mordida: t >= cranio.t ? MORDIDA_CRANIO : null, olhoAceso: !!eco?.lendo, modoCorpo: CORPO, gesto,
     decapitada: desfeita,
+    pfx,
+    respiros: RESP && hab !== 'fusao' ? RESP : null, luzCorpo: RESP ? (u) => RESP.luz(u) : null,
   };
   // (stage 3, his note "esses gaps em todas as gerações": `vaos=1` probes every frame for the scene showing through at
   // the skull's joint — the frame drawn again on a flat magenta ground; magenta pixels near the joint that a closing of
@@ -462,6 +486,8 @@ for (let f = 0; f * dt <= T; f++) {
   if (!filma && !foto) continue;
   const buf = quadro(D, s);
   if (filma) await escreve(buf);
+  // (`md5=1`: each raw frame's hash, before the encoder — to prove a change left the rest of the fight identical)
+  if (filma && opc.md5 === '1') md5s.push(createHash('md5').update(buf).digest('hex'));
   if (opc.fotos) for (const [nome, tm] of Object.entries(momentos)) if (!fotosFeitas.has(nome) && t >= tm) {
     fotosFeitas.add(nome);
     await sharp(Buffer.from(buf), { raw: { width: N.tela.W, height: N.tela.H, channels: 4 } }).resize(N.tela.W * 3, N.tela.H * 3, { kernel: 'nearest' }).png().toFile(path.join(OUT, `${NOME}-${nome}.png`));
@@ -494,6 +520,7 @@ const json = {
 };
 fs.writeFileSync(path.join(OUT, `${NOME}.json`), JSON.stringify(json, null, 1));
 if (opc.em) fs.writeFileSync(path.join(OUT, `${NOME}-juntas.json`), JSON.stringify(juntas, null, 1));
+if (opc.md5 === '1') fs.writeFileSync(path.join(OUT, `${NOME}-md5.txt`), md5s.join('\n'));
 if (opc.vaos === '1') fs.writeFileSync(path.join(OUT, `${NOME}-vaos.json`), JSON.stringify(vaosLista));
 console.log(`${JOG}: ${f2(T)} s · toques ${JSON.stringify(json.toquesPorTipo)} · ciclo ${json.ciclo} s · acertos ${JSON.stringify(acertos)}`);
 function f2(x) { return x.toFixed(1); }

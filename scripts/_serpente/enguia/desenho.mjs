@@ -78,6 +78,10 @@ function corpoArte(D, s, put, filtro) {
       const vx = -nx * dx + ny * lado * D0x, vy = -nx * dy + ny * lado * D0y; // the strip's +x runs to the tail (−d)
       const k = D.semLuz ? 1 : realce(C, nx, ny, nz, vx, -vy);
       r *= k; g *= k; b *= k;
+    } else if (dw == null && s.luzCorpo) { // (8 Nov: her lights swell where a breather fires, and with the rest wave)
+      const k = s.luzCorpo(u);
+      const kk = Math.min(k, 235 / Math.max(r, g, b, 1));
+      if (kk > 1) { r *= kk; g *= kk; b *= kk; } // (in her own hue — the 1st look pushed the neck's vents to white)
     }
     put(X, Y, [Math.min(255, r), Math.min(255, g), Math.min(255, b)]);
   };
@@ -381,7 +385,16 @@ export function quadro(D, s) {
     }
   }
   // ── 3 · the fire (behind her body: it leaves the pipes' mouths and runs left)
-  if (s.canos && s.canos.fase === 'fogo') {
+  // (8 Nov, the pixelfx round: the plasma stream of `efeitos.mjs` `fogoCanos`, laid over the frame here, behind her)
+  if (s.pfx && s.canos && s.canos.fase === 'fogo') {
+    const q = s.canos, F = N.canos.faixas, bocas = bocasDosCanos(P, N), pin = s.pfx.camada.pintor();
+    for (let l = 0; l < 4; l++) {
+      if (l === q.livre) continue;
+      const fim = q.k > 0.8 ? 1 - (q.k - 0.8) / 0.2 : 1;
+      s.pfx.mod.fogoCanos(pin, t, { x: bocas[l].x, y: (F[l] + F[l + 1]) / 2, meia: (F[l + 1] - F[l]) / 2 - 1, alcance: bocas[l].x + 6, frente: q.frente, fim, semente: l * 13 + 7 });
+    }
+    s.pfx.camada.compoe(out);
+  } else if (s.canos && s.canos.fase === 'fogo') {
     const q = s.canos, F = N.canos.faixas, bocas = bocasDosCanos(P, N);
     for (let l = 0; l < 4; l++) {
       if (l === q.livre) continue;
@@ -522,6 +535,8 @@ export function quadro(D, s) {
     }
     for (const sm of s.eco.sementes) {
       const pisca = sm.voo < 1 ? 1 : sm.falta < 0.3 ? (Math.floor(t * 20) % 2 ? 1 : 0.4) : 0.75 + 0.25 * Math.sin(t * 12 + sm.i);
+      // (8 Nov, the pixelfx round: a plasma core with its tendrils, `efeitos.mjs` `semente`)
+      if (s.pfx) { s.pfx.mod.semente(s.pfx.camada.pintor(), t, { x: sm.x, y: sm.y, r: 4.5, semente: sm.i * 17 + 3, k: pisca }); continue; }
       disco(sm.x, sm.y, 3.2, [8, 20, 40]);
       disco(sm.x, sm.y, 2.3, COR.ciano, pisca);
       put(sm.x - 0.5, sm.y - 0.5, [235, 248, 255], pisca);
@@ -534,6 +549,9 @@ export function quadro(D, s) {
     }
   }
 
+
+  // ── 6½ · the breathers (8 Nov, `respiros.mjs`): their gas and their jets, over her
+  if (s.respiros) s.respiros.desenha(put);
 
   // ── 7 · the particles (jets, debris, embers, steam, dust) — nothing falls: they drift and fade
   for (const p of s.particulas) {
@@ -555,6 +573,16 @@ export function quadro(D, s) {
       for (let i = 0; i < n; i++) { const an = (i / n) * Math.PI * 2; put(p.x + Math.cos(an) * r, p.y + Math.sin(an) * r, p.cor, a); }
     } else if (p.tam > 1) disco(p.x, p.y, p.tam * (p.cresce ? 1 + p.idade / p.vida : 1), p.cor, a);
     else put(p.x, p.y, p.cor, a);
+  }
+
+  // ── 7½ · (8 Nov) the pixelfx layer: the seeds above, the running instances (the fusion's implosion, the geysers'
+  // vapour) and the head's fireball, laid over the frame
+  if (s.pfx) {
+    const C = s.pfx.camada;
+    for (const inst of s.pfx.vivos) { C.pintor(); inst.draw(C.f); }
+    const e = s.pfx.estouro;
+    if (e && t - e.t < 1.6) s.pfx.mod.bolaDeFogo(C.pintor(), t - e.t, { x: e.x, y: e.y, semente: 5 });
+    C.compoe(out);
   }
 
   // ── 8 · the ship and its shots
