@@ -3,6 +3,7 @@ import { COLORS, GAME_WIDTH } from '../config';
 import { ICONES_CARTAS, RARIDADES } from '../cartas';
 import { ART_PECAS_F1, registrarPecasF1 } from '../f1/pecasF1';
 import { CONJUNTOS, IDLE_HAB } from '../entities/serpente/gestosHab';
+import { ARQUIVOS as ARQUIVOS_ENGUIA_BOOT } from '../entities/serpente/enguia/arquivos';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -637,6 +638,8 @@ const ART: Record<string, string> = {
   serpente2c: 'sprites/serpente-2c.png',
   serpente1c: 'sprites/serpente-1c.png',
   serpenteFusao: 'sprites/serpente-fusao.png',
+  // A ENGUIA COLOSSAL (08/11, a S2): a arte aprovada, lida pixel a pixel pela própria maquete portada (`enguia/arte.ts`)
+  ...ARQUIVOS_ENGUIA_BOOT,
   // O ROMBO DA SERPENTE (28/10, S1, a escolha dele: o conceito A, o rasgo): uma faixa do casco da PROA (duto2 | duto |
   // placa, 318×100, 34 px de céu acima da crista) com o rasgo no meio, por inpaint no PixelLab — ela entra NA faixa do
   // casco (`Parallax.inserirNoCasco`), e por isso não há emenda. O LÁBIO é a face do casco na frente das roscas dela:

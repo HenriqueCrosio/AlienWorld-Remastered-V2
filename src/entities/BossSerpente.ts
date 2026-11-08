@@ -8,6 +8,9 @@ import { ERGUER, type Cor } from './gestoSerpente';
 import { MORDIDAS_FUSAO } from './serpenteFusao';
 import type { DevSerpente } from './serpente/atalho';
 import { CamadaPixels } from './serpente/camadaPixels';
+import { aditivoPuro } from './serpente/aditivo';
+import { EnguiaEmJogo } from './serpente/enguia/emJogo';
+import { VidaEnguia } from './serpente/enguia/vida';
 import { CONJUNTOS, IDLE_HAB } from './serpente/gestosHab';
 import type { CorpoSerpente, Habilidade } from './serpente/habilidade';
 import { Luzes } from './serpente/luzes';
@@ -60,25 +63,8 @@ export interface ArenaSerpente {
 
 type Corpo = 'nada' | 'repouso';
 
-/**
- * O ADITIVO PURO (02/11 — ele: *"existe uma tela preta em volta da serpente [...] fica mais aparente quando nuvem mais
- * clara passa atrás"*). O `ADD` do Phaser é (ONE, DST_ALPHA): o que já está desenhado é MULTIPLICADO pelo próprio alfa.
- * As nuvens do céu são semitransparentes (alfa < 1 no alvo da câmera), então um quadrado aditivo, mesmo vazio, as
- * escurece — e o das VEIAS tem o tamanho do quadro dela: um retângulo escuro em volta dela, nítido sobre nuvem clara
- * (medido: o céu logo dentro da borda do quadro 28,9 contra 32,3 logo fora; com o aditivo puro, nenhuma queda). O
- * (ONE, ONE) só soma luz. Um por renderizador.
- */
-const ADITIVO_PURO = new WeakMap<Phaser.Renderer.WebGL.WebGLRenderer, number>();
-function aditivoPuro(scene: Phaser.Scene): number {
-  const r = scene.renderer;
-  if (!(r instanceof Phaser.Renderer.WebGL.WebGLRenderer)) return Phaser.BlendModes.ADD;
-  let m = ADITIVO_PURO.get(r);
-  if (m === undefined) {
-    m = r.addBlendMode([r.gl.ONE, r.gl.ONE], r.gl.FUNC_ADD);
-    ADITIVO_PURO.set(r, m);
-  }
-  return m;
-}
+// O ADITIVO PURO das veias (o (ONE, ONE) — ver `serpente/aditivo.ts`, de onde a luz da enguia também o tira; o das
+// VEIAS tem o tamanho do quadro dela, e o `ADD` do Phaser escurecia um retângulo em volta dela sobre nuvem clara).
 
 /**
  * SERPENTE DO CASCO — chefão da Fase 3. A luta é por ANATOMIA (design do Henrique).
@@ -170,6 +156,14 @@ export class BossSerpente implements StageBoss {
   private fusaoPasso: 'afundando' | 'silencio' | 'luzes' | 'implosao' | 'surgindo' | null = null;
   private fusaoT = 0;
   private fusaoObjs: Phaser.GameObjects.GameObject[] = [];
+  /**
+   * A ENGUIA COLOSSAL (08/11, a S2 — spec `2026-11-03-serpente-grande-enguia-design.md`): a fase 4 da luta, no lugar da
+   * fusão de hoje. Ela roda num worker (`serpente/enguia/`), portada da maquete aprovada; aqui ficam a vida dela, a barra
+   * e o contrato com a cena. `emEnguia`: ela já irrompeu (o resto da máquina de formas para).
+   */
+  private enguia: EnguiaEmJogo | null = null;
+  private vidaEnguia: VidaEnguia | null = null;
+  private emEnguia = false;
 
   /** AS VEIAS (28/10, S1 — no lugar da estrela) e a SOMBRA que apaga as das outras cabeças. */
   private readonly veias: Phaser.GameObjects.Image;
@@ -356,6 +350,15 @@ export class BossSerpente implements StageBoss {
     this.habs.gas = new Gas(this.corpoHab);
 
     this.definirCorpo(rombo ? 'nada' : 'repouso');
+
+    // A ENGUIA: o worker monta a arte dela já agora (≈1 s, fora da linha do jogo), muito antes da fusão
+    if (scene.textures.exists('enguiaF1') && typeof Worker !== 'undefined')
+      this.enguia = new EnguiaEmJogo(scene, { maquete: this.dev?.roteiro === 'maquete', taxa: this.dev?.taxa ?? 30 });
+  }
+
+  /** A MORTE ENCENADA (a enguia, `StageBoss.morteAcabou`): ela já tocou a própria morte no rombo; a cena só fecha. */
+  get morteAcabou(): boolean {
+    return this.emEnguia && !!this.enguia?.estado?.acabou;
   }
 
   get isDead(): boolean {
@@ -366,13 +369,17 @@ export class BossSerpente implements StageBoss {
    * Os DESTROÇOS (27/10): a vida é a da luta inteira, e a morte é a ruptura nos próprios pixels (D1). As mordidas (28/10)
    * são três, todas na fusão, cada uma no seu ponto: pescoço, queixo, crânio; nas outras formas a mira é a cabeça viva.
    */
-  get destrocos(): {
-    quem: string;
-    vida: number;
-    forma: number;
-    mira?: { x: number; y: number } | { x: number; y: number }[];
-    zona?: { x: number; y: number; r: number };
-  } {
+  get destrocos():
+    | {
+        quem: string;
+        vida: number;
+        forma: number;
+        mira?: { x: number; y: number } | { x: number; y: number }[];
+        zona?: { x: number; y: number; r: number };
+      }
+    | undefined {
+    // (a enguia se desfaz pelas próprias mordidas e pela morte no rombo: o motor de destroços não morde um sprite escondido)
+    if (this.emEnguia) return undefined;
     const viva = this.cabeca.active ? { x: this.cabeca.x, y: this.cabeca.y } : undefined;
     const f = this.fase;
     return {
@@ -443,9 +450,16 @@ export class BossSerpente implements StageBoss {
     if (this.imune > 0) this.imune -= dt;
     this.alvo = target;
 
+    // a enguia: a arte dela lida aos poucos (uns PNGs por quadro, até mandar ao worker); depois, o relógio dela anda
+    // desde as luzes da fusão (a resposta do worker chega num quadro seguinte)
+    this.enguia?.carrega();
+    if (this.enguia?.ativa) {
+      const b = target.body as Phaser.Physics.Arcade.Body;
+      this.enguia.update(dt, { x: b.center.x, y: b.center.y });
+    }
     if (this.entering) this.chegar(dt);
     else if (this.colapso) this.colapsar(dt);
-    else {
+    else if (!this.emEnguia) {
       this.mover();
       this.atacar(dt, target);
       this.fumegar(dt);
@@ -459,7 +473,8 @@ export class BossSerpente implements StageBoss {
     if (this.abortando && !this.abortando.viva) this.abortando = null;
     this.rescaldo?.update(dt);
     if (this.rescaldo && !this.rescaldo.restos) this.rescaldo = null;
-    this.sincronizarCabeca();
+    if (this.emEnguia) this.sincronizarEnguia();
+    else this.sincronizarCabeca();
     this.casco?.update(dt);
     // a camada: o que elas soltam, sobre o corpo dela ou sob a nave
     this.camada.inicio();
@@ -498,6 +513,8 @@ export class BossSerpente implements StageBoss {
    * corte reto continua valendo para eles (`sonda-hab mapa-gestos`).
    */
   acertoNoCorpo(x0: number, y0: number, x1: number, y1: number): 'cabeca' | 'corpo' | 'casco' | null {
+    // (a enguia: o que ela pintou no último quadro — a cabeça, o corpo, ou o lábio na frente dela)
+    if (this.emEnguia) return this.dead || !this.enguia ? null : this.enguia.acerto(x0, y0, x1, y1);
     if (this.dead || this.corpo === 'nada') return null;
     const ela = this.camada.mascara(this.sprite);
     if (!ela) return null;
@@ -518,6 +535,8 @@ export class BossSerpente implements StageBoss {
 
   /** O que a habilidade fere por medição (o raio, a geleia de fogo): `StageBoss.morde`. */
   morde(esq: number, dir: number, topo: number, base: number): boolean {
+    // (a enguia: o corpo e a cabeça dela, o fogo dos canos, os gêiseres e as explosões do Eco — os perigos da maquete)
+    if (this.emEnguia) return !!this.enguia && !this.dead && this.enguia.morde(esq, dir, topo, base);
     const h = this.habViva();
     return !!h && h.viva && !!h.morde && h.morde(esq, dir, topo, base);
   }
@@ -570,8 +589,10 @@ export class BossSerpente implements StageBoss {
       this.entering = false;
       this.entrada = null;
       this.definirCorpo('repouso');
-      // O ATALHO DE DEV (spec das habilidades §5.6): a forma pedida já na chegada
-      if (this.dev && this.dev.forma !== 'A') this.vestirFase({ A: 0, B: 1, C: 2, fusao: 3 }[this.dev.forma]);
+      // O ATALHO DE DEV (spec das habilidades §5.6): a forma pedida já na chegada (a fusão: a cena da fusão já aqui, e a
+      // enguia irrompe dela)
+      if (this.dev?.forma === 'fusao') this.fusao();
+      else if (this.dev && this.dev.forma !== 'A') this.vestirFase({ A: 0, B: 1, C: 2 }[this.dev.forma]);
     }
   }
 
@@ -994,6 +1015,7 @@ export class BossSerpente implements StageBoss {
   // ─── Dano e fases ───────────────────────────────────────────────────────────
 
   damage(amount: number, onde?: 'alvo' | 'corpo'): boolean {
+    if (this.emEnguia) return this.danoEnguia(amount);
     if (this.dead || this.entering || this.imune > 0 || this.corpo === 'nada') return false;
 
     // O TETO POR GOLPE (30/10, `golpeMax`): nenhum acerto tira mais de 1/3 da vida da forma (a bomba tira 12).
@@ -1022,6 +1044,44 @@ export class BossSerpente implements StageBoss {
 
     this.transicao();
     return false;
+  }
+
+  /**
+   * O DANO NA ENGUIA (spec §6.1–6.4, `VidaEnguia`): o teto por golpe de sempre; as mordidas a 22 / 13 / 5 % da vida
+   * DELA viram pedidos à luta (a cauda espera aparecer; o crânio liga a reta final); fora da pausa do Eco da reta final
+   * a vida não passa de 1, e ali ela chega a 0 e a morte começa. Nunca devolve true: a morte é encenada, e a cena fecha
+   * pelo `morteAcabou`.
+   */
+  private danoEnguia(amount: number): boolean {
+    const e = this.enguia?.estado, v = this.vidaEnguia;
+    if (this.dead || !e || !v || !this.enguia) return false;
+    const antes = v.hp;
+    const r = v.fere(Math.min(amount, golpeMax(LUTA.vida.fusao)), { podeMorrer: e.podeMorrer, imune: e.imune });
+    this.hpTotal -= antes - v.hp;
+    this.bar.width = 160 * Math.max(0, this.hpTotal / this.maxHpTotal);
+    if (this.dev?.roteiro !== 'maquete') {
+      for (const pct of r.mordidas) this.enguia.mordida(pct);
+      if (r.morreu) this.enguia.mata();
+    }
+    return false;
+  }
+
+  /** A cabeça-alvo e o casco seguem a enguia (o último quadro pronto do worker). */
+  private sincronizarEnguia(): void {
+    const e = this.enguia?.estado;
+    if (this.romboLabio && this.rombo) this.romboLabio.setPosition(this.rombo.x, this.rombo.y);
+    this.veias.setVisible(false);
+    this.sombra.setVisible(false);
+    if (!e) return;
+    this.cabeca.setPosition(e.cabeca.x, e.cabeca.y);
+    this.sprite.setPosition(e.cabeca.x, e.cabeca.y);
+    if (this.casco) {
+      this.casco.lombada = e.lombada;
+      // (the crack behind her, as the mock draws it: the living hull paints it, healing from the breach's end)
+      this.casco.fissuras.length = 0;
+      for (const f of e.fissuras) this.casco.fissuras.push({ de: f.de, ate: f.ate, origem: f.ate, cura: f.cura > 0 ? f.cura : null });
+      this.casco.frente(1, 0);
+    }
   }
 
   /**
@@ -1151,9 +1211,15 @@ export class BossSerpente implements StageBoss {
         break;
       }
       case 'silencio':
-        if (this.fusaoT <= 0) this.acenderLuzes();
+        // (a enguia: o silêncio espera o worker ter a arte pronta — ele começou no início da luta)
+        if (this.fusaoT <= 0 && (!this.enguia || this.enguia.pronta || this.enguia.erro)) this.acenderLuzes();
         break;
       case 'luzes':
+        // a enguia: o estalo da implosão do pixelfx (1,02 s no relógio dela) é a detonação
+        if (this.enguia?.ativa) {
+          if (this.enguia.t >= 1.02) this.detonar();
+          break;
+        }
         if (this.fusaoT <= 0) {
           const cx = this.romboX(), cy = LUTA.crista + 14;
           this.fx.implodeBig(cx, cy, 1.2, 28);
@@ -1189,8 +1255,13 @@ export class BossSerpente implements StageBoss {
       { x: cx, y: LUTA.crista + 2 },
       { x: cx + 52, y: LUTA.crista + 6 },
     ];
-    const nucleo = this.scene.add.image(cx, cy, 'fusaoNucleo').setDepth(34).setScale(0).setAlpha(0).setName('nucleoDaFusao');
-    this.fusaoObjs.push(nucleo);
+    // A ENGUIA (decisão 9 do plano): as luzes chegam aos 0,8 s, e a implosão do pixelfx (desenhada por ela) toma o lugar
+    // do núcleo e do `implodeBig`; o relógio dela começa aqui
+    const comEnguia = !!this.enguia?.pronta && !this.enguia.erro;
+    const conv = comEnguia ? 0.8 : F.convergencia;
+    if (comEnguia) this.enguia?.comeca();
+    const nucleo = comEnguia ? null : this.scene.add.image(cx, cy, 'fusaoNucleo').setDepth(34).setScale(0).setAlpha(0).setName('nucleoDaFusao');
+    if (nucleo) this.fusaoObjs.push(nucleo);
     origens.forEach((o, i) => {
       const fio = this.scene.add
         .image(o.x, o.y, 'spark')
@@ -1208,10 +1279,10 @@ export class BossSerpente implements StageBoss {
       const halo = this.scene.add.image(o.x, o.y, 'puff').setTint(BossSerpente.CORES_CABECAS[i]).setBlendMode(Phaser.BlendModes.ADD).setDepth(34).setScale(0).setAlpha(0.6);
       this.fusaoObjs.push(halo);
       this.scene.tweens.add({ targets: halo, scale: 0.9, duration: 200, ease: 'Quad.easeOut' });
-      this.scene.tweens.add({ targets: halo, x: cx, y: cy, delay: 300, duration: F.convergencia * 1000 - 200, ease: 'Quad.easeIn', onComplete: () => halo.destroy() });
-      this.scene.tweens.add({ targets: fio, x: cx, y: cy, delay: 300, duration: F.convergencia * 1000 - 200, ease: 'Quad.easeIn', onComplete: () => fio.destroy() });
+      this.scene.tweens.add({ targets: halo, x: cx, y: cy, delay: 300, duration: conv * 1000 - 200, ease: 'Quad.easeIn', onComplete: () => halo.destroy() });
+      this.scene.tweens.add({ targets: fio, x: cx, y: cy, delay: 300, duration: conv * 1000 - 200, ease: 'Quad.easeIn', onComplete: () => fio.destroy() });
     });
-    this.scene.tweens.add({ targets: nucleo, scale: 1.0, alpha: 1, delay: 300, duration: F.convergencia * 1000 - 200, ease: 'Quad.easeIn' });
+    if (nucleo) this.scene.tweens.add({ targets: nucleo, scale: 1.0, alpha: 1, delay: 300, duration: conv * 1000 - 200, ease: 'Quad.easeIn' });
     for (let i = 0; i < 5; i++) {
       this.scene.time.delayedCall(300 + i * 140, () => {
         if (this.dead) return;
@@ -1236,13 +1307,32 @@ export class BossSerpente implements StageBoss {
       }
     }
     for (let i = 0; i < 18; i++) this.poeiraFx.emitParticleAt(cx + Phaser.Math.Between(-70, 70), LUTA.crista - Phaser.Math.Between(0, 8));
-    this.vestirFase(this.faseIdx + 1);
-    this.sprite.setPosition(cx, escondidaRombo(this.forma));
-    this.mostrar();
     this.fx.choque(cx, LUTA.crista, 2.2);
     this.scene.cameras.main.shake(360, 0.014);
     // BRANCO, não rosa — rosa é dano, branco é nascimento
     this.scene.cameras.main.flash(220, 255, 255, 255);
+    if (this.enguia?.ativa) {
+      // A ENGUIA IRROMPE (a pausa `fusao` dela segue até 1,6 s; depois o arco): a máquina das formas para, o sprite some
+      // (ela é as lonas do worker), a vida dela começa (`?vida=` no atalho de dev a começa mais baixa)
+      this.faseIdx = BossSerpente.FASES.length - 1;
+      this.hpFase = LUTA.vida.fusao;
+      const inicio = this.dev?.vida != null ? Math.max(0.01, Math.min(1, this.dev.vida / 100)) : 1;
+      this.vidaEnguia = new VidaEnguia(LUTA.vida.fusao, inicio);
+      this.hpTotal -= LUTA.vida.fusao * (1 - inicio);
+      this.bar.width = 160 * Math.max(0, this.hpTotal / this.maxHpTotal);
+      this.sprite.anims.stop();
+      this.sprite.setVisible(false);
+      this.definirCorpo('nada');
+      this.tocador.soltar();
+      this.emEnguia = true;
+      this.colapso = false;
+      this.fusaoPasso = null;
+      this.imune = 0;
+      return;
+    }
+    this.vestirFase(this.faseIdx + 1);
+    this.sprite.setPosition(cx, escondidaRombo(this.forma));
+    this.mostrar();
     this.fusaoPasso = 'surgindo';
   }
 
@@ -1287,5 +1377,7 @@ export class BossSerpente implements StageBoss {
     this.casco?.destroy();
     this.camada.destroy();
     this.luzes.destroy();
+    this.enguia?.destroy();
+    this.enguia = null;
   }
 }

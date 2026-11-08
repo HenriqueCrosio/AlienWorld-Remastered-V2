@@ -988,6 +988,8 @@ export class GameScene extends Phaser.Scene {
     }
     this.pickups.update();
     this.boss?.update(dt, this.ship);
+    // (a morte encenada — a enguia — acaba sozinha, sem um golpe que a mate: a cena fecha quando ela pede)
+    if (this.boss?.morteAcabou && !this.boss.isDead) this.killBoss();
     this.golfinho?.update(dt, this.ship);
     // ⚠️ A ÁGUA ANDA COM `dt` CRU, e não com o relógio da fase. A arena SEGURA o relógio em t=49,5
     // (`golfinhoSeguraEm`), então amarrar o enchimento ao `elapsed` congelaria a água no meio do
@@ -2257,6 +2259,14 @@ export class GameScene extends Phaser.Scene {
   private killBoss(): void {
     const boss = this.boss!;
     this.score += 2000;
+
+    // A MORTE ENCENADA (a enguia, `StageBoss.morteAcabou`): ela já morreu no rombo, na frente dele — a cena só fecha
+    if (boss.morteAcabou) {
+      boss.destroy();
+      this.boss = null;
+      this.time.delayedCall(boss.pausaFinalMs ?? 1400, () => this.victory());
+      return;
+    }
 
     // O PESO do impacto: o mundo congela por um instante no momento da morte — antes da
     // cadeia. Sem hitstop, matar o chefão é só mais uma explosão; com ele, é A explosão.

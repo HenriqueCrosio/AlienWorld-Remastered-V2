@@ -39,6 +39,12 @@ export interface StageBoss {
    */
   readonly pausaFinalMs?: number;
   /**
+   * A MORTE ENCENADA (a enguia da Serpente, 08/11): o chefão toca a própria morte (presa no rombo, a cabeça se desfaz, o
+   * resto afunda) e, quando ela acaba, isto vira verdadeiro — a cena chama `killBoss`, que então pula a cadeia de
+   * explosões e o estouro final e só fecha. Ausente = a morte de sempre (o `damage` que devolve true).
+   */
+  readonly morteAcabou?: boolean;
+  /**
    * O que o chefão põe na arena que FERE POR CONTATO mas NÃO é alvo — a serra do guardião da Fase 4.
    * A cena liga um `overlap` com a nave e mais nada: ninguém registra as balas do jogador contra este
    * grupo, e é justamente isso que faz a bala ATRAVESSAR a serra. Ausente = o chefão não põe nada.
