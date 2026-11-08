@@ -323,3 +323,9 @@ Chamadas principais de câmera:
 5. **GameOver reinicia SEMPRE na Fase 1 com o jato** (GameOverScene.ts:86) — morrer na Fase 4 perde a campanha toda; decisão de design a revisitar na rodada de balanceamento
 6. **Pool de projéteis do jogador = 128** e do inimigo = 64: em fúria do Núcleo (leque 5 + mirado + anéis) o pool inimigo é o recurso mais apertado — tiros descartados silenciosamente quando cheio
 7. **Sem no-hit bonus, sem bomba, sem continue** — três alavancas clássicas de balanceamento disponíveis e não utilizadas
+8. **(08/11) A VIDA DA ENGUIA COLOSSAL** (a fase 4 da Serpente, no lugar da fusão — `BossSerpente`, `LUTA.vida.fusao`
+   = 120, a de antes, calibrada com o bug dos tiros de 03/11). Ele jogou e aprovou a luta como está, e mandou a vida
+   para cá. O alvo da spec (`specs/2026-11-03-serpente-grande-enguia-design.md` §6.1): ela morrer em 2–3 voltas, ~60–80 s
+   (um ciclo dura ~27–36 s). As mordidas caem a 22 / 13 / 5 % da vida DELA (`serpente/enguia/vida.ts`), o teto por
+   golpe é o `golpeMax` (1/3), a cabeça vale 1,5×. Para testar: `?serpente=fusao&vida=<pct>`; sem jogador,
+   `node scripts/test-enguia-porte.mjs motor` (dano contínuo de 0,12 por passo à vista → morreu em ~72 s)

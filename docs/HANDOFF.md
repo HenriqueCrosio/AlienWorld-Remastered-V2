@@ -16,12 +16,50 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-08-enguia-instalacao-START.md`. A Parte B passos 1–3
-> (os anéis, a girada, as 6 animações da cabeça, os respiros e os 5 efeitos do pixelfx) estão APROVADOS e commitados,
-> tudo na MAQUETE. A sessão abre no passo 4: escrever o PLANO NOVO da instalação da enguia no jogo
-> (superpowers:writing-plans) e mostrar a ele antes de mexer no `src/`."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-cenario-luta-serpente-START.md`. A Serpente grande (a
+> enguia colossal) está fechada e commitada. A sessão abre no CENÁRIO da luta da Serpente: começar pelas perguntas a
+> ele (superpowers:brainstorming), antes de gerar qualquer arte."**
 >
-> (O arranque anterior abria na Parte B passo 3, os efeitos do corpo: feitos e aprovados em 08/11, ver o 📍 abaixo.)
+> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO da luta (o próximo) → H → I → J → F.** O START do
+> cenário traz o que a arena é hoje, os fatos já medidos (as nuvens `nebula3` são PNGs pequenos AMPLIADOS 1–3×, contra
+> a lei dos fundos; a camada de brilho dos destroços que escurece as nuvens; o tranco do `cascoVivo.copiar()`) e as
+> perguntas de abertura.
+>
+> 📍 **08/11 (fim) — A ENGUIA APROVADA NO JOGO.** Ele viu a folha, jogou e: *"aprovo da forma que está"*. Ficam como
+> estão a taxa 30 (o padrão), a reta final que segue até o posto e mergulha sem os canos, e o Eco final repetido. *"Sobre
+> a vida, vai entrar para a parte de rebalanceamento"*: o item 8 do apêndice de `docs/MAPA_TECNICO_BALANCEAMENTO.md` (o
+> passo 5 do plano mãe vira isso; o START `plans/2026-11-09-enguia-calibragem-START.md` ficou só como registro).
+> **COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`:
+> - `c47b916`: o jogo — `src/entities/serpente/enguia/`, as 76 imagens em `public/sprites/enguia/`, o `BossSerpente`,
+>   a `GameScene` e o `StageBoss.morteAcabou`;
+> - `c415bec`: o oráculo, as sondas e a folha `folhas/2026-11-08/enguia-jogo/`, com as fotos da arena de hoje;
+> - os docs.
+>
+> Os vídeos e o `cru/` ficaram fora. O `npm run build` empacota o worker (`enguia.worker-*.js`, 128 KB).
+>
+> 📍 **08/11 (noite) — O PASSO 4: A ENGUIA NO JOGO.** Plano `plans/2026-11-08-enguia-instalacao.md` (Tarefas 1–11 feitas;
+> a 12 são estes registros). Ele mandou escrever o plano e já implementar.
+> - **O porte:** cada arquivo da maquete virou um `.ts` em `src/entities/serpente/enguia/` (mesmo nome, mesma lógica). O
+>   oráculo `scripts/test-enguia-porte.mjs` compara módulo a módulo com a maquete, e `scripts/_serpente/_enguia-porte.mjs`
+>   roda a luta inteira pelo porte: **o md5 dos 3.300 quadros IGUAL ao da maquete** (`desvia` e `parado`; JSON igual).
+> - **A arte** é calculada no carregamento a partir dos PNG aprovados (copiados para `public/sprites/enguia/` por
+>   `_enguia-assets.mjs`), pelo mesmo código; o mapa 8× do RotSprite é feito na hora (`ampliado.ts`: 376 MB → nada).
+> - **As lonas** (`alvos.ts` `AlvoLonas`): cima (ela, o lábio e o que cai neles, sobre a nave), luz (o aditivo puro
+>   do pixelfx sobre o vazio) e baixo (sob a nave). Compostas sobre a foto: ≤ 2 de diferença da maquete.
+> - **O desempenho:** o porte idêntico custa 11 ms / 24 ms (p50/p95) por passo; a fumaça da raspada (até 5.400
+>   partículas) e o fogo dos canos pesam. **Escolha dele: o worker** (`enguia.worker.ts` + `motor.ts`). No navegador, a
+>   linha do jogo fica em 0,5 / 1,0 ms; o worker, 12 / 26 ms por passo, a 30 passos/s (`?taxa=auto` = 60 quando dá).
+>   Ele perguntou se 30 lê estranho: o vídeo lado a lado está na folha para ele escolher.
+> - **A vida** (`vida.ts`): mordidas a 22 / 13 / 5 %, piso de 1 fora da pausa do Eco da reta final; a morte encenada
+>   (`StageBoss.morteAcabou`, a cena só fecha). Decisões a confirmar com ele: na volta ao posto a reta final segue até o
+>   posto e mergulha sem canos (não a meia-volta da spec); o Eco final se repete até ela morrer.
+> - **O atalho:** `?serpente=fusao` (+ `&roteiro=maquete`, `&vida=<pct>`, `&taxa=30|auto`). A sonda:
+>   `scripts/_serpente/_sonda-enguia.mjs` (`--filmar`, `--perfil <quadro>`).
+> - **Achado fora do passo:** o `cascoVivo.copiar()` dá um tranco de ~0,6–0,8 s quando o mundo para (na sonda, GPU por
+>   software). Já existia.
+> - **Nada commitado** (ele pede quando quiser; vídeos e `cru/` fora).
+>
+> (O arranque anterior abria no passo 4, a instalação: feito em 08/11, acima.)
 >
 > 📍 **08/11 — A PARTE B PASSO 3 FECHADO: OS RESPIROS E OS EFEITOS DO PIXELFX, APROVADOS E COMMITADOS.** Tudo na
 > MAQUETE; folha `folhas/2026-11-08/enguia-respiros/respiros.html` (3 rodadas):

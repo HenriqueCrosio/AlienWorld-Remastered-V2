@@ -1,5 +1,8 @@
 # START — a enguia colossal (S2): o PASSO 4, a instalação no jogo
 
+> ⚠️ **FECHADO EM 08/11:** o plano `plans/2026-11-08-enguia-instalacao.md` foi feito e aprovado por ele jogando. O
+> próximo item do roadmap é o START `plans/2026-11-09-cenario-luta-serpente-START.md`.
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. A Parte B passos 1–3 (os anéis, a girada, as 6
 > animações da cabeça, os respiros e os 5 efeitos do pixelfx) estão APROVADOS e commitados, tudo na MAQUETE. A sessão
 > abre no passo 4: escrever o PLANO NOVO da instalação da enguia no jogo (superpowers:writing-plans) e mostrar a ele

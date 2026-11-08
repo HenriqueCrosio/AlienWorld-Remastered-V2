@@ -384,6 +384,8 @@ tinha o pedido.
 > **08/11:** o passo 3 (os efeitos) FEITO e aprovado na maquete: os respiros com jato (`enguia/respiros.mjs`) e 5
 > efeitos do pixelfx copiados e adaptados (`enguia/efeitos.mjs`, `enguia/pixelfx/`); folha
 > `folhas/2026-11-08/enguia-respiros/respiros.html`. O passo 4 abre pelo START `plans/2026-11-08-enguia-instalacao-START.md`.
+> **08/11 (fim): o passo 4 FEITO** (plano `plans/2026-11-08-enguia-instalacao.md`, a enguia no jogo idêntica à maquete,
+> num worker) **e APROVADO por ele jogando; o passo 5 (a vida) foi para o rebalanceamento. A Serpente grande FECHOU.**
 
 Os números e os caminhos aprovados na maquete são a fonte. Cada parte abre o seu plano curto quando chegar a vez:
 
