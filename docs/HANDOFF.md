@@ -24,7 +24,7 @@ sprite que se desfaz nos próprios pixels).
 > enguia escura) → I (1 ✅ as explosões → 2 os flashes → 3 a tela final) → J → F.**
 >
 > 📍 **09/11 (fim) — COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: a etapa 1 do bloco I em três
-> commits (o jogo; as ferramentas, o teste e as folhas, sem os vídeos e os `q/`; os docs, com o START da etapa 2,
+> commits (`60bccee` o jogo; `d1f99ba` as ferramentas, o teste e as folhas, sem os vídeos e os `q/`; `c882db1` os docs, com o START da etapa 2,
 > `plans/2026-11-09-bloco-i-etapa2-START.md`, que traz o inventário dos 21 flashes e as perguntas).
 >
 > 📍 **09/11 (7) — BLOCO I, ETAPA 1 APROVADA COM UM AJUSTE NA CUTSCENE 1 (feito).** Ele: *"Boa, eu gostei. só tome
