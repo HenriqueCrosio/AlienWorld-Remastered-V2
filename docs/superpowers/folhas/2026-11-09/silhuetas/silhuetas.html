@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silhuetas que passam</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 15px; margin: 18px 0 6px; color: var(--destaque); }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  .grade2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .grade2 span { color: var(--suave); font-size: 13px; text-align: center; display: block; margin: 2px 0 10px; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+  @media (max-width: 720px) { .grade2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>As silhuetas que passam — bloco H, rodada 1</h1>
+  <p class="suave">09/11 · no jogo: <code>?silF3=A|B|C</code> (F3) e <code>?silF4=A|B|C</code> (F4); <code>=0</code> desliga.
+    Sem a chave, o jogo usa a A até você escolher. Só cenário: sem corpo, sem dano, fora de todo grupo.</p>
+  <p>As suas respostas: F1 e F2 ficam como estão. F3: <i>"a silhueta distante da serpente (enguia), ela passa rápido e ao
+    longe"</i> e, depois, <i>"quero ela maior do que a silhueta do leviatã e do golfinho [...] vista e de mais perto"</i>,
+    <i>"cruze a tela de forma rápida, então ela pode ter um tamanho bom"</i>. F4: <i>"a silhueta do golfinho pode aparecer
+    na câmara torácica"</i>.</p>
+
+  <h2>A arte</h2>
+  <p>Saiu da arte aprovada, pela receita da silhueta do Leviatã: reduzida a partir do quadro grande em cada tamanho em que
+    aparece (nunca ampliada nem encolhida pelo jogo, senão o aro de 1 px vira pontilhado), com o aro frio nas costas.</p>
+  <h3>A enguia (a F1 aprovada, inteira)</h3>
+  <p>Em 150, 190 e 240 px de comprimento, ou seja, de 40% a 60% da tela (a do Leviatã tem 40–60 px). Ela nada por uma onda
+    que corre da cabeça para a cauda, como o corpo dela no jogo, com a cabeça firme, em 12 quadros. As duas versões
+    guardam as luzes dela: o olho e a cauda ciano e a goela laranja.</p>
+  <img src="arte/enguia-longe-aro-x3.png">
+  <p class="suave">Chapada: só a sombra, o aro e as luzes (A).</p>
+  <img src="arte/enguia-longe-afundada-x3.png">
+  <p class="suave">Afundada: o corpo dela escurecido para o tom da nuvem, com os anéis à mostra (B e C).</p>
+  <h3>O golfinho (o nado aprovado, 9 quadros)</h3>
+  <p>De 10 a 30 px, distante, com o aro na luz da água.</p>
+  <img src="arte/golfinho-longe-x6.png">
+
+  <h2>F3 — a enguia no Ato 1</h2>
+  <p>Ela cruza da esquerda para a direita, nadando à frente, para onde a nave vai: é lá que ela espera (a Serpente, aos 97 s).
+    Passa aos <b>19 s</b> e sai aos 23 s: depois da 1ª aparição da lula, com os kamikazes dos 20 s passando por baixo dela. No 1º filme ela passava aos 22 s, e os batedores dos 24 s entravam pela direita na mesma altura, escuros sobre o corpo escuro dela; por isso adiantei. Fica na
+    frente da nuvem do meio e das rochas escuras distantes, e atrás de todo inimigo e dos véus. Na 1ª foto, atrás da nuvem,
+    ela quase sumia.</p>
+  <h3>A — a sombra</h3>
+  <p>Chapada: só a sombra, o aro frio e as luzes dela. 190 px, 4,2 s de borda a borda.</p>
+  <video src="f3-A/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2" style="margin-top:6px"><div><img src="f3-A/foto-20.5s.png"><span>20,5 s</span></div><div><img src="f3-A/foto-21.5s.png"><span>21,5 s</span></div></div>
+  <h3>B — afundada na nuvem</h3>
+  <p>O mesmo caminho, mas com o corpo dela à mostra (os anéis), escurecido para o tom da nebulosa.</p>
+  <video src="f3-B/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2" style="margin-top:6px"><div><img src="f3-B/foto-20.5s.png"><span>20,5 s</span></div><div><img src="f3-B/foto-21.5s.png"><span>21,5 s</span></div></div>
+  <h3>C — mais perto</h3>
+  <p>A maior (240 px), afundada, e mais rápida (3,6 s).</p>
+  <video src="f3-C/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2" style="margin-top:6px"><div><img src="f3-C/foto-20.5s.png"><span>20,5 s</span></div><div><img src="f3-C/foto-21.5s.png"><span>21,5 s</span></div></div>
+  <p class="suave">Os vídeos estão no dobro da tela, em velocidade real, de 18,6 a 23,8 s. A nave fica parada e intocável, e os inimigos do roteiro continuam na tela.</p>
+
+  <h2>F4 — o golfinho na câmara B</h2>
+  <p>A câmara só tem água enquanto ele vive: ela drena quando ele morre. Por isso os outros da espécie passam
+    <b>durante o duelo</b>, ao longe, no fundo do túnel de costelas da pintura (o trecho claro dela). A conta é o relógio do
+    duelo: a 1ª passagem sai 7 s depois de ele nascer (depois do aviso e do X), a 2ª aos 22 s, no sentido contrário, se o
+    duelo ainda durar. Se ele morre no meio de uma passagem, ela some com a água drenando. Fica atrás de toda peça do
+    interior (as costelas, os órgãos, o maquinário), e as colunas às vezes a escondem. O caminho passa só pelo trecho claro do túnel <b>medido no jogo</b> (x 100–255, y 70–120): no 1º filme ele cruzava a faixa de veias escuras à direita, e ali o corpo sumia e sobrava só o aro.</p>
+  <h3>A — um ao longe</h3>
+  <p>Um golfinho de 20 px atravessa o fundo do túnel em 8 s. Aos 22 s do duelo, outro volta no sentido contrário.</p>
+  <video src="f4-A/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2" style="margin-top:6px"><div><img src="f4-A/foto-49s.png"><span>49 s</span></div><div><img src="f4-A/foto-51s.png"><span>51 s</span></div></div>
+  <h3>B — o par</h3>
+  <p>Dois juntos, um menor e um pouco atrás, nas mesmas duas passagens.</p>
+  <video src="f4-B/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2" style="margin-top:6px"><div><img src="f4-B/foto-49s.png"><span>49 s</span></div><div><img src="f4-B/foto-51s.png"><span>51 s</span></div></div>
+  <h3>C — para o fundo</h3>
+  <p>Ele nada para dentro do túnel, encolhendo de 28 para 10 px, e some na água ao longe.</p>
+  <video src="f4-C/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2" style="margin-top:6px"><div><img src="f4-C/foto-49s.png"><span>49 s</span></div><div><img src="f4-C/foto-51s.png"><span>51 s</span></div></div>
+  <p class="suave">Os vídeos vão de 46,6 a 55,6 s da fase, ou seja, de 6,6 a 15,6 s do duelo (o golfinho nasce aos 40 s): é a 1ª passagem. A 2ª, aos 22 s do duelo, só acontece se o duelo durar.</p>
+
+  <h2>Para você decidir</h2>
+  <ol class="pergunta">
+    <li><b>A enguia:</b> A (a sombra), B (afundada) ou C (a maior, mais baixa e mais rápida)? E o tamanho, a velocidade, a
+      altura e o momento (19 s) servem?</li>
+    <li><b>O golfinho:</b> A (um, e outro na volta), B (o par) ou C (nadando para o fundo do túnel)? E o tamanho (20 px)? Uma vez a silhueta passa atrás do golfinho de verdade; se isso confundir, ela pode esperar a hora em que ele está fora da tela.</li>
+  </ol>
+</main>
+</body>
+</html>

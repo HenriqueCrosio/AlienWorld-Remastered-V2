@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silhuetas, rodada 2</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 15px; margin: 18px 0 6px; color: var(--destaque); }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  .grade2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
+  .grade2 span { color: var(--suave); font-size: 13px; text-align: center; display: block; margin: 2px 0 10px; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+  @media (max-width: 720px) { .grade2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>As silhuetas — rodada 2</h1>
+  <p class="suave">09/11 · no jogo: a enguia com <code>?silF3=A|B|C</code> (sem a chave, a A); <code>?silF3=0</code> e
+    <code>?silF4=0</code> desligam cada uma. A rodada 1 está em <a href="silhuetas.html" style="color:inherit">silhuetas.html</a>.</p>
+
+  <h2>✅ A sua resposta e o ajuste (o fechamento)</h2>
+  <p><i>"Os golfinhos ficaram ótimos, pode fechar assim. A enguia com a opção B, mas quero ela mais escura e passando mais
+    rápido"</i></p>
+  <ul>
+    <li><b>Os golfinhos:</b> fechados como estão abaixo.</li>
+    <li><b>A enguia:</b> ficou só a B (o tubo com os anéis e o fio laranja na barriga). A e C saíram do jogo.</li>
+    <li><b>Mais escura:</b> toda a paleta dela a ~70% (os tons do corpo, o aro e as luzes juntos, para o equilíbrio entre
+      eles ficar o mesmo), e a "noite" para onde ela afunda ficou mais escura que a nuvem (a de antes erguia os pretos).</li>
+    <li><b>Mais rápida:</b> a passagem foi de 3,6 s para <b>2,6 s</b> (~240 px/s, era ~175). Sai aos 19 s e some aos 21,6 s.</li>
+  </ul>
+  <video src="r3/f3/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2"><div><img src="r3/f3/foto-19.9s.png"><span>19,9 s</span></div><div><img src="r3/f3/foto-20.6s.png"><span>20,6 s</span></div></div>
+  <img src="r3/zoom.png" style="max-width:780px">
+  <p class="suave">A cabeça dela ampliada 6×, na paleta nova. Para comparar, a B de antes está mais abaixo.</p>
+
+  <h2>Os golfinhos (o B, a dupla)</h2>
+  <p>A sua resposta: <i>"vai ser o B (dois) só que eles vão chegar da extrema direita e cruzar a tela em diagonal até a
+    parte de baixo [...] quero a silhueta deles nadando iguais a um golfinho e mais rápido do que está, faça pequenas bolhas
+    de rastro quando passarem"</i>.</p>
+  <ul>
+    <li><b>O caminho:</b> entram por fora da tela, no alto da direita, e descem em diagonal até sair pela borda de baixo,
+      em 3,8 s (eram 8–9). O menor vem 0,35 s atrás e um pouco abaixo. A diagonal é <b>curva</b>: no jogo, a metade direita
+      da câmara é escura (medido), e reta a dupla cruzava quase só o escuro e as peças de baixo, sem chegar a ler. Assim eles
+      entram quase retos pelo alto e descem pelo claro do túnel. No escuro da entrada, o que os desenha é o aro, que ficou
+      um tom mais claro, e as bolhas.</li>
+    <li><b>O nado de golfinho:</b> o caminho sobe e desce em volta da diagonal, como o golfinho que mergulha e volta, e o
+      nariz segue a curva. Para isso o nado aprovado foi girado em cada ângulo (de 5 em 5°) antes de reduzir, e o aro não
+      serrilha. O rabo bate a 14 quadros/s (eram 6). Os dois nadam fora de compasso.</li>
+    <li><b>As bolhas:</b> saem do rabo, sobem devagar (é água), balançam e somem em ~1,3 s. São de 1 px, com alguns anéis
+      de 3 px, na luz da água.</li>
+    <li>Ficam na camada mais de trás: as colunas, as mesas e as bordas os escondem quando passam por elas.</li>
+  </ul>
+  <img src="arte2/golfinho-fundo-x6.png">
+  <p class="suave">As vistas giradas (o de 20 px, ampliado 6×): cada linha é um ângulo do mergulho, cada coluna um quadro do nado.</p>
+  <video src="r2/f4/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2"><div><img src="r2/f4/foto-48.4s.png"><span>48,4 s</span></div><div><img src="r2/f4/foto-49.4s.png"><span>49,4 s</span></div></div>
+  <p class="suave">A 1ª passagem, aos 7 s do duelo (de 46,8 a 51,8 s da fase). A 2ª, aos 22 s do duelo, é igual.</p>
+
+  <h2>A enguia em cilindro</h2>
+  <p>A sua resposta: <i>"A enguia que tomou como base está muito engessada e feia, sem movimento. Quero que crie um
+    cilindro que 'nada' igual uma serpente.... ela vai passar rápido mesmo, da borda de baixo até diagonalmente sair no
+    canto superior direito."</i></p>
+  <ul>
+    <li><b>O corpo é desenhado pelo código a cada quadro:</b> um tubo sombreado com a luz vindo de cima, em poucos tons
+      pontilhados. O pontilhado e os anéis andam com o corpo, sem ferver na tela. Tem um fio do aro frio no topo, a cabeça
+      um pouco mais grossa com o olho ciano e a goela laranja, e a cauda afinando até a barbatana ciano.</li>
+    <li><b>O nado de serpente:</b> a cabeça corre a diagonal e o corpo é uma onda lateral que cresce da cabeça para a
+      cauda e corre para trás pelo corpo, um pouco mais rápido do que ela avança. É o "escorregar" de quem nada: a curva
+      muda de forma o tempo todo, em vez de ser uma dobra parada deslizando.</li>
+    <li><b>O caminho:</b> a cabeça sai da borda de baixo (x 70) e o corpo inteiro some no canto superior direito, em 3,6 s
+      (~175 px/s). Passa aos 19 s, como na rodada 1.</li>
+  </ul>
+  <img src="r2/zoom.png">
+  <p class="suave">As cabeças ampliadas 6×, de cima para baixo: A, B e C.</p>
+  <h3>A — o tubo</h3>
+  <p>Só o cilindro sombreado, o aro e as luzes. 210 px de comprimento, 12 de espessura.</p>
+  <video src="r2/f3-A/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2"><div><img src="r2/f3-A/foto-20s.png"><span>20 s</span></div><div><img src="r2/f3-A/foto-21s.png"><span>21 s</span></div></div>
+  <h3>B — com os anéis</h3>
+  <p>O mesmo tubo com as costuras a cada 7 px e o fio laranja entre elas na barriga, como os anéis dela.</p>
+  <video src="r2/f3-B/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2"><div><img src="r2/f3-B/foto-20s.png"><span>20 s</span></div><div><img src="r2/f3-B/foto-21s.png"><span>21 s</span></div></div>
+  <h3>C — maior</h3>
+  <p>280 px e 18 de espessura, com os anéis e uma onda mais larga.</p>
+  <video src="r2/f3-C/video.mp4" controls loop muted playsinline></video>
+  <div class="grade2"><div><img src="r2/f3-C/foto-20s.png"><span>20 s</span></div><div><img src="r2/f3-C/foto-21s.png"><span>21 s</span></div></div>
+  <p class="suave">Os vídeos estão no dobro da tela, em velocidade real, de 18,8 a 23,2 s. A nave fica parada e intocável, e os inimigos do roteiro continuam na tela.</p>
+
+  <h2>Para você decidir</h2>
+  <ol class="pergunta">
+    <li><b>A enguia:</b> o cilindro serve, ou ela sai de vez? Se serve: A (o tubo liso), B (com os anéis e o fio laranja
+      da barriga) ou C (maior e mais grossa)? E a velocidade e a onda?</li>
+    <li><b>Os golfinhos:</b> o mergulho, a velocidade e as bolhas estão como você pensou?</li>
+  </ol>
+</main>
+</body>
+</html>
