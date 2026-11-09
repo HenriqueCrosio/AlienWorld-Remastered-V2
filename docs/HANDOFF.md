@@ -18,7 +18,7 @@ sprite que se desfaz nos próprios pixels).
 
 > **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco H está no jogo (09/11): F1 e F2 ficaram, os golfinhos da câmara B FECHADOS,
 > a enguia em cilindro do Ato 1 da F3 na B mais escura e mais rápida (folha `folhas/2026-11-09/silhuetas/silhuetas-r2.html`,
-> o topo). A sessão abre no ok dele à enguia (ou no ajuste) e no commit; depois, o bloco I."**
+> o topo). Tudo commitado e empurrado. A sessão abre no ok dele à enguia (ou no ajuste); depois, o bloco I."**
 >
 > **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H (falta o ok da enguia) → I →
 > J → F.**
@@ -27,8 +27,9 @@ sprite que se desfaz nos próprios pixels).
 > ficaram ótimos, pode fechar assim. A enguia com a opção B, mas quero ela mais escura e passando mais rápido"*. Ficou só
 > a B (`ENGUIA` em `src/f3/enguiaCilindro.ts`; A, C e a chave `?silF3=A|B|C` saíram, `=0` segue desligando), a paleta
 > inteira ~0,7× (tons, aro e luzes juntos) e afundada para uma noite mais escura ([10,13,26]), a passagem em 2,6 s
-> (~240 px/s, era 3,6). Folha: o topo da `silhuetas-r2.html` (vídeo e fotos em `r3/`). Build e os 27 testes ok. Nada
-> commitado.
+> (~240 px/s, era 3,6). Folha: o topo da `silhuetas-r2.html` (vídeo e fotos em `r3/`). Build e os 27 testes ok. **COMMITADO E
+> EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: `38c0481` (o jogo), `9623bf9` (ferramentas, teste e folhas,
+> sem os vídeos e os `q/`) e os docs.
 >
 > 📍 **09/11 (3) — O BLOCO H, RODADA 2 FEITA (espera ele).** Folha `folhas/2026-11-09/silhuetas/silhuetas-r2.html`.
 > - **A resposta dele à rodada 1:** os golfinhos = *"o B (dois) só que eles vão chegar da extrema direita e cruzar a tela
