@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-08)
+# HANDOFF — estado do projeto (2026-11-09)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-08) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-09) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,12 +16,67 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco H está no jogo (09/11): F1 e F2 ficaram, os golfinhos da câmara B FECHADOS,
-> a enguia em cilindro do Ato 1 da F3 na B mais escura e mais rápida (folha `folhas/2026-11-09/silhuetas/silhuetas-r2.html`,
-> o topo). Tudo commitado e empurrado. A sessão abre no ok dele à enguia (ou no ajuste); depois, o bloco I."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-bloco-i-etapa2-START.md`. A etapa 1 do bloco I (as
+> explosões) está aprovada, commitada e empurrada. A sessão abre na etapa 2, os flashes de tela cheia: começar pelas
+> perguntas a ele (superpowers:brainstorming), uma por vez, antes de mexer em qualquer flash."**
 >
-> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H (falta o ok da enguia) → I →
-> J → F.**
+> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (falta só o ok dele à
+> enguia escura) → I (1 ✅ as explosões → 2 os flashes → 3 a tela final) → J → F.**
+>
+> 📍 **09/11 (fim) — COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: a etapa 1 do bloco I em três
+> commits (o jogo; as ferramentas, o teste e as folhas, sem os vídeos e os `q/`; os docs, com o START da etapa 2,
+> `plans/2026-11-09-bloco-i-etapa2-START.md`, que traz o inventário dos 21 flashes e as perguntas).
+>
+> 📍 **09/11 (7) — BLOCO I, ETAPA 1 APROVADA COM UM AJUSTE NA CUTSCENE 1 (feito).** Ele: *"Boa, eu gostei. só tome
+> cuidado com a explosão da cutscene 1, eu quero ela maior, vi que no final do video existem duas implosões. Aquilo pode
+> sair, quero a mesma mecanica, explosao grande e a nave saindo para baixo (como estava). Os efeitos e explosoes antigos
+> você pode deixar numa pasta backup"*.
+> - **A cutscene 1** (`InterludeScene.implosao`): a cadeia maior (`explode` 1,5 → 2, `explodeBig` 0,8 → 1,2) e o final =
+>   UMA `explodeBig(…, 1.7, 26, 'chefeFim')` no meio do casco (no lugar das duas `implodeBig`), a Aurora afundando como
+>   antes. Folha `jogo.html` (o vídeo `jogo/cutscene1-r2/`).
+> - **As antigas no backup:** as 3 folhas para `assets/raw/backup-explosoes/` (com `LEIA.md`); saíram o registro no
+>   `BootScene`, as anims antigas e todos os retornos a elas (`Fx`, `Destrocos`, `MorteDaNave`, `ExplosaoDoJogador`); a
+>   `probe-fx` foi atualizada (passa). A `implodeBig` segue (a Serpente). Build, os 28 testes e o oráculo da enguia ok.
+>   Nada commitado. **O próximo: a etapa 2, os flashes de tela cheia.**
+>
+> 📍 **09/11 (6) — BLOCO I, ETAPA 1: AS EXPLOSÕES NOVAS NO JOGO INTEIRO (aprovada acima).** Plano
+> `plans/2026-11-09-bloco-i-explosoes.md` (Tasks 1–7 feitas); folha `folhas/2026-11-09/explosoes/jogo.html`.
+> - **As respostas:** *"eu gostei de todos, portanto vamos usar todos. misturando alguns quando for conveniente"* → a
+>   distribuição pelo MATERIAL (spec §4b), *"Boa, pode seguir"*.
+> - **O motor:** o pixelfx saiu da enguia para `src/fx/pixelfx/` (o `git mv` foi barrado pelo Windows: cópia + `git rm`);
+>   `test-enguia-porte` segue todo `ok`.
+> - **As receitas** (`scripts/_i/explosoes/receitas.mjs`, puras): 4 partes (fumaça de bolhas, fogo, plasma, estilhaços) e 9
+>   tipos (`perigo` A · `metal` D+fogo · `chefeFim` C sobre A+D · `luz`/`carta` B · `biomec` B→C · `carne` C de matéria +
+>   um estouro de matéria sem fogo · `rocha` D em pedra · `implosao` o `implosion`), vácuo × atmosfera (só A, C e D na F1).
+> - **Assadas** (`scripts/_i/_explosoes-assar.mjs`): 34 folhas cor + luz em `public/sprites/explosoes/` (4,8 MB, em GRADE
+>   ≤ 4096 px — uma linha da grande teria ~11 000 px), 20 fps, até esvaziar; o manifesto GERADO
+>   `src/systems/explosoes/folhasExplosao.ts` (`escolheFolha`: só reduz; `explodeBig(e)` = size 2e).
+> - **No jogo:** `Fx.explosao(tipo, …)` (a cor + a luz em ADD, o lado alternando sem tocar no sorteio), `Fx.zona`
+>   (`GameScene`: atm na F1 até o `breakAtmosphere`), `explode/explodeBig/implodeBig/sheetExplosion` com `tipo`;
+>   `tipoDoMaterial` (`src/systems/explosoes/tipoExplosao.ts`) nos pontos de chamada (inimigo, peça, prop, porta,
+>   chefões, Destrocos — a carne ganhou a sua —, MorteDaNave, cartas, cutscenes 1–3). As folhas antigas seguem
+>   carregadas (retorno e as cartas aprovadas) até o ok dele.
+> - **Ferramentas:** `scripts/_i/_explosoes-jogo.mjs` (filma uma fase matando um alvo na tela a cada `--matar` s;
+>   `--chefe T` faz `spawnBoss` e `killBoss` — o `skipTo` descarta o evento do chefão), `scripts/_i/_cutscene-filmar.mjs`
+>   (escolhe a 1ª carta da mesa pela própria `onEscolha` e esconde a camada HD), teste `scripts/test-explosoes.mjs`
+>   (`process.exitCode`, não `exit`: no Windows o `exit` com o sharp aberto aborta no libuv). Build e os 28 testes ok.
+>   Nada commitado.
+>
+> 📍 **09/11 (5) — O BLOCO I ABRIU: TRÊS ETAPAS, A 1ª NOS CONCEITOS (feita acima).** Spec
+> `specs/2026-11-09-bloco-i-explosoes-design.md` (aprovada em conversa); folha `folhas/2026-11-09/explosoes/explosoes.html`.
+> - **O I agora:** o 10 e o 16 já estavam feitos (17/10); o 15 (drones encavalados) SAIU de vez — ele: *"isso faz parte do
+>   estilo do jogo. Eles andam em enxames"*. Sobram o 9, o 11, o 13 e o 14, em 3 etapas: **1 = as explosões** (o 9 e o 14
+>   são a MESMA causa: as folhas `explosion*-sheet` usadas por todo estouro, anéis lisos + fumaça de bolinhas, e o `Fx` as
+>   amplia até 1,4×), **2 = os flashes de tela cheia** (o 13; ~22 `cameras.main.flash`), **3 = a tela final** (o 11).
+> - **A decisão dele:** trocar TODAS as explosões (pequena, média, grande, implosão), no jogo inteiro.
+> - **O desenho:** o motor do pixelfx sai da enguia para `src/fx/pixelfx/` (o oráculo da enguia prova o idêntico); as
+>   explosões ASSADAS em folhas (cor + luz aditiva) no formato de hoje, no maior tamanho em que aparecem; vácuo × atmosfera
+>   pela zona; luz só onde há energia.
+> - **Os conceitos** (`scripts/_i/_explosoes-conceitos.mjs`, todos no vácuo): A fogo e fumaça · B plasma · C fumaça densa ·
+>   D estilhaços, nos 3 tamanhos ao lado da de hoje + a cadeia da cutscene 1. **Lição (3 tentativas na fumaça):** discos
+>   soltos = bolinhas de novo; a massa iluminada por inteiro = pedra; o desfazer pelo Bayer = xadrez. Ficou a massa de
+>   BOLHAS, cada uma com a sua tampa clara (a luz do puff que domina o pixel), contorno escuro, erosão + ruído no fim, e
+>   desenhada ANTES do fogo. Nada no jogo ainda; nada commitado.
 >
 > 📍 **09/11 (4) — O BLOCO H, RODADA 3: OS GOLFINHOS FECHADOS, A ENGUIA ESCOLHIDA (espera o ok).** Ele: *"Os golfinhos
 > ficaram ótimos, pode fechar assim. A enguia com a opção B, mas quero ela mais escura e passando mais rápido"*. Ficou só
@@ -1051,8 +1106,9 @@ sprite que se desfaz nos próprios pixels).
 >   (02–03/11: a de 3 cabeças FECHADA no jogo. 03/11 (2): o S2 virou a **ENGUIA COLOSSAL**, spec
 >   `specs/2026-11-03-serpente-grande-enguia-design.md`; a escolha da cabeça espera ele em
 >   `folhas/2026-11-03/enguia-cabeca/cabecas.html` — ver o 📍 de 03/11 (2) no topo.)
-> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO desde 09/11; START NOVO `plans/2026-11-09-bloco-h-START.md` — o de
->   21/10 é registro; só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
+> - **H — efeitos de imersão por fase** (✅ 09/11, commitado e empurrado: F1 e F2 ficaram como estavam, os golfinhos da
+>   câmara B FECHADOS, a enguia em cilindro no Ato 1 da F3 — falta só o ok dele à versão escura e rápida; ver os 📍 de
+>   09/11 no topo. O texto abaixo é o pedido original; START `plans/2026-11-09-bloco-h-START.md`, registro):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica
 >     abaixo do fundo do salão, −83, some atrás dele sozinho; o que ficar acima precisa da máscara inversa da caverna);
 >   - F2: a silhueta do Leviatã NOVO passando ao fundo, distante (depende de D);
@@ -1062,7 +1118,10 @@ sprite que se desfaz nos próprios pixels).
 >   Depois de G, porque os efeitos da F1 moram nas camadas que G vai refazer. Ele está aberto a mais ideias. A técnica
 >   do menu (`docs/CENARIO-VIVO.md`) é o ponto de partida: camadas, luzes que apagam limpas, volume, perigo, tudo em
 >   função do relógio.
-> - **I — os itens 9 a 16 da análise de 14/10** (✅ 17/10: o 10 e o 16 APROVADOS por ele; o 15 DESCARTADO por ele: a fila unida
+> - **▶️ I — os itens 9 a 16 da análise de 14/10** — O ATUAL desde 09/11, em 3 etapas: **1 ✅ as explosões** (os itens 9 e
+>   14, commitada e empurrada) → **2 ▶️ os flashes de tela cheia** (o 13; START `plans/2026-11-09-bloco-i-etapa2-START.md`)
+>   → **3 a tela final** (o 11). O 15 saiu de vez em 09/11 (*"eles andam em enxames"*). Registro:
+>   (✅ 17/10: o 10 e o 16 APROVADOS por ele; o 15 DESCARTADO por ele: a fila unida
 >   é DE PROPÓSITO (*"pela card de reação em cadeia, além de ser mais prazeroso entrar em cadeia"*), testado e desfeito;
 >   folha `folhas/2026-10-17/bloco-i/`; o 10 e o 16 foram COMMITADOS com o bloco C, em `63ca5f0`. Faltam o 9, 11, 13 e 14, que pedem arte ou decisão): a fumaça de bolinhas dos chefões, os rótulos "(LEGACY)/(NEW)" do HUD,
 >   a tela final, o subtítulo do menu (✅ resolvido no E: o REMASTERED ficou como texto, acendendo depois do
