@@ -16,11 +16,61 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-bloco-h-START.md`. O cenário do casco e da arena da F3
-> está fechado, commitado e empurrado. A sessão abre no bloco H: começar pelas perguntas a ele (superpowers:brainstorming),
-> uma fase por vez, antes de gerar qualquer arte."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`. O bloco H está no jogo (09/11): F1 e F2 ficaram, os golfinhos da câmara B FECHADOS,
+> a enguia em cilindro do Ato 1 da F3 na B mais escura e mais rápida (folha `folhas/2026-11-09/silhuetas/silhuetas-r2.html`,
+> o topo). A sessão abre no ok dele à enguia (ou no ajuste) e no commit; depois, o bloco I."**
 >
-> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H → I → J → F.**
+> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H (falta o ok da enguia) → I →
+> J → F.**
+>
+> 📍 **09/11 (4) — O BLOCO H, RODADA 3: OS GOLFINHOS FECHADOS, A ENGUIA ESCOLHIDA (espera o ok).** Ele: *"Os golfinhos
+> ficaram ótimos, pode fechar assim. A enguia com a opção B, mas quero ela mais escura e passando mais rápido"*. Ficou só
+> a B (`ENGUIA` em `src/f3/enguiaCilindro.ts`; A, C e a chave `?silF3=A|B|C` saíram, `=0` segue desligando), a paleta
+> inteira ~0,7× (tons, aro e luzes juntos) e afundada para uma noite mais escura ([10,13,26]), a passagem em 2,6 s
+> (~240 px/s, era 3,6). Folha: o topo da `silhuetas-r2.html` (vídeo e fotos em `r3/`). Build e os 27 testes ok. Nada
+> commitado.
+>
+> 📍 **09/11 (3) — O BLOCO H, RODADA 2 FEITA (espera ele).** Folha `folhas/2026-11-09/silhuetas/silhuetas-r2.html`.
+> - **A resposta dele à rodada 1:** os golfinhos = *"o B (dois) só que eles vão chegar da extrema direita e cruzar a tela
+>   em diagonal até a parte de baixo [...] vão sumir atrás dos assets do cenario, borda etc. mas quero a silhueta deles
+>   nadando iguais a um golfinho e mais rápido do que está, faça pequenas bolhas de rastro"*. A enguia da arte reduzida
+>   REPROVADA (*"muito engessada e feia, sem movimento"*) → *"crie um cilindro que 'nada' igual uma serpente [...] da borda
+>   de baixo até diagonalmente sair no canto superior direito"*; se não servir, *"vamos descartá-la"*.
+> - **Os golfinhos** (`src/f4/golfinhosFundo.ts` puro + `camadaGolfinhos.ts`; arte `scripts/_h/_golfinhos-fundo.mjs`): o
+>   nado aprovado GIRADO de −75° a 15° (de 5 em 5) antes de reduzir a 15/20 px (`golfinho-fundo.png`, célula 26), o rabo
+>   a 14 quadros/s, o caminho uma Bézier (entra alto pela direita, desce pelo claro até a borda de baixo, 3,8 s) com o
+>   MERGULHO (onda perpendicular, o nariz na tangente), a dupla fora de fase; bolhas (`bolha-agua.png`: ponto e anel) do
+>   rabo que SOBEM e somem em ~1,3 s. ⚠️ A metade direita da câmara B é ESCURA no jogo (23–41): a diagonal reta sumia; a
+>   curva + o aro um tom mais claro (96,146,172) os fazem ler (busca do caminho: `scripts/_h/_golfinhos-caminho.mjs`).
+> - **A enguia em cilindro** (`src/f3/enguiaCilindro.ts` puro + `camadaEnguia.ts`, redesenhada A CADA QUADRO na passagem):
+>   um tubo sombreado em pixel (luz de cima, 5 tons pontilhados no espaço do CORPO, aro frio no topo), cabeça mais grossa
+>   com olho ciano e goela laranja, cauda até a barbatana ciano; o nado = a cabeça na diagonal + uma onda lateral que
+>   cresce para a cauda e corre para trás pelo corpo (o escorregar 0,72). A/B/C = o tubo liso / com anéis e o fio laranja
+>   / maior (280×18). 19–22,6 s (C 22,9). Prévia fora do jogo: `scripts/_h/_enguia-previa.mjs` (`--zoom`, `--video`).
+>   Lição: a 1ª prévia acendeu a barriga — a normal do tubo é a FÍSICA, só o lado aceso troca.
+> - **Saíram** a enguia da rodada 1 (as folhas `enguia-longe-*`, `src/cenario/`, `_silhuetas-longe.mjs`) e o
+>   `golfinho-longe`. Teste novo `scripts/test-h-silhuetas.mjs` (o antigo saiu); build e os 27 testes ok. Nada commitado.
+>
+> 📍 **09/11 (2) — O BLOCO H ABRIU: AS RESPOSTAS DELE E A RODADA 1 FEITA (substituída pela rodada 2 acima).** Folha
+> `folhas/2026-11-09/silhuetas/silhuetas.html`.
+> - **As respostas:** a F1 (*"não falta nada"*) e a F2 (*"está bom também"*) ficam como estão. A F3 = a silhueta da
+>   ENGUIA no Ato 1, passando rápido; e logo: *"quero ela maior do que a silhueta do leviatã e do golfinho [...] vista e
+>   de mais perto"*, *"cruze a tela de forma rápida, então ela pode ter um tamanho bom"*. A F4 = a silhueta do GOLFINHO
+>   na câmara torácica (a B).
+> - **A arte** (`scripts/_h/_silhuetas-longe.mjs`, a receita da do Leviatã: reduzida do quadro grande em cada largura,
+>   aro frio de 1 px): a enguia da F1 aprovada em 150/190/240 px, 12 quadros de uma onda cabeça → cauda (cabeça firme),
+>   `enguia-longe-aro` (sombra + as luzes dela: olho/cauda ciano, goela laranja) e `enguia-longe-afundada` (o corpo
+>   escurecido para a nuvem, os anéis à mostra); o golfinho do nado aprovado de 10 a 30 px (`golfinho-longe`).
+> - **No jogo:** `src/cenario/silhuetaPassante.ts` (puro: a pose, os conceitos A/B/C de cada fase) +
+>   `camadaSilhueta.ts` (os sprites); a `GameScene` liga (`?silF3=` / `?silF4=`, `=0` desliga; sem chave, a A) e dá o
+>   relógio: na F3 o da fase, só no Ato 1 sem chefão (e o `Parallax` corta fora do céu do Ato 1); na F4 o relógio do
+>   DUELO (`relogioDoDuelo`, desde que o golfinho nasce — a fase fica presa em 49,5), com o alpha da água, porque a
+>   câmara só tem água com ele vivo. A enguia cruza de 19 a 23 s, da esquerda para a direita (à frente, para onde ela
+>   espera), em −88: a −91 a 1ª foto a mostrou apagada atrás da nuvem do meio e das rochas distantes; e aos 22 s os
+>   batedores de 24 entravam na mesma faixa, escuros sobre ela. O golfinho em −95, no fundo do túnel de costelas, 7 s e
+>   22 s depois de ele nascer, só no claro MEDIDO NO JOGO (x 100–255, y 70–120; a direita da pintura crua parecia clara
+>   e no jogo é a faixa de veias, onde o corpo sumia). Teste `scripts/test-silhuetas-passantes.mjs`; sonda `scripts/_h/_filmar.mjs` (`--fase 4 --quadros`).
+> - **Nada commitado.**
 >
 > 📍 **09/11 (fim) — COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: `6fe3825` (o jogo: `src/f3/`,
 > `public/sprites/f3casco/`, o `Parallax`, a `GameScene`, o roteiro, os perfis, o getter do chefão), `d3eaf30` (as
