@@ -10,6 +10,9 @@ import { montarCaverna, type CavernaF1 } from './f1/cavernaF1';
 import { CeuDoCasco } from './f3/ceuDoCasco';
 import { CamadaCasco } from './f3/camadaCasco';
 import { CamadaBatalha } from './f3/camadaBatalha';
+import { CamadaEnguia } from './f3/camadaEnguia';
+import type { ConceitoEnguia } from './f3/enguiaCilindro';
+import { CamadaGolfinhos } from './f4/camadaGolfinhos';
 import { CHAVE_CEU_F3, chavePinturaF3, type RegimeCeuF3 } from './f3/numerosCeuF3';
 
 /**
@@ -252,6 +255,9 @@ export class Parallax {
   momentoCalmo = false;
   private ceuCasco: CeuDoCasco | null = null;
   private regimeCeu: RegimeCeuF3 = 'ato1';
+  /** O BLOCO H (09/11): a enguia em cilindro da F3 e os golfinhos da F4. A `GameScene` liga e dá o relógio. */
+  private enguia: CamadaEnguia | null = null;
+  private golfinhos: CamadaGolfinhos | null = null;
 
   /** As duas cópias da pintura do interior (Fase 4). `setPintura` troca a textura delas. */
   private pinturaF4: Phaser.GameObjects.Image[] = [];
@@ -2007,6 +2013,28 @@ export class Parallax {
    * ⚠️ ELAS APAGAM, MAS CONTINUAM NASCENDO. Parar a emissão (`gap` infinito) mudava a sequência de sorteios do
    * `Phaser.Math.Between`, e o casco sorteava outras peças: o antes e depois da folha deixava de ser o mesmo jogo.
    */
+  /** Liga a enguia em cilindro do Ato 1 (F3, bloco H, `src/f3/enguiaCilindro.ts`). */
+  ligarEnguia(c: ConceitoEnguia): void {
+    this.enguia?.destroy();
+    this.enguia = new CamadaEnguia(this.scene, c);
+  }
+
+  /** A enguia no relógio da fase (`null` = não pode aparecer). Só com o céu do Ato 1: o preto da virada e o treino o trocam. */
+  enguiaNoRelogio(t: number | null): void {
+    this.enguia?.update(this.regimeCeu === 'ato1' ? t : null);
+  }
+
+  /** Liga os golfinhos ao fundo da câmara B (F4, bloco H, `src/f4/golfinhosFundo.ts`). */
+  ligarGolfinhos(): void {
+    this.golfinhos?.destroy();
+    this.golfinhos = new CamadaGolfinhos(this.scene);
+  }
+
+  /** Os golfinhos no relógio do duelo (`null` com a câmara seca), com o nível da água no alpha. */
+  golfinhosNoRelogio(t: number | null, dt: number, agua: number): void {
+    this.golfinhos?.update(t, dt, agua);
+  }
+
   ligarCeuDoCasco(): void {
     if (!this.cenarioNovo || this.mode !== 'nebulosa' || this.ceuCasco) return;
     if (this.scene.textures.exists(CHAVE_CEU_F3)) for (const img of this.nebulaPainting) img.setTexture(CHAVE_CEU_F3).setAlpha(1);

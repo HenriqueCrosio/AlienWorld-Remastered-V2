@@ -538,6 +538,11 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // (um aro de 1px reduzido pela engine vira pontilhado) — uma linha por largura, 16 quadros do nado por linha, células
   // de 72×33 (`scripts/_leviata/_silhueta.mjs longe`). O quadro é (largura − 28) × 16 + quadro do nado.
   leviathanLonge: { path: 'sprites/leviathan-longe-sheet.png', w: 72, h: 33 },
+  // 09/11 (bloco H) · os GOLFINHOS AO FUNDO da câmara B (`src/f4/golfinhosFundo.ts`): o nado aprovado GIRADO em cada
+  // rumo do mergulho (−60° a 0°, de 5 em 5) antes de reduzir a 15 e 20px — o aro de 1px gira inteiro, sem serrilhar
+  // (`scripts/_h/_golfinhos-fundo.mjs`). O quadro é ((largura × 13) + ângulo) × 9 + quadro do nado. E as bolhas do rastro.
+  golfinhoFundo: { path: 'sprites/golfinho-fundo.png', w: 26, h: 26 },
+  bolhaAgua: { path: 'sprites/bolha-agua.png', w: 3, h: 3 },
 
   // O GOLFINHO BIOMECÂNICO — o mini-chefão da câmara B da Fase 4 (spec 2026-09-11). Animações
   // PixMiniMax aprovadas pelo Henrique, 80×80 com o bicho virado para a ESQUERDA (o sentido dos

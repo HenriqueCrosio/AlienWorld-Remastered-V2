@@ -57,6 +57,7 @@ import { ELITES } from '../data/numerosElites';
 import { MorteDaNave, type OpcoesMorte } from '../systems/morte/MorteDaNave';
 import { MORTE, ESTILOS_MORTE, estiloDaNave, type EstiloMorte } from '../systems/morte/numerosMorte';
 import { Destrocos } from '../systems/morte/Destrocos';
+import { ENGUIA } from '../f3/enguiaCilindro';
 import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, SEPARACAO, type Classe, type Variante, type VarianteRocha } from '../systems/morte/numerosDestrocos';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
@@ -136,6 +137,11 @@ export class GameScene extends Phaser.Scene {
   /** O `t` que o relógio da fase não passa enquanto o golfinho viver (`seguraEm` do roteiro). */
   private golfinhoSeguraEm = Infinity;
   private golfinhoColliders: Phaser.Physics.Arcade.Collider[] = [];
+  /**
+   * O relógio do DUELO (s desde que o golfinho nasceu; bloco H): os outros da espécie passam ao fundo nele, não no da
+   * fase (preso em 49,5 enquanto ele vive). Segue depois da morte só enquanto a água drena; `null` com a câmara seca.
+   */
+  private relogioDoDuelo: number | null = null;
   private stage!: StageDef;
   /** A nave escolhida na interlude. Ela DEFINE a arma base (src/ships.ts). */
   private shipId: string = DEFAULT_SHIP;
@@ -408,6 +414,15 @@ export class GameScene extends Phaser.Scene {
         if (q.get('batalha') === '0') this.parallax.batalhaF3 = false;
       }
     }
+    // O BLOCO H (09/11): a enguia em cilindro no Ato 1 da F3 (`src/f3/enguiaCilindro.ts`) e os golfinhos ao fundo da
+    // câmara B da F4 (`src/f4/golfinhosFundo.ts`). Ligados por ESTA cena (a `Interlude3Scene` também monta um
+    // `Parallax('nebulosa')`). Chaves de dev: `?silF3=0` / `?silF4=0` desligam cada um (o ANTES).
+    {
+      const q = import.meta.env.DEV ? new URLSearchParams(location.search) : null;
+      if (this.stage.parallax === 'nebulosa' && q?.get('silF3') !== '0') this.parallax.ligarEnguia(ENGUIA);
+      if (this.stage.parallax === 'interior' && q?.get('silF4') !== '0') this.parallax.ligarGolfinhos();
+    }
+    this.relogioDoDuelo = null;
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
     this.destrocos = new Destrocos(
@@ -909,6 +924,15 @@ export class GameScene extends Phaser.Scene {
     this.parallax.setNave(this.ship);
     // (a batalha ao fundo da F3 só passa nos momentos calmos da luta — só leitura do chefão, 08/11)
     this.parallax.momentoCalmo = this.boss?.momentoCalmo ?? false;
+    // O bloco H: a enguia só no Ato 1 da F3 (antes do `hazard rate 0` de 44,5, nunca com chefão — o atalho da Serpente
+    // abre nela); os golfinhos no relógio do duelo, com o alpha da água (ela drena na morte dele).
+    if (this.stage.parallax === 'nebulosa') {
+      this.parallax.enguiaNoRelogio(!this.boss && this.elapsed < 44.5 ? this.elapsed : null);
+    } else if (this.stage.parallax === 'interior') {
+      const nivel = this.agua.estadoAtual.nivel;
+      if (this.relogioDoDuelo !== null) this.relogioDoDuelo = this.golfinho || nivel > 0 ? this.relogioDoDuelo + dt : null;
+      this.parallax.golfinhosNoRelogio(this.relogioDoDuelo, dt, nivel);
+    }
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
@@ -2015,6 +2039,7 @@ export class GameScene extends Phaser.Scene {
     const g = new Golfinho(this, this.enemies, this.moldura, sentido ?? (Math.random() < 0.5 ? 'sobe' : 'desce'));
     this.golfinho = g;
     this.golfinhoSeguraEm = seguraEm;
+    this.relogioDoDuelo = 0;
 
     // ⚠️ O PRIMEIRO PLANO SAI DE CENA NA ARENA, pela mesma lei do chefão e do duto: *"durante a fase
     // as silhuetas na frente da nave são dificuldade; durante o chefão elas tapam a leitura dos
