@@ -16,14 +16,103 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-cenario-luta-serpente-START.md`. A Serpente grande (a
-> enguia colossal) está fechada e commitada. A sessão abre no CENÁRIO da luta da Serpente: começar pelas perguntas a
-> ele (superpowers:brainstorming), antes de gerar qualquer arte."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-bloco-h-START.md`. O cenário do casco e da arena da F3
+> está fechado, commitado e empurrado. A sessão abre no bloco H: começar pelas perguntas a ele (superpowers:brainstorming),
+> uma fase por vez, antes de gerar qualquer arte."**
 >
-> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO da luta (o próximo) → H → I → J → F.** O START do
-> cenário traz o que a arena é hoje, os fatos já medidos (as nuvens `nebula3` são PNGs pequenos AMPLIADOS 1–3×, contra
-> a lei dos fundos; a camada de brilho dos destroços que escurece as nuvens; o tranco do `cascoVivo.copiar()`) e as
-> perguntas de abertura.
+> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H → I → J → F.**
+>
+> 📍 **09/11 (fim) — COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: `6fe3825` (o jogo: `src/f3/`,
+> `public/sprites/f3casco/`, o `Parallax`, a `GameScene`, o roteiro, os perfis, o getter do chefão), `d3eaf30` (as
+> ferramentas, os testes e as folhas, sem os vídeos e o `cru/`) e os docs (este 🧭, a spec, os planos e o START novo do H,
+> `plans/2026-11-09-bloco-h-START.md`). Pendente dele, sem pressa: jogar a F3 inteira com o cenário novo.
+>
+> 📍 **09/11 — O CENÁRIO DO CASCO E DA ARENA: A RODADA 4 FEITA, INSTALADO.** Plano
+> `plans/2026-11-09-cenario-casco-rodada4.md`, folha `folhas/2026-11-08/cenario-casco/instalacao.html`.
+> - **A virada:** o preto 500/1500/500 ms (`GameScene.escurecerParaOCasco`); no preto cheio os tiros inimigos somem; a
+>   nave sem dano (`semDanoAte`, sem piscar) do escurecer até **1 s depois de clarear** (a sonda achou kamikazes do Ato 1,
+>   já na tela antes do preto, acertando 0,03 s depois do clarear); o `STAGE_3` +2 s de t=55 em diante (17 eventos; a
+>   Serpente 97, o `ceu` 91). Sonda `scripts/_cenario/_f3-virada-sonda.mjs` (a nave exposta no meio; `--antigo` força o
+>   cenário velho): **VIRADA OK** (nada nasce no escuro, nenhum golpe na janela, Serpente em 97,0).
+> - **A chave saiu:** quem liga o cenário novo é a `GameScene`, quando `stage.parallax === 'nebulosa'` (só a F3). O
+>   `Parallax` nasce com ele DESLIGADO porque a `Interlude3Scene` também monta um `Parallax('nebulosa')` — conferida, sem
+>   mudança. Ficaram as chaves de dev `&casco=0` e `&batalha=0`. O Ato 1 comparado com o modo antigo na mesma sorte: igual,
+>   menos a pintura parada (a emenda). `npm run build` e todos os `scripts/test-*.mjs` ok.
+> - **O desempenho no Chrome (RTX 5070), passo a passo:** as 3 cabeças 0,6/1,5 → 0,8/1,7 ms (mediana/p95); a enguia com o
+>   cenário 0,6/1,0 (pior 4,3). **O tranco antigo** num navegador de verdade é de 23–54 ms, não ~1 s; a cópia do casco vivo
+>   custa 0,5 ms (não é ela) — ele cai na irrupção dela do rombo (os pedaços explodindo), que é da luta: ficou como estava.
+>   (Medir no Chrome desta máquina: a janela fica atrás e o rAF cai a ~1,5/s — avançar o jogo à mão com `loop.sleep` +
+>   `game.step`, em blocos de ≤ 1.200 passos por chamada; o resultado não pode conter o `location.search`.)
+>
+> (O arranque anterior abria na rodada 4: feita acima.)
+>
+> 📍 **08/11 (noite) — O CENÁRIO DO CASCO E DA ARENA: DESENHADO COM ELE E A RODADA 1 FEITA (espera ele).**
+> - **As decisões dele (brainstorming):** a F3 tem de seguir "dentro da nebulosa, na aproximação do Leviatã" depois do
+>   casco. A sua pintura do Ato 1 FICA (escurecida) do preto da virada em diante, com nuvens à deriva e a luz da
+>   nebulosa; o casco (arte final) ganha pulso nos traços de cobre, vapor, faíscas no rombo e um aro (sem tecido vivo);
+>   ao fundo, os restos da frota caindo (clarões sempre, silhuetas só nos momentos calmos); o preto da virada vai a
+>   ~2,5 s (500/1500/500) e o Ato 2 anda +2 s (a Serpente 95 → 97), sem dano às cegas; a luta final (3 cabeças + enguia)
+>   MAIS LIMPA que o Ato 2. **Só visual: inimigos, aranha, cabeças e enguia não mudam.** O Ato 1 não muda.
+> - **A rodada 1 (atrás da chave de dev `?cenario=novo&ceu=1|2|3`):** `scripts/_cenario/_f3-ceu-assar.mjs` assa
+>   `public/sprites/f3casco/` (3 céus 384×216 e as nuvens recortadas pelo brilho, emenda cruzada sem espelho);
+>   `src/f3/numerosCeuF3.ts` + `ceuDoCasco.ts`; o `Parallax` (`ligarCeuDoCasco` no preto e no treino, `regimeDoCeu`);
+>   os perfis `faseF3Casco`/`faseF3Arena` + `MS_DA_TROCA`; o evento `ceu` (t=89). Testes: `scripts/test-f3-ceu.mjs`,
+>   `test-atmosfera-perfis.mjs` (11 pinturas), `test-enguia-porte.mjs` (passa). Sonda: `scripts/_cenario/_f3-casco-filmar.mjs`
+>   (`--real` a F3 do zero; sem ele, o atalho da Serpente); a da enguia ganhou `--q`.
+> - **Correções do START (medidas):** os "blocos azuis" da arena eram os ASTEROIDES distantes (−90, ampliados 0,8–1,7×)
+>   e a camada `nebula` (−98), não as `nebula3` (essas já apagam com a nuvem). Com a chave, eles, o planeta e as rochas de
+>   primeiro plano (60, ampliadas até 2,6×) apagam no preto — continuam SORTEANDO (parar a emissão mudava os sorteios do
+>   casco). O brilho dos destroços só escurece sobre céu transparente: com a pintura opaca, não aparece. ⚠️ CORRIGIDO na
+>   rodada 2: o tranco do mundo parando (quadro 376 da sonda da enguia, 0,65–1,1 s, + um de ~0,2 s no 447) NÃO sumiu —
+>   naquela filmagem só não apareceu; ele é antigo e fica para a rodada 4. A linha do jogo: +1,1 ms p95 na sonda da
+>   rodada 1, +0,5 ms na da rodada 2 (GPU por software) — medir num navegador de verdade na rodada 4. O halo amostrado da pintura dava bege: ficou o laranja da F3.
+> - **Achado da sonda:** as peças do casco e as ondas variam entre duas filmagens iguais (a ordem do carregamento), não
+>   por causa do céu.
+> - **✅ A RODADA 1 FECHADA (a resposta dele à folha `ceu.html`):** *"nivel 2"*, as nuvens *"mais lenta um pouco"*
+>   (o vento ×0,7: −1,4 / −3,2 px/s), a luz *"Ficaram com cara"*, as rochas de primeiro plano *"podem ficar fora"*. Só o
+>   nível 2 ficou (`f3casco/ceu.png`, `nuvem-longe.png`, `nuvem-perto.png`; a chave `&ceu=` saiu). **O apontamento dele,
+>   a emenda de dois fundos no céu (~50 s), era do JOGO:** as duas cópias da pintura da F3 não casam na borda e ela rolava
+>   a 1,7 px/s (a emenda em x≈295 aos 50 s; a névoa do Ato 1 escondia). Com a chave, a pintura da F3 fica PARADA (o
+>   movimento é das nuvens). E as rochas ampliadas agora saem com a BRUMA (t=49, mesmo fade; o `/ 0,75` protege a afinada
+>   de t=21), não só no preto. ⚠️ Sem a chave, a emenda continua no Ato 1 (escondida pela névoa) até a rodada 4.
+> - **A RODADA 2 FEITA (espera ele):** uma camada de pixels só do casco (`src/f3/camadaCasco.ts` + a lógica pura
+>   `efeitosCasco.ts` + `numerosCascoF3.ts`; 384×116 de y=100, `depth −74,8`, entre as peças −75 e o casco vivo da arena
+>   −74,5; redesenho a 30 Hz): o PULSO nos traços de cobre (máscara `ehCobre` medida nas peças: placa 365 px … duto 671;
+>   onda para a cabeça, λ 240, 55 px/s, pico [255,228,150] + brilho de 1 px), o ARO violeta na crista, o VAPOR (fio de
+>   1 px no bocal → bolsão pontilhado com ruído; os respiros por peça em `RESPIROS`), as FAÍSCAS só na arena no rombo
+>   aberto (`serpenteRombo`, o buraco achado na linha crista+4). A arena (o evento `ceu`) = pulso pela metade e vapor raro,
+>   em 4 s; o treino entra seco. `&casco=0` desliga (o ANTES da folha). Teste `scripts/test-f3-casco.mjs` (o cobre bate
+>   com as peças reais; o vapor nunca desce nem acelera; as faíscas retas; nada de vermelho de aviso nem branco-azulado).
+>   **Lições:** a cor do pico tem de ser bem mais clara que o cobre (a 1ª, [255,190,105], não mudava nada); as peças se
+>   SOBREPÕEM — sem o mapa de "quem está por cima" o pulso acendia o cobre escondido (anéis sobre chapa lisa); o Bayer
+>   puro deixa o gás em tabuleiro de xadrez (o ruído quebra); ler as máscaras na hora dava trancos de ~135 ms a cada
+>   peça nova — agora todas são lidas quando a camada nasce (atrás do preto). O custo: +0,5 ms p95 na sonda.
+> - **✅ A RODADA 2 FECHADA (a resposta dele):** *"O pulso ficou bom, mas senti que ele vibra o treme muito"* → duas
+>   causas medidas e corrigidas: a camada (30 Hz) escorregava 1 px atrás das peças (60 Hz) — agora ela segue a faixa entre
+>   dois desenhos; e a onda era medida na tela (cruzava os traços a ~139 px/s com a rolagem) — agora anda 55 px/s sobre o
+>   casco; o brilho acompanha a onda (sem o "liga" em 0,25). *"Não quero o aro, pode retirar de tudo"* → saiu.
+>   Vapor e faíscas *"bom"*; o vapor *"pode sumir na luta final"* → `VAPOR.arena.porSeg = 0`.
+> - **A RODADA 3 FEITA (espera ele):** `src/f3/silhuetasF3.ts` (4 naves + 4 criaturas em mapas de caracteres, 7–14 px;
+>   o jogo usa A/A até ele escolher; folha `cru/r3-silhuetas.png` por `scripts/_cenario/_f3-silhuetas-folha.mjs`),
+>   `batalhaFundo.ts` (puro: clarões raros sempre; na arena, passagens de ~4,5 s que saem e voltam para a névoa, na faixa
+>   alta e nos 2/3 da esquerda, com tiros e uma nave abatida que gira na inércia e explode; nunca duas em < 8 s),
+>   `camadaBatalha.ts` (384×128 de y=8, `depth −93`), `pixel.ts` (Bayer, ruído e o `pintor`, comuns ao casco). O chefão
+>   ganhou `momentoCalmo` (só leitura: a enguia nos trechos mergulho/mergulho-cauda/volta-escondida/afunda; as cabeças na
+>   pausa); a `GameScene` o repassa ao `Parallax`. `&batalha=0` desliga. Teste `scripts/test-f3-batalha.mjs`.
+>   **Medido:** as janelas calmas das cabeças duram 2,4 s (9,3 / 16,8 / 35,5 s no atalho), as da enguia ~4 s — por isso a
+>   passagem não atravessa a tela (~10 s). **Achado:** a nuvem distante (a pintura espelhada) nascia em x=0 → céu
+>   simétrico no instante do preto; agora nasce em 137.
+>   ⚠️ **Lição de novo:** editei `src/` com uma filmagem da enguia rodando — a filmagem foi descartada e refeita.
+>   **Custo:** +0,2 ms p95; a camada da batalha não sobe para a GPU enquanto vazia. **Nenhum tranco novo:** o antigo
+>   (~1 s) às vezes se parte em dois picos (~q340 e ~q380), com ou sem a batalha (medido 3× cada).
+> - **✅ A RODADA 3 FECHADA (09/11, a resposta dele):** *"As silhuetas podem ser uma variedade das criadas. Ora passam
+>   frotas de uma, outra"* → cada passagem sorteia um par nave/criatura (A–D) e a frota inteira voa esse par
+>   (`OPCOES`, o `ESCOLHA` saiu); *"a frequencia pode ser aumentada ligeiramente [...] deixe discretas"* → chance 0,9 e
+>   `minEntre` 6 s (4 passagens em 60 s nas cabeças); os clarões *"estão bons"*.
+> - **Nada commitado** (ele pede quando quiser).
+>
+> (O arranque anterior abria nas perguntas do cenário, START `plans/2026-11-09-cenario-luta-serpente-START.md`: feito
+> acima.)
 >
 > 📍 **08/11 (fim) — A ENGUIA APROVADA NO JOGO.** Ele viu a folha, jogou e: *"aprovo da forma que está"*. Ficam como
 > estão a taxa 30 (o padrão), a reta final que segue até o posto e mergulha sem os canos, e o Eco final repetido. *"Sobre
@@ -911,8 +1000,8 @@ sprite que se desfaz nos próprios pixels).
 >   (02–03/11: a de 3 cabeças FECHADA no jogo. 03/11 (2): o S2 virou a **ENGUIA COLOSSAL**, spec
 >   `specs/2026-11-03-serpente-grande-enguia-design.md`; a escolha da cabeça espera ele em
 >   `folhas/2026-11-03/enguia-cabeca/cabecas.html` — ver o 📍 de 03/11 (2) no topo.)
-> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO, depois do retorno dele sobre as naves de 25–26/10; START do H
->   `plans/2026-10-21-bloco-h-START.md`; só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
+> - **▶️ H — efeitos de imersão por fase** (O PRÓXIMO desde 09/11; START NOVO `plans/2026-11-09-bloco-h-START.md` — o de
+>   21/10 é registro; só visual, ZERO efeito no jogo: sem corpo, sem dano, fora de todo grupo):
 >   - F1: mísseis caindo do céu nas camadas de trás, e meteoros (⚠️ fora do salão da caverna, ~42–58 s: o que fica
 >     abaixo do fundo do salão, −83, some atrás dele sozinho; o que ficar acima precisa da máscara inversa da caverna);
 >   - F2: a silhueta do Leviatã NOVO passando ao fundo, distante (depende de D);

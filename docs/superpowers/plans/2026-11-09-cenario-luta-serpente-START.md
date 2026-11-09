@@ -1,5 +1,10 @@
 # START — o CENÁRIO da luta da Serpente (a arena da F3)
 
+> ✅ **FECHADO (08–09/11).** Virou o "cenário do casco e da arena": spec `specs/2026-11-08-cenario-casco-arena-design.md`,
+> 4 rodadas, commitado em `6fe3825`/`d3eaf30`. ⚠️ O fato 1 abaixo estava errado: os "blocos azuis" eram os asteroides
+> distantes (−90) e a nebulosa do espaço (−98), não as `nebula3`; o fato 4 (o tranco) num navegador de verdade é de
+> 23–54 ms e vem da irrupção dela, não da cópia do casco. O próximo é o H: `plans/2026-11-09-bloco-h-START.md`.
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. A Serpente grande (a enguia colossal) está
 > fechada e commitada. A sessão abre no CENÁRIO da luta da Serpente: começar pelas perguntas a ele
 > (superpowers:brainstorming), antes de gerar qualquer arte."**

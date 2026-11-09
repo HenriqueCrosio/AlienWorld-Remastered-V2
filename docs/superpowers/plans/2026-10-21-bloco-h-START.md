@@ -1,5 +1,8 @@
 # START — o retorno dele jogando, e depois o bloco H (os efeitos de imersão por fase)
 
+> 📜 **REGISTRO (09/11).** O §0 (o retorno jogando) foi cumprido em 28/10. O START vivo do H é
+> `plans/2026-11-09-bloco-h-START.md` (com o estado de 09/11 e as ferramentas do cenário do casco).
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. Tudo de 22–27/10 está commitado e empurrado.
 > Primeiro o retorno dele jogando (§0); depois o bloco H, abrindo com as perguntas a ele."**
 > O roadmap vivo é o 🧭 do HANDOFF (a ordem dele: G ✅ → **H** → I → J → F); este START é o mapa de entrada da sessão.
