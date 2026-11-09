@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explosões, conceitos</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 15px; margin: 18px 0 6px; color: var(--destaque); }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  .cols { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; color: var(--suave); font-size: 13px; margin: 4px 0 12px; }
+  .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; color: var(--suave); font-size: 13px; margin: 4px 0 12px; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>As explosões — os conceitos</h1>
+  <p class="suave">09/11 · bloco I, etapa 1 (itens 9 e 14) · spec <code>specs/2026-11-09-bloco-i-explosoes-design.md</code> ·
+    ferramenta <code>scripts/_i/_explosoes-conceitos.mjs</code>. Nada mudou no jogo ainda.</p>
+  <p>A folha de explosão de hoje é usada em todo estouro do jogo. Os quadros do meio são anéis vermelhos lisos e os do fim,
+    fumaça de bolinhas pretas: são os itens 9 e 14 ao mesmo tempo. Os quatro caminhos abaixo são desenhados em pixel com as
+    peças do pixelfx (as bolas de fogo, as faíscas, as brasas, a luz) e estão todos no <b>vácuo</b>: nada sobe nem cai, a
+    bola se abre, os estilhaços saem retos e a fumaça abre em esfera. A versão da F1, com a fumaça subindo, sai do
+    escolhido.</p>
+  <ul>
+    <li><b>A · fogo e fumaça:</b> a bola de fogo se abre em labaredas que esfriam, e uma fumaça escura se abre atrás.</li>
+    <li><b>B · plasma:</b> energia sem fumaça. Um núcleo branco, uma casca de contorno irregular que corre e afina, e arcos
+      que estalam. Sobram brasas soltas.</li>
+    <li><b>C · fumaça densa:</b> pouco fogo e uma nuvem pesada que demora e se desfaz encolhendo, com brasas acesas dentro.
+      É a resposta mais direta ao item 9.</li>
+    <li><b>D · estilhaços:</b> o fogo e pedaços de casco girando retos para fora, acesos no começo, cada um deixando um
+      rastro de fumaça.</li>
+  </ul>
+  <p class="suave">A fumaça precisou de três tentativas. Discos soltos liam como bolinhas de novo, a massa iluminada por
+    inteiro lia como pedra, e o desfazer pelo pontilhado mostrava o xadrez. Ficou uma massa só de bolhas, cada uma com a sua
+    tampa clara e contorno escuro, que encolhe até sumir.</p>
+
+  <h2>Os três tamanhos, lado a lado com a de hoje</h2>
+  <p>Em velocidade real, sobre a pintura da F2, no tamanho em que o jogo desenha cada uma hoje: a pequena (drones,
+    batedores), a média (torres, a nave levando dano) e a grande (cargueiro, chefões, a bomba).</p>
+  <video src="comparativo.mp4" controls loop muted playsinline autoplay></video>
+  <div class="cols"><span>hoje</span><span>A · fogo e fumaça</span><span>B · plasma</span><span>C · fumaça densa</span><span>D · estilhaços</span></div>
+  <img src="comparativo.png">
+  <p class="suave">O mesmo quadro parado, aos 0,25 s.</p>
+
+  <h2>Numa cena: a cadeia da cutscene 1</h2>
+  <p>A "IMPACTO · A FROTA CAIU": 14 estouros a cada 0,15 s, varrendo da direita para a esquerda, um grande a cada quatro,
+    como a cena faz hoje.</p>
+  <video src="cadeia.mp4" controls loop muted playsinline autoplay></video>
+  <p class="suave">Em cima: hoje, A e B. Embaixo: C e D.</p>
+  <img src="cadeia-1.6s.png">
+  <p class="suave">Aos 1,6 s.</p>
+
+  <h2>A grande, quadro a quadro (a cada 3 quadros, ampliada 3×)</h2>
+  <h3>A · fogo e fumaça</h3>
+  <img src="quadros-A.png">
+  <h3>B · plasma</h3>
+  <img src="quadros-B.png">
+  <h3>C · fumaça densa</h3>
+  <img src="quadros-C.png">
+  <h3>D · estilhaços</h3>
+  <img src="quadros-D.png">
+  <p class="suave">O primeiro quadro (o clarão branco) é o assunto da etapa 2, os flashes. Aqui ele é a explosão, não a tela.</p>
+
+  <h2>Para você decidir</h2>
+  <ol class="pergunta">
+    <li><b>Qual caminho:</b> A, B, C ou D? Dá para misturar, por exemplo o fogo do A com a fumaça do C, ou o D para naves e
+      o B para os inimigos alien.</li>
+    <li><b>A duração:</b> a de hoje some mais rápido. A fumaça nova fica até ~1,8 s na grande. Mais curta ou assim?</li>
+  </ol>
+</main>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explosões no jogo</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  table { border-collapse: collapse; margin: 8px 0 16px; font-size: 14px; }
+  td, th { border: 1px solid var(--linha); padding: 4px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--suave); font-weight: 600; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>As explosões no jogo</h1>
+  <p class="suave">09/11 · bloco I, etapa 1 · plano <code>plans/2026-11-09-bloco-i-explosoes.md</code> · os conceitos em
+    <a href="explosoes.html" style="color:inherit">explosoes.html</a>.</p>
+  <p>A sua resposta aos conceitos: <i>"eu gostei de todos, portanto vamos usar todos. misturando alguns quando for
+    conveniente"</i>, e à distribuição: <i>"Boa, pode seguir"</i>. As explosões novas estão no jogo inteiro. Cada uma é
+    escolhida pelo material de quem explode, o que o jogo já sabia de cada inimigo, chefão e peça.</p>
+  <table>
+    <tr><th>material</th><th>explosão</th><th>onde se vê abaixo</th></tr>
+    <tr><td>metal (naves, torres, elites)</td><td>D, estilhaços com o fogo do A</td><td>F1, F2, F3, a cutscene 1</td></tr>
+    <tr><td>minas, sensores, a bomba</td><td>A, fogo e fumaça</td><td>F2, F3</td></tr>
+    <tr><td>chefão de metal (o último estouro)</td><td>C, a nuvem que fica, sobre A + D</td><td>a Capitânia, a cutscene 1</td></tr>
+    <tr><td>luz (água-viva)</td><td>B, plasma</td><td>F3</td></tr>
+    <tr><td>biomecânico (lula, Larva, Guardião, golfinho)</td><td>B passando a C</td><td>F3, F4</td></tr>
+    <tr><td>carne (pupas, moscas, Tubo, Predador, portas)</td><td>C de matéria, sem fogo</td><td>F4</td></tr>
+    <tr><td>rocha (asteroides)</td><td>D em pedra</td><td>F2, F3</td></tr>
+    <tr><td>as cartas</td><td>B</td><td>(quando uma carta explode)</td></tr>
+  </table>
+  <p>Na F1, que tem atmosfera, a fumaça sobe. Nas outras fases e nas cutscenes nada sobe nem cai. Todas saíram em pixel, no
+    maior tamanho em que aparecem: o jogo só as reduz.</p>
+  <p class="suave">Como foi filmado: a nave fica parada e não atira, então a sonda mata, a cada ~0,4 s, um inimigo ou uma
+    peça na tela pelo caminho normal do jogo (cada um explode com o seu material). Em velocidade real, no dobro da tela.
+    Os flashes de tela cheia continuam os de hoje: eles são a etapa 2.</p>
+
+  <h2>F1 · atmosfera (metal; a fumaça sobe)</h2>
+  <video src="jogo/f1/video.mp4" controls loop muted playsinline></video>
+  <h2>F2 · o cinturão (metal e rocha)</h2>
+  <video src="jogo/f2/video.mp4" controls loop muted playsinline></video>
+  <h2>F2 · a morte da Capitânia (a cadeia e o último estouro)</h2>
+  <video src="jogo/f2-capitania/video.mp4" controls loop muted playsinline></video>
+  <h2>F3 · o Ato 1 (luz, biomecânico, metal, rocha)</h2>
+  <video src="jogo/f3/video.mp4" controls loop muted playsinline></video>
+  <h2>F4 · o interior (carne e biomecânico)</h2>
+  <video src="jogo/f4/video.mp4" controls loop muted playsinline></video>
+  <h2>Cutscene 1 · "a frota caiu" — o ajuste</h2>
+  <p>A sua resposta: <i>"só tome cuidado com a explosão da cutscene 1, eu quero ela maior, vi que no final do video
+    existem duas implosões. Aquilo pode sair, quero a mesma mecanica, explosao grande e a nave saindo para baixo (como
+    estava)"</i>. A cadeia ficou maior (a média no tamanho em que foi assada, as grandes de 0,8 para 1,2) e as duas
+    implosões saíram: no lugar delas, uma explosão grande, a maior que existe, no meio do casco, e a Aurora afundando e
+    saindo por baixo como antes.</p>
+  <video src="jogo/cutscene1-r2/video.mp4" controls loop muted playsinline></video>
+  <p class="suave">Antes do ajuste:</p>
+  <video src="jogo/cutscene1/video.mp4" controls loop muted playsinline></video>
+  <p class="suave">Sem os textos da cena: eles e a mesa de cartas vivem numa camada à parte, escondida nesta filmagem para a
+    mesa não tapar o convés.</p>
+
+  <h2>Para você decidir</h2>
+  <ol class="pergunta">
+    <li><b>As explosões no jogo:</b> estão como você quer, material por material? Se algum material pedir outra mistura, é
+      uma linha na tabela.</li>
+    <li><b>As antigas:</b> com o seu ok, as folhas de explosão antigas saem para <code>assets/raw/</code>. As cartas com arte
+      própria aprovada seguem com a delas.</li>
+  </ol>
+  <p class="suave">Depois vem a etapa 2: os flashes de tela cheia.</p>
+</main>
+</body>
+</html>

@@ -1,6 +1,9 @@
 // Sonda do SISTEMA DE EXPLOSÕES ANIMADAS (o passe visual do Fx, 2026-07-20).
 //
-// O que ela prova: matar um inimigo de verdade faz nascer um SPRITE da sheet `explosion`
+// (09/11, bloco I: as explosões são as folhas novas por material, `explosao-<tipo>-<zona>-<tam>` — a antiga `explosion`
+// está em `assets/raw/backup-explosoes/`.)
+//
+// O que ela prova: matar um inimigo de verdade faz nascer um SPRITE de explosão
 // (não só fagulha de partícula), a animação dele está TOCANDO, e ele SOME sozinho quando a
 // animação completa (o `once('animationcomplete', destroy)` — sem ele, sprites de explosão
 // vazariam pela fase inteira).
@@ -29,7 +32,7 @@ const explosoes = () =>
     if (!s) return { cena: null, sprites: [], inimigos: 0 };
     // Sprites VIVOS da sheet de explosão na display list da cena.
     const sprites = s.children.list
-      .filter((c) => c.type === 'Sprite' && c.texture?.key === 'explosionSheet')
+      .filter((c) => c.type === 'Sprite' && c.texture?.key?.startsWith('explosao-') && !c.texture.key.endsWith('-luz'))
       .map((c) => ({
         anim: c.anims?.currentAnim?.key ?? null,
         tocando: c.anims?.isPlaying ?? false,
@@ -86,11 +89,12 @@ for (let i = 0; i < 120; i++) {
 await page.keyboard.up('Space');
 
 ok(!!visto, 'uma explosão da SHEET apareceu quando o inimigo morreu (não só fagulha)');
-ok(visto?.anim === 'explosion', `a animação é a ` + `'explosion' (${visto?.anim})`);
+// (the first death in the probe's line of fire may be a rock on the way, not the drone: any of the new ones)
+ok(visto?.anim?.startsWith('explosao-'), `a animação é uma das novas, pelo material: ${visto?.anim}`);
 ok(visto?.tocando === true, 'a animação está TOCANDO (isPlaying)');
 ok(
-  visto && visto.escala > 0.3 && visto.escala < 1.0,
-  `a escala é a de inimigo comum (~0.5-0.8: ${visto?.escala})`,
+  visto && visto.escala > 0.3 && visto.escala <= 1.0,
+  `a escala é a de inimigo comum, nunca ampliada (${visto?.escala})`,
 );
 ok(completou, 'o sprite se DESTRUIU ao completar a animação (one-shot, sem vazamento)');
 
