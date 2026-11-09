@@ -471,8 +471,10 @@ export class InterludeScene extends Phaser.Scene {
         const t = i / (N - 1);
         const x = Phaser.Math.Linear(GAME_WIDTH + 10, 40, t) + Phaser.Math.Between(-14, 14);
         const y = InterludeScene.DECK_Y + Phaser.Math.Between(-10, 26);
-        if (i % 4 === 3) this.fx.explodeBig(x, y - 14, 0.8, 26);
-        else this.fx.explode(x, y, 1.5, 26);
+        // (bloco I) a Aurora é metal: a cadeia em D, os compartimentos grandes fechando na nuvem (C sobre A + D). Maiores
+        // que na 1ª instalação (ele: *"eu quero ela maior"*): a média no tamanho em que foi assada, as grandes a 1,2.
+        if (i % 4 === 3) this.fx.explodeBig(x, y - 14, 1.2, 26, 'chefeFim');
+        else this.fx.explode(x, y, 2, 26, 'metal');
       });
     }
 
@@ -488,18 +490,17 @@ export class InterludeScene extends Phaser.Scene {
       this.tweens.add({ targets: this.ship, y: 60, duration: 1600, ease: 'Cubic.easeOut' });
     });
 
-    // O FINAL É IMPLOSÃO, não explosão — é a palavra da cena ("a Aurora IMPLODE"), e agora ela
-    // é VISUAL: a `explosion-big` invertida suga a luz para dentro do casco. A sheet lê como
-    // matéria sendo engolida: fumaça → chama → núcleo branco → nada. Duas, em pontos do casco:
-    // uma nave de 384px não implode num ponto só.
+    // O FINAL É UMA EXPLOSÃO GRANDE (09/11, bloco I). Eram duas implosões (a `explosion-big` tocada ao contrário, e na
+    // 1ª instalação das explosões novas o `implosion` do pixelfx); ele, vendo o vídeo: *"vi que no final do video existem
+    // duas implosões. Aquilo pode sair, quero a mesma mecanica, explosao grande e a nave saindo para baixo (como
+    // estava)"*. Uma só, a maior que existe (a grande do `chefeFim`, no tamanho em que foi assada), no meio do casco.
     this.time.delayedCall(2700, () => {
       if (this.done) return;
 
       this.cameras.main.flash(500, 255, 210, 120);
-      this.fx.implodeBig(GAME_WIDTH / 2 - 60, InterludeScene.DECK_Y - 34, 1.5, 26);
-      this.fx.implodeBig(GAME_WIDTH / 2 + 70, InterludeScene.DECK_Y - 26, 1.2, 26);
+      this.fx.explodeBig(GAME_WIDTH / 2, InterludeScene.DECK_Y - 30, 1.7, 26, 'chefeFim');
 
-      // O casco AFUNDA e apaga no rastro da implosão: a Aurora sai de cena por baixo, por onde
+      // O casco AFUNDA e apaga no rastro da explosão: a Aurora sai de cena por baixo, por onde
       // entrou — puxada para dentro e para baixo, não varrida para o lado.
       this.tweens.add({
         targets: [this.carrier, this.deckRim],

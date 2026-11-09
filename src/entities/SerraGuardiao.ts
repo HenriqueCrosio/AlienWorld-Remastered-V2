@@ -197,7 +197,7 @@ export class SerraGuardiao {
     this.t = 0;
     this.tocar('serra-travada');
     // A mordida na borda: faíscas e um tranco de câmera. A serra fica onde cravou.
-    this.fx.explode(this.sprite.x, this.sprite.y, 0.5);
+    this.fx.explode(this.sprite.x, this.sprite.y, 0.5, 50, 'biomec');
     this.scene.cameras.main.shake(90, 0.004);
   }
 

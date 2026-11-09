@@ -4,6 +4,7 @@ import { ICONES_CARTAS, RARIDADES } from '../cartas';
 import { ART_PECAS_F1, registrarPecasF1 } from '../f1/pecasF1';
 import { CONJUNTOS, IDLE_HAB } from '../entities/serpente/gestosHab';
 import { ARQUIVOS as ARQUIVOS_ENGUIA_BOOT } from '../entities/serpente/enguia/arquivos';
+import { FOLHAS_EXPLOSAO } from '../systems/explosoes/folhasExplosao';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -342,14 +343,9 @@ const SHEET_ANIMS: {
 ];
 
 const SHEETS: Record<string, { path: string; w: number; h: number }> = {
-  // A explosão-MESTRA do jogo: núcleo branco-quente → chamas → fumaça escura → some.
-  explosionSheet: { path: 'sprites/explosion-sheet.png', w: 64, h: 64 },
-  // A detonação apocalíptica (bosses, bombas, set-pieces). INVERTIDA vira IMPLOSÃO (Fx).
-  explosionBigSheet: { path: 'sprites/explosion-big-sheet.png', w: 128, h: 128 },
-  // A explosão PEQUENA (9f 32²): drones, batedores, kamikazes, minas. Antes TUDO usava a
-  // mestra de 64px — o estouro de um drone de 24px cobria o dobro do cadáver e lia como
-  // capital. Explosão tem TAMANHO DE CASO agora (ver Fx.explode): pequena/média/grande.
-  explosionSmallSheet: { path: 'sprites/explosion-small-sheet.png', w: 32, h: 32 },
+  // (As três explosões antigas — `explosionSheet`, `explosionBigSheet`, `explosionSmallSheet` — saíram em 09/11 com o
+  // bloco I: as novas vêm do manifesto `FOLHAS_EXPLOSAO`, carregado no `preload`. As antigas estão em
+  // `assets/raw/backup-explosoes/`.)
   // AS EXPLOSÕES DAS CARTAS (aprovadas em 01/10, spec do catálogo §5.1c — `scripts/instalar-explosoes-cartas.mjs`):
   // o impacto DIRECIONAL humano (pequeno e grande) e o cone alien apontam para a DIREITA; a redonda #53 (míssil), o
   // fogo da Combustão #11 e o pulso da Sobrecarga #4 não têm rumo. Ver `ExplosaoDoJogador`.
@@ -1439,6 +1435,12 @@ export class BootScene extends Phaser.Scene {
 
     for (const [key, sheet] of Object.entries(SHEETS)) {
       this.load.spritesheet(key, sheet.path, { frameWidth: sheet.w, frameHeight: sheet.h });
+    }
+    // AS EXPLOSÕES (09/11, bloco I, etapa 1): a folha de COR e a de LUZ de cada tipo × zona × tamanho, em grade, pelo
+    // manifesto gerado (`scripts/_i/_explosoes-assar.mjs`). O `Fx` as escolhe pelo material de quem explode.
+    for (const f of Object.values(FOLHAS_EXPLOSAO)) {
+      this.load.spritesheet(f.chave, f.arq, { frameWidth: f.cel, frameHeight: f.cel });
+      this.load.spritesheet(f.luz, f.arqLuz, { frameWidth: f.cel, frameHeight: f.cel });
     }
 
     // AS HABILIDADES DA SERPENTE (02/11 — `scripts/_serpente/_hab-instalar.mjs`): uma folha de quadros de 256² (8

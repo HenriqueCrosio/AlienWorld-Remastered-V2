@@ -688,6 +688,7 @@ export class BossNucleo implements StageBoss {
           this.sprite.y + Phaser.Math.Between(-70, 80) * e,
           1.6,
           52,
+          'biomec',
         );
       });
     }
@@ -696,7 +697,7 @@ export class BossNucleo implements StageBoss {
       if (this.dead) return;
       this.sprite.anims.stop();
       if (this.scene.textures.exists('guardiaoDestruido')) this.sprite.setTexture('guardiaoDestruido');
-      this.estouro = this.fx.explodeBig(this.core.x, this.core.y, 1.1, 52);
+      this.estouro = this.fx.explodeBig(this.core.x, this.core.y, 1.1, 52, 'biomec');
       explosaoSangrenta(this.scene, this.core.x, this.core.y);
       sangueNaTela(this.scene);
       this.scene.tweens.add({ targets: this.sprite, alpha: 0, duration: BossNucleo.TROCA_MS - BossNucleo.MORTE_MS });

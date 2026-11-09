@@ -1,7 +1,7 @@
 /**
  * THE EEL'S PIXELFX EFFECTS (08/11, the round he approved: "Perfeito, todos ficaram ótimos") — the mock's
  * `scripts/_serpente/enguia/efeitos.mjs`, ported line by line (plan `2026-11-08-enguia-instalacao.md`, Task 2), on the
- * vendored pixelfx (`./pixelfx/`, patch-gg/pixelfx, MIT — see its LICENSE/NOTICE; Hugo Duprez's Sprite Fusion
+ * vendored pixelfx (`src/fx/pixelfx/`, the game's since 09/11; patch-gg/pixelfx, MIT — see its LICENSE/NOTICE; Hugo Duprez's Sprite Fusion
  * recipes), each bent to the game's rules (in the vacuum nothing sags, falls or rises by weight) and to her scale:
  *   - the pipes' FIRE (from `flamethrower`): a pressurised plasma stream per lane, dead straight;
  *   - the Echo's SEEDS (from `plasma-ball`): a ~5 px plasma core with 4 wandering tendrils;
@@ -10,11 +10,11 @@
  *   - the head's burst (the FIREBALL of `big-explosion`, only its body).
  * Drawn into a pixelfx frame (colour + additive light) and laid over the eel's frame (`Camada`).
  */
-import { createFrame, clearFrame, painterFor, composite, createFx, fit, hex, mix, WHITE, TAU, rng, loopNoise, clamp, noise2 } from './pixelfx/core/index.js';
-import type { Cor, Frame, Fx, Painter } from './pixelfx/core/index.js';
-import { pnoise, hotFirst, firePuff, spark, smokePuff } from './pixelfx/fx/fire/_lib.js';
-import * as implosao from './pixelfx/fx/explosions/implosion.js';
-import * as nuvem from './pixelfx/fx/nature/poison-cloud.js';
+import { createFrame, clearFrame, painterFor, composite, createFx, fit, hex, mix, WHITE, TAU, rng, loopNoise, clamp, noise2 } from '../../../fx/pixelfx/core/index.js';
+import type { Cor, Frame, Fx, Painter } from '../../../fx/pixelfx/core/index.js';
+import { pnoise, hotFirst, firePuff, spark, smokePuff } from '../../../fx/pixelfx/fx/fire/_lib.js';
+import * as implosao from '../../../fx/pixelfx/fx/explosions/implosion.js';
+import * as nuvem from '../../../fx/pixelfx/fx/nature/poison-cloud.js';
 
 export type { Fx, Frame, Painter };
 

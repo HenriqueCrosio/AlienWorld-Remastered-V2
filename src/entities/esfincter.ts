@@ -444,7 +444,7 @@ export class Esfincter {
     this.abrirPoca(x);
     this.sangrarNaTela();
 
-    this.fx.explode(x, y, 2.2);
+    this.fx.explode(x, y, 2.2, 50, 'carne');
   }
 
   /**

@@ -96,7 +96,7 @@ export class ExplosaoDoJogador {
   ): void {
     const fx = this.c.h.fx;
     if (this.arte === 'jogo') {
-      fx.explode(x, y, visual);
+      fx.explode(x, y, visual, undefined, 'carta');
       return;
     }
     const anim = this.arte === 'aprovada' ? this.animDaCarta(fonte, maior) : null;
@@ -105,7 +105,7 @@ export class ExplosaoDoJogador {
         this.variar(this.animar(anim, ex, ey, angulo), anim.direcional);
         return;
       }
-      const s = fx.sheetSprite('explosion-small', 'explosionSmallSheet', ex, ey, 1.1 * escala, PROFUNDIDADE);
+      const s = fx.explosao('carta', ex, ey, escala, PROFUNDIDADE);
       if (s) this.variar(s, false);
     };
 

@@ -141,7 +141,7 @@ export function afundarNaLava(scene: Phaser.Scene, corpo: Phaser.GameObjects.Ima
         // ─── 2. O ESTOURO ───
         scene.cameras.main.shake(320, 0.013);
         for (let i = 0; i < 5; i++) {
-          scene.time.delayedCall(i * 80, () => fx.explode(racha.x + (i - 2) * 46, superficie + 6, 1.3, 52));
+          scene.time.delayedCall(i * 80, () => fx.explode(racha.x + (i - 2) * 46, superficie + 6, 1.3, 52, 'carne'));
         }
         brasas.explode(70, racha.x, superficie + 4);
         // As LASCAS de placa arrancadas: sobem girando e caem de volta na fenda.

@@ -7,6 +7,7 @@ import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import { InputReader } from '../input';
 import { Fx } from '../systems/Fx';
+import { tipoDoMaterial } from '../systems/explosoes/tipoExplosao';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { MS_DA_TROCA, PERFIL_DA_PINTURA, type ChavePintura } from '../systems/atmosfera/perfis';
 import { Moldura } from '../systems/Moldura';
@@ -425,6 +426,8 @@ export class GameScene extends Phaser.Scene {
     this.relogioDoDuelo = null;
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
+    // (bloco I) na atmosfera a fumaça das explosões sobe; o `breakAtmosphere` passa ao vácuo
+    this.fx.zona = this.zone === 'atmosfera' ? 'atm' : 'vac';
     this.destrocos = new Destrocos(
       this,
       this.fx,
@@ -1778,7 +1781,7 @@ export class GameScene extends Phaser.Scene {
   private saiDaMare(anima: boolean): void {
     if (this.mare === 'aco') return;
     if (anima) {
-      this.terrain.afundar('mesaMar', this.superficieDaMoldura, (x, y) => this.fx.explode(x, y, 1.1, -0.4));
+      this.terrain.afundar('mesaMar', this.superficieDaMoldura, (x, y) => this.fx.explode(x, y, 1.1, -0.4, 'rocha'));
       this.mare = 'voltando';
       this.mareEspera = GameScene.MARE_ESPERA;
       this.mareParesEmergindo = GameScene.MARE_PARES_EMERGINDO;
@@ -2100,7 +2103,7 @@ export class GameScene extends Phaser.Scene {
         de: { x: this.ship.x, y: this.ship.y },
         aoClimax: () => this.lentaDeMorte(),
       });
-    } else this.fx.explodeBig(g.sprite.x, g.sprite.y, 0.8);
+    } else this.fx.explodeBig(g.sprite.x, g.sprite.y, 0.8, 50, 'biomec');
     this.score += Golfinho.SCORE;
     this.encerrarGolfinho();
     this.cartas.aoMorrerGuardiao();
@@ -2361,6 +2364,8 @@ export class GameScene extends Phaser.Scene {
             boss.sprite.x + Phaser.Math.Between(-24, 24),
             boss.sprite.y + Phaser.Math.Between(-32, 32),
             1.4,
+            50,
+            tipoDoMaterial(quem?.material),
           );
         });
       }
@@ -2379,7 +2384,7 @@ export class GameScene extends Phaser.Scene {
       } else {
         const queda = naF1 ? explosaoDaQueda(this, boss.sprite.x, boss.sprite.y + 44, 50) : null;
         if (queda) this.fx.abaloGrande(boss.sprite.x, boss.sprite.y, 1.2);
-        else this.fx.explodeBig(boss.sprite.x, boss.sprite.y, 1.2);
+        else this.fx.explodeBig(boss.sprite.x, boss.sprite.y, 1.2, 50, tipoDoMaterial(quem?.material, 'chefe'));
       }
       boss.destroy();
       this.boss = null;
@@ -2400,6 +2405,7 @@ export class GameScene extends Phaser.Scene {
    */
   private breakAtmosphere(): void {
     this.zone = 'vacuo';
+    this.fx.zona = 'vac';
     this.parallax.breakAtmosphere();
     this.applyHandling(true);
     // A nave sobe com o bico a 45° (ver `SUBIDA_ANGULO`).
@@ -2593,7 +2599,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    this.fx.explode(prop.x, prop.y - prop.displayHeight / 2, 1.5);
+    this.fx.explode(prop.x, prop.y - prop.displayHeight / 2, 1.5, 50, 'metal');
     this.score += prop.getData('score') as number;
     prop.destroy();
   }
@@ -2642,7 +2648,7 @@ export class GameScene extends Phaser.Scene {
 
     this.time.delayedCall(150, () => {
       if (!porta.active) return;
-      this.fx.explode(porta.x, porta.y, 1.5);
+      this.fx.explode(porta.x, porta.y, 1.5, 50, 'carne');
     });
   }
 
@@ -2737,7 +2743,9 @@ export class GameScene extends Phaser.Scene {
       if (v !== 'hoje') this.destrocos.morrer(hazard, { estilo: 'rocha', material: 'rocha', classe: p.classe, de: de ?? { x: this.ship.x, y: this.ship.y }, rocha: v });
     }
 
-    this.fx.explode(x, y, explode ? 2 : hazard.scale);
+    // (bloco I) quem estoura de verdade (mina, sensor) é o A; o resto, o do material (a pedra; na F4 o casco engolido)
+    const mat = this.stage.id === 4 && p?.materialF4 ? p.materialF4 : p?.material;
+    this.fx.explode(x, y, explode ? 2 : hazard.scale, 50, explode ? 'perigo' : tipoDoMaterial(mat, p?.classe));
     hazard.destroy();
 
     if (!explode) return;
@@ -2853,7 +2861,9 @@ export class GameScene extends Phaser.Scene {
       // A pupa SOME sem explodir (spec F4 §2.2): só a faísca do acerto — quem ameaça é a mosca.
       this.fx.hit(e.x, e.y);
     } else {
-      this.fx.explode(e.x, e.y, e.scale);
+      // (bloco I) a explosão pelo material dele: metal = D, luz = B, biomec = B → C, carne = C de matéria
+      const sep = SEPARACAO[kind];
+      this.fx.explode(e.x, e.y, e.scale, 50, tipoDoMaterial(sep?.material, sep?.classe));
     }
     this.score += e.getData('score') as number;
     this.medidas?.abate(e.getData('kind') as string, e);
@@ -2900,7 +2910,7 @@ export class GameScene extends Phaser.Scene {
   private bombaDePanico(): void {
     this.cameras.main.flash(220, 255, 232, 180);
     this.cameras.main.shake(280, 0.008);
-    this.fx.explode(this.ship.x + 14, this.ship.y, 1.8);
+    this.fx.explode(this.ship.x + 14, this.ship.y, 1.8, 50, 'metal');
     // A detonação CENTRAL: a bomba é um evento de tela inteira, e a explosão grande no meio
     // dela é o que vende isso (o efeito existente — flash/shake/limpeza — continua por cima).
     this.fx.explodeBig(GAME_WIDTH / 2, GAME_HEIGHT / 2, 1.7);

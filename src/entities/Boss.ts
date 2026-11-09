@@ -792,7 +792,7 @@ export class Boss implements StageBoss {
     pontos.forEach(([dx, dy, tam], i) => {
       this.scene.time.delayedCall(Math.round(i * passo), () => {
         if (this.dead || !this.sprite.active) return;
-        this.fx.explode(this.sprite.x + dx, this.sprite.y + dy, tam);
+        this.fx.explode(this.sprite.x + dx, this.sprite.y + dy, tam, 50, 'metal');
       });
     });
 
@@ -804,7 +804,7 @@ export class Boss implements StageBoss {
     // ver. A bola de fogo local cobre o corte; a tela continua legível ao redor dela.
     this.scene.time.delayedCall(Boss.SWAP_AT, () => {
       if (this.dead || !this.sprite.active) return;
-      this.fx.explode(this.sprite.x, this.sprite.y + 30, 2.6);
+      this.fx.explode(this.sprite.x, this.sprite.y + 30, 2.6, 50, 'metal');
       this.swapToAirArt();
     });
   }

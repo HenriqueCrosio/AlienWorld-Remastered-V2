@@ -733,7 +733,7 @@ export class Interlude3Scene extends Phaser.Scene {
   private derrapagem(): void {
     if (this.done) return;
 
-    this.fx.explode(this.ship.x, Interlude3Scene.DECK_Y, 1.3);
+    this.fx.explode(this.ship.x, Interlude3Scene.DECK_Y, 1.3, 50, 'metal');
     this.fagulhas.emitting = true;
 
     // O quique: um só, curto. Dois quiques viram bolinha; nenhum vira pouso.
@@ -912,7 +912,7 @@ export class Interlude3Scene extends Phaser.Scene {
     // Agora ela estoura no PONTO DE IMPACTO (a borda esquerda, por onde o torpedo entrou), menor,
     // e o clarão da câmera encurta. O que o jogador olha durante a morte é a criatura, não o fogo.
     const impactoX = Math.round(g.bocaX - 18);
-    this.fx.explodeBig(impactoX, g.bocaY, 0.7, Interlude3Scene.DEPTH_GARGANTA + 1);
+    this.fx.explodeBig(impactoX, g.bocaY, 0.7, Interlude3Scene.DEPTH_GARGANTA + 1, 'carne');
     this.cameras.main.flash(140, 255, 150, 80);
     this.cameras.main.shake(320, 0.008);
 
@@ -938,7 +938,7 @@ export class Interlude3Scene extends Phaser.Scene {
 
       this.time.delayedCall(t0 + i * passo, () => {
         if (this.done) return;
-        this.fx.explode(x, y, 1.4);
+        this.fx.explode(x, y, 1.4, 50, 'carne');
       });
     }
   }

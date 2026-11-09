@@ -31,6 +31,7 @@ import {
   rgba,
 } from './pedacos';
 import { DESTROCOS, type Classe, type Estilo, type Material, type Mordida, type VarianteRocha } from './numerosDestrocos';
+import { tipoDoMaterial } from '../explosoes/tipoExplosao';
 
 /**
  * THE ENEMIES' DEBRIS (26/10, his ask: *"aplicarmos efeitos de dano, explosões, derrotas decentes iguais ao das
@@ -1683,16 +1684,16 @@ export class Destrocos {
       this.fx.choque(x, y, tamanho * 0.6);
       return;
     }
+    const depth = this.depth + (frente ? 0.03 : -0.03);
     if (mat === 'carne') {
+      // (bloco I, 09/11) flesh gets its own: the matter cloud, no fire (it only shook before)
+      this.fx.explosao(tipoDoMaterial('carne'), x, y, tamanho, depth);
       this.scene.cameras.main.shake(60 * tamanho, 0.0025 * tamanho);
       return;
     }
-    const depth = this.depth + (frente ? 0.03 : -0.03);
     const escala = mat === 'biomec' ? tamanho * 0.7 : tamanho;
-    // the same sizes as `Fx.explode`: the small sheet, the 64 px one, the big one (a boss)
-    if (escala <= 1.25) this.fx.sheetSprite('explosion-small', 'explosionSmallSheet', x, y, 1.1 * escala, depth);
-    else if (escala <= 2) this.fx.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * escala, depth);
-    else this.fx.sheetSprite('explosion-big', 'explosionBigSheet', x, y, 0.5 * escala, depth) ?? this.fx.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * escala, depth);
+    // the explosion of the material (bloco I: metal = D, biomec = B → C), at the same sizes as `Fx.explode`
+    this.fx.explosao(tipoDoMaterial(mat), x, y, escala, depth);
     this.scene.cameras.main.shake(70 * Math.min(2, escala), 0.003 * Math.min(2, escala));
   }
 

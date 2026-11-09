@@ -559,8 +559,11 @@ export class MorteDaNave {
       this.scene.cameras.main.shake(90 * abalo, 0.004 * abalo);
       return;
     }
-    const tex = folha === 'explosion' ? 'explosionSheet' : 'explosionSmallSheet';
-    this.o.fx.sheetSprite(folha, tex, x, y, escala, this.depth + (frente ? 0.03 : -0.03));
+    const depth = this.depth + (frente ? 0.03 : -0.03);
+    // (bloco I) the ship is metal: D. `folha`/`escala` keep the old sheets' sizes (the 64 px at ×0.6 per size, the 32 px
+    // at ×1.1), which the numbers of each death were tuned on
+    const size = folha === 'explosion' ? escala / 0.6 : escala / 1.1;
+    this.o.fx.explosao('metal', x, y, size, depth);
     this.o.fx.abalo(x, y, abalo);
   }
 

@@ -1,8 +1,11 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config';
+import { FOLHAS_EXPLOSAO, FPS_EXPLOSAO, escolheFolha } from './explosoes/folhasExplosao';
+import type { TipoExplosao } from './explosoes/tipoExplosao';
 
 /**
- * Explosões e impactos: SPRITE ANIMADO (sheet do PixelLab) + fagulhas em partícula.
+ * Explosões e impactos: SPRITE ANIMADO + fagulhas em partícula. (09/11, bloco I: as folhas são as explosões novas, assadas
+ * em pixel por material — `scripts/_i/explosoes/receitas.mjs`; as antigas do PixelLab estão em `assets/raw/backup-explosoes/`.)
  *
  * ─── A SHEET SOZINHA NÃO BASTA, A PARTÍCULA SOZINHA NÃO BASTAVA ───
  *
@@ -16,6 +19,13 @@ import { COLORS } from '../config';
  * (arte entra asset por asset; a guarda é `anims.exists`).
  */
 export class Fx {
+  /**
+   * A ZONA da cena (09/11, bloco I): na atmosfera (a F1) a fumaça das explosões sobe; no vácuo nada sobe nem cai. Quem
+   * monta a cena diz (a `GameScene` pela zona da fase); as cutscenes ficam no vácuo.
+   */
+  zona: 'vac' | 'atm' = 'vac';
+  /** o lado de cada estouro alterna (sem tocar no sorteio do jogo) */
+  private lado = 0;
   private readonly burst: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly hitSpark: Phaser.GameObjects.Particles.ParticleEmitter;
   /** As fagulhas do `choque` — a família FRIA. Ver o construtor. */
@@ -62,67 +72,27 @@ export class Fx {
   }
 
   /**
-   * As animações das sheets (carregadas no BootScene). Registradas UMA vez — o Fx é criado
+   * As animações das folhas (carregadas no BootScene). Registradas UMA vez — o Fx é criado
    * por cena, e `anims.create` com chave repetida gritaria; a guarda `anims.exists` resolve.
    *
-   * - `explosion` (13f @18fps ≈ 720ms): a explosão-MESTRA, média. Rápida o bastante para ler
-   *   como ESTOURO, lenta o bastante para a fumaça escura aparecer — a saída em fumaça é o que
-   *   a separa de um clarão de partícula.
-   * - `explosion-small` (9f @20fps ≈ 450ms): o estouro seco dos inimigos pequenos (32²).
-   *   Bicho pequeno morre rápido — a mestra a 0.6× lia como capital (o estouro engolia o
-   *   cadáver de 24px).
-   * - `explosion-big` (13f @13fps ≈ 1s): a detonação de set-piece. Mais lenta: massa grande
-   *   explode devagar (é o que vende a ESCALA — uma explosão de 128px a 18fps lê como pequena
-   *   ampliada).
-   * - `implosion-big`: os MESMOS quadros ao contrário. Fumaça → chama → núcleo branco: matéria
-   *   sendo SUGADA para dentro. É a morte da Aurora (Interlude 1).
+   * ⚠️ 09/11 (bloco I): as explosões são as do manifesto `FOLHAS_EXPLOSAO` (uma anim por folha, a cor e a luz, a 20
+   * quadros/s). As três antigas do PixelLab (`explosion`, `explosion-small`, `explosion-big` e a `implosion-big`, a grande
+   * ao contrário) saíram com as folhas delas, para `assets/raw/backup-explosoes/`.
    */
   private registerAnims(): void {
     const anims = this.scene.anims;
     const tex = this.scene.textures;
-
-    if (tex.exists('explosionSmallSheet') && !anims.exists('explosion-small')) {
-      anims.create({
-        key: 'explosion-small',
-        frames: anims.generateFrameNumbers('explosionSmallSheet', { start: 0, end: 8 }),
-        frameRate: 20,
-        repeat: 0,
-      });
-    }
-
-    if (tex.exists('explosionSheet') && !anims.exists('explosion')) {
-      anims.create({
-        key: 'explosion',
-        frames: anims.generateFrameNumbers('explosionSheet', { start: 0, end: 12 }),
-        frameRate: 18,
-        repeat: 0,
-      });
-    }
-
-    if (tex.exists('explosionBigSheet')) {
-      if (!anims.exists('explosion-big')) {
-        anims.create({
-          key: 'explosion-big',
-          frames: anims.generateFrameNumbers('explosionBigSheet', { start: 0, end: 12 }),
-          frameRate: 13,
-          repeat: 0,
-        });
-      }
-      if (!anims.exists('implosion-big')) {
-        anims.create({
-          key: 'implosion-big',
-          frames: anims.generateFrameNumbers('explosionBigSheet', { start: 12, end: 0 }),
-          frameRate: 13,
-          repeat: 0,
-        });
+    for (const f of Object.values(FOLHAS_EXPLOSAO)) {
+      for (const k of [f.chave, f.luz]) {
+        if (!tex.exists(k) || anims.exists(k)) continue;
+        anims.create({ key: k, frames: anims.generateFrameNumbers(k, { start: 0, end: f.quadros - 1 }), frameRate: FPS_EXPLOSAO, repeat: 0 });
       }
     }
   }
 
   /**
-   * Um sprite one-shot: toca a animação UMA vez e se destrói. Devolve o sprite para a cena
-   * poder ajustar profundidade/escala (as cutscenes precisam dele NA FRENTE dos cenários —
-   * os emissores de partícula vivem no depth 50, atrás de doca/Leviatã).
+   * Um sprite one-shot de uma folha qualquer: toca a animação UMA vez e se destrói (as explosões das cartas aprovadas,
+   * `ExplosaoDoJogador`). Devolve o sprite para a cena ajustar profundidade/escala.
    */
   sheetSprite(
     anim: string,
@@ -141,33 +111,15 @@ export class Fx {
   }
 
   /**
-   * A explosão de combate: sheet + fagulhas + shake.
+   * A explosão de combate: a folha do material + fagulhas + shake.
    *
-   * `size` é o parâmetro histórico (1 = inimigo comum, 1.5 = prop/torre, 2+ = mina/capital) —
-   * e agora ele escolhe A SHEET, não só a escala. Antes tudo saía da mestra de 64px: o drone
-   * de 24px morria numa bola de fogo de 38px (o estouro engolia o cadáver e lia como capital),
-   * e o cargueiro de 122px morria no mesmo foguinho ampliado. Explosão tem TAMANHO DE CASO:
-   *
-   *   size ≤ 1.25  → `explosion-small` (32², 20fps) — drones, batedores, kamikazes.
-   *                  Estouro curto e seco: bicho pequeno morre rápido.
-   *   size ≤ 2.0   → `explosion` (64²) — torres, canhoneiras, o jogador levando dano.
-   *   size > 2.0   → `explosion-big` (128²) — cargueiro, capitais, a morte do jogador.
-   *
-   * `depth` expõe a frente de cena das cutscenes.
+   * `size` é o parâmetro histórico (1 = inimigo comum, 1.5 = prop/torre, 2+ = mina/capital) e escolhe o TAMANHO da
+   * folha (`escolheFolha`: ≤ 1,25 a pequena, ≤ 2 a média, mais a grande), que só reduz. `tipo` é o material de quem
+   * explode (`tipoDoMaterial`); sem ele, o A (`perigo`). `depth` expõe a frente de cena das cutscenes.
    */
-  explode(x: number, y: number, size = 1, depth = 50): Phaser.GameObjects.Sprite | null {
+  explode(x: number, y: number, size = 1, depth = 50, tipo: TipoExplosao = 'perigo'): Phaser.GameObjects.Sprite | null {
     this.abalo(x, y, size);
-    if (size <= 1.25) {
-      return this.sheetSprite('explosion-small', 'explosionSmallSheet', x, y, 1.1 * size, depth)
-        ?? this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth);
-    }
-    if (size <= 2.0) {
-      return this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth);
-    }
-    return (
-      this.sheetSprite('explosion-big', 'explosionBigSheet', x, y, 0.5 * size, depth) ??
-      this.sheetSprite('explosion', 'explosionSheet', x, y, 0.6 * size, depth)
-    );
+    return this.explosao(tipo, x, y, size, depth);
   }
 
   /**
@@ -180,14 +132,14 @@ export class Fx {
   }
 
   /**
-   * A DETONAÇÃO GRANDE (a `explosion-big`, 128px): morte de chefão, a bomba, os clímaxes das
-   * cutscenes. Shake mais longo + um flash curto — o peso do impacto.
+   * A DETONAÇÃO GRANDE: morte de chefão, a bomba, os clímaxes das cutscenes. Shake mais longo + um flash curto — o peso
+   * do impacto. `escala` 1 = `size` 2 do `explode`.
    */
-  explodeBig(x: number, y: number, escala = 1, depth = 50): Phaser.GameObjects.Sprite | null {
+  explodeBig(x: number, y: number, escala = 1, depth = 50, tipo: TipoExplosao = 'perigo'): Phaser.GameObjects.Sprite | null {
     this.burst.explode(Math.floor(16 * escala), x, y);
     this.scene.cameras.main.shake(320 * escala, 0.006 * escala);
     this.scene.cameras.main.flash(120, 255, 190, 110);
-    return this.sheetSprite('explosion-big', 'explosionBigSheet', x, y, escala, depth);
+    return this.explosao(tipo, x, y, 2 * escala, depth);
   }
 
   /**
@@ -201,19 +153,18 @@ export class Fx {
   }
 
   /**
-   * A IMPLOSÃO: a `explosion-big` INVERTIDA — a fumaça vira chama, a chama vira núcleo branco,
-   * e tudo some PARA DENTRO. É a morte da Aurora: matéria sugada, não arremessada.
-   * Sem flash: implodir é a tela PERDER luz, não ganhar.
+   * A IMPLOSÃO (o `implosion` do pixelfx, na rampa de fogo): matéria sugada para dentro. Sem flash: implodir é a tela
+   * PERDER luz. (A Aurora deixou de implodir em 09/11 — ela explode; quem chama hoje é a Serpente.)
    */
   implodeBig(x: number, y: number, escala = 1, depth = 50): Phaser.GameObjects.Sprite | null {
     this.scene.cameras.main.shake(340 * escala, 0.005 * escala);
-    return this.sheetSprite('implosion-big', 'explosionBigSheet', x, y, escala, depth);
+    return this.explosao('implosao', x, y, 2 * escala, depth);
   }
 
   /**
-   * O sprite da sheet PURO, sem shake nem flash: para impactos em SILÊNCIO (a chuva de
-   * meteoros da cutscene final — lá o silêncio é o preço, e o `explode` sacode a tela a cada
-   * estouro). As fagulhas ficam a cargo da cena.
+   * A explosão PURA, sem shake nem flash: para impactos em SILÊNCIO (a chuva de meteoros da cutscene final — lá o
+   * silêncio é o preço, e o `explode` sacode a tela a cada estouro). As fagulhas ficam a cargo da cena. `escala` é a
+   * da média antiga (64 px), por isso o `/ 0,6`.
    */
   sheetExplosion(
     x: number,
@@ -221,7 +172,29 @@ export class Fx {
     escala: number,
     depth = 50,
   ): Phaser.GameObjects.Sprite | null {
-    return this.sheetSprite('explosion', 'explosionSheet', x, y, escala, depth);
+    return this.explosao('perigo', x, y, escala / 0.6, depth);
+  }
+
+  /**
+   * UMA EXPLOSÃO DO BLOCO I (09/11; spec `specs/2026-11-09-bloco-i-explosoes-design.md`): a folha do tipo na zona da cena
+   * e no tamanho certo (`escolheFolha`: o jogo só REDUZ), a COR e por cima a LUZ em ADD, as duas one-shot. `size` está
+   * nas unidades do `explode` (1 = inimigo comum; `explodeBig(e)` = 2e). Sem a folha em disco, `null` (quem chama cai na
+   * de sempre). Só o desenho: o abalo e o flash ficam com quem chama.
+   */
+  explosao(tipo: TipoExplosao, x: number, y: number, size = 1, depth = 50): Phaser.GameObjects.Sprite | null {
+    const e = escolheFolha(tipo, this.zona, size);
+    if (!e || !this.scene.anims.exists(e.folha.chave)) return null;
+    const vira = (this.lado++ & 1) === 1;
+    const s = this.scene.add.sprite(x, y, e.folha.chave, 0).setScale(e.escala).setDepth(depth).setFlipX(vira);
+    s.play(e.folha.chave);
+    s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => s.destroy());
+    if (this.scene.anims.exists(e.folha.luz)) {
+      const l = this.scene.add.sprite(x, y, e.folha.luz, 0).setScale(e.escala).setDepth(depth + 0.01).setFlipX(vira)
+        .setBlendMode(Phaser.BlendModes.ADD);
+      l.play(e.folha.luz);
+      l.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => l.destroy());
+    }
+    return s;
   }
 
   hit(x: number, y: number): void {

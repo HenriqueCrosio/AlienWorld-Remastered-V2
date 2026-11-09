@@ -10,7 +10,7 @@
  * Both keep `bicho` (the mock's: her pixels, for the joint's seal) and the hit `mascara` (1 body, 2 head, 3 hers under
  * the lip — the hull absorbs the shot there).
  */
-import { composite } from './pixelfx/core/index.js';
+import { composite } from '../../../fx/pixelfx/core/index.js';
 
 export const PARTE_NADA = 0, PARTE_CORPO = 1, PARTE_CABECA = 2, PARTE_COBERTA = 3;
 

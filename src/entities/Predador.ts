@@ -1153,7 +1153,7 @@ export class Predador {
     sangueNaTela(this.scene, 5);
     for (let i = 0; i < 5; i++) {
       this.scene.time.delayedCall(120 + i * 170, () => {
-        this.fx.explode(this.sprite.x + Phaser.Math.Between(-70, 70) * e, this.sprite.y + Phaser.Math.Between(-90, 90) * e, 1.1, 52);
+        this.fx.explode(this.sprite.x + Phaser.Math.Between(-70, 70) * e, this.sprite.y + Phaser.Math.Between(-90, 90) * e, 1.1, 52, 'carne');
       });
     }
     this.sairDoBreu(800);

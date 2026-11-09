@@ -832,8 +832,9 @@ export class Interlude2Scene extends Phaser.Scene {
         const y =
           Phaser.Math.Linear(Interlude2Scene.PAD_Y, Interlude2Scene.artToScreenY(95), t) +
           Phaser.Math.Between(-10, 10);
-        if (i % 3 === 2) this.fx.explodeBig(x, y - 10, 0.9, Interlude2Scene.DEPTH_DOCA + 3);
-        else this.fx.explode(x, y, 1.6, Interlude2Scene.DEPTH_DOCA + 3);
+        // (bloco I) a doca é metal: a cadeia em D, as grandes fechando na nuvem
+        if (i % 3 === 2) this.fx.explodeBig(x, y - 10, 0.9, Interlude2Scene.DEPTH_DOCA + 3, 'chefeFim');
+        else this.fx.explode(x, y, 1.6, Interlude2Scene.DEPTH_DOCA + 3, 'metal');
       });
     }
 
@@ -853,6 +854,7 @@ export class Interlude2Scene extends Phaser.Scene {
         this.naveDaVaga.y,
         0.8,
         Interlude2Scene.DEPTH_DOCA + 3,
+        'chefeFim',
       );
     });
 
@@ -861,7 +863,7 @@ export class Interlude2Scene extends Phaser.Scene {
       if (this.done) return;
 
       this.amarras.forEach((a, i) => {
-        this.fx.explode(a.ancoraX, a.ancoraY, 1.2, Interlude2Scene.DEPTH_DOCA + 3);
+        this.fx.explode(a.ancoraX, a.ancoraY, 1.2, Interlude2Scene.DEPTH_DOCA + 3, 'metal');
 
         this.tweens.add({
           targets: a.rocha,
@@ -892,6 +894,7 @@ export class Interlude2Scene extends Phaser.Scene {
         Interlude2Scene.artToScreenY(155),
         1.6,
         Interlude2Scene.DEPTH_DOCA + 3,
+        'chefeFim',
       );
 
       // A DOCA AFUNDA E APAGA — e as LUZES vão junto (`this.luzes`, ver `criarLuzes()`): sem
