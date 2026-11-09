@@ -1399,6 +1399,12 @@ const ART: Record<string, string> = {
   // paintBgF2: 480×270, posicionada em y=-27. Ela SEGUE o nebulaDim (some quando a nuvem abre).
   paintBgF3: 'sprites/paint-bg-f3.png',
 
+  // O CÉU DO CASCO (08/11, spec 2026-11-08-cenario-casco-arena): a pintura do Ato 1 escurecida (o nível 2, escolha dele)
+  // e as nuvens à deriva recortadas dela (`scripts/_cenario/_f3-ceu-assar.mjs`). Atrás da chave `?cenario=novo`.
+  f3Ceu: 'sprites/f3casco/ceu.png',
+  f3NuvemLonge: 'sprites/f3casco/nuvem-longe.png',
+  f3NuvemPerto: 'sprites/f3casco/nuvem-perto.png',
+
   // A AURORA nítida (cutscene 1): ~192px exibida ×2 inteira. O `carrier` antigo é o fallback.
   // O estático É o quadro 0 da animação (mesma caixa união — install-anim.mjs), então
   // estático e animação nunca saltam entre si.

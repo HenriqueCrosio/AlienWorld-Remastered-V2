@@ -33,6 +33,11 @@ export interface StageBoss {
    */
   readonly mundo?: number;
   /**
+   * UM MOMENTO CALMO DA LUTA (08/11, o cenário do casco — a batalha ao fundo só passa nele). Só LEITURA: nada da luta
+   * muda. Ausente = nunca calmo (nenhuma passagem).
+   */
+  readonly momentoCalmo?: boolean;
+  /**
    * Quanto a cena espera, depois do estouro final, antes da vitória (no vácuo). O predador da Fase 4 deixa o
    * CORPO estendido no chão e pede tempo para ele ser visto (17/09: *"ele sumiu e depois a cutscene abriu"*).
    * Ausente = 1400ms.

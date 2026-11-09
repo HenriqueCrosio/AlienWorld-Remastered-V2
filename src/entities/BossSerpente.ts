@@ -432,6 +432,18 @@ export class BossSerpente implements StageBoss {
   }
 
   /**
+   * UM MOMENTO CALMO DA LUTA (`StageBoss.momentoCalmo`; 08/11, o cenário do casco — a batalha ao fundo só passa nele).
+   * Só LEITURA, nada da luta muda. A enguia: os trechos em que ela mergulha ou afunda (fora dos canos, do Eco, dos
+   * gêiseres e de todo aviso); as 3 cabeças: a pausa entre as habilidades, depois da entrada.
+   */
+  get momentoCalmo(): boolean {
+    const e = this.enguia;
+    if (e?.ativa) return BossSerpente.TRECHOS_CALMOS.has(e.estado?.trecho ?? '');
+    return !this.entering && this.ciclo.estado === 'pausa';
+  }
+  private static readonly TRECHOS_CALMOS = new Set(['mergulho', 'mergulho-cauda', 'volta-escondida', 'afunda']);
+
+  /**
    * O CÍRCULO DO ACERTO DO TAMANHO DA CABEÇA (28/10, S1): `RAIO_CABECA × escala` em px de tela (16,5 nas cabeças,
    * 18,9 na fusão), no corpo do `flash` (escala 2,2), centrado nele. Recravado a cada forma.
    */

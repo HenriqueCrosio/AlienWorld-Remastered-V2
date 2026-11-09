@@ -15,6 +15,9 @@ export type StageEvent =
    * (as duas coisas são o mesmo fade, ver Parallax.setNebulaDensity).
    */
   | { t: number; type: 'nebula'; density: number }
+  /** O REGIME DO CÉU DO CASCO (08/11, spec 2026-11-08-cenario-casco-arena §6): a arena, mais limpa, entra no silêncio
+   *  antes da Serpente. Só visual; sem a chave `?cenario=novo` não faz nada. */
+  | { t: number; type: 'ceu'; regime: 'arena' }
   /**
    * O MINI-CHEFÃO de uma fase, roteirizado — um por fase.
    *
@@ -491,32 +494,37 @@ export const STAGE_3: StageEvent[] = [
   //
   // O respiradouro cai de ~12,7 para ~3 — e quem garante o ESPAÇAMENTO é a carência no
   // `GameScene.spawnProps`, não esta mistura. Sorteio uniforme pode dar dois seguidos.
-  { t: 55, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
-  { t: 55, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
+  // ⚠️ 09/11 (o cenário do casco, rodada 4): TODO o Ato 2 andou +2 s (55 → 57 … a Serpente 95 → 97), porque o preto da
+  // virada foi a ~2,5 s (`GameScene.escurecerParaOCasco`) e nada pode nascer no escuro. Os eventos são os mesmos, na
+  // mesma ordem; os horários citados nos comentários abaixo são os antigos (−2).
+  { t: 57, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
+  { t: 57, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
 
   // O MINI-BOSS: a aranha entra andando no casco. As pernas dela finalmente têm motivo.
-  { t: 59, type: 'banner', text: 'SENTINELA DO CASCO' },
-  { t: 60, type: 'miniboss' },
+  { t: 61, type: 'banner', text: 'SENTINELA DO CASCO' },
+  { t: 62, type: 'miniboss' },
 
   // RESPIRO pós-aranha (~9s sem spawns novos): a auditoria pediu, e o silêncio também é o
   // contraste que faz o pico final pesar.
-  { t: 61, type: 'terrain', rate: 0, mix: [] },
+  { t: 63, type: 'terrain', rate: 0, mix: [] },
 
-  { t: 70, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
+  { t: 72, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
   // (12/10: o elite do casco saiu do jogo — a F3 fica só com a lula. Os batedores de t=64 e os kamikazes de t=67, que
   // tinham cedido o lugar a ele em 07/10, voltaram.)
-  { t: 71, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
-  { t: 74, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
-  { t: 77, type: 'banner', text: 'DEFESAS DO CASCO' },
-  { t: 78, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
-  { t: 80, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
-  { t: 83, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
-  { t: 85, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
+  { t: 73, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
+  { t: 76, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
+  { t: 79, type: 'banner', text: 'DEFESAS DO CASCO' },
+  { t: 80, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
+  { t: 82, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
+  { t: 85, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
+  { t: 87, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
 
   // Silêncio → serpente. O mesmo telégrafo das duas fases.
-  { t: 89, type: 'terrain', rate: 0, mix: [] },
-  { t: 91, type: 'banner', text: 'ALERTA · SERPENTE DO CASCO' },
-  { t: 95, type: 'boss' },
+  { t: 91, type: 'terrain', rate: 0, mix: [] },
+  // (08/11) O céu do casco limpa para a luta final no mesmo silêncio — só visual.
+  { t: 91, type: 'ceu', regime: 'arena' },
+  { t: 93, type: 'banner', text: 'ALERTA · SERPENTE DO CASCO' },
+  { t: 97, type: 'boss' },
 ];
 
 /**

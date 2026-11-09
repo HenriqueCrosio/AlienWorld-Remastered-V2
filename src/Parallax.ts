@@ -7,6 +7,10 @@ import { montarHorizonte, type Horizonte } from './f1/horizonte';
 import { AGLOMERADOS_F1, BRUMA_F1, COR } from './f1/numerosF1';
 import { montarChao, type ChaoF1 } from './f1/chaoF1';
 import { montarCaverna, type CavernaF1 } from './f1/cavernaF1';
+import { CeuDoCasco } from './f3/ceuDoCasco';
+import { CamadaCasco } from './f3/camadaCasco';
+import { CamadaBatalha } from './f3/camadaBatalha';
+import { CHAVE_CEU_F3, chavePinturaF3, type RegimeCeuF3 } from './f3/numerosCeuF3';
 
 /**
  * Que lugar este parallax desenha. É a mesma decisão da física: tem chão ou não tem.
@@ -235,6 +239,19 @@ export class Parallax {
    * `setNebulaDensity`, à mão. Ver o comentário lá.
    */
   private nebulaPainting: Phaser.GameObjects.Image[] = [];
+
+  /** O CÉU DO CASCO (08/11, spec 2026-11-08-cenario-casco-arena): a chave de dev `?cenario=novo` (a rodada 4 a tira). */
+  cenarioNovo = false;
+  /** O CASCO VIVO (08/11, rodada 2: pulso, aro, vapor, faíscas). `&casco=0` o desliga, para o ANTES da folha. */
+  cascoVivoF3 = true;
+  private camadaCasco: CamadaCasco | null = null;
+  /** A BATALHA AO FUNDO (08/11, rodada 3). `&batalha=0` a desliga, para o ANTES da folha. */
+  batalhaF3 = true;
+  private camadaBatalha: CamadaBatalha | null = null;
+  /** O chefão está num momento calmo (a `GameScene` repassa a cada quadro): as passagens da batalha só vêm nele. */
+  momentoCalmo = false;
+  private ceuCasco: CeuDoCasco | null = null;
+  private regimeCeu: RegimeCeuF3 = 'ato1';
 
   /** As duas cópias da pintura do interior (Fase 4). `setPintura` troca a textura delas. */
   private pinturaF4: Phaser.GameObjects.Image[] = [];
@@ -1511,13 +1528,21 @@ export class Parallax {
     // PRÓXIMAS, e herdar o fator do F1 as fazia deslizar rápido demais. O wrap é só insurance
     // para uma fase longa demais.
     if (this.paintedBg.length) {
+      // ⚠️ COM O CÉU DO CASCO (08/11), A PINTURA DA F3 FICA PARADA. As duas cópias dela não casam na borda, e a 1,7 px/s
+      // a emenda entrava pela direita desde t=0 (em x≈295 aos 50 s). A névoa densa do Ato 1 a escondia; com a pintura
+      // ficando e a bruma aberta, ele a viu: *"isso não pode acontecer"*. Quem dá o movimento são as nuvens à deriva.
+      const f3Parada = this.cenarioNovo && this.mode === 'nebulosa';
       for (const bg of this.paintedBg) {
-        const factor = (bg.getData('bgFactor') as number | undefined) ?? 0.04;
+        const factor = f3Parada ? 0 : ((bg.getData('bgFactor') as number | undefined) ?? 0.04);
         const dx = worldSpeed * factor * dt;
         bg.x -= dx;
         if (bg.x <= -bg.width) bg.x += 2 * bg.width;
       }
     }
+    // As nuvens à deriva do céu do casco (F3, 08/11): vento próprio + uma fração do mundo.
+    this.ceuCasco?.atualizar(dt, worldSpeed);
+    this.camadaCasco?.update(dt);
+    this.camadaBatalha?.update(dt, this.momentoCalmo);
     // O HORIZONTE DA F1 e a BRUMA entre os planos (bloco G): o horizonte pelo relógio da fase; a bruma pelo mundo.
     this.horizonte?.atualizar(this.relogio);
     for (const b of this.brumaF1) b.ts.tilePositionX += worldSpeed * b.fator * dt;
@@ -1766,6 +1791,7 @@ export class Parallax {
     let a = layer.alpha * this.cenarioDim;
     if (layer.primeiroPlano) a *= this.foregroundDim * this.foregroundElite;
     if (layer.nebulosaExtra) a *= this.nebulaDim;
+    if (this.rochaQueSaiComABruma(layer)) a *= Math.min(1, this.nebulaDim / 0.75);
     if (layer.casco) a *= this.cascoReveal;
     return a;
   }
@@ -1927,12 +1953,13 @@ export class Parallax {
       onUpdate: (tw) => {
         this.nebulaDim = tw.getValue() ?? alvo;
         for (const layer of this.layers) {
-          if (!layer.nebulosaExtra) continue;
+          if (!layer.nebulosaExtra && !this.rochaQueSaiComABruma(layer)) continue;
           const a = this.alphaFor(layer);
           for (const s of layer.sprites) s.setAlpha(a);
         }
-        // A pintura não é ScatterLayer, então ela não passa por `alphaFor` — some aqui, à mão.
-        for (const img of this.nebulaPainting) img.setAlpha(this.nebulaDim);
+        // A pintura não é ScatterLayer, então ela não passa por `alphaFor` — some aqui, à mão. COM O CÉU DO CASCO
+        // (08/11) ela FICA: a bruma abre e a nebulosa continua lá (o preto da virada a troca pela versão da arena).
+        if (!this.cenarioNovo) for (const img of this.nebulaPainting) img.setAlpha(this.nebulaDim);
       },
     });
   }
@@ -1966,6 +1993,53 @@ export class Parallax {
   pecasDoCasco(): Phaser.GameObjects.Image[] {
     const layer = this.layers.find((l) => l.casco);
     return layer ? (layer.sprites as Phaser.GameObjects.Image[]) : [];
+  }
+
+  /**
+   * O CÉU DO CASCO LIGA (08/11, spec 2026-11-08-cenario-casco-arena §1–2): chamado ATRÁS do preto da virada (ou no treino,
+   * depois do `cascoNaProa`). A pintura troca para a versão escura da arena, as nuvens à deriva nascem, e a camada
+   * `nebula` do espaço e o planeta apagam (já ficariam atrás da pintura opaca). O CINTURÃO DISTANTE (os `asteroid` em
+   * −90, tingidos de azul-escuro e AMPLIADOS 0,8–1,7×) apaga também: são os "blocos azuis" das fotos da arena, e a
+   * lei dos fundos não deixa ampliar; a pintura dele já tem as rochas dela. E as ROCHAS DE PRIMEIRO PLANO (os
+   * `asteroid` em 60, na frente da nave, ampliados 1,4–2,6×): contra o céu preto quase não apareciam, contra a nebulosa
+   * viram blocos de pixel grande (a folha da rodada 1 mostra; ele decide se voltam). Só com a chave.
+   *
+   * ⚠️ ELAS APAGAM, MAS CONTINUAM NASCENDO. Parar a emissão (`gap` infinito) mudava a sequência de sorteios do
+   * `Phaser.Math.Between`, e o casco sorteava outras peças: o antes e depois da folha deixava de ser o mesmo jogo.
+   */
+  ligarCeuDoCasco(): void {
+    if (!this.cenarioNovo || this.mode !== 'nebulosa' || this.ceuCasco) return;
+    if (this.scene.textures.exists(CHAVE_CEU_F3)) for (const img of this.nebulaPainting) img.setTexture(CHAVE_CEU_F3).setAlpha(1);
+    for (const l of this.layers) {
+      const cinturao = l.key === 'asteroid' && (l.depth === -90 || l.depth === 60);
+      if (l.key !== 'nebula' && l.key !== 'planet' && l.key !== 'planetBroken' && !cinturao) continue;
+      l.alpha = 0;
+      for (const s of l.sprites) s.setAlpha(0);
+    }
+    this.ceuCasco = new CeuDoCasco(this.scene);
+    this.regimeCeu = 'casco';
+    // O casco vivo (rodada 2): a camada de pixels logo acima das peças, lendo a faixa (as peças e o rombo).
+    if (this.cascoVivoF3) this.camadaCasco = new CamadaCasco(this.scene, () => this.pecasDoCasco());
+    // A batalha ao fundo (rodada 3): clarões raros no Ato 2; na arena, as passagens nos momentos calmos.
+    if (this.batalhaF3) this.camadaBatalha = new CamadaBatalha(this.scene);
+  }
+
+  /**
+   * AS ROCHAS AMPLIADAS SAEM COM A BRUMA (08/11, a correção da rodada 1). Com a pintura ficando, entre a bruma abrir
+   * (t=49) e o preto (~55) o cinturão distante (−90) e as rochas de primeiro plano (60) apareciam como blocos de pixel
+   * grande sobre ela (antes sumiam contra o céu preto). Elas apagam junto com a bruma, no mesmo fade. O `/ 0,75` deixa a
+   * afinada de t=21 (densidade 0,75) sem efeito nelas: o Ato 1 não muda.
+   */
+  private rochaQueSaiComABruma(layer: ScatterLayer): boolean {
+    return this.cenarioNovo && this.mode === 'nebulosa' && layer.key === 'asteroid' && (layer.depth === -90 || layer.depth === 60);
+  }
+
+  /** A ARENA (o silêncio antes da Serpente): a mesma luz, mais limpa. Só depois de o céu do casco ligar. */
+  regimeDoCeu(r: 'arena', ms?: number): void {
+    if (!this.ceuCasco) return;
+    this.regimeCeu = r;
+    this.camadaCasco?.regime(r, ms);
+    this.camadaBatalha?.regime(r, ms);
   }
 
   /**
@@ -2091,7 +2165,8 @@ export class Parallax {
       case 'espaco':
         return 'paintBgF2';
       case 'nebulosa':
-        return 'paintBgF3';
+        // (o Ato 1 é `paintBgF3`; com o céu do casco ligado, o casco e a arena têm o perfil deles)
+        return chavePinturaF3(this.regimeCeu);
       case 'interior': {
         const p = this.pinturaAtual;
         return p === 'paintBgF4b' || p === 'paintBgF4c' || p === 'paintBgF4d' ? p : 'paintBgF4a';

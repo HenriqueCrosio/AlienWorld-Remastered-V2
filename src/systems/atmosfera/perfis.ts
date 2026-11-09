@@ -228,6 +228,10 @@ export type ChavePintura =
   | 'paintBgZeroG'
   | 'paintBgF2'
   | 'paintBgF3'
+  // O CÉU DO CASCO (08/11, spec 2026-11-08-cenario-casco-arena): a pintura do Ato 1 fica, escurecida, do preto da virada
+  // em diante; a arena (o silêncio antes da Serpente) é a mesma luz, mais limpa.
+  | 'paintBgF3Casco'
+  | 'paintBgF3Arena'
   | 'paintBgF4a'
   | 'paintBgF4b'
   | 'paintBgF4c'
@@ -264,6 +268,14 @@ function perfilDeFase(nome: string, fator: number, nevoa: Cor, halo: Cor): Perfi
 const ABERTA = 0.75;
 const DENSA = 0.85;
 
+/**
+ * O CÉU DO CASCO (08/11): a névoa amostrada da versão escura da pintura (`scripts/_cenario/_f3-ceu-assar.mjs`, o nível 2,
+ * escolhido por ele na folha da rodada 1). O halo é o laranja que a F3 já usa: a conta das cutscenes sobre esta pintura acha
+ * só ~700 px quentes e dá um bege [159, 132, 109], que apagaria o laranja dos tiros e explosões.
+ */
+const NEVOA_F3_CASCO: Cor = [47, 48, 72];
+const HALO_F3_CASCO: Cor = [220, 120, 60];
+
 /** Os perfis das fases — cores amostradas de cada pintura (a mesma conta das cutscenes). */
 export const PERFIS_FASE = {
   // A F1 do bloco G (20/10): a pintura nova é muito mais escura que as outras, e a conta de sempre (os tons médio-escuros
@@ -275,6 +287,10 @@ export const PERFIS_FASE = {
   faseZeroG: perfilDeFase('faseZeroG', ABERTA, [75, 73, 134], HALO_COMBATE),
   faseF2: perfilDeFase('faseF2', ABERTA, [52, 68, 107], HALO_COMBATE),
   faseF3: perfilDeFase('faseF3', DENSA, [74, 76, 113], [220, 120, 60]),
+  // O CÉU DO CASCO (08/11, spec 2026-11-08-cenario-casco-arena §5): a luz da nebulosa sobre o casco e a luta. A ARENA é a
+  // mesma luz, mais limpa (ABERTA: menos névoa, grão, halo e vinheta) — a luta final não pode ser poluída.
+  faseF3Casco: perfilDeFase('faseF3Casco', DENSA, NEVOA_F3_CASCO, HALO_F3_CASCO),
+  faseF3Arena: perfilDeFase('faseF3Arena', ABERTA, NEVOA_F3_CASCO, HALO_F3_CASCO),
   faseF4a: perfilDeFase('faseF4a', DENSA, [69, 59, 83], [187, 85, 61]),
   faseF4b: perfilDeFase('faseF4b', DENSA, [48, 92, 142], [184, 84, 71]),
   faseF4c: perfilDeFase('faseF4c', DENSA, [70, 68, 101], [186, 74, 59]),
@@ -288,8 +304,16 @@ export const PERFIL_DA_PINTURA: Record<ChavePintura, PerfilAtmosfera> = {
   paintBgZeroG: PERFIS_FASE.faseZeroG,
   paintBgF2: PERFIS_FASE.faseF2,
   paintBgF3: PERFIS_FASE.faseF3,
+  paintBgF3Casco: PERFIS_FASE.faseF3Casco,
+  paintBgF3Arena: PERFIS_FASE.faseF3Arena,
   paintBgF4a: PERFIS_FASE.faseF4a,
   paintBgF4b: PERFIS_FASE.faseF4b,
   paintBgF4c: PERFIS_FASE.faseF4c,
   paintBgF4d: PERFIS_FASE.faseF4d,
 };
+
+/**
+ * Quanto dura a troca PARA o perfil de uma pintura (ms); as outras usam os 1500 de sempre. O casco entra seco, atrás do
+ * preto da virada; a arena entra devagar, no silêncio antes da Serpente (08/11, spec 2026-11-08-cenario-casco-arena).
+ */
+export const MS_DA_TROCA: Partial<Record<ChavePintura, number>> = { paintBgF3Casco: 0, paintBgF3Arena: 4000 };

@@ -8,7 +8,7 @@ import { Music } from '../systems/Music';
 import { InputReader } from '../input';
 import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
-import { PERFIL_DA_PINTURA, type ChavePintura } from '../systems/atmosfera/perfis';
+import { MS_DA_TROCA, PERFIL_DA_PINTURA, type ChavePintura } from '../systems/atmosfera/perfis';
 import { Moldura } from '../systems/Moldura';
 import { PrimeiroPlanoF4 } from '../systems/PrimeiroPlanoF4';
 import { DerivaF4 } from '../systems/DerivaF4';
@@ -227,6 +227,11 @@ export class GameScene extends Phaser.Scene {
   /** Tomou dano nesta fase? O bônus de no-hit é pago na vitória (GDD §8). */
   private tookDamage = false;
   private invulnerableUntil = 0;
+  /**
+   * SEM DANO ATÉ (09/11, o cenário do casco, rodada 4): a janela do preto da virada da F3 — nada fere a nave do escurecer
+   * ao fim do clarear (ele: *"não deixar o jogador tomar dano sem saber"*). Não é a invulnerabilidade: esta não pisca.
+   */
+  private semDanoAte = 0;
   /** A propulsão da nave (a animação do motor) — a base da versão `-azul` dos Propulsores (`tocarMotor`). */
   private animMotor: string | null = null;
   private over = false;
@@ -373,6 +378,7 @@ export class GameScene extends Phaser.Scene {
     this.bombs = 3;
     this.tookDamage = false;
     this.invulnerableUntil = 0;
+    this.semDanoAte = 0;
     this.hitstopAte = 0;
     this.tempoNormal();
     this.over = false;
@@ -390,6 +396,18 @@ export class GameScene extends Phaser.Scene {
       this,
       this.stage.parallax ?? (this.zone === 'atmosfera' ? 'superficie' : 'espaco'),
     );
+    // O CENÁRIO DO CASCO E DA ARENA (08–09/11, spec 2026-11-08-cenario-casco-arena): o padrão da F3 desde a rodada 4 (a
+    // chave `?cenario=novo` saiu). Quem liga é ESTA cena, só na fase da nebulosa: o `Parallax` nasce com ele desligado,
+    // porque a `Interlude3Scene` também monta um `Parallax('nebulosa')` e ela não muda (a pintura dela apaga e rola).
+    if (this.stage.parallax === 'nebulosa') {
+      this.parallax.cenarioNovo = true;
+      if (import.meta.env.DEV) {
+        const q = new URLSearchParams(location.search);
+        // (chaves de dev para comparar: `&casco=0` sem o casco vivo, `&batalha=0` sem a batalha ao fundo)
+        if (q.get('casco') === '0') this.parallax.cascoVivoF3 = false;
+        if (q.get('batalha') === '0') this.parallax.batalhaF3 = false;
+      }
+    }
     this.reader = new InputReader(this);
     this.fx = new Fx(this);
     this.destrocos = new Destrocos(
@@ -498,7 +516,12 @@ export class GameScene extends Phaser.Scene {
       // O CASCO DO LEVIATÃ (28/10, S1 — ele: *"o cenário do boss não condiz com a fase"*): o `skipTo` descarta o mergulho
       // do rabo, que é quem revela o casco, e o treino da Serpente lutava no espaço vazio. Se o roteiro tinha o `rabo`
       // antes do salto, o casco chega pronto, na PROA (onde a luta acontece na fase de verdade).
-      if (this.stage.script.some((e) => e.type === 'rabo' && e.t < this.elapsed)) this.parallax.cascoNaProa();
+      if (this.stage.script.some((e) => e.type === 'rabo' && e.t < this.elapsed)) {
+        this.parallax.cascoNaProa();
+        // (o treino salta o preto e o silêncio: o céu do casco já nasce no regime da arena — 08/11)
+        this.parallax.ligarCeuDoCasco();
+        this.parallax.regimeDoCeu('arena', 0);
+      }
     }
 
     const nave = SHIPS[this.shipId];
@@ -860,7 +883,7 @@ export class GameScene extends Phaser.Scene {
     // faz 1,5s de transição. Depois do hitstop: o freeze-frame congela a névoa junto.
     const pintura = this.parallax.pinturaNaTela();
     if (pintura !== this.pinturaAtm) {
-      this.atm.perfil(PERFIL_DA_PINTURA[pintura], this.pinturaAtm ? 1500 : 0);
+      this.atm.perfil(PERFIL_DA_PINTURA[pintura], this.pinturaAtm ? (MS_DA_TROCA[pintura] ?? 1500) : 0);
       this.pinturaAtm = pintura;
     }
     this.atm.update(dt);
@@ -884,6 +907,8 @@ export class GameScene extends Phaser.Scene {
     this.parallax.setRelogio(this.elapsed - this.tempoNaCaverna);
     // A caverna abre e fecha quando a NAVE cruza (no flap ela anda de lado).
     this.parallax.setNave(this.ship);
+    // (a batalha ao fundo da F3 só passa nos momentos calmos da luta — só leitura do chefão, 08/11)
+    this.parallax.momentoCalmo = this.boss?.momentoCalmo ?? false;
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
@@ -1297,6 +1322,9 @@ export class GameScene extends Phaser.Scene {
         // SAIR é um fade longo: é a virada de ato, e ela tem que ser vista acontecendo.
         this.parallax.setNebulaDensity(e.density, e.density >= 1 ? 0 : 6000);
         break;
+      case 'ceu':
+        this.parallax.regimeDoCeu(e.regime);
+        break;
       case 'miniboss':
         // O mini-chefão da fase. Sem `kind`, a ARANHA do casco (Fase 3, Ato 2): um inimigo do
         // roteiro, não um StageBoss — a fase continua correndo por baixo dela. O GOLFINHO (Fase 4)
@@ -1524,11 +1552,18 @@ export class GameScene extends Phaser.Scene {
    * a um instante VISUAL não pode morar no relógio do roteiro, senão os dois derivam na primeira
    * vez que alguém mexer numa duração.
    *
-   * ⚠️ A ONDA DE DRONES DO `t=48` NASCE COM A TELA AINDA ESCURA, e isso foi conferido em vez de
-   * assumido: eles entram em x=414 e a tela clareia em 48,7, quando ainda estão além da metade
-   * direita. Se alguém adiantar essa onda, é aqui que o jogador começa a levar tiro no escuro.
+   * ⚠️ 09/11 (o cenário do casco, rodada 4 — ele escolheu "B", ~2,5 s: *"com esse cuidado de não deixar o jogador tomar
+   * dano sem saber"*): 500 escurecendo, 1.500 de preto cheio com o nome, 500 clareando. O céu do casco liga no escuro
+   * total. E as GARANTIAS: nada fere a nave do início do escurecer ao fim do clarear (`semDanoAte`, sem piscar); no preto
+   * cheio todo tiro inimigo some; e o Ato 2 do `STAGE_3` andou +2 s (de t=55 em diante), então o primeiro inimigo dele
+   * nasce fora da tela quando o preto já está acabando (o rabo sai em ~54,6 → preto cheio 55,1 → claro 57,1).
    */
   private escurecerParaOCasco(): void {
+    const ESCURECE = 500, CHEIO = 1500, CLAREIA = 500;
+    // + 1 s de RESPIRO depois de clarear: o que já estava na tela antes do preto (um kamikaze do Ato 1) anda no escuro,
+    // e sem isto ele acertava a nave 0,03 s depois do clarear (a sonda da virada pegou) — dano sem tempo de ver.
+    const RESPIRO = 1000;
+    this.semDanoAte = Math.max(this.semDanoAte, this.time.now + ESCURECE + CHEIO + CLAREIA + RESPIRO);
     const preto = this.add
       .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000)
       .setOrigin(0, 0)
@@ -1541,21 +1576,27 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({
       targets: preto,
       alpha: 1,
-      duration: 350,
+      duration: ESCURECE,
       ease: 'Sine.easeIn',
       onComplete: () => {
         // No escuro TOTAL: o chão nasce inteiro e o nome entra. Os 60ms não são um fade — são o
         // mínimo que o `addCounter` precisa para rodar o `onUpdate` que acende as camadas.
         this.parallax.revealCasco(1, 60);
+        // O céu do casco liga aqui, no escuro total, inteiro (08/11).
+        this.parallax.ligarCeuDoCasco();
         this.showBanner('O CASCO DO LEVIATÃ', COLORS.hotBright);
+        // Todo tiro inimigo some no preto cheio: nada que o jogador não viu chega até ele.
+        for (const b of [...this.enemies.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Sprite[]) {
+          if (b.active) this.enemies.release(b);
+        }
 
-        // 420ms de preto cheio: tempo de o nome se firmar antes de a imagem voltar. É o número
-        // para mexer se a virada ficar apressada ou arrastada — os outros três são conta.
-        this.time.delayedCall(420, () => {
+        // O preto cheio: tempo de o nome se firmar antes de a imagem voltar. É o número para mexer se a virada ficar
+        // apressada ou arrastada (e o `STAGE_3` anda junto: ver o comentário acima).
+        this.time.delayedCall(CHEIO, () => {
           this.tweens.add({
             targets: preto,
             alpha: 0,
-            duration: 350,
+            duration: CLAREIA,
             ease: 'Sine.easeOut',
             onComplete: () => preto.destroy(),
           });
@@ -2972,7 +3013,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private damageShip(): void {
-    if (this.over || this.time.now < this.invulnerableUntil || this.cartas.intocavel(this.time.now)) return;
+    if (this.over || this.time.now < this.invulnerableUntil || this.time.now < this.semDanoAte || this.cartas.intocavel(this.time.now)) return;
     // O INVULNERÁVEL do sandbox (tecla 3): para olhar as skills sem morrer.
     if (this.arena?.invulneravel) return;
 
