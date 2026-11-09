@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cenário instalado</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  table { border-collapse: collapse; margin: 8px 0; }
+  td, th { border-bottom: 1px solid var(--linha); padding: 6px 12px 6px 0; text-align: left; font-variant-numeric: tabular-nums; }
+  th { color: var(--suave); font-weight: 500; }
+</style>
+</head>
+<body>
+<main>
+  <h1>O cenário do casco — rodada 4: instalado</h1>
+  <p class="suave">09/11 · plano <code>plans/2026-11-09-cenario-casco-rodada4.md</code> · a chave <code>?cenario=novo</code>
+    saiu: o cenário novo é o padrão da F3.</p>
+
+  <h2>A virada</h2>
+  <ul>
+    <li><b>O preto:</b> 0,5 s escurecendo, 1,5 s de preto cheio com "O CASCO DO LEVIATÃ", 0,5 s clareando. O céu do casco
+      liga no escuro total.</li>
+    <li><b>Sem dano às cegas:</b> no preto cheio todo tiro inimigo some; a nave fica sem dano (sem piscar) do começo do
+      escurecer até <b>1 s depois de clarear</b>; o Ato 2 inteiro andou +2 s (a Serpente em 97 s).</li>
+    <li><b>Por que o 1 s depois de clarear:</b> a sonda (com a nave parada no meio da tela, sem se defender) mostrou
+      kamikazes do Ato 1 que já estavam na tela antes do preto chegando na nave 0,03 s depois de clarear. O respiro dá
+      tempo de ver e desviar.</li>
+    <li><b>A prova</b> (<code>scripts/_cenario/_f3-virada-sonda.mjs</code>): nenhum inimigo ou tiro nasceu no escuro, nenhum
+      golpe do escurecer até o fim do respiro, a Serpente entra em 97,0 s, o céu do casco ligado. <b>VIRADA OK.</b></li>
+  </ul>
+  <video src="cru/r4-video/video.mp4" controls loop muted playsinline></video>
+  <p class="suave">A corrida real de 48 a 64 s, sem chave nenhuma: o rabo, a bruma, o preto, o Ato 2.</p>
+  <img src="corrida-f3.png">
+  <p class="suave">A F3 inteira na sonda da virada: 5 s, 30 s, 45 s, 50 s, o preto (55 s), 57,3 s, 60 s e 80 s.</p>
+
+  <h2>O desempenho num navegador de verdade (Chrome, RTX 5070)</h2>
+  <table>
+    <tr><th>trecho</th><th>sem o cenário novo</th><th>com o cenário novo</th></tr>
+    <tr><td>as 3 cabeças, 40 s (mediana / p95 por passo)</td><td>0,6 / 1,5 ms</td><td>0,8 / 1,7 ms</td></tr>
+    <tr><td>a enguia, 55 s (mediana / p95)</td><td>—</td><td>0,6 / 1,0 ms (pior 4,3)</td></tr>
+  </table>
+  <p>+0,2 ms por passo, dentro do limite de +1 ms; um quadro tem 16,7 ms.</p>
+  <p><b>O tranco antigo da chegada dela:</b> num navegador de verdade ele é de 23–54 ms (1 a 3 quadros), não o segundo
+    inteiro da sonda. Medi a cópia do casco vivo sozinha: 0,5 ms — não é ela. O tranco cai no instante em que ela irrompe
+    do rombo e os pedaços explodem, que é da luta. Como este item não mexe na luta, ficou como estava (anotado).</p>
+
+  <h2>A retirada da chave: o que conferi</h2>
+  <ul>
+    <li><b>Quem liga o cenário novo é a cena do jogo, só na F3.</b> A cena de transição 3 (a do casco crítico) também usa o
+      mesmo fundo de nebulosa e <b>não mudou</b> (aberta e fotografada: sem erro, o cenário novo desligado nela).</li>
+    <li><b>O Ato 1 da F3</b> comparado com o modo antigo, na mesma sorte: igual, a não ser a pintura parada (a correção da
+      emenda que você pediu).</li>
+    <li>O treino e o atalho da Serpente, as outras fases (o modo da nebulosa é só da F3), o build de produção e todos os
+      testes do projeto: ok. A enguia segue idêntica à maquete.</li>
+    <li>Ficaram duas chaves de dev só para comparar: <code>&amp;casco=0</code> (sem o casco vivo) e <code>&amp;batalha=0</code>
+      (sem a batalha ao fundo).</li>
+  </ul>
+  <img src="cru/r4-interlude3.png">
+  <p class="suave">A cena de transição 3, depois da retirada da chave.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casco vivo</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  .grade2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .grade2 span { color: var(--suave); font-size: 13px; text-align: center; display: block; margin: 2px 0 10px; }
+  .rotulos { display: grid; grid-template-columns: 1fr 1fr; text-align: center; color: var(--suave); font-size: 13px; margin-top: 4px; }
+  table { border-collapse: collapse; margin: 8px 0; }
+  td, th { border-bottom: 1px solid var(--linha); padding: 6px 12px 6px 0; text-align: left; font-variant-numeric: tabular-nums; }
+  th { color: var(--suave); font-weight: 500; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+  @media (max-width: 720px) { .grade2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>O casco vivo — rodada 2</h1>
+  <p class="suave">08/11 · plano <code>plans/2026-11-08-cenario-casco-rodada2.md</code> · no jogo:
+    <code>?cenario=novo</code> (com <code>&amp;casco=0</code>, o céu da rodada 1 sem o casco vivo).</p>
+
+  <h2>✅ A resposta dele e os ajustes (fechamento da rodada 2)</h2>
+  <p><i>"1 - O pulso ficou bom, mas senti que ele vibra o treme muito. 2 - Não quero o aro, pode retirar de tudo. 3 - O
+    vapor está bom. 4 - Faiscas estao boas. 5 - pode sumir na luta final."</i></p>
+  <ul>
+    <li><b>O tremor tinha duas causas:</b> a camada era redesenhada a 30 Hz enquanto as peças andam a cada quadro (ela
+      escorregava 1 px atrás delas um quadro sim, outro não) — agora ela segue a faixa entre dois desenhos; e a onda era
+      medida na tela, então a rolagem do Ato 2 a fazia cruzar os traços a ~139 px/s — agora ela anda 55 px/s sobre o
+      próprio casco. O brilho em volta também não "liga" mais de repente: acompanha a onda.</li>
+    <li><b>O aro saiu</b> de tudo. <b>O vapor some</b> na luta final (o casco e as faíscas ficam).</li>
+  </ul>
+  <video src="cru/r2b-casco/video.mp4" controls loop muted playsinline></video>
+  <p class="suave">O Ato 2 depois dos ajustes (corrida real, 56–72 s).</p>
+
+  <h2>O que entrou</h2>
+  <p>A arte do casco não mudou: tudo é desenhado POR CIMA dela, numa camada de pixels presa às peças, a partir dos pixels
+    delas mesmas.</p>
+  <ul>
+    <li><b>O pulso:</b> uma onda de luz corre pelos traços de cobre em direção à cabeça do Leviatã (para a direita), uma
+      crista a cada 240 px, a 55 px/s. Os traços acendem em amarelo-claro com um brilho de 1 px em volta.</li>
+    <li><b>O aro:</b> a crista do casco (a linha de cima de cada peça e do rombo) puxada para o violeta da nebulosa.</li>
+    <li><b>O vapor:</b> sopros curtos das grades do duto, das juntas da placa e do topo do maquinário; um fio de 1 px no
+      bocal que vira um bolsão cinza, desacelera e some. No vácuo nada sobe por peso: é o jato que desacelera.</li>
+    <li><b>As faíscas:</b> só na arena, nas bordas do rombo aberto: estalos de 3 a 6 riscos retos esfriando do
+      amarelo ao vermelho-escuro, com um clarão de um quadro.</li>
+    <li><b>A arena mais limpa:</b> no silêncio antes da Serpente, em 4 s, o pulso cai pela metade (mais lento e mais
+      fraco) e o vapor fica raro (um sopro a cada 6–12 s por respiro, contra 1,6–4,5 s no Ato 2).</li>
+  </ul>
+  <p class="suave">Um defeito achado e corrigido no caminho: as peças da faixa se sobrepõem, e a primeira versão acendia o
+    cobre escondido debaixo da peça seguinte (anéis de luz sobre chapa lisa). Agora só vale o pixel que está por cima.</p>
+
+  <h2>De perto (4×)</h2>
+  <div class="grade2">
+    <div><img src="cru/r2-zoom-casco-a.png"><span>Ato 2 · o pulso passando pelos hexágonos de cobre, o aro violeta</span></div>
+    <div><img src="cru/r2-zoom-casco-c.png"><span>Ato 2 · o pulso na escama</span></div>
+    <div><img src="cru/r2-zoom-casco-b.png"><span>Ato 2 · outro trecho</span></div>
+    <div><img src="cru/r2-zoom-arena.png"><span>arena · o aro nas placas levantadas do rombo</span></div>
+  </div>
+
+  <h2>Em movimento: o casco no Ato 2 (corrida real, 56–72 s)</h2>
+  <video src="cru/r2-casco.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>só o céu (rodada 1)</span><span>com o casco vivo</span></div>
+
+  <h2>Em movimento: as 3 cabeças</h2>
+  <video src="cru/r2-cabecas.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>só o céu</span><span>com o casco vivo (arena: mais limpo)</span></div>
+
+  <h2>Em movimento: a enguia</h2>
+  <video src="cru/r2-enguia.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>só o céu</span><span>com o casco vivo</span></div>
+
+  <h2>O custo e uma correção</h2>
+  <ul>
+    <li>A enguia fez exatamente o mesmo com e sem o casco vivo (440 toques na nave parada nas duas filmagens).</li>
+    <li>A linha do jogo, na luta da enguia: p95 de 2,2 para 2,7 ms (+0,5 ms; sonda com GPU por software).</li>
+    <li>Havia 2 trancos novos de ~135 ms quando cada peça do casco aparecia pela 1ª vez (a leitura dos pixels dela): a
+      leitura passou para o nascimento da camada, que acontece atrás do preto da virada.</li>
+    <li><b>Correção do que eu disse na rodada 1:</b> o tranco de quando o mundo para na chegada dela <b>não sumiu</b> — ele
+      apareceu nas duas filmagens de hoje (1,1 s e 0,65 s). Ele é antigo (a cópia do casco vivo da arena) e fica para a
+      rodada 4, medido num navegador de verdade.</li>
+  </ul>
+
+  <h2>Para você decidir</h2>
+  <ol class="pergunta">
+    <li><b>O pulso:</b> a força e a velocidade estão boas? (mais forte, mais rápido, mais espaçado?)</li>
+    <li><b>O aro violeta</b> na crista: fica, mais forte, ou noutra cor (o laranja do miolo da nebulosa)?</li>
+    <li><b>O vapor:</b> a quantidade e o tamanho dos sopros no Ato 2.</li>
+    <li><b>As faíscas</b> no rombo: a frequência e o tamanho.</li>
+    <li><b>A arena:</b> o vapor raro fica, ou some de vez na luta final?</li>
+  </ol>
+  <p class="suave">A batalha ao fundo é a rodada 3; o preto de 2,5 s, os +2 s e a instalação, a 4.</p>
+</main>
+</body>
+</html>

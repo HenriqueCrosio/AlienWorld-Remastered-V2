@@ -16,6 +16,8 @@ const args = process.argv.slice(2);
 const val = (k, d) => (args.includes(k) ? args[args.indexOf(k) + 1] : d);
 const OUT = args[0];
 const TAXA = val('--taxa', '30'), FILMAR = val('--filmar', null), DE = Number(val('--de', 0)), ATE = Number(val('--ate', 130));
+// (08/11) `--q "<query>"`: more of the URL, e.g. `cenario=novo&ceu=2` — the casco sky behind her (plan cenario-casco-arena)
+const Q = val('--q', '');
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 1152, height: 648 } });
@@ -25,7 +27,7 @@ await page.addInitScript(() => {
   let a = 20261108;
   Math.random = () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 });
-await page.goto(`http://localhost:5173/?serpente=fusao&roteiro=maquete&taxa=${TAXA}`, { waitUntil: 'domcontentloaded' });
+await page.goto(`http://localhost:5173/?serpente=fusao&roteiro=maquete&taxa=${TAXA}${Q ? `&${Q}` : ''}`, { waitUntil: 'domcontentloaded' });
 await page.waitForFunction(() => window.__game?.scene?.getScene('Game')?.cartas, null, { timeout: 120000 });
 const geo = await page.evaluate(() => { const c = window.__game.canvas.getBoundingClientRect(); return { k: c.width / 384, left: c.left, top: c.top }; });
 const clip = { x: geo.left, y: geo.top, width: 384 * geo.k, height: 216 * geo.k };

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Céu do casco</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  .grade4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .grade2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .grade4 span, .grade2 span { color: var(--suave); font-size: 13px; text-align: center; display: block; margin: 2px 0 10px; }
+  .rotulos { display: grid; grid-template-columns: 1fr 1fr; text-align: center; color: var(--suave); font-size: 13px; margin-top: 4px; }
+  table { border-collapse: collapse; margin: 8px 0; }
+  td, th { border-bottom: 1px solid var(--linha); padding: 6px 12px 6px 0; text-align: left; font-variant-numeric: tabular-nums; }
+  th { color: var(--suave); font-weight: 500; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+  @media (max-width: 720px) { .grade4 { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<main>
+  <h1>O céu do casco — rodada 1</h1>
+  <p class="suave">08/11 · spec <code>specs/2026-11-08-cenario-casco-arena-design.md</code> · plano
+    <code>plans/2026-11-08-cenario-casco-arena.md</code> · no jogo: <code>?cenario=novo&amp;ceu=1|2|3</code> (sem a chave, o
+    jogo de hoje). Atalhos: <code>?serpente=A&amp;cenario=novo</code> (as 3 cabeças), <code>?serpente=fusao&amp;cenario=novo</code>
+    (a enguia).</p>
+
+  <h2>✅ A resposta dele e a correção (fechamento da rodada 1)</h2>
+  <p><i>"1 - nivel 2. 2 - Quantidade está boa, talvez a velocidade mais lenta um pouco. 3 - Ficaram com cara. 4 - podem
+    ficar fora."</i> E o apontamento: a <b>junção de dois fundos</b> visível no céu, em ~50 s.</p>
+  <ul>
+    <li><b>A emenda era do jogo, não da montagem:</b> a pintura tem duas cópias lado a lado e rolava a 1,7 px/s; as bordas
+      não casam, e a emenda entrava pela direita desde t=0 (x≈295 aos 50 s). A névoa densa do Ato 1 a escondia. Agora, com
+      o céu do casco, a pintura da F3 fica <b>parada</b> (o movimento vem das nuvens) — a segunda cópia nunca entra.</li>
+    <li><b>O nível 2</b> ficou o único (os outros dois foram apagados); <b>as nuvens 30% mais lentas</b>.</li>
+    <li><b>As rochas ampliadas</b> (o cinturão distante e as de primeiro plano) agora saem <b>junto com a bruma</b> (t=49,
+      no mesmo fade), não só no preto: com a pintura ficando, elas apareciam como blocos entre 49 e 55 s.</li>
+  </ul>
+  <video src="cru/emenda-novo/video.mp4" controls loop muted playsinline></video>
+  <p class="suave">A corrida real de 44 a 62 s: o rabo, a bruma abrindo, o preto e o Ato 2 — sem emenda.</p>
+
+  <h2>O que mudou</h2>
+  <ul>
+    <li><b>A sua pintura do Ato 1 fica.</b> A bruma abre em t=49 como hoje; no preto de "O CASCO DO LEVIATÃ" ela troca para
+      a versão escura da arena (a mesma imagem, 384×216, escala 1).</li>
+    <li><b>Duas camadas de nuvem à deriva</b> recortadas da própria pintura pelo brilho (as rochas, escuras, ficam de fora),
+      andando com vento próprio, mesmo com o mundo parado na luta.</li>
+    <li><b>A luz:</b> o casco (Ato 2) tem um perfil da Atmosfera com a névoa da nebulosa; no silêncio antes da Serpente ele
+      passa, em 4 s, para o da arena, mais limpo.</li>
+    <li><b>Saíram do céu, depois do preto, os "blocos azuis":</b> eram a camada de asteroides distantes (−90) e a de
+      nebulosa do espaço (−98), imagens pequenas AMPLIADAS até 1,7×. O planeta também (ficaria atrás da pintura).</li>
+    <li><b>E as rochas escuras de primeiro plano no Ato 2</b> (as que passam na frente da nave, ampliadas até 2,6×): contra
+      o céu preto quase não apareciam; contra a nebulosa viravam blocos. Apaguei a partir do preto — veja abaixo e decida.</li>
+  </ul>
+  <p class="suave">Nada de inimigo, aranha, cabeças ou enguia mudou (o teste do porte da enguia segue passando). As peças
+    do casco são sorteadas e variam de uma filmagem para outra, como no jogo.</p>
+
+  <h2>A virada: o antes e o depois do preto (corrida real da F3)</h2>
+  <div class="grade4">
+    <div><img src="cru/virada-antes/foto-50s.png"><span>hoje · 50 s (o rabo)</span></div>
+    <div><img src="cru/virada-antes/foto-58s.png"><span>hoje · 58 s</span></div>
+    <div><img src="cru/virada-novo/foto-50s.png"><span>novo · 50 s (a pintura fica)</span></div>
+    <div><img src="cru/virada-novo/foto-58s.png"><span>novo · 58 s (o céu do casco)</span></div>
+  </div>
+  <video src="cru/virada.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>hoje</span><span>novo (nível 2)</span></div>
+
+  <h2>Os 3 níveis de escuro</h2>
+  <p>A mesma imagem, mais escura e com menos contraste, para "afastar" pela luz.</p>
+  <div class="grade4">
+    <div><img src="cru/virada-antes/foto-62s.png"><span>hoje · Ato 2</span></div>
+    <div><img src="cru/virada-ceu1/foto-62s.png"><span>nível 1 · Ato 2</span></div>
+    <div><img src="cru/virada-novo/foto-62s.png"><span>nível 2 · Ato 2</span></div>
+    <div><img src="cru/virada-ceu3/foto-62s.png"><span>nível 3 · Ato 2</span></div>
+    <div><img src="cru/cabecas-antes/foto-20s.png"><span>hoje · 3 cabeças</span></div>
+    <div><img src="cru/cabecas-ceu1/foto-20s.png"><span>nível 1 · 3 cabeças</span></div>
+    <div><img src="cru/cabecas-novo/foto-20s.png"><span>nível 2 · 3 cabeças</span></div>
+    <div><img src="cru/cabecas-ceu3/foto-20s.png"><span>nível 3 · 3 cabeças</span></div>
+  </div>
+  <p class="suave">Na arena (as 3 cabeças e a enguia) a luz da Atmosfera é a mais limpa, e os níveis 2 e 3 ficam
+    parecidos; no Ato 2 a diferença aparece mais.</p>
+
+  <h2>A leitura, em número</h2>
+  <p>O contraste de luminância (1 = igual, quanto maior, mais destaca) entre o corpo delas e o céu atrás (y 20–150).
+    "Médio" é o céu típico; "claro" são os 5% mais claros da nebulosa.</p>
+  <table>
+    <tr><th></th><th>enguia × céu médio</th><th>enguia × céu claro</th><th>cabeças × céu médio</th><th>cabeças × céu claro</th></tr>
+    <tr><td>nível 1</td><td>1,17</td><td>1,35 (ela mais escura)</td><td>1,42</td><td>1,11</td></tr>
+    <tr><td>nível 2</td><td>1,28</td><td>1,13</td><td>1,55</td><td>1,07</td></tr>
+    <tr><td>nível 3</td><td>1,36</td><td>1,02 (empata)</td><td>1,65</td><td>1,23</td></tr>
+  </table>
+  <p>Elas são escuras (dark sci-fi), então qualquer nebulosa chega perto delas em brilho. No <b>nível 1</b> o céu claro
+    fica MAIS claro que elas, e elas leem como silhueta escura recortada; no <b>nível 3</b> elas ficam mais claras que o céu
+    quase todo, mas somem nos trechos mais claros; o <b>nível 2</b> fica no meio. O que salva a leitura nos três é a luz
+    própria delas (as veias, a brasa) e o aro que a rodada 2 desenha no casco.</p>
+
+  <h2>Em movimento: as 3 cabeças</h2>
+  <video src="cru/cabecas.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>hoje</span><span>novo (nível 2)</span></div>
+
+  <h2>Em movimento: a enguia</h2>
+  <video src="cru/enguia.mp4" controls loop muted playsinline></video>
+  <div class="rotulos"><span>hoje</span><span>novo (nível 2)</span></div>
+
+  <h2>De passagem</h2>
+  <ul>
+    <li>A enguia fez exatamente o mesmo nas duas filmagens (440 toques na nave parada em cada uma).</li>
+    <li><b>O tranco de ~0,8 s quando o mundo para</b> (o achado de ontem) não apareceu com o céu novo. Confirmo num
+      navegador de verdade na rodada 4.</li>
+    <li>O custo: a linha do jogo foi de 3,4 para 4,5 ms no p95, na sonda (GPU por software, o pior caso: as duas camadas
+      de nuvem são tela cheia). Medir num navegador de verdade na rodada 4; o limite é +1 ms.</li>
+  </ul>
+
+  <h2>Para você decidir</h2>
+  <ol class="pergunta">
+    <li><b>Qual nível de escuro?</b> 1, 2 ou 3 (ou entre eles).</li>
+    <li><b>As nuvens à deriva:</b> a quantidade e a velocidade estão boas, ou mais/menos?</li>
+    <li><b>A luz:</b> o casco e a arena estão com cara de "dentro da nebulosa"?</li>
+    <li><b>As rochas escuras de primeiro plano no Ato 2:</b> ficam fora (como no vídeo) ou voltam?</li>
+  </ol>
+  <p class="suave">O vapor e o pulso do casco, as faíscas e o aro são a rodada 2; a batalha ao fundo, a 3; o preto de 2,5 s
+    e os +2 s, a 4.</p>
+</main>
+</body>
+</html>
