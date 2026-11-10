@@ -5,7 +5,8 @@ import type { HazardKind } from './DebrisSystem';
 export type StageEvent =
   | { t: number; type: 'wave'; kind: EnemyKind; count: number; spacing: number; y: number }
   /** Relevo ANCORADO no chão. Só faz sentido com gravidade (Fase 1). */
-  | { t: number; type: 'terrain'; rate: number; mix: PropKind[] }
+  // `'vago'`: a slot of the draw that plants NOTHING (bare hull). See the F3's Act 2.
+  | { t: number; type: 'terrain'; rate: number; mix: (PropKind | 'vago')[] }
   /** Destroços FLUTUANDO. O equivalente do relevo no vácuo (Fase 2). */
   | { t: number; type: 'hazard'; rate: number; mix: HazardKind[] }
   | { t: number; type: 'banner'; text: string }
@@ -497,7 +498,12 @@ export const STAGE_3: StageEvent[] = [
   // ⚠️ 09/11 (o cenário do casco, rodada 4): TODO o Ato 2 andou +2 s (55 → 57 … a Serpente 95 → 97), porque o preto da
   // virada foi a ~2,5 s (`GameScene.escurecerParaOCasco`) e nada pode nascer no escuro. Os eventos são os mesmos, na
   // mesma ordem; os horários citados nos comentários abaixo são os antigos (−2).
-  { t: 57, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
+  //
+  // ⚠️ 10/11: AS CHAMINÉS SAÍRAM DO JOGO (ele: *"quero que as chaminés saiam do jogo, fique só os lançadores de
+  // mísseis"*), E A VAGA DELAS FICOU — `'vago'` é casco liso. Tirar o `respiradouro` da mistura e deixar só o lança
+  // DOBRARIA os atiradores (ele passaria a levar 100% dos slots); a vaga vazia mantém os 50% dele sobre a mesma cadência,
+  // que é a conta de cima, intacta.
+  { t: 57, type: 'terrain', rate: 3.0, mix: ['vago', 'lancaMisseis'] },
   { t: 57, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 70 },
 
   // O MINI-BOSS: a aranha entra andando no casco. As pernas dela finalmente têm motivo.
@@ -508,7 +514,7 @@ export const STAGE_3: StageEvent[] = [
   // contraste que faz o pico final pesar.
   { t: 63, type: 'terrain', rate: 0, mix: [] },
 
-  { t: 72, type: 'terrain', rate: 3.0, mix: ['respiradouro', 'lancaMisseis'] },
+  { t: 72, type: 'terrain', rate: 3.0, mix: ['vago', 'lancaMisseis'] },
   // (12/10: o elite do casco saiu do jogo — a F3 fica só com a lula. Os batedores de t=64 e os kamikazes de t=67, que
   // tinham cedido o lugar a ele em 07/10, voltaram.)
   { t: 73, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },

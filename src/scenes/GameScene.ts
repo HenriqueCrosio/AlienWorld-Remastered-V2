@@ -64,16 +64,6 @@ import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
 
-/**
- * A CARÊNCIA DO RESPIRADOURO (Fase 3), em segundos.
- *
- * ⚠️ ESTE É O BOTÃO, E A MISTURA NÃO É. Cortar respiradouro mexendo na mistura mexeria também
- * na proporção de quem ATIRA (o lança-mísseis divide o mesmo sorteio), e o volume de tiro do
- * Ato 2 está congelado até o playtest por decisão do Henrique. Quem regula quantos espiráculos
- * se vê é este número: 5 → ~3 na fase; 3 → ~4; 8 → ~2.
- */
-const RESPIRADOURO_CARENCIA = 5;
-
 /** Os quatro tempos de uma câmera lenta, em ms de relógio cru (ver `GameScene.camaraLenta`). */
 interface CurvaLenta {
   impactoMs: number;
@@ -185,10 +175,8 @@ export class GameScene extends Phaser.Scene {
 
   private waves: PendingWave[] = [];
   private propRate = 0;
-  private propMix: PropKind[] = [];
+  private propMix: (PropKind | 'vago')[] = [];
   private propTimer = 0;
-  /** Segundos desde o último RESPIRADOURO que NASCEU. Ver `RESPIRADOURO_CARENCIA`. */
-  private respiradouroTimer = RESPIRADOURO_CARENCIA;
   /** O mesmo par para os destroços flutuantes do vácuo (ver DebrisSystem). */
   private hazardRate = 0;
   private hazardMix: HazardKind[] = [];
@@ -361,10 +349,6 @@ export class GameScene extends Phaser.Scene {
     this.propRate = 0;
     this.propMix = [];
     this.propTimer = 0;
-    // ⚠️ COMEÇA PRONTO, não em zero: a fase tem que poder cuspir o primeiro espiráculo assim que
-    // o Ato 2 abrir. Em zero, o primeiro slot nasceria bloqueado e o ato abriria com um buraco
-    // que ninguém pediu.
-    this.respiradouroTimer = RESPIRADOURO_CARENCIA;
     this.hazardRate = 0;
     this.hazardMix = [];
     this.hazardTimer = 0;
@@ -1646,11 +1630,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   private spawnProps(dt: number): void {
-    // ⚠️ O RELÓGIO DA CARÊNCIA CORRE SEMPRE, inclusive nas janelas em que `propRate` é 0. Aquilo
-    // é casco liso passando na tela, e casco liso É espaçamento — não contá-lo faria o primeiro
-    // prop depois do respiro da aranha nascer bloqueado sem motivo.
-    this.respiradouroTimer += dt;
-
     if (this.propRate <= 0 || this.propMix.length === 0) return;
 
     this.propTimer -= dt;
@@ -1660,19 +1639,11 @@ export class GameScene extends Phaser.Scene {
 
     const escolhido = Phaser.Utils.Array.GetRandom(this.propMix);
 
-    // ⚠️ A CARÊNCIA DO RESPIRADOURO, E POR QUE A VAGA MORRE EM VEZ DE SER SUBSTITUÍDA.
-    //
-    // Uma baleia tem UM espiráculo. Doze deles ao longo do Ato 2 (o que a mistura antiga dava)
-    // lia como tileset, não como anatomia — o Henrique jogou e pediu "bemmm espaçados, aparecer
-    // poucas vezes".
-    //
-    // Substituir por lança-mísseis manteria a densidade e DOBRARIA os atiradores. O slot morre,
-    // e é justamente isso que preserva o volume de tiro: o lança continua sorteando os 50% dele
-    // sobre o mesmo número de slots. Casco liso é o que "bem espaçado" significa.
-    if (escolhido === 'respiradouro') {
-      if (this.respiradouroTimer < RESPIRADOURO_CARENCIA) return;
-      this.respiradouroTimer = 0;
-    }
+    // ⚠️ A VAGA QUE MORRE (F3, Ato 2). As chaminés saíram do jogo em 10/11 e o lugar delas no sorteio ficou como
+    // `'vago'`: nada nasce, casco liso. Substituir por lança-mísseis manteria a densidade e DOBRARIA os atiradores; a
+    // vaga vazia é o que preserva o volume de tiro — o lança continua com os 50% dele sobre o mesmo número de slots.
+    // (Antes a vaga era o `respiradouro`, com uma carência de 5 s que já matava a maioria delas.)
+    if (escolhido === 'vago') return;
 
     this.terrain.spawn(escolhido);
   }

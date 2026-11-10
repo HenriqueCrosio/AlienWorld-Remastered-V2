@@ -22,9 +22,14 @@ export type PropKind =
   // O CASCO do Leviatã (Fase 3, Ato 2). O Ato 2 sorteava `turret`/`radar`/`silo` — a colônia
   // da FASE 1 transplantada para as costas de uma baleia. Funcionava como bloco de jogo e
   // mentia como ficção: o casco vivo do Leviatã não tem reservatório de colônia em cima.
-  // Estes dois são a defesa DELE, geradas com o Leviatã armored como referência de estilo.
+  // O lança-mísseis é a defesa DELE.
+  //
+  // ⚠️ 10/11: O `respiradouro` (A CHAMINÉ) SAIU DO JOGO, e o lança-mísseis foi REFEITO. Ele, jogando a F3 com o cenário
+  // novo: *"as chaminés e torres de mísseis da parte do casco [...] slopado demais [...] nem a torre e nem a chaminé estão
+  // no estilo do jogo"*; depois da folha: *"quero que as chaminés saiam do jogo, fique só os lançadores de mísseis com a
+  // variância da T2"*. As três variantes são o berço de costelas (`scripts/_casco/_torre-montar.mjs`): o casulo e as
+  // costelas da candidata, sobre um domo de escamas tirado da PRÓPRIA arte do casco (`casco-escama`).
   | 'lancaMisseis'
-  | 'respiradouro'
   // O interior ORGÂNICO do Leviatã (Fase 4): costela biônica, pedaço de órgão, maquinário
   // pesado. Terreno indestrutível como a rocha — existe para ser desviado.
   //
@@ -147,8 +152,30 @@ interface PropDef {
  * ⚠️ SEM VARIAR A ESCALA, e isso é deliberado. Perspectiva pediria que o plantado mais fundo
  * fosse menor, mas escala não-inteira em pixel art de 62px borra a peça — e a faixa é rasa
  * demais (13px de alcance) para o ganho pagar o preço.
+ *
+ * ⚠️ 10/11: O TETO DESCEU DE 199 PARA 196, PELA MESMA REGRA ("o prop mais baixo manda"). O lança-mísseis refeito tem
+ * 56–57 px (o antigo tinha 59), e em 199 ele coroaria 7 px — abaixo dos 10 que este plantio garante. Em 196 a coroa
+ * mínima volta a 10. As chaminés saíram, então ele é o único prop de casco. A faixa ficou com 11 px de alcance: com o
+ * `saltoMin` de 5 sobram sempre pelo menos 2 alturas para o vizinho.
  */
-const PLANTIO = { fundo: 186, frente: 199, saltoMin: 5 } as const;
+const PLANTIO_ANTIGO = { fundo: 186, frente: 196, saltoMin: 5 } as const;
+void PLANTIO_ANTIGO; // kept as the record of the numbers the history above talks about
+
+/**
+ * ⚠️ 10/11 (2): O PLANTIO DESCEU PARA A BORDA DE BAIXO DA TELA, a pedido dele. A base de escamas da rodada 2 não
+ * resolveu o "ligado ao casco" — *"na verdade, destacou que não está bem posicionado. O certo será colocar ele quase na
+ * borda de baixo da tela, para dar a impressão que ele está colado abaixo da linha da tela de baixo"*. O pé fica ABAIXO
+ * da tela (216): a base inteira some sob a borda e só as costelas e o casulo sobem do rodapé. É a técnica do pé
+ * escondido que a F1 já usa — aqui quem esconde é a própria borda da tela. Uma variação curta (3 alturas) evita a fila
+ * sem tirar a peça da borda.
+ *
+ * Consequências, todas aceitas com o pedido: a peça não quebra mais a linha da crista (y 150) — ela fica na face do
+ * casco, na frente; e as bocas descem ~30 px (o tiro nasce mais baixo). Vida, cadência e dano não mudam.
+ */
+const PLANTIO = { fundo: 224, frente: 228, saltoMin: 2 } as const;
+/** Casco props draw IN FRONT of the hull's front strip (−0.2), which would otherwise cut the piece at y 198; still
+ *  behind the ship and the enemies (0). */
+const DEPTH_NO_CASCO = -0.1;
 
 /** Uma faixa de plantio: o pé sorteado entre `fundo` e `frente` (y de tela), nunca a menos de `saltoMin` do anterior. */
 export interface Plantio {
@@ -172,11 +199,9 @@ const PROPS: Record<PropKind, PropDef> = {
   radar: { hp: 4, score: 120, shoots: false },
   wreck: { hp: Infinity, score: 0, shoots: false },
   // ⚠️ OS NÚMEROS SÃO OS DA TORRE E DO SILO, DE PROPÓSITO. Esta é uma troca de ARTE, não de
-  // balanceamento: o `lancaMisseis` herda `hp 5 / score 150 / shoots` da `turret` e o
-  // `respiradouro` herda `hp 6 / score 90` do `silo`. O Ato 2 continua pesando exatamente o
-  // mesmo, e o playtest que ainda não aconteceu vai medir a fase que já existia.
+  // balanceamento: o `lancaMisseis` herda `hp 5 / score 150 / shoots` da `turret`. (O `respiradouro`, que herdava
+  // `hp 6 / score 90` do `silo`, saiu em 10/11 — ver o `PropKind`.)
   lancaMisseis: { hp: 5, score: 150, shoots: true, casco: true },
-  respiradouro: { hp: 6, score: 90, shoots: false, casco: true },
   costela: { hp: Infinity, score: 0, shoots: false },
   orgao: { hp: Infinity, score: 0, shoots: false },
   maquinario: { hp: Infinity, score: 0, shoots: false },
@@ -227,12 +252,31 @@ const PROPS: Record<PropKind, PropDef> = {
 const BOCAS: Partial<Record<PropKind, ReadonlyArray<readonly [number, number]>>> = {
   turret: [[9, 2]],
   lancaMisseis: [
-    [7, 5],
-    [18, 5],
-    [12, 15],
-    [23, 15],
+    [14, 5],
+    [21, 5],
+    [19, 14],
+    [26, 14],
   ],
 };
+
+/**
+ * AS BOCAS POR VARIANTE (10/11, o lança-mísseis refeito). Ele: *"os foguetes precisam sair certo das 4 bocas dos novos
+ * assets"*. A tabela por VARIANTE que o aviso acima dizia não pagar passou a pagar: a textura já está no sprite quando
+ * ele atira (`p.texture.key`), e cada uma das três tem o casulo num lugar. O CENTRO de cada furo do casulo, lido na arte
+ * ampliada com régua e gravado por `scripts/_casco/_torre-montar.mjs` (`torre/bocas.json`); a ordem é a do revezamento:
+ * as duas de cima, depois as duas de baixo.
+ */
+const BOCAS_DA_ARTE: Record<string, ReadonlyArray<readonly [number, number]>> = {
+  lancaMisseis: [[14, 5], [21, 5], [19, 14], [26, 14]],
+  lancaMisseis2: [[14, 5], [21, 5], [19, 14], [26, 14]],
+  lancaMisseis3: [[14, 6], [21, 5], [18, 14], [25, 14]],
+};
+
+/**
+ * O MÍSSIL DO CASCO (10/11) — a folha `missilCasco` (24×9, 4 quadros de chama) em ESCALA 1. O bocal fica 5 px atrás do
+ * centro do quadro e a ponta da chama, 11: é de onde o foguete nasce (o bocal na boca do casulo) e de onde o rastro sai.
+ */
+const MISSIL_CASCO = { bocal: 5, cauda: 11 } as const;
 
 /**
  * Obstáculos da superfície.
@@ -261,6 +305,12 @@ export class TerrainSystem {
    */
   private readonly poeiraFx: Phaser.GameObjects.Particles.ParticleEmitter;
 
+  /**
+   * O RASTRO DO MÍSSIL DO CASCO (10/11): cada partícula toca UMA vez a `rastro-missil` (a brasa que esfria no vapor
+   * cinza do casco e se desfaz), em escala 1 e sem alpha — pixel assado, não um sopro escalado. Um emissor só.
+   */
+  private readonly rastroFx: Phaser.GameObjects.Particles.ParticleEmitter;
+
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly enemyBullets: Phaser.Physics.Arcade.Group,
@@ -277,6 +327,12 @@ export class TerrainSystem {
       scale: { start: 0.5, end: 1.3 },
       alpha: { start: 0.5, end: 0 },
       tint: [0xcfd6dd, 0x8b939c, 0xff8c1a],
+      emitting: false,
+    });
+    this.rastroFx = scene.add.particles(0, 0, 'rastroMissil', {
+      anim: 'rastro-missil',
+      lifespan: 430,
+      speed: { min: 0, max: 5 },
       emitting: false,
     });
 
@@ -393,7 +449,7 @@ export class TerrainSystem {
     // por cima: `−0.5` na aresta de frente, `−0.526` no fundo (13px × 0,002). Toda a faixa fica entre a
     // tira do casco (−0.2, à frente) e a faixa de fundo (−74/−75, atrás), então nada mais no
     // quadro muda de ordem.
-    p.setDepth(faixa ? -0.5 - (faixa.frente - pe) * 0.002 : -0.5);
+    p.setDepth(faixa ? (naCasca ? DEPTH_NO_CASCO : -0.5) - (faixa.frente - pe) * 0.002 : -0.5);
 
     const def = PROPS[kind];
 
@@ -828,6 +884,14 @@ export class TerrainSystem {
       const b = obj as Phaser.Physics.Arcade.Sprite;
       if (!b.active || b.getData('missile') !== true) continue;
 
+      // O míssil do casco deixa o rastro DELE, da ponta da chama (ver `rastroFx`); os outros, a fumaça de sempre.
+      if (b.getData('rastroCasco') === true) {
+        this.rastroFx.emitParticleAt(
+          b.x - Math.cos(b.rotation) * MISSIL_CASCO.cauda,
+          b.y - Math.sin(b.rotation) * MISSIL_CASCO.cauda,
+        );
+        continue;
+      }
       this.smokeFx.emitParticleAt(
         b.x - Math.cos(b.rotation) * 8,
         b.y - Math.sin(b.rotation) * 8,
@@ -924,7 +988,7 @@ export class TerrainSystem {
     const kind = p.getData('kind') as PropKind;
     // A boca MEDIDA NA VARIANTE (as torres da F1, rodada 6: cada uma tem o cano num lugar) vem antes da tabela por tipo.
     const bocaArte = p.getData('bocaArte') as readonly [number, number] | undefined;
-    const bocas = bocaArte ? [bocaArte] : (BOCAS[kind] ?? BOCAS.turret!);
+    const bocas = bocaArte ? [bocaArte] : (BOCAS_DA_ARTE[p.texture.key] ?? BOCAS[kind] ?? BOCAS.turret!);
     const i = ((p.getData('boca') as number | undefined) ?? 0) % bocas.length;
     p.setData('boca', i + 1);
     const [bx, by] = bocas[i];
@@ -964,10 +1028,21 @@ export class TerrainSystem {
     // ⚠️ A CAIXA NÃO DEPENDE DA ARTE. O `setSize` logo abaixo crava 10×7 em px de MUNDO para os
     // dois, então a Fase 1 troca de textura sem que um número de balanceamento se mexa — que era
     // a condição para encostar numa fase já mergeada.
+    //
+    // ⚠️ 10/11: O FOGUETE DO CASCO É O `missilCasco`. Ele: *"hoje é um míssil de osso. Mas quero algo mais parecido com
+    // míssil, talvez com linhas verdes ou de bronze [...] com efeito de propulsor e rastro"*. Corpo de aço com duas
+    // faixas, a chama do motor em 4 quadros e o rastro próprio (`rastroCasco`, ver `tickMissileTrails`). Em ESCALA 1: a
+    // folha já nasce no tamanho de tela (24×9), e 0,8 em pixel art deste tamanho borra. Os números de jogo não mudam.
     const foguete = kind === 'lancaMisseis';
-    b.setTexture(foguete ? 'missile' : 'shotTorre').setScale(0.8).clearTint();
+    if (foguete) {
+      b.setTexture('missilCasco', 0).setScale(1).clearTint();
+      b.play('missil-casco');
+    } else {
+      b.setTexture('shotTorre').setScale(0.8).clearTint();
+    }
     b.setBlendMode(Phaser.BlendModes.NORMAL);
     b.setData('missile', foguete);
+    b.setData('rastroCasco', foguete);
 
     // ⚠️ QUEM ATIROU, para o próprio cano não comer o tiro. Ver `GameScene.enemyBulletHitCover`.
     //
@@ -985,7 +1060,7 @@ export class TerrainSystem {
     // A HITBOX também é a de antes, em px de MUNDO: 10×7. O setSize é em px LOCAIS e o corpo
     // escala junto com o sprite — com a escala visual 0.8, compensa-se dividindo por ela.
     // O release() do pool desfaz isto ao reciclar o slot.
-    b.body!.setSize(10 / 0.8, 7 / 0.8);
+    b.body!.setSize(10 / b.scaleX, 7 / b.scaleY);
 
     b.setData('ox', muzzleX);
     b.setData('oy', muzzleY);
@@ -993,6 +1068,11 @@ export class TerrainSystem {
     const angle = Phaser.Math.Angle.Between(muzzleX, muzzleY, target.x, target.y);
     b.setVelocity(Math.cos(angle) * 100, Math.sin(angle) * 100);
     b.setRotation(angle);
+    // O foguete do casco nasce com o BOCAL na boca do casulo (o quadro é centrado no corpo): sem este passo, metade
+    // do míssil aparecia para TRÁS do furo de onde ele sai.
+    if (foguete) {
+      b.setPosition(muzzleX + Math.cos(angle) * MISSIL_CASCO.bocal, muzzleY + Math.sin(angle) * MISSIL_CASCO.bocal);
+    }
 
     // Sopro de lançamento na boca do cano — o arco estético ficou de fora de propósito:
     // curvar a trajetória mudaria o tempo-até-o-jogador, e esse número está fechado.

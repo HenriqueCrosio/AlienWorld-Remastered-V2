@@ -315,6 +315,10 @@ const SHEET_ANIMS: {
   // frio → aceso), então o quadro 7 encosta no 0 com a mesma derivada e o laço fecha sozinho. Um
   // `yoyo` aqui tocaria a volta duas vezes e dobraria o período sem querer.
   { key: 'porta-nucleo', sheet: 'portaNucleoSheet', frames: 8, frameRate: 10 },
+  // O MÍSSIL DO CASCO (10/11): a chama do motor tremula a 16/s; o rastro toca UMA vez por partícula, 6 quadros em
+  // ~430 ms (a vida da partícula no `TerrainSystem.rastroFx`).
+  { key: 'missil-casco', sheet: 'missilCasco', frames: 4, frameRate: 16 },
+  { key: 'rastro-missil', sheet: 'rastroMissil', frames: 6, frameRate: 14, loop: false },
 
   // ─── A SOLEIRA DO NÚCLEO (21/09, o esfíncter) ───
   //
@@ -450,6 +454,10 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // borda direita e a luz recalculada por mapa de normais (aprovado por ele em 16/10). Assado por
   // `scripts/_polimento/_montar-pixminimax.mjs` + `_corpo-todo.mjs` (pasta `t2-todo500-luz` da folha).
   raboLeviata: { path: 'sprites/rabo-leviata-sheet.png', w: 368, h: 248 },
+  // O MÍSSIL DO LANÇA-MÍSSEIS DO CASCO (F3, 10/11) e o rastro dele, desenhados em pixel por
+  // `scripts/_casco/_missil-assar.mjs`: 4 quadros de chama (24×9) e a brasa que esfria em vapor (6 quadros de 5×5).
+  missilCasco: { path: 'sprites/missil-casco.png', w: 24, h: 9 },
+  rastroMissil: { path: 'sprites/rastro-missil.png', w: 5, h: 5 },
   // ⚠️ 53×76 POR CÉLULA, E OS PEDAÇOS VÊM DO PIXELLAB — a 1ª versão eram recortes MEUS de 24×24
   // tirados da criatura por script, e ele reprovou jogando: liam como estilhaço genérico, não como
   // bicho. Os de agora são placas de casco rasgadas, presas curvas e segmentos do anel de dentes.
@@ -732,11 +740,12 @@ const ART: Record<string, string> = {
   // `scripts/casco-frente.mjs` a partir da peça lisa da base. Ver `buildNebula()`.
   cascoFrente: 'sprites/casco-frente.png',
 
+  // ⚠️ 10/11: REFEITO. As três variantes são o berço de costelas escolhido por ele (a T2 da folha
+  // `folhas/2026-11-10/casco-pecas/`), montadas por `scripts/_casco/_torre-montar.mjs` sobre uma base tirada da própria
+  // arte do casco. As chaminés (`respiradouro`, 3 variantes) SAÍRAM do jogo. As antigas: `assets/raw/backup-casco-pecas/`.
   lancaMisseis: 'sprites/lanca-misseis.png',
   lancaMisseis2: 'sprites/lanca-misseis2.png',
-  respiradouro: 'sprites/respiradouro.png',
-  respiradouro2: 'sprites/respiradouro2.png',
-  respiradouro3: 'sprites/respiradouro3.png',
+  lancaMisseis3: 'sprites/lanca-misseis3.png',
 
   // (O RABO do Leviatã virou spritesheet em 16/10: `raboLeviata` em `SHEETS`.)
 
@@ -840,10 +849,8 @@ const ART: Record<string, string> = {
   // Projéteis de fogo (chefão e shotgun), animados.
   comet: 'sprites/comet.png',
   blast: 'sprites/blast.png',
-  // O MÍSSIL das torres de solo (TerrainSystem). Placeholder de piloto: a arte do PixelLab
-  // entra depois COM ESTA MESMA CHAVE, só copiando o PNG para cá. Desenhado apontando para a
-  // DIREITA, como todo sprite do jogo — o voo o gira (setRotation).
-  missile: 'sprites/missile.png',
+  // (O `missile`, o míssil de OSSO do lança-mísseis do casco, saiu em 10/11: o foguete novo é a folha `missilCasco`,
+  // em `SHEETS`. O PNG antigo está em `assets/raw/backup-casco-pecas/`.)
 
   // ⚠️ O MÍSSIL DA COLÔNIA — a ordenança do CHEFÃO DA FASE 1 na fase aérea, e ele existe porque
   // o `missile` acima estava vestindo os dois. O Henrique topou com isso jogando: *"a segunda
@@ -852,8 +859,8 @@ const ART: Record<string, string> = {
   // achou foi ele, jogando.
   //
   // A separação é de FICÇÃO antes de ser de arte, a mesma regra da munição da torre: um
-  // lança-mísseis do Leviatã dispara ordenança do bicho — o `missile` é OSSO, corpo claro e
-  // chama laranja. A cidadela da colônia dispara ordenança industrial — corpo gunmetal escuro e
+  // lança-mísseis do Leviatã dispara ordenança do bicho — o `missilCasco` (10/11; antes um míssil de OSSO): aço com
+  // faixas de bronze e chama laranja. A cidadela da colônia dispara ordenança industrial — corpo gunmetal escuro e
   // chama FRIA, a mesma família do `shotTorre` que a torre de solo dela acabou de ganhar.
   //
   // As duas se separam em DOIS eixos ao mesmo tempo, e isso foi escolhido: valor do corpo
@@ -1499,8 +1506,6 @@ export class BootScene extends Phaser.Scene {
       mina: () => this.makeMine(),
       capitania: () => this.makeCapitania(),
       carrier: () => this.makeCarrier(),
-      // O míssil da torre de solo — placeholder até a arte do PixelLab entrar com esta chave.
-      missile: () => this.makeMissile(),
 
       // ⚠️ O LEVIATÃ E A LUA ENTRARAM AQUI, e o Leviatã por pouco não custou a arte nova dele.
       //
@@ -1779,43 +1784,6 @@ export class BootScene extends Phaser.Scene {
     g.fillRect(2, 2, 8, 1);
     g.fillRect(2, 9, 8, 1);
     g.generateTexture('pickup', 12, 12);
-    g.destroy();
-  }
-
-  /**
-   * MÍSSIL 16×6 — o tiro das torres de solo da Fase 1.
-   *
-   * ALONGADO de propósito: a leitura que o Henrique pediu é "míssil", e a 384×216 quem diz isso
-   * é a silhueta comprida com nariz e empenas, não a cor. Aponta para a DIREITA (convenção de
-   * todos os sprites); o TerrainSystem o gira para alinhar com o vetor de voo, e a fumaça de
-   * exaustão sai por trás. NÃO é teleguiado — o número de balanceamento é o mesmo do traçante
-   * que ele substitui (só a leitura mudou).
-   */
-  private makeMissile(): void {
-    const g = this.make.graphics({ x: 0, y: 0 }, false);
-
-    // Corpo tubular.
-    g.fillStyle(COLORS.metalMid, 1);
-    g.fillRect(3, 1, 10, 4);
-    g.fillStyle(COLORS.metalLight, 1);
-    g.fillRect(3, 1, 10, 1);
-
-    // Nariz — magenta: a cor de quem atira (o inimigo), lida antes da forma.
-    g.fillStyle(COLORS.enemyBright, 1);
-    g.fillTriangle(13, 0, 16, 3, 13, 6);
-
-    // Empenas na cauda.
-    g.fillStyle(COLORS.metalDark, 1);
-    g.fillTriangle(3, 1, 3, 0, 6, 1);
-    g.fillTriangle(3, 5, 3, 6, 6, 5);
-
-    // Bocal escuro + brasa do motor.
-    g.fillStyle(COLORS.enemyDark, 1);
-    g.fillRect(2, 2, 1, 2);
-    g.fillStyle(COLORS.hotBright, 1);
-    g.fillRect(0, 2, 2, 2);
-
-    g.generateTexture('missile', 16, 6);
     g.destroy();
   }
 
