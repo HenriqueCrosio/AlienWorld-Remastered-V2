@@ -1,0 +1,146 @@
+[
+  {
+    "t": 58.37,
+    "arte": "lancaMisseis3",
+    "boca": [
+      13,
+      6
+    ]
+  },
+  {
+    "t": 61.2,
+    "arte": "lancaMisseis3",
+    "boca": [
+      20,
+      5
+    ]
+  },
+  {
+    "t": 62.02,
+    "arte": "lancaMisseis2",
+    "boca": [
+      14,
+      5
+    ]
+  },
+  {
+    "t": 62.03,
+    "arte": "lancaMisseis3",
+    "boca": [
+      14,
+      6
+    ]
+  },
+  {
+    "t": 62.27,
+    "arte": "lancaMisseis",
+    "boca": [
+      14,
+      5
+    ]
+  },
+  {
+    "t": 64.85,
+    "arte": "lancaMisseis2",
+    "boca": [
+      21,
+      5
+    ]
+  },
+  {
+    "t": 64.87,
+    "arte": "lancaMisseis3",
+    "boca": [
+      21,
+      5
+    ]
+  },
+  {
+    "t": 65.1,
+    "arte": "lancaMisseis",
+    "boca": [
+      21,
+      5
+    ]
+  },
+  {
+    "t": 67.68,
+    "arte": "lancaMisseis2",
+    "boca": [
+      19,
+      14
+    ]
+  },
+  {
+    "t": 67.7,
+    "arte": "lancaMisseis3",
+    "boca": [
+      18,
+      14
+    ]
+  },
+  {
+    "t": 67.93,
+    "arte": "lancaMisseis",
+    "boca": [
+      19,
+      14
+    ]
+  },
+  {
+    "t": 70.52,
+    "arte": "lancaMisseis2",
+    "boca": [
+      26,
+      14
+    ]
+  },
+  {
+    "t": 70.53,
+    "arte": "lancaMisseis3",
+    "boca": [
+      25,
+      14
+    ]
+  },
+  {
+    "t": 70.77,
+    "arte": "lancaMisseis",
+    "boca": [
+      26,
+      14
+    ]
+  },
+  {
+    "t": 73.35,
+    "arte": "lancaMisseis2",
+    "boca": [
+      14,
+      5
+    ]
+  },
+  {
+    "t": 73.37,
+    "arte": "lancaMisseis3",
+    "boca": [
+      14,
+      6
+    ]
+  },
+  {
+    "t": 73.6,
+    "arte": "lancaMisseis",
+    "boca": [
+      14,
+      5
+    ]
+  },
+  {
+    "t": 73.6,
+    "arte": "lancaMisseis3",
+    "boca": [
+      13,
+      6
+    ]
+  }
+]

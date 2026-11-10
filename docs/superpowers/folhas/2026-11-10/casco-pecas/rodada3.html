@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>F3 · o lança-mísseis na borda de baixo</title>
+<style>
+  body { background: #14111f; color: #d8d4e6; font: 15px/1.5 system-ui, sans-serif; margin: 0; padding: 24px 32px 80px; max-width: 1240px; }
+  h1 { font-size: 30px; margin: 0 0 4px; }
+  h2 { font-size: 23px; margin: 44px 0 6px; color: #f0c98a; border-top: 1px solid #332c4a; padding-top: 20px; }
+  p { margin: 6px 0; max-width: 900px; }
+  .nota { color: #9a94b0; font-size: 13px; }
+  img, video { image-rendering: pixelated; display: block; margin: 8px 0; width: 1152px; height: 648px; border: 1px solid #332c4a; }
+  li { margin: 6px 0; max-width: 900px; }
+</style>
+</head>
+<body>
+<h1>F3 · o lança-mísseis na borda de baixo (10/11, rodada 3)</h1>
+<p>O seu retorno: a base não resolveu, ela destacou que a peça estava mal posicionada; o certo é ela ficar quase na borda de baixo da tela, como se estivesse presa abaixo da linha. Bronze e o tom do osso aprovados.</p>
+<p>Feito: o pé da torre agora fica abaixo da borda da tela. A base some inteira; só as costelas e o casulo sobem do rodapé.</p>
+<p class="nota">Já está no jogo (http://localhost:5173, F3, do casco em diante). Nada commitado.</p>
+
+<h2>A fase correndo de verdade</h2>
+<p>O Ato 2 real, sem nada plantado à mão: as torres nascem onde o sorteio do jogo as põe, como antes. As três em fila da folha anterior eram só demonstração.</p>
+<video src="jogo-borda/video.mp4" controls loop muted autoplay></video>
+<p class="nota">Nesta semente de teste nasceram 2 torres, perto do fim do Ato 2. Cada vaga é um sorteio de 50%; a média da fase segue em cerca de 4, igual a antes.</p>
+
+<h2>Três momentos do filme, ampliados 3×</h2>
+<img src="jogo-borda/x3-86.2.png" alt="">
+<img src="jogo-borda/x3-88.2.png" alt="">
+<img src="jogo-borda/x3-90.2.png" alt="">
+
+<h2>O que muda no jogo com a torre mais baixa</h2>
+<ul>
+  <li>A torre desceu cerca de 30 px. Ela não passa mais da linha de cima do casco; fica na face dele, na frente.</li>
+  <li>As bocas descem junto, então o míssil nasce mais baixo na tela.</li>
+  <li>Como obstáculo ela ocupa menos do espaço de voo: o topo fica por volta de y 170 (antes, 130 a 143).</li>
+  <li>Vida, pontos, cadência e dano não mudaram.</li>
+</ul>
+</body>
+</html>

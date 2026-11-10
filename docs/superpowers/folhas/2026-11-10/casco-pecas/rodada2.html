@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>F3 · o lança-mísseis refeito — no jogo</title>
+<style>
+  body { background: #14111f; color: #d8d4e6; font: 15px/1.5 system-ui, sans-serif; margin: 0; padding: 24px 32px 80px; max-width: 1240px; }
+  h1 { font-size: 30px; margin: 0 0 4px; }
+  h2 { font-size: 23px; margin: 44px 0 6px; color: #f0c98a; border-top: 1px solid #332c4a; padding-top: 20px; }
+  p { margin: 6px 0; max-width: 900px; }
+  .nota { color: #9a94b0; font-size: 13px; }
+  img, video { image-rendering: pixelated; display: block; margin: 8px 0; }
+  img.jogo, video { width: 1152px; height: 648px; border: 1px solid #332c4a; }
+  li { margin: 6px 0; max-width: 900px; }
+</style>
+</head>
+<body>
+<h1>F3 · o lança-mísseis refeito — no jogo (10/11, rodada 2)</h1>
+<p>O seu pedido: as chaminés saem; ficam só os lançadores, com a variação da T2; a peça precisa parecer ligada ao casco; o projétil vira um míssil de verdade, com propulsor e rastro, saindo das 4 bocas.</p>
+<p class="nota">Tudo aqui já está instalado no jogo (http://localhost:5173, F3, do casco em diante). Nada foi commitado.</p>
+
+<h2>1 · As três variantes, sobre uma base tirada do casco</h2>
+<p>A cor crua das candidatas já era a do casco. O que destoava era o "morro" que cada uma trouxe como chão: um bloco de corte reto, pintado com os tons claros em área grande. Ele saiu. A base agora é um domo de escamas recortado da própria arte do casco (a peça das escamas, de onde os ossos do casco já saem), que afina nas pontas e se desfaz no pé. As costelas, o casulo e os canos de cobre são os da candidata, pixel por pixel.</p>
+<img src="torre/tira.png" alt="as três variantes ampliadas 5×">
+
+<h2>2 · No jogo, na velocidade real</h2>
+<p>As três plantadas na F3 de verdade, atirando na nave parada.</p>
+<video src="jogo-torre/video.mp4" controls loop muted autoplay></video>
+<img class="jogo" src="jogo-torre/foto-x3.png" alt="foto do jogo ampliada 3×">
+
+<h2>3 · As 4 bocas, em câmera de teste</h2>
+<p>O mesmo, com as torres passando devagar para dar tempo de cada uma disparar várias vezes. Cada variante reveza as quatro bocas: as duas de cima, depois as duas de baixo. O míssil nasce com o bocal na boca do casulo.</p>
+<video src="jogo-bocas/video.mp4" controls loop muted autoplay></video>
+<p class="nota">Conferido pelo registro de cada tiro (variante, boca, posição): as 12 bocas batem com as medidas na arte.</p>
+
+<h2>4 · O míssil: bronze (instalado) ou verde</h2>
+<p>Corpo de aço, nariz claro, duas faixas, empenas; a chama do motor tremula em 4 quadros; o rastro é uma brasa que esfria no vapor cinza do casco e se desfaz.</p>
+<img src="missil/bronze-verde.png" alt="bronze à esquerda, verde à direita, ampliados 12×">
+<p>Instalei o <b>bronze</b>: é o cobre que o casco já usa, então o míssil lê como munição do bicho. O verde está pronto e troca com um comando, se você preferir.</p>
+
+<h2>O que mudou no jogo além da arte</h2>
+<ul>
+  <li><b>As chaminés saíram.</b> A vaga delas no sorteio virou casco liso, de propósito: se eu só as tirasse, os lançadores dobrariam e o Ato 2 atiraria o dobro. A quantidade de lançadores e a cadência de tiro são as de antes.</li>
+  <li><b>A torre ficou 6 px mais larga e 3 px mais baixa</b> que a antiga (64×56 contra 58×59). A área de colisão acompanha a largura: 38 px contra 35.</li>
+  <li><b>O pé das torres pode ficar até 3 px mais alto</b> no casco, para a peça mais baixa continuar quebrando a linha da crista.</li>
+  <li>Velocidade, dano e área de colisão do míssil não mudaram.</li>
+  <li>As peças antigas (as 2 torres, as 3 chaminés, o míssil de osso) estão em <code>assets/raw/backup-casco-pecas/</code>.</li>
+</ul>
+
+<h2>O que eu preciso de você</h2>
+<ol>
+  <li>A base de escamas resolve o "ligado ao casco"?</li>
+  <li>Bronze ou verde no míssil?</li>
+  <li>O osso das costelas fica nesse tom, ou escureço um pouco?</li>
+</ol>
+</body>
+</html>

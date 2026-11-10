@@ -704,14 +704,9 @@ const pares = respiradouros.slice(1).map((t, i) => Number((t - respiradouros[i])
 console.log('respiradouros nasceram em ' + JSON.stringify(respiradouros));
 console.log('intervalos ' + JSON.stringify(pares));
 console.log('lanca-misseis: ' + lancas.length);
-ok(
-  respiradouros.length > 0 && respiradouros.length <= 6,
-  `POUCOS respiradouros no Ato 2 (${respiradouros.length} — eram ~13 antes da carência)`,
-);
-ok(
-  pares.every((d) => d >= 5),
-  `e BEM ESPAÇADOS: nenhum par a menos de 5s (o menor foi ${pares.length ? Math.min(...pares) : 'n/a'}s)`,
-);
+// ⚠️ 10/11: AS CHAMINÉS SAÍRAM DO JOGO (ele: "quero que as chaminés saiam do jogo, fique só os lançadores de mísseis").
+// A vaga delas no sorteio ficou como `'vago'` (casco liso), e é isso que mantém a conta dos atiradores logo abaixo.
+ok(respiradouros.length === 0, `NENHUM respiradouro no Ato 2 (${respiradouros.length}): as chaminés saíram em 10/11`);
 // ⚠️ O ASSERT QUE PROTEGE O BALANCEAMENTO. O corte no respiradouro foi desenhado para NÃO mexer
 // no volume de tiro do Ato 2 (a cadência caiu pela metade e a mistura dobrou a favor do lança,
 // e os dois se cancelam). Se alguém "melhorar" a mistura depois, é aqui que reprova.
@@ -785,18 +780,17 @@ ok(casco.length >= 3, `há props de casco para medir (${casco.length})`);
 // ⚠️ O ASSERT DA FILA. `every(dentro da faixa)` sozinho passaria numa versão que plantasse
 // TODOS em 195 — o defeito original com outro número. O que se está medindo é a VARIAÇÃO.
 ok(new Set(pes).size > 1, `e eles NÃO estão todos no mesmo y (${new Set(pes).size} plantios distintos em ${pes.length})`);
+// ⚠️ 10/11 (2): O PLANTIO DESCEU PARA A BORDA DE BAIXO (ele: "colocar ele quase na borda de baixo da tela, para dar a
+// impressão que ele está colado abaixo da linha da tela de baixo"). O pé fica ABAIXO da tela (224–228): a base some.
 ok(
-  pes.every((y) => y >= 186 && y <= 199),
-  `e todo pé cai DENTRO da faixa do casco, nunca na crista nem abaixo dela (${JSON.stringify(pes)})`,
+  pes.every((y) => y >= 224 && y <= 228),
+  `e todo pé cai ABAIXO da borda da tela, a base escondida (${JSON.stringify(pes)})`,
 );
 // ⚠️ COROAR É O PONTO, E O PIOR CASO É O PROP MAIS BAIXO. 6px era o número do defeito. O
 // `lancaMisseis` tem 59px e é ele quem define o teto do PLANTIO: em 199 ele coroa 10px, e o
 // respiradouro (62px) no fundo da faixa coroa 26. Este assert JÁ REPROVOU uma vez — o teto
 // nasceu 204, calculado sobre o prop mais ALTO, e o lança coroava 5px, pior que o defeito.
-ok(
-  casco.every((n) => n.coroa >= 10),
-  `e todo prop QUEBRA a linha da crista (coroa mínima ${Math.min(...casco.map((n) => n.coroa))}px, o defeito eram 6)`,
-);
+// (10/11 (2): com o plantio na borda de baixo a peça NÃO quebra mais a crista, de propósito — o assert da coroa saiu.)
 // ⚠️ A PROFUNDIDADE ACOMPANHA O PLANTIO, senão quem fica na frente é decidido pela ordem de
 // criação — empate de profundidade renderiza certo por acidente.
 const ordenado = [...casco].sort((a, b) => a.pe - b.pe);

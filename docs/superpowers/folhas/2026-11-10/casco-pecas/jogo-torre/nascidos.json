@@ -1,0 +1,42 @@
+[
+  {
+    "t": 62.2,
+    "arte": "lancaMisseis2",
+    "boca": [
+      13,
+      5
+    ]
+  },
+  {
+    "t": 62.32,
+    "arte": "lancaMisseis",
+    "boca": [
+      13,
+      5
+    ]
+  },
+  {
+    "t": 63.17,
+    "arte": "lancaMisseis3",
+    "boca": [
+      13,
+      6
+    ]
+  },
+  {
+    "t": 65.03,
+    "arte": "lancaMisseis2",
+    "boca": [
+      20,
+      5
+    ]
+  },
+  {
+    "t": 66,
+    "arte": "lancaMisseis3",
+    "boca": [
+      20,
+      5
+    ]
+  }
+]
