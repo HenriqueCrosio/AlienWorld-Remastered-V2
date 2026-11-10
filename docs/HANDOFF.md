@@ -16,12 +16,19 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-bloco-i-etapa2-START.md`. A etapa 1 do bloco I (as
-> explosões) está aprovada, commitada e empurrada. A sessão abre na etapa 2, os flashes de tela cheia: começar pelas
-> perguntas a ele (superpowers:brainstorming), uma por vez, antes de mexer em qualquer flash."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-bloco-i-etapa2-START.md`. O bloco H fechou (a enguia
+> escura aprovada), a etapa 1 do bloco I (as explosões) e o lança-mísseis do casco da F3 estão aprovados, commitados e
+> empurrados. A sessão abre na etapa 2 do bloco I, os flashes de tela cheia: o alcance já está decidido (o jogo
+> inteiro, os 21); retomar na pergunta 2 (a forma), uma pergunta por vez (superpowers:brainstorming), antes de mexer em
+> qualquer flash."**
 >
-> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (a enguia escura
-> APROVADA em 10/11) → I (1 ✅ as explosões → 2 os flashes → 3 a tela final) → J → F.**
+> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11, fechado de
+> vez) → I (1 ✅ as explosões → um desvio ✅ o lança-mísseis do casco, 10/11 → **2 os flashes** → 3 a tela final) → J →
+> F.** Depois dos blocos: o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco) e só então o som.
+>
+> 📍 **10/11 (fim) — COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: `97afc59` (o jogo: o
+> lança-mísseis refeito, o míssil novo, as chaminés fora, as antigas no backup), `d39047a` (as ferramentas e as folhas,
+> sem os vídeos e os `q/`), `1353da1` (os docs) e o commit destes hashes com o START da etapa 2 atualizado.
 >
 > 📍 **10/11 — O RETORNO DELE:** *"Ok para a enguia escura"* (o H fechou de vez). A F3 com o cenário novo: *"gostei dela
 > no geral, só as chaminés e torres de mísseis da parte do casco que eu to achando slopado demais"* → **as chaminés e as
