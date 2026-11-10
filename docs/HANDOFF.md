@@ -20,8 +20,58 @@ sprite que se desfaz nos próprios pixels).
 > explosões) está aprovada, commitada e empurrada. A sessão abre na etapa 2, os flashes de tela cheia: começar pelas
 > perguntas a ele (superpowers:brainstorming), uma por vez, antes de mexer em qualquer flash."**
 >
-> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (falta só o ok dele à
-> enguia escura) → I (1 ✅ as explosões → 2 os flashes → 3 a tela final) → J → F.**
+> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (a enguia escura
+> APROVADA em 10/11) → I (1 ✅ as explosões → 2 os flashes → 3 a tela final) → J → F.**
+>
+> 📍 **10/11 — O RETORNO DELE:** *"Ok para a enguia escura"* (o H fechou de vez). A F3 com o cenário novo: *"gostei dela
+> no geral, só as chaminés e torres de mísseis da parte do casco que eu to achando slopado demais"* → **as chaminés e as
+> torres de mísseis do casco da F3 vão ser REFEITAS, JÁ** (*"Podemos fazer essa alteração da F3 agora"*; a etapa 2 do I
+> espera). O defeito, nas palavras dele: *"Tudo me diz slop nelas, design, repetição [...] a chaminé [...] tinha a
+> intenção de passar a sensação de um casco biomecanicamente vivo, mas não passa isso"*. E a 1ª resposta dos flashes: o
+> alcance é o JOGO INTEIRO (os 21; registrada no START da etapa 2).
+> - **A rodada 1 (conceitos, espera ele):** folha `folhas/2026-11-10/casco-pecas/casco-pecas.html`. 4 conceitos da torre
+>   (craca · berço de costelas · espinho dorsal · feixe de tubos) e 4 do obstáculo (espiráculo · vértebras · cracas ·
+>   brânquias), 3 candidatas cada, ampliadas e plantadas no jogo. A receita (`scripts/_casco/_gerar-pecas.mjs`): cada
+>   peça descrita INTEIRA como algo que cresce do casco, SEM assunto, o `casco-costela2` de ESTILO com a paleta presa,
+>   64×64 → 16 candidatas por 10 gerações, todas em perfil. A triagem `_escolhidas.mjs`; as fotos `_plantar.mjs` (a F3
+>   real até 61,2 s, as peças pelo `terrain.spawn` vestidas com a candidata — o src não muda). Só a ARTE troca: vida,
+>   pontos, cadência e plantio ficam.
+> - **A resposta dele:** *"Sobre a chaminé, vamos descartá-las [...] quero que as chaminés saiam do jogo, fique só os
+>   lançadores de mísseis com a variância da T2. Só que eu percebi pela folha que existe uma diferença de cor, quero que
+>   você deixe os lança mísseis com a aparência que estão realmente conectados ao casco. Além disso, quero mudar o
+>   projétil [...] hoje é um míssil de osso. Mas quero algo mais parecido com míssil, talvez com linhas verdes ou de
+>   bronze. Os foguetes precisam sair certo das 4 bocas dos novos assets, com efeito de propulsor e rastro"*; e *"caso
+>   queira criar uma base que case com o casco, fique à vontade. Já usamos essa técnica em outras partes do jogo"*.
+> - **A rodada 2 (INSTALADA, espera ele):** folha `folhas/2026-11-10/casco-pecas/rodada2.html` (2 vídeos).
+>   - **A torre** (`scripts/_casco/_torre-montar.mjs`): a paleta crua das candidatas JÁ era a do casco; o que destoava
+>     era o MORRO que cada uma trouxe como chão (corte reto, os tons claros em área grande). Saiu; a base é um domo das
+>     escamas do `casco-escama` (afina nas pontas, o pé se desfaz em Bayer), e as costelas, o casulo e os canos ficam
+>     pixel por pixel na frente. 3 variantes (`lanca-misseis{,2,3}.png`, 64×56/57). O `PLANTIO.frente` 199 → 196 (a
+>     peça é 3 px mais baixa; a coroa mínima segue 10).
+>   - **As bocas:** `BOCAS_DA_ARTE` por TEXTURA no `TerrainSystem` (o centro de cada furo, lido com régua); a sonda
+>     registra cada tiro e as 12 bocas batem.
+>   - **O míssil** (`_missil-assar.mjs`, desenhado em pixel): a folha `missilCasco` (24×9, 4 quadros de chama, escala
+>     1, a libré BRONZE instalada; a verde pronta: `--instalar verde`) e o rastro `rastroMissil` (6 quadros de 5×5: a
+>     brasa que esfria no vapor do casco, uma vez por partícula — o `rastroFx`, só para o míssil do casco, marca
+>     `rastroCasco`). O foguete nasce com o BOCAL na boca. Velocidade, dano e caixa iguais.
+>   - **As chaminés:** o `respiradouro` saiu do `PropKind`, do `BootScene` e da `GameScene` (a carência também); a vaga
+>     dele no sorteio ficou como `'vago'` (casco liso) para NÃO dobrar os atiradores.
+>   - As antigas em `assets/raw/backup-casco-pecas/`. Filmagem: `_torre-filmar.mjs` (`--vel 8` mostra as 4 bocas).
+>     Build, os 28 testes e a `probe-f3-visual` ajustada (não rodada inteira). Nada commitado.
+> - **A rodada 3 (INSTALADA, espera ele):** a resposta à rodada 2 — BRONZE aprovado, o tom do OSSO aprovado, e a base:
+>   *"A base não resolve, na verdade, destacou que não está bem posicionado. O certo será colocar ele quase na borda de
+>   baixo da tela, para dar a impressão que ele está colado abaixo da linha da tela de baixo"*; e as três em fila eram
+>   só demonstração (a distribuição é a do sorteio de sempre). Feito: `PLANTIO` do casco = pé em 224–228 (ABAIXO da
+>   tela; a base some, as costelas e o casulo sobem do rodapé) e o prop de casco na FRENTE da tira `cascoFrente`
+>   (`DEPTH_NO_CASCO` −0,1). A peça não quebra mais a crista (aceito com o pedido); as bocas descem ~30 px. Folha
+>   `rodada3.html` (o Ato 2 REAL filmado, 83,5–93 s: nesta semente só nascem 2 torres, em 84 e 87 s). Build e os 28
+>   testes ok; a `probe-f3-visual` ajustada (faixa do pé, sem o assert da coroa), não rodada inteira. Nada commitado.
+> - **FECHADO (10/11):** *"A posição ficou boa"*. COMMITADO E EMPURRADO a pedido dele (o jogo, as ferramentas e as
+>   folhas sem os vídeos e os `q/`, os docs). **A aranha e as torres:** ele perguntou se há regra de não nascer torre com
+>   a aranha no casco — NÃO há (só o respiro por relógio, 63–72 s), e a aranha NUNCA sai sozinha (estaciona em x≈306,
+>   salta entre x 150–300, fica até morrer, inclusive na luta da Serpente). Decisão dele: *"podemos deixar assim"*.
+>   **Anotado para o REBALANCEAMENTO:** dar à aranha uma saída (ex.: ir embora aos ~85 s) para ela não sobrar na Serpente.
+>   **O próximo: volta a etapa 2 do bloco I, os flashes — a pergunta 2 (a forma); o alcance já é o jogo inteiro.**
 >
 > 📍 **09/11 (fim) — COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: a etapa 1 do bloco I em três
 > commits (`60bccee` o jogo; `d1f99ba` as ferramentas, o teste e as folhas, sem os vídeos e os `q/`; `c882db1` os docs, com o START da etapa 2,

@@ -60,6 +60,9 @@ flashes: ficam fora.)
 ## As perguntas a ele (uma por vez)
 
 1. **O alcance:** só as cutscenes (o que a análise apontou) ou também os ~11 do jogo (chefões, bomba, golpe, morte)?
+   ✅ **RESPONDIDA em 10/11:** *"Pode ser as 11 do jogo, sua recomendação"* → o alcance é o JOGO INTEIRO (os 21). A
+   próxima pergunta a fazer é a 2 (a forma). ⚠️ A etapa 2 ficou em espera: antes dela entrou o refazer das chaminés e
+   das torres de mísseis do casco da F3 (ver o 🧭).
 2. **A forma:** o clarão LOCAL (luz em volta da fonte, a tela não muda de cor), a VINHETA (as bordas acendem, o meio
    fica legível), ou o flash de hoje mais fraco e mais curto? Talvez um por família (golpe na nave ≠ explosão ≠ largada).
 3. **Os que são linguagem:** o ciano "nave armada" e o branco "nascimento" da Serpente são sinais, não impacto — ficam?
