@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
@@ -2385,7 +2386,7 @@ export class GameScene extends Phaser.Scene {
 
     this.showBanner('ATMOSFERA ROMPIDA · ZERO-G', COLORS.playerBright);
     this.cameras.main.shake(600, 0.01);
-    this.cameras.main.flash(400, 180, 230, 255);
+    claraoDe(this).largada(0xb4e6ff, 400);
 
     // Alguns segundos de voo livre para o jogador SENTIR a diferença antes do fim da fase.
     this.time.delayedCall(6500, () => this.victory());
@@ -2879,7 +2880,7 @@ export class GameScene extends Phaser.Scene {
    * as cartas"* — ficar intocável é do Dash e do Casco. Vale para as duas bombas.
    */
   private bombaDePanico(): void {
-    this.cameras.main.flash(220, 255, 232, 180);
+    claraoDe(this).impacto(GAME_WIDTH / 2, GAME_HEIGHT / 2, 0xffe8b4, { raio: 120, ms: 220 });
     this.cameras.main.shake(280, 0.008);
     this.fx.explode(this.ship.x + 14, this.ship.y, 1.8, 50, 'metal');
     // A detonação CENTRAL: a bomba é um evento de tela inteira, e a explosão grande no meio
@@ -3056,7 +3057,7 @@ export class GameScene extends Phaser.Scene {
     // desta nave — a MESMA em todo golpe, quantas vidas houver (`MORTE.golpe`). O aviso de "mais um e acabou" continua
     // sendo a fumaça da última vida.
     this.golpes.push(new MorteDaNave(this, this.ship, { ...this.opcoesDaMorte(), golpe: true }));
-    this.cameras.main.flash(90, 255, 122, 168);
+    claraoDe(this).golpe(0xff7aa8, 90);
   }
 
   /** O SANDBOX: de volta à montagem (o `sandbox/iniciar.ts` escuta o evento, para a cena e reabre a tela). */

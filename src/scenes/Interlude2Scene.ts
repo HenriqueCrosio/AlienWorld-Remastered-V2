@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
+import { CLARAO } from '../systems/clarao/claraoRegras';
 import { COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
@@ -619,7 +621,7 @@ export class Interlude2Scene extends Phaser.Scene {
     this.time.delayedCall(2300, () => {
       if (this.done) return;
       this.aviso('PILOTO AUTOMÁTICO · ENGATADO', COLORS.hotBright);
-      this.cameras.main.flash(160, 255, 212, 71);
+      claraoDe(this).largada(0xffd447, 160);
     });
 
     // A CENA É ESTÁTICA — quem chega é a NAVE, não a doca. A doca (e as âncoras/rochas que
@@ -777,7 +779,7 @@ export class Interlude2Scene extends Phaser.Scene {
 
     const nave = SHIPS[id];
     this.aviso(`${nave.name} · ARMADA`, COLORS.hotBright);
-    this.cameras.main.flash(200, 62, 224, 240);
+    claraoDe(this).sinal(this.ship.x, this.ship.y, 0x3ee0f0, CLARAO.sinal.raioNave);
 
     this.time.delayedCall(1400, () => this.destruicao());
   }
@@ -884,7 +886,7 @@ export class Interlude2Scene extends Phaser.Scene {
     this.time.delayedCall(3000, () => {
       if (this.done) return;
 
-      this.cameras.main.flash(800, 255, 170, 90);
+      claraoDe(this).climax(Interlude2Scene.artToScreenX(168), Interlude2Scene.artToScreenY(155), 0xffaa5a, 800);
       // O estouro FINAL, na barriga da estação: a detonação de 128px em escala grande — é ela
       // que apaga a doca, não mais um clarão genérico de partícula. Em espaço de arte (x=168,
       // y=155) em vez de tela — a mesma posição de sempre, só que autodocumentada em vez de dois

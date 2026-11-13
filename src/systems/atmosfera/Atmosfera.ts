@@ -41,8 +41,6 @@ export interface EstadoAtmosfera {
   gradeQuente: number;
   /** Quantos objetos a câmera limpa está desenhando agora. */
   limpos: number;
-  /** 0–1: o quanto do flash da câmera está na tela (o halo cede). */
-  flash: number;
   /** 0–1: o quanto do fade de saída já escureceu. */
   escuro: number;
   /** A costura suspendeu o tratamento (ver `Atmosfera.suspender`)? */
@@ -161,9 +159,8 @@ export class Atmosfera {
     const fade = this.scene.cameras.main.fadeEffect;
     const progresso = fade.isRunning || fade.isComplete ? fade.progress : 0;
     this.pipeline.escuro = fade.direction === false ? (fade.isRunning ? 1 - progresso : 0) : progresso;
-    // O FLASH: `alpha` cai de 1 a 0 ao longo do flash (Phaser `Effects.Flash`, público e tipado).
-    const flash = this.scene.cameras.main.flashEffect;
-    this.pipeline.flash = flash.isRunning ? flash.alpha : 0;
+    // (13/11: o flash da câmera saiu do jogo — os clarões são de `systems/clarao` —, e com ele o `uFlash` que fazia o
+    // halo ceder enquanto a tela piscava.)
   }
 
   /**
@@ -218,7 +215,6 @@ export class Atmosfera {
       grao: p ? +p.grao.toFixed(3) : 0,
       gradeQuente: p ? +p.gradeQuente.toFixed(3) : 0,
       limpos: this.limpos,
-      flash: this.pipeline ? +this.pipeline.flash.toFixed(3) : 0,
       escuro: this.pipeline ? +this.pipeline.escuro.toFixed(3) : 0,
       suspenso: this.suspenso,
     };

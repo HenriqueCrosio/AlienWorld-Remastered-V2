@@ -59,6 +59,18 @@ export interface EstadoMenu {
   pronto: boolean;
   /** A sonda parou o relógio (`MenuScene.irPara`). */
   congelado: boolean;
+  /**
+   * O relógio do VÉU quando ele não é o da abertura: no resultado do fim da campanha (o 1º tempo do amanhecer) o
+   * cenário abre do preto com a abertura ainda parada. Sem ele, o véu lê `tAbertura`.
+   */
+  tVeu?: number;
+}
+
+/** O que a `MenuCenaHD` e o `MenuScene` pedem de um cenário de menu (a noite ou o amanhecer). */
+export interface CenarioDoMenu {
+  atualizar(t: number): void;
+  /** Para a sonda: quantos relâmpagos já caíram (o amanhecer não tem: 0). */
+  relampagos: () => number;
 }
 
 /** Uma peça viva do cenário. */
@@ -130,7 +142,7 @@ function contexto(scene: Phaser.Scene, k: number, prefixo: string): ContextoCena
  * O CENÁRIO montado numa cena (a `MenuCenaHD`, ou o próprio `MenuScene` sem a camada): o céu, a cidade, as peças
  * vivas e o véu da abertura. `atualizar(t)` com o relógio do cenário.
  */
-export class Cenario {
+export class Cenario implements CenarioDoMenu {
   private readonly pecas: Peca[];
   private readonly veu: Phaser.GameObjects.Rectangle;
   private readonly estado: EstadoMenu;

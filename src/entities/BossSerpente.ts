@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
+import { CLARAO } from '../systems/clarao/claraoRegras';
 import { BARRA_CHEFAO_Y, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
@@ -1322,7 +1324,7 @@ export class BossSerpente implements StageBoss {
     this.fx.choque(cx, LUTA.crista, 2.2);
     this.scene.cameras.main.shake(360, 0.014);
     // BRANCO, não rosa — rosa é dano, branco é nascimento
-    this.scene.cameras.main.flash(220, 255, 255, 255);
+    claraoDe(this.scene).sinal(cx, LUTA.crista, 0xffffff, CLARAO.sinal.raioChefe);
     if (this.enguia?.ativa) {
       // A ENGUIA IRROMPE (a pausa `fusao` dela segue até 1,6 s; depois o arco): a máquina das formas para, o sprite some
       // (ela é as lonas do worker), a vida dela começa (`?vida=` no atalho de dev a começa mais baixa)

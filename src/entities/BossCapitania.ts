@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
+import { CLARAO } from '../systems/clarao/claraoRegras';
 import { BARRA_CHEFAO_Y, COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { StageBoss } from './Boss';
@@ -272,7 +274,7 @@ export class BossCapitania implements StageBoss {
       this.wasEnraged = this.enraged;
       this.cycleT = 0;
       this.beatIdx = 0;
-      this.scene.cameras.main.flash(180, 232, 48, 107);
+      claraoDe(this.scene).sinal(this.sprite.x, this.sprite.y, 0xe8306b, CLARAO.sinal.raioChefe);
     }
 
     this.cycleT += dt;

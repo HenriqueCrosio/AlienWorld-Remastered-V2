@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
+import { CLARAO } from '../systems/clarao/claraoRegras';
 import { COLORS, DERIVA_ESPACO, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
@@ -294,7 +296,7 @@ export class InterludeScene extends Phaser.Scene {
     this.time.delayedCall(2300, () => {
       if (this.done) return;
       this.aviso('PILOTO AUTOMÁTICO · ENGATADO', COLORS.hotBright);
-      this.cameras.main.flash(160, 255, 212, 71);
+      claraoDe(this).largada(0xffd447, 160);
     });
 
     // O casco SOBE para dentro da tela: é a Aurora se aproximando por baixo. Ela não "entra em
@@ -445,7 +447,7 @@ export class InterludeScene extends Phaser.Scene {
     }
 
     this.aviso(`${nave.name} · ARMADA`, COLORS.hotBright);
-    this.cameras.main.flash(200, 62, 224, 240);
+    claraoDe(this).sinal(this.ship.x, this.ship.y, 0x3ee0f0, CLARAO.sinal.raioNave);
 
     this.time.delayedCall(1400, () => this.implosao());
   }
@@ -497,7 +499,7 @@ export class InterludeScene extends Phaser.Scene {
     this.time.delayedCall(2700, () => {
       if (this.done) return;
 
-      this.cameras.main.flash(500, 255, 210, 120);
+      claraoDe(this).climax(GAME_WIDTH / 2, InterludeScene.DECK_Y - 30, 0xffd278, 500);
       this.fx.explodeBig(GAME_WIDTH / 2, InterludeScene.DECK_Y - 30, 1.7, 26, 'chefeFim');
 
       // O casco AFUNDA e apaga no rastro da explosão: a Aurora sai de cena por baixo, por onde

@@ -9,7 +9,12 @@ import { PERFIS } from '../systems/atmosfera/perfis';
 import type { HandlingMode } from './GameScene';
 import { ABERTURA, CONDUCOES, CORES_TEXTO, ITEM, JATOS, NOMES_ITENS, SUBTITULO } from '../menu/numerosMenu';
 import { T_FIM, T_LISTA_POUSA, alfaItem, particulasDosJatos, posicaoLetreiro, quedaLista, subAcesa } from '../menu/abertura';
-import { Cenario, carregarCamadasMenu, type EstadoMenu } from '../menu/cenario';
+import { Cenario, carregarCamadasMenu, type CenarioDoMenu, type EstadoMenu } from '../menu/cenario';
+import { CenarioAmanhecer, carregarAmanhecer } from '../menu/amanhecer/cenarioAmanhecer';
+import { guardaDoNavegador, marcarZerou, menuAtivo, menuDaUrl, type QualMenu } from '../menu/qualMenu';
+import { T0_SEGUNDO_TEMPO, resultadoPronto, resultadoSaiu, type ParteResultado } from '../menu/resultado';
+import { montarPainelResultado, type PainelResultado } from '../menu/painelResultado';
+import { medalhaDe, registrarRecorde, type Guarda } from '../placar';
 import { CHAVE_MENU_HD, MenuCenaHD } from '../menu/MenuCenaHD';
 import { criarTitulo, tingirLetras, type TituloMenu } from '../menu/titulo';
 import { Jatos } from '../menu/jatos';
@@ -29,6 +34,12 @@ const movimentoReduzido = (): boolean =>
  * função do relógio (`src/menu/abertura.ts`): a sonda o para em qualquer instante (`irPara`).
  *
  * Qualquer tecla antes de a lista pousar pula para o menu pousado; 1/2/3 começam direto; o movimento reduzido abre pousado.
+ *
+ * O AMANHECER (13/11, bloco I etapa 3 — spec `2026-11-13-bloco-i-tela-final-amanhecer-design.md`): quem zera a campanha
+ * ganha outro cenário, a colônia ao amanhecer com o Leviatã caído (`CenarioAmanhecer`), e o letreiro avariado. E a
+ * cutscene final abre esta cena com um `resultado`: é a TELA FINAL, em dois tempos — o 1º, o resultado da campanha
+ * sobre o amanhecer (o título, os pontos, a medalha, o recorde, o crédito), com a abertura parada; na tecla, o 2º: o
+ * resultado sai, o letreiro chega e o menu é o de sempre, sem corte.
  */
 export class MenuScene extends Phaser.Scene {
   /** Público: a sonda lê. A lista pousou (ou a abertura foi pulada): o menu aceita teclas. */
@@ -40,13 +51,24 @@ export class MenuScene extends Phaser.Scene {
   /** O relógio da abertura e o que o cenário lê (o véu, a janela quieta da tempestade). Público: a sonda lê. */
   readonly estado: EstadoMenu = { tAbertura: 0, pulou: false, reduzido: false, pronto: false, congelado: false };
   /** Sem a camada HD, o cenário mora aqui. Público: a sonda lê. */
-  cenario: Cenario | null = null;
+  cenario: CenarioDoMenu | null = null;
+  /** Qual cenário este menu abriu. Público: a sonda lê. */
+  qual: QualMenu = 'noite';
+  /** O 1º tempo (o resultado da campanha) está na tela: a abertura espera a tecla. Público: a sonda lê. */
+  emResultado = false;
+  /** O relógio do 1º tempo (s). Público: a sonda lê. */
+  tResultado = 0;
   /** Público: a sonda conta as partículas. */
   jatos: Jatos | null = null;
   private atm: Atmosfera | null = null;
   private tCena = 0;
   private tCursor = 0;
   private direto = false;
+  /** O resultado que a cutscene final entrega (`ensaio`: o atalho de dev, que não grava nada). */
+  private resultado: { score: number; handling: HandlingMode; ensaio?: boolean } | null = null;
+  /** Quando a tecla tirou o resultado (relógio do 1º tempo); < 0: ainda não. */
+  private tSaiResultado = -1;
+  private painel: PainelResultado | null = null;
   /** O texto mora na camada HD (a irmã)? Então as posições caem no pixel da tela (1/s). */
   private naCamada = false;
   private itens: Phaser.GameObjects.Text[] = [];
@@ -62,9 +84,10 @@ export class MenuScene extends Phaser.Scene {
     super('Menu');
   }
 
-  init(data: { cursor?: number; direto?: boolean } = {}): void {
+  init(data: { cursor?: number; direto?: boolean; resultado?: { score: number; handling: HandlingMode; ensaio?: boolean } } = {}): void {
     this.cursorMenu = data.cursor ?? ITEM.comecar;
     this.direto = data.direto === true;
+    this.resultado = data.resultado ?? null;
   }
 
   create(): void {
@@ -72,6 +95,16 @@ export class MenuScene extends Phaser.Scene {
     resetVariantCache();
     this.settled = false;
     Object.assign(this.estado, { tAbertura: 0, pulou: false, pronto: false, congelado: false, reduzido: movimentoReduzido() });
+    this.emResultado = this.resultado !== null;
+    this.tResultado = 0;
+    this.tSaiResultado = -1;
+    this.painel = null;
+    // No resultado o véu abre com o relógio do 1º tempo (a abertura fica parada até a tecla).
+    this.estado.tVeu = this.emResultado ? 0 : undefined;
+    // O resultado é sempre sobre o amanhecer; fora dele, o menu de quem zerou (ou o forçado: `?menu=`, [T] em dev).
+    const guarda = guardaDoNavegador();
+    const forcado = menuDaUrl() ?? ((this.registry.get('menuForcado') as QualMenu | undefined) ?? null);
+    this.qual = this.emResultado ? 'amanhecer' : menuAtivo(guarda, forcado);
     this.cenario = null;
     this.atm = null;
     this.jatos = null;
@@ -85,10 +118,11 @@ export class MenuScene extends Phaser.Scene {
 
     this.montarCenario();
     this.montarTexto();
+    if (this.resultado) this.montarResultado(guarda);
     // A faixa atravessa a transição de cena sem corte (Music.play não reinicia se já toca).
     Music.play(this, 'stage1');
     this.bindKeys();
-    if (this.direto || this.estado.reduzido) this.pular();
+    if (!this.emResultado && (this.direto || this.estado.reduzido)) this.pular();
 
     const hd = jogoHD();
     hd?.events.on(EVENTO_ESCALA, this.aoEscala);
@@ -97,22 +131,30 @@ export class MenuScene extends Phaser.Scene {
       removerCenaHD(CHAVE_MENU_HD);
       this.titulo?.destruir();
       this.jatos?.destruir();
+      this.painel?.destruir();
     });
   }
 
   // ─── O cenário e o texto ────────────────────────────────────────────────────
 
   private montarCenario(): void {
-    if (cenaDeFundoHD(CHAVE_MENU_HD, MenuCenaHD, { estado: this.estado })) return;
+    if (cenaDeFundoHD(CHAVE_MENU_HD, MenuCenaHD, { estado: this.estado, qual: this.qual })) return;
     // Sem a camada HD: o cenário na resolução do jogo, aqui mesmo (§8.3).
-    carregarCamadasMenu(this.load, 'menuK1', 'sprites/menu/k1');
+    const amanhecer = this.qual === 'amanhecer';
+    if (amanhecer) carregarAmanhecer(this.load, 'menuAmK1', 'sprites/menu-amanhecer/k1');
+    else carregarCamadasMenu(this.load, 'menuK1', 'sprites/menu/k1');
     this.load.once(Phaser.Loader.Events.COMPLETE, () => {
-      if (!this.sys.isActive()) return;
-      this.cenario = Cenario.criar(this, 1, 'menuK1', this.estado, 18);
+      // ⚠️ Só desiste se a cena já SAIU. Com as camadas já carregadas (a volta ao menu, o resultado) a fila do `load`
+      // está vazia e o COMPLETE dispara aqui dentro do `create`, com a cena ainda em CREATING: `isActive()` é falso, e
+      // o menu ficava preso sem cenário e sem `pronto` (achado em 13/11 pela `_conferir-amanhecer.mjs`, sem a camada HD).
+      if (this.sys.settings.status >= Phaser.Scenes.SHUTDOWN) return;
+      this.cenario = amanhecer
+        ? CenarioAmanhecer.criar(this, 1, 'menuAmK1', this.estado, 18)
+        : Cenario.criar(this, 1, 'menuK1', this.estado, 18);
       if (this.cenario) {
         // O texto, o título e os jatos ficam em 19+: fora do tratamento.
         this.atm = new Atmosfera(this, { limiteLimpo: 19, profundidadePoeira: 1.5 });
-        this.atm.perfil(PERFIS.menu);
+        this.atm.perfil(amanhecer ? PERFIS.menuAmanhecer : PERFIS.menu);
       }
       this.estado.pronto = true;
     });
@@ -136,7 +178,8 @@ export class MenuScene extends Phaser.Scene {
     }
     const irma = irmaDe(this);
     this.naCamada = irma !== null;
-    this.titulo = criarTitulo(this, irma, escalaHD());
+    // O letreiro do amanhecer é o mesmo, AVARIADO: uma letra falha, como neon velho (`letraFalha`).
+    this.titulo = criarTitulo(this, irma, escalaHD(), this.qual === 'amanhecer');
     this.jatos = new Jatos(irma ?? this, 19, JATOS.max);
   }
 
@@ -144,7 +187,7 @@ export class MenuScene extends Phaser.Scene {
 
   /** Vai direto ao menu pousado (uma tecla, a volta do Arquivo, o movimento reduzido). O relógio segue (o repouso). */
   private pular(): void {
-    if (this.estado.pulou) return;
+    if (this.estado.pulou || this.emResultado) return;
     this.estado.pulou = true;
     if (this.estado.tAbertura < T_FIM) this.estado.tAbertura = T_FIM;
     if (!this.settled) {
@@ -187,7 +230,9 @@ export class MenuScene extends Phaser.Scene {
       this.cenario.atualizar(this.tCena);
     }
     if (!this.estado.pronto) return;
-    if (!this.estado.congelado) this.estado.tAbertura += dt;
+    if (this.resultado) this.atualizarResultado(dt);
+    // No 1º tempo a abertura fica parada em 0: o letreiro ainda está acima da tela e a lista, invisível.
+    if (!this.estado.congelado && !this.emResultado) this.estado.tAbertura += dt;
     const t = this.estado.tAbertura;
     if (!this.settled && t >= T_LISTA_POUSA) {
       this.settled = true;
@@ -239,6 +284,56 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
+  // ─── O resultado do fim da campanha (o 1º tempo) ────────────────────────────
+
+  /**
+   * O RESULTADO sobre o amanhecer (spec da etapa 3 §4): o título no céu escuro de cima à esquerda, os pontos com a
+   * medalha e o recorde abaixo dele, o crédito e a tecla no primeiro plano escuro de baixo — nada sobre a carcaça. As
+   * três vozes: o título e os rótulos na do JOGO, os números na da NAVE, o crédito na do PILOTO. Grava a vitória (a
+   * marca `zerou`) e o recorde, a menos que seja o ensaio de dev.
+   */
+  private montarResultado(guarda: Guarda): void {
+    const r = this.resultado!;
+    const semGravar: Guarda = { getItem: (k) => guarda.getItem(k), setItem: () => {} };
+    const placar = registrarRecorde(r.ensaio ? semGravar : guarda, r.handling, r.score, false);
+    if (!r.ensaio) marcarZerou(guarda);
+    this.painel = montarPainelResultado(this, { score: r.score, recorde: placar.recorde, novo: placar.novo, medalha: medalhaDe(r.score) });
+  }
+
+  /** A tecla no 1º tempo: se tudo já entrou, o resultado começa a sair e a abertura parte de pouco antes do letreiro. */
+  private sairDoResultado(): void {
+    if (!this.emResultado || !this.estado.pronto || !resultadoPronto(this.tResultado, this.estado.reduzido)) return;
+    this.emResultado = false;
+    this.tSaiResultado = this.tResultado;
+    this.estado.tAbertura = T0_SEGUNDO_TEMPO;
+    // O movimento reduzido não vê a chegada: o menu abre pousado.
+    if (this.estado.reduzido) this.pular();
+  }
+
+  /** O relógio do 1º tempo, o véu e os textos do resultado (que somem na tecla e são destruídos depois). */
+  private atualizarResultado(dt: number): void {
+    if (!this.estado.congelado) this.tResultado += dt;
+    this.estado.tVeu = this.tResultado;
+    if (!this.painel) return;
+    this.painel.atualizar(this.tResultado, this.tSaiResultado, this.estado.reduzido);
+    if (resultadoSaiu(this.tResultado, this.tSaiResultado)) {
+      this.painel.destruir();
+      this.painel = null;
+    }
+  }
+
+  /** Para a sonda: o 1º tempo parado no instante `t` (s), já desenhado. */
+  irParaResultado(t: number): void {
+    this.estado.congelado = true;
+    this.tResultado = t;
+    this.atualizarResultado(0);
+  }
+
+  /** Para a sonda: o que do resultado está na tela. */
+  diagnosticoResultado(): { parte: ParteResultado; texto: string; alfa: number }[] {
+    return this.painel?.diagnostico() ?? [];
+  }
+
   // ─── Teclas ─────────────────────────────────────────────────────────────────
 
   private bindKeys(): void {
@@ -246,7 +341,13 @@ export class MenuScene extends Phaser.Scene {
     // Antes de a lista pousar, qualquer tecla só PULA a abertura. O Phaser emite `keydown-X` ANTES de `keydown`:
     // os handlers da lista se guardam com `settled` (e não agem), e este pula. Os atalhos 1/2/3 e os de dev começam
     // direto, como sempre (as sondas contam com isso).
-    kb.on('keydown', () => {
+    kb.on('keydown', (ev: KeyboardEvent) => {
+      // No resultado, a tecla só vale depois de tudo entrar, e só um toque NOVO (quem zera segurando o tiro manda
+      // a repetição do sistema): ela tira o resultado e solta a abertura.
+      if (this.emResultado) {
+        if (!ev.repeat) this.sairDoResultado();
+        return;
+      }
       if (!this.settled) this.pular();
     });
     // ⚠️ UM EVENTO, UMA VEZ (a lição da mesa, 03/10): o Phaser reprocessa a fila de teclas a cada evento novo, e o ↓
@@ -286,6 +387,13 @@ export class MenuScene extends Phaser.Scene {
       );
       // A NAVE da humana (25/10): até a cena do hangar dele existir, [H] passa pelas escolhas do hangar (modelo e
       // pintura) para a próxima jogada.
+      // O AMANHECER em dev: [R] ensaia o resultado do fim da campanha (não grava nada); [T] troca o menu (a noite ↔ o
+      // amanhecer) só nesta sessão.
+      kb.on('keydown-R', () => this.scene.start('Menu', { resultado: { score: 21000, handling: this.conducao, ensaio: true } }));
+      kb.on('keydown-T', () => {
+        this.registry.set('menuForcado', this.qual === 'amanhecer' ? 'noite' : 'amanhecer');
+        this.scene.start('Menu', { direto: true });
+      });
       kb.on('keydown-H', () => {
         const agora = nomeDaEscolha(naveEscolhida(this.registry));
         const i = ESCOLHAS.findIndex((e) => nomeDaEscolha(e) === agora);
@@ -296,7 +404,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private textoDevLinha2(): string {
-    return `[I][O][P][F] cutscenes  [L] f4  [K] núcleo  [H] nave ${nomeDaEscolha(naveEscolhida(this.registry))}`;
+    return `[I][O][P][F] cutscenes  [L] f4  [K] núcleo  [R] resultado  [T] menu  [H] nave ${nomeDaEscolha(naveEscolhida(this.registry))}`;
   }
 
   private mover(d: number): void {
@@ -322,6 +430,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private start(handling: HandlingMode): void {
+    if (this.emResultado) return;
     this.scene.start('Game', { handling });
   }
 

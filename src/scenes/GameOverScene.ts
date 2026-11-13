@@ -5,14 +5,7 @@ import { Music } from '../systems/Music';
 import type { HandlingMode } from './GameScene';
 import { mapaAtivo, rotuloDaTecla } from '../controles';
 
-type Medal = 'ouro' | 'prata' | 'bronze' | null;
-
-/** Faixas de medalha — herdadas do v2 (InterfaceGameOver.cs). */
-const MEDALS: { min: number; medal: Exclude<Medal, null>; color: number }[] = [
-  { min: 3000, medal: 'ouro', color: 0xffd447 },
-  { min: 1500, medal: 'prata', color: 0xd0d0dc },
-  { min: 600, medal: 'bronze', color: 0xff8c1a },
-];
+import { medalhaDe, registrarRecorde } from '../placar';
 
 export class GameOverScene extends Phaser.Scene {
   constructor() {
@@ -43,17 +36,13 @@ export class GameOverScene extends Phaser.Scene {
       baseScore = 0,
     } = data;
 
-    // Recorde por modificador — herdeiro do PlayerPrefs do v2.
-    // O TREINO não grava recorde: ele pula 68s de fase, o score não é comparável.
-    const key = `alienworld:record:${handling}`;
-    const previous = Number(localStorage.getItem(key) ?? 0);
-    const isRecord = !practice && score > previous;
-    if (isRecord) localStorage.setItem(key, String(score));
+    // O recorde por modificador e a medalha: `src/placar.ts` (o resultado do fim da campanha usa o mesmo).
+    const { anterior: previous, novo: isRecord } = registrarRecorde(localStorage, handling, score, practice);
 
     // Volta à faixa da fase: a música do chefão não deve sobreviver ao chefão.
     Music.play(this, 'stage1', 1200);
 
-    const medal = MEDALS.find((m) => score >= m.min);
+    const medal = medalhaDe(score);
 
     if (victory) {
       // O subtítulo é o GANCHO para o que vem depois — por fase, porque a campanha é uma

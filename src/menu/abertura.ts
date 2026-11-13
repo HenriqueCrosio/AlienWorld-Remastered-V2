@@ -1,4 +1,4 @@
-import { ABERTURA, ACENDE, JATOS, LISTA, REPOUSO, SUBTITULO, TITULO } from './numerosMenu.ts';
+import { ABERTURA, ACENDE, AVARIA, JATOS, LISTA, REPOUSO, SUBTITULO, TITULO } from './numerosMenu.ts';
 import { hash4, suave } from './acaso.ts';
 
 /**
@@ -145,6 +145,38 @@ export const T_FIM = T_OLHOS + ACENDE.apagadaAte + 0.1;
 export const letraAcesa = (i: number, t: number): boolean => acesa(ACENDE.t0 + i * ACENDE.porLetra, t);
 export const subAcesa = (i: number, t: number): boolean => acesa(T_SUB + i * ACENDE.subPorLetra, t);
 export const olhosAcesos = (t: number): boolean => acesa(T_OLHOS, t);
+
+const entre = (f: readonly [number, number], r: number): number => f[0] + r * (f[1] - f[0]);
+
+/**
+ * O LETREIRO AVARIADO (o menu do amanhecer): a letra `i` está FALHANDO no instante `t`? Função pura do relógio: só a
+ * letra `AVARIA.letra`, só depois de o neon acender inteiro (`T_FIM + desde`), uma rajada por ciclo — as piscadas
+ * curtas e, às vezes, o apagão que volta com um zumbido (apaga de novo um instante). O acaso sai do número do ciclo.
+ */
+export function letraFalha(i: number, t: number): boolean {
+  if (i !== AVARIA.letra) return false;
+  const tau = t - (T_FIM + AVARIA.desde);
+  if (tau < 0) return false;
+  const k = Math.floor(tau / AVARIA.ciclo);
+  const r = (c: number): number => hash4(k, 7, c, 3);
+  let d = tau - k * AVARIA.ciclo - entre(AVARIA.comeca, r(0));
+  if (d < 0) return false;
+  const n = AVARIA.piscadas[0] + Math.floor(r(1) * (AVARIA.piscadas[1] - AVARIA.piscadas[0] + 1));
+  for (let j = 0; j < n; j++) {
+    const apagada = entre(AVARIA.apagada, r(10 + j));
+    if (d < apagada) return true;
+    d -= apagada;
+    const acesaPor = entre(AVARIA.acesa, r(20 + j));
+    if (d < acesaPor) return false;
+    d -= acesaPor;
+  }
+  if (r(2) >= AVARIA.apagao.chance) return false;
+  const dura = entre(AVARIA.apagao.dura, r(3));
+  if (d < dura) return true;
+  d -= dura;
+  const [acende, apaga] = AVARIA.apagao.zumbido;
+  return d >= acende && d < acende + apaga;
+}
 
 /** Aceso inteiro, o letreiro respira (1 → 0,82). */
 export function respiracao(t: number): number {

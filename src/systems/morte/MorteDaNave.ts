@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../clarao/Clarao';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config';
 import type { Fx } from '../Fx';
 import {
@@ -570,7 +571,7 @@ export class MorteDaNave {
   /** The one camera flash of the death (`MORTE.clarao`). */
   private clarao(): void {
     const { ms, cor } = MORTE.clarao;
-    this.scene.cameras.main.flash(ms, cor[0], cor[1], cor[2]);
+    claraoDe(this.scene).golpe((cor[0] << 16) | (cor[1] << 8) | cor[2], ms);
   }
 
   /** B: a small hit at the engine, and the burning front starts eating the hull. */

@@ -184,6 +184,52 @@ export const LISTA = { t0: 7.2, queda: 14, passo: 0.08, periodo: 0.95, amortecim
 /** §6.4 O acender: cada letra acesa, apagada, acesa (a falha das janelas). */
 export const ACENDE = { t0: 8.8, porLetra: 0.07, subDepois: 0.1, subPorLetra: 0.025, olhos: 0.45, acesaAte: 0.04, apagadaAte: 0.09 } as const;
 
+/**
+ * O LETREIRO AVARIADO do menu do amanhecer (13/11, ele: *"um efeito de alguma letra apagando, como letreiros de 'Motel'
+ * em filmes americanos"*): a letra `letra` do título (sem contar o espaço: A L I E N W O R L D = 0…9), `desde` s depois
+ * de o neon acender inteiro, falha uma vez por `ciclo` — de 2 a 4 piscadas curtas e, numa parte das vezes, um apagão que
+ * volta com um zumbido. O da noite não falha.
+ */
+export const AVARIA = {
+  letra: 6,
+  desde: 3,
+  ciclo: 8,
+  /** a rajada começa neste trecho do ciclo (s) */
+  comeca: [0, 4],
+  piscadas: [2, 4],
+  apagada: [0.05, 0.12],
+  acesa: [0.06, 0.18],
+  apagao: { chance: 0.35, dura: [1, 2], zumbido: [0.06, 0.05] },
+} as const;
+
+/**
+ * O RESULTADO do fim da campanha, o 1º tempo do menu do amanhecer (spec da etapa 3 §4): quando cada parte entra (s),
+ * em quanto aparece (`fade`), quando a tecla passa a valer (`pronto`), em quanto tudo some na tecla (`sai`) e quanto
+ * antes de o letreiro entrar o relógio da abertura recomeça (`antesDoLetreiro`).
+ */
+export const RESULTADO = {
+  entra: { titulo: 1.6, pontos: 2.6, recorde: 3.1, credito: 3.9, tecla: 4.7 },
+  fade: 0.6,
+  pronto: 5.3,
+  sai: 0.6,
+  antesDoLetreiro: 0.5,
+  /**
+   * px de jogo: o título no céu escuro de cima à esquerda; a JANELA do placar abaixo dele, com folga (ele: *"o placar
+   * pode ficar mais destacado do 'Leviatã caiu', desça ele mais um pouco"*); a tecla embaixo, no meio; a ASSINATURA
+   * embaixo à direita, em duas linhas (*"pode diminuir um pouquinho só o tamanho da fonte"*: era 5 e 8).
+   */
+  layout: {
+    x: 14, titulo: 20, xTecla: 192, tecla: 208,
+    janela: { x: 12, y: 40, w: 158, h: 48 },
+    xAssinatura: 372, assinatura: [195, 204], tamAssinatura: [4.4, 7],
+  },
+  /** os pontos contam de 0 ao valor neste tempo (s), a partir da entrada deles; o "novo recorde" pisca neste período */
+  conta: 1.4,
+  pisca: 1.1,
+  /** o título no osso das costelas; os pontos claros; os rótulos e a tecla discretos; o crédito entre os dois */
+  cores: { titulo: 0xf0e4cc, pontos: 0xffffff, rotulo: 0x9a958e, credito: 0xd8d2c8 },
+} as const;
+
 /** §6.4 O repouso. */
 export const REPOUSO = { respira: 5.2, respiraMin: 0.82, piscaPeriodo: 2.2, piscaMin: 0.4, outros: 0.7 } as const;
 

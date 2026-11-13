@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { pixelText } from '../ui';
 import { ABERTURA, CORES_TEXTO, TITULO } from './numerosMenu';
-import { letraAcesa, olhosAcesos, respiracao } from './abertura';
+import { letraAcesa, letraFalha, olhosAcesos, respiracao } from './abertura';
 import { gerarLetreiro, type Letreiro } from './letreiro';
 
 /** O título do menu na tela (spec §6.5): o letreiro de neon (camada HD) ou, sem ela, o texto que acende por cor. */
@@ -38,7 +38,8 @@ class TituloNeon implements TituloMenu {
   private letreiro: Letreiro | null = null;
   private ultimo = { x: 0, y: 0, acesas: 0, olhos: false };
 
-  constructor(private readonly cena: Phaser.Scene, s: number) {
+  /** `avariado`: o letreiro do amanhecer, com a letra que falha (`letraFalha`). */
+  constructor(private readonly cena: Phaser.Scene, s: number, private readonly avariado: boolean) {
     this.montar(s);
   }
 
@@ -72,7 +73,7 @@ class TituloNeon implements TituloMenu {
     let acesas = 0;
     this.pecas.forEach((p, i) => {
       const x = cx + (p.ini - L.w / 2) * e;
-      const aceso = letraAcesa(i, t);
+      const aceso = letraAcesa(i, t) && !(this.avariado && letraFalha(i, t));
       if (aceso) acesas++;
       const comOlhos = p.olhos !== null && olhos;
       p.apagado.setPosition(x, cy).setVisible(!aceso);
@@ -106,7 +107,7 @@ class TituloTexto implements TituloMenu {
   private readonly o: Phaser.GameObjects.Text;
   private ultimo = { x: 0, y: 0, acesas: 0, olhos: false };
 
-  constructor(cena: Phaser.Scene) {
+  constructor(cena: Phaser.Scene, private readonly avariado: boolean) {
     this.o = pixelText(cena, ABERTURA.layout.x, -40, TITULO, { size: 20, color: CORES_TEXTO.tituloApagado }).setDepth(20);
   }
 
@@ -114,7 +115,7 @@ class TituloTexto implements TituloMenu {
     let acesas = 0;
     this.o.setPosition(cx, cy).setAlpha(respiracao(t));
     tingirLetras(this.o, (i) => {
-      const a = letraAcesa(i, t);
+      const a = letraAcesa(i, t) && !(this.avariado && letraFalha(i, t));
       if (a) acesas++;
       return a ? CORES_TEXTO.tituloAceso : CORES_TEXTO.tituloApagado;
     });
@@ -135,11 +136,11 @@ class TituloTexto implements TituloMenu {
 }
 
 /** O neon na irmã da camada HD; sem a camada (ou sem a fonte), o texto. */
-export function criarTitulo(mundo: Phaser.Scene, irma: Phaser.Scene | null, s: number): TituloMenu {
+export function criarTitulo(mundo: Phaser.Scene, irma: Phaser.Scene | null, s: number, avariado = false): TituloMenu {
   if (irma) {
-    const neon = new TituloNeon(irma, s);
+    const neon = new TituloNeon(irma, s, avariado);
     if (neon.pronto) return neon;
     neon.destruir();
   }
-  return new TituloTexto(mundo);
+  return new TituloTexto(mundo, avariado);
 }

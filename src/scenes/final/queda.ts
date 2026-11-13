@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../../systems/clarao/Clarao';
 import { DERIVA_ESPACO } from '../../config';
 import { garantirLuzRadial } from '../../entities/Predador';
 import { PERFIS } from '../../systems/atmosfera/perfis';
@@ -257,11 +258,14 @@ export function montarQueda(c: CenaFinal): Capitulo {
       // OS QUADROS DE IMPACTO: tudo vira silhueta. A — preto no laranja-claro; B — o inverso. (O corpo segue descendo
       // por eles e encosta dentro do fogo.)
       const chapa = guarda(scene.add.rectangle(0, 0, 384, 216, 0xffd9a0).setOrigin(0, 0).setDepth(DEPTH.CENARIO - 0.5));
+      // Os quadros de impacto FICAM (linguagem da cena, uma alternância só), mas CONTAM no teto de clarões por segundo.
+      claraoDe(scene).conta();
       const silhuetas = [grande, frente];
       silhuetas.forEach((o) => o.setTintFill(0x000000));
       halos.forEach((h) => h.setVisible(false));
       luzCorpo.setVisible(false);
       scene.time.delayedCall(IMPACTO_A_MS, () => {
+        claraoDe(scene).conta();
         chapa.setFillStyle(0x000000);
         silhuetas.forEach((o) => o.setTintFill(0xffb060));
       });
@@ -273,12 +277,9 @@ export function montarQueda(c: CenaFinal): Capitulo {
 
       const depoisDoChoque = () => {
         cam.shake(700, 0.012);
-        // O CLARÃO: a tela inteira acende e apaga num instante.
-        const clarao = guarda(
-          scene.add.rectangle(0, 0, 384, 216, 0xffc890).setOrigin(0, 0).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.6)
-            .setDepth(DEPTH.CENARIO + 4),
-        );
-        scene.tweens.add({ targets: clarao, alpha: 0, duration: 280, ease: 'Quad.easeOut' });
+        // O CLARÃO (13/11, bloco I etapa 2): era a tela inteira a 60%; agora é a luz em volta do focinho, onde o corpo
+        // bateu — o clímax das cutscenes (`Clarao.climax`), como a explosão final da Aurora.
+        claraoDe(scene).climax(NARIZ.x, NARIZ.y, 0xffc890, 280, DEPTH.CENARIO + 4);
         // O CORPO NÃO FICA CRAVADO: ele DESABA — o rabo cai para o chão, girando em volta do focinho — dentro da
         // explosão, e bate (um segundo tremor). Sob a fumaça vira o que ela revela: ele DEITADO, o quadro do capítulo 6
         // (a carcaça fria + a lava dela no estágio aceso), aparecendo por baixo enquanto a explosão cobre tudo.

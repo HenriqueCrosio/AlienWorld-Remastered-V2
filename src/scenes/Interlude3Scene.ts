@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
+import { CLARAO } from '../systems/clarao/claraoRegras';
 import { COLORS, GAME_WIDTH } from '../config';
 import { Starfield } from '../Starfield';
 import { Parallax } from '../Parallax';
@@ -647,7 +649,7 @@ export class Interlude3Scene extends Phaser.Scene {
     this.time.delayedCall(2300, () => {
       if (this.done) return;
       this.aviso('CASCO CRÍTICO · POTÊNCIA CAINDO', COLORS.enemyBright);
-      this.cameras.main.flash(160, 255, 80, 80);
+      claraoDe(this).largada(0xff5050, 160);
     });
 
     // A nave entra manca pela boca. O x é tween; o cambaleio é do update.
@@ -818,7 +820,7 @@ export class Interlude3Scene extends Phaser.Scene {
 
     const nave = SHIPS[id];
     this.aviso(`${nave.name} · REARMADA`, COLORS.hotBright);
-    this.cameras.main.flash(200, 62, 224, 240);
+    claraoDe(this).sinal(this.ship.x, this.ship.y, 0x3ee0f0, CLARAO.sinal.raioNave);
 
     this.time.delayedCall(1400, () => this.colapso());
   }
@@ -867,7 +869,7 @@ export class Interlude3Scene extends Phaser.Scene {
     // O clarão final e a entrega, depois de a última peça de entulho assentar (ver `selarBoca`).
     this.time.delayedCall(4800, () => {
       if (this.done) return;
-      this.cameras.main.flash(700, 255, 150, 80);
+      claraoDe(this).largada(0xff9650, 700);
     });
     this.time.delayedCall(5600, () => this.avancar());
   }
@@ -913,7 +915,7 @@ export class Interlude3Scene extends Phaser.Scene {
     // e o clarão da câmera encurta. O que o jogador olha durante a morte é a criatura, não o fogo.
     const impactoX = Math.round(g.bocaX - 18);
     this.fx.explodeBig(impactoX, g.bocaY, 0.7, Interlude3Scene.DEPTH_GARGANTA + 1, 'carne');
-    this.cameras.main.flash(140, 255, 150, 80);
+    claraoDe(this).impacto(impactoX, g.bocaY, 0xff9650, { escala: 0.7, ms: 140 });
     this.cameras.main.shake(320, 0.008);
 
     // A legenda, não a causa.

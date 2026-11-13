@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
+import { CLARAO } from '../systems/clarao/claraoRegras';
 import { BARRA_CHEFAO_Y, COLORS, GAME_WIDTH } from '../config';
 import type { Fx } from '../systems/Fx';
 import { explosaoDaQueda, montarPlumas, type Plumas } from '../f1/chefeF1';
@@ -747,7 +749,7 @@ export class Boss implements StageBoss {
     // 160ms, não 400: o clarão é o SOCO de abertura da virada. Esticado, ele lava a tela inteira
     // durante um terço da decolagem — e a decolagem agora tem uma cadeia de estouros para ser
     // VISTA. Um flash que cobre o que ele deveria anunciar trabalha contra si mesmo.
-    this.scene.cameras.main.flash(160, 232, 60, 140);
+    claraoDe(this.scene).sinal(this.sprite.x, this.sprite.y, 0xe83c8c, CLARAO.sinal.raioChefe);
 
     this.blowUpBase();
 

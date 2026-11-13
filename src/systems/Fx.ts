@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { claraoDe } from './clarao/Clarao';
 import { COLORS } from '../config';
 import { FOLHAS_EXPLOSAO, FPS_EXPLOSAO, escolheFolha } from './explosoes/folhasExplosao';
 import type { TipoExplosao } from './explosoes/tipoExplosao';
@@ -138,7 +139,7 @@ export class Fx {
   explodeBig(x: number, y: number, escala = 1, depth = 50, tipo: TipoExplosao = 'perigo'): Phaser.GameObjects.Sprite | null {
     this.burst.explode(Math.floor(16 * escala), x, y);
     this.scene.cameras.main.shake(320 * escala, 0.006 * escala);
-    this.scene.cameras.main.flash(120, 255, 190, 110);
+    claraoDe(this.scene).impacto(x, y, 0xffbe6e, { escala });
     return this.explosao(tipo, x, y, 2 * escala, depth);
   }
 
@@ -149,7 +150,7 @@ export class Fx {
   abaloGrande(x: number, y: number, escala = 1): void {
     this.burst.explode(Math.floor(16 * escala), x, y);
     this.scene.cameras.main.shake(320 * escala, 0.006 * escala);
-    this.scene.cameras.main.flash(120, 255, 190, 110);
+    claraoDe(this.scene).impacto(x, y, 0xffbe6e, { escala });
   }
 
   /**

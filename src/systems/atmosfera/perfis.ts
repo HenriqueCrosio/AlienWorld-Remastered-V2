@@ -171,6 +171,22 @@ export const PERFIS = {
     poeira: { quantidade: 50, cor: [67, 83, 107], deriva: [-4, -1], espalhar: 2 },
   },
   /**
+   * O MENU DO AMANHECER (13/11, bloco I etapa 3): a mesma colônia depois da queda do Leviatã — as cores tiradas da
+   * pintura dele (névoa = os tons médio-escuros, um cinza quase neutro; halo = o âmbar do fogo), a névoa baixa no vale,
+   * mais lenta que a da noite. (A cinza caindo, no lugar da poeira que flutuava, é do cenário.)
+   */
+  menuAmanhecer: {
+    nome: 'menuAmanhecer',
+    nevoa: { densidade: 0.6, cor: [72, 69, 73], altura: 2.2, velTras: [-2, 0], velFrente: [-5, 0], evolucao: 0.015 },
+    halo: { forca: 0.28, limiar: 0.59, cor: [190, 125, 80] },
+    grade: 1,
+    gradeQuente: 1,
+    vinheta: 0.55,
+    grao: 0.6,
+    // a CINZA que cai é uma peça do cenário (`vidaAmanhecer.ts`), não a poeira do perfil
+    poeira: { quantidade: 0, cor: [118, 110, 106], deriva: [-2, 5], espalhar: 2 },
+  },
+  /**
    * O HANGAR DA ESCOLHA (25/10, à noite): a pintura dele, a torre no vale à noite — névoa fria e alta (ele: *"bastante
    * fog no cenário atrás"*; a pesada já vem assada fora do bloco), halo do âmbar das faixas, poeira fria descendo
    * devagar pelos cones das lâmpadas.

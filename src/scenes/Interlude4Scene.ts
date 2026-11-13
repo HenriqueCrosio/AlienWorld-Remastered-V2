@@ -139,6 +139,12 @@ export class Interlude4Scene extends Phaser.Scene {
     if (this.done) return;
     this.done = true;
     this.capitulo?.limpar();
+    // O FIM DA CAMPANHA (13/11, bloco I etapa 3): a tela final é o MENU DO AMANHECER em modo resultado — o Leviatã caído
+    // ao amanhecer, o título, o placar e o crédito; na tecla ele vira o menu. O treino segue para o placar de sempre.
+    if (!this.practice && this.faseConcluida === 4) {
+      this.scene.start('Menu', { resultado: { score: this.score, handling: this.handling } });
+      return;
+    }
     this.scene.start('GameOver', {
       score: this.score,
       handling: this.handling,

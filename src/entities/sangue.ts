@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { claraoDe } from '../systems/clarao/Clarao';
 
 /**
  * O SANGUE DO CHEFÃO FINAL (B3, 16/09) — o jorro e as manchas na tela. Moram fora do `BossNucleo` porque
@@ -37,7 +38,7 @@ export function explosaoSangrenta(scene: Phaser.Scene, x: number, y: number, esc
     gotas.destroy();
     nevoa.destroy();
   });
-  scene.cameras.main.flash(260, 140, 0, 0);
+  claraoDe(scene).impacto(x, y, 0x8c0000, { escala, ms: 260 });
   scene.cameras.main.shake(500, 0.012);
 }
 

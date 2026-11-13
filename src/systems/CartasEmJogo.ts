@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { claraoDe } from './clarao/Clarao';
 import { COLORS } from '../config';
 import type { OrigemProjetil } from './WeaponSystem';
 import type { InputState } from '../flight/FlightController';
@@ -301,7 +302,7 @@ export class CartasEmJogo {
     this.cascoVoltaEm = time + CASCO_RECARGA[Math.min(quantas(this.reg, 'DEF_002'), 1)] * 1000;
     const n = this.h.nave();
     this.h.fx.hit(n.x, n.y);
-    this.h.scene.cameras.main.flash(70, 62, 224, 240);
+    claraoDe(this.h.scene).golpe(0x3ee0f0, 70);
     if (tem(this.reg, 'DEF_004')) this.explosao.explodir('reativo', n.x, n.y, null, null);
     return true;
   }
