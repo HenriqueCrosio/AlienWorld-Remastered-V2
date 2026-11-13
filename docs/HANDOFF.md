@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-09) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-13) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,15 +16,89 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-09-bloco-i-etapa2-START.md`. O bloco H fechou (a enguia
-> escura aprovada), a etapa 1 do bloco I (as explosões) e o lança-mísseis do casco da F3 estão aprovados, commitados e
-> empurrados. A sessão abre na etapa 2 do bloco I, os flashes de tela cheia: o alcance já está decidido (o jogo
-> inteiro, os 21); retomar na pergunta 2 (a forma), uma pergunta por vez (superpowers:brainstorming), antes de mexer em
-> qualquer flash."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-13-bloco-j-START.md`. O bloco I FECHOU em 13/11 (as
+> explosões, os clarões no lugar dos flashes de tela cheia, e a tela final = o menu do amanhecer), aprovado, commitado
+> e empurrado. A sessão abre no bloco J, o pós-processamento: uma pergunta por vez (superpowers:brainstorming), antes
+> de mexer em qualquer shader."**
 >
 > **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11, fechado de
-> vez) → I (1 ✅ as explosões → um desvio ✅ o lança-mísseis do casco, 10/11 → **2 os flashes** → 3 a tela final) → J →
-> F.** Depois dos blocos: o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco) e só então o som.
+> vez) → I ✅ (13/11: 1 as explosões · o desvio do lança-mísseis do casco · 2 os clarões · 3 a tela final = o menu do
+> amanhecer) → **J (o pós-processamento)** → F.** Depois dos blocos: o rebalanceamento (cartas, a vida da enguia, a
+> saída da aranha do casco) e só então o som. Para a etapa 1.55 (o menu de OPÇÕES): a escolha entre o menu da noite e
+> o do amanhecer (só para quem zerou) e a opção "reduzir clarões".
+>
+> 📍 **13/11 (fim) — O BLOCO I FECHOU: COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`, em três
+> commits (o jogo; as ferramentas, os testes e as folhas, sem os vídeos e os `q/`; os docs, com o START do J,
+> `plans/2026-11-13-bloco-j-START.md`). As etapas 2 e 3 abaixo.
+>
+> 📍 **13/11 (2) — BLOCO I, ETAPA 3: A TELA FINAL = O MENU DO AMANHECER; A PARTE A INSTALADA (espera ele; nada
+> commitado).** A ideia dele: a pintura nova do AMANHECER com o Leviatã caído (`assets/raw/Fortaleza em ruínas sob
+> tempestade.png`, a mesma composição do menu) serve à tela final e vira o menu de quem zerou. Decidido: uma tela só
+> (título, placar, crédito), em DOIS TEMPOS (o resultado; na tecla, o menu, sem corte); a troca do menu fica para
+> sempre, e a escolha entre os dois entra nas OPÇÕES (1.55), só para quem já zerou; é a mesma colônia (o menu é a vista
+> realista, as cutscenes a de pixel); o letreiro o mesmo, AVARIADO (uma letra falhando, "letreiro de motel"). Spec
+> `specs/2026-11-13-bloco-i-tela-final-amanhecer-design.md`, plano `plans/2026-11-13-tela-final-parte-a.md`, folha
+> `folhas/2026-11-13/tela-final/parte-a.html`. No jogo: `src/placar.ts`, `src/menu/qualMenu.ts` (`alienworld:zerou`,
+> `alienworld:menu`), `src/menu/resultado.ts`, `src/menu/amanhecer/cenarioAmanhecer.ts`, `letraFalha` + `AVARIA` e
+> `RESULTADO` (`numerosMenu.ts`), o `MenuScene` (`init({ resultado })`; dev: `[R]` ensaia, `[T]` troca, `?menu=`), a
+> `Interlude4` abre o Menu. Teste `scripts/test-menu-amanhecer.mjs`; build e os 30 testes ok. **O próximo: as
+> respostas dele à folha (o layout, a letra) → a PARTE B, a vida da pintura, um efeito por rodada** (fumaça, fogo,
+> brasas, a lava quase apagada, os raios de sol, a bruma, a cinza). Não conferido: sem a camada HD, movimento reduzido.
+> - **O retorno dele e a RODADA 2 (espera ele):** o letreiro (a letra O) e a pintura *"ficam como estão, está ótimo"*; o
+>   crédito à DIREITA, menor, em duas linhas, *"uma fonte [...] mais sofisticada [...] como se fosse uma assinatura"*; o
+>   placar *"muito simples, quero um visual baseado em grandes sucessos de snes"*. Folha
+>   `folhas/2026-11-13/tela-final/rodada2.html`: 3 placares (A a janela, instalado · B o emblema · C o relatório —
+>   `src/menu/painelResultado.ts`, `?res=A|B|C`), a medalha em pixel, os pontos CONTANDO (`pontosMostrados`), o rótulo
+>   que vira "NOVO RECORDE"; 3 fontes de assinatura (Cormorant itálica, instalada · Cinzel · IM Fell —
+>   `public/fonts/assinatura/`, OFL, `?ass=`).
+> - **A PARTE A FECHADA (13/11):** *"placar A, Assinatura cinzel (pode diminuir um pouquinho só o tamanho da fonte)
+>   [...] O placar pode ficar mais destacado do 'Leviatã caiu', desça ele mais um pouco"*. Ficaram a JANELA (10 px mais
+>   baixa: `RESULTADO.layout.janela`) e a Cinzel 500 (`public/fonts/cinzel-500.woff2` + `OFL-cinzel.txt`; 4,4 e 7 px);
+>   saíram os placares B e C, as outras duas fontes e os `?res=`/`?ass=`. Foto e vídeo em
+>   `folhas/2026-11-13/tela-final/r3/`. Build e os 30 testes ok. **O próximo: a PARTE B.**
+> - **A PARTE B, RODADA 1 (espera ele): a BRUMA e os RAIOS DE SOL.** Folha `folhas/2026-11-13/tela-final/vida1.html`
+>   (cada efeito filmado sozinho: `scripts/_menu/_filmar-vida.mjs --vida bruma|raios|0`, o texto escondido). No jogo:
+>   `src/menu/amanhecer/numerosAmanhecer.ts` (puro: `BRUMA`, `RAIOS`, `CARCACA`, as máscaras), `vidaAmanhecer.ts`
+>   (`montarBruma`, `montarRaios`), o `CenarioAmanhecer` monta os de `?vida=` (sem o parâmetro, todos). Duas MÁSCARAS
+>   assadas da pintura (`_camadas-amanhecer.mjs` → `luz.png`, `nevoa.png`): os raios não cobrem silhueta preta; a bruma
+>   só anda sobre a névoa PINTADA (cinza, claridade média) e quase não passa na elipse da carcaça. **Lições:** a máscara
+>   só de claridade lavava o osso e o fogo (a bruma por cima do herói); e o `sharp` devolve 3 canais de um desfoque de 1
+>   canal (a máscara saía com as linhas trocadas — o script agora confere o tamanho).
+> - **A PARTE B, RODADA 2 (espera ele): OS OUTROS CINCO + os ajustes.** Ele: os raios *"pode deixar"*; a bruma *"um pouco
+>   mais densa, não muito"* (os picos +¼: 0,38 · 0,38 · 0,33 · 0,28); os outros *"pode fazer todos de uma vez e eu vejo
+>   na folha um por um"*; a medalha do placar *"alguns pixels"* menor (13×17 → 11×14). Folha
+>   `folhas/2026-11-13/tela-final/vida2.html` (cada efeito sozinho + tudo junto). No jogo (`vidaAmanhecer.ts`, os números
+>   em `numerosAmanhecer.ts`): a FUMAÇA (6 colunas medidas com régua, baforadas escuras que sobem e se desfazem), o FOGO
+>   (um clarão que tremula nos 40 maiores focos), as BRASAS (46, função pura do relógio, 30 da carcaça), a LAVA QUASE
+>   APAGADA (a peça `lava-apagada.png` = a carcaça SEM a lava, por difusão dos vizinhos, só dentro da elipse; por cima da
+>   pintura em 4 faixas que respiram entre 0,5 e 0,88), a CINZA (70 flocos caindo; a poeira do perfil `menuAmanhecer`
+>   foi a zero). `_camadas-amanhecer.mjs` assa também `dados.json` (os 48 focos de fogo e os 19 de lava, `ehFogo`).
+>   Build e os 30 testes ok. **O próximo: o ok dele efeito por efeito → fechar a etapa 3 (o START da próxima sessão, e o
+>   commit quando ele pedir: as etapas 2 e 3 estão as duas fora do git).** Não conferido: sem a camada HD (k1) e o
+>   movimento reduzido.
+> - **A rodada 2 APROVADA (*"Boa, agora está ótimo"*) + O VÉU (espera ele):** o último ajuste dele — *"uma tela ou um
+>   efeito de fumaça e neblina em todo o cenário, para mostrar que as fumaças e a neblina do amanhecer tornaram o
+>   cenário num campo de batalha devastador"*. Feito o efeito `veu` (`VEU` + `montarVeu`): 4 lençóis largos da textura de
+>   bruma sobre a tela INTEIRA, na frente de tudo (sem máscara; só a cinza passa na frente), 2 de fumaça escura e 2 de
+>   neblina clara, cada um na sua velocidade, respirando em 19–31 s. Folha `folhas/2026-11-13/tela-final/vida3.html`.
+>   Build e os 30 testes ok.
+> - **O VÉU APROVADO (*"Ficou perfeito"*) — A ETAPA 3 FECHADA NO JOGO; e os dois modos de reserva CONFERIDOS**
+>   (`scripts/_menu/_conferir-amanhecer.mjs`, fotos em `folhas/2026-11-13/tela-final/conferencia/`): sem a camada HD
+>   (`?semhd`) e com o movimento reduzido, o menu do amanhecer abre com os 8 efeitos, o resultado aparece inteiro e a
+>   tecla pousa o menu. **Um defeito achado e consertado:** sem a camada HD, ao REABRIR o menu (a volta do Arquivo, o
+>   resultado) o cenário não montava e a tela ficava presa — o `COMPLETE` do `load` com a fila vazia dispara dentro do
+>   `create`, e o `isActive()` é falso ali (o defeito já existia no menu da noite). Sem a camada HD o resultado é
+>   legível mas mais tosco (o pontilhado encosta no rótulo do recorde, a assinatura fica borrada): é o modo de reserva.
+>   **Nada commitado: as etapas 2 e 3 do bloco I esperam o pedido dele.**
+>
+> 📍 **13/11 — BLOCO I, ETAPA 2: OS CLARÕES NO LUGAR DOS FLASHES, INSTALADOS (espera ele jogar; nada commitado).** As
+> respostas: uma forma por FAMÍLIA — impacto e sinal = clarão LOCAL na fonte (o sinal com a cor de sempre), golpe na nave
+> = VINHETA (só dele), largada e o que não tem fonte = tela cheia a 28% — e o teto de 3 clarões por segundo (o resto
+> atenuado); a opção de menu fica na 1.55 (`CLARAO.forca`). A cutscene final entrou (o clarão da queda vira local, os
+> quadros de impacto ficam). Spec `specs/2026-11-13-bloco-i-flashes-design.md`, plano `plans/2026-11-13-bloco-i-flashes.md`,
+> folhas `folhas/2026-11-13/flashes/` (`flashes.html` os conceitos aprovados, `instalado.html` o jogo). O módulo:
+> `src/systems/clarao/` (`claraoDe(scene)`); nenhum `cameras.main.flash` sobra em `src/` (`scripts/test-claroes.mjs`
+> falha se voltar). O detalhe e o que não foi filmado: o START da etapa 2. **O próximo: o ok dele → a etapa 3 (a tela final).**
 >
 > 📍 **10/11 (fim) — COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: `97afc59` (o jogo: o
 > lança-mísseis refeito, o míssil novo, as chaminés fora, as antigas no backup), `d39047a` (as ferramentas e as folhas,

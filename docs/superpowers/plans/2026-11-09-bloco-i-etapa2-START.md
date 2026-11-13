@@ -1,5 +1,8 @@
 # START — bloco I, etapa 2: os flashes de tela cheia (item 13)
 
+> ✅ **FECHADO em 13/11** (os clarões instalados e aprovados; e a etapa 3, a tela final, também). O registro fica
+> abaixo; a porta da próxima sessão é `plans/2026-11-13-bloco-j-START.md`.
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O bloco H fechou (a enguia escura aprovada), a
 > etapa 1 do bloco I (as explosões) e o lança-mísseis do casco da F3 estão aprovados, commitados e empurrados. A sessão
 > abre na etapa 2 do bloco I, os flashes de tela cheia: o alcance já está decidido (o jogo inteiro, os 21); retomar na
@@ -71,7 +74,34 @@ flashes: ficam fora.)
 1. **O alcance:** só as cutscenes (o que a análise apontou) ou também os ~11 do jogo (chefões, bomba, golpe, morte)?
    ✅ **RESPONDIDA em 10/11:** *"Pode ser as 11 do jogo, sua recomendação"* → o alcance é o JOGO INTEIRO (os 21).
    (O desvio que segurou a etapa — o lança-mísseis do casco — já fechou.)
-2. ▶️ **A PRÓXIMA A FAZER — a forma:** o clarão LOCAL (luz em volta da fonte, a tela não muda de cor), a VINHETA (as bordas acendem, o meio
+> **13/11 — AS PERGUNTAS 2, 3 E 4 RESPONDIDAS, A FOLHA DE CONCEITOS (a 5) FEITA, ESPERA ELE.**
+> - **2 (a forma):** *"Uma forma por família, como na tabela"* → impacto = clarão LOCAL · golpe na nave = VINHETA ·
+>   largada (+ a nave rompendo a atmosfera) = tela cheia fraca e curta.
+> - **3 (os sinais):** a cor de hoje, em clarão local NO EMISSOR (a nave, o chefão, o ponto da fusão); a vinheta fica
+>   só do golpe (o magenta das viradas é vizinho do rosa da perda de casco). Ele: *"Boa, pode seguir com isso"*.
+> - **4 (a fotossensibilidade):** teto global em código (3 clarões por segundo, o seguinte sai atenuado), teto de
+>   intensidade na tela cheia (~28%), a opção de menu só na etapa 1.55.
+> - **5 (a folha):** `folhas/2026-11-13/flashes/flashes.html` — hoje × o conceito em vídeo e em tiras (a cutscene 1, o
+>   golpe na F2, a bomba e a fúria da Capitânia). O jogo NÃO mudou: `scripts/_i/_flashes-conceitos.mjs` troca o
+>   `Camera.flash` só no navegador (a família pela assinatura ms,r,g,b; a fonte = o último estouro de partículas) e
+>   `_flashes-folha.mjs` monta o lado a lado e as tiras. Depois do ok dele: a spec e o plano.
+
+> **13/11 (2) — A ETAPA 2 INSTALADA, ESPERA ELE JOGAR.** Ele aprovou a folha (*"Boa, aprovado"*), lembrou das outras
+> cutscenes (a 2 e a 3 filmadas e postas na folha; a FINAL achada fora do inventário) e decidiu: na queda do Leviatã o
+> clarão de tela cheia vira clarão local no focinho e os quadros de impacto ficam; o clarão final da cutscene 3 (sem
+> fonte na tela) = véu fraco. *"Pode seguir com plano e implementação."*
+> - **Spec** `specs/2026-11-13-bloco-i-flashes-design.md` · **plano** `plans/2026-11-13-bloco-i-flashes.md` (Tasks 1–5 feitas).
+> - **No jogo:** `src/systems/clarao/` (`claraoRegras.ts` puro, `texturasClarao.ts`, `Clarao.ts` → `claraoDe(scene)` com
+>   `impacto`/`climax`/`sinal`/`golpe`/`largada`/`conta`); as 21 chamadas trocadas + `final/queda.ts`; o `uFlash` saiu da
+>   Atmosfera (e a seção do flash quente da `probe-atmosfera-fases`). NENHUM `cameras.main.flash` em `src/`.
+> - **Testes:** `scripts/test-claroes.mjs` (o teto, o raio, o disco, a vinheta, a quantização, e falha se um flash de
+>   câmera voltar ao `src/`); build e os 29 testes ok.
+> - **A prova:** folha `folhas/2026-11-13/flashes/instalado.html` (conceito × jogo; `_flashes-instalado.mjs`). Golpe,
+>   bomba, fúria e a cadeia da cutscene 2 idênticos ao conceito; as cutscenes 1 e 3 variam de uma filmagem para outra.
+>   NÃO filmados: a Torre da F1, a fusão da Serpente, o núcleo da F4, o Casco, a atmosfera, a bomba de pânico.
+> - **Nada commitado.** O próximo: o ok dele jogando → a etapa 3 do bloco I (a tela final, o item 11).
+
+2. ✅ **a forma (respondida acima):** o clarão LOCAL (luz em volta da fonte, a tela não muda de cor), a VINHETA (as bordas acendem, o meio
    fica legível), ou o flash de hoje mais fraco e mais curto? Talvez um por família (golpe na nave ≠ explosão ≠ largada).
 3. **Os que são linguagem:** o ciano "nave armada" e o branco "nascimento" da Serpente são sinais, não impacto — ficam?
 4. **A fotossensibilidade:** um teto global (quantos por segundo, que intensidade) e, mais tarde, uma opção no menu de
