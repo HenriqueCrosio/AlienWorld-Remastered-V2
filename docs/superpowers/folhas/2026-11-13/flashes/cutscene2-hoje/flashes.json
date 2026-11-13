@@ -1,0 +1,101 @@
+[
+ {
+  "t": 22155,
+  "cena": "Interlude2",
+  "fam": "largada",
+  "ms": 160,
+  "rgb": [
+   255,
+   212,
+   71
+  ]
+ },
+ {
+  "t": 28272,
+  "cena": "Interlude2",
+  "fam": "sinalNave",
+  "ms": 200,
+  "rgb": [
+   62,
+   224,
+   240
+  ]
+ },
+ {
+  "t": 30839,
+  "cena": "Interlude2",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 31222,
+  "cena": "Interlude2",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 31422,
+  "cena": "Interlude2",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 31622,
+  "cena": "Interlude2",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 32005,
+  "cena": "Interlude2",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 32689,
+  "cena": "Interlude2",
+  "fam": "impacto",
+  "ms": 800,
+  "rgb": [
+   255,
+   170,
+   90
+  ]
+ },
+ {
+  "t": 32689,
+  "cena": "Interlude2",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ }
+]

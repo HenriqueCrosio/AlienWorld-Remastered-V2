@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amanhecer vivo, o véu</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; background: #000; border: 1px solid var(--linha); display: block; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>O amanhecer vivo: o véu de fumaça e neblina</h1>
+  <p class="suave">13/11 · bloco I, etapa 3, parte B · a rodada 2 em
+    <a href="vida2.html" style="color:inherit">vida2.html</a>.</p>
+  <p>O seu último ajuste: <i>"uma tela ou um efeito de fumaça e neblina em todo o cenário, para mostrar que as fumaças
+    e a neblina do amanhecer tornaram o cenário num campo de batalha devastador"</i>.</p>
+  <p>São quatro lençóis largos que cobrem a tela inteira e passam na frente de tudo, inclusive das silhuetas do
+    primeiro plano: dois de fumaça escura e quente, que tiram o contraste, e dois de neblina clara. Cada um anda na
+    sua velocidade e engrossa e afina devagar (um ciclo leva de 19 a 31 s), sem nunca sumir. Só a cinza passa na
+    frente dele.</p>
+
+  <h2>Tudo junto, com o véu</h2>
+  <video src="vida3/todos/vida.webm" controls loop muted playsinline></video>
+
+  <h2>Sem o véu (em cima) e com o véu (embaixo)</h2>
+  <img src="vida3/antes-depois.jpg" alt="O cenário com todos os efeitos: em cima sem o véu, embaixo com o véu de fumaça e neblina, mais enevoado e com menos contraste; a carcaça continua legível.">
+
+  <h2>O véu sozinho sobre a pintura</h2>
+  <video src="vida3/veu/vida.webm" controls loop muted playsinline></video>
+
+  <h2>O que eu preciso de você</h2>
+  <ol class="pergunta">
+    <li><b>A densidade:</b> é esse o campo de batalha que você imaginou, ou quer o véu mais pesado ou mais leve?</li>
+    <li><b>A carcaça:</b> ela continua legível o bastante por trás do véu?</li>
+  </ol>
+  <p class="suave">Para ver no jogo: <code>http://localhost:5173/?menu=amanhecer</code> (tudo ligado, com o véu);
+    <code>&amp;vida=veu</code> mostra só o véu, e
+    <code>&amp;vida=bruma,raios,fumaca,fogo,brasas,lava,cinza</code> mostra tudo sem ele.</p>
+</main>
+</body>
+</html>

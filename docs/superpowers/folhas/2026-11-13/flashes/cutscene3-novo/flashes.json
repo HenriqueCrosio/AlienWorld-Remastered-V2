@@ -1,0 +1,57 @@
+[
+ {
+  "t": 28845,
+  "cena": "Interlude3",
+  "fam": "largada",
+  "ms": 160,
+  "rgb": [
+   255,
+   80,
+   80
+  ]
+ },
+ {
+  "t": 36095,
+  "cena": "Interlude3",
+  "fam": "sinalNave",
+  "ms": 200,
+  "rgb": [
+   62,
+   224,
+   240
+  ]
+ },
+ {
+  "t": 38511,
+  "cena": "Interlude3",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 38511,
+  "cena": "Interlude3",
+  "fam": "impacto",
+  "ms": 140,
+  "rgb": [
+   255,
+   150,
+   80
+  ]
+ },
+ {
+  "t": 42311,
+  "cena": "Interlude3",
+  "fam": "largada",
+  "ms": 700,
+  "rgb": [
+   255,
+   150,
+   80
+  ]
+ }
+]

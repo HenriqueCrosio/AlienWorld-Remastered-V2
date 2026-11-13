@@ -69,18 +69,9 @@ await page.evaluate(() => window.__game.scene.getScenes(true)[0].parallax.breakA
 const zg = await espera((e) => e.atm?.perfil === 'faseZeroG', 3000);
 ok(zg.pintura === 'paintBgZeroG' && zg.atm?.perfil === 'faseZeroG', `rompida a atmosfera, o tom vira o do zero-G (${zg.pintura} → ${zg.atm?.perfil})`);
 
-// ─── F2 e o flash quente ───
+// ─── F2 ─── (13/11: the camera flash left the game — `systems/clarao` — and with it the halo yielding to it)
 const f2 = await abrir('V');
 conferir('F2   ', f2);
-const flash = await page.evaluate(async () => {
-  const s = window.__game.scene.getScenes(true)[0];
-  s.cameras.main.flash(600, 255, 150, 80);
-  await new Promise((r) => setTimeout(r, 120));
-  return s.atm.estado().flash;
-});
-ok(flash > 0.3, `durante um flash quente o halo cede (flash=${flash})`);
-const depois = await espera((e) => (e.atm?.flash ?? 1) === 0, 3000);
-ok(depois.atm?.flash === 0, `passado o flash, o halo volta (flash=${depois.atm?.flash})`);
 
 // ─── F3 ───
 conferir('F3   ', await abrir('M'));

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tela final, rodada 2</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 14px; margin: 0 0 6px; color: var(--suave); font-weight: 600; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; background: #000; border: 1px solid var(--linha); display: block; }
+  .tres { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>A tela final, rodada 2: o placar e a assinatura</h1>
+  <p class="suave">13/11 · bloco I, etapa 3 · a rodada 1 em <a href="parte-a.html" style="color:inherit">parte-a.html</a>.</p>
+  <p>O seu retorno: o crédito à direita, menor, em duas linhas ("Um jogo de" e o nome embaixo), numa fonte mais
+    sofisticada que o resto do jogo, como uma assinatura; e o resultado <i>"muito simples"</i>, a refazer com um visual
+    de placar dos grandes jogos de SNES, no estilo do jogo. O letreiro (a letra O) e a pintura ficaram como estavam.</p>
+
+  <h2>Fechado</h2>
+  <p>A sua escolha: <i>"placar A, Assinatura cinzel (pode diminuir um pouquinho só o tamanho da fonte) [...] O placar
+    pode ficar mais destacado do 'Leviatã caiu', desça ele mais um pouco"</i>. Como ficou no jogo:</p>
+  <img src="r3/t6.5.jpg" alt="A tela final fechada: o título, a janela do placar mais abaixo dele, e a assinatura em Cinzel, menor, embaixo à direita.">
+  <video src="r3/tela-final.webm" controls loop muted playsinline></video>
+  <p class="suave">Os placares B e C e as outras duas fontes saíram do jogo (as fotos abaixo são o registro da escolha).</p>
+
+  <h2>O placar: três conceitos</h2>
+  <p>Nos três, a medalha é desenhada em pixel (a fita nas cores da nave e do inimigo), os pontos contam de 0 até o
+    valor, e quando a partida bate o recorde o rótulo vira "NOVO RECORDE", aceso e piscando.</p>
+  <div class="tres">
+    <div><h3>A · a janela (instalado)</h3>
+      <img src="r2/A-cormorant-painel.png" alt="Conceito A: uma caixa escura de borda dupla, com pontilhado do rótulo até o valor e a medalha na última linha.">
+      <p class="suave">A caixa de borda dupla dos placares de fim de fase, com o pontilhado do rótulo até o valor.</p></div>
+    <div><h3>B · o emblema</h3>
+      <img src="r2/B-cinzel-painel.png" alt="Conceito B: sem caixa, duas réguas finas com losangos nas pontas, a medalha grande à esquerda e os pontos em número grande.">
+      <p class="suave">Sem caixa: duas réguas finas, a medalha grande e os pontos como o número principal.</p></div>
+    <div><h3>C · o relatório</h3>
+      <img src="r2/C-fell-painel.png" alt="Conceito C: uma faixa clara de cabeçalho CAMPANHA CONCLUÍDA, colchetes ciano nos cantos e fios entre as linhas.">
+      <p class="suave">A faixa de cabeçalho, os colchetes do painel da nave e os fios entre as linhas.</p></div>
+  </div>
+
+  <h2>A assinatura: três fontes</h2>
+  <p>Embaixo à direita, em duas linhas. Todas são fontes livres (licença OFL).</p>
+  <div class="tres">
+    <div><h3>Cormorant Garamond itálica (instalada)</h3>
+      <img src="r2/A-cormorant-assinatura.png" alt="A assinatura em Cormorant Garamond itálica: Um jogo de, Henrique Crosio."></div>
+    <div><h3>Cinzel (maiúsculas romanas)</h3>
+      <img src="r2/B-cinzel-assinatura.png" alt="A assinatura em Cinzel, em maiúsculas espaçadas: UM JOGO DE, HENRIQUE CROSIO."></div>
+    <div><h3>IM Fell English itálica (tipo antigo)</h3>
+      <img src="r2/C-fell-assinatura.png" alt="A assinatura em IM Fell English itálica: Um jogo de, Henrique Crosio."></div>
+  </div>
+
+  <h2>A tela inteira</h2>
+  <div class="tres">
+    <div><h3>A + Cormorant</h3><img src="r2/A-cormorant/t6.5.jpg" alt="A tela inteira com o conceito A e a assinatura em Cormorant."></div>
+    <div><h3>B + Cinzel</h3><img src="r2/B-cinzel/t6.5.jpg" alt="A tela inteira com o conceito B e a assinatura em Cinzel."></div>
+    <div><h3>C + Fell</h3><img src="r2/C-fell/t6.5.jpg" alt="A tela inteira com o conceito C e a assinatura em IM Fell English."></div>
+  </div>
+  <p class="suave">O painel e a fonte são independentes: qualquer painel combina com qualquer fonte.</p>
+
+  <h2>Em movimento (A + Cormorant): a entrada, a contagem dos pontos, a saída na tecla</h2>
+  <video src="r2/caminho/tela-final.webm" controls loop muted playsinline></video>
+
+  <h2>O que eu preciso de você</h2>
+  <ol class="pergunta">
+    <li><b>O placar:</b> A, B ou C? Ou uma mistura (por exemplo, a medalha grande do B dentro da janela do A).</li>
+    <li><b>A assinatura:</b> qual fonte, e o tamanho e o lugar estão certos?</li>
+    <li><b>O que ainda falta</b> para o placar ficar com a cara que você imaginou?</li>
+  </ol>
+  <p class="suave">Para ver no jogo: <code>[R]</code> no menu.</p>
+</main>
+</body>
+</html>

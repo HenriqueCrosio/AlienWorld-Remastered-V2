@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amanhecer vivo, rodada 2</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 14px; margin: 18px 0 6px; color: var(--suave); font-weight: 600; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; background: #000; border: 1px solid var(--linha); display: block; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>O amanhecer vivo, rodada 2: os cinco efeitos que faltavam</h1>
+  <p class="suave">13/11 · bloco I, etapa 3, parte B · a rodada 1 em
+    <a href="vida1.html" style="color:inherit">vida1.html</a>.</p>
+  <p>O seu retorno à rodada 1: os raios ficam; a bruma <i>"um pouco mais densa, não muito"</i>; os outros efeitos
+    <i>"todos de uma vez"</i>, para ver na folha um por um; e a medalha do placar alguns pixels menor. Está tudo
+    abaixo, cada efeito filmado sozinho no jogo, com o texto escondido. A pintura não foi tocada.</p>
+
+  <h2>Tudo junto</h2>
+  <video src="vida2/todos/vida.webm" controls loop muted playsinline></video>
+
+  <h2>1. A fumaça</h2>
+  <p>Cada uma das seis colunas que a pintura já tem solta baforadas escuras que sobem inclinadas, crescem e se
+    desfazem, sem sair do lugar pintado. Uma baforada leva de 7 a 10 s para subir.</p>
+  <video src="vida2/fumaca/vida.webm" controls loop muted playsinline></video>
+  <h3>De perto (a torre da direita e a coluna ao lado da cidadela)</h3>
+  <video src="vida2/fumaca/perto.webm" controls loop muted playsinline></video>
+  <h3>A pintura sozinha (em cima) e com a fumaça (embaixo)</h3>
+  <img src="vida2/fumaca-antes-depois.png" alt="A coluna de fumaça ao lado da cidadela: embaixo ela está um pouco mais cheia e escura que na pintura sozinha.">
+
+  <h2>2. O fogo</h2>
+  <p>Os 40 maiores focos de fogo da pintura ganham um clarão macio que tremula, cada um no seu ritmo. A chama pintada
+    não se mexe; a luz dela, sim.</p>
+  <video src="vida2/fogo/vida.webm" controls loop muted playsinline></video>
+  <h3>De perto (as ruínas da esquerda)</h3>
+  <video src="vida2/fogo/perto.webm" controls loop muted playsinline></video>
+  <h3>A pintura sozinha (em cima) e com o fogo (embaixo)</h3>
+  <img src="vida2/fogo-antes-depois.png" alt="As ruínas da esquerda: embaixo os focos de fogo têm um clarão quente em volta.">
+
+  <h2>3. As brasas</h2>
+  <p>46 ao todo: 30 sobem da lava da carcaça e 16 dos focos maiores. Cada uma sobe de 16 a 38 px em 4 a 8 s,
+    balançando, esfria do amarelo ao vermelho e some.</p>
+  <video src="vida2/brasas/vida.webm" controls loop muted playsinline></video>
+  <h3>De perto (a carcaça)</h3>
+  <video src="vida2/brasas/perto.webm" controls loop muted playsinline></video>
+  <h3>A pintura sozinha (em cima) e com as brasas (embaixo)</h3>
+  <img src="vida2/brasas-antes-depois.jpg" alt="A carcaça: embaixo há pontos de brasa subindo dela e de um foco de fogo atrás.">
+
+  <h2>4. A lava quase apagada</h2>
+  <p>É a amarra com o fim da cutscene, onde a lava esfria. A carcaça sem a lava fica por cima da pintura e respira em
+    quatro faixas, cada uma no seu ritmo (de 9 a 15 s): a lava pintada aparece por baixo como brasa, entre 12% e 50%
+    da força original, e nunca acende inteira.</p>
+  <video src="vida2/lava/vida.webm" controls loop muted playsinline></video>
+  <h3>De perto</h3>
+  <video src="vida2/lava/perto.webm" controls loop muted playsinline></video>
+  <h3>A pintura sozinha (em cima) e com a lava quase apagada (embaixo)</h3>
+  <img src="vida2/lava-antes-depois.jpg" alt="A carcaça: em cima as rachaduras de lava acesas da pintura; embaixo elas estão quase apagadas, em vermelho escuro. O fogo das pontes em volta continua aceso.">
+
+  <h2>5. A cinza</h2>
+  <p>70 flocos claros caindo devagar pela tela inteira, na frente de tudo, balançando e derivando para a esquerda com
+    o vento da bruma. Entra no lugar da poeira que flutuava no menu da noite.</p>
+  <video src="vida2/cinza/vida.webm" controls loop muted playsinline></video>
+
+  <h2>A bruma, um pouco mais densa</h2>
+  <p>Os picos subiram um quarto (de 0,30 para 0,38 nas duas faixas de trás). O resto é igual à rodada 1.</p>
+  <video src="vida2/bruma/vida.webm" controls loop muted playsinline></video>
+  <video src="vida2/bruma/perto.webm" controls loop muted playsinline></video>
+
+  <h2>O placar: a medalha menor</h2>
+  <p>De 13×17 px para 11×14 px.</p>
+  <img src="r4/placar.png" alt="O placar com a medalha alguns pixels menor, ao lado de MEDALHA DE OURO." style="max-width: 768px">
+
+  <h2>O que eu preciso de você</h2>
+  <ol class="pergunta">
+    <li><b>A lava:</b> é a mudança mais forte, porque esfria a carcaça da sua pintura. O quanto ela fica apagada está
+      certo, ou você a quer mais acesa?</li>
+    <li><b>A fumaça e o fogo:</b> estão discretos. Servem assim, ou quer mais presença?</li>
+    <li><b>As brasas e a cinza:</b> a quantidade e a velocidade servem?</li>
+    <li><b>A bruma e a medalha:</b> ficaram como você pediu?</li>
+  </ol>
+  <p class="suave">Para ver no jogo: <code>http://localhost:5173/?menu=amanhecer</code> (tudo ligado). Para ligar só
+    alguns: <code>&amp;vida=lava,brasas</code> (os nomes: bruma, raios, fumaca, fogo, brasas, lava, cinza;
+    <code>&amp;vida=0</code> é a pintura sozinha).</p>
+</main>
+</body>
+</html>

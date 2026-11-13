@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flashes de tela cheia</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1560px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 14px; margin: 18px 0 6px; color: var(--suave); font-weight: 600; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  .lados { display: flex; justify-content: space-around; color: var(--suave); font-size: 13px; margin: 4px 0 2px; }
+  table { border-collapse: collapse; margin: 8px 0 16px; font-size: 14px; }
+  td, th { border: 1px solid var(--linha); padding: 4px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--suave); font-weight: 600; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Os flashes de tela cheia: hoje × o conceito</h1>
+  <p class="suave">13/11 · bloco I, etapa 2 (o item 13 da análise de 14/10) · nada mudou no jogo: a sonda troca os flashes
+    só no navegador, na hora de filmar.</p>
+  <p>As suas respostas: o alcance é o jogo inteiro (os 21), uma forma por família, os sinais com a cor de hoje em clarão
+    local, e um teto de 3 clarões por segundo.</p>
+  <table>
+    <tr><th>família</th><th>quais</th><th>a forma nova</th></tr>
+    <tr><td>impacto</td><td>as explosões grandes, a bomba, os clímaxes das cutscenes, o núcleo da F4</td><td>clarão local: a luz acende em volta da explosão, a tela não muda de cor</td></tr>
+    <tr><td>golpe na nave</td><td>a perda de casco, o Casco (carta) absorvendo, a morte</td><td>vinheta: as bordas acendem, o meio fica legível</td></tr>
+    <tr><td>sinal</td><td>"nave armada", as viradas de chefão, a fusão da Serpente</td><td>clarão local no dono do sinal, com a cor de hoje</td></tr>
+    <tr><td>largada</td><td>a largada das 3 cutscenes, a nave rompendo a atmosfera</td><td>tela cheia, com 28% da força e mais curta</td></tr>
+  </table>
+  <p class="suave">Em cada vídeo, hoje está à esquerda e o conceito à direita, no mesmo instante. Nas tiras, a linha de
+    cima é hoje e a de baixo é o conceito: os 4 quadros a partir do flash (0, 1, 3 e 5 quadros de 1/30 s depois).</p>
+
+  <h2>Cutscene 1 · a largada, a "nave armada", a cadeia de explosões e a explosão final</h2>
+  <div class="lados"><span>hoje</span><span>o conceito</span></div>
+  <video src="cutscene1.mp4" controls loop muted playsinline></video>
+  <h3>A largada (âmbar) → tela cheia fraca</h3>
+  <img src="cutscene1-tira-1.jpg" alt="A largada: hoje a tela inteira fica amarela; no conceito, um véu fraco.">
+  <h3>"Nave armada" (ciano) → clarão local na nave</h3>
+  <img src="cutscene1-tira-2.jpg" alt="Nave armada: hoje a tela inteira fica ciano; no conceito, a luz ciano em volta da nave.">
+  <h3>A cadeia de explosões → clarão local, com o teto de 3 por segundo</h3>
+  <img src="cutscene1-tira-3.jpg" alt="Uma explosão da cadeia: hoje a tela inteira fica laranja; no conceito, a luz em volta da explosão.">
+  <h3>A explosão final da Aurora (hoje, 500 ms de tela creme) → clarão local grande</h3>
+  <img src="cutscene1-tira-6.jpg" alt="A explosão final: hoje a tela inteira fica creme por meio segundo; no conceito, um clarão grande em volta dela.">
+
+  <h2>Cutscene 2 · a largada, a "nave armada", a cadeia e a doca explodindo</h2>
+  <div class="lados"><span>hoje</span><span>o conceito</span></div>
+  <video src="cutscene2.mp4" controls loop muted playsinline></video>
+  <h3>A cadeia de explosões na doca → clarão local, com o teto de 3 por segundo</h3>
+  <img src="cutscene2-tira-3.jpg" alt="Uma explosão da cadeia na doca: hoje a tela inteira fica laranja; no conceito, a luz em volta da explosão.">
+  <h3>A doca explodindo (hoje, 800 ms de tela laranja) → clarão local grande</h3>
+  <img src="cutscene2-tira-6.jpg" alt="A doca explodindo: hoje a tela inteira fica laranja por quase um segundo; no conceito, um clarão grande em volta da explosão.">
+
+  <h2>Cutscene 3 · a largada, a "nave armada", o impacto na garganta e o clarão final</h2>
+  <div class="lados"><span>hoje</span><span>o conceito</span></div>
+  <video src="cutscene3.mp4" controls loop muted playsinline></video>
+  <h3>O impacto na garganta → clarão local no ponto do impacto</h3>
+  <img src="cutscene3-tira-3.jpg" alt="O impacto na garganta: hoje a tela inteira fica laranja; no conceito, a luz no ponto onde o torpedo entrou.">
+  <h3>O clarão final (hoje, 700 ms de tela laranja) → tela cheia fraca</h3>
+  <p class="suave">Este não tem fonte na tela: a boca já está selada e a cena entrega 0,8 s depois. É pontuação de
+    saída, então vai com a família da largada (o véu fraco), e não com o impacto.</p>
+  <img src="cutscene3-tira-4.jpg" alt="O clarão final da cutscene 3: hoje a tela inteira fica laranja; no conceito, um véu laranja fraco.">
+
+  <h2>F2 · o golpe na nave (duas perdas de casco e a morte)</h2>
+  <div class="lados"><span>hoje</span><span>o conceito</span></div>
+  <video src="golpe.mp4" controls loop muted playsinline></video>
+  <h3>A perda de casco (rosa) → vinheta</h3>
+  <img src="golpe-tira-1.jpg" alt="A perda de casco: hoje a tela inteira fica rosa; no conceito, só as bordas acendem.">
+  <h3>A morte da nave → vinheta</h3>
+  <img src="golpe-tira-3.jpg" alt="A morte da nave: hoje a tela escurece em marrom; no conceito, as bordas acendem de leve.">
+
+  <h2>F2 · a bomba e a Capitânia entrando em fúria</h2>
+  <div class="lados"><span>hoje</span><span>o conceito</span></div>
+  <video src="capitania.mp4" controls loop muted playsinline></video>
+  <h3>A bomba → clarão local</h3>
+  <img src="capitania-tira-1.jpg" alt="A bomba: hoje a tela inteira fica laranja; no conceito, a luz em volta da explosão.">
+  <h3>A fúria (magenta) → clarão local no chefão</h3>
+  <img src="capitania-tira-2.jpg" alt="A fúria da Capitânia: hoje a tela inteira fica magenta; no conceito, a luz magenta em volta do chefão.">
+
+  <h2>O que eu preciso de você</h2>
+  <ol class="pergunta">
+    <li><b>O impacto:</b> o clarão local segura o peso da explosão, ou ficou fraco perto do flash de hoje?</li>
+    <li><b>O golpe:</b> a vinheta avisa a tempo que você foi atingido? Ela pode ser mais forte ou mais larga.</li>
+    <li><b>Os sinais:</b> o ciano na nave e o magenta no chefão ainda se leem como "armada" e "fúria"?</li>
+    <li><b>A largada:</b> o véu fraco serve, ou prefere que ela saia de vez?</li>
+  </ol>
+  <p class="suave">Não filmados nesta rodada, mas na mesma regra: a fusão da Serpente, a virada da Torre da F1, o núcleo
+    da F4, o Casco (carta) e a atmosfera. A cutscene final (a queda do Leviatã) tem luz de tela cheia feita à mão, fora
+    do flash da câmera: está em aberto. A morte da Capitânia não dispara flash nenhum dentro da
+    janela filmada, então o teste do teto ficou só na cadeia da cutscene 1.</p>
+</main>
+</body>
+</html>

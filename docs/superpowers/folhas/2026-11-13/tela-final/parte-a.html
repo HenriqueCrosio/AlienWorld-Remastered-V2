@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tela final, parte A</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 14px; margin: 18px 0 6px; color: var(--suave); font-weight: 600; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; background: #000; border: 1px solid var(--linha); display: block; }
+  .tres { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .tres h3 { margin-top: 0; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>A tela final: o amanhecer, parte A</h1>
+  <p class="suave">13/11 · bloco I, etapa 3 · spec <code>specs/2026-11-13-bloco-i-tela-final-amanhecer-design.md</code> ·
+    plano <code>plans/2026-11-13-tela-final-parte-a.md</code>.</p>
+  <p>A parte A é o esqueleto jogável: a sua pintura parada (ainda sem vida), a cena em dois tempos e o letreiro
+    avariado. A cutscene final já abre esta tela. A vida da pintura (fumaça, fogo, brasas, lava, raios, bruma, cinza) é
+    a parte B, um efeito por rodada.</p>
+
+  <h2>O caminho inteiro: o resultado, a tecla, o menu</h2>
+  <p class="suave">Filmado no jogo. O amanhecer abre do preto; entram o título, os pontos com a medalha, o recorde, o
+    crédito e a tecla; aos 7 s a tecla é apertada: o resultado sai, o letreiro chega freando e a lista desce.</p>
+  <video src="r1/tela-final.webm" controls loop muted playsinline></video>
+  <h3>O resultado inteiro (6,5 s)</h3>
+  <img src="r1/t6.5.jpg" alt="O resultado sobre o amanhecer: o título O LEVIATÃ CAIU, 21000 pontos, medalha de ouro, novo recorde, o crédito e a tecla, sem cobrir a carcaça.">
+  <h3>O menu pousado (19 s)</h3>
+  <img src="r1/t19.0.jpg" alt="O menu do amanhecer pousado: o letreiro ALIEN WORLD aceso e a lista COMEÇAR, CONDUÇÃO, ARQUIVO DE CARTAS.">
+
+  <h2>O letreiro avariado: qual letra?</h2>
+  <p>Uma letra falha uma vez a cada 8 s: de 2 a 4 piscadas curtas e, em cerca de um terço das vezes, um apagão de 1 a
+    2 s que volta com um zumbido. Fica apagada perto de 6% do tempo. O ritmo é o mesmo nos três vídeos; só a letra
+    muda. Está instalado o <b>O</b>.</p>
+  <div class="tres">
+    <div><h3>O (instalado): W RLD</h3><video src="letra-O/letreiro-perto.webm" controls loop muted playsinline></video></div>
+    <div><h3>E: ALI N</h3><video src="letra-E/letreiro-perto.webm" controls loop muted playsinline></video></div>
+    <div><h3>R: WO LD</h3><video src="letra-R/letreiro-perto.webm" controls loop muted playsinline></video></div>
+  </div>
+  <h3>Na tela inteira (o O)</h3>
+  <video src="letra-O/letreiro.webm" controls loop muted playsinline></video>
+
+  <h2>O que eu preciso de você</h2>
+  <ol class="pergunta">
+    <li><b>O resultado:</b> o lugar e o tamanho de cada coisa servem? O título no céu de cima à esquerda, os pontos e
+      a medalha abaixo, o crédito e a tecla embaixo.</li>
+    <li><b>O crédito:</b> a presença dele está certa, ou você o quer maior?</li>
+    <li><b>O letreiro:</b> qual letra falha (O, E, R ou outra), e o ritmo está bom ou quer mais raro ou mais
+      nervoso?</li>
+    <li><b>A pintura no jogo:</b> o tom está certo como base, antes da vida?</li>
+  </ol>
+  <p class="suave">Para ver jogando: no menu, <code>[R]</code> ensaia o resultado sem gravar nada e <code>[T]</code>
+    troca entre a noite e o amanhecer. O caminho de verdade (zerar a F4) grava a vitória e passa a abrir o amanhecer.
+    Ainda não conferido: o menu sem a camada HD e o movimento reduzido.</p>
+</main>
+</body>
+</html>

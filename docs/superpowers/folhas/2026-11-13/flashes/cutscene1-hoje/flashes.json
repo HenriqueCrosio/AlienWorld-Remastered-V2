@@ -1,0 +1,79 @@
+[
+ {
+  "t": 14127,
+  "cena": "Interlude",
+  "fam": "largada",
+  "ms": 160,
+  "rgb": [
+   255,
+   212,
+   71
+  ]
+ },
+ {
+  "t": 20260,
+  "cena": "Interlude",
+  "fam": "sinalNave",
+  "ms": 200,
+  "rgb": [
+   62,
+   224,
+   240
+  ]
+ },
+ {
+  "t": 22110,
+  "cena": "Interlude",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 22727,
+  "cena": "Interlude",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 23310,
+  "cena": "Interlude",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ },
+ {
+  "t": 24377,
+  "cena": "Interlude",
+  "fam": "impacto",
+  "ms": 500,
+  "rgb": [
+   255,
+   210,
+   120
+  ]
+ },
+ {
+  "t": 24377,
+  "cena": "Interlude",
+  "fam": "impacto",
+  "ms": 120,
+  "rgb": [
+   255,
+   190,
+   110
+  ]
+ }
+]

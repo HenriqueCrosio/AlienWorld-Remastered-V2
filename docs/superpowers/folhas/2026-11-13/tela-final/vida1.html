@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amanhecer vivo, rodada 1</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 14px; margin: 18px 0 6px; color: var(--suave); font-weight: 600; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; background: #000; border: 1px solid var(--linha); display: block; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>O amanhecer vivo, rodada 1: a bruma e os raios de sol</h1>
+  <p class="suave">13/11 · bloco I, etapa 3, parte B · a tela final fechada em
+    <a href="rodada2.html" style="color:inherit">rodada2.html</a>.</p>
+  <p>Os dois primeiros efeitos da lista, cada um filmado sozinho no jogo, com o texto escondido. A pintura não foi
+    tocada: tudo vive por cima dela. Faltam a fumaça, o fogo, as brasas, a lava quase apagada e a cinza.</p>
+
+  <h2>1. A bruma</h2>
+  <p>As faixas de névoa do menu da noite, nos cinzas da névoa pintada e na metade da velocidade. Ela só anda sobre a
+    névoa que a pintura já tem: as silhuetas pretas, o fogo e a lava ficam limpos, e sobre a carcaça ela quase não
+    passa.</p>
+  <video src="vida1/bruma/vida.webm" controls loop muted playsinline></video>
+  <h3>O vale de perto</h3>
+  <video src="vida1/bruma/perto.webm" controls loop muted playsinline></video>
+  <h3>A pintura sozinha (em cima) e com a bruma (embaixo)</h3>
+  <img src="vida1/bruma-antes-depois.jpg" alt="O vale com a carcaça: em cima a pintura sozinha, embaixo com a bruma viva sobre a névoa pintada; a carcaça e as silhuetas continuam limpas.">
+
+  <h2>2. Os raios de sol</h2>
+  <p>Em cada uma das três aberturas das nuvens, um leque de fachos quentes que respiram, cada um no seu ritmo (de 7 a
+    13 s), e balançam um nada. Reforçam os raios pintados, não desenham outros, e passam atrás das torres.</p>
+  <video src="vida1/raios/vida.webm" controls loop muted playsinline></video>
+  <h3>O céu de perto</h3>
+  <video src="vida1/raios/perto.webm" controls loop muted playsinline></video>
+  <h3>A pintura sozinha (em cima) e com os raios (embaixo)</h3>
+  <img src="vida1/raios-antes-depois.jpg" alt="O céu atrás da cidadela: em cima a pintura sozinha, embaixo com os fachos de sol reforçados; as torres continuam escuras na frente deles.">
+
+  <h2>Os dois juntos</h2>
+  <video src="vida1/juntos/vida.webm" controls loop muted playsinline></video>
+
+  <h2>O que eu preciso de você</h2>
+  <ol class="pergunta">
+    <li><b>A bruma:</b> a quantidade e a velocidade servem? Ela pode ser mais densa, mais lenta, ou passar mais (ou
+      menos) sobre a carcaça.</li>
+    <li><b>Os raios:</b> a força e o ritmo da respiração servem? Eles podem ser mais discretos ou mais marcados.</li>
+  </ol>
+  <p class="suave">Para ver no jogo: <code>http://localhost:5173/?menu=amanhecer</code> (os dois ligados);
+    <code>&amp;vida=bruma</code>, <code>&amp;vida=raios</code> ou <code>&amp;vida=0</code> ligam só um ou nenhum.</p>
+</main>
+</body>
+</html>

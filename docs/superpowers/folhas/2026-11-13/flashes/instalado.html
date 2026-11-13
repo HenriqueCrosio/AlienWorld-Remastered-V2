@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clarões instalados</title>
+<style>
+  :root { --fundo: #0e0f14; --texto: #e6e3dc; --suave: #9a978f; --linha: #2a2c36; --destaque: #ff8a3a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; }
+  main { max-width: 1560px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; border-top: 1px solid var(--linha); padding-top: 18px; }
+  h3 { font-size: 14px; margin: 18px 0 6px; color: var(--suave); font-weight: 600; }
+  p, li { color: var(--texto); max-width: 78ch; }
+  .suave { color: var(--suave); }
+  img, video { width: 100%; image-rendering: pixelated; background: #000; border: 1px solid var(--linha); display: block; }
+  .lados { display: flex; justify-content: space-around; color: var(--suave); font-size: 13px; margin: 4px 0 2px; }
+  .pergunta li { margin-bottom: 10px; }
+  .pergunta b { color: var(--destaque); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Os clarões instalados no jogo</h1>
+  <p class="suave">13/11 · bloco I, etapa 2 · spec <code>specs/2026-11-13-bloco-i-flashes-design.md</code> · plano
+    <code>plans/2026-11-13-bloco-i-flashes.md</code> · os conceitos em
+    <a href="flashes.html" style="color:inherit">flashes.html</a>.</p>
+  <p>Os 21 flashes de câmera saíram do jogo, e o clarão de tela cheia da cutscene final também. No lugar entraram as
+    quatro formas que você aprovou, com o teto de 3 por segundo. Em cada vídeo, o conceito aprovado está à esquerda e o
+    jogo de verdade à direita. Nas tiras, o conceito em cima e o jogo embaixo.</p>
+  <p class="suave">O golpe, a bomba, a fúria e a cadeia da cutscene 2 saem iguais ao conceito pixel a pixel. As
+    cutscenes 1 e 3 não se repetem iguais de uma filmagem para a outra (as explosões e os destroços variam), então ali a
+    comparação é a olho.</p>
+
+  <h2>Cutscene 1</h2>
+  <div class="lados"><span>o conceito</span><span>o jogo</span></div>
+  <video src="cutscene1-instalado.mp4" controls loop muted playsinline></video>
+  <h3>"Nave armada"</h3>
+  <img src="cutscene1-inst-2.jpg" alt="Nave armada: a luz ciano em volta da nave, igual no conceito e no jogo.">
+  <h3>A explosão final da Aurora</h3>
+  <img src="cutscene1-inst-6.jpg" alt="A explosão final da Aurora: o clarão grande em volta dela, no conceito e no jogo.">
+
+  <h2>Cutscene 2</h2>
+  <div class="lados"><span>o conceito</span><span>o jogo</span></div>
+  <video src="cutscene2-instalado.mp4" controls loop muted playsinline></video>
+  <h3>A doca explodindo</h3>
+  <p class="suave">Aqui o jogo difere do conceito de propósito: no conceito a sonda adivinhava a fonte da luz e deixava
+    uma mancha laranja no canto de cima à esquerda. No jogo a luz nasce exatamente na explosão.</p>
+  <img src="cutscene2-inst-6.jpg" alt="A doca explodindo: no conceito havia uma mancha de luz no canto; no jogo a luz está só na explosão.">
+
+  <h2>Cutscene 3</h2>
+  <div class="lados"><span>o conceito</span><span>o jogo</span></div>
+  <video src="cutscene3-instalado.mp4" controls loop muted playsinline></video>
+  <h3>O impacto na garganta</h3>
+  <img src="cutscene3-inst-3.jpg" alt="O impacto na garganta: a luz no ponto do impacto, no conceito e no jogo.">
+  <h3>O clarão final (o véu fraco)</h3>
+  <img src="cutscene3-inst-4.jpg" alt="O clarão final da cutscene 3: o véu laranja fraco, no conceito e no jogo.">
+
+  <h2>Cutscene final · a queda do Leviatã</h2>
+  <p>Não estava no conceito. Os quadros de impacto (as silhuetas) ficaram como eram. O clarão de tela cheia que vinha
+    logo depois do choque virou a luz em volta do focinho. Só o jogo, 8 quadros em volta do choque:</p>
+  <img src="final-inst-1.jpg" alt="A queda do Leviatã: os dois quadros de silhueta continuam; depois deles a tela não clareia mais inteira, só em volta da explosão.">
+  <video src="final-jogo/video.mp4" controls loop muted playsinline></video>
+
+  <h2>F2 · o golpe na nave</h2>
+  <div class="lados"><span>o conceito</span><span>o jogo</span></div>
+  <video src="golpe-instalado.mp4" controls loop muted playsinline></video>
+  <img src="golpe-inst-1.jpg" alt="A perda de casco em vinheta: igual no conceito e no jogo.">
+
+  <h2>F2 · a bomba e a fúria da Capitânia</h2>
+  <div class="lados"><span>o conceito</span><span>o jogo</span></div>
+  <video src="capitania-instalado.mp4" controls loop muted playsinline></video>
+  <img src="capitania-inst-2.jpg" alt="A fúria da Capitânia: o magenta em volta do chefão, igual no conceito e no jogo.">
+
+  <h2>O que não foi filmado</h2>
+  <p>Estão no jogo pela mesma regra, mas não passaram por filmagem: a virada da Torre da F1, a fusão da Serpente, o
+    núcleo da F4, o Casco (carta), a nave rompendo a atmosfera e a bomba de pânico (o modo antigo da bomba). Vale
+    olhar jogando.</p>
+
+  <h2>O que eu preciso de você</h2>
+  <ol class="pergunta">
+    <li><b>A cutscene final:</b> a luz no focinho depois do choque segura o momento, ou ficou discreta demais?</li>
+    <li><b>Jogando:</b> algum clarão faz falta como era, ou algum ainda incomoda?</li>
+  </ol>
+</main>
+</body>
+</html>
