@@ -28,8 +28,9 @@ sprite que se desfaz nos próprios pixels).
 > o do amanhecer (só para quem zerou) e a opção "reduzir clarões".
 >
 > 📍 **13/11 (fim) — O BLOCO I FECHOU: COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`, em três
-> commits (o jogo; as ferramentas, os testes e as folhas, sem os vídeos e os `q/`; os docs, com o START do J,
-> `plans/2026-11-13-bloco-j-START.md`). As etapas 2 e 3 abaixo.
+> commits: `7bed58e` (o jogo), `a8cb98b` (as ferramentas, os testes e as folhas, sem os vídeos e os `q/`; as imagens
+> grandes das folhas em JPEG — `scripts/_i/_folha-emagrecer.mjs` — porque em PNG o dia pesava 142 MB) e `9ddd87f` (os
+> docs, com o START do J, `plans/2026-11-13-bloco-j-START.md`). As etapas 2 e 3 abaixo.
 >
 > 📍 **13/11 (2) — BLOCO I, ETAPA 3: A TELA FINAL = O MENU DO AMANHECER; A PARTE A INSTALADA (espera ele; nada
 > commitado).** A ideia dele: a pintura nova do AMANHECER com o Leviatã caído (`assets/raw/Fortaleza em ruínas sob
