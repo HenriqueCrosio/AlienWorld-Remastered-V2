@@ -83,6 +83,53 @@ sprite que se desfaz nos próprios pixels).
 >   - **FECHADO (14/11):** *"boa, funcionou"* (a tela cheia conferida por ele, no navegador dele). **COMMITADO E
 >     EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: `0544f13` (o jogo), `7bf86c4` (a medição do J, os
 >     testes, as ferramentas e as folhas) e `49c7bed` (os docs). **O próximo: o M2, os controles, por brainstorming.**
+>   - **O M2 IMPLEMENTADO (14/11; espera ele testar com um controle de verdade; nada commitado).** Spec
+>     `specs/2026-11-14-bloco-m2-controles-design.md` (decisões dele: perfis MODERNO e ARCADE + o remapear por ação com
+>     troca; as dicas seguem o último aparelho usado; movimento e teclas de menu FIXOS; a vibração entra; zona morta e 2º
+>     controle depois). Folha `folhas/2026-11-14/controles/controles.html` (fotos com controle SIMULADO).
+>     - **No jogo, em `src/entrada/`:** `mapas.ts` (puro: os perfis, a troca, as proibidas, a família, os nomes),
+>       `controle.ts` (o leitor único da Gamepad API, lido uma vez por quadro do jogo do MUNDO — `main.ts`, `PRE_STEP` —
+>       e ouvido por `aoQuadro`; o aparelho ativo; a vibração), `menu.ts` (`controleNoMenu(scene, acoes)`: cada tela
+>       mantém o seu teclado e entrega os MESMOS callbacks), `dicas.ts` (`DICA`, `dicaDaAcao`, `dicaViva`), `aviso.ts` (o
+>       "CONTROLE CONECTADO"), `icones.ts` (os ícones). As preferências viraram `v: 2` (`mapaTeclado`, `controle`,
+>       `mapaControle`, `vibracao`; um objeto v1 é lido e completado). A aba CONTROLES: `numerosPausa.ts` (o estado
+>       `captura`, a coluna, RESTAURAR) e `PausaScene.ts`. `controles.ts#definirMapaTeclado` recebe o mapa do jogador.
+>     - **Os ícones (pedido dele: *"pode retirar de acervo público"*):** "Input Prompts Pixel" da Kenney, CC0
+>       (`assets/raw/kenney-input-prompts-pixel/` com a licença), assados em `public/sprites/botoes.png` por
+>       `scripts/_m/_botoes-assar.mjs`. Os quatro botões de face do PlayStation foram desenhados sobre o botão em branco
+>       do pacote (lá eles vêm partidos em dois tiles). **Hoje só a janela das CONFIGURAÇÕES usa os ícones** (o rodapé e
+>       a tabela); as outras telas (hangar, mesa, placares, painel da Doca, Arquivo) mostram o NOME do botão em texto.
+>     - **Armadilhas:** o leitor é por QUADRO (um toque mais curto que um quadro pode não ser visto; no navegador
+>       automático, lento, isso derrubava o teste — os toques simulados agora esperam 2 quadros). Quem nasce num quadro
+>       ignora as bordas dele (o START que abriu a pausa não a fecha). A captura de tecla usa o `keydown` genérico, que o
+>       Phaser emite DEPOIS do `keydown-X`: as teclas de navegação se calam durante a captura, senão o Q trocava de aba
+>       em vez de ser capturado. O Vite não viu duas reescritas inteiras de arquivo (`preferencias.ts`): um `touch`
+>       resolveu.
+>     - **Testes:** `test-mapas.mjs`, `test-preferencias.mjs` (v2), `test-controle-jogo.mjs` (controle simulado: menu,
+>       nave, remapear, queda, PlayStation). Build e os 35 testes ok.
+>     - **O RETORNO DELE COM O DUALSENSE (14/11):** *"funcionou muito bem [...] gostei do feeling do controle"*. Quatro
+>       pontos, todos tratados (espera ele conferir de novo; nada commitado):
+>       1. **O tiro no X também dava o impulso** (*"ele atira e pula"*): o impulso da F1 morava fixo no botão de face de
+>          baixo. Agora ele mora no botão do DASH (`input.ts`): o impulso só existe no voo de flap da F1 e o dash só no
+>          voo livre (`Dash.tick` pede `livre`), então os dois nunca coincidem. MODERNO: impulso no X/A; ARCADE: no
+>          BOLA/B; personalizado: segue o dash. A aba CONTROLES explica na nota.
+>       2. **A troca é anunciada** (pedido dele: *"um aviso que diz que a tecla está sendo usada para outra coisa"*): ao
+>          capturar uma tecla que já tinha dona, a nota diz quais duas ações trocaram (`PausaScene.avisoDaTroca`). É um
+>          aviso DEPOIS da troca, não uma pergunta antes.
+>       3. **A vibração não apareceu** no DualSense: causa NÃO achada (no navegador automático, com o controle simulado,
+>          a chamada sai certa). Entrou: um pulso de teste ao LIGAR a linha VIBRAÇÃO, a nota "este navegador não oferece
+>          vibração para este controle" quando o navegador não a expõe, e a API alternativa do Firefox
+>          (`hapticActuators[0].pulse`). **Perguntar a ele: qual navegador, e cabo ou Bluetooth.**
+>       4. **Os três símbolos de aparelho** no canto de cima à esquerda (PS · XBOX · TECLADO, apagados/acesos):
+>          `src/entrada/indicadores.ts`, no menu principal e na janela da pausa/configurações (não durante a fase: a
+>          HUD mora naquele canto). O teclado fica sempre aceso (uma página não consegue detectá-lo).
+>     - **O M2 FECHADO (14/11):** *"Gostei do que foi feito [...] Tudo confirmado"*. A vibração: *"o chrome não suporta
+>       vibração para controle de ps. mas tudo bem"* (fica como está: funciona onde o navegador a oferece). Os símbolos
+>       de aparelho ficam só no menu e na pausa (*"durante o jogo não precisa"*). **COMMITADO E EMPURRADO a pedido dele.
+>       O próximo: o M3, a tela de fim de fase e de morte no padrão da tela final.**
+>     - **NÃO conferido (só ele consegue):** um controle DE VERDADE (Xbox e PlayStation: os botões no lugar, os
+>       gatilhos, a vibração, o reconhecimento da família); as telas da mesa de cartas, do Arquivo e do painel da Doca
+>       com o controle (ligadas, mas sem teste automático próprio).
 >   - **Não conferido (do M1):** a tela cheia no navegador automático (ele conferiu à mão); o volume com som de verdade (sem áudio
 >     no navegador automático: só o número gravado e o teto do volume); a pausa durante as lutas de chefão e a
 >     cutscene final (a regra é a mesma, não foram filmadas). **O próximo: o olho dele na folha e jogando → o M2.**
