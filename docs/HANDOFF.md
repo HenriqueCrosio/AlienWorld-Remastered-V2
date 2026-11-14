@@ -80,7 +80,10 @@ sprite que se desfaz nos próprios pixels).
 >     e o navegador só sai da tela cheia com o ESC SEGURADO. Só existe no Chrome, Edge e Opera; no Firefox e no Safari
 >     não há o que fazer pela página, e a aba VÍDEO avisa. **Espera ele conferir** (o navegador automático não dá tela
 >     cheia).
->   - **Não conferido:** a tela cheia (o navegador automático não a concede); o volume com som de verdade (sem áudio
+>   - **FECHADO (14/11):** *"boa, funcionou"* (a tela cheia conferida por ele, no navegador dele). **COMMITADO E
+>     EMPURRADO a pedido dele** para `origin/feat/cartas-preview`: `0544f13` (o jogo), `7bf86c4` (a medição do J, os
+>     testes, as ferramentas e as folhas) e `49c7bed` (os docs). **O próximo: o M2, os controles, por brainstorming.**
+>   - **Não conferido (do M1):** a tela cheia no navegador automático (ele conferiu à mão); o volume com som de verdade (sem áudio
 >     no navegador automático: só o número gravado e o teto do volume); a pausa durante as lutas de chefão e a
 >     cutscene final (a regra é a mesma, não foram filmadas). **O próximo: o olho dele na folha e jogando → o M2.**
 >
