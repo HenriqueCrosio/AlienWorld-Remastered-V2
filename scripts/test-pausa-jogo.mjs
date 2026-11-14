@@ -113,7 +113,7 @@ if (roda('config')) {
   ok(!v.textos.includes('JOGO'), 'no GAME tab before the first victory', v.textos);
   await tecla(page, 'ArrowDown', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft', 'ArrowLeft');
   v = await ver(page);
-  ok(v.prefs?.v === 1 && v.prefs.volume.musica === 5 && v.prefs.volume.geral === 10, 'five steps down on MUSIC are recorded at once', v.prefs);
+  ok(v.prefs?.v === 2 && v.prefs.volume.musica === 5 && v.prefs.volume.geral === 10, 'five steps down on MUSIC are recorded at once', v.prefs);
   await tecla(page, 'KeyE', 'ArrowRight');
   v = await ver(page);
   ok(v.prefs.teclas === 'classico' && v.teclas === 'classico', 'the key profile is recorded and mirrored to the old key', [v.prefs, v.teclas]);
