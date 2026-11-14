@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { vibrar } from '../entrada/controle';
 import { ligarPausa } from '../pausa/abrirPausa';
 import { claraoDe } from '../systems/clarao/Clarao';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
@@ -2312,6 +2313,7 @@ export class GameScene extends Phaser.Scene {
   private killBoss(): void {
     const boss = this.boss!;
     this.score += 2000;
+    vibrar('chefao');
 
     // A MORTE ENCENADA (a enguia, `StageBoss.morteAcabou`): ela já morreu no rombo, na frente dele — a cena só fecha
     if (boss.morteAcabou) {
@@ -2874,6 +2876,7 @@ export class GameScene extends Phaser.Scene {
   private useBomb(): void {
     if (this.over || this.bombs <= 0) return;
     this.bombs--;
+    vibrar('bomba');
     if (this.medidas) this.medidas.bombasUsadas++;
     if (this.bombaModo === 'panico') this.bombaDePanico();
     else this.bombas.lancar(this.time.now);
@@ -3040,6 +3043,8 @@ export class GameScene extends Phaser.Scene {
     // respiro de 0,8 s antes do próximo aviso letal. Um dado na nave, só lido — nenhum outro sistema muda. (Também no
     // golpe que o casco das cartas absorve: foi um golpe.)
     this.ship.setData('golpeEm', this.time.now);
+    // the controller shakes with the blow (block M2; only with the controller in use and the option on)
+    vibrar('golpe');
 
     // PROTÓTIPO DAS CARTAS: o CASCO absorve o golpe inteiro — a vida, a especial e as bombas ficam.
     if (this.medidas) this.medidas.golpes++;

@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { controleNoMenu } from '../entrada/menu';
+import { DICA, dicaViva } from '../entrada/dicas';
 import { ligarPausa } from '../pausa/abrirPausa';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { FAMILIA, fontesOk } from '../fonte';
@@ -146,6 +148,8 @@ export class CartasScene extends Phaser.Scene {
     this.titulo = this.criarTexto(data.titulo.toUpperCase(), PX_TITULO, COLORS.playerBright);
     // As setas são as do painel de nave (`ShipPanel`): < >, que a Chakra Petch tem — ←→ ela não tem (item 16, 17/10).
     this.ajuda = this.criarTexto('[<  >] ESCOLHER   [ENTER] CONFIRMAR', PX_AJUDA, COLORS.metalMid);
+    // the hint follows the device in use (14/11, block M2)
+    dicaViva(this, this.ajuda, () => `[<  >] ESCOLHER   [${DICA.ok()}] CONFIRMAR`);
 
     this.opcoes.forEach((c, i) => this.montarCarta(c, i));
     this.posicionar();
@@ -180,6 +184,8 @@ export class CartasScene extends Phaser.Scene {
     kb.on('keydown-TWO', novo(() => this.confirmar(1)));
     kb.on('keydown-THREE', novo(() => this.confirmar(2)));
     kb.on('keydown-ENTER', novo(() => this.confirmar(this.cursor)));
+    // THE CONTROLLER (14/11, block M2): the d-pad or the stick walk, the bottom face button takes the card.
+    controleNoMenu(this, { esquerda: () => mover(-1), direita: () => mover(1), ok: () => this.confirmar(this.cursor) }, () => !this.fechando);
     // A tecla de TIRO do perfil confirma (Espaço no padrão, Z no clássico). O J saiu com o mapa de 03/10.
     for (const t of mapaAtivo().tiro) kb.on(`keydown-${t}`, novo(() => this.confirmar(this.cursor)));
     const sair = data.onSair;

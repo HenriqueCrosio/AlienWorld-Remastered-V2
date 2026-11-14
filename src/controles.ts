@@ -11,6 +11,8 @@
  *
  * É o gancho do MENU DE CONTROLES (spec própria, junto com o áudio): ele só vai escrever em `aw.teclas`.
  */
+import { rotuloDaTecla, type MapaTeclado } from './entrada/mapas.ts';
+
 export type Acao = 'cima' | 'baixo' | 'esquerda' | 'direita' | 'flap' | 'tiro' | 'bomba' | 'dash' | 'flare' | 'missil';
 export type Perfil = 'padrao' | 'classico';
 export type Mapa = Record<Acao, readonly string[]>;
@@ -66,9 +68,17 @@ export function perfilAtivo(): Perfil {
   return perfil;
 }
 
-export const mapaAtivo = (): Mapa => PERFIS[perfilAtivo()];
+/**
+ * O MAPA DO JOGADOR (14/11, bloco M2): as CONFIGURAÇÕES remapeiam as cinco ações, uma tecla cada. Quem o define é
+ * `aplicarPreferencias.ts` (na abertura e a cada mudança); o movimento é sempre o de `MOVIMENTO`. `null` = o perfil de
+ * `aw.teclas`, como antes (o teste em node e quem roda sem as preferências).
+ */
+let mapaDoJogador: Mapa | null = null;
+export function definirMapaTeclado(m: MapaTeclado | null): void {
+  mapaDoJogador = m && { ...MOVIMENTO, tiro: [m.tiro], bomba: [m.bomba], dash: [m.dash], flare: [m.flare], missil: [m.missil] };
+}
 
-const ROTULO: Record<string, string> = { SPACE: 'ESPAÇO' };
+export const mapaAtivo = (): Mapa => mapaDoJogador ?? PERFIS[perfilAtivo()];
 
 /** O nome da tecla na tela ("ESPAÇO repete…"). */
-export const rotuloDaTecla = (nome: string): string => ROTULO[nome] ?? nome;
+export { rotuloDaTecla };

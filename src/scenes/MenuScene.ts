@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { controleNoMenu } from '../entrada/menu';
+import { montarIndicadores } from '../entrada/indicadores';
 import { abrirPausa } from '../pausa/abrirPausa';
 import { GAME_WIDTH } from '../config';
 import { resetVariantCache } from '../art';
@@ -127,6 +129,9 @@ export class MenuScene extends Phaser.Scene {
     // A faixa atravessa a transição de cena sem corte (Music.play não reinicia se já toca).
     Music.play(this, 'stage1');
     this.bindKeys();
+    // the three device symbols in the top left corner (14/11, block M2): lit = connected. Not over the result of the
+    // campaign (its title lives in that corner): they come when the result leaves.
+    if (!this.emResultado) montarIndicadores(this, 5, 4);
     if (!this.emResultado && (this.direto || this.estado.reduzido)) this.pular();
 
     const hd = jogoHD();
@@ -311,6 +316,7 @@ export class MenuScene extends Phaser.Scene {
   private sairDoResultado(): void {
     if (!this.emResultado || !this.estado.pronto || !resultadoPronto(this.tResultado, this.estado.reduzido)) return;
     this.emResultado = false;
+    montarIndicadores(this, 5, 4);
     this.tSaiResultado = this.tResultado;
     this.estado.tAbertura = T0_SEGUNDO_TEMPO;
     // O movimento reduzido não vê a chegada: o menu abre pousado.
@@ -370,6 +376,21 @@ export class MenuScene extends Phaser.Scene {
     for (const k of ['LEFT', 'A']) kb.on(`keydown-${k}`, umaVez(() => this.trocar(-1)));
     for (const k of ['RIGHT', 'D']) kb.on(`keydown-${k}`, umaVez(() => this.trocar(1)));
     for (const k of ['ENTER', 'SPACE']) kb.on(`keydown-${k}`, umaVez(() => this.confirmar()));
+    // THE CONTROLLER (14/11, block M2): the same callbacks. Before the list lands, any button only skips the opening;
+    // on the result, the confirm button takes it away (as the key does).
+    const botao = (f: () => void) => (): void => {
+      if (this.emResultado) this.sairDoResultado();
+      else if (!this.settled) this.pular();
+      else f();
+    };
+    controleNoMenu(this, {
+      cima: botao(() => this.mover(-1)),
+      baixo: botao(() => this.mover(1)),
+      esquerda: botao(() => this.trocar(-1)),
+      direita: botao(() => this.trocar(1)),
+      ok: botao(() => this.confirmar()),
+      start: botao(() => this.confirmar()),
+    });
     kb.on('keydown-ONE', () => this.start('diegetico'));
     kb.on('keydown-TWO', () => this.start('flap'));
     kb.on('keydown-THREE', () => this.start('free'));

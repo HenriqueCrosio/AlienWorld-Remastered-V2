@@ -1,9 +1,13 @@
 import Phaser from 'phaser';
+import { controleNoMenu } from '../entrada/menu';
+import { DICA, dicaDaAcao, dicaViva } from '../entrada/dicas';
+import type { AcaoRemap } from '../entrada/mapas';
+import { aparelhoAtivo } from '../entrada/controle';
 import { COLORS, GAME_WIDTH } from '../config';
 import { CARTAS, type CartaDef, type Categoria } from '../data/catalogoCartas';
 import { numerosDaCarta } from '../data/numerosCartas';
 import { COR_RARIDADE, NOME_RARIDADE } from '../raridade';
-import { mapaAtivo, rotuloDaTecla, type Acao } from '../controles';
+import type { Acao } from '../controles';
 import { Starfield } from '../Starfield';
 import { pixelText } from '../ui';
 import { escalaHD, irmaDe, registrarTextoHD } from '../uiHD';
@@ -94,7 +98,9 @@ export class ArquivoScene extends Phaser.Scene {
 
     this.montarFundo();
     pixelText(this, GAME_WIDTH / 2, 9, 'ARQUIVO DE CARTAS', { size: 8, color: COLORS.playerGlow, voz: 'jogo' });
-    pixelText(this, GAME_WIDTH / 2, 209, '[SETAS] ESCOLHER   [ESC] VOLTAR', { size: 7, color: COLORS.metalMid, voz: 'piloto' });
+    // the hint follows the device in use (14/11, block M2)
+    dicaViva(this, pixelText(this, GAME_WIDTH / 2, 209, ' ', { size: 7, color: COLORS.metalMid, voz: 'piloto' }), () =>
+      `[<  >  ^  v] ESCOLHER   [${DICA.voltar()}] VOLTAR`);
     this.realce = this.add.graphics().setDepth(10);
     this.montarGrade();
     // A moldura da caixa do clipe (sem clipe — as 4 sem movimento, ou enquanto carrega —, o ícone grande).
@@ -248,7 +254,8 @@ export class ArquivoScene extends Phaser.Scene {
     linha(carta.descricao, 7, COLORS.metalLight, 'piloto', 4);
     linha(numerosDaCarta(carta.id), 7, COLORS.playerBright, 'nave', 2);
     const acao = TECLA_DA_CARTA[carta.id];
-    if (acao) linha(`TECLA ${rotuloDaTecla(mapaAtivo()[acao][0])}`, 7, COLORS.hot, 'nave', 0);
+    // the key of the card's action, in the device in use and the player's own map (block M2)
+    if (acao) linha(`${aparelhoAtivo() === 'controle' ? 'BOTÃO' : 'TECLA'} ${dicaDaAcao(acao as AcaoRemap)}`, 7, COLORS.hot, 'nave', 0);
   }
 
   /** A geometria para a sonda: as caixas de texto da ficha (px do mundo) e a área permitida. */
@@ -282,6 +289,14 @@ export class ArquivoScene extends Phaser.Scene {
       [['ESC', 'BACKSPACE'], () => this.scene.start('Menu', { cursor: ITEM.arquivo, direto: true })],
     ];
     for (const [teclas, f] of pares) for (const t of teclas) kb.on(`keydown-${t}`, uma(f));
+    // THE CONTROLLER (14/11, block M2)
+    controleNoMenu(this, {
+      esquerda: () => this.mover(-1, 0),
+      direita: () => this.mover(1, 0),
+      cima: () => this.mover(0, -1),
+      baixo: () => this.mover(0, 1),
+      voltar: () => this.scene.start('Menu', { cursor: ITEM.arquivo, direto: true }),
+    });
   }
 
   /** ←→ na mesma linha; ↑↓ para a linha vizinha, na coluna mais perto. Nas bordas, para. */

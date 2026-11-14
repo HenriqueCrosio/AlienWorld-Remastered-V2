@@ -1,4 +1,7 @@
 import Phaser from 'phaser';
+import { controleNoMenu } from '../entrada/menu';
+import { DICA } from '../entrada/dicas';
+import { aoMudarAparelho } from '../entrada/controle';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
 import { SHIPS, naveEscolhida, nomeDaNave, visualDaNave } from '../ships';
@@ -189,6 +192,23 @@ export class ShipPanel {
 
     kb.on('keydown-ENTER', () => this.enter());
     kb.on('keydown-BACKSPACE', () => this.voltar());
+    // THE CONTROLLER (14/11, block M2): the bottom face button selects and confirms, the right one steps back.
+    const soltar = controleNoMenu(this.scene, {
+      esquerda: () => this.mover(-1),
+      cima: () => this.mover(-1),
+      direita: () => this.mover(1),
+      baixo: () => this.mover(1),
+      ok: () => this.enter(),
+      voltar: () => this.voltar(),
+    }, () => this.vivo);
+    // the footer follows the device in use
+    const soltarDica = aoMudarAparelho(() => {
+      if (this.vivo) this.marcar();
+      else {
+        soltar();
+        soltarDica();
+      }
+    });
     kb.on('keydown-ESC', () => this.onSair());
   }
 
@@ -244,10 +264,10 @@ export class ShipPanel {
 
     this.rodape.setText(
       this.confirmando
-        ? '[ENTER] confirmar  ·  [BACKSPACE] voltar  ·  [ESC] sair'
+        ? `[${DICA.ok()}] confirmar  ·  [${DICA.apagar()}] voltar  ·  [${DICA.pausa()}] pausa`
         // ⚠️ < >, NÃO ←→ (17/10, item 16 do polimento): a Chakra Petch não tem as setas, e o navegador as desenhava
         // na serifada de reserva. ‹ › ela tem, mas saem miúdas; < > leem como as teclas. A mesa de cartas usa as mesmas.
-        : '[<  >] escolher  ·  [ENTER] selecionar  ·  [ESC] sair',
+        : `[<  >] escolher  ·  [${DICA.ok()}] selecionar  ·  [${DICA.pausa()}] pausa`,
     );
   }
 

@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { controleNoMenu } from '../entrada/menu';
+import { DICA, dicaViva } from '../entrada/dicas';
 import { ligarPausa } from '../pausa/abrirPausa';
 import { GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
@@ -82,7 +84,9 @@ export class HangarScene extends Phaser.Scene {
     this.t(GAME_WIDTH / 2, T.titulo.y, T.titulo.texto, T.titulo.tamanho, T.cor);
     this.nome = this.t(GAME_WIDTH / 2, T.nome.y, '', T.nome.tamanho, T.corDestaque);
     this.pintura = this.t(GAME_WIDTH / 2, T.pintura.y, '', T.pintura.tamanho, T.cor);
-    this.t(GAME_WIDTH / 2, T.dica.y, T.dica.texto, T.dica.tamanho, T.corDica);
+    // the hint follows the device in use (block M2)
+    dicaViva(this, this.t(GAME_WIDTH / 2, T.dica.y, ' ', T.dica.tamanho, T.corDica), () =>
+      `[<  >] NAVE     [^  v] PINTURA     [${DICA.ok()}] DECOLAR     [${DICA.pausa()}] PAUSA`);
     this.escreverEscolha();
   }
 
@@ -115,6 +119,16 @@ export class HangarScene extends Phaser.Scene {
         if (confirmar(e)) escolherNave(this.registry, escolhaDoEstado(e));
       }));
     }
+    // THE CONTROLLER (14/11, block M2): the same moves (START pauses, through `ligarPausa`).
+    controleNoMenu(this, {
+      esquerda: () => mudarLado(e, -1),
+      direita: () => mudarLado(e, 1),
+      cima: () => mudarPintura(e, -1),
+      baixo: () => mudarPintura(e, 1),
+      ok: () => {
+        if (confirmar(e)) escolherNave(this.registry, escolhaDoEstado(e));
+      },
+    });
     // A PAUSA (14/11, bloco M1): o ESC abre a janela (continuar · configurações · sair), não sai mais direto.
     ligarPausa(this, { tipo: 'escolha', sair: () => this.scene.start('Menu', { direto: true }), podeAbrir: () => e.tConfirmou === null });
   }

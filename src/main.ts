@@ -15,6 +15,8 @@ import { HangarScene } from './scenes/HangarScene';
 import { PausaScene } from './scenes/PausaScene';
 import { carregarFontes } from './fonte';
 import { criarCamadaHD } from './uiHD';
+import { lerControle } from './entrada/controle';
+import { ligarAvisoDoControle } from './entrada/aviso';
 
 // As fontes das três vozes carregam (e a Silkscreen é assada) ANTES do jogo nascer: o 1º texto já sai nítido.
 await carregarFontes();
@@ -42,6 +44,10 @@ const game = new Phaser.Game({
 
   scene: [BootScene, MenuScene, HangarScene, GameScene, InterludeScene, Interlude2Scene, Interlude3Scene, Interlude4Scene, GameOverScene, CartasScene, ArquivoScene, PausaScene],
 });
+
+// THE CONTROLLER (14/11, block M2): one read per frame, before the scenes (`entrada/controle.ts`).
+game.events.on(Phaser.Core.Events.PRE_STEP, lerControle);
+ligarAvisoDoControle(game);
 
 // Em dev, expõe o jogo para inspeção externa (probe headless, console do navegador).
 if (import.meta.env.DEV) {

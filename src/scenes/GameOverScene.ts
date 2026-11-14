@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { controleNoMenu } from '../entrada/menu';
+import { DICA, dicaViva } from '../entrada/dicas';
 import { COLORS, GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
@@ -86,7 +88,7 @@ export class GameOverScene extends Phaser.Scene {
     // A tecla de TIRO do perfil repete (Espaço no padrão, Z no clássico).
     const tiro = mapaAtivo().tiro[0];
     const tecla = rotuloDaTecla(tiro);
-    this.text(
+    const dica = this.text(
       GAME_WIDTH / 2,
       180,
       practice
@@ -110,9 +112,23 @@ export class GameOverScene extends Phaser.Scene {
       this.scene.start('Game', { stage, handling, practice, ship, score: baseScore });
     });
     kb.once('keydown-ESC', () => this.scene.start('Menu'));
+    // THE CONTROLLER (14/11, block M2): the bottom face button repeats, the right one goes to the menu.
+    controleNoMenu(this, {
+      ok: () => {
+        if (saiu) return;
+        saiu = true;
+        this.scene.start('Game', { stage, handling, practice, ship, score: baseScore });
+      },
+      voltar: () => this.scene.start('Menu'),
+    });
+    // the hint follows the device in use
+    dicaViva(this, dica, () => {
+      const t = DICA.tiro(), m = DICA.voltar();
+      return practice ? `${t} repete o CHEFÃO · ${m} menu` : victory ? `${t} joga de novo · ${m} menu` : `${t} tenta a FASE ${stage} de novo · ${m} menu`;
+    });
   }
 
-  private text(x: number, y: number, value: string, size: number, color: number): void {
-    pixelText(this, x, y, value, { size, color });
+  private text(x: number, y: number, value: string, size: number, color: number): Phaser.GameObjects.Text {
+    return pixelText(this, x, y, value, { size, color });
   }
 }

@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { aoConectar, aoQuadro, desceuBotao } from '../entrada/controle';
+import { BOTAO } from '../entrada/mapas';
 import { ehHD, jogoHD, jogoMundo } from '../uiHD';
 import type { TipoPausa } from './numerosPausa';
 
@@ -96,7 +98,16 @@ export function ligarPausa(scene: Phaser.Scene, opts: OpcoesPausa): void {
   const eventos = scene.game.events;
   eventos.on(Phaser.Core.Events.BLUR, sozinha);
   eventos.on(Phaser.Core.Events.HIDDEN, sozinha);
+  // THE CONTROLLER (block M2): START pauses; and a controller that drops in the middle of the action pauses too.
+  const soltarStart = aoQuadro(() => {
+    if (desceuBotao(BOTAO.START) && scene.scene.isActive()) abrirPausa(scene, opts);
+  });
+  const soltarQueda = aoConectar((ligou) => {
+    if (!ligou && scene.scene.isActive()) abrirPausa(scene, opts);
+  });
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+    soltarStart();
+    soltarQueda();
     kb?.off('keydown-ESC', esc);
     eventos.off(Phaser.Core.Events.BLUR, sozinha);
     eventos.off(Phaser.Core.Events.HIDDEN, sozinha);

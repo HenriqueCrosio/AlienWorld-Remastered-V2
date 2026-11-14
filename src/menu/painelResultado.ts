@@ -2,9 +2,9 @@ import Phaser from 'phaser';
 import { COLORS } from '../config';
 import { pixelText } from '../ui';
 import { escalaHD, irmaDe, registrarTextoHD, type Voz } from '../uiHD';
-import { mapaAtivo, rotuloDaTecla } from '../controles';
 import type { Medalha } from '../placar';
 import { css, textura, texturaJanela as moldura } from '../ui/janela';
+import { DICA, dicaViva } from '../entrada/dicas';
 import { RESULTADO } from './numerosMenu';
 import { alfaResultado, pontosMostrados, type ParteResultado } from './resultado';
 
@@ -148,7 +148,8 @@ export function montarPainelResultado(scene: Phaser.Scene, d: DadosResultado): P
   if (d.medalha) img('recorde', J.x + 8, J.y + 30, texturaMedalha(destino, d.medalha.color));
   txt('recorde', J.x + (d.medalha ? 22 : 8), J.y + 38, d.medalha ? `MEDALHA DE ${d.medalha.medal.toUpperCase()}` : 'SEM MEDALHA', 7, d.medalha ? d.medalha.color : C.rotulo, 'jogo');
 
-  txt('tecla', L.xTecla, L.tecla, `${rotuloDaTecla(mapaAtivo().tiro[0])} continua`, 6, C.rotulo, 'jogo', 'c');
+  // the hint follows the device in use (14/11, block M2)
+  dicaViva(scene, txt('tecla', L.xTecla, L.tecla, ' ', 6, C.rotulo, 'jogo', 'c'), () => `${DICA.tiro()} continua`);
 
   // A ASSINATURA, embaixo à direita: "Um jogo de" e, na linha de baixo, o nome — na fonte só dela.
   void carregarAssinatura().then((veio) => {
