@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-09)
+# HANDOFF — estado do projeto (2026-11-14)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -16,17 +16,21 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-13-bloco-j-START.md`. O bloco I FECHOU em 13/11 (as
-> explosões, os clarões no lugar dos flashes de tela cheia, e a tela final = o menu do amanhecer), aprovado, commitado
-> e empurrado. A sessão abre no bloco J, o pós-processamento: uma pergunta por vez (superpowers:brainstorming), antes
-> de mexer em qualquer shader."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-14-bloco-m3-START.md`. Em 14/11 fecharam o bloco J
+> (enxuto: a medição dos perfis, nenhum mudou), o M1 (a pausa e as CONFIGURAÇÕES) e o M2 (os controles de Xbox e
+> PlayStation, o remapear, as dicas pelo aparelho), aprovados, commitados e empurrados. A sessão abre no M3, a tela de
+> fim de fase e de morte no padrão da tela final: uma pergunta por vez (superpowers:brainstorming), antes de desenhar."**
 >
-> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11, fechado de
-> vez) → I ✅ (13/11: 1 as explosões · o desvio do lança-mísseis do casco · 2 os clarões · 3 a tela final = o menu do
-> amanhecer) → J ✅ (14/11, enxuto: a medição dos perfis, nenhum mudou) → **M (a moldura do jogo, 14/11; absorve a 1.55 e a 1.6:
-> M1 a pausa + as CONFIGURAÇÕES · M2 os controles · M3 a tela de fim de fase e de morte · M4 o carregamento)** → F.** Depois dos blocos: o rebalanceamento (cartas, a vida da enguia, a
-> saída da aranha do casco) e só então o som. Para a etapa 1.55 (o menu de OPÇÕES): a escolha entre o menu da noite e
-> o do amanhecer (só para quem zerou) e a opção "reduzir clarões".
+> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11) → I ✅
+> (13/11) → J ✅ (14/11, enxuto) → **M, a MOLDURA do jogo** (o que dá "cara de jogo lançado"; absorveu as etapas 1.55 e
+> 1.6): M1 a pausa + as CONFIGURAÇÕES ✅ (14/11) · M2 os controles ✅ (14/11) · **M3 a tela de fim de fase e de morte
+> (o próximo)** · M4 o carregamento e o favicon → F (a F2: a frota de batedores e a rocha do minerador).** Depois dos
+> blocos: o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco) e só então o som.
+>
+> **Guardado para depois (pedidos dele, sem data):** a zona morta ajustável do analógico e um 2º controle (M2); a
+> conta do usuário sincronizando as preferências entre navegadores (junto do placar online, etapa 5 — as preferências
+> já são um objeto só, `alienworld:preferencias`); os ícones de botão nas outras telas (hoje só nas CONFIGURAÇÕES);
+> o controle de Xbox de VERDADE ainda não foi testado (ele só tem o DualSense).
 >
 > 📍 **14/11 — O ROADMAP MUDOU E O BLOCO J ABRIU ENXUTO (espera ele; nada commitado).** À pergunta 1 do START ele
 > devolveu outra: *"o que falta para dar cara de jogo lançado [...] ao aspecto de polimento de um jogo terminado?"*. A
@@ -1650,6 +1654,10 @@ Spec: `specs/2026-09-27-cartas-linhagens-pecas-design.md` · porta de entrada: `
 **A frente agora é fechar esse protótipo (etapa 1.5); a calibragem vem depois.**
 **25–26/10:** os tiers saíram (uma nave por linhagem; as peças viraram estrelas que dão só o 1-UP), a humana é
 escolhida no hangar antes da F1 (4 escolhas, só visual) e cada nave morre do seu jeito (`docs/DESTROCOS.md`).
+**14/11 — a MOLDURA do jogo (bloco M):** o `ESC` (e o START do controle) PAUSA em vez de derrubar a partida; as
+CONFIGURAÇÕES (áudio, controles, vídeo, jogo) abrem da pausa e do menu; o jogo lê controle de Xbox e de PlayStation,
+com remapear de teclado e de controle; as preferências do jogador vivem num objeto só (`alienworld:preferencias`).
+Faltam do M: a tela de fim de fase e de morte (M3) e o carregamento com o favicon (M4).
 
 ```
 MENU → HANGAR DA ESCOLHA → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
@@ -1664,14 +1672,14 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 |---|---|---|
 | 1 | **Passe visual por fatias** (0–9) | ✅ **0–9 fechadas e mergeadas** (a 8 e a 9 em 26/09: a Atmosfera nas cutscenes e nas fases) |
 | 1.5 | **Cartas + linhagens + peças** (27–28/09, decisão dele) | 🟠 **A ATUAL** — protótipo jogável na `feat/cartas-preview`. ✅ 29/09: layout da mesa = **COMPACTO** e o texto nas **TRÊS VOZES** numa camada HD (spec `specs/2026-09-29-tres-vozes-camada-hd-design.md`, implementada — falta ele jogar). ✅ 01/10: a **spec 2 = a arte nova do compacto** (`specs/2026-09-30-mesa-compacta-arte-design.md`) — moldura M2+M3, raridade P1, a mesa no grid fino, texto pelos encaixes e a `probe-mesa-texto` (Tasks 1–3 do plano `plans/2026-10-01-mesa-compacta-arte.md`); **os ícones esperam o catálogo**. 🟠 **AGORA (01/10, ordem dele): A = o catálogo de cartas (até 25) → B = inimigos novos que atiram + ondas maiores → C = calibragem.** ✅ 02/10: o catálogo de 24 JOGÁVEL + o sandbox. ✅ 03/10: o mapa de teclas, a bomba de queda e o 1º lote da arte das peças. ✅ 04/10: o 2º lote das peças (tamanhos dele; elétrico = raio + anel; queimando = chama) e o míssil na tecla Q. ✅ 04/10: o tranco do tiro pesado, o ARQUIVO DE CARTAS (a wiki no menu; os números das cartas num endereço só), os tiros LASER, a exaustão do T1 e o jato azul dos Propulsores. 🟠 **AGORA: frente B** — ✅ 05/10 a spec-mãe (2 elites por fase) e a fatia F2 jogável COM A ARTE DELE e animada (drone de mineração + sentinela com propulsores; luta refeita como a do golfinho). ✅ 06/10 a fatia F2 APROVADA (escudo com vida, tiros desenhados). 🟠 AGORA: fatia F3 — ✅ spec + folhas de arte (à mão e PixelLab); ✅ 07/10 JOGÁVEL (a lula com a tinta, o Tentáculo com a regra do casco; arte do Tentáculo provisória); ✅ 08–10/10 o Tentáculo virou a serpente 63-3 e, depois de três dias de trajetórias abandonadas, a Sentinela do casco (gestos no lugar); ✅ 11/10 ela está NO JOGO com a sequência inteira (25°, o bote fere, 2 trios com o vão); ❌ 12/10 ELA FOI CANCELADA e retirada do jogo e da produção antes do teste (decisão dele) — **a F3 fica só com a lula (1 elite, a exceção à regra de 2)**, ✅ 12/10 com gestos e a FUGA aprovados; falta ele jogar a F3 inteira (sem pressa). 🟠 AGORA: **fatia F4** — ✅ 12/10 o desenho aprovado (Larva Mecânica com pupas e moscas + Tubo Pulsante com o pulso em anel; spec `specs/2026-10-12-frente-b-fatia-f4-design.md`, START `plans/2026-10-12-fatia-f4-START.md`); ✅ 13/10 as folhas, a escolha dele (as DUAS variações de cada elite), o plano (`plans/2026-10-13-frente-b-fatia-f4.md`) e os dois JOGÁVEIS no roteiro e no sandbox; falta: ele ver os GIFs em jogo e jogar a F4 (a densidade do anel, as pupas, as peças à mão) → frente C. Falta ainda: arte da peça, tier nas cutscenes do meio, e o que a F4 dá |
-| 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ⬜ spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
-| 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ⬜ spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
+| 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ✅ **14/11, dentro do bloco M** (M1 a tela de CONFIGURAÇÕES com os volumes; M2 o remapear por ação, teclado e controle). Falta só o som em si (depois do balanceamento). Registro de antes: spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
+| 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ✅ **14/11, o M2 do bloco M** (spec `specs/2026-11-14-bloco-m2-controles-design.md`): perfis MODERNO e ARCADE, as dicas pelo aparelho em uso, a vibração onde o navegador a oferece; testado por ele no DualSense, o de Xbox de verdade ainda não. Registro de antes: spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
 | 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
-| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
+| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **HOJE (14/11): os blocos A–E, G, S, H, I e J ✅; o bloco M (a moldura do jogo) com M1 e M2 ✅ → M3 (o próximo, START `plans/2026-11-14-bloco-m3-START.md`) → M4 → F.** Registro: **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
 | — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
 
 ### O que mora em cada etapa
