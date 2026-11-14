@@ -178,6 +178,9 @@ export class CartasEmJogo {
     s.scene.launch('Cartas', {
       opcoes,
       titulo,
+      // o ESC na mesa abre a PAUSA (14/11); sair dela derruba a partida, como o SAIR da pausa na fase
+      pausa: true,
+      onSair: () => s.scene.start('Menu'),
       onEscolha: (id: string) => {
         this.aplicar(id);
         // ⚠️ SOLTA AS TECLAS: a fase pausada não viu o keyup de quem soltou a seta durante a escolha, e a nave

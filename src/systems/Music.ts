@@ -18,6 +18,31 @@ export class Music {
 
   static readonly VOLUME = 0.45;
 
+  /**
+   * The player's volume (general × music, 0–1): `aplicarPreferencias.ts` plugs it in. `VOLUME` is the mix level of the
+   * track at full volume, not the player's choice.
+   */
+  static fator: () => number = () => 1;
+  /** The pause ducks the music while it is open (1 = not ducked). */
+  private static abafo = 1;
+
+  private static alvo(): number {
+    return Music.VOLUME * Music.fator() * Music.abafo;
+  }
+
+  /** The preference changed: the playing track goes to the new level at once, without restarting. */
+  static atualizarVolume(): void {
+    (Music.current as unknown as { setVolume(v: number): void } | null)?.setVolume(Music.alvo());
+  }
+
+  /** Ducks the playing track to `k` of its level (the pause: 0.4) or restores it (1), in `ms`. */
+  static abafar(scene: Phaser.Scene, k: number, ms: number): void {
+    Music.abafo = k;
+    if (!Music.current) return;
+    if (ms <= 0) Music.atualizarVolume();
+    else scene.tweens.add({ targets: Music.current, volume: Music.alvo(), duration: ms });
+  }
+
   static play(scene: Phaser.Scene, key: Track, fadeMs = 800): void {
     if (Music.currentKey === key && Music.current?.isPlaying) return;
     if (!scene.cache.audio.exists(key)) return;
@@ -30,7 +55,7 @@ export class Music {
     // A nova entra subindo...
     scene.tweens.add({
       targets: nova,
-      volume: Music.VOLUME,
+      volume: Music.alvo(),
       duration: fadeMs,
     });
 

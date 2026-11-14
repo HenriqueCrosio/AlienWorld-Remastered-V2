@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { ligarPausa } from '../pausa/abrirPausa';
 import { GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
 import { cenaDeFundoHD, removerCenaHD } from '../uiHD';
@@ -114,9 +115,8 @@ export class HangarScene extends Phaser.Scene {
         if (confirmar(e)) escolherNave(this.registry, escolhaDoEstado(e));
       }));
     }
-    kb.on('keydown-ESC', umaVez(() => {
-      if (e.tConfirmou === null) this.scene.start('Menu', { direto: true });
-    }));
+    // A PAUSA (14/11, bloco M1): o ESC abre a janela (continuar · configurações · sair), não sai mais direto.
+    ligarPausa(this, { tipo: 'escolha', sair: () => this.scene.start('Menu', { direto: true }), podeAbrir: () => e.tConfirmou === null });
   }
 
   override update(_time: number, delta: number): void {

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { forcaDosClaroes } from '../../aplicarPreferencias';
 import { CLARAO, raioDoImpacto, teto } from './claraoRegras';
 import { texturaDisco, texturaVinheta } from './texturasClarao';
 
@@ -26,7 +27,7 @@ export class Clarao {
 
   /** O pico de um clarão novo, já com o teto e a força geral. */
   private pico(base: number): number {
-    return base * teto(janela, this.scene.time.now) * CLARAO.forca;
+    return base * teto(janela, this.scene.time.now) * CLARAO.forca * forcaDosClaroes();
   }
 
   /** Toca os quadros da textura (a luz morrendo) em `ms` e destrói a imagem. */

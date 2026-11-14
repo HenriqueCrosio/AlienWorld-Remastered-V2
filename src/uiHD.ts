@@ -48,6 +48,8 @@ let s = 3;
 
 /** A camada, ou `null` se ela não nasceu — aí o texto fica no mundo (`ui.ts`). */
 export const jogoHD = (): Phaser.Game | null => jogo;
+/** The WORLD game the layer was born over (`null` without the layer): the pause runs there, even over the card table. */
+export const jogoMundo = (): Phaser.Game | null => mundo;
 export const ehHD = (scene: Phaser.Scene): boolean => jogo !== null && scene.game === jogo;
 /** Pixels de tela por pixel do mundo. */
 export const escalaHD = (): number => s;

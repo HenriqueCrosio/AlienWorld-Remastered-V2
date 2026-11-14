@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { ligarPausa } from '../pausa/abrirPausa';
+import { RAPIDO, avancoRapido } from '../pausa/avancoRapido';
 import { claraoDe } from '../systems/clarao/Clarao';
 import { CLARAO } from '../systems/clarao/claraoRegras';
 import { COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config';
@@ -199,6 +201,8 @@ export class Interlude2Scene extends Phaser.Scene {
     this.naveId = SHIPS[data.ship ?? ''] ? data.ship! : DEFAULT_SHIP;
     this.proxima = data.stage ?? 3;
     this.done = false;
+    avancoRapido(this, 1);
+    ligarPausa(this, { tipo: 'cutscene', pular: () => this.pular(), sair: () => this.sair(), podeAbrir: () => !this.done });
     this.panel = null;
     this.amarras = [];
     this.luzes = [];
@@ -704,6 +708,8 @@ export class Interlude2Scene extends Phaser.Scene {
    */
   private escolha(): void {
     if (this.done) return;
+    // a escolha é sempre no relógio normal (o PULAR da pausa a alcança correndo, e para aqui)
+    avancoRapido(this, 1);
 
     // PROTÓTIPO DAS CARTAS: a alien está AQUI, largada na doca. O painel oferece o CERTO e o INCERTO:
     // - ficar na humana → a carta normal da conquista (≥1 Rara);
@@ -724,8 +730,18 @@ export class Interlude2Scene extends Phaser.Scene {
           );
         }
       },
-      () => this.sair(),
+      // o ESC é da PAUSA (14/11): o painel não sai mais sozinho para o menu
+      () => {},
     );
+  }
+
+  /**
+   * PULAR A CENA (14/11, bloco M1), pela janela da pausa — a cena não tem TECLA de pular, de propósito. A cena corre
+   * RÁPIDA até a escolha (pular nunca custa uma carta) e, depois dela, até a fase seguinte.
+   */
+  private pular(): void {
+    if (this.done) return;
+    avancoRapido(this, RAPIDO);
   }
 
   private sair(): void {

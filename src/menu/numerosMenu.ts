@@ -153,7 +153,7 @@ export const TEMPESTADE = {
 /** §6.1–6.2 O véu, o lugar das coisas e a queda do letreiro. */
 export const ABERTURA = {
   veu: 1.2,
-  layout: { x: 192, titulo: 58, sub: 71, lista: [178, 188, 198], desc: 208 },
+  layout: { x: 192, titulo: 58, sub: 71, lista: [168, 178, 188, 198], desc: 208 },
   letreiro: {
     t0: 3.0, yIni: -30, queima: 3.8, forma: 2.4, sobra: 2.5,
     molaY: { periodo: 0.9, amortecimento: 0.55 },
@@ -239,8 +239,9 @@ export const CORES_TEXTO = {
 } as const;
 
 /** §7.2 Os itens da lista. */
-export const ITEM = { comecar: 0, conducao: 1, arquivo: 2 } as const;
-export const NOMES_ITENS = ['COMEÇAR', 'CONDUÇÃO', 'ARQUIVO DE CARTAS'] as const;
+export const ITEM = { comecar: 0, conducao: 1, arquivo: 2, config: 3 } as const;
+/** CONFIGURAÇÕES entrou em 14/11 (bloco M1): a lista tem 4 linhas (3 sem a camada HD: o Arquivo sai, as outras ficam). */
+export const NOMES_ITENS = ['COMEÇAR', 'CONDUÇÃO', 'ARQUIVO DE CARTAS', 'CONFIGURAÇÕES'] as const;
 
 export const CONDUCOES = [
   { id: 'diegetico', nome: 'DIEGÉTICA', desc: 'a gravidade decide · recomendado', cor: 0x3ee0f0 },

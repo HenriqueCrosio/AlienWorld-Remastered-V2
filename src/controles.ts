@@ -36,6 +36,8 @@ export const PERFIS: Record<Perfil, Mapa> = {
 };
 
 export const CHAVE_STORAGE = 'aw.teclas';
+/** Emitted on `game.events` when the SETTINGS change the key profile: every live `InputReader` re-reads the map. */
+export const EVENTO_TECLAS = 'pref:teclas';
 
 const ehPerfil = (v: unknown): v is Perfil => v === 'padrao' || v === 'classico';
 

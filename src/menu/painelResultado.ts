@@ -4,6 +4,7 @@ import { pixelText } from '../ui';
 import { escalaHD, irmaDe, registrarTextoHD, type Voz } from '../uiHD';
 import { mapaAtivo, rotuloDaTecla } from '../controles';
 import type { Medalha } from '../placar';
+import { css, textura, texturaJanela as moldura } from '../ui/janela';
 import { RESULTADO } from './numerosMenu';
 import { alfaResultado, pontosMostrados, type ParteResultado } from './resultado';
 
@@ -59,25 +60,12 @@ function carregarAssinatura(): Promise<boolean> {
   return fonteAssinatura;
 }
 
-const css = (c: number, a = 1): string => `rgba(${(c >> 16) & 255},${(c >> 8) & 255},${c & 255},${a})`;
 const escuro = (c: number, k: number): number =>
   (Math.round(((c >> 16) & 255) * k) << 16) | (Math.round(((c >> 8) & 255) * k) << 8) | Math.round((c & 255) * k);
 const claro = (c: number, k: number): number => {
   const m = (v: number): number => Math.round(v + (255 - v) * k);
   return (m((c >> 16) & 255) << 16) | (m((c >> 8) & 255) << 8) | m(c & 255);
 };
-
-/** Uma textura desenhada pixel a pixel (1 texel = 1 px de jogo), uma vez por jogo. */
-function textura(scene: Phaser.Scene, chave: string, w: number, h: number, desenhar: (c: CanvasRenderingContext2D) => void): string {
-  if (!scene.textures.exists(chave)) {
-    const t = scene.textures.createCanvas(chave, w, h);
-    if (t) {
-      desenhar(t.context);
-      t.refresh();
-    }
-  }
-  return chave;
-}
 
 /** A MEDALHA em pixel: a fita em duas pernas (a cor da nave e a do inimigo) e o disco com aro, brilho e miolo. */
 function texturaMedalha(scene: Phaser.Scene, cor: number): string {
@@ -112,26 +100,13 @@ function texturaMedalha(scene: Phaser.Scene, cor: number): string {
 }
 
 const OSSO = RESULTADO.cores.titulo;
-const FUNDO = 0x07080f;
 
-/** A JANELA dos placares de fim de fase: a caixa escura de borda dupla, as linhas com pontilhado até o valor. */
+/**
+ * A JANELA dos placares de fim de fase: a caixa escura de borda dupla (a moldura do jogo, `src/ui/janela.ts`, a mesma
+ * da pausa desde 14/11), as linhas com pontilhado até o valor.
+ */
 function texturaJanela(scene: Phaser.Scene, w: number, h: number, linhas: readonly number[]): string {
-  return textura(scene, `res-janela-${w}x${h}`, w, h, (c) => {
-    c.fillStyle = css(FUNDO, 0.78);
-    c.fillRect(1, 1, w - 2, h - 2);
-    const borda = (m: number, cor: number, a: number): void => {
-      c.fillStyle = css(cor, a);
-      c.fillRect(m + 1, m, w - 2 * m - 2, 1);
-      c.fillRect(m + 1, h - 1 - m, w - 2 * m - 2, 1);
-      c.fillRect(m, m + 1, 1, h - 2 * m - 2);
-      c.fillRect(w - 1 - m, m + 1, 1, h - 2 * m - 2);
-    };
-    borda(0, OSSO, 0.95);
-    borda(1, 0x000000, 0.9);
-    borda(2, COLORS.player, 0.7);
-    // os cantos: um pixel de brilho
-    c.fillStyle = css(0xffffff);
-    for (const [x, y] of [[1, 1], [w - 2, 1], [1, h - 2], [w - 2, h - 2]]) c.fillRect(x, y, 1, 1);
+  return moldura(scene, `res-janela-${w}x${h}`, w, h, (c) => {
     // o pontilhado de cada linha, do rótulo mais longo ("★ NOVO RECORDE") até antes dos algarismos
     c.fillStyle = css(OSSO, 0.35);
     for (const y of linhas) for (let x = 84; x < w - 54; x += 3) c.fillRect(x, y, 1, 1);

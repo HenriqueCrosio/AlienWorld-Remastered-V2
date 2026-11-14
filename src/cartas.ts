@@ -199,6 +199,8 @@ export function mesaDaCutscene(
       depois();
     },
     onSair,
+    // o ESC na mesa abre a PAUSA (14/11, bloco M1); o SAIR dela chama `onSair`
+    pausa: true,
   });
 }
 

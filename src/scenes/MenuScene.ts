@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { abrirPausa } from '../pausa/abrirPausa';
 import { GAME_WIDTH } from '../config';
 import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
@@ -73,6 +74,10 @@ export class MenuScene extends Phaser.Scene {
   private naCamada = false;
   private itens: Phaser.GameObjects.Text[] = [];
   private coresItens: number[] = [];
+  /** O ITEM de cada linha da lista (sem a camada HD o Arquivo sai e CONFIGURAÇÕES sobe uma linha). */
+  private mostrados: number[] = [];
+  /** A altura de cada linha: as últimas de `ABERTURA.layout.lista` (a lista cresce para cima). */
+  private ysLista: number[] = [];
   private sub: Phaser.GameObjects.Text | null = null;
   private desc: Phaser.GameObjects.Text | null = null;
   /** A 2ª linha das teclas de dev (só em dev): mostra a pintura da nave que [H] troca. */
@@ -164,11 +169,13 @@ export class MenuScene extends Phaser.Scene {
   private montarTexto(): void {
     const L = ABERTURA.layout;
     this.sub = this.t(L.x, -40, SUBTITULO, 8, CORES_TEXTO.subApagado).setAlpha(0);
-    // O ARQUIVO desenha os ícones na camada HD: sem ela, a lista é só COMEÇAR e a condução.
-    const n = jogoHD() ? NOMES_ITENS.length : NOMES_ITENS.length - 1;
+    // O ARQUIVO desenha os ícones na camada HD: sem ela, ele sai da lista (as outras linhas ficam).
+    this.mostrados = [ITEM.comecar, ITEM.conducao, ITEM.arquivo, ITEM.config].filter((it) => it !== ITEM.arquivo || !!jogoHD());
+    const n = this.mostrados.length;
+    this.ysLista = L.lista.slice(L.lista.length - n);
     this.cursorMenu = Math.min(this.cursorMenu, n - 1);
     for (let i = 0; i < n; i++) {
-      this.itens.push(this.t(L.x, L.lista[i] - 40, NOMES_ITENS[i], 8, CORES_TEXTO.item).setAlpha(0));
+      this.itens.push(this.t(L.x, this.ysLista[i] - 40, NOMES_ITENS[this.mostrados[i]], 8, CORES_TEXTO.item).setAlpha(0));
       this.coresItens.push(CORES_TEXTO.item);
     }
     this.desc = this.t(L.x, L.desc, ' ', 7, CONDUCOES[0].cor).setAlpha(0);
@@ -261,7 +268,7 @@ export class MenuScene extends Phaser.Scene {
     const L = ABERTURA.layout;
     const c = CONDUCOES.find((x) => x.id === this.conducao) ?? CONDUCOES[0];
     this.itens.forEach((o, i) => {
-      const nome = i === ITEM.conducao ? `CONDUÇÃO: ${c.nome}` : NOMES_ITENS[i];
+      const nome = i === ITEM.conducao ? `CONDUÇÃO: ${c.nome}` : NOMES_ITENS[this.mostrados[i]];
       const sel = i === this.cursorMenu;
       const txt = sel ? `> ${nome} <` : nome;
       if (o.text !== txt) o.setText(txt);
@@ -271,7 +278,7 @@ export class MenuScene extends Phaser.Scene {
         this.coresItens[i] = cor;
       }
       const { dy, alfa } = quedaLista(i, t);
-      o.setPosition(L.x, q(L.lista[i] + dy));
+      o.setPosition(L.x, q(this.ysLista[i] + dy));
       o.setAlpha(alfa * alfaItem(sel, t, this.tCursor, this.settled));
     });
     if (this.desc) {
@@ -424,9 +431,25 @@ export class MenuScene extends Phaser.Scene {
   private confirmar(): void {
     if (!this.settled) return;
     // COMEÇAR passa pelo HANGAR (25/10): o jogador escolhe a nave antes da F1. Os atalhos 1/2/3 seguem direto.
-    if (this.cursorMenu === ITEM.comecar) this.scene.start('Hangar', { handling: this.conducao });
-    else if (this.cursorMenu === ITEM.conducao) this.trocar(1);
-    else if (this.cursorMenu === ITEM.arquivo) this.scene.start('Arquivo');
+    const item = this.mostrados[this.cursorMenu];
+    if (item === ITEM.comecar) this.scene.start('Hangar', { handling: this.conducao });
+    else if (item === ITEM.conducao) this.trocar(1);
+    else if (item === ITEM.arquivo) this.scene.start('Arquivo');
+    else if (item === ITEM.config) this.abrirConfiguracoes();
+  }
+
+  /**
+   * CONFIGURAÇÕES (14/11, bloco M1): a janela grande sobre a pintura viva (o menu segue animado; só o teclado dele
+   * cala). Ao fechar, se a escolha entre a noite e o amanhecer mudou, o menu reabre no outro, pousado.
+   */
+  private abrirConfiguracoes(): void {
+    abrirPausa(this, {
+      tipo: 'menu',
+      aoFechar: () => {
+        const forcado = menuDaUrl() ?? ((this.registry.get('menuForcado') as QualMenu | undefined) ?? null);
+        if (menuAtivo(guardaDoNavegador(), forcado) !== this.qual) this.scene.start('Menu', { direto: true, cursor: this.cursorMenu });
+      },
+    });
   }
 
   private start(handling: HandlingMode): void {

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { ligarPausa } from '../pausa/abrirPausa';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { FAMILIA, fontesOk } from '../fonte';
 import { EVENTO_ESCALA, ehHD, escalaHD, jogoHD, mouseHD, pixelFino, prepararCameraHD, registrarTextoHD } from '../uiHD';
@@ -34,6 +35,11 @@ export interface CartasData {
   onEscolha: (id: string) => void;
   /** ESC: sair do jogo. Só a cutscene passa (a fase tem o ESC dela, e ela está pausada por baixo). */
   onSair?: () => void;
+  /**
+   * A mesa de uma PARTIDA (fase ou cutscene): o ESC abre a PAUSA (14/11, bloco M1), e o SAIR dela chama `onSair`. Sem
+   * isto (o sandbox, a montagem), o ESC segue chamando `onSair` direto.
+   */
+  pausa?: boolean;
 }
 
 type TipoGrupo = 'nome' | 'efeito' | 'requer' | 'raridade' | 'icone';
@@ -177,7 +183,18 @@ export class CartasScene extends Phaser.Scene {
     // A tecla de TIRO do perfil confirma (Espaço no padrão, Z no clássico). O J saiu com o mapa de 03/10.
     for (const t of mapaAtivo().tiro) kb.on(`keydown-${t}`, novo(() => this.confirmar(this.cursor)));
     const sair = data.onSair;
-    if (sair) {
+    if (data.pausa) {
+      ligarPausa(this, {
+        tipo: 'escolha',
+        podeAbrir: () => !this.fechando,
+        sair: () => {
+          if (this.fechando) return;
+          this.fechando = true;
+          this.scene.stop();
+          sair?.();
+        },
+      });
+    } else if (sair) {
       kb.on('keydown-ESC', () => {
         if (this.fechando) return;
         this.fechando = true;

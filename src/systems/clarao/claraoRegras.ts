@@ -8,7 +8,7 @@
  * O teste `scripts/test-claroes.mjs` o importa direto.
  */
 export const CLARAO = {
-  /** multiplica todo pico: o gancho da opção "reduzir clarões" do menu de OPÇÕES (a etapa 1.55) */
+  /** multiplica todo pico. A opção "reduzir clarões" (14/11, M1) é OUTRO fator, por cima: `forcaDosClaroes()`. */
   forca: 1,
   /** a queda de luz é quantizada nestes níveis pelo Bayer 4×4 … */
   niveis: 4,

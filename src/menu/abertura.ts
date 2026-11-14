@@ -1,4 +1,4 @@
-import { ABERTURA, ACENDE, AVARIA, JATOS, LISTA, REPOUSO, SUBTITULO, TITULO } from './numerosMenu.ts';
+import { ABERTURA, ACENDE, AVARIA, JATOS, LISTA, NOMES_ITENS, REPOUSO, SUBTITULO, TITULO } from './numerosMenu.ts';
 import { hash4, suave } from './acaso.ts';
 
 /**
@@ -120,7 +120,7 @@ export function quedaLista(i: number, t: number): { dy: number; alfa: number } {
 }
 
 /** A lista inteira pousou: o menu aceita teclas. */
-export const T_LISTA_POUSA = LISTA.t0 + 2 * LISTA.passo + LISTA.assenta;
+export const T_LISTA_POUSA = LISTA.t0 + (NOMES_ITENS.length - 1) * LISTA.passo + LISTA.assenta;
 
 /** No repouso: o item do cursor pisca (1 → 0,4), os outros ficam a 0,7. */
 export function alfaItem(selecionado: boolean, t: number, tCursor: number, pousado: boolean): number {

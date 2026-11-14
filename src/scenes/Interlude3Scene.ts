@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { ligarPausa } from '../pausa/abrirPausa';
+import { RAPIDO, avancoRapido } from '../pausa/avancoRapido';
 import { claraoDe } from '../systems/clarao/Clarao';
 import { CLARAO } from '../systems/clarao/claraoRegras';
 import { COLORS, GAME_WIDTH } from '../config';
@@ -309,6 +311,8 @@ export class Interlude3Scene extends Phaser.Scene {
     this.naveId = SHIPS[data.ship ?? ''] ? data.ship! : DEFAULT_SHIP;
     this.proxima = data.stage ?? 4;
     this.done = false;
+    avancoRapido(this, 1);
+    ligarPausa(this, { tipo: 'cutscene', pular: () => this.pular(), sair: () => this.sair(), podeAbrir: () => !this.done });
     this.panel = null;
     this.alarme = false;
     this.cadeiaX = [];
@@ -779,11 +783,22 @@ export class Interlude3Scene extends Phaser.Scene {
    */
   private escolha(): void {
     if (this.done) return;
+    // a escolha é sempre no relógio normal (o PULAR da pausa a alcança correndo, e para aqui)
+    avancoRapido(this, 1);
 
     // PROTÓTIPO DAS CARTAS: a MESA DA CONQUISTA da Serpente — a única que pode trazer ÉPICA.
     mesaDaCutscene(this, 'CONQUISTA · A SERPENTE', { fase: 4, garante: 'rara', pesos: { epica: 12 } }, () =>
       this.escolher(this.naveId), () => this.sair(),
     );
+  }
+
+  /**
+   * PULAR A CENA (14/11, bloco M1), pela janela da pausa — a cena não tem TECLA de pular, de propósito. A cena corre
+   * RÁPIDA até a escolha (pular nunca custa uma carta) e, depois dela, até a fase seguinte.
+   */
+  private pular(): void {
+    if (this.done) return;
+    avancoRapido(this, RAPIDO);
   }
 
   private sair(): void {

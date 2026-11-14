@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { ligarPausa } from '../pausa/abrirPausa';
 import { claraoDe } from '../systems/clarao/Clarao';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import { Starfield } from '../Starfield';
@@ -820,7 +821,18 @@ export class GameScene extends Phaser.Scene {
 
     const kb = this.input.keyboard!;
     // No sandbox, ESC volta à MONTAGEM (com tudo como estava) — não ao menu.
-    kb.on('keydown-ESC', () => (this.sandbox ? this.voltarMontagem() : this.scene.start('Menu')));
+    if (this.sandbox) kb.on('keydown-ESC', () => this.voltarMontagem());
+    else {
+      // A PAUSA (14/11, bloco M1): o ESC não derruba mais a partida. REINICIAR é o retry da `GameOverScene`: a mesma
+      // fase, do placar de entrada, e `entrarNaFase` devolve a mão de cartas do checkpoint.
+      ligarPausa(this, {
+        tipo: 'fase',
+        reiniciar: () =>
+          this.scene.start('Game', { stage: this.stage.id, handling: this.handling, practice: this.practice, ship: this.shipId, score: this.scoreBase }),
+        sair: () => this.scene.start('Menu'),
+        podeAbrir: () => !this.over,
+      });
+    }
     if (this.sandbox) {
       this.medidas = new Medidas(() => this.time.now);
       this.arena = new SandboxArena(this, this.sandbox, this.enemies, this.medidas);

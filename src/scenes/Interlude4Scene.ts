@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { ligarPausa } from '../pausa/abrirPausa';
 import { resetVariantCache } from '../art';
 import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
@@ -67,6 +68,18 @@ export class Interlude4Scene extends Phaser.Scene {
     this.practice = data.practice ?? false;
     this.baseScore = data.baseScore ?? 0;
     this.done = false;
+    // A PAUSA (14/11, bloco M1): pular a cena final vai direto ao resultado.
+    ligarPausa(this, {
+      tipo: 'cutscene',
+      pular: () => this.terminar(),
+      sair: () => {
+        if (this.done) return;
+        this.done = true;
+        this.capitulo?.limpar();
+        this.scene.start('Menu');
+      },
+      podeAbrir: () => !this.done,
+    });
     this.capitulo = null;
     this.estado = {
       capitulo: 0,

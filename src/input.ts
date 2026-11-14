@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { InputState } from './flight/FlightController';
-import { ACOES, mapaAtivo, type Acao, type Mapa } from './controles';
+import { ACOES, EVENTO_TECLAS, mapaAtivo, type Acao, type Mapa } from './controles';
 
 /**
  * Lê o teclado PELO MAPA DE TECLAS (`src/controles.ts`) e devolve um InputState neutro.
@@ -15,14 +15,29 @@ import { ACOES, mapaAtivo, type Acao, type Mapa } from './controles';
  * O mouse não entra mais no jogo (03/10): ele atirava e fazia flap — entrada duplicada.
  */
 export class InputReader {
-  private readonly mapa: Mapa;
+  private mapa: Mapa;
   private readonly keys = new Map<string, Phaser.Input.Keyboard.Key>();
   /** As teclas que DESCERAM desde o último `read`. */
   private readonly desceram = new Set<string>();
 
   constructor(scene: Phaser.Scene) {
-    const kb = scene.input.keyboard!;
     this.mapa = mapaAtivo();
+    this.ligar(scene);
+    // The SETTINGS changed the key profile (14/11, M1): this reader re-reads the map without the scene restarting.
+    const reler = (): void => {
+      const kb = scene.input.keyboard!;
+      for (const nome of this.keys.keys()) kb.removeKey(nome, true);
+      this.keys.clear();
+      this.desceram.clear();
+      this.mapa = mapaAtivo();
+      this.ligar(scene);
+    };
+    scene.game.events.on(EVENTO_TECLAS, reler);
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => scene.game.events.off(EVENTO_TECLAS, reler));
+  }
+
+  private ligar(scene: Phaser.Scene): void {
+    const kb = scene.input.keyboard!;
     for (const a of ACOES) {
       for (const nome of this.mapa[a]) {
         if (this.keys.has(nome)) continue;

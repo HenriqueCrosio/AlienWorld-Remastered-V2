@@ -106,7 +106,7 @@ export const TEXTO = {
   nome: { y: 172, tamanho: 11 },
   pintura: { y: 186, tamanho: 8 },
   // As setas da mesa e do painel (`< >`): a Chakra Petch não tem ←→↑↓ (item 16, 17/10).
-  dica: { y: 205, texto: '[<  >] NAVE     [^  v] PINTURA     [ENTER] DECOLAR     [ESC] VOLTAR', tamanho: 6 },
+  dica: { y: 205, texto: '[<  >] NAVE     [^  v] PINTURA     [ENTER] DECOLAR     [ESC] PAUSA', tamanho: 6 },
   cor: 0xe8dcc8,
   corDica: 0x8d97aa,
   corDestaque: 0xffb347,
