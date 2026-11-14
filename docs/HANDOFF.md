@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-13) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-14) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -23,9 +23,66 @@ sprite que se desfaz nos próprios pixels).
 >
 > **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11, fechado de
 > vez) → I ✅ (13/11: 1 as explosões · o desvio do lança-mísseis do casco · 2 os clarões · 3 a tela final = o menu do
-> amanhecer) → **J (o pós-processamento)** → F.** Depois dos blocos: o rebalanceamento (cartas, a vida da enguia, a
+> amanhecer) → J ✅ (14/11, enxuto: a medição dos perfis, nenhum mudou) → **M (a moldura do jogo, 14/11; absorve a 1.55 e a 1.6:
+> M1 a pausa + as CONFIGURAÇÕES · M2 os controles · M3 a tela de fim de fase e de morte · M4 o carregamento)** → F.** Depois dos blocos: o rebalanceamento (cartas, a vida da enguia, a
 > saída da aranha do casco) e só então o som. Para a etapa 1.55 (o menu de OPÇÕES): a escolha entre o menu da noite e
 > o do amanhecer (só para quem zerou) e a opção "reduzir clarões".
+>
+> 📍 **14/11 — O ROADMAP MUDOU E O BLOCO J ABRIU ENXUTO (espera ele; nada commitado).** À pergunta 1 do START ele
+> devolveu outra: *"o que falta para dar cara de jogo lançado [...] ao aspecto de polimento de um jogo terminado?"*. A
+> resposta (conferida no código): pouco está no shader; o que denuncia protótipo é a MOLDURA do jogo — não existe pausa
+> (o `ESC` na fase volta ao menu e perde a partida), a `GameOverScene` (fase completa / nave perdida) é texto solto, o
+> boot não tem tela de carregamento nem a aba um favicon. Decisão dele: *"J enxuto e a moldura antes do F, mas agora é
+> para ser bem enxuto mesmo"*.
+> - **A ordem nova: J (só a calibragem dos perfis) → M, A MOLDURA DO JOGO (a pausa · a tela de fim de fase e de morte no
+>   padrão da tela final · o carregamento e o favicon) → F.** Bloom novo e CRT ficam FORA do J (o CRT, se entrar, é uma
+>   opção da 1.55).
+> - **O J, a medição:** `scripts/_j/_perfis-fotos.mjs` (uma foto de cada pintura 5 s depois de ela chegar à tela, com a
+>   claridade, os pontos de preto e de branco e a saturação) e `_perfis-folha.mjs` → a folha
+>   `folhas/2026-11-14/perfis/perfis.html`. As 11 pinturas das 4 fases: 9 ficam numa faixa só (claridade 20–31, preto
+>   2–6); saem a F3 Ato 1 (a nebulosa, 36) e a câmara B da F4 (a água, 41,6; preto 11,4) — as duas pela PINTURA e pela
+>   água, não pelo perfil (névoa e grão iguais aos das vizinhas). **Nenhum perfil mudou.** Ele viu a folha: *"Boa, vamos
+>   seguir então"* → **O J FECHOU sem tocar em shader.**
+> - **O BLOCO M ABRIU e cresceu (decisões dele, uma pergunta por vez):** as CONFIGURAÇÕES entram na pausa e no menu
+>   (volumes, teclas, tela cheia, reduzir clarões, o menu da noite ou do amanhecer), e ele quer também o remapear de
+>   teclado e de controle e o jogo reconhecendo o aparelho ativo. O M absorve as etapas 1.55 e 1.6, em quatro peças:
+>   **M1 a pausa + as CONFIGURAÇÕES → M2 os controles (Xbox/PS, o aviso do aparelho ativo, o remapear) → M3 a tela de
+>   fim de fase e de morte → M4 o carregamento e o favicon.** Do M1: uma janela sobre o jogo parado no desenho da do
+>   placar (PEQUENA na pausa, GRANDE nas configurações), abas ÁUDIO · CONTROLES · VÍDEO · JOGO, a pausa nas fases e nas
+>   cutscenes (PULAR A CENA no lugar de REINICIAR), e as preferências num objeto só, com a ponta pronta para o perfil
+>   do usuário (*"entrar em qualquer navegador ou mobiles (futuramente) e jogar com suas preferências"*). **Spec do M1:
+>   `specs/2026-11-14-bloco-m1-pausa-configuracoes-design.md`; plano `plans/2026-11-14-bloco-m1-pausa-configuracoes.md`.**
+> - **O M1 IMPLEMENTADO (14/11; espera ele ver a folha e jogar; nada commitado).** Folha
+>   `folhas/2026-11-14/pausa/pausa.html`. No jogo: `src/preferencias.ts` (puro: o objeto versionado
+>   `alienworld:preferencias`, espelha `aw.teclas` e, para quem zerou, `alienworld:menu`), `src/aplicarPreferencias.ts`
+>   (`prefs()`, `mudarPref`, `forcaDosClaroes()`, `volumeEfeitos()`), `src/pausa/numerosPausa.ts` (puro: as linhas, as
+>   abas, a navegação como `passo(estado, tecla)`), `src/pausa/abrirPausa.ts` (`ligarPausa(scene, opts)`, a pausa
+>   automática no `blur`), `src/scenes/PausaScene.ts`, `src/ui/janela.ts` (a moldura do placar extraída; a textura da
+>   tela final saiu IDÊNTICA: `scripts/_m/_resultado-foto.mjs`), `src/pausa/avancoRapido.ts`. `Music` ganhou `fator`,
+>   `atualizarVolume` e `abafar` (a pausa baixa a música a 40%); o `InputReader` relê o mapa no evento `EVENTO_TECLAS`;
+>   o menu tem 4 linhas (`lista: [168, 178, 188, 198]`; sem a camada HD o Arquivo sai e CONFIGURAÇÕES fica).
+>   - **Duas decisões tomadas na implementação (dizer a ele):** PULAR A CENA = a cutscene corre a 12× (`avancoRapido`)
+>     até a MESA de cartas e para lá — pular nunca custa uma carta; depois da escolha, corre até a fase seguinte (cortar
+>     a cadeia de timers deixaria a cena pela metade). E no menu principal a cena NÃO é pausada (a pintura segue viva),
+>     só o teclado dela cala.
+>   - **As armadilhas:** dois jogos Phaser ouvem a mesma tecla (o ESC que fecha a pausa no mundo reabria a mesa na HD
+>     um quadro depois): cada abrir/fechar guarda o `timeStamp` do evento e ignora o que é mais velho. Com a mesa
+>     aberta numa cutscene, só a MESA abre a pausa (a cutscene roda por baixo e ouviria o mesmo ESC). A irmã HD da
+>     pausa sobe ao topo da camada (`bringToTop`), senão a janela ficava atrás das cartas. O `ShipPanel` da Doca perdeu
+>     o ESC = menu. A dica do hangar virou `[ESC] PAUSA`.
+>   - **Testes:** `test-preferencias.mjs`, `test-pausa.mjs` (regras), `test-pausa-jogo.mjs` (no navegador: fase,
+>     config, cutscene, hangar, menu, e `igual` — a mesma F2 com e sem pausa no meio chega ao mesmo estado). Build e os
+>     33 testes ok; a `probe-menu` ajustada (4 linhas). ⚠️ O `igual` compara posição a posição só quando duas corridas
+>     retas saem iguais entre si (às vezes o carregamento as desalinha; aí compara o relógio e as contagens).
+>   - **O retorno dele (14/11):** *"O restante ficou ótimo e funciona bem"*; o defeito: em tela cheia, o 1º ESC saía da
+>     tela cheia e só o 2º fechava a janela (o navegador é dono do ESC em tela cheia). Conserto: `src/telaCheia.ts`
+>     pede a trava de teclado (`navigator.keyboard.lock(['Escape'])`) enquanto a tela cheia dura — o ESC chega ao jogo,
+>     e o navegador só sai da tela cheia com o ESC SEGURADO. Só existe no Chrome, Edge e Opera; no Firefox e no Safari
+>     não há o que fazer pela página, e a aba VÍDEO avisa. **Espera ele conferir** (o navegador automático não dá tela
+>     cheia).
+>   - **Não conferido:** a tela cheia (o navegador automático não a concede); o volume com som de verdade (sem áudio
+>     no navegador automático: só o número gravado e o teto do volume); a pausa durante as lutas de chefão e a
+>     cutscene final (a regra é a mesma, não foram filmadas). **O próximo: o olho dele na folha e jogando → o M2.**
 >
 > 📍 **13/11 (fim) — O BLOCO I FECHOU: COMMITADO E EMPURRADO a pedido dele** para `origin/feat/cartas-preview`, em três
 > commits: `7bed58e` (o jogo), `a8cb98b` (as ferramentas, os testes e as folhas, sem os vídeos e os `q/`; as imagens
