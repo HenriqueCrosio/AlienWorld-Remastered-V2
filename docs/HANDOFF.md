@@ -125,8 +125,9 @@ sprite que se desfaz nos próprios pixels).
 >          HUD mora naquele canto). O teclado fica sempre aceso (uma página não consegue detectá-lo).
 >     - **O M2 FECHADO (14/11):** *"Gostei do que foi feito [...] Tudo confirmado"*. A vibração: *"o chrome não suporta
 >       vibração para controle de ps. mas tudo bem"* (fica como está: funciona onde o navegador a oferece). Os símbolos
->       de aparelho ficam só no menu e na pausa (*"durante o jogo não precisa"*). **COMMITADO E EMPURRADO a pedido dele.
->       O próximo: o M3, a tela de fim de fase e de morte no padrão da tela final.**
+>       de aparelho ficam só no menu e na pausa (*"durante o jogo não precisa"*). **COMMITADO E EMPURRADO a pedido dele**
+>       (`0959477` o jogo, `7e2ce93` os testes, as ferramentas, a folha e os ícones, `f247c99` os docs).
+>       **O próximo: o M3, a tela de fim de fase e de morte no padrão da tela final.**
 >     - **NÃO conferido (só ele consegue):** um controle DE VERDADE (Xbox e PlayStation: os botões no lugar, os
 >       gatilhos, a vibração, o reconhecimento da família); as telas da mesa de cartas, do Arquivo e do painel da Doca
 >       com o controle (ligadas, mas sem teste automático próprio).
