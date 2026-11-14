@@ -68,7 +68,7 @@ conferir(e.d.titulo.acesas > 0 && e.d.titulo.acesas < 10 && !e.d.titulo.olhos, `
 e = await em(9.4);
 conferir(e.d.jatos === 0 && Math.abs(e.d.titulo.y - 58) <= 0.3, '9,4 s: firme em y 58, sem jatos', e.d);
 conferir(Math.abs(e.d.sub.y - (e.d.titulo.y + 13)) <= tol, 'o REMASTERED 13 px abaixo', [e.d.sub, e.d.titulo]);
-conferir(e.d.lista.every((l, i) => Math.abs(l.y - [178, 188, 198][i]) <= 0.3) && e.settled, 'a lista pousada no lugar; o menu aceita teclas', e.d.lista);
+conferir(e.d.lista.every((l, i) => Math.abs(l.y - [168, 178, 188, 198][i]) <= 0.3) && e.settled, 'a lista pousada no lugar; o menu aceita teclas', e.d.lista);
 e = await em(10.2);
 conferir(e.d.titulo.acesas === 10 && !e.d.titulo.olhos, '10,2 s: aceso inteiro, ainda sem os olhos', e.d.titulo);
 e = await em(10.6);
@@ -182,7 +182,7 @@ const sem = await page.evaluate(() => {
   return { hd: !!window.__gameHD, cenario: !!m.cenario, itens: m.diagnostico().lista.length, titulo: !!m.diagnostico().titulo };
 });
 conferir(!sem.hd && sem.cenario, 'sem a camada HD, o cenário roda no próprio menu (k1)', sem);
-conferir(sem.itens === 2 && sem.titulo, 'a lista sem o ARQUIVO, e o título em texto', sem);
+conferir(sem.itens === 3 && sem.titulo, 'a lista sem o ARQUIVO (COMEÇAR, a condução e CONFIGURAÇÕES), e o título em texto', sem);
 await page.keyboard.press('KeyQ');
 await page.waitForTimeout(300);
 await page.screenshot({ path: 'probe-menu-semhd.png' });

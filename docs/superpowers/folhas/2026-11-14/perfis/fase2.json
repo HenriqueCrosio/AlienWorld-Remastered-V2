@@ -1,0 +1,27 @@
+[
+  {
+    "pintura": "paintBgF2",
+    "t": 5.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF2",
+      "densidade": 0.6,
+      "grao": 0.525,
+      "gradeQuente": 1,
+      "limpos": 10,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 20.1,
+      "p5": 4.2,
+      "p95": 42.9,
+      "sat": 0.736,
+      "cor": [
+        13,
+        21,
+        36
+      ]
+    }
+  }
+]

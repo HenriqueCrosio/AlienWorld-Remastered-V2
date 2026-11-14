@@ -1,0 +1,344 @@
+[
+  {
+    "nome": "f1-pausa",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "PAUSA",
+      "CONTINUAR",
+      "REINICIAR A FASE",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU"
+    ]
+  },
+  {
+    "nome": "f1-confirma",
+    "estado": {
+      "tela": "confirma",
+      "acao": "reiniciar",
+      "sim": false
+    },
+    "textos": [
+      "TEM CERTEZA?",
+      "a fase recomeça do início",
+      "NÃO",
+      "SIM"
+    ]
+  },
+  {
+    "nome": "f1-audio",
+    "estado": {
+      "tela": "config",
+      "aba": 0,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "VOLUME GERAL",
+      "10",
+      "MÚSICA",
+      "10",
+      "EFEITOS",
+      "10",
+      "os efeitos sonoros chegam numa versão futura",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "f1-audio-musica7",
+    "estado": {
+      "tela": "config",
+      "aba": 0,
+      "linha": 1
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "VOLUME GERAL",
+      "10",
+      "MÚSICA",
+      "7",
+      "EFEITOS",
+      "10",
+      "os efeitos sonoros chegam numa versão futura",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "f1-controles",
+    "estado": {
+      "tela": "config",
+      "aba": 1,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "TECLAS",
+      "<  PADRÃO  >",
+      "MOVER",
+      "W A S D  ou  SETAS",
+      "TIRO",
+      "ESPAÇO",
+      "BOMBA",
+      "SHIFT",
+      "DASH",
+      "E",
+      "FLARE",
+      "F",
+      "MÍSSIL",
+      "Q",
+      "PAUSA",
+      "ESC",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "f1-controles-classico",
+    "estado": {
+      "tela": "config",
+      "aba": 1,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "TECLAS",
+      "<  CLÁSSICO  >",
+      "MOVER",
+      "W A S D  ou  SETAS",
+      "TIRO",
+      "Z",
+      "BOMBA",
+      "X",
+      "DASH",
+      "C",
+      "FLARE",
+      "F",
+      "MÍSSIL",
+      "V",
+      "PAUSA",
+      "ESC",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "f1-video",
+    "estado": {
+      "tela": "config",
+      "aba": 2,
+      "linha": 1
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "TELA CHEIA",
+      "DESLIGADA",
+      "REDUZIR CLARÕES",
+      "<  DESLIGADO  >",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "f1-faixa-das-abas",
+    "estado": {
+      "tela": "config",
+      "aba": 2,
+      "linha": -1
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "TELA CHEIA",
+      "DESLIGADA",
+      "REDUZIR CLARÕES",
+      "DESLIGADO",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "f3-pausa",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "PAUSA",
+      "CONTINUAR",
+      "REINICIAR A FASE",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU"
+    ]
+  },
+  {
+    "nome": "f3-audio",
+    "estado": {
+      "tela": "config",
+      "aba": 0,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "VOLUME GERAL",
+      "10",
+      "MÚSICA",
+      "10",
+      "EFEITOS",
+      "10",
+      "os efeitos sonoros chegam numa versão futura",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "cutscene-pausa",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "PAUSA",
+      "CONTINUAR",
+      "PULAR A CENA",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU"
+    ]
+  },
+  {
+    "nome": "hangar-pausa",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "PAUSA",
+      "CONTINUAR",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU"
+    ]
+  },
+  {
+    "nome": "menu-noite-lista",
+    "estado": null,
+    "textos": []
+  },
+  {
+    "nome": "menu-noite-config",
+    "estado": {
+      "tela": "config",
+      "aba": 0,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "VOLUME GERAL",
+      "10",
+      "MÚSICA",
+      "10",
+      "EFEITOS",
+      "10",
+      "os efeitos sonoros chegam numa versão futura",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "menu-amanhecer-lista",
+    "estado": null,
+    "textos": []
+  },
+  {
+    "nome": "menu-amanhecer-config",
+    "estado": {
+      "tela": "config",
+      "aba": 0,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "VOLUME GERAL",
+      "10",
+      "MÚSICA",
+      "10",
+      "EFEITOS",
+      "10",
+      "os efeitos sonoros chegam numa versão futura",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "menu-aba-jogo",
+    "estado": {
+      "tela": "config",
+      "aba": 3,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "JOGO",
+      "MENU",
+      "<  AMANHECER  >",
+      "a tela de abertura: a colônia à noite ou ao amanhecer",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  },
+  {
+    "nome": "semhd-pausa",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "PAUSA",
+      "CONTINUAR",
+      "REINICIAR A FASE",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU"
+    ]
+  },
+  {
+    "nome": "semhd-controles",
+    "estado": {
+      "tela": "config",
+      "aba": 1,
+      "linha": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "TECLAS",
+      "<  PADRÃO  >",
+      "MOVER",
+      "W A S D  ou  SETAS",
+      "TIRO",
+      "ESPAÇO",
+      "BOMBA",
+      "SHIFT",
+      "DASH",
+      "E",
+      "FLARE",
+      "F",
+      "MÍSSIL",
+      "Q",
+      "PAUSA",
+      "ESC",
+      "[<  >] MUDAR     [Q  E] ABA     [ESC] VOLTAR"
+    ]
+  }
+]

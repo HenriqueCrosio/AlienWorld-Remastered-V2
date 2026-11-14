@@ -1,0 +1,77 @@
+[
+  {
+    "pintura": "paintBgF3",
+    "t": 5.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF3",
+      "densidade": 0.68,
+      "grao": 0.595,
+      "gradeQuente": 1,
+      "limpos": 10,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 36,
+      "p5": 7.4,
+      "p95": 89.5,
+      "sat": 0.548,
+      "cor": [
+        31,
+        36,
+        51
+      ]
+    }
+  },
+  {
+    "pintura": "paintBgF3Casco",
+    "t": 60.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF3Casco",
+      "densidade": 0.68,
+      "grao": 0.595,
+      "gradeQuente": 1,
+      "limpos": 10,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 29.4,
+      "p5": 6,
+      "p95": 64,
+      "sat": 0.519,
+      "cor": [
+        25,
+        30,
+        39
+      ]
+    }
+  },
+  {
+    "pintura": "paintBgF3Arena",
+    "t": 96.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF3Arena",
+      "densidade": 0.6,
+      "grao": 0.525,
+      "gradeQuente": 1,
+      "limpos": 10,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 30.7,
+      "p5": 6.2,
+      "p95": 66.9,
+      "sat": 0.498,
+      "cor": [
+        26,
+        31,
+        40
+      ]
+    }
+  }
+]

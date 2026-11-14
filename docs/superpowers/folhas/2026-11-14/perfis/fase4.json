@@ -1,0 +1,102 @@
+[
+  {
+    "pintura": "paintBgF4a",
+    "t": 5.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF4a",
+      "densidade": 0.68,
+      "grao": 0.595,
+      "gradeQuente": 1,
+      "limpos": 7,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 21.8,
+      "p5": 3.3,
+      "p95": 50.3,
+      "sat": 0.525,
+      "cor": [
+        20,
+        22,
+        28
+      ]
+    }
+  },
+  {
+    "pintura": "paintBgF4b",
+    "t": 44.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF4b",
+      "densidade": 0.68,
+      "grao": 0.595,
+      "gradeQuente": 1,
+      "limpos": 9,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 41.6,
+      "p5": 11.4,
+      "p95": 89.3,
+      "sat": 0.671,
+      "cor": [
+        22,
+        45,
+        62
+      ]
+    }
+  },
+  {
+    "pintura": "paintBgF4c",
+    "t": 74.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF4c",
+      "densidade": 0.68,
+      "grao": 0.595,
+      "gradeQuente": 1,
+      "limpos": 7,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 21.8,
+      "p5": 1.9,
+      "p95": 64.6,
+      "sat": 0.614,
+      "cor": [
+        27,
+        20,
+        26
+      ]
+    }
+  },
+  {
+    "pintura": "paintBgF4d",
+    "t": 121.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF4d",
+      "densidade": 0.68,
+      "grao": 0.595,
+      "gradeQuente": 1,
+      "limpos": 9,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 20.5,
+      "p5": 2.9,
+      "p95": 55.9,
+      "sat": 0.616,
+      "cor": [
+        21,
+        20,
+        28
+      ]
+    }
+  }
+]

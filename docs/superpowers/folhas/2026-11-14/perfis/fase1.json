@@ -1,0 +1,77 @@
+[
+  {
+    "pintura": "paintBgF1",
+    "t": 5.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseF1",
+      "densidade": 0.6,
+      "grao": 0.525,
+      "gradeQuente": 1,
+      "limpos": 10,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 20.7,
+      "p5": 5.1,
+      "p95": 44.2,
+      "sat": 0.696,
+      "cor": [
+        13,
+        22,
+        31
+      ]
+    }
+  },
+  {
+    "pintura": "paintBgCaverna",
+    "t": 48.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseCaverna",
+      "densidade": 0.68,
+      "grao": 0.595,
+      "gradeQuente": 1,
+      "limpos": 10,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 30.5,
+      "p5": 4.4,
+      "p95": 75.3,
+      "sat": 0.598,
+      "cor": [
+        22,
+        32,
+        40
+      ]
+    }
+  },
+  {
+    "pintura": "paintBgZeroG",
+    "t": 80.5,
+    "atm": {
+      "ativo": true,
+      "perfil": "faseZeroG",
+      "densidade": 0.6,
+      "grao": 0.525,
+      "gradeQuente": 1,
+      "limpos": 10,
+      "escuro": 0,
+      "suspenso": false
+    },
+    "medida": {
+      "luma": 24.4,
+      "p5": 6.3,
+      "p95": 62.3,
+      "sat": 0.67,
+      "cor": [
+        20,
+        24,
+        44
+      ]
+    }
+  }
+]

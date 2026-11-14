@@ -49,7 +49,8 @@ conferir(p1.every((q) => q.alfa >= 0 && q.alfa <= 1 && q.tam > 0), 'alfa e taman
 // ── A LISTA (§6.4) ──
 conferir(quedaLista(0, 7.2).dy === -14 && quedaLista(0, 7.2).alfa === 0, 'a lista começa 14 px acima, invisível', quedaLista(0, 7.2));
 conferir(Math.abs(quedaLista(2, 9.5).dy) < 0.3 && quedaLista(2, 9.5).alfa === 1, 'e pousa no lugar', quedaLista(2, 9.5));
-conferir(perto(T_LISTA_POUSA, 7.2 + 0.16 + 1.4), `pousa em ${T_LISTA_POUSA.toFixed(2)} s`, T_LISTA_POUSA);
+// 4 linhas desde 14/11 (CONFIGURAÇÕES): a última sai 3 passos depois da primeira
+conferir(perto(T_LISTA_POUSA, 7.2 + 0.24 + 1.4), `pousa em ${T_LISTA_POUSA.toFixed(2)} s`, T_LISTA_POUSA);
 conferir(alfaItem(false, 20, 10, true) === 0.7, 'item fora do cursor a 0,7', null);
 conferir(perto(alfaItem(true, 10, 10, true), 1) && perto(alfaItem(true, 11.1, 10, true), 0.4), 'o do cursor pisca de 1 a 0,4 em 2,2 s', null);
 
