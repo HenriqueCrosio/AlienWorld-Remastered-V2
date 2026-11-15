@@ -23,14 +23,65 @@ sprite que se desfaz nos próprios pixels).
 >
 > **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11) → I ✅
 > (13/11) → J ✅ (14/11, enxuto) → **M, a MOLDURA do jogo** (o que dá "cara de jogo lançado"; absorveu as etapas 1.55 e
-> 1.6): M1 a pausa + as CONFIGURAÇÕES ✅ (14/11) · M2 os controles ✅ (14/11) · **M3 a tela de fim de fase e de morte
-> (o próximo)** · M4 o carregamento e o favicon → F (a F2: a frota de batedores e a rocha do minerador).** Depois dos
+> 1.6): M1 a pausa + as CONFIGURAÇÕES ✅ (14/11) · M2 os controles ✅ (14/11) · M3 a janela da NAVE PERDIDA ✅ (15/11) ·
+> M4 o carregamento e o favicon ✅ (15/11) — **o bloco M FECHOU; o próximo é o F** → F (a F2: a frota de batedores e a rocha do minerador).** Depois dos
 > blocos: o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco) e só então o som.
 >
 > **Guardado para depois (pedidos dele, sem data):** a zona morta ajustável do analógico e um 2º controle (M2); a
 > conta do usuário sincronizando as preferências entre navegadores (junto do placar online, etapa 5 — as preferências
 > já são um objeto só, `alienworld:preferencias`); os ícones de botão nas outras telas (hoje só nas CONFIGURAÇÕES);
 > o controle de Xbox de VERDADE ainda não foi testado (ele só tem o DualSense).
+>
+> 📍 **15/11 — O BLOCO M FECHOU.** O M3 (*"Boa, ficou ótimo"*) e o M4 (*"Ficou bom assim"*, depois do ajuste da nave
+> da barra e do favicon) aprovados, commitados e empurrados em 15/11. **A próxima sessão abre no F** (a F2: a frota de
+> batedores e a rocha do minerador); o START do F ainda não existe — escrever ao abrir.
+>
+> 📍 **15/11 — O M4 IMPLEMENTADO E APROVADO.** Spec
+> `specs/2026-11-15-bloco-m4-carregamento-design.md`; folha `folhas/2026-11-15/carregamento/carregamento.html`; para ver
+> em movimento: `http://localhost:5173/?carregamento=20` (dev: segura a tela 20 s).
+> - **A cena é dele:** a pintura `assets/raw/Hangar no Coração da Tempestade.png` (o hangar ao fundo, tomado pela
+>   tempestade, a doca aparente pelas luzes) e a barra na faixa escura de baixo com a silhueta da nave indo da esquerda
+>   para a direita. A nave grande do primeiro plano (do risco dele) SAIU: *"fica só a barra de nave"*. A atmosfera:
+>   *"pesada"*, clarões atrás das nuvens em vários pontos SEM raio desenhado, fog, volumetria, a luz quente do hangar
+>   na neblina.
+> - **O formato:** ele propôs SVG; medido, a pintura em SVG de grade dá ~950 KB contra 20 KB do PNG assado em 384×216.
+>   PNG para a pintura, SVG para a nave da barra e o favicon.
+> - **Como ficou:** a tela mora no `index.html` (de pé antes do código do jogo), tudo o que se mexe é CSS;
+>   `scripts/_m/_carregamento-assar.mjs` assa as 13 camadas em `public/carregamento/` (74 KB) e o favicon
+>   (`public/favicon.svg` + `.png`, a TERMINUS laranja); `src/carregamento.ts` soma os dois carregadores (`BootScene`,
+>   `BootHDScene`) e o `BootScene.create` só inicia o menu depois da saída da nave. "Reduzir clarões" acalma a
+>   tempestade. O pontilhado ordenado foi testado e saiu (lia como tela de mosquiteiro).
+> - **O 1º retorno dele (15/11):** o favicon com o fundo TRANSPARENTE, só a nave; a nave da barra *"muito grande e
+>   grosseira, pensei em algo mais delicado, mais silhueta e menor"*, e a X-fighter no lugar (*"uma das naves mais
+>   antigas"*). Feito: a X-AELO pela metade (22×13), num tom só, fogo de 2 px. Espera ele ver.
+> - **Testes:** `test-carregamento.mjs` (a regra da barra + o navegador: segurada, na velocidade real, sem a camada HD,
+>   com "reduzir clarões"); `test-derrota-jogo`, `test-pausa-jogo` (fase, menu, hangar) e o build seguem passando.
+> - **O M3 foi APROVADO por ele em 15/11** (*"Boa, ficou ótimo"*), ainda sem commit. **Com o M4 aprovado, o bloco M
+>   fecha e o próximo é o F** (a F2: a frota de batedores e a rocha do minerador).
+>
+> 📍 **15/11 — O M3 IMPLEMENTADO E APROVADO (nada commitado).** Spec
+> `specs/2026-11-15-bloco-m3-nave-perdida-design.md`; folha `folhas/2026-11-15/nave-perdida/nave-perdida.html`.
+> - **As decisões dele (uma pergunta por vez):** a NAVE PERDIDA é um placar sóbrio e rápido de "tente de novo"; o fundo
+>   é o último quadro da fase, parado e escurecido como na pausa; a janela é pequena, os pontos já parados (sem
+>   contagem); três linhas como na pausa (TENTAR DE NOVO · CONFIGURAÇÕES · SAIR PARA O MENU, o cursor na primeira); a
+>   "FASE COMPLETA" fica como está — *"na build final tudo isso vai sumir"* (o treino são as teclas `B`/`C`/`N`/`K` do
+>   menu, todas em `import.meta.env.DEV`). Os 2–3 conceitos do START foram dispensados: *"Pode escrever e implementar, é
+>   algo mais simples. Eu analiso quando terminar tudo"*.
+> - **Conferido no código:** as quatro fases declaram cutscene, então na campanha a única tela da `GameOverScene` que o
+>   jogador via era a NAVE PERDIDA; a saída direta do `victory()` não é alcançada por fase nenhuma.
+> - **Como ficou:** a janela é um TIPO NOVO DA PAUSA (`'derrota'`), não uma cena à parte — a `PausaScene` já tinha a
+>   moldura, as linhas, as configurações, o controle e as dicas. `numerosPausa.ts` (as linhas, `rotuloDaAcao`,
+>   `DERROTA`, `layoutDerrota`, e no `passo`: sem confirmação, `ESC` na lista = sair), `abrirPausa.ts` (os dados em
+>   `OpcoesPausa.derrota`; `abrirPausa` devolve se abriu e aceita a `guarda` de 350 ms sem entrada),
+>   `PausaScene.ts#desenharDerrota`, `painelResultado.ts` (a `texturaMedalha` só ganhou o `export`),
+>   `GameScene.ts#gameOver` (grava o recorde e abre a janela no fim da morte; se uma pausa já estiver aberta, cai na tela
+>   antiga). A `GameOverScene` não foi tocada. A música fica abafada, sem trocar de faixa. A janela tem 172 px (o
+>   subtítulo na fonte de reserva, sem a camada HD, mede 148).
+> - **Testes:** `test-pausa.mjs` (as regras da derrota) e `test-derrota-jogo.mjs` (27 conferências no navegador: a
+>   janela, o tiro segurado, as configurações, sair, o controle simulado); `test-pausa-jogo` e `test-controle-jogo`
+>   seguem passando (o `igual` oscilou uma vez pelo desalinhamento de carregamento já anotado, e passou repetido);
+>   build ok. As fotos: `scripts/_m/_derrota-fotos.mjs` e `_derrota-folha.mjs`.
+> - **O próximo, depois do retorno dele: M4, o carregamento e o favicon.**
 >
 > 📍 **14/11 — O ROADMAP MUDOU E O BLOCO J ABRIU ENXUTO (espera ele; nada commitado).** À pergunta 1 do START ele
 > devolveu outra: *"o que falta para dar cara de jogo lançado [...] ao aspecto de polimento de um jogo terminado?"*. A
