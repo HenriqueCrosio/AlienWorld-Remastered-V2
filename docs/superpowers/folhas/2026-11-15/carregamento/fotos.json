@@ -1,0 +1,19 @@
+{
+  "segundos": 12,
+  "quadros": 63,
+  "pct": [
+    "8%",
+    "97%"
+  ],
+  "brilho": {
+    "quieta": 37.68,
+    "picos": [
+      45.08,
+      42.5,
+      45.66,
+      41.69
+    ],
+    "calma": 42.46
+  },
+  "chegouAoMenu": true
+}

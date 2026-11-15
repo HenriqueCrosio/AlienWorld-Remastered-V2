@@ -1,7 +1,7 @@
 // BLOCK M1 (14/11) — the pause and the settings, the rules (plan `plans/2026-11-14-bloco-m1-pausa-configuracoes.md` Task 4):
 // the lines of each kind of scene, every key on every state, the tabs.
 //   node scripts/test-pausa.mjs
-import { JANELA, LINHAS, LINHAS_DA_ABA, ROTULO, abasDe, alturaPequena, inicial, passo } from '../src/pausa/numerosPausa.ts';
+import { DERROTA, JANELA, LINHAS, LINHAS_DA_ABA, ROTULO, abasDe, alturaPequena, inicial, layoutDerrota, passo, rotuloDaAcao } from '../src/pausa/numerosPausa.ts';
 
 let falhas = 0;
 const ok = (c, m) => { console.log(`${c ? '✔' : '✘'} ${m}`); if (!c) falhas++; };
@@ -69,6 +69,28 @@ ok(corre({ tela: 'config', aba: 3, linha: 0 }, ['ok'], fase).ef[0]?.linha === 'r
 // the settings from the main menu
 ok(inicial('menu').tela === 'config', 'from the main menu the settings open straight on the big window');
 ok(corre(inicial('menu'), ['esc'], menu).ef[0]?.tipo === 'fechar', 'and ESC there closes');
+
+// THE SHIP LOST window (15/11, block M3)
+{
+  const der = { tipo: 'derrota', zerou: false };
+  ok(LINHAS.derrota.join() === 'reiniciar,config,sair', 'a death: TRY AGAIN · SETTINGS · QUIT (no CONTINUE)');
+  ok(rotuloDaAcao('derrota', 'reiniciar') === 'TENTAR DE NOVO' && rotuloDaAcao('fase', 'reiniciar') === ROTULO.reiniciar && rotuloDaAcao('derrota', 'sair') === ROTULO.sair, 'RESTART reads TRY AGAIN only after a death');
+  ok(inicial('derrota').tela === 'lista' && inicial('derrota').cursor === 0, 'it opens with the cursor on TRY AGAIN');
+  const de = corre(inicial('derrota'), ['ok'], der);
+  ok(de.ef.length === 1 && de.ef[0].tipo === 'acao' && de.ef[0].acao === 'reiniciar' && de.e.tela === 'lista', 'OK tries again at once, without asking');
+  const sai = corre(inicial('derrota'), ['cima', 'ok'], der);
+  ok(sai.ef.length === 1 && sai.ef[0].acao === 'sair', 'QUIT does not ask either');
+  const escD = corre(inicial('derrota'), ['esc'], der);
+  ok(escD.ef.length === 1 && escD.ef[0].tipo === 'acao' && escD.ef[0].acao === 'sair', 'ESC leaves for the menu (there is nothing to resume)');
+  ok(!['cima', 'baixo', 'esquerda', 'direita', 'abaAnt', 'abaProx'].some((t) => corre(inicial('derrota'), [t], der).ef.length), 'no other key does anything — and nothing ever CLOSES it');
+  const cfg = corre(inicial('derrota'), ['baixo', 'ok'], der);
+  ok(cfg.e.tela === 'config' && cfg.ef.length === 0, 'SETTINGS opens the big window');
+  const volta = corre(cfg.e, ['esc'], der);
+  ok(volta.e.tela === 'lista' && volta.e.cursor === 1 && volta.ef.length === 0, 'and ESC there comes back to the scoreboard, on SETTINGS');
+  const sem = layoutDerrota(false), com = layoutDerrota(true);
+  ok(sem.medalha === null && com.medalha !== null && com.h === sem.h + 13 && sem.linhas.length === 3, 'the medal row only exists with a medal (the window grows by one row)');
+  ok(com.h <= 216 - 24 && DERROTA.w <= 384 && com.linhas[2] < com.h && sem.regua2 > sem.recorde && com.regua2 > com.medalha, 'it fits the screen with the hint under it, the rows in order');
+}
 
 // purity
 {

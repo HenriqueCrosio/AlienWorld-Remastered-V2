@@ -1,0 +1,205 @@
+[
+  {
+    "nome": "f1-sem-medalha",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 1 continua esperando",
+      "PONTOS",
+      "54",
+      "RECORDE",
+      "1320",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      "[ESPAÇO] CONFIRMA     [ESC] MENU"
+    ]
+  },
+  {
+    "nome": "f2-recorde-prata",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 2 continua esperando",
+      "PONTOS",
+      "1901",
+      "★ NOVO RECORDE",
+      "1901",
+      "MEDALHA DE PRATA",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      "[ESPAÇO] CONFIRMA     [ESC] MENU"
+    ]
+  },
+  {
+    "nome": "f2-cursor-config",
+    "estado": {
+      "tela": "lista",
+      "cursor": 1
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 2 continua esperando",
+      "PONTOS",
+      "1901",
+      "★ NOVO RECORDE",
+      "1901",
+      "MEDALHA DE PRATA",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      "[ESPAÇO] CONFIRMA     [ESC] MENU"
+    ]
+  },
+  {
+    "nome": "f2-config",
+    "estado": {
+      "tela": "config",
+      "aba": 0,
+      "linha": 0,
+      "coluna": 0
+    },
+    "textos": [
+      "ÁUDIO",
+      "CONTROLES",
+      "VÍDEO",
+      "VOLUME GERAL",
+      "10",
+      "MÚSICA",
+      "10",
+      "EFEITOS",
+      "10",
+      "os efeitos sonoros chegam numa versão futura",
+      "[<  >] MUDAR     [Q  E] ABA     [ENTER] CONFIRMA     [ESC] VOLTA"
+    ]
+  },
+  {
+    "nome": "f2-cursor-sair",
+    "estado": {
+      "tela": "lista",
+      "cursor": 2
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 2 continua esperando",
+      "PONTOS",
+      "1901",
+      "★ NOVO RECORDE",
+      "1901",
+      "MEDALHA DE PRATA",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      "[ESPAÇO] CONFIRMA     [ESC] MENU"
+    ]
+  },
+  {
+    "nome": "f3-ouro",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 3 continua esperando",
+      "PONTOS",
+      "3521",
+      "RECORDE",
+      "5120",
+      "MEDALHA DE OURO",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      "[ESPAÇO] CONFIRMA     [ESC] MENU"
+    ]
+  },
+  {
+    "nome": "f4-bronze",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 4 continua esperando",
+      "PONTOS",
+      "841",
+      "RECORDE",
+      "5120",
+      "MEDALHA DE BRONZE",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      "[ESPAÇO] CONFIRMA     [ESC] MENU"
+    ]
+  },
+  {
+    "nome": "controle-xbox",
+    "estado": {
+      "tela": "lista",
+      "cursor": 1
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 2 continua esperando",
+      "PONTOS",
+      "1262",
+      "RECORDE",
+      "2000",
+      "MEDALHA DE BRONZE",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      " CONFIRMA     ",
+      " MENU"
+    ]
+  },
+  {
+    "nome": "controle-ps",
+    "estado": {
+      "tela": "lista",
+      "cursor": 1
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 2 continua esperando",
+      "PONTOS",
+      "1262",
+      "RECORDE",
+      "2000",
+      "MEDALHA DE BRONZE",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      " CONFIRMA     ",
+      " MENU"
+    ]
+  },
+  {
+    "nome": "semhd-recorde-ouro",
+    "estado": {
+      "tela": "lista",
+      "cursor": 0
+    },
+    "textos": [
+      "NAVE PERDIDA",
+      "a fase 2 continua esperando",
+      "PONTOS",
+      "3151",
+      "★ NOVO RECORDE",
+      "3151",
+      "MEDALHA DE OURO",
+      "TENTAR DE NOVO",
+      "CONFIGURAÇÕES",
+      "SAIR PARA O MENU",
+      "[ESPAÇO] CONFIRMA     [ESC] MENU"
+    ]
+  }
+]
