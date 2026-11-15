@@ -10,7 +10,8 @@ import type { Campo } from '../preferencias.ts';
  */
 
 /** Where the pause opened. `menu` = the SETTINGS opened from the main menu (no pause list, straight to the big window). */
-export type TipoPausa = 'fase' | 'cutscene' | 'escolha' | 'menu';
+/** `derrota` = the SHIP LOST window (15/11, block M3): the scoreboard of a death over the frozen stage, no way back. */
+export type TipoPausa = 'fase' | 'cutscene' | 'escolha' | 'menu' | 'derrota';
 export type Acao = 'continuar' | 'reiniciar' | 'pular' | 'config' | 'sair';
 
 /** Restarting a cutscene makes no sense (it gets SKIP); the card table and the hangar are choices (neither). */
@@ -18,6 +19,7 @@ export const LINHAS: Record<Exclude<TipoPausa, 'menu'>, readonly Acao[]> = {
   fase: ['continuar', 'reiniciar', 'config', 'sair'],
   cutscene: ['continuar', 'pular', 'config', 'sair'],
   escolha: ['continuar', 'config', 'sair'],
+  derrota: ['reiniciar', 'config', 'sair'],
 };
 
 export const ROTULO: Record<Acao, string> = {
@@ -27,6 +29,8 @@ export const ROTULO: Record<Acao, string> = {
   config: 'CONFIGURAÇÕES',
   sair: 'SAIR PARA O MENU',
 };
+/** The label of a line where it is shown: after a death, RESTART reads TRY AGAIN. */
+export const rotuloDaAcao = (tipo: TipoPausa, a: Acao): string => (tipo === 'derrota' && a === 'reiniciar' ? 'TENTAR DE NOVO' : ROTULO[a]);
 
 export type Aba = 'audio' | 'controles' | 'video' | 'jogo';
 export const ROTULO_ABA: Record<Aba, string> = { audio: 'ÁUDIO', controles: 'CONTROLES', video: 'VÍDEO', jogo: 'JOGO' };
@@ -81,6 +85,26 @@ export const JANELA = {
 
 export const alturaPequena = (linhas: number): number => JANELA.pequena.margem * 2 + linhas * JANELA.pequena.hLinha;
 
+/**
+ * THE SHIP LOST WINDOW (block M3): the title, the score rows (the medal row only when there is a medal), a rule, and
+ * the three lines. Every `y` counts from the top of the window, in game px.
+ */
+export const DERROTA = {
+  /** (the subtitle in the fallback font, without the HD layer, is 148 px wide) */
+  w: 172,
+  /** ms after it opens in which it takes no input: whoever is still hammering the fire key sees the score first */
+  guarda: 350,
+  /** ms of the veil and of the window coming in (none with reduced motion) */
+  entra: 180,
+} as const;
+export function layoutDerrota(temMedalha: boolean): { h: number; titulo: number; sub: number; regua1: number; pontos: number; recorde: number; medalha: number | null; regua2: number; linhas: number[] } {
+  const recorde = 53;
+  const ultima = temMedalha ? recorde + 13 : recorde;
+  const regua2 = ultima + 9;
+  const linhas = LINHAS.derrota.map((_, i) => regua2 + 11 + i * JANELA.pequena.hLinha);
+  return { h: linhas[linhas.length - 1] + 12, titulo: 13, sub: 24, regua1: 31, pontos: 41, recorde, medalha: temMedalha ? ultima : null, regua2, linhas };
+}
+
 export type Estado =
   | { tela: 'lista'; cursor: number }
   /** `de`: the settings line the confirmation came from (RESTORE); without it, the pause list */
@@ -126,12 +150,15 @@ export function passo(e: Estado, t: Tecla, ctx: Contexto): { estado: Estado; efe
     if (ctx.tipo === 'menu') return { estado: e, efeito: { tipo: 'fechar' } };
     const linhas = LINHAS[ctx.tipo];
     if (t === 'cima' || t === 'baixo') return { estado: { tela: 'lista', cursor: roda(e.cursor + (t === 'cima' ? -1 : 1), linhas.length) }, efeito: NADA };
-    if (t === 'esc') return { estado: e, efeito: { tipo: 'fechar' } };
+    // after a death there is nothing to go back to: ESC leaves for the menu
+    if (t === 'esc') return { estado: e, efeito: ctx.tipo === 'derrota' ? { tipo: 'acao', acao: 'sair' } : { tipo: 'fechar' } };
     if (t !== 'ok') return { estado: e, efeito: NADA };
     const acao = linhas[e.cursor];
     if (acao === 'continuar') return { estado: e, efeito: { tipo: 'fechar' } };
     if (acao === 'config') return { estado: { tela: 'config', aba: 0, linha: 0, coluna: 0 }, efeito: NADA };
     if (acao === 'pular') return { estado: e, efeito: { tipo: 'acao', acao: 'pular' } };
+    // ... and no run to throw away: TRY AGAIN and QUIT do not ask
+    if (ctx.tipo === 'derrota') return { estado: e, efeito: { tipo: 'acao', acao } };
     // restart and quit throw the run away: they ask first, the cursor on NO
     return { estado: { tela: 'confirma', acao, sim: false }, efeito: NADA };
   }

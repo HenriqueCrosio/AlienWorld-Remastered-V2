@@ -68,7 +68,7 @@ const claro = (c: number, k: number): number => {
 };
 
 /** A MEDALHA em pixel: a fita em duas pernas (a cor da nave e a do inimigo) e o disco com aro, brilho e miolo. */
-function texturaMedalha(scene: Phaser.Scene, cor: number): string {
+export function texturaMedalha(scene: Phaser.Scene, cor: number): string {
   // (ele: *"a medalha pode diminuir de tamanho, coisa de alguns pixels apenas"* — era raio 5 e fita 5, 13×17)
   const r = 4, fita = 4;
   return textura(scene, `res-medalha-${cor}`, 2 * r + 3, fita + 2 * r + 2, (c) => {

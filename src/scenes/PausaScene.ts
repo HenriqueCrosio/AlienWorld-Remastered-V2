@@ -13,9 +13,11 @@ import { controleNoMenu } from '../entrada/menu';
 import { guardaDoNavegador, zerou } from '../menu/qualMenu';
 import { devolverCena, type DadosPausa } from '../pausa/abrirPausa';
 import {
-  JANELA, LINHAS, LINHAS_DA_ABA, ROTULO, ROTULO_ABA, abasDe, acaoDaLinha, alturaPequena, fimDaCaptura, inicial, passo, rotuloDaLinha,
+  DERROTA, JANELA, LINHAS, LINHAS_DA_ABA, ROTULO, ROTULO_ABA, abasDe, acaoDaLinha, alturaPequena, fimDaCaptura, inicial, layoutDerrota, passo,
+  rotuloDaAcao, rotuloDaLinha,
   type Contexto, type Estado, type Linha, type Tecla,
 } from '../pausa/numerosPausa';
+import { texturaMedalha } from '../menu/painelResultado';
 import type { Campo, Preferencias } from '../preferencias';
 import { Music } from '../systems/Music';
 import { alternarTelaCheia, emTelaCheia, escFicaNoJogo } from '../telaCheia';
@@ -67,6 +69,8 @@ export class PausaScene extends Phaser.Scene {
   /** the frame just changed size: the content of this screen fades in behind it */
   private cresceu: Phaser.GameObjects.Image | null = null;
   private fechou = false;
+  /** the first screen of the SHIP LOST window fades in (once) */
+  private entrando = false;
   /** the controller frame in which the capture opened: the press that opened it is not the new button */
   private quadroDaCaptura = -1;
   /** the capture refused a key ("that one is the game's") */
@@ -93,7 +97,13 @@ export class PausaScene extends Phaser.Scene {
     // The veil over what is underneath (the HUD and the menu's own text too: they live in the HD layer, below this
     // sister). From the main menu it is lighter — the painting keeps moving behind — and the music is not ducked.
     const doMenu = this.ctx.tipo === 'menu';
-    this.destino.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.bgDeep, doMenu ? JANELA.veuMenu : JANELA.veu).setOrigin(0).setDepth(0);
+    const veu = this.destino.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.bgDeep, doMenu ? JANELA.veuMenu : JANELA.veu).setOrigin(0).setDepth(0);
+    // THE SHIP LOST window (block M3) comes in softly over the last frame of the stage: nobody asked for it
+    this.entrando = this.ctx.tipo === 'derrota' && !movimentoReduzido();
+    if (this.entrando) {
+      veu.setAlpha(0);
+      this.tweens.add({ targets: veu, alpha: JANELA.veu, duration: DERROTA.entra });
+    }
     if (!doMenu) Music.abafar(this, JANELA.abafo, 200);
     pararVibracao();
 
@@ -172,7 +182,8 @@ export class PausaScene extends Phaser.Scene {
 
   private ligarControle(): void {
     const agora = (): number => performance.now();
-    const livre = (): boolean => !this.fechou && this.estado.tela !== 'captura';
+    // (the stamp is in the future while the SHIP LOST window holds its first moments: `abrirPausa`'s `guarda`)
+    const livre = (): boolean => !this.fechou && this.estado.tela !== 'captura' && agora() > this.dados.carimbo;
     controleNoMenu(this, {
       cima: () => this.aplicar('cima', agora()),
       baixo: () => this.aplicar('baixo', agora()),
@@ -331,10 +342,70 @@ export class PausaScene extends Phaser.Scene {
       for (const p of conteudo) p.setAlpha(0);
       this.tweens.add({ targets: conteudo, alpha: 1, duration: 90, delay: JANELA.cresce * 0.6 });
     }
+    if (this.entrando) {
+      this.entrando = false;
+      // each piece comes in up to ITS alpha (the cursor bar and the rules are translucent)
+      for (const p of this.pecas) {
+        const a = (p as unknown as { alpha: number }).alpha;
+        p.setAlpha(0);
+        this.tweens.add({ targets: p, alpha: a, duration: DERROTA.entra, delay: DERROTA.entra * 0.5 });
+      }
+    }
+  }
+
+  /**
+   * THE SHIP LOST WINDOW (15/11, block M3 — spec `2026-11-15-bloco-m3-nave-perdida-design.md`): a sober scoreboard of
+   * "try again" over the last frame of the stage — the title, the points and the record already standing (no
+   * counting: the player sees it many times), the pixel medal of the final screen when there is one, and the three
+   * lines with the cursor on TRY AGAIN.
+   */
+  private desenharDerrota(cursor: number): void {
+    const d = this.dados.opts.derrota;
+    if (!d) return;
+    const L = layoutDerrota(!!d.medalha);
+    const w = DERROTA.w;
+    const cx = GAME_WIDTH / 2, cy = GAME_HEIGHT / 2;
+    const y0 = Math.round(cy - L.h / 2), x0 = cx - w / 2;
+    const xe = x0 + 12, xd = x0 + w - 12;
+    this.janela(cx, cy, w, L.h);
+    this.txt(cx, y0 + L.titulo, 'NAVE PERDIDA', COLORS.enemyBright, 10);
+    this.txt(cx, y0 + L.sub, `a fase ${d.fase} continua esperando`, COR.fraco, 6, 'piloto');
+    this.caixa(x0 + 8, y0 + L.regua1, w - 16, 1, COR_JANELA.osso, 0.25);
+
+    this.txt(xe, y0 + L.pontos, 'PONTOS', COR.fraco, 7, 'jogo', 'e');
+    this.txt(xd, y0 + L.pontos, String(d.score), COR.titulo, 8, 'nave', 'd');
+    const corRecorde = d.novo ? COR.aviso : COR.fraco;
+    this.txt(xe, y0 + L.recorde, d.novo ? '★ NOVO RECORDE' : 'RECORDE', corRecorde, 7, 'jogo', 'e');
+    this.txt(xd, y0 + L.recorde, String(d.recorde), d.novo ? COR.aviso : COR.linha, 8, 'nave', 'd');
+    if (d.medalha && L.medalha !== null) {
+      const img = this.destino.add.image(xe, y0 + L.medalha, texturaMedalha(this.destino, d.medalha.color)).setOrigin(0, 0.5).setDepth(3);
+      this.pecas.push(img as unknown as Coisa);
+      this.txt(xe + 15, y0 + L.medalha, `MEDALHA DE ${d.medalha.medal.toUpperCase()}`, d.medalha.color, 7, 'jogo', 'e');
+    }
+    this.caixa(x0 + 8, y0 + L.regua2, w - 16, 1, COR_JANELA.osso, 0.25);
+
+    LINHAS.derrota.forEach((a, i) => {
+      const y = y0 + L.linhas[i];
+      if (i === cursor) this.caixa(x0 + 7, y - 6, w - 14, 11, COR.barra, 0.3);
+      this.txt(cx, y, rotuloDaAcao('derrota', a), i === cursor ? COR.sel : COR.linha);
+    });
+
+    // the hint under the window follows the device in use: the fire key confirms, as on every scoreboard of the game
+    const noControle = aparelhoAtivo() === 'controle';
+    this.linhaDeDica(
+      cx,
+      y0 + L.h + 9,
+      noControle ? [BOTAO.A, ' CONFIRMA     ', BOTAO.B, ' MENU'] : [`[${rotuloDaTecla(mapaDoTeclado().tiro)}] CONFIRMA     [ESC] MENU`],
+      COR.fraco,
+    );
   }
 
   private desenharLista(cursor: number): void {
     if (this.ctx.tipo === 'menu') return;
+    if (this.ctx.tipo === 'derrota') {
+      this.desenharDerrota(cursor);
+      return;
+    }
     const linhas = LINHAS[this.ctx.tipo];
     const P = JANELA.pequena;
     const h = alturaPequena(linhas.length);

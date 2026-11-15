@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { vibrar } from '../entrada/controle';
-import { ligarPausa } from '../pausa/abrirPausa';
+import { abrirPausa, ligarPausa, pausaAberta } from '../pausa/abrirPausa';
+import { DERROTA } from '../pausa/numerosPausa';
+import { medalhaDe, registrarRecorde } from '../placar';
 import { claraoDe } from '../systems/clarao/Clarao';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import { Starfield } from '../Starfield';
@@ -3110,6 +3112,26 @@ export class GameScene extends Phaser.Scene {
     const final = this.totalScore();
     this.time.delayedCall(espera, () => {
       this.tempoNormal();
+      // THE SHIP LOST WINDOW (15/11, block M3 — spec `2026-11-15-bloco-m3-nave-perdida-design.md`): the stage stops on
+      // its last frame and the scoreboard opens over it, in the frame of the pause (TRY AGAIN · SETTINGS · QUIT). The
+      // retry is of the STAGE, with the same ship and the score of its ENTRY (GDD §8).
+      if (!pausaAberta()) {
+        const { recorde, novo } = registrarRecorde(localStorage, this.handling, final, this.practice);
+        const abriu = abrirPausa(
+          this,
+          {
+            tipo: 'derrota',
+            derrota: { fase: this.stage.id, score: final, recorde, novo, medalha: medalhaDe(final) },
+            reiniciar: () =>
+              this.scene.start('Game', { stage: this.stage.id, handling: this.handling, practice: this.practice, ship: this.shipId, score: this.scoreBase }),
+            sair: () => this.scene.start('Menu'),
+          },
+          undefined,
+          DERROTA.guarda,
+        );
+        if (abriu) return;
+      }
+      // (a pause was open at this very instant — it should not be: the old screen, so the player is never stuck)
       this.scene.start('GameOver', {
         score: final,
         handling: this.handling,

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { aoConectar, aoQuadro, desceuBotao } from '../entrada/controle';
 import { BOTAO } from '../entrada/mapas';
 import { ehHD, jogoHD, jogoMundo } from '../uiHD';
+import type { Medalha } from '../placar';
 import type { TipoPausa } from './numerosPausa';
 
 /**
@@ -16,8 +17,19 @@ import type { TipoPausa } from './numerosPausa';
  * that opens it could be read by the new `Pausa` scene (closing it at once). Each open/close keeps the timestamp of
  * the event that caused it, and nothing older than that is accepted afterwards.
  */
+/** What the SHIP LOST window shows (block M3): the record was already written by whoever opens it. */
+export interface DadosDerrota {
+  fase: number;
+  score: number;
+  recorde: number;
+  novo: boolean;
+  medalha: { medal: Medalha; color: number } | null;
+}
+
 export interface OpcoesPausa {
   tipo: TipoPausa;
+  /** 'derrota': the scoreboard of the death */
+  derrota?: DadosDerrota;
   /** 'fase': start the stage again */
   reiniciar?: () => void;
   /** 'cutscene': skip ahead */
@@ -42,18 +54,21 @@ let fechouEm = -1;
 
 export const pausaAberta = (): boolean => aberta;
 
-/** Pauses `alvo` and runs the Pausa scene over it. No-op when one is already open or the scene says no. */
-export function abrirPausa(alvo: Phaser.Scene, opts: OpcoesPausa, ev?: KeyboardEvent): void {
-  if (aberta) return;
-  const carimbo = ev?.timeStamp ?? performance.now();
-  if (carimbo <= fechouEm) return;
-  if (opts.podeAbrir && !opts.podeAbrir()) return;
+/**
+ * Pauses `alvo` and runs the Pausa scene over it. No-op (returns `false`) when one is already open or the scene says
+ * no. `guarda`: ms from now in which the window takes no input (the SHIP LOST window, block M3).
+ */
+export function abrirPausa(alvo: Phaser.Scene, opts: OpcoesPausa, ev?: KeyboardEvent, guarda = 0): boolean {
+  if (aberta) return false;
+  const carimbo = (ev?.timeStamp ?? performance.now()) + guarda;
+  if (carimbo <= fechouEm) return false;
+  if (opts.podeAbrir && !opts.podeAbrir()) return false;
   const mundo = ehHD(alvo) ? jogoMundo() : alvo.game;
-  if (!mundo) return;
+  if (!mundo) return false;
   // A CARD TABLE OPEN OVER A CUTSCENE: the cutscene keeps running under it and hears the same ESC. The table opens
   // the pause (it is the one that has to go quiet); the scene underneath stays out of it.
   const mesa = (jogoHD() ?? mundo).scene.getScene('Cartas') as Phaser.Scene | null;
-  if (mesa && mesa !== alvo && mesa.scene.isActive()) return;
+  if (mesa && mesa !== alvo && mesa.scene.isActive()) return false;
   aberta = true;
   // From the main menu the living painting keeps moving behind the window: only its keyboard goes quiet.
   if (opts.tipo === 'menu') {
@@ -61,6 +76,7 @@ export function abrirPausa(alvo: Phaser.Scene, opts: OpcoesPausa, ev?: KeyboardE
   } else alvo.scene.pause();
   const dados: DadosPausa = { alvo, opts, carimbo };
   mundo.scene.run('Pausa', dados);
+  return true;
 }
 
 /** The Pausa scene calls this when it closes: gives the scene underneath back (keys released). */
