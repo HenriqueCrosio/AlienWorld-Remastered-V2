@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Alien World: Remastered</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="176x176" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="preload" as="image" href="/carregamento/fundo.png" />
     <style>
       html, body {
         margin: 0;
@@ -21,9 +25,190 @@
         image-rendering: pixelated;
         image-rendering: crisp-edges;
       }
+
+      /*
+       * THE LOADING SCREEN (15/11, block M4 — spec `docs/superpowers/specs/2026-11-15-bloco-m4-carregamento-design.md`).
+       * His painting of the hangar in the heart of the storm, baked at the native 384×216 by
+       * `scripts/_m/_carregamento-assar.mjs`; what moves is CSS only (it stays smooth while the game loads and the
+       * page is busy): the flashes behind the clouds, the fog, the warm light of the dock, the rain, the ship of the bar.
+       * It lives in the page, not in the game: it is on screen before the code of the game arrives.
+       */
+      @font-face {
+        font-family: 'carga';
+        src: url('/fonts/silkscreen.woff2') format('woff2');
+        font-display: block;
+      }
+      #carga {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        background: #05060d;
+        overflow: hidden;
+      }
+      #carga .cena {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 384px;
+        height: 216px;
+        margin: -108px 0 0 -192px;
+        transform: scale(var(--k, 1));
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 0.5s ease-out;
+      }
+      #carga.pronta .cena { opacity: 1; }
+      #carga.saindo .cena { opacity: 0; transition: opacity 0.28s ease-in; }
+      #carga .c {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 384px;
+        height: 216px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        background-repeat: repeat-x;
+        pointer-events: none;
+      }
+      #carga .luz { mix-blend-mode: screen; opacity: 0; }
+
+      /* the flashes: each point on its own clock (the periods never line up), two beats and a slow decay */
+      #carga .r1 { animation: carga-raio-a 7.3s linear infinite 0.6s; }
+      #carga .r2 { animation: carga-raio-b 9.7s linear infinite 3.1s; }
+      #carga .r3 { animation: carga-raio-a 11.9s linear infinite 5.2s; }
+      #carga .r4 { animation: carga-raio-b 13.3s linear infinite 1.9s; }
+      #carga .r5 { animation: carga-raio-a 10.1s linear infinite 7.4s; }
+      #carga .r6 { animation: carga-raio-b 16.7s linear infinite 9.8s; }
+      @keyframes carga-raio-a {
+        0%, 100% { opacity: 0; }
+        0.6% { opacity: 0.95; }
+        1.8% { opacity: 0.3; }
+        3.2% { opacity: 0.8; }
+        5% { opacity: 0.36; }
+        11% { opacity: 0; }
+      }
+      @keyframes carga-raio-b {
+        0%, 100% { opacity: 0; }
+        0.5% { opacity: 0.7; }
+        2.2% { opacity: 0.22; }
+        2.8% { opacity: 1; }
+        4.6% { opacity: 0.4; }
+        7% { opacity: 0.16; }
+        12% { opacity: 0; }
+      }
+      /* the fog drifts one game pixel at a time */
+      #carga .n1 { width: 768px; opacity: 0.9; animation: carga-vento 96s steps(384) infinite; }
+      #carga .n2 { width: 768px; opacity: 0.8; animation: carga-vento 150s steps(384) infinite reverse; }
+      @keyframes carga-vento { to { transform: translateX(-384px); } }
+      /* the dock: the lights pulse, and the fog around them breathes with the wind */
+      #carga .brasa { opacity: 0.75; animation: carga-brasa 6.5s ease-in-out infinite; }
+      #carga .luzes { opacity: 0.5; animation: carga-luzes 2.6s ease-in-out infinite; }
+      @keyframes carga-brasa { 0%, 100% { opacity: 0.6; } 38% { opacity: 0.95; } 70% { opacity: 0.7; } }
+      @keyframes carga-luzes { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.95; } }
+      #carga .chuva {
+        left: -96px;
+        top: -96px;
+        width: 576px;
+        height: 408px;
+        background-repeat: repeat;
+        opacity: 0.55;
+        animation: carga-chuva 0.42s steps(24) infinite;
+      }
+      @keyframes carga-chuva { to { transform: translate(-48px, 96px); } }
+
+      /* the bar, in the darkest band: a thin line, the ship flying along it, the number */
+      #carga .trilho { position: absolute; left: 40px; top: 199px; width: 304px; height: 1px; background: rgba(240, 228, 204, 0.16); }
+      #carga .cheio { position: absolute; left: 0; top: 0; width: 304px; height: 1px; background: #17a6bd; transform-origin: 0 50%; transform: scaleX(var(--p, 0)); transition: transform 0.35s linear; }
+      /* (the X-AELO at half size, 22×13: its nose rides the end of the filled line, two pixels above it) */
+      #carga .nave { position: absolute; left: 19px; top: 185px; width: 22px; height: 13px; transform: translateX(calc(var(--p, 0) * 304px)); transition: transform 0.35s linear; }
+      #carga .nave svg { display: block; }
+      #carga .fogo-a { animation: carga-fogo 0.16s steps(1) infinite; }
+      #carga .fogo-b { animation: carga-fogo 0.16s steps(1) infinite reverse; }
+      @keyframes carga-fogo { 0% { opacity: 1; } 50%, 100% { opacity: 0; } }
+      #carga.saindo .nave { transform: translateX(420px); transition: transform 0.32s cubic-bezier(0.6, 0, 1, 0.5); }
+      #carga .texto { position: absolute; top: 203px; font: 8px/8px 'carga', monospace; color: #9a958e; letter-spacing: 1px; white-space: nowrap; }
+      #carga .rotulo { left: 40px; }
+      #carga .pct { right: 40px; color: #f0e4cc; }
+
+      /* "reduce flashes" (the VIDEO tab) and the system's reduced motion: the storm glows slowly instead of flashing */
+      #carga.calma .luz.r { animation-name: carga-calma; animation-timing-function: ease-in-out; }
+      @keyframes carga-calma { 0%, 100% { opacity: 0; } 8% { opacity: 0.3; } 20% { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) {
+        #carga .luz.r { animation-name: carga-calma; animation-timing-function: ease-in-out; }
+        #carga .chuva, #carga .n1, #carga .n2 { animation: none; }
+      }
     </style>
   </head>
   <body>
+    <div id="carga" aria-live="polite">
+      <div class="cena">
+        <img class="c" id="carga-fundo" src="/carregamento/fundo.png" alt="" />
+        <div class="c luz r r1" style="background-image: url(/carregamento/clarao-1.png)"></div>
+        <div class="c luz r r2" style="background-image: url(/carregamento/clarao-2.png)"></div>
+        <div class="c luz r r3" style="background-image: url(/carregamento/clarao-3.png)"></div>
+        <div class="c luz r r4" style="background-image: url(/carregamento/clarao-4.png)"></div>
+        <div class="c luz r r5" style="background-image: url(/carregamento/clarao-5.png)"></div>
+        <div class="c luz r r6" style="background-image: url(/carregamento/clarao-6.png)"></div>
+        <div class="c n2" style="background-image: url(/carregamento/neblina-b.png)"></div>
+        <div class="c luz brasa" style="background-image: url(/carregamento/brasa.png)"></div>
+        <div class="c luz luzes" style="background-image: url(/carregamento/luzes.png)"></div>
+        <div class="c n1" style="background-image: url(/carregamento/neblina-a.png)"></div>
+        <div class="c chuva" style="background-image: url(/carregamento/chuva.png)"></div>
+        <div class="trilho"><div class="cheio"></div></div>
+        <div class="nave" id="carga-nave"></div>
+        <div class="texto rotulo">CARREGANDO</div>
+        <div class="texto pct" id="carga-pct">0%</div>
+      </div>
+    </div>
+    <script>
+      // THE LOADING SCREEN, the page side (block M4): the scale, the ship, and `window.__carga` for the game
+      // (`src/carregamento.ts`): `progresso(0–1)` and `sair()` → a Promise that resolves when the screen is dark.
+      (function () {
+        var raiz = document.getElementById('carga');
+        var pct = document.getElementById('carga-pct');
+        var fundo = document.getElementById('carga-fundo');
+        var ajustar = function () {
+          raiz.style.setProperty('--k', String(Math.min(window.innerWidth / 384, window.innerHeight / 216)));
+        };
+        ajustar();
+        window.addEventListener('resize', ajustar);
+        // the scene comes in when the painting has arrived (never a half-drawn frame)
+        var pronta = function () { raiz.classList.add('pronta'); };
+        if (fundo.complete) pronta(); else { fundo.addEventListener('load', pronta); fundo.addEventListener('error', pronta); }
+        // the ship of the bar: the SVG baked from the game's sprite, inline so the CSS reaches its engine fire
+        fetch('/carregamento/nave.svg').then(function (r) { return r.ok ? r.text() : ''; }).then(function (s) {
+          if (s.indexOf('<svg') === 0) document.getElementById('carga-nave').innerHTML = s;
+        }).catch(function () {});
+        // "reduce flashes", recorded by the settings of the game
+        try {
+          var prefs = JSON.parse(localStorage.getItem('alienworld:preferencias') || 'null');
+          if (prefs && prefs.reduzirClaroes) raiz.classList.add('calma');
+        } catch (e) {}
+        var maior = 0, fora = false;
+        window.__carga = {
+          progresso: function (p) {
+            if (fora) return;
+            maior = Math.max(maior, Math.min(1, p || 0));
+            raiz.style.setProperty('--p', String(maior));
+            pct.textContent = Math.round(maior * 100) + '%';
+          },
+          sair: function () {
+            if (fora) return Promise.resolve();
+            window.__carga.progresso(1);
+            fora = true;
+            return new Promise(function (ok) {
+              // the bar reaches the end, the ship leaves to the right, the scene goes dark — then the game takes over
+              setTimeout(function () { raiz.classList.add('saindo'); }, 380);
+              setTimeout(ok, 380 + 300);
+            });
+          },
+          remover: function () {
+            window.removeEventListener('resize', ajustar);
+            if (raiz.parentNode) raiz.parentNode.removeChild(raiz);
+          },
+        };
+      })();
+    </script>
     <div id="game"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

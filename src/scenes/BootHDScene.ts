@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { ICONES_CARTAS, RARIDADES } from '../cartas';
 import { carregarCamadasMenu } from '../menu/cenario';
 import { carregarCamadasHangar } from '../hangar/cenarioHangar';
+import { carregou } from '../carregamento';
 
 /**
  * O boot da CAMADA HD (`uiHD.ts`): ela é outro jogo Phaser e não enxerga as texturas do mundo — carrega aqui as que
@@ -13,6 +14,8 @@ export class BootHDScene extends Phaser.Scene {
   }
 
   preload(): void {
+    // the bar of the loading screen (block M4, `src/carregamento.ts`)
+    this.load.on('progress', (p: number) => carregou('hd', p));
     ICONES_CARTAS.forEach((id) => this.load.image(`icone-${id}`, `sprites/cartas/icone-${id}.png`));
     RARIDADES.forEach((r) => this.load.image(`moldura-${r}`, `sprites/cartas/moldura-${r}.png`));
     this.load.image('realce-canto', 'sprites/cartas/realce-canto.png');

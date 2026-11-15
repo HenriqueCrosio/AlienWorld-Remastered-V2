@@ -17,6 +17,7 @@ import { carregarFontes } from './fonte';
 import { criarCamadaHD } from './uiHD';
 import { lerControle } from './entrada/controle';
 import { ligarAvisoDoControle } from './entrada/aviso';
+import { carregamentoComecou } from './carregamento';
 
 // As fontes das três vozes carregam (e a Silkscreen é assada) ANTES do jogo nascer: o 1º texto já sai nítido.
 await carregarFontes();
@@ -62,4 +63,6 @@ if (import.meta.env.DEV) {
 // ela nasce (ela fica pronta bem antes do menu, que é o 1º a escrever); se falhar, o texto fica no mundo.
 // DEV: `?semhd` abre o jogo SEM a camada HD — o plano B do menu e do texto (a sonda do menu passa por ele).
 const semHD = import.meta.env.DEV && new URLSearchParams(location.search).has('semhd');
+// THE LOADING SCREEN (block M4): the code and the fonts are here; the two loaders report from now on.
+carregamentoComecou(semHD);
 if (!semHD) void criarCamadaHD(game, [BootHDScene, CartasScene]);

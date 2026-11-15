@@ -5,6 +5,7 @@ import { ART_PECAS_F1, registrarPecasF1 } from '../f1/pecasF1';
 import { CONJUNTOS, IDLE_HAB } from '../entities/serpente/gestosHab';
 import { ARQUIVOS as ARQUIVOS_ENGUIA_BOOT } from '../entities/serpente/enguia/arquivos';
 import { FOLHAS_EXPLOSAO } from '../systems/explosoes/folhasExplosao';
+import { carregamentoAcabou, carregou, tirarCarregamento } from '../carregamento';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -1437,6 +1438,8 @@ export class BootScene extends Phaser.Scene {
     this.load.on('loaderror', (file: Phaser.Loader.File) => {
       console.info(`[art] '${file.key}' ausente — usando placeholder.`);
     });
+    // the bar of the loading screen (block M4, `src/carregamento.ts`)
+    this.load.on('progress', (p: number) => carregou('mundo', p));
 
     for (const [key, path] of Object.entries(ART)) this.load.image(key, path);
 
@@ -1543,7 +1546,12 @@ export class BootScene extends Phaser.Scene {
     // As peças do chão da F1 (rodada 6 do bloco G): os quadros das luzes assadas e a boca de cada torre.
     registrarPecasF1(this);
 
-    this.scene.start('Menu');
+    // THE LOADING SCREEN (15/11, block M4): the bar completes, the ship leaves and the screen goes dark; the menu
+    // starts under it, and the screen is taken off once the menu has drawn.
+    void carregamentoAcabou().then(() => {
+      this.scene.start('Menu');
+      this.game.events.once(Phaser.Core.Events.POST_RENDER, () => this.game.events.once(Phaser.Core.Events.POST_RENDER, tirarCarregamento));
+    });
   }
 
   /**
