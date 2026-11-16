@@ -1,0 +1,49 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 3 — os inimigos comuns e os perigos",
+    "dia": "2026-11-16",
+    "nota": "A morte de cada um já é a explosão do material (folha 2); aqui ficam o TIRO, o AVISO e os momentos próprios.\nO tiro inimigo é o som que mais repete no jogo (filas, ondas): julgue no ×8, e ele deve avisar sem assustar. O aviso (o telegrafar) é para o jogador LER: tem a duração exata do piscar do jogo.\nAs versões C sintetizadas (avisos, pavio, gás) têm o tempo do jogo medido no código.\n\"Ouvir no lugar\": cada som abre onde mais toca — atmosfera (F1), cabine/espaço (F2 e F3), interior (F4). O impacto da rocha é no vácuo: só o que passa pelo casco.\nEscolha uma versão por som (ou \"refazer\" + nota) e cole o texto do rodapé na conversa."
+  },
+  "grupos": [
+    {
+      "titulo": "Os inimigos comuns",
+      "sons": [
+        { "nome": "inimigo.tiro", "oque": "O TIRO mirado (o mais repetido da folha: macio, baixo)", "onde": "a canhoneira, F1–F4", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "inimigo.aviso", "oque": "O AVISO — os 0,45 s em que a canhoneira pisca antes de atirar", "onde": "a canhoneira, F1–F4", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.03, "vol": 0.08 } },
+        { "nome": "aranha.tiro", "oque": "O LEQUE de 3 (os três tocam como um só, mais pesado)", "onde": "a aranha do casco, F3", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.08 } },
+        { "nome": "aranha.aviso", "oque": "O AGACHAR — os 0,5 s piscando antes do salto", "onde": "a aranha do casco, F3", "lugar": "cabine" },
+        { "nome": "aranha.salto", "oque": "O SALTO — as pernas soltando", "onde": "a aranha do casco, F3", "lugar": "cabine" },
+        { "nome": "aranha.pouso", "oque": "O POUSO — o casco recebendo o peso, o anel de 6 tiros e o tremor", "onde": "a aranha do casco, F3", "lugar": "cabine" },
+        { "nome": "aguaviva.estalo", "oque": "O ESTALO — o arco atravessando o sino (hoje mudo)", "onde": "a água-viva, F3, a cada 1–2 s", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } },
+        { "nome": "cargueiro.largar", "oque": "A BAIA largando um drone (repete a cada 1,5 s: bem macio)", "onde": "o cargueiro, F2–F4", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "kamikaze.travar", "oque": "O TRAVAR — quando ele entra na tela e mira em você", "onde": "o kamikaze, F2–F4", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.03, "vol": 0.08 } }
+      ]
+    },
+    {
+      "titulo": "As torres",
+      "sons": [
+        { "nome": "torre.aviso", "oque": "O AVISO — os 0,4 s em que a torre pisca antes de atirar", "onde": "a torre de colônia, F1", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.03, "vol": 0.08 } },
+        { "nome": "torre.tiro", "oque": "O TIRO de canhão", "onde": "a torre de colônia, F1", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "torre.missil", "oque": "O MÍSSIL — a ignição e o foguete saindo do tubo", "onde": "o lança-mísseis do casco, F3", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.08 } }
+      ]
+    },
+    {
+      "titulo": "Os perigos",
+      "sons": [
+        { "nome": "sensor.acordar", "oque": "O ACORDAR — a mina sensora vê você entrar no raio", "onde": "as minas sensoras, F2–F4", "lugar": "cabine" },
+        { "nome": "sensor.pavio", "oque": "O PAVIO — os 0,7 s até o estouro (o estouro é a explosão de perigo)", "onde": "as minas sensoras, F2–F4", "lugar": "cabine" },
+        { "nome": "perigo.impacto", "oque": "A ROCHA BATENDO na nave, no vácuo (por baixo do \"atingida\")", "onde": "asteroides e destroços, F2–F3", "lugar": "cabine" },
+        { "nome": "acerto.indestrutivel", "oque": "O RICOCHETE — o tiro no que não morre (vai ter limite por segundo)", "onde": "o destroço, o pico e a nave caída da F1, a costela, a mesa", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } }
+      ]
+    },
+    {
+      "titulo": "A F4: a porta e o esfíncter",
+      "sons": [
+        { "nome": "porta.romper", "oque": "O 1º TEMPO da porta — o tecido rasgando (o estouro de carne vem 150 ms depois)", "onde": "as 3 portas do duto, F4", "lugar": "interior" },
+        { "nome": "esfincter.gas", "oque": "O GÁS (laço) — as mangueiras soltas vazando enquanto a nuvem engrossa", "onde": "o esfíncter, F4", "lugar": "interior", "laco": true },
+        { "nome": "esfincter.acender", "oque": "A IGNIÇÃO — o tiro acende a nuvem, o cone de fogo (antes do estouro de carne)", "onde": "o esfíncter, F4", "lugar": "interior" },
+        { "nome": "esfincter.respingo", "oque": "O RESPINGO — os pedaços batendo nas paredes depois do estouro", "onde": "o esfíncter, F4", "lugar": "interior" }
+      ]
+    }
+  ]
+}

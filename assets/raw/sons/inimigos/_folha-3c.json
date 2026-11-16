@@ -1,0 +1,36 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 3c — rodada 3, na direção dele",
+    "dia": "2026-11-16",
+    "nota": "O travar: \"algo que dá lock em você, mas mais curto e agudo. Como algo sibilante que te marca\" — G, H, I do PixelLab, J sintetizado (0,2 s).\nO ricochete: \"som de ricochete, algo batendo num objeto mais duro que faz o projétil ricochetear\" — G, H, I do PixelLab, J sintetizado (o estalo e o assobio saindo).\nOs dois são agudos por pedido: no jogo o ricochete terá teto por segundo e volume baixo."
+  },
+  "grupos": [
+    {
+      "titulo": "Rodada 3",
+      "sons": [
+        {
+          "nome": "kamikaze.travar",
+          "oque": "O TRAVAR — quando ele entra na tela e mira em você",
+          "onde": "o kamikaze, F2–F4",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.03,
+            "vol": 0.08
+          }
+        },
+        {
+          "nome": "acerto.indestrutivel",
+          "oque": "O RICOCHETE — o tiro no que não morre (vai ter limite por segundo)",
+          "onde": "o destroço, o pico e a nave caída da F1, a costela, a mesa",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.08,
+            "vol": 0.15
+          }
+        }
+      ]
+    }
+  ]
+}

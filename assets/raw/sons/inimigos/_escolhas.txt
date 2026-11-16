@@ -1,0 +1,21 @@
+# Sheet 3 (enemies and hazards), his choices 16/11 (kamikaze.travar and acerto.indestrutivel: refazer, round 2)
+inimigo.tiro: B
+inimigo.aviso: B2
+aranha.tiro: B
+aranha.aviso: B
+aranha.salto: A
+aranha.pouso: C
+aguaviva.estalo: B
+cargueiro.largar: B
+torre.aviso: A
+torre.tiro: B
+torre.missil: A
+sensor.acordar: A
+sensor.pavio: C
+perigo.impacto: B
+porta.romper: B
+esfincter.gas: A
+esfincter.acender: B
+esfincter.respingo: B
+kamikaze.travar: H
+acerto.indestrutivel: I

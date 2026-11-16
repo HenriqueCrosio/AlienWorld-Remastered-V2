@@ -1,0 +1,12 @@
+{
+  "_": "Sounds of a single MOMENT (16/11): the Aurora's last blast in cutscene 1, \"um bum oco e abafado\" (his).",
+  "takes": [
+    {
+      "nome": "momento.aurora.fim",
+      "id": "A",
+      "local": "assets/raw/sons/momentos/momento.aurora.fim-A.flac",
+      "mistura": "o explosao.chefeFim A (PixelLab, prompt: \"a colossal warship boss finally destroyed, a chain of deep detonations building into a massive final blast...\") tratado para o vácuo: os primeiros 2,2 s, só o grave (passa-baixa 450 Hz), oco (pente de ecos 12/23 ms), a cauda cortada; com um golpe sub-grave sintetizado (55 → 32 Hz) por baixo",
+      "prompt": "o bum oco e abafado da Aurora"
+    }
+  ]
+}

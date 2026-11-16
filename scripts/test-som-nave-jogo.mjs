@@ -195,21 +195,22 @@ for (const [stage, ship, modelo, nave] of [[2, 'humana', 'jato', 'xaelo'], [2, '
   void n0;
   const grandes = t.filter((n) => n === 'explosao.metalGrande').length;
   ok(grandes >= 12, `the Aurora chain plays the metal-grande sequence (${grandes})`, t.slice(0, 20));
-  ok(t.includes('explosao.chefeFim'), 'the big close at the end', t.slice(-6));
+  // (16/11: the close is the Aurora's own hollow boom of the vacuum, `momento.aurora.fim`, not the open-air boss's end)
+  ok(t.includes('momento.aurora.fim'), 'the big close at the end (the hollow boom)', t.slice(-6));
   ok(t.includes('explosao.lastro'), 'the bed (LASTRO) rolls under the chain', t.filter((n) => n.startsWith('explosao.')).slice(0, 6));
   ok(!t.includes('explosao.metal'), 'no separate small-metal blasts (the chain is composed, and now the small metal HAS a sound)', t.filter((n) => n.startsWith('explosao.')));
   ok((await diag()).lugar === 'cabine', 'the cutscene sounds in the cabin (space)');
 
   // HIS BUG (15/11): the big close went on sounding INSIDE the F2. A scene change ends every voice of the scene left.
   await page.evaluate(() => window.__game.scene.getScene('Interlude').implosao());
-  await page.waitForFunction(() => window.__som.diagnostico().vozes.includes('explosao.chefeFim'), null, { timeout: 8000 }).catch(() => {});
+  await page.waitForFunction(() => window.__som.diagnostico().vozes.includes('momento.aurora.fim'), null, { timeout: 8000 }).catch(() => {});
   const antes = (await diag()).vozes;
-  ok(antes.includes('explosao.chefeFim'), 'the close is sounding when the scene changes', antes);
+  ok(antes.includes('momento.aurora.fim'), 'the close is sounding when the scene changes', antes);
   await page.evaluate(() => window.__game.scene.getScene('Interlude').scene.start('Game', { stage: 2, ship: 'humana' }));
   await page.waitForFunction(() => window.__game.scene.isActive('Game'), null, { timeout: 30000 });
   await page.waitForTimeout(400);
   const depois = await diag();
-  ok(!depois.vozes.some((n) => n === 'explosao.chefeFim' || n === 'explosao.metalGrande' || n === 'explosao.lastro'), 'nothing of the cutscene sounds in the stage after it', depois.vozes);
+  ok(!depois.vozes.some((n) => n === 'momento.aurora.fim' || n === 'explosao.chefeFim' || n === 'explosao.metalGrande' || n === 'explosao.lastro'), 'nothing of the cutscene sounds in the stage after it', depois.vozes);
   ok(!depois.lastro.tocando && depois.lastro.energia === 0, 'the bed was drained by the scene change', depois.lastro);
 }
 

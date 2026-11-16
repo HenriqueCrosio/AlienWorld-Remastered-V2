@@ -1,0 +1,21 @@
+{
+  "_": "The ships' ricochets, 16/11. His two references (C:/Users/Henrique/Music/ricochetes variados.mp3, ricochete laser.mp3; licence unknown) were only MEASURED: local = synthesized from that profile (scripts/_som/_sintetizar-ricochete.mjs); pixellab = generated on his account. The TERMINUS's ricochet is a SET (ricocheteS1… or ricocheteP1…), drawn at random in the game.",
+  "base": "https://backblaze.pixellab.ai/file/pixellab-characters/audio/f7282f36-b779-4f64-832a-4693ca4cc628/",
+  "takes": [
+    {"nome":"nave.terminus.ricocheteS1","id":"A","local":"assets/raw/sons/ricochetes/nave.terminus.ricocheteS1-A.wav","prompt":"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,23 s, a nota em 820 Hz"},
+    {"nome":"nave.terminus.ricocheteS2","id":"A","local":"assets/raw/sons/ricochetes/nave.terminus.ricocheteS2-A.wav","prompt":"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,31 s, a nota em 650 Hz"},
+    {"nome":"nave.terminus.ricocheteS3","id":"A","local":"assets/raw/sons/ricochetes/nave.terminus.ricocheteS3-A.wav","prompt":"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,43 s, a nota oscilando em ~1,1 kHz"},
+    {"nome":"nave.terminus.ricocheteS4","id":"A","local":"assets/raw/sons/ricochetes/nave.terminus.ricocheteS4-A.wav","prompt":"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,33 s, a nota oscilando em ~1,2 kHz"},
+    {"nome":"nave.terminus.ricocheteS5","id":"A","local":"assets/raw/sons/ricochetes/nave.terminus.ricocheteS5-A.wav","prompt":"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,78 s, a nota em 820 Hz, a cauda longa"},
+    {"nome":"nave.terminus.ricocheteP1","id":"A","pixellab":"b6af1d08-e6fd-4cbc-b0dc-afdbdc75ad20/aw-terminus-ricochete-p1.wav","prompt":"a single bullet ricochet off hard rock, a sharp crack and a short whizzing zing bouncing away, quick, dry, no music"},
+    {"nome":"nave.terminus.ricocheteP2","id":"A","pixellab":"ad1d6a38-f914-4357-8acc-6779f465d340/aw-terminus-ricochete-p2.wav","prompt":"a heavy round ricocheting off thick steel plating, a hard clank and a buzzing whine that fades as it flies off, short, dry, no music"},
+    {"nome":"nave.terminus.ricocheteP3","id":"A","pixellab":"b310872c-f1db-4eda-895b-a7f502198f6c/aw-terminus-ricochete-p3.wav","prompt":"a cannon round glancing off a metal hull, a quick ping and a long descending whistling ricochet whine, dry, no music"},
+    {"nome":"nave.terminus.ricocheteP4","id":"A","pixellab":"ce2c07df-85a9-45a0-bd38-8c1275b4fbe1/aw-terminus-ricochete-p4.wav","prompt":"a tiny fast bullet skipping off stone, a dry snap and a very short high zip, quick ricochet, dry, no music"},
+    {"nome":"nave.terminus.ricochete","id":"S","local":"assets/raw/sons/ricochetes/nave.terminus.ricochete-S.wav","prompt":"o CONJUNTO sintetizado (S1–S5) sorteado 8 vezes, como no jogo"},
+    {"nome":"nave.terminus.ricochete","id":"P","local":"assets/raw/sons/ricochetes/nave.terminus.ricochete-P.wav","prompt":"o CONJUNTO do PixelLab (P1–P4) sorteado 8 vezes, como no jogo"},
+    {"nome":"nave.xaelo.ricochete","id":"L1","local":"assets/raw/sons/ricochetes/nave.xaelo.ricochete-L1.wav","prompt":"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o \"piu\" descendo 2,3 kHz → 300 Hz, 0,89 s como a referência"},
+    {"nome":"nave.xaelo.ricochete","id":"L2","local":"assets/raw/sons/ricochetes/nave.xaelo.ricochete-L2.wav","prompt":"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o mesmo \"piu\" em 0,42 s (o tiro dela repete 4,5 por segundo)"},
+    {"nome":"nave.xaelo.ricochete","id":"A","pixellab":"9f15bba4-fb18-4801-8db5-5e300abdec8d/aw-xaelo-ricochete-p1.wav","prompt":"a laser bolt ricocheting off a hard surface, a bright zap followed by a descending sci-fi laser sweep pew bouncing away, dark sci-fi, dry, no music"},
+    {"nome":"nave.xaelo.ricochete","id":"B","pixellab":"290dd99c-9dcb-4345-985e-9f90b265af1d/aw-xaelo-ricochete-p2.wav","prompt":"an energy beam deflecting off solid armor, a short electric crack and a falling laser whine, retro sci-fi laser ricochet, dry, no music"}
+  ]
+}

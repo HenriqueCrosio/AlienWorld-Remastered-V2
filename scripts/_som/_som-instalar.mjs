@@ -10,7 +10,8 @@ const raw = join('assets/raw/sons', grupo);
 const origem = JSON.parse(readFileSync(join(raw, '_origem.json'), 'utf8'));
 const escolhas = readFileSync(join(raw, '_escolhas.txt'), 'utf8')
   .split(/\r?\n/)
-  .map((l) => /^([a-z0-9.]+):\s*([A-Z][0-9]?)/i.exec(l.trim()))
+  // the version id: a letter and then letters/digits (B, C2, D2, BF1 — 16/11: "BF1" was read as "B")
+  .map((l) => /^([a-z0-9.]+):\s*([A-Z][A-Z0-9]*)\b/i.exec(l.trim()))
   .filter(Boolean)
   .map((m) => ({ nome: m[1], id: m[2] }));
 const destino = join('public/sfx', grupo);
@@ -28,9 +29,14 @@ for (const { nome, id } of escolhas) {
   const feito = [t.max ? `cortado em ${t.max} s` : '', t.tempo ? `${t.tempo}× sem mudar o tom` : '', t.limpar ? 'ruído reduzido' : '', t.laco ? 'emenda do laço' : '', 'tratado (_som-tratar)']
     .filter(Boolean)
     .join('; ');
+  // (`dele`: a file HE made and handed over — 16/11, the ricochets; its credit is his, not the project's)
   const linha = t.pixellab
     ? `| \`${nome}\` | \`${grupo}/${nome}\` | PixelLab \`create_sound_effect\` (versão ${id}) | gerado na conta dele | PixelLab (conta dele) | — | prompt: "${(t.prompt ?? '').replaceAll('|', '/')}"; ${feito} |`
-    : t.local
+    : t.mistura
+      ? `| \`${nome}\` | \`${grupo}/${nome}\` | PixelLab \`create_sound_effect\`, mixado no projeto (versão ${id}) | gerado na conta dele | PixelLab (conta dele) | — | ${t.mistura.replaceAll('|', '/')}; ${feito} |`
+      : t.dele
+      ? `| \`${nome}\` | \`${grupo}/${nome}\` | feito por ele (\`${t.local.split('/').pop()}\`) | Henrique | próprio | — | ${(t.prompt ?? '').replaceAll('|', '/')}; ${feito} |`
+      : t.local
       ? `| \`${nome}\` | \`${grupo}/${nome}\` | sintetizado no projeto (versão ${id}) | o projeto | próprio | — | ${(t.prompt ?? '').replaceAll('|', '/')}; ${feito} |`
       : `| \`${nome}\` | \`${grupo}/${nome}\` | Kenney · ${t.kenney.split('/')[0]} · \`${t.kenney.split('/').pop()}\` (versão ${id}) | Kenney (kenney.nl) | CC0 1.0 | https://kenney.nl/assets/${t.kenney.split('/')[0]} | ${feito} |`;
   const velha = creditos.split('\n').find((l) => l.startsWith(`| \`${nome}\` |`));

@@ -1,0 +1,27 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 5b-c — o raspar da enguia e a salva oca",
+    "dia": "2026-11-16",
+    "nota": "O RASPAR: \"uma estrutura enorme raspando em outra estrutura, na pegada de efeitos de filmes com naves gigantes no espaço\". No jogo é um laço que cresce com quanto do corpo dela raspa o casco e some 0,3 s depois do último contato.\nA SALVA: a D que você escolheu e a D2, \"mais abafada e oca\": passa-baixa em 1 kHz e um pente de ecos curtíssimos (9 e 17 ms) que dá o oco.\nNo jogo, TODO som dos chefões no vácuo (F2, F3) agora passa pelo filtro de espaço — mais baixo, abafado e com uma sala fechada curta. Ouça na cabine."
+  },
+  "grupos": [
+    {
+      "titulo": "Rodada 3",
+      "sons": [
+        {
+          "nome": "enguia.raspa",
+          "oque": "O RASPAR (laço) — duas estruturas colossais raspando",
+          "onde": "a enguia, ao entrar e saltar",
+          "lugar": "cabine",
+          "laco": true
+        },
+        {
+          "nome": "serpente.chuva.salva",
+          "oque": "A SALVA — D (antes) e D2 (abafada e oca)",
+          "onde": "a chuva, uma por cabeça",
+          "lugar": "cabine"
+        }
+      ]
+    }
+  ]
+}

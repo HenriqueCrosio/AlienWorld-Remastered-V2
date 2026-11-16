@@ -13,9 +13,9 @@
     { "nome": "explosao.metal", "id": "H", "max": 0.45, "kenney": "sci-fi-sounds/Audio/explosionCrunch_003.ogg" },
     { "nome": "efeito.choque", "id": "F", "pixellab": "8963c755-de3e-4f18-8ba4-39db906be8a4/aw-efeito-choque-f.wav", "prompt": "a single real electric spark snapping, one dry crack of an electric arc jumping a short gap, very short, no hum, no buzz, no hiss, no music" },
     { "nome": "efeito.choque", "id": "G", "pixellab": "90a4156a-8f76-467b-b992-2e9c09ec04b5/aw-efeito-choque-g.wav", "prompt": "a short static discharge snap, a crisp dry electric tick like a spark plug firing once, physical and close, no buzzing tail, no music" },
-    { "nome": "efeito.choque", "id": "C3", "local": "assets/raw/sons/rodada3/efeito.choque-C3.wav", "prompt": "(sintetizado em scripts/_som/_sintetizar-estalo.mjs: uma faísca de ~8 ms, ruído com decaimento rapidíssimo na faixa do estalo, 1,2–7 kHz; sem zumbido)" },
+    { "nome": "efeito.choque", "id": "C3", "local": "assets/raw/sons/rodada3/efeito.choque-C3.flac", "prompt": "(sintetizado em scripts/_som/_sintetizar-estalo.mjs: uma faísca de ~8 ms, ruído com decaimento rapidíssimo na faixa do estalo, 1,2–7 kHz; sem zumbido)" },
     { "nome": "efeito.arco", "id": "F", "pixellab": "ae1bc09e-9c3a-4915-a800-6bbe5f670518/aw-efeito-arco-f.wav", "prompt": "an electric arc jumping between three points, three quick dry spark snaps in a row, physical crackles, no hum, no buzz, no hiss, no music" },
     { "nome": "efeito.arco", "id": "G", "pixellab": "41686c6f-4ae4-49bd-9158-3ac60b23d764/aw-efeito-arco-g.wav", "prompt": "a chain of short static discharges hopping from one object to the next, two or three crisp dry electric snaps, close and physical, no buzzing, no music" },
-    { "nome": "efeito.arco", "id": "C3", "local": "assets/raw/sons/rodada3/efeito.arco-C3.wav", "prompt": "(sintetizado em scripts/_som/_sintetizar-estalo.mjs: três estalos a 70 ms, cada um mais fraco — a faísca pulando)" }
+    { "nome": "efeito.arco", "id": "C3", "local": "assets/raw/sons/rodada3/efeito.arco-C3.flac", "prompt": "(sintetizado em scripts/_som/_sintetizar-estalo.mjs: três estalos a 70 ms, cada um mais fraco — a faísca pulando)" }
   ]
 }

@@ -1,0 +1,123 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 5a — os chefões máquina",
+    "dia": "2026-11-16",
+    "nota": "A Torre da F1 e a Capitânia da F2. A dor (o acerto no corpo) e a morte (o fim de chefão) já são da folha 2; aqui ficam os ataques, os avisos e os momentos.\nA Torre é um METRÔNOMO (o leque a cada 1,9 s no chão, 1,35 s no ar): julgue o leque no ×8. A Capitânia é um NAVIO, \"salva e silêncio\": a bordada rola pelas 3 baterias, 0,2–0,3 s entre elas.\nAs versões C sintetizadas têm o tempo exato do jogo: a carga do míssil (0,65 s) e o pavio do flak (0,35 s).\nA Torre abre na atmosfera (F1), a Capitânia na cabine (o vácuo da F2)."
+  },
+  "grupos": [
+    {
+      "titulo": "A Torre (F1)",
+      "sons": [
+        {
+          "nome": "chefe.torre.leque",
+          "oque": "O LEQUE de 4 cometas — o metrônomo, com o recuo do canhão",
+          "onde": "a Torre, F1",
+          "lugar": "atmosfera",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.03,
+            "vol": 0.08
+          }
+        },
+        {
+          "nome": "chefe.torre.mirado",
+          "oque": "O MIRADO — o cometa no ar, 0,4 s depois do leque",
+          "onde": "a Torre no ar, F1",
+          "lugar": "atmosfera",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.04,
+            "vol": 0.08
+          }
+        },
+        {
+          "nome": "chefe.torre.missilCarga",
+          "oque": "A CARGA DO MÍSSIL — os 0,65 s piscando antes de lançar",
+          "onde": "a Torre no ar, F1",
+          "lugar": "atmosfera"
+        },
+        {
+          "nome": "chefe.torre.missil",
+          "oque": "O MÍSSIL — o lançamento",
+          "onde": "a Torre no ar, F1",
+          "lugar": "atmosfera"
+        },
+        {
+          "nome": "chefe.torre.decolagem",
+          "oque": "A DECOLAGEM — 1,3 s: os motores arrancando a Torre da base (as explosões da base já têm som)",
+          "onde": "a Torre, F1, na metade da vida",
+          "lugar": "atmosfera"
+        },
+        {
+          "nome": "chefe.torre.motor",
+          "oque": "O MOTOR NO AR (laço) — as plumas segurando a Torre",
+          "onde": "a Torre no ar, F1",
+          "lugar": "atmosfera",
+          "laco": true
+        }
+      ]
+    },
+    {
+      "titulo": "A Capitânia (F2)",
+      "sons": [
+        {
+          "nome": "chefe.capitania.hangar",
+          "oque": "O HANGAR — a baia largando os interceptadores (180 ms entre eles)",
+          "onde": "a Capitânia, F2",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "chefe.capitania.bordada",
+          "oque": "A BORDADA — uma bateria (3–4 traçantes a 90 ms); as 3 baterias rolam em sequência",
+          "onde": "a Capitânia, F2",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.04,
+            "vol": 0.08
+          }
+        },
+        {
+          "nome": "chefe.capitania.flak",
+          "oque": "O FLAK — o lançar das cápsulas giratórias",
+          "onde": "a Capitânia, F2",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "chefe.capitania.flakPavio",
+          "oque": "O PAVIO DO FLAK — os últimos 0,35 s piscando",
+          "onde": "a Capitânia, F2",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.03,
+            "vol": 0.08
+          }
+        },
+        {
+          "nome": "chefe.capitania.flakEstouro",
+          "oque": "O ESTOURO DO FLAK — o anel de 8 estilhaços",
+          "onde": "a Capitânia, F2",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.05,
+            "vol": 0.1
+          }
+        },
+        {
+          "nome": "chefe.capitania.mirado",
+          "oque": "O MIRADO — o canhão principal, um tiro na nave",
+          "onde": "a Capitânia furiosa, F2",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "chefe.capitania.furia",
+          "oque": "A FÚRIA — quando ela endurece o ritmo (o clarão)",
+          "onde": "a Capitânia, F2, na metade da vida",
+          "lugar": "cabine"
+        }
+      ]
+    }
+  ]
+}

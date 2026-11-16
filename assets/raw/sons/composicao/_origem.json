@@ -2,13 +2,13 @@
   "_": "The TERMINUS composition, round 2 (16/11): the M2 while the trigger is held; the A1 (the A-10 buzz) ONLY on the release, 0.08 s after letting go, in two shapes (a burst with a spin-down, or a peak that fades). In space the M2 at 1.8 kHz and the A1 only through the hull below 300 Hz. Built by scripts/_som/_compor-terminus.mjs.",
   "base": "",
   "takes": [
-    { "nome": "teste.terminus.f1", "id": "segurado", "local": "assets/raw/sons/composicao/F1-segurado.wav", "prompt": "F1 · 2,2 s de gatilho: só o M2 enquanto segura; ao soltar, o A1 chega (rajada curta + parada)" },
-    { "nome": "teste.terminus.f1", "id": "toque", "local": "assets/raw/sons/composicao/F1-toque.wav", "prompt": "F1 · um toque de 0,3 s, o A1 chegando ao soltar (rajada + parada)" },
-    { "nome": "teste.terminus.f1", "id": "segurado-PICO", "local": "assets/raw/sons/composicao/F1-segurado-pico.wav", "prompt": "F1 · 2,2 s: só o M2; ao soltar, o A1 sobe ao pico e some" },
-    { "nome": "teste.terminus.f1", "id": "toque-PICO", "local": "assets/raw/sons/composicao/F1-toque-pico.wav", "prompt": "F1 · um toque de 0,3 s, o pico do A1 ao soltar" },
-    { "nome": "teste.terminus.f2", "id": "segurado", "local": "assets/raw/sons/composicao/F2-segurado.wav", "prompt": "F2 (espaço) · 2,2 s: o M2 menos abafado (1,8 kHz); ao soltar, o A1 só pelo casco (abaixo de 300 Hz)" },
-    { "nome": "teste.terminus.f2", "id": "toque", "local": "assets/raw/sons/composicao/F2-toque.wav", "prompt": "F2 (espaço) · um toque de 0,3 s" },
-    { "nome": "teste.terminus.f2", "id": "segurado-PICO", "local": "assets/raw/sons/composicao/F2-segurado-pico.wav", "prompt": "F2 (espaço) · 2,2 s: o M2 a 1,8 kHz; ao soltar, o pico do A1 pelo casco" },
-    { "nome": "teste.terminus.f2", "id": "toque-PICO", "local": "assets/raw/sons/composicao/F2-toque-pico.wav", "prompt": "F2 (espaço) · um toque de 0,3 s, o pico pelo casco" }
+    { "nome": "teste.terminus.f1", "id": "segurado", "local": "assets/raw/sons/composicao/F1-segurado.flac", "prompt": "F1 · 2,2 s de gatilho: só o M2 enquanto segura; ao soltar, o A1 chega (rajada curta + parada)" },
+    { "nome": "teste.terminus.f1", "id": "toque", "local": "assets/raw/sons/composicao/F1-toque.flac", "prompt": "F1 · um toque de 0,3 s, o A1 chegando ao soltar (rajada + parada)" },
+    { "nome": "teste.terminus.f1", "id": "segurado-PICO", "local": "assets/raw/sons/composicao/F1-segurado-pico.flac", "prompt": "F1 · 2,2 s: só o M2; ao soltar, o A1 sobe ao pico e some" },
+    { "nome": "teste.terminus.f1", "id": "toque-PICO", "local": "assets/raw/sons/composicao/F1-toque-pico.flac", "prompt": "F1 · um toque de 0,3 s, o pico do A1 ao soltar" },
+    { "nome": "teste.terminus.f2", "id": "segurado", "local": "assets/raw/sons/composicao/F2-segurado.flac", "prompt": "F2 (espaço) · 2,2 s: o M2 menos abafado (1,8 kHz); ao soltar, o A1 só pelo casco (abaixo de 300 Hz)" },
+    { "nome": "teste.terminus.f2", "id": "toque", "local": "assets/raw/sons/composicao/F2-toque.flac", "prompt": "F2 (espaço) · um toque de 0,3 s" },
+    { "nome": "teste.terminus.f2", "id": "segurado-PICO", "local": "assets/raw/sons/composicao/F2-segurado-pico.flac", "prompt": "F2 (espaço) · 2,2 s: o M2 a 1,8 kHz; ao soltar, o pico do A1 pelo casco" },
+    { "nome": "teste.terminus.f2", "id": "toque-PICO", "local": "assets/raw/sons/composicao/F2-toque-pico.flac", "prompt": "F2 (espaço) · um toque de 0,3 s, o pico pelo casco" }
   ]
 }

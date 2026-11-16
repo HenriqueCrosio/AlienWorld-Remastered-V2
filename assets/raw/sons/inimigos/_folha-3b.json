@@ -1,0 +1,16 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 3b — os dois que voltaram",
+    "dia": "2026-11-16",
+    "nota": "A rodada 2 do travar do kamikaze e do ricochete, em direções que a rodada 1 não teve.\nO kamikaze: em vez do bipe de mira, o CORPO dele — o motor crescendo no mergulho (D), o propulsor acendendo para o choque (E), um pulso grave de predador (F).\nO ricochete: em vez do tinido de metal, o tiro MORRENDO na coisa — um baque surdo (D), um chiado que apaga (E), um \"toc\" seco sintetizado, sem anel (F).\nSe nenhuma servir, diga a direção (mais curto? mais grave? nenhum som?) antes da próxima rodada."
+  },
+  "grupos": [
+    {
+      "titulo": "Rodada 2",
+      "sons": [
+        { "nome": "kamikaze.travar", "oque": "O TRAVAR — quando ele entra na tela e mira em você", "onde": "o kamikaze, F2–F4", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.03, "vol": 0.08 } },
+        { "nome": "acerto.indestrutivel", "oque": "O RICOCHETE — o tiro no que não morre (vai ter limite por segundo)", "onde": "o destroço, o pico e a nave caída da F1, a costela, a mesa", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } }
+      ]
+    }
+  ]
+}

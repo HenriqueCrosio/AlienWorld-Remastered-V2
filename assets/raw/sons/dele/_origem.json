@@ -1,0 +1,11 @@
+{
+  "_": "HIS effects (16/11, *\"eu construí o que precisávamos\"*; his answer: made by him, his own). The TERMINUS ricochet is a SET of 5 drawn at random. flybys/ = set aside by him *\"para encher com mais imersão\"* — for the ambience / cutscene sheets (7 and 8), NOT installed yet.",
+  "takes": [
+    {"nome":"nave.terminus.ricochete1","id":"A","dele":true,"local":"assets/raw/sons/dele/ricochete_terminus_1.m4a","prompt":"o ricochete da TERMINUS, variação 1 de 5 (sorteadas no jogo)"},
+    {"nome":"nave.terminus.ricochete2","id":"A","dele":true,"local":"assets/raw/sons/dele/ricochete_terminus_2.m4a","prompt":"o ricochete da TERMINUS, variação 2 de 5 (sorteadas no jogo)"},
+    {"nome":"nave.terminus.ricochete3","id":"A","dele":true,"local":"assets/raw/sons/dele/ricochete_terminus_3.m4a","prompt":"o ricochete da TERMINUS, variação 3 de 5 (sorteadas no jogo)"},
+    {"nome":"nave.terminus.ricochete4","id":"A","dele":true,"local":"assets/raw/sons/dele/ricochete_terminus_4.m4a","prompt":"o ricochete da TERMINUS, variação 4 de 5 (sorteadas no jogo)"},
+    {"nome":"nave.terminus.ricochete5","id":"A","dele":true,"local":"assets/raw/sons/dele/ricochete_terminus_5.m4a","prompt":"o ricochete da TERMINUS, variação 5 de 5 (sorteadas no jogo)"},
+    {"nome":"nave.xaelo.ricochete","id":"A","dele":true,"local":"assets/raw/sons/dele/ricochete_laser.m4a","prompt":"o ricochete de laser da X-AELO"}
+  ]
+}

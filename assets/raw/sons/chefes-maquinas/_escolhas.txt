@@ -1,0 +1,14 @@
+# Sheet 5a (the machine bosses), his choices 16/11 (decolagem B + a rocket layer, motor and flakPavio → round 2)
+chefe.torre.leque: A
+chefe.torre.mirado: B
+chefe.torre.missilCarga: A
+chefe.torre.missil: B
+chefe.capitania.hangar: A
+chefe.capitania.bordada: A
+chefe.capitania.flak: B
+chefe.capitania.flakEstouro: A
+chefe.capitania.mirado: A
+chefe.capitania.furia: A
+chefe.torre.decolagem: BF1
+chefe.torre.motor: G
+chefe.capitania.flakPavio: G

@@ -2,10 +2,10 @@
   "_": "The TERMINUS shot as installed (16/11, his choice on sheet 7): the M2 rotary gun while the trigger is held (spin-up, loop, spin-down), and the A1 (the A-10 buzz) arriving on the RELEASE — the PEAK in the atmosphere, the burst through the hull in space. Parts from scripts/_som/_sintetizar-minigun.mjs (M2) and scripts/_som/_compor-terminus.mjs (the arrivals).",
   "base": "",
   "takes": [
-    { "nome": "nave.terminus.rotativa.arranque", "id": "M2", "local": "assets/raw/sons/minigun/M2-arranque.wav", "prompt": "o arranque da rotativa M2 (o tiro I, o 30 mm, acelerando até 12/s + o assobio do motor)" },
-    { "nome": "nave.terminus.rotativa.laco", "id": "M2", "laco": true, "camada": "acao", "local": "assets/raw/sons/minigun/M2-laco.wav", "prompt": "a rajada segurada da rotativa M2 (o tiro I a 12/s), em laço" },
-    { "nome": "nave.terminus.rotativa.parada", "id": "M2", "local": "assets/raw/sons/minigun/M2-parada.wav", "prompt": "a parada da rotativa M2 (os canos desacelerando)" },
-    { "nome": "nave.terminus.chegada.pico", "id": "A1", "local": "assets/raw/sons/composicao/chegada-pico.wav", "prompt": "a chegada do A1 na atmosfera: o zumbido do A-10 sintetizado da medida da referência dele, subindo ao pico em 50 ms e sumindo em 0,85 s" },
-    { "nome": "nave.terminus.chegada.casco", "id": "A1", "local": "assets/raw/sons/composicao/chegada-casco.wav", "prompt": "a chegada do A1 no espaço: a rajada curta do A1 só pelo casco (abaixo de 300 Hz)" }
+    { "nome": "nave.terminus.rotativa.arranque", "id": "M2", "local": "assets/raw/sons/minigun/M2-arranque.flac", "prompt": "o arranque da rotativa M2 (o tiro I, o 30 mm, acelerando até 12/s + o assobio do motor)" },
+    { "nome": "nave.terminus.rotativa.laco", "id": "M2", "laco": true, "camada": "acao", "local": "assets/raw/sons/minigun/M2-laco.flac", "prompt": "a rajada segurada da rotativa M2 (o tiro I a 12/s), em laço" },
+    { "nome": "nave.terminus.rotativa.parada", "id": "M2", "local": "assets/raw/sons/minigun/M2-parada.flac", "prompt": "a parada da rotativa M2 (os canos desacelerando)" },
+    { "nome": "nave.terminus.chegada.pico", "id": "A1", "local": "assets/raw/sons/composicao/chegada-pico.flac", "prompt": "a chegada do A1 na atmosfera: o zumbido do A-10 sintetizado da medida da referência dele, subindo ao pico em 50 ms e sumindo em 0,85 s" },
+    { "nome": "nave.terminus.chegada.casco", "id": "A1", "local": "assets/raw/sons/composicao/chegada-casco.flac", "prompt": "a chegada do A1 no espaço: a rajada curta do A1 só pelo casco (abaixo de 300 Hz)" }
   ]
 }

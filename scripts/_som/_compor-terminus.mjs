@@ -7,13 +7,14 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { original } from './_original.mjs';
 
 const SR = 44100;
 const [saida] = process.argv.slice(2);
 mkdirSync(saida, { recursive: true });
 const RAW = 'assets/raw/sons/minigun';
 const ler = (arquivo) => {
-  const raw = execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-i', arquivo, '-ac', '1', '-ar', String(SR), '-f', 'f32le', '-'], { maxBuffer: 1 << 28 });
+  const raw = execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-i', original(arquivo), '-ac', '1', '-ar', String(SR), '-f', 'f32le', '-'], { maxBuffer: 1 << 28 });
   return new Float32Array(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.length));
 };
 const parte = (id) => ({ arranque: ler(join(RAW, `${id}-arranque.wav`)), laco: ler(join(RAW, `${id}-laco.wav`)), parada: ler(join(RAW, `${id}-parada.wav`)) });

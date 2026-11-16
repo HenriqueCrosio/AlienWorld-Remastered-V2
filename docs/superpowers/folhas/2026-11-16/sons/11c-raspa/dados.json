@@ -1,0 +1,64 @@
+{
+ "titulo": "Folha de sons 5b-c — o raspar da enguia e a salva oca",
+ "dia": "2026-11-16",
+ "nota": "O RASPAR: \"uma estrutura enorme raspando em outra estrutura, na pegada de efeitos de filmes com naves gigantes no espaço\". No jogo é um laço que cresce com quanto do corpo dela raspa o casco e some 0,3 s depois do último contato.\nA SALVA: a D que você escolheu e a D2, \"mais abafada e oca\": passa-baixa em 1 kHz e um pente de ecos curtíssimos (9 e 17 ms) que dá o oco.\nNo jogo, TODO som dos chefões no vácuo (F2, F3) agora passa pelo filtro de espaço — mais baixo, abafado e com uma sala fechada curta. Ouça na cabine.",
+ "grupos": [
+  {
+   "titulo": "Rodada 3",
+   "sons": [
+    {
+     "nome": "enguia.raspa",
+     "oque": "O RASPAR (laço) — duas estruturas colossais raspando",
+     "onde": "a enguia, ao entrar e saltar",
+     "lugar": "cabine",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/enguia.raspa-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"two colossal metal starship hulls grinding against each other, a deep screeching metal scrape with heavy groaning and rumbling vibration, like a giant spaceship scraping in a sci-fi movie, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/enguia.raspa-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an enormous armored structure dragging across another massive metal surface, a low tortured metallic grind with sparks crackling and a deep resonant groan, cinematic, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/enguia.raspa-C.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"giant hull plates scraping and shuddering together, a heavy industrial metal scrape with low creaking stress and rattling, huge and slow, cinematic space, continuous, seamless, no start or end, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "serpente.chuva.salva",
+     "oque": "A SALVA — D (antes) e D2 (abafada e oca)",
+     "onde": "a chuva, uma por cabeça",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "D",
+       "arquivo": "v/serpente.chuva.salva-D.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a D de antes (para comparar)\""
+      },
+      {
+       "id": "D2",
+       "arquivo": "v/serpente.chuva.salva-D2.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"a D, \"mais abafada e oca, como se estivessem no espaço\": passa-baixa 1 kHz e o pente de 9/17 ms\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

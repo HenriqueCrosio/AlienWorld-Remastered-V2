@@ -122,7 +122,8 @@ ok(validarCatalogo({ 'nave.xaelo.tiro': def({ camada: 'interface', plano: 'fundo
   ok(energiaDepois(e, 8) < LASTRO.desliga, 'eight seconds after the chain, the bed is off');
   ok(ganhoDoLastro(99) === 1 && ganhoDoLastro(-1) === 0, 'the bed gain is clamped');
   ok(forcaNoLugar(1, 'cabine') === EXPLOSAO_NO_VACUO && forcaNoLugar(1, 'atmosfera') === 1, 'in the vacuum the blasts are quieter; in the air, not');
-  const motores = Object.entries(SONS).filter(([n]) => n.endsWith('.motor'));
+  // the SHIPS' engines (a boss's thrusters are a sound of the fight, not the ship's bed)
+  const motores = Object.entries(SONS).filter(([n]) => n.startsWith('nave.') && n.endsWith('.motor'));
   ok(motores.length === 3 && motores.every(([, d]) => d.volume <= 0.2 && d.passaBaixa && d.passaBaixa <= 1500), 'the three engines are low and muffled', motores.map(([n, d]) => [n, d.volume, d.passaBaixa]));
   const explosoes = Object.entries(SONS).filter(([n]) => n.startsWith('explosao.') && n !== 'explosao.luz' && n !== 'explosao.lastro');
   ok(SONS['explosao.lastro']?.laco && !SONS['explosao.lastro'].lastro, 'the bed itself is a loop that does not feed itself');

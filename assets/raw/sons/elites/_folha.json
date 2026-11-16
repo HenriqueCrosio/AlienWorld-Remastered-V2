@@ -1,0 +1,240 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 4 — os elites",
+    "dia": "2026-11-16",
+    "nota": "A morte de cada elite já é a explosão do material (folha 2), e a autodestruição do drone de mineração já estoura com som. Aqui ficam os gestos, os avisos e os tiros.\nOs AVISOS têm a duração do jogo para o jogador LER: o pavio do drone (0,6 s), o abrir/fechar da sentinela (0,5 s), a mira (0,6 s) e o trava (0,3 s) da lula, o inchar do Tubo (0,6 s). As versões C sintetizadas têm o tempo exato.\nOs que repetem muito (o tiro do drone, o escudo, a minigun) se julgam no ×8. Os laços (a broca, a roda, o enxame) tocam 6 s aqui.\nO enxame das moscas é UM laço que sobe com o número delas (até 6), não um por mosca."
+  },
+  "grupos": [
+    {
+      "titulo": "F2 · O drone de mineração",
+      "sons": [
+        {
+          "nome": "drone.minerar",
+          "oque": "A BROCA (laço) — enquanto ele trabalha encaixado na rocha",
+          "onde": "o drone de mineração, F2",
+          "lugar": "cabine",
+          "laco": true
+        },
+        {
+          "nome": "drone.alerta",
+          "oque": "O ALERTA — os 0,65 s em que ele te nota e larga a rocha",
+          "onde": "o drone de mineração, F2",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "drone.tiro",
+          "oque": "O TIRO — cada cristal da rajada de 3 (0,3 s entre eles)",
+          "onde": "o drone de mineração, F2",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.05,
+            "vol": 0.1
+          }
+        },
+        {
+          "nome": "drone.pisca",
+          "oque": "O PAVIO — os 0,6 s piscando antes de se explodir",
+          "onde": "o drone de mineração, F2",
+          "lugar": "cabine"
+        }
+      ]
+    },
+    {
+      "titulo": "F2 · A sentinela",
+      "sons": [
+        {
+          "nome": "sentinela.rolar",
+          "oque": "A RODA (laço) — rolando até o próximo posto",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine",
+          "laco": true
+        },
+        {
+          "nome": "sentinela.abrir",
+          "oque": "O ABRIR — os 0,5 s em que ela abre e ergue o escudo",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "sentinela.escudo",
+          "oque": "O ESCUDO — o seu tiro absorvido (repete muito: macio, com teto)",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.06,
+            "vol": 0.12
+          }
+        },
+        {
+          "nome": "sentinela.escudoQuebra",
+          "oque": "O ESCUDO QUEBRANDO — em lascas",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "sentinela.balaco",
+          "oque": "O BALAÇO — o tiro pesado e lento do canhão de cima",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.04,
+            "vol": 0.08
+          }
+        },
+        {
+          "nome": "sentinela.minigun",
+          "oque": "A MINIGUN — cada tiro do leque e da varredura",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.05,
+            "vol": 0.1
+          }
+        },
+        {
+          "nome": "sentinela.sobrecarga",
+          "oque": "A SOBRECARGA — o arranque da varredura de 1,6 s",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "sentinela.fechar",
+          "oque": "O FECHAR — os 0,5 s em que ela fecha e volta a rolar",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine"
+        }
+      ]
+    },
+    {
+      "titulo": "F3 · A lula",
+      "sons": [
+        {
+          "nome": "lula.surge",
+          "oque": "O SURGIR — os 0,3 s em que ela aparece",
+          "onde": "a lula, F3",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "lula.mira",
+          "oque": "A MIRA — os 0,6 s da linha pontilhada te seguindo",
+          "onde": "a lula, F3",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "lula.trava",
+          "oque": "O TRAVA — os 0,3 s em que a mira trava e pisca, antes do tiro",
+          "onde": "a lula, F3",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "lula.agulhas",
+          "oque": "AS AGULHAS — a rajada de 3, como um som só",
+          "onde": "a lula, F3",
+          "lugar": "cabine",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.04,
+            "vol": 0.08
+          }
+        },
+        {
+          "nome": "lula.tinta",
+          "oque": "A TINTA — a nuvem (menor no sopro, maior na cortina)",
+          "onde": "a lula, F3",
+          "lugar": "cabine"
+        },
+        {
+          "nome": "lula.fuga",
+          "oque": "A FUGA — o jato na 3ª saída",
+          "onde": "a lula, F3",
+          "lugar": "cabine"
+        }
+      ]
+    },
+    {
+      "titulo": "F4 · A Larva, a pupa e as moscas",
+      "sons": [
+        {
+          "nome": "larva.perfura",
+          "oque": "O PERFURAR — o buraco abrindo no tecido",
+          "onde": "a Larva, F4",
+          "lugar": "interior"
+        },
+        {
+          "nome": "larva.sai",
+          "oque": "O SAIR — ela saindo do buraco",
+          "onde": "a Larva, F4",
+          "lugar": "interior"
+        },
+        {
+          "nome": "larva.tranco",
+          "oque": "O TRANCO — o lance até o próximo posto",
+          "onde": "a Larva, F4",
+          "lugar": "interior"
+        },
+        {
+          "nome": "larva.poe",
+          "oque": "O PÔR — as duas pupas lançadas",
+          "onde": "a Larva, F4",
+          "lugar": "interior"
+        },
+        {
+          "nome": "larva.mergulha",
+          "oque": "O MERGULHO — de volta ao buraco",
+          "onde": "a Larva, F4",
+          "lugar": "interior"
+        },
+        {
+          "nome": "pupa.eclode",
+          "oque": "A PUPA ECLODINDO — 2 s depois, solta a mosca",
+          "onde": "as pupas, F4",
+          "lugar": "interior",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.06,
+            "vol": 0.1
+          }
+        },
+        {
+          "nome": "mosca.zumbido",
+          "oque": "O ENXAME (laço) — sobe com o número de moscas vivas",
+          "onde": "as moscas, F4",
+          "lugar": "interior",
+          "laco": true
+        }
+      ]
+    },
+    {
+      "titulo": "F4 · O Tubo de esporos",
+      "sons": [
+        {
+          "nome": "tubo.incha",
+          "oque": "O INCHAR — os 0,6 s de aviso antes do pulso",
+          "onde": "o Tubo, F4",
+          "lugar": "interior"
+        },
+        {
+          "nome": "tubo.pulso",
+          "oque": "O PULSO — os 6 esporos saindo",
+          "onde": "o Tubo, F4",
+          "lugar": "interior"
+        },
+        {
+          "nome": "esporo.grudar",
+          "oque": "O ESPORO GRUDANDO — começam os 2,5 s de lentidão",
+          "onde": "a nave, F4",
+          "lugar": "interior",
+          "repetir": true,
+          "variacao": {
+            "tom": 0.05,
+            "vol": 0.1
+          }
+        }
+      ]
+    }
+  ]
+}

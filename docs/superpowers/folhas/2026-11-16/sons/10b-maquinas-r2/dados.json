@@ -1,0 +1,98 @@
+{
+ "titulo": "Folha de sons 5a-b — a decolagem, o motor e o pavio do flak",
+ "dia": "2026-11-16",
+ "nota": "A DECOLAGEM: a B que você escolheu com um FOGUETE em lançamento por cima (BF1 e BF2: dois foguetes diferentes, a B a 55 %, o foguete a 45 %).\nO MOTOR, refeito como THRUSTERS (o seu pedido): E e F do PixelLab, G e H do Kenney (laços de thruster de verdade). Tocam 6 s aqui.\nO PAVIO DO FLAK voltou sem nota: aqui outras direções — o pavio CHIANDO (D) e a cápsula ASSOBIANDO cada vez mais rápido (E). Se nenhuma servir, diga a direção.",
+ "grupos": [
+  {
+   "titulo": "Rodada 2",
+   "sons": [
+    {
+     "nome": "chefe.torre.decolagem",
+     "oque": "A DECOLAGEM — a B + o foguete por cima",
+     "onde": "a Torre, F1, na metade da vida",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "BF1",
+       "arquivo": "v/chefe.torre.decolagem-BF1.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"a B dele + o FOGUETE 1 por cima (o pedido: \"adicionar uma geração de efeito de foguete em lançamento\"); foguete: \"a big rocket launching, a sharp ignition crack and a powerful rushing rocket blast roaring upward\" (PixelLab)\""
+      },
+      {
+       "id": "BF2",
+       "arquivo": "v/chefe.torre.decolagem-BF2.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"a B dele + o FOGUETE 2 por cima; foguete: \"rocket engines igniting at liftoff, a thunderous crackling exhaust roar building up fast\" (PixelLab)\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.torre.motor",
+     "oque": "O MOTOR NO AR (laço) — thrusters",
+     "onde": "a Torre no ar, F1",
+     "lugar": "atmosfera",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "E",
+       "arquivo": "v/chefe.torre.motor-E.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"powerful attitude thrusters firing steadily on a hovering war machine, a constant roaring jet exhaust hiss with a deep rumble, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "F",
+       "arquivo": "v/chefe.torre.motor-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"rocket thrusters burning continuously to hold a heavy craft in the air, a dense blowtorch roar with crackling flame, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "G",
+       "arquivo": "v/chefe.torre.motor-G.ogg",
+       "fonte": "Kenney · thrusterFire_003.ogg",
+       "licenca": "CC0",
+       "nota": ""
+      },
+      {
+       "id": "H",
+       "arquivo": "v/chefe.torre.motor-H.ogg",
+       "fonte": "Kenney · thrusterFire_001.ogg",
+       "licenca": "CC0",
+       "nota": ""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.capitania.flakPavio",
+     "oque": "O PAVIO DO FLAK — os últimos 0,35 s",
+     "onde": "a Capitânia, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.03,
+      "vol": 0.08
+     },
+     "versoes": [
+      {
+       "id": "D",
+       "arquivo": "v/chefe.capitania.flakPavio-D.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a shell's fuse burning down fast, a rapid hissing sizzle rising in pitch for a third of a second, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "E",
+       "arquivo": "v/chefe.capitania.flakPavio-E.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a spinning armed canister whirring faster and faster with a rising whistle right before it bursts, short, dark sci-fi, dry, no music\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

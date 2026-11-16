@@ -1,0 +1,20 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 4b — a sobrecarga, rodada 2",
+    "dia": "2026-11-16",
+    "nota": "A rodada 1 (o alarme e o zumbido elétrico) voltou. Aqui, outra direção: o MOTOR da minigun acelerando para a varredura de 1,6 s — D sintetizado (os canos girando cada vez mais rápido), E e F do PixelLab.\nSe nenhuma servir, diga a direção antes da próxima rodada."
+  },
+  "grupos": [
+    {
+      "titulo": "Rodada 2",
+      "sons": [
+        {
+          "nome": "sentinela.sobrecarga",
+          "oque": "A SOBRECARGA — o arranque da varredura de 1,6 s",
+          "onde": "a sentinela, F2",
+          "lugar": "cabine"
+        }
+      ]
+    }
+  ]
+}

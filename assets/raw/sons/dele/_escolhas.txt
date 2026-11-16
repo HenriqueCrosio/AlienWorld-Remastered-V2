@@ -1,0 +1,7 @@
+# his own files, installed as they are (16/11)
+nave.terminus.ricochete1: A
+nave.terminus.ricochete2: A
+nave.terminus.ricochete3: A
+nave.terminus.ricochete4: A
+nave.terminus.ricochete5: A
+nave.xaelo.ricochete: A

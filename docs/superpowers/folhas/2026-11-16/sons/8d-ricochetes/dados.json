@@ -1,0 +1,215 @@
+{
+ "titulo": "Folha de sons 3d — o ricochete de cada nave",
+ "dia": "2026-11-16",
+ "nota": "O tiro da nave no que não morre e é DURO (a rocha, o destroço, a costela, a mesa): cada nave com o seu ricochete. O da Manta já está no jogo (o I da rodada 3).\nAs suas duas referências (os arquivos da pasta Música) têm licença incerta: foram só MEDIDAS. As versões sintetizadas (S, L1, L2) têm o perfil medido delas; as do PixelLab foram pedidas na mesma direção.\nA TERMINUS sorteia entre várias: aqui cada versão é o CONJUNTO tocado 8 vezes, como soa no jogo segurando o gatilho numa parede (no jogo, no máximo um ricochete a cada 110 ms).",
+ "grupos": [
+  {
+   "titulo": "Os ricochetes",
+   "sons": [
+    {
+     "nome": "nave.terminus.ricochete",
+     "oque": "A TERMINUS (os projéteis da rotativa) — o CONJUNTO sorteado",
+     "onde": "a TERMINUS, F1–F4",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "S",
+       "arquivo": "v/nave.terminus.ricochete-S.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"o CONJUNTO sintetizado (S1–S5) sorteado 8 vezes, como no jogo\""
+      },
+      {
+       "id": "P",
+       "arquivo": "v/nave.terminus.ricochete-P.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"o CONJUNTO do PixelLab (P1–P4) sorteado 8 vezes, como no jogo\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.xaelo.ricochete",
+     "oque": "A X-AELO — o ricochete de laser",
+     "onde": "a X-AELO, F1–F4",
+     "lugar": "atmosfera",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.06,
+      "vol": 0.12
+     },
+     "versoes": [
+      {
+       "id": "L1",
+       "arquivo": "v/nave.xaelo.ricochete-L1.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o \"piu\" descendo 2,3 kHz → 300 Hz, 0,89 s como a referência\""
+      },
+      {
+       "id": "L2",
+       "arquivo": "v/nave.xaelo.ricochete-L2.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o mesmo \"piu\" em 0,42 s (o tiro dela repete 4,5 por segundo)\""
+      },
+      {
+       "id": "A",
+       "arquivo": "v/nave.xaelo.ricochete-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a laser bolt ricocheting off a hard surface, a bright zap followed by a descending sci-fi laser sweep pew bouncing away, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/nave.xaelo.ricochete-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an energy beam deflecting off solid armor, a short electric crack and a falling laser whine, retro sci-fi laser ricochet, dry, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "As variações da TERMINUS, uma a uma (para tirar alguma do sorteio: \"S3: tirar\")",
+   "sons": [
+    {
+     "nome": "nave.terminus.ricocheteS1",
+     "oque": "variação S1 do conjunto sintetizado",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteS1-A.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,23 s, a nota em 820 Hz\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteS2",
+     "oque": "variação S2 do conjunto sintetizado",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteS2-A.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,31 s, a nota em 650 Hz\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteS3",
+     "oque": "variação S3 do conjunto sintetizado",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteS3-A.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,43 s, a nota oscilando em ~1,1 kHz\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteS4",
+     "oque": "variação S4 do conjunto sintetizado",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteS4-A.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,33 s, a nota oscilando em ~1,2 kHz\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteS5",
+     "oque": "variação S5 do conjunto sintetizado",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteS5-A.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado do perfil MEDIDO na referência dele (só medida, licença desconhecida): o estalo e o zumbido, 0,78 s, a nota em 820 Hz, a cauda longa\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteP1",
+     "oque": "variação P1 do conjunto do PixelLab",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteP1-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single bullet ricochet off hard rock, a sharp crack and a short whizzing zing bouncing away, quick, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteP2",
+     "oque": "variação P2 do conjunto do PixelLab",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteP2-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy round ricocheting off thick steel plating, a hard clank and a buzzing whine that fades as it flies off, short, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteP3",
+     "oque": "variação P3 do conjunto do PixelLab",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteP3-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a cannon round glancing off a metal hull, a quick ping and a long descending whistling ricochet whine, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "nave.terminus.ricocheteP4",
+     "oque": "variação P4 do conjunto do PixelLab",
+     "onde": "a TERMINUS (sorteada)",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.ricocheteP4-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a tiny fast bullet skipping off stone, a dry snap and a very short high zip, quick ricochet, dry, no music\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

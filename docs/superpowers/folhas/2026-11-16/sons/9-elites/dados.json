@@ -1,0 +1,728 @@
+{
+ "titulo": "Folha de sons 4 — os elites",
+ "dia": "2026-11-16",
+ "nota": "A morte de cada elite já é a explosão do material (folha 2), e a autodestruição do drone de mineração já estoura com som. Aqui ficam os gestos, os avisos e os tiros.\nOs AVISOS têm a duração do jogo para o jogador LER: o pavio do drone (0,6 s), o abrir/fechar da sentinela (0,5 s), a mira (0,6 s) e o trava (0,3 s) da lula, o inchar do Tubo (0,6 s). As versões C sintetizadas têm o tempo exato.\nOs que repetem muito (o tiro do drone, o escudo, a minigun) se julgam no ×8. Os laços (a broca, a roda, o enxame) tocam 6 s aqui.\nO enxame das moscas é UM laço que sobe com o número delas (até 6), não um por mosca.",
+ "grupos": [
+  {
+   "titulo": "F2 · O drone de mineração",
+   "sons": [
+    {
+     "nome": "drone.minerar",
+     "oque": "A BROCA (laço) — enquanto ele trabalha encaixado na rocha",
+     "onde": "o drone de mineração, F2",
+     "lugar": "cabine",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/drone.minerar-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small mining drone drilling into an asteroid, a steady grinding drill whir with gritty rock crunch, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/drone.minerar-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a cutting laser burning into rock, a steady low electric buzz with crackling stone, continuous, seamless, no start or end, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "drone.alerta",
+     "oque": "O ALERTA — os 0,65 s em que ele te nota e larga a rocha",
+     "onde": "o drone de mineração, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/drone.alerta-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small mining robot noticing an intruder, its drill winding down abruptly and a quick rising alert chirp, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/drone.alerta-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a machine switching from idle to hostile, a short servo whine and two alert blips, dark sci-fi, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "drone.tiro",
+     "oque": "O TIRO — cada cristal da rajada de 3 (0,3 s entre eles)",
+     "onde": "o drone de mineração, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "B",
+       "arquivo": "v/drone.tiro-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a tiny mineral projectile launched, a quick muted crystalline tick and a soft thump, quiet, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/drone.tiro-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado: um estalo arredondado 320 → 160 Hz e um anel de vidro discreto (2,3 kHz) que morre em 80 ms\""
+      }
+     ]
+    },
+    {
+     "nome": "drone.pisca",
+     "oque": "O PAVIO — os 0,6 s piscando antes de se explodir",
+     "onde": "o drone de mineração, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/drone.pisca-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a drone overloading right before it self destructs, a fast rising electric whine with rapid beeping for half a second, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/drone.pisca-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small reactor going critical, a quick pulsing hum climbing in pitch, short, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/drone.pisca-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado: 0,6 s (o pavio do drone), um zumbido subindo 400 → 1.600 Hz e bipes acelerando até o estouro\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "F2 · A sentinela",
+   "sons": [
+    {
+     "nome": "sentinela.rolar",
+     "oque": "A RODA (laço) — rolando até o próximo posto",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.rolar-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy metal wheel robot rolling fast, a steady spinning rumble with metallic whirr, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.rolar-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a spinning armored sphere rolling through space, a smooth low gyroscopic hum with a faint rattle, continuous, seamless, no start or end, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "sentinela.abrir",
+     "oque": "O ABRIR — os 0,5 s em que ela abre e ergue o escudo",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.abrir-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a rolling robot unfolding into a turret, metal plates clanking open and an energy shield humming up, short, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.abrir-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a mechanical transformation, a hydraulic hiss, a servo clunk and a rising force field hum, short, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "sentinela.escudo",
+     "oque": "O ESCUDO — o seu tiro absorvido (repete muito: macio, com teto)",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.06,
+      "vol": 0.12
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.escudo-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a bullet absorbed by an energy shield, a soft low force field thump with a brief shimmer, quiet, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.escudo-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a shot hitting a plasma barrier, a muffled electric bloop, soft and short, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/sentinela.escudo-C.ogg",
+       "fonte": "Kenney · forceField_002.ogg",
+       "licenca": "CC0",
+       "nota": ""
+      }
+     ]
+    },
+    {
+     "nome": "sentinela.escudoQuebra",
+     "oque": "O ESCUDO QUEBRANDO — em lascas",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.escudoQuebra-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an energy shield shattering, a sharp electric crack and glassy shards scattering, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.escudoQuebra-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a force field collapsing, a powerful zap burst and a falling electronic whine, short, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "sentinela.balaco",
+     "oque": "O BALAÇO — o tiro pesado e lento do canhão de cima",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.04,
+      "vol": 0.08
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.balaco-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy slow plasma cannonball fired from a turret, a deep thump with a low wobbling hum, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.balaco-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a large energy ball launched, a dull heavy whoomp with a throbbing tail, dark sci-fi, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "sentinela.minigun",
+     "oque": "A MINIGUN — cada tiro do leque e da varredura",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.minigun-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single shot of a small rapid fire turret gun, a short dull tack, soft and low, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.minigun-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"one bullet from an alien minigun, a quick muted pop, short and soft, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/sentinela.minigun-C.ogg",
+       "fonte": "Kenney · laserSmall_003.ogg",
+       "licenca": "CC0",
+       "nota": ""
+      }
+     ]
+    },
+    {
+     "nome": "sentinela.sobrecarga",
+     "oque": "A SOBRECARGA — o arranque da varredura de 1,6 s",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.sobrecarga-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a turret entering overload mode, a fast spin-up whine of gun barrels and an alarm pulse, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.sobrecarga-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an electric overcharge building up, a sharp rising buzz and a servo spin, short, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "sentinela.fechar",
+     "oque": "O FECHAR — os 0,5 s em que ela fecha e volta a rolar",
+     "onde": "a sentinela, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/sentinela.fechar-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a robot turret folding back into a ball, metal plates clanking shut and a shield powering down, short, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/sentinela.fechar-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a mechanical retraction, a servo whine falling and a heavy lock clunk, short, dark sci-fi, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "F3 · A lula",
+   "sons": [
+    {
+     "nome": "lula.surge",
+     "oque": "O SURGIR — os 0,3 s em que ela aparece",
+     "onde": "a lula, F3",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/lula.surge-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a creature suddenly appearing out of dark water, a soft wet whoosh and a gurgle, short, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/lula.surge-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a cloaked alien squid decloaking, a breathy watery swish with a faint shimmer, short, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "lula.mira",
+     "oque": "A MIRA — os 0,6 s da linha pontilhada te seguindo",
+     "onde": "a lula, F3",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/lula.mira-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a creature's hunting sense locking on, a thin eerie tone slowly rising, organic and unsettling, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/lula.mira-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a soft sonar-like rising whine tracking its prey, quiet and tense, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/lula.mira-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado: 0,6 s (a mira da lula), um tom fino subindo 700 → 1.100 Hz com um tremor lento, vivo\""
+      }
+     ]
+    },
+    {
+     "nome": "lula.trava",
+     "oque": "O TRAVA — os 0,3 s em que a mira trava e pisca, antes do tiro",
+     "onde": "a lula, F3",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/lula.trava-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a sharp clicking lock, a creature's echolocation snapping onto its target, two quick clicks and a high sting, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/lula.trava-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a quick wet click and a piercing short tone, the hunter locked on, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/lula.trava-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado: 0,3 s (o trava), dois cliques da linha piscando e um ferrão agudo que morre\""
+      }
+     ]
+    },
+    {
+     "nome": "lula.agulhas",
+     "oque": "AS AGULHAS — a rajada de 3, como um som só",
+     "onde": "a lula, F3",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.04,
+      "vol": 0.08
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/lula.agulhas-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"three sharp needles shot in a rapid burst, quick thin airy whips one after another, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/lula.agulhas-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a fast triple spit of bone spines from a creature, three quick soft thwips, dark sci-fi, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "lula.tinta",
+     "oque": "A TINTA — a nuvem (menor no sopro, maior na cortina)",
+     "onde": "a lula, F3",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/lula.tinta-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a squid releasing a thick cloud of ink, a soft wet burst puff and a murky bloom spreading, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/lula.tinta-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a dense dark liquid cloud spreading, a muffled wet whoomph with soft bubbling, dark, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "lula.fuga",
+     "oque": "A FUGA — o jato na 3ª saída",
+     "onde": "a lula, F3",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/lula.fuga-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a squid jetting away at high speed, a powerful wet water jet whoosh fading fast into the distance, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/lula.fuga-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a creature propelling itself away with a strong pulse of water, a deep swoosh and a gurgle, dark, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "F4 · A Larva, a pupa e as moscas",
+   "sons": [
+    {
+     "nome": "larva.perfura",
+     "oque": "O PERFURAR — o buraco abrindo no tecido",
+     "onde": "a Larva, F4",
+     "lugar": "interior",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/larva.perfura-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a mechanical larva boring through a thick living organic wall, a wet drilling squelch with a grinding whir, dark sci-fi creature, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/larva.perfura-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"something burrowing through a soft organic wall, gooey squelching and tearing fibers, dark creature, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "larva.sai",
+     "oque": "O SAIR — ela saindo do buraco",
+     "onde": "a Larva, F4",
+     "lugar": "interior",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/larva.sai-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a large biomechanical larva pushing out of a hole in an organic wall, a wet slithering emergence with a mechanical click, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/larva.sai-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a creature emerging from thick slime, a sticky wet pop and a slither, dark, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "larva.tranco",
+     "oque": "O TRANCO — o lance até o próximo posto",
+     "onde": "a Larva, F4",
+     "lugar": "interior",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/larva.tranco-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy biomechanical worm lunging forward, a sudden wet heave with a metallic clank, short, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/larva.tranco-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a quick heavy lurch of a mechanical larva, a servo jolt and a slimy slap, short, dark, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "larva.poe",
+     "oque": "O PÔR — as duas pupas lançadas",
+     "onde": "a Larva, F4",
+     "lugar": "interior",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/larva.poe-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a larva launching two eggs from its body, a wet double spit with a soft pop, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/larva.poe-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an organic ovipositor squirting out pods, two quick squelchy thwups, dark, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "larva.mergulha",
+     "oque": "O MERGULHO — de volta ao buraco",
+     "onde": "a Larva, F4",
+     "lugar": "interior",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/larva.mergulha-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a larva diving back into a hole in a living wall, a wet slithering plunge and a slurp, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/larva.mergulha-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a creature retreating into slime, a quick sucking slurp, dark, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "pupa.eclode",
+     "oque": "A PUPA ECLODINDO — 2 s depois, solta a mosca",
+     "onde": "as pupas, F4",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.06,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/pupa.eclode-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small insect pod cracking open and a fly bursting out, a crisp wet crack and a short buzz, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/pupa.eclode-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a cocoon splitting, a brittle chitin crack and a sticky pop, short, dark, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "mosca.zumbido",
+     "oque": "O ENXAME (laço) — sobe com o número de moscas vivas",
+     "onde": "as moscas, F4",
+     "lugar": "interior",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/mosca.zumbido-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small swarm of mechanical flies buzzing, a steady droning insect buzz with a metallic edge, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/mosca.zumbido-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a few large insects buzzing around, a low irregular wing hum, continuous, seamless, no start or end, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "F4 · O Tubo de esporos",
+   "sons": [
+    {
+     "nome": "tubo.incha",
+     "oque": "O INCHAR — os 0,6 s de aviso antes do pulso",
+     "onde": "o Tubo, F4",
+     "lugar": "interior",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/tubo.incha-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an organic tube swelling with pressure, a low stretching groan and bubbling build-up, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/tubo.incha-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a living pod inflating, a rising wet creak and gurgling pressure, short, dark, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/tubo.incha-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado: 0,6 s (o inchar do Tubo), um gemido grave subindo 70 → 140 Hz com bolhas\""
+      }
+     ]
+    },
+    {
+     "nome": "tubo.pulso",
+     "oque": "O PULSO — os 6 esporos saindo",
+     "onde": "o Tubo, F4",
+     "lugar": "interior",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/tubo.pulso-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an organic pod releasing a puff of spores, a soft wet pfff burst of air, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/tubo.pulso-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a spore sac bursting gently, a muffled breathy puff and a dusty hiss, dark, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "esporo.grudar",
+     "oque": "O ESPORO GRUDANDO — começam os 2,5 s de lentidão",
+     "onde": "a nave, F4",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/esporo.grudar-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a sticky spore sticking to a spaceship hull, a gooey wet splat with a short squish, dark, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/esporo.grudar-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"something viscous splatting onto metal and clinging, a thick sticky slap, dark, no music\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

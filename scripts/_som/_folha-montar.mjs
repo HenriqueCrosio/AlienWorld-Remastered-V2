@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tratar } from './_som-tratar.mjs';
+import { guardarComoFlac, original } from './_original.mjs';
 
 const [grupo, pasta] = process.argv.slice(2);
 if (!grupo || !pasta) {
@@ -20,15 +21,19 @@ if (!grupo || !pasta) {
     let entrada;
     if (t.pixellab) {
       // a reworked take (A2 …) starts from the raw of the take it reworks (`de`)
-      entrada = join(raw, `${t.nome}-${t.de ?? t.id}.wav`);
-      if (!existsSync(entrada)) {
+      // (the original is KEPT AS FLAC — see _original.mjs: the WAV is downloaded, proved identical, and replaced)
+      const wav = join(raw, `${t.nome}-${t.de ?? t.id}.wav`);
+      if (!existsSync(wav) && !existsSync(wav.replace(/\.wav$/, '.flac'))) {
         const r = await fetch(origem.base + t.pixellab);
         if (!r.ok) throw new Error(`${t.nome} ${t.id}: HTTP ${r.status}`);
-        writeFileSync(entrada, Buffer.from(await r.arrayBuffer()));
+        writeFileSync(wav, Buffer.from(await r.arrayBuffer()));
       }
+      entrada = guardarComoFlac(original(wav));
     } else if (t.local) {
-      // a take made here (synthesized: scripts/_som/_sintetizar-*.mjs), already in assets/raw/sons/<grupo>/
-      entrada = t.local;
+      // a take made here (synthesized: scripts/_som/_sintetizar-*.mjs), already in assets/raw/sons/<grupo>/ — a fresh
+      // synthesized WAV becomes FLAC here too
+      entrada = original(t.local);
+      if (entrada.replaceAll('\\', '/').startsWith('assets/raw/sons/') && !entrada.includes('_kenney')) entrada = guardarComoFlac(entrada);
     } else {
       entrada = join('assets/raw/sons/_kenney', t.kenney);
     }

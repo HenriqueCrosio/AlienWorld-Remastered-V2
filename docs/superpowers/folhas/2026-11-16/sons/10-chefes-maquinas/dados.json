@@ -1,0 +1,329 @@
+{
+ "titulo": "Folha de sons 5a — os chefões máquina",
+ "dia": "2026-11-16",
+ "nota": "A Torre da F1 e a Capitânia da F2. A dor (o acerto no corpo) e a morte (o fim de chefão) já são da folha 2; aqui ficam os ataques, os avisos e os momentos.\nA Torre é um METRÔNOMO (o leque a cada 1,9 s no chão, 1,35 s no ar): julgue o leque no ×8. A Capitânia é um NAVIO, \"salva e silêncio\": a bordada rola pelas 3 baterias, 0,2–0,3 s entre elas.\nAs versões C sintetizadas têm o tempo exato do jogo: a carga do míssil (0,65 s) e o pavio do flak (0,35 s).\nA Torre abre na atmosfera (F1), a Capitânia na cabine (o vácuo da F2).",
+ "grupos": [
+  {
+   "titulo": "A Torre (F1)",
+   "sons": [
+    {
+     "nome": "chefe.torre.leque",
+     "oque": "O LEQUE de 4 cometas — o metrônomo, com o recuo do canhão",
+     "onde": "a Torre, F1",
+     "lugar": "atmosfera",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.03,
+      "vol": 0.08
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.torre.leque-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy alien defense tower cannon firing a fan of four glowing plasma comets at once, a deep punchy boom with a metallic recoil clank, outdoors in thin air, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.torre.leque-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a large fortress turret discharging a spread of energy bolts, a thick low thump with a short hiss of plasma and a heavy barrel recoil, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.torre.mirado",
+     "oque": "O MIRADO — o cometa no ar, 0,4 s depois do leque",
+     "onde": "a Torre no ar, F1",
+     "lugar": "atmosfera",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.04,
+      "vol": 0.08
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.torre.mirado-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single aimed plasma comet fired from a flying war tower, a quick hard thump with a rising sizzle, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.torre.mirado-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"one heavy energy shot snapping out of a big gun barrel, a sharp dull crack with a short tail, dark sci-fi, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.torre.missilCarga",
+     "oque": "A CARGA DO MÍSSIL — os 0,65 s piscando antes de lançar",
+     "onde": "a Torre no ar, F1",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.torre.missilCarga-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a big alien war machine charging a missile for two thirds of a second, a pulsing electric hum climbing fast with sparks crackling, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.torre.missilCarga-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a weapon system arming a guided missile, a quick rising whine with a throbbing pulse, short warning, dark sci-fi, dry, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/chefe.torre.missilCarga-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado: 0,65 s (a carga do míssil), um zumbido subindo 90 → 260 Hz pulsando no ritmo do piscar, estalos por cima\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.torre.missil",
+     "oque": "O MÍSSIL — o lançamento",
+     "onde": "a Torre no ar, F1",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.torre.missil-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a guided missile launched from a flying war tower, a heavy ignition whoosh and a rocket motor roaring away, in thin atmosphere, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.torre.missil-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a big rocket leaving its launcher, a deep thump and a rushing hiss of thrust fading into the distance, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.torre.decolagem",
+     "oque": "A DECOLAGEM — 1,3 s: os motores arrancando a Torre da base (as explosões da base já têm som)",
+     "onde": "a Torre, F1, na metade da vida",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.torre.decolagem-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a massive armored tower tearing itself off its base and lifting into the air, huge thrusters igniting with a rising roar and metal groaning, one and a half seconds, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.torre.decolagem-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"heavy jet engines spooling up and blasting a giant machine upward, a deep swelling rocket roar with a rumbling liftoff, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.torre.motor",
+     "oque": "O MOTOR NO AR (laço) — as plumas segurando a Torre",
+     "onde": "a Torre no ar, F1",
+     "lugar": "atmosfera",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.torre.motor-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"the steady thrusters of a heavy flying war tower hovering, a deep continuous jet rumble with a low turbine whine, continuous, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.torre.motor-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"big hover engines holding a massive machine in the air, a constant throbbing roar with a soft rattle, continuous, seamless, no start or end, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "A Capitânia (F2)",
+   "sons": [
+    {
+     "nome": "chefe.capitania.hangar",
+     "oque": "O HANGAR — a baia largando os interceptadores (180 ms entre eles)",
+     "onde": "a Capitânia, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.capitania.hangar-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a warship's hangar bay opening and launching small attack drones one after another, a heavy hatch clank, a hiss and two or three quick launch thumps, heard through the hull in space, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.capitania.hangar-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a carrier ship catapult releasing fighters, a mechanical latch slam and quick muffled whooshes, low, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.capitania.bordada",
+     "oque": "A BORDADA — uma bateria (3–4 traçantes a 90 ms); as 3 baterias rolam em sequência",
+     "onde": "a Capitânia, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.04,
+      "vol": 0.08
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.capitania.bordada-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a battleship gun battery firing a quick burst of three heavy tracer rounds, three deep punchy cannon shots in rapid succession, muffled through a hull in space, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.capitania.bordada-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a naval broadside, a battery of heavy cannons thudding in a rolling triple burst, low and powerful, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.capitania.flak",
+     "oque": "O FLAK — o lançar das cápsulas giratórias",
+     "onde": "a Capitânia, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.capitania.flak-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a warship launching flak shells, a hollow mortar thump with a spinning whir of the shells flying out, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.capitania.flak-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"two spinning canisters fired from a heavy launcher, a deep pop and a tumbling whistle, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.capitania.flakPavio",
+     "oque": "O PAVIO DO FLAK — os últimos 0,35 s piscando",
+     "onde": "a Capitânia, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.03,
+      "vol": 0.08
+     },
+     "versoes": [
+      {
+       "id": "C",
+       "arquivo": "v/chefe.capitania.flakPavio-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"sintetizado: 0,35 s (o pavio do flak), tiques acelerando e subindo 900 → 1.400 Hz, o último no estouro\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.capitania.flakEstouro",
+     "oque": "O ESTOURO DO FLAK — o anel de 8 estilhaços",
+     "onde": "a Capitânia, F2",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.capitania.flakEstouro-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a flak shell bursting in space, a sharp concussive crack scattering hot shrapnel, short, muffled, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.capitania.flakEstouro-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an airburst shell detonating, a dull heavy pop with fragments flying out in a ring, low, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.capitania.mirado",
+     "oque": "O MIRADO — o canhão principal, um tiro na nave",
+     "onde": "a Capitânia furiosa, F2",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.capitania.mirado-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a warship's main gun firing one aimed heavy round, a deep cannon boom muffled through the hull in space, short, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.capitania.mirado-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single big naval cannon shot, a hard low thud with a short metallic ring, dark sci-fi, dry, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "chefe.capitania.furia",
+     "oque": "A FÚRIA — quando ela endurece o ritmo (o clarão)",
+     "onde": "a Capitânia, F2, na metade da vida",
+     "lugar": "cabine",
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/chefe.capitania.furia-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a damaged alien warship going into a frenzy, a deep blaring battle horn with a power surge and metal groaning, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/chefe.capitania.furia-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a huge battleship overloading its reactor, a heavy rising electric hum, a low alarm wail and a hull shudder, dark sci-fi, no music\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
