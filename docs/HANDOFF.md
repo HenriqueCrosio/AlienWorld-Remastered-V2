@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-14) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-15) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,16 +16,184 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-14-bloco-m3-START.md`. Em 14/11 fecharam o bloco J
-> (enxuto: a medição dos perfis, nenhum mudou), o M1 (a pausa e as CONFIGURAÇÕES) e o M2 (os controles de Xbox e
-> PlayStation, o remapear, as dicas pelo aparelho), aprovados, commitados e empurrados. A sessão abre no M3, a tela de
-> fim de fase e de morte no padrão da tela final: uma pergunta por vez (superpowers:brainstorming), antes de desenhar."**
+> **"Leia o 🧭 do `docs/HANDOFF.md`, a spec `specs/2026-11-15-bloco-som-design.md` e o plano
+> `plans/2026-11-15-bloco-som-fundacao.md`. Em 15/11 o roadmap mudou: o SOM entrou antes do F (a trilha é dele, os
+> efeitos são meus). A fundação está pronta (o tocador, a acústica do lugar, o molde da folha) e a FOLHA 1 (a nave) está
+> montada esperando a escolha dele: `http://localhost:5173/docs/superpowers/folhas/2026-11-15/sons/1-nave/folha.html`.
+> Com as escolhas coladas, o próximo é instalá-las no jogo (um plano novo) e seguir para a folha 2 (as explosões)."**
 >
 > **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11) → I ✅
-> (13/11) → J ✅ (14/11, enxuto) → **M, a MOLDURA do jogo** (o que dá "cara de jogo lançado"; absorveu as etapas 1.55 e
-> 1.6): M1 a pausa + as CONFIGURAÇÕES ✅ (14/11) · M2 os controles ✅ (14/11) · M3 a janela da NAVE PERDIDA ✅ (15/11) ·
-> M4 o carregamento e o favicon ✅ (15/11) — **o bloco M FECHOU; o próximo é o F** → F (a F2: a frota de batedores e a rocha do minerador).** Depois dos
-> blocos: o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco) e só então o som.
+> (13/11) → J ✅ (14/11, enxuto) → M, a MOLDURA ✅ (15/11) → **o SOM (efeitos), 8 folhas: 1 a nave (montada, espera
+> ele) · 2 as explosões · 3 os inimigos e perigos · 4 os elites · 5 os chefões · 6 a interface · 7 as cutscenes · 8 o
+> ambiente** → F (a F2: a frota de batedores e a rocha do minerador; START `plans/2026-11-15-bloco-f-START.md`) → o
+> rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco).**
+>
+> 📍 **16/11 (4) — A TERMINUS ROTATIVA NO JOGO; O SOM DA NAVE E DAS EXPLOSÕES FECHADO; COMMITADO E EMPURRADO.** A escolha
+> dele na folha 7: *"f1 — segurado pico e toque pico; f2 — segurado e toque. Assim fechamos"*. E *"a forma do A1 depois de
+> soltar o gatilho é proporcional à quantidade de tiro dado. Mas impor um limite"*.
+> - **No jogo:** `WeaponSystem.somRotativo` (a TERMINUS, posto pela `GameScene`): apertar = o arranque do M2 + o laço
+>   entrando em 220 ms; soltar = o laço para, a parada, e 80 ms depois a CHEGADA do A1 — o PICO na atmosfera, a rajada
+>   pelo casco no espaço (`Som.lugarAgora`) —, do tamanho dos disparos da rajada até 12 (`chegadaDaRajada`: força 0,4→1 e
+>   0,45→1 do comprimento, `Som.tocar({ fracao })`); a pausa e a morte calam sem chegada. No vácuo o M2 a 1,8 kHz
+>   (`passaBaixaNoVacuo`, campo novo do `DefSom`). `nave.terminus.tiro` saiu do catálogo. Partes em
+>   `public/sfx/terminus-rotativa/` (`assets/raw/sons/terminus-rotativa/`).
+> - **Testes:** `test-som` (a chegada cresce e trava no teto) e `test-som-nave-jogo` (arranque + laço segurando, parada +
+>   chegada ao soltar, o toque contando menos que a rajada); os 41 testes e o build verdes.
+> - **O próximo:** a folha 3 do roadmap do som (os inimigos comuns e os perigos) ou o PASSE DE MIXAGEM proposto em 16/11
+>   (a cola, o espaço comum, o abaixar dinâmico) — perguntar a ordem.
+>
+> 📍 **16/11 (3) — A COMPOSIÇÃO M2 + A1 (a ideia dele; folha 7, o teste).** *"O A-10 é característico porque o projétil
+> viaja tão rápido que se ouve o barulho dos tiros em fragmentos, o ruído alto do final é o som chegando [...] mesclar o
+> M2 e o A1 [...] o A1 entraria no meio do M2, para significar que o som está chegando depois"*; e *"o A1 pode ser até
+> mais curto"*. `scripts/_som/_compor-terminus.mjs` (`CHEGADA`): o M2 na hora do gatilho (sem atraso de comando), o A1
+> 0,35 s depois como rajada de chegada de até 0,6 s; na F1 os dois; no espaço o M2 abafado (900 Hz) e o A1 sem chegar
+> OU só pelo casco (< 140 Hz) — as duas para ele comparar. Folha `.../2026-11-16/sons/7-composicao/folha.html`.
+> - **RODADA 2 — o A1 SÓ AO SOLTAR** (ele: *"o A1 entra muito cedo, ele precisa aparecer no limiar do término do tiro.
+>   mas isso só acontece se o player soltar o gatilho, se ele continuar com o dedo colado, continua apenas o efeito do
+>   tiro normal"*; os toques eram o exemplo certo): segurando = só o M2; ao soltar, o A1 chega 0,08 s depois
+>   (`CHEGADA.aposSoltarS`), nas duas formas (rajada + parada / pico); no espaço *"menos abafado, mas ainda com o
+>   abafo"*: o M2 a 1,8 kHz, o A1 pelo casco abaixo de 300 Hz. Medido: segurando 12 disparos/s (o M2), depois de soltar o
+>   zumbido de 8 ms (o A1). A folha 7 foi refeita com as 8 versões.
+> - **+ a VERSÃO DO PICO** (ele: *"a rajada que chega depois, mas o som dela tem um pico e depois o fade acontece até
+>   sumir — na vida real não é assim, mas talvez aqui fique melhor"*): o A1 sobe em 50 ms até o pico e some em 0,85 s
+>   (`PICO`), nas mesmas situações (F1 segurado/toque, F2 pelo casco segurado/toque); as anteriores ficam na folha.
+>
+> 📍 **16/11 (2) — A TERMINUS COMO ARMA ROTATIVA: folha 6 (espera a escolha).** Ele mandou a referência
+> (`C:/Users/Henrique/Music/myinstants.mp3`, o A-10 — só MEDIDA, nada dela entra no jogo: licença desconhecida) e pediu 6
+> candidatos, 3 do A-10, *"pense numa minigun rodando"*. A medida: o zumbido de 8 ms (~125 disparos/s) e a energia abaixo
+> de 600 Hz. O tiro vira ARRANQUE (canos acelerando + o assobio do motor) → LAÇO enquanto segura → PARADA ao soltar
+> (`scripts/_som/_sintetizar-minigun.mjs`, partes em `assets/raw/sons/minigun/`). Folha 6:
+> `.../2026-11-16/sons/6-minigun/folha.html` — A1 sintetizado da medida, A2 = o tiro F dele repetido a 125/s (o perfil
+> mais próximo da referência), A3 laço do PixelLab (mais ronco que zumbido), M1 minigun leve, M2 rotativa lenta (o tiro I
+> a 12/s), M3 rotativa de energia. Instalar = um modo novo no `WeaponSystem` (o tiro da nave como laço com arranque e
+> parada, os números da arma iguais). A folha 5 (tiros únicos) segue valendo se ele preferir um deles.
+>
+> 📍 **16/11 — ELE JOGOU NO SANDBOX** (*"com muitos inimigos e sons ficaram realmente muito bons"*). Três pontos:
+> - **O estrondo da F1 começa NA TELA PRETA** (*"quando chegar na fase, já estar acabando"*): o hangar o dispara quando o
+>   véu começa a fechar (`TEMPO.veuFecha`) e baixa a música; ele ATRAVESSA a troca de cena — `ponte: true` no catálogo,
+>   A ÚNICA EXCEÇÃO à regra de 15/11; a F1 não o toca de novo (`Som.tocando`), só espera o rabo (música volta em 1,2 s,
+>   motor em 1,1 s). Por outros caminhos (o retry, as teclas de dev) a F1 o toca inteiro, como antes. `test-som-nave-jogo`
+>   cobra o caminho do hangar (no véu, ainda soando na fase, um só).
+> - **Mais uma leva para a TERMINUS:** folha 5 `.../2026-11-16/sons/5-terminus/folha.html` — G (o canhão do A-10, uma
+>   rajada curta por disparo), I, J, K + a F do jogo para comparar (a H saiu muda e foi trocada pela K).
+> - **"Sem trilha, os barulhos ainda estão isolados"** — ele: *"precisamos pensar o que estúdios fazem para trazer o
+>   conjunto sonoro, mais imersão. Provavelmente até o número 8 isso vai melhorar"*. A proposta (a decidir com ele): um
+>   PASSE DE MIXAGEM antes da folha 3 (compressão de cola no barramento do mundo, um espaço comum para todos, o abaixar
+>   dinâmico nos eventos grandes) — ver a conversa de 16/11.
+>
+> 📍 **15/11 (9) — AS FOLHAS 1 E 2 FECHADAS, TUDO NO JOGO (espera ele jogar; nada commitado).** A rodada 3 escolhida
+> (`assets/raw/sons/rodada3/_escolhas.txt`: o acerto G e a explosão G do drone, o metal pequeno G, o choque F, o arco F),
+> instalada em `public/sfx/rodada3/` — nenhum som da nave e das explosões espera mais folha. `public/sfx` = 2,1 MB. Todos
+> os testes e o build verdes. **O próximo:** ele joga (o retorno geral prometido) → a folha 3 do roadmap do som (os
+> inimigos comuns e os perigos: o tiro de cada inimigo, as minas, os asteroides, as portas da F4).
+>
+> 📍 **15/11 (8) — A RODADA 3, NAS DIREÇÕES DELE (espera a escolha; nada commitado).** A 2b (o metal pequeno, o choque,
+> o arco) e a 3b (o drone) voltaram INTEIRAS, sem nota. Em vez de uma 3ª rodada às cegas, a pergunta da direção (as
+> rodadas iam todas para o "macio"): **o drone = matéria quebrando** (a casca rachando, seca, sem fogo e sem eco), **o
+> metal pequeno = explosão curta e seca** (corpo grave, quase sem cauda), **o choque e o arco = estalo elétrico físico**
+> (a faísca, sem zumbido; C3 sintetizada em `_sintetizar-estalo.mjs`, ~30 ms como uma faísca de verdade). Folha 4:
+> `.../sons/4-rodada3/folha.html` (5 sons, 15 versões; origens em `assets/raw/sons/rodada3/`).
+>
+> 📍 **15/11 (7) — O SOM NÃO ATRAVESSA A TROCA DE CENA; os ajustes escolhidos (nada commitado).** O defeito dele: *"o som
+> da explosão maior perde o efeito do espaço e entra na F2, esse tipo de coisa não pode acontecer em nenhuma troca de
+> fase. O som da cutscene não avança para a fase posterior"*. Conserto: `Som.trocarDeCena(lugar)` — a 1ª linha do
+> `create` das 7 cenas (Menu, Hangar, Game, as 4 Interludes): toda voz ainda soando sai em 250 ms, o LASTRO é drenado, e
+> só então o lugar novo (a trilha não, ela é dele). `test-som-nave-jogo` cobra: o fechamento da Aurora tocando na troca,
+> nada dele na F2 400 ms depois.
+> - **Instalados** (`public/sfx/ajustes/`): o tiro F da TERMINUS (o balístico), a explosão A do drone (*"utilize a A para
+>   testarmos"* — no catálogo a 0,9: é uma tomada baixa, RMS −25 dB) e o LASTRO A (a metalGrande C dele esticada).
+> - **Folha 3b** (`.../sons/3b-drone/folha.html`): o ACERTO do drone refeito (D, E do PixelLab e C2 = um "tup" grave
+>   sintetizado, `_sintetizar-tup.mjs`; "sem som" também é resposta) e duas explosões novas (D, E) com a A0 = a do jogo.
+> - **Pendentes dele:** a folha 2b (o metal pequeno, o choque, o arco) e a 3b (o drone).
+>
+> 📍 **15/11 (6) — OS AJUSTES DEPOIS DE ELE JOGAR, E A COMPOSIÇÃO (nada commitado).** Ele: *"se os sons ficam isolados,
+> fica estranho e desconfortável de ouvir"*. Feito:
+> - **O LASTRO** (`mixagem.ts` + `Som.alimentarLastro`): um ronco grave em laço que cada explosão ENCHE (`lastro` no
+>   catálogo, ×`forca`) e que esvazia com τ = 1,4 s — a cadeia rola por cima dele; uma explosão solta mal o levanta.
+>   O som dele espera a escolha (folha de ajustes: A = a metalGrande C dele esticada 4× e só o grave; B = gerada).
+> - **No vácuo** cada explosão sai a 60% (`forcaNoLugar`, perfil cabine); o lastro carrega a cadeia.
+> - **A cadeia da Aurora (cutscene 1) COMPOSTA na cena:** os 14 estouros sem som próprio e, no lugar, a sequência de
+>   `explosao.metalGrande` (a C dele) baixa, três sobrepostas, as grandes um pouco mais fortes; o fechamento grande no
+>   fim (era o `chefeFim` cortando a si mesmo a cada 4 estouros). Não há implosão na cena desde 09/11.
+> - **A F1 abre com o estrondo SOZINHO:** no 1º instante; a música do hangar abaixa sob ele (0,3) e volta em 1,8 s; o
+>   motor entra aos 2 s, subindo em 1,5 s (`ESTRONDO` na `GameScene`).
+> - **Os motores:** 0,35 → 0,17 e passa-baixa de 1,1 kHz nas três naves (`passaBaixa`, um campo novo do `DefSom`).
+> - **O DRONE (o enxame, 25 ondas desde a F1) com categoria própria** (`DO_ENXAME` em `somDaExplosao.ts`): `acerto.drone`
+>   e `explosao.drone`; a morte dele toca o próprio som e cala os estouros em pixel (`mudo` no `Destrocos.morrer`).
+> - **O dash A2 e o casco A2** já estavam instalados. O tiro da TERMINUS foi para refazer (balístico, confortável).
+> - **Folha de ajustes:** `.../sons/3-ajustes/folha.html` (o tiro C/E/F, o acerto e a explosão do drone, o lastro A/B).
+>   Mais uma geração muda descartada (−43,7 dB): o piso do `_folha-montar` subiu para −30 dB.
+> - Testes: `test-som` (o lastro, o vácuo, os motores, o enxame), `test-som-jogo` (o lastro liga com a cadeia e
+>   desliga sozinho), `test-som-nave-jogo` (a abertura da F1 em ordem, a cadeia da Aurora composta); tudo verde + build.
+>
+> 📍 **15/11 (5) — A FOLHA 2 ESCOLHIDA: 15 NO JOGO, 3 NA FOLHA 2b (espera ele; nada commitado).** Escolhas em
+> `assets/raw/sons/explosoes/_escolhas.txt`. Voltaram: o METAL pequeno (*"mais curta, no final tem uma fala ou voz"* →
+> a A cortada em 0,55 s) e o CHOQUE e o ARCO (*"precisa ser algo gostoso de ouvir, está muito ruidoso e em sequência é uma
+> tortura"* → PixelLab com prompts limpos + a limpeza do casco, e um ZING SINTETIZADO sem ruído, `_sintetizar-zing.mjs`;
+> medido, o sintetizado é o mais limpo). Folha 2b: `.../sons/2b-refazer/folha.html`. Uma geração do PixelLab saiu MUDA
+> (−72 dB): o `_folha-montar` agora descarta sozinho o que não passa de −45 dB.
+> - **Onde soa:** `Fx.explosao` (TODA explosão do jogo; `somDaExplosao.ts` — o metal se divide pelo tamanho, ≥ 2 = metal
+>   grande; `som = false` na chuva silenciosa da cena final, nas lascas de cada tiro e nas cartas, que tocam o seu);
+>   `Fx.choque` (a luz; a Sobrecarga passa o seu); `Fx.abaloGrande` (o fim do chefão da F1, com a arte da queda);
+>   `ExplosaoDoJogador.explodir` (carta / combustão); `CartasEmJogo.incendiar` (só quando PEGA fogo); `Eletrico`
+>   (choque / arco, mudos até a 2b); os acertos em `bulletHitEnemy`, no chefão (`materialDoChefe`) e nas peças.
+> - Testes: `test-som` (as regras da folha 2) e `test-som-nave-jogo` (o acerto em jogo, o Fx por tipo e tamanho, a chuva
+>   muda) passando, com os do M e o build.
+>
+> 📍 **15/11 (4) — A FOLHA 2 (AS EXPLOSÕES) MONTADA, espera a escolha dele** (ele pediu para seguir antes do retorno da
+> folha 1: *"depois eu dou meu feedback geral"*).
+> `http://localhost:5173/docs/superpowers/folhas/2026-11-15/sons/2-explosoes/folha.html` — 18 sons, 43 versões (33
+> PixelLab, 10 Kenney CC0), 0,7 MB, ~45 gerações: as 9 explosões do bloco I pelo material + o METAL GRANDE (cargueiro,
+> canhoneira, elites de metal), os 5 efeitos das cartas (incendiar, combustão, choque, arco, sobrecarga) e o ACERTO do
+> tiro em metal/carne/rocha. Origens em `assets/raw/sons/explosoes/_origem.json`. Na instalação, o gancho é o `Fx`
+> (`explode` / `explodeBig` / `explosao` recebem o tipo) — um lugar só para todas; a batalha ao fundo da F3 usa o mesmo
+> arquivo com `plano: 'fundo'`.
+>
+> 📍 **15/11 (3) — A FOLHA 1 (A NAVE) ESCOLHIDA E NO JOGO (espera ele jogar; nada commitado).** As escolhas dele em
+> `assets/raw/sons/nave/_escolhas.txt`; dois ajustes pedidos viraram versões **A2** na folha (para comparar com a A): o
+> DASH *"mais rápida e curta"* (1,6× sem mudar o tom, 0,32 s — o avanço dura 150 ms) e o CASCO QUEBRANDO *"menos ruído"*
+> (redução de ruído + corte em 5,5 kHz: o chiado acima de 6 kHz caiu 11 dB). Instalado por
+> `scripts/_som/_som-instalar.mjs` em `public/sfx/nave/` (26 sons, 1,2 MB) com as 26 linhas do `docs/SONS.md`; o
+> catálogo (`catalogoSons.ts`, `FOLHA_1_NAVE`) tem os volumes de PARTIDA, para ele acertar jogando.
+> - **Onde cada som entra:** o tiro em `WeaponSystem.update` (um por disparo, `somDoTiro` posto pela `GameScene` conforme
+>   a nave — `src/som/somDaNave.ts`); o motor em laço na `GameScene` (para com a morte e com a cena); o golpe + a vida
+>   em `damageShip` (o golpe que mata só tem a morte, em `gameOver`); a bomba em `useBomb`; o casco em
+>   `CartasEmJogo` (absorver + quebrar no golpe, voltar na recarga e ao ganhar a carta); o míssil em `Lancadores` (o bip
+>   de travar ao soltar, o foguete na ignição); o flare em `soltarFlare`; o drone em `DroneAuxiliar`; o dash em
+>   `Dash.comecar`; o impulso em `FlapController`; o estrondo 600 ms depois da F1 abrir (`MOMENTO_ESTRONDO_MS`).
+> - **Teste novo:** `test-som-nave-jogo.mjs` (os 26 carregados; cada nave com o SEU tiro e UM motor; golpe, bomba,
+>   morte, o motor morrendo junto; o estrondo e o impulso na F1, na atmosfera). Todos os testes e o build passando.
+> - **O próximo:** ele joga e diz os volumes/tempos → a folha 2 (as explosões).
+>
+> 📍 **15/11 (2) — O SOM ENTROU NO ROADMAP, ANTES DO F (decisão dele; nada commitado).** *"Vamos aproveitar que maioria
+> está definida para introduzir som [...] A trilha sonora eu mesmo vou entregar, os efeitos ficam por sua conta."*
+> Spec `specs/2026-11-15-bloco-som-design.md` (as 10 decisões dele, uma pergunta por vez), plano
+> `plans/2026-11-15-bloco-som-fundacao.md`.
+> - **As decisões:** cinematográfico/pesado predomina (a trilha dele é orquestra + metal, dark sci-fi), toques retrô só
+>   onde ajudam a ler; quem joga sem trilha ainda tem atmosfera (o AMBIENTE entra no bloco, do lado dos efeitos);
+>   GERAL · MÚSICA · EFEITOS sem controle novo, com o ajuste automático invisível (ambiente e motor baixos sob a trilha,
+>   cheios sem ela); FOLHA DE SONS PARA TUDO antes de entrar no jogo; as 3 naves com tiro, motor e morte próprios;
+>   sons exclusivos (o estrondo sônico na abertura da F1; os trovões presos aos relâmpagos do menu da noite); a
+>   acústica pelo lugar (atmosfera abafada; espaço = cabine seca; e a DISTÂNCIA decide: o fundo no vácuo é só um grave
+>   surdo).
+> - **A fundação no jogo** (`src/som/`): `Som.ts` (o tocador único em Web Audio sobre o contexto do Phaser: vozes com
+>   teto e prioridade, variação de tom/volume, laços, a pausa abafa, a NAVE PERDIDA cala a ação), `mixagem.ts`,
+>   `vozes.ts`, `acustica.ts` (os perfis por lugar; cada cena declara o seu), `catalogoSons.ts` (vazio até as
+>   escolhas), `docs/SONS.md` (créditos e licenças). Ligado em `aplicarPreferencias`, `BootScene`, `PausaScene` e no
+>   `create` de cada cena. **Nenhum som toca ainda no jogo** (o catálogo está vazio).
+> - **A armadilha do dia (Chrome):** `setTargetAtTime` num barramento SEM sinal congela (o Chrome só calcula essa curva
+>   enquanto passa som) — o 1º tiro depois da NAVE PERDIDA saía cheio. Tudo virou rampa linear; o teste mede o SINAL
+>   (`Som.picoDaAcao`), não o parâmetro.
+> - **As ferramentas** (`scripts/_som/`): `_som-tratar.mjs` (ffmpeg: corte, pico −1 dB ou −24 LUFS no motor/ambiente,
+>   a emenda do laço, `--max`), `_kenney-baixar.mjs` (os pacotes CC0 em `assets/raw/sons/_kenney/`), `_folha-montar.mjs`
+>   (baixa as gerações do PixelLab e trata tudo), `_folha-dados.mjs`, `_folha-sons.mjs` (o HTML), `_folha-conferir.mjs`
+>   (a folha no navegador automático). O molde da folha mora em `docs/superpowers/folhas/_sons/` (ouvir no lugar, ×8 com
+>   a variação, trilha por baixo, o texto da escolha).
+> - **A folha 1 (a nave):** 26 sons, 55 versões (33 PixelLab, 22 Kenney CC0), 0,9 MB; ~60 gerações gastas. As origens e
+>   os prompts em `assets/raw/sons/nave/_origem.json`.
+> - **Testes:** `test-som.mjs` (puro), `test-som-tratar.mjs`, `test-som-jogo.mjs` (navegador, com o sinal medido); os do
+>   M (`test-pausa`, `test-preferencias`, `test-pausa-jogo`, `test-derrota-jogo`, `test-carregamento`,
+>   `test-controle-jogo`) e o build passando.
 >
 > **Guardado para depois (pedidos dele, sem data):** a zona morta ajustável do analógico e um 2º controle (M2); a
 > conta do usuário sincronizando as preferências entre navegadores (junto do placar online, etapa 5 — as preferências
@@ -34,7 +202,7 @@ sprite que se desfaz nos próprios pixels).
 >
 > 📍 **15/11 — O BLOCO M FECHOU.** O M3 (*"Boa, ficou ótimo"*) e o M4 (*"Ficou bom assim"*, depois do ajuste da nave
 > da barra e do favicon) aprovados, commitados e empurrados em 15/11. **A próxima sessão abre no F** (a F2: a frota de
-> batedores e a rocha do minerador); o START do F ainda não existe — escrever ao abrir.
+> batedores e a rocha do minerador); START `plans/2026-11-15-bloco-f-START.md`.
 >
 > 📍 **15/11 — O M4 IMPLEMENTADO E APROVADO.** Spec
 > `specs/2026-11-15-bloco-m4-carregamento-design.md`; folha `folhas/2026-11-15/carregamento/carregamento.html`; para ver
