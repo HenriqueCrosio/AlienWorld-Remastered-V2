@@ -1,0 +1,24 @@
+:root { --fundo: #0d0f14; --painel: #161a22; --linha: #232a36; --texto: #d8dde6; --fraco: #8a93a3; --acento: #e08a3c; --ok: #6fbf73; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fundo); color: var(--texto); font: 14px/1.45 system-ui, sans-serif; }
+main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 170px; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 32px 0 8px; color: var(--acento); }
+.nota { color: var(--fraco); margin: 0 0 16px; white-space: pre-line; }
+.barra { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 10px 12px; background: var(--painel); border: 1px solid var(--linha); border-radius: 8px; }
+.barra label { display: flex; gap: 6px; align-items: center; }
+select { background: #0f1218; color: var(--texto); border: 1px solid var(--linha); border-radius: 5px; padding: 3px 6px; font: inherit; }
+.som { margin: 10px 0; padding: 12px; background: var(--painel); border: 1px solid var(--linha); border-radius: 8px; }
+.som header { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; }
+.som code { color: var(--acento); }
+.som .onde { color: var(--fraco); }
+.versoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; margin-top: 10px; }
+.versao { padding: 8px; border: 1px solid var(--linha); border-radius: 6px; }
+.versao.escolhida { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok) inset; }
+.versao .fonte { color: var(--fraco); font-size: 12px; }
+button { background: #222a37; color: var(--texto); border: 1px solid #334055; border-radius: 5px; padding: 4px 10px; cursor: pointer; font: inherit; }
+button:hover { border-color: var(--acento); }
+.escolha { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; align-items: center; }
+.escolha input[type=text] { flex: 1; min-width: 180px; background: #0f1218; color: var(--texto); border: 1px solid var(--linha); border-radius: 5px; padding: 4px 8px; font: inherit; }
+footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px; background: var(--painel); border-top: 1px solid var(--linha); }
+footer textarea { width: 100%; height: 76px; background: #0f1218; color: var(--texto); border: 1px solid var(--linha); border-radius: 5px; font: 12px/1.4 ui-monospace, monospace; }

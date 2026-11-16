@@ -1,0 +1,100 @@
+{
+ "titulo": "Folha de sons 2b — o que voltou para refazer",
+ "dia": "2026-11-15",
+ "nota": "Só as três que você devolveu. As outras 15 da folha 2 já estão no jogo.\nO METAL: a sua A, cortada em 0,55 s — antes do repique onde a voz entrava.\nO CHOQUE e o ARCO: tudo novo, pensado para ouvir em sequência (use o ×8 — é a tortura que você descreveu). As do PixelLab (A2/A3 e B2) vieram com prompts de som limpo e ainda passaram pela limpeza do casco (redução de ruído + corte acima de 5,5 kHz) — medidas, são as mais limpas que ele deu; C2 é sintetizado aqui: um \"zing\" puro, sem ruído nenhum (o mais limpo de todos pela medida).",
+ "grupos": [
+  {
+   "titulo": "A rodada 2",
+   "sons": [
+    {
+     "nome": "explosao.metal",
+     "oque": "METAL — a A mais curta, sem a voz no fim",
+     "onde": "drones, batedores, kamikazes, torres",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.06,
+      "vol": 0.12
+     },
+     "versoes": [
+      {
+       "id": "A2",
+       "arquivo": "v/explosao.metal-A2.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small enemy drone exploding into metal shards, a tight punchy pop with metal fragments scattering, short, dark sci-fi, no music — (a A, 15/11 a pedido dele: \"mais curta, no final tem uma fala ou voz\": cortada em 0,55 s, antes do repique onde a voz entra)\""
+      }
+     ]
+    },
+    {
+     "nome": "efeito.choque",
+     "oque": "ELÉTRICO — o choque que trava (agradável em sequência)",
+     "onde": "a carta ELÉTRICO",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "A3",
+       "arquivo": "v/efeito.choque-A3.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a soft clean electric zap, a smooth tonal blip that sparkles and fades quickly, gentle and pleasant, no static, no buzz, sci-fi, no music\""
+      },
+      {
+       "id": "B2",
+       "arquivo": "v/efeito.choque-B2.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a light crystalline electric tick, a quick glassy plink with a soft sparkle tail, smooth and satisfying to hear many times, no noise, very short, sci-fi, no music\""
+      },
+      {
+       "id": "C2",
+       "arquivo": "v/efeito.choque-C2.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"(sintetizado em scripts/_som/_sintetizar-zing.mjs: um zing tonal descendo 2,6→0,5 kHz com a quinta por cima e um tremor de 90 Hz; nenhum ruído)\""
+      }
+     ]
+    },
+    {
+     "nome": "efeito.arco",
+     "oque": "ARCO EM CADEIA — o choque salta (agradável em sequência)",
+     "onde": "a carta ARCO EM CADEIA",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "A2",
+       "arquivo": "v/efeito.arco-A2.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a clean chain of three quick soft electric zings rising in pitch, smooth tonal sparks jumping, pleasant and musical, no harsh static, no buzz, sci-fi, no music\""
+      },
+      {
+       "id": "B2",
+       "arquivo": "v/efeito.arco-B2.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a gentle ripple of crystalline electric chimes skipping quickly across, smooth sparkling tones, satisfying to hear repeatedly, no noise, sci-fi, no music\""
+      },
+      {
+       "id": "C2",
+       "arquivo": "v/efeito.arco-C2.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"(sintetizado em scripts/_som/_sintetizar-zing.mjs: três zings a 60 ms, subindo de tom — o choque saltando; nenhum ruído)\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

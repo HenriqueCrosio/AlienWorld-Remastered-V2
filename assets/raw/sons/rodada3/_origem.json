@@ -1,0 +1,21 @@
+{
+  "_": "Round 3 (15/11): the five he sent back twice, now in the direction he chose — the drone = MATTER BREAKING, the small metal = a SHORT DRY explosion, the shock and the arc = a PHYSICAL electric snap.",
+  "base": "https://backblaze.pixellab.ai/file/pixellab-characters/audio/f7282f36-b779-4f64-832a-4693ca4cc628/",
+  "takes": [
+    { "nome": "acerto.drone", "id": "F", "pixellab": "3b992d55-0f59-4e49-9818-d424be00c80b/aw-acerto-drone-f.wav", "prompt": "a bullet cracking the thin shell of a small drone, a dry light snap of thin hull plating, short and physical, no ring, no echo, no fire, no music" },
+    { "nome": "acerto.drone", "id": "G", "pixellab": "49893e4a-f01d-42c6-ac74-64c2bee3500a/aw-acerto-drone-g.wav", "prompt": "a quick dry crack of a light composite casing chipping under a hit, a tight brittle tick, physical and close, no ringing, no echo, no music" },
+    { "nome": "acerto.drone", "id": "H", "kenney": "impact-sounds/Audio/impactPlate_light_001.ogg" },
+    { "nome": "explosao.drone", "id": "F", "pixellab": "2091ca48-6fd3-4291-8406-9acfbb379dc8/aw-explosao-drone-f.wav", "prompt": "a small drone's shell cracking apart and its pieces clattering away, a dry brittle crunch of thin plating breaking, no fire, no explosion boom, no echo, no music" },
+    { "nome": "explosao.drone", "id": "G", "pixellab": "1ce34d1b-4467-4de6-af4a-561edf030d43/aw-explosao-drone-g.wav", "prompt": "a light machine casing snapping in two and breaking into small fragments that tumble and rattle, dry and physical, no fire, no echo, no music" },
+    { "nome": "explosao.drone", "id": "H", "kenney": "impact-sounds/Audio/impactPlate_medium_002.ogg" },
+    { "nome": "explosao.metal", "id": "F", "pixellab": "05fe6c84-9c78-4b17-8dfe-1b6ae23232c7/aw-explosao-metal-f.wav", "prompt": "a small short dry explosion of a light enemy fighter, a single punchy pop with a deep body and almost no tail, no debris tinkling, no echo, no voice, no music" },
+    { "nome": "explosao.metal", "id": "G", "pixellab": "558304ca-df91-4b16-9897-52a692151889/aw-explosao-metal-g.wav", "prompt": "a compact tight blast of a small metal ship, a quick dry thump-pop with a short low punch, cut off clean, no rattle, no echo, no music" },
+    { "nome": "explosao.metal", "id": "H", "max": 0.45, "kenney": "sci-fi-sounds/Audio/explosionCrunch_003.ogg" },
+    { "nome": "efeito.choque", "id": "F", "pixellab": "8963c755-de3e-4f18-8ba4-39db906be8a4/aw-efeito-choque-f.wav", "prompt": "a single real electric spark snapping, one dry crack of an electric arc jumping a short gap, very short, no hum, no buzz, no hiss, no music" },
+    { "nome": "efeito.choque", "id": "G", "pixellab": "90a4156a-8f76-467b-b992-2e9c09ec04b5/aw-efeito-choque-g.wav", "prompt": "a short static discharge snap, a crisp dry electric tick like a spark plug firing once, physical and close, no buzzing tail, no music" },
+    { "nome": "efeito.choque", "id": "C3", "local": "assets/raw/sons/rodada3/efeito.choque-C3.wav", "prompt": "(sintetizado em scripts/_som/_sintetizar-estalo.mjs: uma faísca de ~8 ms, ruído com decaimento rapidíssimo na faixa do estalo, 1,2–7 kHz; sem zumbido)" },
+    { "nome": "efeito.arco", "id": "F", "pixellab": "ae1bc09e-9c3a-4915-a800-6bbe5f670518/aw-efeito-arco-f.wav", "prompt": "an electric arc jumping between three points, three quick dry spark snaps in a row, physical crackles, no hum, no buzz, no hiss, no music" },
+    { "nome": "efeito.arco", "id": "G", "pixellab": "41686c6f-4ae4-49bd-9158-3ac60b23d764/aw-efeito-arco-g.wav", "prompt": "a chain of short static discharges hopping from one object to the next, two or three crisp dry electric snaps, close and physical, no buzzing, no music" },
+    { "nome": "efeito.arco", "id": "C3", "local": "assets/raw/sons/rodada3/efeito.arco-C3.wav", "prompt": "(sintetizado em scripts/_som/_sintetizar-estalo.mjs: três estalos a 70 ms, cada um mais fraco — a faísca pulando)" }
+  ]
+}

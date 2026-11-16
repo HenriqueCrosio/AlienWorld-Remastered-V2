@@ -1,0 +1,18 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons — ajustes (depois de você jogar)",
+    "dia": "2026-11-15",
+    "nota": "O tiro BALÍSTICO da TERMINUS (o mais confortável possível: use o ×8 — ele toca 4,5 vezes por segundo).\nO DRONE (o inimigo dos enxames, desde a F1) ganhou categoria própria: um acerto macio no lugar do metal fino, e uma explosão dele.\nO LASTRO é a cola das cadeias: um ronco grave que as explosões vão enchendo e que esvazia devagar quando elas param — no jogo ele sobe e desce sozinho; aqui toca 6 s parado. A A é feita da sua metalGrande C; a B é gerada. Ouça no lugar \"espaço (cabine)\" com a ×8 de uma explosão da folha 2 aberta em outra aba para imaginar a mistura."
+  },
+  "grupos": [
+    {
+      "titulo": "Os ajustes",
+      "sons": [
+        { "nome": "nave.terminus.tiro", "oque": "o tiro BALÍSTICO da TERMINUS (refazer)", "onde": "toda a campanha de quem escolheu a TERMINUS", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.1 } },
+        { "nome": "acerto.drone", "oque": "o tiro entrando no DRONE (macio)", "onde": "os enxames, da F1 à F4", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } },
+        { "nome": "explosao.drone", "oque": "a morte do DRONE", "onde": "os enxames, da F1 à F4", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.06, "vol": 0.12 } },
+        { "nome": "explosao.lastro", "oque": "o LASTRO — o ronco que cola as cadeias de explosão", "onde": "debaixo de toda cadeia (a Aurora, as filas coladas, as mortes de chefão)", "lugar": "cabine", "laco": true }
+      ]
+    }
+  ]
+}

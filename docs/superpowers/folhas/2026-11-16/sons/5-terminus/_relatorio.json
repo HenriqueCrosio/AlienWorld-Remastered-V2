@@ -1,0 +1,42 @@
+[
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "F",
+  "dur": 0.548413,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "G",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "H",
+  "descartada": "muda (pico -43 dB)"
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "I",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "K",
+  "dur": 0.40059,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "J",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ }
+]

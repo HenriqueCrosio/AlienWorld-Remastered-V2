@@ -1,0 +1,17 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 2b — o que voltou para refazer",
+    "dia": "2026-11-15",
+    "nota": "Só as três que você devolveu. As outras 15 da folha 2 já estão no jogo.\nO METAL: a sua A, cortada em 0,55 s — antes do repique onde a voz entrava.\nO CHOQUE e o ARCO: tudo novo, pensado para ouvir em sequência (use o ×8 — é a tortura que você descreveu). As do PixelLab (A2/A3 e B2) vieram com prompts de som limpo e ainda passaram pela limpeza do casco (redução de ruído + corte acima de 5,5 kHz) — medidas, são as mais limpas que ele deu; C2 é sintetizado aqui: um \"zing\" puro, sem ruído nenhum (o mais limpo de todos pela medida)."
+  },
+  "grupos": [
+    {
+      "titulo": "A rodada 2",
+      "sons": [
+        { "nome": "explosao.metal", "oque": "METAL — a A mais curta, sem a voz no fim", "onde": "drones, batedores, kamikazes, torres", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.06, "vol": 0.12 } },
+        { "nome": "efeito.choque", "oque": "ELÉTRICO — o choque que trava (agradável em sequência)", "onde": "a carta ELÉTRICO", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "efeito.arco", "oque": "ARCO EM CADEIA — o choque salta (agradável em sequência)", "onde": "a carta ARCO EM CADEIA", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } }
+      ]
+    }
+  ]
+}

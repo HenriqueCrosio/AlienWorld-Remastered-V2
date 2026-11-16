@@ -1,0 +1,15 @@
+explosao.perigo: C
+explosao.metalGrande: C
+explosao.chefeFim: A
+explosao.luz: B
+explosao.biomec: B
+explosao.carne: B
+explosao.rocha: C
+explosao.carta: C
+explosao.implosao: A
+efeito.incendiar: A
+efeito.combustao: A
+efeito.sobrecarga: A
+acerto.metal: A
+acerto.carne: A
+acerto.rocha: B

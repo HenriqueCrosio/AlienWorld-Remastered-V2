@@ -1,0 +1,5 @@
+acerto.drone: G
+explosao.drone: G
+explosao.metal: G
+efeito.choque: F
+efeito.arco: F

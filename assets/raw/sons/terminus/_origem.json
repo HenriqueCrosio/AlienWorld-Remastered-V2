@@ -1,0 +1,12 @@
+{
+  "_": "The TERMINUS shot, one more round (16/11, his ask: 4 new takes, one like the A-10 Thunderbolt cannon). F is the one in the game now, for comparison.",
+  "base": "https://backblaze.pixellab.ai/file/pixellab-characters/audio/f7282f36-b779-4f64-832a-4693ca4cc628/",
+  "takes": [
+    { "nome": "nave.terminus.tiro", "id": "F", "pixellab": "7bba3645-3c2e-4485-8ab4-9c0b609dd304/aw-nave-terminus-tiro-f.wav", "prompt": "(a F, a que está no jogo agora, para comparar) a single kinetic slug cannon shot, a deep soft punch with a short rounded body and a gentle low tail, comfortable on repeat, no metallic ring, no crack, no music" },
+    { "nome": "nave.terminus.tiro", "id": "G", "pixellab": "a70fccf2-84cf-43f7-9af7-6e215901f2bd/aw-nave-terminus-tiro-g-a-10.wav", "prompt": "(o do A-10) a short burst from a huge rotary gatling autocannon of a ground-attack jet firing extremely fast, a deep tearing buzz-roar like a giant zipper, the famous A-10 Warthog cannon brrrt, very short burst, no music" },
+    { "nome": "nave.terminus.tiro", "id": "H", "pixellab": "3db942ee-4ee8-4ee3-8a92-993a64e12b26/aw-nave-terminus-tiro-h.wav", "prompt": "a single heavy autocannon round from an armored gunship, a deep chesty boom with a short gritty mechanical kick, ballistic and weighty but comfortable, no metallic ring, no music" },
+    { "nome": "nave.terminus.tiro", "id": "I", "pixellab": "9311ea10-b0b3-48c3-adce-41c46b348c1e/aw-nave-terminus-tiro-i.wav", "prompt": "one 30mm cannon shell fired from an attack aircraft, a thick low punch with a tight snap of the breech, dry and powerful, no echo, no ringing, no music" },
+    { "nome": "nave.terminus.tiro", "id": "K", "pixellab": "339fa150-ab80-4671-997d-0db4096b9cfe/aw-nave-terminus-tiro-k.wav", "prompt": "a single heavy cannon round fired from a gunship, a deep weighty boom with a short dry mechanical clack of the breech, powerful but easy on the ears, no ring, no music" },
+    { "nome": "nave.terminus.tiro", "id": "J", "pixellab": "4faa7fab-cbbe-4498-ae51-fb7f9d42c97f/aw-nave-terminus-tiro-j.wav", "prompt": "a single kinetic cannon shot with a rolling low thump and a soft whoosh of the round leaving, rounded and satisfying to fire many times per second, no harsh crack, no music" }
+  ]
+}

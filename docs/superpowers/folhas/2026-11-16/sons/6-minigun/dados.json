@@ -1,0 +1,62 @@
+{
+ "titulo": "Folha de sons 6 — a TERMINUS como arma rotativa",
+ "dia": "2026-11-16",
+ "nota": "Pensando numa minigun: o tiro deixa de ser um som por bala. No jogo, ao APERTAR o tiro os canos aceleram (o arranque, com o assobio do motor subindo), ENQUANTO segura a rajada vira um laço contínuo, e ao SOLTAR os canos desaceleram (a parada). Cada versão aqui é ~3 s de gatilho segurado: ouça com ▶ (o ×8 não faz sentido para um laço).\nA-10: A1 e A2 reproduzem o que a sua referência tem de característico — medi: o zumbido de 8 ms (~125 disparos por segundo) e a energia abaixo de 600 Hz. A1 é sintetizado; A2 é o SEU tiro F repetido a 125/s. A3 é do PixelLab e saiu mais ronco que zumbido.\nM1 minigun leve e aguda, M2 rotativa pesada e lenta (os tiros se contam), M3 canhão rotativo de energia.\n(A sua referência só foi MEDIDA; nada dela vai para o jogo.)",
+ "grupos": [
+  {
+   "titulo": "TERMINUS — o tiro como arma girando",
+   "sons": [
+    {
+     "nome": "nave.terminus.tiro",
+     "oque": "arranque → rajada segurada → parada (~3 s)",
+     "onde": "toda a campanha de quem escolheu a TERMINUS",
+     "lugar": "atmosfera",
+     "versoes": [
+      {
+       "id": "A1",
+       "arquivo": "v/nave.terminus.tiro-A1.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"A-10 · sintetizado a partir da medida da sua referência: o zumbido de 8 ms (~125 disparos/s), a energia abaixo de 600 Hz; grão = um baque grave curto\""
+      },
+      {
+       "id": "A2",
+       "arquivo": "v/nave.terminus.tiro-A2.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"A-10 · o SEU tiro F da TERMINUS repetido a 125/s: a minigun feita do próprio som da nave (o perfil de faixas mais parecido com o da referência)\""
+      },
+      {
+       "id": "A3",
+       "arquivo": "v/nave.terminus.tiro-A3.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"A-10 · laço do PixelLab (\"continuous firing of a huge seven-barrel rotary autocannon of a ground-attack jet, a deep low tearing buzz-roar\") — sai mais RONCO que zumbido, e mais claro\""
+      },
+      {
+       "id": "M1",
+       "arquivo": "v/nave.terminus.tiro-M1.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"minigun leve e rápida · laço do PixelLab (\"a light six-barrel electric minigun, a fast high buzzing rattle with a spinning motor whine\")\""
+      },
+      {
+       "id": "M2",
+       "arquivo": "v/nave.terminus.tiro-M2.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"rotativa pesada e lenta · o tiro I (o 30 mm) repetido a 12/s: os disparos se CONTAM\""
+      },
+      {
+       "id": "M3",
+       "arquivo": "v/nave.terminus.tiro-M3.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"canhão rotativo de energia · laço do PixelLab (\"a sci-fi rotary plasma gatling cannon, a fast pulsing low energy hum-thump with a spinning electric whir\")\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

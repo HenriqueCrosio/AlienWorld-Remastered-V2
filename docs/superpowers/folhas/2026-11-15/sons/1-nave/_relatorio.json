@@ -1,0 +1,401 @@
+[
+ {
+  "nome": "nave.xaelo.tiro",
+  "id": "A",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.tiro",
+  "id": "B",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.tiro",
+  "id": "C",
+  "dur": 0.236327,
+  "pico": -4.6,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "A",
+  "dur": 0.743039,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "B",
+  "dur": 0.743061,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "C",
+  "dur": 0.676644,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.tiro",
+  "id": "A",
+  "dur": 0.743061,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.tiro",
+  "id": "B",
+  "dur": 0.547098,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.tiro",
+  "id": "C",
+  "dur": 0.722902,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.motor",
+  "id": "A",
+  "dur": 5.537188,
+  "pico": -12.3,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.motor",
+  "id": "B",
+  "dur": 4.5,
+  "pico": -12.9,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.motor",
+  "id": "A",
+  "dur": 5.537188,
+  "pico": -12.9,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.motor",
+  "id": "B",
+  "dur": 4.5,
+  "pico": -9.8,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.motor",
+  "id": "A",
+  "dur": 5.537188,
+  "pico": -12.5,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.motor",
+  "id": "B",
+  "dur": 4.5,
+  "pico": -15.4,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.atingida",
+  "id": "A",
+  "dur": 0.75966,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.atingida",
+  "id": "B",
+  "dur": 0.268866,
+  "pico": -4.7,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.atingida",
+  "id": "A",
+  "dur": 0.835941,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.atingida",
+  "id": "B",
+  "dur": 0.41805,
+  "pico": -1.2,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.atingida",
+  "id": "A",
+  "dur": 0.835918,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.atingida",
+  "id": "B",
+  "dur": 0.495283,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.vida",
+  "id": "A",
+  "dur": 1.141111,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.vida",
+  "id": "B",
+  "dur": 0.164785,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.vida",
+  "id": "A",
+  "dur": 1.130771,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.vida",
+  "id": "B",
+  "dur": 0.468934,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.vida",
+  "id": "A",
+  "dur": 1.189252,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.vida",
+  "id": "B",
+  "dur": 1.2,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.morte",
+  "id": "A",
+  "dur": 2.381383,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.morte",
+  "id": "B",
+  "dur": 2.003424,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.morte",
+  "id": "A",
+  "dur": 1.841837,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.morte",
+  "id": "B",
+  "dur": 2.078141,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.morte",
+  "id": "A",
+  "dur": 2.647574,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.morte",
+  "id": "B",
+  "dur": 2.255102,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.missil.lancar",
+  "id": "A",
+  "dur": 1.093515,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.missil.lancar",
+  "id": "B",
+  "dur": 1.1,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.missil.travar",
+  "id": "A",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.missil.travar",
+  "id": "B",
+  "dur": 0.532472,
+  "pico": -1.2,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.drone.tiro",
+  "id": "A",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.drone.tiro",
+  "id": "B",
+  "dur": 0.235442,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.bomba.lancar",
+  "id": "A",
+  "dur": 1.021701,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.bomba.lancar",
+  "id": "B",
+  "dur": 0.507846,
+  "pico": -1.4,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.dash",
+  "id": "A",
+  "dur": 0.672063,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.dash",
+  "id": "B",
+  "dur": 0.7,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.dash",
+  "id": "A2",
+  "dur": 0.32,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.impulso",
+  "id": "A",
+  "dur": 0.835941,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.impulso",
+  "id": "B",
+  "dur": 0.85,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.casco.absorver",
+  "id": "A",
+  "dur": 0.815351,
+  "pico": -3.8,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.casco.absorver",
+  "id": "B",
+  "dur": 0.725488,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.casco.quebrar",
+  "id": "A",
+  "dur": 1.145624,
+  "pico": -1.2,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.casco.quebrar",
+  "id": "B",
+  "dur": 0.238345,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.casco.quebrar",
+  "id": "A2",
+  "dur": 1.108073,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.casco.voltar",
+  "id": "A",
+  "dur": 1.20746,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.casco.voltar",
+  "id": "B",
+  "dur": 0.725193,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.flare.soltar",
+  "id": "A",
+  "dur": 0.894354,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.flare.soltar",
+  "id": "B",
+  "dur": 0.720227,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "momento.f1.estrondo",
+  "id": "A",
+  "dur": 3.102902,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "momento.f1.estrondo",
+  "id": "B",
+  "dur": 3.157937,
+  "pico": -1,
+  "inicio": 0
+ }
+]

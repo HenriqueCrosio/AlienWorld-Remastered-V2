@@ -1,0 +1,126 @@
+[
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "C",
+  "dur": 0.411429,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "D",
+  "descartada": "muda (pico -43.7 dB)"
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "E",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "F",
+  "dur": 0.548413,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "A",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "B",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "C",
+  "dur": 0.137347,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "A",
+  "dur": 0.813243,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "B",
+  "dur": 0.668571,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "C",
+  "dur": 1.331542,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "D",
+  "dur": 0.087596,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "E",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "C2",
+  "dur": 0.139909,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "A0",
+  "dur": 0.813243,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "D",
+  "dur": 0.802222,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "E",
+  "dur": 0.699705,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.lastro",
+  "id": "A",
+  "dur": 7.453243,
+  "pico": -7.7,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.lastro",
+  "id": "B",
+  "dur": 7.487664,
+  "pico": -12.1,
+  "inicio": 0
+ }
+]

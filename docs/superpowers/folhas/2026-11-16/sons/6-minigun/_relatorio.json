@@ -1,0 +1,44 @@
+[
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "A1",
+  "dur": 2.992313,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "A2",
+  "dur": 2.966054,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "A3",
+  "dur": 2.967732,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "M1",
+  "dur": 2.944989,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "M2",
+  "dur": 2.931927,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.tiro",
+  "id": "M3",
+  "dur": 2.953878,
+  "pico": -1,
+  "inicio": 0
+ }
+]

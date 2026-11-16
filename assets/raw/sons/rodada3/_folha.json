@@ -1,0 +1,29 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 4 — a rodada 3, nas direções que você escolheu",
+    "dia": "2026-11-15",
+    "nota": "O DRONE: matéria quebrando — a casca rachando, seca, sem fogo e sem eco.\nO METAL PEQUENO (batedores, kamikazes, torres): uma explosão curta e seca, com corpo grave e quase sem cauda (sem os estilhaços tilintando no fim).\nO CHOQUE e o ARCO: um estalo elétrico físico, a faísca de verdade, sem zumbido nem chiado contínuo. C3 é sintetizado aqui.\nTodos tocam muito: julgue com o ×8."
+  },
+  "grupos": [
+    {
+      "titulo": "O drone — matéria quebrando",
+      "sons": [
+        { "nome": "acerto.drone", "oque": "o tiro entrando no DRONE — a lataria leve estalando", "onde": "os enxames, da F1 à F4", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } },
+        { "nome": "explosao.drone", "oque": "a morte do DRONE — a casca rachando e caindo", "onde": "os enxames, da F1 à F4", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.06, "vol": 0.12 } }
+      ]
+    },
+    {
+      "titulo": "O metal pequeno — curta e seca",
+      "sons": [
+        { "nome": "explosao.metal", "oque": "METAL — as naves pequenas que não são o drone", "onde": "batedores, kamikazes, torres", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.06, "vol": 0.12 } }
+      ]
+    },
+    {
+      "titulo": "O elétrico — o estalo físico",
+      "sons": [
+        { "nome": "efeito.choque", "oque": "ELÉTRICO — o choque que trava", "onde": "a carta ELÉTRICO", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "efeito.arco", "oque": "ARCO EM CADEIA — o choque salta", "onde": "a carta ARCO EM CADEIA", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } }
+      ]
+    }
+  ]
+}

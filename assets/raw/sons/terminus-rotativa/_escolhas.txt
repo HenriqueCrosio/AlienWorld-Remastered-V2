@@ -1,0 +1,5 @@
+nave.terminus.rotativa.arranque: M2
+nave.terminus.rotativa.laco: M2
+nave.terminus.rotativa.parada: M2
+nave.terminus.chegada.pico: A1
+nave.terminus.chegada.casco: A1

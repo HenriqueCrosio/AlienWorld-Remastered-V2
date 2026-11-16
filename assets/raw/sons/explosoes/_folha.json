@@ -1,0 +1,42 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 2 — as explosões",
+    "dia": "2026-11-15",
+    "nota": "As explosões seguem os 9 tipos do bloco I (pelo material de quem morre), mais o \"metal grande\" para as naves grandes. ×8 é o teste da cadeia: oito seguidas, com a variação do jogo — é assim que uma fila de inimigos colada estoura.\nUse \"ouvir no lugar\": a mesma explosão soa abafada na atmosfera (F1), seca na cabine (F2/F3) e úmida no interior (F4). Marque \"ao fundo\" para ouvir como fica a batalha das frotas ao fundo da F3 (no vácuo: só o grave surdo).\nOs acertos tocam a CADA tiro que entra: devem ser discretos."
+  },
+  "grupos": [
+    {
+      "titulo": "As explosões pelo material",
+      "sons": [
+        { "nome": "explosao.perigo", "oque": "PERIGO — a bola de fogo (minas, latas, o que não tem material)", "onde": "minas sensoras, perigos da F1/F2", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "explosao.metal", "oque": "METAL — as naves pequenas (estilhaços)", "onde": "drones, batedores, kamikazes, torres", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.06, "vol": 0.12 } },
+        { "nome": "explosao.metalGrande", "oque": "METAL GRANDE — as naves grandes (estilhaços + o fogo)", "onde": "cargueiro, canhoneira, elites de metal; as cutscenes 1 e 2", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.08 } },
+        { "nome": "explosao.chefeFim", "oque": "FIM DE CHEFÃO — a grande nuvem que fecha a luta", "onde": "a morte dos chefões de metal (F1, Capitânia)", "lugar": "cabine" },
+        { "nome": "explosao.luz", "oque": "LUZ — energia se desfazendo", "onde": "a água-viva", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "explosao.biomec", "oque": "BIOMECÂNICO — o clarão e a fumaça de criatura", "onde": "lula, Larva, Guardião, golfinho, Serpente", "lugar": "cabine" },
+        { "nome": "explosao.carne", "oque": "CARNE — matéria rompendo, sem fogo", "onde": "pupas, moscas, Tubo, Predador, portas e esfíncter da F4; a cutscene 3", "lugar": "interior", "repetir": true, "variacao": { "tom": 0.06, "vol": 0.12 } },
+        { "nome": "explosao.rocha", "oque": "ROCHA — pedra partindo, poeira", "onde": "asteroides, rochas mineráveis (F2/F3)", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.06, "vol": 0.12 } },
+        { "nome": "explosao.carta", "oque": "CARTA — as explosões SUAS", "onde": "EXPLOSIVO, MÍSSIL, FLARE, CASCO REATIVO", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "explosao.implosao", "oque": "IMPLOSÃO — a Aurora", "onde": "a cutscene 1 (a Aurora implode)", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "Os efeitos das cartas",
+      "sons": [
+        { "nome": "efeito.incendiar", "oque": "INCENDIÁRIO — o inimigo pega fogo", "onde": "a carta INCENDIÁRIO (e EM CADEIA)", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "efeito.combustao", "oque": "COMBUSTÃO — o queimado explode ao morrer", "onde": "a carta COMBUSTÃO", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "efeito.choque", "oque": "ELÉTRICO — o choque que trava", "onde": "a carta ELÉTRICO", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "efeito.arco", "oque": "ARCO EM CADEIA — o choque salta", "onde": "a carta ARCO EM CADEIA", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "efeito.sobrecarga", "oque": "SOBRECARGA — o eletrificado solta um pulso ao morrer", "onde": "a carta SOBRECARGA", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "O acerto do tiro (toca a cada tiro que entra — discreto)",
+      "sons": [
+        { "nome": "acerto.metal", "oque": "o tiro entrando em metal", "onde": "naves, torres, chefões de metal", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } },
+        { "nome": "acerto.carne", "oque": "o tiro entrando em carne / criatura", "onde": "criaturas, a F4", "lugar": "interior", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } },
+        { "nome": "acerto.rocha", "oque": "o tiro lascando a rocha", "onde": "asteroides", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.15 } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+ "titulo": "Folha de sons 5 — o tiro da TERMINUS, mais uma leva",
+ "dia": "2026-11-16",
+ "nota": "Quatro novas (G a J) + a F, que está no jogo agora, para comparar. A G é a do canhão do A-10 (o \"brrrt\"): ela é uma RAJADA curta, então no jogo cada disparo vira uma mini-rajada — ouça no ×8 para sentir a 4,5 disparos por segundo.\nO tiro toca o tempo todo: julgue pelo ×8, de preferência com e sem a trilha por baixo.",
+ "grupos": [
+  {
+   "titulo": "TERMINUS",
+   "sons": [
+    {
+     "nome": "nave.terminus.tiro",
+     "oque": "o tiro base da TERMINUS",
+     "onde": "toda a campanha de quem escolheu a TERMINUS",
+     "lugar": "atmosfera",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.04,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "F",
+       "arquivo": "v/nave.terminus.tiro-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"(a F, a que está no jogo agora, para comparar) a single kinetic slug cannon shot, a deep soft punch with a short rounded body and a gentle low tail, comfortable on repeat, no metallic ring, no crack, no music\""
+      },
+      {
+       "id": "G",
+       "arquivo": "v/nave.terminus.tiro-G.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"(o do A-10) a short burst from a huge rotary gatling autocannon of a ground-attack jet firing extremely fast, a deep tearing buzz-roar like a giant zipper, the famous A-10 Warthog cannon brrrt, very short burst, no music\""
+      },
+      {
+       "id": "I",
+       "arquivo": "v/nave.terminus.tiro-I.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"one 30mm cannon shell fired from an attack aircraft, a thick low punch with a tight snap of the breech, dry and powerful, no echo, no ringing, no music\""
+      },
+      {
+       "id": "K",
+       "arquivo": "v/nave.terminus.tiro-K.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single heavy cannon round fired from a gunship, a deep weighty boom with a short dry mechanical clack of the breech, powerful but easy on the ears, no ring, no music\""
+      },
+      {
+       "id": "J",
+       "arquivo": "v/nave.terminus.tiro-J.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single kinetic cannon shot with a rolling low thump and a soft whoosh of the round leaving, rounded and satisfying to fire many times per second, no harsh crack, no music\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

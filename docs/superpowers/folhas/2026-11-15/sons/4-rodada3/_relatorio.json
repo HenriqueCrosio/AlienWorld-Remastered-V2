@@ -1,0 +1,107 @@
+[
+ {
+  "nome": "acerto.drone",
+  "id": "F",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "G",
+  "dur": 0.194535,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.drone",
+  "id": "H",
+  "dur": 0.536848,
+  "pico": -2.7,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "F",
+  "dur": 0.722925,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "G",
+  "dur": 0.708027,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.drone",
+  "id": "H",
+  "dur": 0.508889,
+  "pico": -3.7,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metal",
+  "id": "F",
+  "dur": 0.7161,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metal",
+  "id": "G",
+  "dur": 0.64102,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metal",
+  "id": "H",
+  "dur": 0.45,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "F",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "G",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "C3",
+  "dur": 0.029138,
+  "pico": -5.4,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "F",
+  "dur": 0.557279,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "G",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "C3",
+  "dur": 0.167823,
+  "pico": -2.6,
+  "inicio": 0
+ }
+]

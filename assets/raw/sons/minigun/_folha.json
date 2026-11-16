@@ -1,0 +1,15 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 6 — a TERMINUS como arma rotativa",
+    "dia": "2026-11-16",
+    "nota": "Pensando numa minigun: o tiro deixa de ser um som por bala. No jogo, ao APERTAR o tiro os canos aceleram (o arranque, com o assobio do motor subindo), ENQUANTO segura a rajada vira um laço contínuo, e ao SOLTAR os canos desaceleram (a parada). Cada versão aqui é ~3 s de gatilho segurado: ouça com ▶ (o ×8 não faz sentido para um laço).\nA-10: A1 e A2 reproduzem o que a sua referência tem de característico — medi: o zumbido de 8 ms (~125 disparos por segundo) e a energia abaixo de 600 Hz. A1 é sintetizado; A2 é o SEU tiro F repetido a 125/s. A3 é do PixelLab e saiu mais ronco que zumbido.\nM1 minigun leve e aguda, M2 rotativa pesada e lenta (os tiros se contam), M3 canhão rotativo de energia.\n(A sua referência só foi MEDIDA; nada dela vai para o jogo.)"
+  },
+  "grupos": [
+    {
+      "titulo": "TERMINUS — o tiro como arma girando",
+      "sons": [
+        { "nome": "nave.terminus.tiro", "oque": "arranque → rajada segurada → parada (~3 s)", "onde": "toda a campanha de quem escolheu a TERMINUS", "lugar": "atmosfera" }
+      ]
+    }
+  ]
+}

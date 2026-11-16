@@ -1,0 +1,3 @@
+nave.terminus.tiro: F
+explosao.drone: A
+explosao.lastro: A

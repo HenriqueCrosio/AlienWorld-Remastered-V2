@@ -1,0 +1,58 @@
+[
+ {
+  "nome": "teste.terminus.f1",
+  "id": "segurado",
+  "dur": 3.230272,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "teste.terminus.f1",
+  "id": "toque",
+  "dur": 1.330272,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "teste.terminus.f1",
+  "id": "segurado-PICO",
+  "dur": 3.120113,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "teste.terminus.f1",
+  "id": "toque-PICO",
+  "dur": 1.220113,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "teste.terminus.f2",
+  "id": "segurado",
+  "dur": 3.073243,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "teste.terminus.f2",
+  "id": "toque",
+  "dur": 1.173243,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "teste.terminus.f2",
+  "id": "segurado-PICO",
+  "dur": 3.068571,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "teste.terminus.f2",
+  "id": "toque-PICO",
+  "dur": 1.168571,
+  "pico": -1,
+  "inicio": 0
+ }
+]

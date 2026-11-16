@@ -1,0 +1,60 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 1 — a nave",
+    "dia": "2026-11-15",
+    "nota": "Cada som com 2 ou 3 versões. ▶ ouve uma vez; ×8 ouve oito seguidas com a variação de tom e volume do jogo (é assim que o tiro se julga).\nO seletor \"ouvir no lugar\" passa o som pela MESMA acústica do jogo: atmosfera (abafado, F1), espaço/cabine (seco, F2 e F3), interior (F4). Cada som abre no lugar onde mais toca.\n\"Trilha por baixo\" toca a música de hoje junto, para julgar a mistura. Escolha uma versão por som (ou \"refazer\" + nota) e cole o texto do rodapé na conversa.\nOs motores são laços: tocam 6 s aqui; no jogo ficam baixinhos sob a trilha e sobem quando a MÚSICA está em 0."
+  },
+  "grupos": [
+    {
+      "titulo": "X-AELO (o jato) — morre em RUPTURA",
+      "sons": [
+        { "nome": "nave.xaelo.tiro", "oque": "o tiro base", "onde": "toda a campanha de quem escolheu a X-AELO (F1 em diante)", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.1 } },
+        { "nome": "nave.xaelo.motor", "oque": "o motor (laço)", "onde": "a nave voando", "lugar": "atmosfera", "laco": true },
+        { "nome": "nave.xaelo.atingida", "oque": "atingida (perdeu o casco ou a vida)", "onde": "o golpe na nave", "lugar": "cabine" },
+        { "nome": "nave.xaelo.vida", "oque": "a vida perdida (a lasca de 24 px)", "onde": "logo depois do golpe que custa uma vida", "lugar": "cabine" },
+        { "nome": "nave.xaelo.morte", "oque": "a morte — RUPTURA", "onde": "a nave se rompe (DESTROCOS §0–13½)", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "TERMINUS (a \"a\", laranja ou preta) — morre em ESTILHAÇOS",
+      "sons": [
+        { "nome": "nave.terminus.tiro", "oque": "o tiro base (os mesmos números da X-AELO, outro timbre)", "onde": "toda a campanha de quem escolheu a TERMINUS", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.1 } },
+        { "nome": "nave.terminus.motor", "oque": "o motor (laço)", "onde": "a nave voando", "lugar": "atmosfera", "laco": true },
+        { "nome": "nave.terminus.atingida", "oque": "atingida", "onde": "o golpe na nave", "lugar": "cabine" },
+        { "nome": "nave.terminus.vida", "oque": "a vida perdida", "onde": "o golpe que custa uma vida", "lugar": "cabine" },
+        { "nome": "nave.terminus.morte", "oque": "a morte — ESTILHAÇOS", "onde": "a nave se estilhaça", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "CHARYBDIS (a manta alien, da Doca em diante) — morre em DESINTEGRAÇÃO",
+      "sons": [
+        { "nome": "nave.charybdis.tiro", "oque": "o tiro base (orgânico)", "onde": "F3 e F4 com a manta", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.1 } },
+        { "nome": "nave.charybdis.motor", "oque": "o \"motor\" (o nado, laço)", "onde": "a manta nadando", "lugar": "cabine", "laco": true },
+        { "nome": "nave.charybdis.atingida", "oque": "atingida", "onde": "o golpe na manta", "lugar": "cabine" },
+        { "nome": "nave.charybdis.vida", "oque": "a vida perdida", "onde": "o golpe que custa uma vida", "lugar": "cabine" },
+        { "nome": "nave.charybdis.morte", "oque": "a morte — DESINTEGRAÇÃO", "onde": "a manta se desfaz", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "Comuns às três naves (as cartas e as teclas)",
+      "sons": [
+        { "nome": "nave.missil.lancar", "oque": "o MÍSSIL GUIADO saindo (tecla Q)", "onde": "a carta MÍSSIL GUIADO", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.03, "vol": 0.08 } },
+        { "nome": "nave.missil.travar", "oque": "o míssil travando no alvo", "onde": "logo depois de lançar", "lugar": "cabine" },
+        { "nome": "nave.drone.tiro", "oque": "o tiro do DRONE AUXILIAR", "onde": "a carta DRONE AUXILIAR (mais baixo que o da nave)", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } },
+        { "nome": "nave.bomba.lancar", "oque": "a bomba de queda saindo (a explosão é da folha 2)", "onde": "a tecla da bomba", "lugar": "cabine" },
+        { "nome": "nave.dash", "oque": "o DASH invulnerável", "onde": "a carta DASH, no voo livre", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.03, "vol": 0.08 } },
+        { "nome": "nave.impulso", "oque": "o impulso do voo de flap", "onde": "só a F1", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.1 } },
+        { "nome": "nave.casco.absorver", "oque": "o CASCO absorve o golpe", "onde": "a carta CASCO", "lugar": "cabine" },
+        { "nome": "nave.casco.quebrar", "oque": "o CASCO se parte", "onde": "a carta CASCO (e o CASCO REATIVO, que ainda explode: folha 2)", "lugar": "cabine" },
+        { "nome": "nave.casco.voltar", "oque": "o CASCO recarregado", "onde": "a carta CASCO / RECARGA", "lugar": "cabine" },
+        { "nome": "nave.flare.soltar", "oque": "a armadilha FLARE solta para trás", "onde": "a carta FLARE", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "O momento (pedido seu)",
+      "sons": [
+        { "nome": "momento.f1.estrondo", "oque": "o jato quebrando a barreira do som", "onde": "a abertura da F1, na atmosfera (a hora exata se acerta no jogo)", "lugar": "atmosfera" }
+      ]
+    }
+  ]
+}

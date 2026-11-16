@@ -1,0 +1,15 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 5 — o tiro da TERMINUS, mais uma leva",
+    "dia": "2026-11-16",
+    "nota": "Quatro novas (G a J) + a F, que está no jogo agora, para comparar. A G é a do canhão do A-10 (o \"brrrt\"): ela é uma RAJADA curta, então no jogo cada disparo vira uma mini-rajada — ouça no ×8 para sentir a 4,5 disparos por segundo.\nO tiro toca o tempo todo: julgue pelo ×8, de preferência com e sem a trilha por baixo."
+  },
+  "grupos": [
+    {
+      "titulo": "TERMINUS",
+      "sons": [
+        { "nome": "nave.terminus.tiro", "oque": "o tiro base da TERMINUS", "onde": "toda a campanha de quem escolheu a TERMINUS", "lugar": "atmosfera", "repetir": true, "variacao": { "tom": 0.04, "vol": 0.1 } }
+      ]
+    }
+  ]
+}

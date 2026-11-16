@@ -16,6 +16,10 @@ probe-*.png
 scripts/_*.png
 scripts/_*.gif
 
+# Som (16/11): os pacotes CC0 da Kenney se baixam de novo (`scripts/_som/_kenney-baixar.mjs`); os tratados se regeneram
+assets/raw/sons/_kenney/
+assets/raw/sons/**/tratado/
+
 # Cache de ferramenta (Impeccable)
 .impeccable/
 

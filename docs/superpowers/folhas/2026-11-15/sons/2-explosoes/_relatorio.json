@@ -1,0 +1,357 @@
+[
+ {
+  "nome": "explosao.perigo",
+  "id": "A",
+  "dur": 1.426803,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.perigo",
+  "id": "B",
+  "dur": 1.535692,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.perigo",
+  "id": "C",
+  "dur": 1.21288,
+  "pico": -1.7,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metal",
+  "id": "A",
+  "dur": 1.136599,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metal",
+  "id": "B",
+  "dur": 1.090952,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metal",
+  "id": "C",
+  "dur": 0.768367,
+  "pico": -1.6,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metalGrande",
+  "id": "A",
+  "dur": 2.579501,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metalGrande",
+  "id": "B",
+  "dur": 2.51381,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metalGrande",
+  "id": "C",
+  "dur": 1.993288,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.chefeFim",
+  "id": "A",
+  "dur": 4.401111,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.chefeFim",
+  "id": "B",
+  "dur": 4.302925,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.luz",
+  "id": "A",
+  "dur": 1.03712,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.luz",
+  "id": "B",
+  "dur": 1.039433,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.luz",
+  "id": "C",
+  "dur": 0.725442,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.biomec",
+  "id": "A",
+  "dur": 1.456939,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.biomec",
+  "id": "B",
+  "dur": 1.554444,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.carne",
+  "id": "A",
+  "dur": 1.054172,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.carne",
+  "id": "B",
+  "dur": 0.894853,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.carne",
+  "id": "C",
+  "dur": 0.569433,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.rocha",
+  "id": "A",
+  "dur": 1.210476,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.rocha",
+  "id": "B",
+  "dur": 1.049615,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.rocha",
+  "id": "C",
+  "dur": 0.581678,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.carta",
+  "id": "A",
+  "dur": 0.979569,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.carta",
+  "id": "B",
+  "dur": 1.010204,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.carta",
+  "id": "C",
+  "dur": 1.964014,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.implosao",
+  "id": "A",
+  "dur": 3.651156,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.implosao",
+  "id": "B",
+  "dur": 3.106485,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.incendiar",
+  "id": "A",
+  "dur": 0.835941,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.incendiar",
+  "id": "B",
+  "dur": 0.832132,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.combustao",
+  "id": "A",
+  "dur": 1.172109,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.combustao",
+  "id": "B",
+  "dur": 1.095397,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "A",
+  "dur": 0.557302,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "B",
+  "dur": 0.451678,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "A",
+  "dur": 0.759297,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "B",
+  "dur": 0.835941,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.sobrecarga",
+  "id": "A",
+  "dur": 1.207438,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.sobrecarga",
+  "id": "B",
+  "dur": 1.20746,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.metal",
+  "id": "A",
+  "dur": 0.464422,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.metal",
+  "id": "B",
+  "dur": 0.145351,
+  "pico": -1.2,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.carne",
+  "id": "A",
+  "dur": 0.40356,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.carne",
+  "id": "B",
+  "dur": 0.180204,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.rocha",
+  "id": "A",
+  "dur": 0.454263,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "acerto.rocha",
+  "id": "B",
+  "dur": 0.542676,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "explosao.metal",
+  "id": "A2",
+  "dur": 0.55,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "A2",
+  "descartada": "muda (pico -72.2 dB)"
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "A3",
+  "dur": 0.397687,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "B2",
+  "dur": 0.393243,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.choque",
+  "id": "C2",
+  "dur": 0.239977,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "A2",
+  "dur": 0.093016,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "B2",
+  "dur": 0.527052,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "efeito.arco",
+  "id": "C2",
+  "dur": 0.359977,
+  "pico": -1,
+  "inicio": 0
+ }
+]

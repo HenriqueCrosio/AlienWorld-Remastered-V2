@@ -1,0 +1,192 @@
+{
+ "titulo": "Folha de sons 4 — a rodada 3, nas direções que você escolheu",
+ "dia": "2026-11-15",
+ "nota": "O DRONE: matéria quebrando — a casca rachando, seca, sem fogo e sem eco.\nO METAL PEQUENO (batedores, kamikazes, torres): uma explosão curta e seca, com corpo grave e quase sem cauda (sem os estilhaços tilintando no fim).\nO CHOQUE e o ARCO: um estalo elétrico físico, a faísca de verdade, sem zumbido nem chiado contínuo. C3 é sintetizado aqui.\nTodos tocam muito: julgue com o ×8.",
+ "grupos": [
+  {
+   "titulo": "O drone — matéria quebrando",
+   "sons": [
+    {
+     "nome": "acerto.drone",
+     "oque": "o tiro entrando no DRONE — a lataria leve estalando",
+     "onde": "os enxames, da F1 à F4",
+     "lugar": "atmosfera",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.08,
+      "vol": 0.15
+     },
+     "versoes": [
+      {
+       "id": "F",
+       "arquivo": "v/acerto.drone-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a bullet cracking the thin shell of a small drone, a dry light snap of thin hull plating, short and physical, no ring, no echo, no fire, no music\""
+      },
+      {
+       "id": "G",
+       "arquivo": "v/acerto.drone-G.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a quick dry crack of a light composite casing chipping under a hit, a tight brittle tick, physical and close, no ringing, no echo, no music\""
+      },
+      {
+       "id": "H",
+       "arquivo": "v/acerto.drone-H.ogg",
+       "fonte": "Kenney · impactPlate_light_001.ogg",
+       "licenca": "CC0",
+       "nota": ""
+      }
+     ]
+    },
+    {
+     "nome": "explosao.drone",
+     "oque": "a morte do DRONE — a casca rachando e caindo",
+     "onde": "os enxames, da F1 à F4",
+     "lugar": "atmosfera",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.06,
+      "vol": 0.12
+     },
+     "versoes": [
+      {
+       "id": "F",
+       "arquivo": "v/explosao.drone-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small drone's shell cracking apart and its pieces clattering away, a dry brittle crunch of thin plating breaking, no fire, no explosion boom, no echo, no music\""
+      },
+      {
+       "id": "G",
+       "arquivo": "v/explosao.drone-G.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a light machine casing snapping in two and breaking into small fragments that tumble and rattle, dry and physical, no fire, no echo, no music\""
+      },
+      {
+       "id": "H",
+       "arquivo": "v/explosao.drone-H.ogg",
+       "fonte": "Kenney · impactPlate_medium_002.ogg",
+       "licenca": "CC0",
+       "nota": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "O metal pequeno — curta e seca",
+   "sons": [
+    {
+     "nome": "explosao.metal",
+     "oque": "METAL — as naves pequenas que não são o drone",
+     "onde": "batedores, kamikazes, torres",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.06,
+      "vol": 0.12
+     },
+     "versoes": [
+      {
+       "id": "F",
+       "arquivo": "v/explosao.metal-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a small short dry explosion of a light enemy fighter, a single punchy pop with a deep body and almost no tail, no debris tinkling, no echo, no voice, no music\""
+      },
+      {
+       "id": "G",
+       "arquivo": "v/explosao.metal-G.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a compact tight blast of a small metal ship, a quick dry thump-pop with a short low punch, cut off clean, no rattle, no echo, no music\""
+      },
+      {
+       "id": "H",
+       "arquivo": "v/explosao.metal-H.ogg",
+       "fonte": "Kenney · explosionCrunch_003.ogg",
+       "licenca": "CC0",
+       "nota": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "O elétrico — o estalo físico",
+   "sons": [
+    {
+     "nome": "efeito.choque",
+     "oque": "ELÉTRICO — o choque que trava",
+     "onde": "a carta ELÉTRICO",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "F",
+       "arquivo": "v/efeito.choque-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single real electric spark snapping, one dry crack of an electric arc jumping a short gap, very short, no hum, no buzz, no hiss, no music\""
+      },
+      {
+       "id": "G",
+       "arquivo": "v/efeito.choque-G.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a short static discharge snap, a crisp dry electric tick like a spark plug firing once, physical and close, no buzzing tail, no music\""
+      },
+      {
+       "id": "C3",
+       "arquivo": "v/efeito.choque-C3.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"(sintetizado em scripts/_som/_sintetizar-estalo.mjs: uma faísca de ~8 ms, ruído com decaimento rapidíssimo na faixa do estalo, 1,2–7 kHz; sem zumbido)\""
+      }
+     ]
+    },
+    {
+     "nome": "efeito.arco",
+     "oque": "ARCO EM CADEIA — o choque salta",
+     "onde": "a carta ARCO EM CADEIA",
+     "lugar": "cabine",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "versoes": [
+      {
+       "id": "F",
+       "arquivo": "v/efeito.arco-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an electric arc jumping between three points, three quick dry spark snaps in a row, physical crackles, no hum, no buzz, no hiss, no music\""
+      },
+      {
+       "id": "G",
+       "arquivo": "v/efeito.arco-G.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a chain of short static discharges hopping from one object to the next, two or three crisp dry electric snaps, close and physical, no buzzing, no music\""
+      },
+      {
+       "id": "C3",
+       "arquivo": "v/efeito.arco-C3.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"(sintetizado em scripts/_som/_sintetizar-estalo.mjs: três estalos a 70 ms, cada um mais fraco — a faísca pulando)\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
