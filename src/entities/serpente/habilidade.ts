@@ -38,6 +38,10 @@ export interface CorpoSerpente {
   gesto(acao: () => void): void;
   /** her lights and the hot flash, this frame */
   luz(niveis: Partial<Record<Cor, number>>, tinta?: number): void;
+  /** A sound of the fight (block SOUND, sheet 5b). OPTIONAL: the oracles run the skills in Node, with no sound. */
+  som?(nome: string, x?: number, forca?: number): void;
+  /** A loop of the fight (the green's breath); `parar` fades it out. Optional, as `som`. */
+  somLaco?(nome: string): { parar(ms?: number): void } | null;
 }
 
 export interface Habilidade {

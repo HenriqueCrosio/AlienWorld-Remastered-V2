@@ -19,7 +19,7 @@
 import { CONJUNTOS, type ChaveConjunto } from './gestosHab.ts';
 import { angDe, caminho, caminhoPorPartes, feixe, feixeNaCaixa, poseDe, quadroDe, sorteiaFatia, yBorda, type Faixa, type Feixe } from './geometriaRaio.ts';
 import type { CorpoSerpente, Habilidade } from './habilidade';
-import { FPS_MAQUETE, HAB, chance, gerador, porQuadro } from './numerosHab.ts';
+import { FPS_MAQUETE, HAB, chance, cruza, gerador, porQuadro } from './numerosHab.ts';
 import { Particulas } from './particulas.ts';
 import { H, W } from './pixels.ts';
 import type { Ponto, Put, RGB } from './tipos';
@@ -291,6 +291,19 @@ export class Raio implements Habilidade {
       return;
     }
     for (const f of this.fatias) if (f.pendente && t >= f.t0) this.sortear(f);
+    // THE BEAM'S SOUNDS on its own clock (block SOUND, sheet 5b): the eye reads, locks after the rehearsal, the jaws
+    // open with the charge, the slice fires (the salvo's thin ones lower), the jaws snap shut on the recovery
+    const som = this.corpo.som;
+    if (som) {
+      const cr = (tx: number | undefined): boolean => tx !== undefined && cruza(t, t + dt, tx);
+      for (const f of this.fatias) {
+        if (f.tE !== undefined && cr(f.t0)) som('serpente.raio.leitura');
+        if (cr(f.tC)) som('serpente.raio.trava');
+        if (cr(f.tA)) som('serpente.raio.carga');
+        if (cr(f.t1)) som('serpente.raio.disparo', undefined, f.salva ? 0.55 : 1);
+        if (f.recupera && cr(f.t3 + R.recupera.centra)) som('serpente.raio.recupera');
+      }
+    }
     this.preparar(24);
     // the head: the beam being fired leads; then a charge in progress; then a recovery; else the idle
     const ativa = this.fatias.find((f) => t >= f.t1 && t < f.t3);

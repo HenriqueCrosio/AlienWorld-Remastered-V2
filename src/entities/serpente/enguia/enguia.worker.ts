@@ -43,7 +43,7 @@ ctx.onmessage = (e: MessageEvent) => {
     const baixo = vazio ? new Uint8ClampedArray(0) : recorta(r.baixo, c, 384);
     const luz = vazio ? new Uint8ClampedArray(0) : recorta(r.luz, c, 384);
     const mascara = r.mascara.slice();
-    ctx.postMessage({ tipo: 'quadro', estado: r.estado, caixa: c, cima, baixo, luz, mascara, perigos: r.perigos, ms: r.ms },
+    ctx.postMessage({ tipo: 'quadro', estado: r.estado, caixa: c, cima, baixo, luz, mascara, perigos: r.perigos, vivos: r.vivos, ms: r.ms },
       [cima.buffer, baixo.buffer, luz.buffer, mascara.buffer]);
   }
 };

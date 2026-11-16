@@ -19,7 +19,7 @@
 import { CONJUNTOS, type ChaveConjunto } from './gestosHab.ts';
 import { Geleias, contorno, raioDe } from './geleia.ts';
 import type { CorpoSerpente, Habilidade } from './habilidade';
-import { HAB, chance, gerador, porQuadro } from './numerosHab.ts';
+import { HAB, chance, cruza, gerador, porQuadro } from './numerosHab.ts';
 import { Particulas } from './particulas.ts';
 import { H, W } from './pixels.ts';
 import { Termometro, type Estouro } from './termometro.ts';
@@ -383,6 +383,13 @@ export class Gas implements Habilidade {
     // the green BREATHES IT OUT of her open jaws, down and forward, in a fan that sways and breathes: its aim wanders
     // (two slow sines), its width opens and closes, and it comes in puffs
     this.pufAgora = -1;
+    // THE BREATH'S LOOP, for as long as she breathes it out (block SOUND, sheet 5b): the flashback chokes it
+    const sopra = !this.engasgou && t >= G.sopro[0] && t < G.sopro[1];
+    if (sopra && !this.somSopro) this.somSopro = this.corpo.somLaco?.('serpente.gas.sopro') ?? null;
+    else if (!sopra && this.somSopro) {
+      this.somSopro.parar(400);
+      this.somSopro = null;
+    }
     if (!this.engasgou && t >= G.sopro[0] && t < G.sopro[1]) {
       const ta = t - G.sopro[0];
       const eixo = G.vapor.eixo + 0.1 * Math.sin(2 * Math.PI * 0.8 * ta) + 0.05 * Math.sin(2 * Math.PI * 2.1 * ta + 1.3);
@@ -436,6 +443,8 @@ export class Gas implements Habilidade {
     // the gas the ship heated burns, the thermometer starts over; her pattern's strikes
     G.faiscas.forEach((tf, i) => {
       if (this.engasgou || this.feitas[i]) return;
+      // the orange's 2.5 s charge (block SOUND, sheet 5b)
+      if (cruza(t - dt, t, tf - G.carga)) this.corpo.som?.('serpente.gas.carga', bl.x);
       if (t >= tf - G.carga && t < tf - 1e-6) {
         const c = 1 - (tf - t) / G.carga;
         const n = a() < chance(0.5 + 0.5 * c, dt) ? 1 + Math.floor(a() * (1 + 2 * c)) : 0;
@@ -563,6 +572,8 @@ export class Gas implements Habilidade {
   /** light the cloud at (x, y): a flame front leaves it (the mock 808–819; its pockets' branch is dead since round 7) */
   private acende(x: number, y: number, t: number, origem: 'nave' | 'padrao'): void {
     if (origem === 'nave') {
+      // the thermometer full: the flame runs back up the breath into the green's mouth (block SOUND, sheet 5b)
+      this.corpo.som?.('serpente.gas.retorno', x);
       // lit from the ship's side: the thin gas there only flashes. The front runs back up the breath into HER mouth;
       // the blast there throws the gas in front of it into her face and splashes jelly onto her sisters' (`naCara`)
       const b = this.corpo.boca('verde');
@@ -610,6 +621,8 @@ export class Gas implements Habilidade {
   /** the orange's strike (the mock 880–906): from behind a pocket, so its blast throws the jelly at the ship */
   private golpeia(gp: Golpe, t: number): void {
     const a = this.acaso, bl = this.corpo.boca('laranja'), alvo = this.corpo.nave(), alvos: Ponto[] = [];
+    // the spark strikes the pocket: the blast throws the burning jelly (block SOUND, sheet 5b)
+    this.corpo.som?.('serpente.gas.faisca', bl.x);
     gp.alvos.forEach((a0, k) => {
       const al: AlvoGolpe = typeof a0 === 'number' ? { dy: a0 } : a0;
       const R = al.R ?? gp.R, v = al.v ?? gp.v;
@@ -716,7 +729,12 @@ export class Gas implements Habilidade {
     this.abortado = true;
     this.tAborto = 0;
     this.mostrando = false;
+    this.somSopro?.parar(300);
+    this.somSopro = null;
   }
+
+  /** The breath's loop while it is out (block SOUND, sheet 5b). */
+  private somSopro: { parar(ms?: number): void } | null = null;
 
   /** the mock's `gasDesenha` + `gasFxDesenha` (1176–1253, 1355–1391), then the loose bits (`desenhaGas`) */
   desenhar(put0: Put): void {

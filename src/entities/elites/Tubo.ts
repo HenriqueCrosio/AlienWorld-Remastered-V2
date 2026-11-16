@@ -3,6 +3,7 @@ import { GAME_HEIGHT } from '../../config';
 import { ELITES } from '../../data/numerosElites';
 import { esporosDoPulso, tuboAvanca, tuboCabe, tuboQuadro, varianteDe, type EstadoTubo } from '../../elitesRegras';
 import type { ComportamentoElite, CtxElite, Sprite } from './tipos';
+import { Som } from '../../som/Som';
 
 const T = ELITES.tubo;
 /** As DUAS variações que ele aprovou (13/10): C, a coroa de dentes; D, a craca dupla. Alternam pela ordem de nascimento. */
@@ -99,6 +100,9 @@ export const TUBO: ComportamentoElite = {
       s.fase = prox;
       s.t = 0;
       if (prox === 'pulsa') pulsar(e, s, ctx);
+      // the swelling is the warning (0.6 s), the pulse the 6 spores leaving (block SOUND, sheet 4)
+      if (prox === 'incha') Som.tocar('tubo.incha', { x: e.x });
+      if (prox === 'pulsa') Som.tocar('tubo.pulso', { x: e.x });
     }
     vestirTubo(e, s, tuboQuadro(s.fase, s.t));
   },

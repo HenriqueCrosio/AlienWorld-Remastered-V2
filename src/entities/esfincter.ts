@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { SCROLL_SPEED } from '../config';
 import type { Fx } from '../systems/Fx';
+import { Som, type Laco } from '../som/Som';
 
 
 /**
@@ -162,6 +163,8 @@ export class Esfincter {
   private criatura?: Phaser.Physics.Arcade.Sprite;
   private relogio = 0;
   private acesa = false;
+  /** The hoses leaking (block SOUND, sheet 3): from `armar` until the gas lights or the creature leaves. */
+  private somGas: Laco | null = null;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -266,6 +269,10 @@ export class Esfincter {
     corpo.setAllowGravity(false);
     // A zona é carregada pela criatura no `update`, não por velocidade própria.
     corpo.moves = false;
+
+    // the hiss rises with the cloud (1.2 s), never a wall of sound at once (block SOUND, sheet 3)
+    this.somGas = Som.laco('esfincter.gas', 0);
+    this.somGas?.volume(1, 1200);
   }
 
   update(dt: number, velocidade: number): void {
@@ -385,6 +392,13 @@ export class Esfincter {
     this.nuvem = undefined;
     this.zonaGas?.destroy();
     this.zonaGas = undefined;
+
+    // the gas that leaked is what burns: the hiss stops under the ignition; the pieces reach the walls 40–160 ms later
+    // (the `idade` of `sujarAParede`), and the splatter starts with the first (block SOUND, sheet 3)
+    this.somGas?.parar(150);
+    this.somGas = null;
+    Som.tocar('esfincter.acender', { x });
+    this.scene.time.delayedCall(40, () => Som.tocar('esfincter.respingo', { x: x + 60 }));
 
     // ⚠️ O CANO FICA. Ele não estourou — o que pegou fogo foi o gás que já tinha saído dele. Um
     // cano que some junto contaria que ele era parte da criatura, e ele é parte da PAREDE: rola
@@ -742,5 +756,7 @@ export class Esfincter {
     this.criatura = undefined;
     this.acesa = false;
     this.relogio = 0;
+    this.somGas?.parar(400);
+    this.somGas = null;
   }
 }

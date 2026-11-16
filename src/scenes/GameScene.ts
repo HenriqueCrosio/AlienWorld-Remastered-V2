@@ -13,6 +13,7 @@ import { Music } from '../systems/Music';
 import { forcaNoLugar, lugarDaCena } from '../som/acustica';
 import { Som, type Laco } from '../som/Som';
 import { ESTRONDO_MUSICA_ABAFADA, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
+import { SONS } from '../som/catalogoSons';
 import { somDaMorte, somDoAcerto } from '../som/somDaExplosao';
 import { InputReader } from '../input';
 import { Fx } from '../systems/Fx';
@@ -767,7 +768,11 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.ship, this.terrain.props, () => this.damageShip(), (_s, p) =>
       TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
     );
-    this.physics.add.overlap(this.ship, this.debris.hazards, () => this.damageShip());
+    // a MASS hitting the ship (the rock, the wreck) adds the collision under the ship's "hit" — in the vacuum, only what
+    // comes through the hull (block SOUND, sheet 3); the mines keep their own blast
+    this.physics.add.overlap(this.ship, this.debris.hazards, (_s, h) =>
+      this.damageShip(GameScene.MASSA.has((h as Phaser.GameObjects.GameObject).getData('kind') as string) ? 'perigo.impacto' : undefined),
+    );
     this.physics.add.overlap(this.ship, this.enemies.enemies, () => this.damageShip());
     // O ESPORO NÃO FERE (spec F4 §9.3): encostar deixa a nave lenta. Nenhum overlap com os tiros do jogador — o tiro
     // atravessa.
@@ -2639,7 +2644,29 @@ export class GameScene extends Phaser.Scene {
 
     this.weapons.release(bullet);
     this.fx.hit(bullet.x, bullet.y);
+    if (!Number.isFinite(prop.getData('hp') as number) && GameScene.DURO.has(prop.getData('kind') as string)) this.ricochetear(bullet.x);
     this.ferirConstrucao(prop, bullet.getData('damage') as number);
+  }
+
+  /** The scenery that does not die and is HARD (rock, wreck, bone, machine): the shot bounces. The organ, the throat
+   *  and the door's shard are tissue — no ricochet there. */
+  private static readonly DURO = new Set(['spire', 'wreck', 'costela', 'maquinario', 'mesa', 'mesaMar']);
+  /** A ricochet at most every 110 ms: the TERMINUS fires 12/s, and *"várias vezes o jogador vai cravar o dedo"*. */
+  private static readonly RICOCHETE_MS = 110;
+  private ricocheteEm = -Infinity;
+
+  /**
+   * THE SHIP'S RICOCHET (16/11, his ask): the player's shot bouncing off something harder, in that ship's voice. Every
+   * `nave.<nave>.ricochete*` in the catalogue is a variation, drawn at random (the TERMINUS's are many, *"para dar esse
+   * aspecto mais real"*). False when this ship has none yet — the caller keeps the material's hit.
+   */
+  private ricochetear(x: number): boolean {
+    const variacoes = Object.keys(SONS).filter((n) => n.startsWith(`nave.${this.naveSom}.ricochete`));
+    if (!variacoes.length) return false;
+    if (this.time.now - this.ricocheteEm < GameScene.RICOCHETE_MS) return true;
+    this.ricocheteEm = this.time.now;
+    Som.tocar(variacoes[Math.floor(Math.random() * variacoes.length)], { x });
+    return true;
   }
 
   /** O dano numa peça do cenário — do tiro e da bomba de queda (que desde 03/10 acerta as construções de solo). */
@@ -2709,6 +2736,8 @@ export class GameScene extends Phaser.Scene {
     porta.setTexture('portaLasca');
     porta.setData('hp', Infinity);
     porta.setData('inerte', true);
+    // the 1st beat: the tissue tearing (the meat blast is the 2nd, 150 ms later — block SOUND, sheet 3)
+    Som.tocar('porta.romper', { x: porta.x });
 
     // O PONTO É AGORA, e o estouro é depois: a recompensa não espera a animação.
     this.score += porta.getData('score') as number;
@@ -2753,7 +2782,11 @@ export class GameScene extends Phaser.Scene {
     this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
     {
       const p = PECAS[hazard.getData('kind') as string];
-      Som.tocar(somDoAcerto(this.stage.id === 4 && p?.materialF4 ? p.materialF4 : p?.material), { x: bullet.x });
+      const material = this.stage.id === 4 && p?.materialF4 ? p.materialF4 : p?.material;
+      // what does not die and is HARD bounces the shot: the ship's own ricochet (block SOUND, sheet 3); the swallowed hull
+      // of the F4 is tissue, and keeps its hit
+      const duro = !Number.isFinite(hp) && material !== 'biomec' && material !== 'carne';
+      if (!(duro && this.ricochetear(bullet.x))) Som.tocar(somDoAcerto(material), { x: bullet.x });
     }
 
     // Destroço é indestrutível (hp = Infinity): o tiro ricocheteia — e, desde 27/10, deixa a marca.
@@ -3088,7 +3121,11 @@ export class GameScene extends Phaser.Scene {
    */
   private tocarEsporo(e: Phaser.Physics.Arcade.Sprite): void {
     if (this.over || this.cartas.intocavel(this.time.now)) return;
-    if (this.esporos.tocar(e)) this.lentaAte = lentidaoAte(this.time.now, this.lentaAte);
+    if (this.esporos.tocar(e)) {
+      this.lentaAte = lentidaoAte(this.time.now, this.lentaAte);
+      // the spore sticking: the 2.5 s of slowness start (block SOUND, sheet 4)
+      Som.tocar('esporo.grudar', { x: this.ship.x });
+    }
   }
 
   /**
@@ -3128,10 +3165,15 @@ export class GameScene extends Phaser.Scene {
     return lugares;
   }
 
-  private damageShip(): void {
+  /** The hazards that are MASS (block SOUND, sheet 3): hitting one sounds the collision under the ship's "hit". */
+  private static readonly MASSA = new Set(['asteroid', 'mineravel', 'destroco']);
+
+  /** `impacto`: a sound of what hit the ship, played only when the hit COUNTS (not inside the i-frames). */
+  private damageShip(impacto?: string): void {
     if (this.over || this.time.now < this.invulnerableUntil || this.time.now < this.semDanoAte || this.cartas.intocavel(this.time.now)) return;
     // O INVULNERÁVEL do sandbox (tecla 3): para olhar as skills sem morrer.
     if (this.arena?.invulneravel) return;
+    if (impacto) Som.tocar(impacto, { x: this.ship.x });
 
     // QUANDO A NAVE FOI ATINGIDA (30/10, a Serpente refeita pelo CCGS): o chefão lê `ship.getData('golpeEm')` para dar o
     // respiro de 0,8 s antes do próximo aviso letal. Um dado na nave, só lido — nenhum outro sistema muda. (Também no

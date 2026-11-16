@@ -3,6 +3,7 @@ import { claraoDe } from '../systems/clarao/Clarao';
 import { CLARAO } from '../systems/clarao/claraoRegras';
 import { BARRA_CHEFAO_Y, COLORS, GAME_WIDTH } from '../config';
 import type { Fx } from '../systems/Fx';
+import { Som, type Laco } from '../som/Som';
 import { explosaoDaQueda, montarPlumas, type Plumas } from '../f1/chefeF1';
 
 /**
@@ -128,6 +129,8 @@ export class Boss implements StageBoss {
   private takingOff = false;
   /** As plumas dos propulsores (bloco G): nascem com a arte do ar, fortes na decolagem, respirando no voo. */
   private plumas: Plumas | null = null;
+  /** The thrusters' loop while she flies (block SOUND, sheet 5a). */
+  private somMotor: Laco | null = null;
   /** > 0 = o leque está CALADO (a salva de mísseis tomou o compasso). */
   private fanMute = 0;
 
@@ -461,6 +464,8 @@ export class Boss implements StageBoss {
 
     this.playFire();
     this.fan(this.airborne ? Boss.FAN_AIR : Boss.FAN_GROUND);
+    // the metronome (block SOUND, sheet 5a)
+    Som.tocar('chefe.torre.leque', { x: this.sprite.x });
 
     // O MIRADO vem DEPOIS, não junto (ver AIMED_DELAY): disparado no mesmo frame, ele cruzava o
     // leque e fechava o vão para 15px. `target` é lido de novo no callback — mirar na posição
@@ -469,6 +474,7 @@ export class Boss implements StageBoss {
       this.scene.time.delayedCall(Boss.AIMED_DELAY, () => {
         if (this.dead || this.takingOff || !this.sprite.active || !target.active) return;
         this.aimed(target);
+        Som.tocar('chefe.torre.mirado', { x: this.sprite.x });
         const a = this.muzzle;
         this.muzzleFx.explode(4, a.x, a.y);
       });
@@ -519,6 +525,8 @@ export class Boss implements StageBoss {
 
     this.missileCooldown = Boss.MISSILE_RATE_ENRAGED;
     this.missileCharge = Boss.MISSILE_TELEGRAPH;
+    // the 0.65 s charge, as long as the blink (block SOUND, sheet 5a)
+    Som.tocar('chefe.torre.missilCarga', { x: this.sprite.x });
     // O míssil TOMA o compasso: cala o leque pelo telégrafo inteiro + o rescaldo. É aqui, no
     // início da carga, que o silêncio começa — o jogador vê o telégrafo já sabendo que o leque
     // parou, e lê o míssil sem cometas no meio.
@@ -533,6 +541,7 @@ export class Boss implements StageBoss {
    * voo tiraria a única defesa que a mobilidade de flap permite — ver o bloco de MISSILE_SPEED.
    */
   private launchMissile(target: Phaser.Physics.Arcade.Sprite): void {
+    Som.tocar('chefe.torre.missil', { x: this.sprite.x });
     const m = this.muzzle;
     const angle = Phaser.Math.Angle.Between(m.x, m.y, target.x, target.y);
 
@@ -703,6 +712,8 @@ export class Boss implements StageBoss {
     if (this.hp > 0) return false;
 
     this.dead = true;
+    this.somMotor?.parar(300);
+    this.somMotor = null;
     this.body.setVelocity(0, 0);
     return true;
   }
@@ -752,6 +763,8 @@ export class Boss implements StageBoss {
     claraoDe(this.scene).sinal(this.sprite.x, this.sprite.y, 0xe83c8c, CLARAO.sinal.raioChefe);
 
     this.blowUpBase();
+    // the engines tearing her off the base, over the base's blasts (block SOUND, sheet 5a)
+    Som.tocar('chefe.torre.decolagem', { x: this.sprite.x });
 
     this.scene.tweens.add({
       targets: this.sprite,
@@ -849,9 +862,14 @@ export class Boss implements StageBoss {
     this.cooldown = 1.1;
     this.missileCooldown = Boss.MISSILE_RATE_ENRAGED;
     this.t = 0;
+    // the thrusters holding her up, for as long as she flies (block SOUND, sheet 5a)
+    this.somMotor ??= Som.laco('chefe.torre.motor', 0);
+    this.somMotor?.volume(1, 600);
   }
 
   destroy(): void {
+    this.somMotor?.parar(200);
+    this.somMotor = null;
     this.plumas?.destroy();
     this.plumas = null;
     this.sprite.destroy();

@@ -40,6 +40,16 @@ export const AO_FUNDO: Record<Lugar, { passaBaixa: number; volume: number }> = {
  * baixas"* — in the vacuum each blast is quieter and the LASTRO (the shared rumble, `mixagem.ts`) carries the chain.
  */
 export const EXPLOSAO_NO_VACUO = 0.6;
+
+/**
+ * THE BOSSES IN THE VACUUM (16/11, him: *"tudo que for efeitos e som dos bosses do espaço F2 e F3 precisam do filtro de
+ * espaço, som mais contido, como se tivesse num local 'fechado'"*). In the cabin place, every sound of `prioridade:
+ * 'chefe'` (the Capitânia, the Serpente, the eel, a boss's end — the Aurora's last blast too) goes through a low-pass, a
+ * little lower, and sends part of itself into a small CLOSED ROOM (a short dark tail): contained, not open.
+ */
+// (the room's mix is SMALL on purpose: the generated tail sums back — at 0.35 the Capitânia's shot came out LOUDER in
+// the vacuum than in the air, measured; the rule is "contained", so the boss must come out lower)
+export const CHEFE_NO_VACUO = { passaBaixa: 2200, volume: 0.7, sala: { seg: 0.6, decai: 4, mistura: 0.08 } } as const;
 export const forcaNoLugar = (forca: number, l: Lugar): number => (l === 'cabine' ? forca * EXPLOSAO_NO_VACUO : forca);
 
 /** The place a scene starts in. The cave (F1) and the chamber B water (F4) are switched by the scene itself. */

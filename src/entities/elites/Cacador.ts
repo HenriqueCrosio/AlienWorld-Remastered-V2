@@ -3,6 +3,7 @@ import { ELITES } from '../../data/numerosElites';
 import { cacadorAvanca, cacadorFugaLancada, cacadorQuadro, cacadorTangivel, escolherPosto, tintaDoSumico, type ClipeCacador, type EstadoCacador } from '../../elitesRegras';
 import { PadroesDeTiro } from '../../systems/PadroesDeTiro';
 import { vestir, type ComportamentoElite, type CtxElite, type Sprite } from './tipos';
+import { Som } from '../../som/Som';
 
 const C = ELITES.cacador;
 
@@ -107,6 +108,11 @@ export const CACADOR: ComportamentoElite = {
 function entrar(e: Sprite, s: Estado, fase: EstadoCacador, ctx: CtxElite): void {
   s.fase = fase;
   s.t = 0;
+  // the squid's gestures (block SOUND, sheet 4): the aim (0.6 s) and the lock (0.3 s) last as long as the dotted line,
+  // so the player READS them; the 3 needles are one burst
+  const SOM_DA_FASE: Partial<Record<EstadoCacador, string>> = { surge: 'lula.surge', mira: 'lula.mira', trava: 'lula.trava', rajada: 'lula.agulhas' };
+  const som = SOM_DA_FASE[fase];
+  if (som) Som.tocar(som, { x: e.x });
   if (fase === 'surge') {
     mostrar(e);
   } else if (fase === 'trava') {
@@ -135,6 +141,7 @@ function fugir(e: Sprite, s: Estado, dt: number): void {
   if (!cacadorFugaLancada(s.t)) return;
   if (!s.lancada) {
     s.lancada = true;
+    Som.tocar('lula.fuga', { x: e.x });
     soltarTinta(e, tintaDoSumico(s.sumicos));
     (e.body as Phaser.Physics.Arcade.Body).enable = false;
   }
@@ -174,6 +181,8 @@ function mostrar(e: Sprite): void {
  * (depth 1). Os quadros são assados (`_instalar-f3.mjs`); o sprite se apaga sozinho no fim. Não fere, não bloqueia.
  */
 function soltarTinta(e: Sprite, tipo: 'sopro' | 'cortina'): void {
+  // the same cloud: smaller in the puff, full in the curtain (block SOUND, sheet 4)
+  Som.tocar('lula.tinta', { x: e.x, forca: tipo === 'sopro' ? 0.6 : 1 });
   const cena = e.scene;
   const anim = `elite-tinta-${tipo}`;
   if (!cena.anims.exists(anim)) return;

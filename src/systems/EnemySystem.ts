@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Fx } from './Fx';
+import { Som, type Laco } from '../som/Som';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import { pickVariant } from '../art';
 import { PadroesDeTiro } from './PadroesDeTiro';
@@ -505,6 +506,8 @@ export class EnemySystem {
     // O primeiro sai cedo (0,3–1,1s): a criatura tem ~7,8s de tela, e um estalo que só aparece
     // depois de metade da travessia chega tarde para mudar a decisão de quem vai passar por ela.
     if (kind === 'aguaViva') e.setData('estalo', Phaser.Math.FloatBetween(0.3, 1.1));
+    // the kamikaze's lock sounds ONCE, when it enters the screen (the pool reuses the sprite: reset here)
+    e.setData('travou', false);
 
     if (kind === 'aguaViva' && e.preFX) {
       const glow = e.preFX.addGlow(0x35b6ea, 0, 0, false, 0.1, 10);
@@ -575,8 +578,34 @@ export class EnemySystem {
     return def?.elite?.bloqueia?.(e, deX, deY, dano) ?? false;
   }
 
+  /** THE SWARM (block SOUND, sheet 4): ONE buzz loop for all the flies, its level following how many are alive. */
+  private enxame: Laco | null = null;
+  private moscasVivas = -1;
+
+  private somDoEnxame(): void {
+    let n = 0;
+    for (const obj of this.enemies.getChildren()) {
+      const e = obj as Phaser.Physics.Arcade.Sprite;
+      if (e.active && e.getData('kind') === 'mosca') n++;
+    }
+    if (n === this.moscasVivas) return;
+    this.moscasVivas = n;
+    if (n === 0) {
+      this.enxame?.parar(500);
+      this.enxame = null;
+      return;
+    }
+    // one fly is already heard (0.45); six fill it (1)
+    const nivel = Math.min(1, 0.45 + 0.11 * (n - 1));
+    if (!this.enxame) {
+      this.enxame = Som.laco('mosca.zumbido', 0);
+    }
+    this.enxame?.volume(nivel, 300);
+  }
+
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
     this.alvo = target;
+    this.somDoEnxame();
     // SNAPSHOT do grupo. `getChildren()` devolve o array vivo: o cargueiro ACRESCENTA a ele
     // (cospe drones) e o culling REMOVE dele, os dois no meio da iteração. Percorrer o array
     // vivo enquanto ele muda de tamanho pula elementos — um inimigo perderia um frame de update
@@ -643,6 +672,7 @@ export class EnemySystem {
         const estalo = (e.getData('estalo') as number) - dt;
         if (estalo <= 0) {
           this.fx.estalo(e.x, e.y, e.displayWidth * 0.42);
+          Som.tocar('aguaviva.estalo', { x: e.x });
           e.setData('estalo', Phaser.Math.FloatBetween(1.1, 2.3));
         } else {
           e.setData('estalo', estalo);
@@ -654,6 +684,11 @@ export class EnemySystem {
       }
 
       if (def.homing > 0) this.updateChaser(e, def, target);
+      // the LOCK: the kamikaze enters the screen and marks you (block SOUND, sheet 3)
+      if (def.homing > 0 && !e.getData('travou') && e.x < GAME_WIDTH - 4) {
+        e.setData('travou', true);
+        Som.tocar('kamikaze.travar', { x: e.x });
+      }
       if (def.fireRate > 0) this.updateGunner(e, def, dt, target);
       if (def.spawns) this.updateCarrier(e, def, dt);
 
@@ -735,6 +770,7 @@ export class EnemySystem {
     // ⚠️ Este número vale para ESTA arte. Trocar o sprite do cargueiro obriga a re-medir a baia
     // (`scripts/_probe-cargueiro.mjs` mede a faixa e onde os drones de fato apareceram).
     this.spawn(def.spawns!, e.y + Phaser.Math.Between(5, 11), e.x - 6);
+    Som.tocar('cargueiro.largar', { x: e.x });
   }
 
   /**
@@ -771,6 +807,8 @@ export class EnemySystem {
     if (cd <= 0) {
       e.setData('cooldown', def.fireRate);
       e.setData('charging', EnemySystem.TELEGRAPH);
+      // the warning lasts the blink (0.45 s): the player READS it and leaves the line (block SOUND, sheet 3)
+      Som.tocar('inimigo.aviso', { x: e.x });
     } else {
       e.setData('cooldown', cd);
     }
@@ -806,6 +844,7 @@ export class EnemySystem {
       if (cd <= 0 && body.velocity.x === 0) {
         e.setData('aranhaEstado', 'telegrafo');
         e.setData('aranhaT', 0.5);
+        Som.tocar('aranha.aviso', { x: e.x });
       }
       return;
     }
@@ -824,6 +863,7 @@ export class EnemySystem {
         e.setVelocity(vx, -190);
         body.setAccelerationY(360); // a "gravidade" do salto — só existe no ar
         if (this.scene.anims.exists('aranha-jump')) e.play('aranha-jump');
+        Som.tocar('aranha.salto', { x: e.x });
       }
       return;
     }
@@ -845,6 +885,7 @@ export class EnemySystem {
       this.tiros.anel(e.x, e.y - 6, 6, 105, Math.PI / 12, (b) => EnemySystem.municaoAranha(b), false);
       this.muzzleFlash.explode(8, e.x, e.y + 16);
       this.scene.cameras.main.shake(110, 0.005);
+      Som.tocar('aranha.pouso', { x: e.x });
     }
   }
 
@@ -941,6 +982,8 @@ export class EnemySystem {
     // Pequeno clarão na BOCA, na cor do dono: o disparo vira um evento legível — o telégrafo
     // piscou, e AQUI está a prova de que o tiro saiu (e de onde).
     this.muzzleFlash.explode(3, e.x, e.y);
+    // ONE sound per volley: the spider's fan of 3 plays as one heavier shot (block SOUND, sheet 3)
+    Som.tocar(e.getData('kind') === 'aranha' ? 'aranha.tiro' : 'inimigo.tiro', { x: e.x });
   }
 
   /**

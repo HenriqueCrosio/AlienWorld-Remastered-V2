@@ -4,6 +4,7 @@ import { CLARAO } from '../systems/clarao/claraoRegras';
 import { BARRA_CHEFAO_Y, COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { StageBoss } from './Boss';
+import { Som } from '../som/Som';
 
 /** Uma bateria do casco: de onde sai o tiro, medido a partir do CENTRO do sprite. */
 interface Battery {
@@ -23,6 +24,8 @@ interface Beat {
 interface Flak {
   shell: Phaser.Physics.Arcade.Sprite;
   fuse: number;
+  /** The fuse's warning already sounded (block SOUND). */
+  avisou?: boolean;
 }
 
 /**
@@ -272,6 +275,8 @@ export class BossCapitania implements StageBoss {
     // em que a antiga estava — e os primeiros tempos dela (o lançamento!) seriam pulados.
     if (this.enraged !== this.wasEnraged) {
       this.wasEnraged = this.enraged;
+      // the frenzy (block SOUND, sheet 5a)
+      if (this.enraged) Som.tocar('chefe.capitania.furia', { x: this.sprite.x });
       this.cycleT = 0;
       this.beatIdx = 0;
       claraoDe(this.scene).sinal(this.sprite.x, this.sprite.y, 0xe8306b, CLARAO.sinal.raioChefe);
@@ -310,6 +315,7 @@ export class BossCapitania implements StageBoss {
     // Clarão no hangar: o lançamento tem que ser TELEGRAFADO. Um kamikaze que aparece do nada
     // atrás de você é injusto; um que você viu sair da barriga dela é uma escolha sua.
     this.muzzleFx.explode(10, hx, hy);
+    Som.tocar('chefe.capitania.hangar', { x: hx });
     this.scene.cameras.main.shake(90, 0.003);
 
     for (let i = 0; i < cabe; i++) {
@@ -357,6 +363,8 @@ export class BossCapitania implements StageBoss {
     }
 
     this.scene.cameras.main.shake(60, 0.003);
+    // ONE battery's burst; the three roll in sequence = the broadside (block SOUND, sheet 5a)
+    Som.tocar('chefe.capitania.bordada', { x: this.muzzleOf(battery).x });
   }
 
   /**
@@ -495,6 +503,7 @@ export class BossCapitania implements StageBoss {
     }
 
     this.muzzleFx.explode(8, m.x, m.y);
+    Som.tocar('chefe.capitania.flak', { x: m.x });
   }
 
   /**
@@ -530,6 +539,11 @@ export class BossCapitania implements StageBoss {
       // Pisca antes de estourar — a mesma gramática de telégrafo da torre e da canhoneira.
       if (f.fuse <= 0.35) {
         f.shell.setTint(Math.floor(f.fuse * 30) % 2 === 0 ? 0xffffff : COLORS.hotBright);
+        // the fuse's last 0.35 s, once per shell (block SOUND, sheet 5a)
+        if (!f.avisou) {
+          f.avisou = true;
+          Som.tocar('chefe.capitania.flakPavio', { x: f.shell.x });
+        }
       }
 
       if (f.fuse > 0) {
@@ -562,6 +576,7 @@ export class BossCapitania implements StageBoss {
     // O clarão vem ANTES dos estilhaços saírem, e é grande: o olho tem que ser puxado para o
     // ponto do estouro no frame em que ele acontece, senão o anel parece ter vindo do nada.
     this.muzzleFx.explode(22, x, y);
+    Som.tocar('chefe.capitania.flakEstouro', { x });
     this.scene.cameras.main.shake(110, 0.005);
 
     const shards = 8;
@@ -595,6 +610,7 @@ export class BossCapitania implements StageBoss {
   /** Tiro mirado: pune quem fica parado. Só na fúria — antes disso, ela é só padrão. */
   private aimed(target: Phaser.Physics.Arcade.Sprite): void {
     const m = this.muzzleOf(BossCapitania.BATTERIES[0]);
+    Som.tocar('chefe.capitania.mirado', { x: m.x });
     const angle = Phaser.Math.Angle.Between(m.x, m.y, target.x, target.y);
 
     // Rajada de 3 levemente abertas: uma bala mirada só se esquiva andando de lado; três abrem

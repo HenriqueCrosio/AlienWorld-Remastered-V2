@@ -4,6 +4,7 @@ import { escolherLugar, larvaAvanca, larvaPosto, larvaQuadro, larvaTangivel, pup
 import { abrirBuraco, type Buraco } from './Buraco';
 import { lancarPupa } from './Pupa';
 import { vestir, type Ancora, type ComportamentoElite, type CtxElite, type LugarElite, type Sprite } from './tipos';
+import { Som } from '../../som/Som';
 
 const L = ELITES.larva;
 /** As DUAS variações que ele aprovou (13/10): A, a do conceito; D, a broca. Alternam pela ordem de nascimento. */
@@ -56,6 +57,8 @@ export const LARVA: ComportamentoElite = {
     e.setVisible(false);
     (e.body as Phaser.Physics.Arcade.Body).enable = false;
     s.buraco = abrirBuraco(e.scene, lugar.ancora);
+    // the first hole opening is the same boring as the last one
+    Som.tocar('larva.perfura', { x: p.x });
     // Morta em qualquer estado, o buraco que estiver aberto fecha (o de saída, se ela morrer perfurando).
     e.once('destroy', () => s.buraco?.fechar());
   },
@@ -104,6 +107,10 @@ export const LARVA: ComportamentoElite = {
 function entrar(e: Sprite, s: Estado, fase: EstadoLarva, ctx: CtxElite): void {
   s.fase = fase;
   s.t = 0;
+  // the Larva's gestures (block SOUND, sheet 4); laying the pupae sounds in `porPupas`, when they actually leave
+  const SOM_DA_FASE: Partial<Record<EstadoLarva, string>> = { sai: 'larva.sai', tranco: 'larva.tranco', perfura: 'larva.perfura', mergulha: 'larva.mergulha' };
+  const som = SOM_DA_FASE[fase];
+  if (som) Som.tocar(som, { x: e.x });
   if (fase === 'sai') {
     e.setVisible(true);
   } else if (fase === 'tranco') {
@@ -150,6 +157,7 @@ function lugarDoBuraco(ctx: CtxElite, perto: { x: number; y: number } | null): L
 /** As pupas da parada: um leque curto na direção da nave (`pupaAngulos`), saindo do corpo dela. */
 function porPupas(e: Sprite, s: Estado, ctx: CtxElite): void {
   s.pupasPostas = true;
+  Som.tocar('larva.poe', { x: e.x });
   const base = Phaser.Math.Angle.Between(e.x, e.y, ctx.alvo.x, ctx.alvo.y);
   for (const ang of pupaAngulos(base)) lancarPupa(ctx.nascer('pupa', e.x, e.y), ang);
 }

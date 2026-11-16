@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
+import { Som } from '../som/Som';
 import { pickVariant } from '../art';
 
 /** Linha do solo. Tudo aqui é ANCORADO nela — nada flutua. */
@@ -968,6 +969,8 @@ export class TerrainSystem {
     if (cd <= 0 && naJanela) {
       p.setData('cooldown', TerrainSystem.TURRET_RATE);
       p.setData('charging', TerrainSystem.TELEGRAPH);
+      // the warning lasts the blink (0.4 s), the colony turret and the hull launcher alike (block SOUND, sheet 3)
+      Som.tocar('torre.aviso', { x: p.x });
     } else {
       p.setData('cooldown', cd);
     }
@@ -1043,6 +1046,8 @@ export class TerrainSystem {
     b.setBlendMode(Phaser.BlendModes.NORMAL);
     b.setData('missile', foguete);
     b.setData('rastroCasco', foguete);
+    // the hull launcher's rocket or the colony turret's cannon (block SOUND, sheet 3)
+    Som.tocar(foguete ? 'torre.missil' : 'torre.tiro', { x: p.x });
 
     // ⚠️ QUEM ATIROU, para o próprio cano não comer o tiro. Ver `GameScene.enemyBulletHitCover`.
     //

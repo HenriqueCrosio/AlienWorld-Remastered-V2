@@ -3,6 +3,7 @@ import { ELITES } from '../../data/numerosElites';
 import { droneAvanca, droneExplode, type EstadoDrone } from '../../elitesRegras';
 import { PadroesDeTiro } from '../../systems/PadroesDeTiro';
 import type { ComportamentoElite, CtxElite, Sprite } from './tipos';
+import { Som, type Laco } from '../../som/Som';
 
 const D = ELITES.drone;
 /** O tiro é um CRISTAL laranja do que ele minera (sugestão dele; 06/10, o "grão + rastro" C-C, 5×3), hitbox 4×3. */
@@ -22,6 +23,8 @@ interface Estado {
   cd: number;
   rajada: number;
   rajadaT: number;
+  /** The drill loop while mining (block SOUND, sheet 4). */
+  broca: Laco | null;
 }
 
 /**
@@ -48,7 +51,7 @@ export const DRONE_MINERACAO: ComportamentoElite = {
     // Virado para o CRISTAL (à esquerda dele, no fundo da cratera): os sprites nascem apontando para a direita.
     e.setFlipX(true);
     (e.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
-    const s: Estado = { fase: 'minerando', t: 0, rocha, hpMax: e.getData('hp') as number, dx: ENCAIXE.x, dy: ENCAIXE.y, rumo: Math.PI, cd: D.rajadaCadaS * 0.5, rajada: 0, rajadaT: 0 };
+    const s: Estado = { fase: 'minerando', t: 0, rocha, hpMax: e.getData('hp') as number, dx: ENCAIXE.x, dy: ENCAIXE.y, rumo: Math.PI, cd: D.rajadaCadaS * 0.5, rajada: 0, rajadaT: 0, broca: null };
     e.setData('elite', s);
     if (rocha) {
       e.setPosition(rocha.x + s.dx, rocha.y + s.dy);
@@ -58,6 +61,10 @@ export const DRONE_MINERACAO: ComportamentoElite = {
       rocha.setData('ocupante', e);
     }
     tocar(e, 'elite-drone-minerar');
+    // the DRILL while it works in the rock, rising in (it enters from the right edge) — block SOUND, sheet 4
+    s.broca = Som.laco('drone.minerar', 0);
+    s.broca?.volume(1, 600);
+    e.once('destroy', () => s.broca?.parar(200));
   },
 
   atualizar(e, dt, ctx) {
@@ -75,6 +82,11 @@ export const DRONE_MINERACAO: ComportamentoElite = {
     if (prox !== s.fase) {
       s.fase = prox;
       s.t = 0;
+      // the drill stops the moment it stops mining (block SOUND, sheet 4)
+      s.broca?.parar(200);
+      s.broca = null;
+      if (prox === 'alerta') Som.tocar('drone.alerta', { x: e.x });
+      if (prox === 'pisca') Som.tocar('drone.pisca', { x: e.x });
       if (prox === 'alerta') tocar(e, 'elite-drone-alerta');
       if (prox === 'ataque') {
         // Saiu da cratera: a rocha volta a ser só rocha (no alerta ele ainda está lá dentro).
@@ -122,6 +134,7 @@ function atirar(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
     s.rajadaT -= dt;
     if (s.rajadaT <= 0) {
       ctx.tiros.mirado(e.x, e.y, ctx.alvo.x, ctx.alvo.y, D.velTiro, vestirCristal);
+      Som.tocar('drone.tiro', { x: e.x });
       s.rajada--;
       s.rajadaT = D.rajadaEspacoS;
     }

@@ -162,6 +162,8 @@ export class Tiros {
 
   /** the pool bullet with today's look (the box by construction), invisible: the layer draws the shot */
   private disparar(cor: Cor, x: number, y: number, ang: number, vel: number, clarao: boolean): void {
+    // ONE sound per salvo: the first shot of each mouth's salvo is the one with the muzzle flash (block SOUND, sheet 5b)
+    if (clarao) this.corpo.som?.('serpente.tiro', x);
     const b = this.corpo.enemies.enemyBullets.get(x, y) as Phaser.Physics.Arcade.Sprite | null;
     if (!b) return;
     b.setActive(true).setVisible(false);

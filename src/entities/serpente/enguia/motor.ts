@@ -50,6 +50,8 @@ export interface EstadoEnguia {
   lombada: { x: number; amp: number; larg: number } | null;
   /** the crack behind her, as the mock draws it */
   fissuras: { de: number; ate: number; cura: number }[];
+  /** how many points of her body scraped the hull this step (block SOUND: the scrape) */
+  raspa: number;
 }
 
 export interface RespostaPasso {
@@ -64,6 +66,9 @@ export interface RespostaPasso {
   mascara: Uint8Array;
   /** what hurts the ship now (circles and rectangles: `perigos.ts` `folga`) */
   perigos: Forma[];
+  /** the live hazards that SOUND (the fire, the geysers, the Echo's blasts): type, id, x — the scene plays a sound when
+   *  an id first appears (block SOUND, sheet 5b) */
+  vivos: [string, string, number][];
   /** her own cost this step (ms) */
   ms: number;
 }
@@ -112,10 +117,13 @@ export class MotorEnguia {
       estado: {
         t: p.t, trecho: tr.nome, cap: tr.cap, hab: tr.hab ?? null, imune: L.imune, podeMorrer: L.podeMorrer, morta: L.morta,
         acabou: L.acabou, final: L.final, cabeca: { x: (C.pescoco.x + C.focinho.x) / 2, y: (C.pescoco.y + C.focinho.y) / 2 },
-        lombada, fissuras: s.fissuras,
+        lombada, fissuras: s.fissuras, raspa: L.raspou,
       },
       cima: this.alvo.cima, baixo: this.alvo.baixo, luz: this.alvo.luz, temLuz: this.alvo.temLuz,
-      caixa, mascara: this.alvo.mascara, perigos: L.agora.map((h) => h.forma), ms: performance.now() - a,
+      caixa, mascara: this.alvo.mascara, perigos: L.agora.map((h) => h.forma),
+      vivos: L.agora.filter((h) => h.tipo === 'fogo' || h.tipo === 'geiser' || h.tipo === 'eco')
+        .map((h): [string, string, number] => [h.tipo, h.id, Math.round(h.forma.c ? h.forma.c.x : (h.forma.r!.x0 + h.forma.r!.x1) / 2)]),
+      ms: performance.now() - a,
     };
   }
 }

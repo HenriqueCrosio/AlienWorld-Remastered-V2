@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { ELITES } from '../../data/numerosElites';
 import { moscaPersegue, moscaTremor, pupaEclode, pupaQuadro, pupaTremor, pupaVoo } from '../../elitesRegras';
 import { vestir, type ComportamentoElite, type Sprite } from './tipos';
+import { Som } from '../../som/Som';
 
 const M = ELITES.mosca;
 /** As hitboxes, fixas: o miolo da pupa P1 (7×12; 14/10) e o corpo da mosca (9×6, sem as asas). */
@@ -42,6 +43,7 @@ export const PUPA: ComportamentoElite = {
     if (pupaEclode(s.t)) {
       // Eclodiu: a mosca nasce no lugar; a pupa some sem pontos (não é o caminho de morte).
       ctx.nascer('mosca', e.x, e.y);
+      Som.tocar('pupa.eclode', { x: e.x });
       e.destroy();
       return;
     }

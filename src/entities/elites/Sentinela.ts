@@ -3,6 +3,7 @@ import { ELITES } from '../../data/numerosElites';
 import { escolherPosto, escudoAbsorve, sentinelaAvanca, sentinelaBloqueia, type EstadoSentinela } from '../../elitesRegras';
 import { PadroesDeTiro } from '../../systems/PadroesDeTiro';
 import { vestir, type ComportamentoElite, type CtxElite, type Sprite } from './tipos';
+import { Som, type Laco } from '../../som/Som';
 
 const S = ELITES.sentinela;
 
@@ -18,6 +19,8 @@ interface Estado {
   escudo: Phaser.GameObjects.Image | null;
   /** A vida do escudo DESTE ciclo (`escudoAbsorve`); 0 = quebrado até o próximo ABRIR. */
   escudoHp: number;
+  /** The wheel loop while it rolls (block SOUND, sheet 4). */
+  roda: Laco | null;
 }
 
 /**
@@ -68,7 +71,9 @@ export const SENTINELA: ComportamentoElite = {
   iniciar(e) {
     vestir(e, 'eliteSentinelaRoda');
     e.setFlipX(false);
-    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), cd: 0, pesado: true, escudo: null, escudoHp: S.escudoHp };
+    const s: Estado = { fase: 'rolando', t: 0, ciclos: 0, posto: escolherPosto(Math.random, null), cd: 0, pesado: true, escudo: null, escudoHp: S.escudoHp, roda: null };
+    rolar(s);
+    e.once('destroy', () => s.roda?.parar(150));
     e.setData('elite', s);
     e.once('destroy', () => s.escudo?.destroy());
   },
@@ -117,8 +122,11 @@ export const SENTINELA: ComportamentoElite = {
     if (!s || !sentinelaBloqueia(s.fase, e.x, e.y, deX, deY, s.escudoHp)) return false;
     const r = escudoAbsorve(s.escudoHp, dano);
     s.escudoHp = r.hp;
-    if (r.quebrou) quebrarEscudo(e, s);
-    else if (s.escudo) {
+    if (r.quebrou) {
+      quebrarEscudo(e, s);
+      Som.tocar('sentinela.escudoQuebra', { x: e.x });
+    } else if (s.escudo) {
+      Som.tocar('sentinela.escudo', { x: e.x });
       // O golpe acende o escudo (pisca branco), como o pisca do inimigo ferido.
       s.escudo.setTintFill(0xffffff);
       e.scene.time.delayedCall(40, () => s.escudo?.clearTint());
@@ -153,10 +161,27 @@ function quebrarEscudo(e: Sprite, s: Estado): void {
   }
 }
 
+/** The wheel loop, if it is not already rolling. */
+function rolar(s: Estado): void {
+  if (s.roda) return;
+  s.roda = Som.laco('sentinela.rolar', 0);
+  s.roda?.volume(1, 250);
+}
+
 function entrar(e: Sprite, s: Estado, fase: EstadoSentinela): void {
   if (s.fase === 'fogo') s.ciclos++;
   s.fase = fase;
   s.t = 0;
+  // THE SOUND OF EACH PHASE (block SOUND, sheet 4): the wheel rolls only while it rolls; the opening, the overload
+  // and the closing are the telegraphs the player reads
+  if (fase === 'rolando' || fase === 'saindo') rolar(s);
+  else {
+    s.roda?.parar(150);
+    s.roda = null;
+  }
+  if (fase === 'abrir') Som.tocar('sentinela.abrir', { x: e.x });
+  else if (fase === 'sobrecarga') Som.tocar('sentinela.sobrecarga', { x: e.x });
+  else if (fase === 'fechar') Som.tocar('sentinela.fechar', { x: e.x });
   if (fase === 'abrir') {
     e.setRotation(0);
     vestir(e, 'eliteSentinela', CORPO);
@@ -201,6 +226,7 @@ function varrer(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
     // Os dois canos se revezam na varredura.
     const m = boca(e, CANOS_MINIGUN[Math.floor(s.t / S.varreduraCadaS) % 2]);
     ctx.tiros.disparar(m.x, m.y, ang, S.velVarredura, vestirMinigun);
+    Som.tocar('sentinela.minigun', { x: e.x });
     ctx.tiros.clarao(m.x, m.y, 2);
   }
   if (!e.scene.anims.exists('elite-sentinela-sobrecarga')) e.setTint(Math.floor(s.t * 12) % 2 ? 0xffb894 : (e.getData('tint') as number));
@@ -217,6 +243,7 @@ function atirar(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
   if (s.pesado) {
     const c = boca(e, BOCA_CIMA);
     ctx.tiros.mirado(c.x, c.y, ctx.alvo.x, ctx.alvo.y, S.pesadoVel, vestirPesado);
+    Som.tocar('sentinela.balaco', { x: e.x });
   } else {
     // O LEQUE sai dos DOIS canos: mirado do meio deles, o tiro que sobe sai do cano de cima e o que desce, do de baixo.
     const meio = boca(e, { dx: CANOS_MINIGUN[0].dx, dy: (CANOS_MINIGUN[0].dy + CANOS_MINIGUN[1].dy) / 2 });
@@ -229,6 +256,8 @@ function atirar(e: Sprite, s: Estado, dt: number, ctx: CtxElite): void {
       ctx.tiros.disparar(m.x, m.y, a, S.lequeVel, vestirMinigun);
       ctx.tiros.clarao(m.x, m.y, 2);
     });
+    // the fan of 2 sounds as ONE shot (block SOUND, sheet 4)
+    Som.tocar('sentinela.minigun', { x: e.x });
   }
   s.pesado = !s.pesado;
   if (e.scene.anims.exists('elite-sentinela-disparo')) e.play('elite-sentinela-disparo');

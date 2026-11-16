@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import { pickVariant } from '../art';
 import { ELITES } from '../data/numerosElites';
+import { Som } from '../som/Som';
 
 export type HazardKind = 'asteroid' | 'destroco' | 'mina' | 'sensor' | 'mineravel';
 
@@ -278,6 +279,9 @@ export class DebrisSystem {
       // O sacudir da câmera é o aviso periférico: o jogador está olhando para a frente da nave,
       // não para a mina que entrou no raio dela por baixo.
       this.scene.cameras.main.shake(60, 0.002);
+      // the eye waking + the fuse: its beeps speed up over the same 0.7 s, the last one on the blast (block SOUND, sheet 3)
+      Som.tocar('sensor.acordar', { x: h.x });
+      Som.tocar('sensor.pavio', { x: h.x });
       return;
     }
 

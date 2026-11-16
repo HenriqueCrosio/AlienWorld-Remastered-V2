@@ -1,4 +1,4 @@
-import { AO_FUNDO, montarAcustica, type Acustica, type Lugar } from './acustica.ts';
+import { AO_FUNDO, CHEFE_NO_VACUO, impulso, montarAcustica, type Acustica, type Lugar } from './acustica.ts';
 import { SONS, type DefSom } from './catalogoSons.ts';
 import { LASTRO, energiaDepois, ganhoDaCamada, ganhoDoLastro, type Camada, type Volumes } from './mixagem.ts';
 import { PESO, decidir, sortearVariacao, type VozAtiva } from './vozes.ts';
@@ -85,6 +85,8 @@ export class Som {
   private static cache: CacheAudio | null = null;
   private static barras = {} as Record<Camada, GainNode>;
   private static acaoMudaNo: GainNode | null = null;
+  /** the bosses' closed room in the vacuum (see `CHEFE_NO_VACUO`) */
+  private static salaChefe: GainNode | null = null;
   private static abafoNo: GainNode | null = null;
   private static ac: Acustica | null = null;
   private static lugarAtual: Lugar = 'atmosfera';
@@ -123,6 +125,14 @@ export class Som {
       else b.connect(Som.ac.entrada);
       Som.barras[c] = b;
     }
+    // the CLOSED ROOM of the bosses in the vacuum (`CHEFE_NO_VACUO`): a send into a short dark tail, back into the action
+    const S = CHEFE_NO_VACUO.sala;
+    Som.salaChefe = ctx.createGain();
+    Som.salaChefe.gain.value = S.mistura;
+    const conv = ctx.createConvolver();
+    conv.buffer = impulso(ctx, S.seg, S.decai, 7);
+    Som.salaChefe.connect(conv);
+    conv.connect(Som.barras.acao);
     Som.atualizarVolume();
     if (import.meta.env?.DEV) (window as unknown as { __som: typeof Som }).__som = Som;
   }
@@ -173,7 +183,14 @@ export class Som {
       pan.pan.value = Math.max(-1, Math.min(1, (x / LARGURA_TELA) * 2 - 1)) * PAN_MAX;
       ultimoNo = ultimoNo.connect(pan);
     }
-    const corte = Math.min(def.passaBaixa ?? Infinity, Som.lugarAtual === 'cabine' ? (def.passaBaixaNoVacuo ?? Infinity) : Infinity);
+    // a boss in the vacuum is contained (`CHEFE_NO_VACUO`): its own low-pass, a little lower, a send into the closed room
+    const chefeNoVacuo = Som.lugarAtual === 'cabine' && def.prioridade === 'chefe' && def.camada === 'acao';
+    if (chefeNoVacuo) nivel *= CHEFE_NO_VACUO.volume;
+    const corte = Math.min(
+      def.passaBaixa ?? Infinity,
+      Som.lugarAtual === 'cabine' ? (def.passaBaixaNoVacuo ?? Infinity) : Infinity,
+      chefeNoVacuo ? CHEFE_NO_VACUO.passaBaixa : Infinity,
+    );
     if (Number.isFinite(corte)) {
       const lp = ctx.createBiquadFilter();
       lp.type = 'lowpass';
@@ -191,6 +208,7 @@ export class Som {
     }
     ganho.gain.value = Math.min(1, nivel);
     ultimoNo.connect(Som.barras[def.camada]);
+    if (chefeNoVacuo && Som.salaChefe) ultimoNo.connect(Som.salaChefe);
     const voz: Voz = { id: Som.proxId++, nome, peso, inicio: agora, fonte, ganho, ponte: !!def.ponte };
     fonte.onended = () => {
       Som.ativas = Som.ativas.filter((a) => a !== voz);

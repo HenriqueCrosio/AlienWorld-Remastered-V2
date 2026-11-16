@@ -123,12 +123,18 @@ export class Chuva implements Habilidade {
   /** a cocoon of the salvo: from the mouth where it is now, up and out (35° to the left, ±16°, a hair of luck) */
   private subir(cor: Cor, i: number): void {
     const S = HAB.chuva.salva, b = this.corpo.boca(cor);
+    // THE SALVO, one per head (*"cada cabeça lança uma salva"*, block SOUND, sheet 5b). The heads spit together, and the
+    // player hears one sound per frame of a name: each head sounds on a different cocoon of its salvo (the 1st, 4th,
+    // 7th: 66 ms apart), so three launches are heard, not one
+    if (i === 3 * this.cores.indexOf(cor)) this.corpo.som?.('serpente.chuva.salva', b.x);
     const ang = ((S.inclina + (i - (S.n - 1) / 2) * S.abre + (this.acaso() - 0.5) * S.sorte) * Math.PI) / 180;
     this.nascer(cor, b.x, b.y, -Math.sin(ang) * S.vel, -Math.cos(ang) * S.vel, false);
   }
 
   /** a wave: from rest above the screen, every slot but the gap's */
   private onda(cor: Cor, j: number): void {
+    // the wave lights up above and comes down, one per head (block SOUND, sheet 5b)
+    this.corpo.som?.('serpente.chuva.onda', this.vaos[j]);
     for (const x of this.vagas[j]) this.nascer(cor, x, -6, 0, 0, true);
     this.ondas++;
   }
@@ -177,6 +183,7 @@ export class Chuva implements Habilidade {
     if (!c.desce && c.y < -12) c.morto = true;
     if (c.desce && c.y + 3 >= HAB.crista) {
       c.morto = true;
+      this.corpo.som?.('serpente.chuva.impacto', c.x);
       this.p.clarao(c.x, HAB.crista - 2, c.cor);
       this.p.faiscas(c.x, HAB.crista - 1, 6, HAB.cores.COR[c.cor]);
     }

@@ -14,6 +14,7 @@ import type { EstadoEnguia, Evento, InicioMotor } from './motor';
 import { folga, type Forma } from './perigos';
 import { PARTE_CABECA, PARTE_COBERTA, PARTE_CORPO } from './alvos';
 import type { Img, Ponto } from './tipos';
+import { Som, type Laco } from '../../../som/Som';
 
 export type Taxa = 30 | 'auto';
 
@@ -89,6 +90,50 @@ export class EnguiaEmJogo {
   /** a bite asked by her life (22 / 13 / 5) */
   mordida(pct: number): void {
     this.eventos.push({ tipo: 'mordida', pct });
+    // a ring torn off: her pain (block SOUND, sheet 5b)
+    Som.tocar('enguia.anel', { x: this.estado?.cabeca.x });
+  }
+
+  /** THE EEL'S SOUNDS (block SOUND, sheet 5b), read off what her worker sends: a gesture when her `hab` changes, the
+   *  rumble while the hull bumps over her (`lombada`), and a hazard's sound when its id first appears. */
+  private static readonly SOM_DO_GESTO: Record<string, string> = {
+    canos: 'enguia.canos.carga', eco: 'enguia.eco.leitura', presa: 'enguia.presa', desfaz: 'enguia.desfaz', resto: 'enguia.afunda',
+  };
+  private static readonly SOM_DO_PERIGO: Record<string, string> = { fogo: 'enguia.canos.jato', geiser: 'enguia.geiser', eco: 'enguia.eco.estouro' };
+  private vistos = new Set<string>();
+  private ronco: Laco | null = null;
+  private raspa: Laco | null = null;
+  private raspouEm = -Infinity;
+
+  private soar(antes: EstadoEnguia | null, agora: EstadoEnguia, vivos: [string, string, number][]): void {
+    if (agora.hab !== (antes?.hab ?? null) && agora.hab) {
+      const g = EnguiaEmJogo.SOM_DO_GESTO[agora.hab];
+      if (g) Som.tocar(g, { x: agora.cabeca.x });
+    }
+    const sob = !!agora.lombada && !agora.morta;
+    if (sob && !this.ronco) this.ronco = Som.laco('enguia.sobCasco');
+    else if (!sob && this.ronco) {
+      this.ronco.parar(500);
+      this.ronco = null;
+    }
+    // THE SCRAPE (16/11, him: *"quando a enguia entra, ela salta e raspa seu corpo várias vezes no casco [...] uma
+    // estrutura enorme raspando em outra estrutura, na pegada de efeitos de filmes com naves gigantes no espaço"*): a loop
+    // that swells with how much of her scrapes the hull, and fades 0.3 s after the last contact
+    if (agora.raspa > 0 && !agora.morta) {
+      this.raspouEm = agora.t;
+      this.raspa ??= Som.laco(Math.random() < 0.5 ? 'enguia.raspa' : 'enguia.raspa2', 0);
+      this.raspa?.volume(Math.min(1, 0.5 + agora.raspa * 0.08), 120);
+    } else if (this.raspa && agora.t - this.raspouEm > 0.3) {
+      this.raspa.parar(450);
+      this.raspa = null;
+    }
+    const agoraIds = new Set<string>();
+    for (const [tipo, id, x] of vivos) {
+      const chave = `${tipo}:${id}`;
+      agoraIds.add(chave);
+      if (!this.vistos.has(chave)) Som.tocar(EnguiaEmJogo.SOM_DO_PERIGO[tipo], { x });
+    }
+    this.vistos = agoraIds;
   }
   /** her life reached 0 in the den */
   mata(): void {
@@ -124,8 +169,10 @@ export class EnguiaEmJogo {
     if (m.tipo === 'erro') { this.erro = m.erro as string; return; }
     if (m.tipo !== 'quadro') return;
     this.ocupado = false;
+    const antes = this.estado;
     this.estado = m.estado as EstadoEnguia;
     this.perigos = m.perigos as Forma[];
+    this.soar(antes, this.estado, (m.vivos as [string, string, number][] | undefined) ?? []);
     this.mascara = m.mascara as Uint8Array;
     this.camada.recebe(m.caixa as { x0: number; y0: number; x1: number; y1: number }, m.cima as Uint8ClampedArray, m.luz as Uint8ClampedArray, m.baixo as Uint8ClampedArray);
     this.tempos.push({ t: this.estado.t, ms: m.ms as number });
@@ -159,6 +206,10 @@ export class EnguiaEmJogo {
   }
 
   destroy(): void {
+    this.ronco?.parar(300);
+    this.ronco = null;
+    this.raspa?.parar(300);
+    this.raspa = null;
     this.worker.terminate();
     this.camada.destroy();
   }

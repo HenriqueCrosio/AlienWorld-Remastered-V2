@@ -524,7 +524,11 @@ export class InterludeScene extends Phaser.Scene {
       if (this.done) return;
 
       claraoDe(this).climax(GAME_WIDTH / 2, InterludeScene.DECK_Y - 30, 0xffd278, 500);
-      this.fx.explodeBig(GAME_WIDTH / 2, InterludeScene.DECK_Y - 30, 1.7, 26, 'chefeFim');
+      // ITS OWN SOUND (16/11, him: *"a última explosão da Aurora continua bem estilo de atmosfera, quero um bum oco e
+      // abafado"*): the blast silent, and the hollow muffled boom of the vacuum in its place, rolling over the bed
+      this.fx.explodeBig(GAME_WIDTH / 2, InterludeScene.DECK_Y - 30, 1.7, 26, 'chefeFim', false);
+      Som.tocar('momento.aurora.fim', { x: GAME_WIDTH / 2 });
+      Som.alimentarLastro(0.9);
 
       // O casco AFUNDA e apaga no rastro da explosão: a Aurora sai de cena por baixo, por onde
       // entrou — puxada para dentro e para baixo, não varrida para o lado.

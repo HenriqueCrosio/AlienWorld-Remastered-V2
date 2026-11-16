@@ -67,6 +67,8 @@ export class LutaEnguia {
   final = false;
   cranio: { t: number } | null = null;
   morta = false;
+  /** the points of her body that scraped the hull in the last step (block SOUND: the scrape's sound) */
+  raspou = 0;
   private readonly rnd: () => number;
   private readonly sorte: () => number;
   private readonly canosDe = new Map<Trecho, Canos>();
@@ -340,6 +342,9 @@ export class LutaEnguia {
               }
             }
         }
+      // (block SOUND, 16/11: how many points of her body scraped the hull this step, for the scrape's sound — read only,
+      // no dice: the oracle's choreography is untouched)
+      this.raspou = fumega ? 0 : contato.length;
       for (const c of contato) if (sorte() < (fumega ? 0.12 : 0.25)) this.raspado.push({ ...c, t });
       if (fumega) for (const c of contato) if (sorte() < 0.5)
         this.nasce({ x: c.x + (sorte() - 0.5) * 8, y: c.y + (sorte() - 0.5) * 6, vx: (sorte() - 0.5) * 14 + c.ox * 8, vy: -6 - sorte() * 12, vida: 2.0 + sorte() * 1.2, cor: sorte() < 0.5 ? [52, 48, 52] : [36, 34, 38], tam: 3.5 + sorte() * 3, cresce: true, a: 0.5 });

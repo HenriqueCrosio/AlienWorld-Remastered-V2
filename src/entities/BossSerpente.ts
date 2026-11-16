@@ -4,6 +4,7 @@ import { CLARAO } from '../systems/clarao/claraoRegras';
 import { BARRA_CHEFAO_Y, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
 import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
+import { Som } from '../som/Som';
 import type { StageBoss } from './Boss';
 import { CascoVivo } from './cascoVivo';
 import { ERGUER, type Cor } from './gestoSerpente';
@@ -337,8 +338,12 @@ export class BossSerpente implements StageBoss {
       balas: () => this.arena?.balas() ?? [],
       incendiario: () => this.arena?.incendiario() ?? false,
       contra: () => {
+        // the burning jelly in their faces: the three flinch (block SOUND, sheet 5b)
+        Som.tocar('serpente.dor', { x: this.sprite.x });
         this.damage(this.fase.hp * HAB.contra);
       },
+      som: (nome, x, forca) => Som.tocar(nome, { x: x ?? this.sprite.x, forca }),
+      somLaco: (nome) => Som.laco(nome),
       gesto: (acao) => this.comGesto(acao),
       luz: (niveis, tinta = 0) => {
         this.niveisLuz = niveis;
@@ -570,6 +575,8 @@ export class BossSerpente implements StageBoss {
         this.entrada = 'tremendo';
         this.entradaT = LUTA.tremor;
         this.criarCasco();
+        // the hull trembling under her, the 1.2 s before she breaks out (block SOUND, sheet 5b)
+        Som.tocar('serpente.chegada.tremor', { x: this.romboX() });
       }
     }
     if (this.entrada === 'chegando' || this.entrada === 'freando') {
@@ -635,6 +642,7 @@ export class BossSerpente implements StageBoss {
     this.criarLabio();
     this.casco?.copiar();
     this.muzzleFx.explode(18, r.x, LUTA.crista + 10);
+    Som.tocar('serpente.chegada.rompe', { x: r.x });
     for (let i = 0; i < 14; i++) this.poeiraFx.emitParticleAt(r.x + Phaser.Math.Between(-70, 70), LUTA.crista - Phaser.Math.Between(0, 6));
     this.scene.cameras.main.shake(260, 0.011);
   }
@@ -894,6 +902,8 @@ export class BossSerpente implements StageBoss {
     if (!l || !this.scene.anims.exists(`serpente-erguer-${l}`)) return;
     this.tocador.soltar();
     this.sprite.play(`serpente-erguer-${l}`);
+    // the head rearing before the attack (block SOUND, sheet 5b)
+    Som.tocar('serpente.gesto', { x: this.sprite.x });
     this.sprite.setOrigin(ERGUER[l].origem.x, ERGUER[l].origem.y);
   }
 
@@ -1129,6 +1139,8 @@ export class BossSerpente implements StageBoss {
     this.imune = duracao / 1000 + 0.2;
     this.abortarHab();
     this.sprite.clearTint();
+    // a head dies, between the forms (block SOUND, sheet 5b)
+    Som.tocar('serpente.cabecaMorre', { x: cabecaMorta.x });
 
     for (let i = 0; i < estouros; i++) {
       this.scene.time.delayedCall(i * (duracao / estouros), () => {
@@ -1185,6 +1197,8 @@ export class BossSerpente implements StageBoss {
     this.imune = 99;
     this.colapso = true;
     this.abortarHab();
+    // the heads sinking, before the silence (block SOUND, sheet 5b)
+    Som.tocar('serpente.fusao.afunda', { x: this.romboX() });
     this.tiros.limpar();
     this.sprite.clearTint();
     for (const obj of [...this.enemies.enemyBullets.getChildren()]) {
@@ -1264,6 +1278,8 @@ export class BossSerpente implements StageBoss {
   private acenderLuzes(): void {
     const F = BossSerpente.FUSAO;
     const cx = this.romboX(), cy = LUTA.crista + 14;
+    // the three lights converging, before the detonation (block SOUND, sheet 5b)
+    Som.tocar('serpente.fusao.converge', { x: cx });
     const origens = [
       { x: cx - 52, y: LUTA.crista + 6 },
       { x: cx, y: LUTA.crista + 2 },
