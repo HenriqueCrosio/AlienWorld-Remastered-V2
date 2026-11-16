@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-14)
+# HANDOFF — estado do projeto (2026-11-16)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-15) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-16) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,17 +16,35 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md`, a spec `specs/2026-11-15-bloco-som-design.md` e o plano
-> `plans/2026-11-15-bloco-som-fundacao.md`. Em 15/11 o roadmap mudou: o SOM entrou antes do F (a trilha é dele, os
-> efeitos são meus). A fundação está pronta (o tocador, a acústica do lugar, o molde da folha) e a FOLHA 1 (a nave) está
-> montada esperando a escolha dele: `http://localhost:5173/docs/superpowers/folhas/2026-11-15/sons/1-nave/folha.html`.
-> Com as escolhas coladas, o próximo é instalá-las no jogo (um plano novo) e seguir para a folha 2 (as explosões)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-17-som-chefes-START.md`. Em 15–16/11 o SOM entrou antes
+> do F (a trilha é dele, os efeitos são meus): as folhas 1 (a nave), 2 (as explosões), 3 (os inimigos e perigos), 4 (os
+> elites), 5a (a Torre e a Capitânia) e 5b (a Serpente e a enguia) estão no jogo, commitadas e empurradas. A sessão abre
+> PELO PEDIDO DELE: antes da folha nova, REGULAR os sons dos chefões — alguns estão tão abafados que quase não se ouvem
+> (medir cada um no jogo antes de mexer: o volume da geração, o filtro do vácuo, o passa-baixa próprio). Depois, a 5c
+> (o Guardião e o Predador)."**
 >
-> **O ROADMAP AGORA: a Serpente grande ✅ (08/11) → o CENÁRIO do casco e da arena ✅ (09/11) → H ✅ (10/11) → I ✅
-> (13/11) → J ✅ (14/11, enxuto) → M, a MOLDURA ✅ (15/11) → **o SOM (efeitos), 8 folhas: 1 a nave (montada, espera
-> ele) · 2 as explosões · 3 os inimigos e perigos · 4 os elites · 5 os chefões · 6 a interface · 7 as cutscenes · 8 o
-> ambiente** → F (a F2: a frota de batedores e a rocha do minerador; START `plans/2026-11-15-bloco-f-START.md`) → o
-> rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco).**
+> **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → **o SOM (efeitos), 8 folhas: 1 a nave ✅ · 2 as explosões ✅ · 3 os
+> inimigos e perigos ✅ · 4 os elites ✅ · 5 os chefões (5a ✅ 5b ✅, **a REGULAGEM dos chefões e depois a 5c**) · 6 a
+> interface · 7 as cutscenes (os FLYBYS dele guardados em `assets/raw/sons/dele/flybys/`) · 8 o ambiente** (+ o PASSE
+> DE MIXAGEM, depois da folha 3 — ainda não feito) → F (a F2: a frota de batedores e a rocha do minerador; START
+> `plans/2026-11-15-bloco-f-START.md`) → o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco).**
+>
+> 📍 **16/11 (6) — AS FOLHAS 3, 4, 5a E 5b NO JOGO; COMMITADO E EMPURRADO.** Uma sessão longa (registro inteiro no START
+> `plans/2026-11-16-som-folha3-START.md`, a ordem em que aconteceu; a §10.7 da spec do som tem as regras novas):
+> - **Os originais em FLAC** (`scripts/_som/_original.mjs`, 31 → 16 MB, provados amostra a amostra).
+> - **A folha 3** (os inimigos e os perigos, 20 sons, grupo `inimigos`) · **o RICOCHETE É DA NAVE** (a ideia dele:
+>   `GameScene.ricochetear`, `nave.<nave>.ricochete*` sorteados; a TERMINUS e a X-AELO com os arquivos DELE, grupo
+>   `dele`; a Manta com o PixelLab) · **a folha 4** (os 5 elites, 28 sons, grupo `elites`) · **a 5a** (a Torre e a
+>   Capitânia, 13, `chefes-maquinas`) · **a 5b** (a Serpente e a enguia, 32, `chefes-serpente`: as habilidades pela
+>   fachada `som?`; a enguia pelo worker, `vivos` + `raspa`).
+> - **Os chefões no vácuo, contidos** (`CHEFE_NO_VACUO`: passa-baixa 2,2 kHz, 70 %, uma sala fechada curta) e o **bum
+>   oco da Aurora** (`momento.aurora.fim`, grupo `momentos`).
+> - **A aba dele estava velha** (não ouvia nada do novo): Ctrl+Shift+R resolveu — `__som.diagnostico().carregados` diz.
+> - Testes novos em jogo: `test-som-inimigos-jogo` (24), `test-som-elites-jogo` (20), `test-som-chefes-jogo` (29).
+>
+> 📍 **16/11 (5) — OS DOCS PARA A PRÓXIMA SESSÃO.** O START da folha 3 (`plans/2026-11-16-som-folha3-START.md`); a
+> spec do som ganhou a §10 "O que mudou na execução" (o lastro, a troca de cena e a ponte, o enxame, a TERMINUS
+> rotativa, os campos novos do catálogo, as lições). Nada de código mudou depois de `241608d`.
 >
 > 📍 **16/11 (4) — A TERMINUS ROTATIVA NO JOGO; O SOM DA NAVE E DAS EXPLOSÕES FECHADO; COMMITADO E EMPURRADO.** A escolha
 > dele na folha 7: *"f1 — segurado pico e toque pico; f2 — segurado e toque. Assim fechamos"*. E *"a forma do A1 depois de
@@ -1876,7 +1894,9 @@ escolhida no hangar antes da F1 (4 escolhas, só visual) e cada nave morre do se
 **14/11 — a MOLDURA do jogo (bloco M):** o `ESC` (e o START do controle) PAUSA em vez de derrubar a partida; as
 CONFIGURAÇÕES (áudio, controles, vídeo, jogo) abrem da pausa e do menu; o jogo lê controle de Xbox e de PlayStation,
 com remapear de teclado e de controle; as preferências do jogador vivem num objeto só (`alienworld:preferencias`).
-Faltam do M: a tela de fim de fase e de morte (M3) e o carregamento com o favicon (M4).
+O M fechou em 15/11 (M3 a NAVE PERDIDA, M4 o carregamento e o favicon).
+**15–16/11 — o SOM (efeitos):** um tocador próprio em Web Audio (`src/som/`), a acústica pelo lugar, o lastro que cola
+as cadeias; a nave e as explosões no jogo (folhas 1 e 2). Créditos e licenças em `docs/SONS.md`.
 
 ```
 MENU → HANGAR DA ESCOLHA → F1 → Aurora → F2 → Doca → F3 → HANGAR → F4 → GUARDIÃO → PREDADOR → O AFASTAMENTO → vitória
@@ -1898,7 +1918,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
-| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **HOJE (14/11): os blocos A–E, G, S, H, I e J ✅; o bloco M (a moldura do jogo) com M1 e M2 ✅ → M3 (o próximo, START `plans/2026-11-14-bloco-m3-START.md`) → M4 → F.** Registro: **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
+| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **HOJE (16/11): os blocos A–E, G, S, H, I, J e M ✅; o SOM em curso (folhas 1, 2, 3, 4, 5a e 5b ✅; a próxima sessão REGULA os chefões e faz a 5c, START `plans/2026-11-17-som-chefes-START.md`) → F.** Registro: **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
 | — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
 
 ### O que mora em cada etapa

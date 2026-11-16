@@ -224,3 +224,93 @@ Uma página por grupo em `docs/superpowers/folhas/<dia>/sons/<n>-<grupo>/folha.h
 2. **Folha 1 (a nave)** → ele escolhe → entra no jogo → ele confere jogando → `test-som-jogo.mjs` nasce aqui.
 3. Folhas 2 a 8, uma por vez, cada uma: gerar/buscar → conferir → folha → escolha dele → jogo → conferência.
 4. O fechamento: o peso total, a ficha `SONS.md` completa, o 🧭.
+
+## 10. O que mudou na execução (15–16/11, as folhas 1 e 2 fechadas)
+
+O que o jogo tem hoje e esta spec não previa — vale sobre as seções acima onde as contradiz.
+
+### 10.1 A composição (ele: *"se os sons ficam isolados, fica estranho e desconfortável de ouvir"*)
+
+- **O LASTRO** (`mixagem.ts`: `LASTRO`, `energiaDepois`, `ganhoDoLastro`; `Som.alimentarLastro`): um ronco grave em
+  laço (`explosao.lastro`, a metalGrande C dele esticada 4× e só o grave) que cada explosão ENCHE (`lastro` no
+  `DefSom`, × a `forca`) e que esvazia com τ = 1,4 s. A cadeia rola por cima dele; uma explosão solta mal o levanta.
+- **No vácuo cada explosão sai a 60%** (`acustica.ts`: `EXPLOSAO_NO_VACUO`, `forcaNoLugar`); o lastro carrega.
+- **Momento roteirizado se compõe NA CENA:** a cadeia da Aurora (cutscene 1) toca os estouros sem som próprio e, no
+  lugar, a sequência de `explosao.metalGrande` baixa e sobreposta, com o fechamento grande no fim.
+- **NENHUM SOM ATRAVESSA A TROCA DE CENA** (o defeito que ele achou: o fechamento da Aurora entrava na F2):
+  `Som.trocarDeCena(lugar)` é a 1ª linha do `create` de toda cena — encerra as vozes em 250 ms, drena o lastro, e só
+  então o lugar novo (a trilha não, ela é dele). **A única exceção é `ponte: true`: o estrondo da F1**, que começa no véu
+  do hangar e *"quando chegar na fase, já estar acabando"*.
+- **A abertura da F1:** o estrondo sozinho, a música do hangar abaixando sob ele, o motor entrando depois (`ESTRONDO` na
+  `GameScene`; pelo hangar o estrondo já vem tocando e a F1 só espera o rabo).
+
+### 10.2 O que repete muito é macio, e medido antes de mostrar
+
+- **Os motores:** metade do nível e passa-baixa de 1,1 kHz (`passaBaixa` no `DefSom`) — *"precisa estar ali, mas não
+  brigar com nada"*.
+- **O enxame tem categoria própria** (`somDaExplosao.ts`: `DO_ENXAME`, `somDaMorte`): o `drone` (25 ondas desde a F1)
+  com `acerto.drone` e `explosao.drone` ("matéria quebrando"); a morte dele cala os estouros em pixel (`mudo` no
+  `Destrocos.morrer`).
+- **A medida antes da folha:** a sonoridade (LUFS), o agudo acima de 5–6 kHz contra o corpo, o pico, o silêncio no
+  começo; `_folha-montar` descarta sozinho a geração que não passa de −30 dB (o PixelLab entregou 4 mudas).
+- **Recusado DUAS vezes sem nota:** não se gera a 3ª rodada às cegas — pergunta-se a DIREÇÃO (matéria / explosão seca /
+  elétrico físico / retrô / mudo). O "macio" não era o que ele queria para o drone nem para o elétrico.
+
+### 10.3 A TERMINUS é uma arma rotativa (a ideia dele, a partir do A-10)
+
+- A referência dele (`C:/Users/Henrique/Music/myinstants.mp3`) só foi MEDIDA (licença desconhecida): o zumbido de 8 ms
+  (~125 disparos/s), a energia abaixo de 600 Hz.
+- `WeaponSystem.somRotativo`: ao APERTAR, o arranque do M2 (o tiro I a 12/s) + o laço; ao SOLTAR, a parada e, 80 ms
+  depois, a CHEGADA do A1 (o zumbido do A-10, o som que viajou mais devagar) — o PICO na atmosfera, a rajada pelo casco
+  no espaço; do tamanho da rajada até 12 disparos (`chegadaDaRajada`), com teto (*"várias vezes o jogador vai cravar o
+  dedo no gatilho"*). No vácuo o M2 a 1,8 kHz (`passaBaixaNoVacuo`). A pausa e a morte calam sem chegada.
+- As partes: `scripts/_som/_sintetizar-minigun.mjs` (arranque / laço / parada a partir de um grão) e
+  `_compor-terminus.mjs` (as chegadas).
+
+### 10.4 Os campos novos do `DefSom`
+
+`passaBaixa`, `passaBaixaNoVacuo`, `lastro`, `ponte`. E `Som.tocar({ fracao })` (toca só uma parte, com saída suave),
+`Som.laco(nome, inicial)`, `Som.tocando(nome)`, `Som.lugarAgora()`, `Som.picoDaAcao` (os testes medem o SINAL).
+
+### 10.5 A armadilha do Chrome
+
+`setTargetAtTime` num barramento SEM sinal congela (o Chrome só calcula essa curva enquanto passa som) — o 1º tiro depois
+da NAVE PERDIDA saía cheio. Todo ganho e filtro usa rampa linear (`rumo` no `Som.ts`, `rampa` no `acustica.ts`).
+
+### 10.6 Para depois (propostas a ele)
+
+- **O passe de mixagem** (16/11, a pergunta dele *"o que estúdios fazem para trazer o conjunto sonoro"*): a compressão de
+  cola no barramento do mundo, um espaço comum (hoje a cabine está quase seca, 6%), o abaixar dinâmico nos eventos
+  grandes. As camadas e a presença da nave entram aos poucos; o ambiente é a folha 8.
+- ~~**O peso no git:** os originais em WAV deram ~30 MB em duas folhas — converter para FLAC antes da próxima.~~ Feito
+  em 16/11 (ver §10.7).
+
+### 10.7 As folhas 3, 4, 5a e 5b (16/11) — o que ficou de regra
+
+- **Os originais são FLAC** (`scripts/_som/_original.mjs`: `original()` acha o `.flac` de um caminho `.wav`,
+  `guardarComoFlac()` converte e PROVA amostra a amostra antes de apagar). O `_folha-montar` grava FLAC sozinho.
+- **Um som por SALVA, não por bala** (o leque da aranha, a minigun da sentinela, as cabeças da Serpente pelo clarão da
+  boca). E o tocador segura UM som igual por quadro: o que nasce junto (as 3 salvas das cabeças) se escalona de leve
+  (66 ms) para ser ouvido como vários.
+- **O aviso tem a duração do piscar do jogo** (a canhoneira 0,45 s, a torre 0,4 s, o pavio da sensora 0,7 s, a mira da
+  lula 0,6 s, a carga do raio 0,75 s, a da laranja 2,5 s…): as versões C sintetizadas medem o tempo no código.
+- **O RICOCHETE É DA NAVE** (a ideia dele): o tiro do jogador no que é DURO e não morre (o pico, a nave caída, a costela,
+  o maquinário, as mesas, o destroço da F2/F3 — nunca a carne da F4) toca `nave.<nave>.ricochete*`, sorteado entre as
+  variações, no máximo um a cada 110 ms (`GameScene.ricochetear`). A TERMINUS e a X-AELO usam os arquivos DELE (grupo
+  `dele`, crédito "feito por ele").
+- **Laço por entidade** (a broca do drone, a roda da sentinela, o sopro do gás): nasce no gesto, para no `destroy` e na
+  troca de gesto; **o enxame é UM laço** que sobe com o número de moscas; **o raspar da enguia** cresce com os contatos.
+- **Os chefões no vácuo são contidos** (`CHEFE_NO_VACUO` no `acustica.ts`, aplicado no `Som.voz`): na cabine, todo som de
+  `prioridade: 'chefe'` passa por um passa-baixa de 2,2 kHz, desce a 70 % e manda 8 % a uma sala fechada curta. A sala
+  forte (35 %) deixava o chefão MAIS ALTO no vácuo — medir com `Som.picoDaAcao` antes de mostrar.
+- **Uma explosão gravada "de céu aberto" não vira vácuo por filtro:** a cauda está no arquivo. Um momento que precisa
+  soar no espaço ganha um som PRÓPRIO tratado (o `momento.aurora.fim`: o grave, o pente oco, a cauda cortada, um golpe
+  sub-grave).
+- **As habilidades da Serpente rodam no Node** (os oráculos): o som entra por métodos OPCIONAIS da fachada
+  (`CorpoSerpente.som?` / `somLaco?`); **a enguia roda num worker**: o motor manda `vivos` (tipo, id, x dos perigos) e
+  `raspa`, a cena (`EnguiaEmJogo.soar`) toca quando um id aparece e quando o `hab` muda. Os oráculos seguem verdes.
+- **As ferramentas:** o `_som-instalar` lê versões de várias letras (`BF1`, `D2`) e credita `dele` e `mistura`; o
+  `_folha-montar` copia TODAS as versões para cada folha — as folhas de rodada se enxugam antes do commit (só o que o
+  `dados.json` mostra).
+- **Se ele não ouve nada do novo, a aba está velha** (o Vite perde a ligação numa sessão longa): Ctrl+Shift+R, e
+  `__som.diagnostico().carregados` mostra quantos sons a aba carregou.
