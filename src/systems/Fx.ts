@@ -3,6 +3,9 @@ import { claraoDe } from './clarao/Clarao';
 import { COLORS } from '../config';
 import { FOLHAS_EXPLOSAO, FPS_EXPLOSAO, escolheFolha } from './explosoes/folhasExplosao';
 import type { TipoExplosao } from './explosoes/tipoExplosao';
+import { Som } from '../som/Som';
+import { forcaDaExplosao, somDaExplosao } from '../som/somDaExplosao';
+import { forcaNoLugar } from '../som/acustica';
 
 /**
  * Explosões e impactos: SPRITE ANIMADO + fagulhas em partícula. (09/11, bloco I: as folhas são as explosões novas, assadas
@@ -118,9 +121,9 @@ export class Fx {
    * folha (`escolheFolha`: ≤ 1,25 a pequena, ≤ 2 a média, mais a grande), que só reduz. `tipo` é o material de quem
    * explode (`tipoDoMaterial`); sem ele, o A (`perigo`). `depth` expõe a frente de cena das cutscenes.
    */
-  explode(x: number, y: number, size = 1, depth = 50, tipo: TipoExplosao = 'perigo'): Phaser.GameObjects.Sprite | null {
+  explode(x: number, y: number, size = 1, depth = 50, tipo: TipoExplosao = 'perigo', som = true): Phaser.GameObjects.Sprite | null {
     this.abalo(x, y, size);
-    return this.explosao(tipo, x, y, size, depth);
+    return this.explosao(tipo, x, y, size, depth, som);
   }
 
   /**
@@ -136,11 +139,11 @@ export class Fx {
    * A DETONAÇÃO GRANDE: morte de chefão, a bomba, os clímaxes das cutscenes. Shake mais longo + um flash curto — o peso
    * do impacto. `escala` 1 = `size` 2 do `explode`.
    */
-  explodeBig(x: number, y: number, escala = 1, depth = 50, tipo: TipoExplosao = 'perigo'): Phaser.GameObjects.Sprite | null {
+  explodeBig(x: number, y: number, escala = 1, depth = 50, tipo: TipoExplosao = 'perigo', som = true): Phaser.GameObjects.Sprite | null {
     this.burst.explode(Math.floor(16 * escala), x, y);
     this.scene.cameras.main.shake(320 * escala, 0.006 * escala);
     claraoDe(this.scene).impacto(x, y, 0xffbe6e, { escala });
-    return this.explosao(tipo, x, y, 2 * escala, depth);
+    return this.explosao(tipo, x, y, 2 * escala, depth, som);
   }
 
   /**
@@ -148,6 +151,8 @@ export class Fx {
    * estoura com a PRÓPRIA arte (a morte da Torre da F1 com a explosão da queda do Leviatã, bloco G).
    */
   abaloGrande(x: number, y: number, escala = 1): void {
+    // (the F1 boss's end, with the Leviathan-fall art: the sound of a boss's end — block SOUND)
+    Som.tocar('explosao.chefeFim', { x });
     this.burst.explode(Math.floor(16 * escala), x, y);
     this.scene.cameras.main.shake(320 * escala, 0.006 * escala);
     claraoDe(this.scene).impacto(x, y, 0xffbe6e, { escala });
@@ -173,7 +178,7 @@ export class Fx {
     escala: number,
     depth = 50,
   ): Phaser.GameObjects.Sprite | null {
-    return this.explosao('perigo', x, y, escala / 0.6, depth);
+    return this.explosao('perigo', x, y, escala / 0.6, depth, false);
   }
 
   /**
@@ -181,8 +186,14 @@ export class Fx {
    * e no tamanho certo (`escolheFolha`: o jogo só REDUZ), a COR e por cima a LUZ em ADD, as duas one-shot. `size` está
    * nas unidades do `explode` (1 = inimigo comum; `explodeBig(e)` = 2e). Sem a folha em disco, `null` (quem chama cai na
    * de sempre). Só o desenho: o abalo e o flash ficam com quem chama.
+   *
+   * O SOM (bloco SOM, folha 2): toda explosão do jogo passa aqui, então o som do material sai daqui — UM lugar só
+   * (`somDaExplosao`: o metal se divide pelo tamanho). `som = false` para quem estoura em silêncio de propósito (a
+   * chuva da cena final) ou já tocou o seu (as cartas), e para as lascas de cada tiro (o acerto já soa).
    */
-  explosao(tipo: TipoExplosao, x: number, y: number, size = 1, depth = 50): Phaser.GameObjects.Sprite | null {
+  explosao(tipo: TipoExplosao, x: number, y: number, size = 1, depth = 50, som = true): Phaser.GameObjects.Sprite | null {
+    // (in the vacuum each blast is quieter; the LASTRO it feeds carries the chain — his note, 15/11)
+    if (som) Som.tocar(somDaExplosao(tipo, size), { x, forca: forcaNoLugar(forcaDaExplosao(size), Som.lugarAgora()) });
     const e = escolheFolha(tipo, this.zona, size);
     if (!e || !this.scene.anims.exists(e.folha.chave)) return null;
     const vira = (this.lado++ & 1) === 1;
@@ -302,7 +313,9 @@ export class Fx {
    *   o ANEL        a frente de choque expandindo — é ele que dá TAMANHO ao estouro
    *   as FAGULHAS   matéria arremessada, na cor da criatura e não na do fogo
    */
-  choque(x: number, y: number, escala = 1): void {
+  choque(x: number, y: number, escala = 1, som: string | null = 'explosao.luz'): void {
+    // the discharge of LIGHT dying (the jellyfish) — or, from the cards, the SOBRECARGA pulse (block SOUND)
+    if (som) Som.tocar(som, { x, forca: forcaDaExplosao(escala) });
     // ⚠️ NÃO É PROPORCIONAL PURO. `26 × escala` dava 15,6px na água-viva (que entra em `scale`
     // 0,6) — uma descarga do tamanho da criatura, que some junto com ela. O piso de 16 é o que
     // faz a morte dela ser um EVENTO na tela e não o apagar de um sprite pequeno.

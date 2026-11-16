@@ -10,6 +10,10 @@ import { Parallax } from '../Parallax';
 import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
+import { forcaNoLugar, lugarDaCena } from '../som/acustica';
+import { Som, type Laco } from '../som/Som';
+import { ESTRONDO_MUSICA_ABAFADA, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
+import { somDaMorte, somDoAcerto } from '../som/somDaExplosao';
 import { InputReader } from '../input';
 import { Fx } from '../systems/Fx';
 import { tipoDoMaterial } from '../systems/explosoes/tipoExplosao';
@@ -68,6 +72,20 @@ import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, 
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
+
+/**
+ * The sonic boom that OPENS the F1 (block SOUND, his ask): it plays first and alone, the music dips under it, the
+ * engine comes in after (ms). Tuned with him playing.
+ */
+const ESTRONDO = {
+  musicaVoltaEm: 2200,
+  musicaVoltaMs: 1800,
+  motorEntraEm: 2000,
+  motorSobeMs: 1500,
+  // (from the hangar the boom began ~0.6 s + the load before the stage: its tail is what is left)
+  musicaVoltaVindoEm: 1200,
+  motorEntraVindoEm: 1100,
+};
 
 /** Os quatro tempos de uma câmera lenta, em ms de relógio cru (ver `GameScene.camaraLenta`). */
 interface CurvaLenta {
@@ -234,6 +252,9 @@ export class GameScene extends Phaser.Scene {
   private semDanoAte = 0;
   /** A propulsão da nave (a animação do motor) — a base da versão `-azul` dos Propulsores (`tocarMotor`). */
   private animMotor: string | null = null;
+  /** Which ship sounds (block SOUND: X-AELO / TERMINUS / CHARYBDIS) and its engine loop. */
+  private naveSom: NaveSom = 'terminus';
+  private motorSom: Laco | null = null;
   private over = false;
   /**
    * A MORTE DA NAVE (26/10): os destroços desenhados pixel a pixel (`systems/morte/`). Enquanto ela corre, `over` já é
@@ -336,6 +357,8 @@ export class GameScene extends Phaser.Scene {
     // Fase desconhecida cai na 1: um link velho ou um `scene.start` errado não pode
     // derrubar o jogo numa tela preta.
     this.stage = STAGES[data.stage ?? 1] ?? STAGES[1];
+    // the acoustics of the place (block SOUND): F1 in the atmosphere, F2/F3 the cabin, F4 the organic interior
+    Som.trocarDeCena(lugarDaCena('Game', this.stage.id));
     // A Fase 1 acontece ANTES da escolha, então ela é sempre a nave padrão.
     this.shipId = SHIPS[data.ship ?? ''] ? data.ship! : DEFAULT_SHIP;
 
@@ -552,6 +575,54 @@ export class GameScene extends Phaser.Scene {
     if (anim && tex === visual.texture && this.anims.exists(anim)) this.animMotor = anim;
     else if (tex === 'ship' && this.anims.exists('ship-thrust')) this.animMotor = 'ship-thrust';
     if (this.animMotor) this.ship.play(this.animMotor);
+
+    // THE SHIP'S SOUND (block SOUND, sheet 1): its own shot and its engine loop (the engine sits low under the music and
+    // comes up without it — `mixagem.ts`). The loop stops with the scene and with the death.
+    this.naveSom = naveDoSom(this.shipId, naveEscolhida(this.registry).modelo);
+    this.weapons.somDoTiro = somDaNave(this.naveSom, 'tiro');
+    // THE TERMINUS IS A ROTARY GUN (16/11, his idea): the M2 while held, the A1 arriving on the release — the peak in the
+    // air, the burst through the hull in space (the place is read on each release)
+    this.weapons.somRotativo =
+      this.naveSom === 'terminus'
+        ? {
+            arranque: 'nave.terminus.rotativa.arranque',
+            laco: 'nave.terminus.rotativa.laco',
+            parada: 'nave.terminus.rotativa.parada',
+            chegada: () => (Som.lugarAgora() === 'cabine' ? 'nave.terminus.chegada.casco' : 'nave.terminus.chegada.pico'),
+          }
+        : null;
+    // the pause freezes the stage: the held fire goes quiet (no arrival — nothing was released)
+    const aoPausar = (): void => this.weapons.pararRotativa(false);
+    this.events.on(Phaser.Scenes.Events.PAUSE, aoPausar);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.PAUSE, aoPausar));
+    this.motorSom?.parar(0);
+    this.motorSom = null;
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.motorSom?.parar(250);
+      this.motorSom = null;
+    });
+    // HIS MOMENT, THE STAGE'S SOUND ENTRANCE (15/11, him: *"pode ser antes de começar tudo... ela dá a entrada sonora para
+    // a fase, depois começa os outros sons"*): the sonic boom first and alone — the music coming from the hangar dips
+    // under it and comes back slowly — and only then the engine fades in. Other stages: the engine at once.
+    const abertura = this.stage.id === 1 && !this.sandbox && !this.practice;
+    // (16/11) from the hangar the boom is ALREADY sounding — it started on the black veil and crossed over (`ponte`):
+    // the stage only waits for its tail. Any other way into the F1 (the retry, the dev keys) plays it whole, here.
+    const jaVeio = abertura && Som.tocando('momento.f1.estrondo');
+    if (abertura && !jaVeio) {
+      Som.tocar('momento.f1.estrondo');
+      Music.abafar(this, ESTRONDO_MUSICA_ABAFADA, 150);
+    }
+    if (abertura) {
+      // (a pause opened in between owns the duck: it restores the music itself when it closes)
+      this.time.delayedCall(jaVeio ? ESTRONDO.musicaVoltaVindoEm : ESTRONDO.musicaVoltaEm, () => {
+        if (!pausaAberta()) Music.abafar(this, 1, ESTRONDO.musicaVoltaMs);
+      });
+    }
+    this.time.delayedCall(abertura ? (jaVeio ? ESTRONDO.motorEntraVindoEm : ESTRONDO.motorEntraEm) : 0, () => {
+      if (this.over) return;
+      this.motorSom = Som.laco(somDaNave(this.naveSom, 'motor'), abertura ? 0 : 1);
+      if (abertura) this.motorSom?.volume(1, ESTRONDO.motorSobeMs);
+    });
 
     // A NAVE AVARIADA (última vida) — dano por CÓDIGO, a técnica da Interlude3: fumaça
     // escura seguindo o casco + o motor TOSSINDO (timeScale da propulsão sorteado a cada
@@ -2145,6 +2216,13 @@ export class GameScene extends Phaser.Scene {
 
     this.weapons.release(bullet);
     this.fx.hit(bullet.x, bullet.y);
+    Som.tocar(somDoAcerto(this.materialDoChefe()), { x: bullet.x });
+  }
+
+  /** The material of the boss in the scene (its hits sound like it — block SOUND); `undefined` = metal. */
+  private materialDoChefe(): string | undefined {
+    const quem = this.boss?.destrocos ? CHEFOES[this.boss.destrocos.quem] : undefined;
+    return quem?.material;
   }
 
   /**
@@ -2171,6 +2249,7 @@ export class GameScene extends Phaser.Scene {
     // seguem com a fagulha: o respingo é o que diz "a cabeça vale mais".
     if (this.boss.targets && noAlvo) this.destrocos.respingo(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
     else this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
+    Som.tocar(somDoAcerto(this.materialDoChefe()), { x: bullet.x });
     this.cartas.aoAcertarChefe(bullet.x, bullet.y, origem);
 
     this.medidas?.dano(`${origem ?? 'tiro'} (chefão)`, dano);
@@ -2672,6 +2751,10 @@ export class GameScene extends Phaser.Scene {
     // pixel a cada 2 tiros e solta a fagulha. A fagulha acende no pixel comido.
     const onde = hp > 0 ? this.marcarPeca(hazard, origem ?? 'tiro', de, dano) : null;
     this.fx.hit(onde?.x ?? bullet.x, onde?.y ?? bullet.y);
+    {
+      const p = PECAS[hazard.getData('kind') as string];
+      Som.tocar(somDoAcerto(this.stage.id === 4 && p?.materialF4 ? p.materialF4 : p?.material), { x: bullet.x });
+    }
 
     // Destroço é indestrutível (hp = Infinity): o tiro ricocheteia — e, desde 27/10, deixa a marca.
     if (!Number.isFinite(hp)) return;
@@ -2807,6 +2890,10 @@ export class GameScene extends Phaser.Scene {
       this.weapons.release(bullet);
     }
     this.fx.hit(bullet.x, bullet.y);
+    {
+      const kind = enemy.getData('kind') as string;
+      Som.tocar(somDoAcerto(SEPARACAO[kind]?.material, kind), { x: bullet.x });
+    }
 
     const bx = bullet.x;
     const by = bullet.y;
@@ -2834,6 +2921,9 @@ export class GameScene extends Phaser.Scene {
     // OS DESTROÇOS (26/10, em mesa): cada classe morre nos próprios pixels, na variação escolhida; `hoje` é a de antes.
     const sep = SEPARACAO[kind];
     const variante = sep ? this.varianteDe(sep.classe, e) : 'hoje';
+    // a kind with its own death sound (the swarm drone) plays it here, and its blasts stay mute (block SOUND)
+    const somProprio = somDaMorte(kind);
+    if (somProprio) Som.tocar(somProprio, { x: e.x, forca: forcaNoLugar(1, Som.lugarAgora()) });
     if (sep && variante !== 'hoje') {
       this.destrocos.morrer(e, {
         estilo: ESTILO_DA_VARIANTE[variante],
@@ -2841,6 +2931,7 @@ export class GameScene extends Phaser.Scene {
         classe: sep.classe,
         de: de ?? { x: this.ship.x, y: this.ship.y },
         aoClimax: sep.classe === 'mini' ? () => this.lentaDeMorte() : undefined,
+        mudo: !!somProprio,
       });
       if (variante === 'B2') this.hitstop(DESTROCOS.estilhacos.congelaMs);
     } else if (kind === 'aguaViva') {
@@ -2851,7 +2942,7 @@ export class GameScene extends Phaser.Scene {
     } else {
       // (bloco I) a explosão pelo material dele: metal = D, luz = B, biomec = B → C, carne = C de matéria
       const sep = SEPARACAO[kind];
-      this.fx.explode(e.x, e.y, e.scale, 50, tipoDoMaterial(sep?.material, sep?.classe));
+      this.fx.explode(e.x, e.y, e.scale, 50, tipoDoMaterial(sep?.material, sep?.classe), !somProprio);
     }
     this.score += e.getData('score') as number;
     this.medidas?.abate(e.getData('kind') as string, e);
@@ -2879,6 +2970,7 @@ export class GameScene extends Phaser.Scene {
     if (this.over || this.bombs <= 0) return;
     this.bombs--;
     vibrar('bomba');
+    Som.tocar('nave.bomba.lancar', { x: this.ship.x });
     if (this.medidas) this.medidas.bombasUsadas++;
     if (this.bombaModo === 'panico') this.bombaDePanico();
     else this.bombas.lancar(this.time.now);
@@ -3072,6 +3164,9 @@ export class GameScene extends Phaser.Scene {
       this.gameOver();
       return;
     }
+    // the blow, then the chip flying off (block SOUND; the killing blow has only the death)
+    Som.tocar(somDaNave(this.naveSom, 'atingida'), { x: this.ship.x });
+    this.time.delayedCall(70, () => Som.tocar(somDaNave(this.naveSom, 'vida'), { x: this.ship.x }));
     // A PERDA DE CASCO (26/10, no lugar da explosão do PixelLab): uma lasca da borda do casco voa no estilo da morte
     // desta nave — a MESMA em todo golpe, quantas vidas houver (`MORTE.golpe`). O aviso de "mais um e acabou" continua
     // sendo a fumaça da última vida.
@@ -3088,6 +3183,11 @@ export class GameScene extends Phaser.Scene {
   private gameOver(): void {
     this.over = true;
     this.tempoNormal();
+    // the ship's own death sound; its engine dies with it
+    Som.tocar(somDaNave(this.naveSom, 'morte'), { x: this.ship.x });
+    this.weapons.pararRotativa(false);
+    this.motorSom?.parar(300);
+    this.motorSom = null;
 
     // A MORTE DA NAVE (26/10): a nave some e os pedaços DELA (o quadro que está na tela) ficam no lugar — ver
     // `systems/morte/MorteDaNave.ts`. Cada nave morre do seu jeito (`opcoesDaMorte`). A câmera lenta entra no momento

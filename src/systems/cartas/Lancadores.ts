@@ -3,6 +3,7 @@ import type { Contexto } from './contexto';
 import type { ExplosaoDoJogador } from './ExplosaoDoJogador';
 import { texturaDaLinhagem } from './texturasProvisorias';
 import { NUMEROS } from '../../data/numerosCartas';
+import { Som } from '../../som/Som';
 
 /**
  * PROVISÓRIOS (calibragem). O míssil é forte e raro; o tiro leve e constante é do drone (spec §4.3).
@@ -154,10 +155,13 @@ export class Lancadores {
     const id = ++this.serie;
     b.setData('missil', id);
     const agora = this.c.h.scene.time.now;
+    const alvo = this.alvoLivre(n.x, n.y);
+    // the lock beeps as it drops (block SOUND); the rocket itself sounds at the ignition
+    if (alvo) Som.tocar('nave.missil.travar', { x: n.x });
     this.misseis.push({
       b,
       id,
-      alvo: this.alvoLivre(n.x, n.y),
+      alvo,
       ignicaoEm: agora + QUEDA.ms,
       aceso: false,
       explodeEm: agora + QUEDA.ms + MISSIL.vidaMs,
@@ -209,6 +213,7 @@ export class Lancadores {
         // A IGNIÇÃO: parte rápido na direção do nariz.
         m.aceso = true;
         body.velocity.setToPolar(m.b.rotation, MISSIL.velocidadeIgnicao);
+        Som.tocar('nave.missil.lancar', { x: m.b.x });
       }
       if (m.alvo) {
         const ang = Math.atan2(m.alvo.y - m.b.y, m.alvo.x - m.b.x);
@@ -241,6 +246,7 @@ export class Lancadores {
       origem: 'flare',
     });
     if (!b) return;
+    Som.tocar('nave.flare.soltar', { x });
     // A ARTE APROVADA (04/10, o loop aceso da PixMiniMax a 75%, 12×14): a lata em PÉ — o `disparar` gira o projétil
     // para o rumo (180°), e de cabeça para baixo a chama desceria. A caixa é a da LATA, não a do quadro (o quadro tem
     // as fagulhas em volta): 5×10, perto da provisória que ele jogou.

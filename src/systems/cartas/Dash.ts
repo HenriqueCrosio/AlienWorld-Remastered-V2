@@ -3,6 +3,7 @@ import { rumoDoDash } from '../../cartasRegras';
 import type { InputState } from '../../flight/FlightController';
 import type { Contexto } from './contexto';
 import { NUMEROS } from '../../data/numerosCartas';
+import { Som } from '../../som/Som';
 
 /**
  * PROVISÓRIOS (calibragem) — a ESPERA é o número que segura "dash invulnerável + Casco" (§4.2). Distância, intocável e
@@ -81,6 +82,7 @@ export class Dash {
     this.intocavelAte = agora + DASH.intocavelMs;
     this.prontoEm = agora + DASH.esperaMs;
     this.proximoFantasma = agora;
+    Som.tocar('nave.dash', { x: this.c.h.nave().x });
     if (!this.salvo) this.salvo = { max: body.maxVelocity.clone(), drag: body.drag.clone() };
     body.setMaxVelocity(VELOCIDADE * 2, VELOCIDADE * 2);
     body.setDrag(0, 0);

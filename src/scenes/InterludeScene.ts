@@ -12,6 +12,8 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
+import { lugarDaCena } from '../som/acustica';
+import { Som } from '../som/Som';
 import { SHIPS, DEFAULT_SHIP, naveEscolhida, visualDaNave } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
 import { mesaDaCutscene } from '../cartas';
@@ -110,6 +112,7 @@ export class InterludeScene extends Phaser.Scene {
   }
 
   create(data: { score?: number; handling?: HandlingMode }): void {
+    Som.trocarDeCena(lugarDaCena(this.scene.key));
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     this.done = false;
@@ -490,8 +493,14 @@ export class InterludeScene extends Phaser.Scene {
         const y = InterludeScene.DECK_Y + Phaser.Math.Between(-10, 26);
         // (bloco I) a Aurora é metal: a cadeia em D, os compartimentos grandes fechando na nuvem (C sobre A + D). Maiores
         // que na 1ª instalação (ele: *"eu quero ela maior"*): a média no tamanho em que foi assada, as grandes a 1,2.
-        if (i % 4 === 3) this.fx.explodeBig(x, y - 14, 1.2, 26, 'chefeFim');
-        else this.fx.explode(x, y, 2, 26, 'metal');
+        // THE CHAIN'S SOUND IS COMPOSED HERE, not blast by blast (15/11, him: *"ouve-se as explosões separadas, mas sem um
+        // outro efeito por trás fica estranho e mal acabado [...] adicionar a sequência do explosao.metalGrande (C)"*):
+        // every step is a LOW metal-grande (they overlap three at a time — the cap keeps the newest), the big ones a
+        // little louder, all pouring into the LASTRO that rolls under the chain; the final blast (below) closes it.
+        const grande = i % 4 === 3;
+        Som.tocar('explosao.metalGrande', { x, forca: grande ? 0.7 : 0.45 });
+        if (grande) this.fx.explodeBig(x, y - 14, 1.2, 26, 'chefeFim', false);
+        else this.fx.explode(x, y, 2, 26, 'metal', false);
       });
     }
 

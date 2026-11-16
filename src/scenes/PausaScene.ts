@@ -20,6 +20,7 @@ import {
 import { texturaMedalha } from '../menu/painelResultado';
 import type { Campo, Preferencias } from '../preferencias';
 import { Music } from '../systems/Music';
+import { Som } from '../som/Som';
 import { alternarTelaCheia, emTelaCheia, escFicaNoJogo } from '../telaCheia';
 import { pixelText } from '../ui';
 import { COR_JANELA, texturaJanela } from '../ui/janela';
@@ -104,7 +105,11 @@ export class PausaScene extends Phaser.Scene {
       veu.setAlpha(0);
       this.tweens.add({ targets: veu, alpha: JANELA.veu, duration: DERROTA.entra });
     }
-    if (!doMenu) Music.abafar(this, JANELA.abafo, 200);
+    if (!doMenu) {
+      Music.abafar(this, JANELA.abafo, 200);
+      // the world's effects duck with the music (block SOUND); on SHIP LOST the action is silenced, the ambience stays low
+      Som.abafar(JANELA.abafo, 200, this.ctx.tipo === 'derrota');
+    }
     pararVibracao();
 
     // the three device symbols in the top left corner (lit = connected)
@@ -291,7 +296,10 @@ export class PausaScene extends Phaser.Scene {
   private fechar(carimbo: number): void {
     if (this.fechou) return;
     this.fechou = true;
-    if (this.ctx.tipo !== 'menu') Music.abafar(this, 1, 0);
+    if (this.ctx.tipo !== 'menu') {
+      Music.abafar(this, 1, 0);
+      Som.abafar(1, 0);
+    }
     this.scene.stop();
     devolverCena(this.dados, carimbo);
   }

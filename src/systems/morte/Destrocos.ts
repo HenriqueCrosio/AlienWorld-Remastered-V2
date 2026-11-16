@@ -79,6 +79,8 @@ export interface OpcoesMorteInimigo {
   aoClimax?: () => void;
   /** the rock's way of breaking (`estilo: 'rocha'`): R1 the fracture, R2 the crumble, R3 split in two */
   rocha?: VarianteRocha;
+  /** the blasts make no sound: whoever kills plays its own (the swarm drone — block SOUND, 15/11) */
+  mudo?: boolean;
 }
 
 /** A rigid piece in the world. */
@@ -573,7 +575,7 @@ export class Destrocos {
       this.cairJa(r, c.vy);
       this.corpos.push(r);
     }
-    this.estouro(o.material, cx, cy, L.bola * porte, false);
+    this.estouro(o.material, cx, cy, L.bola * porte, false, !o.mudo);
     this.faiscas(o.material, cx, cy, c.vx, c.vy, Math.round(5 * porte), 1);
     this.spray(c, o.material, 1);
   }
@@ -605,7 +607,7 @@ export class Destrocos {
       this.cairJa(r, c.vy);
       this.corpos.push(r);
     }
-    this.estouro(o.material, mx, my, M.bola * porte, true);
+    this.estouro(o.material, mx, my, M.bola * porte, true, !o.mudo);
     this.faiscas(o.material, mx, my, c.vx, c.vy, Math.round(7 * porte), 1);
     this.spray(c, o.material, 0.7);
   }
@@ -625,7 +627,7 @@ export class Destrocos {
     c.some = Infinity;
     // a first small hit where the shot landed
     const [cx, cy] = this.noMundo(c, c.ox - 0.5, c.oy - 0.5);
-    this.estouro(o.material, cx, cy, 0.3 * porte, true);
+    this.estouro(o.material, cx, cy, 0.3 * porte, true, !o.mudo);
     this.faiscas(o.material, cx, cy, c.vx, c.vy, Math.round(4 * porte), 1);
     this.corpos.push(c);
     this.pendentes.push({
@@ -655,7 +657,7 @@ export class Destrocos {
           this.cairJa(q, r.vy);
           this.corpos.push(q);
         }
-        this.estouro(o.material, x, y, K.bola * porte, false);
+        this.estouro(o.material, x, y, K.bola * porte, false, !o.mudo);
         this.faiscas(o.material, x, y, r.vx, r.vy, Math.round(8 * porte), 1);
         this.spray(r, o.material, 1);
         o.aoClimax?.();
@@ -682,7 +684,7 @@ export class Destrocos {
           if (!p) return;
           c.manchas.push({ u: p.x, v: p.y, t0: this.t });
           const [wx, wy] = this.noMundo(c, p.x, p.y);
-          this.estouro(o.material, wx, wy, R.estalo * porte, true);
+          this.estouro(o.material, wx, wy, R.estalo * porte, true, !o.mudo);
           // (flesh has no fireball: the pop is a gush of droplets)
           this.faiscas(o.material, wx, wy, c.vx, c.vy, Math.round((o.material === 'carne' ? 12 : 5) * porte), 1);
           c.w *= 1.8;
@@ -725,7 +727,7 @@ export class Destrocos {
           this.corpos.push(q);
         }
         // a boss's break-up gets the big blast (behind the pieces: they read over it)
-        this.estouro(o.material, x, y, R.bola * porte * (o.classe === 'chefe' ? R.chefe : 1), false);
+        this.estouro(o.material, x, y, R.bola * porte * (o.classe === 'chefe' ? R.chefe : 1), false, !o.mudo);
         this.faiscas(o.material, x, y, r.vx, r.vy, Math.round(10 * porte), 1);
         this.spray(r, o.material, 1);
         o.aoClimax?.();
@@ -760,7 +762,7 @@ export class Destrocos {
       this.cairJa(r, c.vy);
       this.corpos.push(r);
     }
-    this.estouro(o.material, cx, cy, E.bola * porte, false);
+    this.estouro(o.material, cx, cy, E.bola * porte, false, !o.mudo);
     this.faiscas(o.material, cx, cy, c.vx, c.vy, Math.round(8 * porte), 1);
     this.spray(c, o.material, brilha ? 1 : 1.6);
     o.aoClimax?.();
@@ -780,7 +782,7 @@ export class Destrocos {
     c.w = (this.rnd() - 0.5) * 0.6;
     this.corpos.push(c);
     const [cx, cy] = this.noMundo(c, c.ox - 0.5, c.oy - 0.5);
-    this.estouro(o.material, cx, cy, 0.5 * porte, false);
+    this.estouro(o.material, cx, cy, 0.5 * porte, false, !o.mudo);
   }
 
   /**
@@ -931,13 +933,14 @@ export class Destrocos {
     }
     if (org) {
       // THE ORGANIC BITE (28/10): no explosion sheet, no metal sparks — the flesh's short shake, and the jet out of the tear
-      this.estouro('carne', wx, wy, DESTROCOS.lasca.estouro[classe], false);
+      // (the bite is silent: the shot's hit already sounded — block SOUND)
+      this.estouro('carne', wx, wy, DESTROCOS.lasca.estouro[classe], false, false);
       this.jato(wx, wy, base.vx, base.vy, ux, uy, 6 + alvo * DESTROCOS.organica.jato);
       return;
     }
     const porte = DESTROCOS.porte(alvo * 6);
     this.faiscas(material, wx, wy, base.vx + ux * 30, base.vy + uy * 30, Math.round(5 * porte), 0.8);
-    if (material === 'metal' || material === 'biomec') this.estouro(material, wx, wy, DESTROCOS.lasca.estouro[classe], false);
+    if (material === 'metal' || material === 'biomec') this.estouro(material, wx, wy, DESTROCOS.lasca.estouro[classe], false, false);
     if (material === 'carne' || material === 'biomec') this.gotas(wx, wy, base.vx + ux * 25, base.vy + uy * 25, 6 + alvo / 3);
   }
 
@@ -1677,23 +1680,23 @@ export class Destrocos {
   // ─── the pieces of the effects ───────────────────────────────────────────────────────────────────────────────────
 
   /** The blast under the debris: the PixelLab sheet (metal, biomec), the jellyfish's discharge (light), none (flesh). */
-  private estouro(mat: Material, x: number, y: number, tamanho: number, frente: boolean): void {
+  private estouro(mat: Material, x: number, y: number, tamanho: number, frente: boolean, som = true): void {
     // (a rock has no fire of its own: its blast is the PixelLab explosion the scene puts over it)
     if (tamanho <= 0 || mat === 'rocha') return;
     if (mat === 'luz') {
-      this.fx.choque(x, y, tamanho * 0.6);
+      this.fx.choque(x, y, tamanho * 0.6, som ? 'explosao.luz' : null);
       return;
     }
     const depth = this.depth + (frente ? 0.03 : -0.03);
     if (mat === 'carne') {
       // (bloco I, 09/11) flesh gets its own: the matter cloud, no fire (it only shook before)
-      this.fx.explosao(tipoDoMaterial('carne'), x, y, tamanho, depth);
+      this.fx.explosao(tipoDoMaterial('carne'), x, y, tamanho, depth, som);
       this.scene.cameras.main.shake(60 * tamanho, 0.0025 * tamanho);
       return;
     }
     const escala = mat === 'biomec' ? tamanho * 0.7 : tamanho;
     // the explosion of the material (bloco I: metal = D, biomec = B → C), at the same sizes as `Fx.explode`
-    this.fx.explosao(tipoDoMaterial(mat), x, y, escala, depth);
+    this.fx.explosao(tipoDoMaterial(mat), x, y, escala, depth, som);
     this.scene.cameras.main.shake(70 * Math.min(2, escala), 0.003 * Math.min(2, escala));
   }
 

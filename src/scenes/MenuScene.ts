@@ -7,6 +7,8 @@ import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
 import { cenaDeFundoHD, escalaHD, EVENTO_ESCALA, irmaDe, jogoHD, removerCenaHD } from '../uiHD';
 import { Music } from '../systems/Music';
+import { lugarDaCena } from '../som/acustica';
+import { Som } from '../som/Som';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import type { HandlingMode } from './GameScene';
@@ -98,6 +100,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create(): void {
+    Som.trocarDeCena(lugarDaCena(this.scene.key));
     // Cada partida nova sorteia as variantes de arte de novo (como o menu antigo fazia).
     resetVariantCache();
     this.settled = false;

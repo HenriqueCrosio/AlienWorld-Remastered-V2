@@ -15,6 +15,7 @@ import { EstadosNoInimigo } from './cartas/EstadosNoInimigo';
 import { criarTexturasProvisorias } from './cartas/texturasProvisorias';
 import { NUMEROS } from '../data/numerosCartas';
 import { CAVERNA_F1 } from '../f1/numerosF1';
+import { Som } from '../som/Som';
 
 export type { HostCartas } from './cartas/contexto';
 
@@ -200,6 +201,7 @@ export class CartasEmJogo {
       this.cascoPronto = true;
       this.aura.mostrar();
       this.piscarCasco();
+      Som.tocar('nave.casco.voltar');
     }
     if (id === 'DEF_005') this.h.ganharBomba();
     if (id === 'MOV_001') this.h.motorMudou?.();
@@ -221,6 +223,7 @@ export class CartasEmJogo {
       this.cascoPronto = true;
       this.aura.mostrar();
       this.piscarCasco();
+      Som.tocar('nave.casco.voltar', { x: this.h.nave().x });
     }
 
     // O TETO DO VOO LIVRE sai daqui a cada quadro: os PROPULSORES (só no voo livre — a F1 é impulso, e a carta nem
@@ -306,6 +309,9 @@ export class CartasEmJogo {
     const n = this.h.nave();
     this.h.fx.hit(n.x, n.y);
     claraoDe(this.h.scene).golpe(0x3ee0f0, 70);
+    // the HULL takes the blow and breaks (block SOUND): the thump, and the break right on top of it
+    Som.tocar('nave.casco.absorver', { x: n.x });
+    Som.tocar('nave.casco.quebrar', { x: n.x, forca: 0.85 });
     if (tem(this.reg, 'DEF_004')) this.explosao.explodir('reativo', n.x, n.y, null, null);
     return true;
   }
@@ -323,6 +329,8 @@ export class CartasEmJogo {
 
   private incendiar(e: Inimigo): void {
     if (!e.active) return;
+    // the flame catching sounds only when it CATCHES (not on every re-ignite of one already burning) — block SOUND
+    if (((e.getData('queimaAte') as number | undefined) ?? 0) <= this.h.scene.time.now) Som.tocar('efeito.incendiar', { x: e.x });
     e.setData('queimaAte', this.h.scene.time.now + QUEIMA.queimaMs);
     // A chama #12 por cima (`EstadosNoInimigo`); o tint laranja só sem a arte.
     if (this.estados.tingeQueima) e.setTint(COR_QUEIMANDO);

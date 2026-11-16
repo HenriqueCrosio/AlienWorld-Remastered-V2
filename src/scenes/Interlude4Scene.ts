@@ -11,6 +11,8 @@ import { montarDentro } from './final/dentro';
 import { montarFora } from './final/fora';
 import { montarQueda } from './final/queda';
 import { montarSobrevoo } from './final/sobrevoo';
+import { lugarDaCena } from '../som/acustica';
+import { Som } from '../som/Som';
 
 /**
  * O AFASTAMENTO — a cutscene FINAL, refeita na Fatia 8 (spec 2026-09-23-fatia8-cutscene-final-design.md).
@@ -61,6 +63,7 @@ export class Interlude4Scene extends Phaser.Scene {
     /** true quando o `GameScene` deixou a fotografia do último quadro em `f8Costura`. */
     costura?: boolean;
   }): void {
+    Som.trocarDeCena(lugarDaCena(this.scene.key));
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     this.naveId = SHIPS[data.ship ?? ''] ? data.ship! : DEFAULT_SHIP;

@@ -6,6 +6,7 @@ import {
   fatorEfeitos, fatorMusica, forcaClaroes, gravar, ler, mapaControleDe, mapaTecladoDe, mudar, remapear, restaurarControles,
   type Campo, type Preferencias,
 } from './preferencias';
+import { Som } from './som/Som';
 import { Music } from './systems/Music';
 
 /**
@@ -35,6 +36,7 @@ function aplicar(p: Preferencias): Preferencias {
   atual = p;
   definirMapaTeclado(mapaTecladoDe(p));
   Music.atualizarVolume();
+  Som.atualizarVolume();
   return p;
 }
 
@@ -51,7 +53,7 @@ export const restaurarPref = (): Preferencias => aplicar(restaurarControles(guar
 
 /** "Reduce flashes" as a factor on every flash peak (`systems/clarao/Clarao.ts`). */
 export const forcaDosClaroes = (): number => forcaClaroes(prefs());
-/** The sound-effects level (general × effects, 0–1): recorded today, used when the sound comes in. */
+/** The sound-effects level (general × effects, 0–1). The engine itself reads `Som.volumes` (block SOUND). */
 export const volumeEfeitos = (): number => fatorEfeitos(prefs());
 /** The controller map in force (the ship reads it every frame). */
 export const mapaDoControle = (): Record<AcaoRemap, number> => mapaControleDe(prefs());
@@ -59,5 +61,10 @@ export const mapaDoControle = (): Record<AcaoRemap, number> => mapaControleDe(pr
 export const mapaDoTeclado = (): Record<AcaoRemap, string> => mapaTecladoDe(prefs());
 
 Music.fator = () => fatorMusica(prefs());
+// the effects (block SOUND, 15/11): the three levels apart — the ambience and the engine also read MÚSICA (`mixagem.ts`)
+Som.volumes = () => {
+  const p = prefs();
+  return { geral: p.volume.geral / 10, efeitos: p.volume.efeitos / 10, musica: p.volume.musica / 10 };
+};
 definirVibracao(() => prefs().vibracao);
 definirMapaTeclado(mapaTecladoDe(prefs()));

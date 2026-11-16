@@ -6,6 +6,8 @@ import { CONJUNTOS, IDLE_HAB } from '../entities/serpente/gestosHab';
 import { ARQUIVOS as ARQUIVOS_ENGUIA_BOOT } from '../entities/serpente/enguia/arquivos';
 import { FOLHAS_EXPLOSAO } from '../systems/explosoes/folhasExplosao';
 import { carregamentoAcabou, carregou, tirarCarregamento } from '../carregamento';
+import { SONS } from '../som/catalogoSons';
+import { Som, chaveSom } from '../som/Som';
 
 /**
  * Quantos quadros cada animação tem EM DISCO.
@@ -1488,9 +1490,12 @@ export class BootScene extends Phaser.Scene {
 
     this.load.audio('stage1', 'audio/stage1.mp3');
     this.load.audio('boss', 'audio/boss.mp3');
+    // THE SOUND EFFECTS (block SOUND, 15/11): every sound of the catalogue, ogg with the m4a fallback (Safari).
+    for (const [nome, d] of Object.entries(SONS)) this.load.audio(chaveSom(nome), [`sfx/${d.arquivo}.ogg`, `sfx/${d.arquivo}.m4a`]);
   }
 
   create(): void {
+    Som.iniciar(this.sound, this.cache.audio);
     // Placeholder só para quem ainda não tem arte real. A arte entra asset por asset.
     const fallback: Record<string, () => void> = {
       ship: () => this.makeShip(),

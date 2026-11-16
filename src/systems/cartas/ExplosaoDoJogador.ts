@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { angulosDoLeque, raioDaExplosao } from '../../cartasRegras';
 import type { Contexto, Inimigo } from './contexto';
 import { NUMEROS } from '../../data/numerosCartas';
+import { Som } from '../../som/Som';
 
 export type FonteExplosao = 'explosivo' | 'combustao' | 'reativo' | 'missil' | 'flare';
 
@@ -72,6 +73,8 @@ export class ExplosaoDoJogador {
     const base = EXPLOSAO[fonte];
     const maior = this.c.tem('EFF_002');
     const raio = raioDaExplosao(base.raio, maior);
+    // the sound of YOUR explosion (block SOUND, sheet 2): the burning one bursting has its own; EXPLOSÃO MAIOR is louder
+    Som.tocar(fonte === 'combustao' ? 'efeito.combustao' : 'explosao.carta', { x, forca: maior ? 1 : 0.85 });
     this.desenhar(fonte, x, y, angulo, maior, VISUAL[fonte] * (maior ? VISUAL_MAIOR : 1), raio);
     this.c.depois(() => {
       for (const e of this.c.noRaio(x, y, raio)) {
@@ -105,7 +108,7 @@ export class ExplosaoDoJogador {
         this.variar(this.animar(anim, ex, ey, angulo), anim.direcional);
         return;
       }
-      const s = fx.explosao('carta', ex, ey, escala, PROFUNDIDADE);
+      const s = fx.explosao('carta', ex, ey, escala, PROFUNDIDADE, false);
       if (s) this.variar(s, false);
     };
 

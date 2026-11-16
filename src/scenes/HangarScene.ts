@@ -6,11 +6,14 @@ import { GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
 import { cenaDeFundoHD, removerCenaHD } from '../uiHD';
 import { Music } from '../systems/Music';
+import { lugarDaCena } from '../som/acustica';
+import { Som } from '../som/Som';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { escolherNave, naveEscolhida } from '../ships';
 import type { HandlingMode } from './GameScene';
-import { LADO, NOME_PINTURA, TEXTO } from '../hangar/numerosHangar';
+import { LADO, NOME_PINTURA, TEMPO, TEXTO } from '../hangar/numerosHangar';
+import { ESTRONDO_MUSICA_ABAFADA } from '../som/somDaNave';
 import { acabou, confirmar, escolhaDoEstado, mudarLado, mudarPintura, novoEstado, type EstadoHangar } from '../hangar/escolha';
 import { CenarioHangar, carregarCamadasHangar } from '../hangar/cenarioHangar';
 import { CHAVE_HANGAR_HD, HangarCenaHD } from '../hangar/HangarCenaHD';
@@ -39,6 +42,7 @@ export class HangarScene extends Phaser.Scene {
   /** A sonda para o relógio (para fotografar um instante). */
   congelado = false;
   private saiu = false;
+  private estrondou = false;
 
   constructor() {
     super('Hangar');
@@ -49,10 +53,12 @@ export class HangarScene extends Phaser.Scene {
   }
 
   create(): void {
+    Som.trocarDeCena(lugarDaCena(this.scene.key));
     this.estado = novoEstado(naveEscolhida(this.registry));
     this.cenario = null;
     this.atm = null;
     this.saiu = false;
+    this.estrondou = false;
     this.congelado = false;
     this.cameras.main.setBackgroundColor('#000000');
     this.montarCenario();
@@ -139,6 +145,15 @@ export class HangarScene extends Phaser.Scene {
     this.atm?.update(dt);
     this.cenario?.atualizar();
     this.escreverEscolha();
+    // THE F1'S SOUND ENTRANCE STARTS ON THE BLACK (16/11, him: *"pode começar ainda na tela preta, quando chegar na
+    // fase, já estar acabando"*): the sonic boom fires as the veil starts closing and crosses into the stage (`ponte`);
+    // the music coming from here dips under it (the stage brings it back).
+    const e = this.estado;
+    if (!this.estrondou && e.tConfirmou !== null && e.t - e.tConfirmou >= TEMPO.veuFecha) {
+      this.estrondou = true;
+      Som.tocar('momento.f1.estrondo');
+      Music.abafar(this, ESTRONDO_MUSICA_ABAFADA, 150);
+    }
     if (!this.saiu && acabou(this.estado)) {
       this.saiu = true;
       this.scene.start('Game', { handling: this.handling });

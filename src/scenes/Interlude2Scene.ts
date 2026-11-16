@@ -12,6 +12,8 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
+import { lugarDaCena } from '../som/acustica';
+import { Som } from '../som/Som';
 import { SHIPS, DEFAULT_SHIP, ROSTER_DOCA, naveEscolhida, visualDaNave } from '../ships';
 import { mesaDaCutscene, resetDaAlien } from '../cartas';
 import { ShipPanel } from '../ui/ShipPanel';
@@ -194,6 +196,7 @@ export class Interlude2Scene extends Phaser.Scene {
   }
 
   create(data: { score?: number; handling?: HandlingMode; ship?: string; stage?: number }): void {
+    Som.trocarDeCena(lugarDaCena(this.scene.key));
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     // A nave com que ele CHEGOU. Se ele não trocar nada, é com ela que ele segue — a escolha

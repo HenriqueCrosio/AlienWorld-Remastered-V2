@@ -1,5 +1,11 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH } from '../config';
+import { Som, type Laco } from '../som/Som';
+import { chegadaDaRajada } from '../som/somDaNave';
+
+/** The rotary gun (16/11): the loop fades in under the spin-up (ms); the A1 arrives this long after the release (ms). */
+const ROTATIVA_LACO_ENTRA_MS = 220;
+const ROTATIVA_CHEGADA_MS = 80;
 
 /**
  * O CANO GIRATÓRIO — a trava da mini-gun.
@@ -332,6 +338,18 @@ export class WeaponSystem {
   private weapon: WeaponDef = WEAPONS.pulse;
   private ammo: number | null = null;
   private cooldown = 0;
+  /** The ship's own shot sound (block SOUND: each ship its timbre); one per trigger pull, however many muzzles. */
+  somDoTiro: string | null = null;
+  /**
+   * THE ROTARY GUN SOUND (16/11, the TERMINUS — his idea, sheet 7): instead of a sound per shot, the barrels spin up when
+   * the trigger is pressed, the held fire is a loop, and on the RELEASE they spin down and the A1 ARRIVES (the A-10 buzz,
+   * the sound that travelled), its size growing with the burst up to a cap (`chegadaDaRajada`). `chegada()` picks the
+   * arrival by the place (the peak in the air, the hull burst in space). Only the sound: the weapon's numbers are the same.
+   */
+  somRotativo: { arranque: string; laco: string; parada: string; chegada: () => string } | null = null;
+  private rotLaco: Laco | null = null;
+  private rotGirando = false;
+  private rotDisparos = 0;
   /**
    * A arma BASE — a infinita, para a qual sempre se volta (ao morrer, ao acabar a munição).
    *
@@ -516,6 +534,11 @@ export class WeaponSystem {
 
     // Travada: o gatilho não faz nada. É o preço de ter segurado o dedo.
     const podeAtirar = wantsToFire && this.lock <= 0;
+    // the rotary gun's sound follows the TRIGGER (pressed / released), not each shot
+    if (this.somRotativo) {
+      if (podeAtirar && !this.rotGirando) this.girarRotativa();
+      else if (!podeAtirar && this.rotGirando) this.pararRotativa(true);
+    }
 
     if (!podeAtirar || this.cooldown > 0) {
       this.cull();
@@ -544,6 +567,8 @@ export class WeaponSystem {
       this.cooldown = 1 / rate;
     }
     this.shoot(x, y);
+    if (this.somRotativo) this.rotDisparos++;
+    else if (this.somDoTiro) Som.tocar(this.somDoTiro, { x });
 
     if (spin) {
       this.heat += spin.heatPerShot;
@@ -670,6 +695,34 @@ export class WeaponSystem {
     // atirar" é indistinguível de um bug de input.
     this.muzzle.explode(14, x, y);
     this.scene.cameras.main.shake(120, 0.004);
+  }
+
+  /** The trigger went down: the barrels spin up and the held fire loops (fading in under the spin-up). */
+  private girarRotativa(): void {
+    const r = this.somRotativo;
+    if (!r) return;
+    this.rotGirando = true;
+    this.rotDisparos = 0;
+    Som.tocar(r.arranque);
+    this.rotLaco?.parar(0);
+    this.rotLaco = Som.laco(r.laco, 0);
+    this.rotLaco?.volume(1, ROTATIVA_LACO_ENTRA_MS);
+  }
+
+  /**
+   * The trigger came up (or the gun must go quiet): the loop stops, the barrels spin down, and — `comChegada` — the A1
+   * arrives a moment later, as big as the burst was (capped). The pause and the death call it without the arrival.
+   */
+  pararRotativa(comChegada: boolean): void {
+    const r = this.somRotativo;
+    if (!r || !this.rotGirando) return;
+    this.rotGirando = false;
+    this.rotLaco?.parar(40);
+    this.rotLaco = null;
+    if (!comChegada) return;
+    Som.tocar(r.parada);
+    const { forca, fracao } = chegadaDaRajada(this.rotDisparos);
+    this.scene.time.delayedCall(ROTATIVA_CHEGADA_MS, () => Som.tocar(r.chegada(), { forca, fracao }));
   }
 
   private shoot(x: number, y: number): void {

@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import type { FlightController, InputState } from './FlightController';
+import { Som } from '../som/Som';
 
 /**
  * Condução LEGACY — a física do Alien World v2.
@@ -33,6 +34,7 @@ export class FlapController implements FlightController {
   update(body: Phaser.Physics.Arcade.Body, input: InputState): void {
     if (input.flapPressed) {
       body.setVelocityY(-FlapController.IMPULSE);
+      Som.tocar('nave.impulso', { x: body.center.x });
     }
 
     const h = (input.right ? 1 : 0) - (input.left ? 1 : 0);

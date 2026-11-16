@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { pixelsDoRaio, saltosDoArco, type Ponto } from '../../cartasRegras';
 import type { Contexto, Inimigo } from './contexto';
 import { NUMEROS } from '../../data/numerosCartas';
+import { Som } from '../../som/Som';
 
 /** Os PROVISÓRIOS (calibragem) moram em `numerosCartas` — o Arquivo mostra os mesmos. */
 const ELETRICO = NUMEROS.eletrico;
@@ -70,6 +71,8 @@ export class Eletrico {
     e.setData('anelAte', agora + RAIO_NO_CORPO_MS() + ESTALO_VIVE_MS + ANEL_MS);
     this.noCorpo.set(e, { ate: agora + RAIO_NO_CORPO_MS(), proximo: 0 });
     if (dano) this.c.depois(() => this.c.ferir(e, dano, 'choque'));
+    // the shock (the first hit) and the arc (a jump) sound apart — block SOUND, sheet 2b
+    Som.tocar(saltar ? 'efeito.choque' : 'efeito.arco', { x: e.x });
     if (saltar && this.c.tem('EFF_012')) this.arco(e);
   }
 
@@ -78,7 +81,7 @@ export class Eletrico {
     const ate = (e.getData('eletrificadoAte') as number | undefined) ?? 0;
     if (!this.c.tem('EFF_013') || ate <= this.c.h.scene.time.now) return;
     const { x, y } = e;
-    this.c.h.fx.choque(x, y, 0.8);
+    this.c.h.fx.choque(x, y, 0.8, 'efeito.sobrecarga');
     this.c.depois(() => {
       for (const o of this.c.noRaio(x, y, PULSO.raio)) if (o !== e) this.c.ferir(o, PULSO.dano, 'pulso', { x, y });
     });

@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import type { Contexto, Inimigo } from './contexto';
 import { texturaDaLinhagem } from './texturasProvisorias';
 import { NUMEROS } from '../../data/numerosCartas';
+import { Som } from '../../som/Som';
 
 /** PROVISÓRIOS (calibragem). Posição de descanso: atrás e acima da nave. */
 const DRONE = {
@@ -60,6 +61,7 @@ export class DroneAuxiliar {
     const alvo = this.maisProximo(d.x, d.y);
     if (!alvo) return;
     this.espera = NUMEROS.drone.esperaS;
+    Som.tocar('nave.drone.tiro', { x: d.x });
     this.c.h.weapons.disparar({
       x: d.x,
       y: d.y,
