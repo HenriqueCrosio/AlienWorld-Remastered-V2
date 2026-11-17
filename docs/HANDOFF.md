@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-16) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-17) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,18 +16,43 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-17-som-chefes-START.md`. Em 15–16/11 o SOM entrou antes
-> do F (a trilha é dele, os efeitos são meus): as folhas 1 (a nave), 2 (as explosões), 3 (os inimigos e perigos), 4 (os
-> elites), 5a (a Torre e a Capitânia) e 5b (a Serpente e a enguia) estão no jogo, commitadas e empurradas. A sessão abre
-> PELO PEDIDO DELE: antes da folha nova, REGULAR os sons dos chefões — alguns estão tão abafados que quase não se ouvem
-> (medir cada um no jogo antes de mexer: o volume da geração, o filtro do vácuo, o passa-baixa próprio). Depois, a 5c
-> (o Guardião e o Predador)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-18-som-mixagem-START.md`. O SOM (os efeitos; a trilha é
+> dele) tem as folhas 1 a 5 inteiras no jogo — a nave, as explosões, os inimigos e perigos, os elites e os QUATRO
+> chefões (5a, 5b, 5c) —, a regulagem dos chefões no vácuo e o limitador de segurança, tudo aprovado por ele jogando
+> (17/11). A sessão abre PERGUNTANDO A ORDEM: o PASSE DE MIXAGEM agora (a cola, o abaixar dinâmico, o grave do 'chassi'
+> no vácuo — a recomendação de 17/11, com o conteúdo de combate completo) ou a folha 6 (a interface) antes."**
 >
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → **o SOM (efeitos), 8 folhas: 1 a nave ✅ · 2 as explosões ✅ · 3 os
-> inimigos e perigos ✅ · 4 os elites ✅ · 5 os chefões (5a ✅ 5b ✅, **a REGULAGEM dos chefões e depois a 5c**) · 6 a
-> interface · 7 as cutscenes (os FLYBYS dele guardados em `assets/raw/sons/dele/flybys/`) · 8 o ambiente** (+ o PASSE
-> DE MIXAGEM, depois da folha 3 — ainda não feito) → F (a F2: a frota de batedores e a rocha do minerador; START
+> inimigos e perigos ✅ · 4 os elites ✅ · 5 os chefões ✅ (5a, 5b, a regulagem + o limitador, 5c — 17/11) · **o PASSE DE
+> MIXAGEM (a próxima, a confirmar com ele)** · 6 a interface · 7 as cutscenes (os FLYBYS dele guardados em
+> `assets/raw/sons/dele/flybys/`) · 8 o ambiente** → F (a F2: a frota de batedores e a rocha do minerador; START
 > `plans/2026-11-15-bloco-f-START.md`) → o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco).**
+>
+> 📍 **17/11 — A REGULAGEM DOS CHEFÕES, O LIMITADOR E A FOLHA 5c; APROVADO JOGANDO; COMMITADO.** (registro no START
+> `plans/2026-11-17-som-chefes-START.md`; as regras na §10.8 da spec do som)
+> - **A regulagem** (o pedido dele: *"alguns estão muito abafados"*; depois *"não podem perder o efeito do espaço"*):
+>   medido com `scripts/_som/_medir-chefes.mjs` (cada som SOZINHO no lugar dele). As causas: os LAÇOS instalados no
+>   nível de motor (o sopro do gás, a enguia sob o casco e o raspar, o motor da Torre — re-nivelados como ação com
+>   `_som-renivelar.mjs`); a contenção do vácuo tirando 3–9 dB; volumes de catálogo baixos (a chuva 0,25, o pavio do flak,
+>   o tiro da Serpente). A contenção ganhou presença (1,4 kHz +2 dB), volume 0,85 e um `ganhoNoVacuo` POR SOM medido
+>   (`NO_VACUO`): cada chefe contido fica ~1,5 dB sob o mesmo som no ar. O espaço é o mesmo (2,2 kHz, a sala fechada).
+>   E `Laco.volume()` deixou de perder a contenção no fade. Ele: *"melhorou, consegui escutar os sons que não conseguia"*.
+> - **O LIMITADOR DE SEGURANÇA** (`LIMITADOR`, −3 dB, razão 20; o ganho automático do Chrome desfeito): a pilha dos mais
+>   altos entrava a +7,7 dB e sai a ~−1; abaixo do limiar, idêntico. `test-som-jogo` cobra os dois.
+> - **A análise do guia de áudio dele** (o documento colado em 17/11): o que já seguimos (variação, polifonia, acústica
+>   por lugar, barramentos, desacoplamento), onde discordamos (o corte de 850 Hz em tudo, o compressor de −12/8 como
+>   limitador, hitstop em ricochete, pan 0,8) e o que falta — o limitador (FEITO), e no passe de mixagem: a cola, o
+>   abaixar dinâmico por prioridade, o grave do "chassi" no vácuo; depois: a base de ambiente (folha 8), as explosões em
+>   camadas e o tremor ligado ao som. Resumo no START novo.
+> - **A FOLHA 5c** (o núcleo da F4, 27 sons + a onda da chuva refeita; grupo `chefes-nucleo`; folhas
+>   `.../2026-11-17/sons/12-nucleo` e `12b-urro-galope`): o Guardião (os glóbulos, o telégrafo + a trava, a investida, a
+>   SERRA — o aviso, o lançar, o giro em laço que cala na cravada, a cravada, um tranco por tentativa —, a casca) e o
+>   Predador (os pousos, a garra no teto, a carga, o GOLPE que erra virando o que ACERTA quando a nave é atingida, a
+>   lava, a saída e o aviso, o rasgo + o metal, o breu e o PULSO — as duas versões sorteadas —, a morte, o galope D). O
+>   URRO na rodada 2: a F na chegada, a E na fase 2, a D na saída, e a D e a E AO FUNDO no caminho até o núcleo (evento
+>   de roteiro novo `urro`: 64 s, 88,5 s, 107 s, cada um mais perto). A ONDA DA CHUVA da Serpente (o apito que ele ouviu
+>   como fogos) virou a E: um míssil no espaço, sem apito. Teste novo `test-som-nucleo-jogo` (30). Os 8 testes do som e
+>   o build verdes. Ele jogou e aprovou.
 >
 > 📍 **16/11 (6) — AS FOLHAS 3, 4, 5a E 5b NO JOGO; COMMITADO E EMPURRADO.** Uma sessão longa (registro inteiro no START
 > `plans/2026-11-16-som-folha3-START.md`, a ordem em que aconteceu; a §10.7 da spec do som tem as regras novas):

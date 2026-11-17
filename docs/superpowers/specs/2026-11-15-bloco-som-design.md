@@ -314,3 +314,44 @@ da NAVE PERDIDA saía cheio. Todo ganho e filtro usa rampa linear (`rumo` no `So
   `dados.json` mostra).
 - **Se ele não ouve nada do novo, a aba está velha** (o Vite perde a ligação numa sessão longa): Ctrl+Shift+R, e
   `__som.diagnostico().carregados` mostra quantos sons a aba carregou.
+
+### 10.8 A regulagem dos chefões, o limitador e a folha 5c (17/11) — o que ficou de regra
+
+- **Medir antes de mexer: `scripts/_som/_medir-chefes.mjs`** toca cada som de chefão SOZINHO no lugar dele (a Torre na
+  atmosfera, F2/F3 na cabine, a F4 no `interior`), pela cadeia real, e mede o pico e uma sonoridade curta (K aproximado,
+  os 400 ms mais altos) contra referências que ele aprovou (o tiro da X-AELO −15, a explosão grande −10). `--comparar`
+  mede os sons da cabine também no ar; `--sugerir` dá o `ganhoNoVacuo` de cada um. Re-medir depois de trocar um take.
+- **Laço de AÇÃO não é motor.** O `_folha-montar` tratava todo `laco: true` como motor (−24 LUFS) e os laços dos chefões
+  saíam 9–14 dB abaixo do resto. O take diz `"camada": "acao"`; um já instalado se re-nivela com
+  `_som-renivelar.mjs <grupo> <nome>…` (do original, pelo pico, e marca o take no `_origem.json`).
+- **Os chefões no vácuo, contidos mas ouvidos** (ele: *"melhore e deixe perceptível os sons, mas eles não podem perder o
+  efeito do espaço"*). O ESPAÇO não muda — o mesmo corte de 2,2 kHz e a mesma sala fechada; muda o NÍVEL: uma faixa de
+  PRESENÇA abaixo do corte (1,4 kHz +2 dB), o volume 0,85, e um `ganhoNoVacuo` POR SOM (a tabela `NO_VACUO` do catálogo,
+  medida) que deixa cada um ~1,5 dB abaixo do mesmo som no ar — contido, nunca mais alto. Uma presença global forte
+  (+4 dB) deixava os graves MAIS ALTOS no vácuo: a correção é por som. (Os filtros não se empilhavam: o código usa o
+  menor corte; o agudo perdia 7–9 dB pelo 2,2 kHz sozinho.)
+- **`Laco.volume()` respeita a voz:** o ganho de um laço que muda de volume é a `base` da voz (o volume, a variação, a
+  contenção, o fundo) × v — antes era `def.volume × v` e a contenção caía no primeiro fade.
+- **O LIMITADOR DE SEGURANÇA** (`LIMITADOR` no `mixagem.ts`, no fim da saída dos efeitos, antes do destino do Phaser; a
+  trilha não passa): −3 dB, razão 20, ataque 2 ms. O Chrome soma um ganho automático (≈0,6 × o que ele tiraria de um
+  sinal cheio): `MAKEUP_DO_LIMITADOR` o desfaz, e abaixo do limiar a saída é IDÊNTICA (medido: −12,04 → −12,04). A pilha
+  dos mais altos (o rompimento, o fim do chefão, 3 metais grandes) entrava a +7,7 dB e sai a ~−1. `Som.picoDaSaida`
+  mede depois dele. É SEGURANÇA, não cola: a compressão de cola, o abaixar dinâmico e o grave do "chassi" são o passe
+  de mixagem (§10.6), depois da 5c.
+- **Uma versão, dois nomes:** `nome: ID > outro.nome` no `_escolhas.txt` instala o take com outro nome (o golpe do
+  Predador: a A quando ACERTA a nave, a B quando erra; o pulso do breu: as duas sorteadas; o urro: a F na chegada, a E
+  na fase 2, a D na saída e as duas AO FUNDO no caminho até o núcleo).
+- **O golpe que acerta:** começa como o que erra; se a nave é atingida no meio do corte (`ship.getData('golpeEm')`), o
+  `Som.calar` tira o que erra e toca o que acerta, no instante do golpe.
+- **O chefão antes do encontro** (ele: *"podem até entrar antes mesmo do encontro, para mostrar que o jogador se
+  aproxima de algo infernal"*): o evento de roteiro `urro` (`StageDirector`) toca um som de `plano: 'fundo'` com uma
+  `forca` que cresce perto do núcleo (F4: 64 s, 88,5 s, 107 s). ⚠️ O roteiro tem de estar em ORDEM de tempo — fora de
+  ordem a fase não abre.
+- **Míssil no espaço não apita:** o apito é ar. A onda da chuva antiga era um tom deslizando 4,7 oitavas até 4,5 kHz
+  (medido); a nova queima abaixo de 410 Hz. Medir o tom que desliza (quadro a quadro) antes de mostrar um "míssil".
+- **A folha julga o chefão como o jogo:** `"chefe": true` no som da folha aplica a contenção do vácuo quando o lugar é a
+  cabine.
+- **A F4 é o `interior`:** a sala (30 %, 1,4 s) e o realce em 300 Hz incham os graves — os avisos ficam ~−10 LUFS, o
+  que repete ~−11/−12, e o agudo puro (o estilhaço da lava) precisa de volume cheio porque o interior corta em 4,5 kHz.
+- **Um laço sintetizado no ritmo do jogo** (o galope C, 620 ms) se faz EXATAMENTE periódico e com N ciclos + 0,5 s: o
+  tratamento do laço cruza os primeiros 0,5 s com o fim, e assim a emenda cai no mesmo passo.

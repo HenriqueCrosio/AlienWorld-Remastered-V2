@@ -96,3 +96,30 @@ O PixelLab: ~3.440 gerações em 16/11 à noite (conferir com `get_balance`), re
 - A conversa em português; código, prompts e raciocínio em inglês.
 - Editar com Edit/Write; um heredoc por comando (comando longo com aspas: escrever o script num arquivo); PowerShell sem
   `-Encoding utf8` corrompe acentos.
+
+---
+
+## ✅ O QUE ACONTECEU EM 17/11 (na ordem) — FECHADO, aprovado por ele jogando
+
+1. **Medido** (`scripts/_som/_medir-chefes.mjs`): os mais baixos eram a chuva da Serpente (−34 LUFS), o pavio do flak
+   (−32), o sopro do gás (−31), a enguia sob o casco e o raspar (−26), o motor da Torre (−26), o tiro da Serpente (−22),
+   a trava do raio e o desfaz (−21/−20), contra o tiro da X-AELO a −15. O suspeito 1 confirmado (os laços no nível de
+   motor); o 2 corrigido (os filtros NÃO se empilhavam — o código usa o menor corte; o 2,2 kHz sozinho tirava 7–9 dB do
+   agudo); o 3 confirmado (volumes); o 4 descartado (nenhum take fraco de nascença).
+2. **Ele: *"não podem perder o efeito do espaço"*.** Os laços re-nivelados como ação (`_som-renivelar.mjs`); a contenção
+   com presença (1,4 kHz +2 dB) e volume 0,85; um `ganhoNoVacuo` por som (a tabela `NO_VACUO`, sugerida pelo medidor:
+   ar − 1,5 dB). Uma presença de +4 dB global foi tentada e REPROVADA na medida (os graves ficavam mais altos no vácuo).
+   `Laco.volume()` passou a usar a `base` da voz. 6 volumes de catálogo.
+3. **Ele mandou um guia de áudio** (barramentos, ducking, limitador, game juice) e pediu a análise — o resumo no START
+   novo (`plans/2026-11-18-som-mixagem-START.md`).
+4. **O LIMITADOR** (feito numa cópia do projeto na porta 5174 enquanto ele jogava — editar `src/` recarregaria a aba
+   dele): `LIMITADOR` no `mixagem.ts`, provado (seno −12 → −12; a pilha +7,7 → −1); o rompimento, o fim do chefão e o
+   anel voltaram ao nível certo no vácuo (o limitador segura o pico).
+5. **Ele jogou: *"melhorou"***; e a onda da chuva *"parece fogos de artifício, quero o som de um míssil no espaço"* →
+   refeita junto da 5c.
+6. **A folha 5c** (27 sons, 61 versões; `.../2026-11-17/sons/12-nucleo`): 24 escolhidos de primeira; o golpe com as
+   DUAS (a A quando acerta, a B quando erra), o pulso com as duas sorteadas; o urro (*"mais gutural e infernal"*) e o
+   galope (sem nota) na rodada 2 (`12b-urro-galope`): o urro F + E e D *"em outros momentos... antes mesmo do
+   encontro"*, o galope D. O instalador ganhou `nome: ID > outro.nome`.
+7. **No jogo:** os ganchos no `BossNucleo`, no `SerraGuardiao` e no `Predador`; `Som.calar`; o evento de roteiro `urro`
+   (F4: 64, 88,5, 107 s). Volumes medidos no `interior`. `test-som-nucleo-jogo` (30). Ele jogou e aprovou.
