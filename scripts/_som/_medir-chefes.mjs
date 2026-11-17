@@ -19,6 +19,10 @@ await page.keyboard.press('ArrowDown');
 await page.evaluate(() => window.__som.contexto().resume());
 await page.waitForTimeout(500);
 if (process.argv.includes('--comparar')) await page.evaluate(() => { window.__comparar = true; });
+// --interface: the interface sounds (sheet 6), tapped at the end of the chain; the soundtrack sits ≈ −20 LUFS in the game
+// (the file −13.5 × `Music.VOLUME` 0.45)
+if (process.argv.includes('--interface')) await page.evaluate(() => { window.__interface = true; });
+if (process.argv.includes('--cena')) await page.evaluate(() => { window.__cena = true; });
 
 const resultado = await page.evaluate(async () => {
   const Som = window.__som;
@@ -33,10 +37,12 @@ const resultado = await page.evaluate(async () => {
   const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 38; hp.Q.value = 0.5;
   const sp = ctx.createScriptProcessor(4096, 2, 2);
   const mudo = ctx.createGain(); mudo.gain.value = 0;
-  Som.abafoNo.connect(hs); hs.connect(hp); hp.connect(sp);
+  // (--interface: the interface layer skips the world's chain, so the tap is the very end, after the limiter)
+  const ponto = window.__interface ? Som.fimNo : Som.abafoNo;
+  ponto.connect(hs); hs.connect(hp); hp.connect(sp);
   // a raw tap too, for the true peak
   const sp2 = ctx.createScriptProcessor(4096, 2, 2);
-  Som.abafoNo.connect(sp2);
+  ponto.connect(sp2);
   sp.connect(mudo); sp2.connect(mudo); mudo.connect(ctx.destination);
   const bloco = Math.round(ctx.sampleRate * 0.1);
   let gravando = false; let blocos = []; let acc = 0; let nAcc = 0; let pico = 0;
@@ -92,6 +98,20 @@ const resultado = await page.evaluate(async () => {
     };
   }
 
+  if (window.__interface) {
+    const out = [];
+    for (const r of ['nave.xaelo.tiro', 'explosao.metalGrande']) out.push({ ...(await medir(r, 'atmosfera')), ref: true });
+    for (const n of Object.keys(SONS).filter((x) => SONS[x].camada === 'interface')) out.push(await medir(n, 'atmosfera'));
+    return out;
+  }
+  if (window.__cena) {
+    // --cena: the cutscene sounds (sheet 7), each in the place it plays (the final's chapters move it)
+    const lugar = (n) => (/^fim\.(sobrevoo|apaga)|^momento\.f1\.saida/.test(n) ? 'atmosfera' : /^fim\.(rasgo|descompressao)/.test(n) ? 'interior' : 'cabine');
+    const out = [];
+    for (const r of ['nave.xaelo.tiro', 'explosao.metalGrande']) out.push({ ...(await medir(r, 'cabine')), ref: true });
+    for (const n of Object.keys(SONS).filter((x) => /^(cut|fim)\.|^momento\.f1\.saida/.test(x))) out.push(await medir(n, lugar(n)));
+    return out;
+  }
   const chefes = Object.keys(SONS).filter((n) => SONS[n].prioridade === 'chefe');
   // (the F4 core fights INSIDE the creature: the `interior` place, no vacuum containment)
   const lugarDe = (n) => (n.startsWith('chefe.torre.') ? 'atmosfera' : /^(guardiao|predador)\./.test(n) ? 'interior' : 'cabine');

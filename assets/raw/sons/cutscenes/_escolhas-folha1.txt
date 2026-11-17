@@ -1,0 +1,33 @@
+# Sheet 7 (the cutscenes), his choices 17/11 — ROUND 1, installed from docs/superpowers/folhas/2026-11-17/sons/14-cutscenes.
+# PER SHIP (him: "D2 para X-aelo e D3 para terminus", "falta a Manta"): <name>.xaelo / .terminus — the Manta (.charybdis)
+# comes in round 2. IN SEQUENCE (him: "A e B na sequência ficaram bons"): <name> then <name>2.
+# cut.leviata.queda: refazer — "algo de engine falhando" (round 2).
+momento.f1.saida: D2 > momento.f1.saida.xaelo
+momento.f1.saida: D3 > momento.f1.saida.terminus
+cut.piloto: A
+cut.pouso.descida: A > cut.pouso.descida.xaelo
+cut.pouso.descida: B > cut.pouso.descida.terminus
+cut.pouso.toque: B > cut.pouso.toque.xaelo
+cut.pouso.toque: A > cut.pouso.toque.terminus
+cut.decolagem: B > cut.decolagem.xaelo
+cut.decolagem: A > cut.decolagem.terminus
+cut.aurora.capitania: A
+cut.doca.alarme: B
+cut.doca.cabos: B
+cut.doca.afunda: A
+cut.doca.afunda: B > cut.doca.afunda2
+cut.leviata.alerta: B
+cut.leviata.derrapagem: A
+cut.leviata.colapso: A
+cut.leviata.colapso: B > cut.leviata.colapso2
+cut.leviata.engolida: A
+cut.leviata.selar: A
+fim.rasgo: B
+fim.descompressao: B
+fim.ferida: A
+fim.ferida: B > fim.ferida2
+fim.queda: B
+fim.sobrevoo: D1 > fim.sobrevoo.xaelo
+fim.sobrevoo: D3 > fim.sobrevoo.terminus
+fim.apaga: A
+fim.apaga: B > fim.apaga2

@@ -1,0 +1,55 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 7 — as cutscenes (+ a saída da atmosfera)",
+    "dia": "2026-11-17",
+    "nota": "O que as cenas ainda não têm: as explosões delas JÁ soam (a folha 2, pelo material), o bum oco da Aurora e o estrondo do hangar também. Aqui ficam os momentos mecânicos e da história: o piloto automático, o pouso, a decolagem, os alarmes, os cabos, a queda no Leviatã, a boca que sela — e a cutscene FINAL inteira, que hoje é muda.\nOS SEUS FLYBYS (D1 falcon, D2 variação, D3 jato ao longe) entram como versões em dois lugares: a SAÍDA DA ATMOSFERA (o fim da F1, a subida a 45° depois da Torre) e o SOBREVOO da cutscene final. Na saída, a M mistura o seu falcon com o vento rarefazendo.\nSem gerar nada, no jogo: o torpedo do Leviatã usa o lançar do míssil da nave, e o voo das cutscenes ganha o motor da própria nave, baixo. E a subida da F1 passa a ABRIR a acústica para o espaço (o lugar troca de atmosfera para cabine durante ela)."
+  },
+  "grupos": [
+    {
+      "titulo": "A saída da atmosfera (o fim da F1)",
+      "sons": [
+        { "nome": "momento.f1.saida", "oque": "A SUBIDA — \"ATMOSFERA ROMPIDA · ZERO-G\", a nave sobe a 45° por 6,5 s e o ar acaba", "onde": "o fim da F1", "lugar": "atmosfera" }
+      ]
+    },
+    {
+      "titulo": "Os momentos que se repetem nas cutscenes 1 e 2",
+      "sons": [
+        { "nome": "cut.piloto", "oque": "PILOTO AUTOMÁTICO · ENGATADO — o computador assume o manche", "onde": "a Aurora e a Doca", "lugar": "cabine" },
+        { "nome": "cut.pouso.descida", "oque": "A DESCIDA — os retros freando até o convés (2 s)", "onde": "a Aurora e a Doca", "lugar": "cabine" },
+        { "nome": "cut.pouso.toque", "oque": "O TOQUE — as travas pegando no convés", "onde": "a Aurora e a Doca", "lugar": "cabine" },
+        { "nome": "cut.decolagem", "oque": "A PARTIDA — a nave sai acelerando (a Doca caindo, a Aurora implodindo)", "onde": "a Aurora e a Doca", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "A Aurora e a Doca",
+      "sons": [
+        { "nome": "cut.aurora.capitania", "oque": "A CAPITÂNIA SUBINDO — a Aurora aparece por baixo (5 s), pelo casco", "onde": "a Aurora", "lugar": "cabine" },
+        { "nome": "cut.doca.alarme", "oque": "SOBRECARGA · A DOCA VAI CAIR — o alarme da estação", "onde": "a Doca", "lugar": "cabine" },
+        { "nome": "cut.doca.cabos", "oque": "OS CABOS ARREBENTAM — as rochas se soltam", "onde": "a Doca", "lugar": "cabine" },
+        { "nome": "cut.doca.afunda", "oque": "A DOCA AFUNDA — a estrutura se partindo", "onde": "a Doca", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "O Hangar do Leviatã",
+      "sons": [
+        { "nome": "cut.leviata.alerta", "oque": "CASCO CRÍTICO · POTÊNCIA CAINDO — o alarme e a energia indo embora", "onde": "o Hangar do Leviatã", "lugar": "cabine" },
+        { "nome": "cut.leviata.queda", "oque": "A QUEDA — o motor engasgando enquanto ela cai no hangar", "onde": "o Hangar do Leviatã", "lugar": "cabine" },
+        { "nome": "cut.leviata.derrapagem", "oque": "A DERRAPAGEM — o casco raspando pelo chão (2 s)", "onde": "o Hangar do Leviatã", "lugar": "cabine" },
+        { "nome": "cut.leviata.colapso", "oque": "A ENTRADA ESTÁ COLAPSANDO — a garganta desabando", "onde": "o Hangar do Leviatã", "lugar": "cabine" },
+        { "nome": "cut.leviata.engolida", "oque": "ENGOLIDA — a garganta puxa a nave para dentro", "onde": "o Hangar do Leviatã", "lugar": "cabine" },
+        { "nome": "cut.leviata.selar", "oque": "A BOCA SELA — as batidas da boca fechando, uma a cada 190 ms", "onde": "o Hangar do Leviatã", "lugar": "cabine", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.1 } }
+      ]
+    },
+    {
+      "titulo": "O Afastamento (a cutscene final, hoje muda)",
+      "sons": [
+        { "nome": "fim.rasgo", "oque": "O RASGO — a parede estoura (1,5 s) e a música morre", "onde": "o final", "lugar": "interior" },
+        { "nome": "fim.descompressao", "oque": "A DESCOMPRESSÃO — o vácuo puxa tudo e a nave é arrancada (3,5 s)", "onde": "o final", "lugar": "interior" },
+        { "nome": "fim.ferida", "oque": "A FERIDA — o corte para fora: o bicho jorrando no vácuo (8 s), quase nada", "onde": "o final", "lugar": "cabine" },
+        { "nome": "fim.queda", "oque": "A QUEDA — o Leviatã caindo sobre a colônia (16 s)", "onde": "o final", "lugar": "cabine" },
+        { "nome": "fim.sobrevoo", "oque": "O SOBREVOO — a nave sobre a superfície (24 s)", "onde": "o final", "lugar": "atmosfera" },
+        { "nome": "fim.apaga", "oque": "APAGA — a câmera para sobre a carcaça, a lava esfria (36 s)", "onde": "o final", "lugar": "atmosfera" }
+      ]
+    }
+  ]
+}

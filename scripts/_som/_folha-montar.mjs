@@ -53,7 +53,8 @@ if (!grupo || !pasta) {
     }
     let r;
     try {
-      r = tratar(entrada, join(pasta, 'v', `${t.nome}-${t.id}`), { camada, laco: !!t.laco, max: t.max ?? 0, tempo: t.tempo ?? 1, limpar: !!t.limpar });
+      // (`estereo`: a take whose point is its stereo motion — 17/11, his flybys: a pass from one side to the other)
+      r = tratar(entrada, join(pasta, 'v', `${t.nome}-${t.id}`), { camada, laco: !!t.laco, max: t.max ?? 0, tempo: t.tempo ?? 1, limpar: !!t.limpar, estereo: !!t.estereo });
     } catch (e) {
       descartar(`o tratamento falhou (${String(e.message ?? e).split('\n')[0].slice(0, 80)})`);
       continue;

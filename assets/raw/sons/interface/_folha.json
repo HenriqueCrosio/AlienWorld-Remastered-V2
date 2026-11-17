@@ -1,0 +1,65 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 6 — a interface",
+    "dia": "2026-11-17",
+    "nota": "A tela, não o mundo: a interface não passa pela acústica do lugar (soa igual na F1 e no espaço). Três caminhos por som: A = Kenney Interface Sounds (CC0), B (e D) = PixelLab, C = o TOQUE RETRÔ sintetizado aqui (abafado, para casar com o dark sci-fi; as melodias são nossas).\nOs que repetem muito (mover, ajustar, aba, a estrela) se julgam no ×8 — têm de ser macios. O contador do resultado é um laço (toca 6 s aqui).\nA ESTRELA C são três (C1, C2, C3): cada estrela da fase um degrau mais alta — escolhendo C, entram as três.\nNo fim, uma PROPOSTA minha: o alerta dos letreiros \"ALERTA · …\" (o chefão chegando)."
+  },
+  "grupos": [
+    {
+      "titulo": "A navegação — o menu, a pausa, as configurações, o Arquivo, o hangar",
+      "sons": [
+        { "nome": "ui.mover", "oque": "MOVER — o cursor passa para outra linha (o que mais repete)", "onde": "todas as listas", "interface": true, "repetir": true, "variacao": { "tom": 0.02, "vol": 0.05 } },
+        { "nome": "ui.confirmar", "oque": "CONFIRMAR — Enter numa opção", "onde": "todas as listas", "interface": true },
+        { "nome": "ui.voltar", "oque": "VOLTAR — Esc, sair de uma janela", "onde": "todas as listas", "interface": true },
+        { "nome": "ui.ajustar", "oque": "AJUSTAR — ←→ num valor (os volumes passo a passo, as opções)", "onde": "as configurações", "interface": true, "repetir": true, "variacao": { "tom": 0.02, "vol": 0.05 } },
+        { "nome": "ui.aba", "oque": "A ABA — trocar entre Áudio, Controles, Vídeo, Jogo", "onde": "as configurações", "interface": true, "repetir": true, "variacao": { "tom": 0.02, "vol": 0.05 } },
+        { "nome": "ui.negar", "oque": "NEGAR — o que não pode (uma tecla recusada no remapear)", "onde": "as configurações", "interface": true }
+      ]
+    },
+    {
+      "titulo": "A pausa e o remapear",
+      "sons": [
+        { "nome": "ui.pausa.abrir", "oque": "A PAUSA ABRE — o mundo abaixa por baixo dela", "onde": "a pausa", "interface": true },
+        { "nome": "ui.pausa.fechar", "oque": "A PAUSA FECHA — o jogo volta", "onde": "a pausa", "interface": true },
+        { "nome": "ui.captura", "oque": "ESPERANDO A TECLA — o remapear armado", "onde": "os controles", "interface": true },
+        { "nome": "ui.troca", "oque": "A TROCA ANUNCIADA — a tecla já era de outra ação, as duas trocam", "onde": "os controles", "interface": true }
+      ]
+    },
+    {
+      "titulo": "O começo e a mesa de cartas",
+      "sons": [
+        { "nome": "ui.comecar", "oque": "COMEÇAR — do menu para o hangar (o confirmar mais pesado)", "onde": "o menu", "interface": true },
+        { "nome": "cartas.mesa", "oque": "A MESA — as cartas entram, 50 ms uma da outra", "onde": "a mesa de cartas", "interface": true },
+        { "nome": "cartas.escolher", "oque": "ESCOLHER — a carta pula e as outras somem", "onde": "a mesa de cartas", "interface": true },
+        { "nome": "cartas.raridade.comum", "oque": "A RARIDADE — comum (cinza), por cima do escolher", "onde": "a mesa de cartas", "interface": true },
+        { "nome": "cartas.raridade.incomum", "oque": "A RARIDADE — incomum (verde)", "onde": "a mesa de cartas", "interface": true },
+        { "nome": "cartas.raridade.rara", "oque": "A RARIDADE — rara (azul)", "onde": "a mesa de cartas", "interface": true },
+        { "nome": "cartas.raridade.epica", "oque": "A RARIDADE — épica (roxa)", "onde": "a mesa de cartas", "interface": true }
+      ]
+    },
+    {
+      "titulo": "As estrelas e a vida",
+      "sons": [
+        { "nome": "estrela.pegar", "oque": "A ESTRELA — pegar uma das três da fase (a C sobe um degrau a cada uma)", "onde": "as fases", "interface": true, "repetir": true, "variacao": { "tom": 0.01, "vol": 0.05 } },
+        { "nome": "estrela.completa", "oque": "AS 3 ESTRELAS — o letreiro \"3 ESTRELAS · +1 VIDA NA PRÓXIMA FASE\"", "onde": "as fases", "interface": true },
+        { "nome": "vida.extra", "oque": "A VIDA EXTRA — a fase seguinte começa com o 1-UP", "onde": "o começo da fase", "interface": true }
+      ]
+    },
+    {
+      "titulo": "A NAVE PERDIDA e o resultado",
+      "sons": [
+        { "nome": "ui.navePerdida", "oque": "A NAVE PERDIDA — a janela abre (a ação já calou)", "onde": "a derrota", "interface": true },
+        { "nome": "resultado.fase", "oque": "FASE COMPLETA — o título da tela de fim de fase", "onde": "o fim de fase", "interface": true },
+        { "nome": "resultado.conta", "oque": "O CONTADOR (laço) — os pontos subindo", "onde": "o resultado do amanhecer", "interface": true, "laco": true },
+        { "nome": "resultado.medalha", "oque": "A MEDALHA — ela aparece com os pontos", "onde": "o resultado do amanhecer", "interface": true },
+        { "nome": "resultado.recorde", "oque": "O RECORDE — quando é um recorde novo", "onde": "o resultado do amanhecer", "interface": true }
+      ]
+    },
+    {
+      "titulo": "Proposta — o alerta",
+      "sons": [
+        { "nome": "ui.alerta", "oque": "O ALERTA — os letreiros \"ALERTA · …\" (o chefão chegando). Se não quiser, marque \"não\"", "onde": "as fases", "interface": true }
+      ]
+    }
+  ]
+}

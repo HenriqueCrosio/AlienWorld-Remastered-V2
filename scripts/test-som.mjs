@@ -130,5 +130,44 @@ ok(validarCatalogo({ 'nave.xaelo.tiro': def({ camada: 'interface', plano: 'fundo
   ok(explosoes.every(([, d]) => d.lastro > 0), 'every explosion (but the light) feeds the bed', explosoes.filter(([, d]) => !d.lastro).map(([n]) => n));
 }
 
+// ── SHEET 6, the interface (17/11): the pause's sound is a pure rule over its state machine; the result's timing ──
+{
+  const { passo, inicial } = await import('../src/pausa/numerosPausa.ts');
+  const { somDaPausa } = await import('../src/pausa/somDaPausa.ts');
+  const { sonsDoResultado, RECORDE_DEPOIS } = await import('../src/menu/resultado.ts');
+  const { RESULTADO } = await import('../src/menu/numerosMenu.ts');
+  const ctx = { tipo: 'fase', zerou: false, temControle: false };
+  const som = (e, t, c = ctx) => { const r = passo(e, t, c); return [somDaPausa(e, r.estado, r.efeito, t, c), r.estado]; };
+  let e = inicial('fase');
+  let s;
+  [s, e] = som(e, 'baixo');
+  ok(s === 'ui.mover', 'the pause: ↓ on the list MOVES', s);
+  [s] = som(inicial('fase'), 'esc');
+  ok(s === 'ui.pausa.fechar', 'the pause: ESC closes it', s);
+  [s] = som(inicial('fase'), 'esc', { ...ctx, tipo: 'menu' });
+  ok(s === 'ui.voltar', 'the settings from the MENU: ESC is a back, not the pause closing', s);
+  const cfg = { tela: 'config', aba: 0, linha: 0, coluna: 0 };
+  [s] = som(cfg, 'abaProx');
+  ok(s === 'ui.aba', 'the settings: the tab', s);
+  [s] = som(cfg, 'direita');
+  ok(s === 'ui.ajustar', 'the settings: ←→ on a value ADJUSTS', s);
+  [s] = som({ tela: 'confirma', acao: 'sair', sim: false }, 'direita');
+  ok(s === 'ui.mover', 'the confirmation: SIM/NÃO moves', s);
+  [s] = som({ tela: 'confirma', acao: 'sair', sim: false }, 'ok');
+  ok(s === 'ui.voltar', 'the confirmation: OK on NÃO goes back', s);
+  [s] = som({ tela: 'confirma', acao: 'sair', sim: true }, 'ok');
+  ok(s === 'ui.confirmar', 'the confirmation: OK on SIM confirms the action', s);
+  [s] = som({ tela: 'captura', aba: 1, linha: 0, coluna: 0 }, 'esc');
+  ok(s === 'ui.voltar', 'the remap: ESC cancels the capture (a back)', s);
+  const contaLiga = sonsDoResultado(RESULTADO.entra.pontos - 0.01, RESULTADO.entra.pontos + 0.01, false);
+  const assenta = RESULTADO.entra.pontos + RESULTADO.conta;
+  const fim = sonsDoResultado(assenta - 0.01, assenta + RECORDE_DEPOIS + 0.01, true);
+  ok(contaLiga.includes('contaLiga'), 'the result: the counter starts with the points', contaLiga);
+  ok(fim.join() === 'contaDesliga,medalha,recorde', 'the result: the counter stops, the MEDAL lands, then the RECORD', fim);
+  ok(!sonsDoResultado(assenta - 0.01, assenta + 1, false).includes('recorde'), 'no record sound when it is not a record');
+  const posto = sonsDoResultado(0, 0.5, true, true);
+  ok(!posto.includes('contaLiga') && posto.includes('medalha') && posto.includes('recorde'), 'reduced motion: no counter, the medal and the record at once', posto);
+}
+
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');
 process.exitCode = falhas ? 1 : 0;

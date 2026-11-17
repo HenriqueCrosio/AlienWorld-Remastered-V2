@@ -1,0 +1,25 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 7, rodada 2 — a Manta nas cutscenes + a queda no Leviatã",
+    "dia": "2026-11-17",
+    "nota": "A sua nota: \"falta a Manta, tanto aqui quanto lá em cima\". A CHARYBDIS ganha as dela nos cinco momentos que são de cada nave: a saída da atmosfera, o sobrevoo, a descida, o toque e a partida. O PixelLab dá mono — na saída e no sobrevoo, as AP/BP são a A/B passando da esquerda para a direita (o que faz um flyby).\nA QUEDA NO LEVIATÃ refeita na sua direção (\"algo de engine falhando\"): D, E, F.\nAs da X-AELO e da TERMINUS já estão no jogo."
+  },
+  "grupos": [
+    {
+      "titulo": "A Manta (CHARYBDIS)",
+      "sons": [
+        { "nome": "momento.f1.saida.charybdis", "oque": "A SAÍDA DA ATMOSFERA da Manta", "onde": "o fim da F1", "lugar": "atmosfera" },
+        { "nome": "fim.sobrevoo.charybdis", "oque": "O SOBREVOO da Manta", "onde": "o final", "lugar": "atmosfera" },
+        { "nome": "cut.pouso.descida.charybdis", "oque": "A DESCIDA da Manta até o convés", "onde": "a Aurora e a Doca", "lugar": "cabine" },
+        { "nome": "cut.pouso.toque.charybdis", "oque": "O TOQUE da Manta no convés", "onde": "a Aurora e a Doca", "lugar": "cabine" },
+        { "nome": "cut.decolagem.charybdis", "oque": "A PARTIDA da Manta", "onde": "a Aurora e a Doca", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "Refazer — a queda no Leviatã",
+      "sons": [
+        { "nome": "cut.leviata.queda", "oque": "A QUEDA — o motor falhando enquanto ela cai no hangar (sua nota: \"algo de engine falhando\")", "onde": "o Hangar do Leviatã", "lugar": "cabine" }
+      ]
+    }
+  ]
+}

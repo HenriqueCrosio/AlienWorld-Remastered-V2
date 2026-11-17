@@ -1,0 +1,29 @@
+# Sheet 6 (the interface), his choices 17/11 (ui.alerta: "Não" — the proposal is out). estrela.pegar C: the three steps
+# (C1 the 1st star, C2 the 2nd, C3 the 3rd — the sheet's note: "escolhendo C, entram as três").
+ui.mover: B
+ui.confirmar: A
+ui.voltar: C
+ui.ajustar: B
+ui.aba: B
+ui.negar: C
+ui.pausa.abrir: B
+ui.pausa.fechar: B
+ui.captura: C
+ui.troca: C
+ui.comecar: C
+cartas.mesa: B
+cartas.escolher: A
+cartas.raridade.comum: C
+cartas.raridade.incomum: C
+cartas.raridade.rara: C
+cartas.raridade.epica: C
+estrela.pegar: C1 > estrela.pegar1
+estrela.pegar: C2 > estrela.pegar2
+estrela.pegar: C3 > estrela.pegar3
+estrela.completa: C
+vida.extra: A
+ui.navePerdida: C
+resultado.fase: C
+resultado.conta: C
+resultado.medalha: B
+resultado.recorde: C

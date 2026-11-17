@@ -1,0 +1,10 @@
+# Sheet 7 (the cutscenes), his choices 17/11 — ROUND 2 (the Manta + the fall), installed from
+# docs/superpowers/folhas/2026-11-17/sons/14b-manta. The round-1 choices: _escolhas-folha1.txt.
+# momento.f1.saida.charybdis: "ela só aparece na doca da Fase 2. Mas deixe guardado, pode ser que eu implemente algo com
+# ela depois" — installed, it simply never plays today (the Manta is found at the Dock, after the F1).
+momento.f1.saida.charybdis: AP
+fim.sobrevoo.charybdis: BP
+cut.pouso.descida.charybdis: B
+cut.pouso.toque.charybdis: A
+cut.decolagem.charybdis: A
+cut.leviata.queda: E
