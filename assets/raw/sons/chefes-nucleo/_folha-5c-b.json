@@ -1,0 +1,16 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 5c, rodada 2 — o urro e o galope do Predador",
+    "dia": "2026-11-17",
+    "nota": "As duas que voltaram. O URRO na sua direção (\"mais gutural e infernal\"): D, E e F novos do PixelLab, e a G = a sua B mais grave, dobrada uma oitava abaixo e saturada. As A e B de antes estão junto para comparar.\nO GALOPE voltou sem nota: D e E novos (mais pesados, passadas em pares), e a C sintetizada no ciclo da corrida do jogo (620 ms: os nós dos dedos, depois os pés) — a única que casa com a animação por construção. Os laços tocam 6 s."
+  },
+  "grupos": [
+    {
+      "titulo": "O Predador — o urro e o galope",
+      "sons": [
+        { "nome": "predador.urro", "oque": "O URRO — ele surge (1,2 s, o pico na mandíbula aberta). Sua nota: \"quero mais gutural e infernal\"", "onde": "a troca", "lugar": "interior", "chefe": true },
+        { "nome": "predador.galope", "oque": "O GALOPE (laço) — de quatro como um gorila, no bote, nas corridas e na volta", "onde": "o Predador", "lugar": "interior", "laco": true, "chefe": true }
+      ]
+    }
+  ]
+}

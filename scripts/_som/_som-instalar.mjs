@@ -10,19 +10,22 @@ const raw = join('assets/raw/sons', grupo);
 const origem = JSON.parse(readFileSync(join(raw, '_origem.json'), 'utf8'));
 const escolhas = readFileSync(join(raw, '_escolhas.txt'), 'utf8')
   .split(/\r?\n/)
-  // the version id: a letter and then letters/digits (B, C2, D2, BF1 — 16/11: "BF1" was read as "B")
-  .map((l) => /^([a-z0-9.]+):\s*([A-Z][A-Z0-9]*)\b/i.exec(l.trim()))
+  // the version id: a letter and then letters/digits (B, C2, D2, BF1 — 16/11: "BF1" was read as "B"); `> other.name`
+  // installs that take under another name (17/11: one sound, two moments — the Predador's slash A when it hits, B when
+  // it misses; the heartbeat's two takes drawn in turn)
+  .map((l) => /^([a-z0-9.]+):\s*([A-Z][A-Z0-9]*)\b(?:\s*>\s*([a-z][a-zA-Z0-9.]*))?/i.exec(l.trim()))
   .filter(Boolean)
-  .map((m) => ({ nome: m[1], id: m[2] }));
+  .map((m) => ({ nome: m[1], id: m[2], como: m[3] ?? m[1] }));
 const destino = join('public/sfx', grupo);
 mkdirSync(destino, { recursive: true });
 const SONS = 'docs/SONS.md';
 let creditos = readFileSync(SONS, 'utf8');
-for (const { nome, id } of escolhas) {
-  const t = origem.takes.find((x) => x.nome === nome && x.id === id);
-  if (!t) throw new Error(`${nome} ${id}: not in _origem.json`);
+// (`daFolha` = the sound's row on the sheet, where the take lives; `nome` = the name it is installed and credited as)
+for (const { nome: daFolha, id, como: nome } of escolhas) {
+  const t = origem.takes.find((x) => x.nome === daFolha && x.id === id);
+  if (!t) throw new Error(`${daFolha} ${id}: not in _origem.json`);
   for (const ext of ['ogg', 'm4a']) {
-    const de = join(pasta, 'v', `${nome}-${id}.${ext}`);
+    const de = join(pasta, 'v', `${daFolha}-${id}.${ext}`);
     if (!existsSync(de)) throw new Error(`missing ${de}`);
     copyFileSync(de, join(destino, `${nome}.${ext}`));
   }

@@ -98,6 +98,25 @@ await page.waitForTimeout(600);
 d = await diag();
 ok(d.abafo === 1 && d.acaoMuda === 1, 'closing the pause restores', d);
 
+// THE SAFETY LIMITER (17/11, `LIMITADOR`): under its threshold the effects leave at UNITY (Chrome's makeup undone);
+// a pile of the loudest blasts at once leaves held under 0 dB
+const lim = await page.evaluate(async () => {
+  const S = window.__som; const ctx = S.contexto();
+  const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+  const db = (x) => 20 * Math.log10(x);
+  S.trocarDeCena('atmosfera', 50); await espera(1200);
+  const o = ctx.createOscillator(); const g = ctx.createGain(); g.gain.value = 0.25;
+  o.connect(g).connect(S.limitadorNo); o.start(); await espera(150);
+  const seno = await S.picoDaSaida(300);
+  o.stop(); g.disconnect(); await espera(300);
+  S.tocar('serpente.chegada.rompe'); S.tocar('explosao.chefeFim');
+  for (let i = 0; i < 3; i++) { S.tocar('explosao.metalGrande'); await espera(70); }
+  const pilha = await S.picoDaSaida(2500);
+  return { seno: db(seno.pico), senoReducao: seno.reducaoDb, pilha: db(pilha.pico), pilhaReducao: pilha.reducaoDb };
+});
+ok(Math.abs(lim.seno - -12.04) < 0.3 && lim.senoReducao > -0.05, `the limiter: a −12 dB tone leaves at unity (${lim.seno.toFixed(2)} dB)`, lim);
+ok(lim.pilha < -0.5 && lim.pilhaReducao < -3, `the limiter: the loudest blasts at once leave held (${lim.pilha.toFixed(2)} dB, ${lim.pilhaReducao.toFixed(1)} dB shaved)`, lim);
+
 // SHIP LOST: the action is silenced, the ambience stays
 await page.evaluate(() => { const s = window.__game.scene.getScene('Game'); s.damageShip = () => {}; s.gameOver(); });
 // (the window opens only after the death animation; wait for the 'derrota' kind, not for any pause)

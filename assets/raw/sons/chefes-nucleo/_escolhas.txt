@@ -1,0 +1,9 @@
+# Sheet 5c round 2 (the roar and the gallop), his choices 17/11: "F para o urro, e E e D em outros momentos. Podem até
+# entrar antes mesmo do encontro, para mostrar que o jogador se aproxima de algo infernal"; the gallop D.
+# Installed from docs/superpowers/folhas/2026-11-17/sons/12b-urro-galope. The round-1 choices: _escolhas-folha1.txt.
+predador.urro: F
+predador.urro: E > predador.urro2
+predador.urro: D > predador.urro3
+predador.urro: D > predador.urroLonge
+predador.urro: E > predador.urroLonge2
+predador.galope: D

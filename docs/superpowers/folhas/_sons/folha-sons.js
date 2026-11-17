@@ -2,7 +2,7 @@
 // every sound, heard AS IN THE GAME (the same acoustics module the game uses), repeated ×8 with the per-shot
 // variation, optionally over the soundtrack; one choice per sound; the footer is the text he pastes in the
 // conversation. The choice is kept in this browser only. Served by Vite (it imports the game's .ts modules).
-import { AO_FUNDO, montarAcustica } from '/src/som/acustica.ts';
+import { AO_FUNDO, CHEFE_NO_VACUO, montarAcustica } from '/src/som/acustica.ts';
 import { sortearVariacao } from '/src/som/vozes.ts';
 
 const dados = JSON.parse(document.getElementById('dados').textContent);
@@ -47,6 +47,22 @@ async function tocar(som, versao, { variar = false, quando = 0 } = {}) {
   f.playbackRate.value = v.taxa;
   g.gain.value = 0.8 * v.ganho;
   let no = f.connect(g);
+  // (17/11) a BOSS sound in the vacuum is judged CONTAINED, as the game plays it (`CHEFE_NO_VACUO`: the cut, the presence,
+  // the level — the small closed room is left out here)
+  if (som.chefe && lugar === 'cabine') {
+    const C = CHEFE_NO_VACUO;
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = C.passaBaixa;
+    lp.Q.value = 0.5;
+    const pk = c.createBiquadFilter();
+    pk.type = 'peaking';
+    pk.frequency.value = C.presenca.freq;
+    pk.gain.value = C.presenca.ganhoDb;
+    pk.Q.value = C.presenca.q;
+    g.gain.value *= C.volume;
+    no = no.connect(lp).connect(pk);
+  }
   if (fundo) {
     const lp = c.createBiquadFilter();
     lp.type = 'lowpass';

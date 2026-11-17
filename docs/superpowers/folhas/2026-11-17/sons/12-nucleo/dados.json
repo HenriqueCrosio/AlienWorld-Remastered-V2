@@ -1,0 +1,744 @@
+{
+ "titulo": "Folha de sons 5c — o núcleo da F4 (o Guardião e o Predador) + a onda da chuva refeita",
+ "dia": "2026-11-17",
+ "nota": "A luta da F4, DENTRO da criatura (o lugar 'interior': nada do filtro do vácuo). As explosões da casca (biomecânica) e da morte (carne) e os acertos já soam pela folha 2 — aqui só os gestos.\nOs AVISOS têm o tempo do jogo nas versões C sintetizadas: o telégrafo do Guardião (1,15 s, a trava em 0,71 s), o fio da serra (0,7 s), a carga do Predador (1,5 s, os pulsos acelerando), o aviso da volta (0,5 s), a lava no peito (0,5 s).\nOs que repetem (os glóbulos, os trancos da serra, os pousos, a lava caindo, o pulso no breu) se julgam no ×8. Os laços (o giro da serra, o galope) tocam 6 s aqui.\nNo fim, a ONDA DA CHUVA da Serpente (F3, na cabine) refeita na sua direção: míssil no espaço, sem apito — a A de hoje está junto para comparar.",
+ "grupos": [
+  {
+   "titulo": "O Guardião — os glóbulos e a investida",
+   "sons": [
+    {
+     "nome": "guardiao.leque",
+     "oque": "OS GLÓBULOS — o leque de 3 a 5 que ele cospe parado (a cada 1,8 s)",
+     "onde": "o Guardião flutuando",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.04,
+      "vol": 0.08
+     },
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.leque-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a biomechanical guardian creature spitting a fan of thick glowing globules, a wet heavy plop burst with a bubbling hiss, inside a giant living cavern, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.leque-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an organic cannon pulse launching a few slimy energy orbs at once, a deep gulping thump with a soft fizz, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "guardiao.telegrafo",
+     "oque": "O TELÉGRAFO — o casco esfria, o miolo acende e o coração dispara (1,15 s)",
+     "onde": "antes da investida",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.telegrafo-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a giant creature's glowing core charging up, a heartbeat that speeds up rapidly with a rising humming energy, organic and electric, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.telegrafo-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a living reactor heart accelerating, throbbing pulses getting faster and a tightening resonant whine, dark sci-fi, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/guardiao.telegrafo-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"1,15 s no tempo do jogo: o coração acelera até a TRAVA (0,71 s), um estalo, e o zumbido segura firme até a investida\""
+      }
+     ]
+    },
+    {
+     "nome": "guardiao.trava",
+     "oque": "A TRAVA — a mira crava, ele recua e o miolo estala (aos 0,71 s do telégrafo)",
+     "onde": "no meio do telégrafo",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.trava-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a sudden sharp organic snap and a release of energy, an armored creature tensing before it leaps, a short crack with a burst, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.trava-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy armored shell clenching shut with a wet crack and a quick energy pop, short, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "guardiao.investida",
+     "oque": "A INVESTIDA — ele salta para a esquerda a 300 px/s",
+     "onde": "o fim do telégrafo",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.investida-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a massive armored creature lunging forward at high speed, a heavy whoosh of displaced air and a low rumbling growl, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.investida-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a huge biomechanical body rushing past, a deep rushing roar of motion with creaking shell plates, dark sci-fi, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "O Guardião — a serra",
+   "sons": [
+    {
+     "nome": "guardiao.serra.aviso",
+     "oque": "O FIO DE AVISO — 0,7 s antes de a serra sair",
+     "onde": "a serra",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.serra.aviso-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"an organic bone saw blade revving up inside a creature before launch, a rising whirring grind, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.serra.aviso-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a cable tensing and a toothed disc spinning up, a tight rising mechanical and organic whine, dark sci-fi, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/guardiao.serra.aviso-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"0,7 s (o fio de aviso): o disco acelerando, os dentes de 12 a 45 por segundo\""
+      }
+     ]
+    },
+    {
+     "nome": "guardiao.serra.lanca",
+     "oque": "O LANÇAR — a serra sai presa ao cabo",
+     "onde": "a serra",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.serra.lanca-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a spinning bone saw disc launched on a cable, a sharp whip release with a fast spinning whirr, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.serra.lanca-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy saw blade thrown out, a cable unspooling quickly with a whooshing spin, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "guardiao.serra.giro",
+     "oque": "O GIRO (laço) — a serra voando nas diagonais",
+     "onde": "a serra",
+     "lugar": "interior",
+     "laco": true,
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.serra.giro-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a large spinning saw blade flying through the air, a continuous whirring buzzing hum, continuous, seamless, no start or end, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.serra.giro-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a toothed disc spinning fast, a steady grinding whirr with a low throb, continuous, seamless, no start or end, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "guardiao.serra.crava",
+     "oque": "A CRAVADA — ela morde a borda de cima ou de baixo",
+     "onde": "a serra, 2 ou 3 vezes",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.03,
+      "vol": 0.06
+     },
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.serra.crava-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a spinning saw blade biting hard into a wall of hard organic shell, a heavy thunk with grinding teeth and a crunch, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.serra.crava-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a saw disc slamming into bone and getting stuck, a loud crunching impact with a short metallic ring, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "guardiao.serra.tranco",
+     "oque": "O TRANCO — travada, tenta girar (520 ms; 2× em cima, 1× embaixo)",
+     "onde": "a serra cravada",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.serra.tranco-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a stuck saw blade straining and jerking against bone, a short grinding stall and a heavy scrape, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.serra.tranco-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a jammed spinning disc trying to turn, a strained grinding judder, short, dark sci-fi, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "A troca e o Predador — a chegada e o corpo",
+   "sons": [
+    {
+     "nome": "guardiao.casca",
+     "oque": "A CASCA ESTOURANDO — a carcaça racha e explode (1 s depois do golpe fatal), e o Predador sai dela",
+     "onde": "a troca",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/guardiao.casca-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a huge organic armored shell cracking open and bursting apart, deep crunching splits and a heavy wet burst, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/guardiao.casca-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a giant hard carapace splitting from inside, loud cracking and a shattering pop with a hollow boom, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.urro",
+     "oque": "O URRO — ele surge (1,2 s, o pico na mandíbula aberta)",
+     "onde": "a troca",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.urro-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a monstrous predator creature roaring loudly as it emerges, a deep guttural bellow with a rasping snarl, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.urro-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a huge beast's furious roar, wet and throaty, rising to a peak then trailing off, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.pouso",
+     "oque": "O POUSO — ele cai no chão (o pulo, as viradas, a queda do teto)",
+     "onde": "o Predador",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.04,
+      "vol": 0.08
+     },
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.pouso-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy clawed beast landing on a soft organic floor, a deep thud with a squelch and claws scraping, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.pouso-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a large creature dropping onto the ground, a heavy padded impact with a low thump, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.agarra",
+     "oque": "A GARRA NO TETO — ele salta e se pendura",
+     "onde": "o Predador (fase 2 em diante)",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.agarra-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a beast leaping up and gripping a ceiling with its claws, a heavy grunt and sharp claws digging into hard shell, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.agarra-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"huge claws sinking into a hard organic ceiling, a crunching grip with a creak, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.galope",
+     "oque": "O GALOPE (laço) — de quatro como um gorila, no bote e nas corridas",
+     "onde": "o Predador",
+     "lugar": "interior",
+     "laco": true,
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.galope-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a heavy beast galloping on all fours like a gorilla, rapid thudding footfalls on a soft organic floor, continuous, seamless, no start or end, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.galope-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a large clawed predator charging at a run, heavy rhythmic pounding steps with claw clicks, continuous, seamless, no start or end, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.aviso",
+     "oque": "O AVISO DA VOLTA — o miolo acende na borda direita 0,5 s antes de ele entrar",
+     "onde": "o Predador fora da tela",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.aviso-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a predator growling just out of sight, a low menacing rumble that rises quickly, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.aviso-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a beast approaching from the dark, a quick deep snarl with a heavy heartbeat thump, dark sci-fi, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/predador.aviso-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"0,5 s: três pulsos de 0,2 s (o miolo piscando na borda) sobre um rosnado\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "O Predador — os golpes",
+   "sons": [
+    {
+     "nome": "predador.carga",
+     "oque": "A CARGA DO PEITO — os pulsos acelerando antes do bote (1,3 a 1,6 s)",
+     "onde": "antes do bote",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.carga-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a beast's chest glowing and building energy, a growling heartbeat that accelerates into a fast throb, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.carga-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a monster gathering power, a low snarl over an accelerating pulsing rumble, dark sci-fi, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/predador.carga-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"1,5 s na curva do jogo: os pulsos do peito de 0,55 s a 0,08 s, o rosnado crescendo e o baque de cair de quatro 0,38 s antes do bote\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.golpe",
+     "oque": "O GOLPE — dois cortes e o salto na altura da nave",
+     "onde": "o fim do bote",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.golpe-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a monster slashing twice with huge claws, two fast swipes whooshing and ripping the air, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.golpe-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a predator's double claw strike, quick heavy swishes with a snarl, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.lava.carga",
+     "oque": "A LAVA NO PEITO — o telégrafo do arremesso (0,5 s no chão, 0,68 s pendurado)",
+     "onde": "a lava",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.lava.carga-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"molten lava bubbling and boiling up inside a creature's chest, a thick gurgling hiss, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.lava.carga-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a glob of magma forming, a deep boiling bubble with crackling heat, dark sci-fi, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/predador.lava.carga-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"0,5 s: o peito fervendo, bolhas grossas cada vez mais juntas\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.lava.arremesso",
+     "oque": "O ARREMESSO — 1 a 3 bolas de lava em arco",
+     "onde": "a lava",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.lava.arremesso-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a creature hurling a glob of molten lava, a heavy wet throw with a fiery whoosh, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.lava.arremesso-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a ball of magma thrown through the air, a burning whoosh with sputtering embers, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.lava.impacto",
+     "oque": "A LAVA CAINDO — a bola (ou o metal) batendo no chão ou no teto",
+     "onde": "a lava",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.06,
+      "vol": 0.12
+     },
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.lava.impacto-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a glob of lava splattering on the ground, a sizzling splash with a hiss of steam, short, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.lava.impacto-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"molten rock hitting a wet surface, a hot sizzle and a soft heavy splat, short, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.lava.estilhaco",
+     "oque": "O ESTILHAÇO — na fase 3 a bola se parte em 6 gotas",
+     "onde": "a lava, fase 3",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.05,
+      "vol": 0.1
+     },
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.lava.estilhaco-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a lava ball bursting into many burning droplets, a crackling spray with sizzles, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.lava.estilhaco-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a ball of molten glass shattering into a fan of hot fragments, a sharp crackle with hissing, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.rasgo",
+     "oque": "O RASGO — ele entra galopando e rasga o chão (1,1 s)",
+     "onde": "a volta",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.rasgo-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"huge claws ripping through a hard floor, a long tearing scrape that breaks open with a crunch, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.rasgo-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a beast tearing the ground apart, grinding claws and splitting hard shell plates, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.metal",
+     "oque": "O METAL INCANDESCENTE — o leque de 3 a 5 arcos saindo do chão rasgado",
+     "onde": "o rasgo",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.metal-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"molten metal spraying up out of a torn floor, a hissing fiery burst with sizzling splashes, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.metal-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"white-hot metal fragments erupting from the ground, a roaring sizzle with crackling sparks, dark sci-fi, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "O Predador — o breu e o fim",
+   "sons": [
+    {
+     "nome": "predador.breu",
+     "oque": "O BREU — na fase 3 ele urra e a luz morre (0,6 s até o preto)",
+     "onde": "a virada para a fase 3",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.breu-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a monster's deep roar as all the lights die out, a heavy bass drop into darkness with a long low rumble, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.breu-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a huge beast bellowing while a low ominous drone swells and everything goes dark, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.pulso",
+     "oque": "O PULSO NO BREU — o coração dele, a única luz (a cada 2,4 s)",
+     "onde": "a fase 3, no escuro",
+     "lugar": "interior",
+     "repetir": true,
+     "variacao": {
+      "tom": 0.02,
+      "vol": 0.05
+     },
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.pulso-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a single slow heavy heartbeat of a giant creature, deep and muffled, a double thump, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.pulso-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"one deep low organic pulse in the darkness, a muffled throb with a faint glowing hum, dark sci-fi, no music\""
+      }
+     ]
+    },
+    {
+     "nome": "predador.morte",
+     "oque": "A MORTE — o urro final e a queda (as explosões de carne já soam por cima)",
+     "onde": "o fim da luta",
+     "lugar": "interior",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/predador.morte-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a monstrous predator's dying roar, a long agonized bellow that breaks and fades into a gurgle, dark sci-fi, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/predador.morte-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a giant beast collapsing with a final pained howl and a heavy thud, dark sci-fi, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "Refazer (F3) — a onda da chuva da Serpente",
+   "sons": [
+    {
+     "nome": "serpente.chuva.onda",
+     "oque": "A ONDA — a fileira de casulos acende acima da tela e cai no casco (~1,5 s). A sua nota: \"parece fogos de artifício, quero o som de um míssil no espaço\". A = a de hoje",
+     "onde": "a chuva das 3 cabeças",
+     "lugar": "cabine",
+     "chefe": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/serpente.chuva.onda-A.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"a de HOJE no jogo (a que soa fogos de artifício), para comparar\""
+      },
+      {
+       "id": "E",
+       "arquivo": "v/serpente.chuva.onda-E.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"a wave of small missiles igniting high above and diving down in space, muffled rocket engines rumbling closer, a deep thrusting roar heard through a spaceship hull, no whistle, dark sci-fi, no music\""
+      },
+      {
+       "id": "F",
+       "arquivo": "v/serpente.chuva.onda-F.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"missile thrusters burning as they fall toward a spaceship, a low pulsing rocket rumble growing louder, muffled vacuum sound, no whistling, no fireworks, dark sci-fi, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/serpente.chuva.onda-C.ogg",
+       "fonte": "sintetizado aqui (sem ruído)",
+       "licenca": "próprio",
+       "nota": "\"1,5 s, o míssil NO ESPAÇO: a ignição e a queima crescendo enquanto cai, tudo abaixo de 300 Hz (pelo casco), nenhum tom que desliza (o apito)\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

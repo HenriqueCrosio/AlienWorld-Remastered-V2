@@ -1,0 +1,31 @@
+# Sheet 5c (the F4 core), his choices 17/11, ROUND 1 — installed from docs/superpowers/folhas/2026-11-17/sons/12-nucleo
+# (to reinstall: copy these lines into _escolhas.txt and run _som-instalar with that sheet). urro: refazer — "quero mais
+# gutural e infernal"; galope: refazer, sem nota (both → round 2, _escolhas.txt); golpe: "o A pode ser quando ele acerta
+# a nave e o B se ele errar"; pulso: "gostei dos dois, dá para fazer uma variação"
+guardiao.leque: A
+guardiao.telegrafo: A
+guardiao.trava: A
+guardiao.investida: A
+guardiao.serra.aviso: B
+guardiao.serra.lanca: B
+guardiao.serra.giro: A
+guardiao.serra.crava: B
+guardiao.serra.tranco: A
+guardiao.casca: A
+predador.pouso: B
+predador.agarra: B
+predador.aviso: B
+predador.carga: A
+predador.golpe: A > predador.golpe.acerta
+predador.golpe: B > predador.golpe.erra
+predador.lava.carga: A
+predador.lava.arremesso: B
+predador.lava.impacto: A
+predador.lava.estilhaco: B
+predador.rasgo: B
+predador.metal: B
+predador.breu: B
+predador.pulso: A
+predador.pulso: B > predador.pulso2
+predador.morte: B
+serpente.chuva.onda: E
