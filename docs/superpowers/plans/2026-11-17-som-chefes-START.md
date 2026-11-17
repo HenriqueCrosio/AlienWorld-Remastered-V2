@@ -123,3 +123,12 @@ O PixelLab: ~3.440 gerações em 16/11 à noite (conferir com `get_balance`), re
    encontro"*, o galope D. O instalador ganhou `nome: ID > outro.nome`.
 7. **No jogo:** os ganchos no `BossNucleo`, no `SerraGuardiao` e no `Predador`; `Som.calar`; o evento de roteiro `urro`
    (F4: 64, 88,5, 107 s). Volumes medidos no `interior`. `test-som-nucleo-jogo` (30). Ele jogou e aprovou.
+8. **O som de cada fase e os flybys** (ele: *"barulhos, efeitos, em cada fase"*; *"a F3 não é só o casco, ela se inicia
+   dentro da nebulosa"*): registrado para a folha 8 (spec §6, item 8).
+9. **A folha 6, a interface** (`.../2026-11-17/sons/13-interface`; 26 sons): ele escolheu a C (o toque retrô) em quase
+   todos os estados; o alerta dos letreiros, não. No jogo: a navegação única, a pausa por `somDaPausa`, o remapear, a mesa
+   de cartas com a raridade, as estrelas em degraus, a vida extra, a NAVE PERDIDA, a fase completa, o resultado. O toque
+   de interface atravessa a troca de cena. *"Muito bom"*.
+10. **A folha 7, as cutscenes** (`.../14-cutscenes` e a rodada 2 `.../14b-manta`): as escolhas POR NAVE (os flybys dele na
+    X-AELO e na TERMINUS; a Manta com os próprios), as sequências A+B, a queda refeita (*"engine falhando"*), a cutscene
+    final com som, a saída da F1 abrindo a acústica. Commitado e empurrado.

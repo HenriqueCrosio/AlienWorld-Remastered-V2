@@ -17,16 +17,37 @@ sprite que se desfaz nos próprios pixels).
 ### A frase de arranque da próxima sessão
 
 > **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-18-som-mixagem-START.md`. O SOM (os efeitos; a trilha é
-> dele) tem as folhas 1 a 5 inteiras no jogo — a nave, as explosões, os inimigos e perigos, os elites e os QUATRO
-> chefões (5a, 5b, 5c) —, a regulagem dos chefões no vácuo e o limitador de segurança, tudo aprovado por ele jogando
-> (17/11). A sessão abre PERGUNTANDO A ORDEM: o PASSE DE MIXAGEM agora (a cola, o abaixar dinâmico, o grave do 'chassi'
-> no vácuo — a recomendação de 17/11, com o conteúdo de combate completo) ou a folha 6 (a interface) antes."**
+> dele) tem as folhas 1 a 7 inteiras no jogo — a nave, as explosões, os inimigos e perigos, os elites, os QUATRO
+> chefões, a INTERFACE e as CUTSCENES (com os flybys dele e as versões por nave) —, a regulagem dos chefões no vácuo e o
+> limitador, tudo aprovado por ele (17/11), commitado e empurrado. Falta a FOLHA 8 — o ambiente E os sons de cada fase
+> (2–4 efeitos por fase; a F3 são DOIS lugares, a nebulosa e o casco; os flybys dele nas naves da invasão da F1) — e o
+> PASSE DE MIXAGEM. A sessão abre PERGUNTANDO A ORDEM (a recomendação: a 8 primeiro, porque a mixagem abaixa a base que
+> ela cria)."**
 >
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → **o SOM (efeitos), 8 folhas: 1 a nave ✅ · 2 as explosões ✅ · 3 os
-> inimigos e perigos ✅ · 4 os elites ✅ · 5 os chefões ✅ (5a, 5b, a regulagem + o limitador, 5c — 17/11) · **o PASSE DE
-> MIXAGEM (a próxima, a confirmar com ele)** · 6 a interface · 7 as cutscenes (os FLYBYS dele guardados em
-> `assets/raw/sons/dele/flybys/`) · 8 o ambiente** → F (a F2: a frota de batedores e a rocha do minerador; START
+> inimigos e perigos ✅ · 4 os elites ✅ · 5 os chefões ✅ (5a, 5b, a regulagem + o limitador, 5c) · 6 a interface ✅ · 7 as
+> cutscenes ✅ (17/11) · **8 o ambiente + OS SONS DE CADA FASE (a próxima)** (o pedido dele: 2–4 efeitos por fase para a
+> imersão; a F3 = a nebulosa E o casco; os flybys nas naves da invasão da F1 — spec §6, item 8) · **o PASSE DE MIXAGEM**
+> (a cola, o abaixar dinâmico, o grave do "chassi") → F (a F2: a frota de batedores e a rocha do minerador; START
 > `plans/2026-11-15-bloco-f-START.md`) → o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco).**
+>
+> 📍 **17/11 (2) — AS FOLHAS 6 (A INTERFACE) E 7 (AS CUTSCENES) NO JOGO; COMMITADO E EMPURRADO.** (as regras na §10.9 da
+> spec do som; o registro no fim de `plans/2026-11-17-som-chefes-START.md`)
+> - **A folha 6, a interface** (26 sons, 74 versões; grupo `interface`; Kenney A / PixelLab B / o TOQUE RETRÔ C
+> sintetizado — ele escolheu a C em quase todos os estados): a navegação única de todas as listas (o menu, a pausa, as
+> configurações, o Arquivo, o hangar), a PAUSA por uma regra pura (`src/pausa/somDaPausa.ts`), o remapear (esperando,
+> aceita, a TROCA anunciada, recusada), o COMEÇAR próprio, a mesa de cartas (a mesa, mover, escolher + a RARIDADE por
+> cima), as estrelas um degrau por estrela + o jingle das três, a vida extra na fase seguinte, a NAVE PERDIDA, a fase
+> completa, o resultado do amanhecer (o contador, a medalha, o recorde — `sonsDoResultado`). O alerta dos letreiros: ele
+> disse não. **Mudou no motor:** um toque de interface ATRAVESSA a troca de cena (é a tela). Teste `test-som-interface-jogo`.
+> - **A folha 7, as cutscenes** (+ a rodada 2 da Manta; grupo `cutscenes`): o piloto automático, a Aurora subindo, o
+> pouso (a descida, o toque), a partida, a Doca (o alarme, os cabos, a doca afundando A+B), o Leviatã (o alerta, a queda
+> com o motor falhando, a derrapagem, o torpedo = o míssil da nave, a garganta desabando A+B, engolida, a boca selando) e
+> a cutscene FINAL inteira (era muda: o rasgo, a descompressão, a ferida A+B, a queda, o sobrevoo, a lava A+B), a acústica
+> andando com a câmera. **POR NAVE** (as escolhas dele): a saída da atmosfera, a descida, o toque, a partida e o sobrevoo
+> — os FLYBYS DELE na X-AELO e na TERMINUS, a Manta com os próprios (a saída dela guardada: *"ela só aparece na doca"*).
+> **A subida da F1 abre a acústica para o espaço.** As naves voam com o próprio motor nas cutscenes 1–3. Teste
+> `test-som-cutscenes-jogo`. Os 10 testes do som (291 verificações) e o build verdes.
 >
 > 📍 **17/11 — A REGULAGEM DOS CHEFÕES, O LIMITADOR E A FOLHA 5c; APROVADO JOGANDO; COMMITADO.** (registro no START
 > `plans/2026-11-17-som-chefes-START.md`; as regras na §10.8 da spec do som)

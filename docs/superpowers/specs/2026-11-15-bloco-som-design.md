@@ -195,6 +195,18 @@ Uma página por grupo em `docs/superpowers/folhas/<dia>/sons/<n>-<grupo>/folha.h
 8. **O ambiente** — a tempestade do menu da noite (**os trovões**), o amanhecer, o hangar, a F1 e a caverna, o
    cinturão, o casco, o interior orgânico, a água. Laços longos, presos ao ajuste automático. É aqui que a mistura com
    a trilha dele se calibra.
+   **+ 17/11, o pedido dele — os SONS DE CADA FASE** (*"barulhos, efeitos, em cada fase. Não precisa ser muita coisa por
+   fase, mas sons e efeitos que ajudem a dar a imersão que pretendemos"*): além do laço de fundo, 2–4 EFEITOS DE
+   AMBIENTE por fase, pontuais, presos ao que a tela já mostra (o cenário vivo, o roteiro) — nunca um som sem causa
+   visível (a física do lugar). Ponto de partida a conferir no código: a F1 (a INVASÃO do horizonte, `src/f1/invasao.ts`:
+   as naves descendo das nuvens, a artilharia da defesa, as explosões ao longe; o vento; o trovão; a caverna gotejando),
+   a F2 (o cinturão pelo casco: as rochas se chocando ao longe, o rangido da cabine), a F3 em DOIS lugares (ele, 17/11:
+   *"ela não é só o casco, ela se inicia dentro da nebulosa"*) — o Ato 1, a NEBULOSA (o gás denso, a estática, a carga
+   elétrica, o que vive nela), e o Ato 2, o CASCO do Leviatã (o casco gemendo, o metal sob tensão, o canto dele ao
+   longe), cada um com o seu fundo e os seus efeitos, a troca presa à virada dos atos —, a F4 (a criatura viva: a respiração, o coração, os borbulhos; a água abafada).
+   **OS FLYBYS DELE** (`assets/raw/sons/dele/flybys/`, feitos por ele): em alguns momentos da F1 (as naves da invasão
+   passando) e na mini cutscene da SAÍDA DA ATMOSFERA (o fim da F1, `morteChefeF1.ts`, antes da cutscene 1) — esta
+   última é da folha 7 (as cutscenes), as da F1 são desta.
 
 ## 7. Os testes
 
@@ -355,3 +367,35 @@ da NAVE PERDIDA saía cheio. Todo ganho e filtro usa rampa linear (`rumo` no `So
   que repete ~−11/−12, e o agudo puro (o estilhaço da lava) precisa de volume cheio porque o interior corta em 4,5 kHz.
 - **Um laço sintetizado no ritmo do jogo** (o galope C, 620 ms) se faz EXATAMENTE periódico e com N ciclos + 0,5 s: o
   tratamento do laço cruza os primeiros 0,5 s com o fim, e assim a emenda cai no mesmo passo.
+
+### 10.9 As folhas 6 (a interface) e 7 (as cutscenes) (17/11) — o que ficou de regra
+
+- **A interface é a TELA, não o mundo:** `camada: 'interface'`, `prioridade: 'interface'`, fora da acústica do lugar
+  (soa igual na F1 e no espaço) — e um toque de interface ATRAVESSA a troca de cena (`Voz.tela`: o COMEÇAR que abre o
+  hangar, o voltar que reabre o menu têm de terminar). A regra "nada atravessa a troca de cena" é do MUNDO; os laços de
+  interface (o contador) param.
+- **Três caminhos por som de interface:** Kenney (A), PixelLab (B), o TOQUE RETRÔ sintetizado (C,
+  `_sintetizar-folha6.mjs`: triângulo/quadrada por um passa-baixa — retrô, mas escuro; melodias nossas). Ele escolheu a
+  C em quase todos os avisos e estados.
+- **A navegação é uma só** (`ui.mover` / `ui.confirmar` / `ui.voltar` / `ui.ajustar` / `ui.aba` / `ui.negar`) em todas
+  as listas; **a pausa é uma regra pura** (`src/pausa/somDaPausa.ts`, o antes × o depois de `passo`, testada no Node);
+  o fim da captura do remapear é da cena (aceita / a TROCA anunciada / recusada). Onde a escolha não muda (a ponta da
+  seta do hangar), silêncio.
+- **O nível da interface** se mede no FIM da cadeia (`_medir-chefes.mjs --interface`, depois do limitador): a trilha dele
+  toca ≈ −20 LUFS (o arquivo −13,5 × `Music.VOLUME` 0,45); o confirmar ~−16, a pausa e o negar ABAIXO dele, as estrelas
+  acima da trilha. Clique curto (< 100 ms) se lê pelo pico, não pelos 400 ms.
+- **O que tem tempo de tela tem regra pura:** `sonsDoResultado` (o contador liga com os pontos, desliga quando eles
+  assentam, a medalha no número final, o recorde 0,3 s depois; o movimento reduzido: sem contador).
+- **Um som que é DA NAVE na cutscene** (a saída da atmosfera, a descida, o toque, a partida, o sobrevoo) é
+  `<nome>.<nave>` (`daNaveNaCena`, `naveDoSom`): as escolhas dele por nave — os flybys DELE na X-AELO e na TERMINUS, a
+  Manta com os próprios. A saída da Manta está instalada e guardada (ela só aparece na Doca).
+- **Em sequência** (*"A e B na sequência ficaram bons"*): `<nome>` e `<nome>2`, pelo `Som.emSequencia` (a segunda entra
+  no fim da primeira, 0,3 s de sobra, no relógio da cena). ⚠️ Se a cena acaba antes (a Doca: 4,4 s), as duas se
+  SOBREPÕEM presas a momentos da tela — nunca atravessam a troca de cena.
+- **O flyby é ESTÉREO:** o tratamento faz mono por padrão; o take diz `"estereo": true` (o `_folha-montar` passa) — e um
+  take mono de passagem ganha a versão que cruza da esquerda para a direita (`AP`/`BP`).
+- **A acústica anda com a câmera:** a subida da F1 abre para a cabine (`Som.lugar('cabine', 3500)` em
+  `breakAtmosphere`); a cutscene final vai do `interior` ao vácuo e à `atmosfera` da superfície; nas cutscenes 1–3 a nave
+  voa com o PRÓPRIO motor (para no pouso; no Leviatã morre na queda).
+- **Um take esparso** (estalos, quase sem corpo) não sobe só no volume — comprime e normaliza pela sonoridade (a lava B:
+  −33 → −12 LUFS no jogo).
