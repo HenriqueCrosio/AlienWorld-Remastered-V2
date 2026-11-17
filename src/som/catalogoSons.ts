@@ -375,6 +375,101 @@ const FOLHA_5C_NUCLEO: Record<string, DefSom> = {
 };
 
 /**
+ * SHEET 6 — THE INTERFACE (his choices, 17/11; `assets/raw/sons/interface/_escolhas.txt`): the screen, not the world —
+ * the `interface` layer skips the place's acoustics (the same in the F1 and in space). Kenney (A), PixelLab (B) and the
+ * RETRO touches synthesized here (C, `_sintetizar-folha6.mjs`). The navigation is shared by every list (the menu, the
+ * pause, the settings, the Archive, the hangar); the pause's own sounds come from its state machine (`somDaPausa`).
+ * The star climbs a step per star of the stage (`estrela.pegar1/2/3`). His "não": no alert on the banners.
+ */
+const DA_TELA = (nome: string, volume: number, vozes = 1, tom = 0, vol = 0): DefSom => ({
+  arquivo: `interface/${nome}`, camada: 'interface', volume, vozes, variacao: { tom, vol }, prioridade: 'interface',
+});
+const FOLHA_6_INTERFACE: Record<string, DefSom> = {
+  'ui.mover': DA_TELA('ui.mover', 0.45, 2, 0.02, 0.05),
+  'ui.confirmar': DA_TELA('ui.confirmar', 0.55),
+  'ui.voltar': DA_TELA('ui.voltar', 0.5),
+  // (the volumes measured at the output, 17/11 — `_medir-chefes.mjs --interface`; the soundtrack sits ≈ −20 LUFS:
+  // the confirm ~−16, the pause and the refusal under it, the stars over the music, the big stings ~−12)
+  'ui.ajustar': DA_TELA('ui.ajustar', 0.55, 2, 0.02, 0.05),
+  'ui.aba': DA_TELA('ui.aba', 0.45, 1, 0.02, 0.05),
+  'ui.negar': DA_TELA('ui.negar', 0.32),
+  'ui.pausa.abrir': DA_TELA('ui.pausa.abrir', 0.25),
+  'ui.pausa.fechar': DA_TELA('ui.pausa.fechar', 0.3),
+  'ui.captura': DA_TELA('ui.captura', 0.5),
+  'ui.troca': DA_TELA('ui.troca', 0.5),
+  'ui.comecar': DA_TELA('ui.comecar', 0.6),
+  'cartas.mesa': DA_TELA('cartas.mesa', 0.55),
+  'cartas.escolher': DA_TELA('cartas.escolher', 0.55),
+  'cartas.raridade.comum': DA_TELA('cartas.raridade.comum', 0.45),
+  'cartas.raridade.incomum': DA_TELA('cartas.raridade.incomum', 0.5),
+  'cartas.raridade.rara': DA_TELA('cartas.raridade.rara', 0.55),
+  'cartas.raridade.epica': DA_TELA('cartas.raridade.epica', 0.6),
+  'estrela.pegar1': DA_TELA('estrela.pegar1', 0.7),
+  'estrela.pegar2': DA_TELA('estrela.pegar2', 0.7),
+  'estrela.pegar3': DA_TELA('estrela.pegar3', 0.7),
+  'estrela.completa': DA_TELA('estrela.completa', 0.55),
+  'vida.extra': DA_TELA('vida.extra', 0.55),
+  'ui.navePerdida': DA_TELA('ui.navePerdida', 0.6),
+  'resultado.fase': DA_TELA('resultado.fase', 0.6),
+  'resultado.conta': { ...DA_TELA('resultado.conta', 0.35), laco: true },
+  'resultado.medalha': DA_TELA('resultado.medalha', 0.6),
+  'resultado.recorde': DA_TELA('resultado.recorde', 0.55),
+};
+
+/**
+ * SHEET 7 — THE CUTSCENES (his choices, 17/11; `assets/raw/sons/cutscenes/_escolhas.txt`): the mechanical and story
+ * beats (the explosions were sheet 2's). PER SHIP (him: *"D2 para X-aelo e D3 para terminus"*): the way out of the
+ * atmosphere, the landing (descent, touch), the departure and the final flyover are `<nome>.<nave>` —
+ * `naveDoSom` picks it (`somDaCutscene`); HIS flybys are the X-AELO's and the TERMINUS's. IN SEQUENCE (*"A e B na
+ * sequência ficaram bons"*): `<nome>` then `<nome>2`. The final cutscene, mute until today, sounds chapter by chapter.
+ */
+const DA_CENA = (nome: string, volume: number, vozes = 1, tom = 0, vol = 0): DefSom => ({
+  arquivo: `cutscenes/${nome}`, camada: 'acao', volume, vozes, variacao: { tom, vol }, prioridade: 'cena',
+});
+// (the volumes measured in their places, 17/11 — `_medir-chefes.mjs --cena`: the beats ~-10/-13 LUFS, the big moments
+// -7/-9, the wound "almost nothing" ~-15, the ships' versions matched to each other)
+const FOLHA_7_CUTSCENES: Record<string, DefSom> = {
+  'momento.f1.saida.xaelo': DA_CENA('momento.f1.saida.xaelo', 0.8),
+  'momento.f1.saida.terminus': DA_CENA('momento.f1.saida.terminus', 0.8),
+  'cut.piloto': DA_CENA('cut.piloto', 0.36),
+  'cut.pouso.descida.xaelo': DA_CENA('cut.pouso.descida.xaelo', 0.41),
+  'cut.pouso.descida.terminus': DA_CENA('cut.pouso.descida.terminus', 0.68),
+  'cut.pouso.toque.xaelo': DA_CENA('cut.pouso.toque.xaelo', 0.52),
+  'cut.pouso.toque.terminus': DA_CENA('cut.pouso.toque.terminus', 0.65),
+  'cut.decolagem.xaelo': DA_CENA('cut.decolagem.xaelo', 0.6),
+  'cut.decolagem.terminus': DA_CENA('cut.decolagem.terminus', 0.5),
+  'cut.aurora.capitania': DA_CENA('cut.aurora.capitania', 0.38),
+  'cut.doca.alarme': DA_CENA('cut.doca.alarme', 0.66),
+  'cut.doca.cabos': DA_CENA('cut.doca.cabos', 0.87),
+  'cut.doca.afunda': DA_CENA('cut.doca.afunda', 0.52),
+  'cut.doca.afunda2': DA_CENA('cut.doca.afunda2', 0.47),
+  'cut.leviata.alerta': DA_CENA('cut.leviata.alerta', 0.42),
+  'cut.leviata.derrapagem': DA_CENA('cut.leviata.derrapagem', 0.7),
+  'cut.leviata.colapso': DA_CENA('cut.leviata.colapso', 0.5),
+  'cut.leviata.colapso2': DA_CENA('cut.leviata.colapso2', 0.55),
+  'cut.leviata.engolida': DA_CENA('cut.leviata.engolida', 0.49),
+  'cut.leviata.selar': DA_CENA('cut.leviata.selar', 0.55, 3, 0.05, 0.1),
+  'fim.rasgo': DA_CENA('fim.rasgo', 0.85),
+  'fim.descompressao': DA_CENA('fim.descompressao', 0.8),
+  'fim.ferida': DA_CENA('fim.ferida', 0.2),
+  'fim.ferida2': DA_CENA('fim.ferida2', 0.21),
+  'fim.queda': DA_CENA('fim.queda', 0.8),
+  'fim.sobrevoo.xaelo': DA_CENA('fim.sobrevoo.xaelo', 0.75),
+  'fim.sobrevoo.terminus': DA_CENA('fim.sobrevoo.terminus', 0.75),
+  'fim.apaga': DA_CENA('fim.apaga', 0.27),
+  'fim.apaga2': DA_CENA('fim.apaga2', 0.9),
+  // ROUND 2 (17/11): the MANTA's own (*"falta a Manta"*) — its way out of the F1 is kept for later (him: *"ela só
+  // aparece na doca da Fase 2. Mas deixe guardado"*: today it never plays) — and the fall redone (*"engine falhando"*)
+  // (measured, matched to the X-AELO's and the TERMINUS's)
+  'momento.f1.saida.charybdis': DA_CENA('momento.f1.saida.charybdis', 0.69),
+  'fim.sobrevoo.charybdis': DA_CENA('fim.sobrevoo.charybdis', 0.65),
+  'cut.pouso.descida.charybdis': DA_CENA('cut.pouso.descida.charybdis', 0.44),
+  'cut.pouso.toque.charybdis': DA_CENA('cut.pouso.toque.charybdis', 0.44),
+  'cut.decolagem.charybdis': DA_CENA('cut.decolagem.charybdis', 0.48),
+  'cut.leviata.queda': DA_CENA('cut.leviata.queda', 0.6),
+};
+
+/**
  * THE BOSSES' LEVEL IN THE VACUUM (17/11, him: *"melhore e deixe perceptível os sons, mas eles não podem perder o efeito
  * do espaço"*). Measured one by one (`node scripts/_som/_medir-chefes.mjs --comparar --sugerir`): the containment
  * (`CHEFE_NO_VACUO`, the same 2.2 kHz cut and closed room) takes a different amount off each sound — the bright ones
@@ -396,7 +491,7 @@ const NO_VACUO: Record<string, number> = {
 const comVacuo = (sons: Record<string, DefSom>): Record<string, DefSom> =>
   Object.fromEntries(Object.entries(sons).map(([n, d]) => [n, NO_VACUO[n] ? { ...d, ganhoNoVacuo: NO_VACUO[n] } : d]));
 
-export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO });
+export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES });
 
 /** Every problem of a catalogue, as text (empty = valid). `existe` receives a path under `public/sfx/`. */
 export function validarCatalogo(sons: Record<string, DefSom>, existe: (caminho: string) => boolean, creditos: string): string[] {

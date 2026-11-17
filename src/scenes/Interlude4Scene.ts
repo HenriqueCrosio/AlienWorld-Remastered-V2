@@ -13,6 +13,10 @@ import { montarQueda } from './final/queda';
 import { montarSobrevoo } from './final/sobrevoo';
 import { lugarDaCena } from '../som/acustica';
 import { Som } from '../som/Som';
+import { daNaveNaCena, naveDoSom } from '../som/somDaNave';
+
+/** ms after the last chapter (`T.APAGA`): the B of the cooling lava comes in under the end of the A (sheet 7). */
+const APAGA_B_DEPOIS_MS = 2200;
 
 /**
  * O AFASTAMENTO — a cutscene FINAL, refeita na Fatia 8 (spec 2026-09-23-fatia8-cutscene-final-design.md).
@@ -126,10 +130,38 @@ export class Interlude4Scene extends Phaser.Scene {
     // os capítulos 6 e 7 são um plano só (a câmera fica): o 7 mora dentro do sobrevoo
     this.aos(T.SOBREVOO, () => montarSobrevoo(this.cena));
 
+    this.somDoFinal();
+
     this.time.delayedCall(T.FADE, () => {
       if (!this.done) this.atm.fadeOut(T.FIM - T.FADE);
     });
     this.time.delayedCall(T.FIM, () => this.terminar());
+  }
+
+  /**
+   * O SOM DO FINAL (bloco SOM, folha 7, 17/11 — a cutscene era muda), no mesmo relógio dos capítulos (`T`): o lugar da
+   * acústica anda com a câmera — DENTRO do bicho no rasgo e na descompressão, o VÁCUO da ferida e da queda, a
+   * SUPERFÍCIE do sobrevoo. A ferida e o apagar são duas partes cada (ele: *"A e B na sequência"*; *"a B é a
+   * ambientação interessante para depois da A"* — a B entra por baixo do fim da A, antes do fade).
+   */
+  private somDoFinal(): void {
+    const em = (ms: number, f: () => void): void => {
+      this.time.delayedCall(ms, () => !this.done && f());
+    };
+    Som.lugar('interior', 0);
+    em(T.RASGO, () => Som.tocar('fim.rasgo'));
+    em(T.DESCOMPRESSAO, () => Som.tocar('fim.descompressao'));
+    em(T.FERIDA, () => {
+      Som.lugar('cabine', 400);
+      Som.emSequencia(['fim.ferida', 'fim.ferida2'], em);
+    });
+    em(T.QUEDA, () => Som.tocar('fim.queda'));
+    em(T.SOBREVOO, () => {
+      Som.lugar('atmosfera', 1500);
+      Som.tocar(daNaveNaCena('fim.sobrevoo', naveDoSom(this.naveId, naveEscolhida(this.registry).modelo)));
+    });
+    em(T.APAGA, () => Som.tocar('fim.apaga'));
+    em(T.APAGA + APAGA_B_DEPOIS_MS, () => Som.tocar('fim.apaga2'));
   }
 
   /** O CORTE: o capítulo que sai limpa a tela dele, e o novo entra. */

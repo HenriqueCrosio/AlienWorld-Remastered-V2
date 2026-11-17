@@ -116,25 +116,25 @@ export class HangarScene extends Phaser.Scene {
       f();
     };
     const e = this.estado;
-    for (const k of ['LEFT', 'A']) kb.on(`keydown-${k}`, umaVez(() => mudarLado(e, -1)));
-    for (const k of ['RIGHT', 'D']) kb.on(`keydown-${k}`, umaVez(() => mudarLado(e, 1)));
-    for (const k of ['UP', 'W']) kb.on(`keydown-${k}`, umaVez(() => mudarPintura(e, -1)));
-    for (const k of ['DOWN', 'S']) kb.on(`keydown-${k}`, umaVez(() => mudarPintura(e, 1)));
-    for (const k of ['ENTER', 'SPACE']) {
-      kb.on(`keydown-${k}`, umaVez(() => {
-        if (confirmar(e)) escolherNave(this.registry, escolhaDoEstado(e));
-      }));
-    }
+    // THE SOUND (block SOUND, sheet 6): the shared navigation — a move only when the choice really changed (at the edge
+    // and after the confirmation the state refuses it), the confirm on the choice (the sonic boom comes later, on the veil)
+    const mexer = (f: () => boolean) => (): void => {
+      if (f()) Som.tocar('ui.mover');
+    };
+    const ok = (): void => {
+      if (!confirmar(e)) return;
+      Som.tocar('ui.confirmar');
+      escolherNave(this.registry, escolhaDoEstado(e));
+    };
+    const lado = (d: -1 | 1) => mexer(() => mudarLado(e, d));
+    const pintura = (d: -1 | 1) => mexer(() => mudarPintura(e, d));
+    for (const k of ['LEFT', 'A']) kb.on(`keydown-${k}`, umaVez(lado(-1)));
+    for (const k of ['RIGHT', 'D']) kb.on(`keydown-${k}`, umaVez(lado(1)));
+    for (const k of ['UP', 'W']) kb.on(`keydown-${k}`, umaVez(pintura(-1)));
+    for (const k of ['DOWN', 'S']) kb.on(`keydown-${k}`, umaVez(pintura(1)));
+    for (const k of ['ENTER', 'SPACE']) kb.on(`keydown-${k}`, umaVez(ok));
     // THE CONTROLLER (14/11, block M2): the same moves (START pauses, through `ligarPausa`).
-    controleNoMenu(this, {
-      esquerda: () => mudarLado(e, -1),
-      direita: () => mudarLado(e, 1),
-      cima: () => mudarPintura(e, -1),
-      baixo: () => mudarPintura(e, 1),
-      ok: () => {
-        if (confirmar(e)) escolherNave(this.registry, escolhaDoEstado(e));
-      },
-    });
+    controleNoMenu(this, { esquerda: lado(-1), direita: lado(1), cima: pintura(-1), baixo: pintura(1), ok });
     // A PAUSA (14/11, bloco M1): o ESC abre a janela (continuar · configurações · sair), não sai mais direto.
     ligarPausa(this, { tipo: 'escolha', sair: () => this.scene.start('Menu', { direto: true }), podeAbrir: () => e.tConfirmou === null });
   }

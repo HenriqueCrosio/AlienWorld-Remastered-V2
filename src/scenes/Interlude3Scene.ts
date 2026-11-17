@@ -13,7 +13,8 @@ import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
 import { lugarDaCena } from '../som/acustica';
-import { Som } from '../som/Som';
+import { Som, type Laco } from '../som/Som';
+import { naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
 import { SHIPS, DEFAULT_SHIP, naveEscolhida, visualDaNave } from '../ships';
 import { mesaDaCutscene } from '../cartas';
 import { ShipPanel } from '../ui/ShipPanel';
@@ -72,6 +73,11 @@ export class Interlude3Scene extends Phaser.Scene {
   private score = 0;
   private handling: HandlingMode = 'diegetico';
   private naveId: string = DEFAULT_SHIP;
+  /** THE SOUND (block SOUND, sheet 7): the ship's own engine while it limps in (it dies in the fall) */
+  private somMotor: Laco | null = null;
+  private get naveSom(): NaveSom {
+    return naveDoSom(this.naveId, naveEscolhida(this.registry).modelo);
+  }
   private proxima = 4;
   private done = false;
   /** Ligado no impacto: daí em diante as 17 lâmpadas viram alarme (ver `pulsarLampadas`). */
@@ -652,10 +658,12 @@ export class Interlude3Scene extends Phaser.Scene {
 
   private roteiro(): void {
     this.placar();
+    this.somMotor = Som.laco(somDaNave(this.naveSom, 'motor'), 0.8);
 
     this.time.delayedCall(2300, () => {
       if (this.done) return;
       this.aviso('CASCO CRÍTICO · POTÊNCIA CAINDO', COLORS.enemyBright);
+      Som.tocar('cut.leviata.alerta');
       claraoDe(this).largada(0xff5050, 160);
     });
 
@@ -716,6 +724,10 @@ export class Interlude3Scene extends Phaser.Scene {
     this.sputter?.remove();
     this.ship.anims.timeScale = 1;
     this.aviso('HANGAR DO LEVIATÃ', COLORS.hot);
+    // the engine gives out as she drops (sheet 7: round 2, "algo de engine falhando"); its loop dies here
+    Som.tocar('cut.leviata.queda', { x: this.ship.x });
+    this.somMotor?.parar(350);
+    this.somMotor = null;
 
     // Toca o chão em x=144 — a EMENDA das duas cópias, bem debaixo do portão duplo (o anel
     // espelhado), no único trecho de convés livre de carcaças (montes em ≈61..136 na cópia
@@ -744,6 +756,7 @@ export class Interlude3Scene extends Phaser.Scene {
 
     this.fx.explode(this.ship.x, Interlude3Scene.DECK_Y, 1.3, 50, 'metal');
     this.fagulhas.emitting = true;
+    Som.tocar('cut.leviata.derrapagem', { x: this.ship.x });
 
     // O quique: um só, curto. Dois quiques viram bolinha; nenhum vira pouso.
     this.tweens.add({
@@ -904,6 +917,8 @@ export class Interlude3Scene extends Phaser.Scene {
 
     this.fx.hit(t.x, t.y);
     this.cameras.main.shake(90, 0.002);
+    // the torpedo leaves: the ship's own missile launch (sheet 7: nothing new to make)
+    Som.tocar('nave.missil.lancar', { x: t.x });
 
     this.tweens.add({
       targets: t,
@@ -938,6 +953,8 @@ export class Interlude3Scene extends Phaser.Scene {
 
     // A legenda, não a causa.
     this.aviso('A ENTRADA ESTÁ COLAPSANDO', COLORS.enemyBright);
+    // the throat caving in, A then B (him: "na sequência ficaram bons")
+    Som.emSequencia(['cut.leviata.colapso', 'cut.leviata.colapso2'], (ms, f) => this.time.delayedCall(ms, f));
 
     this.alarme = true;
     this.cadeia();
@@ -1007,6 +1024,7 @@ export class Interlude3Scene extends Phaser.Scene {
 
     const g = Interlude3Scene.GARGANTA;
     const { viagem, engole, escalaFinal } = Interlude3Scene.ENGOLIDA;
+    Som.tocar('cut.leviata.engolida');
 
     this.fumaca.emitting = false;
     this.fagulhas.emitting = false;
@@ -1075,6 +1093,7 @@ export class Interlude3Scene extends Phaser.Scene {
             if (this.done) return;
             this.fx.hit(x, yFinal + 6);
             this.cameras.main.shake(70, 0.002);
+            Som.tocar('cut.leviata.selar');
           },
         });
       });

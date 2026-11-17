@@ -17,7 +17,8 @@ import { T_FIM, T_LISTA_POUSA, alfaItem, particulasDosJatos, posicaoLetreiro, qu
 import { Cenario, carregarCamadasMenu, type CenarioDoMenu, type EstadoMenu } from '../menu/cenario';
 import { CenarioAmanhecer, carregarAmanhecer } from '../menu/amanhecer/cenarioAmanhecer';
 import { guardaDoNavegador, marcarZerou, menuAtivo, menuDaUrl, type QualMenu } from '../menu/qualMenu';
-import { T0_SEGUNDO_TEMPO, resultadoPronto, resultadoSaiu, type ParteResultado } from '../menu/resultado';
+import { T0_SEGUNDO_TEMPO, resultadoPronto, resultadoSaiu, sonsDoResultado, type ParteResultado } from '../menu/resultado';
+import type { Laco } from '../som/Som';
 import { montarPainelResultado, type PainelResultado } from '../menu/painelResultado';
 import { medalhaDe, registrarRecorde, type Guarda } from '../placar';
 import { CHAVE_MENU_HD, MenuCenaHD } from '../menu/MenuCenaHD';
@@ -74,6 +75,9 @@ export class MenuScene extends Phaser.Scene {
   /** Quando a tecla tirou o resultado (relógio do 1º tempo); < 0: ainda não. */
   private tSaiResultado = -1;
   private painel: PainelResultado | null = null;
+  /** the result's sounds (sheet 6): the counter loop while the points count, and whether this one is a new record */
+  private somConta: Laco | null = null;
+  private recordeNovo = false;
   /** O texto mora na camada HD (a irmã)? Então as posições caem no pixel da tela (1/s). */
   private naCamada = false;
   private itens: Phaser.GameObjects.Text[] = [];
@@ -312,6 +316,7 @@ export class MenuScene extends Phaser.Scene {
     const semGravar: Guarda = { getItem: (k) => guarda.getItem(k), setItem: () => {} };
     const placar = registrarRecorde(r.ensaio ? semGravar : guarda, r.handling, r.score, false);
     if (!r.ensaio) marcarZerou(guarda);
+    this.recordeNovo = placar.novo;
     this.painel = montarPainelResultado(this, { score: r.score, recorde: placar.recorde, novo: placar.novo, medalha: medalhaDe(r.score) });
   }
 
@@ -328,7 +333,18 @@ export class MenuScene extends Phaser.Scene {
 
   /** O relógio do 1º tempo, o véu e os textos do resultado (que somem na tecla e são destruídos depois). */
   private atualizarResultado(dt: number): void {
+    const antes = this.tResultado;
     if (!this.estado.congelado) this.tResultado += dt;
+    // the counter, the medal, the record (sheet 6) — the pure timing in `sonsDoResultado`
+    if (this.painel) {
+      for (const s of sonsDoResultado(antes, this.tResultado, this.recordeNovo, this.estado.reduzido)) {
+        if (s === 'contaLiga') this.somConta ??= Som.laco('resultado.conta');
+        else if (s === 'contaDesliga') {
+          this.somConta?.parar(120);
+          this.somConta = null;
+        } else Som.tocar(s === 'medalha' ? 'resultado.medalha' : 'resultado.recorde');
+      }
+    }
     this.estado.tVeu = this.tResultado;
     if (!this.painel) return;
     this.painel.atualizar(this.tResultado, this.tSaiResultado, this.estado.reduzido);
@@ -441,6 +457,7 @@ export class MenuScene extends Phaser.Scene {
   private mover(d: number): void {
     if (!this.settled || this.itens.length < 2) return;
     this.cursorMenu = Phaser.Math.Wrap(this.cursorMenu + d, 0, this.itens.length);
+    Som.tocar('ui.mover');
     this.tCursor = this.estado.tAbertura;
   }
 
@@ -450,12 +467,15 @@ export class MenuScene extends Phaser.Scene {
     const i = CONDUCOES.findIndex((c) => c.id === this.conducao);
     this.conducao = CONDUCOES[Phaser.Math.Wrap(i + d, 0, CONDUCOES.length)].id;
     salvarConducao(this.conducao);
+    Som.tocar('ui.ajustar');
   }
 
   private confirmar(): void {
     if (!this.settled) return;
     // COMEÇAR passa pelo HANGAR (25/10): o jogador escolhe a nave antes da F1. Os atalhos 1/2/3 seguem direto.
     const item = this.mostrados[this.cursorMenu];
+    // COMEÇAR has its own, heavier sound; the others the shared confirm (the condução line: its ←→ "adjust")
+    if (item !== ITEM.conducao) Som.tocar(item === ITEM.comecar ? 'ui.comecar' : 'ui.confirmar');
     if (item === ITEM.comecar) this.scene.start('Hangar', { handling: this.conducao });
     else if (item === ITEM.conducao) this.trocar(1);
     else if (item === ITEM.arquivo) this.scene.start('Arquivo');

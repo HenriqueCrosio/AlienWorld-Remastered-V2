@@ -7,6 +7,7 @@ import { FAMILIA, fontesOk } from '../fonte';
 import { EVENTO_ESCALA, ehHD, escalaHD, jogoHD, mouseHD, pixelFino, prepararCameraHD, registrarTextoHD } from '../uiHD';
 import { CARTAS, COR_RARIDADE, NOME_RARIDADE, type CartaDef } from '../cartas';
 import { mapaAtivo } from '../controles';
+import { Som } from '../som/Som';
 import { ENCAIXE, FOLGA, MOLDURA, type Caixa } from '../molduraCarta';
 import { medidorDaFonte, posicionar, quebrar, tamanhoUnico, type Medir } from '../textoNoEncaixe';
 
@@ -167,6 +168,7 @@ export class CartasScene extends Phaser.Scene {
     const mover = (d: number) => {
       this.cursor = Phaser.Math.Wrap(this.cursor + d, 0, this.opcoes.length);
       this.marcar();
+      Som.tocar('ui.mover');
     };
     kb.on('keydown-LEFT', uma(() => mover(-1)));
     kb.on('keydown-A', uma(() => mover(-1)));
@@ -211,7 +213,9 @@ export class CartasScene extends Phaser.Scene {
 
     this.marcar();
 
-    // Entrada: as cartas sobem para a mesa, uma depois da outra (e terminam em pixel inteiro).
+    // Entrada: as cartas sobem para a mesa, uma depois da outra (e terminam em pixel inteiro). O som da mesa (folha 6)
+    // é um só para as três — a versão escolhida já tem os três deslizes.
+    Som.tocar('cartas.mesa');
     this.cartas.forEach((k, i) => {
       const y = k.y;
       k.y += 16;
@@ -444,6 +448,7 @@ export class CartasScene extends Phaser.Scene {
   private zona(i: number): Phaser.GameObjects.Zone {
     const z = this.add.zone(0, 0, MOLDURA.w, MOLDURA.h).setOrigin(0).setInteractive({ useHandCursor: true });
     z.on('pointerover', () => {
+      if (this.cursor !== i && !this.fechando) Som.tocar('ui.mover');
       this.cursor = i;
       this.marcar();
     });
@@ -459,6 +464,9 @@ export class CartasScene extends Phaser.Scene {
     if (this.fechando || i < 0 || i >= this.opcoes.length) return;
     this.fechando = true;
     const escolhida = this.opcoes[i];
+    // the choice and, over it, its RARITY (sheet 6: 1 to 4 notes, the epic with a low hit)
+    Som.tocar('cartas.escolher');
+    Som.tocar(`cartas.raridade.${escolhida.raridade}`);
 
     this.cartas.forEach((k, j) => {
       // O "pulo" da escolhida cresce a partir do MEIO (a carta é posicionada pelo canto).

@@ -12,7 +12,7 @@ import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import { forcaNoLugar, lugarDaCena } from '../som/acustica';
 import { Som, type Laco } from '../som/Som';
-import { ESTRONDO_MUSICA_ABAFADA, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
+import { ESTRONDO_MUSICA_ABAFADA, daNaveNaCena, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
 import { SONS } from '../som/catalogoSons';
 import { somDaMorte, somDoAcerto } from '../som/somDaExplosao';
 import { InputReader } from '../input';
@@ -78,6 +78,12 @@ export type HandlingMode = 'diegetico' | 'flap' | 'free';
  * The sonic boom that OPENS the F1 (block SOUND, his ask): it plays first and alone, the music dips under it, the
  * engine comes in after (ms). Tuned with him playing.
  */
+/** ms: the climb out of the atmosphere opens the acoustics to space over this long (sheet 7). */
+const SAIDA_ABRE_O_ESPACO_MS = 3500;
+
+/** ms after the stage starts: the 1-UP's chime (sheet 6), once the stage has come in. */
+const VIDA_EXTRA_APOS_MS = 1500;
+
 const ESTRONDO = {
   musicaVoltaEm: 2200,
   musicaVoltaMs: 1800,
@@ -751,6 +757,9 @@ export class GameScene extends Phaser.Scene {
     });
     // O 1-UP da coleção completa da fase ANTERIOR vale só nesta fase (e no retry dela) — não acumula.
     this.lives = 3 + this.cartas.vidasExtras() + (temUmUp(this.registry, this.stage.id) ? 1 : 0);
+    // THE EXTRA LIFE lands with the stage (sheet 6): its chime once the stage has come in (the F1's sonic boom and the
+    // cutscene's tail first), never at the very first frame
+    if (temUmUp(this.registry, this.stage.id)) this.time.delayedCall(VIDA_EXTRA_APOS_MS, () => Som.tocar('vida.extra'));
     // BOMBA EXTRA: 3 por vida (GDD §5) + as da mão.
     this.bombs = 3 + this.cartas.bombasExtras();
     this.weapons.setBase(this.cartas.arma());
@@ -2489,6 +2498,10 @@ export class GameScene extends Phaser.Scene {
     this.subidaAngulo0 = this.ship.angle;
 
     this.showBanner('ATMOSFERA ROMPIDA · ZERO-G', COLORS.playerBright);
+    // THE WAY OUT (block SOUND, sheet 7): the ship's own flyby (his — the X-AELO's, the TERMINUS's; the Manta's own) and
+    // the acoustics OPENING to space over the climb — the air thins, the cabin takes over (no cut: a ramp)
+    Som.tocar(daNaveNaCena('momento.f1.saida', this.naveSom));
+    Som.lugar('cabine', SAIDA_ABRE_O_ESPACO_MS);
     this.cameras.main.shake(600, 0.01);
     claraoDe(this).largada(0xb4e6ff, 400);
 

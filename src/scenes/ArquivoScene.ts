@@ -12,6 +12,7 @@ import { Starfield } from '../Starfield';
 import { pixelText } from '../ui';
 import { escalaHD, irmaDe, registrarTextoHD } from '../uiHD';
 import { ITEM } from '../menu/numerosMenu';
+import { Som } from '../som/Som';
 
 /** Os grupos da grade, na ordem do catálogo. */
 const GRUPOS: { cat: Categoria; nome: string }[] = [
@@ -286,7 +287,7 @@ export class ArquivoScene extends Phaser.Scene {
       [['RIGHT', 'D'], () => this.mover(1, 0)],
       [['UP', 'W'], () => this.mover(0, -1)],
       [['DOWN', 'S'], () => this.mover(0, 1)],
-      [['ESC', 'BACKSPACE'], () => this.scene.start('Menu', { cursor: ITEM.arquivo, direto: true })],
+      [['ESC', 'BACKSPACE'], () => this.voltar()],
     ];
     for (const [teclas, f] of pares) for (const t of teclas) kb.on(`keydown-${t}`, uma(f));
     // THE CONTROLLER (14/11, block M2)
@@ -295,7 +296,7 @@ export class ArquivoScene extends Phaser.Scene {
       direita: () => this.mover(1, 0),
       cima: () => this.mover(0, -1),
       baixo: () => this.mover(0, 1),
-      voltar: () => this.scene.start('Menu', { cursor: ITEM.arquivo, direto: true }),
+      voltar: () => this.voltar(),
     });
   }
 
@@ -308,6 +309,15 @@ export class ArquivoScene extends Phaser.Scene {
       const linha = this.celulas.filter((c) => c.linha === atual.linha + dy);
       alvo = linha.find((c) => c.coluna === Math.min(atual.coluna, linha.length - 1));
     }
-    if (alvo) this.selecionar(alvo.id);
+    if (alvo) {
+      Som.tocar('ui.mover');
+      this.selecionar(alvo.id);
+    }
+  }
+
+  /** Back to the menu, on the Archive line (ESC, BACKSPACE, the controller's back). */
+  private voltar(): void {
+    Som.tocar('ui.voltar');
+    this.scene.start('Menu', { cursor: ITEM.arquivo, direto: true });
   }
 }

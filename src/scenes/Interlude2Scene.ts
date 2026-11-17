@@ -13,7 +13,8 @@ import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
 import { lugarDaCena } from '../som/acustica';
-import { Som } from '../som/Som';
+import { Som, type Laco } from '../som/Som';
+import { daNaveNaCena, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
 import { SHIPS, DEFAULT_SHIP, ROSTER_DOCA, naveEscolhida, visualDaNave } from '../ships';
 import { mesaDaCutscene, resetDaAlien } from '../cartas';
 import { ShipPanel } from '../ui/ShipPanel';
@@ -92,6 +93,12 @@ export class Interlude2Scene extends Phaser.Scene {
   private score = 0;
   private handling: HandlingMode = 'diegetico';
   private naveId: string = DEFAULT_SHIP;
+  /** THE SOUND (block SOUND, sheet 7): the ship's own engine while it flies in (it stops on the pad) */
+  private somMotor: Laco | null = null;
+  /** which of the three ships is flying (the landing, the departure are its own) */
+  private get naveSom(): NaveSom {
+    return naveDoSom(this.naveId, naveEscolhida(this.registry).modelo);
+  }
   private proxima = 3;
   private done = false;
   private t = 0;
@@ -624,10 +631,13 @@ export class Interlude2Scene extends Phaser.Scene {
 
   private roteiro(): void {
     this.placar();
+    // THE SOUND (block SOUND, sheet 7): the ship's own engine while it flies in; the autopilot
+    this.somMotor = Som.laco(somDaNave(this.naveSom, 'motor'), 0.8);
 
     this.time.delayedCall(2300, () => {
       if (this.done) return;
       this.aviso('PILOTO AUTOMÁTICO · ENGATADO', COLORS.hotBright);
+      Som.tocar('cut.piloto');
       claraoDe(this).largada(0xffd447, 160);
     });
 
@@ -681,6 +691,7 @@ export class Interlude2Scene extends Phaser.Scene {
     if (this.done) return;
 
     this.aviso('DOCA KEPLER-9 · MINERAÇÃO', COLORS.hot);
+    Som.tocar(daNaveNaCena('cut.pouso.descida', this.naveSom));
 
     // O alvo é o MEIO DA PISTA, calculado da arte — não um número escolhido a olho.
     const alvoX =
@@ -698,6 +709,9 @@ export class Interlude2Scene extends Phaser.Scene {
       onComplete: () => {
         this.fx.hit(this.ship.x, this.ship.y + 6);
         this.cameras.main.shake(140, 0.004);
+        Som.tocar(daNaveNaCena('cut.pouso.toque', this.naveSom));
+        this.somMotor?.parar(500);
+        this.somMotor = null;
         this.escolha();
       },
     });
@@ -817,9 +831,20 @@ export class Interlude2Scene extends Phaser.Scene {
 
     this.aviso('SOBRECARGA · A DOCA VAI CAIR', COLORS.enemyBright);
     Music.play(this, 'boss', 600);
+    // THE SOUND (sheet 7): the station's alarm; the ship's departure; the dock going down in two parts (him: "A e B na
+    // sequência ficaram bons") — the A with the chain that starts breaking it (0.9 s), the B with the cables snapping
+    // and the dock giving way (2.3 s). They overlap: the scene ends at 4.4 s, and nothing crosses a scene change.
+    Som.tocar('cut.doca.alarme');
+    this.time.delayedCall(900, () => !this.done && Som.tocar('cut.doca.afunda'));
+    this.time.delayedCall(2300, () => {
+      if (this.done) return;
+      Som.tocar('cut.doca.cabos');
+      Som.tocar('cut.doca.afunda2');
+    });
 
     this.time.delayedCall(600, () => {
       if (this.done) return;
+      Som.tocar(daNaveNaCena('cut.decolagem', this.naveSom));
 
       // A nave sai para a DIREITA e para CIMA: é para lá que a Fase 3 corre.
       this.tweens.add({ targets: this.ship, x: GAME_WIDTH + 40, duration: 1700, ease: 'Sine.easeIn' });

@@ -43,7 +43,7 @@ export interface DiagnosticoSom {
 }
 /** The shared rumble under the chains (`mixagem.ts` LASTRO). */
 export const NOME_LASTRO = 'explosao.lastro';
-type Voz = VozAtiva & { fonte: AudioBufferSourceNode; ganho: GainNode; ponte: boolean; base: number; teto: number };
+type Voz = VozAtiva & { fonte: AudioBufferSourceNode; ganho: GainNode; ponte: boolean; tela: boolean; base: number; teto: number };
 
 export const chaveSom = (nome: string): string => `sfx:${nome}`;
 const LARGURA_TELA = 384;
@@ -236,7 +236,7 @@ export class Som {
     ganho.gain.value = Math.min(teto, base * ganhoExtra);
     ultimoNo.connect(Som.barras[def.camada]);
     if (chefeNoVacuo && Som.salaChefe) ultimoNo.connect(Som.salaChefe);
-    const voz: Voz = { id: Som.proxId++, nome, peso, inicio: agora, fonte, ganho, ponte: !!def.ponte, base, teto };
+    const voz: Voz = { id: Som.proxId++, nome, peso, inicio: agora, fonte, ganho, ponte: !!def.ponte, tela: def.camada === 'interface' && !laco, base, teto };
     fonte.onended = () => {
       Som.ativas = Som.ativas.filter((a) => a !== voz);
       ganho.disconnect();
@@ -309,6 +309,27 @@ export class Som {
       return;
     }
     Som.lastroLaco.volume(ganhoDoLastro(e), 150);
+  }
+
+  /** Seconds: how long a loaded sound lasts (0 when it is not loaded). */
+  static duracao(nome: string): number {
+    return Som.achar(nome)?.buffer.duration ?? 0;
+  }
+
+  /**
+   * IN SEQUENCE (17/11, sheet 7 — him: *"A e B na sequência ficaram bons"*): the first sound, then the next one when it
+   * ends, overlapping its tail by `sobrepoe` s so the seam is one sound. On the scene's clock (`agendar`, its
+   * `time.delayedCall`): the fast-forward of a cutscene and its end take the rest with them.
+   */
+  static emSequencia(nomes: readonly string[], agendar: (ms: number, f: () => void) => void, op: { x?: number; sobrepoe?: number } = {}): void {
+    const sobrepoe = op.sobrepoe ?? 0.3;
+    let t = 0;
+    for (const nome of nomes) {
+      const toca = (): void => Som.tocar(nome, { x: op.x });
+      if (t <= 0) toca();
+      else agendar(t * 1000, toca);
+      t += Math.max(0.1, Som.duracao(nome) - sobrepoe);
+    }
   }
 
   /** Fades out every voice of `nome` still sounding (17/11: the Predador's slash that MISSES gives way to the one that
@@ -404,9 +425,11 @@ export class Som {
     const ctx = Som.ctx;
     if (ctx) {
       const agora = ctx.currentTime;
-      // (a `ponte` sound — only the F1 sonic boom — crosses on purpose, and keeps its place in the list)
+      // (a `ponte` sound — only the F1 sonic boom — crosses on purpose, and keeps its place in the list; and so does an
+      // INTERFACE one-shot, sheet 6: the rule is about the WORLD — the menu's START that opens the hangar, the back
+      // that returns to the menu, are the screen's and must finish)
       for (const v of Som.ativas) {
-        if (v.ponte) continue;
+        if (v.ponte || v.tela) continue;
         rumo(v.ganho.gain, 0, agora, ms);
         try {
           v.fonte.stop(agora + ms / 1000 + 0.03);
@@ -414,7 +437,7 @@ export class Som {
           /* already stopped */
         }
       }
-      Som.ativas = Som.ativas.filter((v) => v.ponte);
+      Som.ativas = Som.ativas.filter((v) => v.ponte || v.tela);
       Som.ultimo.clear();
     }
     if (Som.lastroTimer) clearInterval(Som.lastroTimer);

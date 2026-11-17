@@ -21,6 +21,7 @@ import { texturaMedalha } from '../menu/painelResultado';
 import type { Campo, Preferencias } from '../preferencias';
 import { Music } from '../systems/Music';
 import { Som } from '../som/Som';
+import { somDaPausa } from '../pausa/somDaPausa';
 import { alternarTelaCheia, emTelaCheia, escFicaNoJogo } from '../telaCheia';
 import { pixelText } from '../ui';
 import { COR_JANELA, texturaJanela } from '../ui/janela';
@@ -105,6 +106,10 @@ export class PausaScene extends Phaser.Scene {
       veu.setAlpha(0);
       this.tweens.add({ targets: veu, alpha: JANELA.veu, duration: DERROTA.entra });
     }
+    // the window's own sound (sheet 6): SHIP LOST is its sting; the pause opens; the settings from the menu came with
+    // the menu's own "confirm"
+    if (this.ctx.tipo === 'derrota') Som.tocar('ui.navePerdida');
+    else if (!doMenu) Som.tocar('ui.pausa.abrir');
     if (!doMenu) {
       Music.abafar(this, JANELA.abafo, 200);
       // the world's effects duck with the music (block SOUND); on SHIP LOST the action is silenced, the ambience stays low
@@ -174,11 +179,14 @@ export class PausaScene extends Phaser.Scene {
       const troca = nome ? this.avisoDaTroca('teclado', acao, nome) : '';
       if (!nome || !teclaPermitida(nome) || !remapearPref('teclado', acao, nome)) {
         this.recusa = 'essa tecla é do jogo: escolha outra';
+        Som.tocar('ui.negar');
         this.desenhar();
         return;
       }
       // every live `InputReader` re-reads the map (the scene underneath is paused, not restarted)
       this.game.events.emit(EVENTO_TECLAS);
+      // the key taken — and when it was another action's, the SWAP announced has its own sound (sheet 6)
+      Som.tocar(troca ? 'ui.troca' : 'ui.confirmar');
       this.recusa = troca;
       this.estado = fimDaCaptura(e);
       this.desenhar();
@@ -207,6 +215,7 @@ export class PausaScene extends Phaser.Scene {
       if (this.fechou || e.tela !== 'captura' || quadroDoControle() === this.quadroDaCaptura) return;
       if (desceuBotao(BOTAO.START)) {
         this.recusa = '';
+        Som.tocar('ui.voltar');
         this.estado = fimDaCaptura(e);
         this.desenhar();
         return;
@@ -218,9 +227,11 @@ export class PausaScene extends Phaser.Scene {
       const troca = this.avisoDaTroca('controle', acao, b);
       if (!botaoPermitido(b) || !remapearPref('controle', acao, b)) {
         this.recusa = 'esse botão é do jogo: escolha outro';
+        Som.tocar('ui.negar');
         this.desenhar();
         return;
       }
+      Som.tocar(troca ? 'ui.troca' : 'ui.confirmar');
       this.recusa = troca;
       this.estado = fimDaCaptura(e);
       this.desenhar();
@@ -252,6 +263,9 @@ export class PausaScene extends Phaser.Scene {
     // the note of the last capture (a refusal, a swap) leaves with the next key
     this.recusa = '';
     const { estado, efeito } = passo(this.estado, t, this.ctx);
+    // the interface sound of this key (block SOUND, sheet 6) — the pure rule in `somDaPausa`
+    const som = somDaPausa(this.estado, estado, efeito, t, this.ctx);
+    if (som) Som.tocar(som);
     this.estado = estado;
     if (estado.tela === 'captura' && antes !== 'captura') {
       this.quadroDaCaptura = quadroDoControle();

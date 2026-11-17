@@ -28,6 +28,25 @@ export function pontosMostrados(score: number, t: number): number {
   return Math.round(score * (1 - Math.pow(1 - u, 3)));
 }
 
+/**
+ * OS SONS DO RESULTADO (bloco SOM, folha 6, 17/11) entre os instantes `a` e `b` do 1º tempo: o CONTADOR liga quando os
+ * pontos entram e desliga quando eles assentam (`RESULTADO.conta`), a MEDALHA toca no número final e o RECORDE logo
+ * depois, se é novo. O movimento reduzido (tudo já entra posto) não conta: só a medalha e o recorde, no começo.
+ */
+export type SomDoResultado = 'contaLiga' | 'contaDesliga' | 'medalha' | 'recorde';
+export const RECORDE_DEPOIS = 0.3;
+export function sonsDoResultado(a: number, b: number, novo: boolean, posto = false): SomDoResultado[] {
+  const cruza = (x: number): boolean => a < x && b >= x;
+  const entra = posto ? 0 : RESULTADO.entra.pontos;
+  const assenta = posto ? 0 : entra + RESULTADO.conta;
+  const sons: SomDoResultado[] = [];
+  if (!posto && cruza(entra)) sons.push('contaLiga');
+  if (!posto && cruza(assenta)) sons.push('contaDesliga');
+  if (posto ? a <= 0 && b > 0 : cruza(assenta)) sons.push('medalha');
+  if (novo && (posto ? a <= RECORDE_DEPOIS && b > RECORDE_DEPOIS : cruza(assenta + RECORDE_DEPOIS))) sons.push('recorde');
+  return sons;
+}
+
 /** Tudo entrou: a tecla vale. */
 export const resultadoPronto = (t: number, posto = false): boolean => posto || t >= RESULTADO.pronto;
 

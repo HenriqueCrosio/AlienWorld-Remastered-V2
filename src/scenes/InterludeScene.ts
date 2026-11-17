@@ -13,7 +13,8 @@ import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
 import { lugarDaCena } from '../som/acustica';
-import { Som } from '../som/Som';
+import { Som, type Laco } from '../som/Som';
+import { daNaveNaCena, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
 import { SHIPS, DEFAULT_SHIP, naveEscolhida, visualDaNave } from '../ships';
 import { ShipPanel } from '../ui/ShipPanel';
 import { mesaDaCutscene } from '../cartas';
@@ -67,6 +68,12 @@ export class InterludeScene extends Phaser.Scene {
   private panel: ShipPanel | null = null;
   /** A nave escolhida. Se o jogador pular a cutscene, vai a padrão — nunca "nave nenhuma". */
   private naveId: string = DEFAULT_SHIP;
+  /** THE SOUND (block SOUND, sheet 7): the ship's own engine while it flies in (it stops on the deck) */
+  private somMotor: Laco | null = null;
+  /** which of the three ships is flying (the landing, the departure are its own) */
+  private get naveSom(): NaveSom {
+    return naveDoSom(this.naveId, naveEscolhida(this.registry).modelo);
+  }
 
   /** A linha do CONVÉS: é nela que a nave pousa. O casco desce daqui para fora da tela. */
   private static readonly DECK_Y = 168;
@@ -291,6 +298,9 @@ export class InterludeScene extends Phaser.Scene {
 
   private roteiro(): void {
     this.placar();
+    this.somMotor = Som.laco(somDaNave(this.naveSom, 'motor'), 0.8);
+    // the Aurora rising from below (her own tween starts at 2.4 s) — block SOUND, sheet 7
+    this.time.delayedCall(2400, () => !this.done && Som.tocar('cut.aurora.capitania'));
 
     // PILOTO AUTOMÁTICO ENGATADO.
     //
@@ -303,6 +313,7 @@ export class InterludeScene extends Phaser.Scene {
     this.time.delayedCall(2300, () => {
       if (this.done) return;
       this.aviso('PILOTO AUTOMÁTICO · ENGATADO', COLORS.hotBright);
+      Som.tocar('cut.piloto');
       claraoDe(this).largada(0xffd447, 160);
     });
 
@@ -379,6 +390,7 @@ export class InterludeScene extends Phaser.Scene {
     if (this.done) return;
 
     this.aviso('CAPITÂNIA AURORA · CONVÉS DE POUSO', COLORS.playerBright);
+    Som.tocar(daNaveNaCena('cut.pouso.descida', this.naveSom));
 
     this.tweens.add({
       targets: this.ship,
@@ -397,6 +409,10 @@ export class InterludeScene extends Phaser.Scene {
         // ela só para de se mover.
         this.fx.hit(this.ship.x, this.ship.y + 6);
         this.cameras.main.shake(140, 0.004);
+        // the touch on the deck; the engine goes quiet (sheet 7)
+        Som.tocar(daNaveNaCena('cut.pouso.toque', this.naveSom));
+        this.somMotor?.parar(500);
+        this.somMotor = null;
         this.escolha();
       },
     });
@@ -511,6 +527,8 @@ export class InterludeScene extends Phaser.Scene {
     // voltar por onde veio, e o corte para o cinturão ficaria invertido.
     this.time.delayedCall(1600, () => {
       if (this.done) return;
+      // the departure — the chosen ship's own (sheet 7)
+      Som.tocar(daNaveNaCena('cut.decolagem', this.naveSom));
 
       this.tweens.add({ targets: this.ship, x: GAME_WIDTH + 40, duration: 1600, ease: 'Sine.easeIn' });
       this.tweens.add({ targets: this.ship, y: 60, duration: 1600, ease: 'Cubic.easeOut' });

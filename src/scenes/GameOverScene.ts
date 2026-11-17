@@ -4,6 +4,10 @@ import { DICA, dicaViva } from '../entrada/dicas';
 import { COLORS, GAME_WIDTH } from '../config';
 import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
+import { Som } from '../som/Som';
+
+/** ms: the new record's run comes after the stage-cleared sting (sheet 6). */
+const RECORDE_NA_TELA_MS = 900;
 import type { HandlingMode } from './GameScene';
 import { mapaAtivo, rotuloDaTecla } from '../controles';
 
@@ -45,6 +49,13 @@ export class GameOverScene extends Phaser.Scene {
     Music.play(this, 'stage1', 1200);
 
     const medal = medalhaDe(score);
+
+    // THE SOUND (block SOUND, sheet 6): the stage cleared has its sting (and a new record its run, after it); a loss
+    // only lands here when the SHIP LOST window could not open — then it carries that window's sting
+    if (victory) {
+      Som.tocar('resultado.fase');
+      if (isRecord) this.time.delayedCall(RECORDE_NA_TELA_MS, () => Som.tocar('resultado.recorde'));
+    } else Som.tocar('ui.navePerdida');
 
     if (victory) {
       // O subtítulo é o GANCHO para o que vem depois — por fase, porque a campanha é uma

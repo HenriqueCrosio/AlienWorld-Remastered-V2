@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from './config';
 import type { Fx } from './systems/Fx';
+import { Som } from './som/Som';
+
+/** ms: the 3rd star's own step first, then the jingle of the complete collection (sheet 6). */
+const ESTRELAS_COMPLETAS_APOS_MS = 220;
 
 /**
  * AS PEÇAS — PROTÓTIPO (feat/cartas-preview, 28/09). As "moedas-estrela" do jogo, decisão do Henrique:
@@ -207,7 +211,12 @@ export class PecasEmJogo {
       slot.setTexture('estrela-cheia');
       this.h.scene.tweens.add({ targets: slot, scale: { from: 1.6, to: 1 }, duration: 260, ease: 'Back.easeOut' });
     }
+    // O SOM (folha 6): cada estrela um degrau mais alta; a terceira traz, logo depois, o jingle da coleção completa.
+    Som.tocar(`estrela.pegar${Math.min(PECAS_POR_FASE, this.pegas)}`);
     // A estrela do canto já conta 1 e 2; o aviso no meio da tela fica só para a coleção completa.
-    if (this.pegas >= PECAS_POR_FASE) this.h.aviso('3 ESTRELAS · +1 VIDA NA PRÓXIMA FASE');
+    if (this.pegas >= PECAS_POR_FASE) {
+      this.h.aviso('3 ESTRELAS · +1 VIDA NA PRÓXIMA FASE');
+      this.h.scene.time.delayedCall(ESTRELAS_COMPLETAS_APOS_MS, () => Som.tocar('estrela.completa'));
+    }
   }
 }

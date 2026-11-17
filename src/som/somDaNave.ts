@@ -31,3 +31,6 @@ export const ESTRONDO_MUSICA_ABAFADA = 0.3;
 
 /** `nave.<ship>.<what>`: the name of one of the ship's own sounds in the catalogue. */
 export const somDaNave = (n: NaveSom, o: 'tiro' | 'motor' | 'atingida' | 'vida' | 'morte'): string => `nave.${n}.${o}`;
+
+/** A cutscene sound that belongs to the ship flying it (sheet 7, 17/11): `cut.pouso.descida` → `cut.pouso.descida.xaelo`. */
+export const daNaveNaCena = (nome: string, n: NaveSom): string => `${nome}.${n}`;
