@@ -1482,6 +1482,10 @@ export class GameScene extends Phaser.Scene {
         // A montanha entra pela direita (F1, 21/10). Quem anda, abre e fecha é o `Parallax` (`src/f1/cavernaF1.ts`).
         this.parallax.iniciarCaverna();
         break;
+      case 'urro':
+        // the Predador heard from deep inside, before the core (block SOUND, sheet 5c): a background sound
+        Som.tocar(e.som, { forca: e.forca });
+        break;
       case 'boss':
         this.spawnBoss();
         break;

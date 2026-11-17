@@ -164,6 +164,12 @@ export type StageEvent =
    * ⚠️ O roteiro inteiro depois dela foi EMPURRADO `CAVERNA_F1.empurra` s — ela soma tempo, não ocupa um trecho.
    */
   | { t: number; type: 'caverna' }
+  /**
+   * A ROAR FROM DEEP INSIDE (block SOUND, sheet 5c, 17/11 — him: *"podem até entrar antes mesmo do encontro, para mostrar
+   * que o jogador se aproxima de algo infernal"*): the Predador heard far away on the way to the core — a background
+   * sound (the place's own muffle), `forca` growing as the core comes near.
+   */
+  | { t: number; type: 'urro'; som: string; forca: number }
   | { t: number; type: 'boss' };
 
 /**
@@ -701,6 +707,8 @@ export const STAGE_4: StageEvent[] = [
   { t: 63, type: 'banner', text: 'REJEIÇÃO TOTAL' },
   { t: 63.5, type: 'corredor', rate: 1.7, gap: 84 },
   { t: 63.5, type: 'moldura', espessura: 44 },      // não é mais câmara
+  // the Predador, far away (sheet 5c): the 1st of three roars on the way to the core, each nearer
+  { t: 64, type: 'urro', som: 'predador.urroLonge', forca: 0.6 },
   { t: 67, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 100 },
   // O DUTO — a mais escura das quatro (luminância média 11,7), e é onde a leitura mais
   // importa. Na Fatia 7 · Bloco C esta linha se realinha com a entrada das paredes contínuas.
@@ -755,6 +763,7 @@ export const STAGE_4: StageEvent[] = [
   // t=94 era a terceira comporta rebitada, igual às outras duas. O esfíncter de verdade é a
   // garganta da soleira, em t=110 — ver o bloco da soleira mais abaixo.
   { t: 88, type: 'banner', text: 'A ÚLTIMA COMPORTA' },
+  { t: 88.5, type: 'urro', som: 'predador.urroLonge2', forca: 0.8 },
   { t: 89, type: 'corredor', rate: 1.7, gap: 68 },
   { t: 94, type: 'porta', hp: 10 },
 
@@ -794,6 +803,7 @@ export const STAGE_4: StageEvent[] = [
   // rumo ao núcleo"* que ele pediu.
   { t: 106, type: 'moldura', espessura: 26, duto: true },
   { t: 106.5, type: 'hazard', rate: 0, mix: [] },
+  { t: 107, type: 'urro', som: 'predador.urroLonge', forca: 1 },
   // A CÂMARA DO NÚCLEO. Entra no SILÊNCIO que o roteiro já fazia — a sala muda antes do
   // alarme tocar, então o jogador vê onde chegou antes de ser avisado do que vem.
   //

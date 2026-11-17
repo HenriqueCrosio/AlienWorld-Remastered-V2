@@ -1,6 +1,6 @@
 import { AO_FUNDO, CHEFE_NO_VACUO, impulso, montarAcustica, type Acustica, type Lugar } from './acustica.ts';
 import { SONS, type DefSom } from './catalogoSons.ts';
-import { LASTRO, energiaDepois, ganhoDaCamada, ganhoDoLastro, type Camada, type Volumes } from './mixagem.ts';
+import { LASTRO, LIMITADOR, MAKEUP_DO_LIMITADOR, energiaDepois, ganhoDaCamada, ganhoDoLastro, type Camada, type Volumes } from './mixagem.ts';
 import { PESO, decidir, sortearVariacao, type VozAtiva } from './vozes.ts';
 
 /**
@@ -43,7 +43,7 @@ export interface DiagnosticoSom {
 }
 /** The shared rumble under the chains (`mixagem.ts` LASTRO). */
 export const NOME_LASTRO = 'explosao.lastro';
-type Voz = VozAtiva & { fonte: AudioBufferSourceNode; ganho: GainNode; ponte: boolean };
+type Voz = VozAtiva & { fonte: AudioBufferSourceNode; ganho: GainNode; ponte: boolean; base: number; teto: number };
 
 export const chaveSom = (nome: string): string => `sfx:${nome}`;
 const LARGURA_TELA = 384;
@@ -88,6 +88,9 @@ export class Som {
   /** the bosses' closed room in the vacuum (see `CHEFE_NO_VACUO`) */
   private static salaChefe: GainNode | null = null;
   private static abafoNo: GainNode | null = null;
+  /** the safety limiter at the end (`LIMITADOR`) and the node after it — the effects as they leave for the output */
+  private static limitadorNo: DynamicsCompressorNode | null = null;
+  private static fimNo: GainNode | null = null;
   private static ac: Acustica | null = null;
   private static lugarAtual: Lugar = 'atmosfera';
   private static ativas: Voz[] = [];
@@ -111,7 +114,18 @@ export class Som {
     Som.ctx = ctx;
     Som.cache = cache;
     const saida = ctx.createGain();
-    saida.connect(g.destination);
+    // the SAFETY LIMITER (`LIMITADOR`): only the peaks over the threshold are shaved; under it, unity (its makeup undone)
+    const lim = ctx.createDynamicsCompressor();
+    lim.threshold.value = LIMITADOR.limiar;
+    lim.knee.value = LIMITADOR.joelho;
+    lim.ratio.value = LIMITADOR.razao;
+    lim.attack.value = LIMITADOR.ataque;
+    lim.release.value = LIMITADOR.soltura;
+    const compensa = ctx.createGain();
+    compensa.gain.value = 10 ** (-MAKEUP_DO_LIMITADOR / 20);
+    saida.connect(lim).connect(compensa).connect(g.destination);
+    Som.limitadorNo = lim;
+    Som.fimNo = compensa;
     Som.abafoNo = ctx.createGain();
     Som.abafoNo.connect(saida);
     Som.ac = montarAcustica(ctx, Som.lugarAtual);
@@ -176,7 +190,9 @@ export class Som {
     const v = sortearVariacao(Som.rnd, def.variacao.tom, def.variacao.vol);
     fonte.playbackRate.value = v.taxa;
     const ganho = ctx.createGain();
-    let nivel = def.volume * v.ganho * ganhoExtra;
+    // `base` = the voice's level before the caller's factor: a loop's `volume()` scales THIS, so the vacuum containment
+    // and the background factor survive a fade (17/11: it used `def.volume × v` and dropped them)
+    let base = def.volume * v.ganho;
     let ultimoNo: AudioNode = fonte.connect(ganho);
     if (x !== undefined) {
       const pan = ctx.createStereoPanner();
@@ -185,7 +201,7 @@ export class Som {
     }
     // a boss in the vacuum is contained (`CHEFE_NO_VACUO`): its own low-pass, a little lower, a send into the closed room
     const chefeNoVacuo = Som.lugarAtual === 'cabine' && def.prioridade === 'chefe' && def.camada === 'acao';
-    if (chefeNoVacuo) nivel *= CHEFE_NO_VACUO.volume;
+    if (chefeNoVacuo) base *= CHEFE_NO_VACUO.volume * (def.ganhoNoVacuo ?? 1);
     const corte = Math.min(
       def.passaBaixa ?? Infinity,
       Som.lugarAtual === 'cabine' ? (def.passaBaixaNoVacuo ?? Infinity) : Infinity,
@@ -198,18 +214,29 @@ export class Som {
       lp.Q.value = 0.5;
       ultimoNo = ultimoNo.connect(lp);
     }
+    if (chefeNoVacuo) {
+      const P = CHEFE_NO_VACUO.presenca;
+      const pk = ctx.createBiquadFilter();
+      pk.type = 'peaking';
+      pk.frequency.value = P.freq;
+      pk.gain.value = P.ganhoDb;
+      pk.Q.value = P.q;
+      ultimoNo = ultimoNo.connect(pk);
+    }
     if (def.plano === 'fundo' && def.camada !== 'interface') {
       const f = AO_FUNDO[Som.lugarAtual];
       const lp = ctx.createBiquadFilter();
       lp.type = 'lowpass';
       lp.frequency.value = f.passaBaixa;
-      nivel *= f.volume;
+      base *= f.volume;
       ultimoNo = ultimoNo.connect(lp);
     }
-    ganho.gain.value = Math.min(1, nivel);
+    // (a contained boss may go a little past 1: its `ganhoNoVacuo` gives back what the cut took — measured, peak < −1 dB)
+    const teto = chefeNoVacuo ? 1.5 : 1;
+    ganho.gain.value = Math.min(teto, base * ganhoExtra);
     ultimoNo.connect(Som.barras[def.camada]);
     if (chefeNoVacuo && Som.salaChefe) ultimoNo.connect(Som.salaChefe);
-    const voz: Voz = { id: Som.proxId++, nome, peso, inicio: agora, fonte, ganho, ponte: !!def.ponte };
+    const voz: Voz = { id: Som.proxId++, nome, peso, inicio: agora, fonte, ganho, ponte: !!def.ponte, base, teto };
     fonte.onended = () => {
       Som.ativas = Som.ativas.filter((a) => a !== voz);
       ganho.disconnect();
@@ -284,6 +311,21 @@ export class Som {
     Som.lastroLaco.volume(ganhoDoLastro(e), 150);
   }
 
+  /** Fades out every voice of `nome` still sounding (17/11: the Predador's slash that MISSES gives way to the one that
+   *  HITS, at the moment the ship is struck). */
+  static calar(nome: string, ms = 60): void {
+    const ctx = Som.ctx;
+    if (!ctx) return;
+    for (const v of Som.ativas.filter((a) => a.nome === nome)) {
+      rumo(v.ganho.gain, 0, ctx.currentTime, ms);
+      try {
+        v.fonte.stop(ctx.currentTime + ms / 1000 + 0.02);
+      } catch {
+        /* already stopped */
+      }
+    }
+  }
+
   /** Is a sound playing right now? */
   static tocando(nome: string): boolean {
     return Som.ativas.some((v) => v.nome === nome);
@@ -319,7 +361,7 @@ export class Som {
     return {
       volume(v: number, ms = 300): void {
         alvo = v;
-        if (voz) rumo(voz.ganho.gain, Math.min(1, s.def.volume * v), ctx.currentTime, ms);
+        if (voz) rumo(voz.ganho.gain, Math.min(voz.teto, voz.base * v), ctx.currentTime, ms);
       },
       parar(ms = 400): void {
         cancelado = true;
@@ -409,6 +451,34 @@ export class Som {
         else {
           Som.acaoMudaNo?.disconnect(an);
           ok(pico);
+        }
+      };
+      olha();
+    });
+  }
+
+  /** For the tests: the loudest sample (0–1) of the effects as they LEAVE (after the safety limiter) during `ms`, and
+   *  the deepest reduction (dB, ≤ 0) the limiter applied meanwhile. */
+  static picoDaSaida(ms: number): Promise<{ pico: number; reducaoDb: number }> {
+    const ctx = Som.ctx;
+    const no = Som.fimNo;
+    if (!ctx || !no) return Promise.resolve({ pico: 0, reducaoDb: 0 });
+    const an = ctx.createAnalyser();
+    an.fftSize = 2048;
+    no.connect(an);
+    const buf = new Float32Array(an.fftSize);
+    let pico = 0;
+    let reducaoDb = 0;
+    const fim = performance.now() + ms;
+    return new Promise((ok) => {
+      const olha = (): void => {
+        an.getFloatTimeDomainData(buf);
+        for (const v of buf) pico = Math.max(pico, Math.abs(v));
+        reducaoDb = Math.min(reducaoDb, Som.limitadorNo?.reduction ?? 0);
+        if (performance.now() < fim) setTimeout(olha, 10);
+        else {
+          no.disconnect(an);
+          ok({ pico, reducaoDb });
         }
       };
       olha();

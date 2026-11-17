@@ -11,6 +11,18 @@ export type Camada = 'acao' | 'interface' | 'ambiente' | 'motor';
 /** How much of the ambience/engine is left with the music at full volume (tuned by ear on sheet 8). */
 export const PISO_PRESENCA = 0.35;
 
+/**
+ * THE SAFETY LIMITER at the end of the effects (17/11): the regulation measured peaks past 0 dB before the output (the
+ * Serpente breaking out +2.3, a boss's last blast +2.6) and nothing held them — a chain of big blasts would clip. A
+ * LIMITER, not a glue compressor (that one is the mix pass, later): it sleeps under `limiar` and only shaves the peaks
+ * over it (ratio 20, 2 ms attack). Chrome's compressor adds its own makeup gain (≈0.6 × the gain it would take off a
+ * full-scale signal); `compensacao` takes it back, so what passes under the threshold comes out at unity — measured by
+ * `test-som-jogo`. The soundtrack does not pass here (it is his, and Phaser's own).
+ */
+export const LIMITADOR = { limiar: -3, joelho: 0, razao: 20, ataque: 0.002, soltura: 0.15 } as const;
+/** dB: Chrome's automatic makeup for `LIMITADOR` (the gain at 0 dBFS in, × 0.6), undone after the node. */
+export const MAKEUP_DO_LIMITADOR = 0.6 * -(LIMITADOR.limiar - LIMITADOR.limiar / LIMITADOR.razao);
+
 const lim = (v: number): number => Math.min(1, Math.max(0, v));
 
 /** The presence of the ambience and of the engine for a MÚSICA level `musica` (0–1): 1 at 0, the floor at 1. */

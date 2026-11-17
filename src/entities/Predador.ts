@@ -4,6 +4,7 @@ import type { EnemySystem } from '../systems/EnemySystem';
 import type { Fx } from '../systems/Fx';
 import { GROUND_Y, TETO_Y } from '../systems/TerrainSystem';
 import { explosaoSangrenta, sangueNaTela } from './sangue';
+import { Som, type Laco } from '../som/Som';
 
 /**
  * O PREDADOR — a 2ª forma do chefão final da Fase 4 (B3 da Fatia 7, design dele de 16/09).
@@ -266,6 +267,20 @@ export class Predador {
   private halo: Phaser.GameObjects.Image | null = null;
   private revela: Phaser.GameObjects.Image | null = null;
   private nave: Phaser.Physics.Arcade.Sprite | null = null;
+  /** THE SOUND (block SOUND, sheet 5c): the gallop loop while he runs on all fours, and the slash's hit-or-miss — it
+   *  starts as the MISS and turns into the HIT at the instant the ship is struck (his: *"o A quando ele acerta a nave e
+   *  o B se ele errar"*) */
+  private somGalope: Laco | null = null;
+  private golpeDesde = 0;
+  private golpeAcertou = true;
+
+  private galopar(ligar: boolean): void {
+    if (ligar) this.somGalope ??= Som.laco('predador.galope');
+    else {
+      this.somGalope?.parar(160);
+      this.somGalope = null;
+    }
+  }
   private naveDepth = 0;
 
   constructor(
@@ -448,6 +463,7 @@ export class Predador {
     this.posicionarCore();
     this.luz.setAlpha(0.9).setScale(1.4);
     this.tocar('predador-urro', 'predadorS');
+    Som.tocar('predador.urro', { x: this.sprite.x });
     // O tranco no PICO do urro (a mandíbula aberta, as garras no alto).
     this.scene.time.delayedCall(Predador.URRO_MS * 0.45, () => {
       if (this.dead) return;
@@ -474,6 +490,7 @@ export class Predador {
           const v = Phaser.Math.Clamp((k - Predador.PULO_IMPULSO) / (Predador.PULO_POUSO - Predador.PULO_IMPULSO), 0, 1);
           if (v >= 1 && !pousou) {
             pousou = true;
+            Som.tocar('predador.pouso', { x: this.sprite.x });
             this.scene.cameras.main.shake(160, 0.008);
           }
           if (v > 0 && !impulsionou) {
@@ -502,6 +519,12 @@ export class Predador {
 
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void {
     this.nave = target;
+    // the slash that hits: the ship was struck while it swung (`damageShip` stamps `golpeEm`)
+    if (this.estado === 'slash' && !this.golpeAcertou && Number(target.getData('golpeEm') ?? -1) >= this.golpeDesde) {
+      this.golpeAcertou = true;
+      Som.calar('predador.golpe.erra');
+      Som.tocar('predador.golpe.acerta', { x: this.sprite.x });
+    }
     this.t += dt;
     this.estadoT -= dt;
     this.atualizarLavas(dt);
@@ -520,6 +543,8 @@ export class Predador {
       this.entrarNoBreu();
     } else if (f > this.fasePassada && f < 3) {
       this.fasePassada = f;
+      // phase 2: he roars (his E, sheet 5c round 2 — "E e D em outros momentos")
+      Som.tocar('predador.urro2', { x: this.sprite.x });
     }
 
     switch (this.estado) {
@@ -582,6 +607,7 @@ export class Predador {
           const y = this.yApoio('chao');
           this.luz.setPosition(GAME_WIDTH - 14, y + m.y * this.escala);
           this.mudar('aviso', Predador.AVISO);
+          Som.tocar('predador.aviso', { x: GAME_WIDTH - 14 });
         }
         break;
 
@@ -618,6 +644,7 @@ export class Predador {
     this.pulsoFase = 0;
     this.caiuDeQuatro = false;
     this.mudar('carga', dur);
+    Som.tocar('predador.carga', { x: this.sprite.x });
   }
 
   /** O BOTE: galopa de quatro PELO CHÃO até a nave — o salto na altura dela é do golpe. */
@@ -628,12 +655,17 @@ export class Predador {
     const t = Math.max(0.12, Math.abs(dx) / Predador.BOTE_VEL);
     this.body.setVelocity(dx / t, 0);
     this.mudar('bote', t + 0.1);
+    this.galopar(true);
   }
 
   /** O GOLPE: inclina, dois cortes, torce — e SALTA até a altura em que a nave estava, voltando ao chão. */
   private golpear(): void {
     this.mudar('slash');
     this.tocar('predador-slash', 'predadorLuta');
+    this.galopar(false);
+    this.golpeDesde = this.scene.time.now;
+    this.golpeAcertou = false;
+    Som.tocar('predador.golpe.erra', { x: this.sprite.x });
     this.corpoInteiro();
     this.scene.cameras.main.shake(110, 0.006);
     const x0 = this.sprite.x;
@@ -661,12 +693,15 @@ export class Predador {
     if (this.ancora.lado === 'teto') this.tocar('predador-teto-lava', 'predadorTeto');
     else this.tocar('predador-lava', 'predadorLuta');
     this.mudar('telegLava', this.ancora.lado === 'teto' ? Predador.TELEG_LAVA_TETO : Predador.TELEG_LAVA);
+    Som.tocar('predador.lava.carga', { x: this.sprite.x });
   }
 
   /** Bolas de lava em arco: tempo de voo fixo, velocidade resolvida para cair onde a nave está. */
   private arremessar(target: Phaser.Physics.Arcade.Sprite): void {
     const n = this.fase === 1 ? Phaser.Math.Between(1, 2) : Phaser.Math.Between(2, 3);
     const e = this.escala;
+    // one throw sound per volley (sheet 5c)
+    Som.tocar('predador.lava.arremesso', { x: this.sprite.x });
     // A mão que solta a bola, em px virtuais, medida em cada clipe (`scripts/_f4/_medir-mao.mjs`).
     //  · PENDURADO (`teto-lava-f`, rodada 6): −115,+7. O telégrafo de 0,68s num clipe de 1100ms cai no quadro 10,5,
     //    e a garra ali está um pouco mais acima — este número é o que ele JOGOU e aprovou, com a bola saindo da mão.
@@ -740,11 +775,14 @@ export class Predador {
       b.setData('lava', false);
       this.enemies.release(b);
       this.brasas.explode(tipo === 'gota' ? 4 : tipo === 'metal' ? 8 : 14, x, y);
+      // the lava landing (sheet 5c); a drop of a shattered ball is a small one
+      Som.tocar('predador.lava.impacto', { x, forca: tipo === 'gota' ? 0.45 : 1 });
       if (bola && this.fase === 3) this.estilhacar(x, y, bateuChao ? -1 : 1);
     }
   }
 
   private estilhacar(x: number, y: number, sentido: number): void {
+    Som.tocar('predador.lava.estilhaco', { x });
     for (let i = 0; i < Predador.ESTILHACOS; i++) {
       // Um leque aberto para LONGE da borda (para cima se bateu no chão, para baixo se no teto).
       const k = i / (Predador.ESTILHACOS - 1);
@@ -881,6 +919,7 @@ export class Predador {
         },
         () => {
           this.scene.cameras.main.shake(90, 0.004);
+          Som.tocar('predador.agarra', { x: x1 });
           chegar();
         },
         'Sine.easeInOut',
@@ -898,6 +937,7 @@ export class Predador {
         },
         () => {
           this.scene.cameras.main.shake(140, 0.006);
+          Som.tocar('predador.pouso', { x: x1 });
           chegar();
         },
         'Quad.easeIn',
@@ -918,7 +958,15 @@ export class Predador {
     if (x1 < x0) {
       this.tocar('predador-corrida', 'predadorLuta');
       this.corpoInteiro();
-      this.animarAte(Math.max(260, ((x0 - x1) / Predador.BOTE_VEL) * 1000), (k) => this.mover(Phaser.Math.Linear(x0, x1, k), y0 + (y1 - y0) * k), chegar);
+      this.galopar(true);
+      this.animarAte(
+        Math.max(260, ((x0 - x1) / Predador.BOTE_VEL) * 1000),
+        (k) => this.mover(Phaser.Math.Linear(x0, x1, k), y0 + (y1 - y0) * k),
+        () => {
+          this.galopar(false);
+          chegar();
+        },
+      );
       return;
     }
     // Para trás (a direita), de frente para a nave: um salto recuando.
@@ -930,6 +978,7 @@ export class Predador {
       (k) => this.mover(Phaser.Math.Linear(x0, x1, k), Phaser.Math.Linear(y0, y1, k) - Math.sin(Math.PI * k) * altura),
       () => {
         this.scene.cameras.main.shake(90, 0.004);
+        Som.tocar('predador.pouso', { x: x1, forca: 0.8 });
         chegar();
       },
       'Sine.easeInOut',
@@ -939,6 +988,8 @@ export class Predador {
   /** A SAÍDA pela direita: não é âncora (não há parede ali — medido no mock de 16/09), é sumir. */
   private sair(): void {
     const fora: Ancora = { x: GAME_WIDTH + 90, lado: this.ancora.lado };
+    // leaving the screen, a roar: he will be back (his D)
+    Som.tocar('predador.urro3', { x: this.sprite.x });
     this.irPara(fora, () => {
       this.sprite.setVisible(false);
       this.body.enable = false;
@@ -962,6 +1013,7 @@ export class Predador {
     this.mudar('entrada');
     this.tocar('predador-corrida', 'predadorLuta');
     this.corpoInteiro();
+    this.galopar(true);
     this.animarAte(((x0 - x1) / Predador.BOTE_VEL) * 1000, (k) => this.mover(Phaser.Math.Linear(x0, x1, k), y), () => this.rasgar());
   }
 
@@ -969,6 +1021,8 @@ export class Predador {
     this.mudar('rasgo');
     this.tocar('predador-rasgo', 'predadorLuta');
     this.corpoInteiro();
+    this.galopar(false);
+    Som.tocar('predador.rasgo', { x: this.sprite.x });
     this.scene.cameras.main.shake(80, 0.004);
     // A mira é de quando ele PARA: quem se move durante o golpe escapa.
     const ax = this.nave?.x ?? 90;
@@ -995,6 +1049,7 @@ export class Predador {
   private lancarMetal(ax: number, ay: number): void {
     const n = Predador.METAL_N[this.fase];
     const x0 = this.sprite.x - 60 * this.escala;
+    Som.tocar('predador.metal', { x: x0 });
     const y0 = Predador.CHAO_APOIO - 4;
     for (let i = 0; i < n; i++) {
       const T = Predador.METAL_VOO * (0.8 + i * 0.14);
@@ -1039,7 +1094,13 @@ export class Predador {
       forte = 1;
     }
 
+    const antes = this.pulsoFase;
     this.pulsoFase = (this.pulsoFase + (dt * Math.PI * 2) / periodo) % (Math.PI * 2);
+    // THE HEARTBEAT IN THE DARK (sheet 5c): one beat on each peak of the core's own slow pulse — only that one (the charge,
+    // the warning and the entry have their own sounds); his two takes drawn in turn (*"dá para fazer uma variação"*)
+    if (this.breu && periodo === Predador.PULSO_BREU && antes < Math.PI / 2 && this.pulsoFase >= Math.PI / 2 && this.estado !== 'fora' && this.estado !== 'morto') {
+      Som.tocar(Math.random() < 0.5 ? 'predador.pulso' : 'predador.pulso2', { x: this.core.x });
+    }
     this.pulso = Math.pow(Math.max(0, Math.sin(this.pulsoFase)), 3);
     const alpha = base + (forte - base) * this.pulso;
     const visivel = this.estado !== 'fora' && this.estado !== 'morto';
@@ -1052,6 +1113,7 @@ export class Predador {
     this.mudar('urroBreu');
     this.body.setVelocity(0, 0);
     this.scene.cameras.main.shake(420, 0.008);
+    Som.tocar('predador.breu', { x: this.sprite.x });
     this.breu = true;
 
     this.breuCamada = this.scene.add
@@ -1129,6 +1191,8 @@ export class Predador {
     this.recuperando = false;
     this.coreBody.enable = false;
     this.tocar('predador-morte', 'predadorLuta');
+    this.galopar(false);
+    Som.tocar('predador.morte', { x: this.sprite.x });
     this.luz.setAlpha(1).setScale(1.8);
     this.scene.tweens.add({ targets: this.luz, alpha: 0, duration: Predador.MORTE_MS });
 
@@ -1162,6 +1226,7 @@ export class Predador {
 
   destroy(): void {
     this.tween?.stop();
+    this.galopar(false);
     this.sairDoBreu(0);
     for (const l of this.lavas) {
       if (l.b.active) this.enemies.release(l.b);

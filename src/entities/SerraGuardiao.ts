@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH } from '../config';
 import type { Fx } from '../systems/Fx';
+import { Som, type Laco } from '../som/Som';
 
 /**
  * A SERRA DO GUARDIÃO — a skill nova da 1ª forma (design dele, 19/09/2026, depois do teste jogado que
@@ -44,6 +45,8 @@ export class SerraGuardiao {
    */
   static readonly GIRO_MS = 520;
   static readonly GIROS = [2, 1, 1, 1];
+  /** The jolt's sound lands this long into each attempt (after the bite's own crunch). */
+  static readonly TRANCO_APOS_MS = 120;
   /**
    * O passo dos quadradinhos, em px de tela. O CABO é denso (elo colado no elo) para ler como corda; o
    * AVISO é esparso de propósito, para os dois nunca serem confundidos na tela ao mesmo tempo.
@@ -124,6 +127,22 @@ export class SerraGuardiao {
     this.sprite.setVisible(false);
     this.sprite.body!.enable = false;
     this.tocar('serra-giro');
+    // THE SOUND (block SOUND, sheet 5c): the warning thread spins the disc up; the flight is a loop that stops on each
+    // bite (the jolts sound there, one per attempt to turn) and comes back for the next leg
+    Som.tocar('guardiao.serra.aviso', { x: o.x });
+  }
+
+  /** the spin loop while she flies (`null` while stuck or gone) */
+  private somGiro: Laco | null = null;
+  /** how many jolts of this bite have sounded */
+  private trancos = 0;
+
+  private girar(ligar: boolean): void {
+    if (ligar) this.somGiro ??= Som.laco('guardiao.serra.giro');
+    else {
+      this.somGiro?.parar(90);
+      this.somGiro = null;
+    }
   }
 
   /** O guardião está ancorado segurando o cabo — é a janela de dano. */
@@ -149,6 +168,8 @@ export class SerraGuardiao {
           this.t = 0;
           this.sprite.setPosition(o.x, o.y).setVisible(true);
           this.sprite.body!.enable = true;
+          Som.tocar('guardiao.serra.lanca', { x: o.x });
+          this.girar(true);
         }
         break;
       }
@@ -178,11 +199,17 @@ export class SerraGuardiao {
 
       case 'crava': {
         const giros = SerraGuardiao.GIROS[Math.min(this.cravadasFeitas - 1, SerraGuardiao.GIROS.length - 1)];
+        // one JOLT per "tentar girar travada" (2 on top, 1 below), a beat after the bite
+        if (this.trancos < giros && this.t * 1000 >= this.trancos * SerraGuardiao.GIRO_MS + SerraGuardiao.TRANCO_APOS_MS) {
+          this.trancos += 1;
+          Som.tocar('guardiao.serra.tranco', { x: this.sprite.x });
+        }
         if (this.t * 1000 >= giros * SerraGuardiao.GIRO_MS) {
           this.dir = this.dir < 0 ? 1 : -1;
           this.estado = 'voo';
           this.t = 0;
           this.tocar('serra-giro');
+          this.girar(true);
         }
         break;
       }
@@ -196,12 +223,16 @@ export class SerraGuardiao {
     this.estado = 'crava';
     this.t = 0;
     this.tocar('serra-travada');
+    this.girar(false);
+    this.trancos = 0;
+    Som.tocar('guardiao.serra.crava', { x: this.sprite.x });
     // A mordida na borda: faíscas e um tranco de câmera. A serra fica onde cravou.
     this.fx.explode(this.sprite.x, this.sprite.y, 0.5, 50, 'biomec');
     this.scene.cameras.main.shake(90, 0.004);
   }
 
   private sair(): void {
+    this.girar(false);
     this.estado = 'fora';
     this.limparPontos();
     this.sprite.destroy();
@@ -285,6 +316,7 @@ export class SerraGuardiao {
   }
 
   destroy(): void {
+    this.girar(false);
     this.limparPontos();
     if (this.sprite.active) this.sprite.destroy();
     this.estado = 'fora';

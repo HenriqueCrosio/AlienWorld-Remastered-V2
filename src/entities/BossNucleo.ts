@@ -8,6 +8,7 @@ import { Predador } from './Predador';
 import { SerraGuardiao } from './SerraGuardiao';
 import { afundarNaLava } from './fimDoPredador';
 import { explosaoSangrenta, sangueNaTela } from './sangue';
+import { Som } from '../som/Som';
 
 /**
  * O CHEFÃO FINAL da Fase 4, em DUAS FORMAS (design do Henrique, 2026-07-19):
@@ -483,6 +484,8 @@ export class BossNucleo implements StageBoss {
         if (this.cdTiro <= 0) {
           this.cdTiro = 1.8;
           this.leque(BossNucleo.SALVA_N[this.degrau], this.gMuzzle());
+          // one sound per fan (block SOUND, sheet 5c)
+          Som.tocar('guardiao.leque', { x: this.sprite.x });
           this.scene.cameras.main.shake(40, 0.002);
         }
 
@@ -506,6 +509,8 @@ export class BossNucleo implements StageBoss {
             this.proxima = 'serra';
             this.acao = 'telegrafo';
             this.acaoT = BossNucleo.TELEGRAFO_DUR;
+            // the heart racing (sheet 5c): as long as the telegraph, the lock sounds on its own below
+            Som.tocar('guardiao.telegrafo', { x: this.sprite.x });
             this.cargaT = 0;
             this.vyTravado = null;
             this.recuoT = 0;
@@ -558,6 +563,7 @@ export class BossNucleo implements StageBoss {
           // A MIRA FECHA AQUI. Daqui para a frente mexer a nave não move mais a investida — é o que
           // transforma "esperar até o último instante" numa jogada em vez de numa armadilha.
           this.vyTravado = Phaser.Math.Clamp((target.y - this.sprite.y) * 1.2, -70, 70);
+          Som.tocar('guardiao.trava', { x: this.sprite.x });
           this.glow.emitParticleAt(this.core.x, this.core.y, 10);
           this.body.setVelocityX(BossNucleo.RECUO_VEL);
           this.recuoT = BossNucleo.RECUO_MS;
@@ -589,6 +595,7 @@ export class BossNucleo implements StageBoss {
           this.sprite.anims.timeScale = 1;
           this.glow.emitParticleAt(this.core.x, this.core.y, 14);
           this.acao = 'investe';
+          Som.tocar('guardiao.investida', { x: this.sprite.x });
           // Investe na altura lida NA TRAVA — mirada no passado, e agora num passado que ele pode ver
           // acontecer. O `??` é a rede: sem trava (se alguém zerar `TELEG_TRAVA`), vale a leitura do
           // instante do arranque, que é o comportamento antigo.
@@ -697,6 +704,8 @@ export class BossNucleo implements StageBoss {
       if (this.dead) return;
       this.sprite.anims.stop();
       if (this.scene.textures.exists('guardiaoDestruido')) this.sprite.setTexture('guardiaoDestruido');
+      // the shell bursting (sheet 5c) — the blasts of the death are sheet 2's, they already sound
+      Som.tocar('guardiao.casca', { x: this.core.x });
       this.estouro = this.fx.explodeBig(this.core.x, this.core.y, 1.1, 52, 'biomec');
       explosaoSangrenta(this.scene, this.core.x, this.core.y);
       sangueNaTela(this.scene);

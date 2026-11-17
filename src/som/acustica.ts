@@ -49,7 +49,18 @@ export const EXPLOSAO_NO_VACUO = 0.6;
  */
 // (the room's mix is SMALL on purpose: the generated tail sums back — at 0.35 the Capitânia's shot came out LOUDER in
 // the vacuum than in the air, measured; the rule is "contained", so the boss must come out lower)
-export const CHEFE_NO_VACUO = { passaBaixa: 2200, volume: 0.7, sala: { seg: 0.6, decai: 4, mistura: 0.08 } } as const;
+// 17/11, him: *"melhore e deixe perceptível os sons, mas eles não podem perder o efeito do espaço"* — measured
+// (`scripts/_som/_medir-chefes.mjs`): the 2.2 kHz cut + 0.7 took 3–5 dB off every boss sound and 7–9 dB off the bright
+// ones (the lock, the dissolve, the fuse), so they sank under the music. The SPACE stays the same — the same 2.2 kHz
+// cut, the same closed room —; what changes is the LEVEL: a PRESENCE band just under the cut (what the dull hull still
+// passes: the body of the sound, not its air) and a near-unity volume, so a contained boss ends ~1–2 dB under the same
+// sound in the open air instead of 4–9. A sound that is mostly above the cut takes its own `ganhoNoVacuo`.
+export const CHEFE_NO_VACUO = {
+  passaBaixa: 2200,
+  presenca: { freq: 1400, ganhoDb: 2, q: 0.8 },
+  volume: 0.85,
+  sala: { seg: 0.6, decai: 4, mistura: 0.08 },
+} as const;
 export const forcaNoLugar = (forca: number, l: Lugar): number => (l === 'cabine' ? forca * EXPLOSAO_NO_VACUO : forca);
 
 /** The place a scene starts in. The cave (F1) and the chamber B water (F4) are switched by the scene itself. */

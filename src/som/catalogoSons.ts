@@ -25,6 +25,9 @@ export interface DefSom {
   /** Hz: a low-pass only in the VACUUM (the cabin place) — the TERMINUS rotary gun *"no espaço menos abafado, mas ainda
    *  com o abafo"* (16/11). */
   passaBaixaNoVacuo?: number;
+  /** × on a BOSS sound in the vacuum (`CHEFE_NO_VACUO`), for one whose energy is mostly above the 2.2 kHz cut (17/11:
+   *  measured, the cut took 7–9 dB off them) — the space stays, the level comes back. */
+  ganhoNoVacuo?: number;
   /** Energy it pours into the LASTRO each time it plays (× its `forca`): the explosions. */
   lastro?: number;
   /**
@@ -254,12 +257,14 @@ const FOLHA_5A_MAQUINAS: Record<string, DefSom> = {
   // the B + a rocket on top (round 2's BF1, *"adicionar uma geração de efeito de foguete em lançamento"*)
   'chefe.torre.decolagem': doChefe('chefes-maquinas/chefe.torre.decolagem', 0.85, 1, 0, 0),
   // round 2's G (Kenney `thrusterFire_003`), *"um som mais de thrusters mesmo"*; it lives under the fight
-  'chefe.torre.motor': lacoDoMundo('chefes-maquinas/chefe.torre.motor', 0.35),
+  // (17/11: re-levelled as ACTION — it had been installed at the engine's −24 LUFS and sat at −26 under the fight)
+  'chefe.torre.motor': lacoDoMundo('chefes-maquinas/chefe.torre.motor', 0.45),
   'chefe.capitania.hangar': doChefe('chefes-maquinas/chefe.capitania.hangar', 0.55),
   'chefe.capitania.bordada': doChefe('chefes-maquinas/chefe.capitania.bordada', 0.55, 3, 0.04, 0.08),
   'chefe.capitania.flak': doChefe('chefes-maquinas/chefe.capitania.flak', 0.5, 2),
   // round 3's G, *"o som precisa ser de um click/estalo"*: two dry clicks (bright: a light low-pass; one per shell)
-  'chefe.capitania.flakPavio': { ...doChefe('chefes-maquinas/chefe.capitania.flakPavio', 0.45, 3, 0.03, 0.08), passaBaixa: 5000 },
+  // (17/11: 0.45 → 0.9 — a thin click, −25 LUFS even in the open air)
+  'chefe.capitania.flakPavio': { ...doChefe('chefes-maquinas/chefe.capitania.flakPavio', 0.9, 3, 0.03, 0.08), passaBaixa: 5000 },
   'chefe.capitania.flakEstouro': doChefe('chefes-maquinas/chefe.capitania.flakEstouro', 0.55, 3, 0.05, 0.1),
   'chefe.capitania.mirado': doChefe('chefes-maquinas/chefe.capitania.mirado', 0.55, 2),
   'chefe.capitania.furia': doChefe('chefes-maquinas/chefe.capitania.furia', 0.85, 1, 0, 0),
@@ -278,25 +283,30 @@ const FOLHA_5B_SERPENTE: Record<string, DefSom> = {
   'serpente.chegada.tremor': S5B('serpente.chegada.tremor', 0.7, 1, 0, 0),
   'serpente.chegada.rompe': S5B('serpente.chegada.rompe', 0.95, 1, 0, 0),
   'serpente.gesto': S5B('serpente.gesto', 0.45, 3, 0.05, 0.1),
-  'serpente.tiro': S5B('serpente.tiro', 0.4, 4, 0.05, 0.1),
+  'serpente.tiro': S5B('serpente.tiro', 0.5, 4, 0.05, 0.1),
   'serpente.dor': S5B('serpente.dor', 0.7),
   'serpente.cabecaMorre': S5B('serpente.cabecaMorre', 0.85, 1, 0, 0),
   // round 2's D, *"pense numa salva de mísseis descendo"* — ONE per head (*"cada cabeça lança uma salva"*), so 3 voices
   'serpente.chuva.salva': S5B('serpente.chuva.salva', 0.5, 3, 0.05, 0.1),
-  'serpente.chuva.onda': S5B('serpente.chuva.onda', 0.5, 3, 0.04, 0.08),
-  'serpente.chuva.impacto': S5B('serpente.chuva.impacto', 0.25, 4, 0.08, 0.15),
+  // (17/11, round 4 on sheet 5c — him: *"o apito dos mísseis caindo parece fogos de artifício, quero o som de um míssil
+  // no espaço"*; measured: the old one was a tone sliding 4.7 octaves up to 4.5 kHz; the E burns under 410 Hz)
+  'serpente.chuva.onda': { ...doChefe('chefes-nucleo/serpente.chuva.onda', 0.5, 3, 0.04, 0.08) },
+  // (17/11: 0.25 → 0.6 — it measured −30 LUFS even in the open air: inaudible)
+  'serpente.chuva.impacto': S5B('serpente.chuva.impacto', 0.6, 4, 0.08, 0.15),
   'serpente.raio.leitura': S5B('serpente.raio.leitura', 0.35),
   'serpente.raio.trava': S5B('serpente.raio.trava', 0.45, 1, 0.02, 0.05, 5000),
   'serpente.raio.carga': S5B('serpente.raio.carga', 0.55),
   'serpente.raio.disparo': S5B('serpente.raio.disparo', 0.7, 2, 0.03, 0.05),
   'serpente.raio.recupera': S5B('serpente.raio.recupera', 0.5),
-  'serpente.gas.sopro': { ...S5B('serpente.gas.sopro', 0.5, 1, 0, 0), laco: true },
+  // (17/11: the loops re-levelled as ACTION — installed at the engine's level they sat 9–14 dB under the fight; the
+  // volumes come down so a held loop stays under the hits: the breath ~−17, the rumble under the hull ~−17 LUFS)
+  'serpente.gas.sopro': { ...S5B('serpente.gas.sopro', 0.4, 1, 0, 0), laco: true },
   'serpente.gas.carga': S5B('serpente.gas.carga', 0.55),
   'serpente.gas.faisca': S5B('serpente.gas.faisca', 0.6, 3, 0.05, 0.1),
   'serpente.gas.retorno': S5B('serpente.gas.retorno', 0.85, 1, 0, 0),
   'serpente.fusao.afunda': S5B('serpente.fusao.afunda', 0.75, 1, 0, 0),
   'serpente.fusao.converge': S5B('serpente.fusao.converge', 0.7, 1, 0, 0, 5000),
-  'enguia.sobCasco': { ...S5B('enguia.sobCasco', 0.5, 1, 0, 0), laco: true },
+  'enguia.sobCasco': { ...S5B('enguia.sobCasco', 0.3, 1, 0, 0), laco: true },
   // her body scraping the hull (*"uma estrutura enorme raspando em outra estrutura"*): A and B, *"variação é bom"* — one
   // of the two drawn at each scrape (`EnguiaEmJogo.soar`)
   'enguia.raspa': { ...S5B('enguia.raspa', 0.6, 1, 0, 0), laco: true },
@@ -312,7 +322,81 @@ const FOLHA_5B_SERPENTE: Record<string, DefSom> = {
   'enguia.afunda': S5B('enguia.afunda', 0.75, 1, 0, 0),
 };
 
-export const SONS: Record<string, DefSom> = { ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE };
+/**
+ * SHEET 5c — THE F4 CORE (his choices, 17/11; `assets/raw/sons/chefes-nucleo/_escolhas.txt`): the Guardião (the
+ * globules, the telegraph with its lock, the lunge, the SAW — its warning, launch, spin loop, bite, jolts — and the shell
+ * bursting) and the Predador (the landings, the ceiling grip, the warning, the chest charge, the slash — A when it HITS
+ * the ship, B when it misses —, the lava, the rip with its molten metal, the dark and its heartbeat — two takes drawn in
+ * turn —, the death). Inside the creature: the `interior` place, no vacuum containment. The roar and the gallop went
+ * back for a round 2. The Serpente rain's wave was redone here too (*"míssil no espaço"*: no whistle).
+ */
+const S5C = (nome: string, volume: number, vozes = 1, tom = 0.02, vol = 0.05): DefSom => doChefe(`chefes-nucleo/${nome}`, volume, vozes, tom, vol);
+const FOLHA_5C_NUCLEO: Record<string, DefSom> = {
+  'guardiao.leque': S5C('guardiao.leque', 0.55, 2, 0.04, 0.08),
+  // (the volumes measured in the game, `_medir-chefes.mjs`, 17/11: the interior's room swells the low ones — the
+  // warnings sit ~−10 LUFS, a repeated one ~−11/−12, against the X-AELO shot at −15 and a big blast at −10)
+  'guardiao.telegrafo': S5C('guardiao.telegrafo', 0.42),
+  'guardiao.trava': S5C('guardiao.trava', 0.75),
+  'guardiao.investida': S5C('guardiao.investida', 0.7),
+  'guardiao.serra.aviso': S5C('guardiao.serra.aviso', 0.75),
+  'guardiao.serra.lanca': S5C('guardiao.serra.lanca', 0.6),
+  'guardiao.serra.giro': { ...S5C('guardiao.serra.giro', 0.4, 1, 0, 0), laco: true },
+  'guardiao.serra.crava': S5C('guardiao.serra.crava', 0.7, 2, 0.03, 0.06),
+  'guardiao.serra.tranco': S5C('guardiao.serra.tranco', 0.55, 2, 0.05, 0.1),
+  'guardiao.casca': S5C('guardiao.casca', 0.9, 1, 0, 0),
+  'predador.pouso': S5C('predador.pouso', 0.45, 2, 0.04, 0.08),
+  'predador.agarra': S5C('predador.agarra', 0.65),
+  'predador.aviso': S5C('predador.aviso', 0.5),
+  'predador.carga': S5C('predador.carga', 0.42),
+  'predador.golpe.acerta': S5C('predador.golpe.acerta', 0.75),
+  'predador.golpe.erra': S5C('predador.golpe.erra', 0.65),
+  'predador.lava.carga': S5C('predador.lava.carga', 0.4),
+  'predador.lava.arremesso': S5C('predador.lava.arremesso', 0.55, 2, 0.03, 0.06),
+  'predador.lava.impacto': S5C('predador.lava.impacto', 0.5, 4, 0.06, 0.12),
+  // (his B is almost all above 5 kHz and the interior cuts at 4.5: at 0.5 it measured −26 LUFS)
+  'predador.lava.estilhaco': S5C('predador.lava.estilhaco', 1, 2, 0.05, 0.1),
+  'predador.rasgo': S5C('predador.rasgo', 0.75),
+  'predador.metal': S5C('predador.metal', 0.6),
+  'predador.breu': S5C('predador.breu', 0.9, 1, 0, 0),
+  // (a beat every 2.4 s in the dark: felt, not on top — the A measured 3 dB over the B, so it sits lower)
+  'predador.pulso': S5C('predador.pulso', 0.27, 1, 0.02, 0.05),
+  'predador.pulso2': S5C('predador.pulso2', 0.35, 1, 0.02, 0.05),
+  'predador.morte': S5C('predador.morte', 0.9, 1, 0, 0),
+  // ROUND 2 (17/11, him: *"F para o urro, e E e D em outros momentos. Podem até entrar antes mesmo do encontro, para
+  // mostrar que o jogador se aproxima de algo infernal"*): the F is his arrival; the E when he turns to phase 2, the D
+  // when he leaves the screen; and the same D and E FAR AWAY on the way to the core (`StageDirector`, the `urro` event:
+  // the background plane — the interior's 1.8 kHz and half the level — and louder each time, as the core comes near)
+  'predador.urro': S5C('predador.urro', 0.85, 1, 0, 0),
+  'predador.urro2': S5C('predador.urro2', 0.75, 1, 0.02, 0.05),
+  'predador.urro3': S5C('predador.urro3', 0.75, 1, 0.02, 0.05),
+  'predador.urroLonge': { ...S5C('predador.urroLonge', 0.8, 1, 0.03, 0.05), plano: 'fundo' },
+  'predador.urroLonge2': { ...S5C('predador.urroLonge2', 0.8, 1, 0.03, 0.05), plano: 'fundo' },
+  'predador.galope': { ...S5C('predador.galope', 0.5, 1, 0, 0), laco: true },
+};
+
+/**
+ * THE BOSSES' LEVEL IN THE VACUUM (17/11, him: *"melhore e deixe perceptível os sons, mas eles não podem perder o efeito
+ * do espaço"*). Measured one by one (`node scripts/_som/_medir-chefes.mjs --comparar --sugerir`): the containment
+ * (`CHEFE_NO_VACUO`, the same 2.2 kHz cut and closed room) takes a different amount off each sound — the bright ones
+ * lost 7–9 dB, the low-mid ones came out LOUDER than in the air. This × puts each one ~1.5 dB under the same sound in
+ * the open air (contained, never louder). The few that peak past 0 dB (the break-out, a boss's end, the ring) lean on
+ * the SAFETY LIMITER (`LIMITADOR`, at most ~6 dB shaved off a peak). Re-measure after changing a take or the containment.
+ */
+const NO_VACUO: Record<string, number> = {
+  'explosao.chefeFim': 1.1,
+  'chefe.capitania.bordada': 1.1, 'chefe.capitania.flak': 1.15, 'chefe.capitania.flakPavio': 1.35,
+  'chefe.capitania.flakEstouro': 1.3, 'chefe.capitania.mirado': 1.3, 'chefe.capitania.furia': 0.9,
+  'serpente.chegada.tremor': 1.1, 'serpente.chegada.rompe': 1.05, 'serpente.tiro': 1.15, 'serpente.cabecaMorre': 1.2,
+  'serpente.chuva.salva': 1.2, 'serpente.chuva.onda': 0.8, 'serpente.raio.leitura': 1.1, 'serpente.raio.trava': 1.7,
+  'serpente.raio.carga': 1.25, 'serpente.raio.disparo': 1.1, 'serpente.gas.sopro': 1.6, 'serpente.gas.carga': 1.4,
+  'serpente.gas.faisca': 1.15, 'serpente.gas.retorno': 0.9,
+  'enguia.raspa2': 1.2, 'enguia.canos.carga': 1.1, 'enguia.anel': 1.15, 'enguia.canos.jato': 0.9, 'enguia.eco.leitura': 1.1,
+  'enguia.eco.estouro': 1.35, 'enguia.presa': 0.65, 'enguia.desfaz': 1.8,
+};
+const comVacuo = (sons: Record<string, DefSom>): Record<string, DefSom> =>
+  Object.fromEntries(Object.entries(sons).map(([n, d]) => [n, NO_VACUO[n] ? { ...d, ganhoNoVacuo: NO_VACUO[n] } : d]));
+
+export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO });
 
 /** Every problem of a catalogue, as text (empty = valid). `existe` receives a path under `public/sfx/`. */
 export function validarCatalogo(sons: Record<string, DefSom>, existe: (caminho: string) => boolean, creditos: string): string[] {
