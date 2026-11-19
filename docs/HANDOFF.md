@@ -16,17 +16,34 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-15-bloco-f-START.md`. O SOM FECHOU (19/11): as 8 folhas
-> de efeitos no jogo, a trilha DELE em streaming e o passe de mixagem que a pôs de frente — aprovado por ele jogando
-> (*"chegamos a um nível muito bom de balanço entre a trilha sonora e o ambiente"*), commitado e empurrado. O menu da
-> noite ganhou a neblina volumétrica e a chuva fina (aprovadas), e o Leviatã passa numa reta, uma vez só. A sessão abre
-> no F, a Fase 2: os batedores da frota e a rocha do minerador. É jogabilidade: uma pergunta por vez, conferir no
-> código antes de perguntar, e ele avalia JOGANDO e por GIF."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-19-revisao-START.md`. A sessão abre com ELE ANALISANDO
+> tudo o que foi feito em 18–19/11 — o som fechado (a folha 8, a trilha dele, o passe de mixagem), o menu da noite (a
+> neblina, a chuva, o trovão, o Leviatã em reta) e o FIM do jogo (a trilha final dele da ferida até o menu do amanhecer,
+> o impacto do Leviatã, os fundos que ligam a cutscene final, o sobrevoo que se afasta) — com a lista do que analisar
+> no START. Ele joga e diz o que ajustar; quando der a revisão por fechada, segue o F (START
+> `plans/2026-11-15-bloco-f-START.md`, com os dois batedores novos que ele gerou)."**
 >
-> **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem) →
-> **F (a F2: a frota de batedores e a rocha do minerador; START `plans/2026-11-15-bloco-f-START.md`) (o próximo)** → o
+> **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem, o
+> fim do jogo) → **a REVISÃO dele (o próximo)** → F (a F2: a frota de batedores e a rocha do minerador) → o
 > rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco; e o guardado do som, no fim de
 > `plans/2026-11-18-som-mixagem-START.md`).**
+>
+> 📍 **19/11 (2) — A TRILHA FINAL DELE, O IMPACTO DO LEVIATÃ E OS FUNDOS DA CUTSCENE FINAL (folha 10, ESCOLHIDA) E O
+> SOBREVOO QUE SE AFASTA; COMMITADO E EMPURRADO.** (a §10.12 da spec do som)
+> - **A trilha final** (`final`, *"uma trilha mais melancolica para fechar o game"*): entra na FERIDA da cutscene final (a
+>   nave expulsa, o rombo) e segue sem reiniciar até o resultado, os créditos e o menu; é a faixa do MENU DO AMANHECER
+>   (`trilhaDoMenu`); a noite segue com a orquestra; o hangar continua a faixa do menu de onde veio.
+> - **A folha 10** (`folhas/2026-11-19/sons/17-final`, grupo `final`): o IMPACTO no estouro (4 versões) e um FUNDO por
+>   capítulo cruzando com o próximo — o interior da F4 (já aprovado), a ferida no vácuo, a queda, a superfície em
+>   chamas (3+2+3 versões; as C são fundos que já estão no jogo). **As escolhas dele:** o impacto C, a ferida C (o casco
+>   da F3), a queda A, a superfície *"A e C"* — a A do impacto, cruzando para a C (o vento do amanhecer) quando a lava
+>   esfria, e a tela final abre no mesmo fundo.
+> - **O sobrevoo que se afasta** (ele: *"o flyby da nave termina abruptamente quando ela sai do quadro à esquerda....quero
+>   um fade que indica que ela se distanciou"*, nas 3 naves): o pico de cada take no meio da tela, o pan andando com ela,
+>   o fade a partir de 1 s antes da saída (`Som.tocar({ some })`), e o MOTOR dela por baixo, entrando com ela e sumindo
+>   depois; a Manta espelhada (o take dela ia da esquerda para a direita — `_sobrevoo-manta-espelhar.mjs`). Medido com
+>   `_medir-sobrevoo-final.mjs`: as três caem aos poucos e chegam ao fundo ~1 s depois de saírem.
+> - **Os batedores do F:** ele gerou dois substitutos no PixelLab (anotados no START do F).
 >
 > 📍 **19/11 — O PASSE DE MIXAGEM (A TRILHA DE FRENTE), A NEBLINA E A CHUVA DO MENU, O TROVÃO ATRASADO E O LEVIATÃ EM
 > RETA; APROVADO; COMMITADO E EMPURRADO.** (as regras na §10.11 da spec do som; a spec nova
@@ -2000,7 +2017,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
-| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **HOJE (19/11): os blocos A–E, G, S, H, I, J e M ✅; o SOM ✅ (as 8 folhas, a trilha dele, o passe de mixagem) → F (START `plans/2026-11-15-bloco-f-START.md`).** Registro: **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
+| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **HOJE (19/11): os blocos A–E, G, S, H, I, J e M ✅; o SOM ✅ (as 8 folhas, a trilha dele, o passe de mixagem, o fim do jogo) → a REVISÃO dele (START `plans/2026-11-19-revisao-START.md`) → F (START `plans/2026-11-15-bloco-f-START.md`).** Registro: **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
 | — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
 
 ### O que mora em cada etapa

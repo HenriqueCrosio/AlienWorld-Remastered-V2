@@ -5,7 +5,7 @@
 > 2: os batedores da frota e a rocha do minerador. É jogabilidade: uma pergunta por vez (superpowers:brainstorming),
 > conferir no código antes de perguntar, e ele avalia JOGANDO e por GIF."**
 > O roadmap vivo é o 🧭 do HANDOFF. A ordem MUDOU em 15/11 (o som veio antes): … → J ✅ → M ✅ → o SOM ✅ (16–19/11) →
-> **F** → o rebalanceamento. **19/11:** o som fechou e está commitado; abra a sessão pelo F, com a frase do 🧭. O que
+> **F** → o rebalanceamento. **19/11:** o som fechou e está commitado; o F vem DEPOIS da revisão dele (START `plans/2026-11-19-revisao-START.md`). O que
 > segue abaixo é o estado de 15/11 e continua valendo para o F.
 
 ## ▶️ ONDE ESTAMOS (15/11, fim da sessão)
@@ -32,6 +32,11 @@
    - são difíceis de acertar por serem finas: avaliar a hitbox;
    - ⚠️ o `batedor` também voa na F3: decidir se a mudança vale só para a F2;
    - medir o tiro para pressionar sem punir.
+   - **19/11 — ELE GEROU DOIS POSSÍVEIS SUBSTITUTOS no PixelLab** (ele: *"os outros são pequenos e difíceis de atirar"*):
+     https://www.pixellab.ai/create-object/3f3bd97d-cd0f-4f5c-b937-ef69bdfb6664 e
+     https://www.pixellab.ai/create-object/a606e9d2-b3eb-4833-8fba-1297772a5802 — abrir os dois (`get_object`) ANTES da
+     pergunta 3: o tamanho maior responde em parte o "difíceis de acertar". Conferir que estão de PERFIL (o PixelLab tende a
+     dar vista de cima) e no estilo da frota; a escolha entre eles é dele.
 2. **A rocha do elite minerador** destoa da F2 e é grande demais: diminuir, ou prendê-la a um canto ou a um pedaço
    maior de asteroide (arte nova). Fazer junto com o `asteroid` da F2/F3.
 3. Anotações soltas que caíram no F: a silhueta do batedor do cinturão; os alvos da F1 ficaram menores depois da

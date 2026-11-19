@@ -483,3 +483,32 @@ música e efeitos JUNTOS; um teto de pico verdadeiro em −1 dBTP no fim (EBU R1
 6. **Medido junto:** `scripts/_som/_medir-mistura.mjs` mede, lugar a lugar, a música e o mundo na mesma passada e confere
    as distâncias-alvo (menu: a trilha ≥ 10 dB sobre a tempestade na chuva; hangar ≥ 6 sobre a chuva de dentro; fase: ≥ 6 dB
    sobre o fundo — a ação calada — e de −5 a +1 dB do jogo atirando; sem música, o fundo volta ao aprovado).
+
+### 10.12 O fim: a trilha final dele, o impacto e os fundos da cutscene final (19/11)
+
+Ele: *"uma trilha mais melancolica para fechar o game [...] depois da luta final e a morte do boss final, o jogador é sugado
+para fora do leviatã e a tela a seguir é dele sendo expulso e o leviatã com um rombo. Acho interessante a música começar ai,
+para acompanhar as cutscenes até chegar na tela dos créditos e posterior menu"*; *"a trilha que toca vai estar diretamente
+ligada ao menu"*; *"não existe som do impacto quando o leviatã bate no solo da colonia"*; e *"as cutscenes finais precisam de
+uma melhor conexao, preenchimento entre as cenas, de ruidos [...] o que tem hoje em dia são apenas sons esparsos"*.
+
+- **A faixa `final`** (o arquivo dele `Possível theme final.mp3`, 4:33, −13,8 LUFS): `Music.play(…, 'final', 1500, 'cena')`
+  na FERIDA (`T.FERIDA`, 8 s — a música da F4 já morreu no rasgo); a mesma faixa segue sem reiniciar no resultado (o menu
+  do amanhecer) e no menu depois dele, no nível do menu. **A faixa é a do MENU** (`trilhaDoMenu`): a noite = `menu`, o
+  amanhecer = `final`; o hangar continua a que vier do menu.
+- **O impacto** (`fim.impacto`) no ESTOURO (`queda.ts` `IMPACTO_MS`: a bola de fogo nasce 70 ms antes do focinho tocar),
+  com a acústica da superfície desde o corte para o plano baixo.
+- **Os fundos** (`camada: 'ambiente'`, cedem à trilha como todo fundo): o interior da F4 de 0 s (emendado da luta), a ferida
+  na FERIDA, a queda na QUEDA, a superfície NO IMPACTO (o fogo pega sob o estrondo) até o fim; cada um cruza com o próximo
+  em 1,8 s (`CRUZA_FUNDO_MS`). A superfície C é o fundo do amanhecer: a tela final abre no mesmo som.
+- Testes: `test-som-cutscenes-jogo` (o impacto entre a queda e o sobrevoo, os quatro fundos em ordem, a trilha final em
+  `cena`) e `test-som-trilha-jogo` (o amanhecer toca `final` no nível do menu, o hangar continua, a noite volta à orquestra).
+- **As escolhas dele (19/11):** o impacto C, a ferida C (o casco da F3), a queda A, a superfície *"A e C"*: a A (a colônia
+  em chamas) do impacto até a lava esfriar (`T.APAGA`), cruzando para a C (`amb.fim.superficie2`, o vento do amanhecer).
+- **O sobrevoo que se afasta** (*"o flyby da nave termina abruptamente quando ela sai do quadro à esquerda....quero um fade
+  que indica que ela se distanciou"*): a nave leva 7,2 s para cruzar e os takes duram 3,5–8,1 s. O pico de cada take vai
+  para o meio da tela (`PICO_DO_SOBREVOO`), o pan anda com a nave (`xDoRasante`), o take some a partir de 1 s antes da
+  saída (ou antes, para ter ao menos 1,5 s de fade), e o MOTOR da nave entra com ela e some 2,6 s a partir de 1 s antes
+  da saída — o que se ouve depois que ela saiu. A Manta tinha o take passando da esquerda para a direita: espelhado
+  (`_sobrevoo-manta-espelhar.mjs`). Medido (`_medir-sobrevoo-final.mjs`): as três caem aos poucos e chegam ao fundo
+  ~1 s depois da saída.
