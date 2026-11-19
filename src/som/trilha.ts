@@ -7,7 +7,12 @@
  *  3. A SIDECHAIN: the loud moments of the world push the track down by themselves, and it comes back slowly.
  *  4. CLEARED SPACE: the far events of the scenery ask the track for a few dB while they sound.
  */
-export type Track = 'menu' | 'f1' | 'f2' | 'f3' | 'f4';
+/**
+ * 19/11 `final`: his melancholic close (him: *"uma trilha mais melancolica para fechar o game"*): it comes in at the wound
+ * of the final cutscene, carries it to the result and the credits, and is the DAWN menu's track from then on (the night
+ * menu keeps `menu`). The track a menu plays is the menu's: `trilhaDoMenu`.
+ */
+export type Track = 'menu' | 'f1' | 'f2' | 'f3' | 'f4' | 'final';
 export type ContextoTrilha = 'menu' | 'fase' | 'cena';
 
 /** The level every track is brought to before the snapshot (LUFS). */
@@ -23,7 +28,12 @@ export const FAIXAS: Record<Track, { arquivo: string; lufs: number; cauda: numbe
   f2: { arquivo: 'f2', lufs: -14, cauda: 6 },
   f3: { arquivo: 'f3', lufs: -14.3, cauda: 5 },
   f4: { arquivo: 'f4', lufs: -13.7, cauda: 4 },
+  // (4:33; it closes on its own fade from ~4:28)
+  final: { arquivo: 'final', lufs: -13.8, cauda: 4.5 },
 };
+
+/** The track of each menu: the night's orchestra, or the closing theme over the fallen Leviathan. */
+export const trilhaDoMenu = (qual: 'noite' | 'amanhecer'): Track => (qual === 'amanhecer' ? 'final' : 'menu');
 
 /**
  * Each situation: the track's loudness (LUFS) and how deep the pocket is (dB in the sub, dB in the presence band).

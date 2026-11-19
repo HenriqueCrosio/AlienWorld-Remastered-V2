@@ -68,7 +68,8 @@ export class HangarScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#000000');
     this.montarCenario();
     this.montarTexto();
-    Music.play(this, 'menu');
+    // the menu's track carries on into the hangar (19/11: the closing theme, for who opened the dawn menu)
+    Music.play(this, Music.faixaAtual() === 'final' ? 'final' : 'menu');
     // the room, and the rain heard from inside over it (his file, 18/11)
     this.fundos = [tocarFundo('amb.hangar'), tocarFundo('amb.hangar.chuva')];
     this.agendarTrovao(TROVAO_DO_HANGAR.primeiro);

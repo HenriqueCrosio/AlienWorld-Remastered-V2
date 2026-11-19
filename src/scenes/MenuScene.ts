@@ -7,6 +7,7 @@ import { resetVariantCache } from '../art';
 import { pixelText } from '../ui';
 import { cenaDeFundoHD, escalaHD, EVENTO_ESCALA, irmaDe, jogoHD, removerCenaHD } from '../uiHD';
 import { Music } from '../systems/Music';
+import { trilhaDoMenu } from '../som/trilha';
 import { lugarDaCena } from '../som/acustica';
 import { Som } from '../som/Som';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
@@ -138,8 +139,9 @@ export class MenuScene extends Phaser.Scene {
     if (this.qual !== 'amanhecer') Som.fluxo('amb.menu.tempestade');
     this.montarTexto();
     if (this.resultado) this.montarResultado(guarda);
-    // A faixa atravessa a transição de cena sem corte (Music.play não reinicia se já toca).
-    Music.play(this, 'menu');
+    // A faixa atravessa a transição de cena sem corte (Music.play não reinicia se já toca). 19/11: a faixa é a do MENU —
+    // a orquestra na noite, o tema final dele no amanhecer (que chega da cutscene final já tocando).
+    Music.play(this, trilhaDoMenu(this.qual));
     this.bindKeys();
     // the three device symbols in the top left corner (14/11, block M2): lit = connected. Not over the result of the
     // campaign (its title lives in that corner): they come when the result leaves.

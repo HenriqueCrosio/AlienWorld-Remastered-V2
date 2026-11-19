@@ -206,10 +206,14 @@ export class Music {
     if (ctx && Music.abafoNo) rumo(Music.abafoNo.gain, k, ctx.currentTime, ms);
   }
 
-  /** The track of a place. The same track already playing goes on untouched: it only takes the place's level. */
-  static play(_scene: Phaser.Scene, key: Track, fadeMs = 800): void {
+  /**
+   * The track of a place. The same track already playing goes on untouched: it only takes the place's level. The level
+   * is the menu's for the menus' tracks and the stage's for the others, unless `situacao` says (19/11: the closing theme
+   * comes in inside the final cutscene, at the scenes' level).
+   */
+  static play(_scene: Phaser.Scene, key: Track, fadeMs = 800, situacao?: ContextoTrilha): void {
     if (!Music.montar()) return;
-    Music.situacao(key === 'menu' ? 'menu' : 'fase');
+    Music.situacao(situacao ?? (key === 'menu' || key === 'final' ? 'menu' : 'fase'));
     if (Music.atual?.track !== key) Music.entrar(key, fadeMs);
   }
 
@@ -227,6 +231,11 @@ export class Music {
     Music.sair(f, fadeMs);
     // no track sounding: the bed and the engine back to where he approved them, as the track leaves
     Som.musicaSoando(0, fadeMs);
+  }
+
+  /** The track playing now (or fading in), `null` with none. */
+  static faixaAtual(): Track | null {
+    return Music.atual?.track ?? null;
   }
 
   /** For the tests. */

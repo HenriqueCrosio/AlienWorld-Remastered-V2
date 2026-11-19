@@ -37,6 +37,18 @@ const FOGOS = [
 /** O rasante: da direita para a esquerda, por cima da carcaça. */
 const RASANTE_Y = 60;
 const RASANTE_MS = 7200;
+/** O rasante: de onde a nave entra e para onde vai (x), e quanto espera depois do corte (ms). */
+const RASANTE_DE = GAME_WIDTH + 24;
+const RASANTE_ATE = -30;
+const RASANTE_ATRASO_MS = 600;
+/** Onde a nave está (x) `ms` depois do início do capítulo — o som do sobrevoo anda com ela (19/11). */
+export const xDoRasante = (ms: number): number =>
+  RASANTE_DE + (RASANTE_ATE - RASANTE_DE) * Math.min(1, Math.max(0, (ms - RASANTE_ATRASO_MS) / RASANTE_MS));
+/** ms desde o início do capítulo em que a nave está em `x` (o meio da tela, a saída pela esquerda). */
+export const msDoRasanteEm = (x: number): number => RASANTE_ATRASO_MS + ((x - RASANTE_DE) / (RASANTE_ATE - RASANTE_DE)) * RASANTE_MS;
+/** A nave entra no quadro / sai dele pela esquerda (a meia largura dela, ~12 px, já fora). */
+export const RASANTE_ENTRA_MS = RASANTE_ATRASO_MS;
+export const RASANTE_SAI_MS = msDoRasanteEm(-12);
 
 export function montarSobrevoo(c: CenaFinal): Capitulo {
   const { scene, nave, estado } = c;
@@ -82,8 +94,8 @@ export function montarSobrevoo(c: CenaFinal): Capitulo {
   });
 
   // ─── 6 · O RASANTE: da direita para a esquerda, virada para a esquerda — a F1 ao contrário ───
-  nave.setVisible(true).setScale(1).setAngle(0).setFlipX(true).setPosition(GAME_WIDTH + 24, RASANTE_Y);
-  scene.tweens.add({ targets: nave, x: -30, delay: 600, duration: RASANTE_MS, ease: 'Linear' });
+  nave.setVisible(true).setScale(1).setAngle(0).setFlipX(true).setPosition(RASANTE_DE, RASANTE_Y);
+  scene.tweens.add({ targets: nave, x: RASANTE_ATE, delay: RASANTE_ATRASO_MS, duration: RASANTE_MS, ease: 'Linear' });
   scene.tweens.add({ targets: nave, y: RASANTE_Y + 5, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
   const banner = pixelText(scene, GAME_WIDTH / 2, 22, 'KEPLER · A COLÔNIA MORTA', { size: 11, color: COLORS.metalLight })

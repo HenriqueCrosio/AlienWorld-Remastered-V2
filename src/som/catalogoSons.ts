@@ -591,7 +591,28 @@ export const FLUXOS: Record<string, DefFluxo> = {
   'amb.menu.tempestade': { arquivo: 'ambiente/amb.menu.tempestade', camada: 'ambiente', volume: 0.7 },
 };
 
-export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_8_AMBIENTE, ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES });
+/**
+ * SHEET 10, THE FINAL CUTSCENE (19/11). Him: *"não existe som do impacto quando o leviatã bate no solo da colonia"* and
+ * *"as cutscenes finais precisam de uma melhor conexao, preenchimento entre as cenas, de ruidos [...] o que tem hoje em dia
+ * são apenas sons esparsos"*. The IMPACT at the burst (`final/queda.ts`), and one BED per chapter crossing into the next
+ * (`Interlude4Scene.somDoFinal`): inside (the F4 interior, carried from the fight), the wound in the vacuum, the fall, the
+ * burning surface. The beds sit at the level of the stages' (their files measured against `amb.f4.interior`, 0.35), and
+ * yield to his closing theme like every bed (spec §10.11). His choices (19/11): the impact C, the wound C, the fall A, the
+ * surface A then C.
+ */
+const DO_FINAL = (nome: string, volume: number): DefSom => ({ ...DA_CENA(nome, volume), arquivo: `final/${nome}` });
+const FUNDO_DO_FINAL = (nome: string, volume: number): DefSom => ({ ...FUNDO(nome, volume), arquivo: `final/${nome}` });
+const FOLHA_10_FINAL: Record<string, DefSom> = {
+  'fim.impacto': DO_FINAL('fim.impacto', 1),
+  'amb.fim.ferida': FUNDO_DO_FINAL('amb.fim.ferida', 0.27),
+  'amb.fim.queda': FUNDO_DO_FINAL('amb.fim.queda', 0.26),
+  // the surface, his "A e C": the colony burning from the impact, then the dawn's wind as the lava cools (the result
+  // screen opens on the same bed)
+  'amb.fim.superficie': FUNDO_DO_FINAL('amb.fim.superficie', 0.29),
+  'amb.fim.superficie2': FUNDO_DO_FINAL('amb.fim.superficie2', 0.3),
+};
+
+export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_8_AMBIENTE, ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES, ...FOLHA_10_FINAL });
 
 /** Every problem of a catalogue, as text (empty = valid). `existe` receives a path under `public/sfx/`. */
 export function validarCatalogo(sons: Record<string, DefSom>, existe: (caminho: string) => boolean, creditos: string): string[] {

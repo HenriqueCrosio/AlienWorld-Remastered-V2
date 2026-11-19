@@ -9,14 +9,35 @@ import { T } from './final/tempos';
 import { DEPTH, type CenaFinal, type Capitulo, type EstadoFinal } from './final/tipos';
 import { montarDentro } from './final/dentro';
 import { montarFora } from './final/fora';
-import { montarQueda } from './final/queda';
-import { montarSobrevoo } from './final/sobrevoo';
+import { IMPACTO_MS, PLANO_BAIXO_MS, montarQueda } from './final/queda';
+import { RASANTE_ENTRA_MS, RASANTE_SAI_MS, montarSobrevoo, msDoRasanteEm, xDoRasante } from './final/sobrevoo';
+import { GAME_WIDTH } from '../config';
 import { lugarDaCena } from '../som/acustica';
-import { Som } from '../som/Som';
-import { daNaveNaCena, naveDoSom } from '../som/somDaNave';
+import { Som, type Laco } from '../som/Som';
+import { tocarFundo } from '../som/AmbienteDaFase';
+import { Music } from '../systems/Music';
+import { daNaveNaCena, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
 
 /** ms after the last chapter (`T.APAGA`): the B of the cooling lava comes in under the end of the A (sheet 7). */
 const APAGA_B_DEPOIS_MS = 2200;
+/** ms: how long one chapter's bed takes to hand over to the next (the cut is the picture's; the sound crosses). */
+const CRUZA_FUNDO_MS = 1800;
+/** ms: the closing theme coming in at the wound (its own first bars are quiet: a short fade is enough). */
+const ENTRA_TRILHA_MS = 1500;
+/**
+ * THE FLYOVER LEAVING (19/11, him: *"o flyby da nave termina abruptamente quando ela sai do quadro à esquerda....quero um
+ * fade que indica que ela se distanciou"*): the ship takes 7.2 s to cross, and the takes are shorter (the X-AELO's 3.9 s,
+ * the Manta's 3.5 s — they ended with her mid-screen) or end hard as she leaves (the TERMINUS's 8.1 s). So: the take's
+ * loudest moment is put where she crosses the middle of the screen (`PICO_DO_SOBREVOO`, s into each take, measured), it
+ * pans with her, and from 1 s before she leaves it fades out in `SOME_MS`; under it her ENGINE (the one she flies with
+ * in cutscenes 1–3) comes in as she enters and goes away the same way — what is left when she is out of the frame.
+ */
+// (the Manta's take is short and soft at its end: it goes later, so it lasts until she leaves — measured with
+// `scripts/_som/_medir-sobrevoo-final.mjs`)
+const PICO_DO_SOBREVOO: Record<NaveSom, number> = { xaelo: 2.1, terminus: 4, charybdis: 0.6 };
+const SOME_MS = 2600;
+/** Her engine under the pass (the Manta's living hum is soft: it needs more to be heard as she goes). */
+const MOTOR_DO_RASANTE: Record<NaveSom, number> = { xaelo: 0.55, terminus: 0.55, charybdis: 1 };
 
 /**
  * O AFASTAMENTO — a cutscene FINAL, refeita na Fatia 8 (spec 2026-09-23-fatia8-cutscene-final-design.md).
@@ -48,6 +69,8 @@ export class Interlude4Scene extends Phaser.Scene {
   private practice = false;
   private baseScore = 0;
   private done = false;
+  /** The bed of the chapter on screen (19/11): each one crosses into the next. */
+  private fundo: Laco | null = null;
 
   constructor() {
     super('Interlude4');
@@ -143,24 +166,70 @@ export class Interlude4Scene extends Phaser.Scene {
    * acústica anda com a câmera — DENTRO do bicho no rasgo e na descompressão, o VÁCUO da ferida e da queda, a
    * SUPERFÍCIE do sobrevoo. A ferida e o apagar são duas partes cada (ele: *"A e B na sequência"*; *"a B é a
    * ambientação interessante para depois da A"* — a B entra por baixo do fim da A, antes do fade).
+   *
+   * 19/11 — A LIGAÇÃO (ele: *"as cutscenes finais precisam de uma melhor conexao, preenchimento entre as cenas, de ruidos
+   * [...] o que tem hoje em dia são apenas sons esparsos"*): um FUNDO por capítulo, cruzando com o próximo — o interior da
+   * F4 (emendado da luta) até a ferida, o vácuo ao lado do bicho rasgado, a reentrada, e a colônia em chamas do impacto até
+   * o fim (o mesmo fundo do amanhecer: a tela final abre nele). O IMPACTO no estouro (ele: *"não existe som do impacto
+   * quando o leviatã bate no solo"*). E A TRILHA FINAL DELE entra na ferida (*"o jogador é sugado para fora do leviatã e a
+   * tela a seguir é dele sendo expulso e o leviatã com um rombo. Acho interessante a música começar ai"*) e segue até os
+   * créditos e o menu do amanhecer, sem reiniciar (`Music.play` deixa seguir a mesma faixa).
    */
   private somDoFinal(): void {
     const em = (ms: number, f: () => void): void => {
       this.time.delayedCall(ms, () => !this.done && f());
     };
+    const fundo = (nome: string, ms = CRUZA_FUNDO_MS): void => {
+      this.fundo?.parar(ms);
+      this.fundo = tocarFundo(nome, ms);
+    };
     Som.lugar('interior', 0);
+    fundo('amb.f4.interior', 300);
     em(T.RASGO, () => Som.tocar('fim.rasgo'));
     em(T.DESCOMPRESSAO, () => Som.tocar('fim.descompressao'));
     em(T.FERIDA, () => {
       Som.lugar('cabine', 400);
       Som.emSequencia(['fim.ferida', 'fim.ferida2'], em);
+      fundo('amb.fim.ferida');
+      Music.play(this, 'final', ENTRA_TRILHA_MS, 'cena');
     });
-    em(T.QUEDA, () => Som.tocar('fim.queda'));
-    em(T.SOBREVOO, () => {
-      Som.lugar('atmosfera', 1500);
-      Som.tocar(daNaveNaCena('fim.sobrevoo', naveDoSom(this.naveId, naveEscolhida(this.registry).modelo)));
+    em(T.QUEDA, () => {
+      Som.tocar('fim.queda');
+      fundo('amb.fim.queda');
     });
-    em(T.APAGA, () => Som.tocar('fim.apaga'));
+    // the low shot is on the surface: the air of the planet
+    em(T.QUEDA + PLANO_BAIXO_MS, () => Som.lugar('atmosfera', 600));
+    em(T.QUEDA + IMPACTO_MS, () => {
+      Som.tocar('fim.impacto');
+      // the fire takes the colony under the impact's rumble
+      fundo('amb.fim.superficie', 2500);
+    });
+    em(T.SOBREVOO, () => Som.lugar('atmosfera', 1500));
+    const nave = naveDoSom(this.naveId, naveEscolhida(this.registry).modelo);
+    const passa = daNaveNaCena('fim.sobrevoo', nave);
+    const inicio = Math.max(0, msDoRasanteEm(GAME_WIDTH / 2) - PICO_DO_SOBREVOO[nave] * 1000);
+    em(T.SOBREVOO + inicio, () => {
+      const dur = Som.duracao(passa);
+      // the fade starts 1 s before she leaves — or earlier, so a take that ends first still fades for 1.5 s, and the
+      // fade reaches silence at the take's end, never cut short
+      const emS = Math.max(0, Math.min((RASANTE_SAI_MS - 1000 - inicio) / 1000, dur - 1.5));
+      Som.tocar(passa, {
+        x: xDoRasante(inicio),
+        xFim: xDoRasante(inicio + dur * 1000),
+        some: { em: emS, ms: Math.min(SOME_MS, (dur - emS) * 1000) },
+      });
+    });
+    let motor: Laco | null = null;
+    em(T.SOBREVOO + RASANTE_ENTRA_MS, () => {
+      motor = Som.laco(somDaNave(nave, 'motor'), 0);
+      motor?.volume(MOTOR_DO_RASANTE[nave], 1200);
+    });
+    em(T.SOBREVOO + RASANTE_SAI_MS - 1000, () => motor?.parar(SOME_MS));
+    em(T.APAGA, () => {
+      Som.tocar('fim.apaga');
+      // the fire dies down into the dawn's wind: the bed the result screen opens on
+      fundo('amb.fim.superficie2', 3000);
+    });
     em(T.APAGA + APAGA_B_DEPOIS_MS, () => Som.tocar('fim.apaga2'));
   }
 

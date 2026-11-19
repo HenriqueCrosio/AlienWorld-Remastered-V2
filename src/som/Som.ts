@@ -361,7 +361,11 @@ export class Som {
    * its length: what flies past); `forca` (0–1) scales the volume; `fracao` (0–1) plays only that part of it, faded out
    * over its last 80 ms (the TERMINUS arrival that grows with the burst).
    */
-  static tocar(nome: string, op: { x?: number; xFim?: number; forca?: number; fracao?: number } = {}): void {
+  /**
+   * `some` (19/11): the sound goes away — from `em` s after it starts it fades to silence in `ms` (the final flyover: the
+   * ship leaving the frame reads as getting far, not as a cut).
+   */
+  static tocar(nome: string, op: { x?: number; xFim?: number; forca?: number; fracao?: number; some?: { em: number; ms: number } } = {}): void {
     if (!Som.pronto()) return;
     const s = Som.achar(nome);
     if (!s) return;
@@ -371,6 +375,17 @@ export class Som {
       const agora = Som.ctx.currentTime;
       v.pan.pan.setValueAtTime(v.pan.pan.value, agora);
       v.pan.pan.linearRampToValueAtTime(Som.panDe(op.xFim, v.largura), agora + s.buffer.duration / v.fonte.playbackRate.value);
+    }
+    if (v && op.some && Som.ctx) {
+      const ini = Som.ctx.currentTime + Math.max(0, op.some.em);
+      const fim = ini + op.some.ms / 1000;
+      v.ganho.gain.setValueAtTime(v.ganho.gain.value, ini);
+      v.ganho.gain.linearRampToValueAtTime(0, fim);
+      try {
+        v.fonte.stop(fim + 0.02);
+      } catch {
+        /* already stopped */
+      }
     }
     if (v && op.fracao !== undefined && op.fracao < 1 && Som.ctx) {
       const fim = Som.ctx.currentTime + Math.max(0.1, (s.buffer.duration / v.fonte.playbackRate.value) * op.fracao);

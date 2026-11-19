@@ -61,6 +61,10 @@ const IMPACTO_B_MS = 50;
  *  mostrar ele já caído"*) — como um meteoro, ele estoura antes de tocar: o focinho ainda a ~35px do chão. O encosto
  *  acontece DENTRO da bola de fogo, sem ser visto, e nada lê como "bateu reto e duro". */
 const ANTES_MS = 70;
+/** O instante do ESTOURO, em ms desde o início do capítulo: o impacto que se ouve (19/11, a regente o toca). */
+export const IMPACTO_MS = LARGO_MS + ENTRA_MS - ANTES_MS;
+/** O corte para o plano baixo (a superfície), em ms desde o início do capítulo. */
+export const PLANO_BAIXO_MS = LARGO_MS;
 /** O DESABAR: o focinho bateu e o resto vem junto — o rabo cai para o chão, girando em volta do focinho, enquanto a
  *  explosão o engole. Ele termina quase deitado, dentro da onda de poeira (o rabo em x≈55, y≈155). */
 const DESABA_GRAUS = -38;
