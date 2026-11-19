@@ -830,7 +830,7 @@ export class Interlude2Scene extends Phaser.Scene {
     if (this.done) return;
 
     this.aviso('SOBRECARGA · A DOCA VAI CAIR', COLORS.enemyBright);
-    Music.play(this, 'boss', 600);
+    Music.situacao('cena', 600);
     // THE SOUND (sheet 7): the station's alarm; the ship's departure; the dock going down in two parts (him: "A e B na
     // sequência ficaram bons") — the A with the chain that starts breaking it (0.9 s), the B with the cables snapping
     // and the dock giving way (2.3 s). They overlap: the scene ends at 4.4 s, and nothing crosses a scene change.

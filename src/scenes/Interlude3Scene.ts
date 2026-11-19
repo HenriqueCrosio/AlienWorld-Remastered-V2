@@ -879,7 +879,7 @@ export class Interlude3Scene extends Phaser.Scene {
   private colapso(): void {
     if (this.done) return;
 
-    Music.play(this, 'boss', 600);
+    Music.situacao('cena', 600);
 
     // ⚠️ A DECOLAGEM É VERTICAL, E O `x` NÃO ENTRA NESTE TWEEN. Ela subia E recuava ao mesmo
     // tempo, porque parava em x=258 — encostada na criatura — e precisava de distância para o tiro

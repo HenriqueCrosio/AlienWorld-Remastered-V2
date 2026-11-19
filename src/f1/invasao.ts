@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { lcg } from '../menu/acaso';
 import { brilho, garantirTexturas, LARG_CONE } from '../menu/texturas';
+import { cruzou } from '../som/regrasAmbiente';
+import { SomDaInvasao } from '../som/somDaInvasao';
 import { INVASAO, PROF } from './numerosF1';
 import {
   alfaMagenta, anguloDefesa, explosaoEm, flakEm, holofoteAceso, lugaresDasExplosoes, posNave, rajadasDaArma, rastroEm,
@@ -134,9 +136,27 @@ export function montarInvasao(scene: Phaser.Scene, janelas: readonly CaixaF1[], 
     explosoes: explosoes.length,
   };
 
+  // THE SOUND OF THE INVASION (sheet 8): only in the stage itself, on the same clock as what is drawn. A jump of the clock
+  // (a dev skip) or the climb out of the atmosphere stays silent.
+  const som = scene.scene.key === 'Game' ? new SomDaInvasao(scene) : null;
+  const RJ = INVASAO.rajada;
+  let tSom = 0;
+  const soar = (s: SomDaInvasao, t0: number, t: number, dx: number): void => {
+    for (const { n: nave } of naves) if (cruzou(t0, t, nave.t)) s.nave(nave.de[0] + dx, nave.para[0] + dx);
+    for (const { a, rajadas } of armas) {
+      for (const b of rajadas) {
+        if (cruzou(t0, t, b.t)) s.rajada(a.x + dx, t);
+        if (b.flak && cruzou(t0, t, b.t + (b.tiros - 1) * RJ.cadencia + RJ.vida * 0.85)) s.estouroFlak(a.x + dx);
+      }
+    }
+    for (const e of explosoes) if (cruzou(t0, t, e.l.t)) s.explodiu(e.l.x + dx);
+  };
+
   return {
     contagem,
     atualizar(t: number, dx: number, saida: number): void {
+      if (som && t > tSom && t - tSom < 0.5 && saida > 0.5) soar(som, tSom, t, dx);
+      tSom = t;
       for (const m of magentas) {
         const a = alfaMagenta(m.t0, m.per, m.fase, t) * saida;
         m.brilho.setPosition(m.x + dx, m.y).setAlpha(a);

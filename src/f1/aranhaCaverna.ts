@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Som } from '../som/Som';
 import { ARANHA_F1 } from './numerosF1';
 
 /**
@@ -67,6 +68,8 @@ export function montarAranhaCaverna(scene: Phaser.Scene, mascara: Phaser.Display
 
   let ligada = false;
   let inicio: number | null = null;
+  /** the stretch of the walk already heard (him: she walks a while, stops, walks again until she is gone) */
+  let trechoOuvido = -1;
 
   const quadro = (q: number): void => {
     const nome = `q${q}`;
@@ -82,6 +85,7 @@ export function montarAranhaCaverna(scene: Phaser.Scene, mascara: Phaser.Display
     mostrar(v: boolean): void {
       ligada = v;
       inicio = null;
+      trechoOuvido = -1;
       aranha.setVisible(v);
       frente?.setVisible(v);
       quadro(D.grupos.parada[0]);
@@ -102,6 +106,12 @@ export function montarAranhaCaverna(scene: Phaser.Scene, mascara: Phaser.Display
             const s = c.total * u * u * (3 - 2 * u);
             [x, y] = noCaminho(c, s);
             if (t < dur) {
+              // the legs are heard only while she walks: one take cut to the length of this stretch, crossing with her
+              if (trechoOuvido !== p.caminho) {
+                trechoOuvido = p.caminho;
+                const fim = c.pts[c.pts.length - 1];
+                Som.tocar('fx.f1.aranha', { x: fundoX + x, xFim: fundoX + fim[0], fracao: Math.min(1, dur / Math.max(0.1, Som.duracao('fx.f1.aranha'))) });
+              }
               const g = D.grupos.anda;
               quadro(g[0] + (Math.floor(s / (D.passoTela / (g[1] - g[0] + 1))) % (g[1] - g[0] + 1)));
               fim = false;

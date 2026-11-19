@@ -25,6 +25,7 @@ import { CHAVE_MENU_HD, MenuCenaHD } from '../menu/MenuCenaHD';
 import { criarTitulo, tingirLetras, type TituloMenu } from '../menu/titulo';
 import { Jatos } from '../menu/jatos';
 import { lerConducao, salvarConducao } from '../menu/conducao';
+import { tocarFundo } from '../som/AmbienteDaFase';
 import { ESCOLHAS, escolherNave, naveEscolhida, nomeDaEscolha } from '../ships';
 
 const movimentoReduzido = (): boolean =>
@@ -131,10 +132,14 @@ export class MenuScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#000000');
 
     this.montarCenario();
+    // the place you hear (sheet 8): the storm coming at night, the wind over the fallen Leviathan at dawn
+    tocarFundo(this.qual === 'amanhecer' ? 'amb.amanhecer' : 'amb.menu.noite');
+    // his six-minute storm, coming near and going away over the night's bed (18/11)
+    if (this.qual !== 'amanhecer') Som.fluxo('amb.menu.tempestade');
     this.montarTexto();
     if (this.resultado) this.montarResultado(guarda);
     // A faixa atravessa a transição de cena sem corte (Music.play não reinicia se já toca).
-    Music.play(this, 'stage1');
+    Music.play(this, 'menu');
     this.bindKeys();
     // the three device symbols in the top left corner (14/11, block M2): lit = connected. Not over the result of the
     // campaign (its title lives in that corner): they come when the result leaves.

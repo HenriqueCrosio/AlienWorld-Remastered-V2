@@ -31,7 +31,9 @@ export class CamadaCasco {
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly pecas: () => Phaser.GameObjects.Image[],
+    aoEvento: ((tipo: 'vapor' | 'faisca', x: number) => void) | null = null,
   ) {
+    this.ef.aoEvento = aoEvento;
     let n = 0;
     while (scene.textures.exists(`camadaCasco${n}`)) n++;
     this.tex = scene.textures.createCanvas(`camadaCasco${n}`, GAME_WIDTH, CAMADA_CASCO.h)!;

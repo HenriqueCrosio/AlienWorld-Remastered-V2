@@ -45,8 +45,8 @@ export class GameOverScene extends Phaser.Scene {
     // O recorde por modificador e a medalha: `src/placar.ts` (o resultado do fim da campanha usa o mesmo).
     const { anterior: previous, novo: isRecord } = registrarRecorde(localStorage, handling, score, practice);
 
-    // Volta à faixa da fase: a música do chefão não deve sobreviver ao chefão.
-    Music.play(this, 'stage1', 1200);
+    // A faixa da fase segue, no nível das telas de resultado.
+    Music.situacao('cena', 1200);
 
     const medal = medalhaDe(score);
 

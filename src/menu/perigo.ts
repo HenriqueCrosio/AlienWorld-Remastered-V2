@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { ALTURA, BUSCA, FEIXE, HOLOFOTES, LARGURA, PROPULSORES, TEMPESTADE } from './numerosMenu';
+import { somDoRelampago } from '../som/somDaInvasao';
 import { lcg } from './acaso';
 import { quieto } from './abertura';
 import { anguloBusca, anguloHolofote, brilhoRelampago, forcaPropulsor } from './ritmos';
@@ -12,7 +13,7 @@ import type { ContextoCenario, EstadoMenu, Peca } from './cenario';
  * clarões por dentro das nuvens (as silhuetas da frente ficam em contraluz), um raio em cerca de metade deles, a nuvem
  * pesada rolando. Nenhum relâmpago na janela quieta da abertura, nem com movimento reduzido.
  */
-export function montarPerigo(ctx: ContextoCenario, estado: EstadoMenu): Peca & { contagem: () => number } {
+export function montarPerigo(ctx: ContextoCenario, estado: EstadoMenu): Peca & { contagem: () => number; brilho: () => number } {
   const { scene, k, chave, dados: D, tempestade: TD } = ctx;
   const A = scene.add;
   const ADD = Phaser.BlendModes.ADD;
@@ -80,9 +81,12 @@ export function montarPerigo(ctx: ContextoCenario, estado: EstadoMenu): Peca & {
   let proximo: Relampago = { t: TEMPESTADE.primeiro.t, foco: TEMPESTADE.primeiro.foco, comRaio: TEMPESTADE.primeiro.comRaio };
   let atual: Relampago | null = null;
   let contagem = 0;
+  /** O clarão do instante (0–1): a neblina e a chuva acendem com ele (19/11). */
+  let brilhoAgora = 0;
 
   return {
     contagem: () => contagem,
+    brilho: () => brilhoAgora,
     atualizar(t: number): void {
       for (const { o, h } of holofotes) o.setAngle(anguloHolofote(h, t));
       busca.setAngle(anguloBusca(t));
@@ -100,6 +104,8 @@ export function montarPerigo(ctx: ContextoCenario, estado: EstadoMenu): Peca & {
         if (!estado.reduzido && !quieto(estado.tAbertura, estado.pulou)) {
           atual = proximo;
           contagem++;
+          // the thunder follows the flash: at once with a bolt, late and low when it is only the glow in the clouds
+          somDoRelampago(scene, atual.comRaio);
         }
         proximo = sortear(proximo.t);
       }
@@ -108,6 +114,7 @@ export function montarPerigo(ctx: ContextoCenario, estado: EstadoMenu): Peca & {
       flashes.forEach((f, n) => f.setAlpha(a && n === a.foco ? TEMPESTADE.forca * v : 0));
       raios.forEach((r, n) => r.setAlpha(a && a.comRaio && n === a.foco ? raio : 0));
       clarao.setAlpha(TEMPESTADE.global * v);
+      brilhoAgora = v;
     },
   };
 }

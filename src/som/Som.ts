@@ -1,6 +1,8 @@
 import { AO_FUNDO, CHEFE_NO_VACUO, impulso, montarAcustica, type Acustica, type Lugar } from './acustica.ts';
-import { SONS, type DefSom } from './catalogoSons.ts';
-import { LASTRO, LIMITADOR, MAKEUP_DO_LIMITADOR, energiaDepois, ganhoDaCamada, ganhoDoLastro, type Camada, type Volumes } from './mixagem.ts';
+import { FLUXOS, SONS, type DefSom } from './catalogoSons.ts';
+import { CAUDA_DISTANCIA, meioDoLugar, perfilDaDistancia, type Meio } from './distancia.ts';
+import { BURACO, LASTRO, LIMITADOR, MAKEUP_DO_LIMITADOR, MAKEUP_DO_MESTRE, MESTRE, buracoDoAmbiente, energiaDepois, ganhoDaCamada, ganhoDoLastro, type Camada, type Volumes } from './mixagem.ts';
+import { abreEspaco } from './trilha.ts';
 import { PESO, decidir, sortearVariacao, type VozAtiva } from './vozes.ts';
 
 /**
@@ -34,6 +36,9 @@ export interface DiagnosticoSom {
   ganhos: Record<Camada, number>;
   abafo: number;
   acaoMuda: number;
+  /** how much the soundtrack is sounding (0–1) and the depth of the bed's hole for it (dB) */
+  musicaSoa: number;
+  buraco: number;
   /** How many catalogue sounds have a decoded buffer (of how many). */
   carregados: [number, number];
   /** Every name that started playing since the page opened, in order (the tests read it). */
@@ -43,7 +48,7 @@ export interface DiagnosticoSom {
 }
 /** The shared rumble under the chains (`mixagem.ts` LASTRO). */
 export const NOME_LASTRO = 'explosao.lastro';
-type Voz = VozAtiva & { fonte: AudioBufferSourceNode; ganho: GainNode; ponte: boolean; tela: boolean; base: number; teto: number };
+type Voz = VozAtiva & { fonte: AudioBufferSourceNode; ganho: GainNode; ponte: boolean; tela: boolean; base: number; teto: number; pan: StereoPannerNode | null; largura: number };
 
 export const chaveSom = (nome: string): string => `sfx:${nome}`;
 const LARGURA_TELA = 384;
@@ -64,7 +69,7 @@ const CAMADAS: Camada[] = ['acao', 'interface', 'ambiente', 'motor'];
 const alvos = new WeakMap<AudioParam, number>();
 const alvoDe = (p: AudioParam | undefined): number => (p ? (alvos.get(p) ?? p.value) : 0);
 
-function rumo(p: AudioParam, v: number, agora: number, ms: number): void {
+export function rumo(p: AudioParam, v: number, agora: number, ms: number): void {
   alvos.set(p, v);
   const daqui = p.value;
   p.cancelScheduledValues(0);
@@ -87,13 +92,24 @@ export class Som {
   private static acaoMudaNo: GainNode | null = null;
   /** the bosses' closed room in the vacuum (see `CHEFE_NO_VACUO`) */
   private static salaChefe: GainNode | null = null;
+  /** the tail of the far sounds, one per medium (`distancia.ts`), made when first needed and dropped on a scene change */
+  private static caudas = new Map<Meio, { entrada: GainNode; saida: GainNode }>();
   private static abafoNo: GainNode | null = null;
   /** the safety limiter at the end (`LIMITADOR`) and the node after it — the effects as they leave for the output */
   private static limitadorNo: DynamicsCompressorNode | null = null;
   private static fimNo: GainNode | null = null;
+  /** the game's output: the soundtrack joins the effects here, after their limiter — the MASTER's input (`MESTRE`) */
+  private static destino: AudioNode | null = null;
+  /** the hole the ambience opens in its mids for the music sounding (`BURACO`) */
+  private static buracoNo: BiquadFilterNode | null = null;
+  /** how much the music is SOUNDING (0–1): the track playing, written by `Music`; × the MÚSICA control = how much the bed yields */
+  private static musicaSoa = 0;
+  private static escuta: AnalyserNode | null = null;
   private static ac: Acustica | null = null;
   private static lugarAtual: Lugar = 'atmosfera';
   private static ativas: Voz[] = [];
+  /** the sounds streamed from their files (`fluxo`) */
+  private static fluxos: { nome: string; laco: Laco; el: HTMLAudioElement }[] = [];
   private static ultimo = new Map<string, number>();
   private static extras = new Map<string, { def: DefSom; buffer: AudioBuffer }>();
   private static proxId = 1;
@@ -113,6 +129,19 @@ export class Som {
     const ctx = g.context;
     Som.ctx = ctx;
     Som.cache = cache;
+    // THE MASTER (`MESTRE`, 19/11): the effects and the soundtrack meet here, one safety limiter at −1 dBFS before the
+    // speakers (their sum must not clip); `fimNo` below stays the effects alone, for the calibration tools.
+    const mestre = ctx.createGain();
+    const limM = ctx.createDynamicsCompressor();
+    limM.threshold.value = MESTRE.limiar;
+    limM.knee.value = MESTRE.joelho;
+    limM.ratio.value = MESTRE.razao;
+    limM.attack.value = MESTRE.ataque;
+    limM.release.value = MESTRE.soltura;
+    const compM = ctx.createGain();
+    compM.gain.value = 10 ** (-MAKEUP_DO_MESTRE / 20);
+    mestre.connect(limM).connect(compM).connect(g.destination);
+    Som.destino = mestre;
     const saida = ctx.createGain();
     // the SAFETY LIMITER (`LIMITADOR`): only the peaks over the threshold are shaved; under it, unity (its makeup undone)
     const lim = ctx.createDynamicsCompressor();
@@ -123,7 +152,7 @@ export class Som {
     lim.release.value = LIMITADOR.soltura;
     const compensa = ctx.createGain();
     compensa.gain.value = 10 ** (-MAKEUP_DO_LIMITADOR / 20);
-    saida.connect(lim).connect(compensa).connect(g.destination);
+    saida.connect(lim).connect(compensa).connect(mestre);
     Som.limitadorNo = lim;
     Som.fimNo = compensa;
     Som.abafoNo = ctx.createGain();
@@ -136,7 +165,15 @@ export class Som {
       const b = ctx.createGain();
       if (c === 'interface') b.connect(saida);
       else if (c === 'acao') b.connect(Som.acaoMudaNo);
-      else b.connect(Som.ac.entrada);
+      else if (c === 'ambiente') {
+        // the bed's hole in the mids, as deep as the music is sounding (0 dB with no music: the approved bed, untouched)
+        Som.buracoNo = ctx.createBiquadFilter();
+        Som.buracoNo.type = 'peaking';
+        Som.buracoNo.frequency.value = BURACO.hz;
+        Som.buracoNo.Q.value = BURACO.q;
+        Som.buracoNo.gain.value = 0;
+        b.connect(Som.buracoNo).connect(Som.ac.entrada);
+      } else b.connect(Som.ac.entrada);
       Som.barras[c] = b;
     }
     // the CLOSED ROOM of the bosses in the vacuum (`CHEFE_NO_VACUO`): a send into a short dark tail, back into the action
@@ -159,6 +196,27 @@ export class Som {
     return Som.ctx?.state === 'running';
   }
 
+  /** Where the soundtrack joins the game's output. */
+  static destinoFinal(): AudioNode | null {
+    return Som.destino;
+  }
+
+  /** The world as it is heard (the interface does not count): the soundtrack's sidechain listens here. */
+  static escutaDoMundo(): AnalyserNode | null {
+    if (!Som.ctx || !Som.abafoNo) return null;
+    if (!Som.escuta) {
+      Som.escuta = Som.ctx.createAnalyser();
+      Som.escuta.fftSize = 2048;
+      Som.abafoNo.connect(Som.escuta);
+    }
+    return Som.escuta;
+  }
+
+  /** Is a far event of the scenery sounding? The soundtrack clears some space for it. */
+  static cenarioSoando(): boolean {
+    return Som.ativas.some((v) => abreEspaco(v.nome));
+  }
+
   private static achar(nome: string): { def: DefSom; buffer: AudioBuffer } | null {
     const extra = Som.extras.get(nome);
     if (extra) return extra;
@@ -170,6 +228,23 @@ export class Som {
   /** A sound beside the catalogue (the tests, and DEV tries). */
   static registrar(nome: string, def: DefSom, buffer: AudioBuffer): void {
     Som.extras.set(nome, { def, buffer });
+  }
+
+  /** The tail of the far sounds in this medium: it comes back through the action bus, inside the place's acoustics. */
+  private static cauda(meio: Meio): GainNode {
+    const ctx = Som.ctx!;
+    let c = Som.caudas.get(meio);
+    if (!c) {
+      const C = CAUDA_DISTANCIA[meio];
+      const entrada = ctx.createGain();
+      const conv = ctx.createConvolver();
+      conv.buffer = impulso(ctx, C.seg, C.decai, 11);
+      const saida = ctx.createGain();
+      entrada.connect(conv).connect(saida).connect(Som.barras.acao);
+      c = { entrada, saida };
+      Som.caudas.set(meio, c);
+    }
+    return c.entrada;
   }
 
   private static voz(nome: string, def: DefSom, buffer: AudioBuffer, ganhoExtra: number, x: number | undefined, laco: boolean): Voz | null {
@@ -194,10 +269,27 @@ export class Som {
     // and the background factor survive a fade (17/11: it used `def.volume × v` and dropped them)
     let base = def.volume * v.ganho;
     let ultimoNo: AudioNode = fonte.connect(ganho);
+    // THE DEPTH (`distancia.ts`): the farther, the quieter, the darker, the narrower, and the more of it is its own tail
+    const longe = def.distancia ? perfilDaDistancia(def.distancia, Som.lugarAtual) : null;
+    const largura = PAN_MAX * (longe?.pan ?? 1);
+    let pan: StereoPannerNode | null = null;
     if (x !== undefined) {
-      const pan = ctx.createStereoPanner();
-      pan.pan.value = Math.max(-1, Math.min(1, (x / LARGURA_TELA) * 2 - 1)) * PAN_MAX;
+      pan = ctx.createStereoPanner();
+      pan.pan.value = Som.panDe(x, largura);
       ultimoNo = ultimoNo.connect(pan);
+    }
+    if (longe) {
+      base *= longe.volume;
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = longe.passaBaixa;
+      lp.Q.value = 0.5;
+      ultimoNo = ultimoNo.connect(lp);
+      const atraso = ctx.createDelay(0.5);
+      atraso.delayTime.value = longe.atrasoEco;
+      const envio = ctx.createGain();
+      envio.gain.value = longe.eco;
+      ultimoNo.connect(atraso).connect(envio).connect(Som.cauda(meioDoLugar(Som.lugarAtual)));
     }
     // a boss in the vacuum is contained (`CHEFE_NO_VACUO`): its own low-pass, a little lower, a send into the closed room
     const chefeNoVacuo = Som.lugarAtual === 'cabine' && def.prioridade === 'chefe' && def.camada === 'acao';
@@ -236,7 +328,7 @@ export class Som {
     ganho.gain.value = Math.min(teto, base * ganhoExtra);
     ultimoNo.connect(Som.barras[def.camada]);
     if (chefeNoVacuo && Som.salaChefe) ultimoNo.connect(Som.salaChefe);
-    const voz: Voz = { id: Som.proxId++, nome, peso, inicio: agora, fonte, ganho, ponte: !!def.ponte, tela: def.camada === 'interface' && !laco, base, teto };
+    const voz: Voz = { id: Som.proxId++, nome, peso, inicio: agora, fonte, ganho, ponte: !!def.ponte, tela: def.camada === 'interface' && !laco, base, teto, pan, largura };
     fonte.onended = () => {
       Som.ativas = Som.ativas.filter((a) => a !== voz);
       ganho.disconnect();
@@ -259,16 +351,27 @@ export class Som {
     }
   }
 
+  /** The pan of a screen x inside a stereo width. */
+  private static panDe(x: number, largura: number): number {
+    return Math.max(-1, Math.min(1, (x / LARGURA_TELA) * 2 - 1)) * largura;
+  }
+
   /**
-   * A one-shot. `x` = screen x (0–384) → a gentle pan; `forca` (0–1) scales the volume; `fracao` (0–1) plays only that
-   * part of it, faded out over its last 80 ms (the TERMINUS arrival that grows with the burst).
+   * A one-shot. `x` = screen x (0–384) → a gentle pan; `xFim` = where it ends up (the sound crosses the stereo field over
+   * its length: what flies past); `forca` (0–1) scales the volume; `fracao` (0–1) plays only that part of it, faded out
+   * over its last 80 ms (the TERMINUS arrival that grows with the burst).
    */
-  static tocar(nome: string, op: { x?: number; forca?: number; fracao?: number } = {}): void {
+  static tocar(nome: string, op: { x?: number; xFim?: number; forca?: number; fracao?: number } = {}): void {
     if (!Som.pronto()) return;
     const s = Som.achar(nome);
     if (!s) return;
     const v = Som.voz(nome, s.def, s.buffer, op.forca ?? 1, op.x, false);
     if (v && s.def.lastro) Som.alimentarLastro(s.def.lastro * (op.forca ?? 1));
+    if (v?.pan && op.xFim !== undefined && Som.ctx) {
+      const agora = Som.ctx.currentTime;
+      v.pan.pan.setValueAtTime(v.pan.pan.value, agora);
+      v.pan.pan.linearRampToValueAtTime(Som.panDe(op.xFim, v.largura), agora + s.buffer.duration / v.fonte.playbackRate.value);
+    }
     if (v && op.fracao !== undefined && op.fracao < 1 && Som.ctx) {
       const fim = Som.ctx.currentTime + Math.max(0.1, (s.buffer.duration / v.fonte.playbackRate.value) * op.fracao);
       v.ganho.gain.setValueAtTime(v.ganho.gain.value, fim - 0.08);
@@ -397,14 +500,98 @@ export class Som {
     };
   }
 
+  /**
+   * A long sound STREAMED from its file (`FLUXOS`), looping, through its layer's bus: nothing is decoded into memory. It
+   * rises from silence once the browser lets it play, and a scene change takes it away like any other voice.
+   */
+  static fluxo(nome: string, ms = 1500): Laco | null {
+    const ctx = Som.ctx;
+    const def = FLUXOS[nome];
+    if (!ctx || !def) return null;
+    const el = new Audio();
+    el.src = `sfx/${def.arquivo}.${el.canPlayType('audio/ogg; codecs="vorbis"') ? 'ogg' : 'm4a'}`;
+    el.loop = true;
+    el.preload = 'auto';
+    const fonte = ctx.createMediaElementSource(el);
+    const ganho = ctx.createGain();
+    ganho.gain.value = 0;
+    fonte.connect(ganho).connect(Som.barras[def.camada]);
+    let vivo = true;
+    let alvo = 1;
+    let tocando = false;
+    const soltarEscutas = (): void => {
+      ctx.removeEventListener('statechange', tentar);
+      window.removeEventListener('pointerdown', tentar);
+      window.removeEventListener('keydown', tentar);
+    };
+    // (the browser may refuse to play before the first gesture: it tries again on each of the next ones)
+    function tentar(): void {
+      if (!vivo || tocando || ctx?.state !== 'running') return;
+      el.play().then(() => {
+        if (!vivo || tocando || !ctx) return;
+        tocando = true;
+        soltarEscutas();
+        rumo(ganho.gain, def.volume * alvo, ctx.currentTime, ms);
+      }).catch(() => {
+        /* still locked, or the file failed: the place simply stays without it */
+      });
+    }
+    ctx.addEventListener('statechange', tentar);
+    window.addEventListener('pointerdown', tentar);
+    window.addEventListener('keydown', tentar);
+    tentar();
+    const laco: Laco = {
+      volume(v: number, msV = 300): void {
+        alvo = v;
+        if (tocando) rumo(ganho.gain, def.volume * v, ctx.currentTime, msV);
+      },
+      parar(msP = 400): void {
+        if (!vivo) return;
+        vivo = false;
+        soltarEscutas();
+        Som.fluxos = Som.fluxos.filter((f) => f.laco !== laco);
+        rumo(ganho.gain, 0, ctx.currentTime, msP);
+        setTimeout(() => {
+          el.pause();
+          el.removeAttribute('src');
+          el.load();
+          fonte.disconnect();
+          ganho.disconnect();
+        }, msP + 60);
+      },
+    };
+    // (`el` for the meters: `_medir-mistura` seeks the storm to its rain)
+    Som.fluxos.push({ nome, laco, el });
+    return laco;
+  }
+
   /** The preferences changed: each layer bus to its new gain at once. */
   static atualizarVolume(): void {
+    Som.aplicarCamadas(0);
+  }
+
+  /**
+   * How much the soundtrack is SOUNDING (0–1), from `Music`: a lap playing = 1, stopped = 0. The bed and the engine yield
+   * to it (`PISO_AMBIENTE`, `PISO_PRESENCA`, `BURACO`) by this × the MÚSICA control, in `ms` — so whoever plays without
+   * music, or a cutscene with the track stopped, has the bed exactly as approved.
+   */
+  static musicaSoando(k: number, ms: number): void {
+    const novo = Math.min(1, Math.max(0, k));
+    if (novo === Som.musicaSoa) return;
+    Som.musicaSoa = novo;
+    Som.aplicarCamadas(ms);
+  }
+
+  private static aplicarCamadas(ms: number): void {
     if (!Som.ctx) return;
     const v = Som.volumes();
+    const ouvida = { ...v, musica: v.musica * Som.musicaSoa };
+    const t = Som.ctx.currentTime;
     for (const c of CAMADAS) {
       const b = Som.barras[c];
-      if (b) rumo(b.gain, ganhoDaCamada(c, v), Som.ctx.currentTime, 0);
+      if (b) rumo(b.gain, ganhoDaCamada(c, ouvida), t, ms);
     }
+    if (Som.buracoNo) rumo(Som.buracoNo.gain, buracoDoAmbiente(ouvida.musica), t, ms);
   }
 
   /** Ducks the world to `k` (the pause: the music's factor) or restores it (1); `calarAcao` = SHIP LOST. */
@@ -438,7 +625,14 @@ export class Som {
         }
       }
       Som.ativas = Som.ativas.filter((v) => v.ponte || v.tela);
+      for (const f of [...Som.fluxos]) f.laco.parar(ms);
       Som.ultimo.clear();
+      // the far sounds' tails ring for seconds: they leave with the scene too (a new tail is made when one is needed)
+      for (const c of Som.caudas.values()) {
+        rumo(c.saida.gain, 0, agora, ms);
+        setTimeout(() => c.saida.disconnect(), ms + 60);
+      }
+      Som.caudas.clear();
     }
     if (Som.lastroTimer) clearInterval(Som.lastroTimer);
     Som.lastroTimer = null;
@@ -516,11 +710,13 @@ export class Som {
       pronto: Som.pronto(),
       estado: Som.ctx?.state ?? 'none',
       lugar: Som.lugarAtual,
-      vozes: Som.ativas.map((a) => a.nome),
+      vozes: [...Som.ativas.map((a) => a.nome), ...Som.fluxos.map((f) => f.nome)],
       recusadas: Som.recusadas,
       ganhos,
       abafo: Som.abafoNo ? alvoDe(Som.abafoNo.gain) : 1,
       acaoMuda: Som.acaoMudaNo ? alvoDe(Som.acaoMudaNo.gain) : 1,
+      musicaSoa: Som.musicaSoa,
+      buraco: Som.buracoNo ? alvoDe(Som.buracoNo.gain) : 0,
       carregados: [Object.keys(SONS).filter((n) => Som.cache?.get(chaveSom(n)) instanceof AudioBuffer).length, Object.keys(SONS).length],
       tocados: [...Som.tocados],
       lastro: { energia: Som.ctx ? energiaDepois(Som.energia, Som.ctx.currentTime - Som.energiaEm) : 0, tocando: !!Som.lastroLaco },

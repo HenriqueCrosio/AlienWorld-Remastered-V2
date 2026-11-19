@@ -21,8 +21,26 @@ export interface EstadoHangar {
   tPintura: number;
   /** Quando o jogador confirmou (null = escolhendo). */
   tConfirmou: number | null;
+  /** Depois de confirmar: quando o véu começa a fechar e quando a cena acaba (s). */
+  saida: SaidaDoHangar;
   /** O cenário montou. */
   pronto: boolean;
+}
+
+export interface SaidaDoHangar {
+  veuFecha: number;
+  fim: number;
+}
+
+/**
+ * A SAÍDA MEDE-SE PELA DECOLAGEM (18/11, ele: *"comece antes para terminar no ultimo ms da tela preta, mesmo que seja para
+ * pausar a tela preta por 1 seg"*): o som entra logo após confirmar, a cena só acaba quando ele acaba, e o véu fecha a tempo
+ * de restar `pretoSegura` de tela preta. Sem som (áudio travado): o tempo de sempre.
+ */
+export function saidaDoHangar(duracaoDoSom: number): SaidaDoHangar {
+  if (duracaoDoSom <= 0) return { veuFecha: TEMPO.veuFecha, fim: TEMPO.fim };
+  const fim = Math.max(TEMPO.fim, TEMPO.somEntra + duracaoDoSom);
+  return { veuFecha: Math.max(TEMPO.veuFecha, fim - TEMPO.pretoSegura - TEMPO.veuDura), fim };
 }
 
 const LONGE = -1e6;
@@ -32,7 +50,7 @@ export function novoEstado(e: Escolha): EstadoHangar {
   const lado = LADOS.find((l) => LADO[l].modelo === e.modelo) ?? 'esq';
   const pinturas = { esq: 0, dir: 0 } as Record<Lado, number>;
   pinturas[lado] = Math.max(0, LADO[lado].pinturas.indexOf(e.pintura));
-  return { t: 0, lado, pinturas, ladoAntes: lado, tLado: LONGE, ladoPintura: lado, pinturaAntes: pinturas[lado], tPintura: LONGE, tConfirmou: null, pronto: false };
+  return { t: 0, lado, pinturas, ladoAntes: lado, tLado: LONGE, ladoPintura: lado, pinturaAntes: pinturas[lado], tPintura: LONGE, tConfirmou: null, saida: saidaDoHangar(0), pronto: false };
 }
 
 /** A escolha que o estado representa. */
@@ -85,7 +103,7 @@ export function andamentoPintura(e: EstadoHangar): number {
 /** O véu: abre na entrada, fecha depois de confirmar. */
 export function alfaVeu(e: EstadoHangar): number {
   const abre = 1 - prender(e.t / TEMPO.entrada);
-  const fecha = e.tConfirmou === null ? 0 : prender((e.t - e.tConfirmou - TEMPO.veuFecha) / (TEMPO.fim - 0.1 - TEMPO.veuFecha));
+  const fecha = e.tConfirmou === null ? 0 : prender((e.t - e.tConfirmou - e.saida.veuFecha) / TEMPO.veuDura);
   return Math.max(abre, fecha);
 }
 
@@ -96,5 +114,5 @@ export function forcaMotor(e: EstadoHangar): number {
 
 /** A cena acabou (a fase pode começar). */
 export function acabou(e: EstadoHangar): boolean {
-  return e.tConfirmou !== null && e.t - e.tConfirmou >= TEMPO.fim;
+  return e.tConfirmou !== null && e.t - e.tConfirmou >= e.saida.fim;
 }

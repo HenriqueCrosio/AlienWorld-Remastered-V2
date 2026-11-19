@@ -89,6 +89,8 @@ interface Passagem { naves: Nave[]; d: 1 | -1; tiro: number; abateEm: number; ab
 
 export class BatalhaFundo {
   readonly claroes: Clarao[] = [];
+  /** a distant explosion lights up (x on screen): its thump reaches the hull a moment later (sheet 8) */
+  aoClarao: ((x: number) => void) | null = null;
   passagem: Passagem | null = null;
   readonly tiros: Tiro[] = [];
   private readonly fumacas: Fumaca[] = [];
@@ -140,7 +142,9 @@ export class BatalhaFundo {
     this.esperaClarao -= dt;
     if (this.esperaClarao <= 0) {
       this.esperaClarao = this.entre(CLAROES.espera);
-      this.claroes.push({ x: this.entre(CLAROES.x), y: this.entre(CLAROES.y), idade: 0, vida: this.entre(CLAROES.vida), raio: this.entre(CLAROES.raio) });
+      const xClarao = this.entre(CLAROES.x);
+      this.aoClarao?.(xClarao);
+      this.claroes.push({ x: xClarao, y: this.entre(CLAROES.y), idade: 0, vida: this.entre(CLAROES.vida), raio: this.entre(CLAROES.raio) });
     }
     for (let i = this.claroes.length - 1; i >= 0; i--) {
       const c = this.claroes[i];

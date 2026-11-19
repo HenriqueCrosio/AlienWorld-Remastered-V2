@@ -1488,8 +1488,7 @@ export class BootScene extends Phaser.Scene {
     this.load.atlas('f4Engolido', 'sprites/f4-engolido.png', 'sprites/f4-engolido.json');
     this.load.atlas('f4Deriva', 'sprites/f4-deriva.png', 'sprites/f4-deriva.json');
 
-    this.load.audio('stage1', 'audio/stage1.mp3');
-    this.load.audio('boss', 'audio/boss.mp3');
+    // (the soundtrack is not loaded here: `Music` streams it from its files)
     // THE SOUND EFFECTS (block SOUND, 15/11): every sound of the catalogue, ogg with the m4a fallback (Safari).
     for (const [nome, d] of Object.entries(SONS)) this.load.audio(chaveSom(nome), [`sfx/${d.arquivo}.ogg`, `sfx/${d.arquivo}.m4a`]);
   }

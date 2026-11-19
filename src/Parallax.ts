@@ -154,6 +154,8 @@ const LEVI_LONGE = {
 
 export class Parallax {
   private readonly layers: ScatterLayer[] = [];
+  /** O que o cenário vivo da F3 faz e se ouve (o vapor, as faíscas, os clarões ao longe): só a `GameScene` escuta (folha 8). */
+  aoEventoDoCenario: ((tipo: 'vapor' | 'faisca' | 'clarao', x: number) => void) | null = null;
   // Não existem no vácuo: lá não há chão. Nulos, e não "invisíveis" — um TileSprite escondido
   // ainda seria atualizado todo frame para não ser visto.
   private ground: Phaser.GameObjects.TileSprite | null = null;
@@ -2047,9 +2049,14 @@ export class Parallax {
     this.ceuCasco = new CeuDoCasco(this.scene);
     this.regimeCeu = 'casco';
     // O casco vivo (rodada 2): a camada de pixels logo acima das peças, lendo a faixa (as peças e o rombo).
-    if (this.cascoVivoF3) this.camadaCasco = new CamadaCasco(this.scene, () => this.pecasDoCasco());
+    if (this.cascoVivoF3) this.camadaCasco = new CamadaCasco(this.scene, () => this.pecasDoCasco(), (tipo, x) => this.aoEventoDoCenario?.(tipo, x));
     // A batalha ao fundo (rodada 3): clarões raros no Ato 2; na arena, as passagens nos momentos calmos.
-    if (this.batalhaF3) this.camadaBatalha = new CamadaBatalha(this.scene);
+    if (this.batalhaF3) this.camadaBatalha = new CamadaBatalha(this.scene, (x) => this.aoEventoDoCenario?.('clarao', x));
+  }
+
+  /** As peças de uma camada espalhada que estão vivas (o som do cenário lê o quadro e a posição delas; folha 8). */
+  pecasDaCamada(key: string): Phaser.GameObjects.Image[] {
+    return this.layers.find((l) => l.key === key)?.sprites ?? [];
   }
 
   /**

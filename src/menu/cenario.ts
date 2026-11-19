@@ -7,6 +7,8 @@ import { montarVida } from './vida';
 import { montarVolume } from './volume';
 import { montarPerigo } from './perigo';
 import { montarEspaco } from './espaco';
+import { carregarNeblina, montarNeblina } from './neblina';
+import { montarChuva } from './chuva';
 
 /**
  * O CENÁRIO DO MENU (spec `2026-10-19-menu-refeito-design.md` §2–5): a pintura dele em camadas, viva e com perigo no
@@ -104,6 +106,7 @@ export function carregarCamadasMenu(load: Phaser.Loader.LoaderPlugin, prefixo: s
   }
   if (!json.exists(`${prefixo}-dados`)) load.json(`${prefixo}-dados`, `${pasta}/dados.json`);
   if (!json.exists(`${prefixo}-tempestade`)) load.json(`${prefixo}-tempestade`, `${pasta}/tempestade/tempestade.json`);
+  carregarNeblina(load);
 }
 
 /** O contexto das peças, ou `null` se as camadas não estão carregadas. */
@@ -155,7 +158,8 @@ export class Cenario implements CenarioDoMenu {
     scene.add.image(0, 0, chave('ceu')).setOrigin(0).setScale(1 / k).setDepth(0);
     scene.add.image(0, 0, chave('cidade')).setOrigin(0).setScale(1 / k).setDepth(2);
     const perigo = montarPerigo(ctx, estado);
-    this.pecas = [montarLeviata(ctx), montarEspaco(ctx), montarVida(ctx), montarVolume(ctx), perigo];
+    const extras = [montarNeblina(ctx, estado, perigo.brilho), montarChuva(ctx, estado, perigo.brilho)].filter((p): p is Peca => p !== null);
+    this.pecas = [montarLeviata(ctx), montarEspaco(ctx), montarVida(ctx), montarVolume(ctx), perigo, ...extras];
     this.relampagos = perigo.contagem;
     this.veu = scene.add.rectangle(0, 0, LARGURA, ALTURA, 0x000000, 1).setOrigin(0).setDepth(profundidadeVeu);
   }

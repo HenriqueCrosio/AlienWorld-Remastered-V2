@@ -8,8 +8,34 @@
  */
 export type Camada = 'acao' | 'interface' | 'ambiente' | 'motor';
 
-/** How much of the ambience/engine is left with the music at full volume (tuned by ear on sheet 8). */
-export const PISO_PRESENCA = 0.35;
+/**
+ * How much of the ship's engine and of the AMBIENCE is left with the music at full volume. 1 = THE MUSIC MOVES NOTHING
+ * (18/11, him: *"A musica que tem hoje em dia não é a trilha sonora [...] A ambientação precisa funcionar perfeitamente antes
+ * mesmo da música entrar"*): the world has one scale, with or without the track. When the real soundtrack arrives, the
+ * mix against it is decided here.
+ */
+export const PISO_PRESENCA = 0.7;
+export const PISO_AMBIENTE = 0.5;
+
+/**
+ * 19/11, THE MIX PASS (spec §10.11): the real soundtrack arrived, so the bed gives way to it — the filler yields first.
+ * With the music SOUNDING (the MÚSICA control × the track actually playing), the ambience goes −6 dB (`PISO_AMBIENTE`) and
+ * opens a HOLE in the mids where the music lives (`BURACO`; the frequency sidechain of Baldur's Gate 3: cut only the band
+ * where they fight), the engine −3 dB (`PISO_PRESENCA`). With no music (the control at 0, a cutscene with the track
+ * stopped) both are back exactly where he approved them. The point events (thunder, flybys) are on the action layer.
+ */
+export const BURACO = { hz: 1600, q: 0.6, db: -4 } as const;
+
+/** The depth of the hole (dB ≤ 0) for the music sounding at `musica` (0–1). */
+export const buracoDoAmbiente = (musica: number): number => BURACO.db * Math.min(1, Math.max(0, musica));
+
+/**
+ * THE MASTER (19/11): the soundtrack and the effects meet in one safety limiter before the output — the sum of the two
+ * must not clip (the effects' own limiter shaves at −3, the track joins after it). The true-peak ceiling of EBU R128 /
+ * ASWG-R001 is −1 dBTP. Asleep under it; `compensacao` undoes Chrome's makeup, as in `LIMITADOR`.
+ */
+export const MESTRE = { limiar: -1, joelho: 0, razao: 20, ataque: 0.001, soltura: 0.1 } as const;
+export const MAKEUP_DO_MESTRE = 0.6 * -(MESTRE.limiar - MESTRE.limiar / MESTRE.razao);
 
 /**
  * THE SAFETY LIMITER at the end of the effects (17/11): the regulation measured peaks past 0 dB before the output (the
@@ -26,7 +52,7 @@ export const MAKEUP_DO_LIMITADOR = 0.6 * -(LIMITADOR.limiar - LIMITADOR.limiar /
 const lim = (v: number): number => Math.min(1, Math.max(0, v));
 
 /** The presence of the ambience and of the engine for a MÚSICA level `musica` (0–1): 1 at 0, the floor at 1. */
-export const presenca = (musica: number): number => 1 - (1 - PISO_PRESENCA) * lim(musica);
+export const presenca = (musica: number, piso = PISO_PRESENCA): number => 1 - (1 - piso) * lim(musica);
 
 /** The player's volumes, each 0–1 (the settings' 0–10 divided by 10). */
 export interface Volumes {
@@ -60,5 +86,6 @@ export const ganhoDoLastro = (e: number): number => Math.min(1, Math.max(0, e) *
 /** The gain of a layer's bus. */
 export function ganhoDaCamada(c: Camada, v: Volumes): number {
   const base = lim(v.geral) * lim(v.efeitos);
-  return c === 'ambiente' || c === 'motor' ? base * presenca(v.musica) : base;
+  if (c === 'ambiente') return base * presenca(v.musica, PISO_AMBIENTE);
+  return c === 'motor' ? base * presenca(v.musica) : base;
 }

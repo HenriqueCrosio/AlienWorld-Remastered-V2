@@ -14,7 +14,8 @@ export class CamadaBatalha {
   private readonly batalha = new BatalhaFundo(20261108);
   private acumulado = 1;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, aoClarao: ((x: number) => void) | null = null) {
+    this.batalha.aoClarao = aoClarao;
     let n = 0;
     while (scene.textures.exists(`camadaBatalha${n}`)) n++;
     this.tex = scene.textures.createCanvas(`camadaBatalha${n}`, GAME_WIDTH, CAMADA_BATALHA.h)!;

@@ -12,7 +12,7 @@ import { pixelText } from '../ui';
 import { Music } from '../systems/Music';
 import { forcaNoLugar, lugarDaCena } from '../som/acustica';
 import { Som, type Laco } from '../som/Som';
-import { ESTRONDO_MUSICA_ABAFADA, daNaveNaCena, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
+import { ESTRONDO_MUSICA_ABAFADA, daNaveNaCena, estrondoDaNave, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
 import { SONS } from '../som/catalogoSons';
 import { somDaMorte, somDoAcerto } from '../som/somDaExplosao';
 import { InputReader } from '../input';
@@ -69,6 +69,7 @@ import { MorteDaNave, type OpcoesMorte } from '../systems/morte/MorteDaNave';
 import { MORTE, ESTILOS_MORTE, estiloDaNave, type EstiloMorte } from '../systems/morte/numerosMorte';
 import { Destrocos } from '../systems/morte/Destrocos';
 import { ENGUIA } from '../f3/enguiaCilindro';
+import { AmbienteDaFase } from '../som/AmbienteDaFase';
 import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, SEPARACAO, type Classe, type Variante, type VarianteRocha } from '../systems/morte/numerosDestrocos';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
@@ -89,9 +90,6 @@ const ESTRONDO = {
   musicaVoltaMs: 1800,
   motorEntraEm: 2000,
   motorSobeMs: 1500,
-  // (from the hangar the boom began ~0.6 s + the load before the stage: its tail is what is left)
-  musicaVoltaVindoEm: 1200,
-  motorEntraVindoEm: 1100,
 };
 
 /** Os quatro tempos de uma câmera lenta, em ms de relógio cru (ver `GameScene.camaraLenta`). */
@@ -151,6 +149,8 @@ export class GameScene extends Phaser.Scene {
   private boss: StageBoss | null = null;
   /** O mini-chefão da câmara B da Fase 4 (spec 2026-09-11). `null` fora da arena dele. */
   private golfinho: Golfinho | null = null;
+  /** O som do lugar (folha 8): o fundo de cada lugar e os efeitos presos ao que a tela mostra. */
+  private ambiente!: AmbienteDaFase;
   /** Há elite em cena (o primeiro plano está atenuado)? Zerado no `create` — a instância da cena é reaproveitada. */
   private eliteEmCena = false;
   /** A água da arena do golfinho. Existe em toda fase; só a Fase 4 manda encher. */
@@ -184,6 +184,8 @@ export class GameScene extends Phaser.Scene {
   private zone: Zone = 'atmosfera';
   /** Treino de chefão: pula direto para a luta e reinicia nela. */
   private practice = false;
+  /** Veio do hangar, com a decolagem já ouvida na tela preta. */
+  private decolou = false;
   /** O SANDBOX de dev, se a fase foi aberta por ele (ver `src/sandbox/`). */
   private sandbox: ConfigSandbox | null = null;
   /** O ATALHO DA SERPENTE de dev (ver `entities/serpente/atalho.ts`), se a luta foi aberta por ele. */
@@ -359,7 +361,10 @@ export class GameScene extends Phaser.Scene {
     serpente?: DevSerpente;
     /** Total acumulado das fases anteriores (a campanha soma; a fase começa do checkpoint). */
     score?: number;
+    /** Veio do hangar: a decolagem já soou inteira na tela preta, a fase entra com o próprio som. */
+    decolou?: boolean;
   }): void {
+    this.decolou = data.decolou ?? false;
     this.eliteEmCena = false;
     // Fase desconhecida cai na 1: um link velho ou um `scene.start` errado não pode
     // derrubar o jogo numa tela preta.
@@ -611,24 +616,30 @@ export class GameScene extends Phaser.Scene {
     // HIS MOMENT, THE STAGE'S SOUND ENTRANCE (15/11, him: *"pode ser antes de começar tudo... ela dá a entrada sonora para
     // a fase, depois começa os outros sons"*): the sonic boom first and alone — the music coming from the hangar dips
     // under it and comes back slowly — and only then the engine fades in. Other stages: the engine at once.
-    const abertura = this.stage.id === 1 && !this.sandbox && !this.practice;
-    // (16/11) from the hangar the boom is ALREADY sounding — it started on the black veil and crossed over (`ponte`):
-    // the stage only waits for its tail. Any other way into the F1 (the retry, the dev keys) plays it whole, here.
-    const jaVeio = abertura && Som.tocando('momento.f1.estrondo');
-    if (abertura && !jaVeio) {
-      Som.tocar('momento.f1.estrondo');
+    // (18/11, him: *"quando começar a fase 1 já comece com o som da fase"*: from the hangar the take-off already ended on the
+    // black, so the stage comes in with its engine and its bed at once.)
+    const abertura = this.stage.id === 1 && !this.sandbox && !this.practice && !this.decolou;
+    // THE SOUND OF THE PLACE (sheet 8): the bed enters with the engine, after the boom; the F3 practice starts on the hull
+    this.ambiente = new AmbienteDaFase(this, this.stage.id, this.parallax, this.stage.id === 3 && this.stage.script.some((e) => e.type === 'rabo' && e.t < this.elapsed));
+    // Any way into the F1 other than the hangar (the retry, the dev keys) plays the entrance whole, here.
+    const entrada = estrondoDaNave(this.naveSom);
+    if (abertura) {
+      Som.tocar(entrada);
       Music.abafar(this, ESTRONDO_MUSICA_ABAFADA, 150);
     }
+    // (the X-AELO's flyby is longer than the boom these times were set by: the stage waits for what it has more)
+    const aMais = Math.max(0, Som.duracao(entrada) - Som.duracao('momento.f1.estrondo')) * 1000;
     if (abertura) {
       // (a pause opened in between owns the duck: it restores the music itself when it closes)
-      this.time.delayedCall(jaVeio ? ESTRONDO.musicaVoltaVindoEm : ESTRONDO.musicaVoltaEm, () => {
+      this.time.delayedCall(ESTRONDO.musicaVoltaEm + aMais, () => {
         if (!pausaAberta()) Music.abafar(this, 1, ESTRONDO.musicaVoltaMs);
       });
     }
-    this.time.delayedCall(abertura ? (jaVeio ? ESTRONDO.motorEntraVindoEm : ESTRONDO.motorEntraEm) : 0, () => {
+    this.time.delayedCall(abertura ? ESTRONDO.motorEntraEm + aMais : 0, () => {
       if (this.over) return;
       this.motorSom = Som.laco(somDaNave(this.naveSom, 'motor'), abertura ? 0 : 1);
       if (abertura) this.motorSom?.volume(1, ESTRONDO.motorSobeMs);
+      if (!this.sandbox) this.ambiente.ligar(abertura ? ESTRONDO.motorSobeMs : undefined);
     });
 
     // A NAVE AVARIADA (última vida) — dano por CÓDIGO, a técnica da Interlude3: fumaça
@@ -779,9 +790,13 @@ export class GameScene extends Phaser.Scene {
     );
     // a MASS hitting the ship (the rock, the wreck) adds the collision under the ship's "hit" — in the vacuum, only what
     // comes through the hull (block SOUND, sheet 3); the mines keep their own blast
-    this.physics.add.overlap(this.ship, this.debris.hazards, (_s, h) =>
-      this.damageShip(GameScene.MASSA.has((h as Phaser.GameObjects.GameObject).getData('kind') as string) ? 'perigo.impacto' : undefined),
-    );
+    // (sheet 8, him: the gravel only when the ship really HITS the rock; passing close has its own sound)
+    this.physics.add.overlap(this.ship, this.debris.hazards, (_s, h) => {
+      const perigo = h as Phaser.GameObjects.GameObject;
+      const kind = perigo.getData('kind') as string;
+      perigo.setData('bateu', true);
+      this.damageShip(GameScene.MASSA.has(kind) ? 'perigo.impacto' : undefined, kind === 'asteroid' || kind === 'mineravel' ? 'fx.f2.cascalho' : undefined);
+    });
     this.physics.add.overlap(this.ship, this.enemies.enemies, () => this.damageShip());
     // O ESPORO NÃO FERE (spec F4 §9.3): encostar deixa a nave lenta. Nenhum overlap com os tiros do jogador — o tiro
     // atravessa.
@@ -904,8 +919,8 @@ export class GameScene extends Phaser.Scene {
 
     this.applyHandling(false);
 
-    // No treino do chefão, a trilha certa é a dele — a fase nem chega a existir.
-    Music.play(this, this.practice ? 'boss' : 'stage1');
+    // Cada fase tem a sua trilha; o chefão luta sobre ela.
+    Music.play(this, this.stage.music);
 
     const kb = this.input.keyboard!;
     // No sandbox, ESC volta à MONTAGEM (com tudo como estava) — não ao menu.
@@ -1022,6 +1037,17 @@ export class GameScene extends Phaser.Scene {
       this.parallax.golfinhosNoRelogio(this.relogioDoDuelo, dt, nivel);
     }
     this.parallax.update(dt, SCROLL_SPEED * frenagem);
+    if (!this.sandbox) {
+      this.ambiente.quadro(dt, {
+        t: this.elapsed,
+        chefe: !!this.boss,
+        caverna: this.parallax.cavernaAberta(),
+        agua: this.stage.parallax === 'interior' ? this.agua.estadoAtual.estado : 'seco',
+        duelo: this.relogioDoDuelo,
+        nave: this.ship,
+        perigos: this.debris.hazards.getChildren(),
+      });
+    }
     // ⚠️ ANTES dos spawns. O corredor que nasce neste frame pergunta à curva onde está o vão, e ela
     // tem de estar já avançada — senão o obstáculo nasce uma placa atrás do desenho.
     this.moldura.avanca(dt, SCROLL_SPEED * frenagem);
@@ -1448,6 +1474,7 @@ export class GameScene extends Phaser.Scene {
         // O quadro tem de estar VAZIO quando o rabo entra: o Caçador vivo some de vez (spec F3 §2.2).
         this.enemies.aoRabo();
         this.raboDoLeviata();
+        this.ambiente.rabo();
         break;
       case 'agua':
         // ⚠️ QUEM ENCHE É O ROTEIRO, e não o nascimento do golfinho — foi assim até o teste jogado
@@ -1700,6 +1727,8 @@ export class GameScene extends Phaser.Scene {
         this.parallax.revealCasco(1, 60);
         // O céu do casco liga aqui, no escuro total, inteiro (08/11).
         this.parallax.ligarCeuDoCasco();
+        // the nebula gives way to the hull behind the black (sheet 8)
+        this.ambiente.paraOCasco();
         this.showBanner('O CASCO DO LEVIATÃ', COLORS.hotBright);
         // Todo tiro inimigo some no preto cheio: nada que o jogador não viu chega até ele.
         for (const b of [...this.enemies.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Sprite[]) {
@@ -2006,9 +2035,6 @@ export class GameScene extends Phaser.Scene {
     this.propRate = 0;
     this.hazardRate = 0;
     this.corredorRate = 0;
-
-    // A trilha vira ANTES de o chefão aparecer na tela: a música é o primeiro aviso.
-    Music.play(this, 'boss', 1200);
 
     // O PRIMEIRO PLANO SAI DE CENA no mesmo aviso. Durante a fase as silhuetas na frente da
     // nave são dificuldade; durante o chefão elas tapam a leitura dos padrões. Não volta
@@ -2502,6 +2528,7 @@ export class GameScene extends Phaser.Scene {
     // the acoustics OPENING to space over the climb — the air thins, the cabin takes over (no cut: a ramp)
     Som.tocar(daNaveNaCena('momento.f1.saida', this.naveSom));
     Som.lugar('cabine', SAIDA_ABRE_O_ESPACO_MS);
+    this.ambiente.saidaDaAtmosfera(SAIDA_ABRE_O_ESPACO_MS);
     this.cameras.main.shake(600, 0.01);
     claraoDe(this).largada(0xb4e6ff, 400);
 
@@ -3185,12 +3212,14 @@ export class GameScene extends Phaser.Scene {
   /** The hazards that are MASS (block SOUND, sheet 3): hitting one sounds the collision under the ship's "hit". */
   private static readonly MASSA = new Set(['asteroid', 'mineravel', 'destroco']);
 
-  /** `impacto`: a sound of what hit the ship, played only when the hit COUNTS (not inside the i-frames). */
-  private damageShip(impacto?: string): void {
+  /** `impacto` (and `materia`, the gravel of a rock on top of it): sounds of what hit the ship, played only when the hit
+   *  COUNTS (not inside the i-frames). */
+  private damageShip(impacto?: string, materia?: string): void {
     if (this.over || this.time.now < this.invulnerableUntil || this.time.now < this.semDanoAte || this.cartas.intocavel(this.time.now)) return;
     // O INVULNERÁVEL do sandbox (tecla 3): para olhar as skills sem morrer.
     if (this.arena?.invulneravel) return;
     if (impacto) Som.tocar(impacto, { x: this.ship.x });
+    if (materia) Som.tocar(materia, { x: this.ship.x });
 
     // QUANDO A NAVE FOI ATINGIDA (30/10, a Serpente refeita pelo CCGS): o chefão lê `ship.getData('golpeEm')` para dar o
     // respiro de 0,8 s antes do próximo aviso letal. Um dado na nave, só lido — nenhum outro sistema muda. (Também no

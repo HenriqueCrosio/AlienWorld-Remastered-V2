@@ -1,3 +1,4 @@
+import type { Distancia } from './distancia.ts';
 import type { Camada } from './mixagem.ts';
 import type { Prioridade } from './vozes.ts';
 
@@ -19,6 +20,8 @@ export interface DefSom {
   prioridade: Prioridade;
   /** `fundo` = lives in the back layers (in space: only the dull thump). Default `perto`. */
   plano?: 'perto' | 'fundo';
+  /** How far away it happens (`distancia.ts`: level, highs, tail and stereo width move together). Default: right here. */
+  distancia?: Distancia;
   laco?: boolean;
   /** Hz: a low-pass of its own (the engines: *"mais baixos e mais abafados"*, 15/11). */
   passaBaixa?: number;
@@ -58,31 +61,34 @@ const motor = (arquivo: string, volume: number): DefSom => ({
  * tuned by him PLAYING. The shot repeats 4.5×/s: low and with variation; the death and the boom are the loudest.
  */
 const FOLHA_1_NAVE: Record<string, DefSom> = {
-  'nave.xaelo.tiro': daNave('nave/nave.xaelo.tiro', 0.4, 4, 0.04, 0.1),
-  'nave.xaelo.motor': motor('nave/nave.xaelo.motor', 0.17),
+  // THE GUNFIRE SITS LOW (18/11, him: *"um jogador que busca a competitividade vai deixar o tiro o tempo todo acionado, isso
+  // até o final pode cansar"*): the shots, the rotary gun and the hits are 6 dB under where they were, so the world is heard
+  'nave.xaelo.tiro': daNave('nave/nave.xaelo.tiro', 0.2, 4, 0.04, 0.1),
+  // (the engines: sheet 9, his choices 18/11 — the X-AELO's C, the TERMINUS's C, the Manta's D)
+  'nave.xaelo.motor': motor('motores/nave.xaelo.motor', 0.51),
   'nave.xaelo.atingida': daNave('nave/nave.xaelo.atingida', 0.8, 2),
   'nave.xaelo.vida': daNave('nave/nave.xaelo.vida', 0.75),
   'nave.xaelo.morte': daNave('nave/nave.xaelo.morte', 1),
   // THE TERMINUS SHOT IS A ROTARY GUN (16/11, his idea, sheet 7): the M2 while the trigger is held (spin-up, loop,
   // spin-down — `WeaponSystem.somRotativo`), and on the RELEASE the A1 arrives (the A-10 buzz, the sound that travelled):
   // the PEAK in the atmosphere, the burst through the hull in space. No `nave.terminus.tiro` any more.
-  'nave.terminus.rotativa.arranque': { ...daNave('terminus-rotativa/nave.terminus.rotativa.arranque', 0.5, 1, 0.02, 0.05), passaBaixaNoVacuo: 1800 },
-  'nave.terminus.rotativa.laco': { ...daNave('terminus-rotativa/nave.terminus.rotativa.laco', 0.5, 1, 0, 0), laco: true, passaBaixaNoVacuo: 1800 },
-  'nave.terminus.rotativa.parada': { ...daNave('terminus-rotativa/nave.terminus.rotativa.parada', 0.5, 1, 0.02, 0.05), passaBaixaNoVacuo: 1800 },
+  'nave.terminus.rotativa.arranque': { ...daNave('terminus-rotativa/nave.terminus.rotativa.arranque', 0.25, 1, 0.02, 0.05), passaBaixaNoVacuo: 1800 },
+  'nave.terminus.rotativa.laco': { ...daNave('terminus-rotativa/nave.terminus.rotativa.laco', 0.25, 1, 0, 0), laco: true, passaBaixaNoVacuo: 1800 },
+  'nave.terminus.rotativa.parada': { ...daNave('terminus-rotativa/nave.terminus.rotativa.parada', 0.25, 1, 0.02, 0.05), passaBaixaNoVacuo: 1800 },
   'nave.terminus.chegada.pico': daNave('terminus-rotativa/nave.terminus.chegada.pico', 0.45, 2, 0.03, 0.08),
   'nave.terminus.chegada.casco': daNave('terminus-rotativa/nave.terminus.chegada.casco', 0.3, 2, 0.03, 0.08),
-  'nave.terminus.motor': motor('nave/nave.terminus.motor', 0.17),
+  'nave.terminus.motor': motor('motores/nave.terminus.motor', 0.43),
   'nave.terminus.atingida': daNave('nave/nave.terminus.atingida', 0.8, 2),
   'nave.terminus.vida': daNave('nave/nave.terminus.vida', 0.75),
   'nave.terminus.morte': daNave('nave/nave.terminus.morte', 1),
-  'nave.charybdis.tiro': daNave('nave/nave.charybdis.tiro', 0.4, 4, 0.04, 0.1),
-  'nave.charybdis.motor': motor('nave/nave.charybdis.motor', 0.17),
+  'nave.charybdis.tiro': daNave('nave/nave.charybdis.tiro', 0.2, 4, 0.04, 0.1),
+  'nave.charybdis.motor': motor('motores/nave.charybdis.motor', 0.29),
   'nave.charybdis.atingida': daNave('nave/nave.charybdis.atingida', 0.8, 2),
   'nave.charybdis.vida': daNave('nave/nave.charybdis.vida', 0.75),
   'nave.charybdis.morte': daNave('nave/nave.charybdis.morte', 1),
   'nave.missil.lancar': daNave('nave/nave.missil.lancar', 0.55, 3, 0.03, 0.08),
   'nave.missil.travar': daNave('nave/nave.missil.travar', 0.4, 2),
-  'nave.drone.tiro': daNave('nave/nave.drone.tiro', 0.25, 3, 0.05, 0.1),
+  'nave.drone.tiro': daNave('nave/nave.drone.tiro', 0.13, 3, 0.05, 0.1),
   'nave.bomba.lancar': daNave('nave/nave.bomba.lancar', 0.7, 2),
   'nave.dash': daNave('nave/nave.dash', 0.6, 1, 0.03, 0.08),
   'nave.impulso': daNave('nave/nave.impulso', 0.35, 2, 0.04, 0.1),
@@ -94,6 +100,8 @@ const FOLHA_1_NAVE: Record<string, DefSom> = {
   // the boss's end cut to its low body, hollowed, its open-air tail removed, a sub thump under it
   'momento.aurora.fim': { arquivo: 'momentos/momento.aurora.fim', camada: 'acao', volume: 0.85, vozes: 1, variacao: { tom: 0, vol: 0 }, prioridade: 'cena' },
   'momento.f1.estrondo': { arquivo: 'nave/momento.f1.estrondo', camada: 'acao', volume: 0.9, vozes: 1, variacao: { tom: 0, vol: 0 }, prioridade: 'cena', ponte: true },
+  // (18/11, him: the boom stays with the TERMINUS, *"acrescentar aquele flyby da falcon para quem escolhe a X-aelo"*)
+  'momento.f1.estrondo.xaelo': { arquivo: 'cutscenes/fim.sobrevoo.xaelo', camada: 'acao', volume: 0.74, vozes: 1, variacao: { tom: 0, vol: 0 }, prioridade: 'cena', ponte: true },
 };
 
 /** A one-shot of the world (explosions, effects, hits): `prioridade` says who may push it out under the voice cap. */
@@ -119,14 +127,14 @@ const FOLHA_2_EXPLOSOES: Record<string, DefSom> = {
   'efeito.incendiar': doMundo('explosoes/efeito.incendiar', 0.4, 3, 'jogador', 0.05, 0.1),
   'efeito.combustao': doMundo('explosoes/efeito.combustao', 0.55, 3, 'jogador', 0.05, 0.1),
   'efeito.sobrecarga': doMundo('explosoes/efeito.sobrecarga', 0.6, 2, 'jogador', 0.04, 0.08),
-  'acerto.metal': doMundo('explosoes/acerto.metal', 0.22, 4, 'inimigo', 0.08, 0.15),
-  'acerto.carne': doMundo('explosoes/acerto.carne', 0.25, 4, 'inimigo', 0.08, 0.15),
-  'acerto.rocha': doMundo('explosoes/acerto.rocha', 0.22, 4, 'inimigo', 0.08, 0.15),
+  'acerto.metal': doMundo('explosoes/acerto.metal', 0.11, 4, 'inimigo', 0.08, 0.15),
+  'acerto.carne': doMundo('explosoes/acerto.carne', 0.13, 4, 'inimigo', 0.08, 0.15),
+  'acerto.rocha': doMundo('explosoes/acerto.rocha', 0.11, 4, 'inimigo', 0.08, 0.15),
   // THE ADJUSTMENTS SHEET (15/11): the swarm drone's own death (the A "para testarmos" — new takes coming) and the
   // LASTRO, the rumble under every chain (his metal-grande C stretched; it rides the action bus, through the place).
   // ROUND 3 (15/11), in the directions he chose after two rounds sent back: the drone = MATTER BREAKING (a quiet take,
   // RMS −26 dB, so it sits high), the small metal = a SHORT DRY blast, the shock and the arc = a PHYSICAL electric snap.
-  'acerto.drone': doMundo('rodada3/acerto.drone', 0.35, 4, 'inimigo', 0.08, 0.15),
+  'acerto.drone': doMundo('rodada3/acerto.drone', 0.18, 4, 'inimigo', 0.08, 0.15),
   'explosao.drone': doMundo('rodada3/explosao.drone', 0.9, 4, 'inimigo', 0.06, 0.12),
   'explosao.metal': doMundo('rodada3/explosao.metal', 0.65, 4, 'inimigo', 0.06, 0.12),
   'efeito.choque': doMundo('rodada3/efeito.choque', 0.45, 3, 'jogador', 0.06, 0.12),
@@ -161,7 +169,8 @@ for (const [nome, e] of Object.entries(LASTRO_DA_EXPLOSAO)) if (FOLHA_2_EXPLOSOE
  * low-pass of their own. `kamikaze.travar` and `acerto.indestrutivel` went back for a second round.
  */
 const FOLHA_3_INIMIGOS: Record<string, DefSom> = {
-  'inimigo.tiro': doMundo('inimigos/inimigo.tiro', 0.3, 4, 'inimigo', 0.05, 0.1),
+  // (18/11: at the level of the ship's own gunfire, never over it)
+  'inimigo.tiro': doMundo('inimigos/inimigo.tiro', 0.18, 4, 'inimigo', 0.05, 0.1),
   'inimigo.aviso': doMundo('inimigos/inimigo.aviso', 0.3, 3, 'inimigo', 0.03, 0.08),
   'aranha.tiro': doMundo('inimigos/aranha.tiro', 0.45, 2, 'inimigo', 0.04, 0.08),
   'aranha.aviso': doMundo('inimigos/aranha.aviso', 0.5, 1, 'inimigo', 0.02, 0.05),
@@ -208,7 +217,7 @@ const lacoDoMundo = (arquivo: string, volume: number, passaBaixa?: number): DefS
  * the lock, the pupa) get a low-pass too. `sentinela.sobrecarga` went back for a second round (sheet 4b).
  */
 const FOLHA_4_ELITES: Record<string, DefSom> = {
-  'drone.minerar': lacoDoMundo('elites/drone.minerar', 0.35, 1200),
+  'drone.minerar': lacoDoMundo('elites/drone.minerar', 0.87, 1200),
   'drone.alerta': { ...doMundo('elites/drone.alerta', 0.28, 1, 'inimigo', 0.02, 0.05), passaBaixa: 1800 },
   'drone.tiro': doMundo('elites/drone.tiro', 0.3, 4, 'inimigo', 0.05, 0.1),
   'drone.pisca': { ...doMundo('elites/drone.pisca', 0.45, 1, 'inimigo', 0.02, 0.05), passaBaixa: 1600 },
@@ -470,6 +479,84 @@ const FOLHA_7_CUTSCENES: Record<string, DefSom> = {
 };
 
 /**
+ * SHEET 8 — THE AMBIENCE AND THE SOUNDS OF EACH STAGE (his choices, 18/11; `assets/raw/sons/ambiente/_escolhas-folha1.txt`
+ * and `-folha2.txt`; spec §10.10). The beds ride the `ambiente` layer (low under the music, up without it). The effects
+ * ride the action layer and take their place in the world from `distancia`: him, *"o laser e batidas do cinturao ficam
+ * muito distantes, algumas outras coisas mais perto, as naves da F1 descendo na colonia ficam distantes"*.
+ */
+const FUNDO = (nome: string, volume: number): DefSom => ({
+  arquivo: `ambiente/${nome}`, camada: 'ambiente', volume, vozes: 1, variacao: { tom: 0, vol: 0 }, prioridade: 'cena', laco: true,
+});
+const NO_MUNDO = (nome: string, volume: number, distancia?: Distancia, vozes = 2, tom = 0.04, vol = 0.12): DefSom => ({
+  arquivo: `ambiente/${nome}`, camada: 'acao', volume, vozes, variacao: { tom, vol }, prioridade: 'inimigo', ...(distancia ? { distancia } : {}),
+});
+/** A moment of the stage: nothing pushes it out, it does not vary. */
+const MOMENTO = (nome: string, volume: number, distancia?: Distancia): DefSom => ({
+  ...NO_MUNDO(nome, volume, distancia, 1, 0, 0), prioridade: 'cena',
+});
+const FOLHA_8_AMBIENTE: Record<string, DefSom> = {
+  // (the volumes are MEASURED at the end of the chain against THE SCALE of the game, WITHOUT the music — him: *"a ambientação
+  // precisa funcionar perfeitamente antes mesmo da música entrar"*: `scripts/_som/_calibrar-escala.mjs`. Re-measure after
+  // changing a take or a distance.)
+  'amb.menu.noite': FUNDO('amb.menu.noite', 0.39),
+  'amb.amanhecer': FUNDO('amb.amanhecer', 0.3),
+  'amb.hangar': FUNDO('amb.hangar', 0.3),
+  // HIS files (18/11, complements of what was already here): the rain heard from inside the hangar, over its room tone, and
+  // the tension under the two space stages
+  'amb.hangar.chuva': FUNDO('amb.hangar.chuva', 0.92),
+  'amb.espaco.tensao': FUNDO('amb.espaco.tensao', 0.34),
+  'amb.f1.fora': FUNDO('amb.f1.fora', 0.39),
+  'amb.f1.caverna': FUNDO('amb.f1.caverna', 0.32),
+  'amb.f2': FUNDO('amb.f2', 0.31),
+  'amb.f3.nebulosa': FUNDO('amb.f3.nebulosa', 0.4),
+  'amb.f3.casco': FUNDO('amb.f3.casco', 0.31),
+  'amb.f4.interior': FUNDO('amb.f4.interior', 0.35),
+  'amb.f4.interior2': FUNDO('amb.f4.interior2', 0.31),
+  'amb.f4.agua': FUNDO('amb.f4.agua', 0.27),
+  // the storm: the bolt is close, the flash alone rolls far behind the clouds
+  'fx.menu.trovao.perto': MOMENTO('fx.menu.trovao.perto', 0.27, 'medio'),
+  'fx.menu.trovao.perto2': MOMENTO('fx.menu.trovao.perto2', 0.58, 'medio'),
+  'fx.menu.trovao.longe': MOMENTO('fx.menu.trovao.longe', 0.79, 'muitoLonge'),
+  'fx.menu.trovao.longe2': MOMENTO('fx.menu.trovao.longe2', 0.95, 'muitoLonge'),
+  'fx.menu.trovao.longe3': MOMENTO('fx.menu.trovao.longe3', 1, 'muitoLonge'),
+  'fx.menu.trovao.longe4': MOMENTO('fx.menu.trovao.longe4', 1, 'muitoLonge'),
+  'fx.menu.trovao.longe5': MOMENTO('fx.menu.trovao.longe5', 0.84, 'muitoLonge'),
+  // his rolling thunder again, this time heard through the hangar's walls (18/11)
+  'fx.hangar.trovao': { ...MOMENTO('fx.menu.trovao.longe5', 0.51, 'longe'), passaBaixa: 1200 },
+  // F1: the invasion is on the horizon; the spider is in the same cave as the ship
+  'fx.f1.flyby': NO_MUNDO('fx.f1.flyby', 0.31, 'longe'),
+  'fx.f1.flyby2': NO_MUNDO('fx.f1.flyby2', 0.63, 'longe'),
+  'fx.f1.flyby3': NO_MUNDO('fx.f1.flyby3', 0.61, 'longe'),
+  'fx.f1.artilharia': NO_MUNDO('fx.f1.artilharia', 0.86, 'muitoLonge'),
+  'fx.f1.flak': NO_MUNDO('fx.f1.flak', 0.74, 'muitoLonge'),
+  'fx.f1.flak2': NO_MUNDO('fx.f1.flak2', 0.5, 'muitoLonge'),
+  'fx.f1.explosao': NO_MUNDO('fx.f1.explosao', 0.43, 'muitoLonge'),
+  'fx.f1.explosao2': NO_MUNDO('fx.f1.explosao2', 0.37, 'muitoLonge'),
+  'fx.f1.aranha': NO_MUNDO('fx.f1.aranha', 0.38, undefined, 1),
+  // F2: the rigs are very far, the dead metal far, the cabin and the rocks right here
+  'fx.f2.laser': NO_MUNDO('fx.f2.laser', 0.61, 'muitoLonge', 1),
+  'fx.f2.martelo': NO_MUNDO('fx.f2.martelo', 0.75, 'muitoLonge', 1),
+  'fx.f2.metal': NO_MUNDO('fx.f2.metal', 0.2, 'longe', 1),
+  'fx.f2.rangido': NO_MUNDO('fx.f2.rangido', 0.7, undefined, 1),
+  'fx.f2.rangido2': NO_MUNDO('fx.f2.rangido2', 0.29, undefined, 1),
+  'fx.f2.cascalho': NO_MUNDO('fx.f2.cascalho', 0.56),
+  'fx.f2.passa': NO_MUNDO('fx.f2.passa', 0.2, undefined, 2),
+  // F3: the eel and the battle are far off; the Leviathan's tail is enormous and near; the hull is under the ship
+  'fx.f3.enguia': NO_MUNDO('fx.f3.enguia', 0.33, 'longe', 1),
+  'fx.f3.rabo': MOMENTO('fx.f3.rabo', 0.44, 'medio'),
+  'fx.f3.vapor': NO_MUNDO('fx.f3.vapor', 0.56, 'medio'),
+  'fx.f3.faiscas': { ...NO_MUNDO('fx.f3.faiscas', 0.72, 'medio'), passaBaixa: 3500 },
+  'fx.f3.faiscas2': { ...NO_MUNDO('fx.f3.faiscas2', 0.66, 'medio'), passaBaixa: 3500 },
+  'fx.f3.baque': NO_MUNDO('fx.f3.baque', 0.39, 'muitoLonge'),
+  // F4: the creature is all around the ship; the others of the dolphin's kind are far behind the duel
+  'fx.f4.coracao': NO_MUNDO('fx.f4.coracao', 0.18, 'medio', 1, 0.01, 0.05),
+  'fx.f4.fornalha': NO_MUNDO('fx.f4.fornalha', 0.23, 'medio', 1),
+  'fx.f4.agua.sobe': MOMENTO('fx.f4.agua.sobe', 0.34),
+  'fx.f4.agua.desce': MOMENTO('fx.f4.agua.desce', 0.44),
+  'fx.f4.golfinho': NO_MUNDO('fx.f4.golfinho', 0.33, 'longe', 1),
+};
+
+/**
  * THE BOSSES' LEVEL IN THE VACUUM (17/11, him: *"melhore e deixe perceptível os sons, mas eles não podem perder o efeito
  * do espaço"*). Measured one by one (`node scripts/_som/_medir-chefes.mjs --comparar --sugerir`): the containment
  * (`CHEFE_NO_VACUO`, the same 2.2 kHz cut and closed room) takes a different amount off each sound — the bright ones
@@ -491,7 +578,20 @@ const NO_VACUO: Record<string, number> = {
 const comVacuo = (sons: Record<string, DefSom>): Record<string, DefSom> =>
   Object.fromEntries(Object.entries(sons).map(([n, d]) => [n, NO_VACUO[n] ? { ...d, ganhoNoVacuo: NO_VACUO[n] } : d]));
 
-export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES });
+/**
+ * A sound too long to live decoded in memory: the player STREAMS it from its file (`Som.fluxo`) instead of loading it at the
+ * boot. His six-minute storm of the night menu (18/11), which comes near and goes away: decoded it would take ~130 MB.
+ */
+export interface DefFluxo {
+  arquivo: string;
+  camada: Camada;
+  volume: number;
+}
+export const FLUXOS: Record<string, DefFluxo> = {
+  'amb.menu.tempestade': { arquivo: 'ambiente/amb.menu.tempestade', camada: 'ambiente', volume: 0.7 },
+};
+
+export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_8_AMBIENTE, ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES });
 
 /** Every problem of a catalogue, as text (empty = valid). `existe` receives a path under `public/sfx/`. */
 export function validarCatalogo(sons: Record<string, DefSom>, existe: (caminho: string) => boolean, creditos: string): string[] {

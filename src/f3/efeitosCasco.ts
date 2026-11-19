@@ -52,6 +52,8 @@ const lerp = (a: number, b: number, k: number): number => a + (b - a) * k;
 export class EfeitosCasco {
   readonly vapor: Vapor[] = [];
   readonly faiscas: Faisca[] = [];
+  /** a vent starts to blow, the breach spits sparks (x on screen): the sound of the living hull (sheet 8) */
+  aoEvento: ((tipo: 'vapor' | 'faisca', x: number) => void) | null = null;
   private readonly claroes: Clarao[] = [];
   private readonly respiros = new Map<string, Respiro>();
   private t = 0;
@@ -128,7 +130,10 @@ export class EfeitosCasco {
           if (r.sopro <= 0) r.espera = this.entre([lerp(vc.espera[0], va.espera[0], k), lerp(vc.espera[1], va.espera[1], k)]);
         } else {
           r.espera -= dt;
-          if (r.espera <= 0) r.sopro = this.entre([lerp(vc.sopro[0], va.sopro[0], k), lerp(vc.sopro[1], va.sopro[1], k)]);
+          if (r.espera <= 0) {
+            r.sopro = this.entre([lerp(vc.sopro[0], va.sopro[0], k), lerp(vc.sopro[1], va.sopro[1], k)]);
+            this.aoEvento?.('vapor', p.x0 + v.x);
+          }
         }
       });
     });
@@ -152,6 +157,7 @@ export class EfeitosCasco {
       if (this.esperaFaisca <= 0) {
         this.esperaFaisca = this.entre(FAISCAS.espera);
         this.estala(rombo);
+        this.aoEvento?.('faisca', (rombo.buraco[0] + rombo.buraco[1]) / 2);
       }
     }
     for (let i = this.faiscas.length - 1; i >= 0; i--) {

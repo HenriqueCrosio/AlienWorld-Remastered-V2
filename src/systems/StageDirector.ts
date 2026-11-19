@@ -1,6 +1,7 @@
 import type { EnemyKind } from './EnemySystem';
 import type { PropKind } from './TerrainSystem';
 import type { HazardKind } from './DebrisSystem';
+import type { Track } from '../som/trilha';
 
 export type StageEvent =
   | { t: number; type: 'wave'; kind: EnemyKind; count: number; spacing: number; y: number }
@@ -871,8 +872,8 @@ export interface StageDef {
    * atmosfera tem gravidade → flap; vácuo não tem → livre.
    */
   zone: Zone;
-  /** Trilha da fase (a do chefão é sempre 'boss'). */
-  music: string;
+  /** Trilha da fase (o chefão luta sobre ela). */
+  music: Track;
   /**
    * Modo do fundo, quando a zona não basta. A Fase 3 é `vacuo` (voo livre) mas abre DENTRO
    * de uma nebulosa — o fundo é outro sem a física ser outra. Ausente = derivado da zona.
@@ -902,7 +903,7 @@ export const STAGES: Record<number, StageDef> = {
     // Começa COM gravidade. A atmosfera só rompe ao matar o chefão — e é aí que a
     // Fase 1 entrega a Fase 2 já no vácuo.
     zone: 'atmosfera',
-    music: 'stage1',
+    music: 'f1',
     next: 2,
     // Matar a Torre não entrega a Fase 2 direto: entrega o pouso na capitânia — e é a implosão
     // dela que EXPLICA o cinturão de destroços da Fase 2.
@@ -914,7 +915,7 @@ export const STAGES: Record<number, StageDef> = {
     script: STAGE_2,
     // Vácuo do começo ao fim: a atmosfera ficou para trás na fase passada.
     zone: 'vacuo',
-    music: 'stage1',
+    music: 'f2',
     next: 3,
     // A DOCA KEPLER-9: pouso na estação de mineração, a nave ALIENÍGENA entra no róster, e a doca
     // explode. É a ponte para a Fase 3 — que agora EXISTE (2026-07-18).
@@ -928,7 +929,7 @@ export const STAGES: Record<number, StageDef> = {
     // separadas de propósito (ver `parallax` na StageDef).
     zone: 'vacuo',
     parallax: 'nebulosa',
-    music: 'stage1',
+    music: 'f3',
     // Vencer a serpente entrega o HANGAR DO LEVIATÃ (3ª cutscene): a nave sai danificada e é
     // engolida — e a cutscene entrega a Fase 4, que agora EXISTE (2026-07-19).
     next: 4,
@@ -942,7 +943,7 @@ export const STAGES: Record<number, StageDef> = {
     // Henrique que REVERTEU o plano antigo de o flap voltar aqui).
     zone: 'vacuo',
     parallax: 'interior',
-    music: 'stage1',
+    music: 'f4',
     // A FASE FINAL: não há próxima. Mas Vencer o NÚCLEO não cai direto na tela de fim:
     // entrega a CUTSCENE FINAL (O AFASTAMENTO — vitória amarga, 2026-07-20). É a
     // GameScene.victory quem honra a interlude mesmo com `next: null` — sem isso a

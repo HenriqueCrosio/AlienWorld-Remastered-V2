@@ -7,14 +7,16 @@ import { pixelText } from '../ui';
 import { cenaDeFundoHD, removerCenaHD } from '../uiHD';
 import { Music } from '../systems/Music';
 import { lugarDaCena } from '../som/acustica';
-import { Som } from '../som/Som';
+import { tocarFundo } from '../som/AmbienteDaFase';
+import { TROVAO_DO_HANGAR, proximoTrovaoDoHangar } from '../som/regrasAmbiente';
+import { Som, type Laco } from '../som/Som';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { escolherNave, naveEscolhida } from '../ships';
 import type { HandlingMode } from './GameScene';
 import { LADO, NOME_PINTURA, TEMPO, TEXTO } from '../hangar/numerosHangar';
-import { ESTRONDO_MUSICA_ABAFADA } from '../som/somDaNave';
-import { acabou, confirmar, escolhaDoEstado, mudarLado, mudarPintura, novoEstado, type EstadoHangar } from '../hangar/escolha';
+import { estrondoDaNave, naveDoSom } from '../som/somDaNave';
+import { acabou, confirmar, escolhaDoEstado, mudarLado, mudarPintura, novoEstado, saidaDoHangar, type EstadoHangar } from '../hangar/escolha';
 import { CenarioHangar, carregarCamadasHangar } from '../hangar/cenarioHangar';
 import { CHAVE_HANGAR_HD, HangarCenaHD } from '../hangar/HangarCenaHD';
 
@@ -43,6 +45,8 @@ export class HangarScene extends Phaser.Scene {
   congelado = false;
   private saiu = false;
   private estrondou = false;
+  private calouFundos = false;
+  private fundos: (Laco | null)[] = [];
 
   constructor() {
     super('Hangar');
@@ -59,13 +63,26 @@ export class HangarScene extends Phaser.Scene {
     this.atm = null;
     this.saiu = false;
     this.estrondou = false;
+    this.calouFundos = false;
     this.congelado = false;
     this.cameras.main.setBackgroundColor('#000000');
     this.montarCenario();
     this.montarTexto();
-    Music.play(this, 'stage1');
+    Music.play(this, 'menu');
+    // the room, and the rain heard from inside over it (his file, 18/11)
+    this.fundos = [tocarFundo('amb.hangar'), tocarFundo('amb.hangar.chuva')];
+    this.agendarTrovao(TROVAO_DO_HANGAR.primeiro);
     this.teclas();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => removerCenaHD(CHAVE_HANGAR_HD));
+  }
+
+  /** The storm outside goes on while the player chooses; the take-off has the air to itself. */
+  private agendarTrovao(s: number): void {
+    this.time.delayedCall(s * 1000, () => {
+      if (this.estado.tConfirmou !== null) return;
+      Som.tocar(TROVAO_DO_HANGAR.nome);
+      this.agendarTrovao(proximoTrovaoDoHangar(Math.random));
+    });
   }
 
   private montarCenario(): void {
@@ -125,6 +142,10 @@ export class HangarScene extends Phaser.Scene {
       if (!confirmar(e)) return;
       Som.tocar('ui.confirmar');
       escolherNave(this.registry, escolhaDoEstado(e));
+      // the take-off measures the way out: the scene ends when its sound ends, and the track leaves to make room for it
+      e.saida = saidaDoHangar(Som.pronto() ? Som.duracao(this.somDaDecolagem()) : 0);
+      Som.calar(TROVAO_DO_HANGAR.nome, 500);
+      Music.stop(this, 1600);
     };
     const lado = (d: -1 | 1) => mexer(() => mudarLado(e, d));
     const pintura = (d: -1 | 1) => mexer(() => mudarPintura(e, d));
@@ -145,19 +166,30 @@ export class HangarScene extends Phaser.Scene {
     this.atm?.update(dt);
     this.cenario?.atualizar();
     this.escreverEscolha();
-    // THE F1'S SOUND ENTRANCE STARTS ON THE BLACK (16/11, him: *"pode começar ainda na tela preta, quando chegar na
-    // fase, já estar acabando"*): the sonic boom fires as the veil starts closing and crosses into the stage (`ponte`);
-    // the music coming from here dips under it (the stage brings it back).
+    // THE TAKE-OFF ENDS ON THE BLACK (18/11, him: *"Para que o som acabe na tela preta e quando começar a fase 1 já comece
+    // com o som da fase"*): it fires right after the confirmation, the veil closes under it, and the stage only starts
+    // when it has finished. The room and the rain leave with the last of the light.
     const e = this.estado;
-    if (!this.estrondou && e.tConfirmou !== null && e.t - e.tConfirmou >= TEMPO.veuFecha) {
-      this.estrondou = true;
-      Som.tocar('momento.f1.estrondo');
-      Music.abafar(this, ESTRONDO_MUSICA_ABAFADA, 150);
+    if (e.tConfirmou !== null) {
+      const dt0 = e.t - e.tConfirmou;
+      if (!this.estrondou && dt0 >= TEMPO.somEntra) {
+        this.estrondou = true;
+        Som.tocar(this.somDaDecolagem());
+      }
+      if (!this.calouFundos && dt0 >= e.saida.veuFecha) {
+        this.calouFundos = true;
+        for (const f of this.fundos) f?.volume(0, TEMPO.veuDura * 1000);
+      }
     }
     if (!this.saiu && acabou(this.estado)) {
       this.saiu = true;
-      this.scene.start('Game', { handling: this.handling });
+      this.scene.start('Game', { handling: this.handling, decolou: true });
     }
+  }
+
+  /** The hangar only offers the human ships: the model says which one took off. */
+  private somDaDecolagem(): string {
+    return estrondoDaNave(naveDoSom('humana', naveEscolhida(this.registry).modelo));
   }
 
   private t(x: number, y: number, value: string, size: number, color: number): Phaser.GameObjects.Text {

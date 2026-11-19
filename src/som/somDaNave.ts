@@ -26,6 +26,9 @@ export function chegadaDaRajada(disparos: number): { forca: number; fracao: numb
   };
 }
 
+/** The F1's sound entrance, the moment the ship is chosen in the hangar: the X-AELO has his Falcon-style flyby (18/11). */
+export const estrondoDaNave = (n: NaveSom): string => (n === 'xaelo' ? 'momento.f1.estrondo.xaelo' : 'momento.f1.estrondo');
+
 /** How low the music sits under the F1 sonic boom (the hangar dips it, the stage brings it back). */
 export const ESTRONDO_MUSICA_ABAFADA = 0.3;
 

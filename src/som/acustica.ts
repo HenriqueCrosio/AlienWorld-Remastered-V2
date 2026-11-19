@@ -23,7 +23,9 @@ export const PERFIS_SOM: Record<Lugar, Perfil> = {
   caverna: { passaAlta: 40, passaBaixa: 5000, realce: { freq: 400, ganhoDb: 1 }, eco: { seg: 1.2, decai: 2, mistura: 0.35 } },
   cabine: { passaAlta: 60, passaBaixa: 14000, realce: { freq: 2500, ganhoDb: 2 }, eco: { seg: 0.25, decai: 6, mistura: 0.06 } },
   interior: { passaAlta: 40, passaBaixa: 4500, realce: { freq: 300, ganhoDb: 2 }, eco: { seg: 1.4, decai: 2.5, mistura: 0.3 } },
-  agua: { passaAlta: 30, passaBaixa: 800, realce: { freq: 120, ganhoDb: 3 }, eco: { seg: 1.0, decai: 2, mistura: 0.25 } },
+  // (18/11, sheet 8, his choice: submerged but MODERATE — at the old 800 Hz the shots and the warnings of the dolphin's
+  // duel went under with everything else)
+  agua: { passaAlta: 30, passaBaixa: 1800, realce: { freq: 120, ganhoDb: 3 }, eco: { seg: 1.0, decai: 2, mistura: 0.25 } },
 };
 
 /** A sound with `plano: 'fundo'`: its own low-pass and volume on top of the place. In space: almost nothing. */

@@ -37,7 +37,13 @@ export const TEMPO = {
   /** Confirmou: o motor acende, o anel estoura, o véu fecha e a fase começa. */
   motor: 0.55,
   veuFecha: 0.75,
+  /** O véu leva este tanto para fechar. */
+  veuDura: 0.5,
   fim: 1.35,
+  /** A decolagem soa logo depois do toque de confirmar. */
+  somEntra: 0.15,
+  /** Quanto da decolagem se ouve já na tela preta (18/11: ela termina aqui, nunca dentro da fase). */
+  pretoSegura: 1,
 };
 
 /** A SETA sobre a nave escolhida: pixel art em px de jogo, balançando devagar. */

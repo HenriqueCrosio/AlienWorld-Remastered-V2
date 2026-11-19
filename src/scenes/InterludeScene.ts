@@ -491,7 +491,7 @@ export class InterludeScene extends Phaser.Scene {
     if (this.done) return;
 
     this.aviso('IMPACTO · A FROTA CAIU', COLORS.enemyBright);
-    Music.play(this, 'boss', 600);
+    Music.situacao('cena', 600);
 
     // A CADEIA VARRE O CASCO DA DIREITA PARA A ESQUERDA, ao longo da linha do convés — e ela
     // chega ATÉ a nave. É a direção que cria a urgência: o jogador vê a destruição vindo na

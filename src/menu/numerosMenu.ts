@@ -14,17 +14,17 @@ export const SUBTITULO = 'R E M A S T E R E D';
 // ─── O CENÁRIO ──────────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * §3.1 O Leviatã: a travessia em loop (sai à direita, o céu fica vazio, ele volta a sair da nuvem).
- * 22/10, ele: *"vai caindo degraus… parece travado… algo mais orgânico… passar mais lentamente, tipo 1h30 ou 2min"*.
- * A travessia foi de 45 s para 120 s (escolha dele entre 90 e 120, na folha `folhas/2026-10-22/menu.html`); ela ONDULA
- * (`onda`: meias-ondas de seno em cima da reta, zero nas pontas) em vez da reta; e o lugar dele quando o título acende
- * (`noTitulo`: a fração da travessia aos `t` s, a de 19/10) não muda — o `adiantar` sai dele. Os degraus eram o
- * `roundPixels` (ver `leviata.ts`).
+ * §3.1 O Leviatã: UMA travessia — sai à direita e o céu fica vazio (não volta).
+ * 22/10, ele: *"vai caindo degraus… parece travado… algo mais orgânico… passar mais lentamente, tipo 1h30 ou 2min"*:
+ * de 45 s para 120 s, com uma ondulação em cima da reta.
+ * 19/11, ele: *"faça uma rota retilínea e mais devagar ainda, para passar aquela sensação que ele está passando bem
+ * longe"*, e que não volte ao início depois de sair: 240 s numa reta, sem onda, sem loop. O lugar dele quando o
+ * título acende (`noTitulo`: a fração da travessia aos `t` s, a de 19/10) não muda. Os degraus eram o arredondamento
+ * do desenho (ver `leviata.ts`).
  */
 export const TRAVESSIA = {
-  x0: 200, y0: 30, x1: 404, y1: 42, seg: 120, pausa: 6, nadoFps: 6, quadros: 16,
+  x0: 200, y0: 30, x1: 404, y1: 42, seg: 240, nadoFps: 6, quadros: 16,
   noTitulo: { t: 9, u: 0.267 },
-  onda: { amp: 2.5, meias: 3 },
 } as const;
 
 /**
@@ -251,3 +251,40 @@ export const CONDUCOES = [
 
 /** A chave da condução lembrada (`localStorage`). */
 export const CHAVE_CONDUCAO = 'alienworld:conducao';
+
+// ─── A NEBLINA E A CHUVA (19/11) ─────────────────────────────────────────────────────────────────────────────────
+
+/**
+ * §3 A neblina volumétrica (spec `2026-11-19-menu-neblina-chuva-design.md`). O arco é o CRESCIMENTO sobre o piso, nos
+ * segundos da faixa da tempestade (a chuva chega forte em 1:00–2:10; o ar fica pesado até 4:00; abre até 6:16).
+ */
+export const NEBLINA = {
+  // aprovada por ele em 19/11 (*"o movimento ficou fluido e natural"*, *"a densidade do pico ficou exatamente como imaginei"*)
+  pasta: 'sprites/menu/neblina',
+  profundidade: 2.5,
+  /** O piso: a cobertura do primeiro quadro (já esconde as bordas da pintura). */
+  piso: 0.68,
+  arco: [[0, 0], [25, 0], [62, 0.5], [100, 1], [240, 1], [300, 0.6], [372, 0], [376.13, 0]] as const,
+  alfa: 0.78,
+  /** A velocidade do véu ao longo do fluxo (px de jogo/s). */
+  vel: 2.4,
+  corEscura: 0x1f2735,
+  corClara: 0x4a576b,
+  corLuz: 0xffa95c,
+  forcaLuz: 0.75,
+  corClarao: 0x9fb4d8,
+  forcaClarao: 0.5,
+} as const;
+
+/** §4 A chuva fina: dois planos, só onde há luz (o mapa da neblina e o clarão). */
+export const CHUVA = {
+  arco: [[0, 0], [46, 0], [62, 0.55], [78, 1], [130, 1], [168, 0.55], [212, 0.22], [240, 0], [376.13, 0]] as const,
+  /** O vento (dx por dy), o mesmo lado da deriva da neblina. */
+  vento: 0.2,
+  corFria: 0x9fb2cc,
+  corLuz: 0xffb877,
+  planos: [
+    { quantidade: 260, semente: 71, profundidade: 2.06, comprimento: 3.5, largura: 0.25, vel: 170, alfa: 0.05, alfaLuz: 0.35, alfaClarao: 0.25 },
+    { quantidade: 140, semente: 113, profundidade: 2.65, comprimento: 7, largura: 0.25, vel: 290, alfa: 0.07, alfaLuz: 0.45, alfaClarao: 0.35 },
+  ],
+} as const;

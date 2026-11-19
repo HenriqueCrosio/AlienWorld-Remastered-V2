@@ -53,17 +53,19 @@ export function torres(caixas: readonly Caixa[]): number[] {
 }
 
 /**
- * O Leviatã: a travessia de `seg` s em loop, com `pausa` s de céu vazio entre uma e outra, adiantada para estar no
- * mesmo lugar quando o título acende; em cima da reta, uma ondulação lenta que zera nas duas pontas (22/10).
- * Devolve a posição EXATA (fracionária): quem desenha cuida do arredondamento.
+ * O Leviatã: UMA travessia de `seg` s numa reta, adiantada para estar no mesmo lugar quando o título acende; depois
+ * de sair à direita, o céu fica vazio (19/11: não volta ao início). Devolve a posição EXATA (fracionária).
  */
-export function travessia(t: number): { x: number; y: number; quadro: number } {
+export function travessia(t: number): { x: number; y: number; quadro: number; visivel: boolean } {
   const T = TRAVESSIA;
   const adiantar = T.noTitulo.u * T.seg - T.noTitulo.t;
-  const ciclo = T.seg + T.pausa;
-  const u = Math.min(1, ((((t + adiantar) % ciclo) + ciclo) % ciclo) / T.seg);
-  const onda = T.onda.amp * Math.sin(Math.PI * T.onda.meias * u);
-  return { x: T.x0 + (T.x1 - T.x0) * u, y: T.y0 + (T.y1 - T.y0) * u + onda, quadro: Math.floor(t * T.nadoFps) % T.quadros };
+  const u = Math.min(1, Math.max(0, (t + adiantar) / T.seg));
+  return {
+    x: T.x0 + (T.x1 - T.x0) * u,
+    y: T.y0 + (T.y1 - T.y0) * u,
+    quadro: Math.floor(t * T.nadoFps) % T.quadros,
+    visivel: u < 1,
+  };
 }
 
 /**
