@@ -399,3 +399,87 @@ da NAVE PERDIDA saía cheio. Todo ganho e filtro usa rampa linear (`rumo` no `So
   voa com o PRÓPRIO motor (para no pouso; no Leviatã morre na queda).
 - **Um take esparso** (estalos, quase sem corpo) não sobe só no volume — comprime e normaliza pela sonoridade (a lava B:
   −33 → −12 LUFS no jogo).
+
+### 10.10 A folha 8 (18/11) — a lista aprovada por ele
+
+**A regra:** o EFEITO pontual precisa de causa visível na tela; o que não tem causa visível só pode morar dentro do FUNDO.
+Por isso saíram do pedido original o trovão da F1 (a fase não tem relâmpago) e os estalos elétricos da nebulosa (não há
+raios), e as gotas da caverna ficam dentro do laço (nenhuma gota aparece).
+
+| Lugar | O fundo (laço, `camada: 'ambiente'`) | Os efeitos e o gatilho na tela |
+|---|---|---|
+| Menu, noite | vento e tempestade | trovão perto (relâmpago com raio), trovão longe (só o clarão) — `src/menu/perigo.ts` |
+| Amanhecer | vento fraco e fogo distante | — |
+| Hangar | zumbido da baia, tempestade abafada lá fora | — |
+| F1, exterior | vento | os flybys dele nas 5 naves (`INVASAO.naves`), as rajadas da artilharia, o flak, as explosões ao longe (`INVASAO.explosoes`) — no relógio da invasão, que pausa na caverna |
+| F1, caverna | ar parado, gotas e brasas | as patas da aranha no teto |
+| F2 | ronco baixo da cabine | o rangido ao passar um casco morto, o cascalho quando um asteroide passa na frente |
+| F3, nebulosa (Ato 1) | gás denso e estática | a enguia ao fundo (`enguiaNoRelogio`), o golpe do rabo (evento `rabo`, t = 45) |
+| F3, casco (Ato 2) | metal sob tensão e o canto ao longe | o vapor dos respiros, as faíscas do rombo, o baque dos clarões da batalha distante |
+| F4, interior | respiração e borbulhos | o coração no ritmo do órgão na tela (7 quadros/s), a fornalha do maquinário (5 quadros/s) |
+| F4, câmara de água | água abafada | a água subindo (`agua.encher`), drenando (`agua.esvaziar`), os golfinhos ao fundo |
+
+**A acústica que faltava ligar:** os perfis `caverna` e `agua` existem, mas nada chamava `Som.lugar` com eles. A folha 8 os
+liga: a caverna quando ela abre e fecha (`Parallax.cavernaAberta`), a água com o encher e o esvaziar. **A escolha dele para a
+água: abafar MODERADO** — o `agua.passaBaixa` sobe de 800 Hz para perto de 1,8 kHz (submerso, mas os tiros e os avisos da luta
+contra o golfinho seguem legíveis); o valor final se confirma medindo e jogando.
+
+**O que ele acrescentou ao ouvir (18/11):** os flybys dele ficam só com as naves do jogador, e as naves invasoras ganharam três
+próprios, que se alternam; o metal rangendo no espaço, o laser das mineradoras colossais e os martelos nas bigornas entram como
+camadas sorteadas da F2 (raras, nunca duas juntas, seguras durante o chefão); o cascalho só toca quando a nave BATE na rocha, e
+passar perto tem som próprio; o interior da F4 é a A com visitas à B; os trovões, o flak, as explosões, o rangido e as faíscas
+variam entre as versões, sem repetir a mesma duas vezes; as patas da aranha só soam nos dois trechos em que ela anda.
+
+**A PROFUNDIDADE (a regra dele: *"precisamos muito dar profundidade"*) — `src/som/distancia.ts`:** quatro planos, e cada passo
+para longe move QUATRO coisas juntas: menos volume, menos agudo, mais cauda (e mais atrasada) e menos abertura estéreo. No vácuo
+tudo é mais escuro e a cauda mais curta, porque o som chega pelo casco. E **o que está longe se vê antes de se ouvir**: o trovão
+sem raio, os tiros e as explosões do horizonte da F1 e os clarões da batalha da F3 chegam atrasados em relação à luz.
+
+| Plano | Sons |
+|---|---|
+| Aqui (sem `distancia`) | o que toca a nave: cascalho, asteroide passando, rangido da cabine, a água subindo e drenando, a aranha |
+| `medio` | o trovão com raio, o rabo do Leviatã, o vapor, as faíscas, o coração, a fornalha |
+| `longe` | as naves invasoras, o metal morto da F2, a enguia, os golfinhos |
+| `muitoLonge` | o laser e os martelos da F2, a artilharia, o flak e as explosões da F1, o trovão sem raio, o baque da batalha da F3 |
+
+**O NÍVEL SE MEDE CONTRA A TRILHA, FAIXA POR FAIXA (a 1ª calibragem falhou — ele: *"eu nao consegui ouvir a maior parte dos novos
+efeitos"*).** Medidos sozinhos, a −29/−34 LUFS, 22 dos 26 sons ficavam sob a música; e o corte dos planos distantes (460–850 Hz) os
+empurrava para onde a trilha é mais forte. A régua agora é a MARGEM: quantos dB o som fica acima da trilha na sua melhor faixa de
+oitava (`scripts/_som/_medir-ambiente.mjs`; o que ele ouve bem, o tiro da X-AELO e a explosão de metal, fica em ≈ +3; abaixo de −3 a
+música cobre). Os alvos: fundo −6, encostado +3, `medio` +1,5, `longe` 0, `muitoLonge` −1,5. **Longe é cor, não volume baixo:** a
+distância se ouve na cauda, no escuro e no estéreo estreito. Os fundos ganharam um piso próprio sob a música (`PISO_AMBIENTE` 0,7);
+o motor segue no piso que ele aprovou (`PISO_PRESENCA` 0,35). ⚠️ Medir sempre com movimento reduzido: os relâmpagos do menu moram no
+outro jogo da camada HD e trovejam por cima da medida.
+
+### 10.11 O passe de mixagem: a trilha de frente (19/11)
+
+Ele, depois de testar a trilha: *"a musica precisa ter um destaque tambem e hoje, ela está 'apagada' por trás de tanto
+efeito [...] a trilha é um layer, os efeitos outros [...] a música precisa estar audível suficiente para passar a tensão
+do 16 bits"*; no menu, *"o ruido de chuva abafa ela completamente"*. E: *"a musica pode manter de frente o jogo todo"*, mas
+*"existem diversos jogadores que preferem jogar apenas com a ambientação e efeitos, sem a musica"*.
+
+**O diagnóstico (os números de 18/11):** a fase punha a trilha a −27 LUFS, 5 dB abaixo do tiro contínuo (−22); o bolso
+tirava mais −5/−4 dB; o sidechain (limiar −21 dBFS) abaixava até −8 dB com qualquer coisa — a trilha ficava 7–13 dB
+sob os tiros. E o ambiente nunca cedia (`PISO_AMBIENTE = 1`, travado em 18/11 porque a música era de teste).
+
+**As referências seguidas:** música e efeitos no MESMO patamar médio (a tabela de níveis por categoria da Audiokinetic:
+música = efeitos, diálogo um degrau acima); o ambiente é o recheio e cede primeiro (sidechain do ambiente sob o que é
+importante); abrir um BURACO de frequência em vez de abaixar tudo (o sidechain por frequência de Baldur's Gate 3); medir
+música e efeitos JUNTOS; um teto de pico verdadeiro em −1 dBTP no fim (EBU R128 / ASWG-R001).
+
+**As regras:**
+1. **As camadas:** interface > ação (os transitórios) ≈ música (a camada sustentada) > motor > ambiente (o recheio).
+2. **A música de frente, no jogo todo:** fase −19 LUFS (medido: 7–10 dB sobre o fundo de cada fase e 1–5 dB sob o jogo
+   inteiro atirando — tiro + inimigos + explosões, onde os transitórios precisam sobressair), menu −18, cena −19; o bolso raso
+   (fase −3 dB nos graves, −2 na presença), só onde brigam explosão e tiro.
+3. **O sidechain só no que é grande:** limiar −15 dBFS (da explosão comum para cima), no máximo −4 dB, de volta em ~1,6 s;
+   o tiro segurado nunca mexe na trilha; um evento distante pede só −2 dB.
+4. **O ambiente cede à música que está SOANDO:** −6 dB (`PISO_AMBIENTE` 0,5) e um buraco de −4 dB nos médios
+   (1,6 kHz, Q 0,6) onde a música mora; o motor cede −3 dB (`PISO_PRESENCA` 0,7). Proporcional ao controle MÚSICA ×
+   a trilha tocando de fato: sem música (o controle em 0, ou a trilha parada numa cutscene), o ambiente e o motor
+   voltam exatamente ao que ele aprovou. Os eventos pontuais (trovões, sobrevoos) são da camada de ação: não cedem.
+5. **O mestre:** a trilha e os efeitos se juntam num limitador de segurança em −1 dBFS antes da saída (a soma dos dois
+   não estoura); o `fimNo` continua medindo só os efeitos (as ferramentas de calibragem não mudam).
+6. **Medido junto:** `scripts/_som/_medir-mistura.mjs` mede, lugar a lugar, a música e o mundo na mesma passada e confere
+   as distâncias-alvo (menu: a trilha ≥ 10 dB sobre a tempestade na chuva; hangar ≥ 6 sobre a chuva de dentro; fase: ≥ 6 dB
+   sobre o fundo — a ação calada — e de −5 a +1 dB do jogo atirando; sem música, o fundo volta ao aprovado).

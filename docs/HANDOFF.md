@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-16)
+# HANDOFF — estado do projeto (2026-11-19)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-17) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-19) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,20 +16,56 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-18-som-mixagem-START.md`. O SOM (os efeitos; a trilha é
-> dele) tem as folhas 1 a 7 inteiras no jogo — a nave, as explosões, os inimigos e perigos, os elites, os QUATRO
-> chefões, a INTERFACE e as CUTSCENES (com os flybys dele e as versões por nave) —, a regulagem dos chefões no vácuo e o
-> limitador, tudo aprovado por ele (17/11), commitado e empurrado. Falta a FOLHA 8 — o ambiente E os sons de cada fase
-> (2–4 efeitos por fase; a F3 são DOIS lugares, a nebulosa e o casco; os flybys dele nas naves da invasão da F1) — e o
-> PASSE DE MIXAGEM. A sessão abre PERGUNTANDO A ORDEM (a recomendação: a 8 primeiro, porque a mixagem abaixa a base que
-> ela cria)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-15-bloco-f-START.md`. O SOM FECHOU (19/11): as 8 folhas
+> de efeitos no jogo, a trilha DELE em streaming e o passe de mixagem que a pôs de frente — aprovado por ele jogando
+> (*"chegamos a um nível muito bom de balanço entre a trilha sonora e o ambiente"*), commitado e empurrado. O menu da
+> noite ganhou a neblina volumétrica e a chuva fina (aprovadas), e o Leviatã passa numa reta, uma vez só. A sessão abre
+> no F, a Fase 2: os batedores da frota e a rocha do minerador. É jogabilidade: uma pergunta por vez, conferir no
+> código antes de perguntar, e ele avalia JOGANDO e por GIF."**
 >
-> **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → **o SOM (efeitos), 8 folhas: 1 a nave ✅ · 2 as explosões ✅ · 3 os
-> inimigos e perigos ✅ · 4 os elites ✅ · 5 os chefões ✅ (5a, 5b, a regulagem + o limitador, 5c) · 6 a interface ✅ · 7 as
-> cutscenes ✅ (17/11) · **8 o ambiente + OS SONS DE CADA FASE (a próxima)** (o pedido dele: 2–4 efeitos por fase para a
-> imersão; a F3 = a nebulosa E o casco; os flybys nas naves da invasão da F1 — spec §6, item 8) · **o PASSE DE MIXAGEM**
-> (a cola, o abaixar dinâmico, o grave do "chassi") → F (a F2: a frota de batedores e a rocha do minerador; START
-> `plans/2026-11-15-bloco-f-START.md`) → o rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco).**
+> **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem) →
+> **F (a F2: a frota de batedores e a rocha do minerador; START `plans/2026-11-15-bloco-f-START.md`) (o próximo)** → o
+> rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco; e o guardado do som, no fim de
+> `plans/2026-11-18-som-mixagem-START.md`).**
+>
+> 📍 **19/11 — O PASSE DE MIXAGEM (A TRILHA DE FRENTE), A NEBLINA E A CHUVA DO MENU, O TROVÃO ATRASADO E O LEVIATÃ EM
+> RETA; APROVADO; COMMITADO E EMPURRADO.** (as regras na §10.11 da spec do som; a spec nova
+> `specs/2026-11-19-menu-neblina-chuva-design.md`; o registro no fim de `plans/2026-11-18-som-mixagem-START.md`)
+> - **O passe de mixagem** (ele: *"a musica precisa ter um destaque [...] hoje, ela está 'apagada'"*; *"a musica pode
+>   manter de frente o jogo todo"*; e quem joga SEM música precisa da mistura boa também): as camadas interface > ação
+>   ≈ música > motor > ambiente; a trilha a −18 LUFS no menu e −19 nas fases e nas cenas (`src/som/trilha.ts`), o bolso
+>   raso, o sidechain só no grande (limiar −15 dBFS, máx −4 dB; o tiro segurado não mexe; as explosões distantes da F1
+>   saíram de `ABREM_ESPACO`); o AMBIENTE CEDE à música que está SOANDO (−6 dB + um buraco de −4 dB em 1,6 kHz; o motor
+>   −3 dB — `src/som/mixagem.ts`, `Som.musicaSoando`): com MÚSICA 0 ou a trilha parada, o mundo volta exatamente ao
+>   aprovado; um limitador MESTRE em −1 dBFS onde trilha e efeitos se juntam. Medido JUNTO com
+>   `scripts/_som/_medir-mistura.mjs [porta] [--exigir]`: o menu +21 dB sobre a tempestade, o hangar +13, as fases
+>   +8 a +10 sobre o fundo e −1 a −6 sob o jogo inteiro atirando.
+> - **A neblina e a chuva do menu da noite** (o pedido dele: esconder as bordas da pintura gerada por IA, no quadro
+>   inteiro, densa no pico a ponto de as luzes âmbar refletirem no véu; a chuva fina noutra camada): `src/menu/neblina.ts`
+>   (um shader direto na câmera, ruído assado sem emenda, um mapa de fluxo em duas fases), `chuva.ts`,
+>   `tempoDaTempestade.ts` (as duas presas ao arco da faixa da tempestade, 6min16); os mapas de
+>   `scripts/_menu/_neblina-assar.mjs` em `public/sprites/menu/neblina/`. Ele: *"o movimento ficou fluido e natural"*,
+>   *"a densidade do pico ficou exatamente como imaginei"*. Lições no `CENARIO-VIVO` e na memória.
+> - **O trovão do raio visível** chega 0,9–1,15 s depois do clarão (`TROVAO.perto.atraso`): o raio está longe.
+> - **O Leviatã do menu** (ele: *"cai pequenos degraus [...] faça uma rota retilínea e mais devagar ainda"*, e sem voltar
+>   ao início): uma travessia só, numa reta, em 240 s; desenhado SEM o arredondamento da câmera (o canto do quadro
+>   caía em px de tela — CENARIO-VIVO §9); medido com `scripts/_menu/_leviata-trilho.mjs`: o maior salto vertical de 1 px
+>   para 0,07 px.
+>
+> 📍 **18/11 — A FOLHA 8 (O AMBIENTE E OS SONS DE CADA FASE), A ESCALA, OS MOTORES E A TRILHA DELE NO JOGO.** (a §10.10
+> da spec do som)
+> - **A folha 8** (15-ambiente, 15b-ambiente-novos): um FUNDO por lugar (o menu da noite e o amanhecer, o hangar, a F1
+>   fora e a caverna, a F2, a F3 nebulosa e casco, a F4 interior e a câmara de água) e os EFEITOS presos ao que a tela
+>   mostra — os trovões nos relâmpagos do menu, a invasão da F1 (três sobrevoos próprios das invasoras, a artilharia, o
+>   flak, as explosões ao longe), a aranha da caverna, os rangidos, o cascalho, o laser e os martelos da F2, a enguia e o
+>   rabo da F3, o vapor, as faíscas e a batalha do casco, o coração, a fornalha, a água e os golfinhos da F4
+>   (`src/som/AmbienteDaFase.ts`, `regrasAmbiente.ts`, `somDaInvasao.ts`). A acústica da caverna e da água ligada.
+> - **A PROFUNDIDADE** (`src/som/distancia.ts`: quatro planos; longe = mais baixo, escuro, com cauda, estreito e DEPOIS
+>   da luz) e **A ESCALA** sem música (`scripts/_som/_calibrar-escala.mjs`, ancorada no que ele aprovou; os tiros −6 dB).
+> - **O motor de cada nave** (folha 16-motores: a X-AELO C, a TERMINUS C, a Manta D) e **os arquivos dele** (a
+>   tempestade de 6min16 do menu, a chuva do hangar, a tensão da F2/F3, o raio).
+> - **A trilha dele** (`C:\Users\Henrique\Music\Trilha sonora Alienworld`: o menu e F1–F4) substituiu a de teste, em
+>   streaming (`public/audio/trilha/`, `src/systems/Music.ts`). Sem faixa de chefão: a luta segue na da fase.
 >
 > 📍 **17/11 (2) — AS FOLHAS 6 (A INTERFACE) E 7 (AS CUTSCENES) NO JOGO; COMMITADO E EMPURRADO.** (as regras na §10.9 da
 > spec do som; o registro no fim de `plans/2026-11-17-som-chefes-START.md`)
@@ -1964,7 +2000,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
-| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **HOJE (16/11): os blocos A–E, G, S, H, I, J e M ✅; o SOM em curso (folhas 1, 2, 3, 4, 5a e 5b ✅; a próxima sessão REGULA os chefões e faz a 5c, START `plans/2026-11-17-som-chefes-START.md`) → F.** Registro: **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
+| 7 | **Polimento e dívidas** (lista abaixo) | 🟠 **HOJE (19/11): os blocos A–E, G, S, H, I, J e M ✅; o SOM ✅ (as 8 folhas, a trilha dele, o passe de mixagem) → F (START `plans/2026-11-15-bloco-f-START.md`).** Registro: **adiantado a pedido dele (14/10):** a análise de F1–F4 + cutscenes tem 16 itens (`folhas/2026-10-14/polimento/`). ✅ 15/10 os blocos A (itens 1, 2, 3, 5 e a costela) e B (o esfíncter preso ao tecido + o item 4). ✅ 17/10 o bloco C (o rabo colossal, o primeiro plano da F4, os itens 7, 8 e 2b, o rabo em 45s, os itens 10 e 16; o 15 descartado), commitado e empurrado. Segue o roadmap em blocos D–J do 🧭 (D ✅ 19/10, E ✅ 20/10; próximo: F, START `plans/2026-10-19-blocos-f-a-j-START.md`). Registro do C: `plans/2026-10-15-polimento-START.md` |
 | — | Modo Sobrevivência (Legacy) · Mobile/touch | 💤 depois de tudo, ou nunca (mobile: decisão *desktop primeiro*) |
 
 ### O que mora em cada etapa

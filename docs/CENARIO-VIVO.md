@@ -71,8 +71,9 @@ recorta. Rode sempre que assar de novo.
   atravessando parede.
 - **Luzes de uma máquina**: posições relativas ao recorte; uma fileira que corre, umas que respiram, um farol.
 - **Estrelas**: só onde a frente é transparente e o céu é escuro.
-- **Um bicho ao longe**: pequeno (96 px de camada = 24 px de jogo), lento (45 s de travessia), atrás das camadas de
-  frente, com um aro frio; em loop com uma pausa de 6 s de céu vazio (nada de corte preto).
+- **Um bicho ao longe**: pequeno (96 px de camada = 24 px de jogo), lento (19/11: 240 s de travessia, numa RETA — a
+  sensação de passar bem longe), atrás das camadas de frente, com um aro frio; passa UMA vez e o céu fica vazio (19/11:
+  voltar ao início lia como loop).
 
 ## 4. O volume (`src/menu/volume.ts`: o tratamento das fases, além da Atmosfera)
 
@@ -129,6 +130,11 @@ emissão a 60 Hz e um hash por partícula), então a sonda vê as mesmas em qual
   objeto que anda devagar vai aos saltos de `s` px de tela (5 em 1920) — o Leviatã "descia degraus" (22/10). A posição
   fica inteira e a fração vai pela origem de desenho (`setDisplayOrigin`, que não é arredondada): ver `leviata.ts`. As
   `TileSprite` não sofrem disso (o `tilePosition` anda a textura).
+- **…e arredonda também o CANTO do quadro final, em px de TELA** (`camera.renderRoundPixels` → `setQuad`): a origem
+  fracionária tira o primeiro degrau, não este. Numa diagonal lenta, o objeto anda reto e desce 1 px de vez em quando
+  — a escada que ele viu de novo em 19/11. Para um objeto lento em textura LINEAR (a camada HD), desenhe-o SEM o
+  arredondamento: `renderWebGL` envolvido, desligando `roundPixels` e `renderRoundPixels` da câmera só para ele
+  (`leviata.ts`). Medido com `scripts/_menu/_leviata-trilho.mjs`: o maior salto em y caiu de 1 px para 0,07 px.
 - **Dentro do `create()`, `sys.isActive()` é falso** (o estado é CREATING). Para "a cena ainda existe?", use
   `sys.settings.status < Phaser.Scenes.SHUTDOWN`.
 - **`scene.remove` só emite `DESTROY`**, não `SHUTDOWN`: quem segura pipeline solta no `DESTROY` (`Atmosfera.liberar`).

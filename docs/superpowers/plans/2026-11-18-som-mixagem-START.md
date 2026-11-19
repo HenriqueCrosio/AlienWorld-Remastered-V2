@@ -1,5 +1,9 @@
 # START — o SOM: a FOLHA 8 (o ambiente e os sons de cada fase) e o PASSE DE MIXAGEM — PERGUNTAR A ORDEM
 
+> ✅ **FECHADO EM 19/11** (a folha 8 em 18/11, o passe de mixagem em 19/11; aprovado por ele jogando, commitado e
+> empurrado). O registro está no fim deste arquivo; o próximo é o F, com a frase do 🧭 do HANDOFF. O que segue abaixo é
+> o plano como foi escrito em 17/11.
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O SOM (os efeitos; a trilha é dele) tem as folhas
 > 1 a 7 inteiras no jogo — a nave, as explosões, os inimigos e perigos, os elites, os QUATRO chefões, a INTERFACE e as
 > CUTSCENES (com os flybys dele e as versões por nave) —, a regulagem dos chefões no vácuo e o limitador, tudo aprovado
@@ -61,6 +65,8 @@ real e o tremor de tela ligado à força do som (sensação de jogo: o rebalance
 
 ## Guardado para depois
 
+- ~~LEMBRAR ASSIM QUE A FOLHA 8 FECHAR (pedido dele, 18/11): uma camada na FRENTE do menu da noite com mais neblina e
+  talvez chuva~~ — FEITO em 19/11 (`specs/2026-11-19-menu-neblina-chuva-design.md`).
 - **A saída da atmosfera da MANTA** (`momento.f1.saida.charybdis`, a AP) está instalada e não toca: ela só aparece na Doca
   (ele: *"deixe guardado, pode ser que eu implemente algo com ela depois"*).
 - **Os canos da enguia** só avisam na 1ª salva (as outras não têm o som da carga — o worker teria que mandar os avisos).
@@ -96,3 +102,27 @@ O PixelLab: 3.347 gerações em 17/11 à noite (conferir com `get_balance`), ren
 - A conversa em português; código, prompts e raciocínio em inglês.
 - Editar com Edit/Write; um heredoc por comando (e nada de `\` de regex dentro de heredoc — escrever o script com Write);
   PowerShell sem `-Encoding utf8` corrompe acentos.
+
+## O REGISTRO — 18 e 19/11 (o que aconteceu)
+
+**18/11 — a folha 8, a escala, os motores, a trilha dele** (a §10.10 da spec): ele escolheu a ordem recomendada (a 8
+primeiro). A lista aprovada (o efeito só com causa visível; o resto mora no fundo), as folhas `2026-11-18/sons/15-ambiente`,
+`15b-ambiente-novos` e `16-motores`; a profundidade em quatro planos (`src/som/distancia.ts`); a 1ª calibragem contra a
+música de teste falhou (*"eu nao consegui ouvir a maior parte dos novos efeitos"*) e virou A ESCALA sem música
+(`_calibrar-escala.mjs`, `_medir-sem-musica.mjs`, `_sonda-partida.mjs`; os tiros −6 dB). Os arquivos dele (a tempestade
+de 6min16, a chuva do hangar, a tensão da F2/F3, o raio) e a TRILHA dele em streaming (`_trilha-dele.mjs`,
+`_ambiente-dele.mjs`; os takes esparsos encorpados com `_som-comprimir.mjs`).
+
+**19/11 — o passe de mixagem** (a §10.11 da spec): a trilha de frente (menu −18, fase e cena −19 LUFS), o sidechain só no
+grande, o ambiente cedendo à música que está soando (−6 dB + o buraco de 1,6 kHz; o motor −3) e voltando ao aprovado
+sem música, o limitador mestre em −1 dBFS. Medido junto: `_medir-mistura.mjs 5173 --exigir` → "a mistura no alvo".
+Ele: *"chegamos a um nível muito bom de balanço entre a trilha sonora e o ambiente"*. No mesmo dia, no menu: a neblina e
+a chuva (a spec própria), o trovão do raio 0,9–1,15 s depois do clarão, e o Leviatã numa reta de 240 s, uma vez só, sem
+o degrau do arredondamento (`_leviata-trilho.mjs`).
+
+**Do §3 que NÃO entrou** (a trilha de frente resolveu o que ele pediu; ficam para o polimento, se ele sentir falta): a
+COLA no barramento do mundo; o abaixar dinâmico do motor/ambiente/inimigos sob os eventos grandes (hoje só a trilha
+abaixa); o grave do "chassi" no vácuo; o `PAN_MAX` 0,5–0,6 (segue 0,4).
+
+**Os testes do som agora (13):** os 10 de antes + `test-som-ambiente`, `test-som-ambiente-jogo`,
+`test-som-trilha-jogo`, mais o medidor `_medir-mistura.mjs --exigir`; do menu, `test-menu-neblina` e `test-menu-ritmos`.

@@ -87,6 +87,12 @@ O Leviatã nada de (200, 30) a (404, 42), em **45 s**, no nado de 6 quadros/s. Q
 pela direita (~40 s), o céu fica vazio por **6 s** e ele volta a sair da nuvem (*"melhor que ter um corte preto e
 iniciar de novo"*). Ele passa por trás das agulhas e na frente do planeta.
 
+**19/11 (substitui o loop e a onda de 22/10):** *"faça uma rota retilínea e mais devagar ainda, para passar aquela
+sensação que ele está passando bem longe"*, e sem voltar ao início depois de sair à direita. A travessia é **uma só**,
+numa **reta** de (200, 30) a (404, 42), em **240 s**; no título (9 s) ele está no mesmo lugar de 19/10; depois de sair,
+o céu fica vazio. Os "pequenos degraus" eram o canto do quadro arredondado em px de tela: ele desenha sem o
+arredondamento da câmera (`leviata.ts`, CENARIO-VIVO §9).
+
 ### 3.2 As luzes que piscam
 
 - **24 janelas**, sorteadas entre os grupos `janela` pequenos (≤ 6 px² de jogo). Cada uma apaga de tempos em tempos:

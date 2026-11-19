@@ -4,7 +4,9 @@
 > da NAVE PERDIDA, M4 a tela de carregamento e o favicon), aprovado, commitado e empurrado. A sessão abre no F, a Fase
 > 2: os batedores da frota e a rocha do minerador. É jogabilidade: uma pergunta por vez (superpowers:brainstorming),
 > conferir no código antes de perguntar, e ele avalia JOGANDO e por GIF."**
-> O roadmap vivo é o 🧭 do HANDOFF. A ordem: … → J ✅ → M ✅ → **F** → o rebalanceamento → só então o som.
+> O roadmap vivo é o 🧭 do HANDOFF. A ordem MUDOU em 15/11 (o som veio antes): … → J ✅ → M ✅ → o SOM ✅ (16–19/11) →
+> **F** → o rebalanceamento. **19/11:** o som fechou e está commitado; abra a sessão pelo F, com a frase do 🧭. O que
+> segue abaixo é o estado de 15/11 e continua valendo para o F.
 
 ## ▶️ ONDE ESTAMOS (15/11, fim da sessão)
 
