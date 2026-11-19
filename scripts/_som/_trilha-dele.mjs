@@ -1,6 +1,6 @@
 // BLOCK SOUND (18/11) — HIS soundtrack and HIS lightning. The five tracks are only converted (their dynamics are his); the
 // game streams them (`src/systems/Music.ts`). The lightning file holds two strikes: each becomes one take of the bolt.
-//   node scripts/_som/_trilha-dele.mjs
+//   node scripts/_som/_trilha-dele.mjs [faixa…]   (19/11: naming tracks converts only those, and leaves the lightning alone)
 import { execFileSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -21,10 +21,14 @@ const FAIXAS = {
   f2: 'Fase 2 theme.mp3',
   f3: 'Fase 3 theme.mp3',
   f4: 'Fase 4 theme 1.mp3',
+  // 19/11, his melancholic close: from the wound of the final cutscene to the credits, and the dawn menu after
+  final: 'Possível theme final.mp3',
 };
+const SO = process.argv.slice(2);
 mkdirSync(RAW_TRILHA, { recursive: true });
 mkdirSync(SAI_TRILHA, { recursive: true });
 for (const [nome, arquivo] of Object.entries(FAIXAS)) {
+  if (SO.length && !SO.includes(nome)) continue;
   const raw = join(RAW_TRILHA, `${nome}.mp3`);
   copyFileSync(join(ORIGEM_TRILHA, arquivo), raw);
   ff(['-i', raw, '-vn', '-map_metadata', '-1', '-ac', '2', '-ar', '44100', '-c:a', 'libvorbis', '-q:a', '5', join(SAI_TRILHA, `${nome}.ogg`)]);
@@ -32,6 +36,7 @@ for (const [nome, arquivo] of Object.entries(FAIXAS)) {
   console.log('faixa', nome);
 }
 
+if (!SO.length) {
 const tmp = mkdtempSync(join(tmpdir(), 'raio-dele-'));
 try {
   const raw = join(RAW_AMBIENTE, 'raio.mp3');
@@ -48,4 +53,5 @@ try {
   }
 } finally {
   rmSync(tmp, { recursive: true, force: true });
+}
 }

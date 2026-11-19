@@ -1,0 +1,86 @@
+[
+ {
+  "nome": "fim.impacto",
+  "id": "A",
+  "dur": 4.483673,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fim.impacto",
+  "id": "B",
+  "dur": 5.528186,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fim.impacto",
+  "id": "C",
+  "dur": 5.137619,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fim.impacto",
+  "id": "D",
+  "dur": 6.037029,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.ferida",
+  "id": "A",
+  "dur": 17.9,
+  "pico": -11.2,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.ferida",
+  "id": "B",
+  "dur": 17.9,
+  "pico": -15.5,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.ferida",
+  "id": "C",
+  "dur": 16.4,
+  "pico": -11.6,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.queda",
+  "id": "A",
+  "dur": 17.9,
+  "pico": -11.2,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.queda",
+  "id": "B",
+  "dur": 17.9,
+  "pico": -15.4,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.superficie",
+  "id": "A",
+  "dur": 17.9,
+  "pico": -14.7,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.superficie",
+  "id": "B",
+  "dur": 17.9,
+  "pico": -7.6,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.fim.superficie",
+  "id": "C",
+  "dur": 17.3,
+  "pico": -10.2,
+  "inicio": 0
+ }
+]

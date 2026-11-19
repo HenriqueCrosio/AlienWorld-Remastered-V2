@@ -1,0 +1,8 @@
+# Sheet 10 (the final cutscene), HIS choices 19/11 (docs/superpowers/folhas/2026-11-19/sons/17-final).
+# The surface: "A e C" — both, in turn: A (the colony burning) from the impact, crossing into C (the dawn's wind, the
+# same bed the result screen opens on) as the lava cools.
+fim.impacto: C
+amb.fim.ferida: C
+amb.fim.queda: A
+amb.fim.superficie: A
+amb.fim.superficie: C > amb.fim.superficie2

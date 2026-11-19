@@ -94,10 +94,14 @@ await cena('Interlude4', { score: 1000, handling: 'diegetico', ship: 'intercepto
 await ativa('Interlude4');
 await rapido('Interlude4', 3);
 const lugares = [];
+const faixas = [];
 const fimFinal = Date.now() + 25000;
 while (Date.now() < fimFinal && !(await novos(n)).includes('fim.apaga2')) {
   const l = (await diag()).lugar;
   if (lugares[lugares.length - 1] !== l) lugares.push(l);
+  const m = await page.evaluate(() => window.__music.diagnostico());
+  const f = `${m.faixa}/${m.contexto}`;
+  if (faixas[faixas.length - 1] !== f) faixas.push(f);
   await page.waitForTimeout(200);
 }
 t = await novos(n);
@@ -105,6 +109,12 @@ const final = ['fim.rasgo', 'fim.descompressao', 'fim.ferida', 'fim.ferida2', 'f
 ok(final.every((x, i) => i === 0 || antes(t, final[i - 1], x)), 'the final: the rip, the decompression, the wound A then B, the fall', final.filter((x) => !t.includes(x)));
 ok(t.some((x) => x.startsWith('fim.sobrevoo.')) && antes(t, 'fim.apaga', 'fim.apaga2'), 'the flyover (the ship\'s own), the lava cooling A then B', t.filter((x) => x.startsWith('fim.')));
 ok(lugares.join() === 'interior,cabine,atmosfera', `the place moves with the camera (${lugares.join(' → ')})`, lugares);
+// 19/11 — sheet 10: the impact at the burst, a bed under every chapter crossing into the next, his closing theme from the wound
+ok(antes(t, 'fim.queda', 'fim.impacto') && t.some((x, i) => x.startsWith('fim.sobrevoo.') && i > t.indexOf('fim.impacto')), 'the Leviathan HITS the colony: the impact after the fall, before the flyover', t.filter((x) => x.startsWith('fim.')));
+const fundos = ['amb.f4.interior', 'amb.fim.ferida', 'amb.fim.queda', 'amb.fim.superficie', 'amb.fim.superficie2'];
+ok(fundos.every((x, i) => i === 0 || antes(t, fundos[i - 1], x)), 'a bed for each chapter, in order: inside, the wound, the fall, the surface burning, then the dawn wind', fundos.filter((x) => !t.includes(x)));
+ok(antes(t, 'amb.fim.queda', 'fim.impacto') && t.indexOf('amb.fim.superficie') > t.indexOf('fim.impacto'), 'the surface bed comes in with the impact', null);
+ok(faixas.includes('final/cena'), `his closing theme plays in the cutscene, at the scenes' level (${faixas.join(' → ')})`, faixas);
 
 ok(erros.length === 0, 'no page errors', erros);
 await browser.close();

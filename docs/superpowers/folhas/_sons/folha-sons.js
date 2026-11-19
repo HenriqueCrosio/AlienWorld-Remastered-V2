@@ -110,7 +110,8 @@ function alternarTrilha(liga) {
     trilha?.pause();
     return;
   }
-  trilha ??= Object.assign(new Audio('/audio/stage1.mp3'), { loop: true, volume: 0.45 });
+  // (19/11: a sheet may name the track it is judged under — the final cutscene's beds, under HIS closing theme)
+  trilha ??= Object.assign(new Audio(dados.trilha ?? '/audio/stage1.mp3'), { loop: true, volume: 0.45 });
   trilha.play();
 }
 function gravar() {

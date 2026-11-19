@@ -156,6 +156,27 @@ for (const n of [1, 2, 3, 4]) {
   ok(d.faixa === f && d.contexto === 'cena', 'a cutscene keeps the track, at its own level', d);
 }
 
+// 19/11 — THE CLOSING THEME is the dawn menu's: the result screen (where the final cutscene lands) plays it at the menu's
+// level, the hangar carries it on, and the night menu goes back to the orchestra
+{
+  const espera = (f) => page.waitForFunction((x) => window.__music.diagnostico().faixa === x && window.__music.diagnostico().tocando, f, { timeout: 15000 }).catch(() => {});
+  await irPara('Menu', { resultado: { score: 1000, handling: 'diegetico', ensaio: true } });
+  await espera('final');
+  let d = await diag();
+  ok(d.faixa === 'final' && d.tocando && d.contexto === 'menu', 'the dawn (the result) plays his closing theme, at the menu level', d);
+  const t0 = d.tempo;
+  await irPara('Hangar', { handling: 'diegetico' });
+  await page.waitForTimeout(1200);
+  d = await diag();
+  ok(d.faixa === 'final' && d.tempo >= t0, 'the hangar carries the dawn menu track on, without restarting', d);
+  await page.evaluate(() => { window.__game.registry.set('menuForcado', 'noite'); });
+  await irPara('Menu', { direto: true });
+  await espera('menu');
+  d = await diag();
+  ok(d.faixa === 'menu' && d.tocando, 'the night menu goes back to the orchestra', d);
+  await page.evaluate(() => { window.__game.registry.remove('menuForcado'); });
+}
+
 ok(erros.length === 0, 'no page errors', erros);
 await browser.close();
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');

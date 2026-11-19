@@ -1,0 +1,25 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 10 — a cutscene final: o impacto e os fundos entre as cenas",
+    "dia": "2026-11-19",
+    "ouvirLaco": 12,
+    "trilha": "/audio/trilha/final.ogg",
+    "nota": "O IMPACTO: quatro versões do Leviatã batendo no chão da colônia. No jogo ele entra no estouro (a bola de fogo nasce um instante antes do focinho tocar) e, ~0,55 s depois, o rabo desaba — a B já traz a segunda batida.\nOS FUNDOS: o que liga os capítulos. Hoje a cutscene só tem sons soltos, com buracos de silêncio (6,5–8 s, 20,5–24 s e 28–36 s). Cada capítulo ganha um laço por baixo, cruzando com o próximo: DENTRO (0–8 s) o interior da F4 que você já aprovou, emendado da luta; a FERIDA no vácuo (8–16 s); a QUEDA (16–24 s); a SUPERFÍCIE (24 s até o fim). A C da ferida é o casco da F3 que já está no jogo; a C da superfície é o fundo do menu do amanhecer — com ela, a superfície emenda sem corte na tela final.\nMarque \"trilha por baixo\": toca a SUA faixa final, que no jogo entra na ferida e segue até o menu. Os fundos no jogo ficam baixos sob ela."
+  },
+  "grupos": [
+    {
+      "titulo": "O impacto",
+      "sons": [
+        { "nome": "fim.impacto", "oque": "O IMPACTO — o Leviatã cai sobre a colônia", "onde": "a queda, no estouro", "lugar": "atmosfera" }
+      ]
+    },
+    {
+      "titulo": "Os fundos (os laços entre as cenas)",
+      "sons": [
+        { "nome": "amb.fim.ferida", "oque": "A FERIDA — o vácuo ao lado do bicho rasgado, ouvido pelo casco da nave", "onde": "8–16 s, fora do Leviatã", "lugar": "cabine", "laco": true },
+        { "nome": "amb.fim.queda", "oque": "A QUEDA — o ar grosso e o ronco do corpo queimando à frente", "onde": "16–24 s, a reentrada até o impacto", "lugar": "cabine", "laco": true },
+        { "nome": "amb.fim.superficie", "oque": "A SUPERFÍCIE — a colônia em chamas depois da queda", "onde": "24 s até o fim (o sobrevoo, a lava esfriando)", "lugar": "atmosfera", "laco": true }
+      ]
+    }
+  ]
+}
