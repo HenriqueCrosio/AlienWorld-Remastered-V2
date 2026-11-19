@@ -1,0 +1,86 @@
+[
+ {
+  "nome": "nave.xaelo.motor",
+  "id": "A",
+  "dur": 5.537188,
+  "pico": -12.3,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.motor",
+  "id": "B",
+  "dur": 8.5,
+  "pico": -13,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.motor",
+  "id": "C",
+  "dur": 10.25,
+  "pico": -12.9,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.xaelo.motor",
+  "id": "D",
+  "dur": 11.25,
+  "pico": -11.3,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.motor",
+  "id": "A",
+  "dur": 5.537188,
+  "pico": -12.9,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.motor",
+  "id": "B",
+  "dur": 11.25,
+  "pico": -13.7,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.motor",
+  "id": "C",
+  "dur": 11.25,
+  "pico": -11.9,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.terminus.motor",
+  "id": "D",
+  "dur": 11.25,
+  "pico": -13.3,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.motor",
+  "id": "A",
+  "dur": 5.537188,
+  "pico": -12.5,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.motor",
+  "id": "B",
+  "dur": 11,
+  "pico": -15.8,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.motor",
+  "id": "C",
+  "dur": 11.25,
+  "pico": -8.4,
+  "inicio": 0
+ },
+ {
+  "nome": "nave.charybdis.motor",
+  "id": "D",
+  "dur": 10.5,
+  "pico": -8.9,
+  "inicio": 0
+ }
+]

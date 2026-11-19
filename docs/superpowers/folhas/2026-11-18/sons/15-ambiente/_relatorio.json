@@ -1,0 +1,415 @@
+[
+ {
+  "nome": "amb.menu.noite",
+  "id": "A",
+  "dur": 15.2,
+  "pico": -12.4,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.amanhecer",
+  "id": "A2",
+  "dur": 15.4,
+  "pico": -5.5,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.hangar",
+  "id": "A",
+  "dur": 14.1,
+  "pico": -12.6,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f1.fora",
+  "id": "A",
+  "dur": 17.3,
+  "pico": -14.2,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f1.caverna",
+  "id": "A",
+  "dur": 15,
+  "pico": -11,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f2",
+  "id": "A",
+  "dur": 17.3,
+  "pico": -10.1,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f3.nebulosa",
+  "id": "A",
+  "dur": 15.6,
+  "pico": -11.5,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f3.casco",
+  "id": "A",
+  "dur": 16.4,
+  "pico": -11.6,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f4.interior",
+  "id": "A",
+  "dur": 13.6,
+  "pico": -5.2,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f4.agua",
+  "id": "A",
+  "dur": 15.9,
+  "pico": -7.4,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.menu.noite",
+  "id": "B",
+  "dur": 14,
+  "pico": -11.4,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.amanhecer",
+  "id": "B",
+  "dur": 17.3,
+  "pico": -10.2,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.hangar",
+  "id": "B",
+  "dur": 16,
+  "pico": -7.4,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f1.fora",
+  "id": "B",
+  "dur": 10.1,
+  "pico": -10.2,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f1.caverna",
+  "id": "B",
+  "dur": 18.1,
+  "pico": -3.7,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f2",
+  "id": "B",
+  "dur": 14,
+  "pico": -13.6,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f3.nebulosa",
+  "id": "B",
+  "dur": 12.8,
+  "pico": -13.7,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f3.casco",
+  "id": "B",
+  "dur": 15.8,
+  "pico": -13.3,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f4.interior",
+  "id": "B",
+  "dur": 14.5,
+  "pico": -10.2,
+  "inicio": 0
+ },
+ {
+  "nome": "amb.f4.agua",
+  "id": "B",
+  "dur": 18,
+  "pico": -4.2,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.menu.trovao.perto",
+  "id": "A",
+  "dur": 5.547868,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.menu.trovao.longe",
+  "id": "A",
+  "dur": 5.738934,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.artilharia",
+  "id": "A",
+  "dur": 1.80424,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.flak",
+  "id": "A",
+  "dur": 1.865964,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.explosao",
+  "id": "A",
+  "dur": 4.836122,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.aranha",
+  "id": "A2",
+  "dur": 2.816825,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f2.rangido",
+  "id": "A",
+  "dur": 3.695692,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f2.cascalho",
+  "id": "A",
+  "dur": 2.47678,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.enguia",
+  "id": "A",
+  "dur": 3.978594,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.rabo",
+  "id": "A",
+  "dur": 4.880136,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.vapor",
+  "id": "A",
+  "dur": 2.463333,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.faiscas",
+  "id": "A",
+  "dur": 1.433787,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.baque",
+  "id": "A",
+  "dur": 2.635147,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.coracao",
+  "id": "A",
+  "dur": 1.798005,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.fornalha",
+  "id": "A",
+  "dur": 3.461134,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.agua.sobe",
+  "id": "A",
+  "dur": 4.98449,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.agua.desce",
+  "id": "A",
+  "dur": 5.015533,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.golfinho",
+  "id": "A",
+  "dur": 3.619002,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.menu.trovao.perto",
+  "id": "B",
+  "dur": 5.325102,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.menu.trovao.longe",
+  "id": "B",
+  "dur": 5.710703,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.artilharia",
+  "id": "B",
+  "dur": 2.043379,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.flak",
+  "id": "B",
+  "dur": 1.942766,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.explosao",
+  "id": "B",
+  "dur": 4.842132,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.aranha",
+  "id": "B2",
+  "dur": 2.911791,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f2.rangido",
+  "id": "B",
+  "dur": 3.993855,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f2.cascalho",
+  "id": "B",
+  "dur": 2.445215,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.enguia",
+  "id": "B",
+  "dur": 4.532358,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.rabo",
+  "id": "B",
+  "dur": 4.224785,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.vapor",
+  "id": "B",
+  "dur": 2.443016,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.faiscas",
+  "id": "B",
+  "dur": 1.409433,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f3.baque",
+  "id": "B",
+  "dur": 2.852585,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.coracao",
+  "id": "B",
+  "dur": 1.840159,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.fornalha",
+  "id": "B",
+  "dur": 3.522449,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.agua.sobe",
+  "id": "B",
+  "dur": 4.764331,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.agua.desce",
+  "id": "B",
+  "dur": 4.965828,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f4.golfinho",
+  "id": "B",
+  "dur": 3.540181,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.flyby",
+  "id": "D1",
+  "dur": 3.916644,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.flyby",
+  "id": "D2",
+  "dur": 3.627483,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "fx.f1.flyby",
+  "id": "D3",
+  "dur": 8.137098,
+  "pico": -1,
+  "inicio": 0
+ }
+]

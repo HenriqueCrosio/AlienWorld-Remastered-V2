@@ -1,0 +1,29 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 9 — o motor de cada nave",
+    "dia": "2026-11-18",
+    "ouvirLaco": 10,
+    "abafoDoJogo": 1100,
+    "nota": "A é o motor que está no jogo hoje. B, C e D são as versões novas. Todas estão no mesmo volume, para você comparar só o caráter de cada uma.\n▶ toca 10 segundos em laço, e tocar outra versão troca na hora. Hoje o jogo abafa os motores em 1100 Hz: marque a caixa \"abafado como no jogo hoje\" para ouvir assim. Se a versão que você gostar perder o caráter abafada, escreva na nota: o abafamento pode mudar na calibragem."
+  },
+  "grupos": [
+    {
+      "titulo": "A X-AELO",
+      "sons": [
+        { "nome": "nave.xaelo.motor", "oque": "O MOTOR DA X-AELO — o caça estelar: uivo agudo e rasgado", "onde": "a nave voando", "lugar": "cabine", "laco": true }
+      ]
+    },
+    {
+      "titulo": "A TERMINUS",
+      "sons": [
+        { "nome": "nave.terminus.motor", "oque": "O MOTOR DA TERMINUS — o caça a jato: turbina e empuxo pesado", "onde": "a nave voando", "lugar": "cabine", "laco": true }
+      ]
+    },
+    {
+      "titulo": "A MANTA",
+      "sons": [
+        { "nome": "nave.charybdis.motor", "oque": "O MOTOR DA MANTA — a nave biomecânica: viva, orgânica", "onde": "a manta nadando", "lugar": "cabine", "laco": true }
+      ]
+    }
+  ]
+}

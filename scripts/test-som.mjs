@@ -4,7 +4,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { AO_FUNDO, PERFIS_SOM, lugarDaCena } from '../src/som/acustica.ts';
 import { NOME_SOM, SONS, validarCatalogo } from '../src/som/catalogoSons.ts';
-import { PISO_PRESENCA, ganhoDaCamada, presenca } from '../src/som/mixagem.ts';
+import { BURACO, MESTRE, PISO_AMBIENTE, PISO_PRESENCA, buracoDoAmbiente, ganhoDaCamada, presenca } from '../src/som/mixagem.ts';
+import { CONTEXTOS, DUCK, FAIXAS, abreEspaco, curvaEntra, proximoDuck, reducaoDaTrilha } from '../src/som/trilha.ts';
 import { INTERVALO_MIN, PESO, TETO_GERAL, decidir, sortearVariacao } from '../src/som/vozes.ts';
 
 let falhas = 0;
@@ -19,7 +20,12 @@ ok(presenca(-1) === 1 && perto(presenca(2), PISO_PRESENCA), 'presence clamps out
 const v = { geral: 0.5, efeitos: 0.8, musica: 1 };
 ok(perto(ganhoDaCamada('acao', v), 0.4), 'action = general × effects', ganhoDaCamada('acao', v));
 ok(perto(ganhoDaCamada('interface', v), 0.4), 'interface = general × effects');
-ok(perto(ganhoDaCamada('ambiente', v), 0.4 * PISO_PRESENCA), 'ambience = general × effects × presence');
+ok(perto(ganhoDaCamada('ambiente', v), 0.4 * PISO_AMBIENTE), 'ambience = general × effects × its own floor under the music');
+ok(perto(ganhoDaCamada('motor', v), 0.4 * PISO_PRESENCA), 'engine = general × effects × its floor under the music');
+// 19/11, the mix pass (spec §10.11): the real track arrived — the bed yields to it, the engine a little, and the hole follows the music
+ok(PISO_AMBIENTE < PISO_PRESENCA && PISO_PRESENCA < 1 && PISO_AMBIENTE >= 0.4, 'the bed yields first (−6 dB), the engine less (−3 dB)', [PISO_AMBIENTE, PISO_PRESENCA]);
+ok(buracoDoAmbiente(0) === 0 && buracoDoAmbiente(1) === BURACO.db && BURACO.db < 0 && buracoDoAmbiente(2) === BURACO.db, "the bed's hole: none without music, its depth with the music full");
+ok(MESTRE.limiar === -1 && MESTRE.razao >= 20, 'the master holds the sum under −1 dBFS (EBU R128 / ASWG true-peak ceiling)');
 ok(perto(ganhoDaCamada('motor', { ...v, musica: 0 }), 0.4), 'engine without music = full');
 ok(ganhoDaCamada('acao', { geral: 0, efeitos: 1, musica: 1 }) === 0, 'GERAL 0 silences everything');
 ok(ganhoDaCamada('ambiente', { geral: 1, efeitos: 0, musica: 0 }) === 0, 'EFEITOS 0 silences the ambience too');
@@ -58,7 +64,7 @@ ok(lugarDaCena('Game', 4) === 'interior', 'stage 4 is the organic interior');
 ok(lugarDaCena('Interlude2') === 'cabine', 'a cutscene without its own place falls on the cabin');
 ok(PERFIS_SOM.atmosfera.passaBaixa < PERFIS_SOM.cabine.passaBaixa, 'the atmosphere is more muffled than the cabin');
 ok(PERFIS_SOM.atmosfera.eco.seg > PERFIS_SOM.cabine.eco.seg, 'the atmosphere has a longer tail than the cabin');
-ok(PERFIS_SOM.agua.passaBaixa <= 1000, 'the water lets only the low end through');
+ok(PERFIS_SOM.agua.passaBaixa <= 2000 && PERFIS_SOM.agua.passaBaixa < PERFIS_SOM.interior.passaBaixa, 'the water is the most muffled place, moderately (his choice, 18/11)');
 ok(AO_FUNDO.cabine.passaBaixa <= 200 && AO_FUNDO.cabine.volume <= 0.3, 'in space the background is only a dull low thump');
 ok(Object.keys(PERFIS_SOM).every((l) => AO_FUNDO[l].passaBaixa < PERFIS_SOM[l].passaBaixa), 'the background is always more muffled than the place');
 
@@ -124,7 +130,7 @@ ok(validarCatalogo({ 'nave.xaelo.tiro': def({ camada: 'interface', plano: 'fundo
   ok(forcaNoLugar(1, 'cabine') === EXPLOSAO_NO_VACUO && forcaNoLugar(1, 'atmosfera') === 1, 'in the vacuum the blasts are quieter; in the air, not');
   // the SHIPS' engines (a boss's thrusters are a sound of the fight, not the ship's bed)
   const motores = Object.entries(SONS).filter(([n]) => n.startsWith('nave.') && n.endsWith('.motor'));
-  ok(motores.length === 3 && motores.every(([, d]) => d.volume <= 0.2 && d.passaBaixa && d.passaBaixa <= 1500), 'the three engines are low and muffled', motores.map(([n, d]) => [n, d.volume, d.passaBaixa]));
+  ok(motores.length === 3 && motores.every(([, d]) => d.camada === 'motor' && d.passaBaixa && d.passaBaixa <= 1500), 'the three engines are muffled, on their own layer', motores.map(([n, d]) => [n, d.volume, d.passaBaixa]));
   const explosoes = Object.entries(SONS).filter(([n]) => n.startsWith('explosao.') && n !== 'explosao.luz' && n !== 'explosao.lastro');
   ok(SONS['explosao.lastro']?.laco && !SONS['explosao.lastro'].lastro, 'the bed itself is a loop that does not feed itself');
   ok(explosoes.every(([, d]) => d.lastro > 0), 'every explosion (but the light) feeds the bed', explosoes.filter(([, d]) => !d.lastro).map(([n]) => n));
@@ -167,6 +173,23 @@ ok(validarCatalogo({ 'nave.xaelo.tiro': def({ camada: 'interface', plano: 'fundo
   ok(!sonsDoResultado(assenta - 0.01, assenta + 1, false).includes('recorde'), 'no record sound when it is not a record');
   const posto = sonsDoResultado(0, 0.5, true, true);
   ok(!posto.includes('contaLiga') && posto.includes('medalha') && posto.includes('recorde'), 'reduced motion: no counter, the medal and the record at once', posto);
+}
+
+// THE SOUNDTRACK UNDER THE WORLD (18/11)
+{
+  ok(CONTEXTOS.fase.lufs >= -22 && CONTEXTOS.fase.lufs <= CONTEXTOS.cena.lufs && CONTEXTOS.cena.lufs < CONTEXTOS.menu.lufs, 'the track up front: level with the action while playing (≥ −22), highest on the menu');
+  ok(CONTEXTOS.fase.graves < 0 && CONTEXTOS.fase.presenca < 0, 'while playing it leaves a pocket for the explosions and the shots');
+  ok(reducaoDaTrilha(DUCK.limiar - 1, false) === 0, 'under the threshold the track is left alone');
+  ok(reducaoDaTrilha(DUCK.limiar + 4, false) < 0, 'a loud moment pushes it down');
+  ok(reducaoDaTrilha(0, false) === DUCK.maximo, 'never deeper than the limit');
+  ok(reducaoDaTrilha(-60, true) === DUCK.cenario, 'a far event clears space even in silence');
+  ok(reducaoDaTrilha(0, true) === DUCK.maximo, 'the deeper of the two wins');
+  ok(Math.abs(proximoDuck(0, -8, 0.04)) > Math.abs(proximoDuck(-8, 0, 0.04) + 8), 'it gets out of the way faster than it comes back');
+  ok(proximoDuck(-1, -1, 0.04) === -1 && proximoDuck(-0.01, 0, 1) === 0, 'it stops on the target');
+  ok(abreEspaco('fx.f2.laser') && abreEspaco('fx.f3.enguia') && abreEspaco('fx.menu.trovao.perto'), 'the far events ask for space');
+  ok(!abreEspaco('fx.f1.artilharia') && !abreEspaco('fx.f4.coracao') && !abreEspaco('nave.xaelo.tiro'), 'what repeats all the time does not');
+  ok(Math.abs(curvaEntra(0.5) ** 2 + curvaEntra(0.5) ** 2 - 1) < 1e-9, 'the crossfade keeps the power constant');
+  for (const [t, f] of Object.entries(FAIXAS)) ok(existsSync(`public/audio/trilha/${f.arquivo}.ogg`) && existsSync(`public/audio/trilha/${f.arquivo}.m4a`), `the track ${t} is installed in both formats`);
 }
 
 console.log(falhas ? `\n${falhas} falha(s)` : '\ntudo certo');

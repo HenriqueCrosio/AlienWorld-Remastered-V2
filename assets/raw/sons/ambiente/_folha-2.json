@@ -1,0 +1,24 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 8b — os sons novos que você pediu",
+    "dia": "2026-11-18",
+    "nota": "Só o que você pediu depois da folha 8: os flybys próprios das naves invasoras (os seus ficam com as naves do jogador), o metal rangendo no espaço, o asteroide que passa perto sem bater, o laser das mineradoras colossais e os martelos nas bigornas distantes.\nO laser, os martelos e o metal entram como camadas sorteadas por cima do fundo da F2, sempre ao longe e pelo casco. Pode marcar mais de uma versão na nota para elas se alternarem."
+  },
+  "grupos": [
+    {
+      "titulo": "A F1: as naves invasoras",
+      "sons": [
+        { "nome": "fx.f1.flyby", "oque": "AS NAVES INVASORAS — cada uma das 5 descendo das nuvens, com som próprio", "onde": "a F1, ao fundo", "lugar": "atmosfera", "plano": "fundo" }
+      ]
+    },
+    {
+      "titulo": "A F2: o cinturão e as mineradoras",
+      "sons": [
+        { "nome": "fx.f2.metal", "oque": "O METAL RANGENDO NO ESPAÇO — as estruturas mortas ao longe, separado do fundo", "onde": "a F2, sorteado", "lugar": "cabine" },
+        { "nome": "fx.f2.passa", "oque": "O ASTEROIDE PASSANDO PERTO — sem bater (o cascalho fica só para a batida)", "onde": "a F2", "lugar": "cabine" },
+        { "nome": "fx.f2.laser", "oque": "O LASER DAS MINERADORAS — a vibração distante, abafada pelo espaço", "onde": "a F2, sorteado", "lugar": "cabine" },
+        { "nome": "fx.f2.martelo", "oque": "OS MARTELOS NAS BIGORNAS — distantes, abafados pelo espaço", "onde": "a F2, sorteado", "lugar": "cabine" }
+      ]
+    }
+  ]
+}

@@ -2,10 +2,12 @@
 // every sound, heard AS IN THE GAME (the same acoustics module the game uses), repeated ×8 with the per-shot
 // variation, optionally over the soundtrack; one choice per sound; the footer is the text he pastes in the
 // conversation. The choice is kept in this browser only. Served by Vite (it imports the game's .ts modules).
-import { AO_FUNDO, CHEFE_NO_VACUO, montarAcustica } from '/src/som/acustica.ts';
+import { AO_FUNDO, CHEFE_NO_VACUO, PERFIS_SOM, montarAcustica } from '/src/som/acustica.ts';
 import { sortearVariacao } from '/src/som/vozes.ts';
 
 const dados = JSON.parse(document.getElementById('dados').textContent);
+// (18/11) a sheet may judge a place with a profile he already chose but the game has not received yet
+for (const [lugar, perfil] of Object.entries(dados.perfis ?? {})) Object.assign(PERFIS_SOM[lugar], perfil);
 const raiz = document.getElementById('folha');
 const CHAVE = `folha-sons:${location.pathname}`;
 let escolhas = {};
@@ -21,6 +23,9 @@ let trilha = null;
 const buffers = new Map();
 let lugarForcado = '';
 let fundo = false;
+// (18/11, the engines' sheet) the low-pass the game gives this kind of sound today, as an option to compare with and without
+let abafoDoJogo = false;
+let lacoAtual = null;
 
 function audio() {
   if (!ctx) {
@@ -63,7 +68,23 @@ async function tocar(som, versao, { variar = false, quando = 0 } = {}) {
     g.gain.value *= C.volume;
     no = no.connect(lp).connect(pk);
   }
-  if (fundo) {
+  // (18/11) the low-pass of its own that the catalogue will give it (`passaBaixa` in the `DefSom`)
+  if (som.passaBaixa) {
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = som.passaBaixa;
+    lp.Q.value = 0.5;
+    no = no.connect(lp);
+  }
+  if (abafoDoJogo && dados.abafoDoJogo) {
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = dados.abafoDoJogo;
+    lp.Q.value = 0.5;
+    no = no.connect(lp);
+  }
+  // (18/11) a sound the game plays with `plano: 'fundo'` is always judged in the background
+  if (fundo || som.plano === 'fundo') {
     const lp = c.createBiquadFilter();
     lp.type = 'lowpass';
     lp.frequency.value = AO_FUNDO[lugar].passaBaixa;
@@ -71,8 +92,18 @@ async function tocar(som, versao, { variar = false, quando = 0 } = {}) {
     no = no.connect(lp);
   }
   no.connect(som.interface ? c.destination : ac.entrada);
+  // (18/11) a loop really loops, so its seam is judged too, and the next one heard replaces it: two engines never overlap
+  if (som.laco) {
+    try {
+      lacoAtual?.stop();
+    } catch {
+      /* already over */
+    }
+    lacoAtual = f;
+    f.loop = true;
+  }
   f.start(c.currentTime + quando);
-  if (som.laco) f.stop(c.currentTime + quando + 6);
+  if (som.laco) f.stop(c.currentTime + quando + (dados.ouvirLaco ?? 6));
 }
 function alternarTrilha(liga) {
   if (!liga) {
@@ -124,7 +155,8 @@ const seletorLugar = () => {
 raiz.append(
   el('h1', { textContent: dados.titulo }),
   el('p', { className: 'nota', textContent: dados.nota ?? '' }),
-  el('div', { className: 'barra' }, seletorLugar(), caixa('ao fundo (camada de trás)', (v) => (fundo = v)), caixa('trilha por baixo', alternarTrilha)),
+  el('div', { className: 'barra' }, seletorLugar(), caixa('ao fundo (camada de trás)', (v) => (fundo = v)), caixa('trilha por baixo', alternarTrilha),
+    dados.abafoDoJogo ? caixa(`abafado como no jogo hoje (${dados.abafoDoJogo} Hz)`, (v) => (abafoDoJogo = v)) : ''),
 );
 for (const gr of dados.grupos) {
   raiz.append(el('h2', { textContent: gr.titulo }));

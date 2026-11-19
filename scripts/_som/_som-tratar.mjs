@@ -31,13 +31,18 @@ const silencioInicial = (f) => {
  * `tempo` (×): faster/shorter without changing the pitch (atempo) — his "mais rápida e curta".
  * `limpar`: less noise — FFT denoise + a gentle low-pass that takes the hiss off the top — his "menos ruído".
  */
-export function tratar(entrada, saida, { camada = 'acao', laco = false, estereo = false, max = 0, tempo = 1, limpar = false } = {}) {
+/**
+ * `corte` ([ini, fim], s): keeps only that stretch of the take, before anything else — 18/11, the ambience beds: PixelLab
+ * takes can open or close on ~1 s of silence, and a loop made from them drops out on every lap.
+ */
+export function tratar(entrada, saida, { camada = 'acao', laco = false, estereo = false, max = 0, tempo = 1, limpar = false, corte = null } = {}) {
   mkdirSync(dirname(resolve(saida)), { recursive: true });
   const tmp = mkdtempSync(join(tmpdir(), 'tratar-'));
   try {
     const canais = estereo || camada === 'ambiente' ? 2 : 1;
     const a0 = join(tmp, 'a0.wav');
     const filtros = [];
+    if (corte) filtros.push(`atrim=${corte[0]}:${corte[1]}`, 'asetpts=PTS-STARTPTS');
     if (limpar) filtros.push('afftdn=nr=30:nf=-35', 'lowpass=f=5500', 'lowpass=f=5500', 'highpass=f=50');
     if (tempo !== 1) filtros.push(`atempo=${tempo}`);
     if (!laco) {

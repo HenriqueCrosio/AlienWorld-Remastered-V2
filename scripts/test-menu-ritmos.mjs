@@ -23,7 +23,7 @@ conferir(hash4(1, 2, 3, 4) === hash4(1, 2, 3, 4) && hash4(1, 2, 3, 4) !== hash4(
 conferir(suave(0, 1, -1) === 0 && suave(0, 1, 2) === 1 && suave(0, 1, 0.5) === 0.5, 'o smoothstep', null);
 
 // ── OS NÚMEROS ──
-conferir(TRAVESSIA.seg === 120 && TRAVESSIA.pausa === 6, "a travessia (22/10): 120 s, 6 s de pausa", TRAVESSIA);
+conferir(TRAVESSIA.seg === 240 && !('pausa' in TRAVESSIA) && !('onda' in TRAVESSIA), 'a travessia (19/11): 240 s, uma reta, uma vez só', TRAVESSIA);
 conferir(FAROIS.ciclo === 2.3 && FAROIS.acesoAte === 1.4, 'o farol: 1,4 s aceso a cada 2,3 s', FAROIS);
 conferir(TRAFEGO.pontes.length === 5, 'cinco pontes', TRAFEGO.pontes.length);
 conferir(TEMPESTADE.focos.length === 3 && TEMPESTADE.raios.length === 3, 'três focos e três raios', null);
@@ -38,23 +38,25 @@ conferir(!farolApagado(0, 0.5) && farolApagado(0, 1.5) && !farolApagado(0, 2.4),
 const raizes = torres([{ x: 10, y: 10, w: 1, h: 1 }, { x: 10.5, y: 18, w: 1, h: 1 }, { x: 40, y: 10, w: 1, h: 1 }]);
 conferir(raizes[0] === raizes[1] && raizes[2] !== raizes[0], 'dois faróis na mesma coluna são uma torre; o longe é outra', raizes);
 
-// ── A TRAVESSIA EM LOOP (§3.1) ──
-// 22/10: quando o título acende (9 s), ele está onde estava na travessia de 45 s aprovada em 19/10 (x ≈ 254,4).
+// ── A TRAVESSIA (§3.1; 19/11: uma reta, uma vez só) ──
+// Quando o título acende (9 s), ele está onde estava na travessia de 45 s aprovada em 19/10 (x ≈ 254,4).
 const antigoNoTitulo = 200 + (204 * (9 + 3)) / 45;
 conferir(Math.abs(travessia(9).x - antigoNoTitulo) < 0.3, 'no título, o Leviatã está no lugar de 19/10', [travessia(9).x, antigoNoTitulo]);
 const fim = TRAVESSIA.seg - (TRAVESSIA.noTitulo.u * TRAVESSIA.seg - TRAVESSIA.noTitulo.t); // o instante em que u = 1
-conferir(travessia(fim + 0.01).x === 404 && travessia(fim + 5.9).x === 404, 'sai pela direita e o céu fica vazio por 6 s', [travessia(fim + 0.01).x, travessia(fim + 5.9).x]);
-conferir(travessia(fim + 6.1).x < 201, 'e volta a sair da nuvem: loop de seg + 6 s', travessia(fim + 6.1));
-conferir(Math.abs(travessia(fim + 0.01).y - 42) < 1e-6 && Math.abs(travessia(fim + 6.01).y - 30) < 0.01, 'a onda zera nas pontas (chega e sai no mesmo lugar)', [travessia(fim + 0.01).y, travessia(fim + 6.01).y]);
+conferir(travessia(fim - 1).visivel && !travessia(fim + 0.01).visivel, 'sai pela direita e some', [travessia(fim - 1), travessia(fim + 0.01)]);
+conferir([fim + 6.1, fim + 60, fim + 3600].every((t) => !travessia(t).visivel && travessia(t).x === 404), 'e NÃO volta ao início: o céu fica vazio', travessia(fim + 6.1));
 {
-  // Sem degraus nem trancos: de 1/30 s em 1/30 s, a posição exata anda pouco e sempre (o arredondamento é do desenho).
-  let maxDy = 0, maxDx = 0;
+  // Uma reta: todo ponto da travessia cai na linha (x0,y0)–(x1,y1), e anda pouco e sempre.
+  const T = TRAVESSIA;
+  let foraDaReta = 0, maxDy = 0, maxDx = 0;
   for (let t = 0; t < fim - 1 / 30; t += 1 / 30) {
     const p = travessia(t), q = travessia(t + 1 / 30);
+    foraDaReta = Math.max(foraDaReta, Math.abs(p.y - (T.y0 + ((p.x - T.x0) * (T.y1 - T.y0)) / (T.x1 - T.x0))));
     maxDy = Math.max(maxDy, Math.abs(q.y - p.y));
     maxDx = Math.max(maxDx, Math.abs(q.x - p.x));
   }
-  conferir(maxDy < 0.05 && maxDx < 0.1 && maxDx > 0, 'contínua: < 0,05 px em y e < 0,1 px em x por quadro', { maxDy, maxDx });
+  conferir(foraDaReta < 1e-9, 'retilínea: nenhum ponto fora da reta', foraDaReta);
+  conferir(maxDy < 0.01 && maxDx < 0.03 && maxDx > 0, 'contínua e mais lenta: < 0,01 px em y e < 0,03 px em x por quadro', { maxDy, maxDx });
 }
 conferir(travessia(1).quadro === 6 % 16, 'nada a 6 quadros/s', travessia(1).quadro);
 

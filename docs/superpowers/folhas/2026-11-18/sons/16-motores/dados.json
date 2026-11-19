@@ -1,0 +1,135 @@
+{
+ "titulo": "Folha de sons 9 — o motor de cada nave",
+ "dia": "2026-11-18",
+ "ouvirLaco": 10,
+ "abafoDoJogo": 1100,
+ "nota": "A é o motor que está no jogo hoje. B, C e D são as versões novas. Todas estão no mesmo volume, para você comparar só o caráter de cada uma.\n▶ toca 10 segundos em laço, e tocar outra versão troca na hora. Hoje o jogo abafa os motores em 1100 Hz: marque a caixa \"abafado como no jogo hoje\" para ouvir assim. Se a versão que você gostar perder o caráter abafada, escreva na nota: o abafamento pode mudar na calibragem.",
+ "grupos": [
+  {
+   "titulo": "A X-AELO",
+   "sons": [
+    {
+     "nome": "nave.xaelo.motor",
+     "oque": "O MOTOR DA X-AELO — o caça estelar: uivo agudo e rasgado",
+     "onde": "a nave voando",
+     "lugar": "cabine",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.xaelo.motor-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous steady low engine hum of a small agile fighter jet cruising, smooth turbine whine over a soft rumble, constant, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/nave.xaelo.motor-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous sci-fi starfighter engine in flight, a bright howling ion turbine with a ragged tearing edge, a high screaming whine over a fast fluttering roar, steady constant pitch, no doppler, no pass-by, seamless, no start or end, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/nave.xaelo.motor-C.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous small space fighter with four engines running in unison, a sharp metallic high whistle layered over a raspy ripping thrust and a tight low rumble, steady and constant, no doppler, no fly-by, seamless, no music\""
+      },
+      {
+       "id": "D",
+       "arquivo": "v/nave.xaelo.motor-D.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous retro science fiction fighter craft engine, a warbling electric howl with a growling roar beneath it, slightly detuned twin tones beating against each other, constant level, no doppler, no pass-by, no start or end, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "A TERMINUS",
+   "sons": [
+    {
+     "nome": "nave.terminus.motor",
+     "oque": "O MOTOR DA TERMINUS — o caça a jato: turbina e empuxo pesado",
+     "onde": "a nave voando",
+     "lugar": "cabine",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.terminus.motor-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous heavy engine drone of an armored gunship, a deep growling thrust with a metallic resonance, constant, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/nave.terminus.motor-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous military fighter jet engine at steady cruise, powerful turbofan roar with a clear compressor whine, heard from the cockpit, constant, no doppler, no takeoff, no start or end, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/nave.terminus.motor-C.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous twin engine attack jet, two turbofans with a high whistling intake over a heavy deep exhaust roar, steady throttle, constant, no doppler, no fly-by, seamless, no music\""
+      },
+      {
+       "id": "D",
+       "arquivo": "v/nave.terminus.motor-D.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous afterburner of a heavy combat jet held at steady thrust, a dense crackling low roar with a hard metallic turbine edge, constant, no doppler, no ignition, no start or end, no music\""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "titulo": "A MANTA",
+   "sons": [
+    {
+     "nome": "nave.charybdis.motor",
+     "oque": "O MOTOR DA MANTA — a nave biomecânica: viva, orgânica",
+     "onde": "a manta nadando",
+     "lugar": "cabine",
+     "laco": true,
+     "versoes": [
+      {
+       "id": "A",
+       "arquivo": "v/nave.charybdis.motor-A.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous breathing organic hum of a living alien manta-ray ship, a slow wet pulse with a low glassy drone, constant, seamless, no start or end, no music\""
+      },
+      {
+       "id": "B",
+       "arquivo": "v/nave.charybdis.motor-B.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous living biomechanical spacecraft engine, a deep resonant whale-like hum inside a chitin shell, slow breathing swell with soft wet pulses, alien and organic, constant, seamless, no voices, no music\""
+      },
+      {
+       "id": "C",
+       "arquivo": "v/nave.charybdis.motor-C.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous alien bio-organic ship drive, a glassy harmonic drone vibrating through living membranes, a slow heartbeat-like throb and subtle insect chitter, steady, no start or end, no voices, no music\""
+      },
+      {
+       "id": "D",
+       "arquivo": "v/nave.charybdis.motor-D.ogg",
+       "fonte": "PixelLab (gerado)",
+       "licenca": "conta dele",
+       "nota": "\"continuous biomechanical creature ship gliding, a low throat-like purr merged with a soft hydraulic pulse and a shimmering crystalline overtone, smooth and steady, no roar, no voices, no music\""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

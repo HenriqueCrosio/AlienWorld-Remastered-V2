@@ -13,8 +13,8 @@ const origem = JSON.parse(readFileSync(join(raw, '_origem.json'), 'utf8'));
 const folha = JSON.parse(readFileSync(join(raw, opcao('--folha') ?? '_folha.json'), 'utf8'));
 const rodada = opcao('--rodada') ? Number(opcao('--rodada')) : null;
 const daRodada = (t) => rodada === null || (t.rodada ?? 1) === rodada;
-const fonte = (t) => (t.pixellab ? 'PixelLab (gerado)' : t.local ? 'sintetizado aqui (sem ruído)' : `Kenney · ${t.kenney.split('/').pop()}`);
-const licenca = (t) => (t.pixellab ? 'conta dele' : t.local ? 'próprio' : 'CC0');
+const fonte = (t) => (t.dele ? 'feito por ele' : t.pixellab ? 'PixelLab (gerado)' : t.local ? 'sintetizado aqui (sem ruído)' : `Kenney · ${t.kenney.split('/').pop()}`);
+const licenca = (t) => (t.dele ? 'dele' : t.pixellab ? 'conta dele' : t.local ? 'próprio' : 'CC0');
 const versoesDe = (nome) =>
   origem.takes
     // a take the builder discarded (mute, broken) has no file in v/: it is not on the sheet

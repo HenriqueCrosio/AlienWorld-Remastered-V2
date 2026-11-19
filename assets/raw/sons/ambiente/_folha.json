@@ -1,0 +1,70 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 8 — o ambiente e os sons de cada fase",
+    "dia": "2026-11-18",
+    "perfis": { "agua": { "passaBaixa": 1800 } },
+    "ouvirLaco": 12,
+    "nota": "A lista que você aprovou: 10 fundos em laço e 19 efeitos, cada efeito preso a algo que a tela já mostra. Os fundos se julgam deixando tocar um pouco, com a trilha por baixo: eles ficam baixos no jogo e não podem brigar com nada. Na câmara de água, a folha já toca com o abafar MODERADO que você escolheu (corte em 1,8 kHz, não nos 800 Hz antigos).\nOS SEUS FLYBYS (D1 falcon, D2 variação, D3 jato ao longe) entram nas 5 naves invasoras da F1: pode escolher um só ou marcar mais de um na nota, para eles se alternarem entre as naves."
+  },
+  "grupos": [
+    {
+      "titulo": "Os fundos (os laços de cada lugar)",
+      "sons": [
+        { "nome": "amb.menu.noite", "oque": "A TEMPESTADE DO MENU — o vento e a chuva ao longe, sem trovão", "onde": "o menu da noite", "lugar": "atmosfera", "laco": true },
+        { "nome": "amb.amanhecer", "oque": "O AMANHECER — o vento fraco e o fogo distante sobre o Leviatã caído", "onde": "a tela final", "lugar": "atmosfera", "laco": true },
+        { "nome": "amb.hangar", "oque": "O HANGAR — o zumbido da baia, a tempestade abafada lá fora", "onde": "a escolha da nave", "lugar": "atmosfera", "laco": true },
+        { "nome": "amb.f1.fora", "oque": "A F1 POR FORA — o vento sobre a colônia", "onde": "a F1, fora da caverna", "lugar": "atmosfera", "laco": true },
+        { "nome": "amb.f1.caverna", "oque": "A CAVERNA — o ar parado, as gotas e as brasas", "onde": "a F1, dentro do salão", "lugar": "caverna", "laco": true },
+        { "nome": "amb.f2", "oque": "O CINTURÃO — o ronco baixo da cabine", "onde": "a F2 inteira", "lugar": "cabine", "laco": true },
+        { "nome": "amb.f3.nebulosa", "oque": "A NEBULOSA — o gás denso e a estática", "onde": "a F3, Ato 1", "lugar": "cabine", "laco": true },
+        { "nome": "amb.f3.casco", "oque": "O CASCO — o metal sob tensão e o canto do Leviatã ao longe", "onde": "a F3, Ato 2", "lugar": "cabine", "laco": true },
+        { "nome": "amb.f4.interior", "oque": "O INTERIOR — a respiração e os borbulhos da criatura", "onde": "a F4", "lugar": "interior", "laco": true },
+        { "nome": "amb.f4.agua", "oque": "A CÂMARA DE ÁGUA — a pressão abafada", "onde": "a F4, a luta do golfinho", "lugar": "agua", "laco": true }
+      ]
+    },
+    {
+      "titulo": "O menu da noite",
+      "sons": [
+        { "nome": "fx.menu.trovao.perto", "oque": "O TROVÃO PERTO — quando o relâmpago cai com raio", "onde": "o menu da noite", "lugar": "atmosfera" },
+        { "nome": "fx.menu.trovao.longe", "oque": "O TROVÃO LONGE — quando é só o clarão nas nuvens", "onde": "o menu da noite", "lugar": "atmosfera" }
+      ]
+    },
+    {
+      "titulo": "A F1: a invasão no horizonte e a caverna",
+      "sons": [
+        { "nome": "fx.f1.flyby", "oque": "AS NAVES INVASORAS — cada uma das 5 descendo das nuvens (os seus flybys)", "onde": "a F1, ao fundo", "lugar": "atmosfera", "plano": "fundo" },
+        { "nome": "fx.f1.artilharia", "oque": "A ARTILHARIA DA COLÔNIA — cada rajada de traçantes subindo", "onde": "a F1, ao fundo", "lugar": "atmosfera", "plano": "fundo" },
+        { "nome": "fx.f1.flak", "oque": "O FLAK — o estouro no alto da rajada", "onde": "a F1, ao fundo", "lugar": "atmosfera", "plano": "fundo" },
+        { "nome": "fx.f1.explosao", "oque": "AS EXPLOSÕES AO LONGE — as 10 da colônia caindo", "onde": "a F1, ao fundo", "lugar": "atmosfera", "plano": "fundo" },
+        { "nome": "fx.f1.aranha", "oque": "A ARANHA NO TETO — as patas na rocha", "onde": "a F1, dentro do salão", "lugar": "caverna" }
+      ]
+    },
+    {
+      "titulo": "A F2: o cinturão",
+      "sons": [
+        { "nome": "fx.f2.rangido", "oque": "O RANGIDO — a cabine ao passar um casco morto", "onde": "a F2", "lugar": "cabine" },
+        { "nome": "fx.f2.cascalho", "oque": "O CASCALHO — quando um asteroide passa na frente", "onde": "a F2", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "A F3: a nebulosa e o casco",
+      "sons": [
+        { "nome": "fx.f3.enguia", "oque": "A ENGUIA AO FUNDO — a silhueta passando no gás", "onde": "a F3, Ato 1", "lugar": "cabine" },
+        { "nome": "fx.f3.rabo", "oque": "O GOLPE DO RABO — o Leviatã aparece (t = 45 s)", "onde": "a virada da F3", "lugar": "cabine" },
+        { "nome": "fx.f3.vapor", "oque": "O VAPOR — os respiros do casco soprando", "onde": "a F3, Ato 2", "lugar": "cabine" },
+        { "nome": "fx.f3.faiscas", "oque": "AS FAÍSCAS — na borda rasgada do rombo", "onde": "a arena da Serpente", "lugar": "cabine", "passaBaixa": 3500 },
+        { "nome": "fx.f3.baque", "oque": "O BAQUE — os clarões da batalha distante, sentidos pelo casco", "onde": "a F3, Ato 2", "lugar": "cabine" }
+      ]
+    },
+    {
+      "titulo": "A F4: a criatura viva e a água",
+      "sons": [
+        { "nome": "fx.f4.coracao", "oque": "O CORAÇÃO — uma batida, no ritmo do órgão na tela (2,3 s)", "onde": "a F4", "lugar": "interior" },
+        { "nome": "fx.f4.fornalha", "oque": "A FORNALHA — o maquinário do teto (um ciclo de 3,2 s)", "onde": "a F4", "lugar": "interior" },
+        { "nome": "fx.f4.agua.sobe", "oque": "A ÁGUA SUBINDO — a câmara enche", "onde": "a F4, antes do golfinho", "lugar": "interior" },
+        { "nome": "fx.f4.agua.desce", "oque": "A ÁGUA DRENANDO — o golfinho morreu", "onde": "a F4, depois do golfinho", "lugar": "agua" },
+        { "nome": "fx.f4.golfinho", "oque": "OS GOLFINHOS AO FUNDO — os outros da espécie passando", "onde": "a F4, a luta do golfinho", "lugar": "agua", "plano": "fundo" }
+      ]
+    }
+  ]
+}

@@ -60,7 +60,8 @@ d = await diag();
 ok(d.ganhos.ambiente === 1 && d.ganhos.motor === 1, 'MÚSICA 0 = the ambience and the engine full', d.ganhos);
 await prefs('volume.musica', 1);
 d = await diag();
-ok(d.ganhos.ambiente < 0.5 && d.ganhos.acao === 1, 'MÚSICA 10 = the ambience under the music, the action untouched', d.ganhos);
+// (19/11, the mix pass — spec §10.11: with the track sounding, the bed yields first, the engine less, the action never)
+ok(d.ganhos.ambiente < d.ganhos.motor && d.ganhos.motor < 1 && d.ganhos.acao === 1, 'MÚSICA 10 with the track sounding = the bed yields, the engine a little, the action untouched', d.ganhos);
 await page.evaluate(() => window.__lacoTeste.parar(0));
 
 // THE LASTRO (the bed under the chains): a registered rumble loop and a blast that feeds it

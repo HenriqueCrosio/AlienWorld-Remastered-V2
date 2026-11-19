@@ -1,0 +1,9 @@
+# Sheet 8b (the new sounds he asked for), his choices 18/11, from
+# docs/superpowers/folhas/2026-11-18/sons/15b-ambiente-novos. The round-1 choices: _escolhas-folha1.txt.
+fx.f1.flyby: A
+fx.f1.flyby: B > fx.f1.flyby2
+fx.f1.flyby: C > fx.f1.flyby3
+fx.f2.metal: B
+fx.f2.passa: A
+fx.f2.laser: C
+fx.f2.martelo: B

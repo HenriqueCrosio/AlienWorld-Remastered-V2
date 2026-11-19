@@ -1,0 +1,4 @@
+# Sheet 9 (the engine of each ship), his choices 18/11, from docs/superpowers/folhas/2026-11-18/sons/16-motores.
+nave.xaelo.motor: C
+nave.terminus.motor: C
+nave.charybdis.motor: D

@@ -1,0 +1,37 @@
+# Sheet 8 (the ambience and the sounds of each stage), his choices 18/11, from
+# docs/superpowers/folhas/2026-11-18/sons/15-ambiente. "A e B variando" = both installed, drawn in turn.
+amb.menu.noite: B
+amb.amanhecer: B
+amb.hangar: A
+amb.f1.fora: A
+amb.f1.caverna: B
+amb.f2: A
+amb.f3.nebulosa: A
+amb.f3.casco: A
+amb.f4.interior: A
+amb.f4.interior: B > amb.f4.interior2
+amb.f4.agua: B
+fx.menu.trovao.perto: A
+fx.menu.trovao.perto: B > fx.menu.trovao.perto2
+fx.menu.trovao.longe: A
+fx.menu.trovao.longe: B > fx.menu.trovao.longe2
+fx.f1.artilharia: A
+fx.f1.flak: A
+fx.f1.flak: B > fx.f1.flak2
+fx.f1.explosao: A
+fx.f1.explosao: B > fx.f1.explosao2
+fx.f1.aranha: B2
+fx.f2.rangido: B
+fx.f2.rangido: A > fx.f2.rangido2
+fx.f2.cascalho: B
+fx.f3.enguia: A
+fx.f3.rabo: A
+fx.f3.vapor: B
+fx.f3.faiscas: A
+fx.f3.faiscas: B > fx.f3.faiscas2
+fx.f3.baque: A
+fx.f4.coracao: A
+fx.f4.fornalha: A
+fx.f4.agua.sobe: B
+fx.f4.agua.desce: B
+fx.f4.golfinho: B

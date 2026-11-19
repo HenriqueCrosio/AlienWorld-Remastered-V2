@@ -165,13 +165,13 @@ for (const [stage, ship, modelo, nave] of [[2, 'humana', 'jato', 'xaelo'], [2, '
   await iniciar(1, 'humana', 'jato');
   // the boom is the stage's sound ENTRANCE: first and alone; the engine only fades in after it
   const logo = await page.evaluate(() => window.__som.diagnostico());
-  ok(logo.tocados.slice(n0).includes('momento.f1.estrondo') && !logo.vozes.some((n) => n.endsWith('.motor')), 'the F1 opens with the sonic boom, alone (no engine yet)', logo.vozes);
-  await page.waitForTimeout(2600);
+  ok(logo.tocados.slice(n0).includes('momento.f1.estrondo.xaelo') && !logo.vozes.some((n) => n.endsWith('.motor')), 'the F1 opens with the X-AELO flyby, alone (no engine yet)', logo.vozes);
+  await page.waitForTimeout(3400);
   ok((await diag()).vozes.includes('nave.xaelo.motor'), 'the engine comes in after the boom', (await diag()).vozes);
   await page.keyboard.press('KeyW');
   await page.waitForTimeout(300);
   const t = await novos(n0);
-  ok(t.indexOf('momento.f1.estrondo') === 0 || t.filter((n) => n !== 'momento.f1.estrondo').length === t.length - 1, 'the boom is the first sound of the stage', t.slice(0, 4));
+  ok(t.indexOf('momento.f1.estrondo.xaelo') === 0 || t.filter((n) => n !== 'momento.f1.estrondo.xaelo').length === t.length - 1, 'the flyby is the first sound of the stage', t.slice(0, 4));
   ok(t.includes('nave.impulso'), 'the flap impulse sounds', t);
   ok((await diag()).lugar === 'atmosfera', 'the F1 is heard in the atmosphere');
 }
@@ -214,11 +214,14 @@ for (const [stage, ship, modelo, nave] of [[2, 'humana', 'jato', 'xaelo'], [2, '
   ok(!depois.lastro.tocando && depois.lastro.energia === 0, 'the bed was drained by the scene change', depois.lastro);
 }
 
-// THE BOOM STARTS ON THE BLACK (16/11): from the hangar, it fires on the veil, crosses into the F1 (the one `ponte`
-// sound), and the stage does not play it a second time
+// THE TAKE-OFF ENDS ON THE BLACK (18/11, him: *"Para que o som acabe na tela preta e quando começar a fase 1 já comece com o
+// som da fase"*): nothing of it reaches the stage, which comes in with its engine, its bed and its track at once
 {
   await page.evaluate(() => {
     const g = window.__game;
+    // (the boom is the TERMINUS's: the X-AELO has his flyby, checked below)
+    g.registry.set('modeloNave', 'a');
+    g.registry.set('pinturaNave', 'laranja');
     const ativa = g.scene.getScenes(true).find((s) => !['IrmaHD', 'Pausa'].includes(s.scene.key));
     ativa.scene.start('Hangar', { handling: 'diegetico' });
   });
@@ -228,15 +231,41 @@ for (const [stage, ship, modelo, nave] of [[2, 'humana', 'jato', 'xaelo'], [2, '
   await page.keyboard.press('Enter');
   await page.waitForFunction((k) => window.__som.diagnostico().tocados.slice(k).includes('momento.f1.estrondo') || !window.__game.scene.isActive('Hangar'), n2, { timeout: 8000, polling: 16 }).then(() => true, () => false);
   const noVeu = await page.evaluate(() => window.__game.scene.isActive('Hangar'));
-  ok(noVeu && (await novos(n2)).includes('momento.f1.estrondo'), 'the boom fires on the hangar veil, before the stage', await novos(n2));
-  await page.waitForFunction(() => window.__game.scene.isActive('Game'), null, { timeout: 30000 });
-  await page.waitForTimeout(200);
+  ok(noVeu && (await novos(n2)).includes('momento.f1.estrondo'), 'the boom fires in the hangar, before the stage', await novos(n2));
+  const saida = await page.evaluate(() => window.__game.scene.getScene('Hangar').estado.saida);
+  ok(Math.abs(saida.fim - saida.veuFecha - 1.5) < 0.01, 'the veil closes in time to leave one second of black', saida);
+  // the instant the stage exists: the boom has finished, and the stage's own sound is already on
+  await page.waitForFunction(() => window.__game.scene.isActive('Game'), null, { timeout: 30000, polling: 16 });
   const d2 = await diag();
-  ok(d2.vozes.includes('momento.f1.estrondo'), 'the stage opens with the boom still sounding (it crossed over)', d2.vozes);
-  await page.waitForTimeout(2500);
+  ok(!d2.vozes.includes('momento.f1.estrondo'), 'the boom ended on the black: nothing of it enters the stage', d2.vozes);
+  await page.waitForTimeout(400);
+  const d3 = await diag();
+  ok(d3.vozes.includes('nave.terminus.motor') && d3.vozes.includes('amb.f1.fora'), 'the stage opens on its engine and its bed', d3.vozes);
   const t2 = await novos(n2);
   ok(t2.filter((n) => n === 'momento.f1.estrondo').length === 1, 'one boom only (the stage did not play it again)', t2.filter((n) => n.startsWith('momento')));
-  ok((await diag()).vozes.some((n) => n.endsWith('.motor')), 'the engine came in after the boom');
+  ok((await page.evaluate(() => window.__music.diagnostico().faixa)) === 'f1', 'the F1 track is on');
+}
+
+// THE X-AELO TAKES OFF ON HIS FALCON-STYLE FLYBY (18/11): the boom stays with the TERMINUS
+{
+  await page.evaluate(() => {
+    const g = window.__game;
+    g.registry.set('modeloNave', 'jato');
+    g.registry.set('pinturaNave', 'laranja');
+    g.scene.getScenes(true).find((s) => !['IrmaHD', 'Pausa'].includes(s.scene.key)).scene.start('Hangar', { handling: 'diegetico' });
+  });
+  await page.waitForFunction(() => window.__game.scene.isActive('Hangar'), null, { timeout: 30000 });
+  await page.waitForTimeout(1500);
+  const n3 = await desde();
+  await page.keyboard.press('Enter');
+  await page.waitForFunction((k) => window.__som.diagnostico().tocados.slice(k).includes('momento.f1.estrondo.xaelo') || !window.__game.scene.isActive('Hangar'), n3, { timeout: 8000, polling: 16 }).then(() => true, () => false);
+  ok((await novos(n3)).includes('momento.f1.estrondo.xaelo'), 'the X-AELO: his flyby fires in the hangar', await novos(n3));
+  await page.waitForFunction(() => window.__game.scene.isActive('Game'), null, { timeout: 30000, polling: 16 });
+  ok(!(await diag()).vozes.includes('momento.f1.estrondo.xaelo'), 'the flyby ended on the black: nothing of it enters the stage', (await diag()).vozes);
+  await page.waitForTimeout(400);
+  const t3 = await novos(n3);
+  ok(t3.filter((n) => n === 'momento.f1.estrondo.xaelo').length === 1 && !t3.includes('momento.f1.estrondo'), 'one flyby only, and no boom', t3.filter((n) => n.startsWith('momento')));
+  ok((await diag()).vozes.includes('nave.xaelo.motor'), 'the X-AELO engine is on from the start of the stage', (await diag()).vozes);
 }
 
 ok(erros.length === 0, 'no page errors', erros);
