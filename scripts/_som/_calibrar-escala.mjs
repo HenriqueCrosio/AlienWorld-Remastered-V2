@@ -16,13 +16,17 @@ const arg = (k) => (process.argv.includes(k) ? process.argv[process.argv.indexOf
  */
 const DEGRAU = {
   trovaoPerto: -17, momento: -15, perto: -17, trovaoLonge: -18, medio: -19, sobrevoo: -19, colosso: -20, longe: -21,
-  broca: -21, muitoLonge: -22, repetido: -23, chuva: -24, motor: -29, fundo: -30, tensao: -31, detalhe: -31,
+  broca: -21, muitoLonge: -22, repetido: -23, chuva: -24, fundoPresente: -26, tensaoPresente: -27, motor: -29, fundo: -30,
+  tensao: -31, detalhe: -31,
 };
 const ESCALA = {
   // the place
   'amb.menu.noite': 'fundo', 'amb.amanhecer': 'fundo', 'amb.hangar': 'fundo', 'amb.f1.fora': 'fundo', 'amb.f1.caverna': 'fundo', 'amb.f2': 'fundo',
   'amb.f3.nebulosa': 'fundo', 'amb.f3.casco': 'fundo', 'amb.f4.interior': 'fundo', 'amb.f4.interior2': 'fundo', 'amb.f4.agua': 'fundo',
   'amb.espaco.tensao': 'tensao', 'amb.hangar.chuva': 'chuva',
+  // 20/11 — his beds of the cutscenes between stages: the space hum; the Leviathan's inside (a bed + its low complement)
+  // (the Leviathan's pair 4 dB more present — him, 20/11: *"ela pode ser mais presente"*)
+  'amb.cut.espaco': 'fundo', 'amb.cut.leviata': 'fundoPresente', 'amb.cut.leviata2': 'tensaoPresente',
   // the ship
   'nave.xaelo.motor': 'motor', 'nave.terminus.motor': 'motor', 'nave.charybdis.motor': 'motor',
   // the storm
@@ -43,7 +47,7 @@ const LUGAR = (n) => {
   if (n === 'amb.f1.caverna' || n === 'fx.f1.aranha') return 'caverna';
   if (n === 'amb.f4.agua' || n === 'fx.f4.agua.desce' || n === 'fx.f4.golfinho') return 'agua';
   if (n.startsWith('amb.f4') || n.startsWith('fx.f4')) return 'interior';
-  if (n.startsWith('amb.f2') || n.startsWith('amb.f3') || n.startsWith('amb.espaco') || n.startsWith('fx.f2') || n.startsWith('fx.f3') || n === 'drone.minerar' || n.endsWith('.motor')) return 'cabine';
+  if (n.startsWith('amb.f2') || n.startsWith('amb.f3') || n.startsWith('amb.espaco') || n.startsWith('amb.cut') || n.startsWith('fx.f2') || n.startsWith('fx.f3') || n === 'drone.minerar' || n.endsWith('.motor')) return 'cabine';
   return 'atmosfera';
 };
 

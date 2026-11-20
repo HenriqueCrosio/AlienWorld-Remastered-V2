@@ -75,6 +75,8 @@ const descida = t.find((x) => x.startsWith('cut.pouso.descida.'));
 const toque = t.find((x) => x.startsWith('cut.pouso.toque.'));
 ok(descida && toque && antes(t, descida, toque), `the landing: the descent, then the touch (${descida}, ${toque})`, t);
 ok(t.some((x) => x.startsWith('nave.') && x.endsWith('.motor')), 'the ship\'s own ENGINE while it flies in', t);
+// 20/11 — HIS beds in place of the music
+ok(t.includes('amb.cut.espaco'), 'the Aurora: his deep space bed', t.filter((x) => x.startsWith('amb.')));
 
 // ── cutscene 2, the Dock ──
 n = await desde();
@@ -87,6 +89,7 @@ t = await novos(n);
 ok(t.includes('cut.piloto') && t.some((x) => x.startsWith('cut.pouso.toque.')), 'the Dock: the autopilot and the landing', t);
 ok(antes(t, 'cut.doca.alarme', 'cut.doca.afunda') && antes(t, 'cut.doca.afunda', 'cut.doca.cabos') && t.includes('cut.doca.afunda2'), 'the alarm, the dock breaking (A), the cables and the dock giving way (B)', t);
 ok(t.some((x) => x.startsWith('cut.decolagem.')), 'the ship leaves', t);
+ok(t.includes('amb.cut.espaco'), 'the Dock: his deep space bed', t.filter((x) => x.startsWith('amb.')));
 
 // ── cutscene 3, the Leviathan's hangar ──
 n = await desde();
@@ -99,6 +102,7 @@ t = await novos(n);
 ok(antes(t, 'cut.leviata.alerta', 'cut.leviata.derrapagem'), 'the alarm, then the skid', t);
 ok(antes(t, 'nave.missil.lancar', 'cut.leviata.colapso') && antes(t, 'cut.leviata.colapso', 'cut.leviata.colapso2'), 'the torpedo, the throat caving in A then B', t);
 ok(antes(t, 'cut.leviata.engolida', 'cut.leviata.selar'), 'swallowed, then the mouth seals', t);
+ok(t.includes('amb.cut.leviata') && t.includes('amb.cut.leviata2'), 'the hangar: his two beds of the Leviathan\'s inside, together', t.filter((x) => x.startsWith('amb.')));
 
 // ── the final cutscene ──
 n = await desde();
