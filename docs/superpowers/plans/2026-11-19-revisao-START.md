@@ -20,10 +20,9 @@
 - **2, o menu:** *"tudo ficou muito bem feito"*.
 - **Novo, dele:** as CUTSCENES ENTRE AS FASES (1, 2 e 3) sem música — *"só ocorra os efeitos e ambientação. É a pausa
   que o jogador precisa entre as fases"*: a trilha sai em 1,5 s quando a cutscene abre (`SAI_A_TRILHA_MS`). Elas não têm
-  fundo de ambiente próprio (só o motor e os efeitos). **O preenchimento é DELE** (20/11): *"vou ver se crio um fundo de
-  espaço para as duas primeiras cutscenes e uma de interior para a cutscene da doca da F4"* — quando os arquivos
-  chegarem, instalar como fundo (`tocarFundo`, a camada ambiente, o nível medido como os do final) na `InterludeScene` e
-  na `Interlude2Scene` (o espaço) e na `Interlude3Scene` (o interior do hangar do Leviatã).
+  fundo de ambiente próprio. **O preenchimento veio DELE no mesmo dia e está no jogo:** o espaço grave nas cutscenes 1 e
+  2, o interior biomecânico + o complemento grave juntos na 3 (mais presentes, a pedido dele), e o assobio do alerta da
+  cutscene 3 abafado. Aprovado: *"perfeito"*. (a §10.13 da spec do som)
 - **Anotado para a limpeza da build final (ele: *"pode ser anotado agora e ajustado depois"*):** o RESULTADO/os CRÉDITOS
   repetem — do menu do amanhecer, ir a uma cutscene ou fase e voltar ao menu cai de novo na tela de créditos; deve
   disparar UMA vez por zerada. Ver o 🧭 do HANDOFF (a causa já achada).

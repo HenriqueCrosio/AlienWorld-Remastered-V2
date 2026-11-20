@@ -526,8 +526,17 @@ uma melhor conexao, preenchimento entre as cenas, de ruidos [...] o que tem hoje
   menu do amanhecer abre no vento.
 - **As cutscenes ENTRE AS FASES sem música** (*"só ocorra os efeitos e ambientação. É a pausa que o jogador precisa
   entre as fases para começar com a música de cada fase"*): a `InterludeScene`, a `Interlude2Scene` e a `Interlude3Scene`
-  param a trilha ao abrir (1,5 s, `SAI_A_TRILHA_MS`); a fase seguinte entra com a dela. O fundo de cada uma virá dele
-  (o espaço nas duas primeiras, um interior na do hangar do Leviatã). A cutscene final segue com a trilha final.
+  param a trilha ao abrir (1,5 s, `SAI_A_TRILHA_MS`); a fase seguinte entra com a dela. A cutscene final segue com a
+  trilha final.
+- **Os FUNDOS DELE no lugar da música** (os arquivos dele; `scripts/_som/_ambiente-cutscenes.mjs`: um trecho estável de
+  cada um, cortado num vale de volume — o biomecânico entre as batidas —, a emenda cruzada, −24 LUFS): `amb.cut.espaco`
+  (*"essa vibração bem grave para complementar os efeitos"*) nas cutscenes 1 e 2, no degrau `fundo` (−30); no hangar do
+  Leviatã os DOIS juntos, `amb.cut.leviata` (o coração, os sons da criatura) e `amb.cut.leviata2` (o grave contínuo), nos
+  degraus `fundoPresente` (−26) e `tensaoPresente` (−27) — 4 dB acima dos das fases (*"ela pode ser mais presente"*).
+  Entram em 2 s enquanto a trilha sai.
+- **O assobio do alerta da cutscene 3** (*"um som agudo altissimo [...] corte isso ou abafe ele"*): `cut.leviata.alerta`
+  tinha um tom fixo em 3,8 kHz (+27 dB sobre o próprio espectro, harmônicos em 8 e 12 kHz); `passaBaixa: 1800` o derruba
+  ~15 dB e o corpo do alarme ~1 dB.
 - **O hangar** segue a faixa do menu de onde se veio (confirmado por ele: é sempre a noite na prática).
 - Os testes: `test-som-cutscenes-jogo` (o silêncio das três, o fogo na queda, o vento com o fogo, o tema na 1ª cena) e
   `test-som-trilha-jogo` (a cutscene entre fases larga a trilha).

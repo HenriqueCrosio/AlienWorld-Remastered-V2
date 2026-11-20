@@ -25,9 +25,13 @@ sprite que se desfaz nos próprios pixels).
 > - **O fim:** a trilha final entra na 1ª cena (a nave sugada); a 1ª cena e o impacto um pouco mais baixos; o fogo da
 >   colônia já na queda, baixo; a superfície "A e C" juntas (o vento por baixo do fogo, à frente quando a lava esfria).
 > - **As cutscenes ENTRE AS FASES sem música** (ele: *"É a pausa que o jogador precisa entre as fases para começar com
->   a música de cada fase"*): a trilha sai em 1,5 s ao abrir a cutscene 1, 2 ou 3; ficam os efeitos e o motor. **O
->   fundo delas virá DELE:** um de espaço para as cutscenes 1 e 2, um de interior para a 3 (o hangar do Leviatã) —
->   instalar quando os arquivos chegarem.
+>   a música de cada fase"*): a trilha sai em 1,5 s ao abrir a cutscene 1, 2 ou 3; ficam os efeitos e o motor.
+> - **Os FUNDOS DELE nas cutscenes 1–3** (os arquivos dele, `assets/raw/sons/ambiente-dele/`, laços por
+>   `scripts/_som/_ambiente-cutscenes.mjs`): o espaço grave (`amb.cut.espaco`) na Aurora e na Doca; no hangar do Leviatã
+>   os DOIS juntos — o biomecânico com o coração (`amb.cut.leviata`) sobre o complemento grave contínuo (`amb.cut.leviata2`),
+>   4 dB acima dos fundos das fases (ele: *"pode ser mais presente"*). Medidos na escala (`_calibrar-escala.mjs --so
+>   amb.cut`). E o ASSOBIO do alerta da cutscene 3 (um tom de 3,8 kHz) abafado por um passa-baixa próprio (1,8 kHz).
+>   Aprovados por ele: *"perfeito"*.
 > - ⚠️ **PARA A LIMPEZA DA BUILD FINAL (os atalhos de dev, os das cutscenes etc.) — anotado por ele em 20/11:** do menu
 >   do amanhecer, ir a uma cutscene ou fase e voltar ao menu cai DE NOVO na tela de créditos; o resultado/os créditos
 >   devem disparar UMA ÚNICA VEZ por zerada. **A causa (conferida):** o Phaser guarda os últimos dados de uma cena —
