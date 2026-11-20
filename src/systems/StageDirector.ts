@@ -277,7 +277,9 @@ export const STAGE_2: StageEvent[] = [
   // com a Fase 1 e o jogador precisa senti-la antes de qualquer inimigo aparecer.
   { t: 1, type: 'hazard', rate: 1.4, mix: ['asteroid'] },
   { t: 5, type: 'wave', kind: 'drone', count: 4, spacing: 0.4, y: 80 },
-  { t: 9, type: 'wave', kind: 'batedor', count: 4, spacing: 0.4, y: 130 },
+  // 20/11 — THE SONDA in place of the DART (spec 2026-11-20-bloco-f-sonda): his dark art, 3 per wave (the darts came
+  // 4–6), the same close line.
+  { t: 9, type: 'wave', kind: 'sonda', count: 3, spacing: 0.4, y: 130 },
 
   // ─── O DRONE DE MINERAÇÃO ENTRA AQUI, E SOZINHO (frente B, 05/10) ───
   //
@@ -292,7 +294,7 @@ export const STAGE_2: StageEvent[] = [
   { t: 19, type: 'banner', text: 'RESTOS DA 3ª FROTA' },
   { t: 20, type: 'hazard', rate: 1.2, mix: ['asteroid', 'asteroid', 'destroco'] },
   { t: 21, type: 'wave', kind: 'drone', count: 5, spacing: 0.3, y: 60 },
-  { t: 24, type: 'wave', kind: 'batedor', count: 5, spacing: 0.32, y: 110 },
+  { t: 24, type: 'wave', kind: 'sonda', count: 3, spacing: 0.32, y: 110 },
 
   // ─── A MINA SENSORA ENTRA AQUI, E SOZINHA ───
   //
@@ -302,7 +304,7 @@ export const STAGE_2: StageEvent[] = [
   // Ensinar uma mecânica no meio de um enxame não é dificuldade, é sonegação.
   { t: 28, type: 'banner', text: 'CAMPO MINADO · SENSORES ATIVOS' },
   { t: 29, type: 'hazard', rate: 2.0, mix: ['sensor', 'asteroid'] },
-  { t: 33, type: 'wave', kind: 'batedor', count: 5, spacing: 0.3, y: 70 },
+  { t: 33, type: 'wave', kind: 'sonda', count: 3, spacing: 0.3, y: 70 },
 
   // Agora ela é COBRADA: sensor + mina comum + destroço, com pressão aérea por cima. É aqui que
   // a fase deixa de ser "atire no que vem" e passa a exigir que o jogador LIMPE O CAMINHO À
@@ -318,7 +320,7 @@ export const STAGE_2: StageEvent[] = [
   { t: 46, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 60 },
   // O DRONE COBRADO (frente B): minerando no meio dos kamikazes — quem só desvia deixa ele acordar.
   { t: 47, type: 'wave', kind: 'droneMineracao', count: 1, spacing: 0, y: 150 },
-  { t: 48, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 130 },
+  { t: 48, type: 'wave', kind: 'sonda', count: 3, spacing: 0.28, y: 130 },
 
   // O CRUZAMENTO CRUEL: o kamikaze te empurra para trás, a mina sensora pune quem recua sem
   // olhar. Duas peças que, juntas, negam as duas saídas fáceis — e nenhuma delas é nova.
@@ -326,7 +328,7 @@ export const STAGE_2: StageEvent[] = [
   { t: 52, type: 'banner', text: 'CARGUEIRO INIMIGO' },
   { t: 53, type: 'wave', kind: 'cargueiro', count: 1, spacing: 0, y: 80 },
   { t: 56, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.6, y: 120 },
-  { t: 58, type: 'wave', kind: 'batedor', count: 4, spacing: 0.3, y: 55 },
+  { t: 58, type: 'wave', kind: 'sonda', count: 3, spacing: 0.3, y: 55 },
 
   // ─── A SENTINELA ORBITAL ENTRA AQUI, E SOZINHA (frente B, 05/10) ───
   //
@@ -345,7 +347,7 @@ export const STAGE_2: StageEvent[] = [
   { t: 78, type: 'wave', kind: 'droneMineracao', count: 1, spacing: 0, y: 160 },
   { t: 79, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
   { t: 82, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 60 },
-  { t: 84, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 140 },
+  { t: 84, type: 'wave', kind: 'sonda', count: 3, spacing: 0.25, y: 140 },
   { t: 86, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
   // A SENTINELA COBRADA no lugar da 2ª canhoneira (frente B §3.4).
   { t: 87, type: 'wave', kind: 'sentinela', count: 1, spacing: 0, y: 120 },
@@ -412,6 +414,8 @@ export const STAGE_3: StageEvent[] = [
   { t: 14, type: 'hazard', rate: 1.0, mix: ['sensor', 'sensor', 'asteroid', 'mina'] },
   // (A onda de 6 drones de t=16 saiu em 07/10: o Caçador ocupa o lugar dela.)
   { t: 16, type: 'wave', kind: 'aguaViva', count: 4, spacing: 1.4, y: 75 },
+  // 20/11 — THE RUST SONDA (spec 2026-11-20-bloco-f-sonda): its own waves, beside the purple batedores
+  { t: 18.5, type: 'wave', kind: 'sonda', count: 3, spacing: 0.3, y: 60 },
   { t: 20, type: 'wave', kind: 'kamikaze', count: 3, spacing: 0.7, y: 100 },
 
   // ⚠️ O LEVIATÃ COMEÇA A APARECER NA METADE DO ATO 1 (Fatia 5). O `HANDOFF` sempre pediu isso —
@@ -526,11 +530,15 @@ export const STAGE_3: StageEvent[] = [
   // tinham cedido o lugar a ele em 07/10, voltaram.)
   { t: 73, type: 'wave', kind: 'batedor', count: 5, spacing: 0.28, y: 110 },
   { t: 76, type: 'wave', kind: 'kamikaze', count: 4, spacing: 0.55, y: 80 },
+  // 20/11 — THE RUST SONDA (spec 2026-11-20-bloco-f-sonda): its own waves, beside the purple batedores
+  { t: 78, type: 'wave', kind: 'sonda', count: 3, spacing: 0.3, y: 140 },
   { t: 79, type: 'banner', text: 'DEFESAS DO CASCO' },
   { t: 80, type: 'wave', kind: 'canhoneira', count: 1, spacing: 0, y: 70 },
   { t: 82, type: 'wave', kind: 'drone', count: 8, spacing: 0.2, y: 120 },
   { t: 85, type: 'wave', kind: 'kamikaze', count: 5, spacing: 0.5, y: 100 },
   { t: 87, type: 'wave', kind: 'batedor', count: 6, spacing: 0.25, y: 60 },
+  // 20/11 — THE RUST SONDA (spec 2026-11-20-bloco-f-sonda): its own waves, beside the purple batedores
+  { t: 89, type: 'wave', kind: 'sonda', count: 3, spacing: 0.3, y: 100 },
 
   // Silêncio → serpente. O mesmo telégrafo das duas fases.
   { t: 91, type: 'terrain', rate: 0, mix: [] },

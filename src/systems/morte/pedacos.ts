@@ -437,6 +437,8 @@ export function clarear(c: number, k: number): number {
   const [r, g, b, a] = canais(c);
   return rgba(Math.round(r + (0xc4 - r) * passo), Math.round(g + (0xd0 - g) * passo), Math.round(b + (0xd4 - b) * passo), a);
 }
+/** THE RUST (20/11): oxidized orange (hot, h = 1) down to the dark brown of old rust — no white, it is not fire. */
+export const RAMPA_FERRUGEM = ['ffb070', 'f08a3a', 'd0662a', 'a8481e', '80361a', '5a2414', '3c180e', '24100a'].reverse().map(hex);
 export const RAMPA_MEDUSA = ['e0f8ff', '94e4fc', '74e4fc', '947cf4', '8444ec', '6454bc', '2c34c4', '2c2c74', '1c1c5c'].reverse().map(hex);
 
 /**

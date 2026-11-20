@@ -13,6 +13,7 @@ import { CACADOR } from '../entities/elites/Cacador';
 import { LARVA } from '../entities/elites/Larva';
 import { MOSCA, PUPA } from '../entities/elites/Pupa';
 import { TUBO } from '../entities/elites/Tubo';
+import { SONDA_COMPORTAMENTO, TEXTURA_SONDA } from '../entities/sonda/Sonda';
 
 export type EnemyKind =
   | 'drone'
@@ -32,7 +33,9 @@ export type EnemyKind =
   | 'tubo'
   // …e os MIÚDOS da Larva: a pupa que ela põe e a mosca que nasce dela.
   | 'pupa'
-  | 'mosca';
+  | 'mosca'
+  // the F2 (in place of the dart) and the F3: spec 2026-11-20-bloco-f-sonda
+  | 'sonda';
 
 interface EnemyDef {
   texture: string;
@@ -206,6 +209,9 @@ const DEFS: Record<EnemyKind, EnemyDef> = {
   // grupo, todas as cartas funcionam neles sem código novo (o míssil trava na pupa, o elétrico prende a mosca).
   pupa: { texture: 'elitePupaAnim0', hp: ELITES.pupa.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.pupa.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: PUPA, miudo: true },
   mosca: { texture: 'eliteMoscaAnim0', hp: ELITES.mosca.hp, speed: 0, wave: 0, fireRate: 0, score: ELITES.mosca.score, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: MOSCA, miudo: true },
+  // THE SONDA (spec 2026-11-20-bloco-f-sonda-design.md): his art, dark in the F2 (in place of the dart), rust in the F3
+  // (beside the batedores). A `miudo` with its own brain (`entities/sonda`): the path, one shot, the dodge.
+  sonda: { texture: TEXTURA_SONDA.f2, hp: 2, speed: 0, wave: 0, fireRate: 0, score: 60, scale: 1, tint: 0xffffff, homing: 0, spawnRate: 0, elite: SONDA_COMPORTAMENTO, miudo: true },
 };
 
 /**
@@ -245,7 +251,7 @@ const STAGE_2_SKIN: Partial<
     }
   >
 > = {
-  batedor: { texture: 'enemyScoutCinturao', anim: 'scout-cinturao-fly', scale: 0.28, tint: 0xffffff },
+  // (the batedor's DART skin left on 20/11: the sonda took its place in the F2 — the PNGs stay on disk)
   // 0.72 encolhe a arte (115×36, a caixa união do voo) até os 26px de ALTURA da canhoneira
   // biomec, não até os 45 de largura. A escolha é de balanceamento, não de enquadramento: o
   // jogador atira na HORIZONTAL, então quem decide "quão difícil é acertar" é o perfil VERTICAL
@@ -353,7 +359,7 @@ export class EnemySystem {
   }
 
   private ctxElite(alvo: Phaser.Physics.Arcade.Sprite): CtxElite {
-    return { scene: this.scene, alvo, tiros: this.tiros, ganchos: this.ganchos, nascer: (kind, x, y) => this.spawn(kind, y, x) };
+    return { scene: this.scene, alvo, tiros: this.tiros, ganchos: this.ganchos, nascer: (kind, x, y) => this.spawn(kind, y, x), fase: this.stageId };
   }
 
   /** Este inimigo está INTOCÁVEL agora? (a lula escondida) — `GameScene.ferirInimigo`. */
@@ -942,12 +948,10 @@ export class EnemySystem {
         // A BOLA da pele do cinturão (Fase 2). Sem tint e sem blend aditivo: a arte já vem
         // magenta com núcleo branco, e somar luz por cima só estoura o núcleo e come a borda
         // escura que a separa do fundo — a borda é metade do motivo de ela ser visível.
-        b.setTexture(municao.texture).setScale(municao.scale).clearTint();
-        b.setBlendMode(Phaser.BlendModes.NORMAL);
+        PadroesDeTiro.vestirBola(b);
         // E ela PULSA. Mesma guarda do resto: sem a animação registrada, fica o estático (que é
         // o quadro 0 — mesma caixa união, então não salta ao começar). `release()` já para a
         // animação ao reciclar o slot, senão o próximo tiro a herdar a vaga sairia pulsando.
-        if (municao.anim && this.scene.anims.exists(municao.anim)) b.play(municao.anim);
         // A hitbox do slot é a do `bolt2` até alguém trocá-la (o pool é compartilhado, ver
         // `release`). Uma bola redonda com a caixa de um traço acerta pelo canto vazio — então
         // aqui ela é um CÍRCULO, como o cometa da Torre (mesma razão, ver `release`).
@@ -958,7 +962,6 @@ export class EnemySystem {
         // ANTERIOR tinha (10.2×9.8) e que o balanceamento da Fase 2 já foi jogado em cima.
         // Manter o `0.7` do canvas aqui teria inflado a caixa vertical em 37% de graça: o canvas
         // novo é mais alto, e a fagulha teria virado hitbox.
-        (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
       } else if (e.getData('kind') === 'aranha') {
         // A ARANHA TEM MUNIÇÃO PRÓPRIA (2026-08-29). Ver `municaoAranha` e `makeShotsChefes`.
         EnemySystem.municaoAranha(b);
@@ -1031,6 +1034,8 @@ export class EnemySystem {
     // ANTERIOR — um projétil que atravessa uma torre por herança de vaga. Ver
     // `TerrainSystem.fireAt` e `GameScene.enemyBulletHitCover`.
     b.setData('atirador', null);
+    // the sonda's orb pops when the player's shot hits it (spec 2026-11-20 §7): a recycled slot is solid again
+    b.setData('destrutivel', false);
   }
 
   private cullBullets(): void {

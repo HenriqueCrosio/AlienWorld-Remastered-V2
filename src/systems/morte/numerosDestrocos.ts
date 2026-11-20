@@ -13,7 +13,14 @@ export type Classe = 'comum' | 'elite' | 'mini' | 'chefe';
  * the flesh's cut, and a small fireball. ROCHA (27/10, the F2 belt) has no fire at all: gravel, dust, and a fresh face
  * a little lighter than the weathered one.
  */
-export type Material = 'metal' | 'luz' | 'carne' | 'biomec' | 'rocha';
+export type Material = 'metal' | 'luz' | 'carne' | 'biomec' | 'rocha' | 'ferrugem';
+/**
+ * FERRUGEM (20/11, the rust sonda of the F3 — him: *"crispy parecido com os outros, mas uma nova seria bem-vindo"*): a
+ * shell eaten by rust — no fire of its own: the cut glows oxidized orange and goes dark brown, dry orange sparks, a
+ * puff of rust dust, a small pop. Two shapes on the table for him: F1 *crocante* (the commons' chips) and F2
+ * *esfarela* (it comes apart in flakes, the burn front of `desintegra`).
+ */
+export type VarianteFerrugem = 'F1' | 'F2';
 /** The death shapes (geometry); the material paints them. `rocha`: a rock breaking in the vacuum (`DESTROCOS.rocha`). */
 export type Estilo = 'lascas' | 'meio' | 'carcaca' | 'ruptura' | 'estilhacos' | 'desintegra' | 'rocha';
 /** How a rock breaks (27/10, for him to choose in the film): R1 the fracture, R2 the crumble, R3 split in two. */
@@ -43,6 +50,7 @@ export type Variante = 'hoje' | 'A1' | 'A2' | 'A3' | 'B1' | 'B2' | 'C1' | 'C2' |
 export const SEPARACAO: Record<string, { classe: Classe; material: Material }> = {
   drone: { classe: 'comum', material: 'metal' },
   batedor: { classe: 'comum', material: 'metal' },
+  sonda: { classe: 'comum', material: 'metal' },
   canhoneira: { classe: 'comum', material: 'metal' },
   kamikaze: { classe: 'comum', material: 'metal' },
   cargueiro: { classe: 'comum', material: 'metal' },
@@ -113,6 +121,8 @@ export const ESTILO_DA_VARIANTE: Record<Exclude<Variante, 'hoje'>, Estilo> = {
 };
 
 export const DESTROCOS = {
+  /** the rust's death (`VarianteFerrugem`): HIS CHOICE (20/11, *"a F1"*): the crispy chips (F1) */
+  ferrugem: { variante: 'F1' as VarianteFerrugem, faiscas: 1.6, poeira: 7 },
   mundo: {
     gravidade: 170,
     arrasto: { atmosfera: 0.9, vacuo: 0.25 },

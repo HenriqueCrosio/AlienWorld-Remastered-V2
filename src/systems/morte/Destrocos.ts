@@ -23,6 +23,7 @@ import {
   RAMPA_CARNE,
   RAMPA_ROCHA,
   RAMPA_FLUIDO,
+  RAMPA_FERRUGEM,
   clarear,
   corDaRampa,
   queimar,
@@ -52,8 +53,8 @@ import { tipoDoMaterial } from '../explosoes/tipoExplosao';
 
 const W = GAME_WIDTH;
 const H = GAME_HEIGHT;
-const RAMPAS = [RAMPA_FOGO, RAMPA_MEDUSA, RAMPA_CARNE, RAMPA_ROCHA, RAMPA_FLUIDO];
-const RAMPA_DO: Record<Material, number> = { metal: 0, luz: 1, carne: 2, biomec: 2, rocha: 3 };
+const RAMPAS = [RAMPA_FOGO, RAMPA_MEDUSA, RAMPA_CARNE, RAMPA_ROCHA, RAMPA_FLUIDO, RAMPA_FERRUGEM];
+const RAMPA_DO: Record<Material, number> = { metal: 0, luz: 1, carne: 2, biomec: 2, rocha: 3, ferrugem: 5 };
 /** the serpent's fluid (28/10, the organic bite's droplets): its ramp in `RAMPAS` */
 const FLUIDO = 4;
 /**
@@ -66,8 +67,10 @@ const FUMO: [number, number][] = [
   [rgba(0x4a, 0x22, 0x2a), rgba(0x30, 0x14, 0x1c)],
   [rgba(0x46, 0x34, 0x3c), rgba(0x2e, 0x22, 0x2a)],
   [rgba(0x6a, 0x7a, 0x86), rgba(0x46, 0x54, 0x60)],
+  // the RUST's dust (20/11): a dry red-brown
+  [rgba(0x7a, 0x46, 0x30), rgba(0x52, 0x2e, 0x22)],
 ];
-const FUMO_DO: Record<Material, number> = { metal: 0, luz: 1, carne: 2, biomec: 3, rocha: 4 };
+const FUMO_DO: Record<Material, number> = { metal: 0, luz: 1, carne: 2, biomec: 3, rocha: 4, ferrugem: 5 };
 
 export interface OpcoesMorteInimigo {
   estilo: Estilo;
@@ -1074,6 +1077,11 @@ export class Destrocos {
     const x0 = primeiro % vis.w, y0 = (primeiro - x0) / vis.w;
     const [wx, wy] = this.noMundo(base, x0, y0);
     if (material === 'metal') this.brasas.add(wx, wy, (this.rnd() - 0.5) * 60, -20 - this.rnd() * 40, 0.15 + this.rnd() * 0.15, 1, 0, 0, 0, 0);
+    // the rust: a dry orange spark and a flake of its dust off the face it was hit on (20/11)
+    if (material === 'ferrugem') {
+      this.brasas.add(wx, wy, (this.rnd() - 0.5) * 60, -20 - this.rnd() * 40, 0.15 + this.rnd() * 0.15, 1, 0, 0, RAMPA_DO.ferrugem, 0);
+      this.fumos.add(wx, wy, bvx - (rx / rn) * 10, bvy - (ry / rn) * 10, 0.4 + this.rnd() * 0.3, 0.5, 1.4 + Math.min(2, px * 0.5), FUMO_DO.ferrugem);
+    }
     if ((material === 'carne' || material === 'biomec') && px >= 3) this.gotas(wx, wy, 0, 0, px);
     // rock: a puff of dust off the face it was hit on (no spark: stone does not spark)
     if (material === 'rocha') this.fumos.add(wx, wy, bvx - (rx / rn) * 10, bvy - (ry / rn) * 10, 0.4 + this.rnd() * 0.3, 0.5, 1.6 + Math.min(2, px * 0.5), FUMO_DO.rocha);
@@ -1694,7 +1702,8 @@ export class Destrocos {
       this.scene.cameras.main.shake(60 * tamanho, 0.0025 * tamanho);
       return;
     }
-    const escala = mat === 'biomec' ? tamanho * 0.7 : tamanho;
+    // (the rust: a small dry pop — its death is the sparks and the dust, `faiscas`)
+    const escala = mat === 'biomec' ? tamanho * 0.7 : mat === 'ferrugem' ? tamanho * 0.45 : tamanho;
     // the explosion of the material (bloco I: metal = D, biomec = B → C), at the same sizes as `Fx.explode`
     this.fx.explosao(tipoDoMaterial(mat), x, y, escala, depth, som);
     this.scene.cameras.main.shake(70 * Math.min(2, escala), 0.003 * Math.min(2, escala));
@@ -1703,6 +1712,15 @@ export class Destrocos {
   /** Sparks (metal), cold embers (light), droplets (flesh) out of a point. */
   private faiscas(mat: Material, x: number, y: number, vx: number, vy: number, n: number, h0: number): void {
     if (mat === 'carne') return this.gotas(x, y, vx, vy, n * 1.5);
+    if (mat === 'ferrugem') {
+      // CRISPY (20/11): more dry orange sparks than the metal's, and the rust's dust puffing out
+      const F = DESTROCOS.ferrugem;
+      n = Math.round(n * F.faiscas);
+      for (let i = 0; i < F.poeira; i++) {
+        const a = this.rnd() * Math.PI * 2, v = 6 + this.rnd() * 18;
+        this.fumos.add(x + Math.cos(a) * 3, y + Math.sin(a) * 3, vx * 0.5 + Math.cos(a) * v, vy * 0.5 + Math.sin(a) * v, 0.5 + this.rnd() * 0.5, 0.8, 2 + this.rnd() * 2, FUMO_DO.ferrugem);
+      }
+    }
     for (let i = 0; i < n; i++) {
       const a = this.rnd() * Math.PI * 2, v = 25 + this.rnd() * 55;
       this.brasas.add(x, y, vx + Math.cos(a) * v, vy + Math.sin(a) * v, 0.2 + this.rnd() * 0.35, h0, 0, 0, RAMPA_DO[mat === 'biomec' ? 'metal' : mat], this.rnd());

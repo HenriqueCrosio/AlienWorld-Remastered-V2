@@ -70,7 +70,7 @@ import { MORTE, ESTILOS_MORTE, estiloDaNave, type EstiloMorte } from '../systems
 import { Destrocos } from '../systems/morte/Destrocos';
 import { ENGUIA } from '../f3/enguiaCilindro';
 import { AmbienteDaFase } from '../som/AmbienteDaFase';
-import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, SEPARACAO, type Classe, type Variante, type VarianteRocha } from '../systems/morte/numerosDestrocos';
+import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, SEPARACAO, type Classe, type Estilo, type Material, type Variante, type VarianteFerrugem, type VarianteRocha } from '../systems/morte/numerosDestrocos';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
 export type HandlingMode = 'diegetico' | 'flap' | 'free';
@@ -839,6 +839,14 @@ export class GameScene extends Phaser.Scene {
       this.enemies.enemies,
       (b, e) => this.bulletHitEnemy(b as Phaser.Physics.Arcade.Sprite, e as Phaser.Physics.Arcade.Sprite),
       (b, e) => !this.pelaBrecha(b as Phaser.Physics.Arcade.Sprite, e as Phaser.Physics.Arcade.Sprite),
+    );
+    // THE SONDA's ORB IS DESTRUCTIBLE (spec 2026-11-20 §7): the player's shot pops it in a small red shockwave. Only the
+    // orbs marked `destrutivel` — every other enemy shot stays solid to the player's fire.
+    this.physics.add.overlap(
+      this.weapons.bullets,
+      this.enemies.enemyBullets,
+      (b, t) => this.tiroAcertaTiro(b as Phaser.Physics.Arcade.Sprite, t as Phaser.Physics.Arcade.Sprite),
+      (_b, t) => (t as Phaser.Physics.Arcade.Sprite).getData('destrutivel') === true,
     );
     this.physics.add.overlap(this.ship, this.pickups.pickups, (_s, p) =>
       this.collectPickup(p as Phaser.Physics.Arcade.Sprite),
@@ -2799,6 +2807,15 @@ export class GameScene extends Phaser.Scene {
    * (o pico é indestrutível); no vácuo ele se ABATE. O destroço da frota, não: é massa morta,
    * grande demais para o canhão de um caça.
    */
+  /** The player's shot met a destructible enemy orb (the sonda's): both go, the orb in its red shockwave. */
+  private tiroAcertaTiro(bala: Phaser.Physics.Arcade.Sprite, tiro: Phaser.Physics.Arcade.Sprite): void {
+    if (!bala.active || !tiro.active) return;
+    const { x, y } = tiro;
+    this.weapons.release(bala);
+    this.enemies.release(tiro);
+    this.fx.estouroDoTiro(x, y);
+  }
+
   private bulletHitHazard(
     bullet: Phaser.Physics.Arcade.Sprite,
     hazard: Phaser.Physics.Arcade.Sprite,
@@ -2969,7 +2986,7 @@ export class GameScene extends Phaser.Scene {
     this.fx.hit(bullet.x, bullet.y);
     {
       const kind = enemy.getData('kind') as string;
-      Som.tocar(somDoAcerto(SEPARACAO[kind]?.material, kind), { x: bullet.x });
+      Som.tocar(somDoAcerto(this.separacaoDe(enemy)?.material, kind), { x: bullet.x });
     }
 
     const bx = bullet.x;
@@ -2993,17 +3010,33 @@ export class GameScene extends Phaser.Scene {
    *
    * O `aguaViva` é o único caso hoje; a forma da função é o que impede o próximo de nascer torto.
    */
+  /**
+   * The kind's class and material — the material the enemy SAYS it is made of when it says (`setData('material')`: the
+   * sonda, metal in the F2 and RUST in the F3, one kind with two skins — 20/11), else its kind's.
+   */
+  private separacaoDe(e: Phaser.GameObjects.GameObject): { classe: Classe; material: Material } | undefined {
+    const sep = SEPARACAO[e.getData('kind') as string];
+    const proprio = e.getData('material') as Material | undefined;
+    return sep && proprio ? { ...sep, material: proprio } : sep;
+  }
+
+  /** The RUST's death shape (20/11, for him to choose in the film: F1 the chips, F2 the crumble); the registry overrides. */
+  private estiloDaFerrugem(): Estilo {
+    const v = (this.registry.get('ferrugemVariante') as VarianteFerrugem | undefined) ?? DESTROCOS.ferrugem.variante;
+    return v === 'F2' ? 'desintegra' : 'lascas';
+  }
+
   private matarInimigo(e: Phaser.Physics.Arcade.Sprite, de?: { x: number; y: number }): void {
     const kind = e.getData('kind') as string;
     // OS DESTROÇOS (26/10, em mesa): cada classe morre nos próprios pixels, na variação escolhida; `hoje` é a de antes.
-    const sep = SEPARACAO[kind];
+    const sep = this.separacaoDe(e);
     const variante = sep ? this.varianteDe(sep.classe, e) : 'hoje';
     // a kind with its own death sound (the swarm drone) plays it here, and its blasts stay mute (block SOUND)
     const somProprio = somDaMorte(kind);
     if (somProprio) Som.tocar(somProprio, { x: e.x, forca: forcaNoLugar(1, Som.lugarAgora()) });
     if (sep && variante !== 'hoje') {
       this.destrocos.morrer(e, {
-        estilo: ESTILO_DA_VARIANTE[variante],
+        estilo: sep.material === 'ferrugem' ? this.estiloDaFerrugem() : ESTILO_DA_VARIANTE[variante],
         material: sep.material,
         classe: sep.classe,
         de: de ?? { x: this.ship.x, y: this.ship.y },
@@ -3018,7 +3051,7 @@ export class GameScene extends Phaser.Scene {
       this.fx.hit(e.x, e.y);
     } else {
       // (bloco I) a explosão pelo material dele: metal = D, luz = B, biomec = B → C, carne = C de matéria
-      const sep = SEPARACAO[kind];
+      const sep = this.separacaoDe(e);
       this.fx.explode(e.x, e.y, e.scale, 50, tipoDoMaterial(sep?.material, sep?.classe), !somProprio);
     }
     this.score += e.getData('score') as number;
@@ -3130,7 +3163,7 @@ export class GameScene extends Phaser.Scene {
     //   de dano 3, cava mais —, a explosão 3 e a bomba 4; a queima e o choque não têm lado e não tiram);
     // - perto da morte, um limiar arranca o PEDAÇO grande do lado do tiro, e a mordida fica no corpo. A aranha perde
     //   as PATAS no fim (a mordida mira a base dela).
-    const sep = SEPARACAO[e.getData('kind') as string];
+    const sep = this.separacaoDe(e);
     if (sep && this.varianteDe(sep.classe, e) !== 'hoje') {
       if (de) this.destrocos.marcar(e, DESTROCOS.marca.px(fonte, dano), de, sep.classe, sep.material, true, { rumo: de.rumo });
       const hpMax = (e.getData('hpMax') as number | undefined) ?? antes;

@@ -7,7 +7,7 @@ import { ESCOLHAS, escolhaPorNome, nomeDaEscolha } from '../ships.ts';
  */
 
 /** Os inimigos que o sandbox solta (o `EnemyKind` do jogo; a aranha é minichefe: 0 ou 1). */
-export const INIMIGOS = ['drone', 'batedor', 'canhoneira', 'kamikaze', 'cargueiro', 'aguaViva', 'droneMineracao', 'sentinela', 'cacador', 'larva', 'tubo', 'mosca', 'aranha'] as const;
+export const INIMIGOS = ['drone', 'batedor', 'canhoneira', 'kamikaze', 'cargueiro', 'aguaViva', 'droneMineracao', 'sentinela', 'cacador', 'larva', 'tubo', 'mosca', 'aranha', 'sonda'] as const;
 export type TipoInimigo = (typeof INIMIGOS)[number];
 export const NOME_INIMIGO: Record<TipoInimigo, string> = {
   drone: 'drone',
@@ -23,6 +23,7 @@ export const NOME_INIMIGO: Record<TipoInimigo, string> = {
   tubo: 'tubo pulsante (elite, F4)',
   mosca: 'mosca da larva (F4)',
   aranha: 'aranha (minichefe)',
+  sonda: 'sonda (F2 escura / F3 ferrugem)',
 };
 export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
   drone: 20,
@@ -38,6 +39,7 @@ export const MAX_POR_ONDA: Record<TipoInimigo, number> = {
   tubo: 5,
   mosca: 20,
   aranha: 1,
+  sonda: 12,
 };
 export interface ConfigSandbox {
   nave: Nave;
@@ -60,7 +62,7 @@ export const PADRAO: ConfigSandbox = {
   livre: false,
   fase: 2,
   chefe: false,
-  inimigos: { drone: 6, batedor: 0, canhoneira: 2, kamikaze: 2, cargueiro: 0, aguaViva: 0, droneMineracao: 0, sentinela: 0, cacador: 0, larva: 0, tubo: 0, mosca: 0, aranha: 0 },
+  inimigos: { drone: 6, batedor: 0, canhoneira: 2, kamikaze: 2, cargueiro: 0, aguaViva: 0, droneMineracao: 0, sentinela: 0, cacador: 0, larva: 0, tubo: 0, mosca: 0, aranha: 0, sonda: 0 },
   intervalo: 8,
   repetir: true,
 };

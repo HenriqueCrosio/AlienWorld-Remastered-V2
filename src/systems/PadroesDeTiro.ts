@@ -20,6 +20,18 @@ export class PadroesDeTiro {
   }
 
   /**
+   * The ORB of the belt (the F2 gunship's ammo, `bulletOrb`): its art untinted and not additive (the dark rim is half of
+   * why it reads), pulsing, a CIRCLE hitbox — 10 px across on screen at 0.8 (measured: see `EnemySystem.fireAt`). The
+   * sonda shoots it in the F2 and the F3.
+   */
+  static vestirBola(b: Tiro): void {
+    b.setTexture('bulletOrb').setScale(0.8).clearTint();
+    b.setBlendMode(Phaser.BlendModes.NORMAL);
+    if (b.scene.anims.exists('bullet-orb-pulse')) b.play('bullet-orb-pulse');
+    (b.body as Phaser.Physics.Arcade.Body).setCircle(6.25, 10 - 6.25, 12 - 6.25);
+  }
+
+  /**
    * Um tiro DESENHADO (06/10, os dos elites): a arte nas cores dela, sem tint nem brilho, e uma hitbox PRÓPRIA centrada
    * no quadro — o `release` devolve a do `bolt2` (13×9), grande e torta para um traço de 7×1.
    */

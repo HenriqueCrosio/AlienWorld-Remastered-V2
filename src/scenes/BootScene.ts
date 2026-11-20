@@ -53,12 +53,20 @@ const FRAMES: Record<string, number> = {
   minaAnim: 7,
   flakAnim: 7,
 
-  // A FACÇÃO DO CINTURÃO (passe visual 2026-08-08): canhoneira e batedor trocam de pele por
-  // FASE (ver EnemySystem.STAGE_2_SKIN) — estas são as chaves de animação da pele nova.
-  scoutCinturaoAnim: 11,
+  // A FACÇÃO DO CINTURÃO (passe visual 2026-08-08): a canhoneira troca de pele por FASE (ver EnemySystem.STAGE_2_SKIN)
+  // — esta é a chave de animação da pele nova. (A do batedor, o dardo, saiu em 20/11: a sonda entrou no lugar dele.)
   gunshipCinturaoAnim: 7,
   // Os ELITES da F2 (frente B, 05/10): PixMiniMax, instalados por `scripts/_elites/_instalar-anims.mjs`.
   eliteDroneMinerarAnim: 14,
+  // THE SONDA's hover loops (20/11, his choice: the dark A, the rust A — PixMiniMax from his art, cleaned so that
+  // outside the eye and the legs every pixel is his art): `sonda/sonda-<pele>-voo-<n>.png`, 48×48, frame 0 = his art.
+  sondaF2VooAnim: 8,
+  sondaF3VooAnim: 8,
+  // …and the LEAN into a climb / a dive: his art → his art tilted 15° (both ends fixed), 5 frames, played once and held
+  sondaF2SobeAnim: 5,
+  sondaF2DesceAnim: 5,
+  sondaF3SobeAnim: 5,
+  sondaF3DesceAnim: 5,
   eliteDroneAlertaAnim: 5,
   eliteDroneVooAnim: 8,
   eliteSentinelaAbrirAnim: 9,
@@ -197,15 +205,19 @@ const ANIMS: { key: string; prefix: string; frameRate: number; loop?: boolean }[
   // como um navio ancorado.
   { key: 'kamikaze-fly', prefix: 'kamikazeAnim', frameRate: 14 },
   { key: 'scout-fly', prefix: 'scoutAnim', frameRate: 12 },
-  // A pele do cinturão (Fase 2) do batedor: MESMA cadência do 'scout-fly' — é o mesmo
-  // comportamento, só a pele muda (ver EnemySystem.STAGE_2_SKIN).
-  { key: 'scout-cinturao-fly', prefix: 'scoutCinturaoAnim', frameRate: 12 },
   // A pele do cinturão da canhoneira: MESMA cadência do 'gunship-fly' (8) — é o mesmo
   // comportamento pesado, só a pele muda.
   { key: 'gunship-cinturao-fly', prefix: 'gunshipCinturaoAnim', frameRate: 8 },
   // Os ELITES da F2 (frente B, 05/10). A broca e o propulsor a 12–14 (máquina trabalhando); o alerta é um gesto
   // (5 quadros em ~0,4s, o tempo do estado) e o abrir/fechar da sentinela também — tocam uma vez e param.
   { key: 'elite-drone-minerar', prefix: 'eliteDroneMinerarAnim', frameRate: 14 },
+  // the sonda (spec 2026-11-20): the hover at 10 fps (the eye pulse; the rust one's legs paddling)
+  { key: 'sonda-f2-voo', prefix: 'sondaF2VooAnim', frameRate: 10 },
+  { key: 'sonda-f3-voo', prefix: 'sondaF3VooAnim', frameRate: 10 },
+  { key: 'sonda-f2-sobe', prefix: 'sondaF2SobeAnim', frameRate: 16, loop: false },
+  { key: 'sonda-f2-desce', prefix: 'sondaF2DesceAnim', frameRate: 16, loop: false },
+  { key: 'sonda-f3-sobe', prefix: 'sondaF3SobeAnim', frameRate: 16, loop: false },
+  { key: 'sonda-f3-desce', prefix: 'sondaF3DesceAnim', frameRate: 16, loop: false },
   { key: 'elite-drone-alerta', prefix: 'eliteDroneAlertaAnim', frameRate: 12, loop: false },
   { key: 'elite-drone-voo', prefix: 'eliteDroneVooAnim', frameRate: 12 },
   { key: 'elite-sentinela-abrir', prefix: 'eliteSentinelaAbrirAnim', frameRate: 18, loop: false },
@@ -787,11 +799,17 @@ const ART: Record<string, string> = {
   // sprite antigo lilás — e sem animação, porque a animação só toca na variante BASE.
   // A variante volta quando houver um segundo candidato da arte NOVA.
 
-  // A FACÇÃO DO CINTURÃO (Fase 2, passe visual 2026-08-08): canhoneira/batedor trocam de pele
-  // por fase (STAGE_2_SKIN no EnemySystem) — sem este PNG, a Fase 2 cai de volta na arte biomec
-  // de sempre (guarda de textura).
-  enemyScoutCinturao: 'sprites/enemy-scout-cinturao.png',
-  ...animFrames('scoutCinturaoAnim', 'scout-cinturao-anim'),
+  // THE SONDA (20/11): his PixelLab art, dark (F2) and rust (F3) — the first frame of her clips (spec 2026-11-20).
+  sondaF2: 'sprites/sonda/sonda-f2.png',
+  sondaF3: 'sprites/sonda/sonda-f3.png',
+  ...animFrames('sondaF2VooAnim', 'sonda/sonda-f2-voo'),
+  ...animFrames('sondaF3VooAnim', 'sonda/sonda-f3-voo'),
+  ...animFrames('sondaF2SobeAnim', 'sonda/sonda-f2-sobe'),
+  ...animFrames('sondaF2DesceAnim', 'sonda/sonda-f2-desce'),
+  ...animFrames('sondaF3SobeAnim', 'sonda/sonda-f3-sobe'),
+  ...animFrames('sondaF3DesceAnim', 'sonda/sonda-f3-desce'),
+  // A FACÇÃO DO CINTURÃO (Fase 2, passe visual 2026-08-08): a canhoneira troca de pele por fase (STAGE_2_SKIN no
+  // EnemySystem) — sem este PNG, a Fase 2 cai de volta na arte biomec de sempre (guarda de textura).
   enemyGunshipCinturao: 'sprites/enemy-gunship-cinturao.png',
   ...animFrames('gunshipCinturaoAnim', 'gunship-cinturao-anim'),
   // A BOLA de energia que a canhoneira do cinturão cospe (ver STAGE_2_SKIN.canhoneira.bullet):

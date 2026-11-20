@@ -350,4 +350,70 @@ export class Fx {
     // pesado — o que ele empurra é luz, não massa.
     this.scene.cameras.main.shake(70, 0.003);
   }
+
+  /** The red shockwave's frames: radius and colour, ring by ring (the last ones fade to the dark red). */
+  private static readonly ANEL_VERMELHO: { r: number; cor: string; miolo?: string }[] = [
+    { r: 1, cor: '#ff6a52', miolo: '#ffd2c4' },
+    { r: 3, cor: '#ff3a32', miolo: '#ff8a70' },
+    { r: 5, cor: '#e8222a' },
+    { r: 7, cor: '#b0141e' },
+    { r: 8, cor: '#6e0c14' },
+  ];
+
+  /**
+   * The red shockwave's frames, BAKED IN PIXELS once (a lesson kept: a scene effect drawn with `Graphics` reads as
+   * "generated"): a 1-px midpoint circle per frame at the game's resolution, 17×17.
+   */
+  private garantirAnelVermelho(): void {
+    const tex = this.scene.textures;
+    if (tex.exists('anelVermelho0')) return;
+    Fx.ANEL_VERMELHO.forEach(({ r, cor, miolo }, k) => {
+      const c = tex.createCanvas(`anelVermelho${k}`, 17, 17);
+      if (!c) return;
+      const g = c.getContext();
+      g.fillStyle = cor;
+      // the midpoint circle: every octant's pixel, no anti-aliasing
+      let x = r;
+      let y = 0;
+      let erro = 1 - r;
+      while (x >= y) {
+        for (const [dx, dy] of [[x, y], [y, x], [-y, x], [-x, y], [-x, -y], [-y, -x], [y, -x], [x, -y]]) g.fillRect(8 + dx, 8 + dy, 1, 1);
+        y++;
+        if (erro < 0) erro += 2 * y + 1;
+        else {
+          x--;
+          erro += 2 * (y - x) + 1;
+        }
+      }
+      if (miolo) {
+        g.fillStyle = miolo;
+        g.fillRect(7, 7, 3, 3);
+      }
+      c.refresh();
+    });
+  }
+
+  /**
+   * THE SONDA's ORB POPPED by the player's shot (spec 2026-11-20 §7, him: *"uma pequena onda de choque vermelha na
+   * explosao dos tiros"*): the red ring opens in 5 frames (~210 ms) and is gone. Small and quick: it is a shot, not a kill.
+   */
+  estouroDoTiro(x: number, y: number): void {
+    this.garantirAnelVermelho();
+    const anel = this.scene.add.image(Math.round(x), Math.round(y), 'anelVermelho0').setDepth(50);
+    let k = 0;
+    const passo = this.scene.time.addEvent({
+      delay: 42,
+      repeat: Fx.ANEL_VERMELHO.length - 1,
+      callback: () => {
+        k++;
+        if (k >= Fx.ANEL_VERMELHO.length) {
+          anel.destroy();
+          passo.remove();
+          return;
+        }
+        anel.setTexture(`anelVermelho${k}`);
+      },
+    });
+    Som.tocar('acerto.drone', { x, forca: 0.6 });
+  }
 }

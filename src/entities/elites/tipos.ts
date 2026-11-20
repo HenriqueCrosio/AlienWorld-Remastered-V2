@@ -53,6 +53,8 @@ export interface CtxElite {
   ganchos: GanchosElite;
   /** Faz NASCER outro inimigo em (x, y) — a pupa da Larva, a mosca da pupa. Ele entra no grupo dos inimigos. */
   nascer: (kind: EnemyKind, x: number, y: number) => Sprite;
+  /** The stage (1–4): who dresses by stage (the sonda: dark in the F2, rust in the F3). */
+  fase: number;
 }
 
 /**

@@ -13,5 +13,7 @@ export type TipoExplosao = 'perigo' | 'metal' | 'chefeFim' | 'luz' | 'biomec' | 
 export function tipoDoMaterial(material: Material | undefined, classe?: Classe): TipoExplosao {
   if (!material) return 'perigo';
   if (material === 'metal') return classe === 'chefe' ? 'chefeFim' : 'metal';
+  // (the rust: the metal's blast, small — `Destrocos.estouro` scales it)
+  if (material === 'ferrugem') return 'metal';
   return material;
 }
