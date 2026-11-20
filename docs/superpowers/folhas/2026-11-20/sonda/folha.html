@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonda: os laços de voo</title>
+<style>
+  :root { --fundo: #0e1016; --texto: #d8dbe2; --fraco: #8a90a0; --linha: #262a36; --acento: #ff8a3c; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  p.sub { color: var(--fraco); margin: 0 0 24px; }
+  section { border-top: 1px solid var(--linha); padding: 20px 0; }
+  h2 { font-size: 19px; margin: 0 0 4px; }
+  h2 b { color: var(--acento); }
+  .nota { color: var(--fraco); margin: 0 0 12px; }
+  .linha { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .painel { background: #000; border: 1px solid var(--linha); }
+  .painel span { display: block; font-size: 12px; color: var(--fraco); padding: 4px 8px; background: #11131a; }
+  canvas { display: block; image-rendering: pixelated; max-width: 100%; }
+</style>
+</head>
+<body>
+<main>
+  <h1>A sonda: os laços de voo</h1>
+  <p class="sub">A sua arte é o quadro 0 e o fim de cada laço. Fora do olho e das patas, cada pixel é o da sua arte (as
+    fagulhas e o vazamento do olho que o gerador pôs foram tirados). 10 quadros por segundo, a velocidade planejada.
+    À esquerda, a onda de 3 em fila atravessando o fundo da fase no tamanho do jogo (a tela ×3); à direita, ampliada ×8.</p>
+
+  <section>
+    <h2><b>F2 · escura — A</b> (a única das duas gerações aproveitável)</h2>
+    <p class="nota">Só o olho pulsa. A B explodiu em fagulhas em volta do corpo e foi descartada.</p>
+    <div class="linha" data-clipe="f2-vooA" data-fundo="fundo-f2.jpg"></div>
+  </section>
+
+  <section>
+    <h2><b>F3 · ferrugem — A</b></h2>
+    <p class="nota">As patas mexem pouco; o olho pulsa dentro do anel.</p>
+    <div class="linha" data-clipe="f3-vooA" data-fundo="fundo-f3-nebulosa.jpg"></div>
+  </section>
+
+  <section>
+    <h2><b>F3 · ferrugem — B</b></h2>
+    <p class="nota">As patas remam com mais força (o olho dela virava uma explosão em estrela: contido no anel).</p>
+    <div class="linha" data-clipe="f3-vooB" data-fundo="fundo-f3-casco.jpg"></div>
+  </section>
+</main>
+<script>
+  const QUADROS = 8, FPS = 10, ESC = 3, ZOOM = 8, VEL = 80 * ESC; // her 80 px/s on the ×3 screen
+  const carregar = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.src = src; });
+  for (const el of document.querySelectorAll('[data-clipe]')) {
+    const nome = el.dataset.clipe;
+    Promise.all([carregar(el.dataset.fundo), ...Array.from({ length: QUADROS }, (_, k) => carregar(`q/${nome}-${k}.png`))]).then(([fundo, ...fr]) => {
+      const p1 = document.createElement('div'); p1.className = 'painel';
+      const c1 = document.createElement('canvas'); c1.width = 1152; c1.height = 648; c1.style.width = '768px';
+      p1.append(c1); const l1 = document.createElement('span'); l1.textContent = 'em jogo (a onda de 3, fila colada)'; p1.append(l1);
+      const p2 = document.createElement('div'); p2.className = 'painel';
+      const c2 = document.createElement('canvas'); c2.width = 48 * ZOOM; c2.height = 48 * ZOOM;
+      p2.append(c2); const l2 = document.createElement('span'); l2.textContent = '×8'; p2.append(l2);
+      el.append(p1, p2);
+      const g1 = c1.getContext('2d'), g2 = c2.getContext('2d');
+      g1.imageSmoothingEnabled = false; g2.imageSmoothingEnabled = false;
+      const t0 = performance.now();
+      const passo = (agora) => {
+        // (a rAF timestamp can come before t0: a negative frame index killed the loop of one section)
+        const t = Math.max(0, (agora - t0) / 1000), q = Math.floor(t * FPS) % QUADROS;
+        g1.drawImage(fundo, 0, 0);
+        const cruza = (1152 + 300) / VEL;
+        for (let i = 0; i < 3; i++) {
+          const ti = (t - i * 0.3) % cruza;
+          if (ti < 0) continue;
+          const x = 1152 + 60 - ti * VEL, y = 300 + Math.sin((x / 1152) * Math.PI) * -90;
+          g1.drawImage(fr[(q + i * 3) % QUADROS], Math.round(x - 72), Math.round(y - 72), 48 * ESC, 48 * ESC);
+        }
+        g2.clearRect(0, 0, c2.width, c2.height);
+        g2.fillStyle = '#05060a'; g2.fillRect(0, 0, c2.width, c2.height);
+        g2.drawImage(fr[q], 0, 0, 48 * ZOOM, 48 * ZOOM);
+        requestAnimationFrame(passo);
+      };
+      requestAnimationFrame(passo);
+    });
+  }
+</script>
+</body>
+</html>

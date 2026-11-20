@@ -8,6 +8,7 @@
 //   grupos: comuns (F2: drone, batedor, canhoneira, kamikaze, cargueiro) · f1 (F1: drone, batedor, canhoneira — the air)
 //           · vivos (água-viva F3, pupa e mosca F4) · elites · mini (a aranha) · chefe (a Capitânia) · jogo (a wave, as in play)
 //           · torre · serpente · nucleo (guardião e predador) · golfinho — the whole fight, in the practice arena (27/10)
+//           · sonda (20/11: the dark one, and the rust one's F1 / F2)
 // (with `npm run dev` running; do not touch src/ or .html while it films — Vite reloads)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -32,6 +33,17 @@ const GRUPOS = {
       { rotulo: 'canhoneira (F2)', stage: 2, kind: 'canhoneira', golpes: golpes(6, [0.4, 0.3]), mata: 1.8, ate: 3.4 },
       { rotulo: 'kamikaze', stage: 2, kind: 'kamikaze', golpes: golpes(2, [0.5]), mata: 1.3, ate: 2.9 },
       { rotulo: 'cargueiro', stage: 2, kind: 'cargueiro', golpes: golpes(24, [0.25, 0.25, 0.25], 0.4, 0.5), mata: 2.1, ate: 3.8 },
+    ],
+  },
+  // (20/11) THE SONDA: the dark one (metal) and the RUST one in the two shapes of its new material (F1 the chips, F2 the
+  // crumble), each beside today's blast (`hoje`)
+  sonda: {
+    cols: ['hoje', 'A1'],
+    cel: { w: 150, h: 96 },
+    linhas: [
+      { rotulo: 'sonda escura (F2, metal)', stage: 2, kind: 'sonda', golpes: golpes(2, [0.5]), mata: 1.3, ate: 2.9 },
+      { rotulo: 'ferrugem F1 (crocante)', stage: 3, kind: 'sonda', ferrugem: 'F1', golpes: golpes(2, [0.5]), mata: 1.3, ate: 2.9 },
+      { rotulo: 'ferrugem F2 (esfarela)', stage: 3, kind: 'sonda', ferrugem: 'F2', golpes: golpes(2, [0.5]), mata: 1.3, ate: 3.3 },
     ],
   },
   // (27/10, him: the shards were thrown up before falling — now they fall at once, `cairJa`; `escolha` = what plays)
@@ -212,6 +224,8 @@ async function gravar(linha, variante) {
     g.registry.set('pinturaNave', 'laranja');
     g.registry.set('estiloMorte', undefined);
     g.registry.set('sementeMorte', 20261026);
+    // (20/11: the rust's death shape, F1 or F2 — the row says)
+    g.registry.set('ferrugemVariante', linha.ferrugem);
     // (`escolha` = what the game plays: no override, the kinds' and classes' own — the commons' mix included)
     g.registry.set('destrocosVariantes', variante === 'escolha' ? undefined : { comum: variante, elite: variante, mini: variante, chefe: variante });
     // (the scene object is reused: the wait below must see THIS run's cards, not the last one's)
