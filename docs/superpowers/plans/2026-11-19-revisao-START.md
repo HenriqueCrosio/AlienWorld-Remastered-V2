@@ -9,6 +9,26 @@
 > Tudo está commitado e empurrado (19/11). As regras do som: §10.10–10.12 da spec `specs/2026-11-15-bloco-som-design.md`;
 > o menu: `specs/2026-11-19-menu-neblina-chuva-design.md` e a §3.1 de `specs/2026-10-19-menu-refeito-design.md`.
 
+## 📍 20/11 — os pontos 1 e 2 REVISADOS por ele, os ajustes feitos, commitados e empurrados
+
+- **1, o fim do jogo:** *"ficou muito bom com a trilha sonora do tema final"*; o flyby final e o impacto aprovados. Os
+  ajustes (a §10.13 da spec do som): a trilha final ADIANTADA para a 1ª cena (a nave sugada, `T.DESCOMPRESSAO`); o rasgo e
+  a descompressão −1,7 dB; o impacto −1,4 dB; o FOGO da colônia já na queda, baixo (*"a colonia já está em chamas
+  antes"*), e a superfície "A e C" JUNTAS (o vento por baixo do fogo desde o impacto, à frente quando a lava esfria, o
+  fogo em brasas). Ele: *"Agora tudo ficou muito bem organizado"*.
+- **A decisão do hangar:** confirmada como já estava (o hangar segue a faixa do menu de onde veio).
+- **2, o menu:** *"tudo ficou muito bem feito"*.
+- **Novo, dele:** as CUTSCENES ENTRE AS FASES (1, 2 e 3) sem música — *"só ocorra os efeitos e ambientação. É a pausa
+  que o jogador precisa entre as fases"*: a trilha sai em 1,5 s quando a cutscene abre (`SAI_A_TRILHA_MS`). Elas não têm
+  fundo de ambiente próprio (só o motor e os efeitos). **O preenchimento é DELE** (20/11): *"vou ver se crio um fundo de
+  espaço para as duas primeiras cutscenes e uma de interior para a cutscene da doca da F4"* — quando os arquivos
+  chegarem, instalar como fundo (`tocarFundo`, a camada ambiente, o nível medido como os do final) na `InterludeScene` e
+  na `Interlude2Scene` (o espaço) e na `Interlude3Scene` (o interior do hangar do Leviatã).
+- **Anotado para a limpeza da build final (ele: *"pode ser anotado agora e ajustado depois"*):** o RESULTADO/os CRÉDITOS
+  repetem — do menu do amanhecer, ir a uma cutscene ou fase e voltar ao menu cai de novo na tela de créditos; deve
+  disparar UMA vez por zerada. Ver o 🧭 do HANDOFF (a causa já achada).
+- **Falta da revisão:** o ponto 3 (o som inteiro, as quatro fases com MÚSICA 10 e 0). Depois, o F.
+
 ## ▶️ Como abrir a sessão
 
 1. `npm run dev` (http://localhost:5173) e `git status` (limpo, fora os vídeos e os `q/`). Lembrar o **Ctrl+Shift+R**.

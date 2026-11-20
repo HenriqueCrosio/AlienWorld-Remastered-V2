@@ -512,3 +512,22 @@ uma melhor conexao, preenchimento entre as cenas, de ruidos [...] o que tem hoje
   da saída — o que se ouve depois que ela saiu. A Manta tinha o take passando da esquerda para a direita: espelhado
   (`_sobrevoo-manta-espelhar.mjs`). Medido (`_medir-sobrevoo-final.mjs`): as três caem aos poucos e chegam ao fundo
   ~1 s depois da saída.
+
+### 10.13 A revisão dele do fim e das cutscenes (20/11)
+
+- **A trilha final entra na 1ª cena** (ele: *"ela pode até começar antes [...] na primeira cena e não na segunda"*): na
+  descompressão (`T.DESCOMPRESSAO`, a nave sugada), não mais na ferida. A da luta continua morrendo no rasgo.
+- **A 1ª cena um pouco mais baixa** (*"diminuir um pouco apenas, não muito"*): o rasgo 0,85 → 0,7 e a descompressão
+  0,8 → 0,66 (−1,7 dB). **O impacto** 1 → 0,85 (−1,4 dB; *"um pouco alto, mas nada de mais"*).
+- **O fogo antes do impacto** (*"a colonia já está em chamas antes"*): a superfície A entra durante a queda — 0,3 no plano
+  largo (800 ms depois do começo do capítulo, subindo em 2,4 s), 0,55 no plano baixo, inteira no impacto.
+- **A superfície "A e C" JUNTAS** (*"em conjunto, um complementando o outro"*): o vento do amanhecer (C) entra por baixo
+  do fogo no impacto (0,55, em 4 s); quando a lava esfria, o vento vai à frente (1) e o fogo fica em brasas (0,3). O
+  menu do amanhecer abre no vento.
+- **As cutscenes ENTRE AS FASES sem música** (*"só ocorra os efeitos e ambientação. É a pausa que o jogador precisa
+  entre as fases para começar com a música de cada fase"*): a `InterludeScene`, a `Interlude2Scene` e a `Interlude3Scene`
+  param a trilha ao abrir (1,5 s, `SAI_A_TRILHA_MS`); a fase seguinte entra com a dela. O fundo de cada uma virá dele
+  (o espaço nas duas primeiras, um interior na do hangar do Leviatã). A cutscene final segue com a trilha final.
+- **O hangar** segue a faixa do menu de onde se veio (confirmado por ele: é sempre a noite na prática).
+- Os testes: `test-som-cutscenes-jogo` (o silêncio das três, o fogo na queda, o vento com o fogo, o tema na 1ª cena) e
+  `test-som-trilha-jogo` (a cutscene entre fases larga a trilha).

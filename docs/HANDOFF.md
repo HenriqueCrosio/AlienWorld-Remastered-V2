@@ -16,12 +16,26 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-19-revisao-START.md`. A sessão abre com ELE ANALISANDO
-> tudo o que foi feito em 18–19/11 — o som fechado (a folha 8, a trilha dele, o passe de mixagem), o menu da noite (a
-> neblina, a chuva, o trovão, o Leviatã em reta) e o FIM do jogo (a trilha final dele da ferida até o menu do amanhecer,
-> o impacto do Leviatã, os fundos que ligam a cutscene final, o sobrevoo que se afasta) — com a lista do que analisar
-> no START. Ele joga e diz o que ajustar; quando der a revisão por fechada, segue o F (START
-> `plans/2026-11-15-bloco-f-START.md`, com os dois batedores novos que ele gerou)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-19-revisao-START.md`. A revisão de 18–19/11 está no meio:
+> em 20/11 ele revisou o FIM do jogo e o MENU (ajustados, commitados e empurrados — o 📍 de 20/11 no START); falta o
+> ponto 3, o SOM INTEIRO (as quatro fases com MÚSICA 10 e 0). Ele joga e diz o que ajustar; quando der a revisão por
+> fechada, segue o F (START `plans/2026-11-15-bloco-f-START.md`, com os dois batedores novos que ele gerou)."**
+>
+> 📍 **20/11 — A REVISÃO DO FIM E DO MENU; COMMITADO E EMPURRADO.** (a §10.13 da spec do som; o registro no START)
+> - **O fim:** a trilha final entra na 1ª cena (a nave sugada); a 1ª cena e o impacto um pouco mais baixos; o fogo da
+>   colônia já na queda, baixo; a superfície "A e C" juntas (o vento por baixo do fogo, à frente quando a lava esfria).
+> - **As cutscenes ENTRE AS FASES sem música** (ele: *"É a pausa que o jogador precisa entre as fases para começar com
+>   a música de cada fase"*): a trilha sai em 1,5 s ao abrir a cutscene 1, 2 ou 3; ficam os efeitos e o motor. **O
+>   fundo delas virá DELE:** um de espaço para as cutscenes 1 e 2, um de interior para a 3 (o hangar do Leviatã) —
+>   instalar quando os arquivos chegarem.
+> - ⚠️ **PARA A LIMPEZA DA BUILD FINAL (os atalhos de dev, os das cutscenes etc.) — anotado por ele em 20/11:** do menu
+>   do amanhecer, ir a uma cutscene ou fase e voltar ao menu cai DE NOVO na tela de créditos; o resultado/os créditos
+>   devem disparar UMA ÚNICA VEZ por zerada. **A causa (conferida):** o Phaser guarda os últimos dados de uma cena —
+>   `Systems.start(data)` só troca `settings.data` quando vêm dados — e várias saídas fazem `scene.start('Menu')` sem
+>   dados (a pausa, o GameOver, as cutscenes 2 e 3, o Boot), então o menu recebe outra vez o `{ resultado }` que a
+>   `Interlude4Scene.terminar` deu. ⚠️ Não é só dos atalhos: um jogador que zera e depois sai de uma fase pela pausa
+>   também cai nisso. O conserto: o menu consumir o `resultado` (limpar `this.sys.settings.data` ao usá-lo), ou toda
+>   saída passar `{}`; e um teste que volta ao menu duas vezes.
 >
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem, o
 > fim do jogo) → **a REVISÃO dele (o próximo)** → F (a F2: a frota de batedores e a rocha do minerador) → o
