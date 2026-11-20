@@ -26,7 +26,9 @@
 - **Anotado para a limpeza da build final (ele: *"pode ser anotado agora e ajustado depois"*):** o RESULTADO/os CRÉDITOS
   repetem — do menu do amanhecer, ir a uma cutscene ou fase e voltar ao menu cai de novo na tela de créditos; deve
   disparar UMA vez por zerada. Ver o 🧭 do HANDOFF (a causa já achada).
-- **Falta da revisão:** o ponto 3 (o som inteiro, as quatro fases com MÚSICA 10 e 0). Depois, o F.
+- ✅ **A REVISÃO FECHOU (20/11):** ele revisou também o ponto 3 — *"está tudo certo com as pendencias do ponto 1 e 2,
+  ponto 3"*. Segue o F (START `plans/2026-11-15-bloco-f-START.md`). (A chama azul da TERMINUS no espaço que ele
+  quis na X-AELO era a carta Propulsores: descartado.)
 
 ## ▶️ Como abrir a sessão
 

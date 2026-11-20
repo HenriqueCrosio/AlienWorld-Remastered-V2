@@ -24,7 +24,13 @@
 
 ## ▶️ O F: o que está anotado (do 🧭, o item "F — Fase 2: a frota e o minerador")
 
-1. **Os batedores da frota** (as naves finas da pele do cinturão):
+0. ~~A chama do motor pelo lugar~~ — **descartado em 20/11:** ele pediu a X-AELO laranja na atmosfera e azul no
+   espaço como a TERMINUS, mas o azul que ele viu era a carta PROPULSORES (`GameScene.tocarMotor`, a versão `-azul`
+   das humanas); ele: *"Você tem razão, deixe como está então. Tinha me esquecido da carta"*. Nada a fazer.
+
+1. ✅ **FEITO EM 20/11 — virou a SONDA** (spec `specs/2026-11-20-bloco-f-sonda-design.md`; o "batedor" destas notas
+   era o DARDO, e ele saiu; os batedores roxos ficam). O registro de antes:
+   **Os batedores da frota** (as naves finas da pele do cinturão):
    - menos naves por frota;
    - voo de NAVE (inclinar, fazer curva) no lugar da senóide;
    - atirar contra o jogador; manobra de evasão;

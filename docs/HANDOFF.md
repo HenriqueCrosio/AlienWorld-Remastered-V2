@@ -16,10 +16,29 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-19-revisao-START.md`. A revisão de 18–19/11 está no meio:
-> em 20/11 ele revisou o FIM do jogo e o MENU (ajustados, commitados e empurrados — o 📍 de 20/11 no START); falta o
-> ponto 3, o SOM INTEIRO (as quatro fases com MÚSICA 10 e 0). Ele joga e diz o que ajustar; quando der a revisão por
-> fechada, segue o F (START `plans/2026-11-15-bloco-f-START.md`, com os dois batedores novos que ele gerou)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-15-bloco-f-START.md`. A REVISÃO de 18–19/11 FECHOU em
+> 20/11 (os pontos 1, 2 e 3 — ele: *"está tudo certo"*). No F, a SONDA (no lugar dos dardos da F2, e ondas próprias
+> na F3) FECHOU em 20/11 — aprovada (*"Agora melhorou"*). A sessão abre no 2º item do F: a ROCHA do elite minerador
+> (START `plans/2026-11-15-bloco-f-START.md`, a pergunta 4). Uma pergunta por vez; ele avalia JOGANDO e por GIF."**
+>
+> 📍 **20/11 (3) — A SONDA, O INIMIGO NOVO DO F; APROVADA.** (spec `specs/2026-11-20-bloco-f-sonda-design.md`, plano
+> `plans/2026-11-20-bloco-f-sonda.md`)
+> - **O que era "batedor" nas anotações era o DARDO** (a pele do batedor na F2, ~32×10 px: difícil de acertar). Ele
+>   gerou dois substitutos (tags "Batedor F2" e "Batedor F3"): a **sonda escura** entra nas 6 ondas dos dardos da F2
+>   (3 por onda), a **de ferrugem** ganha 3 ondas próprias na F3 (18,5 · 78 · 89 s), ao lado dos batedores roxos, que
+>   ficam como estão em todas as fases. Um `miudo` do `EnemySystem` (`src/entities/sonda/`, os números em
+>   `src/data/numerosSonda.ts`), a pele pela fase (`CtxElite.fase`).
+> - **O comportamento:** três caminhos sorteados (o mergulho até a altura da nave, o corte em diagonal, a DISPERSÃO em
+>   leque), a fila colada, um BALANÇO leve (4 px; cada uma na sua fase), a esquiva de quem mira (uma vez, 0,25 s de
+>   demora, só dentro da tela); o tiro: uma bolinha (a bola da canhoneira em escala 0,3) logo ao entrar e a cada 1,2 s,
+>   até 3, com aviso de 0,3 s — e DESTRUTÍVEL: o tiro da nave a estoura numa onda de choque vermelha assada em pixel
+>   (`Fx.estouroDoTiro`).
+> - **A arte:** a dele, intocada; o voo A das duas (PixMiniMax limpo: fora do olho e das patas, pixel a pixel a arte
+>   dele) e os clipes de inclinar (as duas pontas fixas). **A morte:** a escura METAL; a de ferrugem num material NOVO,
+>   `ferrugem` (a escolha dele: a F1, crocante — lascas oxidadas, fagulhas secas, poeira de ferrugem).
+> - **Saiu:** a pele do dardo (os PNGs ficam no disco). Os testes `test-sonda-regras`, `test-sonda-ondas`
+>   (`--experimental-transform-types`), `test-sonda-jogo`; o GIF em jogo `scripts/_sonda/_gif-sonda-jogo.mjs`; o grupo
+>   `sonda` no `_filmar-destrocos.mjs`. Folhas em `folhas/2026-11-20/sonda/`.
 >
 > 📍 **20/11 — A REVISÃO DO FIM E DO MENU; COMMITADO E EMPURRADO.** (a §10.13 da spec do som; o registro no START)
 > - **O fim:** a trilha final entra na 1ª cena (a nave sugada); a 1ª cena e o impacto um pouco mais baixos; o fogo da
@@ -42,7 +61,7 @@ sprite que se desfaz nos próprios pixels).
 >   saída passar `{}`; e um teste que volta ao menu duas vezes.
 >
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem, o
-> fim do jogo) → **a REVISÃO dele (o próximo)** → F (a F2: a frota de batedores e a rocha do minerador) → o
+> fim do jogo) → a REVISÃO dele ✅ (20/11) → **F (o próximo)** (a F2: a frota de batedores e a rocha do minerador) → o
 > rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco; e o guardado do som, no fim de
 > `plans/2026-11-18-som-mixagem-START.md`).**
 >
