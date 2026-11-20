@@ -452,7 +452,10 @@ const FOLHA_7_CUTSCENES: Record<string, DefSom> = {
   'cut.doca.cabos': DA_CENA('cut.doca.cabos', 0.87),
   'cut.doca.afunda': DA_CENA('cut.doca.afunda', 0.52),
   'cut.doca.afunda2': DA_CENA('cut.doca.afunda2', 0.47),
-  'cut.leviata.alerta': DA_CENA('cut.leviata.alerta', 0.42),
+  // 20/11, him: *"um som agudo altissimo [...] Um assovio alto, quero que corte isso ou abafe ele"*: the alarm carries a
+  // steady 3.8 kHz whistle (+27 dB over its spectrum, harmonics at 8 and 12 kHz); its own low-pass takes the whistle
+  // down ~15 dB and the body ~1 dB (measured on the file)
+  'cut.leviata.alerta': { ...DA_CENA('cut.leviata.alerta', 0.42), passaBaixa: 1800 },
   'cut.leviata.derrapagem': DA_CENA('cut.leviata.derrapagem', 0.7),
   'cut.leviata.colapso': DA_CENA('cut.leviata.colapso', 0.5),
   'cut.leviata.colapso2': DA_CENA('cut.leviata.colapso2', 0.55),
@@ -506,6 +509,14 @@ const FOLHA_8_AMBIENTE: Record<string, DefSom> = {
   // the tension under the two space stages
   'amb.hangar.chuva': FUNDO('amb.hangar.chuva', 0.92),
   'amb.espaco.tensao': FUNDO('amb.espaco.tensao', 0.34),
+  // 20/11 — HIS beds for the cutscenes between stages, which have no music (`scripts/_som/_ambiente-cutscenes.mjs`): the
+  // deep space hum of cutscenes 1 and 2; the Leviathan's inside in cutscene 3, the two together — the heartbeats and
+  // biomechanical sounds (a bed) over the continuous low complement (a tension layer, like the stages' pair); the levels
+  // measured on the scale (`_calibrar-escala.mjs --so amb.cut`: −30 the space bed; the Leviathan's pair 4 dB over the
+  // stages' beds — 20/11, him: *"não percebi tanto essa ambientação na cutscene 3, ela pode ser mais presente"*)
+  'amb.cut.espaco': FUNDO('amb.cut.espaco', 0.35),
+  'amb.cut.leviata': FUNDO('amb.cut.leviata', 0.7),
+  'amb.cut.leviata2': FUNDO('amb.cut.leviata2', 0.57),
   'amb.f1.fora': FUNDO('amb.f1.fora', 0.39),
   'amb.f1.caverna': FUNDO('amb.f1.caverna', 0.32),
   'amb.f2': FUNDO('amb.f2', 0.31),

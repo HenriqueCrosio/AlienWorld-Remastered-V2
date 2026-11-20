@@ -12,6 +12,7 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
+import { tocarFundo } from '../som/AmbienteDaFase';
 import { lugarDaCena } from '../som/acustica';
 import { Som, type Laco } from '../som/Som';
 import { daNaveNaCena, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
@@ -27,6 +28,8 @@ import docaLuzes from '../data/doca-luzes.json';
 
 /** ms: the track fading out as a cutscene between stages opens (20/11: silence, only the effects and the place). */
 const SAI_A_TRILHA_MS = 1500;
+/** ms: his bed of the cutscene coming in as the track leaves (20/11). */
+const ENTRA_O_FUNDO_MS = 2000;
 
 /** Uma rocha ancorada: o sprite + o ponto da doca em que o cabo dela prende. */
 interface Amarra {
@@ -211,6 +214,9 @@ export class Interlude2Scene extends Phaser.Scene {
     // ambientação. É a pausa que o jogador precisa entre as fases para começar com a música de cada fase"*): the track
     // that came in (the stage's, or the menu's through the dev shortcut) leaves as the cutscene opens
     Music.stop(this, SAI_A_TRILHA_MS);
+    // HIS bed (20/11, `amb.cut.espaco`): the deep space hum under the effects (him: *"dá essa vibração bem grave para
+    // complementar os efeitos"*); it dies with the scene, like every loop
+    tocarFundo('amb.cut.espaco', ENTRA_O_FUNDO_MS);
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     // A nave com que ele CHEGOU. Se ele não trocar nada, é com ela que ele segue — a escolha

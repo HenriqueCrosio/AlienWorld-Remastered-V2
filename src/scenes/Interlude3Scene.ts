@@ -12,6 +12,7 @@ import { Fx } from '../systems/Fx';
 import { Atmosfera } from '../systems/atmosfera/Atmosfera';
 import { PERFIS } from '../systems/atmosfera/perfis';
 import { Music } from '../systems/Music';
+import { tocarFundo } from '../som/AmbienteDaFase';
 import { lugarDaCena } from '../som/acustica';
 import { Som, type Laco } from '../som/Som';
 import { naveDoSom, somDaNave, type NaveSom } from '../som/somDaNave';
@@ -23,6 +24,8 @@ import type { HandlingMode } from './GameScene';
 
 /** ms: the track fading out as a cutscene between stages opens (20/11: silence, only the effects and the place). */
 const SAI_A_TRILHA_MS = 1500;
+/** ms: his bed of the cutscene coming in as the track leaves (20/11). */
+const ENTRA_O_FUNDO_MS = 2000;
 
 /**
  * O HANGAR DO LEVIATÃ — a cutscene entre a Fase 3 e a Fase 4.
@@ -321,6 +324,10 @@ export class Interlude3Scene extends Phaser.Scene {
     // ambientação. É a pausa que o jogador precisa entre as fases para começar com a música de cada fase"*): the track
     // that came in (the stage's, or the menu's through the dev shortcut) leaves as the cutscene opens
     Music.stop(this, SAI_A_TRILHA_MS);
+    // HIS beds (20/11): the Leviathan's inside, the TWO together (him: *"o interior biomecanico traz batidas de coração,
+    // sons caracteristicos de uma criatura biomecanica, o complemento é o som grave mais baixo continuo"*)
+    tocarFundo('amb.cut.leviata', ENTRA_O_FUNDO_MS);
+    tocarFundo('amb.cut.leviata2', ENTRA_O_FUNDO_MS);
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     // A nave com que ele LUTOU contra a serpente — é ela que chega em frangalhos.
