@@ -24,6 +24,15 @@ const ativa = (k) => page.waitForFunction((x) => window.__game.scene.isActive(x)
 const cena = (k, dados) => page.evaluate(([x, d]) => { const g = window.__game; g.scene.getScenes(true)[0].scene.start(x, d); }, [k, dados]);
 const rapido = (k, v) => page.evaluate(async ([x, f]) => { const { avancoRapido } = await import('/src/pausa/avancoRapido.ts'); avancoRapido(window.__game.scene.getScene(x), f); }, [k, v]);
 const antes = (t, a, b) => t.indexOf(a) >= 0 && t.indexOf(a) < t.indexOf(b);
+const faixa = () => page.evaluate(() => window.__music.diagnostico().faixa);
+/** 20/11 — the cutscenes BETWEEN stages are silent of music (him: *"só ocorra os efeitos e ambientação"*): whatever track
+ *  came in leaves as the cutscene opens (`SAI_A_TRILHA_MS`, 1.5 s) */
+async function semTrilha(k) {
+  const antesDela = await faixa();
+  await page.waitForTimeout(2200);
+  const depois = await faixa();
+  ok(depois === null, `${k}: the track leaves as it opens (${antesDela} → ${depois})`, depois);
+}
 /** waits for `nome` to be played since `n0`, confirming with Enter whatever asks (the Dock's ship panel, a card table)
  *  — the choice resets the fast-forward, so it is put back */
 async function esperar(n0, nome, ms, chave) {
@@ -58,6 +67,7 @@ n = await desde();
 await cena('Interlude', { score: 1000, handling: 'diegetico' });
 await ativa('Interlude');
 await rapido('Interlude', 3);
+await semTrilha('Interlude');
 ok(await esperar(n, 'cut.decolagem.xaelo', 40000, 'Interlude') || (await novos(n)).some((x) => x.startsWith('cut.decolagem.')), 'the Aurora runs to the departure');
 t = await novos(n);
 ok(antes(t, 'cut.piloto', 'cut.aurora.capitania') || (t.includes('cut.piloto') && t.includes('cut.aurora.capitania')), 'the autopilot and the Aurora rising', t);
@@ -71,6 +81,7 @@ n = await desde();
 await cena('Interlude2', { score: 1000, handling: 'diegetico', ship: 'interceptor', stage: 3 });
 await ativa('Interlude2');
 await rapido('Interlude2', 3);
+await semTrilha('Interlude2');
 ok(await esperar(n, 'cut.doca.afunda2', 45000, 'Interlude2'), 'the Dock runs to the dock going down');
 t = await novos(n);
 ok(t.includes('cut.piloto') && t.some((x) => x.startsWith('cut.pouso.toque.')), 'the Dock: the autopilot and the landing', t);
@@ -82,6 +93,7 @@ n = await desde();
 await cena('Interlude3', { score: 1000, handling: 'diegetico', ship: 'interceptor', stage: 4 });
 await ativa('Interlude3');
 await rapido('Interlude3', 3);
+await semTrilha('Interlude3');
 ok(await esperar(n, 'cut.leviata.selar', 50000, 'Interlude3'), 'the hangar runs to the mouth sealing');
 t = await novos(n);
 ok(antes(t, 'cut.leviata.alerta', 'cut.leviata.derrapagem'), 'the alarm, then the skid', t);
@@ -95,6 +107,7 @@ await ativa('Interlude4');
 await rapido('Interlude4', 3);
 const lugares = [];
 const faixas = [];
+let entradaDoTema = null;
 const fimFinal = Date.now() + 25000;
 while (Date.now() < fimFinal && !(await novos(n)).includes('fim.apaga2')) {
   const l = (await diag()).lugar;
@@ -102,6 +115,7 @@ while (Date.now() < fimFinal && !(await novos(n)).includes('fim.apaga2')) {
   const m = await page.evaluate(() => window.__music.diagnostico());
   const f = `${m.faixa}/${m.contexto}`;
   if (faixas[faixas.length - 1] !== f) faixas.push(f);
+  if (m.faixa === 'final' && entradaDoTema === null) entradaDoTema = { lugar: l, ferida: (await novos(n)).includes('fim.ferida') };
   await page.waitForTimeout(200);
 }
 t = await novos(n);
@@ -113,8 +127,12 @@ ok(lugares.join() === 'interior,cabine,atmosfera', `the place moves with the cam
 ok(antes(t, 'fim.queda', 'fim.impacto') && t.some((x, i) => x.startsWith('fim.sobrevoo.') && i > t.indexOf('fim.impacto')), 'the Leviathan HITS the colony: the impact after the fall, before the flyover', t.filter((x) => x.startsWith('fim.')));
 const fundos = ['amb.f4.interior', 'amb.fim.ferida', 'amb.fim.queda', 'amb.fim.superficie', 'amb.fim.superficie2'];
 ok(fundos.every((x, i) => i === 0 || antes(t, fundos[i - 1], x)), 'a bed for each chapter, in order: inside, the wound, the fall, the surface burning, then the dawn wind', fundos.filter((x) => !t.includes(x)));
-ok(antes(t, 'amb.fim.queda', 'fim.impacto') && t.indexOf('amb.fim.superficie') > t.indexOf('fim.impacto'), 'the surface bed comes in with the impact', null);
+// 20/11 — the colony already burning: the fire (the surface A) comes in low DURING the fall, before the impact; and his
+// "A e C" together: the dawn's wind (the C) under the fire from the impact on
+ok(antes(t, 'amb.fim.queda', 'amb.fim.superficie') && antes(t, 'amb.fim.superficie', 'fim.impacto'), 'the fire is heard during the fall, before the impact', t.filter((x) => x.startsWith('amb.fim') || x === 'fim.impacto'));
+ok(t.indexOf('amb.fim.superficie2') > t.indexOf('fim.impacto') && t.indexOf('amb.fim.superficie2') < t.indexOf('fim.apaga'), 'the dawn wind comes in under the fire at the impact (A and C together)', t.filter((x) => x.startsWith('amb.fim') || x.startsWith('fim.')));
 ok(faixas.includes('final/cena'), `his closing theme plays in the cutscene, at the scenes' level (${faixas.join(' → ')})`, faixas);
+ok(entradaDoTema?.lugar === 'interior' && !entradaDoTema.ferida, 'the closing theme comes in in the FIRST scene (the ship sucked out), before the wound', entradaDoTema);
 
 ok(erros.length === 0, 'no page errors', erros);
 await browser.close();

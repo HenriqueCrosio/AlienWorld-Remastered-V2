@@ -146,6 +146,8 @@ for (const n of [1, 2, 3, 4]) {
     await page.evaluate(() => { window.__som.abafar(1, 50); window.__game.scene.getScene('Game').scene.resume(); });
   }
 }
+// 20/11 — the cutscenes BETWEEN stages are silent of music (him: *"só ocorra os efeitos e ambientação. É a pausa que o
+// jogador precisa entre as fases para começar com a música de cada fase"*): the stage's track leaves as one opens
 {
   const f = (await diag()).faixa;
   await irPara('Interlude3', { score: 0, handling: 'diegetico' });
@@ -153,7 +155,7 @@ for (const n of [1, 2, 3, 4]) {
   await page.evaluate(() => window.__game.scene.getScene('Interlude3').colapso());
   await page.waitForTimeout(300);
   const d = await diag();
-  ok(d.faixa === f && d.contexto === 'cena', 'a cutscene keeps the track, at its own level', d);
+  ok(f !== null && d.faixa === null, `a cutscene between stages lets the track go (${f} → ${d.faixa})`, d);
 }
 
 // 19/11 — THE CLOSING THEME is the dawn menu's: the result screen (where the final cutscene lands) plays it at the menu's
