@@ -21,6 +21,9 @@ import { ShipPanel } from '../ui/ShipPanel';
 import { STAGES } from '../systems/StageDirector';
 import type { HandlingMode } from './GameScene';
 
+/** ms: the track fading out as a cutscene between stages opens (20/11: silence, only the effects and the place). */
+const SAI_A_TRILHA_MS = 1500;
+
 /**
  * O HANGAR DO LEVIATÃ — a cutscene entre a Fase 3 e a Fase 4.
  *
@@ -314,6 +317,10 @@ export class Interlude3Scene extends Phaser.Scene {
 
   create(data: { score?: number; handling?: HandlingMode; ship?: string; stage?: number }): void {
     Som.trocarDeCena(lugarDaCena(this.scene.key));
+    // 20/11 — THE PAUSE BETWEEN STAGES (him: *"as cutscenes entre as fases eu quero o silêncio [...] só ocorra os efeitos e
+    // ambientação. É a pausa que o jogador precisa entre as fases para começar com a música de cada fase"*): the track
+    // that came in (the stage's, or the menu's through the dev shortcut) leaves as the cutscene opens
+    Music.stop(this, SAI_A_TRILHA_MS);
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     // A nave com que ele LUTOU contra a serpente — é ela que chega em frangalhos.
@@ -879,7 +886,6 @@ export class Interlude3Scene extends Phaser.Scene {
   private colapso(): void {
     if (this.done) return;
 
-    Music.situacao('cena', 600);
 
     // ⚠️ A DECOLAGEM É VERTICAL, E O `x` NÃO ENTRA NESTE TWEEN. Ela subia E recuava ao mesmo
     // tempo, porque parava em x=258 — encostada na criatura — e precisava de distância para o tiro

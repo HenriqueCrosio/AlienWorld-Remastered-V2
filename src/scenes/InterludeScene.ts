@@ -20,6 +20,9 @@ import { ShipPanel } from '../ui/ShipPanel';
 import { mesaDaCutscene } from '../cartas';
 import type { HandlingMode } from './GameScene';
 
+/** ms: the track fading out as a cutscene between stages opens (20/11: silence, only the effects and the place). */
+const SAI_A_TRILHA_MS = 1500;
+
 /**
  * INTERLUDE — entre a Fase 1 e a Fase 2. O beat arcade dos anos 90.
  *
@@ -120,6 +123,10 @@ export class InterludeScene extends Phaser.Scene {
 
   create(data: { score?: number; handling?: HandlingMode }): void {
     Som.trocarDeCena(lugarDaCena(this.scene.key));
+    // 20/11 — THE PAUSE BETWEEN STAGES (him: *"as cutscenes entre as fases eu quero o silêncio [...] só ocorra os efeitos e
+    // ambientação. É a pausa que o jogador precisa entre as fases para começar com a música de cada fase"*): the track
+    // that came in (the stage's, or the menu's through the dev shortcut) leaves as the cutscene opens
+    Music.stop(this, SAI_A_TRILHA_MS);
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     this.done = false;
@@ -491,7 +498,6 @@ export class InterludeScene extends Phaser.Scene {
     if (this.done) return;
 
     this.aviso('IMPACTO · A FROTA CAIU', COLORS.enemyBright);
-    Music.situacao('cena', 600);
 
     // A CADEIA VARRE O CASCO DA DIREITA PARA A ESQUERDA, ao longo da linha do convés — e ela
     // chega ATÉ a nave. É a direção que cria a urgência: o jogador vê a destruição vindo na

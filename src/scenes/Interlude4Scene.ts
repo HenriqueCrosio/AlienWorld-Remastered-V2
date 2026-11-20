@@ -22,8 +22,20 @@ import { daNaveNaCena, naveDoSom, somDaNave, type NaveSom } from '../som/somDaNa
 const APAGA_B_DEPOIS_MS = 2200;
 /** ms: how long one chapter's bed takes to hand over to the next (the cut is the picture's; the sound crosses). */
 const CRUZA_FUNDO_MS = 1800;
-/** ms: the closing theme coming in at the wound (its own first bars are quiet: a short fade is enough). */
+/** ms: the closing theme coming in as the ship is sucked out (its own first bars are quiet: a short fade is enough). */
 const ENTRA_TRILHA_MS = 1500;
+/**
+ * THE FIRE BEFORE THE IMPACT and the surface's "A e C" together (20/11): the burning colony (the A) is heard low from the
+ * fall's wide shot (ms into the fall), nearer on the low shot, whole at the impact; the dawn's wind (the C) comes in under
+ * it at the impact and takes the front as the lava cools, the fire left as embers. Levels are × the bed's own volume.
+ */
+const FOGO_ENTRA_MS = 800;
+const FOGO_SOBE_MS = 2400;
+const FOGO_DE_LONGE = 0.3;
+const FOGO_PERTO = 0.55;
+const VENTO_COM_O_FOGO = 0.55;
+const VENTO_ENTRA_MS = 4000;
+const FOGO_BRASAS = 0.3;
 /**
  * THE FLYOVER LEAVING (19/11, him: *"o flyby da nave termina abruptamente quando ela sai do quadro à esquerda....quero um
  * fade que indica que ela se distanciou"*): the ship takes 7.2 s to cross, and the takes are shorter (the X-AELO's 3.9 s,
@@ -174,6 +186,10 @@ export class Interlude4Scene extends Phaser.Scene {
    * quando o leviatã bate no solo"*). E A TRILHA FINAL DELE entra na ferida (*"o jogador é sugado para fora do leviatã e a
    * tela a seguir é dele sendo expulso e o leviatã com um rombo. Acho interessante a música começar ai"*) e segue até os
    * créditos e o menu do amanhecer, sem reiniciar (`Music.play` deixa seguir a mesma faixa).
+   *
+   * 20/11 — a revisão dele: a trilha ADIANTADA para a descompressão (a nave sugada, 1ª cena); o fogo da colônia antes do
+   * impacto, baixo; a superfície "A e C" JUNTAS (o vento por baixo do fogo desde o impacto, à frente quando a lava
+   * esfria); a 1ª cena e o impacto um pouco mais baixos (`catalogoSons.ts`).
    */
   private somDoFinal(): void {
     const em = (ms: number, f: () => void): void => {
@@ -186,23 +202,44 @@ export class Interlude4Scene extends Phaser.Scene {
     Som.lugar('interior', 0);
     fundo('amb.f4.interior', 300);
     em(T.RASGO, () => Som.tocar('fim.rasgo'));
-    em(T.DESCOMPRESSAO, () => Som.tocar('fim.descompressao'));
+    em(T.DESCOMPRESSAO, () => {
+      Som.tocar('fim.descompressao');
+      // 20/11 — the closing theme comes in as the ship is SUCKED OUT (him: *"ela pode até começar antes [...] na primeira
+      // cena e não na segunda"*): the fight's track already died at the tear, its first bars are quiet
+      Music.play(this, 'final', ENTRA_TRILHA_MS, 'cena');
+    });
     em(T.FERIDA, () => {
       Som.lugar('cabine', 400);
       Som.emSequencia(['fim.ferida', 'fim.ferida2'], em);
       fundo('amb.fim.ferida');
-      Music.play(this, 'final', ENTRA_TRILHA_MS, 'cena');
     });
     em(T.QUEDA, () => {
       Som.tocar('fim.queda');
       fundo('amb.fim.queda');
     });
+    // 20/11 — THE COLONY WAS ALREADY BURNING (him: *"a colonia já está em chamas antes. então o barulho de fogo e crepitar
+    // pode já estar antes, num volume mais baixo"*): the fire (the surface A) comes in low under the fall as the colony
+    // shows in the wide shot, nearer on the low shot, and whole at the impact
+    let fogo: Laco | null = null;
+    let vento: Laco | null = null;
+    em(T.QUEDA + FOGO_ENTRA_MS, () => {
+      fogo = Som.laco('amb.fim.superficie', 0);
+      fogo?.volume(FOGO_DE_LONGE, FOGO_SOBE_MS);
+    });
     // the low shot is on the surface: the air of the planet
-    em(T.QUEDA + PLANO_BAIXO_MS, () => Som.lugar('atmosfera', 600));
+    em(T.QUEDA + PLANO_BAIXO_MS, () => {
+      Som.lugar('atmosfera', 600);
+      fogo?.volume(FOGO_PERTO, 400);
+    });
     em(T.QUEDA + IMPACTO_MS, () => {
       Som.tocar('fim.impacto');
-      // the fire takes the colony under the impact's rumble
-      fundo('amb.fim.superficie', 2500);
+      this.fundo?.parar(2500);
+      this.fundo = null;
+      fogo?.volume(1, 1200);
+      // his "A e C" TOGETHER (20/11: *"em conjunto, um complementando o outro"*): the dawn's wind (the C) comes in under
+      // the fire from the impact on
+      vento = Som.laco('amb.fim.superficie2', 0);
+      vento?.volume(VENTO_COM_O_FOGO, VENTO_ENTRA_MS);
     });
     em(T.SOBREVOO, () => Som.lugar('atmosfera', 1500));
     const nave = naveDoSom(this.naveId, naveEscolhida(this.registry).modelo);
@@ -227,8 +264,9 @@ export class Interlude4Scene extends Phaser.Scene {
     em(T.SOBREVOO + RASANTE_SAI_MS - 1000, () => motor?.parar(SOME_MS));
     em(T.APAGA, () => {
       Som.tocar('fim.apaga');
-      // the fire dies down into the dawn's wind: the bed the result screen opens on
-      fundo('amb.fim.superficie2', 3000);
+      // the lava cools: the fire sinks to embers and the dawn's wind takes the front — the bed the result screen opens on
+      fogo?.volume(FOGO_BRASAS, 3000);
+      vento?.volume(1, 3000);
     });
     em(T.APAGA + APAGA_B_DEPOIS_MS, () => Som.tocar('fim.apaga2'));
   }

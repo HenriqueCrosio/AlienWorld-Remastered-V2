@@ -458,8 +458,9 @@ const FOLHA_7_CUTSCENES: Record<string, DefSom> = {
   'cut.leviata.colapso2': DA_CENA('cut.leviata.colapso2', 0.55),
   'cut.leviata.engolida': DA_CENA('cut.leviata.engolida', 0.49),
   'cut.leviata.selar': DA_CENA('cut.leviata.selar', 0.55, 3, 0.05, 0.1),
-  'fim.rasgo': DA_CENA('fim.rasgo', 0.85),
-  'fim.descompressao': DA_CENA('fim.descompressao', 0.8),
+  // 20/11, him: the first scene (the ship sucked out) *"muito altos, diminuir um pouco apenas, não muito"*: −1.7 dB
+  'fim.rasgo': DA_CENA('fim.rasgo', 0.7),
+  'fim.descompressao': DA_CENA('fim.descompressao', 0.66),
   'fim.ferida': DA_CENA('fim.ferida', 0.2),
   'fim.ferida2': DA_CENA('fim.ferida2', 0.21),
   'fim.queda': DA_CENA('fim.queda', 0.8),
@@ -603,7 +604,8 @@ export const FLUXOS: Record<string, DefFluxo> = {
 const DO_FINAL = (nome: string, volume: number): DefSom => ({ ...DA_CENA(nome, volume), arquivo: `final/${nome}` });
 const FUNDO_DO_FINAL = (nome: string, volume: number): DefSom => ({ ...FUNDO(nome, volume), arquivo: `final/${nome}` });
 const FOLHA_10_FINAL: Record<string, DefSom> = {
-  'fim.impacto': DO_FINAL('fim.impacto', 1),
+  // 20/11, him: *"decente, um pouco alto, mas nada de mais"*: −1.4 dB
+  'fim.impacto': DO_FINAL('fim.impacto', 0.85),
   'amb.fim.ferida': FUNDO_DO_FINAL('amb.fim.ferida', 0.27),
   'amb.fim.queda': FUNDO_DO_FINAL('amb.fim.queda', 0.26),
   // the surface, his "A e C": the colony burning from the impact, then the dawn's wind as the lava cools (the result

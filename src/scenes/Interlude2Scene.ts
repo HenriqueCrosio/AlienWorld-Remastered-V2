@@ -25,6 +25,9 @@ import type { HandlingMode } from './GameScene';
 // lâmpada de um parafuso batendo luz). Coordenadas em espaço de ARTE — `criarLuzes()` converte.
 import docaLuzes from '../data/doca-luzes.json';
 
+/** ms: the track fading out as a cutscene between stages opens (20/11: silence, only the effects and the place). */
+const SAI_A_TRILHA_MS = 1500;
+
 /** Uma rocha ancorada: o sprite + o ponto da doca em que o cabo dela prende. */
 interface Amarra {
   rocha: Phaser.GameObjects.Image;
@@ -204,6 +207,10 @@ export class Interlude2Scene extends Phaser.Scene {
 
   create(data: { score?: number; handling?: HandlingMode; ship?: string; stage?: number }): void {
     Som.trocarDeCena(lugarDaCena(this.scene.key));
+    // 20/11 — THE PAUSE BETWEEN STAGES (him: *"as cutscenes entre as fases eu quero o silêncio [...] só ocorra os efeitos e
+    // ambientação. É a pausa que o jogador precisa entre as fases para começar com a música de cada fase"*): the track
+    // that came in (the stage's, or the menu's through the dev shortcut) leaves as the cutscene opens
+    Music.stop(this, SAI_A_TRILHA_MS);
     this.score = data.score ?? 0;
     this.handling = data.handling ?? 'diegetico';
     // A nave com que ele CHEGOU. Se ele não trocar nada, é com ela que ele segue — a escolha
@@ -830,7 +837,6 @@ export class Interlude2Scene extends Phaser.Scene {
     if (this.done) return;
 
     this.aviso('SOBRECARGA · A DOCA VAI CAIR', COLORS.enemyBright);
-    Music.situacao('cena', 600);
     // THE SOUND (sheet 7): the station's alarm; the ship's departure; the dock going down in two parts (him: "A e B na
     // sequência ficaram bons") — the A with the chain that starts breaking it (0.9 s), the B with the cables snapping
     // and the dock giving way (2.3 s). They overlap: the scene ends at 4.4 s, and nothing crosses a scene change.
