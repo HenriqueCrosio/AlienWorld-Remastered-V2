@@ -16,10 +16,23 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-15-bloco-f-START.md`. A REVISÃO de 18–19/11 FECHOU em
-> 20/11 (os pontos 1, 2 e 3 — ele: *"está tudo certo"*). No F, a SONDA (no lugar dos dardos da F2, e ondas próprias
-> na F3) FECHOU em 20/11 — aprovada (*"Agora melhorou"*). A sessão abre no 2º item do F: a ROCHA do elite minerador
-> (START `plans/2026-11-15-bloco-f-START.md`, a pergunta 4). Uma pergunta por vez; ele avalia JOGANDO e por GIF."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-21-bloco-f-veredito-START.md`. O bloco F está FEITO: a
+> SONDA (aprovada em 20/11) e os ASTEROIDES novos com a rocha do minerador (instalados em 20–21/11). A sessão abre com
+> ELE analisando as folhas e jogando a F2 e a F3, e dando o VEREDITO; eu ajusto uma coisa por vez. Quando ele fechar
+> o F, segue o rebalanceamento."**
+>
+> 📍 **20–21/11 — OS ASTEROIDES NOVOS E A ROCHA DO MINERADOR (o 2º item do F); COMMITADO E EMPURRADO, SEM O VEREDITO
+> DELE.** (spec `specs/2026-11-20-bloco-f-asteroides-design.md`; folha `folhas/2026-11-20/asteroides/folha.html`)
+> - **A análise** (ele: *"alguns maiores têm angulos mais retos"*): os 3 de hoje eram blocos (o `asteroid-2` um cubo),
+>   desenhados com sombra de chão, e os grandes eram a arte de 26 px AMPLIADA até ×1,9 (o blocado e os degraus).
+> - **A família nova** (PixelLab, a paleta dos de hoje; as escolhas dele): os pequenos 28, 49, 61, os médios 4, 17, o
+>   grande 5 com o TOM ajustado — 24 a 32 px, a escala 0,85–1,0 (NUNCA ampliada). Seis variantes (`asteroid`…`6`).
+> - **A rocha do minerador**: a rachadura 2·a e o grande 1·âmbar a (com o cristal âmbar), redesenhadas a ~60 px (2× o
+>   drone, MEDIDO: a de 32 ficava menor que ele; a de 80 era grande demais), sorteadas; o drone sobre o âmbar
+>   (`DroneMineracao.ENCAIXE` por textura). Os antigos em `assets/raw/asteroides-antigos/`; as ferramentas, como
+>   receita, em `scripts/_asteroides/`.
+> - **Em aberto para o veredito**: o tom das rochas no cinturão (podem pedir mais escuras) e o campo menor (o maior de
+>   49 px na tela para 32).
 >
 > 📍 **20/11 (3) — A SONDA, O INIMIGO NOVO DO F; APROVADA.** (spec `specs/2026-11-20-bloco-f-sonda-design.md`, plano
 > `plans/2026-11-20-bloco-f-sonda.md`)
@@ -61,7 +74,7 @@ sprite que se desfaz nos próprios pixels).
 >   saída passar `{}`; e um teste que volta ao menu duas vezes.
 >
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem, o
-> fim do jogo) → a REVISÃO dele ✅ (20/11) → **F (o próximo)** (a F2: a frota de batedores e a rocha do minerador) → o
+> fim do jogo) → a REVISÃO dele ✅ (20/11) → **F (feito em 20–21/11: a sonda ✅, os asteroides — o veredito dele é o próximo)** (a F2: a frota de batedores e a rocha do minerador) → o
 > rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco; e o guardado do som, no fim de
 > `plans/2026-11-18-som-mixagem-START.md`).**
 >

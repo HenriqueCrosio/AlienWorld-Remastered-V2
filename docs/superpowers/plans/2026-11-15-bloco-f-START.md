@@ -43,7 +43,10 @@
      https://www.pixellab.ai/create-object/a606e9d2-b3eb-4833-8fba-1297772a5802 — abrir os dois (`get_object`) ANTES da
      pergunta 3: o tamanho maior responde em parte o "difíceis de acertar". Conferir que estão de PERFIL (o PixelLab tende a
      dar vista de cima) e no estilo da frota; a escolha entre eles é dele.
-2. **A rocha do elite minerador** destoa da F2 e é grande demais: diminuir, ou prendê-la a um canto ou a um pedaço
+2. 🟠 **FEITO EM 20–21/11, falta o veredito dele** — virou a FAMÍLIA NOVA de asteroides e a rocha do minerador com a
+   rachadura e o âmbar (spec `specs/2026-11-20-bloco-f-asteroides-design.md`; o veredito: START
+   `plans/2026-11-21-bloco-f-veredito-START.md`). O registro de antes:
+   **A rocha do elite minerador** destoa da F2 e é grande demais: diminuir, ou prendê-la a um canto ou a um pedaço
    maior de asteroide (arte nova). Fazer junto com o `asteroid` da F2/F3.
 3. Anotações soltas que caíram no F: a silhueta do batedor do cinturão; os alvos da F1 ficaram menores depois da
    rodada 6 do G (a antena virou agulha) — conferir se ainda incomoda.
