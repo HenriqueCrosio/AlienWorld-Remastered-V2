@@ -16,10 +16,29 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o §3 do START `plans/2026-11-21-bloco-f-veredito-START.md`. O bloco F FECHOU
-> (21/11, aprovado por ele jogando). A próxima frente é o REBALANCEAMENTO: as cartas fortes demais, a vida da enguia, a
-> saída da aranha do casco e o guardado do som. A sessão abre comigo listando o que há e ele escolhendo por onde
-> começar."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-21-rebalanceamento-START.md`. O REBALANCEAMENTO abriu em
+> 21/11: a análise das cartas, as decisões dele e a ordem das frentes (0 as lutas dos chefões → 1 os alvos → 2 o draft
+> → 3 os inimigos → 4 as cartas → 5 a vida dos chefões). Na frente 0 a CAPITÂNIA fechou; a sessão abre no GUARDIÃO,
+> com a observação e a pergunta pendente da §4.2 do START (A o movimento · B o propósito · C os dois)."**
+>
+> 📍 **21/11 (3) — A FRENTE 0: A CAPITÂNIA APROVADA; COMMITADO E EMPURRADO.** (a §4.1 do START) Ele: *"é tranquilo até
+> o momento do enfurecer"*. Medido em jogo (`scripts/_rebalance/medir-capitania.mjs`): a fúria tinha 18,8 ameaças na
+> tela em média (pico 33) contra 4,8 da luta inteira — a 3ª cápsula do flak caía no ciclo seguinte e os 8 estilhaços
+> cruzavam a tela por 3–4 s, e o silêncio sumia. **O que entrou** (`src/entities/BossCapitania.ts`): o ciclo da fúria
+> 3,4 → 4,0 s; a 3ª cápsula 0,9 s depois das outras (no mesmo ciclo) e MAIS LENTA (voo 1,7–1,85 s, pedido dele); 6
+> estilhaços que se apagam em 1,2 s (um estouro local; a marca `estilhaco`, apagada no `EnemySystem.release`); e — o
+> problema de verdade, ele: *"são os kamikazes do estágio 2"* — **1 kamikaze por ciclo na fúria** (eram 3). O kamikaze
+> segue com o comportamento global (o não abatido volta a caçar: ele vetou combustível e teto de caçadores). Ele: *"Agora
+> ficou melhor. Já está menos punitivo, vai cobrar algumas tentativas, mas dentro da normalidade"*. **O Guardião:** a
+> observação (a investida é a imagem inteira deslizando, o mesmo defeito da serpente de 29/10; ele é preso por tubos
+> que hoje viajam com ele) e a pergunta A/B/C, no START.
+>
+> 📍 **21/11 (2) — O REBALANCEAMENTO ABRIU (nada de código).** A análise das cartas (a arma se multiplica até ×9, os
+> inimigos com 2 de vida da F1 à F4, a raridade invertida, as cadeias de 3 mortas, o Elétrico crescendo com o volume de
+> fogo), simulada em `scripts/_rebalance/sim-draft.mts`. As decisões dele: inimigos ganham vida ao longo da campanha,
+> efeitos reduzidos contra chefão, mais mesas e a rerrolagem, enxames de batedores da F2 em diante, o Drone refeito.
+> Os chefões: o que eles FAZEM antes (a fúria da Capitânia, a investida do Guardião, o bote da Besta), a vida depois.
+> Tudo no START.
 >
 > 📍 **21/11 — O VEREDITO DO F: APROVADO; O NASCIMENTO SEM SOBREPOSIÇÃO E O CRISTAL DE ÂMBAR DA F3; COMMITADO E
 > EMPURRADO.** (a §5 da spec dos asteroides; folha `folhas/2026-11-21/ambar/folha.html`)
@@ -86,8 +105,9 @@ sprite que se desfaz nos próprios pixels).
 >
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem, o
 > fim do jogo) → a REVISÃO dele ✅ (20/11) → **F ✅ (20–21/11: a sonda, os asteroides, a rocha do minerador, o cristal de âmbar da F3; aprovado em 21/11)** → **o
-> rebalanceamento, O PRÓXIMO** (cartas, a vida da enguia, a saída da aranha do casco; e o guardado do som, no fim de
-> `plans/2026-11-18-som-mixagem-START.md`).**
+> REBALANCEAMENTO, AGORA** (START `plans/2026-11-21-rebalanceamento-START.md`: frente 0 as lutas dos chefões —
+> Capitânia ✅ 21/11 → Guardião → Besta —, depois os alvos, o draft, os inimigos, as cartas e a vida dos chefões; fora
+> dele, depois: a saída da aranha do casco e o guardado do som, no fim de `plans/2026-11-18-som-mixagem-START.md`).**
 >
 > 📍 **19/11 (2) — A TRILHA FINAL DELE, O IMPACTO DO LEVIATÃ E OS FUNDOS DA CUTSCENE FINAL (folha 10, ESCOLHIDA) E O
 > SOBREVOO QUE SE AFASTA; COMMITADO E EMPURRADO.** (a §10.12 da spec do som)
