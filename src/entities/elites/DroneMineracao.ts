@@ -28,11 +28,15 @@ interface Estado {
 }
 
 /**
- * O ENCAIXE NA CRATERA (05/10, o rabisco dele): o drone trabalha DENTRO do geodo, no canto de cima à direita da
- * cratera, virado para o cristal. Medido na arte aprovada (`elite-rocha.png` = a rocha 1 inteira, 80×78: a cratera
- * centrada em (40, 34)) — trocou a rocha, mede de novo (`scripts/_elites/_tratar.mjs cratera`).
+ * O ENCAIXE (20/11, a rocha nova do bloco F): o drone trabalha sobre o CRISTAL ÂMBAR — na rachadura do topo da rocha 1
+ * (`eliteRocha`, 62×63) e dentro da cratera da rocha 2 (`eliteRocha2`, 62×58). O centro do drone a partir do centro da
+ * rocha, medido no centro do âmbar de cada arte (`scratchpad/asteroides/instalar.py`, o mesmo encaixe da folha). A de
+ * 05/10 (o geodo de 80×78, o drone no canto da cratera) era { x: 8, y: -11 }. Trocou a rocha, mede de novo.
  */
-const ENCAIXE = { x: 8, y: -11 };
+const ENCAIXE: Record<string, { x: number; y: number }> = {
+  eliteRocha: { x: 19, y: -27 },
+  eliteRocha2: { x: -2, y: -15 },
+};
 
 /** As animações, se a arte já as registrou (a provisória é estática). */
 const tocar = (e: Sprite, chave: string): void => {
@@ -51,7 +55,8 @@ export const DRONE_MINERACAO: ComportamentoElite = {
     // Virado para o CRISTAL (à esquerda dele, no fundo da cratera): os sprites nascem apontando para a direita.
     e.setFlipX(true);
     (e.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
-    const s: Estado = { fase: 'minerando', t: 0, rocha, hpMax: e.getData('hp') as number, dx: ENCAIXE.x, dy: ENCAIXE.y, rumo: Math.PI, cd: D.rajadaCadaS * 0.5, rajada: 0, rajadaT: 0, broca: null };
+    const encaixe = ENCAIXE[rocha?.texture.key ?? 'eliteRocha'] ?? ENCAIXE.eliteRocha;
+    const s: Estado = { fase: 'minerando', t: 0, rocha, hpMax: e.getData('hp') as number, dx: encaixe.x, dy: encaixe.y, rumo: Math.PI, cd: D.rajadaCadaS * 0.5, rajada: 0, rajadaT: 0, broca: null };
     e.setData('elite', s);
     if (rocha) {
       e.setPosition(rocha.x + s.dx, rocha.y + s.dy);

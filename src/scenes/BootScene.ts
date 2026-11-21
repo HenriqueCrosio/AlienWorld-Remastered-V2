@@ -820,7 +820,10 @@ const ART: Record<string, string> = {
   // OS ELITES DA F2 (frente B, 05/10 — as escolhas dele na folha `folhas/2026-10-05/elites/`). Sem o PNG, a forma
   // provisória em código nasce na mesma chave (`entities/elites/texturasProvisorias.ts`).
   eliteDrone: 'sprites/elite-drone.png',
+  // the miner's rock (20/11): the family's big rock redrawn at ~60 px (twice the drone), with the crack on top (1) or
+  // the amber crater (2) — `DroneMineracao.ENCAIXE` per texture
   eliteRocha: 'sprites/elite-rocha.png',
+  eliteRocha2: 'sprites/elite-rocha-2.png',
   eliteSentinela: 'sprites/elite-sentinela.png',
   eliteSentinelaRoda: 'sprites/elite-sentinela-roda.png',
   ...animFrames('eliteDroneMinerarAnim', 'elite-drone-minerar'),
@@ -898,9 +901,15 @@ const ART: Record<string, string> = {
   // O cinturão da Fase 2. A rocha e a mina ainda são PLACEHOLDER procedural — a arte do
   // PixelLab entra só copiando os PNGs para cá: `pickVariant` acha as variantes sozinho e
   // nenhuma linha de código muda (docs/ASSETS.md).
+  // THE ASTEROIDS (20/11, bloco F, his choices): a new family — round, cratered, no straight side, no ground shadow —
+  // each at its own native size (the small 24–26, the medium 26–28, the big 32), never scaled up (the old 26-px ones
+  // went to ×1.9 and their pixels turned to blocks). The old ones are in `assets/raw/asteroides-antigos/`.
   asteroid: 'sprites/asteroid.png',
   asteroid2: 'sprites/asteroid-2.png',
   asteroid3: 'sprites/asteroid-3.png',
+  asteroid4: 'sprites/asteroid-4.png',
+  asteroid5: 'sprites/asteroid-5.png',
+  asteroid6: 'sprites/asteroid-6.png',
   mina: 'sprites/mina.png',
   mina2: 'sprites/mina-2.png',
 

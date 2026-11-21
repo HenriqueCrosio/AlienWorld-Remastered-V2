@@ -72,7 +72,9 @@ interface HazardDef {
  *              puro controle de espaço (docs/GDD.md §6).
  */
 const HAZARDS: Record<HazardKind, HazardDef> = {
-  asteroid: { texture: 'asteroid', hp: 3, score: 15, scale: [0.7, 1.9], spin: [-40, 40], drift: 10 },
+  // (20/11) the new family carries its sizes in its art (24 to 32 px): a scale of 0.85–1.0, NEVER above 1 — the old
+  // [0.7, 1.9] blew a 26-px rock up to 49 and its pixels into blocks and straight faces
+  asteroid: { texture: 'asteroid', hp: 3, score: 15, scale: [0.85, 1], spin: [-40, 40], drift: 10 },
 
   // O destroço usa a arte `destroco` — casco RASGADO à deriva, sem base nenhuma.
   //
