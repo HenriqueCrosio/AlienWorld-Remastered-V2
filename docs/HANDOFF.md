@@ -16,10 +16,21 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-21-bloco-f-veredito-START.md`. O bloco F está FEITO: a
-> SONDA (aprovada em 20/11) e os ASTEROIDES novos com a rocha do minerador (instalados em 20–21/11). A sessão abre com
-> ELE analisando as folhas e jogando a F2 e a F3, e dando o VEREDITO; eu ajusto uma coisa por vez. Quando ele fechar
-> o F, segue o rebalanceamento."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o §3 do START `plans/2026-11-21-bloco-f-veredito-START.md`. O bloco F FECHOU
+> (21/11, aprovado por ele jogando). A próxima frente é o REBALANCEAMENTO: as cartas fortes demais, a vida da enguia, a
+> saída da aranha do casco e o guardado do som. A sessão abre comigo listando o que há e ele escolhendo por onde
+> começar."**
+>
+> 📍 **21/11 — O VEREDITO DO F: APROVADO; O NASCIMENTO SEM SOBREPOSIÇÃO E O CRISTAL DE ÂMBAR DA F3; COMMITADO E
+> EMPURRADO.** (a §5 da spec dos asteroides; folha `folhas/2026-11-21/ambar/folha.html`)
+> - **O veredito** (ele, jogando a F2 e a F3): *"O restante ficou bom"* — o tom das rochas, o campo menor e o drone no
+>   âmbar ficam como estão.
+> - **Um asteroide nascia em cima do outro** (sobretudo junto com a rocha do minerador): todo destroço nasce na mesma
+>   coluna e rola à mesma velocidade; agora a travessia inteira (com a deriva) é conferida no nascimento
+>   (`src/systems/vagaDosDestrocos.ts`): o asteroide sorteia outra altura, a rocha sai só o mínimo, e sem vaga cede quem
+>   ainda está fora da tela. Testes `test-destrocos-vaga` (puro) e `test-destrocos-vaga-jogo` (0 sobreposições).
+> - **O cristal de âmbar** (o pedido dele, *"sem pedra, só um aglomerado de cristal"*): o P17 (22 px) e o M2 (29×31),
+>   só visuais, variantes do asteroide SÓ na F3 (um em quatro; `VARIANTES_DA_FASE`).
 >
 > 📍 **20–21/11 — OS ASTEROIDES NOVOS E A ROCHA DO MINERADOR (o 2º item do F); COMMITADO E EMPURRADO, SEM O VEREDITO
 > DELE.** (spec `specs/2026-11-20-bloco-f-asteroides-design.md`; folha `folhas/2026-11-20/asteroides/folha.html`)
@@ -74,8 +85,8 @@ sprite que se desfaz nos próprios pixels).
 >   saída passar `{}`; e um teste que volta ao menu duas vezes.
 >
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem, o
-> fim do jogo) → a REVISÃO dele ✅ (20/11) → **F (feito em 20–21/11: a sonda ✅, os asteroides — o veredito dele é o próximo)** (a F2: a frota de batedores e a rocha do minerador) → o
-> rebalanceamento (cartas, a vida da enguia, a saída da aranha do casco; e o guardado do som, no fim de
+> fim do jogo) → a REVISÃO dele ✅ (20/11) → **F ✅ (20–21/11: a sonda, os asteroides, a rocha do minerador, o cristal de âmbar da F3; aprovado em 21/11)** → **o
+> rebalanceamento, O PRÓXIMO** (cartas, a vida da enguia, a saída da aranha do casco; e o guardado do som, no fim de
 > `plans/2026-11-18-som-mixagem-START.md`).**
 >
 > 📍 **19/11 (2) — A TRILHA FINAL DELE, O IMPACTO DO LEVIATÃ E OS FUNDOS DA CUTSCENE FINAL (folha 10, ESCOLHIDA) E O

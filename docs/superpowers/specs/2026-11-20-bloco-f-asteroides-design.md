@@ -42,9 +42,33 @@ A receita do tom (para descer as rochas, se ele pedir): a paleta dos 3 asteroide
 luminância; cada pixel da pedra que está nela anda `delta` posições (a média do candidato até a média dos antigos;
 para escurecer mais, subtrair 1–2), o contorno (as 3 mais escuras) não anda, o âmbar (fora da paleta) não muda.
 
-## 5. Em aberto (o veredito dele, START `plans/2026-11-21-bloco-f-veredito-START.md`)
+## 5. O veredito dele (21/11) — APROVADO
 
-- O tom das rochas do minerador no cinturão (podem pedir 1–2 degraus mais escuras).
-- O campo menor: o maior asteroide de 49 px na tela para 32 — se faltar pedra grande, 1–2 de 40–48 px gerados com o
-  grande 5 como estilo.
-- O drone trabalhando no âmbar e a rocha quebrando no tamanho novo (a morte de rocha R2/R3 do `DESTROCOS`).
+Ele jogou a F2 e a F3: *"O restante ficou bom"* — o tom das rochas do minerador, o campo menor, o drone no âmbar e a
+rocha quebrando ficaram como estão. Duas coisas entraram:
+
+### 5.1 Um asteroide nascia em cima do outro (corrigido)
+
+Ele: *"em alguns momentos, um asteroide nascia em cima do outro [...] no asteroide medio ou pequeno nascendo junto com
+o asteroide do mineirador"*. **A causa:** todo destroço nasce na MESMA coluna (`GAME_WIDTH + 40`; a rocha do drone
+também: `e.x + 24` a partir de `GAME_WIDTH + 16`), a altura do asteroide era sorteada sem olhar quem já estava ali, e
+todos rolam à MESMA velocidade — quem nasce junto fica junto, e a deriva vertical (±10 px/s) os fazia se encontrar
+no caminho. **O conserto** (`src/systems/vagaDosDestrocos.ts`, puro): no nascimento, a travessia INTEIRA (a deriva
+incluída, uma reta em y) é conferida contra quem divide a coluna; o asteroide sorteia outra altura (8 tentativas; a
+coluna cheia pula o nascimento); a rocha do minerador sai da altura do roteiro só o mínimo (passos de 2 px; o drone
+vai junto) e, sem vaga, quem cede é o destroço ainda FORA da tela. O raio de cada peça: 0,45 × o maior lado na tela.
+Testes: `test-destrocos-vaga.mjs` (puro, `--experimental-transform-types`) e `test-destrocos-vaga-jogo.mjs` (a F2
+com um asteroide a cada 0,35 s e um drone a cada 3 s, 30 s: 0 sobreposições; eram 94 antes do caminho de reserva).
+
+### 5.2 O asteroide de CRISTAL DE ÂMBAR da F3 (novo, só visual)
+
+Ele: *"um asteroide de cristal ambar...sem pedra, só um aglomerado de cristal de ambar [...] uma boa adição para a
+fase 3, faça 2 variações, pequena e média"*. Folha `folhas/2026-11-21/ambar/folha.html`. PixelLab `create_image_pro`
+com o âmbar da `elite-rocha-2` e o `asteroid-6` como referências (canvas 32 → ~22 px; 42 → ~28 px); a 1ª leva de
+pequenos saiu "folha de bordo" (estrela chapada e clara) — refeita com o médio 17 como referência ("prismas finos de
+comprimentos diferentes, para todos os lados"). **As escolhas dele: P17** (22×22, `asteroid-ambar.png`) **e M2**
+(29×31, `asteroid-ambar-2.png`), *"só visual, como variante da F3"*: `asteroidAmbar`/`asteroidAmbar2` sorteados junto
+com a família do asteroide SÓ na F3 (`DebrisSystem.VARIANTES_DA_FASE`, `art.variantsOf`) — 6 cinza + 2 âmbar, um em
+quatro (contado: 208 de 800; na F2, 0). A arte é a dele, intocada: reduzir para a rampa da rocha 2 apagou o miolo
+escuro (os vermelhos das sombras viraram marrom). A morte é a da rocha; os pedaços saem da arte (âmbar), a poeira
+segue a cinza-azulada. Os crus em `assets/raw/asteroides-ambar/`; as receitas em `scripts/_ambar/`.

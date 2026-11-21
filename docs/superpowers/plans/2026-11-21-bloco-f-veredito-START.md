@@ -7,6 +7,17 @@
 > Tudo está commitado e empurrado (21/11). A spec dos asteroides: `specs/2026-11-20-bloco-f-asteroides-design.md`; a da
 > sonda: `specs/2026-11-20-bloco-f-sonda-design.md`.
 
+## ✅ O VEREDITO (21/11) — O F FECHOU
+
+Ele jogou a F2 e a F3: *"O restante ficou bom"*. Entraram duas coisas, aprovadas (*"está tudo ok"*), commitadas e
+empurradas — o registro na §5 da spec dos asteroides:
+- **Um asteroide nascia em cima do outro** (sobretudo junto com a rocha do minerador) → a vaga conferida no
+  nascimento, a travessia inteira com a deriva (`src/systems/vagaDosDestrocos.ts`; testes `test-destrocos-vaga`,
+  `test-destrocos-vaga-jogo`).
+- **O cristal de âmbar da F3** (o pedido dele) → o P17 e o M2, variantes só visuais do asteroide na F3 (um em quatro).
+
+**A próxima sessão abre no §3 abaixo (o rebalanceamento).** As seções 1 e 2 ficam como registro.
+
 ## ▶️ Como abrir a sessão
 
 1. `npm run dev` (http://localhost:5173) e `git status` (limpo, fora os vídeos, os GIFs e as pastas `q/`). Lembrar o
