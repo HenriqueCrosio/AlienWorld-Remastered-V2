@@ -1,0 +1,6 @@
+# The asteroid tools of 20–21/11 (bloco F; spec docs/superpowers/specs/2026-11-20-bloco-f-asteroides-design.md).
+# Kept as RECIPES: they were run from the session's scratchpad (their paths point there; the candidates downloaded by
+# baixar.py lived in it). analise.py — the old asteroids as the game draws them; baixar.py — the PixelLab candidates;
+# folha.py — the finalists on the F2 background; tom.py — the TONE MATCH by the old palette; montar-minerador.py — the
+# ~60 px miner rocks, tone-matched, mocked with the drone; instalar.py — the install (crop, backup, the drone ENCAIXE);
+# foto-jogo.mjs — a still of the F2 with them in game.

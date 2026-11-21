@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asteroides novos</title>
+<style>
+  :root { --fundo: #0e1016; --texto: #d8dbe2; --fraco: #8a90a0; --linha: #262a36; --acento: #ff8a3c; --rec: #6fd38a; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  p.sub { color: var(--fraco); margin: 0 0 20px; max-width: 900px; }
+  section { border-top: 1px solid var(--linha); padding: 20px 0; }
+  h2 { font-size: 19px; margin: 0 0 4px; color: var(--acento); }
+  .nota { color: var(--fraco); margin: 0 0 14px; }
+  .grade { display: flex; flex-wrap: wrap; gap: 12px; }
+  .cel { width: 200px; background: #11131a; border: 1px solid var(--linha); }
+  .cel.rec { border-color: var(--rec); }
+  .rot { font-size: 13px; padding: 4px 8px; display: flex; justify-content: space-between; }
+  .rot b { color: var(--rec); font-weight: 600; }
+  /* the game's view: the real F2 background, the sprite at its native size ×3 (the screen) */
+  .jogo { height: 180px; background: url(fundo-f2.jpg) center / 1152px 648px; display: grid; place-items: center; overflow: hidden; }
+  .zoom { height: 200px; background: #05060a; display: grid; place-items: center; overflow: hidden; }
+  img { image-rendering: pixelated; display: block; }
+  .gira { animation: gira 14s linear infinite; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  label { color: var(--fraco); font-size: 14px; cursor: pointer; }
+  .mock { width: 288px; background: #11131a; border: 1px solid var(--linha); }
+  .mock img { width: 288px; }
+  .mock .rot { font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Asteroides novos</h1>
+  <p class="sub">Cada candidato no fundo real da F2, no tamanho do jogo (a tela ×3), e ampliado ao lado. Eles giram
+    devagar como no jogo, para ver se algum lado vira reto no giro. Em verde, a minha recomendação. Os números são os
+    dos candidatos do PixelLab.</p>
+  <p><label><input type="checkbox" id="parar"> parar o giro</label></p>
+
+  <section>
+    <h2>Hoje (26 px, ampliados até ×1,9 no jogo)</h2>
+    <p class="nota">As formas quadradas, a sombra de chão embaixo e o bloco de pixels quando ampliados.</p>
+    <div class="grade" data-itens="hoje-asteroid:asteroid:1 | hoje-asteroid-2:asteroid-2:1 | hoje-asteroid-3:asteroid-3:1 | hoje-asteroid-2:asteroid-2 ×1,9:1.9 | hoje-elite-rocha:a rocha do minerador:1"></div>
+  </section>
+
+  <section>
+    <h2>Pequenos · 26 px — escolha 3</h2>
+    <p class="nota">28, 49 e 61: redondos, com crateras, da mesma família dos grandes. 22 e 52: pontudos.</p>
+    <div class="grade" data-itens="peq-28:peq 28:1:rec | peq-46:peq 46:1 | peq-49:peq 49:1:rec | peq-61:peq 61:1:rec | peq-22:peq 22:1 | peq-52:peq 52:1"></div>
+  </section>
+
+  <section>
+    <h2>Médios · 38 px — escolha 2</h2>
+    <p class="nota">Vieram mais lascados; estes são os mais encaroçados (os de facetas retas e triangulares foram descartados).</p>
+    <div class="grade" data-itens="med-4:med 4:1:rec | med-15:med 15:1 | med-17:med 17:1:rec | med-11:med 11:1 | med-14:med 14:1 | med-1:med 1:1"></div>
+  </section>
+
+  <section>
+    <h2>Grandes · 48 px (a variação maior) — escolha 1</h2>
+    <p class="nota">Vieram claros demais para o cinturão: em cima, como saíram; embaixo, com o tom descido pela paleta
+      dos asteroides de hoje (a cor e a forma iguais). A escolha é na versão de tom ajustado.</p>
+    <div class="grade" data-itens="gra-0:gra 0:1 | gra-1:gra 1:1 | gra-5:gra 5:1 | gra-14:gra 14:1 | gra-22:gra 22:1 | gra-24:gra 24:1"></div>
+    <div class="grade" style="margin-top:12px" data-itens="gra-0-tom:gra 0 · tom:1 | gra-1-tom:gra 1 · tom:1 | gra-5-tom:gra 5 · tom:1:rec | gra-14-tom:gra 14 · tom:1 | gra-22-tom:gra 22 · tom:1 | gra-24-tom:gra 24 · tom:1"></div>
+  </section>
+
+  <section>
+    <h2>Minerador · 52 px (a rachadura no topo)</h2>
+    <p class="nota">Todos trouxeram o V no topo, mas lisos e claros demais. A minha proposta: partir do GRANDE escolhido
+      e abrir só a rachadura nele (inpaint) — a mesma pedra da família, com o corte onde o drone trabalha.</p>
+    <div class="grade" data-itens="min-4:min 4:1 | min-11:min 11:1 | min-13:min 13:1 | min-15:min 15:1 | min-12:min 12:1 | min-8:min 8:1"></div>
+  </section>
+  <section>
+    <h2>Minerador · a partir do grande 5 (a rachadura no topo, com âmbar)</h2>
+    <p class="nota">O grande 5 com o tom ajustado, e a rachadura aberta por inpaint só numa faixa do topo — fora dela a
+      pedra é pixel a pixel a mesma. 1: a rachadura em V, uma lasca de âmbar · 2: o V marcado, um punhado de cristal
+      dentro · 3: o âmbar despontando pela borda · 4: o âmbar enche a cratera de cima, quase sem rachadura.</p>
+    <div class="grade" data-itens="gra-5-tom:gra 5 (a base):1 | rach-1:rachadura 1:1 | rach-2:rachadura 2:1:rec | rach-3:rachadura 3:1 | rach-4:rachadura 4:1"></div>
+  </section>
+
+  <section>
+    <h2>Os tamanhos de verdade</h2>
+    <p class="nota">O gerador encolheu a pedra dentro do quadro: os pequenos têm 24×26 px, os médios só 26–28, o grande
+      32. Hoje o maior chega a 49 px na tela porque a arte de 26 é ampliada até ×1,9. Sem ampliar (a escala de 0,85 a 1,0,
+      a regra que tira o blocado), o maior passa a ter 32 px.</p>
+  </section>
+  <section>
+    <h2>Minerador · maior (~60 px), com o drone — escolha um de cada (2, 4 e o grande 1)</h2>
+    <p class="nota">Com a pedra de 32 px o drone (31 px) ficava maior que ela. Aqui as três que você escolheu, redesenhadas
+      no tamanho que funciona (~60 px), com o tom da família; em cima sozinha, embaixo com o drone encaixado, tudo no
+      tamanho do jogo (a tela ×3). O jogo sorteia entre as três.</p>
+    <div class="grade">
+      <div class="mock"><div class="rot"><span>rachadura 2 · a</span></div><img src="q/mg-r2-0-so.png" alt=""><img src="q/mg-r2-0-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>rachadura 2 · b</span></div><img src="q/mg-r2-5-so.png" alt=""><img src="q/mg-r2-5-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>rachadura 4 · cristal pequeno a</span></div><img src="q/mg-r4-0-so.png" alt=""><img src="q/mg-r4-0-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>rachadura 4 · cristal pequeno b</span></div><img src="q/mg-r4-2-so.png" alt=""><img src="q/mg-r4-2-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>rachadura 4 · cristal maior a</span></div><img src="q/mg-r4-3-so.png" alt=""><img src="q/mg-r4-3-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>rachadura 4 · cristal maior b</span></div><img src="q/mg-r4-7-so.png" alt=""><img src="q/mg-r4-7-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>grande 1 · âmbar a</span></div><img src="q/mg-g1-0-so.png" alt=""><img src="q/mg-g1-0-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>grande 1 · âmbar b</span></div><img src="q/mg-g1-2-so.png" alt=""><img src="q/mg-g1-2-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>grande 1 · âmbar c</span></div><img src="q/mg-g1-4-so.png" alt=""><img src="q/mg-g1-4-drone.png" alt=""></div>
+      <div class="mock"><div class="rot"><span>grande 1 · âmbar d</span></div><img src="q/mg-g1-7-so.png" alt=""><img src="q/mg-g1-7-drone.png" alt=""></div>
+    </div>
+  </section>
+</main>
+<script>
+  const ESC = 3, ZOOM = 6;
+  for (const g of document.querySelectorAll('[data-itens]')) {
+    for (const item of g.dataset.itens.split('|').map((s) => s.trim())) {
+      const [arq, rotulo, escala, rec] = item.split(':');
+      const cel = document.createElement('div');
+      cel.className = 'cel' + (rec ? ' rec' : '');
+      cel.innerHTML = `<div class="rot"><span>${rotulo}</span>${rec ? '<b>recomendo</b>' : ''}</div><div class="jogo"></div><div class="zoom"></div>`;
+      g.append(cel);
+      const im = new Image();
+      im.onload = () => {
+        const k = Number(escala);
+        const a = im.cloneNode(); a.className = 'gira';
+        // the game view at the screen's exact ×3
+        a.style.width = `${im.naturalWidth * k * ESC}px`;
+        const b = im.cloneNode(); b.className = 'gira';
+        b.style.width = `${Math.min(176, Math.round(im.naturalWidth * k * ZOOM))}px`;
+        cel.querySelector('.jogo').append(a);
+        cel.querySelector('.zoom').append(b);
+      };
+      im.onerror = () => { cel.querySelector('.jogo').textContent = 'não carregou'; };
+      im.src = `q/${arq}.png`;
+    }
+  }
+  document.getElementById('parar').addEventListener('change', (e) => {
+    for (const el of document.querySelectorAll('.gira')) el.style.animationPlayState = e.target.checked ? 'paused' : 'running';
+  });
+</script>
+</body>
+</html>
