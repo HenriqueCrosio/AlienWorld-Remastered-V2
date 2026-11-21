@@ -1028,6 +1028,9 @@ export class EnemySystem {
     // um slot reciclado.
     b.setBlendMode(Phaser.BlendModes.NORMAL);
     b.setData('tracer', false);
+    // A marca do estilhaço do flak da Capitânia (a vida dele, `BossCapitania.detonate`): sem apagar, o tempo de um
+    // estilhaço antigo apagaria o projétil novo que herdou o slot.
+    b.setData('estilhaco', 0);
     b.setData('missile', false);
     b.setData('rastroCasco', false);
     // E o ATIRADOR: sem apagar, o slot reciclado continuaria imune ao prop que disparou o tiro

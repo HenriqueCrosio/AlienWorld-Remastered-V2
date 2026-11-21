@@ -52,7 +52,7 @@ interface Flak {
  * ─── DUAS FASES, DOIS SKILL SETS ───
  *
  *  inteira (100–50%)  salva rolante + 2 kamikazes. A luta se ENSINA.
- *  fúria    (<50%)    onda mais rápida + 3 kamikazes + BARRAGEM DE FLAK + rajada mirada.
+ *  fúria    (<50%)    onda mais rápida + 1 kamikaze + BARRAGEM DE FLAK + rajada mirada.
  *
  * O flak só aparece na fúria de propósito. Ele pergunta "onde você VAI estar" (a granada estoura
  * num ponto, não te acerta em movimento) — uma pergunta diferente da onda, e cara demais para
@@ -95,6 +95,19 @@ export class BossCapitania implements StageBoss {
 
   /** Teto de interceptadores vivos. Sem ele, o acúmulo mata o jogador — não a luta. */
   private static readonly MAX_KAMIKAZES = 5;
+
+  /** O FLAK da fúria (21/11, ver `beats`): a 3ª cápsula sai este tanto depois das duas; o estouro solta
+   * `ESTILHACOS`, e cada um se apaga em `ESTILHACO_VIDA_MS`. */
+  private static readonly FLAK_RETARDATARIA_MS = 900;
+  /** O voo das DUAS e o da RETARDATÁRIA (s; o tempo de voo é o telégrafo). A retardatária viaja ~35% mais devagar
+   * (21/11, ele: *"reduzir a velocidade do terceiro flak, para além do atraso, viajar mais lentamente. Assim dá mais
+   * respiro"*) — ela é a pergunta que volta, e chega sem pressa. */
+  private static readonly FLAK_VOO: readonly [number, number] = [1.1, 1.35];
+  private static readonly FLAK_VOO_RETARDATARIA: readonly [number, number] = [1.7, 1.85];
+  private static readonly ESTILHACOS = 6;
+  private static readonly ESTILHACO_VIDA_MS = 1200;
+  /** A marca de cada estilhaço (ver `detonate`). */
+  private estilhacoSeq = 0;
 
   /**
    * As três baterias, a partir do CENTRO do sprite (124×65).
@@ -212,17 +225,24 @@ export class BossCapitania implements StageBoss {
 
   /** Duração do ciclo. O que sobra depois do último tempo é o SILÊNCIO — e ele é a mecânica. */
   private get cycleLength(): number {
-    return this.enraged ? 3.4 : 4.2;
+    return this.enraged ? 4.0 : 4.2;
   }
 
   /**
    * A partitura do ciclo.
    *
    * INTEIRA (4.2s): larga 2 kamikazes → a onda varre o casco (0.8s…1.4s) → **2.8s de silêncio**.
-   * FÚRIA   (3.4s): larga 3 → onda mais apertada → BARRAGEM DE FLAK → rajada mirada → 1.3s.
+   * FÚRIA   (4.0s): larga 1 → onda mais apertada → BARRAGEM DE FLAK (a 3ª cápsula aos 2.4s) → rajada mirada
+   *                 → **1.6s sem tiro novo**.
    *
    * A pausa encolhe na fúria mas NUNCA some: sem ela o jogador não tem quando matar os
    * interceptadores, e a luta deixa de ser uma luta e vira uma maré.
+   *
+   * ⚠️ 21/11 (o rebalanceamento, frente 0; ele: *"é tranquilo até o momento do enfurecer, após isso, o campo fica
+   * repleto de minas explodindo, kamikazes"*): a fúria era de 3.4s e a 3ª cápsula saía 3s depois das outras — já
+   * DENTRO do ciclo seguinte —, e os estilhaços (8, cruzando a tela) viviam 3–4s: a barragem de um ciclo caía em cima da
+   * onda do outro e o silêncio sumia. Medido (`scripts/_rebalance/medir-capitania.mjs`): 18,8 ameaças na tela em
+   * média, 33 no pico. Agora: 4.0s, a 3ª cápsula no mesmo ciclo, 6 estilhaços que se apagam em 1.2s — 12,8 e 21.
    */
   private get beats(): Beat[] {
     const [b0, b1, b2] = BossCapitania.BATTERIES;
@@ -240,7 +260,10 @@ export class BossCapitania implements StageBoss {
     }
 
     return [
-      { at: 0.0, run: () => this.launch(3) },
+      // UM só (21/11, ele: *"na segunda fase do boss, sai apenas 1 kamikaze. Assim o respiro continua, o kamikaze
+      // sozinho pode cobrar quem não abater logo"*). Eram 3: o kamikaze não abatido volta a caçar (o comportamento
+      // dele no jogo todo, que fica), e com 3 por ciclo a fúria vivia no teto de 5 caçando a nave.
+      { at: 0.0, run: () => this.launch(1) },
       { at: 0.5, run: () => { this.playFire(); this.burst(b0, 4, 34); } },
       { at: 0.7, run: () => this.burst(b1, 4, 34) },
       { at: 0.9, run: () => this.burst(b2, 4, 34) },
@@ -433,19 +456,25 @@ export class BossCapitania implements StageBoss {
    */
   private flakVolley(target: Phaser.Physics.Arcade.Sprite): void {
     // TRÊS cápsulas, mas em DOIS tempos (pedido do Henrique, 2026-07-18): DUAS agora, e a
-    // TERCEIRA 3s depois. Três estouros no mesmo instante liam como uma parede única; a
+    // TERCEIRA depois. Três estouros no mesmo instante liam como uma parede única; a
     // retardatária reabre a pergunta do flak ("onde você VAI estar") quando o jogador acha que
     // a barragem já acabou — sem acrescentar dano, só ritmo.
+    // ⚠️ 21/11: a retardatária era 3s depois — caía no ciclo SEGUINTE, em cima da onda dele. Agora 0.9s: ela estoura
+    // ainda neste ciclo, antes do silêncio (ver `beats`).
     this.lancarCapsulas(target, 2);
-    this.scene.time.delayedCall(3000, () => {
+    this.scene.time.delayedCall(BossCapitania.FLAK_RETARDATARIA_MS, () => {
       // Chefão morto não atira do túmulo (a mesma regra do die(): granada póstuma mata o
       // jogador na tela de vitória). E se a luta reiniciou (treino), o sprite já morreu junto.
       if (this.dead || !this.sprite.active) return;
-      this.lancarCapsulas(target, 1);
+      this.lancarCapsulas(target, 1, BossCapitania.FLAK_VOO_RETARDATARIA);
     });
   }
 
-  private lancarCapsulas(target: Phaser.Physics.Arcade.Sprite, quantas: number): void {
+  private lancarCapsulas(
+    target: Phaser.Physics.Arcade.Sprite,
+    quantas: number,
+    vooS: readonly [number, number] = BossCapitania.FLAK_VOO,
+  ): void {
     const m = this.muzzleOf(BossCapitania.BATTERIES[0]);
 
     // Cada cápsula nega uma ÁREA (o estouro tem raio): áreas sorteadas cobrem mais tela do que
@@ -467,8 +496,9 @@ export class BossCapitania implements StageBoss {
       const alvoX = Phaser.Math.Between(40, Math.min(GAME_WIDTH - 70, this.sprite.x - 40));
 
       // Tempo de voo FIXO: é ele que o jogador aprende a ler. Com tempo variável, a mesma
-      // distância daria pressas diferentes e não haveria o que aprender.
-      const voo = Phaser.Math.FloatBetween(1.1, 1.35);
+      // distância daria pressas diferentes e não haveria o que aprender. (A retardatária tem o SEU tempo, também
+      // fixo: mais longo — ver `FLAK_VOO_RETARDATARIA`.)
+      const voo = Phaser.Math.FloatBetween(vooS[0], vooS[1]);
 
       shell.setActive(true).setVisible(true);
       shell.body!.enable = true;
@@ -579,7 +609,9 @@ export class BossCapitania implements StageBoss {
     Som.tocar('chefe.capitania.flakEstouro', { x });
     this.scene.cameras.main.shake(110, 0.005);
 
-    const shards = 8;
+    // O ESTOURO É LOCAL (21/11): 6 estilhaços que se apagam em `ESTILHACO_VIDA_MS` (~115px de alcance) — eram 8
+    // cruzando a tela inteira, e o flak deixava de negar um PONTO para virar uma parede que varre tudo.
+    const shards = BossCapitania.ESTILHACOS;
     const offset = Phaser.Math.FloatBetween(0, Math.PI * 2);
 
     for (let i = 0; i < shards; i++) {
@@ -604,6 +636,17 @@ export class BossCapitania implements StageBoss {
       // Estilhaço é RÁPIDO (a cápsula é que era lenta). O perigo do flak é o instante do estouro:
       // um anel arrastado seria só mais uma nuvem para contornar, e o ataque perderia o susto.
       s.setVelocity(Math.cos(angle) * 96, Math.sin(angle) * 96);
+
+      // A VIDA do estilhaço. O slot é do pool compartilhado: a marca (`estilhaco`, um número só deste estilhaço)
+      // diz se ele ainda é o mesmo quando o tempo acaba — o `release()` a apaga, então um slot já reciclado (um tiro
+      // de drone, um traçante) não é apagado por engano. Ele se apaga com duas fagulhas: queimou, não sumiu.
+      const marca = ++this.estilhacoSeq;
+      s.setData('estilhaco', marca);
+      this.scene.time.delayedCall(BossCapitania.ESTILHACO_VIDA_MS, () => {
+        if (!s.active || s.getData('estilhaco') !== marca) return;
+        this.muzzleFx.explode(2, s.x, s.y);
+        this.enemies.release(s);
+      });
     }
   }
 
