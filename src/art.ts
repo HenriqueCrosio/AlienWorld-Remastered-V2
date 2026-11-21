@@ -24,6 +24,11 @@ function keysFor(scene: Phaser.Scene, base: string): string[] {
   return keys;
 }
 
+/** Todas as variantes que existem de uma base (`<base>`, `<base>2`…) — para sortear entre duas famílias juntas. */
+export function variantsOf(scene: Phaser.Scene, base: string): readonly string[] {
+  return scene.textures.exists(base) ? keysFor(scene, base) : [];
+}
+
 /** Sorteia uma variante da textura. Se não houver variante, devolve a própria base. */
 export function pickVariant(scene: Phaser.Scene, base: string): string {
   return Phaser.Utils.Array.GetRandom(keysFor(scene, base));

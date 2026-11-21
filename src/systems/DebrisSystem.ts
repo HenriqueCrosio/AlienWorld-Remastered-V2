@@ -1,8 +1,12 @@
 import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, SCROLL_SPEED } from '../config';
-import { pickVariant } from '../art';
+import { pickVariant, variantsOf } from '../art';
 import { ELITES } from '../data/numerosElites';
 import { Som } from '../som/Som';
+import { alturaMaisPerto, alturaSorteada, raioDe, seEncontram, type Trilho } from './vagaDosDestrocos';
+
+/** The heights a hazard is born in: clear of the HUD at the top and of the bottom edge. */
+const FAIXA_Y: [number, number] = [30, GAME_HEIGHT - 24];
 
 export type HazardKind = 'asteroid' | 'destroco' | 'mina' | 'sensor' | 'mineravel';
 
@@ -129,6 +133,16 @@ const STAGE_4_SKIN: Partial<Record<HazardKind, { atlas: string; scale: [number, 
   destroco: { atlas: 'f4Engolido', scale: [1, 1] },
 };
 
+/**
+ * THE AMBER CRYSTALS OF THE F3 (21/11, him: *"um asteroide de cristal ambar...sem pedra, só um aglomerado de cristal
+ * de ambar [...] uma boa adição para a fase 3"*; his choice P17 and M2, sheet `folhas/2026-11-21/ambar/`). A second
+ * family drawn TOGETHER with the asteroid's in that stage — every variant of both weighs the same (today 6 grey + 2
+ * amber: one rock in four is amber). Just visual: the same `asteroid` hazard (life, score, the rock's death).
+ */
+const VARIANTES_DA_FASE: Partial<Record<number, Partial<Record<HazardKind, string>>>> = {
+  3: { asteroid: 'asteroidAmbar' },
+};
+
 /** Raio (px) em que a mina fere ao explodir. Generoso o bastante para ENSINAR, não para punir. */
 export const MINE_BLAST_RADIUS = 30;
 
@@ -177,16 +191,75 @@ export class DebrisSystem {
   spawn(kind: HazardKind): void {
     // Nasce em qualquer altura: é o vácuo, não há linha do chão a respeitar.
     // A faixa evita o HUD no topo e a borda de baixo.
-    this.spawnEm(kind, GAME_WIDTH + 40, Phaser.Math.Between(30, GAME_HEIGHT - 24));
+    const h = this.spawnEm(kind, GAME_WIDTH + 40, Phaser.Math.Between(...FAIXA_Y));
+    // (21/11) the height is drawn AGAIN until the whole crossing is clear of who already shares this column (the
+    // drift included — `vagaDosDestrocos.ts`); a full column skips this birth instead of stacking two rocks
+    const y = alturaSorteada(Math.random, FAIXA_Y, this.trilho(h), this.outros(h), this.travessia(h));
+    if (y === null) h.destroy();
+    else this.mover(h, y);
   }
 
   /** Um destroço num ponto dado — o roteiro sorteia a altura (`spawn`); o drone de mineração pede a rocha dele aqui. */
   spawnEm(kind: HazardKind, x: number, y: number): Phaser.Physics.Arcade.Sprite {
+    const h = this.criar(kind, x, y);
+    if (kind === 'mineravel') {
+      // (21/11) the miner's rock has the script's height and the drone is placed on it AFTER this returns: on a busy
+      // column it steps aside as little as it must (the asteroids born before it are already there)
+      const yy = alturaMaisPerto(y, FAIXA_Y, this.trilho(h), this.outros(h), this.travessia(h));
+      if (yy !== null && yy !== y) this.mover(h, yy);
+      // no room left in the column: the rock keeps its height and the pieces in its way that are still OFF the screen
+      // (never seen yet) give way to it
+      if (yy === null) {
+        const rocha = this.trilho(h);
+        for (const o of [...this.hazards.getChildren()] as Phaser.Physics.Arcade.Sprite[]) {
+          if (o === h || !o.active) continue;
+          const t = this.trilho(o);
+          if (t.x - t.r > GAME_WIDTH && seEncontram(rocha, t, this.travessia(h))) o.destroy();
+        }
+      }
+    }
+    return h;
+  }
+
+  /** The hazard as the room check sees it. */
+  private trilho(h: Phaser.Physics.Arcade.Sprite): Trilho {
+    return { x: h.x, y: h.y, vy: (h.body as Phaser.Physics.Arcade.Body).velocity.y, r: raioDe(h.displayWidth, h.displayHeight) };
+  }
+
+  /** Every other live hazard. */
+  private outros(h: Phaser.Physics.Arcade.Sprite): Trilho[] {
+    return this.hazards
+      .getChildren()
+      .filter((o) => o !== h && o.active)
+      .map((o) => this.trilho(o as Phaser.Physics.Arcade.Sprite));
+  }
+
+  /** Seconds until it leaves by the left edge (the `update` cull). */
+  private travessia(h: Phaser.Physics.Arcade.Sprite): number {
+    return (h.x + 50) / SCROLL_SPEED;
+  }
+
+  /** A new height, keeping the velocity (`body.reset` zeroes it). */
+  private mover(h: Phaser.Physics.Arcade.Sprite, y: number): void {
+    const body = h.body as Phaser.Physics.Arcade.Body;
+    const vx = body.velocity.x;
+    const vy = body.velocity.y;
+    h.setY(y);
+    body.reset(h.x, y);
+    body.setVelocity(vx, vy);
+  }
+
+  private criar(kind: HazardKind, x: number, y: number): Phaser.Physics.Arcade.Sprite {
     const def = HAZARDS[kind];
     // Sem o atlas (guarda de textura), cai na arte de sempre — ver STAGE_4_SKIN.
     const skin = this.stageId === 4 ? STAGE_4_SKIN[kind] : undefined;
     const atlas = skin && this.scene.textures.exists(skin.atlas) ? skin.atlas : undefined;
-    const texture = atlas ?? pickVariant(this.scene, def.texture);
+    const extra = VARIANTES_DA_FASE[this.stageId]?.[kind];
+    const texture =
+      atlas ??
+      (extra
+        ? Phaser.Utils.Array.GetRandom([...variantsOf(this.scene, def.texture), ...variantsOf(this.scene, extra)])
+        : pickVariant(this.scene, def.texture));
     const frame = atlas
       ? Phaser.Utils.Array.GetRandom(this.scene.textures.get(atlas).getFrameNames())
       : undefined;

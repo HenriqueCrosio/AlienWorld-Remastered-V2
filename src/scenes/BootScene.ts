@@ -910,6 +910,11 @@ const ART: Record<string, string> = {
   asteroid4: 'sprites/asteroid-4.png',
   asteroid5: 'sprites/asteroid-5.png',
   asteroid6: 'sprites/asteroid-6.png',
+  // THE AMBER CRYSTALS (21/11, his choice P17 and M2, sheet `folhas/2026-11-21/ambar/`): an asteroid of amber crystal
+  // only, no stone — the small 22 px and the medium 29×31, at their native size. ONLY in the F3, mixed into the
+  // asteroid family there (`DebrisSystem`, `VARIANTES_DA_FASE`); just visual. The raw ones in `assets/raw/asteroides-ambar/`.
+  asteroidAmbar: 'sprites/asteroid-ambar.png',
+  asteroidAmbar2: 'sprites/asteroid-ambar-2.png',
   mina: 'sprites/mina.png',
   mina2: 'sprites/mina-2.png',
 
