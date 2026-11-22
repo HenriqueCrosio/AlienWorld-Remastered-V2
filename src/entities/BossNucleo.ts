@@ -9,6 +9,10 @@ import { SerraGuardiao } from './SerraGuardiao';
 import { afundarNaLava } from './fimDoPredador';
 import { explosaoSangrenta, sangueNaTela } from './sangue';
 import { Som } from '../som/Som';
+import { CamadaCabos } from './guardiao/camadaCabos';
+import { TRANCOS, deslocTranco, voltaElastica, xDaParada, type Tranco } from './guardiao/coleira';
+import { LavaGuardiao } from './guardiao/lavaGuardiao';
+import { angulosSalva, miraSalva, type LequeLava } from './guardiao/padroes';
 
 /**
  * O CHEFÃO FINAL da Fase 4, em DUAS FORMAS (design do Henrique, 2026-07-19):
@@ -55,7 +59,7 @@ export class BossNucleo implements StageBoss {
   private t = 0;
 
   /** Guardião: máquina de estados do movimento. Parado = vulnerável; movendo = fechado. */
-  private acao: 'flutua' | 'telegrafo' | 'investe' | 'volta' | 'serra' = 'flutua';
+  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'volta' | 'serra' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
   /**
@@ -93,6 +97,29 @@ export class BossNucleo implements StageBoss {
    */
   private vyTravado: number | null = null;
   private recuoT = 0;
+
+  /**
+   * ─── A COLEIRA (22/11, spec 2026-11-22-guardiao-coleira-design.md) ───
+   * Ele: *"como se fosse um cachorro raivoso que vai atacar e é travado por uma coleira presa"*. Os cabos do alto saíram
+   * do desenho e viraram CORDAS presas ao teto (`entities/guardiao/`): a investida vai até a primeira chegar ao máximo,
+   * e aí o TRANCO — o corpo passa um pouco, a corda o segura, e os cabos o recolhem até a estação. A investida não
+   * termina mais atrás da nave: termina no meio.
+   */
+  private readonly cabos: CamadaCabos;
+  /** a lava do miolo: o leque do tranco (spec 2026-11-22 §5) */
+  private readonly lava: LavaGuardiao;
+  /** o último leque (lido pelo teste) */
+  ultimoLeque: LequeLava | null = null;
+  /** gotas no leque do tranco, por degrau */
+  private static readonly LAVA_N = [5, 6, 7];
+  /** o tranco em uso — `?tranco=A|B|C` na URL (A seco · B elástico · C vibrante), para comparar; padrão A */
+  private readonly tranco: Tranco;
+  private parada = { x: 0, y: 0 };
+  private trancoT = 0;
+  /** a parada de referência, na altura da base: o centro do corpo aqui deixa o focinho a ~1/3 da tela */
+  static readonly X_PARADA = 200;
+  /** a volta puxada pelos cabos (s) */
+  private static readonly VOLTA_S = 0.8;
 
   // ─── Guardião (256×256 a escala 0.7 ≈ 179×179) ───
   private static readonly G_ESCALA = 0.7;
@@ -255,6 +282,15 @@ export class BossNucleo implements StageBoss {
     this.sprite = scene.physics.add.sprite(GAME_WIDTH + 120, BossNucleo.G_BASE_Y, 'guardiao');
     this.sprite.setScale(BossNucleo.G_ESCALA);
     this.sprite.setData('boss', this);
+    this.cabos = new CamadaCabos(
+      scene,
+      BossNucleo.G_ESCALA,
+      { x: BossNucleo.G_STATION_X, y: BossNucleo.G_BASE_Y },
+      { x: BossNucleo.X_PARADA, y: BossNucleo.G_BASE_Y },
+    );
+    this.lava = new LavaGuardiao(scene, enemies, BossNucleo.ARENA_TOPO, BossNucleo.ARENA_BASE);
+    const qTranco = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('tranco') : null;
+    this.tranco = TRANCOS[qTranco === 'B' || qTranco === 'C' ? qTranco : 'A'];
 
     // O GUARDIÃO RESPIRA (sheet do PixelLab): a massa vermelha pulsa como um coração — mover =
     // sístole, e até parado ele é órgão vivo. Sem a sheet, o estático segura a luta (arte entra
@@ -444,6 +480,10 @@ export class BossNucleo implements StageBoss {
     // ANTES de qualquer saída antecipada: os glóbulos no ar continuam sendo glóbulos depois que o
     // guardião morre (a salva sobrevive à troca por ~2s), e um rastro que corta no meio se denuncia.
     this.rastroGlobulos(dt);
+    // os cabos seguem o corpo SEMPRE (na entrada, na troca, arrebentados na morte)
+    this.cabos.atualizar(dt, this.sprite);
+    // a lava no ar segue caindo depois da morte, como os glóbulos
+    this.lava.atualizar(dt);
 
     // O predador roda até DEPOIS de morto (a luz apaga, o breu sai, a lava no ar segue caindo).
     if (this.predador) {
@@ -483,7 +523,7 @@ export class BossNucleo implements StageBoss {
         this.cdTiro -= dt;
         if (this.cdTiro <= 0) {
           this.cdTiro = 1.8;
-          this.leque(BossNucleo.SALVA_N[this.degrau], this.gMuzzle());
+          this.leque(BossNucleo.SALVA_N[this.degrau], this.gMuzzle(), target);
           // one sound per fan (block SOUND, sheet 5c)
           Som.tocar('guardiao.leque', { x: this.sprite.x });
           this.scene.cameras.main.shake(40, 0.002);
@@ -596,6 +636,8 @@ export class BossNucleo implements StageBoss {
           this.glow.emitParticleAt(this.core.x, this.core.y, 14);
           this.acao = 'investe';
           Som.tocar('guardiao.investida', { x: this.sprite.x });
+          // o teto solta cabo quase reto: o cachorro puxando a coleira
+          this.cabos.setTensa(true);
           // Investe na altura lida NA TRAVA — mirada no passado, e agora num passado que ele pode ver
           // acontecer. O `??` é a rede: sem trava (se alguém zerar `TELEG_TRAVA`), vale a leitura do
           // instante do arranque, que é o comportamento antigo.
@@ -625,19 +667,44 @@ export class BossNucleo implements StageBoss {
       }
 
       case 'investe': {
-        if (this.sprite.x < 70) {
+        // A COLEIRA: até a primeira corda chegar ao máximo — e aí o TRANCO. O `x < 70` antigo fica só como rede.
+        if (this.cabos.noLimite(this.sprite) || this.sprite.x < 70) {
+          // a parada EXATA do alcance (a 300 px/s um quadro lento passaria 5–15 px dela)
+          this.parada = { x: Math.max(this.sprite.x, this.xParadaEm(this.sprite.y)), y: this.sprite.y };
+          this.body.reset(this.parada.x, this.parada.y);
+          this.acao = 'tranco';
+          this.trancoT = 0;
+          this.cabos.golpe(this.tranco.vibra);
+          this.scene.cameras.main.shake(90, this.tranco.tremor);
+          // O LEQUE: a inércia arranca a lava do miolo, centrada na nave, com um vão
+          this.posicionarCore();
+          this.ultimoLeque = this.lava.leque(BossNucleo.LAVA_N[this.degrau], { x: this.core.x, y: this.core.y }, target.y);
+        }
+        break;
+      }
+
+      case 'tranco': {
+        // o corpo passa um pouco da parada (a inércia) e a corda o segura de volta
+        this.trancoT += dt;
+        this.body.reset(this.parada.x - deslocTranco(this.trancoT, this.tranco), this.parada.y);
+        if (this.trancoT >= this.tranco.volta) {
           this.acao = 'volta';
-          this.body.setVelocity(150, 0);
+          this.trancoT = 0;
+          this.cabos.setTensa(false);
         }
         break;
       }
 
       case 'volta': {
-        if (this.sprite.x >= BossNucleo.G_STATION_X) {
-          this.sprite.x = BossNucleo.G_STATION_X;
-          this.body.setVelocity(0, 0);
-          const alvoY = BossNucleo.G_BASE_Y - this.sprite.y;
-          this.body.setVelocityY(alvoY * 2);
+        // os cabos o RECOLHEM: rápido no começo, assentando na estação (era uma reta a 150 px/s)
+        this.trancoT += dt;
+        const kVolta = voltaElastica(Math.min(1, this.trancoT / BossNucleo.VOLTA_S));
+        this.body.reset(
+          Phaser.Math.Linear(this.parada.x, BossNucleo.G_STATION_X, kVolta),
+          Phaser.Math.Linear(this.parada.y, BossNucleo.G_BASE_Y, kVolta),
+        );
+        if (this.trancoT >= BossNucleo.VOLTA_S) {
+          this.body.reset(BossNucleo.G_STATION_X, BossNucleo.G_BASE_Y);
           this.acao = 'flutua';
           this.acaoT = BossNucleo.pausa(this.degrau);
           this.cdTiro = 1.0;
@@ -646,6 +713,11 @@ export class BossNucleo implements StageBoss {
         break;
       }
     }
+  }
+
+  /** Lido pelo teste: onde a coleira pararia o corpo na altura `y`. */
+  xParadaEm(y: number): number {
+    return this.cabos.xParada(y, xDaParada);
   }
 
   private gMuzzle(): { x: number; y: number } {
@@ -671,6 +743,8 @@ export class BossNucleo implements StageBoss {
   private trocarParaPredador(): void {
     this.trocando = true;
     this.travaTroca = true;
+    // a COLEIRA arrebenta no golpe final: as cordas chicoteiam penduradas no casco e apagam
+    this.cabos.arrebentar();
     // A serra é do GUARDIÃO. Se ele morre com ela na arena, ela some junto — o predador tem as armas dele.
     this.serra?.destroy();
     this.serra = null;
@@ -736,10 +810,10 @@ export class BossNucleo implements StageBoss {
     (this.core.body as Phaser.Physics.Arcade.Body).reset(x, y);
   }
 
-  private leque(n: number, boca: { x: number; y: number }): void {
-    const abre = BossNucleo.SALVA_ABRE;
-    for (let i = 0; i < n; i++) {
-      const angle = Phaser.Math.DegToRad(180 - abre / 2 + (i / (n - 1)) * abre);
+  /** A SALVA MIRADA: a mesma abertura e o mesmo número, o centro na nave (spec 2026-11-22 §5). */
+  private leque(n: number, boca: { x: number; y: number }, alvo: { x: number; y: number }): void {
+    const centro = miraSalva(boca, alvo);
+    for (const angle of angulosSalva(n, BossNucleo.SALVA_ABRE, centro, Math.random)) {
       this.gLobulo(angle, BossNucleo.SALVA_VEL, boca);
     }
   }
@@ -855,6 +929,8 @@ export class BossNucleo implements StageBoss {
 
   destroy(): void {
     this.serra?.destroy();
+    this.cabos.destroy();
+    this.lava.destroy();
     this.serra = null;
     // O CORPO FICA (17/09: *"a animação dele morto não apareceu, ele sumiu"*): a cena destrói o chefão 1,2s depois
     // do golpe final, bem quando o clipe da morte termina estendido. O último quadro vira uma imagem solta no

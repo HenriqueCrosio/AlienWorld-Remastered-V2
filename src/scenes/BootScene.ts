@@ -393,10 +393,13 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // ⚠️ O GUARDIÃO NÃO TEM MAIS ESSA ARMADILHA (15/09, B1): a arte nova DELE (PixelLab 9436240c) sai
   // com estático, respiração, morte e destruído no MESMO quadro de 256², montados sem recorte por
   // `scripts/_f4/_instalar-guardiao.mjs`. Um offset vale para os quatro.
-  guardiaoIdleSheet: { path: 'sprites/guardiao-idle-sheet.png', w: 256, h: 256 },
+  // ⚠️ 22/11 (a COLEIRA): as quatro artes SEM os cabos do alto — eles viraram cordas desenhadas em jogo
+  // (`entities/guardiao/`); recorte por `scripts/_guardiao/_recortar-cabos.mjs`, os originais em
+  // `assets/raw/guardiao-com-cabos/`. Fora da máscara, idênticas: o offset e o miolo medidos continuam valendo.
+  guardiaoIdleSheet: { path: 'sprites/guardiao-coleira-idle-sheet.png', w: 256, h: 256 },
   // A MORTE (9f, a que termina OCA). Toca na troca para a 2ª forma, com as explosões do motor por
   // cima e o `guardiaoDestruido` no fim — a decisão dele de 15/09 (ver `BossNucleo.trocarParaCoracao`).
-  guardiaoMorteSheet: { path: 'sprites/guardiao-morte-sheet.png', w: 256, h: 256 },
+  guardiaoMorteSheet: { path: 'sprites/guardiao-coleira-morte-sheet.png', w: 256, h: 256 },
   nucleoBeatSheet: { path: 'sprites/nucleo-beat-sheet.png', w: 128, h: 128 },
   // A PORTA DO DUTO RESPIRANDO (20/09, M4): 8 quadros de 64×112, só a FENDA pulsa.
   //
@@ -1000,9 +1003,9 @@ const ART: Record<string, string> = {
   // a massa exposta — substitui a 03ef8c07 (256×227, casco verde-oliva).
   // ⚠️ A massa vermelha (alvo) é MEDIDA: x=115..192 y=109..176, centroide 152,141
   // (`scripts/_f4/_medir-guardiao.mjs`). Trocar a arte OBRIGA a remedir (BossNucleo.G_CORE_OFF_*).
-  guardiao: 'sprites/guardiao.png',
+  guardiao: 'sprites/guardiao-coleira.png',
   // O último quadro da morte — o casco partido em anel, o único em que a silhueta QUEBRA.
-  guardiaoDestruido: 'sprites/guardiao-destruido.png',
+  guardiaoDestruido: 'sprites/guardiao-coleira-destruido.png',
   // O PREDADOR, as três POSES (16/09, B3). Miolo MEDIDO (`scripts/_f4/_medir-predador.mjs`), offset ao
   // centro do quadro VIRTUAL: S +6,−5 · luta −23,−3 · pendurado −25,−24 (ver `Predador.QUADRO`) (ver `Predador.MIOLO`).
   predadorS: 'sprites/predador-s.png',
