@@ -11,8 +11,8 @@ import { explosaoSangrenta, sangueNaTela } from './sangue';
 import { Som } from '../som/Som';
 import { CamadaCabos } from './guardiao/camadaCabos';
 import { TRANCOS, deslocTranco, voltaElastica, xDaParada, type Tranco } from './guardiao/coleira';
-import { LavaGuardiao } from './guardiao/lavaGuardiao';
-import { angulosSalva, miraSalva, type LequeLava } from './guardiao/padroes';
+import { LavaGuardiao, type PulsoDisparado } from './guardiao/lavaGuardiao';
+import { angulosPulso, angulosSalva, miraSalva } from './guardiao/padroes';
 
 /**
  * O CHEFÃO FINAL da Fase 4, em DUAS FORMAS (design do Henrique, 2026-07-19):
@@ -59,7 +59,7 @@ export class BossNucleo implements StageBoss {
   private t = 0;
 
   /** Guardião: máquina de estados do movimento. Parado = vulnerável; movendo = fechado. */
-  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'volta' | 'serra' = 'flutua';
+  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'segura' | 'volta' | 'serra' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
   /**
@@ -106,12 +106,42 @@ export class BossNucleo implements StageBoss {
    * termina mais atrás da nave: termina no meio.
    */
   private readonly cabos: CamadaCabos;
-  /** a lava do miolo: o leque do tranco (spec 2026-11-22 §5) */
+  /** a lava do miolo: os pulsos do tranco (spec 2026-11-22 §5) */
   private readonly lava: LavaGuardiao;
-  /** o último leque (lido pelo teste) */
-  ultimoLeque: LequeLava | null = null;
-  /** gotas no leque do tranco, por degrau */
-  private static readonly LAVA_N = [5, 6, 7];
+  /**
+   * ─── OS PULSOS ALTERNADOS (22/11, a escolha dele) ───
+   * Ele: *"eu priorizo muito a perspectiva de bullet hell, ou seja, são formatos mais geométricos que induzem o jogador a
+   * ler o ataque, cobra quem demora ou não percebe o padrão"*. O leque com UM vão sorteado (o passo 2, rodada 1) era só
+   * reação: saiu. No tranco a lava sai em PULSOS de raios retos e ângulos fixos (`angulosPulso`): A (7), B (8, meio
+   * passo, nos vãos do A), A… Com 10° de passo nenhum ponto parado da metade esquerda escapa dos dois pulsos, e na
+   * coluna da nave (x ≈ 40–80) o vão livre é de 11–18 px (a nave tem 9). Perto do Guardião os raios se fecham num muro.
+   *
+   * ⚠️ ELE SEGURA NA PARADA enquanto os pulsos saem (a escolha dele, entre SEGURA e RECUA, no GIF lado a lado): com a
+   * fonte recuando, os arcos deixavam de ser concêntricos e às vezes abria um ponto parado seguro (MEDIDO: a nave parada
+   * levou lava nas 2 investidas segurando, em 1 só recuando). Cada pulso depois do 1º é um mini-tranco na corda tensa.
+   *
+   * ⚠️ A VELOCIDADE É A DELE, jogando: 200 px/s e 0,3 s entre pulsos *"está bem rápido"*; com `?lavaVel=160&lavaEntre=0.4`,
+   * *"achei mais interessante as duas juntas"*. O último degrau mantém a proporção de antes (+20% de velocidade, −20% de
+   * intervalo).
+   */
+  private static readonly LAVA_PULSOS = [2, 3, 3];
+  private static readonly LAVA_RAIOS = 7;
+  private static readonly LAVA_PASSO = 10;
+  private static readonly LAVA_VEL = [160, 160, 190];
+  private static readonly LAVA_ENTRE = [0.4, 0.4, 0.32];
+  /** quanto ele segura na parada depois do último pulso, antes da volta (s) */
+  private static readonly SEGURA_FIM = 0.15;
+  /** o mini-tranco de cada pulso, segurando: a corda já tensa dá um solavanco */
+  private static readonly MINI_TRANCO: Tranco = { passa: 1.5, volta: 0.1, vibra: 3, tremor: 0.002, molas: 0 };
+  private readonly lavaVel: number[];
+  private readonly lavaEntre: number[];
+  private pulsoK = 0;
+  private pulsoT = 0;
+  private miniT = 1;
+  /** o último pulso (lido pelo teste e pelo filme) */
+  get ultimoPulso(): PulsoDisparado | null {
+    return this.lava.ultimoPulso;
+  }
   /** o tranco em uso — `?tranco=A|B|C` na URL (A seco · B elástico · C vibrante), para comparar; padrão A */
   private readonly tranco: Tranco;
   private parada = { x: 0, y: 0 };
@@ -291,6 +321,12 @@ export class BossNucleo implements StageBoss {
     this.lava = new LavaGuardiao(scene, enemies, BossNucleo.ARENA_TOPO, BossNucleo.ARENA_BASE);
     const qTranco = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('tranco') : null;
     this.tranco = TRANCOS[qTranco === 'B' || qTranco === 'C' ? qTranco : 'A'];
+    const q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : null;
+    // para calibrar jogando (22/11): `?lavaVel=160` (px/s, todos os degraus) e `?lavaEntre=0.4` (s entre pulsos)
+    const qVel = Number(q?.get('lavaVel'));
+    const qEntre = Number(q?.get('lavaEntre'));
+    this.lavaVel = qVel > 0 ? [qVel, qVel, qVel] : BossNucleo.LAVA_VEL;
+    this.lavaEntre = qEntre > 0 ? [qEntre, qEntre, qEntre] : BossNucleo.LAVA_ENTRE;
 
     // O GUARDIÃO RESPIRA (sheet do PixelLab): a massa vermelha pulsa como um coração — mover =
     // sístole, e até parado ele é órgão vivo. Sem a sheet, o estático segura a luta (arte entra
@@ -676,9 +712,10 @@ export class BossNucleo implements StageBoss {
           this.trancoT = 0;
           this.cabos.golpe(this.tranco.vibra);
           this.scene.cameras.main.shake(90, this.tranco.tremor);
-          // O LEQUE: a inércia arranca a lava do miolo, centrada na nave, com um vão
-          this.posicionarCore();
-          this.ultimoLeque = this.lava.leque(BossNucleo.LAVA_N[this.degrau], { x: this.core.x, y: this.core.y }, target.y);
+          // O 1º PULSO: a inércia arranca a lava do miolo, na figura fixa
+          this.pulsoK = 0;
+          this.pulsoT = 0;
+          this.dispararPulso();
         }
         break;
       }
@@ -686,8 +723,21 @@ export class BossNucleo implements StageBoss {
       case 'tranco': {
         // o corpo passa um pouco da parada (a inércia) e a corda o segura de volta
         this.trancoT += dt;
+        this.seguirPulsos(dt);
         this.body.reset(this.parada.x - deslocTranco(this.trancoT, this.tranco), this.parada.y);
         if (this.trancoT >= this.tranco.volta) {
+          this.trancoT = 0;
+          this.acao = 'segura';
+        }
+        break;
+      }
+
+      case 'segura': {
+        // preso na parada, a corda tensa, um mini-tranco a cada pulso — e só depois do último, a volta
+        this.seguirPulsos(dt);
+        this.miniT += dt;
+        this.body.reset(this.parada.x - deslocTranco(this.miniT, BossNucleo.MINI_TRANCO), this.parada.y);
+        if (this.pulsoK >= BossNucleo.LAVA_PULSOS[this.degrau] && this.pulsoT >= BossNucleo.SEGURA_FIM) {
           this.acao = 'volta';
           this.trancoT = 0;
           this.cabos.setTensa(false);
@@ -713,6 +763,31 @@ export class BossNucleo implements StageBoss {
         break;
       }
     }
+  }
+
+  /** O próximo pulso da figura, do miolo de agora. Cada pulso depois do 1º é um mini-tranco. */
+  private dispararPulso(): void {
+    this.posicionarCore();
+    const boca = { x: this.core.x, y: this.core.y };
+    const alvo = { x: 0, y: (BossNucleo.ARENA_TOPO + BossNucleo.ARENA_BASE) / 2 };
+    const angulos = angulosPulso(this.pulsoK, BossNucleo.LAVA_RAIOS, BossNucleo.LAVA_PASSO, boca, alvo);
+    this.lava.pulso(boca, angulos, this.lavaVel[this.degrau]);
+    if (this.pulsoK > 0) {
+      this.miniT = 0;
+      this.cabos.golpe(BossNucleo.MINI_TRANCO.vibra);
+      this.scene.cameras.main.shake(50, BossNucleo.MINI_TRANCO.tremor);
+    }
+    this.pulsoK++;
+  }
+
+  /** O relógio dos pulsos: corre no tranco e segurando. Depois do último, conta o fim. */
+  private seguirPulsos(dt: number): void {
+    this.pulsoT += dt;
+    if (this.pulsoK >= BossNucleo.LAVA_PULSOS[this.degrau]) return;
+    const entre = this.lavaEntre[this.degrau];
+    if (this.pulsoT < entre) return;
+    this.pulsoT -= entre;
+    this.dispararPulso();
   }
 
   /** Lido pelo teste: onde a coleira pararia o corpo na altura `y`. */

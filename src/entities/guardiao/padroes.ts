@@ -1,5 +1,5 @@
 /**
- * OS PADRÕES DO GUARDIÃO (spec 2026-11-22-guardiao-coleira-design.md §5): a salva MIRADA e o LEQUE DE LAVA com vão.
+ * OS PADRÕES DO GUARDIÃO (spec 2026-11-22-guardiao-coleira-design.md §5): a salva MIRADA e os PULSOS ALTERNADOS de lava.
  * Puro: sem Phaser.
  */
 export interface Ponto {
@@ -25,48 +25,16 @@ export function angulosSalva(n: number, abre: number, centro: number, rnd: () =>
   return Array.from({ length: n }, (_, i) => ((c - abre / 2 + i * passo) * Math.PI) / 180);
 }
 
-export interface OpcoesLeque {
-  n: number;
-  boca: Ponto;
-  /** a coluna em que as gotas ficam a `passo` px uma da outra */
-  xAlvo: number;
-  /** o tempo de voo até ela (s) */
-  T: number;
-  g: number;
-  passo: number;
-  /** o centro do leque na coluna (a altura da nave), preso na arena */
-  centroY: number;
-  topo: number;
-  base: number;
-  rnd: () => number;
-}
-
-export interface LequeLava {
-  /** a velocidade de cada gota (px/s), do alto para baixo */
-  vel: Ponto[];
-  /** as n + 1 alturas na coluna alvo, e qual delas ficou sem gota */
-  faixas: number[];
-  vao: number;
-}
-
 /**
- * O LEQUE: n + 1 faixas a `passo` px na coluna alvo, uma tirada (o VÃO, nunca a da ponta). Todas as gotas têm o MESMO
- * vx: cruzam qualquer coluna no mesmo instante, um muro curvo que abre para a esquerda, com um buraco.
+ * OS PULSOS ALTERNADOS (22/11, ele: *"eu priorizo muito a perspectiva de bullet hell, ou seja, são formatos mais
+ * geométricos que induzem o jogador a ler o ataque, cobra quem demora ou não percebe o padrão"*): raios RETOS em
+ * ângulos FIXOS a partir do miolo. O pulso A (k par) tem `n` raios; o B (k ímpar) tem `n + 1`, deslocado meio passo — cai
+ * nos vãos do A. O eixo da figura aponta para `alvo` (o meio da borda esquerda da arena): de qualquer altura, ela
+ * preenche a metade esquerda (com o eixo horizontal e o miolo baixo, sobrava o alto inteiro, parado e seguro). Radianos.
  */
-export function lequeLava(o: OpcoesLeque): LequeLava {
-  const nf = o.n + 1;
-  const altura = (nf - 1) * o.passo;
-  // O ARCO SOBE mais que a faixa: a gota de cima chega à coluna já descendo, e o pico dela fica acima. A faixa mais alta
-  // é a que tem o pico a 3 px do teto — mais alto, a gota morria no teto antes de chegar à coluna (22/11, em jogo).
-  const A = o.topo + 3;
-  const topoArco = o.boca.y > A ? o.boca.y - o.T * Math.sqrt(2 * o.g * (o.boca.y - A)) + 0.5 * o.g * o.T * o.T : o.topo;
-  const topo = Math.max(o.topo, topoArco);
-  const c = altura >= o.base - topo ? (topo + o.base) / 2 : Math.min(o.base - altura / 2, Math.max(topo + altura / 2, o.centroY));
-  const faixas = Array.from({ length: nf }, (_, i) => c - altura / 2 + i * o.passo);
-  const vao = 1 + Math.min(nf - 3, Math.floor(o.rnd() * (nf - 2)));
-  const vx = (o.xAlvo - o.boca.x) / o.T;
-  const vel = faixas
-    .filter((_, i) => i !== vao)
-    .map((y) => ({ x: vx, y: (y - o.boca.y - 0.5 * o.g * o.T * o.T) / o.T }));
-  return { vel, faixas, vao };
+export function angulosPulso(k: number, n: number, passoDeg: number, boca: Ponto, alvo: Ponto): number[] {
+  const m = k % 2 === 0 ? n : n + 1;
+  const eixo = Math.atan2(alvo.y - boca.y, alvo.x - boca.x);
+  const passo = (passoDeg * Math.PI) / 180;
+  return Array.from({ length: m }, (_, i) => eixo + (i - (m - 1) / 2) * passo);
 }
