@@ -3,15 +3,16 @@
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O Guardião está sendo refeito pela spec
 > `specs/2026-11-22-guardiao-coleira-design.md` (a coleira, o leque de lava, os cabos-serpente e o próprio Leviatã),
 > em 6 passos, cada um com GIF em jogo e o veredito dele. O passo 1 (o recorte, a corda, a investida presa e o tranco
-> A) está APROVADO; o passo 2 (o leque de lava e a salva mirada) está no `src/`, COMMITADO, e espera o VEREDITO dele
-> (§2 abaixo). Depois: o passo 3, os cabos-serpente."**
+> A) está APROVADO; o passo 2 foi REFEITO como bullet hell (os pulsos alternados, §1½), aprovado jogando, COMMITADO e
+> EMPURRADO, com DUAS perguntas em aberto (§2): o bolsão colado nele e o último degrau. Depois: o passo 3, os
+> cabos-serpente."**
 > Contexto maior: o START do rebalanceamento (`plans/2026-11-21-rebalanceamento-START.md`, as frentes 0–5).
 
 ## ▶️ Como abrir a sessão
 
 1. `npm run dev` (http://localhost:5173) e `git status` (limpo, fora os vídeos, os GIFs e as pastas `q/`). Lembrar o
    **Ctrl+Shift+R**. Treino da F4 no menu (dev): `K`.
-2. Dizer a ele onde paramos (§1) e pedir o veredito do passo 2 com a folha aberta:
+2. Dizer a ele onde paramos (§1 e §1½) e fazer a pergunta em aberto (§2) com a folha aberta (a rodada 3 no topo):
    `docs/superpowers/folhas/2026-11-22/guardiao/folha.html` (os GIFs não estão no git: se faltarem, refilmar com os
    comandos da §4).
 3. Se ele for jogar enquanto eu edito: a CÓPIA na 5174 (memória `filmagem-vite-recarrega`: `src`, `index.html`, os
@@ -36,7 +37,7 @@
   os **cabos de trás** (os que a arte arrasta para a direita acabavam na borda do quadro, presos em nada na parada) →
   cada ponta vira corda até o hospedeiro (fora da tela à direita, ou o teto), a raiz seguindo a respiração.
 
-**O passo 2 — no `src/`, ESPERANDO O VEREDITO.** (plano `plans/2026-11-22-guardiao-coleira-passo2.md`)
+**O passo 2, a 1ª versão — SUBSTITUÍDA pelos pulsos (§1½).** (plano `plans/2026-11-22-guardiao-coleira-passo2.md`)
 - **O leque de lava no tranco** (`src/entities/guardiao/lavaGuardiao.ts`, regras puras em `padroes.ts`): 5/6/7 gotas
   por degrau, gravidade 260, cruzam a metade esquerda em ~1 s; as gotas a 18 px na coluna x = 40 (8 px livres: a nave,
   de 9, não passa) e **um vão de 26 px livres**, sorteado, nunca na ponta. **Centrado na altura da nave** no tranco
@@ -44,14 +45,37 @@
   necessário). Na borda, **só respingo** (decisão minha; a spec falava do estilhaço).
 - **A salva mirada:** a mesma abertura, número e cadência; o centro na nave; com 4, meio passo para um lado sorteado.
 
-## 2. As perguntas pendentes a ele (o veredito do passo 2)
+## 1½. O passo 2 refeito (22/11, à noite) — a spec §5 reescrita
 
-1. O leque lê bem e é justo?
-2. O vão (26 px livres) está largo o bastante?
-3. A velocidade (~1 s para cruzar) está boa?
-4. O leque centrado na nave e o respingo (em vez do estilhaço) na borda: aprova?
+- **A direção dele:** *"eu priorizo muito a perspectiva de bullet hell, ou seja, são formatos mais geométricos que
+  induzem o jogador a ler o ataque, cobra quem demora ou não percebe o padrão"*. O leque com vão sorteado saiu.
+- **Os pulsos alternados** (`angulosPulso` em `padroes.ts`; `LavaGuardiao.pulso`; `BossNucleo.dispararPulso`/`seguirPulsos`
+  e o estado `segura`): raios retos em ângulos fixos, A 7 · B 8 (meio passo), o eixo no meio da borda esquerda; 2/3/3
+  pulsos por degrau.
+- **SEGURA** (a escolha dele no GIF lado a lado com a RECUA, que saiu do código): preso na parada, um mini-tranco por
+  pulso, a volta 0,15 s depois do último.
+- **A velocidade dele, jogando:** 160 px/s e 0,4 s (`?lavaVel=` e `?lavaEntre=` ficam na URL para calibrar); o último
+  degrau 190 e 0,32.
+- **A brasa** no vermelho do miolo, metade da densidade.
+- **A lava atravessa a parede** (ele: a nave vai até a linha da tela): respinga na borda da arena e segue até sair.
+- Testes: `test-guardiao-padroes.mjs` (puro) e `test-guardiao-lava-jogo.mjs` (em jogo) reescritos; o filme
+  `scripts/_guardiao/_gif-pulsos.mjs` (a nave lê o padrão e conta os toques de lava).
+- ⚠️ As armadilhas de medição desta noite (no script do filme, já corrigidas): o toque se conta pelo `release` + o
+  `damageShip` no MESMO passo (distância perdia toques; uma marca que sobra de um quadro conta toque falso); a caixa da
+  nave é 21×9; entre as cenas, a nave sai do caminho e o ciclo dele fica preso.
 
-Registrar o veredito na spec §10 (passo 2).
+## 2. As perguntas em aberto a ele (abrir a sessão com elas, a folha na rodada 3)
+
+1. **O bolsão colado nele:** a figura de 7 raios cobre a tela inteira até x ≈ 80 (fio seguro ≤ 7 px), mas de x ≈ 90 em
+   diante os cantos de cima e de baixo da tela ficam fora dela (um bolsão parado de 10–39 px na cara dele). Duas
+   opções: (a) **deixar** — encostar nele na investida já é risco; (b) **abrir o leque para 9 raios** — fecha o canto, mas
+   cada pulso fica com mais gotas.
+2. **O último degrau (33–0%):** 190 px/s e 0,32 s entre pulsos — decisão MINHA (a proporção de antes: +20% de velocidade,
+   −20% de intervalo sobre os 160/0,4 dele). Confirmar, ou o último fica igual aos outros? Para ele testar sem eu mexer
+   no código: `?lavaVel=` e `?lavaEntre=` valem para TODOS os degraus (para o último, forçar a vida baixa no treino).
+
+Registrar na spec §5 / §10 (passo 2). Se a (b) do 1 for escolhida: `LAVA_RAIOS = 9` em `BossNucleo.ts`, refazer as contas
+do teste puro (o fio parado e o vão lendo) e refilmar com `_gif-pulsos.mjs`.
 
 ## 3. O que vem (a spec §6–§12)
 
@@ -71,8 +95,10 @@ BESTA (o START do rebalanceamento, §4.3).
 - Testes puros: `node --experimental-transform-types scripts/test-guardiao-coleira.mjs` e `… scripts/test-guardiao-padroes.mjs`.
 - Em jogo (com o `npm run dev`): `node scripts/test-guardiao-coleira-jogo.mjs [--porta 5173] [--fotos <dir>]` e
   `node scripts/test-guardiao-lava-jogo.mjs [--porta 5173]`.
-- GIFs: `node scripts/_guardiao/_gif-investida.mjs <out.gif> --variantes A [--cenas 70:4.8,150:4.8] [--desvia]` (a
-  investida; `--desvia` leva a nave ao vão do leque) e `node scripts/_guardiao/_fotos-entrada.mjs <dir> --cada 3 --gif <out.gif>`
+- GIFs: `node scripts/_guardiao/_gif-pulsos.mjs <out.gif> [--degrau 1] [--cenas 100:5,10:5] [--variantes <query>,…]
+  [--rotulos …] [--parada]` (os pulsos; a nave lê o padrão e o script imprime os toques de lava),
+  `node scripts/_guardiao/_gif-investida.mjs <out.gif> --variantes A [--cenas 70:4.8,150:4.8]` (a investida; o `--desvia`
+  era do leque antigo e não faz mais nada) e `node scripts/_guardiao/_fotos-entrada.mjs <dir> --cada 3 --gif <out.gif>`
   (a entrada, com a camada das cordas sozinha ao lado).
 - A arte: `_recortar-cabos.mjs [--folha]`, `_amostrar-cabo.mjs`, `_bordas-tras.mjs` (as pontas na borda direita por
   quadro), `_grade.mjs` (recorte ampliado com grade).

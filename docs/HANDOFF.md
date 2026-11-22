@@ -19,8 +19,20 @@ sprite que se desfaz nos próprios pixels).
 > **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-22-guardiao-coleira-START.md`. O REBALANCEAMENTO
 > (START `plans/2026-11-21-rebalanceamento-START.md`, frentes 0 os chefões → 1 os alvos → 2 o draft → 3 os inimigos →
 > 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA fechou; o GUARDIÃO está sendo refeito pela spec da
-> coleira em 6 passos. O passo 1 está aprovado; a sessão abre pedindo o VEREDITO do passo 2 (o leque de lava e a salva
-> mirada, a §2 do START do Guardião), depois o passo 3 (os cabos-serpente)."**
+> coleira em 6 passos. Os passos 1 e 2 estão aprovados (o 2 refeito como bullet hell: os pulsos alternados), commitados e
+> empurrados; a sessão abre com DUAS perguntas em aberto (a §2 do START do Guardião: o bolsão colado nele — deixar ou 9
+> raios — e o último degrau a 190 px/s · 0,32 s, decisão minha), depois o passo 3 (os cabos-serpente)."**
+>
+> 📍 **22/11 (noite) — O PASSO 2 REFEITO COMO BULLET HELL: OS PULSOS ALTERNADOS; COMMITADO E EMPURRADO.** (a §5 da spec reescrita; o §1½ do START;
+> folha `folhas/2026-11-22/guardiao/folha.html`, rodadas 2 e 3)
+> - **A direção dele:** *"eu priorizo muito a perspectiva de bullet hell, ou seja, são formatos mais geométricos que
+>   induzem o jogador a ler o ataque, cobra quem demora ou não percebe o padrão"*. O leque com vão sorteado saiu.
+> - **Os pulsos:** raios retos em ângulos fixos, A 7 e B 8 (meio passo, nos vãos do A), 2/3/3 por degrau; ele **SEGURA**
+>   na parada (a escolha dele, SEGURA × RECUA no GIF), um mini-tranco por pulso; **160 px/s e 0,4 s** (a velocidade dele,
+>   jogando, pela URL `?lavaVel=&lavaEntre=`), o último degrau 190 e 0,32; a brasa no vermelho do miolo; a lava
+>   **atravessa a parede** (a nave vai até a linha da tela) e respinga na borda.
+> - **Em aberto (as 2 perguntas da próxima sessão):** colado nele (x ≥ 90) os cantos da tela ficam fora da figura —
+>   deixar ou abrir para 9 raios; e o último degrau a 190 px/s · 0,32 s (decisão minha) — confirmar ou igualar aos outros.
 >
 > 📍 **22/11 — O GUARDIÃO NA COLEIRA: OS PASSOS 1 (APROVADO) E 2 (ESPERANDO O VEREDITO); COMMITADO E EMPURRADO.** (spec
 > `specs/2026-11-22-guardiao-coleira-design.md`, planos `plans/2026-11-22-guardiao-coleira-passo1.md`/`-passo2.md`,

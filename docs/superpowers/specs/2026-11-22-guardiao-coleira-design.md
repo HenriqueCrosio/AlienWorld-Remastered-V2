@@ -48,14 +48,39 @@ teto que sangra, os cabos-serpente, este o desenho dele: saem DO GUARDIÃO, não
 **Não muda:** o corpo fechado na investida (`corpoInteiro`: o tiro morre no casco), as pausas por degrau (4,2 · 3,4 ·
 2,6 s). **Muda de propósito:** a investida não termina mais atrás da nave — termina no meio; quem empurra é a lava.
 
-## 5. O leque de lava e a salva mirada (camada 1)
+## 5. Os pulsos de lava e a salva mirada (camada 1)
 
-**O leque, no tranco:** 5 gotas grossas saem do miolo em leque (do alto para baixo, apontando para a esquerda), no
-quadro em que os cabos esticam. Caem em arco com `Predador.LAVA_G` (260) e cruzam a metade esquerda em ~1 s.
-- **Um VÃO** por leque: o espaço de uma gota tirada, ~30 px de corredor, **sorteado** a cada investida.
-- Nos degraus: 6 gotas (66–33%), 7 (33–0%); o vão segue um só, o leque mais denso em volta.
-- A arte: a bola de lava da Besta em escala menor, com o rastro quente dos glóbulos; na borda, o estilhaço de lava que
-  já existe. Dano 1.
+> ⚠️ **22/11, REESCRITA pela direção dele** (o leque com UM vão sorteado, a 1ª versão do passo 2, saiu): *"eu priorizo
+> muito a perspectiva de bullet hell, ou seja, são formatos mais geométricos que induzem o jogador a ler o ataque, cobra
+> quem demora ou não percebe o padrão. Já utilizamos isso em vários bosses e inimigos do jogo."* O leque sorteado era só
+> reação: não havia forma a aprender nem preço para quem demora.
+
+**Os pulsos alternados, no tranco:** a inércia arranca a lava do miolo em PULSOS de raios **retos** (sem gravidade: a
+figura tem de ler), em ângulos **fixos** (`angulosPulso`, `padroes.ts`):
+- O pulso **A** tem 7 raios a 10° um do outro; o **B** tem 8, deslocado meio passo — cai nos vãos do A. Por degrau:
+  A, B (100–66%) · A, B, A (66–33%) · A, B, A mais rápidos (33–0%).
+- O eixo da figura aponta para o **meio da borda esquerda** da arena (com o eixo horizontal e o miolo baixo, o alto da
+  tela inteiro ficava seguro). A figura é sempre a mesma; só a altura muda, com a parada.
+- **Ele SEGURA na parada** enquanto os pulsos saem (a escolha dele, entre SEGURA e RECUA no GIF lado a lado): a corda
+  tensa e um mini-tranco a cada pulso (`MINI_TRANCO`), e só 0,15 s depois do último a volta elástica. Recuando, a fonte
+  andava e os arcos deixavam de ser concêntricos (medido: a nave parada levava lava nas 2 investidas segurando, em 1 só
+  recuando).
+- **A velocidade dele, jogando:** 200 px/s e 0,3 s entre pulsos *"está bem rápido"*; com `?lavaVel=160&lavaEntre=0.4`,
+  *"achei mais interessante as duas juntas"* → **160 px/s e 0,4 s**; o último degrau **190 px/s e 0,32 s** (a proporção
+  de antes). Os dois parâmetros da URL ficam para calibrar.
+- **A parede não protege** (ele: *"a nave pode ir até na linha da tela, ou seja, as lavas precisam passar a parede para
+  punir quem tenta ficar embaixo ou em cima. Só que deixe efeitos que a lava bateu"*): na borda da arena a gota respinga
+  (as brasas e o som do impacto) e SEGUE até sair da tela. A regra do casco da F3.
+- **A geometria (medida):** na coluna da nave (x 40–80) o vão livre de um pulso é de ≥ 11 px (a nave tem 9 de altura);
+  parado, na tela inteira até x ≈ 80, o maior fio seguro é de 7 px, nos cantos. Perto do Guardião os raios se fecham num
+  muro. ⚠️ **Em aberto, para ele:** de x ≈ 90 em diante (colado nele) os 7 raios não alcançam os cantos de cima e de baixo
+  da tela — um bolsão parado de 10 a 39 px na cara dele.
+- A arte: a bola de lava da Besta em escala menor, com a luz dela; a **brasa no vermelho do MIOLO** (ele: *"a brasa pode
+  ser mais avermelhada, como o core dele"*; amostrada da arte: `#f85732`, `#e4270f`, `#ce1c0b`, `#8f150e`), com metade da
+  densidade, para o rastro não borrar a figura. Na borda, só respingo (sem estilhaço que fira). Dano 1.
+
+**A 1ª versão (registro):** 5/6/7 gotas em arco com `Predador.LAVA_G`, a 18 px na coluna x = 40, um vão de 26 px
+livres sorteado e o leque centrado na altura da nave.
 
 **A salva mirada:** a mesma abertura (96°), o mesmo número por degrau (3, 4, 5), a mesma cadência (1,8 s); o **centro
 aponta para a nave** no disparo. Com número par (o 4) o vão do meio cairia em cima da nave: aí o centro ganha um desvio
@@ -135,11 +160,13 @@ serpentes, o aperto, o teto. A investida segue fechada. **A vida** (90) não mud
    vira corda até o hospedeiro (fora da tela à direita, ou o teto), com a raiz seguindo o quadro da respiração
    (`RAIZES_TRAS`, de `_amostrar-cabo.mjs`). Folha: `folhas/2026-11-22/guardiao/`.
 2. O leque de lava + a salva mirada.
-   **22/11, feito, ESPERANDO O VEREDITO** (plano `plans/2026-11-22-guardiao-coleira-passo2.md`; `lavaGuardiao.ts`,
-   `padroes.ts`). Fixado na implementação: as gotas a 18 px na coluna x = 40 (8 px livres; a nave tem 9), o vão com
-   26 px livres, nunca na ponta; T = 1 s até a coluna; **o leque centra na altura da nave** no tranco; o arco de cima
-   nunca toca o teto (o leque desce); **na borda só respingo** (sem estilhaço que fira). Os dois "centra na nave" e
-   "respingo" são decisões minhas, a confirmar com ele.
+   22/11, a 1ª versão (plano `plans/2026-11-22-guardiao-coleira-passo2.md`): o leque em arco com UM vão sorteado,
+   centrado na nave. **22/11, o veredito: REFEITO como bullet hell** (a §5 reescrita) — os PULSOS ALTERNADOS de raios
+   retos e ângulos fixos (A 7, B 8 meio passo), ele SEGURA na parada (a escolha dele, SEGURA × RECUA no GIF), a
+   velocidade dele jogando (160 px/s e 0,4 s; o último degrau 190 e 0,32), a brasa no vermelho do miolo, e a lava
+   ATRAVESSA a parede (respinga e segue). A salva mirada ficou como estava. **Em aberto:** o bolsão parado colado nele
+   (x ≥ 90, os cantos da tela) — deixar ou abrir o leque para 9 raios; e o último degrau (190 px/s · 0,32 s, decisão
+   minha) — confirmar ou igualar aos outros. Folha `folhas/2026-11-22/guardiao/` (rodadas 2 e 3).
 3. Os cabos-serpente.
 4. O aperto.
 5. O teto que sangra.
@@ -149,7 +176,10 @@ Enquanto ele joga: a cópia na 5174 (memória `filmagem-vite-recarrega`).
 
 ## 11. Os testes e a medição
 
-- **Regras (puros):** o leque sempre deixa um vão ≥ a altura da nave + folga, em qualquer sorteio; o anel do aperto
+- **Regras (puros):** os pulsos: A e B fixos (o B no meio de cada vão do A), parado nenhum fio seguro > 7 px na tela
+  inteira até x = 80, lendo um vão ≥ 11 px livres na coluna da nave (`test-guardiao-padroes.mjs`); em jogo, ele segura
+  na parada, os pulsos concêntricos e retos, a lava atravessa as bordas e acerta a nave parada em 5 alturas, da linha de
+  cima à de baixo (`test-guardiao-lava-jogo.mjs`); o anel do aperto
   nunca fecha abaixo de 50 px; as duas ondas do teto nunca se sobrepõem; o alcance da coleira é fixo; o rodízio por
   degrau.
 - **Em jogo:** forçar a vida pelos três degraus e conferir a ordem das ações; a prova do recorte (os pixels fora da
