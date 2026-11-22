@@ -2,8 +2,9 @@
 
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O rebalanceamento abriu em 21/11 com a análise
 > das cartas (§1) e as decisões dele (§2). A ordem das frentes está na §3; a primeira é a FRENTE 0 (as lutas dos
-> chefões, §4). A Capitânia FECHOU (aprovada e empurrada); a sessão abre no GUARDIÃO, com a pergunta pendente da §4.2
-> (A o movimento · B o propósito · C os dois). Cada frente tem spec, plano e o veredito dele antes da próxima."**
+> chefões, §4). A Capitânia FECHOU (aprovada e empurrada). O GUARDIÃO está sendo refeito (22/11, a spec da coleira):
+> a sessão abre no START próprio dele, `plans/2026-11-22-guardiao-coleira-START.md`. Cada frente tem spec, plano e o
+> veredito dele antes da próxima."**
 > A simulação do draft: `node --experimental-transform-types scripts/_rebalance/sim-draft.mts`; a medição da Capitânia
 > (o molde para medir os outros chefões): `node scripts/_rebalance/medir-capitania.mjs [--mata ms] [--variante X]`.
 
@@ -11,8 +12,8 @@
 
 1. `npm run dev` (http://localhost:5173) e `git status` (limpo, fora os vídeos, os GIFs e as pastas `q/`). Lembrar o
    **Ctrl+Shift+R**. Só subir o que for usar (a 5174 só se ele for jogar enquanto eu edito).
-2. Dizer a ele onde paramos: a Capitânia aprovada; o Guardião com a observação da §4.2 e a pergunta A/B/C. A resposta
-   dele decide o caminho; depois, a Besta (§4.3).
+2. Dizer a ele onde paramos: a Capitânia aprovada; o Guardião no START próprio (`plans/2026-11-22-guardiao-coleira-START.md`);
+   depois, a Besta (§4.3).
 3. Treinos de chefão no menu (dev): `C` a Capitânia, `K` a F4 (o Guardião, depois a Besta).
 
 ## 1. A análise das cartas (21/11) — o diagnóstico
@@ -135,7 +136,17 @@ tempos diferentes.**
    `specs/2026-09-19-fase4-luta-guardiao-design.md`.
 
    **▶️ A OBSERVAÇÃO (21/11) — ONDE A PRÓXIMA SESSÃO ABRE.** Lido no código (`src/entities/BossNucleo.ts`,
-   `updateGuardiao`) e na spec de 19/09, cruzado com o registro da serpente:
+   `updateGuardiao`) e na spec de 19/09, cruzado com o registro da serpente.
+
+   **✅ 22/11 — A RESPOSTA DELE E O CAMINHO.** Nem A nem B: a ideia dele — *"os cabos que o prendem cheguem num limite
+   e trave o guardião de avançar mais, dando um tranco nele. Como se fosse um cachorro raivoso [...] travado por uma
+   coleira"*, e no tranco ele lança algo sobre a nave. Jogando, ele foi além (*"o guardião é praticamente inútil, a
+   única mecanica é a serra e os tiros em leque sempre no mesmo lugar"*; *"é o boss final, justo ter uma luta mais
+   longa"*): **a luta MUDA DE ESTRUTURA, por decisão dele** — a coleira, o leque de lava com vão, a salva mirada, os
+   cabos-serpente (66%), o aperto e o teto que sangra (33%). Spec `specs/2026-11-22-guardiao-coleira-design.md`, em 6
+   passos. **O passo 1 (o recorte, a corda, o tranco A) APROVADO; o passo 2 (o leque e a salva mirada) no `src/`,
+   esperando o veredito.** O estado e o que vem: `plans/2026-11-22-guardiao-coleira-START.md`. O que segue abaixo é o
+   registro da observação de 21/11:
    - **O Guardião só tem duas animações:** a respiração (`guardiao-idle`) e a morte. A investida inteira é feita com
      isso: (1) a CARGA de 1,15 s (`TELEGRAFO_DUR`) — a respiração acelera até 5×, o casco esfria (escurece), o miolo
      acende, um anel de partículas fecha nele; aos 0,62 s a mira TRAVA (`TELEG_TRAVA`) e ele recua um pouco; (2) a

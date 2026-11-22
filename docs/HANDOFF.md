@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-19)
+# HANDOFF — estado do projeto (2026-11-22)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-19) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-22) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,10 +16,25 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-21-rebalanceamento-START.md`. O REBALANCEAMENTO abriu em
-> 21/11: a análise das cartas, as decisões dele e a ordem das frentes (0 as lutas dos chefões → 1 os alvos → 2 o draft
-> → 3 os inimigos → 4 as cartas → 5 a vida dos chefões). Na frente 0 a CAPITÂNIA fechou; a sessão abre no GUARDIÃO,
-> com a observação e a pergunta pendente da §4.2 do START (A o movimento · B o propósito · C os dois)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-22-guardiao-coleira-START.md`. O REBALANCEAMENTO
+> (START `plans/2026-11-21-rebalanceamento-START.md`, frentes 0 os chefões → 1 os alvos → 2 o draft → 3 os inimigos →
+> 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA fechou; o GUARDIÃO está sendo refeito pela spec da
+> coleira em 6 passos. O passo 1 está aprovado; a sessão abre pedindo o VEREDITO do passo 2 (o leque de lava e a salva
+> mirada, a §2 do START do Guardião), depois o passo 3 (os cabos-serpente)."**
+>
+> 📍 **22/11 — O GUARDIÃO NA COLEIRA: OS PASSOS 1 (APROVADO) E 2 (ESPERANDO O VEREDITO); COMMITADO E EMPURRADO.** (spec
+> `specs/2026-11-22-guardiao-coleira-design.md`, planos `plans/2026-11-22-guardiao-coleira-passo1.md`/`-passo2.md`,
+> folha `folhas/2026-11-22/guardiao/folha.html`)
+> - **A ideia dele** no lugar do A/B/C: os cabos que prendem o Guardião são uma COLEIRA — a investida para no alcance
+>   deles com um tranco, *"como se fosse um cachorro raivoso"*. E, jogando: *"o guardião é praticamente inútil"* → a luta
+>   muda de estrutura (decisão dele): o leque de lava no tranco, a salva mirada, os cabos-serpente (66%), o aperto e o
+>   teto que sangra (33%), uma camada por degrau.
+> - **O passo 1:** os cabos recortados das 4 artes (prova: 0 pixels fora da máscara) e redesenhados em jogo como corda
+>   com a textura amostrada da pintura (`src/entities/guardiao/`, `src/data/cordaGuardiao.ts`), a coleira retrátil, a
+>   parada a ~1/3 da tela, o **tranco A (seco)**, a volta elástica. Duas correções dele: o glitch da entrada e os cabos
+>   de trás (as pontas na borda do quadro viraram corda até o hospedeiro).
+> - **O passo 2:** o leque de lava com UM vão sorteado (5/6/7 gotas, 26 px livres no vão, centrado na nave) e a salva
+>   de glóbulos mirada na nave. **Falta o veredito dele.**
 >
 > 📍 **21/11 (3) — A FRENTE 0: A CAPITÂNIA APROVADA; COMMITADO E EMPURRADO.** (a §4.1 do START) Ele: *"é tranquilo até
 > o momento do enfurecer"*. Medido em jogo (`scripts/_rebalance/medir-capitania.mjs`): a fúria tinha 18,8 ameaças na
@@ -106,7 +121,7 @@ sprite que se desfaz nos próprios pixels).
 > **O ROADMAP AGORA: … M, a MOLDURA ✅ (15/11) → o SOM ✅ (16–19/11: as 8 folhas, a trilha dele, o passe de mixagem, o
 > fim do jogo) → a REVISÃO dele ✅ (20/11) → **F ✅ (20–21/11: a sonda, os asteroides, a rocha do minerador, o cristal de âmbar da F3; aprovado em 21/11)** → **o
 > REBALANCEAMENTO, AGORA** (START `plans/2026-11-21-rebalanceamento-START.md`: frente 0 as lutas dos chefões —
-> Capitânia ✅ 21/11 → Guardião → Besta —, depois os alvos, o draft, os inimigos, as cartas e a vida dos chefões; fora
+> Capitânia ✅ 21/11 → Guardião (22/11: a coleira, START `plans/2026-11-22-guardiao-coleira-START.md`; passo 1 ✅, passo 2 esperando o veredito) → Besta —, depois os alvos, o draft, os inimigos, as cartas e a vida dos chefões; fora
 > dele, depois: a saída da aranha do casco e o guardado do som, no fim de `plans/2026-11-18-som-mixagem-START.md`).**
 >
 > 📍 **19/11 (2) — A TRILHA FINAL DELE, O IMPACTO DO LEVIATÃ E OS FUNDOS DA CUTSCENE FINAL (folha 10, ESCOLHIDA) E O
