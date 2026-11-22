@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guardião — a coleira</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 24px; background: #0a0c12; color: #e6e6ee; font: 15px/1.5 system-ui, sans-serif; }
+  h1 { font-size: 20px; color: #ffaa5a; margin: 28px 0 6px; }
+  h1:first-child { margin-top: 0; }
+  h2 { font-size: 16px; color: #ffcf8a; margin: 0 0 4px; }
+  p, li { max-width: 1000px; }
+  img { image-rendering: pixelated; max-width: 100%; height: auto; display: block; }
+  .nota { color: #ffcf8a; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(560px, 1fr)); gap: 20px; margin: 14px 0; }
+  .card { background: #12151e; border: 1px solid #252a38; border-radius: 6px; padding: 12px; }
+  .card p { margin: 6px 0 0; font-size: 14px; color: #b9bccb; }
+  code { color: #9fd3ff; }
+  ol li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<h1>Passo 2: o leque de lava e a salva mirada</h1>
+<p><b>O leque, no tranco:</b> a inércia arranca a lava do miolo. São 5 gotas (6 a partir de 66% de vida, 7 a partir de 33%),
+em arco com a gravidade da lava da F4, e <b>um vão sorteado</b> a cada investida.</p>
+<ul>
+  <li><b>Centrado na altura da nave</b> no tranco. Sem isso, com 5 gotas o leque cobre 108 dos 160 px da arena e a nave
+  escaparia sempre pela mesma borda.</li>
+  <li><b>A geometria:</b> perto da nave, as gotas ficam a 18 px uma da outra, e entre duas vizinhas sobram 8 px (a nave tem 9:
+  não passa). No vão sobram <b>26 px</b>. Cruzam a metade esquerda em ~1 s.</li>
+  <li>A gota é a bola de lava da Besta, menor, com a luz e as brasas dela. Na borda, só respinga (não vira estilhaço que fere).</li>
+  <li>Os arcos de cima nunca sobem até o teto: com a nave alta, o leque desce o necessário.</li>
+</ul>
+<p><b>A salva mirada:</b> a mesma abertura, o mesmo número (3/4/5) e a mesma cadência; o centro aponta para a nave. Com 4,
+o meio seria um vão em cima da nave, então o leque anda meio passo para um lado sorteado e um glóbulo vai nela.</p>
+<div class="grade">
+  <div class="card">
+    <h2>A · seco, com o leque</h2>
+    <img src="lava-A.gif" alt="A investida com o tranco, o leque de lava com um vão e a nave desviando por ele">
+    <p>Duas investidas (nave alta, depois baixa). Depois do tranco, a nave desliza até o vão a 150 px/s para mostrar o
+    corredor (invulnerável e parada, ela só "comeria" as gotas). Na volta à estação, a salva mira a nave.</p>
+  </div>
+</div>
+<p><b>Perguntas:</b> o leque lê bem e é justo? O vão está largo o bastante? A velocidade (~1 s para cruzar) está boa?</p>
+
+<h1>✅ Rodada 2: o tranco A e os cabos de trás</h1>
+<p><b>A escolha: o tranco A, seco</b> (o mais natural). Ele já é o padrão do jogo.</p>
+<p><b>Os cabos soltos que você marcou</b> são os que a arte arrasta para a <b>direita</b>. Eles acabavam na borda do quadro
+de 256 px: na estação ficavam fora da tela, mas na parada apareciam presos em nada. Agora cada ponta vira corda, com a
+mesma textura, na direção em que o cabo pintado sai, até o hospedeiro: fora da tela à direita, ou no teto (os dois de cima
+sobem para o canto). Eles também esticam na investida e vibram no tranco.</p>
+<ul>
+  <li>São 5 pontas na borda direita. A raiz de cada corda segue a <b>respiração</b> (as pontas sobem e descem até 4 px entre os quadros).</li>
+  <li>A grossura de cada corda é a do cabo pintado em que ela emenda.</li>
+</ul>
+<div class="grade">
+  <div class="card">
+    <h2>A · seco, com os cabos de trás</h2>
+    <img src="investida-A-tras.gif" alt="Investida com o tranco A e os cabos de trás continuando como corda">
+    <p>A nave alta, depois baixa. Na parada, os cabos de trás saem esticados para a direita e para o canto de cima.</p>
+  </div>
+</div>
+
+<h1>Rodada 1: o recorte, a corda e o tranco</h1>
+<p>Na velocidade real, no treino da F4 (nave invulnerável e parada). Cada GIF tem duas investidas: a nave <b>alta</b>, depois
+<b>baixa</b>. No jogo: <code>http://localhost:5174/?tranco=A</code> (ou <code>B</code>, <code>C</code>) e o treino <code>K</code>.</p>
+
+<div class="grade">
+  <div class="card">
+    <h2>A · seco</h2>
+    <img src="investida-A.gif" alt="Investida com o tranco A, seco">
+    <p>Passa 3 px da parada e volta em 0,12 s. Vibração média, tremor de câmera leve.</p>
+  </div>
+  <div class="card">
+    <h2>B · elástico</h2>
+    <img src="investida-B.gif" alt="Investida com o tranco B, elástico">
+    <p>Passa 8 px e quica duas vezes em 0,45 s. Vibração menor, a coleira "mola".</p>
+  </div>
+  <div class="card">
+    <h2>C · vibrante</h2>
+    <img src="investida-C.gif" alt="Investida com o tranco C, vibrante">
+    <p>Passa 4 px e volta em 0,15 s. Os cabos vibram forte e a câmera treme mais.</p>
+  </div>
+</div>
+
+<h1>A entrada: o glitch corrigido</h1>
+<p>O que você viu: na chegada, o Guardião ainda está à direita da estação, além do alcance da coleira. Os cabos ficavam
+presos no máximo, chegavam <b>retos e deitados</b> na raiz, e a ponta cortada da corda saía para fora do toco pintado: o
+picotado perto do casco.</p>
+<ul>
+  <li><b>A coleira só segura na investida.</b> Fora dela, o teto solta o cabo que precisar: na entrada ele chega frouxo.</li>
+  <li><b>A folga é em pixels</b> (a da estação), não proporcional ao vão: com 15 %, o vão longo da entrada pendurava laços abaixo do casco.</li>
+  <li><b>O cabo sai do toco para cima</b> (5 px pelo eixo do toco) antes de seguir para a âncora, como um cabo embutido: a ponta nunca fica deitada.</li>
+</ul>
+<div class="grade">
+  <div class="card">
+    <h2>A entrada, agora</h2>
+    <img src="entrada.gif" alt="A entrada do Guardião com os cabos frouxos">
+    <p>Do nascimento à estação, e ~2 s parado.</p>
+  </div>
+</div>
+
+<h1>O recorte</h1>
+<p>Os cabos do alto saíram das quatro artes (o estático, a respiração, a morte e o destruído). Prova pixel a pixel:
+<b>0 pixels diferentes fora da máscara</b> nas quatro. Os originais estão em <code>assets/raw/guardiao-com-cabos/</code>.</p>
+<img src="recorte.png" alt="Antes e depois do recorte dos cabos, ampliado 3×" style="margin:14px 0">
+
+<h1>As perguntas</h1>
+<ol>
+  <li><b>Qual tranco: A, B ou C?</b> Ou uma mistura (por exemplo, o quique da B com a vibração da C).</li>
+  <li><b>O ponto de parada</b> (a ~1/3 da tela, x ≈ 200 na altura da base): está bom, ou ele deve chegar mais perto / ficar mais longe?</li>
+  <li><b>A corda lê como o cabo pintado?</b> Largura, contorno, cor, o leque das âncoras. O que destoar?</li>
+</ol>
+</body>
+</html>
