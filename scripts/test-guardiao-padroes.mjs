@@ -1,6 +1,6 @@
 // THE GUARDIAN'S PATTERNS — the pure rules of step 2 (spec 2026-11-22-guardiao-coleira-design.md §5). From the root:
 //   node --experimental-transform-types scripts/test-guardiao-padroes.mjs
-import { miraSalva, angulosSalva, lequeLava } from '../src/entities/guardiao/padroes.ts';
+import { miraSalva, angulosSalva, angulosPulso } from '../src/entities/guardiao/padroes.ts';
 
 const falhas = [];
 const conferir = (ok, msg, visto) => {
@@ -33,38 +33,49 @@ for (const n of [3, 4, 5]) {
   conferir(lados.size === 2, 'n=4: o desvio de meio passo sorteia o lado', [...lados]);
 }
 
-// ── the lava fan: n drops, one gap, never at an end, all cross the target column together ──
-const base = { boca: { x: 217, y: 113 }, xAlvo: 40, T: 1, g: 260, passo: 18, topo: 30, base: 190 };
-for (const n of [5, 6, 7]) {
-  for (const r of [0, 0.5, 0.999]) {
-    const L = lequeLava({ ...base, n, centroY: 110, rnd: seq(r) });
-    conferir(L.vel.length === n && L.faixas.length === n + 1, `n=${n}: ${n} gotas em ${n + 1} faixas`, L.vel.length);
-    conferir(L.vao >= 1 && L.vao <= n - 1, `n=${n} (sorteio ${r}): o vão nunca é a faixa da ponta`, L.vao);
-    // simulate to the target column
-    const ys = L.vel.map((v) => {
-      const t = (base.xAlvo - base.boca.x) / v.x;
-      return base.boca.y + v.y * t + 0.5 * base.g * t * t;
-    });
-    const ts = L.vel.map((v) => (base.xAlvo - base.boca.x) / v.x);
-    conferir(ts.every((t) => Math.abs(t - base.T) < 1e-9), `n=${n}: todas chegam à coluna em T`, ts);
-    const sep = ys.slice(1).map((y, i) => y - ys[i]).sort((p, q) => p - q);
-    conferir(Math.abs(sep[0] - 18) < 1e-6 && Math.abs(sep[sep.length - 1] - 36) < 1e-6 && sep.filter((s) => s > 20).length === 1,
-      `n=${n}: vizinhas a 18 px, UM vão de 36 px (26 px livres)`, sep);
-    conferir(ys.every((y) => y >= base.topo && y <= base.base), `n=${n}: todas dentro da arena na coluna`, ys);
-  }
-  // the arc's peak: with the ship near the ceiling, no drop may graze it before the column (it would die there)
-  for (const centroY of [30, 60, 110]) {
-    const L = lequeLava({ ...base, n, centroY, rnd: seq(0.5) });
-    const picos = L.vel.map((v) => (v.y < 0 ? base.boca.y - (v.y * v.y) / (2 * base.g) : base.boca.y));
-    conferir(picos.every((p) => p >= base.topo + 3 - 1e-9), `n=${n}, nave em y=${centroY}: nenhum arco sobe ao teto`, picos);
-  }
-}
+// ── the lava pulses (22/11, his bullet-hell direction): a FIXED figure, A = n rays, B = n + 1 half a step off ──
 {
-  const L = lequeLava({ ...base, n: 5, centroY: 32, rnd: seq(0.5) });
-  conferir(L.faixas[0] >= base.topo, 'nave colada no teto: o leque fica preso na arena', L.faixas);
-  const nao = lequeLava({ ...base, n: 5, centroY: 120, rnd: seq(0.5) });
-  const meio = (nao.faixas[0] + nao.faixas[nao.faixas.length - 1]) / 2;
-  conferir(Math.abs(meio - 120) < 1e-6, 'o leque centra na altura da nave', meio);
+  const graus2 = (L) => L.map(graus);
+  const boca = { x: 218, y: 100 }, alvo = { x: 0, y: 110 };
+  const A = graus2(angulosPulso(0, 7, 10, boca, alvo));
+  const B = graus2(angulosPulso(1, 7, 10, boca, alvo));
+  const A2 = graus2(angulosPulso(2, 7, 10, boca, alvo));
+  conferir(A.length === 7 && B.length === 8, 'o pulso A tem 7 raios, o B tem 8', [A.length, B.length]);
+  conferir(A.every((a, i) => Math.abs(a - A2[i]) < 1e-9), 'o 3º pulso repete o A (a figura não sorteia nada)', A2);
+  const passos = A.slice(1).map((a, i) => a - A[i]);
+  conferir(passos.every((p) => Math.abs(p - 10) < 1e-9), 'o A: raios a 10° um do outro', passos);
+  const meios = A.slice(1).map((a, i) => (a + A[i]) / 2);
+  conferir(meios.every((m) => B.some((b) => Math.abs(b - m) < 1e-9)), 'o B cai no meio de cada vão do A', { meios, B });
+  const eixo = graus(Math.atan2(alvo.y - boca.y, alvo.x - boca.x));
+  conferir(Math.abs(A[3] - eixo) < 1e-9 && Math.abs((B[3] + B[4]) / 2 - eixo) < 1e-9, 'as duas figuras centradas no eixo (o meio da borda esquerda)', { eixo, A3: A[3] });
+}
+// the rule he asked for: "cobra quem não percebe o padrão" — no parked spot survives both pulses. Over where the core
+// really stops (the lunge aims ±70: core y 80–150; the leash puts it at x 215–232), in the ship's zone (x 20–80, the
+// WHOLE screen height: the drops cross the arena walls, 22/11 — the ship can hug the screen edge, y 5–211), the widest
+// run of parked-safe centers is a hairline at the corners (measured 22/11: ≤ 7 px up to x = 80). ⚠️ NEARER HIM (from x ≈ 90) the 7 rays
+// don't reach the screen's top and bottom corners: a parked pocket that grows to 10–39 px by x 100–120, at his face — left OPEN, for him.
+{
+  const HIT = 5 + 4.5, alvo = { x: 0, y: 110 };
+  let pior = 0, onde = null, livreMin = Infinity;
+  for (const ox of [215, 232]) for (const oy of [80, 100, 126, 150]) {
+    const boca = { x: ox, y: oy };
+    const A = angulosPulso(0, 7, 10, boca, alvo), B = angulosPulso(1, 7, 10, boca, alvo);
+    const ys = (L, x) => L.map((a) => oy + (x - ox) * Math.tan(a));
+    for (let x = 20; x <= 80; x += 2) {
+      let run = 0;
+      for (let y = 5; y <= 211; y += 0.5) {
+        run = [...ys(A, x), ...ys(B, x)].some((v) => Math.abs(v - y) < HIT) ? 0 : run + 0.5;
+        if (run > pior) { pior = run; onde = { ox, oy, x, y }; }
+      }
+    }
+    // the gap of ONE pulse at the ship's usual column (x 40–80) must fit the 9 px ship with room
+    for (const x of [40, 60, 80]) {
+      const s = ys(A, x).sort((p, q) => p - q);
+      for (let i = 1; i < s.length; i++) if (s[i] > 35 && s[i - 1] < 185) livreMin = Math.min(livreMin, s[i] - s[i - 1] - 2 * 5);
+    }
+  }
+  conferir(pior <= 7.5, 'parado, na tela inteira (x 20–80), nenhum fio seguro acima de 7 px', { pior, onde });
+  conferir(livreMin >= 11, 'lendo, o vão de um pulso na coluna da nave tem ≥ 11 px livres (a nave tem 9)', livreMin);
 }
 
 console.log(falhas.length ? `\n${falhas.length} FALHA(S)` : '\nTODOS OK');

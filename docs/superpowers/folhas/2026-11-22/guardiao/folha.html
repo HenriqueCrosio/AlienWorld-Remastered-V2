@@ -21,7 +21,67 @@
 </style>
 </head>
 <body>
-<h1>Passo 2: o leque de lava e a salva mirada</h1>
+<h1>Passo 2, rodada 3: a SEGURA a 160 px/s, e a lava atravessando a parede</h1>
+<p><b>As suas escolhas:</b> a <b>SEGURA</b>, e a velocidade que você achou jogando (<code>?lavaVel=160&amp;lavaEntre=0.4</code>):
+<b>160 px/s e 0,4 s entre pulsos</b>. O último degrau mantém a proporção de antes: <b>190 px/s e 0,32 s</b>. A RECUA saiu do código.</p>
+<p><b>A parede</b> (o seu pedido: <i>"a nave pode ir até na linha da tela, ou seja, as lavas precisam passar a parede para punir
+quem tenta ficar embaixo ou em cima"</i>): na borda da arena a gota <b>respinga e segue</b> (as brasas e o som do impacto,
+como antes) até sair da tela. A faixa entre a parede e a linha da tela não é mais esconderijo.</p>
+<div class="grade">
+  <div class="card">
+    <h2>160 px/s · 0,4 s, a nave no meio e depois colada no alto</h2>
+    <img src="pulsos-160.gif" alt="Os pulsos de lava a 160 px/s; na segunda investida a nave começa colada no alto da tela e as gotas passam da parede">
+    <p>O degrau do meio (3 pulsos). A nave lê o padrão na velocidade real dela. Na segunda investida ela começa colada no
+    alto: as gotas de cima respingam na parede e continuam.</p>
+  </div>
+</div>
+<p><b>Medido em jogo:</b> a nave <b>parada</b> leva lava em todas as alturas, inclusive colada na linha da tela (y = 8 e
+y = 208). A nave <b>lendo</b>: 0 toques nos degraus do meio e do último (no alto, no meio e embaixo). No degrau cheio o
+robô levou 2 toques no limite exato (a gota encostando no canto do nariz, 0 px de sobreposição): é falta de precisão do
+robô, não um vão que falte. O seu teste jogando é o que vale.</p>
+<p class="nota"><b>Um achado para você decidir:</b> a figura de 7 raios cobre a tela inteira até x ≈ 80, onde a nave fica
+(o maior fio parado seguro é de 7 px, nos cantos). <b>Colado no Guardião</b>, de x ≈ 90 em diante, ela não alcança os cantos
+de cima e de baixo da tela: sobra um bolsão parado de 10 a 39 px na cara dele. Deixo como está (encostar nele durante a
+investida já é risco)? Ou abro o leque (9 raios, mais gotas por pulso) para fechar esse canto?</p>
+<p class="nota"><b>E uma decisão minha para você confirmar:</b> o último degrau (33–0%) a 190 px/s e 0,32 s entre pulsos (a
+proporção de antes sobre os seus 160/0,4). Confirma, ou o último fica igual aos outros?</p>
+
+<h1>Passo 2, rodada 2: os pulsos alternados (o protótipo)</h1>
+<p><b>A sua direção:</b> <i>"eu priorizo muito a perspectiva de bullet hell, ou seja, são formatos mais geométricos que induzem
+o jogador a ler o ataque, cobra quem demora ou não percebe o padrão"</i>. O leque com vão sorteado saiu. No lugar dele:</p>
+<ul>
+  <li><b>A figura fixa:</b> raios <b>retos</b> (sem gravidade), em ângulos fixos a partir do miolo. O pulso <b>A</b> tem 7 raios, o
+  <b>B</b> tem 8 e sai deslocado meio passo, caindo nos vãos do A. Por degrau são 2 pulsos (A, B), depois 3 (A, B, A),
+  depois 3 mais rápidos.</li>
+  <li><b>Nenhum ponto parado escapa</b> na metade esquerda: quem fica parado é atingido; quem lê desloca meio passo
+  (~12 px) e passa. Na coluna da nave, o vão livre entre gotas é de 11 a 18 px (a nave tem 9). Perto do Guardião, os raios se
+  fecham num muro: encostar nele custa caro.</li>
+  <li>O eixo da figura aponta para o <b>meio da borda esquerda</b> da arena. Com o eixo horizontal e o miolo baixo, o alto da
+  tela inteiro ficava seguro.</li>
+  <li><b>A brasa</b> no vermelho do miolo (amostrado da arte: <code>#e4270f</code>, <code>#ce1c0b</code>, <code>#8f150e</code>, realce
+  <code>#f85732</code>), e metade da densidade no raio reto, para o rastro não borrar a figura.</li>
+</ul>
+<p><b>A decisão em aberto: a parada.</b> No filme, as duas versões no degrau do meio (3 pulsos, 200 px/s, 0,3 s entre eles).
+A nave <b>lê o padrão</b>: a cada pulso que chega, ela desliza até o vão mais perto, na velocidade real dela (110 px/s).</p>
+<div class="grade">
+  <div class="card">
+    <h2>SEGURA (em cima) · RECUA (embaixo)</h2>
+    <img src="pulsos-segura-recua.gif" alt="Os pulsos de lava: em cima o Guardião segura na parada, embaixo os pulsos saem enquanto ele volta">
+    <p><b>SEGURA:</b> ele fica preso na parada com a coleira tensa, um mini-tranco a cada pulso, e só depois volta. A investida
+    fica ~0,6 s mais longa. <b>RECUA:</b> os pulsos saem do miolo enquanto os cabos o puxam de volta.</p>
+  </div>
+</div>
+<p><b>Medido em jogo</b> (2 investidas por versão, a nave invulnerável contando os toques de lava):</p>
+<ul>
+  <li><b>Lendo o padrão: 0 toques nas duas</b>, no degrau do meio e no último (240 px/s, 0,24 s entre pulsos).</li>
+  <li><b>Parada: SEGURA acerta nas 2 investidas; RECUA só em 1.</b> Como a fonte recua, a figura deforma: os arcos deixam de
+  ser concêntricos, o espaço entre eles cresce, e às vezes abre um ponto parado seguro. Isso quebra a regra do "cobra quem não
+  percebe o padrão".</li>
+</ul>
+<p class="nota">A minha recomendação é a SEGURA: arcos concêntricos e igualmente espaçados, a figura que se ensina, e o
+Guardião preso puxando a coleira em cada pulso. A RECUA é mais curta e mais solta, mas a geometria varia a cada investida.</p>
+
+<h1>Passo 2, rodada 1: o leque de lava e a salva mirada (substituído)</h1>
 <p><b>O leque, no tranco:</b> a inércia arranca a lava do miolo. São 5 gotas (6 a partir de 66% de vida, 7 a partir de 33%),
 em arco com a gravidade da lava da F4, e <b>um vão sorteado</b> a cada investida.</p>
 <ul>

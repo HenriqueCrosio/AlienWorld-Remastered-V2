@@ -1,4 +1,4 @@
-// THE LAVA FAN AND THE AIMED SALVO IN GAME (spec 2026-11-22-guardiao-coleira-design.md §5). npm run dev, then
+// THE LAVA PULSES AND THE AIMED SALVO IN GAME (spec 2026-11-22-guardiao-coleira-design.md §5). npm run dev, then
 //   node scripts/test-guardiao-lava-jogo.mjs [--porta 5173]
 import { chromium } from 'playwright';
 
@@ -39,38 +39,94 @@ await page.evaluate(() => {
   };
 });
 
-// ── the lava fan at the jerk ──
-const leque = await page.evaluate(() => {
+// ── the lava pulses at the jerk (22/11): A (7) then B (8), straight, from ONE point — he HOLDS at the stop meanwhile ──
+const pulsos = await page.evaluate(() => {
   const s = window.__game.scene.getScene('Game');
   const b = s.boss;
-  s.ship.setPosition(70, 100);
+  s.ship.setPosition(370, 200); // out of the way: a drop that touches the ship is spent, even invulnerable
   b.serra?.destroy?.();
   b.serra = null;
   b.acao = 'flutua';
   b.proxima = 'investida';
   b.acaoT = 0;
   b.cdTiro = 99;
-  for (let i = 0; i < 400 && b.acao !== 'tranco'; i++) window.__step(1);
-  // the ship out of the fan's way (a drop that touches it is spent, even with the ship invulnerable)
-  s.ship.setPosition(370, 200);
   const gotas = () => s.enemies.enemyBullets.getChildren().filter((o) => o.active && o.getData('lavaGuardiao') === true);
-  const n = gotas().length;
-  const L = b.ultimoLeque;
-  const x0 = gotas()[0]?.x;
-  // step until the drops reach the target column (x = 40)
-  for (let i = 0; i < 120 && gotas().length && gotas()[0].x > 40; i++) window.__step(1);
-  const ys = gotas().map((o) => o.y).sort((p, q) => p - q);
-  return { n, L, x0, ys, xs: gotas().map((o) => Math.round(o.x)) };
+  for (let i = 0; i < 400 && b.acao !== 'tranco'; i++) window.__step(1);
+  const parada = { x: b.sprite.x, y: b.sprite.y };
+  const vistos = [];
+  let P = null, maxDesvio = 0, acaoFim = null, quadrosSegura = 0, yMin = 999, yMax = -999;
+  const vel0 = new Map();
+  for (let i = 0; i < 120; i++) {
+    if (b.ultimoPulso !== P) {
+      P = b.ultimoPulso;
+      vistos.push({ n: P.angulos.length, ox: P.ox, oy: P.oy, vel: P.vel, t: P.t });
+      for (const o of gotas()) if (!vel0.has(o)) vel0.set(o, { x: o.body.velocity.x, y: o.body.velocity.y });
+    }
+    if (b.acao === 'segura') {
+      quadrosSegura++;
+      maxDesvio = Math.max(maxDesvio, Math.abs(b.sprite.x - parada.x), Math.abs(b.sprite.y - parada.y));
+    }
+    if (b.acao === 'volta' && acaoFim === null) acaoFim = { i, pulsos: vistos.length };
+    for (const o of gotas()) { yMin = Math.min(yMin, o.y); yMax = Math.max(yMax, o.y); }
+    window.__step(1);
+  }
+  let curva = 0;
+  for (const [o, v] of vel0) if (o.active) curva = Math.max(curva, Math.abs(o.body.velocity.y - v.y), Math.abs(o.body.velocity.x - v.x));
+  return { vistos, maxDesvio, acaoFim, quadrosSegura, curva, yMin, yMax };
 });
-conferir(leque.n === 5, 'no tranco saem 5 gotas (vida cheia)', leque.n);
-const sep = leque.ys.slice(1).map((y, i) => y - leque.ys[i]);
-const grandes = sep.filter((s) => s > 27);
-conferir(grandes.length === 1 && sep.every((s) => (s > 27 ? Math.abs(s - 36) < 3 : Math.abs(s - 18) < 3)),
-  'na coluna x=40: vizinhas a ~18 px, UM vão de ~36 px', { sep, xs: leque.xs });
-const faixas = leque.L?.faixas ?? [NaN];
-const meio = (faixas[0] + faixas[faixas.length - 1]) / 2;
-conferir(Math.abs(meio - 100) < 1.5, 'o leque centra na nave', faixas);
-conferir(leque.ys.every((y) => y >= 28 && y <= 192), 'todas dentro da arena na coluna', leque.ys);
+const V = pulsos.vistos;
+conferir(V.length === 2 && V[0].n === 7 && V[1].n === 8, 'vida cheia: 2 pulsos, A com 7 e B com 8', V);
+conferir(V.every((p) => p.vel === 160), 'a 160 px/s (a escolha dele)', V.map((p) => p.vel));
+conferir(V.length === 2 && Math.abs(V[1].t - V[0].t - 400) < 20, '0,4 s entre os pulsos', V.map((p) => p.t));
+conferir(V.length === 2 && Math.hypot(V[1].ox - V[0].ox, V[1].oy - V[0].oy) < 2.5, 'os dois do MESMO ponto: arcos concêntricos', V);
+conferir(pulsos.quadrosSegura > 20 && pulsos.maxDesvio <= 2, 'ele SEGURA na parada enquanto os pulsos saem (só o mini-tranco)', pulsos);
+conferir(pulsos.acaoFim?.pulsos === 2, 'a volta só começa depois do último pulso', pulsos.acaoFim);
+conferir(pulsos.curva < 0.5, 'as gotas são retas (sem gravidade)', pulsos.curva);
+conferir(pulsos.yMin < 20 && pulsos.yMax > 200, 'a lava ATRAVESSA as bordas da arena (30 e 190) até a linha da tela', { yMin: pulsos.yMin, yMax: pulsos.yMax });
+
+// ── "cobra quem não percebe o padrão": the ship PARKED takes lava in every lunge ──
+for (const naveY of [8, 60, 105, 160, 208]) {
+  const toques = await page.evaluate((naveY) => {
+    const s = window.__game.scene.getScene('Game');
+    const b = s.boss;
+    for (let i = 0; i < 300 && b.acao !== 'flutua'; i++) window.__step(1);
+    // the last lunge's drops leave, with his cycle held (no saw, no telegraph, no salvo meanwhile)
+    b.acaoT = 99;
+    b.cdTiro = 99;
+    for (let i = 0; i < 240; i++) window.__step(1);
+    const parado = { acao: b.acao, x: Math.round(b.sprite.x) };
+    // a TOUCH = the ship's overlap: it releases the drop and calls `damageShip` right after (GameScene). The lava's own
+    // edge splash clears `lavaGuardiao` before releasing, so it never counts.
+    let n = 0, lava = false;
+    const solta = s.enemies.release.bind(s.enemies);
+    const fere = s.damageShip;
+    s.enemies.release = (o) => {
+      lava = o.getData('lavaGuardiao') === true;
+      return solta(o);
+    };
+    s.damageShip = () => {
+      if (lava) n++;
+      lava = false;
+    };
+    b.serra?.destroy?.();
+    b.serra = null;
+    b.acao = 'flutua';
+    b.proxima = 'investida';
+    b.acaoT = 0;
+    b.cdTiro = 99;
+    const origens = [];
+    let P = b.ultimoPulso;
+    for (let i = 0; i < 300; i++) {
+      s.ship.setPosition(60, naveY);
+      window.__step(1);
+      if (b.ultimoPulso !== P) { P = b.ultimoPulso; origens.push([Math.round(P.ox), Math.round(P.oy)]); }
+    }
+    s.enemies.release = solta;
+    s.damageShip = fere;
+    return { n, parado, origens };
+  }, naveY);
+  conferir(toques.n >= 1, `nave PARADA em (60, ${naveY}): a lava a acerta`, toques);
+}
 
 // ── the aimed salvo ──
 for (const naveY of [50, 170]) {
