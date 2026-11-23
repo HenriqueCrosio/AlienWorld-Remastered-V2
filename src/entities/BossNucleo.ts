@@ -16,7 +16,7 @@ import { angulosPulso, angulosSalva, miraSalva, proximaAcao, type AcaoGuardiao, 
 import { CamadaSerpentes } from './guardiao/camadaSerpentes';
 import type { ParamSerpente } from './guardiao/serpente';
 import { CamadaBorda } from './guardiao/camadaBorda';
-import { VAOS_Y, empurrar } from './guardiao/aperto';
+import { APERTO, Aperto, VAOS_Y, empurrar } from './guardiao/aperto';
 import { TetoQueSangra } from './guardiao/tetoSangra';
 import { SangueTeto } from './guardiao/sangueTeto';
 import type { Moldura } from '../systems/Moldura';
@@ -46,8 +46,32 @@ export class BossNucleo implements StageBoss {
   readonly targets: Phaser.Physics.Arcade.Sprite[];
 
   // Antes dos campos de instância que os usam (ordem de inicialização de classe).
-  private static readonly HP_GUARDIAO = 90;
-  private static readonly HP_TOTAL = BossNucleo.HP_GUARDIAO + Predador.HP;
+  /**
+   * ⚠️ 23/11 (ele, jogando a luta nova: *"não consegui chegar nas próximas etapas… depois das serpentes, atirei mais e
+   * logo veio a besta. A vida dos dois estão linkadas"*): 90 era a vida da luta antiga (serra ↔ investida). Medido: uma
+   * volta do rodízio dura 16,7 s a 100–66 %, 27,3 s a 66–33 % e 36,8 s a 33–0 %; com a mão mediana do Núcleo (×2,6 da
+   * arma base: ~12 de dano/s) 90 caía em ~8 s. 800 = ~70 s com a mão mediana — e a TRAVA POR DEGRAU (`piso`) garante
+   * as camadas novas com qualquer mão. O ajuste fino segue na frente 5 do rebalanceamento.
+   */
+  private static readonly HP_GUARDIAO = 800;
+  /**
+   * A TRAVA POR DEGRAU (23/11, a escolha dele): a vida não passa de um degrau antes de o ataque NOVO dele aparecer — as
+   * serpentes antes de cair abaixo de 33 %, o aperto e o teto antes de morrer. O dano a mais bate no CASCO (o brilho frio,
+   * sem dano), e o rodízio puxa o ataque que falta para a próxima vez — a trava se encurta sozinha.
+   * Um golpe maior que a vida inteira (só os scripts de desenvolvimento dão um: `damage(999)` e afins) atravessa a trava.
+   */
+  private static readonly PISO_33 = 0.331;
+  private static readonly PISO_FIM = 0.01;
+  /** os ataques que já COMEÇARAM nesta luta (a trava os lê) */
+  private readonly vistas = new Set<AcaoGuardiao>();
+  /**
+   * A BARRA EM CAMADAS (23/11, ele: *"uma barra sobreposta a outra… a primeira barra tem uma borda azul (de guardião),
+   * quando termina a barra do guardião, ela se torna vermelha e da fera"*): a do Guardião (azul) POR CIMA da da fera
+   * (vermelha, cheia) — ao esvaziar, a de baixo aparece; acabou o Guardião, a borda vira vermelha e a barra é a dela.
+   */
+  private static readonly BARRA_AZUL = 0x3f8fd8;
+  private static readonly BORDA_AZUL = 0x8cc8ff;
+  private static readonly BORDA_FERA = COLORS.enemyBright;
   /** Do estouro final até a cutscene: o corpo no chão, o piso rachando e a lava subindo (ver `fimDoPredador`). */
   static readonly CORPO_FICA_MS = 4200;
 
@@ -90,6 +114,8 @@ export class BossNucleo implements StageBoss {
   private static readonly TETO_BOMBEIA = 4;
   /** quantos apertos já houve: o vão alterna alto/baixo (`VAOS_Y`) */
   private vezAperto = 0;
+  /** a fase do aperto no quadro anterior: o inchar e a nota saem na TROCA (folha de som 15b) */
+  private faseAperto = '';
   /** a caixa da nave (`GameScene.HITBOX_NAVE`): é ela que a parede do aperto empurra */
   private static readonly CAIXA_NAVE = { w: 21, h: 9 };
   /** a nave encostou na borda TORCIDA neste quadro (lido e zerado pelo `morde`) */
@@ -159,6 +185,10 @@ export class BossNucleo implements StageBoss {
 
   private readonly core: Phaser.Physics.Arcade.Sprite;
   private readonly barBg: Phaser.GameObjects.Rectangle;
+  /** a barra da fera, por baixo da do Guardião (cheia até ele cair) */
+  private readonly barFera: Phaser.GameObjects.Rectangle;
+  /** a borda: azul no Guardião, vermelha na fera */
+  private readonly barBorda: Phaser.GameObjects.Rectangle;
   private readonly bar: Phaser.GameObjects.Rectangle;
   private readonly glow: Phaser.GameObjects.Particles.ParticleEmitter;
   /**
@@ -517,10 +547,18 @@ export class BossNucleo implements StageBoss {
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyDark)
       .setDepth(100);
-    this.bar = scene.add
+    this.barFera = scene.add
       .rectangle(GAME_WIDTH / 2 - 80, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyBright)
       .setOrigin(0, 0.5)
       .setDepth(101);
+    this.bar = scene.add
+      .rectangle(GAME_WIDTH / 2 - 80, BARRA_CHEFAO_Y, 160, 4, BossNucleo.BARRA_AZUL)
+      .setOrigin(0, 0.5)
+      .setDepth(102);
+    this.barBorda = scene.add
+      .rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 162, 6)
+      .setStrokeStyle(1, BossNucleo.BORDA_AZUL)
+      .setDepth(103);
 
     this.acaoT = BossNucleo.pausa(1);
     this.cdTiro = 1.4;
@@ -673,8 +711,11 @@ export class BossNucleo implements StageBoss {
 
         if (this.acaoT <= 0) {
           // o RODÍZIO do degrau (spec 2026-11-22 §8)
-          const agora = this.proxima;
+          // a TRAVA puxa o ataque que falta para agora (ela se encurta sozinha)
+          const falta = this.travado ? this.falta : null;
+          const agora = falta ?? this.proxima;
           this.proxima = proximaAcao(this.degrau, agora);
+          this.vistas.add(agora);
           if (agora === 'teto') {
             // O TETO QUE SANGRA (§7). Ele BOMBEIA pelos cabos: o pulso sobe ao teto, corre a borda, os pontos incham e
             // soltam colunas de gotas em duas ondas alternadas. Na estação, miolo aberto, sem salva.
@@ -683,14 +724,17 @@ export class BossNucleo implements StageBoss {
             this.teto = new TetoQueSangra();
             this.borda.iniciar(this.teto);
             this.cabos.golpe(BossNucleo.TETO_BOMBEIA);
+            Som.tocar('guardiao.teto.bombeia', { x: this.sprite.x });
           } else if (agora === 'aperto') {
             // O APERTO (§7). Ele opera o hospedeiro pelos cabos: o PUXÃO (os cabos esticam para cima e vibram, a borda
             // estremece), e a constrição corre a arena. Na estação, miolo aberto, sem salva — o vão é o desafio inteiro.
             this.acao = 'aperto';
+            this.faseAperto = '';
             this.body.setVelocityY(0);
             this.borda.soltar(VAOS_Y[this.vezAperto++ % VAOS_Y.length]);
             this.cabos.setTensa(true);
             this.cabos.golpe(BossNucleo.APERTO_PUXAO);
+            Som.tocar('guardiao.aperto.puxao', { x: this.sprite.x });
             this.scene.cameras.main.shake(600, 0.003);
           } else if (agora === 'serpentes') {
             // OS CABOS-SERPENTE. Ele fica na estação operando os cabos: parado, à direita, miolo aberto (§8).
@@ -869,6 +913,24 @@ export class BossNucleo implements StageBoss {
       }
 
       case 'aperto': {
+        // A ONDA SOA (folha 15b, a composição dele): o INCHAR já diz qual vão vem — o escuro antes da nota grave (o vão
+        // baixo), o claro antes da alta (o vão alto) —, e a NOTA sai quando o anel começa a correr e viaja com ele
+        const ap = this.borda.atual;
+        if (ap instanceof Aperto && ap.fase !== this.faseAperto) {
+          this.faseAperto = ap.fase;
+          const alto = ap.vaoY === VAOS_Y[0];
+          if (ap.fase === 'cresce') Som.tocar(alto ? 'guardiao.aperto.inchaAlto' : 'guardiao.aperto.inchaBaixo', { x: APERTO.X0 });
+          else if (ap.fase === 'corre') {
+            // O FADE DOS FLYBYS (23/11, ele: *"as notas estão cortando secas depois que passam a tela, quero um fade nelas,
+            // para terminarem mais orgânicas"* — o que fizemos no sobrevoo da cena final, `Interlude4Scene`): o fade começa
+            // 1 s antes de o anel sair pela esquerda (o fim da travessia) — ou antes, para durar ao menos 1,5 s — e chega
+            // ao silêncio no fim do arquivo, nunca no corte dele
+            const nota = alto ? 'guardiao.aperto.notaAlta' : 'guardiao.aperto.notaBaixa';
+            const dur = Som.duracao(nota);
+            const emS = Math.max(0, Math.min(APERTO.TRAVESSIA - 1, dur - 1.5));
+            Som.tocar(nota, { x: APERTO.X0, xFim: APERTO.X1, some: { em: emS, ms: Math.min(2600, (dur - emS) * 1000) } });
+          }
+        }
         // firme na estação (o balanço reduzido, como nas serpentes), o miolo aberto e brilhando; sem salva
         this.ampBalanco = Math.max(BossNucleo.SERPENTE_BALANCO, this.ampBalanco - dt * 1.5);
         const alvoY = BossNucleo.G_BASE_Y + Math.sin(this.t * 0.7) * 16 * this.ampBalanco;
@@ -893,6 +955,7 @@ export class BossNucleo implements StageBoss {
           this.acao = 'tranco';
           this.trancoT = 0;
           this.cabos.golpe(this.tranco.vibra);
+          Som.tocar('guardiao.tranco', { x: this.sprite.x });
           this.scene.cameras.main.shake(90, this.tranco.tremor);
           // O 1º PULSO: a inércia arranca a lava do miolo, na figura fixa
           this.pulsoK = 0;
@@ -1211,8 +1274,21 @@ export class BossNucleo implements StageBoss {
     // Ancorado no cabo, em esforço: o dano dobra. Mesma gramática da recuperação do predador — a
     // janela de dano da luta tem de PAGAR, senão ela é só um lugar onde nada acontece.
     const dano = this.segurandoCabo ? amount * BossNucleo.DANO_CRAVADA : amount;
-    this.hpGuardiao = Math.max(0, this.hpGuardiao - dano);
+    // a TRAVA POR DEGRAU: abaixo do piso, o golpe bate no casco (nunca sobe a vida de quem já está abaixo dele)
+    const piso = amount >= BossNucleo.HP_GUARDIAO ? 0 : Math.min(this.hpGuardiao, this.piso);
+    const antes = this.hpGuardiao;
+    this.hpGuardiao = Math.max(piso, this.hpGuardiao - dano);
     this.atualizarBarra();
+    if (this.hpGuardiao === antes && antes > 0) {
+      // o casco segura: o brilho FRIO, curto (não o morno do dano)
+      this.sprite.setTint(BossNucleo.CASCO_FRIO);
+      this.scene.time.delayedCall(60, () => {
+        if (this.dead) return;
+        if (this.acao === 'telegrafo') this.sprite.setTint(BossNucleo.CASCO_FRIO);
+        else this.sprite.clearTint();
+      });
+      return false;
+    }
 
     this.sprite.setTint(0xffb090);
     // ⚠️ O flash de dano NÃO pode apagar o tint frio do telégrafo: um golpe que cai no último quadro
@@ -1227,9 +1303,39 @@ export class BossNucleo implements StageBoss {
     return false;
   }
 
-  /** UMA barra para as duas formas: a luta é uma só, e a barra é a promessa do tamanho dela. */
+  /** o piso da vida agora (a trava por degrau): o ataque novo do degrau ainda não apareceu */
+  private get piso(): number {
+    // (pelo degrau de AGORA: abaixo de 33 % só contam o aperto e o teto — e uma vida forçada abaixo do piso, num teste
+    // ou no treino, nunca é puxada de volta: o `damage` usa `min(vida, piso)`)
+    const H = BossNucleo.HP_GUARDIAO;
+    // (≥ com folga: a vida PARADA no piso continua travada nele)
+    if (this.hpGuardiao >= H * BossNucleo.PISO_33 - 1e-6 && !this.vistas.has('serpentes')) return H * BossNucleo.PISO_33;
+    if (!this.vistas.has('aperto') || !this.vistas.has('teto')) return BossNucleo.HP_GUARDIAO * BossNucleo.PISO_FIM;
+    return 0;
+  }
+
+  /** a trava segura a vida (está no piso) — o rodízio puxa o ataque que falta */
+  private get travado(): boolean {
+    const p = this.piso;
+    return p > 0 && this.hpGuardiao <= p + 1e-6;
+  }
+
+  /** o ataque que a trava espera, se o degrau já o tem */
+  private get falta(): AcaoGuardiao | null {
+    if (!this.vistas.has('serpentes')) return this.degrau >= 1 ? 'serpentes' : null;
+    if (!this.vistas.has('aperto')) return this.degrau >= 2 ? 'aperto' : null;
+    if (!this.vistas.has('teto')) return this.degrau >= 2 ? 'teto' : null;
+    return null;
+  }
+
+  /**
+   * A BARRA EM CAMADAS: a do Guardião (azul, borda azul) por cima da da fera (vermelha); acabou o Guardião, a borda fica
+   * vermelha e a barra é a dela (o Predador chama isto a cada golpe).
+   */
   private atualizarBarra(): void {
-    this.bar.width = 160 * ((this.hpGuardiao + (this.predador?.hp ?? Predador.HP)) / BossNucleo.HP_TOTAL);
+    this.barFera.width = 160 * ((this.predador?.hp ?? Predador.HP) / Predador.HP);
+    this.bar.width = this.predador ? 0 : 160 * (this.hpGuardiao / BossNucleo.HP_GUARDIAO);
+    this.barBorda.setStrokeStyle(1, this.predador || this.hpGuardiao <= 0 ? BossNucleo.BORDA_FERA : BossNucleo.BORDA_AZUL);
   }
 
   /** O corpo do predador fica na tela, racha o chão e afunda na lava antes da cutscene — ver `destroy`. */
@@ -1262,6 +1368,8 @@ export class BossNucleo implements StageBoss {
     this.sprite.destroy();
     this.core.destroy();
     this.bar.destroy();
+    this.barFera.destroy();
+    this.barBorda.destroy();
     this.barBg.destroy();
     this.glow.destroy();
     this.fumaca.destroy();

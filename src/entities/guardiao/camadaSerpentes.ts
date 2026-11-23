@@ -9,6 +9,7 @@
  * `perigos` do chefão (o que fere sem ser alvo: o tiro atravessa, como na serra).
  */
 import Phaser from 'phaser';
+import { Som } from '../../som/Som';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config';
 import { FAIXAS_CABO } from '../../data/cordaGuardiao';
 import { desenharCorda, escurecerFaixa } from './desenharCorda';
@@ -84,8 +85,23 @@ export class CamadaSerpentes {
   /** as serpentes desta ação */
   soltar(params: readonly ParamSerpente[]): void {
     this.serpentes = params.map((p) => new Serpente(p));
+    this.fases.clear();
     this.scene.tweens.killTweensOf(this.img);
     this.img.setAlpha(1);
+  }
+
+  /** a fase de cada serpente no quadro anterior: o som sai na TROCA (a saída, a trava, o bote — folha de som 15) */
+  private readonly fases = new Map<Serpente, string>();
+
+  private soar(): void {
+    for (const s of this.serpentes) {
+      const antes = this.fases.get(s);
+      if (antes === s.fase) continue;
+      this.fases.set(s, s.fase);
+      if (s.fase === 'cresce') Som.tocar('guardiao.serpente.sai', { x: s.p.raiz.x });
+      else if (s.fase === 'trava') Som.tocar('guardiao.serpente.trava', { x: s.cabeca.x });
+      else if (s.fase === 'bote') Som.tocar('guardiao.serpente.bote', { x: s.cabeca.x });
+    }
   }
 
   /** lida pelos testes e pelo filme */
@@ -102,6 +118,7 @@ export class CamadaSerpentes {
   atualizar(dt: number, nave: Ponto, desvio: Ponto = { x: 0, y: 0 }): void {
     for (const s of this.serpentes) s.desvio = { x: desvio.x, y: desvio.y };
     if (this.serpentes.length) passoSerpentes(this.serpentes, dt, { x: nave.x, y: nave.y });
+    this.soar();
     this.desenhar();
     this.posicionarFeridas();
   }

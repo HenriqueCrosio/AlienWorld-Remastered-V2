@@ -625,7 +625,36 @@ const FOLHA_10_FINAL: Record<string, DefSom> = {
   'amb.fim.superficie2': FUNDO_DO_FINAL('amb.fim.superficie2', 0.3),
 };
 
-export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_8_AMBIENTE, ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES, ...FOLHA_10_FINAL });
+/**
+ * SHEET 15 — THE GUARDIAN ON THE LEASH (step 6 of spec 2026-11-22, his choices 23/11; `assets/raw/sons/chefes-coleira/`).
+ * The new moments of the fight, in the interior. The starting volumes follow the sheet-5c neighbours (the warnings ~0.7,
+ * the repeated ~0.4–0.6) — measured in the game with `_medir-chefes.mjs`. The aperto's wave: round 2 (the swell + one
+ * distorted note per ring).
+ */
+const S15 = (nome: string, volume: number, vozes = 1, tom = 0.02, vol = 0.05): DefSom => doChefe(`chefes-coleira/${nome}`, volume, vozes, tom, vol);
+const FOLHA_15_COLEIRA: Record<string, DefSom> = {
+  'guardiao.tranco': S15('guardiao.tranco', 0.7, 1, 0.03, 0.06),
+  // (the levels measured in the game, `_medir-chefes.mjs` 23/11, to the scale he approved for this fight: the warnings
+  // ~−10 LUFS, the repeated ~−12. The pull and the pump came out over the lunge and the big blast (−5.9, −7.5): down. The
+  // lock — the warning the player READS — and the drop and splash were transients at −19/−24/−29: the files got a light
+  // compression (`acompressor` 5:1, +6 dB, the peak still −1 dB) and the volume up)
+  'guardiao.serpente.sai': S15('guardiao.serpente.sai', 0.67, 2, 0.04, 0.06),
+  'guardiao.serpente.trava': S15('guardiao.serpente.trava', 1, 2, 0.03, 0.05),
+  'guardiao.serpente.bote': S15('guardiao.serpente.bote', 0.67, 2, 0.05, 0.08),
+  'guardiao.aperto.puxao': S15('guardiao.aperto.puxao', 0.5),
+  // THE WAVE (sheet 15b, his composition 23/11: *"E com B (nota grave) / D com B (nota alta)… Quem entende a preparação,
+  // sabe qual nota vai sair"*): one ring per squeeze, so ONE distorted note, and the SWELL before it already tells which
+  // — the darker E before the low note (the low gap), the brighter D before the high one, a tritone up (the high gap)
+  'guardiao.aperto.inchaBaixo': S15('guardiao.aperto.inchaBaixo', 0.71, 1, 0, 0.03),
+  'guardiao.aperto.inchaAlto': S15('guardiao.aperto.inchaAlto', 0.6, 1, 0, 0.03),
+  'guardiao.aperto.notaBaixa': S15('guardiao.aperto.notaBaixa', 0.58, 1, 0, 0.03),
+  'guardiao.aperto.notaAlta': S15('guardiao.aperto.notaAlta', 0.6, 1, 0, 0.03),
+  'guardiao.teto.bombeia': S15('guardiao.teto.bombeia', 0.56),
+  'guardiao.teto.gota': S15('guardiao.teto.gota', 0.8, 4, 0.08, 0.1),
+  'guardiao.teto.respingo': S15('guardiao.teto.respingo', 1, 4, 0.08, 0.1),
+};
+
+export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_8_AMBIENTE, ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_15_COLEIRA, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES, ...FOLHA_10_FINAL });
 
 /** Every problem of a catalogue, as text (empty = valid). `existe` receives a path under `public/sfx/`. */
 export function validarCatalogo(sons: Record<string, DefSom>, existe: (caminho: string) => boolean, creditos: string): string[] {

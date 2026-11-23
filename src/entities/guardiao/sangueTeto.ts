@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT } from '../../config';
 import { garantirLuzRadial } from '../Predador';
+import { Som } from '../../som/Som';
 import { TETO, type Pendurada } from './tetoSangra';
 
 /**
@@ -112,7 +113,10 @@ export class SangueTeto {
       .setAlpha(SangueTeto.HALO_ALPHA)
       .setDepth(40);
     this.gotas.push({ s, luz, respingou: false });
-    this.penduradas.get(x)?.setVisible(false);
+    // a gota que ESTICAVA pendurada solta com som (uma por ponto; as outras da coluna seguem caladas)
+    const pend = this.penduradas.get(x);
+    if (pend?.visible) Som.tocar('guardiao.teto.gota', { x });
+    pend?.setVisible(false);
   }
 
   /** as penduradas esticando nos pontos (a ponta presa no teto inchado em `tetoEm(x)`) */
@@ -155,6 +159,7 @@ export class SangueTeto {
       if (!g.respingou && g.s.y + BULBO.y - ALTURA / 2 >= chaoEm(g.s.x)) {
         g.respingou = true;
         this.respingo.explode(7, g.s.x, chaoEm(g.s.x));
+        Som.tocar('guardiao.teto.respingo', { x: g.s.x });
       }
     }
   }
