@@ -22,7 +22,8 @@ sprite que se desfaz nos próprios pixels).
 > coleira em 6 passos. Os passos 1 e 2 FECHARAM (o 2 refeito como bullet hell: os pulsos alternados; em 23/11 o bolsão
 > ficou e o último degrau igualou aos outros, 160 px/s · 0,4 s). O passo 3 (os cabos-serpente) FECHOU e foi commitado. O
 > passo 4 (o aperto) FECHOU e foi commitado (a borda torcida cobra 1 vida, o fio aceso é o hitbox; os sons e as notas
-> de guitarra no passo 6). Próximo: o passo 5, o teto que sangra."**
+> de guitarra no passo 6). O passo 5 (o teto que sangra) FECHOU e foi commitado. Próximo: o passo 6, os sons e os
+> efeitos das skills novas (e as notas de guitarra arranhando na onda do aperto), e ele jogando a luta inteira."**
 >
 > 📍 **23/11 — O PASSO 3, RODADA 2: OS CABOS-SERPENTE NO JOGO, DO JEITO DO DESENHO DELE (não commitado).** De 66%: duas
 > serpentes saem DO CORPO dele em arcos largos (por cima quase no teto, por baixo quase no chão) e as cabeças ficam postadas

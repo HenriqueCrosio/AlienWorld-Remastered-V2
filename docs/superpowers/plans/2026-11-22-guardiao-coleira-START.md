@@ -64,6 +64,18 @@
   `damageShip` no MESMO passo (distância perdia toques; uma marca que sobra de um quadro conta toque falso); a caixa da
   nave é 21×9; entre as cenas, a nave sai do caminho e o ciclo dele fica preso.
 
+## 1⅞½. O passo 5, o teto que sangra (23/11) — APROVADO na rodada 1, commitado
+
+O passo 4 FECHOU e foi commitado (`f330a68e`, `a5c54f05`, `978facc8`). Plano `plans/2026-11-23-guardiao-coleira-passo5.md`;
+a folha no topo: `teto-momentos.jpg` e `teto.gif` (a nave lendo em cima, parada embaixo).
+- O código: `src/entities/guardiao/tetoSangra.ts` (puro: a linha do tempo, os pontos, o inchaço, a agenda das gotas),
+  `sangueTeto.ts` (as gotas em pixel, penduradas, a queda, o respingo), `deformaBorda.ts` (o contrato da borda viva),
+  `camadaBorda.ts` (era `camadaAperto.ts`; o campo do Guardião virou `borda`), `CamadaCabos.pulso`, `BossNucleo.ts`
+  (a ação `teto`), `padroes.ts` (o rodízio 33–0 %: … → serra → teto).
+- Os testes: `test-guardiao-teto.mjs` (puro), `test-guardiao-teto-jogo.mjs`. O filme: `scripts/_guardiao/_gif-teto.mjs
+  <out.gif> [--paineis le,parada] [--nave 100:110]`.
+- As 3 perguntas da folha (a figura, a folga da troca, a cor): APROVADO como está.
+
 ## 1⅞. O passo 4, o aperto (23/11) — APROVADO na rodada 2, commitado
 
 O passo 3 FECHOU (*"aprovado"*), commitado (`563acff2`, `2c3f749a`, `b3c49063`). Plano

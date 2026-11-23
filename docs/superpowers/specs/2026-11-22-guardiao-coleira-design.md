@@ -222,7 +222,15 @@ serpentes, o aperto, o teto. A investida segue fechada. **A vida** (90) não mud
    duto, a borda nunca morde sem a linha acesa. Pelo gancho `morde` da cena (os i-frames de 1,4 s: uma vida por aperto);
    o empurrão continua, só para tirar a nave de dentro. Regra: **parede que cobra tem a linha acesa — o hitbox é o que se
    vê**. Folha: passo 4, rodada 2. **23/11: APROVADO** (*"aprovado, pode commitar e seguir pro passo 5"*).
-5. O teto que sangra.
+5. O teto que sangra. **23/11, rodada 1 NO JOGO** (plano `plans/2026-11-23-guardiao-coleira-passo5.md`): o pulso sobe
+   pelos cabos (`CamadaCabos.pulso`, contas acesas de 7 px) e corre a borda de cima (outra luz, 3 px, não morde); 4
+   pontos por onda incham 6 px na camada da borda (`CamadaBorda`, agora genérica: `DeformaBorda` — o aperto e o teto)
+   com o FIO aceso (mordem); a gota pendurada estica 0,25 s; 3 gotas por coluna a 0,1 s, retas, gravidade 260 (a da
+   lava), atravessam a borda de baixo com respingo; a 2ª onda 0,7 s depois, nos vãos (A 32…224, B 64…256). O sangue em
+   pixel (`sangueTeto.ts`), escuro, com um halo carmim fraco (sem ele sumia no fundo). Medido: a troca de coluna tem
+   0,35 s de janela de y 60 para baixo (com 0,14 s entre gotas eram 0,07 s). **Decisões minhas em aberto:** a figura (4
+   pontos a 64 px), a folga da troca, a cor. Folha: passo 5, rodada 1. **23/11: APROVADO como está** (*"aprovado, pode
+   commitar e seguir pro passo 6"*).
 6. Os sons novos (o tranco, a serpente, o aperto, o teto — primeiro com a biblioteca) e ele jogando a luta inteira.
    ⚠️ 23/11, ele: *"como alteramos skills e adicionamos, precisamos gerar sons e efeitos para as novas animações"* — e
    para a onda do aperto: *"um efeito de notas, como se fossem notas musicais de guitarra arranhando ou algo parecido"*
