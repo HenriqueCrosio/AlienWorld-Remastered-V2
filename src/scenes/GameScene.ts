@@ -2065,7 +2065,7 @@ export class GameScene extends Phaser.Scene {
 
     this.boss =
       this.stage.id === 4
-        ? new BossNucleo(this, this.enemies, this.terrain, this.fx)
+        ? new BossNucleo(this, this.enemies, this.terrain, this.fx, this.moldura)
         : this.stage.id === 3
           ? // O ROMBO (28/10, S1): a faixa do casco entra como a próxima peça do casco, e ela sai dele. 29/10 (S1b — ele:
             // *"o casco explode e o buraco se abre"*): a faixa entra INTEIRA e estoura de dentro para fora; o chefão

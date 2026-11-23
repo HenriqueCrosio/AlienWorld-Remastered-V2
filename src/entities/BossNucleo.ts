@@ -15,6 +15,9 @@ import { LavaGuardiao, type PulsoDisparado } from './guardiao/lavaGuardiao';
 import { angulosPulso, angulosSalva, miraSalva, proximaAcao, type AcaoGuardiao, type Ponto } from './guardiao/padroes';
 import { CamadaSerpentes } from './guardiao/camadaSerpentes';
 import type { ParamSerpente } from './guardiao/serpente';
+import { CamadaAperto } from './guardiao/camadaAperto';
+import { VAOS_Y, empurrar } from './guardiao/aperto';
+import type { Moldura } from '../systems/Moldura';
 
 /**
  * O CHEFÃO FINAL da Fase 4, em DUAS FORMAS (design do Henrique, 2026-07-19):
@@ -61,7 +64,7 @@ export class BossNucleo implements StageBoss {
   private t = 0;
 
   /** Guardião: máquina de estados do movimento. Parado = vulnerável; movendo = fechado. */
-  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'segura' | 'volta' | 'serra' | 'serpentes' = 'flutua';
+  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'segura' | 'volta' | 'serra' | 'serpentes' | 'aperto' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
   /**
@@ -73,6 +76,16 @@ export class BossNucleo implements StageBoss {
   private proxima: AcaoGuardiao = 'serra';
   /** os cabos-serpente (spec 2026-11-22 §6): lidos pelos testes e pelo filme (`serpentes.lista`) */
   private readonly serpentes: CamadaSerpentes;
+  /** o aperto (spec 2026-11-22 §7, o passo 4): a borda redesenhada coluna a coluna; lido pelos testes e pelo filme */
+  private readonly aperto: CamadaAperto;
+  /** quantos apertos já houve: o vão alterna alto/baixo (`VAOS_Y`) */
+  private vezAperto = 0;
+  /** a caixa da nave (`GameScene.HITBOX_NAVE`): é ela que a parede do aperto empurra */
+  private static readonly CAIXA_NAVE = { w: 21, h: 9 };
+  /** a nave encostou na borda TORCIDA neste quadro (lido e zerado pelo `morde`) */
+  private mordeuAperto = false;
+  /** o puxão do aviso do aperto: os cabos esticam e vibram forte */
+  private static readonly APERTO_PUXAO = 9;
   /**
    * ─── OS CABOS-SERPENTE (23/11, o passo 3) ───
    * ⚠️ O DESENHO DELE (23/11, por cima da 1ª rodada, que corria pela borda até a nave — recusada): *"as serpentes saem do
@@ -369,6 +382,7 @@ export class BossNucleo implements StageBoss {
     // O terreno era das PAREDES do coração; o predador não usa. Fica na assinatura da cena.
     _terrain: TerrainSystem,
     private readonly fx: Fx,
+    moldura?: Moldura,
   ) {
     this.sprite = scene.physics.add.sprite(GAME_WIDTH + 120, BossNucleo.G_BASE_Y, 'guardiao');
     this.sprite.setScale(BossNucleo.G_ESCALA);
@@ -487,6 +501,7 @@ export class BossNucleo implements StageBoss {
     this.perigos = scene.physics.add.group({ allowGravity: false });
     SerraGuardiao.registrarAnims(scene);
     this.serpentes = new CamadaSerpentes(scene, this.perigos, BossNucleo.G_ESCALA);
+    this.aperto = new CamadaAperto(scene, moldura ?? null);
 
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyDark)
@@ -585,6 +600,9 @@ export class BossNucleo implements StageBoss {
     // as serpentes (na troca elas arrebentam e a camada apaga)
     const o = this.origemSerpentes;
     this.serpentes.atualizar(dt, target, o ? { x: this.sprite.x - o.x, y: this.sprite.y - o.y } : undefined);
+    // o aperto: a borda deformada, e a parede EMPURRA a nave (nunca dano)
+    this.aperto.atualizar(dt);
+    if (!this.aperto.terminou) this.empurrarNave(target);
 
     // O predador roda até DEPOIS de morto (a luz apaga, o breu sai, a lava no ar segue caindo).
     if (this.predador) {
@@ -635,7 +653,16 @@ export class BossNucleo implements StageBoss {
           // o RODÍZIO do degrau (spec 2026-11-22 §8)
           const agora = this.proxima;
           this.proxima = proximaAcao(this.degrau, agora);
-          if (agora === 'serpentes') {
+          if (agora === 'aperto') {
+            // O APERTO (§7). Ele opera o hospedeiro pelos cabos: o PUXÃO (os cabos esticam para cima e vibram, a borda
+            // estremece), e a constrição corre a arena. Na estação, miolo aberto, sem salva — o vão é o desafio inteiro.
+            this.acao = 'aperto';
+            this.body.setVelocityY(0);
+            this.aperto.soltar(VAOS_Y[this.vezAperto++ % VAOS_Y.length]);
+            this.cabos.setTensa(true);
+            this.cabos.golpe(BossNucleo.APERTO_PUXAO);
+            this.scene.cameras.main.shake(600, 0.003);
+          } else if (agora === 'serpentes') {
             // OS CABOS-SERPENTE. Ele fica na estação operando os cabos: parado, à direita, miolo aberto (§8).
             this.acao = 'serpentes';
             this.body.setVelocityY(0);
@@ -793,6 +820,22 @@ export class BossNucleo implements StageBoss {
         break;
       }
 
+      case 'aperto': {
+        // firme na estação (o balanço reduzido, como nas serpentes), o miolo aberto e brilhando; sem salva
+        this.ampBalanco = Math.max(BossNucleo.SERPENTE_BALANCO, this.ampBalanco - dt * 1.5);
+        const alvoY = BossNucleo.G_BASE_Y + Math.sin(this.t * 0.7) * 16 * this.ampBalanco;
+        this.body.setVelocityY((alvoY - this.sprite.y) * 6);
+        if (Math.random() < 0.35) this.glow.emitParticleAt(this.core.x, this.core.y);
+        if (this.aperto.terminou) {
+          this.body.setVelocityY(0);
+          this.cabos.setTensa(false);
+          this.acao = 'flutua';
+          this.acaoT = BossNucleo.pausa(this.degrau);
+          this.cdTiro = 0.6;
+        }
+        break;
+      }
+
       case 'investe': {
         // A COLEIRA: até a primeira corda chegar ao máximo — e aí o TRANCO. O `x < 70` antigo fica só como rede.
         if (this.cabos.noLimite(this.sprite) || this.sprite.x < 70) {
@@ -881,6 +924,34 @@ export class BossNucleo implements StageBoss {
     this.dispararPulso();
   }
 
+  /**
+   * a parede do aperto encostou na nave: se foi na borda TORCIDA (o fio aceso), MORDE — 1 vida, pela cena (`morde`,
+   * a mesma lei da parede do duto; os i-frames separam os toques) — e ela sai pela normal (`empurrar`), para não ficar
+   * dentro da parede
+   */
+  private empurrarNave(nave: Phaser.Physics.Arcade.Sprite): void {
+    const C = BossNucleo.CAIXA_NAVE;
+    for (let x = Math.round(nave.x - C.w / 2); x <= Math.round(nave.x + C.w / 2); x++) {
+      const naTeto = this.aperto.torcidaEm(x, true) && nave.y - C.h / 2 < this.aperto.tetoEm(x);
+      const naChao = this.aperto.torcidaEm(x, false) && nave.y + C.h / 2 > this.aperto.chaoEm(x);
+      if (naTeto || naChao) {
+        this.mordeuAperto = true;
+        break;
+      }
+    }
+    const n = empurrar({ x: nave.x, y: nave.y }, C.w, C.h, (x) => this.aperto.tetoEm(x), (x) => this.aperto.chaoEm(x));
+    if (n.x === nave.x && n.y === nave.y) return;
+    nave.setPosition(Math.max(C.w / 2, n.x), n.y);
+    (nave.body as Phaser.Physics.Arcade.Body).updateFromGameObject();
+  }
+
+  /** O que ele fere POR MEDIÇÃO (o gancho da cena, `StageBoss.morde`): a borda torcida do aperto. */
+  morde(_esq: number, _dir: number, _topo: number, _base: number): boolean {
+    const m = this.mordeuAperto;
+    this.mordeuAperto = false;
+    return m;
+  }
+
   /** As serpentes do degrau de agora, com as raízes na tela (o corpo está na estação). */
   private paramSerpentes(): ParamSerpente[] {
     const k = Math.max(0, this.degrau - 1);
@@ -932,6 +1003,7 @@ export class BossNucleo implements StageBoss {
     // a COLEIRA arrebenta no golpe final: as cordas chicoteiam penduradas no casco e apagam
     this.cabos.arrebentar();
     this.serpentes.arrebentar();
+    this.aperto.cancelar();
     // A serra é do GUARDIÃO. Se ele morre com ela na arena, ela some junto — o predador tem as armas dele.
     this.serra?.destroy();
     this.serra = null;
@@ -1118,6 +1190,7 @@ export class BossNucleo implements StageBoss {
     this.serra?.destroy();
     this.cabos.destroy();
     this.serpentes.destroy();
+    this.aperto.destroy();
     this.lava.destroy();
     this.serra = null;
     // O CORPO FICA (17/09: *"a animação dele morto não apareceu, ele sumiu"*): a cena destrói o chefão 1,2s depois

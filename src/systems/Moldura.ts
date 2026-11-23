@@ -791,6 +791,25 @@ export class Moldura {
     return this.placaEm(xTela).vaoY;
   }
 
+  /**
+   * As PEÇAS da faixa, de trás para a frente (a saia, depois a peça; os traços por cima), teto e chão — o APERTO do
+   * Guardião (`entities/guardiao/camadaAperto.ts`, 23/11) as redesenha coluna a coluna, deslocadas, e as apaga por alpha
+   * enquanto isso (esta classe nunca mexe no alpha delas). A saia entra mesmo invisível: é a continuação da peça para
+   * além da tela, e é ela que aparece quando a borda desce.
+   */
+  pecasDaFaixa(): {
+    teto: Phaser.GameObjects.Image[];
+    chao: Phaser.GameObjects.Image[];
+    tracos: Phaser.GameObjects.Rectangle[];
+  } {
+    const n = this.chao.length;
+    return {
+      teto: [...Array.from({ length: n }, (_, i) => this.saia[i * 2 + 1]), ...this.teto],
+      chao: [...Array.from({ length: n }, (_, i) => this.saia[i * 2]), ...this.chao],
+      tracos: [...this.fios],
+    };
+  }
+
   /** A linha de cima da faixa do chão em `xTela`. */
   superficieChaoEm(xTela: number): number {
     return this.placaEm(xTela).superficieChao;

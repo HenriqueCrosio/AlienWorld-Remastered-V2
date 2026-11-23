@@ -32,17 +32,17 @@ export function angulosSalva(n: number, abre: number, centro: number, rnd: () =>
  * nos vãos do A. O eixo da figura aponta para `alvo` (o meio da borda esquerda da arena): de qualquer altura, ela
  * preenche a metade esquerda (com o eixo horizontal e o miolo baixo, sobrava o alto inteiro, parado e seguro). Radianos.
  */
-export type AcaoGuardiao = 'serra' | 'investida' | 'serpentes';
+export type AcaoGuardiao = 'serra' | 'investida' | 'serpentes' | 'aperto';
 
 /**
  * O RODÍZIO por degrau (spec §8): uma camada nova por degrau (decisão dele, quebra a regra de 19/09). 100–66% a serra e a
- * investida alternando (como sempre); 66–33% entram as serpentes; 33–0% elas vêm logo depois da investida. O aperto e o
- * teto que sangra entram nos passos 4 e 5.
+ * investida alternando (como sempre); 66–33% entram as serpentes; 33–0% elas vêm logo depois da investida, e o APERTO
+ * (23/11, o passo 4) logo depois delas. O teto que sangra entra no passo 5, depois da serra.
  */
 export const RODIZIO: readonly (readonly AcaoGuardiao[])[] = [
   ['serra', 'investida'],
   ['investida', 'serra', 'serpentes'],
-  ['investida', 'serpentes', 'serra'],
+  ['investida', 'serpentes', 'aperto', 'serra'],
 ];
 
 /** A ação depois de `atual` no degrau `degrau`; fora da lista do degrau (a vida caiu de degrau), recomeça por ela. */
