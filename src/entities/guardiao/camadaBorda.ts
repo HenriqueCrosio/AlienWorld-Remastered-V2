@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../../config';
 import type { Moldura } from '../../systems/Moldura';
-import { APERTO, Aperto, deslocamentos } from './aperto';
+import { APERTO, Aperto } from './aperto';
+import type { DeformaBorda } from './deformaBorda';
 
 /** os pixels de uma textura, lidos uma vez (ABGR, como o `Uint32Array` de um `ImageData`) */
 interface Fonte {
@@ -26,14 +27,15 @@ interface Peca {
 }
 
 /**
- * O APERTO NA TELA (23/11, o passo 4): a faixa da moldura redesenhada COLUNA A COLUNA, cada uma deslocada um número
+ * A BORDA VIVA NA TELA (23/11): o APERTO (passo 4) e o TETO QUE SANGRA (passo 5) — qualquer `DeformaBorda`. Nasceu como a
+ * camada do aperto: a faixa da moldura redesenhada COLUNA A COLUNA, cada uma deslocada um número
  * inteiro de pixels para dentro — o teto desce e o chão sobe no mesmo ponto, o anel correndo da direita para a esquerda
  * (`aperto.ts`). Nada estica nem se redesenha: é a própria pintura da peça (e a saia, a continuação dela além da tela),
  * lida pixel a pixel da textura. Enquanto ele aperta, as peças originais ficam apagadas por alpha (a `Moldura` nunca
  * mexe no alpha delas) e esta camada as substitui no mesmo lugar, inclusive nas colunas paradas — assim nada da peça
  * original aparece por trás da deslocada. Depth −0,58: logo à frente da faixa (−0,6), atrás dos cabos e do corpo dele.
  */
-export class CamadaAperto {
+export class CamadaBorda {
   private static readonly DEPTH = -0.58;
 
   private readonly tex: Phaser.Textures.CanvasTexture;
@@ -41,7 +43,7 @@ export class CamadaAperto {
   private readonly dado: ImageData;
   private readonly buf: Uint32Array;
   private readonly fontes = new Map<string, Fonte>();
-  private aperto: Aperto | null = null;
+  private aperto: DeformaBorda | null = null;
   /** o estremecer do aviso: um deslocamento por bloco de colunas, teto e chão */
   private readonly tremeT = new Int8Array(Math.ceil(GAME_WIDTH / APERTO.TREME_BLOCO) + 1);
   private readonly tremeC = new Int8Array(Math.ceil(GAME_WIDTH / APERTO.TREME_BLOCO) + 1);
@@ -64,20 +66,20 @@ export class CamadaAperto {
     private readonly scene: Phaser.Scene,
     private readonly moldura: Moldura | null,
   ) {
-    if (scene.textures.exists('guardiaoAperto')) scene.textures.remove('guardiaoAperto');
-    this.tex = scene.textures.createCanvas('guardiaoAperto', GAME_WIDTH, GAME_HEIGHT)!;
+    if (scene.textures.exists('guardiaoBorda')) scene.textures.remove('guardiaoBorda');
+    this.tex = scene.textures.createCanvas('guardiaoBorda', GAME_WIDTH, GAME_HEIGHT)!;
     this.img = scene.add
-      .image(0, 0, 'guardiaoAperto')
+      .image(0, 0, 'guardiaoBorda')
       .setOrigin(0, 0)
-      .setDepth(CamadaAperto.DEPTH)
+      .setDepth(CamadaBorda.DEPTH)
       .setScrollFactor(0)
       .setVisible(false);
     this.dado = this.tex.context.createImageData(GAME_WIDTH, GAME_HEIGHT);
     this.buf = new Uint32Array(this.dado.data.buffer);
   }
 
-  /** o aperto em curso (lido pelos testes e pelo filme) */
-  get atual(): Aperto | null {
+  /** a deformação em curso (lida pelos testes e pelo filme) */
+  get atual(): DeformaBorda | null {
     return this.aperto;
   }
 
@@ -87,10 +89,17 @@ export class CamadaAperto {
 
   /** começa um aperto com o vão centrado em `vaoY` */
   soltar(vaoY: number): Aperto {
-    this.aperto = new Aperto(vaoY);
+    const a = new Aperto(vaoY);
+    this.iniciar(a);
+    return a;
+  }
+
+  /** começa uma deformação qualquer (o teto que sangra) */
+  iniciar(f: DeformaBorda): void {
+    if (this.aperto) this.encerrar();
+    this.aperto = f;
     this.tremeRelogio = Infinity;
     this.apagar(true);
-    return this.aperto;
   }
 
   /** a borda está torcida (o anel passando) na coluna `x`, em cima ou embaixo? — é onde ela morde */
@@ -127,7 +136,7 @@ export class CamadaAperto {
   destroy(): void {
     this.cancelar();
     this.img.destroy();
-    if (this.scene.textures.exists('guardiaoAperto')) this.scene.textures.remove('guardiaoAperto');
+    if (this.scene.textures.exists('guardiaoBorda')) this.scene.textures.remove('guardiaoBorda');
   }
 
   private encerrar(): void {
@@ -161,10 +170,10 @@ export class CamadaAperto {
     }
   }
 
-  /** os deslocamentos de cada coluna neste quadro: o anel e, no aviso, o estremecer */
+  /** os deslocamentos de cada coluna neste quadro: a fonte e, no aviso, o estremecer */
   private medir(dt: number): void {
     const a = this.aperto!;
-    if (a.fase === 'aviso') {
+    if (a.treme) {
       this.tremeRelogio += dt;
       if (this.tremeRelogio >= APERTO.TREME_S) {
         this.tremeRelogio = 0;
@@ -175,9 +184,9 @@ export class CamadaAperto {
         }
       }
     }
-    const treme = a.fase === 'aviso';
+    const treme = a.treme;
     for (let x = 0; x < GAME_WIDTH; x++) {
-      const d = deslocamentos(x, this.superficie(x, true), this.superficie(x, false), a.xc, a.amp, a.vaoY);
+      const d = a.deslocar(x, this.superficie(x, true), this.superficie(x, false));
       const b = Math.floor(x / APERTO.TREME_BLOCO);
       this.anelTeto[x] = d.teto;
       this.anelChao[x] = d.chao;
@@ -262,14 +271,21 @@ export class CamadaAperto {
         if (c) this.buf[y * W + x] = c;
       }
       // o FIO na superfície torcida (dentro da parede, colado na face): onde ele acende, ela morde
-      const F = CamadaAperto.FIO_PX;
+      const F = CamadaBorda.FIO_PX;
       if (this.anelTeto[x] > 0) {
         const s = this.superficie(x, true) + dT;
-        for (let y = Math.max(0, s - F); y < Math.min(H, s); y++) this.buf[y * W + x] = CamadaAperto.FIO;
+        for (let y = Math.max(0, s - F); y < Math.min(H, s); y++) this.buf[y * W + x] = CamadaBorda.FIO;
       }
       if (this.anelChao[x] > 0) {
         const s = this.superficie(x, false) - dC;
-        for (let y = Math.max(0, s); y < Math.min(H, s + F); y++) this.buf[y * W + x] = CamadaAperto.FIO;
+        for (let y = Math.max(0, s); y < Math.min(H, s + F); y++) this.buf[y * W + x] = CamadaBorda.FIO;
+      }
+      // a luz que NÃO morde (o pulso de sangue correndo pelo teto): onde não há fio
+      const luz = this.anelTeto[x] > 0 ? 0 : (this.aperto?.luzTeto?.(x) ?? 0);
+      if (luz) {
+        // 3 px: a luz que não morde é mais grossa que o fio (2), e de outra cor — não se confundem
+        const s = this.superficie(x, true) + dT;
+        for (let y = Math.max(0, s - F - 1); y < Math.min(H, s); y++) this.buf[y * W + x] = luz;
       }
     }
     this.tex.context.putImageData(this.dado, 0, 0);

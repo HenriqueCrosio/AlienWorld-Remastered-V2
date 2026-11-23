@@ -60,6 +60,18 @@ export class CamadaCabos {
   private readonly cabos: Cabo[] = [];
   private tensa = false;
   private solta = false;
+  /**
+   * O PULSO (23/11, o teto que sangra): ele BOMBEIA pelos cabos — uma luz vermelha sobe de cada raiz até a âncora no teto.
+   * 0..1 ao longo da corda (0 = no corpo dele), ou null.
+   */
+  private pulsoK: number | null = null;
+  /**
+   * ABGR: o miolo aceso do pulso (rgb 255,120,90), o vermelho do sangue em volta (o do pulso que corre a borda,
+   * `TETO.LUZ_PULSO`) e o halo escuro. Com 3 px ele sumia no quadro parado (23/11): agora 7, com 3 anéis.
+   */
+  private static readonly PULSO = 0xff5a78ff;
+  private static readonly PULSO_MEIO = 0xff2a3ad8;
+  private static readonly PULSO_HALO = 0xff1a1f8a;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -148,6 +160,11 @@ export class CamadaCabos {
     return this.cabos.some((c) => c.corda.esticada(c.ancora, c.corda.pontos()[c.corda.nos - 1]));
   }
 
+  /** o pulso subindo pelos cabos (0..1, do corpo à âncora), ou null para apagar */
+  pulso(k: number | null): void {
+    this.pulsoK = k;
+  }
+
   golpe(forca: number): void {
     for (const c of this.cabos) c.corda.golpe(forca * (0.7 + Math.random() * 0.6));
   }
@@ -185,9 +202,31 @@ export class CamadaCabos {
       }
       // a âncora afina um pouco: o cabo entra no teto
       desenharCorda(this.buf, GAME_WIDTH, GAME_HEIGHT, c.corda.pontos(), c.faixa, c.escala, c.s0, 0.25);
+      if (this.pulsoK !== null && !this.solta) this.pintarPulso(c.corda.pontos(), this.pulsoK);
     }
     this.tex.context.putImageData(this.dado, 0, 0);
     this.tex.refresh();
+  }
+
+  /** uma conta de luz de 3 px (com halo) na corda, a `k` do caminho do corpo (o último ponto) até a âncora (o 1º) */
+  private pintarPulso(pts: readonly Ponto[], k: number): void {
+    const n = pts.length;
+    if (n < 2) return;
+    const f = (1 - k) * (n - 1);
+    const i = Math.min(n - 2, Math.floor(f));
+    const u = f - i;
+    const x = Math.round(pts[i].x + (pts[i + 1].x - pts[i].x) * u);
+    const y = Math.round(pts[i].y + (pts[i + 1].y - pts[i].y) * u);
+    for (let dy = -3; dy <= 3; dy++)
+      for (let dx = -3; dx <= 3; dx++) {
+        const px = x + dx, py = y + dy;
+        if (px < 0 || py < 0 || px >= GAME_WIDTH || py >= GAME_HEIGHT) continue;
+        const d = Math.hypot(dx, dy);
+        const i = py * GAME_WIDTH + px;
+        if (d <= 1.2) this.buf[i] = CamadaCabos.PULSO;
+        else if (d <= 2.3) this.buf[i] = CamadaCabos.PULSO_MEIO;
+        else if (d <= 3.2 && this.buf[i] >>> 24) this.buf[i] = CamadaCabos.PULSO_HALO;
+      }
   }
 
   destroy(): void {

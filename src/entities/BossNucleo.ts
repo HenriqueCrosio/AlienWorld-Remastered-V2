@@ -15,8 +15,10 @@ import { LavaGuardiao, type PulsoDisparado } from './guardiao/lavaGuardiao';
 import { angulosPulso, angulosSalva, miraSalva, proximaAcao, type AcaoGuardiao, type Ponto } from './guardiao/padroes';
 import { CamadaSerpentes } from './guardiao/camadaSerpentes';
 import type { ParamSerpente } from './guardiao/serpente';
-import { CamadaAperto } from './guardiao/camadaAperto';
+import { CamadaBorda } from './guardiao/camadaBorda';
 import { VAOS_Y, empurrar } from './guardiao/aperto';
+import { TetoQueSangra } from './guardiao/tetoSangra';
+import { SangueTeto } from './guardiao/sangueTeto';
 import type { Moldura } from '../systems/Moldura';
 
 /**
@@ -64,7 +66,7 @@ export class BossNucleo implements StageBoss {
   private t = 0;
 
   /** Guardião: máquina de estados do movimento. Parado = vulnerável; movendo = fechado. */
-  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'segura' | 'volta' | 'serra' | 'serpentes' | 'aperto' = 'flutua';
+  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'segura' | 'volta' | 'serra' | 'serpentes' | 'aperto' | 'teto' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
   /**
@@ -76,8 +78,16 @@ export class BossNucleo implements StageBoss {
   private proxima: AcaoGuardiao = 'serra';
   /** os cabos-serpente (spec 2026-11-22 §6): lidos pelos testes e pelo filme (`serpentes.lista`) */
   private readonly serpentes: CamadaSerpentes;
-  /** o aperto (spec 2026-11-22 §7, o passo 4): a borda redesenhada coluna a coluna; lido pelos testes e pelo filme */
-  private readonly aperto: CamadaAperto;
+  /**
+   * a BORDA VIVA (spec 2026-11-22 §7): a faixa redesenhada coluna a coluna — o aperto (passo 4) e o teto que sangra (passo
+   * 5); lida pelos testes e pelo filme
+   */
+  private readonly borda: CamadaBorda;
+  /** o teto que sangra em curso (o passo 5) e as gotas dele (lidos pelos testes e pelo filme) */
+  private teto: TetoQueSangra | null = null;
+  private readonly sangue: SangueTeto;
+  /** o bombear de cada onda do teto: os cabos dão um tranco curto quando as gotas soltam */
+  private static readonly TETO_BOMBEIA = 4;
   /** quantos apertos já houve: o vão alterna alto/baixo (`VAOS_Y`) */
   private vezAperto = 0;
   /** a caixa da nave (`GameScene.HITBOX_NAVE`): é ela que a parede do aperto empurra */
@@ -501,7 +511,8 @@ export class BossNucleo implements StageBoss {
     this.perigos = scene.physics.add.group({ allowGravity: false });
     SerraGuardiao.registrarAnims(scene);
     this.serpentes = new CamadaSerpentes(scene, this.perigos, BossNucleo.G_ESCALA);
-    this.aperto = new CamadaAperto(scene, moldura ?? null);
+    this.borda = new CamadaBorda(scene, moldura ?? null);
+    this.sangue = new SangueTeto(scene, this.perigos);
 
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyDark)
@@ -600,9 +611,20 @@ export class BossNucleo implements StageBoss {
     // as serpentes (na troca elas arrebentam e a camada apaga)
     const o = this.origemSerpentes;
     this.serpentes.atualizar(dt, target, o ? { x: this.sprite.x - o.x, y: this.sprite.y - o.y } : undefined);
-    // o aperto: a borda deformada, e a parede EMPURRA a nave (nunca dano)
-    this.aperto.atualizar(dt);
-    if (!this.aperto.terminou) this.empurrarNave(target);
+    // a borda viva (o aperto, o teto que sangra): deformada, e onde ela está torcida MORDE e empurra a nave para fora
+    this.borda.atualizar(dt);
+    if (!this.borda.terminou) this.empurrarNave(target);
+    // o teto que sangra: o pulso nos cabos, as gotas penduradas esticando, as que soltam; as no ar caem até depois da morte
+    const ts = this.teto;
+    if (ts) {
+      this.cabos.pulso(ts.pulsoCabos);
+      if (ts.quedas.length) {
+        for (const q of ts.quedas) this.sangue.soltar(q.x, this.borda.tetoEm(q.x));
+        this.cabos.golpe(BossNucleo.TETO_BOMBEIA);
+      }
+      this.sangue.pendurar(ts.penduradas(), (x) => this.borda.tetoEm(x));
+    }
+    this.sangue.atualizar((x) => this.borda.chaoEm(x));
 
     // O predador roda até DEPOIS de morto (a luz apaga, o breu sai, a lava no ar segue caindo).
     if (this.predador) {
@@ -653,12 +675,20 @@ export class BossNucleo implements StageBoss {
           // o RODÍZIO do degrau (spec 2026-11-22 §8)
           const agora = this.proxima;
           this.proxima = proximaAcao(this.degrau, agora);
-          if (agora === 'aperto') {
+          if (agora === 'teto') {
+            // O TETO QUE SANGRA (§7). Ele BOMBEIA pelos cabos: o pulso sobe ao teto, corre a borda, os pontos incham e
+            // soltam colunas de gotas em duas ondas alternadas. Na estação, miolo aberto, sem salva.
+            this.acao = 'teto';
+            this.body.setVelocityY(0);
+            this.teto = new TetoQueSangra();
+            this.borda.iniciar(this.teto);
+            this.cabos.golpe(BossNucleo.TETO_BOMBEIA);
+          } else if (agora === 'aperto') {
             // O APERTO (§7). Ele opera o hospedeiro pelos cabos: o PUXÃO (os cabos esticam para cima e vibram, a borda
             // estremece), e a constrição corre a arena. Na estação, miolo aberto, sem salva — o vão é o desafio inteiro.
             this.acao = 'aperto';
             this.body.setVelocityY(0);
-            this.aperto.soltar(VAOS_Y[this.vezAperto++ % VAOS_Y.length]);
+            this.borda.soltar(VAOS_Y[this.vezAperto++ % VAOS_Y.length]);
             this.cabos.setTensa(true);
             this.cabos.golpe(BossNucleo.APERTO_PUXAO);
             this.scene.cameras.main.shake(600, 0.003);
@@ -820,13 +850,31 @@ export class BossNucleo implements StageBoss {
         break;
       }
 
+      case 'teto': {
+        // firme na estação (o balanço reduzido), o miolo aberto e brilhando; sem salva. Acaba quando a borda murchou e a
+        // última gota saiu da tela.
+        this.ampBalanco = Math.max(BossNucleo.SERPENTE_BALANCO, this.ampBalanco - dt * 1.5);
+        const alvoY = BossNucleo.G_BASE_Y + Math.sin(this.t * 0.7) * 16 * this.ampBalanco;
+        this.body.setVelocityY((alvoY - this.sprite.y) * 6);
+        if (Math.random() < 0.35) this.glow.emitParticleAt(this.core.x, this.core.y);
+        if ((!this.teto || this.teto.acabou) && this.sangue.vazio) {
+          this.teto = null;
+          this.cabos.pulso(null);
+          this.body.setVelocityY(0);
+          this.acao = 'flutua';
+          this.acaoT = BossNucleo.pausa(this.degrau);
+          this.cdTiro = 0.6;
+        }
+        break;
+      }
+
       case 'aperto': {
         // firme na estação (o balanço reduzido, como nas serpentes), o miolo aberto e brilhando; sem salva
         this.ampBalanco = Math.max(BossNucleo.SERPENTE_BALANCO, this.ampBalanco - dt * 1.5);
         const alvoY = BossNucleo.G_BASE_Y + Math.sin(this.t * 0.7) * 16 * this.ampBalanco;
         this.body.setVelocityY((alvoY - this.sprite.y) * 6);
         if (Math.random() < 0.35) this.glow.emitParticleAt(this.core.x, this.core.y);
-        if (this.aperto.terminou) {
+        if (this.borda.terminou) {
           this.body.setVelocityY(0);
           this.cabos.setTensa(false);
           this.acao = 'flutua';
@@ -932,14 +980,14 @@ export class BossNucleo implements StageBoss {
   private empurrarNave(nave: Phaser.Physics.Arcade.Sprite): void {
     const C = BossNucleo.CAIXA_NAVE;
     for (let x = Math.round(nave.x - C.w / 2); x <= Math.round(nave.x + C.w / 2); x++) {
-      const naTeto = this.aperto.torcidaEm(x, true) && nave.y - C.h / 2 < this.aperto.tetoEm(x);
-      const naChao = this.aperto.torcidaEm(x, false) && nave.y + C.h / 2 > this.aperto.chaoEm(x);
+      const naTeto = this.borda.torcidaEm(x, true) && nave.y - C.h / 2 < this.borda.tetoEm(x);
+      const naChao = this.borda.torcidaEm(x, false) && nave.y + C.h / 2 > this.borda.chaoEm(x);
       if (naTeto || naChao) {
         this.mordeuAperto = true;
         break;
       }
     }
-    const n = empurrar({ x: nave.x, y: nave.y }, C.w, C.h, (x) => this.aperto.tetoEm(x), (x) => this.aperto.chaoEm(x));
+    const n = empurrar({ x: nave.x, y: nave.y }, C.w, C.h, (x) => this.borda.tetoEm(x), (x) => this.borda.chaoEm(x));
     if (n.x === nave.x && n.y === nave.y) return;
     nave.setPosition(Math.max(C.w / 2, n.x), n.y);
     (nave.body as Phaser.Physics.Arcade.Body).updateFromGameObject();
@@ -1003,7 +1051,10 @@ export class BossNucleo implements StageBoss {
     // a COLEIRA arrebenta no golpe final: as cordas chicoteiam penduradas no casco e apagam
     this.cabos.arrebentar();
     this.serpentes.arrebentar();
-    this.aperto.cancelar();
+    this.borda.cancelar();
+    this.teto = null;
+    this.cabos.pulso(null);
+    this.sangue.soltarTudo();
     // A serra é do GUARDIÃO. Se ele morre com ela na arena, ela some junto — o predador tem as armas dele.
     this.serra?.destroy();
     this.serra = null;
@@ -1190,7 +1241,8 @@ export class BossNucleo implements StageBoss {
     this.serra?.destroy();
     this.cabos.destroy();
     this.serpentes.destroy();
-    this.aperto.destroy();
+    this.borda.destroy();
+    this.sangue.destroy();
     this.lava.destroy();
     this.serra = null;
     // O CORPO FICA (17/09: *"a animação dele morto não apareceu, ele sumiu"*): a cena destrói o chefão 1,2s depois

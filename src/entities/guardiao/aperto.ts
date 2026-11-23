@@ -20,6 +20,8 @@
  * depois do toque, e os i-frames do `damageShip` separam os toques.
  */
 
+import type { DeformaBorda } from './deformaBorda';
+
 export interface Ponto {
   x: number;
   y: number;
@@ -85,7 +87,7 @@ export function deslocamentos(
   };
 }
 
-export class Aperto {
+export class Aperto implements DeformaBorda {
   fase: FaseAperto = 'aviso';
   /** o centro do anel (x de tela) */
   xc: number = APERTO.X0;
@@ -97,6 +99,15 @@ export class Aperto {
 
   get acabou(): boolean {
     return this.fase === 'fim';
+  }
+
+  /** o aviso: a borda inteira estremece */
+  get treme(): boolean {
+    return this.fase === 'aviso';
+  }
+
+  deslocar(x: number, yTeto: number, yChao: number): { teto: number; chao: number } {
+    return deslocamentos(x, yTeto, yChao, this.xc, this.amp, this.vaoY);
   }
 
   /** o relógio da fase (o estremecer do aviso o usa) */
