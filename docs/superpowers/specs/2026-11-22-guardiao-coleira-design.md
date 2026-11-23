@@ -207,9 +207,26 @@ serpentes, o aperto, o teto. A investida segue fechada. **A vida** (90) não mud
    que fere não mudam), e ele segue a mesma onda do flutuar com o balanço REDUZIDO (`SERPENTE_BALANCO` 0,35: 16 → ~5 px),
    a amplitude descendo e voltando suave. 2 botes por serpente nos DOIS degraus (o 2º muda só o ensaio). Regra: **tudo
    que sai do corpo dele vai com o corpo** — nada calculado uma vez e pregado. Folha: rodada 6.
-4. O aperto.
+   **23/11: APROVADO** (*"aprovado, pode commitar e seguir pro passo 4"*); commitado (`563acff2`, `2c3f749a`, `b3c49063`).
+4. O aperto. **23/11, rodada 1 NO JOGO** (plano `plans/2026-11-23-guardiao-coleira-passo4.md`): o puxão (cabos tensos +
+   golpe, a câmera treme, a borda estremece 1 px em blocos, 0,6 s), o anel incha no lugar à direita (0,45 s) e corre a
+   175 px/s; cada coluna da faixa desloca um inteiro (`camadaAperto.ts` relê as texturas da peça e da saia; as originais
+   apagadas por alpha); o vão 50 px nunca menos (`floor` com as superfícies reais da coluna); o empurrão pela normal da
+   parede, sem dano. **Decisões minhas em aberto:** o vão alterna A alto (y 80) / B baixo (y 138); inchar no lugar antes
+   de correr; o empurrão sem custo além da posição; a cara da faixa D inchada (chapa, as luzes vermelhas da continuação
+   da peça, a borda de cima pouco destacada no escuro). Folha: passo 4, rodada 1.
+   **Rodada 2 (as respostas dele):** a alternância A/B FICA; inchar no lugar FICA (*"uma primeira leitura justa, depois é
+   reflexo do jogador"*); e o contato agora COBRA 1 VIDA (*"o aperto é mais uma mecânica na rotação… essa mecânica é a
+   borda retorcida"*), com o hitbox sendo uma LINHA em volta da borda inchada (*"essa linha do contorno pode ser o hitbox
+   que a borda convencional não tem"*): o FIO aceso (a luz do duto, 0xffb478, 2 px) só nas colunas torcidas — a lei do
+   duto, a borda nunca morde sem a linha acesa. Pelo gancho `morde` da cena (os i-frames de 1,4 s: uma vida por aperto);
+   o empurrão continua, só para tirar a nave de dentro. Regra: **parede que cobra tem a linha acesa — o hitbox é o que se
+   vê**. Folha: passo 4, rodada 2. **23/11: APROVADO** (*"aprovado, pode commitar e seguir pro passo 5"*).
 5. O teto que sangra.
 6. Os sons novos (o tranco, a serpente, o aperto, o teto — primeiro com a biblioteca) e ele jogando a luta inteira.
+   ⚠️ 23/11, ele: *"como alteramos skills e adicionamos, precisamos gerar sons e efeitos para as novas animações"* — e
+   para a onda do aperto: *"um efeito de notas, como se fossem notas musicais de guitarra arranhando ou algo parecido"*
+   (enquanto o anel corre).
 
 Enquanto ele joga: a cópia na 5174 (memória `filmagem-vite-recarrega`).
 

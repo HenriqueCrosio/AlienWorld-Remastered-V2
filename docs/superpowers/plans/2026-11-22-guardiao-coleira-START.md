@@ -64,7 +64,23 @@
   `damageShip` no MESMO passo (distância perdia toques; uma marca que sobra de um quadro conta toque falso); a caixa da
   nave é 21×9; entre as cenas, a nave sai do caminho e o ciclo dele fica preso.
 
-## 1¾. O passo 3, rodada 1 (23/11) — ESPERANDO O VEREDITO
+## 1⅞. O passo 4, o aperto (23/11) — APROVADO na rodada 2, commitado
+
+O passo 3 FECHOU (*"aprovado"*), commitado (`563acff2`, `2c3f749a`, `b3c49063`). Plano
+`plans/2026-11-23-guardiao-coleira-passo4.md`; a folha no topo: `aperto-A.gif` (vão alto) e `aperto-B.gif` (vão baixo),
+a nave lendo em cima e parada embaixo.
+- O código: `src/entities/guardiao/aperto.ts` (puro: o anel, as fases, o empurrão), `camadaAperto.ts` (a faixa
+  redesenhada coluna a coluna), `Moldura.pecasDaFaixa()`, `BossNucleo.ts` (a ação `aperto`, `empurrarNave`, a
+  `moldura` no construtor), `padroes.ts` (o rodízio 33–0 %: investida → serpentes → aperto → serra).
+- Os testes: `test-guardiao-aperto.mjs` (puro), `test-guardiao-aperto-jogo.mjs`, `test-guardiao-padroes.mjs` (+ o
+  rodízio). O filme: `scripts/_guardiao/_gif-aperto.mjs <out.gif> --paineis 0:le,0:parada` (0 = vão A, 1 = vão B).
+- As 4 perguntas da folha: o vão alternando, inchar no lugar antes de correr, o empurrão sem custo, a cara da faixa D.
+- ⚠️ **RODADA 2 (as respostas dele):** alternância e inchar no lugar FICAM; a borda torcida COBRA 1 VIDA e o hitbox é o
+  FIO aceso em volta dela (`CamadaAperto.FIO`, `torcidaEm`, `BossNucleo.morde` → a cena). Folha no topo:
+  `aperto-fio.png`, `aperto-r2-A.gif`, `aperto-r2-B.gif`. Os sons (e a ideia das notas de guitarra arranhando na onda)
+  ficam no passo 6. APROVADO (*"aprovado, pode commitar e seguir pro passo 5"*).
+
+## 1¾. O passo 3 (23/11) — APROVADO
 
 Plano `plans/2026-11-23-guardiao-coleira-passo3.md`; a folha na rodada 5 (o topo): `serpentes-r5-d1.gif` (66–33%, duas,
 2 botes cada) e `serpentes-r5-d2.gif` (33–0%, as mesmas duas, 3 botes cada), a nave lendo em cima e parada embaixo.

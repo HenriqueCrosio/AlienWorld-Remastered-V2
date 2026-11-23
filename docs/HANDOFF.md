@@ -20,9 +20,9 @@ sprite que se desfaz nos próprios pixels).
 > (START `plans/2026-11-21-rebalanceamento-START.md`, frentes 0 os chefões → 1 os alvos → 2 o draft → 3 os inimigos →
 > 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA fechou; o GUARDIÃO está sendo refeito pela spec da
 > coleira em 6 passos. Os passos 1 e 2 FECHARAM (o 2 refeito como bullet hell: os pulsos alternados; em 23/11 o bolsão
-> ficou e o último degrau igualou aos outros, 160 px/s · 0,4 s). O passo 3 (os cabos-serpente) está no jogo, rodada 1,
-> rodada 6, ESPERANDO O VEREDITO (o §1¾ do START: a de baixo saindo de trás da carcaça, as raízes acompanhando o corpo
-> dele com o balanço reduzido, 2 botes por serpente nos dois degraus; cabeça e tom ficam)."**
+> ficou e o último degrau igualou aos outros, 160 px/s · 0,4 s). O passo 3 (os cabos-serpente) FECHOU e foi commitado. O
+> passo 4 (o aperto) FECHOU e foi commitado (a borda torcida cobra 1 vida, o fio aceso é o hitbox; os sons e as notas
+> de guitarra no passo 6). Próximo: o passo 5, o teto que sangra."**
 >
 > 📍 **23/11 — O PASSO 3, RODADA 2: OS CABOS-SERPENTE NO JOGO, DO JEITO DO DESENHO DELE (não commitado).** De 66%: duas
 > serpentes saem DO CORPO dele em arcos largos (por cima quase no teto, por baixo quase no chão) e as cabeças ficam postadas
