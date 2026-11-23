@@ -235,6 +235,24 @@ serpentes, o aperto, o teto. A investida segue fechada. **A vida** (90) não mud
    ⚠️ 23/11, ele: *"como alteramos skills e adicionamos, precisamos gerar sons e efeitos para as novas animações"* — e
    para a onda do aperto: *"um efeito de notas, como se fossem notas musicais de guitarra arranhando ou algo parecido"*
    (enquanto o anel corre).
+   **23/11, a folha de som 15** (`folhas/2026-11-23/sons/15-coleira/`, o grupo `assets/raw/sons/chefes-coleira/`): 9 sons
+   novos — `guardiao.tranco`, `guardiao.serpente.sai/.trava/.bote`, `guardiao.aperto.puxao/.onda`,
+   `guardiao.teto.bombeia/.gota/.respingo` — com A/B do PixelLab, C sintetizada no tempo do jogo
+   (`_sintetizar-coleira.mjs`: a onda com as notas de guitarra arranhando, a trava nos 0,4 s, o bombeio nos 0,3 + 0,3 s)
+   e R da biblioteca (o tranco da serra, a agarrada do Predador, o impacto da lava).
+   **As escolhas dele:** tranco A, saída B, trava A, bote A, puxão A, bombeio B, gota A, respingo A; a ONDA virou a folha
+   15b — UM anel por aperto, então UMA nota distorcida por aperto, e a composição DELE: o INCHAR já diz o vão (*"quem
+   entende a preparação, sabe qual nota vai sair"*) — E (escuro) → a nota grave (o vão baixo), D (claro) → a nota B um
+   trítono acima (o vão alto). Os níveis medidos no jogo (`_medir-chefes.mjs`): os avisos −8,6…−11,5 LUFS; a trava, a
+   gota e o respingo (transientes baixos) com compressão leve no arquivo. A nota ganhou o FADE DOS FLYBYS (*"as notas
+   estão cortando secas depois que passam a tela"*): desce 1 s antes de o anel sair e chega ao silêncio no fim do
+   arquivo. A folha da luta com o som (`15c-luta`, com e sem trilha, em tempo real: `_filmar-som.mjs`).
+   **A VIDA (ele, jogando: *"atirei mais e logo veio a besta. A vida dos dois estão linkadas"*):** 90 → 800 (~70 s com a
+   mão mediana do Núcleo; uma volta do rodízio dura 16,7 / 27,3 / 36,8 s por degrau) + a TRAVA POR DEGRAU (as camadas
+   novas sempre aparecem; o golpe a mais bate no casco; o rodízio puxa o ataque que falta) + a BARRA EM CAMADAS (a azul
+   do Guardião por cima da vermelha da fera, a borda vira vermelha — a ideia dele). **23/11: O PASSO 6 FECHOU**
+   (*"pronto, agora sim"*), commitado e empurrado. Em aberto: a Besta (a mesma trava/vida?) e o K sem cartas (uma mão
+   típica, ou teclas que pulam para 66 %/33 %); `scripts/_rebalance/medir-guardiao.mjs` (§11).
 
 Enquanto ele joga: a cópia na 5174 (memória `filmagem-vite-recarrega`).
 

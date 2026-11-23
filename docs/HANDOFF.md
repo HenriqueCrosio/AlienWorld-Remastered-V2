@@ -20,10 +20,17 @@ sprite que se desfaz nos próprios pixels).
 > (START `plans/2026-11-21-rebalanceamento-START.md`, frentes 0 os chefões → 1 os alvos → 2 o draft → 3 os inimigos →
 > 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA fechou; o GUARDIÃO está sendo refeito pela spec da
 > coleira em 6 passos. Os passos 1 e 2 FECHARAM (o 2 refeito como bullet hell: os pulsos alternados; em 23/11 o bolsão
-> ficou e o último degrau igualou aos outros, 160 px/s · 0,4 s). O passo 3 (os cabos-serpente) FECHOU e foi commitado. O
-> passo 4 (o aperto) FECHOU e foi commitado (a borda torcida cobra 1 vida, o fio aceso é o hitbox; os sons e as notas
-> de guitarra no passo 6). O passo 5 (o teto que sangra) FECHOU e foi commitado. Próximo: o passo 6, os sons e os
-> efeitos das skills novas (e as notas de guitarra arranhando na onda do aperto), e ele jogando a luta inteira."**
+> ficou e o último degrau igualou aos outros, 160 px/s · 0,4 s). Os passos 3 (os cabos-serpente), 4 (o aperto), 5 (o
+> teto que sangra) e 6 (os sons, com a nota distorcida que ele compôs) FECHARAM em 23/11, e a vida foi refeita (800 + a
+> trava por degrau + a barra em camadas) — tudo commitado e empurrado. Em aberto (o §0 do START): a Besta, o K sem
+> cartas e a medição da luta; depois, a frente 1 do rebalanceamento."**
+>
+> 📍 **23/11 (fim da sessão) — O GUARDIÃO FECHOU.** Os cabos-serpente (2 serpentes saindo do corpo dele, 2 botes cada
+> nos dois degraus, a de baixo de trás da carcaça, as raízes acompanhando o corpo), o aperto (a borda redesenhada coluna
+> a coluna, vão 50 alternando alto/baixo, a borda torcida com o fio aceso cobra 1 vida), o teto que sangra (o pulso nos
+> cabos, 4 pontos por onda, colunas de gotas retas, a 2ª onda nos vãos), os 12 sons novos (folhas 15, 15b, 15c — a onda:
+> o inchar diz o vão, uma nota distorcida por anel, com o fade dos flybys) e a vida (90 → 800, a trava, a barra azul
+> sobre a vermelha). Ele jogou e aprovou: *"pronto, agora sim"*.
 >
 > 📍 **23/11 — O PASSO 3, RODADA 2: OS CABOS-SERPENTE NO JOGO, DO JEITO DO DESENHO DELE (não commitado).** De 66%: duas
 > serpentes saem DO CORPO dele em arcos largos (por cima quase no teto, por baixo quase no chão) e as cabeças ficam postadas

@@ -1,12 +1,27 @@
 # START — O GUARDIÃO NA COLEIRA (a frente 0 do rebalanceamento, passos 2 → 6)
 
-> A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O Guardião está sendo refeito pela spec
-> `specs/2026-11-22-guardiao-coleira-design.md` (a coleira, o leque de lava, os cabos-serpente e o próprio Leviatã),
-> em 6 passos, cada um com GIF em jogo e o veredito dele. O passo 1 (o recorte, a corda, a investida presa e o tranco
-> A) está APROVADO; o passo 2 foi REFEITO como bullet hell (os pulsos alternados, §1½), aprovado jogando, COMMITADO e
-> EMPURRADO; as duas perguntas (§2) FECHARAM em 23/11 (o bolsão fica, o último degrau igual aos outros). Agora: o
-> passo 3, os cabos-serpente."**
+> A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O Guardião foi refeito pela spec
+> `specs/2026-11-22-guardiao-coleira-design.md` em 6 passos, TODOS FECHADOS em 23/11, commitados e empurrados: a coleira
+> e o tranco, os pulsos de lava, os cabos-serpente, o aperto, o teto que sangra, os sons (a onda com a nota distorcida
+> que ele compôs) — e a vida (800 + a trava por degrau + a barra em camadas). Em aberto (§0): a Besta (a mesma
+> trava/vida?), o K sem cartas e a medição da luta (`medir-guardiao.mjs`); depois, a frente 1 do rebalanceamento."**
 > Contexto maior: o START do rebalanceamento (`plans/2026-11-21-rebalanceamento-START.md`, as frentes 0–5).
+
+## 0. Onde paramos (23/11, fim da sessão) — O GUARDIÃO FECHOU
+
+Os 6 passos da spec aprovados por ele, um a um (as seções 1⅞⅞⅞ → 1 abaixo, da mais nova para a mais velha), e a vida
+refeita depois de ele jogar. **As três perguntas que ficam:**
+1. **A Besta:** as fases dela seguem a vida DELA (180; 66 %/33 %); a barra cheia não muda nada por dentro, mas com a mão
+   mediana ela dura ~15 s (a forte, ~5 s: pula as fases 2 e 3) — o mesmo tratamento do Guardião (vida + trava), ou a
+   frente 5?
+2. **O K entra sem cartas** (a arma base, 4,5/s: o Guardião leva ~3 min): uma mão típica no treino do K, ou teclas de
+   desenvolvimento que pulam o Guardião para 66 %/33 %?
+3. **A medição** da luta: `scripts/_rebalance/medir-guardiao.mjs` (spec §11, no molde do `medir-capitania.mjs`).
+
+Os testes da frente: `test-guardiao-{coleira,padroes,serpente,aperto,teto}.mjs` (puros) e
+`test-guardiao-{coleira,lava,serpente,aperto,teto,vida}-jogo.mjs`, `test-som-coleira-jogo.mjs`, `test-som-nucleo-jogo.mjs`.
+⚠️ Fora desta frente, já falhando antes: `test-som.mjs` (3 `amb.cut.*` sem linha no `docs/SONS.md`) e
+`probe-stage4.mjs` (espera a "tela de vitória"; a campanha fecha no menu do amanhecer desde 13/11).
 
 ## ▶️ Como abrir a sessão
 
@@ -63,6 +78,70 @@
 - ⚠️ As armadilhas de medição desta noite (no script do filme, já corrigidas): o toque se conta pelo `release` + o
   `damageShip` no MESMO passo (distância perdia toques; uma marca que sobra de um quadro conta toque falso); a caixa da
   nave é 21×9; entre as cenas, a nave sai do caminho e o ciclo dele fica preso.
+
+## 1⅞⅞⅞. A FOLHA DOS SONS NA LUTA (23/11) — APROVADA: O PASSO 6 FECHOU
+
+⚠️ A última correção dele: *"as notas estão cortando secas depois que passam a tela, quero um fade nelas"* — o FADE DOS
+FLYBYS da cena final (`Interlude4Scene`): a nota desce 1 s antes de o anel sair e chega ao silêncio no fim do arquivo
+(`some` do `Som.tocar`). Medido no vídeo: −13 constante e corte para −22 → −15, −16, −17, −19, −24. Depois: *"pronto,
+agora sim"*.
+
+Ele jogou pelo K e chegou às serpentes e à investida (*"quando começo pelo K, vou sem nenhuma carta ou melhoria"*: a arma
+base, 4,5/s, contra os 800 = ~3 min). Pediu a folha: `folhas/2026-11-23/sons/15c-luta/folha.html` — o aperto (vão alto e
+baixo) e o teto, COM e SEM trilha, gravados em TEMPO REAL com o som do jogo (`scripts/_guardiao/_filmar-som.mjs`: o canvas
+por `captureStream` + o `masterVolumeNode` do Phaser num `MediaStreamDestination`, MediaRecorder → mp4 ×3; a trilha é
+`window.__music`, nunca um `import()` do módulo — outra instância). Pergunta na folha: o K entrar com uma mão típica de
+cartas, ou teclas de desenvolvimento que pulam o Guardião para 66 %/33 %.
+
+## 1⅞⅞. A VIDA DO GUARDIÃO (23/11, ele jogando) — NO JOGO, ESPERANDO ELE JOGAR DE NOVO
+
+Ele: *"não consegui chegar nas próximas etapas da luta do guardião, depois das serpentes, atirei mais e logo veio a
+besta. A vida dos dois estão linkadas"*. Medido: uma volta do rodízio dura 16,7 / 27,3 / 36,8 s por degrau; com a mão
+mediana do Núcleo (~12 de dano/s) os 90 de vida caíam em ~8 s. As escolhas DELE:
+- **A barra em camadas** (*"uma barra sobreposta a outra… borda azul (de guardião), quando termina… ela se torna
+  vermelha e da fera"*): a azul do Guardião por cima da vermelha da fera; acabou o Guardião, a borda vira vermelha e a
+  barra é a dela (`bar`, `barFera`, `barBorda`, `atualizarBarra`).
+- **A trava por degrau** + vida 800 (~70 s com a mão mediana): a vida não passa dos 33 % antes das serpentes, nem morre
+  antes do aperto e do teto; o golpe a mais bate no casco (o brilho frio); travado, o rodízio puxa o ataque que falta
+  (`piso`, `travado`, `falta`, `vistas`). Um golpe ≥ a vida inteira (os `damage(999)` dos scripts) atravessa.
+- Teste: `scripts/test-guardiao-vida-jogo.mjs`. ⚠️ A BESTA: as fases dela seguem a vida DELA (180, 66 %/33 %), a barra
+  cheia não muda nada por dentro — mas com ~12 de dano/s ela dura ~15 s (a mão forte, ~5 s: pode pular as fases 2 e 3,
+  o mesmo problema). Perguntado a ele. ⚠️ `probe-stage4.mjs` falha 1 assert velho: espera "tela de vitória" e a
+  campanha fecha no Menu (o menu do amanhecer é a tela final desde 13/11) — não é desta frente.
+
+## 1⅞¾. O passo 6, os sons (23/11) — OS 12 INSTALADOS, LIGADOS E MEDIDOS; FALTA ELE JOGAR A LUTA INTEIRA
+
+⚠️ **A onda (folha 15b), a composição DELE:** *"E com B (nota grave) / D com B (nota alta)… Quem entende a preparação,
+sabe qual nota vai sair"* — o inchar já diz o vão: `guardiao.aperto.inchaBaixo` (E, mais escuro) antes da
+`notaBaixa` (o vão baixo), `inchaAlto` (D, mais claro) antes da `notaAlta` (B um trítono acima, o vão alto); medido:
+centroide 1594 × 2245 Hz. A nota sai no `corre` e viaja com o anel (`x` 372 → `xFim` −66). Ligado no `case 'aperto'`
+(`faseAperto`). **Os níveis** (`_medir-chefes.mjs`): o puxão e o bombeio desceram (passavam a investida); a trava, a
+gota e o respingo eram transientes baixos — os arquivos ganharam compressão leve (5:1, +6 dB) e volume; agora os
+avisos −8,6…−11,5 LUFS, a trava da serpente −11,5 (a da investida −12,8), a gota −15, o respingo −18. Testes:
+`test-som-coleira-jogo.mjs` (a ordem de cada um; o par alto e o par baixo alternando). NÃO COMMITADO. Próximo: ele
+jogando a luta inteira (o treino da F4) e, depois, `scripts/_rebalance/medir-guardiao.mjs` (spec §11).
+
+### (as escolhas e a rodada 2)
+
+⚠️ **As escolhas dele (folha 15):** tranco A, serpente.sai B, trava A, bote A, aperto.puxao A, teto.bombeia B, gota A,
+respingo A — instalados (`public/sfx/chefes-coleira/`, `FOLHA_15_COLEIRA` no catálogo, `docs/SONS.md`) e ligados nos
+momentos; `scripts/test-som-coleira-jogo.mjs` confere a ordem (a regra das vozes: o mesmo som no mesmo quadro toca uma
+vez — uma gota por onda). **A onda** foi para a RODADA 2 (ele: *"o inchar ter um som metálico parecido com esses e cada
+onda vir como uma nota distorcida"*): é UM anel por aperto, então UMA nota por aperto, grave no vão baixo e um trítono
+acima no alto (decisão minha, na folha). A folha: `folhas/2026-11-23/sons/15b-onda/` (o inchar A–E, as notas A–C em par);
+depois: instalar, `Som.tocar('guardiao.aperto.incha')` no começo do `cresce` e a nota no começo do `corre` com
+`x: 372 → xFim: −66` (viaja com o anel). ⚠️ Antes de 23/11 o `test-som.mjs` já falhava em 3 sons `amb.cut.*` sem linha
+no `docs/SONS.md` (de 19/11, não desta frente).
+
+### (a rodada 1)
+
+A folha: `http://localhost:5173/docs/superpowers/folhas/2026-11-23/sons/15-coleira/folha.html` (9 sons, 24 versões: A/B
+PixelLab, C sintetizada no tempo do jogo, R da biblioteca). O grupo: `assets/raw/sons/chefes-coleira/` (`_folha.json`,
+`_origem.json`; ele escreve `_escolhas.txt` pela folha). Depois das escolhas: `node scripts/_som/_som-instalar.mjs
+chefes-coleira <pasta>`, as linhas no `catalogoSons.ts` (o molde `S5C`, a pasta `chefes-coleira`), os `Som.tocar` nos
+momentos (o tranco no `acao = 'tranco'`; a saída, a trava e o bote nas fases da `Serpente`; o puxão no começo do aperto
+e a onda no `cresce`, com `x`→`xFim` da direita para a esquerda; o bombeio no começo do teto, a gota uma por ponto, o
+respingo no `SangueTeto`), medir com `_medir-chefes.mjs`, e ele jogando a luta inteira.
 
 ## 1⅞½. O passo 5, o teto que sangra (23/11) — APROVADO na rodada 1, commitado
 
