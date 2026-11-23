@@ -1,0 +1,110 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 15 — o Guardião na coleira (o passo 6: os sons das skills novas)",
+    "dia": "2026-11-23",
+    "nota": "Os momentos NOVOS da luta do Guardião (o tranco da coleira, os cabos-serpente, o aperto, o teto que sangra), DENTRO da criatura (o lugar 'interior'). O que já soa e fica: os glóbulos, a investida, a serra, a lava dos pulsos (o arremesso e o impacto do Predador).\nAs versões: A e B geradas no PixelLab; C sintetizada aqui NO TEMPO DO JOGO (a onda do aperto com as suas notas de guitarra arranhando, no 0,45 s do anel inchando + os 2,5 s da travessia; a trava da serpente nos 0,4 s exatos; o bombeio nos 0,3 + 0,3 s do pulso subindo e correndo a borda); R = da BIBLIOTECA, um som que você já aprovou (o tranco da serra, a agarrada do Predador, o impacto da lava) ou um Kenney.\nOs que repetem (o bote, a gota, o respingo: 12 gotas por onda) se julgam no ×8."
+  },
+  "grupos": [
+    {
+      "titulo": "A coleira",
+      "sons": [
+        {
+          "nome": "guardiao.tranco",
+          "oque": "O TRANCO — a investida chega no alcance e a coleira o segura seco, os cabos esticam de uma vez (a lava sai junto)",
+          "onde": "o fim de cada investida",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": { "tom": 0.03, "vol": 0.06 },
+          "chefe": true
+        }
+      ]
+    },
+    {
+      "titulo": "Os cabos-serpente (66% em diante)",
+      "sons": [
+        {
+          "nome": "guardiao.serpente.sai",
+          "oque": "A SAÍDA — as serpentes saem do corpo dele num arco largo até o posto (~1 s)",
+          "onde": "o começo da ação, uma por serpente",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": { "tom": 0.04, "vol": 0.06 },
+          "chefe": true
+        },
+        {
+          "nome": "guardiao.serpente.trava",
+          "oque": "A TRAVA — a cabeça para e enrijece 0,4 s antes do bote: o aviso que o jogador lê",
+          "onde": "antes de cada bote (4 por ação)",
+          "lugar": "interior",
+          "repetir": true,
+          "variacao": { "tom": 0.03, "vol": 0.05 },
+          "chefe": true
+        },
+        {
+          "nome": "guardiao.serpente.bote",
+          "oque": "O BOTE — reto até onde a nave estava, a 400 px/s",
+          "onde": "logo depois de cada trava",
+          "lugar": "interior",
+          "repetir": true,
+          "variacao": { "tom": 0.05, "vol": 0.08 },
+          "chefe": true
+        }
+      ]
+    },
+    {
+      "titulo": "O aperto (33–0%)",
+      "sons": [
+        {
+          "nome": "guardiao.aperto.puxao",
+          "oque": "O PUXÃO — ele puxa a coleira, os cabos esticam e a borda inteira estremece (0,6 s)",
+          "onde": "o começo do aperto",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": { "tom": 0.02, "vol": 0.05 },
+          "chefe": true
+        },
+        {
+          "nome": "guardiao.aperto.onda",
+          "oque": "A ONDA — o anel incha à direita (0,45 s) e corre a arena (2,5 s). A SUA IDEIA: notas de guitarra arranhando",
+          "onde": "enquanto o anel corre",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": { "tom": 0, "vol": 0 },
+          "chefe": true
+        }
+      ]
+    },
+    {
+      "titulo": "O teto que sangra (33–0%)",
+      "sons": [
+        {
+          "nome": "guardiao.teto.bombeia",
+          "oque": "O BOMBEIO — o pulso sobe pelos cabos (0,3 s) e corre a borda de cima (0,3 s)",
+          "onde": "o começo do teto",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": { "tom": 0.02, "vol": 0.05 },
+          "chefe": true
+        },
+        {
+          "nome": "guardiao.teto.gota",
+          "oque": "A GOTA — estica pendurada e solta (4 pontos × 3 gotas por onda: toca uma por ponto)",
+          "onde": "cada gota que solta",
+          "lugar": "interior",
+          "repetir": true,
+          "variacao": { "tom": 0.08, "vol": 0.1 },
+          "chefe": true
+        },
+        {
+          "nome": "guardiao.teto.respingo",
+          "oque": "O RESPINGO — a gota bate na borda de baixo e segue",
+          "onde": "cada gota no chão",
+          "lugar": "interior",
+          "repetir": true,
+          "variacao": { "tom": 0.08, "vol": 0.1 },
+          "chefe": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+{
+ "_": "Sheet 15 (the Guardian on the leash, step 6) takes, 23/11. pixellab = generated on his account; local C = synthesized (scripts/_som/_sintetizar-coleira.mjs); local/kenney R = from the LIBRARY (sounds he already approved, or Kenney CC0).",
+ "base": "https://backblaze.pixellab.ai/file/pixellab-characters/audio/f7282f36-b779-4f64-832a-4693ca4cc628/",
+ "takes": [
+  {
+   "nome": "guardiao.tranco",
+   "id": "A",
+   "pixellab": "f9569074-d9b4-447a-b7e0-667dd3cdd6b6/aw-guardiao-tranco-a.wav",
+   "prompt": "a heavy biomechanical creature yanked to a sudden stop by thick taut cables, a deep metallic jolt with cables snapping tight and twanging, a creaking organic strain, inside a giant living cavern, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.tranco",
+   "id": "B",
+   "pixellab": "d187497d-f13e-4905-a37b-4e375afb066f/aw-guardiao-tranco-b.wav",
+   "prompt": "a chained monster lunging and being jerked back hard by its leash, a thick steel cable going taut with a heavy thud and a low ringing twang, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.tranco",
+   "id": "R",
+   "local": "assets/raw/sons/chefes-nucleo/guardiao.serra.tranco-A.flac",
+   "prompt": "da BIBLIOTECA: o tranco da serra que você aprovou (5c, A)"
+  },
+  {
+   "nome": "guardiao.serpente.sai",
+   "id": "A",
+   "pixellab": "dbad7bcb-8fa7-464e-ac5d-e0973bd1b855/aw-guardiao-serpente-sai-a.wav",
+   "prompt": "thick living cables uncoiling and slithering out of a giant creature's body like snakes, a wet rubbery slither with creaking fibers and a low hiss, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.serpente.sai",
+   "id": "B",
+   "pixellab": "1e6f06e8-8397-44da-98af-7365ce3851f9/aw-guardiao-serpente-sai-b.wav",
+   "prompt": "biomechanical tentacle cables snaking out and rising, a sliding scraping slither of braided cable with a soft organic hiss, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.serpente.trava",
+   "id": "A",
+   "pixellab": "4ef6e482-5839-4cb5-81dc-7ccc2d7b3df6/aw-guardiao-serpente-trava-a.wav",
+   "prompt": "a cable serpent coiling tight just before it strikes, a short tense rattle and creaking cable tightening, a held breath of tension, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.serpente.trava",
+   "id": "B",
+   "pixellab": "2b728015-cb44-4ee2-86df-f0e4083bed23/aw-guardiao-serpente-trava-b.wav",
+   "prompt": "a mechanical snake locking into a strike pose, a quick ratcheting click and a tight hiss, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.serpente.trava",
+   "id": "C",
+   "local": "assets/raw/sons/chefes-coleira/guardiao.serpente.trava-C.wav",
+   "prompt": "sintetizada no tempo do jogo: a catraca apertando em 0,4 s, o estalo no fim (o bote sai nele)"
+  },
+  {
+   "nome": "guardiao.serpente.bote",
+   "id": "A",
+   "pixellab": "76de554c-6100-4326-85c7-92f86e73c66e/aw-guardiao-serpente-bote-a.wav",
+   "prompt": "a cable serpent striking forward very fast, a sharp whip crack lunge with a whooshing snap, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.serpente.bote",
+   "id": "B",
+   "pixellab": "6cc25709-83bb-47e8-a096-5fde5b24b2f6/aw-guardiao-serpente-bote-b.wav",
+   "prompt": "a biomechanical tentacle lashing out in a straight strike, a fast heavy whoosh ending in a wet snap, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.serpente.bote",
+   "id": "R",
+   "local": "assets/raw/sons/chefes-nucleo/predador.agarra-B.flac",
+   "prompt": "da BIBLIOTECA: a agarrada do Predador que você aprovou (5c, B)"
+  },
+  {
+   "nome": "guardiao.aperto.puxao",
+   "id": "A",
+   "pixellab": "18f4f142-b58a-41d6-a284-f6d6e0122279/aw-guardiao-aperto-puxao-a.wav",
+   "prompt": "a giant creature pulling hard on the cables that hold it, the metal walls of the chamber groaning and shuddering, a deep straining metal creak and rumble, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.aperto.puxao",
+   "id": "B",
+   "pixellab": "809c320b-f93e-435f-96d1-e575dc0e081a/aw-guardiao-aperto-puxao-b.wav",
+   "prompt": "massive steel plates trembling and buckling under a sudden pull, a low groaning metallic shudder with rattling, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.aperto.onda",
+   "id": "A",
+   "pixellab": "40f707e1-5d3e-47e8-b901-daac853b0013/aw-guardiao-aperto-onda-a.wav",
+   "prompt": "a heavy distorted electric guitar string being scraped and scratched slowly down the neck with a pick, harsh grinding metallic notes sliding in pitch, a wave of constriction passing through a metal corridor, dark sci-fi, no drums, no melody"
+  },
+  {
+   "nome": "guardiao.aperto.onda",
+   "id": "B",
+   "pixellab": "74c83974-a221-4fbe-9ae0-7c91a01fd6cb/aw-guardiao-aperto-onda-b.wav",
+   "prompt": "detuned guitar strings scratched and scraped in a rising and falling glissando, gritty pick scrapes and dissonant string squeals, eerie industrial, dark sci-fi, no drums, no melody"
+  },
+  {
+   "nome": "guardiao.aperto.onda",
+   "id": "C",
+   "max": 3.4,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.onda-C.wav",
+   "prompt": "sintetizada no tempo do jogo: a palheta sobe no anel inchando (0,45 s) e raspa para baixo na travessia (2,5 s), com notas graves dissonantes num fuzz, uma a cada ~0,31 s"
+  },
+  {
+   "nome": "guardiao.teto.bombeia",
+   "id": "A",
+   "pixellab": "0198a759-bf7c-4ec4-a214-b10284c0ffde/aw-guardiao-teto-bombeia-a.wav",
+   "prompt": "a giant creature pumping blood up through thick cables, a deep heartbeat surge with a wet rising whoosh traveling upward, organic, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.teto.bombeia",
+   "id": "B",
+   "pixellab": "c22c3a95-c2cf-437b-8bce-fb094e62dea9/aw-guardiao-teto-bombeia-b.wav",
+   "prompt": "a single powerful organic pump throb, thick fluid forced through tubes with a gurgling rush, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.teto.bombeia",
+   "id": "C",
+   "local": "assets/raw/sons/chefes-coleira/guardiao.teto.bombeia-C.wav",
+   "prompt": "sintetizada no tempo do jogo: o baque do coração, o jorro subindo pelos cabos (0,3 s), o chiado correndo o teto (0,3 s)"
+  },
+  {
+   "nome": "guardiao.teto.gota",
+   "id": "A",
+   "pixellab": "428b91ff-be7d-46fd-ad9d-539ba7de5da3/aw-guardiao-teto-gota-a.wav",
+   "prompt": "a thick viscous drop of blood stretching and dripping from a ceiling, a slow wet stretch and a heavy drip release, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.teto.gota",
+   "id": "B",
+   "pixellab": "3aaa7080-6d42-4e90-816c-c7c4d16dbdc0/aw-guardiao-teto-gota-b.wav",
+   "prompt": "a heavy syrupy liquid drop falling off a fleshy surface, a soft wet plip, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.teto.respingo",
+   "id": "A",
+   "pixellab": "ab8b321e-56e9-4849-8461-94e3ae54198f/aw-guardiao-teto-respingo-a.wav",
+   "prompt": "a thick drop of blood splashing on a metal floor, a short wet splat with tiny droplets, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.teto.respingo",
+   "id": "B",
+   "pixellab": "abb90090-1b17-478a-b8ec-d84dbc81e83b/aw-guardiao-teto-respingo-b.wav",
+   "prompt": "viscous liquid hitting a hard metal plate, a heavy wet slap with a small sizzle, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.teto.respingo",
+   "id": "R",
+   "local": "assets/raw/sons/chefes-nucleo/predador.lava.impacto-A.flac",
+   "prompt": "da BIBLIOTECA: o impacto da lava que você aprovou (5c, A) — o que já soa quando a lava dos pulsos bate na borda"
+  },
+  {
+   "nome": "guardiao.aperto.incha",
+   "id": "A",
+   "rodada": 2,
+   "pixellab": "3cd90a8e-5bda-4f50-884e-507122f17c69/aw-guardiao-aperto-incha-a.wav",
+   "prompt": "a guitar pick sliding up a heavy wound metal string, a short metallic scraping swell rising in pitch, gritty and tense, dark sci-fi, no drums, no melody"
+  },
+  {
+   "nome": "guardiao.aperto.incha",
+   "id": "B",
+   "rodada": 2,
+   "pixellab": "40e82d7c-8865-4a68-a021-a47d1730c178/aw-guardiao-aperto-incha-b.wav",
+   "prompt": "a metal string being scraped and tightened, a rising grinding metallic screech that swells quickly, industrial, dark sci-fi, no music"
+  },
+  {
+   "nome": "guardiao.aperto.incha",
+   "id": "C",
+   "rodada": 2,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.incha-C.wav",
+   "prompt": "sintetizada: a palheta subindo a corda nos 0,45 s do anel inchando"
+  },
+  {
+   "nome": "guardiao.aperto.incha",
+   "id": "D",
+   "rodada": 2,
+   "max": 0.6,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.onda-A.flac",
+   "prompt": "o começo da onda A da rodada 1 (a que você ouviu), cortado em 0,6 s"
+  },
+  {
+   "nome": "guardiao.aperto.incha",
+   "id": "E",
+   "rodada": 2,
+   "max": 0.6,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.onda-B.flac",
+   "prompt": "o começo da onda B da rodada 1, cortado em 0,6 s"
+  },
+  {
+   "nome": "guardiao.aperto.notaBaixa",
+   "id": "A",
+   "rodada": 2,
+   "max": 2.8,
+   "pixellab": "3872ce33-375f-464a-b9a9-0aca116039d5/aw-guardiao-aperto-nota-a.wav",
+   "prompt": "a single low note on a heavily distorted electric guitar, struck once and left ringing with heavy fuzz, slowly decaying with feedback, no drums, no melody, dark industrial"
+  },
+  {
+   "nome": "guardiao.aperto.notaBaixa",
+   "id": "B",
+   "rodada": 2,
+   "max": 2.8,
+   "pixellab": "05140ade-c123-4bf3-84cd-d7790fc11ece/aw-guardiao-aperto-nota-b.wav",
+   "prompt": "one dissonant distorted guitar power note hit hard and sustained, gritty amp fuzz ringing out and fading, eerie, no drums, no melody, dark sci-fi"
+  },
+  {
+   "nome": "guardiao.aperto.notaBaixa",
+   "id": "C",
+   "rodada": 2,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.notaBaixa-C.wav",
+   "prompt": "sintetizada: um Mi grave num fuzz, duas cordas, soando enquanto o anel atravessa"
+  },
+  {
+   "nome": "guardiao.aperto.notaAlta",
+   "id": "A",
+   "rodada": 2,
+   "max": 2.8,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.notaAlta-A.wav",
+   "prompt": "a nota A (PixelLab) um TRÍTONO acima, mesma duração (o vão alto)"
+  },
+  {
+   "nome": "guardiao.aperto.notaAlta",
+   "id": "B",
+   "rodada": 2,
+   "max": 2.8,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.notaAlta-B.wav",
+   "prompt": "a nota B (PixelLab) um TRÍTONO acima, mesma duração (o vão alto)"
+  },
+  {
+   "nome": "guardiao.aperto.notaAlta",
+   "id": "C",
+   "rodada": 2,
+   "local": "assets/raw/sons/chefes-coleira/guardiao.aperto.notaAlta-C.wav",
+   "prompt": "sintetizada: um Lá# grave (o trítono acima do Mi) num fuzz"
+  }
+ ]
+}

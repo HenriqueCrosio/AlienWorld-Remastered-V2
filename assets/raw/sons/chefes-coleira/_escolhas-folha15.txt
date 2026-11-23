@@ -1,0 +1,10 @@
+# Sheet 15 (the Guardian on the leash, step 6), his choices 23/11. The aperto's wave goes to a round 2 (him: "seria
+# interessante o inchar ter um som metálico parecido com esses e cada onda vir como uma nota distorcida").
+guardiao.tranco: A
+guardiao.serpente.sai: B
+guardiao.serpente.trava: A
+guardiao.serpente.bote: A
+guardiao.aperto.puxao: A
+guardiao.teto.bombeia: B
+guardiao.teto.gota: A
+guardiao.teto.respingo: A

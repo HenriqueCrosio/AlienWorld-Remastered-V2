@@ -1,0 +1,7 @@
+# Sheet 15b (the aperto's wave, round 2), his choices 23/11: "E com B (nota grave) / D com B (nota alta) … Quem entende a
+# preparação, sabe qual nota vai sair." The swell itself tells the gap: E (darker) before the low note, D (brighter)
+# before the high one (measured: centroid 1594 vs 2245 Hz, body 135 vs 183 Hz). The round-1 choices: _escolhas-folha15.txt.
+guardiao.aperto.incha: E > guardiao.aperto.inchaBaixo
+guardiao.aperto.incha: D > guardiao.aperto.inchaAlto
+guardiao.aperto.notaBaixa: B
+guardiao.aperto.notaAlta: B

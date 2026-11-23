@@ -83,7 +83,8 @@ await page.waitForTimeout(300); // (the loop's 90 ms fade)
 ok(!(await vozes()).includes('guardiao.serra.giro'), 'the saw gone, its loop is gone', await vozes());
 
 // ── the change ──
-t = await ouvir('b.hpGuardiao = 1; b.damage(5);', 4200);
+// (damage(999): more than his whole life — the dev one-shot that passes the step lock of 23/11)
+t = await ouvir('b.hpGuardiao = 1; b.damage(999);', 4200);
 ok(t.includes('guardiao.casca'), 'the SHELL bursts', t);
 ok(antesDe(t, 'predador.urro', 'predador.pouso'), 'the Predador comes out ROARING (his F), then LANDS', t);
 await page.waitForFunction(() => ['chao', 'teto'].includes(window.__game.scene.getScene('Game').boss.predador?.estado), null, { timeout: 8000 });

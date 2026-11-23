@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guardião — os sons na luta</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 24px; background: #0a0c12; color: #e6e6ee; font: 15px/1.5 system-ui, sans-serif; }
+  h1 { font-size: 20px; color: #ffaa5a; margin: 28px 0 6px; }
+  h1:first-child { margin-top: 0; }
+  h2 { font-size: 16px; color: #ffcf8a; margin: 0 0 4px; }
+  p, li { max-width: 1000px; }
+  video { width: 100%; height: auto; display: block; image-rendering: pixelated; background: #000; }
+  .nota { color: #ffcf8a; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(560px, 1fr)); gap: 20px; margin: 14px 0; }
+  .card { background: #12151e; border: 1px solid #252a38; border-radius: 6px; padding: 12px; }
+  .card p { margin: 6px 0 0; font-size: 14px; color: #b9bccb; }
+  code { color: #9fd3ff; }
+  ul li, ol li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<h1>Passo 6: os sons das camadas novas, na luta (23/11)</h1>
+<p>Gravado <b>em tempo real</b> no treino da F4 (o caminho do <b>K</b>), com o som que o jogo manda para a caixa: os efeitos
+pela cadeia de verdade (o interior da criatura, a mixagem, o limitador) e, nos vídeos <b>com trilha</b>, a trilha da F4
+por baixo. A vida do Guardião foi posta nos 33–0 % e a nave <b>lê</b> cada ataque sozinha: ela vai para a altura do vão no
+aperto e troca de coluna no teto. Ela não leva dano e não atira. Use fone ou caixa: a nota do aperto atravessa a tela da
+direita para a esquerda.</p>
+
+<h1>O aperto: o vão alto, depois o baixo</h1>
+<p><b>O puxão</b> (os cabos e a borda estremecendo), <b>o inchar</b> e <b>a nota</b>. A composição é a sua: o inchar já diz o
+vão. O <b>D</b>, mais claro, vem antes da nota alta (o vão alto); o <b>E</b>, mais escuro, antes da nota grave (o vão
+baixo). A nota sai quando o anel começa a correr e vai junto com ele. Os dois apertos seguidos mostram a alternância.</p>
+<p class="nota"><b>Refeito (o seu pedido):</b> a nota não corta mais seca depois que o anel sai da tela. Ela ganhou o fade dos
+flybys da cena final: começa a descer 1 s antes de o anel sair pela esquerda e chega ao silêncio no fim do arquivo.
+Medido no vídeo: antes ela ficava em −13 dB até cair de uma vez para −22; agora desce −15, −16, −17, −19, −24.</p>
+<div class="grade">
+  <div class="card">
+    <h2>Com trilha</h2>
+    <video src="aperto-com-trilha.mp4" controls preload="metadata"></video>
+  </div>
+  <div class="card">
+    <h2>Sem trilha</h2>
+    <video src="aperto-sem-trilha.mp4" controls preload="metadata"></video>
+  </div>
+</div>
+
+<h1>O teto que sangra: as gotas e os respingos</h1>
+<p><b>O bombeio</b> (B) com o pulso subindo pelos cabos e correndo o teto, <b>a gota</b> (A) que estica e solta e <b>o
+respingo</b> (A) no chão. Os 4 pontos de uma onda soltam juntos, então sai <b>um som de gota por onda</b>: é a regra do
+motor de som, o mesmo som no mesmo quadro toca uma vez só. Os respingos vêm conforme as gotas batem.</p>
+<div class="grade">
+  <div class="card">
+    <h2>Com trilha</h2>
+    <video src="teto-com-trilha.mp4" controls preload="metadata"></video>
+  </div>
+  <div class="card">
+    <h2>Sem trilha</h2>
+    <video src="teto-sem-trilha.mp4" controls preload="metadata"></video>
+  </div>
+</div>
+
+<h1>Os 12 sons novos e os níveis</h1>
+<p>Medidos no jogo (<code>_medir-chefes.mjs</code>) na escala que você aprovou para esta luta: os avisos perto de −10 LUFS
+e os repetidos perto de −12.</p>
+<ul>
+  <li><b>O tranco</b> da coleira (A) −9,1 · <b>a saída</b> das serpentes (B) −10,8 · <b>a trava</b> (A) −11,5 (a da investida
+  é −12,8) · <b>o bote</b> (A) −11,3.</li>
+  <li><b>O puxão</b> (A) −9,4 · <b>o inchar</b> alto −9,5 / baixo −9,6 · <b>a nota</b> alta −9,8 / grave −10,2.</li>
+  <li><b>O bombeio</b> (B) −8,6 · <b>a gota</b> (A) −15,3 · <b>o respingo</b> (A) −18,1 (os dois repetem: mais discretos).</li>
+  <li>A trava, a gota e o respingo eram estalos baixos (−19, −24 e −29). Os arquivos ganharam uma <b>compressão leve</b>
+  (o pico continua em −1 dB) e o volume subiu.</li>
+</ul>
+<p>Não aparece nos vídeos: a contagem de pontos e o texto do HUD ficam numa camada à parte da gravação. A barra do chefão
+aparece, já em camadas (a azul do Guardião).</p>
+
+<h1>O K e as cartas</h1>
+<p class="nota">Pelo K você entra <b>sem nenhuma carta</b>: a arma base tira 4,5 de dano/s, e com os 800 de vida novos a luta
+do Guardião leva ~3 min. A vida foi medida para a mão que se tem ao chegar no Núcleo (~12 de dano/s, ~70 s). Por isso
+você chegou até as serpentes e a investida. Para testar daqui em diante, posso fazer o treino pelo K entrar com uma
+mão típica de cartas, ou pôr teclas de desenvolvimento que pulam o Guardião para 66 % e para 33 %. Qual prefere?</p>
+</body>
+</html>
