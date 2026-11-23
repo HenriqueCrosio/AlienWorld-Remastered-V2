@@ -61,14 +61,14 @@ const rodar = (le) =>
     const balas = () => s.enemies.enemyBullets.getChildren().filter((o) => o.active).length;
     const pecas = () => s.moldura.pecasDaFaixa();
     for (let i = 0; i < 30 && b.acao !== 'aperto'; i++) window.__step();
-    const a = b.aperto.atual;
+    const a = b.borda.atual;
     const vaoY = a?.vaoY ?? null;
     const x0 = b.sprite.x;
     let quadros = 0, menorVao = Infinity, foraDoCorredor = 0, empurroes = 0, maxBalas = 0, dano = null;
     let apagadas = true, camada = true, tensa = false, maxDesl = 0, fases = [], fioCerto = 0, fioErrado = 0;
     const FIO = 0xff78b4ff;
     for (let i = 0; i < 60 * 12 && b.acao === 'aperto'; i++) {
-      const at = b.aperto.atual;
+      const at = b.borda.atual;
       if (le && at && at.fase !== 'aviso') {
         const dy = at.vaoY - s.ship.y;
         s.ship.setPosition(80, s.ship.y + Math.sign(dy) * Math.min(Math.abs(dy), 110 / 60));
@@ -76,24 +76,24 @@ const rodar = (le) =>
       const antes = { x: s.ship.x, y: s.ship.y };
       window.__step();
       quadros++;
-      const ap = b.aperto.atual;
+      const ap = b.borda.atual;
       if (!ap) break;
       if (fases[fases.length - 1] !== ap.fase) fases.push(ap.fase);
       if (Math.hypot(s.ship.x - antes.x, s.ship.y - antes.y) > 0.01) empurroes++;
       for (let x = 0; x < 384; x++) {
-        menorVao = Math.min(menorVao, b.aperto.chaoEm(x) - b.aperto.tetoEm(x));
-        maxDesl = Math.max(maxDesl, b.aperto.dTeto[x], b.aperto.dChao[x]);
+        menorVao = Math.min(menorVao, b.borda.chaoEm(x) - b.borda.tetoEm(x));
+        maxDesl = Math.max(maxDesl, b.borda.dTeto[x], b.borda.dChao[x]);
       }
       // after the push the ship's box sits inside the deformed corridor (sampled over its width)
       for (let x = Math.round(s.ship.x - 10); x <= Math.round(s.ship.x + 10); x++)
-        if (s.ship.y - 4.5 < b.aperto.tetoEm(x) - 0.01 || s.ship.y + 4.5 > b.aperto.chaoEm(x) + 0.01) { foraDoCorredor++; break; }
+        if (s.ship.y - 4.5 < b.borda.tetoEm(x) - 0.01 || s.ship.y + 4.5 > b.borda.chaoEm(x) + 0.01) { foraDoCorredor++; break; }
       // the lit line: on the twisted surface, and nowhere else
       if (ap.fase === 'corre') {
-        const buf = b.aperto.buf;
+        const buf = b.borda.buf;
         for (let x = 0; x < 384; x++) {
           for (const teto of [true, false]) {
-            const torcida = b.aperto.torcidaEm(x, teto);
-            const y = teto ? Math.round(b.aperto.tetoEm(x)) - 1 : Math.round(b.aperto.chaoEm(x));
+            const torcida = b.borda.torcidaEm(x, teto);
+            const y = teto ? Math.round(b.borda.tetoEm(x)) - 1 : Math.round(b.borda.chaoEm(x));
             const aceso = y >= 0 && y < 216 && buf[y * 384 + x] === FIO;
             if (torcida && aceso) fioCerto++;
             if (!torcida && aceso) fioErrado++;
@@ -102,7 +102,7 @@ const rodar = (le) =>
       }
       const p = pecas();
       if (![...p.teto, ...p.chao].every((o) => o.alpha === 0)) apagadas = false;
-      if (!b.aperto.img.visible) camada = false;
+      if (!b.borda.img.visible) camada = false;
       if (b.cabos.tensa) tensa = true;
       maxBalas = Math.max(maxBalas, balas());
       if (i === 120 && dano === null) {
@@ -118,7 +118,7 @@ const rodar = (le) =>
       maxX: Math.abs(b.sprite.x - x0),
       danoNave: window.__dano,
       acao: b.acao,
-      voltou: [...p.teto, ...p.chao].every((o) => o.alpha === 1) && !b.aperto.img.visible,
+      voltou: [...p.teto, ...p.chao].every((o) => o.alpha === 1) && !b.borda.img.visible,
       soltou: !b.cabos.tensa,
       naveY: s.ship.y,
     };

@@ -71,7 +71,7 @@ async function filmar([vez, modo], k) {
       const V = 110 / 60;
       for (let i = 0; i < n; i++) {
         if (b.acao === 'flutua') b.cdTiro = 99;
-        const a = b.aperto.atual;
+        const a = b.borda.atual;
         // the robot reads the gap as soon as the ring swells (cresce) and slides to its height
         const alvo = le && a && a.fase !== 'aviso' ? { x: window.__casa.x, y: a.vaoY } : window.__casa;
         if (le || !a) {
@@ -83,8 +83,8 @@ async function filmar([vez, modo], k) {
         g.step(window.__passo.t, QUADRO);
         const m = Math.hypot(s.ship.x - antes.x, s.ship.y - antes.y);
         if (m > 0.01) { window.__empurroes++; window.__maxEmpurrao = Math.max(window.__maxEmpurrao, m); }
-        if (b.aperto.atual) window.__comecou = true;
-        if (window.__comecou && b.acao === 'flutua' && !b.aperto.atual) window.__fim++;
+        if (b.borda.atual) window.__comecou = true;
+        if (window.__comecou && b.acao === 'flutua' && !b.borda.atual) window.__fim++;
       }
       return window.__fim;
     }, { n, QUADRO, le });

@@ -21,6 +21,49 @@
 </style>
 </head>
 <body>
+<h1>Passo 5, rodada 1: o teto que sangra (23/11)</h1>
+<p><b>O passo 4 fechou</b> (<i>"aprovado"</i>) e está commitado. <b>O que entrou</b> (a spec §7): aos <b>33–0 %</b>, depois da
+serra, ele <b>bombeia</b> pelos cabos. Um pulso aceso sobe por eles até o teto e corre a borda de cima, da direita para a
+esquerda. Depois, <b>4 pontos</b> da borda (nos 2/3 da esquerda) <b>incham e acendem</b> por 0,8 s, e de cada um pende uma
+gota que <b>estica</b> antes de soltar. Cada ponto solta uma <b>coluna reta</b> de 3 gotas grossas que caem com a gravidade,
+sem arco. A <b>2ª onda</b>, 0,7 s depois, cai nos <b>vãos</b> da 1ª. Na borda de baixo a gota respinga e segue, porque a
+parede não protege (a regra da lava). Cada gota tira 1 vida.</p>
+<ul>
+  <li><b>O sangue:</b> desenhado em pixel, vermelho mais escuro que a lava do miolo, com um brilho carmim fraco (a lava é
+  laranja forte). Sem o brilho, a gota sumia no vermelho do fundo no meio da tela.</li>
+  <li><b>A borda viva de novo:</b> os pontos incham na mesma camada do aperto e levam o <b>fio aceso</b>, então mordem: quem
+  se esconde na faixa do teto, em cima deles, não fica de fora. O pulso que corre a borda é <b>outra luz</b> (vermelha,
+  mais grossa) e não morde.</li>
+  <li><b>O rodízio dos 33–0 %:</b> investida → serpentes → aperto → serra → <b>teto que sangra</b>, como na spec §8. Na
+  estação, miolo aberto, sem salva.</li>
+</ul>
+<div class="grade">
+  <div class="card">
+    <h2>Os quatro momentos</h2>
+    <img src="teto-momentos.jpg" alt="Quatro quadros: o pulso subindo pelos cabos como contas acesas, o pulso correndo a borda de cima, os pontos inchados com gotas penduradas, as colunas de gotas caindo">
+    <p>O pulso sobe pelos cabos; corre a borda de cima; os pontos incham com a gota pendurada; as colunas caem.</p>
+  </div>
+  <div class="card">
+    <h2>Em jogo: lendo e parada</h2>
+    <img src="teto.gif" alt="O teto que sangra em jogo; em cima a nave lê as duas ondas e passa, embaixo fica parada debaixo de uma coluna e perde uma vida">
+    <p>Em cima a nave <b>lê</b>: fica no vão da 1ª onda enquanto ela cai e, quando a última gota passa da altura dela, vai
+    para a coluna velha (a 2ª cai nos vãos). <b>0 vidas.</b> Embaixo ela fica parada debaixo de uma coluna da 1ª onda:
+    <b>1 vida</b>.</p>
+  </div>
+</div>
+<p><b>Medido</b> (<code>test-guardiao-teto.mjs</code> e <code>test-guardiao-teto-jogo.mjs</code>): 24 gotas em 8 colunas
+alternadas a 32 px, cada uma reta e acelerando; dentro de uma onda, o vão entre colunas cabe a nave com 36 px de folga; da
+altura 60 para baixo, a troca de coluna tem uma janela de 0,35 s (a nave anda os 32 px em 0,29 s); a parada perde 1 vida,
+a que lê 0, a escondida na faixa do teto é mordida; ele não sai da estação e o miolo toma dano. A ação dura ~3,5 s.</p>
+<p class="nota"><b>As perguntas (decisões minhas):</b></p>
+<ol class="nota">
+  <li><b>A figura:</b> 4 pontos por onda, a cada 64 px (a 1ª em 32…224, a 2ª em 64…256), sempre os mesmos, como os pulsos.
+  Fica, ou quer 5–6 pontos (mais apertado)?</li>
+  <li><b>A troca é justa mas exige reflexo:</b> 0,35 s de janela para andar 32 px. Acima de y 60 (logo abaixo dos pontos) é
+  mais apertado; ali a gota ainda está lenta. Quer mais folga (2 gotas por coluna, ou a 2ª onda mais tarde)?</li>
+  <li><b>A cor:</b> o sangue escuro com o brilho carmim fraco. Mais aceso, ou assim?</li>
+</ol>
+
 <h1>Passo 4, rodada 2: a borda torcida morde, e o fio é o hitbox (23/11)</h1>
 <p><b>As suas respostas:</b> a alternância alto/baixo <b>fica</b>; o anel inchando no lugar antes de correr <b>fica</b>
 (<i>"é preciso uma primeira leitura justa, depois é reflexo do jogador"</i>). E o empurrão: o aperto é uma ação própria do
