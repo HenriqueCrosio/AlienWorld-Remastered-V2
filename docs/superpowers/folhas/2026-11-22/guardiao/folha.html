@@ -21,6 +21,89 @@
 </style>
 </head>
 <body>
+<h1>Passo 4, rodada 2: a borda torcida morde, e o fio é o hitbox (23/11)</h1>
+<p><b>As suas respostas:</b> a alternância alto/baixo <b>fica</b>; o anel inchando no lugar antes de correr <b>fica</b>
+(<i>"é preciso uma primeira leitura justa, depois é reflexo do jogador"</i>). E o empurrão: o aperto é uma ação própria do
+rodízio, então <b>cobra 1 vida se relar</b> (<i>"normalmente a borda não cobra, essa mecânica é a borda retorcida"</i>). A
+resposta veio junto: <i>"caso coloque uma linha em torno da borda inchada, essa linha do contorno pode ser o hitbox que a
+borda convencional não tem"</i>.</p>
+<ul>
+  <li><b>O fio:</b> uma linha acesa de 2 px contorna a borda <b>só onde ela está torcida</b>, com a <b>mesma luz da parede que
+  morde no duto</b>. É a mesma regra de lá: a borda só morde onde a linha está acesa, e a linha só acende onde ela morde. A
+  borda parada continua sem cobrar.</li>
+  <li><b>Encostou no fio, perde 1 vida.</b> A parede também empurra a nave para fora, para ela não ficar presa dentro. Os
+  1,4 s de invulnerabilidade separam os toques: a lomba inteira passa por ela em ~0,7 s, então é <b>uma vida por aperto</b>.</li>
+  <li>O fio aparece no anel inchando à direita, então a primeira leitura justa também vale para o hitbox.</li>
+</ul>
+<div class="grade">
+  <div class="card">
+    <h2>O fio na borda torcida (três momentos)</h2>
+    <img src="aperto-fio.png" alt="Três momentos do aperto com o vão alto: o anel inchando à direita e correndo, contornado por uma linha laranja acesa">
+    <p>Inchando à direita, atrás dele; correndo; passando pela nave. A linha laranja é o hitbox.</p>
+  </div>
+</div>
+<div class="grade">
+  <div class="card">
+    <h2>O vão A, alto</h2>
+    <img src="aperto-r2-A.gif" alt="O aperto com o vão alto e o fio aceso; em cima a nave lê e passa, embaixo fica parada e perde uma vida">
+    <p>Em cima a nave lê e passa limpa (0 vidas). Embaixo, parada, ela encosta no fio: <b>1 vida</b> e é empurrada para o vão.</p>
+  </div>
+  <div class="card">
+    <h2>O vão B, baixo</h2>
+    <img src="aperto-r2-B.gif" alt="O aperto com o vão baixo e o fio aceso; em cima a nave lê, embaixo perde uma vida">
+    <p>A mesma coisa: lendo, 0; parada, <b>1</b>.</p>
+  </div>
+</div>
+<p><b>Medido em jogo:</b> o fio acende só nas colunas torcidas (nenhum pixel aceso fora delas); a parada perde 1 vida e a
+que lê, 0; o vão continua nunca abaixo de 50 px.</p>
+<p class="nota"><b>Os sons e os efeitos (o seu "obs."):</b> anotei no passo 6 da spec, que é o dos sons novos (o tranco, as
+serpentes, o aperto, o teto). Entra também a sua ideia para a onda: <b>notas de guitarra arranhando</b> enquanto o anel
+corre. Faço junto com os outros no passo 6, depois do teto que sangra (passo 5). Se quiser antes, eu adianto.</p>
+
+<h1>Passo 4, rodada 1: o aperto (23/11)</h1>
+<p><b>O passo 3 fechou</b> (<i>"aprovado"</i>) e está commitado. <b>O que entrou</b> (a spec §7): aos <b>33–0 %</b> ele opera
+o próprio Leviatã pela coleira. Primeiro vem o <b>puxão</b> (0,6 s): os cabos esticam e vibram, a tela treme e a borda
+inteira <b>estremece</b>. Depois uma <b>constrição</b> corre a arena da direita para a esquerda. A borda de cima e a de baixo
+<b>incham para dentro no mesmo ponto</b> e fecham o corredor num <b>vão de 50 px</b>, que nunca fica menor. A travessia
+leva 2,5 s.</p>
+<ul>
+  <li><b>A técnica que você pediu:</b> cada coluna da faixa desloca um número <b>inteiro</b> de pixels. É a própria pintura da
+  peça, lida pixel a pixel, sem esticar nem redesenhar. Quando a borda desce, aparece a continuação da peça, que fica fora
+  da tela.</li>
+  <li><b>O contato empurra, não tira vida.</b> Durante a onda não sai salva; o miolo fica aberto, a janela de dano.</li>
+  <li><b>O rodízio dos 33–0 %:</b> investida → serpentes → <b>aperto</b> → serra (o teto que sangra entra no passo 5).</li>
+</ul>
+<div class="grade">
+  <div class="card">
+    <h2>O vão A, alto</h2>
+    <img src="aperto-A.gif" alt="A borda de baixo incha muito e a de cima pouco, o vão alto; em cima a nave sobe para o vão, embaixo fica parada e é empurrada">
+    <p>Em cima a nave <b>lê</b>: quando o anel incha no lugar, à direita, ela vai para a altura do vão a 110 px/s e passa sem
+    encostar. Embaixo ela fica parada e a parede a <b>empurra</b> para o vão, sem dano.</p>
+  </div>
+  <div class="card">
+    <h2>O vão B, baixo (o aperto seguinte)</h2>
+    <img src="aperto-B.gif" alt="A borda de cima desce muito e a de baixo pouco, o vão baixo; em cima a nave lê, embaixo é empurrada">
+    <p>O vão alterna a cada aperto: A, B, A… Aqui é o teto que desce quase até o meio.</p>
+  </div>
+</div>
+<p><b>Medido em jogo</b> (<code>test-guardiao-aperto-jogo.mjs</code>): o vão nunca abaixo de 50 px, coluna a coluna, quadro a
+quadro; a borda incha até ~85 px; a nave parada é empurrada e fica sempre dentro do corredor, <b>sem dano</b>; a que lê passa
+sem encostar; nada de salva; ele não sai da estação; o miolo toma dano; no fim a faixa original volta inteira e os cabos
+soltam. A ação dura ~3,6 s.</p>
+<p class="nota"><b>As perguntas (decisões minhas):</b></p>
+<ol class="nota">
+  <li><b>O vão alterna alto/baixo</b> (A em y 80, B em y 138), uma figura fixa, como os pulsos. Ou prefere sempre no meio, ou
+  outra sequência?</li>
+  <li><b>O anel incha no lugar à direita (0,45 s) antes de correr</b>, que é quando se lê o vão. Depois corre a 175 px/s,
+  mais rápido que a nave: não dá para fugir à frente dele, só passar pelo vão.</li>
+  <li><b>O empurrão</b> é para fora da parede. No flanco da frente ele também leva a nave para a esquerda, junto com o anel.
+  Como não tira vida, quem não lê só é empurrado. Quer que custe mais (empurrar mais forte, ou um toque de dano na
+  frente do anel)?</li>
+  <li><b>A cara da borda inchada:</b> é a faixa D de metal, então incha como chapa, e a continuação da peça traz as
+  <b>luzes vermelhas</b> da parte de baixo dela. No escuro, a borda de cima descendo se destaca pouco do fundo. Fica assim,
+  ou acendo a linha da superfície enquanto ela aperta?</li>
+</ol>
+
 <h1>Passo 3, rodada 6: as serpentes acompanham o corpo dele, e 2 botes nos dois degraus (23/11)</h1>
 <p><b>O seu pedido:</b> <i>"antes das serpentes saírem, o guardião e os cabos estão balançando como devem ser, mas depois
 que saem, os cabos ficam presos e o guardião continua se movendo menos, quero que os cabos acompanhem essa reduzida de

@@ -78,12 +78,13 @@ for (const n of [3, 4, 5]) {
   conferir(livreMin >= 11, 'lendo, o vão de um pulso na coluna da nave tem ≥ 11 px livres (a nave tem 9)', livreMin);
 }
 
-// ── the rotation per life step (spec §8): 100–66% saw ↔ lunge; 66–33% lunge → saw → serpents; 33–0% lunge → serpents → saw ──
+// ── the rotation per life step (spec §8): 100–66% saw ↔ lunge; 66–33% lunge → saw → serpents; 33–0% lunge → serpents → squeeze → saw ──
 {
   const ciclo = (d, a0, n) => { const v = [a0]; for (let i = 1; i < n; i++) v.push(proximaAcao(d, v[i - 1])); return v.join(','); };
   conferir(ciclo(0, 'serra', 4) === 'serra,investida,serra,investida', '100–66%: serra ↔ investida (sem serpentes)', ciclo(0, 'serra', 4));
   conferir(ciclo(1, 'investida', 4) === 'investida,serra,serpentes,investida', '66–33%: investida → serra → serpentes', ciclo(1, 'investida', 4));
-  conferir(ciclo(2, 'investida', 4) === 'investida,serpentes,serra,investida', '33–0%: investida → serpentes → serra', ciclo(2, 'investida', 4));
+  conferir(ciclo(2, 'investida', 5) === 'investida,serpentes,aperto,serra,investida', '33–0%: investida → serpentes → aperto → serra', ciclo(2, 'investida', 5));
+  conferir(!ciclo(1, 'investida', 8).includes('aperto') && !ciclo(0, 'serra', 8).includes('aperto'), 'o aperto só no último degrau (33–0%)', null);
   conferir(proximaAcao(0, 'serpentes') === 'serra', 'uma ação fora do rodízio do degrau recomeça a lista', proximaAcao(0, 'serpentes'));
 }
 
