@@ -4,8 +4,8 @@
 > `specs/2026-11-22-guardiao-coleira-design.md` (a coleira, o leque de lava, os cabos-serpente e o próprio Leviatã),
 > em 6 passos, cada um com GIF em jogo e o veredito dele. O passo 1 (o recorte, a corda, a investida presa e o tranco
 > A) está APROVADO; o passo 2 foi REFEITO como bullet hell (os pulsos alternados, §1½), aprovado jogando, COMMITADO e
-> EMPURRADO, com DUAS perguntas em aberto (§2): o bolsão colado nele e o último degrau. Depois: o passo 3, os
-> cabos-serpente."**
+> EMPURRADO; as duas perguntas (§2) FECHARAM em 23/11 (o bolsão fica, o último degrau igual aos outros). Agora: o
+> passo 3, os cabos-serpente."**
 > Contexto maior: o START do rebalanceamento (`plans/2026-11-21-rebalanceamento-START.md`, as frentes 0–5).
 
 ## ▶️ Como abrir a sessão
@@ -64,7 +64,48 @@
   `damageShip` no MESMO passo (distância perdia toques; uma marca que sobra de um quadro conta toque falso); a caixa da
   nave é 21×9; entre as cenas, a nave sai do caminho e o ciclo dele fica preso.
 
-## 2. As perguntas em aberto a ele (abrir a sessão com elas, a folha na rodada 3)
+## 1¾. O passo 3, rodada 1 (23/11) — ESPERANDO O VEREDITO
+
+Plano `plans/2026-11-23-guardiao-coleira-passo3.md`; a folha na rodada 5 (o topo): `serpentes-r5-d1.gif` (66–33%, duas,
+2 botes cada) e `serpentes-r5-d2.gif` (33–0%, as mesmas duas, 3 botes cada), a nave lendo em cima e parada embaixo.
+- ⚠️ **A RODADA 5 (23/11):** a raiz de baixo DENTRO DA CARCAÇA, (58, 40) = (186, 168) do PNG — a corda sai de baixo da
+  borda dela (o traço dele, (332, 148) na tela), não da faixa de tentáculos (opaca, mas escura como o fundo: *"quero que
+  ela saia de trás do guardião, como eu disse"*). As respostas dele: cabeça fica, tom fica, a 3ª SAIU (duas com mais
+  botes: `SERPENTE_BOTES = [2, 3]`). Em aberto: só o 3 do último degrau (decisão minha). Fotos: `_raiz-verde.mjs`
+  (+ `--sem-verde`, o tom de verdade).
+- ⚠️ **A RODADA 6 (23/11):** as raízes acompanham o corpo (`Serpente.desvio`, antes pregadas na saída) e ele segue
+  balançando reduzido nas serpentes (`SERPENTE_BALANCO` 0,35); `SERPENTE_BOTES = [2, 2]` (ele: *"duas serpentes, 2 botes
+  cada"*). Folha no topo: `serpentes-acompanham.png`, `serpentes-r6-d1.gif`, `serpentes-r6-d2.gif`. Nada em aberto no
+  passo 3 além do veredito.
+- O código: `src/entities/guardiao/serpente.ts` (puro), `camadaSerpentes.ts`, `padroes.ts` (`proximaAcao`, o rodízio),
+  `desenharCorda.ts` (+ `pontaPx`, `escurecerFaixa`), `BossNucleo.ts` (a ação `serpentes`, `SERPENTES`, `paramSerpentes`).
+- Os testes: `test-guardiao-serpente.mjs` (puro), `test-guardiao-padroes.mjs` (+ o rodízio), `test-guardiao-serpente-jogo.mjs`.
+  O filme: `scripts/_guardiao/_gif-serpentes.mjs <out.gif> --paineis 1:le,1:parada [--fotos <dir>]`.
+- ⚠️ Armadilhas do filme (corrigidas): o robô fugindo na perpendicular do bote entrava no limite da tela ou na cara da
+  outra cabeça; a fuga certa é DE LADO (em x) — o bote vem da borda, íngreme. E sem teto em x ele encostava no corpo dele.
+- ⚠️ **A RODADA 2 (o desenho dele, 23/11):** *"as serpentes saem do próprio guardião"* — a corrida pela borda SAIU; cada
+  uma sai do corpo num ARCO LARGO (cúbica raiz → posto, os controles na altura do arco) e a cabeça fica POSTADA, fixa, à
+  frente dele: (183, 54) e (178, 128), medidos no desenho (`SERPENTE_CIMA`/`SERPENTE_BAIXO` em `BossNucleo.ts`). O
+  desvio do robô (teste e filme): na perpendicular do bote, para o lado com folga, as outras cabeças contando como parede.
+- ⚠️ **A RODADA 3 (23/11, ele: mais finas, sem quina, "comportamento de serpente, mais natural e fluido"):** 5 px
+  (`CamadaSerpentes.FINA`); o corpo é uma curva só (arco + pescoço em cúbica com a tangente contínua, controles que crescem
+  com a virada); os arcos chegam ao posto na horizontal (`c2` na altura do posto); o enrolar é PARA DENTRO do corpo (contra
+  a nave virava laço); serpenteia, onda no corpo todo, tangente da cabeça suavizada, recolher ondulando. Regra: ≤ 40° a
+  cada 4 px (`DOBRA_MAX`, no teste puro); a medida por fase: `node --experimental-transform-types scripts/_guardiao/_dobra.mjs`.
+- ⚠️ **RODADA 4 (23/11):** ele *"gostei desse"* — e a de baixo *"sai do nada"*: a raiz caía num pixel TRANSPARENTE da
+  arte; agora `RAIZ_BAIXO` (84, 67), dentro da faixa de tentáculos opaca nos 9 quadros. Prova em verde:
+  `node scripts/_guardiao/_raiz-verde.mjs <out.png> [--quadros 60,90,130] [--recorte x,y,w,h]`.
+- As perguntas (na folha, rodada 2): a cabeça (a ponta afilada × recorte × PixelLab), a 3ª serpente (fora do
+  desenho: feixe de trás, posto (150, 90)) ou só duas com mais botes, os números, o tom do corpo (75 %).
+
+## 2. As duas perguntas — FECHADAS em 23/11
+
+- **O bolsão FICA** (ele: *"deixa como está, é muito arriscado ir para esse spot pequeno"*): 7 raios.
+- **O último degrau IGUAL aos outros**, 160 px/s · 0,4 s (ele: *"tem que manter igual aos outros, exatamente por conta da
+  dificuldade da parede. Mesmo do jeito que está hoje, está difícil desviar"*): `LAVA_VEL`/`LAVA_ENTRE` em `BossNucleo.ts`.
+  Testes verdes. **O passo 2 FECHOU → o passo 3 (os cabos-serpente).**
+
+O registro das perguntas como foram feitas:
 
 1. **O bolsão colado nele:** a figura de 7 raios cobre a tela inteira até x ≈ 80 (fio seguro ≤ 7 px), mas de x ≈ 90 em
    diante os cantos de cima e de baixo da tela ficam fora dela (um bolsão parado de 10–39 px na cara dele). Duas

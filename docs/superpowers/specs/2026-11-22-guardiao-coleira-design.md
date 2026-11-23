@@ -58,7 +58,7 @@ teto que sangra, os cabos-serpente, este o desenho dele: saem DO GUARDIÃO, não
 **Os pulsos alternados, no tranco:** a inércia arranca a lava do miolo em PULSOS de raios **retos** (sem gravidade: a
 figura tem de ler), em ângulos **fixos** (`angulosPulso`, `padroes.ts`):
 - O pulso **A** tem 7 raios a 10° um do outro; o **B** tem 8, deslocado meio passo — cai nos vãos do A. Por degrau:
-  A, B (100–66%) · A, B, A (66–33%) · A, B, A mais rápidos (33–0%).
+  A, B (100–66%) · A, B, A (66–33%) · A, B, A (33–0%, na MESMA velocidade — 23/11, ele).
 - O eixo da figura aponta para o **meio da borda esquerda** da arena (com o eixo horizontal e o miolo baixo, o alto da
   tela inteiro ficava seguro). A figura é sempre a mesma; só a altura muda, com a parada.
 - **Ele SEGURA na parada** enquanto os pulsos saem (a escolha dele, entre SEGURA e RECUA no GIF lado a lado): a corda
@@ -66,15 +66,17 @@ figura tem de ler), em ângulos **fixos** (`angulosPulso`, `padroes.ts`):
   andava e os arcos deixavam de ser concêntricos (medido: a nave parada levava lava nas 2 investidas segurando, em 1 só
   recuando).
 - **A velocidade dele, jogando:** 200 px/s e 0,3 s entre pulsos *"está bem rápido"*; com `?lavaVel=160&lavaEntre=0.4`,
-  *"achei mais interessante as duas juntas"* → **160 px/s e 0,4 s**; o último degrau **190 px/s e 0,32 s** (a proporção
-  de antes). Os dois parâmetros da URL ficam para calibrar.
+  *"achei mais interessante as duas juntas"* → **160 px/s e 0,4 s, nos TRÊS degraus**. O último a 190 px/s · 0,32 s (a
+  proporção de antes, decisão minha) saiu em 23/11 — ele: *"tem que manter igual aos outros, exatamente por conta da
+  dificuldade da parede. Mesmo do jeito que está hoje, está difícil desviar"*. O aperto do fim vem das camadas 2 e 3, não
+  da lava. Os dois parâmetros da URL ficam para calibrar.
 - **A parede não protege** (ele: *"a nave pode ir até na linha da tela, ou seja, as lavas precisam passar a parede para
   punir quem tenta ficar embaixo ou em cima. Só que deixe efeitos que a lava bateu"*): na borda da arena a gota respinga
   (as brasas e o som do impacto) e SEGUE até sair da tela. A regra do casco da F3.
 - **A geometria (medida):** na coluna da nave (x 40–80) o vão livre de um pulso é de ≥ 11 px (a nave tem 9 de altura);
   parado, na tela inteira até x ≈ 80, o maior fio seguro é de 7 px, nos cantos. Perto do Guardião os raios se fecham num
-  muro. ⚠️ **Em aberto, para ele:** de x ≈ 90 em diante (colado nele) os 7 raios não alcançam os cantos de cima e de baixo
-  da tela — um bolsão parado de 10 a 39 px na cara dele.
+  muro. De x ≈ 90 em diante (colado nele) os 7 raios não alcançam os cantos de cima e de baixo da tela — um bolsão parado
+  de 10 a 39 px na cara dele. **FICA (23/11, ele):** *"é muito arriscado ir para esse spot pequeno"* — nada de 9 raios.
 - A arte: a bola de lava da Besta em escala menor, com a luz dela; a **brasa no vermelho do MIOLO** (ele: *"a brasa pode
   ser mais avermelhada, como o core dele"*; amostrada da arte: `#f85732`, `#e4270f`, `#ce1c0b`, `#8f150e`), com metade da
   densidade, para o rastro não borrar a figura. Na borda, só respingo (sem estilhaço que fira). Dano 1.
@@ -163,11 +165,48 @@ serpentes, o aperto, o teto. A investida segue fechada. **A vida** (90) não mud
    22/11, a 1ª versão (plano `plans/2026-11-22-guardiao-coleira-passo2.md`): o leque em arco com UM vão sorteado,
    centrado na nave. **22/11, o veredito: REFEITO como bullet hell** (a §5 reescrita) — os PULSOS ALTERNADOS de raios
    retos e ângulos fixos (A 7, B 8 meio passo), ele SEGURA na parada (a escolha dele, SEGURA × RECUA no GIF), a
-   velocidade dele jogando (160 px/s e 0,4 s; o último degrau 190 e 0,32), a brasa no vermelho do miolo, e a lava
-   ATRAVESSA a parede (respinga e segue). A salva mirada ficou como estava. **Em aberto:** o bolsão parado colado nele
-   (x ≥ 90, os cantos da tela) — deixar ou abrir o leque para 9 raios; e o último degrau (190 px/s · 0,32 s, decisão
-   minha) — confirmar ou igualar aos outros. Folha `folhas/2026-11-22/guardiao/` (rodadas 2 e 3).
+   velocidade dele jogando (160 px/s e 0,4 s), a brasa no vermelho do miolo, e a lava ATRAVESSA a parede (respinga e
+   segue). A salva mirada ficou como estava. **23/11, as duas perguntas fechadas:** o bolsão colado nele FICA (*"é muito
+   arriscado ir para esse spot pequeno"*), e o último degrau ficou IGUAL aos outros, 160 px/s · 0,4 s (*"exatamente por
+   conta da dificuldade da parede. Mesmo do jeito que está hoje, está difícil desviar"*). **O passo 2 FECHOU.** Folha
+   `folhas/2026-11-22/guardiao/` (rodadas 2 e 3).
 3. Os cabos-serpente.
+   **23/11, a rodada 1 no jogo** (plano `plans/2026-11-23-guardiao-coleira-passo3.md`): `entities/guardiao/serpente.ts`
+   (puro: o trilho pela borda, as fases cresce → ensaio → trava 0,4 s → bote reto → recolhe → volta, um bote por vez) e
+   `camadaSerpentes.ts` (a mesma corda, depth −0,39, o corpo a 75 % do tom, a cabeça e o trecho do bote claros, círculos
+   no `perigos`); o rodízio por degrau (`proximaAcao`). Medido: a nave parada leva todos os botes (4 · 6), a que sai de lado
+   na trava, 0. **Decisões minhas em aberto:** a cabeça é a ponta afilada da corda (os tentáculos de baixo saem pela borda
+   do quadro: não há ponta pintada para recortar); estacionar 30 px à esquerda da nave (a 3ª, 80); os números (bote 400
+   px/s até 190, 2 botes, ensaio 1,1/0,7 s); a 3ª pelo feixe de trás. Folha: rodada 4.
+   **23/11, a correção dele (o desenho):** *"as serpentes saem do próprio guardião"* — a corrida pela borda SAIU. Cada uma
+   sai do corpo num ARCO LARGO (a de cima: do alto do domo, sobe quase até o teto e desce; a de baixo: de baixo do corpo,
+   desce quase até o chão e sobe) e a cabeça fica POSTADA À FRENTE DELE — medido no desenho: (183, 54) e (178, 128) — fixa,
+   e o bote sai do posto (alcance 260 px: a metade esquerda inteira). Medido: parada leva todos (4 · 6), lendo 0. **Em
+   aberto:** a cabeça, a 3ª serpente (fora do desenho dele: feixe de trás, posto (150, 90)), os números, o tom.
+   **23/11, rodada 3 (ele: *"um pouco mais finas… os ataques quebram, formam ângulos retos… comportamento de serpente,
+   mais natural e fluido"*):** 5 px (eram 7); o corpo é UMA CURVA SÓ — o arco e um pescoço em cúbica com a tangente
+   contínua até a cabeça (a quina nascia na emenda pescoço → reta do bote); os arcos chegam ao posto na HORIZONTAL (o traço
+   final do desenho dele); no ensaio ela se enrola para dentro do próprio corpo (S), o pescoço serpenteia, uma onda corre o
+   corpo inteiro, a direção da cabeça vira sem estalo, e ao recolher o trecho do bote relaxa ondulando. A regra medida: o
+   corpo nunca dobra mais de 40° a cada 4 px (`DOBRA_MAX`; `scripts/_guardiao/_dobra.mjs` mede por fase).
+   **Rodada 4 (ele: *"gostei desse… a serpente de baixo sai do nada, quero ela… atrás do corpo"*):** a raiz de baixo caía
+   num pixel transparente da arte (o vão entre os tentáculos); agora (84, 67) = (212, 195) do PNG, dentro da faixa de
+   tentáculos opaca nos 9 quadros, no ponto que ele circulou. A prova: `scripts/_guardiao/_raiz-verde.mjs` (a camada das
+   serpentes em verde, só na foto). Regra: **raiz de corda se confere na transparência da arte, quadro a quadro**.
+   **Rodada 5 (ele: *"quero que ela saia de trás do guardião, como eu disse"*):** a faixa de tentáculos é opaca mas escura
+   como o fundo — a corda ainda lia nascendo no vazio. O traço dele sobe até (332, 148) na tela = a BORDA DE BAIXO DA
+   CARCAÇA (183, 185 do PNG). A raiz agora é (58, 40) = (186, 168), DENTRO da carcaça; a corda desce escondida e aparece
+   saindo de baixo da borda, na vertical (`c1` = (330, 240)). Regra: **"sair de trás" = sair de trás de uma parte que LÊ
+   como corpo**, não de qualquer pixel opaco. **As respostas dele:** a cabeça fica (a ponta afilada); o tom fica (75 %);
+   a 3ª serpente SAIU — no último degrau as mesmas duas com mais botes (2 por serpente aos 66–33 %, 3 aos 33–0 %: o 3 é
+   decisão minha, perguntada). Medido: parada leva 4 · 6, lendo 0; ~8,2 s e ~10,2 s de ação. Folha: rodada 5.
+   **Rodada 6 (ele: *"depois que saem, os cabos ficam presos e o guardião continua se movendo menos — quero que os cabos
+   acompanhem essa reduzida de movimento, mas continuem acompanhando o guardião"*; e o último degrau: *"duas serpentes, 2
+   botes cada"*):** a raiz era calculada uma vez, na saída, e ficava pregada enquanto o corpo assentava na base. Agora as
+   raízes vão com o corpo (`Serpente.desvio`: inteiro na raiz, some suave até o começo do pescoço; a cabeça no posto e o
+   que fere não mudam), e ele segue a mesma onda do flutuar com o balanço REDUZIDO (`SERPENTE_BALANCO` 0,35: 16 → ~5 px),
+   a amplitude descendo e voltando suave. 2 botes por serpente nos DOIS degraus (o 2º muda só o ensaio). Regra: **tudo
+   que sai do corpo dele vai com o corpo** — nada calculado uma vez e pregado. Folha: rodada 6.
 4. O aperto.
 5. O teto que sangra.
 6. Os sons novos (o tranco, a serpente, o aperto, o teto — primeiro com a biblioteca) e ele jogando a luta inteira.

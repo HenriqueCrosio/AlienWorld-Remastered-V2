@@ -19,9 +19,21 @@ sprite que se desfaz nos próprios pixels).
 > **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-22-guardiao-coleira-START.md`. O REBALANCEAMENTO
 > (START `plans/2026-11-21-rebalanceamento-START.md`, frentes 0 os chefões → 1 os alvos → 2 o draft → 3 os inimigos →
 > 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA fechou; o GUARDIÃO está sendo refeito pela spec da
-> coleira em 6 passos. Os passos 1 e 2 estão aprovados (o 2 refeito como bullet hell: os pulsos alternados), commitados e
-> empurrados; a sessão abre com DUAS perguntas em aberto (a §2 do START do Guardião: o bolsão colado nele — deixar ou 9
-> raios — e o último degrau a 190 px/s · 0,32 s, decisão minha), depois o passo 3 (os cabos-serpente)."**
+> coleira em 6 passos. Os passos 1 e 2 FECHARAM (o 2 refeito como bullet hell: os pulsos alternados; em 23/11 o bolsão
+> ficou e o último degrau igualou aos outros, 160 px/s · 0,4 s). O passo 3 (os cabos-serpente) está no jogo, rodada 1,
+> rodada 6, ESPERANDO O VEREDITO (o §1¾ do START: a de baixo saindo de trás da carcaça, as raízes acompanhando o corpo
+> dele com o balanço reduzido, 2 botes por serpente nos dois degraus; cabeça e tom ficam)."**
+>
+> 📍 **23/11 — O PASSO 3, RODADA 2: OS CABOS-SERPENTE NO JOGO, DO JEITO DO DESENHO DELE (não commitado).** De 66%: duas
+> serpentes saem DO CORPO dele em arcos largos (por cima quase no teto, por baixo quase no chão) e as cabeças ficam postadas
+> à frente dele (fixas; a rodada 1, correndo pela borda até a nave, foi recusada: *"as serpentes saem do próprio
+> guardião"*); ensaiam, travam 0,4 s e dão o bote reto onde a nave estava; 33–0% três. Um bote por vez; só a cabeça e o
+> trecho do bote ferem. O rodízio por degrau (`proximaAcao`). Medido: a nave parada leva todos os botes, a que sai da reta
+> na trava, nenhum. Plano `plans/2026-11-23-guardiao-coleira-passo3.md`.
+>
+> 📍 **23/11 — O PASSO 2 FECHOU: as duas perguntas.** O bolsão colado nele FICA (*"é muito arriscado ir para esse spot
+> pequeno"*); o último degrau IGUAL aos outros, 160 px/s · 0,4 s (*"exatamente por conta da dificuldade da parede. Mesmo do
+> jeito que está hoje, está difícil desviar"*) — o 190/0,32 saiu de `BossNucleo.ts`. Typecheck e testes verdes.
 >
 > 📍 **22/11 (noite) — O PASSO 2 REFEITO COMO BULLET HELL: OS PULSOS ALTERNADOS; COMMITADO E EMPURRADO.** (a §5 da spec reescrita; o §1½ do START;
 > folha `folhas/2026-11-22/guardiao/folha.html`, rodadas 2 e 3)
