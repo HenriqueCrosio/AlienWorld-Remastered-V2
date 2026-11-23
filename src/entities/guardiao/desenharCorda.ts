@@ -17,7 +17,8 @@ const cacheAbgr = new WeakMap<number[][], Uint32Array[]>();
 
 /**
  * Desenha a polilinha `pts` com a faixa, na escala `escala` da arte (0,7 = a do Guardião). `s0` desloca a textura ao
- * longo da corda (a corda que corre pela borda, nas serpentes). `afina` (0–1) estreita a ponta da âncora.
+ * longo da corda (a corda que corre pela borda, nas serpentes). `afina` (0–1) estreita a ponta do primeiro ponto (a
+ * âncora da coleira, a cabeça da serpente): ao longo da corda inteira, ou só nos primeiros `pontaPx` px.
  */
 export function desenharCorda(
   buf: Uint32Array,
@@ -28,6 +29,7 @@ export function desenharCorda(
   escala: number,
   s0 = 0,
   afina = 0,
+  pontaPx = 0,
 ): void {
   let linhas = cacheAbgr.get(faixa.linhas);
   if (!linhas) {
@@ -53,8 +55,8 @@ export function desenharCorda(
         const x = a.x + (dx * t) / d, y = a.y + (dy * t) / d;
         const sAqui = s + t;
         const linha = linhas[Math.floor((sAqui + s0) / escala) % linhas.length];
-        // a ponta da âncora (s = 0) afina até `1 − afina` da largura
-        const fator = afina > 0 && total > 0 ? 1 - afina * (1 - sAqui / total) : 1;
+        // a ponta (s = 0) afina até `1 − afina` da largura: ao longo da corda inteira, ou só nos primeiros `pontaPx`
+        const fator = afina > 0 && total > 0 ? 1 - afina * (1 - Math.min(1, sAqui / (pontaPx > 0 ? pontaPx : total))) : 1;
         const w = Math.max(2, Math.round(larg * fator));
         const o0 = miolo ? 2 : 0, o1 = miolo ? w * 2 - 2 : w * 2;
         for (let o = o0; o < o1; o++) {
@@ -68,4 +70,11 @@ export function desenharCorda(
       s += d;
     }
   }
+}
+
+/** a faixa num tom mais escuro (k < 1): o corpo da serpente encostado na borda, que não fere (como o cabo da serra) */
+export function escurecerFaixa(f: FaixaCabo, k: number): FaixaCabo {
+  const e = (c: number): number =>
+    (Math.round(((c >> 16) & 0xff) * k) << 16) | (Math.round(((c >> 8) & 0xff) * k) << 8) | Math.round((c & 0xff) * k);
+  return { largura: f.largura, linhas: f.linhas.map((l) => l.map(e)) };
 }

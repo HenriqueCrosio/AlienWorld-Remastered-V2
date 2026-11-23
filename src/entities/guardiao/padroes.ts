@@ -32,6 +32,25 @@ export function angulosSalva(n: number, abre: number, centro: number, rnd: () =>
  * nos vãos do A. O eixo da figura aponta para `alvo` (o meio da borda esquerda da arena): de qualquer altura, ela
  * preenche a metade esquerda (com o eixo horizontal e o miolo baixo, sobrava o alto inteiro, parado e seguro). Radianos.
  */
+export type AcaoGuardiao = 'serra' | 'investida' | 'serpentes';
+
+/**
+ * O RODÍZIO por degrau (spec §8): uma camada nova por degrau (decisão dele, quebra a regra de 19/09). 100–66% a serra e a
+ * investida alternando (como sempre); 66–33% entram as serpentes; 33–0% elas vêm logo depois da investida. O aperto e o
+ * teto que sangra entram nos passos 4 e 5.
+ */
+export const RODIZIO: readonly (readonly AcaoGuardiao[])[] = [
+  ['serra', 'investida'],
+  ['investida', 'serra', 'serpentes'],
+  ['investida', 'serpentes', 'serra'],
+];
+
+/** A ação depois de `atual` no degrau `degrau`; fora da lista do degrau (a vida caiu de degrau), recomeça por ela. */
+export function proximaAcao(degrau: number, atual: AcaoGuardiao): AcaoGuardiao {
+  const lista = RODIZIO[Math.max(0, Math.min(RODIZIO.length - 1, degrau))];
+  return lista[(lista.indexOf(atual) + 1) % lista.length];
+}
+
 export function angulosPulso(k: number, n: number, passoDeg: number, boca: Ponto, alvo: Ponto): number[] {
   const m = k % 2 === 0 ? n : n + 1;
   const eixo = Math.atan2(alvo.y - boca.y, alvo.x - boca.x);

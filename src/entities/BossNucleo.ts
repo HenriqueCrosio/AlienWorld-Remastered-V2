@@ -12,7 +12,9 @@ import { Som } from '../som/Som';
 import { CamadaCabos } from './guardiao/camadaCabos';
 import { TRANCOS, deslocTranco, voltaElastica, xDaParada, type Tranco } from './guardiao/coleira';
 import { LavaGuardiao, type PulsoDisparado } from './guardiao/lavaGuardiao';
-import { angulosPulso, angulosSalva, miraSalva } from './guardiao/padroes';
+import { angulosPulso, angulosSalva, miraSalva, proximaAcao, type AcaoGuardiao, type Ponto } from './guardiao/padroes';
+import { CamadaSerpentes } from './guardiao/camadaSerpentes';
+import type { ParamSerpente } from './guardiao/serpente';
 
 /**
  * O CHEFÃO FINAL da Fase 4, em DUAS FORMAS (design do Henrique, 2026-07-19):
@@ -59,15 +61,71 @@ export class BossNucleo implements StageBoss {
   private t = 0;
 
   /** Guardião: máquina de estados do movimento. Parado = vulnerável; movendo = fechado. */
-  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'segura' | 'volta' | 'serra' = 'flutua';
+  private acao: 'flutua' | 'telegrafo' | 'investe' | 'tranco' | 'segura' | 'volta' | 'serra' | 'serpentes' = 'flutua';
   private acaoT = 0;
   private cdTiro = 0;
   /**
    * As duas skills se ALTERNAM (spec de 19/09). A investida empurra o jogador para as bordas; a salva
    * torna a borda cara; a serra é a ameaça de caminho fixo E a janela de dano. A dificuldade mora na
    * tensão entre elas, não em cada uma ficar mais rápida.
+   * ⚠️ 23/11: o RODÍZIO por degrau (`proximaAcao`, spec 2026-11-22 §8) — de 66% em diante entram as serpentes.
    */
-  private proxima: 'serra' | 'investida' = 'serra';
+  private proxima: AcaoGuardiao = 'serra';
+  /** os cabos-serpente (spec 2026-11-22 §6): lidos pelos testes e pelo filme (`serpentes.lista`) */
+  private readonly serpentes: CamadaSerpentes;
+  /**
+   * ─── OS CABOS-SERPENTE (23/11, o passo 3) ───
+   * ⚠️ O DESENHO DELE (23/11, por cima da 1ª rodada, que corria pela borda até a nave — recusada): *"as serpentes saem do
+   * próprio guardião"* — num ARCO LARGO, a de cima sobe quase até o teto e desce, a de baixo desce quase até o chão e
+   * sobe, e as cabeças ficam POSTADAS À FRENTE DELE. Medido no desenho (na tela de 384×216): a de cima sai do alto do domo
+   * (a raiz do recorte em (7, −73) do PNG ≈ (303, 53) na tela), o topo do arco em y ≈ 30, a cabeça em (183, 54); a de baixo
+   * sai de baixo da carcaça (ver `RAIZ_BAIXO`), o fundo do arco em y ≈ 182, a cabeça em (178, 128).
+   * `c1` é o 1º controle da cúbica (calculado para o topo/fundo do arco cair onde o desenho mostra); o 2º fica 40 px
+   * atrás do posto, NA ALTURA DELE: o arco chega ao posto na HORIZONTAL, apontado para a esquerda — o traço final do
+   * desenho dele —, e a cabeça nunca precisa dar meia-volta para mirar a nave (chegando de baixo para cima, a de baixo
+   * virava um grampo com a nave lá embaixo: medido, `_dobra.mjs`).
+   * ⚠️ 23/11 AS RESPOSTAS DELE: a cabeça fica (a ponta afilada da corda); o tom fica (75 %); NADA de 3ª serpente — no
+   * último degrau são as MESMAS duas com mais botes (*"duas com mais botes, dois botes cada fica bom"*): 2 por serpente
+   * aos 66–33 % e 3 aos 33–0 % (o 3 é decisão minha, perguntada na folha); o ensaio 1,1 s com 2 fintas e 0,7 s com 1.
+   */
+  private static readonly RAIZ_ALTO = { x: 7, y: -73 };
+  /**
+   * ⚠️ 23/11, duas correções dele: *"a serpente de baixo sai do nada"* e, de novo, *"quero que ela saia de trás do
+   * guardião, como eu disse"*. A 1ª raiz, (72, 68) = (200, 196) do PNG, caía num pixel TRANSPARENTE; a 2ª, (84, 67) =
+   * (212, 195), na faixa de tentáculos — opaca, mas escura como o fundo, e a corda ainda lia nascendo no vazio. O traço
+   * dele sobe da corda até (332, 148) na tela = (183, 185) do PNG: a BORDA DE BAIXO DA CARCAÇA, entre os pingos do miolo
+   * e os tentáculos. Agora a raiz é (58, 40) = (186, 168), DENTRO da carcaça (opaca em todos os 9 quadros de y 160 a
+   * 182 nessa coluna); a corda desce escondida atrás dela e APARECE saindo de baixo da borda, em y ≈ 184 do PNG.
+   */
+  private static readonly RAIZ_BAIXO = { x: 58, y: 40 };
+  private static readonly SERPENTE_CIMA = { posto: { x: 183, y: 54 }, c1: { x: 245, y: -2 } };
+  // c1 logo abaixo da raiz: a corda sai da carcaça DESCENDO, na vertical, antes de varrer o chão para a esquerda
+  private static readonly SERPENTE_BAIXO = { posto: { x: 178, y: 128 }, c1: { x: 330, y: 240 } };
+  private static readonly SERPENTES: { raiz: Ponto; posto: Ponto; c1: Ponto; atraso: number }[][] = [
+    [
+      { raiz: BossNucleo.RAIZ_ALTO, ...BossNucleo.SERPENTE_CIMA, atraso: 0.3 },
+      { raiz: BossNucleo.RAIZ_BAIXO, ...BossNucleo.SERPENTE_BAIXO, atraso: 0.8 },
+    ],
+    [
+      { raiz: BossNucleo.RAIZ_ALTO, ...BossNucleo.SERPENTE_CIMA, atraso: 0.3 },
+      { raiz: BossNucleo.RAIZ_BAIXO, ...BossNucleo.SERPENTE_BAIXO, atraso: 0.6 },
+    ],
+  ];
+  private static readonly SERPENTE_BOTES = [2, 2];
+  /**
+   * ⚠️ 23/11 (ele: *"antes das serpentes saírem, o guardião e os cabos estão balançando como devem ser, mas depois que
+   * saem, os cabos ficam presos e o guardião continua se movendo menos — quero que os cabos acompanhem essa reduzida de
+   * movimento, mas continuem acompanhando o guardião"*): nas serpentes ele NÃO para — segue flutuando com o balanço
+   * REDUZIDO a esta fração (16 px → ~5), a amplitude descendo e voltando suave; e as raízes das serpentes vão junto
+   * com o corpo (`Serpente.desvio`), antes pregadas onde ele estava quando elas saíram.
+   */
+  private static readonly SERPENTE_BALANCO = 0.35;
+  /** a amplitude do balanço do flutuar (1 = os 16 px de sempre), descendo nas serpentes */
+  private ampBalanco = 1;
+  /** onde o corpo estava quando as serpentes saíram (o `desvio` delas é o quanto ele andou desde então) */
+  private origemSerpentes: Ponto | null = null;
+  private static readonly SERPENTE_ENSAIO = [1.1, 0.7];
+  private static readonly SERPENTE_FINTAS = [2, 1];
   private serra: SerraGuardiao | null = null;
   /**
    * O que FERE por contato mas NÃO é alvo: a serra. Fica num grupo próprio justamente porque ninguém
@@ -121,14 +179,17 @@ export class BossNucleo implements StageBoss {
    * levou lava nas 2 investidas segurando, em 1 só recuando). Cada pulso depois do 1º é um mini-tranco na corda tensa.
    *
    * ⚠️ A VELOCIDADE É A DELE, jogando: 200 px/s e 0,3 s entre pulsos *"está bem rápido"*; com `?lavaVel=160&lavaEntre=0.4`,
-   * *"achei mais interessante as duas juntas"*. O último degrau mantém a proporção de antes (+20% de velocidade, −20% de
-   * intervalo).
+   * *"achei mais interessante as duas juntas"*. O ÚLTIMO DEGRAU É IGUAL AOS OUTROS (23/11, ele): *"tem que manter igual
+   * aos outros, exatamente por conta da dificuldade da parede. Mesmo do jeito que está hoje, está difícil desviar"* — o
+   * 190 px/s · 0,32 s (a proporção de antes, decisão minha) saiu; o aperto do fim vem do passo 4/5, não da lava.
+   * ⚠️ E O BOLSÃO COLADO NELE FICA (23/11, ele): de x ≈ 90 em diante os cantos da tela ficam fora da figura de 7 raios,
+   * *"é muito arriscado ir para esse spot pequeno"* — não abrir para 9 raios.
    */
   private static readonly LAVA_PULSOS = [2, 3, 3];
   private static readonly LAVA_RAIOS = 7;
   private static readonly LAVA_PASSO = 10;
-  private static readonly LAVA_VEL = [160, 160, 190];
-  private static readonly LAVA_ENTRE = [0.4, 0.4, 0.32];
+  private static readonly LAVA_VEL = [160, 160, 160];
+  private static readonly LAVA_ENTRE = [0.4, 0.4, 0.4];
   /** quanto ele segura na parada depois do último pulso, antes da volta (s) */
   private static readonly SEGURA_FIM = 0.15;
   /** o mini-tranco de cada pulso, segurando: a corda já tensa dá um solavanco */
@@ -425,6 +486,7 @@ export class BossNucleo implements StageBoss {
     // ⚠️ `allowGravity: false`: a serra anda pela própria coreografia, não pela física da cena.
     this.perigos = scene.physics.add.group({ allowGravity: false });
     SerraGuardiao.registrarAnims(scene);
+    this.serpentes = new CamadaSerpentes(scene, this.perigos, BossNucleo.G_ESCALA);
 
     this.barBg = scene.add
       .rectangle(GAME_WIDTH / 2, BARRA_CHEFAO_Y, 160, 4, COLORS.enemyDark)
@@ -520,6 +582,9 @@ export class BossNucleo implements StageBoss {
     this.cabos.atualizar(dt, this.sprite);
     // a lava no ar segue caindo depois da morte, como os glóbulos
     this.lava.atualizar(dt);
+    // as serpentes (na troca elas arrebentam e a camada apaga)
+    const o = this.origemSerpentes;
+    this.serpentes.atualizar(dt, target, o ? { x: this.sprite.x - o.x, y: this.sprite.y - o.y } : undefined);
 
     // O predador roda até DEPOIS de morto (a luz apaga, o breu sai, a lava no ar segue caindo).
     if (this.predador) {
@@ -550,7 +615,8 @@ export class BossNucleo implements StageBoss {
 
     switch (this.acao) {
       case 'flutua': {
-        const alvoY = BossNucleo.G_BASE_Y + Math.sin(this.t * 0.7) * 16;
+        this.ampBalanco = Math.min(1, this.ampBalanco + dt * 1.5);
+        const alvoY = BossNucleo.G_BASE_Y + Math.sin(this.t * 0.7) * 16 * this.ampBalanco;
         this.body.setVelocityY((alvoY - this.sprite.y) * 6);
 
         // A barriga exposta BRILHA de leve: parado = vulnerável, e o brilho é o telégrafo.
@@ -566,9 +632,17 @@ export class BossNucleo implements StageBoss {
         }
 
         if (this.acaoT <= 0) {
-          if (this.proxima === 'serra') {
+          // o RODÍZIO do degrau (spec 2026-11-22 §8)
+          const agora = this.proxima;
+          this.proxima = proximaAcao(this.degrau, agora);
+          if (agora === 'serpentes') {
+            // OS CABOS-SERPENTE. Ele fica na estação operando os cabos: parado, à direita, miolo aberto (§8).
+            this.acao = 'serpentes';
+            this.body.setVelocityY(0);
+            this.serpentes.soltar(this.paramSerpentes());
+            this.origemSerpentes = { x: this.sprite.x, y: this.sprite.y };
+          } else if (agora === 'serra') {
             // A SERRA. Ele fica na estação segurando o cabo: parado, à direita, miolo aberto.
-            this.proxima = 'investida';
             this.acao = 'serra';
             this.body.setVelocityY(0);
             this.serra = new SerraGuardiao(
@@ -582,7 +656,6 @@ export class BossNucleo implements StageBoss {
             );
           } else {
             // TELEGRAFO: pisca e FECHA o corpo — quem ainda estiver na frente foi avisado.
-            this.proxima = 'serra';
             this.acao = 'telegrafo';
             this.acaoT = BossNucleo.TELEGRAFO_DUR;
             // the heart racing (sheet 5c): as long as the telegraph, the lock sounds on its own below
@@ -702,6 +775,24 @@ export class BossNucleo implements StageBoss {
         break;
       }
 
+      case 'serpentes': {
+        // operando os cabos: o balanço REDUZIDO (`SERPENTE_BALANCO`, a mesma onda do flutuar, sem emenda), as raízes
+        // indo junto com o corpo, o miolo aberto e brilhando — a janela de dano (§8). Sem salva: as serpentes são a
+        // ameaça inteira.
+        const alvoAmp = BossNucleo.SERPENTE_BALANCO;
+        this.ampBalanco = Math.max(alvoAmp, this.ampBalanco - dt * 1.5);
+        const alvoY = BossNucleo.G_BASE_Y + Math.sin(this.t * 0.7) * 16 * this.ampBalanco;
+        this.body.setVelocityY((alvoY - this.sprite.y) * 6);
+        if (Math.random() < 0.35) this.glow.emitParticleAt(this.core.x, this.core.y);
+        if (this.serpentes.terminou) {
+          this.body.setVelocityY(0);
+          this.acao = 'flutua';
+          this.acaoT = BossNucleo.pausa(this.degrau);
+          this.cdTiro = 0.6;
+        }
+        break;
+      }
+
       case 'investe': {
         // A COLEIRA: até a primeira corda chegar ao máximo — e aí o TRANCO. O `x < 70` antigo fica só como rede.
         if (this.cabos.noLimite(this.sprite) || this.sprite.x < 70) {
@@ -790,6 +881,26 @@ export class BossNucleo implements StageBoss {
     this.dispararPulso();
   }
 
+  /** As serpentes do degrau de agora, com as raízes na tela (o corpo está na estação). */
+  private paramSerpentes(): ParamSerpente[] {
+    const k = Math.max(0, this.degrau - 1);
+    const e = BossNucleo.G_ESCALA;
+    return BossNucleo.SERPENTES[k].map((c) => {
+      const raiz = { x: this.sprite.x + c.raiz.x * e, y: this.sprite.y + c.raiz.y * e };
+      return {
+        raiz,
+        c1: c.c1,
+        // na altura do posto: o arco chega nele na horizontal (ver `SERPENTES`)
+        c2: { x: c.posto.x + 40, y: c.posto.y },
+        posto: c.posto,
+        atraso: c.atraso,
+        botes: BossNucleo.SERPENTE_BOTES[k],
+        ensaio: BossNucleo.SERPENTE_ENSAIO[k],
+        fintas: BossNucleo.SERPENTE_FINTAS[k],
+      };
+    });
+  }
+
   /** Lido pelo teste: onde a coleira pararia o corpo na altura `y`. */
   xParadaEm(y: number): number {
     return this.cabos.xParada(y, xDaParada);
@@ -820,6 +931,7 @@ export class BossNucleo implements StageBoss {
     this.travaTroca = true;
     // a COLEIRA arrebenta no golpe final: as cordas chicoteiam penduradas no casco e apagam
     this.cabos.arrebentar();
+    this.serpentes.arrebentar();
     // A serra é do GUARDIÃO. Se ele morre com ela na arena, ela some junto — o predador tem as armas dele.
     this.serra?.destroy();
     this.serra = null;
@@ -1005,6 +1117,7 @@ export class BossNucleo implements StageBoss {
   destroy(): void {
     this.serra?.destroy();
     this.cabos.destroy();
+    this.serpentes.destroy();
     this.lava.destroy();
     this.serra = null;
     // O CORPO FICA (17/09: *"a animação dele morto não apareceu, ele sumiu"*): a cena destrói o chefão 1,2s depois
