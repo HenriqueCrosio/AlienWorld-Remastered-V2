@@ -1,0 +1,284 @@
+{
+ "_": "Sheet 18 (the Beast remade, step 10) takes, 25/11. pixellab = generated on his account; local C = synthesized (ffmpeg, in the game's timing); local R = from the LIBRARY (the old Beast's sounds he already approved, as installed in public/sfx/chefes-nucleo).",
+ "base": "https://backblaze.pixellab.ai/file/pixellab-characters/audio/f7282f36-b779-4f64-832a-4693ca4cc628/",
+ "takes": [
+  {
+   "nome": "besta.risada",
+   "id": "A",
+   "pixellab": "5948250c-d5d4-431a-bb4e-3cac0dd543d0/besta-risada-a.wav",
+   "prompt": "a deep slow demonic laugh echoing in a huge dark metal chamber, menacing and inhuman, low pitched, reverberant"
+  },
+  {
+   "nome": "besta.risada",
+   "id": "B",
+   "pixellab": "17f3d97d-3be0-4932-8dcd-98981c072891/besta-risada-b.wav",
+   "prompt": "a guttural monstrous chuckle that grows into a cruel laugh, distorted and inhuman, far away in the dark, with long echo"
+  },
+  {
+   "nome": "besta.murmurio",
+   "id": "A",
+   "laco": true,
+   "camada": "ambiente",
+   "pixellab": "8db37bd9-4fd7-4043-8191-7e1427fb01b6/besta-murmurio-a.wav",
+   "prompt": "unintelligible demonic whispers and murmurs swirling in total darkness, many low voices, eerie and quiet, dark ambience, no music"
+  },
+  {
+   "nome": "besta.murmurio",
+   "id": "B",
+   "laco": true,
+   "camada": "ambiente",
+   "pixellab": "49e91ee9-1c9e-4268-9534-419b8ac40604/besta-murmurio-b.wav",
+   "prompt": "creepy low breathing and hissing whispers moving around in a dark cave, faint distant growls, unsettling horror ambience, no music"
+  },
+  {
+   "nome": "besta.olhos.acende",
+   "id": "A",
+   "pixellab": "818d8b27-6bea-4b0a-b4d7-24839f8b3f6b/besta-olhos-acende-a.wav",
+   "prompt": "a low eerie shimmer and soft hiss as glowing eyes open in the dark, subtle and ominous"
+  },
+  {
+   "nome": "besta.olhos.acende",
+   "id": "B",
+   "pixellab": "94e431d9-a01d-457b-b221-99025cfe0aa4/besta-olhos-acende-b.wav",
+   "prompt": "a quiet dark glimmer like embers flaring, with a low breath, horror sting, short"
+  },
+  {
+   "nome": "besta.olhos.salto",
+   "id": "A",
+   "pixellab": "95c5dc5d-9589-47e2-afd9-d19fed28f31c/besta-olhos-salto-a.wav",
+   "prompt": "a huge armored creature leaping fast through the air, heavy whoosh with a snarl, claws forward"
+  },
+  {
+   "nome": "besta.olhos.salto",
+   "id": "B",
+   "pixellab": "fffbae9c-b4cc-46b7-900d-88fbfe823fdb/besta-olhos-salto-b.wav",
+   "prompt": "a fast heavy pounce whoosh, a big beast lunging out of the darkness with a short roar"
+  },
+  {
+   "nome": "besta.olhos.salto",
+   "id": "R",
+   "local": "public/sfx/chefes-nucleo/predador.golpe.erra.ogg",
+   "prompt": "da BIBLIOTECA: o golpe que erra do Predador, que você aprovou (5c)"
+  },
+  {
+   "nome": "besta.sede.abre",
+   "id": "A",
+   "pixellab": "5b4d39e3-63b6-4e3f-bb18-e8860de2879d/besta-sede-abre-a.wav",
+   "prompt": "a biomechanical chest of armor plates opening like ribs, then a deep humming energy ring igniting and holding"
+  },
+  {
+   "nome": "besta.sede.abre",
+   "id": "B",
+   "pixellab": "3ee6ade9-55b3-4523-bca3-ea66e1eddef3/besta-sede-abre-b.wav",
+   "prompt": "heavy metal plates sliding open with a hiss, followed by a low resonant vortex hum, sci-fi creature"
+  },
+  {
+   "nome": "besta.sede.gole",
+   "id": "A",
+   "pixellab": "de28fb31-1513-4e28-85fd-7a3257679cfe/besta-sede-gole-a.wav",
+   "prompt": "a short soft energy absorption, a small laser bolt swallowed into a glowing core, quick sip"
+  },
+  {
+   "nome": "besta.sede.gole",
+   "id": "B",
+   "pixellab": "9ce5b0cf-ae6f-4497-8538-38874274b477/besta-sede-gole-b.wav",
+   "prompt": "a tiny electric gulp, energy being sucked in, short and muffled"
+  },
+  {
+   "nome": "besta.sede.gole",
+   "id": "A2",
+   "pixellab": "d12a1bdc-3482-4f4e-bb76-b9f0b73f81f0/besta-sede-gole-a2.wav",
+   "prompt": "(a A veio muda e saiu) a quick soft suction gulp, a small bolt of light being absorbed into a glowing orb, short muffled zip"
+  },
+  {
+   "nome": "besta.sede.gole",
+   "id": "C",
+   "local": "assets/raw/sons/besta/besta.sede.gole-C.wav",
+   "prompt": "sintetizada no tempo de um tiro (0,22 s): um zip que desce de ~1,1 kHz a 220 Hz, abafado"
+  },
+  {
+   "nome": "besta.sede.tranco",
+   "id": "A",
+   "pixellab": "70de301e-b89d-4275-89b7-03db8c569667/besta-sede-tranco-a.wav",
+   "prompt": "a violent burst of stored energy released at once, a heavy jolt throwing many projectiles back, deep boom with crackle"
+  },
+  {
+   "nome": "besta.sede.tranco",
+   "id": "B",
+   "pixellab": "0c5bca67-f984-4d6b-9c16-063bc3805e2e/besta-sede-tranco-b.wav",
+   "prompt": "a powerful energy discharge blast with a roar, a creature spitting fire bolts back, punchy and heavy"
+  },
+  {
+   "nome": "besta.sede.tranco",
+   "id": "R",
+   "local": "public/sfx/chefes-nucleo/predador.lava.arremesso.ogg",
+   "prompt": "da BIBLIOTECA: o arremesso da lava que você aprovou (5c) — o que a sede usa hoje, provisório"
+  },
+  {
+   "nome": "besta.garras",
+   "id": "A",
+   "pixellab": "1b8f370e-cdf2-4949-99e9-279d89313850/besta-garras-metal-a.wav",
+   "prompt": "heavy bone claws gripping and scraping steel walls, a large creature climbing on metal, clanks and screeches"
+  },
+  {
+   "nome": "besta.garras",
+   "id": "B",
+   "pixellab": "a8ddb9fb-53e8-42dc-b174-ef6da5a11716/besta-garras-metal-b.wav",
+   "prompt": "sharp claws digging into a metal hull, scraping and clanging, creature crawling along a wall"
+  },
+  {
+   "nome": "besta.garras",
+   "id": "R",
+   "local": "public/sfx/chefes-nucleo/predador.agarra.ogg",
+   "prompt": "da BIBLIOTECA: a agarrada do Predador que você aprovou (5c) — o que a volta usa hoje nas trocas de mão"
+  },
+  {
+   "nome": "besta.coracao.aperta",
+   "id": "A",
+   "pixellab": "e6ae2a9f-307f-4d6c-b8d6-e098aa271dfc/besta-coracao-aperta-a.wav",
+   "prompt": "a giant beating heart squeezed hard by claws, a wet crunch, then one last slow heavy heartbeat fading into silence"
+  },
+  {
+   "nome": "besta.coracao.aperta",
+   "id": "B",
+   "pixellab": "f0418154-a86e-4dff-b411-6ccb785d39b8/besta-coracao-aperta-b.wav",
+   "prompt": "a huge organic heart crushed by armored claws, a deep thud and a long wet squeeze, the heartbeat stopping, dark horror"
+  },
+  {
+   "nome": "besta.coracao.parado",
+   "id": "A",
+   "pixellab": "569c47e0-d597-40b8-9f4f-40d338e05ebf/besta-coracao-parado-a.wav",
+   "prompt": "time frozen in total silence, a very quiet high thin ringing tone and a faint deep drone, suspended, eerie, no music"
+  },
+  {
+   "nome": "besta.coracao.parado",
+   "id": "C",
+   "local": "assets/raw/sons/besta/besta.coracao.parado-C.wav",
+   "prompt": "sintetizada no tempo do jogo (2,0 s): um zumbido agudo e fino de ouvido tapado sobre um grave de 48 Hz quase parado, entra e sai em fade"
+  },
+  {
+   "nome": "besta.coracao.volta",
+   "id": "A",
+   "pixellab": "e037de99-1ac7-4bd3-a1a5-7ef9fb8dcdef/besta-coracao-volta-a.wav",
+   "prompt": "a massive heartbeat thump restarting, one deep boom with a shockwave rush, as if time unfreezes, cinematic"
+  },
+  {
+   "nome": "besta.coracao.volta",
+   "id": "B",
+   "pixellab": "075be580-7998-43e3-a1f6-f7a742533ce2/besta-coracao-volta-b.wav",
+   "prompt": "a monstrous heart starting to beat again with a violent double thump and a reverse whoosh releasing, heavy and dark"
+  },
+  {
+   "nome": "besta.coracao.volta",
+   "id": "R",
+   "local": "public/sfx/chefes-nucleo/predador.pulso2.ogg",
+   "prompt": "da BIBLIOTECA: o batimento do breu (o seu 2º take, 5c) — o que o coração usa hoje, provisório"
+  },
+  {
+   "nome": "besta.risada",
+   "id": "A2",
+   "rodada": 2,
+   "pixellab": "bfba3a61-c118-40e5-90d2-f3b09ed76fa6/besta-risada-a2.wav",
+   "prompt": "(refazer: mais gutural e sinistro) a very deep guttural demonic laugh, slow and sinister, a huge beast chuckling from its throat with wet rasping growl, in a dark metal chamber, inhuman, no music"
+  },
+  {
+   "nome": "besta.risada",
+   "id": "B2",
+   "rodada": 2,
+   "pixellab": "3df874cd-8182-40fd-86bf-793a6f8700c0/besta-risada-b2.wav",
+   "prompt": "(refazer: mais gutural e sinistro) a sinister low growling laugh from a monstrous demon, rumbling and throaty, menacing pauses, echoing in darkness, horror, no music"
+  },
+  {
+   "nome": "besta.risada",
+   "id": "C",
+   "rodada": 2,
+   "local": "assets/raw/sons/besta/besta.risada-C.wav",
+   "prompt": "a risada A trabalhada aqui: 22 % mais grave e lenta, graves reforçados, um pouco de aspereza (crusher) e eco na câmara"
+  },
+  {
+   "nome": "besta.murmurio",
+   "id": "AB",
+   "rodada": 2,
+   "laco": true,
+   "camada": "ambiente",
+   "local": "assets/raw/sons/besta/besta.murmurio-AB.wav",
+   "prompt": "a sua escolha: A e B juntas (\"as duas casam bem juntas\"), niveladas e somadas num laço só"
+  },
+  {
+   "nome": "besta.coracao.parado",
+   "id": "AC",
+   "rodada": 2,
+   "local": "assets/raw/sons/besta/besta.coracao.parado-AC.wav",
+   "prompt": "a sua escolha: A e C juntas (\"os dois podem casar juntos também\"), niveladas e somadas"
+  },
+  {
+   "nome": "besta.coracao.volta",
+   "id": "BR",
+   "rodada": 2,
+   "local": "assets/raw/sons/besta/besta.coracao.volta-BR.wav",
+   "prompt": "a sua escolha: o B e, na sequência (1,25 s depois), o R — o batimento do breu que você aprovou"
+  },
+  {
+   "nome": "besta.murmurio",
+   "rodada": 3,
+   "laco": true,
+   "camada": "ambiente",
+   "id": "R",
+   "local": "assets/raw/sons/besta/besta.murmurio-AB.wav",
+   "prompt": "o de HOJE no jogo (A+B, a sua escolha), para comparar o timbre"
+  },
+  {
+   "nome": "besta.murmurio",
+   "rodada": 3,
+   "laco": true,
+   "camada": "ambiente",
+   "id": "C",
+   "pixellab": "7ea0d090-12a1-4a9c-9e64-45a8ae36ece1/besta-murmurio-c3.wav",
+   "prompt": "sinister demonic whispers circling very close around the listener in total darkness, several overlapping hissing voices speaking an unknown language, slow and menacing, horror ambience, no music"
+  },
+  {
+   "nome": "besta.murmurio",
+   "rodada": 3,
+   "laco": true,
+   "camada": "ambiente",
+   "id": "D",
+   "pixellab": "4ffcfdf5-abc5-41d3-9558-bf463350f42f/besta-murmurio-d3.wav",
+   "prompt": "a predator stalking in the dark: low wet throaty breathing and growls very close to the ear, mixed with faint evil whispers, unsettling horror ambience, no music"
+  },
+  {
+   "nome": "besta.murmurio",
+   "rodada": 3,
+   "laco": true,
+   "camada": "ambiente",
+   "id": "E",
+   "pixellab": "cc02c542-bca5-4557-95d8-bf04aab11bf6/besta-murmurio-e3.wav",
+   "prompt": "a crowd of deep slowed-down demonic voices whispering and chanting under the breath, an occasional sharp hiss and a quiet cruel giggle, echoing in a dark metal chamber, horror atmosphere, no music"
+  },
+  {
+   "nome": "besta.murmurio",
+   "rodada": 3,
+   "laco": true,
+   "camada": "ambiente",
+   "id": "F",
+   "pixellab": "d4b0cb2f-0d9b-46a3-9305-4f4cdb21623c/besta-murmurio-f3.wav",
+   "prompt": "ghostly whispers that rise and fall, some voices reversed, sudden close breaths from left and right, a deep slow rumble underneath, terrifying haunted darkness, no music"
+  },
+  {
+   "nome": "besta.murmurio",
+   "rodada": 3,
+   "laco": true,
+   "camada": "ambiente",
+   "id": "G",
+   "estereo": true,
+   "local": "assets/raw/sons/besta/besta.murmurio-G.wav",
+   "prompt": "a de hoje (A+B) trabalhada aqui: 20 % mais grave e lenta, graves reforçados, eco de câmara e as vozes girando devagar de um lado para o outro"
+  },
+  {
+   "nome": "besta.coracao.batida",
+   "id": "P",
+   "rodada": 4,
+   "local": "assets/raw/sons/besta/besta.coracao.batida-P.wav",
+   "prompt": "o seu batimento do breu (o 2º take, 5c) com CORPO: 95–98 % dele ficava abaixo de 80 Hz e some em alto-falante de notebook/fone; saturado para nascer harmônicos de 120–1400 Hz (+4 dB em 220 Hz) somados ao original — o mesmo tum, agora ouvido"
+  }
+ ]
+}

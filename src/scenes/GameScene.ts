@@ -70,6 +70,7 @@ import { MORTE, ESTILOS_MORTE, estiloDaNave, type EstiloMorte } from '../systems
 import { Destrocos } from '../systems/morte/Destrocos';
 import { ENGUIA } from '../f3/enguiaCilindro';
 import { AmbienteDaFase } from '../som/AmbienteDaFase';
+import { IrParaFase } from '../dev/irParaFase';
 import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, SEPARACAO, type Classe, type Estilo, type Material, type Variante, type VarianteFerrugem, type VarianteRocha } from '../systems/morte/numerosDestrocos';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
@@ -184,6 +185,8 @@ export class GameScene extends Phaser.Scene {
   private zone: Zone = 'atmosfera';
   /** Treino de chefão: pula direto para a luta e reinicia nela. */
   private practice = false;
+  /** DEV (spec 2026-11-24-besta-refeita §7): walks the boss to the phase of `?fase=` or of key 8's restart. */
+  private devIrPara: IrParaFase | null = null;
   /** Veio do hangar, com a decolagem já ouvida na tela preta. */
   private decolou = false;
   /** O SANDBOX de dev, se a fase foi aberta por ele (ver `src/sandbox/`). */
@@ -363,6 +366,10 @@ export class GameScene extends Phaser.Scene {
     score?: number;
     /** Veio do hangar: a decolagem já soou inteira na tela preta, a fase entra com o próprio som. */
     decolou?: boolean;
+    /** DEV: the boss phase to walk to as soon as the boss is up (`?fase=`, key 8's restart). */
+    devFase?: string;
+    /** DEV: the card hand of this entry (`?mao=`, key 8) — set after `entrarNaFase`, which zeroes the F1. */
+    devMao?: string[];
   }): void {
     this.decolou = data.decolou ?? false;
     this.eliteEmCena = false;
@@ -378,6 +385,7 @@ export class GameScene extends Phaser.Scene {
     this.practice = data.practice ?? false;
     this.sandbox = data.sandbox ?? null;
     this.serpenteDev = data.serpente ?? null;
+    this.devIrPara = import.meta.env.DEV && data.devFase ? new IrParaFase(data.devFase) : null;
     // A ZONA VEM DA FASE. É ela que decide a condução no modo diegético — e é por isso que a
     // Fase 2 começa em voo livre sem que ninguém escolha nada.
     this.zone = this.stage.zone;
@@ -686,6 +694,12 @@ export class GameScene extends Phaser.Scene {
     // da fase (`entrarNaFase`): um retry devolve as cartas com que se entrou, não as ganhas antes de morrer.
     // (No sandbox a mão é a da montagem: o checkpoint da F1 a zeraria.)
     if (!this.sandbox) entrarNaFase(this.registry, this.stage.id);
+    // DEV (key 8, `?mao=`): the chosen hand IS this stage's entry hand — a death-retry gives it back too
+    if (import.meta.env.DEV && data.devMao) {
+      const cps = (this.registry.get('cartasCheckpoint') as Record<number, string[]> | undefined) ?? {};
+      this.registry.set('cartas', [...data.devMao]);
+      this.registry.set('cartasCheckpoint', { ...cps, [this.stage.id]: [...data.devMao] });
+    }
     this.cartas = new CartasEmJogo({
       scene: this,
       fx: this.fx,
@@ -980,6 +994,20 @@ export class GameScene extends Phaser.Scene {
       kb.on('keydown-SIX', () => {
         if (!this.over) this.cartas.abrirMesa(`dev${mesasDev++}`, 'MESA DE TESTE (DEV)');
       });
+
+      // 7: the boss's next phase (spec 2026-11-24-besta-refeita §7) — the Guardian's steps, then the Beast's phases
+      kb.on('keydown-SEVEN', () => {
+        if (this.over || !this.boss?.devProximaFase) return;
+        const f = this.boss.devProximaFase();
+        console.info(`[dev] 7 → ${f ?? `fica em ${this.boss.devFaseAtual} (sem próxima, ou numa transição)`}`);
+      });
+
+      // 8: choose the card hand — the stage restarts at the same boss phase with it (spec 2026-11-24-besta-refeita §7).
+      // (a DYNAMIC import: the panel pulls `sandbox/config.ts`, dev-only code, and this scene is in the player's build)
+      kb.on('keydown-EIGHT', () => {
+        if (this.over) return;
+        void import('../dev/painelMao').then((m) => m.abrirPainelMao(this, (cartas) => this.devTrocarMao(cartas)));
+      });
     }
   }
 
@@ -999,6 +1027,9 @@ export class GameScene extends Phaser.Scene {
       this.tweens.resumeAll();
       this.anims.resumeAll();
     }
+
+    // DEV: walking to the phase of `?fase=` / key 8 (one jump per frame; the boss refuses during its transitions)
+    if (import.meta.env.DEV && this.devIrPara?.passo(this.boss, delta / 1000)) this.devIrPara = null;
 
     const escala = this.escalaDoQuadro(delta);
     // ⚠️ O `dt` DA CENA TAMBÉM ENTRA NA ESCALA, e é ele que carrega o mundo: o `elapsed`, o
@@ -1085,6 +1116,8 @@ export class GameScene extends Phaser.Scene {
     // Os ALVOS da perseguição (a nave alienígena) saem daqui: inimigos vivos + o chefão. Rocha
     // NÃO entra — um projétil teleguiado que se joga no primeiro asteroide da frente seria uma
     // arma que se sabota sozinha, e o cinturão inteiro é feito de asteroides.
+    // 25/11: in the Beast's dark the shots fly OVER the black layer (depth 5) — tracers, his call
+    this.weapons.profundidadeTiro = this.boss?.escuro?.() && !this.boss.isDead ? 6 : 1;
     this.weapons.update(
       dt,
       input.firing && this.boss?.armaTravada !== true,
@@ -1092,6 +1125,7 @@ export class GameScene extends Phaser.Scene {
       this.ship.y,
       this.homingTargets(),
     );
+    this.congelarTiros();
     this.bombas.tick(dt, time);
 
     if (this.subidaDesde >= 0) {
@@ -1140,6 +1174,8 @@ export class GameScene extends Phaser.Scene {
     if (this.boss?.morde && !this.boss.isDead && this.boss.morde(body.left, body.right, body.top, body.bottom)) this.damageShip();
     // O CORPO INTEIRO LEVA DANO (03/11, a Serpente): os tiros do jogador contra o DESENHO dela, por medição.
     if (this.boss?.acertoNoCorpo && !this.boss.isDead) this.tirosNoCorpo();
+    // 25/11, THE THIRST (the Beast): the ring drinks the shots inside it, even those that touch no body
+    if (this.boss?.beber && !this.boss.isDead) this.beberTiros();
 
     this.spawnWaves(dt);
     this.spawnProps(dt);
@@ -2093,7 +2129,12 @@ export class GameScene extends Phaser.Scene {
             ? new BossCapitania(this, this.enemies, 150)
             : new Boss(this, this.enemies.enemyBullets, this.fx, 150);
 
-    this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip());
+    // 25/11: the narrow phase (the Beast is touched where she is DRAWN — `StageBoss.tocaDesenho`)
+    const noDesenho = (o: Phaser.GameObjects.GameObject, nave = false): boolean => {
+      const c = (o as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.Body | null;
+      return !this.boss?.tocaDesenho || !c || this.boss.tocaDesenho(c.left, c.top, c.right, c.bottom, nave);
+    };
+    this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip(), (s) => noDesenho(s as Phaser.GameObjects.GameObject, true));
     // O que o chefão põe na arena e FERE sem ser alvo (a serra do guardião). ⚠️ Só este overlap: não
     // registrar as balas do jogador contra `perigos` é o que faz o tiro ATRAVESSAR a serra, e é isso
     // que mantém a linha de tiro limpa na cravada — a janela de dano daquela luta.
@@ -2118,8 +2159,11 @@ export class GameScene extends Phaser.Scene {
       // nave, não o desenho. Nos outros (o Núcleo) ele vira cobertura — absorve o tiro sem dano (invulnerável é
       // telégrafo; o jogador vê a fagulha morrer no casco e aprende a mirar no que brilha).
       if (!this.boss.acertoNoCorpo)
-        this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
-          this.bulletAbsorvedByBoss(b as Phaser.Physics.Arcade.Sprite),
+        this.physics.add.overlap(
+          this.boss.sprite,
+          this.weapons.bullets,
+          (_boss, b) => this.bulletAbsorvedByBoss(b as Phaser.Physics.Arcade.Sprite),
+          (_boss, b) => noDesenho(b as Phaser.GameObjects.GameObject),
         );
     } else {
       this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
@@ -2247,12 +2291,79 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * 25/11, THE HEART STOPS (the Beast, spec §4.4): while her heart is stopped, every player shot in the air freezes where
+   * it is; the shots fired in the freeze fly to just in front of the ship and PILE there, following it; when the heart
+   * beats again they all resume their own velocities — the pile leaves at once. (`gelo` = the velocity it will get back;
+   * `pilha` = its place in front of the ship.)
+   */
+  private congelarTiros(): void {
+    const cong = !!this.boss?.congelado?.() && !this.boss.isDead;
+    if (!cong && !this.weapons.congelado) return;
+    const tiros = this.weapons.bullets.getChildren() as Phaser.Physics.Arcade.Sprite[];
+    if (cong) {
+      const novo = !this.weapons.congelado;
+      this.weapons.congelado = true;
+      let n = 0;
+      for (const b of tiros) {
+        if (!b.active) continue;
+        const body = b.body as Phaser.Physics.Arcade.Body;
+        const pilha = b.getData('pilha') as { dx: number; dy: number } | null;
+        if (pilha) {
+          b.setPosition(this.ship.x + pilha.dx, this.ship.y + pilha.dy);
+          body.reset(b.x, b.y);
+          n++;
+          continue;
+        }
+        if (b.getData('gelo')) continue;
+        // in the air when the heart stopped: frozen where it is
+        if (novo) {
+          b.setData('gelo', { x: body.velocity.x, y: body.velocity.y });
+          body.setVelocity(0, 0);
+          continue;
+        }
+        // fired in the freeze: it flies to the pile, then stays in front of the ship
+        if (b.x - this.ship.x >= 12) {
+          b.setData('gelo', { x: body.velocity.x, y: body.velocity.y });
+          b.setData('pilha', { dx: 12 + (n % 5) * 2, dy: b.y - this.ship.y });
+          body.setVelocity(0, 0);
+          n++;
+        }
+      }
+      return;
+    }
+    // the heart beats again: everything resumes together
+    this.weapons.congelado = false;
+    for (const b of tiros) {
+      const v = b.getData('gelo') as { x: number; y: number } | null;
+      if (!b.active || !v) continue;
+      (b.body as Phaser.Physics.Arcade.Body).setVelocity(v.x, v.y);
+      b.setData('ox', b.x);
+      b.setData('oy', b.y);
+      b.setData('gelo', null);
+      b.setData('pilha', null);
+    }
+  }
+
+  /** 25/11, THE THIRST: every live player shot inside the Beast's open ring is drunk — gone, no damage, no card effect. */
+  private beberTiros(): void {
+    for (const o of [...this.weapons.bullets.getChildren()]) {
+      const bala = o as Phaser.Physics.Arcade.Sprite;
+      if (bala.active && this.boss?.beber?.(bala)) this.weapons.release(bala);
+    }
+  }
+
+  /**
    * O CORPO do chefão multi-parte absorve o tiro: sem dano, só a fagulha. O perfurante também
    * morre aqui — atravessar o chefão inteiro de graça faria da cabeça um alvo opcional.
    */
   private bulletAbsorvedByBoss(bullet: Phaser.Physics.Arcade.Sprite): void {
     if (!this.weapons.bullets.contains(bullet)) return;
     if (!bullet.active || !this.boss || this.boss.isDead) return;
+    // the physics overlaps run BEFORE the scene update: the ring asks first (the thirst)
+    if (this.boss.beber?.(bullet)) {
+      this.weapons.release(bullet);
+      return;
+    }
 
     // Se a bala está na ZONA da cabeça, deixa o overlap da cabeça cobrar o dano — os dois
     // corpos se sobrepõem, e a ordem dos callbacks no mesmo frame não é garantida.
@@ -2287,6 +2398,10 @@ export class GameScene extends Phaser.Scene {
     // que REALMENTE saiu dele. Sem isto, um erro de ordem volta a "reciclar" o chefão.
     if (!this.weapons.bullets.contains(bullet)) return;
     if (!bullet.active || !this.boss || this.boss.isDead) return;
+    if (this.boss.beber?.(bullet)) {
+      this.weapons.release(bullet);
+      return;
+    }
 
     const origem = bullet.getData('origem') as OrigemProjetil | null;
     const de = this.deOndeVeio(bullet);
@@ -3079,6 +3194,16 @@ export class GameScene extends Phaser.Scene {
   private useBomb(): void {
     if (this.over || this.bombs <= 0) return;
     this.bombs--;
+    // 25/11, the heart stopped (spec §4.4, his "a"): the bomb clears her frozen field AND spends the player's pile with it
+    if (this.boss?.congelado?.()) {
+      this.boss.limparCampo?.();
+      for (const b of [...this.weapons.bullets.getChildren()] as Phaser.Physics.Arcade.Sprite[]) {
+        if (b.active && b.getData('pilha')) {
+          this.fx.hit(b.x, b.y);
+          this.weapons.release(b);
+        }
+      }
+    }
     vibrar('bomba');
     Som.tocar('nave.bomba.lancar', { x: this.ship.x });
     if (this.medidas) this.medidas.bombasUsadas++;
@@ -3296,6 +3421,23 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** O SANDBOX: de volta à montagem (o `sandbox/iniciar.ts` escuta o evento, para a cena e reabre a tela). */
+  /**
+   * DEV, key 8 (spec 2026-11-24-besta-refeita §7): the chosen hand becomes this stage's entry hand and the stage restarts
+   * in the practice at the boss phase it was in — the extra life, the hull, the drone and the gun are born from the hand,
+   * as at a real stage entry.
+   */
+  private devTrocarMao(cartas: string[]): void {
+    this.scene.start('Game', {
+      stage: this.stage.id,
+      handling: this.handling,
+      practice: true,
+      ship: this.shipId,
+      score: this.scoreBase,
+      devFase: this.boss?.devFaseAtual,
+      devMao: cartas,
+    });
+  }
+
   private voltarMontagem(): void {
     this.tempoNormal();
     this.game.events.emit('sandbox:montagem');

@@ -672,6 +672,19 @@ export class BossCapitania implements StageBoss {
     return { quem: 'capitania', vida: this.hp / this.maxHp };
   }
 
+  /** DEV (spec 2026-11-24 §7): above half life = 'capitania1'; enraged = 'capitania2'. */
+  get devFaseAtual(): string {
+    return this.enraged ? 'capitania2' : 'capitania1';
+  }
+
+  /** DEV: to half life (the `update` sees the fury turn on, with its sound, next frame). */
+  devProximaFase(): string | null {
+    if (this.dead || this.entering || this.enraged) return null;
+    this.hp = this.maxHp / 2;
+    this.bar.width = 160 * (this.hp / this.maxHp);
+    return 'capitania2';
+  }
+
   /** @returns true se este dano matou o chefão. */
   damage(amount: number): boolean {
     // Invulnerável enquanto desliza para dentro da tela — senão dá para matá-la ANTES DE ELA

@@ -1,0 +1,26 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 18c — a Besta: os sussurros mais sinistros",
+    "dia": "2026-11-25",
+    "nota": "Você pediu: \"os sussurros estão baixos demais, quero que o escuro seja amedrontador e os sussurros sejam ainda mais sinistros\", e o escuro como \"sentidos super aguçados\": a trilha quase nula, o coração, os sussurros e a risada mais fortes.\nO volume já subiu no jogo (sussurros +9 dB, coração +7 dB, risada +3 dB, a trilha 28 dB abaixo). Aqui é o TIMBRE: quatro takes novas do PixelLab (C, D, E, F), a de hoje trabalhada aqui (G: mais grave, com eco e girando de um lado para o outro) e a de hoje (R) para comparar.\nSão laços do breu inteiro: ouça com a trilha por baixo (ela entra quase nula). Dá para pedir duas juntas, como a A+B."
+  },
+  "grupos": [
+    {
+      "titulo": "Os sussurros do escuro",
+      "sons": [
+        {
+          "nome": "besta.murmurio",
+          "oque": "OS SUSSURROS — o laço por baixo do breu inteiro, para dar medo do escuro",
+          "onde": "do breu até a morte, em laço",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": {
+            "tom": 0,
+            "vol": 0
+          },
+          "chefe": true
+        }
+      ]
+    }
+  ]
+}

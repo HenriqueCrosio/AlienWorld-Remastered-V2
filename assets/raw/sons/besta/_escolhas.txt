@@ -1,0 +1,15 @@
+# 25/11 — HIS picks from sheets 18, 18b (`_escolhas-folha18.txt`; the redone risada: C) and 18c (the whispers: G the dark,
+# E as the dark lifts at her death, F layered with G while the eyes blink).
+besta.risada: C
+besta.murmurio: G
+besta.murmurio: E > besta.murmurio.saida
+besta.murmurio: F > besta.murmurio.olhos
+besta.olhos.acende: A
+besta.olhos.salto: B
+besta.sede.abre: A
+besta.sede.gole: C
+besta.sede.tranco: R
+besta.garras: A
+besta.coracao.aperta: A
+besta.coracao.parado: AC
+besta.coracao.volta: BR

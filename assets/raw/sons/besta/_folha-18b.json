@@ -1,0 +1,67 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 18b — a Besta: a risada refeita e as suas combinações",
+    "dia": "2026-11-25",
+    "nota": "As suas respostas da folha 18 já estão no jogo: os olhos acendem A, o salto B, o peito abre A, o gole C, o tranco R, as garras A, o aperto A.\nAqui: a RISADA refeita (\"mais gutural e sinistro\": A2 e B2 geradas de novo, C = a A trabalhada aqui, mais grave e áspera) — no jogo vai a A2 até você escolher. E as três COMBINAÇÕES que você pediu, montadas para conferir: os murmúrios A+B num laço só, o coração parado A+C, a volta B e logo depois o R."
+  },
+  "grupos": [
+    {
+      "titulo": "A risada refeita",
+      "sons": [
+        {
+          "nome": "besta.risada",
+          "oque": "A RISADA — ela some no escuro e ri de algum lugar que você não vê",
+          "onde": "cada vez que os olhos começam; e uma vez na entrada do breu",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": {
+            "tom": 0.04,
+            "vol": 0.05
+          },
+          "chefe": true
+        }
+      ]
+    },
+    {
+      "titulo": "As suas combinações (para conferir)",
+      "sons": [
+        {
+          "nome": "besta.murmurio",
+          "oque": "OS MURMÚRIOS — A e B juntas, em laço, o breu inteiro",
+          "onde": "do breu até a morte",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": {
+            "tom": 0,
+            "vol": 0
+          },
+          "chefe": true
+        },
+        {
+          "nome": "besta.coracao.parado",
+          "oque": "O CORAÇÃO PARADO — A e C juntas, debaixo dos 2,0 s congelados",
+          "onde": "o congelamento inteiro",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": {
+            "tom": 0,
+            "vol": 0
+          },
+          "chefe": true
+        },
+        {
+          "nome": "besta.coracao.volta",
+          "oque": "O CORAÇÃO VOLTA — o B e na sequência o R",
+          "onde": "o fim do congelamento",
+          "lugar": "interior",
+          "repetir": false,
+          "variacao": {
+            "tom": 0,
+            "vol": 0
+          },
+          "chefe": true
+        }
+      ]
+    }
+  ]
+}

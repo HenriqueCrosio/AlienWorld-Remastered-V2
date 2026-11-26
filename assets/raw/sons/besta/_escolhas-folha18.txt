@@ -1,0 +1,18 @@
+# HIS answers on sheet 18 (25/11), verbatim
+besta.risada: refazer — mais gutural e sinistro
+besta.murmurio: ? — as duas casam bem juntas
+besta.olhos.acende: A
+besta.olhos.salto: B
+besta.sede.abre: A
+besta.sede.gole: C
+besta.sede.tranco: R
+besta.garras: A
+besta.coracao.aperta: A
+besta.coracao.parado: ? — os dois podem casar juntos também
+besta.coracao.volta: ? — o B e na sequencia o R? ficam bons
+
+# HIS answers on sheet 18b (25/11)
+besta.risada: C
+besta.murmurio: AB
+besta.coracao.parado: AC
+besta.coracao.volta: BR

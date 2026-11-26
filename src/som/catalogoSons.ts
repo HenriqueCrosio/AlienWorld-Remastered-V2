@@ -368,8 +368,10 @@ const FOLHA_5C_NUCLEO: Record<string, DefSom> = {
   'predador.metal': S5C('predador.metal', 0.6),
   'predador.breu': S5C('predador.breu', 0.9, 1, 0, 0),
   // (a beat every 2.4 s in the dark: felt, not on top — the A measured 3 dB over the B, so it sits lower)
-  'predador.pulso': S5C('predador.pulso', 0.27, 1, 0.02, 0.05),
-  'predador.pulso2': S5C('predador.pulso2', 0.35, 1, 0.02, 0.05),
+  // 25/11, him on the dark: "como se os sentidos estivessem super aguçados... coração, sussurros, a risada diabólica no
+  // início ficam mais fortes" — the heart (heard only in the dark) 0.27/0.35 → 0.6/0.75 (+7 dB)
+  'predador.pulso': S5C('predador.pulso', 0.6, 1, 0.02, 0.05),
+  'predador.pulso2': S5C('predador.pulso2', 0.75, 1, 0.02, 0.05),
   'predador.morte': S5C('predador.morte', 0.9, 1, 0, 0),
   // ROUND 2 (17/11, him: *"F para o urro, e E e D em outros momentos. Podem até entrar antes mesmo do encontro, para
   // mostrar que o jogador se aproxima de algo infernal"*): the F is his arrival; the E when he turns to phase 2, the D
@@ -631,6 +633,36 @@ const FOLHA_10_FINAL: Record<string, DefSom> = {
  * the repeated ~0.4–0.6) — measured in the game with `_medir-chefes.mjs`. The aperto's wave: round 2 (the swell + one
  * distorted note per ring).
  */
+/**
+ * SHEET 18 — THE BEAST REMADE (step 10 of spec 2026-11-24, 25/11): the new signatures and THE DARK, HIS picks on sheets
+ * 18 and 18b (`assets/raw/sons/besta/_escolhas.txt`): the laugh redone (C, deeper and rougher), the murmurs A+B in one
+ * loop, the frozen heart A+C, the restart B then R. The volumes are still the first guess (to measure in the fight).
+ * The murmurs are an ambience loop under the whole dark; the old Beast's library (5c) keeps everything else.
+ */
+const S18 = (nome: string, volume: number, vozes = 1, tom = 0.02, vol = 0.05): DefSom => doChefe(`besta/${nome}`, volume, vozes, tom, vol);
+const FOLHA_18_BESTA: Record<string, DefSom> = {
+  'besta.risada': S18('besta.risada', 1.15, 1, 0.04, 0.05),
+  // 25/11, him: "os sussurros estão baixos demais, quero que o escuro seja amedrontador" — 0.5 → 1.4 (+9 dB). Sheet 18c,
+  // his: the G ("ficou muito boa com o som 3D") under the whole dark; the F with it while the eyes blink, before you
+  // know which one attacks; the E as the dark lifts at her death, before the light comes back.
+  // 26/11, him again: *"ainda não consigo escutar os sussurros direito... quero mais deles, pouca coisa, não muito"* —
+  // 1.4 → 1.75 (+2 dB).
+  'besta.murmurio': { ...S18('besta.murmurio', 1.75, 1, 0, 0), camada: 'ambiente', laco: true },
+  'besta.murmurio.olhos': { ...S18('besta.murmurio.olhos', 1.1, 1, 0, 0), camada: 'ambiente', laco: true },
+  'besta.murmurio.saida': S18('besta.murmurio.saida', 1.2, 1, 0, 0),
+  'besta.olhos.acende': S18('besta.olhos.acende', 0.5, 1, 0.03, 0.05),
+  'besta.olhos.salto': S18('besta.olhos.salto', 0.7, 1, 0.04, 0.06),
+  'besta.sede.abre': S18('besta.sede.abre', 0.6, 1, 0.02, 0.04),
+  'besta.sede.gole': S18('besta.sede.gole', 0.3, 3, 0.08, 0.1),
+  'besta.sede.tranco': S18('besta.sede.tranco', 0.75, 1, 0.02, 0.05),
+  'besta.garras': S18('besta.garras', 0.5, 2, 0.05, 0.08),
+  'besta.coracao.aperta': S18('besta.coracao.aperta', 0.85, 1, 0, 0),
+  'besta.coracao.parado': S18('besta.coracao.parado', 0.5, 1, 0, 0),
+  'besta.coracao.volta': S18('besta.coracao.volta', 0.9, 1, 0, 0),
+  // 26/11: the heartbeat WITH BODY (his 5c take + harmonics 120–1400 Hz): the eyes' beat and the stopped heart's count
+  'besta.coracao.batida': S18('besta.coracao.batida', 0.8, 2, 0.01, 0.03),
+};
+
 const S15 = (nome: string, volume: number, vozes = 1, tom = 0.02, vol = 0.05): DefSom => doChefe(`chefes-coleira/${nome}`, volume, vozes, tom, vol);
 const FOLHA_15_COLEIRA: Record<string, DefSom> = {
   'guardiao.tranco': S15('guardiao.tranco', 0.7, 1, 0.03, 0.06),
@@ -654,7 +686,7 @@ const FOLHA_15_COLEIRA: Record<string, DefSom> = {
   'guardiao.teto.respingo': S15('guardiao.teto.respingo', 1, 4, 0.08, 0.1),
 };
 
-export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_8_AMBIENTE, ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_15_COLEIRA, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES, ...FOLHA_10_FINAL });
+export const SONS: Record<string, DefSom> = comVacuo({ ...FOLHA_8_AMBIENTE, ...FOLHA_1_NAVE, ...FOLHA_2_EXPLOSOES, ...FOLHA_3_INIMIGOS, ...FOLHA_4_ELITES, ...FOLHA_5A_MAQUINAS, ...FOLHA_5B_SERPENTE, ...FOLHA_5C_NUCLEO, ...FOLHA_15_COLEIRA, ...FOLHA_18_BESTA, ...FOLHA_6_INTERFACE, ...FOLHA_7_CUTSCENES, ...FOLHA_10_FINAL });
 
 /** Every problem of a catalogue, as text (empty = valid). `existe` receives a path under `public/sfx/`. */
 export function validarCatalogo(sons: Record<string, DefSom>, existe: (caminho: string) => boolean, creditos: string): string[] {

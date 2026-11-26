@@ -163,6 +163,11 @@ export interface WeaponDef {
   semHalo?: boolean;
   /** Partículas do flash de boca por disparo (padrão 2). O flash é o coice visual da arma. */
   muzzleFlash?: number;
+  /**
+   * 25/11: the shot's SHAPE from the cards — 2 = Duplo, 3 = Triplo (absent = the single shot). Only the look of what the
+   * Beast's thirst gives back reads it (one, two or three beads); it changes nothing in the gun.
+   */
+  forma?: 2 | 3;
 }
 
 /**
@@ -445,6 +450,51 @@ export class WeaponSystem {
     this.glowWarm = scene.add
       .particles(0, 0, 'spark', { ...halo, tint: [0xff7a2a, 0xffd9a0] })
       .setDepth(18);
+    WeaponSystem.garantirLuz(scene);
+  }
+
+  /**
+   * 25/11 — EVERY SHOT IS A TRACER (him: *"quero que os projéteis da nave (todas as naves) sejam luminosos, como se fossem
+   * traçantes... assim, atirar pode guiar um pouco o caminho, mas é uma luz branda"*): each live shot carries a soft
+   * additive light (its family's colour), above the Beast's dark. `profundidadeTiro` lifts the shots themselves over the
+   * dark while it is on (the scene sets it): the dark is an opaque layer at depth 5, and the shots at 1 vanished under it.
+   */
+  static readonly LUZ_ALFA = 0.3;
+  static readonly LUZ_ESCALA = 0.75;
+  static readonly LUZ_PROF = 5.6;
+  profundidadeTiro = 1;
+  private readonly luzes = new Map<Phaser.Physics.Arcade.Sprite, Phaser.GameObjects.Image>();
+
+  private static garantirLuz(scene: Phaser.Scene): void {
+    if (scene.textures.exists('luzTracante')) return;
+    const tex = scene.textures.createCanvas('luzTracante', 32, 32);
+    if (!tex) return;
+    const ctx = tex.getContext();
+    const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 15);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 32, 32);
+    tex.refresh();
+  }
+
+  /** The tracer light of a shot that was just fired (`cor` = its family's tint). */
+  private acender(b: Phaser.Physics.Arcade.Sprite, cor: number): void {
+    let l = this.luzes.get(b);
+    if (!l) {
+      l = this.scene.add.image(b.x, b.y, 'luzTracante').setBlendMode(Phaser.BlendModes.ADD).setDepth(WeaponSystem.LUZ_PROF);
+      this.luzes.set(b, l);
+    }
+    l.setPosition(b.x, b.y).setTint(cor).setScale(WeaponSystem.LUZ_ESCALA).setAlpha(WeaponSystem.LUZ_ALFA).setVisible(true);
+    b.setDepth(this.profundidadeTiro);
+  }
+
+  /** The tracer colour of the equipped weapon's family (warm / cyan / the plain light of the lasers and cards). */
+  private static corDaLuz(kind: 'cyan' | 'warm' | null, tint?: number): number {
+    if (kind === 'warm') return 0xffc98a;
+    if (kind === 'cyan') return 0x9eeeff;
+    return tint ?? 0xfff0dc;
   }
 
   get current(): WeaponDef {
@@ -523,8 +573,8 @@ export class WeaponSystem {
     this.cooldown -= dt;
 
     // A correção de rumo roda TODO frame, mesmo sem o gatilho: os projéteis já no ar continuam
-    // caçando depois de o jogador ter soltado o botão.
-    this.steer(dt, targets);
+    // caçando depois de o jogador ter soltado o botão. (25/11: not while the Beast's heart is stopped — frozen.)
+    if (!this.congelado) this.steer(dt, targets);
 
     // O figurino também: o rastro do enxame e o pulso do obus não dependem do gatilho.
     this.tickFx();
@@ -781,6 +831,8 @@ export class WeaponSystem {
         this.weapon.bullet,
       );
       b.setData('glowKind', this.weapon.homing || this.weapon.semHalo ? null : quente ? 'warm' : 'cyan');
+      // (the light takes the shot's own family even where the particle halo is off — the lasers, the homing)
+      this.acender(b, WeaponSystem.corDaLuz(quente ? 'warm' : 'cyan', this.weapon.tint));
       // Hitbox derivada da arte, e generosa: bala fina com corpo justo erra o que devia acertar.
       // O PISO de 3px existe pelo traçante (8×1): a 90% da arte, o corpo dele teria ~1px de
       // altura e atravessaria inimigo sem tocar — visualmente acertando.
@@ -798,6 +850,7 @@ export class WeaponSystem {
       b.setData('damage', damage);
       // O pool é um só: um slot que foi míssil de carta tem que voltar a ser tiro da NAVE.
       b.setData('origem', null);
+      b.setData('forma', this.weapon.forma ?? 1);
       // Perfurante: o projétil não morre no inimigo, mas fere cada um só 1× — o Set guarda quem
       // já pagou. Setado a CADA disparo (o pool é compartilhado; um slot que foi perfurante não
       // pode continuar atravessando quando virar bala de pulse).
@@ -862,6 +915,10 @@ export class WeaponSystem {
         );
       }
 
+      // the tracer light follows its shot (and the shot climbs over the dark while it is on)
+      this.luzes.get(b)?.setPosition(b.x, b.y);
+      if (b.depth !== this.profundidadeTiro) b.setDepth(this.profundidadeTiro);
+
       // O halo de legibilidade: uma partícula por projétil por frame, NA posição dele.
       const haloKind = b.getData('glowKind') as 'cyan' | 'warm' | null;
       if (haloKind === 'cyan') this.glowCyan.emitParticleAt(b.x, b.y);
@@ -896,6 +953,7 @@ export class WeaponSystem {
     b.setAlpha(1);
     b.setData('glow', false);
     b.setData('glowKind', null);
+    this.acender(b, WeaponSystem.corDaLuz(null, p.tint));
     // O piso de 3px do traçante vale aqui: o tiro do drone é 6×1 e atravessaria inimigo sem tocar.
     b.body!.setSize(Math.max(b.width, 3), Math.max(b.height, 3));
     // (a caixa velha do slot reusado: ver o `shoot` — antes do `setVelocity`, o `reset` zera a velocidade)
@@ -909,6 +967,7 @@ export class WeaponSystem {
     b.setData('homing', p.homing);
     b.setData('speed', p.velocidade);
     b.setData('origem', p.origem);
+    b.setData('forma', 1);
     const rad = Phaser.Math.DegToRad(p.angulo);
     b.setVelocity(Math.cos(rad) * p.velocidade, Math.sin(rad) * p.velocidade);
     b.setRotation(rad);
@@ -916,6 +975,9 @@ export class WeaponSystem {
   }
 
   /** Devolve ao pool em vez de destruir. */
+  /** 25/11, THE HEART STOPS (the Beast): the shots in the air are frozen by the scene; homing and range wait. */
+  congelado = false;
+
   release(b: Phaser.Physics.Arcade.Sprite): void {
     b.setActive(false).setVisible(false);
     b.body!.enable = false;
@@ -929,6 +991,7 @@ export class WeaponSystem {
     b.setData('glow', false);
     // E o halo: um slot que foi ciano não pode continuar soltando brilho como bala reciclada.
     b.setData('glowKind', null);
+    this.luzes.get(b)?.setVisible(false);
   }
 
   private cull(): void {
@@ -941,9 +1004,10 @@ export class WeaponSystem {
         continue;
       }
 
-      // Alcance esgotado: o projétil se dissipa no ar.
+      // Alcance esgotado: o projétil se dissipa no ar. (25/11: a frozen shot has no range; it counts again from where it
+      // resumes — the pile in front of the ship included.)
       const range = b.getData('range') as number | null;
-      if (range === null) continue;
+      if (range === null || this.congelado) continue;
 
       const dx = b.x - (b.getData('ox') as number);
       const dy = b.y - (b.getData('oy') as number);

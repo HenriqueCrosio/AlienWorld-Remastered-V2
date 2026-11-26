@@ -155,12 +155,14 @@ export function montarArma(reg: Phaser.Data.DataManager, baseId: string): string
       { dy: 3, angle: 5 },
     ];
     def.pellets = 3;
+    def.forma = 3;
   } else if (tem(reg, 'WPN_001')) {
     def.muzzles = [
       { dy: -2, angle: 0 },
       { dy: 2, angle: 0 },
     ];
     def.pellets = 2;
+    def.forma = 2;
   }
   const cadencia = quantas(reg, 'WPN_004');
   if (cadencia) def.rate = base.rate * Math.pow(NUMEROS.cadencia.fator, cadencia);

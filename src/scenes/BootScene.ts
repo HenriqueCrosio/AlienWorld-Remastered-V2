@@ -412,18 +412,16 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // O PREDADOR (16/09, B3): a 2ª forma do chefão final — o que sai de dentro do guardião. Todos os clipes
   // no MESMO quadro de 256² (v3 do PixelLab a partir de PNG local), montados sem recorte por
   // `scripts/_f4/_instalar-predador.mjs`. Um offset por POSE vale para os clipes que partem dela.
-  predadorUrroSheet: { path: 'sprites/predador-urro-sheet.png', w: 256, h: 256 },
-  predadorGiroSheet: { path: 'sprites/predador-giro-sheet.png', w: 256, h: 256 },
-  predadorPuloSheet: { path: 'sprites/predador-pulo-sheet.png', w: 256, h: 256 },
-  predadorAndarSheet: { path: 'sprites/predador-andar-sheet.png', w: 256, h: 256 },
-  predadorQuatroSheet: { path: 'sprites/predador-quatro-sheet.png', w: 256, h: 256 },
-  predadorCorridaSheet: { path: 'sprites/predador-corrida-sheet.png', w: 256, h: 256 },
-  predadorAgarraSheet: { path: 'sprites/predador-agarra-sheet.png', w: 256, h: 256 },
-  predadorTetoBalancoSheet: { path: 'sprites/predador-teto-balanco-sheet.png', w: 256, h: 256 },
-  predadorSlashSheet: { path: 'sprites/predador-slash-sheet.png', w: 256, h: 256 },
-  predadorRasgoSheet: { path: 'sprites/predador-rasgo-sheet.png', w: 256, h: 256 },
-  predadorLavaSheet: { path: 'sprites/predador-lava-sheet.png', w: 256, h: 256 },
-  predadorTetoLavaSheet: { path: 'sprites/predador-teto-lava-sheet.png', w: 256, h: 256 },
+  // 25/11 A BESTA NOVA (E-7-1, the art switch of 24/11): every clip he chose in `besta-bio/passo3b.html`, one sheet each
+  // in the same 256² frame, built and MEASURED per frame by `scripts/_f4/besta_folhas.py` (the table lives in
+  // `src/entities/besta/quadros.ts`). The old `predador-*` sheets stay on disk, no longer loaded.
+  ...Object.fromEntries(
+    [
+      'urro', 'pulo', 'vira', 'andar', 'quatro', 'galope', 'golpe', 'lava', 'rasgo', 'salto-tras', 'morte', 'agarra',
+      'teto-anda-a', 'teto-anda-b', 'teto-lava-1', 'teto-lava-2', 'sede-abre', 'sede-devolve', 'coracao', 'rastejar',
+      'quina-chao-parede', 'quina-parede-teto', 'canto', 'parede-descola', 'parede-agarra', 'escalada',
+    ].map((n) => [`besta:${n}`, { path: `sprites/besta/${n}.png`, w: 256, h: 256 }]),
+  ),
   // A SERRA DO GUARDIÃO (19/09, a skill nova da 1ª forma). Montadas por `scripts/_f4/_instalar-serra.mjs`
   // a partir da candidata `a-disco`. Ver `src/entities/SerraGuardiao.ts`.
   serraGiroSheet: { path: 'sprites/serra-giro-sheet.png', w: 96, h: 96 },
@@ -526,7 +524,6 @@ const SHEETS: Record<string, { path: string; w: number; h: number }> = {
   // P3: o que o vácuo puxa pelo rasgo — rastros, gota de lava, tendão, osso, tecido (16×16, assadas).
   f8SuccaoSheet: { path: 'sprites/f8-succao-sheet.png', w: 16, h: 16 },
   f4Destroco: { path: 'sprites/f4-destroco.png', w: 12, h: 10 },
-  predadorMorteSheet: { path: 'sprites/predador-morte-sheet.png', w: 256, h: 256 },
 
   // AS DUAS PEÇAS-ASSINATURA DO CENÁRIO DA F4, RESPIRANDO (13/09). O coração no chão e o
   // maquinário no teto — as mesmas peças estáticas de sempre (`orgao`/`maquinario`), agora com o
@@ -1008,9 +1005,8 @@ const ART: Record<string, string> = {
   guardiaoDestruido: 'sprites/guardiao-coleira-destruido.png',
   // O PREDADOR, as três POSES (16/09, B3). Miolo MEDIDO (`scripts/_f4/_medir-predador.mjs`), offset ao
   // centro do quadro VIRTUAL: S +6,−5 · luta −23,−3 · pendurado −25,−24 (ver `Predador.QUADRO`) (ver `Predador.MIOLO`).
-  predadorS: 'sprites/predador-s.png',
-  predadorLuta: 'sprites/predador-luta.png',
-  predadorTeto: 'sprites/predador-teto.png',
+  // 25/11: the new Beast's still poses (side, front, all fours, hanging by hand 1 / hand 2, the wall jump's flight).
+  ...Object.fromEntries(['lado', 'frente', 'quatro-pose', 'teto1', 'teto2', 'voo'].map((n) => [`besta:${n}`, `sprites/besta/${n}.png`])),
 
   // ─── O INTERIOR ORGÂNICO DA FASE 4 (2026-07-21) ───
   // Os corredores do Leviatã eram picos e rochas de superfície tingidos — pedra lunar dentro

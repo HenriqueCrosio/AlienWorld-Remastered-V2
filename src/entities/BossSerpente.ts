@@ -1038,6 +1038,28 @@ export class BossSerpente implements StageBoss {
 
   // ─── Dano e fases ───────────────────────────────────────────────────────────
 
+  /**
+   * DEV (spec 2026-11-24 §7): the heads by name; 'fusao' is only the fusion SCENE (a transition, like the Guardian's
+   * 'troca': it always ends in the eel), and 'enguia' the last phase (her life: `?serpente=fusao&vida=`).
+   */
+  private static readonly FASES_DEV = ['serpenteA', 'serpenteB', 'serpenteC', 'fusao'] as const;
+
+  get devFaseAtual(): string {
+    return this.emEnguia ? 'enguia' : BossSerpente.FASES_DEV[this.faseIdx];
+  }
+
+  /** DEV: the current head dies (its real chain of blasts, `transicao`); from C it is the fusion scene, then the eel. */
+  devProximaFase(): string | null {
+    if (this.emEnguia || this.dead || this.entering || this.imune > 0 || this.corpo === 'nada') return null;
+    if (this.faseIdx >= BossSerpente.FASES.length - 1) return null;
+    const proxima = this.faseIdx === BossSerpente.FASES.length - 2 ? 'enguia' : BossSerpente.FASES_DEV[this.faseIdx + 1];
+    this.hpTotal -= this.hpFase;
+    this.hpFase = 0;
+    this.bar.width = 160 * Math.max(0, this.hpTotal / this.maxHpTotal);
+    this.transicao();
+    return proxima;
+  }
+
   damage(amount: number, onde?: 'alvo' | 'corpo'): boolean {
     if (this.emEnguia) return this.danoEnguia(amount);
     if (this.dead || this.entering || this.imune > 0 || this.corpo === 'nada') return false;

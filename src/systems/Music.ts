@@ -61,6 +61,9 @@ export class Music {
   private static contextoNo: GainNode | null = null;
   private static duckNo: GainNode | null = null;
   private static abafoNo: GainNode | null = null;
+  /** 25/11, the Beast's dark (step 10, his idea): a low-pass + a level that close the track almost completely. */
+  private static escuroFiltro: BiquadFilterNode | null = null;
+  private static escuroNo: GainNode | null = null;
   /** The end of the chain (public: the probes tap it). */
   static saidaNo: GainNode | null = null;
   private static mundo: AnalyserNode | null = null;
@@ -82,9 +85,13 @@ export class Music {
     Music.contextoNo = ctx.createGain();
     Music.duckNo = ctx.createGain();
     Music.abafoNo = ctx.createGain();
+    Music.escuroFiltro = ctx.createBiquadFilter();
+    Music.escuroFiltro.type = 'lowpass';
+    Music.escuroFiltro.frequency.value = Music.ESCURO_HZ_ABERTO;
+    Music.escuroNo = ctx.createGain();
     Music.saidaNo = ctx.createGain();
     Music.saidaNo.gain.value = Music.fator();
-    Music.entrada.connect(Music.graves).connect(Music.presenca).connect(Music.contextoNo).connect(Music.duckNo).connect(Music.abafoNo).connect(Music.saidaNo).connect(destino);
+    Music.entrada.connect(Music.graves).connect(Music.presenca).connect(Music.contextoNo).connect(Music.duckNo).connect(Music.abafoNo).connect(Music.escuroFiltro).connect(Music.escuroNo).connect(Music.saidaNo).connect(destino);
     Music.mundo = Som.escutaDoMundo();
     Music.aplicarContexto(0);
     // the tab went to the background: Phaser suspends the context, and the elements wait with it
@@ -141,6 +148,7 @@ export class Music {
     const el = new Audio();
     el.src = `audio/trilha/${FAIXAS[track].arquivo}.${el.canPlayType('audio/ogg; codecs="vorbis"') ? 'ogg' : 'm4a'}`;
     el.preload = 'auto';
+    if (Music.taxa !== 1) Music.taxaNo(el, Music.taxa);
     const fonte = ctx.createMediaElementSource(el);
     const ganho = ctx.createGain();
     ganho.gain.value = 0;
@@ -198,6 +206,58 @@ export class Music {
   static atualizarVolume(): void {
     const ctx = Som.contexto();
     if (ctx && Music.saidaNo) rumo(Music.saidaNo.gain, Music.fator(), ctx.currentTime, 0);
+  }
+
+  /** The dark's filter wide open (nothing cut), Hz. */
+  static readonly ESCURO_HZ_ABERTO = 20000;
+
+  /**
+   * 25/11 — THE BEAST'S DARK (his: *"aplicar um efeito na trilha sonora, para ela se abafar quase completamente nessa
+   * etapa"*; then, playing: *"a música da trilha sonora não ficou abafada a ponto de quase sumir"* — the first pass cut
+   * only above ~600 Hz and 6 dB, and his track is mixed up front, so the bass and the kick came through whole. His call:
+   * *"deixá-la muito baixa e abafada para dar a entender que ela ainda está lá, mas os murmúrios, batimentos etc são mais
+   * importantes"*). `alvo` = the low-pass (Hz) and the level (dB) to go to, in `ms`; `null` = the track as it is. Linear
+   * ramps (memory: setTargetAtTime freezes in Chrome).
+   */
+  static escuro(alvo: { hz: number; db: number } | null, ms: number): void {
+    const ctx = Music.montar();
+    if (!ctx || !Music.escuroFiltro || !Music.escuroNo) return;
+    rumo(Music.escuroFiltro.frequency, alvo ? alvo.hz : Music.ESCURO_HZ_ABERTO, ctx.currentTime, ms);
+    rumo(Music.escuroNo.gain, alvo ? Math.pow(10, alvo.db / 20) : 1, ctx.currentTime, ms);
+  }
+
+  /** The track's speed now (1 = as composed); a new lap starts at it. */
+  private static taxa = 1;
+  private static taxaTimer: ReturnType<typeof setInterval> | null = null;
+
+  /**
+   * 26/11 — THE SLOW MOTION (his, the Beast's slow wall: *"quero que aconteça algum evento para indicar que ela está em
+   * slow motion, como a música ficar lenta"*): the track slows like a tape — speed AND pitch go down together
+   * (`preservesPitch` off), to `taxa` in `ms` (a linear ramp in 40 ms steps: the element's rate is no AudioParam).
+   */
+  static lento(taxa: number, ms: number): void {
+    const de = Music.taxa;
+    const ate = Math.max(0.25, Math.min(1, taxa));
+    if (Music.taxaTimer) clearInterval(Music.taxaTimer);
+    const t0 = performance.now();
+    const aplicar = (r: number): void => {
+      Music.taxa = r;
+      for (const f of [Music.atual, ...Music.saindo]) if (f) Music.taxaNo(f.el, r);
+    };
+    if (ms <= 0) return aplicar(ate);
+    Music.taxaTimer = setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0) / ms);
+      aplicar(de + (ate - de) * k);
+      if (k >= 1 && Music.taxaTimer) {
+        clearInterval(Music.taxaTimer);
+        Music.taxaTimer = null;
+      }
+    }, PASSO_MS);
+  }
+
+  private static taxaNo(el: HTMLAudioElement, r: number): void {
+    (el as HTMLAudioElement & { preservesPitch: boolean }).preservesPitch = false;
+    el.playbackRate = r;
   }
 
   /** Ducks the track to `k` of its level (the pause: 0.4) or restores it (1), in `ms`. */

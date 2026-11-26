@@ -1263,6 +1263,62 @@ export class BossNucleo implements StageBoss {
    * O gate do dano é o ESTADO: o guardião fecha ao MOVER (o corpo inteiro absorve — este método nem é
    * chamado); o predador decide o dele (o surgimento não fere, a recuperação dobra).
    */
+  /** DEV (spec 2026-11-24 §7): the Guardian's steps, 'troca' during the swap, then the Beast's phases. */
+  get devFaseAtual(): string {
+    if (this.predador) return this.predador.devFaseAtual;
+    return this.trocando || this.hpGuardiao <= 0 ? 'troca' : `guardiao${this.degrau + 1}`;
+  }
+
+  /**
+   * DEV: the next step, with the lock of the one before counted as met (the serpents before 33 %; the squeeze and the
+   * ceiling before he dies); from the last step, the one-shot (a hit ≥ his whole life skips the lock) and the Beast.
+   */
+  devProximaFase(): string | null {
+    if (this.predador) return this.predador.devProximaFase();
+    if (this.dead || this.entering || this.trocando) return null;
+    const H = BossNucleo.HP_GUARDIAO;
+    // (floor − 1: just below the threshold, never a floating-point hair above it)
+    if (this.degrau === 0) {
+      this.hpGuardiao = Math.min(this.hpGuardiao, Math.floor(H * BossNucleo.DEGRAUS[0]) - 1);
+      this.atualizarBarra();
+      return 'guardiao2';
+    }
+    this.vistas.add('serpentes');
+    if (this.degrau === 1) {
+      this.hpGuardiao = Math.min(this.hpGuardiao, Math.floor(H * BossNucleo.DEGRAUS[1]) - 1);
+      this.atualizarBarra();
+      return 'guardiao3';
+    }
+    this.vistas.add('aperto');
+    this.vistas.add('teto');
+    this.damage(H);
+    return 'besta1';
+  }
+
+  /** 25/11, THE HEART STOPS: everything that flies is frozen (see `StageBoss.congelado`). */
+  congelado(): boolean {
+    return this.predador?.congelado ?? false;
+  }
+
+  limparCampo(): void {
+    this.predador?.limparCampo();
+  }
+
+  /** 25/11: the Beast is touched where she is DRAWN (see `StageBoss.tocaDesenho`); the guardian keeps his box. */
+  tocaDesenho(x0: number, y0: number, x1: number, y1: number, nave = false): boolean {
+    return this.forma === 'predador' && this.predador ? this.predador.tocaDesenho(x0, y0, x1, y1, nave) : true;
+  }
+
+  /** 25/11: the Beast's dark is on (see `StageBoss.escuro`). */
+  escuro(): boolean {
+    return this.forma === 'predador' && (this.predador?.breu ?? false);
+  }
+
+  /** 25/11, THE THIRST: the Beast's open ring drinks the player's shots (see `StageBoss.beber`). */
+  beber(bala: Phaser.Physics.Arcade.Sprite): boolean {
+    return this.predador?.beber(bala) ?? false;
+  }
+
   damage(amount: number): boolean {
     if (this.predador) {
       if (!this.predador.damage(amount)) return false;

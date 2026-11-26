@@ -57,6 +57,8 @@ if (import.meta.env.DEV) {
   void import('./sandbox/iniciar.ts').then((m) => m.ligarSandbox(game));
   // A SERPENTE DIRETO NA LUTA (só em dev): `?serpente=A&hab=raio` (spec das habilidades §5.6).
   void import('./entities/serpente/atalho.ts').then((m) => m.ligarAtalhoSerpente(game));
+  // A FASE DE UM CHEFÃO DIRETO (só em dev): `?fase=besta3&mao=mediana` (spec 2026-11-24-besta-refeita §7).
+  void import('./dev/atalhoFase.ts').then((m) => m.ligarAtalhoFase(game));
 }
 
 // A CAMADA HD por cima do mundo (`uiHD.ts`): o texto das três vozes e a mesa. O mundo carrega os assets enquanto

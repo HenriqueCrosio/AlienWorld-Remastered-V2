@@ -71,6 +71,26 @@ export interface StageBoss {
    * `sprite` deixa de ser só cobertura dos `targets`. Ausente = o corpo dos chefões de partes absorve (o Núcleo).
    */
   acertoNoCorpo?(x0: number, y0: number, x1: number, y1: number): 'cabeca' | 'corpo' | 'casco' | null;
+  /**
+   * 25/11, THE THIRST (the Beast, spec 2026-11-24 §4.1): `true` = the boss DRANK this player shot (no damage, no card
+   * effect; the scene releases it). Asked before every hit on the boss and, each frame, for every live shot.
+   */
+  beber?(bala: Phaser.Physics.Arcade.Sprite): boolean;
+  /**
+   * 25/11 (the Beast — him: *"os tiros estão pegando no ar"*): the narrow phase of every touch on `sprite` — `true` when
+   * the world box falls on the DRAWN pixels. The scene asks it as the overlap's process callback, for the ship and for
+   * the player's shots (`nave` = the box is the ship's: a boss may spare it, e.g. the Beast travelling between anchors).
+   * Absent = the arcade box is the whole truth.
+   */
+  tocaDesenho?(x0: number, y0: number, x1: number, y1: number, nave?: boolean): boolean;
+  /**
+   * 25/11, THE HEART STOPS (the Beast, spec §4.4): `true` while everything that flies is frozen — the scene freezes the
+   * player's shots too and piles the new ones in front of the ship. `limparCampo` = the bomb in the freeze: her field goes.
+   */
+  congelado?(): boolean;
+  limparCampo?(): void;
+  /** 25/11: `true` while the boss's DARK is on (the Beast's phase 3): the scene lifts the player's shots over it. */
+  escuro?(): boolean;
   /** quanto vale o acerto nos `targets` e na `cabeca` desenhada (a que vai cair: mais, não o dobro); ausente = 1 */
   readonly valeAlvo?: number;
   /**
@@ -88,6 +108,17 @@ export interface StageBoss {
     mira?: { x: number; y: number } | { x: number; y: number }[];
     zona?: { x: number; y: number; r: number };
   };
+  /**
+   * DEV (spec 2026-11-24-besta-refeita §7 — key 7, `?fase=`, key 8): the phase the fight is in now, by the names of
+   * `src/dev/fasesDev.ts` ('torre1', 'besta2'…). Absent = the boss has no phases for the dev keys.
+   */
+  readonly devFaseAtual?: string;
+  /**
+   * DEV: to the START of the next phase, through the boss's own transition, with the current phase's lock counted as
+   * met. Returns the new phase's name, or null when there is no next one or the boss can't jump now (entering, a
+   * transition running) — `IrParaFase` asks again next frame.
+   */
+  devProximaFase?(): string | null;
   update(dt: number, target: Phaser.Physics.Arcade.Sprite): void;
   /**
    * @param onde por onde o tiro entrou, quando a cena sabe: `corpo` é o corpo desenhado (a Serpente, 03/11 — ela não
@@ -684,6 +715,20 @@ export class Boss implements StageBoss {
     b.setData('oy', m.y);
 
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+  }
+
+  /** DEV (spec 2026-11-24 §7): grounded = 'torre1'; from the takeoff on = 'torre2'. */
+  get devFaseAtual(): string {
+    return this.airborne || this.takingOff ? 'torre2' : 'torre1';
+  }
+
+  /** DEV: to half life and the takeoff — the same beat a hit at 50 % triggers. */
+  devProximaFase(): string | null {
+    if (this.dead || this.entering || this.airborne || this.takingOff) return null;
+    this.hp = Math.min(this.hp, this.maxHp / 2);
+    this.bar.width = 160 * (this.hp / this.maxHp);
+    this.startTakeoff();
+    return 'torre2';
   }
 
   /** @returns true se este dano matou o boss. */

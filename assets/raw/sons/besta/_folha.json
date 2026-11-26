@@ -1,0 +1,40 @@
+{
+  "cabeca": {
+    "titulo": "Folha de sons 18 — a Besta refeita (o passo 10: os sons das skills novas e o escuro)",
+    "dia": "2026-11-25",
+    "nota": "Os momentos NOVOS da Besta (a sede, a meia volta, os olhos no escuro, o coração que para), dentro da criatura (o lugar 'interior'), e O ESCURO da fase 3 como você pediu: a risada diabólica quando ela some nos olhos, os murmúrios em laço no breu inteiro e a trilha abafada quase toda (ela já está no jogo: entra no breu e volta na morte).\nO que já soa e FICA (a biblioteca da Besta antiga, aprovada na 5c): o urro, os urros longes, o pouso, o galope, o golpe que acerta e o que erra (também no canto da volta), a carga, o aviso, a lava (carga, arremesso, impacto, estilhaço — as brasas dos olhos estouram com ele), o rasgo, o metal, o breu, os dois batimentos e a morte.\nAs versões: A e B geradas no PixelLab; C sintetizada aqui no tempo do jogo; R = da BIBLIOTECA, o som que você já aprovou e que o jogo usa hoje nesse lugar, provisório.\nO gole da sede repete (um por tiro bebido): julgue no ×8. Os murmúrios são laço: ouça com a trilha por baixo (ela entra abafada no escuro)."
+  },
+  "grupos": [
+    {
+      "titulo": "O escuro (fase 3) — o medo",
+      "sons": [
+        { "nome": "besta.risada", "oque": "A RISADA — ela some no escuro (o salto para trás nos olhos) e ri de algum lugar que você não vê", "onde": "cada vez que os olhos começam; e uma vez na entrada do breu", "lugar": "interior", "repetir": false, "variacao": { "tom": 0.04, "vol": 0.05 }, "chefe": true },
+        { "nome": "besta.murmurio", "oque": "OS MURMÚRIOS — sussurros e respiração em laço, baixos, o breu inteiro (a trilha abafada por cima)", "onde": "do breu até a morte, em laço", "lugar": "interior", "repetir": false, "variacao": { "tom": 0, "vol": 0 }, "chefe": true },
+        { "nome": "besta.olhos.acende", "oque": "OS OLHOS ACENDEM — as três luzes abrem nas bordas", "onde": "uma vez por olhos, quando as luzes acendem", "lugar": "interior", "repetir": false, "variacao": { "tom": 0.03, "vol": 0.05 }, "chefe": true },
+        { "nome": "besta.olhos.salto", "oque": "O SALTO — a verdadeira sai da luz e atravessa a sala (ou cai do teto) pela altura onde você estava", "onde": "o fim de cada olhos", "lugar": "interior", "repetir": false, "variacao": { "tom": 0.04, "vol": 0.06 }, "chefe": true }
+      ]
+    },
+    {
+      "titulo": "A sede (fase 1)",
+      "sons": [
+        { "nome": "besta.sede.abre", "oque": "O PEITO ABRE — as placas abrem como costelas e o anel acende no core", "onde": "o começo de cada sede", "lugar": "interior", "repetir": false, "variacao": { "tom": 0.02, "vol": 0.04 }, "chefe": true },
+        { "nome": "besta.sede.gole", "oque": "O GOLE — cada tiro seu que o anel bebe", "onde": "um por tiro bebido (a HMG: ~15 por segundo)", "lugar": "interior", "repetir": true, "variacao": { "tom": 0.08, "vol": 0.1 }, "chefe": true },
+        { "nome": "besta.sede.tranco", "oque": "O TRANCO — ela devolve tudo de uma vez pela mesma linha", "onde": "o fim de cada sede", "lugar": "interior", "repetir": false, "variacao": { "tom": 0.02, "vol": 0.05 }, "chefe": true }
+      ]
+    },
+    {
+      "titulo": "A meia volta (fase 2)",
+      "sons": [
+        { "nome": "besta.garras", "oque": "AS GARRAS NO METAL — ela crava no teto, vira na quina e desce a parede da direita", "onde": "cada troca de mão no teto, a quina e a descida", "lugar": "interior", "repetir": true, "variacao": { "tom": 0.05, "vol": 0.08 }, "chefe": true }
+      ]
+    },
+    {
+      "titulo": "O coração para (fase 3, o clímax)",
+      "sons": [
+        { "nome": "besta.coracao.aperta", "oque": "O APERTO — ela crava as garras no próprio core, o último batimento", "onde": "o instante em que tudo congela", "lugar": "interior", "repetir": false, "variacao": { "tom": 0, "vol": 0 }, "chefe": true },
+        { "nome": "besta.coracao.parado", "oque": "O CORAÇÃO PARADO — os 2,0 s em que tudo está congelado (a trilha some quase toda)", "onde": "debaixo do congelamento inteiro", "lugar": "interior", "repetir": false, "variacao": { "tom": 0, "vol": 0 }, "chefe": true },
+        { "nome": "besta.coracao.volta", "oque": "O CORAÇÃO VOLTA — o estouro das garras, tudo retoma e a sua pilha de tiros sai", "onde": "o fim do congelamento", "lugar": "interior", "repetir": false, "variacao": { "tom": 0, "vol": 0 }, "chefe": true }
+      ]
+    }
+  ]
+}
