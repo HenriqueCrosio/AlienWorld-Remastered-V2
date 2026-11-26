@@ -3,15 +3,17 @@
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O Guardião foi refeito pela spec
 > `specs/2026-11-22-guardiao-coleira-design.md` em 6 passos, TODOS FECHADOS em 23/11, commitados e empurrados: a coleira
 > e o tranco, os pulsos de lava, os cabos-serpente, o aperto, o teto que sangra, os sons (a onda com a nota distorcida
-> que ele compôs) — e a vida (800 + a trava por degrau + a barra em camadas). Em aberto (§0): a Besta (a mesma
-> trava/vida?), o K sem cartas e a medição da luta (`medir-guardiao.mjs`); depois, a frente 1 do rebalanceamento."**
+> que ele compôs) — e a vida (800 + a trava por degrau + a barra em camadas). Em aberto (§0): o K sem cartas e a
+> medição da luta (`medir-guardiao.mjs`); depois, a frente 1 do rebalanceamento. A Besta FECHOU em 26/11 (a spec
+> `specs/2026-11-24-besta-refeita-design.md`)."**
 > Contexto maior: o START do rebalanceamento (`plans/2026-11-21-rebalanceamento-START.md`, as frentes 0–5).
 
 ## 0. Onde paramos (23/11, fim da sessão) — O GUARDIÃO FECHOU
 
 Os 6 passos da spec aprovados por ele, um a um (as seções 1⅞⅞⅞ → 1 abaixo, da mais nova para a mais velha), e a vida
 refeita depois de ele jogar. **As três perguntas que ficam:**
-1. **A Besta:** as fases dela seguem a vida DELA (180; 66 %/33 %); a barra cheia não muda nada por dentro, mas com a mão
+1. **A Besta:** ✅ 26/11 refeita pela spec `specs/2026-11-24-besta-refeita-design.md` (12 passos, as travas por fase);
+   a vida dela vai para a frente 5. (A pergunta antiga:) as fases dela seguem a vida DELA (180; 66 %/33 %); a barra cheia não muda nada por dentro, mas com a mão
    mediana ela dura ~15 s (a forte, ~5 s: pula as fases 2 e 3) — o mesmo tratamento do Guardião (vida + trava), ou a
    frente 5?
 2. **O K entra sem cartas** (a arma base, 4,5/s: o Guardião leva ~3 min): uma mão típica no treino do K, ou teclas de

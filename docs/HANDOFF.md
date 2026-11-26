@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-22)
+# HANDOFF — estado do projeto (2026-11-26)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-22) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-26) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -18,12 +18,31 @@ sprite que se desfaz nos próprios pixels).
 
 > **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-22-guardiao-coleira-START.md`. O REBALANCEAMENTO
 > (START `plans/2026-11-21-rebalanceamento-START.md`, frentes 0 os chefões → 1 os alvos → 2 o draft → 3 os inimigos →
-> 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA fechou; o GUARDIÃO está sendo refeito pela spec da
-> coleira em 6 passos. Os passos 1 e 2 FECHARAM (o 2 refeito como bullet hell: os pulsos alternados; em 23/11 o bolsão
-> ficou e o último degrau igualou aos outros, 160 px/s · 0,4 s). Os passos 3 (os cabos-serpente), 4 (o aperto), 5 (o
-> teto que sangra) e 6 (os sons, com a nota distorcida que ele compôs) FECHARAM em 23/11, e a vida foi refeita (800 + a
-> trava por degrau + a barra em camadas) — tudo commitado e empurrado. Em aberto (o §0 do START): a Besta, o K sem
-> cartas e a medição da luta; depois, a frente 1 do rebalanceamento."**
+> 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA, o GUARDIÃO (a coleira, 23/11) e a BESTA (a spec
+> `specs/2026-11-24-besta-refeita-design.md`, 12 passos, 26/11) FECHARAM, commitados e empurrados. Em aberto na frente
+> 0 (o §0 do START da coleira): o K sem cartas e a medição das lutas (`medir-guardiao.mjs`, e a da Besta); a vida da
+> Besta vai para a frente 5. Depois, a frente 1 do rebalanceamento (os alvos e a medição)."**
+>
+> 📍 **24–26/11 — A BESTA REFEITA FECHOU; COMMITADO E EMPURRADO.** (spec `specs/2026-11-24-besta-refeita-design.md`, a
+> §10 com o registro inteiro; planos `plans/2026-11-24-besta-passo1-teclas-dev.md` e `plans/2026-11-25-besta-passo*.md`;
+> folhas `folhas/2026-11-24/besta-bio/` (passo1 → passo11c) e as de som `folhas/2026-11-25/sons/18*-besta/`)
+> - **A arte trocou** (24/11, decisão dele): a biomecânica E-7-1 (armadura grafite, o core aceso, o rabo), todos os
+>   clipes no PixMiniMax em trechos presos, as folhas em `public/sprites/besta/` com a tabela por quadro
+>   (`scripts/_f4/besta_folhas.py` → `src/entities/besta/quadros.ts`), a cor B.
+> - **A luta:** a sede (fase 1: o anel bebe os tiros e devolve na forma deles), a volta (fase 2: meia volta pela FRENTE
+>   pelo teto até o rasgo) e a parede lenta (a laje com o corredor, a trilha desacelerando como fita), o breu da fase 3
+>   com os olhos (6 batidas, o vermelho só no pico dela, as brasas falsas que estouram com tiro, só visual) e o coração
+>   que para (o campo congelado 4,5 s, a rota apagada em varredura). As travas por fase; o acerto pelo DESENHO
+>   (`besta/mascara.ts`); nada a ataca por trás da nave. As teclas de dev `7` (a próxima fase do chefão) e `8` (a mão)
+>   e o `?fase=besta3&mao=mediana` (`src/dev/`).
+> - **O som:** a folha 18 (risada, sussurros G/F/E, olhos, sede, garras, coração), o batimento com corpo
+>   (`besta.coracao.batida`: o sub-grave não tocava em notebook) e o urro de morte destapado. Medidores
+>   `scripts/_som/_medir-besta-{escuro,batimento,morte}.mjs` (sempre também como alto-falante de notebook, 150 Hz).
+> - Ele, jogando: *"agora sim chegamos num nível ótimo de gameplay"*. A vida dela (180) fica para a frente 5.
+> - Os testes: `scripts/test-besta-{sede,volta,olhos,coracao,parede,mascara}.mjs` (puros), `scripts/_f4/_besta-*.mjs`
+>   (em jogo; o `_besta-coracao-humano.mjs` joga como uma pessoa, reagindo em 0,8 s), `test-dev-*.mjs`. ⚠️ O
+>   `coracao-bomba` do `_besta-coracao.mjs` falha às vezes por uma corrida do próprio teste (um tiro entra na pilha logo
+>   antes da bomba); passa ao repetir.
 >
 > 📍 **23/11 (fim da sessão) — O GUARDIÃO FECHOU.** Os cabos-serpente (2 serpentes saindo do corpo dele, 2 botes cada
 > nos dois degraus, a de baixo de trás da carcaça, as raízes acompanhando o corpo), o aperto (a borda redesenhada coluna
@@ -2141,7 +2160,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ✅ **14/11, dentro do bloco M** (M1 a tela de CONFIGURAÇÕES com os volumes; M2 o remapear por ação, teclado e controle). Falta só o som em si (depois do balanceamento). Registro de antes: spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ✅ **14/11, o M2 do bloco M** (spec `specs/2026-11-14-bloco-m2-controles-design.md`): perfis MODERNO e ARCADE, as dicas pelo aparelho em uso, a vibração onde o navegador a oferece; testado por ele no DualSense, o de Xbox de verdade ainda não. Registro de antes: spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
-| 3 | **Balanceamento** (colisões, explosões, armas e naves) | ⬜ |
+| 3 | **Balanceamento** (colisões, explosões, armas e naves) | 🟠 **O REBALANCEAMENTO (desde 21/11, START `plans/2026-11-21-rebalanceamento-START.md`), frentes 0–5.** Frente 0, as lutas dos chefões: ✅ a Capitânia (21/11), ✅ o Guardião na coleira (23/11), ✅ a Besta refeita (26/11); falta o K sem cartas e a medição das lutas. Depois: 1 os alvos e a medição → 2 o draft → 3 os inimigos → 4 as cartas → 5 a vida dos chefões e ele jogando tudo |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
@@ -4194,9 +4213,12 @@ antiga) — mas só se sabe isso conferindo, e uma delas ficou mais ESTRITA, nã
 | `L` | menu | entra direto na **FASE 4** (corredores chão+teto → o NÚCLEO) |
 | `K` | menu | treino do chefão final (**GUARDIÃO → CORAÇÃO**, as duas formas) |
 | `F` | menu | entra direto na **CUTSCENE FINAL** (O AFASTAMENTO, ~42s → crédito) |
-| `G` | jogo | pula da fase atual direto para o chefão dela |
-| `1` `2` `3` | jogo | equipa Pulse / HMG / Shotgun |
-| `4` | jogo | equipa o **ENXAME** (a arma alienígena) — é a que mais precisa de playtest |
+| `1`–`4` | jogo, só no `?sandbox` | onda · limpar · invulnerável · painel de medidas (desde 03/10; as armas 1–4 de antes saíram) |
+| `5` | jogo | pula da fase atual direto para o chefão dela (era o `G` até 03/10) |
+| `6` | jogo | abre uma mesa de cartas |
+| `7` | jogo | **a próxima fase do chefão** (24/11): `torre1/2`, `capitania1/2`, `serpenteA/B/C` → `enguia` (pela cena da fusão), `guardiao1/2/3` → `besta1/2/3` (pela troca). A trava da fase anterior conta como cumprida |
+| `8` | jogo | **escolher a mão** (24/11): sem cartas / mediana / forte / a do sandbox (1–4 ou clique, ESC fecha); a fase reinicia no mesmo ponto da luta com a mão nova |
+| URL | — | `?fase=besta3&mao=mediana` abre direto naquela fase do chefão, com aquela mão (spec `2026-11-24-besta-refeita` §7). A mediana e a forte são PROVISÓRIAS: a frente 1 do rebalanceamento as calibra |
 
 ⚠️ **São CORTA-CAMINHOS. Remover quando o balanceamento fechar.**
 
