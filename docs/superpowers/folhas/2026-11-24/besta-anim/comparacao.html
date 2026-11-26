@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: novas contra o jogo</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --no:#ff6b6b; --old:#7fb2ff; --new:#ffb347; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.55 system-ui, sans-serif; margin:0 auto; max-width:1240px; padding:16px; }
+  h1 { font-size:24px; margin:8px 0 4px; } h2 { font-size:19px; margin:40px 0 10px; border-top:1px solid var(--line); padding-top:16px; }
+  p, li { max-width: 940px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  .par { background:var(--pane); border:1px solid var(--line); border-radius:6px; padding:12px; margin:16px 0; }
+  .par h3 { margin:0 0 8px; font-size:17px; }
+  .lado { display:flex; flex-wrap:wrap; gap:12px; }
+  .lado figure { margin:0; }
+  .lado figcaption { font-size:13px; margin-top:4px; }
+  .velho figcaption { color:var(--old); } .novo figcaption { color:var(--new); }
+  .velho img { outline:2px solid #2b4470; } .novo img { outline:2px solid #6b4a17; }
+  .par ul { margin:10px 0 0; padding-left:20px; }
+  details { margin:8px 0; } summary { cursor:pointer; color:var(--dim); }
+  table { border-collapse:collapse; width:100%; font-size:14px; } th, td { border:1px solid var(--line); padding:5px 8px; text-align:left; } th { background:var(--pane); }
+  td.n { text-align:right; font-variant-numeric:tabular-nums; } tr.novo td:first-child { color:var(--new); } tr.velho td:first-child { color:var(--old); }
+  .baixo { color:var(--no); }
+</style>
+</head>
+<body>
+<h1>A Besta: as animações novas contra as que estão no jogo</h1>
+<p class="dim">24/11. Em cada par, à esquerda (azul) está o clipe que já está no jogo e à direita (laranja) a candidata nova. Os dois aparecem no <b>mesmo tamanho de tela</b> (a escala da luta ×2, cada clipe pelo seu fator, com os pés na mesma linha), no <b>tempo do jogo</b> e sobre o escuro da F4. O velho roda duas vezes; o novo para um instante na pose de base antes e depois. Os vereditos "bom" da folha anterior estão <b>retirados</b>: eu julguei se ela continuava ela, e não o movimento comparado com o jogo.</p>
+
+<h2>1. Os pares</h2>
+
+<div class="par"><h3>1. Salto para trás</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-pulo.gif" alt=""><figcaption>jogo: o salto da entrada (11 q, 91 ms)</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-salto-tras.gif" alt=""><figcaption>novo: salto para trás (8 q, 90 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>O novo quase não sai da pose de base. São 8 quadros da mesma silhueta com um agachar de poucos pixels, e não se lê como salto.</li>
+  <li>O velho troca a silhueta inteira a cada quadro: abre, gira, encolhe e pousa.</li>
+</ul></div>
+
+<div class="par"><h3>2. A sede (abre os braços e devolve)</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-urro.gif" alt=""><figcaption>jogo: o urro (9 q, 133 ms)</figcaption></figure>
+  <figure class="velho"><img src="comparar/velho-lava.gif" alt=""><figcaption>jogo: o arremesso de lava (15 q, 39 ms)</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-sede.gif" alt=""><figcaption>novo: a sede (14 q, 110 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>Os braços viram dois bastões retos e compridos, mais longos que os da base, sem cotovelo e sem músculo. Abertos, parecem asas.</li>
+  <li>No tranco da devolução (10–12), os braços viram riscos horizontais borrados.</li>
+  <li>O core fica apagado e nenhum quadro acende. Nos velhos, a luz é o evento: o urro acende o peito e a lava acende o braço.</li>
+</ul></div>
+
+<div class="par"><h3>3. O coração para</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-urro.gif" alt=""><figcaption>jogo: o urro (o peito que acende)</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-coracao.gif" alt=""><figcaption>novo: o coração para (12 q, 110 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>Os braços perdem a carne vermelha e viram faixas claras de osso cruzando o peito. Ela parece enrolada em fitas, e o gesto de cravar as garras no core não se lê.</li>
+  <li>O core some: é o clipe com menos vermelho de todos (0,081).</li>
+</ul></div>
+
+<div class="par"><h3>4. Salto de parede a parede</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-agarra.gif" alt=""><figcaption>jogo: o salto ao teto (17 q, 50 ms)</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-salto-parede.gif" alt=""><figcaption>novo: salto de parede (6 q, 100 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>Quatro dos seis quadros repetem a mesma pose esticada.</li>
+  <li>O corpo escurece (vermelho 0,048), o core some, as garras viram um leque claro e borrado e as pernas afinam.</li>
+  <li>O velho tem um gesto claro: o braço sobe e agarra.</li>
+</ul></div>
+
+<div class="par"><h3>5. Rastejar (e a escalada, que é ele girado)</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-corrida.gif" alt=""><figcaption>jogo: o galope, da mesma base (15 q, 41 ms)</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-rasteja.gif" alt=""><figcaption>novo: rastejar (8 q, 110 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>O quadro 1 tem uma mancha bege embaixo da barriga, um defeito que eu não tinha visto.</li>
+  <li>Os membros quase não se mexem. O galope velho, feito da mesma pose, move as patas de verdade.</li>
+  <li>Girado para a parede, isto não vai ler como escalada.</li>
+</ul></div>
+
+<div class="par"><h3>6. Golpe de canto</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-slash.gif" alt=""><figcaption>jogo: o golpe (15 q, 60 ms)</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-canto.gif" alt=""><figcaption>novo: golpe de canto (7 q, 100 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>O braço que golpeia derrete numa mancha vermelha (2–4), e as garras continuam no chão. Parece um fantasma do braço, não o braço.</li>
+  <li>É lento e picotado: 7 quadros a 100 ms, contra 15 a 60 ms no velho, que ainda tem os arcos de fogo pintados com textura.</li>
+</ul></div>
+
+<div class="par"><h3>7. Troca de mão no teto</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-teto-balanco.gif" alt=""><figcaption>jogo: o balanço pendurado (11 q, 118 ms)</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-teto-maos.gif" alt=""><figcaption>novo: troca de mão, PixMiniMax (16 q, 100 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>As mãos viram punhos curtos com nós redondos (1–9) e perdem as garras longas, que são a marca dela.</li>
+  <li>Do quadro 10 em diante, a placa vira pelo e os braços viram osso. O "meio aproveitável" que escrevi não se sustenta.</li>
+</ul></div>
+
+<div class="par"><h3>8. Golpe pendurado</h3>
+<div class="lado">
+  <figure class="velho"><img src="comparar/velho-teto-lava.gif" alt=""><figcaption>jogo: a lava pendurada (17 q, 65 ms)</figcaption></figure>
+  <figure class="velho"><img src="comparar/velho-slash.gif" alt=""><figcaption>jogo: os arcos do golpe de chão</figcaption></figure>
+  <figure class="novo"><img src="comparar/novo-teto-golpe.gif" alt=""><figcaption>novo: golpe pendurado, PixMiniMax (8 q, 100 ms)</figcaption></figure>
+</div>
+<ul>
+  <li>O arco é uma meia-lua vermelha lisa, de cor chapada e sem textura. Lê como vetor, ao contrário dos arcos de fogo texturizados do golpe de chão.</li>
+  <li>Aparecem bolas cinza no ombro (3–8) e um borrão cinza no quadro 4.</li>
+</ul></div>
+
+<h2>2. O que a comparação mostra</h2>
+<ul>
+  <li><b>Amplitude:</b> os clipes do jogo trocam a silhueta inteira; os novos quase não mudam. Posei com medo de quebrar o desenho, e o movimento saiu tímido.</li>
+  <li><b>Membro longe da base:</b> quando o braço sai muito da pose de partida, o gerador o repinta como osso claro, bastão ou borrão (a sede, o coração, o canto, o teto). O esqueleto segura a cara e a placa, mas não segura os braços.</li>
+  <li><b>Cor e luz:</b> os novos ficam com 5–12% de vermelho vivo, e os do jogo com 11–19%. Nenhum novo tem o core acendendo, e nos velhos a luz é parte do gesto.</li>
+  <li><b>Ritmo:</b> os ataques do jogo têm 15–17 quadros a 40–65 ms. Os meus têm 6–8 quadros a 100 ms, então saem mais lentos e picotados.</li>
+</ul>
+
+<h2>3. As medidas</h2>
+<p class="dim">Por clipe, média dos quadros: altura em px virtuais (o quadro da luta, já corrigido pelo fator), vermelho vivo (a fração do corpo), brilho médio do corpo e cores distintas por quadro. Os números baixos dos novos estão em vermelho.</p>
+<table>
+<tr><th>Clipe</th><th>Quadros</th><th>ms/quadro</th><th>Altura</th><th>Vermelho</th><th>Brilho</th><th>Cores</th></tr>
+<tr class="velho"><td>jogo: o salto da entrada</td><td class="n">11</td><td class="n">91</td><td class="n">214</td><td class="n">0,084</td><td class="n">0,169</td><td class="n">1890</td></tr>
+<tr class="velho"><td>jogo: o urro</td><td class="n">9</td><td class="n">133</td><td class="n">245</td><td class="n">0,107</td><td class="n">0,225</td><td class="n">59</td></tr>
+<tr class="velho"><td>jogo: a lava</td><td class="n">15</td><td class="n">39</td><td class="n">249</td><td class="n">0,163</td><td class="n">0,202</td><td class="n">64</td></tr>
+<tr class="velho"><td>jogo: o salto ao teto</td><td class="n">17</td><td class="n">50</td><td class="n">294</td><td class="n">0,130</td><td class="n">0,184</td><td class="n">574</td></tr>
+<tr class="velho"><td>jogo: o galope</td><td class="n">15</td><td class="n">41</td><td class="n">217</td><td class="n">0,127</td><td class="n">0,182</td><td class="n">64</td></tr>
+<tr class="velho"><td>jogo: o golpe</td><td class="n">15</td><td class="n">60</td><td class="n">264</td><td class="n">0,154</td><td class="n">0,233</td><td class="n">62</td></tr>
+<tr class="velho"><td>jogo: o rasgo</td><td class="n">17</td><td class="n">65</td><td class="n">254</td><td class="n">0,188</td><td class="n">0,238</td><td class="n">688</td></tr>
+<tr class="velho"><td>jogo: o balanço no teto</td><td class="n">11</td><td class="n">118</td><td class="n">298</td><td class="n">0,147</td><td class="n">0,185</td><td class="n">64</td></tr>
+<tr class="velho"><td>jogo: a lava pendurada</td><td class="n">17</td><td class="n">65</td><td class="n">312</td><td class="n">0,147</td><td class="n">0,183</td><td class="n">64</td></tr>
+<tr class="novo"><td>novo: salto para trás</td><td class="n">8</td><td class="n">90</td><td class="n">244</td><td class="n">0,117</td><td class="n">0,185</td><td class="n">61</td></tr>
+<tr class="novo"><td>novo: a sede</td><td class="n">14</td><td class="n">110</td><td class="n">269</td><td class="n baixo">0,106</td><td class="n">0,177</td><td class="n">65</td></tr>
+<tr class="novo"><td>novo: o coração para</td><td class="n">12</td><td class="n">110</td><td class="n">247</td><td class="n baixo">0,081</td><td class="n">0,184</td><td class="n">59</td></tr>
+<tr class="novo"><td>novo: salto de parede</td><td class="n">6</td><td class="n">100</td><td class="n">205</td><td class="n baixo">0,048</td><td class="n baixo">0,161</td><td class="n">56</td></tr>
+<tr class="novo"><td>novo: rastejar</td><td class="n">8</td><td class="n">110</td><td class="n">208</td><td class="n baixo">0,099</td><td class="n baixo">0,172</td><td class="n">49</td></tr>
+<tr class="novo"><td>novo: golpe de canto</td><td class="n">7</td><td class="n">100</td><td class="n">209</td><td class="n baixo">0,092</td><td class="n baixo">0,168</td><td class="n">51</td></tr>
+<tr class="novo"><td>novo: troca de mão no teto</td><td class="n">16</td><td class="n">100</td><td class="n baixo">246</td><td class="n">0,146</td><td class="n">0,181</td><td class="n">51</td></tr>
+<tr class="novo"><td>novo: golpe pendurado</td><td class="n">8</td><td class="n">100</td><td class="n">274</td><td class="n">0,194</td><td class="n">0,210</td><td class="n">54</td></tr>
+</table>
+<p class="dim">No golpe pendurado, o vermelho alto vem da meia-lua chapada, não do corpo. A troca de mão fica ~50 px mais baixa que o balanço porque as mãos-punho não chegam à altura das garras.</p>
+
+<h2>4. Todos os quadros</h2>
+<p class="dim">Os quadros em px virtuais (1:1 na escala da luta, sem ampliação), numerados. Nos novos, o 0 é a base de partida.</p>
+<details><summary>Salto para trás: novo / o salto da entrada / o giro</summary><img src="comparar/tira-novo-salto-tras.jpg" alt=""><img src="comparar/tira-velho-pulo.jpg" alt=""><img src="comparar/tira-velho-giro.jpg" alt=""></details>
+<details><summary>A sede: novo / o urro / a lava</summary><img src="comparar/tira-novo-sede.jpg" alt=""><img src="comparar/tira-velho-urro.jpg" alt=""><img src="comparar/tira-velho-lava.jpg" alt=""></details>
+<details><summary>O coração para: novo / o urro</summary><img src="comparar/tira-novo-coracao.jpg" alt=""><img src="comparar/tira-velho-urro.jpg" alt=""></details>
+<details><summary>Salto de parede: novo / o salto ao teto</summary><img src="comparar/tira-novo-salto-parede.png" alt=""><img src="comparar/tira-velho-agarra.jpg" alt=""></details>
+<details><summary>Rastejar: novo / o galope / o de quatro / o andar</summary><img src="comparar/tira-novo-rasteja.png" alt=""><img src="comparar/tira-velho-corrida.jpg" alt=""><img src="comparar/tira-velho-quatro.jpg" alt=""><img src="comparar/tira-velho-andar.jpg" alt=""></details>
+<details><summary>Golpe de canto: novo / o golpe / o rasgo</summary><img src="comparar/tira-novo-canto.png" alt=""><img src="comparar/tira-velho-slash.jpg" alt=""><img src="comparar/tira-velho-rasgo.jpg" alt=""></details>
+<details><summary>Troca de mão no teto: novo / o balanço</summary><img src="comparar/tira-novo-teto-maos.jpg" alt=""><img src="comparar/tira-velho-teto-balanco.png" alt=""></details>
+<details><summary>Golpe pendurado: novo / a lava pendurada</summary><img src="comparar/tira-novo-teto-golpe.png" alt=""><img src="comparar/tira-velho-teto-lava.jpg" alt=""></details>
+
+<p class="dim">Gerada por <code>ferramentas/comparar.py</code> (lê <code>public/sprites/predador-*-sheet.png</code> com os quadros e tempos de <code>Predador.ts</code>, e as candidatas em <code>cru/</code>). As medidas cruas estão em <code>comparar/medidas.json</code>.</p>
+</body>
+</html>

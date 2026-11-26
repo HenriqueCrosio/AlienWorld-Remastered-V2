@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: os olhos no escuro</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1800px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  h3 { font-size:17px; margin:30px 0 8px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  nav a { color:#9ecbff; margin-right:14px; }
+  .par { display:flex; flex-wrap:wrap; gap:12px; } .par figure { margin:0; } figcaption { color:var(--dim); font-size:13px; max-width:768px; }
+</style>
+</head>
+<body>
+<h1>A Besta, passo 7: os olhos no escuro</h1>
+<p class="dim">25/11. Spec <code>2026-11-24-besta-refeita-design.md</code> §4.3, com a sua escolha "A"; o plano está em <code>plans/2026-11-25-besta-passo7-olhos.md</code>. Tudo foi filmado no jogo rodando, no breu (<code>?fase=besta3&amp;mao=nenhuma</code>), no tempo real, com a nave parada e invulnerável. Nada aqui está aprovado.</p>
+<nav><a href="#como">Como ficou</a><a href="#ver">No jogo</a><a href="#decidir">Para você decidir</a><a href="#teste">Os testes</a></nav>
+
+<h2 id="como">Como ficou</h2>
+<ol>
+  <li><b>Ela sai:</b> um salto para trás pela borda da direita.</li>
+  <li><b>Três luzes acendem, só na frente da nave:</b> na parede da direita e no teto. Cada uma é um brilho com dois olhos acesos.</li>
+  <li><b>A regra:</b> ela é a luz que pulsa <b>junto com o coração</b>. O batimento se ouve, e a luz verdadeira acende em cada um. As outras duas são brasas de lava que pulsam fora do ritmo: ficam apagadas no batimento e acendem entre um e outro, como iscas.</li>
+  <li><b>Depois de dois batimentos</b> (~1,6 s), as brasas estouram em faíscas e a verdadeira salta. O salto passa pelo ponto onde a nave estava <b>no último batimento</b>:
+    <ul>
+      <li><b>da parede:</b> ela solta da parede e atravessa a sala em linha reta, a 380 px/s, até sair pela borda da esquerda. Não para atrás da nave: volta pela direita, com o aviso na borda e o galope até a âncora;</li>
+      <li><b>do teto:</b> os olhos correm pelo teto até ficar em cima da coluna da nave, ainda no escuro, e ela cai reta. Depois volta à âncora com o salto para trás.</li>
+    </ul></li>
+  <li><b>No salto</b>, o corpo inteiro fere e o core fica aceso, no nível de aviso do breu.</li>
+  <li><b>Como fugir:</b> da parede, troque de altura para longe da luz depois do batimento. O corpo do voo é comprido e desce na diagonal, então subir na direção dela não basta. Do teto, troque de coluna.</li>
+  <li><b>Escondida, ela não leva dano.</b> As figuras giram numa tabela fixa, nunca sorteada, e a verdadeira alterna parede, teto, parede.</li>
+</ol>
+
+<h2 id="ver">No jogo</h2>
+<div class="par">
+  <figure><img src="passo7/jogo/olhos-parede.gif" alt="" style="width:768px"><figcaption>Da parede, com a nave parada: o salto passa por ela.</figcaption></figure>
+  <figure><img src="passo7/jogo/olhos-parede-foge.gif" alt="" style="width:768px"><figcaption>Da parede: a nave desce 60 px depois do último batimento e escapa.</figcaption></figure>
+  <figure><img src="passo7/jogo/olhos-teto.gif" alt="" style="width:768px"><figcaption>Do teto: os olhos correm até a coluna da nave e ela cai.</figcaption></figure>
+  <figure><img src="passo7/jogo/olhos-teto-foge.gif" alt="" style="width:768px"><figcaption>Do teto: a nave troca de coluna depois do batimento e escapa da queda.</figcaption></figure>
+</div>
+<h3>Quadro a quadro</h3>
+<img src="passo7/parede.jpg" alt="" style="width:1536px">
+<p class="dim">Da parede. Nos quadros de 1,4 s e 1,6 s, a brasa do meio acende entre os batimentos (a isca), e a verdadeira, a de baixo, espera o batimento.</p>
+<img src="passo7/mergulho.jpg" alt="" style="width:1536px;margin-top:8px">
+<p class="dim">Do teto: o mergulho é só o soltar do agarrar (quadros 4 → 0). O clipe inteiro ao contrário ficava pendurado em três quartos do tempo e caía no fim.</p>
+
+<h2 id="decidir">Para você decidir</h2>
+<table>
+  <tr><th></th><th>O que fiz</th><th>Por quê</th></tr>
+  <tr><td>1. O coração acelera</td><td>Nos olhos o batimento vai de 2,4 s para 0,8 s.</td><td>Com o batimento lento do breu, os dois batimentos seriam quase 5 s de espera. A spec pede ~1,6 s.</td></tr>
+  <tr><td>2. As três figuras</td><td>(parede 60, <b>parede 150</b>, teto 250) · (parede 105, <b>teto 175</b>, teto 300) · (<b>parede 70</b>, parede 165, teto 220). A verdadeira está em negrito.</td><td>Uma tabela fixa que gira, com a verdadeira alternando parede e teto.</td></tr>
+  <tr><td>3. As brasas</td><td>Elas estouram só em faíscas, sem perigo.</td><td>A spec diz "um respingo curto em volta, sem projétil longo". Achei que um perigo a mais ali só pune.</td></tr>
+  <tr><td>4. O teto</td><td>Os olhos correm até a coluna da nave (700 px/s) e a queda é reta.</td><td>Cair na diagonal fazia o corpo deslizar pendurado. Os olhos correndo no escuro leem como "ela está vindo por cima de você".</td></tr>
+  <tr><td>5. A volta depois da parede</td><td>Ela sai pela esquerda sem parar e volta pela direita: a luz de aviso na borda e o galope até a âncora.</td><td>Ficar na parede da esquerda seria ficar atrás da nave.</td></tr>
+  <tr><td>6. Os olhos em dobro</td><td>Resolvido no passo 8: a ordem da fase 3 agora é olhos → golpe → lava → olhos → coração ↻.</td><td>O coração entrou entre os dois.</td></tr>
+</table>
+
+<h2 id="teste">Os testes</h2>
+<ul>
+  <li><b>Puros</b> (<code>node --experimental-transform-types scripts/test-besta-olhos.mjs</code>):
+    <ul>
+      <li>em seis aparições: três luzes, uma verdadeira, todas na frente da nave e a ≥ 40 px uma da outra;</li>
+      <li>a verdadeira acende em cada batimento; as brasas ficam apagadas nele e pulsam entre um e outro;</li>
+      <li>a verdadeira alterna parede / teto / parede; os dois batimentos dão ~1,6 s;</li>
+      <li>da parede, a linha passa onde a nave estava e sai inteira pela esquerda, a 380 px/s;</li>
+      <li>do teto, a queda é reta na coluna da nave, depois de os olhos correrem até ela.</li>
+    </ul></li>
+  <li><b>No jogo</b> (<code>node scripts/_f4/_besta-olhos.mjs [pasta]</code>), em 5 aparições no breu, tudo certo:
+    <ul>
+      <li>ela some, e as três luzes ficam na frente;</li>
+      <li>no batimento a verdadeira acende (0,98) e as brasas não (0,12);</li>
+      <li>salta depois de 2 batimentos, pela posição da nave nesse batimento;</li>
+      <li>a nave parada leva o salto, e a que troca de altura (parede) ou de coluna (teto) escapa;</li>
+      <li>ela volta ao chão; nenhum erro no console.</li>
+    </ul></li>
+  <li><b>A luta sozinha</b>, fase 3 por 45 s: olhos → golpe → lava → olhos ↻, nenhum erro.</li>
+  <li><b>Arquivos:</b>
+    <ul>
+      <li>novos: <code>src/entities/besta/olhos.ts</code> e os dois testes;</li>
+      <li>mexidos: <code>Predador.ts</code> (o estado <code>olhos</code>, as luzes e os olhos assados em pixel, o batimento que marca a nave, os dois saltos, o mergulho, e o <code>reentrar</code> que agora volta à âncora). Nada commitado.</li>
+    </ul></li>
+</ul>
+</body>
+</html>

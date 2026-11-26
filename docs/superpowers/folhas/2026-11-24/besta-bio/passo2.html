@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta nova: as poses</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1200px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:20px; margin:44px 0 10px; border-top:1px solid var(--line); padding-top:18px; }
+  p, li { max-width: 940px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; width:100%; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .ok { color:var(--ok); } .meh { color:var(--meh); } .no { color:var(--no); }
+  details { margin:10px 0; } summary { cursor:pointer; color:var(--dim); }
+</style>
+</head>
+<body>
+<h1>A Besta nova, passo 2: as outras poses</h1>
+<p class="dim">24/11. As poses de frente, de quatro e pendurada, tiradas da E-7-1 pela animação, que é o caminho que guarda o traço (a rotação alisa). Cada uma partiu da E-7-1 em 256², com folga no quadro: duas tentativas no PixMiniMax e, na de frente, uma terceira na animação v3, a que segurou o giro em setembro. Custo: 20 gerações.</p>
+
+<h2>As transições andando</h2>
+<p>Começam na E-7-1 e terminam na pose nova, que fica parada no fim.</p>
+<img src="gif/poses.gif" alt="as sete transições" style="width:1024px">
+
+<h2>As poses finais, ×2</h2>
+<img src="poses-fim.png" alt="as poses finais">
+<table style="margin-top:12px">
+<tr><th>Pose</th><th>Tentativa</th><th>O que saiu</th></tr>
+<tr><td rowspan="3">De frente<br><span class="dim">o surgimento, o urro, a sede e o coração</span></td><td class="ok">frente-1</td><td>Fica <b>de frente</b>, simétrica, com os braços abertos e as garras para baixo. O core aparece inteiro, e o rabo some atrás do corpo. O giro é contínuo e ela é a mesma do começo ao fim.</td></tr>
+<tr><td class="meh">frente-v3</td><td>Para em <b>três quartos</b>, quase de frente, com o rabo à mostra. Fica de frente para a nave, como a pose do surgimento de setembro. Custou 8 gerações.</td></tr>
+<tr><td class="no">frente-2</td><td>Passa do ponto e termina virada para a <b>direita</b>.</td></tr>
+<tr><td rowspan="2">De quatro<br><span class="dim">o galope, o rastejar e a escalada</span></td><td class="ok">quatro-1</td><td>Cai de quatro com a cabeça erguida e o core à mostra, as garras no chão e o rabo para cima.</td></tr>
+<tr><td class="meh">quatro-2</td><td>Fica mais rente ao chão, com a cabeça baixa e o core quase escondido.</td></tr>
+<tr><td rowspan="2">Pendurada<br><span class="dim">o teto</span></td><td class="ok">teto-1</td><td>Fica pendurada pelo braço erguido, com as garras abertas no alto, que é onde fica a linha do teto. O corpo, as pernas e o rabo caem soltos.</td></tr>
+<tr><td class="no">teto-2</td><td>A mão de cima vira um <b>punho</b> fechado e perde as garras, o mesmo defeito de hoje à tarde.</td></tr>
+</table>
+
+<details><summary>Os quadros do meio das transições escolhidas</summary><img src="cru/_poses-meio.jpg" alt=""></details>
+
+<p style="color:#6fdc8c"><b>Aprovado em 24/11:</b> de frente, a <b>frente-v3</b> (o três quartos, que encara a nave); de quatro, a <b>quatro-2</b> (o core mais contido, mas à mostra; a garra de lado da quatro-1 contaminaria o galope); pendurada, <b>as duas</b>. A teto-1 se pendura por uma mão e a teto-2 pela outra, então cada uma tem o seu ataque de lava com a mão livre, e a troca entre elas é o andar pelo teto, alternando as garras que cravam.</p>
+<h2>A minha recomendação</h2>
+<ul>
+  <li><b>De frente: a frente-1.</b> Os gestos de frente (o urro, a sede e o coração) giram em torno do core, e ela mostra o core inteiro. A frente-v3 fica de reserva, se você preferir o três quartos.</li>
+  <li><b>De quatro: a quatro-1.</b></li>
+  <li><b>Pendurada: a teto-1.</b></li>
+</ul>
+<p><b>De quebra, as transições já são clipes.</b> A frente-1 de trás para a frente é a volta do surgimento para a pose da luta. A quatro-1 é o cair de quatro antes do galope. A teto-1 é o salto que agarra o teto. No passo 3 elas entram na comparação com os clipes de hoje, como os outros.</p>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: o coração para</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1800px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  nav a { color:#9ecbff; margin-right:14px; }
+  figure { margin:0; } figcaption { color:var(--dim); font-size:13px; max-width:768px; }
+</style>
+</head>
+<body>
+<h1>A Besta, passo 8: o coração para</h1>
+<p class="dim">25/11. Spec <code>2026-11-24-besta-refeita-design.md</code> §4.4 e a trava do §3; o plano está em <code>plans/2026-11-25-besta-passo8-coracao.md</code>. Tudo foi filmado no jogo rodando, no breu (<code>?fase=besta3&amp;mao=nenhuma</code>), no tempo real, com a nave invulnerável. Nada aqui está aprovado.</p>
+<nav><a href="#como">Como ficou</a><a href="#ver">No jogo</a><a href="#decidir">Para você decidir</a><a href="#teste">Os testes</a></nav>
+
+<h2 id="como">Como ficou</h2>
+<p><b>25/11, os ajustes 1 e 2 que você pediu:</b></p>
+<ul>
+  <li>o coração fica parado <b>2,0 s</b> (eram 1,5). A 110 px/s, a nave sai do canto esquerdo e chega ao bolso perto dela dentro do congelamento;</li>
+  <li>os arcos <b>abriram</b>: 15 estilhaços (3 arcos de 5), a 36 px um do outro. O estilhaço fere pelo miolo aceso (9×6 px), então sobram 27 px de vão para os 21 px da nave, que atravessa qualquer arco por qualquer vão;</li>
+  <li>no aperto, cada estilhaço vai <b>exatamente</b> para o seu lugar da figura (os temporizadores da sequência atrasavam alguns px, e o vão medido não era o do jogo).</li>
+</ul>
+<p>No jogo, o filme leva a nave na velocidade real pelo vão do arco do meio, pelo corredor de cima e até o bolso, e ela não encosta em nada durante o congelamento. Uma coisa a notar: depois da retomada ela volta a se mover, e o galope até a outra âncora passa pelo bolso. Quem soltou a pilha precisa sair dali.</p>
+<ol>
+  <li><b>O arremesso:</b> plantada no chão, ela arremessa do peito (o clipe da lava) <b>um campo de 15 estilhaços</b> de metal em brasa, em <b>3 arcos de alturas diferentes</b>, cobrindo a sala da direita para a esquerda. Não há leque com vão: o desafio é o mapa.</li>
+  <li><b>O aperto:</b> ela vira de frente e crava as garras no próprio core (coracao-a). No aperto, <b>o coração para</b>. Tudo o que voa congela: os estilhaços dela, as brasas, as luzes da lava e os tiros da nave que estavam no ar. O batimento some. <b>Só a nave se move.</b></li>
+  <li><b>O mapa:</b> a sala escura fica iluminada só pelas brasas paradas. Os rastros também param e mostram para onde cada estilhaço ia.</li>
+  <li><b>A pilha:</b> os tiros que você dispara no congelamento voam até 12 px à frente da nave, param ali, se acumulam e acompanham a nave.</li>
+  <li><b>A volta do coração:</b> depois de 2,0 s, as garras soltam num estouro e o coração volta. <b>Tudo retoma junto:</b> os estilhaços seguem os arcos para a esquerda, e a pilha sai de uma vez.</li>
+  <li><b>A jogada:</b> todos os estilhaços seguem para a esquerda, então o lugar seguro é <b>atravessar o mapa até o bolso perto dela</b>, uns 50 px entre o campo e o corpo. Dali a pilha sai no core à queima-roupa: é o maior golpe da luta para quem leu o mapa.</li>
+  <li><b>Ela fica vulnerável</b> no congelamento, com o core aceso e firme.</li>
+  <li><b>A bomba no congelamento</b> limpa o campo dela e gasta a pilha junto, como a sua resposta (a) pediu. O míssil congela como qualquer tiro.</li>
+  <li><b>A trava da fase 3:</b> ela segura em 1 de vida até o coração parar uma vez. Com a trava, a próxima jogada é o coração. Depois dele, o golpe final mata.</li>
+</ol>
+
+<h2 id="ver">No jogo</h2>
+<figure><img src="passo8/jogo/coracao.gif" alt="" style="width:768px"><figcaption>O arremesso, o aperto, o mapa congelado (a nave atravessa atirando até o bolso perto dela), o estouro e a retomada. A nave aqui é levada pelo teste.</figcaption></figure>
+<img src="passo8/prancha.jpg" alt="" style="width:1536px;margin-top:12px">
+
+<h2 id="decidir">Para você decidir</h2>
+<table>
+  <tr><th></th><th>O que fiz</th><th>Por quê</th></tr>
+  <tr><td>1. O congelamento no clipe</td><td>O coracao-a fecha as garras no core (quadros 0–3), segura durante os 2,0 s (3–12) e solta num estouro (13–15). O estouro é o coração voltando.</td><td>O clipe já tem esse gesto. O core escurece debaixo das garras, mas a luz do core continua acesa e firme por cima, porque a spec pede o core aceso.</td></tr>
+  <tr><td>2. O campo</td><td>Estilhaços de metal em brasa (o tiro do rasgo), todos de uma vez do peito. Cada um chega ao seu lugar no instante do aperto.</td><td>"Estilhaços e lava": a bola de lava respinga e deixa poça ao cair, e isso somaria um segundo perigo ao mapa.</td></tr>
+  <tr><td>3. O bolso perto dela</td><td>~50 px entre o campo e o corpo dela.</td><td>É para onde a leitura do mapa leva, e de onde a pilha acerta.</td></tr>
+  <tr><td>4. A pilha</td><td>Acompanha a nave, 12–20 px à frente.</td><td>Ela sai de onde você está quando o coração volta, e não de onde você atirou.</td></tr>
+  <tr><td>5. O que para</td><td>Os projéteis (dela e seus), as brasas e as luzes da lava. O fundo e a própria Besta não param: ela segue apertando o core.</td><td>A spec: tudo o que voa.</td></tr>
+  <tr><td>6. A trava</td><td>1 de vida até o coração parar uma vez.</td><td>A spec: "não morre antes do coração parar".</td></tr>
+</table>
+
+<h2 id="teste">Os testes</h2>
+<ul>
+  <li><b>Puros</b> (<code>node --experimental-transform-types scripts/test-besta-coracao.mjs</code>):
+    <ul>
+      <li>15 estilhaços em 3 arcos de 5, em alturas diferentes, de x 36 a 198;</li>
+      <li>em qualquer vão de um arco sobram ≥ 26 px livres para a nave de 21 px;</li>
+      <li>saindo de x=40, a nave chega ao bolso dentro do congelamento;</li>
+      <li>cada um chega exato ao seu lugar no aperto, e nenhum bate no teto ou no chão antes;</li>
+      <li>todos seguem para a esquerda, e há o bolso de ~50 px perto dela.</li>
+    </ul></li>
+  <li><b>No jogo</b> (<code>node scripts/_f4/_besta-coracao.mjs</code>), tudo certo:
+    <ul>
+      <li>a trava segura em 1 de vida e puxa o coração;</li>
+      <li>o campo tem 15 estilhaços, e o coração fica parado 2,0 s;</li>
+      <li>os estilhaços e os tiros da nave no ar ficam parados, e só a nave se move;</li>
+      <li>a pilha se forma na frente da nave e a acompanha;</li>
+      <li>na batida os estilhaços seguem viagem e a pilha sai de uma vez;</li>
+      <li>a bomba no congelamento limpa o campo e gasta a pilha;</li>
+      <li>depois do coração a trava abre e o golpe final mata;</li>
+      <li>nenhum erro no console.</li>
+    </ul></li>
+  <li><b>A luta sozinha</b>, fase 3 por 60 s: olhos → golpe → lava → olhos → coração ↻, nenhum erro. Os olhos já não aparecem duas vezes seguidas.</li>
+  <li><b>Arquivos:</b>
+    <ul>
+      <li>novos: <code>src/entities/besta/coracao.ts</code>, os dois testes e o filme;</li>
+      <li>mexidos: <code>Predador.ts</code> (o estado <code>coracao</code>, o campo, congelar e descongelar, a trava), <code>Boss.ts</code> e <code>BossNucleo.ts</code> (o <code>congelado</code> e o <code>limparCampo</code>), <code>GameScene.ts</code> (os tiros congelados, a pilha, a bomba) e <code>WeaponSystem.ts</code> (a perseguição e o alcance esperam). Nada commitado.</li>
+    </ul></li>
+</ul>
+</body>
+</html>

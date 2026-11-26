@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta nova: os clipes</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1800px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  h3 { font-size:17px; margin:30px 0 8px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .no { color:var(--no); } .meh { color:var(--meh); } .ok { color:var(--ok); }
+  details { margin:8px 0 14px; } summary { cursor:pointer; color:var(--dim); }
+  nav a { color:#9ecbff; margin-right:14px; }
+  .nota { background:var(--pane); border:1px solid var(--line); border-radius:6px; padding:8px 12px; max-width:980px; }
+</style>
+</head>
+<body>
+<h1>A Besta nova, passo 3: os clipes</h1>
+<p class="dim">24/11, à noite, gerado enquanto você estava fora. Todos os clipes da lista, a partir das poses aprovadas (de lado = E-7-1, de frente = frente-v3, de quatro = quatro-2, pendurada = teto-1 e teto-2), no PixMiniMax, com 16 quadros e duas candidatas por pedido. Custo: <b>~128 gerações</b> (saldo ~2.210 até 04/12).</p>
+<p><b>Como ler os GIFs:</b> cada painel é desenhado como o MOTOR desenha. <b>HOJE</b> é o clipe que está no jogo, no fator e no tempo dele (Predador.ts). <b>NOVA</b> é a candidata, em 105 px de altura, com os pés no mesmo chão e o mesmo tempo total. Não marquei nenhuma como boa: os textos dizem o que se vê e os defeitos. A escolha é sua.</p>
+<nav><a href="#teto">Pendurada</a><a href="#frente">De frente</a><a href="#lado">De lado</a><a href="#quatro">De quatro e as quinas</a><a href="#aprendi">O que a geração ensinou</a><a href="#falta">O que falta</a></nav>
+
+<div class="nota"><b>Limpo</b> no rótulo quer dizer que tirei do clipe de 1 a 3 quadros em que o gerador pintou um clarão em forma de estrela, sem tocar no resto. Os quadros tirados estão listados em cada caso.</div>
+
+<!-- ============================================================ TETO -->
+<h2 id="teto">Pendurada (teto-1 e teto-2)</h2>
+<p class="dim">Pendurada, ela ocupa a arena até o chão (decidido em 24/11: "não tem problema").</p>
+<img src="passo3/teto-no-jogo.png" alt="as poses penduradas no jogo" style="width:760px">
+
+<h3>O andar pendurado: a troca de mão</h3>
+<p>São dois clipes, um da teto-1 para a teto-2 e outro de volta. Em cada um, a mão livre crava no teto e a outra solta. Para ela <b>avançar de verdade</b>, o último quadro de cada clipe está deslocado para a esquerda (48 px no primeiro e 64 px no segundo), então o corpo anda dentro do clipe e a garra que segura não se mexe. Na emenda, o motor só reposiciona o sprite, sem salto. Medi a garra em todos os quadros: a que segura fica no mesmo pixel do teto até soltar, nas quatro candidatas. Na passagem há uns 2 quadros com as duas mãos cravadas.</p>
+<p>Em cima, hoje: o balanço, com o corpo deslizando pelo código. Embaixo, a nova: dois ciclos, com o clipe a 50 ms por quadro.</p>
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+  <figure style="margin:0"><img src="passo3/teto/a-andar.gif" alt="" style="width:768px"><figcaption class="dim">candidatas A (troca-12-a + troca-21-a)</figcaption></figure>
+  <figure style="margin:0"><img src="passo3/teto/b-andar.gif" alt="" style="width:768px"><figcaption class="dim">candidatas B (troca-12-b + troca-21-b)</figcaption></figure>
+</div>
+<ul>
+  <li>Nas duas, ela cruza o braço livre à frente e crava. A mão que crava na teto-2 é o punho fechado que você já tinha visto.</li>
+  <li><b>A velocidade:</b> a 50 ms por quadro, ela anda ~49 px/s, menos da metade do balanço de hoje (~110 px/s). Isso se acerta no motor, encurtando o tempo de cada quadro.</li>
+  <li>Na troca-12-a há um pixel laranja solto perto dos pés, no quadro 9.</li>
+</ul>
+<details><summary>Os quadros das quatro trocas, em 256²</summary><img src="passo3/teto/trocas-q.jpg" alt=""></details>
+
+<h3>A lava do teto, com a mão livre</h3>
+<p>Uma lava por pose, cada uma com a mão que está solta. Em cada GIF: hoje, a lava da teto-1 e a da teto-2.</p>
+<table>
+<tr><th>Rodada</th><th>O que saiu</th></tr>
+<tr><td>a, b (1ª)</td><td class="no">Em três das quatro, o <b>corpo inteiro acende em laranja</b> no meio do gesto (lava-1-b, lava-2-a, lava-2-b). A lava-1-a fica escura: colhe a bola no core, arremessa e volta.</td></tr>
+<tr><td>c, d (2ª, pedindo o corpo escuro)</td><td>As quatro mantêm <b>o corpo escuro</b>. A garra vai ao core, tira a bola, arremessa para a esquerda e volta. A lava-1-c e as lava-2 pintam um rastro de fogo depois da soltura, e a lava-1-d deixa a bola pintada <b>cair</b> sozinha.</td></tr>
+</table>
+<p class="dim">Em todas, a bola pintada tem de sair do clipe no quadro da soltura, porque quem lança a bola é o motor. É o mesmo corte que a lava de hoje já tem.</p>
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+  <figure style="margin:0"><img src="passo3/teto/a-lava.gif" alt="" style="width:600px"><figcaption class="dim">lava-1-a, lava-2-a</figcaption></figure>
+  <figure style="margin:0"><img src="passo3/teto/b-lava.gif" alt="" style="width:600px"><figcaption class="dim">lava-1-b, lava-2-b</figcaption></figure>
+  <figure style="margin:0"><img src="passo3/teto/c-lava.gif" alt="" style="width:600px"><figcaption class="dim">lava-1-c, lava-2-c (corpo escuro)</figcaption></figure>
+  <figure style="margin:0"><img src="passo3/teto/d-lava.gif" alt="" style="width:600px"><figcaption class="dim">lava-1-d, lava-2-d (corpo escuro)</figcaption></figure>
+</div>
+<details><summary>Os quadros das oito lavas, em 256²</summary><img src="passo3/teto/lavas-q.jpg" alt=""><img src="passo3/teto/lavas-cd-q.jpg" alt="" style="margin-top:8px"></details>
+
+<h3>Agarrar o teto e soltar</h3>
+<p>É a transição da teto-1, feita no passo 2. De trás para a frente, ela solta o teto. No jogo, o código leva o corpo do chão ao teto durante o clipe, como faz hoje com a agarra.</p>
+<img src="passo3/chao/troca-agarra.gif" alt="" style="width:1320px">
+
+<!-- ============================================================ FRENTE -->
+<h2 id="frente">De frente (frente-v3)</h2>
+
+<h3>A troca de lado para frente</h3>
+<p>É a transição da frente-v3, feita no passo 2. De trás para a frente, ela é a volta para a pose de luta, que hoje é o giro.</p>
+<img src="passo3/chao/troca-lado-frente.gif" alt="" style="width:1320px">
+
+<h3>O urro</h3>
+<img src="passo3/chao/urro.gif" alt="" style="width:100%">
+<table>
+<tr><td>urro-a <span class="dim">(limpo: sem q6–8)</span></td><td>Joga a cabeça para trás, com a boca aberta e os braços abertos. Mesmo depois do corte, sobram fagulhas pintadas em volta por alguns quadros.</td></tr>
+<tr><td class="no">urro-b</td><td>O corpo inteiro fica laranja no meio do gesto.</td></tr>
+<tr><td>urro2-a <span class="dim">(limpo: sem q13–14)</span></td><td>Boca aberta para cima, braços abertos e o corpo escuro o tempo todo. O urro segura por vários quadros antes de voltar.</td></tr>
+<tr><td>urro2-b <span class="dim">(limpo: sem q10–11)</span></td><td>O mesmo gesto, mais curto.</td></tr>
+</table>
+<details><summary>Os quadros em 256² (sem a limpeza)</summary><img src="passo3/chao/urro-q.jpg" alt=""></details>
+
+<h3>O pulo (o surgimento)</h3>
+<p>Ela se agacha, salta com as pernas recolhidas e os braços erguidos, pousa agachada e volta à pose. A distância do salto fica com o código, como hoje.</p>
+<img src="passo3/chao/pulo.gif" alt="" style="width:1320px">
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/pulo-q.png" alt=""></details>
+
+<h3>A sede: abrir e beber</h3>
+<p>Ainda não existe no jogo, então o painel de hoje mostra o urro, o gesto de frente mais parecido.</p>
+<img src="passo3/chao/sede-abre.gif" alt="" style="width:100%">
+<table>
+<tr><td class="no">sede-abre-a, -b (1ª)</td><td>Corpo laranja e clarões.</td></tr>
+<tr><td class="no">sede-abre2-a, -b (2ª)</td><td>Clarões em estrela maiores ainda.</td></tr>
+<tr><td>sede-abre3-a, -b (3ª)</td><td><b>Limpas.</b> Abre os braços, arqueia, as placas do peito se abrem como costelas e mostram o core, segura aberta e fecha. O corpo fica escuro e nada é pintado no ar.</td></tr>
+</table>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/sede-abre-q.jpg" alt=""></details>
+
+<h3>A sede: devolver</h3>
+<img src="passo3/chao/sede-devolve.gif" alt="" style="width:100%">
+<table>
+<tr><td class="no">sede-devolve-a, -b, 2-a, 2-b</td><td>Explosões pintadas que cobrem o corpo.</td></tr>
+<tr><td>sede-devolve3-a</td><td><b>Limpa.</b> Ela se curva, dá um tranco para cima com os braços para trás e as costelas abertas, depois se curva e fecha.</td></tr>
+<tr><td>sede-devolve3-b</td><td>O mesmo tranco, com o core e as costelas mais acesos no meio.</td></tr>
+</table>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/sede-devolve-q.jpg" alt=""></details>
+
+<h3>O coração para</h3>
+<img src="passo3/chao/coracao.gif" alt="" style="width:1320px">
+<table>
+<tr><td>coracao-a <span class="dim">(limpo: sem q13)</span></td><td>Crava as garras das duas mãos no core e aperta. O core apaga quase todo, ela solta e ele volta. No q13 havia uma mancha clara em volta do corpo.</td></tr>
+<tr><td>coracao-b</td><td>O mesmo, sem mancha nenhuma.</td></tr>
+</table>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/coracao-q.png" alt=""></details>
+
+<!-- ============================================================ LADO -->
+<h2 id="lado">De lado (E-7-1)</h2>
+
+<h3>O andar no lugar</h3>
+<p>É um ciclo. O laço foi achado dentro do clipe com o <code>_achar-loop</code>, como nos de setembro.</p>
+<img src="passo3/chao/andar.gif" alt="" style="width:1320px">
+<ul><li><b>andar-a</b> fecha o laço nos quadros 1..13 e <b>andar-b</b> nos quadros 1..9. Os dois fecham razoavelmente (fecho/passo ~0,6), mas não perfeito: pode haver um pequeno tranco na volta do laço.</li></ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/andar-q.png" alt=""></details>
+
+<h3>O golpe</h3>
+<img src="passo3/chao/golpe.gif" alt="" style="width:100%">
+<table>
+<tr><td class="no">golpe-a, -b, 2-a, 2-b</td><td>Arcos de foice enormes pintados em 2 a 7 quadros. O braço sobe bem, mas o arco cobre o gesto.</td></tr>
+<tr><td>golpe3-a <span class="dim">(limpo: sem q5–6)</span></td><td>Ergue o braço bem alto e desce duas vezes até o chão. Depois do corte, sobram umas fagulhas no q7.</td></tr>
+<tr><td>golpe3-b</td><td>O mesmo gesto, com um risco vermelho fino no q5.</td></tr>
+</table>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/golpe-q.jpg" alt=""></details>
+
+<h3>O rasgo</h3>
+<img src="passo3/chao/rasgo.gif" alt="" style="width:100%">
+<table>
+<tr><td class="no">rasgo-a, -b, 2-a, 2-b</td><td>Pintam uma coluna de luz ou de fogo saindo do chão, que é justamente o que o motor lança.</td></tr>
+<tr><td>rasgo3-a</td><td><b>Limpo.</b> Agacha, crava as garras no chão e sobe puxando o braço até acima da cabeça, depois volta.</td></tr>
+<tr><td>rasgo3-b <span class="dim">(limpo: sem q6)</span></td><td>O mesmo, com gotas de lava pintadas nas garras no q5 e no q7.</td></tr>
+</table>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/rasgo-q.jpg" alt=""></details>
+
+<h3>A lava do chão</h3>
+<img src="passo3/chao/lava.gif" alt="" style="width:100%">
+<ul>
+  <li>Nas quatro candidatas, a garra colhe a bola no core e arremessa, e o corpo fica escuro. Na lava-b e na lava2-a, a soltura vira um <b>jato de fogo</b> pintado.</li>
+  <li>A lava-a e a lava2-b soltam uma bola pintada inteira. Em todas, a bola sai do clipe no quadro da soltura, porque quem lança é o motor.</li>
+  <li>No tempo de hoje (580 ms), os 16 quadros passam rápidos.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/lava-q.jpg" alt=""></details>
+
+<h3>O salto para trás</h3>
+<p>Hoje ela fica parada e o código a desliza. Nas duas candidatas, ela se agacha, salta para trás com as pernas recolhidas, pousa e volta à pose. A distância fica com o código.</p>
+<img src="passo3/chao/salto-tras.gif" alt="" style="width:1320px">
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/salto-tras-q.png" alt=""></details>
+
+<!-- ============================================================ QUATRO -->
+<h2 id="quatro">De quatro (quatro-2) e as quinas</h2>
+
+<h3>Cair de quatro</h3>
+<p>É a transição da quatro-2, feita no passo 2: uma vez no tempo de hoje (380 ms) e outra no dobro.</p>
+<img src="passo3/chao/troca-quatro.gif" alt="" style="width:1320px">
+
+<h3>O galope</h3>
+<img src="passo3/chao/galope.gif" alt="" style="width:1320px">
+<ul>
+  <li><b>galope-a</b> tem um laço quase perfeito nos quadros 3..12 (fecho/passo 0,1). As garras vão e voltam, as pernas impulsionam e o rabo segue.</li>
+  <li><b>galope-b</b> não fecha laço limpo: daria um tranco a cada volta.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/galope-q.png" alt=""></details>
+
+<h3>O rastejar (a base da escalada)</h3>
+<p>A escalada é o rastejar girado 90° fora do jogo, como a spec previu.</p>
+<img src="passo3/chao/rastejar.gif" alt="" style="width:1320px">
+<ul><li class="meh">Nenhuma das duas fecha laço limpo (fecho/passo acima de 1,2). O gesto é o rastejar pedido, mas em ciclo daria tranco. Falta uma rodada, ou o laço em vai-e-volta.</li></ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/rastejar-q.png" alt=""></details>
+
+<h3>O salto de parede a parede</h3>
+<p>Ela se lança com o corpo esticado e reto, os dois braços à frente e as garras abertas, e volta a ficar de quatro. O voo de borda a borda fica com o código.</p>
+<img src="passo3/chao/salto-parede.gif" alt="" style="width:900px">
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/salto-parede-q.png" alt=""></details>
+
+<h3>As quinas da volta</h3>
+<p>A pose na parede é a quatro-2 girada 90° em pixel, que é exato: a cabeça para cima e as garras na parede da esquerda. A parede da direita é o espelho.</p>
+<p><b>Do chão para a parede:</b> ela chega à parede, sobe as garras da frente e puxa o corpo até ficar agarrada de pé.</p>
+<img src="passo3/chao/quina-chao-parede.gif" alt="" style="width:900px">
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/quina-chao-parede-q.png" alt=""></details>
+<p><b>Da parede para o teto:</b> agarrada no alto da parede, ela estica um braço para o teto, crava e se pendura na teto-1. Na -b, ela chega pendurada muito cedo (já no q5) e fica parada no resto.</p>
+<img src="passo3/chao/quina-parede-teto.gif" alt="" style="width:900px">
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/quina-parede-teto-q.png" alt=""></details>
+
+<h3 id="canto">O ataque de canto</h3>
+<p>Agarrada embaixo na parede, ela torce o tronco para dentro da sala e varre com o braço livre. O painel de hoje mostra o slash, o mais parecido.</p>
+<img src="passo3/chao/canto.gif" alt="" style="width:1320px">
+<ul>
+  <li><b>canto-a:</b> presa pelas garras de trás, ela se joga para dentro da sala com o braço esticado e volta. No meio do gesto, o peito vira uma faixa listrada de laranja maior que o core, e há fagulhas soltas no q7.</li>
+  <li><b>canto-b:</b> o mesmo gesto, com o core do tamanho normal e umas fagulhas no q7.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/chao/canto-q.png" alt=""></details>
+
+<!-- ============================================================ APRENDI -->
+<h2 id="aprendi">O que a geração ensinou</h2>
+<ul>
+  <li><b>A palavra do efeito vira efeito pintado.</b> "core flaring", "slashes", "tears upward" e "bursting" deram clarões em estrela, arcos de foice e colunas de luz.</li>
+  <li><b>Negar o efeito ("no flash, no slash arc") pintou ainda mais.</b> Na 2ª rodada, quatro dos cinco gestos pioraram.</li>
+  <li><b>A 3ª rodada descreveu só a mecânica do corpo</b> ("lifts the arm… swings it down", "the plates hinge open like ribs"), sem nenhuma palavra de efeito. A sede saiu limpa nas quatro, e o rasgo e o golpe quase limpos. A pose base da E-7-1, com placas e juntas, ajuda: dá para pedir "as placas abrem como costelas" e o gerador entende.</li>
+  <li><b>"The armor stays dark graphite; only the small core glows"</b> segurou o corpo escuro nas lavas.</li>
+  <li>Em nenhum clipe ela virou outro bicho nem se virou para o lado errado, o problema que derrubou os clipes da carne.</li>
+</ul>
+
+<!-- ============================================================ FALTA -->
+<h2 id="falta">O que falta</h2>
+<ol>
+  <li><b>A sua escolha, clipe a clipe</b>, entre as candidatas, ou o pedido de outra rodada.</li>
+  <li><b>O rastejar</b> sem laço limpo: uma nova rodada ou o laço em vai-e-volta.</li>
+  <li><b>A morte</b>, que deixei para depois de você ver como ela se mexe.</li>
+  <li><b>No passo 4 (o motor):</b> cortar a bola pintada no quadro da soltura em todas as lavas; o tempo de cada clipe (o andar no teto está devagar); as folhas de sprite e os fatores; as hitboxes por quadro.</li>
+</ol>
+<p class="dim">Ferramentas: <code>ferramentas/teto-clipes.mjs</code> e <code>passo3-clipes.mjs</code> (as gerações, com os pedidos de cada rodada comentados), <code>comparar_teto.py</code> e <code>comparar_p3.py</code> (os GIFs lado a lado como o motor desenha), <code>garras_teto.py</code> (a garra no teto por quadro), <code>clarao.py</code> (os quadros com clarão pintado), <code>ampliar.py</code> (os quadros em 256²). Os quadros crus ficam em <code>cru/teto/</code> e <code>cru/p3/</code>.</p>
+</body>
+</html>

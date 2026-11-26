@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: a sede</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1800px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  h3 { font-size:17px; margin:30px 0 8px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .meh { color:var(--meh); } .ok { color:var(--ok); }
+  nav a { color:#9ecbff; margin-right:14px; }
+  .par { display:flex; flex-wrap:wrap; gap:12px; } .par figure { margin:0; } figcaption { color:var(--dim); font-size:13px; max-width:576px; }
+</style>
+</head>
+<body>
+<h1>A Besta, passo 5: a sede</h1>
+<p class="dim">25/11. Spec <code>2026-11-24-besta-refeita-design.md</code> §4.1 e a trava do §3; o plano está em <code>plans/2026-11-25-besta-passo5-sede.md</code>. Tudo foi filmado no jogo rodando (<code>?fase=besta1&amp;mao=nenhuma</code>), no tempo real, com a nave parada e invulnerável. Nada aqui está aprovado.</p>
+<nav><a href="#como">Como ficou</a><a href="#ver">No jogo</a><a href="#decidir">Para você decidir</a><a href="#teste">Os testes</a></nav>
+
+<h2 id="como">Como ficou</h2>
+<ul>
+  <li><b>A sequência:</b> plantada numa âncora do chão, ela vira de frente para a nave (o virar ao contrário) e abre o peito (sede-abre3-a). O core acende <b>o anel</b>. Por 2,0 s o peito fica aberto, respirando: são os quadros 5–12 indo e voltando. Depois o peito fecha, vem o tranco (sede-devolve-b, com o clarão que você manteve) e ela volta ao perfil. Por fim, 0,6 s de recuperação com o dano em dobro, como depois da lava. Pendurada, ela solta do teto antes.</li>
+  <li><b>O anel bebe:</b> todo tiro cuja caixa encosta no anel some nele, sem dano e sem efeito de carta. O míssil entra nessa regra. Cada um guarda o ponto onde entrou e a direção em que vinha. O anel e a luz do core vão tomando a cor do que bebem (com a arma base ficaram ciano-claro).</li>
+  <li><b>O tranco devolve:</b> cada tiro volta pela mesma linha, ao contrário e na ordem em que entrou, tudo comprimido em 0,6 s. O tiro devolvido é a gota de lava dela, reta, com a luz na cor da arma. Quem atirou parado recebe uma parede na própria altura, e o dispersor volta em leque.</li>
+  <li><b>A trava da fase 1:</b> a vida não passa de 66 % antes de uma sede. Com a trava, a próxima jogada é a sede, e o tiro a mais bate no osso com o brilho frio, como na fase 2.</li>
+  <li><b>Um conserto no corpo:</b> de frente, de braços abertos, a caixa do tronco engolia os braços e segurava a bala antes do anel. Isso contraria o §6 da spec, que deixa braços e pernas vazados. Nos quadros da sede o corpo agora é <b>a coluna do tronco e da cabeça</b> (verde, abaixo). Também corrigi três quadros em que o core da tabela pulava para fora do peito (abrir 15, devolver 11 e 12).
+    <img src="passo5/corpo-tronco.png" alt="" style="width:1024px;margin-top:8px"></li>
+  <li><b>Os sons</b> ficam para o passo 10. Por enquanto a sede reaproveita a carga e o arremesso da lava.</li>
+</ul>
+
+<h2 id="ver">No jogo</h2>
+<div class="par">
+  <figure><img src="passo5/jogo/sede-inteira.gif" alt="" style="width:576px"><figcaption>A sede inteira, sem tiro: virar de frente, abrir, o anel, fechar, o tranco (sem nada bebido não volta nada) e voltar ao perfil.</figcaption></figure>
+  <figure><img src="passo5/jogo/sede-base.gif" alt="" style="width:576px"><figcaption>A arma base atirando parada na altura do core: o anel bebeu 6 e devolveu 6 na mesma linha.</figcaption></figure>
+  <figure><img src="passo5/jogo/sede-hmg.gif" alt="" style="width:576px"><figcaption>A HMG já girando: o anel bebeu 29 e devolveu 24 (o teto), uma parede na altura da nave.</figcaption></figure>
+  <figure><img src="passo5/jogo/sede-dispersor.gif" alt="" style="width:576px"><figcaption>O dispersor de perto (o alcance dele é 110 px): volta em leque.</figcaption></figure>
+</div>
+<h3>Quadros soltos</h3>
+<div class="par">
+  <figure><img src="passo5/hmg-tranco.jpg" alt="" style="width:768px"><figcaption>A HMG: o anel aberto, o tranco e a parede saindo do peito até a nave.</figcaption></figure>
+  <figure><img src="passo5/anel-base.png" alt="" style="width:576px"><figcaption>O anel com a cor da arma base (ampliado 2×).</figcaption></figure>
+  <figure><img src="passo5/leque.png" alt="" style="width:576px"><figcaption>O leque do dispersor voltando (ampliado 2×).</figcaption></figure>
+</div>
+
+<h2 id="decidir">Para você decidir</h2>
+<p><b>25/11, as suas respostas:</b> o 1 e o 2 estão ok. No 3, a gota ficou um pouco menor: foi de 8 px para 6 px, com a luz menor junto (os GIFs acima foram regravados). O 4 fica como está: a trava existe e conta a sede mesmo sem nada bebido. Assim ninguém fica preso na porcentagem, inclusive quem entendeu a mecânica e para de atirar para não receber o tiro de volta. O 5 está explicado na conversa.</p>
+<img src="passo5/gota-antes-agora.png" alt="" style="width:940px;margin-bottom:12px">
+<h3>A devolução na forma do tiro (a sua ideia, só visual)</h3>
+<p>A gota devolvida veste a forma do tiro que você atirou:</p>
+<ul>
+  <li><b>tiro único:</b> uma conta;</li>
+  <li><b>Duplo:</b> duas contas lado a lado;</li>
+  <li><b>Triplo:</b> três contas em triângulo.</li>
+</ul>
+<p>É só o desenho. O acerto continua 6 px, e a linha, o tempo e a velocidade não mudam. As duas linhas do Duplo (4 px uma da outra) voltam como <b>uma</b> linha de pares, então o Duplo devolve o mesmo tanto de tiros que o único (7 nos 2,0 s). As outras armas continuam com uma conta.</p>
+<img src="passo5/formas.png" alt="" style="width:940px;margin-bottom:12px">
+<div class="par">
+  <figure><img src="passo5/jogo/sede-duplo.gif" alt="" style="width:576px"><figcaption>Com o Duplo.</figcaption></figure>
+  <figure><img src="passo5/jogo/sede-triplo.gif" alt="" style="width:576px"><figcaption>Com o Triplo.</figcaption></figure>
+</div>
+<table>
+  <tr><th></th><th>O que fiz</th><th>Por quê</th></tr>
+  <tr><td>1. O agrupamento</td><td>Li o "&lt; 4 px viram um" da spec ao longo de cada linha. Dois devolvidos da mesma linha (mesma direção, a &lt; 4 px de lado) que sairiam a &lt; 4 px um do outro viram um.</td><td>Se cada linha virasse um tiro só, a HMG parada devolveria um único tiro, e a spec pede uma parede.</td></tr>
+  <tr><td>2. O teto de 24</td><td>Passando de 24, fica um subconjunto espaçado por igual que guarda o primeiro e o último de cada linha.</td><td>A figura do jogador se mantém, só mais rala.</td></tr>
+  <tr><td>3. A velocidade da volta</td><td>240 px/s para toda arma.</td><td>Na velocidade do tiro dele (até 500 px/s) não dá tempo de sair da altura.</td></tr>
+  <tr><td>4. O tiro devolvido</td><td>A gota de lava dela, reta, com a luz na cor da arma bebida.</td><td>A spec manda os projéteis de carta voltarem como tiro comum dela, e ela não tinha um. A gota já é dela e lê como perigo.</td></tr>
+  <tr><td>5. O anel</td><td>Raio 18 px, 2 px de espessura, assado em pixel e aditivo. Abre em 150 ms, pisca a cada gole e fecha junto com o peito.</td><td>Cobre o peito aberto. A coluna do tronco (±17 px) fica dentro dele, então o tiro na altura do core sempre chega ao anel.</td></tr>
+  <tr><td>6. A trava conta a sede no tranco</td><td>Mesmo sem nada bebido.</td><td>Senão quem não atira nela ficaria travado em 66 % para sempre.</td></tr>
+  <tr><td>7. Os tempos</td><td>Virar 450 ms, abrir 400 ms, aberta 2,0 s, fechar 250 ms, devolver 1100 ms (o tranco no quadro 4), virar 450 ms. São 4,7 s no total, mais 0,6 s de recuperação.</td><td>O 2,0 s é o ponto de partida da spec. Os outros tempos seguem o ritmo dos clipes do passo 4.</td></tr>
+  <tr><td>8. A bomba</td><td>O tiro devolvido é tiro inimigo comum. A bomba de pânico limpa a devolução inteira (testei). A bomba de queda, que é a de hoje, fere por raio e não limpa tiro nenhum, então também não limpa a devolução.</td><td>A spec diz "como limpa qualquer tiro inimigo". Hoje é exatamente isso, porque a bomba de queda não limpa tiro inimigo nenhum.</td></tr>
+</table>
+
+<h2 id="teste">Os testes</h2>
+<ul>
+  <li><b>Puros</b> (<code>node --experimental-transform-types scripts/test-besta-sede.mjs</code>), 15/15:
+    <ul>
+      <li>a linha volta ao contrário; a ordem de entrada se mantém;</li>
+      <li>o tempo vai de 0 a 0,6 s; a HMG parada vira uma parede de ≤ 24, na mesma altura, a ≥ 4 px;</li>
+      <li>o dispersor volta em 3 linhas; linhas a 3 px viram uma e a 5 px ficam duas;</li>
+      <li>40 linhas viram 24 e guardam a primeira e a última.</li>
+    </ul></li>
+  <li><b>No jogo</b> (<code>node scripts/_f4/_besta-sede.mjs [pasta]</code>), tudo certo:
+    <ul>
+      <li>a trava: <code>damage(100)</code> com a vida cheia para em 66,1 %; a próxima é a sede, e ela a escolhe sozinha;</li>
+      <li>depois do tranco o mesmo golpe passa;</li>
+      <li>com a base, a HMG e o dispersor, nenhuma vida se perde com o anel aberto;</li>
+      <li>cada devolvido volta pela linha até a boca da nave; a HMG bebeu 29 e devolveu 24; o dispersor voltou em leque;</li>
+      <li>a bomba de pânico limpa a devolução;</li>
+      <li>nenhum erro no console.</li>
+    </ul></li>
+  <li><b>Arquivos:</b>
+    <ul>
+      <li>novos: <code>src/entities/besta/sede.ts</code> (as regras), os dois testes e a cena <code>sede</code> em <code>_ver-besta-nova.mjs</code>;</li>
+      <li>mexidos: <code>Predador.ts</code> (o estado, os clipes, o anel, o beber, o tranco, a trava), <code>BossNucleo.ts</code> e <code>Boss.ts</code> (o <code>beber</code>), <code>GameScene.ts</code> (o beber antes de todo acerto e a cada quadro) e <code>besta_folhas.py</code> (a coluna do tronco e o core corrigido). Nada commitado.</li>
+    </ul></li>
+</ul>
+</body>
+</html>

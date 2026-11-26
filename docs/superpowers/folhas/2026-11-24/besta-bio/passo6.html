@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: a volta</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1800px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  h3 { font-size:17px; margin:30px 0 8px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  td.n, th.n { text-align:right; font-variant-numeric: tabular-nums; }
+  nav a { color:#9ecbff; margin-right:14px; }
+  .par { display:flex; flex-wrap:wrap; gap:12px; } .par figure { margin:0; } figcaption { color:var(--dim); font-size:13px; max-width:768px; }
+</style>
+</head>
+<body>
+<h1>A Besta, passo 6: a volta</h1>
+<p class="dim">25/11. Spec <code>2026-11-24-besta-refeita-design.md</code> §4.2; o plano está em <code>plans/2026-11-25-besta-passo6-volta.md</code>. Tudo foi filmado no jogo rodando (<code>?fase=besta1&amp;mao=nenhuma</code>), no tempo real, com a nave parada e invulnerável. Nada aqui está aprovado.</p>
+<nav><a href="#como">Como ficou</a><a href="#ver">No jogo</a><a href="#tempos">Os tempos</a><a href="#decidir">Para você decidir</a><a href="#teste">Os testes</a></nav>
+
+<h2 id="como">Como ficou: a meia volta pela frente</h2>
+<p><b>25/11, a sua escolha (A):</b> a primeira versão subia a parede da esquerda, atrás da nave, e você achou injusto (<i>"a nave não vira o nariz para trás"</i>). Agora ela nunca passa da metade da sala. Numa corrida só, ela:</p>
+<ol>
+  <li>pula para o teto, com o mesmo agarrar de hoje;</li>
+  <li>anda 2 trocas de mão para a direita, até a âncora do canto;</li>
+  <li>vira no canto e desce para a parede da direita (a quina);</li>
+  <li><b>ataca para dentro da sala</b> no canto de cima à direita;</li>
+  <li>desce a parede;</li>
+  <li><b>ataca de novo</b>, no canto de baixo à direita;</li>
+  <li>salta da parede, pousa galopando e rasga o chão no meio da arena, como o rasgo de hoje.</li>
+</ol>
+<ul>
+  <li><b>O core fica exposto a volta inteira.</b></li>
+  <li><b>O corpo fere</b> em toda a volta, sem o rabo. No canto, as garras que atacam a sala ferem quadro a quadro.</li>
+  <li><b>Se ela já estiver pendurada,</b> não solta nem pula de novo. Anda pelo teto, só com trocas inteiras, até a mão 1 mais perto do canto, e começa na quina.</li>
+  <li><b>A trava da fase 2</b> (uma volta inteira) espera esta volta: com a trava, a próxima jogada é a volta, e ela abre depois do rasgo.</li>
+  <li><b>Nada foi gerado.</b> Tudo sai dos clipes que você escolheu no passo 3:
+    <ul>
+      <li>a quina é a quina-parede-teto-b, espelhada e ao contrário;</li>
+      <li>o ataque é o canto-b espelhado;</li>
+      <li>a descida é o rastejar2L-a girado 90° no pixel, espelhado;</li>
+      <li>a saída da parede é o descola-a.</li>
+    </ul>
+    A pose da parede é exatamente o rastejar girado e deslocado, então as junções batem no pixel.</li>
+</ul>
+
+<h2 id="ver">No jogo</h2>
+<div class="par">
+  <figure><img src="passo6/jogo/volta.gif" alt="" style="width:768px"><figcaption>A meia volta, do chão ao rasgo, no tempo real.</figcaption></figure>
+  <figure><img src="passo6/jogo/volta-caixas.gif" alt="" style="width:768px"><figcaption>A mesma volta com as caixas: vermelho é o corpo que fere, ciano é o core.</figcaption></figure>
+</div>
+<h3>Quadro a quadro</h3>
+<img src="passo6/prancha.jpg" alt="" style="width:1536px">
+
+<h2 id="tempos">Os tempos</h2>
+<p>São <b>5,4 s</b> até o rasgo, mais 1,6 s do rasgo, perto dos ~6 s da spec. Cada número abaixo é um botão (<code>VOLTA</code> em <code>src/entities/besta/volta.ts</code>):</p>
+<table>
+  <tr><th>Trecho</th><th class="n">ms</th></tr>
+  <tr><td>Agarrar o teto</td><td class="n">850</td></tr>
+  <tr><td>Teto (2 trocas de 340 ms)</td><td class="n">680</td></tr>
+  <tr><td>Quina de cima à direita</td><td class="n">600</td></tr>
+  <tr><td>Canto de cima à direita (250 parada + 650 golpe)</td><td class="n">900</td></tr>
+  <tr><td>Descida</td><td class="n">560</td></tr>
+  <tr><td>Canto de baixo à direita</td><td class="n">900</td></tr>
+  <tr><td>Saída da parede + salto + pouso</td><td class="n">873</td></tr>
+  <tr><th>Total até o rasgo</th><th class="n">5363</th></tr>
+</table>
+
+<h2 id="decidir">Para você decidir</h2>
+<table>
+  <tr><th></th><th>O que fiz</th><th>Por quê</th></tr>
+  <tr><td>1. A chegada</td><td>No pé da parede da direita ela salta da parede (descola-a), pousa galopando e rasga no meio da arena.</td><td>Descer pela quina ao contrário a deixaria de quatro virada para a parede, de costas para a nave, e não há clipe de virar de quatro. O salto é curto: o clipe a ergue uns 55 px e o motor a traz de volta ao chão em 0,4 s.</td></tr>
+  <tr><td>2. A virada no teto</td><td>No canto de cima ela troca de lado pendurada (um corte de um quadro: a pose pendurada espelhada). A garra que segura fica no mesmo lugar, e o motor leva os 38 px que faltam até a parede durante a quina.</td><td>A quina da direita é a quina-parede-teto espelhada, que começa na pendurada virada para a direita.</td></tr>
+  <tr><td>3. A descida</td><td>É a escalada espelhada tocada ao contrário: ela desce de cabeça para cima, como o passo 3 previu.</td><td>Descer de cabeça para baixo pediria outra quina para chegar ao chão.</td></tr>
+  <tr><td>4. Os dois cantos</td><td>O de cima e o de baixo da parede da direita.</td><td>A spec tinha três (dois na esquerda). Sem a parede da esquerda, a direita ganhou o canto de baixo.</td></tr>
+  <tr><td>5. O teto curto</td><td>Duas trocas, de x≈244 até 322.</td><td>Cruzar o teto inteiro levava 2 s e passava por cima da nave. Se quiser mais teto, são 4 trocas a partir de x≈165, +0,7 s.</td></tr>
+</table>
+
+<h2 id="teste">Os testes</h2>
+<ul>
+  <li><b>A rota pura</b> (<code>node --experimental-transform-types scripts/test-besta-volta.mjs</code>), saindo das duas âncoras do chão:
+    <ul>
+      <li>a ordem teto → parede da direita → chão, nunca a parede da esquerda;</li>
+      <li>os cantos de cima e de baixo à direita, nessa ordem;</li>
+      <li>o core exposto a volta inteira;</li>
+      <li>as garras sempre na borda do trecho;</li>
+      <li>2 trocas que terminam na mão 1, na âncora do canto;</li>
+      <li>na virada, a garra fica onde segura;</li>
+      <li>fica na metade da frente e nunca sai da tela;</li>
+      <li>pendurada, só trocas inteiras até a mão 1 (das âncoras do teto, chega em 322).</li>
+    </ul></li>
+  <li><b>No jogo</b> (<code>node scripts/_f4/_besta-volta.mjs</code>), tudo certo:
+    <ul>
+      <li>a trava da fase 2 puxa a volta;</li>
+      <li>os 10 trechos aparecem, na ordem;</li>
+      <li>a caixa que fere nunca sai da tela (medida no passo da física) e nunca chega a x=60;</li>
+      <li>o core fica ligado a volta inteira;</li>
+      <li>a nave na frente da parede da direita leva o golpe do canto de baixo;</li>
+      <li>termina no rasgo, e a trava abre;</li>
+      <li>saindo pendurada, ela anda até o canto e começa na quina;</li>
+      <li>nenhum erro no console.</li>
+    </ul></li>
+  <li><b>Um conserto no caminho:</b> o primeiro quadro de cada trecho usava a caixa do clipe anterior no lugar novo, porque a física roda antes do update. Agora a caixa do quadro novo entra na hora da troca.</li>
+  <li><b>Arquivos:</b>
+    <ul>
+      <li>novos: <code>src/entities/besta/volta.ts</code> (a rota), os dois testes e a folha <code>public/sprites/besta/escalada.png</code>;</li>
+      <li>mexidos: <code>Predador.ts</code> (a volta, os trechos e a tabela espelhada; saiu o <code>sair</code> pela direita), <code>BootScene.ts</code>, <code>besta_folhas.py</code> (a escalada e o lado do rabo por quadro), <code>quadros.ts</code> (gerado) e a cena <code>volta</code> em <code>_ver-besta-nova.mjs</code>. Nada commitado.</li>
+    </ul></li>
+</ul>
+</body>
+</html>

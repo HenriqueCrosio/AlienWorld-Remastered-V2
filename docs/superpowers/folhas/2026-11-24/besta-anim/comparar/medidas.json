@@ -1,0 +1,272 @@
+{
+ "velhos": {
+  "urro": {
+   "cores": 59,
+   "luz": 0.225,
+   "alt": 245,
+   "alt_max": 254,
+   "larg_max": 244,
+   "vermelho": 0.107,
+   "quadros": 9,
+   "f": 1.0,
+   "ms_quadro": 133
+  },
+  "pulo": {
+   "cores": 1890,
+   "luz": 0.169,
+   "alt": 214,
+   "alt_max": 254,
+   "larg_max": 251,
+   "vermelho": 0.084,
+   "quadros": 11,
+   "f": 1.0,
+   "ms_quadro": 91
+  },
+  "giro": {
+   "cores": 2292,
+   "luz": 0.193,
+   "alt": 252,
+   "alt_max": 254,
+   "larg_max": 249,
+   "vermelho": 0.14,
+   "quadros": 9,
+   "f": 1.0,
+   "ms_quadro": 111
+  },
+  "andar": {
+   "cores": 63,
+   "luz": 0.194,
+   "alt": 253,
+   "alt_max": 258,
+   "larg_max": 221,
+   "vermelho": 0.133,
+   "quadros": 9,
+   "f": 0.85,
+   "ms_quadro": 100
+  },
+  "quatro": {
+   "cores": 690,
+   "luz": 0.182,
+   "alt": 225,
+   "alt_max": 252,
+   "larg_max": 271,
+   "vermelho": 0.11,
+   "quadros": 17,
+   "f": 0.85,
+   "ms_quadro": 22
+  },
+  "corrida": {
+   "cores": 64,
+   "luz": 0.182,
+   "alt": 217,
+   "alt_max": 225,
+   "larg_max": 271,
+   "vermelho": 0.127,
+   "quadros": 15,
+   "f": 0.85,
+   "ms_quadro": 41
+  },
+  "slash": {
+   "cores": 62,
+   "luz": 0.233,
+   "alt": 264,
+   "alt_max": 299,
+   "larg_max": 300,
+   "vermelho": 0.154,
+   "quadros": 15,
+   "f": 0.85,
+   "ms_quadro": 60
+  },
+  "rasgo": {
+   "cores": 688,
+   "luz": 0.238,
+   "alt": 254,
+   "alt_max": 300,
+   "larg_max": 300,
+   "vermelho": 0.188,
+   "quadros": 17,
+   "f": 0.85,
+   "ms_quadro": 65
+  },
+  "lava": {
+   "cores": 64,
+   "luz": 0.202,
+   "alt": 249,
+   "alt_max": 249,
+   "larg_max": 202,
+   "vermelho": 0.163,
+   "quadros": 15,
+   "f": 1.0,
+   "ms_quadro": 39
+  },
+  "agarra": {
+   "cores": 574,
+   "luz": 0.184,
+   "alt": 294,
+   "alt_max": 336,
+   "larg_max": 277,
+   "vermelho": 0.13,
+   "quadros": 17,
+   "f": 0.75,
+   "ms_quadro": 50
+  },
+  "teto-balanco": {
+   "cores": 64,
+   "luz": 0.185,
+   "alt": 298,
+   "alt_max": 312,
+   "larg_max": 176,
+   "vermelho": 0.147,
+   "quadros": 11,
+   "f": 0.75,
+   "ms_quadro": 118
+  },
+  "teto-lava": {
+   "cores": 64,
+   "luz": 0.183,
+   "alt": 312,
+   "alt_max": 341,
+   "larg_max": 260,
+   "vermelho": 0.147,
+   "quadros": 17,
+   "f": 0.75,
+   "ms_quadro": 65
+  },
+  "estatico-luta": {
+   "cores": 59,
+   "luz": 0.192,
+   "alt": 249,
+   "alt_max": 249,
+   "larg_max": 192,
+   "vermelho": 0.144,
+   "quadros": 1,
+   "f": 1.0
+  },
+  "estatico-teto": {
+   "cores": 63,
+   "luz": 0.183,
+   "alt": 288,
+   "alt_max": 288,
+   "larg_max": 176,
+   "vermelho": 0.131,
+   "quadros": 1,
+   "f": 0.75
+  },
+  "estatico-s": {
+   "cores": 20158,
+   "luz": 0.19,
+   "alt": 254,
+   "alt_max": 254,
+   "larg_max": 244,
+   "vermelho": 0.076,
+   "quadros": 1,
+   "f": 1.0
+  }
+ },
+ "novos": {
+  "salto-tras": {
+   "cores": 61,
+   "luz": 0.185,
+   "alt": 244,
+   "alt_max": 253,
+   "larg_max": 193,
+   "vermelho": 0.117,
+   "quadros": 8,
+   "f": 0.85,
+   "base": "base-chao.png",
+   "dif_base": 0.0,
+   "ms_quadro": 90
+  },
+  "sede": {
+   "cores": 65,
+   "luz": 0.177,
+   "alt": 269,
+   "alt_max": 303,
+   "larg_max": 366,
+   "vermelho": 0.106,
+   "quadros": 14,
+   "f": 0.7,
+   "base": "base-chao-070.png",
+   "dif_base": 0.0,
+   "ms_quadro": 110
+  },
+  "coracao": {
+   "cores": 59,
+   "luz": 0.184,
+   "alt": 247,
+   "alt_max": 250,
+   "larg_max": 197,
+   "vermelho": 0.081,
+   "quadros": 12,
+   "f": 0.7,
+   "base": "base-chao-070.png",
+   "dif_base": 0.0,
+   "ms_quadro": 110
+  },
+  "salto-parede": {
+   "cores": 56,
+   "luz": 0.161,
+   "alt": 205,
+   "alt_max": 240,
+   "larg_max": 340,
+   "vermelho": 0.048,
+   "quadros": 6,
+   "f": 0.7,
+   "base": "base-chao-070.png",
+   "dif_base": 0.0,
+   "ms_quadro": 100
+  },
+  "rasteja": {
+   "cores": 49,
+   "luz": 0.172,
+   "alt": 208,
+   "alt_max": 211,
+   "larg_max": 285,
+   "vermelho": 0.099,
+   "quadros": 8,
+   "f": 0.85,
+   "base": "base-quatro.png",
+   "dif_base": 0.0,
+   "ms_quadro": 110
+  },
+  "canto": {
+   "cores": 51,
+   "luz": 0.168,
+   "alt": 209,
+   "alt_max": 215,
+   "larg_max": 274,
+   "vermelho": 0.092,
+   "quadros": 7,
+   "f": 0.85,
+   "base": "base-quatro.png",
+   "dif_base": 0.0,
+   "ms_quadro": 100
+  },
+  "teto-maos": {
+   "cores": 51,
+   "luz": 0.181,
+   "alt": 246,
+   "alt_max": 257,
+   "larg_max": 227,
+   "vermelho": 0.146,
+   "quadros": 16,
+   "f": 0.75,
+   "base": "base-teto.png",
+   "dif_base": 0.0,
+   "ms_quadro": 100
+  },
+  "teto-golpe": {
+   "cores": 54,
+   "luz": 0.21,
+   "alt": 274,
+   "alt_max": 293,
+   "larg_max": 321,
+   "vermelho": 0.194,
+   "quadros": 8,
+   "f": 0.75,
+   "base": "base-teto.png",
+   "dif_base": 0.0,
+   "ms_quadro": 100
+  }
+ }
+}

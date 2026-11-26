@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: a cor e as garras</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:2560px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  h3 { font-size:17px; margin:26px 0 8px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  nav a { color:#9ecbff; margin-right:14px; }
+  .rotulo { display:grid; grid-template-columns:repeat(6, 1fr); color:var(--dim); font-size:13px; max-width:100%; }
+  .rotulo3 { display:grid; grid-template-columns:repeat(3, 1fr); color:var(--dim); font-size:13px; }
+</style>
+</head>
+<body>
+<h1>A Besta, passo 9: a cor e as garras</h1>
+<p class="dim">25/11. Spec <code>2026-11-24-besta-refeita-design.md</code> §5 (3)–(4) e §6 ("clara / garras pontilhadas"). Cada candidata está desenhada sobre a arena de verdade (capturada no jogo sem ela) no tamanho do jogo, na posição em que o motor a põe. </p>
+<p><b>25/11, aplicada a B</b> (ele: <i>"pode aplicar a B e instalar tudo"</i>). As 32 folhas da Besta foram geradas de novo com o osso e o vermelho mais escuros. As medidas por quadro (o core, o corpo, a caixa que fere) continuam idênticas: o gerador agora mede o quadro original e só pinta a folha. Abaixo, ela no jogo com a B.</p>
+<img src="passo9/no-jogo-B.png" alt="" style="width:768px;margin-bottom:12px">
+<nav><a href="#garras">As garras</a><a href="#cor">A cor</a><a href="#real">Em tamanho real</a><a href="#decidir">Para você decidir</a></nav>
+
+<h2 id="garras">As garras: a redução para 0,70 segura a linha?</h2>
+<p>O jogo desenha a Besta a 0,70 pelo vizinho mais próximo (o modo pixel art), que descarta linhas e colunas inteiras do quadro. Na Besta velha isso deixava as garras pontilhadas. Comparei com a alternativa da spec: <b>pré-reduzir</b> as folhas pela média da área, cortando o alfa em 50 % e prendendo cada pixel à paleta do próprio quadro.</p>
+<p><b>Resultado:</b> com a E-7-1 as garras <b>seguram a linha</b> nos dois jeitos. O desenho limpo tem garras largas, com 4–6 px de traço no quadro, e nada pontilha. A pré-redução (à direita) só alisa um pouco os degraus. Minha recomendação é <b>não mudar nada aqui</b>: pré-reduzir obrigaria a refazer a tabela por quadro e todo o motor numa grade de 180 px, para um ganho que mal se vê.</p>
+<img src="passo9/garras.png" alt="" style="width:960px">
+<p class="dim">À esquerda, como o jogo desenha hoje (vizinho mais próximo). À direita, pré-reduzida. Ampliado 6×: as garras da frente de lado, de quatro e pendurada.</p>
+
+<h2 id="cor">A cor</h2>
+<p>A spec pedia um mapa de cor só, aplicado a todos os clipes: <b>osso e vermelho mais escuros, acesos só o core, a lava e a boca</b> (a regra do dark sci-fi: luz só onde há energia). A E-7-1 já nasceu grafite, então a dúvida é se o osso bege (garras, espinhos, crânio) ainda está claro demais.</p>
+<ul>
+  <li><b>A</b>: a arte de hoje.</li>
+  <li><b>B</b>: o osso 28 % mais escuro e o vermelho 32 % mais escuro. O core, a lava e o brilho em volta deles ficam intactos.</li>
+  <li><b>C</b>: B, mais o grafite 10 % mais escuro e o core e a lava um pouco mais quentes.</li>
+</ul>
+<p>Cada faixa abaixo mostra, da esquerda para a direita: <b>A</b> como o jogo desenha · A pré-reduzida · <b>B</b> · B pré-reduzida · <b>C</b> · C pré-reduzida. Tudo ampliado 3×.</p>
+<div class="rotulo"><span>A</span><span>A pré-reduzida</span><span>B</span><span>B pré-reduzida</span><span>C</span><span>C pré-reduzida</span></div>
+<h3>De lado (a pose base)</h3><img src="passo9/pose-lado.png" alt="">
+<h3>De quatro</h3><img src="passo9/pose-quatro-pose.png" alt="">
+<h3>Pendurada</h3><img src="passo9/pose-teto1.png" alt="">
+<h3>De frente (a sede, o coração)</h3><img src="passo9/pose-frente.png" alt="">
+<h3>O golpe, no salto</h3><img src="passo9/pose-golpe.png" alt="">
+<h3>O canto</h3><img src="passo9/pose-canto.png" alt="">
+
+<h2 id="real">Em tamanho real (1×), como no jogo</h2>
+<div class="rotulo3"><span>A (hoje)</span><span>B</span><span>C</span></div>
+<img src="passo9/arena-lado.png" alt="" style="width:1164px">
+<img src="passo9/arena-quatro-pose.png" alt="" style="width:1164px;margin-top:8px">
+<img src="passo9/arena-teto1.png" alt="" style="width:1164px;margin-top:8px">
+
+<h2 id="decidir">Para você decidir</h2>
+<table>
+  <tr><th></th><th>Opções</th><th>A minha recomendação</th></tr>
+  <tr><td>1. As garras</td><td>Manter a redução de hoje, ou pré-reduzir as folhas.</td><td><b>Manter.</b> Nada pontilha, e pré-reduzir muda o motor inteiro por quase nada.</td></tr>
+  <tr><td>2. A cor</td><td>A, B ou C.</td><td><b>B.</b> O osso deixa de competir com o core, e a silhueta continua lendo contra o vórtice azul. Na C o grafite mais escuro some no fundo escuro da arena, e no breu ela já é só silhueta.</td></tr>
+</table>
+<p>Aplicar é uma linha: <code>COR = 'B'</code> no topo de <code>scripts/_f4/besta_folhas.py</code>, e gerar de novo. As folhas e a tabela saem recoloridas, todas no mesmo mapa. Com <code>COR = 'A'</code>, a saída é idêntica à de hoje (conferido no md5). O comparador é o <code>scripts/_f4/besta_recolor.py</code>, e o fundo vem de <code>scripts/_f4/_besta-fundo.mjs</code>.</p>
+</body>
+</html>

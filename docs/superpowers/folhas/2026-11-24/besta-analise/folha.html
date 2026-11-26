@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta — análise</title>
+<style>
+  :root { --bg: #0e1015; --fg: #e4e4e8; --dim: #9a9aa6; --red: #ff5a5a; --yel: #ffe040; --cy: #40e0ff; --mag: #ff40dc; }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; margin: 0 auto; max-width: 1500px; padding: 16px; }
+  h1 { font-size: 22px; } h2 { font-size: 18px; margin-top: 40px; border-top: 1px solid #2a2d36; padding-top: 16px; }
+  img { max-width: 100%; display: block; margin: 8px 0; image-rendering: pixelated; }
+  .leg span { margin-right: 14px; } p { max-width: 1000px; } .dim { color: var(--dim); }
+  .gifs { display: flex; flex-wrap: wrap; gap: 12px; } .gifs img { max-width: 49%; }
+</style>
+</head>
+<body>
+<h1>A Besta (o Predador) — análise de cada movimento, 24/11</h1>
+<p class="leg"><span style="color:var(--red)">■ vermelho = o corpo dela (o que fere e o que segura a bala)</span><span style="color:var(--yel)">■ amarelo = o core (onde o tiro dá dano)</span><span style="color:var(--cy)">■ ciano = a nave</span><span style="color:var(--mag)">■ magenta (nas folhas de clipe) = arte FORA do corpo: o que se vê e não fere</span></p>
+<p class="dim">Filmado no jogo (dev, a nave intocável, o passo fixo de 1/60 s) com os corpos reais da física desenhados por cima. Scripts: <code>scripts/_f4/_ver-slash-hitbox.mjs</code> e <code>scripts/_f4/_ver-besta-movimentos.mjs</code>.</p>
+
+<h2>1. O slash: a garra passa pela nave (o bug que você viu)</h2>
+<p>O corpo do golpe é UM retângulo fixo do tronco. Os dois cortes e os rastros pintados saem bem acima e à frente dele. O salto é limitado (o centro dela nunca sobe acima de y=70), então o topo do corpo para em y=23, e a nave no canto (y≤20) nunca é tocada. Medido: <b>nave no canto: 0 dano</b>; <b>nave que sobe durante o bote: 0 dano</b> (ela pula na altura antiga, o topo do corpo em y=85); <b>nave no meio: 21 quadros de toque</b>.</p>
+<img src="clipe-slash.jpg" alt="slash, cada quadro com o corpo">
+<div class="gifs"><img src="slash-canto.gif" alt="nave no canto"><img src="slash-sobe.gif" alt="nave subindo"></div>
+<img src="jogo-slash-A-canto.jpg" alt="tira: nave no canto">
+<img src="jogo-slash-B-sobe.jpg" alt="tira: nave subindo">
+
+<h2>2. O galope: a luz do core flutua nas costas</h2>
+<p>De quatro, o peito aceso desce, mas o core e a luz ficam na altura da pose em pé, sobre o ombro escuro. Na tira de cima, os quadros 3–6 mostram o amarelo nas costas e o brilho pintado abaixo.</p>
+<img src="clipe-corrida.jpg" alt="galope">
+
+<h2>3. A lava pendurada: duas bolas</h2>
+<p>O clipe do teto PINTA a própria bola (quadros 10–16), que cai em diagonal até o chão, enquanto o motor lança a bola de verdade na nave. É o mesmo artefato do chão que você achou em 19/09, e lá foi resolvido cortando o clipe no 14. O do teto toca os 17 quadros.</p>
+<img src="clipe-teto-lava.jpg" alt="lava do teto">
+<img src="4-lava-teto.gif" alt="lava do teto no jogo">
+
+<h2>4. A ronda: imagem parada deslizando</h2>
+<p><b>Para a direita (e a SAÍDA da tela):</b> a pose parada <code>predadorLuta</code>, com um pulinho em seno. Os 6 quadros têm a mesma pose. <b>De teto a teto:</b> o laço do balanço enquanto a garra desliza pelo teto, sem trocar de mão. <b>Chão→teto / teto→chão:</b> uma reta, com o clipe da agarrada (e o mesmo clipe AO CONTRÁRIO na descida: cai com o braço erguido).</p>
+<div class="gifs"><img src="2-chao-para-direita.gif" alt="para a direita"><img src="5-teto-para-teto.gif" alt="teto a teto"></div>
+<img src="jogo-3-chao-para-teto.jpg" alt="chão para teto">
+<img src="jogo-6-teto-para-chao.jpg" alt="teto para chão">
+
+<h2>5. A volta e o rasgo</h2>
+<p>O aviso (o core aceso na borda), o galope até o meio, o rasgo e o metal em arco funcionam e se leem. O clipe pinta uma onda de fogo enorme (quadros 12–16) que não fere: quem fere é só o metal.</p>
+<img src="jogo-7-sai-e-rasgo.jpg" alt="saída, volta e rasgo">
+<img src="clipe-rasgo.jpg" alt="rasgo">
+
+<h2>6. O breu: o bote é invisível</h2>
+<p>Na carga o core pisca rápido (o aviso), mas no galope e no slash ele volta ao pulso lento do breu (2,4 s, base 0). O ataque mais perigoso passa no escuro: na tira, os quadros de 214 a 220 só mostram os retângulos.</p>
+<img src="9-slash-no-breu.gif" alt="slash no breu">
+<img src="jogo-9-slash-no-breu.jpg" alt="tira: slash no breu">
+
+<h2>7. O bicho comparado ao jogo</h2>
+<p>Os quatro chefões no jogo (a Capitânia, a Serpente, o Guardião, a Besta), sem nada desenhado por cima. Depois, o recorte em tamanho real (a Besta, o Guardião e a Serpente) e o surgimento.</p>
+<p><b>O brilho:</b> 12% dos pixels dela passam de meia luz. No Guardião são 1%, na Serpente 5% e na Capitânia 0,3%. São os ossos, as garras e o crânio, quase brancos, e o vermelho do corpo também acende. <b>A escala:</b> o Guardião é desenhado a 0,70 do tamanho da arte e ela a ~0,55. Por isso as garras finas se partem em pontilhado.</p>
+<img src="estilo-chefoes.jpg" alt="os quatro chefões no jogo">
+<img src="estilo-zoom.jpg" alt="Besta, Guardião e Serpente em tamanho real">
+<img src="estilo-surge.jpg" alt="o surgimento">
+
+<h2>Referência: a lava do chão e a agarrada</h2>
+<p>Parada, ela só é sólida na placa do ombro: cabeça, braços e pernas não seguram bala nem ferem.</p>
+<img src="clipe-lava.jpg" alt="lava do chão">
+<img src="clipe-agarra.jpg" alt="agarrada">
+</body>
+</html>

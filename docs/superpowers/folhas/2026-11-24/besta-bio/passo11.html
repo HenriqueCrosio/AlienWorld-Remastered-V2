@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: parede e brasas</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1240px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:44px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; margin:8px 0; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .grade { display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:10px; }
+</style>
+</head>
+<body>
+<h1>A Besta, passos 11 e 12: a parede lenta e as brasas apagadas</h1>
+<p class="dim">25/11. Planos: <code>plans/2026-11-25-besta-passo11-parede-lenta.md</code> e <code>-passo12-brasas-apagadas.md</code>. Aprovados por ele (<i>"ok para a spec"</i>, <i>"as brasas, ok"</i>, <i>"siga"</i>). Fotos tiradas no jogo, no tamanho dele ×3.</p>
+
+<h2>Passo 11 — a parede lenta (fase 2)</h2>
+<p>Ele: <i>"precisamos tirar um dos ataques no ar, não faz sentido ter. Então escolha o melhor momento para isso, ou faça a besta atacar o meio"</i>. <b>Os dois golpes de canto saíram</b> (os dois batiam no ar). Na meia volta ela desce até o <b>meio</b> da parede da direita, golpeia a sala e a laje sai dela coluna por coluna. O coração desacelera: as lascas pulsam no batimento lento, e o batimento pesado toca a cada 1,6 s.</p>
+<ul>
+  <li><b>A laje:</b> 5 colunas a 36 px, ~52 lascas, cada coluna fechada do teto ao chão (frestas de 6 px; a nave tem 9) com um vão de 48 px. Anda a 55 px/s, metade da nave.</li>
+  <li><b>O corredor é um tubo:</b> o vão muda no máximo 28 px de uma coluna para a outra, e os vãos vizinhos se sobrepõem mais que a altura da nave. Entre duas colunas sobram só ~6 px de x para a nave de 21 px, então nunca é preciso "pular" de vão: quem fica onde os dois vãos se cruzam passa deslizando.</li>
+  <li><b>Três corredores fixos, sorteados:</b> o que desce, o que sobe e o S.</li>
+  <li><b>Ela segura na parede</b> com o core aceso enquanto a laje atravessa (~6,8 s): os seus tiros atravessam a laje e acertam o core. Ela só segue a volta quando a última coluna passa de x 40, então a laje já saiu quando ela rasga o chão.</li>
+</ul>
+<div class="grade">
+  <img src="passo11/laje-1.png" alt="">
+  <img src="passo11/laje-2.png" alt="">
+  <img src="passo11/laje-3.png" alt="">
+</div>
+<p><b>Medido no jogo</b> (<code>_besta-parede.mjs</code>): nos três corredores, a nave que segue o tubo a ≤ 110 px/s leva <b>0 toques</b>; a que fica parada leva a laje; nenhum golpe de canto na rota; a laje sai pela esquerda antes do rasgo.</p>
+
+<h2>Passo 12 — as brasas apagadas (fase 3, o coração parado)</h2>
+<p>Ele: <i>"nessa salva de lava, alguns vão se apagar, assim o jogador consegue passar nos que tiverem apagados sem tomar dano"</i>. No aperto, uma <b>rota</b> de lascas se apaga: metal escuro e frio, sem dano, sem luz, sem rastro. Os rastros de fogo congelados em volta da rota também somem (eram eles que fechavam a passagem na foto do primeiro teste). Na retomada, as apagadas se desfazem.</p>
+<ul>
+  <li><b>O campo:</b> de 15 para 30 lascas (5 linhas × 6 colunas).</li>
+  <li><b>Quatro rotas fixas, sorteadas</b> (a que desce, a que sobe, a de cima, a de baixo), de 7–8 lascas, em degraus em L, da parede da esquerda até o bolso na frente dela.</li>
+  <li><b>O congelamento subiu para 3,0 s</b> (o plano dizia 2,5): pela rota, da parede da esquerda ao bolso são 2,3–2,6 s a 110 px/s.</li>
+  <li><b>Duas correções que o teste achou:</b> o coração agora sai sempre da âncora de longe (x 300) — da de perto (238) o corpo dela cobria o bolso; e depois do coração ela fica onde está — pular para a outra âncora caía em cima de quem esperava no bolso.</li>
+</ul>
+<div class="grade">
+  <img src="passo11/brasas-1.png" alt="">
+  <img src="passo11/brasas-2.png" alt="">
+</div>
+<p><b>Medido no jogo</b> (<code>_besta-coracao.mjs</code>, nos corpos de verdade): em cada rota, a caixa da nave passa com <b>14–17 px de folga</b> das acesas; nenhuma apagada tem corpo; no bolso, nada toca a nave até 1,2 s depois da retomada.</p>
+
+<h2>Junto: a luz verdadeira leva dano</h2>
+<p>Ele: <i>"pode deixar que ele tome o dano caso o jogador saque o esquema, mas pode ser um dano reduzido"</i>. Enquanto as luzes estão acesas, o core dela está na luz verdadeira (também quando ela desliza pelo teto) e leva <b>metade do dano</b>. As brasas falsas não levam nada. Medido: um tiro de 4 na luz verdadeira tira 2.</p>
+
+<h2>Para você conferir jogando</h2>
+<table>
+  <tr><th>O quê</th><th>Onde</th></tr>
+  <tr><td>A parede lenta: o corredor dá para seguir? A espera dela na parede (~6,8 s) está longa?</td><td><code>?fase=besta2</code></td></tr>
+  <tr><td>As brasas apagadas: a rota se lê de imediato? Os 3,0 s de congelamento bastam?</td><td><code>?fase=besta3</code></td></tr>
+  <tr><td>A luz verdadeira com meio dano: vale a pena atirar nela?</td><td><code>?fase=besta3</code></td></tr>
+</table>
+</body>
+</html>

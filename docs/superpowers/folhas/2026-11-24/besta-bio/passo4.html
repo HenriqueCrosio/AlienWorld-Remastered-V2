@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta nova no jogo</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1800px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  h3 { font-size:17px; margin:30px 0 8px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .meh { color:var(--meh); } .ok { color:var(--ok); }
+  nav a { color:#9ecbff; margin-right:14px; }
+  .nota { background:var(--pane); border:1px solid var(--line); border-radius:6px; padding:8px 12px; max-width:980px; }
+  .par { display:flex; flex-wrap:wrap; gap:12px; } .par figure { margin:0; } figcaption { color:var(--dim); font-size:13px; }
+</style>
+</head>
+<body>
+<h1>A Besta nova, passo 4: no jogo</h1>
+<p class="dim">25/11, feito com você fora (<i>"pode começar o passo 4, no localhost principal mesmo… corrigimos tudo e verificamos quando eu voltar"</i>). Todos os GIFs foram filmados no jogo rodando, em <code>?fase=besta1&amp;mao=nenhuma</code>, no tempo real e com a nave parada e invulnerável. Cada movimento foi forçado na ordem da lista. Nada aqui está aprovado: a folha mostra o que mudou e o que eu vi de defeito.</p>
+<nav><a href="#feito">O que mudou</a><a href="#chao">No chão</a><a href="#teto">No teto</a><a href="#volta">A volta</a><a href="#estrutura">A estrutura</a><a href="#caixas">As caixas</a><a href="#ver">Para você ver</a></nav>
+
+<h2 id="feito">O que mudou no motor</h2>
+<ul>
+  <li><b>A arte:</b> todos os clipes que você escolheu no passo 3 viraram folhas de sprite (<code>public/sprites/besta/</code>), todas no mesmo quadro de 256² e na escala de 105 px (0,70). As folhas velhas (<code>predador-*</code>) continuam no disco, só não são mais carregadas.</li>
+  <li><b>O corpo e o core saem da arte, quadro a quadro.</b> Um script mede cada quadro de cada clipe e grava uma tabela (<code>src/entities/besta/quadros.ts</code>, gerada por <code>scripts/_f4/besta_folhas.py</code>):
+    <ul>
+      <li>a posição do core;</li>
+      <li>o tronco com a cabeça, que é o corpo parado: segura bala e fere no toque;</li>
+      <li>o corpo inteiro com as garras, que é o corpo nos ataques.</li>
+    </ul>
+    Isso é o conserto da spec §6 para a garra que passava pela nave e para o core nas costas no galope.</li>
+  <li><b>O rabo é só visual:</b> fica fora das caixas, como você decidiu.</li>
+  <li><b>A lava:</b> a bola pintada foi cortada das três lavas, a do chão e as duas do teto. A bola do jogo nasce nas garras da frente, no quadro em que a pintada sairia. Agora no teto há uma bola só (spec §6).</li>
+  <li><b>No teto, as duas mãos:</b> as duas âncoras do teto ficam a um ciclo e meio de troca de mão uma da outra. Andando de uma para a outra, ela chega pendurada pela outra mão, e a lava sai pela mão livre da pose em que está. Para soltar estando na mão 2, ela troca de mão uma vez antes.</li>
+  <li><b>Os consertos da spec que dependiam da arte:</b>
+    <ul>
+      <li>o salto do golpe vai livre até o teto (antes parava em y=70 e o canto de cima era abrigo);</li>
+      <li>o galope para na linha x=90;</li>
+      <li>no breu, todo ataque deixa o core no nível do aviso.</li>
+    </ul>
+  </li>
+  <li><b>A luta</b> ganhou a estrutura da spec depois do passo 4 (ver <a href="#estrutura" style="color:#9ecbff">A estrutura</a>). A vida e as fases continuam as de hoje. As assinaturas novas (a sede, a volta pelas paredes, os olhos no escuro, o coração) são os passos 5 a 8 da spec: os clipes delas já estão nas folhas, mas ainda não entram na luta.</li>
+</ul>
+
+<h2 id="chao">No chão</h2>
+<h3>O surgimento</h3>
+<p>O Guardião morre e ela urra de frente (urro2-b), salta (pulo-b), pousa encarando a nave e vira de lado (frente-v3 ao contrário) antes de começar.</p>
+<img src="passo4/jogo/surge.gif" alt="" style="width:576px">
+<ul>
+  <li><span class="meh">O tamanho do surgimento ficou em 1,0, menor que o de hoje.</span> A 1,2 ela teria a mesma altura de hoje (178 px), mas no urro a cabeça e as garras saíam pelo alto e pela direita da tela. A 1,0 ela tem 148 px e cabe.</li>
+  <li>No urro2-b, além dos quadros 10 e 11 que você já tinha visto sem, tirei o <b>12</b>, que ainda tinha um clarão em estrela, e o <b>13</b>, com pixels soltos.</li>
+  <li>O salto agora é o pintado no clipe. O motor só a segura abaixo do teto no ponto mais alto e a encolhe até o tamanho da luta.</li>
+</ul>
+<div class="par">
+  <figure><img src="passo4/jogo/lava.gif" alt="" style="width:576px"><figcaption>A lava do chão (lava2-a, 700 ms). A bola nasce nas garras da frente.</figcaption></figure>
+  <figure><img src="passo4/jogo/golpe.gif" alt="" style="width:576px"><figcaption>A carga, cair de quatro (quatro-2 devagar), o galope até a linha de parada e o golpe-a com o salto.</figcaption></figure>
+  <figure><img src="passo4/jogo/salto-tras.gif" alt="" style="width:576px"><figcaption>O salto para trás (salto-tras-a). Antes era a pose parada com um pulinho em seno.</figcaption></figure>
+  <figure><img src="passo4/jogo/morte.gif" alt="" style="width:576px"><figcaption>A morte (morte-b). Ela termina deitada na linha do chão, e dali entra o fim de hoje (o piso racha e ela afunda).</figcaption></figure>
+</div>
+<ul>
+  <li><span class="meh">Dois cortes de pose ficaram:</span>
+    <ul>
+      <li>o golpe começa de pé, logo depois do galope de quatro;</li>
+      <li>ir para a esquerda pelo chão começa o galope sem cair de quatro antes.</li>
+    </ul>
+    Hoje é igual (o corrida → slash velho também cortava). Dá para pôr o "levanta" e o "cair de quatro" no meio, mas cada um custa uns 400 ms de luta: é decisão sua.</li>
+</ul>
+
+<h2 id="teto">No teto</h2>
+<p><b>25/11, corrigido (o seu pedido: "a garra está agarrando o vazio"):</b> pendurada, a ponta da garra agora fica em y=19, dentro da faixa de metal do teto (que vai de y≈14 a 28, medida no jogo). Antes ficava em y=30, abaixo da borda. Ela subiu 11 px. Todos os clipes do teto têm a garra na mesma linha do quadro, então uma só medida move as duas poses e todas as animações. Os GIFs abaixo foram regravados; o "teto-volta" e o das caixas ainda são de antes.</p>
+<img src="passo4/garra-antes-agora.png" alt="" style="width:100%;max-width:1470px">
+<div class="par">
+  <figure><img src="passo4/jogo/agarra.gif" alt="" style="width:576px"><figcaption>Agarrar o teto (teto-1): ela sobe pendurada pela mão 1.</figcaption></figure>
+  <figure><img src="passo4/jogo/teto-anda.gif" alt="" style="width:576px"><figcaption>O andar pendurado, para a esquerda: troca-12-b e troca-21-b, três trocas, e ela chega na mão 2.</figcaption></figure>
+  <figure><img src="passo4/jogo/teto-lava-2.gif" alt="" style="width:576px"><figcaption>Pendurada pela mão 2, a lava da mão livre (lava-2-b, a que acende o corpo em laranja).</figcaption></figure>
+  <figure><img src="passo4/jogo/teto-volta.gif" alt="" style="width:576px"><figcaption>O andar pendurado para a direita: as mesmas trocas tocadas ao contrário.</figcaption></figure>
+  <figure><img src="passo4/jogo/teto-lava-1.gif" alt="" style="width:576px"><figcaption>Pendurada pela mão 1, a lava da outra mão (lava-1-c).</figcaption></figure>
+  <figure><img src="passo4/jogo/solta.gif" alt="" style="width:576px"><figcaption>Soltar estando na mão 2: uma troca primeiro, depois o agarrar ao contrário até o chão.</figcaption></figure>
+</div>
+<ul>
+  <li><span class="meh">Pendurada e parada ela fica <b>imóvel</b>.</span> Nunca geramos uma respiração pendurada: o idle velho era o balanço, que saiu. Se quiser, é uma geração curta para cada mão.</li>
+  <li><b>A velocidade do andar pendurado:</b> 480 ms por troca, ≈ 80 px/s. O balanço de hoje ia a ~110 px/s.</li>
+  <li><b>Para andar para a direita</b> as trocas tocam ao contrário. A garra que segura continua parada no teto, mas o gesto é o da ida desfeito. Confira se lê como andar.</li>
+</ul>
+
+<h2 id="volta">A volta (a fase 2 de hoje)</h2>
+<p>Ela sai pela direita com o salto para trás, o core acende na borda e ela entra galopando. No meio da arena crava as garras, arranca o metal (rasgoD-a com o arco de hoje, 1625 ms) e se levanta (quatro-2 ao contrário, 400 ms).</p>
+<img src="passo4/jogo/volta.gif" alt="" style="width:768px">
+<ul>
+  <li>O metal do motor sai das garras da frente no quadro 13, quando o arco pintado sobe do chão.</li>
+  <li><span class="meh">O rasgo ficou mais longo que o de hoje:</span> 1625 ms contra 1100, porque são 25 quadros no mesmo ritmo. As garras ficam cravadas ~0,4 s antes de o metal sair, que é o aviso.</li>
+</ul>
+
+<h2 id="estrutura">E mais uma etapa: a estrutura da luta (spec §3)</h2>
+<p>Você pediu para eu avançar mais etapas, então depois do passo 4 fiz a estrutura da spec. Tudo isto é o que a spec aprovada diz, só que ainda sem as assinaturas novas.</p>
+<ul>
+  <li><b>A ordem fixa, sem sorteio:</b>
+    <ul>
+      <li>fase 1: lava → golpe → <i>sede</i> → golpe ↻;</li>
+      <li>fase 2: golpe → lava → volta ↻;</li>
+      <li>fase 3: <i>olhos</i> → golpe → lava → <i>olhos</i> → <i>coração</i> ↻.</li>
+    </ul>
+    As assinaturas em itálico ainda não existem: a ordem pula cada uma até o passo dela chegar. Por enquanto a "volta" é a de hoje (sai pela direita → aviso → galope → rasgo), até o passo 6 refazer pelas paredes. Medido no jogo, a fase 1 rodou lava, golpe, golpe ↻ por 40 s.</li>
+  <li><b>A trava da fase 2</b>, a mesma gramática do Guardião: a vida não passa de 33% antes de uma volta inteira. O tiro a mais bate no osso com o brilho frio e não tira vida, e a ordem puxa a volta como próxima jogada.
+    <ul>
+      <li>Medido: um tiro de 100 com a vida em 117 parou em 59,6, ainda na fase 2, e a próxima jogada foi a volta.</li>
+      <li>Depois do rasgo, 5 de dano passaram para a fase 3.</li>
+      <li>A tecla 7 dá a trava como cumprida.</li>
+    </ul>
+    As travas da sede (fase 1) e do coração (fase 3) entram com os passos delas.</li>
+  <li><b>A lava em pontos fixos:</b> três bolas em arco caem em x = 60/130/200 ou 95/165/235, alternando as duas figuras, e a mais perto cai primeiro. Cada uma respinga uma coluna curta para cima (~70 px) e deixa uma poça de 0,8 s no chão, que fere no toque. Do teto, o mesmo arremesso de cima. O estilhaço em leque da fase 3 saiu: agora a figura é dos pontos fixos.</li>
+</ul>
+<div class="par">
+  <figure><img src="passo4/jogo/lava-fixa.gif" alt="" style="width:576px"><figcaption>A lava do chão: as três bolas, as colunas e as poças.</figcaption></figure>
+  <figure><img src="passo4/jogo/teto-lava-fixa.gif" alt="" style="width:576px"><figcaption>A mesma figura, do teto (a outra figura de pontos).</figcaption></figure>
+</div>
+<ul>
+  <li><span class="meh">As poças são pequenas</span> (20×5 px, desenhadas no motor, como a bola). As colunas usam a gota e as brasas de hoje. Aqui a medida certa sai de você jogando.</li>
+</ul>
+
+<h2 id="caixas">As caixas, quadro a quadro</h2>
+<p>As mesmas cenas, com o corpo desenhado: <b>verde</b> é o corpo parado (tronco e cabeça), <b>vermelho</b> é o corpo de ataque (garras incluídas, sem o rabo) e <b>ciano</b> é o core.</p>
+<div class="par">
+  <figure><img src="passo4/jogo/golpe-caixas.gif" alt="" style="width:576px"><figcaption>No golpe a caixa segue o braço e as garras em cada quadro.</figcaption></figure>
+  <figure><img src="passo4/jogo/teto-caixas.gif" alt="" style="width:576px"><figcaption>Pendurada: o corpo e o core seguem as trocas de mão.</figcaption></figure>
+</div>
+<ul>
+  <li>Medi a luta correndo sozinha nas fases 2 e 3, com a nave invulnerável, por 60 s e 30 s. Ela passa por todos os estados, nada trava e não sai erro no console.</li>
+  <li class="dim">A caixa ciano do core aparece meio quadrado deslocada, para baixo e para a direita. A física recentra o core no passo seguinte, e com o Guardião é igual, porque é o mesmo código.</li>
+</ul>
+
+<h2 id="ver">Para você ver quando voltar</h2>
+<ol>
+  <li><b>Jogar a luta:</b> <code>?fase=besta1</code>, <code>besta2</code> e <code>besta3</code>, ou a tecla 7 a partir do Guardião.</li>
+  <li><b>O tamanho do surgimento</b> (1,0) e se o salto pintado está bom.</li>
+  <li><b>Os tempos:</b> a lava do chão em 700 ms, a do teto em 900, o rasgo em 1625, a troca de mão em 480 e o salto para trás em 700.</li>
+  <li><b>Os dois cortes de pose</b> (galope → golpe, de pé → galope): ficam assim, ou entram as transições com mais ~400 ms?</li>
+  <li><b>Pendurada parada:</b> imóvel, ou gerar uma respiração para cada mão?</li>
+  <li><b>A lava-2-b</b> acende o corpo inteiro em laranja no jogo. Você a escolheu assim, mas aqui dá para ver no tamanho real.</li>
+  <li><b>A estrutura:</b> a ordem fixa, a trava da fase 2 e a lava em pontos fixos, jogando com uma mão de verdade (a tecla 8).</li>
+  <li><b>O próximo passo da spec:</b> o 5, a sede, que bebe os tiros e os devolve pela mesma linha. Os clipes dela (sede-abre3-a e sede-devolve-b) já estão nas folhas. Não comecei: é a primeira mecânica nova de verdade, e a spec pede o plano e a sua aprovação antes.</li>
+</ol>
+<div class="nota">Nada foi commitado. Os arquivos novos e alterados:
+  <ul>
+    <li><code>src/entities/Predador.ts</code>, <code>src/scenes/BootScene.ts</code> e o novo <code>src/entities/besta/quadros.ts</code>, que é gerado;</li>
+    <li><code>public/sprites/besta/</code>, com 31 PNGs e 6 MB;</li>
+    <li>os scripts <code>scripts/_f4/besta_folhas.py</code>, <code>besta_conferir.py</code>, <code>_ver-besta-nova.mjs</code>, <code>_besta-solta.mjs</code>, <code>_tira-jogo.py</code> e <code>_gif-jogo.py</code>.</li>
+  </ul>
+  Os GIFs desta folha ficam fora do git, como sempre.</div>
+</body>
+</html>

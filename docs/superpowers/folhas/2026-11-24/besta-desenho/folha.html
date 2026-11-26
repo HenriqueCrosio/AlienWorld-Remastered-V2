@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta refeita</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --draft:#ffb347;
+          --nave:#40e0ff; --core:#ff7a2a; --perigo:#ff4a4a; --luz:#ffe08a; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.55 system-ui, sans-serif; margin:0 auto; max-width:1180px; padding:16px; }
+  h1 { font-size:24px; margin:8px 0 4px; } h2 { font-size:19px; margin:44px 0 10px; border-top:1px solid var(--line); padding-top:18px; }
+  h3 { font-size:16px; margin:22px 0 6px; }
+  p, li { max-width: 900px; } .dim { color:var(--dim); }
+  .tag { display:inline-block; font-size:12px; padding:1px 8px; border-radius:10px; margin-left:8px; vertical-align:middle; }
+  .ok { background:#1d3a27; color:var(--ok); } .draft { background:#3d2b12; color:var(--draft); }
+  table { border-collapse:collapse; width:100%; margin:8px 0; font-size:14px; }
+  th, td { border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; }
+  th { background:var(--pane); }
+  .grid2 { display:grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap:18px; align-items:start; }
+  @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
+  svg.arena { width:100%; height:auto; background:#07080b; border:1px solid var(--line); display:block; }
+  .fases { display:grid; grid-template-columns: 3fr 3fr 4fr; gap:6px; margin:10px 0; }
+  .fase { background:var(--pane); border:1px solid var(--line); border-radius:6px; padding:10px; }
+  .fase b { display:block; margin-bottom:6px; }
+  .chip { display:inline-block; background:#232733; border-radius:4px; padding:1px 7px; margin:2px 2px; font-size:13px; }
+  .chip.sig { background:#4a2410; color:#ffc79a; font-weight:600; }
+  .trava { font-size:13px; color:var(--draft); margin-top:6px; }
+  img { max-width:100%; display:block; margin:8px 0; image-rendering:pixelated; }
+  code { background:#1c1f28; padding:0 4px; border-radius:3px; }
+</style>
+</head>
+<body>
+<h1>A Besta refeita: o desenho até aqui</h1>
+<p class="dim">24/11. Opção B: refinar e escalar, com uma assinatura nova por fase. As partes 1 a 3 já estão aprovadas por você <span class="tag ok">aprovado</span>. As partes 4 a 6 são rascunho meu para você analisar <span class="tag draft">rascunho</span>. A análise do que existe hoje está na <a href="../besta-analise/folha.html" style="color:var(--nave)">folha da análise</a>.</p>
+
+<h2>O que já está decidido <span class="tag ok">aprovado</span></h2>
+<table>
+<tr><th>Pergunta</th><th>Escolha</th></tr>
+<tr><td>Como consertar</td><td><b>C</b>: consertar os defeitos e refazer a ronda com animação nova. Uma ordem de ataques fixa por fase, uma trava por fase e uma vida nova.</td></tr>
+<tr><td>A ambição</td><td><b>B</b>: refinar e escalar. Uma assinatura por fase, e o breu é o ápice.</td></tr>
+<tr><td>O tipo do bicho</td><td><b>Fica</b> demônio de carne e osso, sem nada biomecânico. <i>"a besta está presa por um motivo"</i>.</td></tr>
+<tr><td>O tema</td><td>Perto da <b>(c)</b>, como tempero: a luz e a energia são dela. O core, a luz e o breu são o fio da luta.</td></tr>
+<tr><td>A duração</td><td>Mais ou menos <b>a do Guardião</b>. Uma trava por fase, e o breu é a fase mais longa (≈30/30/40%).</td></tr>
+<tr><td>As assinaturas</td><td><b>Mecânicas que o jogo ainda não tem</b>: a sede, a volta, os olhos no escuro e o coração para.</td></tr>
+<tr><td>O visual</td><td>Escurecer o osso e o vermelho, deixando acesos só o core, a lava e a boca. As garras pensadas para o tamanho em que ela aparece no jogo.</td></tr>
+</table>
+
+<h3>Por que essas mecânicas: o que o jogo já tem e o que ninguém usa</h3>
+<table>
+<tr><th>Já usado (fica de fora)</th><th>Ninguém usa (onde entra)</th></tr>
+<tr><td>Leque com brecha (Torre, Guardião), anel (aranha, flak), espiral e faixa segura (enguia), coluna do teto (Guardião, casulos), feixe varrendo (Serpente), bote mirado no passado (quase todos), parede que aperta, lacaios, o eco do próprio caminho, lentidão (esporos), escuridão (o breu de hoje)</td>
+<td><b>Absorver e devolver os tiros do jogador</b>: a sede<br><b>Atacar por trás, do lado esquerdo</b> (a nave só atira para a direita): a volta<br><b>Isca com regra de leitura</b>: os olhos no escuro<br><b>Mexer no tempo</b>: o coração para</td></tr>
+</table>
+
+<h2>Parte 1: a estrutura <span class="tag ok">aprovado</span></h2>
+<div class="fases">
+  <div class="fase"><b>Fase 1: o chão (100% a 66%)</b>
+    <span class="chip">lava</span><span class="chip">golpe</span><span class="chip sig">sede</span><span class="chip">golpe</span> ↻
+    <div class="trava">Trava: só libera depois de uma sede com devolução.</div></div>
+  <div class="fase"><b>Fase 2: a volta (66% a 33%)</b>
+    <span class="chip">golpe</span><span class="chip">lava</span><span class="chip sig">a volta</span> ↻
+    <div class="trava">Trava: só libera depois de uma volta inteira, que termina no rasgo.</div></div>
+  <div class="fase"><b>Fase 3: o breu (33% a 0)</b>
+    <span class="chip sig">olhos no escuro</span><span class="chip">golpe</span><span class="chip">lava</span><span class="chip sig">olhos no escuro</span><span class="chip sig">coração para</span> ↻
+    <div class="trava">Trava final: ela não morre antes do coração parar.</div></div>
+</div>
+<ul>
+<li><b>A trava</b> funciona como os degraus do Guardião. O tiro a mais acerta o osso, solta faísca e não tira vida.</li>
+<li><b>A lava</b> deixa de ser mirada: ela arremessa 3 bolas em arco que caem em pontos fixos do chão. Os pontos alternam entre duas figuras, e cada bola respinga uma coluna para cima e deixa uma poça curta. Ela domina o chão e empurra a nave para cima, onde o golpe pega.</li>
+<li><b>O golpe</b> continua mirado no passado. Ganha uma linha de parada fixa longe da parede, a hitbox da garra quadro a quadro e um salto que pode chegar ao teto. O canto deixa de ser abrigo.</li>
+<li><b>No breu</b>, o core fica aceso em todo ataque. Nada perigoso passa invisível.</li>
+<li>A morte (o piso cede e a lava engole o corpo) fica como está.</li>
+</ul>
+
+<h2>As quatro assinaturas <span class="tag ok">aprovado</span></h2>
+
+<h3>Fase 1: a sede (ela bebe os seus tiros e os devolve)</h3>
+<div class="grid2">
+<svg class="arena" viewBox="0 0 384 216" role="img" aria-label="a sede">
+  <rect x="0" y="0" width="384" height="10" fill="#1a1c24"/><rect x="0" y="206" width="384" height="10" fill="#1a1c24"/>
+  <g stroke="#ff7a2a" stroke-width="2.2">
+    <line x1="286" y1="141" x2="20" y2="55"/><line x1="286" y1="141" x2="20" y2="141"/>
+  </g>
+  <g stroke="#40e0ff" stroke-width="1.5" stroke-dasharray="6 5">
+    <line x1="81" y1="70" x2="282" y2="135"/><line x1="81" y1="136" x2="280" y2="136"/>
+  </g>
+  <polygon points="20,55 30,54 27,61" fill="#ff7a2a"/><polygon points="20,141 29,137 29,145" fill="#ff7a2a"/>
+  <circle cx="290" cy="141" r="16" fill="none" stroke="var(--luz)" stroke-width="2" stroke-dasharray="3 3"/>
+  <circle cx="290" cy="141" r="7" fill="var(--core)"/>
+  <rect x="60" y="66" width="21" height="9" fill="var(--nave)" opacity=".45"/><rect x="60" y="132" width="21" height="9" fill="var(--nave)" opacity=".45"/>
+  <rect x="120" y="100" width="21" height="9" fill="var(--nave)"/>
+  <text x="300" y="118" fill="var(--luz)" font-size="9">anel aberto: bebe</text>
+  <text x="24" y="46" fill="var(--core)" font-size="9">volta pela linha de onde veio</text>
+  <text x="124" y="96" fill="var(--nave)" font-size="9">a nave já saiu da altura</text>
+  <text x="24" y="198" fill="var(--dim)" font-size="8">tracejado = seus tiros (um reto, um do espalhamento) · laranja = a devolução, na mesma linha</text>
+</svg>
+<div>
+<ul>
+<li>O core abre um anel e <b>bebe os tiros da nave</b>. Ela não perde vida, e o core vai mudando para a cor da sua arma.</li>
+<li>Depois de um tranco, ela <b>devolve tudo pela mesma linha</b>: cada tiro volta na altura e no ângulo de onde você atirou. A figura é você que desenha.</li>
+<li><b>Para ler:</b> o anel aceso e os tiros sumindo nele. <b>Para desviar:</b> pare de atirar, ou atire e depois saia da altura de onde atirou.</li>
+<li>A sede alterna com a abertura de dano em dobro. A luta cobra saber <b>quando atirar</b>.</li>
+<li>A devolução tem teto (a HMG atira 18 por segundo). Os tiros além do teto se apagam no core.</li>
+</ul>
+</div>
+</div>
+
+<h3>Fase 2: a volta (ela dá a volta na arena pela borda e ataca por trás)</h3>
+<div class="grid2">
+<svg class="arena" viewBox="0 0 384 216" role="img" aria-label="a volta">
+  <rect x="0" y="0" width="384" height="10" fill="#1a1c24"/><rect x="0" y="206" width="384" height="10" fill="#1a1c24"/>
+  <path d="M330 200 L18 200 L18 16 L366 16 L366 196" fill="none" stroke="var(--perigo)" stroke-width="3" stroke-linejoin="round" opacity=".8"/>
+  <polygon points="18,120 13,132 23,132" fill="var(--perigo)"/><polygon points="200,16 188,11 188,21" fill="var(--perigo)"/>
+  <polygon points="150,200 162,195 162,205" fill="var(--perigo)"/><polygon points="366,140 361,128 371,128" fill="var(--perigo)"/>
+  <rect x="10" y="16" width="16" height="184" fill="var(--perigo)" opacity=".12"/>
+  <g fill="var(--core)" opacity=".85">
+    <path d="M22 196 L70 170 L64 182 Z"/><path d="M22 20 L72 46 L60 50 Z"/><path d="M362 20 L314 46 L326 50 Z"/>
+  </g>
+  <ellipse cx="190" cy="108" rx="96" ry="52" fill="var(--nave)" opacity=".07" stroke="var(--nave)" stroke-dasharray="4 4"/>
+  <rect x="180" y="104" width="21" height="9" fill="var(--nave)"/>
+  <line x1="201" y1="108" x2="240" y2="108" stroke="var(--nave)" stroke-width="1"/><text x="243" y="111" fill="var(--nave)" font-size="8">→ só atira para a direita</text>
+  <text x="30" y="110" fill="var(--perigo)" font-size="9">aqui a arma</text><text x="30" y="121" fill="var(--perigo)" font-size="9">não alcança</text>
+  <text x="150" y="160" fill="var(--nave)" font-size="9">o meio é o abrigo</text>
+  <text x="250" y="194" fill="var(--dim)" font-size="8">termina no rasgo (o metal)</text>
+</svg>
+<div>
+<ul>
+<li>Em uma corrida só, ela <b>corre pelo chão, sobe a parede da esquerda, atravessa o teto de mão em mão e desce pela direita</b>. Cada trecho tem animação própria.</li>
+<li>Na parede da esquerda <b>ela está atrás de você</b>, e a arma só atira para a direita. É a única hora do jogo em que o perigo vem de trás.</li>
+<li><b>Em cada canto</b> ela para um instante e ataca para dentro da sala, com o golpe ou a lava saindo da quina. Os cantos são sempre os mesmos.</li>
+<li>A borda onde ela está é proibida, e o meio é o abrigo, que muda de forma conforme ela anda.</li>
+<li>Ela chega ao chão pela direita, e essa chegada <b>é o rasgo</b> de hoje: o piso rasgado e o metal em arco.</li>
+</ul>
+</div>
+</div>
+
+<h3>Fase 3: os olhos no escuro (três luzes, e só uma é ela)</h3>
+<div class="grid2">
+<svg class="arena" viewBox="0 0 384 216" role="img" aria-label="os olhos no escuro">
+  <rect x="0" y="0" width="384" height="216" fill="#030305"/>
+  <circle cx="8" cy="60" r="7" fill="var(--core)" opacity=".55"/><circle cx="376" cy="150" r="7" fill="var(--core)"/>
+  <circle cx="200" cy="8" r="7" fill="var(--core)" opacity=".55"/>
+  <circle cx="376" cy="150" r="13" fill="none" stroke="var(--core)" stroke-width="1.5"/>
+  <text x="282" y="178" fill="var(--core)" font-size="9">♥ bate com o coração</text>
+  <text x="16" y="48" fill="var(--dim)" font-size="9">fora do ritmo: brasa</text><text x="210" y="24" fill="var(--dim)" font-size="9">brasa</text>
+  <line x1="368" y1="150" x2="14" y2="150" stroke="var(--perigo)" stroke-width="5" opacity=".35"/>
+  <rect x="120" y="146" width="21" height="9" fill="var(--nave)" opacity=".4"/><rect x="120" y="98" width="21" height="9" fill="var(--nave)"/>
+  <text x="146" y="104" fill="var(--nave)" font-size="9">trocou de altura no aviso</text>
+  <text x="40" y="168" fill="var(--perigo)" font-size="9">ela cruza na altura do aviso</text>
+</svg>
+<div>
+<ul>
+<li>No breu ela some, e <b>acendem três luzes nas bordas</b>.</li>
+<li><b>A regra de leitura:</b> ela é a que bate <b>junto com o coração</b>, o batimento que já toca no breu. As outras são brasas de lava que ela deixou: pulsam fora do ritmo e estouram no lugar.</li>
+<li>A verdadeira faz <b>o borda a borda</b>: agarrada à parede, ela salta reto até a outra parede na altura em que a nave estava no aviso.</li>
+<li>Ela alterna os lados e começa pela esquerda. A parede não é abrigo.</li>
+<li>Ler o ritmo com o ouvido e com a luz é coisa que nenhum chefão cobra.</li>
+</ul>
+</div>
+</div>
+
+<h3>Fase 3, o clímax: o coração para (tudo congela no ar, menos a nave)</h3>
+<div class="grid2">
+<svg class="arena" viewBox="0 0 384 216" role="img" aria-label="o coração para">
+  <rect x="0" y="0" width="384" height="216" fill="#030305"/>
+  <g fill="var(--luz)">
+    <circle cx="60" cy="40" r="3"/><circle cx="96" cy="58" r="3"/><circle cx="132" cy="40" r="3"/><circle cx="168" cy="62" r="3"/><circle cx="204" cy="44" r="3"/><circle cx="240" cy="66" r="3"/>
+    <circle cx="50" cy="120" r="3"/><circle cx="90" cy="140" r="3"/><circle cx="130" cy="118" r="3"/><circle cx="170" cy="150" r="3"/><circle cx="210" cy="126" r="3"/><circle cx="250" cy="160" r="3"/>
+    <circle cx="80" cy="186" r="3"/><circle cx="150" cy="190" r="3"/><circle cx="220" cy="188" r="3"/><circle cx="110" cy="92" r="3"/><circle cx="190" cy="96" r="3"/><circle cx="260" cy="104" r="3"/>
+  </g>
+  <circle cx="320" cy="130" r="9" fill="var(--core)" opacity=".35"/>
+  <path d="M40 170 C 70 160, 70 104, 110 108 S 150 80, 160 80" fill="none" stroke="var(--nave)" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <rect x="150" y="76" width="21" height="9" fill="var(--nave)"/>
+  <g stroke="var(--nave)" stroke-width="1.5"><line x1="176" y1="80" x2="184" y2="80"/><line x1="188" y1="80" x2="196" y2="80"/><line x1="200" y1="80" x2="208" y2="80"/><line x1="212" y1="80" x2="220" y2="80"/></g>
+  <text x="226" y="78" fill="var(--nave)" font-size="8">seus tiros parados se acumulam</text>
+  <text x="300" y="152" fill="var(--core)" font-size="9">coração parado</text>
+  <text x="16" y="208" fill="var(--dim)" font-size="8">pontos = o campo dela congelado (a única luz da sala) · tracejado = o caminho lido com calma</text>
+</svg>
+<div>
+<ul>
+<li>Ela enche a sala de estilhaços e lava, crava as garras no próprio core, e <b>o coração para</b>.</li>
+<li>Tudo o que está voando <b>congela no ar</b>, o dela e o seu. Só a nave se move. As brasas paradas são a única luz, e a sala escura vira um mapa.</li>
+<li>Você atravessa o campo até um lugar seguro, e os seus tiros parados vão se acumulando.</li>
+<li>Depois de ~1,5 s o coração volta a bater e tudo retoma junto: o campo dela segue as trajetórias, e a sua rajada acumulada cai sobre ela.</li>
+<li>Quem lê o mapa sai ileso <b>e dá o maior golpe da luta</b>.</li>
+</ul>
+</div>
+</div>
+
+<h2>Parte 3: o movimento e as animações <span class="tag ok">aprovado</span></h2>
+<p>O PixelLab faz o movimento do corpo, e o código só leva ela por um caminho apoiado no mundo, como o chão, a parede, o teto ou a borda. Nada desliza.</p>
+<h3>Ficam como estão (o quadro do meio de cada clipe)</h3>
+<img src="../besta-analise/clipes-que-ficam.jpg" alt="os 12 clipes que ficam">
+<h3>Clipes novos</h3>
+<table>
+<tr><th>Clipe</th><th>Para quê</th><th>Ferramenta</th></tr>
+<tr><td>Salto para trás</td><td>voltar para a direita depois do golpe; acaba o deslizar</td><td>esqueleto (o primeiro teste)</td></tr>
+<tr><td>Escalada</td><td>subir a parede da esquerda e descer a da direita; gerada como rastejar e girada 90°, que é exato em pixel</td><td>esqueleto</td></tr>
+<tr><td>Troca de mão no teto</td><td>atravessar o teto na volta</td><td>esqueleto</td></tr>
+<tr><td>Quinas (chão→parede, parede→teto)</td><td>as viradas da volta</td><td>PixMiniMax, com a pose final presa</td></tr>
+<tr><td>Ataque de canto</td><td>o golpe para dentro da sala, saindo da quina</td><td>PixMiniMax</td></tr>
+<tr><td>A sede: abrir / devolver</td><td>o peito abre e bebe; o tranco que solta tudo de volta</td><td>PixMiniMax</td></tr>
+<tr><td>Salto de parede a parede</td><td>o borda a borda, com o corpo esticado e as garras à frente</td><td>esqueleto</td></tr>
+<tr><td>O coração para</td><td>ela crava as garras no próprio core e o aperta, e depois solta</td><td>PixMiniMax</td></tr>
+</table>
+<p class="dim">O esqueleto acerta a pose e mantém o desenho dela, e ainda dá a posição da ponta de cada garra em todo quadro, que vira a hitbox. O PixMiniMax fica com os gestos grandes, que ele ganhou em setembro. Custo: perto de 120 gerações (temos 2.537). A recoloração (osso e vermelho mais escuros) vem no fim, com o mesmo mapa de cor em todos os clipes.</p>
+
+<h2>Parte 4: os consertos <span class="tag draft">rascunho</span></h2>
+<table>
+<tr><th>Defeito (seção da análise)</th><th>Conserto</th></tr>
+<tr><td>A garra passa pela nave (§1)</td><td>Uma hitbox por quadro para cada garra, nos <code>perigos</code>, medida na arte (ou tirada do esqueleto nos clipes novos). O corpo fere só onde há massa. O salto pode ir até o teto, e a linha de parada fica fixa longe da parede. A prova: a nave no canto e a nave que sobe durante a corrida <b>levam o golpe</b>.</td></tr>
+<tr><td>O core flutua nas costas no galope (§2)</td><td>Uma tabela da posição do core por quadro em cada clipe. A luz e a caixa do core seguem o peito.</td></tr>
+<tr><td>Duas bolas na lava do teto (§3)</td><td>Cortar o clipe antes da bola pintada, como no chão (no 14). Se o corte quebrar o laço, apagar a bola por máscara e provar que o resto ficou idêntico.</td></tr>
+<tr><td>A ronda desliza (§4)</td><td>Some com a parte 3: salto para trás, escalada, troca de mão.</td></tr>
+<tr><td>A onda de fogo do rasgo não fere (§5)</td><td>Regra: o que está pintado fere. A onda ganha hitbox que segue a faixa pintada no chão, combinando com a lava que domina o chão.</td></tr>
+<tr><td>O golpe invisível no breu (§6)</td><td>Em todo estado de ataque o core fica no nível de aviso, nunca no pulso lento.</td></tr>
+<tr><td>Parada, só o ombro é sólido (ref.)</td><td>O corpo segura bala no tronco e na cabeça. Os braços e as pernas continuam vazados, mas as garras ferem quando atacam.</td></tr>
+<tr><td>Clara demais / garras pontilhadas (§7)</td><td>A recoloração e o teste da redução (parte 3).</td></tr>
+</table>
+
+<h2>Parte 5: as teclas de dev <span class="tag draft">rascunho</span></h2>
+<p>Hoje já existem o <b>5</b> (pula para o chefão) e o <b>6</b> (abre uma mesa de cartas). Proposta, só em dev e nunca com CTRL:</p>
+<ul>
+<li><b>7: a próxima fase do chefão.</b> No Guardião, o próximo degrau; depois, a Besta fase 1, 2 e 3. Para em cada uma com a vida no topo da fase. Vale para todo chefão que tem fase.</li>
+<li><b>8: escolher a mão.</b> Abre uma lista de mãos prontas (sem cartas, mediana, forte e a última montada no sandbox) e aplica na hora.</li>
+<li>Os mesmos dois na URL (<code>?fase=besta3&amp;mao=mediana</code>), para os scripts de medição do rebalanceamento entrarem direto.</li>
+</ul>
+
+<h2>Parte 6: os testes e a ordem dos passos <span class="tag draft">rascunho</span></h2>
+<h3>Como se prova</h3>
+<ul>
+<li><b>Puros:</b> a geometria de cada figura (os pontos da lava, a devolução na mesma linha, o caminho da volta, o ritmo das luzes) e a ordem dos ataques com as travas.</li>
+<li><b>No jogo, filmados com os corpos desenhados:</b> o golpe pega no canto; o core aceso em todo ataque no breu; a sede com a HMG respeita o teto; o congelamento para os dois lados e retoma junto.</li>
+<li><b>Você jogando</b> cada passo, como no Guardião.</li>
+</ul>
+<h3>A ordem proposta</h3>
+<ol>
+<li>As teclas de dev (7 e 8), que servem para todo o resto e para o rebalanceamento.</li>
+<li>Os consertos de código: as garras, o core por quadro, o breu aceso, a onda do rasgo, a bola do teto.</li>
+<li>A estrutura: a ordem fixa, as travas e a lava em pontos fixos.</li>
+<li>O teste do esqueleto com o salto para trás; ele decide a ferramenta dos outros clipes.</li>
+<li>A sede.</li>
+<li>A volta (os clipes de escalada, troca de mão e quinas, e o rasgo no fim).</li>
+<li>Os olhos no escuro.</li>
+<li>O coração para.</li>
+<li>A recoloração e as garras.</li>
+<li>Os sons novos e você jogando a luta inteira. A vida sai da medição no rebalanceamento.</li>
+</ol>
+
+<h2>As perguntas <span class="tag ok">respondidas: todas pela proposta</span></h2>
+<ul>
+<li>A sede: o teto da devolução e quanto tempo o anel fica aberto, medidos com cada arma.</li>
+<li>A volta: durante a volta, ela leva tiro no teto e na parede da direita? A minha proposta é sim, com o core exposto. Só na parede da esquerda ela é intocável, porque está atrás.</li>
+<li>O coração para: a bomba limpa o campo congelado? A minha proposta é sim, mas aí ela gasta a rajada acumulada junto. E o míssil teleguiado congela como os tiros.</li>
+<li>Os olhos no escuro: quem joga sem som também precisa ler. A luz verdadeira pisca junto com o batimento na tela, então o ritmo se vê, não só se ouve.</li>
+</ul>
+</body>
+</html>

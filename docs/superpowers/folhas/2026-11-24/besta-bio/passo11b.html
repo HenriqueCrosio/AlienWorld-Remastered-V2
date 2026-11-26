@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: segunda rodada</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#7fd88a; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1640px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:44px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  h3 { font-size:17px; margin:22px 0 6px; }
+  p, li { max-width: 1000px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; margin:8px 0; border:1px solid var(--line); }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .ab { display:flex; gap:24px; flex-wrap:wrap; align-items:center; background:var(--pane); padding:12px; border-radius:6px; max-width:1000px; }
+  .ab div { display:flex; flex-direction:column; gap:4px; }
+  code { background:var(--pane); padding:1px 4px; border-radius:3px; }
+</style>
+</head>
+<body>
+<h1>A Besta, segunda rodada: o que vi jogando</h1>
+<p class="dim">26/11. Tudo aqui saiu do jogo rodando: fotos em sequência, sons registrados enquanto ela luta, e um teste que joga como uma pessoa (com tempo de reação). As fotos estão no tamanho dele.</p>
+
+<h2>O "respingo infinito" (fase 3), e por que a laje perdia colunas (fase 2)</h2>
+<p>O registro dos sons em 90 s de fase 3 mostrou <b>122 impactos de lava e 113 estilhaços para só 5 arremessos</b>. Cada salva virava uma cadeia de uns 5 s, até o pool de projéteis esvaziar.</p>
+<p><b>A causa era um erro de reaproveitamento.</b> A bola que cai solta o projétil dela, e o respingo pega <i>esse mesmo</i> projétil na hora. A ficha antiga ("bola") continuava apontando para ele, então cada gotinha que caía era tratada como bola de novo e respingava de novo. Isso também enchia o pool de 128 projéteis: numa das paredes, 61 já estavam ocupados quando ela lançou a laje, e a laje precisa de 52. Com mais respingos no ar, as últimas colunas da laje simplesmente não nasciam.</p>
+<p><b>Corrigido:</b> agora a ficha só vale enquanto o projétil carrega o número dela. Depois da correção, em 60 s houve 18 impactos e 14 estilhaços, um por bola que cai. O metal do campo do coração, que caía em 15 batidas cheias no mesmo segundo, agora toca uma batida macia a cada 120 ms.</p>
+
+<h2>Fase 2: a laje e a câmera lenta</h2>
+<p>Joguei três paredes seguidas, atirando e me mexendo. As três saíram inteiras, com as 52–53 lascas na tela (a 3ª abaixo).</p>
+<img src="passo11b/parede-3.jpg" alt="">
+<p><b>Uma ressalva honesta:</b> não consegui reproduzir os 80 % fora da tela. A causa mais provável é a do respingo infinito acima: a parede é o 3º ataque da fase 2 (golpe, lava, <b>volta</b>), e ela vem logo depois da salva de lava. Se ainda acontecer, me mande um print daquele momento.</p>
+<h3>A câmera lenta</h3>
+<p>Quando a laje sai, <b>a trilha desacelera como uma fita</b>: velocidade e tom caem juntos, até 60 %, em 0,9 s. Ela volta ao normal quando a besta solta a parede. É o efeito que você pediu: dá para fazer na trilha, porque ela toca num elemento de áudio do navegador cuja velocidade dá para mudar sem segurar o tom. O batimento lento que acompanha a laje agora é o batimento com corpo (abaixo).</p>
+
+<h2>Fase 3: os olhos</h2>
+<h3>Antes (fotos a cada 0,5 s)</h3>
+<p>Três pares de pontinhos laranja iguais. Pela imagem não dá para saber qual é ela.</p>
+<img src="passo11b/olhos-antes.jpg" alt="">
+<h3>O coração que não se ouvia</h3>
+<p>Medi a mistura inteira nos olhos, a trilha e o mundo como você ouve. <b>95–98 % da energia dos dois takes do batimento fica abaixo de 80 Hz.</b> É grave puro, que alto-falante de notebook e a maioria dos fones quase não tocam. No medidor ele se destacava; num alto-falante de notebook ficava <b>a 0 dB do resto</b>, ou seja, não se ouvia.</p>
+<p>Fiz um batimento com corpo a partir do seu próprio take (o 2º, da folha 5c). Saturei o take para nascerem harmônicos entre 120 e 1400 Hz e somei ao original: o mesmo tum, agora audível em qualquer alto-falante. Medido: <b>+8–9 dB acima do resto</b> num alto-falante de notebook. Ele entra nos olhos, no batimento do breu, na laje lenta e na contagem do coração parado. <b>É provisório até você ouvir:</b></p>
+<div class="ab">
+  <div><b>antes</b>: o seu take (5c)<audio controls src="/sfx/chefes-nucleo/predador.pulso2.ogg"></audio></div>
+  <div><b>depois</b>: com corpo<audio controls src="/sfx/besta/besta.coracao.batida.ogg"></audio></div>
+</div>
+<p>Junto com isso, enquanto as luzes procuram por ela, os sentidos se fecham no coração: os sussurros caem para 20–30 % do volume, a trilha fecha como no coração parado e a risada some antes dos batimentos. Antes, ela cobria os três primeiros.</p>
+<h3>Depois: o vermelho só na batida dela</h3>
+<p>Em repouso, as três luzes têm o mesmo âmbar fraco. <b>No pico do próprio ritmo, cada uma mostra a sua cor: a besta acende vermelho, as brasas acendem amarelo.</b> Então o vermelho aparece exatamente no batimento que você ouve, e uma olhada num momento parado não diz nada. Fica mais fácil, mas ainda pede olhar e ouvir juntos.</p>
+<p>O tempo também cresceu: <b>6 batimentos de 1,25 s</b> (eram 4 de 1,0), o aviso subiu para 0,8 s, e são uns 7,4 s até o salto (eram 3,9). Achei novos ritmos para as brasas: nenhuma passa de 10 % de brilho em nenhum dos 6 batimentos dela.</p>
+<p class="dim">Colunas: na batida 2 · entre batidas · na batida 3 · entre batidas · o aviso. Linhas: as três figuras.</p>
+<img src="passo11b/olhos-depois.jpg" alt="">
+
+<h2>Fase 3: o coração parado</h2>
+<h3>Antes</h3>
+<p>O campo chegava voando em cima da nave e já feria antes de parar. Os rastros e a luz grande faziam cada lasca parecer três vezes maior que o corpo dela, então a parede parecia fechada. A rota apagada era escura demais para ler no breu.</p>
+<img src="passo11b/coracao-antes.jpg" alt="">
+<h3>O que mudou</h3>
+<ul>
+  <li><b>O arremesso só forma o campo:</b> as lascas ferem a partir do congelamento, nunca no voo.</li>
+  <li><b>O campo nunca se forma em cima da nave:</b> no congelamento, a lasca acesa a até 8 px da nave apaga junto.</li>
+  <li><b>Ler o campo:</b> todos os rastros congelados somem, e as acesas ficam com uma luz pequena e firme, do tamanho do que fere.</li>
+  <li><b>A rota apaga em varredura</b>, da parede da esquerda até o espaço livre, uma lasca a cada 75 ms. O olho segue o caminho. As apagadas viram metal cinza-frio, visíveis mas sem luz.</li>
+  <li><b>O tempo: 3,0 → 4,5 s.</b> O coração conta a volta com três batimentos com corpo, a 1,5, 0,9 e 0,4 s do fim, cada um mais forte, e as acesas pulsam junto.</li>
+</ul>
+<h3>Depois (início no meio · no canto de cima)</h3>
+<p class="dim">Lançamento · congela · a rota apagando · voando · 1º batimento da volta · a retomada · meio segundo depois.</p>
+<img src="passo11b/coracao-depois.jpg" alt="">
+<img src="passo11b/coracao-depois-2.jpg" alt="">
+<p><b>Jogado como uma pessoa</b> (<code>_besta-coracao-humano.mjs</code>): a nave parte de 6 lugares comuns e não faz nada durante o arremesso. No congelamento ela espera 0,8 s de reação e voa a 110 px/s por um caminho planejado nas caixas de verdade, com a caixa dela mais 3 px de cada lado. Depois segura no espaço livre durante a retomada. Resultado: <b>0 dano nos 6</b>, e todos chegaram com folga (de 0,7 a 1,7 s de voo, dentro dos 4,5 s).</p>
+
+<h2>Para você conferir jogando</h2>
+<table>
+  <tr><th>O quê</th><th>Onde</th></tr>
+  <tr><td>A laje sai inteira nas três vezes? A trilha desacelerando lê como câmera lenta?</td><td><code>?fase=besta2</code></td></tr>
+  <tr><td>Os olhos: o vermelho na batida + o coração audível. Ficou fácil demais, ou no ponto?</td><td><code>?fase=besta3</code></td></tr>
+  <tr><td>O batimento com corpo (os dois botões acima, e no jogo).</td><td>esta folha</td></tr>
+  <tr><td>O coração parado: dá para ler a rota e chegar? Os 4,5 s estão longos?</td><td><code>?fase=besta3</code></td></tr>
+  <tr><td>A lava quicando: o barulho infinito sumiu?</td><td><code>?fase=besta3</code></td></tr>
+</table>
+</body>
+</html>

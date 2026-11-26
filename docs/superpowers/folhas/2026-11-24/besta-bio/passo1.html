@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta nova: a base</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1200px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:20px; margin:44px 0 10px; border-top:1px solid var(--line); padding-top:18px; }
+  p, li { max-width: 940px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  .lado { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; } figure { margin:0; } figcaption { font-size:13px; color:var(--dim); margin-top:4px; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; } th { background:var(--pane); } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+<h1>A Besta nova, passo 1: a base E-7-1</h1>
+<p class="dim">24/11. A E-7-1 conferida ampliada e posta dentro do jogo rodando (na 5173, com a Atmosfera da F4 por cima), ao lado da Besta atual e do Guardião. Ela entra como uma textura a mais na hora: nada foi mexido em <code>src/</code>.</p>
+
+<h2>A limpeza</h2>
+<div class="lado">
+  <figure><img src="base-x4.png" alt="" style="width:680px"><figcaption>a E-7-1 ×4</figcaption></figure>
+  <figure><img src="rabo-x8.png" alt="" style="width:240px"><figcaption>o rabo ×8, sobre verde</figcaption></figure>
+</div>
+<ul>
+  <li><b>Não há o que limpar.</b> Não tem pixel solto nem borda semitransparente, e são 45 cores.</li>
+  <li><b>Os espinhos do rabo estão presos.</b> No escuro eles parecem uma linha pontilhada solta ao lado do rabo, mas sobre o verde se vê que cada um encosta no contorno. É o contorno escuro do rabo que some no fundo.</li>
+</ul>
+
+<h2>No jogo: ao lado da Besta atual</h2>
+<p>A nova está à esquerda, no mesmo chão (os pés em y 190), e a atual à direita, parada na pose dela.</p>
+<div class="lado">
+  <figure><img src="jogo/besta-lado-a-lado.png" alt="" style="width:576px"><figcaption>a nova na MESMA ALTURA da atual (117 px de tela)</figcaption></figure>
+  <figure><img src="jogo-105/besta-lado-a-lado.png" alt="" style="width:576px"><figcaption>a nova um pouco menor (105 px de tela)</figcaption></figure>
+</div>
+<ul>
+  <li><b>Na mesma altura, ela pesa mais.</b> É mais larga, mais curvada para a frente e tem o rabo, então ocupa mais da arena.</li>
+  <li><b>Em 105 px, ela tem a massa da atual.</b> Também sobra mais espaço para o teto, as paredes e o salto de parede a parede.</li>
+</ul>
+
+<h2>No jogo: ao lado do Guardião</h2>
+<div class="lado">
+  <figure><img src="jogo/guardiao-e-besta.png" alt="" style="width:576px"><figcaption>117 px</figcaption></figure>
+  <figure><img src="jogo-105/guardiao-e-besta.png" alt="" style="width:576px"><figcaption>105 px</figcaption></figure>
+</div>
+<p><b>Ela conversa com o Guardião.</b> A placa grafite e o core aceso são o mesmo vocabulário da casca dele, e ela parece a energia que estava lá dentro, que é o tema (c). A Besta atual, toda vermelha, era outra família.</p>
+
+<h2>O brilho</h2>
+<table>
+<tr><th></th><th>média</th><th>mediana</th><th>os 5% mais claros</th><th>o 1% mais claro</th></tr>
+<tr><td>o Guardião (a coleira)</td><td class="n">0,159</td><td class="n">0,144</td><td class="n">0,400</td><td class="n">0,554</td></tr>
+<tr><td>a Besta nova (E-7-1)</td><td class="n">0,181</td><td class="n">0,115</td><td class="n">0,653</td><td class="n">0,777</td></tr>
+<tr><td>a Besta atual (a luta)</td><td class="n">0,192</td><td class="n">0,093</td><td class="n">0,793</td><td class="n">0,923</td></tr>
+</table>
+<p>A nova fica entre os dois. O corpo é escuro como o do Guardião. O que a deixa clara é o <b>osso</b> (o capacete, os chifres, as garras e os espinhos), que é o pedaço mais claro dela, embora já bem mais escuro que o osso da atual. A spec do rework já previa escurecer o osso da Besta. Aqui, isso seria opcional.</p>
+
+<p style="color:#6fdc8c"><b>Aprovado em 24/11:</b> tamanho de 105 px e o osso como está.</p>
+<h2>As duas decisões</h2>
+<ol>
+  <li><b>O tamanho:</b> 117 px (a altura da atual) ou 105 px (a massa da atual). Eu iria de <b>105</b>: ela continua grande, e as fases da parede e do teto pedem espaço.</li>
+  <li><b>O osso:</b> manter como está ou escurecer um pouco, uns 15%, só no osso. Eu <b>manteria</b> por enquanto e decidiria com ela já se mexendo no jogo, porque o osso é o que a deixa legível no breu.</li>
+</ol>
+<p class="dim">Ferramenta: <code>ferramentas/no-jogo.mjs &lt;png&gt; &lt;pasta&gt; [altura]</code> põe qualquer arte na luta da Besta e na do Guardião e fotografa as duas.</p>
+</body>
+</html>

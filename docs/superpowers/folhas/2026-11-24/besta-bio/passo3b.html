@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta nova: a rodada 4</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1800px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:52px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  p, li { max-width: 980px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .no { color:var(--no); } .meh { color:var(--meh); } .ok { color:var(--ok); }
+  details { margin:8px 0 14px; } summary { cursor:pointer; color:var(--dim); }
+  nav a { color:#9ecbff; margin-right:14px; }
+  .nota { background:var(--pane); border:1px solid var(--line); border-radius:6px; padding:8px 12px; max-width:980px; }
+</style>
+</head>
+<body>
+<h1>A Besta nova, passo 3: a rodada 4</h1>
+<p class="dim">25/11. O que você pediu para refazer na revisão do <a href="passo3.html" style="color:#9ecbff">passo3.html</a> e o que ainda não tinha sido feito. Custo desta rodada: <b>44 gerações</b>.</p>
+<p><b>Como ler os GIFs:</b> como no passo3. <b>HOJE</b> é o clipe do jogo, <b>ESCOLHA</b> é a que você escolheu e <b>NOVA</b> é a candidata desta rodada, com os pés no mesmo chão e o mesmo tempo total.</p>
+<nav><a href="#r8">Rodada 8</a><a href="#r7">Rodada 7</a><a href="#r6">Rodada 6</a><a href="#r5">Rodada 5</a><a href="#escolhas">As suas escolhas</a><a href="#andar">Andar</a><a href="#rasgo">Rasgo</a><a href="#golpe">Golpe</a><a href="#rastejar">Rastejar</a><a href="#morte">Morte</a><a href="#falta">O que falta</a></nav>
+
+<div class="nota"><b>O passo 3 fechou em 25/11.</b> Todos os clipes estão escolhidos (tabela em <a href="#escolhas" style="color:#9ecbff">As suas escolhas</a>). Por último ficaram descola-a + agarra-a e rasgoD-a.</div>
+
+<h2 id="r8">Rodada 8: o rasgo até em cima e o salto saindo da parede</h2>
+<p class="dim">25/11. Esta rodada custou 10 gerações.</p>
+
+<h3>O rasgo: o braço vai até em cima</h3>
+<p>O seu ponto: no rasgo original, o braço e as garras fazem o movimento <b>completo</b>, do chão até bem acima da cabeça, e o arco é esse caminho. Na rasgoC os braços paravam à frente, na altura do peito. Agora o trecho de arrancar parte das garras enterradas e leva os dois braços para a frente e para cima <b>até ficarem retos acima da cabeça</b>, de perfil e com o core visível de lado. Depois vem um trecho novo de volta, dos braços no alto até a pose do galope. A ordem é: crava (8 quadros), sobe até em cima (8) e desce (8), 25 quadros no total. O arco de hoje acompanha a subida.</p>
+<img src="passo3/r8/galope-rasgo.gif" alt="" style="width:900px">
+<img src="passo3/r8/rasgo.gif" alt="" style="width:1320px">
+<ul>
+  <li><b>rasgoD-a</b>: crava com as garras à frente da cara, arrasta e sobe. O arco acende quando os braços passam da altura da cabeça.</li>
+  <li><b>rasgoD-b</b>: começa a arrancar um quadro antes e marca os riscos das garras no arranque.</li>
+  <li>Nos quadros do alto ela está de pé, de perfil, com os braços acima da cabeça. A cara fica de três quartos, mas o peito não vira para a tela.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r8/rasgo-q.png" alt=""></details>
+
+<h3>O salto de parede a parede, saindo da parede</h3>
+<p>São dois trechos de 8 quadros, presos nas poses de verdade:</p>
+<ul>
+  <li><b>descola</b>: agarrada na parede da direita, ela empurra com as quatro patas e se estica no voo. Termina no quadro do corpo esticado da salto-parede-b, que você escolheu.</li>
+  <li><b>agarra</b>: esticada, chega na parede da esquerda, crava as garras e o corpo gira para cima até ficar agarrada.</li>
+</ul>
+<p>No meio, o motor leva o quadro esticado de uma parede à outra a 380 px/s, como diz a spec. O GIF mostra a arena inteira. A ida da esquerda para a direita é o mesmo clipe espelhado.</p>
+<img src="passo3/r8/salto-arena.gif" alt="" style="width:768px">
+<ul>
+  <li><b>descola-a + agarra-a</b>: ela gira o corpo da parede para o voo com a cabeça na frente.</li>
+  <li><b>descola-b + agarra-b</b>: ela se estica mais cedo e o voo começa mais perto da parede.</li>
+  <li><span class="meh">Nas duas decolagens ela mostra o peito por 1 ou 2 quadros enquanto gira para fora da parede.</span> A esta velocidade é rápido, mas confira.</li>
+</ul>
+
+<h2 id="r7">Rodada 7: as garras do rasgo, como as da original</h2>
+<p class="dim">25/11. Esta rodada custou 16 gerações.</p>
+<p><b>O gesto da original:</b> ela abre os braços com os dedos longos espalhados, desce as duas garras à frente, que cravam e se curvam agarrando o chão, arrasta, e arranca num grande arco. O arco de metal é o próprio caminho das garras. A rasgoP só apoiava as garras e empinava.</p>
+<p><b>O problema que apareceu:</b> pedi esse gesto num clipe inteiro (rasgo10 e rasgo11). As garras ficaram certas, mas toda vez que ela empinava <b>virava o peito para a tela</b>, que é o defeito que você apontou. Então montei o rasgo em <b>trechos curtos com as duas pontas presas em quadros de perfil</b>, para ela não ter espaço de virar:</p>
+<ol>
+  <li><b>crava</b> (rcrava-a ou rcrava-b, 8 quadros): parte da pose do galope, empina de perfil com as garras abertas à frente da cara e crava as duas no chão. Termina num quadro de perfil, com as garras enterradas, tirado da rasgo10-a.</li>
+  <li><b>arranca</b> (rarranca2-a, 8 quadros): parte das garras enterradas, arrasta e arranca os dois braços do chão para a frente, subindo nas patas de trás. Termina na empinada de perfil da rasgoP-b. Das seis tentativas deste trecho, quatro viravam o peito para a tela por 2 quadros, então fiquei com uma das duas que seguraram o perfil.</li>
+  <li><b>volta</b> (os 5 últimos quadros da rasgo8-b): de volta à pose do galope.</li>
+</ol>
+<p>São 22 quadros, com o fogo nas garras enquanto estão enterradas e o arco de hoje subindo junto com o arranque.</p>
+<img src="passo3/r7/galope-rasgo.gif" alt="" style="width:100%">
+<p class="dim">Acima: o galope duas vezes e o rasgo em seguida. Nesta sequência o rasgo toca a 65 ms por quadro. No GIF de baixo, os 22 quadros cabem nos mesmos 1100 ms do rasgo de hoje, então ela fica mais rápida lá. O tempo se escolhe como no andar.</p>
+<img src="passo3/r7/rasgo.gif" alt="" style="width:100%">
+<ul>
+  <li><b>rasgoC-a</b> (com a rcrava-a): empina mais alto, com as garras abertas à frente da cara, antes de cravar.</li>
+  <li><b>rasgoC-b</b> (com a rcrava-b): o mesmo gesto, com os braços erguidos mais altos e um pouco mais de abertura.</li>
+  <li>Em todos os quadros a cabeça aponta para a nave.</li>
+  <li><span class="meh">Como antes, o arco é desenhado na frente do corpo e cobre a cabeça nos quadros mais altos.</span> Nos cortes não há salto, porque cada trecho começa exatamente no último quadro do anterior.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r7/rasgo-q.jpg" alt=""></details>
+
+<h2 id="r6">Rodada 6: o rasgo de perfil, encarando a nave</h2>
+<p class="dim">25/11. O andar fica na andar5-a a 1400 ms por ciclo. Esta rodada custou 8 gerações.</p>
+<p>O seu ponto: ela vem galopando, crava as garras e joga o metal quente na nave, então precisa estar virada para a nave e não para a tela. Todas as anteriores saíam de frente para a tela. Agora o rasgo <b>parte da pose do galope</b> (quatro-2), e o pedido é de perfil e virada para a esquerda o tempo todo: ela freia de quatro, crava as duas garras da frente no chão, segura, empina nas patas de trás puxando os dois braços para a frente e para cima, e volta de quatro. Por cima vai o fogo e o arco recortados do rasgo de hoje, com o fogo nas garras da frente.</p>
+<img src="passo3/r6/galope-rasgo.gif" alt="" style="width:900px">
+<p class="dim">Acima: o galope (galope-a) duas vezes e o rasgo em seguida, sem pausa. Aqui ela fica no lugar; no jogo o motor a leva pelo chão durante o galope. A emenda do galope com a pose quatro-2 só levanta o rabo de uma vez.</p>
+<img src="passo3/r6/rasgo.gif" alt="" style="width:100%">
+<ul>
+  <li><b>rasgoP-a</b> (sobre a rasgo8-a): crava com o focinho baixo, o fogo acende nas garras da frente e o arco sobe quando ela empina. Os cacos caem enquanto ela está com os braços para a frente.</li>
+  <li><b>rasgoP-b</b> (sobre a rasgo8-b): o mesmo gesto, mais alto na empinada e com os braços mais esticados para a frente. O arco cobre mais o corpo.</li>
+  <li><b>rasgo8-a/b</b>, os corpos sozinhos: perfil o tempo todo, a cabeça nunca vira para a tela.</li>
+  <li class="dim">Descartei as rasgo9, que deviam terminar em pé de lado: quase não se mexem e pulam para a pose final no último quadro.</li>
+  <li><span class="meh">Como na rodada 5, o arco é desenhado na frente do corpo e passa por cima da cabeça no quadro mais alto.</span> Se você quiser este caminho, no passo 4 eu corto o arco atrás da cabeça e ajusto o ponto de onde o motor solta o metal para a boca do arco.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r6/rasgo-q.jpg" alt=""></details>
+
+<h2 id="r5">Rodada 5: o rasgo de frente e o tempo do andar</h2>
+<p class="dim">25/11, depois da sua segunda revisão: andar5-a, golpe-a, rastejar2L-a e morte-b ficam. Esta rodada custou 8 gerações.</p>
+
+<h3>O rasgo</h3>
+<p><b>O que era aquilo saindo:</b> eram os dois arcos de metal derretido que eu pedi pelo nome ("ripping a glowing arc of molten metal up out of the floor"). O gerador desenhou como dois tubos lisos de neon. Por isso refiz só de frente e pedi <b>só o corpo</b>: as duas garras cravam no chão, ela segura, sobe e puxa os braços até acima da cabeça. Saíram limpas, sem nada pintado no ar (rasgo6 e rasgo7, 2 cada).</p>
+<p>Como o que você gostava no rasgo de hoje é o efeito, recortei <b>do próprio clipe de hoje</b> o fogo nas garras e o arco de metal que se desfaz em cacos. Recortei pela cor e pus por cima de dois corpos novos, na escala nova, com chão sobre chão, no tempo do gesto (<b>rasgoH-a</b> sobre a rasgo6-b e <b>rasgoH-b</b> sobre a rasgo7-b). É arte que você já aprovou, sem geração nova.</p>
+<img src="passo3/r5/rasgo.gif" alt="" style="width:100%">
+<ul>
+  <li><b>rasgoH-a:</b> o fogo acende nas garras enquanto ela segura agachada. O arco sobe junto com os braços e se desfaz em cacos enquanto ela está de pé.</li>
+  <li><b>rasgoH-b:</b> o mesmo efeito num gesto mais curto. Ela crava, sobe logo e o arco vem mais cedo.</li>
+  <li><span class="meh">Os defeitos da montagem:</span>
+    <ul>
+      <li>o arco passa por cima da cara dela no quadro mais alto;</li>
+      <li>ficaram uns poucos pixels claros do clipe velho perto da cabeça;</li>
+      <li>o fogo é o do lado esquerdo de hoje, então só a garra esquerda acende.</li>
+    </ul>
+    Tudo isso se acerta no recorte se for este o caminho.</li>
+  <li><b>rasgo6-a/b e rasgo7-a/b</b> são os corpos sozinhos, caso você prefira que o efeito venha só do motor, que já lança o metal que fere.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r5/rasgo-q.jpg" alt=""></details>
+
+<h3>O tempo do andar</h3>
+<p>A andar5-a é um ciclo de dois passos em 14 quadros. Na folha ela tocava em 840 ms, a 60 ms por quadro, e por isso parecia rápida. O andar de hoje toca a 100 ms por quadro. Abaixo estão três tempos, e o motor usa o que você escolher. A velocidade com que ela anda pela sala se acerta junto, para o pé não escorregar no chão.</p>
+<img src="passo3/r4/andar-tempo.gif" alt="" style="width:100%">
+
+<h2 id="escolhas">As suas escolhas (25/11)</h2>
+<table>
+<tr><th>Clipe</th><th>Fica</th></tr>
+<tr><td>Andar no teto (troca de mão)</td><td>troca-12-b + troca-21-b</td></tr>
+<tr><td>Lava do teto</td><td>lava-1-c (da teto-1) e lava-2-b (da teto-2). Você leu a legenda certo: o número diz a pose e c/d são a rodada do corpo escuro. <span class="meh">Na lava-2-b o corpo inteiro acende em laranja no meio do gesto. Se isso incomodar, a lava-2-c tem o mesmo gesto com o corpo escuro.</span></td></tr>
+<tr><td>Agarrar e soltar o teto</td><td>teto-1 (e ao contrário)</td></tr>
+<tr><td>Troca de lado para frente</td><td>frente-v3</td></tr>
+<tr><td>Urro</td><td>urro2-b (limpo, sem os quadros 10 e 11)</td></tr>
+<tr><td>Pulo</td><td>pulo-b</td></tr>
+<tr><td>A sede: abrir</td><td>sede-abre3-a</td></tr>
+<tr><td>A sede: devolver</td><td>sede-devolve-b, com o clarão</td></tr>
+<tr><td>O coração para</td><td>coracao-a (limpo, sem o quadro 13)</td></tr>
+<tr><td>Golpe</td><td>golpe-a, a única com as duas garras. Gerei mais duas abaixo para você comparar.</td></tr>
+<tr><td>Lava do chão</td><td>lava2-a</td></tr>
+<tr><td>Salto para trás</td><td>salto-tras-a</td></tr>
+<tr><td>Cair de quatro</td><td>quatro-2, no tempo devagar (760 ms)</td></tr>
+<tr><td>Galope</td><td>galope-a (laço 3..12)</td></tr>
+<tr><td>Salto de parede a parede</td><td>salto-parede-b</td></tr>
+<tr><td>Quinas</td><td>quina-chao-parede-b e quina-parede-teto-b</td></tr>
+<tr><td>Ataque de canto</td><td>canto-b</td></tr>
+<tr><td>Andar</td><td>andar5-a, laço 1..14, a 1400 ms por ciclo (rodada 4)</td></tr>
+<tr><td>Rasgo</td><td>rasgoD-a: rcrava-a + rsobe-c + rdesce-c2, com o arco recortado do rasgo de hoje (rodada 8)</td></tr>
+<tr><td>Rastejar (a escalada)</td><td>rastejar2L-a: rastejar2-b + a volta a, 32 quadros (rodada 4)</td></tr>
+<tr><td>Morte</td><td>morte-b (rodada 4)</td></tr>
+<tr><td>Salto de parede a parede</td><td>descola-a + o voo da salto-parede-b q6 levado pelo motor + agarra-a (rodada 8)</td></tr>
+</table>
+
+<h2 id="andar">Andar</h2>
+<p>Você estava certo: a andar-a e a andar-b da primeira rodada mal mexem as pernas. Os pés ficam plantados e só o corpo balança. Desta vez o pedido descreve o passo: a perna sobe, vai à frente e planta.</p>
+<img src="passo3/r4/andar.gif" alt="" style="width:100%">
+<ul>
+  <li><b>andar5-a:</b> o melhor laço até agora. O ciclo 1..14 fecha quase perfeito, com uma emenda de 0,13 do passo médio, e as pernas abrem e fecham a passada. Ela também varre o rabo para trás no meio do ciclo.</li>
+  <li><b>andar4-a:</b> passadas largas e visíveis, com o corpo subindo e descendo, no laço 2..10. A emenda é moderada, 0,85 do passo.</li>
+  <li><b>andar5-b:</b> abre a passada como a 5-a, no laço 3..10, com emenda moderada.</li>
+  <li><b>andar4-b:</b> é a que menos anda. Mais troca de peso que passo, no laço 1..15.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r4/andar-q.jpg" alt=""></details>
+
+<h2 id="rasgo">Rasgo</h2>
+<p>O rasgo de hoje crava as garras, o chão solta faíscas e um arco de metal incandescente sobe. Esse arco é pintado no próprio clipe, e foi por isso que você gostou dele, então desta vez o pedido nomeia o metal arrancado. As duas garras cravam em todas as quatro candidatas. Duas saíram de lado (E-7-1) e duas de frente (frente-v3), como o rasgo de hoje.</p>
+<img src="passo3/r4/rasgo.gif" alt="" style="width:100%">
+<ul>
+  <li><b>rasgo5-a (de frente):</b> crava as duas garras com faíscas no chão, arranca dois arcos de metal derretido que sobem e se desfazem em brasas, e volta. É a mais parecida com o rasgo de hoje.</li>
+  <li><b>rasgo5-b (de frente):</b> o mesmo gesto, mas os dois arcos são <b>enormes e muito claros</b>, quase brancos no meio, e cobrem o corpo dela por uns 3 quadros.</li>
+  <li><b>rasgo4-a (de lado):</b> arranca <b>placas</b> do piso, com a borda acesa em laranja, que sobem e saem da tela. É chapa de metal de verdade, não arco de fogo.</li>
+  <li><b>rasgo4-b (de lado):</b> arranca tiras serrilhadas acesas, que sobem e somem.</li>
+  <li>Em todas, quem lança o metal que fere é o motor (<code>RASGO_SOLTA</code>), então o que o clipe pinta é só o rasgo no chão. No passo 4 o arco pintado e o metal do motor precisam sair do mesmo ponto.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r4/rasgo-q.jpg" alt=""></details>
+
+<h2 id="golpe">Golpe</h2>
+<p>A golpe-a fica, e está no GIF como ESCOLHA. Pedi mais duas que alternam as garras, braço da frente, braço de trás e de novo o da frente, para você comparar.</p>
+<img src="passo3/r4/golpe.gif" alt="" style="width:100%">
+<ul>
+  <li><b>golpe4-a:</b> um golpe grande de cima para baixo, com um arco claro cor de osso. O segundo braço quase não aparece.</li>
+  <li><b>golpe4-b:</b> dois golpes com arcos laranja, um de cada braço, mais rápidos e mais baixos que os da golpe-a.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r4/golpe-q.png" alt=""></details>
+
+<h2 id="rastejar">Rastejar (a base da escalada)</h2>
+<p>De novo nenhum dos quatro rastejares gerados fechou o laço sozinho. A emenda ficava entre 0,9 e 1,4 vez o passo médio, um tranco visível. A solução foi gerar <b>a volta</b>: um segundo trecho que começa no último quadro do rastejar e termina presa na pose quatro-2, que é o primeiro quadro. Os dois juntos dão um ciclo de 32 quadros que fecha sozinho. Medi as duas emendas das quatro combinações e todas ficam do tamanho de um passo normal, sem tranco.</p>
+<img src="passo3/r4/rastejar.gif" alt="" style="width:100%">
+<ul>
+  <li><b>rastejar2L-a</b> (rastejar2-b + volta a): a emenda mais lisa das quatro. O maior passo do ciclo inteiro é 1,1 vez o passo médio.</li>
+  <li><b>rastejar2L-b, rastejar3L-a e 3L-b:</b> também fecham, com o maior passo do ciclo entre 1,2 e 1,3 vez o médio.</li>
+  <li>O movimento é contido: ombros e quadris sobem e descem e as garras se reposicionam, mas não é uma passada larga. Na parede, girado 90°, é isso que vai aparecer subindo.</li>
+</ul>
+<details><summary>Os quadros em 256² (só a primeira metade de cada)</summary><img src="passo3/r4/rastejar-q.png" alt=""></details>
+
+<h2 id="morte">Morte</h2>
+<p>Ainda não tinha sido feita. São duas de frente (frente-v3), como a de hoje, e duas de lado (E-7-1). Todas terminam deitada no chão, que é o que o motor precisa: <i>"o corpo não pode flutuar caído, precisa cair na borda"</i>.</p>
+<img src="passo3/r4/morte.gif" alt="" style="width:1320px">
+<ul>
+  <li><b>morte-a (de frente):</b> abre os braços, empina, cambaleia e cai de cara para a esquerda. Fica estendida, com o core ainda aceso. No quadro 2 aparece um risco vermelho fino acima da cabeça.</li>
+  <li><b>morte-b (de frente):</b> empina mais devagar, curva, cai para a frente e fica estendida. É a queda mais longa das duas.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r4/morte-q.png" alt=""></details>
+<img src="passo3/r4/morte-lado.gif" alt="" style="width:1320px">
+<ul>
+  <li><b>morte-lado-a:</b> empina, gira para frente e cai de lado, encolhida. No último quadro o core se apaga e ela fica só silhueta.</li>
+  <li><b>morte-lado-b:</b> <span class="meh">entre os quadros 3 e 4 ela pula de lado para de frente de uma vez.</span> Depois disso a queda é boa e termina estendida.</li>
+</ul>
+<details><summary>Os quadros em 256²</summary><img src="passo3/r4/morte-lado-q.png" alt=""></details>
+
+<h2 id="falta">O que falta</h2>
+<ul>
+  <li><b>A sua escolha</b> do andar, do rasgo, do rastejar e da morte, e se o golpe fica a golpe-a.</li>
+  <li><b>Fora disso, todos os clipes da spec §5 já existem.</b> O que falta não precisa de geração e entra no passo 4:
+    <ul>
+      <li>a escalada é o rastejar girado 90°, e a parede da direita é o mesmo clipe espelhado;</li>
+      <li>a quina de cima à direita (teto → parede) é a quina-parede-teto-b espelhada e tocada ao contrário;</li>
+      <li>a descida da parede da direita para o chão é a quina-chao-parede-b espelhada e ao contrário.</li>
+    </ul>
+  </li>
+  <li class="meh"><b>Uma pergunta para o passo 4:</b> o salto de parede a parede (salto-parede-b) foi gerado de quatro no chão, na horizontal. No jogo ela salta agarrada na parede, então o começo e o fim do salto precisam mostrar o desgrudar e o agarrar. Ou o motor usa só os quadros do meio, com o corpo esticado, e faz o resto com as quinas, ou geramos o clipe saindo da pose da parede (~4 gerações).</li>
+</ul>
+</body>
+</html>

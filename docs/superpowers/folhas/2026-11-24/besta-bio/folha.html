@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: o desenho anima?</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1240px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:20px; margin:44px 0 10px; border-top:1px solid var(--line); padding-top:18px; }
+  p, li { max-width: 940px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; }
+  .lado { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+  .lado figure { margin:0; } figcaption { font-size:13px; color:var(--dim); margin-top:4px; }
+  table { border-collapse:collapse; width:100%; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  .ok { color:var(--ok); } .meh { color:var(--meh); } .no { color:var(--no); }
+  details { margin:10px 0; } summary { cursor:pointer; color:var(--dim); }
+</style>
+</head>
+<body>
+<h1>A Besta: o problema é o desenho?</h1>
+<p class="dim">24/11. Você perguntou se é o desenho de hoje que é difícil de animar. Para responder, fiz variações a partir do seu conceito biomecânico, cada uma atacando um ponto fraco do desenho atual. Depois animei as melhores e a Besta atual com o mesmo gesto, o mesmo pedido, a mesma ferramenta (PixMiniMax, a de setembro) e duas tentativas cada. Assim o único fator que muda é o desenho. São candidatas: nada entrou no jogo e a decisão do tipo do bicho continua sua.</p>
+
+<h2>O seu conceito</h2>
+<img src="conceito.jpg" alt="o conceito biomecânico" style="width:400px">
+
+<h2>As variações</h2>
+<p>Quatro pedidos, com quatro candidatas cada, todas em 170² (o tamanho dela na luta é ~120 px). Todos os pedidos dizem o mesmo sobre o corpo: membros em segmentos rígidos, juntas escuras desenhadas, braços num tom diferente do tronco, formas grandes sem ruído miúdo, proporções compactas e luz só no core.</p>
+<table>
+<tr><th>Linha</th><th>O que pedi</th><th>O que saiu</th></tr>
+<tr><td>A</td><td>O seu conceito de frente, escurecido.</td><td>Fiel ao conceito, mas o gerador não escureceu: o corpo inteiro continua aceso e a superfície é muito picada.</td></tr>
+<tr><td>B</td><td>O seu conceito de lado, em três quartos virado à esquerda, na pose de bote.</td><td>Os quatro saíram escuros, de lado e virados para o lado certo, com juntas e placas que se leem. O B1 saiu de quatro, com rabo. Ficou mais "armadura" que o seu conceito.</td></tr>
+<tr><td>C</td><td>A carne e osso de hoje com a construção de membros do conceito (sem metal), de frente.</td><td>Limpo e legível, mas o core virou um coração de desenho (♥) e o conjunto ficou genérico, mais "demônio de RPG" que horrendo.</td></tr>
+<tr><td>D</td><td>A mesma carne com juntas, de lado.</td><td>Falhou: o D0 é a Besta atual copiada, e o D2 e o D3 saíram com duas cabeças.</td></tr>
+</table>
+<img src="variacoes.jpg" alt="as 16 variações" style="margin-top:12px">
+
+<h2>O teste: o mesmo gesto em cada desenho</h2>
+<p>Em cada painel estão as duas tentativas de cada desenho, uma por linha. A Besta atual entra reduzida para caber no quadro com folga (a mesma base de 0,70 de hoje à tarde), e as variações ficam do mesmo tamanho dentro dele.</p>
+
+<h3>De frente: abre os braços e escancara a boca, depois volta</h3>
+<img src="gif/teste-frente.gif" alt="teste de frente">
+<table style="margin-top:10px">
+<tr><th>Desenho</th><th>O que acontece</th></tr>
+<tr><td class="no">Atual</td><td><b>Vira outro bicho</b> nas duas tentativas. Com os braços abertos, a placa dos ombros some, a cabeça vira uma cabeça humanoide de boca aberta, o peito vira abdômen musculoso aceso e as garras longas viram mãos pequenas. Ela só volta a ser ela no quadro 13.</td></tr>
+<tr><td class="meh">A1 (o conceito)</td><td><b>O corpo segura</b>: as placas, o capacete e as pernas continuam os mesmos. As garras se enrolam em argolas com os braços abertos.</td></tr>
+<tr><td class="meh">C2 (carne com juntas)</td><td><b>O corpo segura</b> quase todo, com o coração e os segmentos no lugar. Na tentativa #1 as ombreiras somem no meio, e as garras viram punhos redondos.</td></tr>
+</table>
+
+<h3>De lado: ergue o braço da frente e corta para baixo, depois volta</h3>
+<img src="gif/teste-lado.gif" alt="teste de lado">
+<table style="margin-top:10px">
+<tr><th>Desenho</th><th>O que acontece</th></tr>
+<tr><td class="no">Atual</td><td>Na #1 o corpo acende e perde a placa no quadro 2, e um arco branco é pintado no 6. Na #2 o arco é vermelho, e no fim ela <b>se vira para a direita</b> e acaba virada para o lado errado.</td></tr>
+<tr><td class="ok">B2</td><td><b>O braço sobe inteiro</b>, com os segmentos e a mão de garras no lugar (quadros 5–6), corta e volta. O bicho é o mesmo do começo ao fim. Mesmo pedindo que não, as duas tentativas pintam um arco num quadro só (vermelho na #1, osso na #2).</td></tr>
+<tr><td class="ok">B0</td><td>O mesmo: na #2 o braço sobe limpo e sem arco nenhum, e na #1 há um arco num quadro. O corpo segura nas duas.</td></tr>
+</table>
+
+<details><summary>Os quadros-chave ampliados (0, 1, 2, 6, 12, 13, 16)</summary>
+<img src="quadros-frente.jpg" alt=""><img src="quadros-lado.jpg" alt="" style="margin-top:8px"></details>
+
+<h2>O que o teste responde</h2>
+<ul>
+  <li><b>Sim, o desenho de hoje é difícil de animar.</b> No mesmo gesto, com a mesma ferramenta, a Besta atual vira outro bicho de frente e se vira de lado. Os desenhos com segmentos e juntas continuam sendo eles mesmos, e o braço sobe inteiro.</li>
+  <li><b>Isso não conserta a ferramenta.</b> Nos seis desenhos, o PixMiniMax de hoje vai à pose final num pulo (do quadro 1 para o 2), segura e volta de uma vez, e continua pintando o arco do corte. O movimento ainda precisa de trechos curtos com as duas pontas presas (a lição da serpente) e da limpeza do arco no disco, como já fizemos.</li>
+  <li><b>Os melhores candidatos para animar são os de lado da linha B</b> (B0 e B2): escuros, legíveis e virados para o lado certo. Já estão na pose da luta, que é onde ela passa quase todo o tempo.</li>
+</ul>
+
+<h2>A linha B com o rabo da B1</h2>
+<p>Você gostou da criatura da linha B e do rabo que só a B1 teve. Pedi a B2 (a do teste) como assunto e a B1 só pelo rabo, em duas chamadas: 8 candidatas e 30 gerações. A grade mostra as 8, com a B2 e a B1 no fim para comparar.</p>
+<img src="variacoes-rabo.png" alt="as 8 com rabo">
+<ul>
+  <li><b>Erraram:</b> a E-11-0 saiu sem rabo, e a E-11-2 saiu com uma garra a mais sobre a cabeça e o rabo na frente.</li>
+  <li><b>Mais baixas, quase de quatro:</b> a E-11-1, a E-11-3 e a E-7-0. Servem de referência para o galope.</li>
+  <li><b>As melhores na pose da luta:</b> a E-7-1 (a B2 com rabo, em pé), a E-7-2 e a E-7-3 (mais agachadas). Abaixo, ampliadas:</li>
+</ul>
+<img src="rabo-ampliado.png" alt="E-7-1, E-7-2, E-7-3 ampliadas">
+
+<h3>O teste do rabo: o mesmo golpe de lado na E-7-1</h3>
+<p>Mesmo pedido do golpe de lado, com uma frase a mais: o rabo chicoteia junto e fica atrás das pernas. À esquerda, para comparar, está a Besta atual no mesmo pedido.</p>
+<img src="gif/teste-rabo.gif" alt="o golpe com rabo">
+<ul>
+  <li><b>O corpo segura nas duas tentativas:</b> o braço sobe em segmentos, com a mão de garras inteira, e volta. O bicho é o mesmo do começo ao fim.</li>
+  <li><b>O rabo anima bem:</b> ele se enrola, desce, estica para trás na hora do corte (quadro 9) e volta, sem cruzar o corpo. Só num quadro da #1 (o 7) ele vira um borrão escuro.</li>
+  <li><b>O gesto ficou mais gradual</b> que nos outros testes: o braço sobe em passos (quadros 2, 4 e 6), em vez de pular para a pose final.</li>
+  <li><b>O arco continua sendo pintado</b> no quadro 7: marrom na #1, de fogo na #2. Esse de fogo parece com os arcos do golpe que está no jogo.</li>
+</ul>
+<details><summary>Os quadros-chave</summary><img src="quadros-rabo.jpg" alt=""></details>
+
+<h2>O que fica para você decidir</h2>
+<ol>
+  <li><b>O tipo do bicho.</b> A linha B é biomecânica, o que desfaz o "demônio de carne e osso, presa por um motivo". A linha C guarda a carne, mas saiu genérica. Uma terceira saída é a carne de hoje redesenhada com juntas marcadas: seria repetir a linha C com o seu desenho atual de ESTILO, não só de assunto, para não perder o horrendo.</li>
+  <li><b>Se for trocar o desenho, a troca é grande.</b> Todos os clipes da Besta teriam de ser refeitos: o surgimento, o andar, o galope, o golpe, o rasgo, a lava, o teto e a morte. A cena em que ela sai de dentro do Guardião também. Em troca, cada clipe novo sairia mais fácil e mais fiel.</li>
+</ol>
+<p class="dim">Custo: 60 gerações nas variações e 24 no teste. Ferramentas em <code>ferramentas/variar.mjs</code> (as variações, REST <code>/generate-image-v2</code>) e <code>scripts/_f4/_pl.mjs mini</code> (o teste). As bases do teste estão em <code>cru/bases/</code>, e os quadros em <code>cru/anim/</code>.</p>
+</body>
+</html>

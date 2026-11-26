@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: animações novas</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; --ok:#6fdc8c; --meh:#ffb347; --no:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.55 system-ui, sans-serif; margin:0 auto; max-width:1200px; padding:16px; }
+  h1 { font-size:24px; margin:8px 0 4px; } h2 { font-size:19px; margin:40px 0 10px; border-top:1px solid var(--line); padding-top:16px; }
+  p, li { max-width: 920px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; }
+  .grade { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+  .card { background:var(--pane); border:1px solid var(--line); border-radius:6px; padding:10px; }
+  .card img { width:256px; height:256px; margin:0 auto 8px; }
+  .card b { display:block; margin-bottom:4px; }
+  .tag { display:inline-block; font-size:12px; padding:1px 8px; border-radius:10px; margin-left:6px; }
+  .ok { background:#1d3a27; color:var(--ok); } .meh { background:#3d2b12; color:var(--meh); } .no { background:#3d1717; color:var(--no); }
+  table { border-collapse:collapse; width:100%; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+</style>
+</head>
+<body>
+<h1>A Besta: as animações novas (24/11)</h1>
+<p style="color:#ff6b6b"><b>Os vereditos desta folha foram retirados.</b> Postas lado a lado com os clipes do jogo, as candidatas não se sustentam. Ver <a href="comparacao.html" style="color:#ffb347">comparacao.html</a>.</p>
+<p class="dim">Antecipadas a seu pedido: o teste do esqueleto e todas as animações, antes do código. Cada GIF está em 256² e mais ou menos na velocidade de jogo. São candidatas, nada entrou no jogo. A recoloração (o osso e o vermelho mais escuros) vem no fim, num passo só, para todos os clipes.</p>
+
+<h2>1. O teste do esqueleto</h2>
+<p>O mesmo gesto (o salto para trás) feito por três caminhos:</p>
+<ul>
+<li><b>PixMiniMax (por texto):</b> muda de pose de uma vez no quadro 3 e fica parado no ar até o 8. A garra vira um punho.</li>
+<li><b>Esqueleto com o movimento escrito pela ferramenta:</b> mantém o desenho, mas só balança o braço, borra as garras e no quadro 5 o corpo vira chuvisco.</li>
+<li><b>Esqueleto posado à mão por mim, quadro a quadro:</b> ela continua sendo ela, com as garras nítidas, e faz exatamente as poses mandadas. O brilho fica estável (0,17–0,18 contra 0,185 da base): o clarear de setembro não acontece mais.</li>
+</ul>
+<p><b>Resultado:</b> o esqueleto posado à mão é o caminho principal. O PixMiniMax ficou para o teto (ver o item 7). O arco do salto continua com o código, e o clipe é no lugar.</p>
+<img src="salto-teste.gif" alt="as três candidatas do salto para trás" style="width:768px">
+
+<h2>2. Os clipes</h2>
+<div class="grade">
+  <div class="card"><img src="gif/salto-tras.gif" alt=""><b>Salto para trás <span class="tag ok">bom</span></b>Agacha, salta encolhendo as pernas, pousa e levanta. Serve à volta para a direita depois do golpe e à saída dos olhos no escuro. Acaba com a imagem parada deslizando.</div>
+  <div class="card"><img src="gif/sede.gif" alt=""><b>A sede <span class="tag ok">bom</span></b>Abre os braços em V com o core à mostra (1–8: o 5–8 respira em laço enquanto o anel está aberto) e dá o tranco para a frente da devolução (9–14). Base reduzida a 0,70 para caber os braços.</div>
+  <div class="card"><img src="gif/coracao.gif" alt=""><b>O coração para <span class="tag ok">bom</span></b>Leva as garras ao próprio core, aperta tremendo (4–9) e solta. Os antebraços ficam à mostra. Base a 0,70.</div>
+  <div class="card"><img src="gif/salto-parede.gif" alt=""><b>Salto de parede a parede <span class="tag meh">bom, com ressalva</span></b>Recolhe, estica na horizontal e voa com as garras à frente. O jogo espelha para o salto à direita. <b>Ressalva:</b> o core fica sob o corpo; no breu, a luz dele sai do motor, presa ao peito.</div>
+  <div class="card"><img src="gif/rasteja.gif" alt=""><b>Rastejar <span class="tag meh">sutil</span></b>O ciclo de quatro no lugar, com os membros alternando. Girado 90° (exato em pixel) vira a escalada, abaixo. O passo é discreto: ele lê como um predador espreitando, mas talvez pouco para "subir a parede".</div>
+  <div class="card"><img src="gif/escalada-parede-esq.gif" alt=""><b>Escalada: sobe a parede da esquerda</b>O rastejar girado no sentido horário: a cabeça para cima, as patas na parede.</div>
+  <div class="card"><img src="gif/escalada-parede-dir.gif" alt=""><b>Escalada: desce a parede da direita</b>O mesmo, girado no sentido anti-horário.</div>
+  <div class="card"><img src="gif/canto.gif" alt=""><b>Golpe de canto <span class="tag ok">bom</span></b>De quatro, ela ergue o braço da frente e corta. Na parede (girado, abaixo), o corte sai para dentro da sala.</div>
+  <div class="card"><img src="gif/canto-na-parede.gif" alt=""><b>Golpe de canto, na parede</b>O mesmo clipe girado: serve às duas quinas da esquerda.</div>
+  <div class="card"><img src="gif/teto-maos.gif" alt=""><b>Troca de mão no teto (PixMiniMax) <span class="tag meh">meio aproveitável</span></b>Os braços alternam de verdade e agarram o teto nos quadros 1–9. Do 12 em diante, a placa do ombro vira pelo e a cara muda. O laço completo ainda não fecha.</div>
+  <div class="card"><img src="gif/teto-maos-esq.gif" alt=""><b>Troca de mão no teto (esqueleto) <span class="tag no">reprovada</span></b>O braço pendurado é encurtado no desenho; posado, a mão que sobe vira um toco e as garras apontam para os lados.</div>
+  <div class="card"><img src="gif/teto-golpe.gif" alt=""><b>Golpe pendurado (PixMiniMax) <span class="tag meh">com arco pintado</span></b>Pendurada, ela puxa o braço e corta para a frente e para baixo. O gerador pinta um arco vermelho (3–5), mesmo pedindo que não. O golpe de chão aprovado tem os rastros pintados, então o arco cabe no vocabulário dela, e a hitbox o segue.</div>
+</div>
+
+<h2>3. O que falta e o que proponho</h2>
+<table>
+<tr><th>Peça</th><th>Proposta</th></tr>
+<tr><td>As quinas (chão→parede, parede→teto)</td><td>Viradas pelo <b>código</b>: os quadros do rastejar girando 90° em volta do ponto onde as garras encostam na quina, em ~0,25 s, como o RotSprite com pivô no apoio que já usamos. Sem clipe novo: a virada é o corpo girando sobre o apoio, não um gesto. Na quina de cima, a agarrada de hoje (o salto ao teto) termina a passagem da parede para o teto.</td></tr>
+<tr><td>A troca de mão no teto</td><td>Duas saídas: (a) <b>montar o laço</b> com dois pedaços do PixMiniMax, cada um com as duas pontas presas (a base com a mão de trás no teto → a pose com a mão da frente no teto → a base), usando os quadros bons 1–9 como guia; (b) trocar a travessia por <b>saltos de agarrada</b> (ela solta e se joga para a frente, agarrando de novo com a mesma mão, como o balanço de hoje). Recomendo a (a).</td></tr>
+<tr><td>O golpe de canto no teto</td><td>O golpe pendurado acima, com o arco. Se o arco incomodar, eu o apago no disco, quadro a quadro.</td></tr>
+<tr><td>A recoloração e as garras</td><td>No fim, num passo só, para todos os clipes, velhos e novos.</td></tr>
+</table>
+<p class="dim">Custo até aqui: ~58 gerações (saldo 2.479 até 04/12). As ferramentas: <code>scripts/_f4/_esqueleto.mjs</code> (a animação por esqueleto pela REST, com as poses lidas do disco) e o kit de pose (cinemática inversa nos membros), os esqueletos e as poses em <code>ferramentas/</code>.</p>
+</body>
+</html>

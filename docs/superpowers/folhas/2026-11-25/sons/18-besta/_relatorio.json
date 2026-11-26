@@ -1,0 +1,238 @@
+[
+ {
+  "nome": "besta.risada",
+  "id": "A",
+  "dur": 3.022494,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.risada",
+  "id": "B",
+  "dur": 3.108503,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.murmurio",
+  "id": "A",
+  "dur": 9.53102,
+  "pico": -13.1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.murmurio",
+  "id": "B",
+  "dur": 9.53102,
+  "pico": -9,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.olhos.acende",
+  "id": "A",
+  "dur": 1.399932,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.olhos.acende",
+  "id": "B",
+  "dur": 1.127166,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.olhos.salto",
+  "id": "A",
+  "dur": 1.085964,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.olhos.salto",
+  "id": "B",
+  "dur": 0.9778,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.olhos.salto",
+  "id": "R",
+  "dur": 0.812449,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.abre",
+  "id": "A",
+  "dur": 1.996054,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.abre",
+  "id": "B",
+  "dur": 1.831633,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.gole",
+  "id": "A",
+  "descartada": "muda (pico -73.4 dB)"
+ },
+ {
+  "nome": "besta.sede.gole",
+  "id": "B",
+  "dur": 0.434762,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.gole",
+  "id": "A2",
+  "dur": 0.451383,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.gole",
+  "id": "C",
+  "dur": 0.219887,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.tranco",
+  "id": "A",
+  "dur": 1.436304,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.tranco",
+  "id": "B",
+  "dur": 1.041043,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.sede.tranco",
+  "id": "R",
+  "dur": 0.775011,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.garras",
+  "id": "A",
+  "dur": 1.997415,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.garras",
+  "id": "B",
+  "dur": 1.927324,
+  "pico": -1,
+  "inicio": 0.0492517
+ },
+ {
+  "nome": "besta.garras",
+  "id": "R",
+  "dur": 0.889819,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.aperta",
+  "id": "A",
+  "dur": 2.096644,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.aperta",
+  "id": "B",
+  "dur": 2.001587,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.parado",
+  "id": "A",
+  "dur": 2.343991,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.parado",
+  "id": "C",
+  "dur": 1.977778,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.volta",
+  "id": "A",
+  "dur": 1.292018,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.volta",
+  "id": "B",
+  "dur": 1.373469,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.volta",
+  "id": "R",
+  "dur": 0.99907,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.risada",
+  "id": "A2",
+  "dur": 3.111882,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.risada",
+  "id": "B2",
+  "dur": 3.075918,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.risada",
+  "id": "C",
+  "dur": 4.208571,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.murmurio",
+  "id": "AB",
+  "dur": 9.53102,
+  "pico": -10.8,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.parado",
+  "id": "AC",
+  "dur": 2.371429,
+  "pico": -1,
+  "inicio": 0
+ },
+ {
+  "nome": "besta.coracao.volta",
+  "id": "BR",
+  "dur": 2.039796,
+  "pico": -1,
+  "inicio": 0
+ }
+]

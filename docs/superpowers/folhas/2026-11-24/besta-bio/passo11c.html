@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Besta: as brasas e o urro</title>
+<style>
+  :root { --bg:#0e1015; --pane:#161921; --line:#2a2d36; --fg:#e4e4e8; --dim:#9a9aa6; }
+  * { box-sizing: border-box; }
+  body { background:var(--bg); color:var(--fg); font:15px/1.6 system-ui, sans-serif; margin:0 auto; max-width:1640px; padding:16px; }
+  h1 { font-size:28px; margin:8px 0 6px; } h2 { font-size:22px; margin:44px 0 10px; border-top:2px solid var(--line); padding-top:18px; }
+  p, li { max-width: 1000px; } .dim { color:var(--dim); }
+  img { image-rendering:pixelated; display:block; max-width:100%; height:auto; margin:8px 0; border:1px solid var(--line); }
+  table { border-collapse:collapse; font-size:14px; } th, td { border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; } th { background:var(--pane); }
+  code { background:var(--pane); padding:1px 4px; border-radius:3px; }
+</style>
+</head>
+<body>
+<h1>A Besta: as brasas que estouram, o urro e os sussurros</h1>
+<p class="dim">26/11, a 3ª rodada. As fotos saíram do jogo rodando, com a nave atirando de verdade (a tecla de tiro segurada).</p>
+
+<h2>Os olhos de lava estouram (a sua B)</h2>
+<ul>
+  <li>Cada brasa falsa aguenta <b>3 tiros</b>. A cada acerto ela pisca quente (branco-amarelo) e solta uma faísca.</li>
+  <li>No 3º ela <b>estoura</b>: as faíscas sobem um pouco, caem até a borda do chão e apagam ali, com um último brilho na lava.</li>
+  <li><b>É só visual:</b> a vida dela não se mexe, não há bônus nem castigo além do tempo perdido. Ela continua o ritmo e salta na mesma hora.</li>
+  <li>A caixa da brasa é do mesmo tamanho da caixa da verdadeira (26×24), então nenhuma é mais fácil de acertar.</li>
+</ul>
+<p class="dim">Colunas: as três acesas · o 1º acerto (a brasa pisca) · o estouro · as faíscas caindo · meio segundo depois.</p>
+<img src="passo11c/brasa-1.jpg" alt="">
+<img src="passo11c/brasa-3.jpg" alt="">
+<p><b>Uma coisa que o teste mostrou:</b> na 2ª figura (ela no teto, à esquerda), as duas brasas ficam <b>atrás dela, na mesma linha</b>. Como a nave só atira para a frente, o tiro mirado na brasa acerta ela primeiro. Nas figuras 1 e 3 cada brasa tem a própria linha. Deixei assim: nessa figura quem atira "na isca" acaba achando a verdadeira. Se preferir, dá para afastar as brasas da linha dela.</p>
+
+<h2>O urro de morte</h2>
+<p>Ele existia (<code>predador.morte</code>), mas os cinco estouros de carne em volume cheio, o laço dos sussurros e a subida da saída caíam em cima do começo dele: medido, o urro somava só 0 a 2 dB ao que se ouvia. Agora o urro abre sozinho: os estouros ficaram por baixo, o laço cala no golpe, a saída dos sussurros entra em 0,9 s e a trilha só abre depois dele (1,9 s). Medido: <b>+7 a +16 dB</b> acima do resto, também num alto-falante de notebook. Você já ouviu e aprovou.</p>
+
+<h2>Os sussurros do escuro</h2>
+<p>+2 dB (1,4 → 1,75), "pouca coisa".</p>
+
+<h2>Para você conferir jogando</h2>
+<table>
+  <tr><th>O quê</th><th>Onde</th></tr>
+  <tr><td>Atirar numa brasa: o pisca, o estouro e as faíscas caindo leem bem? 3 tiros está bom?</td><td><code>?fase=besta3</code></td></tr>
+  <tr><td>A 2ª figura: tudo bem as brasas atrás dela, ou afasto?</td><td><code>?fase=besta3</code></td></tr>
+</table>
+</body>
+</html>
