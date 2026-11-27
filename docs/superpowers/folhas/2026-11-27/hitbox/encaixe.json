@@ -1,0 +1,29 @@
+[
+  {
+    "nave": "a-laranja",
+    "vazioHojePct": 3,
+    "vazioEncaixadoPct": 0,
+    "desloc": {
+      "x": -3.5,
+      "y": 1
+    }
+  },
+  {
+    "nave": "jato-laranja",
+    "vazioHojePct": 19,
+    "vazioEncaixadoPct": 8,
+    "desloc": {
+      "x": -6,
+      "y": -1
+    }
+  },
+  {
+    "nave": "alien",
+    "vazioHojePct": 26,
+    "vazioEncaixadoPct": 7,
+    "desloc": {
+      "x": 3,
+      "y": 2
+    }
+  }
+]

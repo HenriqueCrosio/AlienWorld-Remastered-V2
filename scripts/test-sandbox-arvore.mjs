@@ -27,10 +27,13 @@ r = somar('EFF_004', r, ctx());
 igual(podeSomar('EFF_006', r, ctx()), true, 'Combustão com Incendiário: sim');
 r = somar('WPN_004', somar('WPN_004', somar('WPN_004', r, ctx()), ctx()), ctx());
 igual([r.WPN_004, podeSomar('WPN_004', r, ctx())], [3, false], 'Cadência para em 3/3');
-r = somar('WPN_002', r, ctx());
-igual(podeSomar('WPN_001', r, ctx()), false, 'com o Triplo, o Duplo tranca');
-igual(gastos(r), 5, 'gastos contam os níveis');
-r = somar('DEF_001', somar('DEF_003', r, ctx()), ctx());
+// 27/11: o Triplo exige o Duplo (o TIRO MÚLTIPLO numa linha só).
+igual(podeSomar('WPN_002', r, ctx()), false, 'Triplo sem Duplo: não');
+r = somar('WPN_002', somar('WPN_001', r, ctx()), ctx());
+igual([r.WPN_001, r.WPN_002], [1, 1], 'Duplo → Triplo');
+igual(podeTirar('WPN_001', r), false, 'não tira o Duplo enquanto o Triplo depende dele');
+igual(gastos(r), 6, 'gastos contam os níveis');
+r = somar('DEF_001', r, ctx());
 igual([gastos(r), podeSomar('DEF_005', r, ctx()), podeSomar('DEF_005', r, ctx({ nave: 'alienigena' }))], [7, false, true], 'no limite (7) não soma; a alien ainda tem 1');
 igual(podeSomar('DEF_005', r, ctx({ livre: true })), true, 'LIVRE passa do limite');
 igual([podeSomar('MOV_003', {}, ctx({ fase: 1 })), podeSomar('MOV_003', {}, ctx({ fase: 2 }))], [false, true], 'Dash não existe na F1');

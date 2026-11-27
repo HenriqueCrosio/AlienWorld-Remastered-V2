@@ -17,7 +17,7 @@ igual(NUMEROS.casco.recargaS, [8, 5.5], 'casco: 8s / 5,5s com Recarga');
 
 // A linha da ficha sai do módulo.
 igual(numerosDaCarta('WPN_009'), 'recarga 8s (×2: 5s) · dano 2 · explosão raio 20', 'linha do míssil');
-igual(numerosDaCarta('EFF_011'), '20% por acerto · trava 0,4s', 'linha do elétrico');
+igual(numerosDaCarta('EFF_011'), '20% por acerto · trava 0,4s · imune 1,2s depois', 'linha do elétrico');
 igual(numerosDaCarta('WPN_007'), 'dano 100% → 90% → 60% → 30%', 'linha do Perfurante (a queda por inimigo)');
 igual(numerosDaCarta('WPN_001'), '', 'o Tiro Duplo não tem número');
 // Mexer no módulo muda a ficha (o que a calibragem vai fazer).

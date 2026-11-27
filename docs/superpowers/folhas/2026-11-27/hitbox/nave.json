@@ -1,0 +1,77 @@
+[
+  {
+    "nave": "Terminus · CLÁSSICA",
+    "quadro": "44×26",
+    "casco": "40×20",
+    "caixa": "21×9 em (11.5,8.5)",
+    "cascoForaPct": 59,
+    "caixaVaziaPct": 3,
+    "caixaSoFogoPx": 0,
+    "lados": {
+      "frente": 9.5,
+      "tras": 9.5,
+      "cima": 5.5,
+      "baixo": 5.5
+    }
+  },
+  {
+    "nave": "Terminus · UNGOLIANT",
+    "quadro": "44×26",
+    "casco": "40×20",
+    "caixa": "21×9 em (11.5,8.5)",
+    "cascoForaPct": 59,
+    "caixaVaziaPct": 3,
+    "caixaSoFogoPx": 0,
+    "lados": {
+      "frente": 9.5,
+      "tras": 9.5,
+      "cima": 5.5,
+      "baixo": 5.5
+    }
+  },
+  {
+    "nave": "X-Aelo · CLÁSSICA",
+    "quadro": "44×26",
+    "casco": "38×20",
+    "caixa": "21×9 em (11.5,8.5)",
+    "cascoForaPct": 61,
+    "caixaVaziaPct": 19,
+    "caixaSoFogoPx": 0,
+    "lados": {
+      "frente": 8.5,
+      "tras": 8.5,
+      "cima": 4.5,
+      "baixo": 6.5
+    }
+  },
+  {
+    "nave": "X-Aelo · REBELS",
+    "quadro": "44×26",
+    "casco": "38×20",
+    "caixa": "21×9 em (11.5,8.5)",
+    "cascoForaPct": 61,
+    "caixaVaziaPct": 19,
+    "caixaSoFogoPx": 0,
+    "lados": {
+      "frente": 8.5,
+      "tras": 8.5,
+      "cima": 4.5,
+      "baixo": 6.5
+    }
+  },
+  {
+    "nave": "Charybdis (a manta)",
+    "quadro": "44×26",
+    "casco": "27×13",
+    "caixa": "21×9 em (11.5,8.5)",
+    "cascoForaPct": 47,
+    "caixaVaziaPct": 26,
+    "caixaSoFogoPx": 37,
+    "lados": {
+      "frente": 5.5,
+      "tras": 0.5,
+      "cima": 0.5,
+      "baixo": 3.5
+    }
+  }
+]

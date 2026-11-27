@@ -13,8 +13,13 @@ const igual = (a, b, msg) => {
 const ids = Object.keys(CARTAS);
 const por = (r) => ids.filter((id) => CARTAS[id].raridade === r).length;
 igual(ids.length, 24, '24 cartas');
-igual([por('comum'), por('incomum'), por('rara'), por('epica')], [5, 8, 7, 4], 'distribuição 5·8·7·4');
+// 27/11 (o rebalanceamento, a raridade por importância — o §8 do documento dele + a análise de 21/11): Míssil e Flare
+// → comum; Casco → incomum; Vida Extra → incomum; Drone → incomum; Tiro Pesado → épica (a épica sem requisito).
+// Era 5·8·7·4.
+igual([por('comum'), por('incomum'), por('rara'), por('epica')], [6, 9, 5, 4], 'distribuição 6·9·5·4');
 igual(ids.filter((id) => CARTAS[id].id !== id), [], 'a chave é o id da carta');
+// 27/11: o TIRO MÚLTIPLO numa linha só (a saída de 21/11) — o Triplo é a evolução do Duplo, nenhuma escolha jogada fora.
+igual(CARTAS.WPN_002.requer, 'WPN_001', 'o Triplo exige o Duplo');
 igual(ids.filter((id) => CARTAS[id].nome.length > 14), [], 'nenhum nome passa de 14 letras');
 igual(ids.filter((id) => CARTAS[id].requer && !CARTAS[CARTAS[id].requer]), [], 'todo requisito existe');
 const CORTADAS = ['WPN_003', 'WPN_005', 'WPN_006', 'EFF_005', 'EFF_008', 'EFF_009', 'MOV_002', 'MOV_004'];

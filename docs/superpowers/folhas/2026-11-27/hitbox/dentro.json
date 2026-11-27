@@ -1,0 +1,32 @@
+[
+  {
+    "nave": "a-laranja",
+    "caixa": "24×8",
+    "area": 192,
+    "areaHoje": 189,
+    "centroDesloc": {
+      "x": -2,
+      "y": 1
+    }
+  },
+  {
+    "nave": "jato-laranja",
+    "caixa": "28×4",
+    "area": 112,
+    "areaHoje": 189,
+    "centroDesloc": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  {
+    "nave": "alien",
+    "caixa": "23×5",
+    "area": 115,
+    "areaHoje": 189,
+    "centroDesloc": {
+      "x": 3.5,
+      "y": 3.5
+    }
+  }
+]

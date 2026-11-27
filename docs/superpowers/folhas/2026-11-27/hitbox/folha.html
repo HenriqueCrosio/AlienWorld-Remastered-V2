@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A hitbox da nave</title>
+<style>
+  :root { --fundo: #111318; --texto: #d8dce4; --fraco: #8a91a0; --linha: #2a2f3a; --vermelho: #ff4b4b; --verde: #4ce062; --azul: #4aaaff; --ambar: #ffbe3c; --magenta: #c828c8; }
+  body { background: var(--fundo); color: var(--texto); font: 15px/1.55 system-ui, sans-serif; margin: 0; padding: 24px 16px 64px; }
+  main { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 30px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 36px 0 10px; border-bottom: 1px solid var(--linha); padding-bottom: 6px; }
+  .sub { color: var(--fraco); margin: 0 0 20px; }
+  img { image-rendering: pixelated; max-width: 100%; display: block; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  figure { margin: 0; background: #0b0c10; border: 1px solid var(--linha); padding: 10px; }
+  figcaption { color: var(--fraco); font-size: 13px; margin-top: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--linha); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { color: var(--fraco); font-weight: 600; }
+  .n { font-variant-numeric: tabular-nums; }
+  .cor { display: inline-block; width: 12px; height: 12px; vertical-align: -1px; margin-right: 4px; }
+  .ruim { color: var(--vermelho); }
+</style>
+</head>
+<body>
+<main>
+<h1>A hitbox da nave</h1>
+<p class="sub">27/11/2026 · o rebalanceamento, etapa 2 · a sua queixa: <i>"às vezes relam e não tomam dano, ou não relam e tomam dano"</i>. Nada mudou no jogo: é a medida de hoje e duas opções.</p>
+
+<h2>1. Como é hoje</h2>
+<p>A nave usa uma caixa <b>fixa de 21×9 px</b>, igual para todas, centrada no quadro de 44×26 (<code>GameScene.HITBOX_NAVE</code>). Ela foi fixada em 27/09 com o jato, para a arte não mudar a dificuldade. As naves foram redesenhadas depois (23–25/10), e ninguém conferiu a caixa contra o desenho novo.</p>
+<p><span class="cor" style="background:var(--vermelho)"></span>a caixa · <span class="cor" style="background:var(--ambar)"></span>casco FORA da caixa (encosta e não toma dano) · <span class="cor" style="background:var(--magenta)"></span>caixa SEM casco embaixo (toma dano sem encostar). O casco é o desenho que não muda entre os quadros; o fogo do motor fica de fora. Ampliado 10×.</p>
+<div class="grade">
+  <figure><img src="nave-a-laranja.png" alt=""><figcaption>Terminus (a "a")</figcaption></figure>
+  <figure><img src="nave-jato-laranja.png" alt=""><figcaption>X-Aelo (o jato)</figcaption></figure>
+  <figure><img src="nave-alien.png" alt=""><figcaption>Charybdis (a manta)</figcaption></figure>
+</div>
+<table style="margin-top:14px">
+  <tr><th>Nave</th><th>Casco (largura × altura)</th><th>Casco fora da caixa</th><th>Caixa sem casco</th><th>Quanto o casco passa da caixa</th></tr>
+  <tr><td>Terminus (as duas pinturas)</td><td class="n">40×20</td><td class="n">59%</td><td class="n">3%</td><td class="n">frente 9,5 · trás 9,5 · cima 5,5 · baixo 5,5 px</td></tr>
+  <tr><td>X-Aelo (as duas pinturas)</td><td class="n">38×20</td><td class="n">61%</td><td class="n ruim">19%</td><td class="n">frente 8,5 · trás 8,5 · cima 4,5 · baixo 6,5 px</td></tr>
+  <tr><td>Charybdis</td><td class="n">27×13</td><td class="n">47%</td><td class="n ruim">26%</td><td class="n">frente 5,5 · trás 0,5 · cima 0,5 · baixo 3,5 px</td></tr>
+</table>
+<p><b>Lendo:</b> o casco fora da caixa (o âmbar) é o PERDÃO de propósito do gênero: a caixa menor que a nave faz o shmup parecer justo (o comentário no código diz isso). O que não é de propósito é a caixa sobre o vazio (o magenta): na X-Aelo, embaixo do nariz; na manta, nos dois cantos de cima. É ali que se toma dano sem encostar.</p>
+
+<h2>2. A opção A — a mesma caixa 21×9, no lugar certo de cada nave</h2>
+<p><span class="cor" style="background:var(--vermelho)"></span>hoje · <span class="cor" style="background:var(--verde)"></span>a 21×9 com o mínimo de vazio. A dificuldade (o tamanho) fica a mesma.</p>
+<div class="grade">
+  <figure><img src="encaixe-a-laranja.png" alt=""><figcaption>Terminus · vazio 3% → 0%</figcaption></figure>
+  <figure><img src="encaixe-jato-laranja.png" alt=""><figcaption>X-Aelo · vazio 19% → 8% (recua 6 px)</figcaption></figure>
+  <figure><img src="encaixe-alien.png" alt=""><figcaption>Charybdis · vazio 26% → 7%</figcaption></figure>
+</div>
+<p class="ruim"><b>O problema da A:</b> para fugir do vazio, a caixa recua para a base das asas e deixa o NARIZ sem colisão (a X-Aelo, 6 px para trás). Os inimigos vêm pela frente: o "encosta e não toma" aumenta justamente onde mais acontece.</p>
+
+<h2>3. A opção B — a maior caixa que cabe inteira dentro do casco</h2>
+<p><span class="cor" style="background:var(--vermelho)"></span>hoje · <span class="cor" style="background:var(--azul)"></span>a maior caixa sem nenhum pixel vazio, seguindo a fuselagem até o nariz. Uma caixa por modelo.</p>
+<div class="grade">
+  <figure><img src="dentro-a-laranja.png" alt=""><figcaption>Terminus · 24×8 (área 192; hoje 189)</figcaption></figure>
+  <figure><img src="dentro-jato-laranja.png" alt=""><figcaption>X-Aelo · 28×4 (área 112)</figcaption></figure>
+  <figure><img src="dentro-alien.png" alt=""><figcaption>Charybdis · 23×5 (área 115)</figcaption></figure>
+</div>
+<p><b>O que muda:</b> o "toma sem encostar" do lado da nave some nas três, e a caixa chega mais perto do nariz. Mas a X-Aelo e a manta ficam com a caixa mais BAIXA (4 e 5 px de altura, hoje 9): de cima e de baixo, perdoam mais do que hoje. A Terminus fica quase igual à de hoje.</p>
+
+<h2>4. O outro lado da colisão</h2>
+<p>A colisão é caixa contra caixa. Mesmo com a nave certa, a outra caixa também mente:</p>
+<ul>
+  <li><b>os inimigos:</b> 60% × 55% do quadro (<code>EnemySystem.ts</code>); o batedor fino tem "avaliar a hitbox" anotado em 19/10 e 15/11;</li>
+  <li><b>os destroços e asteroides:</b> 70% × 70%, e a caixa <b>não gira</b> com a pedra (eles giram até 40°/s);</li>
+  <li><b>as peças do terreno:</b> 60% da largura × a altura inteira.</li>
+</ul>
+<p>Isso é a parte seguinte desta etapa. Saber <b>contra o que</b> você sentiu a colisão errada diz por onde começar.</p>
+
+<h2>5. A sua escolha: a colisão pelo DESENHO (no jogo, sem commit)</h2>
+<p>Você escolheu a colisão pelo desenho com 1 px de perdão (a técnica da Besta, 25/11). Ela já está no jogo para os <b>inimigos e os tiros inimigos</b>: a nave só toma o golpe se o desenho do casco (sem o fogo do motor, 1 px para dentro) cai no mesmo ponto do desenho do outro.</p>
+<p><b>A medida que muda a conversa:</b> um drone varrido em volta da nave, em 3.969 posições, contando onde ele FERE. A regra de hoje (as duas caixas) fere em 851 posições, nas três naves. Com os 2 px de perdão, ela NÃO feria em 44% (Terminus), 41% (X-Aelo) e 33% (Charybdis) das posições em que o desenho encosta, e feria sem encostar em 23, 82 e 17 posições.</p>
+<p class="ruim">⚠️ Corrigido em 27/11: a 1ª versão desta folha dizia "mais da metade" e mostrava uma tabela por peça com erros maiores. A medida movia as peças com <code>body.reset</code>, que deixa a caixa física no canto do quadro, sem o deslocamento que a centraliza, até o próximo passo da física. As contagens do DESENHO e as razões abaixo (×2,0, ×1,7…) não dependiam disso e continuam certas; a divisão "hoje erra" estava errada e foi refeita.</p>
+<table>
+  <tr><th>Nave</th><th>Hoje (as caixas)</th><th>Desenho, 0 px</th><th>1 px (a escolha)</th><th>2 px</th><th>3 px</th></tr>
+  <tr><td>Terminus</td><td class="n">851</td><td class="n">1.967 (×2,3)</td><td class="n">1.736 (×2,0)</td><td class="n">1.467 (×1,7)</td><td class="n">1.265 (×1,5)</td></tr>
+  <tr><td>X-Aelo</td><td class="n">851</td><td class="n">1.962 (×2,3)</td><td class="n">1.667 (×2,0)</td><td class="n">1.298 (×1,5)</td><td class="n">920 (×1,1)</td></tr>
+  <tr><td>Charybdis</td><td class="n">851</td><td class="n">1.772 (×2,1)</td><td class="n">~1.490 (×1,75)</td><td class="n">1.243 (×1,5)</td><td class="n">1.023 (×1,2)</td></tr>
+</table>
+<p class="ruim"><b>O que isso quer dizer:</b> com 1 px, a área em que um drone fere a nave DOBRA. O jogo fica mais justo ao olho (encostou, tomou; não encostou, não tomou) e bem mais duro: hoje, de um terço a quase metade dos encostos passava sem dano. Com 3 px, a área fica perto da de hoje, mas no lugar certo (o desenho, não a caixa). Para sentir jogando, em dev: <code>?perdao=1</code>, <code>?perdao=2</code>, <code>?perdao=3</code> na URL.</p>
+<p>Conferido em jogo (<code>scripts/test-colisao-desenho-jogo.mjs</code>): o jogo bate com uma conta de pixels feita à parte em todas as posições das três naves; o drone e o tiro em cima da nave custam a vida, e o tiro volta ao pool.</p>
+</main>
+</body>
+</html>
