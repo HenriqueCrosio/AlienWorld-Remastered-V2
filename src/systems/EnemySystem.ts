@@ -471,6 +471,7 @@ export class EnemySystem {
     // 2s faria o próximo nascer em chamas.
     e.setData('queimaAte', 0);
     e.setData('eletrificadoAte', 0);
+    e.setData('eletricoImuneAte', 0);
     e.setData('anelDesde', 0);
     e.setData('anelAte', 0);
     e.setData('tranco', 0);
@@ -1039,6 +1040,9 @@ export class EnemySystem {
     b.setData('atirador', null);
     // the sonda's orb pops when the player's shot hits it (spec 2026-11-20 §7): a recycled slot is solid again
     b.setData('destrutivel', false);
+    // the Tower's comet wounds by its BODY (the ball's circle), never by its drawing (the tail): a recycled slot goes back
+    // to the drawing (27/11 — `colisaoPeloDesenho.tocaNave`)
+    b.setData('feresoCorpo', false);
   }
 
   private cullBullets(): void {

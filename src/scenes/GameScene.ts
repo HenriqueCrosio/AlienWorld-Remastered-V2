@@ -72,6 +72,7 @@ import { Destrocos } from '../systems/morte/Destrocos';
 import { ENGUIA } from '../f3/enguiaCilindro';
 import { AmbienteDaFase } from '../som/AmbienteDaFase';
 import { IrParaFase } from '../dev/irParaFase';
+import { cascoMorde, quemTocaNave } from '../systems/colisao/colisaoPeloDesenho';
 import { CHEFOES, DESTROCOS, ESTILO_DA_VARIANTE, PADRAO, PADRAO_DO_TIPO, PECAS, SEPARACAO, type Classe, type Estilo, type Material, type Variante, type VarianteFerrugem, type VarianteRocha } from '../systems/morte/numerosDestrocos';
 
 /** Quem decide a condução: o mundo (`diegetico`) ou o jogador (modificadores). */
@@ -802,27 +803,18 @@ export class GameScene extends Phaser.Scene {
     // ⚠️ O `TerrainSystem.solido` NOS TRÊS OVERLAPS DE PROP: a mesa que entra ou sai da parede (a
     // maré da câmara do golfinho) não está onde a hitbox estaria — ela não mata, não para tiro e
     // não cobre bala até chegar. Ver a nota da maré no `TerrainSystem`.
-    this.physics.add.overlap(this.ship, this.terrain.props, (_s, p) => this.damageShip(undefined, undefined, 'cenario', p as Phaser.GameObjects.GameObject), (_s, p) =>
-      TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
+    // ⚠️ 27/11 (the rebalance, step 2): OUTSIDE a fight these four go by the DRAWING, every frame, in
+    // `colisoesPeloDesenho` (`src/systems/colisao/`); these Arcade overlaps (the boxes, the rule before) answer only
+    // DURING a boss fight or the dolphin's arena (`emLuta` — his call: the fights stay as they were built).
+    this.physics.add.overlap(this.ship, this.terrain.props, (_s, p) => this.tocouProp(p as Phaser.GameObjects.GameObject), (_s, p) =>
+      this.emLuta() && TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
     );
-    // a MASS hitting the ship (the rock, the wreck) adds the collision under the ship's "hit" — in the vacuum, only what
-    // comes through the hull (block SOUND, sheet 3); the mines keep their own blast
-    // (sheet 8, him: the gravel only when the ship really HITS the rock; passing close has its own sound)
-    this.physics.add.overlap(this.ship, this.debris.hazards, (_s, h) => {
-      const perigo = h as Phaser.GameObjects.GameObject;
-      const kind = perigo.getData('kind') as string;
-      perigo.setData('bateu', true);
-      this.damageShip(GameScene.MASSA.has(kind) ? 'perigo.impacto' : undefined, kind === 'asteroid' || kind === 'mineravel' ? 'fx.f2.cascalho' : undefined, 'cenario', perigo);
-    });
-    this.physics.add.overlap(this.ship, this.enemies.enemies, (_s, e) => this.damageShip(undefined, undefined, 'inimigo', e as Phaser.GameObjects.GameObject));
+    this.physics.add.overlap(this.ship, this.debris.hazards, (_s, h) => this.tocouPerigo(h as Phaser.GameObjects.GameObject), () => this.emLuta());
+    this.physics.add.overlap(this.ship, this.enemies.enemies, (_s, e) => this.damageShip(undefined, undefined, 'inimigo', e as Phaser.GameObjects.GameObject), () => this.emLuta());
+    this.physics.add.overlap(this.ship, this.enemies.enemyBullets, (_s, b) => this.tocouTiro(b as Phaser.Physics.Arcade.Sprite), () => this.emLuta());
     // O ESPORO NÃO FERE (spec F4 §9.3): encostar deixa a nave lenta. Nenhum overlap com os tiros do jogador — o tiro
     // atravessa.
     this.physics.add.overlap(this.ship, this.esporos.grupo, (_s, e) => this.tocarEsporo(e as Phaser.Physics.Arcade.Sprite));
-    this.physics.add.overlap(this.ship, this.enemies.enemyBullets, (_s, b) => {
-      // (the blow first, while the shot still carries its data: the dev recorder reads what hit — 26/11)
-      this.damageShip(undefined, undefined, 'tiro', b as Phaser.GameObjects.GameObject);
-      this.enemies.release(b as Phaser.Physics.Arcade.Sprite);
-    });
     this.physics.add.overlap(
       this.weapons.bullets,
       this.terrain.props,
@@ -1168,13 +1160,17 @@ export class GameScene extends Phaser.Scene {
     // porque lá o piso é o mundo inteiro; aqui há teto E chão a menos de 84px um do outro, e um
     // empurrão cuspiria a nave direto na parede oposta — dois danos por um encosto. Quem separa
     // os dois toques são os 1400ms de i-frames que o `damageShip` já dá.
-    if (this.moldura.morde(body.left, body.right, body.top, body.bottom)) this.damageShip(undefined, undefined, 'borda');
+    // (27/11: the wall measures the ship's HULL, strip by strip, not its 21×9 box — him: "quero que o jogador entenda que
+    // encostar dá dano, fica feio se ele começar a perceber que pode 'afundar' a asa no cenário sem tomar")
+    // (in a fight — the F4 arenas — the wall bites the ship's BOX, as the fights were built; `naveMorde`)
+    if (this.naveMorde((e, d, t, b) => this.moldura.morde(e, d, t, b), body)) this.damageShip(undefined, undefined, 'borda');
     // O TETO E O CHÃO DA CAVERNA MORDEM (F1, 21/10 — "o flap num corredor perigoso já é punitivo o bastante", ele): a
     // mesma lei da parede do duto acima — uma medição contra os contornos das faixas, sem corpo e SEM empurrão (teto e
     // chão perto um do outro: um empurrão cuspiria a nave na parede oposta; os i-frames separam os toques).
-    if (this.parallax.cavernaMorde(body.left, body.right, body.top, body.bottom)) this.damageShip(undefined, undefined, 'borda');
+    if (this.naveMorde((e, d, t, b) => this.parallax.cavernaMorde(e, d, t, b), body)) this.damageShip(undefined, undefined, 'borda');
     // O QUE O CHEFÃO FERE POR MEDIÇÃO (02/11, a Serpente: o raio e a geleia de fogo) — a mesma lei acima, sem corpo e
     // sem empurrão; os i-frames do `damageShip` separam os toques.
+    // (the boss's bite is a fight's figure: always the ship's box, as it was built — 27/11)
     if (this.boss?.morde && !this.boss.isDead && this.boss.morde(body.left, body.right, body.top, body.bottom)) this.damageShip(undefined, undefined, 'morde');
     // O CORPO INTEIRO LEVA DANO (03/11, a Serpente): os tiros do jogador contra o DESENHO dela, por medição.
     if (this.boss?.acertoNoCorpo && !this.boss.isDead) this.tirosNoCorpo();
@@ -1189,6 +1185,7 @@ export class GameScene extends Phaser.Scene {
     // A mina sensora precisa saber ONDE o jogador está: é a proximidade dele que a acorda.
     this.debris.update(dt, this.ship);
     this.enemies.update(dt, this.ship);
+    this.colisoesPeloDesenho();
     this.esporos.atualizar(dt, this.ship, this.time.now < this.lentaAte);
     // Com ELITE em cena, o primeiro plano atenua (frente B): as silhuetas que passam na frente tapavam o elite.
     const elite = this.enemies.temElite();
@@ -1238,6 +1235,62 @@ export class GameScene extends Phaser.Scene {
     // velocidade, não o dobro.
     this.physics.world.timeScale = 1 / escala;
     return escala;
+  }
+
+  /**
+   * 27/11 — THE SHIP IS TOUCHED WHERE IT IS DRAWN (the rebalance, step 2; him: *"às vezes relam e não tomam dano ou não
+   * relam e tomam dano"*), with 2 px of forgiveness on the hull. The TERRAIN, the WRECKS/ASTEROIDS, the ENEMIES and the
+   * ENEMY SHOTS, each by its own drawing with its pose; what has no readable drawing falls back to the boxes (`tocaNave`).
+   * Same handlers as the Arcade overlaps (in `create`), which keep answering DURING A FIGHT (`emLuta`).
+   */
+  private colisoesPeloDesenho(): void {
+    if (this.emLuta()) return;
+    // the terrain (the table still sliding in from the wall does not hit — `TerrainSystem.solido`, as the overlap had)
+    for (const p of quemTocaNave(this.ship, this.terrain.props, (o) => TerrainSystem.solido(o))) this.tocouProp(p);
+    for (const h of quemTocaNave(this.ship, this.debris.hazards)) this.tocouPerigo(h);
+    for (const e of quemTocaNave(this.ship, this.enemies.enemies)) this.damageShip(undefined, undefined, 'inimigo', e);
+    for (const b of quemTocaNave(this.ship, this.enemies.enemyBullets)) this.tocouTiro(b);
+  }
+
+  /**
+   * A BOSS FIGHT (or the dolphin's arena) is on: every collision of the ship goes by TODAY'S rule, the Arcade boxes (him,
+   * 27/11: *"precisamos manter então os chefões como estão, para manter a experiência que já construímos. Aplicar apenas
+   * onde a dificuldade vai ser de destreza, não de mecânica de luta"*). The fights' figures were drawn and proven with the
+   * 21×9 ship (the Beast's slow wall: *"~6 px of free x for a 21 px ship"*), and they include what comes through the
+   * common pools (the Captain's kamikazes and flak, the Guardian's lava). The aranha (F3) is no fight: it is in the flow.
+   */
+  /** A box query against the ship: its HULL outside a fight (`cascoMorde`), its 21×9 box during one (`emLuta`). */
+  private naveMorde(morde: (esq: number, dir: number, topo: number, base: number) => boolean, body: Phaser.Physics.Arcade.Body): boolean {
+    return this.emLuta() ? morde(body.left, body.right, body.top, body.bottom) : cascoMorde(this.ship, morde);
+  }
+
+  private emLuta(): boolean {
+    // ⚠️ THE TOWER (F1) IS THE EXCEPTION (him, playing, 27/11: *"eu quero o 2px no boss da fase 1 (torre), sempre me
+    // incomodou eu poder 'relar' parte da nave nas bolas de fogo que ela solta em leque"*): its fight goes by the hull,
+    // and its comets wound by the ball's circle, now on the ball (`Boss.shoot`, `feresoCorpo`).
+    const lutaComCaixa = !!this.boss && !this.boss.isDead && this.stage.id !== 1;
+    return lutaComCaixa || !!this.golfinho;
+  }
+
+  private tocouProp(p: Phaser.GameObjects.GameObject): void {
+    this.damageShip(undefined, undefined, 'cenario', p);
+  }
+
+  /**
+   * a MASS hitting the ship (the rock, the wreck) adds the collision under the ship's "hit" — in the vacuum, only what
+   * comes through the hull (block SOUND, sheet 3); the mines keep their own blast (sheet 8, him: the gravel only when the
+   * ship really HITS the rock; passing close has its own sound)
+   */
+  private tocouPerigo(perigo: Phaser.GameObjects.GameObject): void {
+    const kind = perigo.getData('kind') as string;
+    perigo.setData('bateu', true);
+    this.damageShip(GameScene.MASSA.has(kind) ? 'perigo.impacto' : undefined, kind === 'asteroid' || kind === 'mineravel' ? 'fx.f2.cascalho' : undefined, 'cenario', perigo);
+  }
+
+  private tocouTiro(b: Phaser.Physics.Arcade.Sprite): void {
+    // (the blow first, while the shot still carries its data: the dev recorder reads what hit — 26/11)
+    this.damageShip(undefined, undefined, 'tiro', b);
+    this.enemies.release(b);
   }
 
   /**
@@ -2138,6 +2191,8 @@ export class GameScene extends Phaser.Scene {
       const c = (o as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.Body | null;
       return !this.boss?.tocaDesenho || !c || this.boss.tocaDesenho(c.left, c.top, c.right, c.bottom, nave);
     };
+    // (27/11: the boss's collisions with the ship stay as they were built — the boxes, and the Beast by her drawing
+    // against the ship's box; the collision by the ship's HULL is only outside the fights, `emLuta`)
     this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip(undefined, undefined, 'corpo'), (s) => noDesenho(s as Phaser.GameObjects.GameObject, true));
     // O que o chefão põe na arena e FERE sem ser alvo (a serra do guardião). ⚠️ Só este overlap: não
     // registrar as balas do jogador contra `perigos` é o que faz o tiro ATRAVESSAR a serra, e é isso
@@ -3577,7 +3632,7 @@ export class GameScene extends Phaser.Scene {
     // de desenvolvimento na tela do jogador. A zona (1G / ZERO-G) diz a física, e a COR da linha diz a condução
     // (âmbar = flap, ciano = livre, logo abaixo). O `label` continua nos controladores para quem precisar dele.
     this.hud.setText(
-      `${zona}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ' CASCO' : ''}${this.cartas.hudRecargas}${this.arena?.invulneravel ? ' INVULN.' : ''}   B×${this.bombs}   ${this.totalScore()}`,
+      `${zona}   ${nome} ${ammo}   ${'♦'.repeat(Math.max(0, this.lives))}${this.cartas.cascoAtivo ? ` CASCO ${this.cartas.cascoRestantes}` : ''}${this.cartas.hudRecargas}${this.arena?.invulneravel ? ' INVULN.' : ''}   B×${this.bombs}   ${this.totalScore()}`,
     );
     this.hud.setColor(this.controller.id === 'flap' ? '#ff8c1a' : '#3ee0f0');
 

@@ -71,6 +71,8 @@ export class CartasEmJogo {
   private readonly abertas = new Set<string>();
   private cascoPronto = false;
   private cascoVoltaEm = 0;
+  /** Golpes que o Casco ainda pode absorver NESTA fase (o teto `porFase`; zera com a cena, a cada fase). */
+  private cascoRestam: number = NUMEROS.casco.porFase;
   private queimaTick = 0;
 
   // O CASCO tem AURA de novo (01/10, spec §4.3b): não a elipse de 28/09 (que lia como "feixe de luz"), e sim o
@@ -104,6 +106,11 @@ export class CartasEmJogo {
   /** O Casco está pronto para absorver o próximo golpe? (a HUD mostra) */
   get cascoAtivo(): boolean {
     return this.cascoPronto;
+  }
+
+  /** Quantos golpes o Casco ainda absorve nesta fase, contando o de agora (a HUD mostra). */
+  get cascoRestantes(): number {
+    return this.cascoRestam;
   }
 
   /**
@@ -218,8 +225,8 @@ export class CartasEmJogo {
     const t = MESA_NO_TEMPO[this.h.fase];
     if (t !== undefined && elapsed >= t && !this.h.semMesas) this.abrirMesa('meio', 'SUPRIMENTO ENCONTRADO');
 
-    // O CASCO: volta sozinho depois da recarga.
-    if (tem(this.reg, 'DEF_001') && !this.cascoPronto && time >= this.cascoVoltaEm) {
+    // O CASCO: volta sozinho depois da recarga, enquanto houver golpes no teto da fase.
+    if (tem(this.reg, 'DEF_001') && !this.cascoPronto && this.cascoRestam > 0 && time >= this.cascoVoltaEm) {
       this.cascoPronto = true;
       this.aura.mostrar();
       this.piscarCasco();
@@ -304,6 +311,7 @@ export class CartasEmJogo {
   absorver(time: number): boolean {
     if (!this.cascoPronto) return false;
     this.cascoPronto = false;
+    this.cascoRestam--;
     this.aura.quebrar();
     this.cascoVoltaEm = time + CASCO_RECARGA[Math.min(quantas(this.reg, 'DEF_002'), 1)] * 1000;
     const n = this.h.nave();

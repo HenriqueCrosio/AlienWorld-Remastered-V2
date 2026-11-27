@@ -63,6 +63,10 @@ export class Eletrico {
   eletrificar(e: Inimigo, saltar: boolean, dano: number): void {
     if (!e.active) return;
     const agora = this.c.h.scene.time.now;
+    // O RENDIMENTO DECRESCENTE (27/11): da trava até `imuneMs` depois dela, o mesmo inimigo não leva choque nenhum — nem
+    // o do tiro nem o do arco (sem trava renovada, sem dano de arco, sem som).
+    if (this.imune(e, agora)) return;
+    e.setData('eletricoImuneAte', agora + ELETRICO.travaMs + ELETRICO.imuneMs);
     e.setData('eletrificadoAte', agora + ELETRICO.travaMs);
     if (!NAO_TRAVA.has(e.getData('kind') as string)) this.c.h.travar(e, ELETRICO.travaMs);
     // O raio em código atravessando o corpo — ele preferiu este à faísca #17 do PixelLab (04/10) — estalando até o fim
@@ -135,8 +139,15 @@ export class Eletrico {
     }
   }
 
+  /** O inimigo ainda está na trava ou na imunidade que vem depois dela (ver `eletrificar`)? */
+  private imune(e: Inimigo, agora: number): boolean {
+    return ((e.getData('eletricoImuneAte') as number | undefined) ?? 0) > agora;
+  }
+
   private arco(origem: Inimigo): void {
-    const vivos = this.c.h.inimigos().filter((e) => e.active && e !== origem);
+    // O arco não gasta salto em quem está imune: ele pula para o próximo que ainda pode levar o choque.
+    const agora = this.c.h.scene.time.now;
+    const vivos = this.c.h.inimigos().filter((e) => e.active && e !== origem && !this.imune(e, agora));
     const saltos = saltosDoArco(
       { id: -1, x: origem.x, y: origem.y },
       vivos.map((e, i) => ({ id: i, x: e.x, y: e.y })),

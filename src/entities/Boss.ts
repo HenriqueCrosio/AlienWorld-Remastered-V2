@@ -281,6 +281,12 @@ export class Boss implements StageBoss {
 
   /** Raio da bola SÓLIDA do cometa (px do quadro), medido no PNG. A cauda não fere. */
   private static readonly COMET_CORE_RADIUS = 4.5;
+  /**
+   * O centro da bola SÓLIDA no quadro (18×17), medido no PNG (o mesmo centroide do `COMET_ART_ANGLE`). 27/11: o círculo
+   * que fere ia no CENTRO do quadro (9, 8.5), e a bola fica ~3,8 px À FRENTE dele no voo — a frente da bola raspava a
+   * nave sem ferir (ele: *"sempre me incomodou eu poder 'relar' parte da nave nas bolas de fogo"*).
+   */
+  private static readonly COMET_CORE = { x: 11.7, y: 10.7 } as const;
 
   /**
    * O LEQUE, em números — e eles foram MEDIDOS, não estimados (`scripts/_probe-leque.mjs`
@@ -722,11 +728,17 @@ export class Boss implements StageBoss {
     // herdado do `bolt2` do pool, ancorado no canto superior-esquerdo — exatamente a CAUDA.
     // O EnemySystem.release() devolve o corpo padrão ao reciclar o slot.
     const body = b.body as Phaser.Physics.Arcade.Body;
-    body.setCircle(
-      Boss.COMET_CORE_RADIUS,
-      b.width / 2 - Boss.COMET_CORE_RADIUS,
-      b.height / 2 - Boss.COMET_CORE_RADIUS,
-    );
+    // 27/11: o corpo não gira, mas o tiro voa RETO com a rotação fixa — então o círculo vai, uma vez, para onde a bola
+    // GIRADA está (o vetor centro→bola do quadro, girado pela rotação do sprite). Antes ficava no centro do quadro, 3,8 px
+    // atrás da bola (o "relar" dele). Medido em `scripts/_hitbox/_torre-cometa.mjs`.
+    const r = Boss.COMET_CORE_RADIUS;
+    const vx = Boss.COMET_CORE.x - b.width / 2;
+    const vy = Boss.COMET_CORE.y - b.height / 2;
+    const c = Math.cos(b.rotation);
+    const s = Math.sin(b.rotation);
+    body.setCircle(r, b.width / 2 + vx * c - vy * s - r, b.height / 2 + vx * s + vy * c - r);
+    // e ele fere pelo CORPO (o círculo da bola), nunca pelo desenho — a cauda não fere (`tocaNave`)
+    b.setData('feresoCorpo', true);
 
     b.setData('ox', m.x);
     b.setData('oy', m.y);

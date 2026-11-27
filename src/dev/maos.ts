@@ -12,8 +12,9 @@ export const MAOS: Record<Exclude<NomeMao, 'sandbox'>, readonly string[]> = {
   nenhuma: [],
   // double shot, rate ×2, hull, incendiary, extra bomb, thrusters
   mediana: ['WPN_001', 'WPN_004', 'WPN_004', 'DEF_001', 'EFF_004', 'DEF_005', 'MOV_001'],
-  // triple, rate ×3, heavy, explosive + bigger, the drone, hull + recharge, dash
-  forte: ['WPN_002', 'WPN_004', 'WPN_004', 'WPN_004', 'WPN_008', 'EFF_001', 'EFF_002', 'WPN_010', 'DEF_001', 'DEF_002', 'MOV_003'],
+  // double → triple (27/11: the Triple requires the Double), rate ×3, heavy, explosive + bigger, the drone, hull +
+  // recharge, dash
+  forte: ['WPN_001', 'WPN_002','WPN_004', 'WPN_004', 'WPN_004', 'WPN_008', 'EFF_001', 'EFF_002', 'WPN_010', 'DEF_001', 'DEF_002', 'MOV_003'],
 };
 
 export function ehNomeMao(s: string | null): s is NomeMao {

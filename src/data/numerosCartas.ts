@@ -34,11 +34,20 @@ export const NUMEROS = {
   /** 1 de dano a cada `cadaS` enquanto queima (`queimaMs`). */
   incendiario: { chance: 0.25, queimaMs: 2000, cadaS: 0.4, dano: 1 },
   flare: { esperaMs: 8000, dano: 1 },
-  eletrico: { chance: 0.2, travaMs: 400 },
+  /**
+   * `imuneMs`: depois da trava, o MESMO inimigo fica esse tempo sem levar choque (27/11, o rebalanceamento — a saída de
+   * 21/11 para o "Elétrico + Pesado muito roubados" de 04/10): a chance é sorteada por projétil e cada choque renovava a
+   * trava, então com muito tiro o inimigo ficava travado ~70–84% do tempo. Número da análise, a medir no sandbox.
+   */
+  eletrico: { chance: 0.2, travaMs: 400, imuneMs: 1200 },
   arco: { saltos: 3, raio: 50, dano: 1 },
   sobrecarga: { raio: 30, dano: 2 },
-  /** Segundos até o Casco voltar: sem Recarga · com Recarga. */
-  casco: { recargaS: [8, 5.5] },
+  /**
+   * Segundos até o Casco voltar: sem Recarga · com Recarga. `porFase` = quantos golpes ele absorve numa fase, no
+   * máximo (27/11, ele: *"você tem o regen, mas ele quebra uma hora. Renova na próxima fase"*): a recarga por tempo
+   * sem teto o deixava quase imortal nas lutas longas (a F4 mediana: 9,7 de 12 golpes absorvidos, folha 26/11).
+   */
+  casco: { recargaS: [8, 5.5], porFase: 3 },
   propulsores: { porCopia: 0.12 },
   dash: { distancia: 40, intocavelMs: 200, esperaMs: 8000 },
 };
@@ -70,10 +79,10 @@ export function numerosDaCarta(id: string): string {
     ],
     EFF_006: [`dano ${N.explosao.combustao.dano}`, `raio ${N.explosao.combustao.raio}`],
     EFF_010: [`recarga ${s(N.flare.esperaMs)}`, `explosão dano ${N.explosao.flare.dano}`, `raio ${N.explosao.flare.raio}`],
-    EFF_011: [`${pct(N.eletrico.chance)} por acerto`, `trava ${s(N.eletrico.travaMs)}`],
+    EFF_011: [`${pct(N.eletrico.chance)} por acerto`, `trava ${s(N.eletrico.travaMs)}`, `imune ${s(N.eletrico.imuneMs)} depois`],
     EFF_012: [`até ${N.arco.saltos} saltos`, `alcance ${N.arco.raio}`, `dano ${N.arco.dano}`],
     EFF_013: [`dano ${N.sobrecarga.dano}`, `raio ${N.sobrecarga.raio}`],
-    DEF_001: [`volta em ${n(N.casco.recargaS[0])}s`],
+    DEF_001: [`volta em ${n(N.casco.recargaS[0])}s`, `até ${N.casco.porFase} por fase`],
     DEF_002: [`o casco volta em ${n(N.casco.recargaS[1])}s`],
     DEF_004: [`dano ${N.explosao.reativo.dano}`, `raio ${N.explosao.reativo.raio}`],
     MOV_001: [`+${pct(N.propulsores.porCopia)} por cópia`],
