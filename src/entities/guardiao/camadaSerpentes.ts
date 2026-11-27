@@ -55,6 +55,21 @@ export class CamadaSerpentes {
   private readonly escuro = escurecerFaixa(FAIXAS_CABO.musgo, CamadaSerpentes.ESCURO);
   private readonly fere: Phaser.Physics.Arcade.Sprite[] = [];
   private serpentes: Serpente[] = [];
+
+  /** DEV (the piloto): each locked or striking serpent's line, head → where the ship was at the lock, as small boxes. */
+  devAvisos(): { l: number; r: number; t: number; b: number }[] {
+    const out: { l: number; r: number; t: number; b: number }[] = [];
+    for (const s of this.serpentes) {
+      if ((s.fase !== 'trava' && s.fase !== 'bote') || !s.alvo) continue;
+      const dx = s.alvo.x - s.cabeca.x, dy = s.alvo.y - s.cabeca.y;
+      const n = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 8));
+      for (let i = 0; i <= n; i++) {
+        const x = s.cabeca.x + (dx * i) / n, y = s.cabeca.y + (dy * i) / n;
+        out.push({ l: x - 7, r: x + 7, t: y - 7, b: y + 7 });
+      }
+    }
+    return out;
+  }
   /** há algo desenhado no canvas (para limpar uma vez quando acabar) */
   private sujo = false;
 

@@ -114,6 +114,23 @@ export interface StageBoss {
    */
   readonly devFaseAtual?: string;
   /**
+   * DEV (spec 2026-11-26-medicao-das-lutas §3): the attack running now, by the boss's own words ('furia', 'olhos'…), for
+   * the fight recorder's blows. Absent = the phase stands for it.
+   */
+  readonly devAtaque?: string;
+  /**
+   * DEV (the piloto robot, spec 2026-11-26-medicao-das-lutas §4.2): the space the boss's CURRENT WARNING promises to hit
+   * soon — what a player who knows the fight reads (the Beast's gallop lane during the charge, the slash's height from
+   * the crouch, the Guardian's lunge, a serpent's strike line). Screen boxes. Absent = the boss warns nothing ahead.
+   */
+  devAvisos?(nave: { x: number; y: number }): { l: number; r: number; t: number; b: number }[];
+  /**
+   * 26/11 (his "A" — the Beast, the measurement's first finding): `true` = this player shot is on the row of the boss's
+   * LIT weak point and goes through the drawn body in front of it to reach it (the body covers only off that row).
+   * Absent = the drawn body covers everything it touches.
+   */
+  naLinhaDoAlvo?(bala: Phaser.Physics.Arcade.Sprite): boolean;
+  /**
    * DEV: to the START of the next phase, through the boss's own transition, with the current phase's lock counted as
    * met. Returns the new phase's name, or null when there is no next one or the boss can't jump now (entering, a
    * transition running) — `IrParaFase` asks again next frame.

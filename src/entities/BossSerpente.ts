@@ -1048,6 +1048,17 @@ export class BossSerpente implements StageBoss {
     return this.emEnguia ? 'enguia' : BossSerpente.FASES_DEV[this.faseIdx];
   }
 
+  /** DEV (the fight recorder): the skill running, or the cycle's state. */
+  get devAtaque(): string {
+    return this.emEnguia ? 'enguia' : this.ciclo.estado === 'hab' && this.ciclo.hab ? this.ciclo.hab : this.ciclo.estado;
+  }
+
+  /** DEV (the piloto): the running skill's warning (the beam's sweep). */
+  devAvisos(): { l: number; r: number; t: number; b: number }[] {
+    if (this.emEnguia || this.dead) return [];
+    return this.habViva()?.devAvisos?.() ?? [];
+  }
+
   /** DEV: the current head dies (its real chain of blasts, `transicao`); from C it is the fusion scene, then the eel. */
   devProximaFase(): string | null {
     if (this.emEnguia || this.dead || this.entering || this.imune > 0 || this.corpo === 'nada') return null;

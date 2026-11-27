@@ -59,6 +59,8 @@ if (import.meta.env.DEV) {
   void import('./entities/serpente/atalho.ts').then((m) => m.ligarAtalhoSerpente(game));
   // A FASE DE UM CHEFÃO DIRETO (só em dev): `?fase=besta3&mao=mediana` (spec 2026-11-24-besta-refeita §7).
   void import('./dev/atalhoFase.ts').then((m) => m.ligarAtalhoFase(game));
+  // O REGISTRO DA LUTA (só em dev): `?registro` (spec 2026-11-26-medicao-das-lutas §3).
+  void import('./dev/registro/ligar.ts').then((m) => m.ligarRegistro(game));
 }
 
 // A CAMADA HD por cima do mundo (`uiHD.ts`): o texto das três vozes e a mesa. O mundo carrega os assets enquanto

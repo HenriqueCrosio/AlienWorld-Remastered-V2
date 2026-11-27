@@ -56,6 +56,7 @@ import type { ConfigSandbox } from '../sandbox/config.ts';
 import type { DevSerpente } from '../entities/serpente/atalho';
 import { SandboxArena } from '../systems/SandboxArena';
 import { Medidas } from '../systems/Medidas';
+import type { GanchoRegistro } from '../dev/registro/tipos.ts';
 import { PecasEmJogo, colecaoCompleta, reiniciarJogada, temUmUp } from '../pecas';
 import { resetBody, type ConduçãoId, type FlightController } from '../flight/FlightController';
 import { FlapController } from '../flight/FlapController';
@@ -196,6 +197,8 @@ export class GameScene extends Phaser.Scene {
   private arena: SandboxArena | null = null;
   /** As MEDIDAS do sandbox (dano por fonte, abates, recebidos) — só existem nele. */
   medidas: Medidas | null = null;
+  /** DEV (`?registro`, spec 2026-11-26-medicao-das-lutas §3): the fight recorder, set by `src/dev/registro/ligar.ts`. */
+  registro: GanchoRegistro | null = null;
 
   private hud!: Phaser.GameObjects.Text;
   private banner!: Phaser.GameObjects.Text;
@@ -530,7 +533,7 @@ export class GameScene extends Phaser.Scene {
       explodir: (x, y, raio) => {
         this.fx.explode(x, y, 1.8);
         this.cameras.main.shake(120, 0.006);
-        if (Phaser.Math.Distance.Between(x, y, this.ship.x, this.ship.y) <= raio) this.damageShip();
+        if (Phaser.Math.Distance.Between(x, y, this.ship.x, this.ship.y) <= raio) this.damageShip(undefined, undefined, 'perigo');
       },
       // A F4: o VÃO do corredor (a Larva nunca sai dele), a PAREDE (o Tubo vive preso a ela), os LUGARES do buraco
       // da Larva (a borda e as mesas) e os ESPOROS do Tubo.
@@ -799,7 +802,7 @@ export class GameScene extends Phaser.Scene {
     // ⚠️ O `TerrainSystem.solido` NOS TRÊS OVERLAPS DE PROP: a mesa que entra ou sai da parede (a
     // maré da câmara do golfinho) não está onde a hitbox estaria — ela não mata, não para tiro e
     // não cobre bala até chegar. Ver a nota da maré no `TerrainSystem`.
-    this.physics.add.overlap(this.ship, this.terrain.props, () => this.damageShip(), (_s, p) =>
+    this.physics.add.overlap(this.ship, this.terrain.props, (_s, p) => this.damageShip(undefined, undefined, 'cenario', p as Phaser.GameObjects.GameObject), (_s, p) =>
       TerrainSystem.solido(p as Phaser.GameObjects.GameObject),
     );
     // a MASS hitting the ship (the rock, the wreck) adds the collision under the ship's "hit" — in the vacuum, only what
@@ -809,15 +812,16 @@ export class GameScene extends Phaser.Scene {
       const perigo = h as Phaser.GameObjects.GameObject;
       const kind = perigo.getData('kind') as string;
       perigo.setData('bateu', true);
-      this.damageShip(GameScene.MASSA.has(kind) ? 'perigo.impacto' : undefined, kind === 'asteroid' || kind === 'mineravel' ? 'fx.f2.cascalho' : undefined);
+      this.damageShip(GameScene.MASSA.has(kind) ? 'perigo.impacto' : undefined, kind === 'asteroid' || kind === 'mineravel' ? 'fx.f2.cascalho' : undefined, 'cenario', perigo);
     });
-    this.physics.add.overlap(this.ship, this.enemies.enemies, () => this.damageShip());
+    this.physics.add.overlap(this.ship, this.enemies.enemies, (_s, e) => this.damageShip(undefined, undefined, 'inimigo', e as Phaser.GameObjects.GameObject));
     // O ESPORO NÃO FERE (spec F4 §9.3): encostar deixa a nave lenta. Nenhum overlap com os tiros do jogador — o tiro
     // atravessa.
     this.physics.add.overlap(this.ship, this.esporos.grupo, (_s, e) => this.tocarEsporo(e as Phaser.Physics.Arcade.Sprite));
     this.physics.add.overlap(this.ship, this.enemies.enemyBullets, (_s, b) => {
+      // (the blow first, while the shot still carries its data: the dev recorder reads what hit — 26/11)
+      this.damageShip(undefined, undefined, 'tiro', b as Phaser.GameObjects.GameObject);
       this.enemies.release(b as Phaser.Physics.Arcade.Sprite);
-      this.damageShip();
     });
     this.physics.add.overlap(
       this.weapons.bullets,
@@ -1148,7 +1152,7 @@ export class GameScene extends Phaser.Scene {
     if (this.zone === 'atmosfera' && this.ship.y > GROUND_Y - 6) {
       this.ship.y = GROUND_Y - 7;
       body.setVelocityY(-120);
-      this.damageShip();
+      this.damageShip(undefined, undefined, 'chao');
     }
 
     // A PAREDE DO DUTO MORDE (Fase 4, t=68→79). Mesma lei que o chão acima: raspar não pode ser a
@@ -1164,14 +1168,14 @@ export class GameScene extends Phaser.Scene {
     // porque lá o piso é o mundo inteiro; aqui há teto E chão a menos de 84px um do outro, e um
     // empurrão cuspiria a nave direto na parede oposta — dois danos por um encosto. Quem separa
     // os dois toques são os 1400ms de i-frames que o `damageShip` já dá.
-    if (this.moldura.morde(body.left, body.right, body.top, body.bottom)) this.damageShip();
+    if (this.moldura.morde(body.left, body.right, body.top, body.bottom)) this.damageShip(undefined, undefined, 'borda');
     // O TETO E O CHÃO DA CAVERNA MORDEM (F1, 21/10 — "o flap num corredor perigoso já é punitivo o bastante", ele): a
     // mesma lei da parede do duto acima — uma medição contra os contornos das faixas, sem corpo e SEM empurrão (teto e
     // chão perto um do outro: um empurrão cuspiria a nave na parede oposta; os i-frames separam os toques).
-    if (this.parallax.cavernaMorde(body.left, body.right, body.top, body.bottom)) this.damageShip();
+    if (this.parallax.cavernaMorde(body.left, body.right, body.top, body.bottom)) this.damageShip(undefined, undefined, 'borda');
     // O QUE O CHEFÃO FERE POR MEDIÇÃO (02/11, a Serpente: o raio e a geleia de fogo) — a mesma lei acima, sem corpo e
     // sem empurrão; os i-frames do `damageShip` separam os toques.
-    if (this.boss?.morde && !this.boss.isDead && this.boss.morde(body.left, body.right, body.top, body.bottom)) this.damageShip();
+    if (this.boss?.morde && !this.boss.isDead && this.boss.morde(body.left, body.right, body.top, body.bottom)) this.damageShip(undefined, undefined, 'morde');
     // O CORPO INTEIRO LEVA DANO (03/11, a Serpente): os tiros do jogador contra o DESENHO dela, por medição.
     if (this.boss?.acertoNoCorpo && !this.boss.isDead) this.tirosNoCorpo();
     // 25/11, THE THIRST (the Beast): the ring drinks the shots inside it, even those that touch no body
@@ -2134,11 +2138,11 @@ export class GameScene extends Phaser.Scene {
       const c = (o as Phaser.Physics.Arcade.Sprite).body as Phaser.Physics.Arcade.Body | null;
       return !this.boss?.tocaDesenho || !c || this.boss.tocaDesenho(c.left, c.top, c.right, c.bottom, nave);
     };
-    this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip(), (s) => noDesenho(s as Phaser.GameObjects.GameObject, true));
+    this.physics.add.overlap(this.ship, this.boss.sprite, () => this.damageShip(undefined, undefined, 'corpo'), (s) => noDesenho(s as Phaser.GameObjects.GameObject, true));
     // O que o chefão põe na arena e FERE sem ser alvo (a serra do guardião). ⚠️ Só este overlap: não
     // registrar as balas do jogador contra `perigos` é o que faz o tiro ATRAVESSAR a serra, e é isso
     // que mantém a linha de tiro limpa na cravada — a janela de dano daquela luta.
-    if (this.boss.perigos) this.physics.add.overlap(this.ship, this.boss.perigos, () => this.damageShip());
+    if (this.boss.perigos) this.physics.add.overlap(this.ship, this.boss.perigos, (_s, p) => this.damageShip(undefined, undefined, 'perigo', p as Phaser.GameObjects.GameObject));
 
     // ATENÇÃO À ORDEM. `overlap(grupo, sprite)` entrega os argumentos INVERTIDOS: o Phaser
     // roteia para spriteVsGroup, e o primeiro parâmetro do callback vira o SPRITE.
@@ -2163,7 +2167,8 @@ export class GameScene extends Phaser.Scene {
           this.boss.sprite,
           this.weapons.bullets,
           (_boss, b) => this.bulletAbsorvedByBoss(b as Phaser.Physics.Arcade.Sprite),
-          (_boss, b) => noDesenho(b as Phaser.GameObjects.GameObject),
+          // (26/11, his "A": a shot on the row of the LIT weak point goes through the drawing to it — the Beast's core)
+          (_boss, b) => noDesenho(b as Phaser.GameObjects.GameObject) && !this.boss?.naLinhaDoAlvo?.(b as Phaser.Physics.Arcade.Sprite),
         );
     } else {
       this.physics.add.overlap(this.boss.sprite, this.weapons.bullets, (_boss, b) =>
@@ -2214,7 +2219,7 @@ export class GameScene extends Phaser.Scene {
     // ⚠️ SPRITE PRIMEIRO: `overlap(sprite, grupo)` entrega (sprite, projétil) — ver `spawnBoss`.
     this.golfinhoColliders = [
       this.physics.add.overlap(g.sprite, this.ship, () => {
-        if (g.vulneravel) this.damageShip();
+        if (g.vulneravel) this.damageShip(undefined, undefined, 'corpo');
       }),
       this.physics.add.overlap(g.sprite, this.weapons.bullets, (_g, b) =>
         this.bulletHitGolfinho(b as Phaser.Physics.Arcade.Sprite),
@@ -3035,7 +3040,7 @@ export class GameScene extends Phaser.Scene {
     // O RAIO fere de verdade — inclusive você. Matar uma mina colado nela é uma escolha ruim,
     // e o jogo tem que cobrar por ela, senão a mina é só um alvo que dá pontos.
     if (Phaser.Math.Distance.Between(x, y, this.ship.x, this.ship.y) <= MINE_BLAST_RADIUS) {
-      this.damageShip();
+      this.damageShip(undefined, undefined, 'perigo');
     }
   }
 
@@ -3372,7 +3377,11 @@ export class GameScene extends Phaser.Scene {
 
   /** `impacto` (and `materia`, the gravel of a rock on top of it): sounds of what hit the ship, played only when the hit
    *  COUNTS (not inside the i-frames). */
-  private damageShip(impacto?: string, materia?: string): void {
+  /**
+   * `causa` (26/11, the dev fight recorder — spec 2026-11-26-medicao-das-lutas §3): what the call site is ('tiro',
+   * 'corpo', 'morde', 'perigo', 'inimigo', 'borda', 'chao', 'cenario'); `quem` = what touched, when there is one.
+   */
+  private damageShip(impacto?: string, materia?: string, causa = 'outro', quem?: Phaser.GameObjects.GameObject): void {
     if (this.over || this.time.now < this.invulnerableUntil || this.time.now < this.semDanoAte || this.cartas.intocavel(this.time.now)) return;
     // O INVULNERÁVEL do sandbox (tecla 3): para olhar as skills sem morrer.
     if (this.arena?.invulneravel) return;
@@ -3390,12 +3399,14 @@ export class GameScene extends Phaser.Scene {
     if (this.medidas) this.medidas.golpes++;
     if (this.cartas.absorver(this.time.now)) {
       if (this.medidas) this.medidas.cascoGasto++;
+      this.registro?.golpe(causa, true, quem);
       this.invulnerableUntil = this.time.now + 1000;
       return;
     }
 
     this.lives--;
     if (this.medidas) this.medidas.vidasPerdidas++;
+    this.registro?.golpe(causa, false, quem);
     this.invulnerableUntil = this.time.now + 1400;
     this.tookDamage = true;
     // 3 por vida (GDD §5) + a Bomba Extra: a vida nova vem com o estoque cheio.

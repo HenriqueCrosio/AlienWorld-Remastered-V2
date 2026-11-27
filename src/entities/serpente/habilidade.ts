@@ -54,6 +54,8 @@ export interface Habilidade {
   comecar(): void;
   update(dt: number): void;
   desenhar(put: Put): void;
+  /** DEV (the piloto robot): what its warning promises to hurt soon (the beam's sweep), screen boxes */
+  devAvisos?(): { l: number; r: number; t: number; b: number }[];
   /** what it hurts by measurement (the beam, the burning jelly) — the scene's `StageBoss.morde` */
   morde?(esq: number, dir: number, topo: number, base: number): boolean;
   /** her head died: it dissolves over `HAB.aborta` s and does not hurt meanwhile */

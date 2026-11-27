@@ -672,6 +672,11 @@ export class BossCapitania implements StageBoss {
     return { quem: 'capitania', vida: this.hp / this.maxHp };
   }
 
+  /** DEV (the fight recorder): the fury or the base cycle. */
+  get devAtaque(): string {
+    return this.enraged ? 'furia' : 'base';
+  }
+
   /** DEV (spec 2026-11-24 §7): above half life = 'capitania1'; enraged = 'capitania2'. */
   get devFaseAtual(): string {
     return this.enraged ? 'capitania2' : 'capitania1';

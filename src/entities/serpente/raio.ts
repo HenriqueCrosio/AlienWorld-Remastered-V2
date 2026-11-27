@@ -451,6 +451,31 @@ export class Raio implements Habilidade {
     this.corpo.treme(Math.round((v() - 0.5) * 2 * a), Math.round((v() - 0.5) * 2 * a));
   }
 
+  /**
+   * DEV (the piloto robot, spec 2026-11-26-medicao-das-lutas §4.2): the sweep a player who knows the beam reads — from
+   * the charge on, the band from where the beam is (or will start) to where it ends (`de` → `ate` at the left edge), as
+   * boxes along each sampled beam. A salvo slice still being drawn (`pendente`) promises nothing yet.
+   */
+  devAvisos(): { l: number; r: number; t: number; b: number }[] {
+    if (this.abortado) return [];
+    const t = this.t;
+    const f = this.fatias.find((g) => !g.pendente && t >= g.t0 && t < g.t3);
+    if (!f) return [];
+    const u0 = t <= f.t1 ? 0 : Math.min(1, (t - f.t1) / f.dur);
+    const m = (f.meia ?? R.meia) + 2;
+    const out: { l: number; r: number; t: number; b: number }[] = [];
+    for (let i = 0; i <= 6; i++) {
+      const yL = f.de + (f.ate - f.de) * (u0 + ((1 - u0) * i) / 6);
+      const b = this.bocaPara(yL), fx = feixe(b, angDe(b, yL));
+      const n = Math.max(1, Math.ceil(Math.hypot(fx.x1 - fx.x0, fx.y1 - fx.y0) / 10));
+      for (let k = 0; k <= n; k++) {
+        const x = fx.x0 + ((fx.x1 - fx.x0) * k) / n, y = fx.y0 + ((fx.y1 - fx.y0) * k) / n;
+        out.push({ l: x - 5, r: x + 5, t: y - m, b: y + m });
+      }
+    }
+    return out;
+  }
+
   /** what the beam hurts: its band (only what is drawn, the front included) touching the ship's box */
   morde(esq: number, dir: number, topo: number, base: number): boolean {
     const fx = this.feixe;

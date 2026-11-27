@@ -775,6 +775,9 @@ export class WeaponSystem {
     this.scene.time.delayedCall(ROTATIVA_CHEGADA_MS, () => Som.tocar(r.chegada(), { forca, fracao }));
   }
 
+  /** Every projectile that left the ship's pool (the shots and the cards' projectiles): the dev fight recorder's count. */
+  disparos = 0;
+
   private shoot(x: number, y: number): void {
     const { pellets, spread, speed, damage, muzzles } = this.weapon;
 
@@ -790,6 +793,7 @@ export class WeaponSystem {
         if (import.meta.env.DEV) console.warn('[armas] pool cheio, tiro descartado');
         return;
       }
+      this.disparos++;
 
       b.setActive(true).setVisible(true);
       b.body!.enable = true;
@@ -942,6 +946,7 @@ export class WeaponSystem {
       if (import.meta.env.DEV) console.warn('[armas] pool cheio, projétil de carta descartado');
       return null;
     }
+    this.disparos++;
     b.setActive(true).setVisible(true);
     b.body!.enable = true;
     b.anims.stop();

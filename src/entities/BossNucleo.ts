@@ -1264,6 +1264,27 @@ export class BossNucleo implements StageBoss {
    * chamado); o predador decide o dele (o surgimento não fere, a recuperação dobra).
    */
   /** DEV (spec 2026-11-24 §7): the Guardian's steps, 'troca' during the swap, then the Beast's phases. */
+  /** 26/11, his "A": the Beast's lit core is hit along its row (see `Predador.naLinhaDoCore`). */
+  naLinhaDoAlvo(bala: Phaser.Physics.Arcade.Sprite): boolean {
+    return this.predador?.naLinhaDoCore(bala) ?? false;
+  }
+
+  /** DEV (the piloto): the Beast's warnings, or the Guardian's — the lunge's lane in the telegraph, the serpents' strikes. */
+  devAvisos(nave: { x: number; y: number }): { l: number; r: number; t: number; b: number }[] {
+    if (this.predador) return this.predador.devAvisos(nave);
+    const out = this.serpentes.devAvisos();
+    if (this.acao === 'telegrafo') {
+      const c = this.sprite.body as Phaser.Physics.Arcade.Body;
+      out.push({ l: 0, r: c.right, t: c.top - 10, b: c.bottom + 10 });
+    }
+    return out;
+  }
+
+  /** DEV (the fight recorder): the Guardian's action, or the Beast's state. */
+  get devAtaque(): string {
+    return this.predador ? this.predador.estado : this.acao;
+  }
+
   get devFaseAtual(): string {
     if (this.predador) return this.predador.devFaseAtual;
     return this.trocando || this.hpGuardiao <= 0 ? 'troca' : `guardiao${this.degrau + 1}`;

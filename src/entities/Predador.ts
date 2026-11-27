@@ -478,6 +478,41 @@ export class Predador {
     return this.core.body as Phaser.Physics.Arcade.Body;
   }
 
+  /**
+   * 26/11, his "A" (*"contando que fique justo e não mate ele rápido demais"*). Measured by the robots: on the ground, in
+   * the charge, the gallop, the crouch and even the RECOVERY (the ×2 window) not one shot reached the core — her side
+   * pose puts the arm and the chest's drawing 15–25 px in front of it, and the drawing held every shot (`tocaDesenho` +
+   * the Núcleo's body-as-cover). Now a shot on the LIT core's row goes through her drawing to the core: the light is the
+   * target, as the design says ("the core exposed"). Off that row the drawing still covers.
+   */
+  naLinhaDoCore(bala: Phaser.Physics.Arcade.Sprite): boolean {
+    if (this.dead || !this.coreBody.enable) return false;
+    const c = bala.body as Phaser.Physics.Arcade.Body;
+    const k = this.coreBody;
+    return c.bottom > k.top && c.top < k.bottom && c.left < k.right;
+  }
+
+  /**
+   * DEV (the piloto, spec 2026-11-26-medicao-das-lutas §4.2): what her warning promises — the gallop's lane on the floor
+   * during the charge and the gallop (to where it stops, `PARADA_X` / the ship + 50), and the slash's band at the height
+   * taken in the crouch (`alvoY`), from the crouch through the slash.
+   */
+  devAvisos(nave: { x: number; y: number }): { l: number; r: number; t: number; b: number }[] {
+    if (this.dead) return [];
+    const c = this.body;
+    if (!c.enable) return [];
+    if (this.estado === 'carga' || this.estado === 'bote') {
+      const paraX = Math.max(Predador.PARADA_X, (this.estado === 'bote' ? this.alvoX : nave.x) + 50);
+      const l = Math.min(c.left, paraX - (this.sprite.x - c.left));
+      return [{ l, r: c.right, t: c.top, b: c.bottom }];
+    }
+    if (this.estado === 'agacha' || this.estado === 'slash') {
+      const y = this.alvoY;
+      return [{ l: Math.max(0, c.left - 50), r: c.right, t: y - 28, b: y + 28 }];
+    }
+    return [];
+  }
+
   get fase(): number {
     const f = this.hp / Predador.HP;
     return f > 0.66 ? 1 : f > 0.33 ? 2 : 3;
