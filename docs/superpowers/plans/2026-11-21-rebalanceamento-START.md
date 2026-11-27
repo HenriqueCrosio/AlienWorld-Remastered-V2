@@ -1,10 +1,13 @@
 # START — O REBALANCEAMENTO (as cartas, os inimigos, os chefões)
 
-> A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. O rebalanceamento abriu em 21/11 com a análise
+> ⚠️ **27/11: a FRENTE 0 FECHOU. A sessão nova abre no START da frente 1, `plans/2026-11-27-rebalanceamento-frente1-START.md`.**
+> Este START fica como registro (a análise §1, as decisões §2, a ordem §3, a frente 0 §4).
+>
+> ~~A frase de arranque: "Leia o 🧭 do `docs/HANDOFF.md` e este START. O rebalanceamento abriu em 21/11 com a análise
 > das cartas (§1) e as decisões dele (§2). A ordem das frentes está na §3; a primeira é a FRENTE 0 (as lutas dos
 > chefões, §4). A Capitânia FECHOU (aprovada e empurrada). O GUARDIÃO está sendo refeito (22/11, a spec da coleira):
 > a sessão abre no START próprio dele, `plans/2026-11-22-guardiao-coleira-START.md`. Cada frente tem spec, plano e o
-> veredito dele antes da próxima."**
+> veredito dele antes da próxima."~~
 > A simulação do draft: `node --experimental-transform-types scripts/_rebalance/sim-draft.mts`; a medição da Capitânia
 > (o molde para medir os outros chefões): `node scripts/_rebalance/medir-capitania.mjs [--mata ms] [--variante X]`.
 
@@ -82,8 +85,8 @@ se ajusta em cima.
 
 | # | Frente | O que decide |
 |---|---|---|
-| **0** | **As lutas dos chefões** (§4) | O que o chefão FAZ: densidade, justiça, espaço de fuga, o sentido de cada ataque. Não mexe na vida. |
-| **1** | **Os alvos e a medição** | O tempo de cada chefão e de cada onda para uma mão MEDIANA; a simulação como ferramenta; três mãos de referência no sandbox (fraca, mediana, forte). |
+| **0** ✅ | **As lutas dos chefões** (§4) — FECHOU 26/11: a Capitânia (21/11), o Guardião na coleira (23/11), a Besta refeita (26/11) e a MEDIÇÃO das lutas (26/11, `specs/2026-11-26-medicao-das-lutas-design.md`, a folha-base `folhas/2026-11-26/medicao/`) | O que o chefão FAZ: densidade, justiça, espaço de fuga, o sentido de cada ataque. Não mexe na vida. |
+| **1** ⏭️ | **Os alvos e a medição** — A PRÓXIMA (START `plans/2026-11-27-rebalanceamento-frente1-START.md`); a medição já existe (os robôs), falta decidir os alvos | O tempo de cada chefão e de cada onda para uma mão MEDIANA; a simulação como ferramenta; três mãos de referência no sandbox (fraca, mediana, forte). |
 | **2** | **A estrutura do draft** | Quantas mesas por campanha, a rerrolagem (e o que ela custa), o peso maior para a continuação de uma cadeia. Define QUANTAS cartas uma campanha dá — o tamanho total do poder. |
 | **3** | **Os inimigos** | A escada de vida F1 → F4 e os enxames de batedores (a parede que se abre atirando) da F2 em diante. |
 | **4** | **As cartas** | O empilhamento da arma (soma, teto, Duplo → Triplo numa linha só), a raridade pela força, o rendimento decrescente do Elétrico (imunidade depois da trava; nos elites só interrompe o tiro, ou desfaz o escudo da Sentinela — a ideia adiada de 05/10), os efeitos reduzidos no chefão e as cartas refeitas (o Drone primeiro; depois Míssil, Flare, Propulsores, Bomba Extra, Perfurante). |
@@ -108,7 +111,7 @@ tempos diferentes.**
   vida própria (o chefão é uma peça fechada, ajustada aqui) — decidir na frente 3.
 
 **O escopo (ele):** nenhuma luta muda de estrutura — só visual, cadência e estilo. Os três pontos:
-1. **A CAPITÂNIA (F2): a fúria.** *"é tranquilo até o momento do enfurecer; após isso, o campo fica repleto de minas
+1. ✅ **A CAPITÂNIA (F2): a fúria.** *"é tranquilo até o momento do enfurecer; após isso, o campo fica repleto de minas
    explodindo, kamikazes etc."* — a densidade da fúria (os kamikazes, o flak que estoura em anel, as rajadas), a medir.
    **✅ 21/11 — a opção A no `src/` (a escolha dele), falta ele jogar no `C`.** A causa, medida
    (`scripts/_rebalance/medir-capitania.mjs`; a nave parada, cada kamikaze apagado 1,5 s depois de nascer): o ciclo da
@@ -130,7 +133,7 @@ tempos diferentes.**
    ainda chega aos 5, mas em ~20 s, não em ~7.
    **✅ APROVADA (21/11), ele jogando:** *"Agora ficou melhor. Já está menos punitivo, vai cobrar algumas tentativas, mas
    dentro da normalidade"*. A Capitânia FECHOU (a vida dela fica para a frente 5).
-2. **O GUARDIÃO (F4, a 1ª forma do Núcleo): a investida.** *"quase sem sentido, igual a enguia antigamente tinha"*. A
+2. ✅ **23/11 — o Guardião refeito pela COLEIRA** (spec `specs/2026-11-22-guardiao-coleira-design.md`, 6 passos, START `plans/2026-11-22-guardiao-coleira-START.md`). O registro de antes: **O GUARDIÃO (F4, a 1ª forma do Núcleo): a investida.** *"quase sem sentido, igual a enguia antigamente tinha"*. A
    lição da enguia (memória `criatura-inteira-vistas-animacao`): reclamação de movimento se resolve no CORPO e no CAMINHO
    apoiado no mundo, nunca só nos números — a investida precisa de uma razão que se lê. Spec da luta:
    `specs/2026-09-19-fase4-luta-guardiao-design.md`.
@@ -168,9 +171,9 @@ tempos diferentes.**
      luta. **C — os dois.** **A recomendação: começar pela A** (cabe no "só visual, cadência e estilo" e ataca o mesmo
      defeito da serpente). Depois da resposta: 2–3 caminhos medidos e mostrados em GIF em jogo (memória
      `avaliar-skill-por-gif`), antes de mexer na arte.
-3. **A BESTA (F4, a 2ª forma: o Predador): o bote.** *"quando corre e ataca a nave, pensei em dar um pouco mais espaço
+3. ✅ **26/11 — a Besta foi REFEITA inteira** (spec `specs/2026-11-24-besta-refeita-design.md`, 12 passos; a medição achou o core intocável de lado e ele escolheu a opção A). ~~**A BESTA (F4, a 2ª forma: o Predador): o bote.** *"quando corre e ataca a nave, pensei em dar um pouco mais espaço
    para escape da nave"*. O bote galopa pelo chão até a nave (`Predador.BOTE_VEL` = 300). Spec:
-   `specs/2026-09-16-fatia7-b3-predador-design.md`.
+   `specs/2026-09-16-fatia7-b3-predador-design.md`.~~
 
 A Torre (F1) e a Serpente (F3) ficam como estão, salvo pedido dele.
 

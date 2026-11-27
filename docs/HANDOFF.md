@@ -1,4 +1,4 @@
-# HANDOFF — estado do projeto (2026-11-26)
+# HANDOFF — estado do projeto (2026-11-27)
 
 Documento de retomada. **Leia o 🧭 logo abaixo primeiro** — ele é o estado vivo e o roadmap
 inteiro. Tudo depois dele é REGISTRO (histórico, lições, armadilhas) e segue valendo como
@@ -8,7 +8,7 @@ sprite que se desfaz nos próprios pixels).
 
 ---
 
-## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-26) — O ESTADO VIVO
+## 🧭 ONDE ESTAMOS E PARA ONDE VAMOS (2026-11-27) — O ESTADO VIVO
 
 > ⚠️ **ESTA SEÇÃO JUNTOU TRÊS ROADMAPS QUE VIVIAM SEPARADOS** (23/09): a tabela de conteúdo de
 > julho, a ordem fechada de 24/08 e as dívidas que cada fatia empurrou para depois. Se outra parte
@@ -16,12 +16,27 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-22-guardiao-coleira-START.md`. O REBALANCEAMENTO
-> (START `plans/2026-11-21-rebalanceamento-START.md`, frentes 0 os chefões → 1 os alvos → 2 o draft → 3 os inimigos →
-> 4 as cartas → 5 a vida dos chefões) está na frente 0: a CAPITÂNIA, o GUARDIÃO (a coleira, 23/11) e a BESTA (a spec
-> `specs/2026-11-24-besta-refeita-design.md`, 12 passos, 26/11) FECHARAM, commitados e empurrados. Em aberto na frente
-> 0 (o §0 do START da coleira): o K sem cartas e a medição das lutas (`medir-guardiao.mjs`, e a da Besta); a vida da
-> Besta vai para a frente 5. Depois, a frente 1 do rebalanceamento (os alvos e a medição)."**
+> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-27-rebalanceamento-frente1-START.md`. A frente 0 do
+> rebalanceamento (as lutas dos chefões) FECHOU em 26/11: a Capitânia, o Guardião na coleira, a Besta refeita e a
+> MEDIÇÃO das lutas — dois robôs (o canhão e o piloto) mediram os 4 chefões com 3 mãos; a folha-base é
+> `folhas/2026-11-26/medicao/folha.html` (+ `dados.json`). Agora é a FRENTE 1: os ALVOS (quanto cada chefão deve durar
+> e custar), começando pela mão de referência de cada chefão."**
+>
+> 📍 **26/11 — A MEDIÇÃO DAS LUTAS; A FRENTE 0 FECHOU; COMMITADO E EMPURRADO.** (spec
+> `specs/2026-11-26-medicao-das-lutas-design.md`, planos `plans/2026-11-26-medicao-passo1-registro-canhao.md` e
+> `-passo2-piloto.md`, a folha-base `folhas/2026-11-26/medicao/`)
+> - **As escolhas dele:** os robôs avaliam primeiro e ele joga depois; os DOIS robôs; todos os chefões. O registro
+>   da luta `?registro` (`src/dev/registro/`; a causa de cada golpe no `damageShip`, `StageBoss.devAtaque`/`devAvisos`,
+>   `WeaponSystem.disparos`), o **canhão** (o tempo mínimo) e o **piloto** (toma dano, reage com atraso, prevê, lê os
+>   avisos, fica no fundo; o flap na Torre). A régua na Capitânia mediana: o **experiente** (550 ms) perde ~1,8 vida
+>   (a linha mais fácil, a escolha dele) e o **comum** (700 ms) é o "bem difícil" dele.
+> - **O 1º achado virou mudança:** o core da Besta era intocável de lado (o desenho na frente segurava todo tiro;
+>   a fase 1 dela levava até 404 s); ele escolheu a **A** — o tiro na linha do core aceso atravessa até ele
+>   (`naLinhaDoAlvo`). A Besta passou a durar 40–70 s, presa às travas.
+> - **A tabela** (vidas do experiente, mão mediana): Torre 0 · Capitânia 1,7 · Serpente 1,0 · Guardião e Besta 2,3
+>   (morre em 2 de 3 lutas). Sem cartas, impossível da Capitânia em diante; com a forte, a Torre e a Capitânia somem
+>   (4–5 s); a enguia tem piso de ~29 s. Os achados esperam os alvos da frente 1.
+> - ⚠️ A mão "mediana" é a mesma nos 4 chefões: a 1ª tarefa da frente 1 é a mão de referência DE CADA chefão.
 >
 > 📍 **24–26/11 — A BESTA REFEITA FECHOU; COMMITADO E EMPURRADO.** (spec `specs/2026-11-24-besta-refeita-design.md`, a
 > §10 com o registro inteiro; planos `plans/2026-11-24-besta-passo1-teclas-dev.md` e `plans/2026-11-25-besta-passo*.md`;
@@ -2160,7 +2175,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ✅ **14/11, dentro do bloco M** (M1 a tela de CONFIGURAÇÕES com os volumes; M2 o remapear por ação, teclado e controle). Falta só o som em si (depois do balanceamento). Registro de antes: spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ✅ **14/11, o M2 do bloco M** (spec `specs/2026-11-14-bloco-m2-controles-design.md`): perfis MODERNO e ARCADE, as dicas pelo aparelho em uso, a vibração onde o navegador a oferece; testado por ele no DualSense, o de Xbox de verdade ainda não. Registro de antes: spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
-| 3 | **Balanceamento** (colisões, explosões, armas e naves) | 🟠 **O REBALANCEAMENTO (desde 21/11, START `plans/2026-11-21-rebalanceamento-START.md`), frentes 0–5.** Frente 0, as lutas dos chefões: ✅ a Capitânia (21/11), ✅ o Guardião na coleira (23/11), ✅ a Besta refeita (26/11); falta o K sem cartas e a medição das lutas. Depois: 1 os alvos e a medição → 2 o draft → 3 os inimigos → 4 as cartas → 5 a vida dos chefões e ele jogando tudo |
+| 3 | **Balanceamento** (colisões, explosões, armas e naves) | 🟠 **O REBALANCEAMENTO (desde 21/11, START `plans/2026-11-21-rebalanceamento-START.md`), frentes 0–5.** Frente 0, as lutas dos chefões: ✅ FECHOU 26/11 — a Capitânia (21/11), o Guardião na coleira (23/11), a Besta refeita (26/11), a medição das lutas (26/11, a folha-base `folhas/2026-11-26/medicao/`); o K sem cartas em pausa. ⏭️ **A frente 1, os alvos** (START `plans/2026-11-27-rebalanceamento-frente1-START.md`) → 2 o draft → 3 os inimigos → 4 as cartas → 5 a vida dos chefões e ele jogando tudo |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
@@ -4219,6 +4234,7 @@ antiga) — mas só se sabe isso conferindo, e uma delas ficou mais ESTRITA, nã
 | `7` | jogo | **a próxima fase do chefão** (24/11): `torre1/2`, `capitania1/2`, `serpenteA/B/C` → `enguia` (pela cena da fusão), `guardiao1/2/3` → `besta1/2/3` (pela troca). A trava da fase anterior conta como cumprida |
 | `8` | jogo | **escolher a mão** (24/11): sem cartas / mediana / forte / a do sandbox (1–4 ou clique, ESC fecha); a fase reinicia no mesmo ponto da luta com a mão nova |
 | URL | — | `?fase=besta3&mao=mediana` abre direto naquela fase do chefão, com aquela mão (spec `2026-11-24-besta-refeita` §7). A mediana e a forte são PROVISÓRIAS: a frente 1 do rebalanceamento as calibra |
+| URL | — | `?registro` liga o registro da luta (26/11, spec `2026-11-26-medicao-das-lutas` §3): `window.__registro.resumo()` dá o tempo por fase, o dano, os tiros, os golpes na nave com a causa e a densidade de ameaças. Os robôs `scripts/_rebalance/robo/` o usam |
 
 ⚠️ **São CORTA-CAMINHOS. Remover quando o balanceamento fechar.**
 

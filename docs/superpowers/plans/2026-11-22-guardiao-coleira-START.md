@@ -16,9 +16,9 @@ refeita depois de ele jogar. **As três perguntas que ficam:**
    a vida dela vai para a frente 5. (A pergunta antiga:) as fases dela seguem a vida DELA (180; 66 %/33 %); a barra cheia não muda nada por dentro, mas com a mão
    mediana ela dura ~15 s (a forte, ~5 s: pula as fases 2 e 3) — o mesmo tratamento do Guardião (vida + trava), ou a
    frente 5?
-2. **O K entra sem cartas** (a arma base, 4,5/s: o Guardião leva ~3 min): uma mão típica no treino do K, ou teclas de
+2. ⏸️ (27/11: ele — *"o K sem cartas é algo que ajudaria no desenvolver"*; fica para quando atrapalhar; o `?fase=guardiao1&mao=mediana` já cobre) **O K entra sem cartas** (a arma base, 4,5/s: o Guardião leva ~3 min): uma mão típica no treino do K, ou teclas de
    desenvolvimento que pulam o Guardião para 66 %/33 %?
-3. **A medição** da luta: `scripts/_rebalance/medir-guardiao.mjs` (spec §11, no molde do `medir-capitania.mjs`).
+3. ✅ 26/11 — feita para TODOS os chefões pela medição das lutas (`specs/2026-11-26-medicao-das-lutas-design.md`, os robôs em `scripts/_rebalance/robo/`, a folha-base `folhas/2026-11-26/medicao/`). ~~**A medição** da luta: `scripts/_rebalance/medir-guardiao.mjs` (spec §11, no molde do `medir-capitania.mjs`).~~
 
 Os testes da frente: `test-guardiao-{coleira,padroes,serpente,aperto,teto}.mjs` (puros) e
 `test-guardiao-{coleira,lava,serpente,aperto,teto,vida}-jogo.mjs`, `test-som-coleira-jogo.mjs`, `test-som-nucleo-jogo.mjs`.
