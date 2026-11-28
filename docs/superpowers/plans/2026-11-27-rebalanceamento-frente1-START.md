@@ -1,5 +1,9 @@
 # START — O REBALANCEAMENTO, FRENTE 1: OS ALVOS
 
+> ⚠️ **SUBSTITUÍDO em 27/11** pelo `plans/2026-11-27-rebalanceamento-etapas-START.md`. Ele simplificou: sem "alvos" nem
+> medição nova; a ordem agora é cartas → hitboxes → popular as fases → o draft → a passada dele. A §0 (a tabela da
+> folha-base e os 6 achados) e a §3 (as ferramentas e as leis dos robôs) seguem valendo como registro.
+
 > A frase de arranque: **"Leia o 🧭 do `docs/HANDOFF.md` e este START. A frente 0 do rebalanceamento (as lutas dos
 > chefões) FECHOU em 26/11: a Capitânia, o Guardião na coleira, a Besta refeita e a MEDIÇÃO das lutas — dois robôs
 > (o canhão e o piloto) mediram os 4 chefões com 3 mãos, e a folha-base está em `folhas/2026-11-26/medicao/folha.html`

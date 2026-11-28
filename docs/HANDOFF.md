@@ -16,11 +16,25 @@ sprite que se desfaz nos próprios pixels).
 
 ### A frase de arranque da próxima sessão
 
-> **"Leia o 🧭 do `docs/HANDOFF.md` e o START `plans/2026-11-27-rebalanceamento-frente1-START.md`. A frente 0 do
-> rebalanceamento (as lutas dos chefões) FECHOU em 26/11: a Capitânia, o Guardião na coleira, a Besta refeita e a
-> MEDIÇÃO das lutas — dois robôs (o canhão e o piloto) mediram os 4 chefões com 3 mãos; a folha-base é
-> `folhas/2026-11-26/medicao/folha.html` (+ `dados.json`). Agora é a FRENTE 1: os ALVOS (quanto cada chefão deve durar
-> e custar), começando pela mão de referência de cada chefão."**
+> **"Leia o `docs/CONTEXTO-REBALANCEAMENTO.md`, o 🧭 do `docs/HANDOFF.md` e o START
+> `plans/2026-11-27-rebalanceamento-etapas-START.md`. As etapas 1 (as cartas) e 2 (as hitboxes) estão feitas, aprovadas e
+> commitadas (27/11). A próxima é a 3: popular as fases e mais vida para os inimigos comuns."**
+>
+> 📍 **27/11 — O REBALANCEAMENTO SIMPLIFICADO; AS ETAPAS 1 (AS CARTAS) E 2 (AS HITBOXES) FEITAS, APROVADAS, COMMITADAS E EMPURRADAS.** O mapa: `docs/CONTEXTO-REBALANCEAMENTO.md`. (START
+> `plans/2026-11-27-rebalanceamento-etapas-START.md`; o START da frente 1 ficou como registro)
+> - **A ordem nova (dele):** cartas → hitboxes → popular as fases → o draft → a passada dele. Os "alvos" e a medição
+>   nova saíram; a folha-base de 26/11 é a medida do "antes".
+> - **As cartas:** a raridade por IMPORTÂNCIA (o §8 do documento dele; *"a épica mostra a importância da carta. Não é um
+>   item colecionável"*) = 6·9·5·4, o Tiro Pesado épico (a épica sem requisito; veem ≥ 1 épica 75% das campanhas, eram
+>   55%); o Casco no máx. 3 golpes por fase (HUD `CASCO 3`); o Triplo exige o Duplo (o TIRO MÚLTIPLO); o Elétrico fica
+>   1,2 s imune depois da trava (o conserto do "Elétrico + Pesado muito roubados"); o Drone incomum (a cadência na
+>   etapa 4). Testes: `test-casco-teto-jogo`, `test-cartas-saidas-jogo` e os de sempre, verdes.
+> - **A etapa 2 (as hitboxes), aprovada jogando ("Ficou bom assim"):** fora das lutas a nave colide pelo CASCO (2 px de perdão, a escolha
+>   dele jogando) contra o DESENHO de inimigos, tiros, destroços e terreno, e a borda da F4 e a caverna mordem o casco; nas
+>   lutas de chefão e do golfinho, tudo como antes (`emLuta`). Plano `plans/2026-11-27-hitbox-pelo-desenho.md`, folha
+>   `folhas/2026-11-27/hitbox/folha.html`. A TORRE é a exceção pedida por ele: os 2 px também na luta dela (o círculo do cometa estava 3,8 px atrás da bola).
+> - ⚠️ **A lição:** antes de propor, ler o histórico INTEIRO do tema — o documento de origem dele, as specs, os STARTs, a
+>   memória, as transcrições; análise minha não é decisão dele (memória `ler-historico-antes-de-propor`).
 >
 > 📍 **26/11 — A MEDIÇÃO DAS LUTAS; A FRENTE 0 FECHOU; COMMITADO E EMPURRADO.** (spec
 > `specs/2026-11-26-medicao-das-lutas-design.md`, planos `plans/2026-11-26-medicao-passo1-registro-canhao.md` e
@@ -2175,7 +2189,7 @@ de mudar. Balancear contra arte provisória é pagar duas vezes — a Fase 2 já
 | 1.55 | **Menu de OPÇÕES — controles (remapear) + áudio** (03/10, pedido dele) | ✅ **14/11, dentro do bloco M** (M1 a tela de CONFIGURAÇÕES com os volumes; M2 o remapear por ação, teclado e controle). Falta só o som em si (depois do balanceamento). Registro de antes: spec própria. O mapa de teclas de 03/10 já deixou o gancho: o menu só grava o perfil em `localStorage['aw.teclas']` (`src/controles.ts`) |
 | 1.6 | **Controle de Xbox e PS** (29/09, pedido dele) | ✅ **14/11, o M2 do bloco M** (spec `specs/2026-11-14-bloco-m2-controles-design.md`): perfis MODERNO e ARCADE, as dicas pelo aparelho em uso, a vibração onde o navegador a oferece; testado por ele no DualSense, o de Xbox de verdade ainda não. Registro de antes: spec própria, depois de ele aprovar o texto (junto ou logo após a spec 2). O Phaser já lê gamepad pela API do navegador — Xbox e PS com os botões mapeados, sem driver. Falta: mapear os botões para as intenções no `src/input.ts` (ele já nasceu para "plugar gamepad depois"); uma camada de AÇÕES comum para menu e mesa (hoje cada tela escuta teclas próprias); os botões certos na tela ("Ⓐ confirmar" / "✕ confirmar" conforme o controle); vibração opcional |
 | 2 | **Calibragem** do passe visual | ⬜ depois da 1.5 — inclui avaliar a Atmosfera no menu |
-| 3 | **Balanceamento** (colisões, explosões, armas e naves) | 🟠 **O REBALANCEAMENTO (desde 21/11, START `plans/2026-11-21-rebalanceamento-START.md`), frentes 0–5.** Frente 0, as lutas dos chefões: ✅ FECHOU 26/11 — a Capitânia (21/11), o Guardião na coleira (23/11), a Besta refeita (26/11), a medição das lutas (26/11, a folha-base `folhas/2026-11-26/medicao/`); o K sem cartas em pausa. ⏭️ **A frente 1, os alvos** (START `plans/2026-11-27-rebalanceamento-frente1-START.md`) → 2 o draft → 3 os inimigos → 4 as cartas → 5 a vida dos chefões e ele jogando tudo |
+| 3 | **Balanceamento** (colisões, explosões, armas e naves) | 🟠 **O REBALANCEAMENTO (desde 21/11, START `plans/2026-11-21-rebalanceamento-START.md`), frentes 0–5.** Frente 0, as lutas dos chefões: ✅ FECHOU 26/11 — a Capitânia (21/11), o Guardião na coleira (23/11), a Besta refeita (26/11), a medição das lutas (26/11, a folha-base `folhas/2026-11-26/medicao/`); o K sem cartas em pausa. **27/11, a ordem nova dele** (START `plans/2026-11-27-rebalanceamento-etapas-START.md`): ✅ 1 as cartas → ✅ 2 as hitboxes → ⏭️ **3 popular as fases** (enxames + vida dos inimigos) → 4 o draft e os números das cartas → 5 a passada dele |
 | 4 | **Playtest humano de TODAS as fases** | ⬜ |
 | 5 | **Placar online** (Supabase) | ⬜ 🔒 **bloqueado pelo Henrique**: falta a URL do projeto + a anon/public key |
 | 6 | **Deploy** (build estático) | ⬜ depois do placar. ⚠️ **Destino em aberto**: este arquivo cita Vercel num ponto e itch.io noutro — decidir |
